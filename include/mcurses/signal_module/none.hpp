@@ -2,7 +2,7 @@
 #ifndef NONE_HPP
 #define NONE_HPP
 
-#include "signal_module/none_t.hpp"
+#include "none_t.hpp"
 
 /** \namespace mcurses
  *	MCurses Library wide namespace
