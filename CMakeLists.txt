@@ -1,6 +1,14 @@
 cmake_minimum_required (VERSION 3.6)
 project (MCurses)
 
+# Run these command in shell to use Clang Static Analyzer(and scan-build)
+# This need only be run once.
+# ________________________________________________________________________________
+# export CCC_CXX=clang++
+# cmake -DCMAKE_CXX_COMPILER=/usr/lib/clang/c++-analyzer -DCMAKE_LINKER=clang++ ..
+#_________________________________________________________________________________
+# The path to c++-analyzer may be different on your machine.
+
 # Set Output Directories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
@@ -10,7 +18,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/lib")
 # Set Compiler Flags
 set(CMAKE_CXX_FLAGS "-std=c++14 -g -Wall")
 
-# Your Include Directory
+# Include Directory
 include_directories(include)
 
 # Collect Source Files into Variable Names
@@ -24,6 +32,7 @@ list(APPEND WIDGET_MODULE_SOURCES 	#"src/widget_module/...cpp"
 									)
 
 list(APPEND TEST_SOURCES "test/signal_module/none_test.cpp"
+						 "test/signal_module/optional_test.cpp"
 						 )
 
 # Create a Static Library for MCurses
