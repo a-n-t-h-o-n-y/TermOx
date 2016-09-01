@@ -1,0 +1,8 @@
+*.txt
+notes
+!CMakeLists.txt
+bin/*
+doc/*
+!doc/Doxyfile
+!doc/images
+build/*
