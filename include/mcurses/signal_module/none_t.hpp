@@ -12,9 +12,8 @@ namespace mcurses
  *	of type none_t to implicitly evaluate to false while avoiding
  *	many of the common pitfalls with implicit bool conversions.
  */
-struct none_helper {
-	typedef int *none_t;
-};
+struct none_helper {};
+typedef int none_helper::*none_t;
 
 }	// namespace mcurses
 
