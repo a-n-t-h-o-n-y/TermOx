@@ -361,6 +361,140 @@ bool optional<T>::operator!() const noexcept
 	return !initialized_;
 }
 
+// External optional Functions
+
+template <typename T>
+bool operator==(const optional<T>& x, const optional<T>& y)
+{
+	if((x && y) && (*x == *y)) {return true;}
+	else if(!x && !y) {return true;}
+	else {return false;}
+}
+
+template <typename T>
+bool operator!=(const optional<T>& x, const optional<T>& y)
+{
+	return !(x == y);
+}
+
+template <typename T>
+bool operator<(const optional<T>& x, const optional<T>& y)
+{
+	if(!y) {return false;}
+	else if(!x) {return true;}
+	else {return *x < *y;}
+}
+
+template <typename T>
+bool operator>(const optional<T>& x, const optional<T>& y)
+{
+	return (y < x);
+}
+
+template <typename T>
+bool operator<=(const optional<T>& x, const optional<T>& y)
+{
+	return !(y < x);
+}
+
+template <typename T>
+bool operator>=(const optional<T>& x, const optional<T>& y)
+{
+	return !(x < y);
+}
+
+template <typename T>
+bool operator==(const optional<T>& x, none_t) noexcept
+{
+	return !x;
+}
+
+template <typename T>
+bool operator==(none_t, const optional<T>& x) noexcept
+{
+	return !x;
+}
+
+template <typename T>
+bool operator!=(const optional<T>& x, none_t) noexcept
+{
+	return bool(x);
+}
+
+template <typename T>
+bool operator!=(none_t, const optional<T>& x) noexcept
+{
+	return bool(x);
+}
+
+template <typename T>
+optional<T> make_optional(const T& value)
+{
+	return optional<T>(value);
+}
+
+template <typename T>
+optional<T> make_optional(bool condition, const T& value)
+{
+	return optional<T>(condition, value);
+}
+
+template <typename T>
+const T& get(const optional<T>& opt)
+{
+	return opt.get();
+}
+
+template <typename T>
+T& get(optional<T>& opt)
+{
+	return opt.get();
+}
+
+template <typename T>
+const T* get(const optional<T>* opt_ptr)
+{
+	return opt_ptr->get_ptr();
+}
+
+template <typename T>
+T* get(optional<T>* opt_ptr)
+{
+	return opt_ptr->get_ptr();
+}
+
+template <typename T>
+auto get_pointer(const optional<T>& opt) -> typename optional<T>::pointer_const_type
+{
+	return opt.get_ptr();
+}
+
+template <typename T>
+auto get_pointer(optional<T>& opt) -> typename optional<T>::pointer_type
+{
+	return opt.get_ptr();
+}
+
+template <typename T>
+void swap(optional<T>& x, optional<T>& y)
+{
+	if(bool(x) && bool(y))
+	{
+		optional<T> temp = std::move(y);
+		y = std::move(x);
+		x = std::move(temp);
+	}
+	else if(bool(x) && !y)
+	{
+		y = std::move(x);
+	}
+	else if(!x && bool(y))
+	{
+		x = std::move(y);
+	}
+	return;
+}
+
 }	// namespace mcurses
 
 #endif	// OPTIONAL_HPP
