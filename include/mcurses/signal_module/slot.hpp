@@ -3,7 +3,8 @@
 
 #include "slot_base.hpp"
 #include "expired_slot.hpp"
-#include "signal.hpp"
+// #include "signal.hpp" // delete this
+#include "signal_fwd.hpp"
 
 #include "slot_fwd.hpp"
 
