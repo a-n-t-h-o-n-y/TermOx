@@ -1,8 +1,11 @@
-*.txt
-notes
-!CMakeLists.txt
 bin/*
+build/*
 doc/*
 !doc/Doxyfile
 !doc/images
-build/*
+lib/*
+notes
+
+*.[ao]
+*.so
+*.out
