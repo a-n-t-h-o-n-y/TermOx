@@ -137,9 +137,15 @@ TEST_F(SignalImplTest, CopyConstructor)
 	EXPECT_TRUE(copied.empty());
 	copied(7);	// returns void
 
-	type_3 copied2 = si_type3_2;
-	EXPECT_EQ(6, copied2.num_slots());
+	type_2 copied2 = si_type2_2;
+	EXPECT_EQ(3, copied2.num_slots());
 	EXPECT_FALSE(copied2.empty());
-	ASSERT_TRUE(bool(copied2(9999)));
-	// EXPECT_DOUBLE_EQ(9.1, *copied2('4', 6));
+	ASSERT_TRUE(bool(copied2('f', 7)));
+	EXPECT_DOUBLE_EQ(9.1, *(copied2('4', 6)));
+
+	type_3 copied3 = si_type3_2;
+	EXPECT_EQ(6, copied3.num_slots());
+	EXPECT_FALSE(copied3.empty());
+	ASSERT_TRUE(bool(copied3(9999)));
+	EXPECT_EQ(9, *(copied3(9997876)));
 }

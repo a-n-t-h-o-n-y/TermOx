@@ -14,8 +14,6 @@
 #include <utility>
 #include <functional>
 
-#include <iostream>
-
 // Forward Declarations
 namespace mcurses
 {
@@ -269,12 +267,14 @@ public:
 
 	result_type operator()(Args&&... args)
 	{
-		std::vector<slot_iterator<Ret(Args...)>> iter_container;
+		typedef std::vector<std::function<Ret()>> container_type;
+		container_type bound_slot_container;
+		// std::vector<slot_iterator<Ret(Args...)>> iter_container;
 		for(auto& c : at_front_connections_)
 		{
 			if(c->connected() && !c->blocked())
 			{
-				iter_container.push_back(slot_iterator<Ret(Args...)>(c->get_slot(), std::forward<Args>(args)...));
+				bound_slot_container.push_back(std::bind(std::function<Ret(Args...)>{c->get_slot()}, std::forward<Args>(args)...));
 			}
 		}
 
@@ -284,7 +284,7 @@ public:
 			{
 				if(c->connected() && !c->blocked())
 				{
-					iter_container.push_back(slot_iterator<Ret(Args...)>(c->get_slot(), std::forward<Args>(args)...));
+					bound_slot_container.push_back(std::bind(std::function<Ret(Args...)>{c->get_slot()}, std::forward<Args>(args)...));
 				}
 			}
 		}
@@ -293,46 +293,47 @@ public:
 		{
 			if(c->connected() && !c->blocked())
 			{
-				iter_container.push_back(slot_iterator<Ret(Args...)>(c->get_slot(), std::forward<Args>(args)...));
+				bound_slot_container.push_back(std::bind(std::function<Ret(Args...)>{c->get_slot()}, std::forward<Args>(args)...));
 			}
 		}
-		iter_container.push_back(slot_iterator<Ret(Args...)>());	// one past end iterator
-		return combiner_(iter_container.front(), iter_container.back());
+		// iter_container.push_back(slot_iterator<Ret(Args...)>());	// one past end iterator
+		return combiner_(slot_iterator<typename container_type::iterator>(std::begin(bound_slot_container)),
+							slot_iterator<typename container_type::iterator>(std::end(bound_slot_container)));
 	}
 
-	result_type operator()(Args&&... args) const
-	{
-		std::vector<slot_iterator<Ret(Args...)>> iter_container;
-		for(auto& c : at_front_connections_)
-		{
-			if(c->connected() && !c->blocked())
-			{
-				iter_container.push_back(slot_iterator<Ret(Args...)>(c->get_slot(), std::forward<Args>(args)...));
-			}
-		}
+	// result_type operator()(Args&&... args) const
+	// {
+	// 	std::vector<slot_iterator<Ret(Args...)>> iter_container;
+	// 	for(auto& c : at_front_connections_)
+	// 	{
+	// 		if(c->connected() && !c->blocked())
+	// 		{
+	// 			iter_container.push_back(slot_iterator<Ret(Args...)>(c->get_slot(), std::forward<Args>(args)...));
+	// 		}
+	// 	}
 
-		for(auto& kv : grouped_connections_)
-		{
-			for(auto& c : kv.second)
-			{
-				if(c->connected() && !c->blocked())
-				{
-					iter_container.push_back(slot_iterator<Ret(Args...)>(c->get_slot(), std::forward<Args>(args)...));
-				}
-			}
-		}
+	// 	for(auto& kv : grouped_connections_)
+	// 	{
+	// 		for(auto& c : kv.second)
+	// 		{
+	// 			if(c->connected() && !c->blocked())
+	// 			{
+	// 				iter_container.push_back(slot_iterator<Ret(Args...)>(c->get_slot(), std::forward<Args>(args)...));
+	// 			}
+	// 		}
+	// 	}
 
-		for(auto& c : at_back_connections_)
-		{
-			if(c->connected() && !c->blocked())
-			{
-				iter_container.push_back(slot_iterator<Ret(Args...)>(c->get_slot(), std::forward<Args>(args)...));
-			}
-		}
-		iter_container.push_back(slot_iterator<Ret(Args...)>());	// one past end iterator
-		const combiner_type const_comb = combiner_;
-		return const_comb(iter_container.front(), iter_container.back());
-	}
+	// 	for(auto& c : at_back_connections_)
+	// 	{
+	// 		if(c->connected() && !c->blocked())
+	// 		{
+	// 			iter_container.push_back(slot_iterator<Ret(Args...)>(c->get_slot(), std::forward<Args>(args)...));
+	// 		}
+	// 	}
+	// 	iter_container.push_back(slot_iterator<Ret(Args...)>());	// one past end iterator
+	// 	const combiner_type const_comb = combiner_;
+	// 	return const_comb(iter_container.front(), iter_container.back());
+	// }
 
 	combiner_type combiner() const
 	{

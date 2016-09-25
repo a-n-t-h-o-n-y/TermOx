@@ -43,7 +43,7 @@ public:
 		while(first != last)
 		{
 			temp = *first;
-			++first;	// this does not work because you are working on a copy, and incrementing the object address does not work.
+			++first;
 		}
 		return optional<T>(temp);
 	}

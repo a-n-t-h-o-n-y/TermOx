@@ -48,7 +48,7 @@ public:
 	typedef std::function<Ret(const connection&, Args...)>	extended_slot_function_type;
 	typedef typename mcurses::slot<Ret(const mcurses::connection&, Args...), extended_slot_function_type> extended_slot_type;
 	typedef typename SlotFunction::result_type slot_result_type;
-	typedef slot_iterator<signature_type>		slot_call_iterator;
+	// typedef slot_iterator					slot_call_iterator;
 	typedef std::tuple<Args...> 			argument_types;
 	typedef signal_impl<signature_type, combiner_type, group_type,
 						group_compare_type, slot_function_type> impl_type;
