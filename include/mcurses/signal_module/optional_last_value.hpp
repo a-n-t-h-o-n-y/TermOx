@@ -4,6 +4,8 @@
 #include "none.hpp"
 #include "optional.hpp"
 
+#include <iostream>
+
 namespace mcurses
 {
 
@@ -41,7 +43,7 @@ public:
 		while(first != last)
 		{
 			temp = *first;
-			++first;
+			++first;	// this does not work because you are working on a copy, and incrementing the object address does not work.
 		}
 		return optional<T>(temp);
 	}

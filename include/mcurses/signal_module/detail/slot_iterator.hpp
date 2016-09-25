@@ -5,6 +5,7 @@
 
 #include <functional>
 #include <utility>
+#include <memory>
 
 namespace mcurses
 {
@@ -31,14 +32,15 @@ public:
 		return cache_;
 	}
 
-	slot_iterator& operator++()
+	slot_iterator& operator++()	// this gives garbage.
 	{
-		return *(this + 1);	// iters stored in vector
+		*this = *(this + 1);
+		return *this;	// iters stored in vector
 	}
 
 	bool operator==(const slot_iterator& x)
 	{
-		return this == &x;
+		return comparison_.get() == x.comparison_.get();
 	}
 
 	bool operator!=(const slot_iterator& x)
@@ -50,6 +52,7 @@ private:
 	std::function<Ret()> func_;
 	bool has_cache_ = false;
 	Ret cache_;
+	std::shared_ptr<short> comparison_= std::make_shared<short>(1);	// not ideal(for operator==)
 };
 
 
@@ -81,7 +84,7 @@ public:
 
 	bool operator==(const slot_iterator& x)
 	{
-		return this == &x;
+		return comparison_.get() == x.comparison_.get();
 	}
 
 	bool operator!=(const slot_iterator& x)
@@ -92,6 +95,7 @@ public:
 private:
 	std::function<void()> func_;
 	bool has_run_ = false;
+	std::shared_ptr<short> comparison_= std::make_shared<short>(1);	// not ideal(for operator==)
 };
 
 } // namespace mcurses

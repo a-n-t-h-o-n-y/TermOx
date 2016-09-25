@@ -14,6 +14,8 @@
 #include <utility>
 #include <functional>
 
+#include <iostream>
+
 // Forward Declarations
 namespace mcurses
 {
@@ -205,7 +207,7 @@ public:
 	{
 		for(auto& ci_ptr : at_front_connections_)
 		{
-			if(!ci_ptr->disconnected())
+			if(ci_ptr->connected())
 			{
 				return false;
 			}
@@ -215,7 +217,7 @@ public:
 		{			// vector
 			for(auto& ci_ptr : kv.second)
 			{
-				if(!ci_ptr->disconnected())
+				if(ci_ptr->connected())
 				{
 					return false;
 				}
@@ -224,7 +226,7 @@ public:
 
 		for(auto& ci_ptr : at_back_connections_)
 		{
-			if(!ci_ptr->disconnected())
+			if(ci_ptr->connected())
 			{
 				return false;
 			}
@@ -238,7 +240,7 @@ public:
 		std::size_t size{0};
 		for(auto& ci_ptr : at_front_connections_)
 		{
-			if(!ci_ptr->disconnected())
+			if(ci_ptr->connected())
 			{
 				++size;
 			}
@@ -248,7 +250,7 @@ public:
 		{			// vector
 			for(auto& ci_ptr : kv.second)
 			{
-				if(!ci_ptr->disconnected())
+				if(ci_ptr->connected())
 				{
 					++size;
 				}
@@ -257,7 +259,7 @@ public:
 
 		for(auto& ci_ptr : at_back_connections_)
 		{
-			if(!ci_ptr->disconnected())
+			if(ci_ptr->connected())
 			{
 				++size;
 			}
@@ -331,37 +333,6 @@ public:
 		const combiner_type const_comb = combiner_;
 		return const_comb(iter_container.front(), iter_container.back());
 	}
-
-	// void void_specialization_operator_call(Args&&... args) const
-	// {
-	// 	for(auto& ci_ptr : at_front_connections_)
-	// 	{
-	// 		if(ci_ptr->connected() && !ci_ptr->blocked())
-	// 		{
-	// 			ci_ptr->get_slot()(std::forward<Args>(args)...);
-	// 		}
-	// 	}
-
-	// 	for(auto& kv : grouped_connections_)
-	// 	{
-	// 		for(auto& ci_ptr : kv.second)
-	// 		{
-	// 			if(ci_ptr->connected() && !ci_ptr->blocked())
-	// 			{
-	// 				ci_ptr->get_slot()(std::forward<Args>(args)...);
-	// 			}
-	// 		}
-	// 	}
-
-	// 	for(auto& ci_ptr : at_back_connections_)
-	// 	{
-	// 		if(ci_ptr->connected() && !ci_ptr->blocked())
-	// 		{
-	// 			ci_ptr->get_slot()(std::forward<Args>(args)...);
-	// 		}
-	// 	}
-	// 	return;
-	// }
 
 	combiner_type combiner() const
 	{
