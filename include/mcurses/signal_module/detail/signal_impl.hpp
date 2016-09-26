@@ -4,7 +4,7 @@
 #include "../position.hpp"
 #include "../connection.hpp"
 #include "connection_impl.hpp"
-#include "placeholder_template.hpp"
+// #include "placeholder_template.hpp"
 #include "slot_iterator.hpp"
 
 #include <cstddef>
@@ -13,6 +13,8 @@
 #include <map>
 #include <utility>
 #include <functional>
+
+#include <iostream>
 
 // Forward Declarations
 namespace mcurses
@@ -82,7 +84,7 @@ public:
 		auto c = std::make_shared<connection_impl<signature_type>>(s);
 		if(pos == position::at_front)
 		{
-			grouped_connections_[g].insert(std::begin(grouped_connections_), c);
+			grouped_connections_[g].insert(std::begin(grouped_connections_[g]), c);
 			return connection(c);
 		}
 		if(pos == position::at_back)
@@ -97,11 +99,7 @@ public:
 	{
 		auto conn_impl = std::make_shared<connection_impl<signature_type>>();
 		connection conn = connection(conn_impl);
-		conn_impl->get_slot().slot_function() = bind_connection(es.slot_function(), conn);
-		for(std::weak_ptr<void>& wp : es.get_tracked_container())	// copy over tracked items
-		{
-			conn_impl->get_slot().track(wp);
-		}
+		conn_impl->emplace_extended(es.slot_function(), conn);
 
 		if(pos == position::at_front)
 		{
@@ -121,15 +119,11 @@ public:
 	{
 		auto conn_impl = std::make_shared<connection_impl<signature_type>>();
 		connection conn = connection(conn_impl);
-		conn_impl->get_slot().slot_function() = bind_connection(es.slot_function(), conn);
-		for(std::weak_ptr<void>& wp : es.get_tracked_container())	// copy over tracked items
-		{
-			conn_impl->get_slot().track(wp);
-		}
+		conn_impl->emplace_extended(es.slot_function(), conn);
 
 		if(pos == position::at_front)
 		{
-			grouped_connections_[g].insert(std::begin(grouped_connections_), conn_impl);
+			grouped_connections_[g].insert(std::begin(grouped_connections_[g]), conn_impl);
 			return conn;
 		}
 		if(pos == position::at_back)
@@ -147,37 +141,6 @@ public:
 			ci_ptr->disconnect();
 		}
 		// It should be safe to destroy the vector at this key; g.
-	}
-
-	template <typename S>
-	void disconnect(const S& s)
-	{	// maybe go through and change these to for_each or something...
-		for(auto& ci_ptr : at_front_connections_)
-		{
-			if(ci_ptr->get_slot().slot_function() == s)
-			{
-				ci_ptr->disconnect();
-			}
-		}
-
-		for(auto& kv : grouped_connections_)
-		{			// vector
-			for(auto& ci_ptr : kv.second)
-			{
-				if(ci_ptr->get_slot().slot_function() == s)
-				{
-					ci_ptr->disconnect();
-				}
-			}
-		}
-
-		for(auto& ci_ptr : at_back_connections_)
-		{
-			if(ci_ptr->get_slot().slot_function() == s)
-			{
-				ci_ptr->disconnect();
-			}
-		}
 	}
 
 	void disconnect_all_slots()
@@ -205,7 +168,7 @@ public:
 	{
 		for(auto& ci_ptr : at_front_connections_)
 		{
-			if(!ci_ptr->disconnected())
+			if(ci_ptr->connected())
 			{
 				return false;
 			}
@@ -215,7 +178,7 @@ public:
 		{			// vector
 			for(auto& ci_ptr : kv.second)
 			{
-				if(!ci_ptr->disconnected())
+				if(ci_ptr->connected())
 				{
 					return false;
 				}
@@ -224,7 +187,7 @@ public:
 
 		for(auto& ci_ptr : at_back_connections_)
 		{
-			if(!ci_ptr->disconnected())
+			if(ci_ptr->connected())
 			{
 				return false;
 			}
@@ -238,7 +201,7 @@ public:
 		std::size_t size{0};
 		for(auto& ci_ptr : at_front_connections_)
 		{
-			if(!ci_ptr->disconnected())
+			if(ci_ptr->connected())
 			{
 				++size;
 			}
@@ -248,7 +211,7 @@ public:
 		{			// vector
 			for(auto& ci_ptr : kv.second)
 			{
-				if(!ci_ptr->disconnected())
+				if(ci_ptr->connected())
 				{
 					++size;
 				}
@@ -257,7 +220,7 @@ public:
 
 		for(auto& ci_ptr : at_back_connections_)
 		{
-			if(!ci_ptr->disconnected())
+			if(ci_ptr->connected())
 			{
 				++size;
 			}
@@ -267,12 +230,13 @@ public:
 
 	result_type operator()(Args&&... args)
 	{
-		std::vector<slot_iterator<Ret(Args...)>> iter_container;
+		typedef std::vector<std::function<Ret()>> container_type;
+		container_type bound_slot_container;
 		for(auto& c : at_front_connections_)
 		{
 			if(c->connected() && !c->blocked())
 			{
-				iter_container.push_back(slot_iterator<Ret(Args...)>(c->get_slot(), std::forward<Args>(args)...));
+				bound_slot_container.push_back(std::bind(std::function<Ret(Args...)>{c->get_slot()}, std::forward<Args>(args)...));
 			}
 		}
 
@@ -282,7 +246,7 @@ public:
 			{
 				if(c->connected() && !c->blocked())
 				{
-					iter_container.push_back(slot_iterator<Ret(Args...)>(c->get_slot(), std::forward<Args>(args)...));
+					bound_slot_container.push_back(std::bind(std::function<Ret(Args...)>{c->get_slot()}, std::forward<Args>(args)...));
 				}
 			}
 		}
@@ -291,21 +255,22 @@ public:
 		{
 			if(c->connected() && !c->blocked())
 			{
-				iter_container.push_back(slot_iterator<Ret(Args...)>(c->get_slot(), std::forward<Args>(args)...));
+				bound_slot_container.push_back(std::bind(std::function<Ret(Args...)>{c->get_slot()}, std::forward<Args>(args)...));
 			}
 		}
-		iter_container.push_back(slot_iterator<Ret(Args...)>());	// one past end iterator
-		return combiner_(iter_container.front(), iter_container.back());
+		return combiner_(slot_iterator<typename container_type::iterator>(std::begin(bound_slot_container)),
+							slot_iterator<typename container_type::iterator>(std::end(bound_slot_container)));
 	}
 
 	result_type operator()(Args&&... args) const
 	{
-		std::vector<slot_iterator<Ret(Args...)>> iter_container;
+		typedef std::vector<std::function<Ret()>> container_type;
+		container_type bound_slot_container;
 		for(auto& c : at_front_connections_)
 		{
 			if(c->connected() && !c->blocked())
 			{
-				iter_container.push_back(slot_iterator<Ret(Args...)>(c->get_slot(), std::forward<Args>(args)...));
+				bound_slot_container.push_back(std::bind(std::function<Ret(Args...)>{c->get_slot()}, std::forward<Args>(args)...));
 			}
 		}
 
@@ -315,7 +280,7 @@ public:
 			{
 				if(c->connected() && !c->blocked())
 				{
-					iter_container.push_back(slot_iterator<Ret(Args...)>(c->get_slot(), std::forward<Args>(args)...));
+					bound_slot_container.push_back(std::bind(std::function<Ret(Args...)>{c->get_slot()}, std::forward<Args>(args)...));
 				}
 			}
 		}
@@ -324,44 +289,13 @@ public:
 		{
 			if(c->connected() && !c->blocked())
 			{
-				iter_container.push_back(slot_iterator<Ret(Args...)>(c->get_slot(), std::forward<Args>(args)...));
+				bound_slot_container.push_back(std::bind(std::function<Ret(Args...)>{c->get_slot()}, std::forward<Args>(args)...));
 			}
 		}
-		iter_container.push_back(slot_iterator<Ret(Args...)>());	// one past end iterator
 		const combiner_type const_comb = combiner_;
-		return const_comb(iter_container.front(), iter_container.back());
+		return const_comb(slot_iterator<typename container_type::iterator>(std::begin(bound_slot_container)),
+							slot_iterator<typename container_type::iterator>(std::end(bound_slot_container)));
 	}
-
-	// void void_specialization_operator_call(Args&&... args) const
-	// {
-	// 	for(auto& ci_ptr : at_front_connections_)
-	// 	{
-	// 		if(ci_ptr->connected() && !ci_ptr->blocked())
-	// 		{
-	// 			ci_ptr->get_slot()(std::forward<Args>(args)...);
-	// 		}
-	// 	}
-
-	// 	for(auto& kv : grouped_connections_)
-	// 	{
-	// 		for(auto& ci_ptr : kv.second)
-	// 		{
-	// 			if(ci_ptr->connected() && !ci_ptr->blocked())
-	// 			{
-	// 				ci_ptr->get_slot()(std::forward<Args>(args)...);
-	// 			}
-	// 		}
-	// 	}
-
-	// 	for(auto& ci_ptr : at_back_connections_)
-	// 	{
-	// 		if(ci_ptr->connected() && !ci_ptr->blocked())
-	// 		{
-	// 			ci_ptr->get_slot()(std::forward<Args>(args)...);
-	// 		}
-	// 	}
-	// 	return;
-	// }
 
 	combiner_type combiner() const
 	{
@@ -375,17 +309,6 @@ public:
 	}
 
 private:
-	std::function<Ret(Args...)> bind_connection(std::function<Ret(Args...)> f, connection c)
-	{
-		return bind_connection(f, c, std::index_sequence_for<Args...>{});
-	}
-
-	template <typename ... Ints>
-	std::function<Ret(Args...)> bind_connection(std::function<Ret(Args...)> f, connection c, Ints... ints)
-	{
-		return std::bind(f, c, placeholder_template<ints>{}...);
-	}
-
 	positioned_connection_container_type at_front_connections_;
 	grouped_connection_container_type grouped_connections_;
 	positioned_connection_container_type at_back_connections_;

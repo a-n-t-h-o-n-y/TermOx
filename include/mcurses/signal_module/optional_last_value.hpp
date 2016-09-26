@@ -4,6 +4,8 @@
 #include "none.hpp"
 #include "optional.hpp"
 
+#include <iostream>
+
 namespace mcurses
 {
 
@@ -62,6 +64,15 @@ public:
 	template<typename InputIterator>
 	result_type operator()(InputIterator first, InputIterator last) const
 	{
+		if(first == last)
+		{
+			return;
+		}
+		while(first != last)
+		{
+			*first;
+			++first;
+		}
 		return;
 	}
 };
