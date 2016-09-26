@@ -111,13 +111,6 @@ public:
 		return;
 	}
 
-	template <typename S>
-	void disconnect(const S& a_slot)
-	{
-		pimpl_->disconnect(a_slot);
-		return;
-	}
-
 	void disconnect_all_slots()
 	{
 		pimpl_->disconnect_all_slots();

@@ -64,6 +64,15 @@ public:
 	template<typename InputIterator>
 	result_type operator()(InputIterator first, InputIterator last) const
 	{
+		if(first == last)
+		{
+			return;
+		}
+		while(first != last)
+		{
+			*first;
+			++first;
+		}
 		return;
 	}
 };
