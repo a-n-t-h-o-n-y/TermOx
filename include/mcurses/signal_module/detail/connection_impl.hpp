@@ -30,7 +30,6 @@ public:
 	void disconnect() override;
 
 	bool connected() const override;
-	bool blocked() const override;
 
 	slot<Ret(Args...)>& get_slot();
 	const slot<Ret(Args...)>& get_slot() const;
@@ -45,17 +44,16 @@ private:
 
 	slot<Ret(Args...)> slot_;
 	bool connected_;
-	bool blocked_;
 };
 
 template <typename Ret, typename ... Args>
 connection_impl<Ret(Args...)>::connection_impl()
-:slot_{}, connected_{false}, blocked_{false}
+:slot_{}, connected_{false}
 {}
 
 template <typename Ret, typename ... Args>
 connection_impl<Ret(Args...)>::connection_impl(const slot<Ret(Args...)>& x)
-:slot_{x}, connected_{true}, blocked_{false}
+:slot_{x}, connected_{true}
 {}
 
 template <typename Ret, typename ... Args>
@@ -85,12 +83,6 @@ template <typename Ret, typename ... Args>
 bool connection_impl<Ret(Args...)>::connected() const
 {
 	return connected_;
-}
-
-template <typename Ret, typename ... Args>
-bool connection_impl<Ret(Args...)>::blocked() const
-{
-	return blocked_;
 }
 
 template <typename Ret, typename ... Args>

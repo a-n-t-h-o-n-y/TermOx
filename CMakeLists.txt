@@ -28,6 +28,7 @@ list(APPEND PRINTER_MODULE_SOURCES 	#"src/printer_module/...cpp"
 									)
 list(APPEND SIGNAL_MODULE_SOURCES 	"src/signal_module/slot_base.cpp"
 									"src/signal_module/connection.cpp"
+									"src/signal_module/shared_connection_block.cpp"
 									)
 list(APPEND WIDGET_MODULE_SOURCES 	#"src/widget_module/...cpp"
 									)
@@ -41,6 +42,7 @@ list(APPEND TEST_SOURCES "test/signal_module/none_test.cpp"
 						 "test/signal_module/connection_impl_test.cpp"
 						 "test/signal_module/signal_test.cpp"
 						 "test/signal_module/signal_impl_test.cpp"
+						 "test/signal_module/shared_connection_block_test.cpp"
 						 )
 
 # Create a Static Library for MCurses

@@ -20,7 +20,13 @@ public:
 	virtual void disconnect() = 0;
 
 	virtual bool connected() const = 0;
-	virtual bool blocked() const = 0;
+	inline bool blocked() const {return blocking_object_count_ < 1? false : true;}
+
+	inline void add_block() {++blocking_object_count_; return;}
+	inline void remove_block() {--blocking_object_count_; return;}
+
+protected:
+	int blocking_object_count_ = 0;
 };
 
 } // namespace mcurses
