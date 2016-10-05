@@ -38,6 +38,8 @@ public:
 
 	slot() = default;
 
+	slot(const slot&) = default;
+
 	template <typename Function>
 	slot(const Function& func);
 

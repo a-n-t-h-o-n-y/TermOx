@@ -102,7 +102,7 @@ public:
 
 	connection connect_extended(const group_type& g, const extended_slot_type& es, position pos = position::at_back)
 	{
-		return connect_extended(g, es, pos);
+		return pimpl_->connect_extended(g, es, pos);
 	}
 
 	void disconnect(const group_type& g)
@@ -127,12 +127,12 @@ public:
 		return pimpl_->num_slots();
 	}
 
-	result_type operator()(Args... args)
+	result_type operator()(Args&&... args)
 	{
 		return pimpl_->operator()(std::forward<Args>(args)...);
 	}
 
-	result_type operator()(Args... args) const
+	result_type operator()(Args&&... args) const
 	{
 		return pimpl_->operator()(std::forward<Args>(args)...);
 	}
@@ -148,17 +148,6 @@ public:
 		return;
 	}
 
-	void swap(signal& x)
-	{
-		if(this == &x)
-		{
-			return;
-		}
-		using std::swap;
-		swap(pimpl_, x.pimpl_);
-		return;
-	}
-
 	std::shared_ptr<void> lock_impl_as_void() const
 	{
 		return pimpl_;
@@ -169,14 +158,24 @@ public:
 		return pimpl_;
 	}
 
+	friend void swap(signal& x, signal& y)
+	{
+		if(&x == &y)
+		{
+			return;
+		}
+		using std::swap;
+		swap(x.pimpl_, y.pimpl_);
+		return;
+	}
+
 private:
 	std::shared_ptr<impl_type> pimpl_;
 };
 
-template <typename Signature, typename Combiner, typename Group,
+template <typename Ret, typename ... Args, typename Combiner, typename Group,
 		  typename GroupCompare, typename SlotFunction, typename Mutex>
-void swap(signal<Signature, Combiner, Group, GroupCompare, SlotFunction, Mutex>&,
-	 signal<Signature, Combiner, Group, GroupCompare, SlotFunction, Mutex>&);
+const int signal<Ret(Args...), Combiner, Group, GroupCompare, SlotFunction, Mutex>::arity;
 
 } // namespace mcurses
 

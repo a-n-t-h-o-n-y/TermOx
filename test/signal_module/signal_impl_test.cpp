@@ -403,7 +403,7 @@ TEST_F(SignalImplTest, DisconnectByGroup)
 	EXPECT_DOUBLE_EQ(1.3, *si_type2_1('f', 5));
 	si_type2_1.disconnect('a');
 
-	EXPECT_DOUBLE_EQ(9.1, *si_type2_1('k', 8));
+	EXPECT_DOUBLE_EQ(2.8, *si_type2_1('k', 8));
 }
 
 // TEST_F(SignalImplTest, DisconnectBySlot)

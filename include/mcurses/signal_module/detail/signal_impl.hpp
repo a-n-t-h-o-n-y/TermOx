@@ -4,7 +4,6 @@
 #include "../position.hpp"
 #include "../connection.hpp"
 #include "connection_impl.hpp"
-// #include "placeholder_template.hpp"
 #include "slot_iterator.hpp"
 
 #include <cstddef>
@@ -13,8 +12,6 @@
 #include <map>
 #include <utility>
 #include <functional>
-
-#include <iostream>
 
 // Forward Declarations
 namespace mcurses
@@ -67,7 +64,8 @@ public:
 		auto c = std::make_shared<connection_impl<signature_type>>(s);
 		if(pos == position::at_front)
 		{
-			at_front_connections_.push_back(c);
+			at_front_connections_.insert(std::begin(at_front_connections_), c);
+			// at_front_connections_.push_back(c);
 			return connection(c);
 		}
 
@@ -99,11 +97,11 @@ public:
 	{
 		auto conn_impl = std::make_shared<connection_impl<signature_type>>();
 		connection conn = connection(conn_impl);
-		conn_impl->emplace_extended(es.slot_function(), conn);
+		conn_impl->emplace_extended(es, conn);	// this only takes the slot function, not the tracked items..!
 
 		if(pos == position::at_front)
 		{
-			at_front_connections_.push_back(conn_impl);
+			at_front_connections_.insert(std::begin(at_front_connections_), conn_impl);
 			return conn;
 		}
 
@@ -119,7 +117,7 @@ public:
 	{
 		auto conn_impl = std::make_shared<connection_impl<signature_type>>();
 		connection conn = connection(conn_impl);
-		conn_impl->emplace_extended(es.slot_function(), conn);
+		conn_impl->emplace_extended(es, conn);
 
 		if(pos == position::at_front)
 		{

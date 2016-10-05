@@ -11,6 +11,10 @@ class slot_base {
 public:
 	typedef std::vector<std::shared_ptr<void>> locked_container_type;
 
+	slot_base() = default;
+
+	slot_base(const slot_base&) = default;
+
 	virtual ~slot_base() = default;
 
 	bool expired() const;
