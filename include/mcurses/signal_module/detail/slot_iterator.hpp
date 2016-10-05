@@ -1,97 +1,47 @@
 #ifndef SLOT_ITERATOR_HPP
 #define SLOT_ITERATOR_HPP
 
-#include "../slot.hpp"
-
-#include <functional>
-#include <utility>
+#include <iterator>
 
 namespace mcurses
 {
 
-template <typename Signature>
-class slot_iterator;
-
-template <typename Ret, typename ... Args>
-class slot_iterator<Ret(Args...)> {
+template <typename InputIterator>
+class slot_iterator {
 public:
-	slot_iterator() = default;
+	typedef typename std::iterator_traits<InputIterator>::value_type 	iter_result_type;
+	typedef typename iter_result_type::result_type 						result_type;
 
-	slot_iterator(std::function<Ret(Args...)> s, Args&&... args)
-	:func_{std::bind(s, std::forward<Args>(args)...)}
-	{}
+	slot_iterator() = default;	// might never be used?
 
-	Ret operator*()
+	slot_iterator(InputIterator iter)
+	:iter_{iter}{}
+
+	result_type operator*()
 	{
-		if(!has_cache_)
-		{
-			cache_ = func_();
-			has_cache_ = true;
-		}
-		return cache_;
+		auto slt = *iter_;
+		return slt();
 	}
 
 	slot_iterator& operator++()
 	{
-		return *(this + 1);	// iters stored in vector
+		++iter_;
+		return *this;
 	}
 
 	bool operator==(const slot_iterator& x)
 	{
-		return this == &x;
+		return iter_ == x.iter_;
 	}
 
 	bool operator!=(const slot_iterator& x)
 	{
-		return !(*this == x);
+		return !operator==(x);
 	}
+
 
 private:
-	std::function<Ret()> func_;
-	bool has_cache_ = false;
-	Ret cache_;
-};
-
-
-// VOID SPECIALIZATION - \ _
-
-template <typename ... Args>
-class slot_iterator<void(Args...)> {
-public:
-	slot_iterator() = default;
-
-	slot_iterator(std::function<void(Args...)> s, Args&&... args)
-	:func_{std::bind(s, std::forward<Args>(args)...)}
-	{}
-
-	void operator*()
-	{
-		if(!has_run_)
-		{
-			func_();
-			has_run_ = true;
-		}
-		return;
-	}
-
-	slot_iterator& operator++()
-	{
-		return *(this + 1);	// iters stored in vector
-	}
-
-	bool operator==(const slot_iterator& x)
-	{
-		return this == &x;
-	}
-
-	bool operator!=(const slot_iterator& x)
-	{
-		return !(*this == x);
-	}
-
-private:
-	std::function<void()> func_;
-	bool has_run_ = false;
+	InputIterator iter_;
 };
 
 } // namespace mcurses

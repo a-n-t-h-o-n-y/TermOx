@@ -7,3 +7,5 @@
 // #include "widget_module/..."
 
 #endif	// MCURSES_HPP
+
+// make a file like this for each module, then just include those here.

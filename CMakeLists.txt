@@ -40,6 +40,7 @@ list(APPEND TEST_SOURCES "test/signal_module/none_test.cpp"
 						 "test/signal_module/connection_test.cpp"
 						 "test/signal_module/connection_impl_test.cpp"
 						 "test/signal_module/signal_test.cpp"
+						 "test/signal_module/signal_impl_test.cpp"
 						 )
 
 # Create a Static Library for MCurses
