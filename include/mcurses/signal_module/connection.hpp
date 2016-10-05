@@ -29,6 +29,8 @@ public:
 	bool operator!=(const connection& x);
 	bool operator<(const connection& x);
 
+	friend class shared_connection_block;
+
 private:
 	std::weak_ptr<connection_impl_base> pimpl_;
 };
