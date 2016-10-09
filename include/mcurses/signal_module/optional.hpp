@@ -1,8 +1,8 @@
-///	\file optional.hpp
+//!	\file optional.hpp
 #ifndef OPTIONAL_HPP
 #define OPTIONAL_HPP
 
-#include "none_t.hpp"
+#include "none.hpp"
 #include "bad_optional_access.hpp"
 #include <memory>
 
@@ -10,9 +10,9 @@ namespace mcurses
 {
 
 /**	\class optional
- *	\brief Used when a variable might not have a value.
+ *	\brief Represents a variable which optionally contains a value.
  *
- *	This template will wrap the variable and allow users
+ *	This class template will wrap the variable and allow users
  *	to test whether or not the variable contains a value.
  *	Useful when 0, -1, etc... does not suffice for 'no value'.
  */
@@ -71,15 +71,42 @@ public:
 	T& value() &;
 	T&& value() &&;
 
-	template <typename U>
-	T value_or(U&& value) const&;
 
+	//!	Returns val if *this is uninitialized, otherwise returns the value stored in *this.
+	//!	Specialized for when *this is an lvalue.
+	/*!
+		\param	val 	Value to be returned if *this is uninitialized.
+		\retval			Either the value stored in *this, or val.
+	*/
 	template <typename U>
-	T value_or(U&& value) &&;
+	T value_or(U&& val) const&;
 
+
+	//!	Returns val if *this is uninitialized, otherwise returns the value stored in *this.
+	//!	Specialized for when *this is an rvalue.
+	/*!
+		\param	val 	Value to be returned if *this is uninitialized.
+		\retval			Either the value stored in *this, or val.
+	*/
+	template <typename U>
+	T value_or(U&& val) &&;
+
+
+	//! Evaluates func and forwards its return value if *this is uninitialized, otherwise returns the value stoed in *this.
+	//!	Specialized for when *this is an lvalue.
+	/*!
+		\param	func 	Function to be evaluated and returned if *this is uninitialized.
+		\retval			Either the value stored in *this, or the result of evaluating func.
+	*/
 	template <typename F>
 	T value_or_eval(F func) const&;
 
+	//! Evaluates func and forwards its return value if *this is uninitialized, otherwise returns the value stoed in *this.
+	//!	Specialized for when *this is an rvalue.
+	/*!
+		\param	func 	Function to be evaluated and returned if *this is uninitialized.
+		\retval			Either the value stored in *this, or the result of evaluating func.
+	*/
 	template <typename F>
 	T value_or_eval(F func) &&;
 
@@ -293,25 +320,25 @@ T&& optional<T>::value() &&
 
 template <typename T>
 template <typename U>
-T optional<T>::value_or(U&& value) const&
+T optional<T>::value_or(U&& val) const&
 {
 	if(initialized_)
 	{
 		return *value_ptr_;
 	}
-	return std::forward<U>(value);
+	return std::forward<U>(val);
 }
 
 template <typename T>
 template <typename U>
-T optional<T>::value_or(U&& value) &&
+T optional<T>::value_or(U&& val) &&
 {
 	if(initialized_)
 	{
 		initialized_ = false;
 		return std::move(*(value_ptr_.release()));
 	}
-	return std::forward<U>(value);
+	return std::forward<U>(val);
 }
 
 template <typename T>

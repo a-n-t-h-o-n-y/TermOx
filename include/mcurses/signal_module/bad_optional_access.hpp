@@ -9,8 +9,7 @@
 namespace mcurses
 {
 
-class bad_optional_access: public std::exception
-{
+class bad_optional_access: public std::exception {
 public:
 	bad_optional_access(){}
 	bad_optional_access(const std::string& w):what_{w}{}
