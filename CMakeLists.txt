@@ -22,7 +22,7 @@ set(CMAKE_CXX_FLAGS "-std=c++14 -g -Wall")
 include_directories(include)
 
 # Collect Source Files into Variable Names
-list(APPEND EVENT_MODULE_SOURCES 	#"src/event_module/...cpp"
+list(APPEND SYSTEM_MODULE_SOURCES 	#"src/system_module/...cpp"
 								 	)
 list(APPEND PRINTER_MODULE_SOURCES 	#"src/printer_module/...cpp"
 									)
@@ -46,7 +46,7 @@ list(APPEND TEST_SOURCES "test/signal_module/none_test.cpp"
 						 )
 
 # Create a Static Library for MCurses
-add_library(mcurses_lib STATIC #${EVENT_MODULE_SOURCES}
+add_library(mcurses_lib STATIC #${SYSTEM_MODULE_SOURCES}
 # 							   ${PRINTER_MODULE_SOURCES}
  							   ${SIGNAL_MODULE_SOURCES}
 # 							   ${WIDGET_MODULE_SOURCES}
