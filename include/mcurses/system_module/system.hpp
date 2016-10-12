@@ -1,17 +1,19 @@
 #ifndef SYSTEM_HPP
 #define SYSTEM_HPP
 
+#include "object.hpp"
+
 namespace mcurses
 {
 
-class System {
+class System : public Object {
 public:
 
-	// friend Event_dispatcher;
+	int run();
+
+	friend class Abstract_event_dispatcher;
 private:
-	// Event_dispatcher ed_;
-	// container<Event_loop> elc_;
-	// Posted_event_queue pec_;
+
 };
 
 } // namespace mcurses
