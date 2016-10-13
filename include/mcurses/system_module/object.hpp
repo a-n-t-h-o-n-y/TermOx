@@ -8,6 +8,9 @@ class Object {
 public:
 	virtual ~Object(){}
 
+	// slot
+	// delete_later();
+
 private:
 	
 };
