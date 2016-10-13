@@ -20,6 +20,7 @@ public:
 
 	Abstract_event_dispatcher& dispatcher();
 
+	bool						can_wait_ = true; // is true if no more events to process on queue
 	bool 						quit_now_ = false;
 	std::stack<Event_loop>		event_loops_;
 	Posted_event_queue			event_queue_;

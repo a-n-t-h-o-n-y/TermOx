@@ -3,20 +3,25 @@
 
 #include "posted_event.hpp"
 
-#include <queue>
+#include <list>
 
-namespace mcurses
-{
-namespace detail
-{
+namespace mcurses {
+namespace detail {
 
-// implements priority sorting and(?) collapsing of redraw events
-class Posted_event_queue {
+					// Do no access through std::list pointer/ref 
+class Posted_event_queue : public std::list<Posted_event> {
 public:
-	void add_event(const Posted_event& ev);
+	void add_event(Posted_event& ev);
+	Posted_event next_posted_event();
 
 private:
-	std::queue<Posted_event> queue_;
+	using std::list<Posted_event>::push_back;
+	using std::list<Posted_event>::emplace_back;
+	using std::list<Posted_event>::push_front;
+	using std::list<Posted_event>::emplace_front;
+	using std::list<Posted_event>::emplace;
+	using std::list<Posted_event>::insert;
+	using std::list<Posted_event>::assign;
 };
 
 } // namespace detail

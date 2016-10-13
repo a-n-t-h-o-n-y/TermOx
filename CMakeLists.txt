@@ -26,6 +26,8 @@ list(APPEND SYSTEM_MODULE_SOURCES 	"src/system_module/thread_data.cpp"
 									"src/system_module/system.cpp"
 									"src/system_module/event_loop.cpp"
 									"src/system_module/ncurses_event_dispatcher.cpp"
+									"src/system_module/posted_event_queue.cpp"
+									"src/system_module/posted_event.cpp"
 								 	)
 list(APPEND PRINTER_MODULE_SOURCES 	#"src/printer_module/...cpp"
 									)
