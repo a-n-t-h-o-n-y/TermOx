@@ -7,9 +7,9 @@ TEST(PostedEventTest, LessThanOperator)
 {
 	mcurses::Object obj;
 	auto ev = std::make_unique<mcurses::Event>();	// change this when Event becomes pure virtual
-	mcurses::detail::Posted_event pe1(obj, std::move(ev), 1);
-	mcurses::detail::Posted_event pe4(obj, std::unique_ptr<mcurses::Event>{new mcurses::Event{}}, 4);	// change this too ^^
-	mcurses::detail::Posted_event pe0(obj, std::make_unique<mcurses::Event>(), 0);
+	mcurses::detail::Posted_event pe1(&obj, std::move(ev), 1);
+	mcurses::detail::Posted_event pe4(&obj, std::unique_ptr<mcurses::Event>{new mcurses::Event{}}, 4);	// change this too ^^
+	mcurses::detail::Posted_event pe0(&obj, std::make_unique<mcurses::Event>(), 0);
 
 	EXPECT_TRUE(pe1 < 4);
 	EXPECT_TRUE(pe0 < 4);

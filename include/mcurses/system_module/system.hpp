@@ -2,12 +2,17 @@
 #define SYSTEM_HPP
 
 #include "object.hpp"
+#include "event.hpp"
+
+#include <memory>
 
 namespace mcurses
 {
 
 class System : public Object {
 public:
+
+	static void post_event(Object* obj, std::unique_ptr<Event> event, int priority = 0);
 
 	int run();
 

@@ -13,18 +13,18 @@ namespace detail
 
 class Posted_event {
 public:
-	Posted_event(Object& obj, std::unique_ptr<Event> ev, int priority);
+	Posted_event(Object* obj, std::unique_ptr<Event> ev, int priority);
 	Posted_event(const Posted_event&) = delete;
 	Posted_event& operator=(const Posted_event&) = delete;
 	Posted_event(Posted_event&&) = default;
 	Posted_event& operator=(Posted_event&&) = default;
 
-	Object& reciever() {return reciever_;}
+	Object* reciever() {return reciever_;}
 	Event& event() {return *event_;}
 	int priority() const {return priority_;}
 
 private:
-	Object&					reciever_;
+	Object*					reciever_;
 	std::unique_ptr<Event> 	event_;
 	int 					priority_;
 };
