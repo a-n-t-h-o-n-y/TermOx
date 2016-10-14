@@ -6,16 +6,21 @@ namespace mcurses
 
 int Event_loop::run()
 {
-	if(this->process_events())
-		return 0;
-	else
-		return 1;
+	auto& data = detail::Thread_data::current();
+	data.event_loops.push(this);
+
+	// this is a loop, no need to loop
+	this->process_events();
+
+	data.event_loops.pop();
+
+	return 0;
 }
 
 bool Event_loop::process_events()
 {
-	detail::Thread_data& main_thread_data = detail::Thread_data::current();
-	return main_thread_data.dispatcher().process_events();
+	detail::Thread_data& data = detail::Thread_data::current();
+	return data.dispatcher().process_events();	// this loops
 }
 
 } // namespace mcurses

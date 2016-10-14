@@ -5,7 +5,7 @@
 namespace mcurses {
 namespace detail {
 
-Posted_event::Posted_event(Object& obj, std::unique_ptr<Event> ev, int priority)
+Posted_event::Posted_event(Object* obj, std::unique_ptr<Event> ev, int priority)
 :reciever_{obj}, event_{std::move(ev)}, priority_{priority}
 {}
 
