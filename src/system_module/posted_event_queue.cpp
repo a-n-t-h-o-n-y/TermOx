@@ -1,5 +1,6 @@
 #include <mcurses/system_module/detail/posted_event_queue.hpp>
 #include <mcurses/system_module/detail/posted_event.hpp>
+#include <mcurses/system_module/event.hpp>
 
 #include <algorithm>
 #include <functional>
@@ -12,7 +13,7 @@ namespace detail {
 void Posted_event_queue::add_event(Posted_event& pe)
 {
 	int priority = pe.priority();
-	if(this->empty() || this->back().priority() >= priority)
+	if(this->empty() || this->back().priority() >= priority || (pe.event().type() == Event::Type::DeferredDelete))
 	{
 		this->emplace_back(std::move(pe));
 	}

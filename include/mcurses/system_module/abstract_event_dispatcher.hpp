@@ -2,16 +2,21 @@
 #define ABSTRACT_EVENT_DISPATCHER_HPP
 
 #include "object.hpp"
+#include "event.hpp"
+
+#include <memory>
 
 namespace mcurses
 {
 
 class Abstract_event_dispatcher : public Object {
 public:
-	virtual bool process_events() = 0;
+	virtual bool process_events();
+	void interrupt();
 
-private:
-	
+protected:
+	virtual void post_user_input() = 0;
+	bool interrupt_ = false;
 };
 
 } // namespace mcurses
