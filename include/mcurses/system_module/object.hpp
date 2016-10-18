@@ -2,7 +2,6 @@
 #define OBJECT_HPP
 
 #include "event.hpp"
-#include "object.hpp"
 
 #include <vector>
 

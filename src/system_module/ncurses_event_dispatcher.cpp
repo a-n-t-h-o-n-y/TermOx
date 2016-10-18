@@ -131,7 +131,7 @@ Object*
 NCurses_event_dispatcher::find_object(unsigned x, unsigned y)
 {
 	Object* obj = System::head();
-	if(obj == nullptr) { return obj; }
+	if(obj == nullptr || !obj->has_coordinates(x,y)) { return nullptr; }
 
 	bool keep_going = true;
 	while(keep_going && !obj->children().empty()) {

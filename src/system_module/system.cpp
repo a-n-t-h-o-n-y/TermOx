@@ -43,23 +43,17 @@ System::send_event(Object* obj, const Event& event)
 void
 System::send_posted_events(Object* obj, Event::Type et)
 {
-	std::vector<Event*> to_remove;
 	auto& queue = detail::Thread_data::current().event_queue;
-	for(detail::Posted_event& pe : queue)
-	{
-		if((obj == nullptr || obj == pe.reciever())
+	while(!queue.empty()) {
+		auto& pe = queue.front();
+		if ((obj == nullptr || obj == pe.reciever())
 			&& (et == Event::Type::None || et == pe.event().type())
 			&& ((pe.event().type() != Event::Type::DeferredDelete)
 				|| et == Event::Type::DeferredDelete))
 		{
-			notify(pe.reciever(), pe.event());
-			to_remove.push_back(&pe.event());
+			detail::Posted_event posted = queue.next_posted_event();
+			notify(posted.reciever(), posted.event());
 		}
-	}
-
-	// Remove events all at once so as to not invalidate iterators during above for range loop
-	for(Event* ep : to_remove) {
-		remove_posted_event(ep);
 	}
 	return;
 }
@@ -90,6 +84,22 @@ void System::exit(int return_code)
 	return;
 }
 
+unsigned
+System::max_height() // eventually implement with static Painter function?
+{
+	int x{0}, y{0};
+	getmaxyx(stdscr, y, x);
+	return y;
+}
+
+unsigned
+System::max_width() // eventually implement with static Painter function?
+{
+	int x{0}, y{0};
+	getmaxyx(stdscr, y, x);
+	return x;
+}
+
 Object* System::head_ = nullptr;
 
 Object* System::head()
@@ -97,23 +107,18 @@ Object* System::head()
 	return head_;
 }
 
-unsigned System::max_width = 0;
-unsigned System::max_height = 0;
-
 System::System()
 {
 	// Theses should be passed of to a single static Painter function(s) that generalize for other systems, not just ncurses.
 	// Painter::initialize();
+	::setlocale(LC_ALL, "");
 	::initscr();
 	::cbreak(); // change to raw() once you can handle exit signals on your own.
 	::noecho();
 	::keypad(::stdscr, true);
 	::mousemask(ALL_MOUSE_EVENTS, nullptr);
 	::mouseinterval(0);
-
-	// now initialize max height and width
-	System::max_width = ::COLS;
-	System::max_height = ::LINES;
+	::curs_set(0); // invisible cursor
 }
 
 System::~System()
