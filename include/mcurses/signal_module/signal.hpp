@@ -129,12 +129,20 @@ public:
 
 	result_type operator()(Args&&... args)
 	{
-		return pimpl_->operator()(std::forward<Args>(args)...);
+		if(enabled_) {
+			return pimpl_->operator()(std::forward<Args>(args)...);
+		} else {
+			return result_type();
+		}
 	}
 
 	result_type operator()(Args&&... args) const
 	{
-		return pimpl_->operator()(std::forward<Args>(args)...);
+		if(enabled_) {
+			return pimpl_->operator()(std::forward<Args>(args)...);
+		} else {
+			return result_type();
+		}
 	}
 
 	combiner_type combiner() const
@@ -169,8 +177,13 @@ public:
 		return;
 	}
 
+	bool enabled() const { return enabled_; }
+	void enable() { enabled_ = true; }
+	void disable() { enabled_ = false; }
+
 private:
 	std::shared_ptr<impl_type> pimpl_;
+	bool enabled_ = true;
 };
 
 template <typename Ret, typename ... Args, typename Combiner, typename Group,

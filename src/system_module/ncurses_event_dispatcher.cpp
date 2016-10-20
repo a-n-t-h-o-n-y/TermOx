@@ -54,7 +54,7 @@ void NCurses_event_dispatcher::post_user_input()
 std::pair<Object*, std::unique_ptr<Event>>
 NCurses_event_dispatcher::parse_mouse_event()
 {
-	::MEVENT 			mouse_event;
+	::MEVENT mouse_event;
 	if(::getmouse(&mouse_event) == OK) {
 		// Find Object
 		Object* object = find_object(mouse_event.x, mouse_event.y);
