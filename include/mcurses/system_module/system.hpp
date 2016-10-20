@@ -21,8 +21,8 @@ public:
 	static bool notify(Object* obj, const Event& event);
 	static void exit(int return_code = 0);
 	static Object* head();
-	static unsigned max_height;
-	static unsigned max_width;
+	static unsigned max_height();
+	static unsigned max_width();
 
 	System();
 	~System();

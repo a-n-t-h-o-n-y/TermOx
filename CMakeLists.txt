@@ -33,6 +33,9 @@ list(APPEND SYSTEM_MODULE_SOURCES 	"src/system_module/thread_data.cpp"
 									"src/system_module/object.cpp"
 								 	)
 list(APPEND PAINTER_MODULE_SOURCES 	"src/painter_module/canvas.cpp"
+									"src/painter_module/painter.cpp"
+									"src/painter_module/paint_engine.cpp"
+									"src/painter_module/ncurses_paint_engine.cpp"
 									)
 list(APPEND SIGNAL_MODULE_SOURCES 	"src/signal_module/slot_base.cpp"
 									"src/signal_module/connection.cpp"

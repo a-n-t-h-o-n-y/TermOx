@@ -9,10 +9,10 @@ Canvas::Canvas(unsigned x, unsigned y, unsigned width, unsigned height)
 bool
 Canvas::check_coordinates(unsigned glob_x, unsigned glob_y)
 {
-	if(glob_x >= x_ && glob_x <= x_ + width_) {
-		if(glob_y >= y_ && glob_y <= y_ + height_) {
-			return true;
-		}
+	if((glob_x >= x_) && (glob_x <= (x_ + width_))
+		&& (glob_y >= y_) && (glob_y <= (y_ + height_)))
+	{
+		return true;
 	}
 	return false;
 }

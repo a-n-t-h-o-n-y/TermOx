@@ -1,5 +1,7 @@
 #include <mcurses/mcurses.hpp>
 
+#include <sstream>
+
 class Click_paint_widget : public mcurses::Widget {
 public:
 	Click_paint_widget(unsigned x, unsigned y, unsigned width, unsigned height)
@@ -17,7 +19,6 @@ public:
 
 	void mouse_press_event(const mcurses::Mouse_event& event)
 	{
-		// mcurses::System::exit();
 		mcurses::Painter p{this};
 		p.move(event.local_x(), event.local_y());
 		// std::stringstream ss;
@@ -46,7 +47,7 @@ int main()
 {
 	mcurses::System system;
 
-	Click_paint_widget widg(0, 0, mcurses::System::max_width, mcurses::System::max_height);
+	Click_paint_widget widg(0, 0, mcurses::System::max_width()/2, mcurses::System::max_height()/2);
 
 	system.set_head(&widg);
 
