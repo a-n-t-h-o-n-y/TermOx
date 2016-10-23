@@ -1,14 +1,11 @@
 #include <mcurses/system_module/detail/thread_data.hpp>
 
-namespace mcurses
-{
-namespace detail
-{
+namespace mcurses {
+namespace detail {
 
 Thread_data& Thread_data::current()
 {
 	static Thread_data data_; // have the constructor initialize everything
-
 
 	return data_;
 }

@@ -1,11 +1,9 @@
 #ifndef MCURSES_HPP
 #define MCURSES_HPP
 
-// #include "system_module/..."
-// #include "printer_module/..."
-// #include "signal_module/..."
-// #include "widget_module/..."
+#include "mcurses_system.hpp"
+#include "mcurses_painter.hpp"
+#include "mcurses_signal.hpp"
+#include "mcurses_widget.hpp"
 
 #endif	// MCURSES_HPP
-
-// make a file like this for each module, then just include those here.

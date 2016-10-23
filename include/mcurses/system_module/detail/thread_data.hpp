@@ -9,20 +9,19 @@
 #include <stack>
 #include <memory>
 
-namespace mcurses
-{
-namespace detail
-{
+namespace mcurses {
+namespace detail {
 
 class Thread_data {
 public:
 	static Thread_data& current();
-
 	Abstract_event_dispatcher& dispatcher();
 
-	bool 						quit_now_ = false;
-	std::stack<Event_loop>		event_loops_;
-	Posted_event_queue			event_queue_;
+	bool					can_wait = true; // is true if no more events to process on queue
+	bool 					quit_now = false;
+	int						loop_level = 0;
+	std::stack<Event_loop*>	event_loops;
+	Posted_event_queue		event_queue;
 
 private:
 	std::unique_ptr<Abstract_event_dispatcher> 	dispatcher_ = std::make_unique<NCurses_event_dispatcher>();
