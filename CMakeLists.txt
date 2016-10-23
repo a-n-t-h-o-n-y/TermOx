@@ -42,6 +42,7 @@ list(APPEND SIGNAL_MODULE_SOURCES 	"src/signal_module/slot_base.cpp"
 									"src/signal_module/shared_connection_block.cpp"
 									)
 list(APPEND WIDGET_MODULE_SOURCES 	"src/widget_module/widget.cpp"
+									"src/widget_module/layout.cpp"
 									)
 
 list(APPEND TEST_SOURCES "test/signal_module/none_test.cpp"

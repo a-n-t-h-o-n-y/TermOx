@@ -1,10 +1,10 @@
 #ifndef EVENT_HPP
 #define EVENT_HPP
 
+#include "object.hpp"
+
 namespace mcurses
 {
-
-class Object;
 
 class Event {
 public:

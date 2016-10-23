@@ -69,8 +69,8 @@ public:
 	signal(const signal&) = delete;
 
 	signal(signal&& x)
-	:pimpl_{std::move(x.pimpl_)}
-	{}
+	:pimpl_{std::move(x.pimpl_)}, enabled_{x.enabled_}
+	{ x.enabled_ = false; }
 
 	signal& operator=(const signal&) = delete;
 
@@ -81,6 +81,8 @@ public:
 			return *this;
 		}
 		pimpl_ = std::move(x.pimpl_);
+		enabled_ = x.enabled_;
+		x.enabled_ = false;
 
 		return *this;
 	}
@@ -174,6 +176,7 @@ public:
 		}
 		using std::swap;
 		swap(x.pimpl_, y.pimpl_);
+		swap(x.enabled_, y.enabled_);
 		return;
 	}
 

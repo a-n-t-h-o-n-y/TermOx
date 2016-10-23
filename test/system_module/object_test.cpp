@@ -1,9 +1,13 @@
 #include <mcurses/system_module/object.hpp>
 #include <mcurses/system_module/event_loop.hpp>
+#include <mcurses/system_module/system.hpp>
 #include <mcurses/widget_module/widget.hpp>
+#include <mcurses/painter_module/canvas.hpp>
+#include <mcurses/system_module/events/child_event.hpp>
 #include <gtest/gtest.h>
 
 #include <string>
+#include <utility>
 
 TEST(ObjectTest, DefaultConstructor)
 {
@@ -70,3 +74,151 @@ TEST(ObjectTest, AddChild)
 	EXPECT_EQ("Widget 2", children[1]->name());
 }
 
+TEST(ObjectTest, FindChild)
+{
+	mcurses::Object obj;
+	obj.set_name("Parent");
+	mcurses::Object& c1 = obj.make_child<mcurses::Widget>(0,0,50,50);
+	c1.set_name("Child 1");
+	mcurses::Object& c2 = obj.make_child<mcurses::Object>();
+	c2.set_name("Child 2");
+
+	mcurses::Widget& c1_c1 = c1.make_child<mcurses::Widget>(0,0,7,5);
+	c1_c1.set_name("Child 1 - Child 1");
+	mcurses::Widget& c1_c2 = c1.make_child<mcurses::Widget>(10,10,3,2);
+	c1_c2.set_name("Child 1 - Child 2");
+	mcurses::Object& c1_c3 = c1.make_child<mcurses::Event_loop>();
+	c1_c3.set_name("Child 1 - Child 3");
+
+	mcurses::Object& c1_c3_c1 = c1_c3.make_child<mcurses::Object>();
+	c1_c3_c1.set_name("Child 1 - Child 3 - Child 1");
+
+	mcurses::Object& c1_c3_c1_c1 = c1_c3_c1.make_child<mcurses::Event_loop>();
+	c1_c3_c1_c1.set_name("Child 1");	// Duplicate name
+
+	mcurses::Widget& c2_c1 = c2.make_child<mcurses::Widget>(5,4,3,2);
+	c2_c1.set_name("Child 2 - Child 1");
+	mcurses::Object& c2_c1_c1 = c2_c1.make_child<mcurses::Object>();
+	c2_c1_c1.set_name("Child 2 - Child 1 - Child 1");
+
+	EXPECT_EQ(&c2, obj.find_child<mcurses::Object>("Child 2"));
+	EXPECT_EQ(&c1, obj.find_child<mcurses::Object>("Child 1"));
+	EXPECT_EQ(&c1, obj.find_child<mcurses::Widget>("Child 1"));
+	EXPECT_EQ(&c1_c3_c1_c1, obj.find_child<mcurses::Event_loop>("Child 1"));
+	EXPECT_EQ(3, obj.find_child<mcurses::Widget>("Child 1")->children().size());
+	EXPECT_EQ(&c1_c3_c1_c1, obj.find_child<mcurses::Event_loop>("Child 1"));
+	EXPECT_EQ(nullptr, obj.find_child<mcurses::Object>("Child 12345"));
+	EXPECT_EQ(&obj, obj.find_child<mcurses::Object>("Parent"));
+	EXPECT_EQ(&c1_c1, obj.find_child<mcurses::Widget>("Child 1 - Child 1"));
+	EXPECT_EQ(&c1_c2, obj.find_child<mcurses::Canvas>("Child 1 - Child 2"));
+	EXPECT_EQ(&c1_c3, obj.find_child<mcurses::Event_loop>("Child 1 - Child 3"));
+	EXPECT_EQ(nullptr, obj.find_child<mcurses::Widget>("Child 1 - Child 3 - Child 1"));
+	EXPECT_EQ(&c1_c3_c1, obj.find_child<mcurses::Object>("Child 1 - Child 3 - Child 1"));
+	EXPECT_EQ(&c2_c1, obj.find_child<mcurses::Canvas>("Child 2 - Child 1"));
+	EXPECT_EQ(&c2_c1_c1, obj.find_child<mcurses::Object>("Child 2 - Child 1 - Child 1"));
+	EXPECT_EQ(nullptr, obj.find_child<mcurses::Widget>("Child 2 - Child 1 - Child 1"));
+}
+
+TEST(ObjectTest, ConstFindChild)
+{
+	mcurses::Object obj;
+	obj.set_name("Parent");
+	mcurses::Object& c1 = obj.make_child<mcurses::Widget>(0,0,50,50);
+	c1.set_name("Child 1");
+	mcurses::Object& c2 = obj.make_child<mcurses::Object>();
+	c2.set_name("Child 2");
+
+	mcurses::Widget& c1_c1 = c1.make_child<mcurses::Widget>(0,0,7,5);
+	c1_c1.set_name("Child 1 - Child 1");
+	mcurses::Widget& c1_c2 = c1.make_child<mcurses::Widget>(10,10,3,2);
+	c1_c2.set_name("Child 1 - Child 2");
+	mcurses::Object& c1_c3 = c1.make_child<mcurses::Event_loop>();
+	c1_c3.set_name("Child 1 - Child 3");
+
+	mcurses::Object& c1_c3_c1 = c1_c3.make_child<mcurses::Object>();
+	c1_c3_c1.set_name("Child 1 - Child 3 - Child 1");
+
+	mcurses::Object& c1_c3_c1_c1 = c1_c3_c1.make_child<mcurses::Event_loop>();
+	c1_c3_c1_c1.set_name("Child 1");	// Duplicate name
+
+	mcurses::Widget& c2_c1 = c2.make_child<mcurses::Widget>(5,4,3,2);
+	c2_c1.set_name("Child 2 - Child 1");
+	mcurses::Object& c2_c1_c1 = c2_c1.make_child<mcurses::Object>();
+	c2_c1_c1.set_name("Child 2 - Child 1 - Child 1");
+
+	const mcurses::Object obj_const = std::move(obj);
+
+	EXPECT_EQ(&c2, obj_const.find_child<mcurses::Object>("Child 2"));
+	EXPECT_EQ(&c1, obj_const.find_child<mcurses::Object>("Child 1"));
+	EXPECT_EQ(&c1, obj_const.find_child<mcurses::Widget>("Child 1"));
+	EXPECT_EQ(&c1_c3_c1_c1, obj_const.find_child<mcurses::Event_loop>("Child 1"));
+	EXPECT_EQ(3, obj_const.find_child<mcurses::Widget>("Child 1")->children().size());
+	EXPECT_EQ(&c1_c3_c1_c1, obj_const.find_child<mcurses::Event_loop>("Child 1"));
+	EXPECT_EQ(nullptr, obj_const.find_child<mcurses::Object>("Child 12345"));
+	EXPECT_EQ(&obj_const, obj_const.find_child<mcurses::Object>("Parent"));
+	EXPECT_EQ(&c1_c1, obj_const.find_child<mcurses::Widget>("Child 1 - Child 1"));
+	EXPECT_EQ(&c1_c2, obj_const.find_child<mcurses::Canvas>("Child 1 - Child 2"));
+	EXPECT_EQ(&c1_c3, obj_const.find_child<mcurses::Event_loop>("Child 1 - Child 3"));
+	EXPECT_EQ(nullptr, obj_const.find_child<mcurses::Widget>("Child 1 - Child 3 - Child 1"));
+	EXPECT_EQ(&c1_c3_c1, obj_const.find_child<mcurses::Object>("Child 1 - Child 3 - Child 1"));
+	EXPECT_EQ(&c2_c1, obj_const.find_child<mcurses::Canvas>("Child 2 - Child 1"));
+	EXPECT_EQ(&c2_c1_c1, obj_const.find_child<mcurses::Object>("Child 2 - Child 1 - Child 1"));
+	EXPECT_EQ(nullptr, obj_const.find_child<mcurses::Widget>("Child 2 - Child 1 - Child 1"));
+}
+
+int glob_test_int{0};
+
+class Event_filter_test : public mcurses::Widget {
+public:
+	Event_filter_test():Widget(0,0,5,3){}
+	virtual bool event_filter(mcurses::Object* watched, const mcurses::Event& event) {
+		++glob_test_int;
+		return true;
+	}
+};
+
+TEST(ObjectTest, InstallEventFilter)
+{
+	Event_filter_test test_obj;
+	test_obj.install_event_filter(&test_obj);	// Does nothing
+
+	mcurses::Widget widg(0,0,4,3);
+	widg.install_event_filter(&test_obj); // test_obj now is notified of events send to widg
+
+	mcurses::System::send_event(&widg, mcurses::Child_event(mcurses::Event::Type::ChildAdded));
+
+	EXPECT_EQ(1, glob_test_int);
+}
+
+TEST(ObjectTest, RemoveEventFilter)
+{
+	Event_filter_test test_obj;
+	mcurses::Widget widg(0,0,4,3);
+	widg.install_event_filter(&test_obj);
+
+	mcurses::System::send_event(&widg, mcurses::Child_event(mcurses::Event::Type::ChildAdded));
+	EXPECT_EQ(2, glob_test_int);
+
+	widg.remove_event_filter(&test_obj);
+	mcurses::System::send_event(&widg, mcurses::Child_event(mcurses::Event::Type::ChildAdded));
+	EXPECT_EQ(2, glob_test_int);
+}
+
+TEST(ObjectTest, SignalObjectNameChanged)
+{
+	mcurses::Object obj("NameOne");
+	int i{0};
+	obj.object_name_changed.connect([&i](const std::string& s){++i;});
+	obj.set_name("NameTwo");
+	EXPECT_EQ("NameTwo", obj.name());
+	EXPECT_EQ(1, i);
+}
+
+TEST(ObjectTest, SignalDestroyed)
+{
+	auto obj = std::make_shared<mcurses::Object>();
+	int i{0};
+	obj->destroyed.connect([&i](mcurses::Object*){++i;});
+	obj.reset();
+	EXPECT_EQ(1, i);
+}

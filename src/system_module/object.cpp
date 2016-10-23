@@ -1,19 +1,19 @@
 #include <mcurses/system_module/object.hpp>
 #include <mcurses/system_module/event.hpp>
+#include <mcurses/system_module/events/child_event.hpp>
+#include <mcurses/system_module/system.hpp>
+#include <mcurses/signal_module/slot.hpp>
 
 #include <algorithm>
 #include <iterator>
 #include <memory>
-#include <queue>
 #include <string>
 
 namespace mcurses {
 
-std::vector<Object*> Object::children() const
+void Object::initialize()
 {
-	std::vector<Object*> ret;
-	std::transform(std::begin(children_), std::end(children_), std::back_inserter(ret), [](auto& up){return up.get();});
-	return ret;
+	delete_later = [this](){ System::post_event(this, std::make_unique<Event>(Event::Type::DeferredDelete));};
 }
 
 void Object::add_child(std::unique_ptr<Object> child)
@@ -23,6 +23,12 @@ void Object::add_child(std::unique_ptr<Object> child)
 
 bool Object::event(const Event& event)
 {
+	bool handled_ = false;
+	if(!event_filter_objects_.empty() && !handled_) {	// could use a range for and be cleaner?
+		for_each(std::begin(event_filter_objects_), std::end(event_filter_objects_), [&](Object* p){ handled_ = p->event_filter(this, event); });
+	}
+
+
 	if(event.type() == Event::Type::ChildAdded
 	|| event.type() == Event::Type::ChildPolished
 	|| event.type() == Event::Type::ChildRemoved) {
@@ -40,36 +46,49 @@ void Object::child_event(const Child_event& event)
 
 bool Object::event_filter(Object* watched, const Event& event)
 {
-	// Anything?
+	// Default to anything?
 	return true;
 }
 
-// Breadth First Search for name
-template <typename T>
-T* Object::find_child(const std::string& name) const
+void Object::install_event_filter(Object* filter_object)
 {
-	std::queue<const Object*> queue_;
-	queue_.push(this);
-	while(!queue_.empty()) {
-		const Object* current =queue_.front();
-		queue_.pop();
-		if(current->name() == name && dynamic_cast<T*>(current)) {
-			return dynamic_cast<T*>(current);
-		}
-		std::for_each(std::begin(current->children()), std::end(current->children()), [&](Object* p){queue_.push(p);});
-	}
-	return nullptr;
+	if(filter_object == this) { return; }
+	event_filter_objects_.push_back(filter_object);
+	return;
 }
-
-
-
 
 Object* Object::parent() const
 {
 	return parent_;
 }
 
+void Object::remove_event_filter(Object* obj)
+{
+	auto at = std::find(std::begin(event_filter_objects_), std::end(event_filter_objects_), obj);
+	if(at != std::end(event_filter_objects_)) {
+		event_filter_objects_.erase(at);
+	}
+	return;
+}
 
+void Object::set_name(const std::string& name)
+{
+	object_name_ = name;
+	object_name_changed(name);
+	return;
+}
 
+void Object::set_parent(Object* parent)
+{
+	parent_ = parent;
+	return;
+}
+
+std::vector<Object*> Object::children() const
+{
+	std::vector<Object*> ret;
+	std::transform(std::begin(children_), std::end(children_), std::back_inserter(ret), [](auto& up){return up.get();});
+	return ret;
+}
 
 } // namespace mcurses

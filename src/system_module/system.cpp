@@ -61,10 +61,19 @@ System::send_posted_events(Object* obj, Event::Type et)
 bool
 System::notify(Object* obj, const Event& event)
 {
-	// propogates mouse and others up to parents if returns false
-	bool ret = obj->event(event);
-	if(ret == false) { // && event type is mouse or key
-		ret = notify(obj->parent(), event);
+	bool ret {false};
+	// Send event to any filter objects first
+	for (Object* f : obj->event_filter_objects_) {
+		ret = f->event_filter(obj, event);
+		if(ret) { return ret; }
+	}
+
+	ret = obj->event(event);
+	if (ret == false) { // && event type is can propogate
+		Object* parent = obj->parent();
+		if (parent != nullptr) {
+			ret = notify(obj->parent(), event);
+		}
 	}
 
 	return ret;
