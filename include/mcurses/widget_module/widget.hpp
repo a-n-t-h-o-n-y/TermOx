@@ -8,6 +8,9 @@
 #include "../system_module/events/mouse_event.hpp"
 #include "../system_module/events/key_event.hpp"
 #include "../system_module/events/close_event.hpp"
+#include "../system_module/events/hide_event.hpp"
+#include "../system_module/events/show_event.hpp"
+#include "../system_module/events/enable_event.hpp"
 #include "../painter_module/paint_engine.hpp"
 #include "../painter_module/detail/ncurses_paint_engine.hpp"
 #include "../painter_module/palette.hpp"
@@ -119,6 +122,9 @@ protected:
 	virtual void key_press_event(Key_event& event);
 	virtual void key_release_event(Key_event& event);
 	virtual void close_event(Close_event& event);
+	virtual void hide_event(Hide_event& event);
+	virtual void show_event(Show_event& event);
+	virtual void enable_event(Enable_event& event) override;
 
 	unsigned find_global_x() const;
 	unsigned find_global_y() const;

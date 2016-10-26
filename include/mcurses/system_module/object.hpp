@@ -16,6 +16,7 @@ namespace mcurses {
 
 class Event;
 class Child_event;
+class Enable_event;
 
 class Object {
 public:
@@ -71,6 +72,8 @@ public:
 
 	void set_parent(Object* parent);
 
+	void set_enabled(bool enabled);
+
 	std::vector<Object*> children() const;
 
 	virtual bool has_coordinates(unsigned glob_x, unsigned glob_y){ return false; }
@@ -90,6 +93,7 @@ public:
 
 protected:
 	virtual void child_event(Child_event& event);
+	virtual void enable_event(Enable_event& event);
 
 	std::string object_name_;
 	Object* parent_ = nullptr;

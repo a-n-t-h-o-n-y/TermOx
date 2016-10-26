@@ -1,6 +1,7 @@
 #include <mcurses/system_module/object.hpp>
 #include <mcurses/system_module/event.hpp>
 #include <mcurses/system_module/events/child_event.hpp>
+#include <mcurses/system_module/events/enable_event.hpp>
 #include <mcurses/system_module/system.hpp>
 #include <mcurses/signal_module/slot.hpp>
 #include <mcurses/widget_module/widget.hpp>
@@ -25,10 +26,10 @@ void Object::initialize()
 	this->delete_later = [this](){ System::post_event(this, std::make_unique<Event>(Event::Type::DeferredDelete));};
 	this->delete_later.track(this->destroyed); // Hack to disable slot when *this dies.
 
-	this->enable = [this](){this->enabled_ = true;};
+	this->enable = [this](){this->set_enabled(true);};
 	this->enable.track(this->destroyed);
 
-	this->disable = [this](){this->enabled_ = false;};
+	this->disable = [this](){this->set_enabled(false);};
 	this->disable.track(this->destroyed);
 }
 
@@ -59,6 +60,11 @@ bool Object::event(Event& event)
 		return event.is_accepted();
 	}
 
+	if(event.type() == Event::Type::EnabledChange) {
+		this->enable_event(static_cast<Enable_event&>(event));
+		return event.is_accepted();
+	}
+
 	return event.is_accepted();
 }
 
@@ -68,6 +74,11 @@ void Object::child_event(Child_event& event)
 	if(parent) {
 		parent->update();
 	}
+	event.accept();
+	return;
+}
+
+void Object::enable_event(Enable_event& event){
 	event.accept();
 	return;
 }
@@ -108,6 +119,14 @@ void Object::set_name(const std::string& name)
 void Object::set_parent(Object* parent)
 {
 	parent_ = parent;
+	return;
+}
+
+void Object::set_enabled(bool enabled)
+{
+	enabled_ = enabled;
+	Enable_event ee(enabled);
+	System::send_event(this, ee);
 	return;
 }
 

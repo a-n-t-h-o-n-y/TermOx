@@ -8,6 +8,10 @@
 #include <mcurses/system_module/events/resize_event.hpp>
 #include <mcurses/system_module/events/move_event.hpp>
 #include <mcurses/system_module/events/close_event.hpp>
+#include <mcurses/system_module/events/hide_event.hpp>
+#include <mcurses/system_module/events/show_event.hpp>
+#include <mcurses/system_module/events/enable_event.hpp>
+
 
 #include <memory>
 
@@ -44,9 +48,9 @@ void Widget::initialize()
 bool
 Widget::has_coordinates(unsigned glob_x, unsigned glob_y)
 {
+	if(!this->is_enabled() || !this->visible()) { return false; }
 	if((glob_x >= this->global_x()) && (glob_x <= (this->global_max_x()))
-		&& (glob_y >= this->global_y()) && (glob_y <= (this->global_max_y())))
-	{
+		&& (glob_y >= this->global_y()) && (glob_y <= (this->global_max_y()))) {
 		return true;
 	}
 	return false;
@@ -100,16 +104,19 @@ bool Widget::event(Event& event)
 
 	// Paint_event
 	if(event.type() == Event::Type::Paint) {
-		if(this->visible()) {
+		if(this->visible() && this->is_enabled()) {
 			this->paint_event(static_cast<Paint_event&>(event));
-		} else {
+		} else if(this->visible() && !this->is_enabled()) {
 			this->paint_hidden_widget();
-		}
+		} else if(!this->visible()){}
 		return event.is_accepted();
 	}
 
 	// Mouse_events
 	if(event.type() == Event::Type::MouseButtonPress) {
+		if(!this->is_enabled() || !this->visible()) {
+			return event.is_accepted();
+		}
 		if(this->focus_policy() == Focus_policy::ClickFocus
 			|| this->focus_policy() == Focus_policy::StrongFocus) {
 			System::set_focus_widget(this);
@@ -118,28 +125,46 @@ bool Widget::event(Event& event)
 		return event.is_accepted();
 	}
 	if(event.type() == Event::Type::MouseButtonRelease) {
+		if(!this->is_enabled() || !this->visible()) {
+			return event.is_accepted();
+		}
 		this->mouse_release_event(static_cast<Mouse_event&>(event));
 		return event.is_accepted();
 	}
 	if(event.type() == Event::Type::MouseButtonDblClick) {
+		if(!this->is_enabled() || !this->visible()) {
+			return event.is_accepted();
+		}
 		this->mouse_double_click_event(static_cast<Mouse_event&>(event));
 		return event.is_accepted();
 	}
 	if(event.type() == Event::Type::Wheel) {
+		if(!this->is_enabled() || !this->visible()) {
+			return event.is_accepted();
+		}
 		this->wheel_event(static_cast<Mouse_event&>(event));
 		return event.is_accepted();
 	}
 	if(event.type() == Event::Type::MouseMove && this->has_mouse_tracking()) {
+		if(!this->is_enabled() || !this->visible()) {
+			return event.is_accepted();
+		}
 		this->mouse_move_event(static_cast<Mouse_event&>(event));
 		return event.is_accepted();
 	}
 
 	// KeyEvent
 	if(event.type() == Event::Type::KeyPress) {
+		if(!this->is_enabled() || !this->visible()) {
+			return event.is_accepted();
+		}
 		this->key_press_event(static_cast<Key_event&>(event));
 		return event.is_accepted();
 	}
 	if(event.type() == Event::Type::KeyRelease) {
+		if(!this->is_enabled() || !this->visible()) {
+			return event.is_accepted();
+		}
 		this->key_release_event(static_cast<Key_event&>(event));
 		return event.is_accepted();
 	}
@@ -147,6 +172,18 @@ bool Widget::event(Event& event)
 	// Close Event
 	if(event.type() == Event::Type::Close) {
 		this->close_event(static_cast<Close_event&>(event));
+		return event.is_accepted();
+	}
+
+	// Hide Event
+	if(event.type() == Event::Type::Hide) {
+		this->hide_event(static_cast<Hide_event&>(event));
+		return event.is_accepted();
+	}
+
+	// Show Event
+	if(event.type() == Event::Type::Show) {
+		this->show_event(static_cast<Show_event&>(event));
 		return event.is_accepted();
 	}
 
@@ -249,6 +286,29 @@ void Widget::close_event(Close_event& event)
 	return;
 }
 
+void Widget::hide_event(Hide_event& event)
+{
+	event.accept();
+	return;
+}
+
+void Widget::show_event(Show_event& event)
+{
+	event.accept();
+	return;
+}
+
+void Widget::enable_event(Enable_event& event)
+{
+	if(!event.is_enabled()) {
+		// save current palette and
+		// set palette to greyscale
+	} else {
+		// set palette back to saved original
+	}
+	Object::enable_event(event);
+	return;
+}
 
 void Widget::set_focus(bool focus)
 {
@@ -275,6 +335,13 @@ void Widget::set_palette_recursively(Palette palette)
 void Widget::set_visible(bool visible)
 {
 	this->visible_ = visible;
+	if(visible) {
+		Show_event show;
+		System::send_event(this, show);
+	} else {
+		Hide_event hide;
+		System::send_event(this, hide);
+	}
 	for(Object* c : this->children()) {
 		Widget* child = dynamic_cast<Widget*>(c);
 		if(child) {
@@ -283,9 +350,6 @@ void Widget::set_visible(bool visible)
 	}
 	return;
 }
-
-
-
 
 unsigned Widget::find_global_x() const	// previously get_global_x
 {
