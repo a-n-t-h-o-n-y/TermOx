@@ -129,7 +129,7 @@ public:
 
 protected:
 	Type type_;
-	bool accepted_ = false;
+	bool accepted_ = true;
 	
 };
 

@@ -2,6 +2,7 @@
 #define NCURSES_PAINT_ENGINE_HPP
 
 #include "../paint_engine.hpp"
+#include "../color.hpp"
 
 #include <string>
 
@@ -15,6 +16,9 @@ public:
 	virtual void put_string(const std::string& s) override;
 	virtual void show_cursor() override;
 	virtual void hide_cursor() override;
+	virtual unsigned screen_width() override;
+	virtual unsigned screen_height() override;
+	virtual void fill_rect(unsigned x, unsigned y, unsigned width, unsigned height, Color background) override;
 
 private:
 

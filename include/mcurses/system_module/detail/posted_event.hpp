@@ -6,10 +6,8 @@
 
 #include <memory>
 
-namespace mcurses
-{
-namespace detail
-{
+namespace mcurses {
+namespace detail {
 
 class Posted_event {
 public:

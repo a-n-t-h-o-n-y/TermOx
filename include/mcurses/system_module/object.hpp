@@ -20,21 +20,20 @@ class Child_event;
 class Object {
 public:
 	Object(){initialize();}
-	Object(const std::string& name): object_name_{name}{initialize();}
 	Object(Object&&) = default;
-	virtual ~Object(){ destroyed(this); }
+	virtual ~Object();
 
 	template <typename T, typename ... Args>
 	T& make_child(Args&&... args) {
-		children_.emplace_back(std::make_unique<T>(std::forward<Args>(args)...));
+		this->add_child(std::make_unique<T>(std::forward<Args>(args)...));
 		return static_cast<T&>(*children_.back());
 	}
 
 	void add_child(std::unique_ptr<Object> child);
 
-	virtual bool event(const Event& event);
+	virtual bool event(Event& event);
 
-	virtual bool event_filter(Object* watched, const Event& event);
+	virtual bool event_filter(Object* watched, Event& event);
 
 	// Breadth First Search for name
 	template <typename T>
@@ -80,6 +79,8 @@ public:
 
 	// Slots - change to uppercase Slot eventually
 	slot<void()> delete_later;
+	slot<void()> enable;
+	slot<void()> disable;
 
 	// Signals
 	signal<void(Object*)> destroyed;
@@ -88,17 +89,17 @@ public:
 	friend class System;
 
 protected:
-	virtual void child_event(const Child_event& event);
-
-	Object* parent_ = nullptr;
-	std::vector<std::unique_ptr<Object>> children_;
+	virtual void child_event(Child_event& event);
 
 	std::string object_name_;
-	bool enabled_ = true;
-	bool is_widget_ = false;
-
+	Object* parent_ = nullptr;
+	std::vector<std::unique_ptr<Object>> children_;
 	std::vector<Object*> event_filter_objects_;
+
+	bool enabled_ = true;
+
 private:
+	void delete_child(Object* child);
 	void initialize();
 };
 

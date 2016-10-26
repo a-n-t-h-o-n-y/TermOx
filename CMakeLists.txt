@@ -31,11 +31,13 @@ list(APPEND SYSTEM_MODULE_SOURCES 	"src/system_module/thread_data.cpp"
 									"src/system_module/event.cpp"
 									"src/system_module/abstract_event_dispatcher.cpp"
 									"src/system_module/object.cpp"
+									"src/system_module/move_event.cpp"
+									"src/system_module/resize_event.cpp"
 								 	)
-list(APPEND PAINTER_MODULE_SOURCES 	"src/painter_module/canvas.cpp"
+list(APPEND PAINTER_MODULE_SOURCES  "src/painter_module/ncurses_paint_engine.cpp"
 									"src/painter_module/painter.cpp"
 									"src/painter_module/paint_engine.cpp"
-									"src/painter_module/ncurses_paint_engine.cpp"
+									"src/painter_module/palette.cpp"
 									)
 list(APPEND SIGNAL_MODULE_SOURCES 	"src/signal_module/slot_base.cpp"
 									"src/signal_module/connection.cpp"
@@ -43,6 +45,7 @@ list(APPEND SIGNAL_MODULE_SOURCES 	"src/signal_module/slot_base.cpp"
 									)
 list(APPEND WIDGET_MODULE_SOURCES 	"src/widget_module/widget.cpp"
 									"src/widget_module/layout.cpp"
+									"src/widget_module/horizontal_layout.cpp"
 									)
 
 list(APPEND TEST_SOURCES "test/signal_module/none_test.cpp"
@@ -65,6 +68,8 @@ list(APPEND TEST_SOURCES "test/signal_module/none_test.cpp"
 						 "test/system_module/posted_event_queue_test.cpp"
 						 "test/system_module/posted_event_test.cpp"
 						 "test/system_module/ncurses_event_dispatcher_test.cpp"
+
+						 "test/widget_module/widget_test.cpp"
 						 )
 
 list(APPEND TEST1_SOURCES "test/test1/main.cpp"

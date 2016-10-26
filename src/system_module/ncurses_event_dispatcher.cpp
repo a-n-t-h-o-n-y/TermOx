@@ -1,8 +1,10 @@
 #include <mcurses/system_module/detail/ncurses_event_dispatcher.hpp>
 #include <mcurses/system_module/event.hpp>
 #include <mcurses/system_module/events/mouse_event.hpp>
+#include <mcurses/system_module/events/key_event.hpp>
+#include <mcurses/system_module/events/resize_event.hpp>
 #include <mcurses/system_module/system.hpp>
-#include <mcurses/painter_module/canvas.hpp>
+#include <mcurses/widget_module/widget.hpp>
 
 #include <ncurses.h>
 
@@ -38,9 +40,12 @@ void NCurses_event_dispatcher::post_user_input()
 			object = handle_resize_object();
 			break;
 
-		default:
+		default: // Key_event
 			event = handle_keyboard_event();
 			object = handle_keyboard_object();
+			if (static_cast<Key_event*>(event.get())->key() == 9) {
+				System::cycle_tab_focus();
+			}
 			break;
 	}
 
@@ -116,10 +121,10 @@ NCurses_event_dispatcher::parse_mouse_event()
 			return std::pair<Object*, std::unique_ptr<Event>>{nullptr, nullptr};
 		}
 
-		Canvas* canv = dynamic_cast<Canvas*>(object);
-		if(canv) {
-			unsigned local_x = mouse_event.x - canv->position_x();
-			unsigned local_y = mouse_event.y - canv->position_y();
+		Widget* widg = dynamic_cast<Widget*>(object);
+		if(widg) {
+			unsigned local_x = mouse_event.x - widg->global_x();
+			unsigned local_y = mouse_event.y - widg->global_y();
 			auto event = std::make_unique<Mouse_event>(ev_type, ev_button, mouse_event.x, mouse_event.y, local_x, local_y, mouse_event.id);
 			return std::make_pair(object, std::move(event));
 		}

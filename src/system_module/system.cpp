@@ -4,10 +4,17 @@
 #include <mcurses/system_module/object.hpp>
 #include <mcurses/system_module/event.hpp>
 #include <mcurses/system_module/event_loop.hpp>
+#include <mcurses/painter_module/detail/ncurses_paint_engine.hpp>
+#include <mcurses/painter_module/paint_engine.hpp>
+#include <mcurses/system_module/events/paint_event.hpp>
+#include <mcurses/widget_module/widget.hpp>
 
 #include <ncurses.h>
 
 #include <algorithm>
+#include <iterator>
+#include <memory>
+#include <vector>
 
 namespace mcurses
 {
@@ -15,6 +22,7 @@ namespace mcurses
 void
 System::post_event(Object* obj, std::unique_ptr<Event> event, int priority)
 {
+	if(!obj) { return; }
 	detail::Posted_event pe(obj, std::move(event), priority);
 	detail::Thread_data::current().event_queue.add_event(pe);
 	return;
@@ -35,8 +43,9 @@ System::remove_posted_event(Event* event)
 }
 
 bool
-System::send_event(Object* obj, const Event& event)
+System::send_event(Object* obj, Event& event)
 {
+	if (!obj) { return false; }
 	return notify(obj, event);
 }
 
@@ -52,31 +61,54 @@ System::send_posted_events(Object* obj, Event::Type et)
 				|| et == Event::Type::DeferredDelete))
 		{
 			detail::Posted_event posted = queue.next_posted_event();
-			notify(posted.reciever(), posted.event());
+			if (posted.event().type() == Event::Type::DeferredDelete) {
+				Object* parent = obj->parent();
+				if(!parent) {
+					if(parent == System::head()) {
+						System::set_head(nullptr);
+					} else { return; }
+				}
+				parent->delete_child(obj);
+			} else {
+				notify(posted.reciever(), posted.event());
+			}
 		}
 	}
 	return;
 }
 
 bool
-System::notify(Object* obj, const Event& event)
+System::notify(Object* obj, Event& event)
 {
-	bool ret {false};
-	// Send event to any filter objects first
-	for (Object* f : obj->event_filter_objects_) {
-		ret = f->event_filter(obj, event);
-		if(ret) { return ret; }
+	bool handled {false};
+
+	// Send event to any filter objects
+	unsigned i{0};
+	while (i < obj->event_filter_objects_.size() && !handled) { // While loop incase event_filter invalidates iterators
+		handled = obj->event_filter_objects_[i]->event_filter(obj, event);
+		++i;
+	}
+	if(handled) {
+		return true;
 	}
 
-	ret = obj->event(event);
-	if (ret == false) { // && event type is can propogate
+	return notify_helper(obj, event);
+}
+
+bool System::notify_helper(Object* obj, Event& event)
+{
+	bool handled {false};
+	// Send event to object
+	handled = obj->event(event);
+
+	// Propagate event to parent
+	if (!handled) { // && event type can propogate
 		Object* parent = obj->parent();
-		if (parent != nullptr) {
-			ret = notify(obj->parent(), event);
+		if (parent) {
+			handled = notify_helper(parent, event);
 		}
 	}
-
-	return ret;
+	return handled;
 }
 
 void System::exit(int return_code)
@@ -93,31 +125,100 @@ void System::exit(int return_code)
 	return;
 }
 
-unsigned
-System::max_height() // eventually implement with static Painter function?
+Paint_engine* System::paint_engine()
 {
-	int x{0}, y{0};
-	getmaxyx(stdscr, y, x);
-	return y;
+	return engine_.get();
+}
+
+void System::set_paint_engine(std::unique_ptr<Paint_engine> engine)
+{
+	if(!engine) { return; }
+	engine_ = std::move(engine);
+	System::post_event(System::head(), std::make_unique<Paint_event>());
+	return;
 }
 
 unsigned
-System::max_width() // eventually implement with static Painter function?
+System::max_width()
 {
-	int x{0}, y{0};
-	getmaxyx(stdscr, y, x);
-	return x;
+	return System::paint_engine()->screen_width();
+}
+
+unsigned
+System::max_height()
+{
+	return System::paint_engine()->screen_height();
 }
 
 Object* System::head_ = nullptr;
+std::unique_ptr<Paint_engine> System::engine_ = nullptr;
 
 Object* System::head()
 {
 	return head_;
 }
 
-System::System()
+Widget* System::focus_widg_ = nullptr;
+
+Widget* System::focus_widget()
 {
+	return focus_widg_;
+}
+
+void System::set_focus_widget(Widget* widg)
+{
+	if(focus_widg_) {
+		focus_widg_->clear_focus();
+	}
+	focus_widg_ = widg;
+	focus_widg_->set_focus(true);
+	return;
+}
+
+void System::cycle_tab_focus()
+{
+	if(!System::head()) { return; }
+	std::vector<Object*> objects;
+
+	// Populate objects vector
+	objects.push_back(System::head());
+	int i{0};
+	while(i < objects.size()) {
+		Object* current = objects[i];
+		auto children = current->children();
+		std::for_each(std::begin(children), std::end(children), [&objects](Object* p){objects.push_back(p);});
+		++i;
+	}
+
+	// Rearrange objects vector
+	Object* current_focus_object = static_cast<Object*>(System::focus_widget());
+	if(current_focus_object) {
+		auto current_iter = std::find(std::begin(objects), std::end(objects), current_focus_object);
+		if(current_iter != std::end(objects)) {
+			std::move(std::begin(objects), current_iter+1, std::back_inserter(objects));
+		}
+	}
+
+	// Find the next focus widget
+	for(Object* child : objects) {
+		Widget* widg = dynamic_cast<Widget*>(child);
+		if(widg) {
+			if(widg->focus_policy() == Widget::Focus_policy::TabFocus
+			|| widg->focus_policy() == Widget::Focus_policy::StrongFocus) {
+				System::set_focus_widget(widg);
+			return;
+			}
+		}
+	}
+	return;	
+}
+
+
+
+System::System(std::unique_ptr<Paint_engine> engine)
+{
+	System::set_paint_engine(std::move(engine));
+
 	// Theses should be passed of to a single static Painter function(s) that generalize for other systems, not just ncurses.
 	// Painter::initialize();
 	::setlocale(LC_ALL, "");

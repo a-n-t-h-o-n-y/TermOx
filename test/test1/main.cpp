@@ -5,19 +5,19 @@
 class Click_paint_widget : public mcurses::Widget {
 public:
 	Click_paint_widget(unsigned x, unsigned y, unsigned width, unsigned height)
-	:Widget(x,y,width,height)
 	{
-		show_cursor_ = false;
+		this->set_geometry(x,y,width,height);
+		this->set_show_cursor(false);
 	}
 
-	void repaint_event(const mcurses::Paint_event& event)
+	void paint_event(mcurses::Paint_event& event) override
 	{
 		// mcurses::Painter p;
 		// p.touch(event->region());
 		// return;
 	}
 
-	void mouse_press_event(const mcurses::Mouse_event& event)
+	void mouse_press_event(mcurses::Mouse_event& event) override
 	{
 		mcurses::Painter p{this};
 		p.move(event.local_x(), event.local_y());
@@ -25,22 +25,8 @@ public:
 		// ss << "x:" << mcurses::System::max_width() << ",y:" << mcurses::System::max_height();
 		// p.put(ss.str());
 		p.put("Ѩ҉ξᾨ");
+		Widget::mouse_press_event(event);
 	}
-
-	bool event(const mcurses::Event& event) override
-	{
-		if(event.type() == mcurses::Event::Type::MouseButtonPress)
-		{
-			this->mouse_press_event(static_cast<const mcurses::Mouse_event&>(event));
-		}
-		if(event.type() == mcurses::Event::Type::Paint)
-		{
-			this->repaint_event(static_cast<const mcurses::Paint_event&>(event));
-		}
-		return true;
-	}
-private:
-
 };
 
 int main()

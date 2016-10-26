@@ -2,7 +2,6 @@
 #define MCURSES_PAINTER_HPP
 
 #include "painter_module/detail/ncurses_paint_engine.hpp"
-#include "painter_module/canvas.hpp"
 #include "painter_module/paint_engine.hpp"
 #include "painter_module/painter.hpp"
 

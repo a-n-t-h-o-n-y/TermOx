@@ -3,6 +3,7 @@
 #include <mcurses/system_module/events/child_event.hpp>
 #include <mcurses/system_module/system.hpp>
 #include <mcurses/signal_module/slot.hpp>
+#include <mcurses/widget_module/widget.hpp>
 
 #include <algorithm>
 #include <iterator>
@@ -11,43 +12,69 @@
 
 namespace mcurses {
 
+Object::~Object()
+{
+	Child_event ev{Event::Type::ChildRemoved, this};
+	System::send_event(this->parent(), ev);
+	destroyed(this);
+}
+
 void Object::initialize()
 {
-	delete_later = [this](){ System::post_event(this, std::make_unique<Event>(Event::Type::DeferredDelete));};
+	// Slots
+	this->delete_later = [this](){ System::post_event(this, std::make_unique<Event>(Event::Type::DeferredDelete));};
+	this->delete_later.track(this->destroyed); // Hack to disable slot when *this dies.
+
+	this->enable = [this](){this->enabled_ = true;};
+	this->enable.track(this->destroyed);
+
+	this->disable = [this](){this->enabled_ = false;};
+	this->disable.track(this->destroyed);
 }
 
 void Object::add_child(std::unique_ptr<Object> child)
 {
 	children_.emplace_back(std::move(child));
-}
-
-bool Object::event(const Event& event)
-{
-	bool handled_ = false;
-	if(!event_filter_objects_.empty() && !handled_) {	// could use a range for and be cleaner?
-		for_each(std::begin(event_filter_objects_), std::end(event_filter_objects_), [&](Object* p){ handled_ = p->event_filter(this, event); });
-	}
-
-
-	if(event.type() == Event::Type::ChildAdded
-	|| event.type() == Event::Type::ChildPolished
-	|| event.type() == Event::Type::ChildRemoved) {
-		this->child_event(static_cast<const Child_event&>(event));
-		return true;
-	}
-	return false;
-}
-
-void Object::child_event(const Child_event& event)
-{
-	// Does this have default behavior?
+	children_.back()->set_parent(this);
+	Child_event ev(Event::Type::ChildAdded, this);
+	System::send_event(this, ev);
 	return;
 }
 
-bool Object::event_filter(Object* watched, const Event& event)
+void Object::delete_child(Object* child) {
+	auto at = std::find_if(std::begin(children_), std::end(children_),
+		[&child](auto& c){return c.get() == child ? true : false;});
+	if(at != std::end(children_)) {
+		children_.erase(at);
+	}
+	return;
+}
+
+bool Object::event(Event& event)
 {
-	// Default to anything?
-	return true;
+	if(event.type() == Event::Type::ChildAdded
+	|| event.type() == Event::Type::ChildPolished
+	|| event.type() == Event::Type::ChildRemoved) {
+		this->child_event(static_cast<Child_event&>(event));
+		return event.is_accepted();
+	}
+
+	return event.is_accepted();
+}
+
+void Object::child_event(Child_event& event)
+{
+	Widget* parent = dynamic_cast<Widget*>(this->parent());
+	if(parent) {
+		parent->update();
+	}
+	event.accept();
+	return;
+}
+
+bool Object::event_filter(Object* watched, Event& event)
+{
+	return false;
 }
 
 void Object::install_event_filter(Object* filter_object)
