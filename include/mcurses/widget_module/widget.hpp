@@ -96,7 +96,8 @@ public:
 
 	Paint_engine& paint_engine() const;
 
-
+	void erase_widget_screen();
+	
 	// Signals
 	signal<void()> Layout_param_changed;
 
@@ -129,15 +130,9 @@ protected:
 	unsigned find_global_x() const;
 	unsigned find_global_y() const;
 
-	// Physical Properties
-	unsigned x_ = 0;
-	unsigned y_ = 0;
-	unsigned width_ = 0;
-	unsigned height_ = 0;
-
 	// Properties for Layouts
-	unsigned width_hint_ = 0;
-	unsigned height_hint_ = 0;
+	unsigned width_hint_ = System::max_width();
+	unsigned height_hint_ = System::max_height();
 	unsigned max_width_ = std::numeric_limits<unsigned>::max();
 	unsigned max_height_ = std::numeric_limits<unsigned>::max();
 	unsigned min_width_ = 0;
@@ -145,6 +140,12 @@ protected:
 	unsigned min_height_ = 0;
 	unsigned min_height_hint_ = 0;
 	Size_policy size_policy_;
+
+	// Physical Properties
+	unsigned x_ = 0;
+	unsigned y_ = 0;
+	unsigned width_ = width_hint_;
+	unsigned height_ = height_hint_;
 
 	bool show_cursor_ = true;
 	bool focus_ = false;
@@ -157,7 +158,7 @@ protected:
 	std::unique_ptr<Paint_engine> paint_engine_ = nullptr;
 
 private:
-	void paint_hidden_widget();
+	void paint_disabled_widget();
 	void initialize();
 };
 

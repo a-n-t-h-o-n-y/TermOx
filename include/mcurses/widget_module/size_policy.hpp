@@ -7,7 +7,7 @@ class Size_policy {
 public:
 	enum Policy { Fixed, Minimum, Maximum, Preferred, Expanding, MinimumExpanding, Ignored };
 
-	Size_policy(Policy horizontal = Fixed , Policy vertical = Fixed )
+	Size_policy(Policy horizontal = Preferred , Policy vertical = Preferred )
 	:policy_h_{horizontal}, policy_v_{vertical}
 	{}
 

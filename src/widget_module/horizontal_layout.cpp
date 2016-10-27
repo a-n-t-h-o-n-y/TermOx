@@ -1,15 +1,24 @@
 #include <mcurses/widget_module/layouts/horizontal_layout.hpp>
+#include <mcurses/system_module/events/resize_event.hpp>
+#include <mcurses/system_module/events/move_event.hpp>
 
 namespace mcurses {
 
-void Horizontal_layout::refresh()
+void Horizontal_layout::update_geometry()
 {
-	// for each child, look at its size hint and policy and figure out where it should be and 
-	// what it's dimensions should be, then post a resize and move event to that child.
+	unsigned n = this->children().size();
+	unsigned h = this->height();
+	unsigned w = this->width()/ n;
+	unsigned x{0};
+	unsigned y{0};
+
 	for(Object* c : this->children()) {
-		// unsigned new_width = find_width(c); // uses the size policy and hints along with other children to figure this out
-		// unsigned new_height = find_height(c); // probably wrong way to do this, since you need to consider all children together.
-		// System::post_event(c, std::make_unique<Move_event>(old_width, old_height, new_width, new_height);
+		Widget* child = dynamic_cast<Widget*>(c);
+		if(child && child->visible()) {
+			System::post_event(child, std::make_unique<Resize_event>(w, h)); // this is fine, it is not global
+			System::post_event(child, std::make_unique<Move_event>(x, y)); // are you posting global coords to local spots??
+			x += w;
+		}
 	}
 }
 

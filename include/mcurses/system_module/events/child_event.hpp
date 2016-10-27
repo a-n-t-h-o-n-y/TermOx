@@ -7,7 +7,7 @@ namespace mcurses {
 
 class Child_event : public Event {
 public:
-	Child_event(Event::Type type, Object* child):Event(type), child_{child}{}
+	Child_event(Event::Type type, Object* child);
 	bool added() const;
 	bool polished() const;
 	bool removed() const;

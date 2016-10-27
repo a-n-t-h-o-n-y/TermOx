@@ -14,18 +14,18 @@ Layout::Layout()
 	this->initialize();
 }
 
-void Layout::update()
-{
-	this->refresh();
-	Widget::update();
-	return;
-}
-
 void Layout::initialize()
 {
 	// Slots
-	this->refresh_layout = std::bind(&Layout::refresh, this);
-	this->refresh_layout.track(this->destroyed);
+	this->update_layout = std::bind(&Layout::update_geometry, this);
+	this->update_layout.track(this->destroyed);
+}
+
+void Layout::update()
+{
+	this->update_geometry();
+	Widget::update();
+	return;
 }
 
 void Layout::child_event(Child_event& event)
@@ -33,14 +33,14 @@ void Layout::child_event(Child_event& event)
 	if (event.added()) {
 		Widget* child_widg = dynamic_cast<Widget*>(event.child());
 		if(child_widg) {
-			child_widg->Layout_param_changed.connect(refresh_layout);
+			child_widg->Layout_param_changed.connect(update_layout);
 		}
 		this->update();
 		event.accept();
 		return;
 	}
 
-	if (event.removed()) {
+	else if (event.removed()) {
 		this->update();
 		event.accept();
 		return;

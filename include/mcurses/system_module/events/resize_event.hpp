@@ -7,7 +7,7 @@ namespace mcurses {
 
 class Resize_event : public Event {
 public:
-	Resize_event(unsigned old_width, unsigned old_height, unsigned new_width, unsigned new_height);
+	Resize_event(unsigned new_width, unsigned new_height, unsigned old_width = 0, unsigned old_height = 0);
 	
 	unsigned old_width() const { return old_width_; }
 	unsigned old_height() const { return old_height_; }
@@ -15,10 +15,10 @@ public:
 	unsigned new_height() const { return new_height_; }
 
 protected:
-	unsigned old_width_;
-	unsigned old_height_;
 	unsigned new_width_;
 	unsigned new_height_;
+	unsigned old_width_;
+	unsigned old_height_;
 };
 
 } // namespace mcurses

@@ -9,7 +9,7 @@ class Horizontal_layout : public Layout {
 public:
 
 protected:
-	virtual void refresh() override;
+	virtual void update_geometry() override;
 };
 
 } // namespace mcurses

@@ -4,5 +4,7 @@
 #include "painter_module/detail/ncurses_paint_engine.hpp"
 #include "painter_module/paint_engine.hpp"
 #include "painter_module/painter.hpp"
+#include "painter_module/color.hpp"
+#include "painter_module/palette.hpp"
 
 #endif // MCURSES_PAINTER_HPP

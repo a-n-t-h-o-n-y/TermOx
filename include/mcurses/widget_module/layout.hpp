@@ -17,11 +17,11 @@ public:
 	virtual void update() override;
 
 	// Slots
-	slot<void()> refresh_layout; // this should call update()
+	slot<void()> update_layout; // this should call update()
 
 protected:
 	virtual void child_event(Child_event& event) override;
-	virtual void refresh() = 0; // sends resize and move events to children depending on arrangement
+	virtual void update_geometry() = 0;
 
 private:
 	void initialize();

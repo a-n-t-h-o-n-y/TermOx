@@ -33,6 +33,7 @@ list(APPEND SYSTEM_MODULE_SOURCES 	"src/system_module/thread_data.cpp"
 									"src/system_module/object.cpp"
 									"src/system_module/move_event.cpp"
 									"src/system_module/resize_event.cpp"
+									"src/system_module/child_event.cpp"
 								 	)
 list(APPEND PAINTER_MODULE_SOURCES  "src/painter_module/ncurses_paint_engine.cpp"
 									"src/painter_module/painter.cpp"

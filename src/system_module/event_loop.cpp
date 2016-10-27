@@ -1,5 +1,6 @@
 #include <mcurses/system_module/event_loop.hpp>
 #include <mcurses/system_module/detail/thread_data.hpp>
+#include <mcurses/painter_module/paint_engine.hpp>
 
 #include <ncurses.h> // use painter instead eventually
 
@@ -15,6 +16,7 @@ int Event_loop::run()
 	while(!exit_)
 	{
 		this->process_events();
+		touchwin(::stdscr);
 		::refresh(); // call with static from painter?
 	}
 

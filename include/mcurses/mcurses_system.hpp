@@ -9,5 +9,13 @@
 #include "system_module/events/input_event.hpp"
 #include "system_module/events/mouse_event.hpp"
 #include "system_module/events/paint_event.hpp"
+#include "system_module/events/child_event.hpp"
+#include "system_module/events/close_event.hpp"
+#include "system_module/events/enable_event.hpp"
+#include "system_module/events/hide_event.hpp"
+#include "system_module/events/key_event.hpp"
+#include "system_module/events/move_event.hpp"
+#include "system_module/events/resize_event.hpp"
+#include "system_module/events/show_event.hpp"
 
 #endif // MCURSES_SYSTEM_HPP

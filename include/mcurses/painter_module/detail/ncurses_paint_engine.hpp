@@ -11,6 +11,7 @@ namespace detail {
 
 class NCurses_paint_engine : public Paint_engine {
 public:
+	virtual void refresh() override;
 	virtual void move(unsigned x, unsigned y) override;
 	virtual void put_char(char c) override;
 	virtual void put_string(const std::string& s) override;
@@ -18,7 +19,6 @@ public:
 	virtual void hide_cursor() override;
 	virtual unsigned screen_width() override;
 	virtual unsigned screen_height() override;
-	virtual void fill_rect(unsigned x, unsigned y, unsigned width, unsigned height, Color background) override;
 
 private:
 

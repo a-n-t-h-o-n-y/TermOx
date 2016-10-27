@@ -2,30 +2,54 @@
 
 #include <sstream>
 
+class Normal_widget : public mcurses::Widget {
+public:
+	Normal_widget()
+	{
+		this->set_show_cursor(false);
+	}
+	void paint_event(mcurses::Paint_event& event) override
+	{
+		mcurses::Painter p{this};
+		p.border("-");
+		p.move(0,0);
+		p.put("Normal Widget");
+		return;
+	}
+};
+
 class Click_paint_widget : public mcurses::Widget {
 public:
-	Click_paint_widget(unsigned x, unsigned y, unsigned width, unsigned height)
+	Click_paint_widget()
 	{
-		this->set_geometry(x,y,width,height);
 		this->set_show_cursor(false);
 	}
 
 	void paint_event(mcurses::Paint_event& event) override
 	{
-		// mcurses::Painter p;
-		// p.touch(event->region());
-		// return;
+		mcurses::Painter p{this};
+		p.border("*");
+		p.move(0,0);
+		p.put("Click Widget");
+		return;
 	}
 
 	void mouse_press_event(mcurses::Mouse_event& event) override
 	{
 		mcurses::Painter p{this};
 		p.move(event.local_x(), event.local_y());
-		// std::stringstream ss;
-		// ss << "x:" << mcurses::System::max_width() << ",y:" << mcurses::System::max_height();
-		// p.put(ss.str());
-		p.put("Ѩ҉ξᾨ");
+		p.put("X");
 		Widget::mouse_press_event(event);
+	}
+};
+
+class Main_widget : public mcurses::Horizontal_layout {
+public:
+	Main_widget()
+	{
+		this->make_child<Click_paint_widget>();
+		this->make_child<Normal_widget>();
+		this->make_child<Click_paint_widget>();
 	}
 };
 
@@ -33,7 +57,7 @@ int main()
 {
 	mcurses::System system;
 
-	Click_paint_widget widg(0, 0, mcurses::System::max_width()/2, mcurses::System::max_height()/2);
+	Main_widget widg;
 
 	system.set_head(&widg);
 

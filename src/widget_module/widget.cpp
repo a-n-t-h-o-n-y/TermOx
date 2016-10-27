@@ -12,7 +12,6 @@
 #include <mcurses/system_module/events/show_event.hpp>
 #include <mcurses/system_module/events/enable_event.hpp>
 
-
 #include <memory>
 
 namespace mcurses {
@@ -20,6 +19,7 @@ namespace mcurses {
 Widget::Widget()
 {
 	this->initialize();
+	this->update();
 }
 
 void Widget::initialize()
@@ -49,8 +49,8 @@ bool
 Widget::has_coordinates(unsigned glob_x, unsigned glob_y)
 {
 	if(!this->is_enabled() || !this->visible()) { return false; }
-	if((glob_x >= this->global_x()) && (glob_x <= (this->global_max_x()))
-		&& (glob_y >= this->global_y()) && (glob_y <= (this->global_max_y()))) {
+	if((glob_x >= this->global_x()) && (glob_x < (this->global_max_x()))
+		&& (glob_y >= this->global_y()) && (glob_y < (this->global_max_y()))) {
 		return true;
 	}
 	return false;
@@ -107,7 +107,7 @@ bool Widget::event(Event& event)
 		if(this->visible() && this->is_enabled()) {
 			this->paint_event(static_cast<Paint_event&>(event));
 		} else if(this->visible() && !this->is_enabled()) {
-			this->paint_hidden_widget();
+			this->paint_disabled_widget();
 		} else if(!this->visible()){}
 		return event.is_accepted();
 	}
@@ -194,8 +194,8 @@ void Widget::move_event(Move_event& event)
 {
 	this->set_x(event.new_x());
 	this->set_y(event.new_y());
-	Widget* parent = dynamic_cast<Widget*>(this->parent());
-	if (parent) { parent->update(); }
+	// Widget* parent = dynamic_cast<Widget*>(this->parent()); // causes infinte loop
+	// if (parent) { parent->update(); }
 	this->update();
 	event.accept();
 	return;
@@ -203,12 +203,11 @@ void Widget::move_event(Move_event& event)
 
 void Widget::resize_event(Resize_event& event)
 {
+	this->erase_widget_screen();
 	this->set_width(event.new_width());
 	this->set_height(event.new_height());
-	if (event.new_width() < event.old_width() || event.new_height() < event.old_height()) {
-		Widget* parent = dynamic_cast<Widget*>(this->parent());
-		if (parent) { parent->update(); }
-	}
+	
+	// Do you need to tell the parent if the size of the widget it holds shrinks? layouts take care of this already..
 	this->update();
 	event.accept();
 	return;
@@ -227,8 +226,18 @@ void Widget::paint_event(Paint_event& event)
 	return;
 }
 
-void Widget::paint_hidden_widget()
+void Widget::erase_widget_screen()
 {
+	Painter p{this};
+	p.fill(this->x(), this->y(), this->width(), this->height(), this->palette().background());
+	return;
+}
+
+void Widget::paint_disabled_widget()
+{
+	// Re-implement this to change the palette to grey and repaint, this might be done
+	// elsewhere when the widget is disabled, the palette is changed to greyscale, then
+	// a typical update is done. The function will probably not be needed.
 	Painter p{this};
 	Widget* parent = dynamic_cast<Widget*>(this->parent());
 	Color background = Color::Black;

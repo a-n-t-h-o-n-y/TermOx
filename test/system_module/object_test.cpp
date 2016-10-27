@@ -10,6 +10,7 @@
 
 TEST(ObjectTest, DefaultConstructor)
 {
+	mcurses::System system; // Needed to prevent crash in other tests, static functions might be accessing non-static variables of system?
 	mcurses::Object obj;
 	EXPECT_TRUE(obj.children().empty());
 	EXPECT_EQ(nullptr, obj.parent());

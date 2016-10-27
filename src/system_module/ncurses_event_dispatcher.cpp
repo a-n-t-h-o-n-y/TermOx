@@ -167,13 +167,13 @@ NCurses_event_dispatcher::handle_keyboard_object()
 std::unique_ptr<Event>
 NCurses_event_dispatcher::handle_resize_event() // sent to head widget and all children, etc.. sent to everything
 {
-	return std::unique_ptr<Event>{};
+	return std::make_unique<Resize_event>(System::max_width(), System::max_height());
 }
 
 Object*
 NCurses_event_dispatcher::handle_resize_object()
 {
-	return nullptr;
+	return System::head();
 }
 
 
