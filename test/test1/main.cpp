@@ -1,36 +1,76 @@
 #include <mcurses/mcurses.hpp>
 
-#include <sstream>
+#include <string>
+
+class Text_box : public mcurses::Widget {
+public:
+	Text_box()
+	{
+		this->set_focus_policy(mcurses::Widget::Focus_policy::StrongFocus);
+		this->set_cursor(true);
+	}
+	void virtual paint_event(mcurses::Paint_event& event) override
+	{
+		this->erase_widget_screen();
+		mcurses::Painter p{this};
+		p.move(0,0);
+		p.put(contents_);
+		Widget::paint_event(event);
+		return;
+	}
+	void virtual key_press_event(mcurses::Key_event& event) override
+	{
+		contents_.append(std::string(1, event.text()));
+		Widget::key_press_event(event);
+		this->update();
+		return;
+	}
+private:
+	std::string contents_;
+};
 
 class Normal_widget : public mcurses::Widget {
 public:
 	Normal_widget()
 	{
-		this->set_show_cursor(false);
+		this->set_focus_policy(mcurses::Widget::Focus_policy::StrongFocus);
+		this->set_cursor(true);
+		this->enable_border();
 	}
 	void paint_event(mcurses::Paint_event& event) override
 	{
+		this->erase_widget_screen();
 		mcurses::Painter p{this};
-		p.border("-");
-		p.move(0,0);
+		p.move(1,1);
 		p.put("Normal Widget");
+		p.move(this->width()/2,this->height()/2);
+		p.put(text_);
+		Widget::paint_event(event);
 		return;
 	}
+	void key_press_event(mcurses::Key_event& event) override
+	{
+		text_ = event.text();
+		this->update();
+	}
+private:
+	char text_ = ' ';
 };
 
 class Click_paint_widget : public mcurses::Widget {
 public:
 	Click_paint_widget()
 	{
-		this->set_show_cursor(false);
+		this->set_cursor(false);
+		this->enable_border();
 	}
 
 	void paint_event(mcurses::Paint_event& event) override
 	{
 		mcurses::Painter p{this};
-		p.border("*");
-		p.move(0,0);
+		p.move(1,1);
 		p.put("Click Widget");
+		Widget::paint_event(event);
 		return;
 	}
 
@@ -50,6 +90,7 @@ public:
 		this->make_child<Click_paint_widget>();
 		this->make_child<Normal_widget>();
 		this->make_child<Click_paint_widget>();
+		this->make_child<Text_box>();
 	}
 };
 

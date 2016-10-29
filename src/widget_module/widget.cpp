@@ -11,6 +11,7 @@
 #include <mcurses/system_module/events/hide_event.hpp>
 #include <mcurses/system_module/events/show_event.hpp>
 #include <mcurses/system_module/events/enable_event.hpp>
+#include <mcurses/system_module/events/focus_event.hpp>
 
 #include <memory>
 
@@ -118,7 +119,7 @@ bool Widget::event(Event& event)
 			return event.is_accepted();
 		}
 		if(this->focus_policy() == Focus_policy::ClickFocus
-			|| this->focus_policy() == Focus_policy::StrongFocus) {
+		|| this->focus_policy() == Focus_policy::StrongFocus) {
 			System::set_focus_widget(this);
 		}
 		this->mouse_press_event(static_cast<Mouse_event&>(event));
@@ -187,6 +188,13 @@ bool Widget::event(Event& event)
 		return event.is_accepted();
 	}
 
+	// Focus Event
+	if(event.type() == Event::Type::FocusIn
+	|| event.type() == Event::Type::FocusOut) {
+		this->focus_event(static_cast<Focus_event&>(event));
+		return event.is_accepted();
+	}
+
 	return Object::event(event);
 }
 
@@ -216,6 +224,9 @@ void Widget::resize_event(Resize_event& event)
 void Widget::paint_event(Paint_event& event)
 {
 	// Post paint event to each child
+	if(border_.is_enabled()) {
+		border_.draw();
+	}
 	for(Object* c : this->children()) {
 		Widget* child = dynamic_cast<Widget*>(c);
 		if(child) {
@@ -229,7 +240,7 @@ void Widget::paint_event(Paint_event& event)
 void Widget::erase_widget_screen()
 {
 	Painter p{this};
-	p.fill(this->x(), this->y(), this->width(), this->height(), this->palette().background());
+	p.fill(0, 0, this->width(), this->height(), this->palette().background());
 	return;
 }
 
@@ -319,12 +330,28 @@ void Widget::enable_event(Enable_event& event)
 	return;
 }
 
+void Widget::focus_event(Focus_event& event)
+{
+	if(event.type() == Event::Type::FocusIn) {
+		Painter p{this};
+		p.set_cursor(this->cursor());
+		p.move(cursor_x_, cursor_y_);
+	} // if(event.type() == FocusOut)
+	event.accept();
+	return;
+}
+
 void Widget::set_focus(bool focus)
 {
 	if(this->focus_policy() == Focus_policy::NoFocus) {
 		return;
 	}
 	focus_ = focus;
+	if(focus) {
+		System::post_event(this, std::make_unique<Focus_event>(Event::Type::FocusIn));
+	} else {
+		System::post_event(this, std::make_unique<Focus_event>(Event::Type::FocusOut));
+	}
 	return;
 }
 

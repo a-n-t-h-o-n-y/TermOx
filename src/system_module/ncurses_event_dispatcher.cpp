@@ -41,7 +41,7 @@ void NCurses_event_dispatcher::post_user_input()
 			break;
 
 		default: // Key_event
-			event = handle_keyboard_event();
+			event = handle_keyboard_event(input);
 			object = handle_keyboard_object();
 			if (static_cast<Key_event*>(event.get())->key() == 9) {
 				System::cycle_tab_focus();
@@ -153,15 +153,17 @@ NCurses_event_dispatcher::find_object(unsigned x, unsigned y)
 }
 
 std::unique_ptr<Event>
-NCurses_event_dispatcher::handle_keyboard_event()
+NCurses_event_dispatcher::handle_keyboard_event(int input)
 {
-	return std::unique_ptr<Event>{};
+
+
+	return std::make_unique<Key_event>(Event::Type::KeyPress, input);
 }
 
 Object*
 NCurses_event_dispatcher::handle_keyboard_object()
 {
-	return nullptr;
+	return System::focus_widget();
 }
 
 std::unique_ptr<Event>

@@ -17,7 +17,7 @@ protected:
 	void post_user_input() override;
 	std::pair<Object*, std::unique_ptr<Event>> parse_mouse_event();
 	Object* find_object(unsigned x, unsigned y);
-	std::unique_ptr<Event> handle_keyboard_event();
+	std::unique_ptr<Event> handle_keyboard_event(int input);
 	Object* handle_keyboard_object();
 	std::unique_ptr<Event> handle_resize_event();
 	Object* handle_resize_object();

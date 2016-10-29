@@ -11,6 +11,7 @@
 #include "../system_module/events/hide_event.hpp"
 #include "../system_module/events/show_event.hpp"
 #include "../system_module/events/enable_event.hpp"
+#include "../system_module/events/focus_event.hpp"
 #include "../painter_module/paint_engine.hpp"
 #include "../painter_module/detail/ncurses_paint_engine.hpp"
 #include "../painter_module/palette.hpp"
@@ -18,6 +19,7 @@
 #include "../system_module/system.hpp"
 #include "../signal_module/signal.hpp"
 #include "../signal_module/slot.hpp"
+#include "border.hpp"
 
 #include <limits>
 #include <memory>
@@ -55,7 +57,11 @@ public:
 	void set_fixed_height(unsigned height);
 	void set_size_policy(const Size_policy& policy) { size_policy_ = policy; Layout_param_changed(); }
 
-	void set_show_cursor(bool show) { show_cursor_ = show; }
+	void set_cursor(bool show) { show_cursor_ = show; }
+	void set_cursor_x(unsigned x) { cursor_x_ = x; }
+	void set_cursor_y(unsigned y) { cursor_y_ = y; }
+	unsigned cursor_x() const { return cursor_x_; }
+	unsigned cursor_y() const { return cursor_y_; }
 	void set_paint_engine(std::unique_ptr<Paint_engine> engine) { paint_engine_ = std::move(engine); }
 	
 	unsigned x() const { return x_; }
@@ -80,9 +86,9 @@ public:
 	
 	Size_policy size_policy() const { return size_policy_; Layout_param_changed(); }
 
-	bool show_cursor() const {return show_cursor_; }
+	bool cursor() const {return show_cursor_; }
 	void set_focus(bool focus);
-	void clear_focus() { focus_ = false; }
+	void clear_focus() { this->set_focus(false); }
 	bool has_focus() const { return focus_; }
 	Focus_policy focus_policy() const { return focus_policy_; }
 	void set_focus_policy(Focus_policy policy) { focus_policy_ = policy; }
@@ -93,6 +99,11 @@ public:
 	Palette palette() const { return palette_; }
 	bool visible() const { return visible_; }
 	void set_visible(bool visible);
+	void set_wrap_at_space(bool condition) { wrap_at_space_ = condition; }
+	bool wrap_at_space() const { return wrap_at_space_; } // maybe in a textbox widget instead
+	bool has_border() const { return border_.is_enabled(); }
+	void enable_border() { border_.enable(); this->update(); }
+	void disable_border() { border_.disable(); this->update(); }
 
 	Paint_engine& paint_engine() const;
 
@@ -126,6 +137,7 @@ protected:
 	virtual void hide_event(Hide_event& event);
 	virtual void show_event(Show_event& event);
 	virtual void enable_event(Enable_event& event) override;
+	virtual void focus_event(Focus_event& event);
 
 	unsigned find_global_x() const;
 	unsigned find_global_y() const;
@@ -148,12 +160,16 @@ protected:
 	unsigned height_ = height_hint_;
 
 	bool show_cursor_ = true;
+	unsigned cursor_x_ = 0;
+	unsigned cursor_y_ = 0;
 	bool focus_ = false;
 	bool mouse_tracking_ = false;
 	bool visible_ = true;
+	bool wrap_at_space_ = false;
 
 	Focus_policy focus_policy_ = Focus_policy::NoFocus;
 	Palette palette_;
+	Border border_ = Border{this};
 
 	std::unique_ptr<Paint_engine> paint_engine_ = nullptr;
 

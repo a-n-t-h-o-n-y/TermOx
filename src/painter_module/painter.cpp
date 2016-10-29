@@ -12,6 +12,14 @@ Painter::refresh()
 void
 Painter::move(unsigned x, unsigned y)
 {
+	widget_->set_cursor_x(x);
+	widget_->set_cursor_y(y);
+	this->move_(x,y);
+}
+
+void
+Painter::move_(unsigned x, unsigned y)
+{
 	unsigned glob_x = widget_->global_x() + x;
 	unsigned glob_y = widget_->global_y() + y;
 
@@ -25,15 +33,7 @@ Painter::move(unsigned x, unsigned y)
 }
 
 void
-Painter::put(char c)
-{
-	if(!valid_position_) { return; }
-	widget_->paint_engine().put_char(c);
-	return;
-}
-
-void
-Painter::put(const std::string& s)
+Painter::put_to_engine_(const std::string& s)
 {
 	if(!valid_position_) { return; }
 	widget_->paint_engine().put_string(s);
@@ -43,13 +43,13 @@ Painter::put(const std::string& s)
 void Painter::fill(unsigned x, unsigned y, unsigned width, unsigned height, Color background)
 {
 	for(unsigned i{y}; i < height; ++i) {
-		this->line(x, i, width, i, " ");	// eventually update with proper background color
+		this->line(x, i, width, i, " ");	// Update with proper background color
 	}
 	return;
 }
 
 void
-Painter::show_cursor(bool state)
+Painter::set_cursor(bool state)
 {
 	if(state) {
 		widget_->paint_engine().show_cursor();
@@ -65,15 +65,15 @@ void Painter::line(unsigned x1, unsigned y1, unsigned x2, unsigned y2, const std
 	// Horizontal
 	if(y1 == y2) {
 		for(unsigned i{x1}; i <= x2; ++i) {
-			this->move(i, y1);
-			this->put(b);
+			this->move_(i, y1);
+			this->put_feature_(b);
 		}
 	}
 	// Vertical
 	else if(x1 == x2) {
 		for(unsigned i{y1}; i <= y2; ++i) {
-			this->move(x1, i);
-			this->put(b);
+			this->move_(x1, i);
+			this->put_feature_(b);
 		}
 	}
 	// Diagonal not implemented right now

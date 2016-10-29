@@ -39,6 +39,8 @@ list(APPEND PAINTER_MODULE_SOURCES  "src/painter_module/ncurses_paint_engine.cpp
 									"src/painter_module/painter.cpp"
 									"src/painter_module/paint_engine.cpp"
 									"src/painter_module/palette.cpp"
+									"src/painter_module/glyph.cpp"
+									"src/painter_module/brush.cpp"
 									)
 list(APPEND SIGNAL_MODULE_SOURCES 	"src/signal_module/slot_base.cpp"
 									"src/signal_module/connection.cpp"
@@ -47,6 +49,7 @@ list(APPEND SIGNAL_MODULE_SOURCES 	"src/signal_module/slot_base.cpp"
 list(APPEND WIDGET_MODULE_SOURCES 	"src/widget_module/widget.cpp"
 									"src/widget_module/layout.cpp"
 									"src/widget_module/horizontal_layout.cpp"
+									"src/widget_module/border.cpp"
 									)
 
 list(APPEND TEST_SOURCES "test/signal_module/none_test.cpp"
@@ -71,6 +74,9 @@ list(APPEND TEST_SOURCES "test/signal_module/none_test.cpp"
 						 "test/system_module/ncurses_event_dispatcher_test.cpp"
 
 						 "test/widget_module/widget_test.cpp"
+
+						 "test/painter_module/glyph_test.cpp"
+						 "test/painter_module/brush_test.cpp"
 						 )
 
 list(APPEND TEST1_SOURCES "test/test1/main.cpp"
