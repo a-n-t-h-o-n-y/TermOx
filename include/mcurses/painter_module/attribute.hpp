@@ -9,6 +9,7 @@ enum class Attribute {
 	Underline,
 	Standout,
 	Dim,
+	Inverse,
 	Invisible,
 	Blink
 };

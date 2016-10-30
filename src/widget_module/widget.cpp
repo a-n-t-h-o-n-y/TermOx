@@ -3,6 +3,7 @@
 #include <mcurses/system_module/events/paint_event.hpp>
 #include <mcurses/painter_module/color.hpp>
 #include <mcurses/painter_module/painter.hpp>
+#include <mcurses/painter_module/brush.hpp>
 #include <mcurses/system_module/events/key_event.hpp>
 #include <mcurses/system_module/events/mouse_event.hpp>
 #include <mcurses/system_module/events/resize_event.hpp>
@@ -20,6 +21,8 @@ namespace mcurses {
 Widget::Widget()
 {
 	this->initialize();
+	this->brush().set_background(Color::Black);
+	this->brush().set_foreground(Color::White);
 	this->update();
 }
 
@@ -240,20 +243,22 @@ void Widget::paint_event(Paint_event& event)
 void Widget::erase_widget_screen()
 {
 	Painter p{this};
-	p.fill(0, 0, this->width(), this->height(), this->palette().background());
+	if(this->brush().background_color()) {
+		p.fill(0, 0, this->width(), this->height(), *this->brush().background_color());
+	}
 	return;
 }
 
 void Widget::paint_disabled_widget()
 {
-	// Re-implement this to change the palette to grey and repaint, this might be done
-	// elsewhere when the widget is disabled, the palette is changed to greyscale, then
+	// Re-implement this to change the brush to grey and repaint, this might be done
+	// elsewhere when the widget is disabled, the brush is changed to greyscale, then
 	// a typical update is done. The function will probably not be needed.
 	Painter p{this};
 	Widget* parent = dynamic_cast<Widget*>(this->parent());
 	Color background = Color::Black;
-	if(parent) {
-		background = parent->palette().background();
+	if(parent && parent->brush().background_color()) {
+		background = *parent->brush().background_color();
 	}
 	p.fill(0, 0, this->width(), this->height(), background);
 }
@@ -321,10 +326,10 @@ void Widget::show_event(Show_event& event)
 void Widget::enable_event(Enable_event& event)
 {
 	if(!event.is_enabled()) {
-		// save current palette and
-		// set palette to greyscale
+		// save current brush and
+		// set brush to greyscale
 	} else {
-		// set palette back to saved original
+		// set brush back to saved original
 	}
 	Object::enable_event(event);
 	return;
@@ -355,14 +360,14 @@ void Widget::set_focus(bool focus)
 	return;
 }
 
-void Widget::set_palette_recursively(Palette palette)
+void Widget::set_brush_recursively(Brush brush)
 {
-	this->palette_ = palette;
+	this->default_brush_ = brush;
 	this->update();
 	for(Object* c : this->children()) {
 		Widget* child = dynamic_cast<Widget*>(c);
 		if(child) {
-			child->set_palette_recursively(palette);
+			child->set_brush_recursively(brush);
 		}
 	}
 	return;

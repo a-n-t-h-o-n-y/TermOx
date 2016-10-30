@@ -5,38 +5,61 @@ namespace mcurses {
 
 enum class Color {
 	Black,
-	White,
-	Red,
+	Dark_red,
+	Dark_blue,
+	Dark_gray,
+	Brown,
 	Green,
-	Yellow,
+	Red,
+	Gray,
 	Blue,
-	Magenta,
-	Cyan
-
+	Orange,
+	Light_gray,
+	Light_green,
+	Violet,
+	Light_blue,
+	Yellow,
+	White
 };
 
 namespace detail {
 
 enum class BackgroundColor {
 	Black,
-	White,
-	Red,
+	Dark_red,
+	Dark_blue,
+	Dark_gray,
+	Brown,
 	Green,
-	Yellow,
+	Red,
+	Gray,
 	Blue,
-	Magenta,
-	Cyan
+	Orange,
+	Light_gray,
+	Light_green,
+	Violet,
+	Light_blue,
+	Yellow,
+	White
 };
 
 enum class ForegroundColor {
 	Black,
-	White,
-	Red,
+	Dark_red,
+	Dark_blue,
+	Dark_gray,
+	Brown,
 	Green,
-	Yellow,
+	Red,
+	Gray,
 	Blue,
-	Magenta,
-	Cyan
+	Orange,
+	Light_gray,
+	Light_green,
+	Violet,
+	Light_blue,
+	Yellow,
+	White
 };
 
 } // namespace detail

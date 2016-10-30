@@ -8,6 +8,8 @@
 #include <mcurses/painter_module/paint_engine.hpp>
 #include <mcurses/system_module/events/paint_event.hpp>
 #include <mcurses/widget_module/widget.hpp>
+#include <mcurses/painter_module/palette.hpp>
+#include <mcurses/painter_module/color.hpp>
 
 #include <ncurses.h>
 
@@ -213,7 +215,35 @@ void System::cycle_tab_focus()
 	return;	
 }
 
+std::unique_ptr<Palette> System::system_palette_ = nullptr;
 
+void
+System::set_palette(std::unique_ptr<Palette> palette) {
+	system_palette_ = std::move(palette);
+	Palette* p = System::palette();
+
+	System::paint_engine()->set_rgb(Color::Black, p->red_value(Color::Black), p->green_value(Color::Black), p->blue_value(Color::Black));
+	System::paint_engine()->set_rgb(Color::Dark_red, p->red_value(Color::Dark_red), p->green_value(Color::Dark_red), p->blue_value(Color::Dark_red));
+	System::paint_engine()->set_rgb(Color::Dark_blue, p->red_value(Color::Dark_blue), p->green_value(Color::Dark_blue), p->blue_value(Color::Dark_blue));
+	System::paint_engine()->set_rgb(Color::Dark_gray, p->red_value(Color::Dark_gray), p->green_value(Color::Dark_gray), p->blue_value(Color::Dark_gray));
+	System::paint_engine()->set_rgb(Color::Brown, p->red_value(Color::Brown), p->green_value(Color::Brown), p->blue_value(Color::Brown));
+	System::paint_engine()->set_rgb(Color::Green, p->red_value(Color::Green), p->green_value(Color::Green), p->blue_value(Color::Green));
+	System::paint_engine()->set_rgb(Color::Red, p->red_value(Color::Red), p->green_value(Color::Red), p->blue_value(Color::Red));
+	System::paint_engine()->set_rgb(Color::Gray, p->red_value(Color::Gray), p->green_value(Color::Gray), p->blue_value(Color::Gray));
+	System::paint_engine()->set_rgb(Color::Blue, p->red_value(Color::Blue), p->green_value(Color::Blue), p->blue_value(Color::Blue));
+	System::paint_engine()->set_rgb(Color::Orange, p->red_value(Color::Orange), p->green_value(Color::Orange), p->blue_value(Color::Orange));
+	System::paint_engine()->set_rgb(Color::Light_gray, p->red_value(Color::Light_gray), p->green_value(Color::Light_gray), p->blue_value(Color::Light_gray));
+	System::paint_engine()->set_rgb(Color::Light_green, p->red_value(Color::Light_green), p->green_value(Color::Light_green), p->blue_value(Color::Light_green));
+	System::paint_engine()->set_rgb(Color::Violet, p->red_value(Color::Violet), p->green_value(Color::Violet), p->blue_value(Color::Violet));
+	System::paint_engine()->set_rgb(Color::Light_blue, p->red_value(Color::Light_blue), p->green_value(Color::Light_blue), p->blue_value(Color::Light_blue));
+	System::paint_engine()->set_rgb(Color::Yellow, p->red_value(Color::Yellow), p->green_value(Color::Yellow), p->blue_value(Color::Yellow));
+	System::paint_engine()->set_rgb(Color::White, p->red_value(Color::White), p->green_value(Color::White), p->blue_value(Color::White));
+	return;
+}
+
+Palette* System::palette() {
+	return system_palette_.get();
+}
 
 System::System(std::unique_ptr<Paint_engine> engine)
 {
@@ -230,6 +260,8 @@ System::System(std::unique_ptr<Paint_engine> engine)
 	::mouseinterval(0);
 	::curs_set(0); // invisible cursor
 	::start_color();
+
+	System::set_palette(std::make_unique<DawnBringer_palette>());
 }
 
 System::~System()

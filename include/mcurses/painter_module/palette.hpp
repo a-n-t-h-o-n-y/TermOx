@@ -3,21 +3,35 @@
 
 #include "color.hpp"
 
+#include <vector>
+#include <array>
+
 namespace mcurses {
 
 class Palette {
 public:
-	// Types
-	enum class Style { Standard, Light, Dark };
+	virtual ~Palette() = default;
+	void set_rgb(Color c, int r, int g, int b);
 
-	Style style() const { return style_; }
-	Color background() const { return background_; }
-	Color foreground() const { return foreground_; }
+	int red_value(Color c) const;
+	int green_value(Color c) const;
+	int blue_value(Color c) const;
 
 private:
-	Style style_ = Style::Standard;
-	Color background_ = Color::Black;
-	Color foreground_ = Color::White;
+	typedef int index_;
+	static index_ translate_(Color c);
+
+	std::array<std::array<int,3>, 16> definitions_;
+};
+
+class Standard_palette : public Palette {
+public:
+	Standard_palette();
+};
+
+class DawnBringer_palette : public Palette {
+public:
+	DawnBringer_palette();
 };
 
 } // namespace mcurses

@@ -14,7 +14,7 @@
 #include "../system_module/events/focus_event.hpp"
 #include "../painter_module/paint_engine.hpp"
 #include "../painter_module/detail/ncurses_paint_engine.hpp"
-#include "../painter_module/palette.hpp"
+#include "../painter_module/brush.hpp"
 #include "size_policy.hpp"
 #include "../system_module/system.hpp"
 #include "../signal_module/signal.hpp"
@@ -94,9 +94,9 @@ public:
 	void set_focus_policy(Focus_policy policy) { focus_policy_ = policy; }
 	bool has_mouse_tracking() const { return mouse_tracking_; }
 	void set_mouse_tracking(bool track) { mouse_tracking_ = track; }
-	void set_palette(Palette palette) { palette_ = palette; this->update(); }
-	void set_palette_recursively(Palette palette);
-	Palette palette() const { return palette_; }
+	void set_brush(Brush brush) { default_brush_ = brush; this->update(); }
+	void set_brush_recursively(Brush brush);
+	Brush& brush() { return default_brush_; }
 	bool visible() const { return visible_; }
 	void set_visible(bool visible);
 	void set_wrap_at_space(bool condition) { wrap_at_space_ = condition; }
@@ -168,7 +168,7 @@ protected:
 	bool wrap_at_space_ = false;
 
 	Focus_policy focus_policy_ = Focus_policy::NoFocus;
-	Palette palette_;
+	Brush default_brush_;
 	Border border_ = Border{this};
 
 	std::unique_ptr<Paint_engine> paint_engine_ = nullptr;

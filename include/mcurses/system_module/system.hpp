@@ -7,6 +7,7 @@
 #include <mcurses/signal_module/slot.hpp>
 #include <mcurses/painter_module/paint_engine.hpp>
 #include <mcurses/painter_module/detail/ncurses_paint_engine.hpp>
+#include <mcurses/painter_module/palette.hpp>
 
 #include <memory>
 
@@ -31,6 +32,8 @@ public:
 	static Widget* focus_widget();
 	static void set_focus_widget(Widget* widg);
 	static void cycle_tab_focus();
+	static void set_palette(std::unique_ptr<Palette> palette);
+	static Palette* palette();
 
 	System(std::unique_ptr<Paint_engine> engine = std::make_unique<detail::NCurses_paint_engine>());
 	~System();
@@ -47,6 +50,7 @@ private:
 	static Object* head_;
 	static std::unique_ptr<Paint_engine> engine_;
 	static Widget* focus_widg_;
+	static std::unique_ptr<Palette> system_palette_;
 	static bool notify_helper(Object* obj, Event& event);
 
 };

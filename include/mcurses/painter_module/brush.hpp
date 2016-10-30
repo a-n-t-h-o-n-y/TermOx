@@ -21,8 +21,8 @@ public:
 	void remove_attribute(Attribute attr);
 	void clear_attributes() { attributes_.clear(); }
 
-	void set_background_color(Color color) { background_color_ = color; }
-	void set_foreground_color(Color color) { foreground_color_ = color; }
+	void set_background(Color color) { background_color_ = color; }
+	void set_foreground(Color color) { foreground_color_ = color; }
 
 	std::vector<Attribute> attributes() const { return attributes_; }
 	optional<Color> background_color() const { return background_color_; }
@@ -41,12 +41,12 @@ private:
 	}
 
 	void do_init(detail::BackgroundColor bc) {
-		this->set_background_color(static_cast<Color>(bc));
+		this->set_background(static_cast<Color>(bc));
 		return;
 	}
 
 	void do_init(detail::ForegroundColor fc) {
-		this->set_foreground_color(static_cast<Color>(fc));
+		this->set_foreground(static_cast<Color>(fc));
 		return;
 	}
 

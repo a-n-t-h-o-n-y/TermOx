@@ -77,6 +77,7 @@ list(APPEND TEST_SOURCES "test/signal_module/none_test.cpp"
 
 						 "test/painter_module/glyph_test.cpp"
 						 "test/painter_module/brush_test.cpp"
+						 "test/painter_module/palette_test.cpp"
 						 )
 
 list(APPEND TEST1_SOURCES "test/test1/main.cpp"
