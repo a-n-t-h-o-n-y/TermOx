@@ -43,7 +43,7 @@ void NCurses_event_dispatcher::post_user_input()
 		default: // Key_event
 			event = handle_keyboard_event(input);
 			object = handle_keyboard_object();
-			if (static_cast<Key_event*>(event.get())->key() == 9) {
+			if (static_cast<Key_event*>(event.get())->key_code() == Key::Tab) {
 				System::cycle_tab_focus();
 			}
 			break;

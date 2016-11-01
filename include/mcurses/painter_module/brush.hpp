@@ -5,6 +5,7 @@
 #include "attribute.hpp"
 #include "../signal_module/optional.hpp"
 
+#include <algorithm>
 #include <vector>
 #include <utility>
 
@@ -27,6 +28,12 @@ public:
 	std::vector<Attribute> attributes() const { return attributes_; }
 	optional<Color> background_color() const { return background_color_; }
 	optional<Color> foreground_color() const { return foreground_color_; }
+
+	friend bool operator==(const Brush& x, const Brush& y) {
+	return(std::is_permutation(std::begin(x.attributes_), std::end(x.attributes_), std::begin(y.attributes_), std::end(y.attributes_))
+		&& x.background_color_ == y.background_color_
+		&& x.foreground_color_ == y.foreground_color_);
+}
 
 private:
 	// Base Case

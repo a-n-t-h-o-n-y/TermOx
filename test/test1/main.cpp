@@ -20,7 +20,7 @@ public:
 	}
 	void virtual key_press_event(mcurses::Key_event& event) override
 	{
-		contents_.append(std::string(1, event.text()));
+		contents_.append(event.text());
 		Widget::key_press_event(event);
 		this->update();
 		return;
@@ -54,7 +54,7 @@ public:
 		this->update();
 	}
 private:
-	char text_ = ' ';
+	std::string text_; // change to glyph
 };
 
 class Click_paint_widget : public mcurses::Widget {

@@ -33,13 +33,13 @@ public:
 
 private:
 	Glyph north_ = "─";
-	Glyph south_ = "─";
-	Glyph east_ = "│";
-	Glyph west_ = "│";
-	Glyph north_west_ = "┌";
-	Glyph north_east_ = "┐";
-	Glyph south_west_ = "└";
-	Glyph south_east_ = "┘";
+	Glyph south_{"─"};
+	Glyph east_{"│"};
+	Glyph west_{"│"};
+	Glyph north_west_{"┌"};
+	Glyph north_east_{"┐"};
+	Glyph south_west_{"└"};
+	Glyph south_east_{"┘"};
 
 	Palette palette_;
 	bool enabled_ = false;

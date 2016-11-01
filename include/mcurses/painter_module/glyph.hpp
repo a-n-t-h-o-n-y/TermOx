@@ -4,9 +4,9 @@
 #include "color.hpp"
 #include "brush.hpp"
 
-#include <sstream>
 #include <stdexcept>
 #include <string>
+#include <utility>
 
 namespace mcurses {
 
@@ -19,28 +19,30 @@ class Glyph {
 public:
 	Glyph() = default;
 
-	template <typename T>
-	Glyph(const T& item) {
-		this->set_glyph(item);
+	template <typename Symbol, typename ... Attributes>
+	Glyph(Symbol symbol, Attributes... attrs)
+	:brush_{std::forward<Attributes>(attrs)...} {
+		this->set_symbol(std::forward<Symbol>(symbol));
 	}
 
-	template <typename T>
-	void set_glyph(const T& item) {
-		std::stringstream ss;
-		ss << item;
-		if(verify_length_(ss.str())) {
-			character_ = ss.str();
+	template <typename Symbol>
+	void set_symbol(Symbol symbol) {
+		if(verify_length_(std::string{symbol})) {
+			symbol_ = std::string{symbol};
 		} else {
-			throw Glyph_error("Printable size is greater than one character.");
+			throw Glyph_error("Print size is greater than one character.");
 		}
 	}
+	void set_brush(const Brush& brush) { brush_ = brush; }
 
-	std::string str() const { return character_; }
+	std::string symbol() const { return symbol_; }
+	Brush& brush() { return brush_; }
+	const Brush& brush() const { return brush_; }
 
 private:
-	bool verify_length_(const std::string& s);
+	static bool verify_length_(const std::string& s);
 
-	std::string character_ = " ";
+	std::string symbol_ = " ";
 	Brush brush_;
 };
 
