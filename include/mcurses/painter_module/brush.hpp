@@ -13,12 +13,21 @@ namespace mcurses {
 
 class Brush {
 public:
-	template <typename ... Args>
-	Brush(Args... args) {
-		this->brush_initializer(std::forward<Args>(args)...);
+	template <typename ... Attributes>
+	Brush(Attributes... attrs) {
+		this->add_attributes(std::forward<Attributes>(attrs)...);
 	}
 
-	void add_attribute(Attribute attr);
+	// Recursive Case
+	template <typename T, typename ... Rest>
+	void add_attributes(T t, Rest... rest) {
+		this->set_attr_(t);
+		this->add_attributes(rest...);
+	}
+
+	// Base Case
+	void add_attributes(){}
+
 	void remove_attribute(Attribute attr);
 	void clear_attributes() { attributes_.clear(); }
 
@@ -36,30 +45,21 @@ public:
 }
 
 private:
-	// Base Case
-	void brush_initializer() {
-	}
-
-	// Recursive Case
-	template <typename T, typename ... Rest>
-	void brush_initializer(T t, Rest... rest) {
-		this->do_init(t);
-		this->brush_initializer(rest...);
-	}
-
-	void do_init(detail::BackgroundColor bc) {
+	void set_attr_(detail::BackgroundColor bc) {
 		this->set_background(static_cast<Color>(bc));
 		return;
 	}
 
-	void do_init(detail::ForegroundColor fc) {
+	void set_attr_(detail::ForegroundColor fc) {
 		this->set_foreground(static_cast<Color>(fc));
 		return;
 	}
 
-	void do_init(Attribute attr) {
-		this->add_attribute(attr);
+	void set_attr_(Attribute attr) {
+		this->push_attribute(attr);
 	}
+
+	void push_attribute(Attribute attr);
 
 	std::vector<Attribute> attributes_;
 	optional<Color> background_color_;

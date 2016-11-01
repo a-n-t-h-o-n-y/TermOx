@@ -7,7 +7,7 @@
 #include <string>
 
 std::string foo(const mcurses::Glyph& g) {
-	return g.symbol();
+	return g.str();
 }
 
 TEST(GlyphTest, StringConstructor) {
@@ -48,9 +48,9 @@ TEST(GlyphTest, Symbol) {
 	mcurses::Glyph glf_2("ↈ");
 	mcurses::Glyph glf_3("6");
 
-	EXPECT_EQ("H", glf_1.symbol());
-	EXPECT_EQ("ↈ", glf_2.symbol());
-	EXPECT_EQ("6", glf_3.symbol());
+	EXPECT_EQ("H", glf_1.str());
+	EXPECT_EQ("ↈ", glf_2.str());
+	EXPECT_EQ("6", glf_3.str());
 }
 
 TEST(GlyphTest, SetSymbol) {
@@ -58,17 +58,17 @@ TEST(GlyphTest, SetSymbol) {
 	mcurses::Glyph g2 = {"ആ", mcurses::Attribute::Italic, mcurses::background(mcurses::Color::Green)};
 	mcurses::Glyph g3{"g", mcurses::foreground(mcurses::Color::Red), mcurses::Attribute::Dim};
 
-	EXPECT_EQ("ੴ", g1.symbol());
-	EXPECT_EQ("ആ", g2.symbol());
-	EXPECT_EQ("g", g3.symbol());
+	EXPECT_EQ("ੴ", g1.str());
+	EXPECT_EQ("ആ", g2.str());
+	EXPECT_EQ("g", g3.str());
 
 	g1.set_symbol(" ");
 	g2.set_symbol("ᆅ");
 	g3.set_symbol("ᛥ");
 
-	EXPECT_EQ(" ", g1.symbol());
-	EXPECT_EQ("ᆅ", g2.symbol());
-	EXPECT_EQ("ᛥ", g3.symbol());
+	EXPECT_EQ(" ", g1.str());
+	EXPECT_EQ("ᆅ", g2.str());
+	EXPECT_EQ("ᛥ", g3.str());
 }
 
 TEST(GlyphTest, SetBrush) {
@@ -79,7 +79,7 @@ TEST(GlyphTest, SetBrush) {
 	EXPECT_EQ((mcurses::Brush{mcurses::Attribute::Italic, mcurses::background(mcurses::Color::White)}), g2.brush());
 
 	g2.brush().set_foreground(mcurses::Color::Yellow);
-	g2.brush().add_attribute(mcurses::Attribute::Standout);
+	g2.brush().add_attributes(mcurses::Attribute::Standout);
 
 	EXPECT_EQ((mcurses::Brush{mcurses::Attribute::Standout, mcurses::Attribute::Italic, mcurses::background(mcurses::Color::White), mcurses::foreground(mcurses::Color::Yellow)}), g2.brush());
 }

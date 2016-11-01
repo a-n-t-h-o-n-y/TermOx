@@ -35,9 +35,14 @@ public:
 	}
 	void set_brush(const Brush& brush) { brush_ = brush; }
 
-	std::string symbol() const { return symbol_; }
+	std::string str() const { return symbol_; }
+	std::u32string str_u32() const;
 	Brush& brush() { return brush_; }
 	const Brush& brush() const { return brush_; }
+
+	friend bool operator==(const Glyph& x, const Glyph& y) {
+		return ((x.symbol_ == y.symbol_) && (x.brush_ == y.brush_));
+	}
 
 private:
 	static bool verify_length_(const std::string& s);
