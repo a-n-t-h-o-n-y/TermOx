@@ -30,7 +30,12 @@ TEST(ObjectTest, NameConstructor)
 
 class Test_widg : public mcurses::Widget {
 public:
-	Test_widg(){ this->set_geometry(0,0,10,20); }
+	Test_widg(){
+		this->set_x(0);
+		this->set_y(0);
+		this->geometry().set_width(10);
+		this->geometry().set_height(20);
+	}
 };
 
 TEST(ObjectTest, MakeChild)
@@ -38,7 +43,10 @@ TEST(ObjectTest, MakeChild)
 	mcurses::Object obj;
 	obj.set_name("An Object");
 	auto& child = obj.make_child<mcurses::Widget>();
-	child.set_geometry(0,0,5,5);
+	child.set_x(0);
+	child.set_y(0);
+	child.geometry().set_width(5);
+	child.geometry().set_height(5);
 	EXPECT_TRUE(obj.make_child<Test_widg>().has_coordinates(7, 12));
 
 	EXPECT_EQ(2, obj.children().size());
@@ -48,9 +56,15 @@ TEST(ObjectTest, Children)
 {
 	mcurses::Object obj;
 	auto& child1 = obj.make_child<mcurses::Widget>();
-	child1.set_geometry(4,5,10,30);
+	child1.set_x(4);
+	child1.set_y(5);
+	child1.geometry().set_width(10);
+	child1.geometry().set_height(30);
 	auto& child2 = obj.make_child<Test_widg>();
-	child2.set_geometry(30,30,15,20);
+	child2.set_x(30);
+	child2.set_y(30);
+	child2.geometry().set_width(15);
+	child2.geometry().set_height(20);
 	obj.make_child<mcurses::Event_loop>();
 	auto children = obj.children();
 	ASSERT_EQ(3, children.size());
@@ -65,7 +79,10 @@ TEST(ObjectTest, AddChild)
 	mcurses::Object obj;
 	auto c1 = std::make_unique<mcurses::Widget>();
 	c1->set_name("Widget 1");
-	c1->set_geometry(0,0,4,5);
+	c1->set_x(0);
+	c1->set_y(0);
+	c1->geometry().set_width(4);
+	c1->geometry().set_height(5);
 	auto c2 = std::make_unique<Test_widg>();
 	c2->set_name("Widget 2");
 
@@ -86,16 +103,25 @@ TEST(ObjectTest, FindChild)
 	obj.set_name("Parent");
 	mcurses::Widget& c1 = obj.make_child<mcurses::Widget>();
 	c1.set_name("Child 1");
-	c1.set_geometry(0,0,50,50);
+	c1.set_x(0);
+	c1.set_y(0);
+	c1.geometry().set_width(50);
+	c1.geometry().set_height(50);
 	mcurses::Object& c2 = obj.make_child<mcurses::Object>();
 	c2.set_name("Child 2");
 
 	mcurses::Widget& c1_c1 = c1.make_child<mcurses::Widget>();
 	c1_c1.set_name("Child 1 - Child 1");
-	c1_c1.set_geometry(0,0,7,5);
+	c1_c1.set_x(0);
+	c1_c1.set_y(0);
+	c1_c1.geometry().set_width(7);
+	c1_c1.geometry().set_height(5);
 	mcurses::Widget& c1_c2 = c1.make_child<mcurses::Widget>();
 	c1_c2.set_name("Child 1 - Child 2");
-	c1_c2.set_geometry(10,10,3,2);
+	c1_c2.set_x(10);
+	c1_c2.set_y(10);
+	c1_c2.geometry().set_width(3);
+	c1_c2.geometry().set_height(2);
 	mcurses::Object& c1_c3 = c1.make_child<mcurses::Event_loop>();
 	c1_c3.set_name("Child 1 - Child 3");
 
@@ -107,7 +133,10 @@ TEST(ObjectTest, FindChild)
 
 	mcurses::Widget& c2_c1 = c2.make_child<mcurses::Widget>();
 	c2_c1.set_name("Child 2 - Child 1");
-	c2_c1.set_geometry(5,4,3,2);
+	c2_c1.set_x(5);
+	c2_c1.set_y(4);
+	c2_c1.geometry().set_width(3);
+	c2_c1.geometry().set_height(2);
 	mcurses::Object& c2_c1_c1 = c2_c1.make_child<mcurses::Object>();
 	c2_c1_c1.set_name("Child 2 - Child 1 - Child 1");
 
@@ -135,16 +164,25 @@ TEST(ObjectTest, ConstFindChild)
 	obj.set_name("Parent");
 	mcurses::Widget& c1 = obj.make_child<mcurses::Widget>();
 	c1.set_name("Child 1");
-	c1.set_geometry(0,0,50,50);
+	c1.set_x(0);
+	c1.set_y(0);
+	c1.geometry().set_width(50);
+	c1.geometry().set_height(50);
 	mcurses::Object& c2 = obj.make_child<mcurses::Object>();
 	c2.set_name("Child 2");
 
 	mcurses::Widget& c1_c1 = c1.make_child<mcurses::Widget>();
 	c1_c1.set_name("Child 1 - Child 1");
-	c1_c1.set_geometry(0,0,7,5);
+	c1_c1.set_x(0);
+	c1_c1.set_y(0);
+	c1_c1.geometry().set_width(7);
+	c1_c1.geometry().set_height(5);
 	mcurses::Widget& c1_c2 = c1.make_child<mcurses::Widget>();
 	c1_c2.set_name("Child 1 - Child 2");
-	c1_c2.set_geometry(10,10,3,2);
+	c1_c2.set_x(10);
+	c1_c2.set_y(10);
+	c1_c2.geometry().set_width(3);
+	c1_c2.geometry().set_height(2);
 	mcurses::Object& c1_c3 = c1.make_child<mcurses::Event_loop>();
 	c1_c3.set_name("Child 1 - Child 3");
 
@@ -156,7 +194,10 @@ TEST(ObjectTest, ConstFindChild)
 
 	mcurses::Widget& c2_c1 = c2.make_child<mcurses::Widget>();
 	c2_c1.set_name("Child 2 - Child 1");
-	c2_c1.set_geometry(5,4,3,2);
+	c2_c1.set_x(5);
+	c2_c1.set_y(4);
+	c2_c1.geometry().set_width(3);
+	c2_c1.geometry().set_height(2);
 	mcurses::Object& c2_c1_c1 = c2_c1.make_child<mcurses::Object>();
 	c2_c1_c1.set_name("Child 2 - Child 1 - Child 1");
 
@@ -184,7 +225,12 @@ int glob_test_int{0};
 
 class Event_filter_test : public mcurses::Widget {
 public:
-	Event_filter_test(){ this->set_geometry(0,0,5,3); }
+	Event_filter_test(){
+		this->set_x(0);
+		this->set_y(0);
+		this->geometry().set_width(5);
+		this->geometry().set_height(3);
+	}
 	virtual bool event_filter(mcurses::Object* watched, mcurses::Event& event) override {
 		++glob_test_int;
 		return true;
@@ -197,7 +243,10 @@ TEST(ObjectTest, InstallEventFilter)
 	test_obj.install_event_filter(&test_obj);	// Does nothing
 
 	mcurses::Widget widg;
-	widg.set_geometry(0,0,4,3);
+	widg.set_x(0);
+	widg.set_y(0);
+	widg.geometry().set_width(4);
+	widg.geometry().set_height(3);
 	widg.install_event_filter(&test_obj); // test_obj now is notified of events send to widg
 
 	mcurses::Child_event ce(mcurses::Event::Type::ChildAdded, nullptr);
@@ -211,7 +260,10 @@ TEST(ObjectTest, RemoveEventFilter)
 {
 	Event_filter_test test_obj;
 	mcurses::Widget widg;
-	widg.set_geometry(0,0,4,3);
+	widg.set_x(0);
+	widg.set_y(0);
+	widg.geometry().set_width(4);
+	widg.geometry().set_height(3);
 	widg.install_event_filter(&test_obj);
 
 	mcurses::Child_event ce(mcurses::Event::Type::ChildAdded, nullptr);

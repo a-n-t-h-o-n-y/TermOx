@@ -43,7 +43,7 @@ public:
 		mcurses::Painter p{this};
 		p.move(1,1);
 		p.put("Normal Widget");
-		p.move(this->width()/2,this->height()/2);
+		p.move(this->geometry().width()/2,this->geometry().height()/2);
 		p.put(text_);
 		Widget::paint_event(event);
 		return;

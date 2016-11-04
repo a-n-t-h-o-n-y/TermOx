@@ -60,30 +60,54 @@ Widget::has_coordinates(unsigned glob_x, unsigned glob_y)
 	return false;
 }
 
-void Widget::set_geometry(unsigned x, unsigned y, unsigned width, unsigned height)
-{
-	this->set_x(x);
-	this->set_y(y);
-	this->set_width(width);
-	this->set_height(height);
+void Widget::enable_border() {
+	this->border_.enable();
+	unsigned offset = this->border_.thickness();
+	this->geometry().set_active_region(offset, offset, offset, offset);
+	this->update();
 	return;
 }
 
-void Widget::set_fixed_width(unsigned width)
-{
-	this->set_min_width(width);
-	this->set_max_width(width);
-	this->Layout_param_changed(); 
+void Widget::disable_border() {
+	this->border_.disable();
+	this->geometry().set_active_region();
+	this->update();
 	return;
 }
 
-void Widget::set_fixed_height(unsigned height)
-{
-	this->set_min_height(height);
-	this->set_max_height(height);
-	this->Layout_param_changed(); 
-	return;
+void Widget::set_geometry(const Geometry& g) {
+	geometry_.set_widget(nullptr); // prob not needed
+	geometry_ = g;
+	geometry_.set_widget(dynamic_cast<Widget*>(this->parent()));
+	this->update();
 }
+
+// void Widget::set_geometry(unsigned x, unsigned y, unsigned width, unsigned height)
+// {
+// 	this->set_x(x);
+// 	this->set_y(y);
+// 	this->set_width(width);
+// 	this->set_height(height);
+// 	return;
+// }
+
+// remove this --------------------------------------------------------
+// void Widget::set_fixed_width(unsigned width)
+// {
+// 	this->set_min_width(width);
+// 	this->set_max_width(width);
+// 	this->Layout_param_changed(); 
+// 	return;
+// }
+
+// void Widget::set_fixed_height(unsigned height)
+// {
+// 	this->set_min_height(height);
+// 	this->set_max_height(height);
+// 	this->Layout_param_changed(); 
+// 	return;
+// }
+// to this^
 
 void
 Widget::update()
@@ -215,8 +239,8 @@ void Widget::move_event(Move_event& event)
 void Widget::resize_event(Resize_event& event)
 {
 	this->erase_widget_screen();
-	this->set_width(event.new_width());
-	this->set_height(event.new_height());
+	this->geometry().set_width(event.new_width());
+	this->geometry().set_height(event.new_height());
 	
 	// Do you need to tell the parent if the size of the widget it holds shrinks? layouts take care of this already..
 	this->update();
@@ -228,7 +252,8 @@ void Widget::paint_event(Paint_event& event)
 {
 	// Post paint event to each child
 	if(border_.is_enabled()) {
-		border_.draw();
+		Painter p{this};
+		p.border(border_);
 	}
 	for(Object* c : this->children()) {
 		Widget* child = dynamic_cast<Widget*>(c);
@@ -244,7 +269,7 @@ void Widget::erase_widget_screen()
 {
 	Painter p{this};
 	if(this->brush().background_color()) {
-		p.fill(0, 0, this->width(), this->height(), *this->brush().background_color());
+		p.fill(0, 0, this->geometry().width(), this->geometry().height(), *this->brush().background_color());
 	}
 	return;
 }
@@ -260,7 +285,7 @@ void Widget::paint_disabled_widget()
 	if(parent && parent->brush().background_color()) {
 		background = *parent->brush().background_color();
 	}
-	p.fill(0, 0, this->width(), this->height(), background);
+	p.fill(0, 0, this->geometry().width(), this->geometry().height(), background);
 }
 
 void Widget::mouse_press_event(Mouse_event& event)

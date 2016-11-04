@@ -68,5 +68,4 @@ DawnBringer_palette::DawnBringer_palette() {
 	this->set_rgb(Color::White, 222, 238, 214);
 }
 
-
 } // namespace mcurses

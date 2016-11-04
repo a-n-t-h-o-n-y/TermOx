@@ -4,11 +4,31 @@
 
 #include <ncurses.h>
 
+#include <cstdlib>
 #include <string>
 #include <vector>
+#include <stdexcept>
 
 namespace mcurses {
 namespace detail {
+
+NCurses_paint_engine::NCurses_paint_engine() {
+	setenv("TERM", "xterm-256color", 1);
+	::setlocale(LC_ALL, "en_US.UTF-8");
+	::initscr();
+	::cbreak(); // change to raw() once you can handle exit signals on your own.
+	::noecho();
+	::keypad(::stdscr, true);
+	::mousemask(ALL_MOUSE_EVENTS, nullptr);
+	::mouseinterval(0);
+	::curs_set(0); // invisible cursor
+	::start_color();
+
+	this->initialize_color_pairs();
+}
+NCurses_paint_engine::~NCurses_paint_engine() {
+	::endwin();
+}
 
 void
 NCurses_paint_engine::refresh()
@@ -67,7 +87,7 @@ unsigned NCurses_paint_engine::screen_height()
 
 void
 NCurses_paint_engine::set_rgb(Color c, int r, int g, int b) {
-	auto scale = [](int i){ return (i/255) * 1000; };
+	auto scale = [](int i){ return (static_cast<double>(i)/255) * 1000; };
 	int r_ = scale(r);
 	int g_ = scale(g);
 	int b_ = scale(b);
@@ -134,12 +154,14 @@ NCurses_paint_engine::clear_attributes() {
 void
 NCurses_paint_engine::set_background_color(Color c) {
 	::wattron(::stdscr, COLOR_PAIR(this->find_pair(this->current_foreground(), c)));
+	// ::wattron(::stdscr, COLOR_PAIR(15));
 	return;
 }
 
 void
 NCurses_paint_engine::set_foreground_color(Color c) {
 	::wattron(::stdscr, COLOR_PAIR(this->find_pair(c, this->current_background())));
+	// ::wattron(::stdscr, COLOR_PAIR(15));
 	return;
 }
 
@@ -147,14 +169,24 @@ Color NCurses_paint_engine::current_foreground() {
 	int attrs;
 	int pair;
 	wattr_get(::stdscr, &attrs, &pair, nullptr);
-	return static_cast<Color>(pair/16 + 240);
+	if(pair == 0) {
+		return Color::White;
+	} else if(pair == 15) {
+		return Color::Black;
+	} else {
+		return static_cast<Color>(pair%16 + 240);
+	}
 }
 
 Color NCurses_paint_engine::current_background() {
 	int attrs;
 	int pair;
 	wattr_get(::stdscr, &attrs, &pair, nullptr);
-	return static_cast<Color>(pair%16 + 240);
+	if(pair == 15) {
+		return Color::White;
+	} else {
+		return static_cast<Color>(pair/16 + 240);
+	}
 }
 
 void
@@ -163,7 +195,13 @@ NCurses_paint_engine::initialize_color_pairs() const {
 	int index{0};
 	for(int i{0}; i<16; ++i) {
 		for(int j{0}; j<16; ++j) {
-			::init_pair(index++, int_colors[i], int_colors[j]);
+			if(i == 0 && j == 0) {
+				::init_pair(index++, int_colors[15], int_colors[0]);
+			} else if(i == 0 && j == 15) {
+				::init_pair(index++, int_colors[0], int_colors[15]);
+			} else {
+				::init_pair(index++, int_colors[i], int_colors[j]);
+			}
 		}
 	}
 }

@@ -32,4 +32,8 @@ Event::Type Event::type() const
 	return type_;
 }
 
+bool operator==(const Event& x, const Event& y) {
+	return x.type() == y.type();
+}
+
 } // namespace mcurses

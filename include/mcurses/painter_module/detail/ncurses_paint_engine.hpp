@@ -12,7 +12,8 @@ namespace detail {
 
 class NCurses_paint_engine : public Paint_engine {
 public:
-	NCurses_paint_engine() { this->initialize_color_pairs(); }
+	NCurses_paint_engine();
+	virtual ~NCurses_paint_engine();
 	virtual void refresh() override;
 	virtual void move(unsigned x, unsigned y) override;
 	virtual void put_char(char c) override;

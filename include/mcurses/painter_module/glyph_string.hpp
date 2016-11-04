@@ -14,6 +14,8 @@ namespace mcurses {
 
 class Glyph_string : private std::vector<Glyph> {
 public:
+	Glyph_string() = default;
+
 	template <typename ... Attributes>
 	Glyph_string(const std::string& symbols, Attributes... attrs):
 	vector<Glyph>::vector() {
@@ -148,13 +150,9 @@ public:
 	using std::vector<Glyph>::swap;
 };
 
-bool operator==(const Glyph_string& x, const Glyph_string& y) {
-	return std::equal(std::begin(x), std::end(x), std::begin(y), std::end(y));
-}
+bool operator==(const Glyph_string& x, const Glyph_string& y);
 
-bool operator!=(const Glyph_string& x, const Glyph_string& y) {
-	return !(x == y);
-}
+bool operator!=(const Glyph_string& x, const Glyph_string& y);
 
 } // namespace mcurses
 #endif // GLYPH_STRING_HPP

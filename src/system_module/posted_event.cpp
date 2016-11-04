@@ -29,6 +29,9 @@ bool operator>(const Posted_event& pe, int priority)
 	return priority < pe;
 }
 
+bool operator==(const Posted_event& x, const Posted_event& y) {
+	return (x.reciever() == y.reciever()) && (x.event() == y.event());
+}
 
 } // namespace detail
 } // namespace mcurses

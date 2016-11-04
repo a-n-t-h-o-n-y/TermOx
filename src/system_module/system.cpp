@@ -11,7 +11,7 @@
 #include <mcurses/painter_module/palette.hpp>
 #include <mcurses/painter_module/color.hpp>
 
-#include <ncurses.h>
+// #include <ncurses.h>
 
 #include <algorithm>
 #include <iterator>
@@ -249,24 +249,23 @@ System::System(std::unique_ptr<Paint_engine> engine)
 {
 	System::set_paint_engine(std::move(engine));
 
-	// Theses should be passed of to a single static Painter function(s) that generalize for other systems, not just ncurses.
-	// Painter::initialize();
-	::setlocale(LC_ALL, "en_US.UTF-8");
-	::initscr();
-	::cbreak(); // change to raw() once you can handle exit signals on your own.
-	::noecho();
-	::keypad(::stdscr, true);
-	::mousemask(ALL_MOUSE_EVENTS, nullptr);
-	::mouseinterval(0);
-	::curs_set(0); // invisible cursor
-	::start_color();
+	// Goes in the paint engine constructor
+	// ::setlocale(LC_ALL, "en_US.UTF-8");
+	// ::initscr();
+	// ::cbreak(); // change to raw() once you can handle exit signals on your own.
+	// ::noecho();
+	// ::keypad(::stdscr, true);
+	// ::mousemask(ALL_MOUSE_EVENTS, nullptr);
+	// ::mouseinterval(0);
+	// ::curs_set(0); // invisible cursor
+	// ::start_color();
 
 	System::set_palette(std::make_unique<DawnBringer_palette>());
 }
 
 System::~System()
 {
-	::endwin();
+	// ::endwin();
 }
 
 void

@@ -7,8 +7,8 @@ namespace mcurses {
 void Horizontal_layout::update_geometry()
 {
 	unsigned n = this->children().size();
-	unsigned h = this->height();
-	unsigned w = this->width()/ n;
+	unsigned h = this->geometry().height();
+	unsigned w = this->geometry().width()/ n;
 	unsigned x{0};
 	unsigned y{0};
 

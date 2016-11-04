@@ -41,6 +41,8 @@ list(APPEND PAINTER_MODULE_SOURCES  "src/painter_module/ncurses_paint_engine.cpp
 									"src/painter_module/palette.cpp"
 									"src/painter_module/glyph.cpp"
 									"src/painter_module/brush.cpp"
+									"src/painter_module/geometry.cpp"
+									"src/painter_module/glyph_string.cpp"
 									)
 list(APPEND SIGNAL_MODULE_SOURCES 	"src/signal_module/slot_base.cpp"
 									"src/signal_module/connection.cpp"
@@ -84,6 +86,9 @@ list(APPEND TEST_SOURCES "test/signal_module/none_test.cpp"
 list(APPEND TEST1_SOURCES "test/test1/main.cpp"
 						 )
 
+list(APPEND TEST2_SOURCES "test/test2/main.cpp"
+						 )
+
 # Create a Static Library for MCurses
 add_library(mcurses_lib STATIC ${SYSTEM_MODULE_SOURCES}
 							   ${PAINTER_MODULE_SOURCES}
@@ -94,10 +99,12 @@ add_library(mcurses_lib STATIC ${SYSTEM_MODULE_SOURCES}
 # Create Executables with the Sources
 add_executable(tests ${TEST_SOURCES})
 add_executable(test1 ${TEST1_SOURCES})
+add_executable(test2 ${TEST2_SOURCES})
 
 # Link libraries to executables
 target_link_libraries(tests mcurses_lib gtest gtest_main ncurses)
 target_link_libraries(test1 mcurses_lib ncurses)
+target_link_libraries(test2 mcurses_lib ncurses)
 
 # Doxygen Target - Doxyfile in project/doc - make doc
 find_package(Doxygen)

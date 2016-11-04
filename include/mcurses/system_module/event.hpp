@@ -129,9 +129,10 @@ public:
 
 protected:
 	Type type_;
-	bool accepted_ = true;
-	
+	bool accepted_ = true;	
 };
+
+bool operator==(const Event& x, const Event& y);
 
 } // namespace mcurses
 #endif // EVENT_HPP
