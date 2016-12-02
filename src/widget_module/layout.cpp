@@ -25,14 +25,12 @@ void Layout::update()
 {
 	this->update_geometry();
 	Widget::update();
-	return;
 }
 
 void Layout::child_event(Child_event& event)
 {
 	this->update();
 	event.accept();
-	return;
 }
 
 } // namespace mcurses

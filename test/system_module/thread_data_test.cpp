@@ -1,8 +1,10 @@
 #include <mcurses/system_module/detail/thread_data.hpp>
+#include <mcurses/system_module/system.hpp>
 #include <gtest/gtest.h>
 
 TEST(ThreadDataTest, Default)
 {
+	mcurses::System system;
 	auto& data = mcurses::detail::Thread_data::current();
 	EXPECT_TRUE(data.can_wait);
 	EXPECT_FALSE(data.quit_now);

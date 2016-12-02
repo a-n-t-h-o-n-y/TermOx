@@ -16,6 +16,7 @@ TEST(SystemTest, DefaultConstructor)
 
 TEST(SystemTest, PostEvent)
 {
+	// mcurses::System system;
 	// mcurses::Object obj;
 	// mcurses::System::post_event(&obj, std::make_unique<mcurses::Event>(mcurses::Event::Type::None));
 	// ^ This screws up the next test because of global objects.
@@ -23,6 +24,7 @@ TEST(SystemTest, PostEvent)
 
 TEST(SystemTest, RemovePostedEvent)
 {
+	mcurses::System system;
 	mcurses::detail::Posted_event_queue& queue = mcurses::detail::Thread_data::current().event_queue;
 	EXPECT_TRUE(queue.empty());
 
@@ -72,5 +74,4 @@ TEST(SystemTest, RemovePostedEvent)
 	EXPECT_EQ(3, queue.size());
 	mcurses::System::remove_posted_event(ptr6);
 	EXPECT_EQ(2, queue.size());
-
 }

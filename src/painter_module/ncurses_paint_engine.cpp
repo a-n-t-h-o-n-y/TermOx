@@ -24,39 +24,19 @@ NCurses_paint_engine::NCurses_paint_engine() {
 	::curs_set(0); // invisible cursor
 	::start_color();
 
+	this->buffer_.resize(this->screen_width(), this->screen_height());
 	this->initialize_color_pairs();
 }
 NCurses_paint_engine::~NCurses_paint_engine() {
 	::endwin();
 }
 
-void
-NCurses_paint_engine::refresh()
-{
-	::wrefresh(::stdscr);
-	return;
-}
-
-void
-NCurses_paint_engine::move(unsigned x, unsigned y)
-{
-	::wmove(::stdscr, y, x);
-	return;
-}
-
-void
-NCurses_paint_engine::put_char(char c)
-{
-	::waddch(::stdscr, c);
-	return;
-}
-
-void
-NCurses_paint_engine::put_string(const std::string& s)
-{
-	::waddstr(::stdscr, s.c_str());
-	return;
-}
+// void
+// NCurses_paint_engine::put_char(char c)
+// {
+// 	::waddch(::stdscr, c);
+// 	return;
+// }
 
 void
 NCurses_paint_engine::show_cursor()
@@ -75,6 +55,7 @@ unsigned NCurses_paint_engine::screen_width()
 {
 	int x{0}, y{0};
 	getmaxyx(stdscr, y, x);
+	buffer_.resize(x,y); // not the best, but it works
 	return x;
 }
 
@@ -82,6 +63,7 @@ unsigned NCurses_paint_engine::screen_height()
 {
 	int x{0}, y{0};
 	getmaxyx(stdscr, y, x);
+	buffer_.resize(x,y); // not the best, but it works
 	return y;
 }
 
@@ -133,21 +115,35 @@ NCurses_paint_engine::attr_to_int(Attribute attr) {
 	return a;
 }
 
+// void
+// NCurses_paint_engine::unset_attribute(Attribute attr) {
+// 	::wattroff(::stdscr, attr_to_int(attr));
+// 	return;
+// }
+
 void
-NCurses_paint_engine::set_attribute(Attribute attr) {
-	::wattron(::stdscr, attr_to_int(attr));
+NCurses_paint_engine::move(unsigned x, unsigned y)
+{
+	::wmove(::stdscr, y, x);
 	return;
 }
 
 void
-NCurses_paint_engine::unset_attribute(Attribute attr) {
-	::wattroff(::stdscr, attr_to_int(attr));
+NCurses_paint_engine::put_string(const std::string& s)
+{
+	::waddstr(::stdscr, s.c_str());
 	return;
 }
 
 void
 NCurses_paint_engine::clear_attributes() {
 	::wattron(::stdscr, A_NORMAL);
+	return;
+}
+
+void
+NCurses_paint_engine::set_attribute(Attribute attr) {
+	::wattron(::stdscr, attr_to_int(attr));
 	return;
 }
 
@@ -165,29 +161,50 @@ NCurses_paint_engine::set_foreground_color(Color c) {
 	return;
 }
 
-Color NCurses_paint_engine::current_foreground() {
-	int attrs;
-	int pair;
-	wattr_get(::stdscr, &attrs, &pair, nullptr);
-	if(pair == 0) {
-		return Color::White;
-	} else if(pair == 15) {
-		return Color::Black;
-	} else {
-		return static_cast<Color>(pair%16 + 240);
-	}
+void
+NCurses_paint_engine::refresh()
+{
+	::wrefresh(::stdscr);
+	return;
 }
 
 Color NCurses_paint_engine::current_background() {
-	int attrs;
-	int pair;
-	wattr_get(::stdscr, &attrs, &pair, nullptr);
-	if(pair == 15) {
-		return Color::White;
-	} else {
-		return static_cast<Color>(pair/16 + 240);
-	}
+	int y{0};
+	int x{0};
+	getyx(::stdscr, y, x);
+	return *buffer_.at(x,y).brush().background_color();
 }
+
+Color NCurses_paint_engine::current_foreground() {
+	int y{0};
+	int x{0};
+	getyx(::stdscr, y, x);
+	return *buffer_.at(x,y).brush().foreground_color();
+}
+
+// Color NCurses_paint_engine::current_foreground() {
+// 	int attrs;
+// 	int pair;
+// 	wattr_get(::stdscr, &attrs, &pair, nullptr);
+// 	if(pair == 0) {
+// 		return Color::White;
+// 	} else if(pair == 15) {
+// 		return Color::Black;
+// 	} else {
+// 		return static_cast<Color>(pair%16 + 240);
+// 	}
+// }
+
+// Color NCurses_paint_engine::current_background() {
+// 	int attrs;
+// 	int pair;
+// 	wattr_get(::stdscr, &attrs, &pair, nullptr);
+// 	if(pair == 15) {
+// 		return Color::White;
+// 	} else {
+// 		return static_cast<Color>(pair/16 + 240);
+// 	}
+// }
 
 void
 NCurses_paint_engine::initialize_color_pairs() const {

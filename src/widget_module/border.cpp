@@ -16,7 +16,7 @@ namespace mcurses {
 // 	p.line(widget_->geometry().width()-1, 1, widget_->geometry().width()-1, widget_->geometry().height()-2, east_.str());
 
 // 	// West
-// 	p.line(0, 1, 0, widget_->geometry().height()-2, west_.str());	
+// 	p.line(0, 1, 0, widget_->geometry().height()-2, west_.str());
 
 // 	// North - West
 // 	p.move(0, 0);
@@ -43,7 +43,6 @@ void Border::set_walls(const Glyph& horizontals, const Glyph& verticals)
 	south_ = horizontals;
 	east_ = verticals;
 	west_ = verticals;
-	return;
 }
 
 } // namespace mcurses
