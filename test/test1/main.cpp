@@ -1,53 +1,104 @@
 #include <mcurses/mcurses.hpp>
 
-#include <sstream>
+#include <string>
+
+class Text_box : public mcurses::Widget {
+public:
+	Text_box()
+	{
+		this->set_focus_policy(mcurses::Widget::Focus_policy::StrongFocus);
+		this->set_cursor(true);
+	}
+	void virtual paint_event(mcurses::Paint_event& event) override
+	{
+		this->erase_widget_screen();
+		mcurses::Painter p{this};
+		p.move(0,0);
+		p.put(contents_);
+		Widget::paint_event(event);
+		return;
+	}
+	void virtual key_press_event(mcurses::Key_event& event) override
+	{
+		contents_.append(event.text());
+		Widget::key_press_event(event);
+		this->update();
+		return;
+	}
+private:
+	std::string contents_;
+};
+
+class Normal_widget : public mcurses::Widget {
+public:
+	Normal_widget()
+	{
+		this->set_focus_policy(mcurses::Widget::Focus_policy::StrongFocus);
+		this->set_cursor(true);
+		this->enable_border();
+	}
+	void paint_event(mcurses::Paint_event& event) override
+	{
+		this->erase_widget_screen();
+		mcurses::Painter p{this};
+		p.move(1,1);
+		p.put("Normal Widget");
+		p.move(this->geometry().width()/2,this->geometry().height()/2);
+		p.put(text_);
+		Widget::paint_event(event);
+		return;
+	}
+	void key_press_event(mcurses::Key_event& event) override
+	{
+		text_ = event.text();
+		this->update();
+	}
+private:
+	std::string text_; // change to glyph
+};
 
 class Click_paint_widget : public mcurses::Widget {
 public:
-	Click_paint_widget(unsigned x, unsigned y, unsigned width, unsigned height)
-	:Widget(x,y,width,height)
+	Click_paint_widget()
 	{
-		show_cursor_ = false;
+		this->set_cursor(false);
+		this->enable_border();
 	}
 
-	void repaint_event(const mcurses::Paint_event& event)
+	void paint_event(mcurses::Paint_event& event) override
 	{
-		// mcurses::Painter p;
-		// p.touch(event->region());
-		// return;
+		mcurses::Painter p{this};
+		p.move(1,1);
+		p.put("Click Widget");
+		Widget::paint_event(event);
+		return;
 	}
 
-	void mouse_press_event(const mcurses::Mouse_event& event)
+	void mouse_press_event(mcurses::Mouse_event& event) override
 	{
 		mcurses::Painter p{this};
 		p.move(event.local_x(), event.local_y());
-		// std::stringstream ss;
-		// ss << "x:" << mcurses::System::max_width() << ",y:" << mcurses::System::max_height();
-		// p.put(ss.str());
-		p.put("Ѩ҉ξᾨ");
+		p.put("X");
+		Widget::mouse_press_event(event);
 	}
+};
 
-	bool event(const mcurses::Event& event) override
+class Main_widget : public mcurses::Horizontal_layout {
+public:
+	Main_widget()
 	{
-		if(event.type() == mcurses::Event::Type::MouseButtonPress)
-		{
-			this->mouse_press_event(static_cast<const mcurses::Mouse_event&>(event));
-		}
-		if(event.type() == mcurses::Event::Type::Paint)
-		{
-			this->repaint_event(static_cast<const mcurses::Paint_event&>(event));
-		}
-		return true;
+		this->make_child<Click_paint_widget>();
+		this->make_child<Normal_widget>();
+		this->make_child<Click_paint_widget>();
+		this->make_child<Text_box>();
 	}
-private:
-
 };
 
 int main()
 {
 	mcurses::System system;
 
-	Click_paint_widget widg(0, 0, mcurses::System::max_width()/2, mcurses::System::max_height()/2);
+	Main_widget widg;
 
 	system.set_head(&widg);
 

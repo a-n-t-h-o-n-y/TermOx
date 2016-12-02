@@ -1,13 +1,16 @@
 cmake_minimum_required (VERSION 3.6)
 project (MCurses)
 
-# Run these command in shell before cmake to use Clang Static Analyzer
-# This need only be run once.
-#__________________________________________________________________________
-# export CCC_CXX=clang++
-# cmake -DCMAKE_CXX_COMPILER=/usr/lib/clang/c++-analyzer -DCMAKE_LINKER=clang++ ..
-#__________________________________________________________________________
-# The path to c++-analyzer may be different on your machine.
+# Uncomment the next three lines to compile with clang static analyzer
+# set(CCC_CXX clang++)
+# set(CMAKE_CXX_COMPILER /usr/lib/clang/c++-analyzer)
+# set(CMAKE_LINKER clang++)
+
+# Build System Information For Clang-Tidy
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+add_custom_target(compile_commands ALL
+	COMMAND [ -f ${CMAKE_SOURCE_DIR}/build/compile_commands.json ] && mv ${CMAKE_SOURCE_DIR}/build/compile_commands.json
+		${CMAKE_SOURCE_DIR}/compile_commands.json || :)
 
 # Set Output Directories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
@@ -31,11 +34,19 @@ list(APPEND SYSTEM_MODULE_SOURCES 	"src/system_module/thread_data.cpp"
 									"src/system_module/event.cpp"
 									"src/system_module/abstract_event_dispatcher.cpp"
 									"src/system_module/object.cpp"
+									"src/system_module/move_event.cpp"
+									"src/system_module/resize_event.cpp"
+									"src/system_module/child_event.cpp"
 								 	)
-list(APPEND PAINTER_MODULE_SOURCES 	"src/painter_module/canvas.cpp"
+list(APPEND PAINTER_MODULE_SOURCES  "src/painter_module/ncurses_paint_engine.cpp"
 									"src/painter_module/painter.cpp"
 									"src/painter_module/paint_engine.cpp"
-									"src/painter_module/ncurses_paint_engine.cpp"
+									"src/painter_module/palette.cpp"
+									"src/painter_module/glyph.cpp"
+									"src/painter_module/brush.cpp"
+									"src/painter_module/geometry.cpp"
+									"src/painter_module/glyph_string.cpp"
+									"src/painter_module/paint_buffer.cpp"
 									)
 list(APPEND SIGNAL_MODULE_SOURCES 	"src/signal_module/slot_base.cpp"
 									"src/signal_module/connection.cpp"
@@ -43,6 +54,8 @@ list(APPEND SIGNAL_MODULE_SOURCES 	"src/signal_module/slot_base.cpp"
 									)
 list(APPEND WIDGET_MODULE_SOURCES 	"src/widget_module/widget.cpp"
 									"src/widget_module/layout.cpp"
+									"src/widget_module/horizontal_layout.cpp"
+									"src/widget_module/border.cpp"
 									)
 
 list(APPEND TEST_SOURCES "test/signal_module/none_test.cpp"
@@ -65,9 +78,20 @@ list(APPEND TEST_SOURCES "test/signal_module/none_test.cpp"
 						 "test/system_module/posted_event_queue_test.cpp"
 						 "test/system_module/posted_event_test.cpp"
 						 "test/system_module/ncurses_event_dispatcher_test.cpp"
+
+						 "test/widget_module/widget_test.cpp"
+
+						 "test/painter_module/glyph_test.cpp"
+						 "test/painter_module/glyph_string_test.cpp"
+						 "test/painter_module/brush_test.cpp"
+						 "test/painter_module/palette_test.cpp"
+						 "test/painter_module/glyph_matrix_test.cpp"
 						 )
 
 list(APPEND TEST1_SOURCES "test/test1/main.cpp"
+						 )
+
+list(APPEND TEST2_SOURCES "test/test2/main.cpp"
 						 )
 
 # Create a Static Library for MCurses
@@ -80,10 +104,12 @@ add_library(mcurses_lib STATIC ${SYSTEM_MODULE_SOURCES}
 # Create Executables with the Sources
 add_executable(tests ${TEST_SOURCES})
 add_executable(test1 ${TEST1_SOURCES})
+add_executable(test2 ${TEST2_SOURCES})
 
 # Link libraries to executables
 target_link_libraries(tests mcurses_lib gtest gtest_main ncurses)
 target_link_libraries(test1 mcurses_lib ncurses)
+target_link_libraries(test2 mcurses_lib ncurses)
 
 # Doxygen Target - Doxyfile in project/doc - make doc
 find_package(Doxygen)

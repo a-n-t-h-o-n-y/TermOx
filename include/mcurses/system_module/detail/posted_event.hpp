@@ -6,10 +6,8 @@
 
 #include <memory>
 
-namespace mcurses
-{
-namespace detail
-{
+namespace mcurses {
+namespace detail {
 
 class Posted_event {
 public:
@@ -20,7 +18,9 @@ public:
 	Posted_event& operator=(Posted_event&&) = default;
 
 	Object* reciever() {return reciever_;}
+	const Object* reciever() const {return reciever_;}
 	Event& event() {return *event_;}
+	const Event& event() const {return *event_;}
 	int priority() const {return priority_;}
 
 private:
@@ -33,6 +33,8 @@ bool operator<(int priority, const Posted_event& pe);
 bool operator<(const Posted_event& pe, int priority);
 bool operator>(int priority, const Posted_event& pe);
 bool operator>(const Posted_event& pe, int priority);
+
+bool operator==(const Posted_event& x, const Posted_event& y);
 
 } // namespace detail
 } // namespace mcurses

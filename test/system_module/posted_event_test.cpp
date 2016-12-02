@@ -1,10 +1,12 @@
 #include <mcurses/system_module/detail/posted_event.hpp>
 #include <mcurses/system_module/object.hpp>
 #include <mcurses/system_module/event.hpp>
+#include <mcurses/system_module/system.hpp>
 #include <gtest/gtest.h>
 
 TEST(PostedEventTest, LessThanOperator)
 {
+	mcurses::System system;
 	mcurses::Object obj;
 	auto ev = std::make_unique<mcurses::Event>(mcurses::Event::Type::None);	// change this when Event becomes pure virtual
 	mcurses::detail::Posted_event pe1(&obj, std::move(ev), 1);

@@ -1,8 +1,10 @@
 #include <mcurses/system_module/detail/ncurses_event_dispatcher.hpp>
 #include <mcurses/system_module/event.hpp>
 #include <mcurses/system_module/events/mouse_event.hpp>
+#include <mcurses/system_module/events/key_event.hpp>
+#include <mcurses/system_module/events/resize_event.hpp>
 #include <mcurses/system_module/system.hpp>
-#include <mcurses/painter_module/canvas.hpp>
+#include <mcurses/widget_module/widget.hpp>
 
 #include <ncurses.h>
 
@@ -36,11 +38,18 @@ void NCurses_event_dispatcher::post_user_input()
 		case KEY_RESIZE:
 			event = handle_resize_event();
 			object = handle_resize_object();
+			// if(object != nullptr && event != nullptr) {
+			// 	System::send_event(object, *event);
+			// }
+			// return;
 			break;
 
-		default:
-			event = handle_keyboard_event();
+		default: // Key_event
+			event = handle_keyboard_event(input);
 			object = handle_keyboard_object();
+			if (static_cast<Key_event*>(event.get())->key_code() == Key::Tab) {
+				System::cycle_tab_focus();
+			}
 			break;
 	}
 
@@ -116,10 +125,10 @@ NCurses_event_dispatcher::parse_mouse_event()
 			return std::pair<Object*, std::unique_ptr<Event>>{nullptr, nullptr};
 		}
 
-		Canvas* canv = dynamic_cast<Canvas*>(object);
-		if(canv) {
-			unsigned local_x = mouse_event.x - canv->position_x();
-			unsigned local_y = mouse_event.y - canv->position_y();
+		Widget* widg = dynamic_cast<Widget*>(object);
+		if(widg) {
+			unsigned local_x = mouse_event.x - widg->global_x();
+			unsigned local_y = mouse_event.y - widg->global_y();
 			auto event = std::make_unique<Mouse_event>(ev_type, ev_button, mouse_event.x, mouse_event.y, local_x, local_y, mouse_event.id);
 			return std::make_pair(object, std::move(event));
 		}
@@ -148,27 +157,28 @@ NCurses_event_dispatcher::find_object(unsigned x, unsigned y)
 }
 
 std::unique_ptr<Event>
-NCurses_event_dispatcher::handle_keyboard_event()
+NCurses_event_dispatcher::handle_keyboard_event(int input)
 {
-	return std::unique_ptr<Event>{};
+
+
+	return std::make_unique<Key_event>(Event::Type::KeyPress, input);
 }
 
 Object*
 NCurses_event_dispatcher::handle_keyboard_object()
 {
-	return nullptr;
+	return System::focus_widget();
 }
 
 std::unique_ptr<Event>
-NCurses_event_dispatcher::handle_resize_event() // sent to head widget and all children, etc.. sent to everything
-{
-	return std::unique_ptr<Event>{};
+NCurses_event_dispatcher::handle_resize_event(){
+	return std::make_unique<Resize_event>(System::max_width(), System::max_height());
 }
 
 Object*
 NCurses_event_dispatcher::handle_resize_object()
 {
-	return nullptr;
+	return System::head();
 }
 
 

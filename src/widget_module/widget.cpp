@@ -1,22 +1,447 @@
 #include <mcurses/widget_module/widget.hpp>
 #include <mcurses/system_module/system.hpp>
+#include <mcurses/system_module/events/paint_event.hpp>
+#include <mcurses/painter_module/color.hpp>
+#include <mcurses/painter_module/painter.hpp>
+#include <mcurses/painter_module/brush.hpp>
+#include <mcurses/system_module/events/key_event.hpp>
+#include <mcurses/system_module/events/mouse_event.hpp>
+#include <mcurses/system_module/events/resize_event.hpp>
+#include <mcurses/system_module/events/move_event.hpp>
+#include <mcurses/system_module/events/close_event.hpp>
+#include <mcurses/system_module/events/hide_event.hpp>
+#include <mcurses/system_module/events/show_event.hpp>
+#include <mcurses/system_module/events/enable_event.hpp>
+#include <mcurses/system_module/events/focus_event.hpp>
+
+#include <memory>
 
 namespace mcurses {
 
-Widget::Widget(unsigned x, unsigned y, unsigned width, unsigned height)
-:Canvas{x, y, width, height}
-{}
+Widget::Widget()
+{
+	this->initialize();
+	this->brush().set_background(Color::Black);
+	this->brush().set_foreground(Color::White);
+	this->update();
+}
+
+void Widget::initialize()
+{
+	this->close = [this](){ System::post_event(this, std::make_unique<Close_event>()); };
+	this->close.track(this->destroyed);
+
+	this->hide = [this](){ this->set_visible(false); };
+	this->hide.track(this->destroyed);
+
+	this->show = [this](){ this->set_visible(true); };
+	this->show.track(this->destroyed);
+
+	this->repaint = [this](){ Paint_event e; System::send_event(this, e); };
+	this->repaint.track(this->destroyed);
+
+	this->give_focus = [this](){ std::bind(&Widget::set_focus, this, true); };
+	this->give_focus.track(this->destroyed);
+
+	this->update_me = [this](){ std::bind(&Widget::update, this); };
+	this->update_me.track(this->destroyed);
+
+	return;
+}
 
 bool
 Widget::has_coordinates(unsigned glob_x, unsigned glob_y)
 {
-	return Canvas::check_coordinates(glob_x, glob_y);
+	if(!this->is_enabled() || !this->visible()) { return false; }
+	if((glob_x >= this->global_x()) && (glob_x < (this->global_max_x()))
+		&& (glob_y >= this->global_y()) && (glob_y < (this->global_max_y()))) {
+		return true;
+	}
+	return false;
 }
+
+void Widget::enable_border() {
+	this->border_.enable();
+	unsigned offset = this->border_.thickness();
+	this->geometry().set_active_region(offset, offset, offset, offset);
+	this->update();
+	return;
+}
+
+void Widget::disable_border() {
+	this->border_.disable();
+	this->geometry().set_active_region();
+	this->update();
+	return;
+}
+
+void Widget::set_geometry(const Geometry& g) {
+	geometry_.set_widget(nullptr); // prob not needed
+	geometry_ = g;
+	geometry_.set_widget(dynamic_cast<Widget*>(this->parent()));
+	this->update();
+}
+
+// void Widget::set_geometry(unsigned x, unsigned y, unsigned width, unsigned height)
+// {
+// 	this->set_x(x);
+// 	this->set_y(y);
+// 	this->set_width(width);
+// 	this->set_height(height);
+// 	return;
+// }
+
+// remove this --------------------------------------------------------
+// void Widget::set_fixed_width(unsigned width)
+// {
+// 	this->set_min_width(width);
+// 	this->set_max_width(width);
+// 	this->Layout_param_changed(); 
+// 	return;
+// }
+
+// void Widget::set_fixed_height(unsigned height)
+// {
+// 	this->set_min_height(height);
+// 	this->set_max_height(height);
+// 	this->Layout_param_changed(); 
+// 	return;
+// }
+// to this^
 
 void
 Widget::update()
 {
 	System::post_event(this, std::make_unique<Paint_event>());
+	return;
+}
+
+bool Widget::event(Event& event)
+{
+	// Move_event
+	if(event.type() == Event::Type::Move) {
+		this->move_event(static_cast<Move_event&>(event));
+		return event.is_accepted();
+	}
+
+	// Resize_event
+	if(event.type() == Event::Type::Resize) {
+		this->resize_event(static_cast<Resize_event&>(event));
+		return event.is_accepted();
+	}
+
+	// Paint_event
+	if(event.type() == Event::Type::Paint) {
+		this->erase_widget_screen();
+		if(this->visible() && this->is_enabled()) {
+			this->paint_event(static_cast<Paint_event&>(event));
+		} else if(this->visible() && !this->is_enabled()) {
+			this->paint_disabled_widget();
+		} else if(!this->visible()){}
+		return event.is_accepted();
+	}
+
+	// Mouse_events
+	if(event.type() == Event::Type::MouseButtonPress) {
+		if(!this->is_enabled() || !this->visible()) {
+			return event.is_accepted();
+		}
+		if(this->focus_policy() == Focus_policy::ClickFocus
+		|| this->focus_policy() == Focus_policy::StrongFocus) {
+			System::set_focus_widget(this);
+		}
+		this->mouse_press_event(static_cast<Mouse_event&>(event));
+		return event.is_accepted();
+	}
+	if(event.type() == Event::Type::MouseButtonRelease) {
+		if(!this->is_enabled() || !this->visible()) {
+			return event.is_accepted();
+		}
+		this->mouse_release_event(static_cast<Mouse_event&>(event));
+		return event.is_accepted();
+	}
+	if(event.type() == Event::Type::MouseButtonDblClick) {
+		if(!this->is_enabled() || !this->visible()) {
+			return event.is_accepted();
+		}
+		this->mouse_double_click_event(static_cast<Mouse_event&>(event));
+		return event.is_accepted();
+	}
+	if(event.type() == Event::Type::Wheel) {
+		if(!this->is_enabled() || !this->visible()) {
+			return event.is_accepted();
+		}
+		this->wheel_event(static_cast<Mouse_event&>(event));
+		return event.is_accepted();
+	}
+	if(event.type() == Event::Type::MouseMove && this->has_mouse_tracking()) {
+		if(!this->is_enabled() || !this->visible()) {
+			return event.is_accepted();
+		}
+		this->mouse_move_event(static_cast<Mouse_event&>(event));
+		return event.is_accepted();
+	}
+
+	// KeyEvent
+	if(event.type() == Event::Type::KeyPress) {
+		if(!this->is_enabled() || !this->visible()) {
+			return event.is_accepted();
+		}
+		this->key_press_event(static_cast<Key_event&>(event));
+		return event.is_accepted();
+	}
+	if(event.type() == Event::Type::KeyRelease) {
+		if(!this->is_enabled() || !this->visible()) {
+			return event.is_accepted();
+		}
+		this->key_release_event(static_cast<Key_event&>(event));
+		return event.is_accepted();
+	}
+
+	// Close Event
+	if(event.type() == Event::Type::Close) {
+		this->close_event(static_cast<Close_event&>(event));
+		return event.is_accepted();
+	}
+
+	// Hide Event
+	if(event.type() == Event::Type::Hide) {
+		this->hide_event(static_cast<Hide_event&>(event));
+		return event.is_accepted();
+	}
+
+	// Show Event
+	if(event.type() == Event::Type::Show) {
+		this->show_event(static_cast<Show_event&>(event));
+		return event.is_accepted();
+	}
+
+	// Focus Event
+	if(event.type() == Event::Type::FocusIn
+	|| event.type() == Event::Type::FocusOut) {
+		this->focus_event(static_cast<Focus_event&>(event));
+		return event.is_accepted();
+	}
+
+	return Object::event(event);
+}
+
+void Widget::move_event(Move_event& event)
+{
+	this->set_x(event.new_x());
+	this->set_y(event.new_y());
+	// Widget* parent = dynamic_cast<Widget*>(this->parent()); // causes infinte loop
+	// if (parent) { parent->update(); }
+	this->update();
+	event.accept();
+	return;
+}
+
+void Widget::resize_event(Resize_event& event)
+{
+	this->geometry().set_width(event.new_width());
+	this->geometry().set_height(event.new_height());
+	// this->erase_widget_screen(); // put in event();
+	event.accept();
+	return;
+}
+
+void Widget::paint_event(Paint_event& event)
+{
+	// Post paint event to each child
+	if(border_.is_enabled()) {
+		Painter p{this};
+		p.border(border_);
+	}
+	for(Object* c : this->children()) {
+		Widget* child = dynamic_cast<Widget*>(c);
+		if(child) {
+			child->update();
+		}
+	}
+	event.accept();
+	return;
+}
+
+void Widget::erase_widget_screen()
+{
+	Painter p{this};
+	if(this->brush().background_color()) {
+		p.fill(0, 0, this->geometry().width(), this->geometry().height(), *this->brush().background_color());
+	}
+	return;
+}
+
+void Widget::paint_disabled_widget()
+{
+	// Re-implement this to change the brush to grey and repaint, this might be done
+	// elsewhere when the widget is disabled, the brush is changed to greyscale, then
+	// a typical update is done. The function will probably not be needed.
+	Painter p{this};
+	Widget* parent = dynamic_cast<Widget*>(this->parent());
+	Color background = Color::Black;
+	if(parent && parent->brush().background_color()) {
+		background = *parent->brush().background_color();
+	}
+	p.fill(0, 0, this->geometry().width(), this->geometry().height(), background);
+}
+
+void Widget::mouse_press_event(Mouse_event& event)
+{
+	event.ignore();
+	return;
+}
+
+void Widget::mouse_release_event(Mouse_event& event)
+{
+	event.ignore();
+	return;
+}
+
+void Widget::mouse_double_click_event(Mouse_event& event)
+{
+	event.ignore();
+	return;
+}
+
+void Widget::wheel_event(Mouse_event& event)
+{
+	event.ignore();
+	return;
+}
+
+void Widget::mouse_move_event(Mouse_event& event)
+{
+	event.ignore();
+	return;
+}
+
+void Widget::key_press_event(Key_event& event)
+{
+	event.ignore();
+	return;
+}
+
+void Widget::key_release_event(Key_event& event)
+{
+	event.ignore();
+	return;
+}
+
+void Widget::close_event(Close_event& event)
+{
+	this->delete_later();
+	return;
+}
+
+void Widget::hide_event(Hide_event& event)
+{
+	event.accept();
+	return;
+}
+
+void Widget::show_event(Show_event& event)
+{
+	event.accept();
+	return;
+}
+
+void Widget::enable_event(Enable_event& event)
+{
+	if(!event.is_enabled()) {
+		// save current brush and
+		// set brush to greyscale
+	} else {
+		// set brush back to saved original
+	}
+	Object::enable_event(event);
+	return;
+}
+
+void Widget::focus_event(Focus_event& event)
+{
+	if(event.type() == Event::Type::FocusIn) {
+		Painter p{this};
+		p.set_cursor(this->cursor());
+		p.move(cursor_x_, cursor_y_);
+	} // if(event.type() == FocusOut)
+	event.accept();
+	return;
+}
+
+void Widget::set_focus(bool focus)
+{
+	if(this->focus_policy() == Focus_policy::NoFocus) {
+		return;
+	}
+	focus_ = focus;
+	if(focus) {
+		System::post_event(this, std::make_unique<Focus_event>(Event::Type::FocusIn));
+	} else {
+		System::post_event(this, std::make_unique<Focus_event>(Event::Type::FocusOut));
+	}
+	return;
+}
+
+void Widget::set_brush_recursively(Brush brush)
+{
+	this->default_brush_ = brush;
+	this->update();
+	for(Object* c : this->children()) {
+		Widget* child = dynamic_cast<Widget*>(c);
+		if(child) {
+			child->set_brush_recursively(brush);
+		}
+	}
+	return;
+}
+
+void Widget::set_visible(bool visible)
+{
+	this->visible_ = visible;
+	if(visible) {
+		Show_event show;
+		System::send_event(this, show);
+	} else {
+		Hide_event hide;
+		System::send_event(this, hide);
+	}
+	for(Object* c : this->children()) {
+		Widget* child = dynamic_cast<Widget*>(c);
+		if(child) {
+			child->set_visible(visible);
+		}
+	}
+	return;
+}
+
+unsigned Widget::find_global_x() const	// previously get_global_x
+{
+	Widget* parent_widg = dynamic_cast<Widget*>(this->parent());
+	if(!parent_widg) {
+		return this->x();
+	} else {
+		return this->x() + parent_widg->find_global_x();
+	}
+}
+
+unsigned Widget::find_global_y() const
+{
+	Widget* parent_widg = dynamic_cast<Widget*>(this->parent());
+	if(!parent_widg) {
+		return this->y();
+	} else {
+		return this->y() + parent_widg->find_global_y();
+	}
+}
+
+Paint_engine& Widget::paint_engine() const
+{
+	if(paint_engine_) {
+		return *paint_engine_;
+	} else {
+		return *System::paint_engine();
+	}
 }
 
 } // namespace mcurses

@@ -13,12 +13,16 @@ namespace detail {
 void Posted_event_queue::add_event(Posted_event& pe)
 {
 	int priority = pe.priority();
-	if(this->empty() || this->back().priority() >= priority || (pe.event().type() == Event::Type::DeferredDelete))
-	{
+	if(this->empty() || this->back().priority() >= priority || (pe.event().type() == Event::Type::DeferredDelete)) {
 		this->emplace_back(std::move(pe));
-	}
-	else
-	{
+		return;
+	} else if(pe.event() == Event::Type::Paint) {
+		// Remove multiple paint events to the same object
+		auto at = std::find(this->begin(), this->end(), pe);
+		if(at != this->end()) {
+			this->erase(at);
+		}
+	} else {
 		auto gt = [](const Posted_event& e, const int& i){return e > i;};
 		auto at = std::lower_bound(this->begin(), this->end(), priority, gt);
 		this->emplace(at, std::move(pe));

@@ -1,10 +1,12 @@
 #include <mcurses/system_module/detail/posted_event_queue.hpp>
+#include <mcurses/system_module/system.hpp>
 #include <gtest/gtest.h>
 
 #include <memory>
 
 TEST(PostedEventQueueTest, AddEvent)
 {
+	mcurses::System system;
 	mcurses::detail::Posted_event_queue queue;
 	EXPECT_TRUE(queue.empty());
 
@@ -48,6 +50,7 @@ TEST(PostedEventQueueTest, AddEvent)
 
 TEST(PostedEventQueueTest, NextEvent)
 {
+	mcurses::System system;
 	mcurses::detail::Posted_event_queue queue;
 
 	mcurses::Object object1;
