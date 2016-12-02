@@ -1,6 +1,7 @@
-#include <mcurses/system_module/event_loop.hpp>
-#include <mcurses/system_module/detail/thread_data.hpp>
 #include <mcurses/painter_module/paint_engine.hpp>
+#include <mcurses/system_module/detail/thread_data.hpp>
+#include <mcurses/system_module/event_loop.hpp>
+#include <mcurses/system_module/system.hpp>
 
 #include <ncurses.h> // use painter instead eventually
 
@@ -12,12 +13,12 @@ int Event_loop::run()
 	auto& data = detail::Thread_data::current();
 	data.event_loops.push(this);
 
-	// this is a loop, no need to loop
 	while(!exit_)
 	{
 		this->process_events();
-		touchwin(::stdscr);
-		::refresh(); // call with static from painter?
+		touchwin(::stdscr); // this too
+		// ::refresh(); // call with static from painter?
+		System::paint_engine()->flush();
 	}
 
 	data.event_loops.pop();
@@ -30,7 +31,6 @@ void Event_loop::exit(int return_code)
 	return_code_ = return_code;
 	exit_ = true;
 	detail::Thread_data::current().dispatcher().interrupt();
-	return;
 }
 
 bool Event_loop::process_events()

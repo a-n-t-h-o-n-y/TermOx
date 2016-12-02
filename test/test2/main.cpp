@@ -7,6 +7,7 @@ public:
 		this->set_focus_policy(mcurses::Widget::Focus_policy::StrongFocus);
 		this->set_cursor(true);
 		this->enable_border();
+		this->brush().set_background(Color::Green);
 	}
 
 	virtual void key_press_event(Key_event& event) override {

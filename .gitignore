@@ -11,3 +11,5 @@ notes
 *.out
 *.sublime-project
 *.sublime-workspace
+*.json
+*.vim

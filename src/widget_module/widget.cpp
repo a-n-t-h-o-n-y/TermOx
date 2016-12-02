@@ -132,6 +132,7 @@ bool Widget::event(Event& event)
 
 	// Paint_event
 	if(event.type() == Event::Type::Paint) {
+		this->erase_widget_screen();
 		if(this->visible() && this->is_enabled()) {
 			this->paint_event(static_cast<Paint_event&>(event));
 		} else if(this->visible() && !this->is_enabled()) {
@@ -238,12 +239,9 @@ void Widget::move_event(Move_event& event)
 
 void Widget::resize_event(Resize_event& event)
 {
-	this->erase_widget_screen();
 	this->geometry().set_width(event.new_width());
 	this->geometry().set_height(event.new_height());
-	
-	// Do you need to tell the parent if the size of the widget it holds shrinks? layouts take care of this already..
-	this->update();
+	// this->erase_widget_screen(); // put in event();
 	event.accept();
 	return;
 }

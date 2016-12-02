@@ -1,13 +1,16 @@
 cmake_minimum_required (VERSION 3.6)
 project (MCurses)
 
-# Run these command in shell before cmake to use Clang Static Analyzer
-# This need only be run once.
-#__________________________________________________________________________
-# export CCC_CXX=clang++
-# cmake -DCMAKE_CXX_COMPILER=/usr/lib/clang/c++-analyzer -DCMAKE_LINKER=clang++ ..
-#__________________________________________________________________________
-# The path to c++-analyzer may be different on your machine.
+# Uncomment the next three lines to compile with clang static analyzer
+# set(CCC_CXX clang++)
+# set(CMAKE_CXX_COMPILER /usr/lib/clang/c++-analyzer)
+# set(CMAKE_LINKER clang++)
+
+# Build System Information For Clang-Tidy
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+add_custom_target(compile_commands ALL
+	COMMAND [ -f ${CMAKE_SOURCE_DIR}/build/compile_commands.json ] && mv ${CMAKE_SOURCE_DIR}/build/compile_commands.json
+		${CMAKE_SOURCE_DIR}/compile_commands.json || :)
 
 # Set Output Directories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
@@ -43,6 +46,7 @@ list(APPEND PAINTER_MODULE_SOURCES  "src/painter_module/ncurses_paint_engine.cpp
 									"src/painter_module/brush.cpp"
 									"src/painter_module/geometry.cpp"
 									"src/painter_module/glyph_string.cpp"
+									"src/painter_module/paint_buffer.cpp"
 									)
 list(APPEND SIGNAL_MODULE_SOURCES 	"src/signal_module/slot_base.cpp"
 									"src/signal_module/connection.cpp"
@@ -81,6 +85,7 @@ list(APPEND TEST_SOURCES "test/signal_module/none_test.cpp"
 						 "test/painter_module/glyph_string_test.cpp"
 						 "test/painter_module/brush_test.cpp"
 						 "test/painter_module/palette_test.cpp"
+						 "test/painter_module/glyph_matrix_test.cpp"
 						 )
 
 list(APPEND TEST1_SOURCES "test/test1/main.cpp"

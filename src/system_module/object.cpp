@@ -72,7 +72,7 @@ void Object::child_event(Child_event& event)
 {
 	Widget* parent = dynamic_cast<Widget*>(this->parent());
 	if(parent) {
-		parent->erase_widget_screen();
+		// parent->erase_widget_screen();
 		parent->update();
 	}
 	event.accept();

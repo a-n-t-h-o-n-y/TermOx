@@ -38,6 +38,10 @@ void NCurses_event_dispatcher::post_user_input()
 		case KEY_RESIZE:
 			event = handle_resize_event();
 			object = handle_resize_object();
+			// if(object != nullptr && event != nullptr) {
+			// 	System::send_event(object, *event);
+			// }
+			// return;
 			break;
 
 		default: // Key_event
@@ -167,8 +171,7 @@ NCurses_event_dispatcher::handle_keyboard_object()
 }
 
 std::unique_ptr<Event>
-NCurses_event_dispatcher::handle_resize_event() // sent to head widget and all children, etc.. sent to everything
-{
+NCurses_event_dispatcher::handle_resize_event(){
 	return std::make_unique<Resize_event>(System::max_width(), System::max_height());
 }
 
