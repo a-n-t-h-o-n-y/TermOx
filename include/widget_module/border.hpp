@@ -1,8 +1,8 @@
 #ifndef BORDER_HPP
 #define BORDER_HPP
 
-#include "../painter_module/palette.hpp"
-#include "../painter_module/glyph.hpp"
+#include <painter_module/palette.hpp>
+#include <painter_module/glyph.hpp>
 
 #include <string>
 

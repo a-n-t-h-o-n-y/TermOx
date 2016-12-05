@@ -1,7 +1,7 @@
-#include <mcurses/painter_module/paint_engine.hpp>
-#include <mcurses/system_module/detail/thread_data.hpp>
-#include <mcurses/system_module/event_loop.hpp>
-#include <mcurses/system_module/system.hpp>
+#include <painter_module/paint_engine.hpp>
+#include <system_module/detail/thread_data.hpp>
+#include <system_module/event_loop.hpp>
+#include <system_module/system.hpp>
 
 #include <ncurses.h> // use painter instead eventually
 

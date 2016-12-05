@@ -1,4 +1,4 @@
-#include <mcurses/painter_module/paint_engine.hpp>
+#include <painter_module/paint_engine.hpp>
 
 namespace mcurses {
 

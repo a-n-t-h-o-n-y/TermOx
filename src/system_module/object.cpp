@@ -1,10 +1,11 @@
-#include <mcurses/system_module/object.hpp>
-#include <mcurses/system_module/event.hpp>
-#include <mcurses/system_module/events/child_event.hpp>
-#include <mcurses/system_module/events/enable_event.hpp>
-#include <mcurses/system_module/system.hpp>
-#include <mcurses/signal_module/slot.hpp>
-#include <mcurses/widget_module/widget.hpp>
+#include <system_module/object.hpp>
+#include <system_module/event.hpp>
+#include <system_module/events/child_event.hpp>
+#include <system_module/events/enable_event.hpp>
+#include <system_module/system.hpp>
+#include <widget_module/widget.hpp>
+
+#include <aml/signals/slot.hpp>
 
 #include <algorithm>
 #include <iterator>

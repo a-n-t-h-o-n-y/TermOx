@@ -1,28 +1,30 @@
 #ifndef WIDGET_HPP
 #define WIDGET_HPP
 
-#include "../system_module/object.hpp"
-#include "../system_module/events/paint_event.hpp"
-#include "../system_module/events/resize_event.hpp"
-#include "../system_module/events/move_event.hpp"
-#include "../system_module/events/mouse_event.hpp"
-#include "../system_module/events/key_event.hpp"
-#include "../system_module/events/close_event.hpp"
-#include "../system_module/events/hide_event.hpp"
-#include "../system_module/events/show_event.hpp"
-#include "../system_module/events/enable_event.hpp"
-#include "../system_module/events/focus_event.hpp"
-#include "../painter_module/paint_engine.hpp"
-#include "../painter_module/detail/ncurses_paint_engine.hpp"
-#include "../painter_module/brush.hpp"
-#include "size_policy.hpp"
-#include "../system_module/system.hpp"
-#include "../signal_module/signal.hpp" // remove
-#include "../signal_module/slot.hpp"
 #include "border.hpp"
-#include "../painter_module/geometry.hpp"
+#include "size_policy.hpp"
 
-#include <limits> // remove
+#include <system_module/object.hpp>
+#include <system_module/events/paint_event.hpp>
+#include <system_module/events/resize_event.hpp>
+#include <system_module/events/move_event.hpp>
+#include <system_module/events/mouse_event.hpp>
+#include <system_module/events/key_event.hpp>
+#include <system_module/events/close_event.hpp>
+#include <system_module/events/hide_event.hpp>
+#include <system_module/events/show_event.hpp>
+#include <system_module/events/enable_event.hpp>
+#include <system_module/events/focus_event.hpp>
+#include <system_module/system.hpp>
+#include <painter_module/geometry.hpp>
+#include <painter_module/paint_engine.hpp>
+#include <painter_module/detail/ncurses_paint_engine.hpp>
+#include <painter_module/brush.hpp>
+
+// #include <aml/signals/signal.hpp> // remove
+#include <aml/signals/slot.hpp>
+
+// #include <limits> // remove
 #include <memory>
 #include <functional>
 

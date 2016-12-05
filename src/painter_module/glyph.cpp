@@ -1,4 +1,4 @@
-#include <mcurses/painter_module/glyph.hpp>
+#include <painter_module/glyph.hpp>
 
 #include <locale>
 #include <codecvt>

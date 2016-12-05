@@ -1,4 +1,4 @@
-#include <mcurses/mcurses.hpp>
+#include <mcurses.hpp>
 
 #include <string>
 

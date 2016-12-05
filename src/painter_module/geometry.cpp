@@ -1,5 +1,5 @@
-#include <mcurses/painter_module/geometry.hpp>
-#include <mcurses/widget_module/widget.hpp>
+#include <painter_module/geometry.hpp>
+#include <widget_module/widget.hpp>
 
 namespace mcurses {
 class Size_policy;

@@ -1,6 +1,5 @@
-#include <mcurses/system_module/events/move_event.hpp>
-
-#include <mcurses/system_module/event.hpp>
+#include <system_module/events/move_event.hpp>
+#include <system_module/event.hpp>
 
 namespace mcurses {
 

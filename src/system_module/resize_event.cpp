@@ -1,4 +1,4 @@
-#include <mcurses/system_module/events/resize_event.hpp>
+#include <system_module/events/resize_event.hpp>
 
 namespace mcurses {
 

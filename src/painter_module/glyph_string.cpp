@@ -1,4 +1,4 @@
-#include <mcurses/painter_module/glyph_string.hpp>
+#include <painter_module/glyph_string.hpp>
 
 #include <algorithm>
 

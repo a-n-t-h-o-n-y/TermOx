@@ -1,11 +1,13 @@
 #ifndef LAYOUT_HPP
 #define LAYOUT_HPP
 
-#include "../system_module/object.hpp"
 #include "widget.hpp"
-#include "../signal_module/slot.hpp"
-#include "../system_module/events/child_event.hpp"
-#include "../system_module/events/paint_event.hpp"
+
+#include <system_module/object.hpp>
+#include <system_module/events/child_event.hpp>
+#include <system_module/events/paint_event.hpp>
+
+#include <aml/signals/slot.hpp>
 
 namespace mcurses {
 

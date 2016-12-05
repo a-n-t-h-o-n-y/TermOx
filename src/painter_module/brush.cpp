@@ -1,5 +1,5 @@
-#include <mcurses/painter_module/brush.hpp>
-#include <mcurses/painter_module/attribute.hpp>
+#include <painter_module/brush.hpp>
+#include <painter_module/attribute.hpp>
 
 #include <algorithm>
 

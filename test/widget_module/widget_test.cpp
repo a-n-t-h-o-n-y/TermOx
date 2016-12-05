@@ -1,4 +1,5 @@
-#include <mcurses/widget_module/widget.hpp>
+#include <widget_module/widget.hpp>
+
 #include <gtest/gtest.h>
 
 TEST(WidgetTest, Default)

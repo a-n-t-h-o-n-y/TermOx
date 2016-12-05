@@ -1,5 +1,5 @@
-#include <mcurses/system_module/event.hpp>
-#include <mcurses/system_module/system.hpp>
+#include <system_module/event.hpp>
+#include <system_module/system.hpp>
 
 namespace mcurses {
 

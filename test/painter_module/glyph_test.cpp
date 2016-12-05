@@ -1,7 +1,8 @@
-#include <mcurses/painter_module/glyph.hpp>
-#include <mcurses/painter_module/attribute.hpp>
-#include <mcurses/painter_module/color.hpp>
-#include <mcurses/painter_module/brush.hpp>
+#include <painter_module/glyph.hpp>
+#include <painter_module/attribute.hpp>
+#include <painter_module/color.hpp>
+#include <painter_module/brush.hpp>
+
 #include <gtest/gtest.h>
 
 #include <string>

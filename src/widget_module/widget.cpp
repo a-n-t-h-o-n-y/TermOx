@@ -1,18 +1,18 @@
-#include <mcurses/widget_module/widget.hpp>
-#include <mcurses/system_module/system.hpp>
-#include <mcurses/system_module/events/paint_event.hpp>
-#include <mcurses/painter_module/color.hpp>
-#include <mcurses/painter_module/painter.hpp>
-#include <mcurses/painter_module/brush.hpp>
-#include <mcurses/system_module/events/key_event.hpp>
-#include <mcurses/system_module/events/mouse_event.hpp>
-#include <mcurses/system_module/events/resize_event.hpp>
-#include <mcurses/system_module/events/move_event.hpp>
-#include <mcurses/system_module/events/close_event.hpp>
-#include <mcurses/system_module/events/hide_event.hpp>
-#include <mcurses/system_module/events/show_event.hpp>
-#include <mcurses/system_module/events/enable_event.hpp>
-#include <mcurses/system_module/events/focus_event.hpp>
+#include <widget_module/widget.hpp>
+#include <system_module/system.hpp>
+#include <system_module/events/paint_event.hpp>
+#include <system_module/events/key_event.hpp>
+#include <system_module/events/mouse_event.hpp>
+#include <system_module/events/resize_event.hpp>
+#include <system_module/events/move_event.hpp>
+#include <system_module/events/close_event.hpp>
+#include <system_module/events/hide_event.hpp>
+#include <system_module/events/show_event.hpp>
+#include <system_module/events/enable_event.hpp>
+#include <system_module/events/focus_event.hpp>
+#include <painter_module/color.hpp>
+#include <painter_module/painter.hpp>
+#include <painter_module/brush.hpp>
 
 #include <memory>
 

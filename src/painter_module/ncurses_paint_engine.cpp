@@ -1,6 +1,6 @@
-#include <mcurses/painter_module/detail/ncurses_paint_engine.hpp>
-#include <mcurses/painter_module/color.hpp>
-#include <mcurses/painter_module/attribute.hpp>
+#include <painter_module/detail/ncurses_paint_engine.hpp>
+#include <painter_module/color.hpp>
+#include <painter_module/attribute.hpp>
 
 #include <ncurses.h>
 

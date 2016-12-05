@@ -1,6 +1,6 @@
-#include <mcurses/widget_module/layouts/horizontal_layout.hpp>
-#include <mcurses/system_module/events/resize_event.hpp>
-#include <mcurses/system_module/events/move_event.hpp>
+#include <widget_module/layouts/horizontal_layout.hpp>
+#include <system_module/events/resize_event.hpp>
+#include <system_module/events/move_event.hpp>
 
 namespace mcurses {
 
