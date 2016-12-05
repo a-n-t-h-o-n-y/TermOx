@@ -1,6 +1,7 @@
-#include <mcurses/painter_module/brush.hpp>
-#include <mcurses/painter_module/color.hpp>
-#include <mcurses/painter_module/attribute.hpp>
+#include <painter_module/brush.hpp>
+#include <painter_module/color.hpp>
+#include <painter_module/attribute.hpp>
+
 #include <gtest/gtest.h>
 
 TEST(BrushTest, Constructor) {

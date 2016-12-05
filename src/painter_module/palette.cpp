@@ -1,5 +1,5 @@
-#include <mcurses/painter_module/palette.hpp>
-#include <mcurses/painter_module/color.hpp>
+#include <painter_module/palette.hpp>
+#include <painter_module/color.hpp>
 
 namespace mcurses {
 

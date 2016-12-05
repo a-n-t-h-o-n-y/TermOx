@@ -1,4 +1,4 @@
-#include <mcurses/painter_module/detail/paint_buffer.hpp>
+#include <painter_module/detail/paint_buffer.hpp>
 
 namespace mcurses {
 namespace detail {

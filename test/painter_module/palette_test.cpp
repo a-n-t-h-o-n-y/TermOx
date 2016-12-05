@@ -1,7 +1,8 @@
-#include <mcurses/painter_module/palette.hpp>
-#include <mcurses/painter_module/color.hpp>
-#include <mcurses/system_module/system.hpp>
-#include <mcurses/system_module/system.hpp>
+#include <painter_module/palette.hpp>
+#include <painter_module/color.hpp>
+#include <system_module/system.hpp>
+#include <system_module/system.hpp>
+
 #include <gtest/gtest.h>
 
 TEST(PaletteTest, Everything){

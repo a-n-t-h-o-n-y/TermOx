@@ -3,7 +3,8 @@
 
 #include "color.hpp"
 #include "attribute.hpp"
-#include "../signal_module/optional.hpp"
+
+#include <aml/optional/optional.hpp>
 
 #include <algorithm>
 #include <vector>

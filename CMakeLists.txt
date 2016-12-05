@@ -48,28 +48,13 @@ list(APPEND PAINTER_MODULE_SOURCES  "src/painter_module/ncurses_paint_engine.cpp
 									"src/painter_module/glyph_string.cpp"
 									"src/painter_module/paint_buffer.cpp"
 									)
-list(APPEND SIGNAL_MODULE_SOURCES 	"src/signal_module/slot_base.cpp"
-									"src/signal_module/connection.cpp"
-									"src/signal_module/shared_connection_block.cpp"
-									)
 list(APPEND WIDGET_MODULE_SOURCES 	"src/widget_module/widget.cpp"
 									"src/widget_module/layout.cpp"
 									"src/widget_module/horizontal_layout.cpp"
 									"src/widget_module/border.cpp"
 									)
 
-list(APPEND TEST_SOURCES "test/signal_module/none_test.cpp"
-						 "test/signal_module/optional_test.cpp"
-						 "test/signal_module/optional_last_value_test.cpp"
-						 "test/signal_module/slot_test.cpp"
-						 "test/signal_module/slot_base_test.cpp"
-						 "test/signal_module/connection_test.cpp"
-						 "test/signal_module/connection_impl_test.cpp"
-						 "test/signal_module/signal_test.cpp"
-						 "test/signal_module/signal_impl_test.cpp"
-						 "test/signal_module/shared_connection_block_test.cpp"
-						 
-						 "test/system_module/system_test.cpp"
+list(APPEND TEST_SOURCES "test/system_module/system_test.cpp"
 						 "test/system_module/object_test.cpp"
 						 "test/system_module/event_loop_test.cpp"
 						 "test/system_module/event_test.cpp"
@@ -95,11 +80,10 @@ list(APPEND TEST2_SOURCES "test/test2/main.cpp"
 						 )
 
 # Create a Static Library for MCurses
-add_library(mcurses_lib STATIC ${SYSTEM_MODULE_SOURCES}
-							   ${PAINTER_MODULE_SOURCES}
- 							   ${SIGNAL_MODULE_SOURCES}
-							   ${WIDGET_MODULE_SOURCES}
- 							   )
+add_library(mcurses STATIC ${SYSTEM_MODULE_SOURCES}
+						   ${PAINTER_MODULE_SOURCES}
+						   ${WIDGET_MODULE_SOURCES}
+ 						   )
 
 # Create Executables with the Sources
 add_executable(tests ${TEST_SOURCES})
@@ -107,9 +91,15 @@ add_executable(test1 ${TEST1_SOURCES})
 add_executable(test2 ${TEST2_SOURCES})
 
 # Link libraries to executables
-target_link_libraries(tests mcurses_lib gtest gtest_main ncurses)
-target_link_libraries(test1 mcurses_lib ncurses)
-target_link_libraries(test2 mcurses_lib ncurses)
+target_link_libraries(tests mcurses signals gtest gtest_main ncurses)
+target_link_libraries(test1 mcurses signals ncurses)
+target_link_libraries(test2 mcurses signals ncurses)
+
+# Install Static Library
+install(TARGETS mcurses ARCHIVE DESTINATION lib)
+
+# Install Headers
+install(DIRECTORY include/ DESTINATION include/aml/mcurses)
 
 # Doxygen Target - Doxyfile in project/doc - make doc
 find_package(Doxygen)

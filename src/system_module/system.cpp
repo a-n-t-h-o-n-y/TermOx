@@ -1,15 +1,15 @@
-#include <mcurses/system_module/system.hpp>
-#include <mcurses/system_module/detail/thread_data.hpp>
-#include <mcurses/system_module/detail/posted_event.hpp>
-#include <mcurses/system_module/object.hpp>
-#include <mcurses/system_module/event.hpp>
-#include <mcurses/system_module/event_loop.hpp>
-#include <mcurses/painter_module/detail/ncurses_paint_engine.hpp>
-#include <mcurses/painter_module/paint_engine.hpp>
-#include <mcurses/system_module/events/paint_event.hpp>
-#include <mcurses/widget_module/widget.hpp>
-#include <mcurses/painter_module/palette.hpp>
-#include <mcurses/painter_module/color.hpp>
+#include <system_module/system.hpp>
+#include <system_module/detail/thread_data.hpp>
+#include <system_module/detail/posted_event.hpp>
+#include <system_module/object.hpp>
+#include <system_module/event.hpp>
+#include <system_module/event_loop.hpp>
+#include <system_module/events/paint_event.hpp>
+#include <painter_module/detail/ncurses_paint_engine.hpp>
+#include <painter_module/paint_engine.hpp>
+#include <painter_module/palette.hpp>
+#include <painter_module/color.hpp>
+#include <widget_module/widget.hpp>
 
 #include <algorithm>
 #include <iterator>

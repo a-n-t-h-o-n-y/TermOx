@@ -1,6 +1,7 @@
-#include <mcurses/painter_module/glyph_string.hpp>
-#include <mcurses/painter_module/glyph.hpp>
-#include <mcurses/painter_module/attribute.hpp>
+#include <painter_module/glyph_string.hpp>
+#include <painter_module/glyph.hpp>
+#include <painter_module/attribute.hpp>
+
 #include <gtest/gtest.h>
 
 TEST(GlyphStringTest, GlyphConstructor) {

@@ -1,9 +1,10 @@
-#include <mcurses/system_module/system.hpp>
-#include <mcurses/system_module/event.hpp>
-#include <mcurses/system_module/object.hpp>
-#include <mcurses/system_module/detail/thread_data.hpp>
-#include <mcurses/system_module/detail/posted_event.hpp>
-#include <mcurses/system_module/detail/posted_event_queue.hpp>
+#include <system_module/system.hpp>
+#include <system_module/event.hpp>
+#include <system_module/object.hpp>
+#include <system_module/detail/thread_data.hpp>
+#include <system_module/detail/posted_event.hpp>
+#include <system_module/detail/posted_event_queue.hpp>
+
 #include <gtest/gtest.h>
 
 #include <memory>

@@ -1,10 +1,10 @@
-#include <mcurses/system_module/detail/ncurses_event_dispatcher.hpp>
-#include <mcurses/system_module/event.hpp>
-#include <mcurses/system_module/events/mouse_event.hpp>
-#include <mcurses/system_module/events/key_event.hpp>
-#include <mcurses/system_module/events/resize_event.hpp>
-#include <mcurses/system_module/system.hpp>
-#include <mcurses/widget_module/widget.hpp>
+#include <system_module/detail/ncurses_event_dispatcher.hpp>
+#include <system_module/event.hpp>
+#include <system_module/events/mouse_event.hpp>
+#include <system_module/events/key_event.hpp>
+#include <system_module/events/resize_event.hpp>
+#include <system_module/system.hpp>
+#include <widget_module/widget.hpp>
 
 #include <ncurses.h>
 
