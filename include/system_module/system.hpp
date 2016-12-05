@@ -4,10 +4,11 @@
 #include "object.hpp"
 #include "event.hpp"
 
-#include <mcurses/signal_module/slot.hpp>
-#include <mcurses/painter_module/paint_engine.hpp>
-#include <mcurses/painter_module/detail/ncurses_paint_engine.hpp>
-#include <mcurses/painter_module/palette.hpp>
+#include <painter_module/paint_engine.hpp>
+#include <painter_module/detail/ncurses_paint_engine.hpp>
+#include <painter_module/palette.hpp>
+
+#include <aml/signals/slot.hpp>
 
 #include <memory>
 

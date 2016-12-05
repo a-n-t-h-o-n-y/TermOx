@@ -1,8 +1,9 @@
-#include <mcurses/system_module/object.hpp>
-#include <mcurses/system_module/event_loop.hpp>
-#include <mcurses/system_module/system.hpp>
-#include <mcurses/widget_module/widget.hpp>
-#include <mcurses/system_module/events/child_event.hpp>
+#include <system_module/object.hpp>
+#include <system_module/event_loop.hpp>
+#include <system_module/system.hpp>
+#include <system_module/events/child_event.hpp>
+#include <widget_module/widget.hpp>
+
 #include <gtest/gtest.h>
 
 #include <string>

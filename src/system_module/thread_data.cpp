@@ -1,4 +1,4 @@
-#include <mcurses/system_module/detail/thread_data.hpp>
+#include <system_module/detail/thread_data.hpp>
 
 namespace mcurses {
 namespace detail {

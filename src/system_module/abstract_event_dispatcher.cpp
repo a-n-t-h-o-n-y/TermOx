@@ -1,7 +1,7 @@
-#include <mcurses/system_module/abstract_event_dispatcher.hpp>
-#include <mcurses/system_module/system.hpp>
-#include <mcurses/system_module/event.hpp>
-#include <mcurses/system_module/object.hpp>
+#include <system_module/abstract_event_dispatcher.hpp>
+#include <system_module/system.hpp>
+#include <system_module/event.hpp>
+#include <system_module/object.hpp>
 
 #include <memory>
 

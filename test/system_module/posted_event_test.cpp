@@ -1,7 +1,8 @@
-#include <mcurses/system_module/detail/posted_event.hpp>
-#include <mcurses/system_module/object.hpp>
-#include <mcurses/system_module/event.hpp>
-#include <mcurses/system_module/system.hpp>
+#include <system_module/detail/posted_event.hpp>
+#include <system_module/object.hpp>
+#include <system_module/event.hpp>
+#include <system_module/system.hpp>
+
 #include <gtest/gtest.h>
 
 TEST(PostedEventTest, LessThanOperator)

@@ -1,4 +1,5 @@
-#include <mcurses/painter_module/glyph_matrix.hpp>
+#include <painter_module/glyph_matrix.hpp>
+
 #include <gtest/gtest.h>
 
 #include <stdexcept>

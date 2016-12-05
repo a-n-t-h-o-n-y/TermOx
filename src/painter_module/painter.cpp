@@ -1,9 +1,9 @@
-#include <mcurses/painter_module/painter.hpp>
-#include <mcurses/painter_module/color.hpp>
-#include <mcurses/painter_module/glyph_string.hpp>
-#include <mcurses/painter_module/attribute.hpp>
-#include <mcurses/painter_module/geometry.hpp>
-#include <mcurses/widget_module/border.hpp>
+#include <painter_module/painter.hpp>
+#include <painter_module/color.hpp>
+#include <painter_module/glyph_string.hpp>
+#include <painter_module/attribute.hpp>
+#include <painter_module/geometry.hpp>
+#include <widget_module/border.hpp>
 
 namespace mcurses {
 

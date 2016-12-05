@@ -1,4 +1,4 @@
-#include <mcurses/system_module/detail/posted_event.hpp>
+#include <system_module/detail/posted_event.hpp>
 
 #include <memory>
 

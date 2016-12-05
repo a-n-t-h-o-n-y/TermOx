@@ -1,6 +1,6 @@
-#include <mcurses/widget_module/border.hpp>
-#include <mcurses/painter_module/painter.hpp>
-#include <mcurses/painter_module/glyph.hpp>
+#include <widget_module/border.hpp>
+#include <painter_module/painter.hpp>
+#include <painter_module/glyph.hpp>
 
 namespace mcurses {
 

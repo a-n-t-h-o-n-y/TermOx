@@ -1,8 +1,8 @@
 #ifndef OBJECT_HPP
 #define OBJECT_HPP
 
-#include "../signal_module/slot.hpp"
-#include "../signal_module/signal.hpp"
+#include <aml/signals/slot.hpp>
+#include <aml/signals/signal.hpp>
 
 #include <memory>
 #include <algorithm>

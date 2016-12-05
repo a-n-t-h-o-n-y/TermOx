@@ -1,5 +1,5 @@
-#include <mcurses/widget_module/layout.hpp>
-#include <mcurses/system_module/object.hpp>
+#include <widget_module/layout.hpp>
+#include <system_module/object.hpp>
 
 namespace mcurses {
 
