@@ -43,7 +43,7 @@ public:
 	int run();
 
 	// Slots
-	slot<void()> quit = [](){System::exit();};
+	Slot<void()> quit = [](){System::exit();};
 
 	friend class Abstract_event_dispatcher;
 	

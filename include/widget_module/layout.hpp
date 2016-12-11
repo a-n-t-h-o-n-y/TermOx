@@ -19,7 +19,7 @@ public:
 	virtual void update() override;
 
 	// Slots
-	slot<void()> update_layout; // this should call update()
+	Slot<void()> update_layout; // this should call update()
 
 protected:
 	virtual void child_event(Child_event& event) override;

@@ -81,13 +81,13 @@ public:
 	bool is_enabled() const { return enabled_; }
 
 	// Slots - change to uppercase Slot eventually
-	slot<void()> delete_later;
-	slot<void()> enable;
-	slot<void()> disable;
+	Slot<void()> delete_later;
+	Slot<void()> enable;
+	Slot<void()> disable;
 
 	// Signals
-	signal<void(Object*)> destroyed;
-	signal<void(const std::string&)> object_name_changed;
+	Signal<void(Object*)> destroyed;
+	Signal<void(const std::string&)> object_name_changed;
 
 	friend class System;
 

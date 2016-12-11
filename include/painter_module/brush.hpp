@@ -36,8 +36,8 @@ public:
 	void set_foreground(Color color) { foreground_color_ = color; }
 
 	std::vector<Attribute> attributes() const { return attributes_; }
-	optional<Color> background_color() const { return background_color_; }
-	optional<Color> foreground_color() const { return foreground_color_; }
+	Optional<Color> background_color() const { return background_color_; }
+	Optional<Color> foreground_color() const { return foreground_color_; }
 
 	friend bool operator==(const Brush& x, const Brush& y) {
 	return(std::is_permutation(std::begin(x.attributes_), std::end(x.attributes_), std::begin(y.attributes_), std::end(y.attributes_))
@@ -63,8 +63,8 @@ private:
 	void push_attribute(Attribute attr);
 
 	std::vector<Attribute> attributes_;
-	optional<Color> background_color_;
-	optional<Color> foreground_color_; 
+	Optional<Color> background_color_;
+	Optional<Color> foreground_color_; 
 };
 
 } // namespace mcurses

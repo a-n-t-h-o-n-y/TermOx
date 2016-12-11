@@ -121,12 +121,12 @@ public:
 	// signal<void()> Layout_param_changed; // remove
 
 	// Slots
-	slot<void()> close;
-	slot<void()> hide;
-	slot<void()> show;
-	slot<void()> repaint;
-	slot<void()> give_focus;
-	slot<void()> update_me;
+	Slot<void()> close;
+	Slot<void()> hide;
+	Slot<void()> show;
+	Slot<void()> repaint;
+	Slot<void()> give_focus;
+	Slot<void()> update_me;
 
 
 protected:
