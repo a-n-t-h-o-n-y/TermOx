@@ -1,16 +1,15 @@
 #ifndef OBJECT_HPP
 #define OBJECT_HPP
 
-#include <aml/signals/slot.hpp>
 #include <aml/signals/signal.hpp>
+#include <aml/signals/slot.hpp>
 
-#include <memory>
 #include <algorithm>
+#include <memory>
+#include <queue>
 #include <string>
 #include <utility>
 #include <vector>
-#include <string>
-#include <queue>
 
 namespace mcurses {
 
@@ -19,93 +18,107 @@ class Child_event;
 class Enable_event;
 
 class Object {
-public:
-	Object(){initialize();}
-	Object(Object&&) = default;
-	virtual ~Object();
+   public:
+    Object() { initialize(); }
 
-	template <typename T, typename ... Args>
-	T& make_child(Args&&... args) {
-		this->add_child(std::make_unique<T>(std::forward<Args>(args)...));
-		return static_cast<T&>(*children_.back());
-	}
+    Object(Object&& rhs) noexcept(false);
 
-	void add_child(std::unique_ptr<Object> child);
+    Object& operator=(Object&& rhs) noexcept(false);
 
-	virtual bool event(Event& event);
+    virtual ~Object();
 
-	virtual bool event_filter(Object* watched, Event& event);
+    template <typename T, typename... Args>
+    T& make_child(Args&&... args) {
+        this->add_child(std::make_unique<T>(std::forward<Args>(args)...));
+        return static_cast<T&>(*children_.back());
+    }
 
-	// Breadth First Search for name
-	template <typename T>
-	T* find_child(const std::string& name)
-	{
-		std::queue<Object*> queue_;
-		queue_.push(this);
-		while(!queue_.empty()) {
-			Object* current = queue_.front();
-			queue_.pop();
-			if(current->name() == name && dynamic_cast<T*>(current)) {
-				return dynamic_cast<T*>(current);
-			}
-			auto children = current->children();
-			std::for_each(std::begin(children), std::end(children), [&](Object* p){queue_.push(p);});
-		}
-		return nullptr;
-	}
+    void add_child(std::unique_ptr<Object> child);
 
-	template <typename T>
-	const T* find_child(const std::string& name) const
-	{
-		return const_cast<Object*>(this)->find_child<T>(name);
-	}
+    virtual bool event(Event& event);
 
-	void install_event_filter(Object* filter_object);
+    virtual bool event_filter(Object* watched, Event& event);
 
-	std::string name() const { return object_name_; }
+    // Breadth First Search for name
+    template <typename T>
+    T* find_child(const std::string& name) {
+        return this->find_child_impl<T>(this, name);
+    }
 
-	Object* parent() const;
+    template <typename T>
+    const T* find_child(const std::string& name) const {
+        return this->find_child_impl<T>(this, name);
+    }
 
-	void remove_event_filter(Object* obj);
+    void install_event_filter(Object* filter_object);
 
-	void set_name(const std::string& name);
+    std::string name() const { return object_name_; }
 
-	void set_parent(Object* parent);
+    Object* parent() const;
 
-	void set_enabled(bool enabled);
+    void remove_event_filter(Object* obj);
 
-	std::vector<Object*> children() const;
+    void set_name(const std::string& name);
 
-	virtual bool has_coordinates(unsigned glob_x, unsigned glob_y){ return false; }
-	
-	bool is_enabled() const { return enabled_; }
+    void set_parent(Object* parent);
 
-	// Slots - change to uppercase Slot eventually
-	slot<void()> delete_later;
-	slot<void()> enable;
-	slot<void()> disable;
+    void set_enabled(bool enabled);
 
-	// Signals
-	signal<void(Object*)> destroyed;
-	signal<void(const std::string&)> object_name_changed;
+    std::vector<Object*> children() const;
 
-	friend class System;
+    virtual bool has_coordinates(std::size_t glob_x, std::size_t glob_y) {
+        return false;
+    }
 
-protected:
-	virtual void child_event(Child_event& event);
-	virtual void enable_event(Enable_event& event);
+    bool is_enabled() const { return enabled_; }
 
-	std::string object_name_;
-	Object* parent_ = nullptr;
-	std::vector<std::unique_ptr<Object>> children_;
-	std::vector<Object*> event_filter_objects_;
+    // Slot - no noexcept specification for Slot's move constructor/assignment
+    Slot<void()> delete_later;
+    Slot<void()> enable;
+    Slot<void()> disable;
 
-	bool enabled_ = true;
+    // Signals
+    Signal<void(Object*)> destroyed;
+    Signal<void(const std::string&)> object_name_changed;
 
-private:
-	void delete_child(Object* child);
-	void initialize();
+    friend class System;
+
+   protected:
+    virtual void child_event(Child_event& event);
+    virtual void enable_event(Enable_event& event);
+
+    std::string object_name_;
+    Object* parent_ = nullptr;
+    std::vector<std::unique_ptr<Object>> children_;
+    std::vector<Object*> event_filter_objects_;
+
+    bool enabled_ = true;
+
+   private:
+    template <typename T, typename U>
+    static auto find_child_impl(U u, const std::string& name)
+        -> decltype(u->template find_child<T>(name)) {
+        std::queue<U> queue_;
+        queue_.push(u);
+        while (!queue_.empty()) {
+            auto current = queue_.front();
+            queue_.pop();
+            auto c_ptr = dynamic_cast<T*>(current);
+            if (current->name() == name && c_ptr) {
+                return c_ptr;
+            }
+            auto children = current->children();
+            std::for_each(std::begin(children), std::end(children),
+                          [&](Object* p) { queue_.push(p); });
+        }
+        return nullptr;
+    }
+
+    void delete_child(Object* child);
+    void initialize();
+
+    bool valid_ = true;
 };
 
-} // namespace mcurses
-#endif // OBJECT_HPP
+}  // namespace mcurses
+#endif  // OBJECT_HPP

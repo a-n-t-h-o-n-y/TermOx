@@ -3,23 +3,28 @@
 
 #include "../event.hpp"
 
+#include <cstddef>
+
 namespace mcurses {
 
 class Resize_event : public Event {
-public:
-	Resize_event(unsigned new_width, unsigned new_height, unsigned old_width = 0, unsigned old_height = 0);
-	
-	unsigned old_width() const { return old_width_; }
-	unsigned old_height() const { return old_height_; }
-	unsigned new_width() const { return new_width_; }
-	unsigned new_height() const { return new_height_; }
+   public:
+    Resize_event(std::size_t new_width,
+                 std::size_t new_height,
+                 std::size_t old_width = 0,
+                 std::size_t old_height = 0);
 
-protected:
-	unsigned new_width_;
-	unsigned new_height_;
-	unsigned old_width_;
-	unsigned old_height_;
+    std::size_t old_width() const { return old_width_; }
+    std::size_t old_height() const { return old_height_; }
+    std::size_t new_width() const { return new_width_; }
+    std::size_t new_height() const { return new_height_; }
+
+   protected:
+    std::size_t new_width_;
+    std::size_t new_height_;
+    std::size_t old_width_;
+    std::size_t old_height_;
 };
 
-} // namespace mcurses
-#endif // RESIZE_EVENT_HPP
+}  // namespace mcurses
+#endif  // RESIZE_EVENT_HPP

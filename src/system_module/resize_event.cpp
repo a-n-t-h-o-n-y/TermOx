@@ -1,11 +1,17 @@
 #include <system_module/events/resize_event.hpp>
 
+#include <cstddef>
+
 namespace mcurses {
 
-Resize_event::Resize_event(unsigned new_width, unsigned new_height, unsigned old_width, unsigned old_height)
-:Event{Event::Type::Resize},
-new_width_{new_width}, new_height_{new_height},
-old_width_{old_width}, old_height_{old_height}
-{}
+Resize_event::Resize_event(std::size_t new_width,
+                           std::size_t new_height,
+                           std::size_t old_width,
+                           std::size_t old_height)
+    : Event{Event::Type::Resize},
+      new_width_{new_width},
+      new_height_{new_height},
+      old_width_{old_width},
+      old_height_{old_height} {}
 
-} // namespace mcurses
+}  // namespace mcurses

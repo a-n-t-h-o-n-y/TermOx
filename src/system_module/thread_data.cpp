@@ -3,17 +3,15 @@
 namespace mcurses {
 namespace detail {
 
-Thread_data& Thread_data::current()
-{
-	static Thread_data data_; // have the constructor initialize everything
-
-	return data_;
+Thread_data& Thread_data::current() {
+    return data_;
 }
 
-Abstract_event_dispatcher& Thread_data::dispatcher()
-{
-	return *dispatcher_;
+Abstract_event_dispatcher& Thread_data::dispatcher() {
+    return *dispatcher_;
 }
 
-} // namespace detail
-} // namespace mcurses
+Thread_data Thread_data::data_;
+
+}  // namespace detail
+}  // namespace mcurses

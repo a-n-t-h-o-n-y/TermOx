@@ -1,51 +1,59 @@
 #ifndef GLYPH_MATRIX_HPP
 #define GLYPH_MATRIX_HPP
 
-#include "glyph.hpp"
 #include "color.hpp"
+#include "glyph.hpp"
 
+// #include <stdexcept>
+#include <cstddef>
 #include <vector>
-#include <stdexcept>
 
 namespace mcurses {
 
 class Glyph_matrix {
-public:
-	explicit Glyph_matrix(unsigned width = 0, unsigned height = 0)
-	:matrix_{height, std::vector<Glyph>(width, Glyph{" ", background(Color::Black), foreground(Color::White)})}
-	{}
+   public:
+    explicit Glyph_matrix(std::size_t width = 0, std::size_t height = 0)
+        : matrix_{height,
+                  std::vector<Glyph>(width,
+                                     Glyph{" ", background(Color::Black),
+                                           foreground(Color::White)})} {}
 
-	void resize(unsigned width, unsigned height) {
-		matrix_.resize(height);
-		for(auto& row : matrix_) {
-			row.resize(width, Glyph{" ", background(Color::Black), foreground(Color::White)});
-		}
-	}
+    void resize(std::size_t width, std::size_t height) {
+        matrix_.resize(height);
+        for (auto& row : matrix_) {
+            row.resize(width, Glyph{" ", background(Color::Black),
+                                    foreground(Color::White)});
+        }
+    }
 
-	unsigned width() const {
-		if(matrix_.size() == 0) {
-			return 0;
-		}
-		return matrix_[0].size();
-	}
+    std::size_t width() const {
+        return matrix_.empty() ? 0 : matrix_[0].size();
+    }
 
-	unsigned height() const { return matrix_.size(); }
+    std::size_t height() const { return matrix_.size(); }
 
-	Glyph& at(unsigned x, unsigned y) {
-		if(matrix_.size() == 0 || y >= matrix_.size() || x >= matrix_[0].size()) {
-			throw std::out_of_range("Matrix access");
-		}
-		return matrix_[y][x];
-	}
+    Glyph& at(std::size_t x, std::size_t y) {
+        return this->at_impl(*this, x, y);
+    }
 
-	const Glyph& at(unsigned x, unsigned y) const {
-		auto nc_this = const_cast<Glyph_matrix*>(this);
-		return nc_this->at(x, y);
-	}
+    const Glyph& at(std::size_t x, std::size_t y) const {
+        return this->at_impl(*this, x, y);
+    }
 
-private:
-	std::vector<std::vector<Glyph>> matrix_;
+   private:
+    template <typename T>
+    static auto at_impl(T& t, std::size_t x, std::size_t y)
+        -> decltype(t.at(x, y)) {
+        // if (t.matrix_.empty() || y >= t.matrix_.size() ||
+        //     x >= t.matrix_[0].size()) {
+        //     throw std::out_of_range("Matrix access");
+        // }
+        // return t.matrix_[y][x];
+        return t.matrix_.at(y).at(x);
+    }
+
+    std::vector<std::vector<Glyph>> matrix_;
 };
 
-} // namespace mcurses
-#endif // GLYPH_MATRIX_HPP
+}  // namespace mcurses
+#endif  // GLYPH_MATRIX_HPP

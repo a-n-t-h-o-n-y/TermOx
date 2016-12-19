@@ -4,15 +4,15 @@
 namespace mcurses {
 
 enum class Attribute {
-	Bold,
-	Italic,
-	Underline,
-	Standout,
-	Dim,
-	Inverse,
-	Invisible,
-	Blink
+    Bold,
+    Italic,
+    Underline,
+    Standout,
+    Dim,
+    Inverse,
+    Invisible,
+    Blink
 };
 
-} // namespace mcurses
-#endif // ATTRIBUTE_HPP
+}  // namespace mcurses
+#endif  // ATTRIBUTE_HPP

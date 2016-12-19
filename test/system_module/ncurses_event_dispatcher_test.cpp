@@ -2,7 +2,6 @@
 
 #include <gtest/gtest.h>
 
-TEST(NCursesEventDispatcherTest, Default)
-{
+TEST(NCursesEventDispatcherTest, Default) {
 
 }

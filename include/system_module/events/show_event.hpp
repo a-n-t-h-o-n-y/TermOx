@@ -6,10 +6,9 @@
 namespace mcurses {
 
 class Show_event : public Event {
-public:
-	Show_event():Event{Event::Type::Show}{}
-
+   public:
+    Show_event() : Event{Event::Type::Show} {}
 };
 
-} // namespace mcurses
-#endif // SHOW_EVENT_HPP
+}  // namespace mcurses
+#endif  // SHOW_EVENT_HPP
