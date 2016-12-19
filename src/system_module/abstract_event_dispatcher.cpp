@@ -11,8 +11,10 @@ bool Abstract_event_dispatcher::process_events() {
     interrupt_ = false;
     System::send_posted_events();
     if (!interrupt_) {
-        System::send_posted_events(nullptr, Event::Type::DeferredDelete);
+        System::send_posted_events(nullptr, Event::DeferredDelete);
     }
+    System::paint_engine()->flush(); // this could be bad for deleted widgets
+                                    //  but maybe not.
     if (!interrupt_) {
         this->post_user_input();  // Blocking call
     }

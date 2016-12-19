@@ -93,35 +93,36 @@ void Object::delete_child(Object* child) {
     }
 }
 
-bool Object::event(Event& event) {
+bool Object::event(const Event& event) {
     if (event.type() == Event::ChildAdded ||
         event.type() == Event::ChildPolished ||
         event.type() == Event::ChildRemoved) {
-        this->child_event(static_cast<Child_event&>(event));
-        return event.is_accepted();
+        return this->child_event(static_cast<const Child_event&>(event));
+        // return event.is_accepted();
     }
 
     if (event.type() == Event::EnabledChange) {
-        this->enable_event(static_cast<Enable_event&>(event));
-        return event.is_accepted();
+        return this->enable_event(static_cast<const Enable_event&>(event));
+        // return event.is_accepted();
     }
 
-    return event.is_accepted();
+    // return event.is_accepted();
+    return true;
 }
 
-void Object::child_event(Child_event& event) {
+bool Object::child_event(const Child_event& event) {
     Widget* parent = dynamic_cast<Widget*>(this->parent());
-    if (parent) {
+    if (parent != nullptr) {
         parent->update();
     }
-    event.accept();
+    return true;
 }
 
-void Object::enable_event(Enable_event& event) {
-    event.accept();
+bool Object::enable_event(const Enable_event& event) {
+    return true;
 }
 
-bool Object::event_filter(Object* watched, Event& event) {
+bool Object::event_filter(Object* watched, const Event& event) {
     return false;
 }
 

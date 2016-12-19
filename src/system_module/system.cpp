@@ -40,7 +40,7 @@ void System::remove_posted_event(Event* event) {
     queue.erase(pos);
 }
 
-bool System::send_event(Object* obj, Event& event) {
+bool System::send_event(Object* obj, const Event& event) {
     return (obj != nullptr) ? notify(obj, event) : false;
 }
 
@@ -70,7 +70,7 @@ void System::send_posted_events(Object* obj, Event::Type etype) {
     }
 }
 
-bool System::notify(Object* obj, Event& event) {
+bool System::notify(Object* obj, const Event& event) {
     bool handled{false};
 
     // Send event to any filter objects
@@ -87,7 +87,7 @@ bool System::notify(Object* obj, Event& event) {
     return notify_helper(obj, event);
 }
 
-bool System::notify_helper(Object* obj, Event& event) {
+bool System::notify_helper(Object* obj, const Event& event) {
     bool handled{false};
     // Send event to object
     handled = obj->event(event);

@@ -247,7 +247,7 @@ class Event_filter_test : public Widget {
         this->geometry().set_width(5);
         this->geometry().set_height(3);
     }
-    virtual bool event_filter(Object* watched, Event& event) override {
+    bool event_filter(Object* watched, const Event& event) override {
         ++glob_test_int;
         return true;
     }

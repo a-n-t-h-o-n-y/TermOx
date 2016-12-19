@@ -22,10 +22,10 @@ class System : public Object {
                            std::unique_ptr<Event> event,
                            int priority = 0);
     static void remove_posted_event(Event* event);
-    static bool send_event(Object* obj, Event& event);
+    static bool send_event(Object* obj, const Event& event);
     static void send_posted_events(Object* obj = nullptr,
                                    Event::Type etype = Event::None);
-    static bool notify(Object* obj, Event& event);
+    static bool notify(Object* obj, const Event& event);
     static void exit(int return_code = 0);
     static Object* head();
     static unsigned max_width();
@@ -55,7 +55,7 @@ class System : public Object {
     static std::unique_ptr<Paint_engine> engine_;
     static Widget* focus_widg_;
     static std::unique_ptr<Palette> system_palette_;
-    static bool notify_helper(Object* obj, Event& event);
+    static bool notify_helper(Object* obj, const Event& event);
 };
 
 }  // namespace mcurses

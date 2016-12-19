@@ -107,22 +107,22 @@ class Widget : public Object {
     Slot<void()> update_me;
 
    protected:
-    bool event(Event& event) override;
-    virtual void move_event(Move_event& event); // these should take pointers
-    virtual void resize_event(Resize_event& event);
-    virtual void paint_event(Paint_event& event);
-    virtual void mouse_press_event(Mouse_event& event);
-    virtual void mouse_release_event(Mouse_event& event);
-    virtual void mouse_double_click_event(Mouse_event& event);
-    virtual void wheel_event(Mouse_event& event);
-    virtual void mouse_move_event(Mouse_event& event);
-    virtual void key_press_event(Key_event& event);
-    virtual void key_release_event(Key_event& event);
-    virtual void close_event(Close_event& event);
-    virtual void hide_event(Hide_event& event);
-    virtual void show_event(Show_event& event);
-    void enable_event(Enable_event& event) override;
-    virtual void focus_event(Focus_event& event);
+    bool event(const Event& event) override;
+    virtual bool move_event(const Move_event& event);
+    virtual bool resize_event(const Resize_event& event);
+    virtual bool paint_event(const Paint_event& event);
+    virtual bool mouse_press_event(const Mouse_event& event);
+    virtual bool mouse_release_event(const Mouse_event& event);
+    virtual bool mouse_double_click_event(const Mouse_event& event);
+    virtual bool wheel_event(const Mouse_event& event);
+    virtual bool mouse_move_event(const Mouse_event& event);
+    virtual bool key_press_event(const Key_event& event);
+    virtual bool key_release_event(const Key_event& event);
+    virtual bool close_event(const Close_event& event);
+    virtual bool hide_event(const Hide_event& event);
+    virtual bool show_event(const Show_event& event);
+    bool enable_event(const Enable_event& event) override;
+    virtual bool focus_event(const Focus_event& event);
 
     std::size_t find_global_x() const;
     std::size_t find_global_y() const;

@@ -24,9 +24,10 @@ void Layout::update() {
     Widget::update();
 }
 
-void Layout::child_event(Child_event& event) {
+bool Layout::child_event(const Child_event& event) {
     this->update();
-    event.accept();
+    // event.accept();
+    return true;
 }
 
 }  // namespace mcurses

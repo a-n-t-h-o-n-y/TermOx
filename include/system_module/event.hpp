@@ -118,21 +118,19 @@ class Event {
         AccessibilityDescription
     };
 
-    explicit Event(Type type);
+    explicit Event(Type type) : type_{type} {}
+
     virtual ~Event() = default;
 
-    void accept();
-    void ignore();
-    bool is_accepted() const;
-    void set_accepted(bool accept);
-    Type type() const;
+    Type type() const { return type_; }
 
    protected:
     Type type_;
-    bool accepted_ = true;
 };
 
-bool operator==(const Event& x, const Event& y);
+inline bool operator==(const Event& x, const Event& y) {
+    return x.type() == y.type();
+}
 
 }  // namespace mcurses
 #endif  // EVENT_HPP

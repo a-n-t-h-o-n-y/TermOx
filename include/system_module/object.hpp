@@ -35,9 +35,9 @@ class Object {
 
     void add_child(std::unique_ptr<Object> child);
 
-    virtual bool event(Event& event);
+    virtual bool event(const Event& event);
 
-    virtual bool event_filter(Object* watched, Event& event);
+    virtual bool event_filter(Object* watched, const Event& event);
 
     // Breadth First Search for name
     template <typename T>
@@ -84,8 +84,8 @@ class Object {
     friend class System;
 
    protected:
-    virtual void child_event(Child_event& event);
-    virtual void enable_event(Enable_event& event);
+    virtual bool child_event(const Child_event& event);
+    virtual bool enable_event(const Enable_event& event);
 
     std::string object_name_;
     Object* parent_ = nullptr;
