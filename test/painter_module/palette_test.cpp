@@ -1,21 +1,25 @@
-#include <painter_module/palette.hpp>
 #include <painter_module/color.hpp>
-#include <system_module/system.hpp>
+#include <painter_module/palette.hpp>
 #include <system_module/system.hpp>
 
 #include <gtest/gtest.h>
 
-TEST(PaletteTest, Everything){
-	mcurses::System system;
-	EXPECT_EQ(255, mcurses::Standard_palette().red_value(mcurses::Color::Red));
-	EXPECT_EQ(0, mcurses::Standard_palette().green_value(mcurses::Color::Red));
-	EXPECT_EQ(0, mcurses::Standard_palette().blue_value(mcurses::Color::Red));
+using mcurses::Color;
+using mcurses::DawnBringer_palette;
+using mcurses::Standard_palette;
+using mcurses::System;
 
-	EXPECT_EQ(52, mcurses::DawnBringer_palette().red_value(mcurses::Color::Green));
-	EXPECT_EQ(101, mcurses::DawnBringer_palette().green_value(mcurses::Color::Green));
-	EXPECT_EQ(36, mcurses::DawnBringer_palette().blue_value(mcurses::Color::Green));
+TEST(PaletteTest, Everything) {
+    System system;
+    EXPECT_EQ(255, Standard_palette().red_value(Color::Red));
+    EXPECT_EQ(0, Standard_palette().green_value(Color::Red));
+    EXPECT_EQ(0, Standard_palette().blue_value(Color::Red));
 
-	EXPECT_EQ(208, mcurses::System::palette()->red_value(mcurses::Color::Red));
-	mcurses::System::set_palette(std::make_unique<mcurses::Standard_palette>());
-	EXPECT_EQ(255, mcurses::System::palette()->red_value(mcurses::Color::Red));
+    EXPECT_EQ(52, DawnBringer_palette().red_value(Color::Green));
+    EXPECT_EQ(101, DawnBringer_palette().green_value(Color::Green));
+    EXPECT_EQ(36, DawnBringer_palette().blue_value(Color::Green));
+
+    EXPECT_EQ(208, System::palette()->red_value(Color::Red));
+    System::set_palette(std::make_unique<Standard_palette>());
+    EXPECT_EQ(255, System::palette()->red_value(Color::Red));
 }

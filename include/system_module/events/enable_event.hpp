@@ -6,15 +6,14 @@
 namespace mcurses {
 
 class Enable_event : public Event {
-public:
-	Enable_event(bool enabled)
-	:Event{Event::Type::EnabledChange}, enabled_{enabled}
-	{}
-	bool is_enabled() const { return enabled_; }
+   public:
+    explicit Enable_event(bool enabled)
+        : Event{Event::Type::EnabledChange}, enabled_{enabled} {}
+    bool is_enabled() const { return enabled_; }
 
-private:
-	bool enabled_;
+   private:
+    bool enabled_;
 };
 
-} // namespace mcurses
-#endif // ENABLE_EVENT_HPP
+}  // namespace mcurses
+#endif  // ENABLE_EVENT_HPP

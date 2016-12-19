@@ -6,12 +6,11 @@
 namespace mcurses {
 
 class Paint_event : public Event {
-public:
-	Paint_event():Event{Event::Type::Paint}{}
+   public:
+    Paint_event() : Event{Event::Type::Paint} {}
 
-private:
-
+   private:
 };
 
-} // namespace mcurses
-#endif // PAINT_EVENT_HPP
+}  // namespace mcurses
+#endif  // PAINT_EVENT_HPP

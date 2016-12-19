@@ -2,7 +2,4 @@
 
 #include <gtest/gtest.h>
 
-TEST(WidgetTest, Default)
-{
-	
-}
+TEST(WidgetTest, Default) {}

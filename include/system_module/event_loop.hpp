@@ -3,19 +3,18 @@
 
 #include "object.hpp"
 
-namespace mcurses
-{
+namespace mcurses {
 
 class Event_loop : public Object {
-public:
-	int run();
-	void exit(int return_code);
-	bool process_events();
+   public:
+    int run();
+    void exit(int return_code);
+    bool process_events();
 
-private:
-	int return_code_ = 0;
-	bool exit_ = false;
+   private:
+    int return_code_ = 0;
+    bool exit_ = false;
 };
 
-} // namespace mcurses
-#endif // EVENT_LOOP_HPP
+}  // namespace mcurses
+#endif  // EVENT_LOOP_HPP

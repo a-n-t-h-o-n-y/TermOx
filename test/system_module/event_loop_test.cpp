@@ -2,7 +2,6 @@
 
 #include <gtest/gtest.h>
 
-TEST(EventLoopTest, Default)
-{
+TEST(EventLoopTest, Default) {
 
 }

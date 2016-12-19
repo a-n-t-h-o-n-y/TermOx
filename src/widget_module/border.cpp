@@ -1,48 +1,14 @@
-#include <widget_module/border.hpp>
-#include <painter_module/painter.hpp>
 #include <painter_module/glyph.hpp>
+#include <painter_module/painter.hpp>
+#include <widget_module/border.hpp>
 
 namespace mcurses {
 
-// void Border::draw() const { // implement this in painter
-// 	Painter p{widget_};
-// 	// North
-// 	p.line(1, 0, widget_->geometry().width()-2, 0, north_.str());
-
-// 	// South
-// 	p.line(1, widget_->geometry().height()-1, widget_->geometry().width()-2, widget_->geometry().height()-1, south_.str());
-
-// 	// East
-// 	p.line(widget_->geometry().width()-1, 1, widget_->geometry().width()-1, widget_->geometry().height()-2, east_.str());
-
-// 	// West
-// 	p.line(0, 1, 0, widget_->geometry().height()-2, west_.str());
-
-// 	// North - West
-// 	p.move(0, 0);
-// 	p.put_feature_(north_west_.str());
-
-// 	// North - East
-// 	p.move(widget_->geometry().width()-1, 0);
-// 	p.put_feature_(north_east_.str());
-
-// 	// South - West
-// 	p.move(0, widget_->geometry().height()-1);
-// 	p.put_feature_(south_west_.str());
-
-// 	// South - East
-// 	p.move(widget_->geometry().width()-1, widget_->geometry().height()-1);
-// 	p.put_feature_(south_east_.str());
-
-// 	return;
-// }
-
-void Border::set_walls(const Glyph& horizontals, const Glyph& verticals)
-{
-	north_ = horizontals;
-	south_ = horizontals;
-	east_ = verticals;
-	west_ = verticals;
+void Border::set_walls(const Glyph& horizontals, const Glyph& verticals) {
+    north_ = horizontals;
+    south_ = horizontals;
+    east_ = verticals;
+    west_ = verticals;
 }
 
-} // namespace mcurses
+}  // namespace mcurses

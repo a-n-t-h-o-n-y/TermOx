@@ -6,10 +6,9 @@
 namespace mcurses {
 
 class Hide_event : public Event {
-public:
-	Hide_event():Event{Event::Type::Hide}{}
-
+   public:
+    Hide_event() : Event{Event::Type::Hide} {}
 };
 
-} // namespace mcurses
-#endif // HIDE_EVENT_HPP
+}  // namespace mcurses
+#endif  // HIDE_EVENT_HPP
