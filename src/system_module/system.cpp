@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <iterator>
 #include <memory>
+#include <utility>
 #include <vector>
 
 namespace mcurses {
@@ -24,8 +25,8 @@ void System::post_event(Object* obj,
     if (obj == nullptr) {
         return;
     }
-    detail::Posted_event pe(obj, std::move(event), priority);
-    detail::Thread_data::current().event_queue.add_event(pe);
+    detail::Posted_event pe{obj, std::move(event), priority};
+    detail::Thread_data::current().event_queue.add_event(std::move(pe));
 }
 
 void System::remove_posted_event(Event* event) {

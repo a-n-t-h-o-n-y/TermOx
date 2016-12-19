@@ -11,7 +11,7 @@ namespace detail {
 // Do no access through std::list pointer/ref
 class Posted_event_queue : public std::list<Posted_event> {
    public:
-    void add_event(Posted_event& ev);
+    void add_event(Posted_event ev);
     Posted_event next_posted_event();
 
    private:
