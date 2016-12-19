@@ -98,15 +98,10 @@ bool Object::event(const Event& event) {
         event.type() == Event::ChildPolished ||
         event.type() == Event::ChildRemoved) {
         return this->child_event(static_cast<const Child_event&>(event));
-        // return event.is_accepted();
     }
-
     if (event.type() == Event::EnabledChange) {
         return this->enable_event(static_cast<const Enable_event&>(event));
-        // return event.is_accepted();
     }
-
-    // return event.is_accepted();
     return true;
 }
 

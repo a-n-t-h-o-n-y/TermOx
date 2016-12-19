@@ -39,7 +39,7 @@ class System : public Object {
     static Palette* palette();
 
     explicit System(std::unique_ptr<Paint_engine> engine =
-               std::make_unique<detail::NCurses_paint_engine>());
+                        std::make_unique<detail::NCurses_paint_engine>());
     ~System() override;
 
     static void set_head(Object* obj);

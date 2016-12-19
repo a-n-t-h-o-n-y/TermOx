@@ -84,13 +84,11 @@ bool Widget::event(const Event& event) {
     // Move_event
     if (event.type() == Event::Move) {
         return this->move_event(static_cast<const Move_event&>(event));
-        // return event.is_accepted();
     }
 
     // Resize_event
     if (event.type() == Event::Resize) {
         return this->resize_event(static_cast<const Resize_event&>(event));
-        // return event.is_accepted();
     }
 
     // Paint_event
@@ -104,14 +102,12 @@ bool Widget::event(const Event& event) {
         } else if (!this->visible()) {
         }
         return true;
-        // return event.is_accepted();
     }
 
     // Mouse_events
     if (event.type() == Event::MouseButtonPress) {
         // should most of this be in event handler function?
         if (!this->is_enabled() || !this->visible()) {
-            // return event.is_accepted();
             return true;
         }
         if (this->focus_policy() == Focus_policy::ClickFocus ||
@@ -119,81 +115,67 @@ bool Widget::event(const Event& event) {
             System::set_focus_widget(this);
         }
         return this->mouse_press_event(static_cast<const Mouse_event&>(event));
-        // return event.is_accepted();
     }
     if (event.type() == Event::MouseButtonRelease) {
         if (!this->is_enabled() || !this->visible()) {
             return true;
-            // return event.is_accepted();
         }
-        return this->mouse_release_event(static_cast<const Mouse_event&>(event));
-        // return event.is_accepted();
+        return this->mouse_release_event(
+            static_cast<const Mouse_event&>(event));
     }
     if (event.type() == Event::MouseButtonDblClick) {
-        if (!this->is_enabled() || !this->visible()) { // things like this should be in the handler
-            // return event.is_accepted();
+        if (!this->is_enabled() ||
+            !this->visible()) {  // things like this should be in the handler
             return true;
         }
-        return this->mouse_double_click_event(static_cast<const Mouse_event&>(event));
-        // return event.is_accepted();
+        return this->mouse_double_click_event(
+            static_cast<const Mouse_event&>(event));
     }
     if (event.type() == Event::Wheel) {
         if (!this->is_enabled() || !this->visible()) {
-            // return event.is_accepted();
             return true;
         }
         return this->wheel_event(static_cast<const Mouse_event&>(event));
-        // return event.is_accepted();
     }
     if (event.type() == Event::MouseMove && this->has_mouse_tracking()) {
         if (!this->is_enabled() || !this->visible()) {
             return true;
-            // return event.is_accepted();
         }
         return this->mouse_move_event(static_cast<const Mouse_event&>(event));
-        // return event.is_accepted();
     }
 
     // KeyEvent
     if (event.type() == Event::KeyPress) {
         if (!this->is_enabled() || !this->visible()) {
-            // return event.is_accepted();
-            return true; // is this the right response? or false?
+            return true;  // is this the right response? or false?
         }
         return this->key_press_event(static_cast<const Key_event&>(event));
-        // return event.is_accepted();
     }
     if (event.type() == Event::KeyRelease) {
         if (!this->is_enabled() || !this->visible()) {
             return true;
-            // return event.is_accepted();
         }
         return this->key_release_event(static_cast<const Key_event&>(event));
-        // return event.is_accepted();
     }
 
     // Close Event
     if (event.type() == Event::Close) {
         return this->close_event(static_cast<const Close_event&>(event));
-        // return event.is_accepted();
     }
 
     // Hide Event
     if (event.type() == Event::Hide) {
         return this->hide_event(static_cast<const Hide_event&>(event));
-        // return event.is_accepted();
     }
 
     // Show Event
     if (event.type() == Event::Show) {
         return this->show_event(static_cast<const Show_event&>(event));
-        // return event.is_accepted();
     }
 
     // Focus Event
     if (event.type() == Event::FocusIn || event.type() == Event::FocusOut) {
         return this->focus_event(static_cast<const Focus_event&>(event));
-        // return event.is_accepted();
     }
 
     return Object::event(event);
@@ -206,14 +188,12 @@ bool Widget::move_event(const Move_event& event) {
     // loop
     // if (parent) { parent->update(); }
     this->update();
-    // event.accept();
     return true;
 }
 
 bool Widget::resize_event(const Resize_event& event) {
     this->geometry().set_width(event.new_width());
     this->geometry().set_height(event.new_height());
-    // event.accept();
     return true;
 }
 
@@ -229,7 +209,6 @@ bool Widget::paint_event(const Paint_event& event) {
             child->update();
         }
     }
-    // event.accept();
     return true;
 }
 // probably not needed anymore??
@@ -258,53 +237,43 @@ void Widget::paint_disabled_widget() {
 }
 
 bool Widget::mouse_press_event(const Mouse_event& event) {
-    // event.ignore();
     return false;
 }
 
 bool Widget::mouse_release_event(const Mouse_event& event) {
-    // event.ignore();
     return false;
 }
 
 bool Widget::mouse_double_click_event(const Mouse_event& event) {
-    // event.ignore();
     return false;
 }
 
 bool Widget::wheel_event(const Mouse_event& event) {
-    // event.ignore();
     return false;
 }
 
 bool Widget::mouse_move_event(const Mouse_event& event) {
-    // event.ignore();
     return false;
 }
 
 bool Widget::key_press_event(const Key_event& event) {
-    // event.ignore();
     return false;
 }
 
 bool Widget::key_release_event(const Key_event& event) {
-    // event.ignore();
     return false;
 }
 
 bool Widget::close_event(const Close_event& event) {
     this->delete_later();
-    // event.accept();
     return true;
 }
 
 bool Widget::hide_event(const Hide_event& event) {
-    // event.accept();
     return true;
 }
 
 bool Widget::show_event(const Show_event& event) {
-    // event.accept();
     return true;
 }
 
@@ -312,7 +281,7 @@ bool Widget::enable_event(const Enable_event& event) {
     if (!event.is_enabled()) {
         // save current brush and
         // set brush to greyscale
-        return true; // ? you'll figure it out
+        return true;  // ? you'll figure it out
     } else {
         // set brush back to saved original
     }
@@ -325,7 +294,6 @@ bool Widget::focus_event(const Focus_event& event) {
         p.set_cursor(this->cursor());
         p.move(cursor_x_, cursor_y_);
     }  // if(event.type() == FocusOut)
-    // event.accept();
     return true;
 }
 

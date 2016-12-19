@@ -26,7 +26,6 @@ void Layout::update() {
 
 bool Layout::child_event(const Child_event& event) {
     this->update();
-    // event.accept();
     return true;
 }
 
