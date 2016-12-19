@@ -45,7 +45,6 @@ list(APPEND PAINTER_MODULE_SOURCES  "src/painter_module/ncurses_paint_engine.cpp
 									"src/painter_module/glyph.cpp"
 									"src/painter_module/brush.cpp"
 									"src/painter_module/geometry.cpp"
-									"src/painter_module/glyph_string.cpp"
 									"src/painter_module/paint_buffer.cpp"
 									)
 list(APPEND WIDGET_MODULE_SOURCES 	"src/widget_module/widget.cpp"
@@ -91,9 +90,9 @@ add_executable(test1 ${TEST1_SOURCES})
 add_executable(test2 ${TEST2_SOURCES})
 
 # Link libraries to executables
-target_link_libraries(tests mcurses signals gtest gtest_main ncurses)
-target_link_libraries(test1 mcurses signals ncurses)
-target_link_libraries(test2 mcurses signals ncurses)
+target_link_libraries(tests mcurses gtest gtest_main ncurses)
+target_link_libraries(test1 mcurses ncurses)
+target_link_libraries(test2 mcurses ncurses)
 
 # Install Static Library
 install(TARGETS mcurses ARCHIVE DESTINATION lib)

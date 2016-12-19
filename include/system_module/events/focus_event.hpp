@@ -6,9 +6,9 @@
 namespace mcurses {
 
 class Focus_event : public Event {
-public:
-	Focus_event(Event::Type type):Event{type}{}
+   public:
+    explicit Focus_event(Event::Type type) : Event{type} {}
 };
 
-} // namespace mcurses
-#endif // FOCUS_EVENT_HPP
+}  // namespace mcurses
+#endif  // FOCUS_EVENT_HPP

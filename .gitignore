@@ -5,6 +5,7 @@ doc/*
 !doc/images
 lib/*
 notes
+tags
 
 *.[ao]
 *.so

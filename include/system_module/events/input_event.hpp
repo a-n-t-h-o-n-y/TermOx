@@ -6,13 +6,14 @@
 namespace mcurses {
 
 class Input_event : public Event {
-public:
-	enum class KeyboardModifiers {};
+   public:
+    enum class KeyboardModifiers { None };
 
-protected:
-	Input_event(Event::Type type):Event{type}{}
-	KeyboardModifiers modifiers_;
+   protected:
+    explicit Input_event(Event::Type type)
+        : Event{type}, modifiers_{KeyboardModifiers::None} {}
+    KeyboardModifiers modifiers_;
 };
 
-} // namespace mcurses
-#endif // INPUT_EVENT_HPP
+}  // namespace mcurses
+#endif  // INPUT_EVENT_HPP

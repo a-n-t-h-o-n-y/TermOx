@@ -6,10 +6,9 @@
 namespace mcurses {
 
 class Close_event : public Event {
-public:
-	Close_event():Event{Event::Type::Close}{}
-
+   public:
+    Close_event() : Event{Event::Type::Close} {}
 };
 
-} // namespace mcurses
-#endif // CLOSE_EVENT_HPP
+}  // namespace mcurses
+#endif  // CLOSE_EVENT_HPP
