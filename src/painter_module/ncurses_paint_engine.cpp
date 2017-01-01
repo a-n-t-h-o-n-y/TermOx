@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-namespace mcurses {
+namespace twf {
 namespace detail {
 
 NCurses_paint_engine::NCurses_paint_engine() {
@@ -161,4 +161,4 @@ void NCurses_paint_engine::initialize_color_pairs() const {
 }
 
 }  // namespace detail
-}  // namespace mcurses
+}  // namespace twf

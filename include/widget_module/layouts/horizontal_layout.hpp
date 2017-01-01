@@ -3,7 +3,7 @@
 
 #include "../layout.hpp"
 
-namespace mcurses {
+namespace twf {
 
 class Horizontal_layout : public Layout {
    public:
@@ -11,5 +11,5 @@ class Horizontal_layout : public Layout {
     void update_geometry() override;
 };
 
-}  // namespace mcurses
+}  // namespace twf
 #endif  // HORIZONTAL_LAYOUT_HPP

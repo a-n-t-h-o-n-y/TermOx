@@ -1,7 +1,7 @@
 #include <painter_module/palette.hpp>
 #include <painter_module/color.hpp>
 
-namespace mcurses {
+namespace twf {
 
 void Palette::set_rgb(Color c, int r, int g, int b) {
     auto& rgb = definitions_[translate_(c)];
@@ -64,4 +64,4 @@ DawnBringer_palette::DawnBringer_palette() : Palette{} {
     this->set_rgb(Color::White, 222, 238, 214);
 }
 
-}  // namespace mcurses
+}  // namespace twf

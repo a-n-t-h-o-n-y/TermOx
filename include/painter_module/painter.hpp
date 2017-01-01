@@ -11,7 +11,7 @@
 #include <sstream>
 #include <string>
 
-namespace mcurses {
+namespace twf {
 class Border;
 
 class Painter {
@@ -42,6 +42,6 @@ class Painter {
     Widget* widget_;
 };
 
-}  // namespace mcurses
+}  // namespace twf
 
 #endif  // PAINTER_HPP

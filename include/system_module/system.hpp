@@ -12,7 +12,7 @@
 
 #include <memory>
 
-namespace mcurses {
+namespace twf {
 
 class Widget;
 
@@ -23,8 +23,8 @@ class System : public Object {
                            int priority = 0);
     static void remove_posted_event(Event* event);
     static bool send_event(Object* obj, const Event& event);
-    static void send_posted_events(Object* obj = nullptr,
-                                   Event::Type etype = Event::None);
+    static void send_posted_events(Object* obj_filter = nullptr,
+                                   Event::Type etype_filter = Event::None);
     static bool notify(Object* obj, const Event& event);
     static void exit(int return_code = 0);
     static Object* head();
@@ -46,7 +46,7 @@ class System : public Object {
     int run();
 
     // Slots
-    Slot<void()> quit = []() { System::exit(); };
+    sig::Slot<void()> quit = []() { System::exit(); };
 
     friend class Abstract_event_dispatcher;
 
@@ -58,5 +58,5 @@ class System : public Object {
     static bool notify_helper(Object* obj, const Event& event);
 };
 
-}  // namespace mcurses
+}  // namespace twf
 #endif  // SYSTEM_HPP

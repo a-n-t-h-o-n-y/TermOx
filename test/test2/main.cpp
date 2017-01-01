@@ -1,10 +1,10 @@
-#include <mcurses.hpp>
-using namespace mcurses;
+#include <twidgets.hpp>
+using namespace twf;
 
 class Textbox : public Widget {
    public:
     Textbox() {
-        this->set_focus_policy(mcurses::Widget::Focus_policy::StrongFocus);
+        this->set_focus_policy(twf::Widget::Focus_policy::StrongFocus);
         this->set_cursor(true);
         this->enable_border();
         this->brush().set_background(Color::Green);
@@ -18,7 +18,7 @@ class Textbox : public Widget {
     }
 
     bool paint_event(const Paint_event& event) override {
-        this->erase_widget_screen();
+        // this->erase_widget_screen();
         Painter p{this};
         p.put(gs_);
         return true;

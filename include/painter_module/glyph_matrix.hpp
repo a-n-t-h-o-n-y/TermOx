@@ -4,11 +4,10 @@
 #include "color.hpp"
 #include "glyph.hpp"
 
-// #include <stdexcept>
 #include <cstddef>
 #include <vector>
 
-namespace mcurses {
+namespace twf {
 
 class Glyph_matrix {
    public:
@@ -55,5 +54,5 @@ class Glyph_matrix {
     std::vector<std::vector<Glyph>> matrix_;
 };
 
-}  // namespace mcurses
+}  // namespace twf
 #endif  // GLYPH_MATRIX_HPP

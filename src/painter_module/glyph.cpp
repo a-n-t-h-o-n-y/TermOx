@@ -3,7 +3,7 @@
 #include <codecvt>
 #include <locale>
 
-namespace mcurses {
+namespace twf {
 
 bool Glyph::verify_length_(const std::string& s) {
     return 1 ==
@@ -18,4 +18,4 @@ std::u32string Glyph::str_u32() const {
     return string;
 }
 
-}  // namespace mcurses
+}  // namespace twf

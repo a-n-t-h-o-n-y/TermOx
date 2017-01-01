@@ -3,12 +3,12 @@
 
 #include "../event.hpp"
 
-namespace mcurses {
+namespace twf {
 
 class Focus_event : public Event {
    public:
     explicit Focus_event(Event::Type type) : Event{type} {}
 };
 
-}  // namespace mcurses
+}  // namespace twf
 #endif  // FOCUS_EVENT_HPP

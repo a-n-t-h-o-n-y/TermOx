@@ -7,15 +7,15 @@
 #include <cstddef>
 #include <limits>
 
-namespace mcurses {
+namespace twf {
 class Widget;
 
 class Geometry {
    public:
     explicit Geometry(Widget* widget = nullptr,
-             std::size_t width_hint = System::max_width(),
-             std::size_t height_hint = System::max_height(),
-             Size_policy policy = Size_policy{})
+                      std::size_t width_hint = System::max_width(),
+                      std::size_t height_hint = System::max_height(),
+                      Size_policy policy = Size_policy{})
         : widget_{widget},
           width_hint_{width_hint},
           height_hint_{height_hint},
@@ -105,5 +105,5 @@ class Geometry {
     std::size_t height_ = height_hint_;
 };
 
-}  // namespace mcurses
+}  // namespace twf
 #endif  // GEOMETRY_HPP

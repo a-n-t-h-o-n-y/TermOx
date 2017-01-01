@@ -5,7 +5,7 @@
 
 #include <cstddef>
 
-namespace mcurses {
+namespace twf {
 
 class Resize_event : public Event {
    public:
@@ -26,5 +26,5 @@ class Resize_event : public Event {
     std::size_t old_height_;
 };
 
-}  // namespace mcurses
+}  // namespace twf
 #endif  // RESIZE_EVENT_HPP

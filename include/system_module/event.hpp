@@ -3,7 +3,7 @@
 
 #include "object.hpp"
 
-namespace mcurses {
+namespace twf {
 
 class Event {
    public:
@@ -132,5 +132,5 @@ inline bool operator==(const Event& x, const Event& y) {
     return x.type() == y.type();
 }
 
-}  // namespace mcurses
+}  // namespace twf
 #endif  // EVENT_HPP

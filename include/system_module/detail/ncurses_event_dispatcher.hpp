@@ -8,7 +8,7 @@
 #include <cstddef>
 #include <memory>
 
-namespace mcurses {
+namespace twf {
 namespace detail {
 
 class NCurses_event_dispatcher : public Abstract_event_dispatcher {
@@ -23,5 +23,5 @@ class NCurses_event_dispatcher : public Abstract_event_dispatcher {
 };
 
 }  // namespace detail
-}  // namespace mcurses
+}  // namespace twf
 #endif  // NCURSES_EVENT_DISPATCHER_HPP

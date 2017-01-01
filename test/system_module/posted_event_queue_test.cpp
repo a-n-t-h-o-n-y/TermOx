@@ -5,11 +5,11 @@
 
 #include <memory>
 
-using mcurses::detail::Posted_event;
-using mcurses::detail::Posted_event_queue;
-using mcurses::Event;
-using mcurses::Object;
-using mcurses::System;
+using twf::detail::Posted_event;
+using twf::detail::Posted_event_queue;
+using twf::Event;
+using twf::Object;
+using twf::System;
 
 TEST(PostedEventQueueTest, AddEvent) {
     System system;
@@ -46,12 +46,18 @@ TEST(PostedEventQueueTest, AddEvent) {
     Posted_event pe6{&object6, std::move(event6), 0};
     queue.add_event(std::move(pe6));
 
-    EXPECT_EQ(queue.next_posted_event().priority(), 100);
-    EXPECT_EQ(queue.next_posted_event().priority(), 1);
-    EXPECT_EQ(queue.next_posted_event().priority(), 0);
-    EXPECT_EQ(queue.next_posted_event().priority(), 0);
-    EXPECT_EQ(queue.next_posted_event().priority(), 0);
-    EXPECT_EQ(queue.next_posted_event().priority(), -9);
+    EXPECT_EQ(queue.front().priority(), 100);
+    queue.pop_front();
+    EXPECT_EQ(queue.front().priority(), 1);
+    queue.pop_front();
+    EXPECT_EQ(queue.front().priority(), 0);
+    queue.pop_front();
+    EXPECT_EQ(queue.front().priority(), 0);
+    queue.pop_front();
+    EXPECT_EQ(queue.front().priority(), 0);
+    queue.pop_front();
+    EXPECT_EQ(queue.front().priority(), -9);
+    queue.pop_front();
 }
 
 TEST(PostedEventQueueTest, NextEvent) {
@@ -69,8 +75,10 @@ TEST(PostedEventQueueTest, NextEvent) {
     queue.add_event(std::move(pe2));
 
     EXPECT_EQ(2, queue.size());
-    queue.next_posted_event();
+    queue.front();
+    queue.pop_front();
     EXPECT_EQ(1, queue.size());
-    queue.next_posted_event();
+    queue.front();
+    queue.pop_front();
     EXPECT_EQ(0, queue.size());
 }

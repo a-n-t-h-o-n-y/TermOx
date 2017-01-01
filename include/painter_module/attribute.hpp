@@ -1,7 +1,7 @@
 #ifndef ATTRIBUTE_HPP
 #define ATTRIBUTE_HPP
 
-namespace mcurses {
+namespace twf {
 
 enum class Attribute {
     Bold,
@@ -14,5 +14,5 @@ enum class Attribute {
     Blink
 };
 
-}  // namespace mcurses
+}  // namespace twf
 #endif  // ATTRIBUTE_HPP

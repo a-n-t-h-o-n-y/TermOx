@@ -4,9 +4,9 @@
 
 #include <gtest/gtest.h>
 
-using mcurses::System;
-using mcurses::Event_loop;
-using mcurses::detail::Thread_data;
+using twf::System;
+using twf::Event_loop;
+using twf::detail::Thread_data;
 
 TEST(ThreadDataTest, Default) {
     System system;

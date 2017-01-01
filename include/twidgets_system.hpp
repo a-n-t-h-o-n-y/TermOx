@@ -1,5 +1,5 @@
-#ifndef MCURSES_SYSTEM_HPP
-#define MCURSES_SYSTEM_HPP
+#ifndef TWIDGETS_SYSTEM_HPP
+#define TWIDGETS_SYSTEM_HPP
 
 #include "system_module/system.hpp"
 #include "system_module/abstract_event_dispatcher.hpp"
@@ -18,4 +18,4 @@
 #include "system_module/events/resize_event.hpp"
 #include "system_module/events/show_event.hpp"
 
-#endif // MCURSES_SYSTEM_HPP
+#endif  // TWIDGETS_SYSTEM_HPP

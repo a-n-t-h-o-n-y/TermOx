@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.6)
-project (MCurses)
+project (TWidgets)
 
 # Uncomment the next three lines to compile with clang static analyzer
 # set(CCC_CXX clang++)
@@ -77,8 +77,11 @@ list(APPEND TEST1_SOURCES "test/test1/main.cpp"
 list(APPEND TEST2_SOURCES "test/test2/main.cpp"
 						 )
 
+list(APPEND TEST3_SOURCES "test/test3/main.cpp"
+						 )
+
 # Create a Static Library for MCurses
-add_library(mcurses STATIC ${SYSTEM_MODULE_SOURCES}
+add_library(twidgets STATIC ${SYSTEM_MODULE_SOURCES}
 						   ${PAINTER_MODULE_SOURCES}
 						   ${WIDGET_MODULE_SOURCES}
  						   )
@@ -87,17 +90,19 @@ add_library(mcurses STATIC ${SYSTEM_MODULE_SOURCES}
 add_executable(tests ${TEST_SOURCES})
 add_executable(test1 ${TEST1_SOURCES})
 add_executable(test2 ${TEST2_SOURCES})
+add_executable(test3 ${TEST3_SOURCES})
 
 # Link libraries to executables
-target_link_libraries(tests mcurses gtest gtest_main ncurses)
-target_link_libraries(test1 mcurses ncurses)
-target_link_libraries(test2 mcurses ncurses)
+target_link_libraries(tests twidgets gtest gtest_main ncurses)
+target_link_libraries(test1 twidgets ncurses)
+target_link_libraries(test2 twidgets ncurses)
+target_link_libraries(test3 twidgets ncurses)
 
 # Install Static Library
-install(TARGETS mcurses ARCHIVE DESTINATION lib)
+install(TARGETS twidgets ARCHIVE DESTINATION lib)
 
 # Install Headers
-install(DIRECTORY include/ DESTINATION include/aml/mcurses)
+install(DIRECTORY include/ DESTINATION include/aml/twidgets)
 
 # Doxygen Target - Doxyfile in project/doc - make doc
 find_package(Doxygen)

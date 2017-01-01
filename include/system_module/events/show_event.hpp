@@ -3,12 +3,12 @@
 
 #include "../event.hpp"
 
-namespace mcurses {
+namespace twf {
 
 class Show_event : public Event {
    public:
     Show_event() : Event{Event::Type::Show} {}
 };
 
-}  // namespace mcurses
+}  // namespace twf
 #endif  // SHOW_EVENT_HPP

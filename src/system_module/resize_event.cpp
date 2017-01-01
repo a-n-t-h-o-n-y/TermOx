@@ -2,7 +2,7 @@
 
 #include <cstddef>
 
-namespace mcurses {
+namespace twf {
 
 Resize_event::Resize_event(std::size_t new_width,
                            std::size_t new_height,
@@ -14,4 +14,4 @@ Resize_event::Resize_event(std::size_t new_width,
       old_width_{old_width},
       old_height_{old_height} {}
 
-}  // namespace mcurses
+}  // namespace twf

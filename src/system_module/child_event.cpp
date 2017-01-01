@@ -1,7 +1,7 @@
 #include <system_module/event.hpp>
 #include <system_module/events/child_event.hpp>
 
-namespace mcurses {
+namespace twf {
 
 Child_event::Child_event(Event::Type type, Object* child)
     : Event(type), child_{child} {}
@@ -18,4 +18,4 @@ bool Child_event::removed() const {
     return type_ == Event::Type::ChildRemoved;
 }
 
-}  // namespace mcurses
+}  // namespace twf

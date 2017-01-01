@@ -1,6 +1,6 @@
 #include <painter_module/paint_engine.hpp>
 
-namespace mcurses {
+namespace twf {
 
 void Paint_engine::put(unsigned x, unsigned y, const Glyph& g) {
     buffer_.stage(x, y, g);
@@ -32,4 +32,4 @@ void Paint_engine::put_glyph(const Glyph& g) {
     this->clear_attributes();
 }
 
-}  // namespace mcurses
+}  // namespace twf

@@ -8,7 +8,7 @@
 
 #include <string>
 
-namespace mcurses {
+namespace twf {
 
 class Paint_engine {
    public:
@@ -45,5 +45,5 @@ class Paint_engine {
     void put_glyph(const Glyph& g);
 };
 
-}  // namespace mcurses
+}  // namespace twf
 #endif  // PAINT_ENGINE_HPP

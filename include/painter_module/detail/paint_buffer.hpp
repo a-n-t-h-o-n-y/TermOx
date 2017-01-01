@@ -3,7 +3,7 @@
 
 #include "../glyph_matrix.hpp"
 
-namespace mcurses {
+namespace twf {
 namespace detail {
 
 class Paint_buffer {
@@ -34,5 +34,5 @@ class Paint_buffer {
 };
 
 }  // namespace detail
-}  // namespace mcurses
+}  // namespace twf
 #endif  // PAINT_BUFFER_HPP

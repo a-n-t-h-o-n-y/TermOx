@@ -3,7 +3,7 @@
 
 #include "../event.hpp"
 
-namespace mcurses {
+namespace twf {
 
 class Child_event : public Event {
    public:
@@ -17,5 +17,5 @@ class Child_event : public Event {
     Object* child_;
 };
 
-}  // namespace mcurses
+}  // namespace twf
 #endif  // CHILD_EVENT_HPP

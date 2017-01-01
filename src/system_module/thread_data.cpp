@@ -1,6 +1,6 @@
 #include <system_module/detail/thread_data.hpp>
 
-namespace mcurses {
+namespace twf {
 namespace detail {
 
 Thread_data& Thread_data::current() {
@@ -14,4 +14,4 @@ Abstract_event_dispatcher& Thread_data::dispatcher() {
 Thread_data Thread_data::data_;
 
 }  // namespace detail
-}  // namespace mcurses
+}  // namespace twf

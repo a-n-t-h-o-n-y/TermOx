@@ -10,12 +10,12 @@
 #include <memory>
 #include <utility>
 
-using mcurses::detail::Posted_event;
-using mcurses::detail::Posted_event_queue;
-using mcurses::detail::Thread_data;
-using mcurses::Event;
-using mcurses::Object;
-using mcurses::System;
+using twf::detail::Posted_event;
+using twf::detail::Posted_event_queue;
+using twf::detail::Thread_data;
+using twf::Event;
+using twf::Object;
+using twf::System;
 
 TEST(SystemTest, DefaultConstructor) {
     System system;

@@ -1,7 +1,7 @@
 #ifndef COLOR_HPP
 #define COLOR_HPP
 
-namespace mcurses {
+namespace twf {
 
 enum class Color {
     Black,
@@ -73,5 +73,5 @@ inline detail::ForegroundColor foreground(Color c) {
     return static_cast<detail::ForegroundColor>(c);
 }
 
-}  // namespace mcurses
+}  // namespace twf
 #endif  // COLOR_HPP

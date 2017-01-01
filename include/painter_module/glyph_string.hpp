@@ -11,7 +11,7 @@
 #include <utility>
 #include <vector>
 
-namespace mcurses {
+namespace twf {
 
 class Glyph_string : private std::vector<Glyph> {
    public:
@@ -62,14 +62,15 @@ class Glyph_string : private std::vector<Glyph> {
         reserve(this->size() + wide_string.size());
         for (char32_t sym : wide_string) {
             this->append(Glyph{converter.to_bytes(sym)},
-                   std::forward<Attributes>(attrs)...);
+                         std::forward<Attributes>(attrs)...);
         }
         return *this;
     }
 
     template <typename... Attributes>
     Glyph_string& append(const std::string& symbols, Attributes... attrs) {
-        return this->append(symbols.c_str(), std::forward<Attributes>(attrs)...);
+        return this->append(symbols.c_str(),
+                            std::forward<Attributes>(attrs)...);
     }
 
     template <typename... Attributes>
@@ -155,5 +156,5 @@ inline bool operator!=(const Glyph_string& x, const Glyph_string& y) {
     return !(x == y);
 }
 
-}  // namespace mcurses
+}  // namespace twf
 #endif  // GLYPH_STRING_HPP

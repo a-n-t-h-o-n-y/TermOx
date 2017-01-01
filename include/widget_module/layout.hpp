@@ -9,7 +9,7 @@
 
 #include <aml/signals/slot.hpp>
 
-namespace mcurses {
+namespace twf {
 
 // Base class for Layouts
 class Layout : public Widget {
@@ -19,7 +19,7 @@ class Layout : public Widget {
     void update() override;
 
     // Slots
-    Slot<void()> update_layout;  // this should call update()
+    sig::Slot<void()> update_layout;  // this should call update()
 
    protected:
     bool child_event(const Child_event& event) override;
@@ -29,5 +29,5 @@ class Layout : public Widget {
     void initialize();
 };
 
-}  // namespace mcurses
+}  // namespace twf
 #endif  // LAYOUT_HPP

@@ -27,7 +27,7 @@
 #include <functional>
 #include <memory>
 
-namespace mcurses {
+namespace twf {
 
 class Widget : public Object {
    public:
@@ -85,7 +85,7 @@ class Widget : public Object {
     Brush& brush() { return default_brush_; }
     bool visible() const { return visible_; }
     void set_visible(bool visible);
-    bool has_border() const { return border_.is_enabled(); }
+    bool has_border() const { return border_.enabled(); }
     void enable_border();
     void disable_border();
     void set_geometry(const Geometry& g);
@@ -99,12 +99,12 @@ class Widget : public Object {
     // Signals
 
     // Slots
-    Slot<void()> close;
-    Slot<void()> hide;
-    Slot<void()> show;
-    Slot<void()> repaint;
-    Slot<void()> give_focus;
-    Slot<void()> update_me;
+    sig::Slot<void()> close;
+    sig::Slot<void()> hide;
+    sig::Slot<void()> show;
+    sig::Slot<void()> repaint;
+    sig::Slot<void()> give_focus;
+    sig::Slot<void()> update_me;
 
    protected:
     bool event(const Event& event) override;
@@ -152,6 +152,6 @@ class Widget : public Object {
     void initialize();
 };
 
-}  // namespace mcurses
+}  // namespace twf
 
 #endif  // WIDGET_HPP

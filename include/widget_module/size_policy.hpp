@@ -3,7 +3,7 @@
 
 #include <cstddef>
 
-namespace mcurses {
+namespace twf {
 
 class Size_policy {
    public:
@@ -29,5 +29,5 @@ class Size_policy {
     bool height_for_width_ = false;
 };
 
-}  // namespace mcurses
+}  // namespace twf
 #endif  // SIZE_POLICY

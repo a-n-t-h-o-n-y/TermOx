@@ -12,7 +12,7 @@
 #include <memory>
 #include <utility>
 
-namespace mcurses {
+namespace twf {
 namespace detail {
 
 // take input from user
@@ -133,7 +133,7 @@ Object* NCurses_event_dispatcher::find_object(std::size_t x, std::size_t y) {
     bool keep_going = true;
     while (keep_going && !obj->children().empty()) {
         for (Object* child : obj->children()) {
-            if (child->has_coordinates(x, y) && child->is_enabled()) {
+            if (child->has_coordinates(x, y) && child->enabled()) {
                 obj = child;
                 keep_going = true;
                 break;
@@ -163,4 +163,4 @@ Object* NCurses_event_dispatcher::handle_resize_object() {
 }
 
 }  // namespace detail
-}  // namespace mcurses
+}  // namespace twf

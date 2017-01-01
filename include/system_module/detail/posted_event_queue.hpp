@@ -4,15 +4,16 @@
 #include "posted_event.hpp"
 
 #include <list>
+#include <queue>
 
-namespace mcurses {
+namespace twf {
 namespace detail {
 
 // Do no access through std::list pointer/ref
 class Posted_event_queue : public std::list<Posted_event> {
    public:
     void add_event(Posted_event ev);
-    Posted_event next_posted_event();
+    // Posted_event next_posted_event();
 
    private:
     using std::list<Posted_event>::push_back;
@@ -25,5 +26,5 @@ class Posted_event_queue : public std::list<Posted_event> {
 };
 
 }  // namespace detail
-}  // namespace mcurses
+}  // namespace twf
 #endif  // POSTED_EVENT_QUEUE_HPP
