@@ -7,12 +7,12 @@
 
 #include <stdexcept>
 
-using mcurses::Attribute;
-using mcurses::background;
-using mcurses::Color;
-using mcurses::foreground;
-using mcurses::Glyph;
-using mcurses::Glyph_matrix;
+using twf::Attribute;
+using twf::background;
+using twf::Color;
+using twf::foreground;
+using twf::Glyph;
+using twf::Glyph_matrix;
 
 TEST(GlyphMatrixTest, Default) {
     const Glyph_matrix gm{3, 3};

@@ -7,13 +7,13 @@
 
 #include <string>
 
-using mcurses::Attribute;
-using mcurses::background;
-using mcurses::Brush;
-using mcurses::Color;
-using mcurses::foreground;
-using mcurses::Glyph;
-using mcurses::Glyph_error;
+using twf::Attribute;
+using twf::background;
+using twf::Brush;
+using twf::Color;
+using twf::foreground;
+using twf::Glyph;
+using twf::Glyph_error;
 
 std::string foo(const Glyph& g) {
     return g.str();

@@ -2,7 +2,7 @@
 #include <painter_module/painter.hpp>
 #include <widget_module/border.hpp>
 
-namespace mcurses {
+namespace twf {
 
 void Border::set_walls(const Glyph& horizontals, const Glyph& verticals) {
     north_ = horizontals;
@@ -11,4 +11,4 @@ void Border::set_walls(const Glyph& horizontals, const Glyph& verticals) {
     west_ = verticals;
 }
 
-}  // namespace mcurses
+}  // namespace twf

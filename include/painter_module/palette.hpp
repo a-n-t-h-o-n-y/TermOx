@@ -6,7 +6,7 @@
 #include <array>
 #include <vector>
 
-namespace mcurses {
+namespace twf {
 
 class Palette {
    public:
@@ -34,5 +34,5 @@ class DawnBringer_palette : public Palette {
     DawnBringer_palette();
 };
 
-}  // namespace mcurses
+}  // namespace twf
 #endif  // PALETTE_HPP

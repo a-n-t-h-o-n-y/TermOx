@@ -1,6 +1,6 @@
 #include <painter_module/detail/paint_buffer.hpp>
 
-namespace mcurses {
+namespace twf {
 namespace detail {
 
 bool Paint_buffer::commit(unsigned x, unsigned y) {
@@ -12,4 +12,4 @@ bool Paint_buffer::commit(unsigned x, unsigned y) {
 }
 
 }  // namespace detail
-}  // namespace mcurses
+}  // namespace twf

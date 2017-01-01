@@ -3,7 +3,7 @@
 
 #include <cstddef>
 
-namespace mcurses {
+namespace twf {
 class Size_policy;
 
 void Geometry::set_width_hint(std::size_t width_hint) {
@@ -78,4 +78,4 @@ void Geometry::set_size_policy(const Size_policy& policy) {
     }
 }
 
-}  // namespace mcurses
+}  // namespace twf

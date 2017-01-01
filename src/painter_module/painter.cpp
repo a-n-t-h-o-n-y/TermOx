@@ -8,7 +8,7 @@
 
 #include <cstddef>
 
-namespace mcurses {
+namespace twf {
 
 Painter::Painter(Widget* widget) : widget_{widget} {
     this->set_cursor(widget_->cursor());
@@ -186,4 +186,4 @@ void Painter::set_cursor(bool state) {
     }
 }
 
-}  // namespace mcurses
+}  // namespace twf

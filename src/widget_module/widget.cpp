@@ -16,10 +16,10 @@
 
 #include <memory>
 
-namespace mcurses {
+namespace twf {
 
 Widget::Widget() {
-    this->initialize();
+    this->Widget::initialize();
     this->brush().set_background(Color::Black);
     this->brush().set_foreground(Color::White);
     this->update();
@@ -51,7 +51,7 @@ void Widget::initialize() {
 }
 
 bool Widget::has_coordinates(std::size_t glob_x, std::size_t glob_y) {
-    if (!this->is_enabled() || !this->visible()) {
+    if (!this->enabled() || !this->visible()) {
         return false;
     }
     return (glob_x >= this->global_x()) && (glob_x < (this->global_max_x())) &&
@@ -77,149 +77,153 @@ void Widget::set_geometry(const Geometry& g) {
 }
 
 void Widget::update() {
-    System::post_event(this, std::make_unique<Paint_event>());
+    if (this->enabled() &&
+        this->visible()) {  // might not need checks for paint event now
+        System::post_event(this, std::make_unique<Paint_event>());
+    }
 }
 
-bool Widget::event(Event& event) {
+bool Widget::event(const Event& event) {
+    auto visible_and_enabled = [this]() {
+        return this->visible() && this->enabled();
+    };
+
     // Move_event
     if (event.type() == Event::Move) {
-        this->move_event(static_cast<Move_event&>(event));
-        return event.is_accepted();
+        return this->move_event(static_cast<const Move_event&>(event));
     }
 
     // Resize_event
     if (event.type() == Event::Resize) {
-        this->resize_event(static_cast<Resize_event&>(event));
-        return event.is_accepted();
+        return this->resize_event(static_cast<const Resize_event&>(event));
     }
 
     // Paint_event
     if (event.type() == Event::Paint) {
-        this->erase_widget_screen();
-        if (this->visible() && this->is_enabled()) {
-            this->paint_event(static_cast<Paint_event&>(event));
-        } else if (this->visible() && !this->is_enabled()) {
+        // handled here so that virtual functions work from derived widgets.
+        if (visible_and_enabled()) {
+            this->erase_widget_screen();  // this does not invalidate
+                                          // optimization buffer
+            return this->paint_event(static_cast<const Paint_event&>(event));
+        }
+        if (this->visible() && !this->enabled()) {
+            this->erase_widget_screen();
             this->paint_disabled_widget();
         } else if (!this->visible()) {
+            this->erase_widget_screen();
         }
-        return event.is_accepted();
+        return true;
     }
 
     // Mouse_events
     if (event.type() == Event::MouseButtonPress) {
-        if (!this->is_enabled() || !this->visible()) {
-            return event.is_accepted();
+        // should most of this be in event handler function?
+        if (visible_and_enabled()) {
+            if (this->focus_policy() == Focus_policy::ClickFocus ||
+                this->focus_policy() == Focus_policy::StrongFocus) {
+                System::set_focus_widget(this);
+            }
+            return this->mouse_press_event(
+                static_cast<const Mouse_event&>(event));
         }
-        if (this->focus_policy() == Focus_policy::ClickFocus ||
-            this->focus_policy() == Focus_policy::StrongFocus) {
-            System::set_focus_widget(this);
-        }
-        this->mouse_press_event(static_cast<Mouse_event&>(event));
-        return event.is_accepted();
-    }
+        return true;
+    }  // continue change from here
     if (event.type() == Event::MouseButtonRelease) {
-        if (!this->is_enabled() || !this->visible()) {
-            return event.is_accepted();
+        if (visible_and_enabled()) {
+            return this->mouse_release_event(
+                static_cast<const Mouse_event&>(event));
         }
-        this->mouse_release_event(static_cast<Mouse_event&>(event));
-        return event.is_accepted();
+        return true;
     }
     if (event.type() == Event::MouseButtonDblClick) {
-        if (!this->is_enabled() || !this->visible()) {
-            return event.is_accepted();
+        if (visible_and_enabled()) {
+            return this->mouse_double_click_event(
+                static_cast<const Mouse_event&>(event));
         }
-        this->mouse_double_click_event(static_cast<Mouse_event&>(event));
-        return event.is_accepted();
+        return true;
     }
     if (event.type() == Event::Wheel) {
-        if (!this->is_enabled() || !this->visible()) {
-            return event.is_accepted();
+        if (!this->enabled() || !this->visible()) {
+            return true;
         }
-        this->wheel_event(static_cast<Mouse_event&>(event));
-        return event.is_accepted();
+        return this->wheel_event(static_cast<const Mouse_event&>(event));
     }
     if (event.type() == Event::MouseMove && this->has_mouse_tracking()) {
-        if (!this->is_enabled() || !this->visible()) {
-            return event.is_accepted();
+        if (!this->enabled() || !this->visible()) {
+            return true;
         }
-        this->mouse_move_event(static_cast<Mouse_event&>(event));
-        return event.is_accepted();
+        return this->mouse_move_event(static_cast<const Mouse_event&>(event));
     }
 
     // KeyEvent
     if (event.type() == Event::KeyPress) {
-        if (!this->is_enabled() || !this->visible()) {
-            return event.is_accepted();
+        if (!this->enabled() || !this->visible()) {
+            return true;  // is this the right response? or false?
         }
-        this->key_press_event(static_cast<Key_event&>(event));
-        return event.is_accepted();
+        return this->key_press_event(static_cast<const Key_event&>(event));
     }
     if (event.type() == Event::KeyRelease) {
-        if (!this->is_enabled() || !this->visible()) {
-            return event.is_accepted();
+        if (!this->enabled() || !this->visible()) {
+            return true;
         }
-        this->key_release_event(static_cast<Key_event&>(event));
-        return event.is_accepted();
+        return this->key_release_event(static_cast<const Key_event&>(event));
     }
 
     // Close Event
     if (event.type() == Event::Close) {
-        this->close_event(static_cast<Close_event&>(event));
-        return event.is_accepted();
+        return this->close_event(static_cast<const Close_event&>(event));
     }
 
     // Hide Event
     if (event.type() == Event::Hide) {
-        this->hide_event(static_cast<Hide_event&>(event));
-        return event.is_accepted();
+        return this->hide_event(static_cast<const Hide_event&>(event));
     }
 
     // Show Event
     if (event.type() == Event::Show) {
-        this->show_event(static_cast<Show_event&>(event));
-        return event.is_accepted();
+        return this->show_event(static_cast<const Show_event&>(event));
     }
 
     // Focus Event
     if (event.type() == Event::FocusIn || event.type() == Event::FocusOut) {
-        this->focus_event(static_cast<Focus_event&>(event));
-        return event.is_accepted();
+        return this->focus_event(static_cast<const Focus_event&>(event));
     }
 
     return Object::event(event);
 }
 
-void Widget::move_event(Move_event& event) {
+bool Widget::move_event(const Move_event& event) {
     this->set_x(event.new_x());
     this->set_y(event.new_y());
     // Widget* parent = dynamic_cast<Widget*>(this->parent()); // causes infinte
     // loop
     // if (parent) { parent->update(); }
+    // maybe send parent a child event?
     this->update();
-    event.accept();
+    return true;
 }
 
-void Widget::resize_event(Resize_event& event) {
+bool Widget::resize_event(const Resize_event& event) {
     this->geometry().set_width(event.new_width());
     this->geometry().set_height(event.new_height());
-    event.accept();
+    this->update();
+    return true;
 }
 
-void Widget::paint_event(Paint_event& event) {
-    // Post paint event to each child
-    if (border_.is_enabled()) {
+bool Widget::paint_event(const Paint_event& event) {
+    if (border_.enabled()) {
         Painter p{this};
         p.border(border_);
     }
-    for (Object* c : this->children()) {
-        Widget* child = dynamic_cast<Widget*>(c);
-        if (child != nullptr) {
-            child->update();
-        }
-    }
-    event.accept();
+    // for (Object* c : this->children()) {
+    //     Widget* child = dynamic_cast<Widget*>(c);
+    //     if (child != nullptr) {
+    //         child->update();
+    //     }
+    // }
+    return true;
 }
-
+// probably not needed anymore??
 void Widget::erase_widget_screen() {
     Painter p{this};
     if (this->brush().background_color()) {
@@ -244,64 +248,66 @@ void Widget::paint_disabled_widget() {
            background);
 }
 
-void Widget::mouse_press_event(Mouse_event& event) {
-    event.ignore();
+bool Widget::mouse_press_event(const Mouse_event& event) {
+    return false;
 }
 
-void Widget::mouse_release_event(Mouse_event& event) {
-    event.ignore();
+bool Widget::mouse_release_event(const Mouse_event& event) {
+    return false;
 }
 
-void Widget::mouse_double_click_event(Mouse_event& event) {
-    event.ignore();
+bool Widget::mouse_double_click_event(const Mouse_event& event) {
+    return false;
 }
 
-void Widget::wheel_event(Mouse_event& event) {
-    event.ignore();
+bool Widget::wheel_event(const Mouse_event& event) {
+    return false;
 }
 
-void Widget::mouse_move_event(Mouse_event& event) {
-    event.ignore();
+bool Widget::mouse_move_event(const Mouse_event& event) {
+    return false;
 }
 
-void Widget::key_press_event(Key_event& event) {
-    event.ignore();
+bool Widget::key_press_event(const Key_event& event) {
+    return false;
 }
 
-void Widget::key_release_event(Key_event& event) {
-    event.ignore();
+bool Widget::key_release_event(const Key_event& event) {
+    return false;
 }
 
-void Widget::close_event(Close_event& event) {
+bool Widget::close_event(const Close_event& event) {
     this->delete_later();
-    event.accept();
+    return true;
+}
+// implement this here
+bool Widget::hide_event(const Hide_event& event) {
+    return true;
 }
 
-void Widget::hide_event(Hide_event& event) {
-    event.accept();
+// implement this here
+bool Widget::show_event(const Show_event& event) {
+    return true;
 }
 
-void Widget::show_event(Show_event& event) {
-    event.accept();
-}
-
-void Widget::enable_event(Enable_event& event) {
+bool Widget::enable_event(const Enable_event& event) {
     if (!event.is_enabled()) {
         // save current brush and
         // set brush to greyscale
+        return true;  // ? you'll figure it out
     } else {
         // set brush back to saved original
     }
-    Object::enable_event(event);
+    return Object::enable_event(event);
 }
 
-void Widget::focus_event(Focus_event& event) {
+bool Widget::focus_event(const Focus_event& event) {
     if (event.type() == Event::FocusIn) {
         Painter p{this};
         p.set_cursor(this->cursor());
         p.move(cursor_x_, cursor_y_);
     }  // if(event.type() == FocusOut)
-    event.accept();
+    return true;
 }
 
 void Widget::set_focus(bool focus) {
@@ -369,4 +375,4 @@ Paint_engine& Widget::paint_engine() const {
     return *System::paint_engine();
 }
 
-}  // namespace mcurses
+}  // namespace twf

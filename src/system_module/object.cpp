@@ -5,14 +5,14 @@
 #include <system_module/system.hpp>
 #include <widget_module/widget.hpp>
 
-#include <aml/signals/slot.hpp>
+#include <aml/signals/slot.hpp>  // might not need this
 
 #include <algorithm>
 #include <iterator>
 #include <memory>
 #include <string>
 
-namespace mcurses {
+namespace twf {
 
 Object::Object(Object&& rhs)
     : delete_later{std::move(rhs.delete_later)},
@@ -67,8 +67,7 @@ void Object::initialize() {
         System::post_event(this,
                            std::make_unique<Event>(Event::DeferredDelete));
     };
-    this->delete_later.track(
-        this->destroyed);  // Hack to disable slot when *this dies.
+    this->delete_later.track(this->destroyed);
 
     this->enable = [this]() { this->set_enabled(true); };
     this->enable.track(this->destroyed);
@@ -86,42 +85,39 @@ void Object::add_child(std::unique_ptr<Object> child) {
 }
 
 void Object::delete_child(Object* child) {
-    auto at = std::find_if(std::begin(children_), std::end(children_),
+    auto end_iter = std::end(children_);
+    auto at = std::find_if(std::begin(children_), end_iter,
                            [&child](auto& c) { return c.get() == child; });
-    if (at != std::end(children_)) {
+    if (at != end_iter) {
         children_.erase(at);
     }
 }
 
-bool Object::event(Event& event) {
-    if (event.type() == Event::ChildAdded ||
-        event.type() == Event::ChildPolished ||
-        event.type() == Event::ChildRemoved) {
-        this->child_event(static_cast<Child_event&>(event));
-        return event.is_accepted();
+bool Object::event(const Event& event) {
+    auto event_t = event.type();
+    if (event_t == Event::ChildAdded || event_t == Event::ChildPolished ||
+        event_t == Event::ChildRemoved) {
+        return this->child_event(static_cast<const Child_event&>(event));
     }
-
-    if (event.type() == Event::EnabledChange) {
-        this->enable_event(static_cast<Enable_event&>(event));
-        return event.is_accepted();
+    if (event_t == Event::EnabledChange) {
+        return this->enable_event(static_cast<const Enable_event&>(event));
     }
-
-    return event.is_accepted();
+    return true;
 }
 
-void Object::child_event(Child_event& event) {
+bool Object::child_event(const Child_event& event) {
     Widget* parent = dynamic_cast<Widget*>(this->parent());
-    if (parent) {
+    if (parent != nullptr) {
         parent->update();
     }
-    event.accept();
+    return true;
 }
 
-void Object::enable_event(Enable_event& event) {
-    event.accept();
+bool Object::enable_event(const Enable_event& event) {
+    return true;
 }
 
-bool Object::event_filter(Object* watched, Event& event) {
+bool Object::event_filter(Object* watched, const Event& event) {
     return false;
 }
 
@@ -166,4 +162,4 @@ std::vector<Object*> Object::children() const {
     return ret;
 }
 
-}  // namespace mcurses
+}  // namespace twf

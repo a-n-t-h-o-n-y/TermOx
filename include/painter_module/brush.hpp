@@ -10,7 +10,7 @@
 #include <utility>
 #include <vector>
 
-namespace mcurses {
+namespace twf {
 
 class Brush {
    public:
@@ -36,8 +36,8 @@ class Brush {
     void set_foreground(Color color) { foreground_color_ = color; }
 
     std::vector<Attribute> attributes() const { return attributes_; }
-    Optional<Color> background_color() const { return background_color_; }
-    Optional<Color> foreground_color() const { return foreground_color_; }
+    opt::Optional<Color> background_color() const { return background_color_; }
+    opt::Optional<Color> foreground_color() const { return foreground_color_; }
 
     friend bool operator==(const Brush& x, const Brush& y) {
         return (std::is_permutation(
@@ -61,9 +61,9 @@ class Brush {
     void push_attribute(Attribute attr);
 
     std::vector<Attribute> attributes_;
-    Optional<Color> background_color_;
-    Optional<Color> foreground_color_;
+    opt::Optional<Color> background_color_;
+    opt::Optional<Color> foreground_color_;
 };
 
-}  // namespace mcurses
+}  // namespace twf
 #endif  // BRUSH_HPP

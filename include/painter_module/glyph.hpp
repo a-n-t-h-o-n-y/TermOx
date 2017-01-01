@@ -8,7 +8,7 @@
 #include <string>
 #include <utility>
 
-namespace mcurses {
+namespace twf {
 
 class Glyph_error : public std::runtime_error {
    public:
@@ -51,5 +51,5 @@ class Glyph {
     Brush brush_;
 };
 
-}  // namespace mcurses
+}  // namespace twf
 #endif  // GLYPH_HPP

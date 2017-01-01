@@ -3,7 +3,7 @@
 
 #include "../event.hpp"
 
-namespace mcurses {
+namespace twf {
 
 class Move_event : public Event {
    public:
@@ -24,5 +24,5 @@ class Move_event : public Event {
     std::size_t old_y_;
 };
 
-}  // namespace mcurses
+}  // namespace twf
 #endif  // MOVE_EVENT_HPP

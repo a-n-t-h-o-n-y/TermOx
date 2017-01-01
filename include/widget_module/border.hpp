@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <string>
 
-namespace mcurses {
+namespace twf {
 class Widget;
 
 class Border {
@@ -36,7 +36,7 @@ class Border {
 
     void set_parent(Widget* w) { widget_ = w; }
 
-    bool is_enabled() const { return enabled_; }
+    bool enabled() const { return enabled_; }
     void enable() { enabled_ = true; }
     void disable() { enabled_ = false; }
     std::size_t thickness() const { return thickness_; }
@@ -57,5 +57,5 @@ class Border {
     Widget* widget_ = nullptr;
 };
 
-}  // namespace mcurses
+}  // namespace twf
 #endif  // BORDER_HPP

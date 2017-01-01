@@ -7,9 +7,9 @@
 #include "posted_event_queue.hpp"
 
 #include <memory>
-#include <stack>
+#include <vector>
 
-namespace mcurses {
+namespace twf {
 namespace detail {
 
 class Thread_data {
@@ -20,7 +20,7 @@ class Thread_data {
     bool can_wait = true;  // is true if no more events to process on queue
     bool quit_now = false;
     int loop_level = 0;
-    std::stack<Event_loop*> event_loops;
+    std::vector<Event_loop*> event_loops;
     Posted_event_queue event_queue;
 
    private:
@@ -31,5 +31,5 @@ class Thread_data {
 };
 
 }  // namespace detail
-}  // namespace mcurses
+}  // namespace twf
 #endif  // THREAD_DATA_HPP

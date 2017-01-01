@@ -6,7 +6,7 @@
 
 #include <memory>
 
-namespace mcurses {
+namespace twf {
 
 class Abstract_event_dispatcher : public Object {
    public:
@@ -18,5 +18,5 @@ class Abstract_event_dispatcher : public Object {
     bool interrupt_ = false;
 };
 
-}  // namespace mcurses
+}  // namespace twf
 #endif  // ABSTRACT_EVENT_DISPATCHER_HPP

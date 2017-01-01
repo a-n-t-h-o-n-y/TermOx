@@ -12,7 +12,7 @@
 
 #include <memory>
 
-namespace mcurses {
+namespace twf {
 
 class Widget;
 
@@ -22,10 +22,10 @@ class System : public Object {
                            std::unique_ptr<Event> event,
                            int priority = 0);
     static void remove_posted_event(Event* event);
-    static bool send_event(Object* obj, Event& event);
-    static void send_posted_events(Object* obj = nullptr,
-                                   Event::Type etype = Event::None);
-    static bool notify(Object* obj, Event& event);
+    static bool send_event(Object* obj, const Event& event);
+    static void send_posted_events(Object* obj_filter = nullptr,
+                                   Event::Type etype_filter = Event::None);
+    static bool notify(Object* obj, const Event& event);
     static void exit(int return_code = 0);
     static Object* head();
     static unsigned max_width();
@@ -39,14 +39,14 @@ class System : public Object {
     static Palette* palette();
 
     explicit System(std::unique_ptr<Paint_engine> engine =
-               std::make_unique<detail::NCurses_paint_engine>());
+                        std::make_unique<detail::NCurses_paint_engine>());
     ~System() override;
 
     static void set_head(Object* obj);
     int run();
 
     // Slots
-    Slot<void()> quit = []() { System::exit(); };
+    sig::Slot<void()> quit = []() { System::exit(); };
 
     friend class Abstract_event_dispatcher;
 
@@ -55,8 +55,8 @@ class System : public Object {
     static std::unique_ptr<Paint_engine> engine_;
     static Widget* focus_widg_;
     static std::unique_ptr<Palette> system_palette_;
-    static bool notify_helper(Object* obj, Event& event);
+    static bool notify_helper(Object* obj, const Event& event);
 };
 
-}  // namespace mcurses
+}  // namespace twf
 #endif  // SYSTEM_HPP

@@ -7,7 +7,7 @@
 
 #include <string>
 
-namespace mcurses {
+namespace twf {
 namespace detail {
 
 class NCurses_paint_engine : public Paint_engine {
@@ -48,6 +48,6 @@ class NCurses_paint_engine : public Paint_engine {
 };
 
 }  // namespace detail
-}  // namespace mcurses
+}  // namespace twf
 
 #endif  // NCURSES_PAINT_ENGINE_HPP

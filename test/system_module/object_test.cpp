@@ -9,19 +9,19 @@
 #include <string>
 #include <utility>
 
-using mcurses::Object;
-using mcurses::System;
-using mcurses::Widget;
-using mcurses::Event_loop;
-using mcurses::Event;
-using mcurses::Child_event;
+using twf::Object;
+using twf::System;
+using twf::Widget;
+using twf::Event_loop;
+using twf::Event;
+using twf::Child_event;
 
 TEST(ObjectTest, DefaultConstructor) {
     System system;
     Object obj;
     EXPECT_TRUE(obj.children().empty());
     EXPECT_EQ(nullptr, obj.parent());
-    EXPECT_TRUE(obj.is_enabled());
+    EXPECT_TRUE(obj.enabled());
     EXPECT_EQ(std::string{}, obj.name());
 }
 
@@ -31,7 +31,7 @@ TEST(ObjectTest, NameConstructor) {
     obj.set_name("My Widget");
     EXPECT_TRUE(obj.children().empty());
     EXPECT_EQ(nullptr, obj.parent());
-    EXPECT_TRUE(obj.is_enabled());
+    EXPECT_TRUE(obj.enabled());
     EXPECT_EQ("My Widget", obj.name());
 }
 
@@ -79,10 +79,10 @@ TEST(ObjectTest, Children) {
     obj.make_child<Event_loop>();
     auto children = obj.children();
     ASSERT_EQ(3, children.size());
-    EXPECT_TRUE(children[0]->is_enabled());
+    EXPECT_TRUE(children[0]->enabled());
     EXPECT_FALSE(children[1]->has_coordinates(8, 13));
     EXPECT_TRUE(children[1]->has_coordinates(40, 42));
-    EXPECT_TRUE(children[2]->is_enabled());
+    EXPECT_TRUE(children[2]->enabled());
 }
 
 TEST(ObjectTest, AddChild) {
@@ -247,7 +247,7 @@ class Event_filter_test : public Widget {
         this->geometry().set_width(5);
         this->geometry().set_height(3);
     }
-    virtual bool event_filter(Object* watched, Event& event) override {
+    bool event_filter(Object* watched, const Event& event) override {
         ++glob_test_int;
         return true;
     }
@@ -317,13 +317,13 @@ TEST(ObjectTest, SlotSetEnable) {
     System system;
     Object obj;
 
-    EXPECT_TRUE(obj.is_enabled());
+    EXPECT_TRUE(obj.enabled());
 
     obj.enable();
 
-    EXPECT_TRUE(obj.is_enabled());
+    EXPECT_TRUE(obj.enabled());
 
     obj.disable();
 
-    EXPECT_FALSE(obj.is_enabled());
+    EXPECT_FALSE(obj.enabled());
 }

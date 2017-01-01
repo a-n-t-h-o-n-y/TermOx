@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace mcurses {
+namespace twf {
 
 class Mouse_event : public Input_event {
    public:
@@ -51,5 +51,5 @@ class Mouse_event : public Input_event {
     std::uint8_t device_id_;
 };
 
-}  // namespace mcurses
+}  // namespace twf
 #endif  // MOUSE_EVENT_HPP

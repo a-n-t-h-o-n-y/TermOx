@@ -6,7 +6,7 @@
 
 #include <memory>
 
-namespace mcurses {
+namespace twf {
 namespace detail {
 
 class Posted_event {
@@ -37,5 +37,5 @@ bool operator>(const Posted_event& pe, int priority);
 bool operator==(const Posted_event& x, const Posted_event& y);
 
 }  // namespace detail
-}  // namespace mcurses
+}  // namespace twf
 #endif  // POSTED_EVENT_HPP

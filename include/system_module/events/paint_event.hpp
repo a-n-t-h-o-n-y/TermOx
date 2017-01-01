@@ -3,7 +3,7 @@
 
 #include "../event.hpp"
 
-namespace mcurses {
+namespace twf {
 
 class Paint_event : public Event {
    public:
@@ -12,5 +12,5 @@ class Paint_event : public Event {
    private:
 };
 
-}  // namespace mcurses
+}  // namespace twf
 #endif  // PAINT_EVENT_HPP

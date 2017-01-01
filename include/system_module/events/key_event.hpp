@@ -6,7 +6,7 @@
 
 #include <string>
 
-namespace mcurses {
+namespace twf {
 
 class Key_event : public Event {
    public:
@@ -24,5 +24,5 @@ class Key_event : public Event {
     int key_code_;
 };
 
-}  // namespace mcurses
+}  // namespace twf
 #endif  // KEY_EVENT_HPP

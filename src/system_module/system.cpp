@@ -14,9 +14,10 @@
 #include <algorithm>
 #include <iterator>
 #include <memory>
+#include <utility>
 #include <vector>
 
-namespace mcurses {
+namespace twf {
 
 void System::post_event(Object* obj,
                         std::unique_ptr<Event> event,
@@ -24,55 +25,58 @@ void System::post_event(Object* obj,
     if (obj == nullptr) {
         return;
     }
-    detail::Posted_event pe(obj, std::move(event), priority);
-    detail::Thread_data::current().event_queue.add_event(pe);
+    detail::Posted_event pe{obj, std::move(event), priority};
+    detail::Thread_data::current().event_queue.add_event(std::move(pe));
 }
 
 void System::remove_posted_event(Event* event) {
-    detail::Posted_event_queue& queue =
-        detail::Thread_data::current().event_queue;
+    auto& queue = detail::Thread_data::current().event_queue;
     auto pos =
         std::find_if(std::begin(queue), std::end(queue),
-                     [&event](auto& pe_) { return (&(pe_.event()) == event); });
-    if (pos == std::end(queue)) {
-        return;
+                     [&event](auto& pe) { return (&(pe.event()) == event); });
+    if (pos != std::end(queue)) {
+        queue.erase(pos);
     }
-    queue.erase(pos);
 }
 
-bool System::send_event(Object* obj, Event& event) {
+bool System::send_event(Object* obj, const Event& event) {
     return (obj != nullptr) ? notify(obj, event) : false;
 }
 
-void System::send_posted_events(Object* obj, Event::Type etype) {
+void System::send_posted_events(Object* obj_filter, Event::Type etype_filter) {
     auto& queue = detail::Thread_data::current().event_queue;
-    while (!queue.empty()) {
+    while (!queue.empty()) {  // bad condition, if you are filtering base on
+                              // event or object type, you never get this empty
+                              // sometimes.
         auto& pe = queue.front();
-        if ((obj == nullptr ||
-             obj == pe.reciever()) &&  // can you clean this up
-            (etype == Event::None || etype == pe.event().type()) &&
-            ((pe.event().type() != Event::DeferredDelete) ||
-             etype == Event::DeferredDelete)) {
-            detail::Posted_event posted = queue.next_posted_event();
-            if (posted.event().type() == Event::DeferredDelete) {
-                Object* parent = obj->parent();
+        auto event_t = pe.event().type();
+        if ((obj_filter == nullptr || obj_filter == pe.reciever()) &&
+            (etype_filter == Event::None ||
+             etype_filter == pe.event().type()) &&
+            (pe.event().type() != Event::DeferredDelete ||
+             etype_filter == Event::DeferredDelete)) {
+            if (event_t == Event::DeferredDelete) {
+                auto parent = pe.reciever()->parent();
                 if (parent == nullptr) {
-                    if (obj == System::head()) {  // used to be parent == Sy...
-                        System::set_head(nullptr);
+                    if (pe.reciever() == System::head()) {
+                        // System::set_head(nullptr);
+                        System::exit();
                     }
-                    return;
+                    queue.pop_front();
+                } else {
+                    parent->delete_child(pe.reciever());
+                    queue.pop_front();
                 }
-                parent->delete_child(obj);
-                return;
+            } else {
+                System::notify(pe.reciever(), pe.event());
+                queue.pop_front();
             }
-            notify(posted.reciever(), posted.event());
         }
     }
 }
 
-bool System::notify(Object* obj, Event& event) {
+bool System::notify(Object* obj, const Event& event) {
     bool handled{false};
-
     // Send event to any filter objects
     unsigned i{0};
     while (i < obj->event_filter_objects_.size() &&
@@ -87,7 +91,7 @@ bool System::notify(Object* obj, Event& event) {
     return notify_helper(obj, event);
 }
 
-bool System::notify_helper(Object* obj, Event& event) {
+bool System::notify_helper(Object* obj, const Event& event) {
     bool handled{false};
     // Send event to object
     handled = obj->event(event);
@@ -105,10 +109,8 @@ bool System::notify_helper(Object* obj, Event& event) {
 void System::exit(int return_code) {
     auto& data = detail::Thread_data::current();
     data.quit_now = true;
-    // call exit on each event loop
-    for (int i{0}; i < data.event_loops.size(); ++i) {
-        data.event_loops.top()->exit(return_code);
-        data.event_loops.pop();
+    for (auto loop_ptr : data.event_loops) {
+        loop_ptr->exit(return_code);
     }
 }
 
@@ -271,9 +273,7 @@ void System::set_head(Object* obj) {
 
 int System::run() {
     Event_loop main_loop;
-
-    detail::Thread_data& data = detail::Thread_data::current();
-    data.event_loops.push(&main_loop);
+    auto& data = detail::Thread_data::current();
     data.quit_now = false;
 
     int return_code = main_loop.run();
@@ -283,4 +283,4 @@ int System::run() {
     return return_code;
 }
 
-}  // namespace mcurses
+}  // namespace twf

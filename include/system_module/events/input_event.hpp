@@ -3,7 +3,7 @@
 
 #include "../event.hpp"
 
-namespace mcurses {
+namespace twf {
 
 class Input_event : public Event {
    public:
@@ -15,5 +15,5 @@ class Input_event : public Event {
     KeyboardModifiers modifiers_;
 };
 
-}  // namespace mcurses
+}  // namespace twf
 #endif  // INPUT_EVENT_HPP

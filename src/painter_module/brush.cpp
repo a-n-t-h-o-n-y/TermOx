@@ -3,7 +3,7 @@
 
 #include <algorithm>
 
-namespace mcurses {
+namespace twf {
 
 void Brush::remove_attribute(Attribute attr) {
     auto at = std::find(std::begin(attributes_), std::end(attributes_), attr);
@@ -19,4 +19,4 @@ void Brush::push_attribute(Attribute attr) {
     }
 }
 
-}  // namespace mcurses
+}  // namespace twf

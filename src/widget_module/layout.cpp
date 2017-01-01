@@ -1,7 +1,7 @@
 #include <system_module/object.hpp>
 #include <widget_module/layout.hpp>
 
-namespace mcurses {
+namespace twf {
 
 Layout::Layout() {
     // Set dimensions to maximum initially
@@ -24,9 +24,9 @@ void Layout::update() {
     Widget::update();
 }
 
-void Layout::child_event(Child_event& event) {
+bool Layout::child_event(const Child_event& event) {
     this->update();
-    event.accept();
+    return true;
 }
 
-}  // namespace mcurses
+}  // namespace twf

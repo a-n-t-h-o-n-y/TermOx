@@ -2,7 +2,7 @@
 
 #include <memory>
 
-namespace mcurses {
+namespace twf {
 namespace detail {
 
 Posted_event::Posted_event(Object* obj, std::unique_ptr<Event> ev, int priority)
@@ -29,4 +29,4 @@ bool operator==(const Posted_event& x, const Posted_event& y) {
 }
 
 }  // namespace detail
-}  // namespace mcurses
+}  // namespace twf

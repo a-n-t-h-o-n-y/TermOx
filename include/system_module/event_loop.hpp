@@ -3,7 +3,7 @@
 
 #include "object.hpp"
 
-namespace mcurses {
+namespace twf {
 
 class Event_loop : public Object {
    public:
@@ -16,5 +16,5 @@ class Event_loop : public Object {
     bool exit_ = false;
 };
 
-}  // namespace mcurses
+}  // namespace twf
 #endif  // EVENT_LOOP_HPP

@@ -4,7 +4,7 @@
 
 #include <cstddef>
 
-namespace mcurses {
+namespace twf {
 
 void Horizontal_layout::update_geometry() {
     std::size_t n = this->children().size();
@@ -25,4 +25,4 @@ void Horizontal_layout::update_geometry() {
     }
 }
 
-}  // namespace mcurses
+}  // namespace twf

@@ -3,7 +3,7 @@
 
 #include "../event.hpp"
 
-namespace mcurses {
+namespace twf {
 
 class Enable_event : public Event {
    public:
@@ -15,5 +15,5 @@ class Enable_event : public Event {
     bool enabled_;
 };
 
-}  // namespace mcurses
+}  // namespace twf
 #endif  // ENABLE_EVENT_HPP

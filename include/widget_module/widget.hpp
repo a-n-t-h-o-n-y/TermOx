@@ -27,7 +27,7 @@
 #include <functional>
 #include <memory>
 
-namespace mcurses {
+namespace twf {
 
 class Widget : public Object {
    public:
@@ -85,7 +85,7 @@ class Widget : public Object {
     Brush& brush() { return default_brush_; }
     bool visible() const { return visible_; }
     void set_visible(bool visible);
-    bool has_border() const { return border_.is_enabled(); }
+    bool has_border() const { return border_.enabled(); }
     void enable_border();
     void disable_border();
     void set_geometry(const Geometry& g);
@@ -99,30 +99,30 @@ class Widget : public Object {
     // Signals
 
     // Slots
-    Slot<void()> close;
-    Slot<void()> hide;
-    Slot<void()> show;
-    Slot<void()> repaint;
-    Slot<void()> give_focus;
-    Slot<void()> update_me;
+    sig::Slot<void()> close;
+    sig::Slot<void()> hide;
+    sig::Slot<void()> show;
+    sig::Slot<void()> repaint;
+    sig::Slot<void()> give_focus;
+    sig::Slot<void()> update_me;
 
    protected:
-    bool event(Event& event) override;
-    virtual void move_event(Move_event& event); // these should take pointers
-    virtual void resize_event(Resize_event& event);
-    virtual void paint_event(Paint_event& event);
-    virtual void mouse_press_event(Mouse_event& event);
-    virtual void mouse_release_event(Mouse_event& event);
-    virtual void mouse_double_click_event(Mouse_event& event);
-    virtual void wheel_event(Mouse_event& event);
-    virtual void mouse_move_event(Mouse_event& event);
-    virtual void key_press_event(Key_event& event);
-    virtual void key_release_event(Key_event& event);
-    virtual void close_event(Close_event& event);
-    virtual void hide_event(Hide_event& event);
-    virtual void show_event(Show_event& event);
-    void enable_event(Enable_event& event) override;
-    virtual void focus_event(Focus_event& event);
+    bool event(const Event& event) override;
+    virtual bool move_event(const Move_event& event);
+    virtual bool resize_event(const Resize_event& event);
+    virtual bool paint_event(const Paint_event& event);
+    virtual bool mouse_press_event(const Mouse_event& event);
+    virtual bool mouse_release_event(const Mouse_event& event);
+    virtual bool mouse_double_click_event(const Mouse_event& event);
+    virtual bool wheel_event(const Mouse_event& event);
+    virtual bool mouse_move_event(const Mouse_event& event);
+    virtual bool key_press_event(const Key_event& event);
+    virtual bool key_release_event(const Key_event& event);
+    virtual bool close_event(const Close_event& event);
+    virtual bool hide_event(const Hide_event& event);
+    virtual bool show_event(const Show_event& event);
+    bool enable_event(const Enable_event& event) override;
+    virtual bool focus_event(const Focus_event& event);
 
     std::size_t find_global_x() const;
     std::size_t find_global_y() const;
@@ -152,6 +152,6 @@ class Widget : public Object {
     void initialize();
 };
 
-}  // namespace mcurses
+}  // namespace twf
 
 #endif  // WIDGET_HPP
