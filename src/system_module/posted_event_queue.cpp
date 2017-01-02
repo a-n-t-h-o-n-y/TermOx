@@ -18,19 +18,20 @@ void Posted_event_queue::add_event(Posted_event pe) {
             this->erase(at);
         }
     }
-    auto priority = pe.priority();
-    if (this->empty() || this->back().priority() >= priority) {
-        this->emplace_back(std::move(pe));
-        return;
-    }
-    // by priority
-    auto gt = [](const Posted_event& e, const int& i) {
-        return e > i;
-    };  // replace with std::greater
-    auto at = std::lower_bound(
-        this->begin(), this->end(), priority,
-        gt);  // use a priority queue and it will automatically sort
-    this->emplace(at, std::move(pe));  // no need for the emplace call then
+    this->insert(std::move(pe));
+    // auto priority = pe.priority();
+    // if (this->empty() || this->back().priority() >= priority) {
+    //     this->emplace_back(std::move(pe));
+    //     return;
+    // }
+    // // by priority
+    // auto gt = [](const Posted_event& e, const int& i) {
+    //     return e > i;
+    // };  // replace with std::greater
+    // auto at = std::lower_bound(
+    //     this->begin(), this->end(), priority,
+    //     gt);  // use a priority queue and it will automatically sort
+    // this->emplace(at, std::move(pe));  // no need for the emplace call then
 }
 
 }  // namespace detail

@@ -45,35 +45,70 @@ bool System::send_event(Object* obj, const Event& event) {
 
 void System::send_posted_events(Object* obj_filter, Event::Type etype_filter) {
     auto& queue = detail::Thread_data::current().event_queue;
-    while (!queue.empty()) {  // bad condition, if you are filtering base on
-                              // event or object type, you never get this empty
-                              // sometimes.
-        auto& pe = queue.front();
-        auto event_t = pe.event().type();
-        if ((obj_filter == nullptr || obj_filter == pe.reciever()) &&
+    auto posted_iter = std::begin(queue);
+    while (posted_iter != std::end(queue)) {
+        auto event_t = posted_iter->event().type();
+        if ((obj_filter == nullptr || obj_filter == posted_iter->reciever()) &&
             (etype_filter == Event::None ||
-             etype_filter == pe.event().type()) &&
-            (pe.event().type() != Event::DeferredDelete ||
+             etype_filter == posted_iter->event().type()) &&
+            (posted_iter->event().type() != Event::DeferredDelete ||
              etype_filter == Event::DeferredDelete)) {
             if (event_t == Event::DeferredDelete) {
-                auto parent = pe.reciever()->parent();
+                auto parent = posted_iter->reciever()->parent();
                 if (parent == nullptr) {
-                    if (pe.reciever() == System::head()) {
+                    if (posted_iter->reciever() == System::head()) {
                         // System::set_head(nullptr);
                         System::exit();
                     }
-                    queue.pop_front();
+                    queue.erase(posted_iter);
+                    posted_iter = std::begin(queue);
                 } else {
-                    parent->delete_child(pe.reciever());
-                    queue.pop_front();
+                    parent->delete_child(const_cast<Object*>(posted_iter->reciever()));
+                    queue.erase(posted_iter);
+                    posted_iter = std::begin(queue);
                 }
             } else {
-                System::notify(pe.reciever(), pe.event());
-                queue.pop_front();
+                System::notify(const_cast<Object*>(posted_iter->reciever()), posted_iter->event());
+                queue.erase(posted_iter);
+                posted_iter = std::begin(queue);
             }
+        } else {
+            ++posted_iter;
         }
     }
 }
+
+// void System::send_posted_events(Object* obj_filter, Event::Type etype_filter) {
+//     auto& queue = detail::Thread_data::current().event_queue;
+//     while (!queue.empty()) {  // bad condition, if you are filtering base on
+//                               // event or object type, you never get this empty
+//                               // sometimes.
+//         auto& pe = queue.front();
+//         auto event_t = pe.event().type();
+//         if ((obj_filter == nullptr || obj_filter == pe.reciever()) &&
+//             (etype_filter == Event::None ||
+//              etype_filter == pe.event().type()) &&
+//             (pe.event().type() != Event::DeferredDelete ||
+//              etype_filter == Event::DeferredDelete)) {
+//             if (event_t == Event::DeferredDelete) {
+//                 auto parent = pe.reciever()->parent();
+//                 if (parent == nullptr) {
+//                     if (pe.reciever() == System::head()) {
+//                         // System::set_head(nullptr);
+//                         System::exit();
+//                     }
+//                     queue.pop_front();
+//                 } else {
+//                     parent->delete_child(pe.reciever());
+//                     queue.pop_front();
+//                 }
+//             } else {
+//                 System::notify(pe.reciever(), pe.event());
+//                 queue.pop_front();
+//             }
+//         }
+//     }
+// }
 
 bool System::notify(Object* obj, const Event& event) {
     bool handled{false};

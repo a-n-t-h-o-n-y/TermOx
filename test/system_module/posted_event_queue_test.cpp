@@ -46,18 +46,18 @@ TEST(PostedEventQueueTest, AddEvent) {
     Posted_event pe6{&object6, std::move(event6), 0};
     queue.add_event(std::move(pe6));
 
-    EXPECT_EQ(queue.front().priority(), 100);
-    queue.pop_front();
-    EXPECT_EQ(queue.front().priority(), 1);
-    queue.pop_front();
-    EXPECT_EQ(queue.front().priority(), 0);
-    queue.pop_front();
-    EXPECT_EQ(queue.front().priority(), 0);
-    queue.pop_front();
-    EXPECT_EQ(queue.front().priority(), 0);
-    queue.pop_front();
-    EXPECT_EQ(queue.front().priority(), -9);
-    queue.pop_front();
+    EXPECT_EQ(std::begin(queue)->priority(), 100);
+    queue.erase(std::begin(queue));
+    EXPECT_EQ(std::begin(queue)->priority(), 1);
+    queue.erase(std::begin(queue));
+    EXPECT_EQ(std::begin(queue)->priority(), 0);
+    queue.erase(std::begin(queue));
+    EXPECT_EQ(std::begin(queue)->priority(), 0);
+    queue.erase(std::begin(queue));
+    EXPECT_EQ(std::begin(queue)->priority(), 0);
+    queue.erase(std::begin(queue));
+    EXPECT_EQ(std::begin(queue)->priority(), -9);
+    queue.erase(std::begin(queue));
 }
 
 TEST(PostedEventQueueTest, NextEvent) {
@@ -75,10 +75,8 @@ TEST(PostedEventQueueTest, NextEvent) {
     queue.add_event(std::move(pe2));
 
     EXPECT_EQ(2, queue.size());
-    queue.front();
-    queue.pop_front();
+    queue.erase(std::begin(queue));
     EXPECT_EQ(1, queue.size());
-    queue.front();
-    queue.pop_front();
+    queue.erase(std::begin(queue));
     EXPECT_EQ(0, queue.size());
 }
