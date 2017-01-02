@@ -78,38 +78,6 @@ void System::send_posted_events(Object* obj_filter, Event::Type etype_filter) {
     }
 }
 
-// void System::send_posted_events(Object* obj_filter, Event::Type etype_filter) {
-//     auto& queue = detail::Thread_data::current().event_queue;
-//     while (!queue.empty()) {  // bad condition, if you are filtering base on
-//                               // event or object type, you never get this empty
-//                               // sometimes.
-//         auto& pe = queue.front();
-//         auto event_t = pe.event().type();
-//         if ((obj_filter == nullptr || obj_filter == pe.reciever()) &&
-//             (etype_filter == Event::None ||
-//              etype_filter == pe.event().type()) &&
-//             (pe.event().type() != Event::DeferredDelete ||
-//              etype_filter == Event::DeferredDelete)) {
-//             if (event_t == Event::DeferredDelete) {
-//                 auto parent = pe.reciever()->parent();
-//                 if (parent == nullptr) {
-//                     if (pe.reciever() == System::head()) {
-//                         // System::set_head(nullptr);
-//                         System::exit();
-//                     }
-//                     queue.pop_front();
-//                 } else {
-//                     parent->delete_child(pe.reciever());
-//                     queue.pop_front();
-//                 }
-//             } else {
-//                 System::notify(pe.reciever(), pe.event());
-//                 queue.pop_front();
-//             }
-//         }
-//     }
-// }
-
 bool System::notify(Object* obj, const Event& event) {
     bool handled{false};
     // Send event to any filter objects
