@@ -29,6 +29,8 @@ class Posted_event {
     int priority_;
 };
 
+bool operator<(const Posted_event& x, const Posted_event& y);
+bool operator>(const Posted_event& x, const Posted_event& y);
 bool operator<(int priority, const Posted_event& pe);
 bool operator<(const Posted_event& pe, int priority);
 bool operator>(int priority, const Posted_event& pe);

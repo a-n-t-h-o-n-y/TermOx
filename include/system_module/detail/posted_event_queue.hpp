@@ -3,26 +3,21 @@
 
 #include "posted_event.hpp"
 
-#include <list>
-#include <queue>
+#include <functional>
+#include <set>
 
 namespace twf {
 namespace detail {
 
-// Do no access through std::list pointer/ref
-class Posted_event_queue : public std::list<Posted_event> {
+class Posted_event_queue
+    : public std::multiset<Posted_event, std::greater<Posted_event>> {
    public:
     void add_event(Posted_event ev);
-    // Posted_event next_posted_event();
 
    private:
-    using std::list<Posted_event>::push_back;
-    using std::list<Posted_event>::emplace_back;
-    using std::list<Posted_event>::push_front;
-    using std::list<Posted_event>::emplace_front;
-    using std::list<Posted_event>::emplace;
-    using std::list<Posted_event>::insert;
-    using std::list<Posted_event>::assign;
+    using std::multiset<Posted_event, std::greater<Posted_event>>::emplace;
+    using std::multiset<Posted_event, std::greater<Posted_event>>::emplace_hint;
+    using std::multiset<Posted_event, std::greater<Posted_event>>::insert;
 };
 
 }  // namespace detail
