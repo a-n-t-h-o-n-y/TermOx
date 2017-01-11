@@ -111,7 +111,7 @@ class Widget : public Object {
     bool enable_event(const Enable_event& event) override;
     virtual bool focus_event(const Focus_event& event);
 
-    // Coordinates relative to parent
+    // Top left corner coordinates relative to parent
     std::size_t x_ = 0;
     std::size_t y_ = 0;
 

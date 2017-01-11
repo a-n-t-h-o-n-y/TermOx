@@ -45,16 +45,6 @@ class Geometry {
         this->set_max_height(height);
     }
 
-    void set_active_region(std::size_t west_offset = 0,
-                           std::size_t east_offset = 0,
-                           std::size_t north_offset = 0,
-                           std::size_t south_offset = 0) {
-        offset_west_ = west_offset;
-        offset_east_ = east_offset;
-        offset_north_ = north_offset;
-        offset_south_ = south_offset;
-    }
-
     // Get
     std::size_t width() const { return width_; }
     std::size_t height() const { return height_; }
@@ -70,15 +60,6 @@ class Geometry {
 
     Size_policy size_policy() const { return size_policy_; }
 
-    std::size_t active_x_min() const { return this->offset_west_; }
-    std::size_t active_x_max() const {
-        return this->width() - 1 - this->offset_east_;
-    }
-    std::size_t active_y_min() const { return this->offset_north_; }
-    std::size_t active_y_max() const {
-        return this->height() - 1 - this->offset_south_;
-    }
-
    private:
     Widget* widget_;
 
@@ -93,12 +74,6 @@ class Geometry {
     std::size_t min_height_hint_ = 0;
 
     Size_policy size_policy_;
-
-    // Active Region Parameters
-    std::size_t offset_west_ = 0;
-    std::size_t offset_east_ = 0;
-    std::size_t offset_north_ = 0;
-    std::size_t offset_south_ = 0;
 
     // Actual Size
     std::size_t width_ = width_hint_;

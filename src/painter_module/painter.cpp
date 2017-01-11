@@ -37,27 +37,17 @@ void Painter::put(const Glyph_string& gs) {
 }
 
 void Painter::move(std::size_t x, std::size_t y) {
+    Geometry& geo = widget_->geometry();
+    // Adjust coordinates if out of widget_'s bounds
+    if (x > geo.width() - 1) {
+        x = 0;
+        ++y;
+    }
+    if (y > geo.height() - 1) {
+        y = geo.height() - 1;
+    }
     widget_->set_cursor_x(x);
     widget_->set_cursor_y(y);
-
-    // If out of widget_'s bounds
-    Geometry& geo = widget_->geometry();
-    if (x < geo.active_x_min()) {
-        this->move(geo.active_x_min(), y);
-        return;
-    }
-    if (x > geo.active_x_max()) {
-        this->move(geo.active_x_min(), y + 1);
-        return;
-    }
-    if (y < geo.active_y_min()) {
-        this->move(x, geo.active_y_min());
-        return;
-    }
-    if (y > geo.active_y_max()) {
-        this->move(x, geo.active_y_max());
-        return;
-    }
 }
 
 void Painter::fill(std::size_t x,

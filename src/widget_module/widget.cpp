@@ -62,8 +62,7 @@ bool Widget::has_coordinates(std::size_t global_x, std::size_t global_y) {
 
 void Widget::enable_border() {
     this->border_.enable();
-    std::size_t offset = this->border_.thickness();
-    this->geometry().set_active_region(offset, offset, offset, offset);
+    // this->geometry().set_active_region(1, 1, 1, 1);
     this->update();
 }
 

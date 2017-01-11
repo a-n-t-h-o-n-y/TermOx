@@ -32,14 +32,12 @@ class Border {
     Glyph south_west() const { return south_west_; }
     Glyph south_east() const { return south_east_; }
 
-    // void draw() const; // implement this in painter
-
     void set_parent(Widget* w) { widget_ = w; }
 
     bool enabled() const { return enabled_; }
     void enable() { enabled_ = true; }
     void disable() { enabled_ = false; }
-    std::size_t thickness() const { return thickness_; }
+    // std::size_t thickness() const { return thickness_; }
 
    private:
     Glyph north_ = "─";
@@ -51,7 +49,7 @@ class Border {
     Glyph south_west_ = "└";
     Glyph south_east_ = "┘";
 
-    std::size_t thickness_ = 1;// remove this
+    // std::size_t thickness_ = 1;// remove this
 
     bool enabled_ = false;
     Widget* widget_ = nullptr;
