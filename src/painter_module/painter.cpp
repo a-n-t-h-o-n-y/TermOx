@@ -29,8 +29,8 @@ void Painter::put(const Glyph_string& gs) {
             g.brush().add_attributes(attr);
         }
 
-        std::size_t glob_x = widget_->global_x() + widget_->cursor_x();
-        std::size_t glob_y = widget_->global_y() + widget_->cursor_y();
+        std::size_t glob_x = widget_->x() + widget_->cursor_x();
+        std::size_t glob_y = widget_->y() + widget_->cursor_y();
         widget_->paint_engine().put(glob_x, glob_y, g);
         this->move(widget_->cursor_x() + 1, widget_->cursor_y());
     }

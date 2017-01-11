@@ -113,8 +113,8 @@ NCurses_event_dispatcher::parse_mouse_event() {
 
         Widget* widg = dynamic_cast<Widget*>(object);
         if (widg) {
-            std::size_t local_x = mouse_event.x - widg->global_x();
-            std::size_t local_y = mouse_event.y - widg->global_y();
+            std::size_t local_x = mouse_event.x - widg->x();
+            std::size_t local_y = mouse_event.y - widg->y();
             auto event = std::make_unique<Mouse_event>(
                 ev_type, ev_button, mouse_event.x, mouse_event.y, local_x,
                 local_y, mouse_event.id);

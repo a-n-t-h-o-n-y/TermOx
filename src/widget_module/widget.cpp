@@ -50,12 +50,14 @@ void Widget::initialize() {
     this->update_me.track(this->destroyed);
 }
 
-bool Widget::has_coordinates(std::size_t glob_x, std::size_t glob_y) {
+bool Widget::has_coordinates(std::size_t global_x, std::size_t global_y) {
     if (!this->enabled() || !this->visible()) {
         return false;
     }
-    return (glob_x >= this->global_x()) && (glob_x < (this->global_max_x())) &&
-           (glob_y >= this->global_y()) && (glob_y < (this->global_max_y()));
+    return global_x >= this->x() &&
+           global_x < (this->x() + this->geometry().width()) &&
+           global_y >= this->y() &&
+           global_y < (this->y() + this->geometry().height());
 }
 
 void Widget::enable_border() {
@@ -351,21 +353,21 @@ void Widget::set_visible(bool visible) {
     }
 }
 
-std::size_t Widget::find_global_x() const  // previously get_global_x
+std::size_t Widget::x() const  // previously get_global_x
 {
     Widget* parent_widg = dynamic_cast<Widget*>(this->parent());
     if (parent_widg == nullptr) {
-        return this->x();
+        return this->x_;
     }
-    return this->x() + parent_widg->find_global_x();
+    return this->x_ + parent_widg->x();
 }
 
-std::size_t Widget::find_global_y() const {
+std::size_t Widget::y() const {
     Widget* parent_widg = dynamic_cast<Widget*>(this->parent());
     if (parent_widg == nullptr) {
-        return this->y();
+        return this->y_;
     }
-    return this->y() + parent_widg->find_global_y();
+    return this->y_ + parent_widg->y();
 }
 
 Paint_engine& Widget::paint_engine() const {

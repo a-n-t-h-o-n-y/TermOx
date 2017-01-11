@@ -39,7 +39,7 @@ class Widget : public Object {
 
     virtual void update();
 
-    bool has_coordinates(std::size_t glob_x, std::size_t glob_y) override;
+    bool has_coordinates(std::size_t global_x, std::size_t global_y) override;
 
     void set_x(std::size_t x) { x_ = x; }
     void set_y(std::size_t y) { y_ = y; }
@@ -52,22 +52,9 @@ class Widget : public Object {
         paint_engine_ = std::move(engine);
     }
 
-    std::size_t x() const { return x_; }
-    std::size_t y() const { return y_; }
-    std::size_t global_x() const { return find_global_x(); }
-    std::size_t global_y() const { return find_global_y(); }
-    std::size_t max_x() const { return x_ + this->geometry().height(); }
-    //^^ from within parent? do you need this? who uses it?
-    std::size_t max_y() const { return y_ + this->geometry().width(); }
-    // ^^ can you simplify these?
-    std::size_t global_max_x() const {
-        return this->global_x() + this->geometry().width();
-    }
-    // ^^ can you simplify these?
-    std::size_t global_max_y() const {
-        return this->global_y() + this->geometry().height();
-    }
-    // ^^ can you simplify these?
+    // Global Coordinates
+    std::size_t x() const;
+    std::size_t y() const;
 
     bool cursor() const { return show_cursor_; }
     void set_focus(bool focus);
@@ -124,10 +111,7 @@ class Widget : public Object {
     bool enable_event(const Enable_event& event) override;
     virtual bool focus_event(const Focus_event& event);
 
-    std::size_t find_global_x() const;
-    std::size_t find_global_y() const;
-
-    // Physical Properties
+    // Coordinates relative to parent
     std::size_t x_ = 0;
     std::size_t y_ = 0;
 

@@ -57,18 +57,19 @@ void System::send_posted_events(Object* obj_filter, Event::Type etype_filter) {
                 auto parent = posted_iter->reciever()->parent();
                 if (parent == nullptr) {
                     if (posted_iter->reciever() == System::head()) {
-                        // System::set_head(nullptr);
                         System::exit();
                     }
                     queue.erase(posted_iter);
                     posted_iter = std::begin(queue);
                 } else {
-                    parent->delete_child(const_cast<Object*>(posted_iter->reciever()));
+                    parent->delete_child(
+                        const_cast<Object*>(posted_iter->reciever()));
                     queue.erase(posted_iter);
                     posted_iter = std::begin(queue);
                 }
             } else {
-                System::notify(const_cast<Object*>(posted_iter->reciever()), posted_iter->event());
+                System::notify(const_cast<Object*>(posted_iter->reciever()),
+                               posted_iter->event());
                 queue.erase(posted_iter);
                 posted_iter = std::begin(queue);
             }

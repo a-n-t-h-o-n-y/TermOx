@@ -51,7 +51,7 @@ class Border {
     Glyph south_west_ = "└";
     Glyph south_east_ = "┘";
 
-    std::size_t thickness_ = 1;
+    std::size_t thickness_ = 1;// remove this
 
     bool enabled_ = false;
     Widget* widget_ = nullptr;
