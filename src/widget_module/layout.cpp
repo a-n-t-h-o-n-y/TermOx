@@ -15,7 +15,7 @@ Layout::Layout() {
 
 void Layout::initialize() {
     // Slots
-    this->update_layout = std::bind(&Layout::update_geometry, this);
+    this->update_layout = std::bind(&Layout::update, this);
     this->update_layout.track(this->destroyed);
 }
 

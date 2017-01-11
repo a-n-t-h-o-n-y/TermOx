@@ -19,7 +19,7 @@ class Layout : public Widget {
     void update() override;
 
     // Slots
-    sig::Slot<void()> update_layout;  // this should call update()
+    sig::Slot<void()> update_layout;
 
    protected:
     bool child_event(const Child_event& event) override;

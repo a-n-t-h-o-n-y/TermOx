@@ -11,7 +11,7 @@ class Widget;
 
 class Border {
    public:
-    explicit Border(Widget* w) : widget_{w} {}
+    // explicit Border(Widget* w) : widget_{w} {}
 
     void set_walls(const Glyph& horizontals, const Glyph& verticals);
     void set_north(const Glyph& g) { north_ = g; }
@@ -32,7 +32,7 @@ class Border {
     Glyph south_west() const { return south_west_; }
     Glyph south_east() const { return south_east_; }
 
-    void set_parent(Widget* w) { widget_ = w; }
+    // void set_parent(Widget* w) { widget_ = w; }
 
     bool enabled() const { return enabled_; }
     void enable() { enabled_ = true; }
@@ -52,7 +52,7 @@ class Border {
     // std::size_t thickness_ = 1;// remove this
 
     bool enabled_ = false;
-    Widget* widget_ = nullptr;
+    // Widget* widget_ = nullptr;
 };
 
 }  // namespace twf

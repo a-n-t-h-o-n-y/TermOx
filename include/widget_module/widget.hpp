@@ -126,7 +126,7 @@ class Widget : public Object {
     Focus_policy focus_policy_ = Focus_policy::NoFocus;
     Brush default_brush_ =
         Brush(background(Color::Black), foreground(Color::White));
-    Border border_ = Border{this};
+    Border border_;
 
     std::unique_ptr<Paint_engine> paint_engine_ = nullptr;
     Geometry geometry_ = Geometry{this};
