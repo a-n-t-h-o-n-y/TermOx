@@ -41,7 +41,6 @@ class Normal_widget : public twf::Widget {
         p.move(this->geometry().width() / 2, this->geometry().height() / 2);
         p.put(text_);
         return Widget::paint_event(event);
-        // return;
     }
     bool key_press_event(const twf::Key_event& event) override {
         text_ = event.text();

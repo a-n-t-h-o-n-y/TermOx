@@ -18,6 +18,7 @@ class Move_event : public Event {
     std::size_t old_y() const { return old_y_; }
 
    protected:
+    // In global coordinates
     std::size_t new_x_;
     std::size_t new_y_;
     std::size_t old_x_;

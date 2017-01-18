@@ -4,15 +4,12 @@
 #include <painter_module/glyph.hpp>
 
 #include <cstddef>
-#include <string>
 
 namespace twf {
 class Widget;
 
 class Border {
    public:
-    // explicit Border(Widget* w) : widget_{w} {}
-
     void set_walls(const Glyph& horizontals, const Glyph& verticals);
     void set_north(const Glyph& g) { north_ = g; }
     void set_south(const Glyph& g) { south_ = g; }
@@ -32,12 +29,14 @@ class Border {
     Glyph south_west() const { return south_west_; }
     Glyph south_east() const { return south_east_; }
 
-    // void set_parent(Widget* w) { widget_ = w; }
-
     bool enabled() const { return enabled_; }
     void enable() { enabled_ = true; }
     void disable() { enabled_ = false; }
-    // std::size_t thickness() const { return thickness_; }
+
+    bool north_enabled() { return north_enabled_; }
+    bool south_enabled() { return south_enabled_; }
+    bool east_enabled() { return east_enabled_; }
+    bool west_enabled() { return west_enabled_; }
 
    private:
     Glyph north_ = "─";
@@ -49,10 +48,12 @@ class Border {
     Glyph south_west_ = "└";
     Glyph south_east_ = "┘";
 
-    // std::size_t thickness_ = 1;// remove this
-
     bool enabled_ = false;
-    // Widget* widget_ = nullptr;
+
+    bool north_enabled_ = true;
+    bool south_enabled_ = true;
+    bool east_enabled_ = true;
+    bool west_enabled_ = true;
 };
 
 }  // namespace twf
