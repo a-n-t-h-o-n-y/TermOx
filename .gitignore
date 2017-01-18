@@ -1,8 +1,6 @@
 bin/*
 build/*
-doc/*
-!doc/Doxyfile
-!doc/images
+docs/html/
 lib/*
 notes
 tags
