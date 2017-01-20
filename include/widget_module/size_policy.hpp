@@ -5,8 +5,7 @@
 
 namespace twf {
 
-class Size_policy {
-   public:
+struct Size_policy {
     enum Policy {
         Fixed,
         Minimum,
@@ -17,16 +16,15 @@ class Size_policy {
         Ignored
     };
 
+    Policy horizontal_policy;
+    Policy vertical_policy;
+    std::size_t horizontal_stretch = 1;
+    std::size_t vertical_stretch = 1;
+    bool height_for_width = false;
+
     explicit Size_policy(Policy horizontal = Preferred,
                          Policy vertical = Preferred)
-        : policy_h_{horizontal}, policy_v_{vertical} {}
-
-   private:
-    Policy policy_h_;
-    Policy policy_v_;
-    std::size_t stretch_h_ = 1;
-    std::size_t stretch_v_ = 1;
-    bool height_for_width_ = false;
+        : horizontal_policy{horizontal}, vertical_policy{vertical} {}
 };
 
 }  // namespace twf

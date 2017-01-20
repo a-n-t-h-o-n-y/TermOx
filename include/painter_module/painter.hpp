@@ -40,6 +40,16 @@ class Painter {
 
    private:
     Widget* widget_;
+
+    void unbound_put_string(std::size_t g_x,
+                            std::size_t g_y,
+                            const Glyph_string& gs);
+    void unbound_line(std::size_t g_x1,
+                      std::size_t g_y1,
+                      std::size_t g_x2,
+                      std::size_t g_y2,
+                      const Glyph& g);
+    void add_default_attributes(Glyph& g);
 };
 
 }  // namespace twf

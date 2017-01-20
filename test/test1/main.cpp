@@ -7,6 +7,8 @@ class Text_box : public twf::Widget {
     Text_box() {
         this->set_focus_policy(twf::Widget::Focus_policy::StrongFocus);
         this->set_cursor(true);
+        this->enable_border();
+        this->size_policy().horizontal_stretch = 5;
     }
     bool paint_event(const twf::Paint_event& event) override {
         this->erase_widget_screen();
@@ -32,11 +34,12 @@ class Normal_widget : public twf::Widget {
         this->set_focus_policy(twf::Widget::Focus_policy::StrongFocus);
         this->set_cursor(true);
         this->enable_border();
+        this->size_policy().horizontal_stretch = 2;
     }
     bool paint_event(const twf::Paint_event& event) override {
         this->erase_widget_screen();
         twf::Painter p{this};
-        p.move(1, 1);
+        p.move(0, 0);
         p.put("Normal Widget");
         p.move(this->geometry().width() / 2, this->geometry().height() / 2);
         p.put(text_);
@@ -61,7 +64,7 @@ class Click_paint_widget : public twf::Widget {
 
     bool paint_event(const twf::Paint_event& event) override {
         twf::Painter p{this};
-        p.move(1, 1);
+        p.move(0, 0);
         p.put("Click Widget");
         return Widget::paint_event(event);
         // return;

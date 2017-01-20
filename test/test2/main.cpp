@@ -1,6 +1,32 @@
 #include <twidgets.hpp>
 using namespace twf;
 
+class Text_box : public twf::Widget {
+   public:
+    Text_box() {
+        this->set_focus_policy(twf::Widget::Focus_policy::StrongFocus);
+        this->set_cursor(true);
+        this->enable_border();
+        this->size_policy().horizontal_stretch = 5;
+    }
+    bool paint_event(const twf::Paint_event& event) override {
+        this->erase_widget_screen();
+        twf::Painter p{this};
+        p.move(0, 0);
+        p.put(contents_);
+        return Widget::paint_event(event);
+    }
+    bool key_press_event(const twf::Key_event& event) override {
+        contents_.append(event.text());
+        this->update();  // every time you call update you are just putting a
+                         // call to paint_event() in the queue.
+        return Widget::key_press_event(event);
+    }
+
+   private:
+    std::string contents_;
+};
+
 class Textbox : public Widget {
    public:
     Textbox() {
@@ -8,6 +34,7 @@ class Textbox : public Widget {
         this->set_cursor(true);
         this->enable_border();
         this->brush().set_background(Color::Green);
+        this->brush().set_foreground(Color::White);
     }
 
     bool key_press_event(const Key_event& event) override {
@@ -18,10 +45,11 @@ class Textbox : public Widget {
     }
 
     bool paint_event(const Paint_event& event) override {
-        // this->erase_widget_screen();
+        this->erase_widget_screen(); 
         Painter p{this};
+        p.move(0, 0);
         p.put(gs_);
-        return true;
+        return Widget::paint_event(event);
     }
 
    private:
@@ -33,6 +61,7 @@ class My_widg : public Horizontal_layout {
     My_widg() {
         this->make_child<Textbox>();
         this->make_child<Textbox>();
+        this->make_child<Text_box>();
     }
 };
 

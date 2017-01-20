@@ -11,6 +11,7 @@
 #include <system_module/events/paint_event.hpp>
 #include <system_module/events/resize_event.hpp>
 #include <system_module/events/show_event.hpp>
+#include <system_module/events/child_event.hpp>
 #include <system_module/system.hpp>
 #include <widget_module/widget.hpp>
 
@@ -63,7 +64,9 @@ bool Widget::has_coordinates(std::size_t global_x, std::size_t global_y) {
 void Widget::enable_border() {
     this->border_.enable();
     // this->geometry().set_active_region(1, 1, 1, 1);
-    this->update();
+    /* this->update(); */
+    System::post_event(this->parent(), std::make_unique<Child_event>(
+                                           Event::ChildPolished, this));
 }
 
 void Widget::disable_border() {
@@ -115,7 +118,7 @@ bool Widget::event(const Event& event) {
         }
         return true;
     }
-
+    
     // Mouse_events
     if (event.type() == Event::MouseButtonPress) {
         // should most of this be in event handler function?
@@ -191,6 +194,11 @@ bool Widget::event(const Event& event) {
     }
 
     return Object::event(event);
+}
+
+bool Widget::child_event(const Child_event& event) {
+    this->update();
+    return true;
 }
 
 bool Widget::move_event(const Move_event& event) {

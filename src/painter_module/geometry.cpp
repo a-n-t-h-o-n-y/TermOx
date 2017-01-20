@@ -4,7 +4,7 @@
 #include <cstddef>
 
 namespace twf {
-class Size_policy;
+struct Size_policy;
 
 void Geometry::set_width_hint(std::size_t width_hint) {
     width_hint_ = width_hint;

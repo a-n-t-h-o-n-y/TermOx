@@ -47,31 +47,36 @@ void System::send_posted_events(Object* obj_filter, Event::Type etype_filter) {
     auto& queue = detail::Thread_data::current().event_queue;
     auto posted_iter = std::begin(queue);
     while (posted_iter != std::end(queue)) {
-        auto event_t = posted_iter->event().type();
-        if ((obj_filter == nullptr || obj_filter == posted_iter->reciever()) &&
-            (etype_filter == Event::None ||
-             etype_filter == posted_iter->event().type()) &&
-            (posted_iter->event().type() != Event::DeferredDelete ||
-             etype_filter == Event::DeferredDelete)) {
-            if (event_t == Event::DeferredDelete) {
-                auto parent = posted_iter->reciever()->parent();
-                if (parent == nullptr) {
-                    if (posted_iter->reciever() == System::head()) {
-                        System::exit();
+        if (posted_iter->reciever() != nullptr) {
+            auto event_t = posted_iter->event().type();
+            if ((obj_filter == nullptr ||
+                 obj_filter == posted_iter->reciever()) &&
+                (etype_filter == Event::None ||
+                 etype_filter == posted_iter->event().type()) &&
+                (posted_iter->event().type() != Event::DeferredDelete ||
+                 etype_filter == Event::DeferredDelete)) {
+                if (event_t == Event::DeferredDelete) {
+                    auto parent = posted_iter->reciever()->parent();
+                    if (parent == nullptr) {
+                        if (posted_iter->reciever() == System::head()) {
+                            System::exit();
+                        }
+                        queue.erase(posted_iter);
+                        posted_iter = std::begin(queue);
+                    } else {
+                        parent->delete_child(
+                            const_cast<Object*>(posted_iter->reciever()));
+                        queue.erase(posted_iter);
+                        posted_iter = std::begin(queue);
                     }
-                    queue.erase(posted_iter);
-                    posted_iter = std::begin(queue);
                 } else {
-                    parent->delete_child(
-                        const_cast<Object*>(posted_iter->reciever()));
+                    System::notify(const_cast<Object*>(posted_iter->reciever()),
+                                   posted_iter->event());
                     queue.erase(posted_iter);
                     posted_iter = std::begin(queue);
                 }
             } else {
-                System::notify(const_cast<Object*>(posted_iter->reciever()),
-                               posted_iter->event());
-                queue.erase(posted_iter);
-                posted_iter = std::begin(queue);
+                ++posted_iter;
             }
         } else {
             ++posted_iter;

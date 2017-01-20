@@ -21,12 +21,12 @@ void Layout::initialize() {
 
 void Layout::update() {
     this->update_geometry();
-    Widget::update();
+    /* Widget::update(); */
 }
 
-bool Layout::child_event(const Child_event& event) {
-    this->update();
-    return true;
-}
+/* bool Layout::child_event(const Child_event& event) {
+ *     this->update();
+ *     return true;
+ * } */
 
 }  // namespace twf

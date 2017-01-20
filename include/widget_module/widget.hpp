@@ -52,7 +52,7 @@ class Widget : public Object {
         paint_engine_ = std::move(engine);
     }
 
-    // Global Coordinates
+    // Global Coordinateold_y_ws
     std::size_t x() const;
     std::size_t y() const;
 
@@ -72,12 +72,16 @@ class Widget : public Object {
     Brush& brush() { return default_brush_; }
     bool visible() const { return visible_; }
     void set_visible(bool visible);
+    Border& border() { return border_; }
+    const Border& border() const { return border_; }
     bool has_border() const { return border_.enabled(); }
     void enable_border();
     void disable_border();
     void set_geometry(const Geometry& g);
     Geometry& geometry() { return geometry_; }
     const Geometry& geometry() const { return geometry_; }
+    Size_policy& size_policy() { return size_policy_; }
+    const Size_policy& size_policy() const { return size_policy_; }
 
     Paint_engine& paint_engine() const;
 
@@ -110,6 +114,7 @@ class Widget : public Object {
     virtual bool show_event(const Show_event& event);
     bool enable_event(const Enable_event& event) override;
     virtual bool focus_event(const Focus_event& event);
+    bool child_event(const Child_event& event) override;
 
     // Top left corner coordinates relative to parent
     std::size_t x_ = 0;
@@ -127,6 +132,7 @@ class Widget : public Object {
     Brush default_brush_ =
         Brush(background(Color::Black), foreground(Color::White));
     Border border_;
+    Size_policy size_policy_;
 
     std::unique_ptr<Paint_engine> paint_engine_ = nullptr;
     Geometry geometry_ = Geometry{this};

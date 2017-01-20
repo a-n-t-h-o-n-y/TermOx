@@ -78,10 +78,11 @@ void Object::initialize() {
 
 void Object::add_child(std::unique_ptr<Object> child) {
     children_.emplace_back(std::move(child));
-    children_.back()->set_parent(
-        this);  // if you move this, the child's parent pointer is invalid
-    Child_event ev(Event::ChildAdded, this);
-    System::send_event(this, ev);
+    children_.back()->set_parent(this);
+    // Child_event ev(Event::ChildAdded, this);
+    // System::send_event(this, ev);
+    System::post_event(this,
+                       std::make_unique<Child_event>(Event::ChildAdded, this));
 }
 
 void Object::delete_child(Object* child) {
@@ -106,10 +107,13 @@ bool Object::event(const Event& event) {
 }
 
 bool Object::child_event(const Child_event& event) {
-    Widget* parent = dynamic_cast<Widget*>(this->parent());
-    if (parent != nullptr) {
-        parent->update();
-    }
+    // you should update this, not the parent of this
+    // leave updating to layout, update should not be default behavior
+    /* Widget* parent = dynamic_cast<Widget*>(this->parent());
+     * if (parent != nullptr) {
+     *     parent->update();
+     * } */
+    // this->update();
     return true;
 }
 
@@ -151,8 +155,9 @@ void Object::set_parent(Object* parent) {
 
 void Object::set_enabled(bool enabled) {
     enabled_ = enabled;
-    Enable_event ee(enabled);
-    System::send_event(this, ee);
+    /* Enable_event ee(enabled);
+     * System::send_event(this, ee); */
+    System::post_event(this, std::make_unique<Enable_event>(enabled));
 }
 
 std::vector<Object*> Object::children() const {

@@ -17,18 +17,7 @@ Painter::Painter(Widget* widget) : widget_{widget} {
 
 void Painter::put(const Glyph_string& gs) {
     for (Glyph g : gs) {
-        if (!g.brush().background_color()) {
-            g.brush().add_attributes(
-                background(*widget_->brush().background_color()));
-        }
-        if (!g.brush().foreground_color()) {
-            g.brush().add_attributes(
-                foreground(*widget_->brush().background_color()));
-        }
-        for (Attribute& attr : widget_->brush().attributes()) {
-            g.brush().add_attributes(attr);
-        }
-
+        add_default_attributes(g);
         std::size_t glob_x = widget_->x() + widget_->cursor_x();
         std::size_t glob_y = widget_->y() + widget_->cursor_y();
         widget_->paint_engine().put(glob_x, glob_y, g);
@@ -39,11 +28,11 @@ void Painter::put(const Glyph_string& gs) {
 void Painter::move(std::size_t x, std::size_t y) {
     Geometry& geo = widget_->geometry();
     // Adjust coordinates if out of widget_'s bounds
-    if (x > geo.width() - 1) {
+    if (x >= geo.width()) {
         x = 0;
         ++y;
     }
-    if (y > geo.height() - 1) {
+    if (y >= geo.height()) {
         y = geo.height() - 1;
     }
     widget_->set_cursor_x(x);
@@ -55,6 +44,9 @@ void Painter::fill(std::size_t x,
                    std::size_t width,
                    std::size_t height,
                    Color fill_background) {
+    if (width == 0 || height == 0) {
+        return;
+    }
     // Save current cursor position
     std::size_t cur_x = widget_->cursor_x();
     std::size_t cur_y = widget_->cursor_y();
@@ -102,49 +94,63 @@ void Painter::line(std::size_t x1,
 }
 
 void Painter::border(const Border& b) {
-    // Save current cursor position
-    std::size_t cur_x = widget_->cursor_x();
-    std::size_t cur_y = widget_->cursor_y();
+    const std::size_t widg_x = widget_->x();
+    const std::size_t widg_y = widget_->y();
+    const std::size_t width = widget_->geometry().width();
+    const std::size_t height = widget_->geometry().height();
+
+    // !!Hack!! Sometimes widgets are painted before they are in their layout
+    // and their coordinates are not updated, printing a border then is unsafe.
+    if (widg_x == 0 || widg_y == 0) {
+        return;
+    }
 
     // North
-    this->line(1, 0, widget_->geometry().width() - 2, 0, b.north());
+    if (b.enabled() && b.north_enabled()) {
+        unbound_line(widg_x, widg_y - 1, widg_x + width - 1, widg_y - 1,
+                     b.north());
+    }
 
     // South
-    this->line(1, widget_->geometry().height() - 1,
-               widget_->geometry().width() - 2,
-               widget_->geometry().height() - 1, b.south());
+    if (b.enabled() && b.south_enabled()) {
+        unbound_line(widg_x, widg_y + height, widg_x + width - 1,
+                     widg_y + height, b.south());
+    }
 
     // East
-    this->line(widget_->geometry().width() - 1, 1,
-               widget_->geometry().width() - 1,
-               widget_->geometry().height() - 2, b.east());
+    if (b.enabled() && b.east_enabled()) {
+        unbound_line(widg_x - 1, widg_y, widg_x - 1, widg_y + height - 1,
+                     b.east());
+    }
 
     // West
-    this->line(0, 1, 0, widget_->geometry().height() - 2, b.west());
+    if (b.enabled() && b.west_enabled()) {
+        unbound_line(widg_x + width, widg_y, widg_x + width,
+                     widg_y + height - 1, b.west());
+    }
 
-    // North - West
-    this->move(0, 0);
-    this->put(b.north_west());
+    // North-West
+    if (b.enabled() && b.north_enabled() && b.west_enabled()) {
+        unbound_put_string(widg_x - 1, widg_y - 1, b.north_west());
+    }
 
-    // North - East
-    this->move(widget_->geometry().width() - 1, 0);
-    this->put(b.north_east());
+    // North-East
+    if (b.enabled() && b.north_enabled() && b.east_enabled()) {
+        unbound_put_string(widg_x + width, widg_y - 1, b.north_east());
+    }
 
-    // South - West
-    this->move(0, widget_->geometry().height() - 1);
-    this->put(b.south_west());
+    // South-West
+    if (b.enabled() && b.south_enabled() && b.west_enabled()) {
+        unbound_put_string(widg_x - 1, widg_y + height, b.south_west());
+    }
 
-    // South - East
-    this->move(widget_->geometry().width() - 1,
-               widget_->geometry().height() - 1);
-    this->put(b.south_east());
-
-    // Set Widget's cursor position back
-    widget_->set_cursor_x(cur_x);
-    widget_->set_cursor_y(cur_y);
+    // South-East
+    if (b.enabled() && b.south_enabled() && b.east_enabled()) {
+        unbound_put_string(widg_x + width, widg_y + height, b.south_east());
+    }
 }
 
-void Painter::border(const Glyph_string& gs) {  // get rid of this...? {
+void Painter::border(const Glyph_string& gs) {
     // Save current cursor position
     std::size_t cur_x = widget_->cursor_x();
     std::size_t cur_y = widget_->cursor_y();
@@ -173,6 +179,46 @@ void Painter::set_cursor(bool state) {
         widget_->paint_engine().show_cursor();
     } else {
         widget_->paint_engine().hide_cursor();
+    }
+}
+
+void Painter::unbound_put_string(std::size_t g_x,
+                                 std::size_t g_y,
+                                 const Glyph_string& gs) {
+    for (Glyph g : gs) {
+        add_default_attributes(g);
+        widget_->paint_engine().put(g_x++, g_y, g);
+    }
+}
+
+void Painter::unbound_line(std::size_t g_x1,
+                           std::size_t g_y1,
+                           std::size_t g_x2,
+                           std::size_t g_y2,
+                           const Glyph& g) {
+    // Horizontal
+    if (g_y1 == g_y2) {
+        for (std::size_t i{g_x1}; i <= g_x2; ++i) {
+            unbound_put_string(i, g_y1, g);
+        }
+    } else if (g_x1 == g_x2) {
+        for (std::size_t i{g_y1}; i <= g_y2; ++i) {
+            unbound_put_string(g_x1, i, g);
+        }
+    }
+}
+
+void Painter::add_default_attributes(Glyph& g) {
+    if (!g.brush().background_color()) {
+        g.brush().add_attributes(
+            background(*widget_->brush().background_color()));
+    }
+    if (!g.brush().foreground_color()) {
+        g.brush().add_attributes(
+            foreground(*widget_->brush().background_color()));
+    }
+    for (Attribute& attr : widget_->brush().attributes()) {
+        g.brush().add_attributes(attr);
     }
 }
 

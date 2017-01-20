@@ -25,7 +25,7 @@ class Border {
     Glyph east() const { return east_; }
     Glyph west() const { return west_; }
     Glyph north_west() const { return north_west_; }
-    Glyph north_east() const { return north_; }
+    Glyph north_east() const { return north_east_; }
     Glyph south_west() const { return south_west_; }
     Glyph south_east() const { return south_east_; }
 
@@ -33,10 +33,10 @@ class Border {
     void enable() { enabled_ = true; }
     void disable() { enabled_ = false; }
 
-    bool north_enabled() { return north_enabled_; }
-    bool south_enabled() { return south_enabled_; }
-    bool east_enabled() { return east_enabled_; }
-    bool west_enabled() { return west_enabled_; }
+    bool north_enabled() const { return north_enabled_; }
+    bool south_enabled() const { return south_enabled_; }
+    bool east_enabled() const { return east_enabled_; }
+    bool west_enabled() const { return west_enabled_; }
 
    private:
     Glyph north_ = "─";

@@ -22,7 +22,7 @@ class Layout : public Widget {
     sig::Slot<void()> update_layout;
 
    protected:
-    bool child_event(const Child_event& event) override;
+    /* bool child_event(const Child_event& event) override; */
     virtual void update_geometry() = 0;
 
    private:
