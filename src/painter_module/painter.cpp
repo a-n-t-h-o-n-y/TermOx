@@ -12,7 +12,7 @@ namespace twf {
 
 Painter::Painter(Widget* widget) : widget_{widget} {
     this->set_cursor(widget_->cursor());
-    this->move(0, 0);
+    // this->move(0, 0);
 }
 
 void Painter::put(const Glyph_string& gs) {
@@ -23,6 +23,7 @@ void Painter::put(const Glyph_string& gs) {
         widget_->paint_engine().put(glob_x, glob_y, g);
         this->move(widget_->cursor_x() + 1, widget_->cursor_y());
     }
+    widget_->paint_engine().clear_attributes();
 }
 
 void Painter::move(std::size_t x, std::size_t y) {
@@ -150,7 +151,7 @@ void Painter::border(const Border& b) {
     }
 }
 
-void Painter::border(const Glyph_string& gs) {
+void Painter::border(const Glyph_string& gs) { // Probably delete this
     // Save current cursor position
     std::size_t cur_x = widget_->cursor_x();
     std::size_t cur_y = widget_->cursor_y();
@@ -189,6 +190,7 @@ void Painter::unbound_put_string(std::size_t g_x,
         add_default_attributes(g);
         widget_->paint_engine().put(g_x++, g_y, g);
     }
+    widget_->paint_engine().clear_attributes();
 }
 
 void Painter::unbound_line(std::size_t g_x1,
@@ -215,7 +217,7 @@ void Painter::add_default_attributes(Glyph& g) {
     }
     if (!g.brush().foreground_color()) {
         g.brush().add_attributes(
-            foreground(*widget_->brush().background_color()));
+            foreground(*widget_->brush().foreground_color()));
     }
     for (Attribute& attr : widget_->brush().attributes()) {
         g.brush().add_attributes(attr);

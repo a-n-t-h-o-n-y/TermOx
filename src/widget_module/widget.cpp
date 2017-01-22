@@ -106,8 +106,7 @@ bool Widget::event(const Event& event) {
     if (event.type() == Event::Paint) {
         // handled here so that virtual functions work from derived widgets.
         if (visible_and_enabled()) {
-            this->erase_widget_screen();  // this does not invalidate
-                                          // optimization buffer
+            this->erase_widget_screen();
             return this->paint_event(static_cast<const Paint_event&>(event));
         }
         if (this->visible() && !this->enabled()) {
@@ -118,7 +117,7 @@ bool Widget::event(const Event& event) {
         }
         return true;
     }
-    
+
     // Mouse_events
     if (event.type() == Event::MouseButtonPress) {
         // should most of this be in event handler function?

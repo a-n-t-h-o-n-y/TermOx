@@ -4,7 +4,7 @@
 namespace twf {
 
 enum class Color {
-    Black,
+    Black = 240,
     Dark_red,
     Dark_blue,
     Dark_gray,
@@ -25,7 +25,7 @@ enum class Color {
 namespace detail {
 
 enum class BackgroundColor {
-    Black,
+    Black = 240,
     Dark_red,
     Dark_blue,
     Dark_gray,
@@ -44,7 +44,7 @@ enum class BackgroundColor {
 };
 
 enum class ForegroundColor {
-    Black,
+    Black = 240,
     Dark_red,
     Dark_blue,
     Dark_gray,

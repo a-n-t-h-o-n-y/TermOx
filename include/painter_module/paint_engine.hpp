@@ -27,13 +27,14 @@ class Paint_engine {
     virtual unsigned screen_width() = 0;
     virtual unsigned screen_height() = 0;
 
+    virtual void clear_attributes() = 0;
+
    protected:
     // functions to put to physical screen
     virtual void move(unsigned x, unsigned y) = 0;
     virtual void put_string(const std::string& sym) = 0;
 
     virtual void set_attribute(Attribute attr) = 0;
-    virtual void clear_attributes() = 0;
     virtual void set_background_color(Color c) = 0;
     virtual void set_foreground_color(Color c) = 0;
 

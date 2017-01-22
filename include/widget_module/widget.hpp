@@ -135,7 +135,7 @@ class Widget : public Object {
     Size_policy size_policy_;
 
     std::unique_ptr<Paint_engine> paint_engine_ = nullptr;
-    Geometry geometry_ = Geometry{this};
+    Geometry geometry_ = Geometry{this}; // does geo need to know about this?
 
    private:
     void paint_disabled_widget();

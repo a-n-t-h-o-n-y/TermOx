@@ -19,8 +19,8 @@ class Text_box : public twf::Widget {
     }
     bool key_press_event(const twf::Key_event& event) override {
         contents_.append(event.text());
-        this->update();  // every time you call update you are just putting a
-                         // call to paint_event() in the queue.
+        twf::Painter p{this};
+        p.put(event.text());
         return Widget::key_press_event(event);
     }
 

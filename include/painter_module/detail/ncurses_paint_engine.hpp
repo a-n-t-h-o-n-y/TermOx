@@ -36,11 +36,10 @@ class NCurses_paint_engine : public Paint_engine {
     void initialize_color_pairs() const;
 
     int find_pair(Color foreground, Color background) const {
-        return (this->translate_(foreground) - 240) * 16 +
-               (this->translate_(background) - 240);
+        return this->translate(background) * 16 + this->translate(foreground);
     }
 
-    static int translate_(Color c) { return static_cast<int>(c) + 240; }
+    static int translate(Color c) { return static_cast<int>(c) - 240; }
 
     static int attr_to_int(Attribute attr);
     Color current_foreground();
