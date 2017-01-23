@@ -6,14 +6,17 @@ void Paint_engine::put(unsigned x, unsigned y, const Glyph& g) {
     buffer_.stage(x, y, g);
 }
 
-void Paint_engine::flush() {
+void Paint_engine::flush(bool optimize) {
     for (int j{0}; j < buffer_.height(); ++j) {
         for (int i{0}; i < buffer_.width(); ++i) {
-            if (buffer_.commit(i, j)) {
+            if (buffer_.commit(i, j) || !optimize) {
                 this->move(i, j);
                 this->put_glyph(buffer_.at(i, j));
             }
         }
+    }
+    if(!optimize) {
+        this->touch_all();
     }
     this->refresh();
 }

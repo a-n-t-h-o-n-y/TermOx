@@ -20,6 +20,7 @@ class NCurses_paint_engine : public Paint_engine {
     void hide_cursor() override;
     unsigned screen_width() override;
     unsigned screen_height() override;
+    void touch_all() override;
 
    protected:
     void move(unsigned x, unsigned y) override;

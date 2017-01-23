@@ -28,10 +28,13 @@ NCurses_paint_engine::NCurses_paint_engine() {
 
     this->buffer_.resize(this->screen_width(), this->screen_height());
     this->initialize_color_pairs();
-    ::touchwin(::stdscr); // maybe remove this
 }
 NCurses_paint_engine::~NCurses_paint_engine() {
     ::endwin();
+}
+
+void NCurses_paint_engine::touch_all() {
+    ::touchwin(::stdscr);
 }
 
 void NCurses_paint_engine::show_cursor() {

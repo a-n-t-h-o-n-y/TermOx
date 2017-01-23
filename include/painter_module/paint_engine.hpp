@@ -18,7 +18,7 @@ class Paint_engine {
     void put(unsigned x, unsigned y, const Glyph& g);
 
     // Flush to screen
-    void flush();
+    void flush(bool optimize);
 
     virtual void set_rgb(Color c, int r, int g, int b) = 0;
 
@@ -28,6 +28,7 @@ class Paint_engine {
     virtual unsigned screen_height() = 0;
 
     virtual void clear_attributes() = 0;
+    virtual void touch_all() = 0;
 
    protected:
     // functions to put to physical screen

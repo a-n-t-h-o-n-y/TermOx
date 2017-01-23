@@ -7,6 +7,7 @@ class Layout_color : public twf::Horizontal_layout {
     public:
         Layout_color() {
             // this->make_child<Exit_widget>();
+            this->make_child<Palette_changer>();
             this->make_child<Color_test_widget>();
             auto& cw = this->make_child<Color_test_widget>();
             cw.size_policy().horizontal_stretch = 2;

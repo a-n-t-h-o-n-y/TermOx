@@ -258,6 +258,7 @@ void System::set_palette(std::unique_ptr<Palette> palette) {
     System::paint_engine()->set_rgb(Color::White, p->red_value(Color::White),
                                     p->green_value(Color::White),
                                     p->blue_value(Color::White));
+    System::paint_engine()->flush(false);
 }
 
 Palette* System::palette() {

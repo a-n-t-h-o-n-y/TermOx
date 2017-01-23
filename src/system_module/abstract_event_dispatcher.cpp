@@ -14,7 +14,7 @@ bool Abstract_event_dispatcher::process_events() {
         System::send_posted_events(nullptr, Event::DeferredDelete);
     }
     if (!interrupt_) {
-        System::paint_engine()->flush();
+        System::paint_engine()->flush(true);
     }
     if (!interrupt_) {
         this->post_user_input();  // Blocking call

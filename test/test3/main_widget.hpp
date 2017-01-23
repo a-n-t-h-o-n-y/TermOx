@@ -46,6 +46,23 @@ class Color_display : public Widget {
     Glyph_string colors_;
 };
 
+class Palette_changer : public Widget {
+   public:
+    Palette_changer() {
+        enable_border();
+        brush().set_background(Color::Dark_red);
+        this->set_focus_policy(Widget::Focus_policy::ClickFocus);
+    }
+    bool key_press_event(const Key_event& event) override {
+        if (event.text() == "s") {
+            System::set_palette(std::make_unique<Standard_palette>());
+        } else if (event.text() == "d") {
+            System::set_palette(std::make_unique<DawnBringer_palette>());
+        }
+        return Widget::key_press_event(event);
+    }
+};
+
 class Main_widget : public Horizontal_layout {
    public:
     Main_widget() {
