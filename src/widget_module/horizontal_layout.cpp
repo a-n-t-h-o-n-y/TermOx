@@ -41,7 +41,7 @@ void Horizontal_layout::update_geometry() {
                 ++y_pos;
             }
             // Size
-            std::size_t width = 
+            std::size_t width =
                 widg_space *
                 (cw->size_policy().horizontal_stretch / double(total_stretch));
             std::size_t height{this->geometry().height()};
@@ -55,8 +55,11 @@ void Horizontal_layout::update_geometry() {
                                std::make_unique<Resize_event>(width, height));
             System::post_event(cw, std::make_unique<Move_event>(
                                        this->x() + x_pos, this->y() + y_pos));
+            // System::send_event(cw, Resize_event(width, height));
+            // System::send_event(
+            //     cw, Move_event(this->x() + x_pos, this->y() + y_pos));
             x_pos += width;
-            if(cw->border().east_enabled() && cw->border().enabled()) {
+            if (cw->border().east_enabled() && cw->border().enabled()) {
                 ++x_pos;
             }
         }

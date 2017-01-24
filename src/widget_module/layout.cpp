@@ -19,9 +19,14 @@ void Layout::initialize() {
     this->update_layout.track(this->destroyed);
 }
 
+// bool Layout::paint_event(const Paint_event& event) {
+//     this->update_geometry();
+//     return Widget::paint_event(event);
+// }
+
 void Layout::update() {
     this->update_geometry();
-    /* Widget::update(); */
+    Widget::update();
 }
 
 /* bool Layout::child_event(const Child_event& event) {

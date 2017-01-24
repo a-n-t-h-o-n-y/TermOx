@@ -39,7 +39,7 @@ void Widget::initialize() {
     this->show.track(this->destroyed);
 
     this->repaint = [this]() {
-        Paint_event e;
+        Paint_event e; // change this to a single line.
         System::send_event(this, e);
     };
     this->repaint.track(this->destroyed);
@@ -49,6 +49,24 @@ void Widget::initialize() {
 
     this->update_me = [this]() { std::bind(&Widget::update, this); };
     this->update_me.track(this->destroyed);
+}
+
+void Widget::set_x(std::size_t global_x) {
+    auto parent = dynamic_cast<Widget*>(this->parent());
+    if (parent != nullptr) {
+        x_ = global_x - parent->x();
+    } else {
+        x_ = global_x;
+    }
+}
+
+void Widget::set_y(std::size_t global_y) {
+    auto parent = dynamic_cast<Widget*>(this->parent());
+    if (parent != nullptr) {
+        y_ = global_y - parent->y();
+    } else {
+        y_ = global_y;
+    }
 }
 
 bool Widget::has_coordinates(std::size_t global_x, std::size_t global_y) {

@@ -23,7 +23,7 @@ int Palette::blue_value(Color c) const {
 }
 
 Palette::index_ Palette::translate_(Color c) {
-    return static_cast<int>(c);
+    return static_cast<int>(c) - 240;
 }
 
 Standard_palette::Standard_palette() : Palette{} {

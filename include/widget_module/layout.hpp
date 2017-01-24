@@ -23,6 +23,7 @@ class Layout : public Widget {
 
    protected:
     /* bool child_event(const Child_event& event) override; */
+    // bool paint_event(const Paint_event& event) override;
     virtual void update_geometry() = 0;
 
    private:

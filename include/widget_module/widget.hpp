@@ -41,8 +41,10 @@ class Widget : public Object {
 
     bool has_coordinates(std::size_t global_x, std::size_t global_y) override;
 
-    void set_x(std::size_t x) { x_ = x; }
-    void set_y(std::size_t y) { y_ = y; }
+    // Takes global coordinates.
+    void set_x(std::size_t global_x);
+    void set_y(std::size_t global_y);
+
     void set_cursor(bool show) { show_cursor_ = show; }
     void set_cursor_x(std::size_t x) { cursor_x_ = x; }
     void set_cursor_y(std::size_t y) { cursor_y_ = y; }
@@ -52,7 +54,7 @@ class Widget : public Object {
         paint_engine_ = std::move(engine);
     }
 
-    // Global Coordinateold_y_ws
+    // Global Coordinates
     std::size_t x() const;
     std::size_t y() const;
 
