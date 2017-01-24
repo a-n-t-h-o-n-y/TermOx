@@ -55,6 +55,9 @@ class Vertical_test : public twf::Vertical_layout {
         tb1.brush().set_background(twf::Color::Light_blue);
         tb1.brush().set_foreground(twf::Color::Yellow);
         tb1.border().set_south("Џ");
+        tb1.border().disable_north();
+        tb1.border().disable_north_west();
+        tb1.border().disable_north_east();
 
         auto& hl = this->make_child<twf::Horizontal_layout>();
         auto& chl = hl.make_child<Text_box>();
@@ -68,8 +71,11 @@ class Vertical_test : public twf::Vertical_layout {
         // auto& tb1 = this->make_child<Text_box>();
         // tb1.brush().set_background(twf::Color::Light_blue);
         // tb1.brush().set_foreground(twf::Color::Yellow);
-        this->make_child<Text_box>().brush().set_foreground(twf::Color::Orange);
-        this->make_child<Click_paint_widget>().brush().set_foreground(
-            twf::Color::Light_blue);
+        auto& tb2 = this->make_child<Text_box>();
+        tb2.brush().set_foreground(twf::Color::Orange);
+        // tb2.border().disable_walls();
+        auto& cpw = this->make_child<Click_paint_widget>();
+        cpw.brush().set_foreground(twf::Color::Light_blue);
+        // cpw.border().enable_corners();
     }
 };

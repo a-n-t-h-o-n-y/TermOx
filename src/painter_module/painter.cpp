@@ -118,40 +118,40 @@ void Painter::border(const Border& b) {
                      widg_y + height, b.south());
     }
 
-    // East
-    if (b.enabled() && b.east_enabled()) {
-        unbound_line(widg_x - 1, widg_y, widg_x - 1, widg_y + height - 1,
-                     b.east());
-    }
-
     // West
     if (b.enabled() && b.west_enabled()) {
+        unbound_line(widg_x - 1, widg_y, widg_x - 1, widg_y + height - 1,
+                     b.west());
+    }
+
+    // East
+    if (b.enabled() && b.east_enabled()) {
         unbound_line(widg_x + width, widg_y, widg_x + width,
-                     widg_y + height - 1, b.west());
+                     widg_y + height - 1, b.east());
     }
 
     // North-West
-    if (b.enabled() && b.north_enabled() && b.west_enabled()) {
+    if (b.enabled() && b.north_west_enabled()) {
         unbound_put_string(widg_x - 1, widg_y - 1, b.north_west());
     }
 
     // North-East
-    if (b.enabled() && b.north_enabled() && b.east_enabled()) {
+    if (b.enabled() && b.north_east_enabled()) {
         unbound_put_string(widg_x + width, widg_y - 1, b.north_east());
     }
 
     // South-West
-    if (b.enabled() && b.south_enabled() && b.west_enabled()) {
+    if (b.enabled() && b.south_west_enabled()) {
         unbound_put_string(widg_x - 1, widg_y + height, b.south_west());
     }
 
     // South-East
-    if (b.enabled() && b.south_enabled() && b.east_enabled()) {
+    if (b.enabled() && b.south_east_enabled()) {
         unbound_put_string(widg_x + width, widg_y + height, b.south_east());
     }
 }
 
-void Painter::border(const Glyph_string& gs) { // Probably delete this
+void Painter::border(const Glyph_string& gs) {  // Probably delete this
     // Save current cursor position
     std::size_t cur_x = widget_->cursor_x();
     std::size_t cur_y = widget_->cursor_y();
