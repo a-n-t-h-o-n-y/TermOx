@@ -102,7 +102,14 @@ void Painter::border(const Border& b) {
 
     // !!Hack!! Sometimes widgets are painted before they are in their layout
     // and their coordinates are not updated, printing a border then is unsafe.
-    if (widg_x == 0 || widg_y == 0) {
+    if (widg_x == 0 && (b.north_west_enabled() || b.west_enabled() ||
+                        b.south_west_enabled()) &&
+        b.enabled()) {
+        return;
+    }
+    if (widg_y == 0 && (b.north_enabled() || b.north_west_enabled() ||
+         b.north_east_enabled()) &&
+        b.enabled()) {
         return;
     }
 
