@@ -33,7 +33,13 @@ void Vertical_layout::update_geometry() {
             total_stretch += cw->size_policy().vertical_stretch;
         }
     }
-    std::size_t widg_space = this->geometry().height() - border_space;
+    std::size_t widg_space{0};
+    if (this->geometry().height() < border_space) {
+        widg_space = 0;
+    } else {
+        widg_space = this->geometry().height() - border_space;
+    }
+
     std::size_t y_pos{0};
     for (Object* c : this->children()) {
         Widget* cw{dynamic_cast<Widget*>(c)};
@@ -53,6 +59,9 @@ void Vertical_layout::update_geometry() {
                 ++x_pos;
             }
             // Size
+            if (total_stretch == 0) {
+                total_stretch = this->children().size();
+            }
             std::size_t height =
                 widg_space *
                 (cw->size_policy().vertical_stretch / double(total_stretch));
@@ -60,13 +69,13 @@ void Vertical_layout::update_geometry() {
             if ((cw->border().west_enabled() ||
                  cw->border().north_west_enabled() ||
                  cw->border().south_west_enabled()) &&
-                cw->border().enabled()) {
+                cw->border().enabled() && width != 0) {
                 --width;
             }
             if ((cw->border().east_enabled() ||
                  cw->border().north_east_enabled() ||
                  cw->border().south_east_enabled()) &&
-                cw->border().enabled()) {
+                cw->border().enabled() && width != 0) {
                 --width;
             }
             System::post_event(cw,
@@ -79,6 +88,13 @@ void Vertical_layout::update_geometry() {
                  cw->border().south_east_enabled()) &&
                 cw->border().enabled()) {
                 ++y_pos;
+            }
+            // if last widget, extend to rest of layout
+            if (c == *(--std::end(this->children())) &&
+                this->geometry().height() > y_pos) {
+                System::post_event(
+                    cw, std::make_unique<Resize_event>(
+                            width, height + this->geometry().height() - y_pos));
             }
         }
     }

@@ -5,6 +5,7 @@
 #include <painter_module/glyph_string.hpp>
 #include <painter_module/painter.hpp>
 #include <widget_module/border.hpp>
+#include <system_module/system.hpp>
 
 #include <cstddef>
 
@@ -97,19 +98,29 @@ void Painter::line(std::size_t x1,
 void Painter::border(const Border& b) {
     const std::size_t widg_x = widget_->x();
     const std::size_t widg_y = widget_->y();
-    const std::size_t width = widget_->geometry().width();
-    const std::size_t height = widget_->geometry().height();
+    std::size_t width = widget_->geometry().width();
+    std::size_t height = widget_->geometry().height();
 
-    // !!Hack!! Sometimes widgets are painted before they are in their layout
-    // and their coordinates are not updated, printing a border then is unsafe.
+    if (widg_y + height > System::max_height()) {
+        return;
+    }
+    if (widg_x + width > System::max_width()) {
+        return;
+    }
     if (widg_x == 0 && (b.north_west_enabled() || b.west_enabled() ||
                         b.south_west_enabled()) &&
         b.enabled()) {
         return;
     }
     if (widg_y == 0 && (b.north_enabled() || b.north_west_enabled() ||
-         b.north_east_enabled()) &&
+                        b.north_east_enabled()) &&
         b.enabled()) {
+        return;
+    }
+    if (widg_x + width == 0 && (b.north_enabled() || b.south_enabled())) {
+        return;
+    }
+    if (widg_y + height == 0 && (b.west_enabled() || b.east_enabled())) {
         return;
     }
 

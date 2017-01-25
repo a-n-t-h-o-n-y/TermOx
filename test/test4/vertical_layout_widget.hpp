@@ -6,7 +6,7 @@ class Text_box : public twf::Widget {
         this->set_focus_policy(twf::Widget::Focus_policy::StrongFocus);
         this->set_cursor(true);
         this->enable_border();
-        this->size_policy().horizontal_stretch = 2;
+        this->size_policy().vertical_stretch = 2;
     }
     bool paint_event(const twf::Paint_event& event) override {
         // this->erase_widget_screen();
@@ -69,6 +69,7 @@ class Vertical_test : public twf::Vertical_layout {
         chl.brush().set_foreground(twf::Color::Red);
         chl.border().disable_walls();
         chl.border().enable_corners();
+        chl.border().enable_south();
 
         // auto& tb1 = this->make_child<Text_box>();
         // tb1.brush().set_background(twf::Color::Light_blue);

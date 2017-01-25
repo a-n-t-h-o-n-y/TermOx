@@ -39,7 +39,7 @@ void Widget::initialize() {
     this->show.track(this->destroyed);
 
     this->repaint = [this]() {
-        Paint_event e; // change this to a single line.
+        Paint_event e;  // change this to a single line.
         System::send_event(this, e);
     };
     this->repaint.track(this->destroyed);
@@ -251,6 +251,12 @@ bool Widget::paint_event(const Paint_event& event) {
 }
 // probably not needed anymore??
 void Widget::erase_widget_screen() {
+    if (this->y() + this->geometry().height() > System::max_height()) {
+        return;
+    }
+    if (this->x() + this->geometry().width() > System::max_width()) {
+        return;
+    }
     Painter p{this};
     if (this->brush().background_color()) {
         p.fill(0, 0, this->geometry().width(), this->geometry().height(),

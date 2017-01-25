@@ -33,7 +33,13 @@ void Horizontal_layout::update_geometry() {
             total_stretch += cw->size_policy().horizontal_stretch;
         }
     }
-    std::size_t widg_space = this->geometry().width() - border_space;
+    std::size_t widg_space{0};
+    if (this->geometry().width() < border_space) {
+        widg_space = 0;
+    } else {
+        widg_space = this->geometry().width() - border_space;
+    }
+    // std::size_t widg_space = this->geometry().width() - border_space;
     std::size_t x_pos{0};
     for (Object* c : this->children()) {
         Widget* cw{dynamic_cast<Widget*>(c)};
@@ -53,6 +59,9 @@ void Horizontal_layout::update_geometry() {
                 ++y_pos;
             }
             // Size
+            if (total_stretch == 0) {
+                total_stretch = this->children().size();
+            }
             std::size_t width =
                 widg_space *
                 (cw->size_policy().horizontal_stretch / double(total_stretch));
@@ -60,13 +69,13 @@ void Horizontal_layout::update_geometry() {
             if ((cw->border().north_enabled() ||
                  cw->border().north_west_enabled() ||
                  cw->border().north_east_enabled()) &&
-                cw->border().enabled()) {
+                cw->border().enabled() && height != 0) {
                 --height;
             }
             if ((cw->border().south_enabled() ||
                  cw->border().south_west_enabled() ||
                  cw->border().south_east_enabled()) &&
-                cw->border().enabled()) {
+                cw->border().enabled() && height != 0) {
                 --height;
             }
             System::post_event(cw,
@@ -79,6 +88,13 @@ void Horizontal_layout::update_geometry() {
                  cw->border().south_east_enabled()) &&
                 cw->border().enabled()) {
                 ++x_pos;
+            }
+            // if last widget, extend to rest of layout
+            if (c == *(--std::end(this->children())) &&
+                this->geometry().width() > x_pos) {
+                System::post_event(
+                    cw, std::make_unique<Resize_event>(
+                            width + this->geometry().width() - x_pos, height));
             }
         }
     }

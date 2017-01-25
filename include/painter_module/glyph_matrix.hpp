@@ -43,11 +43,9 @@ class Glyph_matrix {
     template <typename T>
     static auto at_impl(T& t, std::size_t x, std::size_t y)
         -> decltype(t.at(x, y)) {
-        // if (t.matrix_.empty() || y >= t.matrix_.size() ||
-        //     x >= t.matrix_[0].size()) {
-        //     throw std::out_of_range("Matrix access");
-        // }
-        // return t.matrix_[y][x];
+        if(y >= t.matrix_.size() || x >= t.matrix_.at(y).size()) {
+            return t.matrix_.at(0).at(0);
+        }
         return t.matrix_.at(y).at(x);
     }
 
