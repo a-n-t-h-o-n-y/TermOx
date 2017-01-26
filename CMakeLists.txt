@@ -51,6 +51,7 @@ list(APPEND WIDGET_MODULE_SOURCES 	"src/widget_module/widget.cpp"
 									"src/widget_module/horizontal_layout.cpp"
 									"src/widget_module/border.cpp"
                                     "src/widget_module/vertical_layout.cpp"
+                                    "src/widget_module/textbox.cpp"
 									)
 
 list(APPEND TEST_SOURCES "test/system_module/system_test.cpp"
@@ -84,6 +85,9 @@ list(APPEND TEST3_SOURCES "test/test3/main.cpp"
 list(APPEND TEST4_SOURCES "test/test4/main.cpp"
 						 )
 
+list(APPEND TEST5_SOURCES "test/test5/main.cpp"
+						 )
+
 # Create a Static Library for MCurses
 add_library(twidgets STATIC ${SYSTEM_MODULE_SOURCES}
 						   ${PAINTER_MODULE_SOURCES}
@@ -96,6 +100,7 @@ add_executable(test1 ${TEST1_SOURCES})
 add_executable(test2 ${TEST2_SOURCES})
 add_executable(test3 ${TEST3_SOURCES})
 add_executable(test4 ${TEST4_SOURCES})
+add_executable(test5 ${TEST5_SOURCES})
 
 # Link libraries to executables
 target_link_libraries(tests twidgets gtest gtest_main ncurses)
@@ -103,6 +108,7 @@ target_link_libraries(test1 twidgets ncurses)
 target_link_libraries(test2 twidgets ncurses)
 target_link_libraries(test3 twidgets ncurses)
 target_link_libraries(test4 twidgets ncurses)
+target_link_libraries(test5 twidgets ncurses)
 
 # Install Static Library
 install(TARGETS twidgets ARCHIVE DESTINATION lib)

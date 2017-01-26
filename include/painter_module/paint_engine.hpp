@@ -16,6 +16,7 @@ class Paint_engine {
 
     // Put to buffer
     void put(unsigned x, unsigned y, const Glyph& g);
+    void clear(unsigned x, unsigned y);
 
     // Flush to screen
     void flush(bool optimize);
@@ -29,10 +30,11 @@ class Paint_engine {
 
     virtual void clear_attributes() = 0;
     virtual void touch_all() = 0;
+    virtual void move(unsigned x, unsigned y) = 0;
+    void put_glyph(const Glyph& g);
 
    protected:
     // functions to put to physical screen
-    virtual void move(unsigned x, unsigned y) = 0;
     virtual void put_string(const std::string& sym) = 0;
 
     virtual void set_attribute(Attribute attr) = 0;
@@ -42,9 +44,6 @@ class Paint_engine {
     virtual void refresh() = 0;
 
     detail::Paint_buffer buffer_;
-
-   private:
-    void put_glyph(const Glyph& g);
 };
 
 }  // namespace twf

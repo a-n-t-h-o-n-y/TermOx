@@ -27,9 +27,9 @@ class Text_box : public twf::Widget {
     std::string contents_;
 };
 
-class Textbox : public Widget {
+class Textbox2 : public Widget {
    public:
-    Textbox() {
+    Textbox2() {
         this->set_focus_policy(twf::Widget::Focus_policy::StrongFocus);
         this->set_cursor(true);
         this->enable_border();
@@ -59,8 +59,8 @@ class Textbox : public Widget {
 class My_widg : public Horizontal_layout {
    public:
     My_widg() {
-        this->make_child<Textbox>();
-        this->make_child<Textbox>();
+        this->make_child<Textbox2>();
+        this->make_child<Textbox2>();
         this->make_child<Text_box>();
     }
 };

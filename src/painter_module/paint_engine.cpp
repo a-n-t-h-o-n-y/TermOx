@@ -6,6 +6,14 @@ void Paint_engine::put(unsigned x, unsigned y, const Glyph& g) {
     buffer_.stage(x, y, g);
 }
 
+void Paint_engine::clear(unsigned x, unsigned y) {
+    buffer_.stage(x, y, " ");
+    buffer_.commit(x, y);
+    this->move(x, y);
+    this->put_glyph(" ");
+    this->move(x, y);
+}
+
 void Paint_engine::flush(bool optimize) {
     for (int j{0}; j < buffer_.height(); ++j) {
         for (int i{0}; i < buffer_.width(); ++i) {
