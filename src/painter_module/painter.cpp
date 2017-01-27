@@ -27,9 +27,9 @@ void Painter::put(const Glyph_string& gs) {
             widget_->paint_engine().put(glob_x, glob_y, g);
             this->move(widget_->cursor_x() + 1, widget_->cursor_y());
         }
-        widget_->paint_engine().move(widget_->x() + widget_->cursor_x(),
-                                     widget_->y() + widget_->cursor_y());
     }
+    widget_->paint_engine().move(widget_->x() + widget_->cursor_x(),
+                                 widget_->y() + widget_->cursor_y());
     widget_->paint_engine().clear_attributes();
 }
 

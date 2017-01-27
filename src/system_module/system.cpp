@@ -198,6 +198,8 @@ void System::cycle_tab_focus() {
             if (widg->focus_policy() == Widget::Focus_policy::TabFocus ||
                 widg->focus_policy() == Widget::Focus_policy::StrongFocus) {
                 System::set_focus_widget(widg);
+                widg->paint_engine().move(widg->x() + widg->cursor_x(),
+                                          widg->y() + widg->cursor_y());
                 return;
             }
         }

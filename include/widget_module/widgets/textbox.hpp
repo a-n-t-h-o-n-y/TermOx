@@ -6,6 +6,9 @@
 #include "../../system_module/events/key_event.hpp"
 #include "../../painter_module/glyph_string.hpp"
 
+#include <cstddef>
+#include <array>
+
 namespace twf {
 
 class Textbox : public Widget {
@@ -21,6 +24,10 @@ class Textbox : public Widget {
 
    private:
     Glyph_string contents_;
+
+    std::array<std::size_t, 2> cursor_position_2d();
+    std::size_t index_from_position(std::size_t x, std::size_t y);
+    std::size_t cursor_index_ = 0;
 };
 
 }  // namespace twf

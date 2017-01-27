@@ -143,6 +143,8 @@ bool Widget::event(const Event& event) {
             if (this->focus_policy() == Focus_policy::ClickFocus ||
                 this->focus_policy() == Focus_policy::StrongFocus) {
                 System::set_focus_widget(this);
+                this->paint_engine().move(this->x() + this->cursor_x(),
+                                          this->y() + this->cursor_y());
             }
             return this->mouse_press_event(
                 static_cast<const Mouse_event&>(event));

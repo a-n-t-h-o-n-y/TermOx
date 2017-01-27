@@ -12,6 +12,7 @@ void Paint_engine::clear(unsigned x, unsigned y) {
     this->move(x, y);
     this->put_glyph(" ");
     this->move(x, y);
+    this->refresh();
 }
 
 void Paint_engine::flush(bool optimize) {
