@@ -10,10 +10,9 @@ namespace twf {
 
 bool Textbox::paint_event(const Paint_event& event) {
     Painter p{this};
-    p.move(0, 0);
-    p.put(contents_);
-    this->paint_engine().move(this->x() + this->cursor_x(),
-                              this->y() + this->cursor_y());
+    p.put_at(0, 0, contents_, false);
+    auto pos = this->cursor_position_2d();
+    p.move(pos[0], pos[1]);
     return Widget::paint_event(event);
 }
 
@@ -22,38 +21,58 @@ bool Textbox::key_press_event(const Key_event& event) {
     // Backspace
     if (event.key_code() == Key::Backspace) {
         if (this->cursor_x() == 0 && this->cursor_y() != 0) {
-            if (contents_.back().str() == "\n") {
-                contents_.pop_back();
+            if (contents_.at(cursor_index_ - 1).str() == "\n") {
                 --cursor_index_;
+                contents_.erase(std::begin(contents_) + cursor_index_);
                 auto pos = this->cursor_position_2d();
                 p.move(pos[0], pos[1]);
-                this->paint_engine().move(this->x() + this->cursor_x(),
-                                          this->y() + this->cursor_y());
+                this->update();
                 return true;
             } else {
                 p.move(this->geometry().width() - 1, this->cursor_y() - 1);
-                this->paint_engine().clear(this->x() + this->cursor_x(),
-                                           this->y() + this->cursor_y());
+                p.put(" ", false);
             }
         } else if (this->cursor_x() == 0 && this->cursor_y() == 0) {
             return true;
         } else {
             p.move(this->cursor_x() - 1, this->cursor_y());
-            this->paint_engine().clear(this->x() + this->cursor_x(),
-                                       this->y() + this->cursor_y());
+            p.put(" ", false);
         }
-        contents_.pop_back();
         --cursor_index_;
+        contents_.erase(std::begin(contents_) + cursor_index_);
         // Enter
     } else if (event.key_code() == Key::Enter) {
-        contents_.append("\n");
+        if (cursor_index_ == contents_.size()) {
+            contents_.append("\n");
+        } else {
+            contents_.insert(std::begin(contents_) + cursor_index_, "\n");
+            this->update();
+        }
         ++cursor_index_;
         p.put("\n");
         // Character
     } else if (event.text().size() != 0) {
-        contents_.append(event.text());
+        if (cursor_index_ == contents_.size()) {
+            contents_.append(event.text());
+        } else {
+            contents_.insert(std::begin(contents_) + cursor_index_,
+                             event.text());
+            this->update();
+        }
         ++cursor_index_;
         p.put(event.text());
+    } else if (event.key_code() == Key::Arrow_right) {
+        if (cursor_index_ != contents_.size()) {
+            ++cursor_index_;
+            auto pos = cursor_position_2d();
+            p.move(pos[0], pos[1]);
+        }
+    } else if (event.key_code() == Key::Arrow_left) {
+        if (cursor_index_ != 0) {
+            --cursor_index_;
+            auto pos = cursor_position_2d();
+            p.move(pos[0], pos[1]);
+        }
     }
     return true;
 }

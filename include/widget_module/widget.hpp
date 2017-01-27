@@ -3,6 +3,7 @@
 
 #include "border.hpp"
 #include "size_policy.hpp"
+#include "coordinate.hpp"
 
 #include <system_module/object.hpp>
 #include <system_module/events/paint_event.hpp>
@@ -46,10 +47,10 @@ class Widget : public Object {
     void set_y(std::size_t global_y);
 
     void set_cursor(bool show) { show_cursor_ = show; }
-    void set_cursor_x(std::size_t x) { cursor_x_ = x; }
-    void set_cursor_y(std::size_t y) { cursor_y_ = y; }
-    std::size_t cursor_x() const { return cursor_x_; }
-    std::size_t cursor_y() const { return cursor_y_; }
+    void set_cursor_x(std::size_t x) { cursor_position_.x = x; }
+    void set_cursor_y(std::size_t y) { cursor_position_.y = y; }
+    std::size_t cursor_x() const { return cursor_position_.x; }
+    std::size_t cursor_y() const { return cursor_position_.y; }
     void set_paint_engine(std::unique_ptr<Paint_engine> engine) {
         paint_engine_ = std::move(engine);
     }
@@ -119,13 +120,11 @@ class Widget : public Object {
     bool child_event(const Child_event& event) override;
 
     // Top left corner coordinates relative to parent
-    std::size_t x_ = 0;
-    std::size_t y_ = 0;
+    Coordinate position_;
 
     bool show_cursor_ = true;
-    std::size_t cursor_x_ = 0;
-    // create cursor object to hold x, y and bool show ^^
-    std::size_t cursor_y_ = 0;
+    Coordinate cursor_position_;
+
     bool focus_ = false;
     bool mouse_tracking_ = false;
     bool visible_ = true;
@@ -137,7 +136,7 @@ class Widget : public Object {
     Size_policy size_policy_;
 
     std::unique_ptr<Paint_engine> paint_engine_ = nullptr;
-    Geometry geometry_ = Geometry{this}; // does geo need to know about this?
+    Geometry geometry_ = Geometry{this};  // does geo need to know about this?
 
    private:
     void paint_disabled_widget();

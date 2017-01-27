@@ -19,8 +19,12 @@ class Painter {
     explicit Painter(Widget* widget);
 
     // Essential Functions
-    void put(const Glyph_string& gs);
-    void move(std::size_t x, std::size_t y);
+    void put(const Glyph_string& gs, bool move_cursor = true);
+    void put_at(std::size_t x,
+                std::size_t y,
+                const Glyph_string& gs,
+                bool move_cursor = true);
+    void move(std::size_t x, std::size_t y, bool update_buffer = true);
 
     // Convinience functions
     void fill(std::size_t x,

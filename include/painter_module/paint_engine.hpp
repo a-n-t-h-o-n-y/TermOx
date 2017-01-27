@@ -33,6 +33,9 @@ class Paint_engine {
     virtual void move(unsigned x, unsigned y) = 0;
     void put_glyph(const Glyph& g);
 
+    detail::Paint_buffer& buffer() { return buffer_; }
+    const detail::Paint_buffer& buffer() const { return buffer_; }
+
    protected:
     // functions to put to physical screen
     virtual void put_string(const std::string& sym) = 0;

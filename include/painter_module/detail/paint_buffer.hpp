@@ -2,6 +2,7 @@
 #define PAINT_BUFFER_HPP
 
 #include "../glyph_matrix.hpp"
+#include <widget_module/coordinate.hpp>
 
 namespace twf {
 namespace detail {
@@ -27,6 +28,8 @@ class Paint_buffer {
     void stage(unsigned x, unsigned y, const Glyph& glyph) {
         staging_area_.at(x, y) = glyph;
     }
+
+    Coordinate cursor_position; 
 
    private:
     Glyph_matrix backing_store_;

@@ -54,18 +54,18 @@ void Widget::initialize() {
 void Widget::set_x(std::size_t global_x) {
     auto parent = dynamic_cast<Widget*>(this->parent());
     if (parent != nullptr) {
-        x_ = global_x - parent->x();
+        position_.x = global_x - parent->x();
     } else {
-        x_ = global_x;
+        position_.x = global_x;
     }
 }
 
 void Widget::set_y(std::size_t global_y) {
     auto parent = dynamic_cast<Widget*>(this->parent());
     if (parent != nullptr) {
-        y_ = global_y - parent->y();
+        position_.y = global_y - parent->y();
     } else {
-        y_ = global_y;
+        position_.y = global_y;
     }
 }
 
@@ -243,6 +243,8 @@ bool Widget::paint_event(const Paint_event& event) {
         Painter p{this};
         p.border(border_);
     }
+    this->paint_engine().move(this->x() + this->cursor_x(),
+                              this->y() + this->cursor_y());
     // for (Object* c : this->children()) {
     //     Widget* child = dynamic_cast<Widget*>(c);
     //     if (child != nullptr) {
@@ -251,7 +253,7 @@ bool Widget::paint_event(const Paint_event& event) {
     // }
     return true;
 }
-// probably not needed anymore??
+// probably not needed anymore?? no..
 void Widget::erase_widget_screen() {
     if (this->y() + this->geometry().height() > System::max_height()) {
         return;
@@ -339,7 +341,7 @@ bool Widget::focus_event(const Focus_event& event) {
     if (event.type() == Event::FocusIn) {
         Painter p{this};
         p.set_cursor(this->cursor());
-        p.move(cursor_x_, cursor_y_);
+        p.move(cursor_position_.x, cursor_position_.y);
     }  // if(event.type() == FocusOut)
     return true;
 }
@@ -389,17 +391,17 @@ std::size_t Widget::x() const  // previously get_global_x
 {
     Widget* parent_widg = dynamic_cast<Widget*>(this->parent());
     if (parent_widg == nullptr) {
-        return this->x_;
+        return this->position_.x;
     }
-    return this->x_ + parent_widg->x();
+    return this->position_.x + parent_widg->x();
 }
 
 std::size_t Widget::y() const {
     Widget* parent_widg = dynamic_cast<Widget*>(this->parent());
     if (parent_widg == nullptr) {
-        return this->y_;
+        return this->position_.y;
     }
-    return this->y_ + parent_widg->y();
+    return this->position_.y + parent_widg->y();
 }
 
 Paint_engine& Widget::paint_engine() const {

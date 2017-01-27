@@ -13,27 +13,37 @@ namespace twf {
 
 Painter::Painter(Widget* widget) : widget_{widget} {
     this->set_cursor(widget_->cursor());
-    // this->move(0, 0);
 }
 
-void Painter::put(const Glyph_string& gs) {
+void Painter::put(const Glyph_string& gs, bool move_cursor) {
+    Coordinate old_position{widget_->cursor_x(), widget_->cursor_y()};
     for (Glyph g : gs) {
         add_default_attributes(g);
         std::size_t glob_x = widget_->x() + widget_->cursor_x();
         std::size_t glob_y = widget_->y() + widget_->cursor_y();
         if (g.str() == "\n") {
-            this->move(0, widget_->cursor_y() + 1);
+            this->move(0, widget_->cursor_y() + 1, move_cursor);
         } else {
             widget_->paint_engine().put(glob_x, glob_y, g);
-            this->move(widget_->cursor_x() + 1, widget_->cursor_y());
+            this->move(widget_->cursor_x() + 1, widget_->cursor_y(),
+                       move_cursor);
         }
     }
-    widget_->paint_engine().move(widget_->x() + widget_->cursor_x(),
-                                 widget_->y() + widget_->cursor_y());
+    if (!move_cursor) {
+        this->move(old_position.x, old_position.y, false);
+    }
     widget_->paint_engine().clear_attributes();
 }
 
-void Painter::move(std::size_t x, std::size_t y) {
+void Painter::put_at(std::size_t x,
+            std::size_t y,
+            const Glyph_string& gs,
+            bool move_cursor) {
+    this->move(x, y, move_cursor);
+    this->put(gs, move_cursor);
+}
+
+void Painter::move(std::size_t x, std::size_t y, bool update_buffer) {
     Geometry& geo = widget_->geometry();
     // Adjust coordinates if out of widget_'s bounds
     if (x >= geo.width()) {
@@ -45,6 +55,13 @@ void Painter::move(std::size_t x, std::size_t y) {
     }
     widget_->set_cursor_x(x);
     widget_->set_cursor_y(y);
+    // Move cursor on screen
+    if (update_buffer) {
+        widget_->paint_engine().buffer().cursor_position.x =
+            widget_->x() + widget_->cursor_x();
+        widget_->paint_engine().buffer().cursor_position.y =
+            widget_->y() + widget_->cursor_y();
+    }
 }
 
 void Painter::fill(std::size_t x,
@@ -83,14 +100,14 @@ void Painter::line(std::size_t x1,
     // Horizontal
     if (y1 == y2) {
         for (std::size_t i{x1}; i <= x2; ++i) {
-            this->move(i, y1);
+            this->move(i, y1, false);
             this->put(gs);
         }
     }
     // Vertical
     else if (x1 == x2) {
         for (std::size_t i{y1}; i <= y2; ++i) {
-            this->move(x1, i);
+            this->move(x1, i, false);
             this->put(gs);
         }
     }

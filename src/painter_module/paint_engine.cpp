@@ -6,6 +6,7 @@ void Paint_engine::put(unsigned x, unsigned y, const Glyph& g) {
     buffer_.stage(x, y, g);
 }
 
+// probably no need for this now.
 void Paint_engine::clear(unsigned x, unsigned y) {
     buffer_.stage(x, y, " ");
     buffer_.commit(x, y);
@@ -24,9 +25,10 @@ void Paint_engine::flush(bool optimize) {
             }
         }
     }
-    if(!optimize) {
+    if (!optimize) {
         this->touch_all();
     }
+    this->move(buffer_.cursor_position.x, buffer_.cursor_position.y);
     this->refresh();
 }
 
