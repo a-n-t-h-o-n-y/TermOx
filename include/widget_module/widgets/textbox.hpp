@@ -25,9 +25,14 @@ class Textbox : public Widget {
    private:
     Glyph_string contents_;
 
-    std::array<std::size_t, 2> cursor_position_2d();
+    // rename these 2
+    std::array<std::size_t, 2> cursor_position_2d(
+        std::size_t index);  // change to Coordinate.
     std::size_t index_from_position(std::size_t x, std::size_t y);
     std::size_t cursor_index_ = 0;
+
+    void cursor_up();
+    void cursor_down();
 };
 
 }  // namespace twf
