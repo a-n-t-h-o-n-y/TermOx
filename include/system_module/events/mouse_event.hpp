@@ -10,7 +10,7 @@ namespace twf {
 
 class Mouse_event : public Input_event {
    public:
-    enum class Button {
+    enum class Button {// maybe move outside of Mouse_event class.
         NoButton,
         LeftButton,  // BUTTON1
         MidButton,

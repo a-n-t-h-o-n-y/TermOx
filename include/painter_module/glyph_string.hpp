@@ -17,6 +17,11 @@ class Glyph_string : private std::vector<Glyph> {
    public:
     Glyph_string() = default;
 
+    // Iterators
+    template <typename InputIterator>
+    Glyph_string(InputIterator first, InputIterator last)
+        : vector<Glyph>::vector(first, last) {}
+
     template <typename... Attributes>
     Glyph_string(const std::string& symbols, Attributes... attrs)
         : vector<Glyph>::vector() {

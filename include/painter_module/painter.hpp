@@ -4,6 +4,7 @@
 #include "../widget_module/widget.hpp"
 #include "color.hpp"
 #include "glyph_string.hpp"
+#include "../widget_module/coordinate.hpp"
 
 #include <codecvt>
 #include <cstddef>
@@ -19,11 +20,16 @@ class Painter {
     explicit Painter(Widget* widget);
 
     // Essential Functions
-    void put(const Glyph_string& gs, bool move_cursor = true);
+    void put(const Glyph_string& string, bool move_cursor = true);
+    void put_at(Coordinate pos,
+                const Glyph_string& string,
+                bool move_cursor = true);
     void put_at(std::size_t x,
                 std::size_t y,
-                const Glyph_string& gs,
+                const Glyph_string& string,
                 bool move_cursor = true);
+    // Moves the cursor position within Widget and Paint_buffer.
+    void move(Coordinate pos, bool update_buffer = true);
     void move(std::size_t x, std::size_t y, bool update_buffer = true);
 
     // Convinience functions

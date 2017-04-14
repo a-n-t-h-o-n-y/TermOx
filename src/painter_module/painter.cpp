@@ -5,6 +5,7 @@
 #include <painter_module/glyph_string.hpp>
 #include <painter_module/painter.hpp>
 #include <widget_module/border.hpp>
+#include <widget_module/coordinate.hpp>
 #include <system_module/system.hpp>
 
 #include <cstddef>
@@ -15,9 +16,9 @@ Painter::Painter(Widget* widget) : widget_{widget} {
     this->set_cursor(widget_->cursor());
 }
 
-void Painter::put(const Glyph_string& gs, bool move_cursor) {
+void Painter::put(const Glyph_string& string, bool move_cursor) {
     Coordinate old_position{widget_->cursor_x(), widget_->cursor_y()};
-    for (Glyph g : gs) {
+    for (Glyph g : string) {
         add_default_attributes(g);
         std::size_t glob_x = widget_->x() + widget_->cursor_x();
         std::size_t glob_y = widget_->y() + widget_->cursor_y();
@@ -35,12 +36,22 @@ void Painter::put(const Glyph_string& gs, bool move_cursor) {
     widget_->paint_engine().clear_attributes();
 }
 
+void Painter::put_at(Coordinate pos,
+                     const Glyph_string& string,
+                     bool move_cursor) {
+    this->put_at(pos.x, pos.y, string, move_cursor);
+}
+
 void Painter::put_at(std::size_t x,
-            std::size_t y,
-            const Glyph_string& gs,
-            bool move_cursor) {
+                     std::size_t y,
+                     const Glyph_string& string,
+                     bool move_cursor) {
     this->move(x, y, move_cursor);
-    this->put(gs, move_cursor);
+    this->put(string, move_cursor);
+}
+
+void Painter::move(Coordinate pos, bool update_buffer) {
+    this->move(pos.x, pos.y, update_buffer);
 }
 
 void Painter::move(std::size_t x, std::size_t y, bool update_buffer) {
