@@ -1,7 +1,7 @@
 #ifndef KEY_HPP
 #define KEY_HPP
 
-enum Key {
+enum class Key {
     // Control Characters
     Null = 0,    // Ctrl + Space, or Ctrl + 2, OR Ctrl + @
     Ctrl_a,      // Start of heading

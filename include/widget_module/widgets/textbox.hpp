@@ -5,6 +5,7 @@
 #include "../../system_module/events/paint_event.hpp"
 #include "../../system_module/events/key_event.hpp"
 #include "../../painter_module/glyph_string.hpp"
+#include "painter_module/glyph_string.hpp"
 
 #include <cstddef>
 #include <array>
@@ -21,6 +22,8 @@ class Textbox : public Textbox_core {
     bool key_press_event(const Key_event& event) override;
 
     bool mouse_press_event(const Mouse_event& event) override;
+
+    Glyph_string text() const { return contents_; }
 };
 
 }  // namespace twf

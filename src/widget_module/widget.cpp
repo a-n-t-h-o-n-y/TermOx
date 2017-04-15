@@ -234,6 +234,7 @@ bool Widget::move_event(const Move_event& event) {
 bool Widget::resize_event(const Resize_event& event) {
     this->geometry().set_width(event.new_width());
     this->geometry().set_height(event.new_height());
+    this->erase_widget_screen();
     this->update();
     return true;
 }

@@ -10,6 +10,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <ostream>
 
 namespace twf {
 
@@ -50,6 +51,10 @@ class Glyph_string : private std::vector<Glyph> {
         for (const Glyph& g : glyphs) {
             this->append(g, std::forward<Attributes>(attrs)...);
         }
+    }
+
+    operator std::string() const {
+        return this->str();
     }
 
     // Entry point to internal Glyph vector
@@ -159,6 +164,10 @@ inline bool operator==(const Glyph_string& x, const Glyph_string& y) {
 
 inline bool operator!=(const Glyph_string& x, const Glyph_string& y) {
     return !(x == y);
+}
+
+inline std::ostream& operator<<(std::ostream& os, const Glyph_string& gs) {
+    return os << static_cast<std::string>(gs);
 }
 
 }  // namespace twf

@@ -9,7 +9,9 @@ namespace twf {
 
 Textbox_core::Textbox_core(const Glyph_string& string) : contents_{string} {};
 
-void Textbox_core::scroll_up(std::size_t n) { // work here, top line is not showing
+// this is scroll_down, you didn't knowtice because button::scroll_up/down is
+// reversed probably
+void Textbox_core::scroll_up(std::size_t n) {  // top line is not showing
     for (std::size_t i = upper_bound_; i < contents_.size(); ++i) {
         if (i - upper_bound_ == this->geometry().width() - 1 ||
             contents_.at(i).str() == "\n") {
@@ -17,23 +19,17 @@ void Textbox_core::scroll_up(std::size_t n) { // work here, top line is not show
             break;
         }
     }
+    lower_bound_ = find_lower_bound();
     // set lower bound first??
     if (cursor_index_ > lower_bound_) {
         this->set_cursor_index(lower_bound_);
     }
 }
 
+// this is really scroll up
 void Textbox_core::scroll_down(std::size_t n) {
-    if (upper_bound_ == 0) {
-        return;
-    }
-    for (std::size_t i = upper_bound_ - 1; i != 0; --i) {
-        if (contents_.at(i).str() == "\n" ||
-            upper_bound_ - i == this->geometry().width() - 1) {
-            upper_bound_ = i;
-            break;
-        }
-    }
+    upper_bound_ = previous_line_break(upper_bound_);
+    lower_bound_ = find_lower_bound();
     if (cursor_index_ < upper_bound_) {
         this->set_cursor_index(upper_bound_);
     }
@@ -77,7 +73,7 @@ bool Textbox_core::paint_event(const Paint_event& event) {
     Painter p{this};
     // Paint the visible sub-string.
     Glyph_string sub_str(std::begin(contents_) + upper_bound_,
-                         std::end(contents_) + lower_bound_);
+                         std::begin(contents_) + lower_bound_);
     p.put_at(0, 0, sub_str, false);
     // Move the cursor to the appropriate position.
     auto pos = this->position_from_index(cursor_index_);
@@ -132,7 +128,8 @@ Coordinate Textbox_core::position_from_index(std::size_t index) {
 // Sets the position of the cursor in the Glyph_string. Possibly scrolls so
 // that the index position is visible in the window.
 void Textbox_core::set_cursor_index(std::size_t index) {
-    cursor_index_ = index; // this was set to i, which is an enum, subtle bug...
+    cursor_index_ =
+        index;  // this was set to i, which is an enum, subtle bug...
     if (cursor_index_ < upper_bound_) {
         // scroll up as many times as needed
     } else if (cursor_index_ > lower_bound_) {
@@ -141,6 +138,43 @@ void Textbox_core::set_cursor_index(std::size_t index) {
     auto pos = this->position_from_index(cursor_index_);
     Painter p{this};
     p.move(pos.x, pos.y);
+}
+
+std::size_t Textbox_core::previous_line_break(std::size_t current_upper_bound) {
+    if (current_upper_bound == 0) {
+        return 0;
+    }
+    std::size_t previous{0};
+    std::size_t line_index{0};
+    for (std::size_t i{0}; i < current_upper_bound - 1; ++i) {
+        if (contents_.at(i) == '\n') {
+            previous = i + 1;
+            line_index = 0;
+        } else if (line_index + 1 == this->geometry().width()) {
+            previous += line_index + 1;
+            line_index = 0;
+        } else {
+            ++line_index;
+        }
+    }
+    return previous;
+}
+
+std::size_t Textbox_core::find_lower_bound() {
+    std::size_t height{0};
+    std::size_t line_index{0};
+    for(std::size_t i{upper_bound_}; i < contents_.size(); ++i) {
+        if (height - 1 == this->geometry().height()) {
+            return i;
+        } else if (contents_.at(i) == '\n') {
+            ++height;
+            line_index = 0;
+        } else if (line_index == this->geometry().width()) {
+            ++height;
+            line_index = 0;
+        }
+    }
+    return contents_.size();
 }
 
 }  // namespace twf

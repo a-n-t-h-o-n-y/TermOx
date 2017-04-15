@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <string>
 #include <utility>
+#include <ostream>
 
 namespace twf {
 
@@ -23,6 +24,10 @@ class Glyph {
     Glyph(Symbol symbol, Attributes... attrs)
         : brush_{std::forward<Attributes>(attrs)...} {
         set_symbol(std::forward<Symbol>(symbol));
+    }
+
+    operator std::string() const {
+        return symbol_;
     }
 
     template <typename Symbol>
@@ -50,6 +55,10 @@ class Glyph {
     std::string symbol_ = " ";
     Brush brush_;
 };
+
+inline std::ostream& operator<<(std::ostream& os, const Glyph& g) {
+    return os << static_cast<std::string>(g);
+}
 
 }  // namespace twf
 #endif  // GLYPH_HPP
