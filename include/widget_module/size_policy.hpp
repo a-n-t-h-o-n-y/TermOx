@@ -20,7 +20,8 @@ struct Size_policy {
     Policy vertical_policy;
     std::size_t horizontal_stretch = 1;
     std::size_t vertical_stretch = 1;
-    bool height_for_width = false;
+    bool height_for_width = false; // essentially fixed, nothing in width policy matters
+    bool width_for_height = false; // you can only check for one on hori/vert layouts otherwise recursive loop
 
     explicit Size_policy(Policy horizontal = Preferred,
                          Policy vertical = Preferred)

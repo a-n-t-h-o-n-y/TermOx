@@ -10,6 +10,11 @@
 
 namespace twf {
 
+void Horizontal_layout::Size_widgets() {
+
+}
+
+
 void Horizontal_layout::update_geometry() {
     std::size_t border_space{0};
     std::size_t total_stretch{0};

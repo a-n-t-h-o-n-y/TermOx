@@ -58,20 +58,22 @@ class Geometry {
     std::size_t min_height() const { return min_height_; }
     std::size_t min_height_hint() const { return min_height_hint_; }
 
-    Size_policy size_policy() const { return size_policy_; }
+    Size_policy& size_policy() { return size_policy_; }
+    const Size_policy& size_policy() const { return size_policy_; }
 
    private:
     Widget* widget_;
 
     // Parameters for Layouts to use
     std::size_t width_hint_;
-    std::size_t height_hint_;
-    std::size_t max_width_ = std::numeric_limits<std::size_t>::max();
-    std::size_t max_height_ = std::numeric_limits<std::size_t>::max();
+    std::size_t min_width_hint_ = 0;// prob not needed
     std::size_t min_width_ = 0;
-    std::size_t min_width_hint_ = 0;
+    std::size_t max_width_ = std::numeric_limits<std::size_t>::max();
+
+    std::size_t height_hint_;
+    std::size_t min_height_hint_ = 0; // prob not needed
     std::size_t min_height_ = 0;
-    std::size_t min_height_hint_ = 0;
+    std::size_t max_height_ = std::numeric_limits<std::size_t>::max();
 
     Size_policy size_policy_;
 

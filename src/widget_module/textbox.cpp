@@ -23,7 +23,7 @@ bool Textbox::key_press_event(const Key_event& event) {
                 this->update();
                 return true;
             } else {
-                p.move(this->geometry().width() - 1, this->cursor_y() - 1);
+                p.move(this->width() - 1, this->cursor_y() - 1);
                 p.put(" ", false);
             }
         } else if (this->cursor_x() == 0 && this->cursor_y() == 0) {
@@ -35,6 +35,7 @@ bool Textbox::key_press_event(const Key_event& event) {
         --cursor_index_;
         contents_.erase(std::begin(contents_) + cursor_index_);
         lower_bound_ = find_lower_bound();
+        this->erase_widget_screen();
         this->update();  // Only need this for backspace when cursor_index_ is
         // different than the index size(); you can optimize this.
         // Enter
@@ -79,7 +80,7 @@ bool Textbox::key_press_event(const Key_event& event) {
         }
     } else if (event.key_code() == Key::Arrow_down) {
         auto last_index =
-            this->index_from_position(0, this->geometry().height() - 1);
+            this->index_from_position(0, this->height() - 1);
         auto pos = position_from_index(last_index);
         if (this->cursor_y() != pos.y) {
             this->cursor_down();

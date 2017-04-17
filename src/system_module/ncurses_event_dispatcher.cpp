@@ -5,6 +5,7 @@
 #include <system_module/events/resize_event.hpp>
 #include <system_module/system.hpp>
 #include <widget_module/widget.hpp>
+#include <widget_module/border.hpp>
 
 #include <ncurses.h>
 
@@ -53,6 +54,8 @@ void NCurses_event_dispatcher::post_user_input() {
     }
 }
 
+#undef border
+
 std::pair<Object*, std::unique_ptr<Event>>
 NCurses_event_dispatcher::parse_mouse_event() {
     ::MEVENT mouse_event;
@@ -91,30 +94,45 @@ NCurses_event_dispatcher::parse_mouse_event() {
             ev_button = Mouse_event::Button::RightButton;
         }
 
-        // Button 4 / Scroll Down?
+        // Button 4 / Scroll Up
         else if (mouse_event.bstate & BUTTON4_PRESSED) {
             ev_type = Event::Type::MouseButtonPress;
-            ev_button = Mouse_event::Button::ScrollDown;
+            ev_button = Mouse_event::Button::ScrollUp;
         } else if (mouse_event.bstate & BUTTON4_RELEASED) {
             ev_type = Event::Type::MouseButtonRelease;
-            ev_button = Mouse_event::Button::ScrollDown;
+            ev_button = Mouse_event::Button::ScrollUp;
         }
 
-        // Button 5 / Scroll Up?
+        // Button 5 / Scroll Down
         else if (mouse_event.bstate & BUTTON5_PRESSED) {
             ev_type = Event::Type::MouseButtonPress;
-            ev_button = Mouse_event::Button::ScrollUp;
+            ev_button = Mouse_event::Button::ScrollDown;
         } else if (mouse_event.bstate & BUTTON5_RELEASED) {
             ev_type = Event::Type::MouseButtonRelease;
-            ev_button = Mouse_event::Button::ScrollUp;
+            ev_button = Mouse_event::Button::ScrollDown;
         } else {
             return std::pair<Object*, std::unique_ptr<Event>>{nullptr, nullptr};
         }
 
         Widget* widg = dynamic_cast<Widget*>(object);
         if (widg) {
-            std::size_t local_x = mouse_event.x - widg->x();
-            std::size_t local_y = mouse_event.y - widg->y();
+            // Replace with utility function used in Widget and maybe Painter
+            std::size_t x_border_offset{0};
+            std::size_t y_border_offset{0};
+            if (widg->border().enabled() &&
+                (widg->border().west_enabled() ||
+                 widg->border().north_west_enabled() ||
+                 widg->border().south_west_enabled())) {
+                ++x_border_offset;
+            }
+            if (widg->border().enabled() &&
+                (widg->border().north_enabled() ||
+                 widg->border().north_east_enabled() ||
+                 widg->border().north_west_enabled())) {
+                ++y_border_offset;
+            }
+            std::size_t local_x = mouse_event.x - widg->x() - x_border_offset;
+            std::size_t local_y = mouse_event.y - widg->y() - y_border_offset;
             auto event = std::make_unique<Mouse_event>(
                 ev_type, ev_button, mouse_event.x, mouse_event.y, local_x,
                 local_y, mouse_event.id);

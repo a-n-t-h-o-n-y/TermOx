@@ -74,9 +74,9 @@ bool Widget::has_coordinates(std::size_t global_x, std::size_t global_y) {
         return false;
     }
     return global_x >= this->x() &&
-           global_x < (this->x() + this->geometry().width()) &&
+           global_x < (this->x() + this->width()) &&
            global_y >= this->y() &&
-           global_y < (this->y() + this->geometry().height());
+           global_y < (this->y() + this->height());
 }
 
 void Widget::enable_border() {
@@ -410,6 +410,32 @@ Paint_engine& Widget::paint_engine() const {
         return *paint_engine_;
     }
     return *System::paint_engine();
+}
+
+std::size_t Widget::width() const {
+    std::size_t w = this->geometry().width();
+    if (!border_.enabled()) {
+        return w;
+    }
+    std::size_t border_offset =
+        (border_.west_enabled() ? 1 : 0) + (border_.east_enabled() ? 1 : 0);
+    if (border_offset > w) {
+        return 0;
+    }
+    return w - border_offset;
+}
+
+std::size_t Widget::height() const {
+    std::size_t h = this->geometry().height();
+    if (!border_.enabled()) {
+        return h;
+    }
+    std::size_t border_offset =
+        (border_.north_enabled() ? 1 : 0) + (border_.south_enabled() ? 1 : 0);
+    if (border_offset > h) {
+        return 0;
+    }
+    return h - border_offset;
 }
 
 }  // namespace twf

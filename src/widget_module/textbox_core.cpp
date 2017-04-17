@@ -9,11 +9,17 @@ namespace twf {
 
 Textbox_core::Textbox_core(const Glyph_string& string) : contents_{string} {};
 
-// this is scroll_down, you didn't knowtice because button::scroll_up/down is
-// reversed probably
-void Textbox_core::scroll_up(std::size_t n) {  // top line is not showing
+void Textbox_core::scroll_up(std::size_t n) {
+    upper_bound_ = previous_line_break(upper_bound_);
+    lower_bound_ = find_lower_bound();
+    if (cursor_index_ < upper_bound_) {
+        this->set_cursor_index(upper_bound_);
+    }
+}
+
+void Textbox_core::scroll_down(std::size_t n) {  // top line is not showing
     for (std::size_t i = upper_bound_; i < contents_.size(); ++i) {
-        if (i - upper_bound_ == this->geometry().width() - 1 ||
+        if (i - upper_bound_ == this->width() - 1 ||
             contents_.at(i).str() == "\n") {
             upper_bound_ = i + 1;
             break;
@@ -23,15 +29,6 @@ void Textbox_core::scroll_up(std::size_t n) {  // top line is not showing
     // set lower bound first??
     if (cursor_index_ > lower_bound_) {
         this->set_cursor_index(lower_bound_);
-    }
-}
-
-// this is really scroll up
-void Textbox_core::scroll_down(std::size_t n) {
-    upper_bound_ = previous_line_break(upper_bound_);
-    lower_bound_ = find_lower_bound();
-    if (cursor_index_ < upper_bound_) {
-        this->set_cursor_index(upper_bound_);
     }
 }
 
@@ -95,7 +92,7 @@ std::size_t Textbox_core::index_from_position(std::size_t x, std::size_t y) {
         }
         // Increment
         if (contents_.at(i).str() == "\n" ||
-            running_position.x + 1 == this->geometry().width()) {
+            running_position.x + 1 == this->width()) {
             ++running_position.y;
             running_position.x = 0;
         } else {
@@ -115,7 +112,7 @@ Coordinate Textbox_core::position_from_index(std::size_t index) {
     Coordinate position;
     for (std::size_t i{upper_bound_}; i < index; ++i) {
         if (contents_.at(i).str() == "\n" ||
-            position.x + 1 == this->geometry().width()) {
+            position.x + 1 == this->width()) {
             ++position.y;
             position.x = 0;
         } else {
@@ -150,7 +147,7 @@ std::size_t Textbox_core::previous_line_break(std::size_t current_upper_bound) {
         if (contents_.at(i) == '\n') {
             previous = i + 1;
             line_index = 0;
-        } else if (line_index + 1 == this->geometry().width()) {
+        } else if (line_index + 1 == this->width()) {
             previous += line_index + 1;
             line_index = 0;
         } else {
@@ -164,12 +161,12 @@ std::size_t Textbox_core::find_lower_bound() {
     std::size_t height{0};
     std::size_t line_index{0};
     for(std::size_t i{upper_bound_}; i < contents_.size(); ++i) {
-        if (height - 1 == this->geometry().height()) {
+        if (height - 1 == this->height()) {
             return i;
         } else if (contents_.at(i) == '\n') {
             ++height;
             line_index = 0;
-        } else if (line_index == this->geometry().width()) {
+        } else if (line_index == this->width()) {
             ++height;
             line_index = 0;
         }
