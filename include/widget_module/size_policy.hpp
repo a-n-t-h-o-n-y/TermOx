@@ -16,9 +16,11 @@ struct Size_policy {
         Ignored
     };
 
-    Policy horizontal_policy;
-    Policy vertical_policy;
+    Policy horizontal_policy = Preferred;
+    Policy vertical_policy = Preferred;
+    /// 0 value for stretch factors is undefined behavior
     std::size_t horizontal_stretch = 1;
+    /// 0 value for stretch factors is undefined behavior
     std::size_t vertical_stretch = 1;
     bool height_for_width = false; // essentially fixed, nothing in width policy matters
     bool width_for_height = false; // you can only check for one on hori/vert layouts otherwise recursive loop

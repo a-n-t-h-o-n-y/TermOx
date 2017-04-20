@@ -26,6 +26,7 @@ class Geometry {
     // Set
     void set_width(std::size_t width) { width_ = width; }
     void set_height(std::size_t height) { height_ = height; }
+
     void set_width_hint(std::size_t width_hint);
     void set_height_hint(std::size_t height_hint);
     void set_max_width(std::size_t max_width);
