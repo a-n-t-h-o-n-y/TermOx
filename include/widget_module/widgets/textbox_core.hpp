@@ -35,8 +35,6 @@ class Textbox_core : public Widget {
     std::size_t cursor_index_ = 0;
     std::size_t upper_bound_ = 0;
     std::size_t lower_bound_ = 0;
-
-   private:
 };
 
 }  // namespace twf

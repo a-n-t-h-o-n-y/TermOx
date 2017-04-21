@@ -14,7 +14,7 @@
 
 namespace twf {
 
-void Horizontal_layout::size_widgets() {
+std::vector<std::size_t> Horizontal_layout::size_widgets() {
     // <Widget*, width, height>
     std::vector<std::tuple<Widget*, std::size_t, std::size_t>> widgets;
     std::size_t total_stretch{0};
@@ -59,6 +59,7 @@ void Horizontal_layout::size_widgets() {
     }
     if (width_available < 0) {
         this->paint_too_small_warning();
+        return std::vector<std::size_t>();
     }
 
     // Set Maximum, Preferred and Expanding to width_hint
@@ -92,6 +93,48 @@ void Horizontal_layout::size_widgets() {
     }
 
     // VERTICAL - repeat the above, but with vertical properties
+    for (auto& tup : widgets) {
+        auto policy =
+            std::get<0>(tup)->geometry().size_policy().vertical_policy;
+        if (policy == Size_policy::Fixed) {
+            std::get<2>(tup) = std::get<0>(tup)->geometry().height_hint();
+            if (std::get<2>(tup) > this->height()) {
+                this->paint_too_small_warning();
+                return std::vector<std::size_t>();
+            }
+        } else if (policy == Size_policy::Ignored ||
+                   policy == Size_policy::Preferred ||
+                   policy == Size_policy::Expanding) {
+            std::get<2>(tup) = this->height();
+            if (std::get<2>(tup) > std::get<0>(tup)->geometry().max_height()) {
+                std::get<2>(tup) = std::get<0>(tup)->geometry().max_height();
+            } else if (std::get<2>(tup) <
+                       std::get<0>(tup)->geometry().min_height()) {
+                this->paint_too_small_warning();
+                return std::vector<std::size_t>();
+            }
+        } else if (policy == Size_policy::Maximum) {
+            std::get<2>(tup) = this->height();
+            if (std::get<2>(tup) > std::get<0>(tup)->geometry().height_hint()) {
+                std::get<2>(tup) = std::get<0>(tup)->geometry().height_hint();
+            } else if (std::get<2>(tup) <
+                       std::get<0>(tup)->geometry().min_height()) {
+                this->paint_too_small_warning();
+                return std::vector<std::size_t>();
+            }
+        } else if (policy == Size_policy::Minimum ||
+                   policy == Size_policy::MinimumExpanding) {
+            std::get<2>(tup) = this->height();
+            if (std::get<2>(tup) < std::get<0>(tup)->geometry().height_hint()) {
+                std::get<2>(tup) = std::get<0>(tup)->geometry().height_hint();
+            }
+            if (std::get<2>(tup) > std::get<0>(tup)->geometry().max_height() ||
+                std::get<2>(tup) > this->height()) {
+                this->paint_too_small_warning();
+                return std::vector<std::size_t>();
+            }
+        }
+    }
 
     // Post all Resize_events
     for (auto& tup : widgets) {
@@ -99,13 +142,12 @@ void Horizontal_layout::size_widgets() {
             std::get<0>(tup),
             std::make_unique<Resize_event>(std::get<1>(tup), std::get<2>(tup)));
     }
-}
-
-void Horizontal_layout::position_widgets() {}
-
-void Horizontal_layout::update_geometry() {
-    this->size_widgets();
-    this->position_widgets();
+    std::vector<std::size_t> widths;
+    widths.reserve(widgets.size());
+    for (const auto& tup : widgets) {
+        widths.push_back(std::get<1>(tup));
+    }
+    return widths;
 }
 
 void Horizontal_layout::distribute_space(
@@ -125,18 +167,18 @@ void Horizontal_layout::distribute_space(
 
     // Calculate new widths of widgets in new group, if any go over max_width
     // then assign max value and recurse without that widget in vector.
-    std::deque<std::size_t> possible_widths;
+    std::deque<std::size_t> width_additions;
     int index{0};
     for (const auto& tup : widgets) {
         auto policy =
             std::get<0>(tup)->geometry().size_policy().horizontal_policy;
         if (policy == Size_policy::Expanding ||
             policy == Size_policy::MinimumExpanding) {
-            possible_widths.push_back(
+            width_additions.push_back(
                 (std::get<0>(tup)->geometry().size_policy().horizontal_stretch /
                  static_cast<double>(total_stretch)) *
                 width_left);
-            if ((std::get<1>(tup) + possible_widths.back()) >
+            if ((std::get<1>(tup) + width_additions.back()) >
                 std::get<0>(tup)->geometry().max_width()) {
                 std::get<1>(tup) = std::get<0>(tup)->geometry().max_width();
                 width_left -= std::get<1>(tup);
@@ -154,9 +196,9 @@ void Horizontal_layout::distribute_space(
             std::get<0>(tup)->geometry().size_policy().horizontal_policy;
         if (policy == Size_policy::Expanding ||
             policy == Size_policy::MinimumExpanding) {
-            std::get<1>(tup) = possible_widths.front();
-            width_left -= possible_widths.front();
-            possible_widths.pop_front();
+            std::get<1>(tup) += width_additions.front();
+            width_left -= width_additions.front();
+            width_additions.pop_front();
         }
     }
 
@@ -171,7 +213,7 @@ void Horizontal_layout::distribute_space(
         auto policy =
             std::get<0>(tup)->geometry().size_policy().horizontal_policy;
         if (policy == Size_policy::Preferred ||
-            policy == Size_policy::Minimum) {
+            policy == Size_policy::Minimum || policy == Size_policy::Ignored) {
             total_stretch +=
                 std::get<0>(tup)->geometry().size_policy().horizontal_stretch;
         }
@@ -179,18 +221,18 @@ void Horizontal_layout::distribute_space(
 
     // Calculate new widths of widgets in new group, if any go over max_width
     // then assign max value and recurse without that widget in vector.
-    possible_widths.clear();
+    width_additions.clear();
     index = 0;
     for (const auto& tup : widgets) {
         auto policy =
             std::get<0>(tup)->geometry().size_policy().horizontal_policy;
         if (policy == Size_policy::Preferred ||
-            policy == Size_policy::Minimum) {
-            possible_widths.push_back(
+            policy == Size_policy::Minimum || policy == Size_policy::Ignored) {
+            width_additions.push_back(
                 (std::get<0>(tup)->geometry().size_policy().horizontal_stretch /
                  static_cast<double>(total_stretch)) *
                 width_left);
-            if ((std::get<1>(tup) + possible_widths.back()) >
+            if ((std::get<1>(tup) + width_additions.back()) >
                 std::get<0>(tup)->geometry().max_width()) {
                 std::get<1>(tup) = std::get<0>(tup)->geometry().max_width();
                 width_left -= std::get<1>(tup);
@@ -208,9 +250,9 @@ void Horizontal_layout::distribute_space(
             std::get<0>(tup)->geometry().size_policy().horizontal_policy;
         if (policy == Size_policy::Preferred ||
             policy == Size_policy::Minimum) {
-            std::get<1>(tup) = possible_widths.front();
-            width_left -= possible_widths.front();
-            possible_widths.pop_front();
+            std::get<1>(tup) += width_additions.front();
+            width_left -= width_additions.front();
+            width_additions.pop_front();
         }
     }
 }
@@ -218,101 +260,188 @@ void Horizontal_layout::distribute_space(
 void Horizontal_layout::collect_space(
     std::vector<std::tuple<Widget*, std::size_t&, std::size_t&>> widgets,
     int width_left) {
-    //
+    // Find total stretch of first group
+    std::size_t total_stretch{0};
+    for (const auto& tup : widgets) {
+        auto policy =
+            std::get<0>(tup)->geometry().size_policy().horizontal_policy;
+        if (policy == Size_policy::Minimum ||
+            policy == Size_policy::Preferred ||
+            policy == Size_policy::Ignored) {
+            total_stretch +=
+                std::get<0>(tup)->geometry().size_policy().horizontal_stretch;
+        }
+    }
+
+    // Find total of inverse of percentages
+    double total_inverse{0};
+    for (const auto& tup : widgets) {
+        auto policy =
+            std::get<0>(tup)->geometry().size_policy().horizontal_policy;
+        if (policy == Size_policy::Minimum ||
+            policy == Size_policy::Preferred ||
+            policy == Size_policy::Ignored) {
+            total_inverse +=
+                1 /
+                (std::get<0>(tup)->geometry().size_policy().horizontal_stretch /
+                 static_cast<double>(total_stretch));
+        }
+    }
+
+    // Calculate new widths of widgets in new group, if any go under min_width
+    // then assign min value and recurse without that widget in vector.
+    std::deque<std::size_t> width_deductions;
+    int index{0};
+    for (const auto& tup : widgets) {
+        auto policy =
+            std::get<0>(tup)->geometry().size_policy().horizontal_policy;
+        if (policy == Size_policy::Minimum ||
+            policy == Size_policy::Preferred ||
+            policy == Size_policy::Ignored) {
+            width_deductions.push_back(
+                ((1 / (std::get<0>(tup)
+                           ->geometry()
+                           .size_policy()
+                           .horizontal_stretch /
+                       static_cast<double>(total_stretch))) /
+                 static_cast<double>(total_inverse)) *
+                (width_left * -1));
+            if ((std::get<1>(tup) - width_deductions.back()) <
+                std::get<0>(tup)->geometry().min_width()) {
+                std::get<1>(tup) = std::get<0>(tup)->geometry().min_width();
+                width_left += std::get<1>(tup);
+                widgets.erase(std::begin(widgets) + index);
+                return collect_space(widgets, width_left);
+            }
+        }
+        ++index;
+    }
+
+    // If it has gotten this far, no widgets were over space, assign calculated
+    // values
+    for (auto& tup : widgets) {
+        auto policy =
+            std::get<0>(tup)->geometry().size_policy().horizontal_policy;
+        if (policy == Size_policy::Minimum ||
+            policy == Size_policy::Preferred ||
+            policy == Size_policy::Ignored) {
+            std::get<1>(tup) -= width_deductions.front();
+            width_left += width_deductions.front();
+            width_deductions.pop_front();
+        }
+    }
+
+    // SECOND GROUP - duplicate of above dependent on Policies to work with.
+    // Preferred and Minimum
+    if (width_left == 0) {
+        return;
+    }
+    // Find total stretch
+    total_stretch = 0;
+    for (const auto& tup : widgets) {
+        auto policy =
+            std::get<0>(tup)->geometry().size_policy().horizontal_policy;
+        if (policy == Size_policy::Expanding) {
+            total_stretch +=
+                std::get<0>(tup)->geometry().size_policy().horizontal_stretch;
+        }
+    }
+
+    // Find total of inverse of percentages
+    total_inverse = 0;
+    for (const auto& tup : widgets) {
+        auto policy =
+            std::get<0>(tup)->geometry().size_policy().horizontal_policy;
+        if (policy == Size_policy::Expanding) {
+            total_inverse +=
+                1 /
+                (std::get<0>(tup)->geometry().size_policy().horizontal_stretch /
+                 static_cast<double>(total_stretch));
+        }
+    }
+
+    // Calculate new widths of widgets in new group, if any go over max_width
+    // then assign max value and recurse without that widget in vector.
+    width_deductions.clear();
+    index = 0;
+    for (const auto& tup : widgets) {
+        auto policy =
+            std::get<0>(tup)->geometry().size_policy().horizontal_policy;
+        if (policy == Size_policy::Expanding) {
+            width_deductions.push_back(
+                ((1 / (std::get<0>(tup)
+                           ->geometry()
+                           .size_policy()
+                           .horizontal_stretch /
+                       static_cast<double>(total_stretch))) /
+                 static_cast<double>(total_inverse)) *
+                (width_left * -1));
+            if ((std::get<1>(tup) - width_deductions.back()) <
+                std::get<0>(tup)->geometry().min_width()) {
+                std::get<1>(tup) = std::get<0>(tup)->geometry().min_width();
+                width_left += std::get<1>(tup);
+                widgets.erase(std::begin(widgets) + index);
+                return collect_space(widgets, width_left);
+            }
+        }
+        ++index;
+    }
+
+    // If it has gotten this far, no widgets were over space, assign calculated
+    // values
+    for (auto& tup : widgets) {
+        auto policy =
+            std::get<0>(tup)->geometry().size_policy().horizontal_policy;
+        if (policy == Size_policy::Expanding) {
+            std::get<1>(tup) -= width_deductions.front();
+            width_left += width_deductions.front();
+            width_deductions.pop_front();
+        }
+    }
+    if (width_left != 0) {
+        // subtract more!
+        paint_too_small_warning();
+        return;
+    }
 }
 
-// void Horizontal_layout::update_geometry() {
-//     std::size_t border_space{0};
-//     std::size_t total_stretch{0};
-//     for (const Object* c : this->children()) {
-//         const Widget* cw{dynamic_cast<const Widget*>(c)};
-//         if (cw != nullptr) {
-//             // Border space
-//             if ((cw->border().west_enabled() ||
-//                  cw->border().north_west_enabled() ||
-//                  cw->border().south_west_enabled()) &&
-//                 cw->border().enabled()) {
-//                 ++border_space;
-//             }
-//             if ((cw->border().east_enabled() ||
-//                  cw->border().north_east_enabled() ||
-//                  cw->border().south_east_enabled()) &&
-//                 cw->border().enabled()) {
-//                 ++border_space;
-//             }
-//             // Stretch factor
-//             total_stretch += cw->size_policy().horizontal_stretch;
-//         }
-//     }
-//     std::size_t widg_space{0};
-//     if (this->geometry().width() < border_space) {
-//         widg_space = 0;
-//     } else {
-//         widg_space = this->geometry().width() - border_space;
-//     }
-//     // std::size_t widg_space = this->geometry().width() - border_space;
-//     std::size_t x_pos{0};
-//     for (Object* c : this->children()) {
-//         Widget* cw{dynamic_cast<Widget*>(c)};
-//         if (cw != nullptr) {
-//             // Position
-//             if ((cw->border().west_enabled() ||
-//                  cw->border().north_west_enabled() ||
-//                  cw->border().south_west_enabled()) &&
-//                 cw->border().enabled()) {
-//                 ++x_pos;
-//             }
-//             std::size_t y_pos{0};
-//             if ((cw->border().north_enabled() ||
-//                  cw->border().north_west_enabled() ||
-//                  cw->border().north_east_enabled()) &&
-//                 cw->border().enabled()) {
-//                 ++y_pos;
-//             }
-//             // Size
-//             if (total_stretch == 0) {
-//                 total_stretch = this->children().size();
-//             }
-//             std::size_t width =
-//                 widg_space *
-//                 (cw->size_policy().horizontal_stretch /
-//                 double(total_stretch));
-//             std::size_t height{this->geometry().height()};
-//             if ((cw->border().north_enabled() ||
-//                  cw->border().north_west_enabled() ||
-//                  cw->border().north_east_enabled()) &&
-//                 cw->border().enabled() && height != 0) {
-//                 --height;
-//             }
-//             if ((cw->border().south_enabled() ||
-//                  cw->border().south_west_enabled() ||
-//                  cw->border().south_east_enabled()) &&
-//                 cw->border().enabled() && height != 0) {
-//                 --height;
-//             }
-//             System::post_event(cw,
-//                                std::make_unique<Resize_event>(width,
-//                                height));
-//             System::post_event(cw, std::make_unique<Move_event>(
-//                                        this->x() + x_pos, this->y() +
-//                                        y_pos));
-//             x_pos += width;
-//             if ((cw->border().east_enabled() ||
-//                  cw->border().north_east_enabled() ||
-//                  cw->border().south_east_enabled()) &&
-//                 cw->border().enabled()) {
-//                 ++x_pos;
-//             }
-//             // if last widget, extend to rest of layout
-//             if (c == *(--std::end(this->children())) &&
-//                 this->geometry().width() > x_pos) {
-//                 System::post_event(
-//                     cw, std::make_unique<Resize_event>(
-//                             width + this->geometry().width() - x_pos,
-//                             height));
-//             }
-//         }
-//     }
-// }
+void Horizontal_layout::position_widgets(
+    const std::vector<std::size_t>& widths) {
+    std::vector<Widget*> widgets;
+    for (Object* c : this->children()) {
+        Widget* w{dynamic_cast<Widget*>(c)};
+        if (w != nullptr) {
+            widgets.push_back(w);
+        }
+    }
+    std::size_t x_pos{0};
+    std::size_t y_pos{0};
+    std::size_t index{0};
+    if (widgets.size() != widths.size()) {
+        return;
+    }
+    if ((this->border().west_enabled() || this->border().north_west_enabled() ||
+         this->border().south_west_enabled()) &&
+        this->border().enabled()) {
+        ++x_pos;
+    }
+    if ((this->border().north_enabled() ||
+         this->border().north_west_enabled() ||
+         this->border().north_east_enabled()) &&
+        this->border().enabled()) {
+        ++y_pos;
+    }
+    for (auto& widg : widgets) {
+        System::post_event(widg, std::make_unique<Move_event>(
+                                     this->x() + x_pos, this->y() + y_pos));
+        x_pos += widths.at(index);
+        ++index;
+    }
+}
+
+void Horizontal_layout::update_geometry() {
+    auto widths = this->size_widgets();
+    this->position_widgets(widths);
+}
 
 }  // namespace twf

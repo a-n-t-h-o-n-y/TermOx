@@ -14,8 +14,8 @@ class Horizontal_layout : public Layout {
     void update_geometry() override;
 
    private:
-    void size_widgets();
-    void position_widgets();
+    std::vector<std::size_t> size_widgets();
+    void position_widgets(const std::vector<std::size_t>& widths);
 
     void distribute_space(
         std::vector<std::tuple<Widget*, std::size_t&, std::size_t&>> widgets,
