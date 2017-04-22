@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <vector>
+#include <functional>
 #include <tuple>
 #include "../layout.hpp"
 
@@ -18,11 +19,15 @@ class Horizontal_layout : public Layout {
     void position_widgets(const std::vector<std::size_t>& widths);
 
     void distribute_space(
-        std::vector<std::tuple<Widget*, std::size_t&, std::size_t&>> widgets,
+        std::vector<std::tuple<Widget*,
+                               std::reference_wrapper<std::size_t>,
+                               std::reference_wrapper<std::size_t>>> widgets,
         int width_left);
 
     void collect_space(
-        std::vector<std::tuple<Widget*, std::size_t&, std::size_t&>> widgets,
+        std::vector<std::tuple<Widget*,
+                               std::reference_wrapper<std::size_t>,
+                               std::reference_wrapper<std::size_t>>> widgets,
         int width_left);
 };
 

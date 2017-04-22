@@ -111,8 +111,8 @@ std::size_t Textbox_core::index_from_position(Coordinate pos) {
 Coordinate Textbox_core::position_from_index(std::size_t index) {
     Coordinate position;
     for (std::size_t i{upper_bound_}; i < index; ++i) {
-        if (contents_.at(i).str() == "\n" ||
-            position.x + 1 == this->width()) {
+        if (contents_.at(i).str() == "\n" || // occasional crash from this .at()
+            position.x + 1 == this->width()) { // ^ out of range.
             ++position.y;
             position.x = 0;
         } else {
