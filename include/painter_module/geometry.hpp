@@ -55,11 +55,11 @@ class Geometry {
     Widget* widget_;
 
     // Parameters for Layouts to use
-    std::size_t width_hint_ = System::max_width();
+    std::size_t width_hint_ = 0;  //= System::max_width();
     std::size_t min_width_ = 0;
     std::size_t max_width_ = std::numeric_limits<std::size_t>::max();
 
-    std::size_t height_hint_ = System::max_height();
+    std::size_t height_hint_ = 0;  //= System::max_height();
     std::size_t min_height_ = 0;
     std::size_t max_height_ = std::numeric_limits<std::size_t>::max();
 
