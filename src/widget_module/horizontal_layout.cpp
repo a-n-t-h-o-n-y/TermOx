@@ -155,7 +155,9 @@ std::vector<std::size_t> Horizontal_layout::size_widgets() {
 }
 
 void Horizontal_layout::distribute_space(
-    std::vector<std::tuple<Widget*, std::reference_wrapper<std::size_t>, std::reference_wrapper<std::size_t>>> widgets,
+    std::vector<std::tuple<Widget*,
+                           std::reference_wrapper<std::size_t>,
+                           std::reference_wrapper<std::size_t>>> widgets,
     int width_left) {
     // Find total stretch of first group
     std::size_t total_stretch{0};
@@ -187,7 +189,8 @@ void Horizontal_layout::distribute_space(
                 std::get<0>(tup)->geometry().max_width()) {
                 width_left -=
                     std::get<0>(tup)->geometry().max_width() - std::get<1>(tup);
-                std::get<1>(tup).get() = std::get<0>(tup)->geometry().max_width();
+                std::get<1>(tup).get() =
+                    std::get<0>(tup)->geometry().max_width();
                 // width_left -= std::get<1>(tup);
                 widgets.erase(std::begin(widgets) + index);
                 return distribute_space(widgets, width_left);
@@ -244,13 +247,11 @@ void Horizontal_layout::distribute_space(
                 std::get<0>(tup)->geometry().max_width()) {
                 width_left -=
                     std::get<0>(tup)->geometry().max_width() - std::get<1>(tup);
-                std::get<1>(tup).get() = std::get<0>(tup)->geometry().max_width();
+                std::get<1>(tup).get() =
+                    std::get<0>(tup)->geometry().max_width();
                 // width_left -= std::get<1>(tup);
-                auto& width_ref = std::get<1>(tup).get();
                 widgets.erase(std::begin(widgets) + index);
-                distribute_space(widgets, width_left);
-                return;
-                // return distribute_space(widgets, width_left);
+                return distribute_space(widgets, width_left);
             }
         }
         ++index;
@@ -262,7 +263,7 @@ void Horizontal_layout::distribute_space(
         auto policy =
             std::get<0>(tup)->geometry().size_policy().horizontal_policy;
         if (policy == Size_policy::Preferred ||
-            policy == Size_policy::Minimum) {
+            policy == Size_policy::Minimum || policy == Size_policy::Ignored) {
             std::get<1>(tup).get() += width_additions.front();
             width_left -= width_additions.front();
             width_additions.pop_front();
@@ -271,9 +272,13 @@ void Horizontal_layout::distribute_space(
 }
 
 void Horizontal_layout::collect_space(
-    std::vector<std::tuple<Widget*, std::reference_wrapper<std::size_t>, std::reference_wrapper<std::size_t>>> widgets,
+    std::vector<std::tuple<Widget*,
+                           std::reference_wrapper<std::size_t>,
+                           std::reference_wrapper<std::size_t>>> widgets,
     int width_left) {
     if (width_left == 0) {
+        std::ofstream log{"log.txt", std::fstream::app};
+        log << "top top g collect_space, width_left = " << width_left << std::endl;
         return;
     }
     // Find total stretch of first group
@@ -325,10 +330,10 @@ void Horizontal_layout::collect_space(
                 (to_collect * -1));
             if ((std::get<1>(tup).get() - width_deductions.back()) <
                 std::get<0>(tup)->geometry().min_width()) {
-                width_left +=
-                    std::get<1>(tup).get() - std::get<0>(tup)->geometry().min_width();
-                std::get<1>(tup).get() = std::get<0>(tup)->geometry().min_width();
-                // width_left += std::get<1>(tup);
+                width_left += std::get<1>(tup).get() -
+                              std::get<0>(tup)->geometry().min_width();
+                std::get<1>(tup).get() =
+                    std::get<0>(tup)->geometry().min_width();
                 widgets.erase(std::begin(widgets) + index);
                 return collect_space(widgets, width_left);
             }
@@ -352,6 +357,8 @@ void Horizontal_layout::collect_space(
 
     // SECOND GROUP - duplicate of above dependent on Policies to work with.
     if (width_left == 0) {
+        std::ofstream log{"log.txt", std::fstream::app};
+        log << "top 2nd g collect_space, width_left = " << width_left << std::endl;
         return;
     }
     // Find total stretch
@@ -397,11 +404,10 @@ void Horizontal_layout::collect_space(
                 (to_collect * -1));
             if ((std::get<1>(tup).get() - width_deductions.back()) <
                 std::get<0>(tup)->geometry().min_width()) {
-                width_left +=
-                    std::get<1>(tup).get() - std::get<0>(tup)->geometry().min_width();
-                std::get<1>(tup).get() = std::get<0>(tup)->geometry().min_width();
-                // width_left += std::get<1>(tup).get(); // wrong, this is not how
-                // much you ate from width left it is what the value is
+                width_left += std::get<1>(tup).get() -
+                              std::get<0>(tup)->geometry().min_width();
+                std::get<1>(tup).get() =
+                    std::get<0>(tup)->geometry().min_width();
                 widgets.erase(std::begin(widgets) + index);
                 return collect_space(widgets, width_left);
             }
@@ -424,8 +430,12 @@ void Horizontal_layout::collect_space(
     if (width_left != 0) {
         // subtract more!
         paint_too_small_warning();
+        std::ofstream log{"log.txt", std::fstream::app};
+        log << "bottom 0 collect_space, width_left = " << width_left << std::endl;
         return;
     }
+    std::ofstream log{"log.txt", std::fstream::app};
+    log << "bottom not 0 collect_space, width_left = " << width_left << std::endl;
 }
 
 void Horizontal_layout::position_widgets(

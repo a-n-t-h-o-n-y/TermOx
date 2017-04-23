@@ -28,7 +28,7 @@ class Geometry {
     void set_min_height(std::size_t min_height);
     void set_size_policy(const Size_policy& policy);
 
-    void set_fixed_width(std::size_t width) {
+    void set_fixed_width(std::size_t width) { // you have a fixed policy, not needed? is it in Qt? Don't need it if you don't need it
         this->set_min_width(width);
         this->set_max_width(width);
     }
