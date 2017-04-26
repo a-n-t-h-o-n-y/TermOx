@@ -1,14 +1,14 @@
 #include "twidgets.hpp"
 
 class Bordered : public twf::Horizontal_layout {
-    public:
-        Bordered(){
-            auto& tb = make_child<twf::Textbox>();
-            tb.brush().set_background(twf::Color::Light_blue);
-            tb.enable_border();
-            this->brush().set_foreground(twf::Color::Red);
-            this->enable_border();
-        }
+   public:
+    Bordered() {
+        auto& tb = make_child<twf::Textbox>();
+        tb.brush().set_background(twf::Color::Light_blue);
+        tb.enable_border();
+        this->brush().set_foreground(twf::Color::Red);
+        this->enable_border();
+    }
 };
 
 int main() {

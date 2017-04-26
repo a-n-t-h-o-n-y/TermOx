@@ -69,6 +69,10 @@ void Textbox_core::cursor_right(std::size_t n) {
 bool Textbox_core::paint_event(const Paint_event& event) {
     Painter p{this};
     // Paint the visible sub-string.
+    // auto checked_lb = lower_bound_;
+    // if(lower_bound_ != 0 && lower_bound_ >= contents_.size()) {
+    //     checked_lb = contents_.size() - 1;
+    // }
     Glyph_string sub_str(std::begin(contents_) + upper_bound_,
                          std::begin(contents_) + lower_bound_);
     p.put_at(0, 0, sub_str, false);
@@ -111,8 +115,10 @@ std::size_t Textbox_core::index_from_position(Coordinate pos) {
 Coordinate Textbox_core::position_from_index(std::size_t index) {
     Coordinate position;
     for (std::size_t i{upper_bound_}; i < index; ++i) {
-        if (contents_.at(i).str() == "\n" || // occasional crash from this .at()
-            position.x + 1 == this->width()) { // ^ out of range.
+        if (i == contents_.size()) {
+            return position;
+        }
+        if (contents_.at(i).str() == "\n" || position.x + 1 == this->width()) {
             ++position.y;
             position.x = 0;
         } else {
@@ -160,7 +166,7 @@ std::size_t Textbox_core::previous_line_break(std::size_t current_upper_bound) {
 std::size_t Textbox_core::find_lower_bound() {
     std::size_t height{0};
     std::size_t line_index{0};
-    for(std::size_t i{upper_bound_}; i < contents_.size(); ++i) {
+    for (std::size_t i{upper_bound_}; i < contents_.size(); ++i) {
         if (height - 1 == this->height()) {
             return i;
         } else if (contents_.at(i) == '\n') {

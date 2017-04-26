@@ -12,7 +12,6 @@
 #include <deque>
 #include <tuple>
 #include <functional>
-#include <fstream>  // temp
 
 namespace twf {
 
@@ -277,8 +276,6 @@ void Horizontal_layout::collect_space(
                            std::reference_wrapper<std::size_t>>> widgets,
     int width_left) {
     if (width_left == 0) {
-        std::ofstream log{"log.txt", std::fstream::app};
-        log << "top top g collect_space, width_left = " << width_left << std::endl;
         return;
     }
     // Find total stretch of first group
@@ -357,8 +354,6 @@ void Horizontal_layout::collect_space(
 
     // SECOND GROUP - duplicate of above dependent on Policies to work with.
     if (width_left == 0) {
-        std::ofstream log{"log.txt", std::fstream::app};
-        log << "top 2nd g collect_space, width_left = " << width_left << std::endl;
         return;
     }
     // Find total stretch
@@ -430,12 +425,8 @@ void Horizontal_layout::collect_space(
     if (width_left != 0) {
         // subtract more!
         paint_too_small_warning();
-        std::ofstream log{"log.txt", std::fstream::app};
-        log << "bottom 0 collect_space, width_left = " << width_left << std::endl;
         return;
     }
-    std::ofstream log{"log.txt", std::fstream::app};
-    log << "bottom not 0 collect_space, width_left = " << width_left << std::endl;
 }
 
 void Horizontal_layout::position_widgets(
