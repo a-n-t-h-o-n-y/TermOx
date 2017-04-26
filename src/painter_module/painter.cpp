@@ -18,10 +18,25 @@ Painter::Painter(Widget* widget) : widget_{widget} {
 
 void Painter::put(const Glyph_string& string, bool move_cursor) {
     Coordinate old_position{widget_->cursor_x(), widget_->cursor_y()};
+        std::size_t x_border_offset{0};
+        std::size_t y_border_offset{0};
+        if (widget_->border().enabled() &&
+            (widget_->border().west_enabled() || widget_->border().north_west_enabled() ||
+             widget_->border().south_west_enabled())) {
+            ++x_border_offset;
+        }
+        if (widget_->border().enabled() &&
+            (widget_->border().north_enabled() || widget_->border().north_east_enabled() ||
+             widget_->border().north_west_enabled())) {
+            ++y_border_offset;
+        }
+
     for (Glyph g : string) {
         add_default_attributes(g);
-        std::size_t glob_x = widget_->x() + widget_->cursor_x();
-        std::size_t glob_y = widget_->y() + widget_->cursor_y();
+        std::size_t glob_x =
+            widget_->x() + widget_->cursor_x() + x_border_offset;
+        std::size_t glob_y =
+            widget_->y() + widget_->cursor_y() + y_border_offset;
         if (g.str() == "\n") {
             this->move(0, widget_->cursor_y() + 1, move_cursor);
         } else {
@@ -55,23 +70,35 @@ void Painter::move(Coordinate pos, bool update_buffer) {
 }
 
 void Painter::move(std::size_t x, std::size_t y, bool update_buffer) {
-    Geometry& geo = widget_->geometry();
     // Adjust coordinates if out of widget_'s bounds
-    if (x >= geo.width()) {
+    if (x >= widget_->width()) {
         x = 0;
         ++y;
     }
-    if (y >= geo.height()) {
-        y = geo.height() - 1;
+    if (y >= widget_->height()) {
+        y = widget_->height() - 1;
     }
     widget_->set_cursor_x(x);
     widget_->set_cursor_y(y);
     // Move cursor on screen
     if (update_buffer) {
+        // put into utility global function
+        std::size_t x_border_offset{0};
+        std::size_t y_border_offset{0};
+        if (widget_->border().enabled() &&
+            (widget_->border().west_enabled() || widget_->border().north_west_enabled() ||
+             widget_->border().south_west_enabled())) {
+            ++x_border_offset;
+        }
+        if (widget_->border().enabled() &&
+            (widget_->border().north_enabled() || widget_->border().north_east_enabled() ||
+             widget_->border().north_west_enabled())) {
+            ++y_border_offset;
+        }
         widget_->paint_engine().buffer().cursor_position.x =
-            widget_->x() + widget_->cursor_x();
+            widget_->x() + widget_->cursor_x() + x_border_offset;
         widget_->paint_engine().buffer().cursor_position.y =
-            widget_->y() + widget_->cursor_y();
+            widget_->y() + widget_->cursor_y() + y_border_offset;
     }
 }
 
@@ -111,8 +138,9 @@ void Painter::line(std::size_t x1,
     // Horizontal
     if (y1 == y2) {
         for (std::size_t i{x1}; i <= x2; ++i) {
-            this->move(i, y1, false);
-            this->put(gs);
+            this->move(i, y1,
+                       false);  // change to put_at(); but check that bool
+            this->put(gs);      // maybe don't change, not as efficient?
         }
     }
     // Vertical
@@ -135,71 +163,80 @@ void Painter::border(const Border& b) {
     std::size_t width = widget_->geometry().width();
     std::size_t height = widget_->geometry().height();
 
-    if (widg_y + height > System::max_height()) {
+    // if (widg_y + height > System::max_height()) {
+    //     return;
+    // }
+    // if (widg_x + width > System::max_width()) {
+    //     return;
+    // }
+    // if (widg_x == 0 && (b.north_west_enabled() || b.west_enabled() ||
+    //                     b.south_west_enabled()) &&
+    //     b.enabled()) {
+    //     return;
+    // }
+    // if (widg_y == 0 && (b.north_enabled() || b.north_west_enabled() ||
+    //                     b.north_east_enabled()) &&
+    //     b.enabled()) {
+    //     return;
+    // }
+    // if (widg_x + width == 0 && (b.north_enabled() || b.south_enabled())) {
+    //     return;
+    // }
+    // if (widg_y + height == 0 && (b.west_enabled() || b.east_enabled())) {
+    //     return;
+    // }
+
+    // Checks for making sure size_t's do not go negative
+    if (b.enabled() && widg_x + width < 2 && b.north_enabled() &&
+        b.south_enabled()) {
         return;
     }
-    if (widg_x + width > System::max_width()) {
-        return;
-    }
-    if (widg_x == 0 && (b.north_west_enabled() || b.west_enabled() ||
-                        b.south_west_enabled()) &&
-        b.enabled()) {
-        return;
-    }
-    if (widg_y == 0 && (b.north_enabled() || b.north_west_enabled() ||
-                        b.north_east_enabled()) &&
-        b.enabled()) {
-        return;
-    }
-    if (widg_x + width == 0 && (b.north_enabled() || b.south_enabled())) {
-        return;
-    }
-    if (widg_y + height == 0 && (b.west_enabled() || b.east_enabled())) {
+    if (b.enabled() && widg_y + height < 2 && b.east_enabled() &&
+        b.west_enabled()) {
         return;
     }
 
     // North
     if (b.enabled() && b.north_enabled()) {
-        unbound_line(widg_x, widg_y - 1, widg_x + width - 1, widg_y - 1,
-                     b.north());
+        unbound_line(widg_x + 1, widg_y, widg_x + width - 2, widg_y, b.north());
     }
 
     // South
     if (b.enabled() && b.south_enabled()) {
-        unbound_line(widg_x, widg_y + height, widg_x + width - 1,
-                     widg_y + height, b.south());
+        unbound_line(widg_x + 1, widg_y + height - 1, widg_x + width - 2,
+                     widg_y + height - 1, b.south());
     }
 
     // West
     if (b.enabled() && b.west_enabled()) {
-        unbound_line(widg_x - 1, widg_y, widg_x - 1, widg_y + height - 1,
-                     b.west());
+        unbound_line(widg_x, widg_y + 1, widg_x, widg_y + height - 2, b.west());
     }
 
     // East
     if (b.enabled() && b.east_enabled()) {
-        unbound_line(widg_x + width, widg_y, widg_x + width,
-                     widg_y + height - 1, b.east());
+        unbound_line(widg_x + width - 1, widg_y + 1, widg_x + width - 1,
+                     widg_y + height - 2, b.east());
     }
 
     // North-West
     if (b.enabled() && b.north_west_enabled()) {
-        unbound_put_string(widg_x - 1, widg_y - 1, b.north_west());
+        unbound_put_string(widg_x, widg_y, b.north_west());
     }
 
     // North-East
     if (b.enabled() && b.north_east_enabled()) {
-        unbound_put_string(widg_x + width, widg_y - 1, b.north_east());
+        unbound_put_string(widg_x + width - 1, widg_y, b.north_east());
     }
 
     // South-West
     if (b.enabled() && b.south_west_enabled()) {
-        unbound_put_string(widg_x - 1, widg_y + height, b.south_west());
+        unbound_put_string(widg_x, widg_y + height - 1, b.south_west());
     }
 
     // South-East
     if (b.enabled() && b.south_east_enabled()) {
-        unbound_put_string(widg_x + width, widg_y + height, b.south_east());
+        unbound_put_string(widg_x + width - 1, widg_y + height - 1,
+                           b.south_east());
     }
 }
 

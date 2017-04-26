@@ -25,6 +25,7 @@ class Layout : public Widget {
     /* bool child_event(const Child_event& event) override; */
     // bool paint_event(const Paint_event& event) override;
     virtual void update_geometry() = 0;
+    void paint_too_small_warning();
 
    private:
     void initialize();

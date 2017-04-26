@@ -46,24 +46,8 @@ void Geometry::set_min_width(std::size_t min_width) {
     }
 }
 
-void Geometry::set_min_width_hint(std::size_t min_width_hint) {
-    min_width_hint_ = min_width_hint;
-    auto parent = dynamic_cast<Widget*>(widget_->parent());
-    if (parent) {
-        parent->update();
-    }
-}
-
 void Geometry::set_min_height(std::size_t min_height) {
     min_height_ = min_height;
-    auto parent = dynamic_cast<Widget*>(widget_->parent());
-    if (parent) {
-        parent->update();
-    }
-}
-
-void Geometry::set_min_height_hint(std::size_t min_height_hint) {
-    min_height_hint_ = min_height_hint;
     auto parent = dynamic_cast<Widget*>(widget_->parent());
     if (parent) {
         parent->update();

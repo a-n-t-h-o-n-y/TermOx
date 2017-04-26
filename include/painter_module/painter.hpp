@@ -28,6 +28,7 @@ class Painter {
                 std::size_t y,
                 const Glyph_string& string,
                 bool move_cursor = true);
+
     // Moves the cursor position within Widget and Paint_buffer.
     void move(Coordinate pos, bool update_buffer = true);
     void move(std::size_t x, std::size_t y, bool update_buffer = true);
@@ -38,11 +39,14 @@ class Painter {
               std::size_t width,
               std::size_t height,
               Color fill_background);
+
+    // Takes local coords
     void line(std::size_t x1,
               std::size_t y1,
               std::size_t x2,
               std::size_t y2,
               const Glyph_string& gs = "-");
+
     void border(const Border& b);
     void border(const Glyph_string& gs);
 
