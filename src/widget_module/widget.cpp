@@ -73,16 +73,12 @@ bool Widget::has_coordinates(std::size_t global_x, std::size_t global_y) {
     if (!this->enabled() || !this->visible()) {
         return false;
     }
-    return global_x >= this->x() &&
-           global_x < (this->x() + this->width()) &&
-           global_y >= this->y() &&
-           global_y < (this->y() + this->height());
+    return global_x >= this->x() && global_x < (this->x() + this->width()) &&
+           global_y >= this->y() && global_y < (this->y() + this->height());
 }
 
 void Widget::enable_border() {
     this->border_.enable();
-    // this->geometry().set_active_region(1, 1, 1, 1);
-    /* this->update(); */
     System::post_event(this->parent(), std::make_unique<Child_event>(
                                            Event::ChildPolished, this));
 }
@@ -418,7 +414,14 @@ std::size_t Widget::width() const {
         return w;
     }
     std::size_t border_offset =
-        (border_.west_enabled() ? 1 : 0) + (border_.east_enabled() ? 1 : 0);
+        (border_.west_enabled() || border_.north_west_enabled() ||
+                 border_.south_west_enabled()
+             ? 1
+             : 0) +
+        (border_.east_enabled() || border_.north_east_enabled() ||
+                 border_.south_east_enabled()
+             ? 1
+             : 0);
     if (border_offset > w) {
         return 0;
     }
@@ -431,7 +434,14 @@ std::size_t Widget::height() const {
         return h;
     }
     std::size_t border_offset =
-        (border_.north_enabled() ? 1 : 0) + (border_.south_enabled() ? 1 : 0);
+        (border_.north_enabled() || border_.north_west_enabled() ||
+                 border_.north_east_enabled()
+             ? 1
+             : 0) +
+        (border_.south_enabled() || border_.south_east_enabled() ||
+                 border_.south_west_enabled()
+             ? 1
+             : 0);
     if (border_offset > h) {
         return 0;
     }

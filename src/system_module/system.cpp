@@ -16,6 +16,9 @@
 #include <memory>
 #include <utility>
 #include <vector>
+#include <fstream>  // temp
+#include <string>   // temp
+#include <sstream>  // temp
 
 namespace twf {
 
@@ -88,8 +91,7 @@ bool System::notify(Object* obj, const Event& event) {
     bool handled{false};
     // Send event to any filter objects
     unsigned i{0};
-    while (i < obj->event_filter_objects_.size() &&
-           !handled) {  // While loop in case event_filter invalidates iterators
+    while (i < obj->event_filter_objects_.size() && !handled) {
         handled = obj->event_filter_objects_[i]->event_filter(obj, event);
         ++i;
     }
@@ -100,16 +102,52 @@ bool System::notify(Object* obj, const Event& event) {
     return notify_helper(obj, event);
 }
 
+std::string string_event(const Event& event) {
+    std::stringstream ss;
+    Event ev(event);
+    ss << "Event type: ";
+    if (event.type() == Event::Move) {
+        ss << "Move" << std::endl;
+        auto& me = static_cast<Move_event&>(ev);
+        ss << "x = " << me.new_x() << ", y = " << me.new_y() << std::endl;
+    } else if (event.type() == Event::Resize) {
+        ss << "Resize" << std::endl;
+        auto& re = static_cast<Resize_event&>(ev);
+        ss << "width: " << re.new_width() << ", height: " << re.new_height() << std::endl;
+    } else if (event.type() == Event::Paint) {
+        ss << "Paint" << std::endl;
+    } else if (event.type() == Event::ChildAdded) {
+        ss << "ChildAdded" << std::endl;
+    } else if (event.type() == Event::ChildRemoved) {
+        ss << "ChildRemoved" << std::endl;
+    } else if (event.type() == Event::ChildPolished) {
+        ss << "ChildPolished" << std::endl;
+    }
+
+    else {
+        ss << "Something else" << std::endl;
+    }
+    return ss.str();
+}
+
 bool System::notify_helper(Object* obj, const Event& event) {
     bool handled{false};
     // Send event to object
     handled = obj->event(event);
+
+    // logger //
+    std::ofstream log("log.txt", std::fstream::app);
+    log << "widget name: " << obj->name() << std::endl;
+    log << string_event(event) << std::endl;
 
     // Propagate event to parent
     if (!handled) {  // && event type can propogate
         Object* parent = obj->parent();
         if (parent != nullptr) {
             handled = notify_helper(parent, event);
+            // Logger //
+            log << "Parent widget name: " << obj->name() << std::endl;
+            log << string_event(event) << std::endl;
         }
     }
     return handled;

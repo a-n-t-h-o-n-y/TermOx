@@ -36,37 +36,52 @@ class Meta_textbox : public twf::Textbox {
 class Split_widg : public twf::Horizontal_layout {
    public:
     Split_widg() {
-        auto& box1 = this->make_child<Meta_textbox>();
-        box1.enable_border();
-        box1.brush().set_background(twf::Color::Light_gray);
-        box1.brush().set_foreground(twf::Color::Dark_blue);
-        box1.geometry().size_policy().horizontal_policy =
-            twf::Size_policy::Minimum;
-        box1.geometry().size_policy().vertical_policy = twf::Size_policy::Fixed;
-        box1.geometry().set_height_hint(20);
-        box1.geometry().set_width_hint(17);
-        box1.geometry().set_min_width(3);
+        // auto& box1 = this->make_child<Meta_textbox>();
+        // box1.enable_border();
+        // box1.brush().set_background(twf::Color::Light_gray);
+        // box1.brush().set_foreground(twf::Color::Dark_blue);
+        // box1.geometry().size_policy().horizontal_policy =
+        //     twf::Size_policy::Minimum;
+        // box1.geometry().size_policy().vertical_policy =
+        // twf::Size_policy::Fixed;
+        // box1.geometry().set_height_hint(20);
+        // box1.geometry().set_width_hint(17);
+        // box1.geometry().set_min_width(3);
 
-        auto& box3 = this->make_child<Meta_textbox>();
-        box3.enable_border();
-        box3.brush().set_background(twf::Color::White);
-        box3.brush().set_foreground(twf::Color::Black);
-        box3.geometry().size_policy().horizontal_policy =
-            twf::Size_policy::Maximum;
-        box3.geometry().set_width_hint(20);
-        box3.geometry().set_min_width(6);
-        box3.geometry().size_policy().vertical_policy =
-            twf::Size_policy::Preferred;
-        box3.geometry().set_height_hint(30);
+        // auto& box3 = this->make_child<Meta_textbox>();
+        // box3.enable_border();
+        // box3.brush().set_background(twf::Color::White);
+        // box3.brush().set_foreground(twf::Color::Black);
+        // box3.geometry().size_policy().horizontal_policy =
+        //     twf::Size_policy::Maximum;
+        // box3.geometry().set_width_hint(20);
+        // box3.geometry().set_min_width(6);
+        // box3.geometry().size_policy().vertical_policy =
+        //     twf::Size_policy::Preferred;
+        // box3.geometry().set_height_hint(30);
 
-        auto& box2 = this->make_child<Meta_textbox>();
-        box2.enable_border();
-        box2.brush().set_background(twf::Color::Green);
-        box2.brush().set_foreground(twf::Color::Light_blue);
-        box2.geometry().size_policy().horizontal_policy =
-            twf::Size_policy::Minimum;
-        box2.geometry().set_width_hint(17);
-        box2.geometry().set_min_width(4);
+        // auto& box2 = this->make_child<Meta_textbox>();
+        // box2.enable_border();
+        // box2.brush().set_background(twf::Color::Green);
+        // box2.brush().set_foreground(twf::Color::Light_blue);
+        // box2.geometry().size_policy().horizontal_policy =
+        //     twf::Size_policy::Minimum;
+        // box2.geometry().set_width_hint(17);
+        // box2.geometry().set_min_width(4);
+
+        auto& tb = this->make_child<twf::Textbox>();
+        tb.geometry().size_policy().horizontal_policy =
+            twf::Size_policy::Expanding;
+        tb.enable_border();
+        tb.set_name("textbox");
+        auto& sb = this->make_child<twf::Vertical_scrollbar>();
+        sb.set_name("scrollbar");
+        sb.up_button.set_name("up_button");
+        sb.down_button.set_name("down_button");
+        this->set_name("Layout");
+        // auto& w = this->make_child<twf::Widget>();
+        // w.brush().set_background(twf::Color::Light_blue);
+        // this->enable_border();
     }
 };
 
@@ -74,7 +89,7 @@ int main() {
     twf::System sys;
 
     Split_widg sw;
-    sw.enable_border();
+    // sw.enable_border();
 
     sys.set_head(&sw);
 

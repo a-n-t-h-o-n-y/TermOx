@@ -55,6 +55,7 @@ list(APPEND WIDGET_MODULE_SOURCES 	"src/widget_module/widget.cpp"
                                     "src/widget_module/textbox_core.cpp"
                                     "src/widget_module/push_button.cpp"
                                     "src/widget_module/horizontal_scrollbar.cpp"
+                                    "src/widget_module/vertical_scrollbar.cpp"
 									)
 
 list(APPEND TEST_SOURCES "test/system_module/system_test.cpp"

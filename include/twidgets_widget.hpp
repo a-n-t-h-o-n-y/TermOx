@@ -8,5 +8,7 @@
 #include "widget_module/layouts/vertical_layout.hpp"
 #include "widget_module/widgets/textbox.hpp"
 #include "widget_module/widgets/push_button.hpp"
+#include "widget_module/widgets/horizontal_scrollbar.hpp"
+#include "widget_module/widgets/vertical_scrollbar.hpp"
 
 #endif  // TWIDGETS_WIDGET_HPP
