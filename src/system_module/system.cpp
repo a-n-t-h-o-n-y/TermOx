@@ -16,9 +16,6 @@
 #include <memory>
 #include <utility>
 #include <vector>
-#include <fstream>  // temp
-#include <string>   // temp
-#include <sstream>  // temp
 
 namespace twf {
 
@@ -102,52 +99,47 @@ bool System::notify(Object* obj, const Event& event) {
     return notify_helper(obj, event);
 }
 
-std::string string_event(const Event& event) {
-    std::stringstream ss;
-    ss << "Event type: ";
-    if (event.type() == Event::Move) {
-        ss << "Move" << std::endl;
-        auto& me = static_cast<const Move_event&>(event);
-        ss << "x = " << me.new_x() << ", y = " << me.new_y() << std::endl;
-    } else if (event.type() == Event::Resize) {
-        ss << "Resize" << std::endl;
-        auto& re = static_cast<const Resize_event&>(event);
-        ss << "width: " << re.new_width() << ", height: " << re.new_height() << std::endl;
-    } else if (event.type() == Event::Paint) {
-        ss << "Paint" << std::endl;
-    } else if (event.type() == Event::ChildAdded) {
-        ss << "ChildAdded" << std::endl;
-    } else if (event.type() == Event::ChildRemoved) {
-        ss << "ChildRemoved" << std::endl;
-    } else if (event.type() == Event::ChildPolished) {
-        ss << "ChildPolished" << std::endl;
-    } else if (event.type() == Event::MouseButtonPress){
-        ss << "MouseButtonPress" << std::endl;
-    } else if (event.type() == Event::MouseButtonRelease) {
-        ss << "MouseButtonRelease" << std::endl;
-    } else if (event.type() == Event::None) {
-        ss << "None Type" << std::endl;
-    } else if (event.type() == Event::FocusIn) {
-        ss << "FocusIn" << std::endl;
-    } else if (event.type() == Event::FocusOut) {
-        ss << "FocusOut" << std::endl;
-    }
+// std::string string_event(const Event& event) {
+//     std::stringstream ss;
+//     ss << "Event type: ";
+//     if (event.type() == Event::Move) {
+//         ss << "Move" << std::endl;
+//         auto& me = static_cast<const Move_event&>(event);
+//         ss << "x = " << me.new_x() << ", y = " << me.new_y() << std::endl;
+//     } else if (event.type() == Event::Resize) {
+//         ss << "Resize" << std::endl;
+//         auto& re = static_cast<const Resize_event&>(event);
+//         ss << "width: " << re.new_width() << ", height: " << re.new_height() << std::endl;
+//     } else if (event.type() == Event::Paint) {
+//         ss << "Paint" << std::endl;
+//     } else if (event.type() == Event::ChildAdded) {
+//         ss << "ChildAdded" << std::endl;
+//     } else if (event.type() == Event::ChildRemoved) {
+//         ss << "ChildRemoved" << std::endl;
+//     } else if (event.type() == Event::ChildPolished) {
+//         ss << "ChildPolished" << std::endl;
+//     } else if (event.type() == Event::MouseButtonPress){
+//         ss << "MouseButtonPress" << std::endl;
+//     } else if (event.type() == Event::MouseButtonRelease) {
+//         ss << "MouseButtonRelease" << std::endl;
+//     } else if (event.type() == Event::None) {
+//         ss << "None Type" << std::endl;
+//     } else if (event.type() == Event::FocusIn) {
+//         ss << "FocusIn" << std::endl;
+//     } else if (event.type() == Event::FocusOut) {
+//         ss << "FocusOut" << std::endl;
+//     }
 
-    else {
-        ss << "Something else" << std::endl;
-    }
-    return ss.str();
-}
+//     else {
+//         ss << "Something else" << std::endl;
+//     }
+//     return ss.str();
+// }
 
 bool System::notify_helper(Object* obj, const Event& event) {
     bool handled{false};
     // Send event to object
     handled = obj->event(event);
-
-    // logger //
-    std::ofstream log("log.txt", std::fstream::app);
-    log << "widget name: " << obj->name() << std::endl;
-    log << string_event(event) << std::endl;
 
     // Propagate event to parent
     if (!handled) {  // && event type can propogate
