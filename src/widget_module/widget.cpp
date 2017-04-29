@@ -95,8 +95,7 @@ void Widget::set_geometry(const Geometry& g) {
 }
 
 void Widget::update() {
-    if (this->enabled() &&
-        this->visible()) {  // might not need checks for paint event now
+    if (this->enabled() && this->visible()) {
         System::post_event(this, std::make_unique<Paint_event>());
     }
 }
@@ -250,7 +249,7 @@ bool Widget::paint_event(const Paint_event& event) {
     // }
     return true;
 }
-// probably not needed anymore?? no..
+
 void Widget::erase_widget_screen() {
     if (this->y() + this->geometry().height() > System::max_height()) {
         return;

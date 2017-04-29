@@ -121,6 +121,16 @@ std::string string_event(const Event& event) {
         ss << "ChildRemoved" << std::endl;
     } else if (event.type() == Event::ChildPolished) {
         ss << "ChildPolished" << std::endl;
+    } else if (event.type() == Event::MouseButtonPress){
+        ss << "MouseButtonPress" << std::endl;
+    } else if (event.type() == Event::MouseButtonRelease) {
+        ss << "MouseButtonRelease" << std::endl;
+    } else if (event.type() == Event::None) {
+        ss << "None Type" << std::endl;
+    } else if (event.type() == Event::FocusIn) {
+        ss << "FocusIn" << std::endl;
+    } else if (event.type() == Event::FocusOut) {
+        ss << "FocusOut" << std::endl;
     }
 
     else {
@@ -144,9 +154,6 @@ bool System::notify_helper(Object* obj, const Event& event) {
         Object* parent = obj->parent();
         if (parent != nullptr) {
             handled = notify_helper(parent, event);
-            // Logger //
-            log << "Parent widget name: " << obj->name() << std::endl;
-            log << string_event(event) << std::endl;
         }
     }
     return handled;
@@ -193,6 +200,7 @@ Widget* System::focus_widget() {
 }
 
 void System::set_focus_widget(Widget* widg) {
+    if (widg == focus_widg_) { return; }
     if (focus_widg_ != nullptr) {
         focus_widg_->clear_focus();
     }
