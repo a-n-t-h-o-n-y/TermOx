@@ -104,15 +104,14 @@ bool System::notify(Object* obj, const Event& event) {
 
 std::string string_event(const Event& event) {
     std::stringstream ss;
-    Event ev(event);
     ss << "Event type: ";
     if (event.type() == Event::Move) {
         ss << "Move" << std::endl;
-        auto& me = static_cast<Move_event&>(ev);
+        auto& me = static_cast<const Move_event&>(event);
         ss << "x = " << me.new_x() << ", y = " << me.new_y() << std::endl;
     } else if (event.type() == Event::Resize) {
         ss << "Resize" << std::endl;
-        auto& re = static_cast<Resize_event&>(ev);
+        auto& re = static_cast<const Resize_event&>(event);
         ss << "width: " << re.new_width() << ", height: " << re.new_height() << std::endl;
     } else if (event.type() == Event::Paint) {
         ss << "Paint" << std::endl;
