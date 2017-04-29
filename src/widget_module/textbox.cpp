@@ -104,7 +104,7 @@ bool Textbox::mouse_press_event(const Mouse_event& event) {
         Painter p{this};
         this->update();
     }
-    return Widget::mouse_press_event(event);
+    return true;
 }
 
 }  // namespace twf
