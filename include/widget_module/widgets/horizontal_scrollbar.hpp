@@ -13,6 +13,6 @@ class Horizontal_scrollbar : public Horizontal_layout {
     Push_button& right_button = this->make_child<Push_button>("⯈");
 };
 
-}  // namespace twf
+} // namespace twf;
 
-#endif  // HORIZONTAL_SCROLLBAR
+#endif // HORIZONTAL_SCROLLBAR
