@@ -5,7 +5,7 @@ class Meta_textbox : public twf::Textbox {
     Meta_textbox() {}
 
     bool paint_event(const twf::Paint_event& e) override {
-        std::stringstream ss;
+        std::stringstream ss; // ӌ
         ss << "width: " << this->geometry().width()
            << "\nwidth[inner]: " << this->width()
            << "\nHorizontal size_policy: "

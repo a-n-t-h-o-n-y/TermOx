@@ -1,9 +1,11 @@
 #ifndef ATTRIBUTE_HPP
 #define ATTRIBUTE_HPP
 
+#include <cstdint>
+
 namespace twf {
 
-enum class Attribute {
+enum class Attribute : std::int8_t {
     Bold,
     Italic,
     Underline,

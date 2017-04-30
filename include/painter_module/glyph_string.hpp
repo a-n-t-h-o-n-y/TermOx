@@ -100,7 +100,7 @@ class Glyph_string : private std::vector<Glyph> {
     std::u32string str_u32() const {
         std::u32string string_;
         for (const Glyph& g : *this) {
-            string_.append(g.str_u32());
+            string_.append(1, g.get_char());
         }
         return string_;
     }
