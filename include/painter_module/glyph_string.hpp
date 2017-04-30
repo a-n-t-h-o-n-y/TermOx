@@ -35,7 +35,7 @@ class Glyph_string : private std::vector<Glyph> {
     }
 
     template <typename... Attributes>
-    Glyph_string(char symbol, Attributes... attrs) {
+    Glyph_string(char32_t symbol, Attributes... attrs) {
         this->append(Glyph{symbol, std::forward<Attributes>(attrs)...});
     }
 

@@ -70,11 +70,22 @@ class Split_widg : public twf::Horizontal_layout {
     }
 };
 
+class wid : public twf::Widget {
+    public:
+        bool paint_event(const twf::Paint_event& event) override {
+            twf::Painter p{this};
+            p.put_at(0,0,U'Ӎ');
+            return Widget::paint_event(event);
+        }
+};
+
 int main() {
     twf::System sys;
 
-    Split_widg sw;
-    sw.enable_border();
+    // Split_widg sw;
+    // sw.enable_border();
+
+    wid sw;
 
     sys.set_head(&sw);
 
