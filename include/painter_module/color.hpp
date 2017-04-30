@@ -1,9 +1,11 @@
 #ifndef COLOR_HPP
 #define COLOR_HPP
 
+#include <cstdint>
+
 namespace twf {
 
-enum class Color {
+enum class Color : std::int16_t {
     Black = 240,
     Dark_red,
     Dark_blue,
@@ -24,7 +26,7 @@ enum class Color {
 
 namespace detail {
 
-enum class BackgroundColor {
+enum class BackgroundColor : std::int16_t {
     Black = 240,
     Dark_red,
     Dark_blue,
@@ -43,7 +45,7 @@ enum class BackgroundColor {
     White
 };
 
-enum class ForegroundColor {
+enum class ForegroundColor : std::int16_t {
     Black = 240,
     Dark_red,
     Dark_blue,

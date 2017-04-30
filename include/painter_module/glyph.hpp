@@ -52,7 +52,8 @@ class Glyph {
    private:
     static bool verify_length_(const std::string& s);
 
-    std::string symbol_ = " ";
+    // std::string symbol_ = " ";
+    char32_t symbol_ = U' ';
     Brush brush_;
 };
 
