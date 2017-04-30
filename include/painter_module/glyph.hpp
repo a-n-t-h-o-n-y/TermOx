@@ -11,37 +11,51 @@
 
 namespace twf {
 
-class Glyph_error : public std::runtime_error {
-   public:
-    using std::runtime_error::runtime_error;
-};
+using Glyph_error = std::runtime_error;
+// class Glyph_error : public std::runtime_error {
+//    public:
+//     using std::runtime_error::runtime_error;
+// };
 
 class Glyph {
    public:
     Glyph() = default;
 
-    template <typename Symbol, typename... Attributes>
-    Glyph(Symbol symbol, Attributes... attrs)
+    template <typename... Attributes>
+    Glyph(const char32_t& symbol, Attributes&&... attrs)
+        : brush_{std::forward<Attributes>(attrs)...}, symbol_{symbol} {}
+
+    // template <typename... Attributes>
+    // Glyph(const char16_t& symbol, Attributes&&... attrs)
+    //     : brush_{std::forward<Attributes>(attrs)...}, symbol_(symbol) {}
+
+    // template <typename... Attributes>
+    // Glyph(const char& symbol, Attributes&&... attrs)
+    //     : brush_{std::forward<Attributes>(attrs)...}, symbol_(symbol) {}
+
+    template <typename... Attributes>
+    Glyph(const char* symbol, Attributes&&... attrs)
         : brush_{std::forward<Attributes>(attrs)...} {
-        set_symbol(std::forward<Symbol>(symbol));
+        symbol_ = string_to_wchar(symbol);
     }
 
-    operator std::string() const {
-        return symbol_;
+    template <typename... Attributes>
+    Glyph(const std::string& symbol, Attributes&&... attrs)
+        : brush_{std::forward<Attributes>(attrs)...} {
+        symbol_ = string_to_wchar(symbol);
     }
 
-    template <typename Symbol>
-    void set_symbol(Symbol symbol) {
-        if (verify_length_(std::string{symbol})) {
-            symbol_ = std::string{symbol};
-        } else {
-            throw Glyph_error("Print size is greater than one character.");
-        }
+    operator std::string() const { return this->str(); }
+    std::string str() const;
+    char32_t get_char() const { return symbol_; }
+
+    void set_symbol(char32_t symbol) { symbol_ = symbol; }
+    void set_symbol(const char* symbol) { symbol_ = string_to_wchar(symbol); }
+    void set_symbol(const std::string& symbol) {
+        symbol_ = string_to_wchar(symbol);
     }
+
     void set_brush(const Brush& brush) { brush_ = brush; }
-
-    std::string str() const { return symbol_; }
-    std::u32string str_u32() const;
     Brush& brush() { return brush_; }
     const Brush& brush() const { return brush_; }
 
@@ -49,12 +63,13 @@ class Glyph {
         return ((x.symbol_ == y.symbol_) && (x.brush_ == y.brush_));
     }
 
-   private:
-    static bool verify_length_(const std::string& s);
+    friend bool operator!=(const Glyph& x, const Glyph& y) { return !(x == y); }
 
-    // std::string symbol_ = " ";
-    char32_t symbol_ = U' ';
+   private:
     Brush brush_;
+    char32_t symbol_ = U' ';
+
+    char32_t string_to_wchar(const std::string& s);
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Glyph& g) {

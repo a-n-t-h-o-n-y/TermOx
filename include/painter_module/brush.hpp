@@ -37,8 +37,14 @@ class Brush {
     void set_foreground(Color color) { foreground_color_ = color; }
 
     std::vector<Attribute> attributes() const;
-    opt::Optional<Color> background_color() const { return background_color_; }
-    opt::Optional<Color> foreground_color() const { return foreground_color_; }
+    const opt::Optional<Color>& background_color() const {
+        return background_color_;
+    }
+    opt::Optional<Color>& background_color() { return background_color_; }
+    const opt::Optional<Color>& foreground_color() const {
+        return foreground_color_;
+    }
+    opt::Optional<Color>& foreground_color() { return foreground_color_; }
 
     friend bool operator==(const Brush& a, const Brush& b);
 
