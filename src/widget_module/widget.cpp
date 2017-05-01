@@ -383,9 +383,11 @@ void Widget::set_visible(bool visible) {
     }
 }
 
-std::size_t Widget::x() const  // previously get_global_x
-{
-    Widget* parent_widg = dynamic_cast<Widget*>(this->parent());
+std::size_t Widget::x() const {
+    Widget* parent_widg = dynamic_cast<Widget*>(
+        this->parent());  // If you only allow widgets you do not need this
+                          // dynamic cast, too expansible with objects instead
+                          // of widgets in tree.
     if (parent_widg == nullptr) {
         return this->position_.x;
     }

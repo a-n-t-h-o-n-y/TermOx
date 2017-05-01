@@ -16,10 +16,6 @@
 namespace twf {
 namespace detail {
 
-// take input from user
-// decifer event
-// find object in different ways depending on the event type
-// post the event to the system queue
 void NCurses_event_dispatcher::post_user_input() {
     std::unique_ptr<Event> event = nullptr;
     Object* object = nullptr;

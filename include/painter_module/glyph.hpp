@@ -4,6 +4,7 @@
 #include "brush.hpp"
 #include "color.hpp"
 
+#include <array>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -46,6 +47,7 @@ class Glyph {
     }
 
     operator std::string() const { return this->str(); }
+    const char* c_str() const;
     std::string str() const;
     char32_t get_char() const { return symbol_; }
 
@@ -67,7 +69,8 @@ class Glyph {
 
    private:
     Brush brush_;
-    char32_t symbol_ = U' ';
+    char32_t symbol_{U' '};
+    mutable std::array<char, 5> symbol_c_str_{"\0\0\0\0"};
 
     char32_t string_to_wchar(const std::string& s);
 };

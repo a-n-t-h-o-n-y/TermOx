@@ -108,8 +108,12 @@ void NCurses_paint_engine::move(unsigned x, unsigned y) {
     ::wmove(::stdscr, y, x);
 }
 
+void NCurses_paint_engine::put_string(const char* s) {
+    ::waddstr(::stdscr, s);
+}
+
 void NCurses_paint_engine::put_string(const std::string& s) {
-    ::waddstr(::stdscr, s.c_str());
+    this->put_string(s.c_str());
 }
 
 void NCurses_paint_engine::clear_attributes() {
