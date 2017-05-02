@@ -15,9 +15,10 @@ void Textbox_core::scroll_up(std::size_t n) {
     if (cursor_index_ < upper_bound_) {
         this->set_cursor_index(upper_bound_);
     }
+    this->update();
 }
 
-void Textbox_core::scroll_down(std::size_t n) {  // top line is not showing
+void Textbox_core::scroll_down(std::size_t n) {
     for (std::size_t i = upper_bound_; i < contents_.size(); ++i) {
         if (i - upper_bound_ == this->width() - 1 ||
             contents_.at(i).str() == "\n") {
@@ -26,10 +27,10 @@ void Textbox_core::scroll_down(std::size_t n) {  // top line is not showing
         }
     }
     lower_bound_ = find_lower_bound();
-    // set lower bound first??
     if (cursor_index_ > lower_bound_) {
         this->set_cursor_index(lower_bound_);
     }
+    this->update();
 }
 
 // Moves the cursor up n positions, scrolls if need be.

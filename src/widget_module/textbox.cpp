@@ -97,12 +97,8 @@ bool Textbox::mouse_press_event(const Mouse_event& event) {
         p.move(pos.x, pos.y);
     } else if (event.button() == Mouse_event::Button::ScrollUp) {
         this->scroll_up();
-        Painter p{this};
-        this->update();
     } else if (event.button() == Mouse_event::Button::ScrollDown) {
         this->scroll_down();
-        Painter p{this};
-        this->update();
     }
     return true;
 }

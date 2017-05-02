@@ -73,8 +73,33 @@ bool Widget::has_coordinates(std::size_t global_x, std::size_t global_y) {
     if (!this->enabled() || !this->visible()) {
         return false;
     }
-    return global_x >= this->x() && global_x < (this->x() + this->width()) &&
-           global_y >= this->y() && global_y < (this->y() + this->height());
+    // x() and y() are top left of screen is that with or without border
+    // considered? Because width() and height() consider the border. The thing
+    // here is that if you have a widget within another widget, and that out
+    // widget has a border on, you are going to get errors from this and mouse
+    // press events will not trigger on the whole widget, test with with that
+    // first widget you made, made a widget that just displays an 'X' whereever
+    // you click, it does not have to save all of the clicks, though you could
+    // with a Glyph_matrix or something, or maybe just a vector of positions
+    // that are enabled so it is shorter. Anyways
+    std::size_t x_offset{0};
+    std::size_t y_offset{0};
+    if (this->border().enabled()) {
+        if (this->border().west_enabled() ||
+            this->border().north_west_enabled() ||
+            this->border().south_east_enabled()) {
+            ++x_offset;
+        }
+        if (this->border().north_enabled() ||
+            this->border().north_west_enabled() ||
+            this->border().north_east_enabled()) {
+            ++y_offset;
+        }
+    }
+    return global_x >= (this->x() + x_offset) &&
+           global_x < (this->x() + this->width() + x_offset) &&
+           global_y >= (this->y() + y_offset) &&
+           global_y < (this->y() + this->height() + y_offset);
 }
 
 void Widget::enable_border() {

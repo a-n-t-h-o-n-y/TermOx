@@ -146,7 +146,6 @@ class Widget : public Object {
     Brush default_brush_ =
         Brush(background(Color::Black), foreground(Color::White));
     Border border_;
-    // Size_policy size_policy_;
 
     std::unique_ptr<Paint_engine> paint_engine_ = nullptr;
     Geometry geometry_ = Geometry{this};  // does geo need to know about this?

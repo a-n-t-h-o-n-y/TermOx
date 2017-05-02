@@ -12,8 +12,6 @@ Vertical_scrollbar::Vertical_scrollbar() {
     up_button.geometry().size_policy().vertical_policy = Size_policy::Fixed;
     up_button.geometry().set_height_hint(1);
 
-    // middle.geometry().size_policy().horizontal_policy = Size_policy::Fixed;
-    // middle.geometry().set_width_hint(1);
     middle.geometry().size_policy().vertical_policy = Size_policy::Expanding;
     middle.brush().set_background(Color::Light_gray);
 
