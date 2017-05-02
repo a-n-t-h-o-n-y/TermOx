@@ -3,7 +3,7 @@
 class Split_widg : public twf::Horizontal_layout {
    public:
     Split_widg() {
-        // this->enable_border();
+        this->enable_border();
         // Textbox
         auto& tb = this->make_child<twf::Textbox>();
         tb.geometry().size_policy().horizontal_policy =
@@ -58,11 +58,11 @@ class L_clicker : public twf::Horizontal_layout {
 int main() {
     twf::System sys;
 
-    L_clicker c;
+    // L_clicker c;
 
-    // Split_widg sw;
+    Split_widg sw;
 
-    sys.set_head(&c);
+    sys.set_head(&sw);
 
     return sys.run();
 }

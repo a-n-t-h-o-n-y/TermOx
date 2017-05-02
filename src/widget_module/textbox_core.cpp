@@ -74,7 +74,14 @@ bool Textbox_core::paint_event(const Paint_event& event) {
     // if(lower_bound_ != 0 && lower_bound_ >= contents_.size()) {
     //     checked_lb = contents_.size() - 1;
     // }
-    Glyph_string sub_str(std::begin(contents_) + upper_bound_,
+    std::size_t upper{0};
+    if (upper_bound_ > contents_.size()) {
+        upper = contents_.size();
+    } else {
+        upper = upper_bound_;
+    }
+
+    Glyph_string sub_str(std::begin(contents_) + upper, // upper_bound is one over contents_.size()
                          std::begin(contents_) + lower_bound_);
     p.put_at(0, 0, sub_str, false);
     // Move the cursor to the appropriate position.

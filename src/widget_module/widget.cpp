@@ -73,15 +73,6 @@ bool Widget::has_coordinates(std::size_t global_x, std::size_t global_y) {
     if (!this->enabled() || !this->visible()) {
         return false;
     }
-    // x() and y() are top left of screen is that with or without border
-    // considered? Because width() and height() consider the border. The thing
-    // here is that if you have a widget within another widget, and that out
-    // widget has a border on, you are going to get errors from this and mouse
-    // press events will not trigger on the whole widget, test with with that
-    // first widget you made, made a widget that just displays an 'X' whereever
-    // you click, it does not have to save all of the clicks, though you could
-    // with a Glyph_matrix or something, or maybe just a vector of positions
-    // that are enabled so it is shorter. Anyways
     std::size_t x_offset{0};
     std::size_t y_offset{0};
     if (this->border().enabled()) {
@@ -409,21 +400,30 @@ void Widget::set_visible(bool visible) {
 }
 
 std::size_t Widget::x() const {
-    Widget* parent_widg = dynamic_cast<Widget*>(
-        this->parent());  // If you only allow widgets you do not need this
-                          // dynamic cast, too expansible with objects instead
-                          // of widgets in tree.
-    if (parent_widg == nullptr) {
+    // Widget* parent_widg = dynamic_cast<Widget*>(
+    //     this->parent());
+    // if (parent_widg == nullptr) {
+    //     return this->position_.x;
+    // }
+    if (this->parent() == nullptr) {
         return this->position_.x;
     }
+    // Object* tree should only contain Widget* this is something to change, to
+    // create a Widget* tree instead, dynamic_cast from above is too large a
+    // performance hit for a function that is used so many times.
+    Widget* parent_widg = static_cast<Widget*>(this->parent());
     return this->position_.x + parent_widg->x();
 }
 
 std::size_t Widget::y() const {
-    Widget* parent_widg = dynamic_cast<Widget*>(this->parent());
-    if (parent_widg == nullptr) {
-        return this->position_.y;
+    // Widget* parent_widg = dynamic_cast<Widget*>(this->parent());
+    // if (parent_widg == nullptr) {
+    //     return this->position_.y;
+    // }
+    if (this->parent() == nullptr) {
+        return this->position_.x;
     }
+    Widget* parent_widg = static_cast<Widget*>(this->parent());
     return this->position_.y + parent_widg->y();
 }
 
