@@ -1,0 +1,16 @@
+                             __Issues__
+
+_ Cursor up/down in Textbox should scroll text when at top and bottom.
+
+_ Move Widget::erase_widget_screen() to Painter::clear_screen() and paint over
+    borders.
+
+_ Change Object* tree to Widget* tree - low priority
+
+_ Create a Coordinate Widget::border_offset() function to replace duplicate code
+
+_ Create some way of decorating/specifying elements of a Textbox; scrollbars,
+    scrolling with what buttons and keys, etc... template? multiple classes?
+
+_ Easier way of specifying look of Widget and other options with some sort of
+    json like syntax?
