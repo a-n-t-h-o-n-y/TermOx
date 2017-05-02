@@ -13,4 +13,78 @@ _ Create some way of decorating/specifying elements of a Textbox; scrollbars,
     scrolling with what buttons and keys, etc... template? multiple classes?
 
 _ Easier way of specifying look of Widget and other options with some sort of
-    json like syntax?
+    json like syntax? Or most likely give detailed interfaces for widgets and
+    documentation of those interfaces, not widget look can really be specified
+    with something generic, like json.
+
+_ Textbox scroll_up() leaves the last line of text as the last line displayed
+    while scrolling down. Look into Painter::move() and lower_bound_ being reset
+    when scrolling up.
+
+_ Create Page_layout that can display any number of different 'screens' or pages
+    of widgets. Only one page is displayed at a time and it is given the entire
+    screen. instead of every page being a child, it'll only have one child and
+    it will change that child out to have it printed to the screen. Also need
+    some way of switching between multiple pages, maybe signals, you might have
+    to make this a fixed number of pages for signal names.
+
+_ Creating a widget object without attatching it as head or as a child or any
+    other widget still prints to the screen at startup. There is no check that
+    it has a parent before sending paint events to the global event queue.
+    Possibly add a check that parent() != nullptr && this != head_widget().
+
+_ Find out why upper_bound_ is sometimes larger than the length of the string,
+    happens in the Textbox paint_event() function when creating the substring to
+    print to the screen.
+
+_ Add tab key to textbox, you'll have to work around the tab as change focus.
+    Think of the interface, should tab to change focus just be disabled on
+    Textboxes? and how to do that when Tab is removed from being sent to the
+    Textbox by an event filter, maybe the event filter can check if the object
+    to send to is a textbox and if so, then it sends it along instead of
+    processing it.
+
+_ Move tab focus to event filter instead of the Widget::or Object::event()
+    functions.
+
+_ Create a forms widget that has pairs of title and field, where the field is
+    accessible from some variable and a signal is called whenever it is changed.
+    Use partial borders or different background colors to give a nice look.
+
+_ Make sure partial border work, test in nested widgets.
+
+_ Create a radio button and/or checkbox widget that has a bool state, signal
+    when it is toggled, signal for when it is toggled true and for toggled
+    false.
+
+_ Try to work out hovering widgets, they would be on same level as the head
+    widget. Their known bounds are the screen bounds. Used for Dialog Boxes and
+    Pulldown menus where a widget has to be printed outside of its
+    bounds/parents bounds.
+
+_ Create Pulldown menu widget that is a hovering widget, though part of it would
+    be a child to some other widget, the pull down part will be a hovering
+    widget printed just under the actual menu widget.
+
+_ Create Menu widget with selectable/highlightable options that call a signal
+    enter is pressed or they are clicked. Lots of options you need to let client
+    dictate in an easy way. It'd be nice to have a variable number of Menu
+    options with a template or something, though for the signals to be named I'm
+    not sure you could do this, you'd have to do it through some kind of
+    container/index.
+
+_ Add mutex to the event_queue, lock when posting events and when processing
+    events from the queue. This will help if you want to use asynchronous timers
+    to perform animation by changing the state of a widget and then posting a
+    paint event through a call to this->update() every certain number of timer
+    ticks.
+
+_ Widget placement/alignment in layouts when there is extra space that can't be
+    taken by any widget, enums like left aligned, right aligned, centered,
+    justified, floating...
+
+_ Layout still do not take all possible space given to them because of rounding
+    errors, use a similar recursive function to split up the space that should
+    have been taken, but wasn't, very similar to the current recursive function
+    that gives out space, but this one does not consider stretch factors, it
+    just hands out one block at a time.
