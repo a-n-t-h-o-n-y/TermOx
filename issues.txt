@@ -17,7 +17,7 @@ _ Easier way of specifying look of Widget and other options with some sort of
     documentation of those interfaces, not widget look can really be specified
     with something generic, like json.
 
-_ Textbox scroll_up() leaves the last line of text as the last line displayed
+X Textbox scroll_up() leaves the last line of text as the last line displayed
     while scrolling down. Look into Painter::move() and lower_bound_ being reset
     when scrolling up.
 

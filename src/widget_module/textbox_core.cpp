@@ -90,6 +90,13 @@ bool Textbox_core::paint_event(const Paint_event& event) {
     return Widget::paint_event(event);
 }
 
+bool Textbox_core::resize_event(const Resize_event& event){
+    Widget::resize_event(event);
+    lower_bound_ = find_lower_bound();
+    this->update();
+    return true;
+}
+
 // Finds the location in the Glyph_string where the given position refers to.
 std::size_t Textbox_core::index_from_position(std::size_t x, std::size_t y) {
     Coordinate running_position;

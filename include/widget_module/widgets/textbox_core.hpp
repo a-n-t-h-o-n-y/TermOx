@@ -29,6 +29,7 @@ class Textbox_core : public Widget {
 
    protected:
     bool paint_event(const Paint_event& event) override;
+    bool resize_event(const Resize_event& event) override;
 
     std::size_t index_from_position(Coordinate pos);
     std::size_t index_from_position(std::size_t x, std::size_t y);
