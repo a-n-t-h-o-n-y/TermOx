@@ -3,7 +3,15 @@
 _ Cursor up/down in Textbox should scroll text when at top and bottom.
 
 _ Move Widget::erase_widget_screen() to Painter::clear_screen() and paint over
-    borders.
+    borders. Is there a way to optimize this like paint_event? can paint event
+    objects specify what they do? erase paint events clear the screen? or
+    another type of event entirely so that you can get the post event
+    optimization since most of the program time is eaten up by erasing the
+    screen and these are called in place and not posted as events, this could be
+    an important change. You could then call a Widget::clear_screen() function
+    similar to update, that posts a clear_screen_event object to the queue, and
+    the Event_queue::add_event() function could optimize out multiple clears on
+    the same widget.
 
 _ Change Object* tree to Widget* tree - low priority
 

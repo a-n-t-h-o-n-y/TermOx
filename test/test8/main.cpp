@@ -14,9 +14,8 @@ class Meta_textbox : public twf::Textbox {
            << "\nh_stretch: "
            << this->geometry().size_policy().horizontal_stretch
            << "\nmin_width: " << this->geometry().min_width()
-           << "\nmax_width: " << this->geometry().max_width() << "\n";
+           << "\nmax_width: " << this->geometry().max_width();
         this->contents_ = ss.str();
-        this->lower_bound_ = this->contents_.size();
         return Textbox::paint_event(e);
     }
 };
@@ -35,9 +34,8 @@ class Meta_vert : public twf::Textbox {
            << "\nh_stretch: "
            << this->geometry().size_policy().horizontal_stretch
            << "\nmin_height: " << this->geometry().min_height()
-           << "\nmax_height: " << this->geometry().max_height() << "\n";
+           << "\nmax_height: " << this->geometry().max_height();
         this->contents_ = ss.str();
-        this->lower_bound_ = ss.str().size();
         return Textbox::paint_event(e);
     }
 };

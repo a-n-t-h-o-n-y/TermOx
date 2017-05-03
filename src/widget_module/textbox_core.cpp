@@ -11,7 +11,6 @@ Textbox_core::Textbox_core(const Glyph_string& string) : contents_{string} {};
 
 void Textbox_core::scroll_up(std::size_t n) {
     upper_bound_ = previous_line_break(upper_bound_);
-    lower_bound_ = find_lower_bound();
     if (cursor_index_ < upper_bound_) {
         this->set_cursor_index(upper_bound_);
     }
@@ -26,7 +25,7 @@ void Textbox_core::scroll_down(std::size_t n) {
             break;
         }
     }
-    lower_bound_ = find_lower_bound();
+    lower_bound_ = find_lower_bound(); // possibly add this check to paint_event
     if (cursor_index_ > lower_bound_) {
         this->set_cursor_index(lower_bound_);
     }
@@ -81,7 +80,8 @@ bool Textbox_core::paint_event(const Paint_event& event) {
         upper = upper_bound_;
     }
 
-    Glyph_string sub_str(std::begin(contents_) + upper, // upper_bound is one over contents_.size()
+    lower_bound_ = find_lower_bound();
+    Glyph_string sub_str(std::begin(contents_) + upper,
                          std::begin(contents_) + lower_bound_);
     p.put_at(0, 0, sub_str, false);
     // Move the cursor to the appropriate position.
@@ -92,7 +92,6 @@ bool Textbox_core::paint_event(const Paint_event& event) {
 
 bool Textbox_core::resize_event(const Resize_event& event){
     Widget::resize_event(event);
-    lower_bound_ = find_lower_bound();
     this->update();
     return true;
 }
@@ -182,7 +181,8 @@ std::size_t Textbox_core::find_lower_bound() {
     std::size_t height{0};
     std::size_t line_index{0};
     for (std::size_t i{upper_bound_}; i < contents_.size(); ++i) {
-        if (height - 1 == this->height()) {
+        ++line_index;
+        if (height == this->height()) {
             return i;
         } else if (contents_.at(i) == '\n') {
             ++height;

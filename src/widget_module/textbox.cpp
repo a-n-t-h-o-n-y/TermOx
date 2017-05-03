@@ -34,7 +34,6 @@ bool Textbox::key_press_event(const Key_event& event) {
         }
         --cursor_index_;
         contents_.erase(std::begin(contents_) + cursor_index_);
-        lower_bound_ = find_lower_bound();
         this->erase_widget_screen();
         this->update();  // Only need this for backspace when cursor_index_ is
         // different than the index size(); you can optimize this.
@@ -44,7 +43,6 @@ bool Textbox::key_press_event(const Key_event& event) {
             contents_.append("\n");
         } else {
             contents_.insert(std::begin(contents_) + cursor_index_, "\n");
-            lower_bound_ = find_lower_bound();
             this->update();
         }
         ++cursor_index_;
@@ -56,12 +54,10 @@ bool Textbox::key_press_event(const Key_event& event) {
         } else {
             contents_.insert(std::begin(contents_) + cursor_index_,
                              event.text());
-            lower_bound_ = find_lower_bound();
             this->update();
         }
         ++cursor_index_;
         p.put(event.text());
-        lower_bound_ = find_lower_bound();
     } else if (event.key_code() == Key::Arrow_right) {
         if (cursor_index_ != contents_.size()) {
             ++cursor_index_;
