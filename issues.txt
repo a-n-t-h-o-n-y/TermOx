@@ -1,5 +1,16 @@
                              __Issues__
 
+_ Finish Scrollbar widgets, possibly add a constructor that takes pointer? or
+    some reference to the textbox, can ask it its height and its total height of
+    text that the textbox widget knows how to calculate, and the current
+    position in that total height, then use this information to create a
+    bar with length determined by current_window_height/total_text_height, and
+    centered over current_position_in_text/total_text_height, these fractions
+    are multiplied by the height of the scrollbar widget since that does not
+    have to be the same height as the textbox. If constructed without a textbox
+    then bar is always same height of scrollbar widget, minus arrows, so
+    fraction 1/1.
+
 _ Move Widget::erase_widget_screen() to Painter::clear_screen() and paint over
     borders. Is there a way to optimize this like paint_event? can paint event
     objects specify what they do? erase paint events clear the screen? or
@@ -91,8 +102,6 @@ _ Layout still do not take all possible space given to them because of rounding
     that gives out space, but this one does not consider stretch factors, it
     just hands out one block at a time.
 
-_ Add scroll_down to right arrow and scroll_up to left arrow on textbox.
-
 _ Textbox with keys pressed when it has predetermined text and lower_bound will
     crash on keypresses past the length of the string.(test8) This can be fixed
     by not taking keyboard input on these types of boxes, but there are
@@ -111,6 +120,15 @@ _ Very large and instant resize events(like full screen to tiny screen) can
     down below where you left the cursor before the resize. Handle:
     if(cursor_position > lower_bound_) then scroll down until cursor index
     is in the middle of the screen or something.
+
+_ Cursor disappears sometimes, letters still print, this might be fixed by
+    compiling with optimizations? or does the event_loop calling flush()
+    sometimes not put the cursor to the screen? does the cursor get coordinates
+    that are not correct and therefore cannot print them on the screen?
+
+X Textbox scroll_up on backspace at top left corner.
+
+X Add scroll_down to right arrow and scroll_up to left arrow on textbox.
     
 X Textbox scroll_up() leaves the last line of text as the last line displayed
     while scrolling down. Look into Painter::move() and lower_bound_ being reset

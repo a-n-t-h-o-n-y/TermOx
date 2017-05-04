@@ -26,8 +26,13 @@ bool Textbox::key_press_event(const Key_event& event) {
                 p.move(this->width() - 1, this->cursor_y() - 1);
                 p.put(" ", false);
             }
-        } else if (this->cursor_x() == 0 && this->cursor_y() == 0) {
+        } else if (cursor_index_ == 0) {
             return true;
+        } else if (this->cursor_x() == 0 && this->cursor_y() == 0) {
+            this->scroll_up();
+            // this->set_cursor_index(
+                // this->index_from_position(this->width() - 1, 0));
+            // return true;
         } else {
             p.move(this->cursor_x() - 1, this->cursor_y());
             p.put(" ", false);
@@ -57,22 +62,32 @@ bool Textbox::key_press_event(const Key_event& event) {
             contents_.insert(std::begin(contents_) + cursor_index_,
                              event.text());
         }
-        if (this->cursor_y() == this->height() - 1 && this->cursor_x() == this->width() - 1) {
+        if (this->cursor_y() == this->height() - 1 &&
+            this->cursor_x() == this->width() - 1) {
             this->scroll_down();
+        } else {
+            this->set_cursor_index(cursor_index_ + 1);
         }
-        this->set_cursor_index(cursor_index_ + 1);
         this->update();
     } else if (event.key_code() == Key::Arrow_right) {
-        if (cursor_index_ != contents_.size()) {
-            this->set_cursor_index(cursor_index_ + 1);
-            // ++cursor_index_;
-            auto pos = position_from_index(cursor_index_);
-            p.move(pos.x, pos.y);
+        if (cursor_index_ == contents_.size()) {
+            return true;
         }
+        if (this->cursor_y() == this->height() - 1) {
+            if (this->contents_.at(cursor_index_) == '\n' ||
+                this->cursor_x() == this->width() - 1) {
+                this->scroll_down();
+            }
+        }
+        this->set_cursor_index(cursor_index_ + 1);
+        auto pos = position_from_index(cursor_index_);
+        p.move(pos.x, pos.y);
     } else if (event.key_code() == Key::Arrow_left) {
         if (cursor_index_ != 0) {
+            if (this->cursor_y() == 0 && this->cursor_x() == 0) {
+                this->scroll_up();
+            }
             this->set_cursor_index(cursor_index_ - 1);
-            // --cursor_index_;
             auto pos = position_from_index(cursor_index_);
             p.move(pos.x, pos.y);
         }

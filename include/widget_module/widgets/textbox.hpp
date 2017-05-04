@@ -19,11 +19,11 @@ class Textbox : public Textbox_core {
         this->set_cursor(true);
     }
 
-    bool key_press_event(const Key_event& event) override;
-
-    bool mouse_press_event(const Mouse_event& event) override;
-
     Glyph_string text() const { return contents_; }
+
+   protected:
+    bool key_press_event(const Key_event& event) override;
+    bool mouse_press_event(const Mouse_event& event) override;
 };
 
 }  // namespace twf

@@ -4,6 +4,7 @@
 #include <widget_module/coordinate.hpp>
 
 #include <cstddef>
+#include <functional>
 
 namespace twf {
 
@@ -13,7 +14,6 @@ void Textbox_core::scroll_up(std::size_t n) {
     upper_bound_ = previous_line_break(upper_bound_);
     lower_bound_ = this->find_lower_bound();
     if (cursor_index_ > lower_bound_) {
-        // this->set_cursor_index(lower_bound_);
         this->set_cursor_index(
             this->index_from_position(0, this->height() - 1));
     }
@@ -28,7 +28,6 @@ void Textbox_core::scroll_down(std::size_t n) {
             break;
         }
     }
-    // lower_bound_ = this->find_lower_bound();
     if (cursor_index_ < upper_bound_) {
         this->set_cursor_index(upper_bound_);
     }
@@ -101,6 +100,11 @@ bool Textbox_core::paint_event(const Paint_event& event) {
 
 bool Textbox_core::resize_event(const Resize_event& event) {
     Widget::resize_event(event);
+    lower_bound_ = this->find_lower_bound();
+    if (cursor_index_ > lower_bound_) {
+        this->set_cursor_index(
+            this->index_from_position(0, this->height() - 1));
+    }
     this->update();
     return true;
 }
@@ -154,13 +158,7 @@ Coordinate Textbox_core::position_from_index(std::size_t index) {
 // Sets the position of the cursor in the Glyph_string. Possibly scrolls so
 // that the index position is visible in the window.
 void Textbox_core::set_cursor_index(std::size_t index) {
-    cursor_index_ =
-        index;  // this was set to i, which is an enum, subtle bug...
-    if (cursor_index_ < upper_bound_) {
-        // scroll up as many times as needed
-    } else if (cursor_index_ > lower_bound_) {
-        // scroll down as many times as needed
-    }
+    cursor_index_ = index;
     auto pos = this->position_from_index(cursor_index_);
     Painter p{this};
     p.move(pos.x, pos.y);
