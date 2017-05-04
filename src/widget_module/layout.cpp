@@ -34,9 +34,4 @@ bool Layout::paint_event(const Paint_event& event) {
     return Widget::paint_event(event);
 }
 
-/* bool Layout::child_event(const Child_event& event) {
- *     this->update();
- *     return true;
- * } */
-
 }  // namespace twf

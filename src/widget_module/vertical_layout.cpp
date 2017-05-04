@@ -266,6 +266,47 @@ void Vertical_layout::distribute_space(
             height_additions.pop_front();
         }
     }
+    if (height_left == 0) {
+        return;
+    }
+    // Rounding error extra
+    // First Group
+    auto height_check{height_left};
+    do {
+        height_check = height_left;
+        for (auto& tup : widgets) {
+            auto policy =
+                std::get<0>(tup)->geometry().size_policy().vertical_policy;
+            if ((policy == Size_policy::Expanding ||
+                 policy == Size_policy::MinimumExpanding) &&
+                height_left > 0) {
+                if (std::get<2>(tup).get() + 1 <=
+                    std::get<0>(tup)->geometry().max_height()) {
+                    std::get<2>(tup).get() += 1;
+                    height_left -= 1;
+                }
+            }
+        }
+    } while (height_check != height_left);
+
+    // Second Group
+    do {
+        height_check = height_left;
+        for (auto& tup : widgets) {
+            auto policy =
+                std::get<0>(tup)->geometry().size_policy().vertical_policy;
+            if ((policy == Size_policy::Preferred ||
+                 policy == Size_policy::Minimum ||
+                 policy == Size_policy::Ignored) &&
+                height_left > 0) {
+                if (std::get<2>(tup).get() + 1 <=
+                    std::get<0>(tup)->geometry().max_height()) {
+                    std::get<2>(tup).get() += 1;
+                    height_left -= 1;
+                }
+            }
+        }
+    } while (height_check != height_left);
 }
 
 void Vertical_layout::collect_space(

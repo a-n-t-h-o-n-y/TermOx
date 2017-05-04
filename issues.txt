@@ -96,12 +96,6 @@ _ Widget placement/alignment in layouts when there is extra space that can't be
     taken by any widget, enums like left aligned, right aligned, centered,
     justified, floating...
 
-_ Layout still do not take all possible space given to them because of rounding
-    errors, use a similar recursive function to split up the space that should
-    have been taken, but wasn't, very similar to the current recursive function
-    that gives out space, but this one does not consider stretch factors, it
-    just hands out one block at a time.
-
 _ Textbox with keys pressed when it has predetermined text and lower_bound will
     crash on keypresses past the length of the string.(test8) This can be fixed
     by not taking keyboard input on these types of boxes, but there are
@@ -142,4 +136,10 @@ X Very large and instant resize events(like full screen to tiny screen) can
     down below where you left the cursor before the resize. Handle:
     if(cursor_position > lower_bound_) then scroll down until cursor index
     is in the middle of the screen or something.
+
+X Layout still do not take all possible space given to them because of rounding
+    errors, use a similar recursive function to split up the space that should
+    have been taken, but wasn't, very similar to the current recursive function
+    that gives out space, but this one does not consider stretch factors, it
+    just hands out one block at a time.
 

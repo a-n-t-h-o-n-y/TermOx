@@ -268,6 +268,48 @@ void Horizontal_layout::distribute_space(
             width_additions.pop_front();
         }
     }
+
+    if (width_left == 0) {
+        return;
+    }
+    // Rounding error extra
+    // First Group
+    auto width_check{width_left};
+    do {
+        width_check = width_left;
+        for (auto& tup : widgets) {
+            auto policy =
+                std::get<0>(tup)->geometry().size_policy().horizontal_policy;
+            if ((policy == Size_policy::Expanding ||
+                 policy == Size_policy::MinimumExpanding) &&
+                width_left > 0) {
+                if (std::get<1>(tup).get() + 1 <=
+                    std::get<0>(tup)->geometry().max_width()) {
+                    std::get<1>(tup).get() += 1;
+                    width_left -= 1;
+                }
+            }
+        }
+    } while (width_check != width_left);
+
+    // Second Group
+    do {
+        width_check = width_left;
+        for (auto& tup : widgets) {
+            auto policy =
+                std::get<0>(tup)->geometry().size_policy().horizontal_policy;
+            if ((policy == Size_policy::Preferred ||
+                 policy == Size_policy::Minimum ||
+                 policy == Size_policy::Ignored) &&
+                width_left > 0) {
+                if (std::get<1>(tup).get() + 1 <=
+                    std::get<0>(tup)->geometry().max_width()) {
+                    std::get<1>(tup).get() += 1;
+                    width_left -= 1;
+                }
+            }
+        }
+    } while (width_check != width_left);
 }
 
 void Horizontal_layout::collect_space(

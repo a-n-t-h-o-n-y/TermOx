@@ -78,8 +78,6 @@ class Horiz_thing : public twf::Horizontal_layout {
         box1.brush().set_foreground(twf::Color::Dark_blue);
         box1.geometry().size_policy().horizontal_policy =
             twf::Size_policy::Minimum;
-        // box1.geometry().size_policy().vertical_policy = twf::Size_policy::Fixed;
-        // box1.geometry().set_height_hint(5);
         box1.geometry().set_width_hint(5);
         box1.geometry().set_min_width(3);
 
@@ -90,10 +88,6 @@ class Horiz_thing : public twf::Horizontal_layout {
         box3.geometry().size_policy().horizontal_policy =
             twf::Size_policy::Fixed;
         box3.geometry().set_width_hint(10);
-        // box3.geometry().set_min_width(6);
-        // box3.geometry().size_policy().vertical_policy =
-        //     twf::Size_policy::Fixed;
-        // box3.geometry().set_height_hint(10);
 
         auto& box2 = this->make_child<Meta_textbox>();
         box2.enable_border();
