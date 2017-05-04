@@ -2,20 +2,30 @@
 
 #include <codecvt>
 #include <locale>
+#include <cstdlib>
 
 namespace twf {
 
-bool Glyph::verify_length_(const std::string& s) {
-    return 1 ==
-           std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t>()
-               .from_bytes(s)
-               .size();
+const char* Glyph::c_str() const {
+    auto len = std::wctomb(symbol_c_str_.data(), symbol_);
+    symbol_c_str_[len] = U'\0';
+    return symbol_c_str_.data();
 }
 
-std::u32string Glyph::str_u32() const {
-    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter;
-    std::u32string string = converter.from_bytes(symbol_);
-    return string;
+std::string Glyph::str() const {
+    return std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t>()
+        .to_bytes(symbol_);
+}
+
+char32_t Glyph::string_to_wchar(const std::string& s) {// dyn alloc here too
+    auto wstring = std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t>()
+                       .from_bytes(s);
+    if (wstring.size() == 1) {
+        return wstring[0];
+    }
+    throw Glyph_error(
+        "Glyph constructor: symbol must be printable as a single "
+        "character");
 }
 
 }  // namespace twf

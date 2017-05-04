@@ -42,7 +42,7 @@ void Paint_engine::put_glyph(const Glyph& g) {
     if (g.brush().foreground_color()) {
         this->set_foreground_color(*g.brush().foreground_color());
     }
-    this->put_string(g.str());
+    this->put_string(g.c_str());
     this->clear_attributes();
 }
 

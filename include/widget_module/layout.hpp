@@ -16,14 +16,11 @@ class Layout : public Widget {
    public:
     Layout();
 
-    void update() override;
-
     // Slots
     sig::Slot<void()> update_layout;
 
    protected:
-    /* bool child_event(const Child_event& event) override; */
-    // bool paint_event(const Paint_event& event) override;
+    bool paint_event(const Paint_event& event) override;
     virtual void update_geometry() = 0;
     void paint_too_small_warning();
 

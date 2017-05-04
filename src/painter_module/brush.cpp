@@ -1,22 +1,33 @@
 #include <painter_module/attribute.hpp>
 #include <painter_module/brush.hpp>
 
-#include <algorithm>
+#include <cstdint>
+#include <vector>
 
 namespace twf {
 
 void Brush::remove_attribute(Attribute attr) {
-    auto at = std::find(std::begin(attributes_), std::end(attributes_), attr);
-    if (at != std::end(attributes_)) {
-        attributes_.erase(at);
-    }
+    attributes_.set(static_cast<std::int8_t>(attr), false);
 }
 
-void Brush::push_attribute(Attribute attr) {
-    auto at = std::find(std::begin(attributes_), std::end(attributes_), attr);
-    if (at == std::end(attributes_)) {
-        attributes_.push_back(attr);
+std::vector<Attribute> Brush::attributes() const {
+    std::vector<Attribute> vec;
+    for (auto i = 0; i < attributes_.size(); ++i) {
+        if (attributes_.test(i)) {
+            vec.push_back(static_cast<Attribute>(i));
+        }
     }
+    return vec;
+}
+
+void Brush::set_attr(Attribute attr) {
+    attributes_.set(static_cast<std::int8_t>(attr));
+}
+
+bool operator==(const Brush& a, const Brush& b) {
+    return (a.attributes_ == b.attributes_ &&
+            a.background_color_ == b.background_color_ &&
+            a.foreground_color_ == b.foreground_color_);
 }
 
 }  // namespace twf

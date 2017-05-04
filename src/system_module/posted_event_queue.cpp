@@ -12,7 +12,9 @@ namespace detail {
 // sorts by priority when adding Posted_event
 void Posted_event_queue::add_event(Posted_event pe) {
     // Remove multiple paint events to the same object
-    if (pe.event().type() == Event::Paint) {
+    if (pe.event().type() == Event::Paint ||
+        pe.event().type() == Event::Resize ||
+        pe.event().type() == Event::Move) {
         auto at = std::find(this->begin(), this->end(), pe);
         if (at != this->end()) {
             this->erase(at);

@@ -1,13 +1,11 @@
 #include "widget_module/widgets/push_button.hpp"
 
 #include "system_module/events/mouse_event.hpp"
-#include <string>
 #include <utility>
 
 namespace twf {
 
-Push_button::Push_button(std::string name) : name_{std::move(name)} {
-    this->enable_border();
+Push_button::Push_button(Glyph_string name) : title_{std::move(name)} {
     this->set_cursor(false);
 }
 
@@ -21,8 +19,8 @@ bool Push_button::mouse_press_event(const Mouse_event& event) {
 bool Push_button::paint_event(const Paint_event& event) {
     Painter p{this};
     // Paint the visible sub-string.
-    p.put_at(this->geometry().width() / 2 - (name_.size() / 2),
-             this->geometry().height() / 2, name_, false);
+    p.put_at(this->width() / 2 - (title_.size() / 2), this->height() / 2,
+             title_, false);
     // Move the cursor to the appropriate position.
     return Widget::paint_event(event);
 }

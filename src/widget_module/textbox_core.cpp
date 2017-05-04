@@ -4,6 +4,7 @@
 #include <widget_module/coordinate.hpp>
 
 #include <cstddef>
+#include <functional>
 
 namespace twf {
 
@@ -11,13 +12,15 @@ Textbox_core::Textbox_core(const Glyph_string& string) : contents_{string} {};
 
 void Textbox_core::scroll_up(std::size_t n) {
     upper_bound_ = previous_line_break(upper_bound_);
-    lower_bound_ = find_lower_bound();
-    if (cursor_index_ < upper_bound_) {
-        this->set_cursor_index(upper_bound_);
+    lower_bound_ = this->find_lower_bound();
+    if (cursor_index_ > lower_bound_) {
+        this->set_cursor_index(
+            this->index_from_position(0, this->height() - 1));
     }
+    this->update();
 }
 
-void Textbox_core::scroll_down(std::size_t n) {  // top line is not showing
+void Textbox_core::scroll_down(std::size_t n) {
     for (std::size_t i = upper_bound_; i < contents_.size(); ++i) {
         if (i - upper_bound_ == this->width() - 1 ||
             contents_.at(i).str() == "\n") {
@@ -25,16 +28,18 @@ void Textbox_core::scroll_down(std::size_t n) {  // top line is not showing
             break;
         }
     }
-    lower_bound_ = find_lower_bound();
-    // set lower bound first??
-    if (cursor_index_ > lower_bound_) {
-        this->set_cursor_index(lower_bound_);
+    if (cursor_index_ < upper_bound_) {
+        this->set_cursor_index(upper_bound_);
     }
+    this->update();
 }
 
 // Moves the cursor up n positions, scrolls if need be.
 void Textbox_core::cursor_up(std::size_t n) {
     auto pos = this->position_from_index(cursor_index_);
+    if (pos.y == 0) {
+        return;
+    }
     --pos.y;
     this->set_cursor_index(this->index_from_position(pos));
 }
@@ -42,6 +47,9 @@ void Textbox_core::cursor_up(std::size_t n) {
 // Moves the cursor down n positions, scrolls if need be.
 void Textbox_core::cursor_down(std::size_t n) {
     auto pos = this->position_from_index(cursor_index_);
+    if (this->position_from_index(lower_bound_).y == pos.y) {
+        return;
+    }
     ++pos.y;
     this->set_cursor_index(this->index_from_position(pos));
 }
@@ -73,13 +81,32 @@ bool Textbox_core::paint_event(const Paint_event& event) {
     // if(lower_bound_ != 0 && lower_bound_ >= contents_.size()) {
     //     checked_lb = contents_.size() - 1;
     // }
-    Glyph_string sub_str(std::begin(contents_) + upper_bound_,
+    std::size_t upper{0};
+    if (upper_bound_ > contents_.size()) {
+        upper = contents_.size();
+    } else {
+        upper = upper_bound_;
+    }
+
+    lower_bound_ = find_lower_bound();
+    Glyph_string sub_str(std::begin(contents_) + upper,
                          std::begin(contents_) + lower_bound_);
     p.put_at(0, 0, sub_str, false);
     // Move the cursor to the appropriate position.
     auto pos = this->position_from_index(cursor_index_);
     p.move(pos.x, pos.y);
     return Widget::paint_event(event);
+}
+
+bool Textbox_core::resize_event(const Resize_event& event) {
+    Widget::resize_event(event);
+    lower_bound_ = this->find_lower_bound();
+    if (cursor_index_ > lower_bound_) {
+        this->set_cursor_index(
+            this->index_from_position(0, this->height() - 1));
+    }
+    this->update();
+    return true;
 }
 
 // Finds the location in the Glyph_string where the given position refers to.
@@ -131,13 +158,7 @@ Coordinate Textbox_core::position_from_index(std::size_t index) {
 // Sets the position of the cursor in the Glyph_string. Possibly scrolls so
 // that the index position is visible in the window.
 void Textbox_core::set_cursor_index(std::size_t index) {
-    cursor_index_ =
-        index;  // this was set to i, which is an enum, subtle bug...
-    if (cursor_index_ < upper_bound_) {
-        // scroll up as many times as needed
-    } else if (cursor_index_ > lower_bound_) {
-        // scroll down as many times as needed
-    }
+    cursor_index_ = index;
     auto pos = this->position_from_index(cursor_index_);
     Painter p{this};
     p.move(pos.x, pos.y);
@@ -167,7 +188,8 @@ std::size_t Textbox_core::find_lower_bound() {
     std::size_t height{0};
     std::size_t line_index{0};
     for (std::size_t i{upper_bound_}; i < contents_.size(); ++i) {
-        if (height - 1 == this->height()) {
+        ++line_index;
+        if (height == this->height()) {
             return i;
         } else if (contents_.at(i) == '\n') {
             ++height;

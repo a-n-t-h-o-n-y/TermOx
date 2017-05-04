@@ -38,6 +38,7 @@ class Paint_engine {
 
    protected:
     // functions to put to physical screen
+    virtual void put_string(const char* s) = 0;
     virtual void put_string(const std::string& sym) = 0;
 
     virtual void set_attribute(Attribute attr) = 0;

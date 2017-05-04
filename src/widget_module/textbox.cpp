@@ -26,15 +26,19 @@ bool Textbox::key_press_event(const Key_event& event) {
                 p.move(this->width() - 1, this->cursor_y() - 1);
                 p.put(" ", false);
             }
-        } else if (this->cursor_x() == 0 && this->cursor_y() == 0) {
+        } else if (cursor_index_ == 0) {
             return true;
+        } else if (this->cursor_x() == 0 && this->cursor_y() == 0) {
+            this->scroll_up();
+            // this->set_cursor_index(
+            // this->index_from_position(this->width() - 1, 0));
+            // return true;
         } else {
             p.move(this->cursor_x() - 1, this->cursor_y());
             p.put(" ", false);
         }
         --cursor_index_;
         contents_.erase(std::begin(contents_) + cursor_index_);
-        lower_bound_ = find_lower_bound();
         this->erase_widget_screen();
         this->update();  // Only need this for backspace when cursor_index_ is
         // different than the index size(); you can optimize this.
@@ -44,11 +48,13 @@ bool Textbox::key_press_event(const Key_event& event) {
             contents_.append("\n");
         } else {
             contents_.insert(std::begin(contents_) + cursor_index_, "\n");
-            lower_bound_ = find_lower_bound();
-            this->update();
         }
-        ++cursor_index_;
-        p.put("\n");
+        if (this->cursor_y() == this->height() - 1) {
+            this->scroll_down();
+        } else {
+            this->set_cursor_index(cursor_index_ + 1);
+        }
+        this->update();
         // Character
     } else if (event.text().size() != 0) {
         if (cursor_index_ == contents_.size()) {
@@ -56,35 +62,47 @@ bool Textbox::key_press_event(const Key_event& event) {
         } else {
             contents_.insert(std::begin(contents_) + cursor_index_,
                              event.text());
-            lower_bound_ = find_lower_bound();
-            this->update();
         }
-        ++cursor_index_;
-        p.put(event.text());
-        lower_bound_ = find_lower_bound();
+        if (this->cursor_y() == this->height() - 1 &&
+            this->cursor_x() == this->width() - 1) {
+            this->scroll_down();
+        } else {
+            this->set_cursor_index(cursor_index_ + 1);
+        }
+        this->update();
     } else if (event.key_code() == Key::Arrow_right) {
-        if (cursor_index_ != contents_.size()) {
-            ++cursor_index_;
-            auto pos = position_from_index(cursor_index_);
-            p.move(pos.x, pos.y);
+        if (cursor_index_ == contents_.size()) {
+            return true;
         }
+        if (this->cursor_y() == this->height() - 1) {
+            if (this->contents_.at(cursor_index_) == '\n' ||
+                this->cursor_x() == this->width() - 1) {
+                this->scroll_down();
+            }
+        }
+        this->set_cursor_index(cursor_index_ + 1);
+        auto pos = position_from_index(cursor_index_);
+        p.move(pos.x, pos.y);
     } else if (event.key_code() == Key::Arrow_left) {
         if (cursor_index_ != 0) {
-            --cursor_index_;
+            if (this->cursor_y() == 0 && this->cursor_x() == 0) {
+                this->scroll_up();
+            }
+            this->set_cursor_index(cursor_index_ - 1);
             auto pos = position_from_index(cursor_index_);
             p.move(pos.x, pos.y);
         }
     } else if (event.key_code() == Key::Arrow_up) {
-        if (this->cursor_y() != 0) {
-            this->cursor_up();
+        if (this->cursor_y() == 0) {
+            this->scroll_up();
         }
+        this->cursor_up();
     } else if (event.key_code() == Key::Arrow_down) {
-        auto last_index =
-            this->index_from_position(0, this->height() - 1);
-        auto pos = position_from_index(last_index);
-        if (this->cursor_y() != pos.y) {
-            this->cursor_down();
+        if (this->cursor_y() == this->height() - 1 &&
+            this->position_from_index(lower_bound_).y != this->height() - 1) {
+            this->scroll_down();
         }
+        this->cursor_down();
     }
     return true;
 }
@@ -97,14 +115,10 @@ bool Textbox::mouse_press_event(const Mouse_event& event) {
         p.move(pos.x, pos.y);
     } else if (event.button() == Mouse_event::Button::ScrollUp) {
         this->scroll_up();
-        Painter p{this};
-        this->update();
     } else if (event.button() == Mouse_event::Button::ScrollDown) {
         this->scroll_down();
-        Painter p{this};
-        this->update();
     }
-    return Widget::mouse_press_event(event);
+    return true;
 }
 
 }  // namespace twf

@@ -29,14 +29,9 @@ void Layout::paint_too_small_warning() {
     // Widget::paint_event(Paint_event());
 }
 
-// bool Layout::paint_event(const Paint_event& event) {
-//     this->update_geometry();
-//     return Widget::paint_event(event);
-// }
-
-void Layout::update() {
+bool Layout::paint_event(const Paint_event& event) {
     this->update_geometry();
-    Widget::update();
+    return Widget::paint_event(event);
 }
 
 /* bool Layout::child_event(const Child_event& event) {

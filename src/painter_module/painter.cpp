@@ -9,6 +9,7 @@
 #include <system_module/system.hpp>
 
 #include <cstddef>
+#include <cstring>
 
 namespace twf {
 
@@ -18,18 +19,20 @@ Painter::Painter(Widget* widget) : widget_{widget} {
 
 void Painter::put(const Glyph_string& string, bool move_cursor) {
     Coordinate old_position{widget_->cursor_x(), widget_->cursor_y()};
-        std::size_t x_border_offset{0};
-        std::size_t y_border_offset{0};
-        if (widget_->border().enabled() &&
-            (widget_->border().west_enabled() || widget_->border().north_west_enabled() ||
-             widget_->border().south_west_enabled())) {
-            ++x_border_offset;
-        }
-        if (widget_->border().enabled() &&
-            (widget_->border().north_enabled() || widget_->border().north_east_enabled() ||
-             widget_->border().north_west_enabled())) {
-            ++y_border_offset;
-        }
+    std::size_t x_border_offset{0};
+    std::size_t y_border_offset{0};
+    if (widget_->border().enabled() &&
+        (widget_->border().west_enabled() ||
+         widget_->border().north_west_enabled() ||
+         widget_->border().south_west_enabled())) {
+        ++x_border_offset;
+    }
+    if (widget_->border().enabled() &&
+        (widget_->border().north_enabled() ||
+         widget_->border().north_east_enabled() ||
+         widget_->border().north_west_enabled())) {
+        ++y_border_offset;
+    }
 
     for (Glyph g : string) {
         add_default_attributes(g);
@@ -37,7 +40,7 @@ void Painter::put(const Glyph_string& string, bool move_cursor) {
             widget_->x() + widget_->cursor_x() + x_border_offset;
         std::size_t glob_y =
             widget_->y() + widget_->cursor_y() + y_border_offset;
-        if (g.str() == "\n") {
+        if (std::strcmp(g.c_str(), "\n") == 0) {
             this->move(0, widget_->cursor_y() + 1, move_cursor);
         } else {
             widget_->paint_engine().put(glob_x, glob_y, g);
@@ -86,12 +89,14 @@ void Painter::move(std::size_t x, std::size_t y, bool update_buffer) {
         std::size_t x_border_offset{0};
         std::size_t y_border_offset{0};
         if (widget_->border().enabled() &&
-            (widget_->border().west_enabled() || widget_->border().north_west_enabled() ||
+            (widget_->border().west_enabled() ||
+             widget_->border().north_west_enabled() ||
              widget_->border().south_west_enabled())) {
             ++x_border_offset;
         }
         if (widget_->border().enabled() &&
-            (widget_->border().north_enabled() || widget_->border().north_east_enabled() ||
+            (widget_->border().north_enabled() ||
+             widget_->border().north_east_enabled() ||
              widget_->border().north_west_enabled())) {
             ++y_border_offset;
         }
@@ -308,7 +313,7 @@ void Painter::add_default_attributes(Glyph& g) {
         g.brush().add_attributes(
             foreground(*widget_->brush().foreground_color()));
     }
-    for (Attribute& attr : widget_->brush().attributes()) {
+    for (const Attribute& attr : widget_->brush().attributes()) {
         g.brush().add_attributes(attr);
     }
 }

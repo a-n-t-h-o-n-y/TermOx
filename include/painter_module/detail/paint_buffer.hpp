@@ -25,11 +25,9 @@ class Paint_buffer {
 
     Glyph& at(unsigned x, unsigned y) { return backing_store_.at(x, y); }
 
-    void stage(unsigned x, unsigned y, const Glyph& glyph) {
-        staging_area_.at(x, y) = glyph;
-    }
+    void stage(unsigned x, unsigned y, const Glyph& glyph);
 
-    Coordinate cursor_position; 
+    Coordinate cursor_position;
 
    private:
     Glyph_matrix backing_store_;

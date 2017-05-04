@@ -24,6 +24,7 @@ class NCurses_paint_engine : public Paint_engine {
 
    protected:
     void move(unsigned x, unsigned y) override;
+    void put_string(const char* s) override;
     void put_string(const std::string& s) override;
 
     void set_attribute(Attribute attr) override;

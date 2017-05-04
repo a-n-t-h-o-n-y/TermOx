@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <utility>
 #include <vector>
+#include <bitset>
 
 namespace twf {
 
@@ -30,22 +31,22 @@ class Brush {
     void add_attributes() {}
 
     void remove_attribute(Attribute attr);
-    void clear_attributes() { attributes_.clear(); }
+    void clear_attributes() { attributes_.reset(); }
 
     void set_background(Color color) { background_color_ = color; }
     void set_foreground(Color color) { foreground_color_ = color; }
 
-    std::vector<Attribute> attributes() const { return attributes_; }
-    opt::Optional<Color> background_color() const { return background_color_; }
-    opt::Optional<Color> foreground_color() const { return foreground_color_; }
-
-    friend bool operator==(const Brush& x, const Brush& y) {
-        return (std::is_permutation(
-                    std::begin(x.attributes_), std::end(x.attributes_),
-                    std::begin(y.attributes_), std::end(y.attributes_)) &&
-                x.background_color_ == y.background_color_ &&
-                x.foreground_color_ == y.foreground_color_);
+    std::vector<Attribute> attributes() const;
+    const opt::Optional<Color>& background_color() const {
+        return background_color_;
     }
+    opt::Optional<Color>& background_color() { return background_color_; }
+    const opt::Optional<Color>& foreground_color() const {
+        return foreground_color_;
+    }
+    opt::Optional<Color>& foreground_color() { return foreground_color_; }
+
+    friend bool operator==(const Brush& a, const Brush& b);
 
    private:
     void set_attr(detail::BackgroundColor bc) {
@@ -56,11 +57,9 @@ class Brush {
         this->set_foreground(static_cast<Color>(fc));
     }
 
-    void set_attr(Attribute attr) { this->push_attribute(attr); }
+    void set_attr(Attribute attr);
 
-    void push_attribute(Attribute attr);
-
-    std::vector<Attribute> attributes_;
+    std::bitset<8> attributes_;
     opt::Optional<Color> background_color_;
     opt::Optional<Color> foreground_color_;
 };

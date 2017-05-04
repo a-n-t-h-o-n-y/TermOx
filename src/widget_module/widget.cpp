@@ -73,16 +73,28 @@ bool Widget::has_coordinates(std::size_t global_x, std::size_t global_y) {
     if (!this->enabled() || !this->visible()) {
         return false;
     }
-    return global_x >= this->x() &&
-           global_x < (this->x() + this->width()) &&
-           global_y >= this->y() &&
-           global_y < (this->y() + this->height());
+    std::size_t x_offset{0};
+    std::size_t y_offset{0};
+    if (this->border().enabled()) {
+        if (this->border().west_enabled() ||
+            this->border().north_west_enabled() ||
+            this->border().south_east_enabled()) {
+            ++x_offset;
+        }
+        if (this->border().north_enabled() ||
+            this->border().north_west_enabled() ||
+            this->border().north_east_enabled()) {
+            ++y_offset;
+        }
+    }
+    return global_x >= (this->x() + x_offset) &&
+           global_x < (this->x() + this->width() + x_offset) &&
+           global_y >= (this->y() + y_offset) &&
+           global_y < (this->y() + this->height() + y_offset);
 }
 
 void Widget::enable_border() {
     this->border_.enable();
-    // this->geometry().set_active_region(1, 1, 1, 1);
-    /* this->update(); */
     System::post_event(this->parent(), std::make_unique<Child_event>(
                                            Event::ChildPolished, this));
 }
@@ -99,8 +111,7 @@ void Widget::set_geometry(const Geometry& g) {
 }
 
 void Widget::update() {
-    if (this->enabled() &&
-        this->visible()) {  // might not need checks for paint event now
+    if (this->enabled() && this->visible()) {
         System::post_event(this, std::make_unique<Paint_event>());
     }
 }
@@ -254,7 +265,7 @@ bool Widget::paint_event(const Paint_event& event) {
     // }
     return true;
 }
-// probably not needed anymore?? no..
+
 void Widget::erase_widget_screen() {
     if (this->y() + this->geometry().height() > System::max_height()) {
         return;
@@ -388,20 +399,31 @@ void Widget::set_visible(bool visible) {
     }
 }
 
-std::size_t Widget::x() const  // previously get_global_x
-{
-    Widget* parent_widg = dynamic_cast<Widget*>(this->parent());
-    if (parent_widg == nullptr) {
+std::size_t Widget::x() const {
+    // Widget* parent_widg = dynamic_cast<Widget*>(
+    //     this->parent());
+    // if (parent_widg == nullptr) {
+    //     return this->position_.x;
+    // }
+    if (this->parent() == nullptr) {
         return this->position_.x;
     }
+    // Object* tree should only contain Widget* this is something to change, to
+    // create a Widget* tree instead, dynamic_cast from above is too large a
+    // performance hit for a function that is used so many times.
+    Widget* parent_widg = static_cast<Widget*>(this->parent());
     return this->position_.x + parent_widg->x();
 }
 
 std::size_t Widget::y() const {
-    Widget* parent_widg = dynamic_cast<Widget*>(this->parent());
-    if (parent_widg == nullptr) {
-        return this->position_.y;
+    // Widget* parent_widg = dynamic_cast<Widget*>(this->parent());
+    // if (parent_widg == nullptr) {
+    //     return this->position_.y;
+    // }
+    if (this->parent() == nullptr) {
+        return this->position_.x;
     }
+    Widget* parent_widg = static_cast<Widget*>(this->parent());
     return this->position_.y + parent_widg->y();
 }
 
@@ -418,7 +440,14 @@ std::size_t Widget::width() const {
         return w;
     }
     std::size_t border_offset =
-        (border_.west_enabled() ? 1 : 0) + (border_.east_enabled() ? 1 : 0);
+        (border_.west_enabled() || border_.north_west_enabled() ||
+                 border_.south_west_enabled()
+             ? 1
+             : 0) +
+        (border_.east_enabled() || border_.north_east_enabled() ||
+                 border_.south_east_enabled()
+             ? 1
+             : 0);
     if (border_offset > w) {
         return 0;
     }
@@ -431,7 +460,14 @@ std::size_t Widget::height() const {
         return h;
     }
     std::size_t border_offset =
-        (border_.north_enabled() ? 1 : 0) + (border_.south_enabled() ? 1 : 0);
+        (border_.north_enabled() || border_.north_west_enabled() ||
+                 border_.north_east_enabled()
+             ? 1
+             : 0) +
+        (border_.south_enabled() || border_.south_east_enabled() ||
+                 border_.south_west_enabled()
+             ? 1
+             : 0);
     if (border_offset > h) {
         return 0;
     }

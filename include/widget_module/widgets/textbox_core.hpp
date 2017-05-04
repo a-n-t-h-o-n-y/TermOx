@@ -21,8 +21,15 @@ class Textbox_core : public Widget {
     void cursor_left(std::size_t n = 1);
     void cursor_right(std::size_t n = 1);
 
+    sig::Slot<void()> scroll_up_slot =
+        std::bind(&Textbox_core::scroll_up, this, 1);
+
+    sig::Slot<void()> scroll_down_slot =
+        std::bind(&Textbox_core::scroll_down, this, 1);
+
    protected:
     bool paint_event(const Paint_event& event) override;
+    bool resize_event(const Resize_event& event) override;
 
     std::size_t index_from_position(Coordinate pos);
     std::size_t index_from_position(std::size_t x, std::size_t y);
