@@ -11,8 +11,11 @@ Textbox_core::Textbox_core(const Glyph_string& string) : contents_{string} {};
 
 void Textbox_core::scroll_up(std::size_t n) {
     upper_bound_ = previous_line_break(upper_bound_);
-    if (cursor_index_ < upper_bound_) {
-        this->set_cursor_index(upper_bound_);
+    lower_bound_ = this->find_lower_bound();
+    if (cursor_index_ > lower_bound_) {
+        // this->set_cursor_index(lower_bound_);
+        this->set_cursor_index(
+            this->index_from_position(0, this->height() - 1));
     }
     this->update();
 }
@@ -25,9 +28,9 @@ void Textbox_core::scroll_down(std::size_t n) {
             break;
         }
     }
-    lower_bound_ = find_lower_bound(); // possibly add this check to paint_event
-    if (cursor_index_ > lower_bound_) {
-        this->set_cursor_index(lower_bound_);
+    // lower_bound_ = this->find_lower_bound();
+    if (cursor_index_ < upper_bound_) {
+        this->set_cursor_index(upper_bound_);
     }
     this->update();
 }
@@ -35,6 +38,9 @@ void Textbox_core::scroll_down(std::size_t n) {
 // Moves the cursor up n positions, scrolls if need be.
 void Textbox_core::cursor_up(std::size_t n) {
     auto pos = this->position_from_index(cursor_index_);
+    if (pos.y == 0) {
+        return;
+    }
     --pos.y;
     this->set_cursor_index(this->index_from_position(pos));
 }
@@ -42,6 +48,9 @@ void Textbox_core::cursor_up(std::size_t n) {
 // Moves the cursor down n positions, scrolls if need be.
 void Textbox_core::cursor_down(std::size_t n) {
     auto pos = this->position_from_index(cursor_index_);
+    if (this->position_from_index(lower_bound_).y == pos.y) {
+        return;
+    }
     ++pos.y;
     this->set_cursor_index(this->index_from_position(pos));
 }
@@ -90,7 +99,7 @@ bool Textbox_core::paint_event(const Paint_event& event) {
     return Widget::paint_event(event);
 }
 
-bool Textbox_core::resize_event(const Resize_event& event){
+bool Textbox_core::resize_event(const Resize_event& event) {
     Widget::resize_event(event);
     this->update();
     return true;

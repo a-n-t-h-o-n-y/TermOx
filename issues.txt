@@ -1,7 +1,5 @@
                              __Issues__
 
-_ Cursor up/down in Textbox should scroll text when at top and bottom.
-
 _ Move Widget::erase_widget_screen() to Painter::clear_screen() and paint over
     borders. Is there a way to optimize this like paint_event? can paint event
     objects specify what they do? erase paint events clear the screen? or
@@ -24,10 +22,6 @@ _ Easier way of specifying look of Widget and other options with some sort of
     json like syntax? Or most likely give detailed interfaces for widgets and
     documentation of those interfaces, not widget look can really be specified
     with something generic, like json.
-
-X Textbox scroll_up() leaves the last line of text as the last line displayed
-    while scrolling down. Look into Painter::move() and lower_bound_ being reset
-    when scrolling up.
 
 _ Create Page_layout that can display any number of different 'screens' or pages
     of widgets. Only one page is displayed at a time and it is given the entire
@@ -96,3 +90,36 @@ _ Layout still do not take all possible space given to them because of rounding
     have been taken, but wasn't, very similar to the current recursive function
     that gives out space, but this one does not consider stretch factors, it
     just hands out one block at a time.
+
+_ Add scroll_down to right arrow and scroll_up to left arrow on textbox.
+
+_ Textbox with keys pressed when it has predetermined text and lower_bound will
+    crash on keypresses past the length of the string.(test8) This can be fixed
+    by not taking keyboard input on these types of boxes, but there are
+    situations where you would still want to allow for editing of text. There is
+    a bug here you should focus on instead, it probably has to do with the
+    paint_event in the Meta_box widget in test8/main.cpp, the solution is a
+    better interface for a static textbox, if you want a textbox that is
+    editable, then you just set the contents of the textbox once at construction
+    and everything should work fine from there. It is only an issue if you want
+    a static textbox and keyboard input(which is redic, but its a bug and should
+    be fixed with a better interface.)
+
+_ Very large and instant resize events(like full screen to tiny screen) can
+    leave the cursor way down below and the cursor will be on the screen in
+    some random position and move as you type, but all of the letters are going
+    down below where you left the cursor before the resize. Handle:
+    if(cursor_position > lower_bound_) then scroll down until cursor index
+    is in the middle of the screen or something.
+    
+X Textbox scroll_up() leaves the last line of text as the last line displayed
+    while scrolling down. Look into Painter::move() and lower_bound_ being reset
+    when scrolling up.
+
+X If you scroll wheel all the way down on a textbox the cursor moves to the
+    leftmost position and you are not about to right arrow or left arrow around.
+
+X Add scroll_down on text input that goes below textbox widget
+
+X Cursor up/down in Textbox should scroll text when at top and bottom.
+

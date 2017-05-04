@@ -43,10 +43,12 @@ bool Textbox::key_press_event(const Key_event& event) {
             contents_.append("\n");
         } else {
             contents_.insert(std::begin(contents_) + cursor_index_, "\n");
-            this->update();
         }
-        ++cursor_index_;
-        p.put("\n");
+        if (this->cursor_y() == this->height() - 1) {
+            this->scroll_down();
+        }
+        this->set_cursor_index(cursor_index_ + 1);
+        this->update();
         // Character
     } else if (event.text().size() != 0) {
         if (cursor_index_ == contents_.size()) {
@@ -54,33 +56,37 @@ bool Textbox::key_press_event(const Key_event& event) {
         } else {
             contents_.insert(std::begin(contents_) + cursor_index_,
                              event.text());
-            this->update();
         }
-        ++cursor_index_;
-        p.put(event.text());
+        if (this->cursor_y() == this->height() - 1 && this->cursor_x() == this->width() - 1) {
+            this->scroll_down();
+        }
+        this->set_cursor_index(cursor_index_ + 1);
+        this->update();
     } else if (event.key_code() == Key::Arrow_right) {
         if (cursor_index_ != contents_.size()) {
-            ++cursor_index_;
+            this->set_cursor_index(cursor_index_ + 1);
+            // ++cursor_index_;
             auto pos = position_from_index(cursor_index_);
             p.move(pos.x, pos.y);
         }
     } else if (event.key_code() == Key::Arrow_left) {
         if (cursor_index_ != 0) {
-            --cursor_index_;
+            this->set_cursor_index(cursor_index_ - 1);
+            // --cursor_index_;
             auto pos = position_from_index(cursor_index_);
             p.move(pos.x, pos.y);
         }
     } else if (event.key_code() == Key::Arrow_up) {
-        if (this->cursor_y() != 0) {
-            this->cursor_up();
+        if (this->cursor_y() == 0) {
+            this->scroll_up();
         }
+        this->cursor_up();
     } else if (event.key_code() == Key::Arrow_down) {
-        auto last_index =
-            this->index_from_position(0, this->height() - 1);
-        auto pos = position_from_index(last_index);
-        if (this->cursor_y() != pos.y) {
-            this->cursor_down();
+        if (this->cursor_y() == this->height() - 1 &&
+            this->position_from_index(lower_bound_).y != this->height() - 1) {
+            this->scroll_down();
         }
+        this->cursor_down();
     }
     return true;
 }
