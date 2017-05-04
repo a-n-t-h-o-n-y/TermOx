@@ -51,7 +51,8 @@ bool Textbox::key_press_event(const Key_event& event) {
         }
         if (this->cursor_y() == this->height() - 1) {
             this->scroll_down();
-        } else {
+        }
+        if (this->height() != 1) { // otherwise index moved twice.
             this->set_cursor_index(cursor_index_ + 1);
         }
         this->update();
