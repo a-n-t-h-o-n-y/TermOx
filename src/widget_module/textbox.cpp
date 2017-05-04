@@ -31,7 +31,7 @@ bool Textbox::key_press_event(const Key_event& event) {
         } else if (this->cursor_x() == 0 && this->cursor_y() == 0) {
             this->scroll_up();
             // this->set_cursor_index(
-                // this->index_from_position(this->width() - 1, 0));
+            // this->index_from_position(this->width() - 1, 0));
             // return true;
         } else {
             p.move(this->cursor_x() - 1, this->cursor_y());
@@ -51,8 +51,9 @@ bool Textbox::key_press_event(const Key_event& event) {
         }
         if (this->cursor_y() == this->height() - 1) {
             this->scroll_down();
+        } else {
+            this->set_cursor_index(cursor_index_ + 1);
         }
-        this->set_cursor_index(cursor_index_ + 1);
         this->update();
         // Character
     } else if (event.text().size() != 0) {
