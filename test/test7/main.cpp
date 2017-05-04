@@ -24,6 +24,16 @@ class Split_widg : public twf::Horizontal_layout {
     }
 };
 
+class H_scrolls : public twf::Vertical_layout {
+    public:
+    H_scrolls() {
+        auto& tb = this->make_child<twf::Textbox>();
+        auto& sb = this->make_child<twf::Horizontal_scrollbar>();
+        sb.left.connect(tb.scroll_up_slot);
+        sb.right.connect(tb.scroll_down_slot);
+    }
+};
+
 class Clicker : public twf::Widget {
    public:
     Clicker() { this->set_cursor(false); }
@@ -61,6 +71,8 @@ int main() {
     // L_clicker c;
 
     Split_widg sw;
+
+    // H_scrolls sw;
 
     sys.set_head(&sw);
 

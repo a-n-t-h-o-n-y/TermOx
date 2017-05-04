@@ -1,6 +1,6 @@
                              __Issues__
 
-_ Finish Scrollbar widgets, possibly add a constructor that takes pointer? or
+_ Possibly add a constructor to Scrollbar widgets that takes a pointer or ....?
     some reference to the textbox, can ask it its height and its total height of
     text that the textbox widget knows how to calculate, and the current
     position in that total height, then use this information to create a
@@ -114,17 +114,12 @@ _ Textbox with keys pressed when it has predetermined text and lower_bound will
     a static textbox and keyboard input(which is redic, but its a bug and should
     be fixed with a better interface.)
 
-_ Very large and instant resize events(like full screen to tiny screen) can
-    leave the cursor way down below and the cursor will be on the screen in
-    some random position and move as you type, but all of the letters are going
-    down below where you left the cursor before the resize. Handle:
-    if(cursor_position > lower_bound_) then scroll down until cursor index
-    is in the middle of the screen or something.
-
 _ Cursor disappears sometimes, letters still print, this might be fixed by
     compiling with optimizations? or does the event_loop calling flush()
     sometimes not put the cursor to the screen? does the cursor get coordinates
     that are not correct and therefore cannot print them on the screen?
+
+X Finish Scrollbar widgets
 
 X Textbox scroll_up on backspace at top left corner.
 
@@ -140,4 +135,11 @@ X If you scroll wheel all the way down on a textbox the cursor moves to the
 X Add scroll_down on text input that goes below textbox widget
 
 X Cursor up/down in Textbox should scroll text when at top and bottom.
+
+X Very large and instant resize events(like full screen to tiny screen) can
+    leave the cursor way down below and the cursor will be on the screen in
+    some random position and move as you type, but all of the letters are going
+    down below where you left the cursor before the resize. Handle:
+    if(cursor_position > lower_bound_) then scroll down until cursor index
+    is in the middle of the screen or something.
 
