@@ -1,0 +1,521 @@
+test/test7/main.cpp:6:        this->enable_border();
+test/test7/main.cpp:8:        auto& tb = this->make_child<twf::Textbox>();
+test/test7/main.cpp:15:        auto& sb = this->make_child<twf::Vertical_scrollbar>();
+test/test7/main.cpp:19:        this->set_name("Layout");
+test/test7/main.cpp:20:        auto& w = this->make_child<twf::Widget>();
+test/test7/main.cpp:30:        auto& tb = this->make_child<twf::Textbox>();
+test/test7/main.cpp:31:        auto& sb = this->make_child<twf::Horizontal_scrollbar>();
+test/test7/main.cpp:39:    Clicker() { this->set_cursor(false); }
+test/test7/main.cpp:44:            this->update();
+test/test7/main.cpp:62:            this->enable_border();
+test/test7/main.cpp:63:            this->make_child<Clicker>();
+test/test7/main.cpp:64:            this->make_child<Clicker>().enable_border();
+test/test5/main.cpp:9:        auto& w = this->make_child<twf::Textbox>();
+test/test5/main.cpp:20:        auto& tb = this->make_child<twf::Textbox>();
+test/test5/main.cpp:25:        auto& hl = this->make_child<twf::Horizontal_layout>();
+test/system_module/object_test.cpp:45:        this->set_x(0);
+test/system_module/object_test.cpp:46:        this->set_y(0);
+test/system_module/object_test.cpp:47:        this->geometry().set_width(10);
+test/system_module/object_test.cpp:48:        this->geometry().set_height(20);
+test/system_module/object_test.cpp:245:        this->set_x(0);
+test/system_module/object_test.cpp:246:        this->set_y(0);
+test/system_module/object_test.cpp:247:        this->geometry().set_width(5);
+test/system_module/object_test.cpp:248:        this->geometry().set_height(3);
+test/test8/main.cpp:9:        ss << "widthӌ: " << this->geometry().width()
+test/test8/main.cpp:10:           << "\nwidth[inner]: " << this->width()
+test/test8/main.cpp:12:           << this->geometry().size_policy().horizontal_policy
+test/test8/main.cpp:13:           << "\nh_size_hint: " << this->geometry().width_hint()
+test/test8/main.cpp:15:           << this->geometry().size_policy().horizontal_stretch
+test/test8/main.cpp:16:           << "\nmin_width: " << this->geometry().min_width()
+test/test8/main.cpp:17:           << "\nmax_width: " << this->geometry().max_width();
+test/test8/main.cpp:18:        this->contents_ = ss.str();
+test/test8/main.cpp:29:        ss << "height: " << this->geometry().height()
+test/test8/main.cpp:30:           << "\nheight[inner]: " << this->height()
+test/test8/main.cpp:32:           << this->geometry().size_policy().horizontal_policy
+test/test8/main.cpp:33:           << "\nh_size_hint: " << this->geometry().height_hint()
+test/test8/main.cpp:35:           << this->geometry().size_policy().horizontal_stretch
+test/test8/main.cpp:36:           << "\nmin_height: " << this->geometry().min_height()
+test/test8/main.cpp:37:           << "\nmax_height: " << this->geometry().max_height();
+test/test8/main.cpp:38:        this->contents_ = ss.str();
+test/test8/main.cpp:46:        auto& box1 = this->make_child<Meta_vert>();
+test/test8/main.cpp:54:        auto& box3 = this->make_child<Meta_vert>();
+test/test8/main.cpp:62:        auto& box2 = this->make_child<Meta_vert>();
+test/test8/main.cpp:75:        auto& box1 = this->make_child<Meta_textbox>();
+test/test8/main.cpp:84:        auto& box3 = this->make_child<Meta_textbox>();
+test/test8/main.cpp:92:        auto& box2 = this->make_child<Meta_textbox>();
+test/test4/vertical_layout_widget.hpp:6:        this->set_focus_policy(twf::Widget::Focus_policy::StrongFocus);
+test/test4/vertical_layout_widget.hpp:7:        this->set_cursor(true);
+test/test4/vertical_layout_widget.hpp:8:        this->enable_border();
+test/test4/vertical_layout_widget.hpp:9:        this->size_policy().vertical_stretch = 2;
+test/test4/vertical_layout_widget.hpp:31:        this->set_cursor(false);
+test/test4/vertical_layout_widget.hpp:32:        // this->enable_border();
+test/test4/vertical_layout_widget.hpp:53:        auto& tb1 = this->make_child<Text_box>();
+test/test4/vertical_layout_widget.hpp:61:        auto& hl = this->make_child<twf::Horizontal_layout>();
+test/test4/vertical_layout_widget.hpp:73:        // auto& tb1 = this->make_child<Text_box>();
+test/test4/vertical_layout_widget.hpp:76:        auto& cpw = this->make_child<Click_paint_widget>();
+test/test4/vertical_layout_widget.hpp:85:        auto& tb2 = this->make_child<Text_box>();
+test/test1/main.cpp:8:        this->set_focus_policy(twf::Widget::Focus_policy::StrongFocus);
+test/test1/main.cpp:9:        this->set_cursor(true);
+test/test1/main.cpp:10:        this->enable_border();
+test/test1/main.cpp:11:        this->size_policy().horizontal_stretch = 5;
+test/test1/main.cpp:14:        this->clear_screen();
+test/test1/main.cpp:34:        this->set_focus_policy(twf::Widget::Focus_policy::StrongFocus);
+test/test1/main.cpp:35:        this->set_cursor(true);
+test/test1/main.cpp:36:        this->enable_border();
+test/test1/main.cpp:37:        this->size_policy().horizontal_stretch = 2;
+test/test1/main.cpp:40:        this->clear_screen();
+test/test1/main.cpp:44:        p.move(this->geometry().width() / 2, this->geometry().height() / 2);
+test/test1/main.cpp:50:        this->update();
+test/test1/main.cpp:61:        this->set_cursor(false);
+test/test1/main.cpp:62:        this->enable_border();
+test/test1/main.cpp:84:        this->make_child<Click_paint_widget>();
+test/test1/main.cpp:85:        this->make_child<Normal_widget>();
+test/test1/main.cpp:86:        this->make_child<Click_paint_widget>();
+test/test1/main.cpp:87:        this->make_child<Text_box>();
+test/test3/main.cpp:9:            // this->make_child<Exit_widget>();
+test/test3/main.cpp:10:            this->make_child<Palette_changer>();
+test/test3/main.cpp:11:            this->make_child<Color_test_widget>();
+test/test3/main.cpp:12:            auto& cw = this->make_child<Color_test_widget>();
+test/test3/main_widget.hpp:10:        this->set_focus_policy(Widget::Focus_policy::ClickFocus);
+test/test3/main_widget.hpp:11:        this->set_cursor(true);
+test/test3/main_widget.hpp:12:        this->enable_border();
+test/test3/main_widget.hpp:13:        this->set_brush(
+test/test3/main_widget.hpp:19:            this->close();
+test/test3/main_widget.hpp:28:        this->set_cursor(false);
+test/test3/main_widget.hpp:54:        this->set_focus_policy(Widget::Focus_policy::ClickFocus);
+test/test3/main_widget.hpp:69:        // this->make_child<Exit_widget>();
+test/test3/main_widget.hpp:70:        this->make_child<Color_display>();
+test/test3/color_test_widget.hpp:12:        this->set_cursor(false);
+test/test3/color_test_widget.hpp:13:        this->enable_border();
+test/test3/color_test_widget.hpp:14:        this->set_brush(
+test/test6/main.cpp:9:        this->brush().set_foreground(twf::Color::Red);
+test/test6/main.cpp:10:        this->enable_border();
+test/test2/main.cpp:7:        this->set_focus_policy(twf::Widget::Focus_policy::StrongFocus);
+test/test2/main.cpp:8:        this->set_cursor(true);
+test/test2/main.cpp:9:        this->enable_border();
+test/test2/main.cpp:10:        this->size_policy().horizontal_stretch = 5;
+test/test2/main.cpp:13:        this->clear_screen();
+test/test2/main.cpp:21:        this->update();  // every time you call update you are just putting a
+test/test2/main.cpp:33:        this->set_focus_policy(twf::Widget::Focus_policy::StrongFocus);
+test/test2/main.cpp:34:        this->set_cursor(true);
+test/test2/main.cpp:35:        this->enable_border();
+test/test2/main.cpp:36:        this->brush().set_background(Color::Green);
+test/test2/main.cpp:37:        this->brush().set_foreground(Color::White);
+test/test2/main.cpp:43:        this->update();
+test/test2/main.cpp:48:        this->clear_screen();
+test/test2/main.cpp:62:        this->make_child<Textbox2>();
+test/test2/main.cpp:63:        this->make_child<Textbox2>();
+test/test2/main.cpp:64:        this->make_child<Text_box>();
+src/system_module/posted_event_queue.cpp:19:        auto at = std::find(this->begin(), this->end(), pe);
+src/system_module/posted_event_queue.cpp:20:        if (at != this->end()) {
+src/system_module/posted_event_queue.cpp:21:            this->erase(at);
+src/system_module/posted_event_queue.cpp:24:    this->insert(std::move(pe));
+test/test9/main.cpp:8:        this->make_child<twf::Textbox>();
+test/test9/main.cpp:9:        this->enable_border();
+test/test9/main.cpp:16://             this->make_child<twf::Checkbox>();
+src/system_module/event_loop.cpp:13:        this->process_events();
+src/system_module/abstract_event_dispatcher.cpp:20:        this->post_user_input();  // Blocking call
+src/painter_module/paint_engine.cpp:13:    this->move(x, y);
+src/painter_module/paint_engine.cpp:14:    this->put_glyph(" ");
+src/painter_module/paint_engine.cpp:15:    this->move(x, y);
+src/painter_module/paint_engine.cpp:16:    this->refresh();
+src/painter_module/paint_engine.cpp:23:                this->move(i, j);
+src/painter_module/paint_engine.cpp:24:                this->put_glyph(buffer_.at(i, j));
+src/painter_module/paint_engine.cpp:29:        this->touch_all();
+src/painter_module/paint_engine.cpp:31:    this->move(buffer_.cursor_position.x, buffer_.cursor_position.y);
+src/painter_module/paint_engine.cpp:32:    this->refresh();
+src/painter_module/paint_engine.cpp:37:        this->set_attribute(attr);
+src/painter_module/paint_engine.cpp:40:        this->set_background_color(*g.brush().background_color());
+src/painter_module/paint_engine.cpp:43:        this->set_foreground_color(*g.brush().foreground_color());
+src/painter_module/paint_engine.cpp:45:    this->put_string(g.c_str());
+src/painter_module/paint_engine.cpp:46:    this->clear_attributes();
+src/painter_module/ncurses_paint_engine.cpp:29:    this->buffer_.resize(this->screen_width(), this->screen_height());
+src/painter_module/ncurses_paint_engine.cpp:30:    this->initialize_color_pairs();
+src/painter_module/ncurses_paint_engine.cpp:116:    this->put_string(s.c_str());
+src/painter_module/ncurses_paint_engine.cpp:131:    ::color_set(this->find_pair(this->current_foreground(), c), nullptr);
+src/painter_module/ncurses_paint_engine.cpp:135:    ::color_set(this->find_pair(c, this->current_background()), nullptr);
+src/painter_module/palette.cpp:30:    this->set_rgb(Color::Black, 0, 0, 0);
+src/painter_module/palette.cpp:31:    this->set_rgb(Color::Dark_red, 128, 0, 0);
+src/painter_module/palette.cpp:32:    this->set_rgb(Color::Dark_blue, 0, 0, 128);
+src/painter_module/palette.cpp:33:    this->set_rgb(Color::Dark_gray, 105, 105, 105);
+src/painter_module/palette.cpp:34:    this->set_rgb(Color::Brown, 128, 128, 0);
+src/painter_module/palette.cpp:35:    this->set_rgb(Color::Green, 0, 128, 0);
+src/painter_module/palette.cpp:36:    this->set_rgb(Color::Red, 255, 0, 0);
+src/painter_module/palette.cpp:37:    this->set_rgb(Color::Gray, 128, 128, 128);
+src/painter_module/palette.cpp:38:    this->set_rgb(Color::Blue, 0, 0, 255);
+src/painter_module/palette.cpp:39:    this->set_rgb(Color::Orange, 255, 165, 0);
+src/painter_module/palette.cpp:40:    this->set_rgb(Color::Light_gray, 192, 192, 192);
+src/painter_module/palette.cpp:41:    this->set_rgb(Color::Light_green, 0, 255, 0);
+src/painter_module/palette.cpp:42:    this->set_rgb(Color::Violet, 255, 0, 255);
+src/painter_module/palette.cpp:43:    this->set_rgb(Color::Light_blue, 0, 255, 255);
+src/painter_module/palette.cpp:44:    this->set_rgb(Color::Yellow, 255, 255, 0);
+src/painter_module/palette.cpp:45:    this->set_rgb(Color::White, 255, 255, 255);
+src/painter_module/palette.cpp:49:    this->set_rgb(Color::Black, 20, 12, 28);
+src/painter_module/palette.cpp:50:    this->set_rgb(Color::Dark_red, 68, 36, 52);
+src/painter_module/palette.cpp:51:    this->set_rgb(Color::Dark_blue, 48, 52, 109);
+src/painter_module/palette.cpp:52:    this->set_rgb(Color::Dark_gray, 78, 74, 78);
+src/painter_module/palette.cpp:53:    this->set_rgb(Color::Brown, 133, 76, 48);
+src/painter_module/palette.cpp:54:    this->set_rgb(Color::Green, 52, 101, 36);
+src/painter_module/palette.cpp:55:    this->set_rgb(Color::Red, 208, 70, 72);
+src/painter_module/palette.cpp:56:    this->set_rgb(Color::Gray, 117, 113, 97);
+src/painter_module/palette.cpp:57:    this->set_rgb(Color::Blue, 89, 125, 206);
+src/painter_module/palette.cpp:58:    this->set_rgb(Color::Orange, 210, 125, 44);
+src/painter_module/palette.cpp:59:    this->set_rgb(Color::Light_gray, 133, 149, 161);
+src/painter_module/palette.cpp:60:    this->set_rgb(Color::Light_green, 109, 170, 44);
+src/painter_module/palette.cpp:61:    this->set_rgb(Color::Violet, 210, 170, 153);
+src/painter_module/palette.cpp:62:    this->set_rgb(Color::Light_blue, 109, 194, 202);
+src/painter_module/palette.cpp:63:    this->set_rgb(Color::Yellow, 218, 212, 94);
+src/painter_module/palette.cpp:64:    this->set_rgb(Color::White, 222, 238, 214);
+src/painter_module/painter.cpp:17:    this->set_cursor(widget_->cursor());
+src/painter_module/painter.cpp:44:            this->move(0, widget_->cursor_y() + 1, move_cursor);
+src/painter_module/painter.cpp:47:            this->move(widget_->cursor_x() + 1, widget_->cursor_y(),
+src/painter_module/painter.cpp:52:        this->move(old_position.x, old_position.y, false);
+src/painter_module/painter.cpp:60:    this->put_at(pos.x, pos.y, string, move_cursor);
+src/painter_module/painter.cpp:67:    this->move(x, y, move_cursor);
+src/painter_module/painter.cpp:68:    this->put(string, move_cursor);
+src/painter_module/painter.cpp:72:    this->move(pos.x, pos.y, update_buffer);
+src/painter_module/painter.cpp:124:        this->line(x, i, width - 1, i, tile);
+src/painter_module/painter.cpp:146:            this->move(i, y1,
+src/painter_module/painter.cpp:148:            this->put(gs);      // maybe don't change, not as efficient?
+src/painter_module/painter.cpp:154:            this->move(x1, i, false);
+src/painter_module/painter.cpp:155:            this->put(gs);
+src/painter_module/painter.cpp:254:    this->line(0, 0, widget_->geometry().width() - 1, 0, gs);
+src/painter_module/painter.cpp:257:    this->line(0, widget_->geometry().height() - 1,
+src/painter_module/painter.cpp:262:    this->line(0, 0, 0, widget_->geometry().height() - 1, gs);
+src/painter_module/painter.cpp:263:    this->line(widget_->geometry().width() - 1, 0,
+src/painter_module/painter.cpp:292:        this->unbound_line(gx, i, gx + width - 1, i, tile);
+src/widget_module/layout.cpp:10:    this->set_x(0);
+src/widget_module/layout.cpp:11:    this->set_y(0);
+src/widget_module/layout.cpp:12:    this->geometry().set_width(System::max_width());
+src/widget_module/layout.cpp:13:    this->geometry().set_height(System::max_height());
+src/widget_module/layout.cpp:15:    this->initialize();
+src/widget_module/layout.cpp:20:    this->update_layout = std::bind(&Layout::update, this);
+src/widget_module/layout.cpp:21:    this->update_layout.track(this->destroyed);
+src/widget_module/layout.cpp:25:    this->clear_screen();
+src/widget_module/layout.cpp:33:    this->update_geometry();
+issues.txt:92:    paint event through a call to this->update() every certain number of timer
+src/widget_module/vertical_layout.cpp:22:    for (Object* c : this->children()) {
+src/widget_module/vertical_layout.cpp:30:    int height_available = this->height();
+src/widget_module/vertical_layout.cpp:44:        this->paint_too_small_warning();
+src/widget_module/vertical_layout.cpp:55:            std::size_t height = percent * this->height();
+src/widget_module/vertical_layout.cpp:89:        this->distribute_space(widgets_w_refs, height_available);
+src/widget_module/vertical_layout.cpp:95:        this->collect_space(widgets_w_refs, height_available);
+src/widget_module/vertical_layout.cpp:104:            if (std::get<1>(tup) > this->width()) {
+src/widget_module/vertical_layout.cpp:105:                this->paint_too_small_warning();
+src/widget_module/vertical_layout.cpp:111:            std::get<1>(tup) = this->width();
+src/widget_module/vertical_layout.cpp:116:                this->paint_too_small_warning();
+src/widget_module/vertical_layout.cpp:120:            std::get<1>(tup) = this->width();
+src/widget_module/vertical_layout.cpp:125:                this->paint_too_small_warning();
+src/widget_module/vertical_layout.cpp:130:            std::get<1>(tup) = this->width();
+src/widget_module/vertical_layout.cpp:135:                std::get<1>(tup) > this->width()) {
+src/widget_module/vertical_layout.cpp:136:                this->paint_too_small_warning();
+src/widget_module/vertical_layout.cpp:473:    for (Object* c : this->children()) {
+src/widget_module/vertical_layout.cpp:485:    if ((this->border().west_enabled() || this->border().north_west_enabled() ||
+src/widget_module/vertical_layout.cpp:486:         this->border().south_west_enabled()) &&
+src/widget_module/vertical_layout.cpp:487:        this->border().enabled()) {
+src/widget_module/vertical_layout.cpp:490:    if ((this->border().north_enabled() ||
+src/widget_module/vertical_layout.cpp:491:         this->border().north_west_enabled() ||
+src/widget_module/vertical_layout.cpp:492:         this->border().north_east_enabled()) &&
+src/widget_module/vertical_layout.cpp:493:        this->border().enabled()) {
+src/widget_module/vertical_layout.cpp:498:                                     this->x() + x_pos, this->y() + y_pos));
+src/widget_module/vertical_layout.cpp:505:    auto heights = this->size_widgets();
+src/widget_module/vertical_layout.cpp:506:    this->position_widgets(heights);
+src/widget_module/vertical_layout.cpp:512://     for (const Object* c : this->children()) {
+src/widget_module/vertical_layout.cpp:533://     if (this->geometry().height() < border_space) {
+src/widget_module/vertical_layout.cpp:536://         widg_space = this->geometry().height() - border_space;
+src/widget_module/vertical_layout.cpp:540://     for (Object* c : this->children()) {
+src/widget_module/vertical_layout.cpp:559://                 total_stretch = this->children().size();
+src/widget_module/vertical_layout.cpp:564://             std::size_t width{this->geometry().width()};
+src/widget_module/vertical_layout.cpp:581://                                        this->x() + x_pos, this->y() +
+src/widget_module/vertical_layout.cpp:591://             if (c == *(--std::end(this->children())) &&
+src/widget_module/vertical_layout.cpp:592://                 this->geometry().height() > y_pos) {
+src/widget_module/vertical_layout.cpp:595://                             width, height + this->geometry().height() -
+src/widget_module/textbox_core.cpp:12:    this->set_cursor(true);
+src/widget_module/textbox_core.cpp:17:    lower_bound_ = this->find_lower_bound();
+src/widget_module/textbox_core.cpp:19:        this->set_cursor_index(
+src/widget_module/textbox_core.cpp:20:            this->index_from_position(0, this->height() - 1));
+src/widget_module/textbox_core.cpp:22:    this->update();
+src/widget_module/textbox_core.cpp:27:        if (i - upper_bound_ == this->width() - 1 ||
+src/widget_module/textbox_core.cpp:34:        this->set_cursor_index(upper_bound_);
+src/widget_module/textbox_core.cpp:36:    this->update();
+src/widget_module/textbox_core.cpp:41:    auto pos = this->position_from_index(cursor_index_);
+src/widget_module/textbox_core.cpp:46:    this->set_cursor_index(this->index_from_position(pos));
+src/widget_module/textbox_core.cpp:51:    auto pos = this->position_from_index(cursor_index_);
+src/widget_module/textbox_core.cpp:52:    if (this->position_from_index(lower_bound_).y == pos.y) {
+src/widget_module/textbox_core.cpp:56:    this->set_cursor_index(this->index_from_position(pos));
+src/widget_module/textbox_core.cpp:62:        auto pos = this->position_from_index(cursor_index_);
+src/widget_module/textbox_core.cpp:64:        this->set_cursor_index(this->index_from_position(pos));
+src/widget_module/textbox_core.cpp:71:        auto pos = this->position_from_index(cursor_index_);
+src/widget_module/textbox_core.cpp:73:        this->set_cursor_index(this->index_from_position(pos));
+src/widget_module/textbox_core.cpp:98:    auto pos = this->position_from_index(cursor_index_);
+src/widget_module/textbox_core.cpp:105:    lower_bound_ = this->find_lower_bound();
+src/widget_module/textbox_core.cpp:107:        this->set_cursor_index(
+src/widget_module/textbox_core.cpp:108:            this->index_from_position(0, this->height() - 1));
+src/widget_module/textbox_core.cpp:110:    this->update();
+src/widget_module/textbox_core.cpp:128:            running_position.x + 1 == this->width()) {
+src/widget_module/textbox_core.cpp:139:    return this->index_from_position(pos.x, pos.y);
+src/widget_module/textbox_core.cpp:150:        if (contents_.at(i).str() == "\n" || position.x + 1 == this->width()) {
+src/widget_module/textbox_core.cpp:164:    auto pos = this->position_from_index(cursor_index_);
+src/widget_module/textbox_core.cpp:179:        } else if (line_index + 1 == this->width()) {
+src/widget_module/textbox_core.cpp:194:        if (height == this->height()) {
+src/widget_module/textbox_core.cpp:199:        } else if (line_index == this->width()) {
+src/widget_module/widget.cpp:23:    this->Widget::initialize();
+src/widget_module/widget.cpp:24:    this->brush().set_background(Color::Black);
+src/widget_module/widget.cpp:25:    this->brush().set_foreground(Color::White);
+src/widget_module/widget.cpp:26:    this->update();
+src/widget_module/widget.cpp:30:    this->close = [this]() {
+src/widget_module/widget.cpp:33:    this->close.track(this->destroyed);
+src/widget_module/widget.cpp:35:    this->hide = [this]() { this->set_visible(false); };
+src/widget_module/widget.cpp:36:    this->hide.track(this->destroyed);
+src/widget_module/widget.cpp:38:    this->show = [this]() { this->set_visible(true); };
+src/widget_module/widget.cpp:39:    this->show.track(this->destroyed);
+src/widget_module/widget.cpp:41:    this->repaint = [this]() {
+src/widget_module/widget.cpp:45:    this->repaint.track(this->destroyed);
+src/widget_module/widget.cpp:47:    this->give_focus = [this]() { std::bind(&Widget::set_focus, this, true); };
+src/widget_module/widget.cpp:48:    this->give_focus.track(this->destroyed);
+src/widget_module/widget.cpp:50:    this->update_me = [this]() { std::bind(&Widget::update, this); };
+src/widget_module/widget.cpp:51:    this->update_me.track(this->destroyed);
+src/widget_module/widget.cpp:55:    auto parent = dynamic_cast<Widget*>(this->parent());
+src/widget_module/widget.cpp:64:    auto parent = dynamic_cast<Widget*>(this->parent());
+src/widget_module/widget.cpp:73:    if (!this->enabled() || !this->visible()) {
+src/widget_module/widget.cpp:78:    if (this->border().enabled()) {
+src/widget_module/widget.cpp:79:        if (this->border().west_enabled() ||
+src/widget_module/widget.cpp:80:            this->border().north_west_enabled() ||
+src/widget_module/widget.cpp:81:            this->border().south_east_enabled()) {
+src/widget_module/widget.cpp:84:        if (this->border().north_enabled() ||
+src/widget_module/widget.cpp:85:            this->border().north_west_enabled() ||
+src/widget_module/widget.cpp:86:            this->border().north_east_enabled()) {
+src/widget_module/widget.cpp:90:    return global_x >= (this->x() + x_offset) &&
+src/widget_module/widget.cpp:91:           global_x < (this->x() + this->width() + x_offset) &&
+src/widget_module/widget.cpp:92:           global_y >= (this->y() + y_offset) &&
+src/widget_module/widget.cpp:93:           global_y < (this->y() + this->height() + y_offset);
+src/widget_module/widget.cpp:97:    this->border_.enable();
+src/widget_module/widget.cpp:98:    System::post_event(this->parent(), std::make_unique<Child_event>(
+src/widget_module/widget.cpp:103:    this->delete_later();
+src/widget_module/widget.cpp:109:    geometry_.set_widget(dynamic_cast<Widget*>(this->parent()));
+src/widget_module/widget.cpp:110:    this->update();
+src/widget_module/widget.cpp:114:    if (this->enabled() && this->visible()) {
+src/widget_module/widget.cpp:125:        return this->visible() && this->enabled();
+src/widget_module/widget.cpp:130:        return this->move_event(static_cast<const Move_event&>(event));
+src/widget_module/widget.cpp:135:        return this->resize_event(static_cast<const Resize_event&>(event));
+src/widget_module/widget.cpp:142:            this->clear_screen();
+src/widget_module/widget.cpp:143:            return this->paint_event(static_cast<const Paint_event&>(event));
+src/widget_module/widget.cpp:145:        if (this->visible() && !this->enabled()) {
+src/widget_module/widget.cpp:146:            this->clear_screen();
+src/widget_module/widget.cpp:147:            this->paint_disabled_widget();
+src/widget_module/widget.cpp:148:        } else if (!this->visible()) {
+src/widget_module/widget.cpp:149:            this->clear_screen();
+src/widget_module/widget.cpp:156:        return this->clear_screen_event(
+src/widget_module/widget.cpp:164:            if (this->focus_policy() == Focus_policy::ClickFocus ||
+src/widget_module/widget.cpp:165:                this->focus_policy() == Focus_policy::StrongFocus) {
+src/widget_module/widget.cpp:167:                this->paint_engine().move(this->x() + this->cursor_x(),
+src/widget_module/widget.cpp:168:                                          this->y() + this->cursor_y());
+src/widget_module/widget.cpp:170:            return this->mouse_press_event(
+src/widget_module/widget.cpp:177:            return this->mouse_release_event(
+src/widget_module/widget.cpp:184:            return this->mouse_double_click_event(
+src/widget_module/widget.cpp:190:        if (!this->enabled() || !this->visible()) {
+src/widget_module/widget.cpp:193:        return this->wheel_event(static_cast<const Mouse_event&>(event));
+src/widget_module/widget.cpp:195:    if (event.type() == Event::MouseMove && this->has_mouse_tracking()) {
+src/widget_module/widget.cpp:196:        if (!this->enabled() || !this->visible()) {
+src/widget_module/widget.cpp:199:        return this->mouse_move_event(static_cast<const Mouse_event&>(event));
+src/widget_module/widget.cpp:204:        if (!this->enabled() || !this->visible()) {
+src/widget_module/widget.cpp:207:        return this->key_press_event(static_cast<const Key_event&>(event));
+src/widget_module/widget.cpp:210:        if (!this->enabled() || !this->visible()) {
+src/widget_module/widget.cpp:213:        return this->key_release_event(static_cast<const Key_event&>(event));
+src/widget_module/widget.cpp:218:        return this->close_event(static_cast<const Close_event&>(event));
+src/widget_module/widget.cpp:223:        return this->hide_event(static_cast<const Hide_event&>(event));
+src/widget_module/widget.cpp:228:        return this->show_event(static_cast<const Show_event&>(event));
+src/widget_module/widget.cpp:233:        return this->focus_event(static_cast<const Focus_event&>(event));
+src/widget_module/widget.cpp:240:    this->update();
+src/widget_module/widget.cpp:245:    this->set_x(event.new_x());
+src/widget_module/widget.cpp:246:    this->set_y(event.new_y());
+src/widget_module/widget.cpp:247:    // Widget* parent = dynamic_cast<Widget*>(this->parent()); // causes infinte
+src/widget_module/widget.cpp:251:    this->update();
+src/widget_module/widget.cpp:256:    this->geometry().set_width(event.new_width());
+src/widget_module/widget.cpp:257:    this->geometry().set_height(event.new_height());
+src/widget_module/widget.cpp:258:    this->clear_screen();
+src/widget_module/widget.cpp:259:    this->update();
+src/widget_module/widget.cpp:268:    this->paint_engine().move(this->x() + this->cursor_x(),
+src/widget_module/widget.cpp:269:                              this->y() + this->cursor_y());
+src/widget_module/widget.cpp:270:    // for (Object* c : this->children()) {
+src/widget_module/widget.cpp:286://     if (this->y() + this->geometry().height() > System::max_height()) {
+src/widget_module/widget.cpp:289://     if (this->x() + this->geometry().width() > System::max_width()) {
+src/widget_module/widget.cpp:293://     if (this->brush().background_color()) {
+src/widget_module/widget.cpp:294://         p.fill(0, 0, this->geometry().width(), this->geometry().height(),
+src/widget_module/widget.cpp:295://                *this->brush().background_color());
+src/widget_module/widget.cpp:306:    Widget* parent = dynamic_cast<Widget*>(this->parent());
+src/widget_module/widget.cpp:311:    p.fill(0, 0, this->geometry().width(), this->geometry().height(),
+src/widget_module/widget.cpp:344:    this->delete_later();
+src/widget_module/widget.cpp:371:        p.set_cursor(this->cursor());
+src/widget_module/widget.cpp:378:    if (this->focus_policy() == Focus_policy::NoFocus) {
+src/widget_module/widget.cpp:391:    this->default_brush_ = brush;
+src/widget_module/widget.cpp:392:    this->update();
+src/widget_module/widget.cpp:393:    for (Object* c : this->children()) {
+src/widget_module/widget.cpp:402:    this->visible_ = visible;
+src/widget_module/widget.cpp:410:    for (Object* c : this->children()) {
+src/widget_module/widget.cpp:420:    //     this->parent());
+src/widget_module/widget.cpp:422:    //     return this->position_.x;
+src/widget_module/widget.cpp:424:    if (this->parent() == nullptr) {
+src/widget_module/widget.cpp:425:        return this->position_.x;
+src/widget_module/widget.cpp:430:    Widget* parent_widg = static_cast<Widget*>(this->parent());
+src/widget_module/widget.cpp:431:    return this->position_.x + parent_widg->x();
+src/widget_module/widget.cpp:435:    // Widget* parent_widg = dynamic_cast<Widget*>(this->parent());
+src/widget_module/widget.cpp:437:    //     return this->position_.y;
+src/widget_module/widget.cpp:439:    if (this->parent() == nullptr) {
+src/widget_module/widget.cpp:440:        return this->position_.x;
+src/widget_module/widget.cpp:442:    Widget* parent_widg = static_cast<Widget*>(this->parent());
+src/widget_module/widget.cpp:443:    return this->position_.y + parent_widg->y();
+src/widget_module/widget.cpp:454:    std::size_t w = this->geometry().width();
+src/widget_module/widget.cpp:474:    std::size_t h = this->geometry().height();
+src/widget_module/checkbox.cpp:10:    // this->enable_border();
+src/widget_module/checkbox.cpp:11:    // this->brush().set_background(Color::Red);
+src/widget_module/checkbox.cpp:12:    this->geometry().size_policy().horizontal_policy = Size_policy::Fixed;
+src/widget_module/checkbox.cpp:13:    this->geometry().size_policy().vertical_policy = Size_policy::Fixed;
+src/widget_module/checkbox.cpp:14:    this->geometry().set_width_hint(2);
+src/widget_module/checkbox.cpp:15:    this->geometry().set_height_hint(1);
+src/widget_module/checkbox.cpp:30:        this->toggle();
+src/widget_module/checkbox.cpp:31:        this->update();
+src/widget_module/textbox.cpp:17:        if (this->cursor_x() == 0 && this->cursor_y() != 0) {
+src/widget_module/textbox.cpp:21:                auto pos = this->position_from_index(cursor_index_);
+src/widget_module/textbox.cpp:23:                this->update();
+src/widget_module/textbox.cpp:26:                p.move(this->width() - 1, this->cursor_y() - 1);
+src/widget_module/textbox.cpp:31:        } else if (this->cursor_x() == 0 && this->cursor_y() == 0) {
+src/widget_module/textbox.cpp:32:            this->scroll_up();
+src/widget_module/textbox.cpp:33:            // this->set_cursor_index(
+src/widget_module/textbox.cpp:34:            // this->index_from_position(this->width() - 1, 0));
+src/widget_module/textbox.cpp:37:            p.move(this->cursor_x() - 1, this->cursor_y());
+src/widget_module/textbox.cpp:42:        this->clear_screen();
+src/widget_module/textbox.cpp:43:        this->update();  // Only need this for backspace when cursor_index_ is
+src/widget_module/textbox.cpp:52:        if (this->cursor_y() == this->height() - 1) {
+src/widget_module/textbox.cpp:53:            this->scroll_down();
+src/widget_module/textbox.cpp:55:        if (this->height() != 1) { // otherwise index moved twice.
+src/widget_module/textbox.cpp:56:            this->set_cursor_index(cursor_index_ + 1);
+src/widget_module/textbox.cpp:58:        this->update();
+src/widget_module/textbox.cpp:67:        if (this->cursor_y() == this->height() - 1 &&
+src/widget_module/textbox.cpp:68:            this->cursor_x() == this->width() - 1) {
+src/widget_module/textbox.cpp:69:            this->scroll_down();
+src/widget_module/textbox.cpp:71:            this->set_cursor_index(cursor_index_ + 1);
+src/widget_module/textbox.cpp:73:        this->update();
+src/widget_module/textbox.cpp:78:        if (this->cursor_y() == this->height() - 1) {
+src/widget_module/textbox.cpp:79:            if (this->contents_.at(cursor_index_) == '\n' ||
+src/widget_module/textbox.cpp:80:                this->cursor_x() == this->width() - 1) {
+src/widget_module/textbox.cpp:81:                this->scroll_down();
+src/widget_module/textbox.cpp:84:        this->set_cursor_index(cursor_index_ + 1);
+src/widget_module/textbox.cpp:89:            if (this->cursor_y() == 0 && this->cursor_x() == 0) {
+src/widget_module/textbox.cpp:90:                this->scroll_up();
+src/widget_module/textbox.cpp:92:            this->set_cursor_index(cursor_index_ - 1);
+src/widget_module/textbox.cpp:97:        if (this->cursor_y() == 0) {
+src/widget_module/textbox.cpp:98:            this->scroll_up();
+src/widget_module/textbox.cpp:100:        this->cursor_up();
+src/widget_module/textbox.cpp:102:        if (this->cursor_y() == this->height() - 1 &&
+src/widget_module/textbox.cpp:103:            this->position_from_index(lower_bound_).y != this->height() - 1) {
+src/widget_module/textbox.cpp:104:            this->scroll_down();
+src/widget_module/textbox.cpp:106:        this->cursor_down();
+src/widget_module/textbox.cpp:118:        this->scroll_up();
+src/widget_module/textbox.cpp:120:        this->scroll_down();
+src/widget_module/horizontal_scrollbar.cpp:6:    this->set_cursor(false);
+src/widget_module/horizontal_scrollbar.cpp:7:    this->geometry().size_policy().vertical_policy = Size_policy::Fixed;
+src/widget_module/horizontal_scrollbar.cpp:8:    this->geometry().set_height_hint(1);
+src/widget_module/horizontal_scrollbar.cpp:9:    this->geometry().size_policy().horizontal_policy = Size_policy::Expanding;
+src/widget_module/horizontal_layout.cpp:22:    for (Object* c : this->children()) {
+src/widget_module/horizontal_layout.cpp:30:    int width_available = this->width();
+src/widget_module/horizontal_layout.cpp:44:        this->paint_too_small_warning();
+src/widget_module/horizontal_layout.cpp:55:            std::size_t width = percent * this->width();
+src/widget_module/horizontal_layout.cpp:89:        this->distribute_space(widgets_w_refs, width_available);
+src/widget_module/horizontal_layout.cpp:95:        this->collect_space(widgets_w_refs, width_available);
+src/widget_module/horizontal_layout.cpp:104:            if (std::get<2>(tup) > this->height()) {
+src/widget_module/horizontal_layout.cpp:105:                this->paint_too_small_warning();
+src/widget_module/horizontal_layout.cpp:111:            std::get<2>(tup) = this->height();
+src/widget_module/horizontal_layout.cpp:116:                this->paint_too_small_warning();
+src/widget_module/horizontal_layout.cpp:120:            std::get<2>(tup) = this->height();
+src/widget_module/horizontal_layout.cpp:125:                this->paint_too_small_warning();
+src/widget_module/horizontal_layout.cpp:130:            std::get<2>(tup) = this->height();
+src/widget_module/horizontal_layout.cpp:135:                std::get<2>(tup) > this->height()) {
+src/widget_module/horizontal_layout.cpp:136:                this->paint_too_small_warning();
+src/widget_module/horizontal_layout.cpp:477:    for (Object* c : this->children()) {
+src/widget_module/horizontal_layout.cpp:489:    if ((this->border().west_enabled() || this->border().north_west_enabled() ||
+src/widget_module/horizontal_layout.cpp:490:         this->border().south_west_enabled()) &&
+src/widget_module/horizontal_layout.cpp:491:        this->border().enabled()) {
+src/widget_module/horizontal_layout.cpp:494:    if ((this->border().north_enabled() ||
+src/widget_module/horizontal_layout.cpp:495:         this->border().north_west_enabled() ||
+src/widget_module/horizontal_layout.cpp:496:         this->border().north_east_enabled()) &&
+src/widget_module/horizontal_layout.cpp:497:        this->border().enabled()) {
+src/widget_module/horizontal_layout.cpp:502:                                     this->x() + x_pos, this->y() + y_pos));
+src/widget_module/horizontal_layout.cpp:509:    auto widths = this->size_widgets();
+src/widget_module/horizontal_layout.cpp:510:    this->position_widgets(widths);
+src/system_module/object.cpp:59:        System::send_event(this->parent(), ev);
+src/system_module/object.cpp:66:    this->delete_later = [this]() {
+src/system_module/object.cpp:70:    this->delete_later.track(this->destroyed);
+src/system_module/object.cpp:72:    this->enable = [this]() { this->set_enabled(true); };
+src/system_module/object.cpp:73:    this->enable.track(this->destroyed);
+src/system_module/object.cpp:75:    this->disable = [this]() { this->set_enabled(false); };
+src/system_module/object.cpp:76:    this->disable.track(this->destroyed);
+src/system_module/object.cpp:101:        return this->child_event(static_cast<const Child_event&>(event));
+src/system_module/object.cpp:104:        return this->enable_event(static_cast<const Enable_event&>(event));
+src/system_module/object.cpp:112:    /* Widget* parent = dynamic_cast<Widget*>(this->parent());
+src/system_module/object.cpp:116:    // this->update();
+src/widget_module/push_button.cpp:9:    this->set_cursor(false);
+src/widget_module/push_button.cpp:22:    p.put_at(this->width() / 2 - (title_.size() / 2), this->height() / 2,
+include/system_module/object.hpp:22:    Object() { this->Object::initialize(); }
+include/system_module/object.hpp:32:        this->add_child(std::make_unique<T>(std::forward<Args>(args)...));
+include/system_module/object.hpp:44:        return this->find_child_impl<T>(this, name);
+include/system_module/object.hpp:49:        return this->find_child_impl<T>(this, name);
+include/painter_module/glyph_matrix.hpp:35:        return this->at_impl(*this, x, y);
+include/painter_module/glyph_matrix.hpp:39:        return this->at_impl(*this, x, y);
+include/painter_module/detail/ncurses_paint_engine.hpp:41:        return this->translate(background) * 16 + this->translate(foreground);
+include/painter_module/brush.hpp:20:        this->add_attributes(std::forward<Attributes>(attrs)...);
+include/painter_module/brush.hpp:26:        this->set_attr(t);
+include/painter_module/brush.hpp:27:        this->add_attributes(rest...);
+include/painter_module/brush.hpp:53:        this->set_background(static_cast<Color>(bc));
+include/painter_module/brush.hpp:57:        this->set_foreground(static_cast<Color>(fc));
+include/painter_module/glyph.hpp:49:    operator std::string() const { return this->str(); }
+include/painter_module/geometry.hpp:32:        this->set_min_width(width);
+include/painter_module/geometry.hpp:33:        this->set_max_width(width);
+include/painter_module/geometry.hpp:36:        this->set_min_height(height);
+include/painter_module/geometry.hpp:37:        this->set_max_height(height);
+include/painter_module/glyph_string.hpp:29:        this->append(symbols, std::forward<Attributes>(attrs)...);
+include/painter_module/glyph_string.hpp:34:        this->append(symbols, std::forward<Attributes>(attrs)...);
+include/painter_module/glyph_string.hpp:39:        this->append(Glyph{symbol, std::forward<Attributes>(attrs)...});
+include/painter_module/glyph_string.hpp:44:        this->append(glyph, std::forward<Attributes>(attrs)...);
+include/painter_module/glyph_string.hpp:50:        this->reserve(glyphs.size());
+include/painter_module/glyph_string.hpp:52:            this->append(g, std::forward<Attributes>(attrs)...);
+include/painter_module/glyph_string.hpp:57:        return this->str();
+include/painter_module/glyph_string.hpp:63:        this->push_back(symbol);
+include/painter_module/glyph_string.hpp:64:        this->back().brush().add_attributes(std::forward<Attributes>(attrs)...);
+include/painter_module/glyph_string.hpp:72:        reserve(this->size() + wide_string.size());
+include/painter_module/glyph_string.hpp:74:            this->append(Glyph{converter.to_bytes(sym)},
+include/painter_module/glyph_string.hpp:82:        return this->append(symbols.c_str(),
+include/painter_module/glyph_string.hpp:89:            this->append(glyph, std::forward<Attributes>(attrs)...);
+include/painter_module/glyph_string.hpp:94:    size_type length() const { return this->size(); }
+include/painter_module/glyph_string.hpp:96:    Glyph_string& operator+=(const Glyph& glyph) { return this->append(glyph); }
+include/painter_module/glyph_string.hpp:98:    Glyph_string& operator+(const Glyph_string& gs) { return this->append(gs); }
+include/widget_module/widgets/vertical_scrollbar.hpp:15:    Push_button& up_button = this->make_child<Push_button>("▴");
+include/widget_module/widgets/vertical_scrollbar.hpp:16:    Widget& middle = this->make_child<Widget>();
+include/widget_module/widgets/vertical_scrollbar.hpp:17:    Push_button& down_button = this->make_child<Push_button>("▾");
+include/widget_module/widgets/textbox.hpp:18:        this->set_focus_policy(Widget::Focus_policy::StrongFocus);
+include/widget_module/widgets/textbox.hpp:19:        this->set_cursor(true);
+src/widget_module/vertical_scrollbar.cpp:7:    this->set_cursor(false);
+src/widget_module/vertical_scrollbar.cpp:8:    this->geometry().size_policy().horizontal_policy = Size_policy::Fixed;
+src/widget_module/vertical_scrollbar.cpp:9:    this->geometry().set_width_hint(1);
+src/widget_module/vertical_scrollbar.cpp:10:    this->geometry().size_policy().vertical_policy = Size_policy::Expanding;
+src/widget_module/border.cpp:15:    this->enable_north();
+src/widget_module/border.cpp:16:    this->enable_south();
+src/widget_module/border.cpp:17:    this->enable_west();
+src/widget_module/border.cpp:18:    this->enable_east();
+src/widget_module/border.cpp:22:    this->disable_north();
+src/widget_module/border.cpp:23:    this->disable_south();
+src/widget_module/border.cpp:24:    this->disable_west();
+src/widget_module/border.cpp:25:    this->disable_east();
+src/widget_module/border.cpp:29:    this->enable_north_west();
+src/widget_module/border.cpp:30:    this->enable_north_east();
+src/widget_module/border.cpp:31:    this->enable_south_west();
+src/widget_module/border.cpp:32:    this->enable_south_east();
+src/widget_module/border.cpp:36:    this->disable_north_west();
+src/widget_module/border.cpp:37:    this->disable_north_east();
+src/widget_module/border.cpp:38:    this->disable_south_west();
+src/widget_module/border.cpp:39:    this->disable_south_east();
+include/widget_module/widget.hpp:72:    void clear_focus() { this->set_focus(false); }
+include/widget_module/widget.hpp:82:        this->update();
+include/widget_module/widgets/horizontal_scrollbar.hpp:15:    Push_button& left_button = this->make_child<Push_button>("◂");
+include/widget_module/widgets/horizontal_scrollbar.hpp:16:    Widget& middle = this->make_child<Widget>();
+include/widget_module/widgets/horizontal_scrollbar.hpp:17:    Push_button& right_button = this->make_child<Push_button>("▸");

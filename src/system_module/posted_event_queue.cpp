@@ -13,6 +13,7 @@ namespace detail {
 void Posted_event_queue::add_event(Posted_event pe) {
     // Remove multiple paint events to the same object
     if (pe.event().type() == Event::Paint ||
+        pe.event().type() == Event::ClearScreen ||
         pe.event().type() == Event::Resize ||
         pe.event().type() == Event::Move) {
         auto at = std::find(this->begin(), this->end(), pe);

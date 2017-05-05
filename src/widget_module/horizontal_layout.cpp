@@ -41,7 +41,7 @@ std::vector<std::size_t> Horizontal_layout::size_widgets() {
         }
     }
     if (width_available < 0) {
-        this->paint_too_small_warning();
+        too_small_ = true;
         return std::vector<std::size_t>();
     }
 
@@ -102,7 +102,7 @@ std::vector<std::size_t> Horizontal_layout::size_widgets() {
         if (policy == Size_policy::Fixed) {
             std::get<2>(tup) = std::get<0>(tup)->geometry().height_hint();
             if (std::get<2>(tup) > this->height()) {
-                this->paint_too_small_warning();
+                too_small_ = true;
                 return std::vector<std::size_t>();
             }
         } else if (policy == Size_policy::Ignored ||
@@ -113,7 +113,7 @@ std::vector<std::size_t> Horizontal_layout::size_widgets() {
                 std::get<2>(tup) = std::get<0>(tup)->geometry().max_height();
             } else if (std::get<2>(tup) <
                        std::get<0>(tup)->geometry().min_height()) {
-                this->paint_too_small_warning();
+                too_small_ = true;
                 return std::vector<std::size_t>();
             }
         } else if (policy == Size_policy::Maximum) {
@@ -122,7 +122,7 @@ std::vector<std::size_t> Horizontal_layout::size_widgets() {
                 std::get<2>(tup) = std::get<0>(tup)->geometry().height_hint();
             } else if (std::get<2>(tup) <
                        std::get<0>(tup)->geometry().min_height()) {
-                this->paint_too_small_warning();
+                too_small_ = true;
                 return std::vector<std::size_t>();
             }
         } else if (policy == Size_policy::Minimum ||
@@ -133,7 +133,7 @@ std::vector<std::size_t> Horizontal_layout::size_widgets() {
             }
             if (std::get<2>(tup) > std::get<0>(tup)->geometry().max_height() ||
                 std::get<2>(tup) > this->height()) {
-                this->paint_too_small_warning();
+                too_small_ = true;
                 return std::vector<std::size_t>();
             }
         }
@@ -465,8 +465,7 @@ void Horizontal_layout::collect_space(
     }
     // Change this to distribute the space, it might not be too small
     if (width_left != 0) {
-        // subtract more!
-        paint_too_small_warning();
+        too_small_ = true;
         return;
     }
 }

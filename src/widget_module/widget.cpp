@@ -111,9 +111,12 @@ void Widget::set_geometry(const Geometry& g) {
 }
 
 void Widget::update() {
-    if (this->enabled() && this->visible()) {
-        System::post_event(this, std::make_unique<Paint_event>());
-    }
+    this->clear_screen();
+    System::post_event(this, std::make_unique<Paint_event>());
+}
+
+void Widget::clear_screen() {
+    System::post_event(this, std::make_unique<Clear_screen_event>());
 }
 
 bool Widget::event(const Event& event) {
@@ -135,16 +138,18 @@ bool Widget::event(const Event& event) {
     if (event.type() == Event::Paint) {
         // handled here so that virtual functions work from derived widgets.
         if (visible_and_enabled()) {
-            this->erase_widget_screen();
             return this->paint_event(static_cast<const Paint_event&>(event));
         }
         if (this->visible() && !this->enabled()) {
-            this->erase_widget_screen();
             this->paint_disabled_widget();
-        } else if (!this->visible()) {
-            this->erase_widget_screen();
         }
         return true;
+    }
+
+    // ClearScreen_event
+    if (event.type() == Event::ClearScreen) {
+        return this->clear_screen_event(
+            static_cast<const Clear_screen_event&>(event));
     }
 
     // Mouse_events
@@ -245,7 +250,6 @@ bool Widget::move_event(const Move_event& event) {
 bool Widget::resize_event(const Resize_event& event) {
     this->geometry().set_width(event.new_width());
     this->geometry().set_height(event.new_height());
-    this->erase_widget_screen();
     this->update();
     return true;
 }
@@ -266,19 +270,25 @@ bool Widget::paint_event(const Paint_event& event) {
     return true;
 }
 
-void Widget::erase_widget_screen() {
-    if (this->y() + this->geometry().height() > System::max_height()) {
-        return;
-    }
-    if (this->x() + this->geometry().width() > System::max_width()) {
-        return;
-    }
+bool Widget::clear_screen_event(const Clear_screen_event& event) {
     Painter p{this};
-    if (this->brush().background_color()) {
-        p.fill(0, 0, this->geometry().width(), this->geometry().height(),
-               *this->brush().background_color());
-    }
+    p.clear_screen();
+    return true;
 }
+
+// void Widget::erase_widget_screen() {
+//     if (this->y() + this->geometry().height() > System::max_height()) {
+//         return;
+//     }
+//     if (this->x() + this->geometry().width() > System::max_width()) {
+//         return;
+//     }
+//     Painter p{this};
+//     if (this->brush().background_color()) {
+//         p.fill(0, 0, this->geometry().width(), this->geometry().height(),
+//                *this->brush().background_color());
+//     }
+// }
 
 void Widget::paint_disabled_widget() {
     // Re-implement this to change the brush to grey and repaint, this might be

@@ -16,6 +16,7 @@
 #include <system_module/events/show_event.hpp>
 #include <system_module/events/enable_event.hpp>
 #include <system_module/events/focus_event.hpp>
+#include <system_module/events/clear_screen_event.hpp>
 #include <system_module/system.hpp>
 #include <painter_module/brush.hpp>
 #include <painter_module/detail/ncurses_paint_engine.hpp>
@@ -38,7 +39,7 @@ class Widget : public Object {
     Widget();
     ~Widget() override = default;
 
-    virtual void update();
+    void update();
 
     bool has_coordinates(std::size_t global_x, std::size_t global_y) override;
 
@@ -56,7 +57,7 @@ class Widget : public Object {
         paint_engine_ = std::move(engine);
     }
 
-    // Global Coordinates
+    // Global Coordinates - not including border offset
     std::size_t x() const;
     std::size_t y() const;
 
@@ -101,8 +102,6 @@ class Widget : public Object {
 
     Paint_engine& paint_engine() const;
 
-    void erase_widget_screen();
-
     // Signals
 
     // Slots
@@ -131,6 +130,9 @@ class Widget : public Object {
     bool enable_event(const Enable_event& event) override;
     virtual bool focus_event(const Focus_event& event);
     bool child_event(const Child_event& event) override;
+    virtual bool clear_screen_event(const Clear_screen_event& event);
+
+    void clear_screen();
 
     // Top left corner coordinates relative to parent
     Coordinate position_;

@@ -30,18 +30,13 @@ bool Textbox::key_press_event(const Key_event& event) {
             return true;
         } else if (this->cursor_x() == 0 && this->cursor_y() == 0) {
             this->scroll_up();
-            // this->set_cursor_index(
-            // this->index_from_position(this->width() - 1, 0));
-            // return true;
         } else {
             p.move(this->cursor_x() - 1, this->cursor_y());
             p.put(" ", false);
         }
-        --cursor_index_;
+        this->set_cursor_index(cursor_index_ - 1);
         contents_.erase(std::begin(contents_) + cursor_index_);
-        this->erase_widget_screen();
-        this->update();  // Only need this for backspace when cursor_index_ is
-        // different than the index size(); you can optimize this.
+        this->update();
         // Enter
     } else if (event.key_code() == Key::Enter) {
         if (cursor_index_ == contents_.size()) {
