@@ -22,11 +22,18 @@ int main() {
 
     twf::Horizontal_layout w;
     auto& ckbx = w.make_child<twf::Checkbox>();
-    auto change_color = [&ckbx](twf::Color c) {
-        ckbx.brush().set_background(c);
+    auto& vl = w.make_child<twf::Vertical_layout>();
+    auto& tb = vl.make_child<twf::Textbox>();
+    tb.enable_border();
+    auto change_color = [&tb](twf::Color c) {
+        tb.brush().set_background(c);
+        tb.update();
     };
     ckbx.checked.connect(std::bind(change_color, twf::Color::Light_blue));
     ckbx.unchecked.connect(std::bind(change_color, twf::Color::Light_green));
+    auto& sb = vl.make_child<twf::Horizontal_scrollbar>();
+    sb.left.connect(std::bind(change_color, twf::Color::Brown));
+    sb.right.connect(std::bind(change_color, twf::Color::Violet));
 
     s.set_head(&w);
     return s.run();

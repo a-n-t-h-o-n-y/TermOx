@@ -123,13 +123,24 @@ _ System head should have a built in layout if your widget does not have one, or
     at least sane widget layout with a layout, for simple widgets.
 
 _ Allow a Widget to be able to change its default background Glyph(' ' by
-default). This is helpful when you want a line draw on a single lined text
-box(like a form, where the text input is underlined too, Glyph(' ',
-Attribute::Underlined)) and can also be helpful with checkered box characters
-for drawing and color mixtures.
+    default). This is helpful when you want a line draw on a single lined text
+    box(like a form, where the text input is underlined too, Glyph(' ',
+    Attribute::Underlined)) and can also be helpful with checkered box
+    characters for drawing and color mixtures.
 
 _ Attributes are not cleared when new glyph with different attributes is placed
     on the same square. Look into how attributes are reset.
+
+_ Add a Freeform layout that has Window widgets wrapping each child widget, the
+    child widgets can be click and dragged to move and resize. Set TERM variable
+    to xterm-1003 to get mouse move events all the time, layout keeps track of
+    the currently moving/selected child widget. Overlap and click_events and
+    paint_events should work fine if you re-arrange the child widgets in the
+    layout so that the currently selected is at the top of the list. Though this
+    would work for click events it would be painted last.. Still some things to
+    work out on that one. Window widget would add a bar on top that can be
+    selected and moved, propagates clicks to layout parent. bottom right corner
+    icon to resize.
 
 X Finish Scrollbar widgets
 

@@ -10,7 +10,6 @@ class Text_box : public twf::Widget {
         this->size_policy().horizontal_stretch = 5;
     }
     bool paint_event(const twf::Paint_event& event) override {
-        this->erase_widget_screen();
         twf::Painter p{this};
         p.move(0, 0);
         p.put(contents_);
@@ -45,7 +44,6 @@ class Textbox2 : public Widget {
     }
 
     bool paint_event(const Paint_event& event) override {
-        this->erase_widget_screen(); 
         Painter p{this};
         p.move(0, 0);
         p.put(gs_);

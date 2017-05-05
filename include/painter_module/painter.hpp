@@ -52,6 +52,8 @@ class Painter {
 
     void set_cursor(bool state);
 
+    void clear_screen();
+
    private:
     Widget* widget_;
 

@@ -21,16 +21,13 @@ void Layout::initialize() {
     this->update_layout.track(this->destroyed);
 }
 
-void Layout::paint_too_small_warning() {
-    this->erase_widget_screen();
-    Painter p{this};
-    p.move(0, 0);
-    p.put("Layout too small for widgets.");
-    // Widget::paint_event(Paint_event());
-}
-
 bool Layout::paint_event(const Paint_event& event) {
+    too_small_ = false;
     this->update_geometry();
+    if (too_small_) {
+        Painter p{this};
+        p.put_at(0, 0, "Screen too small.");
+    }
     return Widget::paint_event(event);
 }
 

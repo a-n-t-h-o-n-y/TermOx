@@ -277,6 +277,23 @@ void Painter::set_cursor(bool state) {
     }
 }
 
+void Painter::clear_screen() {
+    auto width = widget_->geometry().width();
+    auto height = widget_->geometry().height();
+    auto gx = widget_->x();
+    auto gy = widget_->y(); 
+
+    if (width == 0 || height == 0) {
+        return;
+    }
+    // change this to widget's default background tile.
+    Glyph tile{" ", background(*widget_->brush().background_color())};
+    for (std::size_t i{gy}; i < gy + height; ++i) {
+        this->unbound_line(gx, i, gx + width - 1, i, tile);
+    }
+
+}
+
 void Painter::unbound_put_string(std::size_t g_x,
                                  std::size_t g_y,
                                  const Glyph_string& gs) {

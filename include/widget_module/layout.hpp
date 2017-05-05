@@ -22,10 +22,10 @@ class Layout : public Widget {
    protected:
     bool paint_event(const Paint_event& event) override;
     virtual void update_geometry() = 0;
-    void paint_too_small_warning();
+    bool too_small_{false};
 
    private:
-    void initialize();
+    void initialize(); // Object::initialize() exists as well. but not virtual
 };
 
 }  // namespace twf
