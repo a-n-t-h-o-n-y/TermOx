@@ -135,7 +135,7 @@ class Widget : public Object {
     // Top left corner coordinates relative to parent
     Coordinate position_;
 
-    bool show_cursor_ = true;
+    bool show_cursor_ = false;
     Coordinate cursor_position_;
 
     bool focus_ = false;

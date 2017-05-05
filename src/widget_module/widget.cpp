@@ -228,7 +228,7 @@ bool Widget::event(const Event& event) {
 
 bool Widget::child_event(const Child_event& event) {
     this->update();
-    return true;
+    return Object::child_event(event);
 }
 
 bool Widget::move_event(const Move_event& event) {

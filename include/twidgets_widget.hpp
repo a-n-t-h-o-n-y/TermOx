@@ -10,5 +10,6 @@
 #include "widget_module/widgets/push_button.hpp"
 #include "widget_module/widgets/horizontal_scrollbar.hpp"
 #include "widget_module/widgets/vertical_scrollbar.hpp"
+#include "widget_module/widgets/checkbox.hpp"
 
 #endif  // TWIDGETS_WIDGET_HPP

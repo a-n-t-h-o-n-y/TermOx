@@ -8,7 +8,9 @@
 
 namespace twf {
 
-Textbox_core::Textbox_core(const Glyph_string& string) : contents_{string} {};
+Textbox_core::Textbox_core(const Glyph_string& string) : contents_{string} {
+    this->set_cursor(true);
+};
 
 void Textbox_core::scroll_up(std::size_t n) {
     upper_bound_ = previous_line_break(upper_bound_);

@@ -113,6 +113,24 @@ _ Cursor disappears sometimes, letters still print, this might be fixed by
     sometimes not put the cursor to the screen? does the cursor get coordinates
     that are not correct and therefore cannot print them on the screen?
 
+_ Partial borders and resizing to 0 then resizing back to a typical size causes
+    ncurses to not print anymore, not a crash, you've seen this before.
+
+_ Need a better border interface that allows you more freedom to create half
+    borders without text disapearing from the top and side lines
+
+_ System head should have a built in layout if your widget does not have one, or
+    at least sane widget layout with a layout, for simple widgets.
+
+_ Allow a Widget to be able to change its default background Glyph(' ' by
+default). This is helpful when you want a line draw on a single lined text
+box(like a form, where the text input is underlined too, Glyph(' ',
+Attribute::Underlined)) and can also be helpful with checkered box characters
+for drawing and color mixtures.
+
+_ Attributes are not cleared when new glyph with different attributes is placed
+    on the same square. Look into how attributes are reset.
+
 X Finish Scrollbar widgets
 
 X Textbox scroll_up on backspace at top left corner.
