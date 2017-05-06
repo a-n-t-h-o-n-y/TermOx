@@ -16,6 +16,7 @@
 #include <memory>
 #include <utility>
 #include <vector>
+#include <mutex>
 
 namespace twf {
 
@@ -45,6 +46,7 @@ bool System::send_event(Object* obj, const Event& event) {
 
 void System::send_posted_events(Object* obj_filter, Event::Type etype_filter) {
     auto& queue = detail::Thread_data::current().event_queue;
+    std::lock_guard<std::mutex> lock(queue.mtx_);
     auto posted_iter = std::begin(queue);
     while (posted_iter != std::end(queue)) {
         if (posted_iter->reciever() != nullptr) {
