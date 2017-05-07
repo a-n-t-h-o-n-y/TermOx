@@ -1,57 +1,63 @@
 #include <twidgets.hpp>
-// #include <thread>
-// #include <chrono>
-#include <functional>
+#include <thread>
+#include <chrono>
 
-// #include <boost/asio.hpp>
-// #include <boost/date_time/posix_time/posix_time.hpp>
+class Animated_widget : public twf::Widget {
+   public:
+    Animated_widget(int fps) : fps_{fps} {
+        this->enable_border();
+        std::thread([this]() { this->launch_animation(); }).detach();
+    }
 
-// class Animated_widget : public twf::Widget {
-//    protected:
-//     bool paint_event(const twf::Paint_event& event) override {
-//         if (!started_) {
-//             started_ = true;
-//             t_.async_wait(
-//                 std::bind(std::bind(&Animated_widget::launch_animation, this)));
-//         }
-//         twf::Painter p{this};
-//         if (state_1_) {
-//             p.put_at(0, 0, twf::Glyph("*", twf::foreground(twf::Color::Green)));
-//         } else {
-//             p.put_at(0, 0, " ");
-//         }
-//         return Widget::paint_event(event);
-//     }
+   protected:
+    bool paint_event(const twf::Paint_event& event) override {
+        twf::Painter p{this};
+        if (state_1_) {
+            p.put_at(0, 0,
+                     twf::Glyph_string("* * * * * * * * * * * * * * * * * * *",
+                                       twf::foreground(twf::Color::White)));
+        } else {
+            p.put_at(0, 0,
+                     twf::Glyph_string("* * * * * * * * * * * * * * * * * * *",
+                                       twf::foreground(twf::Color::Light_gray)));
+            this->brush().set_background(twf::Color::Light_green);
+        }
+        return Widget::paint_event(event);
+    }
 
-//    private:
-//     void launch_animation() {
-//         // update state
-//         state_1_ = !state_1_;
+   private:
+    void launch_animation() {
+        while (true) {
+            // wait on timer
+            std::this_thread::sleep_for(std::chrono::milliseconds(
+                static_cast<int>((1 / static_cast<float>(fps_)) * 1000)));
 
-//         // update widget
-//         this->update();
+            // update state
+            state_1_ = !state_1_;
 
-//         // call another timer
-//         t_.async_wait(std::bind(&Animated_widget::launch_animation, this));
-//     }
+            // paint
+            this->update_now();
+        }
+    }
 
-//     // State
-//     bool state_1_{true};
-//     bool started_{false};
+    // State
+    bool state_1_{true};
+    int fps_;
+};
 
-//     boost::asio::io_service io_;
-//     boost::asio::deadline_timer t_{io_, boost::posix_time::seconds(1)};
-// };
-
-// class Animated_layout : public twf::Horizontal_layout {
-//    public:
-//     Animated_layout() { this->make_child<Animated_widget>(); }
-// };
+class Animated_layout : public twf::Horizontal_layout {
+   public:
+    Animated_layout() { this->make_child<Animated_widget>(10); }
+};
 
 int main() {
     twf::System s;
     // Animated_layout w;
-    twf::Widget w;
+    twf::Horizontal_layout w;
+    w.make_child<Animated_widget>(5);
+    w.make_child<Animated_widget>(2);
+    w.make_child<twf::Textbox>().enable_border();
+    w.make_child<Animated_widget>(1);
 
     s.set_head(&w);
     return s.run();

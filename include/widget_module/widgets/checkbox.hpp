@@ -26,8 +26,8 @@ class Checkbox : public Widget {
 
     void toggle();
 
-    Glyph empty_ = Glyph(U'☐');
-    Glyph check_ = Glyph(U'☒');
+    Glyph empty_ = Glyph("☐");
+    Glyph check_ = Glyph("☒");
     bool checked_ = false;
 };
 

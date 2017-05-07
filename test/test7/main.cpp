@@ -48,7 +48,7 @@ class Clicker : public twf::Widget {
 
     bool paint_event(const twf::Paint_event& event) override {
         twf::Painter p{this};
-        p.put_at(pos_.x, pos_.y, U'X');
+        p.put_at(pos_.x, pos_.y, 'X');
         return Widget::paint_event(event);
     }
 

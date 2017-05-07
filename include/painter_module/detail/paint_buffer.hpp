@@ -4,6 +4,8 @@
 #include "../glyph_matrix.hpp"
 #include <widget_module/coordinate.hpp>
 
+#include <mutex>
+
 namespace twf {
 namespace detail {
 
@@ -12,10 +14,7 @@ class Paint_buffer {
     explicit Paint_buffer(unsigned x = 0, unsigned y = 0)
         : backing_store_{x, y}, staging_area_{x, y} {}
 
-    void resize(unsigned x, unsigned y) {
-        backing_store_.resize(x, y);
-        staging_area_.resize(x, y);
-    }
+    void resize(unsigned x, unsigned y);
 
     unsigned width() const { return staging_area_.width(); }
 
@@ -23,15 +22,19 @@ class Paint_buffer {
 
     bool commit(unsigned x, unsigned y);
 
-    Glyph& at(unsigned x, unsigned y) { return backing_store_.at(x, y); }
-
     void stage(unsigned x, unsigned y, const Glyph& glyph);
+
+    const Glyph& at(unsigned x, unsigned y) const;
 
     Coordinate cursor_position;
 
    private:
+    // Glyph& at(unsigned x, unsigned y);
+
     Glyph_matrix backing_store_;
     Glyph_matrix staging_area_;
+    std::mutex staging_mtx_;
+    mutable std::mutex backing_mtx_;
 };
 
 }  // namespace detail

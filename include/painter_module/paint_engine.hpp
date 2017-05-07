@@ -16,7 +16,7 @@ class Paint_engine {
 
     // Put to buffer
     void put(unsigned x, unsigned y, const Glyph& g);
-    void clear(unsigned x, unsigned y);
+    // void clear(unsigned x, unsigned y);
 
     // Flush to screen
     void flush(bool optimize);

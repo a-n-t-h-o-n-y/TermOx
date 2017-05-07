@@ -19,8 +19,8 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/lib")
 
 # Set Compiler Flags
-set(CMAKE_CXX_FLAGS "-std=c++14 -g -Wall")
-# set(CMAKE_CXX_FLAGS "-std=c++14 -O2 -Wall")
+# set(CMAKE_CXX_FLAGS "-std=c++14 -g -Wall")
+set(CMAKE_CXX_FLAGS "-std=c++14 -O2 -Wall")
 
 # Include Directory
 include_directories(include)
@@ -145,8 +145,8 @@ target_link_libraries(test5 twidgets ncurses)
 target_link_libraries(test6 twidgets ncurses)
 target_link_libraries(test7 twidgets ncurses)
 target_link_libraries(test8 twidgets ncurses)
-target_link_libraries(test9 twidgets ncurses) #Threads::Threads) # ${Boost_LIBRARIES}
-target_link_libraries(demo_animation twidgets ncurses) #Threads::Threads)
+target_link_libraries(test9 twidgets ncurses Threads::Threads) # ${Boost_LIBRARIES}
+target_link_libraries(demo_animation twidgets ncurses Threads::Threads)
 
 # Install Static Library
 install(TARGETS twidgets ARCHIVE DESTINATION lib)

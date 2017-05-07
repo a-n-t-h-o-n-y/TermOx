@@ -46,7 +46,8 @@ bool System::send_event(Object* obj, const Event& event) {
 
 void System::send_posted_events(Object* obj_filter, Event::Type etype_filter) {
     auto& queue = detail::Thread_data::current().event_queue;
-    std::lock_guard<std::mutex> lock(queue.mtx_);
+    std::lock_guard<std::mutex> lg(queue.send_mtx_);
+    queue.add_mtx_.lock();
     auto posted_iter = std::begin(queue);
     while (posted_iter != std::end(queue)) {
         if (posted_iter->reciever() != nullptr) {
@@ -72,8 +73,12 @@ void System::send_posted_events(Object* obj_filter, Event::Type etype_filter) {
                         posted_iter = std::begin(queue);
                     }
                 } else {
+                    queue.add_mtx_.unlock();
+                    // This can post to the queue.
                     System::notify(const_cast<Object*>(posted_iter->reciever()),
                                    posted_iter->event());
+                    queue.add_mtx_.lock();
+                    posted_iter = std::begin(queue);
                     queue.erase(posted_iter);
                     posted_iter = std::begin(queue);
                 }
@@ -84,6 +89,8 @@ void System::send_posted_events(Object* obj_filter, Event::Type etype_filter) {
             ++posted_iter;
         }
     }
+    queue.add_mtx_.unlock();
+    System::paint_engine()->flush(true);
 }
 
 bool System::notify(Object* obj, const Event& event) {
@@ -111,7 +118,8 @@ bool System::notify(Object* obj, const Event& event) {
 //     } else if (event.type() == Event::Resize) {
 //         ss << "Resize" << std::endl;
 //         auto& re = static_cast<const Resize_event&>(event);
-//         ss << "width: " << re.new_width() << ", height: " << re.new_height() << std::endl;
+//         ss << "width: " << re.new_width() << ", height: " << re.new_height()
+//         << std::endl;
 //     } else if (event.type() == Event::Paint) {
 //         ss << "Paint" << std::endl;
 //     } else if (event.type() == Event::ChildAdded) {
@@ -194,7 +202,9 @@ Widget* System::focus_widget() {
 }
 
 void System::set_focus_widget(Widget* widg) {
-    if (widg == focus_widg_) { return; }
+    if (widg == focus_widg_) {
+        return;
+    }
     if (focus_widg_ != nullptr) {
         focus_widg_->clear_focus();
     }

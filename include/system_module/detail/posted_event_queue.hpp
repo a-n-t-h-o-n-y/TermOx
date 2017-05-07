@@ -14,8 +14,8 @@ class Posted_event_queue
     : public std::multiset<Posted_event, std::greater<Posted_event>> {
    public:
     void add_event(Posted_event ev);
-    std::mutex mtx_; // can you make this private? multiset::begin/end() does
-    // not provide safety because iterators are used which cannot help you.
+    std::mutex add_mtx_;
+    std::mutex send_mtx_;
 
    private:
     using std::multiset<Posted_event, std::greater<Posted_event>>::emplace;

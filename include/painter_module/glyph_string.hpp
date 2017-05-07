@@ -67,6 +67,8 @@ class Glyph_string : private std::vector<Glyph> {
 
     template <typename... Attributes>
     Glyph_string& append(const char* symbols, Attributes... attrs) {
+        // Converts to wide char string and then converts each wide char to a
+        // byte string to create a glyph with possible multibyte length.
         std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter;
         std::u32string wide_string = converter.from_bytes(symbols);
         reserve(this->size() + wide_string.size());
@@ -97,13 +99,13 @@ class Glyph_string : private std::vector<Glyph> {
 
     Glyph_string& operator+(const Glyph_string& gs) { return this->append(gs); }
 
-    std::u32string str_u32() const {
-        std::u32string string_;
-        for (const Glyph& g : *this) {
-            string_.append(1, g.get_char());
-        }
-        return string_;
-    }
+    // std::u32string str_u32() const { // delete this
+    //     std::u32string string_;
+    //     for (const Glyph& g : *this) {
+    //         string_.append(1, g.get_char());
+    //     }
+    //     return string_;
+    // }
 
     std::string str() const {
         std::string string_;

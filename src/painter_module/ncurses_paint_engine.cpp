@@ -4,7 +4,6 @@
 
 #include <ncurses.h>
 
-#include <cstdlib>
 #include <stdexcept>
 #include <string>
 #include <vector>

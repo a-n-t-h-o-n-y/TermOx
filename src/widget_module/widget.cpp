@@ -115,6 +115,11 @@ void Widget::update() {
     System::post_event(this, std::make_unique<Paint_event>());
 }
 
+void Widget::update_now() {
+    this->update();
+    twf::System::send_posted_events();
+}
+
 void Widget::clear_screen() {
     System::post_event(this, std::make_unique<Clear_screen_event>());
 }
