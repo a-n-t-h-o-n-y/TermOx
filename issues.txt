@@ -73,12 +73,6 @@ _ Create Menu widget with selectable/highlightable options that call a signal
     not sure you could do this, you'd have to do it through some kind of
     container/index.
 
-_ Add mutex to the event_queue, lock when posting events and when processing
-    events from the queue. This will help if you want to use asynchronous timers
-    to perform animation by changing the state of a widget and then posting a
-    paint event through a call to this->update() every certain number of timer
-    ticks.
-
 _ Widget placement/alignment in layouts when there is extra space that can't be
     taken by any widget, enums like left aligned, right aligned, centered,
     justified, floating...
@@ -132,6 +126,45 @@ _ Add a Freeform layout that has Window widgets wrapping each child widget, the
 _ Fixed size policy in layouts currently includes border space, it should not,
     so a single box height object that wants a border should not have to resize
     its Fixed height to 3 or 2 depending on the number of borders. 
+
+_ Consider implementing single thread animation by putting a timer around the
+    ::wgetch() call on ncurses. This will make sure concurrent access to the
+    ncurses library does not happen(this can happen with the current
+    implementation). If the blocking call to wgetch() does not return within a
+    frame time, then an AnimationFrame Event will be sent to all widgets, along
+    with a call to update(). This will allow any widget to override
+    animation_frame_event() function to update the state of their widget for a
+    new frame. The limitation here is that you are stuck with a single frame
+    rate for the entire program, unless you implement complex timer notification
+    system, which adds too much complexity to the library. The whole point of
+    doing this is to avoid concurrent access to the ncurses library which though
+    rare, can cause crashes.
+
+_ Animated widgets in a program make textbox widgets never have a cursor because
+    the cursor is constantly being moved around to paint the animations. You'd
+    have to implement your own cursor drawing to get around this, and it would
+    have to be part of the animation system. 
+
+_ Updating the background color of a widget in a paint event leaves you with the
+    old background color until the next update, this is because for update you
+    get a call to clear the screen, which uses the old background color, and
+    then you paint new glyphs with the new background color, left with a mix of
+    both, you need a call to clear screen after changing the background color.
+    Actually, it should be a call to update() to post both a clear screen and
+    paint event, just incase you are calling this at the end of a paint_event,
+    the name set_background() implies that it is not changing the contents of
+    the screen. Add a function to widget class to set the background directly
+    through the widget, it'll just call down to the Brush object, but it will
+    also call update(), which brush cannot do. it'll make the interface for
+    setting the background a bit cleaner for the user as well. Add a function
+    for foreground as well.
+
+X Add mutex to the event_queue, lock when posting events and when processing
+    events from the queue. This will help if you want to use asynchronous timers
+    to perform animation by changing the state of a widget and then posting a
+    paint event through a call to this->update() every certain number of timer
+    ticks.
+
 
 X Create a checkbox widget that has a bool state, signal when it is toggled,
     signal for when it is toggled true and for toggled false.
