@@ -19,8 +19,8 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/lib")
 
 # Set Compiler Flags
-set(CMAKE_CXX_FLAGS "-std=c++14 -g -Wall")
-# set(CMAKE_CXX_FLAGS "-std=c++14 -O2 -Wall")
+# set(CMAKE_CXX_FLAGS "-std=c++14 -g -Wall")
+set(CMAKE_CXX_FLAGS "-std=c++14 -O2 -Wall")
 
 # Include Directory
 include_directories(include)
@@ -106,6 +106,9 @@ list(APPEND TEST8_SOURCES "test/test8/main.cpp"
 list(APPEND TEST9_SOURCES "test/test9/main.cpp"
 						 )
 
+list(APPEND ANIM_DEMO_SOURCES "demos/animation/main.cpp"
+						 )
+
 # Create a Static Library for MCurses
 add_library(twidgets STATIC ${SYSTEM_MODULE_SOURCES}
 						   ${PAINTER_MODULE_SOURCES}
@@ -123,6 +126,14 @@ add_executable(test6 ${TEST6_SOURCES})
 add_executable(test7 ${TEST7_SOURCES})
 add_executable(test8 ${TEST8_SOURCES})
 add_executable(test9 ${TEST9_SOURCES})
+add_executable(demo_animation ${ANIM_DEMO_SOURCES})
+
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
+find_package(Boost REQUIRED COMPONENTS system)
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
+link_directories(${Boost_LIBRARY_DIRS})
 
 # Link libraries to executables
 target_link_libraries(tests twidgets gtest gtest_main ncurses)
@@ -134,7 +145,8 @@ target_link_libraries(test5 twidgets ncurses)
 target_link_libraries(test6 twidgets ncurses)
 target_link_libraries(test7 twidgets ncurses)
 target_link_libraries(test8 twidgets ncurses)
-target_link_libraries(test9 twidgets ncurses)
+target_link_libraries(test9 twidgets ncurses Threads::Threads) # ${Boost_LIBRARIES}
+target_link_libraries(demo_animation twidgets ncurses Threads::Threads)
 
 # Install Static Library
 install(TARGETS twidgets ARCHIVE DESTINATION lib)

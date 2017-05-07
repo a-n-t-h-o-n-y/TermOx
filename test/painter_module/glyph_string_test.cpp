@@ -166,8 +166,6 @@ TEST(GlyphStringTest, Str) {
     EXPECT_EQ(gs3.str(), "");
 
     EXPECT_EQ(6, gs2.str().find("⍇"));
-
-    EXPECT_EQ(4, gs2.str_u32().find(U"⍇"));
 }
 
 TEST(GlyphStringTest, OperatorPlus) {

@@ -40,6 +40,7 @@ class Widget : public Object {
     ~Widget() override = default;
 
     void update();
+    void update_now();
 
     bool has_coordinates(std::size_t global_x, std::size_t global_y) override;
 
