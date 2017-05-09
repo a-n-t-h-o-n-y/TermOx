@@ -4,8 +4,6 @@
 #include "../glyph_matrix.hpp"
 #include <widget_module/coordinate.hpp>
 
-#include <mutex>
-
 namespace twf {
 namespace detail {
 
@@ -33,8 +31,6 @@ class Paint_buffer {
 
     Glyph_matrix backing_store_;
     Glyph_matrix staging_area_;
-    std::mutex staging_mtx_;
-    mutable std::mutex backing_mtx_;
 };
 
 }  // namespace detail
