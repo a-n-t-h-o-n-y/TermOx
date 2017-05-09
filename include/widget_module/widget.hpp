@@ -48,6 +48,9 @@ class Widget : public Object {
     void set_x(std::size_t global_x);
     void set_y(std::size_t global_y);
 
+    void set_background(Color c);
+    void set_foreground(Color c);
+
     void set_cursor(bool show) { show_cursor_ = show; }
     void set_cursor_x(std::size_t x) { cursor_position_.x = x; }
     void set_cursor_y(std::size_t y) { cursor_position_.y = y; }

@@ -16,11 +16,12 @@ class Animated_widget : public twf::Widget {
             p.put_at(0, 0,
                      twf::Glyph_string("* * * * * * * * * * * * * * * * * * *",
                                        twf::foreground(twf::Color::White)));
+            this->set_background(twf::Color::Violet);
         } else {
             p.put_at(0, 0,
                      twf::Glyph_string("* * * * * * * * * * * * * * * * * * *",
                                        twf::foreground(twf::Color::Light_gray)));
-            this->brush().set_background(twf::Color::Light_green);
+            this->set_background(twf::Color::Light_green);
         }
         return Widget::paint_event(event);
     }

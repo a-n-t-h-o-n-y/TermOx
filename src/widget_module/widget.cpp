@@ -69,6 +69,16 @@ void Widget::set_y(std::size_t global_y) {
     }
 }
 
+void Widget::set_background(Color c) {
+    this->brush().set_background(c);
+    this->update();
+}
+
+void Widget::set_foreground(Color c) {
+    this->brush().set_foreground(c);
+    this->update();
+}
+
 bool Widget::has_coordinates(std::size_t global_x, std::size_t global_y) {
     if (!this->enabled() || !this->visible()) {
         return false;
