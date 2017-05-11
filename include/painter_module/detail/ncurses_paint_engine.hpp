@@ -1,10 +1,11 @@
-#ifndef NCURSES_PAINT_ENGINE_HPP
-#define NCURSES_PAINT_ENGINE_HPP
+#ifndef PAINTER_MODULE_DETAIL_NCURSES_PAINT_ENGINE_HPP
+#define PAINTER_MODULE_DETAIL_NCURSES_PAINT_ENGINE_HPP
 
-#include "../attribute.hpp"
-#include "../color.hpp"
-#include "../paint_engine.hpp"
-
+#include "painter_module/attribute.hpp"
+#include "painter_module/color.hpp"
+#include "painter_module/paint_engine.hpp"
+#include <cstddef>
+#include <cstdint>
 #include <string>
 
 namespace twf {
@@ -13,17 +14,24 @@ namespace detail {
 class NCurses_paint_engine : public Paint_engine {
    public:
     NCurses_paint_engine();
+    NCurses_paint_engine(const NCurses_paint_engine&) = delete;
+    NCurses_paint_engine(NCurses_paint_engine&&) noexcept = default;
+    NCurses_paint_engine& operator=(const NCurses_paint_engine&) = delete;
+    NCurses_paint_engine& operator=(NCurses_paint_engine&&) = default;
     ~NCurses_paint_engine() override;
 
-    void set_rgb(Color c, int r, int g, int b) override;
+    void set_rgb(Color c,
+                 std::uint8_t r,
+                 std::uint8_t g,
+                 std::uint8_t b) override;
     void show_cursor() override;
     void hide_cursor() override;
-    unsigned screen_width() override;
-    unsigned screen_height() override;
+    std::size_t screen_width() override;
+    std::size_t screen_height() override;
     void touch_all() override;
 
    protected:
-    void move(unsigned x, unsigned y) override;
+    void move(std::size_t x, std::size_t y) override;
     void put_string(const char* s) override;
     void put_string(const std::string& s) override;
 
@@ -35,20 +43,10 @@ class NCurses_paint_engine : public Paint_engine {
     void refresh() override;
 
    private:
-    void initialize_color_pairs() const;
-
-    int find_pair(Color foreground, Color background) const {
-        return this->translate(background) * 16 + this->translate(foreground);
-    }
-
-    static int translate(Color c) { return static_cast<int>(c) - 240; }
-
-    static int attr_to_int(Attribute attr);
     Color current_foreground();
     Color current_background();
 };
 
 }  // namespace detail
 }  // namespace twf
-
-#endif  // NCURSES_PAINT_ENGINE_HPP
+#endif  // PAINTER_MODULE_DETAIL_NCURSES_PAINT_ENGINE_HPP

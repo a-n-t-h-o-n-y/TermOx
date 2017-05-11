@@ -1,4 +1,15 @@
-                             __Issues__
+                             __Issues+Ideas__
+
+_ Add Expanding Widget that is a title with a little arrow, when you click on
+    it, it expands by changing its size hint, its policy should be fixed(?) It
+    pushes other widgets in the layout out of the way instead of drawing on top
+    of them like a hovering widget would. It opens up to a possibly indented
+    list of whatever widgets, buttons, line edits, etc.. The arrow can change to
+    a downward arrow when it is open.
+
+_ Option to make textbox read only/non-editable.
+
+_ Add Meta_widget which wraps any widget and gives information about it.
 
 _ Possibly add a constructor to Scrollbar widgets that takes a pointer or ....?
     some reference to the textbox, can ask it its height and its total height of
@@ -179,6 +190,9 @@ X Move Widget::erase_widget_screen() to Painter::clear_screen() and paint over
     similar to update, that posts a clear_screen_event object to the queue, and
     the Event_queue::add_event() function could optimize out multiple clears on
     the same widget.
+
+X Add title_bar widget that has a title and an exit button. Use is with a
+    vertical layout with another widget.
 
 X Finish Scrollbar widgets
 

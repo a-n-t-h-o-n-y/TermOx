@@ -12,7 +12,7 @@ namespace twf {
 
 class Textbox_core : public Widget {
    public:
-    Textbox_core(const Glyph_string& contents = Glyph_string{});
+    Textbox_core(const Glyph_string& contents = "");
 
     void scroll_up(std::size_t n = 1);
     void scroll_down(std::size_t n = 1);

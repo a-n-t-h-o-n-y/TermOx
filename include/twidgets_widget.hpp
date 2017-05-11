@@ -11,5 +11,6 @@
 #include "widget_module/widgets/horizontal_scrollbar.hpp"
 #include "widget_module/widgets/vertical_scrollbar.hpp"
 #include "widget_module/widgets/checkbox.hpp"
+#include "widget_module/widgets/titlebar.hpp"
 
 #endif  // TWIDGETS_WIDGET_HPP

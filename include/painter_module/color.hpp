@@ -1,5 +1,5 @@
-#ifndef COLOR_HPP
-#define COLOR_HPP
+#ifndef PAINTER_MODULE_COLOR_HPP
+#define PAINTER_MODULE_COLOR_HPP
 
 #include <cstdint>
 
@@ -76,4 +76,4 @@ inline detail::ForegroundColor foreground(Color c) {
 }
 
 }  // namespace twf
-#endif  // COLOR_HPP
+#endif  // PAINTER_MODULE_COLOR_HPP

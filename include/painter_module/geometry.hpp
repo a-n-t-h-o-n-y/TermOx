@@ -1,9 +1,7 @@
-#ifndef GEOMETRY_HPP
-#define GEOMETRY_HPP
+#ifndef PAINTER_MODULE_GEOMETRY_HPP
+#define PAINTER_MODULE_GEOMETRY_HPP
 
-#include "../system_module/system.hpp"
-#include "../widget_module/size_policy.hpp"
-
+#include "widget_module/size_policy.hpp"
 #include <cstddef>
 #include <limits>
 
@@ -20,22 +18,13 @@ class Geometry {
     void set_width(std::size_t width) { width_ = width; }
     void set_height(std::size_t height) { height_ = height; }
 
-    void set_width_hint(std::size_t width_hint);
-    void set_height_hint(std::size_t height_hint);
+    void set_width_hint(std::size_t hint);
+    void set_height_hint(std::size_t hint);
     void set_max_width(std::size_t max_width);
     void set_max_height(std::size_t max_height);
     void set_min_width(std::size_t min_width);
     void set_min_height(std::size_t min_height);
     void set_size_policy(const Size_policy& policy);
-
-    void set_fixed_width(std::size_t width) { // you have a fixed policy, not needed? is it in Qt? Don't need it if you don't need it
-        this->set_min_width(width);
-        this->set_max_width(width);
-    }
-    void set_fixed_height(std::size_t height) {
-        this->set_min_height(height);
-        this->set_max_height(height);
-    }
 
     // Get
     std::size_t width() const { return width_; }
@@ -55,11 +44,11 @@ class Geometry {
     Widget* widget_;
 
     // Parameters for Layouts to use
-    std::size_t width_hint_ = 0;  //= System::max_width();
+    std::size_t width_hint_ = 0;
     std::size_t min_width_ = 0;
     std::size_t max_width_ = std::numeric_limits<std::size_t>::max();
 
-    std::size_t height_hint_ = 0;  //= System::max_height();
+    std::size_t height_hint_ = 0;
     std::size_t min_height_ = 0;
     std::size_t max_height_ = std::numeric_limits<std::size_t>::max();
 
@@ -68,7 +57,9 @@ class Geometry {
     // Actual Size
     std::size_t width_ = width_hint_;
     std::size_t height_ = height_hint_;
+
+    void update_parent() const;
 };
 
 }  // namespace twf
-#endif  // GEOMETRY_HPP
+#endif  // PAINTER_MODULE_GEOMETRY_HPP

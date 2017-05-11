@@ -6,31 +6,41 @@
 #include "detail/paint_buffer.hpp"
 #include "glyph_string.hpp"
 
+#include <cstddef>
+#include <cstdint>
 #include <string>
 
 namespace twf {
 
 class Paint_engine {
    public:
+    Paint_engine() = default;
+    Paint_engine(const Paint_engine&) = delete;
+    Paint_engine(Paint_engine&&) noexcept = default;
+    Paint_engine& operator=(const Paint_engine&) = delete;
+    Paint_engine& operator=(Paint_engine&&) noexcept = default;
     virtual ~Paint_engine() = default;
 
     // Put to buffer
-    void put(unsigned x, unsigned y, const Glyph& g);
-    // void clear(unsigned x, unsigned y);
+    void put(std::size_t x, std::size_t y, const Glyph& g);
+    // void clear(std::size_t x, std::size_t y);
 
     // Flush to screen
     void flush(bool optimize);
 
-    virtual void set_rgb(Color c, int r, int g, int b) = 0;
+    virtual void set_rgb(Color c,
+                         std::uint8_t r,
+                         std::uint8_t g,
+                         std::uint8_t b) = 0;
 
     virtual void show_cursor() = 0;
     virtual void hide_cursor() = 0;
-    virtual unsigned screen_width() = 0;
-    virtual unsigned screen_height() = 0;
+    virtual std::size_t screen_width() = 0;
+    virtual std::size_t screen_height() = 0;
 
     virtual void clear_attributes() = 0;
     virtual void touch_all() = 0;
-    virtual void move(unsigned x, unsigned y) = 0;
+    virtual void move(std::size_t x, std::size_t y) = 0;
     void put_glyph(const Glyph& g);
 
     detail::Paint_buffer& buffer() { return buffer_; }

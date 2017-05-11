@@ -58,6 +58,7 @@ list(APPEND WIDGET_MODULE_SOURCES 	"src/widget_module/widget.cpp"
                                     "src/widget_module/horizontal_scrollbar.cpp"
                                     "src/widget_module/vertical_scrollbar.cpp"
                                     "src/widget_module/checkbox.cpp"
+                                    "src/widget_module/titlebar.cpp"
 									)
 
 list(APPEND TEST_SOURCES "test/system_module/system_test.cpp"

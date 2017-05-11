@@ -1,25 +1,18 @@
 #include "twidgets.hpp"
+#include <string>
 
-class Bordered : public twf::Horizontal_layout {
+class Meta : public twf::Vertical_layout {
    public:
-    Bordered() {
-        auto& tb = make_child<twf::Textbox>();
-        tb.brush().set_background(twf::Color::Light_blue);
-        tb.enable_border();
-        this->brush().set_foreground(twf::Color::Red);
-        this->enable_border();
-    }
+    Meta() { this->make_child<twf::Titlebar>("Notes"); }
 };
 
 int main() {
     twf::System sys;
 
-    Bordered mw;
-    // twf::Textbox mw;
-    // mw.enable_border();
-    // mw.brush().set_background(twf::Color::Light_blue);
+    Meta w;
+    w.make_child<twf::Textbox>().set_background(twf::Color::Light_gray);
 
-    sys.set_head(&mw);
+    sys.set_head(&w);
 
     return sys.run();
 }

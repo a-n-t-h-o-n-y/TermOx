@@ -14,7 +14,7 @@ namespace twf {
 
 class Textbox : public Textbox_core {
    public:
-    Textbox() {
+    Textbox(const Glyph_string& contents = "") : Textbox_core{contents} {
         this->set_focus_policy(Widget::Focus_policy::StrongFocus);
         this->set_cursor(true);
     }

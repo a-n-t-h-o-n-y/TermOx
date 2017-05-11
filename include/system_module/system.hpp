@@ -46,7 +46,7 @@ class System : public Object {
     int run();
 
     // Slots
-    sig::Slot<void()> quit = []() { System::exit(); };
+    static sig::Slot<void()> quit;
 
     friend class Abstract_event_dispatcher;
 

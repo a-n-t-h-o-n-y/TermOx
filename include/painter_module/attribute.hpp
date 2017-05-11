@@ -1,5 +1,5 @@
-#ifndef ATTRIBUTE_HPP
-#define ATTRIBUTE_HPP
+#ifndef PAINTER_MODULE_ATTRIBUTE_HPP
+#define PAINTER_MODULE_ATTRIBUTE_HPP
 
 #include <cstdint>
 
@@ -17,4 +17,4 @@ enum class Attribute : std::int8_t {
 };
 
 }  // namespace twf
-#endif  // ATTRIBUTE_HPP
+#endif  // PAINTER_MODULE_ATTRIBUTE_HPP

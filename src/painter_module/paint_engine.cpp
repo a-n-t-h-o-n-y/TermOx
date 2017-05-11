@@ -1,13 +1,15 @@
 #include <painter_module/paint_engine.hpp>
 
+#include <cstddef>
+
 namespace twf {
 
-void Paint_engine::put(unsigned x, unsigned y, const Glyph& g) {
+void Paint_engine::put(std::size_t x, std::size_t y, const Glyph& g) {
     buffer_.stage(x, y, g);
 }
 
 // probably no need for this now.
-// void Paint_engine::clear(unsigned x, unsigned y) {
+// void Paint_engine::clear(std::size_t x, std::size_t y) {
 //     buffer_.stage(x, y, " ");
 //     buffer_.commit(x, y);
 //     this->move(x, y);

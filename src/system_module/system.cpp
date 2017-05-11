@@ -19,6 +19,8 @@
 
 namespace twf {
 
+sig::Slot<void()> System::quit = []() { System::exit(); };
+
 void System::post_event(Object* obj,
                         std::unique_ptr<Event> event,
                         int priority) {
