@@ -1,5 +1,4 @@
 #include <twidgets.hpp>
-
 #include <functional>
 
 class Bordered : public twf::Horizontal_layout {
@@ -9,13 +8,6 @@ class Bordered : public twf::Horizontal_layout {
         this->enable_border();
     }
 };
-
-// class Checked : public twf::Horizontal_layout {
-//     public:
-//         Checked() {
-//             this->make_child<twf::Checkbox>();
-//         }
-// };
 
 int main() {
     twf::System s;

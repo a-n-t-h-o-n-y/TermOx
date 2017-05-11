@@ -19,18 +19,30 @@ class Glyph {
 
     // Implcit conversions are allowed.
     template <typename... Attributes>
-    Glyph(const char& symbol, Attributes&&... attrs)
+    Glyph(const char& symbol, Attributes&&... attrs)  // NOLINT
         : brush_{std::forward<Attributes>(attrs)...}, symbol_{{symbol, '\0'}} {}
 
     template <typename... Attributes>
-    Glyph(const char* symbol, Attributes&&... attrs)
+    Glyph(const char* symbol, Attributes&&... attrs)  // NOLINT
         : brush_{std::forward<Attributes>(attrs)...} {
         this->set_symbol(symbol);
     }
 
     template <typename... Attributes>
-    Glyph(const std::string& symbol, Attributes&&... attrs)
+    Glyph(const std::string& symbol, Attributes&&... attrs)  // NOLINT
         : brush_{std::forward<Attributes>(attrs)...} {
+        this->set_symbol(symbol);
+    }
+
+    Glyph(const char& symbol, Brush b) : brush_{std::move(b)} {
+        this->set_symbol(symbol);
+    }
+
+    Glyph(const char* symbol, Brush b) : brush_{std::move(b)} {
+        this->set_symbol(symbol);
+    }
+
+    Glyph(const std::string& symbol, Brush b) : brush_{std::move(b)} {
         this->set_symbol(symbol);
     }
 
@@ -40,7 +52,7 @@ class Glyph {
 
     std::string str() const;
     const char* c_str() const;
-    operator std::string() const { return this->str(); }  // Implicit conv. okay
+    operator std::string() const { return this->str(); }  // NOLINT
 
     void set_brush(const Brush& brush) { brush_ = brush; }
 

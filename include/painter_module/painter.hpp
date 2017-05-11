@@ -1,19 +1,14 @@
-#ifndef PAINTER_HPP
-#define PAINTER_HPP
+#ifndef PAINTER_MODULE_PAINTER_HPP
+#define PAINTER_MODULE_PAINTER_HPP
 
-#include "../widget_module/widget.hpp"
-#include "color.hpp"
-#include "glyph_string.hpp"
-#include "../widget_module/coordinate.hpp"
-
-#include <codecvt>
+#include "painter_module/color.hpp"
+#include "painter_module/glyph_string.hpp"
+#include "widget_module/coordinate.hpp"
 #include <cstddef>
-#include <locale>
-#include <sstream>
-#include <string>
 
 namespace twf {
 class Border;
+class Widget;
 
 class Painter {
    public:
@@ -29,7 +24,7 @@ class Painter {
                 const Glyph_string& string,
                 bool move_cursor = true);
 
-    // Moves the cursor position within Widget and Paint_buffer.
+    // Moves the cursor position within Widget.
     void move(Coordinate pos, bool update_buffer = true);
     void move(std::size_t x, std::size_t y, bool update_buffer = true);
 
@@ -38,7 +33,7 @@ class Painter {
               std::size_t y,
               std::size_t width,
               std::size_t height,
-              Color fill_background);
+              const Glyph& fill_symbol);
 
     // Takes local coords
     void line(std::size_t x1,
@@ -55,8 +50,6 @@ class Painter {
     void clear_screen();
 
    private:
-    Widget* widget_;
-
     void unbound_put_string(std::size_t g_x,
                             std::size_t g_y,
                             const Glyph_string& gs);
@@ -65,9 +58,10 @@ class Painter {
                       std::size_t g_x2,
                       std::size_t g_y2,
                       const Glyph& g);
-    void add_default_attributes(Glyph& g);
+    void add_default_attributes(Glyph* g);
+
+    Widget* widget_;
 };
 
 }  // namespace twf
-
-#endif  // PAINTER_HPP
+#endif  // PAINTER_MODULE_PAINTER_HPP

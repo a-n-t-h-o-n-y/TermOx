@@ -50,7 +50,7 @@ void NCurses_event_dispatcher::post_user_input() {
     }
 }
 
-#undef border
+#undef border // NCurses macro, naming conflict.
 
 std::pair<Object*, std::unique_ptr<Event>>
 NCurses_event_dispatcher::parse_mouse_event() {
@@ -111,24 +111,11 @@ NCurses_event_dispatcher::parse_mouse_event() {
         }
 
         Widget* widg = dynamic_cast<Widget*>(object);
-        if (widg) {
-            // Replace with utility function used in Widget and maybe Painter
-            std::size_t x_border_offset{0};
-            std::size_t y_border_offset{0};
-            if (widg->border().enabled() &&
-                (widg->border().west_enabled() ||
-                 widg->border().north_west_enabled() ||
-                 widg->border().south_west_enabled())) {
-                ++x_border_offset;
-            }
-            if (widg->border().enabled() &&
-                (widg->border().north_enabled() ||
-                 widg->border().north_east_enabled() ||
-                 widg->border().north_west_enabled())) {
-                ++y_border_offset;
-            }
-            std::size_t local_x = mouse_event.x - widg->x() - x_border_offset;
-            std::size_t local_y = mouse_event.y - widg->y() - y_border_offset;
+        if (widg != nullptr) {
+            std::size_t local_x =
+                mouse_event.x - widg->x() - west_border_offset(widg->border());
+            std::size_t local_y =
+                mouse_event.y - widg->y() - north_border_offset(widg->border());
             auto event = std::make_unique<Mouse_event>(
                 ev_type, ev_button, mouse_event.x, mouse_event.y, local_x,
                 local_y, mouse_event.id);

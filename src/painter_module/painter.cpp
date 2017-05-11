@@ -1,13 +1,10 @@
-#include <painter_module/attribute.hpp>
-#include <painter_module/color.hpp>
-#include <painter_module/geometry.hpp>
-#include <painter_module/glyph.hpp>
-#include <painter_module/glyph_string.hpp>
-#include <painter_module/painter.hpp>
-#include <widget_module/border.hpp>
-#include <widget_module/coordinate.hpp>
-#include <system_module/system.hpp>
-
+#include "painter_module/painter.hpp"
+#include "painter_module/color.hpp"
+#include "painter_module/glyph.hpp"
+#include "painter_module/glyph_string.hpp"
+#include "widget_module/border.hpp"
+#include "widget_module/coordinate.hpp"
+#include "widget_module/widget.hpp"
 #include <cstddef>
 #include <cstring>
 
@@ -19,27 +16,12 @@ Painter::Painter(Widget* widget) : widget_{widget} {
 
 void Painter::put(const Glyph_string& string, bool move_cursor) {
     Coordinate old_position{widget_->cursor_x(), widget_->cursor_y()};
-    std::size_t x_border_offset{0};
-    std::size_t y_border_offset{0};
-    if (widget_->border().enabled() &&
-        (widget_->border().west_enabled() ||
-         widget_->border().north_west_enabled() ||
-         widget_->border().south_west_enabled())) {
-        ++x_border_offset;
-    }
-    if (widget_->border().enabled() &&
-        (widget_->border().north_enabled() ||
-         widget_->border().north_east_enabled() ||
-         widget_->border().north_west_enabled())) {
-        ++y_border_offset;
-    }
-
     for (Glyph g : string) {
-        add_default_attributes(g);
-        std::size_t glob_x =
-            widget_->x() + widget_->cursor_x() + x_border_offset;
-        std::size_t glob_y =
-            widget_->y() + widget_->cursor_y() + y_border_offset;
+        add_default_attributes(&g);
+        std::size_t glob_x = widget_->x() + widget_->cursor_x() +
+                             west_border_offset(widget_->border());
+        std::size_t glob_y = widget_->y() + widget_->cursor_y() +
+                             north_border_offset(widget_->border());
         if (std::strcmp(g.c_str(), "\n") == 0) {
             this->move(0, widget_->cursor_y() + 1, move_cursor);
         } else {
@@ -85,25 +67,12 @@ void Painter::move(std::size_t x, std::size_t y, bool update_buffer) {
     widget_->set_cursor_y(y);
     // Move cursor on screen
     if (update_buffer) {
-        // put into utility global function
-        std::size_t x_border_offset{0};
-        std::size_t y_border_offset{0};
-        if (widget_->border().enabled() &&
-            (widget_->border().west_enabled() ||
-             widget_->border().north_west_enabled() ||
-             widget_->border().south_west_enabled())) {
-            ++x_border_offset;
-        }
-        if (widget_->border().enabled() &&
-            (widget_->border().north_enabled() ||
-             widget_->border().north_east_enabled() ||
-             widget_->border().north_west_enabled())) {
-            ++y_border_offset;
-        }
         widget_->paint_engine().buffer().cursor_position.x =
-            widget_->x() + widget_->cursor_x() + x_border_offset;
+            widget_->x() + widget_->cursor_x() +
+            west_border_offset(widget_->border());
         widget_->paint_engine().buffer().cursor_position.y =
-            widget_->y() + widget_->cursor_y() + y_border_offset;
+            widget_->y() + widget_->cursor_y() +
+            north_border_offset(widget_->border());
     }
 }
 
@@ -111,7 +80,7 @@ void Painter::fill(std::size_t x,
                    std::size_t y,
                    std::size_t width,
                    std::size_t height,
-                   Color fill_background) {
+                   const Glyph& fill_symbol) {
     if (width == 0 || height == 0) {
         return;
     }
@@ -119,9 +88,8 @@ void Painter::fill(std::size_t x,
     std::size_t cur_x = widget_->cursor_x();
     std::size_t cur_y = widget_->cursor_y();
 
-    Glyph_string tile{" ", background(fill_background)};
     for (std::size_t i{y}; i < height; ++i) {
-        this->line(x, i, width - 1, i, tile);
+        this->line(x, i, width - 1, i, fill_symbol);
     }
 
     // Set Widget's cursor position back
@@ -281,24 +249,28 @@ void Painter::clear_screen() {
     auto width = widget_->geometry().width();
     auto height = widget_->geometry().height();
     auto gx = widget_->x();
-    auto gy = widget_->y(); 
+    auto gy = widget_->y();
 
     if (width == 0 || height == 0) {
         return;
     }
-    // change this to widget's default background tile.
-    Glyph tile{" ", background(*widget_->brush().background_color())};
-    for (std::size_t i{gy}; i < gy + height; ++i) {
-        this->unbound_line(gx, i, gx + width - 1, i, tile);
+    Glyph bg_tile = widget_->background_tile();
+    if (!bg_tile.brush().background_color()) {
+        bg_tile.brush().set_background(*widget_->brush().background_color());
     }
-
+    if (!bg_tile.brush().foreground_color()) {
+        bg_tile.brush().set_foreground(*widget_->brush().foreground_color());
+    }
+    for (std::size_t i{gy}; i < gy + height; ++i) {
+        this->unbound_line(gx, i, gx + width - 1, i, bg_tile);
+    }
 }
 
 void Painter::unbound_put_string(std::size_t g_x,
                                  std::size_t g_y,
                                  const Glyph_string& gs) {
     for (Glyph g : gs) {
-        add_default_attributes(g);
+        add_default_attributes(&g);
         widget_->paint_engine().put(g_x++, g_y, g);
     }
     widget_->paint_engine().clear_attributes();
@@ -321,17 +293,17 @@ void Painter::unbound_line(std::size_t g_x1,
     }
 }
 
-void Painter::add_default_attributes(Glyph& g) {
-    if (!g.brush().background_color()) {
-        g.brush().add_attributes(
+void Painter::add_default_attributes(Glyph* g) {
+    if (!g->brush().background_color()) {
+        g->brush().add_attributes(
             background(*widget_->brush().background_color()));
     }
-    if (!g.brush().foreground_color()) {
-        g.brush().add_attributes(
+    if (!g->brush().foreground_color()) {
+        g->brush().add_attributes(
             foreground(*widget_->brush().foreground_color()));
     }
-    for (const Attribute& attr : widget_->brush().attributes()) {
-        g.brush().add_attributes(attr);
+    for (const auto& attr : widget_->brush().attributes()) {
+        g->brush().add_attributes(attr);
     }
 }
 

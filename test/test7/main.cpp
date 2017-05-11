@@ -68,13 +68,11 @@ class L_clicker : public twf::Horizontal_layout {
 int main() {
     twf::System sys;
 
-    // L_clicker c;
+    twf::Vertical_layout vl;
+    vl.make_child<twf::Titlebar>("Title");
+    vl.make_child<Split_widg>();
 
-    Split_widg sw;
-
-    // H_scrolls sw;
-
-    sys.set_head(&sw);
+    sys.set_head(&vl);
 
     return sys.run();
 }

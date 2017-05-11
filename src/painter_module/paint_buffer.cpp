@@ -1,10 +1,11 @@
-#include <painter_module/detail/paint_buffer.hpp>
-#include <painter_module/glyph.hpp>
+#include "painter_module/detail/paint_buffer.hpp"
+#include "painter_module/glyph.hpp"
+#include <cstddef>
 
 namespace twf {
 namespace detail {
 
-bool Paint_buffer::commit(unsigned x, unsigned y) {
+bool Paint_buffer::commit(std::size_t x, std::size_t y) {
     if (staging_area_.at(x, y) == backing_store_.at(x, y)) {
         return false;
     }
@@ -12,21 +13,17 @@ bool Paint_buffer::commit(unsigned x, unsigned y) {
     return true;
 }
 
-void Paint_buffer::stage(unsigned x, unsigned y, const Glyph& glyph) {
+void Paint_buffer::stage(std::size_t x, std::size_t y, const Glyph& glyph) {
     if (staging_area_.at(x, y) != glyph) {
         staging_area_.at(x, y) = glyph;
     }
 }
 
-// Glyph& Paint_buffer::at(unsigned x, unsigned y) { // not used.
-//     return backing_store_.at(x, y);
-// }
-
-const Glyph& Paint_buffer::at(unsigned x, unsigned y) const {
+const Glyph& Paint_buffer::at(std::size_t x, std::size_t y) const {
     return backing_store_.at(x, y);
 }
 
-void Paint_buffer::resize(unsigned x, unsigned y) {
+void Paint_buffer::resize(std::size_t x, std::size_t y) {
     backing_store_.resize(x, y);
     staging_area_.resize(x, y);
 }

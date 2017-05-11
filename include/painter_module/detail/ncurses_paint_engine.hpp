@@ -15,15 +15,15 @@ class NCurses_paint_engine : public Paint_engine {
    public:
     NCurses_paint_engine();
     NCurses_paint_engine(const NCurses_paint_engine&) = delete;
-    NCurses_paint_engine(NCurses_paint_engine&&) noexcept = default;
+    NCurses_paint_engine(NCurses_paint_engine&&) noexcept = default; // NOLINT
     NCurses_paint_engine& operator=(const NCurses_paint_engine&) = delete;
-    NCurses_paint_engine& operator=(NCurses_paint_engine&&) = default;
+    NCurses_paint_engine& operator=(NCurses_paint_engine&&) = default;// NOLINT
     ~NCurses_paint_engine() override;
 
     void set_rgb(Color c,
-                 std::uint8_t r,
-                 std::uint8_t g,
-                 std::uint8_t b) override;
+                 std::int16_t r,
+                 std::int16_t g,
+                 std::int16_t b) override;
     void show_cursor() override;
     void hide_cursor() override;
     std::size_t screen_width() override;

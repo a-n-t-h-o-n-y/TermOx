@@ -114,15 +114,15 @@ std::size_t NCurses_paint_engine::screen_height() {
 }
 
 void NCurses_paint_engine::set_rgb(Color c,
-                                   std::uint8_t r,
-                                   std::uint8_t g,
-                                   std::uint8_t b) {
-    auto scale = [](std::uint8_t i) {
+                                   std::int16_t r,
+                                   std::int16_t g,
+                                   std::int16_t b) {
+    auto scale = [](std::int16_t i) {
         return (static_cast<double>(i) / 255) * 1000;
     };
-    std::uint8_t r_ = scale(r);
-    std::uint8_t g_ = scale(g);
-    std::uint8_t b_ = scale(b);
+    std::int16_t r_ = scale(r);
+    std::int16_t g_ = scale(g);
+    std::int16_t b_ = scale(b);
     ::init_color(static_cast<std::int16_t>(c), r_, g_, b_);
 }
 
@@ -139,7 +139,7 @@ void NCurses_paint_engine::put_string(const std::string& s) {
 }
 
 void NCurses_paint_engine::clear_attributes() {
-    ::wattron(::stdscr, A_NORMAL);
+    wattrset(::stdscr, A_NORMAL);
 }
 
 void NCurses_paint_engine::set_attribute(Attribute attr) {

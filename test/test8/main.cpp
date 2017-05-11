@@ -1,4 +1,5 @@
 #include <twidgets.hpp>
+#include <sstream>
 
 class Meta_textbox : public twf::Textbox {
    public:
@@ -112,9 +113,11 @@ class Vert_horiz_thing : public twf::Vertical_layout {
 int main() {
     twf::System s;
 
-    Vert_horiz_thing vt;
+    twf::Vertical_layout vl;
+    vl.make_child<twf::Titlebar>("Layouts/Info");
+    vl.make_child<Vert_horiz_thing>();
 
-    s.set_head(&vt);
+    s.set_head(&vl);
 
     return s.run();
 }

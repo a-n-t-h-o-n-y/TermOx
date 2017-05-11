@@ -10,7 +10,9 @@ int main() {
     twf::System sys;
 
     Meta w;
-    w.make_child<twf::Textbox>().set_background(twf::Color::Light_gray);
+    auto& tb = w.make_child<twf::Textbox>();
+    tb.set_background(twf::Color::Light_gray);
+    tb.background_tile() = twf::Glyph(" ", twf::Attribute::Underline);
 
     sys.set_head(&w);
 

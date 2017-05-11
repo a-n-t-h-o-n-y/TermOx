@@ -87,5 +87,10 @@ class Border {
     bool south_east_enabled_ = true;
 };
 
+std::size_t west_border_offset(const Border& b);
+std::size_t east_border_offset(const Border& b);
+std::size_t north_border_offset(const Border& b);
+std::size_t south_border_offset(const Border& b);
+
 }  // namespace twf
 #endif  // BORDER_HPP

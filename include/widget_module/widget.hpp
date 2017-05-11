@@ -96,6 +96,9 @@ class Widget : public Object {
     void enable_border();
     void disable_border();
 
+    const Glyph& background_tile() const { return background_tile_; }
+    Glyph& background_tile() { return background_tile_; }
+
     void set_geometry(const Geometry& g);
     Geometry& geometry() { return geometry_; }
     const Geometry& geometry() const { return geometry_; }
@@ -152,12 +155,13 @@ class Widget : public Object {
     Brush default_brush_ =
         Brush(background(Color::Black), foreground(Color::White));
     Border border_;
+    Glyph background_tile_{" "};
 
     std::unique_ptr<Paint_engine> paint_engine_ = nullptr;
     Geometry geometry_ = Geometry{this};  // does geo need to know about this?
 
    private:
-    void paint_disabled_widget();
+    // void paint_disabled_widget();
     void initialize();
 };
 

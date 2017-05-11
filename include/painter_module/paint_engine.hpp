@@ -1,11 +1,10 @@
-#ifndef PAINT_ENGINE_HPP
-#define PAINT_ENGINE_HPP
+#ifndef PAINTER_MODULE_PAINT_ENGINE_HPP
+#define PAINTER_MODULE_PAINT_ENGINE_HPP
 
-#include "attribute.hpp"
-#include "color.hpp"
-#include "detail/paint_buffer.hpp"
-#include "glyph_string.hpp"
-
+#include "painter_module/attribute.hpp"
+#include "painter_module/color.hpp"
+#include "painter_module/detail/paint_buffer.hpp"
+#include "painter_module/glyph_string.hpp"
 #include <cstddef>
 #include <cstdint>
 #include <string>
@@ -16,22 +15,24 @@ class Paint_engine {
    public:
     Paint_engine() = default;
     Paint_engine(const Paint_engine&) = delete;
-    Paint_engine(Paint_engine&&) noexcept = default;
+    Paint_engine(Paint_engine&&) noexcept = default;  // NOLINT
     Paint_engine& operator=(const Paint_engine&) = delete;
-    Paint_engine& operator=(Paint_engine&&) noexcept = default;
+    Paint_engine& operator=(Paint_engine&&) noexcept = default;  // NOLINT
     virtual ~Paint_engine() = default;
+
+    virtual void move(std::size_t x, std::size_t y) = 0;
 
     // Put to buffer
     void put(std::size_t x, std::size_t y, const Glyph& g);
-    // void clear(std::size_t x, std::size_t y);
+    void put_glyph(const Glyph& g);
 
     // Flush to screen
     void flush(bool optimize);
 
     virtual void set_rgb(Color c,
-                         std::uint8_t r,
-                         std::uint8_t g,
-                         std::uint8_t b) = 0;
+                         std::int16_t r,
+                         std::int16_t g,
+                         std::int16_t b) = 0;
 
     virtual void show_cursor() = 0;
     virtual void hide_cursor() = 0;
@@ -40,14 +41,12 @@ class Paint_engine {
 
     virtual void clear_attributes() = 0;
     virtual void touch_all() = 0;
-    virtual void move(std::size_t x, std::size_t y) = 0;
-    void put_glyph(const Glyph& g);
 
     detail::Paint_buffer& buffer() { return buffer_; }
     const detail::Paint_buffer& buffer() const { return buffer_; }
 
    protected:
-    // functions to put to physical screen
+    // Functions to put to screen, not buffer.
     virtual void put_string(const char* s) = 0;
     virtual void put_string(const std::string& sym) = 0;
 
@@ -61,4 +60,4 @@ class Paint_engine {
 };
 
 }  // namespace twf
-#endif  // PAINT_ENGINE_HPP
+#endif  // PAINTER_MODULE_PAINT_ENGINE_HPP

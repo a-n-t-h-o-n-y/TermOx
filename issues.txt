@@ -1,5 +1,7 @@
                              __Issues+Ideas__
 
+_ Word wrap on space in textbox, not sure how to do this in a simple way yet.
+
 _ Add Expanding Widget that is a title with a little arrow, when you click on
     it, it expands by changing its size hint, its policy should be fixed(?) It
     pushes other widgets in the layout out of the way instead of drawing on top
@@ -23,8 +25,6 @@ _ Possibly add a constructor to Scrollbar widgets that takes a pointer or ....?
     fraction 1/1.
 
 _ Change Object* tree to Widget* tree - low priority
-
-_ Create a Coordinate Widget::border_offset() function to replace duplicate code
 
 _ Create some way of decorating/specifying elements of a Textbox; scrollbars,
     scrolling with what buttons and keys, etc... template? multiple classes?
@@ -170,12 +170,13 @@ _ Updating the background color of a widget in a paint event leaves you with the
     setting the background a bit cleaner for the user as well. Add a function
     for foreground as well.
 
+X Create a Coordinate Widget::border_offset() function to replace duplicate code
+
 X Add mutex to the event_queue, lock when posting events and when processing
     events from the queue. This will help if you want to use asynchronous timers
     to perform animation by changing the state of a widget and then posting a
     paint event through a call to this->update() every certain number of timer
     ticks.
-
 
 X Create a checkbox widget that has a bool state, signal when it is toggled,
     signal for when it is toggled true and for toggled false.

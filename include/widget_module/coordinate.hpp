@@ -1,5 +1,5 @@
-#ifndef COORDINATE_HPP
-#define COORDINATE_HPP
+#ifndef WIDGET_MODULE_COORDINATE_HPP
+#define WIDGET_MODULE_COORDINATE_HPP
 
 #include <cstddef>
 
@@ -10,5 +10,5 @@ struct Coordinate {
     std::size_t y = 0;
 };
 
-} // namespace twf
-#endif // COORDINATE_HPP
+}  // namespace twf
+#endif  // WIDGET_MODULE_COORDINATE_HPP

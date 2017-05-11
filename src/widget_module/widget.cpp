@@ -14,6 +14,7 @@
 #include <system_module/events/child_event.hpp>
 #include <system_module/system.hpp>
 #include <widget_module/widget.hpp>
+#include "widget_module/border.hpp"
 
 #include <memory>
 
@@ -83,24 +84,13 @@ bool Widget::has_coordinates(std::size_t global_x, std::size_t global_y) {
     if (!this->enabled() || !this->visible()) {
         return false;
     }
-    std::size_t x_offset{0};
-    std::size_t y_offset{0};
-    if (this->border().enabled()) {
-        if (this->border().west_enabled() ||
-            this->border().north_west_enabled() ||
-            this->border().south_east_enabled()) {
-            ++x_offset;
-        }
-        if (this->border().north_enabled() ||
-            this->border().north_west_enabled() ||
-            this->border().north_east_enabled()) {
-            ++y_offset;
-        }
-    }
-    return global_x >= (this->x() + x_offset) &&
-           global_x < (this->x() + this->width() + x_offset) &&
-           global_y >= (this->y() + y_offset) &&
-           global_y < (this->y() + this->height() + y_offset);
+    // too messy, subfunctions - lambdas
+    return global_x >= (this->x() + west_border_offset(this->border())) &&
+           global_x < (this->x() + this->width() +
+                       west_border_offset(this->border())) &&
+           global_y >= (this->y() + north_border_offset(this->border())) &&
+           global_y < (this->y() + this->height() +
+                       north_border_offset(this->border()));
 }
 
 void Widget::enable_border() {
@@ -156,7 +146,7 @@ bool Widget::event(const Event& event) {
             return this->paint_event(static_cast<const Paint_event&>(event));
         }
         if (this->visible() && !this->enabled()) {
-            this->paint_disabled_widget();
+            // this->paint_disabled_widget();
         }
         return true;
     }
@@ -305,21 +295,21 @@ bool Widget::clear_screen_event(const Clear_screen_event& event) {
 //     }
 // }
 
-void Widget::paint_disabled_widget() {
-    // Re-implement this to change the brush to grey and repaint, this might be
-    // done
-    // elsewhere when the widget is disabled, the brush is changed to greyscale,
-    // then
-    // a typical update is done. The function will probably not be needed.
-    Painter p{this};
-    Widget* parent = dynamic_cast<Widget*>(this->parent());
-    Color background = Color::Black;
-    if (parent != nullptr && parent->brush().background_color()) {
-        background = *parent->brush().background_color();
-    }
-    p.fill(0, 0, this->geometry().width(), this->geometry().height(),
-           background);
-}
+// void Widget::paint_disabled_widget() {
+//     // Re-implement this to change the brush to grey and repaint, this might be
+//     // done
+//     // elsewhere when the widget is disabled, the brush is changed to greyscale,
+//     // then
+//     // a typical update is done. The function will probably not be needed.
+//     Painter p{this};
+//     Widget* parent = dynamic_cast<Widget*>(this->parent());
+//     Color background = Color::Black;
+//     if (parent != nullptr && parent->brush().background_color()) {
+//         background = *parent->brush().background_color();
+//     }
+//     p.fill(0, 0, this->geometry().width(), this->geometry().height(),
+//            background);
+// }
 
 bool Widget::mouse_press_event(const Mouse_event& event) {
     return false;
@@ -460,43 +450,23 @@ Paint_engine& Widget::paint_engine() const {
 }
 
 std::size_t Widget::width() const {
+    std::size_t width_border_offset =
+        west_border_offset(this->border()) + east_border_offset(this->border());
     std::size_t w = this->geometry().width();
-    if (!border_.enabled()) {
-        return w;
-    }
-    std::size_t border_offset =
-        (border_.west_enabled() || border_.north_west_enabled() ||
-                 border_.south_west_enabled()
-             ? 1
-             : 0) +
-        (border_.east_enabled() || border_.north_east_enabled() ||
-                 border_.south_east_enabled()
-             ? 1
-             : 0);
-    if (border_offset > w) {
+    if (width_border_offset > w) {
         return 0;
     }
-    return w - border_offset;
+    return w - width_border_offset;
 }
 
 std::size_t Widget::height() const {
+    std::size_t height_border_offset = north_border_offset(this->border()) +
+                                       south_border_offset(this->border());
     std::size_t h = this->geometry().height();
-    if (!border_.enabled()) {
-        return h;
-    }
-    std::size_t border_offset =
-        (border_.north_enabled() || border_.north_west_enabled() ||
-                 border_.north_east_enabled()
-             ? 1
-             : 0) +
-        (border_.south_enabled() || border_.south_east_enabled() ||
-                 border_.south_west_enabled()
-             ? 1
-             : 0);
-    if (border_offset > h) {
+    if (height_border_offset > h) {
         return 0;
     }
-    return h - border_offset;
+    return h - height_border_offset;
 }
 
 }  // namespace twf
