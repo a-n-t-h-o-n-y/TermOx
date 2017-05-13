@@ -33,7 +33,7 @@ class System : public Object {
     static Paint_engine* paint_engine();
     static void set_paint_engine(std::unique_ptr<Paint_engine> engine);
     static Widget* focus_widget();
-    static void set_focus_widget(Widget* widg);
+    static void set_focus_widget(Widget* widg, bool clear_focus = true);
     static void cycle_tab_focus();
     static void set_palette(std::unique_ptr<Palette> palette);
     static Palette* palette();

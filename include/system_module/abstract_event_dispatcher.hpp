@@ -1,10 +1,8 @@
-#ifndef ABSTRACT_EVENT_DISPATCHER_HPP
-#define ABSTRACT_EVENT_DISPATCHER_HPP
+#ifndef SYSTEM_MODULE_ABSTRACT_EVENT_DISPATCHER_HPP
+#define SYSTEM_MODULE_ABSTRACT_EVENT_DISPATCHER_HPP
 
-#include "event.hpp"
-#include "object.hpp"
-
-#include <memory>
+#include "system_module/event.hpp"
+#include "system_module/object.hpp"
 
 namespace twf {
 
@@ -19,4 +17,4 @@ class Abstract_event_dispatcher : public Object {
 };
 
 }  // namespace twf
-#endif  // ABSTRACT_EVENT_DISPATCHER_HPP
+#endif  // SYSTEM_MODULE_ABSTRACT_EVENT_DISPATCHER_HPP

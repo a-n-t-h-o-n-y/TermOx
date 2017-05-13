@@ -27,6 +27,12 @@ Widget::Widget() {
     this->update();
 }
 
+Widget::~Widget() {
+    if (System::focus_widget() == this) {
+        System::set_focus_widget(nullptr, false);
+    }
+}
+
 void Widget::initialize() {
     this->close = [this]() {
         System::post_event(this, std::make_unique<Close_event>());

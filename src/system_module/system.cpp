@@ -197,15 +197,19 @@ Widget* System::focus_widget() {
     return focus_widg_;
 }
 
-void System::set_focus_widget(Widget* widg) {
+void System::set_focus_widget(Widget* widg, bool clear_focus) {
     if (widg == focus_widg_) {
         return;
     }
-    if (focus_widg_ != nullptr) {
+    // Old focus widget
+    if (focus_widg_ != nullptr && clear_focus) {
         focus_widg_->clear_focus();
     }
+    // New focus widget
     focus_widg_ = widg;
-    focus_widg_->set_focus(true);
+    if (widg != nullptr) {
+        focus_widg_->set_focus(true);
+    }
 }
 
 void System::cycle_tab_focus() {

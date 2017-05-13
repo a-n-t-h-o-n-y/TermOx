@@ -80,21 +80,13 @@ void Painter::fill(std::size_t x,
                    std::size_t y,
                    std::size_t width,
                    std::size_t height,
-                   const Glyph& fill_symbol) {
-    if (width == 0 || height == 0) {
+                   const Glyph& tile) {
+    if (width == 0) {
         return;
     }
-    // Save current cursor position
-    std::size_t cur_x = widget_->cursor_x();
-    std::size_t cur_y = widget_->cursor_y();
-
-    for (std::size_t i{y}; i < height; ++i) {
-        this->line(x, i, width - 1, i, fill_symbol);
+    for (; y < height; ++y) {
+        this->line(x, y, width - 1, y, tile);
     }
-
-    // Set Widget's cursor position back
-    widget_->set_cursor_x(cur_x);
-    widget_->set_cursor_y(cur_y);
 }
 
 void Painter::line(std::size_t x1,
@@ -102,143 +94,83 @@ void Painter::line(std::size_t x1,
                    std::size_t x2,
                    std::size_t y2,
                    const Glyph_string& gs) {
-    // Save current cursor position
-    std::size_t cur_x = widget_->cursor_x();
-    std::size_t cur_y = widget_->cursor_y();
-
-    // points must be left to right/ top to bottom right now, implement
-    // alternatives.
-    // Horizontal
-    if (y1 == y2) {
-        for (std::size_t i{x1}; i <= x2; ++i) {
-            this->move(i, y1,
-                       false);  // change to put_at(); but check that bool
-            this->put(gs);      // maybe don't change, not as efficient?
+    // No diagonal lines atm.
+    if (y1 == y2) {  // Horizontal
+        for (; x1 <= x2; ++x1) {
+            this->put_at(x1, y1, gs, false);
+        }
+    } else if (x1 == x2) {  // Vertical
+        for (; y1 <= y2; ++y1) {
+            this->put_at(x1, y1, gs, false);
         }
     }
-    // Vertical
-    else if (x1 == x2) {
-        for (std::size_t i{y1}; i <= y2; ++i) {
-            this->move(x1, i, false);
-            this->put(gs);
-        }
-    }
-    // Diagonal not implemented right now
-
-    // Set Widget's cursor position back
-    widget_->set_cursor_x(cur_x);
-    widget_->set_cursor_y(cur_y);
 }
 
 void Painter::border(const Border& b) {
+    if (!b.enabled()) {
+        return;
+    }
     const std::size_t widg_x = widget_->x();
     const std::size_t widg_y = widget_->y();
     std::size_t width = widget_->geometry().width();
     std::size_t height = widget_->geometry().height();
 
-    // if (widg_y + height > System::max_height()) {
-    //     return;
-    // }
-    // if (widg_x + width > System::max_width()) {
-    //     return;
-    // }
-    // if (widg_x == 0 && (b.north_west_enabled() || b.west_enabled() ||
-    //                     b.south_west_enabled()) &&
-    //     b.enabled()) {
-    //     return;
-    // }
-    // if (widg_y == 0 && (b.north_enabled() || b.north_west_enabled() ||
-    //                     b.north_east_enabled()) &&
-    //     b.enabled()) {
-    //     return;
-    // }
-    // if (widg_x + width == 0 && (b.north_enabled() || b.south_enabled())) {
-    //     return;
-    // }
-    // if (widg_y + height == 0 && (b.west_enabled() || b.east_enabled())) {
-    //     return;
-    // }
-
     // Checks for making sure size_t's do not go negative
-    if (b.enabled() && widg_x + width < 2 && b.north_enabled() &&
-        b.south_enabled()) {
+    if (widg_x + width < 2 && b.north_enabled() && b.south_enabled()) {
         return;
     }
-    if (b.enabled() && widg_y + height < 2 && b.east_enabled() &&
-        b.west_enabled()) {
+    if (widg_y + height < 2 && b.east_enabled() && b.west_enabled()) {
         return;
     }
 
     // North
-    if (b.enabled() && b.north_enabled()) {
-        unbound_line(widg_x + 1, widg_y, widg_x + width - 2, widg_y, b.north());
+    if (b.north_enabled()) {
+        this->unbound_line(widg_x + 1, widg_y, widg_x + width - 2, widg_y,
+                           b.north());
     }
 
     // South
-    if (b.enabled() && b.south_enabled()) {
-        unbound_line(widg_x + 1, widg_y + height - 1, widg_x + width - 2,
-                     widg_y + height - 1, b.south());
+    if (b.south_enabled()) {
+        this->unbound_line(widg_x + 1, widg_y + height - 1, widg_x + width - 2,
+                           widg_y + height - 1, b.south());
     }
 
     // West
-    if (b.enabled() && b.west_enabled()) {
-        unbound_line(widg_x, widg_y + 1, widg_x, widg_y + height - 2, b.west());
+    if (b.west_enabled()) {
+        this->unbound_line(widg_x, widg_y + 1, widg_x, widg_y + height - 2,
+                           b.west());
     }
 
     // East
-    if (b.enabled() && b.east_enabled()) {
-        unbound_line(widg_x + width - 1, widg_y + 1, widg_x + width - 1,
-                     widg_y + height - 2, b.east());
+    if (b.east_enabled()) {
+        this->unbound_line(widg_x + width - 1, widg_y + 1, widg_x + width - 1,
+                           widg_y + height - 2, b.east());
     }
 
     // North-West
-    if (b.enabled() && b.north_west_enabled()) {
-        unbound_put_string(widg_x, widg_y, b.north_west());
+    if (b.north_west_enabled()) {
+        this->unbound_put_string(widg_x, widg_y, b.north_west());
     }
 
     // North-East
-    if (b.enabled() && b.north_east_enabled()) {
-        unbound_put_string(widg_x + width - 1, widg_y, b.north_east());
+    if (b.north_east_enabled()) {
+        this->unbound_put_string(widg_x + width - 1, widg_y, b.north_east());
     }
 
     // South-West
-    if (b.enabled() && b.south_west_enabled()) {
-        unbound_put_string(widg_x, widg_y + height - 1, b.south_west());
+    if (b.south_west_enabled()) {
+        this->unbound_put_string(widg_x, widg_y + height - 1, b.south_west());
     }
 
     // South-East
-    if (b.enabled() && b.south_east_enabled()) {
-        unbound_put_string(widg_x + width - 1, widg_y + height - 1,
-                           b.south_east());
+    if (b.south_east_enabled()) {
+        this->unbound_put_string(widg_x + width - 1, widg_y + height - 1,
+                                 b.south_east());
     }
 }
 
-void Painter::border(const Glyph_string& gs) {  // Probably delete this
-    // Save current cursor position
-    std::size_t cur_x = widget_->cursor_x();
-    std::size_t cur_y = widget_->cursor_y();
-
-    // Top border
-    this->line(0, 0, widget_->geometry().width() - 1, 0, gs);
-
-    // Bottom border
-    this->line(0, widget_->geometry().height() - 1,
-               widget_->geometry().width() - 1,
-               widget_->geometry().height() - 1, gs);
-
-    // Middle sides
-    this->line(0, 0, 0, widget_->geometry().height() - 1, gs);
-    this->line(widget_->geometry().width() - 1, 0,
-               widget_->geometry().width() - 1,
-               widget_->geometry().height() - 1, gs);
-
-    // Set Widget's cursor position back
-    widget_->set_cursor_x(cur_x);
-    widget_->set_cursor_y(cur_y);
-}
-
-void Painter::set_cursor(bool state) {
-    if (state) {
+void Painter::set_cursor(bool enabled) {
+    if (enabled) {
         widget_->paint_engine().show_cursor();
     } else {
         widget_->paint_engine().hide_cursor();
@@ -255,10 +187,12 @@ void Painter::clear_screen() {
         return;
     }
     Glyph bg_tile = widget_->background_tile();
-    if (!bg_tile.brush().background_color()) {
+    if (!bg_tile.brush().background_color() &&
+        widget_->brush().background_color()) {
         bg_tile.brush().set_background(*widget_->brush().background_color());
     }
-    if (!bg_tile.brush().foreground_color()) {
+    if (!bg_tile.brush().foreground_color() &&
+        widget_->brush().foreground_color()) {
         bg_tile.brush().set_foreground(*widget_->brush().foreground_color());
     }
     for (std::size_t i{gy}; i < gy + height; ++i) {
@@ -283,22 +217,22 @@ void Painter::unbound_line(std::size_t g_x1,
                            const Glyph& g) {
     // Horizontal
     if (g_y1 == g_y2) {
-        for (std::size_t i{g_x1}; i <= g_x2; ++i) {
-            unbound_put_string(i, g_y1, g);
+        for (; g_x1 <= g_x2; ++g_x1) {
+            unbound_put_string(g_x1, g_y1, g);
         }
     } else if (g_x1 == g_x2) {
-        for (std::size_t i{g_y1}; i <= g_y2; ++i) {
-            unbound_put_string(g_x1, i, g);
+        for (; g_y1 <= g_y2; ++g_y1) {
+            unbound_put_string(g_x1, g_y1, g);
         }
     }
 }
 
 void Painter::add_default_attributes(Glyph* g) {
-    if (!g->brush().background_color()) {
+    if (!g->brush().background_color() && widget_->brush().background_color()) {
         g->brush().add_attributes(
             background(*widget_->brush().background_color()));
     }
-    if (!g->brush().foreground_color()) {
+    if (!g->brush().foreground_color() && widget_->brush().foreground_color()) {
         g->brush().add_attributes(
             foreground(*widget_->brush().foreground_color()));
     }

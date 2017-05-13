@@ -66,7 +66,6 @@ enum class ForegroundColor : std::int16_t {
 
 }  // namespace detail
 
-// Free Functions
 inline detail::BackgroundColor background(Color c) {
     return static_cast<detail::BackgroundColor>(c);
 }

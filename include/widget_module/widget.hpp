@@ -37,7 +37,7 @@ class Widget : public Object {
     enum class Focus_policy { TabFocus, ClickFocus, StrongFocus, NoFocus };
 
     Widget();
-    ~Widget() override = default;
+    virtual ~Widget() override;
 
     void update();
     void update_now();

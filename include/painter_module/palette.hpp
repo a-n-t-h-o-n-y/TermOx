@@ -1,27 +1,29 @@
-#ifndef PALETTE_HPP
-#define PALETTE_HPP
+#ifndef PAINTER_MODULE_PALETTE_HPP
+#define PAINTER_MODULE_PALETTE_HPP
 
-#include "color.hpp"
-
+#include "painter_module/color.hpp"
 #include <array>
-#include <vector>
+#include <cstddef>
+#include <cstdint>
 
 namespace twf {
 
 class Palette {
    public:
+    Palette() = default;
+    Palette(const Palette&) = default;
+    Palette& operator=(const Palette&) = default;
+    Palette(Palette&&) noexcept = default;             // NOLINT
+    Palette& operator=(Palette&&) noexcept = default;  // NOLINT
     virtual ~Palette() = default;
-    void set_rgb(Color c, int r, int g, int b);
 
+    void set_rgb(Color c, std::int16_t r, std::int16_t g, std::int16_t b);
     int red_value(Color c) const;
     int green_value(Color c) const;
     int blue_value(Color c) const;
 
    private:
-    using index_ = int;
-    static index_ translate_(Color c);
-
-    std::array<std::array<int, 3>, 16> definitions_;
+    std::array<std::array<int, 3>, 16> definitions_{};
 };
 
 class Standard_palette : public Palette {
@@ -35,4 +37,4 @@ class DawnBringer_palette : public Palette {
 };
 
 }  // namespace twf
-#endif  // PALETTE_HPP
+#endif  // PAINTER_MODULE_PALETTE_HPP

@@ -9,7 +9,8 @@ project (TWidgets)
 # Build System Information For Clang-Tidy
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_custom_target(compile_commands ALL
-	COMMAND [ -f ${CMAKE_SOURCE_DIR}/build/compile_commands.json ] && mv ${CMAKE_SOURCE_DIR}/build/compile_commands.json
+	COMMAND [ -f ${CMAKE_SOURCE_DIR}/build/compile_commands.json ] && 
+        mv ${CMAKE_SOURCE_DIR}/build/compile_commands.json
 		${CMAKE_SOURCE_DIR}/compile_commands.json || :)
 
 # Set Output Directories
@@ -26,58 +27,64 @@ set(CMAKE_CXX_FLAGS "-std=c++14 -g -Wall")
 include_directories(include)
 
 # Collect Source Files into Variable Names
-list(APPEND SYSTEM_MODULE_SOURCES 	"src/system_module/thread_data.cpp"
-									"src/system_module/system.cpp"
-									"src/system_module/event_loop.cpp"
-									"src/system_module/ncurses_event_dispatcher.cpp"
-									"src/system_module/posted_event_queue.cpp"
-									"src/system_module/posted_event.cpp"
-									"src/system_module/abstract_event_dispatcher.cpp"
-									"src/system_module/object.cpp"
-									"src/system_module/move_event.cpp"
-									"src/system_module/resize_event.cpp"
-									"src/system_module/child_event.cpp"
+list(APPEND SYSTEM_MODULE_SOURCES
+    "src/system_module/thread_data.cpp"
+	"src/system_module/system.cpp"
+	"src/system_module/event_loop.cpp"
+	"src/system_module/ncurses_event_dispatcher.cpp"
+	"src/system_module/posted_event_queue.cpp"
+	"src/system_module/posted_event.cpp"
+	"src/system_module/abstract_event_dispatcher.cpp"
+	"src/system_module/object.cpp"
+	"src/system_module/move_event.cpp"
+	"src/system_module/resize_event.cpp"
+	"src/system_module/child_event.cpp"
 								 	)
-list(APPEND PAINTER_MODULE_SOURCES  "src/painter_module/ncurses_paint_engine.cpp"
-									"src/painter_module/painter.cpp"
-									"src/painter_module/paint_engine.cpp"
-									"src/painter_module/palette.cpp"
-									"src/painter_module/glyph.cpp"
-									"src/painter_module/brush.cpp"
-									"src/painter_module/geometry.cpp"
-									"src/painter_module/paint_buffer.cpp"
+list(APPEND PAINTER_MODULE_SOURCES
+    "src/painter_module/ncurses_paint_engine.cpp"
+	"src/painter_module/painter.cpp"
+	"src/painter_module/paint_engine.cpp"
+	"src/painter_module/palette.cpp"
+	"src/painter_module/glyph.cpp"
+	"src/painter_module/brush.cpp"
+	"src/painter_module/geometry.cpp"
+	"src/painter_module/paint_buffer.cpp"
+    "src/painter_module/glyph_matrix.cpp"
+    "src/painter_module/glyph_string.cpp"
 									)
-list(APPEND WIDGET_MODULE_SOURCES 	"src/widget_module/widget.cpp"
-									"src/widget_module/layout.cpp"
-									"src/widget_module/horizontal_layout.cpp"
-									"src/widget_module/border.cpp"
-                                    "src/widget_module/vertical_layout.cpp"
-                                    "src/widget_module/textbox.cpp"
-                                    "src/widget_module/textbox_core.cpp"
-                                    "src/widget_module/push_button.cpp"
-                                    "src/widget_module/horizontal_scrollbar.cpp"
-                                    "src/widget_module/vertical_scrollbar.cpp"
-                                    "src/widget_module/checkbox.cpp"
-                                    "src/widget_module/titlebar.cpp"
+list(APPEND WIDGET_MODULE_SOURCES
+    "src/widget_module/widget.cpp"
+	"src/widget_module/layout.cpp"
+	"src/widget_module/horizontal_layout.cpp"
+	"src/widget_module/border.cpp"
+    "src/widget_module/vertical_layout.cpp"
+    "src/widget_module/textbox.cpp"
+    "src/widget_module/textbox_core.cpp"
+    "src/widget_module/push_button.cpp"
+    "src/widget_module/horizontal_scrollbar.cpp"
+    "src/widget_module/vertical_scrollbar.cpp"
+    "src/widget_module/checkbox.cpp"
+    "src/widget_module/titlebar.cpp"
 									)
 
-list(APPEND TEST_SOURCES "test/system_module/system_test.cpp"
-						 "test/system_module/object_test.cpp"
-						 "test/system_module/event_loop_test.cpp"
-						 "test/system_module/event_test.cpp"
-						 "test/system_module/abstract_event_dispatcher_test.cpp"
-						 "test/system_module/thread_data_test.cpp"
-						 "test/system_module/posted_event_queue_test.cpp"
-						 "test/system_module/posted_event_test.cpp"
-						 "test/system_module/ncurses_event_dispatcher_test.cpp"
+list(APPEND TEST_SOURCES
+    "test/system_module/system_test.cpp"
+	"test/system_module/object_test.cpp"
+	"test/system_module/event_loop_test.cpp"
+	"test/system_module/event_test.cpp"
+	"test/system_module/abstract_event_dispatcher_test.cpp"
+	"test/system_module/thread_data_test.cpp"
+	"test/system_module/posted_event_queue_test.cpp"
+	"test/system_module/posted_event_test.cpp"
+	"test/system_module/ncurses_event_dispatcher_test.cpp"
 
-						 "test/widget_module/widget_test.cpp"
+	"test/widget_module/widget_test.cpp"
 
-						 "test/painter_module/glyph_test.cpp"
-						 "test/painter_module/glyph_string_test.cpp"
-						 "test/painter_module/brush_test.cpp"
-						 "test/painter_module/palette_test.cpp"
-						 "test/painter_module/glyph_matrix_test.cpp"
+	"test/painter_module/glyph_test.cpp"
+	"test/painter_module/glyph_string_test.cpp"
+	"test/painter_module/brush_test.cpp"
+	"test/painter_module/palette_test.cpp"
+	"test/painter_module/glyph_matrix_test.cpp"
 						 )
 
 list(APPEND TEST1_SOURCES "test/test1/main.cpp"

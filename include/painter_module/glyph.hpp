@@ -19,7 +19,7 @@ class Glyph {
 
     // Implcit conversions are allowed.
     template <typename... Attributes>
-    Glyph(const char& symbol, Attributes&&... attrs)  // NOLINT
+    Glyph(char symbol, Attributes&&... attrs)  // NOLINT
         : brush_{std::forward<Attributes>(attrs)...}, symbol_{{symbol, '\0'}} {}
 
     template <typename... Attributes>
@@ -34,7 +34,7 @@ class Glyph {
         this->set_symbol(symbol);
     }
 
-    Glyph(const char& symbol, Brush b) : brush_{std::move(b)} {
+    Glyph(char symbol, Brush b) : brush_{std::move(b)} {
         this->set_symbol(symbol);
     }
 

@@ -33,7 +33,7 @@ class Painter {
               std::size_t y,
               std::size_t width,
               std::size_t height,
-              const Glyph& fill_symbol);
+              const Glyph& tile);
 
     // Takes local coords
     void line(std::size_t x1,
@@ -43,9 +43,8 @@ class Painter {
               const Glyph_string& gs = "-");
 
     void border(const Border& b);
-    void border(const Glyph_string& gs);
 
-    void set_cursor(bool state);
+    void set_cursor(bool enabled);
 
     void clear_screen();
 
