@@ -1,8 +1,7 @@
-#ifndef MOUSE_EVENT_HPP
-#define MOUSE_EVENT_HPP
+#ifndef SYSTEM_MODULE_EVENTS_MOUSE_EVENT_HPP
+#define SYSTEM_MODULE_EVENTS_MOUSE_EVENT_HPP
 
-#include "input_event.hpp"
-
+#include "system_module/events/input_event.hpp"
 #include <cstddef>
 #include <cstdint>
 
@@ -10,14 +9,13 @@ namespace twf {
 
 class Mouse_event : public Input_event {
    public:
-    enum class Button {// maybe move outside of Mouse_event class.
+    enum class Button {
         NoButton,
-        LeftButton,  // BUTTON1
+        LeftButton,
         MidButton,
         RightButton,
         ScrollUp,
         ScrollDown
-        // ... add ?
     };
 
     Mouse_event(Event::Type type,

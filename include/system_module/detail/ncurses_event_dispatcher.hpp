@@ -1,14 +1,15 @@
-#ifndef NCURSES_EVENT_DISPATCHER_HPP
-#define NCURSES_EVENT_DISPATCHER_HPP
+#ifndef SYSTEM_MODULE_DETAIL_NCURSES_EVENT_DISPATCHER_HPP
+#define SYSTEM_MODULE_DETAIL_NCURSES_EVENT_DISPATCHER_HPP
 
-#include "../abstract_event_dispatcher.hpp"
-#include "../event.hpp"
-#include "../object.hpp"
-
+#include "system_module/abstract_event_dispatcher.hpp"
 #include <cstddef>
 #include <memory>
+#include <utility>
 
 namespace twf {
+class Object;
+class Event;
+
 namespace detail {
 
 class NCurses_event_dispatcher : public Abstract_event_dispatcher {
@@ -24,4 +25,4 @@ class NCurses_event_dispatcher : public Abstract_event_dispatcher {
 
 }  // namespace detail
 }  // namespace twf
-#endif  // NCURSES_EVENT_DISPATCHER_HPP
+#endif  // SYSTEM_MODULE_DETAIL_NCURSES_EVENT_DISPATCHER_HPP

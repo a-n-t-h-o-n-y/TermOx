@@ -1,16 +1,14 @@
-#include <painter_module/color.hpp>
-#include <painter_module/detail/ncurses_paint_engine.hpp>
-#include <painter_module/paint_engine.hpp>
-#include <painter_module/palette.hpp>
-#include <system_module/detail/posted_event.hpp>
-#include <system_module/detail/thread_data.hpp>
-#include <system_module/event.hpp>
-#include <system_module/event_loop.hpp>
-#include <system_module/events/paint_event.hpp>
-#include <system_module/object.hpp>
-#include <system_module/system.hpp>
-#include <widget_module/widget.hpp>
-
+#include "system_module/system.hpp"
+#include "painter_module/color.hpp"
+#include "painter_module/paint_engine.hpp"
+#include "painter_module/palette.hpp"
+#include "system_module/detail/posted_event.hpp"
+#include "system_module/detail/thread_data.hpp"
+#include "system_module/event.hpp"
+#include "system_module/event_loop.hpp"
+#include "system_module/events/paint_event.hpp"
+#include "system_module/object.hpp"
+#include "widget_module/widget.hpp"
 #include <algorithm>
 #include <iterator>
 #include <memory>
@@ -19,7 +17,11 @@
 
 namespace twf {
 
-sig::Slot<void()> System::quit = []() { System::exit(); };
+sig::Slot<void()> System::quit = []() { System::exit(); };   // NOLINT
+Object* System::head_ = nullptr;                             // NOLINT
+std::unique_ptr<Paint_engine> System::engine_ = nullptr;     // NOLINT
+std::unique_ptr<Palette> System::system_palette_ = nullptr;  // NOLINT
+Widget* System::focus_widg_ = nullptr;                       // NOLINT
 
 void System::post_event(Object* obj,
                         std::unique_ptr<Event> event,
@@ -72,7 +74,7 @@ void System::send_posted_events(Object* obj_filter, Event::Type etype_filter) {
                         posted_iter = std::begin(queue);
                     }
                 } else {
-                    // This can post to the queue.
+                    // const_cast because of multi-set const only iterator.
                     System::notify(const_cast<Object*>(posted_iter->reciever()),
                                    posted_iter->event());
                     posted_iter = std::begin(queue);
@@ -86,7 +88,6 @@ void System::send_posted_events(Object* obj_filter, Event::Type etype_filter) {
             ++posted_iter;
         }
     }
-    System::paint_engine()->flush(true);
 }
 
 bool System::notify(Object* obj, const Event& event) {
@@ -104,51 +105,12 @@ bool System::notify(Object* obj, const Event& event) {
     return notify_helper(obj, event);
 }
 
-// std::string string_event(const Event& event) {
-//     std::stringstream ss;
-//     ss << "Event type: ";
-//     if (event.type() == Event::Move) {
-//         ss << "Move" << std::endl;
-//         auto& me = static_cast<const Move_event&>(event);
-//         ss << "x = " << me.new_x() << ", y = " << me.new_y() << std::endl;
-//     } else if (event.type() == Event::Resize) {
-//         ss << "Resize" << std::endl;
-//         auto& re = static_cast<const Resize_event&>(event);
-//         ss << "width: " << re.new_width() << ", height: " << re.new_height()
-//         << std::endl;
-//     } else if (event.type() == Event::Paint) {
-//         ss << "Paint" << std::endl;
-//     } else if (event.type() == Event::ChildAdded) {
-//         ss << "ChildAdded" << std::endl;
-//     } else if (event.type() == Event::ChildRemoved) {
-//         ss << "ChildRemoved" << std::endl;
-//     } else if (event.type() == Event::ChildPolished) {
-//         ss << "ChildPolished" << std::endl;
-//     } else if (event.type() == Event::MouseButtonPress){
-//         ss << "MouseButtonPress" << std::endl;
-//     } else if (event.type() == Event::MouseButtonRelease) {
-//         ss << "MouseButtonRelease" << std::endl;
-//     } else if (event.type() == Event::None) {
-//         ss << "None Type" << std::endl;
-//     } else if (event.type() == Event::FocusIn) {
-//         ss << "FocusIn" << std::endl;
-//     } else if (event.type() == Event::FocusOut) {
-//         ss << "FocusOut" << std::endl;
-//     }
-
-//     else {
-//         ss << "Something else" << std::endl;
-//     }
-//     return ss.str();
-// }
-
 bool System::notify_helper(Object* obj, const Event& event) {
     bool handled{false};
     // Send event to object
     handled = obj->event(event);
-
     // Propagate event to parent
-    if (!handled) {  // && event type can propogate
+    if (!handled) {
         Object* parent = obj->parent();
         if (parent != nullptr) {
             handled = notify_helper(parent, event);
@@ -184,14 +146,9 @@ unsigned System::max_height() {
     return System::paint_engine()->screen_height();
 }
 
-Object* System::head_ = nullptr;
-std::unique_ptr<Paint_engine> System::engine_ = nullptr;
-
 Object* System::head() {
     return head_;
 }
-
-Widget* System::focus_widg_ = nullptr;
 
 Widget* System::focus_widget() {
     return focus_widg_;
@@ -230,7 +187,7 @@ void System::cycle_tab_focus() {
     }
 
     // Rearrange objects vector
-    Object* current_focus_object = static_cast<Object*>(System::focus_widget());
+    auto* current_focus_object = static_cast<Object*>(System::focus_widget());
     if (current_focus_object != nullptr) {
         auto current_iter = std::find(std::begin(objects), std::end(objects),
                                       current_focus_object);
@@ -242,7 +199,7 @@ void System::cycle_tab_focus() {
 
     // Find the next focus widget
     for (Object* child : objects) {
-        Widget* widg = dynamic_cast<Widget*>(child);
+        auto* widg = dynamic_cast<Widget*>(child);
         if (widg != nullptr) {
             if (widg->focus_policy() == Widget::Focus_policy::TabFocus ||
                 widg->focus_policy() == Widget::Focus_policy::StrongFocus) {
@@ -254,8 +211,6 @@ void System::cycle_tab_focus() {
         }
     }
 }
-
-std::unique_ptr<Palette> System::system_palette_ = nullptr;
 
 void System::set_palette(std::unique_ptr<Palette> palette) {
     system_palette_ = std::move(palette);
@@ -323,9 +278,6 @@ System::System(std::unique_ptr<Paint_engine> engine) {
 
 System::~System() {
     System::set_paint_engine(nullptr);
-
-    // Set all static objects to their default state(mainly for testing)
-    // there is a static variable in a function somewhere.
 }
 
 void System::set_head(Object* obj) {
@@ -336,11 +288,8 @@ int System::run() {
     Event_loop main_loop;
     auto& data = detail::Thread_data::current();
     data.quit_now = false;
-
     int return_code = main_loop.run();
-
     data.quit_now = false;
-
     return return_code;
 }
 

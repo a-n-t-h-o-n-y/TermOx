@@ -1,7 +1,7 @@
-#ifndef EVENT_LOOP_HPP
-#define EVENT_LOOP_HPP
+#ifndef SYSTEM_MODULE_EVENT_LOOP_HPP
+#define SYSTEM_MODULE_EVENT_LOOP_HPP
 
-#include "object.hpp"
+#include "system_module/object.hpp"
 
 namespace twf {
 
@@ -17,4 +17,4 @@ class Event_loop : public Object {
 };
 
 }  // namespace twf
-#endif  // EVENT_LOOP_HPP
+#endif  // SYSTEM_MODULE_EVENT_LOOP_HPP

@@ -1,8 +1,7 @@
-#ifndef RESIZE_EVENT_HPP
-#define RESIZE_EVENT_HPP
+#ifndef SYSTEM_MODULE_EVENTS_RESIZE_EVENT_HPP
+#define SYSTEM_MODULE_EVENTS_RESIZE_EVENT_HPP
 
-#include "../event.hpp"
-
+#include "system_module/event.hpp"
 #include <cstddef>
 
 namespace twf {
@@ -27,4 +26,4 @@ class Resize_event : public Event {
 };
 
 }  // namespace twf
-#endif  // RESIZE_EVENT_HPP
+#endif  // SYSTEM_MODULE_EVENTS_RESIZE_EVENT_HPP

@@ -1,7 +1,7 @@
-#ifndef INPUT_EVENT_HPP
-#define INPUT_EVENT_HPP
+#ifndef SYSTEM_MODULE_EVENTS_INPUT_EVENT_HPP
+#define SYSTEM_MODULE_EVENTS_INPUT_EVENT_HPP
 
-#include "../event.hpp"
+#include "system_module/event.hpp"
 
 namespace twf {
 
@@ -16,4 +16,4 @@ class Input_event : public Event {
 };
 
 }  // namespace twf
-#endif  // INPUT_EVENT_HPP
+#endif  // SYSTEM_MODULE_EVENTS_INPUT_EVENT_HPP

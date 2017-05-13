@@ -1,7 +1,7 @@
-#ifndef EVENT_HPP
-#define EVENT_HPP
+#ifndef SYSTEM_MODULE_EVENT_HPP
+#define SYSTEM_MODULE_EVENT_HPP
 
-#include "object.hpp"
+#include "system_module/object.hpp"
 
 namespace twf {
 
@@ -121,7 +121,10 @@ class Event {
     };
 
     explicit Event(Type type) : type_{type} {}
-
+    Event(const Event&) = default;
+    Event& operator=(const Event&) = default;
+    Event(Event&&) noexcept = default;
+    Event& operator=(Event&&) noexcept = default;
     virtual ~Event() = default;
 
     Type type() const { return type_; }
@@ -135,4 +138,4 @@ inline bool operator==(const Event& x, const Event& y) {
 }
 
 }  // namespace twf
-#endif  // EVENT_HPP
+#endif  // SYSTEM_MODULE_EVENT_HPP

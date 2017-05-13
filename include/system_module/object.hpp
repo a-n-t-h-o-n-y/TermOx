@@ -1,10 +1,10 @@
-#ifndef OBJECT_HPP
-#define OBJECT_HPP
+#ifndef SYSTEM_MODULE_OBJECT_HPP
+#define SYSTEM_MODULE_OBJECT_HPP
 
 #include <aml/signals/signal.hpp>
 #include <aml/signals/slot.hpp>
-
 #include <algorithm>
+#include <cstddef>
 #include <memory>
 #include <queue>
 #include <string>
@@ -20,11 +20,10 @@ class Enable_event;
 class Object {
    public:
     Object() { this->Object::initialize(); }
-
-    Object(Object&& rhs) noexcept(false);
-
-    Object& operator=(Object&& rhs) noexcept(false);
-
+    Object(const Object&) = delete;
+    Object& operator=(const Object&) = delete;
+    Object(Object&& rhs) noexcept;
+    Object& operator=(Object&& rhs) noexcept;
     virtual ~Object();
 
     template <typename T, typename... Args>
@@ -34,10 +33,7 @@ class Object {
     }
 
     void add_child(std::unique_ptr<Object> child);
-
-    virtual bool event(const Event& event);
-
-    virtual bool event_filter(Object* watched, const Event& event);
+    std::vector<Object*> children() const;
 
     template <typename T>
     T* find_child(const std::string& name) {
@@ -49,29 +45,26 @@ class Object {
         return this->find_child_impl<T>(this, name);
     }
 
-    void install_event_filter(Object* filter_object);
-
-    std::string name() const { return object_name_; }
-
     Object* parent() const;
-
-    void remove_event_filter(Object* obj);
-
-    void set_name(const std::string& name);
-
     void set_parent(Object* parent);
 
-    void set_enabled(bool enabled);
+    std::string name() const { return object_name_; }
+    void set_name(const std::string& name);
+
+    virtual bool event(const Event& event);
+    virtual bool event_filter(Object* watched, const Event& event);
+
+    void install_event_filter(Object* filter_object);
+    void remove_event_filter(Object* obj);
 
     bool enabled() const { return enabled_; }
-
-    std::vector<Object*> children() const;
+    void set_enabled(bool enabled);
 
     virtual bool has_coordinates(std::size_t glob_x, std::size_t glob_y) {
         return false;
     }
 
-    // Slot - no noexcept specification for Slot's move constructor/assignment
+    // Slots
     sig::Slot<void()> delete_later;
     sig::Slot<void()> enable;
     sig::Slot<void()> disable;
@@ -90,7 +83,6 @@ class Object {
     Object* parent_ = nullptr;
     std::vector<std::unique_ptr<Object>> children_;
     std::vector<Object*> event_filter_objects_;
-
     bool enabled_ = true;
 
    private:
@@ -121,4 +113,4 @@ class Object {
 };
 
 }  // namespace twf
-#endif  // OBJECT_HPP
+#endif  // SYSTEM_MODULE_OBJECT_HPP

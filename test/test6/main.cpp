@@ -8,6 +8,45 @@ class Meta : public twf::Vertical_layout {
     Meta() { this->make_child<twf::Titlebar>("ƴots"); }
 };
 
+class scroll_test : public twf::Widget {
+   public:
+    bool mouse_press_event(const twf::Mouse_event& event) override {
+        if (event.button() == twf::Mouse_event::Button::ScrollUp) {
+            up_ = true;
+        } else if (event.button() == twf::Mouse_event::Button::ScrollDown) {
+            up_ = false;
+        }
+        this->update();
+        return true;
+    }
+
+    bool paint_event(const twf::Paint_event& event) override {
+        twf::Painter p{this};
+        if (up_) {
+            p.put_at(0, 0, "Scroll Up");
+        } else {
+            p.put_at(0, 0, "Scroll Down");
+        }
+        return Widget::paint_event(event);
+    }
+
+   private:
+    bool up_ = false;
+};
+
+class resizing_button : public twf::Push_button {
+   public:
+    resizing_button() : Push_button("resize") {
+        clicked.connect([this] {
+            this->geometry().size_policy().vertical_policy =
+                twf::Size_policy::Fixed;
+            this->geometry().set_height_hint(3);
+        });
+        this->enable_border();
+        this->set_background(twf::Color::Violet);
+    }
+};
+
 int main() {
     twf::System sys;
 
@@ -16,18 +55,22 @@ int main() {
     tb.geometry().size_policy().vertical_policy = twf::Size_policy::Expanding;
     tb.set_background(twf::Color::Light_gray);
     tb.background_tile() = twf::Glyph(" ", twf::Attribute::Underline);
+    tb.enable_border();
+    tb.border().set_north_west("╭");
+    tb.border().set_north_east("╮");
+    tb.border().set_south_west("╰");
+    tb.border().set_south_east("╯");
+    w.make_child<scroll_test>().enable_border();
+    w.make_child<resizing_button>();
     auto& pb = w.make_child<twf::Push_button>("delete textbox");
     pb.geometry().set_height_hint(3);
     pb.geometry().size_policy().vertical_policy = twf::Size_policy::Preferred;
     pb.clicked.connect(tb.close);
-
-    // you need delete_later to check if it is valid? though its object will be
-    // gone,
-    // the reason you are having trouble is because you hold a reference, you
-    // need to
-    // ask the parent for a copy, if it exists, maybe by name, maybe it returns
-    // an optional?
-    // you want to make it simple to use.
+    pb.enable_border();
+    pb.border().set_north_west("╭");
+    pb.border().set_north_east("╮");
+    pb.border().set_south_west("╰");
+    pb.border().set_south_east("╯");
 
     sys.set_head(&w);
 

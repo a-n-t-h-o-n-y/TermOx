@@ -1,14 +1,12 @@
-#include <system_module/detail/ncurses_event_dispatcher.hpp>
-#include <system_module/event.hpp>
-#include <system_module/events/mouse_event.hpp>
-#include <system_module/events/key_event.hpp>
-#include <system_module/events/resize_event.hpp>
-#include <system_module/system.hpp>
-#include <widget_module/widget.hpp>
-#include <widget_module/border.hpp>
-
+#include "system_module/detail/ncurses_event_dispatcher.hpp"
+#include "system_module/event.hpp"
+#include "system_module/events/key_event.hpp"
+#include "system_module/events/mouse_event.hpp"
+#include "system_module/events/resize_event.hpp"
+#include "system_module/system.hpp"
+#include "widget_module/border.hpp"
+#include "widget_module/widget.hpp"
 #include <ncurses.h>
-
 #include <cstddef>
 #include <memory>
 #include <utility>
@@ -17,7 +15,7 @@ namespace twf {
 namespace detail {
 
 void NCurses_event_dispatcher::post_user_input() {
-    std::unique_ptr<Event> event = nullptr;
+    std::unique_ptr<Event> event{nullptr};
     Object* object = nullptr;
 
     int input = ::getch();  // blocking call
@@ -39,9 +37,6 @@ void NCurses_event_dispatcher::post_user_input() {
         default:  // Key_event
             event = handle_keyboard_event(input);
             object = handle_keyboard_object();
-            if (static_cast<Key_event*>(event.get())->key_code() == Key::Tab) {
-                System::cycle_tab_focus();
-            }
             break;
     }
 
@@ -50,13 +45,12 @@ void NCurses_event_dispatcher::post_user_input() {
     }
 }
 
-#undef border // NCurses macro, naming conflict.
+#undef border  // NCurses macro, naming conflict.
 
 std::pair<Object*, std::unique_ptr<Event>>
 NCurses_event_dispatcher::parse_mouse_event() {
-    ::MEVENT mouse_event;
+    ::MEVENT mouse_event;  // NOLINT
     if (::getmouse(&mouse_event) == OK) {
-        // Find Object
         Object* object = find_object(mouse_event.x, mouse_event.y);
 
         // Parse NCurses Event
@@ -64,57 +58,58 @@ NCurses_event_dispatcher::parse_mouse_event() {
         Mouse_event::Button ev_button = Mouse_event::Button::NoButton;
 
         // Button 1 / Left Button
-        if (mouse_event.bstate & BUTTON1_PRESSED) {
+        if (static_cast<bool>(mouse_event.bstate & BUTTON1_PRESSED)) {
             ev_type = Event::Type::MouseButtonPress;
             ev_button = Mouse_event::Button::LeftButton;
-        } else if (mouse_event.bstate & BUTTON1_RELEASED) {
+        } else if (static_cast<bool>(mouse_event.bstate & BUTTON1_RELEASED)) {
             ev_type = Event::Type::MouseButtonRelease;
             ev_button = Mouse_event::Button::LeftButton;
         }
 
         // Button 2 / Middle Button
-        else if (mouse_event.bstate & BUTTON2_PRESSED) {
+        else if (static_cast<bool>(mouse_event.bstate & BUTTON2_PRESSED)) {
             ev_type = Event::Type::MouseButtonPress;
             ev_button = Mouse_event::Button::MidButton;
-        } else if (mouse_event.bstate & BUTTON2_RELEASED) {
+        } else if (static_cast<bool>(mouse_event.bstate & BUTTON2_RELEASED)) {
             ev_type = Event::Type::MouseButtonRelease;
             ev_button = Mouse_event::Button::MidButton;
         }
 
         // Button 3 / Right Button
-        else if (mouse_event.bstate & BUTTON3_PRESSED) {
+        else if (static_cast<bool>(mouse_event.bstate & BUTTON3_PRESSED)) {
             ev_type = Event::Type::MouseButtonPress;
             ev_button = Mouse_event::Button::RightButton;
-        } else if (mouse_event.bstate & BUTTON3_RELEASED) {
+        } else if (static_cast<bool>(mouse_event.bstate & BUTTON3_RELEASED)) {
             ev_type = Event::Type::MouseButtonRelease;
             ev_button = Mouse_event::Button::RightButton;
         }
 
         // Button 4 / Scroll Up
-        else if (mouse_event.bstate & BUTTON4_PRESSED) {
+        else if (static_cast<bool>(mouse_event.bstate & BUTTON4_PRESSED)) {
             ev_type = Event::Type::MouseButtonPress;
             ev_button = Mouse_event::Button::ScrollUp;
-        } else if (mouse_event.bstate & BUTTON4_RELEASED) {
+        } else if (static_cast<bool>(mouse_event.bstate & BUTTON4_RELEASED)) {
             ev_type = Event::Type::MouseButtonRelease;
             ev_button = Mouse_event::Button::ScrollUp;
         }
 
         // Button 5 / Scroll Down
-        else if (mouse_event.bstate & BUTTON5_PRESSED) {
+        else if (static_cast<bool>(mouse_event.bstate & BUTTON5_PRESSED)) {
             ev_type = Event::Type::MouseButtonPress;
             ev_button = Mouse_event::Button::ScrollDown;
-        } else if (mouse_event.bstate & BUTTON5_RELEASED) {
+        } else if (static_cast<bool>(mouse_event.bstate & BUTTON5_RELEASED)) {
             ev_type = Event::Type::MouseButtonRelease;
             ev_button = Mouse_event::Button::ScrollDown;
         } else {
             return std::pair<Object*, std::unique_ptr<Event>>{nullptr, nullptr};
         }
 
-        Widget* widg = dynamic_cast<Widget*>(object);
+        // Determine location of mouse event.
+        auto* widg = dynamic_cast<Widget*>(object);
         if (widg != nullptr) {
-            std::size_t local_x =
+            auto local_x =
                 mouse_event.x - widg->x() - west_border_offset(widg->border());
-            std::size_t local_y =
+            auto local_y =
                 mouse_event.y - widg->y() - north_border_offset(widg->border());
             auto event = std::make_unique<Mouse_event>(
                 ev_type, ev_button, mouse_event.x, mouse_event.y, local_x,

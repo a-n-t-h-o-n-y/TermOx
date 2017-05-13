@@ -47,11 +47,16 @@ bool Textbox::key_press_event(const Key_event& event) {
         if (this->cursor_y() == this->height() - 1) {
             this->scroll_down();
         }
-        if (this->height() != 1) { // otherwise index moved twice.
+        if (this->height() != 1) {  // otherwise index moved twice.
             this->set_cursor_index(cursor_index_ + 1);
         }
         this->update();
         // Character
+    } else if (event.key_code() == Key::Tab) {
+        // insert 4 spaces, or variable amount set by user, possibly implement
+        // real tabs, by moving to the next line divisible by 4. insert '\t'
+        // into contents, this will need new printing functions, probably just
+        // insert here.
     } else if (event.text().size() != 0) {
         if (cursor_index_ == contents_.size()) {
             contents_.append(event.text());

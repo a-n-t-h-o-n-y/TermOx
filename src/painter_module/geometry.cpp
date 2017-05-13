@@ -8,7 +8,7 @@ struct Size_policy;
 
 void Geometry::set_width_hint(std::size_t hint) {
     width_hint_ = hint;
-    this->update_parent();
+    this->update_parent(); // should possibly post child_event
 }
 
 void Geometry::set_height_hint(std::size_t hint) {

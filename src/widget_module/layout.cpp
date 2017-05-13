@@ -1,6 +1,7 @@
 #include <system_module/object.hpp>
 #include <widget_module/layout.hpp>
 #include "painter_module/painter.hpp"
+#include "system_module/events/child_event.hpp"
 #include "system_module/events/paint_event.hpp"
 
 namespace twf {
@@ -29,6 +30,11 @@ bool Layout::paint_event(const Paint_event& event) {
         p.put_at(0, 0, "Screen too small.");
     }
     return Widget::paint_event(event);
+}
+
+bool Layout::child_event(const Child_event& event) {
+    this->update();    
+    return Widget::child_event(event);
 }
 
 }  // namespace twf

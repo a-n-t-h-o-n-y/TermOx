@@ -1,9 +1,8 @@
-#ifndef KEY_EVENT_HPP
-#define KEY_EVENT_HPP
+#ifndef SYSTEM_MODULE_EVENTS_KEY_EVENT_HPP
+#define SYSTEM_MODULE_EVENTS_KEY_EVENT_HPP
 
-#include "../event.hpp"
-#include "../key.hpp"
-
+#include "system_module/event.hpp"
+#include "system_module/key.hpp"
 #include <string>
 
 namespace twf {
@@ -25,4 +24,4 @@ class Key_event : public Event {
 };
 
 }  // namespace twf
-#endif  // KEY_EVENT_HPP
+#endif  // SYSTEM_MODULE_EVENTS_KEY_EVENT_HPP

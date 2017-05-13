@@ -15,6 +15,7 @@
 #include <system_module/system.hpp>
 #include <widget_module/widget.hpp>
 #include "widget_module/border.hpp"
+#include "system_module/key.hpp"
 
 #include <memory>
 
@@ -302,9 +303,11 @@ bool Widget::clear_screen_event(const Clear_screen_event& event) {
 // }
 
 // void Widget::paint_disabled_widget() {
-//     // Re-implement this to change the brush to grey and repaint, this might be
+//     // Re-implement this to change the brush to grey and repaint, this might
+//     be
 //     // done
-//     // elsewhere when the widget is disabled, the brush is changed to greyscale,
+//     // elsewhere when the widget is disabled, the brush is changed to
+//     greyscale,
 //     // then
 //     // a typical update is done. The function will probably not be needed.
 //     Painter p{this};
@@ -338,6 +341,9 @@ bool Widget::mouse_move_event(const Mouse_event& event) {
 }
 
 bool Widget::key_press_event(const Key_event& event) {
+    if (event.key_code() == Key::Tab) {
+        System::cycle_tab_focus();
+    }
     return false;
 }
 

@@ -1,5 +1,18 @@
                              __Issues+Ideas__
 
+_ Add Shadow widget, which attaches to an existing widget in some way and paints
+     a shaow in either block chars or checkered blocks, or even just empty with
+     background color changed, though the glyph way let's you vary the design
+     more.
+
+_ Add Color_picker widget with width 2 squares of all 16 colors in the palette
+    with signals that trigger on clicking. It'll be made up of a collection of
+    two horizontal layouts within a vertical layout of 16 buttons total with
+    fixed width hint of 2 and fixed height hint of 1(only on the horizontal
+    layouts). And a vertical layout hixed height of 2.
+
+_ All Slots in Widgets need to be tracking the Object::destroyed Signal.
+
 _ Word wrap on space in textbox, not sure how to do this in a simple way yet.
 
 _ Add Expanding Widget that is a title with a little arrow, when you click on
@@ -109,7 +122,12 @@ _ Partial borders and resizing to 0 then resizing back to a typical size causes
     ncurses to not print anymore, not a crash, you've seen this before.
 
 _ Need a better border interface that allows you more freedom to create half
-    borders without text disapearing from the top and side lines
+    borders without text disapearing from the top and side lines. Do this by
+    having more conditionals, if you have a corner piece, but no top side, then
+    print at the very top, this allows the user to add a blank space to get
+    around this, if all four corners are active and no walls, then it has inner
+    height and width, go through each scenario and tailor it. Not sure if this
+    is the best.
 
 _ System head should have a built in layout if your widget does not have one, or
     at least sane widget layout with a layout, for simple widgets.

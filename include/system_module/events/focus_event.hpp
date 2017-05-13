@@ -1,7 +1,7 @@
-#ifndef FOCUS_EVENT_HPP
-#define FOCUS_EVENT_HPP
+#ifndef SYSTEM_MODULE_EVENTS_FOCUS_EVENT_HPP
+#define SYSTEM_MODULE_EVENTS_FOCUS_EVENT_HPP
 
-#include "../event.hpp"
+#include "system_module/event.hpp"
 
 namespace twf {
 
@@ -11,4 +11,4 @@ class Focus_event : public Event {
 };
 
 }  // namespace twf
-#endif  // FOCUS_EVENT_HPP
+#endif  // SYSTEM_MODULE_EVENTS_FOCUS_EVENT_HPP

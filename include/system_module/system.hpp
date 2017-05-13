@@ -1,15 +1,12 @@
-#ifndef SYSTEM_HPP
-#define SYSTEM_HPP
+#ifndef SYSTEM_MODULE_SYSTEM_HPP
+#define SYSTEM_MODULE_SYSTEM_HPP
 
-#include "event.hpp"
-#include "object.hpp"
-
-#include <painter_module/detail/ncurses_paint_engine.hpp>
-#include <painter_module/paint_engine.hpp>
-#include <painter_module/palette.hpp>
-
+#include "system_module/event.hpp"
+#include "system_module/object.hpp"
+#include "painter_module/detail/ncurses_paint_engine.hpp"
+#include "painter_module/paint_engine.hpp"
+#include "painter_module/palette.hpp"
 #include <aml/signals/slot.hpp>
-
 #include <memory>
 
 namespace twf {
@@ -18,6 +15,14 @@ class Widget;
 
 class System : public Object {
    public:
+    explicit System(std::unique_ptr<Paint_engine> engine =
+                        std::make_unique<detail::NCurses_paint_engine>());
+    System(const System&) = delete;
+    System& operator=(const System&) = delete;
+    System(System&&) noexcept = default;
+    System& operator=(System&&) noexcept = default;
+    ~System() override;
+
     static void post_event(Object* obj,
                            std::unique_ptr<Event> event,
                            int priority = 0);
@@ -37,12 +42,8 @@ class System : public Object {
     static void cycle_tab_focus();
     static void set_palette(std::unique_ptr<Palette> palette);
     static Palette* palette();
-
-    explicit System(std::unique_ptr<Paint_engine> engine =
-                        std::make_unique<detail::NCurses_paint_engine>());
-    ~System() override;
-
     static void set_head(Object* obj);
+
     int run();
 
     // Slots
@@ -59,4 +60,4 @@ class System : public Object {
 };
 
 }  // namespace twf
-#endif  // SYSTEM_HPP
+#endif  // SYSTEM_MODULE_SYSTEM_HPP

@@ -1,7 +1,6 @@
 #ifndef SYSTEM_MODULE_ABSTRACT_EVENT_DISPATCHER_HPP
 #define SYSTEM_MODULE_ABSTRACT_EVENT_DISPATCHER_HPP
 
-#include "system_module/event.hpp"
 #include "system_module/object.hpp"
 
 namespace twf {
