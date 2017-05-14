@@ -107,6 +107,7 @@ class Vert_horiz_thing : public twf::Vertical_layout {
             make_child<Horiz_thing>();
             make_child<Horiz_thing>();
             make_child<Horiz_thing>();
+            make_child<Horiz_thing>();
         }
 };
 

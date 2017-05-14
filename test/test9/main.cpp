@@ -15,6 +15,7 @@ int main() {
     twf::Horizontal_layout w;
     auto& ckbx = w.make_child<twf::Checkbox>();
     auto& vl = w.make_child<twf::Vertical_layout>();
+    vl.make_child<twf::Titlebar>("~ Checkbox and Textbox ~");
     auto& tb = vl.make_child<twf::Textbox>();
     tb.enable_border();
     auto change_color = [&tb](twf::Color c) {

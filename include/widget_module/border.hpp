@@ -1,8 +1,7 @@
-#ifndef BORDER_HPP
-#define BORDER_HPP
+#ifndef WIDGET_MODULE_BORDER_HPP
+#define WIDGET_MODULE_BORDER_HPP
 
-#include <painter_module/glyph.hpp>
-
+#include "painter_module/glyph.hpp"
 #include <cstddef>
 
 namespace twf {
@@ -93,4 +92,4 @@ std::size_t north_border_offset(const Border& b);
 std::size_t south_border_offset(const Border& b);
 
 }  // namespace twf
-#endif  // BORDER_HPP
+#endif  // WIDGET_MODULE_BORDER_HPP

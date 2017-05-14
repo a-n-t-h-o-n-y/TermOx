@@ -1,15 +1,13 @@
-#ifndef CHECKBOX_HPP
-#define CHECKBOX_HPP
-
-#include <aml/signals/signals.hpp>
+#ifndef WIDGET_MODULE_WIDGETS_CHECKBOX_HPP
+#define WIDGET_MODULE_WIDGETS_CHECKBOX_HPP
 
 #include "painter_module/glyph.hpp"
 #include "widget_module/widget.hpp"
-#include "system_module/events/mouse_event.hpp"
-#include "system_module/events/paint_event.hpp"
-#include "painter_module/attribute.hpp"
+#include <aml/signals/signals.hpp>
 
 namespace twf {
+class Mouse_event;
+class Paint_event;
 
 class Checkbox : public Widget {
    public:
@@ -26,10 +24,10 @@ class Checkbox : public Widget {
 
     void toggle();
 
-    Glyph empty_ = Glyph("☐");
-    Glyph check_ = Glyph("☒");
-    bool checked_ = false;
+    Glyph empty_box_{"☐"};
+    Glyph checked_box_{"☒"};
+    bool checked_{false};
 };
 
 }  // namespace twf
-#endif  // CHECKBOX_HPP
+#endif  // WIDGET_MODULE_WIDGETS_CHECKBOX_HPP

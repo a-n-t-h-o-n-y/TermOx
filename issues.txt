@@ -210,6 +210,11 @@ X Move Widget::erase_widget_screen() to Painter::clear_screen() and paint over
     the Event_queue::add_event() function could optimize out multiple clears on
     the same widget.
 
+_ Ncurses crash with certain widget amounts in layout. getting it with a
+    vertical layout in test6 with a widget after textbox.
+    The above is only a problem in a few terminals, but it is still pointing at
+    a problem in this library.
+
 X Add title_bar widget that has a title and an exit button. Use is with a
     vertical layout with another widget.
 

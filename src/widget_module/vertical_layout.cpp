@@ -6,6 +6,8 @@
 #include <tuple>
 #include <functional>
 
+#include <fstream>
+
 #include <system_module/events/move_event.hpp>
 #include <system_module/events/resize_event.hpp>
 #include <system_module/system.hpp>
@@ -150,6 +152,11 @@ std::vector<std::size_t> Vertical_layout::size_widgets() {
     for (const auto& tup : widgets) {
         heights.push_back(std::get<2>(tup));
     }
+    // log
+    std::fstream log("heights.txt", std::ios_base::app);
+    for (auto& h : heights) {
+        log << "height: " << h << std::endl;
+    }
     return heights;
 }
 
@@ -186,7 +193,7 @@ void Vertical_layout::distribute_space(
                 to_distribute);
             if ((std::get<2>(tup).get() + height_additions.back()) >
                 std::get<0>(tup)->geometry().max_height()) {
-                height_left -= std::get<0>(tup)->geometry().max_height() -
+                height_left += std::get<0>(tup)->geometry().max_height() -
                                std::get<2>(tup);
                 std::get<2>(tup).get() =
                     std::get<0>(tup)->geometry().max_height();
@@ -357,16 +364,14 @@ void Vertical_layout::collect_space(
             policy == Size_policy::Preferred ||
             policy == Size_policy::Ignored) {
             height_deductions.push_back(
-                ((1 / (std::get<0>(tup)
-                           ->geometry()
-                           .size_policy()
-                           .horizontal_stretch /
-                       static_cast<double>(total_stretch))) /
+                ((1 /
+                  (std::get<0>(tup)->geometry().size_policy().vertical_stretch /
+                   static_cast<double>(total_stretch))) /
                  static_cast<double>(total_inverse)) *
                 (to_collect * -1));
             if ((std::get<2>(tup).get() - height_deductions.back()) <
                 std::get<0>(tup)->geometry().min_height()) {
-                height_left += std::get<2>(tup).get() -
+                height_left -= std::get<2>(tup).get() -
                                std::get<0>(tup)->geometry().min_height();
                 std::get<2>(tup).get() =
                     std::get<0>(tup)->geometry().min_height();
@@ -385,7 +390,11 @@ void Vertical_layout::collect_space(
         if (policy == Size_policy::Maximum ||
             policy == Size_policy::Preferred ||
             policy == Size_policy::Ignored) {
-            std::get<2>(tup).get() -= height_deductions.front();
+            if (std::get<2>(tup).get() >= height_deductions.front()) {
+                std::get<2>(tup).get() -= height_deductions.front();
+            } else {
+                std::get<2>(tup).get() = 0;
+            }
             height_left += height_deductions.front();
             height_deductions.pop_front();
         }
@@ -398,7 +407,8 @@ void Vertical_layout::collect_space(
     // Find total stretch
     total_stretch = 0;
     for (const auto& tup : widgets) {
-        auto policy = std::get<0>(tup)->geometry().size_policy().vertical_policy;
+        auto policy =
+            std::get<0>(tup)->geometry().size_policy().vertical_policy;
         if (policy == Size_policy::Expanding) {
             total_stretch +=
                 std::get<0>(tup)->geometry().size_policy().vertical_stretch;
@@ -454,7 +464,11 @@ void Vertical_layout::collect_space(
         auto policy =
             std::get<0>(tup)->geometry().size_policy().vertical_policy;
         if (policy == Size_policy::Expanding) {
-            std::get<2>(tup).get() -= height_deductions.front();
+            if (std::get<2>(tup).get() >= height_deductions.front()) {
+                std::get<2>(tup).get() -= height_deductions.front();
+            } else {
+                std::get<2>(tup).get() = 0;
+            }
             height_left += height_deductions.front();
             height_deductions.pop_front();
         }
@@ -475,28 +489,17 @@ void Vertical_layout::position_widgets(
             widgets.push_back(w);
         }
     }
-    std::size_t x_pos{0};
-    std::size_t y_pos{0};
-    std::size_t index{0};
     if (widgets.size() != heights.size()) {
         return;
     }
-    if ((this->border().west_enabled() || this->border().north_west_enabled() ||
-         this->border().south_west_enabled()) &&
-        this->border().enabled()) {
-        ++x_pos;
-    }
-    if ((this->border().north_enabled() ||
-         this->border().north_west_enabled() ||
-         this->border().north_east_enabled()) &&
-        this->border().enabled()) {
-        ++y_pos;
-    }
+    std::size_t y_pos = north_border_offset(this->border());
+    std::size_t index{0};
     for (auto& widg : widgets) {
-        System::post_event(widg, std::make_unique<Move_event>(
-                                     this->x() + x_pos, this->y() + y_pos));
-        y_pos += heights.at(index);
-        ++index;
+        System::post_event(widg,
+                           std::make_unique<Move_event>(
+                               this->x() + west_border_offset(this->border()),
+                               this->y() + y_pos));
+        y_pos += heights.at(index++);
     }
 }
 

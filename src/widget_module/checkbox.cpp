@@ -1,26 +1,22 @@
 #include "widget_module/widgets/checkbox.hpp"
-
-#include "widget_module/size_policy.hpp"
-#include "painter_module/color.hpp"
 #include "painter_module/painter.hpp"
+#include "widget_module/size_policy.hpp"
 
 namespace twf {
 
 Checkbox::Checkbox() {
-    // this->enable_border();
-    // this->brush().set_background(Color::Red);
     this->geometry().size_policy().horizontal_policy = Size_policy::Fixed;
-    this->geometry().size_policy().vertical_policy = Size_policy::Fixed;
     this->geometry().set_width_hint(2);
+    this->geometry().size_policy().vertical_policy = Size_policy::Fixed;
     this->geometry().set_height_hint(1);
 }
 
 bool Checkbox::paint_event(const Paint_event& event) {
     Painter p{this};
     if (checked_) {
-        p.put_at(0, 0, check_);
+        p.put_at(0, 0, checked_box_);
     } else {
-        p.put_at(0, 0, empty_);
+        p.put_at(0, 0, empty_box_);
     }
     return Widget::paint_event(event);
 }
@@ -36,11 +32,7 @@ bool Checkbox::mouse_press_event(const Mouse_event& event) {
 void Checkbox::toggle() {
     checked_ = !checked_;
     toggled();
-    if (checked_) {
-        checked();
-    } else {
-        unchecked();
-    }
+    checked_ ? checked() : unchecked();
 }
 
 }  // namespace twf

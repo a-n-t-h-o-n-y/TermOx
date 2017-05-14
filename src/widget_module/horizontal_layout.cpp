@@ -1,17 +1,15 @@
-#include <widget_module/layouts/horizontal_layout.hpp>
-
-#include <system_module/events/move_event.hpp>
-#include <system_module/events/resize_event.hpp>
-#include <system_module/system.hpp>
-#include <widget_module/border.hpp>
-#include <widget_module/size_policy.hpp>
-#include <painter_module/geometry.hpp>
-
+#include "widget_module/layouts/horizontal_layout.hpp"
+// #include "painter_module/geometry.hpp"
+#include "system_module/events/move_event.hpp"
+#include "system_module/events/resize_event.hpp"
+#include "system_module/system.hpp"
+// #include "widget_module/border.hpp"
+#include "widget_module/size_policy.hpp"
 #include <cstddef>
-#include <vector>
 #include <deque>
-#include <tuple>
 #include <functional>
+#include <tuple>
+#include <vector>
 
 namespace twf {
 
@@ -22,7 +20,7 @@ std::vector<std::size_t> Horizontal_layout::size_widgets() {
     for (Object* c : this->children()) {
         Widget* w{dynamic_cast<Widget*>(c)};
         if (w != nullptr) {
-            widgets.push_back(std::make_tuple(w, 0, 0));
+            widgets.emplace_back(w, 0, 0);
             total_stretch += w->geometry().size_policy().horizontal_stretch;
         }
     }
@@ -80,8 +78,8 @@ std::vector<std::size_t> Horizontal_layout::size_widgets() {
                            std::reference_wrapper<std::size_t>>>
         widgets_w_refs;
     for (auto& tup : widgets) {
-        widgets_w_refs.push_back(
-            std::tie(std::get<0>(tup), std::get<1>(tup), std::get<2>(tup)));
+        widgets_w_refs.emplace_back(std::get<0>(tup), std::get<1>(tup),
+                                    std::get<2>(tup));
     }
     // If space left, fill in expanding and min_expanding, then if still,
     // preferred and min
@@ -274,7 +272,7 @@ void Horizontal_layout::distribute_space(
     }
     // Rounding error extra
     // First Group
-    auto width_check{width_left};
+    auto width_check{0};
     do {
         width_check = width_left;
         for (auto& tup : widgets) {
@@ -388,7 +386,11 @@ void Horizontal_layout::collect_space(
         if (policy == Size_policy::Maximum ||
             policy == Size_policy::Preferred ||
             policy == Size_policy::Ignored) {
-            std::get<1>(tup).get() -= width_deductions.front();
+            if (std::get<1>(tup).get() >= width_deductions.front()) {
+                std::get<1>(tup).get() -= width_deductions.front();
+            } else {
+                std::get<1>(tup).get() = 0;
+            }
             width_left += width_deductions.front();
             width_deductions.pop_front();
         }
@@ -458,7 +460,11 @@ void Horizontal_layout::collect_space(
         auto policy =
             std::get<0>(tup)->geometry().size_policy().horizontal_policy;
         if (policy == Size_policy::Expanding) {
-            std::get<1>(tup).get() -= width_deductions.front();
+            if (std::get<1>(tup).get() >= width_deductions.front()) {
+                std::get<1>(tup).get() -= width_deductions.front();
+            } else {
+                std::get<1>(tup).get() = 0;
+            }
             width_left += width_deductions.front();
             width_deductions.pop_front();
         }

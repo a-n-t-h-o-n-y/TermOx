@@ -60,7 +60,6 @@ int main() {
     tb.border().set_north_east("╮");
     tb.border().set_south_west("╰");
     tb.border().set_south_east("╯");
-    w.make_child<scroll_test>().enable_border();
     w.make_child<resizing_button>();
     auto& pb = w.make_child<twf::Push_button>("delete textbox");
     pb.geometry().set_height_hint(3);
