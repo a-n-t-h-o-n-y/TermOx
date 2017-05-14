@@ -116,10 +116,10 @@ void Painter::border(const Border& b) {
     std::size_t height = widget_->geometry().height();
 
     // Checks for making sure size_t's do not go negative
-    if (widg_x + width < 2 && b.north_enabled() && b.south_enabled()) {
+    if (widg_x + width < 2 && (b.north_enabled() || b.south_enabled())) {
         return;
     }
-    if (widg_y + height < 2 && b.east_enabled() && b.west_enabled()) {
+    if (widg_y + height < 2 && (b.east_enabled() || b.west_enabled())) {
         return;
     }
 

@@ -77,8 +77,6 @@ _ Create a forms widget that has pairs of title and field, where the field is
     accessible from some variable and a signal is called whenever it is changed.
     Use partial borders or different background colors to give a nice look.
 
-_ Make sure partial border work, test in nested widgets.
-
 _ Create a radio button group widget, only one is selected at a time.
 
 _ Try to work out hovering widgets, they would be on same level as the head
@@ -99,7 +97,8 @@ _ Create Menu widget with selectable/highlightable options that call a signal
 
 _ Widget placement/alignment in layouts when there is extra space that can't be
     taken by any widget, enums like left aligned, right aligned, centered,
-    justified, floating...
+    justified, floating... helpful when you have many fixed size widgets and you
+    want them evenly spaced within a layout space.
 
 _ Textbox with keys pressed when it has predetermined text and lower_bound will
     crash on keypresses past the length of the string.(test8) This can be fixed
@@ -118,9 +117,6 @@ _ Cursor disappears sometimes, letters still print, this might be fixed by
     sometimes not put the cursor to the screen? does the cursor get coordinates
     that are not correct and therefore cannot print them on the screen?
 
-_ Partial borders and resizing to 0 then resizing back to a typical size causes
-    ncurses to not print anymore, not a crash, you've seen this before.
-
 _ Need a better border interface that allows you more freedom to create half
     borders without text disapearing from the top and side lines. Do this by
     having more conditionals, if you have a corner piece, but no top side, then
@@ -131,15 +127,6 @@ _ Need a better border interface that allows you more freedom to create half
 
 _ System head should have a built in layout if your widget does not have one, or
     at least sane widget layout with a layout, for simple widgets.
-
-_ Allow a Widget to be able to change its default background Glyph(' ' by
-    default). This is helpful when you want a line draw on a single lined text
-    box(like a form, where the text input is underlined too, Glyph(' ',
-    Attribute::Underlined)) and can also be helpful with checkered box
-    characters for drawing and color mixtures.
-
-_ Attributes are not cleared when new glyph with different attributes is placed
-    on the same square. Look into how attributes are reset.
 
 _ Add a Freeform layout that has Window widgets wrapping each child widget, the
     child widgets can be click and dragged to move and resize. Set TERM variable
@@ -174,7 +161,18 @@ _ Animated widgets in a program make textbox widgets never have a cursor because
     have to implement your own cursor drawing to get around this, and it would
     have to be part of the animation system. 
 
-_ Updating the background color of a widget in a paint event leaves you with the
+X Make sure partial border work, test in nested widgets.
+
+X Allow a Widget to be able to change its default background Glyph(' ' by
+    default). This is helpful when you want a line draw on a single lined text
+    box(like a form, where the text input is underlined too, Glyph(' ',
+    Attribute::Underlined)) and can also be helpful with checkered box
+    characters for drawing and color mixtures.
+
+X Attributes are not cleared when new glyph with different attributes is placed
+    on the same square. Look into how attributes are reset.
+
+X Updating the background color of a widget in a paint event leaves you with the
     old background color until the next update, this is because for update you
     get a call to clear the screen, which uses the old background color, and
     then you paint new glyphs with the new background color, left with a mix of
@@ -186,7 +184,12 @@ _ Updating the background color of a widget in a paint event leaves you with the
     through the widget, it'll just call down to the Brush object, but it will
     also call update(), which brush cannot do. it'll make the interface for
     setting the background a bit cleaner for the user as well. Add a function
-    for foreground as well.
+    for foreground as well. This function should not be used in a paint event.
+    That is the problem.
+
+X Partial borders and resizing to 0 then resizing back to a typical size causes
+    ncurses to not print anymore, not a crash, you've seen this before. It is an
+    infinite loop, probably from an unsigned underflow.
 
 X Create a Coordinate Widget::border_offset() function to replace duplicate code
 
@@ -210,7 +213,7 @@ X Move Widget::erase_widget_screen() to Painter::clear_screen() and paint over
     the Event_queue::add_event() function could optimize out multiple clears on
     the same widget.
 
-_ Ncurses crash with certain widget amounts in layout. getting it with a
+X Ncurses crash with certain widget amounts in layout. getting it with a
     vertical layout in test6 with a widget after textbox.
     The above is only a problem in a few terminals, but it is still pointing at
     a problem in this library.
