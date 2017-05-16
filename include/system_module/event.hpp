@@ -123,8 +123,8 @@ class Event {
     explicit Event(Type type) : type_{type} {}
     Event(const Event&) = default;
     Event& operator=(const Event&) = default;
-    Event(Event&&) noexcept = default;
-    Event& operator=(Event&&) noexcept = default;
+    Event(Event&&) noexcept = default;             // NOLINT
+    Event& operator=(Event&&) noexcept = default;  // NOLINT
     virtual ~Event() = default;
 
     Type type() const { return type_; }

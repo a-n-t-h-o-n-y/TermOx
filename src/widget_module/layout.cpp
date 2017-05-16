@@ -1,5 +1,4 @@
-#include <system_module/object.hpp>
-#include <widget_module/layout.hpp>
+#include "widget_module/layout.hpp"
 #include "painter_module/painter.hpp"
 #include "system_module/events/child_event.hpp"
 #include "system_module/events/paint_event.hpp"
@@ -7,18 +6,15 @@
 namespace twf {
 
 Layout::Layout() {
-    // Set dimensions to maximum initially
     this->set_x(0);
     this->set_y(0);
     this->geometry().set_width(System::max_width());
     this->geometry().set_height(System::max_height());
-
-    this->initialize();
+    Layout::initialize();
 }
 
 void Layout::initialize() {
-    // Slots
-    this->update_layout = std::bind(&Layout::update, this);
+    this->update_layout = [this]{this->update();};
     this->update_layout.track(this->destroyed);
 }
 

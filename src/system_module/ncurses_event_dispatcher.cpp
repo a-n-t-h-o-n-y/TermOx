@@ -54,52 +54,52 @@ NCurses_event_dispatcher::parse_mouse_event() {
         Object* object = find_object(mouse_event.x, mouse_event.y);
 
         // Parse NCurses Event
-        Event::Type ev_type = Event::Type::None;
-        Mouse_event::Button ev_button = Mouse_event::Button::NoButton;
+        Event::Type ev_type = Event::None;
+        Mouse_button ev_button = Mouse_button::None;
 
         // Button 1 / Left Button
         if (static_cast<bool>(mouse_event.bstate & BUTTON1_PRESSED)) {
-            ev_type = Event::Type::MouseButtonPress;
-            ev_button = Mouse_event::Button::LeftButton;
+            ev_type = Event::MouseButtonPress;
+            ev_button = Mouse_button::Left;
         } else if (static_cast<bool>(mouse_event.bstate & BUTTON1_RELEASED)) {
-            ev_type = Event::Type::MouseButtonRelease;
-            ev_button = Mouse_event::Button::LeftButton;
+            ev_type = Event::MouseButtonRelease;
+            ev_button = Mouse_button::Left;
         }
 
         // Button 2 / Middle Button
         else if (static_cast<bool>(mouse_event.bstate & BUTTON2_PRESSED)) {
-            ev_type = Event::Type::MouseButtonPress;
-            ev_button = Mouse_event::Button::MidButton;
+            ev_type = Event::MouseButtonPress;
+            ev_button = Mouse_button::Middle;
         } else if (static_cast<bool>(mouse_event.bstate & BUTTON2_RELEASED)) {
-            ev_type = Event::Type::MouseButtonRelease;
-            ev_button = Mouse_event::Button::MidButton;
+            ev_type = Event::MouseButtonRelease;
+            ev_button = Mouse_button::Middle;
         }
 
         // Button 3 / Right Button
         else if (static_cast<bool>(mouse_event.bstate & BUTTON3_PRESSED)) {
-            ev_type = Event::Type::MouseButtonPress;
-            ev_button = Mouse_event::Button::RightButton;
+            ev_type = Event::MouseButtonPress;
+            ev_button = Mouse_button::Right;
         } else if (static_cast<bool>(mouse_event.bstate & BUTTON3_RELEASED)) {
-            ev_type = Event::Type::MouseButtonRelease;
-            ev_button = Mouse_event::Button::RightButton;
+            ev_type = Event::MouseButtonRelease;
+            ev_button = Mouse_button::Right;
         }
 
         // Button 4 / Scroll Up
         else if (static_cast<bool>(mouse_event.bstate & BUTTON4_PRESSED)) {
-            ev_type = Event::Type::MouseButtonPress;
-            ev_button = Mouse_event::Button::ScrollUp;
+            ev_type = Event::MouseButtonPress;
+            ev_button = Mouse_button::ScrollUp;
         } else if (static_cast<bool>(mouse_event.bstate & BUTTON4_RELEASED)) {
-            ev_type = Event::Type::MouseButtonRelease;
-            ev_button = Mouse_event::Button::ScrollUp;
+            ev_type = Event::MouseButtonRelease;
+            ev_button = Mouse_button::ScrollUp;
         }
 
         // Button 5 / Scroll Down
         else if (static_cast<bool>(mouse_event.bstate & BUTTON5_PRESSED)) {
-            ev_type = Event::Type::MouseButtonPress;
-            ev_button = Mouse_event::Button::ScrollDown;
+            ev_type = Event::MouseButtonPress;
+            ev_button = Mouse_button::ScrollDown;
         } else if (static_cast<bool>(mouse_event.bstate & BUTTON5_RELEASED)) {
-            ev_type = Event::Type::MouseButtonRelease;
-            ev_button = Mouse_event::Button::ScrollDown;
+            ev_type = Event::MouseButtonRelease;
+            ev_button = Mouse_button::ScrollDown;
         } else {
             return std::pair<Object*, std::unique_ptr<Event>>{nullptr, nullptr};
         }
@@ -142,7 +142,7 @@ Object* NCurses_event_dispatcher::find_object(std::size_t x, std::size_t y) {
 
 std::unique_ptr<Event> NCurses_event_dispatcher::handle_keyboard_event(
     int input) {
-    return std::make_unique<Key_event>(Event::Type::KeyPress, input);
+    return std::make_unique<Key_event>(Event::KeyPress, input);
 }
 
 Object* NCurses_event_dispatcher::handle_keyboard_object() {

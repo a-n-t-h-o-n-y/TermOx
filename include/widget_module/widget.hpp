@@ -22,6 +22,7 @@
 #include <painter_module/detail/ncurses_paint_engine.hpp>
 #include <painter_module/geometry.hpp>
 #include <painter_module/paint_engine.hpp>
+#include "widget_module/focus_policy.hpp"
 
 #include <aml/signals/slot.hpp>
 
@@ -33,9 +34,6 @@ namespace twf {
 
 class Widget : public Object {
    public:
-    // Types
-    enum class Focus_policy { TabFocus, ClickFocus, StrongFocus, NoFocus };
-
     Widget();
     virtual ~Widget() override;
 
@@ -151,7 +149,7 @@ class Widget : public Object {
     bool mouse_tracking_ = false;
     bool visible_ = true;
 
-    Focus_policy focus_policy_ = Focus_policy::NoFocus;
+    Focus_policy focus_policy_ = Focus_policy::None;
     Brush default_brush_ =
         Brush(background(Color::Black), foreground(Color::White));
     Border border_;

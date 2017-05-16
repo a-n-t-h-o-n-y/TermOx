@@ -3,7 +3,7 @@
 class Text_box : public twf::Widget {
    public:
     Text_box() {
-        this->set_focus_policy(twf::Widget::Focus_policy::StrongFocus);
+        this->set_focus_policy(twf::Focus_policy::Strong);
         this->set_cursor(true);
         this->enable_border();
         this->size_policy().vertical_stretch = 2;

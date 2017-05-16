@@ -1,25 +1,21 @@
-#ifndef TEXTBOX_HPP
-#define TEXTBOX_HPP
+#ifndef WIDGET_MODULE_WIDGETS_TEXTBOX_HPP
+#define WIDGET_MODULE_WIDGETS_TEXTBOX_HPP
 
-#include "textbox_core.hpp"
-#include "../../system_module/events/paint_event.hpp"
-#include "../../system_module/events/key_event.hpp"
-#include "../../painter_module/glyph_string.hpp"
 #include "painter_module/glyph_string.hpp"
-
-#include <cstddef>
-#include <array>
+#include "widget_module/focus_policy.hpp"
+#include "widget_module/widgets/textbox_core.hpp"
 
 namespace twf {
+class Key_event;
+class Mouse_event;
 
 class Textbox : public Textbox_core {
    public:
-    Textbox(const Glyph_string& contents = "") : Textbox_core{contents} {
-        this->set_focus_policy(Widget::Focus_policy::StrongFocus);
+    explicit Textbox(const Glyph_string& contents = "")
+        : Textbox_core{contents} {
+        this->set_focus_policy(Focus_policy::Strong);
         this->set_cursor(true);
     }
-
-    Glyph_string text() const { return contents_; }
 
    protected:
     bool key_press_event(const Key_event& event) override;
@@ -27,4 +23,4 @@ class Textbox : public Textbox_core {
 };
 
 }  // namespace twf
-#endif  // TEXTBOX_HPP
+#endif  // WIDGET_MODULE_WIDGETS_TEXTBOX_HPP

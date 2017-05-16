@@ -7,7 +7,7 @@ namespace twf {
 
 class Clear_screen_event : public Event {
    public:
-    Clear_screen_event() : Event{Event::Type::ClearScreen} {}
+    Clear_screen_event() : Event{Event::ClearScreen} {}
 };
 
 }  // namespace twf

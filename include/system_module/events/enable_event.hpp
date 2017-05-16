@@ -8,7 +8,7 @@ namespace twf {
 class Enable_event : public Event {
    public:
     explicit Enable_event(bool enabled)
-        : Event{Event::Type::EnabledChange}, enabled_{enabled} {}
+        : Event{Event::EnabledChange}, enabled_{enabled} {}
     bool is_enabled() const { return enabled_; }
 
    private:

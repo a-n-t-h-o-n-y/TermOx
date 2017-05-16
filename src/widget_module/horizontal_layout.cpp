@@ -1,10 +1,9 @@
 #include "widget_module/layouts/horizontal_layout.hpp"
-// #include "painter_module/geometry.hpp"
 #include "system_module/events/move_event.hpp"
 #include "system_module/events/resize_event.hpp"
 #include "system_module/system.hpp"
-// #include "widget_module/border.hpp"
 #include "widget_module/size_policy.hpp"
+#include "widget_module/border.hpp"
 #include <cstddef>
 #include <deque>
 #include <functional>
@@ -196,8 +195,7 @@ void Horizontal_layout::distribute_space(
         ++index;
     }
 
-    // If it has gotten this far, no widgets were over space, assign calculated
-    // values
+    // If it has gotten this far, no widgets were over space, assign values
     for (auto& tup : widgets) {
         auto policy =
             std::get<0>(tup)->geometry().size_policy().horizontal_policy;
@@ -254,8 +252,7 @@ void Horizontal_layout::distribute_space(
         ++index;
     }
 
-    // If it has gotten this far, no widgets were over space, assign calculated
-    // values
+    // If it has gotten this far, no widgets were over space, assign values
     for (auto& tup : widgets) {
         auto policy =
             std::get<0>(tup)->geometry().size_policy().horizontal_policy;
@@ -485,28 +482,17 @@ void Horizontal_layout::position_widgets(
             widgets.push_back(w);
         }
     }
-    std::size_t x_pos{0};
-    std::size_t y_pos{0};
-    std::size_t index{0};
     if (widgets.size() != widths.size()) {
         return;
     }
-    if ((this->border().west_enabled() || this->border().north_west_enabled() ||
-         this->border().south_west_enabled()) &&
-        this->border().enabled()) {
-        ++x_pos;
-    }
-    if ((this->border().north_enabled() ||
-         this->border().north_west_enabled() ||
-         this->border().north_east_enabled()) &&
-        this->border().enabled()) {
-        ++y_pos;
-    }
+    std::size_t x_pos{west_border_offset(this->border())};
+    std::size_t index{0};
     for (auto& widg : widgets) {
-        System::post_event(widg, std::make_unique<Move_event>(
-                                     this->x() + x_pos, this->y() + y_pos));
-        x_pos += widths.at(index);
-        ++index;
+        System::post_event(
+            widg, std::make_unique<Move_event>(
+                      this->x() + x_pos,
+                      this->y() + north_border_offset(this->border())));
+        x_pos += widths.at(index++);
     }
 }
 

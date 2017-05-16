@@ -1,13 +1,10 @@
-#ifndef LAYOUT_HPP
-#define LAYOUT_HPP
-
-#include "widget.hpp"
-
-#include <system_module/events/child_event.hpp>
-#include <system_module/events/paint_event.hpp>
-#include <system_module/object.hpp>
+#ifndef WIDGET_MODULE_LAYOUT_HPP
+#define WIDGET_MODULE_LAYOUT_HPP
 
 #include <aml/signals/slot.hpp>
+#include "widget_module/widget.hpp"
+#include "system_module/events/child_event.hpp"
+#include "system_module/events/paint_event.hpp"
 
 namespace twf {
 
@@ -26,8 +23,8 @@ class Layout : public Widget {
     bool too_small_{false};
 
    private:
-    void initialize();  // Object::initialize() exists as well. but not virtual
+    void initialize();
 };
 
 }  // namespace twf
-#endif  // LAYOUT_HPP
+#endif  // WIDGET_MODULE_LAYOUT_HPP

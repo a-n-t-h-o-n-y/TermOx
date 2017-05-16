@@ -7,7 +7,7 @@ namespace twf {
 
 class Show_event : public Event {
    public:
-    Show_event() : Event{Event::Type::Show} {}
+    Show_event() : Event{Event::Show} {}
 };
 
 }  // namespace twf

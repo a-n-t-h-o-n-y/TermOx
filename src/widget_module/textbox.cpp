@@ -1,11 +1,9 @@
-#include <widget_module/widgets/textbox.hpp>
-
-#include <painter_module/painter.hpp>
-#include <system_module/key.hpp>
-#include <system_module/events/paint_event.hpp>
-#include <system_module/events/key_event.hpp>
-#include <system_module/system.hpp>
-
+#include "widget_module/widgets/textbox.hpp"
+#include "painter_module/painter.hpp"
+#include "system_module/events/key_event.hpp"
+#include "system_module/events/paint_event.hpp"
+#include "system_module/key.hpp"
+#include "system_module/system.hpp"
 #include <cstddef>
 
 namespace twf {
@@ -22,10 +20,9 @@ bool Textbox::key_press_event(const Key_event& event) {
                 p.move(pos.x, pos.y);
                 this->update();
                 return true;
-            } else {
-                p.move(this->width() - 1, this->cursor_y() - 1);
-                p.put(" ", false);
             }
+            p.move(this->width() - 1, this->cursor_y() - 1);
+            p.put(" ", false);
         } else if (cursor_index_ == 0) {
             return true;
         } else if (this->cursor_x() == 0 && this->cursor_y() == 0) {
@@ -57,7 +54,7 @@ bool Textbox::key_press_event(const Key_event& event) {
         // real tabs, by moving to the next line divisible by 4. insert '\t'
         // into contents, this will need new printing functions, probably just
         // insert here.
-    } else if (event.text().size() != 0) {
+    } else if (!event.text().empty()) {
         if (cursor_index_ == contents_.size()) {
             contents_.append(event.text());
         } else {
@@ -109,14 +106,14 @@ bool Textbox::key_press_event(const Key_event& event) {
 }
 
 bool Textbox::mouse_press_event(const Mouse_event& event) {
-    if (event.button() == Mouse_event::Button::LeftButton) {
+    if (event.button() == Mouse_button::Left) {
         cursor_index_ = index_from_position(event.local_x(), event.local_y());
         auto pos = position_from_index(cursor_index_);
         Painter p{this};
         p.move(pos.x, pos.y);
-    } else if (event.button() == Mouse_event::Button::ScrollUp) {
+    } else if (event.button() == Mouse_button::ScrollUp) {
         this->scroll_up();
-    } else if (event.button() == Mouse_event::Button::ScrollDown) {
+    } else if (event.button() == Mouse_button::ScrollDown) {
         this->scroll_down();
     }
     return true;

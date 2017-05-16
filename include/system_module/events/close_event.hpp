@@ -7,7 +7,7 @@ namespace twf {
 
 class Close_event : public Event {
    public:
-    Close_event() : Event{Event::Type::Close} {}
+    Close_event() : Event{Event::Close} {}
 };
 
 }  // namespace twf

@@ -143,7 +143,7 @@ enum class Key {
     Backspace_2,  // unused? int 263
 
     // Function keys, up to 63.
-    // Add function number to enum for more ex) F15 key = Key::Function + 15;
+    // Add function number to enum for more. ex) F15 key = Key::Function + 15;
     Function = 264,
     Function1,
     Function2,

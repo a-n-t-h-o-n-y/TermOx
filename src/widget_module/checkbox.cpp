@@ -22,7 +22,7 @@ bool Checkbox::paint_event(const Paint_event& event) {
 }
 
 bool Checkbox::mouse_press_event(const Mouse_event& event) {
-    if (event.button() == Mouse_event::Button::LeftButton) {
+    if (event.button() == Mouse_button::Left) {
         this->toggle();
         this->update();
     }

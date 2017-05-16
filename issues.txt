@@ -26,6 +26,48 @@ _ Option to make textbox read only/non-editable.
 
 _ Add Meta_widget which wraps any widget and gives information about it.
 
+_ Add a widget that wraps any widget and allows you to change certain things
+    about it live, like color and attributes, this becomes more difficult with
+    composite widgets and widgets with too small a size. Instead you should
+    create a widget that does not physically wrap the widget, but that is off to
+    the side, a box, and it can be associated with a specific widget, even
+    better, you only need one of these and it has a drop down to access all
+    widgets in the app(works through the tree from head). Only allows for
+    generic widget parameter access, though you could have some option that
+    casts the widget as a particular type to get more options, though this is
+    weird, there might be some way to do it, the meta widget itself would have
+    to have extra parameters that show up on the cast, or you can have it
+    replace itself with a derived varient of the meta object, specific to that
+    widget, kinda strange but it might work, and it'd leave it extensible and
+    functionality for analyzing each widget type would be seperated into
+    subclasses.
+
+_ Empty space in layouts is left with junk when drawing, since it is never
+    overridden, inbetween prints are shown. One solution is to print twice, this
+    is because the resize events are sent and then the move events are sent, if
+    you send them all again, then they will be in the right places when a resize
+    is called, after a clear screen on the layout and you get a clean print,
+    this is a lot of calls to copying Glyphs and Attributes, not the best. The
+    other option is to replace the empty space with a base Widget object, it'd
+    have to have the same background color as the layout and you'd have to make
+    sure it always filled in the empty space and did not alter the spacing or
+    sizing of the real widgets in the layout. This seems possible and much more
+    efficient. In the layout logic, if you have empty space left, you call
+    make_child<Widget>(); to fill in the space. This is more difficult if you
+    need to have it in the middle of two widgets or something, and also you only
+    want to do this once. Maybe it's not the cleanest solution, think about it,
+    fixing the layout printing sequence could potentially solve this the right
+    way, but figuring out sizes, posting position events and then posting resize
+    events, but I'm assuming that you will have the same problems, just in
+    different places. The real solution here deals with processing the move and
+    resize events at the same time before anything is printed, which is should
+    do since this all happens in a single loop, the buffer is written to
+    mutliple times but the screen is only written to once. This is possibly not
+    happening though as the initial printing process seems to be drawing in the
+    unadusted position, and then fixing itself, but leaving the remnants in
+    spaces without any widget.
+
+
 _ Possibly add a constructor to Scrollbar widgets that takes a pointer or ....?
     some reference to the textbox, can ask it its height and its total height of
     text that the textbox widget knows how to calculate, and the current
@@ -94,6 +136,11 @@ _ Create Menu widget with selectable/highlightable options that call a signal
     options with a template or something, though for the signals to be named I'm
     not sure you could do this, you'd have to do it through some kind of
     container/index.
+
+_ Move Painter::move() logic into Widget, since it is manipulating the cursor
+    which is stored within Widget. In textbox this causes you to create a
+    painter just to move the cursor around, and it also locks you into a
+    particlar way of moving.
 
 _ Widget placement/alignment in layouts when there is extra space that can't be
     taken by any widget, enums like left aligned, right aligned, centered,

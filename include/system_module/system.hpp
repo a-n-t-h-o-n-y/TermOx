@@ -19,8 +19,8 @@ class System : public Object {
                         std::make_unique<detail::NCurses_paint_engine>());
     System(const System&) = delete;
     System& operator=(const System&) = delete;
-    System(System&&) noexcept = default;
-    System& operator=(System&&) noexcept = default;
+    System(System&&) noexcept = default;             // NOLINT
+    System& operator=(System&&) noexcept = default;  // NOLINT
     ~System() override;
 
     static void post_event(Object* obj,

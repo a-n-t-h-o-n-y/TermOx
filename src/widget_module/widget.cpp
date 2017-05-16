@@ -168,8 +168,8 @@ bool Widget::event(const Event& event) {
     if (event.type() == Event::MouseButtonPress) {
         // should most of this be in event handler function?
         if (visible_and_enabled()) {
-            if (this->focus_policy() == Focus_policy::ClickFocus ||
-                this->focus_policy() == Focus_policy::StrongFocus) {
+            if (this->focus_policy() == Focus_policy::Click ||
+                this->focus_policy() == Focus_policy::Strong) {
                 System::set_focus_widget(this);
                 this->paint_engine().move(this->x() + this->cursor_x(),
                                           this->y() + this->cursor_y());
@@ -386,7 +386,7 @@ bool Widget::focus_event(const Focus_event& event) {
 }
 
 void Widget::set_focus(bool focus) {
-    if (this->focus_policy() == Focus_policy::NoFocus) {
+    if (this->focus_policy() == Focus_policy::None) {
         return;
     }
     focus_ = focus;

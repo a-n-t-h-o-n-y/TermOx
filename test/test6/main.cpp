@@ -11,9 +11,9 @@ class Meta : public twf::Vertical_layout {
 class scroll_test : public twf::Widget {
    public:
     bool mouse_press_event(const twf::Mouse_event& event) override {
-        if (event.button() == twf::Mouse_event::Button::ScrollUp) {
+        if (event.button() == twf::Mouse_button::ScrollUp) {
             up_ = true;
-        } else if (event.button() == twf::Mouse_event::Button::ScrollDown) {
+        } else if (event.button() == twf::Mouse_button::ScrollDown) {
             up_ = false;
         }
         this->update();

@@ -7,7 +7,7 @@ namespace twf {
 
 class Paint_event : public Event {
    public:
-    Paint_event() : Event{Event::Type::Paint} {}
+    Paint_event() : Event{Event::Paint} {}
 };
 
 }  // namespace twf

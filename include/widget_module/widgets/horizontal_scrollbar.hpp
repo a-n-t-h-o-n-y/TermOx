@@ -1,10 +1,10 @@
-#ifndef HORIZONTAL_SCROLLBAR
-#define HORIZONTAL_SCROLLBAR
+#ifndef WIDGET_MODULE_WIDGETS_HORIZONTAL_SCROLLBAR
+#define WIDGET_MODULE_WIDGETS_HORIZONTAL_SCROLLBAR
 
 #include <aml/signals/signals.hpp>
-
-#include "../layouts/horizontal_layout.hpp"
-#include "push_button.hpp"
+#include "widget_module/layouts/horizontal_layout.hpp"
+#include "widget_module/widget.hpp"
+#include "widget_module/widgets/push_button.hpp"
 
 namespace twf {
 
@@ -23,4 +23,4 @@ class Horizontal_scrollbar : public Horizontal_layout {
 
 }  // namespace twf;
 
-#endif  // HORIZONTAL_SCROLLBAR
+#endif  // WIDGET_MODULE_WIDGETS_HORIZONTAL_SCROLLBAR

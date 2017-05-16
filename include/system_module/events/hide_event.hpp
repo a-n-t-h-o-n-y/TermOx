@@ -7,7 +7,7 @@ namespace twf {
 
 class Hide_event : public Event {
    public:
-    Hide_event() : Event{Event::Type::Hide} {}
+    Hide_event() : Event{Event::Hide} {}
 };
 
 }  // namespace twf

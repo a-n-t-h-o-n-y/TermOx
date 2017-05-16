@@ -61,16 +61,16 @@ Object::~Object() {
 
 void Object::initialize() {
     // Slots
-    this->delete_later = [this]() {
+    this->delete_later = [this] {
         System::post_event(this,
                            std::make_unique<Event>(Event::DeferredDelete));
     };
     this->delete_later.track(this->destroyed);
 
-    this->enable = [this]() { this->set_enabled(true); };
+    this->enable = [this] { this->set_enabled(true); };
     this->enable.track(this->destroyed);
 
-    this->disable = [this]() { this->set_enabled(false); };
+    this->disable = [this] { this->set_enabled(false); };
     this->disable.track(this->destroyed);
 }
 

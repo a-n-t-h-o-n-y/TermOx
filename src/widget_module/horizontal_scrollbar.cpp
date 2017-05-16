@@ -1,4 +1,6 @@
-#include <widget_module/widgets/horizontal_scrollbar.hpp>
+#include "widget_module/widgets/horizontal_scrollbar.hpp"
+#include "painter_module/color.hpp"
+#include "widget_module/size_policy.hpp"
 
 namespace twf {
 

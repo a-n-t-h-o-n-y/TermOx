@@ -38,7 +38,7 @@ class Clicker : public twf::Widget {
    public:
     Clicker() { this->set_cursor(false); }
     bool mouse_press_event(const twf::Mouse_event& event) override {
-        if (event.button() == twf::Mouse_event::Button::LeftButton) {
+        if (event.button() == twf::Mouse_button::Left) {
             pos_.x = event.local_x();
             pos_.y = event.local_y();
             this->update();

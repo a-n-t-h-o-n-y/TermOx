@@ -7,7 +7,7 @@ using namespace twf;
 class Exit_widget : public Widget {
    public:
     Exit_widget() {
-        this->set_focus_policy(Widget::Focus_policy::ClickFocus);
+        this->set_focus_policy(Focus_policy::Click);
         this->set_cursor(true);
         this->enable_border();
         this->set_brush(
@@ -51,7 +51,7 @@ class Palette_changer : public Widget {
     Palette_changer() {
         enable_border();
         brush().set_background(Color::Dark_red);
-        this->set_focus_policy(Widget::Focus_policy::ClickFocus);
+        this->set_focus_policy(Focus_policy::Click);
     }
     bool key_press_event(const Key_event& event) override {
         if (event.text() == "s") {

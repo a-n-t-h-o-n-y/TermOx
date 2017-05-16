@@ -9,6 +9,7 @@
 #include "system_module/events/paint_event.hpp"
 #include "system_module/object.hpp"
 #include "widget_module/widget.hpp"
+#include "widget_module/focus_policy.hpp"
 #include <algorithm>
 #include <iterator>
 #include <memory>
@@ -201,8 +202,8 @@ void System::cycle_tab_focus() {
     for (Object* child : objects) {
         auto* widg = dynamic_cast<Widget*>(child);
         if (widg != nullptr) {
-            if (widg->focus_policy() == Widget::Focus_policy::TabFocus ||
-                widg->focus_policy() == Widget::Focus_policy::StrongFocus) {
+            if (widg->focus_policy() == Focus_policy::Tab ||
+                widg->focus_policy() == Focus_policy::Strong) {
                 System::set_focus_widget(widg);
                 widg->paint_engine().move(widg->x() + widg->cursor_x(),
                                           widg->y() + widg->cursor_y());
