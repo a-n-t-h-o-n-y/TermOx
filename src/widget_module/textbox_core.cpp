@@ -9,7 +9,7 @@
 namespace twf {
 
 Textbox_core::Textbox_core(const Glyph_string& string) : contents_{string} {
-    this->set_cursor(true);
+    this->enable_cursor();
 };
 
 void Textbox_core::scroll_up(std::size_t n) {
@@ -93,10 +93,10 @@ bool Textbox_core::paint_event(const Paint_event& event) {
     lower_bound_ = find_lower_bound();
     Glyph_string sub_str(std::begin(contents_) + upper,
                          std::begin(contents_) + lower_bound_);
-    p.put_at(0, 0, sub_str, false);
+    p.put(sub_str);
     // Move the cursor to the appropriate position.
     auto pos = this->position_from_index(cursor_index_);
-    p.move(pos.x, pos.y);
+    this->move_cursor(pos.x, pos.y);
     return Widget::paint_event(event);
 }
 
@@ -163,7 +163,7 @@ void Textbox_core::set_cursor_index(std::size_t index) {
     cursor_index_ = index;
     auto pos = this->position_from_index(cursor_index_);
     Painter p{this};
-    p.move(pos.x, pos.y);
+    this->move_cursor(pos.x, pos.y);
 }
 
 std::size_t Textbox_core::previous_line_break(std::size_t current_upper_bound) {

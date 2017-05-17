@@ -2,7 +2,6 @@
 #define PAINTER_MODULE_DETAIL_PAINT_BUFFER_HPP
 
 #include "painter_module/glyph_matrix.hpp"
-#include "widget_module/coordinate.hpp"
 #include <cstddef>
 
 namespace twf {
@@ -20,8 +19,6 @@ class Paint_buffer {
     const Glyph& at(std::size_t x, std::size_t y) const;
     std::size_t width() const { return staging_area_.width(); }
     std::size_t height() const { return staging_area_.height(); }
-
-    Coordinate cursor_position;
 
    private:
     Glyph_matrix backing_store_;

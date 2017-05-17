@@ -14,9 +14,9 @@ Checkbox::Checkbox() {
 bool Checkbox::paint_event(const Paint_event& event) {
     Painter p{this};
     if (checked_) {
-        p.put_at(0, 0, checked_box_);
+        p.put(checked_box_);
     } else {
-        p.put_at(0, 0, empty_box_);
+        p.put(empty_box_);
     }
     return Widget::paint_event(event);
 }

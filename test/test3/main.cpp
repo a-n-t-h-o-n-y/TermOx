@@ -4,23 +4,23 @@
 #include <twidgets.hpp>
 
 class Layout_color : public twf::Horizontal_layout {
-    public:
-        Layout_color() {
-            // this->make_child<Exit_widget>();
-            this->make_child<Palette_changer>();
-            this->make_child<Color_test_widget>();
-            auto& cw = this->make_child<Color_test_widget>();
-            cw.size_policy().horizontal_stretch = 2;
-            cw.brush().set_background(Color::Light_green);
-        }
+   public:
+    Layout_color() {
+        // this->make_child<Exit_widget>();
+        this->make_child<Palette_changer>();
+        this->make_child<Color_test_widget>();
+        auto& cw = this->make_child<Color_test_widget>();
+        cw.size_policy().horizontal_stretch = 2;
+        cw.brush().set_background(Color::Light_green);
+    }
 };
 
 int main() {
     twf::System sys;
 
-    // Main_widget mw;
-    // Color_test_widget mw;
-    Layout_color mw;
+    twf::Vertical_layout mw;
+    mw.make_child<twf::Titlebar>("press 's' and 'd' to toggle palettes");
+    mw.make_child<Layout_color>();
 
     sys.set_head(&mw);
 

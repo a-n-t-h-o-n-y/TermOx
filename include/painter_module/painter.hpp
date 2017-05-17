@@ -15,18 +15,24 @@ class Painter {
     explicit Painter(Widget* widget);
 
     // Essential Functions
-    void put(const Glyph_string& string, bool move_cursor = true);
-    void put_at(Coordinate pos,
-                const Glyph_string& string,
-                bool move_cursor = true);
-    void put_at(std::size_t x,
-                std::size_t y,
-                const Glyph_string& string,
-                bool move_cursor = true);
+    // void put(const Glyph_string& string, bool move_cursor = true);
 
-    // Moves the cursor position within Widget.
-    void move(Coordinate pos, bool update_buffer = true);
-    void move(std::size_t x, std::size_t y, bool update_buffer = true);
+    void put(const Glyph_string& string,
+             std::size_t x = 0,
+             std::size_t y = 0,
+             bool move_cursor = false);
+    void put(const Glyph_string& string,
+             Coordinate position,
+             bool move_cursor = false);
+
+    // void put_at(Coordinate pos,
+    //             const Glyph_string& string,
+    //             bool move_cursor = true);
+
+    // void put_at(std::size_t x,
+    //             std::size_t y,
+    //             const Glyph_string& string,
+    //             bool move_cursor = true);
 
     // Convinience functions
     void fill(std::size_t x,
@@ -44,19 +50,17 @@ class Painter {
 
     void border(const Border& b);
 
-    void set_cursor(bool enabled);
-
     void clear_screen();
 
    private:
-    void unbound_put_string(std::size_t g_x,
-                            std::size_t g_y,
-                            const Glyph_string& gs);
-    void unbound_line(std::size_t g_x1,
-                      std::size_t g_y1,
-                      std::size_t g_x2,
-                      std::size_t g_y2,
-                      const Glyph& g);
+    void unbound_put_string(const Glyph_string& gs,
+                            std::size_t glob_x,
+                            std::size_t glob_y);
+    void unbound_line(std::size_t glob_x1,
+                      std::size_t glob_y1,
+                      std::size_t glob_x2,
+                      std::size_t glob_y2,
+                      const Glyph& symbol);
     void add_default_attributes(Glyph* g);
 
     Widget* widget_;

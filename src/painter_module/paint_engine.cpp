@@ -1,5 +1,7 @@
 #include "painter_module/paint_engine.hpp"
 #include "painter_module/glyph.hpp"
+#include "system_module/system.hpp"
+#include "widget_module/widget.hpp"
 #include <cstddef>
 
 namespace twf {
@@ -35,7 +37,20 @@ void Paint_engine::flush(bool optimize) {
     if (!optimize) {
         this->touch_all();
     }
-    this->move(buffer_.cursor_position.x, buffer_.cursor_position.y);
+    // Set cursor
+    auto* focus_widg = System::focus_widget();
+    if (focus_widg != nullptr) {
+        this->show_cursor(focus_widg->cursor());
+        if (focus_widg->cursor()) {
+            auto x = focus_widg->x() + focus_widg->cursor_x() +
+                     west_border_offset(focus_widg->border());
+            auto y = focus_widg->y() + focus_widg->cursor_y() +
+                     north_border_offset(focus_widg->border());
+            this->move(x, y);
+        }
+    } else {
+        this->hide_cursor();
+    }
     this->refresh();
 }
 

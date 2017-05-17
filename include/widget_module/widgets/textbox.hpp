@@ -14,7 +14,7 @@ class Textbox : public Textbox_core {
     explicit Textbox(const Glyph_string& contents = "")
         : Textbox_core{contents} {
         this->set_focus_policy(Focus_policy::Strong);
-        this->set_cursor(true);
+        this->enable_cursor();
     }
 
    protected:
