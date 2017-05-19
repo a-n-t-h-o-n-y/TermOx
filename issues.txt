@@ -1,5 +1,14 @@
                              __Issues+Ideas__
 
+_ How to take input in such a way that is similar to asking a question and
+    having the user enter a text answer into a box, and how should it be left
+    for the client to turn that information into a type, through a stream
+    excration operator or just giving a string back and letting the client use a
+    string stream, or passing back a string stream. Related to forms? Forms are
+    like question and answer, output and input. Similar concept to using cout
+    and cin, works as bridge for someone who has not programed in this events
+    system way before but has used stdin/out.
+
 _ Add Shadow widget, which attaches to an existing widget in some way and paints
      a shaow in either block chars or checkered blocks, or even just empty with
      background color changed, though the glyph way let's you vary the design

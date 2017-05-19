@@ -12,6 +12,7 @@
 #include "widget_module/widgets/vertical_scrollbar.hpp"
 #include "widget_module/widgets/checkbox.hpp"
 #include "widget_module/widgets/titlebar.hpp"
+#include "widget_module/widgets/text_display.hpp"
 #include "widget_module/focus_policy.hpp"
 
 #endif  // TWIDGETS_WIDGET_HPP

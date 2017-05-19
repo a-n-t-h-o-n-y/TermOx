@@ -16,29 +16,32 @@ class Glyph_string : private std::vector<Glyph> {
    public:
     Glyph_string() = default;
 
+    // Used as 'Until the end of the string'
+    static const std::size_t npos = -1;
+
     // Iterators
     template <typename InputIterator>
     Glyph_string(InputIterator first, InputIterator last)
         : vector<Glyph>::vector(first, last) {}
 
     template <typename... Attributes>
-    Glyph_string(const std::string& symbols, Attributes&&... attrs) // NOLINT
+    Glyph_string(const std::string& symbols, Attributes&&... attrs)  // NOLINT
         : vector<Glyph>::vector() {
         this->append(symbols, std::forward<Attributes>(attrs)...);
     }
 
     template <typename... Attributes>
-    Glyph_string(const char* symbols, Attributes&&... attrs) { // NOLINT
+    Glyph_string(const char* symbols, Attributes&&... attrs) {  // NOLINT
         this->append(symbols, std::forward<Attributes>(attrs)...);
     }
 
     template <typename... Attributes>
-    Glyph_string(char symbol, Attributes&&... attrs) { // NOLINT
+    Glyph_string(char symbol, Attributes&&... attrs) {  // NOLINT
         this->append(Glyph{symbol, std::forward<Attributes>(attrs)...});
     }
 
     template <typename... Attributes>
-    Glyph_string(const Glyph& glyph, Attributes&&... attrs) { // NOLINT
+    Glyph_string(const Glyph& glyph, Attributes&&... attrs) {  // NOLINT
         this->append(glyph, std::forward<Attributes>(attrs)...);
     }
 
@@ -51,7 +54,7 @@ class Glyph_string : private std::vector<Glyph> {
         }
     }
 
-    operator std::string() const; // NOLINT
+    operator std::string() const;  // NOLINT
     std::string str() const;
     size_type length() const;
 
