@@ -20,10 +20,10 @@ class active_tb : public twf::Text_display {
         if (event.button() == twf::Mouse_button::ScrollUp) {
             this->scroll_up();
         } else if (event.button() == twf::Mouse_button::ScrollDown) {
-            this->scroll_down(5);
+            this->scroll_down(1);
         }
-        this->erase(0, 1);
-        this->pop_back();
+        // this->erase(0, 1);
+        // this->pop_back();
         this->update();
         return Widget::mouse_press_event(event);
     }
@@ -34,20 +34,21 @@ int main() {
 
     twf::Vertical_layout w;
     w.make_child<twf::Titlebar>("Text_display widget");
-    w.make_child<active_tb>();
-    w.make_child<active_tb>(
-        "The diddle-check seems like it's degenerated into the girls all "
-        "getting very excited and exchanging data on what kinds of animal "
-        "members of their own biologic families either imitate or physically "
-        "resemble, and Avril's out of sight and silent and apparently letting\n"
-        "them go with it for a while and vent stress. Hal keeps checking for\n"
-        "jaw-drool with the back of his hand. Pemulis, in a Cyrillic-lettered\n"
-        "T-shirt, takes off the hat and looks around himself and makes\n"
-        "reflexive tiestraightening movements, taking one last look at his\n"
-        "lines on the printout while Axford stands there needing three tries\n"
-        "to work the outside door's knob. Ann Kittenplan, on the other hand,\n"
-        "wears an expression of almost regal calm, and precedes them through\n"
-        "the inner door like someone stepping down off a dais.");
+    // w.make_child<twf::Textbox>().enable_border();
+    w.make_child<twf::Textbox>(
+         "The diddle-check seems like it's degenerated into the girls all "
+         "getting very excited and exchanging data on what kinds of animal "
+         "members of their own biologic families either imitate or physically "
+         "resemble, and Avril's out of sight and silent and apparently letting "
+         "them go with it for a while and vent stress. Hal keeps checking for "
+         "jaw-drool with the back of his hand. Pemulis, in a Cyrillic-lettered "
+         "T-shirt, takes off\n\n\n\n\n\nthe hat and looks around himself and makes "
+         "reflexive tiestraightening movements, taking one last look at his\n"
+         "lines on the printout while Axford stands there needing three tries "
+         "to work the outside door's knob. Ann Kittenplan, on the other hand, "
+         "wears an expression of almost regal calm, and precedes them through "
+         "the inner door like someone stepping down off a dais.")
+        .enable_border();
 
     s.set_head(&w);
 

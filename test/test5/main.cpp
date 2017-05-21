@@ -39,7 +39,7 @@ class Main_widget : public twf::Vertical_layout {
         v2.brush() = brush;
         auto save_text = [&tb](){
             std::ofstream fs{"test2.txt"};
-            fs << tb.text();
+            fs << tb.contents();
         };
         btn.clicked.connect(save_text);
     }

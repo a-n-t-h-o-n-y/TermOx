@@ -24,14 +24,19 @@ class Text_display : public Widget {
     void clear();
 
     // Movement
-    void scroll_up(std::size_t n = 1);
-    void scroll_down(std::size_t n = 1);
+    virtual void scroll_up(std::size_t n = 1);
+    virtual void scroll_down(std::size_t n = 1);
 
     // Query Functions
     std::size_t row_length(std::size_t y) const;
-    std::size_t string_index(Coordinate position) const ;
+    std::size_t number_of_rows() const;
+    std::size_t string_index(Coordinate position) const;
     std::size_t string_index(std::size_t x, std::size_t y) const;
     Coordinate display_position(std::size_t index) const;
+    Glyph_string contents() const { return contents_; }
+    std::size_t contents_size() const { return contents_.size(); }
+    bool contents_empty() const { return contents_.empty(); }
+    bool word_wrap() const { return word_wrap_; }
 
     // Options
     void enable_word_wrap(bool enable = true) { word_wrap_ = enable; }
@@ -40,6 +45,12 @@ class Text_display : public Widget {
    protected:
     bool paint_event(const Paint_event& event) override;
     bool resize_event(const Resize_event& event) override;
+
+    std::size_t line_at(std::size_t index) const;
+    std::size_t index_at(std::size_t line) const;
+    std::size_t top_line() const;
+    std::size_t last_line() const;
+    std::size_t line_length(std::size_t line) const;
 
    private:
     struct line_info {
@@ -50,14 +61,10 @@ class Text_display : public Widget {
     std::vector<line_info> display_state_;
 
     std::size_t top_line_{0};
-    bool word_wrap_ = false;
+    bool word_wrap_ = true;
     Glyph_string contents_;
 
     void update_display(std::size_t from_line = 0);
-    std::size_t line_at(std::size_t index) const;
-    std::size_t index_at(std::size_t line) const;
-    std::size_t top_line() const;
-    std::size_t last_line() const;
 };
 
 }  // namespace twf

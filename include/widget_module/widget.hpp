@@ -57,6 +57,7 @@ class Widget : public Object {
     void move_cursor_y(std::size_t y);
     std::size_t cursor_x() const { return cursor_position_.x; }
     std::size_t cursor_y() const { return cursor_position_.y; }
+    Coordinate cursor_coordinate() const { return cursor_position_; }
 
     void set_paint_engine(std::unique_ptr<Paint_engine> engine) {
         paint_engine_ = std::move(engine);
