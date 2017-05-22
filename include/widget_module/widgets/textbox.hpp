@@ -26,7 +26,7 @@ class Textbox : public Textbox_core {
    private:
     bool scroll_wheel_{true};
     std::size_t scroll_speed_up_{1};
-    std::size_t scroll_speed_down_{2};
+    std::size_t scroll_speed_down_{1};
 };
 
 }  // namespace twf

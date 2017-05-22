@@ -14,6 +14,12 @@ Text_display::Text_display(Glyph_string content)
     this->update_display();
 }
 
+void Text_display::set_text(const Glyph_string& string) {
+    contents_ = string;
+    this->update_display();
+    this->update();
+}
+
 void Text_display::insert(const Glyph_string& string, std::size_t index) {
     if (contents_.empty()) {
         contents_.append(string);
@@ -32,9 +38,10 @@ void Text_display::erase(std::size_t index, std::size_t length) {
     if (contents_.empty() || index >= contents_.size()) {
         return;
     }
-    auto end = (length == Glyph_string::npos)
-                   ? std::end(contents_)
-                   : std::begin(contents_) + length + index;
+    auto end = std::begin(contents_) + length + index;
+    if (length == Glyph_string::npos) {
+        end = std::end(contents_);
+    }
     contents_.erase(std::begin(contents_) + index, end);
     this->update_display(this->line_at(index));
 }
@@ -89,27 +96,66 @@ std::size_t Text_display::string_index(std::size_t x, std::size_t y) const {
     }
     auto line = this->top_line() + y;
     if (line >= display_state_.size()) {
-        line = display_state_.size() - 1;
+        return Glyph_string::npos;
+        // line = display_state_.size() - 1;
     }
     auto info = display_state_.at(line);
     if (info.length == 0) {
         return info.start_index;
     }
     if (x >= info.length) {
-        x = info.length - 1;//
+        if (line == display_state_.size() - 1) {
+            return Glyph_string::npos;
+        }
+        x = info.length - 1;
     }
     return info.start_index + x;
 }
 
 Coordinate Text_display::display_position(std::size_t index) const {
-    Coordinate result;
-    auto line = this->line_at(index);
-    result.y = line - this->top_line();
-    result.x = index - display_state_.at(line).start_index;
-    return result;
+    Coordinate position;
+    if (display_state_.empty()) {
+        return position;
+    }
+    if (index >= this->contents_size()) {
+        // auto last_x = this->last_index() -
+        //               display_state_.at(this->last_line()).start_index + 1;
+        const auto last_x = this->row_length(this->last_line());
+        const auto last_char = this->glyph_at(this->last_index()).str();
+        if (last_char == "\n" || last_x == this->width()) {
+            auto offset = 0;
+            if (this->cursor_y() == 0 && last_x == this->width()) {
+                // (last_char == " " || last_char == "\n")) {
+                // ++offset;
+                position.y = 0;
+            }
+            // position.y = this->number_of_rows() - offset;
+            else if (this->cursor_y() == 0) {
+                position.y = this->number_of_rows() - 1;
+            } else {
+                position.y = this->number_of_rows();
+            }
+            position.x = 0;
+        } else {
+            position.y = this->number_of_rows() - 1;
+            position.x = last_x;
+        }
+    } else {
+        // if (this->cursor_y() == 0 && this->top_line() != 0 &&
+        //     this->cursor_x() == ) {
+        //     position
+        // }
+        auto line = this->line_at(index);
+        position.y = line - this->top_line();
+        position.x = index - display_state_.at(line).start_index;
+    }
+    return position;
 }
 
 bool Text_display::paint_event(const Paint_event& event) {
+    if (display_state_.empty()) {
+        return Widget::paint_event(event);
+    }
     Painter p{this};
     std::size_t line_n{0};
     Glyph_string contents_wo_nl{this->contents_};
@@ -126,7 +172,9 @@ bool Text_display::paint_event(const Paint_event& event) {
     if (display_state_.size() > this->top_line() + this->height()) {
         end = begin + this->height();
     }
-    std::for_each(begin, end, paint);
+    if (this->top_line() < display_state_.size()) {
+        std::for_each(begin, end, paint);
+    }
     return Widget::paint_event(event);
 }
 
@@ -137,9 +185,12 @@ bool Text_display::resize_event(const Resize_event& event) {
     return true;
 }
 
-// TODO: Implement tab character and 'from_line' optimization.
+// TODO: Implement tab character and 'from_line' optimization. consolidate dups.
 void Text_display::update_display(std::size_t from_line) {
     display_state_.clear();
+    if (this->width() == 0) {
+        return;
+    }
     std::size_t start_index{0};
     std::size_t length{0};
     std::size_t last_space{0};
@@ -149,33 +200,40 @@ void Text_display::update_display(std::size_t from_line) {
             last_space = length;
         }
         if (contents_.at(i).str() == "\n") {
-            display_state_.push_back(line_info{start_index, length - 1});
+            display_state_.push_back(line_info{start_index, length});
             start_index += length;
             length = 0;
         } else if (length == this->width()) {
-            std::size_t step_over{0};
-            if (this->width() > 1) {
-                if (i + 1 != contents_.size()) {
-                    auto next_char = contents_.at(i + 1).str();
-                    if (next_char == "\n" || next_char == " ") {
-                        ++i;
-                        last_space = 0;
-                        ++step_over;
-                    }
-                }
-                if (this->word_wrap() && last_space > 1) {
-                    i -= length - last_space;
-                    length = last_space - 1;
-                    last_space = 0;
-                    ++step_over;
-                }
+            if (contents_.at(i) == " ") {
+                display_state_.push_back(line_info{start_index, length});
+                start_index += length;
+                length = 0;
+            } else if (this->word_wrap() && last_space > 0) {
+                i -= length - last_space;
+                length = last_space;
+                last_space = 0;
+                display_state_.push_back(line_info{start_index, length});
+                start_index += length;
+                length = 0;
+            } else {
+                display_state_.push_back(line_info{start_index, length});
+                start_index += length;
+                length = 0;
             }
-            display_state_.push_back(line_info{start_index, length});
-            start_index += length + step_over;
-            length = 0;
         }
     }
-    display_state_.push_back(line_info{start_index, length});
+    if (length != 0) {
+        display_state_.push_back(line_info{start_index, length});
+    }
+    if (display_state_.empty()) {
+        return;
+    }
+    // Scroll if no text on screen
+    const auto last_x = this->row_length(this->last_line());
+    const auto last_char = this->glyph_at(this->last_index()).str();
+    if (last_x == this->width() || last_char == "\n") {
+        return;
+    }
     if (top_line_ >= display_state_.size()) {
         if (display_state_.empty()) {
             top_line_ = 0;
@@ -185,29 +243,32 @@ void Text_display::update_display(std::size_t from_line) {
 }
 
 std::size_t Text_display::line_at(std::size_t index) const {
-    if (index + 1 > contents_.size()) {
+    if (index >= contents_.size()) {
         return display_state_.empty() ? 0 : display_state_.size() - 1;
     }
-    auto pred = [index](auto& info) {
+    auto contains_index = [index](const auto& info) {
         return (info.start_index + info.length) > index;
     };
-    auto pos = std::find_if(std::begin(display_state_),
-                            std::end(display_state_), pred);
-    return pos - std::begin(display_state_);
+    auto line_iter = std::find_if(std::begin(display_state_),
+                                  std::end(display_state_), contains_index);
+    return line_iter - std::begin(display_state_);
 }
 
 std::size_t Text_display::number_of_rows() const {
-    if (this->last_line() == 0) {
-        return 0;
+    if (this->last_line() == 0 || this->top_line() > this->last_line()) {
+        return 1;
     }
-    auto lower_rows = this->last_line() - this->top_line() + 1;
-    if (lower_rows >= this->height()) {
+    auto visible_rows = 1 + this->last_line() - this->top_line();
+    if (visible_rows >= this->height()) {
         return this->height();
     }
-    return lower_rows;
+    return visible_rows;
 }
 
 std::size_t Text_display::top_line() const {
+    // if (top_line_ > this->last_line()) {
+    //     top_line_ = this->last_line();
+    // }
     return top_line_;
 }
 
@@ -219,8 +280,9 @@ std::size_t Text_display::index_at(std::size_t line) const {
     if (display_state_.empty()) {
         return 0;
     }
-    if (line >= display_state_.size()) {
-        line = display_state_.size() - 1;
+    if (line >= display_state_.size() && line != 0) {
+        // line = display_state_.size() - 1;
+        return Glyph_string::npos;
     }
     return display_state_.at(line).start_index;
 }
@@ -233,6 +295,13 @@ std::size_t Text_display::line_length(std::size_t line) const {
         line = display_state_.size() - 1;
     }
     return display_state_.at(line).length;
+}
+
+std::size_t Text_display::last_index() const {
+    if (this->contents_empty()) {
+        return 0;
+    }
+    return this->contents_size() - 1;
 }
 
 }  // namespace twf

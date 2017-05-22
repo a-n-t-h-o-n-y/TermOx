@@ -17,6 +17,7 @@ class Text_display : public Widget {
     explicit Text_display(Glyph_string content);
 
     // String Modification
+    void set_text(const Glyph_string& string);
     void insert(const Glyph_string& string, std::size_t index);
     void append(const Glyph_string& string);
     void erase(std::size_t index, std::size_t length = Glyph_string::npos);
@@ -34,6 +35,7 @@ class Text_display : public Widget {
     std::size_t string_index(std::size_t x, std::size_t y) const;
     Coordinate display_position(std::size_t index) const;
     Glyph_string contents() const { return contents_; }
+    Glyph glyph_at(std::size_t index) const { return contents_.at(index); }
     std::size_t contents_size() const { return contents_.size(); }
     bool contents_empty() const { return contents_.empty(); }
     bool word_wrap() const { return word_wrap_; }
@@ -51,6 +53,7 @@ class Text_display : public Widget {
     std::size_t top_line() const;
     std::size_t last_line() const;
     std::size_t line_length(std::size_t line) const;
+    std::size_t last_index() const;
 
    private:
     struct line_info {

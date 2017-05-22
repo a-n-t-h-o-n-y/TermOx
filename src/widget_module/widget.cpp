@@ -149,18 +149,6 @@ void Widget::clear_screen() {
     System::post_event(this, std::make_unique<Clear_screen_event>());
 }
 
-void Widget::move_cursor_x(std::size_t x) {
-    if (x < this->width()) {
-        cursor_position_.x = x;
-    }
-}
-
-void Widget::move_cursor_y(std::size_t y) {
-    if (y < this->height()) {
-        cursor_position_.y = y;
-    }
-}
-
 void Widget::move_cursor(Coordinate c) {
     this->move_cursor(c.x, c.y);
 }
@@ -171,16 +159,32 @@ void Widget::move_cursor(std::size_t x, std::size_t y) {
     // if you want textwrapping, inherit from textbox, or string_display...
     // textwrapping is not inherit to a widget, characters are decorative
     // elements and text, textbox makes the distinction.
-    if (x >= this->width()) {
-        x = 0;
-        ++y;
-    }
-    if (y >= this->height()) {
-        y = this->height() - 1;
-    }
+    // if (x >= this->width()) {
+    //     x = 0;
+    //     ++y;
+    // }
+    // if (y >= this->height()) {
+    //     y = this->height() - 1;
+    // }
     // should just be these two calls below, they will check for bounds
     this->move_cursor_x(x);
     this->move_cursor_y(y);
+}
+
+void Widget::move_cursor_x(std::size_t x) {
+    if (x < this->width()) {
+        cursor_position_.x = x;
+    } else if (this->width() != 0) {
+        cursor_position_.x = this->width() - 1;
+    }
+}
+
+void Widget::move_cursor_y(std::size_t y) {
+    if (y < this->height()) {
+        cursor_position_.y = y;
+    } else if (this->height() != 0) {
+        cursor_position_.y = this->height() - 1;
+    }
 }
 
 bool Widget::event(const Event& event) {

@@ -46,7 +46,7 @@ int main() {
          "reflexive tiestraightening movements, taking one last look at his\n"
          "lines on the printout while Axford stands there needing three tries "
          "to work the outside door's knob. Ann Kittenplan, on the other hand, "
-         "wears an expression of almost regal calm, and precedes them through "
+         "wears an expression\nof almost regal calm, and precedes them through "
          "the inner door like someone stepping down off a dais.")
         .enable_border();
 

@@ -3,6 +3,7 @@
 #include "system_module/events/key_event.hpp"
 #include "system_module/events/mouse_event.hpp"
 #include "system_module/key.hpp"
+#include "widget_module/coordinate.hpp"
 #include "widget_module/focus_policy.hpp"
 #include <iterator>
 #include <utility>
@@ -42,20 +43,40 @@ void Textbox::set_wheel_speed_down(std::size_t lines) {
 bool Textbox::key_press_event(const Key_event& event) {
     switch (event.key_code()) {
         case Key::Backspace: {
-            auto original_index = this->string_index(this->cursor_coordinate());
-            if (original_index == 0) {
+            if (this->cursor_coordinate() == Coordinate{0, 0} &&
+                this->top_line() == 0) {
                 return true;
+            }  // below is really this->cursor_index();
+            auto original_index = this->string_index(this->cursor_coordinate());
+            if (original_index == Glyph_string::npos) {
+                this->pop_back();
+                // if (this->glyph_at(this->last_index()).str() == "\n") {
+                //     this->set_cursor_coordinates(0, this->number_of_rows());
+                // } else {
+                    this->set_cursor_at_index(this->last_index() + 1);
+                // }
+                break;
             }
             this->erase(original_index - 1, 1);
-            auto new_index = this->string_index(this->cursor_coordinate()) + 1;
-            this->cursor_left(new_index - original_index);
+            auto new_index =
+                this->string_index(this->cursor_coordinate()) + 1;  // +1?
+            if (new_index > original_index) {
+                this->cursor_left(new_index - original_index);
+            } else if (original_index > new_index) {
+                this->cursor_right(original_index - new_index);
+            } else {
+                this->cursor_left();
+            }
         }
         // this->cursor_left();
-        // this->erase(this->string_index(this->cursor_coordinate()), 1);
+        // this->erase(this->string_index(this->cursor_coordinate()),
+        // 1);
 
         // this is duplicate of arrow left, put this away maybe into
-        // textbox_core, it might not be so bad to have scrolling within the
-        // cursor functions in textbox_core, it'd be nice actually so you
+        // textbox_core, it might not be so bad to have scrolling within
+        // the
+        // cursor functions in textbox_core, it'd be nice actually so
+        // you
         // don't have logic for the same thing across two different
         // functions.
         // if (this->cursor_x() == 0 && this->cursor_y() == 0 &&
@@ -83,18 +104,21 @@ bool Textbox::key_press_event(const Key_event& event) {
         //     this->scroll_up();
         // }
         // else {
-        //     this->move_cursor(this->cursor_x() - 1, this->cursor_y());
+        //     this->move_cursor(this->cursor_x() - 1,
+        //     this->cursor_y());
         // }
         // this->set_cursor_index(cursor_index_ - 1);
         // contents_.erase(std::begin(contents_) + cursor_index_);
         break;
 
-        case Key::Enter:
+        case Key::Enter:  // still this
+                          // call to string index should check for npos..
             this->insert("\n", this->string_index(this->cursor_coordinate()));
             // if (cursor_index_ == contents_.size()) {
             //     contents_.append("\n");
             // } else {
-            //     contents_.insert(std::begin(contents_) + cursor_index_,
+            //     contents_.insert(std::begin(contents_) +
+            //     cursor_index_,
             //     "\n");
             // }
             if (this->cursor_y() == this->height() - 1) {
@@ -102,13 +126,15 @@ bool Textbox::key_press_event(const Key_event& event) {
             } else {
                 this->cursor_right();
             }
-            // if (this->height() != 1) {  // otherwise index moved twice.
+            // if (this->height() != 1) {  // otherwise index moved
+            // twice.
             //     this->set_cursor_index(cursor_index_ + 1);
             // }
             break;
 
         case Key::Tab:
-            // Insert tab character, in Widget::move or somewhere you will have
+            // Insert tab character, in Widget::move or somewhere you
+            // will have
             // the logic for spacing the tab on the screen.
             break;
 
@@ -142,7 +168,8 @@ bool Textbox::key_press_event(const Key_event& event) {
             // if (this->cursor_x() == 0 && this->cursor_y() == 0 &&
             //     this->string_index(0, 0) != 0) {
             //     this->scroll_up();
-            //     this->set_cursor_coordinates(0, this->cursor_y() + 1);
+            //     this->set_cursor_coordinates(0, this->cursor_y() +
+            //     1);
             // }
             this->cursor_left();
             break;
@@ -155,15 +182,17 @@ bool Textbox::key_press_event(const Key_event& event) {
             this->cursor_down();
             break;
 
-        default:
+        default:  // still this
             if (!event.text().empty()) {
+                // below string index should check for npos
                 this->insert(event.text(),
                              this->string_index(this->cursor_coordinate()));
 
                 // if (cursor_index_ == contents_.size()) {
                 //     contents_.append(event.text());
                 // } else {
-                //     contents_.insert(std::begin(contents_) + cursor_index_,
+                //     contents_.insert(std::begin(contents_) +
+                //     cursor_index_,
                 //                      event.text());
                 // }
                 if (this->cursor_y() == this->height() - 1 &&

@@ -2,7 +2,8 @@
 #include <painter_module/painter.hpp>
 #include <system_module/events/paint_event.hpp>
 #include "system_module/events/resize_event.hpp"
-#include <widget_module/coordinate.hpp>
+#include "widget_module/coordinate.hpp"
+#include "painter_module/glyph_string.hpp"
 
 #include <cstddef>
 #include <functional>
@@ -21,31 +22,43 @@ void Textbox_core::set_cursor_coordinates(Coordinate pos) {
 
 void Textbox_core::set_cursor_coordinates(std::size_t x, std::size_t y) {
     // Off the end of string cursor position.
-    auto destination_index = this->index_at(this->top_line() + y) + x;
+    auto destination_index = this->index_at(this->top_line() + y);
+    if (destination_index != Glyph_string::npos) {
+        destination_index += x;
+    }
+    // auto destination_index = (this->top_line() + y) * this->width() + x;
     if (!this->contents_empty() && destination_index >= this->contents_size()) {
-        auto last_pos = this->display_position(this->contents_size() - 1);
-        x = ++last_pos.x;
+        // auto last_pos = this->display_position(this->last_index());
+        auto last_pos = this->display_position(destination_index);
+        x = last_pos.x;
         y = last_pos.y;
-        if (x >= this->width()) {
-            x = 0;
-            ++y;
-        }
-        // this->move_cursor(x, y);
-        // return;
-    } else if (y >= this->number_of_rows()) {
-        if (this->number_of_rows() == 0) {
-            y = 0;
-        } else {
-            y = this->number_of_rows() - 1;
-        }
-    } else if (x > this->row_length(y)) {
-        // if (this->row_length(y) == 0) {
+        // x = last_pos.x + 1;
+        // y = last_pos.y;
+        // if (x >= this->width()) {
         //     x = 0;
-        // } else {
-        x = this->row_length(y);
+        //     ++y;
         // }
+    } else {
+        if (y >= this->number_of_rows()) {
+            if (this->number_of_rows() == 0) {
+                y = 0;
+            } else {
+                y = this->number_of_rows() - 1;
+            }
+        }
+        if (x >= this->row_length(y)) {
+            if (this->row_length(y) == 0) {
+                x = 0;
+            } else {
+                x = this->row_length(y) - 1;
+            }
+        }
     }
     this->move_cursor(x, y);
+}
+
+void Textbox_core::set_cursor_at_index(std::size_t index) {
+    this->set_cursor_coordinates(this->display_position(index));
 }
 
 std::size_t Textbox_core::cursor_index() const {
@@ -97,25 +110,25 @@ void Textbox_core::increment_cursor_left() {
     // Special Cases
     // when moving upwards, move x to either length - 1 if width == row_length
     // of the above line, or move x to length otherwise.
-    if (this->cursor_x() == 0 && this->cursor_y() == 0) {
+    if (this->cursor_coordinate() == Coordinate{0, 0}) {
         if (this->top_line() == 0) {
             return;
         }
         this->scroll_up(1);
-        // duplicated below, shoule be able to combine fingers crossed.
-        auto new_x = this->row_length(0);
-        if (new_x == this->width()) {
-            --new_x;
-        }
+        // duplicated below, should be able to combine fingers crossed.
+        auto new_x = this->row_length(0) - 1;
+        // if (new_x == this->width()) {
+        //     --new_x;
+        // }
         this->set_cursor_coordinates(new_x, 0);
         return;
     }
     // Core logic -- TODO: Double check bounds checking - row_length -1
     if (this->cursor_x() == 0) {
-        auto new_x = this->row_length(this->cursor_y() - 1);
-        if (new_x == this->width()) {
-            --new_x;
-        }
+        auto new_x = this->row_length(this->cursor_y() - 1) - 1;
+        // if (new_x == this->width()) {
+        //     --new_x;
+        // }
         this->set_cursor_coordinates(new_x, this->cursor_y() - 1);
     } else {
         this->set_cursor_coordinates(this->cursor_x() - 1, this->cursor_y());
@@ -129,16 +142,21 @@ void Textbox_core::cursor_right(std::size_t n) {
 }
 
 void Textbox_core::increment_cursor_right() {
-    // Last Position
-    if (this->cursor_y() + this->top_line() == this->last_line() &&
-        this->cursor_x() == this->row_length(this->last_line())) {
+    auto at_last_position = [this](std::size_t minus) {
+        return this->cursor_y() + this->top_line() == this->last_line() &&
+               this->cursor_x() + minus == this->row_length(this->last_line());
+    };
+    auto at_row_end = [this] {
+        return this->cursor_x() + 1 == this->row_length(this->cursor_y());
+    };
+
+    if (at_last_position(0)) {
         return;
     }
     // Core Logic
     auto x = this->cursor_x() + 1;
     auto y = this->cursor_y();
-    if (this->cursor_x() == this->row_length(this->cursor_y()) ||
-        this->cursor_x() + 1 == this->width()) {
+    if (at_row_end() && !at_last_position(0)) {
         if (this->does_scroll() && this->cursor_y() + 1 == this->height()) {
             this->scroll_down(1);
         }
@@ -211,7 +229,17 @@ void Textbox_core::increment_cursor_right() {
 
 bool Textbox_core::resize_event(const Resize_event& event) {
     auto index = this->string_index(this->cursor_coordinate());
+    if (index == Glyph_string::npos) {
+        index = this->last_index();
+    }
     Text_display::resize_event(event);
+    if (this->top_line() > this->line_at(index)) {
+        this->scroll_down(this->top_line() - this->line_at(index));
+    } else if (this->top_line() + this->number_of_rows() <
+               this->line_at(index)) {
+        this->scroll_up(this->line_at(index) -
+                        (this->top_line() + this->number_of_rows()));
+    }
     this->set_cursor_coordinates(this->display_position(index));
     return true;
 }
@@ -221,17 +249,20 @@ void Textbox_core::scroll_up(std::size_t n) {
         return;
     }
     Text_display::scroll_up(n);
-    auto x = this->cursor_x();
-    auto y = this->cursor_y() + n;
-    auto distance_to_bottom = this->height() - 1 - this->cursor_y();
-    if (n > distance_to_bottom) {
-        auto destination_length = this->row_length(this->cursor_y());
-        if (destination_length < x) {
-            x = destination_length;
-        }
-        y = this->height() - 1;
-    }
-    this->set_cursor_coordinates(x, y);
+    // auto x = this->cursor_x();
+    // auto y = this->cursor_y() + n;
+    // if (y >= this->height()) {
+    //     y = this->height() - 1; // bounds check?
+    // }
+    // auto distance_to_bottom = this->height() - 1 - this->cursor_y();
+    // if (n > distance_to_bottom) {
+    //     // auto destination_length = this->row_length(this->cursor_y()) - 1;
+    //     // if (destination_length < x) {
+    //     //     x = destination_length;
+    //     // }
+    //     y = this->height() - 1;
+    // }
+    this->set_cursor_coordinates(this->cursor_x(), this->cursor_y() + n);
 }
 
 void Textbox_core::scroll_down(std::size_t n) {
@@ -243,18 +274,28 @@ void Textbox_core::scroll_down(std::size_t n) {
     //     this->set_cursor_coordinates(x, this->cursor_y() - 1);
     // }
     Text_display::scroll_down(n);
-    auto x = this->cursor_x();
+    // auto x = this->cursor_x();
     auto y = this->cursor_y();
-    if (this->cursor_y() != 0) {
+    if (y < n) {
+        y = 0;
+    } else {
         y -= n;
     }
-    if (n > this->cursor_y()) {
-        auto new_length = this->row_length(0);
-        if (new_length < this->cursor_x()) {
-            x = new_length;
-        }
-    }
-    this->set_cursor_coordinates(x, y);
+    // if (this->cursor_y() != 0) {  // check that y is greater or equal to n ?
+    //     y -= n;
+    // }
+    // if (n > this->cursor_y()) {  // create a bool is_end_cursor(x,y) member
+    // for
+    // checks
+    // if (is_end_cursor(x,1) // 1 because you haven't moved to 0 yet.
+    // then destination_length += 1; // put this below the auto creation.
+    // just below the next line.
+    // auto destination_length = this->row_length(0) - 1;
+    // if (destination_length < this->cursor_x()) {
+    //     x = destination_length;
+    // }
+    // }
+    this->set_cursor_coordinates(this->cursor_x(), y);
 }
 
 // void Textbox_core::scroll_up(std::size_t n) {

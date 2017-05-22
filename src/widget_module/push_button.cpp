@@ -19,8 +19,13 @@ bool Push_button::mouse_press_event(const Mouse_event& event) {
 
 bool Push_button::paint_event(const Paint_event& event) {
     Painter p{this};
-    p.put(title_, this->width() / 2 - (title_.size() / 2),
-             this->height() / 2);
+    auto widg_mid_point = this->width() / 2;
+    auto title_mid_point = title_.size() / 2;
+    auto x = widg_mid_point - title_mid_point;
+    if (title_mid_point > widg_mid_point) {
+        x = 0;
+    }
+    p.put(title_, x, this->height() / 2);
     return Widget::paint_event(event);
 }
 

@@ -23,6 +23,7 @@ class Textbox_core : public Text_display {
     void cursor_right(std::size_t n = 1);
     void set_cursor_coordinates(Coordinate);
     void set_cursor_coordinates(std::size_t x, std::size_t y);
+    void set_cursor_at_index(std::size_t index);
     std::size_t cursor_index() const;
 
     void enable_scrolling(bool enable = true) { scroll_ = enable; }
