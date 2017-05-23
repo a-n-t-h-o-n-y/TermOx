@@ -33,25 +33,30 @@ std::size_t Textbox_core::cursor_index() const {
 }
 
 void Textbox_core::cursor_up(std::size_t n) {
-    auto x = this->cursor_x();
     auto y = this->cursor_y() - n;
-    if (this->does_scroll() && this->cursor_y() < n) {
-        this->scroll_up(n - this->cursor_y());
+    if (this->cursor_y() < n) {
+        if (this->does_scroll()) {
+            this->scroll_up(n - this->cursor_y());
+        }
         y = 0;
-    } else if (!this->does_scroll() && this->cursor_y() < n) {
-        y = 0; // working on making a non-scrolling textbox do the right thing
     }
-    this->set_cursor_at_coordinates(x, y);
+    this->set_cursor_at_coordinates(this->cursor_x(), y);
 }
 
 void Textbox_core::cursor_down(std::size_t n) {
     if (this->cursor_y() + this->top_line() == this->last_line()) {
         return;
     }
-    if (this->does_scroll() && this->cursor_y() + n >= this->height()) {
-        this->scroll_down(n - (this->height() - 1 - this->cursor_y()));
+    auto y = this->cursor_y() + n;
+    if (y >= this->height()) {
+        if (this->does_scroll()) {
+            this->scroll_down(y - (this->height() - 1));
+            y = this->cursor_y() + n;
+        } else {
+            return;
+        }
     }
-    this->set_cursor_at_coordinates(this->cursor_x(), this->cursor_y() + n);
+    this->set_cursor_at_coordinates(this->cursor_x(), y);
 }
 
 void Textbox_core::cursor_left(std::size_t n) {
@@ -61,8 +66,12 @@ void Textbox_core::cursor_left(std::size_t n) {
 }
 
 void Textbox_core::increment_cursor_left() {
-    if (this->does_scroll() && this->cursor_coordinate() == Coordinate{0, 0}) {
-        this->scroll_up(1);
+    if (this->cursor_coordinate() == Coordinate{0, 0}) {
+        if (this->does_scroll()) {
+            this->scroll_up(1);
+        } else {
+            return;
+        }
     }
     auto next_index = this->cursor_index();
     if (next_index == 0) {
@@ -83,9 +92,13 @@ void Textbox_core::increment_cursor_right() {
         return;
     }
     auto true_last_index = this->first_index_at(this->bottom_line() + 1) - 1;
-    if (this->does_scroll() && this->cursor_index() == true_last_index &&
+    if (this->cursor_index() == true_last_index &&
         this->cursor_y() == this->height() - 1) {
-        this->scroll_down(1);
+        if (this->does_scroll()) {
+            this->scroll_down(1);
+        } else {
+            return;
+        }
     }
     this->set_cursor_at_index(this->cursor_index() + 1);
 }

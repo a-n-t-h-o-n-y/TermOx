@@ -76,6 +76,18 @@ void Text_display::scroll_down(std::size_t n) {
     }
 }
 
+void Text_display::enable_word_wrap(bool enable) {
+    word_wrap_ = enable;
+    this->update_display();
+    this->update();
+}
+
+void Text_display::disable_word_wrap(bool disable) {
+    word_wrap_ = !disable;
+    this->update_display();
+    this->update();
+}
+
 std::size_t Text_display::row_length(std::size_t y) const {
     auto line = this->top_line() + y;
     return this->line_length(line);
@@ -221,7 +233,7 @@ void Text_display::update_display(std::size_t from_line) {
                 display_state_.push_back(line_info{start_index, length});
                 start_index += length;
                 length = 0;
-            } else if (this->word_wrap() && last_space > 0) {
+            } else if (this->does_word_wrap() && last_space > 0) {
                 i -= length - last_space;
                 length = last_space;
                 last_space = 0;

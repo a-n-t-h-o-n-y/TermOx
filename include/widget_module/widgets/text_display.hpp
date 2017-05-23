@@ -39,11 +39,11 @@ class Text_display : public Widget {
     Glyph glyph_at(std::size_t index) const { return contents_.at(index); }
     std::size_t contents_size() const { return contents_.size(); }
     bool contents_empty() const { return contents_.empty(); }
-    bool word_wrap() const { return word_wrap_; }
+    bool does_word_wrap() const { return word_wrap_; }
 
     // Options
-    void enable_word_wrap(bool enable = true) { word_wrap_ = enable; }
-    void disable_word_wrap(bool disable = true) { word_wrap_ = !disable; }
+    void enable_word_wrap(bool enable = true);
+    void disable_word_wrap(bool disable = true);
 
    protected:
     bool paint_event(const Paint_event& event) override;

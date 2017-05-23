@@ -34,7 +34,12 @@ int main() {
 
     twf::Vertical_layout w;
     w.make_child<twf::Titlebar>("Text_display widget");
-    w.make_child<twf::Textbox>().enable_border();
+    auto& btb = w.make_child<twf::Textbox>();
+    btb.enable_border();
+    auto& pb = w.make_child<twf::Push_button>("Toggle Word Wrap below.");
+    pb.geometry().size_policy().vertical_policy = twf::Size_policy::Fixed;
+    pb.geometry().set_height_hint(3);
+    pb.set_background(twf::Color::Red);
     auto& tb = w.make_child<twf::Textbox>(
         "The diddle-check seems like it's degenerated into the girls all "
         "getting very excited and exchanging data on what kinds of animal "
@@ -50,8 +55,9 @@ int main() {
         "wears an expression\nof almost regal calm, and precedes them through "
         "the inner door like someone stepping down off a dais.");
     tb.enable_border();
-    tb.disable_scrolling();
+    // tb.disable_scrolling();
     // tb.disable_word_wrap();
+    pb.clicked.connect([&tb] { tb.enable_word_wrap(!tb.does_word_wrap()); });
 
     s.set_head(&w);
 
