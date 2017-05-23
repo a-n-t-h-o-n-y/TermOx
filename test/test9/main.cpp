@@ -34,21 +34,24 @@ int main() {
 
     twf::Vertical_layout w;
     w.make_child<twf::Titlebar>("Text_display widget");
-    // w.make_child<twf::Textbox>().enable_border();
-    w.make_child<twf::Textbox>(
-         "The diddle-check seems like it's degenerated into the girls all "
-         "getting very excited and exchanging data on what kinds of animal "
-         "members of their own biologic families either imitate or physically "
-         "resemble, and Avril's out of sight and silent and apparently letting "
-         "them go with it for a while and vent stress. Hal keeps checking for "
-         "jaw-drool with the back of his hand. Pemulis, in a Cyrillic-lettered "
-         "T-shirt, takes off\n\n\n\n\n\nthe hat and looks around himself and makes "
-         "reflexive tiestraightening movements, taking one last look at his\n"
-         "lines on the printout while Axford stands there needing three tries "
-         "to work the outside door's knob. Ann Kittenplan, on the other hand, "
-         "wears an expression\nof almost regal calm, and precedes them through "
-         "the inner door like someone stepping down off a dais.")
-        .enable_border();
+    w.make_child<twf::Textbox>().enable_border();
+    auto& tb = w.make_child<twf::Textbox>(
+        "The diddle-check seems like it's degenerated into the girls all "
+        "getting very excited and exchanging data on what kinds of animal "
+        "members of their own biologic families either imitate or physically "
+        "resemble, and Avril's out of sight and silent and apparently letting "
+        "them go with it for a while and vent stress. Hal keeps checking for "
+        "jaw-drool with the back of his hand. Pemulis, in a Cyrillic-lettered "
+        "T-shirt, takes off\n\n\n\n\n\nthe hat and looks around himself and "
+        "makes "
+        "reflexive tiestraightening movements, taking one last look at his\n"
+        "lines on the printout while Axford stands there needing three tries "
+        "to work the outside door's knob. Ann Kittenplan, on the other hand, "
+        "wears an expression\nof almost regal calm, and precedes them through "
+        "the inner door like someone stepping down off a dais.");
+    tb.enable_border();
+    tb.disable_scrolling();
+    // tb.disable_word_wrap();
 
     s.set_head(&w);
 

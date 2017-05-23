@@ -30,10 +30,11 @@ class Text_display : public Widget {
 
     // Query Functions
     std::size_t row_length(std::size_t y) const;
-    std::size_t number_of_rows() const;
-    std::size_t string_index(Coordinate position) const;
-    std::size_t string_index(std::size_t x, std::size_t y) const;
+    std::size_t display_height() const;
+    std::size_t index_at(Coordinate position) const;
+    std::size_t index_at(std::size_t x, std::size_t y) const;
     Coordinate display_position(std::size_t index) const;
+
     Glyph_string contents() const { return contents_; }
     Glyph glyph_at(std::size_t index) const { return contents_.at(index); }
     std::size_t contents_size() const { return contents_.size(); }
@@ -49,11 +50,15 @@ class Text_display : public Widget {
     bool resize_event(const Resize_event& event) override;
 
     std::size_t line_at(std::size_t index) const;
-    std::size_t index_at(std::size_t line) const;
     std::size_t top_line() const;
+    std::size_t bottom_line() const;
     std::size_t last_line() const;
+
+    std::size_t first_index_at(std::size_t line) const;
+    std::size_t last_index_at(std::size_t line) const;
+
     std::size_t line_length(std::size_t line) const;
-    std::size_t last_index() const;
+    std::size_t end_index() const;
 
    private:
     struct line_info {

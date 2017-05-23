@@ -43,134 +43,35 @@ void Textbox::set_wheel_speed_down(std::size_t lines) {
 bool Textbox::key_press_event(const Key_event& event) {
     switch (event.key_code()) {
         case Key::Backspace: {
-            if (this->cursor_coordinate() == Coordinate{0, 0} &&
-                this->top_line() == 0) {
-                return true;
-            }  // below is really this->cursor_index();
-            auto original_index = this->string_index(this->cursor_coordinate());
-            if (original_index == Glyph_string::npos) {
-                this->pop_back();
-                // if (this->glyph_at(this->last_index()).str() == "\n") {
-                //     this->set_cursor_coordinates(0, this->number_of_rows());
-                // } else {
-                    this->set_cursor_at_index(this->last_index() + 1);
-                // }
+            auto cursor_index = this->cursor_index();
+            if (cursor_index == 0) {
                 break;
             }
-            this->erase(original_index - 1, 1);
-            auto new_index =
-                this->string_index(this->cursor_coordinate()) + 1;  // +1?
-            if (new_index > original_index) {
-                this->cursor_left(new_index - original_index);
-            } else if (original_index > new_index) {
-                this->cursor_right(original_index - new_index);
-            } else {
-                this->cursor_left();
+            this->erase(--cursor_index, 1);
+            if (this->line_at(cursor_index) < this->top_line()) {
+                this->scroll_up();
             }
-        }
-        // this->cursor_left();
-        // this->erase(this->string_index(this->cursor_coordinate()),
-        // 1);
+            this->set_cursor_at_index(cursor_index);
+        } break;
 
-        // this is duplicate of arrow left, put this away maybe into
-        // textbox_core, it might not be so bad to have scrolling within
-        // the
-        // cursor functions in textbox_core, it'd be nice actually so
-        // you
-        // don't have logic for the same thing across two different
-        // functions.
-        // if (this->cursor_x() == 0 && this->cursor_y() == 0 &&
-        //     this->string_index(0, 0) != 0) {
-        //     this->scroll_up();
-        //     this->set_cursor_coordinates(0, this->cursor_y() + 1);
-        // }
-
-        // if (this->cursor_x() == 0 && this->cursor_y() != 0) {
-        //     if (contents_.at(cursor_index_ - 1).str() == "\n") {
-        //         --cursor_index_;
-        //         contents_.erase(std::begin(contents_) +
-        //         cursor_index_);
-        //         auto pos = this->position_from_index(cursor_index_);
-        //         this->move_cursor(pos.x, pos.y);
-        //         this->update();
-        //         return true;
-        //     }
-        //     this->move_cursor(this->width() - 1, this->cursor_y() -
-        //     1);
-        // } else if (cursor_index_ == 0) {
-        //     return true;
-        // }
-        // else if (this->cursor_x() == 0 && this->cursor_y() == 0) {
-        //     this->scroll_up();
-        // }
-        // else {
-        //     this->move_cursor(this->cursor_x() - 1,
-        //     this->cursor_y());
-        // }
-        // this->set_cursor_index(cursor_index_ - 1);
-        // contents_.erase(std::begin(contents_) + cursor_index_);
-        break;
-
-        case Key::Enter:  // still this
-                          // call to string index should check for npos..
-            this->insert("\n", this->string_index(this->cursor_coordinate()));
-            // if (cursor_index_ == contents_.size()) {
-            //     contents_.append("\n");
-            // } else {
-            //     contents_.insert(std::begin(contents_) +
-            //     cursor_index_,
-            //     "\n");
-            // }
-            if (this->cursor_y() == this->height() - 1) {
-                this->scroll_down();
-            } else {
-                this->cursor_right();
+        case Key::Enter: {
+            auto cursor_index = this->cursor_index();
+            this->insert('\n', cursor_index);
+            if (this->cursor_y() + 1 == this->height()) {
+                this->scroll_down(1);
             }
-            // if (this->height() != 1) {  // otherwise index moved
-            // twice.
-            //     this->set_cursor_index(cursor_index_ + 1);
-            // }
-            break;
+            this->set_cursor_at_index(cursor_index + 1);
+        } break;
 
         case Key::Tab:
-            // Insert tab character, in Widget::move or somewhere you
-            // will have
-            // the logic for spacing the tab on the screen.
+            // Insert '\t', it will be taken care of in update_display()
             break;
 
         case Key::Arrow_right:
-            // if (cursor_index_ == contents_.size()) {
-            //     return true;
-            // }
-            // if (this->cursor_y() == this->height() - 1) {
-            //     if (this->contents_.at(cursor_index_) == '\n' ||
-            //         this->cursor_x() == this->width() - 1) {
-            //         this->scroll_down();
-            //     }
-            // }
-            // this->set_cursor_index(cursor_index_ + 1);
-            // {
-            //     auto pos = position_from_index(cursor_index_);
-            //     this->move_cursor(pos.x, pos.y);
-            // }
             this->cursor_right();
             break;
 
         case Key::Arrow_left:
-            // if (cursor_index_ != 0) {
-            //     if (this->cursor_y() == 0 && this->cursor_x() == 0) {
-            //         this->scroll_up();
-            //     }
-            //     this->set_cursor_index(cursor_index_ - 1);
-            //     auto pos = position_from_index(cursor_index_);
-            //     this->move_cursor(pos.x, pos.y);
-            // }
-            // if (this->cursor_x() == 0 && this->cursor_y() == 0 &&
-            //     this->string_index(0, 0) != 0) {
-            //     this->scroll_up();
-            //     this->set_cursor_coordinates(0, this->cursor_y() +
-            //     1);
-            // }
             this->cursor_left();
             break;
 
@@ -182,26 +83,13 @@ bool Textbox::key_press_event(const Key_event& event) {
             this->cursor_down();
             break;
 
-        default:  // still this
-            if (!event.text().empty()) {
-                // below string index should check for npos
-                this->insert(event.text(),
-                             this->string_index(this->cursor_coordinate()));
-
-                // if (cursor_index_ == contents_.size()) {
-                //     contents_.append(event.text());
-                // } else {
-                //     contents_.insert(std::begin(contents_) +
-                //     cursor_index_,
-                //                      event.text());
-                // }
-                if (this->cursor_y() == this->height() - 1 &&
-                    this->cursor_x() == this->width() - 1) {
-                    this->scroll_down();
-                } else {
-                    this->cursor_right();
-                    // this->set_cursor_index(cursor_index_ + 1);
-                }
+        default:  // Insert text
+            auto text = event.text();
+            if (!text.empty()) {
+                auto cursor_index = this->cursor_index();
+                this->insert(text, cursor_index);
+                this->cursor_right();
+                this->set_cursor_at_index(cursor_index + 1);
             }
     }
     this->update();
@@ -210,11 +98,7 @@ bool Textbox::key_press_event(const Key_event& event) {
 
 bool Textbox::mouse_press_event(const Mouse_event& event) {
     if (event.button() == Mouse_button::Left) {
-        this->set_cursor_coordinates(event.local_x(), event.local_y());
-        // cursor_index_ = index_from_position(event.local_x(),
-        // event.local_y());
-        // auto pos = position_from_index(cursor_index_);
-        // this->move_cursor(pos.x, pos.y);
+        this->set_cursor_at_coordinates(event.local_x(), event.local_y());
     } else if (event.button() == Mouse_button::ScrollUp) {
         if (scroll_wheel_) {
             this->scroll_up(scroll_speed_up_);
