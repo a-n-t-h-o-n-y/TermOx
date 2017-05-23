@@ -44,9 +44,9 @@ class Color_display : public Widget {
     Glyph_string colors_;
 };
 
-class Palette_changer : public Widget {
+class Palette_changer : public Text_display {
    public:
-    Palette_changer() {
+    Palette_changer() : Text_display("Click me to enable palette changes") {
         enable_border();
         brush().set_background(Color::Dark_red);
         this->set_focus_policy(Focus_policy::Click);
@@ -57,13 +57,7 @@ class Palette_changer : public Widget {
         } else if (event.text() == "d") {
             System::set_palette(std::make_unique<DawnBringer_palette>());
         }
-        return Widget::key_press_event(event);
-    }
-    
-    bool paint_event(const Paint_event& event) override {
-        twf::Painter p{this};
-        p.put("Click me to enable palette changes");
-        return Widget::paint_event(event);
+        return Text_display::key_press_event(event);
     }
 };
 

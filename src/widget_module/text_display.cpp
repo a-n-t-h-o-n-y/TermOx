@@ -66,6 +66,7 @@ void Text_display::scroll_up(std::size_t n) {
     } else {
         top_line_ -= n;
     }
+    this->update();
 }
 
 void Text_display::scroll_down(std::size_t n) {
@@ -74,6 +75,7 @@ void Text_display::scroll_down(std::size_t n) {
     } else {
         top_line_ += n;
     }
+    this->update();
 }
 
 void Text_display::enable_word_wrap(bool enable) {
