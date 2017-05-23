@@ -5,7 +5,7 @@
 namespace twf {
 
 Horizontal_scrollbar::Horizontal_scrollbar() {
-    this->set_cursor(false);
+    this->disable_cursor();
     this->geometry().size_policy().vertical_policy = Size_policy::Fixed;
     this->geometry().set_height_hint(1);
     this->geometry().size_policy().horizontal_policy = Size_policy::Expanding;

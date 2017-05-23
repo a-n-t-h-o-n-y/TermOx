@@ -82,6 +82,7 @@ NCurses_paint_engine::NCurses_paint_engine() {
     buffer_.resize(NCurses_paint_engine::screen_width(),
                    NCurses_paint_engine::screen_height());
     initialize_color_pairs();
+    this->hide_cursor();
 }
 
 NCurses_paint_engine::~NCurses_paint_engine() {
@@ -92,11 +93,15 @@ void NCurses_paint_engine::touch_all() {
     ::touchwin(::stdscr);
 }
 
-void NCurses_paint_engine::show_cursor() {
-    ::curs_set(1);
+void NCurses_paint_engine::show_cursor(bool show) {
+    if (show) {
+        ::curs_set(1);
+    } else {
+        ::curs_set(0);
+    }
 }
-void NCurses_paint_engine::hide_cursor() {
-    ::curs_set(0);
+void NCurses_paint_engine::hide_cursor(bool hide) {
+    this->show_cursor(!hide);
 }
 
 std::size_t NCurses_paint_engine::screen_width() {

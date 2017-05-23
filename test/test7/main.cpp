@@ -36,7 +36,7 @@ class H_scrolls : public twf::Vertical_layout {
 
 class Clicker : public twf::Widget {
    public:
-    Clicker() { this->set_cursor(false); }
+    Clicker() { this->disable_cursor(); }
     bool mouse_press_event(const twf::Mouse_event& event) override {
         if (event.button() == twf::Mouse_button::Left) {
             pos_.x = event.local_x();
@@ -48,7 +48,7 @@ class Clicker : public twf::Widget {
 
     bool paint_event(const twf::Paint_event& event) override {
         twf::Painter p{this};
-        p.put_at(pos_.x, pos_.y, 'X');
+        p.put('X', pos_.x, pos_.y);
         return Widget::paint_event(event);
     }
 

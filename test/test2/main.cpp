@@ -5,13 +5,12 @@ class Text_box : public twf::Widget {
    public:
     Text_box() {
         this->set_focus_policy(twf::Focus_policy::Strong);
-        this->set_cursor(true);
+        this->enable_cursor();
         this->enable_border();
         this->size_policy().horizontal_stretch = 5;
     }
     bool paint_event(const twf::Paint_event& event) override {
         twf::Painter p{this};
-        p.move(0, 0);
         p.put(contents_);
         return Widget::paint_event(event);
     }
@@ -30,7 +29,7 @@ class Textbox2 : public Widget {
    public:
     Textbox2() {
         this->set_focus_policy(twf::Focus_policy::Strong);
-        this->set_cursor(true);
+        this->enable_cursor();
         this->enable_border();
         this->brush().set_background(Color::Green);
         this->brush().set_foreground(Color::White);
@@ -45,7 +44,6 @@ class Textbox2 : public Widget {
 
     bool paint_event(const Paint_event& event) override {
         Painter p{this};
-        p.move(0, 0);
         p.put(gs_);
         return Widget::paint_event(event);
     }

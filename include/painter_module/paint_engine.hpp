@@ -34,8 +34,8 @@ class Paint_engine {
                          std::int16_t g,
                          std::int16_t b) = 0;
 
-    virtual void show_cursor() = 0;
-    virtual void hide_cursor() = 0;
+    virtual void show_cursor(bool show = true) = 0; // NOLINT
+    virtual void hide_cursor(bool hide = true) = 0; // NOLINT
     virtual std::size_t screen_width() = 0;
     virtual std::size_t screen_height() = 0;
 

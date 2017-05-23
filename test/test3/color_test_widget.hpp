@@ -9,7 +9,7 @@ using namespace twf;
 class Color_test_widget : public Widget {
    public:
     Color_test_widget() {
-        this->set_cursor(false);
+        this->set_focus_policy(Focus_policy::Click);
         this->enable_border();
         this->set_brush(
             Brush(background(Color::Light_blue), foreground(Color::Yellow)));
@@ -26,23 +26,16 @@ class Color_test_widget : public Widget {
 
         // Display glyph
         Glyph g("Ʈ", background(c_back), foreground(c_fore));
-        p.move(event.local_x(), event.local_y());
-        p.put(g);
+        p.put(g, event.local_x(), event.local_y());
 
         // Translate Colors to English strings
         Glyph_string back_string = find_name(c_back);
         Glyph_string fore_string = find_name(c_fore);
 
-        p.move(0, 0);
         p.put("                                    ");
-        p.move(0, 0);
-        p.put("Background Color: ");
-        p.put(back_string);
-        p.move(0, 1);
-        p.put("                                    ");
-        p.move(0, 1);
-        p.put("Foreground Color: ");
-        p.put(fore_string);
+        p.put(Glyph_string("Background Color: ") + back_string);
+        p.put("                                    ", 0, 1);
+        p.put(Glyph_string("Foreground Color: ") + fore_string, 0, 1);
         return Widget::mouse_press_event(event);
     }
 

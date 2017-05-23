@@ -24,7 +24,7 @@ class Main_widget : public twf::Vertical_layout {
 
         auto& hl = this->make_child<twf::Horizontal_layout>();
         auto& v1 = hl.make_child<twf::Vertical_layout>();
-        v1.set_cursor(false);
+        v1.disable_cursor();
         v1.enable_border();
         twf::Brush brush;
         brush.set_foreground(twf::Color::Red);
@@ -34,12 +34,12 @@ class Main_widget : public twf::Vertical_layout {
         // v1.brush().set_background(twf::Color::Dark_red);
         auto& btn = hl.make_child<twf::Push_button>("Save");
         auto& v2 = hl.make_child<twf::Vertical_layout>();
-        v2.set_cursor(false);
+        v2.disable_cursor();
         v2.enable_border();
         v2.brush() = brush;
         auto save_text = [&tb](){
             std::ofstream fs{"test2.txt"};
-            fs << tb.text();
+            fs << tb.contents();
         };
         btn.clicked.connect(save_text);
     }

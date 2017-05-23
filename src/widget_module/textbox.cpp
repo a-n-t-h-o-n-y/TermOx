@@ -1,121 +1,114 @@
 #include "widget_module/widgets/textbox.hpp"
-#include "painter_module/painter.hpp"
+#include "painter_module/glyph_string.hpp"
 #include "system_module/events/key_event.hpp"
-#include "system_module/events/paint_event.hpp"
+#include "system_module/events/mouse_event.hpp"
 #include "system_module/key.hpp"
-#include "system_module/system.hpp"
+#include "widget_module/coordinate.hpp"
+#include "widget_module/focus_policy.hpp"
+#include <iterator>
+#include <utility>
 #include <cstddef>
 
 namespace twf {
 
+Textbox::Textbox(Glyph_string contents) : Textbox_core{std::move(contents)} {
+    this->set_focus_policy(Focus_policy::Strong);
+}
+
+void Textbox::enable_scroll_wheel(bool enable) {
+    scroll_wheel_ = enable;
+}
+
+void Textbox::disable_scroll_wheel(bool disable) {
+    scroll_wheel_ = !disable;
+}
+
+bool Textbox::does_scroll_wheel() const {
+    return scroll_wheel_;
+}
+
+void Textbox::set_wheel_speed(std::size_t lines) {
+    this->set_wheel_speed_up(lines);
+    this->set_wheel_speed_down(lines);
+}
+
+void Textbox::set_wheel_speed_up(std::size_t lines) {
+    scroll_speed_up_ = lines;
+}
+
+void Textbox::set_wheel_speed_down(std::size_t lines) {
+    scroll_speed_down_ = lines;
+}
+
 bool Textbox::key_press_event(const Key_event& event) {
-    Painter p{this};
-    // Backspace
-    if (event.key_code() == Key::Backspace) {
-        if (this->cursor_x() == 0 && this->cursor_y() != 0) {
-            if (contents_.at(cursor_index_ - 1).str() == "\n") {
-                --cursor_index_;
-                contents_.erase(std::begin(contents_) + cursor_index_);
-                auto pos = this->position_from_index(cursor_index_);
-                p.move(pos.x, pos.y);
-                this->update();
-                return true;
+    switch (event.key_code()) {
+        case Key::Backspace: {
+            auto cursor_index = this->cursor_index();
+            if (cursor_index == 0) {
+                break;
             }
-            p.move(this->width() - 1, this->cursor_y() - 1);
-            p.put(" ", false);
-        } else if (cursor_index_ == 0) {
-            return true;
-        } else if (this->cursor_x() == 0 && this->cursor_y() == 0) {
-            this->scroll_up();
-        } else {
-            p.move(this->cursor_x() - 1, this->cursor_y());
-            p.put(" ", false);
-        }
-        this->set_cursor_index(cursor_index_ - 1);
-        contents_.erase(std::begin(contents_) + cursor_index_);
-        this->update();
-        // Enter
-    } else if (event.key_code() == Key::Enter) {
-        if (cursor_index_ == contents_.size()) {
-            contents_.append("\n");
-        } else {
-            contents_.insert(std::begin(contents_) + cursor_index_, "\n");
-        }
-        if (this->cursor_y() == this->height() - 1) {
-            this->scroll_down();
-        }
-        if (this->height() != 1) {  // otherwise index moved twice.
-            this->set_cursor_index(cursor_index_ + 1);
-        }
-        this->update();
-        // Character
-    } else if (event.key_code() == Key::Tab) {
-        // insert 4 spaces, or variable amount set by user, possibly implement
-        // real tabs, by moving to the next line divisible by 4. insert '\t'
-        // into contents, this will need new printing functions, probably just
-        // insert here.
-    } else if (!event.text().empty()) {
-        if (cursor_index_ == contents_.size()) {
-            contents_.append(event.text());
-        } else {
-            contents_.insert(std::begin(contents_) + cursor_index_,
-                             event.text());
-        }
-        if (this->cursor_y() == this->height() - 1 &&
-            this->cursor_x() == this->width() - 1) {
-            this->scroll_down();
-        } else {
-            this->set_cursor_index(cursor_index_ + 1);
-        }
-        this->update();
-    } else if (event.key_code() == Key::Arrow_right) {
-        if (cursor_index_ == contents_.size()) {
-            return true;
-        }
-        if (this->cursor_y() == this->height() - 1) {
-            if (this->contents_.at(cursor_index_) == '\n' ||
-                this->cursor_x() == this->width() - 1) {
-                this->scroll_down();
-            }
-        }
-        this->set_cursor_index(cursor_index_ + 1);
-        auto pos = position_from_index(cursor_index_);
-        p.move(pos.x, pos.y);
-    } else if (event.key_code() == Key::Arrow_left) {
-        if (cursor_index_ != 0) {
-            if (this->cursor_y() == 0 && this->cursor_x() == 0) {
+            this->erase(--cursor_index, 1);
+            if (this->line_at(cursor_index) < this->top_line()) {
                 this->scroll_up();
             }
-            this->set_cursor_index(cursor_index_ - 1);
-            auto pos = position_from_index(cursor_index_);
-            p.move(pos.x, pos.y);
-        }
-    } else if (event.key_code() == Key::Arrow_up) {
-        if (this->cursor_y() == 0) {
-            this->scroll_up();
-        }
-        this->cursor_up();
-    } else if (event.key_code() == Key::Arrow_down) {
-        if (this->cursor_y() == this->height() - 1 &&
-            this->position_from_index(lower_bound_).y != this->height() - 1) {
-            this->scroll_down();
-        }
-        this->cursor_down();
+            this->set_cursor_at_index(cursor_index);
+        } break;
+
+        case Key::Enter: {
+            auto cursor_index = this->cursor_index();
+            this->insert('\n', cursor_index);
+            if (this->cursor_y() + 1 == this->height()) {
+                this->scroll_down(1);
+            }
+            this->set_cursor_at_index(cursor_index + 1);
+        } break;
+
+        case Key::Tab:
+            // Insert '\t', it will be taken care of in update_display()
+            break;
+
+        case Key::Arrow_right:
+            this->cursor_right();
+            break;
+
+        case Key::Arrow_left:
+            this->cursor_left();
+            break;
+
+        case Key::Arrow_up:
+            this->cursor_up();
+            break;
+
+        case Key::Arrow_down:
+            this->cursor_down();
+            break;
+
+        default:  // Insert text
+            auto text = event.text();
+            if (!text.empty()) {
+                auto cursor_index = this->cursor_index();
+                this->insert(text, cursor_index);
+                this->cursor_right();
+                this->set_cursor_at_index(cursor_index + 1);
+            }
     }
+    this->update();
     return true;
 }
 
 bool Textbox::mouse_press_event(const Mouse_event& event) {
     if (event.button() == Mouse_button::Left) {
-        cursor_index_ = index_from_position(event.local_x(), event.local_y());
-        auto pos = position_from_index(cursor_index_);
-        Painter p{this};
-        p.move(pos.x, pos.y);
+        this->set_cursor_at_coordinates(event.local_x(), event.local_y());
     } else if (event.button() == Mouse_button::ScrollUp) {
-        this->scroll_up();
+        if (scroll_wheel_) {
+            this->scroll_up(scroll_speed_up_);
+        }
     } else if (event.button() == Mouse_button::ScrollDown) {
-        this->scroll_down();
+        if (scroll_wheel_) {
+            this->scroll_down(scroll_speed_down_);
+        }
     }
+    this->update();
     return true;
 }
 

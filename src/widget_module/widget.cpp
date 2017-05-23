@@ -15,17 +15,18 @@
 #include <system_module/system.hpp>
 #include <widget_module/widget.hpp>
 #include "widget_module/border.hpp"
+#include "widget_module/coordinate.hpp"
 #include "system_module/key.hpp"
 
 #include <memory>
+#include <cstddef>
 
 namespace twf {
 
 Widget::Widget() {
     this->Widget::initialize();
-    this->brush().set_background(Color::Black);
-    this->brush().set_foreground(Color::White);
-    this->update();
+    this->set_background(Color::Black);
+    this->set_foreground(Color::White);
 }
 
 Widget::~Widget() {
@@ -46,23 +47,30 @@ void Widget::initialize() {
     this->show = [this]() { this->set_visible(true); };
     this->show.track(this->destroyed);
 
-    this->repaint = [this]() {
-        Paint_event e;  // change this to a single line.
-        System::send_event(this, e);
-    };
+    this->repaint = [this]() { System::send_event(this, Paint_event()); };
     this->repaint.track(this->destroyed);
 
-    this->give_focus = [this]() { std::bind(&Widget::set_focus, this, true); };
+    this->give_focus = [this]() { this->set_focus(true); };
     this->give_focus.track(this->destroyed);
 
-    this->update_me = [this]() { std::bind(&Widget::update, this); };
+    this->update_me = [this]() { this->update(); };
     this->update_me.track(this->destroyed);
 }
 
 void Widget::set_x(std::size_t global_x) {
     auto parent = dynamic_cast<Widget*>(this->parent());
+    auto screen_width = System::max_width();
+    if (global_x >= screen_width && screen_width > 0) {
+        global_x = screen_width - 1;
+    } else if (screen_width == 0) {
+        global_x = 0;
+    }
     if (parent != nullptr) {
-        position_.x = global_x - parent->x();
+        if (global_x >= parent->x()) {
+            position_.x = global_x - parent->x();
+        } else {
+            position_.x = 0;
+        }
     } else {
         position_.x = global_x;
     }
@@ -70,8 +78,18 @@ void Widget::set_x(std::size_t global_x) {
 
 void Widget::set_y(std::size_t global_y) {
     auto parent = dynamic_cast<Widget*>(this->parent());
+    auto screen_height = System::max_height();
+    if (global_y >= screen_height && screen_height > 0) {
+        global_y = screen_height - 1;
+    } else if (screen_height == 0) {
+        global_y = 0;
+    }
     if (parent != nullptr) {
-        position_.y = global_y - parent->y();
+        if (global_y >= parent->y()) {
+            position_.y = global_y - parent->y();
+        } else {
+            position_.y = 0;
+        }
     } else {
         position_.y = global_y;
     }
@@ -129,6 +147,44 @@ void Widget::update_now() {
 
 void Widget::clear_screen() {
     System::post_event(this, std::make_unique<Clear_screen_event>());
+}
+
+void Widget::move_cursor(Coordinate c) {
+    this->move_cursor(c.x, c.y);
+}
+
+void Widget::move_cursor(std::size_t x, std::size_t y) {
+    // Adjust coordinates if out of widget's bounds
+    // Remove this once you implement proper textbox display
+    // if you want textwrapping, inherit from textbox, or string_display...
+    // textwrapping is not inherit to a widget, characters are decorative
+    // elements and text, textbox makes the distinction.
+    // if (x >= this->width()) {
+    //     x = 0;
+    //     ++y;
+    // }
+    // if (y >= this->height()) {
+    //     y = this->height() - 1;
+    // }
+    // should just be these two calls below, they will check for bounds
+    this->move_cursor_x(x);
+    this->move_cursor_y(y);
+}
+
+void Widget::move_cursor_x(std::size_t x) {
+    if (x < this->width()) {
+        cursor_position_.x = x;
+    } else if (this->width() != 0) {
+        cursor_position_.x = this->width() - 1;
+    }
+}
+
+void Widget::move_cursor_y(std::size_t y) {
+    if (y < this->height()) {
+        cursor_position_.y = y;
+    } else if (this->height() != 0) {
+        cursor_position_.y = this->height() - 1;
+    }
 }
 
 bool Widget::event(const Event& event) {
@@ -355,12 +411,12 @@ bool Widget::close_event(const Close_event& event) {
     this->delete_later();
     return true;
 }
-// implement this here
+// implement here
 bool Widget::hide_event(const Hide_event& event) {
     return true;
 }
 
-// implement this here
+// implement here
 bool Widget::show_event(const Show_event& event) {
     return true;
 }
@@ -377,11 +433,6 @@ bool Widget::enable_event(const Enable_event& event) {
 }
 
 bool Widget::focus_event(const Focus_event& event) {
-    if (event.type() == Event::FocusIn) {
-        Painter p{this};
-        p.set_cursor(this->cursor());
-        p.move(cursor_position_.x, cursor_position_.y);
-    }  // if(event.type() == FocusOut)
     return true;
 }
 

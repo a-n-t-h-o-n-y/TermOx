@@ -24,8 +24,8 @@ class NCurses_paint_engine : public Paint_engine {
                  std::int16_t r,
                  std::int16_t g,
                  std::int16_t b) override;
-    void show_cursor() override;
-    void hide_cursor() override;
+    void show_cursor(bool show = true) override; // NOLINT
+    void hide_cursor(bool hide = true) override; // NOLINT
     std::size_t screen_width() override;
     std::size_t screen_height() override;
     void touch_all() override;

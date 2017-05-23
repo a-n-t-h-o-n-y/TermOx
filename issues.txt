@@ -1,9 +1,21 @@
                              __Issues+Ideas__
 
+_ How to take input in such a way that is similar to asking a question and
+    having the user enter a text answer into a box, and how should it be left
+    for the client to turn that information into a type, through a stream
+    excration operator or just giving a string back and letting the client use a
+    string stream, or passing back a string stream. Related to forms? Forms are
+    like question and answer, output and input. Similar concept to using cout
+    and cin, works as bridge for someone who has not programed in this events
+    system way before but has used stdin/out.
+
 _ Add Shadow widget, which attaches to an existing widget in some way and paints
      a shaow in either block chars or checkered blocks, or even just empty with
      background color changed, though the glyph way let's you vary the design
      more.
+
+_ Glyph_string destructor(vector) threw once on free(). This was the
+    Text_display contents_ Glyph_string.
 
 _ Add Color_picker widget with width 2 squares of all 16 colors in the palette
     with signals that trigger on clicking. It'll be made up of a collection of
@@ -207,6 +219,13 @@ _ Animated widgets in a program make textbox widgets never have a cursor because
     the cursor is constantly being moved around to paint the animations. You'd
     have to implement your own cursor drawing to get around this, and it would
     have to be part of the animation system. 
+
+X When the bottom widget in a vertical layout disapears because the screen is
+    too small, you get the bottom right corner of that widget being printed in
+    the top left of the screen. This has to do with putting to the paint_buffer,
+    not to ncurses itself, assuming the paint buffer is the correct size. Look
+    in the Vertical layout class itself, what would happen if there was no space
+    at all for a widget?
 
 X Make sure partial border work, test in nested widgets.
 

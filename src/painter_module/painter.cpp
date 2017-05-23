@@ -10,71 +10,106 @@
 
 namespace twf {
 
-Painter::Painter(Widget* widget) : widget_{widget} {
-    this->set_cursor(widget_->cursor());
-}
+Painter::Painter(Widget* widget) : widget_{widget} {}
 
-void Painter::put(const Glyph_string& string, bool move_cursor) {
-    Coordinate old_position{widget_->cursor_x(), widget_->cursor_y()};
+// void Painter::put(const Glyph_string& string, bool move_cursor) {
+//     Coordinate old_position{widget_->cursor_x(), widget_->cursor_y()};
+//     for (Glyph g : string) {
+//         add_default_attributes(&g);
+//         std::size_t glob_x = widget_->x() + widget_->cursor_x() +
+//                              west_border_offset(widget_->border());
+//         std::size_t glob_y = widget_->y() + widget_->cursor_y() +
+//                              north_border_offset(widget_->border());
+//         if (std::strcmp(g.c_str(), "\n") == 0) {
+//             widget_->move_cursor(0, widget_->cursor_y() + 1);
+//         }  // else if ( == \t) then move to next x coord divisible by 4 or
+//            // variable
+//            // this should be here and textbox should just account for it.
+//         else {
+//             widget_->paint_engine().put(glob_x, glob_y, g);
+//             widget_->move_cursor(widget_->cursor_x() + 1,
+//             widget_->cursor_y());
+//         }
+//     }
+//     if (!move_cursor) {
+//         widget_->move_cursor(old_position.x, old_position.y);
+//     }
+//     widget_->paint_engine().clear_attributes();
+// }
+void Painter::put(const Glyph_string& string,
+                  std::size_t x,
+                  std::size_t y,
+                  bool move_cursor) {
+    Coordinate original_position{widget_->cursor_x(), widget_->cursor_y()};
+    widget_->move_cursor(x, y);
     for (Glyph g : string) {
         add_default_attributes(&g);
-        std::size_t glob_x = widget_->x() + widget_->cursor_x() +
-                             west_border_offset(widget_->border());
-        std::size_t glob_y = widget_->y() + widget_->cursor_y() +
-                             north_border_offset(widget_->border());
+        auto glob_x = west_border_offset(widget_->border()) + widget_->x() +
+                      widget_->cursor_x();
+        auto glob_y = north_border_offset(widget_->border()) + widget_->y() +
+                      widget_->cursor_y();
         if (std::strcmp(g.c_str(), "\n") == 0) {
-            this->move(0, widget_->cursor_y() + 1, move_cursor);
-        } else {
+            widget_->move_cursor(0, widget_->cursor_y() + 1);
+        }  // else if ( == \t) then move to next x coord divisible by 4 or
+           // variable
+           // this should be here and textbox should just account for it.
+        else {
             widget_->paint_engine().put(glob_x, glob_y, g);
-            this->move(widget_->cursor_x() + 1, widget_->cursor_y(),
-                       move_cursor);
+            widget_->move_cursor(widget_->cursor_x() + 1, widget_->cursor_y());
         }
     }
     if (!move_cursor) {
-        this->move(old_position.x, old_position.y, false);
+        widget_->move_cursor(original_position.x, original_position.y);
     }
     widget_->paint_engine().clear_attributes();
 }
 
-void Painter::put_at(Coordinate pos,
-                     const Glyph_string& string,
-                     bool move_cursor) {
-    this->put_at(pos.x, pos.y, string, move_cursor);
+void Painter::put(const Glyph_string& string,
+                  Coordinate position,
+                  bool move_cursor) {
+    this->put(string, position.x, position.y, move_cursor);
 }
 
-void Painter::put_at(std::size_t x,
-                     std::size_t y,
-                     const Glyph_string& string,
-                     bool move_cursor) {
-    this->move(x, y, move_cursor);
-    this->put(string, move_cursor);
-}
+// void Painter::put_at(Coordinate pos,
+//                      const Glyph_string& string,
+//                      bool move_cursor) {
+//     this->put_at(pos.x, pos.y, string, move_cursor);
+// }
 
-void Painter::move(Coordinate pos, bool update_buffer) {
-    this->move(pos.x, pos.y, update_buffer);
-}
+// void Painter::put_at(std::size_t x,
+//                      std::size_t y,
+//                      const Glyph_string& string,
+//                      bool move_cursor) {
+//     widget_->move_cursor(x, y);
+//     this->put(string, move_cursor);
+// }
 
-void Painter::move(std::size_t x, std::size_t y, bool update_buffer) {
-    // Adjust coordinates if out of widget_'s bounds
-    if (x >= widget_->width()) {
-        x = 0;
-        ++y;
-    }
-    if (y >= widget_->height()) {
-        y = widget_->height() - 1;
-    }
-    widget_->set_cursor_x(x);
-    widget_->set_cursor_y(y);
-    // Move cursor on screen
-    if (update_buffer) {
-        widget_->paint_engine().buffer().cursor_position.x =
-            widget_->x() + widget_->cursor_x() +
-            west_border_offset(widget_->border());
-        widget_->paint_engine().buffer().cursor_position.y =
-            widget_->y() + widget_->cursor_y() +
-            north_border_offset(widget_->border());
-    }
-}
+// void Painter::move(Coordinate pos, bool update_buffer) {
+//     this->move(pos.x, pos.y, update_buffer);
+// }
+
+// void Painter::move(std::size_t x, std::size_t y, bool update_buffer) { //
+// don't need bool
+//     // Adjust coordinates if out of widget_'s bounds
+//     if (x >= widget_->width()) {
+//         x = 0;
+//         ++y;
+//     }
+//     if (y >= widget_->height()) {
+//         y = widget_->height() - 1;
+//     }
+//     widget_->move_cursor_cursor_x(x);
+//     widget_->move_cursor_cursor_y(y);
+//     // Move cursor on screen
+//     // if (update_buffer) {
+//     //     widget_->paint_engine().buffer().cursor_position.x =
+//     //         widget_->x() + widget_->cursor_x() +
+//     //         west_border_offset(widget_->border());
+//     //     widget_->paint_engine().buffer().cursor_position.y =
+//     //         widget_->y() + widget_->cursor_y() +
+//     //         north_border_offset(widget_->border());
+//     // }
+// }
 
 void Painter::fill(std::size_t x,
                    std::size_t y,
@@ -97,11 +132,11 @@ void Painter::line(std::size_t x1,
     // No diagonal lines atm.
     if (y1 == y2) {  // Horizontal
         for (; x1 <= x2; ++x1) {
-            this->put_at(x1, y1, gs, false);
+            this->put(gs, x1, y1);
         }
     } else if (x1 == x2) {  // Vertical
         for (; y1 <= y2; ++y1) {
-            this->put_at(x1, y1, gs, false);
+            this->put(gs, x1, y1);
         }
     }
 }
@@ -149,33 +184,37 @@ void Painter::border(const Border& b) {
 
     // North-West
     if (b.north_west_enabled()) {
-        this->unbound_put_string(widg_x, widg_y, b.north_west());
+        this->unbound_put_string(b.north_west(), widg_x, widg_y);
     }
 
     // North-East
     if (b.north_east_enabled()) {
-        this->unbound_put_string(widg_x + width - 1, widg_y, b.north_east());
+        this->unbound_put_string(b.north_east(), widg_x + width - 1, widg_y);
     }
 
     // South-West
     if (b.south_west_enabled()) {
-        this->unbound_put_string(widg_x, widg_y + height - 1, b.south_west());
+        this->unbound_put_string(b.south_west(), widg_x, widg_y + height - 1);
     }
 
     // South-East
     if (b.south_east_enabled()) {
-        this->unbound_put_string(widg_x + width - 1, widg_y + height - 1,
-                                 b.south_east());
+        this->unbound_put_string(b.south_east(), widg_x + width - 1,
+                                 widg_y + height - 1);
     }
 }
 
-void Painter::set_cursor(bool enabled) {
-    if (enabled) {
-        widget_->paint_engine().show_cursor();
-    } else {
-        widget_->paint_engine().hide_cursor();
-    }
-}
+// void Painter::show_cursor(bool show) {
+//     if (show) {
+//         widget_->paint_engine().show_cursor();
+//     } else {
+//         widget_->paint_engine().hide_cursor();
+//     }
+// }
+
+// void Painter::hide_cursor(bool hide) {
+//     this->show_cursor(!hide);
+// }
 
 void Painter::clear_screen() {
     auto width = widget_->geometry().width();
@@ -200,29 +239,29 @@ void Painter::clear_screen() {
     }
 }
 
-void Painter::unbound_put_string(std::size_t g_x,
-                                 std::size_t g_y,
-                                 const Glyph_string& gs) {
+void Painter::unbound_put_string(const Glyph_string& gs,
+                                 std::size_t glob_x,
+                                 std::size_t glob_y) {
     for (Glyph g : gs) {
         add_default_attributes(&g);
-        widget_->paint_engine().put(g_x++, g_y, g);
+        widget_->paint_engine().put(glob_x++, glob_y, g);
     }
     widget_->paint_engine().clear_attributes();
 }
 
-void Painter::unbound_line(std::size_t g_x1,
-                           std::size_t g_y1,
-                           std::size_t g_x2,
-                           std::size_t g_y2,
-                           const Glyph& g) {
+void Painter::unbound_line(std::size_t glob_x1,
+                           std::size_t glob_y1,
+                           std::size_t glob_x2,
+                           std::size_t glob_y2,
+                           const Glyph& symbol) {
     // Horizontal
-    if (g_y1 == g_y2) {
-        for (; g_x1 <= g_x2; ++g_x1) {
-            unbound_put_string(g_x1, g_y1, g);
+    if (glob_y1 == glob_y2) {
+        for (; glob_x1 <= glob_x2; ++glob_x1) {
+            unbound_put_string(symbol, glob_x1, glob_y1);
         }
-    } else if (g_x1 == g_x2) {
-        for (; g_y1 <= g_y2; ++g_y1) {
-            unbound_put_string(g_x1, g_y1, g);
+    } else if (glob_x1 == glob_x2) {
+        for (; glob_y1 <= glob_y2; ++glob_y1) {
+            unbound_put_string(symbol, glob_x1, glob_y1);
         }
     }
 }

@@ -5,7 +5,7 @@ class Meta_textbox : public twf::Textbox {
    public:
     Meta_textbox() {}
 
-    bool paint_event(const twf::Paint_event& e) override {
+    bool resize_event(const twf::Resize_event& e) override {
         std::stringstream ss; // ӌ
         ss << "widthӌ: " << this->geometry().width()
            << "\nwidth[inner]: " << this->width()
@@ -16,8 +16,8 @@ class Meta_textbox : public twf::Textbox {
            << this->geometry().size_policy().horizontal_stretch
            << "\nmin_width: " << this->geometry().min_width()
            << "\nmax_width: " << this->geometry().max_width();
-        this->contents_ = ss.str();
-        return Textbox::paint_event(e);
+        this->set_text(ss.str());
+        return Textbox::resize_event(e);
     }
 };
 
@@ -25,7 +25,7 @@ class Meta_vert : public twf::Textbox {
    public:
     Meta_vert() {}
 
-    bool paint_event(const twf::Paint_event& e) override {
+    bool resize_event(const twf::Resize_event& e) override {
         std::stringstream ss;
         ss << "height: " << this->geometry().height()
            << "\nheight[inner]: " << this->height()
@@ -36,8 +36,8 @@ class Meta_vert : public twf::Textbox {
            << this->geometry().size_policy().horizontal_stretch
            << "\nmin_height: " << this->geometry().min_height()
            << "\nmax_height: " << this->geometry().max_height();
-        this->contents_ = ss.str();
-        return Textbox::paint_event(e);
+        this->set_text(ss.str());
+        return Textbox::resize_event(e);
     }
 };
 

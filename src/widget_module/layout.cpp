@@ -14,7 +14,7 @@ Layout::Layout() {
 }
 
 void Layout::initialize() {
-    this->update_layout = [this]{this->update();};
+    this->update_layout = [this] { this->update(); };
     this->update_layout.track(this->destroyed);
 }
 
@@ -23,13 +23,13 @@ bool Layout::paint_event(const Paint_event& event) {
     this->update_geometry();
     if (too_small_) {
         Painter p{this};
-        p.put_at(0, 0, "Screen too small.");
+        p.put("Screen too small.");
     }
     return Widget::paint_event(event);
 }
 
 bool Layout::child_event(const Child_event& event) {
-    this->update();    
+    this->update();
     return Widget::child_event(event);
 }
 

@@ -6,20 +6,18 @@ class Text_box : public twf::Widget {
    public:
     Text_box() {
         this->set_focus_policy(twf::Focus_policy::Strong);
-        this->set_cursor(true);
+        this->enable_cursor();
         this->enable_border();
         this->size_policy().horizontal_stretch = 5;
     }
     bool paint_event(const twf::Paint_event& event) override {
         twf::Painter p{this};
-        p.move(0, 0);
-        p.put(contents_);
+        p.put(contents_, 0, 0, true);
         return Widget::paint_event(event);
     }
     bool key_press_event(const twf::Key_event& event) override {
         contents_.append(event.text());
-        twf::Painter p{this};
-        p.put(event.text());
+        this->update();
         return Widget::key_press_event(event);
     }
 
@@ -31,16 +29,15 @@ class Normal_widget : public twf::Widget {
    public:
     Normal_widget() {
         this->set_focus_policy(twf::Focus_policy::Strong);
-        this->set_cursor(true);
+        this->enable_cursor();
         this->enable_border();
         this->size_policy().horizontal_stretch = 2;
     }
     bool paint_event(const twf::Paint_event& event) override {
         twf::Painter p{this};
-        p.move(0, 0);
         p.put("Normal Widget");
-        p.move(this->geometry().width() / 2, this->geometry().height() / 2);
-        p.put(text_);
+        p.put(text_, this->geometry().width() / 2,
+              this->geometry().height() / 2);
         return Widget::paint_event(event);
     }
     bool key_press_event(const twf::Key_event& event) override {
@@ -56,22 +53,19 @@ class Normal_widget : public twf::Widget {
 class Click_paint_widget : public twf::Widget {
    public:
     Click_paint_widget() {
-        this->set_cursor(false);
+        this->disable_cursor();
         this->enable_border();
     }
 
     bool paint_event(const twf::Paint_event& event) override {
         twf::Painter p{this};
-        p.move(0, 0);
         p.put("Click Widget");
         return Widget::paint_event(event);
-        // return;
     }
 
     bool mouse_press_event(const twf::Mouse_event& event) override {
         twf::Painter p{this};
-        p.move(event.local_x(), event.local_y());
-        p.put("X");
+        p.put("X", event.local_x(), event.local_y());
         return Widget::mouse_press_event(event);
     }
 };

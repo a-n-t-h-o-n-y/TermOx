@@ -3,8 +3,6 @@
 
 #include "border.hpp"
 #include "size_policy.hpp"
-#include "coordinate.hpp"
-
 #include <system_module/object.hpp>
 #include <system_module/events/paint_event.hpp>
 #include <system_module/events/resize_event.hpp>
@@ -23,6 +21,7 @@
 #include <painter_module/geometry.hpp>
 #include <painter_module/paint_engine.hpp>
 #include "widget_module/focus_policy.hpp"
+#include "widget_module/coordinate.hpp"
 
 #include <aml/signals/slot.hpp>
 
@@ -49,11 +48,16 @@ class Widget : public Object {
     void set_background(Color c);
     void set_foreground(Color c);
 
-    void set_cursor(bool show) { show_cursor_ = show; }
-    void set_cursor_x(std::size_t x) { cursor_position_.x = x; }
-    void set_cursor_y(std::size_t y) { cursor_position_.y = y; }
+    bool cursor() const { return cursor_enabled_; }
+    void enable_cursor(bool enable = true) { cursor_enabled_ = enable; }
+    void disable_cursor(bool disable = true) { cursor_enabled_ = !disable; }
+    void move_cursor(std::size_t x, std::size_t y);
+    void move_cursor(Coordinate c);
+    void move_cursor_x(std::size_t x);
+    void move_cursor_y(std::size_t y);
     std::size_t cursor_x() const { return cursor_position_.x; }
     std::size_t cursor_y() const { return cursor_position_.y; }
+    Coordinate cursor_coordinate() const { return cursor_position_; }
 
     void set_paint_engine(std::unique_ptr<Paint_engine> engine) {
         paint_engine_ = std::move(engine);
@@ -66,8 +70,6 @@ class Widget : public Object {
     // Dimensions not including border space.
     std::size_t width() const;
     std::size_t height() const;
-
-    bool cursor() const { return show_cursor_; }
 
     void set_focus(bool focus);
     void clear_focus() { this->set_focus(false); }
@@ -142,7 +144,7 @@ class Widget : public Object {
     // Top left corner coordinates relative to parent
     Coordinate position_;
 
-    bool show_cursor_ = false;
+    bool cursor_enabled_ = false;
     Coordinate cursor_position_;
 
     bool focus_ = false;

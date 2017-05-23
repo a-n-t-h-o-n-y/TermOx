@@ -23,13 +23,12 @@ class scroll_test : public twf::Widget {
     bool paint_event(const twf::Paint_event& event) override {
         twf::Painter p{this};
         if (up_) {
-            p.put_at(0, 0, twf::Glyph_string(
-                               "Scroll Up", twf::Attribute::Bold,
-                               twf::Attribute::Underline,
-                               twf::background(twf::Color::Red),
-                               twf::foreground(twf::Color::Light_blue)));
+            p.put(twf::Glyph_string("Scroll Up", twf::Attribute::Bold,
+                                    twf::Attribute::Underline,
+                                    twf::background(twf::Color::Red),
+                                    twf::foreground(twf::Color::Light_blue)));
         } else {
-            p.put_at(0, 0, "Scroll Down");
+            p.put("Scroll Down");
         }
         return Widget::paint_event(event);
     }
