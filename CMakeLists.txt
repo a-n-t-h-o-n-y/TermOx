@@ -59,7 +59,7 @@ list(APPEND WIDGET_MODULE_SOURCES
 	"src/widget_module/border.cpp"
     "src/widget_module/vertical_layout.cpp"
     "src/widget_module/textbox.cpp"
-    "src/widget_module/textbox_core.cpp"
+    "src/widget_module/textbox_base.cpp"
     "src/widget_module/push_button.cpp"
     "src/widget_module/horizontal_scrollbar.cpp"
     "src/widget_module/vertical_scrollbar.cpp"

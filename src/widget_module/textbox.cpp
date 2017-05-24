@@ -11,7 +11,7 @@
 
 namespace twf {
 
-Textbox::Textbox(Glyph_string contents) : Textbox_core{std::move(contents)} {
+Textbox::Textbox(Glyph_string contents) : Textbox_base{std::move(contents)} {
     this->set_focus_policy(Focus_policy::Strong);
 }
 

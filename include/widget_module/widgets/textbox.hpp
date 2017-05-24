@@ -2,13 +2,13 @@
 #define WIDGET_MODULE_WIDGETS_TEXTBOX_HPP
 
 #include "painter_module/glyph_string.hpp"
-#include "widget_module/widgets/textbox_core.hpp"
+#include "widget_module/widgets/textbox_base.hpp"
 
 namespace twf {
 class Key_event;
 class Mouse_event;
 
-class Textbox : public Textbox_core {
+class Textbox : public Textbox_base {
    public:
     explicit Textbox(Glyph_string contents = "");
 

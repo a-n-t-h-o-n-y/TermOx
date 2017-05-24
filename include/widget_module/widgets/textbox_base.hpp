@@ -1,5 +1,5 @@
-#ifndef WIDGET_MODULE_WIDGETS_TEXTBOX_CORE_HPP
-#define WIDGET_MODULE_WIDGETS_TEXTBOX_CORE_HPP
+#ifndef WIDGET_MODULE_WIDGETS_TEXTBOX_BASE_HPP
+#define WIDGET_MODULE_WIDGETS_TEXTBOX_BASE_HPP
 
 #include "painter_module/glyph_string.hpp"
 #include "widget_module/coordinate.hpp"
@@ -10,15 +10,15 @@
 namespace twf {
 class Resize_event;
 
-class Textbox_core : public Text_display {
+class Textbox_base : public Text_display {
    public:
-    Textbox_core(Glyph_string contents = "");
+    explicit Textbox_base(Glyph_string contents = "");
 
     void cursor_up(std::size_t n = 1);
     void cursor_down(std::size_t n = 1);
     void cursor_left(std::size_t n = 1);
     void cursor_right(std::size_t n = 1);
-    void set_cursor_at_coordinates(Coordinate);
+    void set_cursor_at_coordinates(Coordinate pos);
     void set_cursor_at_coordinates(std::size_t x, std::size_t y);
     void set_cursor_at_index(std::size_t index);
     std::size_t cursor_index() const;
@@ -40,4 +40,4 @@ class Textbox_core : public Text_display {
 };
 
 }  // namespace twf
-#endif  // WIDGET_MODULE_WIDGETS_TEXTBOX_CORE_HPP
+#endif  // WIDGET_MODULE_WIDGETS_TEXTBOX_BASE_HPP
