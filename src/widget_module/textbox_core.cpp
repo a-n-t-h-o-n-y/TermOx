@@ -51,7 +51,7 @@ void Textbox_core::cursor_down(std::size_t n) {
     if (y >= this->height()) {
         if (this->does_scroll()) {
             this->scroll_down(y - (this->height() - 1));
-            y = this->cursor_y() + n;
+            y = this->height() - 1;
         } else {
             return;
         }
@@ -66,6 +66,7 @@ void Textbox_core::cursor_left(std::size_t n) {
 }
 
 void Textbox_core::increment_cursor_left() {
+    auto next_index = this->cursor_index();
     if (this->cursor_coordinate() == Coordinate{0, 0}) {
         if (this->does_scroll()) {
             this->scroll_up(1);
@@ -73,7 +74,6 @@ void Textbox_core::increment_cursor_left() {
             return;
         }
     }
-    auto next_index = this->cursor_index();
     if (next_index == 0) {
         return;
     }
@@ -92,7 +92,8 @@ void Textbox_core::increment_cursor_right() {
         return;
     }
     auto true_last_index = this->first_index_at(this->bottom_line() + 1) - 1;
-    if (this->cursor_index() == true_last_index &&
+    auto cursor_index = this->cursor_index();
+    if (cursor_index == true_last_index &&
         this->cursor_y() == this->height() - 1) {
         if (this->does_scroll()) {
             this->scroll_down(1);
@@ -100,7 +101,7 @@ void Textbox_core::increment_cursor_right() {
             return;
         }
     }
-    this->set_cursor_at_index(this->cursor_index() + 1);
+    this->set_cursor_at_index(cursor_index + 1);
 }
 
 void Textbox_core::scroll_up(std::size_t n) {
@@ -137,7 +138,7 @@ bool Textbox_core::resize_event(const Resize_event& event) {
         this->scroll_down(cursor_line - this->bottom_line());
     }
     this->set_cursor_at_index(cursor_index);
-    return true;
+    return Text_display::resize_event(event);
 }
 
 }  // namespace twf

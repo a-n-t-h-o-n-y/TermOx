@@ -1,5 +1,5 @@
-#ifndef WIDGET_MODULE_SIZE_POLICY
-#define WIDGET_MODULE_SIZE_POLICY
+#ifndef WIDGET_MODULE_SIZE_POLICY_HPP
+#define WIDGET_MODULE_SIZE_POLICY_HPP
 
 #include <cstddef>
 
@@ -30,4 +30,4 @@ struct Size_policy {
 };
 
 }  // namespace twf
-#endif  // WIDGET_MODULE_SIZE_POLICY
+#endif  // WIDGET_MODULE_SIZE_POLICY_HPP

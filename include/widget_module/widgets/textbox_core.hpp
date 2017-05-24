@@ -1,11 +1,10 @@
-#ifndef TEXTBOX_CORE_HPP
-#define TEXTBOX_CORE_HPP
+#ifndef WIDGET_MODULE_WIDGETS_TEXTBOX_CORE_HPP
+#define WIDGET_MODULE_WIDGETS_TEXTBOX_CORE_HPP
 
-#include "../widget.hpp"
-#include "../coordinate.hpp"
-#include "../../painter_module/glyph_string.hpp"
+#include "painter_module/glyph_string.hpp"
+#include "widget_module/coordinate.hpp"
+#include "widget_module/widget.hpp"
 #include "widget_module/widgets/text_display.hpp"
-
 #include <cstddef>
 
 namespace twf {
@@ -28,10 +27,6 @@ class Textbox_core : public Text_display {
     void disable_scrolling(bool disable = true) { scroll_ = !disable; }
     bool does_scroll() const { return scroll_; }
 
-    // are these connected to destroyed signal?
-    sig::Slot<void()> scroll_up_slot = [this] { this->scroll_up(); };
-    sig::Slot<void()> scroll_down_slot = [this] { this->scroll_down(); };
-
    private:
     void increment_cursor_right();
     void increment_cursor_left();
@@ -40,9 +35,9 @@ class Textbox_core : public Text_display {
    protected:
     bool resize_event(const Resize_event& event) override;
 
-    void scroll_up(std::size_t n = 1) override;
-    void scroll_down(std::size_t n = 1) override;
+    void scroll_up(std::size_t n = 1);
+    void scroll_down(std::size_t n = 1);
 };
 
 }  // namespace twf
-#endif  // TEXTBOX_CORE_HPP
+#endif  // WIDGET_MODULE_WIDGETS_TEXTBOX_CORE_HPP

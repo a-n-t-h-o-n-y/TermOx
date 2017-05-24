@@ -49,7 +49,7 @@ bool Textbox::key_press_event(const Key_event& event) {
             }
             this->erase(--cursor_index, 1);
             if (this->line_at(cursor_index) < this->top_line()) {
-                this->scroll_up();
+                this->scroll_up(1);
             }
             this->set_cursor_at_index(cursor_index);
         } break;

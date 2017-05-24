@@ -1,9 +1,10 @@
 #ifndef WIDGET_MODULE_WIDGETS_TEXT_DISPLAY_HPP
 #define WIDGET_MODULE_WIDGETS_TEXT_DISPLAY_HPP
 
+#include "painter_module/glyph.hpp"
 #include "painter_module/glyph_string.hpp"
-#include "widget_module/widget.hpp"
 #include "widget_module/coordinate.hpp"
+#include "widget_module/widget.hpp"
 #include <cstddef>
 #include <vector>
 
@@ -25,8 +26,8 @@ class Text_display : public Widget {
     void clear();
 
     // Movement
-    virtual void scroll_up(std::size_t n = 1);
-    virtual void scroll_down(std::size_t n = 1);
+    void scroll_up(std::size_t n = 1);
+    void scroll_down(std::size_t n = 1);
 
     // Query Functions
     std::size_t row_length(std::size_t y) const;
@@ -66,7 +67,7 @@ class Text_display : public Widget {
         std::size_t length;
     };
 
-    std::vector<line_info> display_state_;
+    std::vector<line_info> display_state_{line_info{0, 0}};
 
     std::size_t top_line_{0};
     bool word_wrap_ = true;

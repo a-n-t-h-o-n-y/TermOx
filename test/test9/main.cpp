@@ -18,7 +18,7 @@ class active_tb : public twf::Text_display {
    protected:
     bool mouse_press_event(const twf::Mouse_event& event) override {
         if (event.button() == twf::Mouse_button::ScrollUp) {
-            this->scroll_up();
+            this->scroll_up(1);
         } else if (event.button() == twf::Mouse_button::ScrollDown) {
             this->scroll_down(1);
         }
