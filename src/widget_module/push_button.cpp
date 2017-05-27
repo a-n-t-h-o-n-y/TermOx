@@ -8,6 +8,8 @@ namespace twf {
 
 Push_button::Push_button(Glyph_string name) : title_{std::move(name)} {
     this->disable_cursor();
+    click = [this] { clicked(); };
+    click.track(this->destroyed);
 }
 
 bool Push_button::mouse_press_event(const Mouse_event& event) {

@@ -3,9 +3,9 @@
 
 #include "painter_module/glyph_string.hpp"
 #include "widget_module/layouts/horizontal_layout.hpp"
-#include "widget_module/widgets/push_button.hpp"
 
 namespace twf {
+class Push_button;
 
 class Titlebar : public Horizontal_layout {
    public:

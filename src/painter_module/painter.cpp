@@ -2,6 +2,7 @@
 #include "painter_module/color.hpp"
 #include "painter_module/glyph.hpp"
 #include "painter_module/glyph_string.hpp"
+#include "painter_module/paint_engine.hpp"
 #include "widget_module/border.hpp"
 #include "widget_module/coordinate.hpp"
 #include "widget_module/widget.hpp"

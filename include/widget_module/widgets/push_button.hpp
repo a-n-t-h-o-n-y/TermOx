@@ -15,6 +15,9 @@ class Push_button : public Widget {
     bool mouse_press_event(const Mouse_event& event) override;
     bool paint_event(const Paint_event& event) override;
 
+    // Slots
+    sig::Slot<void()> click;
+
     // Signals
     sig::Signal<void()> clicked;
 

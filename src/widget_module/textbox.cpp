@@ -47,20 +47,20 @@ bool Textbox::key_press_event(const Key_event& event) {
             if (cursor_index == 0) {
                 break;
             }
-            this->erase(--cursor_index, 1);
+            this->erase_(--cursor_index, 1);
             if (this->line_at(cursor_index) < this->top_line()) {
-                this->scroll_up(1);
+                this->scroll_up_(1);
             }
-            this->set_cursor_at_index(cursor_index);
+            this->set_cursor_at_index_(cursor_index);
         } break;
 
         case Key::Enter: {
             auto cursor_index = this->cursor_index();
-            this->insert('\n', cursor_index);
+            this->insert_('\n', cursor_index);
             if (this->cursor_y() + 1 == this->height()) {
-                this->scroll_down(1);
+                this->scroll_down_(1);
             }
-            this->set_cursor_at_index(cursor_index + 1);
+            this->set_cursor_at_index_(cursor_index + 1);
         } break;
 
         case Key::Tab:
@@ -68,28 +68,28 @@ bool Textbox::key_press_event(const Key_event& event) {
             break;
 
         case Key::Arrow_right:
-            this->cursor_right();
+            this->cursor_right_(1);
             break;
 
         case Key::Arrow_left:
-            this->cursor_left();
+            this->cursor_left_(1);
             break;
 
         case Key::Arrow_up:
-            this->cursor_up();
+            this->cursor_up_(1);
             break;
 
         case Key::Arrow_down:
-            this->cursor_down();
+            this->cursor_down_(1);
             break;
 
         default:  // Insert text
             auto text = event.text();
             if (!text.empty()) {
                 auto cursor_index = this->cursor_index();
-                this->insert(text, cursor_index);
-                this->cursor_right();
-                this->set_cursor_at_index(cursor_index + 1);
+                this->insert_(text, cursor_index);
+                this->cursor_right_(1);
+                this->set_cursor_at_index_(cursor_index + 1);
             }
     }
     this->update();
@@ -98,14 +98,14 @@ bool Textbox::key_press_event(const Key_event& event) {
 
 bool Textbox::mouse_press_event(const Mouse_event& event) {
     if (event.button() == Mouse_button::Left) {
-        this->set_cursor_at_coordinates(event.local_x(), event.local_y());
+        this->set_cursor_at_coordinates_(event.local_x(), event.local_y());
     } else if (event.button() == Mouse_button::ScrollUp) {
         if (scroll_wheel_) {
-            this->scroll_up(scroll_speed_up_);
+            this->scroll_up_(scroll_speed_up_);
         }
     } else if (event.button() == Mouse_button::ScrollDown) {
         if (scroll_wheel_) {
-            this->scroll_down(scroll_speed_down_);
+            this->scroll_down_(scroll_speed_down_);
         }
     }
     this->update();

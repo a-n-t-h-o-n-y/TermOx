@@ -1,52 +1,46 @@
-#ifndef WIDGET_HPP
-#define WIDGET_HPP
+#ifndef WIDGET_MODULE_WIDGET_HPP
+#define WIDGET_MODULE_WIDGET_HPP
 
-#include "border.hpp"
-#include "size_policy.hpp"
-#include <system_module/object.hpp>
-#include <system_module/events/paint_event.hpp>
-#include <system_module/events/resize_event.hpp>
-#include <system_module/events/move_event.hpp>
-#include <system_module/events/mouse_event.hpp>
-#include <system_module/events/key_event.hpp>
-#include <system_module/events/close_event.hpp>
-#include <system_module/events/hide_event.hpp>
-#include <system_module/events/show_event.hpp>
-#include <system_module/events/enable_event.hpp>
-#include <system_module/events/focus_event.hpp>
-#include <system_module/events/clear_screen_event.hpp>
-#include <system_module/system.hpp>
-#include <painter_module/brush.hpp>
-#include <painter_module/detail/ncurses_paint_engine.hpp>
-#include <painter_module/geometry.hpp>
-#include <painter_module/paint_engine.hpp>
-#include "widget_module/focus_policy.hpp"
+#include "painter_module/brush.hpp"
+#include "painter_module/color.hpp"
+#include "painter_module/geometry.hpp"
+#include "painter_module/glyph.hpp"
+#include "painter_module/paint_engine.hpp"
+#include "system_module/events/mouse_event.hpp"
+#include "system_module/key.hpp"
+#include "system_module/object.hpp"
+#include "widget_module/border.hpp"
 #include "widget_module/coordinate.hpp"
-
-#include <aml/signals/slot.hpp>
-
+#include "widget_module/focus_policy.hpp"
+#include <aml/signals/signals.hpp>
 #include <cstddef>
-#include <functional>
 #include <memory>
+#include <utility>
 
 namespace twf {
+class Clear_screen_event;
+class Close_event;
+class Enable_event;
+class Focus_event;
+class Hide_event;
+class Key_event;
+class Move_event;
+class Paint_event;
+class Resize_event;
+class Show_event;
 
 class Widget : public Object {
    public:
     Widget();
     virtual ~Widget() override;
 
-    void update();
-    void update_now();
-
-    bool has_coordinates(std::size_t global_x, std::size_t global_y) override;
-
-    // Takes global coordinates.
+    // Global Coordinates - Includes border space.
+    std::size_t x() const;
+    std::size_t y() const;
     void set_x(std::size_t global_x);
     void set_y(std::size_t global_y);
-
-    void set_background(Color c);
-    void set_foreground(Color c);
+    std::size_t width() const;  // Does not include border space
+    std::size_t height() const;
 
     bool cursor() const { return cursor_enabled_; }
     void enable_cursor(bool enable = true) { cursor_enabled_ = enable; }
@@ -59,57 +53,58 @@ class Widget : public Object {
     std::size_t cursor_y() const { return cursor_position_.y; }
     Coordinate cursor_coordinate() const { return cursor_position_; }
 
-    void set_paint_engine(std::unique_ptr<Paint_engine> engine) {
-        paint_engine_ = std::move(engine);
-    }
-
-    // Global Coordinates - not including border offset
-    std::size_t x() const;
-    std::size_t y() const;
-
-    // Dimensions not including border space.
-    std::size_t width() const;
-    std::size_t height() const;
-
-    void set_focus(bool focus);
-    void clear_focus() { this->set_focus(false); }
-    bool has_focus() const { return focus_; }
-    Focus_policy focus_policy() const { return focus_policy_; }
-    void set_focus_policy(Focus_policy policy) { focus_policy_ = policy; }
-
-    bool has_mouse_tracking() const { return mouse_tracking_; }
-    void set_mouse_tracking(bool track) { mouse_tracking_ = track; }
-
-    void set_brush(Brush brush) {
-        default_brush_ = std::move(brush);
-        this->update();
-    }
-    void set_brush_recursively(const Brush& brush);
-    Brush& brush() { return default_brush_; }
-
-    bool visible() const { return visible_; }
-    void set_visible(bool visible);
-
     Border& border() { return border_; }
     const Border& border() const { return border_; }
     bool has_border() const { return border_.enabled(); }
     void enable_border();
     void disable_border();
 
-    const Glyph& background_tile() const { return background_tile_; }
-    Glyph& background_tile() { return background_tile_; }
+    void set_brush(Brush brush);
+    Brush& brush() { return default_brush_; }
+
+    Glyph background_tile() { return background_tile_; }
+    void set_background_tile(Glyph tile) { background_tile_ = std::move(tile); }
+
+    bool has_focus() const { return focus_; }
+    void set_focus(bool focus);
+    void clear_focus() { this->set_focus(false); }
+    Focus_policy focus_policy() const { return focus_policy_; }
+    void set_focus_policy(Focus_policy policy) { focus_policy_ = policy; }
 
     void set_geometry(const Geometry& g);
     Geometry& geometry() { return geometry_; }
     const Geometry& geometry() const { return geometry_; }
 
-    // This is doubled up, maybe remove, already in geometry(), not responsible
     Size_policy& size_policy() { return geometry().size_policy(); }
     const Size_policy& size_policy() const { return geometry().size_policy(); }
 
+    void update();
+
+    bool has_coordinates(std::size_t global_x, std::size_t global_y) override;
+
+    bool has_mouse_tracking() const { return mouse_tracking_; }
+    void set_mouse_tracking(bool track) { mouse_tracking_ = track; }
+
+    bool visible() const { return visible_; }
+    void set_visible(bool visible);
+
     Paint_engine& paint_engine() const;
+    void set_paint_engine(std::unique_ptr<Paint_engine> engine) {
+        paint_engine_ = std::move(engine);
+    }
 
     // Signals
+    sig::Signal<void(std::size_t, std::size_t)> resized;
+    sig::Signal<void(Coordinate)> moved;
+    sig::Signal<void(Coordinate)> clicked;
+    sig::Signal<void(Key)> key_pressed;
+    sig::Signal<void(Widget*)> child_added;
+    sig::Signal<void(Widget*)> child_removed;
+    sig::Signal<void()> focused_in;
+    sig::Signal<void()> focused_out;
+    sig::Signal<void(Coordinate)> cursor_moved;
+    sig::Signal<void(Color)> background_color_changed;
+    sig::Signal<void(Color)> foreground_color_changed;
 
     // Slots
     sig::Slot<void()> close;
@@ -118,6 +113,11 @@ class Widget : public Object {
     sig::Slot<void()> repaint;
     sig::Slot<void()> give_focus;
     sig::Slot<void()> update_me;
+    sig::Slot<void(Mouse_button, Coordinate)> click_me;
+    sig::Slot<void(Key)> keypress_me;
+
+    sig::Slot<void(Color)> set_background;
+    sig::Slot<void(Color)> set_foreground;
 
    protected:
     bool event(const Event& event) override;
@@ -141,30 +141,28 @@ class Widget : public Object {
 
     void clear_screen();
 
-    // Top left corner coordinates relative to parent
-    Coordinate position_;
 
-    bool cursor_enabled_ = false;
+    void set_background_(Color c);
+    void set_foreground_(Color c);
+
+
+    Coordinate position_;  // Top left corner, relative to parent's coordinates.
     Coordinate cursor_position_;
-
-    bool focus_ = false;
-    bool mouse_tracking_ = false;
-    bool visible_ = true;
-
-    Focus_policy focus_policy_ = Focus_policy::None;
-    Brush default_brush_ =
-        Brush(background(Color::Black), foreground(Color::White));
+    bool cursor_enabled_{false};
+    bool focus_{false};
+    bool mouse_tracking_{false};
+    bool visible_{true};
+    Geometry geometry_{this};
     Border border_;
     Glyph background_tile_{" "};
-
-    std::unique_ptr<Paint_engine> paint_engine_ = nullptr;
-    Geometry geometry_ = Geometry{this};  // does geo need to know about this?
+    Brush default_brush_{background(Color::Black), foreground(Color::White)};
+    Focus_policy focus_policy_{Focus_policy::None};
+    std::unique_ptr<Paint_engine> paint_engine_{nullptr};
 
    private:
-    // void paint_disabled_widget();
     void initialize();
 };
 
 }  // namespace twf
 
-#endif  // WIDGET_HPP
+#endif  // WIDGET_MODULE_WIDGET_HPP

@@ -58,7 +58,7 @@ class Geometry {
     std::size_t width_ = width_hint_;
     std::size_t height_ = height_hint_;
 
-    void update_parent() const;
+    void notify_parent() const;
 };
 
 }  // namespace twf

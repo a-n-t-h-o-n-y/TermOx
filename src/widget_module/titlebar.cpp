@@ -10,12 +10,12 @@ namespace twf {
 
 Titlebar::Titlebar(const Glyph_string& title)
     : title_{this->make_child<Push_button>(title)},
-      exit_button_{this->make_child<Push_button>('X')} {
+      exit_button_{this->make_child<Push_button>("│✕ ")} {
     title_.size_policy().horizontal_policy = Size_policy::Expanding;
-    title_.set_background(Color::Light_blue);
+    title_.set_background(Color::White);
     title_.set_foreground(Color::Black);
     exit_button_.clicked.connect(System::quit);
-    exit_button_.set_background(Color::Orange);
+    exit_button_.set_background(Color::White);
     exit_button_.set_foreground(Color::Black);
     exit_button_.size_policy().horizontal_policy = Size_policy::Fixed;
     exit_button_.geometry().set_width_hint(3);

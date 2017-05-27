@@ -1,5 +1,11 @@
 #include <twidgets.hpp>
 #include <functional>
+#include <sstream>
+#include <random>
+#include <string>
+#include <cstdint>
+#include <codecvt>
+#include <locale>
 
 class Bordered : public twf::Horizontal_layout {
    public:
@@ -18,9 +24,9 @@ class active_tb : public twf::Text_display {
    protected:
     bool mouse_press_event(const twf::Mouse_event& event) override {
         if (event.button() == twf::Mouse_button::ScrollUp) {
-            this->scroll_up(1);
+            this->scroll_up_(1);
         } else if (event.button() == twf::Mouse_button::ScrollDown) {
-            this->scroll_down(1);
+            this->scroll_down_(1);
         }
         // this->erase(0, 1);
         // this->pop_back();
@@ -29,18 +35,48 @@ class active_tb : public twf::Text_display {
     }
 };
 
+twf::Color random_color() {
+    std::random_device rd;
+    std::mt19937 mt(rd());
+    std::uniform_int_distribution<std::int16_t> dist(240, 256);
+    auto value = dist(mt);
+    return static_cast<twf::Color>(value);
+}
+
+std::string random_unicode() {
+    std::random_device rd;
+    std::mt19937 mt(rd());
+    std::uniform_int_distribution<std::int32_t> dist(32, 65536);
+    char32_t wc = static_cast<char32_t>(dist(mt));
+    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter;
+    return converter.to_bytes(wc);
+}
+
 int main() {
     twf::System s;
 
     twf::Vertical_layout w;
     w.make_child<twf::Titlebar>("Text_display widget");
-    auto& btb = w.make_child<twf::Textbox>();
-    btb.enable_border();
-    auto& pb = w.make_child<twf::Push_button>("Toggle Word Wrap below.");
-    pb.geometry().size_policy().vertical_policy = twf::Size_policy::Fixed;
-    pb.geometry().set_height_hint(3);
-    pb.set_background(twf::Color::Red);
-    auto& tb = w.make_child<twf::Textbox>(
+    auto& hl_2 = w.make_child<twf::Horizontal_layout>();
+    auto& tb_1 = hl_2.make_child<twf::Textbox>();
+    tb_1.enable_border();
+    auto& tb_3 = hl_2.make_child<twf::Textbox>();
+    tb_3.disable_border();
+    tb_3.disable_word_wrap();
+    tb_3.set_background(twf::Color::Dark_red);
+    auto& hl = w.make_child<twf::Horizontal_layout>();
+    hl.geometry().size_policy().vertical_policy = twf::Size_policy::Fixed;
+    hl.geometry().set_height_hint(3);
+    auto& pb_ww = hl.make_child<twf::Push_button>("Toggle Word Wrap Below");
+    pb_ww.set_background(twf::Color::Red);
+    auto& pb_del = hl.make_child<twf::Push_button>("Delete Textbox Above");
+    pb_del.set_background(twf::Color::Blue);
+    // pb_del.clicked.connect(tb_1.delete_later);
+    pb_del.clicked.connect([&tb_1] {
+        tb_1.size_policy().horizontal_policy = twf::Size_policy::Fixed;
+        tb_1.geometry().set_width_hint(4);
+    });
+    auto& tb_2 = w.make_child<twf::Textbox>(
         "The diddle-check seems like it's degenerated into the girls all "
         "getting very excited and exchanging data on what kinds of animal "
         "members of their own biologic families either imitate or physically "
@@ -54,10 +90,19 @@ int main() {
         "to work the outside door's knob. Ann Kittenplan, on the other hand, "
         "wears an expression\nof almost regal calm, and precedes them through "
         "the inner door like someone stepping down off a dais.");
-    tb.enable_border();
-    // tb.disable_scrolling();
-    // tb.disable_word_wrap();
-    pb.clicked.connect([&tb] { tb.enable_word_wrap(!tb.does_word_wrap()); });
+    tb_2.enable_border();
+    tb_2.cursor_moved.connect([st = tb_1.set_text](twf::Coordinate c) {
+        std::stringstream ss;
+        ss << "x: " << c.x << '\n' << "y: " << c.y;
+        st(ss.str());
+    });
+    tb_2.scrolled.connect([&tb_2] { tb_2.set_foreground(random_color()); });
+    tb_2.cursor_moved.connect([append = tb_3.append](twf::Coordinate) {
+        append(random_unicode());
+    });
+    // tb_2.disable_scrolling();
+    // tb_2.disable_word_wrap();
+    pb_ww.clicked.connect(tb_2.toggle_word_wrap);
 
     s.set_head(&w);
 

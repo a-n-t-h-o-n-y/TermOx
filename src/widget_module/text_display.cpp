@@ -2,7 +2,6 @@
 
 #include "painter_module/glyph_string.hpp"
 #include "painter_module/painter.hpp"
-#include "system_module/events/paint_event.hpp"
 #include "system_module/events/resize_event.hpp"
 #include "widget_module/coordinate.hpp"
 #include <algorithm>
@@ -15,29 +14,69 @@ namespace twf {
 Text_display::Text_display(Glyph_string content)
     : contents_{std::move(content)} {
     this->update_display();
+    this->Text_display::initialize();
 }
 
-void Text_display::set_text(const Glyph_string& string) {
+void Text_display::initialize() {
+    set_text = [this](const Glyph_string& s) { this->set_text_(s); };
+    set_text.track(this->destroyed);
+    insert = [this](const Glyph_string& s, std::size_t index) {
+        this->insert_(s, index);
+    };
+    insert.track(this->destroyed);
+    append = [this](const Glyph_string& s) { this->append_(s); };
+    append.track(this->destroyed);
+    erase = [this](std::size_t index) { this->erase_(index); };
+    erase.track(this->destroyed);
+    pop_back = [this] { this->pop_back_(); };
+    pop_back.track(this->destroyed);
+    clear = [this] { this->clear_(); };
+    clear.track(this->destroyed);
+
+    scroll_up = [this] { this->scroll_up_(1); };
+    scroll_up.track(this->destroyed);
+    scroll_down = [this] { this->scroll_down_(1); };
+    scroll_down.track(this->destroyed);
+    scroll_up_n = [this](std::size_t n) { this->scroll_up_(n); };
+    scroll_up_n.track(this->destroyed);
+    scroll_down_n = [this](std::size_t n) { this->scroll_down_(n); };
+    scroll_down_n.track(this->destroyed);
+
+    enable_word_wrap = [this] { this->enable_word_wrap_(); };
+    enable_word_wrap.track(this->destroyed);
+    disable_word_wrap = [this] { this->disable_word_wrap_(); };
+    disable_word_wrap.track(this->destroyed);
+    toggle_word_wrap = [this] {
+        this->enable_word_wrap_(!this->does_word_wrap());
+    };
+    set_word_wrap = [this](bool enable) { this->enable_word_wrap_(enable); };
+    set_word_wrap.track(this->destroyed);
+}
+
+void Text_display::set_text_(const Glyph_string& string) {
     contents_ = string;
     this->update_display();
+    text_changed(contents_);
 }
 
-void Text_display::insert(const Glyph_string& string, std::size_t index) {
+void Text_display::insert_(const Glyph_string& string, std::size_t index) {
     if (contents_.empty()) {
-        this->append(string);
+        this->append_(string);
         return;
     }
     contents_.insert(std::begin(contents_) + index, std::begin(string),
                      std::end(string));
     this->update_display();
+    text_changed(contents_);
 }
 
-void Text_display::append(const Glyph_string& string) {
+void Text_display::append_(const Glyph_string& string) {
     contents_.append(string);
-    this->update_display(this->last_line());
+    this->update_display();
+    text_changed(contents_);
 }
 
-void Text_display::erase(std::size_t index, std::size_t length) {
+void Text_display::erase_(std::size_t index, std::size_t length) {
     if (contents_.empty() || index >= contents_.size()) {
         return;
     }
@@ -47,45 +86,52 @@ void Text_display::erase(std::size_t index, std::size_t length) {
     }
     contents_.erase(std::begin(contents_) + index, end);
     this->update_display();
+    text_changed(contents_);
 }
 
-void Text_display::pop_back() {
+void Text_display::pop_back_() {
     if (contents_.empty()) {
         return;
     }
     contents_.pop_back();
-    this->update_display(this->last_line());
+    this->update_display();
+    text_changed(contents_);
 }
 
-void Text_display::clear() {
+void Text_display::clear_() {
     contents_.clear();
     this->update_display();
+    text_changed(contents_);
 }
 
-void Text_display::scroll_up(std::size_t n) {
+void Text_display::scroll_up_(std::size_t n) {
     if (n > this->top_line()) {
         top_line_ = 0;
     } else {
         top_line_ -= n;
     }
     this->update();
+    scrolled_up(n);
+    scrolled();
 }
 
-void Text_display::scroll_down(std::size_t n) {
+void Text_display::scroll_down_(std::size_t n) {
     if (this->top_line() + n > this->last_line()) {
         top_line_ = this->last_line();
     } else {
         top_line_ += n;
     }
     this->update();
+    scrolled_down(n);
+    scrolled();
 }
 
-void Text_display::enable_word_wrap(bool enable) {
+void Text_display::enable_word_wrap_(bool enable) {
     word_wrap_ = enable;
     this->update_display();
 }
 
-void Text_display::disable_word_wrap(bool disable) {
+void Text_display::disable_word_wrap_(bool disable) {
     word_wrap_ = !disable;
     this->update_display();
 }

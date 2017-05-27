@@ -57,7 +57,7 @@ int main() {
     auto& tb = w.make_child<twf::Textbox>();
     tb.geometry().size_policy().vertical_policy = twf::Size_policy::Expanding;
     tb.set_background(twf::Color::Light_gray);
-    tb.background_tile() = twf::Glyph(" ", twf::Attribute::Underline);
+    tb.set_background_tile(twf::Glyph(" ", twf::Attribute::Underline));
     tb.enable_border();
     tb.border().set_north_west("╭");
     tb.border().set_north_east("╮");

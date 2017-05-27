@@ -71,6 +71,7 @@ void System::send_posted_events(Object* obj_filter, Event::Type etype_filter) {
                     } else {
                         parent->delete_child(
                             const_cast<Object*>(posted_iter->reciever()));
+                        posted_iter = std::begin(queue);
                         queue.erase(posted_iter);
                         posted_iter = std::begin(queue);
                     }

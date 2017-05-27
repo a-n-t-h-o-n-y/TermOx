@@ -19,15 +19,14 @@ class Textbox : public Textbox_base {
     void set_wheel_speed_up(std::size_t lines);
     void set_wheel_speed_down(std::size_t lines);
 
-    // are these connected to destroyed signal?
-    sig::Slot<void()> scroll_up_slot = [this] { this->scroll_up(1); };
-    sig::Slot<void()> scroll_down_slot = [this] { this->scroll_down(1); };
-
    protected:
     bool key_press_event(const Key_event& event) override;
     bool mouse_press_event(const Mouse_event& event) override;
 
    private:
+    using Textbox_base::scroll_up_;
+    using Textbox_base::scroll_down_;
+
     bool scroll_wheel_{true};
     std::size_t scroll_speed_up_{1};
     std::size_t scroll_speed_down_{1};

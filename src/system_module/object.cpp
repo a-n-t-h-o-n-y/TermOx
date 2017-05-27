@@ -12,6 +12,7 @@
 
 namespace twf {
 
+// These need to be defaulted, figure a way to set parents elsewhere.
 Object::Object(Object&& rhs) noexcept
     : delete_later{std::move(rhs.delete_later)},
       enable{std::move(rhs.enable)},
