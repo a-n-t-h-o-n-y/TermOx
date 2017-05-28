@@ -7,7 +7,7 @@
 #include <tuple>
 #include <vector>
 
-namespace twf {
+namespace cppurses {
 class Widget;
 
 class Horizontal_layout : public Layout {
@@ -31,5 +31,5 @@ class Horizontal_layout : public Layout {
         int width_left);
 };
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // WIDGET_MODULE_LAYOUTS_HORIZONTAL_LAYOUT_HPP

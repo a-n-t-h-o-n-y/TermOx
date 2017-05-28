@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-namespace twf {
+namespace cppurses {
 
 enum class Color : std::int16_t {
     Black = 240,
@@ -74,5 +74,5 @@ inline detail::ForegroundColor foreground(Color c) {
     return static_cast<detail::ForegroundColor>(c);
 }
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // PAINTER_MODULE_COLOR_HPP

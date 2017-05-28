@@ -9,46 +9,46 @@
 // local namespace
 namespace {
 
-std::int16_t color_to_int(twf::Color c) {
+std::int16_t color_to_int(cppurses::Color c) {
     return static_cast<std::int16_t>(c) - 240;
 }
 
-std::int16_t find_pair(twf::Color foreground, twf::Color background) {
+std::int16_t find_pair(cppurses::Color foreground, cppurses::Color background) {
     return color_to_int(background) * 16 + color_to_int(foreground);
 }
 
-std::uint32_t attr_to_int(twf::Attribute attr) {
+std::uint32_t attr_to_int(cppurses::Attribute attr) {
     std::uint32_t a = A_NORMAL;
     switch (attr) {
-        case twf::Attribute::Bold:
+        case cppurses::Attribute::Bold:
             a = A_BOLD;
             break;
 
-        case twf::Attribute::Italic:
+        case cppurses::Attribute::Italic:
             a = A_ITALIC;
             break;
 
-        case twf::Attribute::Underline:
+        case cppurses::Attribute::Underline:
             a = A_UNDERLINE;
             break;
 
-        case twf::Attribute::Standout:
+        case cppurses::Attribute::Standout:
             a = A_STANDOUT;
             break;
 
-        case twf::Attribute::Dim:
+        case cppurses::Attribute::Dim:
             a = A_DIM;
             break;
 
-        case twf::Attribute::Inverse:
+        case cppurses::Attribute::Inverse:
             a = A_REVERSE;
             break;
 
-        case twf::Attribute::Invisible:
+        case cppurses::Attribute::Invisible:
             a = A_INVIS;
             break;
 
-        case twf::Attribute::Blink:
+        case cppurses::Attribute::Blink:
             a = A_BLINK;
             break;
     }
@@ -65,14 +65,14 @@ void initialize_color_pairs() {
 }
 }  // namespace
 
-namespace twf {
+namespace cppurses {
 namespace detail {
 
 NCurses_paint_engine::NCurses_paint_engine() {
     setenv("TERM", "xterm-256color", 1);
     ::setlocale(LC_ALL, "en_US.UTF-8");
     ::initscr();
-    ::raw();
+    this->set_ctrl_char(false);
     ::noecho();
     ::keypad(::stdscr, true);
     ::mousemask(ALL_MOUSE_EVENTS, nullptr);
@@ -83,6 +83,15 @@ NCurses_paint_engine::NCurses_paint_engine() {
                    NCurses_paint_engine::screen_height());
     initialize_color_pairs();
     this->hide_cursor();
+}
+
+void NCurses_paint_engine::set_ctrl_char(bool enable) {
+    if (enable) {
+        ::raw();
+    } else {
+        ::noraw();
+        ::cbreak();
+    }
 }
 
 NCurses_paint_engine::~NCurses_paint_engine() {
@@ -178,4 +187,4 @@ Color NCurses_paint_engine::current_foreground() {
 }
 
 }  // namespace detail
-}  // namespace twf
+}  // namespace cppurses

@@ -2,7 +2,7 @@
 #include "painter_module/glyph.hpp"
 #include <cstddef>
 
-namespace twf {
+namespace cppurses {
 namespace detail {
 
 bool Paint_buffer::commit(std::size_t x, std::size_t y) {
@@ -29,4 +29,4 @@ void Paint_buffer::resize(std::size_t x, std::size_t y) {
 }
 
 }  // namespace detail
-}  // namespace twf
+}  // namespace cppurses

@@ -3,12 +3,12 @@
 
 #include "system_module/event.hpp"
 
-namespace twf {
+namespace cppurses {
 
 class Show_event : public Event {
    public:
     Show_event() : Event{Event::Show} {}
 };
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // SYSTEM_MODULE_EVENTS_SHOW_EVENT_HPP

@@ -6,17 +6,18 @@
 #include "system_module/detail/thread_data.hpp"
 #include "system_module/event.hpp"
 #include "system_module/event_loop.hpp"
-#include "system_module/events/paint_event.hpp"
 #include "system_module/object.hpp"
+#include "system_module/events/paint_event.hpp"
 #include "widget_module/widget.hpp"
 #include "widget_module/focus_policy.hpp"
+#include <aml/signals/signals.hpp>
 #include <algorithm>
 #include <iterator>
 #include <memory>
 #include <utility>
 #include <vector>
 
-namespace twf {
+namespace cppurses {
 
 sig::Slot<void()> System::quit = []() { System::exit(); };   // NOLINT
 Object* System::head_ = nullptr;                             // NOLINT
@@ -295,4 +296,4 @@ int System::run() {
     return return_code;
 }
 
-}  // namespace twf
+}  // namespace cppurses

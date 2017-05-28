@@ -6,7 +6,7 @@
 #include "widget_module/size_policy.hpp"
 #include "widget_module/widgets/push_button.hpp"
 
-namespace twf {
+namespace cppurses {
 
 Titlebar::Titlebar(const Glyph_string& title)
     : title_{this->make_child<Push_button>(title)},
@@ -23,4 +23,4 @@ Titlebar::Titlebar(const Glyph_string& title)
     this->geometry().set_height_hint(1);
 }
 
-}  // namespace twf
+}  // namespace cppurses

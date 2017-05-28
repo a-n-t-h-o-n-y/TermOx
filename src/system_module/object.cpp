@@ -10,7 +10,7 @@
 #include <utility>
 #include <vector>
 
-namespace twf {
+namespace cppurses {
 
 // These need to be defaulted, figure a way to set parents elsewhere.
 Object::Object(Object&& rhs) noexcept
@@ -160,4 +160,4 @@ std::vector<Object*> Object::children() const {
     return ret;
 }
 
-}  // namespace twf
+}  // namespace cppurses

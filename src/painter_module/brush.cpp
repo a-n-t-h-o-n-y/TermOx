@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <vector>
 
-namespace twf {
+namespace cppurses {
 
 void Brush::remove_attribute(Attribute attr) {
     attributes_.set(static_cast<std::int8_t>(attr), false);
@@ -30,4 +30,4 @@ bool operator==(const Brush& lhs, const Brush& rhs) {
             lhs.foreground_color_ == rhs.foreground_color_);
 }
 
-}  // namespace twf
+}  // namespace cppurses

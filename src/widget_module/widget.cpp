@@ -20,15 +20,16 @@
 #include "system_module/object.hpp"
 #include "system_module/system.hpp"
 #include "widget_module/border.hpp"
-#include "widget_module/coordinate.hpp"
+#include "widget_module/coordinates.hpp"
 #include <cstddef>
 #include <memory>
 #include <utility>
 
-namespace twf {
+namespace cppurses {
 
 Widget::Widget() {
     this->Widget::initialize();
+    this->update();
 }
 
 Widget::~Widget() {
@@ -58,7 +59,7 @@ void Widget::initialize() {
     update_me = [this]() { this->update(); };
     update_me.track(this->destroyed);
 
-    click_me = [this](Mouse_button b, Coordinate c) {
+    click_me = [this](Mouse_button b, Coordinates c) {
         System::send_event(
             this, Mouse_event(Event::MouseButtonPress, b, this->x() + c.x,
                               this->y() + c.y, c.x, c.y, 0));
@@ -171,7 +172,7 @@ void Widget::clear_screen() {
     System::post_event(this, std::make_unique<Clear_screen_event>());
 }
 
-void Widget::move_cursor(Coordinate c) {
+void Widget::move_cursor(Coordinates c) {
     this->move_cursor(c.x, c.y);
 }
 
@@ -457,4 +458,4 @@ std::size_t Widget::height() const {
     return h - height_border_offset;
 }
 
-}  // namespace twf
+}  // namespace cppurses

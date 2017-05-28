@@ -2,7 +2,7 @@
 #include "system_module/event.hpp"
 #include <cstddef>
 
-namespace twf {
+namespace cppurses {
 
 Move_event::Move_event(std::size_t new_x,
                        std::size_t new_y,
@@ -14,4 +14,4 @@ Move_event::Move_event(std::size_t new_x,
       old_x_{old_x},
       old_y_{old_y} {}
 
-}  // namespace twf
+}  // namespace cppurses

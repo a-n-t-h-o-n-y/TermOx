@@ -1,6 +1,6 @@
 #include "system_module/detail/thread_data.hpp"
 
-namespace twf {
+namespace cppurses {
 namespace detail {
 
 Thread_data& Thread_data::current() {
@@ -13,4 +13,4 @@ Abstract_event_dispatcher& Thread_data::dispatcher() {
 }
 
 }  // namespace detail
-}  // namespace twf
+}  // namespace cppurses

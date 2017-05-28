@@ -5,13 +5,13 @@
 
 namespace {
 
-std::size_t translate(twf::Color c) {
+std::size_t translate(cppurses::Color c) {
     return static_cast<std::int16_t>(c) - 240;
 }
 
 }  // namespace
 
-namespace twf {
+namespace cppurses {
 
 void Palette::set_rgb(Color c, std::int16_t r, std::int16_t g, std::int16_t b) {
     auto& rgb = definitions_.at(translate(c));
@@ -70,4 +70,4 @@ DawnBringer_palette::DawnBringer_palette() {
     this->set_rgb(Color::White, 222, 238, 214);
 }
 
-}  // namespace twf
+}  // namespace cppurses

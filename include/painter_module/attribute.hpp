@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-namespace twf {
+namespace cppurses {
 
 enum class Attribute : std::int8_t {
     Bold,
@@ -16,5 +16,5 @@ enum class Attribute : std::int8_t {
     Blink
 };
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // PAINTER_MODULE_ATTRIBUTE_HPP

@@ -7,7 +7,7 @@
 #include <cstddef>
 #include <memory>
 
-namespace twf {
+namespace cppurses {
 struct Size_policy;
 
 void Geometry::set_width_hint(std::size_t hint) {
@@ -51,4 +51,4 @@ void Geometry::notify_parent() const {
     System::post_event(parent, std::move(widg));
 }
 
-}  // namespace twf
+}  // namespace cppurses

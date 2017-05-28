@@ -3,7 +3,7 @@
 
 #include <cstddef>
 
-namespace twf {
+namespace cppurses {
 
 struct Size_policy {
     enum Policy {
@@ -29,5 +29,5 @@ struct Size_policy {
     bool width_for_height = false;
 };
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // WIDGET_MODULE_SIZE_POLICY_HPP

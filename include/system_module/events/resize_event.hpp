@@ -4,7 +4,7 @@
 #include "system_module/event.hpp"
 #include <cstddef>
 
-namespace twf {
+namespace cppurses {
 
 class Resize_event : public Event {
    public:
@@ -25,5 +25,5 @@ class Resize_event : public Event {
     std::size_t old_height_;
 };
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // SYSTEM_MODULE_EVENTS_RESIZE_EVENT_HPP

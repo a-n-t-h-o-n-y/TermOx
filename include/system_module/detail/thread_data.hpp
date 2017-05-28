@@ -8,7 +8,7 @@
 #include <memory>
 #include <vector>
 
-namespace twf {
+namespace cppurses {
 namespace detail {
 
 class Thread_data {
@@ -29,5 +29,5 @@ class Thread_data {
 };
 
 }  // namespace detail
-}  // namespace twf
+}  // namespace cppurses
 #endif  // SYSTEM_MODULE_DETAIL_THREAD_DATA_HPP

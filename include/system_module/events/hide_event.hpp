@@ -3,12 +3,12 @@
 
 #include "system_module/event.hpp"
 
-namespace twf {
+namespace cppurses {
 
 class Hide_event : public Event {
    public:
     Hide_event() : Event{Event::Hide} {}
 };
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // SYSTEM_MODULE_EVENTS_HIDE_EVENT_HPP

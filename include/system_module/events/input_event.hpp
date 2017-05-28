@@ -3,7 +3,7 @@
 
 #include "system_module/event.hpp"
 
-namespace twf {
+namespace cppurses {
 
 class Input_event : public Event {
    public:
@@ -15,5 +15,5 @@ class Input_event : public Event {
     KeyboardModifiers modifiers_;
 };
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // SYSTEM_MODULE_EVENTS_INPUT_EVENT_HPP

@@ -4,7 +4,7 @@
 #include "painter_module/glyph_string.hpp"
 #include "widget_module/widgets/textbox_base.hpp"
 
-namespace twf {
+namespace cppurses {
 class Key_event;
 class Mouse_event;
 
@@ -12,9 +12,9 @@ class Textbox : public Textbox_base {
    public:
     explicit Textbox(Glyph_string contents = "");
 
-    void enable_scroll_wheel(bool enable = true);
-    void disable_scroll_wheel(bool disable = true);
-    bool does_scroll_wheel() const;
+    void enable_scrollwheel(bool enable = true);
+    void disable_scrollwheel(bool disable = true);
+    bool does_scrollwheel() const;
     void set_wheel_speed(std::size_t lines);
     void set_wheel_speed_up(std::size_t lines);
     void set_wheel_speed_down(std::size_t lines);
@@ -32,5 +32,5 @@ class Textbox : public Textbox_base {
     std::size_t scroll_speed_down_{1};
 };
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // WIDGET_MODULE_WIDGETS_TEXTBOX_HPP

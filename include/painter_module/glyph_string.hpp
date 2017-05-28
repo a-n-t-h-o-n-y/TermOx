@@ -10,7 +10,7 @@
 #include <utility>
 #include <vector>
 
-namespace twf {
+namespace cppurses {
 
 class Glyph_string : private std::vector<Glyph> {
    public:
@@ -145,5 +145,5 @@ bool operator==(const Glyph_string& x, const Glyph_string& y);
 bool operator!=(const Glyph_string& x, const Glyph_string& y);
 std::ostream& operator<<(std::ostream& os, const Glyph_string& gs);
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // PAINTER_MODULE_GLYPH_STRING_HPP

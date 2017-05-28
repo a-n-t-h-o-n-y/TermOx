@@ -2,12 +2,12 @@
 
 #include "painter_module/glyph_string.hpp"
 #include "system_module/events/resize_event.hpp"
-#include "widget_module/coordinate.hpp"
+#include "widget_module/coordinates.hpp"
 #include "widget_module/widgets/text_display.hpp"
 #include <cstddef>
 #include <utility>
 
-namespace twf {
+namespace cppurses {
 
 Textbox_base::Textbox_base(Glyph_string contents)
     : Text_display{std::move(contents)} {
@@ -33,7 +33,7 @@ void Textbox_base::initialize() {
     cursor_right_n = [this](std::size_t n) { this->cursor_right_(n); };
     cursor_right_n.track(this->destroyed);
 
-    set_cursor_at_coordinates = [this](Coordinate c) {
+    set_cursor_at_coordinates = [this](Coordinates c) {
         this->set_cursor_at_coordinates_(c);
     };
     set_cursor_at_coordinates.track(this->destroyed);
@@ -65,7 +65,7 @@ void Textbox_base::initialize() {
     set_scrolling.track(this->destroyed);
 }
 
-void Textbox_base::set_cursor_at_coordinates_(Coordinate pos) {
+void Textbox_base::set_cursor_at_coordinates_(Coordinates pos) {
     this->set_cursor_at_coordinates_(pos.x, pos.y);
 }
 
@@ -80,7 +80,7 @@ void Textbox_base::set_cursor_at_index_(std::size_t index) {
 }
 
 std::size_t Textbox_base::cursor_index() const {
-    return this->index_at(this->cursor_coordinate());
+    return this->index_at(this->cursor_coordinates());
 }
 
 void Textbox_base::cursor_up_(std::size_t n) {
@@ -121,7 +121,7 @@ void Textbox_base::cursor_left_(std::size_t n) {
 
 void Textbox_base::increment_cursor_left() {
     auto next_index = this->cursor_index();
-    if (this->cursor_coordinate() == Coordinate{0, 0}) {
+    if (this->cursor_coordinates() == Coordinates{0, 0}) {
         if (this->does_scroll()) {
             this->scroll_up_(1);
         } else {
@@ -183,7 +183,7 @@ void Textbox_base::scroll_down_(std::size_t n) {
 }
 
 bool Textbox_base::resize_event(const Resize_event& event) {
-    const auto cursor_index = this->index_at(this->cursor_coordinate());
+    const auto cursor_index = this->index_at(this->cursor_coordinates());
     Text_display::resize_event(event);
     // Scroll if old cursor index is now hidden.
     const auto cursor_line = this->line_at(cursor_index);
@@ -196,4 +196,4 @@ bool Textbox_base::resize_event(const Resize_event& event) {
     return Text_display::resize_event(event);
 }
 
-}  // namespace twf
+}  // namespace cppurses

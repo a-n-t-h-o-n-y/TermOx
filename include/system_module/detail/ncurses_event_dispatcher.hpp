@@ -6,7 +6,7 @@
 #include <memory>
 #include <utility>
 
-namespace twf {
+namespace cppurses {
 class Object;
 class Event;
 
@@ -24,5 +24,5 @@ class NCurses_event_dispatcher : public Abstract_event_dispatcher {
 };
 
 }  // namespace detail
-}  // namespace twf
+}  // namespace cppurses
 #endif  // SYSTEM_MODULE_DETAIL_NCURSES_EVENT_DISPATCHER_HPP

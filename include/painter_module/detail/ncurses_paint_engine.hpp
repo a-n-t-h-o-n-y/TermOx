@@ -8,27 +8,29 @@
 #include <cstdint>
 #include <string>
 
-namespace twf {
+namespace cppurses {
 namespace detail {
 
 class NCurses_paint_engine : public Paint_engine {
    public:
     NCurses_paint_engine();
     NCurses_paint_engine(const NCurses_paint_engine&) = delete;
-    NCurses_paint_engine(NCurses_paint_engine&&) noexcept = default; // NOLINT
+    NCurses_paint_engine(NCurses_paint_engine&&) noexcept = default;  // NOLINT
     NCurses_paint_engine& operator=(const NCurses_paint_engine&) = delete;
-    NCurses_paint_engine& operator=(NCurses_paint_engine&&) = default;// NOLINT
+    NCurses_paint_engine& operator=(NCurses_paint_engine&&) =
+        default;  // NOLINT
     ~NCurses_paint_engine() override;
 
     void set_rgb(Color c,
                  std::int16_t r,
                  std::int16_t g,
                  std::int16_t b) override;
-    void show_cursor(bool show = true) override; // NOLINT
-    void hide_cursor(bool hide = true) override; // NOLINT
+    void show_cursor(bool show = true) override;  // NOLINT
+    void hide_cursor(bool hide = true) override;  // NOLINT
     std::size_t screen_width() override;
     std::size_t screen_height() override;
     void touch_all() override;
+    void set_ctrl_char(bool enable) override;
 
    protected:
     void move(std::size_t x, std::size_t y) override;
@@ -48,5 +50,5 @@ class NCurses_paint_engine : public Paint_engine {
 };
 
 }  // namespace detail
-}  // namespace twf
+}  // namespace cppurses
 #endif  // PAINTER_MODULE_DETAIL_NCURSES_PAINT_ENGINE_HPP

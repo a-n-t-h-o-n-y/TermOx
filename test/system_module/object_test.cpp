@@ -9,12 +9,12 @@
 #include <string>
 #include <utility>
 
-using twf::Object;
-using twf::System;
-using twf::Widget;
-using twf::Event_loop;
-using twf::Event;
-using twf::Child_event;
+using cppurses::Object;
+using cppurses::System;
+using cppurses::Widget;
+using cppurses::Event_loop;
+using cppurses::Event;
+using cppurses::Child_event;
 
 TEST(ObjectTest, DefaultConstructor) {
     System system;

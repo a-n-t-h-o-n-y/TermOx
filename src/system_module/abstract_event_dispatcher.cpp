@@ -2,7 +2,7 @@
 #include "system_module/event.hpp"
 #include "system_module/system.hpp"
 
-namespace twf {
+namespace cppurses {
 
 bool Abstract_event_dispatcher::process_events() {
     interrupt_ = false;
@@ -24,4 +24,4 @@ void Abstract_event_dispatcher::interrupt() {
     interrupt_ = true;
 }
 
-}  // namespace twf
+}  // namespace cppurses

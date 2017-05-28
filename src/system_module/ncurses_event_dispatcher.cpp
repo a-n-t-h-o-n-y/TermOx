@@ -11,7 +11,7 @@
 #include <memory>
 #include <utility>
 
-namespace twf {
+namespace cppurses {
 namespace detail {
 
 void NCurses_event_dispatcher::post_user_input() {
@@ -159,4 +159,4 @@ Object* NCurses_event_dispatcher::handle_resize_object() {
 }
 
 }  // namespace detail
-}  // namespace twf
+}  // namespace cppurses

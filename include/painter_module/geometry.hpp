@@ -5,7 +5,7 @@
 #include <cstddef>
 #include <limits>
 
-namespace twf {
+namespace cppurses {
 class Widget;
 
 class Geometry {
@@ -61,5 +61,5 @@ class Geometry {
     void notify_parent() const;
 };
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // PAINTER_MODULE_GEOMETRY_HPP

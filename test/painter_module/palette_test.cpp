@@ -4,10 +4,10 @@
 
 #include <gtest/gtest.h>
 
-using twf::Color;
-using twf::DawnBringer_palette;
-using twf::Standard_palette;
-using twf::System;
+using cppurses::Color;
+using cppurses::DawnBringer_palette;
+using cppurses::Standard_palette;
+using cppurses::System;
 
 TEST(PaletteTest, Everything) {
     System system;

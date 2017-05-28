@@ -2,7 +2,7 @@
 #include "painter_module/glyph.hpp"
 #include "painter_module/painter.hpp"
 
-namespace twf {
+namespace cppurses {
 
 void Border::set_walls(const Glyph& horizontals, const Glyph& verticals) {
     north_ = horizontals;
@@ -71,4 +71,4 @@ std::size_t south_border_offset(const Border& b) {
     return 0;
 }
 
-}  // namespace twf
+}  // namespace cppurses

@@ -4,7 +4,7 @@
 #include "painter_module/glyph_string.hpp"
 #include "widget_module/layouts/horizontal_layout.hpp"
 
-namespace twf {
+namespace cppurses {
 class Push_button;
 
 class Titlebar : public Horizontal_layout {
@@ -16,6 +16,6 @@ class Titlebar : public Horizontal_layout {
     Push_button& exit_button_;
 };
 
-}  // namespace twf
+}  // namespace cppurses
 
 #endif  // WIDGET_MODULE_WIDGETS_TITLEBAR_HPP

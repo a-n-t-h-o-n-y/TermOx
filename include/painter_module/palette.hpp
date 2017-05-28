@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace twf {
+namespace cppurses {
 
 class Palette {
    public:
@@ -36,5 +36,5 @@ class DawnBringer_palette : public Palette {
     DawnBringer_palette();
 };
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // PAINTER_MODULE_PALETTE_HPP

@@ -2,16 +2,17 @@
 #define WIDGET_MODULE_WIDGETS_CHECKBOX_HPP
 
 #include "painter_module/glyph.hpp"
+#include "painter_module/glyph_string.hpp"
 #include "widget_module/widget.hpp"
 #include <aml/signals/signals.hpp>
 
-namespace twf {
+namespace cppurses {
 class Mouse_event;
 class Paint_event;
 
 class Checkbox : public Widget {
    public:
-    Checkbox();
+    Checkbox(Glyph_string title = "");
 
     // Slots
     sig::Slot<void()> toggle;
@@ -32,10 +33,11 @@ class Checkbox : public Widget {
     Glyph empty_box_{"☐"};
     Glyph checked_box_{"☒"};
     bool checked_{false};
+    Glyph_string title_;
 
    private:
     void initialize();
 };
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // WIDGET_MODULE_WIDGETS_CHECKBOX_HPP

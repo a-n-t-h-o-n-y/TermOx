@@ -3,7 +3,7 @@
 
 #include "system_module/object.hpp"
 
-namespace twf {
+namespace cppurses {
 
 class Event_loop : public Object {
    public:
@@ -16,5 +16,5 @@ class Event_loop : public Object {
     bool exit_ = false;
 };
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // SYSTEM_MODULE_EVENT_LOOP_HPP

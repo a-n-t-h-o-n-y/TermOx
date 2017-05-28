@@ -5,7 +5,7 @@
 #include <functional>
 #include <set>
 
-namespace twf {
+namespace cppurses {
 namespace detail {
 
 class Posted_event_queue : public std::multiset<Posted_event, std::greater<>> {
@@ -19,5 +19,5 @@ class Posted_event_queue : public std::multiset<Posted_event, std::greater<>> {
 };
 
 }  // namespace detail
-}  // namespace twf
+}  // namespace cppurses
 #endif  // SYSTEM_MODULE_DETAIL_POSTED_EVENT_QUEUE_HPP

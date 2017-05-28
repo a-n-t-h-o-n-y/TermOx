@@ -2,7 +2,7 @@
 #include "painter_module/painter.hpp"
 #include "system_module/system.hpp"
 
-namespace twf {
+namespace cppurses {
 class Paint_event;
 
 Layout::Layout() {
@@ -22,4 +22,4 @@ bool Layout::paint_event(const Paint_event& event) {
     return Widget::paint_event(event);
 }
 
-}  // namespace twf
+}  // namespace cppurses

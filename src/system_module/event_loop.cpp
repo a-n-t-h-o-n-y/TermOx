@@ -1,7 +1,7 @@
 #include "system_module/event_loop.hpp"
 #include "system_module/detail/thread_data.hpp"
 
-namespace twf {
+namespace cppurses {
 
 int Event_loop::run() {
     auto& data = detail::Thread_data::current();
@@ -26,4 +26,4 @@ bool Event_loop::process_events() {
     return data.dispatcher().process_events();
 }
 
-}  // namespace twf
+}  // namespace cppurses

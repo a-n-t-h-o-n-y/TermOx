@@ -3,7 +3,7 @@
 
 #include "system_module/object.hpp"
 
-namespace twf {
+namespace cppurses {
 
 class Abstract_event_dispatcher : public Object {
    public:
@@ -12,8 +12,8 @@ class Abstract_event_dispatcher : public Object {
 
    protected:
     virtual void post_user_input() = 0;
-    bool interrupt_ = false;
+    bool interrupt_{false};
 };
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // SYSTEM_MODULE_ABSTRACT_EVENT_DISPATCHER_HPP

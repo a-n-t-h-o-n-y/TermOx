@@ -3,7 +3,7 @@
 
 #include "system_module/event.hpp"
 
-namespace twf {
+namespace cppurses {
 
 class Enable_event : public Event {
    public:
@@ -15,5 +15,5 @@ class Enable_event : public Event {
     bool enabled_;
 };
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // SYSTEM_MODULE_EVENTS_ENABLE_EVENT_HPP

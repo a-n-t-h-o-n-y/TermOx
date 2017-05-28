@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <utility>
 
-namespace twf {
+namespace cppurses {
 namespace detail {
 
 // Sorts by priority when adding Posted_event.
@@ -23,4 +23,4 @@ void Posted_event_queue::add_event(Posted_event pe) {
 }
 
 }  // namespace detail
-}  // namespace twf
+}  // namespace cppurses

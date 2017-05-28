@@ -1,5 +1,7 @@
                              __Issues+Ideas__
 
+_ Change tuples in Layouts to struct.
+
 _ Remove invisible widgets and implement disabled widget handling in layouts, it
     is it disabled, it should just be a black background printed, incase not in
     layout. Make sure you no longer take mouse or keyboard input for disabled

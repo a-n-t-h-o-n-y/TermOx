@@ -1,21 +1,18 @@
-#include <widget_module/layouts/vertical_layout.hpp>
+#include "widget_module/layouts/vertical_layout.hpp"
 
+#include "painter_module/geometry.hpp"
+#include "system_module/events/move_event.hpp"
+#include "system_module/events/resize_event.hpp"
+#include "system_module/system.hpp"
+#include "widget_module/border.hpp"
+#include "widget_module/size_policy.hpp"
 #include <cstddef>
-#include <vector>
 #include <deque>
-#include <tuple>
 #include <functional>
+#include <tuple>
+#include <vector>
 
-#include <fstream>
-
-#include <system_module/events/move_event.hpp>
-#include <system_module/events/resize_event.hpp>
-#include <system_module/system.hpp>
-#include <widget_module/border.hpp>
-#include <widget_module/size_policy.hpp>
-#include <painter_module/geometry.hpp>
-
-namespace twf {
+namespace cppurses {
 
 std::vector<std::size_t> Vertical_layout::size_widgets() {
     // <Widget*, width, height>
@@ -24,7 +21,7 @@ std::vector<std::size_t> Vertical_layout::size_widgets() {
     for (Object* c : this->children()) {
         Widget* w{dynamic_cast<Widget*>(c)};
         if (w != nullptr) {
-            widgets.push_back(std::make_tuple(w, 0, 0));
+            widgets.emplace_back(std::make_tuple(w, 0, 0));
             total_stretch += w->geometry().size_policy().vertical_stretch;
         }
     }
@@ -82,7 +79,7 @@ std::vector<std::size_t> Vertical_layout::size_widgets() {
                            std::reference_wrapper<std::size_t>>>
         widgets_w_refs;
     for (auto& tup : widgets) {
-        widgets_w_refs.push_back(
+        widgets_w_refs.emplace_back(
             std::tie(std::get<0>(tup), std::get<1>(tup), std::get<2>(tup)));
     }
     // If space left, fill in expanding and min_expanding, then if still,
@@ -151,11 +148,6 @@ std::vector<std::size_t> Vertical_layout::size_widgets() {
     heights.reserve(widgets.size());
     for (const auto& tup : widgets) {
         heights.push_back(std::get<2>(tup));
-    }
-    // log
-    std::fstream log("heights.txt", std::ios_base::app);
-    for (auto& h : heights) {
-        log << "height: " << h << std::endl;
     }
     return heights;
 }
@@ -278,7 +270,7 @@ void Vertical_layout::distribute_space(
     }
     // Rounding error extra
     // First Group
-    auto height_check{height_left};
+    auto height_check{0};
     do {
         height_check = height_left;
         for (auto& tup : widgets) {
@@ -508,4 +500,4 @@ void Vertical_layout::update_geometry() {
     this->position_widgets(heights);
 }
 
-}  // namespace twf
+}  // namespace cppurses

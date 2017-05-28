@@ -4,7 +4,7 @@
 #include "widget_module/widget.hpp"
 #include <cstddef>
 
-namespace twf {
+namespace cppurses {
 
 void Paint_engine::put(std::size_t x, std::size_t y, const Glyph& g) {
     buffer_.stage(x, y, g);
@@ -54,4 +54,4 @@ void Paint_engine::flush(bool optimize) {
     this->refresh();
 }
 
-}  // namespace twf
+}  // namespace cppurses

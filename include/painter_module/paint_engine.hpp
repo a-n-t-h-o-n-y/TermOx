@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <string>
 
-namespace twf {
+namespace cppurses {
 
 class Paint_engine {
    public:
@@ -34,13 +34,14 @@ class Paint_engine {
                          std::int16_t g,
                          std::int16_t b) = 0;
 
-    virtual void show_cursor(bool show = true) = 0; // NOLINT
-    virtual void hide_cursor(bool hide = true) = 0; // NOLINT
+    virtual void show_cursor(bool show = true) = 0;  // NOLINT
+    virtual void hide_cursor(bool hide = true) = 0;  // NOLINT
     virtual std::size_t screen_width() = 0;
     virtual std::size_t screen_height() = 0;
 
     virtual void clear_attributes() = 0;
     virtual void touch_all() = 0;
+    virtual void set_ctrl_char(bool enable) = 0;
 
     detail::Paint_buffer& buffer() { return buffer_; }
     const detail::Paint_buffer& buffer() const { return buffer_; }
@@ -59,5 +60,5 @@ class Paint_engine {
     detail::Paint_buffer buffer_;
 };
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // PAINTER_MODULE_PAINT_ENGINE_HPP

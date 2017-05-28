@@ -3,13 +3,13 @@
 #include "painter_module/glyph_string.hpp"
 #include "painter_module/painter.hpp"
 #include "system_module/events/resize_event.hpp"
-#include "widget_module/coordinate.hpp"
+#include "widget_module/coordinates.hpp"
 #include <algorithm>
 #include <cstddef>
 #include <iterator>
 #include <utility>
 
-namespace twf {
+namespace cppurses {
 
 Text_display::Text_display(Glyph_string content)
     : contents_{std::move(content)} {
@@ -18,13 +18,13 @@ Text_display::Text_display(Glyph_string content)
 }
 
 void Text_display::initialize() {
-    set_text = [this](const Glyph_string& s) { this->set_text_(s); };
+    set_text = [this](Glyph_string s) { this->set_text_(std::move(s)); };
     set_text.track(this->destroyed);
-    insert = [this](const Glyph_string& s, std::size_t index) {
-        this->insert_(s, index);
+    insert = [this](Glyph_string s, std::size_t index) {
+        this->insert_(std::move(s), index);
     };
     insert.track(this->destroyed);
-    append = [this](const Glyph_string& s) { this->append_(s); };
+    append = [this](Glyph_string s) { this->append_(std::move(s)); };
     append.track(this->destroyed);
     erase = [this](std::size_t index) { this->erase_(index); };
     erase.track(this->destroyed);
@@ -51,18 +51,33 @@ void Text_display::initialize() {
     };
     set_word_wrap = [this](bool enable) { this->enable_word_wrap_(enable); };
     set_word_wrap.track(this->destroyed);
+
+    set_attribute = [this](Attribute attr) {
+        incoming_brush_.add_attributes(attr);
+    };
+    set_attribute.track(this->destroyed);
+
+    remove_attribute = [this](Attribute attr) {
+        incoming_brush_.remove_attribute(attr);
+    };
+    remove_attribute.track(this->destroyed);
 }
 
-void Text_display::set_text_(const Glyph_string& string) {
-    contents_ = string;
+void Text_display::set_text_(Glyph_string string) {
+    contents_ = std::move(string);
     this->update_display();
     text_changed(contents_);
 }
 
-void Text_display::insert_(const Glyph_string& string, std::size_t index) {
+void Text_display::insert_(Glyph_string string, std::size_t index) {
     if (contents_.empty()) {
-        this->append_(string);
+        this->append_(std::move(string));
         return;
+    }
+    for (auto& glyph : string) {
+        for (auto& attr : incoming_brush_.attributes()) {
+            glyph.brush().add_attributes(attr);
+        }
     }
     contents_.insert(std::begin(contents_) + index, std::begin(string),
                      std::end(string));
@@ -70,8 +85,13 @@ void Text_display::insert_(const Glyph_string& string, std::size_t index) {
     text_changed(contents_);
 }
 
-void Text_display::append_(const Glyph_string& string) {
-    contents_.append(string);
+void Text_display::append_(Glyph_string string) {
+    for (auto& glyph : string) {
+        for (auto& attr : incoming_brush_.attributes()) {
+            glyph.brush().add_attributes(attr);
+        }
+    }
+    contents_.append(std::move(string));
     this->update_display();
     text_changed(contents_);
 }
@@ -141,7 +161,7 @@ std::size_t Text_display::row_length(std::size_t y) const {
     return this->line_length(line);
 }
 
-std::size_t Text_display::index_at(Coordinate position) const {
+std::size_t Text_display::index_at(Coordinates position) const {
     return this->index_at(position.x, position.y);
 }
 
@@ -165,8 +185,8 @@ std::size_t Text_display::index_at(std::size_t x, std::size_t y) const {
     return info.start_index + x;
 }
 
-Coordinate Text_display::display_position(std::size_t index) const {
-    Coordinate position;
+Coordinates Text_display::display_position(std::size_t index) const {
+    Coordinates position;
     auto line = this->line_at(index);
     if (line < this->top_line()) {
         return position;
@@ -308,4 +328,4 @@ std::size_t Text_display::end_index() const {
     return this->contents_size() - 1;
 }
 
-}  // namespace twf
+}  // namespace cppurses

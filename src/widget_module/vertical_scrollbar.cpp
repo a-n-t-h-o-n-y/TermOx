@@ -1,8 +1,10 @@
-#include <widget_module/widgets/vertical_scrollbar.hpp>
+#include "widget_module/widgets/vertical_scrollbar.hpp"
 
-#include <painter_module/color.hpp>
+#include "painter_module/color.hpp"
+#include "painter_module/geometry.hpp"
+#include "widget_module/size_policy.hpp"
 
-namespace twf {
+namespace cppurses {
 Vertical_scrollbar::Vertical_scrollbar() {
     this->disable_cursor();
     this->geometry().size_policy().horizontal_policy = Size_policy::Fixed;
@@ -19,4 +21,4 @@ Vertical_scrollbar::Vertical_scrollbar() {
     down_button.geometry().set_height_hint(1);
 }
 
-}  // namespace twf
+}  // namespace cppurses

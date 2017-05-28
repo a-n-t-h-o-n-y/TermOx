@@ -4,9 +4,9 @@
 
 #include <gtest/gtest.h>
 
-using twf::System;
-using twf::Event_loop;
-using twf::detail::Thread_data;
+using cppurses::System;
+using cppurses::Event_loop;
+using cppurses::detail::Thread_data;
 
 TEST(ThreadDataTest, Default) {
     System system;

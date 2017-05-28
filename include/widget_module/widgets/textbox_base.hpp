@@ -2,12 +2,12 @@
 #define WIDGET_MODULE_WIDGETS_TEXTBOX_BASE_HPP
 
 #include "painter_module/glyph_string.hpp"
-#include "widget_module/coordinate.hpp"
+#include "widget_module/coordinates.hpp"
 #include "widget_module/widgets/text_display.hpp"
 #include <aml/signals/signals.hpp>
 #include <cstddef>
 
-namespace twf {
+namespace cppurses {
 class Resize_event;
 
 class Textbox_base : public Text_display {
@@ -23,7 +23,7 @@ class Textbox_base : public Text_display {
     sig::Slot<void(std::size_t)> cursor_down_n;
     sig::Slot<void(std::size_t)> cursor_left_n;
     sig::Slot<void(std::size_t)> cursor_right_n;
-    sig::Slot<void(Coordinate)> set_cursor_at_coordinates;
+    sig::Slot<void(Coordinates)> set_cursor_at_coordinates;
     sig::Slot<void(std::size_t, std::size_t)> set_cursor_at_coordinates_x_y;
     sig::Slot<void(std::size_t)> set_cursor_at_index;
 
@@ -46,7 +46,7 @@ class Textbox_base : public Text_display {
     sig::Signal<void(std::size_t n)> cursor_moved_right;
     sig::Signal<void(std::size_t n)> cursor_moved_up;
     sig::Signal<void(std::size_t n)> cursor_moved_down;
-    sig::Signal<void(Coordinate)> cursor_moved;
+    sig::Signal<void(Coordinates)> cursor_moved;
 
    private:
     using Text_display::scroll_up_;
@@ -67,10 +67,10 @@ class Textbox_base : public Text_display {
     void cursor_down_(std::size_t n);
     void cursor_left_(std::size_t n);
     void cursor_right_(std::size_t n);
-    void set_cursor_at_coordinates_(Coordinate pos);
+    void set_cursor_at_coordinates_(Coordinates pos);
     void set_cursor_at_coordinates_(std::size_t x, std::size_t y);
     void set_cursor_at_index_(std::size_t index);
 };
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // WIDGET_MODULE_WIDGETS_TEXTBOX_BASE_HPP

@@ -3,7 +3,7 @@
 #include <cstring>
 #include <ostream>
 
-namespace twf {
+namespace cppurses {
 
 const char* Glyph::c_str() const {
     return symbol_.data();
@@ -47,4 +47,4 @@ std::ostream& operator<<(std::ostream& os, const Glyph& g) {
     return os << static_cast<std::string>(g);
 }
 
-}  // namespace twf
+}  // namespace cppurses

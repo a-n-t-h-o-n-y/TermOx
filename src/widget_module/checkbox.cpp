@@ -1,12 +1,11 @@
 #include "widget_module/widgets/checkbox.hpp"
+#include "painter_module/glyph_string.hpp"
 #include "painter_module/painter.hpp"
 #include "widget_module/size_policy.hpp"
 
-namespace twf {
+namespace cppurses {
 
-Checkbox::Checkbox() {
-    this->geometry().size_policy().horizontal_policy = Size_policy::Fixed;
-    this->geometry().set_width_hint(2);
+Checkbox::Checkbox(Glyph_string title) : title_{title} {
     this->geometry().size_policy().vertical_policy = Size_policy::Fixed;
     this->geometry().set_height_hint(1);
     this->Checkbox::initialize();
@@ -36,6 +35,7 @@ bool Checkbox::paint_event(const Paint_event& event) {
     } else {
         p.put(empty_box_);
     }
+    p.put(title_, 3, 0);
     return Widget::paint_event(event);
 }
 
@@ -53,4 +53,4 @@ void Checkbox::toggle_() {
     checked_ ? checked() : unchecked();
 }
 
-}  // namespace twf
+}  // namespace cppurses

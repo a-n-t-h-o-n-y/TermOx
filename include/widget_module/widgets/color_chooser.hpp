@@ -7,7 +7,7 @@
 #include "widget_module/layouts/horizontal_layout.hpp"
 #include <aml/signals/signals.hpp>
 
-namespace twf {
+namespace cppurses {
 
 class Color_chooser : public Vertical_layout {
    public:
@@ -39,5 +39,5 @@ class Color_chooser : public Vertical_layout {
     void initialize();
 };
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // COLOR_CHOOSER_HPP

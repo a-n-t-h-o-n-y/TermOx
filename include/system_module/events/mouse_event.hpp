@@ -5,7 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace twf {
+namespace cppurses {
 
 enum class Mouse_button { None, Left, Middle, Right, ScrollUp, ScrollDown };
 
@@ -42,5 +42,5 @@ class Mouse_event : public Input_event {
     std::uint8_t device_id_;
 };
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // SYSTEM_MODULE_EVENTS_MOUSE_EVENT_HPP

@@ -5,7 +5,7 @@
 #include <cstddef>
 #include <vector>
 
-namespace twf {
+namespace cppurses {
 
 class Glyph_matrix {
    public:
@@ -33,5 +33,5 @@ class Glyph_matrix {
     std::vector<std::vector<Glyph>> matrix_;
 };
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // PAINTER_MODULE_GLYPH_MATRIX_HPP

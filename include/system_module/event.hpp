@@ -3,7 +3,7 @@
 
 #include "system_module/object.hpp"
 
-namespace twf {
+namespace cppurses {
 
 class Event {
    public:
@@ -137,5 +137,5 @@ inline bool operator==(const Event& x, const Event& y) {
     return x.type() == y.type();
 }
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // SYSTEM_MODULE_EVENT_HPP

@@ -1,6 +1,6 @@
 #include "widget_module/widgets/color_chooser.hpp"
 
-namespace twf {
+namespace cppurses {
 
 Color_chooser::Color_chooser() {
     this->Color_chooser::initialize();
@@ -46,4 +46,4 @@ void Color_chooser::initialize() {
     this->geometry().set_height_hint(2);
     this->size_policy().vertical_policy = Size_policy::Fixed;
 }
-}  // namespace twf
+}  // namespace cppurses

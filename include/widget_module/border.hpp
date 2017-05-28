@@ -4,7 +4,7 @@
 #include "painter_module/glyph.hpp"
 #include <cstddef>
 
-namespace twf {
+namespace cppurses {
 class Widget;
 
 class Border {
@@ -91,5 +91,5 @@ std::size_t east_border_offset(const Border& b);
 std::size_t north_border_offset(const Border& b);
 std::size_t south_border_offset(const Border& b);
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // WIDGET_MODULE_BORDER_HPP

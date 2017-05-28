@@ -1,4 +1,6 @@
 #include "widget_module/layouts/horizontal_layout.hpp"
+
+#include "painter_module/geometry.hpp"
 #include "system_module/events/move_event.hpp"
 #include "system_module/events/resize_event.hpp"
 #include "system_module/system.hpp"
@@ -10,7 +12,7 @@
 #include <tuple>
 #include <vector>
 
-namespace twf {
+namespace cppurses {
 
 std::vector<std::size_t> Horizontal_layout::size_widgets() {
     // <Widget*, width, height>
@@ -501,4 +503,4 @@ void Horizontal_layout::update_geometry() {
     this->position_widgets(widths);
 }
 
-}  // namespace twf
+}  // namespace cppurses

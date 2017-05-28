@@ -3,7 +3,7 @@
 
 #include "system_module/event.hpp"
 
-namespace twf {
+namespace cppurses {
 
 class Child_event : public Event {
    public:
@@ -17,5 +17,5 @@ class Child_event : public Event {
     Object* child_;
 };
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // SYSTEM_MODULE_EVENTS_CHILD_EVENT_HPP

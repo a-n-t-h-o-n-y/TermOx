@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <vector>
 
-namespace twf {
+namespace cppurses {
 Glyph_matrix::Glyph_matrix(std::size_t width, std::size_t height)
     : matrix_{height, std::vector<Glyph>(width, Glyph(" "))} {}
 
@@ -30,4 +30,4 @@ const Glyph& Glyph_matrix::at(std::size_t x, std::size_t y) const {
     return this->at_impl(*this, x, y);
 }
 
-}  // namespace twf
+}  // namespace cppurses

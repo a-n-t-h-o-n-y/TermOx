@@ -10,14 +10,14 @@
 #include "system_module/key.hpp"
 #include "system_module/object.hpp"
 #include "widget_module/border.hpp"
-#include "widget_module/coordinate.hpp"
+#include "widget_module/coordinates.hpp"
 #include "widget_module/focus_policy.hpp"
 #include <aml/signals/signals.hpp>
 #include <cstddef>
 #include <memory>
 #include <utility>
 
-namespace twf {
+namespace cppurses {
 class Clear_screen_event;
 class Close_event;
 class Enable_event;
@@ -32,7 +32,11 @@ class Show_event;
 class Widget : public Object {
    public:
     Widget();
-    virtual ~Widget() override;
+    Widget(const Widget&) = delete;
+    Widget& operator=(const Widget&) = delete;
+    Widget(Widget&&) = default;             // NOLINT
+    Widget& operator=(Widget&&) = default;  // NOLINT
+    ~Widget() override;
 
     // Global Coordinates - Includes border space.
     std::size_t x() const;
@@ -46,12 +50,12 @@ class Widget : public Object {
     void enable_cursor(bool enable = true) { cursor_enabled_ = enable; }
     void disable_cursor(bool disable = true) { cursor_enabled_ = !disable; }
     void move_cursor(std::size_t x, std::size_t y);
-    void move_cursor(Coordinate c);
+    void move_cursor(Coordinates c);
     void move_cursor_x(std::size_t x);
     void move_cursor_y(std::size_t y);
     std::size_t cursor_x() const { return cursor_position_.x; }
     std::size_t cursor_y() const { return cursor_position_.y; }
-    Coordinate cursor_coordinate() const { return cursor_position_; }
+    Coordinates cursor_coordinates() const { return cursor_position_; }
 
     Border& border() { return border_; }
     const Border& border() const { return border_; }
@@ -95,14 +99,14 @@ class Widget : public Object {
 
     // Signals
     sig::Signal<void(std::size_t, std::size_t)> resized;
-    sig::Signal<void(Coordinate)> moved;
-    sig::Signal<void(Coordinate)> clicked;
+    sig::Signal<void(Coordinates)> moved;
+    sig::Signal<void(Coordinates)> clicked;
     sig::Signal<void(Key)> key_pressed;
     sig::Signal<void(Widget*)> child_added;
     sig::Signal<void(Widget*)> child_removed;
     sig::Signal<void()> focused_in;
     sig::Signal<void()> focused_out;
-    sig::Signal<void(Coordinate)> cursor_moved;
+    sig::Signal<void(Coordinates)> cursor_moved;
     sig::Signal<void(Color)> background_color_changed;
     sig::Signal<void(Color)> foreground_color_changed;
 
@@ -113,7 +117,7 @@ class Widget : public Object {
     sig::Slot<void()> repaint;
     sig::Slot<void()> give_focus;
     sig::Slot<void()> update_me;
-    sig::Slot<void(Mouse_button, Coordinate)> click_me;
+    sig::Slot<void(Mouse_button, Coordinates)> click_me;
     sig::Slot<void(Key)> keypress_me;
 
     sig::Slot<void(Color)> set_background;
@@ -141,13 +145,11 @@ class Widget : public Object {
 
     void clear_screen();
 
-
     void set_background_(Color c);
     void set_foreground_(Color c);
 
-
-    Coordinate position_;  // Top left corner, relative to parent's coordinates.
-    Coordinate cursor_position_;
+    Coordinates position_;  // Top left corner relative to parent's Coordinates.
+    Coordinates cursor_position_;
     bool cursor_enabled_{false};
     bool focus_{false};
     bool mouse_tracking_{false};
@@ -163,6 +165,6 @@ class Widget : public Object {
     void initialize();
 };
 
-}  // namespace twf
+}  // namespace cppurses
 
 #endif  // WIDGET_MODULE_WIDGET_HPP

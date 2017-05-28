@@ -1,12 +1,11 @@
 #ifndef PAINTER_MODULE_PAINTER_HPP
 #define PAINTER_MODULE_PAINTER_HPP
 
-#include "painter_module/color.hpp"
 #include "painter_module/glyph_string.hpp"
-#include "widget_module/coordinate.hpp"
+#include "widget_module/coordinates.hpp"
 #include <cstddef>
 
-namespace twf {
+namespace cppurses {
 class Border;
 class Widget;
 
@@ -14,25 +13,13 @@ class Painter {
    public:
     explicit Painter(Widget* widget);
 
-    // Essential Functions
-    // void put(const Glyph_string& string, bool move_cursor = true);
-
     void put(const Glyph_string& string,
              std::size_t x = 0,
              std::size_t y = 0,
              bool move_cursor = false);
     void put(const Glyph_string& string,
-             Coordinate position,
+             Coordinates position,
              bool move_cursor = false);
-
-    // void put_at(Coordinate pos,
-    //             const Glyph_string& string,
-    //             bool move_cursor = true);
-
-    // void put_at(std::size_t x,
-    //             std::size_t y,
-    //             const Glyph_string& string,
-    //             bool move_cursor = true);
 
     // Convinience functions
     void fill(std::size_t x,
@@ -66,5 +53,5 @@ class Painter {
     Widget* widget_;
 };
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // PAINTER_MODULE_PAINTER_HPP

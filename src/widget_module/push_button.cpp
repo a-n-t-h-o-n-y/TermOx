@@ -4,7 +4,7 @@
 #include "painter_module/painter.hpp"
 #include <utility>
 
-namespace twf {
+namespace cppurses {
 
 Push_button::Push_button(Glyph_string name) : title_{std::move(name)} {
     this->disable_cursor();
@@ -31,4 +31,4 @@ bool Push_button::paint_event(const Paint_event& event) {
     return Widget::paint_event(event);
 }
 
-}  // namespace twf
+}  // namespace cppurses

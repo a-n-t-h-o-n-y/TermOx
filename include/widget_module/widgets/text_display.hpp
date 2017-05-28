@@ -1,14 +1,16 @@
 #ifndef WIDGET_MODULE_WIDGETS_TEXT_DISPLAY_HPP
 #define WIDGET_MODULE_WIDGETS_TEXT_DISPLAY_HPP
 
+#include "painter_module/attribute.hpp"
+#include "painter_module/brush.hpp"
 #include "painter_module/glyph.hpp"
 #include "painter_module/glyph_string.hpp"
-#include "widget_module/coordinate.hpp"
+#include "widget_module/coordinates.hpp"
 #include "widget_module/widget.hpp"
 #include <aml/signals/signals.hpp>
 #include <cstddef>
 #include <vector>
-namespace twf {
+namespace cppurses {
 class Paint_event;
 class Resize_event;
 
@@ -17,9 +19,9 @@ class Text_display : public Widget {
     explicit Text_display(Glyph_string content = "");
 
     // String Modification
-    sig::Slot<void(const Glyph_string&)> set_text;
-    sig::Slot<void(const Glyph_string&, std::size_t)> insert;
-    sig::Slot<void(const Glyph_string&)> append;
+    sig::Slot<void(Glyph_string)> set_text;
+    sig::Slot<void(Glyph_string, std::size_t)> insert;
+    sig::Slot<void(Glyph_string)> append;
     sig::Slot<void(std::size_t)> erase;
     sig::Slot<void()> pop_back;
     sig::Slot<void()> clear;
@@ -36,12 +38,15 @@ class Text_display : public Widget {
     sig::Slot<void()> toggle_word_wrap;
     sig::Slot<void(bool)> set_word_wrap;
 
+    sig::Slot<void(Attribute)> set_attribute;
+    sig::Slot<void(Attribute)> remove_attribute;
+
     // Query Functions
     std::size_t row_length(std::size_t y) const;
     std::size_t display_height() const;
-    std::size_t index_at(Coordinate position) const;
+    std::size_t index_at(Coordinates position) const;
     std::size_t index_at(std::size_t x, std::size_t y) const;
-    Coordinate display_position(std::size_t index) const;
+    Coordinates display_position(std::size_t index) const;
     Glyph_string contents() const { return contents_; }
     Glyph glyph_at(std::size_t index) const { return contents_.at(index); }
     std::size_t contents_size() const { return contents_.size(); }
@@ -59,9 +64,9 @@ class Text_display : public Widget {
     bool resize_event(const Resize_event& event) override;
     void scroll_up_(std::size_t n);
     void scroll_down_(std::size_t n);
-    void set_text_(const Glyph_string& string);
-    void insert_(const Glyph_string& string, std::size_t index);
-    void append_(const Glyph_string& string);
+    void set_text_(Glyph_string string);
+    void insert_(Glyph_string string, std::size_t index);
+    void append_(Glyph_string string);
     void erase_(std::size_t index, std::size_t length = Glyph_string::npos);
     void pop_back_();
     void clear_();
@@ -90,10 +95,11 @@ class Text_display : public Widget {
     std::size_t top_line_{0};
     bool word_wrap_ = true;
     Glyph_string contents_;
+    Brush incoming_brush_{this->brush()};
 
     void update_display(std::size_t from_line = 0);
     void initialize();
 };
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // WIDGET_MODULE_WIDGETS_TEXT_DISPLAY_HPP

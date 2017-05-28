@@ -9,7 +9,7 @@
 #include <string>
 #include <utility>
 
-namespace twf {
+namespace cppurses {
 
 class Glyph {
    public:
@@ -70,5 +70,5 @@ bool operator!=(const Glyph& lhs, const Glyph& rhs);
 
 std::ostream& operator<<(std::ostream& os, const Glyph& g);
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // PAINTER_MODULE_GLYPH_HPP

@@ -4,7 +4,7 @@
 #include <ostream>
 #include <string>
 
-namespace twf {
+namespace cppurses {
 
 Glyph_string::operator std::string() const { // NOLINT
     return this->str();
@@ -42,4 +42,4 @@ std::ostream& operator<<(std::ostream& os, const Glyph_string& gs) {
     return os << static_cast<std::string>(gs);
 }
 
-}  // namespace twf
+}  // namespace cppurses

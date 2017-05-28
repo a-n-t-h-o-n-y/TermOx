@@ -1,13 +1,13 @@
 #ifndef WIDGET_MODULE_WIDGETS_PUSH_BUTTON_HPP
 #define WIDGET_MODULE_WIDGETS_PUSH_BUTTON_HPP
 
-#include <aml/signals/signal.hpp>
 #include "painter_module/glyph_string.hpp"
 #include "system_module/events/mouse_event.hpp"
 #include "system_module/events/paint_event.hpp"
 #include "widget_module/widget.hpp"
+#include <aml/signals/signals.hpp>
 
-namespace twf {
+namespace cppurses {
 
 class Push_button : public Widget {
    public:
@@ -24,5 +24,5 @@ class Push_button : public Widget {
    private:
     Glyph_string title_;
 };
-}  // namespace twf
+}  // namespace cppurses
 #endif  // WIDGET_MODULE_WIDGETS_PUSH_BUTTON_HPP

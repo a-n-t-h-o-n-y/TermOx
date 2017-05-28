@@ -3,7 +3,7 @@
 
 #include "widget_module/widget.hpp"
 
-namespace twf {
+namespace cppurses {
 class Paint_event;
 
 // Base class for Layouts
@@ -17,5 +17,5 @@ class Layout : public Widget {
     bool too_small_{false};
 };
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // WIDGET_MODULE_LAYOUT_HPP

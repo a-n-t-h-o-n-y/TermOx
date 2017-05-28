@@ -11,7 +11,7 @@
 #include <utility>
 #include <vector>
 
-namespace twf {
+namespace cppurses {
 
 class Event;
 class Child_event;
@@ -112,5 +112,5 @@ class Object {
     bool valid_ = true;
 };
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // SYSTEM_MODULE_OBJECT_HPP

@@ -3,12 +3,12 @@
 
 #include "system_module/event.hpp"
 
-namespace twf {
+namespace cppurses {
 
 class Paint_event : public Event {
    public:
     Paint_event() : Event{Event::Paint} {}
 };
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // SYSTEM_MODULE_EVENTS_PAINT_EVENT_HPP

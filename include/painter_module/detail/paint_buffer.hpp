@@ -4,7 +4,7 @@
 #include "painter_module/glyph_matrix.hpp"
 #include <cstddef>
 
-namespace twf {
+namespace cppurses {
 namespace detail {
 
 class Paint_buffer {
@@ -26,5 +26,5 @@ class Paint_buffer {
 };
 
 }  // namespace detail
-}  // namespace twf
+}  // namespace cppurses
 #endif  // PAINTER_MODULE_DETAIL_PAINT_BUFFER_HPP

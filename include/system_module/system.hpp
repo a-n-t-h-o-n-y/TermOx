@@ -9,7 +9,7 @@
 #include <aml/signals/slot.hpp>
 #include <memory>
 
-namespace twf {
+namespace cppurses {
 
 class Widget;
 
@@ -43,6 +43,9 @@ class System : public Object {
     static void set_palette(std::unique_ptr<Palette> palette);
     static Palette* palette();
     static void set_head(Object* obj);
+    void handle_ctrl_characters(bool enable) {
+        this->paint_engine()->set_ctrl_char(enable);
+    }
 
     int run();
 
@@ -59,5 +62,5 @@ class System : public Object {
     static bool notify_helper(Object* obj, const Event& event);
 };
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // SYSTEM_MODULE_SYSTEM_HPP

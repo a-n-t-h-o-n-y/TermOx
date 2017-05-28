@@ -9,7 +9,7 @@
 #include <utility>
 #include <vector>
 
-namespace twf {
+namespace cppurses {
 
 class Brush {
    public:
@@ -62,5 +62,5 @@ class Brush {
     opt::Optional<Color> foreground_color_;
 };
 
-}  // namespace twf
+}  // namespace cppurses
 #endif  // PAINTER_MODULE_BRUSH_HPP

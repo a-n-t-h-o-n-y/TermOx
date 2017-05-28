@@ -5,7 +5,7 @@
 #include "system_module/object.hpp"
 #include <memory>
 
-namespace twf {
+namespace cppurses {
 namespace detail {
 
 class Posted_event {
@@ -38,5 +38,5 @@ bool operator>(const Posted_event& pe, int priority);
 bool operator==(const Posted_event& x, const Posted_event& y);
 
 }  // namespace detail
-}  // namespace twf
+}  // namespace cppurses
 #endif  // SYSTEM_MODULE_DETAIL_POSTED_EVENT_HPP

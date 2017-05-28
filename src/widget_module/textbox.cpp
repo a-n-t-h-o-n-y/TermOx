@@ -3,27 +3,27 @@
 #include "system_module/events/key_event.hpp"
 #include "system_module/events/mouse_event.hpp"
 #include "system_module/key.hpp"
-#include "widget_module/coordinate.hpp"
+#include "widget_module/coordinates.hpp"
 #include "widget_module/focus_policy.hpp"
 #include <iterator>
 #include <utility>
 #include <cstddef>
 
-namespace twf {
+namespace cppurses {
 
 Textbox::Textbox(Glyph_string contents) : Textbox_base{std::move(contents)} {
     this->set_focus_policy(Focus_policy::Strong);
 }
 
-void Textbox::enable_scroll_wheel(bool enable) {
+void Textbox::enable_scrollwheel(bool enable) {
     scroll_wheel_ = enable;
 }
 
-void Textbox::disable_scroll_wheel(bool disable) {
+void Textbox::disable_scrollwheel(bool disable) {
     scroll_wheel_ = !disable;
 }
 
-bool Textbox::does_scroll_wheel() const {
+bool Textbox::does_scrollwheel() const {
     return scroll_wheel_;
 }
 
@@ -112,4 +112,4 @@ bool Textbox::mouse_press_event(const Mouse_event& event) {
     return true;
 }
 
-}  // namespace twf
+}  // namespace cppurses
