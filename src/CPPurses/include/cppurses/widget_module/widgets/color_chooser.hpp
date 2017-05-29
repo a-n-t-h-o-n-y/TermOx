@@ -5,7 +5,7 @@
 #include "widget_module/widgets/push_button.hpp"
 #include "widget_module/layouts/vertical_layout.hpp"
 #include "widget_module/layouts/horizontal_layout.hpp"
-#include <aml/signals/signals.hpp>
+#include <signals/signals.hpp>
 
 namespace cppurses {
 

@@ -4,7 +4,7 @@
 #include "painter_module/glyph_string.hpp"
 #include "widget_module/coordinates.hpp"
 #include "widget_module/widgets/text_display.hpp"
-#include <aml/signals/signals.hpp>
+#include <signals/signals.hpp>
 #include <cstddef>
 
 namespace cppurses {

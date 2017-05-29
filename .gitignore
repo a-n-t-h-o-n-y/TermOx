@@ -1,15 +1,9 @@
-bin/*
 build/*
-docs/html/
-lib/*
+src/CPPurses/docs/html/
 notes
 tags
-
 *.[ao]
 *.so
 *.out
-*.sublime-project
-*.sublime-workspace
 *.json
 *.vim
-tags

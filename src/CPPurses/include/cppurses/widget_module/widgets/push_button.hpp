@@ -5,7 +5,7 @@
 #include "system_module/events/mouse_event.hpp"
 #include "system_module/events/paint_event.hpp"
 #include "widget_module/widget.hpp"
-#include <aml/signals/signals.hpp>
+#include <signals/signals.hpp>
 
 namespace cppurses {
 

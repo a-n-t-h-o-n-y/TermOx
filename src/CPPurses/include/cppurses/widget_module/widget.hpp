@@ -12,7 +12,7 @@
 #include "widget_module/border.hpp"
 #include "widget_module/coordinates.hpp"
 #include "widget_module/focus_policy.hpp"
-#include <aml/signals/signals.hpp>
+#include <signals/signals.hpp>
 #include <cstddef>
 #include <memory>
 #include <utility>

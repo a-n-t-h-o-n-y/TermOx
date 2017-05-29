@@ -10,7 +10,7 @@
 #include "system_module/events/paint_event.hpp"
 #include "widget_module/widget.hpp"
 #include "widget_module/focus_policy.hpp"
-#include <aml/signals/signals.hpp>
+#include <signals/signals.hpp>
 #include <algorithm>
 #include <iterator>
 #include <memory>
