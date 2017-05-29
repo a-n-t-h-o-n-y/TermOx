@@ -1,14 +1,14 @@
-#ifndef FOCUS_EVENT_HPP
-#define FOCUS_EVENT_HPP
+#ifndef SYSTEM_MODULE_EVENTS_FOCUS_EVENT_HPP
+#define SYSTEM_MODULE_EVENTS_FOCUS_EVENT_HPP
 
-#include "../event.hpp"
+#include "system_module/event.hpp"
 
-namespace twf {
+namespace cppurses {
 
 class Focus_event : public Event {
    public:
     explicit Focus_event(Event::Type type) : Event{type} {}
 };
 
-}  // namespace twf
-#endif  // FOCUS_EVENT_HPP
+}  // namespace cppurses
+#endif  // SYSTEM_MODULE_EVENTS_FOCUS_EVENT_HPP

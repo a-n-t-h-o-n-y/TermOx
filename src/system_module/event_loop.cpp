@@ -1,21 +1,17 @@
-#include <painter_module/paint_engine.hpp>
-#include <system_module/detail/thread_data.hpp>
-#include <system_module/event_loop.hpp>
+#include "system_module/event_loop.hpp"
+#include "system_module/detail/thread_data.hpp"
 
-namespace twf {
+namespace cppurses {
 
 int Event_loop::run() {
     auto& data = detail::Thread_data::current();
     data.event_loops.push_back(this);
     ++data.loop_level;
-
     while (!exit_) {
         this->process_events();
     }
-
     data.event_loops.pop_back();
     --data.loop_level;
-
     return return_code_;
 }
 
@@ -30,4 +26,4 @@ bool Event_loop::process_events() {
     return data.dispatcher().process_events();
 }
 
-}  // namespace twf
+}  // namespace cppurses

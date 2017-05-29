@@ -1,35 +1,13 @@
-#include <painter_module/paint_engine.hpp>
+#include "painter_module/paint_engine.hpp"
+#include "painter_module/glyph.hpp"
+#include "system_module/system.hpp"
+#include "widget_module/widget.hpp"
+#include <cstddef>
 
-namespace twf {
+namespace cppurses {
 
-void Paint_engine::put(unsigned x, unsigned y, const Glyph& g) {
+void Paint_engine::put(std::size_t x, std::size_t y, const Glyph& g) {
     buffer_.stage(x, y, g);
-}
-
-// probably no need for this now.
-// void Paint_engine::clear(unsigned x, unsigned y) {
-//     buffer_.stage(x, y, " ");
-//     buffer_.commit(x, y);
-//     this->move(x, y);
-//     this->put_glyph(" ");
-//     this->move(x, y);
-//     this->refresh();
-// }
-
-void Paint_engine::flush(bool optimize) {
-    for (int j{0}; j < buffer_.height(); ++j) {
-        for (int i{0}; i < buffer_.width(); ++i) {
-            if (buffer_.commit(i, j) || !optimize) {
-                this->move(i, j);
-                this->put_glyph(buffer_.at(i, j));
-            }
-        }
-    }
-    if (!optimize) {
-        this->touch_all();
-    }
-    this->move(buffer_.cursor_position.x, buffer_.cursor_position.y);
-    this->refresh();
 }
 
 void Paint_engine::put_glyph(const Glyph& g) {
@@ -46,4 +24,34 @@ void Paint_engine::put_glyph(const Glyph& g) {
     this->clear_attributes();
 }
 
-}  // namespace twf
+void Paint_engine::flush(bool optimize) {
+    for (std::size_t j{0}; j < buffer_.height(); ++j) {
+        for (std::size_t i{0}; i < buffer_.width(); ++i) {
+            if (buffer_.commit(i, j) || !optimize) {
+                this->move(i, j);
+                this->put_glyph(buffer_.at(i, j));
+            }
+        }
+    }
+    // Forces redraw of the entire screen.
+    if (!optimize) {
+        this->touch_all();
+    }
+    // Set cursor
+    auto* focus_widg = System::focus_widget();
+    if (focus_widg != nullptr) {
+        this->show_cursor(focus_widg->cursor());
+        if (focus_widg->cursor()) {
+            auto x = focus_widg->x() + focus_widg->cursor_x() +
+                     west_border_offset(focus_widg->border());
+            auto y = focus_widg->y() + focus_widg->cursor_y() +
+                     north_border_offset(focus_widg->border());
+            this->move(x, y);
+        }
+    } else {
+        this->hide_cursor();
+    }
+    this->refresh();
+}
+
+}  // namespace cppurses

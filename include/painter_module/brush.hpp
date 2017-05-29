@@ -1,17 +1,15 @@
-#ifndef BRUSH_HPP
-#define BRUSH_HPP
+#ifndef PAINTER_MODULE_BRUSH_HPP
+#define PAINTER_MODULE_BRUSH_HPP
 
-#include "attribute.hpp"
-#include "color.hpp"
-
+#include "painter_module/attribute.hpp"
+#include "painter_module/color.hpp"
 #include <aml/optional/optional.hpp>
-
 #include <algorithm>
+#include <bitset>
 #include <utility>
 #include <vector>
-#include <bitset>
 
-namespace twf {
+namespace cppurses {
 
 class Brush {
    public:
@@ -20,15 +18,15 @@ class Brush {
         this->add_attributes(std::forward<Attributes>(attrs)...);
     }
 
-    // Recursive Case
-    template <typename T, typename... Rest>
-    void add_attributes(T t, Rest... rest) {
-        this->set_attr(t);
-        this->add_attributes(rest...);
-    }
-
     // Base Case
     void add_attributes() {}
+
+    // Recursive Case
+    template <typename T, typename... Others>
+    void add_attributes(T attr, Others... others) {
+        this->set_attr(attr);
+        this->add_attributes(others...);
+    }
 
     void remove_attribute(Attribute attr);
     void clear_attributes() { attributes_.reset(); }
@@ -46,7 +44,7 @@ class Brush {
     }
     opt::Optional<Color>& foreground_color() { return foreground_color_; }
 
-    friend bool operator==(const Brush& a, const Brush& b);
+    friend bool operator==(const Brush& lhs, const Brush& rhs);
 
    private:
     void set_attr(detail::BackgroundColor bc) {
@@ -64,5 +62,5 @@ class Brush {
     opt::Optional<Color> foreground_color_;
 };
 
-}  // namespace twf
-#endif  // BRUSH_HPP
+}  // namespace cppurses
+#endif  // PAINTER_MODULE_BRUSH_HPP

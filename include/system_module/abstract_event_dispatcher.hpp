@@ -1,12 +1,9 @@
-#ifndef ABSTRACT_EVENT_DISPATCHER_HPP
-#define ABSTRACT_EVENT_DISPATCHER_HPP
+#ifndef SYSTEM_MODULE_ABSTRACT_EVENT_DISPATCHER_HPP
+#define SYSTEM_MODULE_ABSTRACT_EVENT_DISPATCHER_HPP
 
-#include "event.hpp"
-#include "object.hpp"
+#include "system_module/object.hpp"
 
-#include <memory>
-
-namespace twf {
+namespace cppurses {
 
 class Abstract_event_dispatcher : public Object {
    public:
@@ -15,8 +12,8 @@ class Abstract_event_dispatcher : public Object {
 
    protected:
     virtual void post_user_input() = 0;
-    bool interrupt_ = false;
+    bool interrupt_{false};
 };
 
-}  // namespace twf
-#endif  // ABSTRACT_EVENT_DISPATCHER_HPP
+}  // namespace cppurses
+#endif  // SYSTEM_MODULE_ABSTRACT_EVENT_DISPATCHER_HPP

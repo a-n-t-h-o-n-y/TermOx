@@ -1,10 +1,9 @@
-#include <painter_module/attribute.hpp>
-#include <painter_module/brush.hpp>
-
+#include "painter_module/brush.hpp"
+#include "painter_module/attribute.hpp"
 #include <cstdint>
 #include <vector>
 
-namespace twf {
+namespace cppurses {
 
 void Brush::remove_attribute(Attribute attr) {
     attributes_.set(static_cast<std::int8_t>(attr), false);
@@ -25,10 +24,10 @@ void Brush::set_attr(Attribute attr) {
     attributes_.set(static_cast<std::int8_t>(attr));
 }
 
-bool operator==(const Brush& a, const Brush& b) {
-    return (a.attributes_ == b.attributes_ &&
-            a.background_color_ == b.background_color_ &&
-            a.foreground_color_ == b.foreground_color_);
+bool operator==(const Brush& lhs, const Brush& rhs) {
+    return (lhs.attributes_ == rhs.attributes_ &&
+            lhs.background_color_ == rhs.background_color_ &&
+            lhs.foreground_color_ == rhs.foreground_color_);
 }
 
-}  // namespace twf
+}  // namespace cppurses

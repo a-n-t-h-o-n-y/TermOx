@@ -1,12 +1,12 @@
-#ifndef HORIZONTAL_SCROLLBAR
-#define HORIZONTAL_SCROLLBAR
+#ifndef WIDGET_MODULE_WIDGETS_HORIZONTAL_SCROLLBAR
+#define WIDGET_MODULE_WIDGETS_HORIZONTAL_SCROLLBAR
 
+#include "widget_module/layouts/horizontal_layout.hpp"
+#include "widget_module/widget.hpp"
+#include "widget_module/widgets/push_button.hpp"
 #include <aml/signals/signals.hpp>
 
-#include "../layouts/horizontal_layout.hpp"
-#include "push_button.hpp"
-
-namespace twf {
+namespace cppurses {
 
 class Horizontal_scrollbar : public Horizontal_layout {
    public:
@@ -21,6 +21,6 @@ class Horizontal_scrollbar : public Horizontal_layout {
     sig::Signal<void()>& right = right_button.clicked;
 };
 
-}  // namespace twf;
+}  // namespace cppurses;
 
-#endif  // HORIZONTAL_SCROLLBAR
+#endif  // WIDGET_MODULE_WIDGETS_HORIZONTAL_SCROLLBAR

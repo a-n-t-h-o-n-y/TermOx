@@ -1,9 +1,9 @@
-#ifndef SIZE_POLICY
-#define SIZE_POLICY
+#ifndef WIDGET_MODULE_SIZE_POLICY_HPP
+#define WIDGET_MODULE_SIZE_POLICY_HPP
 
 #include <cstddef>
 
-namespace twf {
+namespace cppurses {
 
 struct Size_policy {
     enum Policy {
@@ -18,13 +18,16 @@ struct Size_policy {
 
     Policy horizontal_policy = Ignored;
     Policy vertical_policy = Ignored;
+
     /// 0 value for stretch factors is undefined behavior
     std::size_t horizontal_stretch = 1;
+
     /// 0 value for stretch factors is undefined behavior
     std::size_t vertical_stretch = 1;
-    bool height_for_width = false; // essentially fixed, nothing in width policy matters
-    bool width_for_height = false; // you can only check for one on hori/vert layouts otherwise recursive loop
+
+    bool height_for_width = false;
+    bool width_for_height = false;
 };
 
-}  // namespace twf
-#endif  // SIZE_POLICY
+}  // namespace cppurses
+#endif  // WIDGET_MODULE_SIZE_POLICY_HPP

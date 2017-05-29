@@ -1,23 +1,28 @@
-#ifndef SYSTEM_HPP
-#define SYSTEM_HPP
+#ifndef SYSTEM_MODULE_SYSTEM_HPP
+#define SYSTEM_MODULE_SYSTEM_HPP
 
-#include "event.hpp"
-#include "object.hpp"
-
-#include <painter_module/detail/ncurses_paint_engine.hpp>
-#include <painter_module/paint_engine.hpp>
-#include <painter_module/palette.hpp>
-
+#include "system_module/event.hpp"
+#include "system_module/object.hpp"
+#include "painter_module/detail/ncurses_paint_engine.hpp"
+#include "painter_module/paint_engine.hpp"
+#include "painter_module/palette.hpp"
 #include <aml/signals/slot.hpp>
-
 #include <memory>
 
-namespace twf {
+namespace cppurses {
 
 class Widget;
 
 class System : public Object {
    public:
+    explicit System(std::unique_ptr<Paint_engine> engine =
+                        std::make_unique<detail::NCurses_paint_engine>());
+    System(const System&) = delete;
+    System& operator=(const System&) = delete;
+    System(System&&) noexcept = default;             // NOLINT
+    System& operator=(System&&) noexcept = default;  // NOLINT
+    ~System() override;
+
     static void post_event(Object* obj,
                            std::unique_ptr<Event> event,
                            int priority = 0);
@@ -33,20 +38,19 @@ class System : public Object {
     static Paint_engine* paint_engine();
     static void set_paint_engine(std::unique_ptr<Paint_engine> engine);
     static Widget* focus_widget();
-    static void set_focus_widget(Widget* widg);
+    static void set_focus_widget(Widget* widg, bool clear_focus = true);
     static void cycle_tab_focus();
     static void set_palette(std::unique_ptr<Palette> palette);
     static Palette* palette();
-
-    explicit System(std::unique_ptr<Paint_engine> engine =
-                        std::make_unique<detail::NCurses_paint_engine>());
-    ~System() override;
-
     static void set_head(Object* obj);
+    void handle_ctrl_characters(bool enable) {
+        this->paint_engine()->set_ctrl_char(enable);
+    }
+
     int run();
 
     // Slots
-    sig::Slot<void()> quit = []() { System::exit(); };
+    static sig::Slot<void()> quit;
 
     friend class Abstract_event_dispatcher;
 
@@ -58,5 +62,5 @@ class System : public Object {
     static bool notify_helper(Object* obj, const Event& event);
 };
 
-}  // namespace twf
-#endif  // SYSTEM_HPP
+}  // namespace cppurses
+#endif  // SYSTEM_MODULE_SYSTEM_HPP

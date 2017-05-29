@@ -1,11 +1,10 @@
-#ifndef BORDER_HPP
-#define BORDER_HPP
+#ifndef WIDGET_MODULE_BORDER_HPP
+#define WIDGET_MODULE_BORDER_HPP
 
-#include <painter_module/glyph.hpp>
-
+#include "painter_module/glyph.hpp"
 #include <cstddef>
 
-namespace twf {
+namespace cppurses {
 class Widget;
 
 class Border {
@@ -87,5 +86,10 @@ class Border {
     bool south_east_enabled_ = true;
 };
 
-}  // namespace twf
-#endif  // BORDER_HPP
+std::size_t west_border_offset(const Border& b);
+std::size_t east_border_offset(const Border& b);
+std::size_t north_border_offset(const Border& b);
+std::size_t south_border_offset(const Border& b);
+
+}  // namespace cppurses
+#endif  // WIDGET_MODULE_BORDER_HPP

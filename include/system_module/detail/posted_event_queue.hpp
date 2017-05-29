@@ -1,25 +1,23 @@
-#ifndef POSTED_EVENT_QUEUE_HPP
-#define POSTED_EVENT_QUEUE_HPP
+#ifndef SYSTEM_MODULE_DETAIL_POSTED_EVENT_QUEUE_HPP
+#define SYSTEM_MODULE_DETAIL_POSTED_EVENT_QUEUE_HPP
 
-#include "posted_event.hpp"
-
+#include "system_module/detail/posted_event.hpp"
 #include <functional>
 #include <set>
 
-namespace twf {
+namespace cppurses {
 namespace detail {
 
-class Posted_event_queue
-    : public std::multiset<Posted_event, std::greater<Posted_event>> {
+class Posted_event_queue : public std::multiset<Posted_event, std::greater<>> {
    public:
-    void add_event(Posted_event ev);
+    void add_event(Posted_event pe);
 
    private:
-    using std::multiset<Posted_event, std::greater<Posted_event>>::emplace;
-    using std::multiset<Posted_event, std::greater<Posted_event>>::emplace_hint;
-    using std::multiset<Posted_event, std::greater<Posted_event>>::insert;
+    using std::multiset<Posted_event, std::greater<>>::emplace;
+    using std::multiset<Posted_event, std::greater<>>::emplace_hint;
+    using std::multiset<Posted_event, std::greater<>>::insert;
 };
 
 }  // namespace detail
-}  // namespace twf
-#endif  // POSTED_EVENT_QUEUE_HPP
+}  // namespace cppurses
+#endif  // SYSTEM_MODULE_DETAIL_POSTED_EVENT_QUEUE_HPP

@@ -9,12 +9,12 @@
 #include <string>
 #include <utility>
 
-using twf::Object;
-using twf::System;
-using twf::Widget;
-using twf::Event_loop;
-using twf::Event;
-using twf::Child_event;
+using cppurses::Object;
+using cppurses::System;
+using cppurses::Widget;
+using cppurses::Event_loop;
+using cppurses::Event;
+using cppurses::Child_event;
 
 TEST(ObjectTest, DefaultConstructor) {
     System system;
@@ -58,7 +58,7 @@ TEST(ObjectTest, MakeChild) {
     child.set_y(0);
     child.geometry().set_width(5);
     child.geometry().set_height(5);
-    EXPECT_TRUE(obj.make_child<Test_widg>().has_coordinates(7, 12));
+    obj.make_child<Test_widg>();
 
     EXPECT_EQ(2, obj.children().size());
 }
@@ -80,8 +80,7 @@ TEST(ObjectTest, Children) {
     auto children = obj.children();
     ASSERT_EQ(3, children.size());
     EXPECT_TRUE(children[0]->enabled());
-    EXPECT_FALSE(children[1]->has_coordinates(8, 13));
-    EXPECT_TRUE(children[1]->has_coordinates(40, 42));
+    EXPECT_TRUE(children[1]->enabled());
     EXPECT_TRUE(children[2]->enabled());
 }
 
@@ -226,15 +225,19 @@ TEST(ObjectTest, ConstFindChild) {
     EXPECT_EQ(&c1_c2, obj_const.find_child<const Widget>("Child 1 - Child 2"));
     EXPECT_EQ(&c1_c3,
               obj_const.find_child<const Event_loop>("Child 1 - Child 3"));
-    EXPECT_EQ(nullptr, obj_const.find_child<const Widget>(
-                           "Child 1 - Child 3 - Child 1"));
-    EXPECT_EQ(&c1_c3_c1, obj_const.find_child<const Object>(
-                             "Child 1 - Child 3 - Child 1"));
+    EXPECT_EQ(
+        nullptr,
+        obj_const.find_child<const Widget>("Child 1 - Child 3 - Child 1"));
+    EXPECT_EQ(
+        &c1_c3_c1,
+        obj_const.find_child<const Object>("Child 1 - Child 3 - Child 1"));
     EXPECT_EQ(&c2_c1, obj_const.find_child<const Widget>("Child 2 - Child 1"));
-    EXPECT_EQ(&c2_c1_c1, obj_const.find_child<const Object>(
-                             "Child 2 - Child 1 - Child 1"));
-    EXPECT_EQ(nullptr, obj_const.find_child<const Widget>(
-                           "Child 2 - Child 1 - Child 1"));
+    EXPECT_EQ(
+        &c2_c1_c1,
+        obj_const.find_child<const Object>("Child 2 - Child 1 - Child 1"));
+    EXPECT_EQ(
+        nullptr,
+        obj_const.find_child<const Widget>("Child 2 - Child 1 - Child 1"));
 }
 
 int glob_test_int{0};

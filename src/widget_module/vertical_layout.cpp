@@ -1,19 +1,18 @@
-#include <widget_module/layouts/vertical_layout.hpp>
+#include "widget_module/layouts/vertical_layout.hpp"
 
+#include "painter_module/geometry.hpp"
+#include "system_module/events/move_event.hpp"
+#include "system_module/events/resize_event.hpp"
+#include "system_module/system.hpp"
+#include "widget_module/border.hpp"
+#include "widget_module/size_policy.hpp"
 #include <cstddef>
-#include <vector>
 #include <deque>
-#include <tuple>
 #include <functional>
+#include <tuple>
+#include <vector>
 
-#include <system_module/events/move_event.hpp>
-#include <system_module/events/resize_event.hpp>
-#include <system_module/system.hpp>
-#include <widget_module/border.hpp>
-#include <widget_module/size_policy.hpp>
-#include <painter_module/geometry.hpp>
-
-namespace twf {
+namespace cppurses {
 
 std::vector<std::size_t> Vertical_layout::size_widgets() {
     // <Widget*, width, height>
@@ -22,7 +21,7 @@ std::vector<std::size_t> Vertical_layout::size_widgets() {
     for (Object* c : this->children()) {
         Widget* w{dynamic_cast<Widget*>(c)};
         if (w != nullptr) {
-            widgets.push_back(std::make_tuple(w, 0, 0));
+            widgets.emplace_back(std::make_tuple(w, 0, 0));
             total_stretch += w->geometry().size_policy().vertical_stretch;
         }
     }
@@ -80,7 +79,7 @@ std::vector<std::size_t> Vertical_layout::size_widgets() {
                            std::reference_wrapper<std::size_t>>>
         widgets_w_refs;
     for (auto& tup : widgets) {
-        widgets_w_refs.push_back(
+        widgets_w_refs.emplace_back(
             std::tie(std::get<0>(tup), std::get<1>(tup), std::get<2>(tup)));
     }
     // If space left, fill in expanding and min_expanding, then if still,
@@ -186,7 +185,7 @@ void Vertical_layout::distribute_space(
                 to_distribute);
             if ((std::get<2>(tup).get() + height_additions.back()) >
                 std::get<0>(tup)->geometry().max_height()) {
-                height_left -= std::get<0>(tup)->geometry().max_height() -
+                height_left += std::get<0>(tup)->geometry().max_height() -
                                std::get<2>(tup);
                 std::get<2>(tup).get() =
                     std::get<0>(tup)->geometry().max_height();
@@ -271,7 +270,7 @@ void Vertical_layout::distribute_space(
     }
     // Rounding error extra
     // First Group
-    auto height_check{height_left};
+    auto height_check{0};
     do {
         height_check = height_left;
         for (auto& tup : widgets) {
@@ -357,16 +356,14 @@ void Vertical_layout::collect_space(
             policy == Size_policy::Preferred ||
             policy == Size_policy::Ignored) {
             height_deductions.push_back(
-                ((1 / (std::get<0>(tup)
-                           ->geometry()
-                           .size_policy()
-                           .horizontal_stretch /
-                       static_cast<double>(total_stretch))) /
+                ((1 /
+                  (std::get<0>(tup)->geometry().size_policy().vertical_stretch /
+                   static_cast<double>(total_stretch))) /
                  static_cast<double>(total_inverse)) *
                 (to_collect * -1));
             if ((std::get<2>(tup).get() - height_deductions.back()) <
                 std::get<0>(tup)->geometry().min_height()) {
-                height_left += std::get<2>(tup).get() -
+                height_left -= std::get<2>(tup).get() -
                                std::get<0>(tup)->geometry().min_height();
                 std::get<2>(tup).get() =
                     std::get<0>(tup)->geometry().min_height();
@@ -385,7 +382,11 @@ void Vertical_layout::collect_space(
         if (policy == Size_policy::Maximum ||
             policy == Size_policy::Preferred ||
             policy == Size_policy::Ignored) {
-            std::get<2>(tup).get() -= height_deductions.front();
+            if (std::get<2>(tup).get() >= height_deductions.front()) {
+                std::get<2>(tup).get() -= height_deductions.front();
+            } else {
+                std::get<2>(tup).get() = 0;
+            }
             height_left += height_deductions.front();
             height_deductions.pop_front();
         }
@@ -398,7 +399,8 @@ void Vertical_layout::collect_space(
     // Find total stretch
     total_stretch = 0;
     for (const auto& tup : widgets) {
-        auto policy = std::get<0>(tup)->geometry().size_policy().vertical_policy;
+        auto policy =
+            std::get<0>(tup)->geometry().size_policy().vertical_policy;
         if (policy == Size_policy::Expanding) {
             total_stretch +=
                 std::get<0>(tup)->geometry().size_policy().vertical_stretch;
@@ -454,7 +456,11 @@ void Vertical_layout::collect_space(
         auto policy =
             std::get<0>(tup)->geometry().size_policy().vertical_policy;
         if (policy == Size_policy::Expanding) {
-            std::get<2>(tup).get() -= height_deductions.front();
+            if (std::get<2>(tup).get() >= height_deductions.front()) {
+                std::get<2>(tup).get() -= height_deductions.front();
+            } else {
+                std::get<2>(tup).get() = 0;
+            }
             height_left += height_deductions.front();
             height_deductions.pop_front();
         }
@@ -475,28 +481,17 @@ void Vertical_layout::position_widgets(
             widgets.push_back(w);
         }
     }
-    std::size_t x_pos{0};
-    std::size_t y_pos{0};
-    std::size_t index{0};
     if (widgets.size() != heights.size()) {
         return;
     }
-    if ((this->border().west_enabled() || this->border().north_west_enabled() ||
-         this->border().south_west_enabled()) &&
-        this->border().enabled()) {
-        ++x_pos;
-    }
-    if ((this->border().north_enabled() ||
-         this->border().north_west_enabled() ||
-         this->border().north_east_enabled()) &&
-        this->border().enabled()) {
-        ++y_pos;
-    }
+    std::size_t y_pos = north_border_offset(this->border());
+    std::size_t index{0};
     for (auto& widg : widgets) {
-        System::post_event(widg, std::make_unique<Move_event>(
-                                     this->x() + x_pos, this->y() + y_pos));
-        y_pos += heights.at(index);
-        ++index;
+        System::post_event(widg,
+                           std::make_unique<Move_event>(
+                               this->x() + west_border_offset(this->border()),
+                               this->y() + y_pos));
+        y_pos += heights.at(index++);
     }
 }
 
@@ -505,97 +500,4 @@ void Vertical_layout::update_geometry() {
     this->position_widgets(heights);
 }
 
-// void Vertical_layout::update_geometry() {
-//     std::size_t border_space{0};
-//     std::size_t total_stretch{0};
-//     for (const Object* c : this->children()) {
-//         const Widget* cw{dynamic_cast<const Widget*>(c)};
-//         if (cw != nullptr) {
-//             // Border space
-//             if ((cw->border().north_enabled() ||
-//                  cw->border().north_west_enabled() ||
-//                  cw->border().north_east_enabled()) &&
-//                 cw->border().enabled()) {
-//                 ++border_space;
-//             }
-//             if ((cw->border().south_enabled() ||
-//                  cw->border().south_west_enabled() ||
-//                  cw->border().south_east_enabled()) &&
-//                 cw->border().enabled()) {
-//                 ++border_space;
-//             }
-//             // Stretch factor
-//             total_stretch += cw->size_policy().vertical_stretch;
-//         }
-//     }
-//     std::size_t widg_space{0};
-//     if (this->geometry().height() < border_space) {
-//         widg_space = 0;
-//     } else {
-//         widg_space = this->geometry().height() - border_space;
-//     }
-
-//     std::size_t y_pos{0};
-//     for (Object* c : this->children()) {
-//         Widget* cw{dynamic_cast<Widget*>(c)};
-//         if (cw != nullptr) {
-//             // Position
-//             if ((cw->border().north_enabled() ||
-//                  cw->border().north_west_enabled() ||
-//                  cw->border().north_east_enabled()) &&
-//                 cw->border().enabled()) {
-//                 ++y_pos;
-//             }
-//             std::size_t x_pos{0};
-//             if ((cw->border().west_enabled() ||
-//                  cw->border().north_west_enabled() ||
-//                  cw->border().south_west_enabled()) &&
-//                 cw->border().enabled()) {
-//                 ++x_pos;
-//             }
-//             // Size
-//             if (total_stretch == 0) {
-//                 total_stretch = this->children().size();
-//             }
-//             std::size_t height =
-//                 widg_space *
-//                 (cw->size_policy().vertical_stretch / double(total_stretch));
-//             std::size_t width{this->geometry().width()};
-//             if ((cw->border().west_enabled() ||
-//                  cw->border().north_west_enabled() ||
-//                  cw->border().south_west_enabled()) &&
-//                 cw->border().enabled() && width != 0) {
-//                 --width;
-//             }
-//             if ((cw->border().east_enabled() ||
-//                  cw->border().north_east_enabled() ||
-//                  cw->border().south_east_enabled()) &&
-//                 cw->border().enabled() && width != 0) {
-//                 --width;
-//             }
-//             System::post_event(cw,
-//                                std::make_unique<Resize_event>(width,
-//                                height));
-//             System::post_event(cw, std::make_unique<Move_event>(
-//                                        this->x() + x_pos, this->y() +
-//                                        y_pos));
-//             y_pos += height;
-//             if ((cw->border().south_enabled() ||
-//                  cw->border().south_west_enabled() ||
-//                  cw->border().south_east_enabled()) &&
-//                 cw->border().enabled()) {
-//                 ++y_pos;
-//             }
-//             // if last widget, extend to rest of layout
-//             if (c == *(--std::end(this->children())) &&
-//                 this->geometry().height() > y_pos) {
-//                 System::post_event(
-//                     cw, std::make_unique<Resize_event>(
-//                             width, height + this->geometry().height() -
-//                             y_pos));
-//             }
-//         }
-//     }
-// }
-
-}  // namespace twf
+}  // namespace cppurses

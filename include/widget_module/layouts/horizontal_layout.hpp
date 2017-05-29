@@ -1,13 +1,13 @@
-#ifndef HORIZONTAL_LAYOUT_HPP
-#define HORIZONTAL_LAYOUT_HPP
+#ifndef WIDGET_MODULE_LAYOUTS_HORIZONTAL_LAYOUT_HPP
+#define WIDGET_MODULE_LAYOUTS_HORIZONTAL_LAYOUT_HPP
 
+#include "widget_module/layout.hpp"
 #include <cstddef>
-#include <vector>
 #include <functional>
 #include <tuple>
-#include "../layout.hpp"
+#include <vector>
 
-namespace twf {
+namespace cppurses {
 class Widget;
 
 class Horizontal_layout : public Layout {
@@ -31,5 +31,5 @@ class Horizontal_layout : public Layout {
         int width_left);
 };
 
-}  // namespace twf
-#endif  // HORIZONTAL_LAYOUT_HPP
+}  // namespace cppurses
+#endif  // WIDGET_MODULE_LAYOUTS_HORIZONTAL_LAYOUT_HPP

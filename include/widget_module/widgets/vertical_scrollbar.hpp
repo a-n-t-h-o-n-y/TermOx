@@ -1,12 +1,12 @@
-#ifndef VERTICAL_SCROLLBAR_HPP
-#define VERTICAL_SCROLLBAR_HPP
+#ifndef WIDGET_MODULE_WIDGETS_VERTICAL_SCROLLBAR_HPP
+#define WIDGET_MODULE_WIDGETS_VERTICAL_SCROLLBAR_HPP
 
+#include "widget_module/layouts/vertical_layout.hpp"
+#include "widget_module/widget.hpp"
+#include "widget_module/widgets/push_button.hpp"
 #include <aml/signals/signals.hpp>
 
-#include "../layouts/vertical_layout.hpp"
-#include "push_button.hpp"
-
-namespace twf {
+namespace cppurses {
 
 class Vertical_scrollbar : public Vertical_layout {
    public:
@@ -21,5 +21,5 @@ class Vertical_scrollbar : public Vertical_layout {
     sig::Signal<void()>& down = down_button.clicked;
 };
 
-}  // namespace twf
-#endif  // VERTICAL_SCROLLBAR_HPP
+}  // namespace cppurses
+#endif  // WIDGET_MODULE_WIDGETS_VERTICAL_SCROLLBAR_HPP

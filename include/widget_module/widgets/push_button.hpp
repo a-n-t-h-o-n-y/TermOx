@@ -1,19 +1,22 @@
-#ifndef PUSH_BUTTON_HPP
-#define PUSH_BUTTON_HPP
+#ifndef WIDGET_MODULE_WIDGETS_PUSH_BUTTON_HPP
+#define WIDGET_MODULE_WIDGETS_PUSH_BUTTON_HPP
 
-#include "widget_module/widget.hpp"
+#include "painter_module/glyph_string.hpp"
 #include "system_module/events/mouse_event.hpp"
-#include "painter_module/painter.hpp"
+#include "system_module/events/paint_event.hpp"
+#include "widget_module/widget.hpp"
+#include <aml/signals/signals.hpp>
 
-#include <aml/signals/signal.hpp>
-
-namespace twf {
+namespace cppurses {
 
 class Push_button : public Widget {
    public:
-    Push_button(Glyph_string name = "");
+    explicit Push_button(Glyph_string name = "");
     bool mouse_press_event(const Mouse_event& event) override;
     bool paint_event(const Paint_event& event) override;
+
+    // Slots
+    sig::Slot<void()> click;
 
     // Signals
     sig::Signal<void()> clicked;
@@ -21,5 +24,5 @@ class Push_button : public Widget {
    private:
     Glyph_string title_;
 };
-}  // namespace twf
-#endif  // PUSH_BUTTON_HPP
+}  // namespace cppurses
+#endif  // WIDGET_MODULE_WIDGETS_PUSH_BUTTON_HPP

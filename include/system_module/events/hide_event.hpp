@@ -1,14 +1,14 @@
-#ifndef HIDE_EVENT_HPP
-#define HIDE_EVENT_HPP
+#ifndef SYSTEM_MODULE_EVENTS_HIDE_EVENT_HPP
+#define SYSTEM_MODULE_EVENTS_HIDE_EVENT_HPP
 
-#include "../event.hpp"
+#include "system_module/event.hpp"
 
-namespace twf {
+namespace cppurses {
 
 class Hide_event : public Event {
    public:
-    Hide_event() : Event{Event::Type::Hide} {}
+    Hide_event() : Event{Event::Hide} {}
 };
 
-}  // namespace twf
-#endif  // HIDE_EVENT_HPP
+}  // namespace cppurses
+#endif  // SYSTEM_MODULE_EVENTS_HIDE_EVENT_HPP

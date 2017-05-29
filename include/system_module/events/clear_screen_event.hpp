@@ -1,14 +1,14 @@
-#ifndef CLEAR_SCREEN_EVENT_HPP
-#define CLEAR_SCREEN_EVENT_HPP
+#ifndef SYSTEM_MODULE_EVENTS_CLEAR_SCREEN_EVENT_HPP
+#define SYSTEM_MODULE_EVENTS_CLEAR_SCREEN_EVENT_HPP
 
-#include "../event.hpp"
+#include "system_module/event.hpp"
 
-namespace twf {
+namespace cppurses {
 
 class Clear_screen_event : public Event {
    public:
-    Clear_screen_event() : Event{Event::Type::ClearScreen} {}
+    Clear_screen_event() : Event{Event::ClearScreen} {}
 };
 
-}  // namespace twf
-#endif  // CLEAR_SCREEN_EVENT_HPP
+}  // namespace cppurses
+#endif  // SYSTEM_MODULE_EVENTS_CLEAR_SCREEN_EVENT_HPP

@@ -1,19 +1,19 @@
-#ifndef ENABLE_EVENT_HPP
-#define ENABLE_EVENT_HPP
+#ifndef SYSTEM_MODULE_EVENTS_ENABLE_EVENT_HPP
+#define SYSTEM_MODULE_EVENTS_ENABLE_EVENT_HPP
 
-#include "../event.hpp"
+#include "system_module/event.hpp"
 
-namespace twf {
+namespace cppurses {
 
 class Enable_event : public Event {
    public:
     explicit Enable_event(bool enabled)
-        : Event{Event::Type::EnabledChange}, enabled_{enabled} {}
+        : Event{Event::EnabledChange}, enabled_{enabled} {}
     bool is_enabled() const { return enabled_; }
 
    private:
     bool enabled_;
 };
 
-}  // namespace twf
-#endif  // ENABLE_EVENT_HPP
+}  // namespace cppurses
+#endif  // SYSTEM_MODULE_EVENTS_ENABLE_EVENT_HPP

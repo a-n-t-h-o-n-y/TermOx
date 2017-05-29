@@ -1,14 +1,14 @@
-#ifndef SHOW_EVENT_HPP
-#define SHOW_EVENT_HPP
+#ifndef SYSTEM_MODULE_EVENTS_SHOW_EVENT_HPP
+#define SYSTEM_MODULE_EVENTS_SHOW_EVENT_HPP
 
-#include "../event.hpp"
+#include "system_module/event.hpp"
 
-namespace twf {
+namespace cppurses {
 
 class Show_event : public Event {
    public:
-    Show_event() : Event{Event::Type::Show} {}
+    Show_event() : Event{Event::Show} {}
 };
 
-}  // namespace twf
-#endif  // SHOW_EVENT_HPP
+}  // namespace cppurses
+#endif  // SYSTEM_MODULE_EVENTS_SHOW_EVENT_HPP

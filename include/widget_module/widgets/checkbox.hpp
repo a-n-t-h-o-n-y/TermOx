@@ -1,19 +1,23 @@
-#ifndef CHECKBOX_HPP
-#define CHECKBOX_HPP
-
-#include <aml/signals/signals.hpp>
+#ifndef WIDGET_MODULE_WIDGETS_CHECKBOX_HPP
+#define WIDGET_MODULE_WIDGETS_CHECKBOX_HPP
 
 #include "painter_module/glyph.hpp"
+#include "painter_module/glyph_string.hpp"
 #include "widget_module/widget.hpp"
-#include "system_module/events/mouse_event.hpp"
-#include "system_module/events/paint_event.hpp"
-#include "painter_module/attribute.hpp"
+#include <aml/signals/signals.hpp>
 
-namespace twf {
+namespace cppurses {
+class Mouse_event;
+class Paint_event;
 
 class Checkbox : public Widget {
    public:
-    Checkbox();
+    Checkbox(Glyph_string title = "");
+
+    // Slots
+    sig::Slot<void()> toggle;
+    sig::Slot<void()> check;
+    sig::Slot<void()> uncheck;
 
     // Signals
     sig::Signal<void()> checked;
@@ -24,12 +28,16 @@ class Checkbox : public Widget {
     bool paint_event(const Paint_event& event) override;
     bool mouse_press_event(const Mouse_event& event) override;
 
-    void toggle();
+    void toggle_();
 
-    Glyph empty_ = Glyph("☐");
-    Glyph check_ = Glyph("☒");
-    bool checked_ = false;
+    Glyph empty_box_{"☐"};
+    Glyph checked_box_{"☒"};
+    bool checked_{false};
+    Glyph_string title_;
+
+   private:
+    void initialize();
 };
 
-}  // namespace twf
-#endif  // CHECKBOX_HPP
+}  // namespace cppurses
+#endif  // WIDGET_MODULE_WIDGETS_CHECKBOX_HPP

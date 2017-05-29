@@ -1,46 +1,56 @@
 #include "widget_module/widgets/checkbox.hpp"
-
-#include "widget_module/size_policy.hpp"
-#include "painter_module/color.hpp"
+#include "painter_module/glyph_string.hpp"
 #include "painter_module/painter.hpp"
+#include "widget_module/size_policy.hpp"
 
-namespace twf {
+namespace cppurses {
 
-Checkbox::Checkbox() {
-    // this->enable_border();
-    // this->brush().set_background(Color::Red);
-    this->geometry().size_policy().horizontal_policy = Size_policy::Fixed;
+Checkbox::Checkbox(Glyph_string title) : title_{title} {
     this->geometry().size_policy().vertical_policy = Size_policy::Fixed;
-    this->geometry().set_width_hint(2);
     this->geometry().set_height_hint(1);
+    this->Checkbox::initialize();
+}
+
+void Checkbox::initialize() {
+    toggle = [this] { this->toggle_(); };
+    toggle.track(this->destroyed);
+    check = [this] {
+        if (!checked_) {
+            this->toggle_();
+        }
+    };
+    check.track(this->destroyed);
+    uncheck = [this] {
+        if (checked_) {
+            this->toggle_();
+        }
+    };
+    uncheck.track(this->destroyed);
 }
 
 bool Checkbox::paint_event(const Paint_event& event) {
     Painter p{this};
     if (checked_) {
-        p.put_at(0, 0, check_);
+        p.put(checked_box_);
     } else {
-        p.put_at(0, 0, empty_);
+        p.put(empty_box_);
     }
+    p.put(title_, 3, 0);
     return Widget::paint_event(event);
 }
 
 bool Checkbox::mouse_press_event(const Mouse_event& event) {
-    if (event.button() == Mouse_event::Button::LeftButton) {
-        this->toggle();
+    if (event.button() == Mouse_button::Left) {
+        this->toggle_();
         this->update();
     }
     return true;
 }
 
-void Checkbox::toggle() {
+void Checkbox::toggle_() {
     checked_ = !checked_;
     toggled();
-    if (checked_) {
-        checked();
-    } else {
-        unchecked();
-    }
+    checked_ ? checked() : unchecked();
 }
 
-}  // namespace twf
+}  // namespace cppurses

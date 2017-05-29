@@ -1,13 +1,13 @@
-#ifndef VERTICAL_LAYOUT_HPP
-#define VERTICAL_LAYOUT_HPP
+#ifndef WIDGET_MODULE_LAYOUTS_VERTICAL_LAYOUT_HPP
+#define WIDGET_MODULE_LAYOUTS_VERTICAL_LAYOUT_HPP
 
+#include "widget_module/layout.hpp"
 #include <cstddef>
-#include <vector>
 #include <functional>
 #include <tuple>
-#include "../layout.hpp"
+#include <vector>
 
-namespace twf {
+namespace cppurses {
 
 class Vertical_layout : public Layout {
    protected:
@@ -15,7 +15,7 @@ class Vertical_layout : public Layout {
 
    private:
     std::vector<std::size_t> size_widgets();
-    void position_widgets(const std::vector<std::size_t>& widths);
+    void position_widgets(const std::vector<std::size_t>& heights);
 
     void distribute_space(
         std::vector<std::tuple<Widget*,
@@ -30,5 +30,5 @@ class Vertical_layout : public Layout {
         int height_left);
 };
 
-}  // namespace twf
-#endif  // VERTICAL_LAYOUT_HPP
+}  // namespace cppurses
+#endif  // WIDGET_MODULE_LAYOUTS_VERTICAL_LAYOUT_HPP

@@ -1,9 +1,9 @@
-#ifndef INPUT_EVENT_HPP
-#define INPUT_EVENT_HPP
+#ifndef SYSTEM_MODULE_EVENTS_INPUT_EVENT_HPP
+#define SYSTEM_MODULE_EVENTS_INPUT_EVENT_HPP
 
-#include "../event.hpp"
+#include "system_module/event.hpp"
 
-namespace twf {
+namespace cppurses {
 
 class Input_event : public Event {
    public:
@@ -15,5 +15,5 @@ class Input_event : public Event {
     KeyboardModifiers modifiers_;
 };
 
-}  // namespace twf
-#endif  // INPUT_EVENT_HPP
+}  // namespace cppurses
+#endif  // SYSTEM_MODULE_EVENTS_INPUT_EVENT_HPP

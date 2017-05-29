@@ -1,16 +1,14 @@
-#ifndef PAINT_EVENT_HPP
-#define PAINT_EVENT_HPP
+#ifndef SYSTEM_MODULE_EVENTS_PAINT_EVENT_HPP
+#define SYSTEM_MODULE_EVENTS_PAINT_EVENT_HPP
 
-#include "../event.hpp"
+#include "system_module/event.hpp"
 
-namespace twf {
+namespace cppurses {
 
 class Paint_event : public Event {
    public:
-    Paint_event() : Event{Event::Type::Paint} {}
-
-   private:
+    Paint_event() : Event{Event::Paint} {}
 };
 
-}  // namespace twf
-#endif  // PAINT_EVENT_HPP
+}  // namespace cppurses
+#endif  // SYSTEM_MODULE_EVENTS_PAINT_EVENT_HPP

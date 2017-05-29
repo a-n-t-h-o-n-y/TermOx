@@ -7,12 +7,12 @@
 
 #include <string>
 
-using twf::Attribute;
-using twf::background;
-using twf::Brush;
-using twf::Color;
-using twf::foreground;
-using twf::Glyph;
+using cppurses::Attribute;
+using cppurses::background;
+using cppurses::Brush;
+using cppurses::Color;
+using cppurses::foreground;
+using cppurses::Glyph;
 
 std::string foo(const Glyph& g) {
     return g.str();

@@ -1,32 +1,21 @@
-#ifndef LAYOUT_HPP
-#define LAYOUT_HPP
+#ifndef WIDGET_MODULE_LAYOUT_HPP
+#define WIDGET_MODULE_LAYOUT_HPP
 
-#include "widget.hpp"
+#include "widget_module/widget.hpp"
 
-#include <system_module/events/child_event.hpp>
-#include <system_module/events/paint_event.hpp>
-#include <system_module/object.hpp>
-
-#include <aml/signals/slot.hpp>
-
-namespace twf {
+namespace cppurses {
+class Paint_event;
 
 // Base class for Layouts
 class Layout : public Widget {
    public:
     Layout();
 
-    // Slots
-    sig::Slot<void()> update_layout;
-
    protected:
     bool paint_event(const Paint_event& event) override;
     virtual void update_geometry() = 0;
     bool too_small_{false};
-
-   private:
-    void initialize(); // Object::initialize() exists as well. but not virtual
 };
 
-}  // namespace twf
-#endif  // LAYOUT_HPP
+}  // namespace cppurses
+#endif  // WIDGET_MODULE_LAYOUT_HPP
