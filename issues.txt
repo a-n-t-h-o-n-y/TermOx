@@ -1,5 +1,10 @@
                              __Issues+Ideas__
 
+_ Painter sometimes attempts to paint outside of the terminal window at startup
+    of the program. This is currently stepped around with a check in
+    Paint_buffer::stage(). Look into the real reason you are getting these
+    requests, it might have to do with layouts?
+
 _ Change tuples in Layouts to struct.
 
 _ Remove invisible widgets and implement disabled widget handling in layouts, it

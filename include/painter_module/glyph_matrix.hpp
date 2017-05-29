@@ -5,6 +5,8 @@
 #include <cstddef>
 #include <vector>
 
+#include <fstream>
+
 namespace cppurses {
 
 class Glyph_matrix {
@@ -24,9 +26,6 @@ class Glyph_matrix {
     template <typename T>
     static auto at_impl(T& t, std::size_t x, std::size_t y)
         -> decltype(t.at(x, y)) {
-        if (y >= t.matrix_.size() || x >= t.matrix_.at(y).size()) {
-            return t.matrix_.at(0).at(0);
-        }
         return t.matrix_.at(y).at(x);
     }
 

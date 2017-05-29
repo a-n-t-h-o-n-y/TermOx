@@ -14,6 +14,9 @@ bool Paint_buffer::commit(std::size_t x, std::size_t y) {
 }
 
 void Paint_buffer::stage(std::size_t x, std::size_t y, const Glyph& glyph) {
+    if (y >= staging_area_.height() || x >= staging_area_.width()) {
+        return;
+    }
     if (staging_area_.at(x, y) != glyph) {
         staging_area_.at(x, y) = glyph;
     }
