@@ -1,47 +1,57 @@
-#ifndef PAINTER_HPP
-#define PAINTER_HPP
+#ifndef PAINTER_MODULE_PAINTER_HPP
+#define PAINTER_MODULE_PAINTER_HPP
 
-#include "../widget_module/widget.hpp"
-#include "color.hpp"
-#include "glyph_string.hpp"
-
-#include <codecvt>
+#include "painter_module/glyph_string.hpp"
+#include "widget_module/coordinates.hpp"
 #include <cstddef>
-#include <locale>
-#include <sstream>
-#include <string>
 
-namespace twf {
+namespace cppurses {
 class Border;
+class Widget;
 
 class Painter {
    public:
     explicit Painter(Widget* widget);
 
-    // Essential Functions
-    void put(const Glyph_string& gs);
-    void move(std::size_t x, std::size_t y);
+    void put(const Glyph_string& string,
+             std::size_t x = 0,
+             std::size_t y = 0,
+             bool move_cursor = false);
+    void put(const Glyph_string& string,
+             Coordinates position,
+             bool move_cursor = false);
 
     // Convinience functions
     void fill(std::size_t x,
               std::size_t y,
               std::size_t width,
               std::size_t height,
-              Color fill_background);
+              const Glyph& tile);
+
+    // Takes local coords
     void line(std::size_t x1,
               std::size_t y1,
               std::size_t x2,
               std::size_t y2,
               const Glyph_string& gs = "-");
-    void border(const Border& b);
-    void border(const Glyph_string& gs);
 
-    void set_cursor(bool state);
+    void border(const Border& b);
+
+    void clear_screen();
 
    private:
+    void unbound_put_string(const Glyph_string& gs,
+                            std::size_t glob_x,
+                            std::size_t glob_y);
+    void unbound_line(std::size_t glob_x1,
+                      std::size_t glob_y1,
+                      std::size_t glob_x2,
+                      std::size_t glob_y2,
+                      const Glyph& symbol);
+    void add_default_attributes(Glyph* g);
+
     Widget* widget_;
 };
 
-}  // namespace twf
-
-#endif  // PAINTER_HPP
+}  // namespace cppurses
+#endif  // PAINTER_MODULE_PAINTER_HPP

@@ -1,9 +1,10 @@
-#ifndef MOVE_EVENT_HPP
-#define MOVE_EVENT_HPP
+#ifndef SYSTEM_MODULE_EVENTS_MOVE_EVENT_HPP
+#define SYSTEM_MODULE_EVENTS_MOVE_EVENT_HPP
 
-#include "../event.hpp"
+#include "system_module/event.hpp"
+#include <cstddef>
 
-namespace twf {
+namespace cppurses {
 
 class Move_event : public Event {
    public:
@@ -18,11 +19,12 @@ class Move_event : public Event {
     std::size_t old_y() const { return old_y_; }
 
    protected:
+    // In global coordinates
     std::size_t new_x_;
     std::size_t new_y_;
     std::size_t old_x_;
     std::size_t old_y_;
 };
 
-}  // namespace twf
-#endif  // MOVE_EVENT_HPP
+}  // namespace cppurses
+#endif  // SYSTEM_MODULE_EVENTS_MOVE_EVENT_HPP

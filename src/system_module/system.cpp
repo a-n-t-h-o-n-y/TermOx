@@ -1,23 +1,29 @@
-#include <painter_module/color.hpp>
-#include <painter_module/detail/ncurses_paint_engine.hpp>
-#include <painter_module/paint_engine.hpp>
-#include <painter_module/palette.hpp>
-#include <system_module/detail/posted_event.hpp>
-#include <system_module/detail/thread_data.hpp>
-#include <system_module/event.hpp>
-#include <system_module/event_loop.hpp>
-#include <system_module/events/paint_event.hpp>
-#include <system_module/object.hpp>
-#include <system_module/system.hpp>
-#include <widget_module/widget.hpp>
-
+#include "system_module/system.hpp"
+#include "painter_module/color.hpp"
+#include "painter_module/paint_engine.hpp"
+#include "painter_module/palette.hpp"
+#include "system_module/detail/posted_event.hpp"
+#include "system_module/detail/thread_data.hpp"
+#include "system_module/event.hpp"
+#include "system_module/event_loop.hpp"
+#include "system_module/object.hpp"
+#include "system_module/events/paint_event.hpp"
+#include "widget_module/widget.hpp"
+#include "widget_module/focus_policy.hpp"
+#include <aml/signals/signals.hpp>
 #include <algorithm>
 #include <iterator>
 #include <memory>
 #include <utility>
 #include <vector>
 
-namespace twf {
+namespace cppurses {
+
+sig::Slot<void()> System::quit = []() { System::exit(); };   // NOLINT
+Object* System::head_ = nullptr;                             // NOLINT
+std::unique_ptr<Paint_engine> System::engine_ = nullptr;     // NOLINT
+std::unique_ptr<Palette> System::system_palette_ = nullptr;  // NOLINT
+Widget* System::focus_widg_ = nullptr;                       // NOLINT
 
 void System::post_event(Object* obj,
                         std::unique_ptr<Event> event,
@@ -47,30 +53,39 @@ void System::send_posted_events(Object* obj_filter, Event::Type etype_filter) {
     auto& queue = detail::Thread_data::current().event_queue;
     auto posted_iter = std::begin(queue);
     while (posted_iter != std::end(queue)) {
-        auto event_t = posted_iter->event().type();
-        if ((obj_filter == nullptr || obj_filter == posted_iter->reciever()) &&
-            (etype_filter == Event::None ||
-             etype_filter == posted_iter->event().type()) &&
-            (posted_iter->event().type() != Event::DeferredDelete ||
-             etype_filter == Event::DeferredDelete)) {
-            if (event_t == Event::DeferredDelete) {
-                auto parent = posted_iter->reciever()->parent();
-                if (parent == nullptr) {
-                    if (posted_iter->reciever() == System::head()) {
-                        // System::set_head(nullptr);
-                        System::exit();
+        if (posted_iter->reciever() != nullptr) {
+            auto event_t = posted_iter->event().type();
+            if ((obj_filter == nullptr ||
+                 obj_filter == posted_iter->reciever()) &&
+                (etype_filter == Event::None ||
+                 etype_filter == posted_iter->event().type()) &&
+                (posted_iter->event().type() != Event::DeferredDelete ||
+                 etype_filter == Event::DeferredDelete)) {
+                if (event_t == Event::DeferredDelete) {
+                    auto parent = posted_iter->reciever()->parent();
+                    if (parent == nullptr) {
+                        if (posted_iter->reciever() == System::head()) {
+                            System::exit();
+                        }
+                        queue.erase(posted_iter);
+                        posted_iter = std::begin(queue);
+                    } else {
+                        parent->delete_child(
+                            const_cast<Object*>(posted_iter->reciever()));
+                        posted_iter = std::begin(queue);
+                        queue.erase(posted_iter);
+                        posted_iter = std::begin(queue);
                     }
-                    queue.erase(posted_iter);
-                    posted_iter = std::begin(queue);
                 } else {
-                    parent->delete_child(const_cast<Object*>(posted_iter->reciever()));
+                    // const_cast because of multi-set const only iterator.
+                    System::notify(const_cast<Object*>(posted_iter->reciever()),
+                                   posted_iter->event());
+                    posted_iter = std::begin(queue);
                     queue.erase(posted_iter);
                     posted_iter = std::begin(queue);
                 }
             } else {
-                System::notify(const_cast<Object*>(posted_iter->reciever()), posted_iter->event());
-                queue.erase(posted_iter);
-                posted_iter = std::begin(queue);
+                ++posted_iter;
             }
         } else {
             ++posted_iter;
@@ -78,44 +93,11 @@ void System::send_posted_events(Object* obj_filter, Event::Type etype_filter) {
     }
 }
 
-// void System::send_posted_events(Object* obj_filter, Event::Type etype_filter) {
-//     auto& queue = detail::Thread_data::current().event_queue;
-//     while (!queue.empty()) {  // bad condition, if you are filtering base on
-//                               // event or object type, you never get this empty
-//                               // sometimes.
-//         auto& pe = queue.front();
-//         auto event_t = pe.event().type();
-//         if ((obj_filter == nullptr || obj_filter == pe.reciever()) &&
-//             (etype_filter == Event::None ||
-//              etype_filter == pe.event().type()) &&
-//             (pe.event().type() != Event::DeferredDelete ||
-//              etype_filter == Event::DeferredDelete)) {
-//             if (event_t == Event::DeferredDelete) {
-//                 auto parent = pe.reciever()->parent();
-//                 if (parent == nullptr) {
-//                     if (pe.reciever() == System::head()) {
-//                         // System::set_head(nullptr);
-//                         System::exit();
-//                     }
-//                     queue.pop_front();
-//                 } else {
-//                     parent->delete_child(pe.reciever());
-//                     queue.pop_front();
-//                 }
-//             } else {
-//                 System::notify(pe.reciever(), pe.event());
-//                 queue.pop_front();
-//             }
-//         }
-//     }
-// }
-
 bool System::notify(Object* obj, const Event& event) {
     bool handled{false};
     // Send event to any filter objects
     unsigned i{0};
-    while (i < obj->event_filter_objects_.size() &&
-           !handled) {  // While loop in case event_filter invalidates iterators
+    while (i < obj->event_filter_objects_.size() && !handled) {
         handled = obj->event_filter_objects_[i]->event_filter(obj, event);
         ++i;
     }
@@ -130,9 +112,8 @@ bool System::notify_helper(Object* obj, const Event& event) {
     bool handled{false};
     // Send event to object
     handled = obj->event(event);
-
     // Propagate event to parent
-    if (!handled) {  // && event type can propogate
+    if (!handled) {
         Object* parent = obj->parent();
         if (parent != nullptr) {
             handled = notify_helper(parent, event);
@@ -168,25 +149,27 @@ unsigned System::max_height() {
     return System::paint_engine()->screen_height();
 }
 
-Object* System::head_ = nullptr;
-std::unique_ptr<Paint_engine> System::engine_ = nullptr;
-
 Object* System::head() {
     return head_;
 }
-
-Widget* System::focus_widg_ = nullptr;
 
 Widget* System::focus_widget() {
     return focus_widg_;
 }
 
-void System::set_focus_widget(Widget* widg) {
-    if (focus_widg_ != nullptr) {
+void System::set_focus_widget(Widget* widg, bool clear_focus) {
+    if (widg == focus_widg_) {
+        return;
+    }
+    // Old focus widget
+    if (focus_widg_ != nullptr && clear_focus) {
         focus_widg_->clear_focus();
     }
+    // New focus widget
     focus_widg_ = widg;
-    focus_widg_->set_focus(true);
+    if (widg != nullptr) {
+        focus_widg_->set_focus(true);
+    }
 }
 
 void System::cycle_tab_focus() {
@@ -207,7 +190,7 @@ void System::cycle_tab_focus() {
     }
 
     // Rearrange objects vector
-    Object* current_focus_object = static_cast<Object*>(System::focus_widget());
+    auto* current_focus_object = static_cast<Object*>(System::focus_widget());
     if (current_focus_object != nullptr) {
         auto current_iter = std::find(std::begin(objects), std::end(objects),
                                       current_focus_object);
@@ -219,18 +202,18 @@ void System::cycle_tab_focus() {
 
     // Find the next focus widget
     for (Object* child : objects) {
-        Widget* widg = dynamic_cast<Widget*>(child);
+        auto* widg = dynamic_cast<Widget*>(child);
         if (widg != nullptr) {
-            if (widg->focus_policy() == Widget::Focus_policy::TabFocus ||
-                widg->focus_policy() == Widget::Focus_policy::StrongFocus) {
+            if (widg->focus_policy() == Focus_policy::Tab ||
+                widg->focus_policy() == Focus_policy::Strong) {
                 System::set_focus_widget(widg);
+                widg->paint_engine().move(widg->x() + widg->cursor_x(),
+                                          widg->y() + widg->cursor_y());
                 return;
             }
         }
     }
 }
-
-std::unique_ptr<Palette> System::system_palette_ = nullptr;
 
 void System::set_palette(std::unique_ptr<Palette> palette) {
     system_palette_ = std::move(palette);
@@ -284,6 +267,7 @@ void System::set_palette(std::unique_ptr<Palette> palette) {
     System::paint_engine()->set_rgb(Color::White, p->red_value(Color::White),
                                     p->green_value(Color::White),
                                     p->blue_value(Color::White));
+    System::paint_engine()->flush(false);
 }
 
 Palette* System::palette() {
@@ -297,9 +281,6 @@ System::System(std::unique_ptr<Paint_engine> engine) {
 
 System::~System() {
     System::set_paint_engine(nullptr);
-
-    // Set all static objects to their default state(mainly for testing)
-    // there is a static variable in a function somewhere.
 }
 
 void System::set_head(Object* obj) {
@@ -310,12 +291,9 @@ int System::run() {
     Event_loop main_loop;
     auto& data = detail::Thread_data::current();
     data.quit_now = false;
-
     int return_code = main_loop.run();
-
     data.quit_now = false;
-
     return return_code;
 }
 
-}  // namespace twf
+}  // namespace cppurses

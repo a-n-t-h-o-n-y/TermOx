@@ -5,11 +5,11 @@
 
 #include <memory>
 
-using twf::detail::Posted_event;
-using twf::detail::Posted_event_queue;
-using twf::Event;
-using twf::Object;
-using twf::System;
+using cppurses::detail::Posted_event;
+using cppurses::detail::Posted_event_queue;
+using cppurses::Event;
+using cppurses::Object;
+using cppurses::System;
 
 TEST(PostedEventQueueTest, AddEvent) {
     System system;

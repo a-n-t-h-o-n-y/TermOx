@@ -7,13 +7,12 @@
 
 #include <string>
 
-using twf::Attribute;
-using twf::background;
-using twf::Brush;
-using twf::Color;
-using twf::foreground;
-using twf::Glyph;
-using twf::Glyph_error;
+using cppurses::Attribute;
+using cppurses::background;
+using cppurses::Brush;
+using cppurses::Color;
+using cppurses::foreground;
+using cppurses::Glyph;
 
 std::string foo(const Glyph& g) {
     return g.str();
@@ -26,16 +25,6 @@ TEST(GlyphTest, StringConstructor) {
     const char cp[] = "₹";
     EXPECT_NO_THROW(Glyph{cp});
     EXPECT_NO_THROW(Glyph("ↈ"));
-    EXPECT_THROW(Glyph("ↈↈ"), Glyph_error);
-    EXPECT_THROW(Glyph("ↈ "), Glyph_error);
-
-    const char long_cp[] = "hello";
-    std::string s = "hello";
-
-    EXPECT_THROW(Glyph{"54"}, Glyph_error);
-    EXPECT_THROW(Glyph{long_cp}, Glyph_error);
-    EXPECT_THROW(Glyph{s}, Glyph_error);
-    EXPECT_THROW(Glyph("World!"), Glyph_error);
 }
 
 TEST(GlyphTest, StringAndAttributesConstructor) {
@@ -43,18 +32,6 @@ TEST(GlyphTest, StringAndAttributesConstructor) {
     EXPECT_NO_THROW(Glyph("1", background(Color::Blue), Attribute::Underline,
                           Attribute::Bold, Attribute::Underline));
     EXPECT_NO_THROW(Glyph("ޒ", Attribute::Standout));
-
-    const char long_cp[] = "hello";
-    std::string s = "hello";
-
-    EXPECT_THROW((Glyph{"54", Attribute::Bold, background(Color::Light_blue)}),
-                 Glyph_error);
-    EXPECT_THROW((Glyph{long_cp, Attribute::Dim, foreground(Color::Black),
-                        foreground(Color::Dark_red)}),
-                 Glyph_error);
-    EXPECT_THROW(Glyph{s}, Glyph_error);
-    EXPECT_THROW(Glyph("World!", Attribute::Italic, foreground(Color::Red)),
-                 Glyph_error);
 }
 
 TEST(GlyphTest, Symbol) {

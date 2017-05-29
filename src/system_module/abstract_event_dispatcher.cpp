@@ -1,11 +1,8 @@
-#include <system_module/abstract_event_dispatcher.hpp>
-#include <system_module/event.hpp>
-#include <system_module/object.hpp>
-#include <system_module/system.hpp>
+#include "system_module/abstract_event_dispatcher.hpp"
+#include "system_module/event.hpp"
+#include "system_module/system.hpp"
 
-#include <memory>
-
-namespace twf {
+namespace cppurses {
 
 bool Abstract_event_dispatcher::process_events() {
     interrupt_ = false;
@@ -14,7 +11,7 @@ bool Abstract_event_dispatcher::process_events() {
         System::send_posted_events(nullptr, Event::DeferredDelete);
     }
     if (!interrupt_) {
-        System::paint_engine()->flush();
+        System::paint_engine()->flush(true);
     }
     if (!interrupt_) {
         this->post_user_input();  // Blocking call
@@ -27,4 +24,4 @@ void Abstract_event_dispatcher::interrupt() {
     interrupt_ = true;
 }
 
-}  // namespace twf
+}  // namespace cppurses

@@ -1,8 +1,6 @@
 bin/*
 build/*
-doc/*
-!doc/Doxyfile
-!doc/images
+docs/html/
 lib/*
 notes
 tags
@@ -14,3 +12,4 @@ tags
 *.sublime-workspace
 *.json
 *.vim
+tags

@@ -1,32 +1,38 @@
-#include <painter_module/palette.hpp>
-#include <painter_module/color.hpp>
+#include "painter_module/palette.hpp"
+#include "painter_module/color.hpp"
+#include <cstddef>
+#include <cstdint>
 
-namespace twf {
+namespace {
 
-void Palette::set_rgb(Color c, int r, int g, int b) {
-    auto& rgb = definitions_[translate_(c)];
-    rgb[0] = r;
-    rgb[1] = g;
-    rgb[2] = b;
+std::size_t translate(cppurses::Color c) {
+    return static_cast<std::int16_t>(c) - 240;
+}
+
+}  // namespace
+
+namespace cppurses {
+
+void Palette::set_rgb(Color c, std::int16_t r, std::int16_t g, std::int16_t b) {
+    auto& rgb = definitions_.at(translate(c));
+    rgb.at(0) = r;
+    rgb.at(1) = g;
+    rgb.at(2) = b;
 }
 
 int Palette::red_value(Color c) const {
-    return definitions_[translate_(c)][0];
+    return definitions_.at(translate(c)).at(0);
 }
 
 int Palette::green_value(Color c) const {
-    return definitions_[translate_(c)][1];
+    return definitions_.at(translate(c)).at(1);
 }
 
 int Palette::blue_value(Color c) const {
-    return definitions_[translate_(c)][2];
+    return definitions_.at(translate(c)).at(2);
 }
 
-Palette::index_ Palette::translate_(Color c) {
-    return static_cast<int>(c);
-}
-
-Standard_palette::Standard_palette() : Palette{} {
+Standard_palette::Standard_palette() {
     this->set_rgb(Color::Black, 0, 0, 0);
     this->set_rgb(Color::Dark_red, 128, 0, 0);
     this->set_rgb(Color::Dark_blue, 0, 0, 128);
@@ -45,7 +51,7 @@ Standard_palette::Standard_palette() : Palette{} {
     this->set_rgb(Color::White, 255, 255, 255);
 }
 
-DawnBringer_palette::DawnBringer_palette() : Palette{} {
+DawnBringer_palette::DawnBringer_palette() {
     this->set_rgb(Color::Black, 20, 12, 28);
     this->set_rgb(Color::Dark_red, 68, 36, 52);
     this->set_rgb(Color::Dark_blue, 48, 52, 109);
@@ -64,4 +70,4 @@ DawnBringer_palette::DawnBringer_palette() : Palette{} {
     this->set_rgb(Color::White, 222, 238, 214);
 }
 
-}  // namespace twf
+}  // namespace cppurses

@@ -1,12 +1,11 @@
-#ifndef SIZE_POLICY
-#define SIZE_POLICY
+#ifndef WIDGET_MODULE_SIZE_POLICY_HPP
+#define WIDGET_MODULE_SIZE_POLICY_HPP
 
 #include <cstddef>
 
-namespace twf {
+namespace cppurses {
 
-class Size_policy {
-   public:
+struct Size_policy {
     enum Policy {
         Fixed,
         Minimum,
@@ -17,17 +16,18 @@ class Size_policy {
         Ignored
     };
 
-    explicit Size_policy(Policy horizontal = Preferred,
-                         Policy vertical = Preferred)
-        : policy_h_{horizontal}, policy_v_{vertical} {}
+    Policy horizontal_policy = Ignored;
+    Policy vertical_policy = Ignored;
 
-   private:
-    Policy policy_h_;
-    Policy policy_v_;
-    std::size_t stretch_h_ = 1;
-    std::size_t stretch_v_ = 1;
-    bool height_for_width_ = false;
+    /// 0 value for stretch factors is undefined behavior
+    std::size_t horizontal_stretch = 1;
+
+    /// 0 value for stretch factors is undefined behavior
+    std::size_t vertical_stretch = 1;
+
+    bool height_for_width = false;
+    bool width_for_height = false;
 };
 
-}  // namespace twf
-#endif  // SIZE_POLICY
+}  // namespace cppurses
+#endif  // WIDGET_MODULE_SIZE_POLICY_HPP

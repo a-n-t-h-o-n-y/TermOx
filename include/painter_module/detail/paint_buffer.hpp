@@ -1,32 +1,24 @@
-#ifndef PAINT_BUFFER_HPP
-#define PAINT_BUFFER_HPP
+#ifndef PAINTER_MODULE_DETAIL_PAINT_BUFFER_HPP
+#define PAINTER_MODULE_DETAIL_PAINT_BUFFER_HPP
 
-#include "../glyph_matrix.hpp"
+#include "painter_module/glyph_matrix.hpp"
+#include <cstddef>
 
-namespace twf {
+namespace cppurses {
 namespace detail {
 
 class Paint_buffer {
    public:
-    explicit Paint_buffer(unsigned x = 0, unsigned y = 0)
+    explicit Paint_buffer(std::size_t x = 0, std::size_t y = 0)
         : backing_store_{x, y}, staging_area_{x, y} {}
 
-    void resize(unsigned x, unsigned y) {
-        backing_store_.resize(x, y);
-        staging_area_.resize(x, y);
-    }
+    bool commit(std::size_t x, std::size_t y);
+    void stage(std::size_t x, std::size_t y, const Glyph& glyph);
 
-    unsigned width() const { return staging_area_.width(); }
-
-    unsigned height() const { return staging_area_.height(); }
-
-    bool commit(unsigned x, unsigned y);
-
-    Glyph& at(unsigned x, unsigned y) { return backing_store_.at(x, y); }
-
-    void stage(unsigned x, unsigned y, const Glyph& glyph) {
-        staging_area_.at(x, y) = glyph;
-    }
+    void resize(std::size_t x, std::size_t y);
+    const Glyph& at(std::size_t x, std::size_t y) const;
+    std::size_t width() const { return staging_area_.width(); }
+    std::size_t height() const { return staging_area_.height(); }
 
    private:
     Glyph_matrix backing_store_;
@@ -34,5 +26,5 @@ class Paint_buffer {
 };
 
 }  // namespace detail
-}  // namespace twf
-#endif  // PAINT_BUFFER_HPP
+}  // namespace cppurses
+#endif  // PAINTER_MODULE_DETAIL_PAINT_BUFFER_HPP

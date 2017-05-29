@@ -1,0 +1,346 @@
+                             __Issues+Ideas__
+
+_ Painter sometimes attempts to paint outside of the terminal window at startup
+    of the program. This is currently stepped around with a check in
+    Paint_buffer::stage(). Look into the real reason you are getting these
+    requests, it might have to do with layouts?
+
+_ Change tuples in Layouts to struct.
+
+_ Remove invisible widgets and implement disabled widget handling in layouts, it
+    is it disabled, it should just be a black background printed, incase not in
+    layout. Make sure you no longer take mouse or keyboard input for disabled
+    widgets. connected signals and slots will be difficult to handle, but you
+    can toggle a slot on and off, but where do you do that? Derived Widgets can 
+    add slots.
+
+_ There is a color pair that is calculate incorrectly. When you set the
+    foreground color of a widget to come value the background changes as well.
+    Not sure of the color that does this as seeing on a random generator atm.
+
+_ The way Geometry, Brush, and Size_policy are held and accessed within Widget
+    needs to be refactored. Who is responsible for what?
+
+_ Add Shadow widget, which attaches to an existing widget in some way and paints
+     a shaow in either block chars or checkered blocks, or even just empty with
+     background color changed, though the glyph way let's you vary the design
+     more.
+
+_ Glyph_string destructor(vector) threw once on free(). This was the
+    Text_display contents_ Glyph_string.
+
+_ Add Color_picker widget with width 2 squares of all 16 colors in the palette
+    with signals that trigger on clicking. It'll be made up of a collection of
+    two horizontal layouts within a vertical layout of 16 buttons total with
+    fixed width hint of 2 and fixed height hint of 1(only on the horizontal
+    layouts). And a vertical layout hixed height of 2.
+
+_ All Slots in Widgets need to be tracking the Object::destroyed Signal.
+
+_ Word wrap on space in textbox, not sure how to do this in a simple way yet.
+
+_ Add Expanding Widget that is a title with a little arrow, when you click on
+    it, it expands by changing its size hint, its policy should be fixed(?) It
+    pushes other widgets in the layout out of the way instead of drawing on top
+    of them like a hovering widget would. It opens up to a possibly indented
+    list of whatever widgets, buttons, line edits, etc.. The arrow can change to
+    a downward arrow when it is open.
+
+_ Option to make textbox read only/non-editable.
+
+_ Add Meta_widget which wraps any widget and gives information about it.
+
+_ Add a widget that wraps any widget and allows you to change certain things
+    about it live, like color and attributes, this becomes more difficult with
+    composite widgets and widgets with too small a size. Instead you should
+    create a widget that does not physically wrap the widget, but that is off to
+    the side, a box, and it can be associated with a specific widget, even
+    better, you only need one of these and it has a drop down to access all
+    widgets in the app(works through the tree from head). Only allows for
+    generic widget parameter access, though you could have some option that
+    casts the widget as a particular type to get more options, though this is
+    weird, there might be some way to do it, the meta widget itself would have
+    to have extra parameters that show up on the cast, or you can have it
+    replace itself with a derived varient of the meta object, specific to that
+    widget, kinda strange but it might work, and it'd leave it extensible and
+    functionality for analyzing each widget type would be seperated into
+    subclasses.
+
+_ Empty space in layouts is left with junk when drawing, since it is never
+    overridden, inbetween prints are shown. One solution is to print twice, this
+    is because the resize events are sent and then the move events are sent, if
+    you send them all again, then they will be in the right places when a resize
+    is called, after a clear screen on the layout and you get a clean print,
+    this is a lot of calls to copying Glyphs and Attributes, not the best. The
+    other option is to replace the empty space with a base Widget object, it'd
+    have to have the same background color as the layout and you'd have to make
+    sure it always filled in the empty space and did not alter the spacing or
+    sizing of the real widgets in the layout. This seems possible and much more
+    efficient. In the layout logic, if you have empty space left, you call
+    make_child<Widget>(); to fill in the space. This is more difficult if you
+    need to have it in the middle of two widgets or something, and also you only
+    want to do this once. Maybe it's not the cleanest solution, think about it,
+    fixing the layout printing sequence could potentially solve this the right
+    way, but figuring out sizes, posting position events and then posting resize
+    events, but I'm assuming that you will have the same problems, just in
+    different places. The real solution here deals with processing the move and
+    resize events at the same time before anything is printed, which is should
+    do since this all happens in a single loop, the buffer is written to
+    mutliple times but the screen is only written to once. This is possibly not
+    happening though as the initial printing process seems to be drawing in the
+    unadusted position, and then fixing itself, but leaving the remnants in
+    spaces without any widget.
+
+
+_ Possibly add a constructor to Scrollbar widgets that takes a pointer or ....?
+    some reference to the textbox, can ask it its height and its total height of
+    text that the textbox widget knows how to calculate, and the current
+    position in that total height, then use this information to create a
+    bar with length determined by current_window_height/total_text_height, and
+    centered over current_position_in_text/total_text_height, these fractions
+    are multiplied by the height of the scrollbar widget since that does not
+    have to be the same height as the textbox. If constructed without a textbox
+    then bar is always same height of scrollbar widget, minus arrows, so
+    fraction 1/1.
+
+_ Change Object* tree to Widget* tree - low priority
+
+_ Create some way of decorating/specifying elements of a Textbox; scrollbars,
+    scrolling with what buttons and keys, etc... template? multiple classes?
+
+_ Easier way of specifying look of Widget and other options with some sort of
+    json like syntax? Or most likely give detailed interfaces for widgets and
+    documentation of those interfaces, not widget look can really be specified
+    with something generic, like json.
+
+_ Create Page_layout that can display any number of different 'screens' or pages
+    of widgets. Only one page is displayed at a time and it is given the entire
+    screen. instead of every page being a child, it'll only have one child and
+    it will change that child out to have it printed to the screen. Also need
+    some way of switching between multiple pages, maybe signals, you might have
+    to make this a fixed number of pages for signal names.
+
+_ Creating a widget object without attatching it as head or as a child or any
+    other widget still prints to the screen at startup. There is no check that
+    it has a parent before sending paint events to the global event queue.
+    Possibly add a check that parent() != nullptr && this != head_widget().
+
+_ Find out why upper_bound_ is sometimes larger than the length of the string,
+    happens in the Textbox paint_event() function when creating the substring to
+    print to the screen.
+
+_ Add tab key to textbox, you'll have to work around the tab as change focus.
+    Think of the interface, should tab to change focus just be disabled on
+    Textboxes? and how to do that when Tab is removed from being sent to the
+    Textbox by an event filter, maybe the event filter can check if the object
+    to send to is a textbox and if so, then it sends it along instead of
+    processing it.
+
+_ Move tab focus to event filter instead of the Widget::or Object::event()
+    functions.
+
+_ Create a forms widget that has pairs of title and field, where the field is
+    accessible from some variable and a signal is called whenever it is changed.
+    Use partial borders or different background colors to give a nice look.
+
+_ Create a radio button group widget, only one is selected at a time.
+
+_ Try to work out hovering widgets, they would be on same level as the head
+    widget. Their known bounds are the screen bounds. Used for Dialog Boxes and
+    Pulldown menus where a widget has to be printed outside of its
+    bounds/parents bounds.
+
+_ Create Pulldown menu widget that is a hovering widget, though part of it would
+    be a child to some other widget, the pull down part will be a hovering
+    widget printed just under the actual menu widget.
+
+_ Create Menu widget with selectable/highlightable options that call a signal
+    enter is pressed or they are clicked. Lots of options you need to let client
+    dictate in an easy way. It'd be nice to have a variable number of Menu
+    options with a template or something, though for the signals to be named I'm
+    not sure you could do this, you'd have to do it through some kind of
+    container/index.
+
+_ Move Painter::move() logic into Widget, since it is manipulating the cursor
+    which is stored within Widget. In textbox this causes you to create a
+    painter just to move the cursor around, and it also locks you into a
+    particlar way of moving.
+
+_ Widget placement/alignment in layouts when there is extra space that can't be
+    taken by any widget, enums like left aligned, right aligned, centered,
+    justified, floating... helpful when you have many fixed size widgets and you
+    want them evenly spaced within a layout space.
+
+_ Textbox with keys pressed when it has predetermined text and lower_bound will
+    crash on keypresses past the length of the string.(test8) This can be fixed
+    by not taking keyboard input on these types of boxes, but there are
+    situations where you would still want to allow for editing of text. There is
+    a bug here you should focus on instead, it probably has to do with the
+    paint_event in the Meta_box widget in test8/main.cpp, the solution is a
+    better interface for a static textbox, if you want a textbox that is
+    editable, then you just set the contents of the textbox once at construction
+    and everything should work fine from there. It is only an issue if you want
+    a static textbox and keyboard input(which is redic, but its a bug and should
+    be fixed with a better interface.)
+
+_ Cursor disappears sometimes, letters still print, this might be fixed by
+    compiling with optimizations? or does the event_loop calling flush()
+    sometimes not put the cursor to the screen? does the cursor get coordinates
+    that are not correct and therefore cannot print them on the screen?
+
+_ Need a better border interface that allows you more freedom to create half
+    borders without text disapearing from the top and side lines. Do this by
+    having more conditionals, if you have a corner piece, but no top side, then
+    print at the very top, this allows the user to add a blank space to get
+    around this, if all four corners are active and no walls, then it has inner
+    height and width, go through each scenario and tailor it. Not sure if this
+    is the best.
+
+_ System head should have a built in layout if your widget does not have one, or
+    at least sane widget layout with a layout, for simple widgets.
+
+_ Add a Freeform layout that has Window widgets wrapping each child widget, the
+    child widgets can be click and dragged to move and resize. Set TERM variable
+    to xterm-1003 to get mouse move events all the time, layout keeps track of
+    the currently moving/selected child widget. Overlap and click_events and
+    paint_events should work fine if you re-arrange the child widgets in the
+    layout so that the currently selected is at the top of the list. Though this
+    would work for click events it would be painted last.. Still some things to
+    work out on that one. Window widget would add a bar on top that can be
+    selected and moved, propagates clicks to layout parent. bottom right corner
+    icon to resize.
+
+_ Fixed size policy in layouts currently includes border space, it should not,
+    so a single box height object that wants a border should not have to resize
+    its Fixed height to 3 or 2 depending on the number of borders. 
+
+_ Consider implementing single thread animation by putting a timer around the
+    ::wgetch() call on ncurses. This will make sure concurrent access to the
+    ncurses library does not happen(this can happen with the current
+    implementation). If the blocking call to wgetch() does not return within a
+    frame time, then an AnimationFrame Event will be sent to all widgets, along
+    with a call to update(). This will allow any widget to override
+    animation_frame_event() function to update the state of their widget for a
+    new frame. The limitation here is that you are stuck with a single frame
+    rate for the entire program, unless you implement complex timer notification
+    system, which adds too much complexity to the library. The whole point of
+    doing this is to avoid concurrent access to the ncurses library which though
+    rare, can cause crashes.
+
+_ Animated widgets in a program make textbox widgets never have a cursor because
+    the cursor is constantly being moved around to paint the animations. You'd
+    have to implement your own cursor drawing to get around this, and it would
+    have to be part of the animation system. 
+
+_ How to take input in such a way that is similar to asking a question and
+    having the user enter a text answer into a box, and how should it be left
+    for the client to turn that information into a type, through a stream
+    excration operator or just giving a string back and letting the client use a
+    string stream, or passing back a string stream. Related to forms? Forms are
+    like question and answer, output and input. Similar concept to using cout
+    and cin, works as bridge for someone who has not programed in this events
+    system way before but has used stdin/out.
+
+X Signals can crash if you wrap a slot in a lambda, the tracking information 
+    seems to not come through. Or there is some way for a Signal to call on a 
+    slot that has a tracked object that has expired if it is within a lambda.
+    Solution: take Slot by value in lambda function. generalized lambda capture
+    makes this not so bad.
+
+X When the bottom widget in a vertical layout disapears because the screen is
+    too small, you get the bottom right corner of that widget being printed in
+    the top left of the screen. This has to do with putting to the paint_buffer,
+    not to ncurses itself, assuming the paint buffer is the correct size. Look
+    in the Vertical layout class itself, what would happen if there was no space
+    at all for a widget?
+
+X Make sure partial border work, test in nested widgets.
+
+X Allow a Widget to be able to change its default background Glyph(' ' by
+    default). This is helpful when you want a line draw on a single lined text
+    box(like a form, where the text input is underlined too, Glyph(' ',
+    Attribute::Underlined)) and can also be helpful with checkered box
+    characters for drawing and color mixtures.
+
+X Attributes are not cleared when new glyph with different attributes is placed
+    on the same square. Look into how attributes are reset.
+
+X Updating the background color of a widget in a paint event leaves you with the
+    old background color until the next update, this is because for update you
+    get a call to clear the screen, which uses the old background color, and
+    then you paint new glyphs with the new background color, left with a mix of
+    both, you need a call to clear screen after changing the background color.
+    Actually, it should be a call to update() to post both a clear screen and
+    paint event, just incase you are calling this at the end of a paint_event,
+    the name set_background() implies that it is not changing the contents of
+    the screen. Add a function to widget class to set the background directly
+    through the widget, it'll just call down to the Brush object, but it will
+    also call update(), which brush cannot do. it'll make the interface for
+    setting the background a bit cleaner for the user as well. Add a function
+    for foreground as well. This function should not be used in a paint event.
+    That is the problem.
+
+X Partial borders and resizing to 0 then resizing back to a typical size causes
+    ncurses to not print anymore, not a crash, you've seen this before. It is an
+    infinite loop, probably from an unsigned underflow.
+
+X Create a Coordinate Widget::border_offset() function to replace duplicate code
+
+X Add mutex to the event_queue, lock when posting events and when processing
+    events from the queue. This will help if you want to use asynchronous timers
+    to perform animation by changing the state of a widget and then posting a
+    paint event through a call to this->update() every certain number of timer
+    ticks.
+
+X Create a checkbox widget that has a bool state, signal when it is toggled,
+    signal for when it is toggled true and for toggled false.
+
+X Move Widget::erase_widget_screen() to Painter::clear_screen() and paint over
+    borders. Is there a way to optimize this like paint_event? can paint event
+    objects specify what they do? erase paint events clear the screen? or
+    another type of event entirely so that you can get the post event
+    optimization since most of the program time is eaten up by erasing the
+    screen and these are called in place and not posted as events, this could be
+    an important change. You could then call a Widget::clear_screen() function
+    similar to update, that posts a clear_screen_event object to the queue, and
+    the Event_queue::add_event() function could optimize out multiple clears on
+    the same widget.
+
+X Ncurses crash with certain widget amounts in layout. getting it with a
+    vertical layout in test6 with a widget after textbox.
+    The above is only a problem in a few terminals, but it is still pointing at
+    a problem in this library.
+
+X Add title_bar widget that has a title and an exit button. Use is with a
+    vertical layout with another widget.
+
+X Finish Scrollbar widgets
+
+X Textbox scroll_up on backspace at top left corner.
+
+X Add scroll_down to right arrow and scroll_up to left arrow on textbox.
+    
+X Textbox scroll_up() leaves the last line of text as the last line displayed
+    while scrolling down. Look into Painter::move() and lower_bound_ being reset
+    when scrolling up.
+
+X If you scroll wheel all the way down on a textbox the cursor moves to the
+    leftmost position and you are not about to right arrow or left arrow around.
+
+X Add scroll_down on text input that goes below textbox widget
+
+X Cursor up/down in Textbox should scroll text when at top and bottom.
+
+X Very large and instant resize events(like full screen to tiny screen) can
+    leave the cursor way down below and the cursor will be on the screen in
+    some random position and move as you type, but all of the letters are going
+    down below where you left the cursor before the resize. Handle:
+    if(cursor_position > lower_bound_) then scroll down until cursor index
+    is in the middle of the screen or something.
+
+X Layout still do not take all possible space given to them because of rounding
+    errors, use a similar recursive function to split up the space that should
+    have been taken, but wasn't, very similar to the current recursive function
+    that gives out space, but this one does not consider stretch factors, it
+    just hands out one block at a time.
+

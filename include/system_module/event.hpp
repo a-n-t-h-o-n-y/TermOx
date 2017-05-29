@@ -1,9 +1,9 @@
-#ifndef EVENT_HPP
-#define EVENT_HPP
+#ifndef SYSTEM_MODULE_EVENT_HPP
+#define SYSTEM_MODULE_EVENT_HPP
 
-#include "object.hpp"
+#include "system_module/object.hpp"
 
-namespace twf {
+namespace cppurses {
 
 class Event {
    public:
@@ -14,6 +14,7 @@ class Event {
         MouseButtonRelease,
         MouseButtonDblClick,
         MouseButtonTplClick,
+        Wheel,
         MouseMove,
         KeyPress,
         KeyRelease,
@@ -21,6 +22,7 @@ class Event {
         FocusOut,
         Enter,
         Leave,
+        ClearScreen,
         Paint,
         Move,
         Resize,
@@ -29,97 +31,100 @@ class Event {
         Show,
         Hide,
         Close,
-        Quit,
-        ParentChange,
-        ParentAboutToChange,
-        ThreadChange,
-        WindowActive,
-        WindowDeactive,
-        ShowToParent,
-        HideToParent,
-        Wheel,
-        WindowTitleChange,
-        WindowIconChange,
-        ApplicationWindowIconChange,
-        ApplicationFontChange,
-        ApplicationLayoutDirectionChange,
-        ApplicationPaletteChange,
-        PaletteChange,
-        ClipBoard,
-        Speech,
-        SockAct,
-        WinEventAct,
-        DeferredDelete,
-        DragEnter,
-        DragMove,
-        DragLeave,
-        Drop,
-        DragResponse,
         ChildAdded,
         ChildPolished,
         ChildRemoved,
-        ShowWindowRequest,
-        PolishRequest,
-        Polish,
-        LayoutRequest,
-        UpdateRequest,
-        UpdateLater,
-
-        ContextMenu,
-        InputMethod,
-        AccessibilityPrepare,
-        LocaleChange,
-        LanguageChange,
-        LauoutDirectionChange,
-        Style,
-        OkRequest,
-        HelpRequest,
-
-        IconDrag,
-
-        FontChange,
         EnabledChange,
-        ActivationChange,
-        StyleChange,
-        IconTextChange,
-        ModifiedChange,
-        MouseTrackingChange,
-        ToolTip,
-        WhatsThis,
-        StatusTip,
+        DeferredDelete
 
-        ActionChanges,
-        ActionAdded,
-        ActionRemoved,
+        // Quit,
+        // ParentChange,
+        // ParentAboutToChange,
+        // ThreadChange,
+        // WindowActive,
+        // WindowDeactive,
+        // ShowToParent,
+        // HideToParent,
+        // WindowTitleChange,
+        // WindowIconChange,
+        // ApplicationWindowIconChange,
+        // ApplicationFontChange,
+        // ApplicationLayoutDirectionChange,
+        // ApplicationPaletteChange,
+        // PaletteChange,
+        // ClipBoard,
+        // Speech,
+        // SockAct,
+        // WinEventAct,
+        // DragEnter,
+        // DragMove,
+        // DragLeave,
+        // Drop,
+        // DragResponse,
+        // ShowWindowRequest,
+        // PolishRequest,
+        // Polish,
+        // LayoutRequest,
+        // UpdateRequest,
+        // UpdateLater,
 
-        FileOpen,
+        // ContextMenu,
+        // InputMethod,
+        // AccessibilityPrepare,
+        // LocaleChange,
+        // LanguageChange,
+        // LauoutDirectionChange,
+        // Style,
+        // OkRequest,
+        // HelpRequest,
 
-        Shortcut,
-        ShortcutOverride,
+        // IconDrag,
 
-        WhatsThisClicked,
+        // FontChange,
+        // ActivationChange,
+        // StyleChange,
+        // IconTextChange,
+        // ModifiedChange,
+        // MouseTrackingChange,
+        // ToolTip,
+        // WhatsThis,
+        // StatusTip,
 
-        ToolBarChange,
+        // ActionChanges,
+        // ActionAdded,
+        // ActionRemoved,
 
-        ApplicationActivate,
-        ApplicationDeactivate,
+        // FileOpen,
 
-        QueryWhatsThis,
-        EnterWhatsThisMode,
-        LeaveWhatsThisMode,
+        // Shortcut,
+        // ShortcutOverride,
 
-        ZOrderChange,
+        // WhatsThisClicked,
 
-        HoverEnter,
-        HoverLeave,
-        HoverMove,
+        // ToolBarChange,
 
-        AccessibilityHelp,
-        AccessibilityDescription
+        // ApplicationActivate,
+        // ApplicationDeactivate,
+
+        // QueryWhatsThis,
+        // EnterWhatsThisMode,
+        // LeaveWhatsThisMode,
+
+        // ZOrderChange,
+
+        // HoverEnter,
+        // HoverLeave,
+        // HoverMove,
+
+        // AccessibilityHelp,
+        // AccessibilityDescription
     };
 
     explicit Event(Type type) : type_{type} {}
-
+    Event(const Event&) = default;
+    Event& operator=(const Event&) = default;
+    Event(Event&&) noexcept = default;             // NOLINT
+    Event& operator=(Event&&) noexcept = default;  // NOLINT
     virtual ~Event() = default;
 
     Type type() const { return type_; }
@@ -132,5 +137,5 @@ inline bool operator==(const Event& x, const Event& y) {
     return x.type() == y.type();
 }
 
-}  // namespace twf
-#endif  // EVENT_HPP
+}  // namespace cppurses
+#endif  // SYSTEM_MODULE_EVENT_HPP

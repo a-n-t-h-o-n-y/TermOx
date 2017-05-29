@@ -1,16 +1,15 @@
-#ifndef BRUSH_HPP
-#define BRUSH_HPP
+#ifndef PAINTER_MODULE_BRUSH_HPP
+#define PAINTER_MODULE_BRUSH_HPP
 
-#include "attribute.hpp"
-#include "color.hpp"
-
+#include "painter_module/attribute.hpp"
+#include "painter_module/color.hpp"
 #include <aml/optional/optional.hpp>
-
 #include <algorithm>
+#include <bitset>
 #include <utility>
 #include <vector>
 
-namespace twf {
+namespace cppurses {
 
 class Brush {
    public:
@@ -19,33 +18,33 @@ class Brush {
         this->add_attributes(std::forward<Attributes>(attrs)...);
     }
 
-    // Recursive Case
-    template <typename T, typename... Rest>
-    void add_attributes(T t, Rest... rest) {
-        this->set_attr(t);
-        this->add_attributes(rest...);
-    }
-
     // Base Case
     void add_attributes() {}
 
+    // Recursive Case
+    template <typename T, typename... Others>
+    void add_attributes(T attr, Others... others) {
+        this->set_attr(attr);
+        this->add_attributes(others...);
+    }
+
     void remove_attribute(Attribute attr);
-    void clear_attributes() { attributes_.clear(); }
+    void clear_attributes() { attributes_.reset(); }
 
     void set_background(Color color) { background_color_ = color; }
     void set_foreground(Color color) { foreground_color_ = color; }
 
-    std::vector<Attribute> attributes() const { return attributes_; }
-    opt::Optional<Color> background_color() const { return background_color_; }
-    opt::Optional<Color> foreground_color() const { return foreground_color_; }
-
-    friend bool operator==(const Brush& x, const Brush& y) {
-        return (std::is_permutation(
-                    std::begin(x.attributes_), std::end(x.attributes_),
-                    std::begin(y.attributes_), std::end(y.attributes_)) &&
-                x.background_color_ == y.background_color_ &&
-                x.foreground_color_ == y.foreground_color_);
+    std::vector<Attribute> attributes() const;
+    const opt::Optional<Color>& background_color() const {
+        return background_color_;
     }
+    opt::Optional<Color>& background_color() { return background_color_; }
+    const opt::Optional<Color>& foreground_color() const {
+        return foreground_color_;
+    }
+    opt::Optional<Color>& foreground_color() { return foreground_color_; }
+
+    friend bool operator==(const Brush& lhs, const Brush& rhs);
 
    private:
     void set_attr(detail::BackgroundColor bc) {
@@ -56,14 +55,12 @@ class Brush {
         this->set_foreground(static_cast<Color>(fc));
     }
 
-    void set_attr(Attribute attr) { this->push_attribute(attr); }
+    void set_attr(Attribute attr);
 
-    void push_attribute(Attribute attr);
-
-    std::vector<Attribute> attributes_;
+    std::bitset<8> attributes_;
     opt::Optional<Color> background_color_;
     opt::Optional<Color> foreground_color_;
 };
 
-}  // namespace twf
-#endif  // BRUSH_HPP
+}  // namespace cppurses
+#endif  // PAINTER_MODULE_BRUSH_HPP

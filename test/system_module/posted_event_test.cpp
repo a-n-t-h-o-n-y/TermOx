@@ -5,10 +5,10 @@
 
 #include <gtest/gtest.h>
 
-using twf::System;
-using twf::Object;
-using twf::detail::Posted_event;
-using twf::Event;
+using cppurses::System;
+using cppurses::Object;
+using cppurses::detail::Posted_event;
+using cppurses::Event;
 
 TEST(PostedEventTest, LessThanOperator) {
     System system;

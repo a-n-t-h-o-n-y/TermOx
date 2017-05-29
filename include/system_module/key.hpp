@@ -1,7 +1,7 @@
-#ifndef KEY_HPP
-#define KEY_HPP
+#ifndef SYSTEM_MODULE_KEY_HPP
+#define SYSTEM_MODULE_KEY_HPP
 
-enum Key {
+enum class Key {
     // Control Characters
     Null = 0,    // Ctrl + Space, or Ctrl + 2, OR Ctrl + @
     Ctrl_a,      // Start of heading
@@ -16,8 +16,7 @@ enum Key {
     Enter,       // Ctrl + J, or Ctrl + M, AKA Line Feed, AKA Carriage Return
     Ctrl_k,      // Vertical Tab
     Ctrl_l,      // Form Feed
-    Carriage_return_,     // not used? check with keypad, ascii 13 maybe make it
-                          // keypad_enter
+    Carriage_return_,     // old, not on modern keyboards
     Ctrl_n,               // Shift Out
     Ctrl_o,               // Shift In
     Ctrl_p,               // Data Link Escape
@@ -141,10 +140,24 @@ enum Key {
     Arrow_left,
     Arrow_right,
     Home,
-    Backspace_2,     // unused? int 263
-    Function = 264,  // Add function number to enum when used ex) F5 key =
-                     // Key::Function + 5;
-    // up to 63 function keys...
+    Backspace_2,  // unused? int 263
+
+    // Function keys, up to 63.
+    // Add function number to enum for more. ex) F15 key = Key::Function + 15;
+    Function = 264,
+    Function1,
+    Function2,
+    Function3,
+    Function4,
+    Function5,
+    Function6,
+    Function7,
+    Function8,
+    Function9,
+    Function10,
+    Function11,
+    Function12,
+
     Delete_line = 328,
     Insert_line,
     Delete_character,
@@ -160,21 +173,18 @@ enum Key {
     Set_tab,
     Clear_tab,
     Clear_all_tabs,
-    Possibly_keypad_enter_,  // might be Keypad_enter? check it out, function
-                             // key and Enter
-                             // int 343
+    Possibly_keypad_enter_,  // int 343
+
     Print = 346,
-    Home_down,  // Lower left keypad? Home down key? check with larger keyboard
+    Home_down,
     Keypad_7,
     Keypad_9,
-    Keypad_5,  // other keypad numbers are in arrow keys, make sure this is
-               // correct
+    Keypad_5,
     Keypad_1,
     Keypad_3,
     Back_tab,
     Begin,
-    Cancel_dup_,  // look into this to see if its the same as the above cancel
-                  // key
+    Cancel_dup_,
     Close,
     Command,
     Copy,
@@ -230,4 +240,4 @@ enum Key {
     Undo
 };
 
-#endif  // KEY_HPP
+#endif  // SYSTEM_MODULE_KEY_HPP

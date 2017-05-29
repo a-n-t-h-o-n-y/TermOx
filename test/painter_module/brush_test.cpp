@@ -4,11 +4,11 @@
 
 #include <gtest/gtest.h>
 
-using twf::Attribute;
-using twf::background;
-using twf::Brush;
-using twf::Color;
-using twf::foreground;
+using cppurses::Attribute;
+using cppurses::background;
+using cppurses::Brush;
+using cppurses::Color;
+using cppurses::foreground;
 
 TEST(BrushTest, Constructor) {
     Brush b1;

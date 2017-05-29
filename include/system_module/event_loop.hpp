@@ -1,9 +1,9 @@
-#ifndef EVENT_LOOP_HPP
-#define EVENT_LOOP_HPP
+#ifndef SYSTEM_MODULE_EVENT_LOOP_HPP
+#define SYSTEM_MODULE_EVENT_LOOP_HPP
 
-#include "object.hpp"
+#include "system_module/object.hpp"
 
-namespace twf {
+namespace cppurses {
 
 class Event_loop : public Object {
    public:
@@ -16,5 +16,5 @@ class Event_loop : public Object {
     bool exit_ = false;
 };
 
-}  // namespace twf
-#endif  // EVENT_LOOP_HPP
+}  // namespace cppurses
+#endif  // SYSTEM_MODULE_EVENT_LOOP_HPP

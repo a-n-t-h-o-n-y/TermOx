@@ -1,10 +1,12 @@
-#ifndef COLOR_HPP
-#define COLOR_HPP
+#ifndef PAINTER_MODULE_COLOR_HPP
+#define PAINTER_MODULE_COLOR_HPP
 
-namespace twf {
+#include <cstdint>
 
-enum class Color {
-    Black,
+namespace cppurses {
+
+enum class Color : std::int16_t {
+    Black = 240,
     Dark_red,
     Dark_blue,
     Dark_gray,
@@ -24,8 +26,8 @@ enum class Color {
 
 namespace detail {
 
-enum class BackgroundColor {
-    Black,
+enum class BackgroundColor : std::int16_t {
+    Black = 240,
     Dark_red,
     Dark_blue,
     Dark_gray,
@@ -43,8 +45,8 @@ enum class BackgroundColor {
     White
 };
 
-enum class ForegroundColor {
-    Black,
+enum class ForegroundColor : std::int16_t {
+    Black = 240,
     Dark_red,
     Dark_blue,
     Dark_gray,
@@ -64,7 +66,6 @@ enum class ForegroundColor {
 
 }  // namespace detail
 
-// Free Functions
 inline detail::BackgroundColor background(Color c) {
     return static_cast<detail::BackgroundColor>(c);
 }
@@ -73,5 +74,5 @@ inline detail::ForegroundColor foreground(Color c) {
     return static_cast<detail::ForegroundColor>(c);
 }
 
-}  // namespace twf
-#endif  // COLOR_HPP
+}  // namespace cppurses
+#endif  // PAINTER_MODULE_COLOR_HPP

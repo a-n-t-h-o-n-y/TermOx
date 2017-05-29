@@ -1,9 +1,11 @@
-#ifndef ATTRIBUTE_HPP
-#define ATTRIBUTE_HPP
+#ifndef PAINTER_MODULE_ATTRIBUTE_HPP
+#define PAINTER_MODULE_ATTRIBUTE_HPP
 
-namespace twf {
+#include <cstdint>
 
-enum class Attribute {
+namespace cppurses {
+
+enum class Attribute : std::int8_t {
     Bold,
     Italic,
     Underline,
@@ -14,5 +16,5 @@ enum class Attribute {
     Blink
 };
 
-}  // namespace twf
-#endif  // ATTRIBUTE_HPP
+}  // namespace cppurses
+#endif  // PAINTER_MODULE_ATTRIBUTE_HPP

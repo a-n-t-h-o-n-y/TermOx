@@ -1,12 +1,11 @@
-#ifndef KEY_EVENT_HPP
-#define KEY_EVENT_HPP
+#ifndef SYSTEM_MODULE_EVENTS_KEY_EVENT_HPP
+#define SYSTEM_MODULE_EVENTS_KEY_EVENT_HPP
 
-#include "../event.hpp"
-#include "../key.hpp"
-
+#include "system_module/event.hpp"
+#include "system_module/key.hpp"
 #include <string>
 
-namespace twf {
+namespace cppurses {
 
 class Key_event : public Event {
    public:
@@ -24,5 +23,5 @@ class Key_event : public Event {
     int key_code_;
 };
 
-}  // namespace twf
-#endif  // KEY_EVENT_HPP
+}  // namespace cppurses
+#endif  // SYSTEM_MODULE_EVENTS_KEY_EVENT_HPP

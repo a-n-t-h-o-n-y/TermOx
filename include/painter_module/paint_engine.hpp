@@ -1,49 +1,64 @@
-#ifndef PAINT_ENGINE_HPP
-#define PAINT_ENGINE_HPP
+#ifndef PAINTER_MODULE_PAINT_ENGINE_HPP
+#define PAINTER_MODULE_PAINT_ENGINE_HPP
 
-#include "attribute.hpp"
-#include "color.hpp"
-#include "detail/paint_buffer.hpp"
-#include "glyph_string.hpp"
-
+#include "painter_module/attribute.hpp"
+#include "painter_module/color.hpp"
+#include "painter_module/detail/paint_buffer.hpp"
+#include "painter_module/glyph_string.hpp"
+#include <cstddef>
+#include <cstdint>
 #include <string>
 
-namespace twf {
+namespace cppurses {
 
 class Paint_engine {
    public:
+    Paint_engine() = default;
+    Paint_engine(const Paint_engine&) = delete;
+    Paint_engine(Paint_engine&&) noexcept = default;  // NOLINT
+    Paint_engine& operator=(const Paint_engine&) = delete;
+    Paint_engine& operator=(Paint_engine&&) noexcept = default;  // NOLINT
     virtual ~Paint_engine() = default;
 
+    virtual void move(std::size_t x, std::size_t y) = 0;
+
     // Put to buffer
-    void put(unsigned x, unsigned y, const Glyph& g);
+    void put(std::size_t x, std::size_t y, const Glyph& g);
+    void put_glyph(const Glyph& g);
 
     // Flush to screen
-    void flush();
+    void flush(bool optimize);
 
-    virtual void set_rgb(Color c, int r, int g, int b) = 0;
+    virtual void set_rgb(Color c,
+                         std::int16_t r,
+                         std::int16_t g,
+                         std::int16_t b) = 0;
 
-    virtual void show_cursor() = 0;
-    virtual void hide_cursor() = 0;
-    virtual unsigned screen_width() = 0;
-    virtual unsigned screen_height() = 0;
+    virtual void show_cursor(bool show = true) = 0;  // NOLINT
+    virtual void hide_cursor(bool hide = true) = 0;  // NOLINT
+    virtual std::size_t screen_width() = 0;
+    virtual std::size_t screen_height() = 0;
+
+    virtual void clear_attributes() = 0;
+    virtual void touch_all() = 0;
+    virtual void set_ctrl_char(bool enable) = 0;
+
+    detail::Paint_buffer& buffer() { return buffer_; }
+    const detail::Paint_buffer& buffer() const { return buffer_; }
 
    protected:
-    // functions to put to physical screen
-    virtual void move(unsigned x, unsigned y) = 0;
+    // Functions to put to screen, not buffer.
+    virtual void put_string(const char* s) = 0;
     virtual void put_string(const std::string& sym) = 0;
 
     virtual void set_attribute(Attribute attr) = 0;
-    virtual void clear_attributes() = 0;
     virtual void set_background_color(Color c) = 0;
     virtual void set_foreground_color(Color c) = 0;
 
     virtual void refresh() = 0;
 
     detail::Paint_buffer buffer_;
-
-   private:
-    void put_glyph(const Glyph& g);
 };
 
-}  // namespace twf
-#endif  // PAINT_ENGINE_HPP
+}  // namespace cppurses
+#endif  // PAINTER_MODULE_PAINT_ENGINE_HPP

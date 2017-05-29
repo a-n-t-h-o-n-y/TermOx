@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.6)
-project (TWidgets)
+project (CPPurses)
 
 # Uncomment the next three lines to compile with clang static analyzer
 # set(CCC_CXX clang++)
@@ -9,7 +9,8 @@ project (TWidgets)
 # Build System Information For Clang-Tidy
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_custom_target(compile_commands ALL
-	COMMAND [ -f ${CMAKE_SOURCE_DIR}/build/compile_commands.json ] && mv ${CMAKE_SOURCE_DIR}/build/compile_commands.json
+	COMMAND [ -f ${CMAKE_SOURCE_DIR}/build/compile_commands.json ] && 
+        mv ${CMAKE_SOURCE_DIR}/build/compile_commands.json
 		${CMAKE_SOURCE_DIR}/compile_commands.json || :)
 
 # Set Output Directories
@@ -19,96 +20,102 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/lib")
 
 # Set Compiler Flags
-set(CMAKE_CXX_FLAGS "-std=c++14 -g -Wall")
+set(CMAKE_BUILD_TYPE Release)
+# set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_CXX_FLAGS "-std=c++14")
 
 # Include Directory
 include_directories(include)
 
 # Collect Source Files into Variable Names
-list(APPEND SYSTEM_MODULE_SOURCES 	"src/system_module/thread_data.cpp"
-									"src/system_module/system.cpp"
-									"src/system_module/event_loop.cpp"
-									"src/system_module/ncurses_event_dispatcher.cpp"
-									"src/system_module/posted_event_queue.cpp"
-									"src/system_module/posted_event.cpp"
-									"src/system_module/abstract_event_dispatcher.cpp"
-									"src/system_module/object.cpp"
-									"src/system_module/move_event.cpp"
-									"src/system_module/resize_event.cpp"
-									"src/system_module/child_event.cpp"
+list(APPEND SYSTEM_MODULE_SOURCES
+    "src/system_module/thread_data.cpp"
+	"src/system_module/system.cpp"
+	"src/system_module/event_loop.cpp"
+	"src/system_module/ncurses_event_dispatcher.cpp"
+	"src/system_module/posted_event_queue.cpp"
+	"src/system_module/posted_event.cpp"
+	"src/system_module/abstract_event_dispatcher.cpp"
+	"src/system_module/object.cpp"
+	"src/system_module/move_event.cpp"
+	"src/system_module/resize_event.cpp"
+	"src/system_module/child_event.cpp"
 								 	)
-list(APPEND PAINTER_MODULE_SOURCES  "src/painter_module/ncurses_paint_engine.cpp"
-									"src/painter_module/painter.cpp"
-									"src/painter_module/paint_engine.cpp"
-									"src/painter_module/palette.cpp"
-									"src/painter_module/glyph.cpp"
-									"src/painter_module/brush.cpp"
-									"src/painter_module/geometry.cpp"
-									"src/painter_module/paint_buffer.cpp"
+list(APPEND PAINTER_MODULE_SOURCES
+    "src/painter_module/ncurses_paint_engine.cpp"
+	"src/painter_module/painter.cpp"
+	"src/painter_module/paint_engine.cpp"
+	"src/painter_module/palette.cpp"
+	"src/painter_module/glyph.cpp"
+	"src/painter_module/brush.cpp"
+	"src/painter_module/geometry.cpp"
+	"src/painter_module/paint_buffer.cpp"
+    "src/painter_module/glyph_matrix.cpp"
+    "src/painter_module/glyph_string.cpp"
 									)
-list(APPEND WIDGET_MODULE_SOURCES 	"src/widget_module/widget.cpp"
-									"src/widget_module/layout.cpp"
-									"src/widget_module/horizontal_layout.cpp"
-									"src/widget_module/border.cpp"
+list(APPEND WIDGET_MODULE_SOURCES
+    "src/widget_module/widget.cpp"
+	"src/widget_module/layout.cpp"
+	"src/widget_module/horizontal_layout.cpp"
+	"src/widget_module/border.cpp"
+    "src/widget_module/vertical_layout.cpp"
+    "src/widget_module/textbox.cpp"
+    "src/widget_module/textbox_base.cpp"
+    "src/widget_module/push_button.cpp"
+    "src/widget_module/horizontal_scrollbar.cpp"
+    "src/widget_module/vertical_scrollbar.cpp"
+    "src/widget_module/checkbox.cpp"
+    "src/widget_module/titlebar.cpp"
+    "src/widget_module/text_display.cpp"
+    "src/widget_module/color_chooser.cpp"
 									)
+list(APPEND TEST_SOURCES
+    "test/system_module/system_test.cpp"
+	"test/system_module/object_test.cpp"
+	"test/system_module/event_loop_test.cpp"
+	"test/system_module/event_test.cpp"
+	"test/system_module/abstract_event_dispatcher_test.cpp"
+	"test/system_module/thread_data_test.cpp"
+	"test/system_module/posted_event_queue_test.cpp"
+	"test/system_module/posted_event_test.cpp"
+	"test/system_module/ncurses_event_dispatcher_test.cpp"
 
-list(APPEND TEST_SOURCES "test/system_module/system_test.cpp"
-						 "test/system_module/object_test.cpp"
-						 "test/system_module/event_loop_test.cpp"
-						 "test/system_module/event_test.cpp"
-						 "test/system_module/abstract_event_dispatcher_test.cpp"
-						 "test/system_module/thread_data_test.cpp"
-						 "test/system_module/posted_event_queue_test.cpp"
-						 "test/system_module/posted_event_test.cpp"
-						 "test/system_module/ncurses_event_dispatcher_test.cpp"
+	"test/widget_module/widget_test.cpp"
 
-						 "test/widget_module/widget_test.cpp"
-
-						 "test/painter_module/glyph_test.cpp"
-						 "test/painter_module/glyph_string_test.cpp"
-						 "test/painter_module/brush_test.cpp"
-						 "test/painter_module/palette_test.cpp"
-						 "test/painter_module/glyph_matrix_test.cpp"
+	"test/painter_module/glyph_test.cpp"
+	"test/painter_module/glyph_string_test.cpp"
+	"test/painter_module/brush_test.cpp"
+	"test/painter_module/palette_test.cpp"
+	"test/painter_module/glyph_matrix_test.cpp"
 						 )
-
-list(APPEND TEST1_SOURCES "test/test1/main.cpp"
-						 )
-
-list(APPEND TEST2_SOURCES "test/test2/main.cpp"
-						 )
-
-list(APPEND TEST3_SOURCES "test/test3/main.cpp"
-						 )
-
 # Create a Static Library for MCurses
-add_library(twidgets STATIC ${SYSTEM_MODULE_SOURCES}
-						   ${PAINTER_MODULE_SOURCES}
-						   ${WIDGET_MODULE_SOURCES}
- 						   )
+add_library(cppurses STATIC
+    ${SYSTEM_MODULE_SOURCES}
+	${PAINTER_MODULE_SOURCES}
+    ${WIDGET_MODULE_SOURCES}
+    )
 
-# Create Executables with the Sources
+# Test Executable
 add_executable(tests ${TEST_SOURCES})
-add_executable(test1 ${TEST1_SOURCES})
-add_executable(test2 ${TEST2_SOURCES})
-add_executable(test3 ${TEST3_SOURCES})
+
+# Demo Executables
+add_executable(notepad_demo demos/notepad_demo.cpp)
 
 # Link libraries to executables
-target_link_libraries(tests twidgets gtest gtest_main ncurses)
-target_link_libraries(test1 twidgets ncurses)
-target_link_libraries(test2 twidgets ncurses)
-target_link_libraries(test3 twidgets ncurses)
+target_link_libraries(tests cppurses gtest gtest_main ncurses)
+target_link_libraries(notepad_demo cppurses ncurses)
 
 # Install Static Library
-install(TARGETS twidgets ARCHIVE DESTINATION lib)
+install(TARGETS cppurses ARCHIVE DESTINATION lib)
 
 # Install Headers
-install(DIRECTORY include/ DESTINATION include/aml/twidgets)
+install(DIRECTORY include/ DESTINATION include/aml/cppurses)
 
-# Doxygen Target - Doxyfile in project/doc - make doc
+# Doxygen Target - Doxyfile in project/docs - make docs
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
-add_custom_target(doc
-${DOXYGEN_EXECUTABLE} ${CMAKE_SOURCE_DIR}/doc/Doxyfile
-WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/doc
+add_custom_target(docs
+${DOXYGEN_EXECUTABLE} ${CMAKE_SOURCE_DIR}/docs/Doxyfile
+WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/docs
 COMMENT "Generating API documentation with Doxygen" VERBATIM)
 endif(DOXYGEN_FOUND)
