@@ -4,6 +4,8 @@ applications. Through a set of abstractions built on top of NCurses, CPPurses
 enables quick development of complex TUIs, without getting in the way of
 program logic.
 
+![alt text](src/CPPurses/docs/images/CPPurses.png)
+
 __Event System:__
 Event loop, widget drawing, and user input.
 
@@ -12,8 +14,6 @@ Widget to widget communication.
 
 __Widget Library:__
 Pre-made Widgets for reuse.
-
-![alt text](src/CPPurses/docs/images/CPPurses.png)
 
 ## Features
 - UTF-8 support without the need for wide characters
@@ -55,7 +55,7 @@ will handle installation of each library and building of tests.
 
 ## Documentation
 Doxygen documentation can be found [here](
-https://a-n-t-h-o-n-y.github.io/CPPurses/).
+https://a-n-t-h-o-n-y.github.io/CPPurses/annotated.html).
 
 ## Tests
 CPPurses uses google test and has support for ctest.
