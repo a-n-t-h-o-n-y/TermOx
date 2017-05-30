@@ -1,3 +1,5 @@
+# Terminal User Interface Library
+
 __CPPurses__ is a Qt inspired widget framework for NCurses, written in C++14. It
 comes from a desire for a simple and modern approach to building terminal
 applications. Through a set of abstractions built on top of NCurses, CPPurses
