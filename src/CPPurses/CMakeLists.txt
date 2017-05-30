@@ -112,9 +112,9 @@ endif()
 
 # Doxygen Target
 find_package(Doxygen)
-if(DOXYGEN_FOUND AND NOT TARGET docs)
+if(DOXYGEN_FOUND)
     add_custom_target(docs
-    ${DOXYGEN_EXECUTABLE} ${CMAKE_SOURCE_DIR}/docs/Doxyfile
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/docs
+    ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/docs/Doxyfile
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/docs
     COMMENT "Generating API documentation with Doxygen" VERBATIM)
 endif()
