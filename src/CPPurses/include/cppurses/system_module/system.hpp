@@ -6,7 +6,7 @@
 #include "painter_module/detail/ncurses_paint_engine.hpp"
 #include "painter_module/paint_engine.hpp"
 #include "painter_module/palette.hpp"
-#include <aml/signals/slot.hpp>
+#include <signals/slot.hpp>
 #include <memory>
 
 namespace cppurses {

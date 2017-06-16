@@ -4,7 +4,7 @@
 #include "painter_module/glyph.hpp"
 #include "painter_module/glyph_string.hpp"
 #include "widget_module/widget.hpp"
-#include <aml/signals/signals.hpp>
+#include <signals/signals.hpp>
 
 namespace cppurses {
 class Mouse_event;

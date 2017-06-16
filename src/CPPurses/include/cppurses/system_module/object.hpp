@@ -1,8 +1,8 @@
 #ifndef SYSTEM_MODULE_OBJECT_HPP
 #define SYSTEM_MODULE_OBJECT_HPP
 
-#include <aml/signals/signal.hpp>
-#include <aml/signals/slot.hpp>
+#include <signals/signal.hpp>
+#include <signals/slot.hpp>
 #include <algorithm>
 #include <cstddef>
 #include <memory>
