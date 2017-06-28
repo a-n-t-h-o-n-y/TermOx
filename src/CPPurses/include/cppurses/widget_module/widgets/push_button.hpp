@@ -6,6 +6,7 @@
 #include "system_module/events/paint_event.hpp"
 #include "widget_module/widget.hpp"
 #include <signals/signals.hpp>
+#include <utility>
 
 namespace cppurses {
 
@@ -20,6 +21,12 @@ class Push_button : public Widget {
 
     // Signals
     sig::Signal<void()> clicked;
+    sig::Signal<void(Push_button*)> clicked_w_ref;
+
+    void set_text(Glyph_string text) {
+        title_ = std::move(text);
+        this->update();
+    }
 
    private:
     Glyph_string title_;

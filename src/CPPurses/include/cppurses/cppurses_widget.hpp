@@ -9,6 +9,7 @@
 #include "widget_module/widgets/checkbox.hpp"
 #include "widget_module/widgets/color_chooser.hpp"
 #include "widget_module/widgets/horizontal_scrollbar.hpp"
+#include "widget_module/widgets/menu.hpp"
 #include "widget_module/widgets/push_button.hpp"
 #include "widget_module/widgets/text_display.hpp"
 #include "widget_module/widgets/textbox.hpp"

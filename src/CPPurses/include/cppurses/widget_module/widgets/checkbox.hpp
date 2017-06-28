@@ -12,7 +12,7 @@ class Paint_event;
 
 class Checkbox : public Widget {
    public:
-    Checkbox(Glyph_string title = "");
+    Checkbox(Glyph_string title = "", int dist = 3);
 
     // Slots
     sig::Slot<void()> toggle;
@@ -37,6 +37,7 @@ class Checkbox : public Widget {
 
    private:
     void initialize();
+    int dist_;
 };
 
 }  // namespace cppurses

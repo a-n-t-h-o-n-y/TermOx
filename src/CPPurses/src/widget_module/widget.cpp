@@ -21,7 +21,6 @@
 #include "system_module/system.hpp"
 #include "widget_module/border.hpp"
 #include "widget_module/coordinates.hpp"
-#include <cstddef>
 #include <memory>
 #include <utility>
 
@@ -156,6 +155,25 @@ void Widget::set_geometry(const Geometry& g) {
     geometry_ = g;
     geometry_.set_widget(this);
     this->update();
+}
+
+void Widget::set_vertical_policy(Size_policy::Policy policy, std::size_t hint) {
+    this->size_policy().vertical_policy = policy;
+    this->geometry().set_height_hint(hint);
+}
+
+void Widget::set_vertical_policy(Size_policy::Policy policy) {
+    this->size_policy().vertical_policy = policy;
+}
+
+void Widget::set_horizontal_policy(Size_policy::Policy policy,
+                                   std::size_t hint) {
+    this->size_policy().horizontal_policy = policy;
+    this->geometry().set_width_hint(hint);
+}
+
+void Widget::set_horizontal_policy(Size_policy::Policy policy) {
+    this->size_policy().horizontal_policy = policy;
 }
 
 void Widget::update() {
