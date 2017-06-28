@@ -5,7 +5,7 @@
 
 namespace cppurses {
 
-Checkbox::Checkbox(Glyph_string title) : title_{title} {
+Checkbox::Checkbox(Glyph_string title, int dist) : title_{title}, dist_{dist} {
     this->geometry().size_policy().vertical_policy = Size_policy::Fixed;
     this->geometry().set_height_hint(1);
     this->Checkbox::initialize();
@@ -35,7 +35,7 @@ bool Checkbox::paint_event(const Paint_event& event) {
     } else {
         p.put(empty_box_);
     }
-    p.put(title_, 3, 0);
+    p.put(title_, dist_, 0);
     return Widget::paint_event(event);
 }
 

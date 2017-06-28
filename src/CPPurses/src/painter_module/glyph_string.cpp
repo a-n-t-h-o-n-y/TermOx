@@ -6,7 +6,7 @@
 
 namespace cppurses {
 
-Glyph_string::operator std::string() const { // NOLINT
+Glyph_string::operator std::string() const {  // NOLINT
     return this->str();
 }
 
@@ -26,8 +26,10 @@ Glyph_string& Glyph_string::operator+=(const Glyph& glyph) {
     return this->append(glyph);
 }
 
-Glyph_string& Glyph_string::operator+(const Glyph_string& gs) {
-    return this->append(gs);
+Glyph_string Glyph_string::operator+(const Glyph_string& gs) {
+    Glyph_string result{*this};
+    result.append(gs);
+    return result;
 }
 
 bool operator==(const Glyph_string& x, const Glyph_string& y) {

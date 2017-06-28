@@ -81,6 +81,10 @@ class Widget : public Object {
 
     Size_policy& size_policy() { return geometry().size_policy(); }
     const Size_policy& size_policy() const { return geometry().size_policy(); }
+    void set_vertical_policy(Size_policy::Policy policy, std::size_t hint);
+    void set_vertical_policy(Size_policy::Policy policy);
+    void set_horizontal_policy(Size_policy::Policy policy, std::size_t hint);
+    void set_horizontal_policy(Size_policy::Policy policy);
 
     void update();
 

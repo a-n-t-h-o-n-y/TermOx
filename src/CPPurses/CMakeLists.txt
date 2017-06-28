@@ -43,6 +43,7 @@ set(WIDGET_MODULE_SOURCES
     "src/widget_module/titlebar.cpp"
     "src/widget_module/text_display.cpp"
     "src/widget_module/color_chooser.cpp"
+    "src/widget_module/menu.cpp"
     )
 
 set(TEST_SOURCES 
@@ -89,6 +90,8 @@ export(TARGETS cppurses FILE CPPursesConfig.cmake)
 # Demos
 add_executable(notepad demos/notepad_demo.cpp)
 target_link_libraries(notepad cppurses ncurses)
+add_executable(menu demos/menu_demo.cpp)
+target_link_libraries(menu cppurses ncurses)
 
 # Tests
 add_executable(testcppurses ${TEST_SOURCES})

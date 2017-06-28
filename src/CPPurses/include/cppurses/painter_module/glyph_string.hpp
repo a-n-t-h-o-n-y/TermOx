@@ -59,7 +59,7 @@ class Glyph_string : private std::vector<Glyph> {
     size_type length() const;
 
     Glyph_string& operator+=(const Glyph& glyph);
-    Glyph_string& operator+(const Glyph_string& gs);
+    Glyph_string operator+(const Glyph_string& gs);
 
     template <typename... Attributes>
     Glyph_string& append(const Glyph& symbol, Attributes&&... attrs) {
@@ -94,6 +94,13 @@ class Glyph_string : private std::vector<Glyph> {
             this->append(glyph, std::forward<Attributes>(attrs)...);
         }
         return *this;
+    }
+
+    template <typename... Attributes>
+    void add_attributes(Attributes&&... attrs) {
+        for (auto& glyph : *this) {
+            glyph.brush().add_attributes(std::forward<Attributes>(attrs)...);
+        }
     }
 
     // Functions from std::vector<Glyph>
