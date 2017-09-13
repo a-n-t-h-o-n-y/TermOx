@@ -6,7 +6,7 @@ project(libcppurses LANGUAGES CXX)
 # instead you should make optional a dependency of signals
 # then optional is included within signals and signals cmaketext will include
 # the optional subdirectory.
-add_subdirectory(libs/Optional)
+# add_subdirectory(libs/Optional)
 add_subdirectory(libs/Signals)
 
 include(GNUInstallDirs)
@@ -17,8 +17,9 @@ add_compile_options(-std=c++14)
 set(CMAKE_BUILD_TYPE Debug)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/cppurses
-                    ${CMAKE_CURRENT_SOURCE_DIR}/libs/Optional/include
-                    ${CMAKE_CURRENT_SOURCE_DIR}/libs/Signals/include)
+                    ${CMAKE_CURRENT_SOURCE_DIR}/libs/Signals/include
+                # ${CMAKE_CURRENT_SORCE_DIR}/libs/Signals/libs/Optional/include
+                    )
 
 set(SYSTEM_MODULE_SOURCES
     "src/system_module/thread_data.cpp"
