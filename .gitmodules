@@ -1,6 +1,6 @@
-[submodule "src/libs/Optional"]
-	path = src/libs/Optional
+[submodule "libs/Optional"]
+	path = libs/Optional
 	url = https://github.com/a-n-t-h-o-n-y/Optional.git
-[submodule "src/libs/Signals"]
-	path = src/libs/Signals
+[submodule "libs/Signals"]
+	path = libs/Signals
 	url = https://github.com/a-n-t-h-o-n-y/Signals.git

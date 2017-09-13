@@ -1,0 +1,17 @@
+/// \brief Documentation for Signals Library
+/// \author Anthony Leedom
+/// \file mainpage.dox
+
+/// \mainpage Signals Library
+///
+/// A C++14 implementation of the Boost::Signals2 library.
+///
+/// This is an implementation of a Signals and Slots system. Signals are
+/// callbacks with potentially multiple targets. A Signal can be emitted by
+/// calling is with parameters that are to be passed onto the targets. A Slot's
+/// lifetime can be managed by tracking objects involved with the Slot, if one
+/// of these tracked objects is destroyed, the Slot is disabled and will no
+/// longer be called. Return values from multiple Slots have to be combined in
+/// some way in order to be returned by a Signal, the user is allowed to
+/// override the default behavior of returning the return value of the last Slot
+/// called by providing a new Combiner type.

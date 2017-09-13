@@ -1,0 +1,12 @@
+bin/*
+build/*
+lib/*
+notes
+docs/html/
+
+*.[ao]
+*.so
+*.out
+*.json
+*.vim
+tags

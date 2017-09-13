@@ -1,0 +1,12 @@
+/// \brief Documentation for Optional Library
+/// \author Anthony Leedom
+/// \file mainpage.dox
+
+/// \mainpage Optional Library
+///
+/// A header only, C++14 implementation of the Boost::Optional library.
+///
+/// Optional objects wrap any type and allow them to occupy a 'null' state.
+/// The status of the object can be queried with an explicit bool conversion. If
+/// true, the Optional object is valid and can be accessed through a 
+/// dereference. If false, the object is in a null(empty) state.

@@ -1,0 +1,1757 @@
+
+(/home/anthony/Documents/C++/Projects/CPPurses/src/libs/Optional/include/optional/none.hpp has correct #includes/fwd-decls)
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/libs/Optional/test/none_test.cpp should add these lines:
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/libs/Optional/test/none_test.cpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/libs/Optional/test/none_test.cpp:
+#include "optional/none.hpp"
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <gtest/gtest.h>            // for AssertionResult, Test, TestInfo (...
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/libs/Optional/test/optional_test.cpp should add these lines:
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <type_traits>              // for remove_reference<>::type
+namespace opt { class Bad_optional_access; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/libs/Optional/test/optional_test.cpp should remove these lines:
+- #include "optional/bad_optional_access.hpp"  // lines 1-1
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/libs/Optional/test/optional_test.cpp:
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <gtest/gtest.h>            // for AssertionResult, Test, TestInfo (...
+#include <string>                   // for string, basic_string
+#include <type_traits>              // for remove_reference<>::type
+#include <utility>                  // for move, swap
+#include "optional/none.hpp"        // for none, None_t
+#include "optional/optional.hpp"    // for Optional, operator!=, operator==
+namespace opt { class Bad_optional_access; }
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/libs/Optional/include/optional/detail/aligned_storage.hpp should add these lines:
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/libs/Optional/include/optional/detail/aligned_storage.hpp should remove these lines:
+- #include <new>  // lines 4-4
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/libs/Optional/include/optional/detail/aligned_storage.hpp:
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/libs/Optional/test/aligned_storage_test.cpp should add these lines:
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/libs/Optional/test/aligned_storage_test.cpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/libs/Optional/test/aligned_storage_test.cpp:
+#include "optional/detail/aligned_storage.hpp"
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <gtest/gtest.h>            // for Test, TestInfo (ptr only), EXPECT_EQ
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/libs/Signals/test/slot_test.cpp should add these lines:
+#include <bits/shared_ptr.h>                // for make_shared, shared_ptr
+#include <bits/std_function.h>              // for operator==, function
+#include <gtest/gtest-message.h>            // for Message
+#include <gtest/gtest-test-part.h>          // for TestPartResult
+#include <algorithm>                        // for move, swap
+#include "signals/detail/signal_impl.hpp"   // for Signal_impl<>::group_type
+#include "signals/optional_last_value.hpp"  // for Optional_last_value
+namespace boost { template <typename Signature> class function; }
+namespace opt { template <typename T> class Optional; }
+namespace sig { class Expired_slot; }
+namespace sig { template <typename Signature, typename Combiner = sig::Optional_last_value<typename sig::Function_type_splitter<Signature>::return_type>, typename Group = int, typename GroupCompare = std::less<Group>, typename SlotFunction = std::function<Signature>, typename Mutex = std::mutex> class Signal; }
+namespace sig { template <typename Signature, typename FunctionType = std::function<Signature>> class Slot; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/libs/Signals/test/slot_test.cpp should remove these lines:
+- #include <boost/function.hpp>  // lines 5-5
+- #include <optional/optional.hpp>  // lines 4-4
+- #include <typeinfo>  // lines 9-9
+- #include "signals/expired_slot.hpp"  // lines 1-1
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/libs/Signals/test/slot_test.cpp:
+#include <bits/shared_ptr.h>                // for make_shared, shared_ptr
+#include <bits/std_function.h>              // for operator==, function
+#include <gtest/gtest-message.h>            // for Message
+#include <gtest/gtest-test-part.h>          // for TestPartResult
+#include <gtest/gtest.h>                    // for AssertionResult, Test
+#include <algorithm>                        // for move, swap
+#include <functional>                       // for _Bind_helper<>::type, bind
+#include <memory>                           // for __shared_ptr_access
+#include "signals/detail/signal_impl.hpp"   // for Signal_impl<>::group_type
+#include "signals/optional_last_value.hpp"  // for Optional_last_value
+#include "signals/signal.hpp"               // for Signal, Signal<>::result_...
+#include "signals/slot.hpp"                 // for Slot, Slot<>::arg, Slot<>...
+namespace boost { template <typename Signature> class function; }
+namespace opt { template <typename T> class Optional; }
+namespace sig { class Expired_slot; }
+namespace sig { template <typename Signature, typename Combiner = sig::Optional_last_value<typename sig::Function_type_splitter<Signature>::return_type>, typename Group = int, typename GroupCompare = std::less<Group>, typename SlotFunction = std::function<Signature>, typename Mutex = std::mutex> class Signal; }
+namespace sig { template <typename Signature, typename FunctionType = std::function<Signature>> class Slot; }
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/libs/Signals/test/slot_base_test.cpp should add these lines:
+#include <bits/shared_ptr.h>        // for make_shared, shared_ptr
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <algorithm>                // for move
+namespace sig { template <typename Signature, typename FunctionType = std::function<Signature>> class Slot; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/libs/Signals/test/slot_base_test.cpp should remove these lines:
+- #include <memory>  // lines 4-4
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/libs/Signals/test/slot_base_test.cpp:
+#include <bits/shared_ptr.h>        // for make_shared, shared_ptr
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <gtest/gtest.h>            // for AssertionResult, Test, EXPECT_TRUE
+#include <algorithm>                // for move
+#include <vector>                   // for vector
+#include "signals/slot.hpp"         // for Slot
+#include "signals/slot_base.hpp"    // for Slot_base::locked_container_type
+namespace sig { template <typename Signature, typename FunctionType = std::function<Signature>> class Slot; }
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/libs/Signals/include/signals/connection.hpp should add these lines:
+#include <bits/shared_ptr.h>                // for weak_ptr, operator<, oper...
+#include <algorithm>                        // for move
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/libs/Signals/include/signals/connection.hpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/libs/Signals/include/signals/connection.hpp:
+#include <bits/shared_ptr.h>                // for weak_ptr, operator<, oper...
+#include <algorithm>                        // for move
+#include <memory>                           // for __shared_ptr_access
+#include "detail/connection_impl_base.hpp"  // for Connection_impl_base
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/libs/Signals/test/connection_test.cpp should add these lines:
+#include <gtest/gtest-message.h>                    // for Message
+#include <gtest/gtest-test-part.h>                  // for TestPartResult
+#include "signals/detail/connection_impl_base.hpp"  // for Connection_impl_base
+namespace sig { template <typename Signature, typename FunctionType = std::function<Signature>> class Slot; }
+namespace sig { template <typename Signature> class Connection_impl; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/libs/Signals/test/connection_test.cpp should remove these lines:
+- #include <memory>  // lines 5-5
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/libs/Signals/test/connection_test.cpp:
+#include "signals/connection.hpp"
+#include <gtest/gtest-message.h>                    // for Message
+#include <gtest/gtest-test-part.h>                  // for TestPartResult
+#include <gtest/gtest.h>                            // for AssertionResult
+#include "signals/detail/connection_impl.hpp"       // for Connection_impl
+#include "signals/detail/connection_impl_base.hpp"  // for Connection_impl_base
+#include "signals/slot.hpp"                         // for Slot
+namespace sig { template <typename Signature, typename FunctionType = std::function<Signature>> class Slot; }
+namespace sig { template <typename Signature> class Connection_impl; }
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/libs/Signals/test/connection_impl_test.cpp should add these lines:
+#include <bits/shared_ptr.h>                   // for make_shared, shared_ptr
+#include <gtest/gtest-message.h>               // for Message
+#include <gtest/gtest-test-part.h>             // for TestPartResult
+#include <algorithm>                           // for move
+namespace sig { template <typename Signature, typename FunctionType = std::function<Signature>> class Slot; }
+namespace sig { template <typename Signature> class Connection_impl; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/libs/Signals/test/connection_impl_test.cpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/libs/Signals/test/connection_impl_test.cpp:
+#include <bits/shared_ptr.h>                   // for make_shared, shared_ptr
+#include <gtest/gtest-message.h>               // for Message
+#include <gtest/gtest-test-part.h>             // for TestPartResult
+#include <gtest/gtest.h>                       // for AssertionResult, Test
+#include <algorithm>                           // for move
+#include <memory>                              // for __shared_ptr_access
+#include "signals/connection.hpp"              // for Connection
+#include "signals/detail/connection_impl.hpp"  // for Connection_impl
+#include "signals/slot.hpp"                    // for Slot
+namespace sig { template <typename Signature, typename FunctionType = std::function<Signature>> class Slot; }
+namespace sig { template <typename Signature> class Connection_impl; }
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/libs/Signals/test/signal_test.cpp should add these lines:
+#include <bits/shared_ptr.h>                 // for make_shared, shared_ptr
+#include <bits/std_function.h>               // for function
+#include <gtest/gtest-message.h>             // for Message
+#include <gtest/gtest-test-part.h>           // for TestPartResult
+#include <algorithm>                         // for move, swap
+#include "signals/detail/../connection.hpp"  // for Connection
+#include "signals/detail/../position.hpp"    // for Position, Position::at_f...
+#include "signals/detail/signal_impl.hpp"    // for Signal_impl<>::group_type
+namespace sig { class Expired_slot; }
+namespace sig { template <typename Signature, typename Combiner = sig::Optional_last_value<typename sig::Function_type_splitter<Signature>::return_type>, typename Group = int, typename GroupCompare = std::less<Group>, typename SlotFunction = std::function<Signature>, typename Mutex = std::mutex> class Signal; }
+namespace sig { template <typename Signature, typename FunctionType = std::function<Signature>> class Slot; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/libs/Signals/test/signal_test.cpp should remove these lines:
+- #include <typeinfo>  // lines 11-11
+- #include "signals/connection.hpp"  // lines 1-1
+- #include "signals/expired_slot.hpp"  // lines 2-2
+- #include "signals/position.hpp"  // lines 4-4
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/libs/Signals/test/signal_test.cpp:
+#include <bits/shared_ptr.h>                 // for make_shared, shared_ptr
+#include <bits/std_function.h>               // for function
+#include <gtest/gtest-message.h>             // for Message
+#include <gtest/gtest-test-part.h>           // for TestPartResult
+#include <gtest/gtest.h>                     // for AssertionResult, EXPECT_EQ
+#include <algorithm>                         // for move, swap
+#include <functional>                        // for less
+#include <memory>                            // for __shared_ptr_access
+#include <optional/optional.hpp>             // for Optional
+#include "signals/detail/../connection.hpp"  // for Connection
+#include "signals/detail/../position.hpp"    // for Position, Position::at_f...
+#include "signals/detail/signal_impl.hpp"    // for Signal_impl<>::group_type
+#include "signals/optional_last_value.hpp"   // for Optional_last_value, Opt...
+#include "signals/signal.hpp"                // for Signal, Signal<>::result...
+#include "signals/slot.hpp"                  // for Slot
+namespace sig { class Expired_slot; }
+namespace sig { template <typename Signature, typename Combiner = sig::Optional_last_value<typename sig::Function_type_splitter<Signature>::return_type>, typename Group = int, typename GroupCompare = std::less<Group>, typename SlotFunction = std::function<Signature>, typename Mutex = std::mutex> class Signal; }
+namespace sig { template <typename Signature, typename FunctionType = std::function<Signature>> class Slot; }
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/libs/Signals/test/signal_impl_test.cpp should add these lines:
+#include <bits/std_function.h>                   // for function
+#include <gtest/gtest-message.h>                 // for Message
+#include <gtest/gtest-test-part.h>               // for TestPartResult
+#include <algorithm>                             // for move
+#include <boost/function/function_template.hpp>  // for function
+#include <iterator>                              // for begin, end
+#include <optional/optional.hpp>                 // for Optional
+#include "signals/detail/../connection.hpp"      // for Connection
+namespace boost { template <typename Signature> class function; }
+namespace sig { template <typename Signature, typename Combiner = sig::Optional_last_value<typename sig::Function_type_splitter<Signature>::return_type>, typename Group = int, typename GroupCompare = std::less<Group>, typename SlotFunction = std::function<Signature>, typename Mutex = std::mutex> class Signal; }
+namespace sig { template <typename Signature, typename Combiner, typename Group, typename GroupCompare, typename SlotFunction> class Signal_impl; }
+namespace sig { template <typename Signature, typename FunctionType = std::function<Signature>> class Slot; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/libs/Signals/test/signal_impl_test.cpp should remove these lines:
+- #include <boost/function.hpp>  // lines 7-7
+- #include <type_traits>  // lines 10-10
+- #include "signals/connection.hpp"  // lines 1-1
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/libs/Signals/test/signal_impl_test.cpp:
+#include <bits/std_function.h>                   // for function
+#include <gtest/gtest-message.h>                 // for Message
+#include <gtest/gtest-test-part.h>               // for TestPartResult
+#include <gtest/gtest.h>                         // for AssertionResult, EXP...
+#include <algorithm>                             // for move
+#include <boost/function/function_template.hpp>  // for function
+#include <functional>                            // for less, greater
+#include <iterator>                              // for begin, end
+#include <optional/optional.hpp>                 // for Optional
+#include <typeinfo>                              // for type_info
+#include <vector>                                // for vector
+#include "signals/detail/../connection.hpp"      // for Connection
+#include "signals/detail/signal_impl.hpp"        // for Signal_impl<>::resul...
+#include "signals/optional_last_value.hpp"       // for Optional_last_value<...
+#include "signals/position.hpp"                  // for Position, Position::...
+#include "signals/signal.hpp"                    // for Signal
+#include "signals/slot.hpp"                      // for Slot
+namespace boost { template <typename Signature> class function; }
+namespace sig { template <typename Signature, typename Combiner = sig::Optional_last_value<typename sig::Function_type_splitter<Signature>::return_type>, typename Group = int, typename GroupCompare = std::less<Group>, typename SlotFunction = std::function<Signature>, typename Mutex = std::mutex> class Signal; }
+namespace sig { template <typename Signature, typename Combiner, typename Group, typename GroupCompare, typename SlotFunction> class Signal_impl; }
+namespace sig { template <typename Signature, typename FunctionType = std::function<Signature>> class Slot; }
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/libs/Signals/test/shared_connection_block_test.cpp should add these lines:
+#include <bits/shared_ptr.h>                    // for make_shared, shared_ptr
+#include <bits/std_function.h>                  // for function
+#include <gtest/gtest-message.h>                // for Message
+#include <gtest/gtest-test-part.h>              // for TestPartResult
+#include <algorithm>                            // for move
+#include <memory>                               // for __shared_ptr_access
+#include "signals/detail/../connection.hpp"     // for Connection
+#include "signals/detail/signal_impl.hpp"       // for Signal_impl<>::group_...
+#include "signals/optional_last_value.hpp"      // for Optional_last_value
+namespace sig { template <typename Signature, typename Combiner = sig::Optional_last_value<typename sig::Function_type_splitter<Signature>::return_type>, typename Group = int, typename GroupCompare = std::less<Group>, typename SlotFunction = std::function<Signature>, typename Mutex = std::mutex> class Signal; }
+namespace sig { template <typename Signature, typename FunctionType = std::function<Signature>> class Slot; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/libs/Signals/test/shared_connection_block_test.cpp should remove these lines:
+- #include "signals/connection.hpp"  // lines 1-1
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/libs/Signals/test/shared_connection_block_test.cpp:
+#include <bits/shared_ptr.h>                    // for make_shared, shared_ptr
+#include <bits/std_function.h>                  // for function
+#include <gtest/gtest-message.h>                // for Message
+#include <gtest/gtest-test-part.h>              // for TestPartResult
+#include <gtest/gtest.h>                        // for AssertionResult, EXPE...
+#include <algorithm>                            // for move
+#include <memory>                               // for __shared_ptr_access
+#include "signals/detail/../connection.hpp"     // for Connection
+#include "signals/detail/signal_impl.hpp"       // for Signal_impl<>::group_...
+#include "signals/optional_last_value.hpp"      // for Optional_last_value
+#include "signals/shared_connection_block.hpp"  // for Shared_connection_block
+#include "signals/signal.hpp"                   // for Signal, Signal<>::res...
+#include "signals/slot.hpp"                     // for Slot
+namespace sig { template <typename Signature, typename Combiner = sig::Optional_last_value<typename sig::Function_type_splitter<Signature>::return_type>, typename Group = int, typename GroupCompare = std::less<Group>, typename SlotFunction = std::function<Signature>, typename Mutex = std::mutex> class Signal; }
+namespace sig { template <typename Signature, typename FunctionType = std::function<Signature>> class Slot; }
+---
+
+(/home/anthony/Documents/C++/Projects/CPPurses/src/libs/Signals/include/signals/optional_last_value.hpp has correct #includes/fwd-decls)
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/libs/Signals/test/optional_last_value_test.cpp should add these lines:
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <algorithm>                // for move
+#include <iterator>                 // for begin, end
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/libs/Signals/test/optional_last_value_test.cpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/libs/Signals/test/optional_last_value_test.cpp:
+#include "signals/optional_last_value.hpp"
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <gtest/gtest.h>            // for AssertionResult, Test, TestInfo (...
+#include <algorithm>                // for move
+#include <iterator>                 // for begin, end
+#include <vector>                   // for vector
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/demos/notepad_demo.cpp should add these lines:
+#include <signals/signal.hpp>                           // for Signal
+#include <signals/slot.hpp>                             // for Slot
+#include "painter_module/attribute.hpp"                 // for Attribute
+#include "painter_module/brush.hpp"                     // for Brush
+#include "painter_module/color.hpp"                     // for Color, backgr...
+#include "painter_module/geometry.hpp"                  // for Geometry
+#include "painter_module/glyph_string.hpp"              // for Glyph_string
+#include "painter_module/painter.hpp"                   // for Painter
+#include "system_module/system.hpp"                     // for System
+#include "widget_module/border.hpp"                     // for Border
+#include "widget_module/layouts/horizontal_layout.hpp"  // for Horizontal_la...
+#include "widget_module/layouts/vertical_layout.hpp"    // for Vertical_layout
+#include "widget_module/size_policy.hpp"                // for Size_policy
+#include "widget_module/widget.hpp"                     // for Widget
+#include "widget_module/widgets/checkbox.hpp"           // for Checkbox
+#include "widget_module/widgets/color_chooser.hpp"      // for Color_chooser
+#include "widget_module/widgets/push_button.hpp"        // for Push_button
+#include "widget_module/widgets/textbox.hpp"            // for Textbox
+#include "widget_module/widgets/titlebar.hpp"           // for Titlebar
+namespace cppurses { class Paint_event; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/demos/notepad_demo.cpp should remove these lines:
+- #include <fstream>  // lines 2-2
+- #include "cppurses.hpp"  // lines 1-1
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/demos/notepad_demo.cpp:
+#include <signals/signal.hpp>                           // for Signal
+#include <signals/slot.hpp>                             // for Slot
+#include <sstream>                                      // for ifstream, ofs...
+#include <string>                                       // for string, opera...
+#include <utility>                                      // for move
+#include "painter_module/attribute.hpp"                 // for Attribute
+#include "painter_module/brush.hpp"                     // for Brush
+#include "painter_module/color.hpp"                     // for Color, backgr...
+#include "painter_module/geometry.hpp"                  // for Geometry
+#include "painter_module/glyph_string.hpp"              // for Glyph_string
+#include "painter_module/painter.hpp"                   // for Painter
+#include "system_module/system.hpp"                     // for System
+#include "widget_module/border.hpp"                     // for Border
+#include "widget_module/layouts/horizontal_layout.hpp"  // for Horizontal_la...
+#include "widget_module/layouts/vertical_layout.hpp"    // for Vertical_layout
+#include "widget_module/size_policy.hpp"                // for Size_policy
+#include "widget_module/widget.hpp"                     // for Widget
+#include "widget_module/widgets/checkbox.hpp"           // for Checkbox
+#include "widget_module/widgets/color_chooser.hpp"      // for Color_chooser
+#include "widget_module/widgets/push_button.hpp"        // for Push_button
+#include "widget_module/widgets/textbox.hpp"            // for Textbox
+#include "widget_module/widgets/titlebar.hpp"           // for Titlebar
+namespace cppurses { class Paint_event; }
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/demos/menu_demo.cpp should add these lines:
+#include <algorithm>                                    // for move, swap
+#include <signals/slot.hpp>                             // for Slot
+#include "painter_module/color.hpp"                     // for Color, foregr...
+#include "painter_module/glyph_string.hpp"              // for Glyph_string
+#include "system_module/system.hpp"                     // for System
+#include "widget_module/layouts/horizontal_layout.hpp"  // for Horizontal_la...
+#include "widget_module/widgets/menu.hpp"               // for Menu
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/demos/menu_demo.cpp should remove these lines:
+- #include "cppurses.hpp"  // lines 1-1
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/demos/menu_demo.cpp:
+#include <algorithm>                                    // for move, swap
+#include <signals/slot.hpp>                             // for Slot
+#include "painter_module/color.hpp"                     // for Color, foregr...
+#include "painter_module/glyph_string.hpp"              // for Glyph_string
+#include "system_module/system.hpp"                     // for System
+#include "widget_module/layouts/horizontal_layout.hpp"  // for Horizontal_la...
+#include "widget_module/widgets/menu.hpp"               // for Menu
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/detail/thread_data.hpp should add these lines:
+namespace cppurses { class Event_loop; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/detail/thread_data.hpp should remove these lines:
+- #include "system_module/event_loop.hpp"  // lines 5-5
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/detail/thread_data.hpp:
+#include <memory>                                             // for make_un...
+#include <vector>                                             // for vector
+#include "system_module/abstract_event_dispatcher.hpp"        // for Abstrac...
+#include "system_module/detail/ncurses_event_dispatcher.hpp"  // for NCurses...
+#include "system_module/detail/posted_event_queue.hpp"        // for Posted_...
+namespace cppurses { class Event_loop; }
+---
+
+(/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/system_module/thread_data.cpp has correct #includes/fwd-decls)
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/system.hpp should add these lines:
+namespace cppurses { class Palette; }
+namespace cppurses { namespace detail { class NCurses_paint_engine; } }
+namespace sig { template <typename Signature, typename FunctionType = std::function<Signature>> class Slot; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/system.hpp should remove these lines:
+- #include <signals/slot.hpp>  // lines 9-9
+- #include "painter_module/detail/ncurses_paint_engine.hpp"  // lines 6-6
+- #include "painter_module/palette.hpp"  // lines 8-8
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/system.hpp:
+#include <memory>                           // for unique_ptr, make_unique
+#include "painter_module/paint_engine.hpp"  // for Paint_engine
+#include "system_module/event.hpp"          // for Event, Event::Type::None
+#include "system_module/object.hpp"         // for Object
+namespace cppurses { class Palette; }
+namespace cppurses { class Widget; }  // lines 14-14
+namespace cppurses { namespace detail { class NCurses_paint_engine; } }
+namespace sig { template <typename Signature, typename FunctionType = std::function<Signature>> class Slot; }
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/system_module/system.cpp should add these lines:
+#include <map>                                          // for _Rb_tree_cons...
+#include <signals/slot.hpp>                             // for Slot
+#include "system_module/detail/posted_event_queue.hpp"  // for Posted_event_...
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/system_module/system.cpp should remove these lines:
+- #include <signals/signals.hpp>  // lines 13-13
+- #include <utility>  // lines 17-17
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/system_module/system.cpp:
+#include "system_module/system.hpp"
+#include <algorithm>                                    // for move, find
+#include <iterator>                                     // for begin, back_i...
+#include <map>                                          // for _Rb_tree_cons...
+#include <memory>                                       // for unique_ptr
+#include <signals/slot.hpp>                             // for Slot
+#include <vector>                                       // for vector
+#include "painter_module/color.hpp"                     // for Color, Color:...
+#include "painter_module/paint_engine.hpp"              // for Paint_engine
+#include "painter_module/palette.hpp"                   // for Palette, Dawn...
+#include "system_module/detail/posted_event.hpp"        // for Posted_event
+#include "system_module/detail/posted_event_queue.hpp"  // for Posted_event_...
+#include "system_module/detail/thread_data.hpp"         // for Thread_data
+#include "system_module/event.hpp"                      // for Event, Event:...
+#include "system_module/event_loop.hpp"                 // for Event_loop
+#include "system_module/events/paint_event.hpp"         // for Paint_event
+#include "system_module/object.hpp"                     // for Object
+#include "widget_module/focus_policy.hpp"               // for Focus_policy
+#include "widget_module/widget.hpp"                     // for Widget
+---
+
+(/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/event_loop.hpp has correct #includes/fwd-decls)
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/system_module/event_loop.cpp should add these lines:
+#include <vector>                                       // for vector
+#include "system_module/abstract_event_dispatcher.hpp"  // for Abstract_even...
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/system_module/event_loop.cpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/system_module/event_loop.cpp:
+#include "system_module/event_loop.hpp"
+#include <vector>                                       // for vector
+#include "system_module/abstract_event_dispatcher.hpp"  // for Abstract_even...
+#include "system_module/detail/thread_data.hpp"         // for Thread_data
+---
+
+(/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/detail/ncurses_event_dispatcher.hpp has correct #includes/fwd-decls)
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/system_module/ncurses_event_dispatcher.cpp should add these lines:
+#include <curses.h>                               // for MEVENT, getmouse
+#include <type_traits>                            // for remove_reference<>:...
+#include <vector>                                 // for vector
+#include "system_module/object.hpp"               // for Object
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/system_module/ncurses_event_dispatcher.cpp should remove these lines:
+- #include <ncurses.h>  // lines 9-9
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/system_module/ncurses_event_dispatcher.cpp:
+#include "system_module/detail/ncurses_event_dispatcher.hpp"
+#include <curses.h>                               // for MEVENT, getmouse
+#include <cstddef>                                // for size_t
+#include <memory>                                 // for unique_ptr, make_un...
+#include <type_traits>                            // for remove_reference<>:...
+#include <utility>                                // for move, pair, make_pair
+#include <vector>                                 // for vector
+#include "system_module/event.hpp"                // for Event, Event::Type:...
+#include "system_module/events/key_event.hpp"     // for Key_event
+#include "system_module/events/mouse_event.hpp"   // for Mouse_button, Mouse...
+#include "system_module/events/resize_event.hpp"  // for Resize_event
+#include "system_module/object.hpp"               // for Object
+#include "system_module/system.hpp"               // for System
+#include "widget_module/border.hpp"               // for north_border_offset
+#include "widget_module/widget.hpp"               // for Widget
+---
+
+(/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/detail/posted_event_queue.hpp has correct #includes/fwd-decls)
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/system_module/posted_event_queue.cpp should add these lines:
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/system_module/posted_event_queue.cpp should remove these lines:
+- #include <utility>  // lines 5-5
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/system_module/posted_event_queue.cpp:
+#include "system_module/detail/posted_event_queue.hpp"
+#include <algorithm>                              // for find, move
+#include "system_module/detail/posted_event.hpp"  // for Posted_event, opera...
+#include "system_module/event.hpp"                // for Event, Event::Type:...
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/detail/posted_event.hpp should add these lines:
+namespace cppurses { class Event; }
+namespace cppurses { class Object; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/detail/posted_event.hpp should remove these lines:
+- #include "system_module/event.hpp"  // lines 4-4
+- #include "system_module/object.hpp"  // lines 5-5
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/detail/posted_event.hpp:
+#include <memory>  // for unique_ptr
+namespace cppurses { class Event; }
+namespace cppurses { class Object; }
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/system_module/posted_event.cpp should add these lines:
+#include "system_module/event.hpp"  // for operator==, Event
+namespace cppurses { class Object; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/system_module/posted_event.cpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/system_module/posted_event.cpp:
+#include "system_module/detail/posted_event.hpp"
+#include <memory>                   // for unique_ptr
+#include <utility>                  // for move
+#include "system_module/event.hpp"  // for operator==, Event
+namespace cppurses { class Object; }
+---
+
+(/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/abstract_event_dispatcher.hpp has correct #includes/fwd-decls)
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/system_module/abstract_event_dispatcher.cpp should add these lines:
+#include "painter_module/paint_engine.hpp"  // for Paint_engine
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/system_module/abstract_event_dispatcher.cpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/system_module/abstract_event_dispatcher.cpp:
+#include "system_module/abstract_event_dispatcher.hpp"
+#include "painter_module/paint_engine.hpp"  // for Paint_engine
+#include "system_module/event.hpp"          // for Event, Event::Type::Defer...
+#include "system_module/system.hpp"         // for System
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/object.hpp should add these lines:
+#include <signals/detail/signal_impl.hpp>   // for Signal_impl<>::group_comp...
+#include <signals/optional_last_value.hpp>  // for Optional_last_value
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/object.hpp should remove these lines:
+- #include <utility>  // lines 11-11
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/object.hpp:
+#include <algorithm>                        // for for_each, forward
+#include <cstddef>                          // for size_t
+#include <memory>                           // for unique_ptr, make_unique
+#include <queue>                            // for queue
+#include <signals/detail/signal_impl.hpp>   // for Signal_impl<>::group_comp...
+#include <signals/optional_last_value.hpp>  // for Optional_last_value
+#include <signals/signal.hpp>               // for Signal
+#include <signals/slot.hpp>                 // for Slot
+#include <string>                           // for string
+#include <vector>                           // for vector
+namespace cppurses { class Child_event; }  // lines 17-17
+namespace cppurses { class Enable_event; }  // lines 18-18
+namespace cppurses { class Event; }  // lines 16-16
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/system_module/object.cpp should add these lines:
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/system_module/object.cpp should remove these lines:
+- #include <utility>  // lines 10-10
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/system_module/object.cpp:
+#include "system_module/object.hpp"
+#include <algorithm>                              // for move, find, find_if
+#include <iterator>                               // for end, begin, back_in...
+#include <memory>                                 // for unique_ptr, make_un...
+#include <string>                                 // for string
+#include <vector>                                 // for vector
+#include "system_module/event.hpp"                // for Event, Event::Type:...
+#include "system_module/events/child_event.hpp"   // for Child_event
+#include "system_module/events/enable_event.hpp"  // for Enable_event
+#include "system_module/system.hpp"               // for System
+---
+
+(/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/events/move_event.hpp has correct #includes/fwd-decls)
+
+(/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/system_module/move_event.cpp has correct #includes/fwd-decls)
+
+(/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/events/resize_event.hpp has correct #includes/fwd-decls)
+
+(/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/system_module/resize_event.cpp has correct #includes/fwd-decls)
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/events/child_event.hpp should add these lines:
+namespace cppurses { class Object; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/events/child_event.hpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/events/child_event.hpp:
+#include "system_module/event.hpp"  // for Event, Event::Type
+namespace cppurses { class Object; }
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/system_module/child_event.cpp should add these lines:
+namespace cppurses { class Object; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/system_module/child_event.cpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/system_module/child_event.cpp:
+#include "system_module/events/child_event.hpp"
+#include "system_module/event.hpp"  // for Event, Event::Type, Event::Type::...
+namespace cppurses { class Object; }
+---
+
+(/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/detail/ncurses_paint_engine.hpp has correct #includes/fwd-decls)
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/painter_module/ncurses_paint_engine.cpp should add these lines:
+#include <curses.h>                                // for stdscr, curs_set
+#include <locale.h>                                // for setlocale, LC_ALL
+#include <stdlib.h>                                // for setenv
+#include <optional/optional.hpp>                   // for Optional
+#include "painter_module/brush.hpp"                // for Brush
+#include "painter_module/detail/paint_buffer.hpp"  // for Paint_buffer
+#include "painter_module/glyph.hpp"                // for Glyph
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/painter_module/ncurses_paint_engine.cpp should remove these lines:
+- #include <ncurses.h>  // lines 4-4
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/painter_module/ncurses_paint_engine.cpp:
+#include "painter_module/detail/ncurses_paint_engine.hpp"
+#include <curses.h>                                // for stdscr, curs_set
+#include <locale.h>                                // for setlocale, LC_ALL
+#include <stdlib.h>                                // for setenv
+#include <cstddef>                                 // for size_t
+#include <cstdint>                                 // for int16_t, uint32_t
+#include <optional/optional.hpp>                   // for Optional
+#include <string>                                  // for string
+#include "painter_module/attribute.hpp"            // for Attribute, Attribu...
+#include "painter_module/brush.hpp"                // for Brush
+#include "painter_module/color.hpp"                // for Color
+#include "painter_module/detail/paint_buffer.hpp"  // for Paint_buffer
+#include "painter_module/glyph.hpp"                // for Glyph
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/painter.hpp should add these lines:
+namespace cppurses { class Glyph; }
+namespace cppurses { class Glyph_string; }
+namespace cppurses { struct Coordinates; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/painter.hpp should remove these lines:
+- #include "painter_module/glyph_string.hpp"  // lines 4-4
+- #include "widget_module/coordinates.hpp"  // lines 5-5
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/painter.hpp:
+#include <cstddef>  // for size_t
+namespace cppurses { class Border; }  // lines 9-9
+namespace cppurses { class Glyph; }
+namespace cppurses { class Glyph_string; }
+namespace cppurses { class Widget; }  // lines 10-10
+namespace cppurses { struct Coordinates; }
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/painter_module/painter.cpp should add these lines:
+#include <optional/optional.hpp>            // for Optional
+#include "painter_module/brush.hpp"         // for Brush
+#include "painter_module/geometry.hpp"      // for Geometry
+namespace cppurses { class Glyph_string; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/painter_module/painter.cpp should remove these lines:
+- #include "painter_module/glyph_string.hpp"  // lines 5-5
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/painter_module/painter.cpp:
+#include "painter_module/painter.hpp"
+#include <cstddef>                          // for size_t
+#include <cstring>                          // for strcmp
+#include <optional/optional.hpp>            // for Optional
+#include "painter_module/brush.hpp"         // for Brush
+#include "painter_module/color.hpp"         // for background, foreground
+#include "painter_module/geometry.hpp"      // for Geometry
+#include "painter_module/glyph.hpp"         // for Glyph
+#include "painter_module/paint_engine.hpp"  // for Paint_engine
+#include "widget_module/border.hpp"         // for Border, north_border_offset
+#include "widget_module/coordinates.hpp"    // for Coordinates
+#include "widget_module/widget.hpp"         // for Widget
+namespace cppurses { class Glyph_string; }
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/paint_engine.hpp should add these lines:
+namespace cppurses { class Glyph; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/paint_engine.hpp should remove these lines:
+- #include "painter_module/glyph_string.hpp"  // lines 7-7
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/paint_engine.hpp:
+#include <cstddef>                                 // for size_t
+#include <cstdint>                                 // for int16_t
+#include <string>                                  // for string
+#include "painter_module/attribute.hpp"            // for Attribute
+#include "painter_module/color.hpp"                // for Color
+#include "painter_module/detail/paint_buffer.hpp"  // for Paint_buffer
+namespace cppurses { class Glyph; }
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/painter_module/paint_engine.cpp should add these lines:
+#include <optional/optional.hpp>     // for Optional
+#include "painter_module/brush.hpp"  // for Brush
+#include "widget_module/border.hpp"  // for north_border_offset, west_border...
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/painter_module/paint_engine.cpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/painter_module/paint_engine.cpp:
+#include "painter_module/paint_engine.hpp"
+#include <cstddef>                   // for size_t
+#include <optional/optional.hpp>     // for Optional
+#include "painter_module/brush.hpp"  // for Brush
+#include "painter_module/glyph.hpp"  // for Glyph
+#include "system_module/system.hpp"  // for System
+#include "widget_module/border.hpp"  // for north_border_offset, west_border...
+#include "widget_module/widget.hpp"  // for Widget
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/palette.hpp should add these lines:
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/palette.hpp should remove these lines:
+- #include <cstddef>  // lines 6-6
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/palette.hpp:
+#include <array>                     // for array
+#include <cstdint>                   // for int16_t
+#include "painter_module/color.hpp"  // for Color
+---
+
+(/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/painter_module/palette.cpp has correct #includes/fwd-decls)
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/glyph.hpp should add these lines:
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/glyph.hpp should remove these lines:
+- #include "painter_module/color.hpp"  // lines 5-5
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/glyph.hpp:
+#include <array>                     // for array
+#include <ostream>                   // for ostream
+#include <stdexcept>                 // for runtime_error
+#include <string>                    // for string
+#include <utility>                   // for move, forward
+#include "painter_module/brush.hpp"  // for Brush
+---
+
+(/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/painter_module/glyph.cpp has correct #includes/fwd-decls)
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/brush.hpp should add these lines:
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/brush.hpp should remove these lines:
+- #include <utility>  // lines 9-9
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/brush.hpp:
+#include <algorithm>                     // for forward
+#include <bitset>                        // for bitset
+#include <optional/optional.hpp>         // for Optional
+#include <vector>                        // for vector
+#include "painter_module/attribute.hpp"  // for Attribute
+#include "painter_module/color.hpp"      // for Color, BackgroundColor, Fore...
+---
+
+(/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/painter_module/brush.cpp has correct #includes/fwd-decls)
+
+(/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/geometry.hpp has correct #includes/fwd-decls)
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/painter_module/geometry.cpp should add these lines:
+#include <algorithm>                             // for move
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/painter_module/geometry.cpp should remove these lines:
+- namespace cppurses { struct Size_policy; }  // lines 11-11
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/painter_module/geometry.cpp:
+#include "painter_module/geometry.hpp"
+#include <algorithm>                             // for move
+#include <cstddef>                               // for size_t
+#include <memory>                                // for make_unique
+#include "system_module/event.hpp"               // for Event, Event::Type::...
+#include "system_module/events/child_event.hpp"  // for Child_event
+#include "system_module/system.hpp"              // for System
+#include "widget_module/widget.hpp"              // for Widget
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/detail/paint_buffer.hpp should add these lines:
+namespace cppurses { class Glyph; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/detail/paint_buffer.hpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/detail/paint_buffer.hpp:
+#include <cstddef>                          // for size_t
+#include "painter_module/glyph_matrix.hpp"  // for Glyph_matrix
+namespace cppurses { class Glyph; }
+---
+
+(/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/painter_module/paint_buffer.cpp has correct #includes/fwd-decls)
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/glyph_matrix.hpp should add these lines:
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/glyph_matrix.hpp should remove these lines:
+- #include <fstream>  // lines 8-8
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/glyph_matrix.hpp:
+#include <cstddef>                   // for size_t
+#include <vector>                    // for vector
+#include "painter_module/glyph.hpp"  // for Glyph
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/painter_module/glyph_matrix.cpp should add these lines:
+#include <memory>                    // for allocator_traits<>::value_type
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/painter_module/glyph_matrix.cpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/painter_module/glyph_matrix.cpp:
+#include "painter_module/glyph_matrix.hpp"
+#include <cstddef>                   // for size_t
+#include <memory>                    // for allocator_traits<>::value_type
+#include <vector>                    // for vector
+#include "painter_module/glyph.hpp"  // for Glyph
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/glyph_string.hpp should add these lines:
+#include <memory>                    // for allocator_traits<>::value_type
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/glyph_string.hpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/glyph_string.hpp:
+#include <codecvt>                   // for codecvt_utf8
+#include <initializer_list>          // for initializer_list
+#include <locale>                    // for wstring_convert
+#include <memory>                    // for allocator_traits<>::value_type
+#include <ostream>                   // for ostream, size_t
+#include <string>                    // for string, u32string
+#include <utility>                   // for forward
+#include <vector>                    // for vector, vector<>::size_type, vec...
+#include "painter_module/glyph.hpp"  // for Glyph
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/painter_module/glyph_string.cpp should add these lines:
+#include <iterator>                  // for begin, end
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/painter_module/glyph_string.cpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/painter_module/glyph_string.cpp:
+#include "painter_module/glyph_string.hpp"
+#include <algorithm>                 // for equal
+#include <iterator>                  // for begin, end
+#include <ostream>                   // for ostream
+#include <string>                    // for string, operator<<
+#include "painter_module/glyph.hpp"  // for operator==, Glyph
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widget.hpp should add these lines:
+#include <bits/std_function.h>                   // for function
+#include <signals/detail/signal_impl.hpp>        // for Signal_impl<>::group...
+#include <signals/optional_last_value.hpp>       // for Optional_last_value
+#include <signals/signal.hpp>                    // for Signal
+#include <signals/slot.hpp>                      // for Slot
+#include "widget_module/size_policy.hpp"         // for Size_policy, Size_po...
+namespace cppurses { class Child_event; }
+namespace cppurses { class Event; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widget.hpp should remove these lines:
+- #include <signals/signals.hpp>  // lines 15-15
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widget.hpp:
+#include <bits/std_function.h>                   // for function
+#include <cstddef>                               // for size_t
+#include <memory>                                // for unique_ptr
+#include <signals/detail/signal_impl.hpp>        // for Signal_impl<>::group...
+#include <signals/optional_last_value.hpp>       // for Optional_last_value
+#include <signals/signal.hpp>                    // for Signal
+#include <signals/slot.hpp>                      // for Slot
+#include <utility>                               // for move
+#include "painter_module/brush.hpp"              // for Brush
+#include "painter_module/color.hpp"              // for Color, background
+#include "painter_module/geometry.hpp"           // for Geometry
+#include "painter_module/glyph.hpp"              // for Glyph
+#include "painter_module/paint_engine.hpp"       // for Paint_engine
+#include "system_module/events/mouse_event.hpp"  // for Mouse_event (ptr only)
+#include "system_module/key.hpp"                 // for Key
+#include "system_module/object.hpp"              // for Object
+#include "widget_module/border.hpp"              // for Border
+#include "widget_module/coordinates.hpp"         // for Coordinates
+#include "widget_module/focus_policy.hpp"        // for Focus_policy, Focus_...
+#include "widget_module/size_policy.hpp"         // for Size_policy, Size_po...
+namespace cppurses { class Child_event; }
+namespace cppurses { class Clear_screen_event; }  // lines 21-21
+namespace cppurses { class Close_event; }  // lines 22-22
+namespace cppurses { class Enable_event; }  // lines 23-23
+namespace cppurses { class Event; }
+namespace cppurses { class Focus_event; }  // lines 24-24
+namespace cppurses { class Hide_event; }  // lines 25-25
+namespace cppurses { class Key_event; }  // lines 26-26
+namespace cppurses { class Move_event; }  // lines 27-27
+namespace cppurses { class Paint_event; }  // lines 28-28
+namespace cppurses { class Resize_event; }  // lines 29-29
+namespace cppurses { class Show_event; }  // lines 30-30
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/widget.cpp should add these lines:
+#include "system_module/event.hpp"                      // for Event, Event:...
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/widget.cpp should remove these lines:
+- #include "system_module/events/enable_event.hpp"  // lines 10-10
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/widget.cpp:
+#include "widget_module/widget.hpp"
+#include <memory>                                       // for make_unique
+#include <utility>                                      // for move
+#include "painter_module/brush.hpp"                     // for Brush
+#include "painter_module/color.hpp"                     // for Color
+#include "painter_module/geometry.hpp"                  // for Geometry
+#include "painter_module/painter.hpp"                   // for Painter
+#include "system_module/event.hpp"                      // for Event, Event:...
+#include "system_module/events/child_event.hpp"         // for Child_event
+#include "system_module/events/clear_screen_event.hpp"  // for Clear_screen_...
+#include "system_module/events/close_event.hpp"         // for Close_event
+#include "system_module/events/focus_event.hpp"         // for Focus_event
+#include "system_module/events/hide_event.hpp"          // for Hide_event
+#include "system_module/events/key_event.hpp"           // for Key_event
+#include "system_module/events/mouse_event.hpp"         // for Mouse_event
+#include "system_module/events/move_event.hpp"          // for Move_event
+#include "system_module/events/paint_event.hpp"         // for Paint_event
+#include "system_module/events/resize_event.hpp"        // for Resize_event
+#include "system_module/events/show_event.hpp"          // for Show_event
+#include "system_module/key.hpp"                        // for Key, Key::Tab
+#include "system_module/object.hpp"                     // for Object
+#include "system_module/system.hpp"                     // for System
+#include "widget_module/border.hpp"                     // for north_border_...
+#include "widget_module/coordinates.hpp"                // for Coordinates
+---
+
+(/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/layout.hpp has correct #includes/fwd-decls)
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/layout.cpp should add these lines:
+#include "painter_module/geometry.hpp"  // for Geometry
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/layout.cpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/layout.cpp:
+#include "widget_module/layout.hpp"
+#include "painter_module/geometry.hpp"  // for Geometry
+#include "painter_module/painter.hpp"   // for Painter
+#include "system_module/system.hpp"     // for System
+namespace cppurses { class Paint_event; }  // lines 6-6
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/layouts/horizontal_layout.hpp should add these lines:
+#include <bits/refwrap.h>            // for reference_wrapper
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/layouts/horizontal_layout.hpp should remove these lines:
+- #include <functional>  // lines 6-6
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/layouts/horizontal_layout.hpp:
+#include <bits/refwrap.h>            // for reference_wrapper
+#include <cstddef>                   // for size_t
+#include <tuple>                     // for tuple
+#include <vector>                    // for vector
+#include "widget_module/layout.hpp"  // for Layout
+namespace cppurses { class Widget; }  // lines 11-11
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/horizontal_layout.cpp should add these lines:
+#include <ext/new_allocator.h>                    // for size_t
+#include <iterator>                               // for begin
+#include <memory>                                 // for make_unique
+#include "system_module/event.hpp"                // for Event
+#include "system_module/object.hpp"               // for Object
+#include "widget_module/widget.hpp"               // for Widget
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/horizontal_layout.cpp should remove these lines:
+- #include <functional>  // lines 11-11
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/horizontal_layout.cpp:
+#include "widget_module/layouts/horizontal_layout.hpp"
+#include <ext/new_allocator.h>                    // for size_t
+#include <cstddef>                                // for size_t
+#include <deque>                                  // for deque
+#include <iterator>                               // for begin
+#include <memory>                                 // for make_unique
+#include <tuple>                                  // for get, tuple
+#include <vector>                                 // for vector
+#include "painter_module/geometry.hpp"            // for Geometry
+#include "system_module/event.hpp"                // for Event
+#include "system_module/events/move_event.hpp"    // for Move_event
+#include "system_module/events/resize_event.hpp"  // for Resize_event
+#include "system_module/object.hpp"               // for Object
+#include "system_module/system.hpp"               // for System
+#include "widget_module/border.hpp"               // for west_border_offset
+#include "widget_module/size_policy.hpp"          // for Size_policy, Size_p...
+#include "widget_module/widget.hpp"               // for Widget
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/border.hpp should add these lines:
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/border.hpp should remove these lines:
+- namespace cppurses { class Widget; }  // lines 8-8
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/border.hpp:
+#include <cstddef>                   // for size_t
+#include "painter_module/glyph.hpp"  // for Glyph
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/border.cpp should add these lines:
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/border.cpp should remove these lines:
+- #include "painter_module/painter.hpp"  // lines 3-3
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/border.cpp:
+#include "widget_module/border.hpp"
+#include "painter_module/glyph.hpp"  // for Glyph
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/layouts/vertical_layout.hpp should add these lines:
+#include <bits/refwrap.h>            // for reference_wrapper
+namespace cppurses { class Widget; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/layouts/vertical_layout.hpp should remove these lines:
+- #include <functional>  // lines 6-6
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/layouts/vertical_layout.hpp:
+#include <bits/refwrap.h>            // for reference_wrapper
+#include <cstddef>                   // for size_t
+#include <tuple>                     // for tuple
+#include <vector>                    // for vector
+#include "widget_module/layout.hpp"  // for Layout
+namespace cppurses { class Widget; }
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/vertical_layout.cpp should add these lines:
+#include <ext/new_allocator.h>                    // for size_t
+#include <iterator>                               // for begin
+#include <memory>                                 // for make_unique
+#include "system_module/event.hpp"                // for Event
+#include "system_module/object.hpp"               // for Object
+#include "widget_module/widget.hpp"               // for Widget
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/vertical_layout.cpp should remove these lines:
+- #include <functional>  // lines 11-11
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/vertical_layout.cpp:
+#include "widget_module/layouts/vertical_layout.hpp"
+#include <ext/new_allocator.h>                    // for size_t
+#include <cstddef>                                // for size_t
+#include <deque>                                  // for deque
+#include <iterator>                               // for begin
+#include <memory>                                 // for make_unique
+#include <tuple>                                  // for get, tuple, make_tuple
+#include <vector>                                 // for vector
+#include "painter_module/geometry.hpp"            // for Geometry
+#include "system_module/event.hpp"                // for Event
+#include "system_module/events/move_event.hpp"    // for Move_event
+#include "system_module/events/resize_event.hpp"  // for Resize_event
+#include "system_module/object.hpp"               // for Object
+#include "system_module/system.hpp"               // for System
+#include "widget_module/border.hpp"               // for north_border_offset
+#include "widget_module/size_policy.hpp"          // for Size_policy, Size_p...
+#include "widget_module/widget.hpp"               // for Widget
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widgets/textbox.hpp should add these lines:
+#include <cstddef>                                 // for size_t
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widgets/textbox.hpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widgets/textbox.hpp:
+#include <cstddef>                                 // for size_t
+#include "painter_module/glyph_string.hpp"         // for Glyph_string
+#include "widget_module/widgets/textbox_base.hpp"  // for Textbox_base
+namespace cppurses { class Key_event; }  // lines 8-8
+namespace cppurses { class Mouse_event; }  // lines 9-9
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/textbox.cpp should add these lines:
+#include <string>                                // for basic_string
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/textbox.cpp should remove these lines:
+- #include <iterator>  // lines 8-8
+- #include "widget_module/coordinates.hpp"  // lines 6-6
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/textbox.cpp:
+#include "widget_module/widgets/textbox.hpp"
+#include <cstddef>                               // for size_t
+#include <string>                                // for basic_string
+#include <utility>                               // for move
+#include "painter_module/glyph_string.hpp"       // for Glyph_string
+#include "system_module/events/key_event.hpp"    // for Key_event
+#include "system_module/events/mouse_event.hpp"  // for Mouse_event, Mouse_b...
+#include "system_module/key.hpp"                 // for Key, Key::Arrow_down
+#include "widget_module/focus_policy.hpp"        // for Focus_policy, Focus_...
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widgets/textbox_base.hpp should add these lines:
+#include <signals/detail/signal_impl.hpp>          // for Signal_impl<>::gro...
+#include <signals/optional_last_value.hpp>         // for Optional_last_value
+#include <signals/signal.hpp>                      // for Signal
+#include <signals/slot.hpp>                        // for Slot
+namespace cppurses { struct Coordinates; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widgets/textbox_base.hpp should remove these lines:
+- #include <signals/signals.hpp>  // lines 7-7
+- #include "widget_module/coordinates.hpp"  // lines 5-5
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widgets/textbox_base.hpp:
+#include <cstddef>                                 // for size_t
+#include <signals/detail/signal_impl.hpp>          // for Signal_impl<>::gro...
+#include <signals/optional_last_value.hpp>         // for Optional_last_value
+#include <signals/signal.hpp>                      // for Signal
+#include <signals/slot.hpp>                        // for Slot
+#include "painter_module/glyph_string.hpp"         // for Glyph_string
+#include "widget_module/widgets/text_display.hpp"  // for Text_display
+namespace cppurses { class Resize_event; }  // lines 11-11
+namespace cppurses { struct Coordinates; }
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/textbox_base.cpp should add these lines:
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/textbox_base.cpp should remove these lines:
+- #include "system_module/events/resize_event.hpp"  // lines 4-4
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/textbox_base.cpp:
+#include "widget_module/widgets/textbox_base.hpp"
+#include <cstddef>                                 // for size_t
+#include <utility>                                 // for move
+#include "painter_module/glyph_string.hpp"         // for Glyph_string
+#include "widget_module/coordinates.hpp"           // for Coordinates, opera...
+#include "widget_module/widgets/text_display.hpp"  // for Text_display
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widgets/push_button.hpp should add these lines:
+#include <bits/std_function.h>              // for function
+#include <signals/detail/signal_impl.hpp>   // for Signal_impl<>::group_comp...
+#include <signals/optional_last_value.hpp>  // for Optional_last_value
+#include <signals/signal.hpp>               // for Signal
+#include <signals/slot.hpp>                 // for Slot
+namespace cppurses { class Mouse_event; }
+namespace cppurses { class Paint_event; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widgets/push_button.hpp should remove these lines:
+- #include <signals/signals.hpp>  // lines 8-8
+- #include "system_module/events/mouse_event.hpp"  // lines 5-5
+- #include "system_module/events/paint_event.hpp"  // lines 6-6
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widgets/push_button.hpp:
+#include <bits/std_function.h>              // for function
+#include <signals/detail/signal_impl.hpp>   // for Signal_impl<>::group_comp...
+#include <signals/optional_last_value.hpp>  // for Optional_last_value
+#include <signals/signal.hpp>               // for Signal
+#include <signals/slot.hpp>                 // for Slot
+#include <utility>                          // for move
+#include "painter_module/glyph_string.hpp"  // for Glyph_string
+#include "widget_module/widget.hpp"         // for Widget
+namespace cppurses { class Mouse_event; }
+namespace cppurses { class Paint_event; }
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/push_button.cpp should add these lines:
+namespace cppurses { class Paint_event; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/push_button.cpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/push_button.cpp:
+#include "widget_module/widgets/push_button.hpp"
+#include <utility>                               // for move
+#include "painter_module/glyph_string.hpp"       // for Glyph_string
+#include "painter_module/painter.hpp"            // for Painter
+#include "system_module/events/mouse_event.hpp"  // for Mouse_button, Mouse_...
+namespace cppurses { class Paint_event; }
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widgets/horizontal_scrollbar.hpp should add these lines:
+namespace sig { template <typename Signature, typename Combiner = sig::Optional_last_value<typename sig::Function_type_splitter<Signature>::return_type>, typename Group = int, typename GroupCompare = std::less<Group>, typename SlotFunction = std::function<Signature>, typename Mutex = std::mutex> class Signal; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widgets/horizontal_scrollbar.hpp should remove these lines:
+- #include <signals/signals.hpp>  // lines 7-7
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widgets/horizontal_scrollbar.hpp:
+#include "widget_module/layouts/horizontal_layout.hpp"  // for Horizontal_la...
+#include "widget_module/widget.hpp"                     // for Widget
+#include "widget_module/widgets/push_button.hpp"        // for Push_button
+namespace sig { template <typename Signature, typename Combiner = sig::Optional_last_value<typename sig::Function_type_splitter<Signature>::return_type>, typename Group = int, typename GroupCompare = std::less<Group>, typename SlotFunction = std::function<Signature>, typename Mutex = std::mutex> class Signal; }
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/horizontal_scrollbar.cpp should add these lines:
+#include "painter_module/brush.hpp"       // for Brush
+#include "painter_module/geometry.hpp"    // for Geometry
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/horizontal_scrollbar.cpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/horizontal_scrollbar.cpp:
+#include "widget_module/widgets/horizontal_scrollbar.hpp"
+#include "painter_module/brush.hpp"       // for Brush
+#include "painter_module/color.hpp"       // for Color, Color::Light_gray
+#include "painter_module/geometry.hpp"    // for Geometry
+#include "widget_module/size_policy.hpp"  // for Size_policy, Size_policy::P...
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widgets/vertical_scrollbar.hpp should add these lines:
+namespace sig { template <typename Signature, typename Combiner = sig::Optional_last_value<typename sig::Function_type_splitter<Signature>::return_type>, typename Group = int, typename GroupCompare = std::less<Group>, typename SlotFunction = std::function<Signature>, typename Mutex = std::mutex> class Signal; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widgets/vertical_scrollbar.hpp should remove these lines:
+- #include <signals/signals.hpp>  // lines 7-7
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widgets/vertical_scrollbar.hpp:
+#include "widget_module/layouts/vertical_layout.hpp"  // for Vertical_layout
+#include "widget_module/widget.hpp"                   // for Widget
+#include "widget_module/widgets/push_button.hpp"      // for Push_button
+namespace sig { template <typename Signature, typename Combiner = sig::Optional_last_value<typename sig::Function_type_splitter<Signature>::return_type>, typename Group = int, typename GroupCompare = std::less<Group>, typename SlotFunction = std::function<Signature>, typename Mutex = std::mutex> class Signal; }
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/vertical_scrollbar.cpp should add these lines:
+#include "painter_module/brush.hpp"       // for Brush
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/vertical_scrollbar.cpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/vertical_scrollbar.cpp:
+#include "widget_module/widgets/vertical_scrollbar.hpp"
+#include "painter_module/brush.hpp"       // for Brush
+#include "painter_module/color.hpp"       // for Color, Color::Light_gray
+#include "painter_module/geometry.hpp"    // for Geometry
+#include "widget_module/size_policy.hpp"  // for Size_policy, Size_policy::P...
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widgets/checkbox.hpp should add these lines:
+#include <bits/std_function.h>              // for function
+#include <signals/detail/signal_impl.hpp>   // for Signal_impl<>::group_comp...
+#include <signals/optional_last_value.hpp>  // for Optional_last_value
+#include <signals/signal.hpp>               // for Signal
+#include <signals/slot.hpp>                 // for Slot
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widgets/checkbox.hpp should remove these lines:
+- #include <signals/signals.hpp>  // lines 7-7
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widgets/checkbox.hpp:
+#include <bits/std_function.h>              // for function
+#include <signals/detail/signal_impl.hpp>   // for Signal_impl<>::group_comp...
+#include <signals/optional_last_value.hpp>  // for Optional_last_value
+#include <signals/signal.hpp>               // for Signal
+#include <signals/slot.hpp>                 // for Slot
+#include "painter_module/glyph.hpp"         // for Glyph
+#include "painter_module/glyph_string.hpp"  // for Glyph_string
+#include "widget_module/widget.hpp"         // for Widget
+namespace cppurses { class Mouse_event; }  // lines 10-10
+namespace cppurses { class Paint_event; }  // lines 11-11
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/checkbox.cpp should add these lines:
+#include "painter_module/geometry.hpp"           // for Geometry
+#include "system_module/events/mouse_event.hpp"  // for Mouse_button, Mouse_...
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/checkbox.cpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/checkbox.cpp:
+#include "widget_module/widgets/checkbox.hpp"
+#include "painter_module/geometry.hpp"           // for Geometry
+#include "painter_module/glyph_string.hpp"       // for Glyph_string
+#include "painter_module/painter.hpp"            // for Painter
+#include "system_module/events/mouse_event.hpp"  // for Mouse_button, Mouse_...
+#include "widget_module/size_policy.hpp"         // for Size_policy, Size_po...
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widgets/titlebar.hpp should add these lines:
+namespace cppurses { class Glyph_string; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widgets/titlebar.hpp should remove these lines:
+- #include "painter_module/glyph_string.hpp"  // lines 4-4
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widgets/titlebar.hpp:
+#include "widget_module/layouts/horizontal_layout.hpp"  // for Horizontal_la...
+namespace cppurses { class Glyph_string; }
+namespace cppurses { class Push_button; }  // lines 8-8
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/titlebar.cpp should add these lines:
+#include <signals/signal.hpp>                     // for Signal
+#include <signals/slot.hpp>                       // for Slot
+#include "painter_module/geometry.hpp"            // for Geometry
+namespace cppurses { class Glyph_string; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/titlebar.cpp should remove these lines:
+- #include "painter_module/glyph_string.hpp"  // lines 4-4
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/titlebar.cpp:
+#include "widget_module/widgets/titlebar.hpp"
+#include <signals/signal.hpp>                     // for Signal
+#include <signals/slot.hpp>                       // for Slot
+#include "painter_module/color.hpp"               // for Color, Color::Black
+#include "painter_module/geometry.hpp"            // for Geometry
+#include "system_module/system.hpp"               // for System, System::quit
+#include "widget_module/size_policy.hpp"          // for Size_policy, Size_p...
+#include "widget_module/widgets/push_button.hpp"  // for Push_button
+namespace cppurses { class Glyph_string; }
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widgets/text_display.hpp should add these lines:
+#include <bits/std_function.h>              // for function
+#include <signals/detail/signal_impl.hpp>   // for Signal_impl<>::group_comp...
+#include <signals/optional_last_value.hpp>  // for Optional_last_value
+#include <signals/signal.hpp>               // for Signal
+#include <signals/slot.hpp>                 // for Slot
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widgets/text_display.hpp should remove these lines:
+- #include <signals/signals.hpp>  // lines 10-10
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widgets/text_display.hpp:
+#include <bits/std_function.h>              // for function
+#include <cstddef>                          // for size_t
+#include <signals/detail/signal_impl.hpp>   // for Signal_impl<>::group_comp...
+#include <signals/optional_last_value.hpp>  // for Optional_last_value
+#include <signals/signal.hpp>               // for Signal
+#include <signals/slot.hpp>                 // for Slot
+#include <vector>                           // for vector
+#include "painter_module/attribute.hpp"     // for Attribute
+#include "painter_module/brush.hpp"         // for Brush
+#include "painter_module/glyph.hpp"         // for Glyph
+#include "painter_module/glyph_string.hpp"  // for Glyph_string, Glyph_strin...
+#include "widget_module/coordinates.hpp"    // for Coordinates
+#include "widget_module/widget.hpp"         // for Widget
+namespace cppurses { class Paint_event; }  // lines 14-14
+namespace cppurses { class Resize_event; }  // lines 15-15
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/text_display.cpp should add these lines:
+#include <memory>                           // for allocator_traits<>::value...
+#include <string>                           // for operator==, string
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/text_display.cpp should remove these lines:
+- #include <utility>  // lines 10-10
+- #include "system_module/events/resize_event.hpp"  // lines 5-5
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/text_display.cpp:
+#include "widget_module/widgets/text_display.hpp"
+#include <algorithm>                        // for move, for_each
+#include <cstddef>                          // for size_t
+#include <iterator>                         // for begin, end
+#include <memory>                           // for allocator_traits<>::value...
+#include <string>                           // for operator==, string
+#include "painter_module/glyph_string.hpp"  // for Glyph_string, Glyph_strin...
+#include "painter_module/painter.hpp"       // for Painter
+#include "widget_module/coordinates.hpp"    // for Coordinates
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widgets/color_chooser.hpp should add these lines:
+#include <signals/detail/signal_impl.hpp>               // for Signal_impl<>...
+#include <signals/optional_last_value.hpp>              // for Optional_last...
+#include <signals/signal.hpp>                           // for Signal
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widgets/color_chooser.hpp should remove these lines:
+- #include <signals/signals.hpp>  // lines 8-8
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widgets/color_chooser.hpp:
+#include <signals/detail/signal_impl.hpp>               // for Signal_impl<>...
+#include <signals/optional_last_value.hpp>              // for Optional_last...
+#include <signals/signal.hpp>                           // for Signal
+#include "painter_module/color.hpp"                     // for Color
+#include "widget_module/layouts/horizontal_layout.hpp"  // for Horizontal_la...
+#include "widget_module/layouts/vertical_layout.hpp"    // for Vertical_layout
+#include "widget_module/widgets/push_button.hpp"        // for Push_button
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/color_chooser.cpp should add these lines:
+#include <signals/slot.hpp>               // for Slot
+#include "painter_module/geometry.hpp"    // for Geometry
+#include "widget_module/size_policy.hpp"  // for Size_policy, Size_policy::P...
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/color_chooser.cpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/color_chooser.cpp:
+#include "widget_module/widgets/color_chooser.hpp"
+#include <signals/slot.hpp>               // for Slot
+#include "painter_module/geometry.hpp"    // for Geometry
+#include "widget_module/size_policy.hpp"  // for Size_policy, Size_policy::P...
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widgets/menu.hpp should add these lines:
+#include <bits/std_function.h>                 // for function
+#include <memory>                              // for allocator_traits<>::va...
+#include "widget_module/focus_policy.hpp"      // for Focus_policy, Focus_po...
+namespace cppurses { class Paint_event; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widgets/menu.hpp should remove these lines:
+- #include <functional>  // lines 11-11
+- #include "painter_module/color.hpp"  // lines 5-5
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widgets/menu.hpp:
+#include <bits/std_function.h>                 // for function
+#include <memory>                              // for allocator_traits<>::va...
+#include <string>                              // for operator+, to_string
+#include <utility>                             // for move, swap
+#include <vector>                              // for vector
+#include "painter_module/attribute.hpp"        // for Attribute, Attribute::...
+#include "painter_module/glyph_string.hpp"     // for Glyph_string
+#include "painter_module/painter.hpp"          // for Painter
+#include "system_module/events/key_event.hpp"  // for Key_event
+#include "system_module/key.hpp"               // for Key, Key::Arrow_down
+#include "widget_module/focus_policy.hpp"      // for Focus_policy, Focus_po...
+#include "widget_module/widget.hpp"            // for Widget
+namespace cppurses { class Paint_event; }
+---
+
+(/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/src/widget_module/menu.cpp has correct #includes/fwd-decls)
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/system_module/system_test.cpp should add these lines:
+#include <gtest/gtest-message.h>                        // for Message
+#include <gtest/gtest-test-part.h>                      // for TestPartResult
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/system_module/system_test.cpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/system_module/system_test.cpp:
+#include <gtest/gtest-message.h>                        // for Message
+#include <gtest/gtest-test-part.h>                      // for TestPartResult
+#include <gtest/gtest.h>                                // for Test, EXPECT_EQ
+#include <memory>                                       // for make_unique
+#include <system_module/detail/posted_event.hpp>        // for Posted_event
+#include <system_module/detail/posted_event_queue.hpp>  // for Posted_event_...
+#include <system_module/detail/thread_data.hpp>         // for Thread_data
+#include <system_module/event.hpp>                      // for Event, Event:...
+#include <system_module/object.hpp>                     // for Object
+#include <system_module/system.hpp>                     // for System
+#include <utility>                                      // for move
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/object.hpp should add these lines:
+#include <signals/detail/signal_impl.hpp>   // for Signal_impl<>::group_comp...
+#include <signals/optional_last_value.hpp>  // for Optional_last_value
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/object.hpp should remove these lines:
+- #include <utility>  // lines 11-11
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/object.hpp:
+#include <algorithm>                        // for for_each, forward
+#include <cstddef>                          // for size_t
+#include <memory>                           // for unique_ptr, make_unique
+#include <queue>                            // for queue
+#include <signals/detail/signal_impl.hpp>   // for Signal_impl<>::group_comp...
+#include <signals/optional_last_value.hpp>  // for Optional_last_value
+#include <signals/signal.hpp>               // for Signal
+#include <signals/slot.hpp>                 // for Slot
+#include <string>                           // for string
+#include <vector>                           // for vector
+namespace cppurses { class Child_event; }  // lines 17-17
+namespace cppurses { class Enable_event; }  // lines 18-18
+namespace cppurses { class Event; }  // lines 16-16
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/system_module/object_test.cpp should add these lines:
+#include <bits/shared_ptr.h>                     // for make_shared, shared_ptr
+#include <gtest/gtest-message.h>                 // for Message
+#include <gtest/gtest-test-part.h>               // for TestPartResult
+#include "painter_module/geometry.hpp"           // for Geometry
+#include "system_module/event.hpp"               // for Event, Event::Type::...
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/system_module/object_test.cpp should remove these lines:
+- #include <utility>  // lines 10-10
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/system_module/object_test.cpp:
+#include <system_module/object.hpp>
+#include <bits/shared_ptr.h>                     // for make_shared, shared_ptr
+#include <gtest/gtest-message.h>                 // for Message
+#include <gtest/gtest-test-part.h>               // for TestPartResult
+#include <gtest/gtest.h>                         // for AssertionResult, EXP...
+#include <string>                                // for string
+#include <system_module/event_loop.hpp>          // for Event_loop
+#include <system_module/events/child_event.hpp>  // for Child_event
+#include <system_module/system.hpp>              // for System
+#include <widget_module/widget.hpp>              // for Widget
+#include "painter_module/geometry.hpp"           // for Geometry
+#include "system_module/event.hpp"               // for Event, Event::Type::...
+---
+
+(/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/event_loop.hpp has correct #includes/fwd-decls)
+
+(/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/system_module/event_loop_test.cpp has correct #includes/fwd-decls)
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/event.hpp should add these lines:
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/event.hpp should remove these lines:
+- #include "system_module/object.hpp"  // lines 4-4
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/event.hpp:
+---
+
+(/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/system_module/event_test.cpp has correct #includes/fwd-decls)
+
+(/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/abstract_event_dispatcher.hpp has correct #includes/fwd-decls)
+
+(/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/system_module/abstract_event_dispatcher_test.cpp has correct #includes/fwd-decls)
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/detail/thread_data.hpp should add these lines:
+namespace cppurses { class Event_loop; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/detail/thread_data.hpp should remove these lines:
+- #include "system_module/event_loop.hpp"  // lines 5-5
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/detail/thread_data.hpp:
+#include <memory>                                             // for make_un...
+#include <vector>                                             // for vector
+#include "system_module/abstract_event_dispatcher.hpp"        // for Abstrac...
+#include "system_module/detail/ncurses_event_dispatcher.hpp"  // for NCurses...
+#include "system_module/detail/posted_event_queue.hpp"        // for Posted_...
+namespace cppurses { class Event_loop; }
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/system_module/thread_data_test.cpp should add these lines:
+#include <gtest/gtest-message.h>         // for Message
+#include <gtest/gtest-test-part.h>       // for TestPartResult
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/system_module/thread_data_test.cpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/system_module/thread_data_test.cpp:
+#include <system_module/detail/thread_data.hpp>
+#include <gtest/gtest-message.h>         // for Message
+#include <gtest/gtest-test-part.h>       // for TestPartResult
+#include <gtest/gtest.h>                 // for AssertionResult, Test, TestI...
+#include <system_module/event_loop.hpp>  // for Event_loop
+#include <system_module/system.hpp>      // for System
+---
+
+(/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/detail/posted_event_queue.hpp has correct #includes/fwd-decls)
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/system_module/posted_event_queue_test.cpp should add these lines:
+#include <gtest/gtest-message.h>     // for Message
+#include <gtest/gtest-test-part.h>   // for TestPartResult
+#include <algorithm>                 // for move
+#include <iterator>                  // for begin
+#include "system_module/event.hpp"   // for Event, Event::Type::None
+#include "system_module/object.hpp"  // for Object
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/system_module/posted_event_queue_test.cpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/system_module/posted_event_queue_test.cpp:
+#include <system_module/detail/posted_event_queue.hpp>
+#include <gtest/gtest-message.h>     // for Message
+#include <gtest/gtest-test-part.h>   // for TestPartResult
+#include <gtest/gtest.h>             // for EXPECT_EQ, EqHelper, Test, Asser...
+#include <algorithm>                 // for move
+#include <iterator>                  // for begin
+#include <memory>                    // for make_unique
+#include <system_module/system.hpp>  // for System
+#include "system_module/event.hpp"   // for Event, Event::Type::None
+#include "system_module/object.hpp"  // for Object
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/detail/posted_event.hpp should add these lines:
+namespace cppurses { class Object; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/detail/posted_event.hpp should remove these lines:
+- #include "system_module/object.hpp"  // lines 5-5
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/detail/posted_event.hpp:
+#include <memory>                   // for unique_ptr
+#include "system_module/event.hpp"  // for Event
+namespace cppurses { class Object; }
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/system_module/posted_event_test.cpp should add these lines:
+#include <gtest/gtest-message.h>     // for Message
+#include <gtest/gtest-test-part.h>   // for TestPartResult
+#include <algorithm>                 // for move
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/system_module/posted_event_test.cpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/system_module/posted_event_test.cpp:
+#include <system_module/detail/posted_event.hpp>
+#include <gtest/gtest-message.h>     // for Message
+#include <gtest/gtest-test-part.h>   // for TestPartResult
+#include <gtest/gtest.h>             // for AssertionResult, EXPECT_TRUE
+#include <algorithm>                 // for move
+#include <system_module/event.hpp>   // for Event, Event::Type::None
+#include <system_module/object.hpp>  // for Object
+#include <system_module/system.hpp>  // for System
+---
+
+(/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/system_module/detail/ncurses_event_dispatcher.hpp has correct #includes/fwd-decls)
+
+(/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/system_module/ncurses_event_dispatcher_test.cpp has correct #includes/fwd-decls)
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widget.hpp should add these lines:
+#include <signals/optional_last_value.hpp>       // for Optional_last_value
+#include <signals/signal.hpp>                    // for Signal
+#include <signals/slot.hpp>                      // for Slot
+#include "widget_module/size_policy.hpp"         // for Size_policy, Size_po...
+namespace cppurses { class Child_event; }
+namespace cppurses { class Event; }
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widget.hpp should remove these lines:
+- #include <signals/signals.hpp>  // lines 15-15
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/widget_module/widget.hpp:
+#include <cstddef>                               // for size_t
+#include <memory>                                // for unique_ptr
+#include <signals/optional_last_value.hpp>       // for Optional_last_value
+#include <signals/signal.hpp>                    // for Signal
+#include <signals/slot.hpp>                      // for Slot
+#include <utility>                               // for move
+#include "painter_module/brush.hpp"              // for Brush
+#include "painter_module/color.hpp"              // for Color, background
+#include "painter_module/geometry.hpp"           // for Geometry
+#include "painter_module/glyph.hpp"              // for Glyph
+#include "painter_module/paint_engine.hpp"       // for Paint_engine
+#include "system_module/events/mouse_event.hpp"  // for Mouse_event (ptr only)
+#include "system_module/key.hpp"                 // for Key
+#include "system_module/object.hpp"              // for Object
+#include "widget_module/border.hpp"              // for Border
+#include "widget_module/coordinates.hpp"         // for Coordinates
+#include "widget_module/focus_policy.hpp"        // for Focus_policy, Focus_...
+#include "widget_module/size_policy.hpp"         // for Size_policy, Size_po...
+namespace cppurses { class Child_event; }
+namespace cppurses { class Clear_screen_event; }  // lines 21-21
+namespace cppurses { class Close_event; }  // lines 22-22
+namespace cppurses { class Enable_event; }  // lines 23-23
+namespace cppurses { class Event; }
+namespace cppurses { class Focus_event; }  // lines 24-24
+namespace cppurses { class Hide_event; }  // lines 25-25
+namespace cppurses { class Key_event; }  // lines 26-26
+namespace cppurses { class Move_event; }  // lines 27-27
+namespace cppurses { class Paint_event; }  // lines 28-28
+namespace cppurses { class Resize_event; }  // lines 29-29
+namespace cppurses { class Show_event; }  // lines 30-30
+---
+
+(/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/widget_module/widget_test.cpp has correct #includes/fwd-decls)
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/glyph.hpp should add these lines:
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/glyph.hpp should remove these lines:
+- #include "painter_module/color.hpp"  // lines 5-5
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/glyph.hpp:
+#include <array>                     // for array
+#include <ostream>                   // for ostream
+#include <stdexcept>                 // for runtime_error
+#include <string>                    // for string
+#include <utility>                   // for move, forward
+#include "painter_module/brush.hpp"  // for Brush
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/painter_module/glyph_test.cpp should add these lines:
+#include <gtest/gtest-message.h>         // for Message
+#include <gtest/gtest-test-part.h>       // for TestPartResult
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/painter_module/glyph_test.cpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/painter_module/glyph_test.cpp:
+#include <painter_module/glyph.hpp>
+#include <gtest/gtest-message.h>         // for Message
+#include <gtest/gtest-test-part.h>       // for TestPartResult
+#include <gtest/gtest.h>                 // for Test, EXPECT_EQ, EqHelper
+#include <painter_module/attribute.hpp>  // for Attribute, Attribute::Italic
+#include <painter_module/brush.hpp>      // for Brush
+#include <painter_module/color.hpp>      // for background, Color, foreground
+#include <string>                        // for string
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/glyph_string.hpp should add these lines:
+#include <memory>                    // for allocator_traits<>::value_type
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/glyph_string.hpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/include/cppurses/painter_module/glyph_string.hpp:
+#include <codecvt>                   // for codecvt_utf8
+#include <initializer_list>          // for initializer_list
+#include <locale>                    // for wstring_convert
+#include <memory>                    // for allocator_traits<>::value_type
+#include <ostream>                   // for ostream, size_t
+#include <string>                    // for string, u32string
+#include <utility>                   // for forward
+#include <vector>                    // for vector, vector<>::size_type, vec...
+#include "painter_module/glyph.hpp"  // for Glyph
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/painter_module/glyph_string_test.cpp should add these lines:
+#include <gtest/gtest-message.h>         // for Message
+#include <gtest/gtest-test-part.h>       // for TestPartResult
+#include "painter_module/color.hpp"      // for background, Color, foreground
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/painter_module/glyph_string_test.cpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/painter_module/glyph_string_test.cpp:
+#include <painter_module/glyph_string.hpp>
+#include <gtest/gtest-message.h>         // for Message
+#include <gtest/gtest-test-part.h>       // for TestPartResult
+#include <gtest/gtest.h>                 // for EqHelper, EXPECT_EQ, Test
+#include <painter_module/attribute.hpp>  // for Attribute, Attribute::Bold
+#include <painter_module/glyph.hpp>      // for Glyph
+#include "painter_module/color.hpp"      // for background, Color, foreground
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/painter_module/brush_test.cpp should add these lines:
+#include <gtest/gtest-message.h>         // for Message
+#include <gtest/gtest-test-part.h>       // for TestPartResult
+#include <optional/optional.hpp>         // for Optional
+#include <vector>                        // for vector
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/painter_module/brush_test.cpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/painter_module/brush_test.cpp:
+#include <gtest/gtest-message.h>         // for Message
+#include <gtest/gtest-test-part.h>       // for TestPartResult
+#include <gtest/gtest.h>                 // for AssertionResult, EXPECT_EQ
+#include <optional/optional.hpp>         // for Optional
+#include <painter_module/attribute.hpp>  // for Attribute, Attribute::Italic
+#include <painter_module/brush.hpp>      // for Brush
+#include <painter_module/color.hpp>      // for Color, background, foreground
+#include <vector>                        // for vector
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/painter_module/palette_test.cpp should add these lines:
+#include <gtest/gtest-message.h>       // for Message
+#include <gtest/gtest-test-part.h>     // for TestPartResult
+#include <memory>                      // for make_unique
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/painter_module/palette_test.cpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/painter_module/palette_test.cpp:
+#include <gtest/gtest-message.h>       // for Message
+#include <gtest/gtest-test-part.h>     // for TestPartResult
+#include <gtest/gtest.h>               // for EXPECT_EQ, EqHelper, Test, Tes...
+#include <memory>                      // for make_unique
+#include <painter_module/color.hpp>    // for Color, Color::Red, Color::Green
+#include <painter_module/palette.hpp>  // for Standard_palette, DawnBringer_...
+#include <system_module/system.hpp>    // for System
+---
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/painter_module/glyph_matrix_test.cpp should add these lines:
+#include <gtest/gtest-message.h>            // for Message
+#include <gtest/gtest-test-part.h>          // for TestPartResult
+
+/home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/painter_module/glyph_matrix_test.cpp should remove these lines:
+
+The full include-list for /home/anthony/Documents/C++/Projects/CPPurses/src/CPPurses/test/painter_module/glyph_matrix_test.cpp:
+#include <gtest/gtest-message.h>            // for Message
+#include <gtest/gtest-test-part.h>          // for TestPartResult
+#include <gtest/gtest.h>                    // for EXPECT_THROW, EXPECT_EQ
+#include <painter_module/attribute.hpp>     // for Attribute, Attribute::Bold
+#include <painter_module/color.hpp>         // for background, Color, Color:...
+#include <painter_module/glyph.hpp>         // for Glyph
+#include <painter_module/glyph_matrix.hpp>  // for Glyph_matrix
+#include <stdexcept>                        // for out_of_range
+---
