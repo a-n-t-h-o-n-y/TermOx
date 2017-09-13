@@ -1,27 +1,21 @@
 cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 project(libcppurses LANGUAGES CXX)
 
-# Compile libs
-# Why add these if you have to go in and install first
-# instead you should make optional a dependency of signals
-# then optional is included within signals and signals cmaketext will include
-# the optional subdirectory.
-# add_subdirectory(libs/Optional)
-add_subdirectory(libs/Signals)
+# set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
 
+add_subdirectory(libs/Signals)
 include(GNUInstallDirs)
 enable_testing()
 add_compile_options(-std=c++14)
 
-# set(CMAKE_BUILD_TYPE Release)
-set(CMAKE_BUILD_TYPE Debug)
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/cppurses
+    ${CMAKE_CURRENT_SOURCE_DIR}/libs/Signals/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/libs/Signals/libs/Optional/include
+    )
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/cppurses
-                    ${CMAKE_CURRENT_SOURCE_DIR}/libs/Signals/include
-                # ${CMAKE_CURRENT_SORCE_DIR}/libs/Signals/libs/Optional/include
-                    )
-
-set(SYSTEM_MODULE_SOURCES
+set(SYSTEM_SOURCES
     "src/system_module/thread_data.cpp"
 	"src/system_module/system.cpp"
 	"src/system_module/event_loop.cpp"
@@ -35,7 +29,7 @@ set(SYSTEM_MODULE_SOURCES
 	"src/system_module/child_event.cpp"
     )
 
-set(PAINTER_MODULE_SOURCES
+set(PAINTER_SOURCES
     "src/painter_module/ncurses_paint_engine.cpp"
 	"src/painter_module/painter.cpp"
 	"src/painter_module/paint_engine.cpp"
@@ -48,7 +42,7 @@ set(PAINTER_MODULE_SOURCES
     "src/painter_module/glyph_string.cpp"
     )	
 
-set(WIDGET_MODULE_SOURCES
+set(WIDGET_SOURCES
     "src/widget_module/widget.cpp"
 	"src/widget_module/layout.cpp"
 	"src/widget_module/horizontal_layout.cpp"
@@ -86,19 +80,13 @@ set(TEST_SOURCES
 	"test/painter_module/glyph_matrix_test.cpp"
     )
 
-# TODO Remove MODULE from everything
 add_library(cppurses STATIC
-    ${SYSTEM_MODULE_SOURCES}
-	${PAINTER_MODULE_SOURCES}
-    ${WIDGET_MODULE_SOURCES}
+    ${SYSTEM_SOURCES}
+	${PAINTER_SOURCES}
+    ${WIDGET_SOURCES}
     )
 
-# target_include_directories(cppurses PUBLIC
-#     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/cppurses>
-#     $<INSTALL_INTERFACE:include/cppurses>
-#     PRIVATE src)
-
-install(TARGETS cppurses #EXPORT CPPursesConfig
+install(TARGETS cppurses
     ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
