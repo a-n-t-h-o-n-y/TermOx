@@ -4,6 +4,7 @@
 
 namespace cppurses {
 
+// TODO Move to Event_loop class, only call on dispatcher to get user input.
 bool Abstract_event_dispatcher::process_events() {
     interrupt_ = false;
     System::send_posted_events();

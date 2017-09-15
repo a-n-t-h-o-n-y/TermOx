@@ -1,0 +1,158 @@
+Event Module
+
+#Event Class
+#Event_queue Class -^
+#Event_loop Class -^
+#Event_invoker Class \
+#Event_dispatcher Class \
+
+-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
+
+#Event Class
+Responsibility:
+    Hold an event and the object it is to be applied to, along with parameters
+    to the event. It is able to execute the event on the widget when called to
+    do so.
+
+Collaborators:
+    Widget
+        It has to call a member function of a Widget. Non-owning Pointer.
+
+Interface:
+    Event(Event::Type type, Widget* invokee);
+    void execute() = 0;
+    std::unique_ptr<Event> clone() const = 0;
+
+Implementation Notes:
+    This is an abstract base class, and interface. Real events will inherit from
+    this and provide their own constructors which will pass the Event::Type
+    parameter themselves, and their own constructors will still take a widget
+    pointer, and various parameters that will be passed on to the widget's event
+    function specific to that concrete Event class. Will probably need a clone()
+    method for event filters in Widgets.
+
+-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
+
+#Event_queue Class
+Responsibility
+    Hold onto event objects, it should optimize out duplicate events of
+    particular types. Provide public access to add events to the queue. The
+    queue has sole ownership of the Events.
+
+Collaborators:
+    Event
+        This is what it holds onto.
+
+Interface:
+    void add_event(std::unique_ptr<Event>);
+
+Implementation Notes:
+    This should probably be either private inheritance of std::vector or
+    composition of std::vector. I'd try to go with composition, the reason you
+    may have done private inheritance in the past is because you were not trying
+    to limit the interface. If it is composition, it is much cleaner, with
+    regards to invoker having access to the internal vector and working with a
+    vector as a vector and not as an Event_queue. Should be able to be accessed
+    globally, either from System:: or Event_loop::, probably the later.
+
+-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
+
+#Event_invoker Class
+Responsibility
+    Able to send events to their widgets based on type of event. It should
+    understand a widgets event filters and redirect and event if needed based on
+    these filters. Removes events from the queue once they are sent.
+
+Collaborators
+    Event_queue
+        Invoker is a friend of Event_queue, this is so that the public
+        interface of the queue is simple(add event) and so that the queue and
+        invoker can be seperate classes. The Invoker will needs read and remove
+        access on the queue, no one else should have that.
+
+    Widget
+        Invoker queries the widget about its event filters to be able to
+        redirect and event. And it also sends the Event to the Widget via some
+        member function call on the Widget, though this is all indirect and
+        taken care of in the Event.execute() call in the concrete Event classes.
+
+Interface
+    void invoke(Event_queue&,
+                Widget* filter = nullptr,
+                Event::Type filter = Event::None);
+
+Implementation Notes:
+    Must be able to create copies of events and change who the event is going to
+    so that if a widget has an event filter, it will be able to redirect the
+    event to a different widget, and if that filter is on multiple widgets, the
+    event will need to be copied. These events are held by unique_ptrs and you
+    will therefore need to create a new unique_ptr from the dereferenced Event.
+    This could be implemented by a portion of the code in the invoker that takes
+    the event in, looks at its widgets filter objects for that event type, and
+    then possibly spits out more events than taken in to call invoke on.
+    Remember that as you process events, more will be added to the queue, you
+    have to be careful how you go about processing the entire container.
+
+-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
+
+#Event_loop Class
+Responsibility
+    Provide the program loop by processing events from the Event_queue and
+    dispatching to user input at the necessary times. Orchestrates the
+    Event_invoker and the Event_dispatcher.
+
+Collaborators
+    Event_queue
+        The Event_loop needs to make sure all events on the Event_queue are
+        invoked by the Event_invoker on each cycle through the loop. The
+        Event_queue is a static object that lives within a static
+        Event_loop::add_event(std::unique_ptr<Event>) function.
+
+    Event_invoker
+        Event_loop asks the Event_invoker to process(or send) specific types of
+        events at the necessary time in the loop. For instance,
+        Deferred_delete_events are processed after all others on the queue. The
+        Event_loop ownes the Event_invoker.
+        
+    Event_dispatcher
+        Waits on the provided dispatcher for user input in the form of an Event.
+        Adds this returned event to the Event_queue. Event_loop ownes the
+        Event_dispatcher.
+
+Interface
+    int run() -> return_code;
+    void exit(int return_code);
+
+Implementation Notes
+    First all items that are not Deferred_delete_events are processed, next,
+    only Deferred_delete_events are processed, then user input is recieved
+    through a blocking call on the Event_dispatcher for an event. This event can
+    be processed immediately or it can be placed on the Event_queue, this way it
+    will be the first event processed on the next iteration of the Event_loop.
+    The Event_loop class can be templated on the Event_dispatcher type, holding
+    the Event_dispatcher directly in the Event_loop class. There is no abstract
+    class, so this would fit into some 'Dispatcher' Concept, one that only needs
+    to provide a get_user_input() function that returns a u.p. to an Event.
+
+-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
+
+#Event_dispatcher Class
+Responsibility
+    To get user input in the form of an Event object.
+
+Collaborators
+    External library that handles lower level user input(NCurses).
+
+Interface
+    std::unique_ptr<Event> get_user_input();
+
+Implementation Notes
+    This will be held within the Event_loop class as a member. The exact type of
+    the Event_dispatcher is determined by a template parameter on the Event_loop
+    class. I can't think of any good reason to implement this as runtime
+    polymorphism, when will a user want to change the input device at runtime in
+    a Curses environment? It's possible, but not worth making all user input
+    through virtual functions for the few cases out there.
+
+-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
+
