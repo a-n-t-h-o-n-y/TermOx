@@ -18,7 +18,9 @@ include_directories(
 set(SYSTEM_SOURCES
     "src/system/thread_data.cpp"
 	"src/system/system.cpp"
+    "src/system/event.cpp"
 	"src/system/event_loop.cpp"
+    "src/system/key_event.cpp"
 	"src/system/ncurses_event_dispatcher.cpp"
 	"src/system/posted_event_queue.cpp"
 	"src/system/posted_event.cpp"

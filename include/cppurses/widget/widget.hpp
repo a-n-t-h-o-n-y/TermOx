@@ -128,7 +128,7 @@ class Widget : public Object {
     sig::Slot<void(Color)> set_foreground;
 
    protected:
-    bool event(const Event& event) override;
+    // bool event(const Event& event) override;
     virtual bool move_event(const Move_event& event);
     virtual bool resize_event(const Resize_event& event);
     virtual bool paint_event(const Paint_event& event);
