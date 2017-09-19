@@ -40,8 +40,8 @@ void Textbox::set_wheel_speed_down(std::size_t lines) {
     scroll_speed_down_ = lines;
 }
 
-bool Textbox::key_press_event(const Key_event& event) {
-    switch (event.key_code()) {
+bool Textbox::key_press_event(Key key, char symbol) {
+    switch (key) {
         case Key::Backspace: {
             auto cursor_index = this->cursor_index();
             if (cursor_index == 0) {
@@ -84,8 +84,8 @@ bool Textbox::key_press_event(const Key_event& event) {
             break;
 
         default:  // Insert text
-            auto text = event.text();
-            if (!text.empty()) {
+            char text = symbol;
+            if (text != '\0') {
                 auto cursor_index = this->cursor_index();
                 this->insert_(text, cursor_index);
                 this->cursor_right_(1);
@@ -96,14 +96,19 @@ bool Textbox::key_press_event(const Key_event& event) {
     return true;
 }
 
-bool Textbox::mouse_press_event(const Mouse_event& event) {
-    if (event.button() == Mouse_button::Left) {
-        this->set_cursor_at_coordinates_(event.local_x(), event.local_y());
-    } else if (event.button() == Mouse_button::ScrollUp) {
+bool Textbox::mouse_press_event(Mouse_button button,
+                                std::size_t global_x,
+                                std::size_t global_y,
+                                std::size_t local_x,
+                                std::size_t local_y,
+                                std::uint8_t device_id) {
+    if (button == Mouse_button::Left) {
+        this->set_cursor_at_coordinates_(local_x, local_y);
+    } else if (button == Mouse_button::ScrollUp) {
         if (scroll_wheel_) {
             this->scroll_up_(scroll_speed_up_);
         }
-    } else if (event.button() == Mouse_button::ScrollDown) {
+    } else if (button == Mouse_button::ScrollDown) {
         if (scroll_wheel_) {
             this->scroll_down_(scroll_speed_down_);
         }

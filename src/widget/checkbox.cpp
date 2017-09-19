@@ -28,7 +28,7 @@ void Checkbox::initialize() {
     uncheck.track(this->destroyed);
 }
 
-bool Checkbox::paint_event(const Paint_event& event) {
+bool Checkbox::paint_event() {
     Painter p{this};
     if (checked_) {
         p.put(checked_box_);
@@ -36,11 +36,16 @@ bool Checkbox::paint_event(const Paint_event& event) {
         p.put(empty_box_);
     }
     p.put(title_, dist_, 0);
-    return Widget::paint_event(event);
+    return Widget::paint_event();
 }
 
-bool Checkbox::mouse_press_event(const Mouse_event& event) {
-    if (event.button() == Mouse_button::Left) {
+bool Checkbox::mouse_press_event(Mouse_button button,
+                                 std::size_t global_x,
+                                 std::size_t global_y,
+                                 std::size_t local_x,
+                                 std::size_t local_y,
+                                 std::uint8_t device_id) {
+    if (button == Mouse_button::Left) {
         this->toggle_();
         this->update();
     }

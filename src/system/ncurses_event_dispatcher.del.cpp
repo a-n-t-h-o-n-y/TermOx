@@ -16,11 +16,11 @@ namespace detail {
 
 void NCurses_event_dispatcher::post_user_input() {
     std::unique_ptr<Event> event{nullptr};
-    Object* object = nullptr;
+    Widget* object = nullptr;
 
     int input = ::getch();  // blocking call
 
-    std::pair<Object*, std::unique_ptr<Event>> obj_event_pair;
+    std::pair<Widget*, std::unique_ptr<Event>> obj_event_pair;
 
     switch (input) {
         case KEY_MOUSE:
@@ -47,11 +47,11 @@ void NCurses_event_dispatcher::post_user_input() {
 
 #undef border  // NCurses macro, naming conflict.
 
-std::pair<Object*, std::unique_ptr<Event>>
+std::pair<Widget*, std::unique_ptr<Event>>
 NCurses_event_dispatcher::parse_mouse_event() {
     ::MEVENT mouse_event;  // NOLINT
     if (::getmouse(&mouse_event) == OK) {
-        Object* object = find_object(mouse_event.x, mouse_event.y);
+        Widget* object = find_object(mouse_event.x, mouse_event.y);
 
         // Parse NCurses Event
         Event::Type ev_type = Event::None;
@@ -101,7 +101,7 @@ NCurses_event_dispatcher::parse_mouse_event() {
             ev_type = Event::MouseButtonRelease;
             ev_button = Mouse_button::ScrollDown;
         } else {
-            return std::pair<Object*, std::unique_ptr<Event>>{nullptr, nullptr};
+            return std::pair<Widget*, std::unique_ptr<Event>>{nullptr, nullptr};
         }
 
         // Determine location of mouse event.
@@ -117,18 +117,18 @@ NCurses_event_dispatcher::parse_mouse_event() {
             return std::make_pair(object, std::move(event));
         }
     }
-    return std::pair<Object*, std::unique_ptr<Event>>{nullptr, nullptr};
+    return std::pair<Widget*, std::unique_ptr<Event>>{nullptr, nullptr};
 }
 
-Object* NCurses_event_dispatcher::find_object(std::size_t x, std::size_t y) {
-    Object* obj = System::head();
+Widget* NCurses_event_dispatcher::find_object(std::size_t x, std::size_t y) {
+    Widget* obj = System::head();
     if (obj == nullptr || !obj->has_coordinates(x, y)) {
         return nullptr;
     }
 
     bool keep_going = true;
     while (keep_going && !obj->children().empty()) {
-        for (Object* child : obj->children()) {
+        for (Widget* child : obj->children()) {
             if (child->has_coordinates(x, y) && child->enabled()) {
                 obj = child;
                 keep_going = true;
@@ -145,7 +145,7 @@ std::unique_ptr<Event> NCurses_event_dispatcher::handle_keyboard_event(
     return std::make_unique<Key_event>(Event::KeyPress, input);
 }
 
-Object* NCurses_event_dispatcher::handle_keyboard_object() {
+Widget* NCurses_event_dispatcher::handle_keyboard_object() {
     return System::focus_widget();
 }
 
@@ -154,7 +154,7 @@ std::unique_ptr<Event> NCurses_event_dispatcher::handle_resize_event() {
                                           System::max_height());
 }
 
-Object* NCurses_event_dispatcher::handle_resize_object() {
+Widget* NCurses_event_dispatcher::handle_resize_object() {
     return System::head();
 }
 

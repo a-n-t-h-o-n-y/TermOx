@@ -4,19 +4,19 @@
 #include <cstddef>
 
 namespace cppurses {
-class Widget;
+class Event_handler;
 
 class Move_event : public Event {
    public:
     // In global coordinates.
-    Move_event(Widget* receiver,
+    Move_event(Event_handler* receiver,
                std::size_t new_x,
                std::size_t new_y,
                std::size_t old_x = 0,
                std::size_t old_y = 0);
 
     bool send() const override;
-    bool filter_send(Widget* filter_widget) const override;
+    bool filter_send(Event_handler* filter) const override;
 
    protected:
     std::size_t new_x_;

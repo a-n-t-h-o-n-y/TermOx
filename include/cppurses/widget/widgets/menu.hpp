@@ -34,7 +34,7 @@ class Menu : public Widget {
         items_.emplace_back(title, action);
     }
 
-    bool paint_event(const Paint_event& event) override {
+    bool paint_event() override {
         Painter p{this};
         p.put(menu_title_);
         int count{1};
@@ -47,21 +47,19 @@ class Menu : public Widget {
             p.put(display, 0, count);
             ++count;
         }
-        return Widget::paint_event(event);
+        return Widget::paint_event();
     }
 
-    bool key_press_event(const Key_event& event) override {
-        if (event.key_code() == Key::Arrow_down ||
-            event.key_code() == Key::Arrow_left) {
+    bool key_press_event(Key key, char symbol) override {
+        if (key == Key::Arrow_down || key == Key::Arrow_left) {
             if (highlight_ != items_.size()) {
                 ++highlight_;
             }
-        } else if (event.key_code() == Key::Arrow_up ||
-                   event.key_code() == Key::Arrow_right) {
+        } else if (key == Key::Arrow_up || key == Key::Arrow_right) {
             if (highlight_ != 1) {
                 --highlight_;
             }
-        } else if (event.key_code() == Key::Enter) {
+        } else if (key == Key::Enter) {
             if (!items_.empty()) {
                 items_.at(highlight_ - 1).action();
             }

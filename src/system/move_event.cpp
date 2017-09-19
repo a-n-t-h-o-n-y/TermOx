@@ -1,10 +1,10 @@
 #include "system/events/move_event.hpp"
-#include "widget/widget.hpp"
+#include "system/event_handler.hpp"
 #include <cstddef>
 
 namespace cppurses {
 
-Move_event::Move_event(Widget* receiver,
+Move_event::Move_event(Event_handler* receiver,
                        std::size_t new_x,
                        std::size_t new_y,
                        std::size_t old_x,
@@ -19,8 +19,8 @@ bool Move_event::send() const {
     return receiver_->move_event(new_x_, new_y_, old_x_, old_y_);
 }
 
-bool Move_event::filter_send(Widget* filter_widget) const {
-    return filter_widget->move_event_filter(receiver_, new_x_, new_y_, old_x_,
+bool Move_event::filter_send(Event_handler* filter) const {
+    return filter->move_event_filter(receiver_, new_x_, new_y_, old_x_,
                                             old_y_);
 }
 

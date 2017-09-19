@@ -4,7 +4,6 @@
 #include "system/events/mouse_event.hpp"
 #include "system/events/resize_event.hpp"
 #include "system/key.hpp"
-#include "system/object.hpp"
 #include "system/system.hpp"
 #include "widget/widget.hpp"
 
@@ -16,23 +15,22 @@
 namespace {
 
 cppurses::Widget* find_widget_at(std::size_t x, std::size_t y) {
-    cppurses::Object* obj = cppurses::System::head();
-    if (obj == nullptr || !obj->has_coordinates(x, y)) {
+    cppurses::Widget* widg = cppurses::System::head();
+    if (widg == nullptr || !widg->has_coordinates(x, y)) {
         return nullptr;
     }
     bool keep_going = true;
-    while (keep_going && !obj->children().empty()) {
-        for (cppurses::Object* child : obj->children()) {
+    while (keep_going && !widg->children().empty()) {
+        for (cppurses::Widget* child : widg->children()) {
             if (child->has_coordinates(x, y) && child->enabled()) {
-                obj = child;
+                widg = child;
                 keep_going = true;
                 break;
             }
             keep_going = false;
         }
     }
-    // TODO Merge object into Widget class
-    return static_cast<cppurses::Widget*>(obj);
+    return widg;
 }
 
 }  // namespace
@@ -50,12 +48,12 @@ std::unique_ptr<Event> NCurses_event_listener::get_input() const {
 
         case KEY_RESIZE:
             event = handle_resize_event();
-            event->set_receiver(static_cast<Widget*>(handle_resize_object()));
+            event->set_receiver(handle_resize_widget());
             break;
 
         default:  // Key_event
             event = handle_keyboard_event(input);
-            event->set_receiver(static_cast<Widget*>(handle_keyboard_object()));
+            event->set_receiver(handle_keyboard_widget());
             break;
     }
     return event;
@@ -147,7 +145,7 @@ std::unique_ptr<Event> NCurses_event_listener::handle_keyboard_event(
     return std::make_unique<Key_press_event>(nullptr, static_cast<Key>(input));
 }
 
-Object* NCurses_event_listener::handle_keyboard_object() const {
+Widget* NCurses_event_listener::handle_keyboard_widget() const {
     return System::focus_widget();
 }
 
@@ -156,8 +154,8 @@ std::unique_ptr<Event> NCurses_event_listener::handle_resize_event() const {
                                           System::max_height());
 }
 
-Object* NCurses_event_listener::handle_resize_object() const {
-    return static_cast<Widget*>(System::head());
+Widget* NCurses_event_listener::handle_resize_widget() const {
+    return System::head();
 }
 
 }  // namespace detail

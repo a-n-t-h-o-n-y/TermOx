@@ -1,4 +1,7 @@
 #include "system/event_handler.hpp"
+#include "system/system.hpp"
+#include "system/events/enable_event.hpp"
+#include "system/events/disable_event.hpp"
 #include <signals/signals.hpp>
 #include <cstddef>
 #include <vector>
@@ -6,9 +9,20 @@
 namespace cppurses {
 
 Event_handler::~Event_handler() {
-    if (valid_) {
-        destroyed(this);
+    destroyed(this);
+}
+
+void Event_handler::set_enabled(bool enabled) {
+    enabled_ = enabled;
+    if (enabled) {
+        System::post_event<Enable_event>(this);
+    } else {
+        System::post_event<Disable_event>(this);
     }
+}
+
+bool Event_handler::enabled() const {
+    return enabled_;
 }
 
 void Event_handler::install_event_filter(Event_handler* filter) {
@@ -16,8 +30,10 @@ void Event_handler::install_event_filter(Event_handler* filter) {
         return;
     }
     // Remove filter from list on destruction of filter
-    Signals::Slot<void()> remove_on_destroy{
-        [this, filter] { this->remove_event_filter(filter); }};
+    sig::Slot<void(Event_handler*)> remove_on_destroy{
+        [this](Event_handler* being_destroyed) {
+            this->remove_event_filter(being_destroyed);
+        }};
     remove_on_destroy.track(this->destroyed);
     filter->destroyed.connect(remove_on_destroy);
     event_filters_.push_back(filter);
@@ -32,7 +48,7 @@ void Event_handler::remove_event_filter(Event_handler* filter) {
     }
 }
 
-const std::vector<Event_handler*>& Event_filter::get_event_filters() const {
+const std::vector<Event_handler*>& Event_handler::get_event_filters() const {
     return event_filters_;
 }
 
@@ -229,6 +245,11 @@ bool Event_handler::focus_in_event_filter(Event_handler* receiver) {
 }
 
 bool Event_handler::focus_out_event_filter(Event_handler* receiver) {
+    return false;
+}
+
+bool Event_handler::deferred_delete_event_filter(Event_handler* receiver,
+                                                 Event_handler* to_delete) {
     return false;
 }
 

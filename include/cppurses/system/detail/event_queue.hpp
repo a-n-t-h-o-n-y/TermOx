@@ -10,10 +10,11 @@ namespace detail {
 class Event_queue {
    public:
     void append(std::unique_ptr<Event> event);
-    friend class Invoker;
+    friend class Event_invoker;
 
    private:
     std::vector<std::unique_ptr<Event>> queue_;
+    void remove_dd_children(const Event& new_event);
 };
 
 }  // namespace detail

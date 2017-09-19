@@ -18,12 +18,9 @@ std::vector<std::size_t> Vertical_layout::size_widgets() {
     // <Widget*, width, height>
     std::vector<std::tuple<Widget*, std::size_t, std::size_t>> widgets;
     std::size_t total_stretch{0};
-    for (Object* c : this->children()) {
-        Widget* w{dynamic_cast<Widget*>(c)};
-        if (w != nullptr) {
-            widgets.emplace_back(std::make_tuple(w, 0, 0));
-            total_stretch += w->geometry().size_policy().vertical_stretch;
-        }
+    for (Widget* c : this->children()) {
+        widgets.emplace_back(std::make_tuple(c, 0, 0));
+        total_stretch += c->geometry().size_policy().vertical_stretch;
     }
 
     int height_available = this->height();
@@ -140,9 +137,8 @@ std::vector<std::size_t> Vertical_layout::size_widgets() {
 
     // Post all Resize_events
     for (auto& tup : widgets) {
-        System::post_event(
-            std::get<0>(tup),
-            std::make_unique<Resize_event>(std::get<1>(tup), std::get<2>(tup)));
+        System::post_event<Resize_event>(std::get<0>(tup), std::get<1>(tup),
+                                         std::get<2>(tup));
     }
     std::vector<std::size_t> heights;
     heights.reserve(widgets.size());
@@ -475,11 +471,8 @@ void Vertical_layout::collect_space(
 void Vertical_layout::position_widgets(
     const std::vector<std::size_t>& heights) {
     std::vector<Widget*> widgets;
-    for (Object* c : this->children()) {
-        Widget* w{dynamic_cast<Widget*>(c)};
-        if (w != nullptr) {
-            widgets.push_back(w);
-        }
+    for (Widget* c : this->children()) {
+        widgets.push_back(c);
     }
     if (widgets.size() != heights.size()) {
         return;
@@ -487,10 +480,9 @@ void Vertical_layout::position_widgets(
     std::size_t y_pos = north_border_offset(this->border());
     std::size_t index{0};
     for (auto& widg : widgets) {
-        System::post_event(widg,
-                           std::make_unique<Move_event>(
-                               this->x() + west_border_offset(this->border()),
-                               this->y() + y_pos));
+        System::post_event<Move_event>(
+            widg, this->x() + west_border_offset(this->border()),
+            this->y() + y_pos);
         y_pos += heights.at(index++);
     }
 }

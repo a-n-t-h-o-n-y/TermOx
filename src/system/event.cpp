@@ -1,19 +1,20 @@
 #include "system/event.hpp"
-#include "widget/widget.hpp"
+#include "system/event_handler.hpp"
 
 namespace cppurses {
 
-Event::Event(Type type, Widget* receiver) : type_{type}, receiver_{receiver} {}
+Event::Event(Type type, Event_handler* receiver)
+    : type_{type}, receiver_{receiver} {}
 
 Event::Type Event::type() const {
     return type_;
 }
 
-Widget* Event::receiver() const {
+Event_handler* Event::receiver() const {
     return receiver_;
 }
 
-void Event::set_receiver(Widget* receiver) {
+void Event::set_receiver(Event_handler* receiver) {
     receiver_ = receiver;
 }
 
@@ -22,7 +23,8 @@ bool Event::send_to_all_filters() const {
     bool handled = false;
     // Index iteration: event_filters might change size and reallocate.
     for (int i{0}; i < event_filters.size() && !handled; ++i) {
-        handled = this->filter_send(static_cast<Widget*>(event_filters[i]));
+        handled =
+            this->filter_send(event_filters[i]);
     }
     return handled;
 }

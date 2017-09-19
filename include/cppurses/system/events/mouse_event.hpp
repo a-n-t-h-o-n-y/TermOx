@@ -5,14 +5,14 @@
 #include <cstdint>
 
 namespace cppurses {
-class Widget;
+class Event_handler;
 
 enum class Mouse_button { None, Left, Middle, Right, ScrollUp, ScrollDown };
 
 class Mouse_event : public Input_event {
    public:
     Mouse_event(Event::Type type,
-                Widget* receiver,
+                Event_handler* receiver,
                 Mouse_button button,
                 std::size_t glob_x,
                 std::size_t glob_y,
@@ -31,7 +31,7 @@ class Mouse_event : public Input_event {
 
 class Mouse_press_event : public Mouse_event {
    public:
-    Mouse_press_event(Widget* receiver,
+    Mouse_press_event(Event_handler* receiver,
                       Mouse_button button,
                       std::size_t glob_x,
                       std::size_t glob_y,
@@ -40,12 +40,12 @@ class Mouse_press_event : public Mouse_event {
                       std::uint8_t device_id);
 
     bool send() const override;
-    bool filter_send(Widget* filter_widget) const override;
+    bool filter_send(Event_handler* filter) const override;
 };
 
 class Mouse_release_event : public Mouse_event {
    public:
-    Mouse_release_event(Widget* receiver,
+    Mouse_release_event(Event_handler* receiver,
                         Mouse_button button,
                         std::size_t glob_x,
                         std::size_t glob_y,
@@ -54,12 +54,12 @@ class Mouse_release_event : public Mouse_event {
                         std::uint8_t device_id);
 
     bool send() const override;
-    bool filter_send(Widget* filter_widget) const override;
+    bool filter_send(Event_handler* filter) const override;
 };
 
 class Mouse_double_click_event : public Mouse_event {
    public:
-    Mouse_double_click_event(Widget* receiver,
+    Mouse_double_click_event(Event_handler* receiver,
                              Mouse_button button,
                              std::size_t glob_x,
                              std::size_t glob_y,
@@ -68,12 +68,12 @@ class Mouse_double_click_event : public Mouse_event {
                              std::uint8_t device_id);
 
     bool send() const override;
-    bool filter_send(Widget* filter_widget) const override;
+    bool filter_send(Event_handler* filter) const override;
 };
 
 class Mouse_wheel_event : public Mouse_event {
    public:
-    Mouse_wheel_event(Widget* receiver,
+    Mouse_wheel_event(Event_handler* receiver,
                       Mouse_button button,
                       std::size_t glob_x,
                       std::size_t glob_y,
@@ -82,12 +82,12 @@ class Mouse_wheel_event : public Mouse_event {
                       std::uint8_t device_id);
 
     bool send() const override;
-    bool filter_send(Widget* filter_widget) const override;
+    bool filter_send(Event_handler* filter) const override;
 };
 
 class Mouse_move_event : public Mouse_event {
    public:
-    Mouse_move_event(Widget* receiver,
+    Mouse_move_event(Event_handler* receiver,
                      Mouse_button button,
                      std::size_t glob_x,
                      std::size_t glob_y,
@@ -96,7 +96,7 @@ class Mouse_move_event : public Mouse_event {
                      std::uint8_t device_id);
 
     bool send() const override;
-    bool filter_send(Widget* filter_widget) const override;
+    bool filter_send(Event_handler* filter) const override;
 };
 
 }  // namespace cppurses

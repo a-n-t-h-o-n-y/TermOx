@@ -3,25 +3,26 @@
 #include "system/event.hpp"
 
 namespace cppurses {
-class Widget;
-
-// class Focus_event : public Event {
-//    public:
-//     explicit Focus_event(Event::Type type) : Event{type} {}
-// };
+class Event_handler;
 
 class Focus_in_event : public Event {
    public:
-    explicit Focus_in_event(Widget* receiver);
     bool send() const override;
-    bool filter_send(Widget* filter_widget) const override;
+    bool filter_send(Event_handler* filter) const override;
+    friend class Focus;
+
+   private:
+    explicit Focus_in_event(Event_handler* receiver);
 };
 
 class Focus_out_event : public Event {
    public:
-    explicit Focus_out_event(Widget* receiver);
     bool send() const override;
-    bool filter_send(Widget* filter_widget) const override;
+    bool filter_send(Event_handler* filter) const override;
+    friend class Focus;
+
+   private:
+    explicit Focus_out_event(Event_handler* receiver);
 };
 
 }  // namespace cppurses

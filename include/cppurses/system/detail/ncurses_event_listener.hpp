@@ -4,7 +4,7 @@
 #include <memory>
 
 namespace cppurses {
-class Object;
+class Widget;
 namespace detail {
 
 class NCurses_event_listener : public Abstract_event_listener {
@@ -15,9 +15,9 @@ class NCurses_event_listener : public Abstract_event_listener {
     std::unique_ptr<Event> parse_mouse_event() const;
 
     std::unique_ptr<Event> handle_keyboard_event(int input) const;
-    Object* handle_keyboard_object() const;
+    Widget* handle_keyboard_widget() const;
     std::unique_ptr<Event> handle_resize_event() const;
-    Object* handle_resize_object() const;
+    Widget* handle_resize_widget() const;
 };
 
 }  // namespace detail

@@ -5,7 +5,6 @@
 #include "system/abstract_event_dispatcher.hpp"
 #include "system/event.hpp"
 #include "system/event_loop.hpp"
-#include "system/object.hpp"
 #include "system/events/input_event.hpp"
 #include "system/events/mouse_event.hpp"
 #include "system/events/paint_event.hpp"

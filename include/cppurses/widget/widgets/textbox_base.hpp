@@ -58,7 +58,10 @@ class Textbox_base : public Text_display {
     bool scroll_{true};
 
    protected:
-    bool resize_event(const Resize_event& event) override;
+    bool resize_event(std::size_t new_width,
+                      std::size_t new_height,
+                      std::size_t old_width,
+                      std::size_t old_height) override;
     void scroll_up_(std::size_t n);
     void scroll_down_(std::size_t n);
     void enable_scrolling_(bool enable = true) { scroll_ = enable; }

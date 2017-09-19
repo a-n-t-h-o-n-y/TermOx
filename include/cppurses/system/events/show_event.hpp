@@ -3,13 +3,13 @@
 #include "system/event.hpp"
 
 namespace cppurses {
-class Widget;
+class Event_handler;
 
 class Show_event : public Event {
    public:
-    Show_event(Widget* receiver);
+    Show_event(Event_handler* receiver);
     bool send() const override;
-    bool filter_send(Widget* filter_widget) const override;
+    bool filter_send(Event_handler* filter) const override;
 };
 
 }  // namespace cppurses

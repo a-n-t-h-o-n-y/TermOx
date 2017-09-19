@@ -4,18 +4,18 @@
 #include <cstddef>
 
 namespace cppurses {
-class Widget;
+class Event_handler;
 
 class Resize_event : public Event {
    public:
-    Resize_event(Widget* receiver,
+    Resize_event(Event_handler* receiver,
                  std::size_t new_width,
                  std::size_t new_height,
                  std::size_t old_width = 0,
                  std::size_t old_height = 0);
 
     bool send() const override;
-    bool filter_send(Widget* filter_widget) const override;
+    bool filter_send(Event_handler* filter) const override;
 
    protected:
     std::size_t new_width_;

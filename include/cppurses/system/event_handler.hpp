@@ -1,5 +1,7 @@
 #ifndef SYSTEM_EVENT_HANDLER_HPP
 #define SYSTEM_EVENT_HANDLER_HPP
+#include "system/events/mouse_event.hpp"
+#include "system/key.hpp"
 #include <signals/signals.hpp>
 #include <vector>
 
@@ -7,11 +9,16 @@ namespace cppurses {
 
 class Event_handler {
    public:
+    Event_handler() = default;
     Event_handler(const Event_handler&) = delete;
     Event_handler& operator=(const Event_handler&) = delete;
     Event_handler(Event_handler&&) = delete;
     Event_handler& operator=(Event_handler&&) = delete;
     virtual ~Event_handler();
+
+    // Enable
+    bool enabled() const;
+    void set_enabled(bool enabled);
 
     void install_event_filter(Event_handler* filter);
     void remove_event_filter(Event_handler* filter);
@@ -68,6 +75,7 @@ class Event_handler {
     virtual bool show_event();
     virtual bool focus_in_event();
     virtual bool focus_out_event();
+    virtual bool deferred_delete_event(Event_handler* to_delete) = 0;
     virtual bool paint_event() = 0;
     virtual bool clear_screen_event() = 0;
 
@@ -136,6 +144,8 @@ class Event_handler {
     virtual bool show_event_filter(Event_handler* receiver);
     virtual bool focus_in_event_filter(Event_handler* receiver);
     virtual bool focus_out_event_filter(Event_handler* receiver);
+    virtual bool deferred_delete_event_filter(Event_handler* receiver,
+                                              Event_handler* to_delete);
     virtual bool paint_event_filter(Event_handler* receiver);
     virtual bool clear_screen_event_filter(Event_handler* receiver);
 
@@ -144,6 +154,7 @@ class Event_handler {
 
    private:
     std::vector<Event_handler*> event_filters_;
+    bool enabled_ = true;
 };
 
 }  // namespace cppurses

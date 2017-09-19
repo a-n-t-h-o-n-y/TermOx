@@ -182,9 +182,12 @@ void Textbox_base::scroll_down_(std::size_t n) {
     this->set_cursor_at_coordinates_(this->cursor_x(), y);
 }
 
-bool Textbox_base::resize_event(const Resize_event& event) {
+bool Textbox_base::resize_event(std::size_t new_width,
+                                std::size_t new_height,
+                                std::size_t old_width,
+                                std::size_t old_height) {
     const auto cursor_index = this->index_at(this->cursor_coordinates());
-    Text_display::resize_event(event);
+    Text_display::resize_event(new_width, new_height, old_width, old_height);
     // Scroll if old cursor index is now hidden.
     const auto cursor_line = this->line_at(cursor_index);
     if (this->top_line() > cursor_line) {
@@ -193,7 +196,8 @@ bool Textbox_base::resize_event(const Resize_event& event) {
         this->scroll_down_(cursor_line - this->bottom_line());
     }
     this->set_cursor_at_index_(cursor_index);
-    return Text_display::resize_event(event);
+    return Text_display::resize_event(new_width, new_height, old_width,
+                                      old_height);
 }
 
 }  // namespace cppurses

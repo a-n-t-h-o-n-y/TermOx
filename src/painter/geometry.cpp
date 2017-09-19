@@ -47,8 +47,7 @@ void Geometry::set_size_policy(const Size_policy& policy) {
 
 void Geometry::notify_parent() const {
     auto parent = widget_->parent();
-    auto widg = std::make_unique<Child_event>(Event::ChildPolished, widget_);
-    System::post_event(parent, std::move(widg));
+    System::post_event<Child_polished_event>(parent, widget_);
 }
 
 }  // namespace cppurses

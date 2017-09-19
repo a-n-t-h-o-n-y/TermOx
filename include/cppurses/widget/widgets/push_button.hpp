@@ -13,8 +13,13 @@ namespace cppurses {
 class Push_button : public Widget {
    public:
     explicit Push_button(Glyph_string name = "");
-    bool mouse_press_event(const Mouse_event& event) override;
-    bool paint_event(const Paint_event& event) override;
+    bool mouse_press_event(Mouse_button button,
+                           std::size_t global_x,
+                           std::size_t global_y,
+                           std::size_t local_x,
+                           std::size_t local_y,
+                           std::uint8_t device_id) override;
+    bool paint_event() override;
 
     // Slots
     sig::Slot<void()> click;

@@ -3,15 +3,15 @@
 #include "system/event.hpp"
 
 namespace cppurses {
-class Widget;
+class Event_handler;
 namespace detail {
 class Event_queue;
 
 class Event_invoker {
    public:
     void invoke(Event_queue& queue,
-                Event::Type type = Event::None,
-                Widget* widget_filter = nullptr);
+                Event::Type type_filter = Event::None,
+                Event_handler* object_filter = nullptr);
 };
 
 }  // namespace detail

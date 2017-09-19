@@ -12,14 +12,14 @@ Layout::Layout() {
     this->geometry().set_height(System::max_height());
 }
 
-bool Layout::paint_event(const Paint_event& event) {
+bool Layout::paint_event() {
     too_small_ = false;
     this->update_geometry();
     if (too_small_) {
         Painter p{this};
         p.put("Screen too small.");
     }
-    return Widget::paint_event(event);
+    return Widget::paint_event();
 }
 
 }  // namespace cppurses

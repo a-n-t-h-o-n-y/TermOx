@@ -2,7 +2,9 @@
 #define WIDGET_WIDGETS_TEXTBOX_HPP
 
 #include "painter/glyph_string.hpp"
+#include "system/key.hpp"
 #include "widget/widgets/textbox_base.hpp"
+#include <cstddef>
 
 namespace cppurses {
 class Key_event;
@@ -20,8 +22,13 @@ class Textbox : public Textbox_base {
     void set_wheel_speed_down(std::size_t lines);
 
    protected:
-    bool key_press_event(const Key_event& event) override;
-    bool mouse_press_event(const Mouse_event& event) override;
+    bool key_press_event(Key key, char symbol) override;
+    bool mouse_press_event(Mouse_button button,
+                           std::size_t global_x,
+                           std::size_t global_y,
+                           std::size_t local_x,
+                           std::size_t local_y,
+                           std::uint8_t device_id) override;
 
    private:
     using Textbox_base::scroll_up_;

@@ -203,7 +203,7 @@ Coordinates Text_display::display_position(std::size_t index) const {
     return position;
 }
 
-bool Text_display::paint_event(const Paint_event& event) {
+bool Text_display::paint_event() {
     Painter p{this};
     std::size_t line_n{0};
     auto paint = [&p, &line_n, this](const auto& line) {
@@ -219,11 +219,14 @@ bool Text_display::paint_event(const Paint_event& event) {
     if (this->top_line() < display_state_.size()) {
         std::for_each(begin, end, paint);
     }
-    return Widget::paint_event(event);
+    return Widget::paint_event();
 }
 
-bool Text_display::resize_event(const Resize_event& event) {
-    Widget::resize_event(event);
+bool Text_display::resize_event(std::size_t new_width,
+                                std::size_t new_height,
+                                std::size_t old_width,
+                                std::size_t old_height) {
+    Widget::resize_event(new_width, new_height, old_width, old_height);
     this->update_display();
     return true;
 }

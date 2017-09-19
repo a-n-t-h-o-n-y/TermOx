@@ -3,35 +3,35 @@
 #include "system/event.hpp"
 
 namespace cppurses {
-class Widget;
+class Event_handler;
 
 class Child_event : public Event {
    public:
-    Child_event(Event::Type type, Widget* receiver, Widget* child);
+    Child_event(Event::Type type, Event_handler* receiver, Event_handler* child);
 
    protected:
-    Widget* child_;
+    Event_handler* child_;
 };
 
 class Child_added_event : public Child_event {
    public:
-    Child_added_event(Widget* receiver, Widget* child);
+    Child_added_event(Event_handler* receiver, Event_handler* child);
     bool send() const override;
-    bool filter_send(Widget* filter_widget) const override;
+    bool filter_send(Event_handler* filter) const override;
 };
 
 class Child_removed_event : public Child_event {
    public:
-    Child_removed_event(Widget* receiver, Widget* child);
+    Child_removed_event(Event_handler* receiver, Event_handler* child);
     bool send() const override;
-    bool filter_send(Widget* filter_widget) const override;
+    bool filter_send(Event_handler* filter) const override;
 };
 
 class Child_polished_event : public Child_event {
    public:
-    Child_polished_event(Widget* receiver, Widget* child);
+    Child_polished_event(Event_handler* receiver, Event_handler* child);
     bool send() const override;
-    bool filter_send(Widget* filter_widget) const override;
+    bool filter_send(Event_handler* filter) const override;
 };
 
 }  // namespace cppurses

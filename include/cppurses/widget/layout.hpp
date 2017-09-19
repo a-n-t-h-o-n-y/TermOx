@@ -12,7 +12,7 @@ class Layout : public Widget {
     Layout();
 
    protected:
-    bool paint_event(const Paint_event& event) override;
+    bool paint_event() override;
     virtual void update_geometry() = 0;
     bool too_small_{false};
 };

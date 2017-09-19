@@ -1,12 +1,11 @@
 #ifndef SYSTEM_EVENT_LOOP_HPP
 #define SYSTEM_EVENT_LOOP_HPP
-// #include "system/object.hpp"
 #include "system/detail/event_invoker.hpp"
 #include "system/detail/event_queue.hpp"
 
 namespace cppurses {
 
-class Event_loop {  //: public Object {
+class Event_loop {
    public:
     int run();
     void exit(int return_code);

@@ -2,7 +2,7 @@
 #define SYSTEM_EVENT_HPP
 
 namespace cppurses {
-class Widget;
+class Event_handler;
 
 class Event {
    public:
@@ -38,7 +38,7 @@ class Event {
     };
 
     // Special Member Functions
-    explicit Event(Type type, Widget* receiver);
+    explicit Event(Type type, Event_handler* receiver);
     Event(const Event&) = default;
     Event& operator=(const Event&) = default;
     Event(Event&&) = default;
@@ -46,16 +46,16 @@ class Event {
     virtual ~Event() = default;
 
     Type type() const;
-    Widget* receiver() const;
-    void set_receiver(Widget* receiver);
+    Event_handler* receiver() const;
+    void set_receiver(Event_handler* receiver);
 
     bool send_to_all_filters() const;
     virtual bool send() const = 0;
-    virtual bool filter_send(Widget* filter_widget) const = 0;
+    virtual bool filter_send(Event_handler* filter) const = 0;
 
    protected:
     const Type type_;
-    Widget* receiver_;
+    Event_handler* receiver_;
 };
 
 }  // namespace cppurses

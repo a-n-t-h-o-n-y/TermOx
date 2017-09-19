@@ -25,8 +25,13 @@ class Checkbox : public Widget {
     sig::Signal<void()> toggled;
 
    protected:
-    bool paint_event(const Paint_event& event) override;
-    bool mouse_press_event(const Mouse_event& event) override;
+    bool paint_event() override;
+    bool mouse_press_event(Mouse_button button,
+                           std::size_t global_x,
+                           std::size_t global_y,
+                           std::size_t local_x,
+                           std::size_t local_y,
+                           std::uint8_t device_id) override;
 
     void toggle_();
 

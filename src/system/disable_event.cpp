@@ -1,16 +1,16 @@
 #include "system/events/disable_event.hpp"
-#include "widget/widget.hpp"
+#include "system/event_handler.hpp"
 
 namespace cppurses {
-Disable_event::Disable_event(Widget* receiver)
+Disable_event::Disable_event(Event_handler* receiver)
     : Event{Event::Disable, receiver} {}
 
 bool Disable_event::send() const {
     return receiver_->disable_event();
 }
 
-bool Disable_event::filter_send(Widget* filter_widget) const {
-    return filter_widget->disable_event_filter(receiver_);
+bool Disable_event::filter_send(Event_handler* filter) const {
+    return filter->disable_event_filter(receiver_);
 }
 
 }  // namespace cppurses

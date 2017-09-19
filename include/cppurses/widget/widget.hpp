@@ -46,8 +46,9 @@ class Widget : public Event_handler {
     void set_name(const std::string& name);
 
     // Parent
-    Object* parent() const;
-    void set_parent(Object* parent);
+
+    Widget* parent() const;
+    void set_parent(Widget* parent);
 
     // Children
     template <typename T, typename... Args>
@@ -59,6 +60,8 @@ class Widget : public Event_handler {
     void add_child(std::unique_ptr<Widget> child);
     std::vector<Widget*> children() const;
 
+    bool has_child(Widget* child);
+
     template <typename T>
     T* find_child(const std::string& name) {
         return this->find_child_impl<T>(this, name);
@@ -68,10 +71,6 @@ class Widget : public Event_handler {
     const T* find_child(const std::string& name) const {
         return this->find_child_impl<T>(this, name);
     }
-
-    // Enable
-    bool enabled() const;
-    void set_enabled(bool enabled);
 
     // Global Coordinates - Includes border space
     std::size_t x() const;
@@ -157,7 +156,7 @@ class Widget : public Event_handler {
     sig::Slot<void()> hide;
     sig::Slot<void()> show;
     sig::Slot<void()> repaint;
-    sig::Slot<void()> give_focus;
+    // sig::Slot<void()> give_focus;
     sig::Slot<void()> update_me;
     sig::Slot<void(Mouse_button, Coordinates)> click_me;
     sig::Slot<void(Key)> keypress_me;
@@ -167,15 +166,15 @@ class Widget : public Event_handler {
 
     // Event Handling
     // bool event(const Event& event) override;
-    virtual bool move_event(std::size_t new_x,
-                            std::size_t new_y,
-                            std::size_t old_x,
-                            std::size_t old_y);
-    virtual bool resize_event(std::size_t new_width,
-                              std::size_t new_height,
-                              std::size_t old_width,
-                              std::size_t old_height);
-    virtual bool paint_event();
+    bool move_event(std::size_t new_x,
+                    std::size_t new_y,
+                    std::size_t old_x,
+                    std::size_t old_y) override;
+    bool resize_event(std::size_t new_width,
+                      std::size_t new_height,
+                      std::size_t old_width,
+                      std::size_t old_height) override;
+    bool paint_event() override;
     // virtual bool mouse_press_event(Mouse_button button,
     //                                std::size_t global_x,
     //                                std::size_t global_y,
@@ -206,18 +205,19 @@ class Widget : public Event_handler {
     //                               std::size_t local_x,
     //                               std::size_t local_y,
     //                               std::uint8_t device_id);
-    virtual bool key_press_event(Key key, char symbol);
+    bool key_press_event(Key key, char symbol) override;
     // virtual bool key_release_event(Key key, char symbol);
-    virtual bool close_event();
+    bool close_event() override;
     // virtual bool hide_event();
     // virtual bool show_event();
-    // virtual bool focus_in_event();
-    // virtual bool focus_out_event();
-    virtual bool clear_screen_event();
+    bool focus_in_event() override;
+    bool focus_out_event() override;
+    bool clear_screen_event() override;
+    bool deferred_delete_event(Event_handler* to_delete) override;
 
-    bool child_added_event(Widget* child) override;
-    bool child_removed_event(Widget* child) override;
-    bool child_polished_event(Widget* child) override;
+    bool child_added_event(Event_handler* child) override;
+    bool child_removed_event(Event_handler* child) override;
+    bool child_polished_event(Event_handler* child) override;
 
     // Event Filter Handling
     // virtual bool move_event_filter(Widget* receiver,
@@ -298,10 +298,9 @@ class Widget : public Event_handler {
     std::unique_ptr<Paint_engine> paint_engine_{nullptr};
 
    private:
-    std::string object_name_;
+    std::string widget_name_;
     Widget* parent_ = nullptr;
     std::vector<std::unique_ptr<Widget>> children_;
-    bool enabled_ = true;
 
     void initialize();
     void delete_child(Widget* child);
@@ -316,12 +315,12 @@ class Widget : public Event_handler {
             auto current = queue_.front();
             queue_.pop();
             auto c_ptr = dynamic_cast<T*>(current);
-            if (current->name() == name && c_ptr) {
+            if (current->name() == name && c_ptr != nullptr) {
                 return c_ptr;
             }
             auto children = current->children();
             std::for_each(std::begin(children), std::end(children),
-                          [&](Object* p) { queue_.push(p); });
+                          [&](Widget* p) { queue_.push(p); });
         }
         return nullptr;
     }

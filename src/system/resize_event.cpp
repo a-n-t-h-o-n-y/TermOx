@@ -1,10 +1,10 @@
 #include "system/events/resize_event.hpp"
-#include "widget/widget.hpp"
+#include "system/event_handler.hpp"
 #include <cstddef>
 
 namespace cppurses {
 
-Resize_event::Resize_event(Widget* receiver,
+Resize_event::Resize_event(Event_handler* receiver,
                            std::size_t new_width,
                            std::size_t new_height,
                            std::size_t old_width,
@@ -20,8 +20,8 @@ bool Resize_event::send() const {
                                    old_height_);
 }
 
-bool Resize_event::filter_send(Widget* filter_widget) const {
-    return filter_widget->resize_event_filter(
+bool Resize_event::filter_send(Event_handler* filter) const {
+    return filter->resize_event_filter(
         receiver_, new_width_, new_height_, old_width_, old_height_);
 }
 

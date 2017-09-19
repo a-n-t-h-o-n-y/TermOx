@@ -15,8 +15,8 @@
 #include "system/events/paint_event.hpp"
 #include "system/events/resize_event.hpp"
 #include "system/events/show_event.hpp"
+#include "system/events/deferred_delete_event.hpp"
 #include "system/key.hpp"
-#include "system/object.hpp"
 #include "system/system.hpp"
 #include "widget/border.hpp"
 #include "widget/coordinates.hpp"
@@ -49,7 +49,7 @@ Widget::~Widget() {
 void Widget::initialize() {
     // Slots
     this->delete_later = [this] {
-        System::post_event(std::make_unique<Deferred_delete_event>(this));
+        System::post_event<Deferred_delete_event>(this);
     };
     this->delete_later.track(this->destroyed);
 
@@ -59,9 +59,7 @@ void Widget::initialize() {
     this->disable = [this] { this->set_enabled(false); };
     this->disable.track(this->destroyed);
 
-    close = [this]() {
-        System::post_event(this, std::make_unique<Close_event>());
-    };
+    close = [this]() { System::post_event<Close_event>(this); };
     close.track(this->destroyed);
 
     hide = [this]() { this->set_visible(false); };
@@ -70,25 +68,23 @@ void Widget::initialize() {
     show = [this]() { this->set_visible(true); };
     show.track(this->destroyed);
 
-    repaint = [this]() { System::send_event(this, Paint_event()); };
+    repaint = [this]() { System::send_event(Paint_event{this}); };
     repaint.track(this->destroyed);
 
-    give_focus = [this]() { this->set_focus(true); };
-    give_focus.track(this->destroyed);
+    // give_focus = [this]() { this->set_focus(true); };
+    // give_focus.track(this->destroyed);
 
     update_me = [this]() { this->update(); };
     update_me.track(this->destroyed);
 
     click_me = [this](Mouse_button b, Coordinates c) {
-        System::send_event(
-            this, Mouse_event(Event::MouseButtonPress, b, this->x() + c.x,
-                              this->y() + c.y, c.x, c.y, 0));
+        System::send_event(Mouse_press_event{this, b, this->x() + c.x,
+                                             this->y() + c.y, c.x, c.y, 0});
     };
     click_me.track(this->destroyed);
 
     keypress_me = [this](Key key) {
-        System::send_event(this,
-                           Key_event(Event::KeyPress, static_cast<int>(key)));
+        System::send_event(Key_press_event{this, key});
     };
     keypress_me.track(this->destroyed);
 
@@ -99,12 +95,12 @@ void Widget::initialize() {
 }
 
 void Widget::set_name(const std::string& name) {
-    name_ = name;
+    widget_name_ = name;
     name_changed(name);
 }
 
 std::string Widget::name() const {
-    return object_name_;
+    return widget_name_;
 }
 
 void Widget::set_parent(Widget* parent) {
@@ -118,8 +114,7 @@ Widget* Widget::parent() const {
 void Widget::add_child(std::unique_ptr<Widget> child) {
     children_.emplace_back(std::move(child));
     children_.back()->set_parent(this);
-    System::post_event(
-        std::make_unique<Child_added_event>(this, children_.back().get()));
+    System::post_event<Child_added_event>(this, children_.back().get());
 }
 
 void Widget::delete_child(Widget* child) {
@@ -127,34 +122,29 @@ void Widget::delete_child(Widget* child) {
     auto at = std::find_if(std::begin(children_), end_iter,
                            [child](auto& c) { return c.get() == child; });
     if (at != end_iter) {
-        System::post_event(
-            std::make_unique<Child_removed_event>(this, at.get()));
+        System::post_event<Child_removed_event>(this, at->get());
         children_.erase(at);
     }
 }
 
-std::vector<Widget*> Object::children() const {
+bool has_child(Widget* child) {
+    for (Widget* w : children_) {
+        if (w == child || w->is_child(child)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+std::vector<Widget*> Widget::children() const {
     std::vector<Widget*> ret;
     std::transform(std::begin(children_), std::end(children_),
                    std::back_inserter(ret), [](auto& up) { return up.get(); });
     return ret;
 }
 
-void Widget::set_enabled(bool enabled) {
-    enabled_ = enabled;
-    if (enabled) {
-        System::post_event(std::make_unique<Enable_event>(this));
-    } else {
-        System::post_event(std::make_unique<Disable_event>(this));
-    }
-}
-
-bool Widget::enabled() const {
-    return enabled_;
-}
-
 void Widget::set_x(std::size_t global_x) {
-    auto parent = dynamic_cast<Widget*>(this->parent());
+    auto parent = this->parent();
     auto screen_width = System::max_width();
     if (global_x >= screen_width && screen_width > 0) {
         global_x = screen_width - 1;
@@ -173,7 +163,7 @@ void Widget::set_x(std::size_t global_x) {
 }
 
 void Widget::set_y(std::size_t global_y) {
-    auto parent = dynamic_cast<Widget*>(this->parent());
+    auto parent = this->parent();
     auto screen_height = System::max_height();
     if (global_y >= screen_height && screen_height > 0) {
         global_y = screen_height - 1;
@@ -217,14 +207,12 @@ bool Widget::has_coordinates(std::size_t global_x, std::size_t global_y) {
 
 void Widget::enable_border() {
     this->border_.enable();
-    auto event = std::make_unique<Child_event>(Event::ChildPolished, this);
-    System::post_event(this->parent(), std::move(event));
+    System::post_event<Child_polished_event>(this->parent(), this);
 }
 
 void Widget::disable_border() {
     this->border_.disable();
-    auto event = std::make_unique<Child_event>(Event::ChildPolished, this);
-    System::post_event(this->parent(), std::move(event));
+    System::post_event<Child_polished_event>(this->parent(), this);
 }
 
 void Widget::set_geometry(const Geometry& g) {
@@ -254,7 +242,7 @@ void Widget::set_horizontal_policy(Size_policy::Policy policy) {
 
 void Widget::update() {
     this->clear_screen();
-    System::post_event(this, std::make_unique<Paint_event>());
+    System::post_event<Paint_event>(this);
 }
 
 void Widget::set_brush(Brush brush) {
@@ -263,7 +251,7 @@ void Widget::set_brush(Brush brush) {
 }
 
 void Widget::clear_screen() {
-    System::post_event(this, std::make_unique<Clear_screen_event>());
+    System::post_event<Clear_screen_event>(this);
 }
 
 void Widget::move_cursor(Coordinates c) {
@@ -418,6 +406,7 @@ bool Widget::resize_event(std::size_t new_width,
 //                                std::size_t local_x,
 //                                std::size_t local_y,
 //                                std::uint8_t device_id) {
+//     Focus_system::mouse_press(this);
 //     return false;
 // }
 
@@ -481,13 +470,17 @@ bool Widget::close_event() {
 //     return true;
 // }
 
-// bool Widget::focus_in_event() {
-//     return true;
-// }
+bool Widget::focus_in_event() {
+    this->paint_engine().move(this->x() + this->cursor_x(),
+                              this->y() + this->cursor_y());
+    focused_in();
+    return true;
+}
 
-// bool Widget::focus_out_event() {
-//     return true;
-// }
+bool Widget::focus_out_event() {
+    focused_out();
+    return true;
+}
 
 bool Widget::paint_event() {
     if (border_.enabled()) {
@@ -505,152 +498,46 @@ bool Widget::clear_screen_event() {
     return true;
 }
 
-bool Widget::child_added_event(Widget* child) {
-    this->update();
-    return Object::child_event(event);
+bool Widget::deferred_delete_event(Event_handler* to_delete) {
+    this->delete_child(static_cast<Widget*>(to_delete));
 }
 
-bool Widget::child_removed_event(Widget* child) {
+bool Widget::child_added_event(Event_handler* child) {
     this->update();
-    return Object::child_event(event);
+    return Event_handler::child_added_event(child);
 }
 
-bool Widget::child_polished_event(Widget* child) {
+bool Widget::child_removed_event(Event_handler* child) {
     this->update();
-    return Object::child_event(event);
+    return Event_handler::child_removed_event(child);
 }
 
-// Event Filter Handling
-// bool Widget::move_event_filter(Widget* receiver,
-//                                std::size_t new_x,
-//                                std::size_t new_y,
-//                                std::size_t old_x,
-//                                std::size_t old_y) {
-//     return false;
-// }
-
-// bool Widget::resize_event_filter(Widget* receiver,
-//                                  std::size_t new_width,
-//                                  std::size_t new_height,
-//                                  std::size_t old_width,
-//                                  std::size_t old_height) {
-//     return false;
-// }
-
-// bool Widget::paint_event_filter(Widget* receiver) {
-//     return false;
-// }
-
-// bool Widget::mouse_press_event_filter(Widget* receiver,
-//                                       Mouse_button button,
-//                                       std::size_t global_x,
-//                                       std::size_t global_y,
-//                                       std::size_t local_x,
-//                                       std::size_t local_y,
-//                                       std::uint8_t device_id) {
-//     return false;
-// }
-
-// bool Widget::mouse_release_event_filter(Widget* receiver,
-//                                         Mouse_button button,
-//                                         std::size_t global_x,
-//                                         std::size_t global_y,
-//                                         std::size_t local_x,
-//                                         std::size_t local_y,
-//                                         std::uint8_t device_id) {
-//     return false;
-// }
-
-// bool Widget::mouse_double_click_event_filter(Widget* receiver,
-//                                              Mouse_button button,
-//                                              std::size_t global_x,
-//                                              std::size_t global_y,
-//                                              std::size_t local_x,
-//                                              std::size_t local_y,
-//                                              std::uint8_t device_id) {
-//     return false;
-// }
-
-// bool Widget::mouse_wheel_event_filter(Widget* receiver,
-//                                       Mouse_button button,
-//                                       std::size_t global_x,
-//                                       std::size_t global_y,
-//                                       std::size_t local_x,
-//                                       std::size_t local_y,
-//                                       std::uint8_t device_id) {
-//     return false;
-// }
-
-// bool Widget::mouse_move_event_filter(Widget* receiver,
-//                                      Mouse_button button,
-//                                      std::size_t global_x,
-//                                      std::size_t global_y,
-//                                      std::size_t local_x,
-//                                      std::size_t local_y,
-//                                      std::uint8_t device_id) {
-//     return false;
-// }
-
-// bool Widget::key_press_event_filter(Widget* receiver, Key key, char symbol) {
-//     return false;
-// }
-
-// bool Widget::key_release_event_filter(Widget* receiver, Key key, char symbol)
-// {
-//     return false;
-// }
-
-// bool Widget::close_event_filter(Widget* receiver) {
-//     return false;
-// }
-
-// bool Widget::hide_event_filter(Widget* receiver) {
-//     return false;
-// }
-
-// bool Widget::show_event_filter(Widget* receiver) {
-//     return false;
-// }
-
-// bool Widget::focus_in_event_filter(Widget* receiver) {
-//     return false;
-// }
-
-// bool Widget::focus_out_event_filter(Widget* receiver) {
-//     return false;
-// }
-
-// bool Widget::clear_screen_event_filter(Widget* receiver) {
-//     return false;
-// }
+bool Widget::child_polished_event(Event_handler* child) {
+    this->update();
+    return Event_handler::child_polished_event(child);
+}
 
 void Widget::set_focus(bool focus) {
     if (this->focus_policy() == Focus_policy::None) {
         return;
     }
-    focus_ = focus;
+    // focus_ = focus;
     if (focus) {
-        System::post_event(this, std::make_unique<Focus_event>(Event::FocusIn));
+        System::post_event<Focus_in_event>(this);
     } else {
-        System::post_event(this,
-                           std::make_unique<Focus_event>(Event::FocusOut));
+        System::post_event<Focus_out_event>(this);
     }
 }
 
 void Widget::set_visible(bool visible) {
     this->visible_ = visible;
     if (visible) {
-        Show_event show;
-        System::send_event(this, show);
+        System::send_event(Show_event{this});
     } else {
-        Hide_event hide;
-        System::send_event(this, hide);
+        System::send_event(Hide_event{this});
     }
-    for (Object* c : this->children()) {
-        auto* child = dynamic_cast<Widget*>(c);
-        if (child != nullptr) {
-            child->set_visible(visible);
-        }
+    for (Widget* c : this->children()) {
+        c->set_visible(visible);
     }
 }
 
@@ -658,16 +545,16 @@ std::size_t Widget::x() const {
     if (this->parent() == nullptr) {
         return this->position_.x;
     }
-    auto* parent_widg = static_cast<Widget*>(this->parent());
-    return this->position_.x + parent_widg->x();
+    Widget* parent = this->parent();
+    return this->position_.x + parent->x();
 }
 
 std::size_t Widget::y() const {
     if (this->parent() == nullptr) {
         return this->position_.x;
     }
-    auto* parent_widg = static_cast<Widget*>(this->parent());
-    return this->position_.y + parent_widg->y();
+    Widget* parent = this->parent();
+    return this->position_.y + parent->y();
 }
 
 Paint_engine& Widget::paint_engine() const {

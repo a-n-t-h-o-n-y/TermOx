@@ -6,7 +6,6 @@
 // #include "system/detail/thread_data.hpp"
 #include "system/event.hpp"
 #include "system/event_loop.hpp"
-#include "system/object.hpp"
 #include "system/events/paint_event.hpp"
 #include "system/detail/ncurses_event_listener.hpp"
 #include "widget/widget.hpp"
@@ -22,7 +21,7 @@ namespace cppurses {
 
 sig::Slot<void()> System::quit = []() { System::exit(); };  // NOLINT
 
-Object* System::head_ = nullptr;                          // NOLINT
+Widget* System::head_ = nullptr;                          // NOLINT
 std::unique_ptr<Paint_engine> System::engine_ = nullptr;  // NOLINT
 std::unique_ptr<detail::Abstract_event_listener> System::event_listener_ =
     std::make_unique<detail::NCurses_event_listener>();  // NOLINT
@@ -42,111 +41,7 @@ bool System::send_event(const Event& event) {
     return handled;
 }
 
-// void System::post_event(Object* obj,
-//                         std::unique_ptr<Event> event,
-//                         int priority) {
-//     if (obj == nullptr) {
-//         return;
-//     }
-//     detail::Posted_event pe{obj, std::move(event), priority};
-//     detail::Thread_data::current().event_queue.add_event(std::move(pe));
-// }
-
-// void System::remove_posted_event(Event* event) {
-//     auto& queue = detail::Thread_data::current().event_queue;
-//     auto pos =
-//         std::find_if(std::begin(queue), std::end(queue),
-//                      [&event](auto& pe) { return (&(pe.event()) == event);
-//                      });
-//     if (pos != std::end(queue)) {
-//         queue.erase(pos);
-//     }
-// }
-
-// bool System::send_event(Object* obj, const Event& event) {
-//     return (obj != nullptr) ? notify(obj, event) : false;
-// }
-
-// void System::send_posted_events(Object* obj_filter, Event::Type etype_filter)
-// {
-//     auto& queue = detail::Thread_data::current().event_queue;
-//     auto posted_iter = std::begin(queue);
-//     while (posted_iter != std::end(queue)) {
-//         if (posted_iter->receiver() != nullptr) {
-//             auto event_t = posted_iter->event().type();
-//             if ((obj_filter == nullptr ||
-//                  obj_filter == posted_iter->receiver()) &&
-//                 (etype_filter == Event::None ||
-//                  etype_filter == posted_iter->event().type()) &&
-//                 (posted_iter->event().type() != Event::DeferredDelete ||
-//                  etype_filter == Event::DeferredDelete)) {
-//                 if (event_t == Event::DeferredDelete) {
-//                     auto parent = posted_iter->receiver()->parent();
-//                     if (parent == nullptr) {
-//                         if (posted_iter->receiver() == System::head()) {
-//                             System::exit();
-//                         }
-//                         queue.erase(posted_iter);
-//                         posted_iter = std::begin(queue);
-//                     } else {
-//                         parent->delete_child(
-//                             const_cast<Object*>(posted_iter->receiver()));
-//                         posted_iter = std::begin(queue);
-//                         queue.erase(posted_iter);
-//                         posted_iter = std::begin(queue);
-//                     }
-//                 } else {
-//                     // const_cast because of multi-set const only iterator.
-//                     System::notify(const_cast<Object*>(posted_iter->receiver()),
-//                                    posted_iter->event());
-//                     posted_iter = std::begin(queue);
-//                     queue.erase(posted_iter);
-//                     posted_iter = std::begin(queue);
-//                 }
-//             } else {
-//                 ++posted_iter;
-//             }
-//         } else {
-//             ++posted_iter;
-//         }
-//     }
-// }
-
-// bool System::notify(Object* obj, const Event& event) {
-//     bool handled{false};
-//     // Send event to any filter objects
-//     unsigned i{0};
-//     while (i < obj->event_filter_objects_.size() && !handled) {
-//         handled = obj->event_filter_objects_[i]->event_filter(obj, event);
-//         ++i;
-//     }
-//     if (handled) {
-//         return true;
-//     }
-
-//     return notify_helper(obj, event);
-// }
-
-// bool System::notify_helper(Object* obj, const Event& event) {
-//     bool handled{false};
-//     // Send event to object
-//     handled = obj->event(event);
-//     // Propagate event to parent
-//     if (!handled) {
-//         Object* parent = obj->parent();
-//         if (parent != nullptr) {
-//             handled = notify_helper(parent, event);
-//         }
-//     }
-//     return handled;
-// }
-
 void System::exit(int return_code) {
-    // auto& data = detail::Thread_data::current();
-    // data.quit_now = true;
-    // for (auto loop_ptr : data.event_loops) {
-    //     loop_ptr->exit(return_code);
-    // }
     event_loop_.exit(return_code);
 }
 
@@ -161,10 +56,7 @@ Paint_engine* System::paint_engine() {
 void System::set_paint_engine(std::unique_ptr<Paint_engine> engine) {
     engine_ = std::move(engine);
     if (engine_) {
-        // TODO Remove all static casts to widget once object is gone, or make
-        // everything refer to widgets if you keep object base class.
-        System::post_event(std::make_unique<Paint_event>(
-            static_cast<Widget*>(System::head())));
+        System::post_event<Paint_event>(System::head());
     }
 }
 
@@ -176,71 +68,71 @@ unsigned System::max_height() {
     return System::paint_engine()->screen_height();
 }
 
-Object* System::head() {
+Widget* System::head() {
     return head_;
 }
 
-Widget* System::focus_widget() {
-    return focus_widg_;
-}
+// Widget* System::focus_widget() {
+//     return focus_widg_;
+// }
 
-void System::set_focus_widget(Widget* widg, bool clear_focus) {
-    if (widg == focus_widg_) {
-        return;
-    }
-    // Old focus widget
-    if (focus_widg_ != nullptr && clear_focus) {
-        focus_widg_->clear_focus();
-    }
-    // New focus widget
-    focus_widg_ = widg;
-    if (widg != nullptr) {
-        focus_widg_->set_focus(true);
-    }
-}
+// void System::set_focus_widget(Widget* widg, bool clear_focus) {
+//     if (widg == focus_widg_) {
+//         return;
+//     }
+//     // Old focus widget
+//     if (focus_widg_ != nullptr && clear_focus) {
+//         focus_widg_->clear_focus();
+//     }
+//     // New focus widget
+//     focus_widg_ = widg;
+//     if (widg != nullptr) {
+//         focus_widg_->set_focus(true);
+//     }
+// }
 
-void System::cycle_tab_focus() {
-    if (System::head() == nullptr) {
-        return;
-    }
-    std::vector<Object*> objects;
+// void System::cycle_tab_focus() {
+//     if (System::head() == nullptr) {
+//         return;
+//     }
+//     std::vector<Widget*> widgets;
 
-    // Populate objects vector
-    objects.push_back(System::head());
-    int i{0};
-    while (i < objects.size()) {
-        Object* current = objects[i];
-        auto children = current->children();
-        std::for_each(std::begin(children), std::end(children),
-                      [&objects](Object* p) { objects.push_back(p); });
-        ++i;
-    }
+//     // Populate widgets vector
+//     widgets.push_back(System::head());
+//     int i{0};
+//     while (i < widgets.size()) {
+//         Widget* current = widgets[i];
+//         auto children = current->children();
+//         std::for_each(std::begin(children), std::end(children),
+//                       [&widgets](Widget* p) { widgets.push_back(p); });
+//         ++i;
+//     }
 
-    // Rearrange objects vector
-    auto* current_focus_object = static_cast<Object*>(System::focus_widget());
-    if (current_focus_object != nullptr) {
-        auto current_iter = std::find(std::begin(objects), std::end(objects),
-                                      current_focus_object);
-        if (current_iter != std::end(objects)) {
-            std::move(std::begin(objects), current_iter + 1,
-                      std::back_inserter(objects));
-        }
-    }
+//     // Rearrange widgets vector
+//     auto* current_focus_widget = System::focus_widget();
+//     if (current_focus_widget != nullptr) {
+//         auto current_iter = std::find(std::begin(widgets), std::end(widgets),
+//                                       current_focus_widget);
+//         if (current_iter != std::end(widgets)) {
+//             std::move(std::begin(widgets), current_iter + 1,
+//                       std::back_inserter(widgets));
+//         }
+//     }
 
-    // Find the next focus widget
-    for (Object* child : objects) {
-        auto* widg = dynamic_cast<Widget*>(child);
-        if (widg != nullptr) {
-            if (widg->focus_policy() == Focus_policy::Tab ||
-                widg->focus_policy() == Focus_policy::Strong) {
-                System::set_focus_widget(widg);
-                widg->paint_engine().move(widg->x() + widg->cursor_x(),
-                                          widg->y() + widg->cursor_y());
-                return;
-            }
-        }
-    }
-}
+//     // Find the next focus widget
+//     for (Widget* child : widgets) {
+//         auto* widg = child;
+//         if (widg != nullptr) {
+//             if (widg->focus_policy() == Focus_policy::Tab ||
+//                 widg->focus_policy() == Focus_policy::Strong) {
+//                 System::set_focus_widget(widg);
+//                 widg->paint_engine().move(widg->x() + widg->cursor_x(),
+//                                           widg->y() + widg->cursor_y());
+//                 return;
+//             }
+//         }
+//     }
+// }
 
 void System::set_palette(std::unique_ptr<Palette> palette) {
     system_palette_ = std::move(palette);
@@ -310,16 +202,13 @@ System::~System() {
     System::set_paint_engine(nullptr);
 }
 
-void System::set_head(Object* obj) {
-    head_ = obj;
+void System::set_head(Widget* head_widget) {
+    head_ = head_widget;
+    Focus::set_focus_to(head_);
 }
 
 int System::run() {
-    // Event_loop main_loop;
-    // auto& data = detail::Thread_data::current();
-    // data.quit_now = false;
     int return_code = event_loop_.run();
-    // data.quit_now = false;
     return return_code;
 }
 

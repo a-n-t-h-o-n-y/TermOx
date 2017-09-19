@@ -5,11 +5,11 @@
 #include "system/key.hpp"
 
 namespace cppurses {
-class Widget;
+class Event_handler;
 
 class Key_event : public Input_event {
    public:
-    Key_event(Event::Type type, Widget* receiver, Key key_code);
+    Key_event(Event::Type type, Event_handler* receiver, Key key_code);
 
    protected:
     const Key key_code_;
@@ -17,16 +17,16 @@ class Key_event : public Input_event {
 
 class Key_press_event : public Key_event {
    public:
-    Key_press_event(Widget* receiver, Key key_code);
+    Key_press_event(Event_handler* receiver, Key key_code);
     bool send() const override;
-    bool filter_send(Widget* filter_widget) const override;
+    bool filter_send(Event_handler* filter) const override;
 };
 
 class Key_release_event : public Key_event {
    public:
-    Key_release_event(Widget* receiver, Key key_code);
+    Key_release_event(Event_handler* receiver, Key key_code);
     bool send() const override;
-    bool filter_send(Widget* filter_widget) const override;
+    bool filter_send(Event_handler* filter) const override;
 };
 
 }  // namespace cppurses
