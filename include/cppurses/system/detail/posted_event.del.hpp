@@ -17,14 +17,14 @@ class Posted_event {
     Posted_event& operator=(Posted_event&&) noexcept = default;
     ~Posted_event() = default;
 
-    Object* reciever() { return reciever_; }
-    const Object* reciever() const { return reciever_; }
+    Object* receiver() { return receiver_; }
+    const Object* receiver() const { return receiver_; }
     Event& event() { return *event_; }
     const Event& event() const { return *event_; }
     int priority() const { return priority_; }
 
    private:
-    Object* reciever_;
+    Object* receiver_;
     std::unique_ptr<Event> event_;
     int priority_;
 };

@@ -1,6 +1,5 @@
 #ifndef SYSTEM_DETAIL_POSTED_EVENT_QUEUE_HPP
 #define SYSTEM_DETAIL_POSTED_EVENT_QUEUE_HPP
-
 #include "system/detail/posted_event.hpp"
 #include <functional>
 #include <set>

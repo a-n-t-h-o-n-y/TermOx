@@ -1,26 +1,43 @@
 #include "system/events/key_event.hpp"
 #include "system/key.hpp"
-#include <string>
+#include "widget/widget.hpp"
 
 namespace cppurses {
-class Widget;
 
-Key_event::Key_event(Event::Type type, Widget* reciever, int key_code)
-    : Input_event{type, reciever}, key_code_{key_code} {}
+// class Key_event
+Key_event::Key_event(Event::Type type, Widget* receiver, Key key_code)
+    : Input_event{type, receiver}, key_code_{key_code} {}
 
-Key Key_event::key_code() const {
-    return static_cast<Key>(key_code_);
-}
+// class Key_press_event
+Key_press_event::Key_press_event(Widget* receiver, Key key_code)
+    : Key_event{Event::KeyPress, receiver, key_code} {}
 
-std::string Key_event::text() const {
-    if (key_code_ < 32 || key_code_ > 126) {
-        return std::string{};
+bool Key_press_event::send() const {
+    if (receiver_->visible() && receiver_->enabled()) {
+        return receiver_->key_press_event(key_code_, key_to_char(key_code_));
     }
-    return std::string{static_cast<char>(key_code_)};
+    return false;
 }
 
-void Key_event::send() const {
-    reciever_->key_event(static_cast<Key>(key_code_), static_);
+bool Key_press_event::filter_send(Widget* filter_widget) const {
+    return filter_widget->key_press_event_filter(receiver_, key_code_,
+                                                 key_to_char(key_code_));
+}
+
+// class Key_release_event
+Key_release_event::Key_release_event(Widget* receiver, Key key_code)
+    : Key_event{Event::KeyRelease, receiver, key_code} {}
+
+bool Key_release_event::send() const {
+    if (receiver_->visible() && receiver_->enabled()) {
+        return receiver_->key_release_event(key_code_, key_to_char(key_code_));
+    }
+    return false;
+}
+
+bool Key_release_event::filter_send(Widget* filter_widget) const {
+    return filter_widget->key_release_event_filter(receiver_, key_code_,
+                                                   key_to_char(key_code_));
 }
 
 }  // namespace cppurses

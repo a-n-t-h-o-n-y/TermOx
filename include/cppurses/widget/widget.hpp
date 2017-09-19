@@ -1,6 +1,5 @@
 #ifndef WIDGET_WIDGET_HPP
 #define WIDGET_WIDGET_HPP
-
 #include "painter/brush.hpp"
 #include "painter/color.hpp"
 #include "painter/geometry.hpp"
@@ -8,14 +7,18 @@
 #include "painter/paint_engine.hpp"
 #include "system/events/mouse_event.hpp"
 #include "system/key.hpp"
-#include "system/object.hpp"
+#include "system/event_handler.hpp"
 #include "widget/border.hpp"
 #include "widget/coordinates.hpp"
 #include "widget/focus_policy.hpp"
 #include <signals/signals.hpp>
+#include <algorithm>
 #include <cstddef>
 #include <memory>
+#include <string>
 #include <utility>
+#include <vector>
+#include <queue>
 
 namespace cppurses {
 class Clear_screen_event;
@@ -29,22 +32,55 @@ class Paint_event;
 class Resize_event;
 class Show_event;
 
-class Widget : public Object {
+class Widget : public Event_handler {
    public:
     Widget();
     Widget(const Widget&) = delete;
     Widget& operator=(const Widget&) = delete;
-    Widget(Widget&&) = default;             // NOLINT
-    Widget& operator=(Widget&&) = default;  // NOLINT
+    Widget(Widget&&) = delete;
+    Widget& operator=(Widget&&) = delete;
     ~Widget() override;
 
-    // Global Coordinates - Includes border space.
+    // Name
+    std::string name() const;
+    void set_name(const std::string& name);
+
+    // Parent
+    Object* parent() const;
+    void set_parent(Object* parent);
+
+    // Children
+    template <typename T, typename... Args>
+    T& make_child(Args&&... args) {
+        this->add_child(std::make_unique<T>(std::forward<Args>(args)...));
+        return static_cast<T&>(*children_.back());
+    }
+
+    void add_child(std::unique_ptr<Widget> child);
+    std::vector<Widget*> children() const;
+
+    template <typename T>
+    T* find_child(const std::string& name) {
+        return this->find_child_impl<T>(this, name);
+    }
+
+    template <typename T>
+    const T* find_child(const std::string& name) const {
+        return this->find_child_impl<T>(this, name);
+    }
+
+    // Enable
+    bool enabled() const;
+    void set_enabled(bool enabled);
+
+    // Global Coordinates - Includes border space
     std::size_t x() const;
     std::size_t y() const;
     void set_x(std::size_t global_x);
     void set_y(std::size_t global_y);
     std::size_t width() const;  // Does not include border space
     std::size_t height() const;
+    bool has_coordinates(std::size_t global_x, std::size_t global_y);
 
     bool cursor() const { return cursor_enabled_; }
     void enable_cursor(bool enable = true) { cursor_enabled_ = enable; }
@@ -88,8 +124,6 @@ class Widget : public Object {
 
     void update();
 
-    bool has_coordinates(std::size_t global_x, std::size_t global_y) override;
-
     bool has_mouse_tracking() const { return mouse_tracking_; }
     void set_mouse_tracking(bool track) { mouse_tracking_ = track; }
 
@@ -102,6 +136,7 @@ class Widget : public Object {
     }
 
     // Signals
+    sig::Signal<void(const std::string&)> name_changed;
     sig::Signal<void(std::size_t, std::size_t)> resized;
     sig::Signal<void(Coordinates)> moved;
     sig::Signal<void(Coordinates)> clicked;
@@ -115,6 +150,9 @@ class Widget : public Object {
     sig::Signal<void(Color)> foreground_color_changed;
 
     // Slots
+    sig::Slot<void()> delete_later;
+    sig::Slot<void()> enable;
+    sig::Slot<void()> disable;
     sig::Slot<void()> close;
     sig::Slot<void()> hide;
     sig::Slot<void()> show;
@@ -127,26 +165,120 @@ class Widget : public Object {
     sig::Slot<void(Color)> set_background;
     sig::Slot<void(Color)> set_foreground;
 
-   protected:
+    // Event Handling
     // bool event(const Event& event) override;
-    virtual bool move_event(const Move_event& event);
-    virtual bool resize_event(const Resize_event& event);
-    virtual bool paint_event(const Paint_event& event);
-    virtual bool mouse_press_event(const Mouse_event& event);
-    virtual bool mouse_release_event(const Mouse_event& event);
-    virtual bool mouse_double_click_event(const Mouse_event& event);
-    virtual bool wheel_event(const Mouse_event& event);
-    virtual bool mouse_move_event(const Mouse_event& event);
-    virtual bool key_press_event(const Key_event& event);
-    virtual bool key_release_event(const Key_event& event);
-    virtual bool close_event(const Close_event& event);
-    virtual bool hide_event(const Hide_event& event);
-    virtual bool show_event(const Show_event& event);
-    bool enable_event(const Enable_event& event) override;
-    virtual bool focus_event(const Focus_event& event);
-    bool child_event(const Child_event& event) override;
-    virtual bool clear_screen_event(const Clear_screen_event& event);
+    virtual bool move_event(std::size_t new_x,
+                            std::size_t new_y,
+                            std::size_t old_x,
+                            std::size_t old_y);
+    virtual bool resize_event(std::size_t new_width,
+                              std::size_t new_height,
+                              std::size_t old_width,
+                              std::size_t old_height);
+    virtual bool paint_event();
+    // virtual bool mouse_press_event(Mouse_button button,
+    //                                std::size_t global_x,
+    //                                std::size_t global_y,
+    //                                std::size_t local_x,
+    //                                std::size_t local_y,
+    //                                std::uint8_t device_id);
+    // virtual bool mouse_release_event(Mouse_button button,
+    //                                  std::size_t global_x,
+    //                                  std::size_t global_y,
+    //                                  std::size_t local_x,
+    //                                  std::size_t local_y,
+    //                                  std::uint8_t device_id);
+    // virtual bool mouse_double_click_event(Mouse_button button,
+    //                                       std::size_t global_x,
+    //                                       std::size_t global_y,
+    //                                       std::size_t local_x,
+    //                                       std::size_t local_y,
+    //                                       std::uint8_t device_id);
+    // virtual bool mouse_wheel_event(Mouse_button button,
+    //                                std::size_t global_x,
+    //                                std::size_t global_y,
+    //                                std::size_t local_x,
+    //                                std::size_t local_y,
+    //                                std::uint8_t device_id);
+    // virtual bool mouse_move_event(Mouse_button button,
+    //                               std::size_t global_x,
+    //                               std::size_t global_y,
+    //                               std::size_t local_x,
+    //                               std::size_t local_y,
+    //                               std::uint8_t device_id);
+    virtual bool key_press_event(Key key, char symbol);
+    // virtual bool key_release_event(Key key, char symbol);
+    virtual bool close_event();
+    // virtual bool hide_event();
+    // virtual bool show_event();
+    // virtual bool focus_in_event();
+    // virtual bool focus_out_event();
+    virtual bool clear_screen_event();
 
+    bool child_added_event(Widget* child) override;
+    bool child_removed_event(Widget* child) override;
+    bool child_polished_event(Widget* child) override;
+
+    // Event Filter Handling
+    // virtual bool move_event_filter(Widget* receiver,
+    //                                std::size_t new_x,
+    //                                std::size_t new_y,
+    //                                std::size_t old_x,
+    //                                std::size_t old_y);
+    // virtual bool resize_event_filter(Widget* receiver,
+    //                                  std::size_t new_width,
+    //                                  std::size_t new_height,
+    //                                  std::size_t old_width,
+    //                                  std::size_t old_height);
+    // virtual bool paint_event_filter(Widget* receiver);
+    // virtual bool mouse_press_event_filter(Widget* receiver,
+    //                                       Mouse_button button,
+    //                                       std::size_t global_x,
+    //                                       std::size_t global_y,
+    //                                       std::size_t local_x,
+    //                                       std::size_t local_y,
+    //                                       std::uint8_t device_id);
+    // virtual bool mouse_release_event_filter(Widget* receiver,
+    //                                         Mouse_button button,
+    //                                         std::size_t global_x,
+    //                                         std::size_t global_y,
+    //                                         std::size_t local_x,
+    //                                         std::size_t local_y,
+    //                                         std::uint8_t device_id);
+    // virtual bool mouse_double_click_event_filter(Widget* receiver,
+    //                                              Mouse_button button,
+    //                                              std::size_t global_x,
+    //                                              std::size_t global_y,
+    //                                              std::size_t local_x,
+    //                                              std::size_t local_y,
+    //                                              std::uint8_t device_id);
+    // virtual bool mouse_wheel_event_filter(Widget* receiver,
+    //                                       Mouse_button button,
+    //                                       std::size_t global_x,
+    //                                       std::size_t global_y,
+    //                                       std::size_t local_x,
+    //                                       std::size_t local_y,
+    //                                       std::uint8_t device_id);
+    // virtual bool mouse_move_event_filter(Widget* receiver,
+    //                                      Mouse_button button,
+    //                                      std::size_t global_x,
+    //                                      std::size_t global_y,
+    //                                      std::size_t local_x,
+    //                                      std::size_t local_y,
+    //                                      std::uint8_t device_id);
+    // virtual bool key_press_event_filter(Widget* receiver, Key key, char
+    // symbol);
+    // virtual bool key_release_event_filter(Widget* receiver,
+    //                                       Key key,
+    //                                       char symbol);
+    // virtual bool close_event_filter(Widget* receiver);
+    // virtual bool hide_event_filter(Widget* receiver);
+    // virtual bool show_event_filter(Widget* receiver);
+    // virtual bool focus_in_event_filter(Widget* receiver);
+    // virtual bool focus_out_event_filter(Widget* receiver);
+    // virtual bool clear_screen_event_filter(Widget* receiver);
+
+   protected:
     void clear_screen();
 
     void set_background_(Color c);
@@ -166,7 +298,33 @@ class Widget : public Object {
     std::unique_ptr<Paint_engine> paint_engine_{nullptr};
 
    private:
+    std::string object_name_;
+    Widget* parent_ = nullptr;
+    std::vector<std::unique_ptr<Widget>> children_;
+    bool enabled_ = true;
+
     void initialize();
+    void delete_child(Widget* child);
+
+    // Breadth First Search for find_child()
+    template <typename T, typename U>
+    static auto find_child_impl(U u, const std::string& name)
+        -> decltype(u->template find_child<T>(name)) {
+        std::queue<U> queue_;
+        queue_.push(u);
+        while (!queue_.empty()) {
+            auto current = queue_.front();
+            queue_.pop();
+            auto c_ptr = dynamic_cast<T*>(current);
+            if (current->name() == name && c_ptr) {
+                return c_ptr;
+            }
+            auto children = current->children();
+            std::for_each(std::begin(children), std::end(children),
+                          [&](Object* p) { queue_.push(p); });
+        }
+        return nullptr;
+    }
 };
 
 }  // namespace cppurses

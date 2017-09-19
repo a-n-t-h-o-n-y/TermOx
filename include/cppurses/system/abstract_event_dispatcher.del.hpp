@@ -7,12 +7,13 @@ namespace cppurses {
 
 class Abstract_event_dispatcher : public Object {
    public:
-    virtual bool process_events();
-    void interrupt();
+    // virtual bool process_events();
+    // void interrupt();
+    virtual std::unique_ptr<Event> get_input() = 0;
 
    protected:
-    virtual void post_user_input() = 0;
-    bool interrupt_{false};
+    // virtual void post_user_input() = 0;
+    // bool interrupt_{false};
 };
 
 }  // namespace cppurses

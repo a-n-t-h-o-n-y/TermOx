@@ -8,7 +8,6 @@ class Event {
    public:
     enum Type {
         None,
-        // Timer,
         MouseButtonPress,
         MouseButtonRelease,
         MouseButtonDblClick,
@@ -16,28 +15,30 @@ class Event {
         MouseMove,
         KeyPress,
         KeyRelease,
-        // FocusIn,
-        // FocusOut,
+        FocusIn,
+        FocusOut,
+        ClearScreen,
+        Paint,
+        Move,
+        Resize,
+        Show,
+        Hide,
+        Close,
+        ChildAdded,
+        ChildRemoved,
+        ChildPolished,
+        Enable,
+        Disable,
+        DeferredDelete
+        // Timer,
         // Enter,
         // Leave,
-        // ClearScreen,
-        // Paint,
-        // Move,
-        // Resize,
         // Create,
-        // Destroy,
-        // Show,
-        // Hide,
-        // Close,
-        // ChildAdded,
-        // ChildPolished,
-        // ChildRemoved,
-        // EnabledChange,
-        // DeferredDelete
+        // Destroy
     };
 
     // Special Member Functions
-    explicit Event(Type type, Widget* reciever);
+    explicit Event(Type type, Widget* receiver);
     Event(const Event&) = default;
     Event& operator=(const Event&) = default;
     Event(Event&&) = default;
@@ -45,12 +46,16 @@ class Event {
     virtual ~Event() = default;
 
     Type type() const;
+    Widget* receiver() const;
+    void set_receiver(Widget* receiver);
 
-    virtual void send() const = 0;
+    bool send_to_all_filters() const;
+    virtual bool send() const = 0;
+    virtual bool filter_send(Widget* filter_widget) const = 0;
 
    protected:
     const Type type_;
-    Widget* reciever_;
+    Widget* receiver_;
 };
 
 }  // namespace cppurses

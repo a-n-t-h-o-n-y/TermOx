@@ -1,5 +1,4 @@
 #include "widget/widget.hpp"
-
 #include "painter/brush.hpp"
 #include "painter/color.hpp"
 #include "painter/geometry.hpp"
@@ -21,8 +20,12 @@
 #include "system/system.hpp"
 #include "widget/border.hpp"
 #include "widget/coordinates.hpp"
+#include <cstddef>
+#include <iterator>
 #include <memory>
+#include <string>
 #include <utility>
+#include <vector>
 
 namespace cppurses {
 
@@ -32,12 +35,30 @@ Widget::Widget() {
 }
 
 Widget::~Widget() {
+    // if (valid_) {
     if (System::focus_widget() == this) {
         System::set_focus_widget(nullptr, false);
     }
+    Widget* parent = this->parent();
+    if (parent != nullptr) {
+        System::send_event(Child_removed_event{parent, this});
+    }
+    // }
 }
 
 void Widget::initialize() {
+    // Slots
+    this->delete_later = [this] {
+        System::post_event(std::make_unique<Deferred_delete_event>(this));
+    };
+    this->delete_later.track(this->destroyed);
+
+    this->enable = [this] { this->set_enabled(true); };
+    this->enable.track(this->destroyed);
+
+    this->disable = [this] { this->set_enabled(false); };
+    this->disable.track(this->destroyed);
+
     close = [this]() {
         System::post_event(this, std::make_unique<Close_event>());
     };
@@ -75,6 +96,61 @@ void Widget::initialize() {
     set_background.track(this->destroyed);
     set_foreground = [this](Color c) { this->set_foreground_(c); };
     set_foreground.track(this->destroyed);
+}
+
+void Widget::set_name(const std::string& name) {
+    name_ = name;
+    name_changed(name);
+}
+
+std::string Widget::name() const {
+    return object_name_;
+}
+
+void Widget::set_parent(Widget* parent) {
+    parent_ = parent;
+}
+
+Widget* Widget::parent() const {
+    return parent_;
+}
+
+void Widget::add_child(std::unique_ptr<Widget> child) {
+    children_.emplace_back(std::move(child));
+    children_.back()->set_parent(this);
+    System::post_event(
+        std::make_unique<Child_added_event>(this, children_.back().get()));
+}
+
+void Widget::delete_child(Widget* child) {
+    auto end_iter = std::end(children_);
+    auto at = std::find_if(std::begin(children_), end_iter,
+                           [child](auto& c) { return c.get() == child; });
+    if (at != end_iter) {
+        System::post_event(
+            std::make_unique<Child_removed_event>(this, at.get()));
+        children_.erase(at);
+    }
+}
+
+std::vector<Widget*> Object::children() const {
+    std::vector<Widget*> ret;
+    std::transform(std::begin(children_), std::end(children_),
+                   std::back_inserter(ret), [](auto& up) { return up.get(); });
+    return ret;
+}
+
+void Widget::set_enabled(bool enabled) {
+    enabled_ = enabled;
+    if (enabled) {
+        System::post_event(std::make_unique<Enable_event>(this));
+    } else {
+        System::post_event(std::make_unique<Disable_event>(this));
+    }
+}
+
+bool Widget::enabled() const {
+    return enabled_;
 }
 
 void Widget::set_x(std::size_t global_x) {
@@ -215,127 +291,205 @@ void Widget::move_cursor_y(std::size_t y) {
     }
 }
 
-bool Widget::event(const Event& event) {
-    auto visible_and_enabled = [this]() {
-        return this->visible() && this->enabled();
-    };
+// bool Widget::event(const Event& event) {
+//     auto visible_and_enabled = [this]() {
+//         return this->visible() && this->enabled();
+//     };
 
-    if (event.type() == Event::Move) {
-        return this->move_event(static_cast<const Move_event&>(event));
-    }
+//     if (event.type() == Event::Move) {
+//         return this->move_event(static_cast<const Move_event&>(event));
+//     }
 
-    if (event.type() == Event::Resize) {
-        return this->resize_event(static_cast<const Resize_event&>(event));
-    }
+//     if (event.type() == Event::Resize) {
+//         return this->resize_event(static_cast<const Resize_event&>(event));
+//     }
 
-    if (event.type() == Event::Paint) {
-        if (visible_and_enabled()) {
-            return this->paint_event(static_cast<const Paint_event&>(event));
-        }
-        if (this->visible() && !this->enabled()) {
-            // Layout should handle disable widgets, do not allow invisible
-        }
-        return true;
-    }
+//     if (event.type() == Event::Paint) {
+//         if (visible_and_enabled()) {
+//             return this->paint_event(static_cast<const Paint_event&>(event));
+//         }
+//         if (this->visible() && !this->enabled()) {
+//             // Layout should handle disable widgets, do not allow invisible
+//         }
+//         return true;
+//     }
 
-    if (event.type() == Event::ClearScreen) {
-        return this->clear_screen_event(
-            static_cast<const Clear_screen_event&>(event));
-    }
+// if (event.type() == Event::ClearScreen) {
+//     return this->clear_screen_event(
+//         static_cast<const Clear_screen_event&>(event));
+// }
 
-    if (event.type() == Event::MouseButtonPress) {
-        // Handle focus elsewhere.
-        if (visible_and_enabled()) {
-            if (this->focus_policy() == Focus_policy::Click ||
-                this->focus_policy() == Focus_policy::Strong) {
-                System::set_focus_widget(this);
-                this->paint_engine().move(this->x() + this->cursor_x(),
-                                          this->y() + this->cursor_y());
-            }
-            return this->mouse_press_event(
-                static_cast<const Mouse_event&>(event));
-        }
-        return true;
-    }
-    if (event.type() == Event::MouseButtonRelease) {
-        if (visible_and_enabled()) {
-            return this->mouse_release_event(
-                static_cast<const Mouse_event&>(event));
-        }
-        return true;
-    }
-    if (event.type() == Event::MouseButtonDblClick) {
-        if (visible_and_enabled()) {
-            return this->mouse_double_click_event(
-                static_cast<const Mouse_event&>(event));
-        }
-        return true;
-    }
-    if (event.type() == Event::Wheel) {
-        if (!this->enabled() || !this->visible()) {
-            return true;
-        }
-        return this->wheel_event(static_cast<const Mouse_event&>(event));
-    }
-    if (event.type() == Event::MouseMove && this->has_mouse_tracking()) {
-        if (!this->enabled() || !this->visible()) {
-            return true;
-        }
-        return this->mouse_move_event(static_cast<const Mouse_event&>(event));
-    }
+// if (event.type() == Event::MouseButtonPress) {
+//     // Handle focus elsewhere.
+//     if (visible_and_enabled()) {
+//         if (this->focus_policy() == Focus_policy::Click ||
+//             this->focus_policy() == Focus_policy::Strong) {
+//             System::set_focus_widget(this);
+//             this->paint_engine().move(this->x() + this->cursor_x(),
+//                                       this->y() + this->cursor_y());
+//         }
+//         return this->mouse_press_event(
+//             static_cast<const Mouse_event&>(event));
+//     }
+//     return true;
+// }
+// if (event.type() == Event::MouseButtonRelease) {
+//     if (visible_and_enabled()) {
+//         return this->mouse_release_event(
+//             static_cast<const Mouse_event&>(event));
+//     }
+//     return true;
+// }
+// if (event.type() == Event::MouseButtonDblClick) {
+//     if (visible_and_enabled()) {
+//         return this->mouse_double_click_event(
+//             static_cast<const Mouse_event&>(event));
+//     }
+//     return true;
+// }
+// if (event.type() == Event::Wheel) {
+//     if (!this->enabled() || !this->visible()) {
+//         return true;
+//     }
+//     return this->wheel_event(static_cast<const Mouse_event&>(event));
+// }
+// if (event.type() == Event::MouseMove && this->has_mouse_tracking()) {
+//     if (!this->enabled() || !this->visible()) {
+//         return true;
+//     }
+//     return this->mouse_move_event(static_cast<const Mouse_event&>(event));
+// }
 
-    if (event.type() == Event::KeyPress) {
-        if (!this->enabled() || !this->visible()) {
-            return true;  // is this the right response? or false?
-        }
-        return this->key_press_event(static_cast<const Key_event&>(event));
-    }
-    if (event.type() == Event::KeyRelease) {
-        if (!this->enabled() || !this->visible()) {
-            return true;
-        }
-        return this->key_release_event(static_cast<const Key_event&>(event));
-    }
+// if (event.type() == Event::KeyPress) {
+//     if (!this->enabled() || !this->visible()) {
+//         return true;  // is this the right response? or false?
+//     }
+//     return this->key_press_event(static_cast<const Key_event&>(event));
+// }
+// if (event.type() == Event::KeyRelease) {
+//     if (!this->enabled() || !this->visible()) {
+//         return true;
+//     }
+//     return this->key_release_event(static_cast<const Key_event&>(event));
+// }
 
-    if (event.type() == Event::Close) {
-        return this->close_event(static_cast<const Close_event&>(event));
-    }
+//     if (event.type() == Event::Close) {
+//         return this->close_event(static_cast<const Close_event&>(event));
+//     }
 
-    if (event.type() == Event::Hide) {
-        return this->hide_event(static_cast<const Hide_event&>(event));
-    }
+//     if (event.type() == Event::Hide) {
+//         return this->hide_event(static_cast<const Hide_event&>(event));
+//     }
 
-    if (event.type() == Event::Show) {
-        return this->show_event(static_cast<const Show_event&>(event));
-    }
+//     if (event.type() == Event::Show) {
+//         return this->show_event(static_cast<const Show_event&>(event));
+//     }
 
-    if (event.type() == Event::FocusIn || event.type() == Event::FocusOut) {
-        return this->focus_event(static_cast<const Focus_event&>(event));
-    }
+//     if (event.type() == Event::FocusIn || event.type() == Event::FocusOut) {
+//         return this->focus_event(static_cast<const Focus_event&>(event));
+//     }
 
-    return Object::event(event);
-}
+//     return Object::event(event);
+// }
 
-bool Widget::child_event(const Child_event& event) {
-    this->update();
-    return Object::child_event(event);
-}
-
-bool Widget::move_event(const Move_event& event) {
-    this->set_x(event.new_x());
-    this->set_y(event.new_y());
+bool Widget::move_event(std::size_t new_x,
+                        std::size_t new_y,
+                        std::size_t old_x,
+                        std::size_t old_y) {
+    this->set_x(new_x);
+    this->set_y(new_y);
     this->update();
     return true;
 }
 
-bool Widget::resize_event(const Resize_event& event) {
-    this->geometry().set_width(event.new_width());
-    this->geometry().set_height(event.new_height());
+bool Widget::resize_event(std::size_t new_width,
+                          std::size_t new_height,
+                          std::size_t old_width,
+                          std::size_t old_height) {
+    this->geometry().set_width(new_width);
+    this->geometry().set_height(new_height);
     this->update();
     return true;
 }
 
-bool Widget::paint_event(const Paint_event& event) {
+// bool Widget::mouse_press_event(Mouse_button button,
+//                                std::size_t global_x,
+//                                std::size_t global_y,
+//                                std::size_t local_x,
+//                                std::size_t local_y,
+//                                std::uint8_t device_id) {
+//     return false;
+// }
+
+// bool Widget::mouse_release_event(Mouse_button button,
+//                                  std::size_t global_x,
+//                                  std::size_t global_y,
+//                                  std::size_t local_x,
+//                                  std::size_t local_y,
+//                                  std::uint8_t device_id) {
+//     return false;
+// }
+
+// bool Widget::mouse_double_click_event(Mouse_button button,
+//                                       std::size_t global_x,
+//                                       std::size_t global_y,
+//                                       std::size_t local_x,
+//                                       std::size_t local_y,
+//                                       std::uint8_t device_id) {
+//     return false;
+// }
+
+// bool Widget::mouse_wheel_event(Mouse_button button,
+//                                std::size_t global_x,
+//                                std::size_t global_y,
+//                                std::size_t local_x,
+//                                std::size_t local_y,
+//                                std::uint8_t device_id) {
+//     return false;
+// }
+
+// bool Widget::mouse_move_event(Mouse_button button,
+//                               std::size_t global_x,
+//                               std::size_t global_y,
+//                               std::size_t local_x,
+//                               std::size_t local_y,
+//                               std::uint8_t device_id) {
+//     return false;
+// }
+
+bool Widget::key_press_event(Key key, char symbol) {
+    if (key == Key::Tab) {
+        System::cycle_tab_focus();
+    }
+    return false;
+}
+
+// bool Widget::key_release_event(Key key, char symbol) {
+//     return false;
+// }
+
+bool Widget::close_event() {
+    this->delete_later();
+    return true;
+}
+
+// bool Widget::hide_event() {
+//     return true;
+// }
+
+// bool Widget::show_event() {
+//     return true;
+// }
+
+// bool Widget::focus_in_event() {
+//     return true;
+// }
+
+// bool Widget::focus_out_event() {
+//     return true;
+// }
+
+bool Widget::paint_event() {
     if (border_.enabled()) {
         Painter p{this};
         p.border(border_);
@@ -345,63 +499,130 @@ bool Widget::paint_event(const Paint_event& event) {
     return true;
 }
 
-bool Widget::clear_screen_event(const Clear_screen_event& event) {
+bool Widget::clear_screen_event() {
     Painter p{this};
     p.clear_screen();
     return true;
 }
 
-bool Widget::mouse_press_event(const Mouse_event& event) {
-    return false;
+bool Widget::child_added_event(Widget* child) {
+    this->update();
+    return Object::child_event(event);
 }
 
-bool Widget::mouse_release_event(const Mouse_event& event) {
-    return false;
+bool Widget::child_removed_event(Widget* child) {
+    this->update();
+    return Object::child_event(event);
 }
 
-bool Widget::mouse_double_click_event(const Mouse_event& event) {
-    return false;
+bool Widget::child_polished_event(Widget* child) {
+    this->update();
+    return Object::child_event(event);
 }
 
-bool Widget::wheel_event(const Mouse_event& event) {
-    return false;
-}
+// Event Filter Handling
+// bool Widget::move_event_filter(Widget* receiver,
+//                                std::size_t new_x,
+//                                std::size_t new_y,
+//                                std::size_t old_x,
+//                                std::size_t old_y) {
+//     return false;
+// }
 
-bool Widget::mouse_move_event(const Mouse_event& event) {
-    return false;
-}
+// bool Widget::resize_event_filter(Widget* receiver,
+//                                  std::size_t new_width,
+//                                  std::size_t new_height,
+//                                  std::size_t old_width,
+//                                  std::size_t old_height) {
+//     return false;
+// }
 
-bool Widget::key_press_event(const Key_event& event) {
-    if (event.key_code() == Key::Tab) {
-        System::cycle_tab_focus();
-    }
-    return false;
-}
+// bool Widget::paint_event_filter(Widget* receiver) {
+//     return false;
+// }
 
-bool Widget::key_release_event(const Key_event& event) {
-    return false;
-}
+// bool Widget::mouse_press_event_filter(Widget* receiver,
+//                                       Mouse_button button,
+//                                       std::size_t global_x,
+//                                       std::size_t global_y,
+//                                       std::size_t local_x,
+//                                       std::size_t local_y,
+//                                       std::uint8_t device_id) {
+//     return false;
+// }
 
-bool Widget::close_event(const Close_event& event) {
-    this->delete_later();
-    return true;
-}
+// bool Widget::mouse_release_event_filter(Widget* receiver,
+//                                         Mouse_button button,
+//                                         std::size_t global_x,
+//                                         std::size_t global_y,
+//                                         std::size_t local_x,
+//                                         std::size_t local_y,
+//                                         std::uint8_t device_id) {
+//     return false;
+// }
 
-bool Widget::hide_event(const Hide_event& event) {
-    return true;
-}
+// bool Widget::mouse_double_click_event_filter(Widget* receiver,
+//                                              Mouse_button button,
+//                                              std::size_t global_x,
+//                                              std::size_t global_y,
+//                                              std::size_t local_x,
+//                                              std::size_t local_y,
+//                                              std::uint8_t device_id) {
+//     return false;
+// }
 
-bool Widget::show_event(const Show_event& event) {
-    return true;
-}
+// bool Widget::mouse_wheel_event_filter(Widget* receiver,
+//                                       Mouse_button button,
+//                                       std::size_t global_x,
+//                                       std::size_t global_y,
+//                                       std::size_t local_x,
+//                                       std::size_t local_y,
+//                                       std::uint8_t device_id) {
+//     return false;
+// }
 
-bool Widget::enable_event(const Enable_event& event) {
-    return Object::enable_event(event);
-}
+// bool Widget::mouse_move_event_filter(Widget* receiver,
+//                                      Mouse_button button,
+//                                      std::size_t global_x,
+//                                      std::size_t global_y,
+//                                      std::size_t local_x,
+//                                      std::size_t local_y,
+//                                      std::uint8_t device_id) {
+//     return false;
+// }
 
-bool Widget::focus_event(const Focus_event& event) {
-    return true;
-}
+// bool Widget::key_press_event_filter(Widget* receiver, Key key, char symbol) {
+//     return false;
+// }
+
+// bool Widget::key_release_event_filter(Widget* receiver, Key key, char symbol)
+// {
+//     return false;
+// }
+
+// bool Widget::close_event_filter(Widget* receiver) {
+//     return false;
+// }
+
+// bool Widget::hide_event_filter(Widget* receiver) {
+//     return false;
+// }
+
+// bool Widget::show_event_filter(Widget* receiver) {
+//     return false;
+// }
+
+// bool Widget::focus_in_event_filter(Widget* receiver) {
+//     return false;
+// }
+
+// bool Widget::focus_out_event_filter(Widget* receiver) {
+//     return false;
+// }
+
+// bool Widget::clear_screen_event_filter(Widget* receiver) {
+//     return false;
+// }
 
 void Widget::set_focus(bool focus) {
     if (this->focus_policy() == Focus_policy::None) {

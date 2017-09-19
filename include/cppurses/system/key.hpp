@@ -1,7 +1,9 @@
 #ifndef SYSTEM_KEY_HPP
 #define SYSTEM_KEY_HPP
 
-enum class Key {
+namespace cppurses {
+
+enum class Key : short {
     // Control Characters
     Null = 0,    // Ctrl + Space, or Ctrl + 2, OR Ctrl + @
     Ctrl_a,      // Start of heading
@@ -239,5 +241,9 @@ enum class Key {
     Suspend,
     Undo
 };
+
+char key_to_char(Key key);
+
+}  // namespace cppurses
 
 #endif  // SYSTEM_KEY_HPP

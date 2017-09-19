@@ -9,16 +9,25 @@ class Widget;
 
 class Key_event : public Input_event {
    public:
-    Key_event(Event::Type type, Widget* reciever, int key_code);
+    Key_event(Event::Type type, Widget* receiver, Key key_code);
 
-    void send() const override;
-
-   private:
-    const int key_code_;
+   protected:
+    const Key key_code_;
 };
 
-// class key_press_event : public Key_event?
-// class key_release_event : public Key_event?
+class Key_press_event : public Key_event {
+   public:
+    Key_press_event(Widget* receiver, Key key_code);
+    bool send() const override;
+    bool filter_send(Widget* filter_widget) const override;
+};
+
+class Key_release_event : public Key_event {
+   public:
+    Key_release_event(Widget* receiver, Key key_code);
+    bool send() const override;
+    bool filter_send(Widget* filter_widget) const override;
+};
 
 }  // namespace cppurses
 #endif  // SYSTEM_EVENTS_KEY_EVENT_HPP

@@ -2,12 +2,13 @@
 #include "painter/color.hpp"
 #include "painter/paint_engine.hpp"
 #include "painter/palette.hpp"
-#include "system/detail/posted_event.hpp"
-#include "system/detail/thread_data.hpp"
+// #include "system/detail/posted_event.hpp"
+// #include "system/detail/thread_data.hpp"
 #include "system/event.hpp"
 #include "system/event_loop.hpp"
 #include "system/object.hpp"
 #include "system/events/paint_event.hpp"
+#include "system/detail/ncurses_event_listener.hpp"
 #include "widget/widget.hpp"
 #include "widget/focus_policy.hpp"
 #include <signals/signals.hpp>
@@ -19,115 +20,138 @@
 
 namespace cppurses {
 
-sig::Slot<void()> System::quit = []() { System::exit(); };   // NOLINT
-Object* System::head_ = nullptr;                             // NOLINT
-std::unique_ptr<Paint_engine> System::engine_ = nullptr;     // NOLINT
+sig::Slot<void()> System::quit = []() { System::exit(); };  // NOLINT
+
+Object* System::head_ = nullptr;                          // NOLINT
+std::unique_ptr<Paint_engine> System::engine_ = nullptr;  // NOLINT
+std::unique_ptr<detail::Abstract_event_listener> System::event_listener_ =
+    std::make_unique<detail::NCurses_event_listener>();  // NOLINT
+
 std::unique_ptr<Palette> System::system_palette_ = nullptr;  // NOLINT
 Widget* System::focus_widg_ = nullptr;                       // NOLINT
 
-void System::post_event(Object* obj,
-                        std::unique_ptr<Event> event,
-                        int priority) {
-    if (obj == nullptr) {
-        return;
-    }
-    detail::Posted_event pe{obj, std::move(event), priority};
-    detail::Thread_data::current().event_queue.add_event(std::move(pe));
+void System::post_event(std::unique_ptr<Event> event) {
+    event_loop_.event_queue.append(std::move(event));
 }
 
-void System::remove_posted_event(Event* event) {
-    auto& queue = detail::Thread_data::current().event_queue;
-    auto pos =
-        std::find_if(std::begin(queue), std::end(queue),
-                     [&event](auto& pe) { return (&(pe.event()) == event); });
-    if (pos != std::end(queue)) {
-        queue.erase(pos);
-    }
-}
-
-bool System::send_event(Object* obj, const Event& event) {
-    return (obj != nullptr) ? notify(obj, event) : false;
-}
-
-void System::send_posted_events(Object* obj_filter, Event::Type etype_filter) {
-    auto& queue = detail::Thread_data::current().event_queue;
-    auto posted_iter = std::begin(queue);
-    while (posted_iter != std::end(queue)) {
-        if (posted_iter->reciever() != nullptr) {
-            auto event_t = posted_iter->event().type();
-            if ((obj_filter == nullptr ||
-                 obj_filter == posted_iter->reciever()) &&
-                (etype_filter == Event::None ||
-                 etype_filter == posted_iter->event().type()) &&
-                (posted_iter->event().type() != Event::DeferredDelete ||
-                 etype_filter == Event::DeferredDelete)) {
-                if (event_t == Event::DeferredDelete) {
-                    auto parent = posted_iter->reciever()->parent();
-                    if (parent == nullptr) {
-                        if (posted_iter->reciever() == System::head()) {
-                            System::exit();
-                        }
-                        queue.erase(posted_iter);
-                        posted_iter = std::begin(queue);
-                    } else {
-                        parent->delete_child(
-                            const_cast<Object*>(posted_iter->reciever()));
-                        posted_iter = std::begin(queue);
-                        queue.erase(posted_iter);
-                        posted_iter = std::begin(queue);
-                    }
-                } else {
-                    // const_cast because of multi-set const only iterator.
-                    System::notify(const_cast<Object*>(posted_iter->reciever()),
-                                   posted_iter->event());
-                    posted_iter = std::begin(queue);
-                    queue.erase(posted_iter);
-                    posted_iter = std::begin(queue);
-                }
-            } else {
-                ++posted_iter;
-            }
-        } else {
-            ++posted_iter;
-        }
-    }
-}
-
-bool System::notify(Object* obj, const Event& event) {
-    bool handled{false};
-    // Send event to any filter objects
-    unsigned i{0};
-    while (i < obj->event_filter_objects_.size() && !handled) {
-        handled = obj->event_filter_objects_[i]->event_filter(obj, event);
-        ++i;
-    }
-    if (handled) {
-        return true;
-    }
-
-    return notify_helper(obj, event);
-}
-
-bool System::notify_helper(Object* obj, const Event& event) {
-    bool handled{false};
-    // Send event to object
-    handled = obj->event(event);
-    // Propagate event to parent
+bool System::send_event(const Event& event) {
+    bool handled = event.send_to_all_filters();
     if (!handled) {
-        Object* parent = obj->parent();
-        if (parent != nullptr) {
-            handled = notify_helper(parent, event);
-        }
+        event.send();
     }
     return handled;
 }
 
+// void System::post_event(Object* obj,
+//                         std::unique_ptr<Event> event,
+//                         int priority) {
+//     if (obj == nullptr) {
+//         return;
+//     }
+//     detail::Posted_event pe{obj, std::move(event), priority};
+//     detail::Thread_data::current().event_queue.add_event(std::move(pe));
+// }
+
+// void System::remove_posted_event(Event* event) {
+//     auto& queue = detail::Thread_data::current().event_queue;
+//     auto pos =
+//         std::find_if(std::begin(queue), std::end(queue),
+//                      [&event](auto& pe) { return (&(pe.event()) == event);
+//                      });
+//     if (pos != std::end(queue)) {
+//         queue.erase(pos);
+//     }
+// }
+
+// bool System::send_event(Object* obj, const Event& event) {
+//     return (obj != nullptr) ? notify(obj, event) : false;
+// }
+
+// void System::send_posted_events(Object* obj_filter, Event::Type etype_filter)
+// {
+//     auto& queue = detail::Thread_data::current().event_queue;
+//     auto posted_iter = std::begin(queue);
+//     while (posted_iter != std::end(queue)) {
+//         if (posted_iter->receiver() != nullptr) {
+//             auto event_t = posted_iter->event().type();
+//             if ((obj_filter == nullptr ||
+//                  obj_filter == posted_iter->receiver()) &&
+//                 (etype_filter == Event::None ||
+//                  etype_filter == posted_iter->event().type()) &&
+//                 (posted_iter->event().type() != Event::DeferredDelete ||
+//                  etype_filter == Event::DeferredDelete)) {
+//                 if (event_t == Event::DeferredDelete) {
+//                     auto parent = posted_iter->receiver()->parent();
+//                     if (parent == nullptr) {
+//                         if (posted_iter->receiver() == System::head()) {
+//                             System::exit();
+//                         }
+//                         queue.erase(posted_iter);
+//                         posted_iter = std::begin(queue);
+//                     } else {
+//                         parent->delete_child(
+//                             const_cast<Object*>(posted_iter->receiver()));
+//                         posted_iter = std::begin(queue);
+//                         queue.erase(posted_iter);
+//                         posted_iter = std::begin(queue);
+//                     }
+//                 } else {
+//                     // const_cast because of multi-set const only iterator.
+//                     System::notify(const_cast<Object*>(posted_iter->receiver()),
+//                                    posted_iter->event());
+//                     posted_iter = std::begin(queue);
+//                     queue.erase(posted_iter);
+//                     posted_iter = std::begin(queue);
+//                 }
+//             } else {
+//                 ++posted_iter;
+//             }
+//         } else {
+//             ++posted_iter;
+//         }
+//     }
+// }
+
+// bool System::notify(Object* obj, const Event& event) {
+//     bool handled{false};
+//     // Send event to any filter objects
+//     unsigned i{0};
+//     while (i < obj->event_filter_objects_.size() && !handled) {
+//         handled = obj->event_filter_objects_[i]->event_filter(obj, event);
+//         ++i;
+//     }
+//     if (handled) {
+//         return true;
+//     }
+
+//     return notify_helper(obj, event);
+// }
+
+// bool System::notify_helper(Object* obj, const Event& event) {
+//     bool handled{false};
+//     // Send event to object
+//     handled = obj->event(event);
+//     // Propagate event to parent
+//     if (!handled) {
+//         Object* parent = obj->parent();
+//         if (parent != nullptr) {
+//             handled = notify_helper(parent, event);
+//         }
+//     }
+//     return handled;
+// }
+
 void System::exit(int return_code) {
-    auto& data = detail::Thread_data::current();
-    data.quit_now = true;
-    for (auto loop_ptr : data.event_loops) {
-        loop_ptr->exit(return_code);
-    }
+    // auto& data = detail::Thread_data::current();
+    // data.quit_now = true;
+    // for (auto loop_ptr : data.event_loops) {
+    //     loop_ptr->exit(return_code);
+    // }
+    event_loop_.exit(return_code);
+}
+
+detail::Abstract_event_listener* System::event_listener() {
+    return event_listener_.get();
 }
 
 Paint_engine* System::paint_engine() {
@@ -137,7 +161,10 @@ Paint_engine* System::paint_engine() {
 void System::set_paint_engine(std::unique_ptr<Paint_engine> engine) {
     engine_ = std::move(engine);
     if (engine_) {
-        System::post_event(System::head(), std::make_unique<Paint_event>());
+        // TODO Remove all static casts to widget once object is gone, or make
+        // everything refer to widgets if you keep object base class.
+        System::post_event(std::make_unique<Paint_event>(
+            static_cast<Widget*>(System::head())));
     }
 }
 
@@ -288,11 +315,11 @@ void System::set_head(Object* obj) {
 }
 
 int System::run() {
-    Event_loop main_loop;
-    auto& data = detail::Thread_data::current();
-    data.quit_now = false;
-    int return_code = main_loop.run();
-    data.quit_now = false;
+    // Event_loop main_loop;
+    // auto& data = detail::Thread_data::current();
+    // data.quit_now = false;
+    int return_code = event_loop_.run();
+    // data.quit_now = false;
     return return_code;
 }
 
