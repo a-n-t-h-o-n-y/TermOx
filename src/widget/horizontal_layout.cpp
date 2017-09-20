@@ -482,9 +482,9 @@ void Horizontal_layout::position_widgets(
     }
     std::size_t x_pos{west_border_offset(this->border())};
     std::size_t index{0};
-    for (auto& widg : widgets) {
+    for (auto* widg : widgets) {
         System::post_event<Move_event>(
-            this, this->x() + x_pos,
+            widg, this->x() + x_pos,
             this->y() + north_border_offset(this->border()));
         x_pos += widths.at(index++);
     }

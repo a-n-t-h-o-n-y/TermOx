@@ -21,6 +21,7 @@ int main() {
     });
 
     sys.set_head(&hl);
+    Focus::set_focus_to(&menu);
 
     return sys.run();
 }

@@ -2,19 +2,19 @@
 #define SYSTEM_FOCUS_HPP
 
 namespace cppurses {
-class Widget*;
+class Widget;
 
 class Focus {
    public:
-    Widget* focus_widget() const;
+    static Widget* focus_widget();
 
-    void mouse_press(Widget* clicked) const;
-    bool tab_press() const;
-    void set_focus_to(Widget* new_focus);
+    static void mouse_press(Widget* clicked);
+    static bool tab_press();
+    static void set_focus_to(Widget* new_focus);
+    static void clear_focus();
 
    private:
-    Widget* focus_widget_;
-    Widget* next_tab_focus();  // make a free function, anon namespace
+    static Widget* focus_widget_;
 };
 
 }  // namespace cppurses

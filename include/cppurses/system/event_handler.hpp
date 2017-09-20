@@ -68,7 +68,7 @@ class Event_handler {
                                   std::size_t local_x,
                                   std::size_t local_y,
                                   std::uint8_t device_id);
-    virtual bool key_press_event(Key key, char symbol) = 0;
+    virtual bool key_press_event(Key key, char symbol);
     virtual bool key_release_event(Key key, char symbol);
     virtual bool close_event() = 0;
     virtual bool hide_event();

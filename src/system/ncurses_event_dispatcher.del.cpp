@@ -4,6 +4,7 @@
 #include "system/events/mouse_event.hpp"
 #include "system/events/resize_event.hpp"
 #include "system/system.hpp"
+#include "system/focus.hpp"
 #include "widget/border.hpp"
 #include "widget/widget.hpp"
 #include <ncurses.h>
@@ -146,7 +147,7 @@ std::unique_ptr<Event> NCurses_event_dispatcher::handle_keyboard_event(
 }
 
 Widget* NCurses_event_dispatcher::handle_keyboard_object() {
-    return System::focus_widget();
+    return Focus::focus_widget();
 }
 
 std::unique_ptr<Event> NCurses_event_dispatcher::handle_resize_event() {

@@ -1,10 +1,11 @@
 #include "system/events/mouse_event.hpp"
 #include "system/event_handler.hpp"
+#include "system/focus.hpp"
+#include "widget/widget.hpp"
 #include <cstddef>
 #include <cstdint>
 
 namespace cppurses {
-class Widget;
 
 // class Mouse_event
 Mouse_event::Mouse_event(Event::Type type,
@@ -52,7 +53,7 @@ bool Mouse_press_event::send() const {
 
 bool Mouse_press_event::filter_send(Event_handler* filter) const {
     return filter->mouse_press_event_filter(
-        receiver_, button_, glob_x_, glob_y_, local_x_, local_y_, device_id);
+        receiver_, button_, glob_x_, glob_y_, local_x_, local_y_, device_id_);
 }
 
 // class Mouse_release_event
@@ -82,7 +83,7 @@ bool Mouse_release_event::send() const {
 
 bool Mouse_release_event::filter_send(Event_handler* filter) const {
     return filter->mouse_release_event_filter(
-        receiver_, button_, glob_x_, glob_y_, local_x_, local_y_, device_id);
+        receiver_, button_, glob_x_, glob_y_, local_x_, local_y_, device_id_);
 }
 
 // class Mouse_double_click_event
@@ -112,7 +113,7 @@ bool Mouse_double_click_event::send() const {
 
 bool Mouse_double_click_event::filter_send(Event_handler* filter) const {
     return filter->mouse_double_click_event_filter(
-        receiver_, button_, glob_x_, glob_y_, local_x_, local_y_, device_id);
+        receiver_, button_, glob_x_, glob_y_, local_x_, local_y_, device_id_);
 }
 
 // class Mouse_wheel_event
@@ -136,7 +137,7 @@ bool Mouse_wheel_event::send() const {
 
 bool Mouse_wheel_event::filter_send(Event_handler* filter) const {
     return filter->mouse_wheel_event_filter(
-        receiver_, button_, glob_x_, glob_y_, local_x_, local_y_, device_id);
+        receiver_, button_, glob_x_, glob_y_, local_x_, local_y_, device_id_);
 }
 
 // class Mouse_move_event
@@ -151,7 +152,8 @@ Mouse_move_event::Mouse_move_event(Event_handler* receiver,
                   glob_y,           local_x,  local_y, device_id} {}
 
 bool Mouse_move_event::send() const {
-    if (receiver_->enabled() && receiver_->has_mouse_tracking()) {
+    if (receiver_->enabled() &&
+        static_cast<Widget*>(receiver_)->has_mouse_tracking()) {
         return receiver_->mouse_move_event(button_, glob_x_, glob_y_, local_x_,
                                            local_y_, device_id_);
     }
@@ -160,7 +162,7 @@ bool Mouse_move_event::send() const {
 
 bool Mouse_move_event::filter_send(Event_handler* filter) const {
     return filter->mouse_move_event_filter(receiver_, button_, glob_x_, glob_y_,
-                                           local_x_, local_y_, device_id);
+                                           local_x_, local_y_, device_id_);
 }
 
 }  // namespace cppurses;

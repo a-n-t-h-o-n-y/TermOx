@@ -4,11 +4,14 @@
 namespace cppurses {
 
 // class Child_event
-Child_event::Child_event(Event::Type type, Event_handler* receiver, Event_handler* child)
+Child_event::Child_event(Event::Type type,
+                         Event_handler* receiver,
+                         Event_handler* child)
     : Event{type, receiver}, child_{child} {}
 
 // class Child_added_event
-Child_added_event::Child_added_event(Event_handler* receiver, Event_handler* child)
+Child_added_event::Child_added_event(Event_handler* receiver,
+                                     Event_handler* child)
     : Child_event{Event::ChildAdded, receiver, child} {}
 
 bool Child_added_event::send() const {
@@ -20,7 +23,8 @@ bool Child_added_event::filter_send(Event_handler* filter) const {
 }
 
 // class Child_removed_event
-Child_removed_event::Child_removed_event(Event_handler* receiver, Event_handler* child)
+Child_removed_event::Child_removed_event(Event_handler* receiver,
+                                         Event_handler* child)
     : Child_event{Event::ChildRemoved, receiver, child} {}
 
 bool Child_removed_event::send() const {
@@ -32,7 +36,8 @@ bool Child_removed_event::filter_send(Event_handler* filter) const {
 }
 
 // class Child_polished_event
-Child_polished_event::Child_polished_event(Event_handler* receiver, Event_handler* child)
+Child_polished_event::Child_polished_event(Event_handler* receiver,
+                                           Event_handler* child)
     : Child_event{Event::ChildPolished, receiver, child} {}
 
 bool Child_polished_event::send() const {

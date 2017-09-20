@@ -21,16 +21,16 @@ namespace cppurses {
 
 sig::Slot<void()> System::quit = []() { System::exit(); };  // NOLINT
 
-Widget* System::head_ = nullptr;                          // NOLINT
+Widget* System::head_ = nullptr;  // NOLINT
+Event_loop System::event_loop_;
 std::unique_ptr<Paint_engine> System::engine_ = nullptr;  // NOLINT
 std::unique_ptr<detail::Abstract_event_listener> System::event_listener_ =
     std::make_unique<detail::NCurses_event_listener>();  // NOLINT
 
 std::unique_ptr<Palette> System::system_palette_ = nullptr;  // NOLINT
-Widget* System::focus_widg_ = nullptr;                       // NOLINT
 
 void System::post_event(std::unique_ptr<Event> event) {
-    event_loop_.event_queue.append(std::move(event));
+    System::event_loop_.event_queue.append(std::move(event));
 }
 
 bool System::send_event(const Event& event) {
@@ -204,7 +204,6 @@ System::~System() {
 
 void System::set_head(Widget* head_widget) {
     head_ = head_widget;
-    Focus::set_focus_to(head_);
 }
 
 int System::run() {

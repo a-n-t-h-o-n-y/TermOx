@@ -18,6 +18,7 @@
 #include "system/events/deferred_delete_event.hpp"
 #include "system/key.hpp"
 #include "system/system.hpp"
+#include "system/focus.hpp"
 #include "widget/border.hpp"
 #include "widget/coordinates.hpp"
 #include <cstddef>
@@ -36,8 +37,8 @@ Widget::Widget() {
 
 Widget::~Widget() {
     // if (valid_) {
-    if (System::focus_widget() == this) {
-        System::set_focus_widget(nullptr, false);
+    if (Focus::focus_widget() == this) {
+        Focus::clear_focus();
     }
     Widget* parent = this->parent();
     if (parent != nullptr) {
@@ -127,9 +128,9 @@ void Widget::delete_child(Widget* child) {
     }
 }
 
-bool has_child(Widget* child) {
-    for (Widget* w : children_) {
-        if (w == child || w->is_child(child)) {
+bool Widget::has_child(Widget* child) {
+    for (const auto& w_ptr : children_) {
+        if (w_ptr.get() == child || w_ptr->has_child(child)) {
             return true;
         }
     }
@@ -446,12 +447,12 @@ bool Widget::resize_event(std::size_t new_width,
 //     return false;
 // }
 
-bool Widget::key_press_event(Key key, char symbol) {
-    if (key == Key::Tab) {
-        System::cycle_tab_focus();
-    }
-    return false;
-}
+// bool Widget::key_press_event(Key key, char symbol) {
+//     if (key == Key::Tab) {
+//         System::cycle_tab_focus();
+//     }
+//     return false;
+// }
 
 // bool Widget::key_release_event(Key key, char symbol) {
 //     return false;
@@ -487,6 +488,7 @@ bool Widget::paint_event() {
         Painter p{this};
         p.border(border_);
     }
+    // Might not need below if focus widget sets this afterwards, on no focus?
     this->paint_engine().move(this->x() + this->cursor_x(),
                               this->y() + this->cursor_y());
     return true;
@@ -500,34 +502,35 @@ bool Widget::clear_screen_event() {
 
 bool Widget::deferred_delete_event(Event_handler* to_delete) {
     this->delete_child(static_cast<Widget*>(to_delete));
+    return true;
 }
 
 bool Widget::child_added_event(Event_handler* child) {
     this->update();
-    return Event_handler::child_added_event(child);
+    return true;
 }
 
 bool Widget::child_removed_event(Event_handler* child) {
     this->update();
-    return Event_handler::child_removed_event(child);
+    return true;
 }
 
 bool Widget::child_polished_event(Event_handler* child) {
     this->update();
-    return Event_handler::child_polished_event(child);
+    return true;
 }
 
-void Widget::set_focus(bool focus) {
-    if (this->focus_policy() == Focus_policy::None) {
-        return;
-    }
-    // focus_ = focus;
-    if (focus) {
-        System::post_event<Focus_in_event>(this);
-    } else {
-        System::post_event<Focus_out_event>(this);
-    }
-}
+// void Widget::set_focus(bool focus) {
+//     if (this->focus_policy() == Focus_policy::None) {
+//         return;
+//     }
+//     // focus_ = focus;
+//     if (focus) {
+//         System::post_event<Focus_in_event>(this);
+//     } else {
+//         System::post_event<Focus_out_event>(this);
+//     }
+// }
 
 void Widget::set_visible(bool visible) {
     this->visible_ = visible;

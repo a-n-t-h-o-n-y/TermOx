@@ -8,6 +8,7 @@
 #include "system/events/mouse_event.hpp"
 #include "system/key.hpp"
 #include "system/event_handler.hpp"
+#include "system/focus.hpp"
 #include "widget/border.hpp"
 #include "widget/coordinates.hpp"
 #include "widget/focus_policy.hpp"
@@ -104,9 +105,9 @@ class Widget : public Event_handler {
     Glyph background_tile() { return background_tile_; }
     void set_background_tile(Glyph tile) { background_tile_ = std::move(tile); }
 
-    bool has_focus() const { return focus_; }
-    void set_focus(bool focus);
-    void clear_focus() { this->set_focus(false); }
+    bool has_focus() const { return Focus::focus_widget() == this; }
+    // void set_focus(bool focus);
+    // void clear_focus() { this->set_focus(false); }
     Focus_policy focus_policy() const { return focus_policy_; }
     void set_focus_policy(Focus_policy policy) { focus_policy_ = policy; }
 
@@ -205,7 +206,7 @@ class Widget : public Event_handler {
     //                               std::size_t local_x,
     //                               std::size_t local_y,
     //                               std::uint8_t device_id);
-    bool key_press_event(Key key, char symbol) override;
+    // bool key_press_event(Key key, char symbol) override;
     // virtual bool key_release_event(Key key, char symbol);
     bool close_event() override;
     // virtual bool hide_event();

@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 project(libcppurses LANGUAGES CXX)
 
-# set(CMAKE_BUILD_TYPE Release)
-set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Release)
+# set(CMAKE_BUILD_TYPE Debug)
 
 add_subdirectory(libs/Signals)
 include(GNUInstallDirs)
@@ -27,6 +27,7 @@ set(SYSTEM_SOURCES
     "src/system/event_invoker.cpp"
 	"src/system/event_loop.cpp"
     "src/system/event_queue.cpp"
+    "src/system/focus.cpp"
     "src/system/focus_event.cpp"
     "src/system/hide_event.cpp"
     "src/system/key.cpp"
@@ -110,15 +111,15 @@ add_executable(menu demos/menu_demo.cpp)
 target_link_libraries(menu cppurses ncurses)
 
 # Tests
-add_executable(testcppurses ${TEST_SOURCES})
-target_link_libraries(testcppurses cppurses ncurses)
+# add_executable(testcppurses ${TEST_SOURCES})
+# target_link_libraries(testcppurses cppurses ncurses)
 
-find_package(GTest REQUIRED)
-if (GTEST_FOUND)
-    target_link_libraries(testcppurses ${GTEST_BOTH_LIBRARIES})
-endif()
+# find_package(GTest REQUIRED)
+# if (GTEST_FOUND)
+#     target_link_libraries(testcppurses ${GTEST_BOTH_LIBRARIES})
+# endif()
 
-add_test(testcppurses testcppurses)
+# add_test(testcppurses testcppurses)
 
 # Build System Info For Clang-Tidy
 if (NOT TARGET compile_commands)

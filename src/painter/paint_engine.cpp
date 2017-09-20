@@ -1,6 +1,7 @@
 #include "painter/paint_engine.hpp"
 #include "painter/glyph.hpp"
 #include "system/system.hpp"
+#include "system/focus.hpp"
 #include "widget/widget.hpp"
 #include <cstddef>
 
@@ -38,7 +39,7 @@ void Paint_engine::flush(bool optimize) {
         this->touch_all();
     }
     // Set cursor
-    auto* focus_widg = System::focus_widget();
+    auto* focus_widg = Focus::focus_widget();
     if (focus_widg != nullptr) {
         this->show_cursor(focus_widg->cursor());
         if (focus_widg->cursor()) {

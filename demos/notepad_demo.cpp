@@ -14,10 +14,10 @@ class Center_label : public Widget {
     }
 
    protected:
-    bool paint_event(const Paint_event& event) {
+    bool paint_event() override {
         Painter p{this};
         p.put(label_, this->width() / 2 - label_.length() / 2, 0);
-        return Widget::paint_event(event);
+        return Widget::paint_event();
     }
 
    private:
@@ -132,6 +132,8 @@ int main() {
     });
 
     sys.set_head(&main_layout);
+
+    Focus::set_focus_to(&text_area);
 
     return sys.run();
 }

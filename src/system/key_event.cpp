@@ -1,6 +1,7 @@
 #include "system/events/key_event.hpp"
 #include "system/key.hpp"
 #include "system/event_handler.hpp"
+#include "system/focus.hpp"
 
 namespace cppurses {
 
@@ -16,7 +17,7 @@ bool Key_press_event::send() const {
     if (!receiver_->enabled()) {
         return false;
     }
-    if (key_code_ == Key::Tab && Focus_system::tab_press()) {
+    if (key_code_ == Key::Tab && Focus::tab_press()) {
         return true;
     }
     return receiver_->key_press_event(key_code_, key_to_char(key_code_));

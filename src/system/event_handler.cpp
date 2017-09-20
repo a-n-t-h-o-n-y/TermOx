@@ -106,6 +106,10 @@ bool Event_handler::mouse_move_event(Mouse_button button,
     return false;
 }
 
+bool Event_handler::key_press_event(Key key, char symbol) {
+    return false;
+}
+
 bool Event_handler::key_release_event(Key key, char symbol) {
     return false;
 }
