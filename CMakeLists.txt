@@ -48,7 +48,6 @@ set(PAINTER_SOURCES
 	"src/painter/palette.cpp"
 	"src/painter/glyph.cpp"
 	"src/painter/brush.cpp"
-	"src/painter/geometry.cpp"
 	"src/painter/paint_buffer.cpp"
     "src/painter/glyph_matrix.cpp"
     "src/painter/glyph_string.cpp"

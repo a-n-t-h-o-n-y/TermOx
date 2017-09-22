@@ -41,9 +41,9 @@ void Color_chooser::initialize() {
     yellow_.clicked.connect([this] { color_changed(Color::Yellow); });
     white_.clicked.connect([this] { color_changed(Color::White); });
 
-    this->geometry().set_width_hint(16);
-    this->size_policy().horizontal_policy = Size_policy::Fixed;
-    this->geometry().set_height_hint(2);
-    this->size_policy().vertical_policy = Size_policy::Fixed;
+    this->width_policy.hint = 16;
+    this->width_policy.type = Size_policy::Fixed;
+    this->height_policy.hint = 2;
+    this->height_policy.type = Size_policy::Fixed;
 }
 }  // namespace cppurses

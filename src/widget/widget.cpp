@@ -1,7 +1,6 @@
 #include "widget/widget.hpp"
 #include "painter/brush.hpp"
 #include "painter/color.hpp"
-#include "painter/geometry.hpp"
 #include "painter/painter.hpp"
 #include "system/events/child_event.hpp"
 #include "system/events/clear_screen_event.hpp"
@@ -196,39 +195,41 @@ bool Widget::has_coordinates(std::size_t global_x, std::size_t global_y) {
     if (!this->enabled() || !this->visible()) {
         return false;
     }
-    bool within_west = global_x >= (this->x() + west_border_offset(border));
-    bool within_east =
-        global_x < (this->x() + this->width() + west_border_offset(border));
-    bool within_north = global_y >= (this->y() + north_border_offset(border));
-    bool within_south =
-        global_y < (this->y() + this->height() + north_border_offset(border));
+    bool within_west =
+        global_x >= (this->x() + west_border_offset(this->border));
+    bool within_east = global_x < (this->x() + this->width() +
+                                   west_border_offset(this->border));
+    bool within_north = global_y >= (this->y() + north_border_offset(this->border));
+    bool within_south = global_y < (this->y() + this->height() +
+                                    north_border_offset(this->border));
     return within_west && within_east && within_north && within_south;
 }
 
-void Widget::set_geometry(const Geometry& g) {
-    geometry_ = g;
-    geometry_.set_widget(this);
-    this->update();
-}
+// void Widget::set_geometry(const Geometry& g) {
+//     geometry_ = g;
+//     geometry_.set_widget(this);
+//     this->update();
+// }
 
-void Widget::set_vertical_policy(Size_policy::Policy policy, std::size_t hint) {
-    this->size_policy().vertical_policy = policy;
-    this->geometry().set_height_hint(hint);
-}
+// void Widget::set_vertical_policy(Size_policy::Policy policy, std::size_t
+// hint) {
+//     this->size_policy().vertical_policy = policy;
+//     this->geometry().set_height_hint(hint);
+// }
 
-void Widget::set_vertical_policy(Size_policy::Policy policy) {
-    this->size_policy().vertical_policy = policy;
-}
+// void Widget::set_vertical_policy(Size_policy::Policy policy) {
+//     this->size_policy().vertical_policy = policy;
+// }
 
-void Widget::set_horizontal_policy(Size_policy::Policy policy,
-                                   std::size_t hint) {
-    this->size_policy().horizontal_policy = policy;
-    this->geometry().set_width_hint(hint);
-}
+// void Widget::set_horizontal_policy(Size_policy::Policy policy,
+//                                    std::size_t hint) {
+//     this->size_policy().horizontal_policy = policy;
+//     this->geometry().set_width_hint(hint);
+// }
 
-void Widget::set_horizontal_policy(Size_policy::Policy policy) {
-    this->size_policy().horizontal_policy = policy;
-}
+// void Widget::set_horizontal_policy(Size_policy::Policy policy) {
+//     this->size_policy().horizontal_policy = policy;
+// }
 
 void Widget::update() {
     this->clear_screen();
@@ -384,8 +385,8 @@ bool Widget::resize_event(std::size_t new_width,
                           std::size_t new_height,
                           std::size_t old_width,
                           std::size_t old_height) {
-    this->geometry().set_width(new_width);
-    this->geometry().set_height(new_height);
+    width_ = new_width;
+    height_ = new_height;
     this->update();
     return true;
 }
@@ -482,21 +483,19 @@ std::size_t Widget::y() const {
 std::size_t Widget::width() const {
     std::size_t width_border_offset =
         west_border_offset(this->border) + east_border_offset(this->border);
-    std::size_t w = this->geometry().width();
-    if (width_border_offset > w) {
+    if (width_border_offset > width_) {
         return 0;
     }
-    return w - width_border_offset;
+    return width_ - width_border_offset;
 }
 
 std::size_t Widget::height() const {
-    std::size_t height_border_offset = north_border_offset(this->border) +
-                                       south_border_offset(this->border);
-    std::size_t h = this->geometry().height();
-    if (height_border_offset > h) {
+    std::size_t height_border_offset =
+        north_border_offset(this->border) + south_border_offset(this->border);
+    if (height_border_offset > height_) {
         return 0;
     }
-    return h - height_border_offset;
+    return height_ - height_border_offset;
 }
 
 // - - - - - - - - - - - - - - Free Functions - - - - - - - - - - - - - - - - -

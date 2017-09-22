@@ -84,8 +84,11 @@ void Painter::border(const Border& b) {
     }
     const std::size_t widg_x = widget_->x();
     const std::size_t widg_y = widget_->y();
-    std::size_t width = widget_->geometry().width();
-    std::size_t height = widget_->geometry().height();
+    std::size_t width = widget_->width() + west_border_offset(widget_->border) +
+                        east_border_offset(widget_->border);
+    std::size_t height = widget_->height() +
+                         north_border_offset(widget_->border) +
+                         south_border_offset(widget_->border);
 
     // Underflow Checks
     if (widg_x + width < 2 && (b.north_enabled || b.south_enabled)) {
@@ -134,8 +137,10 @@ void Painter::border(const Border& b) {
 }
 
 void Painter::clear_screen() {
-    auto width = widget_->geometry().width();
-    auto height = widget_->geometry().height();
+    auto width = widget_->width() + west_border_offset(widget_->border) +
+                 east_border_offset(widget_->border);
+    auto height = widget_->height() + north_border_offset(widget_->border) +
+                  south_border_offset(widget_->border);
     auto gx = widget_->x();
     auto gy = widget_->y();
 

@@ -1,6 +1,5 @@
 #ifndef WIDGET_COORDINATES_HPP
 #define WIDGET_COORDINATES_HPP
-
 #include <cstddef>
 
 namespace cppurses {

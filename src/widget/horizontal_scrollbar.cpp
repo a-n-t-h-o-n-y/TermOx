@@ -6,19 +6,18 @@ namespace cppurses {
 
 Horizontal_scrollbar::Horizontal_scrollbar() {
     this->disable_cursor();
-    this->geometry().size_policy().vertical_policy = Size_policy::Fixed;
-    this->geometry().set_height_hint(1);
-    this->geometry().size_policy().horizontal_policy = Size_policy::Expanding;
+    this->height_policy.type = Size_policy::Fixed;
+    this->height_policy.hint = 1;
+    this->width_policy.type = Size_policy::Expanding;
 
-    left_button.geometry().size_policy().horizontal_policy = Size_policy::Fixed;
-    left_button.geometry().set_width_hint(1);
+    left_button.width_policy.type = Size_policy::Fixed;
+    left_button.width_policy.hint = 1;
 
-    middle.geometry().size_policy().horizontal_policy = Size_policy::Expanding;
+    middle.width_policy.type = Size_policy::Expanding;
     middle.brush().set_background(Color::Light_gray);
 
-    right_button.geometry().size_policy().horizontal_policy =
-        Size_policy::Fixed;
-    right_button.geometry().set_width_hint(1);
+    right_button.width_policy.type = Size_policy::Fixed;
+    right_button.width_policy.hint = 1;
 }
 
 }  // namespace cppurses

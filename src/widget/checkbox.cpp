@@ -6,8 +6,8 @@
 namespace cppurses {
 
 Checkbox::Checkbox(Glyph_string title, int dist) : title_{title}, dist_{dist} {
-    this->geometry().size_policy().vertical_policy = Size_policy::Fixed;
-    this->geometry().set_height_hint(1);
+    this->height_policy.type = Size_policy::Fixed;
+    this->height_policy.hint = 1;
     this->Checkbox::initialize();
 }
 

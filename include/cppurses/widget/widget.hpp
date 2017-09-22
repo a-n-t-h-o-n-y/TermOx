@@ -2,7 +2,7 @@
 #define WIDGET_WIDGET_HPP
 #include "painter/brush.hpp"
 #include "painter/color.hpp"
-#include "painter/geometry.hpp"
+// #include "painter/geometry.hpp"
 #include "painter/glyph.hpp"
 #include "system/events/mouse_event.hpp"
 #include "system/key.hpp"
@@ -11,6 +11,7 @@
 #include "widget/border.hpp"
 #include "widget/coordinates.hpp"
 #include "widget/focus_policy.hpp"
+#include "widget/size_policy.hpp"
 #include <signals/signals.hpp>
 #include <algorithm>
 #include <cstddef>
@@ -74,11 +75,9 @@ class Widget : public Event_handler {
     // Global Coordinates - Includes border space
     std::size_t x() const;
     std::size_t y() const;
-    void set_x(std::size_t global_x);
-    void set_y(std::size_t global_y);
     std::size_t width() const;  // Does not include border space
     std::size_t height() const;
-    bool has_coordinates(std::size_t global_x, std::size_t global_y);
+    bool has_coordinates(std::size_t global_x, std::size_t global_y); // ff ?
 
     bool cursor() const { return cursor_enabled_; }
     void enable_cursor(bool enable = true) { cursor_enabled_ = enable; }
@@ -101,16 +100,17 @@ class Widget : public Event_handler {
     Focus_policy focus_policy() const { return focus_policy_; }
     void set_focus_policy(Focus_policy policy) { focus_policy_ = policy; }
 
-    void set_geometry(const Geometry& g);
-    Geometry& geometry() { return geometry_; }
-    const Geometry& geometry() const { return geometry_; }
+    // void set_geometry(const Geometry& g);
+    // Geometry& geometry() { return geometry_; }
+    // const Geometry& geometry() const { return geometry_; }
 
-    Size_policy& size_policy() { return geometry().size_policy(); }
-    const Size_policy& size_policy() const { return geometry().size_policy(); }
-    void set_vertical_policy(Size_policy::Policy policy, std::size_t hint);
-    void set_vertical_policy(Size_policy::Policy policy);
-    void set_horizontal_policy(Size_policy::Policy policy, std::size_t hint);
-    void set_horizontal_policy(Size_policy::Policy policy);
+    // Size_policy& size_policy() { return geometry().size_policy(); }
+    // const Size_policy& size_policy() const { return geometry().size_policy();
+    // }
+    // void set_vertical_policy(Size_policy::Policy policy, std::size_t hint);
+    // void set_vertical_policy(Size_policy::Policy policy);
+    // void set_horizontal_policy(Size_policy::Policy policy, std::size_t hint);
+    // void set_horizontal_policy(Size_policy::Policy policy);
 
     void update();
 
@@ -122,6 +122,8 @@ class Widget : public Event_handler {
 
     // Public Objects
     Border border;
+    Size_policy width_policy;
+    Size_policy height_policy;
 
     // Signals
     sig::Signal<void(const std::string&)> name_changed;
@@ -178,13 +180,13 @@ class Widget : public Event_handler {
     void set_background_(Color c);
     void set_foreground_(Color c);
 
-    Coordinates position_;  // Top left corner relative to parent's Coordinates.
     Coordinates cursor_position_;
     bool cursor_enabled_{false};
     bool focus_{false};
     bool mouse_tracking_{false};
     bool visible_{true};
-    Geometry geometry_{this};
+
+    // Geometry geometry_{this};
     Glyph background_tile_{" "};
     Brush default_brush_{background(Color::Black), foreground(Color::White)};
     Focus_policy focus_policy_{Focus_policy::None};
@@ -193,6 +195,10 @@ class Widget : public Event_handler {
     std::string widget_name_;
     Widget* parent_ = nullptr;
     std::vector<std::unique_ptr<Widget>> children_;
+
+    Coordinates position_;  // Top left corner relative to parent's Coordinates.
+    std::size_t width_{width_policy.hint};
+    std::size_t height_{height_policy.hint};
 
     void initialize();
     void delete_child(Widget* child);
@@ -216,6 +222,9 @@ class Widget : public Event_handler {
         }
         return nullptr;
     }
+
+    void set_x(std::size_t global_x);
+    void set_y(std::size_t global_y);
 };
 
 // - - - - - - - - - - - - - - Free Functions - - - - - - - - - - - - - - - - -
