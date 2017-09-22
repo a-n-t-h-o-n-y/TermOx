@@ -4,7 +4,6 @@
 #include "painter/color.hpp"
 #include "painter/geometry.hpp"
 #include "painter/glyph.hpp"
-#include "painter/paint_engine.hpp"
 #include "system/events/mouse_event.hpp"
 #include "system/key.hpp"
 #include "system/event_handler.hpp"
@@ -47,7 +46,6 @@ class Widget : public Event_handler {
     void set_name(const std::string& name);
 
     // Parent
-
     Widget* parent() const;
     void set_parent(Widget* parent);
 
@@ -93,12 +91,6 @@ class Widget : public Event_handler {
     std::size_t cursor_y() const { return cursor_position_.y; }
     Coordinates cursor_coordinates() const { return cursor_position_; }
 
-    Border& border() { return border_; }
-    const Border& border() const { return border_; }
-    bool has_border() const { return border_.enabled(); }
-    void enable_border();
-    void disable_border();
-
     void set_brush(Brush brush);
     Brush& brush() { return default_brush_; }
 
@@ -106,8 +98,6 @@ class Widget : public Event_handler {
     void set_background_tile(Glyph tile) { background_tile_ = std::move(tile); }
 
     bool has_focus() const { return Focus::focus_widget() == this; }
-    // void set_focus(bool focus);
-    // void clear_focus() { this->set_focus(false); }
     Focus_policy focus_policy() const { return focus_policy_; }
     void set_focus_policy(Focus_policy policy) { focus_policy_ = policy; }
 
@@ -130,10 +120,8 @@ class Widget : public Event_handler {
     bool visible() const { return visible_; }
     void set_visible(bool visible);
 
-    Paint_engine& paint_engine() const;
-    void set_paint_engine(std::unique_ptr<Paint_engine> engine) {
-        paint_engine_ = std::move(engine);
-    }
+    // Public Objects
+    Border border;
 
     // Signals
     sig::Signal<void(const std::string&)> name_changed;
@@ -166,7 +154,6 @@ class Widget : public Event_handler {
     sig::Slot<void(Color)> set_foreground;
 
     // Event Handling
-    // bool event(const Event& event) override;
     bool move_event(std::size_t new_x,
                     std::size_t new_y,
                     std::size_t old_x,
@@ -176,108 +163,14 @@ class Widget : public Event_handler {
                       std::size_t old_width,
                       std::size_t old_height) override;
     bool paint_event() override;
-    // virtual bool mouse_press_event(Mouse_button button,
-    //                                std::size_t global_x,
-    //                                std::size_t global_y,
-    //                                std::size_t local_x,
-    //                                std::size_t local_y,
-    //                                std::uint8_t device_id);
-    // virtual bool mouse_release_event(Mouse_button button,
-    //                                  std::size_t global_x,
-    //                                  std::size_t global_y,
-    //                                  std::size_t local_x,
-    //                                  std::size_t local_y,
-    //                                  std::uint8_t device_id);
-    // virtual bool mouse_double_click_event(Mouse_button button,
-    //                                       std::size_t global_x,
-    //                                       std::size_t global_y,
-    //                                       std::size_t local_x,
-    //                                       std::size_t local_y,
-    //                                       std::uint8_t device_id);
-    // virtual bool mouse_wheel_event(Mouse_button button,
-    //                                std::size_t global_x,
-    //                                std::size_t global_y,
-    //                                std::size_t local_x,
-    //                                std::size_t local_y,
-    //                                std::uint8_t device_id);
-    // virtual bool mouse_move_event(Mouse_button button,
-    //                               std::size_t global_x,
-    //                               std::size_t global_y,
-    //                               std::size_t local_x,
-    //                               std::size_t local_y,
-    //                               std::uint8_t device_id);
-    // bool key_press_event(Key key, char symbol) override;
-    // virtual bool key_release_event(Key key, char symbol);
     bool close_event() override;
-    // virtual bool hide_event();
-    // virtual bool show_event();
     bool focus_in_event() override;
     bool focus_out_event() override;
     bool clear_screen_event() override;
     bool deferred_delete_event(Event_handler* to_delete) override;
-
     bool child_added_event(Event_handler* child) override;
     bool child_removed_event(Event_handler* child) override;
     bool child_polished_event(Event_handler* child) override;
-
-    // Event Filter Handling
-    // virtual bool move_event_filter(Widget* receiver,
-    //                                std::size_t new_x,
-    //                                std::size_t new_y,
-    //                                std::size_t old_x,
-    //                                std::size_t old_y);
-    // virtual bool resize_event_filter(Widget* receiver,
-    //                                  std::size_t new_width,
-    //                                  std::size_t new_height,
-    //                                  std::size_t old_width,
-    //                                  std::size_t old_height);
-    // virtual bool paint_event_filter(Widget* receiver);
-    // virtual bool mouse_press_event_filter(Widget* receiver,
-    //                                       Mouse_button button,
-    //                                       std::size_t global_x,
-    //                                       std::size_t global_y,
-    //                                       std::size_t local_x,
-    //                                       std::size_t local_y,
-    //                                       std::uint8_t device_id);
-    // virtual bool mouse_release_event_filter(Widget* receiver,
-    //                                         Mouse_button button,
-    //                                         std::size_t global_x,
-    //                                         std::size_t global_y,
-    //                                         std::size_t local_x,
-    //                                         std::size_t local_y,
-    //                                         std::uint8_t device_id);
-    // virtual bool mouse_double_click_event_filter(Widget* receiver,
-    //                                              Mouse_button button,
-    //                                              std::size_t global_x,
-    //                                              std::size_t global_y,
-    //                                              std::size_t local_x,
-    //                                              std::size_t local_y,
-    //                                              std::uint8_t device_id);
-    // virtual bool mouse_wheel_event_filter(Widget* receiver,
-    //                                       Mouse_button button,
-    //                                       std::size_t global_x,
-    //                                       std::size_t global_y,
-    //                                       std::size_t local_x,
-    //                                       std::size_t local_y,
-    //                                       std::uint8_t device_id);
-    // virtual bool mouse_move_event_filter(Widget* receiver,
-    //                                      Mouse_button button,
-    //                                      std::size_t global_x,
-    //                                      std::size_t global_y,
-    //                                      std::size_t local_x,
-    //                                      std::size_t local_y,
-    //                                      std::uint8_t device_id);
-    // virtual bool key_press_event_filter(Widget* receiver, Key key, char
-    // symbol);
-    // virtual bool key_release_event_filter(Widget* receiver,
-    //                                       Key key,
-    //                                       char symbol);
-    // virtual bool close_event_filter(Widget* receiver);
-    // virtual bool hide_event_filter(Widget* receiver);
-    // virtual bool show_event_filter(Widget* receiver);
-    // virtual bool focus_in_event_filter(Widget* receiver);
-    // virtual bool focus_out_event_filter(Widget* receiver);
-    // virtual bool clear_screen_event_filter(Widget* receiver);
 
    protected:
     void clear_screen();
@@ -292,11 +185,9 @@ class Widget : public Event_handler {
     bool mouse_tracking_{false};
     bool visible_{true};
     Geometry geometry_{this};
-    Border border_;
     Glyph background_tile_{" "};
     Brush default_brush_{background(Color::Black), foreground(Color::White)};
     Focus_policy focus_policy_{Focus_policy::None};
-    std::unique_ptr<Paint_engine> paint_engine_{nullptr};
 
    private:
     std::string widget_name_;
@@ -326,6 +217,12 @@ class Widget : public Event_handler {
         return nullptr;
     }
 };
+
+// - - - - - - - - - - - - - - Free Functions - - - - - - - - - - - - - - - - -
+
+bool has_border(const Widget& w);
+void enable_border(Widget& w);
+void disable_border(Widget& w);
 
 }  // namespace cppurses
 

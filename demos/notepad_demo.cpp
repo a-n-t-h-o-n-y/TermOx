@@ -68,11 +68,8 @@ int main() {
     // Textbox
     auto& text_area = tx_attr_layout.make_child<Textbox>();
     text_area.brush().add_attributes(background(Color::Dark_gray));
-    text_area.enable_border();
-    text_area.border().set_north_west("╭");
-    text_area.border().set_north_east("╮");
-    text_area.border().set_south_west("╰");
-    text_area.border().set_south_east("╯");
+    enable_border(text_area);
+    set_corners(text_area.border, "╭", "╮", "╰", "╯");
 
     // Attributes and Color Section
     auto& attr_layout = tx_attr_layout.make_child<Vertical_layout>();

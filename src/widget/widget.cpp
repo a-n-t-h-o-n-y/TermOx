@@ -196,7 +196,6 @@ bool Widget::has_coordinates(std::size_t global_x, std::size_t global_y) {
     if (!this->enabled() || !this->visible()) {
         return false;
     }
-    auto border = this->border();
     bool within_west = global_x >= (this->x() + west_border_offset(border));
     bool within_east =
         global_x < (this->x() + this->width() + west_border_offset(border));
@@ -204,16 +203,6 @@ bool Widget::has_coordinates(std::size_t global_x, std::size_t global_y) {
     bool within_south =
         global_y < (this->y() + this->height() + north_border_offset(border));
     return within_west && within_east && within_north && within_south;
-}
-
-void Widget::enable_border() {
-    this->border_.enable();
-    System::post_event<Child_polished_event>(this->parent(), this);
-}
-
-void Widget::disable_border() {
-    this->border_.disable();
-    System::post_event<Child_polished_event>(this->parent(), this);
 }
 
 void Widget::set_geometry(const Geometry& g) {
@@ -401,79 +390,14 @@ bool Widget::resize_event(std::size_t new_width,
     return true;
 }
 
-// bool Widget::mouse_press_event(Mouse_button button,
-//                                std::size_t global_x,
-//                                std::size_t global_y,
-//                                std::size_t local_x,
-//                                std::size_t local_y,
-//                                std::uint8_t device_id) {
-//     Focus_system::mouse_press(this);
-//     return false;
-// }
-
-// bool Widget::mouse_release_event(Mouse_button button,
-//                                  std::size_t global_x,
-//                                  std::size_t global_y,
-//                                  std::size_t local_x,
-//                                  std::size_t local_y,
-//                                  std::uint8_t device_id) {
-//     return false;
-// }
-
-// bool Widget::mouse_double_click_event(Mouse_button button,
-//                                       std::size_t global_x,
-//                                       std::size_t global_y,
-//                                       std::size_t local_x,
-//                                       std::size_t local_y,
-//                                       std::uint8_t device_id) {
-//     return false;
-// }
-
-// bool Widget::mouse_wheel_event(Mouse_button button,
-//                                std::size_t global_x,
-//                                std::size_t global_y,
-//                                std::size_t local_x,
-//                                std::size_t local_y,
-//                                std::uint8_t device_id) {
-//     return false;
-// }
-
-// bool Widget::mouse_move_event(Mouse_button button,
-//                               std::size_t global_x,
-//                               std::size_t global_y,
-//                               std::size_t local_x,
-//                               std::size_t local_y,
-//                               std::uint8_t device_id) {
-//     return false;
-// }
-
-// bool Widget::key_press_event(Key key, char symbol) {
-//     if (key == Key::Tab) {
-//         System::cycle_tab_focus();
-//     }
-//     return false;
-// }
-
-// bool Widget::key_release_event(Key key, char symbol) {
-//     return false;
-// }
-
 bool Widget::close_event() {
     this->delete_later();
     return true;
 }
 
-// bool Widget::hide_event() {
-//     return true;
-// }
-
-// bool Widget::show_event() {
-//     return true;
-// }
-
 bool Widget::focus_in_event() {
-    this->paint_engine().move(this->x() + this->cursor_x(),
-                              this->y() + this->cursor_y());
+    System::paint_engine()->move(this->x() + this->cursor_x(),
+                                 this->y() + this->cursor_y());
     focused_in();
     return true;
 }
@@ -484,13 +408,13 @@ bool Widget::focus_out_event() {
 }
 
 bool Widget::paint_event() {
-    if (border_.enabled()) {
+    if (border.enabled) {
         Painter p{this};
-        p.border(border_);
+        p.border(border);
     }
     // Might not need below if focus widget sets this afterwards, on no focus?
-    this->paint_engine().move(this->x() + this->cursor_x(),
-                              this->y() + this->cursor_y());
+    System::paint_engine()->move(this->x() + this->cursor_x(),
+                                 this->y() + this->cursor_y());
     return true;
 }
 
@@ -520,18 +444,6 @@ bool Widget::child_polished_event(Event_handler* child) {
     return true;
 }
 
-// void Widget::set_focus(bool focus) {
-//     if (this->focus_policy() == Focus_policy::None) {
-//         return;
-//     }
-//     // focus_ = focus;
-//     if (focus) {
-//         System::post_event<Focus_in_event>(this);
-//     } else {
-//         System::post_event<Focus_out_event>(this);
-//     }
-// }
-
 void Widget::set_visible(bool visible) {
     this->visible_ = visible;
     if (visible) {
@@ -560,16 +472,16 @@ std::size_t Widget::y() const {
     return this->position_.y + parent->y();
 }
 
-Paint_engine& Widget::paint_engine() const {
-    if (paint_engine_) {
-        return *paint_engine_;
-    }
-    return *System::paint_engine();
-}
+// Paint_engine& Widget::paint_engine() const {
+//     if (paint_engine_) {
+//         return *paint_engine_;
+//     }
+//     return *System::paint_engine();
+// }
 
 std::size_t Widget::width() const {
     std::size_t width_border_offset =
-        west_border_offset(this->border()) + east_border_offset(this->border());
+        west_border_offset(this->border) + east_border_offset(this->border);
     std::size_t w = this->geometry().width();
     if (width_border_offset > w) {
         return 0;
@@ -578,13 +490,29 @@ std::size_t Widget::width() const {
 }
 
 std::size_t Widget::height() const {
-    std::size_t height_border_offset = north_border_offset(this->border()) +
-                                       south_border_offset(this->border());
+    std::size_t height_border_offset = north_border_offset(this->border) +
+                                       south_border_offset(this->border);
     std::size_t h = this->geometry().height();
     if (height_border_offset > h) {
         return 0;
     }
     return h - height_border_offset;
+}
+
+// - - - - - - - - - - - - - - Free Functions - - - - - - - - - - - - - - - - -
+
+bool has_border(const Widget& w) {
+    return w.border.enabled;
+}
+
+void enable_border(Widget& w) {
+    w.border.enabled = true;
+    System::post_event<Child_polished_event>(w.parent(), &w);
+}
+
+void disable_border(Widget& w) {
+    w.border.enabled = false;
+    System::post_event<Child_polished_event>(w.parent(), &w);
 }
 
 }  // namespace cppurses

@@ -477,11 +477,11 @@ void Vertical_layout::position_widgets(
     if (widgets.size() != heights.size()) {
         return;
     }
-    std::size_t y_pos = north_border_offset(this->border());
+    std::size_t y_pos = north_border_offset(this->border);
     std::size_t index{0};
     for (auto& widg : widgets) {
         System::post_event<Move_event>(
-            widg, this->x() + west_border_offset(this->border()),
+            widg, this->x() + west_border_offset(this->border),
             this->y() + y_pos);
         y_pos += heights.at(index++);
     }

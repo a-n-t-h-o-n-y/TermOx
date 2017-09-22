@@ -4,6 +4,7 @@
 #include "painter/glyph.hpp"
 #include "painter/glyph_string.hpp"
 #include "painter/paint_engine.hpp"
+#include "system/system.hpp"
 #include "widget/border.hpp"
 #include "widget/coordinates.hpp"
 #include "widget/widget.hpp"
@@ -22,23 +23,23 @@ void Painter::put(const Glyph_string& string,
     widget_->move_cursor(x, y);
     for (Glyph g : string) {
         add_default_attributes(&g);
-        auto glob_x = west_border_offset(widget_->border()) + widget_->x() +
+        auto glob_x = west_border_offset(widget_->border) + widget_->x() +
                       widget_->cursor_x();
-        auto glob_y = north_border_offset(widget_->border()) + widget_->y() +
+        auto glob_y = north_border_offset(widget_->border) + widget_->y() +
                       widget_->cursor_y();
         if (std::strcmp(g.c_str(), "\n") == 0) {
             widget_->move_cursor(0, widget_->cursor_y() + 1);
         }  // else if ( == \t) then move to next x coord divisible by tabspace
            // should be here and textbox should just account for it.
         else {
-            widget_->paint_engine().put(glob_x, glob_y, g);
+            System::paint_engine()->put(glob_x, glob_y, g);
             widget_->move_cursor(widget_->cursor_x() + 1, widget_->cursor_y());
         }
     }
     if (!move_cursor) {
         widget_->move_cursor(original_position.x, original_position.y);
     }
-    widget_->paint_engine().clear_attributes();
+    System::paint_engine()->clear_attributes();
 }
 
 void Painter::put(const Glyph_string& string,
@@ -78,7 +79,7 @@ void Painter::line(std::size_t x1,
 }
 
 void Painter::border(const Border& b) {
-    if (!b.enabled()) {
+    if (!b.enabled) {
         return;
     }
     const std::size_t widg_x = widget_->x();
@@ -87,47 +88,47 @@ void Painter::border(const Border& b) {
     std::size_t height = widget_->geometry().height();
 
     // Underflow Checks
-    if (widg_x + width < 2 && (b.north_enabled() || b.south_enabled())) {
+    if (widg_x + width < 2 && (b.north_enabled || b.south_enabled)) {
         return;
     }
-    if (widg_y + height < 2 && (b.east_enabled() || b.west_enabled())) {
+    if (widg_y + height < 2 && (b.east_enabled || b.west_enabled)) {
         return;
     }
     // North
-    if (b.north_enabled()) {
+    if (b.north_enabled) {
         this->unbound_line(widg_x + 1, widg_y, widg_x + width - 2, widg_y,
-                           b.north());
+                           b.north);
     }
     // South
-    if (b.south_enabled()) {
+    if (b.south_enabled) {
         this->unbound_line(widg_x + 1, widg_y + height - 1, widg_x + width - 2,
-                           widg_y + height - 1, b.south());
+                           widg_y + height - 1, b.south);
     }
     // West
-    if (b.west_enabled()) {
+    if (b.west_enabled) {
         this->unbound_line(widg_x, widg_y + 1, widg_x, widg_y + height - 2,
-                           b.west());
+                           b.west);
     }
     // East
-    if (b.east_enabled()) {
+    if (b.east_enabled) {
         this->unbound_line(widg_x + width - 1, widg_y + 1, widg_x + width - 1,
-                           widg_y + height - 2, b.east());
+                           widg_y + height - 2, b.east);
     }
     // North-West
-    if (b.north_west_enabled()) {
-        this->unbound_put_string(b.north_west(), widg_x, widg_y);
+    if (b.north_west_enabled) {
+        this->unbound_put_string(b.north_west, widg_x, widg_y);
     }
     // North-East
-    if (b.north_east_enabled()) {
-        this->unbound_put_string(b.north_east(), widg_x + width - 1, widg_y);
+    if (b.north_east_enabled) {
+        this->unbound_put_string(b.north_east, widg_x + width - 1, widg_y);
     }
     // South-West
-    if (b.south_west_enabled()) {
-        this->unbound_put_string(b.south_west(), widg_x, widg_y + height - 1);
+    if (b.south_west_enabled) {
+        this->unbound_put_string(b.south_west, widg_x, widg_y + height - 1);
     }
     // South-East
-    if (b.south_east_enabled()) {
-        this->unbound_put_string(b.south_east(), widg_x + width - 1,
+    if (b.south_east_enabled) {
+        this->unbound_put_string(b.south_east, widg_x + width - 1,
                                  widg_y + height - 1);
     }
 }
@@ -160,9 +161,9 @@ void Painter::unbound_put_string(const Glyph_string& gs,
                                  std::size_t glob_y) {
     for (Glyph g : gs) {
         add_default_attributes(&g);
-        widget_->paint_engine().put(glob_x++, glob_y, g);
+        System::paint_engine()->put(glob_x++, glob_y, g);
     }
-    widget_->paint_engine().clear_attributes();
+    System::paint_engine()->clear_attributes();
 }
 
 void Painter::unbound_line(std::size_t glob_x1,

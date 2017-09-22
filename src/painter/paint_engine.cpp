@@ -44,9 +44,9 @@ void Paint_engine::flush(bool optimize) {
         this->show_cursor(focus_widg->cursor());
         if (focus_widg->cursor()) {
             auto x = focus_widg->x() + focus_widg->cursor_x() +
-                     west_border_offset(focus_widg->border());
+                     west_border_offset(focus_widg->border);
             auto y = focus_widg->y() + focus_widg->cursor_y() +
-                     north_border_offset(focus_widg->border());
+                     north_border_offset(focus_widg->border);
             this->move(x, y);
         }
     } else {

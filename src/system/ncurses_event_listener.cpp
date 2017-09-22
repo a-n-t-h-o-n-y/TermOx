@@ -121,9 +121,9 @@ std::unique_ptr<Event> NCurses_event_listener::parse_mouse_event() const {
 
     // Location
     std::size_t local_x =
-        mouse_event.x - receiver->x() - west_border_offset(receiver->border());
+        mouse_event.x - receiver->x() - west_border_offset(receiver->border);
     std::size_t local_y =
-        mouse_event.y - receiver->y() - north_border_offset(receiver->border());
+        mouse_event.y - receiver->y() - north_border_offset(receiver->border);
 
     // Create Event
     std::unique_ptr<Event> event{nullptr};

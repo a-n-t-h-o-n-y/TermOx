@@ -1,71 +1,82 @@
 #include "widget/border.hpp"
 #include "painter/glyph.hpp"
-#include "painter/painter.hpp"
+#include <cstddef>
 
 namespace cppurses {
 
-void Border::set_walls(const Glyph& horizontals, const Glyph& verticals) {
-    north_ = horizontals;
-    south_ = horizontals;
-    east_ = verticals;
-    west_ = verticals;
+void set_walls(Border& b, const Glyph& horizontal, const Glyph& vertical) {
+    b.north = horizontal;
+    b.south = horizontal;
+    b.east = vertical;
+    b.west = vertical;
 }
 
-void Border::enable_walls() {
-    this->enable_north();
-    this->enable_south();
-    this->enable_west();
-    this->enable_east();
+void enable_walls(Border& b) {
+    b.north_enabled = true;
+    b.south_enabled = true;
+    b.west_enabled = true;
+    b.east_enabled = true;
 }
 
-void Border::disable_walls() {
-    this->disable_north();
-    this->disable_south();
-    this->disable_west();
-    this->disable_east();
+void disable_walls(Border& b) {
+    b.north_enabled = false;
+    b.south_enabled = false;
+    b.west_enabled = false;
+    b.east_enabled = false;
 }
 
-void Border::enable_corners() {
-    this->enable_north_west();
-    this->enable_north_east();
-    this->enable_south_west();
-    this->enable_south_east();
+void set_corners(Border& b,
+                 const Glyph& nw,
+                 const Glyph& ne,
+                 const Glyph& sw,
+                 const Glyph& se) {
+    b.north_west = nw;
+    b.north_east = ne;
+    b.south_west = sw;
+    b.south_east = se;
 }
 
-void Border::disable_corners() {
-    this->disable_north_west();
-    this->disable_north_east();
-    this->disable_south_west();
-    this->disable_south_east();
+void enable_corners(Border& b) {
+    b.north_west_enabled = true;
+    b.north_east_enabled = true;
+    b.south_west_enabled = true;
+    b.south_east_enabled = true;
+}
+
+void disable_corners(Border& b) {
+    b.north_west_enabled = false;
+    b.north_east_enabled = false;
+    b.south_west_enabled = false;
+    b.south_east_enabled = false;
 }
 
 std::size_t west_border_offset(const Border& b) {
-    if (b.enabled() && (b.west_enabled() || b.north_west_enabled() ||
-                        b.south_west_enabled())) {
+    if (b.enabled &&
+        (b.west_enabled || b.north_west_enabled || b.south_west_enabled)) {
         return 1;
     }
     return 0;
 }
 
 std::size_t east_border_offset(const Border& b) {
-    if (b.enabled() && (b.east_enabled() || b.north_east_enabled() ||
-                        b.south_east_enabled())) {
+    if (b.enabled &&
+        (b.east_enabled || b.north_east_enabled || b.south_east_enabled)) {
         return 1;
     }
     return 0;
 }
 
 std::size_t north_border_offset(const Border& b) {
-    if (b.enabled() && (b.north_enabled() || b.north_east_enabled() ||
-                        b.north_west_enabled())) {
+    if (b.enabled &&
+        (b.north_enabled || b.north_east_enabled || b.north_west_enabled)) {
         return 1;
     }
     return 0;
 }
 
 std::size_t south_border_offset(const Border& b) {
-    if (b.enabled() && (b.south_enabled() || b.south_east_enabled() ||
-                        b.south_west_enabled())) {
+    if (b.enabled &&
+        (b.south_enabled || b.south_east_enabled || b.south_west_enabled)) {
         return 1;
     }
     return 0;

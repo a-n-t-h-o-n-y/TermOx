@@ -9,7 +9,7 @@ int main() {
     //     Glyph_string{"Edit me", foreground(Color::Light_gray)});
     auto& menu = hl.make_child<Menu>("~ Set Background Color ~");
     menu.set_foreground(Color::Red);
-    menu.enable_border();
+    enable_border(menu);
 
     menu.make_item("Violet", [&menu] { menu.set_background(Color::Violet); });
     menu.make_item(Glyph_string{"Light Blue", foreground(Color::Yellow)},
