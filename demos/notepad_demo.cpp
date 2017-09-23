@@ -79,10 +79,10 @@ int main() {
     // Color Choosers
     attr_layout.make_child<Center_label>("Foreground⤵");
     auto& foreground_chooser = attr_layout.make_child<Color_chooser>();
-    foreground_chooser.color_changed.connect(text_area.set_foreground);
+    foreground_chooser.color_changed.connect(slot::set_foreground(text_area));
     attr_layout.make_child<Center_label>("Background⤵");
     auto& background_chooser = attr_layout.make_child<Color_chooser>();
-    background_chooser.color_changed.connect(text_area.set_background);
+    background_chooser.color_changed.connect(slot::set_background(text_area));
 
     // Attributes Checkboxes - Connect Signals to Slots
     auto& al = attr_layout.make_child<Attribute_select>();

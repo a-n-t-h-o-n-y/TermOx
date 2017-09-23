@@ -94,6 +94,8 @@ class Widget : public Event_handler {
 
     Glyph background_tile() { return background_tile_; }
     void set_background_tile(Glyph tile) { background_tile_ = std::move(tile); }
+    void set_background(Color c);
+    void set_foreground(Color c);
 
     bool has_focus() const { return Focus::focus_widget() == this; }
     Focus_policy focus_policy() const { return focus_policy_; }
@@ -126,22 +128,6 @@ class Widget : public Event_handler {
     sig::Signal<void(Color)> background_color_changed;
     sig::Signal<void(Color)> foreground_color_changed;
 
-    // Slots
-    sig::Slot<void()> delete_later;
-    sig::Slot<void()> enable;
-    sig::Slot<void()> disable;
-    sig::Slot<void()> close;
-    sig::Slot<void()> hide;
-    sig::Slot<void()> show;
-    sig::Slot<void()> repaint;
-    // sig::Slot<void()> give_focus;
-    sig::Slot<void()> update_me;
-    sig::Slot<void(Mouse_button, Coordinates)> click_me;
-    sig::Slot<void(Key)> keypress_me;
-
-    sig::Slot<void(Color)> set_background;
-    sig::Slot<void(Color)> set_foreground;
-
     // Event Handling
     bool move_event(std::size_t new_x,
                     std::size_t new_y,
@@ -163,9 +149,6 @@ class Widget : public Event_handler {
 
    protected:
     void clear_screen();
-
-    void set_background_(Color c);
-    void set_foreground_(Color c);
 
     Coordinates cursor_position_;
     bool cursor_enabled_{false};
@@ -221,5 +204,4 @@ void enable_border(Widget& w);
 void disable_border(Widget& w);
 
 }  // namespace cppurses
-
 #endif  // WIDGET_WIDGET_HPP

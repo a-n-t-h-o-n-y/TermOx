@@ -20,6 +20,7 @@
 #include "system/focus.hpp"
 #include "widget/border.hpp"
 #include "widget/coordinates.hpp"
+#include <signals/signals.hpp>
 #include <cstddef>
 #include <iterator>
 #include <memory>
@@ -30,12 +31,10 @@
 namespace cppurses {
 
 Widget::Widget() {
-    this->Widget::initialize();
     this->update();
 }
 
 Widget::~Widget() {
-    // if (valid_) {
     if (Focus::focus_widget() == this) {
         Focus::clear_focus();
     }
@@ -43,55 +42,6 @@ Widget::~Widget() {
     if (parent != nullptr) {
         System::send_event(Child_removed_event{parent, this});
     }
-    // }
-}
-
-void Widget::initialize() {
-    // Slots
-    this->delete_later = [this] {
-        System::post_event<Deferred_delete_event>(this);
-    };
-    this->delete_later.track(this->destroyed);
-
-    this->enable = [this] { this->set_enabled(true); };
-    this->enable.track(this->destroyed);
-
-    this->disable = [this] { this->set_enabled(false); };
-    this->disable.track(this->destroyed);
-
-    close = [this]() { System::post_event<Close_event>(this); };
-    close.track(this->destroyed);
-
-    hide = [this]() { this->set_visible(false); };
-    hide.track(this->destroyed);
-
-    show = [this]() { this->set_visible(true); };
-    show.track(this->destroyed);
-
-    repaint = [this]() { System::send_event(Paint_event{this}); };
-    repaint.track(this->destroyed);
-
-    // give_focus = [this]() { this->set_focus(true); };
-    // give_focus.track(this->destroyed);
-
-    update_me = [this]() { this->update(); };
-    update_me.track(this->destroyed);
-
-    click_me = [this](Mouse_button b, Coordinates c) {
-        System::send_event(Mouse_press_event{this, b, this->x() + c.x,
-                                             this->y() + c.y, c.x, c.y, 0});
-    };
-    click_me.track(this->destroyed);
-
-    keypress_me = [this](Key key) {
-        System::send_event(Key_press_event{this, key});
-    };
-    keypress_me.track(this->destroyed);
-
-    set_background = [this](Color c) { this->set_background_(c); };
-    set_background.track(this->destroyed);
-    set_foreground = [this](Color c) { this->set_foreground_(c); };
-    set_foreground.track(this->destroyed);
 }
 
 void Widget::set_name(const std::string& name) {
@@ -181,12 +131,12 @@ void Widget::set_y(std::size_t global_y) {
     }
 }
 
-void Widget::set_background_(Color c) {
+void Widget::set_background(Color c) {
     this->brush().set_background(c);
     this->update();
 }
 
-void Widget::set_foreground_(Color c) {
+void Widget::set_foreground(Color c) {
     this->brush().set_foreground(c);
     this->update();
 }
@@ -199,7 +149,8 @@ bool Widget::has_coordinates(std::size_t global_x, std::size_t global_y) {
         global_x >= (this->x() + west_border_offset(this->border));
     bool within_east = global_x < (this->x() + this->width() +
                                    west_border_offset(this->border));
-    bool within_north = global_y >= (this->y() + north_border_offset(this->border));
+    bool within_north =
+        global_y >= (this->y() + north_border_offset(this->border));
     bool within_south = global_y < (this->y() + this->height() +
                                     north_border_offset(this->border));
     return within_west && within_east && within_north && within_south;
@@ -265,7 +216,7 @@ bool Widget::resize_event(std::size_t new_width,
 }
 
 bool Widget::close_event() {
-    this->delete_later();
+    System::post_event<Deferred_delete_event>(this);
     return true;
 }
 

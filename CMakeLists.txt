@@ -55,6 +55,7 @@ set(PAINTER_SOURCES
 
 set(WIDGET_SOURCES
     "src/widget/widget.cpp"
+    "src/widget/widget_slots.cpp"
 	"src/widget/layout.cpp"
 	"src/widget/horizontal_layout.cpp"
 	"src/widget/border.cpp"

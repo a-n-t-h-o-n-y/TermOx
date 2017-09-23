@@ -21,5 +21,6 @@
 #include "widget/layout.hpp"
 #include "widget/size_policy.hpp"
 #include "widget/widget.hpp"
+#include "widget/widget_slots.hpp"
 
 #endif  // CPPURSES_WIDGET_HPP
