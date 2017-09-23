@@ -2,7 +2,6 @@
 #define WIDGET_WIDGET_HPP
 #include "painter/brush.hpp"
 #include "painter/color.hpp"
-// #include "painter/geometry.hpp"
 #include "painter/glyph.hpp"
 #include "system/events/mouse_event.hpp"
 #include "system/key.hpp"
@@ -77,7 +76,7 @@ class Widget : public Event_handler {
     std::size_t y() const;
     std::size_t width() const;  // Does not include border space
     std::size_t height() const;
-    bool has_coordinates(std::size_t global_x, std::size_t global_y); // ff ?
+    bool has_coordinates(std::size_t global_x, std::size_t global_y);  // ff ?
 
     bool cursor() const { return cursor_enabled_; }
     void enable_cursor(bool enable = true) { cursor_enabled_ = enable; }
@@ -100,18 +99,6 @@ class Widget : public Event_handler {
     Focus_policy focus_policy() const { return focus_policy_; }
     void set_focus_policy(Focus_policy policy) { focus_policy_ = policy; }
 
-    // void set_geometry(const Geometry& g);
-    // Geometry& geometry() { return geometry_; }
-    // const Geometry& geometry() const { return geometry_; }
-
-    // Size_policy& size_policy() { return geometry().size_policy(); }
-    // const Size_policy& size_policy() const { return geometry().size_policy();
-    // }
-    // void set_vertical_policy(Size_policy::Policy policy, std::size_t hint);
-    // void set_vertical_policy(Size_policy::Policy policy);
-    // void set_horizontal_policy(Size_policy::Policy policy, std::size_t hint);
-    // void set_horizontal_policy(Size_policy::Policy policy);
-
     void update();
 
     bool has_mouse_tracking() const { return mouse_tracking_; }
@@ -122,8 +109,8 @@ class Widget : public Event_handler {
 
     // Public Objects
     Border border;
-    Size_policy width_policy;
-    Size_policy height_policy;
+    Size_policy width_policy{this};
+    Size_policy height_policy{this};
 
     // Signals
     sig::Signal<void(const std::string&)> name_changed;
@@ -197,8 +184,8 @@ class Widget : public Event_handler {
     std::vector<std::unique_ptr<Widget>> children_;
 
     Coordinates position_;  // Top left corner relative to parent's Coordinates.
-    std::size_t width_{width_policy.hint};
-    std::size_t height_{height_policy.hint};
+    std::size_t width_{width_policy.hint()};
+    std::size_t height_{height_policy.hint()};
 
     void initialize();
     void delete_child(Widget* child);

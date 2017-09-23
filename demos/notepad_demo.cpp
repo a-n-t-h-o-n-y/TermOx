@@ -9,8 +9,8 @@ class Center_label : public Widget {
    public:
     Center_label(Glyph_string text) : label_{std::move(text)} {
         this->brush().add_attributes(Attribute::Bold);
-        this->height_policy.type = Size_policy::Fixed;
-        this->height_policy.hint = 1;
+        this->height_policy.type(Size_policy::Fixed);
+        this->height_policy.hint(1);
     }
 
    protected:
@@ -73,8 +73,8 @@ int main() {
 
     // Attributes and Color Section
     auto& attr_layout = tx_attr_layout.make_child<Vertical_layout>();
-    attr_layout.width_policy.type = Size_policy::Fixed;
-    attr_layout.width_policy.hint = 16;
+    attr_layout.width_policy.type(Size_policy::Fixed);
+    attr_layout.width_policy.hint(16);
 
     // Color Choosers
     attr_layout.make_child<Center_label>("Foreground⤵");
@@ -105,19 +105,19 @@ int main() {
 
     // Save/Load area
     auto& save_area = main_layout.make_child<Horizontal_layout>();
-    save_area.height_policy.type = Size_policy::Fixed;
-    save_area.height_policy.hint = 1;
+    save_area.height_policy.type(Size_policy::Fixed);
+    save_area.height_policy.hint(1);
     auto& load_btn = save_area.make_child<Push_button>("Load");
-    load_btn.width_policy.type = Size_policy::Fixed;
-    load_btn.width_policy.hint = 6;
+    load_btn.width_policy.type(Size_policy::Fixed);
+    load_btn.width_policy.hint(6);
     load_btn.set_background(Color::Blue);
     auto& filename_edit = save_area.make_child<Textbox>();
     filename_edit.disable_scrollwheel();
     filename_edit.set_background(Color::White);
     filename_edit.set_foreground(Color::Black);
     auto& save_btn = save_area.make_child<Push_button>("Save");
-    save_btn.width_policy.type = Size_policy::Fixed;
-    save_btn.width_policy.hint = 6;
+    save_btn.width_policy.type(Size_policy::Fixed);
+    save_btn.width_policy.hint(6);
     save_btn.set_background(Color::Blue);
     // Signals and Slots
     auto set_text = text_area.set_text;
