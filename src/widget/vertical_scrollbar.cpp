@@ -1,5 +1,4 @@
 #include "widget/widgets/vertical_scrollbar.hpp"
-
 #include "painter/color.hpp"
 #include "widget/size_policy.hpp"
 

@@ -1,6 +1,5 @@
 #ifndef WIDGET_WIDGETS_HORIZONTAL_SCROLLBAR
 #define WIDGET_WIDGETS_HORIZONTAL_SCROLLBAR
-
 #include "widget/layouts/horizontal_layout.hpp"
 #include "widget/widget.hpp"
 #include "widget/widgets/push_button.hpp"

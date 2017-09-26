@@ -24,6 +24,7 @@ set(SYSTEM_SOURCES
     "src/system/enable_event.cpp"
     "src/system/event.cpp"
     "src/system/event_handler.cpp"
+    "src/system/event_handler_slots.cpp"
     "src/system/event_invoker.cpp"
 	"src/system/event_loop.cpp"
     "src/system/event_queue.cpp"

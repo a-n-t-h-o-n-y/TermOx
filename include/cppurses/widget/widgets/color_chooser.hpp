@@ -1,6 +1,5 @@
-#ifndef COLOR_CHOOSER_HPP
-#define COLOR_CHOOSER_HPP
-
+#ifndef WIDGET_WIDGETS_COLOR_CHOOSER_HPP
+#define WIDGET_WIDGETS_COLOR_CHOOSER_HPP
 #include "painter/color.hpp"
 #include "widget/widgets/push_button.hpp"
 #include "widget/layouts/vertical_layout.hpp"
@@ -16,9 +15,10 @@ class Color_chooser : public Vertical_layout {
     // Signals
     sig::Signal<void(Color)> color_changed;
 
-   private:
+   protected:
     Horizontal_layout& row1_{this->make_child<Horizontal_layout>()};
     Horizontal_layout& row2_{this->make_child<Horizontal_layout>()};
+
     Push_button& black_{row1_.make_child<Push_button>()};
     Push_button& dark_red_{row1_.make_child<Push_button>()};
     Push_button& dark_blue_{row1_.make_child<Push_button>()};
@@ -36,8 +36,9 @@ class Color_chooser : public Vertical_layout {
     Push_button& yellow_{row2_.make_child<Push_button>()};
     Push_button& white_{row2_.make_child<Push_button>()};
 
+   private:
     void initialize();
 };
 
 }  // namespace cppurses
-#endif  // COLOR_CHOOSER_HPP
+#endif  // WIDGET_WIDGETS_COLOR_CHOOSER_HPP

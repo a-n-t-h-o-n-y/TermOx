@@ -1,4 +1,6 @@
 #include "widget/widgets/color_chooser.hpp"
+#include "painter/color.hpp"
+#include <signals/signals.hpp>
 
 namespace cppurses {
 
@@ -7,6 +9,11 @@ Color_chooser::Color_chooser() {
 }
 
 void Color_chooser::initialize() {
+    this->width_policy.hint(16);
+    this->width_policy.type(Size_policy::Fixed);
+    this->height_policy.hint(2);
+    this->height_policy.type(Size_policy::Fixed);
+
     black_.set_background(Color::Black);
     dark_red_.set_background(Color::Dark_red);
     dark_blue_.set_background(Color::Dark_blue);
@@ -40,10 +47,6 @@ void Color_chooser::initialize() {
     light_blue_.clicked.connect([this] { color_changed(Color::Light_blue); });
     yellow_.clicked.connect([this] { color_changed(Color::Yellow); });
     white_.clicked.connect([this] { color_changed(Color::White); });
-
-    this->width_policy.hint(16);
-    this->width_policy.type(Size_policy::Fixed);
-    this->height_policy.hint(2);
-    this->height_policy.type(Size_policy::Fixed);
 }
+
 }  // namespace cppurses

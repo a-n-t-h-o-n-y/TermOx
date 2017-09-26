@@ -1,10 +1,10 @@
 #ifndef WIDGET_WIDGETS_CHECKBOX_HPP
 #define WIDGET_WIDGETS_CHECKBOX_HPP
-
 #include "painter/glyph.hpp"
 #include "painter/glyph_string.hpp"
 #include "widget/widget.hpp"
 #include <signals/signals.hpp>
+#include <cstddef>
 
 namespace cppurses {
 class Mouse_event;
@@ -12,12 +12,11 @@ class Paint_event;
 
 class Checkbox : public Widget {
    public:
-    Checkbox(Glyph_string title = "", int dist = 3);
+    explicit Checkbox(Glyph_string title = "", int padding = 3);
 
-    // Slots
-    sig::Slot<void()> toggle;
-    sig::Slot<void()> check;
-    sig::Slot<void()> uncheck;
+    void toggle();
+    bool is_checked() const;
+    Glyph_string title() const;
 
     // Signals
     sig::Signal<void()> checked;
@@ -33,17 +32,23 @@ class Checkbox : public Widget {
                            std::size_t local_y,
                            std::uint8_t device_id) override;
 
-    void toggle_();
-
+   private:
     Glyph empty_box_{"☐"};
     Glyph checked_box_{"☒"};
-    bool checked_{false};
+    bool is_checked_{false};
     Glyph_string title_;
-
-   private:
-    void initialize();
-    int dist_;
+    int padding_;
 };
 
+void check(Checkbox& cb);
+void uncheck(Checkbox& cb);
+
+namespace slot {
+
+sig::Slot<void()> toggle(Checkbox& cb);
+sig::Slot<void()> check(Checkbox& cb);
+sig::Slot<void()> uncheck(Checkbox& cb);
+
+}  // namespace slot
 }  // namespace cppurses
 #endif  // WIDGET_WIDGETS_CHECKBOX_HPP
