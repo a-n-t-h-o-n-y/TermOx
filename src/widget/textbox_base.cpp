@@ -130,6 +130,18 @@ void Textbox_base::scroll_down(std::size_t n) {
     this->set_cursor(this->cursor_x(), y);
 }
 
+void Textbox_base::enable_scrolling(bool enable) {
+    scroll_ = enable;
+}
+
+void Textbox_base::disable_scrolling(bool disable) {
+    scroll_ = !disable;
+}
+
+void Textbox_base::toggle_scrolling() {
+    scroll_ = !scroll_;
+}
+
 bool Textbox_base::resize_event(std::size_t new_width,
                                 std::size_t new_height,
                                 std::size_t old_width,
@@ -239,37 +251,55 @@ sig::Slot<void(std::size_t)> set_cursor_to_index(Textbox_base& tb) {
     return slot;
 }
 
-// Old
-// set_cursor_at_coordinates = [this](Coordinates c) {
-//     this->set_cursor_at_coordinates_(c);
-// };
-// set_cursor_at_coordinates.track(this->destroyed);
-// set_cursor_at_coordinates_x_y = [this](std::size_t x, std::size_t y) {
-//     this->set_cursor_at_coordinates_(x, y);
-// };
-// set_cursor_at_coordinates_x_y.track(this->destroyed);
-// set_cursor_at_index = [this](std::size_t index) {
-//     this->set_cursor_at_index_(index);
-// };
-// set_cursor_at_index.track(this->destroyed);
-
-// scroll_up = [this] { this->scroll_up_(1); };
-// scroll_up.track(this->destroyed);
-// scroll_down = [this] { this->scroll_down_(1); };
-// scroll_down.track(this->destroyed);
-// scroll_up_n = [this](std::size_t n) { this->scroll_up_(n); };
-// scroll_up_n.track(this->destroyed);
-// scroll_down_n = [this](std::size_t n) { this->scroll_down_(n); };
-// scroll_down_n.track(this->destroyed);
-
-// enable_scrolling = [this] { this->enable_scrolling_(); };
-// enable_scrolling.track(this->destroyed);
-// disable_scrolling = [this] { this->disable_scrolling_(); };
-// disable_scrolling.track(this->destroyed);
-// toggle_scrolling = [this] { this->enable_scrolling_(this->does_scroll()); };
-// toggle_scrolling.track(this->destroyed);
-// set_scrolling = [this](bool enable) { this->enable_scrolling_(enable); };
-// set_scrolling.track(this->destroyed);
+sig::Slot<void()> scroll_up(Textbox_base& tb, std::size_t n) {
+    sig::Slot<void()> slot{[&tb, n] { tb.scroll_up(n); }};
+    slot.track(tb.destroyed);
+    return slot;
 }
+
+sig::Slot<void(std::size_t)> scroll_up(Textbox_base& tb) {
+    sig::Slot<void(std::size_t)> slot{[&tb](auto n) { tb.scroll_up(n); }};
+    slot.track(tb.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> scroll_down(Textbox_base& tb, std::size_t n) {
+    sig::Slot<void()> slot{[&tb, n] { tb.scroll_down(n); }};
+    slot.track(tb.destroyed);
+    return slot;
+}
+
+sig::Slot<void(std::size_t)> scroll_down(Textbox_base& tb) {
+    sig::Slot<void(std::size_t)> slot{[&tb](auto n) { tb.scroll_down(n); }};
+    slot.track(tb.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> enable_scrolling(Textbox_base& tb) {
+    sig::Slot<void()> slot{[&tb] { tb.enable_scrolling(); }};
+    slot.track(tb.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> disable_scrolling(Textbox_base& tb) {
+    sig::Slot<void()> slot{[&tb] { tb.disable_scrolling(); }};
+    slot.track(tb.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> toggle_scrolling(Textbox_base& tb) {
+    sig::Slot<void()> slot{[&tb] { tb.toggle_scrolling(); }};
+    slot.track(tb.destroyed);
+    return slot;
+}
+
+sig::Slot<void(bool)> set_scrolling(Textbox_base& tb) {
+    sig::Slot<void(bool)> slot{
+        [&tb](bool enable) { tb.enable_scrolling(enable); }};
+    slot.track(tb.destroyed);
+    return slot;
+}
+
+}  // namespace slot
 
 }  // namespace cppurses

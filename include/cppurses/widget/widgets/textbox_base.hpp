@@ -1,11 +1,10 @@
 #ifndef WIDGET_WIDGETS_TEXTBOX_BASE_HPP
 #define WIDGET_WIDGETS_TEXTBOX_BASE_HPP
-
+#include <cstddef>
+#include <signals/signals.hpp>
 #include "painter/glyph_string.hpp"
 #include "widget/coordinates.hpp"
 #include "widget/widgets/text_display.hpp"
-#include <signals/signals.hpp>
-#include <cstddef>
 
 namespace cppurses {
 class Resize_event;
@@ -17,6 +16,9 @@ class Textbox_base : public Text_display {
     // Scrolling
     void scroll_up(std::size_t n = 1) override;
     void scroll_down(std::size_t n = 1) override;
+    void enable_scrolling(bool enable = true);
+    void disable_scrolling(bool disable = true);
+    void toggle_scrolling();
 
     // Cursor Movement
     void cursor_up(std::size_t n = 1);
@@ -48,9 +50,6 @@ class Textbox_base : public Text_display {
                       std::size_t new_height,
                       std::size_t old_width,
                       std::size_t old_height) override;
-
-    void enable_scrolling_(bool enable = true) { scroll_ = enable; }
-    void disable_scrolling_(bool disable = true) { scroll_ = !disable; }
 };
 
 namespace slot {
@@ -73,14 +72,14 @@ sig::Slot<void()> set_cursor_to_index(Textbox_base& tb, std::size_t index);
 sig::Slot<void(std::size_t)> set_cursor_to_index(Textbox_base& tb);
 
 // Scrolling
-// sig::Slot<void()> scroll_up;
-// sig::Slot<void()> scroll_down;
-// sig::Slot<void(std::size_t)> scroll_up_n;
-// sig::Slot<void(std::size_t)> scroll_down_n;
-// sig::Slot<void()> enable_scrolling;
-// sig::Slot<void()> disable_scrolling;
-// sig::Slot<void()> toggle_scrolling;
-// sig::Slot<void(bool)> set_scrolling;
+sig::Slot<void()> scroll_up(Textbox_base& tb, std::size_t n);
+sig::Slot<void(std::size_t)> scroll_up(Textbox_base& tb);
+sig::Slot<void()> scroll_down(Textbox_base& tb, std::size_t n);
+sig::Slot<void(std::size_t)> scroll_down(Textbox_base& tb);
+sig::Slot<void()> enable_scrolling(Textbox_base& tb);
+sig::Slot<void()> disable_scrolling(Textbox_base& tb);
+sig::Slot<void()> toggle_scrolling(Textbox_base& tb);
+sig::Slot<void(bool)> set_scrolling(Textbox_base& tb);
 
 }  // namespace slot
 

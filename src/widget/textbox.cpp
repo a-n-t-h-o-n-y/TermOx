@@ -1,13 +1,13 @@
 #include "widget/widgets/textbox.hpp"
+#include <cstddef>
+#include <iterator>
+#include <utility>
 #include "painter/glyph_string.hpp"
 #include "system/events/key_event.hpp"
 #include "system/events/mouse_event.hpp"
 #include "system/key.hpp"
 #include "widget/coordinates.hpp"
 #include "widget/focus_policy.hpp"
-#include <iterator>
-#include <utility>
-#include <cstddef>
 
 namespace cppurses {
 
@@ -21,6 +21,10 @@ void Textbox::enable_scrollwheel(bool enable) {
 
 void Textbox::disable_scrollwheel(bool disable) {
     scroll_wheel_ = !disable;
+}
+
+void Textbox::toggle_scrollwheel() {
+    scroll_wheel_ = !scroll_wheel_;
 }
 
 bool Textbox::does_scrollwheel() const {
@@ -116,5 +120,79 @@ bool Textbox::mouse_press_event(Mouse_button button,
     this->update();
     return true;
 }
+
+namespace slot {
+
+sig::Slot<void()> enable_scrollwheel(Textbox& tb) {
+    sig::Slot<void()> slot{[&tb] { tb.enable_scrollwheel(); }};
+    slot.track(tb.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> disable_scrollwheel(Textbox& tb) {
+    sig::Slot<void()> slot{[&tb] { tb.disable_scrollwheel(); }};
+    slot.track(tb.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> toggle_scrollwheel(Textbox& tb) {
+    sig::Slot<void()> slot{[&tb] { tb.toggle_scrollwheel(); }};
+    slot.track(tb.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> set_scrollwheel(Textbox& tb, bool enable) {
+    sig::Slot<void()> slot{[&tb, enable] { tb.enable_scrollwheel(enable); }};
+    slot.track(tb.destroyed);
+    return slot;
+}
+
+sig::Slot<void(bool)> set_scrollwheel(Textbox& tb) {
+    sig::Slot<void(bool)> slot{
+        [&tb](bool enable) { tb.enable_scrollwheel(enable); }};
+    slot.track(tb.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> set_wheel_speed(Textbox& tb, std::size_t lines) {
+    sig::Slot<void()> slot{[&tb, lines] { tb.set_wheel_speed(lines); }};
+    slot.track(tb.destroyed);
+    return slot;
+}
+
+sig::Slot<void(std::size_t)> set_wheel_speed(Textbox& tb) {
+    sig::Slot<void(std::size_t)> slot{
+        [&tb](auto lines) { tb.set_wheel_speed(lines); }};
+    slot.track(tb.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> set_wheel_speed_up(Textbox& tb, std::size_t lines) {
+    sig::Slot<void()> slot{[&tb, lines] { tb.set_wheel_speed_up(lines); }};
+    slot.track(tb.destroyed);
+    return slot;
+}
+
+sig::Slot<void(std::size_t)> set_wheel_speed_up(Textbox& tb) {
+    sig::Slot<void(std::size_t)> slot{
+        [&tb](auto lines) { tb.set_wheel_speed_up(lines); }};
+    slot.track(tb.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> set_wheel_speed_down(Textbox& tb, std::size_t lines) {
+    sig::Slot<void()> slot{[&tb, lines] { tb.set_wheel_speed_down(lines); }};
+    slot.track(tb.destroyed);
+    return slot;
+}
+
+sig::Slot<void(std::size_t)> set_wheel_speed_down(Textbox& tb) {
+    sig::Slot<void(std::size_t)> slot{
+        [&tb](auto lines) { tb.set_wheel_speed_down(lines); }};
+    slot.track(tb.destroyed);
+    return slot;
+}
+
+}  // namespace slot
 
 }  // namespace cppurses
