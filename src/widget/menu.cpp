@@ -1,10 +1,10 @@
 #include "widget/widgets/menu.hpp"
-#include "painter/glyph_string.hpp"
-#include "painter/painter.hpp"
-#include "widget/focus_policy.hpp"
 #include <signals/signals.hpp>
 #include <string>
 #include <utility>
+#include "painter/glyph_string.hpp"
+#include "painter/painter.hpp"
+#include "widget/focus_policy.hpp"
 
 namespace cppurses {
 
@@ -101,8 +101,10 @@ sig::Slot<void(Menu_item)> add_item(Menu& m) {
     return slot;
 }
 
-sig::Slot<void()> add_item(Menu& m, Menu_item item) {
-    sig::Slot<void()> slot{[&m, &item] { m.add_item(std::move(item)); }};
+// TODO: Generalized lambda capture of item with std::move() and parameter
+// Menu_item by value. Below as well.  Once Clang-Format properly handles this.
+sig::Slot<void()> add_item(Menu& m, const Menu_item& item) {
+    sig::Slot<void()> slot{[&m, item] { m.add_item(item); }};
     slot.track(m.destroyed);
     return slot;
 }
@@ -116,16 +118,18 @@ sig::Slot<void(Glyph_string, sig::Slot<void()>)> make_item(Menu& m) {
     return slot;
 }
 
-sig::Slot<void(Glyph_string)> make_item(Menu& m, sig::Slot<void()> action) {
-    sig::Slot<void(Glyph_string)> slot{[&m, &action](auto title) {
+sig::Slot<void(Glyph_string)> make_item(Menu& m,
+                                        const sig::Slot<void()>& action) {
+    sig::Slot<void(Glyph_string)> slot{[&m, action](auto title) {
         m.make_item(std::move(title), std::move(action));
     }};
     slot.track(m.destroyed);
     return slot;
 }
 
-sig::Slot<void(sig::Slot<void()>)> make_item(Menu& m, Glyph_string title) {
-    sig::Slot<void(sig::Slot<void()>)> slot{[&m, &title](auto action) {
+sig::Slot<void(sig::Slot<void()>)> make_item(Menu& m,
+                                             const Glyph_string& title) {
+    sig::Slot<void(sig::Slot<void()>)> slot{[&m, title](auto action) {
         m.make_item(std::move(title), std::move(action));
     }};
     slot.track(m.destroyed);
@@ -133,8 +137,8 @@ sig::Slot<void(sig::Slot<void()>)> make_item(Menu& m, Glyph_string title) {
 }
 
 sig::Slot<void()> make_item(Menu& m,
-                            Glyph_string title,
-                            sig::Slot<void()> action) {
+                            const Glyph_string& title,
+                            const sig::Slot<void()>& action) {
     sig::Slot<void()> slot{[&m, title, action] { m.make_item(title, action); }};
     slot.track(m.destroyed);
     return slot;
@@ -160,7 +164,7 @@ sig::Slot<void(std::size_t)> select_up(Menu& m) {
 }
 
 sig::Slot<void()> select_up(Menu& m, std::size_t n) {
-    sig::Slot<void()> slot{[&m, &n] { m.select_up(n); }};
+    sig::Slot<void()> slot{[&m, n] { m.select_up(n); }};
     slot.track(m.destroyed);
     return slot;
 }
@@ -172,7 +176,7 @@ sig::Slot<void(std::size_t)> select_down(Menu& m) {
 }
 
 sig::Slot<void()> select_down(Menu& m, std::size_t n) {
-    sig::Slot<void()> slot{[&m, &n] { m.select_down(n); }};
+    sig::Slot<void()> slot{[&m, n] { m.select_down(n); }};
     slot.track(m.destroyed);
     return slot;
 }
@@ -185,7 +189,7 @@ sig::Slot<void(std::size_t)> select_item(Menu& m) {
 }
 
 sig::Slot<void()> select_item(Menu& m, std::size_t index) {
-    sig::Slot<void()> slot{[&m, &index] { m.select_item(index); }};
+    sig::Slot<void()> slot{[&m, index] { m.select_item(index); }};
     slot.track(m.destroyed);
     return slot;
 }

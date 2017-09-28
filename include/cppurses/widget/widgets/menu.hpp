@@ -1,16 +1,16 @@
 #ifndef WIDGET_WIDGETS_MENU_HPP
 #define WIDGET_WIDGETS_MENU_HPP
+#include <cstddef>
+#include <signals/signals.hpp>
+#include <utility>
+#include <vector>
 #include "painter/attribute.hpp"
 #include "painter/color.hpp"
 #include "painter/glyph_string.hpp"
 #include "painter/painter.hpp"
-#include "system/key.hpp"
 #include "system/events/key_event.hpp"
+#include "system/key.hpp"
 #include "widget/widget.hpp"
-#include <signals/signals.hpp>
-#include <cstddef>
-#include <utility>
-#include <vector>
 
 namespace cppurses {
 
@@ -46,14 +46,16 @@ class Menu : public Widget {
 namespace slot {
 
 sig::Slot<void(Menu_item)> add_item(Menu& m);
-sig::Slot<void()> add_item(Menu& m, Menu_item item);
+sig::Slot<void()> add_item(Menu& m, const Menu_item& item);
 
 sig::Slot<void(Glyph_string, sig::Slot<void()>)> make_item(Menu& m);
-sig::Slot<void(Glyph_string)> make_item(Menu& m, sig::Slot<void()> action);
-sig::Slot<void(sig::Slot<void()>)> make_item(Menu& m, Glyph_string title);
+sig::Slot<void(Glyph_string)> make_item(Menu& m,
+                                        const sig::Slot<void()>& action);
+sig::Slot<void(sig::Slot<void()>)> make_item(Menu& m,
+                                             const Glyph_string& title);
 sig::Slot<void()> make_item(Menu& m,
-                            Glyph_string title,
-                            sig::Slot<void()> action);
+                            const Glyph_string& title,
+                            const sig::Slot<void()>& action);
 
 sig::Slot<void(std::size_t)> remove_item(Menu& m);
 sig::Slot<void()> remove_item(Menu& m, std::size_t index);

@@ -1,18 +1,18 @@
 #include "widget/widgets/push_button.hpp"
-#include "system/events/mouse_event.hpp"
+#include <utility>
 #include "painter/glyph_string.hpp"
 #include "painter/painter.hpp"
-#include <utility>
+#include "system/events/mouse_event.hpp"
 
 namespace cppurses {
 
 Push_button::Push_button(Glyph_string name) : title_{std::move(name)} {
     this->disable_cursor();
-    click = [this] {
-        clicked();
-        clicked_w_ref(this);
-    };
-    click.track(this->destroyed);
+}
+
+void Push_button::set_text(Glyph_string text) {
+    title_ = std::move(text);
+    this->update();
 }
 
 bool Push_button::mouse_press_event(Mouse_button button,
@@ -41,4 +41,16 @@ bool Push_button::paint_event() {
     return Widget::paint_event();
 }
 
+namespace slot {
+
+sig::Slot<void()> click(Push_button& pb) {
+    sig::Slot<void()> slot{[&pb] {
+        pb.clicked();
+        pb.clicked_w_ref(&pb);
+    }};
+    slot.track(pb.destroyed);
+    return slot;
+}
+
+}  // namespace slot
 }  // namespace cppurses
