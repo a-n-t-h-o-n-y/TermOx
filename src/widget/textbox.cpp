@@ -47,20 +47,20 @@ bool Textbox::key_press_event(Key key, char symbol) {
             if (cursor_index == 0) {
                 break;
             }
-            this->erase_(--cursor_index, 1);
+            this->erase(--cursor_index, 1);
             if (this->line_at(cursor_index) < this->top_line()) {
-                this->scroll_up_(1);
+                this->scroll_up(1);
             }
-            this->set_cursor_at_index_(cursor_index);
+            this->set_cursor(cursor_index);
         } break;
 
         case Key::Enter: {
             auto cursor_index = this->cursor_index();
-            this->insert_('\n', cursor_index);
+            this->insert('\n', cursor_index);
             if (this->cursor_y() + 1 == this->height()) {
-                this->scroll_down_(1);
+                this->scroll_down(1);
             }
-            this->set_cursor_at_index_(cursor_index + 1);
+            this->set_cursor(cursor_index + 1);
         } break;
 
         case Key::Tab:
@@ -68,28 +68,28 @@ bool Textbox::key_press_event(Key key, char symbol) {
             break;
 
         case Key::Arrow_right:
-            this->cursor_right_(1);
+            this->cursor_right(1);
             break;
 
         case Key::Arrow_left:
-            this->cursor_left_(1);
+            this->cursor_left(1);
             break;
 
         case Key::Arrow_up:
-            this->cursor_up_(1);
+            this->cursor_up(1);
             break;
 
         case Key::Arrow_down:
-            this->cursor_down_(1);
+            this->cursor_down(1);
             break;
 
         default:  // Insert text
             char text = symbol;
             if (text != '\0') {
                 auto cursor_index = this->cursor_index();
-                this->insert_(text, cursor_index);
-                this->cursor_right_(1);
-                this->set_cursor_at_index_(cursor_index + 1);
+                this->insert(text, cursor_index);
+                this->cursor_right(1);
+                this->set_cursor(cursor_index + 1);
             }
     }
     this->update();
@@ -103,14 +103,14 @@ bool Textbox::mouse_press_event(Mouse_button button,
                                 std::size_t local_y,
                                 std::uint8_t device_id) {
     if (button == Mouse_button::Left) {
-        this->set_cursor_at_coordinates_(local_x, local_y);
+        this->set_cursor(local_x, local_y);
     } else if (button == Mouse_button::ScrollUp) {
         if (scroll_wheel_) {
-            this->scroll_up_(scroll_speed_up_);
+            this->scroll_up(scroll_speed_up_);
         }
     } else if (button == Mouse_button::ScrollDown) {
         if (scroll_wheel_) {
-            this->scroll_down_(scroll_speed_down_);
+            this->scroll_down(scroll_speed_down_);
         }
     }
     this->update();

@@ -14,89 +14,42 @@ namespace cppurses {
 Text_display::Text_display(Glyph_string content)
     : contents_{std::move(content)} {
     this->update_display();
-    this->Text_display::initialize();
 }
 
-void Text_display::initialize() {
-    set_text = [this](Glyph_string s) { this->set_text_(std::move(s)); };
-    set_text.track(this->destroyed);
-    insert = [this](Glyph_string s, std::size_t index) {
-        this->insert_(std::move(s), index);
-    };
-    insert.track(this->destroyed);
-    append = [this](Glyph_string s) { this->append_(std::move(s)); };
-    append.track(this->destroyed);
-    erase = [this](std::size_t index) { this->erase_(index); };
-    erase.track(this->destroyed);
-    pop_back = [this] { this->pop_back_(); };
-    pop_back.track(this->destroyed);
-    clear = [this] { this->clear_(); };
-    clear.track(this->destroyed);
-
-    scroll_up = [this] { this->scroll_up_(1); };
-    scroll_up.track(this->destroyed);
-    scroll_down = [this] { this->scroll_down_(1); };
-    scroll_down.track(this->destroyed);
-    scroll_up_n = [this](std::size_t n) { this->scroll_up_(n); };
-    scroll_up_n.track(this->destroyed);
-    scroll_down_n = [this](std::size_t n) { this->scroll_down_(n); };
-    scroll_down_n.track(this->destroyed);
-
-    enable_word_wrap = [this] { this->enable_word_wrap_(); };
-    enable_word_wrap.track(this->destroyed);
-    disable_word_wrap = [this] { this->disable_word_wrap_(); };
-    disable_word_wrap.track(this->destroyed);
-    toggle_word_wrap = [this] {
-        this->enable_word_wrap_(!this->does_word_wrap());
-    };
-    set_word_wrap = [this](bool enable) { this->enable_word_wrap_(enable); };
-    set_word_wrap.track(this->destroyed);
-
-    set_attribute = [this](Attribute attr) {
-        incoming_brush_.add_attributes(attr);
-    };
-    set_attribute.track(this->destroyed);
-
-    remove_attribute = [this](Attribute attr) {
-        incoming_brush_.remove_attribute(attr);
-    };
-    remove_attribute.track(this->destroyed);
-}
-
-void Text_display::set_text_(Glyph_string string) {
-    contents_ = std::move(string);
+void Text_display::set_text(Glyph_string text) {
+    contents_ = std::move(text);
     this->update_display();
     text_changed(contents_);
 }
 
-void Text_display::insert_(Glyph_string string, std::size_t index) {
+void Text_display::insert(Glyph_string text, std::size_t index) {
     if (contents_.empty()) {
-        this->append_(std::move(string));
+        this->append(std::move(text));
         return;
     }
-    for (auto& glyph : string) {
-        for (auto& attr : incoming_brush_.attributes()) {
+    for (auto& glyph : text) {
+        for (auto& attr : new_text_brush_.attributes()) {
             glyph.brush().add_attributes(attr);
         }
     }
-    contents_.insert(std::begin(contents_) + index, std::begin(string),
-                     std::end(string));
+    contents_.insert(std::begin(contents_) + index, std::begin(text),
+                     std::end(text));
     this->update_display();
     text_changed(contents_);
 }
 
-void Text_display::append_(Glyph_string string) {
-    for (auto& glyph : string) {
-        for (auto& attr : incoming_brush_.attributes()) {
+void Text_display::append(Glyph_string text) {
+    for (auto& glyph : text) {
+        for (auto& attr : new_text_brush_.attributes()) {
             glyph.brush().add_attributes(attr);
         }
     }
-    contents_.append(std::move(string));
+    contents_.append(std::move(text));
     this->update_display();
     text_changed(contents_);
 }
 
-void Text_display::erase_(std::size_t index, std::size_t length) {
+void Text_display::erase(std::size_t index, std::size_t length) {
     if (contents_.empty() || index >= contents_.size()) {
         return;
     }
@@ -109,7 +62,7 @@ void Text_display::erase_(std::size_t index, std::size_t length) {
     text_changed(contents_);
 }
 
-void Text_display::pop_back_() {
+void Text_display::pop_back() {
     if (contents_.empty()) {
         return;
     }
@@ -118,13 +71,13 @@ void Text_display::pop_back_() {
     text_changed(contents_);
 }
 
-void Text_display::clear_() {
+void Text_display::clear() {
     contents_.clear();
     this->update_display();
     text_changed(contents_);
 }
 
-void Text_display::scroll_up_(std::size_t n) {
+void Text_display::scroll_up(std::size_t n) {
     if (n > this->top_line()) {
         top_line_ = 0;
     } else {
@@ -135,7 +88,7 @@ void Text_display::scroll_up_(std::size_t n) {
     scrolled();
 }
 
-void Text_display::scroll_down_(std::size_t n) {
+void Text_display::scroll_down(std::size_t n) {
     if (this->top_line() + n > this->last_line()) {
         top_line_ = this->last_line();
     } else {
@@ -146,14 +99,31 @@ void Text_display::scroll_down_(std::size_t n) {
     scrolled();
 }
 
-void Text_display::enable_word_wrap_(bool enable) {
+void Text_display::enable_word_wrap(bool enable) {
     word_wrap_ = enable;
     this->update_display();
 }
 
-void Text_display::disable_word_wrap_(bool disable) {
+void Text_display::disable_word_wrap(bool disable) {
     word_wrap_ = !disable;
     this->update_display();
+}
+
+void Text_display::toggle_word_wrap() {
+    word_wrap_ = !word_wrap_;
+    this->update_display();
+}
+
+void Text_display::add_new_text_attribute(Attribute attr) {
+    new_text_brush_.add_attributes(attr);
+}
+
+void Text_display::remove_new_text_attribute(Attribute attr) {
+    new_text_brush_.remove_attribute(attr);
+}
+
+void Text_display::clear_new_text_attributes() {
+    new_text_brush_.clear_attributes();
 }
 
 std::size_t Text_display::row_length(std::size_t y) const {
@@ -330,5 +300,199 @@ std::size_t Text_display::end_index() const {
     }
     return this->contents_size() - 1;
 }
+
+namespace slot {
+
+// Text Modification
+sig::Slot<void()> set_text(Text_display& td, const Glyph_string& text) {
+    sig::Slot<void()> slot{[&td, text] { td.set_text(text); }};
+    slot.track(td.destroyed);
+    return slot;
+}
+
+sig::Slot<void(Glyph_string)> set_text(Text_display& td) {
+    sig::Slot<void(Glyph_string)> slot{
+        [&td](auto text) { td.set_text(std::move(text)); }};
+    slot.track(td.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> insert(Text_display& td,
+                         const Glyph_string& text,
+                         std::size_t index) {
+    sig::Slot<void()> slot{[&td, text, index] { td.insert(text, index); }};
+    slot.track(td.destroyed);
+    return slot;
+}
+
+sig::Slot<void(std::size_t)> insert(Text_display& td,
+                                    const Glyph_string& text) {
+    sig::Slot<void(std::size_t)> slot{
+        [&td, text](auto index) { td.insert(text, index); }};
+    slot.track(td.destroyed);
+    return slot;
+}
+
+sig::Slot<void(Glyph_string)> insert(Text_display& td, std::size_t index) {
+    sig::Slot<void(Glyph_string)> slot{
+        [&td, index](auto text) { td.insert(std::move(text), index); }};
+    slot.track(td.destroyed);
+    return slot;
+}
+
+sig::Slot<void(Glyph_string, std::size_t)> insert(Text_display& td) {
+    sig::Slot<void(Glyph_string, std::size_t)> slot{
+        [&td](auto text, auto index) {
+            td.insert(std::move(text), std::move(index));
+        }};
+    slot.track(td.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> append(Text_display& td, const Glyph_string& text) {
+    sig::Slot<void()> slot{[&td, text] { td.append(text); }};
+    slot.track(td.destroyed);
+    return slot;
+}
+
+sig::Slot<void(Glyph_string)> append(Text_display& td) {
+    sig::Slot<void(Glyph_string)> slot{
+        [&td](auto text) { td.append(std::move(text)); }};
+    slot.track(td.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> erase(Text_display& td,
+                        std::size_t index,
+                        std::size_t length) {
+    sig::Slot<void()> slot{[&td, index, length] { td.erase(index, length); }};
+    slot.track(td.destroyed);
+    return slot;
+}
+
+sig::Slot<void(std::size_t)> erase_at(Text_display& td, std::size_t index) {
+    sig::Slot<void(std::size_t)> slot{
+        [&td, index](auto length) { td.erase(index, std::move(length)); }};
+    slot.track(td.destroyed);
+    return slot;
+}
+
+sig::Slot<void(std::size_t)> erase_n(Text_display& td, std::size_t length) {
+    sig::Slot<void(std::size_t)> slot{
+        [&td, length](auto index) { td.erase(std::move(index), length); }};
+    slot.track(td.destroyed);
+    return slot;
+}
+
+sig::Slot<void(std::size_t, std::size_t)> erase(Text_display& td) {
+    sig::Slot<void(std::size_t, std::size_t)> slot{
+        [&td](auto index, auto length) {
+            td.erase(std::move(index), std::move(length));
+        }};
+    slot.track(td.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> pop_back(Text_display& td) {
+    sig::Slot<void()> slot{[&td] { td.pop_back(); }};
+    slot.track(td.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> clear(Text_display& td) {
+    sig::Slot<void()> slot{[&td] { td.clear(); }};
+    slot.track(td.destroyed);
+    return slot;
+}
+
+// Scrolling
+sig::Slot<void()> scroll_up(Text_display& td, std::size_t n) {
+    sig::Slot<void()> slot{[&td, n] { td.scroll_up(n); }};
+    slot.track(td.destroyed);
+    return slot;
+}
+
+sig::Slot<void(std::size_t)> scroll_up(Text_display& td) {
+    sig::Slot<void(std::size_t)> slot{[&td](auto n) { td.scroll_up(n); }};
+    slot.track(td.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> scroll_down(Text_display& td, std::size_t n) {
+    sig::Slot<void()> slot{[&td, n] { td.scroll_down(n); }};
+    slot.track(td.destroyed);
+    return slot;
+}
+
+sig::Slot<void(std::size_t)> scroll_down(Text_display& td) {
+    sig::Slot<void(std::size_t)> slot{[&td](auto n) { td.scroll_down(n); }};
+    slot.track(td.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> enable_word_wrap(Text_display& td) {
+    sig::Slot<void()> slot{[&td] { td.enable_word_wrap(); }};
+    slot.track(td.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> disable_word_wrap(Text_display& td) {
+    sig::Slot<void()> slot{[&td] { td.disable_word_wrap(); }};
+    slot.track(td.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> toggle_word_wrap(Text_display& td) {
+    sig::Slot<void()> slot{[&td] { td.toggle_word_wrap(); }};
+    slot.track(td.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> set_word_wrap(Text_display& td, bool enable) {
+    sig::Slot<void()> slot{[&td, enable] { td.enable_word_wrap(enable); }};
+    slot.track(td.destroyed);
+    return slot;
+}
+
+sig::Slot<void(bool)> set_word_wrap(Text_display& td) {
+    sig::Slot<void(bool)> slot{
+        [&td](bool enable) { td.enable_word_wrap(enable); }};
+    slot.track(td.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> add_new_text_attribute(Text_display& td, Attribute attr) {
+    sig::Slot<void()> slot{[&td, attr] { td.add_new_text_attribute(attr); }};
+    slot.track(td.destroyed);
+    return slot;
+}
+
+sig::Slot<void(Attribute)> add_new_text_attribute(Text_display& td) {
+    sig::Slot<void(Attribute)> slot{
+        [&td](auto attr) { td.add_new_text_attribute(attr); }};
+    slot.track(td.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> remove_new_text_attribute(Text_display& td, Attribute attr) {
+    sig::Slot<void()> slot{[&td, attr] { td.remove_new_text_attribute(attr); }};
+    slot.track(td.destroyed);
+    return slot;
+}
+
+sig::Slot<void(Attribute)> remove_new_text_attribute(Text_display& td) {
+    sig::Slot<void(Attribute)> slot{
+        [&td](auto attr) { td.remove_new_text_attribute(attr); }};
+    slot.track(td.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> clear_new_text_attributes(Text_display& td) {
+    sig::Slot<void()> slot{[&td] { td.clear_new_text_attributes(); }};
+    slot.track(td.destroyed);
+    return slot;
+}
+
+}  // namespace slot
 
 }  // namespace cppurses

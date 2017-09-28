@@ -1,6 +1,5 @@
 #ifndef WIDGET_WIDGETS_TEXT_DISPLAY_HPP
 #define WIDGET_WIDGETS_TEXT_DISPLAY_HPP
-
 #include "painter/attribute.hpp"
 #include "painter/brush.hpp"
 #include "painter/glyph.hpp"
@@ -10,6 +9,7 @@
 #include <signals/signals.hpp>
 #include <cstddef>
 #include <vector>
+
 namespace cppurses {
 class Paint_event;
 class Resize_event;
@@ -18,28 +18,27 @@ class Text_display : public Widget {
    public:
     explicit Text_display(Glyph_string content = "");
 
-    // String Modification
-    sig::Slot<void(Glyph_string)> set_text;
-    sig::Slot<void(Glyph_string, std::size_t)> insert;
-    sig::Slot<void(Glyph_string)> append;
-    sig::Slot<void(std::size_t)> erase;
-    sig::Slot<void()> pop_back;
-    sig::Slot<void()> clear;
+    // Text Modification
+    void set_text(Glyph_string text);
+    void insert(Glyph_string text, std::size_t index);
+    void append(Glyph_string text);
+    void erase(std::size_t index, std::size_t length = Glyph_string::npos);
+    void pop_back();
+    void clear();
 
     // Scrolling
-    sig::Slot<void()> scroll_up;
-    sig::Slot<void()> scroll_down;
-    sig::Slot<void(std::size_t)> scroll_up_n;
-    sig::Slot<void(std::size_t)> scroll_down_n;
+    virtual void scroll_up(std::size_t n = 1);
+    virtual void scroll_down(std::size_t n = 1);
 
-    // Options
-    sig::Slot<void()> enable_word_wrap;
-    sig::Slot<void()> disable_word_wrap;
-    sig::Slot<void()> toggle_word_wrap;
-    sig::Slot<void(bool)> set_word_wrap;
+    // Word Wrapping
+    void enable_word_wrap(bool enable = true);
+    void disable_word_wrap(bool disable = true);
+    void toggle_word_wrap();
 
-    sig::Slot<void(Attribute)> set_attribute;
-    sig::Slot<void(Attribute)> remove_attribute;
+    // Incoming Text Attributes
+    void add_new_text_attribute(Attribute attr);
+    void remove_new_text_attribute(Attribute attr);
+    void clear_new_text_attributes();
 
     // Query Functions
     std::size_t row_length(std::size_t y) const;
@@ -65,16 +64,6 @@ class Text_display : public Widget {
                       std::size_t new_height,
                       std::size_t old_width,
                       std::size_t old_height) override;
-    void scroll_up_(std::size_t n);
-    void scroll_down_(std::size_t n);
-    void set_text_(Glyph_string string);
-    void insert_(Glyph_string string, std::size_t index);
-    void append_(Glyph_string string);
-    void erase_(std::size_t index, std::size_t length = Glyph_string::npos);
-    void pop_back_();
-    void clear_();
-    void enable_word_wrap_(bool enable = true);
-    void disable_word_wrap_(bool disable = true);
 
     std::size_t line_at(std::size_t index) const;
     std::size_t top_line() const;
@@ -98,11 +87,58 @@ class Text_display : public Widget {
     std::size_t top_line_{0};
     bool word_wrap_ = true;
     Glyph_string contents_;
-    Brush incoming_brush_{this->brush()};
+    Brush new_text_brush_{this->brush()};  // TODO possibly make public member
 
     void update_display(std::size_t from_line = 0);
-    void initialize();
 };
+
+namespace slot {
+
+// Text Modification
+sig::Slot<void()> set_text(Text_display& td, const Glyph_string& text);
+sig::Slot<void(Glyph_string)> set_text(Text_display& td);
+
+sig::Slot<void()> insert(Text_display& td,
+                         const Glyph_string& text,
+                         std::size_t index);
+sig::Slot<void(std::size_t)> insert(Text_display& td, const Glyph_string& text);
+sig::Slot<void(Glyph_string)> insert(Text_display& td, std::size_t index);
+sig::Slot<void(Glyph_string, std::size_t)> insert(Text_display& td);
+
+sig::Slot<void()> append(Text_display& td, const Glyph_string& text);
+sig::Slot<void(Glyph_string)> append(Text_display& td);
+
+sig::Slot<void()> erase(Text_display& td,
+                        std::size_t index,
+                        std::size_t length);
+sig::Slot<void(std::size_t)> erase_at(Text_display& td, std::size_t index);
+sig::Slot<void(std::size_t)> erase_n(Text_display& td, std::size_t length);
+sig::Slot<void(std::size_t, std::size_t)> erase(Text_display& td);
+
+sig::Slot<void()> pop_back(Text_display& td);
+
+sig::Slot<void()> clear(Text_display& td);
+
+// Scrolling
+sig::Slot<void()> scroll_up(Text_display& td, std::size_t n);
+sig::Slot<void(std::size_t)> scroll_up(Text_display& td);
+sig::Slot<void()> scroll_down(Text_display& td, std::size_t n);
+sig::Slot<void(std::size_t)> scroll_down(Text_display& td);
+
+// Options
+sig::Slot<void()> enable_word_wrap(Text_display& td);
+sig::Slot<void()> disable_word_wrap(Text_display& td);
+sig::Slot<void()> toggle_word_wrap(Text_display& td);
+sig::Slot<void()> set_word_wrap(Text_display& td, bool enable);
+sig::Slot<void(bool)> set_word_wrap(Text_display& td);
+
+sig::Slot<void()> add_new_text_attribute(Text_display& td, Attribute attr);
+sig::Slot<void(Attribute)> add_new_text_attribute(Text_display& td);
+sig::Slot<void()> remove_new_text_attribute(Text_display& td, Attribute attr);
+sig::Slot<void(Attribute)> remove_new_text_attribute(Text_display& td);
+sig::Slot<void()> clear_new_text_attributes(Text_display& td);
+
+}  // namespace slot
 
 }  // namespace cppurses
 #endif  // WIDGET_WIDGETS_TEXT_DISPLAY_HPP

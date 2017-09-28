@@ -14,28 +14,18 @@ class Textbox_base : public Text_display {
    public:
     explicit Textbox_base(Glyph_string contents = "");
 
-    // Cursor Movement
-    sig::Slot<void()> cursor_up;
-    sig::Slot<void()> cursor_down;
-    sig::Slot<void()> cursor_left;
-    sig::Slot<void()> cursor_right;
-    sig::Slot<void(std::size_t)> cursor_up_n;
-    sig::Slot<void(std::size_t)> cursor_down_n;
-    sig::Slot<void(std::size_t)> cursor_left_n;
-    sig::Slot<void(std::size_t)> cursor_right_n;
-    sig::Slot<void(Coordinates)> set_cursor_at_coordinates;
-    sig::Slot<void(std::size_t, std::size_t)> set_cursor_at_coordinates_x_y;
-    sig::Slot<void(std::size_t)> set_cursor_at_index;
-
     // Scrolling
-    sig::Slot<void()> scroll_up;
-    sig::Slot<void()> scroll_down;
-    sig::Slot<void(std::size_t)> scroll_up_n;
-    sig::Slot<void(std::size_t)> scroll_down_n;
-    sig::Slot<void()> enable_scrolling;
-    sig::Slot<void()> disable_scrolling;
-    sig::Slot<void()> toggle_scrolling;
-    sig::Slot<void(bool)> set_scrolling;
+    void scroll_up(std::size_t n = 1) override;
+    void scroll_down(std::size_t n = 1) override;
+
+    // Cursor Movement
+    void cursor_up(std::size_t n = 1);
+    void cursor_down(std::size_t n = 1);
+    void cursor_left(std::size_t n = 1);
+    void cursor_right(std::size_t n = 1);
+    void set_cursor(Coordinates pos);
+    void set_cursor(std::size_t x, std::size_t y);
+    void set_cursor(std::size_t index);
 
     // Query Functions
     bool does_scroll() const { return scroll_; }
@@ -49,10 +39,6 @@ class Textbox_base : public Text_display {
     sig::Signal<void(Coordinates)> cursor_moved;
 
    private:
-    using Text_display::scroll_up_;
-    using Text_display::scroll_down_;
-    void initialize();
-
     void increment_cursor_right();
     void increment_cursor_left();
     bool scroll_{true};
@@ -62,18 +48,41 @@ class Textbox_base : public Text_display {
                       std::size_t new_height,
                       std::size_t old_width,
                       std::size_t old_height) override;
-    void scroll_up_(std::size_t n);
-    void scroll_down_(std::size_t n);
+
     void enable_scrolling_(bool enable = true) { scroll_ = enable; }
     void disable_scrolling_(bool disable = true) { scroll_ = !disable; }
-    void cursor_up_(std::size_t n);
-    void cursor_down_(std::size_t n);
-    void cursor_left_(std::size_t n);
-    void cursor_right_(std::size_t n);
-    void set_cursor_at_coordinates_(Coordinates pos);
-    void set_cursor_at_coordinates_(std::size_t x, std::size_t y);
-    void set_cursor_at_index_(std::size_t index);
 };
+
+namespace slot {
+
+// Cursor Movement
+sig::Slot<void()> cursor_up(Textbox_base& tb, std::size_t n);
+sig::Slot<void(std::size_t)> cursor_up(Textbox_base& tb);
+sig::Slot<void()> cursor_down(Textbox_base& tb, std::size_t n);
+sig::Slot<void(std::size_t)> cursor_down(Textbox_base& tb);
+sig::Slot<void()> cursor_left(Textbox_base& tb, std::size_t n);
+sig::Slot<void(std::size_t)> cursor_left(Textbox_base& tb);
+sig::Slot<void()> cursor_right(Textbox_base& tb, std::size_t n);
+sig::Slot<void(std::size_t)> cursor_right(Textbox_base& tb);
+
+sig::Slot<void()> set_cursor(Textbox_base& tb, const Coordinates& coords);
+sig::Slot<void(Coordinates)> set_cursor(Textbox_base& tb);
+sig::Slot<void()> set_cursor_xy(Textbox_base& tb, std::size_t x, std::size_t y);
+sig::Slot<void(std::size_t, std::size_t)> set_cursor_xy(Textbox_base& tb);
+sig::Slot<void()> set_cursor_to_index(Textbox_base& tb, std::size_t index);
+sig::Slot<void(std::size_t)> set_cursor_to_index(Textbox_base& tb);
+
+// Scrolling
+// sig::Slot<void()> scroll_up;
+// sig::Slot<void()> scroll_down;
+// sig::Slot<void(std::size_t)> scroll_up_n;
+// sig::Slot<void(std::size_t)> scroll_down_n;
+// sig::Slot<void()> enable_scrolling;
+// sig::Slot<void()> disable_scrolling;
+// sig::Slot<void()> toggle_scrolling;
+// sig::Slot<void(bool)> set_scrolling;
+
+}  // namespace slot
 
 }  // namespace cppurses
 #endif  // WIDGET_WIDGETS_TEXTBOX_BASE_HPP

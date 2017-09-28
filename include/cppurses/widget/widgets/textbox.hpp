@@ -31,8 +31,8 @@ class Textbox : public Textbox_base {
                            std::uint8_t device_id) override;
 
    private:
-    using Textbox_base::scroll_up_;
-    using Textbox_base::scroll_down_;
+    // using Textbox_base::scroll_up_;
+    // using Textbox_base::scroll_down_;
 
     bool scroll_wheel_{true};
     std::size_t scroll_speed_up_{1};
