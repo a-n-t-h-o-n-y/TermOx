@@ -1,5 +1,6 @@
 #include "painter/painter.hpp"
-
+#include <cstddef>
+#include <cstring>
 #include "painter/color.hpp"
 #include "painter/glyph.hpp"
 #include "painter/glyph_string.hpp"
@@ -8,20 +9,15 @@
 #include "widget/border.hpp"
 #include "widget/coordinates.hpp"
 #include "widget/widget.hpp"
-#include <cstddef>
-#include <cstring>
 
 namespace cppurses {
 
 Painter::Painter(Widget* widget) : widget_{widget} {}
 
-void Painter::put(const Glyph_string& string,
-                  std::size_t x,
-                  std::size_t y,
-                  bool move_cursor) {
+void Painter::put(const Glyph_string& text, std::size_t x, std::size_t y) {
     Coordinates original_position{widget_->cursor_x(), widget_->cursor_y()};
     widget_->move_cursor(x, y);
-    for (Glyph g : string) {
+    for (Glyph g : text) {
         add_default_attributes(&g);
         auto glob_x = west_border_offset(widget_->border) + widget_->x() +
                       widget_->cursor_x();
@@ -36,16 +32,18 @@ void Painter::put(const Glyph_string& string,
             widget_->move_cursor(widget_->cursor_x() + 1, widget_->cursor_y());
         }
     }
-    if (!move_cursor) {
+    if (!move_cursor_on_put) {
         widget_->move_cursor(original_position.x, original_position.y);
     }
     System::paint_engine()->clear_attributes();
 }
 
-void Painter::put(const Glyph_string& string,
-                  Coordinates position,
-                  bool move_cursor) {
-    this->put(string, position.x, position.y, move_cursor);
+void Painter::put(const Glyph_string& text, Coordinates position) {
+    this->put(text, position.x, position.y);
+}
+
+void Painter::put(const Glyph_string& text) {
+    this->put(text, widget_->cursor_x(), widget_->cursor_y());
 }
 
 void Painter::fill(std::size_t x,

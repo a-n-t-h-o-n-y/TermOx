@@ -1,9 +1,9 @@
 #ifndef PAINTER_PAINTER_HPP
 #define PAINTER_PAINTER_HPP
 
+#include <cstddef>
 #include "painter/glyph_string.hpp"
 #include "widget/coordinates.hpp"
-#include <cstddef>
 
 namespace cppurses {
 class Border;
@@ -13,13 +13,11 @@ class Painter {
    public:
     explicit Painter(Widget* widget);
 
-    void put(const Glyph_string& string,
-             std::size_t x = 0,
-             std::size_t y = 0,
-             bool move_cursor = false);
-    void put(const Glyph_string& string,
-             Coordinates position,
-             bool move_cursor = false);
+    void put(const Glyph_string& text, Coordinates position);
+    void put(const Glyph_string& text, std::size_t x, std::size_t y);
+    void put(const Glyph_string& text);
+
+    bool move_cursor_on_put{false};
 
     // Convinience functions
     void fill(std::size_t x,
