@@ -1,13 +1,12 @@
 #ifndef SYSTEM_EVENTS_MOUSE_EVENT_HPP
 #define SYSTEM_EVENTS_MOUSE_EVENT_HPP
 #include "system/events/input_event.hpp"
+#include "system/mouse_button.hpp"
 #include <cstddef>
 #include <cstdint>
 
 namespace cppurses {
 class Event_handler;
-
-enum class Mouse_button { None, Left, Middle, Right, ScrollUp, ScrollDown };
 
 class Mouse_event : public Input_event {
    public:

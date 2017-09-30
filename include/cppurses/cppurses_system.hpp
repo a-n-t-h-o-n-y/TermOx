@@ -22,6 +22,7 @@
 #include "system/event_loop.hpp"
 #include "system/focus.hpp"
 #include "system/key.hpp"
+#include "system/mouse_button.hpp"
 #include "system/system.hpp"
 
 #endif  // CPPURSES_SYSTEM_HPP

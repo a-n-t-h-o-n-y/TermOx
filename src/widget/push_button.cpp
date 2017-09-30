@@ -2,7 +2,7 @@
 #include <utility>
 #include "painter/glyph_string.hpp"
 #include "painter/painter.hpp"
-#include "system/events/mouse_event.hpp"
+#include "system/mouse_button.hpp"
 
 namespace cppurses {
 

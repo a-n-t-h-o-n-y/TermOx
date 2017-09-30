@@ -1,6 +1,7 @@
 #include "system/events/mouse_event.hpp"
 #include "system/event_handler.hpp"
 #include "system/focus.hpp"
+#include "system/mouse_button.hpp"
 #include "widget/widget.hpp"
 #include <cstddef>
 #include <cstdint>

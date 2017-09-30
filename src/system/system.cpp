@@ -21,7 +21,8 @@ sig::Slot<void()> System::quit = []() { System::exit(); };  // NOLINT
 
 Widget* System::head_ = nullptr;  // NOLINT
 Event_loop System::event_loop_;
-std::unique_ptr<Paint_engine> System::engine_ = nullptr;  // NOLINT
+std::unique_ptr<detail::NCurses_paint_engine> System::engine_ =
+    nullptr;  // NOLINT
 std::unique_ptr<detail::Abstract_event_listener> System::event_listener_ =
     std::make_unique<detail::NCurses_event_listener>();  // NOLINT
 
@@ -51,7 +52,8 @@ Paint_engine* System::paint_engine() {
     return engine_.get();
 }
 
-void System::set_paint_engine(std::unique_ptr<Paint_engine> engine) {
+void System::set_paint_engine(
+    std::unique_ptr<detail::NCurses_paint_engine> engine) {
     engine_ = std::move(engine);
     if (engine_) {
         System::post_event<Paint_event>(System::head());
@@ -129,7 +131,7 @@ Palette* System::palette() {
     return system_palette_.get();
 }
 
-System::System(std::unique_ptr<Paint_engine> engine) {
+System::System(std::unique_ptr<detail::NCurses_paint_engine> engine) {
     System::set_paint_engine(std::move(engine));
     System::set_palette(std::make_unique<DawnBringer_palette>());
 }

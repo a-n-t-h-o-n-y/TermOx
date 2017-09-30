@@ -2,6 +2,7 @@
 #include "system/system.hpp"
 #include "system/events/enable_event.hpp"
 #include "system/events/disable_event.hpp"
+#include "system/mouse_button.hpp"
 #include <signals/signals.hpp>
 #include <cstddef>
 #include <vector>

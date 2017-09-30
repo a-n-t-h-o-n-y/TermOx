@@ -1,6 +1,7 @@
 #include "widget/widgets/checkbox.hpp"
 #include "painter/glyph_string.hpp"
 #include "painter/painter.hpp"
+#include "system/mouse_button.hpp"
 #include "widget/size_policy.hpp"
 
 namespace cppurses {

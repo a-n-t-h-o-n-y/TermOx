@@ -1,10 +1,8 @@
 #ifndef SYSTEM_SYSTEM_HPP
 #define SYSTEM_SYSTEM_HPP
-
 #include "system/event.hpp"
 #include "system/event_loop.hpp"
 #include "painter/detail/ncurses_paint_engine.hpp"
-#include "painter/paint_engine.hpp"
 #include "painter/palette.hpp"
 #include <signals/slot.hpp>
 #include <memory>
@@ -15,10 +13,11 @@ namespace detail {
 class Abstract_event_listener;
 }  // namespace detail
 class Widget;
+class Paint_engine;
 
 class System {
    public:
-    explicit System(std::unique_ptr<Paint_engine> engine =
+    explicit System(std::unique_ptr<detail::NCurses_paint_engine> engine =
                         std::make_unique<detail::NCurses_paint_engine>());
     System(const System&) = delete;
     System& operator=(const System&) = delete;
@@ -44,10 +43,8 @@ class System {
     static unsigned max_height();
     static detail::Abstract_event_listener* event_listener();
     static Paint_engine* paint_engine();
-    static void set_paint_engine(std::unique_ptr<Paint_engine> engine);
-    // static Widget* focus_widget();
-    // static void set_focus_widget(Widget* widg, bool clear_focus = true);
-    // static void cycle_tab_focus();
+    static void set_paint_engine(
+        std::unique_ptr<detail::NCurses_paint_engine> engine);
     static void set_palette(std::unique_ptr<Palette> palette);
     static Palette* palette();
     static void set_head(Widget* head_widget);
@@ -62,10 +59,8 @@ class System {
    private:
     static Widget* head_;
     static Event_loop event_loop_;
-    static std::unique_ptr<Paint_engine> engine_;
+    static std::unique_ptr<detail::NCurses_paint_engine> engine_;
     static std::unique_ptr<detail::Abstract_event_listener> event_listener_;
-
-    // static Widget* focus_widg_;
     static std::unique_ptr<Palette> system_palette_;
 };
 

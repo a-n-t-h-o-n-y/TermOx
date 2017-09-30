@@ -13,7 +13,9 @@
 #include "widget/widgets/text_display.hpp"
 #include "widget/widgets/text_display_slots.hpp"
 #include "widget/widgets/textbox.hpp"
+#include "widget/widgets/textbox_slots.hpp"
 #include "widget/widgets/textbox_base.hpp"
+#include "widget/widgets/textbox_base_slots.hpp"
 #include "widget/widgets/titlebar.hpp"
 #include "widget/widgets/vertical_scrollbar.hpp"
 

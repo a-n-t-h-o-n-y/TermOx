@@ -7,6 +7,7 @@
 #include "system/events/key_event.hpp"
 #include "system/events/show_event.hpp"
 #include "system/system.hpp"
+#include "system/mouse_button.hpp"
 #include "widget/coordinates.hpp"
 #include "widget/widget.hpp"
 #include <signals/slot.hpp>

@@ -3,6 +3,7 @@
 #include "system/events/key_event.hpp"
 #include "system/events/mouse_event.hpp"
 #include "system/events/resize_event.hpp"
+#include "system/mouse_button.hpp"
 #include "system/key.hpp"
 #include "system/system.hpp"
 #include "system/focus.hpp"

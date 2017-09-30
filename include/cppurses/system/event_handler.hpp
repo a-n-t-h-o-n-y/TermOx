@@ -1,8 +1,8 @@
 #ifndef SYSTEM_EVENT_HANDLER_HPP
 #define SYSTEM_EVENT_HANDLER_HPP
-#include "system/events/mouse_event.hpp"
 #include "system/key.hpp"
-#include <signals/signals.hpp>
+#include "system/mouse_button.hpp"
+#include <signals/signal.hpp>
 #include <vector>
 
 namespace cppurses {

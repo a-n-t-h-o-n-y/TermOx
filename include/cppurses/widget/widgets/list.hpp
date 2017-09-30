@@ -5,8 +5,8 @@
 #include <cstdint>
 #include <vector>
 #include "painter/glyph_string.hpp"
-#include "system/events/mouse_event.hpp"
 #include "system/key.hpp"
+#include "system/mouse_button.hpp"
 #include "widget/widget.hpp"
 #include <signals/signals.hpp>
 

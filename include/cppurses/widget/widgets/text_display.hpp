@@ -6,13 +6,11 @@
 #include "painter/glyph_string.hpp"
 #include "widget/coordinates.hpp"
 #include "widget/widget.hpp"
-#include <signals/signals.hpp>
+#include <signals/signal.hpp>
 #include <cstddef>
 #include <vector>
 
 namespace cppurses {
-class Paint_event;
-class Resize_event;
 
 class Text_display : public Widget {
    public:
@@ -91,7 +89,6 @@ class Text_display : public Widget {
 
     void update_display(std::size_t from_line = 0);
 };
-
 
 }  // namespace cppurses
 #endif  // WIDGET_WIDGETS_TEXT_DISPLAY_HPP

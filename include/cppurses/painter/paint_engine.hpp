@@ -1,6 +1,5 @@
 #ifndef PAINTER_PAINT_ENGINE_HPP
 #define PAINTER_PAINT_ENGINE_HPP
-
 #include "painter/attribute.hpp"
 #include "painter/color.hpp"
 #include "painter/detail/paint_buffer.hpp"

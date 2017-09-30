@@ -4,8 +4,8 @@
 #include <signals/signals.hpp>
 #include <utility>
 #include "painter/glyph_string.hpp"
-#include "system/events/mouse_event.hpp"
 #include "system/events/paint_event.hpp"
+#include "system/mouse_button.hpp"
 #include "widget/widget.hpp"
 
 namespace cppurses {
