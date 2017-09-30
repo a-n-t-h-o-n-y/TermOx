@@ -12,7 +12,7 @@
 namespace cppurses {
 
 Textbox::Textbox(Glyph_string contents) : Textbox_base{std::move(contents)} {
-    this->set_focus_policy(Focus_policy::Strong);
+    this->focus_policy = Focus_policy::Strong;
 }
 
 void Textbox::enable_scrollwheel(bool enable) {

@@ -152,8 +152,9 @@ Mouse_move_event::Mouse_move_event(Event_handler* receiver,
                   glob_y,           local_x,  local_y, device_id} {}
 
 bool Mouse_move_event::send() const {
-    if (receiver_->enabled() &&
-        static_cast<Widget*>(receiver_)->has_mouse_tracking()) {
+    if (receiver_->enabled()  // &&
+        // static_cast<Widget*>(receiver_)->has_mouse_tracking()
+        ) {
         return receiver_->mouse_move_event(button_, glob_x_, glob_y_, local_x_,
                                            local_y_, device_id_);
     }

@@ -6,9 +6,7 @@
 
 namespace cppurses {
 
-Push_button::Push_button(Glyph_string name) : title_{std::move(name)} {
-    this->disable_cursor();
-}
+Push_button::Push_button(Glyph_string name) : title_{std::move(name)} {}
 
 void Push_button::set_text(Glyph_string text) {
     title_ = std::move(text);

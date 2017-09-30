@@ -2,8 +2,6 @@
 #include "painter/color.hpp"
 #include "painter/paint_engine.hpp"
 #include "painter/palette.hpp"
-// #include "system/detail/posted_event.hpp"
-// #include "system/detail/thread_data.hpp"
 #include "system/event.hpp"
 #include "system/event_loop.hpp"
 #include "system/events/paint_event.hpp"
@@ -71,68 +69,6 @@ unsigned System::max_height() {
 Widget* System::head() {
     return head_;
 }
-
-// Widget* System::focus_widget() {
-//     return focus_widg_;
-// }
-
-// void System::set_focus_widget(Widget* widg, bool clear_focus) {
-//     if (widg == focus_widg_) {
-//         return;
-//     }
-//     // Old focus widget
-//     if (focus_widg_ != nullptr && clear_focus) {
-//         focus_widg_->clear_focus();
-//     }
-//     // New focus widget
-//     focus_widg_ = widg;
-//     if (widg != nullptr) {
-//         focus_widg_->set_focus(true);
-//     }
-// }
-
-// void System::cycle_tab_focus() {
-//     if (System::head() == nullptr) {
-//         return;
-//     }
-//     std::vector<Widget*> widgets;
-
-//     // Populate widgets vector
-//     widgets.push_back(System::head());
-//     int i{0};
-//     while (i < widgets.size()) {
-//         Widget* current = widgets[i];
-//         auto children = current->children();
-//         std::for_each(std::begin(children), std::end(children),
-//                       [&widgets](Widget* p) { widgets.push_back(p); });
-//         ++i;
-//     }
-
-//     // Rearrange widgets vector
-//     auto* current_focus_widget = System::focus_widget();
-//     if (current_focus_widget != nullptr) {
-//         auto current_iter = std::find(std::begin(widgets), std::end(widgets),
-//                                       current_focus_widget);
-//         if (current_iter != std::end(widgets)) {
-//             std::move(std::begin(widgets), current_iter + 1,
-//                       std::back_inserter(widgets));
-//         }
-//     }
-
-//     // Find the next focus widget
-//     for (Widget* child : widgets) {
-//         auto* widg = child;
-//         if (widg != nullptr) {
-//             if (widg->focus_policy() == Focus_policy::Tab ||
-//                 widg->focus_policy() == Focus_policy::Strong) {
-//                 System::set_focus_widget(widg);
-//                 widg->paint_engine().move(widg->x() + widg->cursor_x(),
-//                                           widg->y() + widg->cursor_y());
-//                 return;
-//             }
-//         }
-//     }
-// }
 
 void System::set_palette(std::unique_ptr<Palette> palette) {
     system_palette_ = std::move(palette);

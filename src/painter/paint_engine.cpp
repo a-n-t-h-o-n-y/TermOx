@@ -41,8 +41,8 @@ void Paint_engine::flush(bool optimize) {
     // Set cursor
     auto* focus_widg = Focus::focus_widget();
     if (focus_widg != nullptr) {
-        this->show_cursor(focus_widg->cursor());
-        if (focus_widg->cursor()) {
+        this->show_cursor(focus_widg->cursor_visible());
+        if (focus_widg->cursor_visible()) {
             auto x = focus_widg->x() + focus_widg->cursor_x() +
                      west_border_offset(focus_widg->border);
             auto y = focus_widg->y() + focus_widg->cursor_y() +

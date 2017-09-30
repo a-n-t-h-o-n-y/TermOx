@@ -114,14 +114,6 @@ bool Event_handler::key_release_event(Key key, char symbol) {
     return false;
 }
 
-bool Event_handler::hide_event() {
-    return true;
-}
-
-bool Event_handler::show_event() {
-    return true;
-}
-
 bool Event_handler::focus_in_event() {
     return true;
 }

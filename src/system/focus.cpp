@@ -41,8 +41,8 @@ Widget* next_tab_focus() {
     // Find the next focus widget
     for (Widget* child : widgets) {
         if (child != nullptr) {
-            if (child->focus_policy() == Focus_policy::Tab ||
-                child->focus_policy() == Focus_policy::Strong) {
+            if (child->focus_policy == Focus_policy::Tab ||
+                child->focus_policy == Focus_policy::Strong) {
                 return child;
             }
         }
@@ -61,15 +61,15 @@ Widget* Focus::focus_widget() {
 }
 
 void Focus::mouse_press(Widget* clicked) {
-    if (clicked->focus_policy() == Focus_policy::Click ||
-        clicked->focus_policy() == Focus_policy::Strong) {
+    if (clicked->focus_policy == Focus_policy::Click ||
+        clicked->focus_policy == Focus_policy::Strong) {
         Focus::set_focus_to(clicked);
     }
 }
 
 bool Focus::tab_press() {
-    if (focus_widget_->focus_policy() == Focus_policy::Tab ||
-        focus_widget_->focus_policy() == Focus_policy::Strong) {
+    if (focus_widget_->focus_policy == Focus_policy::Tab ||
+        focus_widget_->focus_policy == Focus_policy::Strong) {
         Widget* next = next_tab_focus();
         Focus::set_focus_to(next);
         return true;
@@ -78,8 +78,7 @@ bool Focus::tab_press() {
 }
 
 void Focus::set_focus_to(Widget* new_focus) {
-    if (new_focus == nullptr ||
-        new_focus->focus_policy() == Focus_policy::None) {
+    if (new_focus == nullptr || new_focus->focus_policy == Focus_policy::None) {
         return;
     }
     if (focus_widget_ != nullptr) {

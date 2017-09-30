@@ -8,7 +8,7 @@ using namespace cppurses;
 class Center_label : public Widget {
    public:
     Center_label(Glyph_string text) : label_{std::move(text)} {
-        this->brush().add_attributes(Attribute::Bold);
+        this->brush.add_attributes(Attribute::Bold);
         this->height_policy.type(Size_policy::Fixed);
         this->height_policy.hint(1);
     }
@@ -67,7 +67,7 @@ int main() {
 
     // Textbox
     auto& text_area = tx_attr_layout.make_child<Textbox>();
-    text_area.brush().add_attributes(background(Color::Dark_gray));
+    text_area.brush.add_attributes(background(Color::Dark_gray));
     enable_border(text_area);
     set_corners(text_area.border, "╭", "╮", "╰", "╯");
 
@@ -136,15 +136,15 @@ int main() {
     auto& load_btn = save_area.make_child<Push_button>("Load");
     load_btn.width_policy.type(Size_policy::Fixed);
     load_btn.width_policy.hint(6);
-    load_btn.set_background(Color::Blue);
+    set_background(load_btn, Color::Blue);
     auto& filename_edit = save_area.make_child<Textbox>();
     filename_edit.disable_scrollwheel();
-    filename_edit.set_background(Color::White);
-    filename_edit.set_foreground(Color::Black);
+    set_background(filename_edit, Color::White);
+    set_foreground(filename_edit, Color::Black);
     auto& save_btn = save_area.make_child<Push_button>("Save");
     save_btn.width_policy.type(Size_policy::Fixed);
     save_btn.width_policy.hint(6);
-    save_btn.set_background(Color::Blue);
+    set_background(save_btn, Color::Blue);
 
     // TODO
     // Slot<void(Glyph_string)> set_text()

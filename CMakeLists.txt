@@ -69,6 +69,7 @@ set(WIDGET_SOURCES
     "src/widget/checkbox.cpp"
     "src/widget/titlebar.cpp"
     "src/widget/text_display.cpp"
+    "src/widget/text_display_slots.cpp"
     "src/widget/color_chooser.cpp"
     "src/widget/menu.cpp"
     "src/widget/size_policy.cpp"

@@ -10,7 +10,7 @@ namespace cppurses {
 
 Textbox_base::Textbox_base(Glyph_string contents)
     : Text_display{std::move(contents)} {
-    this->enable_cursor();
+    this->show_cursor();
 };
 
 void Textbox_base::set_cursor(Coordinates pos) {
@@ -23,7 +23,7 @@ void Textbox_base::set_cursor(std::size_t x, std::size_t y) {
 
 void Textbox_base::set_cursor(std::size_t index) {
     auto coords = this->display_position(index);
-    this->move_cursor(coords);
+    move_cursor(*this, coords);
     cursor_moved(coords);
 }
 

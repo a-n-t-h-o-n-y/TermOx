@@ -50,7 +50,7 @@ class List : public Widget {
 
 template <typename T>
 List<T>::List() {
-    this->set_focus_policy(Focus_policy::Strong);
+    this->focus_policy = Focus_policy::Strong;
 }
 
 template <typename T>
@@ -95,7 +95,7 @@ bool List<T>::paint_event() {
         p.put(display, 0, count);
         ++count;
     }
-    this->move_cursor(0, 0);
+    move_cursor(*this, 0, 0);
     return Widget::paint_event();
 }
 

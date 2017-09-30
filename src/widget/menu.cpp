@@ -9,7 +9,7 @@
 namespace cppurses {
 
 Menu::Menu(Glyph_string title) : menu_title_{std::move(title)} {
-    this->set_focus_policy(Focus_policy::Strong);
+    this->focus_policy = Focus_policy::Strong;
 }
 
 void Menu::add_item(Menu_item item) {

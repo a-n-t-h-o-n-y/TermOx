@@ -14,22 +14,22 @@ void Color_chooser::initialize() {
     this->height_policy.hint(2);
     this->height_policy.type(Size_policy::Fixed);
 
-    black_.set_background(Color::Black);
-    dark_red_.set_background(Color::Dark_red);
-    dark_blue_.set_background(Color::Dark_blue);
-    dark_gray_.set_background(Color::Dark_gray);
-    brown_.set_background(Color::Brown);
-    green_.set_background(Color::Green);
-    red_.set_background(Color::Red);
-    gray_.set_background(Color::Gray);
-    blue_.set_background(Color::Blue);
-    orange_.set_background(Color::Orange);
-    light_gray_.set_background(Color::Light_gray);
-    light_green_.set_background(Color::Light_green);
-    violet_.set_background(Color::Violet);
-    light_blue_.set_background(Color::Light_blue);
-    yellow_.set_background(Color::Yellow);
-    white_.set_background(Color::White);
+    set_background(black_, Color::Black);
+    set_background(dark_red_, Color::Dark_red);
+    set_background(dark_blue_, Color::Dark_blue);
+    set_background(dark_gray_, Color::Dark_gray);
+    set_background(brown_, Color::Brown);
+    set_background(green_, Color::Green);
+    set_background(red_, Color::Red);
+    set_background(gray_, Color::Gray);
+    set_background(blue_, Color::Blue);
+    set_background(orange_, Color::Orange);
+    set_background(light_gray_, Color::Light_gray);
+    set_background(light_green_, Color::Light_green);
+    set_background(violet_, Color::Violet);
+    set_background(light_blue_, Color::Light_blue);
+    set_background(yellow_, Color::Yellow);
+    set_background(white_, Color::White);
 
     black_.clicked.connect([this] { color_changed(Color::Black); });
     dark_red_.clicked.connect([this] { color_changed(Color::Dark_red); });

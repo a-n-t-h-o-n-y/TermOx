@@ -17,13 +17,13 @@ namespace {
 
 cppurses::Widget* find_widget_at(std::size_t x, std::size_t y) {
     cppurses::Widget* widg = cppurses::System::head();
-    if (widg == nullptr || !widg->has_coordinates(x, y)) {
+    if (widg == nullptr || !has_coordinates(*widg, x, y)) {
         return nullptr;
     }
     bool keep_going = true;
     while (keep_going && !widg->children().empty()) {
         for (cppurses::Widget* child : widg->children()) {
-            if (child->has_coordinates(x, y) && child->enabled()) {
+            if (has_coordinates(*child, x, y) && child->enabled()) {
                 widg = child;
                 keep_going = true;
                 break;

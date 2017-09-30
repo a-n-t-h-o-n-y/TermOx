@@ -71,8 +71,8 @@ class Event_handler {
     virtual bool key_press_event(Key key, char symbol);
     virtual bool key_release_event(Key key, char symbol);
     virtual bool close_event() = 0;
-    virtual bool hide_event();
-    virtual bool show_event();
+    virtual bool hide_event() = 0;
+    virtual bool show_event() = 0;
     virtual bool focus_in_event();
     virtual bool focus_out_event();
     virtual bool deferred_delete_event(Event_handler* to_delete) = 0;

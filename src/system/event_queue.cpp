@@ -42,7 +42,7 @@ void Event_queue::remove_dd_children(const Event& new_event) {
         if (event_ptr->type() == Event::DeferredDelete) {
             Widget* child =
                 static_cast<Deferred_delete_event&>(*event_ptr).to_delete();
-            return parent->has_child(child);
+            return parent->contains_child(child);
         }
         return false;
     };
