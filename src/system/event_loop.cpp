@@ -1,6 +1,9 @@
 #include "system/event_loop.hpp"
+#include "system/event.hpp"
 #include "system/system.hpp"
 #include "system/detail/abstract_event_listener.hpp"
+#include "painter/detail/paint_buffer.hpp"
+#include <utility>
 
 namespace cppurses {
 

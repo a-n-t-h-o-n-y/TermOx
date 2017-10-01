@@ -1,7 +1,10 @@
 #include "widget/widgets/menu.hpp"
-#include <signals/signals.hpp>
+#include <signals/slot.hpp>
+#include <cstddef>
+#include <iterator>
 #include <string>
 #include <utility>
+#include "painter/attribute.hpp"
 #include "painter/glyph_string.hpp"
 #include "painter/painter.hpp"
 #include "widget/focus_policy.hpp"

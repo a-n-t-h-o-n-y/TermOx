@@ -4,7 +4,9 @@
 #include "system/system.hpp"
 #include "widget/size_policy.hpp"
 #include "widget/widgets/push_button.hpp"
+#include "widget/widget.hpp"
 #include <signals/signals.hpp>
+#include <utility>
 
 namespace cppurses {
 

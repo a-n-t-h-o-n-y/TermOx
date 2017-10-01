@@ -1,6 +1,5 @@
 #ifndef PAINTER_BRUSH_HPP
 #define PAINTER_BRUSH_HPP
-
 #include "painter/attribute.hpp"
 #include "painter/color.hpp"
 #include <optional/optional.hpp>

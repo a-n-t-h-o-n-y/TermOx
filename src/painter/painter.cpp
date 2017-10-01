@@ -1,13 +1,16 @@
 #include "painter/painter.hpp"
 #include <cstddef>
 #include <cstring>
+#include "painter/brush.hpp"
 #include "painter/color.hpp"
 #include "painter/glyph.hpp"
 #include "painter/glyph_string.hpp"
+#include "painter/detail/paint_buffer.hpp"
 #include "widget/border.hpp"
 #include "widget/coordinates.hpp"
 #include "widget/widget.hpp"
 #include "system/system.hpp"
+#include <optional/optional.hpp>
 
 namespace cppurses {
 
@@ -24,7 +27,8 @@ void Painter::put(const Glyph_string& text, std::size_t x, std::size_t y) {
                       widget_->cursor_y();
         if (std::strcmp(g.c_str(), "\n") == 0) {
             move_cursor(*widget_, 0, widget_->cursor_y() + 1);
-        }  // TODO else if ( == \t) then move to next x coord divisible by tabspace
+        }  // TODO else if ( == \t) then move to next x coord divisible by
+           // tabspace
            // should be here and textbox should just account for it.
         else {
             System::paint_buffer()->stage(glob_x, glob_y, g);

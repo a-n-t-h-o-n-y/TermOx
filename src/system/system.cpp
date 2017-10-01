@@ -1,21 +1,20 @@
 #include "system/system.hpp"
-#include "painter/color.hpp"
 #include "painter/detail/paint_buffer.hpp"
 #include "painter/palette.hpp"
 #include "system/event.hpp"
 #include "system/event_loop.hpp"
 #include "system/events/paint_event.hpp"
 #include "system/detail/ncurses_event_listener.hpp"
+#include "system/detail/event_queue.hpp"
 #include "widget/widget.hpp"
-#include "widget/focus_policy.hpp"
-#include <signals/signals.hpp>
-#include <algorithm>
-#include <iterator>
+#include <signals/slot.hpp>
 #include <memory>
 #include <utility>
-#include <vector>
 
 namespace cppurses {
+namespace detail {
+class Abstract_event_listener;
+}  // namespace detail
 
 sig::Slot<void()> System::quit = []() { System::exit(); };  // NOLINT
 

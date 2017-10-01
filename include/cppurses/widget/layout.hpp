@@ -1,10 +1,8 @@
 #ifndef WIDGET_LAYOUT_HPP
 #define WIDGET_LAYOUT_HPP
-
 #include "widget/widget.hpp"
 
 namespace cppurses {
-class Paint_event;
 
 // Base class for Layouts
 class Layout : public Widget {

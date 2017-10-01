@@ -5,7 +5,6 @@
 #include "system/events/resize_event.hpp"
 
 namespace cppurses {
-class Paint_event;
 
 Layout::Layout() {
     System::post_event<Move_event>(this, 0, 0);

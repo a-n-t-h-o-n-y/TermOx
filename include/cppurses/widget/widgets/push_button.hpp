@@ -1,10 +1,9 @@
 #ifndef WIDGET_WIDGETS_PUSH_BUTTON_HPP
 #define WIDGET_WIDGETS_PUSH_BUTTON_HPP
-
 #include <signals/signals.hpp>
-#include <utility>
+#include <cstddef>
+#include <cstdint>
 #include "painter/glyph_string.hpp"
-#include "system/events/paint_event.hpp"
 #include "system/mouse_button.hpp"
 #include "widget/widget.hpp"
 

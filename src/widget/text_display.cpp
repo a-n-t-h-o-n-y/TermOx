@@ -1,12 +1,12 @@
 #include "widget/widgets/text_display.hpp"
-
 #include "painter/glyph_string.hpp"
 #include "painter/painter.hpp"
-#include "system/events/resize_event.hpp"
 #include "widget/coordinates.hpp"
+#include <signals/signal.hpp>
 #include <algorithm>
 #include <cstddef>
 #include <iterator>
+#include <string>
 #include <utility>
 
 namespace cppurses {

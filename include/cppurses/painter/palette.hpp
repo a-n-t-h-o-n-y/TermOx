@@ -2,7 +2,6 @@
 #define PAINTER_PALETTE_HPP
 #include "painter/color.hpp"
 #include <array>
-#include <cstddef>
 #include <cstdint>
 
 namespace cppurses {

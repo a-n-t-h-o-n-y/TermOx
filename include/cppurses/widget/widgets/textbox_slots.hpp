@@ -1,10 +1,10 @@
 #ifndef WIDGET_WIDGETS_TEXTBOX_SLOTS_HPP
 #define WIDGET_WIDGETS_TEXTBOX_SLOTS_HPP
-#include "widget/widgets/textbox.hpp"
 #include <signals/slot.hpp>
 #include <cstddef>
 
 namespace cppurses {
+class Textbox;
 
 namespace slot {
 

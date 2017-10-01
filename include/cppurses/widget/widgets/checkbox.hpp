@@ -6,10 +6,9 @@
 #include "system/mouse_button.hpp"
 #include <signals/signals.hpp>
 #include <cstddef>
+#include <cstdint>
 
 namespace cppurses {
-class Mouse_event;
-class Paint_event;
 
 class Checkbox : public Widget {
    public:

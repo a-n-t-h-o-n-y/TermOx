@@ -8,11 +8,13 @@
 #include "system/system.hpp"
 #include "system/focus.hpp"
 #include "widget/widget.hpp"
+#include "widget/border.hpp"
 
 #include <ncurses.h>
 
 #include <cstddef>
 #include <memory>
+#include <vector>
 
 namespace {
 

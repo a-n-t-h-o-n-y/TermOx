@@ -2,7 +2,10 @@
 #include "system/events/focus_event.hpp"
 #include "system/system.hpp"
 #include "widget/widget.hpp"
+#include "widget/focus_policy.hpp"
 #include <algorithm>
+#include <iterator>
+#include <memory>
 #include <vector>
 
 namespace {

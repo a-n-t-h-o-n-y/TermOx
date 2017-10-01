@@ -1,7 +1,9 @@
 #include "system/detail/event_invoker.hpp"
+#include "system/detail/event_queue.hpp"
 #include "system/event.hpp"
-#include "system/system.hpp"
-#include "system/event_handler.hpp"
+#include <iterator>
+#include <memory>
+#include <utility>
 
 namespace {
 using namespace cppurses;
@@ -16,6 +18,7 @@ void send_event(const Event& event) {
 }  // namespace
 
 namespace cppurses {
+class Event_handler;
 namespace detail {
 
 void Event_invoker::invoke(Event_queue& queue,

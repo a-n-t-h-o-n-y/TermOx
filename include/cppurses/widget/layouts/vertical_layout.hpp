@@ -1,6 +1,5 @@
 #ifndef WIDGET_LAYOUTS_VERTICAL_LAYOUT_HPP
 #define WIDGET_LAYOUTS_VERTICAL_LAYOUT_HPP
-
 #include "widget/layout.hpp"
 #include <cstddef>
 #include <functional>
@@ -8,6 +7,7 @@
 #include <vector>
 
 namespace cppurses {
+class Widget;
 
 class Vertical_layout : public Layout {
    protected:

@@ -3,6 +3,7 @@
 #include "painter/painter.hpp"
 #include "system/mouse_button.hpp"
 #include "widget/size_policy.hpp"
+#include <utility>
 
 namespace cppurses {
 

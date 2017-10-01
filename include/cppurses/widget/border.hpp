@@ -1,11 +1,9 @@
 #ifndef WIDGET_BORDER_HPP
 #define WIDGET_BORDER_HPP
-
 #include "painter/glyph.hpp"
 #include <cstddef>
 
 namespace cppurses {
-class Widget;
 
 struct Border {
    public:

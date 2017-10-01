@@ -1,11 +1,9 @@
 #include "widget/widgets/textbox.hpp"
 #include <cstddef>
-#include <iterator>
 #include <utility>
 #include "painter/glyph_string.hpp"
 #include "system/key.hpp"
 #include "system/mouse_button.hpp"
-#include "widget/coordinates.hpp"
 #include "widget/focus_policy.hpp"
 
 namespace cppurses {

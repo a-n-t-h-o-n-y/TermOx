@@ -1,8 +1,10 @@
 #include "painter/detail/paint_buffer.hpp"
 #include "painter/glyph.hpp"
 #include "painter/glyph_matrix.hpp"
+#include "painter/palette.hpp"
 #include "system/focus.hpp"
 #include "widget/widget.hpp"
+#include "widget/border.hpp"
 #include <cstddef>
 
 namespace cppurses {

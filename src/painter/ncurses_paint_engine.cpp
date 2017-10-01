@@ -1,8 +1,10 @@
 #include "painter/detail/ncurses_paint_engine.hpp"
 #include "painter/attribute.hpp"
+#include "painter/brush.hpp"
 #include "painter/color.hpp"
 #include "painter/glyph.hpp"
 #include "painter/detail/paint_buffer.hpp"
+#include <optional/optional.hpp>
 #include <ncurses.h>
 #include <string>
 #include <cstddef>

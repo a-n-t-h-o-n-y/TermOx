@@ -1,8 +1,6 @@
 #ifndef PAINTER_GLYPH_HPP
 #define PAINTER_GLYPH_HPP
-
 #include "painter/brush.hpp"
-#include "painter/color.hpp"
 #include <array>
 #include <ostream>
 #include <stdexcept>

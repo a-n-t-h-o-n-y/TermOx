@@ -8,8 +8,6 @@
 #include "widget/widgets/textbox_base.hpp"
 
 namespace cppurses {
-class Key_event;
-class Mouse_event;
 
 class Textbox : public Textbox_base {
    public:

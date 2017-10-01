@@ -1,11 +1,13 @@
 #ifndef PAINTER_DETAIL_PAINT_BUFFER_HPP
 #define PAINTER_DETAIL_PAINT_BUFFER_HPP
+#include "painter/color.hpp"
 #include "painter/glyph_matrix.hpp"
 #include "painter/detail/ncurses_paint_engine.hpp"
 #include "painter/palette.hpp"
 #include <cstddef>
 
 namespace cppurses {
+class Glyph;
 
 class Paint_buffer {
    public:

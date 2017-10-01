@@ -4,6 +4,8 @@
 #include "system/events/disable_event.hpp"
 #include "system/mouse_button.hpp"
 #include <signals/signals.hpp>
+#include <algorithm>
+#include <iterator>
 #include <cstddef>
 #include <vector>
 

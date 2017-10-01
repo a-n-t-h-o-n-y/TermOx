@@ -1,14 +1,9 @@
 #ifndef WIDGET_WIDGETS_MENU_HPP
 #define WIDGET_WIDGETS_MENU_HPP
+#include <signals/slot.hpp>
 #include <cstddef>
-#include <signals/signals.hpp>
-#include <utility>
 #include <vector>
-#include "painter/attribute.hpp"
-#include "painter/color.hpp"
 #include "painter/glyph_string.hpp"
-#include "painter/painter.hpp"
-#include "system/events/key_event.hpp"
 #include "system/key.hpp"
 #include "widget/widget.hpp"
 

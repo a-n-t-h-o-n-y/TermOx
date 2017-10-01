@@ -1,11 +1,8 @@
 #ifndef PAINTER_GLYPH_MATRIX_HPP
 #define PAINTER_GLYPH_MATRIX_HPP
-
 #include "painter/glyph.hpp"
 #include <cstddef>
 #include <vector>
-
-#include <fstream>
 
 namespace cppurses {
 

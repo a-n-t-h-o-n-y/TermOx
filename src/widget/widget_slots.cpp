@@ -11,7 +11,6 @@
 #include "widget/coordinates.hpp"
 #include "widget/widget.hpp"
 #include <signals/slot.hpp>
-#include <functional>
 
 namespace cppurses {
 namespace slot {

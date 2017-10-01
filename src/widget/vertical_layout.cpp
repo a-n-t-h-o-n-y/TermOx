@@ -4,9 +4,11 @@
 #include "system/system.hpp"
 #include "widget/border.hpp"
 #include "widget/size_policy.hpp"
+#include "widget/widget.hpp"
 #include <cstddef>
 #include <deque>
 #include <functional>
+#include <iterator>
 #include <tuple>
 #include <vector>
 

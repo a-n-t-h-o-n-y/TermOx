@@ -3,6 +3,7 @@
 #include "system/events/deferred_delete_event.hpp"
 #include "widget/widget.hpp"
 #include <algorithm>
+#include <iterator>
 #include <memory>
 
 namespace cppurses {

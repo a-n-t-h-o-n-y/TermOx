@@ -3,7 +3,7 @@
 #include "widget/layouts/horizontal_layout.hpp"
 #include "widget/widget.hpp"
 #include "widget/widgets/push_button.hpp"
-#include <signals/signals.hpp>
+#include <signals/signal.hpp>
 
 namespace cppurses {
 

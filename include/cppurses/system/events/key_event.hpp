@@ -1,7 +1,7 @@
 #ifndef SYSTEM_EVENTS_KEY_EVENT_HPP
 #define SYSTEM_EVENTS_KEY_EVENT_HPP
-
 #include "system/events/input_event.hpp"
+#include "system/event.hpp"
 #include "system/key.hpp"
 
 namespace cppurses {

@@ -3,6 +3,8 @@
 #include "system/key.hpp"
 #include "system/mouse_button.hpp"
 #include <signals/signal.hpp>
+#include <cstdint>
+#include <cstddef>
 #include <vector>
 
 namespace cppurses {

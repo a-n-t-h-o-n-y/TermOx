@@ -33,7 +33,7 @@ class Size_policy {
     void max(std::size_t value);
     std::size_t max() const;
 
-    Size_policy(Widget* owner);
+    explicit Size_policy(Widget* owner);
 
    private:
     Size_policy::Type type_{Type::Ignored};

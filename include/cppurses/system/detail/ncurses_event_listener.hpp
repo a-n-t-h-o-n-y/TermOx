@@ -5,6 +5,7 @@
 
 namespace cppurses {
 class Widget;
+class Event;
 namespace detail {
 
 class NCurses_event_listener : public Abstract_event_listener {

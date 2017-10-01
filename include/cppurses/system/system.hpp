@@ -1,9 +1,6 @@
 #ifndef SYSTEM_SYSTEM_HPP
 #define SYSTEM_SYSTEM_HPP
-#include "system/event.hpp"
 #include "system/event_loop.hpp"
-#include "painter/detail/paint_buffer.hpp"
-#include "painter/palette.hpp"
 #include <signals/slot.hpp>
 #include <memory>
 #include <utility>
@@ -13,6 +10,9 @@ namespace detail {
 class Abstract_event_listener;
 }  // namespace detail
 class Widget;
+class Event;
+class Paint_buffer;
+class Palette;
 
 class System {
    public:

@@ -1,8 +1,9 @@
 #include "widget/widgets/textbox_base.hpp"
 #include "painter/glyph_string.hpp"
-#include "system/events/resize_event.hpp"
 #include "widget/coordinates.hpp"
 #include "widget/widgets/text_display.hpp"
+#include "widget/widget.hpp"
+#include <signals/signal.hpp>
 #include <cstddef>
 #include <utility>
 

@@ -1,11 +1,11 @@
 #ifndef WIDGET_WIDGETS_TEXTBOX_BASE_SLOTS_HPP
 #define WIDGET_WIDGETS_TEXTBOX_BASE_SLOTS_HPP
-#include "widget/widgets/textbox_base.hpp"
 #include "widget/coordinates.hpp"
 #include <cstddef>
 #include <signals/slot.hpp>
 
 namespace cppurses {
+class Textbox_base;
 
 namespace slot {
 
