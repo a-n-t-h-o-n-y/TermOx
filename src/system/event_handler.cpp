@@ -3,6 +3,7 @@
 #include "system/events/enable_event.hpp"
 #include "system/events/disable_event.hpp"
 #include "system/mouse_button.hpp"
+#include "widget/coordinates.hpp"
 #include <signals/signals.hpp>
 #include <algorithm>
 #include <iterator>
@@ -10,6 +11,7 @@
 #include <vector>
 
 namespace cppurses {
+class Widget;
 
 Event_handler::~Event_handler() {
     destroyed(this);
@@ -70,7 +72,9 @@ bool Event_handler::mouse_press_event(Mouse_button button,
                                       std::size_t local_x,
                                       std::size_t local_y,
                                       std::uint8_t device_id) {
-    return false;
+    clicked(Coordinates{global_x, global_y});
+    clicked_xy(global_x, global_y);
+    return true;
 }
 
 bool Event_handler::mouse_release_event(Mouse_button button,
@@ -79,7 +83,9 @@ bool Event_handler::mouse_release_event(Mouse_button button,
                                         std::size_t local_x,
                                         std::size_t local_y,
                                         std::uint8_t device_id) {
-    return false;
+    click_released(Coordinates{global_x, global_y});
+    click_released_xy(global_x, global_y);
+    return true;
 }
 
 bool Event_handler::mouse_double_click_event(Mouse_button button,
@@ -88,7 +94,9 @@ bool Event_handler::mouse_double_click_event(Mouse_button button,
                                              std::size_t local_x,
                                              std::size_t local_y,
                                              std::uint8_t device_id) {
-    return false;
+    double_clicked(Coordinates{global_x, global_y});
+    double_clicked_xy(global_x, global_y);
+    return true;
 }
 
 bool Event_handler::mouse_wheel_event(Mouse_button button,
@@ -110,10 +118,12 @@ bool Event_handler::mouse_move_event(Mouse_button button,
 }
 
 bool Event_handler::key_press_event(Key key, char symbol) {
-    return false;
+    key_pressed(key);
+    return true;
 }
 
 bool Event_handler::key_release_event(Key key, char symbol) {
+    key_released(key);
     return false;
 }
 
@@ -127,17 +137,17 @@ bool Event_handler::focus_out_event() {
 
 // - - - - - - - - - - - - Event Filter Handlers - - - - - - - - - - - - - - - -
 bool Event_handler::child_added_event_filter(Event_handler* receiver,
-                                             Event_handler* child) {
+                                             Widget* child) {
     return false;
 }
 
 bool Event_handler::child_removed_event_filter(Event_handler* receiver,
-                                               Event_handler* child) {
+                                               Widget* child) {
     return false;
 }
 
 bool Event_handler::child_polished_event_filter(Event_handler* receiver,
-                                                Event_handler* child) {
+                                                Widget* child) {
     return false;
 }
 

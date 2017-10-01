@@ -85,13 +85,13 @@ class Widget : public Event_handler {
     sig::Signal<void(const std::string&)> name_changed;
     sig::Signal<void(std::size_t, std::size_t)> resized;
     sig::Signal<void(Coordinates)> moved;
-    sig::Signal<void(Coordinates)> clicked;
-    sig::Signal<void(Key)> key_pressed;
+    sig::Signal<void(std::size_t, std::size_t)> moved_xy;
     sig::Signal<void(Widget*)> child_added;
     sig::Signal<void(Widget*)> child_removed;
     sig::Signal<void()> focused_in;
     sig::Signal<void()> focused_out;
     sig::Signal<void(Coordinates)> cursor_moved;
+    sig::Signal<void(std::size_t, std::size_t)> cursor_moved_xy;
     sig::Signal<void(Color)> background_color_changed;
     sig::Signal<void(Color)> foreground_color_changed;
 
@@ -102,9 +102,9 @@ class Widget : public Event_handler {
     bool focus_out_event() override;
     bool clear_screen_event() override;
     bool deferred_delete_event(Event_handler* to_delete) override;
-    bool child_added_event(Event_handler* child) override;
-    bool child_removed_event(Event_handler* child) override;
-    bool child_polished_event(Event_handler* child) override;
+    bool child_added_event(Widget* child) override;
+    bool child_removed_event(Widget* child) override;
+    bool child_polished_event(Widget* child) override;
     bool show_event() override;
     bool hide_event() override;
     bool move_event(std::size_t new_x,

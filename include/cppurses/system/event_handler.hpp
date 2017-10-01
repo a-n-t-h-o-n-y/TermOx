@@ -2,12 +2,14 @@
 #define SYSTEM_EVENT_HANDLER_HPP
 #include "system/key.hpp"
 #include "system/mouse_button.hpp"
+#include "widget/coordinates.hpp"
 #include <signals/signal.hpp>
 #include <cstdint>
 #include <cstddef>
 #include <vector>
 
 namespace cppurses {
+class Widget;
 
 class Event_handler {
    public:
@@ -27,9 +29,9 @@ class Event_handler {
     const std::vector<Event_handler*>& get_event_filters() const;
 
     // - - - - - - - - - - - - - Event Handlers - - - - - - - - - - - - - - - -
-    virtual bool child_added_event(Event_handler* child) = 0;
-    virtual bool child_removed_event(Event_handler* child) = 0;
-    virtual bool child_polished_event(Event_handler* child) = 0;
+    virtual bool child_added_event(Widget* child) = 0;
+    virtual bool child_removed_event(Widget* child) = 0;
+    virtual bool child_polished_event(Widget* child) = 0;
     virtual bool enable_event();
     virtual bool disable_event();
     virtual bool move_event(std::size_t new_x,
@@ -83,11 +85,11 @@ class Event_handler {
 
     // - - - - - - - - - - - Event Filter Handlers - - - - - - - - - - - - - - -
     virtual bool child_added_event_filter(Event_handler* receiver,
-                                          Event_handler* child);
+                                          Widget* child);
     virtual bool child_removed_event_filter(Event_handler* receiver,
-                                            Event_handler* child);
+                                            Widget* child);
     virtual bool child_polished_event_filter(Event_handler* receiver,
-                                             Event_handler* child);
+                                             Widget* child);
     virtual bool enable_event_filter(Event_handler* receiver);
     virtual bool disable_event_filter(Event_handler* receiver);
     virtual bool move_event_filter(Event_handler* receiver,
@@ -153,6 +155,14 @@ class Event_handler {
 
     // Signals
     sig::Signal<void(Event_handler*)> destroyed;
+    sig::Signal<void(Coordinates)> clicked;
+    sig::Signal<void(std::size_t, std::size_t)> clicked_xy;
+    sig::Signal<void(Coordinates)> click_released;
+    sig::Signal<void(std::size_t, std::size_t)> click_released_xy;
+    sig::Signal<void(Coordinates)> double_clicked;
+    sig::Signal<void(std::size_t, std::size_t)> double_clicked_xy;
+    sig::Signal<void(Key)> key_pressed;
+    sig::Signal<void(Key)> key_released;
 
    private:
     std::vector<Event_handler*> event_filters_;

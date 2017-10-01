@@ -205,17 +205,19 @@ bool Widget::deferred_delete_event(Event_handler* to_delete) {
     return true;
 }
 
-bool Widget::child_added_event(Event_handler* child) {
+bool Widget::child_added_event(Widget* child) {
+    child_added(child);
     this->update();
     return true;
 }
 
-bool Widget::child_removed_event(Event_handler* child) {
+bool Widget::child_removed_event(Widget* child) {
+    child_removed(child);
     this->update();
     return true;
 }
 
-bool Widget::child_polished_event(Event_handler* child) {
+bool Widget::child_polished_event(Widget* child) {
     this->update();
     return true;
 }
@@ -238,6 +240,8 @@ bool Widget::move_event(std::size_t new_x,
                         std::size_t old_y) {
     this->set_x(new_x);
     this->set_y(new_y);
+    moved(Coordinates{new_x, new_y});
+    moved_xy(new_x, new_y);
     this->update();
     return true;
 }
@@ -248,6 +252,7 @@ bool Widget::resize_event(std::size_t new_width,
                           std::size_t old_height) {
     width_ = new_width;
     height_ = new_height;
+    resized(width_, height_);
     this->update();
     return true;
 }
@@ -342,15 +347,19 @@ void move_cursor(Widget& w, Coordinates c) {
 void move_cursor(Widget& w, std::size_t x, std::size_t y) {
     w.move_cursor_x(x);
     w.move_cursor_y(y);
+    w.cursor_moved(Coordinates{x, y});
+    w.cursor_moved_xy(x, y);
 }
 
 void set_background(Widget& w, Color c) {
     w.brush.set_background(c);
+    w.background_color_changed(c);
     w.update();
 }
 
 void set_foreground(Widget& w, Color c) {
     w.brush.set_foreground(c);
+    w.foreground_color_changed(c);
     w.update();
 }
 
