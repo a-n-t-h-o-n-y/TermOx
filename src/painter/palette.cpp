@@ -1,6 +1,6 @@
 #include "painter/palette.hpp"
 #include "painter/color.hpp"
-#include "painter/detail/paint_buffer.hpp"
+#include "painter/paint_buffer.hpp"
 #include "system/system.hpp"
 #include <cstddef>
 #include <cstdint>

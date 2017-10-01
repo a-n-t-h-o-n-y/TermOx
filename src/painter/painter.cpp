@@ -5,7 +5,7 @@
 #include "painter/color.hpp"
 #include "painter/glyph.hpp"
 #include "painter/glyph_string.hpp"
-#include "painter/detail/paint_buffer.hpp"
+#include "painter/paint_buffer.hpp"
 #include "widget/border.hpp"
 #include "widget/coordinates.hpp"
 #include "widget/widget.hpp"

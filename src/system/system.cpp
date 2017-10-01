@@ -1,5 +1,5 @@
 #include "system/system.hpp"
-#include "painter/detail/paint_buffer.hpp"
+#include "painter/paint_buffer.hpp"
 #include "painter/palette.hpp"
 #include "system/event.hpp"
 #include "system/event_loop.hpp"

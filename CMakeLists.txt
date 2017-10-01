@@ -111,10 +111,6 @@ install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 # Demos
 add_executable(notepad demos/notepad_demo.cpp)
 target_link_libraries(notepad cppurses ncurses)
-add_executable(menu demos/menu_demo.cpp)
-target_link_libraries(menu cppurses ncurses)
-add_executable(list demos/list_demo.cpp)
-target_link_libraries(list cppurses ncurses)
 
 # Tests
 # add_executable(testcppurses ${TEST_SOURCES})

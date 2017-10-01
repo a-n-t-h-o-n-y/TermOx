@@ -9,6 +9,7 @@
 #include "painter/glyph.hpp"
 #include "painter/glyph_matrix.hpp"
 #include "painter/glyph_string.hpp"
+#include "painter/paint_buffer.hpp"
 #include "painter/painter.hpp"
 #include "painter/palette.hpp"
 

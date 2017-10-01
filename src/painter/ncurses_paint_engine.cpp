@@ -3,7 +3,7 @@
 #include "painter/brush.hpp"
 #include "painter/color.hpp"
 #include "painter/glyph.hpp"
-#include "painter/detail/paint_buffer.hpp"
+#include "painter/paint_buffer.hpp"
 #include <optional/optional.hpp>
 #include <ncurses.h>
 #include <string>

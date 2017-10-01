@@ -1,4 +1,4 @@
-#include "painter/detail/paint_buffer.hpp"
+#include "painter/paint_buffer.hpp"
 #include "painter/glyph.hpp"
 #include "painter/glyph_matrix.hpp"
 #include "painter/palette.hpp"

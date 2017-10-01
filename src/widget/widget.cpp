@@ -2,7 +2,7 @@
 #include "painter/brush.hpp"
 #include "painter/color.hpp"
 #include "painter/painter.hpp"
-#include "painter/detail/paint_buffer.hpp"
+#include "painter/paint_buffer.hpp"
 #include "system/events/child_event.hpp"
 #include "system/events/clear_screen_event.hpp"
 #include "system/events/paint_event.hpp"
