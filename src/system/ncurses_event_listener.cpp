@@ -61,6 +61,15 @@ std::unique_ptr<Event> NCurses_event_listener::get_input() const {
     return event;
 }
 
+void NCurses_event_listener::enable_ctrl_characters() {
+    ::raw();
+}
+
+void NCurses_event_listener::disable_ctrl_characters() {
+    ::noraw();
+    ::cbreak();
+}
+
 #undef border  // NCurses macro, naming conflict.
 
 std::unique_ptr<Event> NCurses_event_listener::parse_mouse_event() const {

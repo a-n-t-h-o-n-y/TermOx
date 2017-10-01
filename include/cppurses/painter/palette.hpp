@@ -1,12 +1,17 @@
 #ifndef PAINTER_PALETTE_HPP
 #define PAINTER_PALETTE_HPP
-
 #include "painter/color.hpp"
 #include <array>
 #include <cstddef>
 #include <cstdint>
 
 namespace cppurses {
+
+struct RGB {
+    std::int16_t red;
+    std::int16_t green;
+    std::int16_t blue;
+};
 
 class Palette {
    public:
@@ -17,13 +22,19 @@ class Palette {
     Palette& operator=(Palette&&) noexcept = default;  // NOLINT
     virtual ~Palette() = default;
 
-    void set_rgb(Color c, std::int16_t r, std::int16_t g, std::int16_t b);
-    int red_value(Color c) const;
-    int green_value(Color c) const;
-    int blue_value(Color c) const;
+    void initialize();
+
+   protected:
+    void set_color(Color c, std::int16_t r, std::int16_t g, std::int16_t b);
+    void set_color(Color c, RGB values);
 
    private:
-    std::array<std::array<int, 3>, 16> definitions_{};
+    std::array<RGB, 16> definitions_;
+
+    RGB get_values(Color c) const;
+    std::int16_t red_value(Color c) const;
+    std::int16_t green_value(Color c) const;
+    std::int16_t blue_value(Color c) const;
 };
 
 class Standard_palette : public Palette {

@@ -10,6 +10,8 @@ namespace detail {
 class NCurses_event_listener : public Abstract_event_listener {
    public:
     std::unique_ptr<Event> get_input() const override;
+    void enable_ctrl_characters() override;
+    void disable_ctrl_characters() override;
 
    private:
     std::unique_ptr<Event> parse_mouse_event() const;

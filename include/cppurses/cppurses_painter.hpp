@@ -6,11 +6,9 @@
 #include "painter/attribute.hpp"
 #include "painter/brush.hpp"
 #include "painter/color.hpp"
-// #include "painter/geometry.hpp"
 #include "painter/glyph.hpp"
 #include "painter/glyph_matrix.hpp"
 #include "painter/glyph_string.hpp"
-#include "painter/paint_engine.hpp"
 #include "painter/painter.hpp"
 #include "painter/palette.hpp"
 

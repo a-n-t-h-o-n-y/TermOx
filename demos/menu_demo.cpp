@@ -5,8 +5,6 @@ using namespace cppurses;
 int main() {
     System sys;
     Horizontal_layout hl;
-    // hl.make_child<Textbox>(
-    //     Glyph_string{"Edit me", foreground(Color::Light_gray)});
     auto& menu = hl.make_child<Menu>("~ Set Background Color ~");
     set_foreground(menu, Color::Red);
     enable_border(menu);

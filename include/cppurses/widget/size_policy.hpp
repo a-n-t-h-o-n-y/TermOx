@@ -46,8 +46,5 @@ class Size_policy {
     void notify_parent() const;
 };
 
-// bool height_for_width = false; // put in widget?
-// bool width_for_height = false;
-
 }  // namespace cppurses
 #endif  // WIDGET_SIZE_POLICY_HPP

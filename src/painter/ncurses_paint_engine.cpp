@@ -1,12 +1,13 @@
 #include "painter/detail/ncurses_paint_engine.hpp"
 #include "painter/attribute.hpp"
 #include "painter/color.hpp"
+#include "painter/glyph.hpp"
+#include "painter/detail/paint_buffer.hpp"
 #include <ncurses.h>
 #include <string>
 #include <cstddef>
 #include <cstdint>
 
-// local namespace
 namespace {
 
 std::int16_t color_to_int(cppurses::Color c) {
@@ -63,39 +64,48 @@ void initialize_color_pairs() {
         }
     }
 }
+
 }  // namespace
 
 namespace cppurses {
 namespace detail {
 
-NCurses_paint_engine::NCurses_paint_engine() {
+NCurses_paint_engine::NCurses_paint_engine(const Paint_buffer& buffer)
+    : buffer_{buffer} {
     setenv("TERM", "xterm-256color", 1);
     ::setlocale(LC_ALL, "en_US.UTF-8");
     ::initscr();
-    this->set_ctrl_char(false);
     ::noecho();
     ::keypad(::stdscr, true);
     ::mousemask(ALL_MOUSE_EVENTS, nullptr);
     ::mouseinterval(0);
     ::start_color();
     ::assume_default_colors(240, 240);  // Sets color pair 0 to black/black
-    buffer_.resize(NCurses_paint_engine::screen_width(),
-                   NCurses_paint_engine::screen_height());
     initialize_color_pairs();
     this->hide_cursor();
 }
 
-void NCurses_paint_engine::set_ctrl_char(bool enable) {
-    if (enable) {
-        ::raw();
-    } else {
-        ::noraw();
-        ::cbreak();
-    }
-}
-
 NCurses_paint_engine::~NCurses_paint_engine() {
     ::endwin();
+}
+
+void NCurses_paint_engine::put_glyph(const Glyph& g) {
+    for (const Attribute& attr : g.brush().attributes()) {
+        this->set_attribute(attr);
+    }
+    if (g.brush().background_color()) {
+        this->set_background_color(*g.brush().background_color());
+    }
+    if (g.brush().foreground_color()) {
+        this->set_foreground_color(*g.brush().foreground_color());
+    }
+    this->put_string(g.c_str());
+    this->clear_attributes();
+}
+
+void NCurses_paint_engine::put(std::size_t x, std::size_t y, const Glyph& g) {
+    this->move(x, y);
+    this->put_glyph(g);
 }
 
 void NCurses_paint_engine::touch_all() {
@@ -116,14 +126,12 @@ void NCurses_paint_engine::hide_cursor(bool hide) {
 std::size_t NCurses_paint_engine::screen_width() {
     int x{0}, y{0};
     getmaxyx(stdscr, y, x);
-    buffer_.resize(x, y);
     return x;
 }
 
 std::size_t NCurses_paint_engine::screen_height() {
     int x{0}, y{0};
     getmaxyx(stdscr, y, x);
-    buffer_.resize(x, y);
     return y;
 }
 

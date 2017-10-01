@@ -4,11 +4,10 @@
 #include "painter/color.hpp"
 #include "painter/glyph.hpp"
 #include "painter/glyph_string.hpp"
-#include "painter/paint_engine.hpp"
-#include "system/system.hpp"
 #include "widget/border.hpp"
 #include "widget/coordinates.hpp"
 #include "widget/widget.hpp"
+#include "system/system.hpp"
 
 namespace cppurses {
 
@@ -25,17 +24,16 @@ void Painter::put(const Glyph_string& text, std::size_t x, std::size_t y) {
                       widget_->cursor_y();
         if (std::strcmp(g.c_str(), "\n") == 0) {
             move_cursor(*widget_, 0, widget_->cursor_y() + 1);
-        }  // else if ( == \t) then move to next x coord divisible by tabspace
+        }  // TODO else if ( == \t) then move to next x coord divisible by tabspace
            // should be here and textbox should just account for it.
         else {
-            System::paint_engine()->put(glob_x, glob_y, g);
+            System::paint_buffer()->stage(glob_x, glob_y, g);
             move_cursor(*widget_, widget_->cursor_x() + 1, widget_->cursor_y());
         }
     }
     if (!move_cursor_on_put) {
         move_cursor(*widget_, original_position.x, original_position.y);
     }
-    System::paint_engine()->clear_attributes();
 }
 
 void Painter::put(const Glyph_string& text, Coordinates position) {
@@ -164,9 +162,8 @@ void Painter::unbound_put_string(const Glyph_string& gs,
                                  std::size_t glob_y) {
     for (Glyph g : gs) {
         add_default_attributes(&g);
-        System::paint_engine()->put(glob_x++, glob_y, g);
+        System::paint_buffer()->stage(glob_x++, glob_y, g);
     }
-    System::paint_engine()->clear_attributes();
 }
 
 void Painter::unbound_line(std::size_t glob_x1,

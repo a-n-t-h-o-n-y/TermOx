@@ -181,7 +181,7 @@ bool Widget::close_event() {
 }
 
 bool Widget::focus_in_event() {
-    System::paint_engine()->move(this->x() + this->cursor_x(),
+    System::paint_buffer()->move(this->x() + this->cursor_x(),
                                  this->y() + this->cursor_y());
     focused_in();
     return true;
@@ -198,7 +198,7 @@ bool Widget::paint_event() {
         p.border(border);
     }
     // Might not need below if focus widget sets this afterwards, on no focus?
-    System::paint_engine()->move(this->x() + this->cursor_x(),
+    System::paint_buffer()->move(this->x() + this->cursor_x(),
                                  this->y() + this->cursor_y());
     return true;
 }

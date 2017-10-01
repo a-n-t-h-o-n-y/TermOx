@@ -86,48 +86,32 @@ int main() {
 
     // Attributes Checkboxes - Connect Signals to Slots
     auto& al = attr_layout.make_child<Attribute_select>();
-    // auto set_attr = text_area.set_attribute;
     al.bold.checked.connect(slot::add_new_text_attribute(text_area, A::Bold));
-    // al.bold.checked.connect([&set_attr] { set_attr(A::Bold); });
     al.italic.checked.connect(
         slot::add_new_text_attribute(text_area, A::Italic));
-    // al.italic.checked.connect([&set_attr] { set_attr(A::Italic); });
     al.underline.checked.connect(
         slot::add_new_text_attribute(text_area, A::Underline));
-    // al.underline.checked.connect([&set_attr] { set_attr(A::Underline); });
     al.standout.checked.connect(
         slot::add_new_text_attribute(text_area, A::Standout));
-    // al.standout.checked.connect([&set_attr] { set_attr(A::Standout); });
     al.dim.checked.connect(slot::add_new_text_attribute(text_area, A::Dim));
-    // al.dim.checked.connect([&set_attr] { set_attr(A::Dim); });
     al.inverse.checked.connect(
         slot::add_new_text_attribute(text_area, A::Inverse));
-    // al.inverse.checked.connect([&set_attr] { set_attr(A::Inverse); });
     al.invisible.checked.connect(
         slot::add_new_text_attribute(text_area, A::Invisible));
-    // al.invisible.checked.connect([&set_attr] { set_attr(A::Invisible); });
-    // auto rem_attr = text_area.remove_attribute;
     al.bold.unchecked.connect(
         slot::remove_new_text_attribute(text_area, A::Bold));
-    // al.bold.unchecked.connect([&rem_attr] { rem_attr(A::Bold); });
     al.italic.unchecked.connect(
         slot::remove_new_text_attribute(text_area, A::Italic));
-    // al.italic.unchecked.connect([&rem_attr] { rem_attr(A::Italic); });
     al.underline.unchecked.connect(
         slot::remove_new_text_attribute(text_area, A::Underline));
-    // al.underline.unchecked.connect([&rem_attr] { rem_attr(A::Underline); });
     al.standout.unchecked.connect(
         slot::remove_new_text_attribute(text_area, A::Standout));
-    // al.standout.unchecked.connect([&rem_attr] { rem_attr(A::Standout); });
     al.dim.unchecked.connect(
         slot::remove_new_text_attribute(text_area, A::Dim));
-    // al.dim.unchecked.connect([&rem_attr] { rem_attr(A::Dim); });
     al.inverse.unchecked.connect(
         slot::remove_new_text_attribute(text_area, A::Inverse));
-    // al.inverse.unchecked.connect([&rem_attr] { rem_attr(A::Inverse); });
     al.invisible.unchecked.connect(
         slot::remove_new_text_attribute(text_area, A::Invisible));
-    // al.invisible.unchecked.connect([&rem_attr] { rem_attr(A::Invisible); });
 
     // Save/Load area
     auto& save_area = main_layout.make_child<Horizontal_layout>();
@@ -151,7 +135,6 @@ int main() {
     // load_btn.file_loaded.connect(slot::set_text(text_area));
 
     // Signals and Slots
-    // auto set_text = text_area.set_text;
     load_btn.clicked.connect([&text_area, &filename_edit] {
         text_area.set_text(load_file(filename_edit.contents().str()));
     });

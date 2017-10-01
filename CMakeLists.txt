@@ -45,7 +45,6 @@ set(SYSTEM_SOURCES
 set(PAINTER_SOURCES
     "src/painter/ncurses_paint_engine.cpp"
 	"src/painter/painter.cpp"
-	"src/painter/paint_engine.cpp"
 	"src/painter/palette.cpp"
 	"src/painter/glyph.cpp"
 	"src/painter/brush.cpp"

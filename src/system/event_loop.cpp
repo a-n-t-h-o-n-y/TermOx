@@ -1,7 +1,6 @@
 #include "system/event_loop.hpp"
 #include "system/system.hpp"
 #include "system/detail/abstract_event_listener.hpp"
-// #include "system/detail/thread_data.hpp"
 
 namespace cppurses {
 
@@ -22,7 +21,7 @@ void Event_loop::process_events() {
     invoker_.invoke(event_queue);
     if (!exit_) {
         invoker_.invoke(event_queue, Event::DeferredDelete);
-        System::paint_engine()->flush(true);
+        System::paint_buffer()->flush(true);
         // Blocking Call
         auto event_ptr = System::event_listener()->get_input();
         event_queue.append(std::move(event_ptr));

@@ -1,6 +1,6 @@
 #include "system/system.hpp"
 #include "painter/color.hpp"
-#include "painter/paint_engine.hpp"
+#include "painter/detail/paint_buffer.hpp"
 #include "painter/palette.hpp"
 #include "system/event.hpp"
 #include "system/event_loop.hpp"
@@ -21,8 +21,7 @@ sig::Slot<void()> System::quit = []() { System::exit(); };  // NOLINT
 
 Widget* System::head_ = nullptr;  // NOLINT
 Event_loop System::event_loop_;
-std::unique_ptr<detail::NCurses_paint_engine> System::engine_ =
-    nullptr;  // NOLINT
+std::unique_ptr<Paint_buffer> System::paint_buffer_ = nullptr;  // NOLINT
 std::unique_ptr<detail::Abstract_event_listener> System::event_listener_ =
     std::make_unique<detail::NCurses_event_listener>();  // NOLINT
 
@@ -48,24 +47,23 @@ detail::Abstract_event_listener* System::event_listener() {
     return event_listener_.get();
 }
 
-Paint_engine* System::paint_engine() {
-    return engine_.get();
+Paint_buffer* System::paint_buffer() {
+    return paint_buffer_.get();
 }
 
-void System::set_paint_engine(
-    std::unique_ptr<detail::NCurses_paint_engine> engine) {
-    engine_ = std::move(engine);
-    if (engine_) {
+void System::set_paint_buffer(std::unique_ptr<Paint_buffer> buffer) {
+    paint_buffer_ = std::move(buffer);
+    if (paint_buffer_ != nullptr) {
         System::post_event<Paint_event>(System::head());
     }
 }
 
 unsigned System::max_width() {
-    return System::paint_engine()->screen_width();
+    return System::paint_buffer()->update_width();
 }
 
 unsigned System::max_height() {
-    return System::paint_engine()->screen_height();
+    return System::paint_buffer()->update_height();
 }
 
 Widget* System::head() {
@@ -74,74 +72,33 @@ Widget* System::head() {
 
 void System::set_palette(std::unique_ptr<Palette> palette) {
     system_palette_ = std::move(palette);
-    Palette* p = System::palette();
-
-    System::paint_engine()->set_rgb(Color::Black, p->red_value(Color::Black),
-                                    p->green_value(Color::Black),
-                                    p->blue_value(Color::Black));
-    System::paint_engine()->set_rgb(
-        Color::Dark_red, p->red_value(Color::Dark_red),
-        p->green_value(Color::Dark_red), p->blue_value(Color::Dark_red));
-    System::paint_engine()->set_rgb(
-        Color::Dark_blue, p->red_value(Color::Dark_blue),
-        p->green_value(Color::Dark_blue), p->blue_value(Color::Dark_blue));
-    System::paint_engine()->set_rgb(
-        Color::Dark_gray, p->red_value(Color::Dark_gray),
-        p->green_value(Color::Dark_gray), p->blue_value(Color::Dark_gray));
-    System::paint_engine()->set_rgb(Color::Brown, p->red_value(Color::Brown),
-                                    p->green_value(Color::Brown),
-                                    p->blue_value(Color::Brown));
-    System::paint_engine()->set_rgb(Color::Green, p->red_value(Color::Green),
-                                    p->green_value(Color::Green),
-                                    p->blue_value(Color::Green));
-    System::paint_engine()->set_rgb(Color::Red, p->red_value(Color::Red),
-                                    p->green_value(Color::Red),
-                                    p->blue_value(Color::Red));
-    System::paint_engine()->set_rgb(Color::Gray, p->red_value(Color::Gray),
-                                    p->green_value(Color::Gray),
-                                    p->blue_value(Color::Gray));
-    System::paint_engine()->set_rgb(Color::Blue, p->red_value(Color::Blue),
-                                    p->green_value(Color::Blue),
-                                    p->blue_value(Color::Blue));
-    System::paint_engine()->set_rgb(Color::Orange, p->red_value(Color::Orange),
-                                    p->green_value(Color::Orange),
-                                    p->blue_value(Color::Orange));
-    System::paint_engine()->set_rgb(
-        Color::Light_gray, p->red_value(Color::Light_gray),
-        p->green_value(Color::Light_gray), p->blue_value(Color::Light_gray));
-    System::paint_engine()->set_rgb(
-        Color::Light_green, p->red_value(Color::Light_green),
-        p->green_value(Color::Light_green), p->blue_value(Color::Light_green));
-    System::paint_engine()->set_rgb(Color::Violet, p->red_value(Color::Violet),
-                                    p->green_value(Color::Violet),
-                                    p->blue_value(Color::Violet));
-    System::paint_engine()->set_rgb(
-        Color::Light_blue, p->red_value(Color::Light_blue),
-        p->green_value(Color::Light_blue), p->blue_value(Color::Light_blue));
-    System::paint_engine()->set_rgb(Color::Yellow, p->red_value(Color::Yellow),
-                                    p->green_value(Color::Yellow),
-                                    p->blue_value(Color::Yellow));
-    System::paint_engine()->set_rgb(Color::White, p->red_value(Color::White),
-                                    p->green_value(Color::White),
-                                    p->blue_value(Color::White));
-    System::paint_engine()->flush(false);
+    system_palette_->initialize();
 }
 
 Palette* System::palette() {
     return system_palette_.get();
 }
 
-System::System(std::unique_ptr<detail::NCurses_paint_engine> engine) {
-    System::set_paint_engine(std::move(engine));
+System::System() {
+    System::set_paint_buffer(std::make_unique<Paint_buffer>());
     System::set_palette(std::make_unique<DawnBringer_palette>());
+    this->disable_ctrl_characters();
 }
 
 System::~System() {
-    System::set_paint_engine(nullptr);
+    System::set_paint_buffer(nullptr);
 }
 
 void System::set_head(Widget* head_widget) {
     head_ = head_widget;
+}
+
+void System::enable_ctrl_characters() {
+    event_listener_->enable_ctrl_characters();
+}
+
+void System::disable_ctrl_characters() {
+    event_listener_->disable_ctrl_characters();
 }
 
 int System::run() {
