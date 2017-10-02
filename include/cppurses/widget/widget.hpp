@@ -1,5 +1,13 @@
 #ifndef WIDGET_WIDGET_HPP
 #define WIDGET_WIDGET_HPP
+#include <algorithm>
+#include <cstddef>
+#include <memory>
+#include <queue>
+#include <signals/signal.hpp>
+#include <string>
+#include <utility>
+#include <vector>
 #include "painter/brush.hpp"
 #include "painter/color.hpp"
 #include "painter/glyph.hpp"
@@ -9,14 +17,6 @@
 #include "widget/coordinates.hpp"
 #include "widget/focus_policy.hpp"
 #include "widget/size_policy.hpp"
-#include <signals/signal.hpp>
-#include <algorithm>
-#include <cstddef>
-#include <memory>
-#include <queue>
-#include <string>
-#include <utility>
-#include <vector>
 
 namespace cppurses {
 
@@ -51,6 +51,9 @@ class Widget : public Event_handler {
 
     template <typename T>
     const T* find_child(const std::string& name) const;
+
+    std::unique_ptr<Widget> remove_child(Widget* child);
+    std::unique_ptr<Widget> remove_child(const std::string& name);
 
     // Global Coordinates(Including Border)
     std::size_t x() const;
@@ -131,7 +134,7 @@ class Widget : public Event_handler {
     std::size_t width_{width_policy.hint()};
     std::size_t height_{height_policy.hint()};
 
-    void delete_child(Widget* child);
+    // void delete_child(Widget* child);
     void set_visible(bool visible);
     void set_x(std::size_t global_x);
     void set_y(std::size_t global_y);

@@ -1,23 +1,23 @@
 #include "widget/widget.hpp"
-#include "painter/brush.hpp"
-#include "painter/color.hpp"
-#include "painter/painter.hpp"
-#include "painter/paint_buffer.hpp"
-#include "system/events/child_event.hpp"
-#include "system/events/clear_screen_event.hpp"
-#include "system/events/paint_event.hpp"
-#include "system/events/deferred_delete_event.hpp"
-#include "system/system.hpp"
-#include "system/focus.hpp"
-#include "widget/border.hpp"
-#include "widget/coordinates.hpp"
-#include <signals/signal.hpp>
 #include <cstddef>
 #include <iterator>
 #include <memory>
+#include <signals/signal.hpp>
 #include <string>
 #include <utility>
 #include <vector>
+#include "painter/brush.hpp"
+#include "painter/color.hpp"
+#include "painter/paint_buffer.hpp"
+#include "painter/painter.hpp"
+#include "system/events/child_event.hpp"
+#include "system/events/clear_screen_event.hpp"
+#include "system/events/deferred_delete_event.hpp"
+#include "system/events/paint_event.hpp"
+#include "system/focus.hpp"
+#include "system/system.hpp"
+#include "widget/border.hpp"
+#include "widget/coordinates.hpp"
 
 namespace {
 using namespace cppurses;
@@ -37,10 +37,6 @@ Widget::Widget(std::string name) : name_{std::move(name)} {
 Widget::~Widget() {
     if (Focus::focus_widget() == this) {
         Focus::clear_focus();
-    }
-    Widget* parent = this->parent();
-    if (parent != nullptr) {
-        System::send_event(Child_removed_event{parent, this});
     }
 }
 
@@ -67,6 +63,13 @@ void Widget::add_child(std::unique_ptr<Widget> child) {
     System::post_event<Child_added_event>(this, children_.back().get());
 }
 
+std::vector<Widget*> Widget::children() const {
+    std::vector<Widget*> ret;
+    std::transform(std::begin(children_), std::end(children_),
+                   std::back_inserter(ret), [](auto& up) { return up.get(); });
+    return ret;
+}
+
 bool Widget::contains_child(Widget* child) {
     for (const auto& w_ptr : children_) {
         if (w_ptr.get() == child || w_ptr->contains_child(child)) {
@@ -76,11 +79,22 @@ bool Widget::contains_child(Widget* child) {
     return false;
 }
 
-std::vector<Widget*> Widget::children() const {
-    std::vector<Widget*> ret;
-    std::transform(std::begin(children_), std::end(children_),
-                   std::back_inserter(ret), [](auto& up) { return up.get(); });
-    return ret;
+std::unique_ptr<Widget> Widget::remove_child(Widget* child) {
+    auto end_iter = std::end(children_);
+    auto at = std::find_if(std::begin(children_), end_iter,
+                           [child](auto& c) { return c.get() == child; });
+    if (at == end_iter) {
+        return nullptr;
+    }
+    std::unique_ptr<Widget> removed = std::move(*at);
+    children_.erase(at);
+    removed->set_parent(nullptr);
+    System::send_event(Child_removed_event{this, child});
+    return removed;
+}
+
+std::unique_ptr<Widget> Widget::remove_child(const std::string& name) {
+    return this->remove_child(this->find_child<Widget>(name));
 }
 
 std::size_t Widget::x() const {
@@ -201,7 +215,7 @@ bool Widget::clear_screen_event() {
 }
 
 bool Widget::deferred_delete_event(Event_handler* to_delete) {
-    this->delete_child(static_cast<Widget*>(to_delete));
+    this->remove_child(static_cast<Widget*>(to_delete));
     return true;
 }
 
@@ -264,14 +278,14 @@ void Widget::set_visible(bool visible) {
     }
 }
 
-void Widget::delete_child(Widget* child) {
-    auto end_iter = std::end(children_);
-    auto at = std::find_if(std::begin(children_), end_iter,
-                           [child](auto& c) { return c.get() == child; });
-    if (at != end_iter) {
-        children_.erase(at);
-    }
-}
+// void Widget::delete_child(Widget* child) {
+//     auto end_iter = std::end(children_);
+//     auto at = std::find_if(std::begin(children_), end_iter,
+//                            [child](auto& c) { return c.get() == child; });
+//     if (at != end_iter) {
+//         children_.erase(at);
+//     }
+// }
 
 void Widget::set_x(std::size_t global_x) {
     auto parent = this->parent();
