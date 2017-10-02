@@ -1,7 +1,8 @@
 #include "painter/glyph_matrix.hpp"
-#include "painter/glyph.hpp"
 #include <cstddef>
 #include <vector>
+#include "painter/glyph.hpp"
+#include "widget/coordinates.hpp"
 
 namespace cppurses {
 Glyph_matrix::Glyph_matrix(std::size_t width, std::size_t height)
@@ -24,12 +25,20 @@ std::size_t Glyph_matrix::height() const {
     return matrix_.size();
 }
 
+Glyph& Glyph_matrix::operator()(std::size_t x, std::size_t y) {
+    return matrix_[y][x];
+}
+
+const Glyph& Glyph_matrix::operator()(std::size_t x, std::size_t y) const {
+    return matrix_[y][x];
+}
+
 Glyph& Glyph_matrix::at(std::size_t x, std::size_t y) {
-    return this->at_impl(*this, x, y);
+    return matrix_.at(y).at(x);
 }
 
 const Glyph& Glyph_matrix::at(std::size_t x, std::size_t y) const {
-    return this->at_impl(*this, x, y);
+    return matrix_.at(y).at(x);
 }
 
 }  // namespace cppurses
