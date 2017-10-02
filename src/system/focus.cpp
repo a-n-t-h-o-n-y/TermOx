@@ -1,12 +1,12 @@
 #include "system/focus.hpp"
-#include "system/events/focus_event.hpp"
-#include "system/system.hpp"
-#include "widget/widget.hpp"
-#include "widget/focus_policy.hpp"
 #include <algorithm>
 #include <iterator>
 #include <memory>
 #include <vector>
+#include "system/events/focus_event.hpp"
+#include "system/system.hpp"
+#include "widget/focus_policy.hpp"
+#include "widget/widget.hpp"
 
 namespace {
 
@@ -82,9 +82,11 @@ bool Focus::tab_press() {
 
 void Focus::set_focus_to(Widget* new_focus) {
     if (new_focus == nullptr || new_focus->focus_policy == Focus_policy::None) {
+        Focus::clear_focus();
         return;
     }
     if (focus_widget_ != nullptr) {
+        // Focus_out_event has private constructor, can't use make_unique.
         std::unique_ptr<Focus_out_event> event{
             new Focus_out_event(focus_widget_)};
         System::post_event(std::move(event));
@@ -102,8 +104,8 @@ void Focus::clear_focus() {
         std::unique_ptr<Focus_out_event> event{
             new Focus_out_event(focus_widget_)};
         System::post_event(std::move(event));
+        focus_widget_ = nullptr;
     }
-    focus_widget_ = nullptr;
 }
 
 }  // namespace cppurses

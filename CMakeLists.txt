@@ -56,6 +56,7 @@ set(PAINTER_SOURCES
 set(WIDGET_SOURCES
     "src/widget/widget.cpp"
     "src/widget/widget_slots.cpp"
+    "src/widget/widget_stack.cpp"
 	"src/widget/layout.cpp"
 	"src/widget/horizontal_layout.cpp"
 	"src/widget/border.cpp"
@@ -111,6 +112,8 @@ install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 # Demos
 add_executable(notepad demos/notepad_demo.cpp)
 target_link_libraries(notepad cppurses ncurses)
+add_executable(stack demos/stack_demo.cpp)
+target_link_libraries(stack cppurses ncurses)
 
 # Tests
 # add_executable(testcppurses ${TEST_SOURCES})
