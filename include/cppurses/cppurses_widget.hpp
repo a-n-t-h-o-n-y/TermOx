@@ -19,6 +19,7 @@
 #include "widget/widgets/titlebar.hpp"
 #include "widget/widgets/vertical_scrollbar.hpp"
 #include "widget/widgets/widget_stack.hpp"
+#include "widget/widgets/widget_stack_menu.hpp"
 
 #include "widget/border.hpp"
 #include "widget/coordinates.hpp"
