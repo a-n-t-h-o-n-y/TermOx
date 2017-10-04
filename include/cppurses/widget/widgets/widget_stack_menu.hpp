@@ -53,6 +53,7 @@ T& Widget_stack_menu::make_page(Glyph_string title, Args&&... args) {
     auto& ret = stack_.make_page<T>(std::forward<Args>(args)...);
     menu_.make_item(std::move(title),
                     slot::set_active_page(stack_, this->size() - 1));
+    this->update();
     return ret;
 }
 

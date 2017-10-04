@@ -74,6 +74,7 @@ class Widget : public Event_handler {
     Coordinates cursor_coordinates() const;
 
     bool visible() const;
+    bool on_tree() const;
     void update();
 
     // Public Objects
@@ -110,6 +111,7 @@ class Widget : public Event_handler {
     bool child_polished_event(Widget* child) override;
     bool show_event() override;
     bool hide_event() override;
+    bool on_tree_event(bool on_tree) override;
     bool move_event(std::size_t new_x,
                     std::size_t new_y,
                     std::size_t old_x,
@@ -124,6 +126,7 @@ class Widget : public Event_handler {
     Widget* parent_ = nullptr;
     std::vector<std::unique_ptr<Widget>> children_;
     bool visible_{true};
+    bool on_tree_{false};
 
     Coordinates cursor_position_;
     bool show_cursor_{false};

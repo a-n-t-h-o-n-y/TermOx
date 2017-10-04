@@ -1,11 +1,4 @@
 #include "widget/widget.hpp"
-#include <cstddef>
-#include <iterator>
-#include <memory>
-#include <signals/signal.hpp>
-#include <string>
-#include <utility>
-#include <vector>
 #include "painter/brush.hpp"
 #include "painter/color.hpp"
 #include "painter/paint_buffer.hpp"
@@ -13,11 +6,21 @@
 #include "system/events/child_event.hpp"
 #include "system/events/clear_screen_event.hpp"
 #include "system/events/deferred_delete_event.hpp"
+#include "system/events/on_tree_event.hpp"
 #include "system/events/paint_event.hpp"
 #include "system/focus.hpp"
 #include "system/system.hpp"
 #include "widget/border.hpp"
 #include "widget/coordinates.hpp"
+
+#include <signals/signal.hpp>
+
+#include <cstddef>
+#include <iterator>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace {
 using namespace cppurses;
@@ -61,6 +64,7 @@ void Widget::add_child(std::unique_ptr<Widget> child) {
     children_.emplace_back(std::move(child));
     children_.back()->set_parent(this);
     System::post_event<Child_added_event>(this, children_.back().get());
+    System::post_event<On_tree_event>(children_.back().get(), this->on_tree());
 }
 
 std::vector<Widget*> Widget::children() const {
@@ -90,6 +94,7 @@ std::unique_ptr<Widget> Widget::remove_child(Widget* child) {
     children_.erase(at);
     removed->set_parent(nullptr);
     System::send_event(Child_removed_event{this, child});
+    System::post_event<On_tree_event>(removed.get(), false);
     return removed;
 }
 
@@ -175,6 +180,10 @@ bool Widget::visible() const {
     return visible_;
 }
 
+bool Widget::on_tree() const {
+    return on_tree_;
+}
+
 void Widget::update() {
     clear_screen(*this);
     System::post_event<Paint_event>(this);
@@ -242,6 +251,14 @@ bool Widget::show_event() {
     return true;
 }
 
+bool Widget::on_tree_event(bool on_tree) {
+    on_tree_ = on_tree;
+    for (auto& child : children_) {
+        System::post_event<On_tree_event>(child.get(), on_tree_);
+    }
+    return true;
+}
+
 bool Widget::hide_event() {
     this->set_visible(false);
     this->update();
@@ -277,15 +294,6 @@ void Widget::set_visible(bool visible) {
         c->set_visible(visible);
     }
 }
-
-// void Widget::delete_child(Widget* child) {
-//     auto end_iter = std::end(children_);
-//     auto at = std::find_if(std::begin(children_), end_iter,
-//                            [child](auto& c) { return c.get() == child; });
-//     if (at != end_iter) {
-//         children_.erase(at);
-//     }
-// }
 
 void Widget::set_x(std::size_t global_x) {
     auto parent = this->parent();

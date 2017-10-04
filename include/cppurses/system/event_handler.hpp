@@ -1,12 +1,12 @@
 #ifndef SYSTEM_EVENT_HANDLER_HPP
 #define SYSTEM_EVENT_HANDLER_HPP
+#include <cstddef>
+#include <cstdint>
+#include <signals/signal.hpp>
+#include <vector>
 #include "system/key.hpp"
 #include "system/mouse_button.hpp"
 #include "widget/coordinates.hpp"
-#include <signals/signal.hpp>
-#include <cstdint>
-#include <cstddef>
-#include <vector>
 
 namespace cppurses {
 class Widget;
@@ -75,8 +75,9 @@ class Event_handler {
     virtual bool key_press_event(Key key, char symbol);
     virtual bool key_release_event(Key key, char symbol);
     virtual bool close_event() = 0;
-    virtual bool hide_event() = 0;
     virtual bool show_event() = 0;
+    virtual bool hide_event() = 0;
+    virtual bool on_tree_event(bool on_tree) = 0;
     virtual bool focus_in_event();
     virtual bool focus_out_event();
     virtual bool deferred_delete_event(Event_handler* to_delete) = 0;
@@ -146,6 +147,7 @@ class Event_handler {
     virtual bool close_event_filter(Event_handler* receiver);
     virtual bool hide_event_filter(Event_handler* receiver);
     virtual bool show_event_filter(Event_handler* receiver);
+    virtual bool on_tree_event_filter(Event_handler* receiver, bool on_tree);
     virtual bool focus_in_event_filter(Event_handler* receiver);
     virtual bool focus_out_event_filter(Event_handler* receiver);
     virtual bool deferred_delete_event_filter(Event_handler* receiver,

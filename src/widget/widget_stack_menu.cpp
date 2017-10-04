@@ -12,6 +12,7 @@ void Widget_stack_menu::add_page(Glyph_string title,
     stack_.add_page(std::move(widget));
     menu_.make_item(std::move(title),
                     slot::set_active_page(stack_, this->size() - 1));
+    this->update();
 }
 
 void Widget_stack_menu::insert_page(Glyph_string title,
@@ -19,10 +20,12 @@ void Widget_stack_menu::insert_page(Glyph_string title,
                                     std::unique_ptr<Widget> widget) {
     stack_.insert_page(index, std::move(widget));
     menu_.make_item(std::move(title), slot::set_active_page(stack_, index));
+    this->update();
 }
 
 std::unique_ptr<Widget> Widget_stack_menu::remove_page(std::size_t index) {
     menu_.remove_item(index);
+    this->update();
     return stack_.remove_page(index);
 }
 
@@ -53,12 +56,6 @@ void Widget_stack_menu::initialize() {
 
     main_menu_button.clicked.connect(slot::set_active_page(stack_, 0));
     main_menu_button.clicked.connect([this] { Focus::set_focus_to(&menu_); });
-
-    // Widget_stack& stack_{this->make_child<Widget_stack>()};
-    // Horizontal_layout& h_layout_{this->make_child<Horizontal_layout>()};
-    // Widget& empty_space{h_layout_.make_child<Widget>()};
-    // Push_button& main_menu_button{
-    //     h_layout.make_child<Push_button>("Main Menu")};
 }
 
 bool Widget_stack_menu::focus_in_event() {

@@ -1,13 +1,16 @@
 #include "system/system.hpp"
 #include "painter/paint_buffer.hpp"
 #include "painter/palette.hpp"
+#include "system/detail/event_queue.hpp"
+#include "system/detail/ncurses_event_listener.hpp"
 #include "system/event.hpp"
 #include "system/event_loop.hpp"
+#include "system/events/on_tree_event.hpp"
 #include "system/events/paint_event.hpp"
-#include "system/detail/ncurses_event_listener.hpp"
-#include "system/detail/event_queue.hpp"
 #include "widget/widget.hpp"
+
 #include <signals/slot.hpp>
+
 #include <memory>
 #include <utility>
 
@@ -89,7 +92,14 @@ System::~System() {
 }
 
 void System::set_head(Widget* head_widget) {
+    if (head_ != nullptr) {
+        System::post_event<On_tree_event>(head_, false);
+    }
     head_ = head_widget;
+    if (head_ != nullptr) {
+        System::post_event<On_tree_event>(head_, true);
+        head_->update();
+    }
 }
 
 void System::enable_ctrl_characters() {

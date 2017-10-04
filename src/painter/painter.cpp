@@ -1,22 +1,25 @@
 #include "painter/painter.hpp"
 #include <cstddef>
 #include <cstring>
+#include <optional/optional.hpp>
 #include "painter/brush.hpp"
 #include "painter/color.hpp"
 #include "painter/glyph.hpp"
 #include "painter/glyph_string.hpp"
 #include "painter/paint_buffer.hpp"
+#include "system/system.hpp"
 #include "widget/border.hpp"
 #include "widget/coordinates.hpp"
 #include "widget/widget.hpp"
-#include "system/system.hpp"
-#include <optional/optional.hpp>
 
 namespace cppurses {
 
 Painter::Painter(Widget* widget) : widget_{widget} {}
 
 void Painter::put(const Glyph_string& text, std::size_t x, std::size_t y) {
+    if (!widget_->on_tree() || !widget_->visible()) {
+        return;
+    }
     Coordinates original_position{widget_->cursor_x(), widget_->cursor_y()};
     move_cursor(*widget_, x, y);
     for (Glyph g : text) {
@@ -164,6 +167,9 @@ void Painter::clear_screen() {
 void Painter::unbound_put_string(const Glyph_string& gs,
                                  std::size_t glob_x,
                                  std::size_t glob_y) {
+    if (!widget_->on_tree() || !widget_->visible()) {
+        return;
+    }
     for (Glyph g : gs) {
         add_default_attributes(&g);
         System::paint_buffer()->stage(glob_x++, glob_y, g);

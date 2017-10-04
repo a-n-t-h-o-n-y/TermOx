@@ -36,6 +36,7 @@ set(SYSTEM_SOURCES
     "src/system/mouse_event.cpp"
 	"src/system/move_event.cpp"
     "src/system/ncurses_event_listener.cpp"
+    "src/system/on_tree_event.cpp"
     "src/system/paint_event.cpp"
 	"src/system/resize_event.cpp"
     "src/system/show_event.cpp"
@@ -98,6 +99,11 @@ set(TEST_SOURCES
 	"test/painter/glyph_matrix_test.cpp"
     )
 
+set(DEMO_SOURCES
+    "demos/demo.cpp"
+    "demos/notepad.cpp"
+    )
+
 add_library(cppurses STATIC
     ${SYSTEM_SOURCES}
 	${PAINTER_SOURCES}
@@ -111,10 +117,8 @@ install(TARGETS cppurses
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # Demos
-add_executable(notepad demos/notepad_demo.cpp)
-target_link_libraries(notepad cppurses ncurses)
-add_executable(stack demos/stack_demo.cpp)
-target_link_libraries(stack cppurses ncurses)
+add_executable(demo ${DEMO_SOURCES})
+target_link_libraries(demo cppurses ncurses)
 
 # Tests
 # add_executable(testcppurses ${TEST_SOURCES})
