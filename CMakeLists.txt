@@ -101,6 +101,7 @@ set(TEST_SOURCES
 
 set(DEMO_SOURCES
     "demos/demo.cpp"
+    "demos/main_menu.cpp"
     "demos/notepad.cpp"
     )
 

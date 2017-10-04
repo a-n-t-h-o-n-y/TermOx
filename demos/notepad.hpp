@@ -73,7 +73,7 @@ class Notepad : public Vertical_layout {
     Notepad();
 
    private:
-    Titlebar& titlebar{this->make_child<Titlebar>("Notepad")};
+    // Titlebar& titlebar{this->make_child<Titlebar>("Notepad")};
     Text_and_attributes& txt_attr{this->make_child<Text_and_attributes>()};
     Save_area& save_area{this->make_child<Save_area>()};
     void initialize();

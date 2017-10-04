@@ -50,6 +50,7 @@ void Widget_stack_menu::initialize() {
     main_menu_button.width_policy.type(Size_policy::Minimum);
     main_menu_button.width_policy.hint(11);
     empty_space_.width_policy.stretch(2);
+    set_background(empty_space_, Color::Light_gray);
     set_background(main_menu_button, Color::Light_blue);
 
     stack_.set_active_page(0);

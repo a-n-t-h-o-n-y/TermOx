@@ -6,10 +6,16 @@
 using namespace cppurses;
 namespace demo {
 
-class Main_menu : public Horizontal_layout {
+class Main_menu : public Vertical_layout {
+   public:
+    Main_menu();
+
+    Titlebar& titlebar{this->make_child<Titlebar>(" C (P P) U R S E S")};
+    Widget_stack_menu& main_menu{this->make_child<Widget_stack_menu>()};
+    Notepad& notepad{main_menu.make_page<Notepad>("Notepad")};
+
    private:
-    Widget_stack_menu& main_menu_{this->make_child<Widget_stack_menu>()};
-    Notepad& notepad_{main_menu_.make_page<Notepad>("Notepad")};
+    void initialize();
 };
 
 }  // namespace demo

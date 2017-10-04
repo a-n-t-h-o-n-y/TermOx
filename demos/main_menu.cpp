@@ -10,7 +10,6 @@ Main_menu::Main_menu() {
 }
 
 void Main_menu::initialize() {
-
 }
 
 }  // namespace demo
