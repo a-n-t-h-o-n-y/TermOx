@@ -34,9 +34,9 @@ class Attrs_and_colors : public Vertical_layout {
 
     // Widgets
     Center_label& fg_label{this->make_child<Center_label>("Foreground⤵")};
-    Color_chooser& fg_select = this->make_child<Color_chooser>();
+    Color_select& fg_select = this->make_child<Color_select>();
     Center_label& bg_label{this->make_child<Center_label>("Background⤵")};
-    Color_chooser& bg_select{this->make_child<Color_chooser>()};
+    Color_select& bg_select{this->make_child<Color_select>()};
     Attribute_select& attr_select{this->make_child<Attribute_select>()};
 
    private:

@@ -1,4 +1,4 @@
-#include "widget/widgets/color_chooser.hpp"
+#include "widget/widgets/color_select.hpp"
 #include "painter/color.hpp"
 #include "widget/size_policy.hpp"
 #include "widget/widget.hpp"
@@ -7,11 +7,11 @@
 
 namespace cppurses {
 
-Color_chooser::Color_chooser() {
-    this->Color_chooser::initialize();
+Color_select::Color_select() {
+    this->Color_select::initialize();
 }
 
-void Color_chooser::initialize() {
+void Color_select::initialize() {
     this->width_policy.hint(16);
     this->width_policy.type(Size_policy::Fixed);
     this->height_policy.hint(2);

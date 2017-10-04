@@ -1,5 +1,5 @@
-#ifndef WIDGET_WIDGETS_COLOR_CHOOSER_HPP
-#define WIDGET_WIDGETS_COLOR_CHOOSER_HPP
+#ifndef WIDGET_WIDGETS_COLOR_SELECT_HPP
+#define WIDGET_WIDGETS_COLOR_SELECT_HPP
 #include "painter/color.hpp"
 #include "widget/widgets/push_button.hpp"
 #include "widget/layouts/vertical_layout.hpp"
@@ -8,9 +8,9 @@
 
 namespace cppurses {
 
-class Color_chooser : public Vertical_layout {
+class Color_select : public Vertical_layout {
    public:
-    Color_chooser();
+    Color_select();
 
     // Signals
     sig::Signal<void(Color)> color_changed;
@@ -41,4 +41,4 @@ class Color_chooser : public Vertical_layout {
 };
 
 }  // namespace cppurses
-#endif  // WIDGET_WIDGETS_COLOR_CHOOSER_HPP
+#endif  // WIDGET_WIDGETS_COLOR_SELECT_HPP
