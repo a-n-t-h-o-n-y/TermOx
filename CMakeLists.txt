@@ -59,6 +59,7 @@ set(WIDGET_SOURCES
     "src/widget/widget_slots.cpp"
     "src/widget/widget_stack.cpp"
     "src/widget/widget_stack_menu.cpp"
+    "src/widget/label.cpp"
 	"src/widget/layout.cpp"
 	"src/widget/horizontal_layout.cpp"
 	"src/widget/border.cpp"
@@ -122,6 +123,8 @@ add_executable(demo ${DEMO_SOURCES})
 target_link_libraries(demo cppurses ncurses)
 
 # Tests
+add_executable(widg_test "test/widget_tester.cpp")
+target_link_libraries(widg_test cppurses ncurses)
 # add_executable(testcppurses ${TEST_SOURCES})
 # target_link_libraries(testcppurses cppurses ncurses)
 
