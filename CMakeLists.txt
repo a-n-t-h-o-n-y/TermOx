@@ -64,6 +64,7 @@ set(WIDGET_SOURCES
     "src/widget/log.cpp"
 	"src/widget/horizontal_layout.cpp"
 	"src/widget/border.cpp"
+    "src/widget/cycle_box.cpp"
     "src/widget/vertical_layout.cpp"
     "src/widget/status_bar.cpp"
     "src/widget/textbox.cpp"

@@ -6,6 +6,7 @@
 
 #include "widget/widgets/checkbox.hpp"
 #include "widget/widgets/color_select.hpp"
+#include "widget/widgets/cycle_box.hpp"
 #include "widget/widgets/horizontal_scrollbar.hpp"
 #include "widget/widgets/label.hpp"
 #include "widget/widgets/list.hpp"

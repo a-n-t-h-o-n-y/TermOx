@@ -18,6 +18,15 @@ int main() {
 
     button.clicked.connect(increment);
 
+    Cycle_box& cb = vl.make_child<Cycle_box>("Switch thing");
+    cb.add_option("option 1");
+    cb.add_option("option 2");
+    cb.add_option("o-p-t-i-o-n 3");
+    // set_background(cb.label, Color::Light_blue);
+
+    Text_display& cb_tb = vl.make_child<Text_display>();
+    cb.option_changed.connect(slot::set_text(cb_tb));
+
     sys.set_head(&vl);
     return sys.run();
 }
