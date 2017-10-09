@@ -9,10 +9,11 @@ enum class Alignment { Left, Center, Right };
 
 class Label : public Widget {
    public:
-    Label(Glyph_string text = "");
+    explicit Label(Glyph_string text = "");
 
     void set_text(Glyph_string text);
     void set_alignment(Alignment type);
+    Glyph_string text() const;
 
    protected:
     bool paint_event() override;

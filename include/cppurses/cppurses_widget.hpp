@@ -11,6 +11,7 @@
 #include "widget/widgets/list.hpp"
 #include "widget/widgets/menu.hpp"
 #include "widget/widgets/push_button.hpp"
+#include "widget/widgets/status_bar.hpp"
 #include "widget/widgets/text_display.hpp"
 #include "widget/widgets/text_display_slots.hpp"
 #include "widget/widgets/textbox.hpp"

@@ -4,13 +4,17 @@ using namespace cppurses;
 int main() {
     System sys;
 
-    Horizontal_layout hl;
-    Label& label = hl.make_child<Label>("A Title that is very long");
-    set_background(label, Color::White);
-    set_foreground(label, Color::Black);
+    Vertical_layout vl;
+    Push_button& button = vl.make_child<Push_button>("Change Status");
+    set_background(button, Color::White);
+    set_foreground(button, Color::Black);
+    button.set_alignment(Alignment::Center);
 
-    label.set_alignment(Alignment::Right);
+    Status_bar& bar = vl.make_child<Status_bar>("Initial thing");
+    bar.set_alignment(Alignment::Center);
 
-    sys.set_head(&hl);
+    button.clicked.connect(slot::update_status(bar, "A New S-t-a-t-u-s !"));
+
+    sys.set_head(&vl);
     return sys.run();
 }

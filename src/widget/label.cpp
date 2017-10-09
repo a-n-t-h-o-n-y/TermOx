@@ -24,6 +24,10 @@ void Label::set_alignment(Alignment type) {
     this->update();
 }
 
+Glyph_string Label::text() const {
+    return text_;
+}
+
 bool Label::paint_event() {
     Painter p{this};
     std::size_t start{0};
@@ -62,7 +66,7 @@ bool Label::paint_event() {
             }
             break;
     }
-    p.put(visible_text, start, 0);
+    p.put(visible_text, start, this->height() / 2);
     return Widget::paint_event();
 }
 

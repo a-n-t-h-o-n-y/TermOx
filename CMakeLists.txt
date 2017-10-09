@@ -64,6 +64,7 @@ set(WIDGET_SOURCES
 	"src/widget/horizontal_layout.cpp"
 	"src/widget/border.cpp"
     "src/widget/vertical_layout.cpp"
+    "src/widget/status_bar.cpp"
     "src/widget/textbox.cpp"
     "src/widget/textbox_slots.cpp"
     "src/widget/textbox_base.cpp"
