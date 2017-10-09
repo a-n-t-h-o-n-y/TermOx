@@ -61,6 +61,7 @@ set(WIDGET_SOURCES
     "src/widget/widget_stack_menu.cpp"
     "src/widget/label.cpp"
 	"src/widget/layout.cpp"
+    "src/widget/log.cpp"
 	"src/widget/horizontal_layout.cpp"
 	"src/widget/border.cpp"
     "src/widget/vertical_layout.cpp"

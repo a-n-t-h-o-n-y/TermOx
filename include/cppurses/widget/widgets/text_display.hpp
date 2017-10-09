@@ -67,6 +67,7 @@ class Text_display : public Widget {
     std::size_t top_line() const;
     std::size_t bottom_line() const;
     std::size_t last_line() const;
+    std::size_t n_of_lines() const;
 
     std::size_t first_index_at(std::size_t line) const;
     std::size_t last_index_at(std::size_t line) const;

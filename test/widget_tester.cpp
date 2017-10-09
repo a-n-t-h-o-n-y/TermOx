@@ -10,10 +10,13 @@ int main() {
     set_foreground(button, Color::Black);
     button.set_alignment(Alignment::Center);
 
-    Status_bar& bar = vl.make_child<Status_bar>("Initial thing");
-    bar.set_alignment(Alignment::Center);
+    Log& log = vl.make_child<Log>();
 
-    button.clicked.connect(slot::update_status(bar, "A New S-t-a-t-u-s !"));
+    int i{0};
+    sig::Slot<void()> increment{
+        [&i, &log] { log.post_message(std::to_string(i++)); }};
+
+    button.clicked.connect(increment);
 
     sys.set_head(&vl);
     return sys.run();

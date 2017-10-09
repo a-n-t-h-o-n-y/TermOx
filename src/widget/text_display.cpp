@@ -272,6 +272,10 @@ std::size_t Text_display::last_line() const {
     return display_state_.size() - 1;
 }
 
+std::size_t Text_display::n_of_lines() const {
+    return display_state_.size();
+}
+
 std::size_t Text_display::first_index_at(std::size_t line) const {
     if (line >= display_state_.size()) {
         line = display_state_.size() - 1;
