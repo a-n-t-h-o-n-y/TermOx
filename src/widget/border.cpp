@@ -1,5 +1,6 @@
 #include "widget/border.hpp"
 #include "painter/glyph.hpp"
+
 #include <cstddef>
 
 namespace cppurses {
@@ -48,38 +49,6 @@ void disable_corners(Border& b) {
     b.north_east_enabled = false;
     b.south_west_enabled = false;
     b.south_east_enabled = false;
-}
-
-std::size_t west_border_offset(const Border& b) {
-    if (b.enabled &&
-        (b.west_enabled || b.north_west_enabled || b.south_west_enabled)) {
-        return 1;
-    }
-    return 0;
-}
-
-std::size_t east_border_offset(const Border& b) {
-    if (b.enabled &&
-        (b.east_enabled || b.north_east_enabled || b.south_east_enabled)) {
-        return 1;
-    }
-    return 0;
-}
-
-std::size_t north_border_offset(const Border& b) {
-    if (b.enabled &&
-        (b.north_enabled || b.north_east_enabled || b.north_west_enabled)) {
-        return 1;
-    }
-    return 0;
-}
-
-std::size_t south_border_offset(const Border& b) {
-    if (b.enabled &&
-        (b.south_enabled || b.south_east_enabled || b.south_west_enabled)) {
-        return 1;
-    }
-    return 0;
 }
 
 }  // namespace cppurses

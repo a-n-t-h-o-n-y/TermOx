@@ -24,10 +24,8 @@ void Painter::put(const Glyph_string& text, std::size_t x, std::size_t y) {
     move_cursor(*widget_, x, y);
     for (Glyph g : text) {
         add_default_attributes(&g);
-        auto glob_x = west_border_offset(widget_->border) + widget_->x() +
-                      widget_->cursor_x();
-        auto glob_y = north_border_offset(widget_->border) + widget_->y() +
-                      widget_->cursor_y();
+        auto glob_x = widget_->x() + widget_->cursor_x();
+        auto glob_y = widget_->y() + widget_->cursor_y();
         if (std::strcmp(g.c_str(), "\n") == 0) {
             move_cursor(*widget_, 0, widget_->cursor_y() + 1);
         }  // TODO else if ( == \t) then move to next x coord divisible by
@@ -85,67 +83,116 @@ void Painter::border(const Border& b) {
     if (!b.enabled) {
         return;
     }
-    const std::size_t widg_x = widget_->x();
-    const std::size_t widg_y = widget_->y();
-    std::size_t width = widget_->width() + west_border_offset(widget_->border) +
-                        east_border_offset(widget_->border);
-    std::size_t height = widget_->height() +
-                         north_border_offset(widget_->border) +
-                         south_border_offset(widget_->border);
+    std::size_t width = widget_->width() + west_border_offset(*widget_);
+    std::size_t height = widget_->height() + north_border_offset(*widget_);
+    if (width < 1 || height < 1) {
+        return;
+    }
+
+    const std::size_t widg_x = widget_->x() - west_border_offset(*widget_);
+    const std::size_t widg_y = widget_->y() - north_border_offset(*widget_);
 
     // Underflow Checks
-    if (widg_x + width < 2 && (b.north_enabled || b.south_enabled)) {
+    if (widg_x + width < 1 && (b.north_enabled || b.south_enabled)) {
         return;
     }
-    if (widg_y + height < 2 && (b.east_enabled || b.west_enabled)) {
+    if (widg_y + height < 1 && (b.east_enabled || b.west_enabled)) {
         return;
     }
+
+    // North Wall
+    Coordinates north_left{widg_x + 1, widg_y};
+    Coordinates north_right{widg_x + width - 1, widg_y};
+    // South Wall
+    Coordinates south_left{widg_x + 1, widg_y + height};
+    Coordinates south_right{widg_x + width - 1, widg_y + height};
+    // West Wall
+    Coordinates west_top{widg_x, widg_y + 1};
+    Coordinates west_bottom{widg_x, widg_y + height - 1};
+    // East Wall
+    Coordinates east_top{widg_x + width, widg_y + 1};
+    Coordinates east_bottom{widg_x + width, widg_y + height - 1};
+
+    // Corners
+    Coordinates north_east{east_top.x, north_left.y};
+    Coordinates north_west{west_top.x, north_right.y};
+    Coordinates south_east{east_bottom.x, south_left.y};
+    Coordinates south_west{west_bottom.x, south_right.y};
+
+    // Special Cases:
+    // Height == 1
+    if (widget_->height() == 1 && widget_->north_border_disqualified()) {
+        west_top = Coordinates{widg_x, widg_y};
+        west_bottom = west_top;
+        east_top = Coordinates{widg_x + width /*- 1*/, widg_y};
+        east_bottom = east_top;
+    } else if (widget_->height() == 1 && widget_->south_border_disqualified() &&
+               !widget_->north_border_disqualified()) {  // && b.north_enabled?
+        west_top = Coordinates{widg_x, widg_y + 1};
+        west_bottom = west_top;
+        east_top = Coordinates{widg_x + width /*- 1*/, widg_y + 1};
+        east_bottom = east_top;
+    }
+
+    // Width == 1
+    if (widget_->width() == 1 && widget_->west_border_disqualified()) {
+        north_left = Coordinates{widg_x, widg_y};
+        north_right = north_left;
+        south_left = Coordinates{widg_x, widg_y + height /*- 1*/};
+        south_right = south_left;
+    } else if (widget_->width() == 1 && widget_->east_border_disqualified() &&
+               !widget_->west_border_disqualified()) {  // && b.west_enabled?
+        north_left = Coordinates{widg_x + 1, widg_y};
+        north_right = north_left;
+        south_left = Coordinates{widg_x + 1, widg_y + height /*- 1*/};
+        south_right = south_left;
+    }
+
     // North
-    if (b.north_enabled) {
-        this->unbound_line(widg_x + 1, widg_y, widg_x + width - 2, widg_y,
-                           b.north);
+    if (b.north_enabled && !widget_->north_border_disqualified()) {
+        this->unbound_line(north_left, north_right, b.north);
     }
     // South
-    if (b.south_enabled) {
-        this->unbound_line(widg_x + 1, widg_y + height - 1, widg_x + width - 2,
-                           widg_y + height - 1, b.south);
+    if (b.south_enabled && !widget_->south_border_disqualified()) {
+        this->unbound_line(south_left, south_right, b.south);
     }
     // West
-    if (b.west_enabled) {
-        this->unbound_line(widg_x, widg_y + 1, widg_x, widg_y + height - 2,
-                           b.west);
+    if (b.west_enabled && !widget_->west_border_disqualified()) {
+        this->unbound_line(west_top, west_bottom, b.west);
     }
     // East
-    if (b.east_enabled) {
-        this->unbound_line(widg_x + width - 1, widg_y + 1, widg_x + width - 1,
-                           widg_y + height - 2, b.east);
+    if (b.east_enabled && !widget_->east_border_disqualified()) {
+        this->unbound_line(east_top, east_bottom, b.east);
     }
     // North-West
-    if (b.north_west_enabled) {
-        this->unbound_put_string(b.north_west, widg_x, widg_y);
+    if (b.north_west_enabled && !widget_->north_border_disqualified() &&
+        !widget_->west_border_disqualified()) {
+        this->unbound_put_string(north_west, b.north_west);
     }
     // North-East
-    if (b.north_east_enabled) {
-        this->unbound_put_string(b.north_east, widg_x + width - 1, widg_y);
+    if (b.north_east_enabled && !widget_->north_border_disqualified() &&
+        !widget_->east_border_disqualified()) {
+        this->unbound_put_string(north_east, b.north_east);
     }
     // South-West
-    if (b.south_west_enabled) {
-        this->unbound_put_string(b.south_west, widg_x, widg_y + height - 1);
+    if (b.south_west_enabled && !widget_->south_border_disqualified() &&
+        !widget_->west_border_disqualified()) {
+        this->unbound_put_string(south_west, b.south_west);
     }
     // South-East
-    if (b.south_east_enabled) {
-        this->unbound_put_string(b.south_east, widg_x + width - 1,
-                                 widg_y + height - 1);
+    if (b.south_east_enabled && !widget_->south_border_disqualified() &&
+        !widget_->east_border_disqualified()) {
+        this->unbound_put_string(south_east, b.south_east);
     }
 }
 
 void Painter::clear_screen() {
-    auto width = widget_->width() + west_border_offset(widget_->border) +
-                 east_border_offset(widget_->border);
-    auto height = widget_->height() + north_border_offset(widget_->border) +
-                  south_border_offset(widget_->border);
-    auto gx = widget_->x();
-    auto gy = widget_->y();
+    auto width = widget_->width() + west_border_offset(*widget_) +
+                 east_border_offset(*widget_);
+    auto height = widget_->height() + north_border_offset(*widget_) +
+                  south_border_offset(*widget_);
+    auto gx = widget_->x() - west_border_offset(*widget_);
+    auto gy = widget_->y() - north_border_offset(*widget_);
 
     if (width == 0 || height == 0) {
         return;
@@ -164,9 +211,14 @@ void Painter::clear_screen() {
     }
 }
 
-void Painter::unbound_put_string(const Glyph_string& gs,
-                                 std::size_t glob_x,
-                                 std::size_t glob_y) {
+void Painter::unbound_put_string(const Coordinates& point,
+                                 const Glyph_string& gs) {
+    this->unbound_put_string(point.x, point.y, gs);
+}
+
+void Painter::unbound_put_string(std::size_t glob_x,
+                                 std::size_t glob_y,
+                                 const Glyph_string& gs) {
     if (!widget_->on_tree() || !widget_->visible()) {
         return;
     }
@@ -174,6 +226,12 @@ void Painter::unbound_put_string(const Glyph_string& gs,
         add_default_attributes(&g);
         System::paint_buffer()->stage(glob_x++, glob_y, g);
     }
+}
+
+void Painter::unbound_line(const Coordinates& point_1,
+                           const Coordinates& point_2,
+                           const Glyph& symbol) {
+    this->unbound_line(point_1.x, point_1.y, point_2.x, point_2.y, symbol);
 }
 
 void Painter::unbound_line(std::size_t glob_x1,
@@ -184,11 +242,11 @@ void Painter::unbound_line(std::size_t glob_x1,
     // Horizontal
     if (glob_y1 == glob_y2) {
         for (; glob_x1 <= glob_x2; ++glob_x1) {
-            unbound_put_string(symbol, glob_x1, glob_y1);
+            unbound_put_string(glob_x1, glob_y1, symbol);
         }
     } else if (glob_x1 == glob_x2) {
         for (; glob_y1 <= glob_y2; ++glob_y1) {
-            unbound_put_string(symbol, glob_x1, glob_y1);
+            unbound_put_string(glob_x1, glob_y1, symbol);
         }
     }
 }

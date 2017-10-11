@@ -15,12 +15,15 @@ Cycle_box::Cycle_box(Glyph_string title) {
 
     this->set_title(std::move(title));
 
-    enable_border(label);
     disable_walls(label.border);
     disable_corners(label.border);
-    set_background(options_box, Color::White);
-    set_foreground(options_box, Color::Black);
     label.border.east_enabled = true;
+    enable_border(label);
+
+    options_box.set_alignment(Alignment::Center);
+
+    // set_background(options_box, Color::White);
+    // set_foreground(options_box, Color::Black);
 
     options_box.clicked.connect(slot::cycle(*this));
 }
@@ -64,7 +67,7 @@ void Cycle_box::cycle() {
 }
 
 void Cycle_box::resize_label() {
-    label.width_policy.hint(label.text().size() + 1);
+    label.width_policy.hint(label.text().size() + 2);
     label.width_policy.type(Size_policy::Fixed);
 }
 

@@ -41,10 +41,8 @@ void Paint_buffer::flush(bool optimize) {
     if (focus_widg != nullptr) {
         engine_.show_cursor(focus_widg->cursor_visible());
         if (focus_widg->cursor_visible()) {
-            auto x = focus_widg->x() + focus_widg->cursor_x() +
-                     west_border_offset(focus_widg->border);
-            auto y = focus_widg->y() + focus_widg->cursor_y() +
-                     north_border_offset(focus_widg->border);
+            auto x = focus_widg->x() + focus_widg->cursor_x();
+            auto y = focus_widg->y() + focus_widg->cursor_y();
             engine_.move(x, y);
         }
     } else {

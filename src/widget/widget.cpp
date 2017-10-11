@@ -119,21 +119,11 @@ std::size_t Widget::y() const {
 }
 
 std::size_t Widget::width() const {
-    std::size_t width_border_offset =
-        west_border_offset(this->border) + east_border_offset(this->border);
-    if (width_border_offset > width_) {
-        return 0;
-    }
-    return width_ - width_border_offset;
+    return width_;
 }
 
 std::size_t Widget::height() const {
-    std::size_t height_border_offset =
-        north_border_offset(this->border) + south_border_offset(this->border);
-    if (height_border_offset > height_) {
-        return 0;
-    }
-    return height_ - height_border_offset;
+    return height_;
 }
 
 bool Widget::cursor_visible() const {
@@ -187,6 +177,22 @@ bool Widget::on_tree() const {
 void Widget::update() {
     clear_screen(*this);
     System::post_event<Paint_event>(this);
+}
+
+bool Widget::east_border_disqualified() const {
+    return east_border_disqualified_;
+}
+
+bool Widget::west_border_disqualified() const {
+    return west_border_disqualified_;
+}
+
+bool Widget::north_border_disqualified() const {
+    return north_border_disqualified_;
+}
+
+bool Widget::south_border_disqualified() const {
+    return south_border_disqualified_;
 }
 
 bool Widget::close_event() {
@@ -269,6 +275,9 @@ bool Widget::move_event(std::size_t new_x,
                         std::size_t new_y,
                         std::size_t old_x,
                         std::size_t old_y) {
+    new_x += west_border_offset(*this);
+    new_y += north_border_offset(*this);
+
     this->set_x(new_x);
     this->set_y(new_y);
     moved(Coordinates{new_x, new_y});
@@ -281,8 +290,40 @@ bool Widget::resize_event(std::size_t new_width,
                           std::size_t new_height,
                           std::size_t old_width,
                           std::size_t old_height) {
-    width_ = new_width;
-    height_ = new_height;
+    east_border_disqualified_ = false;
+    west_border_disqualified_ = false;
+    north_border_disqualified_ = false;
+    south_border_disqualified_ = false;
+
+    // If new_width is too small for widget and borders, disqualify borders
+    if (new_width == 2) {
+        if (west_border_offset(*this) == 0) {
+            west_border_disqualified_ = true;
+        } else {
+            east_border_disqualified_ = true;
+        }
+    }
+    if (new_width <= 1) {
+        east_border_disqualified_ = true;
+        west_border_disqualified_ = true;
+    }
+
+    if (new_height == 2) {
+        if (south_border_offset(*this) == 0) {
+            south_border_disqualified_ = true;
+        } else {
+            north_border_disqualified_ = true;
+        }
+    }
+    if (new_height <= 1) {
+        north_border_disqualified_ = true;
+        south_border_disqualified_ = true;
+    }
+
+    width_ = new_width - east_border_offset(*this) - west_border_offset(*this);
+    height_ =
+        new_height - north_border_offset(*this) - south_border_offset(*this);
+
     resized(width_, height_);
     this->update();
     return true;
@@ -349,16 +390,50 @@ void disable_border(Widget& w) {
     System::post_event<Child_polished_event>(w.parent(), &w);
 }
 
+std::size_t west_border_offset(const Widget& w) {
+    const Border& b{w.border};
+    if (b.enabled && !w.west_border_disqualified() &&
+        (b.west_enabled || b.north_west_enabled || b.south_west_enabled)) {
+        return 1;
+    }
+    return 0;
+}
+
+std::size_t east_border_offset(const Widget& w) {
+    const Border& b{w.border};
+    if (b.enabled && !w.east_border_disqualified() &&
+        (b.east_enabled || b.north_east_enabled || b.south_east_enabled)) {
+        return 1;
+    }
+    return 0;
+}
+
+std::size_t north_border_offset(const Widget& w) {
+    const Border& b{w.border};
+    if (b.enabled && !w.north_border_disqualified() &&
+        (b.north_enabled || b.north_east_enabled || b.north_west_enabled)) {
+        return 1;
+    }
+    return 0;
+}
+
+std::size_t south_border_offset(const Widget& w) {
+    const Border& b{w.border};
+    if (b.enabled && !w.south_border_disqualified() &&
+        (b.south_enabled || b.south_east_enabled || b.south_west_enabled)) {
+        return 1;
+    }
+    return 0;
+}
+
 bool has_coordinates(Widget& w, std::size_t global_x, std::size_t global_y) {
     if (!w.enabled() || !w.visible()) {
         return false;
     }
-    bool within_west = global_x >= (w.x() + west_border_offset(w.border));
-    bool within_east =
-        global_x < (w.x() + w.width() + west_border_offset(w.border));
-    bool within_north = global_y >= (w.y() + north_border_offset(w.border));
-    bool within_south =
-        global_y < (w.y() + w.height() + north_border_offset(w.border));
+    bool within_west = global_x >= w.x();
+    bool within_east = global_x < (w.x() + w.width());
+    bool within_north = global_y >= w.y();
+    bool within_south = global_y < (w.y() + w.height());
     return within_west && within_east && within_north && within_south;
 }
 

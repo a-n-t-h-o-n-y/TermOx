@@ -176,7 +176,7 @@ Coordinates Text_display::display_position(std::size_t index) const {
 bool Text_display::paint_event() {
     Painter p{this};
     std::size_t line_n{0};
-    auto paint = [&p, &line_n, this](const auto& line) {
+    auto paint = [&p, &line_n, this](const Line_info& line) {
         auto sub_begin = std::begin(this->contents_) + line.start_index;
         auto sub_end = sub_begin + line.length;
         p.put(Glyph_string(sub_begin, sub_end), 0, line_n++);
@@ -192,21 +192,12 @@ bool Text_display::paint_event() {
     return Widget::paint_event();
 }
 
-bool Text_display::resize_event(std::size_t new_width,
-                                std::size_t new_height,
-                                std::size_t old_width,
-                                std::size_t old_height) {
-    Widget::resize_event(new_width, new_height, old_width, old_height);
-    this->update_display();
-    return true;
-}
-
 // TODO: Implement tab character.
 void Text_display::update_display(std::size_t from_line) {
-    auto begin = display_state_.at(from_line).start_index;
+    std::size_t begin = display_state_.at(from_line).start_index;
     display_state_.clear();
-    if (this->width() == 0) {
-        display_state_.push_back(line_info{0, 0});
+    if (this->width() == 0) {  // TODO && height?
+        display_state_.push_back(Line_info{0, 0});
         return;
     }
     std::size_t start_index{0};
@@ -218,7 +209,7 @@ void Text_display::update_display(std::size_t from_line) {
             last_space = length;
         }
         if (contents_.at(i).str() == "\n") {
-            display_state_.push_back(line_info{start_index, length - 1});
+            display_state_.push_back(Line_info{start_index, length - 1});
             start_index += length;
             length = 0;
         } else if (length == this->width()) {
@@ -227,12 +218,12 @@ void Text_display::update_display(std::size_t from_line) {
                 length = last_space;
                 last_space = 0;
             }
-            display_state_.push_back(line_info{start_index, length});
+            display_state_.push_back(Line_info{start_index, length});
             start_index += length;
             length = 0;
         }
     }
-    display_state_.push_back(line_info{start_index, length});
+    display_state_.push_back(Line_info{start_index, length});
     // Reset top_line_ if out of bounds of new display.
     if (this->top_line() >= display_state_.size()) {
         top_line_ = this->last_line();

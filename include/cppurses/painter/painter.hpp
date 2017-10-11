@@ -1,8 +1,9 @@
 #ifndef PAINTER_PAINTER_HPP
 #define PAINTER_PAINTER_HPP
-#include <cstddef>
 #include "painter/glyph_string.hpp"
 #include "widget/coordinates.hpp"
+
+#include <cstddef>
 
 namespace cppurses {
 class Border;
@@ -38,9 +39,13 @@ class Painter {
     void clear_screen();
 
    private:
-    void unbound_put_string(const Glyph_string& gs,
-                            std::size_t glob_x,
-                            std::size_t glob_y);
+    void unbound_put_string(const Coordinates& point, const Glyph_string& gs);
+    void unbound_put_string(std::size_t glob_x,
+                            std::size_t glob_y,
+                            const Glyph_string& gs);
+    void unbound_line(const Coordinates& point_1,
+                      const Coordinates& point_2,
+                      const Glyph& symbol);
     void unbound_line(std::size_t glob_x1,
                       std::size_t glob_y1,
                       std::size_t glob_x2,

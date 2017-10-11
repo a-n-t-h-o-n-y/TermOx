@@ -58,10 +58,6 @@ class Text_display : public Widget {
 
    protected:
     bool paint_event() override;
-    bool resize_event(std::size_t new_width,
-                      std::size_t new_height,
-                      std::size_t old_width,
-                      std::size_t old_height) override;
 
     std::size_t line_at(std::size_t index) const;
     std::size_t top_line() const;
@@ -76,12 +72,12 @@ class Text_display : public Widget {
     std::size_t end_index() const;
 
    private:
-    struct line_info {
+    struct Line_info {
         std::size_t start_index;
         std::size_t length;
     };
 
-    std::vector<line_info> display_state_{line_info{0, 0}};
+    std::vector<Line_info> display_state_{Line_info{0, 0}};
 
     std::size_t top_line_{0};
     bool word_wrap_ = true;

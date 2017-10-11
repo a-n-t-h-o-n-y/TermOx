@@ -10,6 +10,7 @@ Main_menu::Main_menu() {
 }
 
 void Main_menu::initialize() {
+    enable_border(*this);
 }
 
 }  // namespace demo

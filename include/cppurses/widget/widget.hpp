@@ -1,13 +1,5 @@
 #ifndef WIDGET_WIDGET_HPP
 #define WIDGET_WIDGET_HPP
-#include <algorithm>
-#include <cstddef>
-#include <memory>
-#include <queue>
-#include <signals/signal.hpp>
-#include <string>
-#include <utility>
-#include <vector>
 #include "painter/brush.hpp"
 #include "painter/color.hpp"
 #include "painter/glyph.hpp"
@@ -17,6 +9,15 @@
 #include "widget/coordinates.hpp"
 #include "widget/focus_policy.hpp"
 #include "widget/size_policy.hpp"
+
+#include <algorithm>
+#include <cstddef>
+#include <memory>
+#include <queue>
+#include <signals/signal.hpp>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace cppurses {
 
@@ -76,6 +77,11 @@ class Widget : public Event_handler {
     bool visible() const;
     bool on_tree() const;
     void update();
+
+    bool east_border_disqualified() const;
+    bool west_border_disqualified() const;
+    bool north_border_disqualified() const;
+    bool south_border_disqualified() const;
 
     // Public Objects
     Border border;
@@ -137,6 +143,11 @@ class Widget : public Event_handler {
     std::size_t width_{width_policy.hint()};
     std::size_t height_{height_policy.hint()};
 
+    bool east_border_disqualified_{false};
+    bool west_border_disqualified_{false};
+    bool north_border_disqualified_{false};
+    bool south_border_disqualified_{false};
+
     // void delete_child(Widget* child);
     void set_visible(bool visible);
     void set_x(std::size_t global_x);
@@ -152,6 +163,11 @@ class Widget : public Event_handler {
 bool has_border(const Widget& w);
 void enable_border(Widget& w);
 void disable_border(Widget& w);
+
+std::size_t west_border_offset(const Widget& w);
+std::size_t east_border_offset(const Widget& w);
+std::size_t north_border_offset(const Widget& w);
+std::size_t south_border_offset(const Widget& w);
 
 bool has_coordinates(Widget& w, std::size_t global_x, std::size_t global_y);
 
