@@ -8,8 +8,6 @@ namespace cppurses {
 
 Layout::Layout() {
     System::post_event<Move_event>(this, 0, 0);
-    System::post_event<Resize_event>(this, System::max_width(),
-                                     System::max_height());
 }
 
 bool Layout::paint_event() {

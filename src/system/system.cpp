@@ -4,9 +4,11 @@
 #include "system/detail/event_queue.hpp"
 #include "system/detail/ncurses_event_listener.hpp"
 #include "system/event.hpp"
+#include "system/events/resize_event.hpp"
 #include "system/event_loop.hpp"
 #include "system/events/on_tree_event.hpp"
 #include "system/events/paint_event.hpp"
+#include "widget/layout.hpp"
 #include "widget/widget.hpp"
 
 #include <signals/slot.hpp>
@@ -22,6 +24,8 @@ class Abstract_event_listener;
 sig::Slot<void()> System::quit = []() { System::exit(); };  // NOLINT
 
 Widget* System::head_ = nullptr;  // NOLINT
+// System::post_event<Resize_event>(this, System::max_width(),
+//                                  System::max_height());
 Event_loop System::event_loop_;
 std::unique_ptr<Paint_buffer> System::paint_buffer_ = nullptr;  // NOLINT
 std::unique_ptr<detail::Abstract_event_listener> System::event_listener_ =
@@ -98,6 +102,10 @@ void System::set_head(Widget* head_widget) {
     head_ = head_widget;
     if (head_ != nullptr) {
         System::post_event<On_tree_event>(head_, true);
+        if (dynamic_cast<Layout*>(head_) != nullptr) {
+            System::post_event<Resize_event>(head_, System::max_width(),
+                                             System::max_height());
+        }
         head_->update();
     }
 }
