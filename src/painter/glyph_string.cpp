@@ -33,6 +33,12 @@ Glyph_string Glyph_string::operator+(const Glyph_string& gs) {
     return result;
 }
 
+void Glyph_string::remove_attribute(Attribute attr) {
+    for (Glyph& glyph : *this) {
+        glyph.brush().remove_attribue(attr);
+    }
+}
+
 bool operator==(const Glyph_string& x, const Glyph_string& y) {
     return std::equal(std::begin(x), std::end(x), std::begin(y), std::end(y));
 }

@@ -103,6 +103,8 @@ class Glyph_string : private std::vector<Glyph> {
         }
     }
 
+    void remove_attribute(Attribute attr);
+
     // Functions from std::vector<Glyph>
     using std::vector<Glyph>::value_type;
     using std::vector<Glyph>::allocator_type;
