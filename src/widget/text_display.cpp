@@ -2,6 +2,7 @@
 #include "painter/glyph_string.hpp"
 #include "painter/painter.hpp"
 #include "widget/coordinates.hpp"
+
 #include <signals/signal.hpp>
 #include <algorithm>
 #include <cstddef>
@@ -12,13 +13,11 @@
 namespace cppurses {
 
 Text_display::Text_display(Glyph_string content)
-    : contents_{std::move(content)} {
-    this->update_display();
-}
+    : contents_{std::move(content)} {}
 
 void Text_display::set_text(Glyph_string text) {
     contents_ = std::move(text);
-    this->update_display();
+    this->update();
     text_changed(contents_);
 }
 
@@ -34,7 +33,7 @@ void Text_display::insert(Glyph_string text, std::size_t index) {
     }
     contents_.insert(std::begin(contents_) + index, std::begin(text),
                      std::end(text));
-    this->update_display();
+    this->update();
     text_changed(contents_);
 }
 
@@ -45,7 +44,7 @@ void Text_display::append(Glyph_string text) {
         }
     }
     contents_.append(std::move(text));
-    this->update_display();
+    this->update();
     text_changed(contents_);
 }
 
@@ -58,7 +57,7 @@ void Text_display::erase(std::size_t index, std::size_t length) {
         end = std::end(contents_);
     }
     contents_.erase(std::begin(contents_) + index, end);
-    this->update_display();
+    this->update();
     text_changed(contents_);
 }
 
@@ -67,13 +66,13 @@ void Text_display::pop_back() {
         return;
     }
     contents_.pop_back();
-    this->update_display();
+    this->update();
     text_changed(contents_);
 }
 
 void Text_display::clear() {
     contents_.clear();
-    this->update_display();
+    this->update();
     text_changed(contents_);
 }
 
@@ -101,17 +100,17 @@ void Text_display::scroll_down(std::size_t n) {
 
 void Text_display::enable_word_wrap(bool enable) {
     word_wrap_ = enable;
-    this->update_display();
+    this->update();
 }
 
 void Text_display::disable_word_wrap(bool disable) {
     word_wrap_ = !disable;
-    this->update_display();
+    this->update();
 }
 
 void Text_display::toggle_word_wrap() {
     word_wrap_ = !word_wrap_;
-    this->update_display();
+    this->update();
 }
 
 void Text_display::add_new_text_attribute(Attribute attr) {
@@ -174,6 +173,7 @@ Coordinates Text_display::display_position(std::size_t index) const {
 }
 
 bool Text_display::paint_event() {
+    this->update_display();
     Painter p{this};
     std::size_t line_n{0};
     auto paint = [&p, &line_n, this](const Line_info& line) {
@@ -196,7 +196,7 @@ bool Text_display::paint_event() {
 void Text_display::update_display(std::size_t from_line) {
     std::size_t begin = display_state_.at(from_line).start_index;
     display_state_.clear();
-    if (this->width() == 0) {  // TODO && height?
+    if (this->width() == 0) {
         display_state_.push_back(Line_info{0, 0});
         return;
     }
@@ -228,7 +228,7 @@ void Text_display::update_display(std::size_t from_line) {
     if (this->top_line() >= display_state_.size()) {
         top_line_ = this->last_line();
     }
-    this->update();
+    // this->update();
 }
 
 std::size_t Text_display::line_at(std::size_t index) const {
