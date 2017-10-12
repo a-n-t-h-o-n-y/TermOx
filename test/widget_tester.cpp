@@ -2,20 +2,9 @@
 
 using namespace cppurses;
 
-class Display_size : public Textbox {
+class Textbox_holder : public Vertical_layout {
    public:
-    Display_size() { enable_border(*this); }
-
-   protected:
-    bool resize_event(std::size_t new_width,
-                      std::size_t new_height,
-                      std::size_t old_width,
-                      std::size_t old_height) override {
-        // this->set_text(std::to_string(this->height()));
-        this->update();
-        return Textbox::resize_event(new_width, new_height, old_width,
-                                     old_height);
-    }
+    Textbox_holder() { enable_border(*this); }
 };
 
 int main() {
@@ -54,20 +43,21 @@ int main() {
     wai.add_option("Easy");
     wai.add_option("Medium");
     wai.add_option("Hard");
-    // disable_walls(wai.border);
-    // disable_corners(wai.border);
-    // wai.border.west_enabled = true;
-    // enable_border(wai);
+    disable_walls(wai.border);
+    disable_corners(wai.border);
+    wai.border.west_enabled = true;
+    enable_border(wai);
 
-    // Text_display& cb_tb = vl.make_child<Text_display>();
-    // cb.option_changed.connect(slot::set_text(cb_tb));
-    // enable_border(cb_tb);
-    // vl.make_child<Display_size>();
     auto& tb = vl.make_child<Textbox>("Hello");
     tb.height_policy.type(Size_policy::Fixed);
     tb.height_policy.hint(3);
     enable_border(tb);
 
     sys.set_head(&vl);
+
+    // Textbox_holder th;
+    // th.make_child<Textbox>();
+    // sys.set_head(&th);
+
     return sys.run();
 }

@@ -24,8 +24,6 @@ class Abstract_event_listener;
 sig::Slot<void()> System::quit = []() { System::exit(); };  // NOLINT
 
 Widget* System::head_ = nullptr;  // NOLINT
-// System::post_event<Resize_event>(this, System::max_width(),
-//                                  System::max_height());
 Event_loop System::event_loop_;
 std::unique_ptr<Paint_buffer> System::paint_buffer_ = nullptr;  // NOLINT
 std::unique_ptr<detail::Abstract_event_listener> System::event_listener_ =

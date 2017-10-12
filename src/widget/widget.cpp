@@ -105,17 +105,17 @@ std::unique_ptr<Widget> Widget::remove_child(const std::string& name) {
 std::size_t Widget::x() const {
     Widget* parent = this->parent();
     if (parent == nullptr) {
-        return this->position_.x;
+        return this->position_.x + west_border_offset(*this);
     }
-    return this->position_.x + parent->x();
+    return this->position_.x + parent->x() + west_border_offset(*this);
 }
 
 std::size_t Widget::y() const {
     Widget* parent = this->parent();
     if (parent == nullptr) {
-        return this->position_.y;
+        return this->position_.y + north_border_offset(*this);
     }
-    return this->position_.y + parent->y();
+    return this->position_.y + parent->y() + north_border_offset(*this);
 }
 
 std::size_t Widget::width() const {
@@ -275,9 +275,6 @@ bool Widget::move_event(std::size_t new_x,
                         std::size_t new_y,
                         std::size_t old_x,
                         std::size_t old_y) {
-    new_x += west_border_offset(*this);
-    new_y += north_border_offset(*this);
-
     this->set_x(new_x);
     this->set_y(new_y);
     moved(Coordinates{new_x, new_y});
@@ -309,10 +306,10 @@ bool Widget::resize_event(std::size_t new_width,
     }
 
     if (new_height == 2) {
-        if (south_border_offset(*this) == 0) {
-            south_border_disqualified_ = true;
-        } else {
+        if (north_border_offset(*this) == 0) {
             north_border_disqualified_ = true;
+        } else {
+            south_border_disqualified_ = true;
         }
     }
     if (new_height <= 1) {
