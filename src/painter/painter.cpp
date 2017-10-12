@@ -124,13 +124,13 @@ void Painter::border(const Border& b) {
     if (widget_->height() == 1 && widget_->north_border_disqualified()) {
         west_top = Coordinates{widg_x, widg_y};
         west_bottom = west_top;
-        east_top = Coordinates{widg_x + width /*- 1*/, widg_y};
+        east_top = Coordinates{widg_x + width, widg_y};
         east_bottom = east_top;
     } else if (widget_->height() == 1 && widget_->south_border_disqualified() &&
                !widget_->north_border_disqualified()) {  // && b.north_enabled?
         west_top = Coordinates{widg_x, widg_y + 1};
         west_bottom = west_top;
-        east_top = Coordinates{widg_x + width /*- 1*/, widg_y + 1};
+        east_top = Coordinates{widg_x + width, widg_y + 1};
         east_bottom = east_top;
     }
 
