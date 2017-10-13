@@ -2,6 +2,9 @@
 #define WIDGET_WIDGETS_TITLEBAR_HPP
 #include "painter/glyph_string.hpp"
 #include "widget/layouts/horizontal_layout.hpp"
+#include "widget/widgets/label.hpp"
+#include "widget/widgets/push_button.hpp"
+
 #include <signals/slot.hpp>
 
 namespace cppurses {
@@ -9,12 +12,11 @@ class Push_button;
 
 class Titlebar : public Horizontal_layout {
    public:
-    explicit Titlebar(const Glyph_string& title = "");
-    void set_title(Glyph_string title);
+    explicit Titlebar(const Glyph_string& title_ = "");
+    void set_title(Glyph_string title_);
 
-   private:
-    Push_button& title_;
-    Push_button& exit_button_;
+    Label& title;
+    Push_button& exit_button;
 };
 
 namespace slot {
