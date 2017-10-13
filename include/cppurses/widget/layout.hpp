@@ -29,5 +29,9 @@ class Layout : public Widget {
     };
 };
 
+// Free Functions
+void set_background(Layout& l, Color c);
+void set_foreground(Layout& l, Color c);
+
 }  // namespace cppurses
 #endif  // WIDGET_LAYOUT_HPP

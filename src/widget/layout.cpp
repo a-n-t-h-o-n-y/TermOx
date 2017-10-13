@@ -20,4 +20,17 @@ bool Layout::paint_event() {
     return Widget::paint_event();
 }
 
+// Free Functions
+void set_background(Layout& l, Color c) {
+    for (Widget* w : l.children()) {
+        set_background(*w, c);
+    }
+}
+
+void set_foreground(Layout& l, Color c) {
+    for (Widget* w : l.children()) {
+        set_foreground(*w, c);
+    }
+}
+
 }  // namespace cppurses
