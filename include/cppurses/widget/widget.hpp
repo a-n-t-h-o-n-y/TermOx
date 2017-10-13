@@ -76,7 +76,7 @@ class Widget : public Event_handler {
 
     bool visible() const;
     bool on_tree() const;
-    void update();
+    virtual void update();
 
     bool east_border_disqualified() const;
     bool west_border_disqualified() const;

@@ -16,6 +16,8 @@ class Text_display : public Widget {
    public:
     explicit Text_display(Glyph_string content = "");
 
+    void update() override;
+
     // Text Modification
     void set_text(Glyph_string text);
     void insert(Glyph_string text, std::size_t index);

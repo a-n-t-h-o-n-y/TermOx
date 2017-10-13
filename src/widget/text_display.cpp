@@ -12,6 +12,11 @@
 
 namespace cppurses {
 
+void Text_display::update() {
+    this->update_display();
+    Widget::update();
+}
+
 Text_display::Text_display(Glyph_string content)
     : contents_{std::move(content)} {}
 
@@ -175,7 +180,6 @@ Coordinates Text_display::display_position(std::size_t index) const {
 }
 
 bool Text_display::paint_event() {
-    this->update_display();
     Painter p{this};
     std::size_t line_n{0};
     auto paint = [&p, &line_n, this](const Line_info& line) {
