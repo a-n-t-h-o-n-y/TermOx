@@ -24,5 +24,6 @@
 #include "system/key.hpp"
 #include "system/mouse_button.hpp"
 #include "system/system.hpp"
+#include "system/shortcuts.hpp"
 
 #endif  // CPPURSES_SYSTEM_HPP

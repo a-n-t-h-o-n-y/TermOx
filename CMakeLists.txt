@@ -41,6 +41,7 @@ set(SYSTEM_SOURCES
 	"src/system/resize_event.cpp"
     "src/system/show_event.cpp"
 	"src/system/system.cpp"
+    "src/system/shortcuts.cpp"
     )
 
 set(PAINTER_SOURCES
