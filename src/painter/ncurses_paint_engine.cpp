@@ -83,6 +83,7 @@ NCurses_paint_engine::NCurses_paint_engine(const Paint_buffer& buffer)
     ::mouseinterval(0);
     ::start_color();
     ::assume_default_colors(240, 240);  // Sets color pair 0 to black/black
+    ::set_escdelay(1);
     initialize_color_pairs();
     this->hide_cursor();
 }
