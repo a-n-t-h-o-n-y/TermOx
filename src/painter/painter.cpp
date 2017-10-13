@@ -1,7 +1,4 @@
 #include "painter/painter.hpp"
-#include <cstddef>
-#include <cstring>
-#include <optional/optional.hpp>
 #include "painter/brush.hpp"
 #include "painter/color.hpp"
 #include "painter/glyph.hpp"
@@ -11,6 +8,11 @@
 #include "widget/border.hpp"
 #include "widget/coordinates.hpp"
 #include "widget/widget.hpp"
+
+#include <optional/optional.hpp>
+
+#include <cstddef>
+#include <cstring>
 
 namespace cppurses {
 
@@ -119,7 +121,7 @@ void Painter::border(const Border& b) {
     Coordinates south_east{east_bottom.x, south_left.y};
     Coordinates south_west{west_bottom.x, south_right.y};
 
-    // Special Cases:
+    // Edge Cases:
     // Height == 1
     if (widget_->height() == 1 && widget_->north_border_disqualified()) {
         west_top = Coordinates{widg_x, widg_y};
@@ -183,6 +185,32 @@ void Painter::border(const Border& b) {
     if (b.south_east_enabled && !widget_->south_border_disqualified() &&
         !widget_->east_border_disqualified()) {
         this->unbound_put_string(south_east, b.south_east);
+    }
+
+    // Corners - Special Cases
+    // North-West
+    if (!b.north_west_enabled && !b.north_enabled && b.west_enabled) {
+        this->unbound_put_string(north_west, b.west);
+    } else if (!b.north_west_enabled && !b.west_enabled && b.north_enabled) {
+        this->unbound_put_string(north_west, b.north);
+    }
+    // North-East
+    if (!b.north_east_enabled && !b.north_enabled && b.east_enabled) {
+        this->unbound_put_string(north_east, b.east);
+    } else if (!b.north_east_enabled && !b.east_enabled && b.north_enabled) {
+        this->unbound_put_string(north_east, b.north);
+    }
+    // South-West
+    if (!b.south_west_enabled && !b.south_enabled && b.west_enabled) {
+        this->unbound_put_string(south_west, b.west);
+    } else if (!b.south_west_enabled && !b.west_enabled && b.south_enabled) {
+        this->unbound_put_string(south_west, b.south);
+    }
+    // South-East
+    if (!b.south_east_enabled && !b.south_enabled && b.east_enabled) {
+        this->unbound_put_string(south_east, b.east);
+    } else if (!b.south_east_enabled && !b.east_enabled && b.south_enabled) {
+        this->unbound_put_string(south_east, b.south);
     }
 }
 
