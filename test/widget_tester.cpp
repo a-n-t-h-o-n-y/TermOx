@@ -1,5 +1,7 @@
 #include "cppurses.hpp"
 
+#include <cctype>
+
 using namespace cppurses;
 
 int main() {
@@ -50,21 +52,35 @@ int main() {
 
     // sys.set_head(&vl);
 
+    // ---------------------------------------------------------------------
+    // Vertical_layout vl;
+    // auto& tb = vl.make_child<Textbox>();
+    // auto& hl = vl.make_child<Horizontal_layout>();
+    // auto& btn = hl.make_child<Push_button>("Button");
+    // auto& cb = hl.make_child<Cycle_box>("Cycle");
+    // auto& tb2 = vl.make_child<Textbox>();
+
+    // set_background(btn, Color::Dark_blue);
+    // set_foreground(btn, Color::White);
+
+    // enable_border(tb);
+    // enable_border(tb2);
+
+    // set_background(cb, Color::Light_gray);
+    // set_foreground(cb, Color::White);
+
+    // sys.set_head(&vl);
+    // ---------------------------------------------------------------------
+
     Vertical_layout vl;
-    auto& tb = vl.make_child<Textbox>();
-    auto& hl = vl.make_child<Horizontal_layout>();
-    auto& btn = hl.make_child<Push_button>("Button");
-    auto& cb = hl.make_child<Cycle_box>("Cycle");
-    auto& tb2 = vl.make_child<Textbox>();
-
-    set_background(btn, Color::Dark_blue);
-    set_foreground(btn, Color::White);
-
+    auto& le = vl.make_child<Line_edit>("Edit Me");
+    auto& tb = vl.make_child<Log>();
     enable_border(tb);
-    enable_border(tb2);
-
-    set_background(cb, Color::Light_gray);
-    set_foreground(cb, Color::White);
+    le.editing_finished.connect(slot::post_message(tb));
+    enable_border(le);
+    // le.invisible_input();
+    le.clear_on_enter();
+    le.set_validator([](char c) { return std::isalpha(c); });
 
     sys.set_head(&vl);
 

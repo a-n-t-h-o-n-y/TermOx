@@ -72,6 +72,8 @@ void Text_display::pop_back() {
 
 void Text_display::clear() {
     contents_.clear();
+    this->move_cursor_x(0);
+    this->move_cursor_y(0);
     this->update();
     text_changed(contents_);
 }
@@ -228,7 +230,6 @@ void Text_display::update_display(std::size_t from_line) {
     if (this->top_line() >= display_state_.size()) {
         top_line_ = this->last_line();
     }
-    // this->update();
 }
 
 std::size_t Text_display::line_at(std::size_t index) const {

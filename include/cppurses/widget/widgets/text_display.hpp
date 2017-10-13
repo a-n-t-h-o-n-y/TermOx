@@ -71,6 +71,8 @@ class Text_display : public Widget {
     std::size_t line_length(std::size_t line) const;
     std::size_t end_index() const;
 
+    void update_display(std::size_t from_line = 0);
+
    private:
     struct Line_info {
         std::size_t start_index;
@@ -83,8 +85,6 @@ class Text_display : public Widget {
     bool word_wrap_ = true;
     Glyph_string contents_;
     Brush new_text_brush_{this->brush};  // TODO possibly make public member
-
-    void update_display(std::size_t from_line = 0);
 };
 
 }  // namespace cppurses

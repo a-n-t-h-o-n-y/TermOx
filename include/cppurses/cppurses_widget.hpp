@@ -10,6 +10,7 @@
 #include "widget/widgets/horizontal_scrollbar.hpp"
 #include "widget/widgets/label.hpp"
 #include "widget/widgets/list.hpp"
+#include "widget/widgets/line_edit.hpp"
 #include "widget/widgets/log.hpp"
 #include "widget/widgets/menu.hpp"
 #include "widget/widgets/push_button.hpp"
