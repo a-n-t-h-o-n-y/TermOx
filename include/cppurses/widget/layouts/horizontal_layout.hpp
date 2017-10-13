@@ -1,10 +1,9 @@
 #ifndef WIDGET_LAYOUTS_HORIZONTAL_LAYOUT_HPP
 #define WIDGET_LAYOUTS_HORIZONTAL_LAYOUT_HPP
-
 #include "widget/layout.hpp"
+
 #include <cstddef>
 #include <functional>
-#include <tuple>
 #include <vector>
 
 namespace cppurses {

@@ -1,6 +1,7 @@
 #include "widget/widgets/widget_stack_menu.hpp"
 #include "system/focus.hpp"
 #include "widget/widgets/menu.hpp"
+#include "system/shortcuts.hpp"
 
 namespace cppurses {
 Widget_stack_menu::Widget_stack_menu() {
@@ -45,18 +46,22 @@ void Widget_stack_menu::initialize() {
     this->focus_policy = Focus_policy::Strong;
     stack_.page_changed.connect(page_changed);
 
-    h_layout_.height_policy.type(Size_policy::Fixed);
-    h_layout_.height_policy.hint(1);
-    main_menu_button.width_policy.type(Size_policy::Minimum);
-    main_menu_button.width_policy.hint(11);
-    empty_space_.width_policy.stretch(2);
-    set_background(empty_space_, Color::Light_gray);
-    set_background(main_menu_button, Color::Light_blue);
+    // h_layout_.height_policy.type(Size_policy::Fixed);
+    // h_layout_.height_policy.hint(1);
+    // main_menu_button.width_policy.type(Size_policy::Minimum);
+    // main_menu_button.width_policy.hint(11);
+    // empty_space_.width_policy.stretch(2);
+    // set_background(empty_space_, Color::Light_gray);
+    // set_background(main_menu_button, Color::Light_blue);
 
     stack_.set_active_page(0);
 
-    main_menu_button.clicked.connect(slot::set_active_page(stack_, 0));
-    main_menu_button.clicked.connect([this] { Focus::set_focus_to(&menu_); });
+    // main_menu_button.clicked.connect(slot::set_active_page(stack_, 0));
+    // main_menu_button.clicked.connect([this] { Focus::set_focus_to(&menu_);
+    // });
+    auto& esc_short = Shortcuts::add_shortcut(Key::Escape);
+    esc_short.connect(slot::set_active_page(stack_, 0));
+    esc_short.connect([this] { Focus::set_focus_to(&menu_); });
 }
 
 bool Widget_stack_menu::focus_in_event() {

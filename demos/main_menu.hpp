@@ -10,7 +10,8 @@ class Main_menu : public Vertical_layout {
    public:
     Main_menu();
 
-    Titlebar& titlebar{this->make_child<Titlebar>(" C (P P) U R S E S")};
+    Horizontal_layout& hl{this->make_child<Horizontal_layout>()};
+    Titlebar& titlebar{hl.make_child<Titlebar>(" C (P P) U R S E S")};
     Widget_stack_menu& main_menu{this->make_child<Widget_stack_menu>()};
     Notepad& notepad{main_menu.make_page<Notepad>("Notepad")};
 

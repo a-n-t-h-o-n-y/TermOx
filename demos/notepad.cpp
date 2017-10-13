@@ -131,6 +131,12 @@ void Save_area::initialize() {
 
 Notepad::Notepad() {
     this->initialize();
+    this->focus_policy = Focus_policy::Strong;
+}
+
+bool Notepad::focus_in_event() {
+    Focus::set_focus_to(&txt_attr.textbox);
+    return Vertical_layout::focus_in_event();
 }
 
 void Notepad::initialize() {

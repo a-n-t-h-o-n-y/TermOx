@@ -72,7 +72,9 @@ int main() {
     // sys.set_head(&vl);
     // ---------------------------------------------------------------------
 
+    // sys.enable_ctrl_characters();
     Vertical_layout vl;
+    vl.make_child<Titlebar>("Widget Tester");
     auto& le = vl.make_child<Line_edit>("Edit Me");
     auto& tb = vl.make_child<Log>();
     enable_border(tb);
@@ -81,6 +83,15 @@ int main() {
     // le.invisible_input();
     le.clear_on_enter();
     le.set_validator([](char c) { return std::isalpha(c); });
+
+    auto& sig = Shortcuts::add_shortcut(Key::Escape);
+    sig.connect([&tb] {
+        if (has_border(tb)) {
+            disable_border(tb);
+        } else {
+            enable_border(tb);
+        }
+    });
 
     sys.set_head(&vl);
 

@@ -38,10 +38,10 @@ class Widget_stack_menu : public Vertical_layout {
    private:
     Widget_stack& stack_{this->make_child<Widget_stack>()};
     Menu& menu_{stack_.make_page<Menu>("Main Menu")};
-    Horizontal_layout& h_layout_{this->make_child<Horizontal_layout>()};
-    Widget& empty_space_{h_layout_.make_child<Widget>()};
-    Push_button& main_menu_button{
-        h_layout_.make_child<Push_button>("Main Menu")};
+    // Horizontal_layout& h_layout_{this->make_child<Horizontal_layout>()};
+    // Widget& empty_space_{h_layout_.make_child<Widget>()};
+    // Push_button& main_menu_button{
+    //     h_layout_.make_child<Push_button>("Main Menu")};
 
     void initialize();
 };

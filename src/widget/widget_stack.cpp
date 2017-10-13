@@ -29,6 +29,7 @@ void Widget_stack::set_active_page(std::size_t index) {
     active_page_ = pages_[index].get();
     this->add_child(std::move(pages_[index]));
     pages_[index] = nullptr;
+    Focus::set_focus_to(active_page_);
     this->page_changed(index);
 }
 
