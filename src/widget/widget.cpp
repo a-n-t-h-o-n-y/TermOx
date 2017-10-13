@@ -457,6 +457,24 @@ void set_foreground(Widget& w, Color c) {
     w.update();
 }
 
+void set_background_recursive(Widget& w, Color c, bool single_level) {
+    for (Widget* w : w.children()) {
+        set_background(*w, c);
+        if (!single_level) {
+            set_background_recursive(*w, c, single_level);
+        }
+    }
+}
+
+void set_foreground_recursive(Widget& w, Color c, bool single_level) {
+    for (Widget* w : w.children()) {
+        set_foreground(*w, c);
+        if (!single_level) {
+            set_foreground_recursive(*w, c, single_level);
+        }
+    }
+}
+
 bool has_focus(const Widget& w) {
     return Focus::focus_widget() == &w;
 }

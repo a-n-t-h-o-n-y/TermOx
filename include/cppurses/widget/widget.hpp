@@ -177,6 +177,9 @@ void move_cursor(Widget& w, std::size_t x, std::size_t y);
 void set_background(Widget& w, Color c);
 void set_foreground(Widget& w, Color c);
 
+void set_background_recursive(Widget& w, Color c, bool single_level = false);
+void set_foreground_recursive(Widget& w, Color c, bool single_level = false);
+
 bool has_focus(const Widget& w);
 
 // - - - - - - - - - - - - Template Implementations - - - - - - - - - - - - - -
