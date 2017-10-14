@@ -31,21 +31,21 @@ std::string load_file(const std::string& filename) {
 using namespace cppurses;
 namespace demo {
 
-Center_label::Center_label(Glyph_string text) : label_{std::move(text)} {
-    this->initialize();
-}
+// Center_label::Center_label(Glyph_string text) : label_{std::move(text)} {
+//     this->initialize();
+// }
 
-void Center_label::initialize() {
-    this->brush.add_attributes(Attribute::Bold);
-    this->height_policy.type(Size_policy::Fixed);
-    this->height_policy.hint(1);
-}
+// void Center_label::initialize() {
+//     this->brush.add_attributes(Attribute::Bold);
+//     this->height_policy.type(Size_policy::Fixed);
+//     this->height_policy.hint(1);
+// }
 
-bool Center_label::paint_event() {
-    Painter p{this};
-    p.put(label_, this->width() / 2 - label_.length() / 2, 0);
-    return Widget::paint_event();
-}
+// bool Center_label::paint_event() {
+//     Painter p{this};
+//     p.put(label_, this->width() / 2 - label_.length() / 2, 0);
+//     return Widget::paint_event();
+// }
 
 // Textbox and Attribute/Color Selection
 Text_and_attributes::Text_and_attributes() {
@@ -97,6 +97,10 @@ void Text_and_attributes::initialize() {
 // Attribute and Color Selections
 Attrs_and_colors::Attrs_and_colors() {
     this->initialize();
+    fg_label.brush.add_attributes(Attribute::Bold);
+    fg_label.set_alignment(Alignment::Center);
+    bg_label.brush.add_attributes(Attribute::Bold);
+    bg_label.set_alignment(Alignment::Center);
 }
 
 void Attrs_and_colors::initialize() {

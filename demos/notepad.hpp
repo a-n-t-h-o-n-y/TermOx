@@ -5,17 +5,17 @@
 using namespace cppurses;
 namespace demo {
 
-class Center_label : public Widget {
-   public:
-    Center_label(Glyph_string text);
+// class Center_label : public Widget {
+//    public:
+//     Center_label(Glyph_string text);
 
-   protected:
-    bool paint_event() override;
+//    protected:
+//     bool paint_event() override;
 
-   private:
-    Glyph_string label_;
-    void initialize();
-};
+//    private:
+//     Glyph_string label_;
+//     void initialize();
+// };
 
 struct Attribute_select : Vertical_layout {
     // Widgets
@@ -33,9 +33,9 @@ class Attrs_and_colors : public Vertical_layout {
     Attrs_and_colors();
 
     // Widgets
-    Center_label& fg_label{this->make_child<Center_label>("Foreground⤵")};
+    Label& fg_label{this->make_child<Label>("Foreground⤵")};
     Color_select& fg_select = this->make_child<Color_select>();
-    Center_label& bg_label{this->make_child<Center_label>("Background⤵")};
+    Label& bg_label{this->make_child<Label>("Background⤵")};
     Color_select& bg_select{this->make_child<Color_select>()};
     Attribute_select& attr_select{this->make_child<Attribute_select>()};
 
