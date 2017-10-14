@@ -83,6 +83,15 @@ void Text_display::clear() {
     text_changed(contents_);
 }
 
+void Text_display::set_alignment(Alignment type) {
+    alignment_ = type;
+    this->update();
+}
+
+Alignment Text_display::alignment() const {
+    return alignment_;
+}
+
 void Text_display::scroll_up(std::size_t n) {
     if (n > this->top_line()) {
         top_line_ = 0;
@@ -185,7 +194,20 @@ bool Text_display::paint_event() {
     auto paint = [&p, &line_n, this](const Line_info& line) {
         auto sub_begin = std::begin(this->contents_) + line.start_index;
         auto sub_end = sub_begin + line.length;
-        p.put(Glyph_string(sub_begin, sub_end), 0, line_n++);
+        std::size_t start{0};
+        switch (alignment_) {
+            case Alignment::Left:
+                start = 0;
+                break;
+            case Alignment::Center:
+                start = (this->width() - line.length) / 2;
+                break;
+
+            case Alignment::Right:
+                start = this->width() - line.length;
+                break;
+        }
+        p.put(Glyph_string(sub_begin, sub_end), start, line_n++);
     };
     auto begin = std::begin(display_state_) + this->top_line();
     auto end = std::end(display_state_);

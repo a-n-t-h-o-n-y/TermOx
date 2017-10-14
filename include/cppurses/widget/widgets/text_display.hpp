@@ -12,6 +12,8 @@
 
 namespace cppurses {
 
+enum class Alignment { Left, Center, Right };
+
 class Text_display : public Widget {
    public:
     explicit Text_display(Glyph_string content = "");
@@ -25,6 +27,9 @@ class Text_display : public Widget {
     void erase(std::size_t index, std::size_t length = Glyph_string::npos);
     void pop_back();
     void clear();
+
+    void set_alignment(Alignment type);
+    Alignment alignment() const;
 
     // Scrolling
     virtual void scroll_up(std::size_t n = 1);
@@ -87,6 +92,7 @@ class Text_display : public Widget {
     bool word_wrap_ = true;
     Glyph_string contents_;
     Brush new_text_brush_{this->brush};  // TODO possibly make public member
+    Alignment alignment_{Alignment::Left};
 };
 
 }  // namespace cppurses

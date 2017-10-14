@@ -9,6 +9,7 @@ namespace cppurses {
 
 Push_button::Push_button(Glyph_string name) : Label{std::move(name)} {
     this->height_policy.type(Size_policy::Preferred);
+    this->set_alignment(Alignment::Center);
 }
 
 bool Push_button::mouse_press_event(Mouse_button button,

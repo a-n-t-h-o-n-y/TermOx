@@ -87,6 +87,7 @@ bool Textbox::key_press_event(Key key, char symbol) {
         default:  // Insert text
             char text = symbol;
             if (text != '\0') {
+                // TODO Cursor Movement for Alignments other than left
                 auto cursor_index = this->cursor_index();
                 this->insert(text, cursor_index);
                 this->cursor_right(1);

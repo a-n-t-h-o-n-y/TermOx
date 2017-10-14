@@ -67,7 +67,7 @@ void Cycle_box::cycle() {
 }
 
 void Cycle_box::resize_label() {
-    label.width_policy.hint(label.text().size() + 2);
+    label.width_policy.hint(label.contents().size() + 2);
     label.width_policy.type(Size_policy::Fixed);
 }
 
