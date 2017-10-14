@@ -53,47 +53,52 @@ int main() {
     // sys.set_head(&vl);
 
     // ---------------------------------------------------------------------
-    // Vertical_layout vl;
-    // auto& tb = vl.make_child<Textbox>();
-    // auto& hl = vl.make_child<Horizontal_layout>();
-    // auto& btn = hl.make_child<Push_button>("Button");
-    // auto& cb = hl.make_child<Cycle_box>("Cycle");
-    // auto& tb2 = vl.make_child<Textbox>();
-
-    // set_background(btn, Color::Dark_blue);
-    // set_foreground(btn, Color::White);
-
-    // enable_border(tb);
-    // enable_border(tb2);
-
-    // set_background(cb, Color::Light_gray);
-    // set_foreground(cb, Color::White);
-
-    // sys.set_head(&vl);
-    // ---------------------------------------------------------------------
-
-    // sys.enable_ctrl_characters();
     Vertical_layout vl;
-    vl.make_child<Titlebar>("Widget Tester");
-    auto& le = vl.make_child<Line_edit>("Edit Me");
-    auto& tb = vl.make_child<Log>();
-    enable_border(tb);
-    le.editing_finished.connect(slot::post_message(tb));
-    enable_border(le);
-    // le.invisible_input();
-    le.clear_on_enter();
-    le.set_validator([](char c) { return std::isalpha(c); });
+    auto& tb = vl.make_child<Textbox>();
+    auto& hl = vl.make_child<Horizontal_layout>();
+    auto& btn = hl.make_child<Push_button>("Button");
+    auto& cb = hl.make_child<Cycle_box>("Cycle");
+    auto& tb2 = vl.make_child<Textbox>();
 
-    auto& sig = Shortcuts::add_shortcut(Key::Escape);
-    sig.connect([&tb] {
-        if (has_border(tb)) {
-            disable_border(tb);
-        } else {
-            enable_border(tb);
-        }
-    });
+    set_background(btn, Color::Dark_blue);
+    set_foreground(btn, Color::White);
+
+    enable_border(tb);
+    tb.border.east_enabled = false;
+    tb.border.north_east_enabled = false;
+    tb.border.south_east_enabled = false;
+    tb.border.south_enabled = false;
+    tb.border.south_west_enabled = false;
+    enable_border(tb2);
+    tb2.border.south_enabled = false;
+
+    set_background(cb, Color::Light_gray);
+    set_foreground(cb, Color::White);
 
     sys.set_head(&vl);
+    // ---------------------------------------------------------------------
+
+    // Vertical_layout vl;
+    // vl.make_child<Titlebar>("Widget Tester");
+    // auto& le = vl.make_child<Line_edit>("Edit Me");
+    // auto& tb = vl.make_child<Log>();
+    // enable_border(tb);
+    // le.editing_finished.connect(slot::post_message(tb));
+    // enable_border(le);
+    // // le.invisible_input();
+    // le.clear_on_enter();
+    // le.set_validator([](char c) { return std::isalpha(c); });
+
+    // auto& sig = Shortcuts::add_shortcut(Key::Escape);
+    // sig.connect([&tb] {
+    //     if (has_border(tb)) {
+    //         disable_border(tb);
+    //     } else {
+    //         enable_border(tb);
+    //     }
+    // });
+
+    // sys.set_head(&vl);
 
     return sys.run();
 }

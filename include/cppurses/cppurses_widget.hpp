@@ -4,6 +4,8 @@
 #include "widget/layouts/horizontal_layout.hpp"
 #include "widget/layouts/vertical_layout.hpp"
 
+#include "widget/widgets/blank_width.hpp"
+#include "widget/widgets/blank_height.hpp"
 #include "widget/widgets/checkbox.hpp"
 #include "widget/widgets/color_select.hpp"
 #include "widget/widgets/cycle_box.hpp"

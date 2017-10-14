@@ -83,6 +83,8 @@ set(WIDGET_SOURCES
     "src/widget/color_select.cpp"
     "src/widget/menu.cpp"
     "src/widget/size_policy.cpp"
+    "src/widget/blank_width.cpp"
+    "src/widget/blank_height.cpp"
     )
 
 set(TEST_SOURCES 
