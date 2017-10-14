@@ -187,6 +187,15 @@ void Painter::border(const Border& b) {
         this->unbound_put_string(south_east, b.south_east);
     }
 
+    if (widget_->height() == 1 && widget_->north_border_disqualified() &&
+        widget_->south_border_disqualified()) {
+        return;
+    }
+    if (widget_->width() == 1 && widget_->west_border_disqualified() &&
+        widget_->east_border_disqualified()) {
+        return;
+    }
+
     // Corners - Special Cases
     // North-West
     if (!b.north_west_enabled && !b.north_enabled && b.west_enabled) {
