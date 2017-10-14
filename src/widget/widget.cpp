@@ -327,7 +327,7 @@ bool Widget::resize_event(std::size_t new_width,
 }
 
 void Widget::set_visible(bool visible) {
-    this->visible_ = visible;
+    visible_ = visible;
     for (Widget* c : this->children()) {
         c->set_visible(visible);
     }

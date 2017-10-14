@@ -74,6 +74,7 @@ class Widget : public Event_handler {
     std::size_t cursor_y() const;
     Coordinates cursor_coordinates() const;
 
+    void set_visible(bool visible);
     bool visible() const;
     bool on_tree() const;
     virtual void update();
@@ -149,7 +150,6 @@ class Widget : public Event_handler {
     bool south_border_disqualified_{false};
 
     // void delete_child(Widget* child);
-    void set_visible(bool visible);
     void set_x(std::size_t global_x);
     void set_y(std::size_t global_y);
 

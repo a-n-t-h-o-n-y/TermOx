@@ -18,8 +18,10 @@ std::vector<std::size_t> Horizontal_layout::size_widgets() {
     std::vector<Dimensions> widgets;
     std::size_t total_stretch{0};
     for (Widget* c : this->children()) {
-        widgets.emplace_back(Dimensions{c, 0, 0});
-        total_stretch += c->width_policy.stretch();
+        if (c->visible()) {
+            widgets.emplace_back(Dimensions{c, 0, 0});
+            total_stretch += c->width_policy.stretch();
+        }
     }
 
     int width_available = this->width();
