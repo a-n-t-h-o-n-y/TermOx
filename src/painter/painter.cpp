@@ -187,6 +187,7 @@ void Painter::border(const Border& b) {
         this->unbound_put_string(south_east, b.south_east);
     }
 
+    // Stop out of bounds drawing for special cases.
     if (widget_->height() == 1 && widget_->north_border_disqualified() &&
         widget_->south_border_disqualified()) {
         return;
@@ -198,28 +199,39 @@ void Painter::border(const Border& b) {
 
     // Corners - Special Cases
     // North-West
+    Coordinates nw{widget_->x() - west_border_offset(*widget_),
+                   widget_->y() - north_border_offset(*widget_)};
     if (!b.north_west_enabled && !b.north_enabled && b.west_enabled) {
-        this->unbound_put_string(north_west, b.west);
+        this->unbound_put_string(nw, b.west);
     } else if (!b.north_west_enabled && !b.west_enabled && b.north_enabled) {
-        this->unbound_put_string(north_west, b.north);
+        this->unbound_put_string(nw, b.north);
     }
     // North-East
+    Coordinates ne{
+        widget_->x() + widget_->width() - 1 + east_border_offset(*widget_),
+        widget_->y() - north_border_offset(*widget_)};
     if (!b.north_east_enabled && !b.north_enabled && b.east_enabled) {
-        this->unbound_put_string(north_east, b.east);
+        this->unbound_put_string(ne, b.east);
     } else if (!b.north_east_enabled && !b.east_enabled && b.north_enabled) {
-        this->unbound_put_string(north_east, b.north);
+        this->unbound_put_string(ne, b.north);
     }
     // South-West
+    Coordinates sw{
+        widget_->x() - west_border_offset(*widget_),
+        widget_->y() + widget_->height() - 1 + south_border_offset(*widget_)};
     if (!b.south_west_enabled && !b.south_enabled && b.west_enabled) {
-        this->unbound_put_string(south_west, b.west);
+        this->unbound_put_string(sw, b.west);
     } else if (!b.south_west_enabled && !b.west_enabled && b.south_enabled) {
-        this->unbound_put_string(south_west, b.south);
+        this->unbound_put_string(sw, b.south);
     }
     // South-East
+    Coordinates se{
+        widget_->x() + widget_->width() - 1 + east_border_offset(*widget_),
+        widget_->y() + widget_->height() - 1 + south_border_offset(*widget_)};
     if (!b.south_east_enabled && !b.south_enabled && b.east_enabled) {
-        this->unbound_put_string(south_east, b.east);
+        this->unbound_put_string(se, b.east);
     } else if (!b.south_east_enabled && !b.east_enabled && b.south_enabled) {
-        this->unbound_put_string(south_east, b.south);
+        this->unbound_put_string(se, b.south);
     }
 }
 

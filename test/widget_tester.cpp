@@ -66,9 +66,11 @@ int main() {
     enable_border(tb);
     tb.border.east_enabled = false;
     tb.border.north_east_enabled = false;
-    tb.border.south_east_enabled = false;
-    tb.border.south_enabled = false;
-    tb.border.south_west_enabled = false;
+    // tb.border.south_east_enabled = false;
+    // tb.border.south_enabled = false;
+    // tb.border.south_west_enabled = false;
+    tb.border.north_west_enabled = false;
+    tb.border.west_enabled = false;
     enable_border(tb2);
     tb2.border.south_enabled = false;
 

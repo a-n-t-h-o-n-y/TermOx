@@ -18,6 +18,7 @@ Cycle_box::Cycle_box(Glyph_string title) {
     disable_walls(label.border);
     disable_corners(label.border);
     label.border.east_enabled = true;
+    label.border.east = "├";
     enable_border(label);
 
     options_box.set_alignment(Alignment::Center);

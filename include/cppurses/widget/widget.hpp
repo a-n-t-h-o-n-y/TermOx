@@ -74,7 +74,7 @@ class Widget : public Event_handler {
     std::size_t cursor_y() const;
     Coordinates cursor_coordinates() const;
 
-    void set_visible(bool visible);
+    void set_visible(bool visible, bool recursive = false);
     bool visible() const;
     bool on_tree() const;
     virtual void update();

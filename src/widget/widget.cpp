@@ -326,8 +326,11 @@ bool Widget::resize_event(std::size_t new_width,
     return true;
 }
 
-void Widget::set_visible(bool visible) {
+void Widget::set_visible(bool visible, bool recursive) {
     visible_ = visible;
+    if (!recursive) {
+        return;
+    }
     for (Widget* c : this->children()) {
         c->set_visible(visible);
     }
@@ -458,19 +461,23 @@ void set_foreground(Widget& w, Color c) {
 }
 
 void set_background_recursive(Widget& w, Color c, bool single_level) {
-    for (Widget* w : w.children()) {
-        set_background(*w, c);
-        if (!single_level) {
-            set_background_recursive(*w, c, single_level);
+    set_background(w, c);
+    for (Widget* child : w.children()) {
+        if (single_level) {
+            set_background(*child, c);
+        } else {
+            set_background_recursive(*child, c, single_level);
         }
     }
 }
 
 void set_foreground_recursive(Widget& w, Color c, bool single_level) {
-    for (Widget* w : w.children()) {
-        set_foreground(*w, c);
-        if (!single_level) {
-            set_foreground_recursive(*w, c, single_level);
+    set_foreground(w, c);
+    for (Widget* child : w.children()) {
+        if (single_level) {
+            set_foreground(*child, c);
+        } else {
+            set_foreground_recursive(*child, c, single_level);
         }
     }
 }
