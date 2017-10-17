@@ -29,23 +29,23 @@ void Widget_stack::set_active_page(std::size_t index) {
     active_page_ = pages_[index].get();
     this->add_child(std::move(pages_[index]));
     pages_[index] = nullptr;
-    Focus::set_focus_to(active_page_);
+    if (sets_focus_) {
+        Focus::set_focus_to(active_page_);
+    }
     this->page_changed(index);
+}
+
+void Widget_stack::sets_focus_on_change(bool sets_focus) {
+    sets_focus_ = sets_focus;
 }
 
 void Widget_stack::add_page(std::unique_ptr<Widget> widget) {
     pages_.push_back(std::move(widget));
-    // if (this->size() == 1) {
-    //     this->set_active_page(0);
-    // }
 }
 
 void Widget_stack::insert_page(std::size_t index,
                                std::unique_ptr<Widget> widget) {
     pages_.insert(std::begin(pages_) + index, std::move(widget));
-    // if (this->size() == 1) {
-    //     this->set_active_page(0);
-    // }
 }
 
 std::unique_ptr<Widget> Widget_stack::remove_page(std::size_t index) {

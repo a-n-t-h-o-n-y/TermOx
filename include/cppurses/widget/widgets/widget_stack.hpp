@@ -14,6 +14,8 @@ class Widget_stack : public Horizontal_layout {
    public:
     void set_active_page(std::size_t index);
 
+    void sets_focus_on_change(bool sets_focus = true);
+
     template <typename T, typename... Args>
     T& make_page(Args&&... args);
 
@@ -29,6 +31,7 @@ class Widget_stack : public Horizontal_layout {
    private:
     std::vector<std::unique_ptr<Widget>> pages_;
     Widget* active_page_{nullptr};
+    bool sets_focus_{true};
 };
 
 // - - - - - - - - - - - - Template Implementations - - - - - - - - - - - - - -

@@ -332,7 +332,7 @@ void Widget::set_visible(bool visible, bool recursive) {
         return;
     }
     for (Widget* c : this->children()) {
-        c->set_visible(visible);
+        c->set_visible(visible, recursive);
     }
 }
 
