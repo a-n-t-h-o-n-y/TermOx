@@ -1,14 +1,14 @@
-#include "system/detail/ncurses_event_listener.hpp"
-#include "system/event.hpp"
-#include "system/events/key_event.hpp"
-#include "system/events/mouse_event.hpp"
-#include "system/events/resize_event.hpp"
-#include "system/mouse_button.hpp"
-#include "system/key.hpp"
-#include "system/system.hpp"
-#include "system/focus.hpp"
-#include "widget/widget.hpp"
-#include "widget/border.hpp"
+#include <cppurses/system/detail/ncurses_event_listener.hpp>
+#include <cppurses/system/event.hpp>
+#include <cppurses/system/events/key_event.hpp>
+#include <cppurses/system/events/mouse_event.hpp>
+#include <cppurses/system/events/resize_event.hpp>
+#include <cppurses/system/focus.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/system/mouse_button.hpp>
+#include <cppurses/system/system.hpp>
+#include <cppurses/widget/border.hpp>
+#include <cppurses/widget/widget.hpp>
 
 #include <ncurses.h>
 

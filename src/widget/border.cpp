@@ -1,5 +1,5 @@
-#include "widget/border.hpp"
-#include "painter/glyph.hpp"
+#include <cppurses/widget/border.hpp>
+#include <cppurses/painter/glyph.hpp>
 
 #include <cstddef>
 

@@ -1,9 +1,10 @@
 #ifndef PAINTER_GLYPH_MATRIX_HPP
 #define PAINTER_GLYPH_MATRIX_HPP
+#include <cppurses/painter/glyph.hpp>
+#include <cppurses/widget/coordinates.hpp>
+
 #include <cstddef>
 #include <vector>
-#include "painter/glyph.hpp"
-#include "widget/coordinates.hpp"
 
 namespace cppurses {
 

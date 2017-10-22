@@ -1,6 +1,7 @@
-#include "system/detail/event_invoker.hpp"
-#include "system/detail/event_queue.hpp"
-#include "system/event.hpp"
+#include <cppurses/system/detail/event_invoker.hpp>
+#include <cppurses/system/detail/event_queue.hpp>
+#include <cppurses/system/event.hpp>
+
 #include <iterator>
 #include <memory>
 #include <utility>

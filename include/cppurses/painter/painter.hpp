@@ -1,12 +1,12 @@
 #ifndef PAINTER_PAINTER_HPP
 #define PAINTER_PAINTER_HPP
-#include "painter/glyph_string.hpp"
-#include "widget/coordinates.hpp"
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/widget/coordinates.hpp>
 
 #include <cstddef>
 
 namespace cppurses {
-class Border;
+struct Border;
 class Glyph;
 class Widget;
 

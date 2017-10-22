@@ -1,7 +1,8 @@
-#include "system/detail/event_queue.hpp"
-#include "system/event.hpp"
-#include "system/events/deferred_delete_event.hpp"
-#include "widget/widget.hpp"
+#include <cppurses/system/detail/event_queue.hpp>
+#include <cppurses/system/event.hpp>
+#include <cppurses/system/events/deferred_delete_event.hpp>
+#include <cppurses/widget/widget.hpp>
+
 #include <algorithm>
 #include <iterator>
 #include <memory>

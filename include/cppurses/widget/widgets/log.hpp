@@ -1,8 +1,8 @@
 #ifndef WIDGET_WIDGETS_LOG_HPP
 #define WIDGET_WIDGETS_LOG_HPP
-#include "widget/widgets/textbox.hpp"
-#include "painter/glyph_string.hpp"
-#include "system/key.hpp"
+#include <cppurses/widget/widgets/textbox.hpp>
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/system/key.hpp>
 
 #include <signals/slot.hpp>
 

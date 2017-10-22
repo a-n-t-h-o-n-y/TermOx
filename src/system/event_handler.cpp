@@ -1,14 +1,15 @@
-#include "system/event_handler.hpp"
+#include <cppurses/system/event_handler.hpp>
+#include <cppurses/system/events/disable_event.hpp>
+#include <cppurses/system/events/enable_event.hpp>
+#include <cppurses/system/mouse_button.hpp>
+#include <cppurses/system/system.hpp>
+#include <cppurses/widget/coordinates.hpp>
+
 #include <algorithm>
 #include <cstddef>
 #include <iterator>
 #include <signals/signals.hpp>
 #include <vector>
-#include "system/events/disable_event.hpp"
-#include "system/events/enable_event.hpp"
-#include "system/mouse_button.hpp"
-#include "system/system.hpp"
-#include "widget/coordinates.hpp"
 
 namespace cppurses {
 class Widget;

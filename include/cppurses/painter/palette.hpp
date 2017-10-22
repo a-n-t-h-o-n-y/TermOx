@@ -1,6 +1,7 @@
 #ifndef PAINTER_PALETTE_HPP
 #define PAINTER_PALETTE_HPP
-#include "painter/color.hpp"
+#include <cppurses/painter/color.hpp>
+
 #include <array>
 #include <cstdint>
 

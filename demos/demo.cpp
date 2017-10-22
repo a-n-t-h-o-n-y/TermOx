@@ -1,4 +1,4 @@
-#include "cppurses.hpp"
+#include <cppurses/cppurses.hpp>
 #include "main_menu.hpp"
 
 int main() {

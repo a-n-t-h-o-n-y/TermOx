@@ -1,7 +1,7 @@
-#include "widget/widgets/push_button.hpp"
-#include "painter/glyph_string.hpp"
-#include "painter/painter.hpp"
-#include "system/mouse_button.hpp"
+#include <cppurses/widget/widgets/push_button.hpp>
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/painter/painter.hpp>
+#include <cppurses/system/mouse_button.hpp>
 
 #include <utility>
 

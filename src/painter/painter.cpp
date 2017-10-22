@@ -1,13 +1,13 @@
-#include "painter/painter.hpp"
-#include "painter/brush.hpp"
-#include "painter/color.hpp"
-#include "painter/glyph.hpp"
-#include "painter/glyph_string.hpp"
-#include "painter/paint_buffer.hpp"
-#include "system/system.hpp"
-#include "widget/border.hpp"
-#include "widget/coordinates.hpp"
-#include "widget/widget.hpp"
+#include <cppurses/painter/painter.hpp>
+#include <cppurses/painter/brush.hpp>
+#include <cppurses/painter/color.hpp>
+#include <cppurses/painter/glyph.hpp>
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/painter/paint_buffer.hpp>
+#include <cppurses/system/system.hpp>
+#include <cppurses/widget/border.hpp>
+#include <cppurses/widget/coordinates.hpp>
+#include <cppurses/widget/widget.hpp>
 
 #include <optional/optional.hpp>
 

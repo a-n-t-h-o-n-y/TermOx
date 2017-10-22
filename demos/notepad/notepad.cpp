@@ -1,5 +1,6 @@
 #include "notepad.hpp"
-#include "cppurses.hpp"
+
+#include <cppurses/cppurses.hpp>
 
 #include <fstream>
 #include <sstream>
@@ -7,6 +8,7 @@
 #include <utility>
 
 namespace {
+
 void save_file(const std::string& filename, const std::string& output) {
     std::ofstream ofs(filename);
     if (!ofs.fail()) {
@@ -26,26 +28,11 @@ std::string load_file(const std::string& filename) {
     }
     return oss.str();
 }
+
 }  // namespace
 
 using namespace cppurses;
 namespace demo {
-
-// Center_label::Center_label(Glyph_string text) : label_{std::move(text)} {
-//     this->initialize();
-// }
-
-// void Center_label::initialize() {
-//     this->brush.add_attributes(Attribute::Bold);
-//     this->height_policy.type(Size_policy::Fixed);
-//     this->height_policy.hint(1);
-// }
-
-// bool Center_label::paint_event() {
-//     Painter p{this};
-//     p.put(label_, this->width() / 2 - label_.length() / 2, 0);
-//     return Widget::paint_event();
-// }
 
 // Textbox and Attribute/Color Selection
 Text_and_attributes::Text_and_attributes() {

@@ -1,12 +1,12 @@
-#include "widget/widgets/line_edit.hpp"
-#include "painter/color.hpp"
-#include "painter/glyph_string.hpp"
-#include "painter/attribute.hpp"
-#include "widget/size_policy.hpp"
-#include "widget/widgets/textbox.hpp"
-#include "system/key.hpp"
-#include "painter/glyph.hpp"
-#include "system/mouse_button.hpp"
+#include <cppurses/widget/widgets/line_edit.hpp>
+#include <cppurses/painter/color.hpp>
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/painter/attribute.hpp>
+#include <cppurses/widget/size_policy.hpp>
+#include <cppurses/widget/widgets/textbox.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/painter/glyph.hpp>
+#include <cppurses/system/mouse_button.hpp>
 
 #include <cstdint>
 #include <cstddef>

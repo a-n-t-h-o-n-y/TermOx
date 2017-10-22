@@ -1,6 +1,8 @@
-#include "widget/widgets/textbox_slots.hpp"
-#include "widget/widgets/textbox.hpp"
+#include <cppurses/widget/widgets/textbox_slots.hpp>
+#include <cppurses/widget/widgets/textbox.hpp>
+
 #include <signals/slot.hpp>
+
 #include <cstddef>
 
 namespace cppurses {

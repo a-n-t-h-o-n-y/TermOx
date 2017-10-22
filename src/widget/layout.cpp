@@ -1,13 +1,14 @@
-#include "widget/layout.hpp"
-#include "painter/painter.hpp"
-#include "system/system.hpp"
-#include "system/events/move_event.hpp"
-#include "system/events/resize_event.hpp"
+#include <cppurses/painter/painter.hpp>
+#include <cppurses/system/events/move_event.hpp>
+#include <cppurses/system/events/resize_event.hpp>
+#include <cppurses/system/system.hpp>
+#include <cppurses/widget/layout.hpp>
 
 namespace cppurses {
 
 Layout::Layout() {
     System::post_event<Move_event>(this, 0, 0);
+    this->focus_policy = Focus_policy::Click;
 }
 
 bool Layout::paint_event() {

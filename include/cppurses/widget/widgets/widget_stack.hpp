@@ -1,6 +1,6 @@
 #ifndef WIDGET_WIDGETS_WIDGET_STACK_HPP
 #define WIDGET_WIDGETS_WIDGET_STACK_HPP
-#include "widget/layouts/horizontal_layout.hpp"
+#include <cppurses/widget/layouts/horizontal_layout.hpp>
 
 #include <signals/signals.hpp>
 

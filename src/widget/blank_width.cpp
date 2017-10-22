@@ -1,4 +1,4 @@
-#include "widget/widgets/blank_width.hpp"
+#include <cppurses/widget/widgets/blank_width.hpp>
 
 #include <cstddef>
 

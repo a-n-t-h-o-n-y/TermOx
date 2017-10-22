@@ -1,7 +1,8 @@
-#include "widget/size_policy.hpp"
-#include "system/events/child_event.hpp"
-#include "system/system.hpp"
-#include "widget/widget.hpp"
+#include <cppurses/widget/size_policy.hpp>
+#include <cppurses/system/events/child_event.hpp>
+#include <cppurses/system/system.hpp>
+#include <cppurses/widget/widget.hpp>
+
 #include <cstddef>
 
 namespace cppurses {

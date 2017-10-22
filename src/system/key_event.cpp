@@ -1,8 +1,8 @@
-#include "system/events/key_event.hpp"
-#include "system/key.hpp"
-#include "system/event_handler.hpp"
-#include "system/focus.hpp"
-#include "system/shortcuts.hpp"
+#include <cppurses/system/events/key_event.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/system/event_handler.hpp>
+#include <cppurses/system/focus.hpp>
+#include <cppurses/system/shortcuts.hpp>
 
 namespace cppurses {
 

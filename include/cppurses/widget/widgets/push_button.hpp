@@ -1,9 +1,9 @@
 #ifndef WIDGET_WIDGETS_PUSH_BUTTON_HPP
 #define WIDGET_WIDGETS_PUSH_BUTTON_HPP
-#include "painter/glyph_string.hpp"
-#include "system/mouse_button.hpp"
-#include "widget/widget.hpp"
-#include "widget/widgets/label.hpp"
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/system/mouse_button.hpp>
+#include <cppurses/widget/widget.hpp>
+#include <cppurses/widget/widgets/label.hpp>
 
 #include <signals/signals.hpp>
 

@@ -1,8 +1,9 @@
-#include "system/events/mouse_event.hpp"
-#include "system/event_handler.hpp"
-#include "system/focus.hpp"
-#include "system/mouse_button.hpp"
-#include "widget/widget.hpp"
+#include <cppurses/system/events/mouse_event.hpp>
+#include <cppurses/system/event_handler.hpp>
+#include <cppurses/system/focus.hpp>
+#include <cppurses/system/mouse_button.hpp>
+#include <cppurses/widget/widget.hpp>
+
 #include <cstddef>
 #include <cstdint>
 

@@ -1,11 +1,12 @@
 #ifndef WIDGET_WIDGETS_TEXTBOX_HPP
 #define WIDGET_WIDGETS_TEXTBOX_HPP
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/system/mouse_button.hpp>
+#include <cppurses/widget/widgets/textbox_base.hpp>
+
 #include <cstddef>
 #include <cstdint>
-#include "painter/glyph_string.hpp"
-#include "system/key.hpp"
-#include "system/mouse_button.hpp"
-#include "widget/widgets/textbox_base.hpp"
 
 namespace cppurses {
 

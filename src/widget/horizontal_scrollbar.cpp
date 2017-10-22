@@ -1,8 +1,8 @@
-#include "widget/widgets/horizontal_scrollbar.hpp"
-#include "painter/color.hpp"
-#include "painter/brush.hpp"
-#include "widget/size_policy.hpp"
-#include "widget/widget.hpp"
+#include <cppurses/widget/widgets/horizontal_scrollbar.hpp>
+#include <cppurses/painter/color.hpp>
+#include <cppurses/painter/brush.hpp>
+#include <cppurses/widget/size_policy.hpp>
+#include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
 

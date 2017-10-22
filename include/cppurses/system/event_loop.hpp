@@ -1,7 +1,7 @@
 #ifndef SYSTEM_EVENT_LOOP_HPP
 #define SYSTEM_EVENT_LOOP_HPP
-#include "system/detail/event_invoker.hpp"
-#include "system/detail/event_queue.hpp"
+#include <cppurses/system/detail/event_invoker.hpp>
+#include <cppurses/system/detail/event_queue.hpp>
 
 namespace cppurses {
 

@@ -1,7 +1,7 @@
 #ifndef PAINTER_GLYPH_STRING_HPP
 #define PAINTER_GLYPH_STRING_HPP
+#include <cppurses/painter/glyph.hpp>
 
-#include "painter/glyph.hpp"
 #include <codecvt>
 #include <initializer_list>
 #include <locale>

@@ -1,10 +1,10 @@
-#include "widget/layouts/vertical_layout.hpp"
-#include "system/events/move_event.hpp"
-#include "system/events/resize_event.hpp"
-#include "system/system.hpp"
-#include "widget/border.hpp"
-#include "widget/size_policy.hpp"
-#include "widget/widget.hpp"
+#include <cppurses/widget/layouts/vertical_layout.hpp>
+#include <cppurses/system/events/move_event.hpp>
+#include <cppurses/system/events/resize_event.hpp>
+#include <cppurses/system/system.hpp>
+#include <cppurses/widget/border.hpp>
+#include <cppurses/widget/size_policy.hpp>
+#include <cppurses/widget/widget.hpp>
 
 #include <cstddef>
 #include <deque>

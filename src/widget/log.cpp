@@ -1,5 +1,5 @@
-#include "widget/widgets/log.hpp"
-#include "system/key.hpp"
+#include <cppurses/widget/widgets/log.hpp>
+#include <cppurses/system/key.hpp>
 
 #include <signals/slot.hpp>
 

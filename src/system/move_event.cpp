@@ -1,5 +1,6 @@
-#include "system/events/move_event.hpp"
-#include "system/event_handler.hpp"
+#include <cppurses/system/events/move_event.hpp>
+#include <cppurses/system/event_handler.hpp>
+
 #include <cstddef>
 
 namespace cppurses {

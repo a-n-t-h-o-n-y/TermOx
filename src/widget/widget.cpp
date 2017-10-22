@@ -1,17 +1,17 @@
-#include "widget/widget.hpp"
-#include "painter/brush.hpp"
-#include "painter/color.hpp"
-#include "painter/paint_buffer.hpp"
-#include "painter/painter.hpp"
-#include "system/events/child_event.hpp"
-#include "system/events/clear_screen_event.hpp"
-#include "system/events/deferred_delete_event.hpp"
-#include "system/events/on_tree_event.hpp"
-#include "system/events/paint_event.hpp"
-#include "system/focus.hpp"
-#include "system/system.hpp"
-#include "widget/border.hpp"
-#include "widget/coordinates.hpp"
+#include <cppurses/widget/widget.hpp>
+#include <cppurses/painter/brush.hpp>
+#include <cppurses/painter/color.hpp>
+#include <cppurses/painter/paint_buffer.hpp>
+#include <cppurses/painter/painter.hpp>
+#include <cppurses/system/events/child_event.hpp>
+#include <cppurses/system/events/clear_screen_event.hpp>
+#include <cppurses/system/events/deferred_delete_event.hpp>
+#include <cppurses/system/events/on_tree_event.hpp>
+#include <cppurses/system/events/paint_event.hpp>
+#include <cppurses/system/focus.hpp>
+#include <cppurses/system/system.hpp>
+#include <cppurses/widget/border.hpp>
+#include <cppurses/widget/coordinates.hpp>
 
 #include <signals/signal.hpp>
 

@@ -1,6 +1,6 @@
 #ifndef SYSTEM_SHORTCUTS_HPP
 #define SYSTEM_SHORTCUTS_HPP
-#include "system/key.hpp"
+#include <cppurses/system/key.hpp>
 
 #include <signals/signal.hpp>
 

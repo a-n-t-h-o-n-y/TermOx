@@ -1,21 +1,9 @@
-#ifndef DEMOS_NOTEPAD_HPP
-#define DEMOS_NOTEPAD_HPP
-#include "cppurses.hpp"
+#ifndef DEMOS_NOTEPAD_NOTEPAD_HPP
+#define DEMOS_NOTEPAD_NOTEPAD_HPP
+#include <cppurses/cppurses.hpp>
 
 using namespace cppurses;
 namespace demo {
-
-// class Center_label : public Widget {
-//    public:
-//     Center_label(Glyph_string text);
-
-//    protected:
-//     bool paint_event() override;
-
-//    private:
-//     Glyph_string label_;
-//     void initialize();
-// };
 
 struct Attribute_select : Vertical_layout {
     // Widgets
@@ -83,4 +71,4 @@ class Notepad : public Vertical_layout {
 
 }  // namespace demo
 
-#endif  // DEMOS_NOTEPAD_HPP
+#endif  // DEMOS_NOTEPAD_NOTEPAD_HPP

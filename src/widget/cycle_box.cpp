@@ -1,4 +1,4 @@
-#include "widget/widgets/cycle_box.hpp"
+#include <cppurses/widget/widgets/cycle_box.hpp>
 
 #include <signals/signals.hpp>
 

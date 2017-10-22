@@ -1,7 +1,7 @@
 #ifndef WIDGET_WIDGETS_STATUS_HPP
 #define WIDGET_WIDGETS_STATUS_HPP
-#include "painter/glyph_string.hpp"
-#include "widget/widgets/label.hpp"
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/widget/widgets/label.hpp>
 
 #include <signals/signals.hpp>
 

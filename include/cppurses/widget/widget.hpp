@@ -1,14 +1,14 @@
 #ifndef WIDGET_WIDGET_HPP
 #define WIDGET_WIDGET_HPP
-#include "painter/brush.hpp"
-#include "painter/color.hpp"
-#include "painter/glyph.hpp"
-#include "system/event_handler.hpp"
-#include "system/key.hpp"
-#include "widget/border.hpp"
-#include "widget/coordinates.hpp"
-#include "widget/focus_policy.hpp"
-#include "widget/size_policy.hpp"
+#include <cppurses/painter/brush.hpp>
+#include <cppurses/painter/color.hpp>
+#include <cppurses/painter/glyph.hpp>
+#include <cppurses/system/event_handler.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/widget/border.hpp>
+#include <cppurses/widget/coordinates.hpp>
+#include <cppurses/widget/focus_policy.hpp>
+#include <cppurses/widget/size_policy.hpp>
 
 #include <algorithm>
 #include <cstddef>

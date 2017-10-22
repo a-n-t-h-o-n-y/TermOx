@@ -1,6 +1,7 @@
 #ifndef PAINTER_GLYPH_HPP
 #define PAINTER_GLYPH_HPP
-#include "painter/brush.hpp"
+#include <cppurses/painter/brush.hpp>
+
 #include <array>
 #include <ostream>
 #include <stdexcept>

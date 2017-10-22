@@ -1,6 +1,6 @@
 #ifndef WIDGET_WIDGETS_BLANK_WIDTH_HPP
 #define WIDGET_WIDGETS_BLANK_WIDTH_HPP
-#include "widget/widget.hpp"
+#include <cppurses/widget/widget.hpp>
 
 #include <cstddef>
 

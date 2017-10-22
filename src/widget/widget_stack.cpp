@@ -1,6 +1,6 @@
-#include "widget/widgets/widget_stack.hpp"
-#include "system/focus.hpp"
-#include "widget/widget.hpp"
+#include <cppurses/widget/widgets/widget_stack.hpp>
+#include <cppurses/system/focus.hpp>
+#include <cppurses/widget/widget.hpp>
 
 #include <signals/slot.hpp>
 

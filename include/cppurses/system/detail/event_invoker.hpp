@@ -1,6 +1,6 @@
 #ifndef SYSTEM_DETAIL_EVENT_INVOKER_HPP
 #define SYSTEM_DETAIL_EVENT_INVOKER_HPP
-#include "system/event.hpp"
+#include <cppurses/system/event.hpp>
 
 namespace cppurses {
 class Event_handler;

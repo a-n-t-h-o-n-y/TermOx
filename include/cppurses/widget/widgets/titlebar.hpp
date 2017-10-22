@@ -1,9 +1,9 @@
 #ifndef WIDGET_WIDGETS_TITLEBAR_HPP
 #define WIDGET_WIDGETS_TITLEBAR_HPP
-#include "painter/glyph_string.hpp"
-#include "widget/layouts/horizontal_layout.hpp"
-#include "widget/widgets/label.hpp"
-#include "widget/widgets/push_button.hpp"
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/widget/layouts/horizontal_layout.hpp>
+#include <cppurses/widget/widgets/label.hpp>
+#include <cppurses/widget/widgets/push_button.hpp>
 
 #include <signals/slot.hpp>
 

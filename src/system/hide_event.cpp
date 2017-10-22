@@ -1,5 +1,5 @@
-#include "system/events/hide_event.hpp"
-#include "system/event_handler.hpp"
+#include <cppurses/system/events/hide_event.hpp>
+#include <cppurses/system/event_handler.hpp>
 
 namespace cppurses {
 

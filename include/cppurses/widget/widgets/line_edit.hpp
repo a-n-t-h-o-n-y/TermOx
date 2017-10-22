@@ -1,10 +1,10 @@
 #ifndef WIDGET_WIDGETS_LINE_EDIT_HPP
 #define WIDGET_WIDGETS_LINE_EDIT_HPP
-#include "widget/widgets/textbox.hpp"
-#include "painter/glyph_string.hpp"
-#include "painter/color.hpp"
-#include "system/mouse_button.hpp"
-#include "system/key.hpp"
+#include <cppurses/widget/widgets/textbox.hpp>
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/painter/color.hpp>
+#include <cppurses/system/mouse_button.hpp>
+#include <cppurses/system/key.hpp>
 
 #include <signals/signals.hpp>
 

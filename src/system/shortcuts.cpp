@@ -1,4 +1,4 @@
-#include "system/shortcuts.hpp"
+#include <cppurses/system/shortcuts.hpp>
 
 #include <map>
 

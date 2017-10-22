@@ -1,7 +1,7 @@
-#include "widget/widgets/label.hpp"
-#include "painter/painter.hpp"
-#include "widget/focus_policy.hpp"
-#include "widget/size_policy.hpp"
+#include <cppurses/widget/widgets/label.hpp>
+#include <cppurses/painter/painter.hpp>
+#include <cppurses/widget/focus_policy.hpp>
+#include <cppurses/widget/size_policy.hpp>
 
 #include <cstddef>
 #include <utility>

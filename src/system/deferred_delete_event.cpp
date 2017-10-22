@@ -1,7 +1,7 @@
-#include "system/events/deferred_delete_event.hpp"
-#include "system/event_handler.hpp"
-#include "system/system.hpp"
-#include "widget/widget.hpp"
+#include <cppurses/system/events/deferred_delete_event.hpp>
+#include <cppurses/system/event_handler.hpp>
+#include <cppurses/system/system.hpp>
+#include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
 

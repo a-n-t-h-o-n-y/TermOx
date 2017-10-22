@@ -1,7 +1,9 @@
 #ifndef SYSTEM_SYSTEM_HPP
 #define SYSTEM_SYSTEM_HPP
-#include "system/event_loop.hpp"
+#include <cppurses/system/event_loop.hpp>
+
 #include <signals/slot.hpp>
+
 #include <memory>
 #include <utility>
 

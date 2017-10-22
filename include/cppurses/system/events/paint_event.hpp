@@ -1,6 +1,6 @@
 #ifndef SYSTEM_EVENTS_PAINT_EVENT_HPP
 #define SYSTEM_EVENTS_PAINT_EVENT_HPP
-#include "system/event.hpp"
+#include <cppurses/system/event.hpp>
 
 namespace cppurses {
 class Event_handler;

@@ -1,6 +1,8 @@
-#include "painter/brush.hpp"
-#include "painter/attribute.hpp"
+#include <cppurses/painter/brush.hpp>
+#include <cppurses/painter/attribute.hpp>
+
 #include <optional/optional.hpp>
+
 #include <cstdint>
 #include <vector>
 

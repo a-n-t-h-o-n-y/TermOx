@@ -1,9 +1,10 @@
 #ifndef WIDGET_WIDGET_SLOTS_HPP
 #define WIDGET_WIDGET_SLOTS_HPP
-#include "painter/color.hpp"
-#include "system/key.hpp"
-#include "system/mouse_button.hpp"
-#include "widget/coordinates.hpp"
+#include <cppurses/painter/color.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/system/mouse_button.hpp>
+#include <cppurses/widget/coordinates.hpp>
+
 #include <signals/slot.hpp>
 
 namespace cppurses {

@@ -1,9 +1,9 @@
 #ifndef WIDGET_WIDGETS_CYCLE_BOX_HPP
 #define WIDGET_WIDGETS_CYCLE_BOX_HPP
-#include "widget/layouts/horizontal_layout.hpp"
-#include "widget/widgets/label.hpp"
-#include "widget/widgets/push_button.hpp"
-#include "painter/glyph_string.hpp"
+#include <cppurses/widget/layouts/horizontal_layout.hpp>
+#include <cppurses/widget/widgets/label.hpp>
+#include <cppurses/widget/widgets/push_button.hpp>
+#include <cppurses/painter/glyph_string.hpp>
 
 #include <signals/signals.hpp>
 

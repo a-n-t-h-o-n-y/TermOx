@@ -1,12 +1,13 @@
-#include "system/focus.hpp"
+#include <cppurses/system/focus.hpp>
+#include <cppurses/system/events/focus_event.hpp>
+#include <cppurses/system/system.hpp>
+#include <cppurses/widget/focus_policy.hpp>
+#include <cppurses/widget/widget.hpp>
+
 #include <algorithm>
 #include <iterator>
 #include <memory>
 #include <vector>
-#include "system/events/focus_event.hpp"
-#include "system/system.hpp"
-#include "widget/focus_policy.hpp"
-#include "widget/widget.hpp"
 
 namespace {
 

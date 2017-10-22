@@ -1,15 +1,15 @@
-#include "system/system.hpp"
-#include "painter/paint_buffer.hpp"
-#include "painter/palette.hpp"
-#include "system/detail/event_queue.hpp"
-#include "system/detail/ncurses_event_listener.hpp"
-#include "system/event.hpp"
-#include "system/events/resize_event.hpp"
-#include "system/event_loop.hpp"
-#include "system/events/on_tree_event.hpp"
-#include "system/events/paint_event.hpp"
-#include "widget/layout.hpp"
-#include "widget/widget.hpp"
+#include <cppurses/system/system.hpp>
+#include <cppurses/painter/paint_buffer.hpp>
+#include <cppurses/painter/palette.hpp>
+#include <cppurses/system/detail/event_queue.hpp>
+#include <cppurses/system/detail/ncurses_event_listener.hpp>
+#include <cppurses/system/event.hpp>
+#include <cppurses/system/events/resize_event.hpp>
+#include <cppurses/system/event_loop.hpp>
+#include <cppurses/system/events/on_tree_event.hpp>
+#include <cppurses/system/events/paint_event.hpp>
+#include <cppurses/widget/layout.hpp>
+#include <cppurses/widget/widget.hpp>
 
 #include <signals/slot.hpp>
 

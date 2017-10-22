@@ -1,6 +1,5 @@
 #ifndef PAINTER_COLOR_HPP
 #define PAINTER_COLOR_HPP
-
 #include <cstdint>
 
 namespace cppurses {

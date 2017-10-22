@@ -1,4 +1,4 @@
-#include "system/key.hpp"
+#include <cppurses/system/key.hpp>
 
 namespace cppurses {
 

@@ -1,6 +1,6 @@
 #ifndef WIDGET_LAYOUT_HPP
 #define WIDGET_LAYOUT_HPP
-#include "widget/widget.hpp"
+#include <cppurses/widget/widget.hpp>
 
 #include <cstddef>
 

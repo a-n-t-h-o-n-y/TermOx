@@ -1,11 +1,13 @@
-#include "painter/detail/ncurses_paint_engine.hpp"
-#include "painter/attribute.hpp"
-#include "painter/brush.hpp"
-#include "painter/color.hpp"
-#include "painter/glyph.hpp"
-#include "painter/paint_buffer.hpp"
+#include <cppurses/painter/detail/ncurses_paint_engine.hpp>
+#include <cppurses/painter/attribute.hpp>
+#include <cppurses/painter/brush.hpp>
+#include <cppurses/painter/color.hpp>
+#include <cppurses/painter/glyph.hpp>
+#include <cppurses/painter/paint_buffer.hpp>
+
 #include <optional/optional.hpp>
 #include <ncurses.h>
+
 #include <string>
 #include <cstddef>
 #include <cstdint>

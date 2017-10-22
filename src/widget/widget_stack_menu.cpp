@@ -1,7 +1,7 @@
-#include "widget/widgets/widget_stack_menu.hpp"
-#include "system/focus.hpp"
-#include "widget/widgets/menu.hpp"
-#include "system/shortcuts.hpp"
+#include <cppurses/widget/widgets/widget_stack_menu.hpp>
+#include <cppurses/system/focus.hpp>
+#include <cppurses/widget/widgets/menu.hpp>
+#include <cppurses/system/shortcuts.hpp>
 
 namespace cppurses {
 Widget_stack_menu::Widget_stack_menu() {

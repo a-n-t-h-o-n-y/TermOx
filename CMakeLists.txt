@@ -5,12 +5,13 @@ project(libcppurses LANGUAGES CXX)
 set(CMAKE_BUILD_TYPE Debug)
 
 add_subdirectory(libs/Signals)
+# add_subdirectory(demos/chess)
 include(GNUInstallDirs)
 enable_testing()
 add_compile_options(-std=c++14)
 
 include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/cppurses
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/Signals/include
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/Signals/libs/Optional/include
     )
@@ -107,10 +108,28 @@ set(TEST_SOURCES
 	"test/painter/glyph_matrix_test.cpp"
     )
 
+set(CHESS_DEMO_SOURCES
+    "demos/chess/src/chessboard_widget.cpp"
+    "demos/chess/src/position.cpp"
+    "demos/chess/src/chess_engine.cpp"
+    "demos/chess/src/invalid_position.cpp"
+    "demos/chess/src/rules.cpp"
+    "demos/chess/src/state.cpp"
+    "demos/chess/src/chessboard_borders.cpp"
+    "demos/chess/src/chess_ui.cpp"
+    "demos/chess/src/side_pane.cpp"
+    "demos/chess/src/settings_pane.cpp"
+    "demos/chess/src/lower_pane.cpp"
+    "demos/chess/src/move_input.cpp"
+    "demos/chess/src/piece.cpp"
+    "demos/chess/src/move.cpp"
+    )
+
 set(DEMO_SOURCES
     "demos/demo.cpp"
     "demos/main_menu.cpp"
-    "demos/notepad.cpp"
+    "demos/notepad/notepad.cpp"
+    ${CHESS_DEMO_SOURCES}
     )
 
 add_library(cppurses STATIC
@@ -130,8 +149,6 @@ add_executable(demo ${DEMO_SOURCES})
 target_link_libraries(demo cppurses ncurses)
 
 # Tests
-add_executable(widg_test "test/widget_tester.cpp")
-target_link_libraries(widg_test cppurses ncurses)
 # add_executable(testcppurses ${TEST_SOURCES})
 # target_link_libraries(testcppurses cppurses ncurses)
 

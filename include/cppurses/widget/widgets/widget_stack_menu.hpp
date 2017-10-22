@@ -1,12 +1,12 @@
 #ifndef WIDGET_WIDGETS_WIDGET_STACK_MENU_HPP
 #define WIDGET_WIDGETS_WIDGET_STACK_MENU_HPP
-#include "painter/glyph_string.hpp"
-#include "widget/layouts/horizontal_layout.hpp"
-#include "widget/layouts/vertical_layout.hpp"
-#include "widget/widget.hpp"
-#include "widget/widgets/menu.hpp"
-#include "widget/widgets/push_button.hpp"
-#include "widget/widgets/widget_stack.hpp"
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/widget/layouts/horizontal_layout.hpp>
+#include <cppurses/widget/layouts/vertical_layout.hpp>
+#include <cppurses/widget/widget.hpp>
+#include <cppurses/widget/widgets/menu.hpp>
+#include <cppurses/widget/widgets/push_button.hpp>
+#include <cppurses/widget/widgets/widget_stack.hpp>
 
 namespace cppurses {
 

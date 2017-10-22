@@ -1,6 +1,5 @@
 #ifndef PAINTER_ATTRIBUTE_HPP
 #define PAINTER_ATTRIBUTE_HPP
-
 #include <cstdint>
 
 namespace cppurses {

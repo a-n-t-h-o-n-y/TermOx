@@ -1,11 +1,13 @@
 #ifndef WIDGET_WIDGETS_MENU_HPP
 #define WIDGET_WIDGETS_MENU_HPP
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/widget/widget.hpp>
+
 #include <signals/slot.hpp>
+
 #include <cstddef>
 #include <vector>
-#include "painter/glyph_string.hpp"
-#include "system/key.hpp"
-#include "widget/widget.hpp"
 
 namespace cppurses {
 

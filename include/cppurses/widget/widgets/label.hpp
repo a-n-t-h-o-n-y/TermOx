@@ -1,7 +1,7 @@
 #ifndef WIDGET_WIDGETS_LABEL_HPP
 #define WIDGET_WIDGETS_LABEL_HPP
-#include "painter/glyph_string.hpp"
-#include "widget/widgets/text_display.hpp"
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/widget/widgets/text_display.hpp>
 
 namespace cppurses {
 

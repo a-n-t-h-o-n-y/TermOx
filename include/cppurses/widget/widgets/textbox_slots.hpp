@@ -1,6 +1,7 @@
 #ifndef WIDGET_WIDGETS_TEXTBOX_SLOTS_HPP
 #define WIDGET_WIDGETS_TEXTBOX_SLOTS_HPP
 #include <signals/slot.hpp>
+
 #include <cstddef>
 
 namespace cppurses {

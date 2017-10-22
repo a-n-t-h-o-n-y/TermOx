@@ -1,8 +1,8 @@
 #ifndef WIDGET_WIDGETS_TEXTBOX_BASE_HPP
 #define WIDGET_WIDGETS_TEXTBOX_BASE_HPP
-#include "painter/glyph_string.hpp"
-#include "widget/coordinates.hpp"
-#include "widget/widgets/text_display.hpp"
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/widget/coordinates.hpp>
+#include <cppurses/widget/widgets/text_display.hpp>
 
 #include <signals/signal.hpp>
 

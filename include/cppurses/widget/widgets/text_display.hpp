@@ -1,12 +1,14 @@
 #ifndef WIDGET_WIDGETS_TEXT_DISPLAY_HPP
 #define WIDGET_WIDGETS_TEXT_DISPLAY_HPP
-#include "painter/attribute.hpp"
-#include "painter/brush.hpp"
-#include "painter/glyph.hpp"
-#include "painter/glyph_string.hpp"
-#include "widget/coordinates.hpp"
-#include "widget/widget.hpp"
+#include <cppurses/painter/attribute.hpp>
+#include <cppurses/painter/brush.hpp>
+#include <cppurses/painter/glyph.hpp>
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/widget/coordinates.hpp>
+#include <cppurses/widget/widget.hpp>
+
 #include <signals/signal.hpp>
+
 #include <cstddef>
 #include <vector>
 
