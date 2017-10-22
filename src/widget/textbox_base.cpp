@@ -1,8 +1,8 @@
-#include <cppurses/widget/widgets/textbox_base.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/coordinates.hpp>
-#include <cppurses/widget/widgets/text_display.hpp>
 #include <cppurses/widget/widget.hpp>
+#include <cppurses/widget/widgets/text_display.hpp>
+#include <cppurses/widget/widgets/textbox_base.hpp>
 
 #include <signals/signal.hpp>
 

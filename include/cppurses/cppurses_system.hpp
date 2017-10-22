@@ -23,7 +23,7 @@
 #include <cppurses/system/focus.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/mouse_button.hpp>
-#include <cppurses/system/system.hpp>
 #include <cppurses/system/shortcuts.hpp>
+#include <cppurses/system/system.hpp>
 
 #endif  // CPPURSES_SYSTEM_HPP

@@ -1,7 +1,7 @@
 #ifndef SYSTEM_EVENTS_MOUSE_EVENT_HPP
 #define SYSTEM_EVENTS_MOUSE_EVENT_HPP
-#include <cppurses/system/events/input_event.hpp>
 #include <cppurses/system/event.hpp>
+#include <cppurses/system/events/input_event.hpp>
 #include <cppurses/system/mouse_button.hpp>
 
 #include <cstddef>

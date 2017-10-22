@@ -1,6 +1,6 @@
-#include <cppurses/widget/size_policy.hpp>
 #include <cppurses/system/events/child_event.hpp>
 #include <cppurses/system/system.hpp>
+#include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget.hpp>
 
 #include <cstddef>

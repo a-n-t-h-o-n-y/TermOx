@@ -1,7 +1,7 @@
-#include <cppurses/widget/widgets/text_display_slots.hpp>
-#include <cppurses/widget/widgets/text_display.hpp>
 #include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/widget/widgets/text_display.hpp>
+#include <cppurses/widget/widgets/text_display_slots.hpp>
 
 #include <signals/slot.hpp>
 

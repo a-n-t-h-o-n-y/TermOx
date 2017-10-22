@@ -1,5 +1,5 @@
-#include <cppurses/system/events/disable_event.hpp>
 #include <cppurses/system/event_handler.hpp>
+#include <cppurses/system/events/disable_event.hpp>
 
 namespace cppurses {
 Disable_event::Disable_event(Event_handler* receiver)

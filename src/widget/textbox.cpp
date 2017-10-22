@@ -1,8 +1,8 @@
-#include <cppurses/widget/widgets/textbox.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/mouse_button.hpp>
 #include <cppurses/widget/focus_policy.hpp>
+#include <cppurses/widget/widgets/textbox.hpp>
 
 #include <cstddef>
 #include <utility>

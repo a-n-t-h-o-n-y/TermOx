@@ -1,5 +1,5 @@
-#include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/glyph.hpp>
+#include <cppurses/painter/glyph_string.hpp>
 
 #include <algorithm>
 #include <iterator>

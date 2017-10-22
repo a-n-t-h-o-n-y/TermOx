@@ -1,15 +1,15 @@
-#include <cppurses/widget/widgets/line_edit.hpp>
-#include <cppurses/painter/color.hpp>
-#include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/attribute.hpp>
-#include <cppurses/widget/size_policy.hpp>
-#include <cppurses/widget/widgets/textbox.hpp>
-#include <cppurses/system/key.hpp>
+#include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/system/key.hpp>
 #include <cppurses/system/mouse_button.hpp>
+#include <cppurses/widget/size_policy.hpp>
+#include <cppurses/widget/widgets/line_edit.hpp>
+#include <cppurses/widget/widgets/textbox.hpp>
 
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #include <utility>
 
 namespace cppurses {

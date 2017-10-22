@@ -1,8 +1,8 @@
 #ifndef WIDGET_WIDGETS_LOG_HPP
 #define WIDGET_WIDGETS_LOG_HPP
-#include <cppurses/widget/widgets/textbox.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/key.hpp>
+#include <cppurses/widget/widgets/textbox.hpp>
 
 #include <signals/slot.hpp>
 
@@ -15,11 +15,11 @@ class Log : public Textbox {
    protected:
     bool key_press_event(Key key, char symbol) override;
 
-    using Text_display::set_text;
-    using Text_display::insert;
     using Text_display::append;
     using Text_display::erase;
+    using Text_display::insert;
     using Text_display::pop_back;
+    using Text_display::set_text;
 };
 
 namespace slot {

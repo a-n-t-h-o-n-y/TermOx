@@ -1,9 +1,9 @@
-#include <cppurses/painter/painter.hpp>
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/paint_buffer.hpp>
+#include <cppurses/painter/painter.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/coordinates.hpp>

@@ -1,5 +1,5 @@
-#include <cppurses/system/event_handler_slots.hpp>
 #include <cppurses/system/event_handler.hpp>
+#include <cppurses/system/event_handler_slots.hpp>
 
 #include <signals/slot.hpp>
 

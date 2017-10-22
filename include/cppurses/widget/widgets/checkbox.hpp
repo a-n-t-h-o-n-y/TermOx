@@ -2,11 +2,11 @@
 #define WIDGET_WIDGETS_CHECKBOX_HPP
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/widget/widget.hpp>
 #include <cppurses/system/mouse_button.hpp>
-#include <signals/signals.hpp>
+#include <cppurses/widget/widget.hpp>
 #include <cstddef>
 #include <cstdint>
+#include <signals/signals.hpp>
 
 namespace cppurses {
 

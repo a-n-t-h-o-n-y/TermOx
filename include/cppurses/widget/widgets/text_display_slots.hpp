@@ -8,7 +8,7 @@
 #include <cstddef>
 
 namespace cppurses {
-    class Text_display;
+class Text_display;
 
 namespace slot {
 

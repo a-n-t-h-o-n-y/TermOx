@@ -1,5 +1,5 @@
-#include <cppurses/system/focus.hpp>
 #include <cppurses/system/events/focus_event.hpp>
+#include <cppurses/system/focus.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/widget.hpp>

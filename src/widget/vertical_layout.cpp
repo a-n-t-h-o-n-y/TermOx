@@ -1,8 +1,8 @@
-#include <cppurses/widget/layouts/vertical_layout.hpp>
 #include <cppurses/system/events/move_event.hpp>
 #include <cppurses/system/events/resize_event.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/border.hpp>
+#include <cppurses/widget/layouts/vertical_layout.hpp>
 #include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget.hpp>
 

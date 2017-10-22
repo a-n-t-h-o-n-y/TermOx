@@ -1,10 +1,10 @@
-#include <cppurses/widget/widgets/titlebar.hpp>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/size_policy.hpp>
-#include <cppurses/widget/widgets/push_button.hpp>
 #include <cppurses/widget/widget.hpp>
+#include <cppurses/widget/widgets/push_button.hpp>
+#include <cppurses/widget/widgets/titlebar.hpp>
 
 #include <signals/signals.hpp>
 

@@ -1,5 +1,5 @@
-#include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/attribute.hpp>
+#include <cppurses/painter/brush.hpp>
 
 #include <optional/optional.hpp>
 

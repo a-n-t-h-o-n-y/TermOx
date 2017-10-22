@@ -1,15 +1,15 @@
-#include <cppurses/widget/widget_slots.hpp>
-#include <cppurses/system/events/deferred_delete_event.hpp>
 #include <cppurses/system/events/close_event.hpp>
+#include <cppurses/system/events/deferred_delete_event.hpp>
 #include <cppurses/system/events/hide_event.hpp>
+#include <cppurses/system/events/key_event.hpp>
 #include <cppurses/system/events/mouse_event.hpp>
 #include <cppurses/system/events/paint_event.hpp>
-#include <cppurses/system/events/key_event.hpp>
 #include <cppurses/system/events/show_event.hpp>
-#include <cppurses/system/system.hpp>
 #include <cppurses/system/mouse_button.hpp>
+#include <cppurses/system/system.hpp>
 #include <cppurses/widget/coordinates.hpp>
 #include <cppurses/widget/widget.hpp>
+#include <cppurses/widget/widget_slots.hpp>
 
 #include <signals/slot.hpp>
 

@@ -1,8 +1,8 @@
-#include <cppurses/widget/widgets/menu.hpp>
 #include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/widget/focus_policy.hpp>
+#include <cppurses/widget/widgets/menu.hpp>
 
 #include <signals/slot.hpp>
 

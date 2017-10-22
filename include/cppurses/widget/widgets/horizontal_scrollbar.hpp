@@ -21,6 +21,6 @@ class Horizontal_scrollbar : public Horizontal_layout {
     sig::Signal<void()>& right = right_button.clicked;
 };
 
-}  // namespace cppurses;
+}  // namespace cppurses
 
 #endif  // WIDGET_WIDGETS_HORIZONTAL_SCROLLBAR

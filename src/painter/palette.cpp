@@ -1,6 +1,6 @@
-#include <cppurses/painter/palette.hpp>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/paint_buffer.hpp>
+#include <cppurses/painter/palette.hpp>
 #include <cppurses/system/system.hpp>
 
 #include <cstddef>

@@ -1,6 +1,6 @@
-#include <cppurses/widget/widgets/textbox_base_slots.hpp>
-#include <cppurses/widget/widgets/textbox_base.hpp>
 #include <cppurses/widget/coordinates.hpp>
+#include <cppurses/widget/widgets/textbox_base.hpp>
+#include <cppurses/widget/widgets/textbox_base_slots.hpp>
 
 #include <signals/slot.hpp>
 

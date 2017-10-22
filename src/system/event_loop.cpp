@@ -1,8 +1,8 @@
-#include <cppurses/system/event_loop.hpp>
-#include <cppurses/system/event.hpp>
-#include <cppurses/system/system.hpp>
-#include <cppurses/system/detail/abstract_event_listener.hpp>
 #include <cppurses/painter/paint_buffer.hpp>
+#include <cppurses/system/detail/abstract_event_listener.hpp>
+#include <cppurses/system/event.hpp>
+#include <cppurses/system/event_loop.hpp>
+#include <cppurses/system/system.hpp>
 
 #include <utility>
 

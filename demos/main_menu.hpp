@@ -1,8 +1,9 @@
 #ifndef DEMOS_MAIN_MENU_HPP
 #define DEMOS_MAIN_MENU_HPP
 #include <cppurses/cppurses.hpp>
-#include "notepad/notepad.hpp"
+
 #include "chess/src/chess_ui.hpp"
+#include "notepad/notepad.hpp"
 
 using namespace cppurses;
 namespace demo {

@@ -1,5 +1,5 @@
-#include <cppurses/system/events/deferred_delete_event.hpp>
 #include <cppurses/system/event_handler.hpp>
+#include <cppurses/system/events/deferred_delete_event.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/widget.hpp>
 

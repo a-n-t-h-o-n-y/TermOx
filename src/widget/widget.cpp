@@ -1,4 +1,3 @@
-#include <cppurses/widget/widget.hpp>
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/paint_buffer.hpp>
@@ -12,6 +11,7 @@
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/coordinates.hpp>
+#include <cppurses/widget/widget.hpp>
 
 #include <signals/signal.hpp>
 

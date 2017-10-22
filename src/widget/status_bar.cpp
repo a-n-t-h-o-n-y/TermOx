@@ -1,5 +1,5 @@
-#include <cppurses/widget/widgets/status_bar.hpp>
 #include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/widget/widgets/status_bar.hpp>
 
 #include <signals/signals.hpp>
 

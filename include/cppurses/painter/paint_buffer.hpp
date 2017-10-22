@@ -1,8 +1,8 @@
 #ifndef PAINTER_DETAIL_PAINT_BUFFER_HPP
 #define PAINTER_DETAIL_PAINT_BUFFER_HPP
 #include <cppurses/painter/color.hpp>
-#include <cppurses/painter/glyph_matrix.hpp>
 #include <cppurses/painter/detail/ncurses_paint_engine.hpp>
+#include <cppurses/painter/glyph_matrix.hpp>
 #include <cppurses/painter/palette.hpp>
 
 #include <cstddef>

@@ -1,5 +1,5 @@
-#include <cppurses/widget/widgets/textbox_slots.hpp>
 #include <cppurses/widget/widgets/textbox.hpp>
+#include <cppurses/widget/widgets/textbox_slots.hpp>
 
 #include <signals/slot.hpp>
 
@@ -81,4 +81,4 @@ sig::Slot<void(std::size_t)> set_wheel_speed_down(Textbox& tb) {
 
 }  // namespace slot
 
-} // namespace cppurses
+}  // namespace cppurses

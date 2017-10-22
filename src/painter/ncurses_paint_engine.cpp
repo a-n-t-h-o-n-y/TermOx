@@ -1,16 +1,16 @@
-#include <cppurses/painter/detail/ncurses_paint_engine.hpp>
 #include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
+#include <cppurses/painter/detail/ncurses_paint_engine.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/paint_buffer.hpp>
 
-#include <optional/optional.hpp>
 #include <ncurses.h>
+#include <optional/optional.hpp>
 
-#include <string>
 #include <cstddef>
 #include <cstdint>
+#include <string>
 
 namespace {
 
