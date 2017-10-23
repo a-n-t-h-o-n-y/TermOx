@@ -1,5 +1,6 @@
-#include "system/events/resize_event.hpp"
-#include "system/event_handler.hpp"
+#include <cppurses/system/event_handler.hpp>
+#include <cppurses/system/events/resize_event.hpp>
+
 #include <cstddef>
 
 namespace cppurses {
@@ -21,8 +22,8 @@ bool Resize_event::send() const {
 }
 
 bool Resize_event::filter_send(Event_handler* filter) const {
-    return filter->resize_event_filter(
-        receiver_, new_width_, new_height_, old_width_, old_height_);
+    return filter->resize_event_filter(receiver_, new_width_, new_height_,
+                                       old_width_, old_height_);
 }
 
 }  // namespace cppurses

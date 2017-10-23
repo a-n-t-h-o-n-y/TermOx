@@ -23,6 +23,7 @@ class Event {
         Resize,
         Show,
         Hide,
+        OnTree,
         Close,
         ChildAdded,
         ChildRemoved,

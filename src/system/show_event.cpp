@@ -1,9 +1,10 @@
-#include "system/events/show_event.hpp"
-#include "system/event_handler.hpp"
+#include <cppurses/system/event_handler.hpp>
+#include <cppurses/system/events/show_event.hpp>
 
 namespace cppurses {
 
-Show_event::Show_event(Event_handler* receiver) : Event{Event::Show, receiver} {}
+Show_event::Show_event(Event_handler* receiver)
+    : Event{Event::Show, receiver} {}
 
 bool Show_event::send() const {
     return receiver_->show_event();

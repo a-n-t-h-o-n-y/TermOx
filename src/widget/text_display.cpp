@@ -1,8 +1,10 @@
-#include "widget/widgets/text_display.hpp"
-#include "painter/glyph_string.hpp"
-#include "painter/painter.hpp"
-#include "widget/coordinates.hpp"
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/painter/painter.hpp>
+#include <cppurses/widget/coordinates.hpp>
+#include <cppurses/widget/widgets/text_display.hpp>
+
 #include <signals/signal.hpp>
+
 #include <algorithm>
 #include <cstddef>
 #include <iterator>
@@ -11,14 +13,17 @@
 
 namespace cppurses {
 
-Text_display::Text_display(Glyph_string content)
-    : contents_{std::move(content)} {
+void Text_display::update() {
     this->update_display();
+    Widget::update();
 }
+
+Text_display::Text_display(Glyph_string content)
+    : contents_{std::move(content)} {}
 
 void Text_display::set_text(Glyph_string text) {
     contents_ = std::move(text);
-    this->update_display();
+    this->update();
     text_changed(contents_);
 }
 
@@ -34,7 +39,7 @@ void Text_display::insert(Glyph_string text, std::size_t index) {
     }
     contents_.insert(std::begin(contents_) + index, std::begin(text),
                      std::end(text));
-    this->update_display();
+    this->update();
     text_changed(contents_);
 }
 
@@ -45,7 +50,7 @@ void Text_display::append(Glyph_string text) {
         }
     }
     contents_.append(std::move(text));
-    this->update_display();
+    this->update();
     text_changed(contents_);
 }
 
@@ -58,7 +63,7 @@ void Text_display::erase(std::size_t index, std::size_t length) {
         end = std::end(contents_);
     }
     contents_.erase(std::begin(contents_) + index, end);
-    this->update_display();
+    this->update();
     text_changed(contents_);
 }
 
@@ -67,14 +72,25 @@ void Text_display::pop_back() {
         return;
     }
     contents_.pop_back();
-    this->update_display();
+    this->update();
     text_changed(contents_);
 }
 
 void Text_display::clear() {
     contents_.clear();
-    this->update_display();
+    this->move_cursor_x(0);
+    this->move_cursor_y(0);
+    this->update();
     text_changed(contents_);
+}
+
+void Text_display::set_alignment(Alignment type) {
+    alignment_ = type;
+    this->update();
+}
+
+Alignment Text_display::alignment() const {
+    return alignment_;
 }
 
 void Text_display::scroll_up(std::size_t n) {
@@ -101,17 +117,17 @@ void Text_display::scroll_down(std::size_t n) {
 
 void Text_display::enable_word_wrap(bool enable) {
     word_wrap_ = enable;
-    this->update_display();
+    this->update();
 }
 
 void Text_display::disable_word_wrap(bool disable) {
     word_wrap_ = !disable;
-    this->update_display();
+    this->update();
 }
 
 void Text_display::toggle_word_wrap() {
     word_wrap_ = !word_wrap_;
-    this->update_display();
+    this->update();
 }
 
 void Text_display::add_new_text_attribute(Attribute attr) {
@@ -176,10 +192,23 @@ Coordinates Text_display::display_position(std::size_t index) const {
 bool Text_display::paint_event() {
     Painter p{this};
     std::size_t line_n{0};
-    auto paint = [&p, &line_n, this](const auto& line) {
+    auto paint = [&p, &line_n, this](const Line_info& line) {
         auto sub_begin = std::begin(this->contents_) + line.start_index;
         auto sub_end = sub_begin + line.length;
-        p.put(Glyph_string(sub_begin, sub_end), 0, line_n++);
+        std::size_t start{0};
+        switch (alignment_) {
+            case Alignment::Left:
+                start = 0;
+                break;
+            case Alignment::Center:
+                start = (this->width() - line.length) / 2;
+                break;
+
+            case Alignment::Right:
+                start = this->width() - line.length;
+                break;
+        }
+        p.put(Glyph_string(sub_begin, sub_end), start, line_n++);
     };
     auto begin = std::begin(display_state_) + this->top_line();
     auto end = std::end(display_state_);
@@ -192,21 +221,12 @@ bool Text_display::paint_event() {
     return Widget::paint_event();
 }
 
-bool Text_display::resize_event(std::size_t new_width,
-                                std::size_t new_height,
-                                std::size_t old_width,
-                                std::size_t old_height) {
-    Widget::resize_event(new_width, new_height, old_width, old_height);
-    this->update_display();
-    return true;
-}
-
 // TODO: Implement tab character.
 void Text_display::update_display(std::size_t from_line) {
-    auto begin = display_state_.at(from_line).start_index;
+    std::size_t begin = display_state_.at(from_line).start_index;
     display_state_.clear();
     if (this->width() == 0) {
-        display_state_.push_back(line_info{0, 0});
+        display_state_.push_back(Line_info{0, 0});
         return;
     }
     std::size_t start_index{0};
@@ -218,7 +238,7 @@ void Text_display::update_display(std::size_t from_line) {
             last_space = length;
         }
         if (contents_.at(i).str() == "\n") {
-            display_state_.push_back(line_info{start_index, length - 1});
+            display_state_.push_back(Line_info{start_index, length - 1});
             start_index += length;
             length = 0;
         } else if (length == this->width()) {
@@ -227,17 +247,16 @@ void Text_display::update_display(std::size_t from_line) {
                 length = last_space;
                 last_space = 0;
             }
-            display_state_.push_back(line_info{start_index, length});
+            display_state_.push_back(Line_info{start_index, length});
             start_index += length;
             length = 0;
         }
     }
-    display_state_.push_back(line_info{start_index, length});
+    display_state_.push_back(Line_info{start_index, length});
     // Reset top_line_ if out of bounds of new display.
     if (this->top_line() >= display_state_.size()) {
         top_line_ = this->last_line();
     }
-    this->update();
 }
 
 std::size_t Text_display::line_at(std::size_t index) const {
@@ -270,6 +289,10 @@ std::size_t Text_display::bottom_line() const {
 
 std::size_t Text_display::last_line() const {
     return display_state_.size() - 1;
+}
+
+std::size_t Text_display::n_of_lines() const {
+    return display_state_.size();
 }
 
 std::size_t Text_display::first_index_at(std::size_t line) const {

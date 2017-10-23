@@ -1,7 +1,8 @@
-#include "painter/palette.hpp"
-#include "painter/color.hpp"
-#include "painter/paint_buffer.hpp"
-#include "system/system.hpp"
+#include <cppurses/painter/color.hpp>
+#include <cppurses/painter/paint_buffer.hpp>
+#include <cppurses/painter/palette.hpp>
+#include <cppurses/system/system.hpp>
+
 #include <cstddef>
 #include <cstdint>
 

@@ -1,13 +1,15 @@
-#include "widget/widgets/menu.hpp"
+#include <cppurses/painter/attribute.hpp>
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/painter/painter.hpp>
+#include <cppurses/widget/focus_policy.hpp>
+#include <cppurses/widget/widgets/menu.hpp>
+
 #include <signals/slot.hpp>
+
 #include <cstddef>
 #include <iterator>
 #include <string>
 #include <utility>
-#include "painter/attribute.hpp"
-#include "painter/glyph_string.hpp"
-#include "painter/painter.hpp"
-#include "widget/focus_policy.hpp"
 
 namespace cppurses {
 

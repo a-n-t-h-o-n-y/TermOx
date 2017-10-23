@@ -1,13 +1,14 @@
-#include "system/event_handler.hpp"
-#include "system/system.hpp"
-#include "system/events/enable_event.hpp"
-#include "system/events/disable_event.hpp"
-#include "system/mouse_button.hpp"
-#include "widget/coordinates.hpp"
-#include <signals/signals.hpp>
+#include <cppurses/system/event_handler.hpp>
+#include <cppurses/system/events/disable_event.hpp>
+#include <cppurses/system/events/enable_event.hpp>
+#include <cppurses/system/mouse_button.hpp>
+#include <cppurses/system/system.hpp>
+#include <cppurses/widget/coordinates.hpp>
+
 #include <algorithm>
-#include <iterator>
 #include <cstddef>
+#include <iterator>
+#include <signals/signals.hpp>
 #include <vector>
 
 namespace cppurses {
@@ -246,6 +247,11 @@ bool Event_handler::hide_event_filter(Event_handler* receiver) {
 }
 
 bool Event_handler::show_event_filter(Event_handler* receiver) {
+    return false;
+}
+
+bool Event_handler::on_tree_event_filter(Event_handler* receiver,
+                                         bool on_tree) {
     return false;
 }
 

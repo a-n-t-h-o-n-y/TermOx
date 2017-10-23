@@ -1,20 +1,26 @@
 #ifndef WIDGET_WIDGETS_TEXT_DISPLAY_HPP
 #define WIDGET_WIDGETS_TEXT_DISPLAY_HPP
-#include "painter/attribute.hpp"
-#include "painter/brush.hpp"
-#include "painter/glyph.hpp"
-#include "painter/glyph_string.hpp"
-#include "widget/coordinates.hpp"
-#include "widget/widget.hpp"
+#include <cppurses/painter/attribute.hpp>
+#include <cppurses/painter/brush.hpp>
+#include <cppurses/painter/glyph.hpp>
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/widget/coordinates.hpp>
+#include <cppurses/widget/widget.hpp>
+
 #include <signals/signal.hpp>
+
 #include <cstddef>
 #include <vector>
 
 namespace cppurses {
 
+enum class Alignment { Left, Center, Right };
+
 class Text_display : public Widget {
    public:
     explicit Text_display(Glyph_string content = "");
+
+    void update() override;
 
     // Text Modification
     void set_text(Glyph_string text);
@@ -23,6 +29,9 @@ class Text_display : public Widget {
     void erase(std::size_t index, std::size_t length = Glyph_string::npos);
     void pop_back();
     void clear();
+
+    void set_alignment(Alignment type);
+    Alignment alignment() const;
 
     // Scrolling
     virtual void scroll_up(std::size_t n = 1);
@@ -58,15 +67,12 @@ class Text_display : public Widget {
 
    protected:
     bool paint_event() override;
-    bool resize_event(std::size_t new_width,
-                      std::size_t new_height,
-                      std::size_t old_width,
-                      std::size_t old_height) override;
 
     std::size_t line_at(std::size_t index) const;
     std::size_t top_line() const;
     std::size_t bottom_line() const;
     std::size_t last_line() const;
+    std::size_t n_of_lines() const;
 
     std::size_t first_index_at(std::size_t line) const;
     std::size_t last_index_at(std::size_t line) const;
@@ -74,20 +80,21 @@ class Text_display : public Widget {
     std::size_t line_length(std::size_t line) const;
     std::size_t end_index() const;
 
+    void update_display(std::size_t from_line = 0);
+
    private:
-    struct line_info {
+    struct Line_info {
         std::size_t start_index;
         std::size_t length;
     };
 
-    std::vector<line_info> display_state_{line_info{0, 0}};
+    std::vector<Line_info> display_state_{Line_info{0, 0}};
 
     std::size_t top_line_{0};
     bool word_wrap_ = true;
     Glyph_string contents_;
     Brush new_text_brush_{this->brush};  // TODO possibly make public member
-
-    void update_display(std::size_t from_line = 0);
+    Alignment alignment_{Alignment::Left};
 };
 
 }  // namespace cppurses

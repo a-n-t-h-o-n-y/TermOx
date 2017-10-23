@@ -1,14 +1,16 @@
 #ifndef WIDGET_WIDGETS_LIST_HPP
 #define WIDGET_WIDGETS_LIST_HPP
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/system/mouse_button.hpp>
+#include <cppurses/widget/widget.hpp>
+
+#include <signals/signals.hpp>
+
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <vector>
-#include "painter/glyph_string.hpp"
-#include "system/key.hpp"
-#include "system/mouse_button.hpp"
-#include "widget/widget.hpp"
-#include <signals/signals.hpp>
 
 namespace cppurses {
 

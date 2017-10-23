@@ -1,7 +1,7 @@
 #ifndef PAINTER_GLYPH_STRING_HPP
 #define PAINTER_GLYPH_STRING_HPP
+#include <cppurses/painter/glyph.hpp>
 
-#include "painter/glyph.hpp"
 #include <codecvt>
 #include <initializer_list>
 #include <locale>
@@ -102,6 +102,8 @@ class Glyph_string : private std::vector<Glyph> {
             glyph.brush().add_attributes(std::forward<Attributes>(attrs)...);
         }
     }
+
+    void remove_attribute(Attribute attr);
 
     // Functions from std::vector<Glyph>
     using std::vector<Glyph>::value_type;

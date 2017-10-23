@@ -34,7 +34,7 @@ Pre-made Widgets for reuse.
 - Titlebar
 - Horizontal_scrollbar
 - Vertical_scrollbar
-- Color_chooser
+- Color_select
 - Horizontal_layout
 - Vertical_layout
 - List

@@ -1,7 +1,8 @@
 #ifndef PAINTER_DETAIL_NCURSES_PAINT_ENGINE_HPP
 #define PAINTER_DETAIL_NCURSES_PAINT_ENGINE_HPP
-#include "painter/attribute.hpp"
-#include "painter/color.hpp"
+#include <cppurses/painter/attribute.hpp>
+#include <cppurses/painter/color.hpp>
+
 #include <cstddef>
 #include <cstdint>
 #include <string>

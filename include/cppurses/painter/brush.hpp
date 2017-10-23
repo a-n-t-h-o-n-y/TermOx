@@ -1,8 +1,10 @@
 #ifndef PAINTER_BRUSH_HPP
 #define PAINTER_BRUSH_HPP
-#include "painter/attribute.hpp"
-#include "painter/color.hpp"
+#include <cppurses/painter/attribute.hpp>
+#include <cppurses/painter/color.hpp>
+
 #include <optional/optional.hpp>
+
 #include <algorithm>
 #include <bitset>
 #include <utility>

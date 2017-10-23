@@ -1,14 +1,16 @@
-#include "painter/detail/ncurses_paint_engine.hpp"
-#include "painter/attribute.hpp"
-#include "painter/brush.hpp"
-#include "painter/color.hpp"
-#include "painter/glyph.hpp"
-#include "painter/paint_buffer.hpp"
-#include <optional/optional.hpp>
+#include <cppurses/painter/attribute.hpp>
+#include <cppurses/painter/brush.hpp>
+#include <cppurses/painter/color.hpp>
+#include <cppurses/painter/detail/ncurses_paint_engine.hpp>
+#include <cppurses/painter/glyph.hpp>
+#include <cppurses/painter/paint_buffer.hpp>
+
 #include <ncurses.h>
-#include <string>
+#include <optional/optional.hpp>
+
 #include <cstddef>
 #include <cstdint>
+#include <string>
 
 namespace {
 
@@ -83,6 +85,7 @@ NCurses_paint_engine::NCurses_paint_engine(const Paint_buffer& buffer)
     ::mouseinterval(0);
     ::start_color();
     ::assume_default_colors(240, 240);  // Sets color pair 0 to black/black
+    ::set_escdelay(1);
     initialize_color_pairs();
     this->hide_cursor();
 }

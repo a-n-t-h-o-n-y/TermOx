@@ -1,16 +1,17 @@
 cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 project(libcppurses LANGUAGES CXX)
 
-set(CMAKE_BUILD_TYPE Release)
-# set(CMAKE_BUILD_TYPE Debug)
+# set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
 
 add_subdirectory(libs/Signals)
+# add_subdirectory(demos/chess)
 include(GNUInstallDirs)
 enable_testing()
 add_compile_options(-std=c++14)
 
 include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/cppurses
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/Signals/include
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/Signals/libs/Optional/include
     )
@@ -36,10 +37,12 @@ set(SYSTEM_SOURCES
     "src/system/mouse_event.cpp"
 	"src/system/move_event.cpp"
     "src/system/ncurses_event_listener.cpp"
+    "src/system/on_tree_event.cpp"
     "src/system/paint_event.cpp"
 	"src/system/resize_event.cpp"
     "src/system/show_event.cpp"
 	"src/system/system.cpp"
+    "src/system/shortcuts.cpp"
     )
 
 set(PAINTER_SOURCES
@@ -56,10 +59,17 @@ set(PAINTER_SOURCES
 set(WIDGET_SOURCES
     "src/widget/widget.cpp"
     "src/widget/widget_slots.cpp"
+    "src/widget/widget_stack.cpp"
+    "src/widget/widget_stack_menu.cpp"
+    "src/widget/label.cpp"
 	"src/widget/layout.cpp"
+    "src/widget/line_edit.cpp"
+    "src/widget/log.cpp"
 	"src/widget/horizontal_layout.cpp"
 	"src/widget/border.cpp"
+    "src/widget/cycle_box.cpp"
     "src/widget/vertical_layout.cpp"
+    "src/widget/status_bar.cpp"
     "src/widget/textbox.cpp"
     "src/widget/textbox_slots.cpp"
     "src/widget/textbox_base.cpp"
@@ -71,9 +81,11 @@ set(WIDGET_SOURCES
     "src/widget/titlebar.cpp"
     "src/widget/text_display.cpp"
     "src/widget/text_display_slots.cpp"
-    "src/widget/color_chooser.cpp"
+    "src/widget/color_select.cpp"
     "src/widget/menu.cpp"
     "src/widget/size_policy.cpp"
+    "src/widget/blank_width.cpp"
+    "src/widget/blank_height.cpp"
     )
 
 set(TEST_SOURCES 
@@ -96,6 +108,32 @@ set(TEST_SOURCES
 	"test/painter/glyph_matrix_test.cpp"
     )
 
+set(CHESS_DEMO_SOURCES
+    "demos/chess/src/chessboard_widget.cpp"
+    "demos/chess/src/position.cpp"
+    "demos/chess/src/chess_engine.cpp"
+    "demos/chess/src/invalid_position.cpp"
+    "demos/chess/src/rules.cpp"
+    "demos/chess/src/no_rules.cpp"
+    "demos/chess/src/standard_rules.cpp"
+    "demos/chess/src/state.cpp"
+    "demos/chess/src/chessboard_borders.cpp"
+    "demos/chess/src/chess_ui.cpp"
+    "demos/chess/src/side_pane.cpp"
+    "demos/chess/src/settings_pane.cpp"
+    "demos/chess/src/lower_pane.cpp"
+    "demos/chess/src/move_input.cpp"
+    "demos/chess/src/piece.cpp"
+    "demos/chess/src/move.cpp"
+    )
+
+set(DEMO_SOURCES
+    "demos/demo.cpp"
+    "demos/main_menu.cpp"
+    "demos/notepad/notepad.cpp"
+    ${CHESS_DEMO_SOURCES}
+    )
+
 add_library(cppurses STATIC
     ${SYSTEM_SOURCES}
 	${PAINTER_SOURCES}
@@ -109,8 +147,8 @@ install(TARGETS cppurses
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # Demos
-add_executable(notepad demos/notepad_demo.cpp)
-target_link_libraries(notepad cppurses ncurses)
+add_executable(demo ${DEMO_SOURCES})
+target_link_libraries(demo cppurses ncurses)
 
 # Tests
 # add_executable(testcppurses ${TEST_SOURCES})

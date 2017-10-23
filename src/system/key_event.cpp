@@ -1,7 +1,8 @@
-#include "system/events/key_event.hpp"
-#include "system/key.hpp"
-#include "system/event_handler.hpp"
-#include "system/focus.hpp"
+#include <cppurses/system/event_handler.hpp>
+#include <cppurses/system/events/key_event.hpp>
+#include <cppurses/system/focus.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/system/shortcuts.hpp>
 
 namespace cppurses {
 
@@ -16,6 +17,10 @@ Key_press_event::Key_press_event(Event_handler* receiver, Key key_code)
 bool Key_press_event::send() const {
     if (!receiver_->enabled()) {
         return false;
+    }
+    // Hotkeys/Shortcuts
+    if (Shortcuts::send_key(key_code_)) {
+        return true;
     }
     if (key_code_ == Key::Tab && Focus::tab_press()) {
         return true;

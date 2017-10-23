@@ -1,19 +1,20 @@
 #ifndef WIDGET_WIDGET_HPP
 #define WIDGET_WIDGET_HPP
-#include "painter/brush.hpp"
-#include "painter/color.hpp"
-#include "painter/glyph.hpp"
-#include "system/event_handler.hpp"
-#include "system/key.hpp"
-#include "widget/border.hpp"
-#include "widget/coordinates.hpp"
-#include "widget/focus_policy.hpp"
-#include "widget/size_policy.hpp"
-#include <signals/signal.hpp>
+#include <cppurses/painter/brush.hpp>
+#include <cppurses/painter/color.hpp>
+#include <cppurses/painter/glyph.hpp>
+#include <cppurses/system/event_handler.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/widget/border.hpp>
+#include <cppurses/widget/coordinates.hpp>
+#include <cppurses/widget/focus_policy.hpp>
+#include <cppurses/widget/size_policy.hpp>
+
 #include <algorithm>
 #include <cstddef>
 #include <memory>
 #include <queue>
+#include <signals/signal.hpp>
 #include <string>
 #include <utility>
 #include <vector>
@@ -52,6 +53,9 @@ class Widget : public Event_handler {
     template <typename T>
     const T* find_child(const std::string& name) const;
 
+    std::unique_ptr<Widget> remove_child(Widget* child);
+    std::unique_ptr<Widget> remove_child(const std::string& name);
+
     // Global Coordinates(Including Border)
     std::size_t x() const;
     std::size_t y() const;
@@ -70,8 +74,15 @@ class Widget : public Event_handler {
     std::size_t cursor_y() const;
     Coordinates cursor_coordinates() const;
 
+    void set_visible(bool visible, bool recursive = true);
     bool visible() const;
-    void update();
+    bool on_tree() const;
+    virtual void update();
+
+    bool east_border_disqualified() const;
+    bool west_border_disqualified() const;
+    bool north_border_disqualified() const;
+    bool south_border_disqualified() const;
 
     // Public Objects
     Border border;
@@ -107,6 +118,7 @@ class Widget : public Event_handler {
     bool child_polished_event(Widget* child) override;
     bool show_event() override;
     bool hide_event() override;
+    bool on_tree_event(bool on_tree) override;
     bool move_event(std::size_t new_x,
                     std::size_t new_y,
                     std::size_t old_x,
@@ -121,6 +133,7 @@ class Widget : public Event_handler {
     Widget* parent_ = nullptr;
     std::vector<std::unique_ptr<Widget>> children_;
     bool visible_{true};
+    bool on_tree_{false};
 
     Coordinates cursor_position_;
     bool show_cursor_{false};
@@ -131,8 +144,12 @@ class Widget : public Event_handler {
     std::size_t width_{width_policy.hint()};
     std::size_t height_{height_policy.hint()};
 
-    void delete_child(Widget* child);
-    void set_visible(bool visible);
+    bool east_border_disqualified_{false};
+    bool west_border_disqualified_{false};
+    bool north_border_disqualified_{false};
+    bool south_border_disqualified_{false};
+
+    // void delete_child(Widget* child);
     void set_x(std::size_t global_x);
     void set_y(std::size_t global_y);
 
@@ -147,6 +164,11 @@ bool has_border(const Widget& w);
 void enable_border(Widget& w);
 void disable_border(Widget& w);
 
+std::size_t west_border_offset(const Widget& w);
+std::size_t east_border_offset(const Widget& w);
+std::size_t north_border_offset(const Widget& w);
+std::size_t south_border_offset(const Widget& w);
+
 bool has_coordinates(Widget& w, std::size_t global_x, std::size_t global_y);
 
 void move_cursor(Widget& w, Coordinates c);
@@ -154,6 +176,9 @@ void move_cursor(Widget& w, std::size_t x, std::size_t y);
 
 void set_background(Widget& w, Color c);
 void set_foreground(Widget& w, Color c);
+
+void set_background_recursive(Widget& w, Color c, bool single_level = false);
+void set_foreground_recursive(Widget& w, Color c, bool single_level = false);
 
 bool has_focus(const Widget& w);
 

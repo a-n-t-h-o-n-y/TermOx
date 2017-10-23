@@ -1,8 +1,9 @@
-#include "system/event_loop.hpp"
-#include "system/event.hpp"
-#include "system/system.hpp"
-#include "system/detail/abstract_event_listener.hpp"
-#include "painter/paint_buffer.hpp"
+#include <cppurses/painter/paint_buffer.hpp>
+#include <cppurses/system/detail/abstract_event_listener.hpp>
+#include <cppurses/system/event.hpp>
+#include <cppurses/system/event_loop.hpp>
+#include <cppurses/system/system.hpp>
+
 #include <utility>
 
 namespace cppurses {

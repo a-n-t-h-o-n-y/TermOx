@@ -1,12 +1,14 @@
 #ifndef WIDGET_WIDGETS_TEXT_DISPLAY_SLOTS_HPP
 #define WIDGET_WIDGETS_TEXT_DISPLAY_SLOTS_HPP
-#include "painter/attribute.hpp"
-#include "painter/glyph_string.hpp"
+#include <cppurses/painter/attribute.hpp>
+#include <cppurses/painter/glyph_string.hpp>
+
 #include <signals/slot.hpp>
+
 #include <cstddef>
 
 namespace cppurses {
-    class Text_display;
+class Text_display;
 
 namespace slot {
 

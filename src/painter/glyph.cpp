@@ -1,7 +1,8 @@
-#include <painter/glyph.hpp>
+#include <cppurses/painter/glyph.hpp>
 
 #include <cstring>
 #include <ostream>
+#include <string>
 
 namespace cppurses {
 

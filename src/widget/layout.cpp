@@ -1,15 +1,14 @@
-#include "widget/layout.hpp"
-#include "painter/painter.hpp"
-#include "system/system.hpp"
-#include "system/events/move_event.hpp"
-#include "system/events/resize_event.hpp"
+#include <cppurses/painter/painter.hpp>
+#include <cppurses/system/events/move_event.hpp>
+#include <cppurses/system/events/resize_event.hpp>
+#include <cppurses/system/system.hpp>
+#include <cppurses/widget/layout.hpp>
 
 namespace cppurses {
 
 Layout::Layout() {
     System::post_event<Move_event>(this, 0, 0);
-    System::post_event<Resize_event>(this, System::max_width(),
-                                     System::max_height());
+    this->focus_policy = Focus_policy::Click;
 }
 
 bool Layout::paint_event() {
@@ -20,6 +19,19 @@ bool Layout::paint_event() {
         p.put("Screen too small.");
     }
     return Widget::paint_event();
+}
+
+// Free Functions
+void set_background(Layout& l, Color c) {
+    for (Widget* w : l.children()) {
+        set_background(*w, c);
+    }
+}
+
+void set_foreground(Layout& l, Color c) {
+    for (Widget* w : l.children()) {
+        set_foreground(*w, c);
+    }
 }
 
 }  // namespace cppurses

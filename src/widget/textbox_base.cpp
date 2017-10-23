@@ -1,9 +1,11 @@
-#include "widget/widgets/textbox_base.hpp"
-#include "painter/glyph_string.hpp"
-#include "widget/coordinates.hpp"
-#include "widget/widgets/text_display.hpp"
-#include "widget/widget.hpp"
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/widget/coordinates.hpp>
+#include <cppurses/widget/widget.hpp>
+#include <cppurses/widget/widgets/text_display.hpp>
+#include <cppurses/widget/widgets/textbox_base.hpp>
+
 #include <signals/signal.hpp>
+
 #include <cstddef>
 #include <utility>
 

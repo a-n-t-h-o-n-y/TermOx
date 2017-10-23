@@ -1,8 +1,8 @@
 #ifndef CPPURSES_HPP
 #define CPPURSES_HPP
 
-#include "cppurses_system.hpp"
-#include "cppurses_painter.hpp"
-#include "cppurses_widget.hpp"
+#include <cppurses/cppurses_painter.hpp>
+#include <cppurses/cppurses_system.hpp>
+#include <cppurses/cppurses_widget.hpp>
 
 #endif  // CPPURSES_HPP

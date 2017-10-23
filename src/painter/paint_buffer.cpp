@@ -1,10 +1,11 @@
-#include "painter/paint_buffer.hpp"
-#include "painter/glyph.hpp"
-#include "painter/glyph_matrix.hpp"
-#include "painter/palette.hpp"
-#include "system/focus.hpp"
-#include "widget/widget.hpp"
-#include "widget/border.hpp"
+#include <cppurses/painter/glyph.hpp>
+#include <cppurses/painter/glyph_matrix.hpp>
+#include <cppurses/painter/paint_buffer.hpp>
+#include <cppurses/painter/palette.hpp>
+#include <cppurses/system/focus.hpp>
+#include <cppurses/widget/border.hpp>
+#include <cppurses/widget/widget.hpp>
+
 #include <cstddef>
 
 namespace cppurses {
@@ -18,8 +19,8 @@ void Paint_buffer::stage(std::size_t x, std::size_t y, const Glyph& glyph) {
     if (y >= staging_area_.height() || x >= staging_area_.width()) {
         return;
     }
-    if (staging_area_.at(x, y) != glyph) {
-        staging_area_.at(x, y) = glyph;
+    if (staging_area_(x, y) != glyph) {
+        staging_area_(x, y) = glyph;
     }
 }
 
@@ -41,10 +42,8 @@ void Paint_buffer::flush(bool optimize) {
     if (focus_widg != nullptr) {
         engine_.show_cursor(focus_widg->cursor_visible());
         if (focus_widg->cursor_visible()) {
-            auto x = focus_widg->x() + focus_widg->cursor_x() +
-                     west_border_offset(focus_widg->border);
-            auto y = focus_widg->y() + focus_widg->cursor_y() +
-                     north_border_offset(focus_widg->border);
+            auto x = focus_widg->x() + focus_widg->cursor_x();
+            auto y = focus_widg->y() + focus_widg->cursor_y();
             engine_.move(x, y);
         }
     } else {
@@ -83,10 +82,10 @@ void Paint_buffer::resize(std::size_t x, std::size_t y) {
 }
 
 bool Paint_buffer::commit(std::size_t x, std::size_t y) {
-    if (staging_area_.at(x, y) == backing_store_.at(x, y)) {
+    if (staging_area_(x, y) == backing_store_(x, y)) {
         return false;
     }
-    backing_store_.at(x, y) = staging_area_.at(x, y);
+    backing_store_(x, y) = staging_area_(x, y);
     return true;
 }
 

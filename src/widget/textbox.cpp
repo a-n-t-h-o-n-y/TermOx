@@ -1,10 +1,11 @@
-#include "widget/widgets/textbox.hpp"
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/system/mouse_button.hpp>
+#include <cppurses/widget/focus_policy.hpp>
+#include <cppurses/widget/widgets/textbox.hpp>
+
 #include <cstddef>
 #include <utility>
-#include "painter/glyph_string.hpp"
-#include "system/key.hpp"
-#include "system/mouse_button.hpp"
-#include "widget/focus_policy.hpp"
 
 namespace cppurses {
 
@@ -87,6 +88,7 @@ bool Textbox::key_press_event(Key key, char symbol) {
         default:  // Insert text
             char text = symbol;
             if (text != '\0') {
+                // TODO Cursor Movement for Alignments other than left
                 auto cursor_index = this->cursor_index();
                 this->insert(text, cursor_index);
                 this->cursor_right(1);

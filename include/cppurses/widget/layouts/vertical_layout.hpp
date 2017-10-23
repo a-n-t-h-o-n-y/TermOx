@@ -1,9 +1,9 @@
 #ifndef WIDGET_LAYOUTS_VERTICAL_LAYOUT_HPP
 #define WIDGET_LAYOUTS_VERTICAL_LAYOUT_HPP
-#include "widget/layout.hpp"
+#include <cppurses/widget/layout.hpp>
+
 #include <cstddef>
 #include <functional>
-#include <tuple>
 #include <vector>
 
 namespace cppurses {
@@ -17,17 +17,11 @@ class Vertical_layout : public Layout {
     std::vector<std::size_t> size_widgets();
     void position_widgets(const std::vector<std::size_t>& heights);
 
-    void distribute_space(
-        std::vector<std::tuple<Widget*,
-                               std::reference_wrapper<std::size_t>,
-                               std::reference_wrapper<std::size_t>>> widgets,
-        int height_left);
+    void distribute_space(std::vector<Dimensions_reference> widget,
+                          int height_left);
 
-    void collect_space(
-        std::vector<std::tuple<Widget*,
-                               std::reference_wrapper<std::size_t>,
-                               std::reference_wrapper<std::size_t>>> widgets,
-        int height_left);
+    void collect_space(std::vector<Dimensions_reference> widgets,
+                       int height_left);
 };
 
 }  // namespace cppurses

@@ -1,7 +1,9 @@
 #ifndef WIDGET_WIDGETS_TEXTBOX_BASE_SLOTS_HPP
 #define WIDGET_WIDGETS_TEXTBOX_BASE_SLOTS_HPP
-#include "widget/coordinates.hpp"
+#include <cppurses/widget/coordinates.hpp>
+
 #include <cstddef>
+
 #include <signals/slot.hpp>
 
 namespace cppurses {

@@ -1,13 +1,18 @@
-#include "system/system.hpp"
-#include "painter/paint_buffer.hpp"
-#include "painter/palette.hpp"
-#include "system/event.hpp"
-#include "system/event_loop.hpp"
-#include "system/events/paint_event.hpp"
-#include "system/detail/ncurses_event_listener.hpp"
-#include "system/detail/event_queue.hpp"
-#include "widget/widget.hpp"
+#include <cppurses/painter/paint_buffer.hpp>
+#include <cppurses/painter/palette.hpp>
+#include <cppurses/system/detail/event_queue.hpp>
+#include <cppurses/system/detail/ncurses_event_listener.hpp>
+#include <cppurses/system/event.hpp>
+#include <cppurses/system/event_loop.hpp>
+#include <cppurses/system/events/on_tree_event.hpp>
+#include <cppurses/system/events/paint_event.hpp>
+#include <cppurses/system/events/resize_event.hpp>
+#include <cppurses/system/system.hpp>
+#include <cppurses/widget/layout.hpp>
+#include <cppurses/widget/widget.hpp>
+
 #include <signals/slot.hpp>
+
 #include <memory>
 #include <utility>
 
@@ -89,7 +94,18 @@ System::~System() {
 }
 
 void System::set_head(Widget* head_widget) {
+    if (head_ != nullptr) {
+        System::post_event<On_tree_event>(head_, false);
+    }
     head_ = head_widget;
+    if (head_ != nullptr) {
+        System::post_event<On_tree_event>(head_, true);
+        if (dynamic_cast<Layout*>(head_) != nullptr) {
+            System::post_event<Resize_event>(head_, System::max_width(),
+                                             System::max_height());
+        }
+        head_->update();
+    }
 }
 
 void System::enable_ctrl_characters() {

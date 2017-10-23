@@ -1,17 +1,20 @@
-#include "widget/widget.hpp"
-#include "painter/brush.hpp"
-#include "painter/color.hpp"
-#include "painter/painter.hpp"
-#include "painter/paint_buffer.hpp"
-#include "system/events/child_event.hpp"
-#include "system/events/clear_screen_event.hpp"
-#include "system/events/paint_event.hpp"
-#include "system/events/deferred_delete_event.hpp"
-#include "system/system.hpp"
-#include "system/focus.hpp"
-#include "widget/border.hpp"
-#include "widget/coordinates.hpp"
+#include <cppurses/painter/brush.hpp>
+#include <cppurses/painter/color.hpp>
+#include <cppurses/painter/paint_buffer.hpp>
+#include <cppurses/painter/painter.hpp>
+#include <cppurses/system/events/child_event.hpp>
+#include <cppurses/system/events/clear_screen_event.hpp>
+#include <cppurses/system/events/deferred_delete_event.hpp>
+#include <cppurses/system/events/on_tree_event.hpp>
+#include <cppurses/system/events/paint_event.hpp>
+#include <cppurses/system/focus.hpp>
+#include <cppurses/system/system.hpp>
+#include <cppurses/widget/border.hpp>
+#include <cppurses/widget/coordinates.hpp>
+#include <cppurses/widget/widget.hpp>
+
 #include <signals/signal.hpp>
+
 #include <cstddef>
 #include <iterator>
 #include <memory>
@@ -38,10 +41,6 @@ Widget::~Widget() {
     if (Focus::focus_widget() == this) {
         Focus::clear_focus();
     }
-    Widget* parent = this->parent();
-    if (parent != nullptr) {
-        System::send_event(Child_removed_event{parent, this});
-    }
 }
 
 void Widget::set_name(std::string name) {
@@ -65,6 +64,14 @@ void Widget::add_child(std::unique_ptr<Widget> child) {
     children_.emplace_back(std::move(child));
     children_.back()->set_parent(this);
     System::post_event<Child_added_event>(this, children_.back().get());
+    System::post_event<On_tree_event>(children_.back().get(), this->on_tree());
+}
+
+std::vector<Widget*> Widget::children() const {
+    std::vector<Widget*> ret;
+    std::transform(std::begin(children_), std::end(children_),
+                   std::back_inserter(ret), [](auto& up) { return up.get(); });
+    return ret;
 }
 
 bool Widget::contains_child(Widget* child) {
@@ -76,45 +83,47 @@ bool Widget::contains_child(Widget* child) {
     return false;
 }
 
-std::vector<Widget*> Widget::children() const {
-    std::vector<Widget*> ret;
-    std::transform(std::begin(children_), std::end(children_),
-                   std::back_inserter(ret), [](auto& up) { return up.get(); });
-    return ret;
+std::unique_ptr<Widget> Widget::remove_child(Widget* child) {
+    auto end_iter = std::end(children_);
+    auto at = std::find_if(std::begin(children_), end_iter,
+                           [child](auto& c) { return c.get() == child; });
+    if (at == end_iter) {
+        return nullptr;
+    }
+    std::unique_ptr<Widget> removed = std::move(*at);
+    children_.erase(at);
+    removed->set_parent(nullptr);
+    System::send_event(Child_removed_event{this, child});
+    System::post_event<On_tree_event>(removed.get(), false);
+    return removed;
+}
+
+std::unique_ptr<Widget> Widget::remove_child(const std::string& name) {
+    return this->remove_child(this->find_child<Widget>(name));
 }
 
 std::size_t Widget::x() const {
     Widget* parent = this->parent();
     if (parent == nullptr) {
-        return this->position_.x;
+        return this->position_.x + west_border_offset(*this);
     }
-    return this->position_.x + parent->x();
+    return this->position_.x + parent->x() + west_border_offset(*this);
 }
 
 std::size_t Widget::y() const {
     Widget* parent = this->parent();
     if (parent == nullptr) {
-        return this->position_.y;
+        return this->position_.y + north_border_offset(*this);
     }
-    return this->position_.y + parent->y();
+    return this->position_.y + parent->y() + north_border_offset(*this);
 }
 
 std::size_t Widget::width() const {
-    std::size_t width_border_offset =
-        west_border_offset(this->border) + east_border_offset(this->border);
-    if (width_border_offset > width_) {
-        return 0;
-    }
-    return width_ - width_border_offset;
+    return width_;
 }
 
 std::size_t Widget::height() const {
-    std::size_t height_border_offset =
-        north_border_offset(this->border) + south_border_offset(this->border);
-    if (height_border_offset > height_) {
-        return 0;
-    }
-    return height_ - height_border_offset;
+    return height_;
 }
 
 bool Widget::cursor_visible() const {
@@ -161,9 +170,29 @@ bool Widget::visible() const {
     return visible_;
 }
 
+bool Widget::on_tree() const {
+    return on_tree_;
+}
+
 void Widget::update() {
     clear_screen(*this);
     System::post_event<Paint_event>(this);
+}
+
+bool Widget::east_border_disqualified() const {
+    return east_border_disqualified_;
+}
+
+bool Widget::west_border_disqualified() const {
+    return west_border_disqualified_;
+}
+
+bool Widget::north_border_disqualified() const {
+    return north_border_disqualified_;
+}
+
+bool Widget::south_border_disqualified() const {
+    return south_border_disqualified_;
 }
 
 bool Widget::close_event() {
@@ -201,7 +230,7 @@ bool Widget::clear_screen_event() {
 }
 
 bool Widget::deferred_delete_event(Event_handler* to_delete) {
-    this->delete_child(static_cast<Widget*>(to_delete));
+    this->remove_child(static_cast<Widget*>(to_delete));
     return true;
 }
 
@@ -228,6 +257,14 @@ bool Widget::show_event() {
     return true;
 }
 
+bool Widget::on_tree_event(bool on_tree) {
+    on_tree_ = on_tree;
+    for (auto& child : children_) {
+        System::post_event<On_tree_event>(child.get(), on_tree_);
+    }
+    return true;
+}
+
 bool Widget::hide_event() {
     this->set_visible(false);
     this->update();
@@ -250,26 +287,52 @@ bool Widget::resize_event(std::size_t new_width,
                           std::size_t new_height,
                           std::size_t old_width,
                           std::size_t old_height) {
-    width_ = new_width;
-    height_ = new_height;
+    east_border_disqualified_ = false;
+    west_border_disqualified_ = false;
+    north_border_disqualified_ = false;
+    south_border_disqualified_ = false;
+
+    // If new_width is too small for widget and borders, disqualify borders
+    if (new_width == 2) {
+        if (west_border_offset(*this) == 0) {
+            west_border_disqualified_ = true;
+        } else {
+            east_border_disqualified_ = true;
+        }
+    }
+    if (new_width <= 1) {
+        east_border_disqualified_ = true;
+        west_border_disqualified_ = true;
+    }
+
+    if (new_height == 2) {
+        if (north_border_offset(*this) == 0) {
+            north_border_disqualified_ = true;
+        } else {
+            south_border_disqualified_ = true;
+        }
+    }
+    if (new_height <= 1) {
+        north_border_disqualified_ = true;
+        south_border_disqualified_ = true;
+    }
+
+    width_ = new_width - east_border_offset(*this) - west_border_offset(*this);
+    height_ =
+        new_height - north_border_offset(*this) - south_border_offset(*this);
+
     resized(width_, height_);
     this->update();
     return true;
 }
 
-void Widget::set_visible(bool visible) {
-    this->visible_ = visible;
-    for (Widget* c : this->children()) {
-        c->set_visible(visible);
+void Widget::set_visible(bool visible, bool recursive) {
+    visible_ = visible;
+    if (!recursive) {
+        return;
     }
-}
-
-void Widget::delete_child(Widget* child) {
-    auto end_iter = std::end(children_);
-    auto at = std::find_if(std::begin(children_), end_iter,
-                           [child](auto& c) { return c.get() == child; });
-    if (at != end_iter) {
-        children_.erase(at);
+    for (Widget* c : this->children()) {
+        c->set_visible(visible, recursive);
     }
 }
 
@@ -327,16 +390,50 @@ void disable_border(Widget& w) {
     System::post_event<Child_polished_event>(w.parent(), &w);
 }
 
+std::size_t west_border_offset(const Widget& w) {
+    const Border& b{w.border};
+    if (b.enabled && !w.west_border_disqualified() &&
+        (b.west_enabled || b.north_west_enabled || b.south_west_enabled)) {
+        return 1;
+    }
+    return 0;
+}
+
+std::size_t east_border_offset(const Widget& w) {
+    const Border& b{w.border};
+    if (b.enabled && !w.east_border_disqualified() &&
+        (b.east_enabled || b.north_east_enabled || b.south_east_enabled)) {
+        return 1;
+    }
+    return 0;
+}
+
+std::size_t north_border_offset(const Widget& w) {
+    const Border& b{w.border};
+    if (b.enabled && !w.north_border_disqualified() &&
+        (b.north_enabled || b.north_east_enabled || b.north_west_enabled)) {
+        return 1;
+    }
+    return 0;
+}
+
+std::size_t south_border_offset(const Widget& w) {
+    const Border& b{w.border};
+    if (b.enabled && !w.south_border_disqualified() &&
+        (b.south_enabled || b.south_east_enabled || b.south_west_enabled)) {
+        return 1;
+    }
+    return 0;
+}
+
 bool has_coordinates(Widget& w, std::size_t global_x, std::size_t global_y) {
     if (!w.enabled() || !w.visible()) {
         return false;
     }
-    bool within_west = global_x >= (w.x() + west_border_offset(w.border));
-    bool within_east =
-        global_x < (w.x() + w.width() + west_border_offset(w.border));
-    bool within_north = global_y >= (w.y() + north_border_offset(w.border));
-    bool within_south =
-        global_y < (w.y() + w.height() + north_border_offset(w.border));
+    bool within_west = global_x >= w.x();
+    bool within_east = global_x < (w.x() + w.width());
+    bool within_north = global_y >= w.y();
+    bool within_south = global_y < (w.y() + w.height());
     return within_west && within_east && within_north && within_south;
 }
 
@@ -361,6 +458,28 @@ void set_foreground(Widget& w, Color c) {
     w.brush.set_foreground(c);
     w.foreground_color_changed(c);
     w.update();
+}
+
+void set_background_recursive(Widget& w, Color c, bool single_level) {
+    set_background(w, c);
+    for (Widget* child : w.children()) {
+        if (single_level) {
+            set_background(*child, c);
+        } else {
+            set_background_recursive(*child, c, single_level);
+        }
+    }
+}
+
+void set_foreground_recursive(Widget& w, Color c, bool single_level) {
+    set_foreground(w, c);
+    for (Widget* child : w.children()) {
+        if (single_level) {
+            set_foreground(*child, c);
+        } else {
+            set_foreground_recursive(*child, c, single_level);
+        }
+    }
 }
 
 bool has_focus(const Widget& w) {

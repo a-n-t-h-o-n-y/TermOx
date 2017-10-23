@@ -1,9 +1,10 @@
-#include "system/events/close_event.hpp"
-#include "system/event_handler.hpp"
+#include <cppurses/system/event_handler.hpp>
+#include <cppurses/system/events/close_event.hpp>
 
 namespace cppurses {
 
-Close_event::Close_event(Event_handler* receiver) : Event{Event::Close, receiver} {}
+Close_event::Close_event(Event_handler* receiver)
+    : Event{Event::Close, receiver} {}
 
 bool Close_event::send() const {
     return receiver_->close_event();

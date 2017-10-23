@@ -1,5 +1,6 @@
-#include "system/events/move_event.hpp"
-#include "system/event_handler.hpp"
+#include <cppurses/system/event_handler.hpp>
+#include <cppurses/system/events/move_event.hpp>
+
 #include <cstddef>
 
 namespace cppurses {
@@ -20,8 +21,7 @@ bool Move_event::send() const {
 }
 
 bool Move_event::filter_send(Event_handler* filter) const {
-    return filter->move_event_filter(receiver_, new_x_, new_y_, old_x_,
-                                            old_y_);
+    return filter->move_event_filter(receiver_, new_x_, new_y_, old_x_, old_y_);
 }
 
 }  // namespace cppurses

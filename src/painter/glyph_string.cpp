@@ -1,5 +1,6 @@
-#include "painter/glyph_string.hpp"
-#include "painter/glyph.hpp"
+#include <cppurses/painter/glyph.hpp>
+#include <cppurses/painter/glyph_string.hpp>
+
 #include <algorithm>
 #include <iterator>
 #include <ostream>
@@ -31,6 +32,12 @@ Glyph_string Glyph_string::operator+(const Glyph_string& gs) {
     Glyph_string result{*this};
     result.append(gs);
     return result;
+}
+
+void Glyph_string::remove_attribute(Attribute attr) {
+    for (Glyph& glyph : *this) {
+        glyph.brush().remove_attribute(attr);
+    }
 }
 
 bool operator==(const Glyph_string& x, const Glyph_string& y) {

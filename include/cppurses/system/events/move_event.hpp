@@ -1,6 +1,7 @@
 #ifndef SYSTEM_EVENTS_MOVE_EVENT_HPP
 #define SYSTEM_EVENTS_MOVE_EVENT_HPP
-#include "system/event.hpp"
+#include <cppurses/system/event.hpp>
+
 #include <cstddef>
 
 namespace cppurses {

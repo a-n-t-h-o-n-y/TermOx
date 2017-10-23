@@ -1,8 +1,9 @@
-#include "system/events/mouse_event.hpp"
-#include "system/event_handler.hpp"
-#include "system/focus.hpp"
-#include "system/mouse_button.hpp"
-#include "widget/widget.hpp"
+#include <cppurses/system/event_handler.hpp>
+#include <cppurses/system/events/mouse_event.hpp>
+#include <cppurses/system/focus.hpp>
+#include <cppurses/system/mouse_button.hpp>
+#include <cppurses/widget/widget.hpp>
+
 #include <cstddef>
 #include <cstdint>
 
@@ -153,9 +154,9 @@ Mouse_move_event::Mouse_move_event(Event_handler* receiver,
                   glob_y,           local_x,  local_y, device_id} {}
 
 bool Mouse_move_event::send() const {
-    if (receiver_->enabled()  // &&
-        // static_cast<Widget*>(receiver_)->has_mouse_tracking()
-        ) {
+    if (receiver_->enabled()
+        // && static_cast<Widget*>(receiver_)->has_mouse_tracking()
+    ) {
         return receiver_->mouse_move_event(button_, glob_x_, glob_y_, local_x_,
                                            local_y_, device_id_);
     }
@@ -167,4 +168,4 @@ bool Mouse_move_event::filter_send(Event_handler* filter) const {
                                            local_x_, local_y_, device_id_);
 }
 
-}  // namespace cppurses;
+}  // namespace cppurses
