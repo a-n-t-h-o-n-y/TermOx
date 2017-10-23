@@ -11,8 +11,8 @@ namespace cppurses {
 class Shortcuts {
    public:
     static sig::Signal<void()>& add_shortcut(Key key);
-    // void remove_shortcut(Key key);
-    // void clear();
+    void remove_shortcut(Key key);
+    void clear();
     static bool send_key(Key key);
 
    private:
