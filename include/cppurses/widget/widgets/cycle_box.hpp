@@ -18,7 +18,7 @@ class Cycle_box : public Horizontal_layout {
 
     void set_title(Glyph_string title);
 
-    void add_option(std::string option);
+    sig::Signal<void()>& add_option(std::string option);
     void remove_option(const std::string& option);
 
     std::string current_option() const;
@@ -32,7 +32,13 @@ class Cycle_box : public Horizontal_layout {
     Push_button& options_box{this->make_child<Push_button>()};
 
    private:
-    std::vector<std::string> options_;
+    struct Option {
+        Option(std::string name_);
+        sig::Signal<void()> enabled;
+        std::string name;
+    };
+
+    std::vector<Option> options_;
 
     void resize_label();
 };

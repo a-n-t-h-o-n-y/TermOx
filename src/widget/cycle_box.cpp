@@ -23,9 +23,6 @@ Cycle_box::Cycle_box(Glyph_string title) {
 
     options_box.set_alignment(Alignment::Center);
 
-    // set_background(options_box, Color::White);
-    // set_foreground(options_box, Color::Black);
-
     options_box.clicked.connect(slot::cycle(*this));
 }
 
@@ -34,16 +31,19 @@ void Cycle_box::set_title(Glyph_string title) {
     this->resize_label();
 }
 
-void Cycle_box::add_option(std::string option) {
+sig::Signal<void()>& Cycle_box::add_option(std::string option) {
     options_.emplace_back(std::move(option));
     if (options_.size() == 1) {
-        options_box.set_text(options_.front());
+        options_box.set_text(options_.front().name);
     }
     this->update();
+    return options_.back().enabled;
 }
 
 void Cycle_box::remove_option(const std::string& option) {
-    auto iter = std::find(std::begin(options_), std::end(options_), option);
+    auto iter = std::find_if(
+        std::begin(options_), std::end(options_),
+        [&option](const Option& opt) { return opt.name == option; });
     if (iter != std::end(options_)) {
         options_.erase(iter);
     }
@@ -54,7 +54,7 @@ std::string Cycle_box::current_option() const {
     if (options_.empty()) {
         return "";
     }
-    return options_.front();
+    return options_.front().name;
 }
 
 void Cycle_box::cycle() {
@@ -63,9 +63,14 @@ void Cycle_box::cycle() {
         std::rotate(begin, begin + 1, std::end(options_));
         options_box.set_text(this->current_option());
         this->option_changed(this->current_option());
+        if (!options_.empty()) {
+            options_.front().enabled();
+        }
         this->update();
     }
 }
+
+Cycle_box::Option::Option(std::string name_) : name{std::move(name_)} {}
 
 void Cycle_box::resize_label() {
     label.width_policy.hint(label.contents().size() + 2);
