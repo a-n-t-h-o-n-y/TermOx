@@ -114,6 +114,8 @@ set(CHESS_DEMO_SOURCES
     "demos/chess/src/chess_engine.cpp"
     "demos/chess/src/invalid_position.cpp"
     "demos/chess/src/rules.cpp"
+    "demos/chess/src/no_rules.cpp"
+    "demos/chess/src/standard_rules.cpp"
     "demos/chess/src/state.cpp"
     "demos/chess/src/chessboard_borders.cpp"
     "demos/chess/src/chess_ui.cpp"
