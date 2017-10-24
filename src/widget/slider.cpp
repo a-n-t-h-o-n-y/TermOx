@@ -1,13 +1,17 @@
+#include <cmath>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/widget/widgets/slider.hpp>
+
+#include <signals/signals.hpp>
 
 namespace cppurses {
 
 Slider::Slider() {
     this->height_policy.type(Size_policy::Fixed);
     this->height_policy.hint(1);
+    this->focus_policy = Focus_policy::Strong;
     this->background_tile = Glyph{"┊", foreground(Color::Light_gray)};
 }
 
@@ -20,6 +24,7 @@ void Slider::set_percent(float percent) {
         percent_progress_ = percent;
     }
     percent_changed(percent_progress_);
+    this->update();
 }
 
 bool Slider::paint_event() {
@@ -35,10 +40,28 @@ bool Slider::mouse_press_event(Mouse_button button,
                                std::size_t local_x,
                                std::size_t local_y,
                                std::uint8_t device_id) {
-    percent_progress_ = position_to_percent(local_x);
-    this->update();
+    if (button == Mouse_button::Left) {
+        percent_progress_ = position_to_percent(local_x);
+        this->update();
+    } else if (button == Mouse_button::ScrollUp) {
+        scrolled_up();
+    } else if (button == Mouse_button::ScrollDown) {
+        scrolled_down();
+    }
     return Widget::mouse_press_event(button, global_x, global_y, local_x,
                                      local_y, device_id);
+}
+
+bool Slider::key_press_event(Key key, char symbol) {
+    std::size_t current_position = percent_to_position(percent_progress_);
+    if (key == Key::Arrow_right) {
+        this->set_percent(position_to_percent(current_position + 1));
+    } else if (key == Key::Arrow_left) {
+        if (current_position != 0) {
+            this->set_percent(position_to_percent(current_position - 1));
+        }
+    }
+    return Widget::key_press_event(key, symbol);
 }
 
 float Slider::position_to_percent(std::size_t position) {
@@ -47,10 +70,10 @@ float Slider::position_to_percent(std::size_t position) {
         return 0.0;
     }
     --w;
-    if (position > w) {
+    if (position >= w) {
         return 1.0;
     }
-    return static_cast<float>(position) / (w - 1);
+    return static_cast<float>(position) / (w);
 }
 
 std::size_t Slider::percent_to_position(float percent) {
@@ -59,7 +82,24 @@ std::size_t Slider::percent_to_position(float percent) {
         return 0;
     }
     --w;
-    return percent * w;
+    return std::round(percent * w);
 }
+
+namespace slot {
+
+sig::Slot<void(float)> set_percent(Slider& s) {
+    sig::Slot<void(float)> slot{
+        [&s](float percent) { s.set_percent(percent); }};
+    slot.track(s.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> set_percent(Slider& s, float percent) {
+    sig::Slot<void()> slot{[&s, percent] { s.set_percent(percent); }};
+    slot.track(s.destroyed);
+    return slot;
+}
+
+}  // namespace slot
 
 }  // namespace cppurses

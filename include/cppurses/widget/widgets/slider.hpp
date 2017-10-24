@@ -4,7 +4,7 @@
 #include <cppurses/system/mouse_button.hpp>
 #include <cppurses/widget/widget.hpp>
 
-#include <signals/signal.hpp>
+#include <signals/signals.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -16,6 +16,8 @@ class Slider : public Widget {
     Slider();
     void set_percent(float percent);
     sig::Signal<void(float)> percent_changed;
+    sig::Signal<void()> scrolled_up;
+    sig::Signal<void()> scrolled_down;
 
    protected:
     bool paint_event() override;
@@ -25,7 +27,7 @@ class Slider : public Widget {
                            std::size_t local_x,
                            std::size_t local_y,
                            std::uint8_t device_id) override;
-    // bool key_press_event(Key key, char symbol) override;
+    bool key_press_event(Key key, char symbol) override;
 
    private:
     Glyph indicator_{"│"};
@@ -34,6 +36,14 @@ class Slider : public Widget {
     float position_to_percent(std::size_t position);
     std::size_t percent_to_position(float percent);
 };
+
+namespace slot {
+
+sig::Slot<void(float)> set_percent(Slider& s);
+
+sig::Slot<void()> set_percent(Slider& s, float percent);
+
+}  // namespace slot
 
 }  // namespace cppurses
 

@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 project(libcppurses LANGUAGES CXX)
 
-set(CMAKE_BUILD_TYPE Release)
-# set(CMAKE_BUILD_TYPE Debug)
+# set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
 
 add_subdirectory(libs/Signals)
 # add_subdirectory(demos/chess)
@@ -156,7 +156,7 @@ install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # Demos
 add_executable(demo ${DEMO_SOURCES})
-target_link_libraries(demo cppurses ncurses)
+target_link_libraries(demo cppurses ncurses tinfo)
 
 # Tests
 # add_executable(testcppurses ${TEST_SOURCES})
