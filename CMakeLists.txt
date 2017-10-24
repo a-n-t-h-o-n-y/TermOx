@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 project(libcppurses LANGUAGES CXX)
 
-# set(CMAKE_BUILD_TYPE Release)
-set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Release)
+# set(CMAKE_BUILD_TYPE Debug)
 
 add_subdirectory(libs/Signals)
 # add_subdirectory(demos/chess)
@@ -66,12 +66,14 @@ set(WIDGET_SOURCES
     "src/widget/line_edit.cpp"
     "src/widget/log.cpp"
 	"src/widget/horizontal_layout.cpp"
+    "src/widget/matrix_display.cpp"
 	"src/widget/border.cpp"
     "src/widget/cycle_box.cpp"
     "src/widget/vertical_layout.cpp"
     "src/widget/status_bar.cpp"
     "src/widget/textbox.cpp"
     "src/widget/textbox_slots.cpp"
+    "src/widget/slider.cpp"
     "src/widget/textbox_base.cpp"
     "src/widget/textbox_base_slots.cpp"
     "src/widget/push_button.cpp"
@@ -127,11 +129,17 @@ set(CHESS_DEMO_SOURCES
     "demos/chess/src/move.cpp"
     )
 
+set(GLYPH_PAINTER_SOURCES
+    "demos/glyph_paint/glyph_paint.cpp"
+    "demos/glyph_paint/paint_area.cpp"
+    )
+
 set(DEMO_SOURCES
     "demos/demo.cpp"
     "demos/main_menu.cpp"
     "demos/notepad/notepad.cpp"
     ${CHESS_DEMO_SOURCES}
+    ${GLYPH_PAINTER_SOURCES}
     )
 
 add_library(cppurses STATIC

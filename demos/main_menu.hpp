@@ -3,6 +3,7 @@
 #include <cppurses/cppurses.hpp>
 
 #include "chess/src/chess_ui.hpp"
+#include "glyph_paint/glyph_paint.hpp"
 #include "notepad/notepad.hpp"
 
 using namespace cppurses;
@@ -17,6 +18,7 @@ class Main_menu : public Vertical_layout {
     Widget_stack_menu& main_menu{this->make_child<Widget_stack_menu>()};
     Notepad& notepad{main_menu.make_page<Notepad>("Notepad")};
     Chess_UI& chess{main_menu.make_page<Chess_UI>("Chess")};
+    Glyph_paint& glyph_paint{main_menu.make_page<Glyph_paint>("Glyph Paint")};
 
    private:
     void initialize();
