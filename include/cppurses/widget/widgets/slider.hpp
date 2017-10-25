@@ -15,6 +15,9 @@ class Slider : public Widget {
    public:
     Slider();
     void set_percent(float percent);
+    float percent() const;
+
+    // Signals
     sig::Signal<void(float)> percent_changed;
     sig::Signal<void()> scrolled_up;
     sig::Signal<void()> scrolled_down;

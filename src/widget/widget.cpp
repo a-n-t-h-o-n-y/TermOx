@@ -94,7 +94,7 @@ std::unique_ptr<Widget> Widget::remove_child(Widget* child) {
     children_.erase(at);
     removed->set_parent(nullptr);
     System::send_event(Child_removed_event{this, child});
-    System::post_event<On_tree_event>(removed.get(), false);
+    System::send_event(On_tree_event{removed.get(), false});
     return removed;
 }
 

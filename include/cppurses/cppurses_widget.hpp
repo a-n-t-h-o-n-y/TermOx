@@ -9,6 +9,8 @@
 #include <cppurses/widget/widgets/checkbox.hpp>
 #include <cppurses/widget/widgets/color_select.hpp>
 #include <cppurses/widget/widgets/cycle_box.hpp>
+#include <cppurses/widget/widgets/glyph_select.hpp>
+#include <cppurses/widget/widgets/glyph_select_stack.hpp>
 #include <cppurses/widget/widgets/horizontal_scrollbar.hpp>
 #include <cppurses/widget/widgets/label.hpp>
 #include <cppurses/widget/widgets/line_edit.hpp>

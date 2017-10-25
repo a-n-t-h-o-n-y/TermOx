@@ -27,6 +27,10 @@ void Slider::set_percent(float percent) {
     this->update();
 }
 
+float Slider::percent() const {
+    return percent_progress_;
+}
+
 bool Slider::paint_event() {
     Painter p{this};
     std::size_t x{percent_to_position(percent_progress_)};
@@ -41,8 +45,7 @@ bool Slider::mouse_press_event(Mouse_button button,
                                std::size_t local_y,
                                std::uint8_t device_id) {
     if (button == Mouse_button::Left) {
-        percent_progress_ = position_to_percent(local_x);
-        this->update();
+        this->set_percent(position_to_percent(local_x));
     } else if (button == Mouse_button::ScrollUp) {
         scrolled_up();
     } else if (button == Mouse_button::ScrollDown) {

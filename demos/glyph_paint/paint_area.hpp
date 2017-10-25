@@ -5,16 +5,15 @@
 #include <cstddef>
 #include <cstdint>
 
+#include <signals/slot.hpp>
+
 using namespace cppurses;
 
 class Paint_area : public Matrix_display {
    public:
-    Paint_area() {
-        enable_border(*this);
-        this->width_policy.stretch(5);
-        this->show_cursor();
-        this->focus_policy = Focus_policy::Strong;
-    }
+    Paint_area();
+
+    void set_symbol(Glyph symbol);
 
    protected:
     bool mouse_press_event(Mouse_button button,
@@ -34,5 +33,13 @@ class Paint_area : public Matrix_display {
    private:
     Glyph current_symbol_{"⊚"};
 };
+
+namespace slot {
+
+sig::Slot<void(Glyph)> set_symbol(Paint_area& pa);
+
+sig::Slot<void()> set_symbol(Paint_area& pa, const Glyph& symbol);
+
+}  // namespace slot
 
 #endif  // DEMOS_GLYPH_PAINT_PAINT_AREA_HPP

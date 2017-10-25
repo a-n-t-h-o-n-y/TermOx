@@ -7,7 +7,8 @@ namespace cppurses {
 
 class Matrix_display : public Widget {
    public:
-    Matrix_display(Glyph_matrix matrix_ = Glyph_matrix{});
+    explicit Matrix_display(Glyph_matrix matrix_ = Glyph_matrix{});
+    Matrix_display(std::size_t width, std::size_t height);
     Glyph_matrix matrix;
 
    protected:

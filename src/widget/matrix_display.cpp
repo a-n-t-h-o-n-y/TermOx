@@ -8,6 +8,9 @@ namespace cppurses {
 Matrix_display::Matrix_display(Glyph_matrix matrix_)
     : matrix{std::move(matrix_)} {}
 
+Matrix_display::Matrix_display(std::size_t width, std::size_t height)
+    : matrix{width, height} {}
+
 bool Matrix_display::paint_event() {
     Painter p{this};
     std::size_t w{matrix.width() > this->width() ? this->width()

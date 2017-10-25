@@ -5,7 +5,6 @@ project(libcppurses LANGUAGES CXX)
 set(CMAKE_BUILD_TYPE Debug)
 
 add_subdirectory(libs/Signals)
-# add_subdirectory(demos/chess)
 include(GNUInstallDirs)
 enable_testing()
 add_compile_options(-std=c++14)
@@ -61,6 +60,8 @@ set(WIDGET_SOURCES
     "src/widget/widget_slots.cpp"
     "src/widget/widget_stack.cpp"
     "src/widget/widget_stack_menu.cpp"
+    "src/widget/glyph_select_stack.cpp"
+    "src/widget/glyph_select.cpp"
     "src/widget/label.cpp"
 	"src/widget/layout.cpp"
     "src/widget/line_edit.cpp"

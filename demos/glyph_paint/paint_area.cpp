@@ -5,8 +5,22 @@
 #include <cctype>
 #include <cstddef>
 #include <cstdint>
+#include <utility>
+
+#include <signals/slot.hpp>
 
 using namespace cppurses;
+
+Paint_area::Paint_area() {
+    enable_border(*this);
+    this->width_policy.stretch(5);
+    this->show_cursor();
+    this->focus_policy = Focus_policy::Strong;
+}
+
+void Paint_area::set_symbol(Glyph symbol) {
+    current_symbol_ = std::move(symbol);
+}
 
 bool Paint_area::mouse_press_event(Mouse_button button,
                                    std::size_t global_x,
@@ -71,3 +85,20 @@ bool Paint_area::key_press_event(Key key, char symbol) {
     }
     return Matrix_display::key_press_event(key, symbol);
 }
+
+namespace slot {
+
+sig::Slot<void(Glyph)> set_symbol(Paint_area& pa) {
+    sig::Slot<void(Glyph)> slot{
+        [&pa](Glyph symbol) { pa.set_symbol(std::move(symbol)); }};
+    slot.track(pa.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> set_symbol(Paint_area& pa, const Glyph& symbol) {
+    sig::Slot<void()> slot{[&pa, symbol] { pa.set_symbol(symbol); }};
+    slot.track(pa.destroyed);
+    return slot;
+}
+
+}  // namespace slot
