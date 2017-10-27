@@ -27,6 +27,7 @@ sig::Slot<void(Color)> set_background(Widget& w);
 sig::Slot<void()> set_background(Widget& w, Color c);
 sig::Slot<void(Color)> set_foreground(Widget& w);
 sig::Slot<void()> set_foreground(Widget& w, Color c);
+sig::Slot<void()> toggle_cursor(Widget& w);
 
 }  // namespace slot
 }  // namespace cppurses

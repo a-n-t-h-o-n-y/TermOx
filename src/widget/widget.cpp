@@ -486,4 +486,8 @@ bool has_focus(const Widget& w) {
     return Focus::focus_widget() == &w;
 }
 
+void toggle_cursor(Widget& w) {
+    w.show_cursor(!w.cursor_visible());
+}
+
 }  // namespace cppurses

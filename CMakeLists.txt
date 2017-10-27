@@ -66,6 +66,7 @@ set(WIDGET_SOURCES
 	"src/widget/layout.cpp"
     "src/widget/line_edit.cpp"
     "src/widget/log.cpp"
+    "src/widget/confirm_button.cpp"
 	"src/widget/horizontal_layout.cpp"
     "src/widget/matrix_display.cpp"
 	"src/widget/border.cpp"
@@ -133,6 +134,9 @@ set(CHESS_DEMO_SOURCES
 set(GLYPH_PAINTER_SOURCES
     "demos/glyph_paint/glyph_paint.cpp"
     "demos/glyph_paint/paint_area.cpp"
+    "demos/glyph_paint/side_pane.cpp"
+    "demos/glyph_paint/attribute_box.cpp"
+    "demos/glyph_paint/options_box.cpp"
     )
 
 set(DEMO_SOURCES

@@ -182,6 +182,8 @@ void set_foreground_recursive(Widget& w, Color c, bool single_level = false);
 
 bool has_focus(const Widget& w);
 
+void toggle_cursor(Widget& w);
+
 // - - - - - - - - - - - - Template Implementations - - - - - - - - - - - - - -
 
 template <typename T, typename... Args>
