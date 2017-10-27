@@ -12,24 +12,26 @@
 
 namespace cppurses {
 
-class Cycle_box : public Horizontal_layout {
+class Cycle_box : public Label {
    public:
-    Cycle_box(Glyph_string title = "");
-
-    void set_title(Glyph_string title);
+    Cycle_box();
 
     sig::Signal<void()>& add_option(std::string option);
     void remove_option(const std::string& option);
-
     std::string current_option() const;
-
-    void cycle();
+    void cycle_forward();
+    void cycle_backward();
 
     // Signals
     sig::Signal<void(std::string)> option_changed;
 
-    Label& label{this->make_child<Label>()};
-    Push_button& options_box{this->make_child<Push_button>()};
+   protected:
+    bool mouse_press_event(Mouse_button button,
+                           std::size_t global_x,
+                           std::size_t global_y,
+                           std::size_t local_x,
+                           std::size_t local_y,
+                           std::uint8_t device_id) override;
 
    private:
     struct Option {
@@ -39,8 +41,6 @@ class Cycle_box : public Horizontal_layout {
     };
 
     std::vector<Option> options_;
-
-    void resize_label();
 };
 
 namespace slot {
@@ -51,7 +51,8 @@ sig::Slot<void()> add_option(Cycle_box& cb, const std::string& option);
 sig::Slot<void(const std::string&)> remove_option(Cycle_box& cb);
 sig::Slot<void()> remove_option(Cycle_box& cb, const std::string& option);
 
-sig::Slot<void()> cycle(Cycle_box& cb);
+sig::Slot<void()> cycle_forward(Cycle_box& cb);
+sig::Slot<void()> cycle_backward(Cycle_box& cb);
 
 }  // namespace slot
 

@@ -67,6 +67,7 @@ set(WIDGET_SOURCES
     "src/widget/line_edit.cpp"
     "src/widget/log.cpp"
     "src/widget/confirm_button.cpp"
+    "src/widget/labeled_cycle_box.cpp"
 	"src/widget/horizontal_layout.cpp"
     "src/widget/matrix_display.cpp"
 	"src/widget/border.cpp"

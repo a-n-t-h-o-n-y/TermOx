@@ -9,32 +9,30 @@
 
 namespace cppurses {
 
-Cycle_box::Cycle_box(Glyph_string title) {
-    this->height_policy.type(Size_policy::Fixed);
-    this->height_policy.hint(1);
+Cycle_box::Cycle_box() {
+    // this->height_policy.type(Size_policy::Fixed);
+    // this->height_policy.hint(1);
 
-    this->set_title(std::move(title));
+    // this->set_title(std::move(title));
 
-    disable_walls(label.border);
-    disable_corners(label.border);
-    label.border.east_enabled = true;
-    label.border.east = "├";
-    enable_border(label);
+    // disable_walls(label.border);
+    // disable_corners(label.border);
+    // label.border.east_enabled = true;
+    // label.border.east = "├";
+    // enable_border(label);
 
-    options_box.set_alignment(Alignment::Center);
-
-    options_box.clicked.connect(slot::cycle(*this));
+    this->set_alignment(Alignment::Center);  // might be default
 }
 
-void Cycle_box::set_title(Glyph_string title) {
-    label.set_text(std::move(title));
-    this->resize_label();
-}
+// void Cycle_box::set_title(Glyph_string title) {
+//     label.set_text(std::move(title));
+//     this->resize_label();
+// }
 
 sig::Signal<void()>& Cycle_box::add_option(std::string option) {
     options_.emplace_back(std::move(option));
     if (options_.size() == 1) {
-        options_box.set_text(options_.front().name);
+        this->set_text(options_.front().name);
     }
     this->update();
     return options_.back().enabled;
@@ -57,25 +55,49 @@ std::string Cycle_box::current_option() const {
     return options_.front().name;
 }
 
-void Cycle_box::cycle() {
+void Cycle_box::cycle_forward() {
     if (options_.size() > 1) {
         auto begin = std::begin(options_);
         std::rotate(begin, begin + 1, std::end(options_));
-        options_box.set_text(this->current_option());
+        this->set_text(this->current_option());
         this->option_changed(this->current_option());
-        if (!options_.empty()) {
-            options_.front().enabled();
-        }
+        options_.front().enabled();
         this->update();
     }
 }
 
+void Cycle_box::cycle_backward() {
+    if (options_.size() > 1) {
+        auto begin = std::rbegin(options_);
+        std::rotate(begin, begin + 1, std::rend(options_));
+        this->set_text(this->current_option());
+        this->option_changed(this->current_option());
+        options_.front().enabled();
+        this->update();
+    }
+}
+
+bool Cycle_box::mouse_press_event(Mouse_button button,
+                                  std::size_t global_x,
+                                  std::size_t global_y,
+                                  std::size_t local_x,
+                                  std::size_t local_y,
+                                  std::uint8_t device_id) {
+    if (button == Mouse_button::Left || button == Mouse_button::ScrollUp) {
+        this->cycle_forward();
+    } else if (button == Mouse_button::ScrollDown) {
+        this->cycle_backward();
+    }
+    return Label::mouse_press_event(button, global_x, global_y, local_x,
+                                    local_y, device_id);
+}
+
 Cycle_box::Option::Option(std::string name_) : name{std::move(name_)} {}
 
-void Cycle_box::resize_label() {
-    label.width_policy.hint(label.contents().size() + 2);
-    label.width_policy.type(Size_policy::Fixed);
-}
+// void Cycle_box::resize_label() {
+//     label.width_policy.hint(label.contents().size() + 2);
+//     label.width_policy.type(Size_policy::Fixed);
+// }
 
 namespace slot {
 
@@ -105,8 +127,14 @@ sig::Slot<void()> remove_option(Cycle_box& cb, const std::string& option) {
     return slot;
 }
 
-sig::Slot<void()> cycle(Cycle_box& cb) {
-    sig::Slot<void()> slot{[&cb]() { cb.cycle(); }};
+sig::Slot<void()> cycle_forward(Cycle_box& cb) {
+    sig::Slot<void()> slot{[&cb]() { cb.cycle_forward(); }};
+    slot.track(cb.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> cycle_backward(Cycle_box& cb) {
+    sig::Slot<void()> slot{[&cb]() { cb.cycle_backward(); }};
     slot.track(cb.destroyed);
     return slot;
 }
