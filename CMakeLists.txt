@@ -62,6 +62,7 @@ set(WIDGET_SOURCES
     "src/widget/widget_stack_menu.cpp"
     "src/widget/glyph_select_stack.cpp"
     "src/widget/glyph_select.cpp"
+    "src/widget/cycle_stack.cpp"
     "src/widget/label.cpp"
 	"src/widget/layout.cpp"
     "src/widget/line_edit.cpp"
@@ -138,6 +139,7 @@ set(GLYPH_PAINTER_SOURCES
     "demos/glyph_paint/side_pane.cpp"
     "demos/glyph_paint/attribute_box.cpp"
     "demos/glyph_paint/options_box.cpp"
+    "demos/glyph_paint/populated_glyph_stack.cpp"
     )
 
 set(DEMO_SOURCES
