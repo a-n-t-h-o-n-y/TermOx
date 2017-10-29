@@ -24,6 +24,7 @@ void Glyph_select_stack::append_symbols(Glyph_string symbols) {
 
 void Glyph_select_stack::set_page_percent(float percent) {
     // set active page by determining the page from the percent
+    percent_ = percent;
     std::size_t size{this->size()};
     if (size == 0) {
         return;
@@ -44,7 +45,7 @@ bool Glyph_select_stack::mouse_press_event_filter(Event_handler* receiver,
         Matrix_display* md = static_cast<Matrix_display*>(this->active_page());
         if (md != nullptr) {
             Glyph_matrix& matrix{md->matrix};
-            if (matrix(local_x, local_y).str() != " ") {
+            if (matrix(local_x, local_y) != Glyph{" "}) {
                 glyph_selected(matrix(local_x, local_y));
             }
         }
@@ -79,14 +80,14 @@ void Glyph_select_stack::update_stack() {
                     matrix(x, y) = symbols_.at(count++);
                 } else {
                     this->update();
-                    this->set_active_page(0);
+                    this->set_page_percent(percent_);
                     return;
                 }
             }
         }
     } while (count < symbols_.size());
     if (this->size() > 0) {
-        this->set_active_page(0);
+        this->set_page_percent(percent_);
     }
     this->update();
 }

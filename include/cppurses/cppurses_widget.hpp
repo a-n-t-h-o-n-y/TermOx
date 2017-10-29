@@ -8,11 +8,14 @@
 #include <cppurses/widget/widgets/blank_width.hpp>
 #include <cppurses/widget/widgets/checkbox.hpp>
 #include <cppurses/widget/widgets/color_select.hpp>
+#include <cppurses/widget/widgets/confirm_button.hpp>
 #include <cppurses/widget/widgets/cycle_box.hpp>
+#include <cppurses/widget/widgets/cycle_stack.hpp>
 #include <cppurses/widget/widgets/glyph_select.hpp>
 #include <cppurses/widget/widgets/glyph_select_stack.hpp>
 #include <cppurses/widget/widgets/horizontal_scrollbar.hpp>
 #include <cppurses/widget/widgets/label.hpp>
+#include <cppurses/widget/widgets/labeled_cycle_box.hpp>
 #include <cppurses/widget/widgets/line_edit.hpp>
 #include <cppurses/widget/widgets/list.hpp>
 #include <cppurses/widget/widgets/log.hpp>

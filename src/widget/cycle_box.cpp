@@ -29,7 +29,7 @@ Cycle_box::Cycle_box() {
 //     this->resize_label();
 // }
 
-sig::Signal<void()>& Cycle_box::add_option(std::string option) {
+sig::Signal<void()>& Cycle_box::add_option(Glyph_string option) {
     options_.emplace_back(std::move(option));
     if (options_.size() == 1) {
         this->set_text(options_.front().name);
@@ -41,14 +41,14 @@ sig::Signal<void()>& Cycle_box::add_option(std::string option) {
 void Cycle_box::remove_option(const std::string& option) {
     auto iter = std::find_if(
         std::begin(options_), std::end(options_),
-        [&option](const Option& opt) { return opt.name == option; });
+        [&option](const Option& opt) { return opt.name.str() == option; });
     if (iter != std::end(options_)) {
         options_.erase(iter);
     }
     this->update();
 }
 
-std::string Cycle_box::current_option() const {
+Glyph_string Cycle_box::current_option() const {
     if (options_.empty()) {
         return "";
     }
@@ -60,7 +60,7 @@ void Cycle_box::cycle_forward() {
         auto begin = std::begin(options_);
         std::rotate(begin, begin + 1, std::end(options_));
         this->set_text(this->current_option());
-        this->option_changed(this->current_option());
+        this->option_changed(this->current_option().str());
         options_.front().enabled();
         this->update();
     }
@@ -71,7 +71,7 @@ void Cycle_box::cycle_backward() {
         auto begin = std::rbegin(options_);
         std::rotate(begin, begin + 1, std::rend(options_));
         this->set_text(this->current_option());
-        this->option_changed(this->current_option());
+        this->option_changed(this->current_option().str());
         options_.front().enabled();
         this->update();
     }
@@ -92,7 +92,7 @@ bool Cycle_box::mouse_press_event(Mouse_button button,
                                     local_y, device_id);
 }
 
-Cycle_box::Option::Option(std::string name_) : name{std::move(name_)} {}
+Cycle_box::Option::Option(Glyph_string name_) : name{std::move(name_)} {}
 
 // void Cycle_box::resize_label() {
 //     label.width_policy.hint(label.contents().size() + 2);
@@ -101,14 +101,14 @@ Cycle_box::Option::Option(std::string name_) : name{std::move(name_)} {}
 
 namespace slot {
 
-sig::Slot<void(std::string)> add_option(Cycle_box& cb) {
-    sig::Slot<void(std::string)> slot{
-        [&cb](std::string option) { cb.add_option(std::move(option)); }};
+sig::Slot<void(Glyph_string)> add_option(Cycle_box& cb) {
+    sig::Slot<void(Glyph_string)> slot{
+        [&cb](Glyph_string option) { cb.add_option(std::move(option)); }};
     slot.track(cb.destroyed);
     return slot;
 }
 
-sig::Slot<void()> add_option(Cycle_box& cb, const std::string& option) {
+sig::Slot<void()> add_option(Cycle_box& cb, const Glyph_string& option) {
     sig::Slot<void()> slot{[&cb, option] { cb.add_option(option); }};
     slot.track(cb.destroyed);
     return slot;

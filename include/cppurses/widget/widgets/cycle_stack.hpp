@@ -19,8 +19,12 @@ class Cycle_stack : public Vertical_layout {
 
     void add_page(Glyph_string title, std::unique_ptr<Widget> widget);
 
-   private:
-    struct Top_row;
+    struct Top_row : public Horizontal_layout {
+        Top_row();
+        Push_button& left_btn{this->make_child<Push_button>("⏴")};
+        Cycle_box& cycle_box{this->make_child<Cycle_box>()};
+        Push_button& right_btn{this->make_child<Push_button>("⏵")};
+    };
 
     Top_row& top_row;
     Widget_stack& stack{this->make_child<Widget_stack>()};

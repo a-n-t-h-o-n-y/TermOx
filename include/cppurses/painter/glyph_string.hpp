@@ -59,7 +59,7 @@ class Glyph_string : private std::vector<Glyph> {
     size_type length() const;
 
     Glyph_string& operator+=(const Glyph& glyph);
-    Glyph_string operator+(const Glyph_string& gs);
+    Glyph_string operator+(const Glyph_string& gs) const;
 
     template <typename... Attributes>
     Glyph_string& append(const Glyph& symbol, Attributes&&... attrs) {

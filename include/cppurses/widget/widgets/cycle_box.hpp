@@ -16,9 +16,9 @@ class Cycle_box : public Label {
    public:
     Cycle_box();
 
-    sig::Signal<void()>& add_option(std::string option);
+    sig::Signal<void()>& add_option(Glyph_string option);
     void remove_option(const std::string& option);
-    std::string current_option() const;
+    Glyph_string current_option() const;
     void cycle_forward();
     void cycle_backward();
 
@@ -35,9 +35,9 @@ class Cycle_box : public Label {
 
    private:
     struct Option {
-        Option(std::string name_);
+        Option(Glyph_string name_);
         sig::Signal<void()> enabled;
-        std::string name;
+        Glyph_string name;
     };
 
     std::vector<Option> options_;
@@ -45,8 +45,8 @@ class Cycle_box : public Label {
 
 namespace slot {
 
-sig::Slot<void(std::string)> add_option(Cycle_box& cb);
-sig::Slot<void()> add_option(Cycle_box& cb, const std::string& option);
+sig::Slot<void(Glyph_string)> add_option(Cycle_box& cb);
+sig::Slot<void()> add_option(Cycle_box& cb, const Glyph_string& option);
 
 sig::Slot<void(const std::string&)> remove_option(Cycle_box& cb);
 sig::Slot<void()> remove_option(Cycle_box& cb, const std::string& option);

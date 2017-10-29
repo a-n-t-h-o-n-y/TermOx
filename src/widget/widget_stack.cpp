@@ -5,6 +5,7 @@
 #include <signals/slot.hpp>
 
 #include <algorithm>
+#include <iterator>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -44,11 +45,17 @@ void Widget_stack::sets_focus_on_change(bool sets_focus) {
 
 void Widget_stack::add_page(std::unique_ptr<Widget> widget) {
     pages_.push_back(std::move(widget));
+    if (pages_.size() == 1) {
+        // this->set_active_page(0);
+    }
 }
 
 void Widget_stack::insert_page(std::size_t index,
                                std::unique_ptr<Widget> widget) {
     pages_.insert(std::begin(pages_) + index, std::move(widget));
+    if (pages_.size() == 1) {
+        // this->set_active_page(0);
+    }
 }
 
 std::unique_ptr<Widget> Widget_stack::remove_page(std::size_t index) {
@@ -77,6 +84,14 @@ std::size_t Widget_stack::size() const {
 
 Widget* Widget_stack::active_page() const {
     return active_page_;
+}
+
+std::size_t Widget_stack::active_page_index() const {
+    if (pages_.empty()) {
+        return 0;
+    }
+    auto at = std::find(std::begin(pages_), std::end(pages_), nullptr);
+    return std::distance(std::begin(pages_), at);
 }
 
 namespace slot {

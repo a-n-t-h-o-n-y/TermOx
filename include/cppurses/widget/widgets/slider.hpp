@@ -33,7 +33,7 @@ class Slider : public Widget {
     bool key_press_event(Key key, char symbol) override;
 
    private:
-    Glyph indicator_{"│"};
+    Glyph indicator_{" ", background(Color::Dark_gray)};
     float percent_progress_{0.0};
 
     float position_to_percent(std::size_t position);

@@ -33,6 +33,7 @@ class Glyph_select_stack : public Widget_stack {
 
    private:
     Glyph_string symbols_;
+    float percent_{0.0};
 
     void update_stack();
 };

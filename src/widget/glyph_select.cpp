@@ -11,15 +11,18 @@ Glyph_select::Glyph_select(Glyph_string symbols) {
     bottom_row.height_policy.type(Size_policy::Fixed);
     bottom_row.height_policy.hint(1);
     left_btn.width_policy.type(Size_policy::Fixed);
-    left_btn.width_policy.hint(2);
+    left_btn.width_policy.hint(1);
+    set_background(left_btn, Color::Light_gray);
+    set_foreground(left_btn, Color::Black);
     right_btn.width_policy.type(Size_policy::Fixed);
-    right_btn.width_policy.hint(2);
+    right_btn.width_policy.hint(1);
+    set_background(right_btn, Color::Light_gray);
+    set_foreground(right_btn, Color::Black);
 
     glyph_stack.glyph_selected.connect(
         [this](Glyph glyph) { this->glyph_selected(std::move(glyph)); });
 
-    slider.percent_changed.connect(
-        [this](float percent) { this->set_stack_index_by_percent(percent); });
+    slider.percent_changed.connect(slot::set_page_percent(glyph_stack));
 
     left_btn.clicked.connect([this] { this->flip_page_backward(); });
     right_btn.clicked.connect([this] { this->flip_page_forward(); });
@@ -34,12 +37,6 @@ void Glyph_select::set_symbols(Glyph_string symbols) {
 std::size_t Glyph_select::current_index() {
     float index = slider.percent() * (glyph_stack.size() - 1);
     return std::round(index);
-}
-
-void Glyph_select::set_stack_index_by_percent(float percent) {
-    auto index{static_cast<std::size_t>(
-        std::round(percent * (glyph_stack.size() - 1)))};
-    glyph_stack.set_active_page(index);
 }
 
 void Glyph_select::flip_page_forward() {

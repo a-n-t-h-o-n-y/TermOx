@@ -18,6 +18,10 @@ void Glyph_matrix::resize(std::size_t width, std::size_t height) {
     }
 }
 
+void Glyph_matrix::clear() {
+    matrix_.clear();
+}
+
 std::size_t Glyph_matrix::width() const {
     return matrix_.empty() ? 0 : matrix_.at(0).size();
 }

@@ -26,6 +26,7 @@ class Widget_stack : public Horizontal_layout {
 
     std::size_t size() const;
     Widget* active_page() const;
+    std::size_t active_page_index() const;
 
     // Signals
     sig::Signal<void(std::size_t)> page_changed;

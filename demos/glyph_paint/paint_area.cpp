@@ -1,37 +1,69 @@
 #include "paint_area.hpp"
 
 #include <cppurses/cppurses.hpp>
+#include <signals/slot.hpp>
 
 #include <cctype>
 #include <cstddef>
 #include <cstdint>
 #include <utility>
 
-#include <signals/slot.hpp>
-
 using namespace cppurses;
+
+namespace demos {
+namespace glyph_paint {
 
 Paint_area::Paint_area() {
     enable_border(*this);
-    this->width_policy.stretch(5);
-    this->show_cursor();
+    disable_walls(this->border);
+    disable_corners(this->border);
+    this->border.east_enabled = true;
     this->focus_policy = Focus_policy::Strong;
+    this->background_tile = Glyph{"┼", foreground(Color::Dark_gray)};
 }
 
-void Paint_area::set_symbol(Glyph symbol) {
-    current_symbol_ = std::move(symbol);
+void Paint_area::set_glyph(Glyph glyph) {
+    current_glyph_ = std::move(glyph);
+    glyph_changed(current_glyph_);
 }
 
-bool Paint_area::mouse_press_event(Mouse_button button,
-                                   std::size_t global_x,
-                                   std::size_t global_y,
-                                   std::size_t local_x,
-                                   std::size_t local_y,
-                                   std::uint8_t device_id) {
-    matrix(local_x, local_y) = current_symbol_;
+void Paint_area::set_symbol(const Glyph& symbol) {
+    current_glyph_.set_symbol(symbol.str());
+    glyph_changed(current_glyph_);
+}
+
+void Paint_area::set_foreground_color(Color c) {
+    current_glyph_.brush().set_foreground(c);
+    glyph_changed(current_glyph_);
+}
+
+void Paint_area::set_background_color(Color c) {
+    current_glyph_.brush().set_background(c);
+    glyph_changed(current_glyph_);
+}
+
+void Paint_area::set_attribute(Attribute attr) {
+    current_glyph_.brush().add_attributes(attr);
+    glyph_changed(current_glyph_);
+}
+
+void Paint_area::remove_attribute(Attribute attr) {
+    current_glyph_.brush().remove_attribute(attr);
+    glyph_changed(current_glyph_);
+}
+
+void Paint_area::clear() {
+    this->matrix.clear();
+    this->matrix.resize(this->width(), this->height());
     this->update();
-    return Matrix_display::mouse_press_event(button, global_x, global_y,
-                                             local_x, local_y, device_id);
+}
+
+Glyph Paint_area::glyph() const {
+    return current_glyph_;
+}
+
+void Paint_area::toggle_clone() {
+    clone_enabled_ = !clone_enabled_;
 }
 
 bool Paint_area::resize_event(std::size_t new_width,
@@ -46,7 +78,21 @@ bool Paint_area::resize_event(std::size_t new_width,
                                         old_height);
 }
 
+bool Paint_area::mouse_press_event(Mouse_button button,
+                                   std::size_t global_x,
+                                   std::size_t global_y,
+                                   std::size_t local_x,
+                                   std::size_t local_y,
+                                   std::uint8_t device_id) {
+    this->place_glyph(local_x, local_y);
+    return Matrix_display::mouse_press_event(button, global_x, global_y,
+                                             local_x, local_y, device_id);
+}
+
 bool Paint_area::key_press_event(Key key, char symbol) {
+    if (!this->cursor_visible()) {
+        return Matrix_display::key_press_event(key, symbol);
+    }
     if (this->width() == 0 || this->height() == 0) {
         return Matrix_display::key_press_event(key, symbol);
     }
@@ -72,13 +118,12 @@ bool Paint_area::key_press_event(Key key, char symbol) {
             this->move_cursor_y(this->cursor_y() - 1);
             break;
         case Key::Enter:
-            matrix.at(this->cursor_x(), this->cursor_y()) = current_symbol_;
-            this->update();
+            this->place_glyph(this->cursor_x(), this->cursor_y());
             break;
         default:
             if (!std::iscntrl(symbol)) {
-                current_symbol_.set_symbol(symbol);
-                matrix.at(this->cursor_x(), this->cursor_y()) = current_symbol_;
+                this->set_symbol(symbol);
+                matrix.at(this->cursor_x(), this->cursor_y()) = current_glyph_;
                 this->update();
             }
             break;
@@ -86,7 +131,29 @@ bool Paint_area::key_press_event(Key key, char symbol) {
     return Matrix_display::key_press_event(key, symbol);
 }
 
+void Paint_area::place_glyph(std::size_t x, std::size_t y) {
+    if (clone_enabled_) {
+        this->set_glyph(matrix(x, y));
+        this->toggle_clone();
+    } else {
+        matrix(x, y) = current_glyph_;
+        this->update();
+    }
+}
+
 namespace slot {
+
+sig::Slot<void(Glyph)> set_glyph(Paint_area& pa) {
+    sig::Slot<void(Glyph)> slot{[&pa](Glyph g) { pa.set_glyph(std::move(g)); }};
+    slot.track(pa.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> set_glyph(Paint_area& pa, const Glyph& glyph) {
+    sig::Slot<void()> slot{[&pa, glyph] { pa.set_glyph(glyph); }};
+    slot.track(pa.destroyed);
+    return slot;
+}
 
 sig::Slot<void(Glyph)> set_symbol(Paint_area& pa) {
     sig::Slot<void(Glyph)> slot{
@@ -101,4 +168,68 @@ sig::Slot<void()> set_symbol(Paint_area& pa, const Glyph& symbol) {
     return slot;
 }
 
+sig::Slot<void(Color)> set_foreground_color(Paint_area& pa) {
+    sig::Slot<void(Color)> slot{[&pa](Color c) { pa.set_foreground_color(c); }};
+    slot.track(pa.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> set_foreground_color(Paint_area& pa, Color c) {
+    sig::Slot<void()> slot{[&pa, c] { pa.set_foreground_color(c); }};
+    slot.track(pa.destroyed);
+    return slot;
+}
+
+sig::Slot<void(Color)> set_background_color(Paint_area& pa) {
+    sig::Slot<void(Color)> slot{[&pa](Color c) { pa.set_background_color(c); }};
+    slot.track(pa.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> set_background_color(Paint_area& pa, Color c) {
+    sig::Slot<void()> slot{[&pa, c] { pa.set_background_color(c); }};
+    slot.track(pa.destroyed);
+    return slot;
+}
+
+sig::Slot<void(Attribute)> set_attribute(Paint_area& pa) {
+    sig::Slot<void(Attribute)> slot{
+        [&pa](Attribute attr) { pa.set_attribute(attr); }};
+    slot.track(pa.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> set_attribute(Paint_area& pa, Attribute attr) {
+    sig::Slot<void()> slot{[&pa, attr] { pa.set_attribute(attr); }};
+    slot.track(pa.destroyed);
+    return slot;
+}
+
+sig::Slot<void(Attribute)> remove_attribute(Paint_area& pa) {
+    sig::Slot<void(Attribute)> slot{
+        [&pa](Attribute attr) { pa.remove_attribute(attr); }};
+    slot.track(pa.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> remove_attribute(Paint_area& pa, Attribute attr) {
+    sig::Slot<void()> slot{[&pa, attr] { pa.remove_attribute(attr); }};
+    slot.track(pa.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> toggle_clone(Paint_area& pa) {
+    sig::Slot<void()> slot{[&pa] { pa.toggle_clone(); }};
+    slot.track(pa.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> clear(Paint_area& pa) {
+    sig::Slot<void()> slot{[&pa] { pa.clear(); }};
+    slot.track(pa.destroyed);
+    return slot;
+}
+
 }  // namespace slot
+}  // namespace glyph_paint
+}  // namespace demos
