@@ -31,7 +31,7 @@ struct Side_pane : Vertical_layout {
     Status_bar& show_glyph{this->make_child<Status_bar>("x")};
 
     Blank_height& space3{this->make_child<Blank_height>(1)};
-    Options_box& options_box{this->make_child<Options_box>()};
+    Options_stack& options_box{this->make_child<Options_stack>()};
 };
 
 }  // namespace glyph_paint

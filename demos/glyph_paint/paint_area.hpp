@@ -12,7 +12,7 @@ using namespace cppurses;
 namespace demos {
 namespace glyph_paint {
 
-class Paint_area : public Matrix_display {
+class Paint_area : public Widget {
    public:
     Paint_area();
 
@@ -27,15 +27,18 @@ class Paint_area : public Matrix_display {
 
     Glyph glyph() const;
     void toggle_clone();
+    void enable_erase();
+    void disable_erase();
+    void enable_grid();
+    void disable_grid();
 
     // Signals
     sig::Signal<void(Glyph)> glyph_changed;
+    sig::Signal<void()> erase_enabled;
+    sig::Signal<void()> erase_disabled;
 
    protected:
-    bool resize_event(std::size_t new_width,
-                      std::size_t new_height,
-                      std::size_t old_width,
-                      std::size_t old_height) override;
+    bool paint_event() override;
 
     bool mouse_press_event(Mouse_button button,
                            std::size_t global_x,
@@ -47,10 +50,14 @@ class Paint_area : public Matrix_display {
     bool key_press_event(Key key, char symbol) override;
 
    private:
+    std::map<Coordinates, Glyph> glyphs_painted_;
     Glyph current_glyph_{"x"};
+    Glyph before_erase_{"x"};
     bool clone_enabled_{false};
+    bool erase_enabled_{false};
 
     void place_glyph(std::size_t x, std::size_t y);
+    void remove_glyph(Coordinates coords);
 };
 
 namespace slot {
@@ -76,6 +83,12 @@ sig::Slot<void()> remove_attribute(Paint_area& pa, Attribute attr);
 sig::Slot<void()> toggle_clone(Paint_area& pa);
 
 sig::Slot<void()> clear(Paint_area& pa);
+
+sig::Slot<void()> enable_erase(Paint_area& pa);
+sig::Slot<void()> disable_erase(Paint_area& pa);
+
+sig::Slot<void()> enable_grid(Paint_area& pa);
+sig::Slot<void()> disable_grid(Paint_area& pa);
 
 }  // namespace slot
 }  // namespace glyph_paint

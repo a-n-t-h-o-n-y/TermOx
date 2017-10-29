@@ -19,42 +19,79 @@ Paint_area::Paint_area() {
     disable_corners(this->border);
     this->border.east_enabled = true;
     this->focus_policy = Focus_policy::Strong;
-    this->background_tile = Glyph{"┼", foreground(Color::Dark_gray)};
 }
 
 void Paint_area::set_glyph(Glyph glyph) {
     current_glyph_ = std::move(glyph);
     glyph_changed(current_glyph_);
+    if (erase_enabled_) {
+        this->disable_erase();
+        erase_disabled();
+    }
 }
 
 void Paint_area::set_symbol(const Glyph& symbol) {
+    if (erase_enabled_) {
+        this->disable_erase();
+        erase_disabled();
+    }
     current_glyph_.set_symbol(symbol.str());
     glyph_changed(current_glyph_);
 }
 
 void Paint_area::set_foreground_color(Color c) {
     current_glyph_.brush().set_foreground(c);
-    glyph_changed(current_glyph_);
+    if (!erase_enabled_) {
+        glyph_changed(current_glyph_);
+    }
 }
 
 void Paint_area::set_background_color(Color c) {
     current_glyph_.brush().set_background(c);
-    glyph_changed(current_glyph_);
+    if (!erase_enabled_) {
+        glyph_changed(current_glyph_);
+    }
 }
 
 void Paint_area::set_attribute(Attribute attr) {
     current_glyph_.brush().add_attributes(attr);
-    glyph_changed(current_glyph_);
+    if (!erase_enabled_) {
+        glyph_changed(current_glyph_);
+    }
 }
 
 void Paint_area::remove_attribute(Attribute attr) {
     current_glyph_.brush().remove_attribute(attr);
+    if (!erase_enabled_) {
+        glyph_changed(current_glyph_);
+    }
+}
+
+void Paint_area::enable_erase() {
+    erase_enabled_ = true;
+    // before_erase_ = current_glyph_;
+    // current_glyph_ = " "; // std::exchange
+    glyph_changed(" ");
+}
+
+void Paint_area::disable_erase() {
+    erase_enabled_ = false;
     glyph_changed(current_glyph_);
+    // this->set_glyph(before_erase_);
+}
+
+void Paint_area::enable_grid() {
+    this->background_tile = Glyph{"┼", foreground(Color::Dark_gray)};
+    this->update();
+}
+
+void Paint_area::disable_grid() {
+    this->background_tile = " ";
+    this->update();
 }
 
 void Paint_area::clear() {
-    this->matrix.clear();
-    this->matrix.resize(this->width(), this->height());
+    glyphs_painted_.clear();
     this->update();
 }
 
@@ -66,17 +103,28 @@ void Paint_area::toggle_clone() {
     clone_enabled_ = !clone_enabled_;
 }
 
-bool Paint_area::resize_event(std::size_t new_width,
-                              std::size_t new_height,
-                              std::size_t old_width,
-                              std::size_t old_height) {
-    // Only expand the matrix, do not delete it
-    if (new_width > matrix.width() || new_height > matrix.height()) {
-        matrix.resize(new_width, new_height);
+bool Paint_area::paint_event() {
+    Painter p{this};
+    for (const auto& gc_pair : glyphs_painted_) {
+        if (gc_pair.first.x < this->width() &&
+            gc_pair.first.y < this->height()) {
+            p.put(gc_pair.second, gc_pair.first);
+        }
     }
-    return Matrix_display::resize_event(new_width, new_height, old_width,
-                                        old_height);
+    return Widget::paint_event();
 }
+
+// bool Paint_area::resize_event(std::size_t new_width,
+//                               std::size_t new_height,
+//                               std::size_t old_width,
+//                               std::size_t old_height) {
+//     // Only expand the matrix, do not delete it
+//     if (new_width > matrix.width() || new_height > matrix.height()) {
+//         matrix.resize(new_width, new_height);
+//     }
+//     return Matrix_display::resize_event(new_width, new_height, old_width,
+//                                         old_height);
+// }
 
 bool Paint_area::mouse_press_event(Mouse_button button,
                                    std::size_t global_x,
@@ -85,16 +133,16 @@ bool Paint_area::mouse_press_event(Mouse_button button,
                                    std::size_t local_y,
                                    std::uint8_t device_id) {
     this->place_glyph(local_x, local_y);
-    return Matrix_display::mouse_press_event(button, global_x, global_y,
-                                             local_x, local_y, device_id);
+    return Widget::mouse_press_event(button, global_x, global_y, local_x,
+                                     local_y, device_id);
 }
 
 bool Paint_area::key_press_event(Key key, char symbol) {
     if (!this->cursor_visible()) {
-        return Matrix_display::key_press_event(key, symbol);
+        return Widget::key_press_event(key, symbol);
     }
     if (this->width() == 0 || this->height() == 0) {
-        return Matrix_display::key_press_event(key, symbol);
+        return Widget::key_press_event(key, symbol);
     }
     std::size_t new_x{this->cursor_x() + 1};
     std::size_t new_y{this->cursor_y() + 1};
@@ -123,22 +171,31 @@ bool Paint_area::key_press_event(Key key, char symbol) {
         default:
             if (!std::iscntrl(symbol)) {
                 this->set_symbol(symbol);
-                matrix.at(this->cursor_x(), this->cursor_y()) = current_glyph_;
+                this->place_glyph(this->cursor_x(), this->cursor_y());
                 this->update();
             }
             break;
     }
-    return Matrix_display::key_press_event(key, symbol);
+    return Widget::key_press_event(key, symbol);
 }
 
 void Paint_area::place_glyph(std::size_t x, std::size_t y) {
     if (clone_enabled_) {
-        this->set_glyph(matrix(x, y));
-        this->toggle_clone();
+        if (glyphs_painted_.count(Coordinates{x, y}) == 1) {
+            this->set_glyph(glyphs_painted_[Coordinates{x, y}]);
+            this->toggle_clone();
+        }
+    } else if (erase_enabled_) {
+        this->remove_glyph(Coordinates{x, y});
     } else {
-        matrix(x, y) = current_glyph_;
+        glyphs_painted_[Coordinates{x, y}] = current_glyph_;
         this->update();
     }
+}
+
+void Paint_area::remove_glyph(Coordinates coords) {
+    glyphs_painted_.erase(coords);
+    this->update();
 }
 
 namespace slot {
@@ -226,6 +283,30 @@ sig::Slot<void()> toggle_clone(Paint_area& pa) {
 
 sig::Slot<void()> clear(Paint_area& pa) {
     sig::Slot<void()> slot{[&pa] { pa.clear(); }};
+    slot.track(pa.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> enable_erase(Paint_area& pa) {
+    sig::Slot<void()> slot{[&pa] { pa.enable_erase(); }};
+    slot.track(pa.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> disable_erase(Paint_area& pa) {
+    sig::Slot<void()> slot{[&pa] { pa.disable_erase(); }};
+    slot.track(pa.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> enable_grid(Paint_area& pa) {
+    sig::Slot<void()> slot{[&pa] { pa.enable_grid(); }};
+    slot.track(pa.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> disable_grid(Paint_area& pa) {
+    sig::Slot<void()> slot{[&pa] { pa.disable_grid(); }};
     slot.track(pa.destroyed);
     return slot;
 }

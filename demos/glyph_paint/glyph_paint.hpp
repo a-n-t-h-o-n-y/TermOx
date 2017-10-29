@@ -17,10 +17,6 @@ class Glyph_paint : public Horizontal_layout {
    private:
     Paint_area& paint_area{this->make_child<Paint_area>()};
     Side_pane& side_pane{this->make_child<Side_pane>()};
-
-    Glyph before_eraser_{" "};
-    void to_eraser();
-    void from_eraser();
 };
 
 }  // namespace glyph_paint

@@ -11,11 +11,6 @@ Glyph_paint::Glyph_paint() {
     side_pane.color_select_background.color_changed.connect(
         slot::set_background_color(paint_area));
 
-    side_pane.options_box.eraser_box.checked.connect(
-        [this] { this->to_eraser(); });
-    side_pane.options_box.eraser_box.unchecked.connect(
-        [this] { this->from_eraser(); });
-
     side_pane.attribute_box.bold_box.checked.connect(
         slot::set_attribute(paint_area, Attribute::Bold));
     side_pane.attribute_box.bold_box.unchecked.connect(
@@ -44,27 +39,36 @@ Glyph_paint::Glyph_paint() {
     paint_area.glyph_changed.connect(
         cppurses::slot::update_status(side_pane.show_glyph));
 
-    side_pane.options_box.clone_btn.clicked.connect(
+    side_pane.options_box.options_a.clone_btn.clicked.connect(
         slot::toggle_clone(paint_area));
 
-    side_pane.options_box.clone_btn.clicked.connect(
+    side_pane.options_box.options_a.clone_btn.clicked.connect(
         cppurses::slot::update_status(
             side_pane.show_glyph,
             Glyph_string{"Clone", foreground(Color::Light_gray)}));
 
-    side_pane.options_box.clear_btn.clicked.connect(slot::clear(paint_area));
+    side_pane.options_box.options_a.clear_btn.clicked.connect(slot::clear(paint_area));
 
-    side_pane.options_box.cursor_box.toggled.connect(
+    side_pane.options_box.options_a.cursor_box.toggled.connect(
         cppurses::slot::toggle_cursor(paint_area));
-}
 
-void Glyph_paint::to_eraser() {
-    before_eraser_ = paint_area.glyph();
-    paint_area.set_glyph(" ");
-}
+    paint_area.erase_disabled.connect(
+        cppurses::slot::uncheck(side_pane.options_box.options_a.eraser_box));
 
-void Glyph_paint::from_eraser() {
-    paint_area.set_glyph(before_eraser_);
+    paint_area.erase_enabled.connect(
+        cppurses::slot::check(side_pane.options_box.options_a.eraser_box));
+
+    side_pane.options_box.options_a.eraser_box.checked.connect(
+        slot::enable_erase(paint_area));
+
+    side_pane.options_box.options_a.eraser_box.unchecked.connect(
+        slot::disable_erase(paint_area));
+
+    side_pane.options_box.options_a.grid_box.checked.connect(
+        slot::enable_grid(paint_area));
+
+    side_pane.options_box.options_a.grid_box.unchecked.connect(
+        slot::disable_grid(paint_area));
 }
 
 }  // namespace glyph_paint
