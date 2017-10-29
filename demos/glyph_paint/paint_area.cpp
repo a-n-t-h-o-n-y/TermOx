@@ -6,9 +6,28 @@
 #include <cctype>
 #include <cstddef>
 #include <cstdint>
+#include <iostream>
+#include <iterator>
+#include <string>
 #include <utility>
 
 using namespace cppurses;
+
+namespace {
+
+void insert_space(Coordinates first, Coordinates second, std::ostream& os) {
+    if (first.y != second.y) {
+        std::string newlines(second.y - first.y, '\n');
+        os << newlines;
+    }
+    if (first.x == second.x) {
+        return;
+    }
+    std::string spaces(second.x - first.x - 1, ' ');
+    os << spaces;
+}
+
+}  // namespace
 
 namespace demos {
 namespace glyph_paint {
@@ -101,6 +120,30 @@ Glyph Paint_area::glyph() const {
 
 void Paint_area::toggle_clone() {
     clone_enabled_ = !clone_enabled_;
+}
+
+void Paint_area::write(std::ostream& os) {
+    Coordinates previous{0, 0};
+    for (const auto& cg_pair : glyphs_painted_) {
+        insert_space(previous, cg_pair.first, os);
+        os << cg_pair.second.str();
+    }
+}
+
+void Paint_area::read(std::istream& is) {
+    this->clear();
+    Coordinates current{0, 0};
+    for (std::istream_iterator<char> iter{is};
+         iter != std::istream_iterator<char>(); ++iter) {
+        if (*iter != ' ' || *iter != '\n' || *iter != '\r') {
+            glyphs_painted_[current] = *iter;
+        }
+        ++current.x;
+        if (*iter == '\n') {
+            ++current.y;
+            current.x = 0;
+        }
+    }
 }
 
 bool Paint_area::paint_event() {

@@ -1,11 +1,11 @@
 #ifndef DEMOS_GLYPH_PAINT_PAINT_AREA_HPP
 #define DEMOS_GLYPH_PAINT_PAINT_AREA_HPP
 #include <cppurses/cppurses.hpp>
+#include <signals/signals.hpp>
 
 #include <cstddef>
 #include <cstdint>
-
-#include <signals/signals.hpp>
+#include <iostream>
 
 using namespace cppurses;
 
@@ -31,6 +31,9 @@ class Paint_area : public Widget {
     void disable_erase();
     void enable_grid();
     void disable_grid();
+
+    void write(std::ostream& os);
+    void read(std::istream& is);
 
     // Signals
     sig::Signal<void(Glyph)> glyph_changed;
