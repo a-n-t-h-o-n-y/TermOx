@@ -93,6 +93,9 @@ sig::Slot<void()> disable_erase(Paint_area& pa);
 sig::Slot<void()> enable_grid(Paint_area& pa);
 sig::Slot<void()> disable_grid(Paint_area& pa);
 
+sig::Slot<void(std::ostream&)> write(Paint_area& pa);
+sig::Slot<void(std::istream&)> read(Paint_area& pa);
+
 }  // namespace slot
 }  // namespace glyph_paint
 }  // namespace demos

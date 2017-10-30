@@ -26,16 +26,10 @@ struct Options_B : public Vertical_layout {
     Cycle_box& palette_box{this->make_child<Cycle_box>()};
 
     Blank_height& space1{this->make_child<Blank_height>(1)};
-    Horizontal_layout& save_layout{this->make_child<Horizontal_layout>()};
-    Push_button& save_btn{save_layout.make_child<Push_button>("Save")};
-    Blank_width& save_seperator{save_layout.make_child<Blank_width>(1)};
-    Line_edit& save_filename_edit{
-        save_layout.make_child<Line_edit>("Filename")};
-    Horizontal_layout& open_layout{this->make_child<Horizontal_layout>()};
-    Push_button& open_btn{open_layout.make_child<Push_button>("Open")};
-    Blank_width& open_seperator{open_layout.make_child<Blank_width>(1)};
-    Line_edit& open_filename_edit{
-        open_layout.make_child<Line_edit>("Filename")};
+
+    Save_file<char>& save_file{this->make_child<Save_file<char>>()};
+    Open_file<char>& open_file{this->make_child<Open_file<char>>()};
+
     Push_button& back_btn{this->make_child<Push_button>("Back")};
 };
 

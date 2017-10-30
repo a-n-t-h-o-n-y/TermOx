@@ -21,7 +21,9 @@
 #include <cppurses/widget/widgets/log.hpp>
 #include <cppurses/widget/widgets/matrix_display.hpp>
 #include <cppurses/widget/widgets/menu.hpp>
+#include <cppurses/widget/widgets/open_file.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
+#include <cppurses/widget/widgets/save_file.hpp>
 #include <cppurses/widget/widgets/slider.hpp>
 #include <cppurses/widget/widgets/status_bar.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>

@@ -47,7 +47,8 @@ Glyph_paint::Glyph_paint() {
             side_pane.show_glyph,
             Glyph_string{"Clone", foreground(Color::Light_gray)}));
 
-    side_pane.options_box.options_a.clear_btn.clicked.connect(slot::clear(paint_area));
+    side_pane.options_box.options_a.clear_btn.clicked.connect(
+        slot::clear(paint_area));
 
     side_pane.options_box.options_a.cursor_box.toggled.connect(
         cppurses::slot::toggle_cursor(paint_area));
@@ -69,6 +70,11 @@ Glyph_paint::Glyph_paint() {
 
     side_pane.options_box.options_a.grid_box.unchecked.connect(
         slot::disable_grid(paint_area));
+
+    side_pane.options_box.options_b.save_file.save_requested.connect(
+        slot::write(paint_area));
+    side_pane.options_box.options_b.open_file.open_requested.connect(
+        slot::read(paint_area));
 }
 
 }  // namespace glyph_paint

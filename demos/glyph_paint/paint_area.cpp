@@ -4,10 +4,12 @@
 #include <signals/slot.hpp>
 
 #include <cctype>
+#include <codecvt>
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
 #include <iterator>
+#include <locale>
 #include <string>
 #include <utility>
 
@@ -15,15 +17,20 @@ using namespace cppurses;
 
 namespace {
 
-void insert_space(Coordinates first, Coordinates second, std::ostream& os) {
-    if (first.y != second.y) {
-        std::string newlines(second.y - first.y, '\n');
-        os << newlines;
-    }
-    if (first.x == second.x) {
+void insert_newline(Coordinates first, Coordinates second, std::ostream& os) {
+    if (first.y == second.y) {
         return;
     }
-    std::string spaces(second.x - first.x - 1, ' ');
+    std::string newlines(second.y - first.y, '\n');
+    os << newlines;
+}
+
+void insert_space(Coordinates first, Coordinates second, std::ostream& os) {
+    std::size_t spaces_n{second.x};
+    if (first.y == second.y) {
+        spaces_n -= first.x + 1;
+    }
+    std::string spaces(spaces_n, ' ');
     os << spaces;
 }
 
@@ -88,15 +95,12 @@ void Paint_area::remove_attribute(Attribute attr) {
 
 void Paint_area::enable_erase() {
     erase_enabled_ = true;
-    // before_erase_ = current_glyph_;
-    // current_glyph_ = " "; // std::exchange
     glyph_changed(" ");
 }
 
 void Paint_area::disable_erase() {
     erase_enabled_ = false;
     glyph_changed(current_glyph_);
-    // this->set_glyph(before_erase_);
 }
 
 void Paint_area::enable_grid() {
@@ -123,23 +127,30 @@ void Paint_area::toggle_clone() {
 }
 
 void Paint_area::write(std::ostream& os) {
-    Coordinates previous{0, 0};
+    Coordinates previous_nl{0, 0};
+    Coordinates previous_s{0, static_cast<std::size_t>(-1)};
     for (const auto& cg_pair : glyphs_painted_) {
-        insert_space(previous, cg_pair.first, os);
+        insert_newline(previous_nl, cg_pair.first, os);
+        insert_space(previous_s, cg_pair.first, os);
         os << cg_pair.second.str();
+        previous_nl = cg_pair.first;
+        previous_s = cg_pair.first;
     }
 }
 
 void Paint_area::read(std::istream& is) {
     this->clear();
     Coordinates current{0, 0};
-    for (std::istream_iterator<char> iter{is};
-         iter != std::istream_iterator<char>(); ++iter) {
-        if (*iter != ' ' || *iter != '\n' || *iter != '\r') {
-            glyphs_painted_[current] = *iter;
+    is >> std::noskipws;
+    std::string file_text{std::istream_iterator<char>{is},
+                          std::istream_iterator<char>()};
+    Glyph_string file_glyphs{file_text};
+    for (const Glyph& glyph : file_glyphs) {
+        if (glyph != ' ' && glyph != '\n' && glyph != '\r') {
+            glyphs_painted_[current] = glyph;
         }
         ++current.x;
-        if (*iter == '\n') {
+        if (glyph == '\n') {
             ++current.y;
             current.x = 0;
         }
@@ -156,18 +167,6 @@ bool Paint_area::paint_event() {
     }
     return Widget::paint_event();
 }
-
-// bool Paint_area::resize_event(std::size_t new_width,
-//                               std::size_t new_height,
-//                               std::size_t old_width,
-//                               std::size_t old_height) {
-//     // Only expand the matrix, do not delete it
-//     if (new_width > matrix.width() || new_height > matrix.height()) {
-//         matrix.resize(new_width, new_height);
-//     }
-//     return Matrix_display::resize_event(new_width, new_height, old_width,
-//                                         old_height);
-// }
 
 bool Paint_area::mouse_press_event(Mouse_button button,
                                    std::size_t global_x,
@@ -350,6 +349,20 @@ sig::Slot<void()> enable_grid(Paint_area& pa) {
 
 sig::Slot<void()> disable_grid(Paint_area& pa) {
     sig::Slot<void()> slot{[&pa] { pa.disable_grid(); }};
+    slot.track(pa.destroyed);
+    return slot;
+}
+
+sig::Slot<void(std::ostream&)> write(Paint_area& pa) {
+    sig::Slot<void(std::ostream&)> slot{
+        [&pa](std::ostream& os) { pa.write(os); }};
+    slot.track(pa.destroyed);
+    return slot;
+}
+
+sig::Slot<void(std::istream&)> read(Paint_area& pa) {
+    sig::Slot<void(std::istream&)> slot{
+        [&pa](std::istream& is) { pa.read(is); }};
     slot.track(pa.destroyed);
     return slot;
 }

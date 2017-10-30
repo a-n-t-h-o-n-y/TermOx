@@ -26,11 +26,10 @@ struct Side_pane : Vertical_layout {
             Glyph_string{"Background", Attribute::Bold})};
 
     Attribute_box& attribute_box{this->make_child<Attribute_box>()};
-    // Blank_height& space2{this->make_child<Blank_height>(1)};
 
     Status_bar& show_glyph{this->make_child<Status_bar>("x")};
 
-    Blank_height& space3{this->make_child<Blank_height>(1)};
+    Blank_height& space2{this->make_child<Blank_height>(1)};
     Options_stack& options_box{this->make_child<Options_stack>()};
 };
 

@@ -8,8 +8,7 @@ namespace glyph_paint {
 
 Side_pane::Side_pane() {
     space1.background_tile = "─";
-    // space2.background_tile = "─";
-    space3.background_tile = "─";
+    space2.background_tile = "─";
 
     this->width_policy.type(Size_policy::Fixed);
     this->width_policy.hint(16);
