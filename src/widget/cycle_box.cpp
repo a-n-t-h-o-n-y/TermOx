@@ -10,24 +10,9 @@
 namespace cppurses {
 
 Cycle_box::Cycle_box() {
-    // this->height_policy.type(Size_policy::Fixed);
-    // this->height_policy.hint(1);
-
-    // this->set_title(std::move(title));
-
-    // disable_walls(label.border);
-    // disable_corners(label.border);
-    // label.border.east_enabled = true;
-    // label.border.east = "├";
-    // enable_border(label);
-
     this->set_alignment(Alignment::Center);  // might be default
+    this->disable_word_wrap();
 }
-
-// void Cycle_box::set_title(Glyph_string title) {
-//     label.set_text(std::move(title));
-//     this->resize_label();
-// }
 
 sig::Signal<void()>& Cycle_box::add_option(Glyph_string option) {
     options_.emplace_back(std::move(option));
@@ -94,11 +79,6 @@ bool Cycle_box::mouse_press_event(Mouse_button button,
 
 Cycle_box::Option::Option(Glyph_string name_) : name{std::move(name_)} {}
 
-// void Cycle_box::resize_label() {
-//     label.width_policy.hint(label.contents().size() + 2);
-//     label.width_policy.type(Size_policy::Fixed);
-// }
-
 namespace slot {
 
 sig::Slot<void(Glyph_string)> add_option(Cycle_box& cb) {
@@ -140,5 +120,4 @@ sig::Slot<void()> cycle_backward(Cycle_box& cb) {
 }
 
 }  // namespace slot
-
 }  // namespace cppurses

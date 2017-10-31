@@ -55,7 +55,5 @@ sig::Slot<void()> cycle_forward(Cycle_box& cb);
 sig::Slot<void()> cycle_backward(Cycle_box& cb);
 
 }  // namespace slot
-
 }  // namespace cppurses
-
 #endif  // WIDGET_WIDGETS_CYCLE_BOX_HPP
