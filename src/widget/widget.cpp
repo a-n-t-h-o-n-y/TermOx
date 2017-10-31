@@ -67,6 +67,13 @@ void Widget::add_child(std::unique_ptr<Widget> child) {
     System::post_event<On_tree_event>(children_.back().get(), this->on_tree());
 }
 
+void Widget::insert_child(std::unique_ptr<Widget> child, std::size_t index) {
+    children_.insert(std::begin(children_) + index, std::move(child));
+    children_[index]->set_parent(this);
+    System::post_event<Child_added_event>(this, children_[index].get());
+    System::post_event<On_tree_event>(children_[index].get(), this->on_tree());
+}
+
 std::vector<Widget*> Widget::children() const {
     std::vector<Widget*> ret;
     std::transform(std::begin(children_), std::end(children_),

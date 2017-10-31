@@ -2,26 +2,25 @@
 #define WIDGET_WIDGETS_MENU_HPP
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/key.hpp>
-#include <cppurses/widget/widget.hpp>
+#include <cppurses/widget/layouts/vertical_layout.hpp>
+#include <cppurses/widget/widgets/push_button.hpp>
+#include <cppurses/widget/widgets/blank_height.hpp>
 
 #include <signals/slot.hpp>
 
 #include <cstddef>
+#include <cstdint>
+#include <functional>
 #include <vector>
 
 namespace cppurses {
 
-struct Menu_item {
-    Glyph_string title;
-    sig::Slot<void()> action;
-};
-
-class Menu : public Widget {
+class Menu : public Vertical_layout {
    public:
     explicit Menu(Glyph_string title);
 
-    void add_item(Menu_item item);
-    void make_item(Glyph_string title, sig::Slot<void()> action);
+    sig::Signal<void()>& add_item(Glyph_string label);
+    sig::Signal<void()>& insert_item(Glyph_string label, std::size_t index);
     void remove_item(std::size_t index);
 
     void select_up(std::size_t n = 1);
@@ -32,30 +31,41 @@ class Menu : public Widget {
 
    protected:
     bool paint_event() override;
+
     bool key_press_event(Key key, char symbol) override;
 
+    bool mouse_press_event(Mouse_button button,
+                           std::size_t global_x,
+                           std::size_t global_y,
+                           std::size_t local_x,
+                           std::size_t local_y,
+                           std::uint8_t device_id) override;
+
+    bool mouse_press_event_filter(Event_handler* receiver,
+                                  Mouse_button button,
+                                  std::size_t global_x,
+                                  std::size_t global_y,
+                                  std::size_t local_x,
+                                  std::size_t local_y,
+                                  std::uint8_t device_id) override;
+
    private:
-    Glyph_string menu_title_;
+    struct Menu_item {
+        Menu_item(Push_button& ref);
+        std::reference_wrapper<Push_button> button;
+        sig::Signal<void()> selected;
+    };
+
     std::vector<Menu_item> items_;
-    std::size_t selected_index_{1};
+    std::size_t selected_index_{0};
+
+    Label& title_;
+    Blank_height& space1{this->make_child<Blank_height>(1)};
+
+    void call_current_item();
 };
 
 namespace slot {
-
-sig::Slot<void(Menu_item)> add_item(Menu& m);
-sig::Slot<void()> add_item(Menu& m, const Menu_item& item);
-
-sig::Slot<void(Glyph_string, sig::Slot<void()>)> make_item(Menu& m);
-sig::Slot<void(Glyph_string)> make_item(Menu& m,
-                                        const sig::Slot<void()>& action);
-sig::Slot<void(sig::Slot<void()>)> make_item(Menu& m,
-                                             const Glyph_string& title);
-sig::Slot<void()> make_item(Menu& m,
-                            const Glyph_string& title,
-                            const sig::Slot<void()>& action);
-
-sig::Slot<void(std::size_t)> remove_item(Menu& m);
-sig::Slot<void()> remove_item(Menu& m, std::size_t index);
 
 sig::Slot<void(std::size_t)> select_up(Menu& m);
 sig::Slot<void()> select_up(Menu& m, std::size_t n);
@@ -68,5 +78,4 @@ sig::Slot<void()> select_item(Menu& m, std::size_t index);
 
 }  // namespace slot
 }  // namespace cppurses
-
 #endif  // WIDGET_WIDGETS_MENU_HPP

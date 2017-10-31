@@ -15,7 +15,7 @@ class Main_menu : public Vertical_layout {
 
     Horizontal_layout& hl{this->make_child<Horizontal_layout>()};
     Titlebar& titlebar{hl.make_child<Titlebar>(" C (P P) U R S E S")};
-    Widget_stack_menu& main_menu{this->make_child<Widget_stack_menu>()};
+    Widget_stack_menu& main_menu{this->make_child<Widget_stack_menu>("D e m o s")};
     Notepad& notepad{main_menu.make_page<Notepad>("Notepad")};
     Chess_UI& chess{main_menu.make_page<Chess_UI>("Chess")};
     glyph_paint::Glyph_paint& glyph_paint{

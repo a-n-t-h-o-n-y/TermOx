@@ -41,6 +41,7 @@ class Widget : public Event_handler {
 
     // Children
     void add_child(std::unique_ptr<Widget> child);
+    void insert_child(std::unique_ptr<Widget> child, std::size_t index);
     std::vector<Widget*> children() const;
     bool contains_child(Widget* child);
 

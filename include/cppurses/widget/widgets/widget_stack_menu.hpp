@@ -13,7 +13,7 @@ namespace cppurses {
 // Menu is index 0
 class Widget_stack_menu : public Vertical_layout {
    public:
-    Widget_stack_menu();
+    Widget_stack_menu(Glyph_string title = "");
 
     template <typename T, typename... Args>
     T& make_page(Glyph_string title, Args&&... args);
@@ -37,11 +37,7 @@ class Widget_stack_menu : public Vertical_layout {
 
    private:
     Widget_stack& stack_{this->make_child<Widget_stack>()};
-    Menu& menu_{stack_.make_page<Menu>("Main Menu")};
-    // Horizontal_layout& h_layout_{this->make_child<Horizontal_layout>()};
-    // Widget& empty_space_{h_layout_.make_child<Widget>()};
-    // Push_button& main_menu_button{
-    //     h_layout_.make_child<Push_button>("Main Menu")};
+    Menu& menu_;
 
     void initialize();
 };
@@ -51,8 +47,8 @@ class Widget_stack_menu : public Vertical_layout {
 template <typename T, typename... Args>
 T& Widget_stack_menu::make_page(Glyph_string title, Args&&... args) {
     auto& ret = stack_.make_page<T>(std::forward<Args>(args)...);
-    menu_.make_item(std::move(title),
-                    slot::set_active_page(stack_, this->size() - 1));
+    auto& signal = menu_.add_item(std::move(title));
+    signal.connect(slot::set_active_page(stack_, this->size() - 1));
     this->update();
     return ret;
 }
