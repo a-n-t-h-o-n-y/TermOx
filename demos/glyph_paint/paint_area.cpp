@@ -181,6 +181,9 @@ bool Paint_area::mouse_press_event(Mouse_button button,
 
 bool Paint_area::key_press_event(Key key, char symbol) {
     if (!this->cursor_visible()) {
+        if (!std::iscntrl(symbol)) {
+            this->set_symbol(symbol);
+        }
         return Widget::key_press_event(key, symbol);
     }
     if (this->width() == 0 || this->height() == 0) {
