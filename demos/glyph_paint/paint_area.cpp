@@ -1,6 +1,7 @@
 #include "paint_area.hpp"
 
 #include <cppurses/cppurses.hpp>
+#include <optional/optional.hpp>
 #include <signals/slot.hpp>
 
 #include <cctype>
@@ -62,6 +63,14 @@ void Paint_area::set_symbol(const Glyph& symbol) {
         erase_disabled();
     }
     current_glyph_.set_symbol(symbol.str());
+    opt::Optional<Color> sym_bg{symbol.brush().background_color()};
+    if (sym_bg) {
+        current_glyph_.brush().set_background(*sym_bg);
+    }
+    opt::Optional<Color> sym_fg{symbol.brush().foreground_color()};
+    if (sym_fg) {
+        current_glyph_.brush().set_foreground(*sym_fg);
+    }
     glyph_changed(current_glyph_);
 }
 
@@ -174,7 +183,16 @@ bool Paint_area::mouse_press_event(Mouse_button button,
                                    std::size_t local_x,
                                    std::size_t local_y,
                                    std::uint8_t device_id) {
-    this->place_glyph(local_x, local_y);
+    Coordinates local{local_x, local_y};
+    if (button == Mouse_button::Right) {
+        this->remove_glyph(local);
+    } else if (button == Mouse_button::Middle) {
+        if (glyphs_painted_.count(local) == 1) {
+            this->set_glyph(glyphs_painted_[local]);
+        }
+    } else {
+        this->place_glyph(local_x, local_y);
+    }
     return Widget::mouse_press_event(button, global_x, global_y, local_x,
                                      local_y, device_id);
 }

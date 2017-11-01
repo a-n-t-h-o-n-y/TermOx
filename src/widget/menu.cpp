@@ -108,9 +108,9 @@ bool Menu::paint_event() {
 }
 
 bool Menu::key_press_event(Key key, char symbol) {
-    if (key == Key::Arrow_down || key == Key::Arrow_left) {
+    if (key == Key::Arrow_down || key == Key::j) {
         this->select_down();
-    } else if (key == Key::Arrow_up || key == Key::Arrow_right) {
+    } else if (key == Key::Arrow_up || key == Key::k) {
         this->select_up();
     } else if (key == Key::Enter) {
         this->call_current_item();
