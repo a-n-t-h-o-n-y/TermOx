@@ -6,7 +6,17 @@ applications. Through a set of abstractions built on top of NCurses, CPPurses
 enables quick development of complex TUIs, without getting in the way of
 program logic.
 
-![alt text](docs/images/CPPurses.png)
+![alt text](docs/images/glyph_paint_demo.png)
+Glyph Paint Demo
+
+![alt text](docs/images/notepad_demo.png)
+Notepad Demo
+
+![alt text](docs/images/chess_demo_1.png)
+Chess Demo
+
+![alt text](docs/images/chess_demo_2.png)
+Chess Demo
 
 __Event System:__
 Event loop, widget drawing, and user input.
@@ -19,7 +29,7 @@ Pre-made Widgets for reuse.
 
 ## Features
 - UTF-8 support without the need for wide characters
-- (Extensible) Color Palettes
+- Extensible Color Palettes
 - Mouse and Keyboard Input
 - Simple and configurable layout system
 - Easy border drawing and manipulation
@@ -31,30 +41,46 @@ Pre-made Widgets for reuse.
 - Text_display
 - Checkbox
 - Push_button
+- Confirm_button
+- Cycle_box
+- Cycle_stack
 - Titlebar
 - Horizontal_scrollbar
 - Vertical_scrollbar
 - Color_select
+- Glyph_select
+- Label
+- Labeled_cycle_box
+- Line_edit
+- List
+- Log
+- Menu
+- Matrix_display
+- Open_file
+- Save_file
+- Slider
+- Status_bar
+- Widget_stack
+- Widget_stack_menu
 - Horizontal_layout
 - Vertical_layout
-- List
-- Menu
 
 ## Future Features
 - Animation
 - Mouse Move Events
-- Pages
 - Tabs Widget
-- Hovering Widgets
+- Hovering Widget Layout
 - Dialog Box Widget
 - Documentation
 
 ## Installation
-CPPurses depends on two (header only)libraries I have created, this repo
+CPPurses depends on two header only libraries, this repo
 includes them as git submodules. After cloning CPPurses, run
-`git submodule update --init -- recursive`
+`git submodule update --init -- recursive --remote`
 to pull in the external libraries. Generated build files from CMake
 will handle installation of each library and building of tests.
+For Unix based installs:
+`sudo make install`
 
 ## Documentation
 Doxygen documentation can be found [here](
