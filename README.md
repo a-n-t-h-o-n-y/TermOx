@@ -18,6 +18,7 @@ Chess Demo
 ![alt text](docs/images/chess_demo_2.png)
 Chess Demo
 
+## Modules
 __Event System:__
 Event loop, widget drawing, and user input.
 
