@@ -5,6 +5,7 @@
 #include <signals/slot.hpp>
 
 #include <algorithm>
+#include <iterator>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -12,6 +13,9 @@
 namespace cppurses {
 
 void Widget_stack::set_active_page(std::size_t index) {
+    if (pages_.empty()) {
+        return;
+    }
     if (pages_[index].get() == nullptr) {
         return;
     }
@@ -41,24 +45,53 @@ void Widget_stack::sets_focus_on_change(bool sets_focus) {
 
 void Widget_stack::add_page(std::unique_ptr<Widget> widget) {
     pages_.push_back(std::move(widget));
+    if (pages_.size() == 1) {
+        // this->set_active_page(0);
+    }
 }
 
 void Widget_stack::insert_page(std::size_t index,
                                std::unique_ptr<Widget> widget) {
     pages_.insert(std::begin(pages_) + index, std::move(widget));
+    if (pages_.size() == 1) {
+        // this->set_active_page(0);
+    }
 }
 
 std::unique_ptr<Widget> Widget_stack::remove_page(std::size_t index) {
-    std::unique_ptr<Widget> removed{std::move(pages_[index])};
-    if (removed == nullptr) {  // Remove the active page.
+    std::unique_ptr<Widget> removed{pages_[index].release()};
+    if (removed == nullptr) {  // If nullptr, then this index is the active page
         removed = this->remove_child(active_page_);
+        active_page_ = nullptr;
     }
     pages_.erase(std::begin(pages_) + index);
     return removed;
 }
 
+void Widget_stack::clear() {
+    auto active_at = std::find(std::begin(pages_), std::end(pages_), nullptr);
+    if (active_at != std::end(pages_)) {
+        this->remove_page(active_at - std::begin(pages_));
+    }
+    active_page_ = nullptr;
+    pages_.clear();
+    this->update();
+}
+
 std::size_t Widget_stack::size() const {
     return pages_.size();
+}
+
+Widget* Widget_stack::active_page() const {
+    return active_page_;
+}
+
+std::size_t Widget_stack::active_page_index() const {
+    if (pages_.empty()) {
+        return 0;
+    }
+    auto at = std::find(std::begin(pages_), std::end(pages_), nullptr);
+    return std::distance(std::begin(pages_), at);
 }
 
 namespace slot {

@@ -9,8 +9,17 @@ struct Coordinates {
     std::size_t y = 0;
 };
 
-inline bool operator==(const Coordinates& left, const Coordinates& right) {
-    return left.x == right.x && left.y == right.y;
+inline bool operator==(const Coordinates& lhs, const Coordinates& rhs) {
+    return lhs.x == rhs.x && lhs.y == rhs.y;
+}
+
+inline bool operator<(const Coordinates& lhs, const Coordinates& rhs) {
+    if (lhs.y < rhs.y) {
+        return true;
+    } else if (lhs.y == rhs.y && lhs.x < rhs.x) {
+        return true;
+    }
+    return false;
 }
 
 }  // namespace cppurses

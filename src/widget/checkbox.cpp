@@ -18,6 +18,7 @@ void Checkbox::toggle() {
     is_checked_ = !is_checked_;
     toggled();
     is_checked_ ? checked() : unchecked();
+    this->update();
 }
 
 bool Checkbox::is_checked() const {
@@ -47,7 +48,6 @@ bool Checkbox::mouse_press_event(Mouse_button button,
                                  std::uint8_t device_id) {
     if (button == Mouse_button::Left) {
         this->toggle();
-        this->update();
     }
     return true;
 }
@@ -56,12 +56,14 @@ void check(Checkbox& cb) {
     if (!cb.is_checked()) {
         cb.toggle();
     }
+    cb.update();
 }
 
 void uncheck(Checkbox& cb) {
     if (cb.is_checked()) {
         cb.toggle();
     }
+    cb.update();
 }
 
 namespace slot {

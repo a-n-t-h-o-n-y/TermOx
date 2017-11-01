@@ -3,64 +3,95 @@
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/widgets/menu.hpp>
+#include <cppurses/widget/widgets/push_button.hpp>
 
-#include <signals/slot.hpp>
+#include <signals/signals.hpp>
 
 #include <cstddef>
+#include <cstdint>
 #include <iterator>
 #include <string>
 #include <utility>
 
 namespace cppurses {
 
-Menu::Menu(Glyph_string title) : menu_title_{std::move(title)} {
+Menu::Menu_item::Menu_item(Push_button& ref) : button{ref}, selected{} {}
+
+Menu::Menu(Glyph_string title)
+    : title_{this->make_child<Label>(std::move(title))} {
     this->focus_policy = Focus_policy::Strong;
+    title_.set_alignment(Alignment::Center);
+    title_.brush.add_attributes(Attribute::Bold);
+    space1.background_tile = "─";
 }
 
-void Menu::add_item(Menu_item item) {
-    items_.emplace_back(std::move(item));
+sig::Signal<void()>& Menu::add_item(Glyph_string label) {
+    Push_button& button_ref{this->make_child<Push_button>(std::move(label))};
+    button_ref.install_event_filter(this);
+    items_.push_back(Menu_item{button_ref});
+    button_ref.height_policy.type(Size_policy::Fixed);
+    button_ref.height_policy.hint(1);
+    auto& signal_ref{items_.back().selected};
+    button_ref.clicked.connect(
+        [ this, index = items_.size() - 1 ] { items_[index].selected(); });
+    this->update();
+    return signal_ref;
 }
 
-void Menu::make_item(Glyph_string title, sig::Slot<void()> action) {
-    items_.emplace_back(Menu_item{std::move(title), std::move(action)});
+sig::Signal<void()>& Menu::insert_item(Glyph_string label, std::size_t index) {
+    auto button_ptr{std::make_unique<Push_button>(std::move(label))};
+    button_ptr->install_event_filter(this);
+    button_ptr->height_policy.type(Size_policy::Fixed);
+    button_ptr->height_policy.hint(1);
+    Push_button& new_button{*button_ptr};
+    items_.insert(std::begin(items_) + index, Menu_item{new_button});
+    auto& signal_ref{items_[index].selected};
+    new_button.clicked.connect([this, index] { items_[index].selected(); });
+    this->update();
+    return signal_ref;
 }
 
 void Menu::remove_item(std::size_t index) {
-    if (index > items_.size() || index < 1) {
+    if (index >= items_.size()) {
         return;
     }
-    items_.erase(std::begin(items_) + index - 1);
+    this->remove_child(&items_[index].button.get());
+    items_.erase(std::begin(items_) + index);
+    this->update();
 }
 
 void Menu::select_up(std::size_t n) {
     if (selected_index_ > n) {
         selected_index_ -= n;
+    } else {
+        selected_index_ = 0;
     }
+    this->update();
 }
 
 void Menu::select_down(std::size_t n) {
     if (items_.empty()) {
         return;
     }
-    if (selected_index_ != items_.size()) {
-        selected_index_ += n;
+    std::size_t new_index{selected_index_ + n};
+    if (new_index >= items_.size()) {
+        selected_index_ = items_.size() - 1;
+    } else {
+        selected_index_ = new_index;
     }
-    if (selected_index_ > items_.size()) {
-        selected_index_ = items_.size();
-    }
+    this->update();
 }
 
 void Menu::select_item(std::size_t index) {
     if (items_.empty()) {
         return;
     }
-    if (index > items_.size()) {
-        selected_index_ = items_.size();
-    } else if (index < 1) {
-        selected_index_ = 1;
+    if (index >= items_.size()) {
+        selected_index_ = items_.size() - 1;
     } else {
         selected_index_ = index;
     }
+    this->update();
 }
 
 std::size_t Menu::size() const {
@@ -68,99 +99,65 @@ std::size_t Menu::size() const {
 }
 
 bool Menu::paint_event() {
-    Painter p{this};
-    p.put(menu_title_);
-    std::size_t count{1};
-    for (const auto& item : items_) {
-        Glyph_string display{Glyph_string{std::to_string(count) + ". "} +
-                             item.title};
-        if (count == selected_index_) {
-            display.add_attributes(Attribute::Bold);
-        }
-        p.put(display, 0, count);
-        ++count;
+    for (Menu_item& item : items_) {
+        item.button.get().brush.remove_attribute(Attribute::Inverse);
     }
-    return Widget::paint_event();
+    items_[selected_index_].button.get().brush.add_attributes(
+        Attribute::Inverse);
+    return Vertical_layout::paint_event();
 }
 
 bool Menu::key_press_event(Key key, char symbol) {
-    if (key == Key::Arrow_down || key == Key::Arrow_left) {
+    if (key == Key::Arrow_down || key == Key::j) {
         this->select_down();
-    } else if (key == Key::Arrow_up || key == Key::Arrow_right) {
+    } else if (key == Key::Arrow_up || key == Key::k) {
         this->select_up();
     } else if (key == Key::Enter) {
-        if (!items_.empty()) {
-            items_.at(selected_index_ - 1).action();
-        }
+        this->call_current_item();
     }
-    this->update();
     return true;
 }
 
+bool Menu::mouse_press_event(Mouse_button button,
+                             std::size_t global_x,
+                             std::size_t global_y,
+                             std::size_t local_x,
+                             std::size_t local_y,
+                             std::uint8_t device_id) {
+    if (button == Mouse_button::ScrollUp) {
+        this->select_up();
+    } else if (button == Mouse_button::ScrollDown) {
+        this->select_down();
+    }
+    return Widget::mouse_press_event(button, global_x, global_y, local_x,
+                                     local_y, device_id);
+}
+
+bool Menu::mouse_press_event_filter(Event_handler* receiver,
+                                    Mouse_button button,
+                                    std::size_t global_x,
+                                    std::size_t global_y,
+                                    std::size_t local_x,
+                                    std::size_t local_y,
+                                    std::uint8_t device_id) {
+    if (button == Mouse_button::ScrollUp) {
+        this->select_up();
+        return true;
+    }
+    if (button == Mouse_button::ScrollDown) {
+        this->select_down();
+        return true;
+    }
+    return false;
+}
+
+void Menu::call_current_item() {
+    if (!items_.empty()) {
+        items_[selected_index_].selected();
+    }
+}
+
 namespace slot {
-
-sig::Slot<void(Menu_item)> add_item(Menu& m) {
-    sig::Slot<void(Menu_item)> slot{
-        [&m](auto item) { m.add_item(std::move(item)); }};
-    slot.track(m.destroyed);
-    return slot;
-}
-
-// TODO: Generalized lambda capture of item with std::move() and parameter
-// Menu_item by value. Below as well.  Once Clang-Format properly handles this.
-sig::Slot<void()> add_item(Menu& m, const Menu_item& item) {
-    sig::Slot<void()> slot{[&m, item] { m.add_item(item); }};
-    slot.track(m.destroyed);
-    return slot;
-}
-
-sig::Slot<void(Glyph_string, sig::Slot<void()>)> make_item(Menu& m) {
-    sig::Slot<void(Glyph_string, sig::Slot<void()>)> slot{
-        [&m](auto title, auto action) {
-            m.make_item(std::move(title), std::move(action));
-        }};
-    slot.track(m.destroyed);
-    return slot;
-}
-
-sig::Slot<void(Glyph_string)> make_item(Menu& m,
-                                        const sig::Slot<void()>& action) {
-    sig::Slot<void(Glyph_string)> slot{[&m, action](auto title) {
-        m.make_item(std::move(title), std::move(action));
-    }};
-    slot.track(m.destroyed);
-    return slot;
-}
-
-sig::Slot<void(sig::Slot<void()>)> make_item(Menu& m,
-                                             const Glyph_string& title) {
-    sig::Slot<void(sig::Slot<void()>)> slot{[&m, title](auto action) {
-        m.make_item(std::move(title), std::move(action));
-    }};
-    slot.track(m.destroyed);
-    return slot;
-}
-
-sig::Slot<void()> make_item(Menu& m,
-                            const Glyph_string& title,
-                            const sig::Slot<void()>& action) {
-    sig::Slot<void()> slot{[&m, title, action] { m.make_item(title, action); }};
-    slot.track(m.destroyed);
-    return slot;
-}
-
-sig::Slot<void(std::size_t)> remove_item(Menu& m) {
-    sig::Slot<void(std::size_t)> slot{
-        [&m](auto index) { m.remove_item(index); }};
-    slot.track(m.destroyed);
-    return slot;
-}
-
-sig::Slot<void()> remove_item(Menu& m, std::size_t index) {
-    sig::Slot<void()> slot{[&m, index] { m.remove_item(index); }};
-    slot.track(m.destroyed);
-    return slot;
-}
 
 sig::Slot<void(std::size_t)> select_up(Menu& m) {
     sig::Slot<void(std::size_t)> slot{[&m](auto n) { m.select_up(n); }};
@@ -200,5 +197,4 @@ sig::Slot<void()> select_item(Menu& m, std::size_t index) {
 }
 
 }  // namespace slot
-
 }  // namespace cppurses

@@ -67,6 +67,13 @@ void Widget::add_child(std::unique_ptr<Widget> child) {
     System::post_event<On_tree_event>(children_.back().get(), this->on_tree());
 }
 
+void Widget::insert_child(std::unique_ptr<Widget> child, std::size_t index) {
+    children_.insert(std::begin(children_) + index, std::move(child));
+    children_[index]->set_parent(this);
+    System::post_event<Child_added_event>(this, children_[index].get());
+    System::post_event<On_tree_event>(children_[index].get(), this->on_tree());
+}
+
 std::vector<Widget*> Widget::children() const {
     std::vector<Widget*> ret;
     std::transform(std::begin(children_), std::end(children_),
@@ -94,7 +101,7 @@ std::unique_ptr<Widget> Widget::remove_child(Widget* child) {
     children_.erase(at);
     removed->set_parent(nullptr);
     System::send_event(Child_removed_event{this, child});
-    System::post_event<On_tree_event>(removed.get(), false);
+    System::send_event(On_tree_event{removed.get(), false});
     return removed;
 }
 
@@ -484,6 +491,10 @@ void set_foreground_recursive(Widget& w, Color c, bool single_level) {
 
 bool has_focus(const Widget& w) {
     return Focus::focus_widget() == &w;
+}
+
+void toggle_cursor(Widget& w) {
+    w.show_cursor(!w.cursor_visible());
 }
 
 }  // namespace cppurses

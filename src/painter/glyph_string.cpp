@@ -28,7 +28,7 @@ Glyph_string& Glyph_string::operator+=(const Glyph& glyph) {
     return this->append(glyph);
 }
 
-Glyph_string Glyph_string::operator+(const Glyph_string& gs) {
+Glyph_string Glyph_string::operator+(const Glyph_string& gs) const {
     Glyph_string result{*this};
     result.append(gs);
     return result;

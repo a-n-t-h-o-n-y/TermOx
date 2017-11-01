@@ -132,5 +132,11 @@ sig::Slot<void()> set_foreground(Widget& w, Color c) {
     return slot;
 }
 
+sig::Slot<void()> toggle_cursor(Widget& w) {
+    sig::Slot<void()> slot{[&w] { cppurses::toggle_cursor(w); }};
+    slot.track(w.destroyed);
+    return slot;
+}
+
 }  // namespace slot
 }  // namespace cppurses

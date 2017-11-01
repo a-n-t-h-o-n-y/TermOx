@@ -13,6 +13,7 @@ class Glyph_matrix {
     explicit Glyph_matrix(std::size_t width = 0, std::size_t height = 0);
 
     void resize(std::size_t width, std::size_t height);
+    void clear();
 
     std::size_t width() const;
     std::size_t height() const;

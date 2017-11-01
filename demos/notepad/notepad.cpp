@@ -32,7 +32,8 @@ std::string load_file(const std::string& filename) {
 }  // namespace
 
 using namespace cppurses;
-namespace demo {
+
+namespace demos {
 
 // Textbox and Attribute/Color Selection
 Text_and_attributes::Text_and_attributes() {
@@ -143,4 +144,4 @@ void Notepad::initialize() {
     });
 }
 
-}  // namespace demo
+}  // namespace demos

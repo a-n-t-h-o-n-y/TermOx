@@ -25,7 +25,9 @@ bool Event::send_to_all_filters() const {
     bool handled = false;
     // Index iteration: event_filters might change size and reallocate.
     for (int i{0}; i < event_filters.size() && !handled; ++i) {
-        handled = this->filter_send(event_filters[i]);
+        if (event_filters[i]->enabled()) {
+            handled = this->filter_send(event_filters[i]);
+        }
     }
     return handled;
 }

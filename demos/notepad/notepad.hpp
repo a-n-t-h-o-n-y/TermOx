@@ -3,7 +3,8 @@
 #include <cppurses/cppurses.hpp>
 
 using namespace cppurses;
-namespace demo {
+
+namespace demos {
 
 struct Attribute_select : Vertical_layout {
     // Widgets
@@ -69,6 +70,6 @@ class Notepad : public Vertical_layout {
     void initialize();
 };
 
-}  // namespace demo
+}  // namespace demos
 
 #endif  // DEMOS_NOTEPAD_NOTEPAD_HPP

@@ -4,15 +4,18 @@
 #include <cppurses/widget/widgets/widget_stack_menu.hpp>
 
 namespace cppurses {
-Widget_stack_menu::Widget_stack_menu() {
+Widget_stack_menu::Widget_stack_menu(Glyph_string title)
+    : menu_{stack_.make_page<Menu>(std::move(title))} {
     this->initialize();
 }
 
 void Widget_stack_menu::add_page(Glyph_string title,
                                  std::unique_ptr<Widget> widget) {
     stack_.add_page(std::move(widget));
-    menu_.make_item(std::move(title),
-                    slot::set_active_page(stack_, this->size() - 1));
+    auto& signal = menu_.add_item(std::move(title));
+    signal.connect(slot::set_active_page(stack_, this->size() - 1));
+    // menu_.make_item(std::move(title),
+    //                 slot::set_active_page(stack_, this->size() - 1));
     this->update();
 }
 
@@ -20,7 +23,8 @@ void Widget_stack_menu::insert_page(Glyph_string title,
                                     std::size_t index,
                                     std::unique_ptr<Widget> widget) {
     stack_.insert_page(index, std::move(widget));
-    menu_.make_item(std::move(title), slot::set_active_page(stack_, index));
+    auto& signal = menu_.insert_item(std::move(title), index);
+    signal.connect(slot::set_active_page(stack_, index));
     this->update();
 }
 

@@ -22,8 +22,11 @@ class Widget_stack : public Horizontal_layout {
     void add_page(std::unique_ptr<Widget> widget);
     void insert_page(std::size_t index, std::unique_ptr<Widget> widget);
     std::unique_ptr<Widget> remove_page(std::size_t index);
+    void clear();
 
     std::size_t size() const;
+    Widget* active_page() const;
+    std::size_t active_page_index() const;
 
     // Signals
     sig::Signal<void(std::size_t)> page_changed;
