@@ -2,7 +2,7 @@
 #define SYSTEM_EVENT_HANDLER_HPP
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/mouse_button.hpp>
-#include <cppurses/widget/coordinates.hpp>
+#include <cppurses/widget/point.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -158,11 +158,11 @@ class Event_handler {
 
     // Signals
     sig::Signal<void(Event_handler*)> destroyed;
-    sig::Signal<void(Coordinates)> clicked;
+    sig::Signal<void(Point)> clicked;
     sig::Signal<void(std::size_t, std::size_t)> clicked_xy;
-    sig::Signal<void(Coordinates)> click_released;
+    sig::Signal<void(Point)> click_released;
     sig::Signal<void(std::size_t, std::size_t)> click_released_xy;
-    sig::Signal<void(Coordinates)> double_clicked;
+    sig::Signal<void(Point)> double_clicked;
     sig::Signal<void(std::size_t, std::size_t)> double_clicked_xy;
     sig::Signal<void(Key)> key_pressed;
     sig::Signal<void(Key)> key_released;

@@ -3,7 +3,7 @@
 #include <cppurses/system/events/enable_event.hpp>
 #include <cppurses/system/mouse_button.hpp>
 #include <cppurses/system/system.hpp>
-#include <cppurses/widget/coordinates.hpp>
+#include <cppurses/widget/point.hpp>
 
 #include <algorithm>
 #include <cstddef>
@@ -73,7 +73,7 @@ bool Event_handler::mouse_press_event(Mouse_button button,
                                       std::size_t local_x,
                                       std::size_t local_y,
                                       std::uint8_t device_id) {
-    clicked(Coordinates{global_x, global_y});
+    clicked(Point{global_x, global_y});
     clicked_xy(global_x, global_y);
     return true;
 }
@@ -84,7 +84,7 @@ bool Event_handler::mouse_release_event(Mouse_button button,
                                         std::size_t local_x,
                                         std::size_t local_y,
                                         std::uint8_t device_id) {
-    click_released(Coordinates{global_x, global_y});
+    click_released(Point{global_x, global_y});
     click_released_xy(global_x, global_y);
     return true;
 }
@@ -95,7 +95,7 @@ bool Event_handler::mouse_double_click_event(Mouse_button button,
                                              std::size_t local_x,
                                              std::size_t local_y,
                                              std::uint8_t device_id) {
-    double_clicked(Coordinates{global_x, global_y});
+    double_clicked(Point{global_x, global_y});
     double_clicked_xy(global_x, global_y);
     return true;
 }

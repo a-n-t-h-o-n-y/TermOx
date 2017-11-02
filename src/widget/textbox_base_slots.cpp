@@ -1,4 +1,4 @@
-#include <cppurses/widget/coordinates.hpp>
+#include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widgets/textbox_base.hpp>
 #include <cppurses/widget/widgets/textbox_base_slots.hpp>
 
@@ -58,14 +58,14 @@ sig::Slot<void(std::size_t)> cursor_right(Textbox_base& tb) {
     return slot;
 }
 
-sig::Slot<void()> set_cursor(Textbox_base& tb, const Coordinates& coords) {
+sig::Slot<void()> set_cursor(Textbox_base& tb, const Point& coords) {
     sig::Slot<void()> slot{[&tb, coords] { tb.set_cursor(coords); }};
     slot.track(tb.destroyed);
     return slot;
 }
 
-sig::Slot<void(Coordinates)> set_cursor(Textbox_base& tb) {
-    sig::Slot<void(Coordinates)> slot{
+sig::Slot<void(Point)> set_cursor(Textbox_base& tb) {
+    sig::Slot<void(Point)> slot{
         [&tb](auto coords) { tb.set_cursor(coords); }};
     slot.track(tb.destroyed);
     return slot;

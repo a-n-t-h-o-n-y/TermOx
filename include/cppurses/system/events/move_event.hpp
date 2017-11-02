@@ -9,7 +9,7 @@ class Event_handler;
 
 class Move_event : public Event {
    public:
-    // In global coordinates.
+    // In global Point.
     Move_event(Event_handler* receiver,
                std::size_t new_x,
                std::size_t new_y,

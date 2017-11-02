@@ -20,7 +20,7 @@ namespace {
 
 cppurses::Widget* find_widget_at(std::size_t x, std::size_t y) {
     cppurses::Widget* widg = cppurses::System::head();
-    if (widg == nullptr || !has_coordinates(*widg, x, y)) {
+    if (widg == nullptr || !has_Point(*widg, x, y)) {
         return nullptr;
     }
     bool keep_going = true;

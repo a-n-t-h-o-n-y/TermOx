@@ -71,6 +71,7 @@ set(WIDGET_SOURCES
     "src/widget/labeled_cycle_box.cpp"
 	"src/widget/horizontal_layout.cpp"
     "src/widget/matrix_display.cpp"
+    "src/widget/point.cpp"
 	"src/widget/border.cpp"
     "src/widget/cycle_box.cpp"
     "src/widget/vertical_layout.cpp"

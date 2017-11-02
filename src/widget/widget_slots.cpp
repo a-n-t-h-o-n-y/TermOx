@@ -7,7 +7,7 @@
 #include <cppurses/system/events/show_event.hpp>
 #include <cppurses/system/mouse_button.hpp>
 #include <cppurses/system/system.hpp>
-#include <cppurses/widget/coordinates.hpp>
+#include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widget_slots.hpp>
 
@@ -53,9 +53,9 @@ sig::Slot<void()> update(Widget& w) {
     return slot;
 }
 
-sig::Slot<void(Coordinates, Mouse_button)> click(Widget& w) {
-    sig::Slot<void(Coordinates, Mouse_button)> slot{
-        [&w](const Coordinates& c, Mouse_button b) {
+sig::Slot<void(Point, Mouse_button)> click(Widget& w) {
+    sig::Slot<void(Point, Mouse_button)> slot{
+        [&w](const Point& c, Mouse_button b) {
             System::send_event(Mouse_press_event{&w, b, w.x() + c.x,
                                                  w.y() + c.y, c.x, c.y, 0});
         }};
@@ -63,7 +63,7 @@ sig::Slot<void(Coordinates, Mouse_button)> click(Widget& w) {
     return slot;
 }
 
-sig::Slot<void(Mouse_button)> click(Widget& w, Coordinates c) {
+sig::Slot<void(Mouse_button)> click(Widget& w, Point c) {
     sig::Slot<void(Mouse_button)> slot{[&w, &c](Mouse_button b) {
         System::send_event(
             Mouse_press_event{&w, b, w.x() + c.x, w.y() + c.y, c.x, c.y, 0});
@@ -72,8 +72,8 @@ sig::Slot<void(Mouse_button)> click(Widget& w, Coordinates c) {
     return slot;
 }
 
-sig::Slot<void(Coordinates)> click(Widget& w, Mouse_button b) {
-    sig::Slot<void(Coordinates)> slot{[&w, b](const Coordinates& c) {
+sig::Slot<void(Point)> click(Widget& w, Mouse_button b) {
+    sig::Slot<void(Point)> slot{[&w, b](const Point& c) {
         System::send_event(
             Mouse_press_event{&w, b, w.x() + c.x, w.y() + c.y, c.x, c.y, 0});
     }};
@@ -81,7 +81,7 @@ sig::Slot<void(Coordinates)> click(Widget& w, Mouse_button b) {
     return slot;
 }
 
-sig::Slot<void()> click(Widget& w, Coordinates c, Mouse_button b) {
+sig::Slot<void()> click(Widget& w, Point c, Mouse_button b) {
     sig::Slot<void()> slot{[&w, &c, b] {
         System::send_event(
             Mouse_press_event{&w, b, w.x() + c.x, w.y() + c.y, c.x, c.y, 0});

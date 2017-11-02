@@ -1,7 +1,7 @@
 #ifndef WIDGET_WIDGETS_TEXTBOX_BASE_HPP
 #define WIDGET_WIDGETS_TEXTBOX_BASE_HPP
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/widget/coordinates.hpp>
+#include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
 
 #include <signals/signal.hpp>
@@ -26,7 +26,7 @@ class Textbox_base : public Text_display {
     void cursor_down(std::size_t n = 1);
     void cursor_left(std::size_t n = 1);
     void cursor_right(std::size_t n = 1);
-    void set_cursor(Coordinates pos);
+    void set_cursor(Point pos);
     void set_cursor(std::size_t x, std::size_t y);
     void set_cursor(std::size_t index);
 
@@ -39,7 +39,7 @@ class Textbox_base : public Text_display {
     sig::Signal<void(std::size_t n)> cursor_moved_right;
     sig::Signal<void(std::size_t n)> cursor_moved_up;
     sig::Signal<void(std::size_t n)> cursor_moved_down;
-    sig::Signal<void(Coordinates)> cursor_moved;
+    sig::Signal<void(Point)> cursor_moved;
 
    private:
     void increment_cursor_right();

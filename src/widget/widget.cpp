@@ -10,7 +10,7 @@
 #include <cppurses/system/focus.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/border.hpp>
-#include <cppurses/widget/coordinates.hpp>
+#include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 
 #include <signals/signal.hpp>
@@ -169,7 +169,7 @@ std::size_t Widget::cursor_y() const {
     return cursor_position_.y;
 }
 
-Coordinates Widget::cursor_coordinates() const {
+Point Widget::cursor_coordinates() const {
     return cursor_position_;
 }
 
@@ -284,7 +284,7 @@ bool Widget::move_event(std::size_t new_x,
                         std::size_t old_y) {
     this->set_x(new_x);
     this->set_y(new_y);
-    moved(Coordinates{new_x, new_y});
+    moved(Point{new_x, new_y});
     moved_xy(new_x, new_y);
     this->update();
     return true;
@@ -444,14 +444,14 @@ bool has_coordinates(Widget& w, std::size_t global_x, std::size_t global_y) {
     return within_west && within_east && within_north && within_south;
 }
 
-void move_cursor(Widget& w, Coordinates c) {
+void move_cursor(Widget& w, Point c) {
     move_cursor(w, c.x, c.y);
 }
 
 void move_cursor(Widget& w, std::size_t x, std::size_t y) {
     w.move_cursor_x(x);
     w.move_cursor_y(y);
-    w.cursor_moved(Coordinates{x, y});
+    w.cursor_moved(Point{x, y});
     w.cursor_moved_xy(x, y);
 }
 

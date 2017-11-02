@@ -1,6 +1,6 @@
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
-#include <cppurses/widget/coordinates.hpp>
+#include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
 
 #include <signals/signal.hpp>
@@ -147,7 +147,7 @@ std::size_t Text_display::row_length(std::size_t y) const {
     return this->line_length(line);
 }
 
-std::size_t Text_display::index_at(Coordinates position) const {
+std::size_t Text_display::index_at(Point position) const {
     return this->index_at(position.x, position.y);
 }
 
@@ -171,8 +171,8 @@ std::size_t Text_display::index_at(std::size_t x, std::size_t y) const {
     return info.start_index + x;
 }
 
-Coordinates Text_display::display_position(std::size_t index) const {
-    Coordinates position;
+Point Text_display::display_position(std::size_t index) const {
+    Point position;
     auto line = this->line_at(index);
     if (line < this->top_line()) {
         return position;

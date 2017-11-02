@@ -4,7 +4,7 @@
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/widget/coordinates.hpp>
+#include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 
 #include <signals/signal.hpp>
@@ -50,9 +50,9 @@ class Text_display : public Widget {
     // Query Functions
     std::size_t row_length(std::size_t y) const;
     std::size_t display_height() const;
-    std::size_t index_at(Coordinates position) const;
+    std::size_t index_at(Point position) const;
     std::size_t index_at(std::size_t x, std::size_t y) const;
-    Coordinates display_position(std::size_t index) const;
+    Point display_position(std::size_t index) const;
     Glyph_string contents() const { return contents_; }
     Glyph glyph_at(std::size_t index) const { return contents_.at(index); }
     std::size_t contents_size() const { return contents_.size(); }
