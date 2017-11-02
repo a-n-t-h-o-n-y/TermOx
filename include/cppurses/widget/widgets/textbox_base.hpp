@@ -47,10 +47,7 @@ class Textbox_base : public Text_display {
     bool scroll_{true};
 
    protected:
-    bool resize_event(std::size_t new_width,
-                      std::size_t new_height,
-                      std::size_t old_width,
-                      std::size_t old_height) override;
+    bool resize_event(Area new_size, Area old_size) override;
 };
 
 }  // namespace cppurses

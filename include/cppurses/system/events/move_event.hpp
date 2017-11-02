@@ -1,8 +1,7 @@
 #ifndef SYSTEM_EVENTS_MOVE_EVENT_HPP
 #define SYSTEM_EVENTS_MOVE_EVENT_HPP
 #include <cppurses/system/event.hpp>
-
-#include <cstddef>
+#include <cppurses/widget/point.hpp>
 
 namespace cppurses {
 class Event_handler;
@@ -11,19 +10,15 @@ class Move_event : public Event {
    public:
     // In global Point.
     Move_event(Event_handler* receiver,
-               std::size_t new_x,
-               std::size_t new_y,
-               std::size_t old_x = 0,
-               std::size_t old_y = 0);
+               Point new_position,
+               Point old_position = Point{0, 0});
 
     bool send() const override;
     bool filter_send(Event_handler* filter) const override;
 
    protected:
-    std::size_t new_x_;
-    std::size_t new_y_;
-    std::size_t old_x_;
-    std::size_t old_y_;
+    Point new_position_;
+    Point old_position_;
 };
 
 }  // namespace cppurses

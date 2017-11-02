@@ -41,10 +41,8 @@ bool Checkbox::paint_event() {
 }
 
 bool Checkbox::mouse_press_event(Mouse_button button,
-                                 std::size_t global_x,
-                                 std::size_t global_y,
-                                 std::size_t local_x,
-                                 std::size_t local_y,
+                                 Point global,
+                                 Point local,
                                  std::uint8_t device_id) {
     if (button == Mouse_button::Left) {
         this->toggle();

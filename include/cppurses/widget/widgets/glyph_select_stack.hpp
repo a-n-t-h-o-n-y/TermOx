@@ -20,16 +20,11 @@ class Glyph_select_stack : public Widget_stack {
    protected:
     bool mouse_press_event_filter(Event_handler* receiver,
                                   Mouse_button button,
-                                  std::size_t global_x,
-                                  std::size_t global_y,
-                                  std::size_t local_x,
-                                  std::size_t local_y,
+                                  Point global,
+                                  Point local,
                                   std::uint8_t device_id) override;
 
-    bool resize_event(std::size_t new_width,
-                      std::size_t new_height,
-                      std::size_t old_width,
-                      std::size_t old_height) override;
+    bool resize_event(Area new_size, Area old_size) override;
 
    private:
     Glyph_string symbols_;

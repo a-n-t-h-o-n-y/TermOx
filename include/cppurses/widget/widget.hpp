@@ -6,8 +6,8 @@
 #include <cppurses/system/event_handler.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/widget/border.hpp>
-#include <cppurses/widget/point.hpp>
 #include <cppurses/widget/focus_policy.hpp>
+#include <cppurses/widget/point.hpp>
 #include <cppurses/widget/size_policy.hpp>
 
 #include <algorithm>
@@ -120,14 +120,8 @@ class Widget : public Event_handler {
     bool show_event() override;
     bool hide_event() override;
     bool on_tree_event(bool on_tree) override;
-    bool move_event(std::size_t new_x,
-                    std::size_t new_y,
-                    std::size_t old_x,
-                    std::size_t old_y) override;
-    bool resize_event(std::size_t new_width,
-                      std::size_t new_height,
-                      std::size_t old_width,
-                      std::size_t old_height) override;
+    bool move_event(Point new_position, Point old_position) override;
+    bool resize_event(Area new_size, Area old_size) override;
 
    private:
     std::string name_;

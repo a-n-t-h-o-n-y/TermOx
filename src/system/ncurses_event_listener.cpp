@@ -8,6 +8,7 @@
 #include <cppurses/system/mouse_button.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/border.hpp>
+#include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 
 #include <ncurses.h>
@@ -20,7 +21,7 @@ namespace {
 
 cppurses::Widget* find_widget_at(std::size_t x, std::size_t y) {
     cppurses::Widget* widg = cppurses::System::head();
-    if (widg == nullptr || !has_Point(*widg, x, y)) {
+    if (widg == nullptr || !has_coordinates(*widg, x, y)) {
         return nullptr;
     }
     bool keep_going = true;
@@ -132,18 +133,20 @@ std::unique_ptr<Event> NCurses_event_listener::parse_mouse_event() const {
     }
 
     // Location
-    std::size_t local_x = mouse_event.x - receiver->x();
-    std::size_t local_y = mouse_event.y - receiver->y();
+    std::size_t mouse_x{static_cast<std::size_t>(mouse_event.x)};
+    std::size_t mouse_y{static_cast<std::size_t>(mouse_event.y)};
+    std::size_t local_x = mouse_x - receiver->x();
+    std::size_t local_y = mouse_y - receiver->y();
 
     // Create Event
     std::unique_ptr<Event> event{nullptr};
     if (type == Event::MouseButtonPress) {
         event = std::make_unique<Mouse_press_event>(
-            receiver, button, mouse_event.x, mouse_event.y, local_x, local_y,
+            receiver, button, Point{mouse_x, mouse_y}, Point{local_x, local_y},
             mouse_event.id);
     } else if (type == Event::MouseButtonRelease) {
         event = std::make_unique<Mouse_release_event>(
-            receiver, button, mouse_event.x, mouse_event.y, local_x, local_y,
+            receiver, button, Point{mouse_x, mouse_y}, Point{local_x, local_y},
             mouse_event.id);
     } else {
         return nullptr;
@@ -161,8 +164,8 @@ Widget* NCurses_event_listener::handle_keyboard_widget() const {
 }
 
 std::unique_ptr<Event> NCurses_event_listener::handle_resize_event() const {
-    return std::make_unique<Resize_event>(nullptr, System::max_width(),
-                                          System::max_height());
+    return std::make_unique<Resize_event>(
+        nullptr, Area{System::max_width(), System::max_height()});
 }
 
 Widget* NCurses_event_listener::handle_resize_widget() const {

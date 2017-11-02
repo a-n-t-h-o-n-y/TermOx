@@ -106,17 +106,14 @@ bool Line_edit::key_press_event(Key key, char symbol) {
 }
 
 bool Line_edit::mouse_press_event(Mouse_button button,
-                                  std::size_t global_x,
-                                  std::size_t global_y,
-                                  std::size_t local_x,
-                                  std::size_t local_y,
+                                  Point global,
+                                  Point local,
                                   std::uint8_t device_id) {
     if (button == Mouse_button::ScrollUp ||
         button == Mouse_button::ScrollDown) {
         return true;
     }
-    return Textbox::mouse_press_event(button, global_x, global_y, local_x,
-                                      local_y, device_id);
+    return Textbox::mouse_press_event(button, global, local, device_id);
 }
 
 bool Line_edit::focus_in_event() {

@@ -101,8 +101,8 @@ void System::set_head(Widget* head_widget) {
     if (head_ != nullptr) {
         System::post_event<On_tree_event>(head_, true);
         if (dynamic_cast<Layout*>(head_) != nullptr) {
-            System::post_event<Resize_event>(head_, System::max_width(),
-                                             System::max_height());
+            System::post_event<Resize_event>(
+                head_, Area{System::max_width(), System::max_height()});
         }
         head_->update();
     }

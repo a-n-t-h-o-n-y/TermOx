@@ -145,12 +145,9 @@ void Textbox_base::toggle_scrolling() {
     scroll_ = !scroll_;
 }
 
-bool Textbox_base::resize_event(std::size_t new_width,
-                                std::size_t new_height,
-                                std::size_t old_width,
-                                std::size_t old_height) {
+bool Textbox_base::resize_event(Area new_size, Area old_size) {
     const auto cursor_index = this->index_at(this->cursor_coordinates());
-    Text_display::resize_event(new_width, new_height, old_width, old_height);
+    Text_display::resize_event(new_size, old_size);
     // Scroll if old cursor index is now hidden.
     const auto cursor_line = this->line_at(cursor_index);
     if (this->top_line() > cursor_line) {
@@ -159,8 +156,7 @@ bool Textbox_base::resize_event(std::size_t new_width,
         this->scroll_down(cursor_line - this->bottom_line());
     }
     this->set_cursor(cursor_index);
-    return Text_display::resize_event(new_width, new_height, old_width,
-                                      old_height);
+    return Text_display::resize_event(new_size, old_size);
 }
 
 }  // namespace cppurses

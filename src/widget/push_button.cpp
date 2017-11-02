@@ -13,16 +13,13 @@ Push_button::Push_button(Glyph_string name) : Label{std::move(name)} {
 }
 
 bool Push_button::mouse_press_event(Mouse_button button,
-                                    std::size_t global_x,
-                                    std::size_t global_y,
-                                    std::size_t local_x,
-                                    std::size_t local_y,
+                                    Point global,
+                                    Point local,
                                     std::uint8_t device_id) {
     if (button == Mouse_button::Left) {
         clicked();
     }
-    return Widget::mouse_press_event(button, global_x, global_y, local_x,
-                                     local_y, device_id);
+    return Widget::mouse_press_event(button, global, local, device_id);
 }
 
 namespace slot {

@@ -100,13 +100,11 @@ bool Textbox::key_press_event(Key key, char symbol) {
 }
 
 bool Textbox::mouse_press_event(Mouse_button button,
-                                std::size_t global_x,
-                                std::size_t global_y,
-                                std::size_t local_x,
-                                std::size_t local_y,
+                                Point global,
+                                Point local,
                                 std::uint8_t device_id) {
     if (button == Mouse_button::Left) {
-        this->set_cursor(local_x, local_y);
+        this->set_cursor(local.x, local.y);
     } else if (button == Mouse_button::ScrollUp) {
         if (scroll_wheel_) {
             this->scroll_up(scroll_speed_up_);
