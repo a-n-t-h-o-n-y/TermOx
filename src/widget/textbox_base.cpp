@@ -1,5 +1,5 @@
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/widget/coordinates.hpp>
+#include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
 #include <cppurses/widget/widgets/textbox_base.hpp>
@@ -16,7 +16,7 @@ Textbox_base::Textbox_base(Glyph_string contents)
     this->show_cursor();
 };
 
-void Textbox_base::set_cursor(Coordinates pos) {
+void Textbox_base::set_cursor(Point pos) {
     this->set_cursor(pos.x, pos.y);
 }
 
@@ -72,7 +72,7 @@ void Textbox_base::cursor_left(std::size_t n) {
 
 void Textbox_base::increment_cursor_left() {
     auto next_index = this->cursor_index();
-    if (this->cursor_coordinates() == Coordinates{0, 0}) {
+    if (this->cursor_coordinates() == Point{0, 0}) {
         if (this->does_scroll()) {
             this->scroll_up(1);
         } else {
@@ -145,12 +145,9 @@ void Textbox_base::toggle_scrolling() {
     scroll_ = !scroll_;
 }
 
-bool Textbox_base::resize_event(std::size_t new_width,
-                                std::size_t new_height,
-                                std::size_t old_width,
-                                std::size_t old_height) {
+bool Textbox_base::resize_event(Area new_size, Area old_size) {
     const auto cursor_index = this->index_at(this->cursor_coordinates());
-    Text_display::resize_event(new_width, new_height, old_width, old_height);
+    Text_display::resize_event(new_size, old_size);
     // Scroll if old cursor index is now hidden.
     const auto cursor_line = this->line_at(cursor_index);
     if (this->top_line() > cursor_line) {
@@ -159,8 +156,7 @@ bool Textbox_base::resize_event(std::size_t new_width,
         this->scroll_down(cursor_line - this->bottom_line());
     }
     this->set_cursor(cursor_index);
-    return Text_display::resize_event(new_width, new_height, old_width,
-                                      old_height);
+    return Text_display::resize_event(new_size, old_size);
 }
 
 }  // namespace cppurses

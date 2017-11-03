@@ -7,7 +7,7 @@
 namespace cppurses {
 
 Layout::Layout() {
-    System::post_event<Move_event>(this, 0, 0);
+    System::post_event<Move_event>(this, Point{0, 0});
     this->focus_policy = Focus_policy::Click;
 }
 

@@ -3,7 +3,7 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/mouse_button.hpp>
-#include <cppurses/widget/coordinates.hpp>
+#include <cppurses/widget/point.hpp>
 
 #include <signals/slot.hpp>
 
@@ -17,10 +17,10 @@ sig::Slot<void()> hide(Widget& w);
 sig::Slot<void()> show(Widget& w);
 sig::Slot<void()> repaint(Widget& w);
 sig::Slot<void()> update(Widget& w);
-sig::Slot<void(Coordinates, Mouse_button)> click(Widget& w);
-sig::Slot<void(Mouse_button)> click(Widget& w, Coordinates c);
-sig::Slot<void(Coordinates)> click(Widget& w, Mouse_button b);
-sig::Slot<void()> click(Widget& w, Coordinates c, Mouse_button b);
+sig::Slot<void(Point, Mouse_button)> click(Widget& w);
+sig::Slot<void(Mouse_button)> click(Widget& w, Point c);
+sig::Slot<void(Point)> click(Widget& w, Mouse_button b);
+sig::Slot<void()> click(Widget& w, Point c, Mouse_button b);
 sig::Slot<void(Key)> keypress(Widget& w);
 sig::Slot<void()> keypress(Widget& w, Key k);
 sig::Slot<void(Color)> set_background(Widget& w);

@@ -6,7 +6,7 @@
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/border.hpp>
-#include <cppurses/widget/coordinates.hpp>
+#include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 
 #include <optional/optional.hpp>
@@ -22,7 +22,7 @@ void Painter::put(const Glyph_string& text, std::size_t x, std::size_t y) {
     if (!widget_->on_tree() || !widget_->visible()) {
         return;
     }
-    Coordinates original_position{widget_->cursor_x(), widget_->cursor_y()};
+    Point original_position{widget_->cursor_x(), widget_->cursor_y()};
     move_cursor(*widget_, x, y);
     for (Glyph g : text) {
         add_default_attributes(&g);
@@ -43,7 +43,7 @@ void Painter::put(const Glyph_string& text, std::size_t x, std::size_t y) {
     }
 }
 
-void Painter::put(const Glyph_string& text, Coordinates position) {
+void Painter::put(const Glyph_string& text, Point position) {
     this->put(text, position.x, position.y);
 }
 
@@ -103,50 +103,50 @@ void Painter::border(const Border& b) {
     }
 
     // North Wall
-    Coordinates north_left{widg_x + 1, widg_y};
-    Coordinates north_right{widg_x + width - 1, widg_y};
+    Point north_left{widg_x + 1, widg_y};
+    Point north_right{widg_x + width - 1, widg_y};
     // South Wall
-    Coordinates south_left{widg_x + 1, widg_y + height};
-    Coordinates south_right{widg_x + width - 1, widg_y + height};
+    Point south_left{widg_x + 1, widg_y + height};
+    Point south_right{widg_x + width - 1, widg_y + height};
     // West Wall
-    Coordinates west_top{widg_x, widg_y + 1};
-    Coordinates west_bottom{widg_x, widg_y + height - 1};
+    Point west_top{widg_x, widg_y + 1};
+    Point west_bottom{widg_x, widg_y + height - 1};
     // East Wall
-    Coordinates east_top{widg_x + width, widg_y + 1};
-    Coordinates east_bottom{widg_x + width, widg_y + height - 1};
+    Point east_top{widg_x + width, widg_y + 1};
+    Point east_bottom{widg_x + width, widg_y + height - 1};
 
     // Corners
-    Coordinates north_east{east_top.x, north_left.y};
-    Coordinates north_west{west_top.x, north_right.y};
-    Coordinates south_east{east_bottom.x, south_left.y};
-    Coordinates south_west{west_bottom.x, south_right.y};
+    Point north_east{east_top.x, north_left.y};
+    Point north_west{west_top.x, north_right.y};
+    Point south_east{east_bottom.x, south_left.y};
+    Point south_west{west_bottom.x, south_right.y};
 
     // Edge Cases:
     // Height == 1
     if (widget_->height() == 1 && widget_->north_border_disqualified()) {
-        west_top = Coordinates{widg_x, widg_y};
+        west_top = Point{widg_x, widg_y};
         west_bottom = west_top;
-        east_top = Coordinates{widg_x + width, widg_y};
+        east_top = Point{widg_x + width, widg_y};
         east_bottom = east_top;
     } else if (widget_->height() == 1 && widget_->south_border_disqualified() &&
                !widget_->north_border_disqualified()) {  // && b.north_enabled?
-        west_top = Coordinates{widg_x, widg_y + 1};
+        west_top = Point{widg_x, widg_y + 1};
         west_bottom = west_top;
-        east_top = Coordinates{widg_x + width, widg_y + 1};
+        east_top = Point{widg_x + width, widg_y + 1};
         east_bottom = east_top;
     }
 
     // Width == 1
     if (widget_->width() == 1 && widget_->west_border_disqualified()) {
-        north_left = Coordinates{widg_x, widg_y};
+        north_left = Point{widg_x, widg_y};
         north_right = north_left;
-        south_left = Coordinates{widg_x, widg_y + height /*- 1*/};
+        south_left = Point{widg_x, widg_y + height /*- 1*/};
         south_right = south_left;
     } else if (widget_->width() == 1 && widget_->east_border_disqualified() &&
                !widget_->west_border_disqualified()) {  // && b.west_enabled?
-        north_left = Coordinates{widg_x + 1, widg_y};
+        north_left = Point{widg_x + 1, widg_y};
         north_right = north_left;
-        south_left = Coordinates{widg_x + 1, widg_y + height /*- 1*/};
+        south_left = Point{widg_x + 1, widg_y + height /*- 1*/};
         south_right = south_left;
     }
 
@@ -199,7 +199,7 @@ void Painter::border(const Border& b) {
 
     // Corners - Special Cases
     // North-West
-    Coordinates nw{widget_->x() - west_border_offset(*widget_),
+    Point nw{widget_->x() - west_border_offset(*widget_),
                    widget_->y() - north_border_offset(*widget_)};
     if (!b.north_west_enabled && !b.north_enabled && b.west_enabled) {
         this->unbound_put_string(nw, b.west);
@@ -207,7 +207,7 @@ void Painter::border(const Border& b) {
         this->unbound_put_string(nw, b.north);
     }
     // North-East
-    Coordinates ne{
+    Point ne{
         widget_->x() + widget_->width() - 1 + east_border_offset(*widget_),
         widget_->y() - north_border_offset(*widget_)};
     if (!b.north_east_enabled && !b.north_enabled && b.east_enabled) {
@@ -216,7 +216,7 @@ void Painter::border(const Border& b) {
         this->unbound_put_string(ne, b.north);
     }
     // South-West
-    Coordinates sw{
+    Point sw{
         widget_->x() - west_border_offset(*widget_),
         widget_->y() + widget_->height() - 1 + south_border_offset(*widget_)};
     if (!b.south_west_enabled && !b.south_enabled && b.west_enabled) {
@@ -225,7 +225,7 @@ void Painter::border(const Border& b) {
         this->unbound_put_string(sw, b.south);
     }
     // South-East
-    Coordinates se{
+    Point se{
         widget_->x() + widget_->width() - 1 + east_border_offset(*widget_),
         widget_->y() + widget_->height() - 1 + south_border_offset(*widget_)};
     if (!b.south_east_enabled && !b.south_enabled && b.east_enabled) {
@@ -260,7 +260,7 @@ void Painter::clear_screen() {
     }
 }
 
-void Painter::unbound_put_string(const Coordinates& point,
+void Painter::unbound_put_string(const Point& point,
                                  const Glyph_string& gs) {
     this->unbound_put_string(point.x, point.y, gs);
 }
@@ -277,8 +277,8 @@ void Painter::unbound_put_string(std::size_t glob_x,
     }
 }
 
-void Painter::unbound_line(const Coordinates& point_1,
-                           const Coordinates& point_2,
+void Painter::unbound_line(const Point& point_1,
+                           const Point& point_2,
                            const Glyph& symbol) {
     this->unbound_line(point_1.x, point_1.y, point_2.x, point_2.y, symbol);
 }

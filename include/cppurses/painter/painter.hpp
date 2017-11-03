@@ -1,7 +1,7 @@
 #ifndef PAINTER_PAINTER_HPP
 #define PAINTER_PAINTER_HPP
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/widget/coordinates.hpp>
+#include <cppurses/widget/point.hpp>
 
 #include <cstddef>
 
@@ -14,7 +14,7 @@ class Painter {
    public:
     explicit Painter(Widget* widget);
 
-    void put(const Glyph_string& text, Coordinates position);
+    void put(const Glyph_string& text, Point position);
     void put(const Glyph_string& text, std::size_t x, std::size_t y);
     void put(const Glyph_string& text);
 
@@ -39,12 +39,12 @@ class Painter {
     void clear_screen();
 
    private:
-    void unbound_put_string(const Coordinates& point, const Glyph_string& gs);
+    void unbound_put_string(const Point& point, const Glyph_string& gs);
     void unbound_put_string(std::size_t glob_x,
                             std::size_t glob_y,
                             const Glyph_string& gs);
-    void unbound_line(const Coordinates& point_1,
-                      const Coordinates& point_2,
+    void unbound_line(const Point& point_1,
+                      const Point& point_2,
                       const Glyph& symbol);
     void unbound_line(std::size_t glob_x1,
                       std::size_t glob_y1,

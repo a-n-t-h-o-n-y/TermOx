@@ -3,8 +3,8 @@
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/widget/layouts/vertical_layout.hpp>
-#include <cppurses/widget/widgets/push_button.hpp>
 #include <cppurses/widget/widgets/blank_height.hpp>
+#include <cppurses/widget/widgets/push_button.hpp>
 
 #include <signals/slot.hpp>
 
@@ -35,18 +35,14 @@ class Menu : public Vertical_layout {
     bool key_press_event(Key key, char symbol) override;
 
     bool mouse_press_event(Mouse_button button,
-                           std::size_t global_x,
-                           std::size_t global_y,
-                           std::size_t local_x,
-                           std::size_t local_y,
+                           Point global,
+                           Point local,
                            std::uint8_t device_id) override;
 
     bool mouse_press_event_filter(Event_handler* receiver,
                                   Mouse_button button,
-                                  std::size_t global_x,
-                                  std::size_t global_y,
-                                  std::size_t local_x,
-                                  std::size_t local_y,
+                                  Point global,
+                                  Point local,
                                   std::uint8_t device_id) override;
 
    private:

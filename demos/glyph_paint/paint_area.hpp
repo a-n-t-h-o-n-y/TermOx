@@ -44,23 +44,21 @@ class Paint_area : public Widget {
     bool paint_event() override;
 
     bool mouse_press_event(Mouse_button button,
-                           std::size_t global_x,
-                           std::size_t global_y,
-                           std::size_t local_x,
-                           std::size_t local_y,
+                           Point global,
+                           Point local,
                            std::uint8_t device_id) override;
 
     bool key_press_event(Key key, char symbol) override;
 
    private:
-    std::map<Coordinates, Glyph> glyphs_painted_;
+    std::map<Point, Glyph> glyphs_painted_;
     Glyph current_glyph_{"x"};
     Glyph before_erase_{"x"};
     bool clone_enabled_{false};
     bool erase_enabled_{false};
 
     void place_glyph(std::size_t x, std::size_t y);
-    void remove_glyph(Coordinates coords);
+    void remove_glyph(Point coords);
 };
 
 namespace slot {

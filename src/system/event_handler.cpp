@@ -3,7 +3,7 @@
 #include <cppurses/system/events/enable_event.hpp>
 #include <cppurses/system/mouse_button.hpp>
 #include <cppurses/system/system.hpp>
-#include <cppurses/widget/coordinates.hpp>
+#include <cppurses/widget/point.hpp>
 
 #include <algorithm>
 #include <cstddef>
@@ -68,52 +68,42 @@ bool Event_handler::disable_event() {
 }
 
 bool Event_handler::mouse_press_event(Mouse_button button,
-                                      std::size_t global_x,
-                                      std::size_t global_y,
-                                      std::size_t local_x,
-                                      std::size_t local_y,
+                                      Point global,
+                                      Point local,
                                       std::uint8_t device_id) {
-    clicked(Coordinates{global_x, global_y});
-    clicked_xy(global_x, global_y);
+    clicked(global);
+    clicked_xy(global.x, global.y);
     return true;
 }
 
 bool Event_handler::mouse_release_event(Mouse_button button,
-                                        std::size_t global_x,
-                                        std::size_t global_y,
-                                        std::size_t local_x,
-                                        std::size_t local_y,
+                                        Point global,
+                                        Point local,
                                         std::uint8_t device_id) {
-    click_released(Coordinates{global_x, global_y});
-    click_released_xy(global_x, global_y);
+    click_released(global);
+    click_released_xy(global.x, global.y);
     return true;
 }
 
 bool Event_handler::mouse_double_click_event(Mouse_button button,
-                                             std::size_t global_x,
-                                             std::size_t global_y,
-                                             std::size_t local_x,
-                                             std::size_t local_y,
+                                             Point global,
+                                             Point local,
                                              std::uint8_t device_id) {
-    double_clicked(Coordinates{global_x, global_y});
-    double_clicked_xy(global_x, global_y);
+    double_clicked(global);
+    double_clicked_xy(global.x, global.y);
     return true;
 }
 
 bool Event_handler::mouse_wheel_event(Mouse_button button,
-                                      std::size_t global_x,
-                                      std::size_t global_y,
-                                      std::size_t local_x,
-                                      std::size_t local_y,
+                                      Point global,
+                                      Point local,
                                       std::uint8_t device_id) {
     return false;
 }
 
 bool Event_handler::mouse_move_event(Mouse_button button,
-                                     std::size_t global_x,
-                                     std::size_t global_y,
-                                     std::size_t local_x,
-                                     std::size_t local_y,
+                                     Point global,
+                                     Point local,
                                      std::uint8_t device_id) {
     return false;
 }
@@ -161,67 +151,53 @@ bool Event_handler::disable_event_filter(Event_handler* receiver) {
 }
 
 bool Event_handler::move_event_filter(Event_handler* receiver,
-                                      std::size_t new_x,
-                                      std::size_t new_y,
-                                      std::size_t old_x,
-                                      std::size_t old_y) {
+                                      Point new_position,
+                                      Point old_position) {
     return false;
 }
 
 bool Event_handler::resize_event_filter(Event_handler* receiver,
-                                        std::size_t new_width,
-                                        std::size_t new_height,
-                                        std::size_t old_width,
-                                        std::size_t old_height) {
+                                        Area new_size,
+                                        Area old_size) {
     return false;
 }
 
 bool Event_handler::mouse_press_event_filter(Event_handler* receiver,
                                              Mouse_button button,
-                                             std::size_t global_x,
-                                             std::size_t global_y,
-                                             std::size_t local_x,
-                                             std::size_t local_y,
+                                             Point global,
+                                             Point local,
                                              std::uint8_t device_id) {
     return false;
 }
 
 bool Event_handler::mouse_release_event_filter(Event_handler* receiver,
                                                Mouse_button button,
-                                               std::size_t global_x,
-                                               std::size_t global_y,
-                                               std::size_t local_x,
-                                               std::size_t local_y,
+                                               Point global,
+                                               Point local,
                                                std::uint8_t device_id) {
     return false;
 }
 
 bool Event_handler::mouse_double_click_event_filter(Event_handler* receiver,
                                                     Mouse_button button,
-                                                    std::size_t global_x,
-                                                    std::size_t global_y,
-                                                    std::size_t local_x,
-                                                    std::size_t local_y,
+                                                    Point global,
+                                                    Point local,
                                                     std::uint8_t device_id) {
     return false;
 }
 
 bool Event_handler::mouse_wheel_event_filter(Event_handler* receiver,
                                              Mouse_button button,
-                                             std::size_t global_x,
-                                             std::size_t global_y,
-                                             std::size_t local_x,
-                                             std::size_t local_y,
+                                             Point global,
+                                             Point local,
                                              std::uint8_t device_id) {
     return false;
 }
 
 bool Event_handler::mouse_move_event_filter(Event_handler* receiver,
                                             Mouse_button button,
-                                            std::size_t global_x,
-                                            std::size_t global_y,
-                                            std::size_t local_x,
-                                            std::size_t local_y,
+                                            Point global,
+                                            Point local,
                                             std::uint8_t device_id) {
     return false;
 }

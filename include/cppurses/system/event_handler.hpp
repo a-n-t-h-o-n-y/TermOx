@@ -2,7 +2,8 @@
 #define SYSTEM_EVENT_HANDLER_HPP
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/mouse_button.hpp>
-#include <cppurses/widget/coordinates.hpp>
+#include <cppurses/widget/area.hpp>
+#include <cppurses/widget/point.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -35,43 +36,27 @@ class Event_handler {
     virtual bool child_polished_event(Widget* child) = 0;
     virtual bool enable_event();
     virtual bool disable_event();
-    virtual bool move_event(std::size_t new_x,
-                            std::size_t new_y,
-                            std::size_t old_x,
-                            std::size_t old_y) = 0;
-    virtual bool resize_event(std::size_t new_width,
-                              std::size_t new_height,
-                              std::size_t old_width,
-                              std::size_t old_height) = 0;
+    virtual bool move_event(Point new_position, Point old_position) = 0;
+    virtual bool resize_event(Area new_size, Area old_size) = 0;
     virtual bool mouse_press_event(Mouse_button button,
-                                   std::size_t global_x,
-                                   std::size_t global_y,
-                                   std::size_t local_x,
-                                   std::size_t local_y,
+                                   Point global,
+                                   Point local,
                                    std::uint8_t device_id);
     virtual bool mouse_release_event(Mouse_button button,
-                                     std::size_t global_x,
-                                     std::size_t global_y,
-                                     std::size_t local_x,
-                                     std::size_t local_y,
+                                     Point global,
+                                     Point local,
                                      std::uint8_t device_id);
     virtual bool mouse_double_click_event(Mouse_button button,
-                                          std::size_t global_x,
-                                          std::size_t global_y,
-                                          std::size_t local_x,
-                                          std::size_t local_y,
+                                          Point global,
+                                          Point local,
                                           std::uint8_t device_id);
     virtual bool mouse_wheel_event(Mouse_button button,
-                                   std::size_t global_x,
-                                   std::size_t global_y,
-                                   std::size_t local_x,
-                                   std::size_t local_y,
+                                   Point global,
+                                   Point local,
                                    std::uint8_t device_id);
     virtual bool mouse_move_event(Mouse_button button,
-                                  std::size_t global_x,
-                                  std::size_t global_y,
-                                  std::size_t local_x,
-                                  std::size_t local_y,
+                                  Point global,
+                                  Point local,
                                   std::uint8_t device_id);
     virtual bool key_press_event(Key key, char symbol);
     virtual bool key_release_event(Key key, char symbol);
@@ -95,49 +80,35 @@ class Event_handler {
     virtual bool enable_event_filter(Event_handler* receiver);
     virtual bool disable_event_filter(Event_handler* receiver);
     virtual bool move_event_filter(Event_handler* receiver,
-                                   std::size_t new_x,
-                                   std::size_t new_y,
-                                   std::size_t old_x,
-                                   std::size_t old_y);
+                                   Point new_position,
+                                   Point old_position);
     virtual bool resize_event_filter(Event_handler* receiver,
-                                     std::size_t new_width,
-                                     std::size_t new_height,
-                                     std::size_t old_width,
-                                     std::size_t old_height);
+                                     Area new_size,
+                                     Area old_size);
     virtual bool mouse_press_event_filter(Event_handler* receiver,
                                           Mouse_button button,
-                                          std::size_t global_x,
-                                          std::size_t global_y,
-                                          std::size_t local_x,
-                                          std::size_t local_y,
+                                          Point global,
+                                          Point local,
                                           std::uint8_t device_id);
     virtual bool mouse_release_event_filter(Event_handler* receiver,
                                             Mouse_button button,
-                                            std::size_t global_x,
-                                            std::size_t global_y,
-                                            std::size_t local_x,
-                                            std::size_t local_y,
+                                            Point global,
+                                            Point local,
                                             std::uint8_t device_id);
     virtual bool mouse_double_click_event_filter(Event_handler* receiver,
                                                  Mouse_button button,
-                                                 std::size_t global_x,
-                                                 std::size_t global_y,
-                                                 std::size_t local_x,
-                                                 std::size_t local_y,
+                                                 Point global,
+                                                 Point local,
                                                  std::uint8_t device_id);
     virtual bool mouse_wheel_event_filter(Event_handler* receiver,
                                           Mouse_button button,
-                                          std::size_t global_x,
-                                          std::size_t global_y,
-                                          std::size_t local_x,
-                                          std::size_t local_y,
+                                          Point global,
+                                          Point local,
                                           std::uint8_t device_id);
     virtual bool mouse_move_event_filter(Event_handler* receiver,
                                          Mouse_button button,
-                                         std::size_t global_x,
-                                         std::size_t global_y,
-                                         std::size_t local_x,
-                                         std::size_t local_y,
+                                         Point global,
+                                         Point local,
                                          std::uint8_t device_id);
     virtual bool key_press_event_filter(Event_handler* receiver,
                                         Key key,
@@ -158,11 +129,11 @@ class Event_handler {
 
     // Signals
     sig::Signal<void(Event_handler*)> destroyed;
-    sig::Signal<void(Coordinates)> clicked;
+    sig::Signal<void(Point)> clicked;
     sig::Signal<void(std::size_t, std::size_t)> clicked_xy;
-    sig::Signal<void(Coordinates)> click_released;
+    sig::Signal<void(Point)> click_released;
     sig::Signal<void(std::size_t, std::size_t)> click_released_xy;
-    sig::Signal<void(Coordinates)> double_clicked;
+    sig::Signal<void(Point)> double_clicked;
     sig::Signal<void(std::size_t, std::size_t)> double_clicked_xy;
     sig::Signal<void(Key)> key_pressed;
     sig::Signal<void(Key)> key_released;

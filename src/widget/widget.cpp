@@ -10,7 +10,7 @@
 #include <cppurses/system/focus.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/border.hpp>
-#include <cppurses/widget/coordinates.hpp>
+#include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 
 #include <signals/signal.hpp>
@@ -169,7 +169,7 @@ std::size_t Widget::cursor_y() const {
     return cursor_position_.y;
 }
 
-Coordinates Widget::cursor_coordinates() const {
+Point Widget::cursor_coordinates() const {
     return cursor_position_;
 }
 
@@ -278,55 +278,50 @@ bool Widget::hide_event() {
     return true;
 }
 
-bool Widget::move_event(std::size_t new_x,
-                        std::size_t new_y,
-                        std::size_t old_x,
-                        std::size_t old_y) {
-    this->set_x(new_x);
-    this->set_y(new_y);
-    moved(Coordinates{new_x, new_y});
-    moved_xy(new_x, new_y);
+bool Widget::move_event(Point new_position, Point old_position) {
+    this->set_x(new_position.x);
+    this->set_y(new_position.y);
+    moved(new_position);
+    moved_xy(new_position.x, new_position.y);
     this->update();
     return true;
 }
 
-bool Widget::resize_event(std::size_t new_width,
-                          std::size_t new_height,
-                          std::size_t old_width,
-                          std::size_t old_height) {
+bool Widget::resize_event(Area new_size, Area old_size) {
     east_border_disqualified_ = false;
     west_border_disqualified_ = false;
     north_border_disqualified_ = false;
     south_border_disqualified_ = false;
 
-    // If new_width is too small for widget and borders, disqualify borders
-    if (new_width == 2) {
+    // If new_size.width is too small for widget and borders, disqualify borders
+    if (new_size.width == 2) {
         if (west_border_offset(*this) == 0) {
             west_border_disqualified_ = true;
         } else {
             east_border_disqualified_ = true;
         }
     }
-    if (new_width <= 1) {
+    if (new_size.width <= 1) {
         east_border_disqualified_ = true;
         west_border_disqualified_ = true;
     }
 
-    if (new_height == 2) {
+    if (new_size.height == 2) {
         if (north_border_offset(*this) == 0) {
             north_border_disqualified_ = true;
         } else {
             south_border_disqualified_ = true;
         }
     }
-    if (new_height <= 1) {
+    if (new_size.height <= 1) {
         north_border_disqualified_ = true;
         south_border_disqualified_ = true;
     }
 
-    width_ = new_width - east_border_offset(*this) - west_border_offset(*this);
-    height_ =
-        new_height - north_border_offset(*this) - south_border_offset(*this);
+    width_ =
+        new_size.width - east_border_offset(*this) - west_border_offset(*this);
+    height_ = new_size.height - north_border_offset(*this) -
+              south_border_offset(*this);
 
     resized(width_, height_);
     this->update();
@@ -444,14 +439,14 @@ bool has_coordinates(Widget& w, std::size_t global_x, std::size_t global_y) {
     return within_west && within_east && within_north && within_south;
 }
 
-void move_cursor(Widget& w, Coordinates c) {
+void move_cursor(Widget& w, Point c) {
     move_cursor(w, c.x, c.y);
 }
 
 void move_cursor(Widget& w, std::size_t x, std::size_t y) {
     w.move_cursor_x(x);
     w.move_cursor_y(y);
-    w.cursor_moved(Coordinates{x, y});
+    w.cursor_moved(Point{x, y});
     w.cursor_moved_xy(x, y);
 }
 

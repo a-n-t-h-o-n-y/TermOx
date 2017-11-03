@@ -6,8 +6,8 @@
 #include <cppurses/system/event_handler.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/widget/border.hpp>
-#include <cppurses/widget/coordinates.hpp>
 #include <cppurses/widget/focus_policy.hpp>
+#include <cppurses/widget/point.hpp>
 #include <cppurses/widget/size_policy.hpp>
 
 #include <algorithm>
@@ -57,7 +57,7 @@ class Widget : public Event_handler {
     std::unique_ptr<Widget> remove_child(Widget* child);
     std::unique_ptr<Widget> remove_child(const std::string& name);
 
-    // Global Coordinates(Including Border)
+    // Global Point(Including Border)
     std::size_t x() const;
     std::size_t y() const;
 
@@ -73,7 +73,7 @@ class Widget : public Event_handler {
     void move_cursor_y(std::size_t y);
     std::size_t cursor_x() const;
     std::size_t cursor_y() const;
-    Coordinates cursor_coordinates() const;
+    Point cursor_coordinates() const;
 
     void set_visible(bool visible, bool recursive = true);
     bool visible() const;
@@ -96,13 +96,13 @@ class Widget : public Event_handler {
     // Signals
     sig::Signal<void(const std::string&)> name_changed;
     sig::Signal<void(std::size_t, std::size_t)> resized;
-    sig::Signal<void(Coordinates)> moved;
+    sig::Signal<void(Point)> moved;
     sig::Signal<void(std::size_t, std::size_t)> moved_xy;
     sig::Signal<void(Widget*)> child_added;
     sig::Signal<void(Widget*)> child_removed;
     sig::Signal<void()> focused_in;
     sig::Signal<void()> focused_out;
-    sig::Signal<void(Coordinates)> cursor_moved;
+    sig::Signal<void(Point)> cursor_moved;
     sig::Signal<void(std::size_t, std::size_t)> cursor_moved_xy;
     sig::Signal<void(Color)> background_color_changed;
     sig::Signal<void(Color)> foreground_color_changed;
@@ -120,14 +120,8 @@ class Widget : public Event_handler {
     bool show_event() override;
     bool hide_event() override;
     bool on_tree_event(bool on_tree) override;
-    bool move_event(std::size_t new_x,
-                    std::size_t new_y,
-                    std::size_t old_x,
-                    std::size_t old_y) override;
-    bool resize_event(std::size_t new_width,
-                      std::size_t new_height,
-                      std::size_t old_width,
-                      std::size_t old_height) override;
+    bool move_event(Point new_position, Point old_position) override;
+    bool resize_event(Area new_size, Area old_size) override;
 
    private:
     std::string name_;
@@ -136,11 +130,11 @@ class Widget : public Event_handler {
     bool visible_{true};
     bool on_tree_{false};
 
-    Coordinates cursor_position_;
+    Point cursor_position_;
     bool show_cursor_{false};
 
     // Top left corner, relative to parent's coordinates.
-    Coordinates position_;
+    Point position_;
 
     std::size_t width_{width_policy.hint()};
     std::size_t height_{height_policy.hint()};
@@ -172,7 +166,7 @@ std::size_t south_border_offset(const Widget& w);
 
 bool has_coordinates(Widget& w, std::size_t global_x, std::size_t global_y);
 
-void move_cursor(Widget& w, Coordinates c);
+void move_cursor(Widget& w, Point c);
 void move_cursor(Widget& w, std::size_t x, std::size_t y);
 
 void set_background(Widget& w, Color c);

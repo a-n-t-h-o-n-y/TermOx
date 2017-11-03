@@ -119,26 +119,21 @@ bool Menu::key_press_event(Key key, char symbol) {
 }
 
 bool Menu::mouse_press_event(Mouse_button button,
-                             std::size_t global_x,
-                             std::size_t global_y,
-                             std::size_t local_x,
-                             std::size_t local_y,
+                             Point global,
+                             Point local,
                              std::uint8_t device_id) {
     if (button == Mouse_button::ScrollUp) {
         this->select_up();
     } else if (button == Mouse_button::ScrollDown) {
         this->select_down();
     }
-    return Widget::mouse_press_event(button, global_x, global_y, local_x,
-                                     local_y, device_id);
+    return Widget::mouse_press_event(button, global, local, device_id);
 }
 
 bool Menu::mouse_press_event_filter(Event_handler* receiver,
                                     Mouse_button button,
-                                    std::size_t global_x,
-                                    std::size_t global_y,
-                                    std::size_t local_x,
-                                    std::size_t local_y,
+                                    Point global,
+                                    Point local,
                                     std::uint8_t device_id) {
     if (button == Mouse_button::ScrollUp) {
         this->select_up();

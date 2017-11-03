@@ -18,7 +18,7 @@ using namespace cppurses;
 
 namespace {
 
-void insert_newline(Coordinates first, Coordinates second, std::ostream& os) {
+void insert_newline(Point first, Point second, std::ostream& os) {
     if (first.y == second.y) {
         return;
     }
@@ -26,7 +26,7 @@ void insert_newline(Coordinates first, Coordinates second, std::ostream& os) {
     os << newlines;
 }
 
-void insert_space(Coordinates first, Coordinates second, std::ostream& os) {
+void insert_space(Point first, Point second, std::ostream& os) {
     std::size_t spaces_n{second.x};
     if (first.y == second.y) {
         spaces_n -= first.x + 1;
@@ -136,8 +136,8 @@ void Paint_area::toggle_clone() {
 }
 
 void Paint_area::write(std::ostream& os) {
-    Coordinates previous_nl{0, 0};
-    Coordinates previous_s{0, static_cast<std::size_t>(-1)};
+    Point previous_nl{0, 0};
+    Point previous_s{0, static_cast<std::size_t>(-1)};
     for (const auto& cg_pair : glyphs_painted_) {
         insert_newline(previous_nl, cg_pair.first, os);
         insert_space(previous_s, cg_pair.first, os);
@@ -149,7 +149,7 @@ void Paint_area::write(std::ostream& os) {
 
 void Paint_area::read(std::istream& is) {
     this->clear();
-    Coordinates current{0, 0};
+    Point current{0, 0};
     is >> std::noskipws;
     std::string file_text{std::istream_iterator<char>{is},
                           std::istream_iterator<char>()};
@@ -178,12 +178,9 @@ bool Paint_area::paint_event() {
 }
 
 bool Paint_area::mouse_press_event(Mouse_button button,
-                                   std::size_t global_x,
-                                   std::size_t global_y,
-                                   std::size_t local_x,
-                                   std::size_t local_y,
+                                   Point global,
+                                   Point local,
                                    std::uint8_t device_id) {
-    Coordinates local{local_x, local_y};
     if (button == Mouse_button::Right) {
         this->remove_glyph(local);
     } else if (button == Mouse_button::Middle) {
@@ -191,10 +188,9 @@ bool Paint_area::mouse_press_event(Mouse_button button,
             this->set_glyph(glyphs_painted_[local]);
         }
     } else {
-        this->place_glyph(local_x, local_y);
+        this->place_glyph(local.x, local.y);
     }
-    return Widget::mouse_press_event(button, global_x, global_y, local_x,
-                                     local_y, device_id);
+    return Widget::mouse_press_event(button, global, local, device_id);
 }
 
 bool Paint_area::key_press_event(Key key, char symbol) {
@@ -244,19 +240,19 @@ bool Paint_area::key_press_event(Key key, char symbol) {
 
 void Paint_area::place_glyph(std::size_t x, std::size_t y) {
     if (clone_enabled_) {
-        if (glyphs_painted_.count(Coordinates{x, y}) == 1) {
-            this->set_glyph(glyphs_painted_[Coordinates{x, y}]);
+        if (glyphs_painted_.count(Point{x, y}) == 1) {
+            this->set_glyph(glyphs_painted_[Point{x, y}]);
             this->toggle_clone();
         }
     } else if (erase_enabled_) {
-        this->remove_glyph(Coordinates{x, y});
+        this->remove_glyph(Point{x, y});
     } else {
-        glyphs_painted_[Coordinates{x, y}] = current_glyph_;
+        glyphs_painted_[Point{x, y}] = current_glyph_;
         this->update();
     }
 }
 
-void Paint_area::remove_glyph(Coordinates coords) {
+void Paint_area::remove_glyph(Point coords) {
     glyphs_painted_.erase(coords);
     this->update();
 }

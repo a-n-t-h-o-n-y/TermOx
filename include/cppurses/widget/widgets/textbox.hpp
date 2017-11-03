@@ -25,10 +25,8 @@ class Textbox : public Textbox_base {
    protected:
     bool key_press_event(Key key, char symbol) override;
     bool mouse_press_event(Mouse_button button,
-                           std::size_t global_x,
-                           std::size_t global_y,
-                           std::size_t local_x,
-                           std::size_t local_y,
+                           Point global,
+                           Point local,
                            std::uint8_t device_id) override;
 
    private:

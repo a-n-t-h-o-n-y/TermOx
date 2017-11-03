@@ -36,29 +36,23 @@ void Glyph_select_stack::set_page_percent(float percent) {
 
 bool Glyph_select_stack::mouse_press_event_filter(Event_handler* receiver,
                                                   Mouse_button button,
-                                                  std::size_t global_x,
-                                                  std::size_t global_y,
-                                                  std::size_t local_x,
-                                                  std::size_t local_y,
+                                                  Point global,
+                                                  Point local,
                                                   std::uint8_t device_id) {
     if (button == Mouse_button::Left) {
         Matrix_display* md = static_cast<Matrix_display*>(this->active_page());
         if (md != nullptr) {
             Glyph_matrix& matrix{md->matrix};
-            if (matrix(local_x, local_y) != Glyph{" "}) {
-                glyph_selected(matrix(local_x, local_y));
+            if (matrix(local.x, local.y) != Glyph{" "}) {
+                glyph_selected(matrix(local.x, local.y));
             }
         }
     }
-    return Widget_stack::mouse_press_event(button, global_x, global_y, local_x,
-                                           local_y, device_id);
+    return Widget_stack::mouse_press_event(button, global, local, device_id);
 }
 
-bool Glyph_select_stack::resize_event(std::size_t new_width,
-                                      std::size_t new_height,
-                                      std::size_t old_width,
-                                      std::size_t old_height) {
-    Widget_stack::resize_event(new_width, new_height, old_width, old_height);
+bool Glyph_select_stack::resize_event(Area new_size, Area old_size) {
+    Widget_stack::resize_event(new_size, old_size);
     this->update_stack();
     return true;
 }

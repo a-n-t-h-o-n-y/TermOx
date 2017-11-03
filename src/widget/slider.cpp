@@ -39,20 +39,17 @@ bool Slider::paint_event() {
 }
 
 bool Slider::mouse_press_event(Mouse_button button,
-                               std::size_t global_x,
-                               std::size_t global_y,
-                               std::size_t local_x,
-                               std::size_t local_y,
+                               Point global,
+                               Point local,
                                std::uint8_t device_id) {
     if (button == Mouse_button::Left) {
-        this->set_percent(position_to_percent(local_x));
+        this->set_percent(position_to_percent(local.x));
     } else if (button == Mouse_button::ScrollUp) {
         scrolled_up();
     } else if (button == Mouse_button::ScrollDown) {
         scrolled_down();
     }
-    return Widget::mouse_press_event(button, global_x, global_y, local_x,
-                                     local_y, device_id);
+    return Widget::mouse_press_event(button, global, local, device_id);
 }
 
 bool Slider::key_press_event(Key key, char symbol) {

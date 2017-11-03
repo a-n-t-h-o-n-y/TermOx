@@ -63,18 +63,15 @@ void Cycle_box::cycle_backward() {
 }
 
 bool Cycle_box::mouse_press_event(Mouse_button button,
-                                  std::size_t global_x,
-                                  std::size_t global_y,
-                                  std::size_t local_x,
-                                  std::size_t local_y,
+                                  Point global,
+                                  Point local,
                                   std::uint8_t device_id) {
     if (button == Mouse_button::Left || button == Mouse_button::ScrollUp) {
         this->cycle_forward();
     } else if (button == Mouse_button::ScrollDown) {
         this->cycle_backward();
     }
-    return Label::mouse_press_event(button, global_x, global_y, local_x,
-                                    local_y, device_id);
+    return Label::mouse_press_event(button, global, local, device_id);
 }
 
 Cycle_box::Option::Option(Glyph_string name_) : name{std::move(name_)} {}

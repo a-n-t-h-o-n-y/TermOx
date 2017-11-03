@@ -1,8 +1,10 @@
 #include <cppurses/system/events/move_event.hpp>
 #include <cppurses/system/events/resize_event.hpp>
 #include <cppurses/system/system.hpp>
+#include <cppurses/widget/area.hpp>
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/layouts/vertical_layout.hpp>
+#include <cppurses/widget/point.hpp>
 #include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget.hpp>
 
@@ -129,7 +131,7 @@ std::vector<std::size_t> Vertical_layout::size_widgets() {
 
     // Post all Resize_events
     for (Dimensions& d : widgets) {
-        System::post_event<Resize_event>(d.widget, d.width, d.height);
+        System::post_event<Resize_event>(d.widget, Area{d.width, d.height});
     }
     std::vector<std::size_t> heights;
     heights.reserve(widgets.size());
@@ -423,14 +425,10 @@ void Vertical_layout::position_widgets(
     std::size_t index{0};
     std::size_t x_offset{west_border_offset(*this)};
     std::size_t y_offset{north_border_offset(*this)};
-    // std::size_t y_offset{0};
     for (Widget* w : widgets) {
         std::size_t x_pos{this->x() - west_border_offset(*this) + x_offset};
         std::size_t y_pos{this->y() - north_border_offset(*this) + y_offset};
-        // std::size_t x_pos{this->x() - west_border_offset(*w) +
-        //                   west_border_offset(*this)};
-        // std::size_t y_pos{this->y() - north_border_offset(*w) + y_offset};
-        System::post_event<Move_event>(w, x_pos, y_pos);
+        System::post_event<Move_event>(w, Point{x_pos, y_pos});
         y_offset += heights.at(index++);
     }
 }

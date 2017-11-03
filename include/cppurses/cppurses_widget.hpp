@@ -38,7 +38,8 @@
 #include <cppurses/widget/widgets/widget_stack_menu.hpp>
 
 #include <cppurses/widget/border.hpp>
-#include <cppurses/widget/coordinates.hpp>
+#include <cppurses/widget/point.hpp>
+#include <cppurses/widget/area.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/layout.hpp>
 #include <cppurses/widget/size_policy.hpp>
