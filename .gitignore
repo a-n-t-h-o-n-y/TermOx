@@ -1,7 +1,6 @@
 build/*
-src/CPPurses/docs/html/
+docs/html
 notes
-issues.txt
 tags
 *.[ao]
 *.so
