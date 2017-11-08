@@ -6,17 +6,100 @@ applications. Through a set of abstractions built on top of NCurses, CPPurses
 enables quick development of complex TUIs, without getting in the way of
 program logic.
 
-![alt text](docs/images/glyph_paint_demo.png)
-Glyph Paint Demo
+# Usage
+### Defining a New Widget
+```C++
+#include <cppurses/cppurses.hpp>
+#include <signals/signals.hpp>
+#include <cstdint>
+#include <utility>
+using namespace cppurses;
 
-![alt text](docs/images/notepad_demo.png)
-Notepad Demo
+// Button Widget that emits a signal when clicked.
+class Button : public Widget {
+   public:
+    Button(Glyph_string title) : title_{std::move(title)} {}
 
-![alt text](docs/images/chess_demo_1.png)
-Chess Demo
+    void set_title(Glyph_string title) {
+        title_ = std::move(title);
+        this->update();  // Post a Paint_event to the event queue.
+    }
 
-![alt text](docs/images/chess_demo_2.png)
-Chess Demo
+    // Signals
+    sig::Signal<void()> clicked;
+
+   protected:
+    bool mouse_press_event(Mouse_button button,
+                           Point global,
+                           Point local,
+                           std::uint8_t device_id) override {
+        // Emit Signal if Left Button Pressed
+        if (button == Mouse_button::Left) {
+            clicked();
+        }
+        return Widget::mouse_press_event(button, global, local, device_id);
+    }
+
+    bool paint_event() override {
+        // Calculate Center Position
+        std::size_t x{(this->width() / 2) - (title_.length() / 2)};
+        std::size_t y{this->height() / 2};
+        Point position{x, y};
+
+        // Put Title to Screen
+        Painter p{this};
+        p.put(title_, position);
+
+        return Widget::paint_event();
+    }
+
+   private:
+    Glyph_string title_;
+};
+
+```
+### Using Existing Widgets
+```C++
+struct Side_pane : public Vertical_layout {
+    Textbox& tbox_mirror{this->make_child<Textbox>("Mirror")};
+    Button& exit_btn{
+        this->make_child<Button>(Glyph_string{"Exit", Attribute::Bold})};
+
+    Side_pane() {
+        enable_border(tbox_mirror);
+        set_background(tbox_mirror, Color::Light_gray);
+        set_foreground(tbox_mirror, Color::Dark_blue);
+
+        exit_btn.height_policy.type(Size_policy::Fixed);
+        exit_btn.height_policy.hint(3);
+        set_background(exit_btn, Color::Dark_blue);
+        set_foreground(exit_btn, Color::Light_gray);
+
+        exit_btn.clicked.connect(System::quit);
+    }
+};
+
+// Two Textboxes and Button to exit.
+struct Two_boxes : public Horizontal_layout {
+    Textbox& tbox{this->make_child<Textbox>()};
+    Side_pane& side_pane{this->make_child<Side_pane>()};
+
+    Two_boxes() {
+        tbox.width_policy.stretch(2);
+        tbox.text_changed.connect(slot::set_text(side_pane.tbox_mirror));
+    }
+};
+
+int main() {
+    System sys;
+
+    Two_boxes main_widget;
+    sys.set_head(&main_widget);
+    Focus::set_focus_to(&main_widget.tbox);
+
+    return sys.run();
+}
+```
 
 ## Modules
 __Event System:__
@@ -86,6 +169,17 @@ For Unix based installs:
 ## Documentation
 Doxygen documentation can be found [here](
 https://a-n-t-h-o-n-y.github.io/CPPurses/annotated.html).
+
+## Demo Screenshots
+![alt text](docs/images/glyph_paint_demo.png)
+Glyph Paint Demo
+
+![alt text](docs/images/notepad_demo.png)
+Notepad Demo
+
+![alt text](docs/images/chess_demo_1.png)
+![alt text](docs/images/chess_demo_2.png)
+Chess Demo
 
 ## Tests
 CPPurses uses google test and has support for ctest.
