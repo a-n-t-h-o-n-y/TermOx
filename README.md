@@ -6,7 +6,7 @@ applications. Through a set of abstractions built on top of NCurses, CPPurses
 enables quick development of complex TUIs, without getting in the way of
 program logic.
 
-# Usage
+## Usage
 ### Defining a New Widget
 ```C++
 #include <cppurses/cppurses.hpp>
@@ -100,6 +100,7 @@ int main() {
     return sys.run();
 }
 ```
+![alt text](docs/images/two_boxes.gif)
 
 ## Modules
 __Event System:__
