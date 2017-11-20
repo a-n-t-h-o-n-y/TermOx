@@ -9,7 +9,8 @@
 namespace cppurses {
 
 struct Confirm_button : public Widget_stack {
-    Confirm_button(Glyph_string title, Glyph_string confirm_text = "Confirm");
+    explicit Confirm_button(Glyph_string title,
+                            Glyph_string confirm_text = "Confirm");
 
     struct Confirm_screen;
     Push_button& title_btn_;

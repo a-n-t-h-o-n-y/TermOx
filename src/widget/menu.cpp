@@ -15,7 +15,7 @@
 
 namespace cppurses {
 
-Menu::Menu_item::Menu_item(Push_button& ref) : button{ref}, selected{} {}
+Menu::Menu_item::Menu_item(Push_button& ref) : button{ref} {}
 
 Menu::Menu(Glyph_string title)
     : title_{this->make_child<Label>(std::move(title))} {
@@ -28,7 +28,7 @@ Menu::Menu(Glyph_string title)
 sig::Signal<void()>& Menu::add_item(Glyph_string label) {
     Push_button& button_ref{this->make_child<Push_button>(std::move(label))};
     button_ref.install_event_filter(this);
-    items_.push_back(Menu_item{button_ref});
+    items_.emplace_back(button_ref);
     button_ref.height_policy.type(Size_policy::Fixed);
     button_ref.height_policy.hint(1);
     auto& signal_ref{items_.back().selected};

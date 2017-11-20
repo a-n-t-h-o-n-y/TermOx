@@ -13,7 +13,7 @@ namespace cppurses {
 
 class Glyph_select : public Vertical_layout {
    public:
-    Glyph_select(Glyph_string symbols = "");
+    explicit Glyph_select(Glyph_string symbols = "");
 
     void set_symbols(Glyph_string symbols);
 

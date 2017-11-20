@@ -10,15 +10,13 @@
 
 namespace cppurses {
 
-Glyph_select_stack::Glyph_select_stack() {}
-
 void Glyph_select_stack::set_symbols(Glyph_string symbols) {
     symbols_ = std::move(symbols);
     this->update_stack();
 }
 
 void Glyph_select_stack::append_symbols(Glyph_string symbols) {
-    symbols_.append(std::move(symbols));
+    symbols_.append(symbols);
     this->update_stack();
 }
 
@@ -40,7 +38,7 @@ bool Glyph_select_stack::mouse_press_event_filter(Event_handler* receiver,
                                                   Point local,
                                                   std::uint8_t device_id) {
     if (button == Mouse_button::Left) {
-        Matrix_display* md = static_cast<Matrix_display*>(this->active_page());
+        auto* md = static_cast<Matrix_display*>(this->active_page());
         if (md != nullptr) {
             Glyph_matrix& matrix{md->matrix};
             if (matrix(local.x, local.y) != Glyph{" "}) {

@@ -10,9 +10,6 @@
 namespace cppurses {
 
 Labeled_cycle_box::Labeled_cycle_box(Glyph_string title) {
-    // this->height_policy.type(Size_policy::Fixed);
-    // this->height_policy.hint(1);
-
     this->set_title(std::move(title));
 
     disable_walls(label.border);
