@@ -76,9 +76,9 @@ void Paint_buffer::set_color(Color c, RGB values) {
     engine_.set_rgb(c, values.red, values.green, values.blue);
 }
 
-void Paint_buffer::resize(std::size_t x, std::size_t y) {
-    backing_store_.resize(x, y);
-    staging_area_.resize(x, y);
+void Paint_buffer::resize(std::size_t width, std::size_t height) {
+    backing_store_.resize(width, height);
+    staging_area_.resize(width, height);
 }
 
 bool Paint_buffer::commit(std::size_t x, std::size_t y) {

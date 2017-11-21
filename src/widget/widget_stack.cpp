@@ -16,7 +16,7 @@ void Widget_stack::set_active_page(std::size_t index) {
     if (pages_.empty()) {
         return;
     }
-    if (pages_[index].get() == nullptr) {
+    if (pages_[index] == nullptr) {
         return;
     }
     // Remove current child & place back into pages_ container.

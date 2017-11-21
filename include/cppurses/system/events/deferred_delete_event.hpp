@@ -8,7 +8,7 @@ class Widget;
 
 class Deferred_delete_event : public Event {
    public:
-    Deferred_delete_event(Event_handler* receiver);
+    explicit Deferred_delete_event(Event_handler* receiver);
 
     Widget* to_delete() const;
 

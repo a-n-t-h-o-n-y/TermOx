@@ -49,7 +49,7 @@ void Text_display::append(Glyph_string text) {
             glyph.brush().add_attributes(attr);
         }
     }
-    contents_.append(std::move(text));
+    contents_.append(text);
     this->update();
     text_changed(contents_);
 }
