@@ -48,7 +48,7 @@ const Menu& Widget_stack_menu::menu() const {
 
 void Widget_stack_menu::initialize() {
     this->focus_policy = Focus_policy::Strong;
-    stack_.page_changed.connect(page_changed);
+    stack_.page_changed.connect(sig::Slot<void(std::size_t)>{page_changed});
 
     // h_layout_.height_policy.type(Size_policy::Fixed);
     // h_layout_.height_policy.hint(1);
