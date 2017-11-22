@@ -23,7 +23,7 @@ Line_edit::Line_edit(Glyph_string initial_text)
 }
 
 void Line_edit::set_validator(std::function<bool(char)> validator) {
-    validator_ = validator;
+    validator_ = std::move(validator);
 }
 
 void Line_edit::clear_on_enter(bool enable) {

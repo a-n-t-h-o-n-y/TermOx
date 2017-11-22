@@ -7,8 +7,6 @@ namespace cppurses {
 
 class Glyph_select_stack : public Widget_stack {
    public:
-    Glyph_select_stack();
-
     void set_symbols(Glyph_string symbols);
     void append_symbols(Glyph_string symbols);
 

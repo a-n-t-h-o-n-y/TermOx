@@ -18,6 +18,7 @@ Widget* Deferred_delete_event::to_delete() const {
 bool Deferred_delete_event::send() const {
     if (receiver_ == nullptr) {
         System::exit();
+        return true;
     }
     return receiver_->deferred_delete_event(to_delete_);
 }

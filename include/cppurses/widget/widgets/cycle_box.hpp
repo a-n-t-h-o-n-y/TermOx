@@ -33,7 +33,7 @@ class Cycle_box : public Label {
 
    private:
     struct Option {
-        Option(Glyph_string name_);
+        explicit Option(Glyph_string name_);
         sig::Signal<void()> enabled;
         Glyph_string name;
     };

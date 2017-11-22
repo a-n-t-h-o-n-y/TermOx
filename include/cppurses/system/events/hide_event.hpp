@@ -7,7 +7,7 @@ class Event_handler;
 
 class Hide_event : public Event {
    public:
-    Hide_event(Event_handler* receiver);
+    explicit Hide_event(Event_handler* receiver);
     bool send() const override;
     bool filter_send(Event_handler* filter) const override;
 };

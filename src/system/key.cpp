@@ -1,11 +1,13 @@
 #include <cppurses/system/key.hpp>
 
+#include <cstdint>
+
 namespace cppurses {
 
 char key_to_char(Key key) {
-    const short alpha_low = 32;
-    const short alpha_high = 126;
-    auto value = static_cast<short>(key);
+    const std::int16_t alpha_low = 32;
+    const std::int16_t alpha_high = 126;
+    auto value = static_cast<std::int16_t>(key);
     if (value < alpha_low || value > alpha_high) {
         return '\0';
     }

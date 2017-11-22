@@ -10,7 +10,7 @@
 namespace cppurses {
 
 struct Confirm_button::Confirm_screen : public Horizontal_layout {
-    Confirm_screen(Glyph_string confirm_text)
+    explicit Confirm_screen(Glyph_string confirm_text)
         : confirm_btn{this->make_child<Push_button>(confirm_text)} {
         x_btn.width_policy.type(Size_policy::Fixed);
         x_btn.width_policy.hint(3);

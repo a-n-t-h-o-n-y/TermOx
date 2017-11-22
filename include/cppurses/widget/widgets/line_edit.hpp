@@ -16,7 +16,7 @@ namespace cppurses {
 
 class Line_edit : public Textbox {
    public:
-    Line_edit(Glyph_string initial_text = "");
+    explicit Line_edit(Glyph_string initial_text = "");
 
     void set_validator(std::function<bool(char)> validator);
 

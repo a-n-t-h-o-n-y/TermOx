@@ -8,7 +8,7 @@ namespace cppurses {
 
 class Blank_width : public Widget {
    public:
-    Blank_width(std::size_t width = 1);
+    explicit Blank_width(std::size_t width = 1);
 };
 
 }  // namespace cppurses

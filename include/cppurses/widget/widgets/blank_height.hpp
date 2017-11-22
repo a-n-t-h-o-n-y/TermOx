@@ -8,7 +8,7 @@ namespace cppurses {
 
 class Blank_height : public Widget {
    public:
-    Blank_height(std::size_t height = 1);
+    explicit Blank_height(std::size_t height = 1);
 };
 
 }  // namespace cppurses

@@ -72,6 +72,7 @@ std::vector<std::size_t> Vertical_layout::size_widgets() {
 
     // create vector of size references for below if statements
     std::vector<Dimensions_reference> widgets_w_refs;
+    widgets_w_refs.reserve(widgets.size());
     for (Dimensions& d : widgets) {
         widgets_w_refs.emplace_back(
             Dimensions_reference{d.widget, &d.width, &d.height});

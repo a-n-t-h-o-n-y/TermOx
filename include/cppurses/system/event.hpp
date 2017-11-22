@@ -55,7 +55,7 @@ class Event {
     virtual bool filter_send(Event_handler* filter) const = 0;
 
    protected:
-    const Type type_;
+    Type type_;
     Event_handler* receiver_;
 };
 

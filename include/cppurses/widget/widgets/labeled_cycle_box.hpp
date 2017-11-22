@@ -15,7 +15,7 @@ namespace cppurses {
 
 class Labeled_cycle_box : public Horizontal_layout {
    public:
-    Labeled_cycle_box(Glyph_string title = "");
+    explicit Labeled_cycle_box(Glyph_string title = "");
 
     void set_title(Glyph_string title);
 

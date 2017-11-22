@@ -47,7 +47,7 @@ class Menu : public Vertical_layout {
 
    private:
     struct Menu_item {
-        Menu_item(Push_button& ref);
+        explicit Menu_item(Push_button& ref);
         std::reference_wrapper<Push_button> button;
         sig::Signal<void()> selected;
     };

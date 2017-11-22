@@ -14,8 +14,6 @@ void Widget_stack_menu::add_page(Glyph_string title,
     stack_.add_page(std::move(widget));
     auto& signal = menu_.add_item(std::move(title));
     signal.connect(slot::set_active_page(stack_, this->size() - 1));
-    // menu_.make_item(std::move(title),
-    //                 slot::set_active_page(stack_, this->size() - 1));
     this->update();
 }
 
@@ -48,21 +46,8 @@ const Menu& Widget_stack_menu::menu() const {
 
 void Widget_stack_menu::initialize() {
     this->focus_policy = Focus_policy::Strong;
-    stack_.page_changed.connect(page_changed);
-
-    // h_layout_.height_policy.type(Size_policy::Fixed);
-    // h_layout_.height_policy.hint(1);
-    // main_menu_button.width_policy.type(Size_policy::Minimum);
-    // main_menu_button.width_policy.hint(11);
-    // empty_space_.width_policy.stretch(2);
-    // set_background(empty_space_, Color::Light_gray);
-    // set_background(main_menu_button, Color::Light_blue);
-
+    stack_.page_changed.connect(sig::Slot<void(std::size_t)>{page_changed});
     stack_.set_active_page(0);
-
-    // main_menu_button.clicked.connect(slot::set_active_page(stack_, 0));
-    // main_menu_button.clicked.connect([this] { Focus::set_focus_to(&menu_);
-    // });
     auto& esc_short = Shortcuts::add_shortcut(Key::Escape);
     esc_short.connect(slot::set_active_page(stack_, 0));
     esc_short.connect([this] { Focus::set_focus_to(&menu_); });

@@ -9,7 +9,8 @@ bool operator==(const Point& lhs, const Point& rhs) {
 bool operator<(const Point& lhs, const Point& rhs) {
     if (lhs.y < rhs.y) {
         return true;
-    } else if (lhs.y == rhs.y && lhs.x < rhs.x) {
+    }
+    if (lhs.y == rhs.y && lhs.x < rhs.x) {
         return true;
     }
     return false;

@@ -7,7 +7,7 @@ class Event_handler;
 
 class Show_event : public Event {
    public:
-    Show_event(Event_handler* receiver);
+    explicit Show_event(Event_handler* receiver);
     bool send() const override;
     bool filter_send(Event_handler* filter) const override;
 };
