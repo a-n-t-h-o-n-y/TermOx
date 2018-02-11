@@ -1,5 +1,8 @@
 #include "populated_glyph_stack.hpp"
 
+#include <cstddef>
+#include <vector>
+
 namespace {
 
 const Glyph_string box_drawing{
@@ -74,8 +77,8 @@ Glyph_string generate_color_blocks() {
 
     Glyph_string str;
     for (Glyph rect : rectangles) {
-        for (int i{0}; i < colors.size(); ++i) {
-            for (int j{i + 1}; j < colors.size(); ++j) {
+        for (std::size_t i{0}; i < colors.size(); ++i) {
+            for (std::size_t j{i + 1}; j < colors.size(); ++j) {
                 str.append(
                     Glyph{rect, background(colors[i]), foreground(colors[j])});
             }
