@@ -3,6 +3,7 @@
 
 #include <optional/optional.hpp>
 
+#include <cstddef>
 #include <cstdint>
 #include <vector>
 
@@ -15,7 +16,7 @@ void Brush::remove_attribute(Attribute attr) {
 std::vector<Attribute> Brush::attributes() const {
     std::vector<Attribute> vec;
     vec.reserve(8);
-    for (auto i = 0; i < attributes_.size(); ++i) {
+    for (std::size_t i = 0; i < attributes_.size(); ++i) {
         if (attributes_.test(i)) {
             vec.push_back(static_cast<Attribute>(i));
         }

@@ -5,6 +5,7 @@
 #include <cppurses/widget/widget.hpp>
 
 #include <algorithm>
+#include <cstddef>
 #include <iterator>
 #include <memory>
 #include <vector>
@@ -21,11 +22,11 @@ Widget* next_tab_focus() {
 
     // Populate widgets vector
     widgets.push_back(System::head());
-    int i{0};
+    std::size_t i{0};
     while (i < widgets.size()) {
         Widget* current = widgets[i];
         auto children = current->children();
-        // std::copy instead
+        // TODO std::copy instead
         std::for_each(std::begin(children), std::end(children),
                       [&widgets](Widget* p) { widgets.push_back(p); });
         ++i;

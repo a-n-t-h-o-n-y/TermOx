@@ -3,11 +3,13 @@ project(libcppurses LANGUAGES CXX)
 
 set(CMAKE_BUILD_TYPE Release)
 # set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+add_compile_options(-Wall)
 
 add_subdirectory(libs/Signals)
 include(GNUInstallDirs)
 enable_testing()
-add_compile_options(-std=c++14 -Werror -ferror-limit=10)
 
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/include
