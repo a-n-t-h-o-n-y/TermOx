@@ -165,9 +165,11 @@ install(TARGETS cppurses
     RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
+
 # Demos
 add_executable(demo ${DEMO_SOURCES})
-target_link_libraries(demo cppurses ncurses tinfo)
+find_package(Threads)
+target_link_libraries(demo cppurses ncurses tinfo ${CMAKE_THREAD_LIBS_INIT})
 
 # Tests
 # add_executable(testcppurses ${TEST_SOURCES})
