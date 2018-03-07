@@ -167,10 +167,10 @@ git clone https://github.com/a-n-t-h-o-n-y/CPPurses.git
 mkdir CPPurses/build && cd CPPurses/build
 git submodule update --init --recursive --remote  # Pull in dependencies
 cmake ..             # Generate Makefiles
-make                 # Build library archive
-ctest                # Run tests
+make                 # Build library archive and demo
 sudo make install    # Install header and library archive to system defaults.jk
 ```
+For projects using CPPurses, link with cppurses, ncurses and pthreads.
 
 ## Documentation
 Doxygen documentation can be found [here](
