@@ -168,8 +168,7 @@ install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # Demos
 add_executable(demo ${DEMO_SOURCES})
-find_package(Threads)
-target_link_libraries(demo cppurses ncurses ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(demo cppurses ncurses)
 
 # Tests
 # add_executable(testcppurses ${TEST_SOURCES})
