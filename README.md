@@ -160,7 +160,7 @@ Pre-made Widgets for reuse.
 
 ## Installation
 CPPurses depends on two header only libraries, this repo
-includes them as git submodules. You'll need NCurses installed
+includes them as git submodules. You'll need NCurses(>=6.0) installed
 on your system.
 ```
 git clone https://github.com/a-n-t-h-o-n-y/CPPurses.git

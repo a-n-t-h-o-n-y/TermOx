@@ -30,7 +30,9 @@ std::uint32_t attr_to_int(cppurses::Attribute attr) {
             break;
 
         case cppurses::Attribute::Italic:
+#if defined(A_ITALIC)
             a = A_ITALIC;
+#endif
             break;
 
         case cppurses::Attribute::Underline:
@@ -85,7 +87,7 @@ NCurses_paint_engine::NCurses_paint_engine(const Paint_buffer& buffer)
     ::mouseinterval(0);
     ::start_color();
     ::assume_default_colors(240, 240);  // Sets color pair 0 to black/black
-    ::set_escdelay(1);
+    ::ESCDELAY = 1;
     initialize_color_pairs();
     this->hide_cursor();
 }
