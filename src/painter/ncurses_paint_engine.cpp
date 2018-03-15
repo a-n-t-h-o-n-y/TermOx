@@ -15,7 +15,7 @@
 namespace {
 
 std::int16_t color_to_int(cppurses::Color c) {
-    return static_cast<std::int16_t>(c) - 240;
+    return static_cast<std::int16_t>(c) - cppurses::detail::k_init_color;
 }
 
 std::int16_t find_pair(cppurses::Color foreground, cppurses::Color background) {
@@ -63,10 +63,14 @@ std::uint32_t attr_to_int(cppurses::Attribute attr) {
 }
 
 void initialize_color_pairs() {
-    int index{0};
-    for (int i{240}; i < 256; ++i) {
-        for (int j{240}; j < 256; ++j) {
-            ::init_pair(index++, j, i);
+    int pair{0};
+    const int end_color{cppurses::detail::k_init_color + 16};
+    for (int i{cppurses::detail::k_init_color}; i < end_color; ++i) {
+        for (int j{cppurses::detail::k_init_color}; j < end_color; ++j) {
+            if (pair != 0) {
+                ::init_pair(pair, j, i);
+            }
+            ++pair;
         }
     }
 }
@@ -86,7 +90,7 @@ NCurses_paint_engine::NCurses_paint_engine(const Paint_buffer& buffer)
     ::mousemask(ALL_MOUSE_EVENTS, nullptr);
     ::mouseinterval(0);
     ::start_color();
-    ::assume_default_colors(240, 240);  // Sets color pair 0 to black/black
+    ::assume_default_colors(k_init_color, k_init_color);
     ::ESCDELAY = 1;
     initialize_color_pairs();
     this->hide_cursor();
@@ -147,7 +151,7 @@ void NCurses_paint_engine::set_rgb(Color c,
                                    std::int16_t g,
                                    std::int16_t b) {
     auto scale = [](std::int16_t i) {
-        return (static_cast<double>(i) / 255) * 1000;
+        return (static_cast<double>(i) / 255) * 999;
     };
     std::int16_t r_ = scale(r);
     std::int16_t g_ = scale(g);

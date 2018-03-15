@@ -4,8 +4,12 @@
 
 namespace cppurses {
 
+namespace detail {
+const int k_init_color{239};
+}  // namespace detail
+
 enum class Color : std::int16_t {
-    Black = 240,
+    Black = detail::k_init_color,
     Dark_red,
     Dark_blue,
     Dark_gray,
@@ -26,7 +30,7 @@ enum class Color : std::int16_t {
 namespace detail {
 
 enum class BackgroundColor : std::int16_t {
-    Black = 240,
+    Black = detail::k_init_color,
     Dark_red,
     Dark_blue,
     Dark_gray,
@@ -45,7 +49,7 @@ enum class BackgroundColor : std::int16_t {
 };
 
 enum class ForegroundColor : std::int16_t {
-    Black = 240,
+    Black = detail::k_init_color,
     Dark_red,
     Dark_blue,
     Dark_gray,
