@@ -8,6 +8,7 @@
 #include <ncurses.h>
 #include <optional/optional.hpp>
 
+#include <clocale>
 #include <cstddef>
 #include <cstdint>
 #include <string>
@@ -83,7 +84,7 @@ namespace detail {
 NCurses_paint_engine::NCurses_paint_engine(const Paint_buffer& buffer)
     : buffer_{buffer} {
     setenv("TERM", "xterm-256color", 1);
-    ::setlocale(LC_ALL, "en_US.UTF-8");
+    std::setlocale(LC_ALL, "en_US.UTF-8");
     ::initscr();
     ::noecho();
     ::keypad(::stdscr, true);
