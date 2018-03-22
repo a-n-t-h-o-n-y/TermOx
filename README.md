@@ -167,7 +167,8 @@ git clone https://github.com/a-n-t-h-o-n-y/CPPurses.git
 mkdir CPPurses/build && cd CPPurses/build
 git submodule update --init --recursive --remote  # Pull in dependencies
 cmake ..             # Generate Makefiles
-make                 # Build library archive and demo
+make                 # Build library
+make demo            # Build demo(optional)
 sudo make install    # Install header and library archive to system defaults
 ```
 For projects using CPPurses, link with cppurses, ncurses and pthreads.
