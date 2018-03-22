@@ -35,9 +35,27 @@ class Glyph_string : private std::vector<Glyph> {
         this->append(symbols, std::forward<Attributes>(attrs)...);
     }
 
+    // template <typename... Attributes>
+    // Glyph_string(char symbol, Attributes&&... attrs) {  // NOLINT
+    //     this->append(Glyph{symbol, std::forward<Attributes>(attrs)...});
+    // }
+
+    // constructor from const wchar_t* and from std::wstring and wchar_t
+
     template <typename... Attributes>
-    Glyph_string(char symbol, Attributes&&... attrs) {  // NOLINT
+    Glyph_string(wchar_t symbol, Attributes&&... attrs) {  // NOLINT
         this->append(Glyph{symbol, std::forward<Attributes>(attrs)...});
+    }
+
+    template <typename... Attributes>
+    Glyph_string(const wchar_t* symbols, Attributes&&... attrs) {  // NOLINT
+        this->append(symbols, std::forward<Attributes>(attrs)...);
+    }
+
+    template <typename... Attributes>
+    Glyph_string(const std::wstring& symbols, Attributes&&... attrs)  // NOLINT
+        : vector<Glyph>::vector() {
+        this->append(symbols, std::forward<Attributes>(attrs)...);
     }
 
     template <typename... Attributes>
@@ -56,6 +74,9 @@ class Glyph_string : private std::vector<Glyph> {
 
     operator std::string() const;  // NOLINT
     std::string str() const;
+    operator std::wstring() const;  // NOLINT
+    std::wstring w_str() const;
+
     size_type length() const;
 
     Glyph_string& operator+=(const Glyph& glyph);
@@ -64,20 +85,19 @@ class Glyph_string : private std::vector<Glyph> {
     template <typename... Attributes>
     Glyph_string& append(const Glyph& symbol, Attributes&&... attrs) {
         this->push_back(symbol);
-        this->back().brush().add_attributes(std::forward<Attributes>(attrs)...);
+        this->back().brush.add_attributes(std::forward<Attributes>(attrs)...);
         return *this;
     }
 
     // Multi-byte char compatibility.
-    // Converts to char32 string, then converts each char32 to a byte string
+    // Converts to wchar_t string, then converts each char32 to a byte string
     template <typename... Attributes>
     Glyph_string& append(const char* symbols, Attributes&&... attrs) {
-        std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter;
-        std::u32string wide_string = converter.from_bytes(symbols);
-        reserve(this->size() + wide_string.size());
-        for (char32_t sym : wide_string) {
-            this->append(Glyph{converter.to_bytes(sym)},
-                         std::forward<Attributes>(attrs)...);
+        std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+        std::wstring wide_string = converter.from_bytes(symbols);
+        this->reserve(this->size() + wide_string.size());
+        for (wchar_t sym : wide_string) {
+            this->append(Glyph{sym, std::forward<Attributes>(attrs)...});
         }
         return *this;
     }
@@ -86,6 +106,24 @@ class Glyph_string : private std::vector<Glyph> {
     Glyph_string& append(const std::string& symbols, Attributes&&... attrs) {
         return this->append(symbols.c_str(),
                             std::forward<Attributes>(attrs)...);
+    }
+
+    template <typename... Attributes>
+    Glyph_string& append(const wchar_t* symbols, Attributes&&... attrs) {
+        std::size_t i{0};
+        while (symbols[i] != L'\0') {
+            this->append(Glyph{symbols[i], std::forward<Attributes>(attrs)...});
+            ++i;
+        }
+        return *this;
+    }
+
+    template <typename... Attributes>
+    Glyph_string& append(const std::wstring& symbols, Attributes&&... attrs) {
+        for (wchar_t sym : symbols) {
+            this->append(Glyph{sym, std::forward<Attributes>(attrs)...});
+        }
+        return *this;
     }
 
     template <typename... Attributes>
@@ -99,7 +137,7 @@ class Glyph_string : private std::vector<Glyph> {
     template <typename... Attributes>
     void add_attributes(Attributes&&... attrs) {
         for (auto& glyph : *this) {
-            glyph.brush().add_attributes(std::forward<Attributes>(attrs)...);
+            glyph.brush.add_attributes(std::forward<Attributes>(attrs)...);
         }
     }
 
@@ -148,7 +186,7 @@ class Glyph_string : private std::vector<Glyph> {
     using std::vector<Glyph>::pop_back;
     using std::vector<Glyph>::resize;
     using std::vector<Glyph>::swap;
-};
+};  // namespace cppurses
 
 bool operator==(const Glyph_string& x, const Glyph_string& y);
 bool operator!=(const Glyph_string& x, const Glyph_string& y);

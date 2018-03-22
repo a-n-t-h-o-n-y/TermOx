@@ -34,7 +34,7 @@ void Text_display::insert(Glyph_string text, std::size_t index) {
     }
     for (auto& glyph : text) {
         for (auto& attr : new_text_brush_.attributes()) {
-            glyph.brush().add_attributes(attr);
+            glyph.brush.add_attributes(attr);
         }
     }
     contents_.insert(std::begin(contents_) + index, std::begin(text),
@@ -46,7 +46,7 @@ void Text_display::insert(Glyph_string text, std::size_t index) {
 void Text_display::append(Glyph_string text) {
     for (auto& glyph : text) {
         for (auto& attr : new_text_brush_.attributes()) {
-            glyph.brush().add_attributes(attr);
+            glyph.brush.add_attributes(attr);
         }
     }
     contents_.append(text);
@@ -234,10 +234,10 @@ void Text_display::update_display(std::size_t from_line) {
     std::size_t last_space{0};
     for (std::size_t i{begin}; i < contents_.size(); ++i) {
         ++length;
-        if (word_wrap_ && contents_.at(i).str() == " ") {
+        if (word_wrap_ && contents_.at(i).symbol == L' ') {
             last_space = length;
         }
-        if (contents_.at(i).str() == "\n") {
+        if (contents_.at(i).symbol == L'\n') {
             display_state_.push_back(Line_info{start_index, length - 1});
             start_index += length;
             length = 0;

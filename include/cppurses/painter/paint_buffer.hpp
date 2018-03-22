@@ -25,7 +25,7 @@ class Paint_buffer {
     const Glyph& at(std::size_t x, std::size_t y) const;
 
    private:
-    detail::NCurses_paint_engine engine_{*this};
+    detail::NCurses_paint_engine engine_;
     Glyph_matrix backing_store_;
     Glyph_matrix staging_area_;
 

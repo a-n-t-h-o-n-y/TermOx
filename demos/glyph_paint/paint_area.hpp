@@ -52,8 +52,8 @@ class Paint_area : public Widget {
 
    private:
     std::map<Point, Glyph> glyphs_painted_;
-    Glyph current_glyph_{"x"};
-    Glyph before_erase_{"x"};
+    Glyph current_glyph_{L'x'};
+    Glyph before_erase_{L'x'};
     bool clone_enabled_{false};
     bool erase_enabled_{false};
 

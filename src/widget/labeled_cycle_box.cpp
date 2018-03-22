@@ -15,7 +15,7 @@ Labeled_cycle_box::Labeled_cycle_box(Glyph_string title) {
     disable_walls(label.border);
     disable_corners(label.border);
     label.border.east_enabled = true;
-    label.border.east = "├";
+    label.border.east = L'├';
     enable_border(label);
 }
 
