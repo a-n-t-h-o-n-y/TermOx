@@ -8,7 +8,7 @@
 #include <cstddef>
 
 namespace cppurses {
-class Glyph;
+struct Glyph;
 
 class Paint_buffer {
    public:

@@ -7,7 +7,7 @@
 
 namespace cppurses {
 struct Border;
-class Glyph;
+struct Glyph;
 class Widget;
 
 class Painter {

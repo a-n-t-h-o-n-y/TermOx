@@ -19,7 +19,7 @@
  */
 
 namespace cppurses {
-class Glyph;
+struct Glyph;
 namespace detail {
 
 class NCurses_paint_engine {

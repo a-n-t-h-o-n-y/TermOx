@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 project(libcppurses LANGUAGES CXX)
 
-set(CMAKE_BUILD_TYPE Release)
-# set(CMAKE_BUILD_TYPE Debug)
+# set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-add_compile_options(-Wall)
+add_compile_options(-Wall )
 
 add_subdirectory(libs/Signals)
 include(GNUInstallDirs)
@@ -15,6 +15,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/Signals/include
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/Signals/libs/Optional/include
+    # /home/anthony/Documents/gcc-5-projects/libs/ncurses/include
     )
 
 set(SYSTEM_SOURCES
@@ -55,6 +56,8 @@ set(PAINTER_SOURCES
 	"src/painter/paint_buffer.cpp"
     "src/painter/glyph_matrix.cpp"
     "src/painter/glyph_string.cpp"
+    "src/painter/wchar_to_bytes.cpp"
+    "src/painter/extended_char.cpp"
     )	
 
 set(WIDGET_SOURCES
@@ -168,7 +171,9 @@ install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # Demos
 add_executable(demo ${DEMO_SOURCES})
-target_link_libraries(demo cppurses ncurses)
+target_link_libraries(demo cppurses
+    ncurses)
+    # /home/anthony/Documents/gcc-5-projects/libs/ncurses/lib/libncurses.a)
 
 # Tests
 # add_executable(testcppurses ${TEST_SOURCES})
