@@ -31,8 +31,8 @@ class Checkbox : public Widget {
                            std::uint8_t device_id) override;
 
    private:
-    Glyph empty_box_{"☐"};
-    Glyph checked_box_{"☒"};
+    Glyph empty_box_{L'☐'};
+    Glyph checked_box_{L'☒'};
     bool is_checked_{false};
     Glyph_string title_;
     int padding_;

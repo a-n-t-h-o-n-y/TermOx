@@ -41,7 +41,7 @@ bool Glyph_select_stack::mouse_press_event_filter(Event_handler* receiver,
         auto* md = static_cast<Matrix_display*>(this->active_page());
         if (md != nullptr) {
             Glyph_matrix& matrix{md->matrix};
-            if (matrix(local.x, local.y) != Glyph{" "}) {
+            if (matrix(local.x, local.y) != Glyph{L' '}) {
                 glyph_selected(matrix(local.x, local.y));
             }
         }

@@ -36,7 +36,7 @@ Open_file<CharT>::Open_file() {
     open_btn.width_policy.type(Size_policy::Fixed);
     open_btn.width_policy.hint(4);
     set_background(open_btn, Color::Blue);
-    seperator.background_tile = "⏵";
+    seperator.background_tile = L'⏵';
     set_background(filename_edit, Color::White);
     set_foreground(filename_edit, Color::Black);
     filename_edit.set_ghost_color(Color::Dark_gray);

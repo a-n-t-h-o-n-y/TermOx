@@ -87,7 +87,7 @@ class Widget : public Event_handler {
     Size_policy width_policy{this};
     Size_policy height_policy{this};
     Focus_policy focus_policy{Focus_policy::None};
-    Glyph background_tile{" "};
+    Glyph background_tile{L' '};
     Brush brush{background(Color::Black), foreground(Color::White)};
 
     // Signals

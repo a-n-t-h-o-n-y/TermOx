@@ -1,8 +1,11 @@
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/painter/utility/wchar_to_bytes.hpp>
 
 #include <algorithm>
+#include <codecvt>
 #include <iterator>
+#include <locale>
 #include <ostream>
 #include <string>
 
@@ -13,11 +16,21 @@ Glyph_string::operator std::string() const {  // NOLINT
 }
 
 std::string Glyph_string::str() const {
-    std::string string_;
+    const std::wstring wide_str{this->w_str()};
+    std::string result = utility::wchar_to_bytes(wide_str);
+    return result;
+}
+
+Glyph_string::operator std::wstring() const {  // NOLINT
+    return this->w_str();
+}
+
+std::wstring Glyph_string::w_str() const {
+    std::wstring result;
     for (const Glyph& g : *this) {
-        string_.append(g.c_str());
+        result.push_back(g.symbol);
     }
-    return string_;
+    return result;
 }
 
 Glyph_string::size_type Glyph_string::length() const {
@@ -36,7 +49,7 @@ Glyph_string Glyph_string::operator+(const Glyph_string& gs) const {
 
 void Glyph_string::remove_attribute(Attribute attr) {
     for (Glyph& glyph : *this) {
-        glyph.brush().remove_attribute(attr);
+        glyph.brush.remove_attribute(attr);
     }
 }
 

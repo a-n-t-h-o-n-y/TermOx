@@ -43,7 +43,7 @@ Text_and_attributes::Text_and_attributes() {
 void Text_and_attributes::initialize() {
     set_background(textbox, Color::Dark_gray);
     enable_border(textbox);
-    set_corners(textbox.border, "╭", "╮", "╰", "╯");
+    set_corners(textbox.border, L'╭', L'╮', L'╰', L'╯');
 
     // Signals -- Colors
     ac_select.fg_select.color_changed.connect(slot::set_foreground(textbox));

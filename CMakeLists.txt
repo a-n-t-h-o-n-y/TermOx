@@ -55,6 +55,8 @@ set(PAINTER_SOURCES
 	"src/painter/paint_buffer.cpp"
     "src/painter/glyph_matrix.cpp"
     "src/painter/glyph_string.cpp"
+    "src/painter/wchar_to_bytes.cpp"
+    "src/painter/extended_char.cpp"
     )	
 
 set(WIDGET_SOURCES
@@ -167,7 +169,7 @@ install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 
 # Demos
-add_executable(demo ${DEMO_SOURCES})
+add_executable(demo EXCLUDE_FROM_ALL ${DEMO_SOURCES})
 target_link_libraries(demo cppurses ncurses)
 
 # Tests
