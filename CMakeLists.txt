@@ -8,9 +8,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_compile_options(-Wall)
 
 add_subdirectory(libs/Signals)
-include(GNUInstallDirs)
 enable_testing()
 
+# Installation Info
+include(GNUInstallDirs)
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/Signals/include
@@ -161,16 +162,27 @@ add_library(cppurses STATIC
     ${WIDGET_SOURCES}
     )
 
+# Find ncurses
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+set(CURSES_NEED_NCURSE TRUE)
+find_package(Ncursesw REQUIRED)
+add_library(ncurses_lib INTERFACE IMPORTED)
+set_property(TARGET ncurses_lib PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+    ${CURSES_INCLUDE_DIR})
+set_property(TARGET ncurses_lib PROPERTY
+    INTERFACE_LINK_LIBRARIES ${CURSES_LIBRARIES})
+
+target_link_libraries(cppurses PRIVATE ncurses_lib)
+
 install(TARGETS cppurses
     ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-
 # Demos
 add_executable(demo EXCLUDE_FROM_ALL ${DEMO_SOURCES})
-target_link_libraries(demo cppurses ncurses)
+target_link_libraries(demo cppurses)
 
 # Tests
 # add_executable(testcppurses ${TEST_SOURCES})
