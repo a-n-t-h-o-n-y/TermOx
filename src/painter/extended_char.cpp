@@ -151,7 +151,18 @@ const std::map<wchar_t, chtype>& get_ext_chars(){
         {L'◉', 'x'},            {L'■', 'x'},            {L'▣', 'x'},
 
         {L'☐', ACS_BLOCK},      {L'⊙', ACS_BLOCK},      {L'○', ACS_BLOCK},
-        {L'▢', ACS_BLOCK},      {L'□', ACS_BLOCK}};
+        {L'▢', ACS_BLOCK},      {L'□', ACS_BLOCK},
+
+        {L'♝', 'B'},            {L'♚', 'K'},            {L'♞','N'},
+        {L'♟', 'P'},            {L'♛','Q'},             {L'♜','R'},
+
+        {L'⁸', '8'},            {L'⁷', '7'},            {L'⁶', '6'},
+        {L'⁵', '5'},            {L'⁴', '4'},            {L'³', '3'},
+        {L'²', '2'},            {L'¹', '1'},
+
+        {L'ᵃ', 'a'},            {L'ᵇ', 'b'},            {L'ᶜ', 'c'},
+        {L'ᵈ', 'd'},            {L'ᵉ', 'e'},            {L'ᶠ', 'f'},
+        {L'ᵍ', 'g'},            {L'ʰ', 'h'}};
     return extended_chars;
 }
 
