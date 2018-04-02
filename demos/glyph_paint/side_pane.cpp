@@ -7,8 +7,8 @@ namespace demos {
 namespace glyph_paint {
 
 Side_pane::Side_pane() {
-    space1.background_tile = "─";
-    space2.background_tile = "─";
+    space1.background_tile = L'─';
+    space2.background_tile = L'─';
 
     this->width_policy.type(Size_policy::Fixed);
     this->width_policy.hint(16);

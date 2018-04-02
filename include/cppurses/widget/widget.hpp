@@ -49,10 +49,7 @@ class Widget : public Event_handler {
     T& make_child(Args&&... args);
 
     template <typename T>
-    T* find_child(const std::string& name);
-
-    template <typename T>
-    const T* find_child(const std::string& name) const;
+    T* find_child(const std::string& name) const;
 
     std::unique_ptr<Widget> remove_child(Widget* child);
     std::unique_ptr<Widget> remove_child(const std::string& name);
@@ -90,7 +87,7 @@ class Widget : public Event_handler {
     Size_policy width_policy{this};
     Size_policy height_policy{this};
     Focus_policy focus_policy{Focus_policy::None};
-    Glyph background_tile{" "};
+    Glyph background_tile{L' '};
     Brush brush{background(Color::Black), foreground(Color::White)};
 
     // Signals
@@ -147,10 +144,6 @@ class Widget : public Event_handler {
     // void delete_child(Widget* child);
     void set_x(std::size_t global_x);
     void set_y(std::size_t global_y);
-
-    template <typename T, typename U>
-    static auto find_child_impl(U u, const std::string& name)
-        -> decltype(u->template find_child<T>(name));
 };
 
 // - - - - - - - - - - - - - - Free Functions - - - - - - - - - - - - - - - - -
@@ -187,32 +180,23 @@ T& Widget::make_child(Args&&... args) {
     return static_cast<T&>(*children_.back());
 }
 
-template <typename T>
-T* Widget::find_child(const std::string& name) {
-    return this->find_child_impl<T>(this, name);
-}
-
-template <typename T>
-const T* Widget::find_child(const std::string& name) const {
-    return this->find_child_impl<T>(this, name);
-}
-
 // Breadth First Search
-template <typename T, typename U>
-auto Widget::find_child_impl(U u, const std::string& name)
-    -> decltype(u->template find_child<T>(name)) {
-    std::queue<U> search_queue;
-    search_queue.push(u);
+template <typename T>
+T* Widget::find_child(const std::string& name) const {
+    std::queue<Widget*> search_queue;
+    for (Widget* child : this->children()) {
+        search_queue.push(child);
+    }
     while (!search_queue.empty()) {
-        auto current = search_queue.front();
+        Widget* current = search_queue.front();
         search_queue.pop();
-        auto widg_T_ptr = dynamic_cast<T*>(current);
-        if (widg_T_ptr != nullptr && current->name() == name) {
-            return widg_T_ptr;
+        auto cast_child = dynamic_cast<T*>(current);
+        if (cast_child != nullptr && current->name() == name) {
+            return cast_child;
         }
-        auto children = current->children();
-        std::for_each(std::begin(children), std::end(children),
-                      [&search_queue](Widget* c) { search_queue.push(c); });
+        for (Widget* child : current->children()) {
+            search_queue.push(child);
+        }
     }
     return nullptr;
 }

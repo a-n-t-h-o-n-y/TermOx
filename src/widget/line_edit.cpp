@@ -54,13 +54,13 @@ void Line_edit::invisible_input(bool enabled) {
 
 void Line_edit::underline(bool enabled) {
     if (enabled) {
-        this->background_tile = Glyph{" ", Attribute::Underline};
+        this->background_tile = Glyph{L' ', Attribute::Underline};
         Glyph_string underlined_text{this->contents()};
         underlined_text.add_attributes(Attribute::Underline);
         this->set_text(std::move(underlined_text));
         this->add_new_text_attribute(Attribute::Underline);
     } else {
-        this->background_tile = Glyph{" "};
+        this->background_tile = Glyph{L' '};
         Glyph_string non_underlined{this->contents()};
         non_underlined.remove_attribute(Attribute::Underline);
         this->set_text(std::move(non_underlined));

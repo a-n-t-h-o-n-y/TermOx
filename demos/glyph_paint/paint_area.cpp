@@ -1,6 +1,7 @@
 #include "paint_area.hpp"
 
 #include <cppurses/cppurses.hpp>
+#include <cppurses/painter/utility/wchar_to_bytes.hpp>
 #include <optional/optional.hpp>
 #include <signals/slot.hpp>
 
@@ -57,46 +58,46 @@ void Paint_area::set_glyph(Glyph glyph) {
     }
 }
 
-void Paint_area::set_symbol(const Glyph& symbol) {
+void Paint_area::set_symbol(const Glyph& sym) {
     if (erase_enabled_) {
         this->disable_erase();
         erase_disabled();
     }
-    current_glyph_.set_symbol(symbol.str());
-    opt::Optional<Color> sym_bg{symbol.brush().background_color()};
+    current_glyph_.symbol = sym.symbol;
+    opt::Optional<Color> sym_bg{sym.brush.background_color()};
     if (sym_bg) {
-        current_glyph_.brush().set_background(*sym_bg);
+        current_glyph_.brush.set_background(*sym_bg);
     }
-    opt::Optional<Color> sym_fg{symbol.brush().foreground_color()};
+    opt::Optional<Color> sym_fg{sym.brush.foreground_color()};
     if (sym_fg) {
-        current_glyph_.brush().set_foreground(*sym_fg);
+        current_glyph_.brush.set_foreground(*sym_fg);
     }
     glyph_changed(current_glyph_);
 }
 
 void Paint_area::set_foreground_color(Color c) {
-    current_glyph_.brush().set_foreground(c);
+    current_glyph_.brush.set_foreground(c);
     if (!erase_enabled_) {
         glyph_changed(current_glyph_);
     }
 }
 
 void Paint_area::set_background_color(Color c) {
-    current_glyph_.brush().set_background(c);
+    current_glyph_.brush.set_background(c);
     if (!erase_enabled_) {
         glyph_changed(current_glyph_);
     }
 }
 
 void Paint_area::set_attribute(Attribute attr) {
-    current_glyph_.brush().add_attributes(attr);
+    current_glyph_.brush.add_attributes(attr);
     if (!erase_enabled_) {
         glyph_changed(current_glyph_);
     }
 }
 
 void Paint_area::remove_attribute(Attribute attr) {
-    current_glyph_.brush().remove_attribute(attr);
+    current_glyph_.brush.remove_attribute(attr);
     if (!erase_enabled_) {
         glyph_changed(current_glyph_);
     }
@@ -104,7 +105,7 @@ void Paint_area::remove_attribute(Attribute attr) {
 
 void Paint_area::enable_erase() {
     erase_enabled_ = true;
-    glyph_changed(" ");
+    glyph_changed(L' ');
 }
 
 void Paint_area::disable_erase() {
@@ -113,12 +114,12 @@ void Paint_area::disable_erase() {
 }
 
 void Paint_area::enable_grid() {
-    this->background_tile = Glyph{"┼", foreground(Color::Dark_gray)};
+    this->background_tile = Glyph{L'┼', foreground(Color::Dark_gray)};
     this->update();
 }
 
 void Paint_area::disable_grid() {
-    this->background_tile = " ";
+    this->background_tile = L' ';
     this->update();
 }
 
@@ -141,7 +142,7 @@ void Paint_area::write(std::ostream& os) {
     for (const auto& cg_pair : glyphs_painted_) {
         insert_newline(previous_nl, cg_pair.first, os);
         insert_space(previous_s, cg_pair.first, os);
-        os << cg_pair.second.str();
+        os << cppurses::utility::wchar_to_bytes(cg_pair.second);
         previous_nl = cg_pair.first;
         previous_s = cg_pair.first;
     }
@@ -155,11 +156,12 @@ void Paint_area::read(std::istream& is) {
                           std::istream_iterator<char>()};
     Glyph_string file_glyphs{file_text};
     for (const Glyph& glyph : file_glyphs) {
-        if (glyph != ' ' && glyph != '\n' && glyph != '\r') {
+        const wchar_t sym{glyph.symbol};
+        if (sym != L' ' && sym != L'\n' && sym != L'\r') {
             glyphs_painted_[current] = glyph;
         }
         ++current.x;
-        if (glyph == '\n') {
+        if (sym == L'\n') {
             ++current.y;
             current.x = 0;
         }

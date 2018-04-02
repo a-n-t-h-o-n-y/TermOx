@@ -24,10 +24,10 @@ class Glyph_select : public Vertical_layout {
     Glyph_select_stack& glyph_stack{this->make_child<Glyph_select_stack>()};
     Horizontal_layout& bottom_row{this->make_child<Horizontal_layout>()};
     Push_button& left_btn{bottom_row.make_child<Push_button>(
-        Glyph{"⏴", foreground(Color::Black)})};
+        Glyph{L'⏴', foreground(Color::Black)})};
     Slider& slider{bottom_row.make_child<Slider>()};
     Push_button& right_btn{bottom_row.make_child<Push_button>(
-        Glyph{"⏵", foreground(Color::Black)})};
+        Glyph{L'⏵', foreground(Color::Black)})};
 
     std::size_t current_index();
     void flip_page_forward();

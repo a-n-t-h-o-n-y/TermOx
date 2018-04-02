@@ -1,10 +1,10 @@
-# Terminal User Interface Library
-
-__CPPurses__ is a widget framework for NCurses inspired by Qt. It
-comes from a desire for a simple and modern approach to building terminal
-applications. Through a set of abstractions built on top of NCurses, CPPurses
-enables quick development of complex TUIs, without getting in the way of
-program logic.
+# TUI Library
+__CPPurses__ is a Terminal User Interface Library built on top of
+[ncurses](https://www.gnu.org/software/ncurses/). CPPurses defines
+a framework of Widgets, Layouts and Events that make user input
+and program output to the terminal simple and readable. The
+library comes with a set of pre-built Widgets, though it is easy
+to define new Widgets and to extend existing Widgets.
 
 ## Usage
 ### Defining a New Widget
@@ -160,12 +160,18 @@ Pre-made Widgets for reuse.
 
 ## Installation
 CPPurses depends on two header only libraries, this repo
-includes them as git submodules. After cloning CPPurses, run
-`git submodule update --init -- recursive --remote`
-to pull in the external libraries. Generated build files from CMake
-will handle installation of each library and building of tests.
-For Unix based installs:
-`sudo make install`
+includes them as git submodules. You'll need NCurses(>=6.0) installed
+on your system.
+```
+git clone https://github.com/a-n-t-h-o-n-y/CPPurses.git
+mkdir CPPurses/build && cd CPPurses/build
+git submodule update --init --recursive --remote  # Pull in dependencies
+cmake ..             # Generate Makefiles
+make                 # Build library
+make demo            # Build demo(optional)
+sudo make install    # Install header and library archive to system defaults
+```
+For projects using CPPurses, link with cppurses, ncurses and pthreads.
 
 ## Documentation
 Doxygen documentation can be found [here](
@@ -183,8 +189,7 @@ Notepad Demo
 Chess Demo
 
 ## Tests
-CPPurses uses google test and has support for ctest.
+CPPurses uses google test.
 
 ## License
 This software is distributed under the [MIT License](LICENSE.txt).
-

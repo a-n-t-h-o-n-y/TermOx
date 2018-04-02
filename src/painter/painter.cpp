@@ -28,7 +28,7 @@ void Painter::put(const Glyph_string& text, std::size_t x, std::size_t y) {
         add_default_attributes(&g);
         auto glob_x = widget_->x() + widget_->cursor_x();
         auto glob_y = widget_->y() + widget_->cursor_y();
-        if (std::strcmp(g.c_str(), "\n") == 0) {
+        if (g.symbol == L'\n') {
             move_cursor(*widget_, 0, widget_->cursor_y() + 1);
         }  // TODO else if ( == \t) then move to next x coord divisible by
            // tabspace
@@ -200,16 +200,15 @@ void Painter::border(const Border& b) {
     // Corners - Special Cases
     // North-West
     Point nw{widget_->x() - west_border_offset(*widget_),
-                   widget_->y() - north_border_offset(*widget_)};
+             widget_->y() - north_border_offset(*widget_)};
     if (!b.north_west_enabled && !b.north_enabled && b.west_enabled) {
         this->unbound_put_string(nw, b.west);
     } else if (!b.north_west_enabled && !b.west_enabled && b.north_enabled) {
         this->unbound_put_string(nw, b.north);
     }
     // North-East
-    Point ne{
-        widget_->x() + widget_->width() - 1 + east_border_offset(*widget_),
-        widget_->y() - north_border_offset(*widget_)};
+    Point ne{widget_->x() + widget_->width() - 1 + east_border_offset(*widget_),
+             widget_->y() - north_border_offset(*widget_)};
     if (!b.north_east_enabled && !b.north_enabled && b.east_enabled) {
         this->unbound_put_string(ne, b.east);
     } else if (!b.north_east_enabled && !b.east_enabled && b.north_enabled) {
@@ -247,21 +246,20 @@ void Painter::clear_screen() {
         return;
     }
     Glyph bg_tile = widget_->background_tile;
-    if (!bg_tile.brush().background_color() &&
+    if (!bg_tile.brush.background_color() &&
         widget_->brush.background_color()) {
-        bg_tile.brush().set_background(*widget_->brush.background_color());
+        bg_tile.brush.set_background(*widget_->brush.background_color());
     }
-    if (!bg_tile.brush().foreground_color() &&
+    if (!bg_tile.brush.foreground_color() &&
         widget_->brush.foreground_color()) {
-        bg_tile.brush().set_foreground(*widget_->brush.foreground_color());
+        bg_tile.brush.set_foreground(*widget_->brush.foreground_color());
     }
     for (std::size_t i{gy}; i < gy + height; ++i) {
         this->unbound_line(gx, i, gx + width - 1, i, bg_tile);
     }
 }
 
-void Painter::unbound_put_string(const Point& point,
-                                 const Glyph_string& gs) {
+void Painter::unbound_put_string(const Point& point, const Glyph_string& gs) {
     this->unbound_put_string(point.x, point.y, gs);
 }
 
@@ -301,16 +299,14 @@ void Painter::unbound_line(std::size_t glob_x1,
 }
 
 void Painter::add_default_attributes(Glyph* g) {
-    if (!g->brush().background_color() && widget_->brush.background_color()) {
-        g->brush().add_attributes(
-            background(*widget_->brush.background_color()));
+    if (!g->brush.background_color() && widget_->brush.background_color()) {
+        g->brush.add_attributes(background(*widget_->brush.background_color()));
     }
-    if (!g->brush().foreground_color() && widget_->brush.foreground_color()) {
-        g->brush().add_attributes(
-            foreground(*widget_->brush.foreground_color()));
+    if (!g->brush.foreground_color() && widget_->brush.foreground_color()) {
+        g->brush.add_attributes(foreground(*widget_->brush.foreground_color()));
     }
     for (const auto& attr : widget_->brush.attributes()) {
-        g->brush().add_attributes(attr);
+        g->brush.add_attributes(attr);
     }
 }
 

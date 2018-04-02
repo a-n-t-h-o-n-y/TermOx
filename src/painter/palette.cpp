@@ -9,7 +9,7 @@
 namespace {
 
 std::size_t translate(cppurses::Color c) {
-    return static_cast<std::int16_t>(c) - 240;
+    return static_cast<std::int16_t>(c) - cppurses::detail::k_init_color;
 }
 
 }  // namespace
