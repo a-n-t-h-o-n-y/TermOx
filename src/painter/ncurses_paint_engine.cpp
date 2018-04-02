@@ -11,7 +11,8 @@
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
-#if NCURSES_VERSION_MAJOR < 6
+
+#ifndef add_wchstr
 #include <cppurses/painter/detail/extended_char.hpp>
 #endif
 
@@ -116,7 +117,7 @@ void NCurses_paint_engine::put_glyph(const Glyph& g) {
         attributes |= attr_to_int(attr);
     }
 
-#if NCURSES_VERSION_MAJOR >= 6  // wchar_t support
+#if defined(add_wchstr)
     cchar_t image{0, {g.symbol}};
     image.attr |= color_pair;
     image.attr |= attributes;
