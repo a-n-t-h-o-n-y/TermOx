@@ -1,7 +1,7 @@
-#include <painter/glyph.hpp>
-#include <painter/attribute.hpp>
-#include <painter/color.hpp>
-#include <painter/brush.hpp>
+#include <cppurses/painter/attribute.hpp>
+#include <cppurses/painter/brush.hpp>
+#include <cppurses/painter/color.hpp>
+#include <cppurses/painter/glyph.hpp>
 
 #include <gtest/gtest.h>
 
