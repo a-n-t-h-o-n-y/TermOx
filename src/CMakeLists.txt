@@ -121,5 +121,8 @@ install(TARGETS libcppurses
     RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(DIRECTORY ../include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(EXPORT CPPursesLibraryConfig DESTINATION share/CPPursesLibrary/cmake)
-export(TARGETS libcppurses FILE CPPursesLibraryConfig.cmake)
+export(
+    TARGETS libcppurses libsignals liboptional
+    FILE CPPursesLibraryConfig.cmake
+)
 
