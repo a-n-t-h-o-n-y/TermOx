@@ -54,5 +54,4 @@ T& Widget_stack_menu::make_page(Glyph_string title, Args&&... args) {
 }
 
 }  // namespace cppurses
-
 #endif  // WIDGET_WIDGETS_WIDGET_STACK_MENU_HPP

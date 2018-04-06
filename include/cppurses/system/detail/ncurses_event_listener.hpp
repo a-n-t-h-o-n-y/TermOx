@@ -1,8 +1,8 @@
 #ifndef NCURSES_EVENT_LISTENER_HPP
 #define NCURSES_EVENT_LISTENER_HPP
-#include <cppurses/system/detail/abstract_event_listener.hpp>
-
 #include <memory>
+
+#include <cppurses/system/detail/abstract_event_listener.hpp>
 
 namespace cppurses {
 class Widget;

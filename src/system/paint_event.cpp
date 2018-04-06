@@ -1,5 +1,6 @@
-#include <cppurses/system/event_handler.hpp>
 #include <cppurses/system/events/paint_event.hpp>
+
+#include <cppurses/system/event_handler.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {

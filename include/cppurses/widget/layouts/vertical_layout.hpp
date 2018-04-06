@@ -1,10 +1,10 @@
 #ifndef WIDGET_LAYOUTS_VERTICAL_LAYOUT_HPP
 #define WIDGET_LAYOUTS_VERTICAL_LAYOUT_HPP
-#include <cppurses/widget/layout.hpp>
-
 #include <cstddef>
 #include <functional>
 #include <vector>
+
+#include <cppurses/widget/layout.hpp>
 
 namespace cppurses {
 class Widget;

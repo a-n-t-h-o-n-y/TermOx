@@ -1,11 +1,12 @@
 #include <cppurses/system/detail/event_queue.hpp>
-#include <cppurses/system/event.hpp>
-#include <cppurses/system/events/deferred_delete_event.hpp>
-#include <cppurses/widget/widget.hpp>
 
 #include <algorithm>
 #include <iterator>
 #include <memory>
+
+#include <cppurses/system/event.hpp>
+#include <cppurses/system/events/deferred_delete_event.hpp>
+#include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
 namespace detail {

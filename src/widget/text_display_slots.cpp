@@ -1,12 +1,13 @@
-#include <cppurses/painter/attribute.hpp>
-#include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/widget/widgets/text_display.hpp>
 #include <cppurses/widget/widgets/text_display_slots.hpp>
-
-#include <signals/slot.hpp>
 
 #include <cstddef>
 #include <utility>
+
+#include <signals/slot.hpp>
+
+#include <cppurses/painter/attribute.hpp>
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/widget/widgets/text_display.hpp>
 
 namespace cppurses {
 

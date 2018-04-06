@@ -1,15 +1,15 @@
 #ifndef CPPURSES_WIDGET_WIDGETS_SAVE_FILE_HPP
 #define CPPURSES_WIDGET_WIDGETS_SAVE_FILE_HPP
+#include <fstream>
+
+#include <signals/signal.hpp>
+
 #include <cppurses/painter/color.hpp>
 #include <cppurses/widget/layouts/horizontal_layout.hpp>
 #include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widgets/blank_width.hpp>
 #include <cppurses/widget/widgets/line_edit.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
-
-#include <signals/signal.hpp>
-
-#include <fstream>
 
 namespace cppurses {
 

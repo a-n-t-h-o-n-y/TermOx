@@ -1,8 +1,9 @@
-#include <cppurses/system/event_handler.hpp>
 #include <cppurses/system/events/resize_event.hpp>
-#include <cppurses/widget/area.hpp>
 
 #include <cstddef>
+
+#include <cppurses/system/event_handler.hpp>
+#include <cppurses/widget/area.hpp>
 
 namespace cppurses {
 

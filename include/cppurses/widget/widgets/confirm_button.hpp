@@ -1,10 +1,10 @@
 #ifndef CPPURSES_WIDGET_WIDGETS_CONFIRM_BUTTON_HPP
 #define CPPURSES_WIDGET_WIDGETS_CONFIRM_BUTTON_HPP
+#include <signals/signal.hpp>
+
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 #include <cppurses/widget/widgets/widget_stack.hpp>
-
-#include <signals/signal.hpp>
 
 namespace cppurses {
 

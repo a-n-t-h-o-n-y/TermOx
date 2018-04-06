@@ -1,3 +1,7 @@
+#include <cppurses/widget/widget_slots.hpp>
+
+#include <signals/slot.hpp>
+
 #include <cppurses/system/events/close_event.hpp>
 #include <cppurses/system/events/deferred_delete_event.hpp>
 #include <cppurses/system/events/hide_event.hpp>
@@ -9,9 +13,6 @@
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
-#include <cppurses/widget/widget_slots.hpp>
-
-#include <signals/slot.hpp>
 
 namespace cppurses {
 namespace slot {

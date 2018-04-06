@@ -1,4 +1,11 @@
 #include <cppurses/system/detail/ncurses_event_listener.hpp>
+
+#include <cstddef>
+#include <memory>
+#include <vector>
+
+#include <ncurses.h>
+
 #include <cppurses/system/event.hpp>
 #include <cppurses/system/events/key_event.hpp>
 #include <cppurses/system/events/mouse_event.hpp>
@@ -10,12 +17,6 @@
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
-
-#include <ncurses.h>
-
-#include <cstddef>
-#include <memory>
-#include <vector>
 
 namespace {
 
@@ -121,7 +122,7 @@ std::unique_ptr<Event> NCurses_event_listener::parse_mouse_event() const {
         type = Event::MouseButtonRelease;
         button = Mouse_button::ScrollUp;
     }
-        // Button 5 / Scroll Down
+    // Button 5 / Scroll Down
 #if defined(BUTTON5_PRESSED) && defined(BUTTON5_RELEASED)
     else if (static_cast<bool>(mouse_event.bstate & BUTTON5_PRESSED)) {
         type = Event::MouseButtonPress;

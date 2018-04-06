@@ -1,3 +1,10 @@
+#include <cppurses/system/system.hpp>
+
+#include <memory>
+#include <utility>
+
+#include <signals/slot.hpp>
+
 #include <cppurses/painter/paint_buffer.hpp>
 #include <cppurses/painter/palette.hpp>
 #include <cppurses/system/detail/event_queue.hpp>
@@ -7,14 +14,8 @@
 #include <cppurses/system/events/on_tree_event.hpp>
 #include <cppurses/system/events/paint_event.hpp>
 #include <cppurses/system/events/resize_event.hpp>
-#include <cppurses/system/system.hpp>
 #include <cppurses/widget/layout.hpp>
 #include <cppurses/widget/widget.hpp>
-
-#include <signals/slot.hpp>
-
-#include <memory>
-#include <utility>
 
 namespace cppurses {
 namespace detail {

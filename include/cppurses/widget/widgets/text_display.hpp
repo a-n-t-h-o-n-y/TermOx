@@ -1,16 +1,16 @@
 #ifndef WIDGET_WIDGETS_TEXT_DISPLAY_HPP
 #define WIDGET_WIDGETS_TEXT_DISPLAY_HPP
+#include <cstddef>
+#include <vector>
+
+#include <signals/signal.hpp>
+
 #include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
-
-#include <signals/signal.hpp>
-
-#include <cstddef>
-#include <vector>
 
 namespace cppurses {
 

@@ -1,9 +1,10 @@
-#include <cppurses/widget/widgets/textbox.hpp>
 #include <cppurses/widget/widgets/textbox_slots.hpp>
+
+#include <cstddef>
 
 #include <signals/slot.hpp>
 
-#include <cstddef>
+#include <cppurses/widget/widgets/textbox.hpp>
 
 namespace cppurses {
 

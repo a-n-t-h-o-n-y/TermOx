@@ -16,5 +16,4 @@ class Matrix_display : public Widget {
 };
 
 }  // namespace cppurses
-
 #endif  // CPPURSES_WIDGET_WIDGETS_MATRIX_DISPLAY_HPP

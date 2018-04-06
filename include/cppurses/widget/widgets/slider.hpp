@@ -1,13 +1,13 @@
 #ifndef CPPURSES_WIDGET_WIDGETS_SLIDER_HPP
 #define CPPURSES_WIDGET_WIDGETS_SLIDER_HPP
-#include <cppurses/painter/glyph.hpp>
-#include <cppurses/system/mouse_button.hpp>
-#include <cppurses/widget/widget.hpp>
+#include <cstddef>
+#include <cstdint>
 
 #include <signals/signals.hpp>
 
-#include <cstddef>
-#include <cstdint>
+#include <cppurses/painter/glyph.hpp>
+#include <cppurses/system/mouse_button.hpp>
+#include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
 

@@ -1,10 +1,12 @@
+#include <cppurses/widget/widgets/slider.hpp>
+
 #include <cmath>
+
+#include <signals/signals.hpp>
+
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/painter.hpp>
-#include <cppurses/widget/widgets/slider.hpp>
-
-#include <signals/signals.hpp>
 
 namespace cppurses {
 

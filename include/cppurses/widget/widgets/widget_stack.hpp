@@ -1,11 +1,11 @@
 #ifndef WIDGET_WIDGETS_WIDGET_STACK_HPP
 #define WIDGET_WIDGETS_WIDGET_STACK_HPP
-#include <cppurses/widget/layouts/horizontal_layout.hpp>
+#include <memory>
+#include <vector>
 
 #include <signals/signals.hpp>
 
-#include <memory>
-#include <vector>
+#include <cppurses/widget/layouts/horizontal_layout.hpp>
 
 namespace cppurses {
 class Widget;

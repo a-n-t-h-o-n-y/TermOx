@@ -1,6 +1,4 @@
-#include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/painter/utility/wchar_to_bytes.hpp>
 
 #include <algorithm>
 #include <codecvt>
@@ -8,6 +6,9 @@
 #include <locale>
 #include <ostream>
 #include <string>
+
+#include <cppurses/painter/glyph.hpp>
+#include <cppurses/painter/utility/wchar_to_bytes.hpp>
 
 namespace cppurses {
 

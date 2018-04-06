@@ -1,18 +1,19 @@
-#include <cppurses/system/events/move_event.hpp>
-#include <cppurses/system/events/resize_event.hpp>
-#include <cppurses/system/system.hpp>
-#include <cppurses/widget/area.hpp>
-#include <cppurses/widget/border.hpp>
 #include <cppurses/widget/layouts/vertical_layout.hpp>
-#include <cppurses/widget/point.hpp>
-#include <cppurses/widget/size_policy.hpp>
-#include <cppurses/widget/widget.hpp>
 
 #include <cstddef>
 #include <deque>
 #include <functional>
 #include <iterator>
 #include <vector>
+
+#include <cppurses/system/events/move_event.hpp>
+#include <cppurses/system/events/resize_event.hpp>
+#include <cppurses/system/system.hpp>
+#include <cppurses/widget/area.hpp>
+#include <cppurses/widget/border.hpp>
+#include <cppurses/widget/point.hpp>
+#include <cppurses/widget/size_policy.hpp>
+#include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
 

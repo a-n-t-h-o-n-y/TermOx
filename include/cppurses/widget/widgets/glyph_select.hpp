@@ -1,13 +1,13 @@
 #ifndef CPPURSES_WIDGET_WIDGETS_GLYPH_SELECT_HPP
 #define CPPURSES_WIDGET_WIDGETS_GLYPH_SELECT_HPP
+#include <signals/signal.hpp>
+
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/layouts/horizontal_layout.hpp>
 #include <cppurses/widget/layouts/vertical_layout.hpp>
 #include <cppurses/widget/widgets/glyph_select_stack.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 #include <cppurses/widget/widgets/slider.hpp>
-
-#include <signals/signal.hpp>
 
 namespace cppurses {
 

@@ -1,14 +1,14 @@
 #ifndef PAINTER_BRUSH_HPP
 #define PAINTER_BRUSH_HPP
-#include <cppurses/painter/attribute.hpp>
-#include <cppurses/painter/color.hpp>
-
-#include <optional/optional.hpp>
-
 #include <algorithm>
 #include <bitset>
 #include <utility>
 #include <vector>
+
+#include <optional/optional.hpp>
+
+#include <cppurses/painter/attribute.hpp>
+#include <cppurses/painter/color.hpp>
 
 namespace cppurses {
 

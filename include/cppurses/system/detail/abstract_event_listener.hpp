@@ -8,6 +8,8 @@ namespace detail {
 
 class Abstract_event_listener {
    public:
+    virtual ~Abstract_event_listener() = default;
+
     virtual std::unique_ptr<Event> get_input() const = 0;
     virtual void enable_ctrl_characters() = 0;
     virtual void disable_ctrl_characters() = 0;

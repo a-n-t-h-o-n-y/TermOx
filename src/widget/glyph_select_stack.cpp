@@ -1,12 +1,13 @@
-#include <cppurses/painter/glyph_matrix.hpp>
-#include <cppurses/system/mouse_button.hpp>
 #include <cppurses/widget/widgets/glyph_select_stack.hpp>
-#include <cppurses/widget/widgets/matrix_display.hpp>
 
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <utility>
+
+#include <cppurses/painter/glyph_matrix.hpp>
+#include <cppurses/system/mouse_button.hpp>
+#include <cppurses/widget/widgets/matrix_display.hpp>
 
 namespace cppurses {
 

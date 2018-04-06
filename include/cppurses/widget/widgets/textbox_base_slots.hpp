@@ -1,10 +1,10 @@
 #ifndef WIDGET_WIDGETS_TEXTBOX_BASE_SLOTS_HPP
 #define WIDGET_WIDGETS_TEXTBOX_BASE_SLOTS_HPP
-#include <cppurses/widget/point.hpp>
-
 #include <cstddef>
 
 #include <signals/slot.hpp>
+
+#include <cppurses/widget/point.hpp>
 
 namespace cppurses {
 class Textbox_base;

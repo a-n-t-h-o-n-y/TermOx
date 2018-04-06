@@ -1,9 +1,10 @@
-#include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_matrix.hpp>
-#include <cppurses/widget/point.hpp>
 
 #include <cstddef>
 #include <vector>
+
+#include <cppurses/painter/glyph.hpp>
+#include <cppurses/widget/point.hpp>
 
 namespace cppurses {
 Glyph_matrix::Glyph_matrix(std::size_t width, std::size_t height)

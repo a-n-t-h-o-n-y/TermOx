@@ -1,10 +1,11 @@
-#include <cppurses/painter/painter.hpp>
-#include <cppurses/widget/focus_policy.hpp>
-#include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widgets/label.hpp>
 
 #include <cstddef>
 #include <utility>
+
+#include <cppurses/painter/painter.hpp>
+#include <cppurses/widget/focus_policy.hpp>
+#include <cppurses/widget/size_policy.hpp>
 
 namespace cppurses {
 

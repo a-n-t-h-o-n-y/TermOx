@@ -1,9 +1,10 @@
-#include <cppurses/system/key.hpp>
 #include <cppurses/widget/widgets/log.hpp>
+
+#include <utility>
 
 #include <signals/slot.hpp>
 
-#include <utility>
+#include <cppurses/system/key.hpp>
 
 namespace cppurses {
 

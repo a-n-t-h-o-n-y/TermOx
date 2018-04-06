@@ -1,8 +1,9 @@
 #include <cppurses/system/event.hpp>
-#include <cppurses/system/event_handler.hpp>
 
 #include <cstddef>
 #include <vector>
+
+#include <cppurses/system/event_handler.hpp>
 
 namespace cppurses {
 

@@ -1,14 +1,14 @@
 #ifndef SYSTEM_EVENT_HANDLER_HPP
 #define SYSTEM_EVENT_HANDLER_HPP
-#include <cppurses/system/key.hpp>
-#include <cppurses/system/mouse_button.hpp>
-#include <cppurses/widget/area.hpp>
-#include <cppurses/widget/point.hpp>
-
 #include <cstddef>
 #include <cstdint>
 #include <signals/signal.hpp>
 #include <vector>
+
+#include <cppurses/system/key.hpp>
+#include <cppurses/system/mouse_button.hpp>
+#include <cppurses/widget/area.hpp>
+#include <cppurses/widget/point.hpp>
 
 namespace cppurses {
 class Widget;

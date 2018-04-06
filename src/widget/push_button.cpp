@@ -1,9 +1,10 @@
-#include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/painter/painter.hpp>
-#include <cppurses/system/mouse_button.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 
 #include <utility>
+
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/painter/painter.hpp>
+#include <cppurses/system/mouse_button.hpp>
 
 namespace cppurses {
 

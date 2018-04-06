@@ -1,8 +1,8 @@
 #ifndef WIDGET_WIDGETS_BLANK_HEIGHT_HPP
 #define WIDGET_WIDGETS_BLANK_HEIGHT_HPP
-#include <cppurses/widget/widget.hpp>
-
 #include <cstddef>
+
+#include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
 
@@ -12,5 +12,4 @@ class Blank_height : public Widget {
 };
 
 }  // namespace cppurses
-
 #endif  // WIDGET_WIDGETS_BLANK_HEIGHT_HPP

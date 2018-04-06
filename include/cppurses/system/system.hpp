@@ -1,11 +1,11 @@
 #ifndef SYSTEM_SYSTEM_HPP
 #define SYSTEM_SYSTEM_HPP
-#include <cppurses/system/event_loop.hpp>
+#include <memory>
+#include <utility>
 
 #include <signals/slot.hpp>
 
-#include <memory>
-#include <utility>
+#include <cppurses/system/event_loop.hpp>
 
 namespace cppurses {
 namespace detail {

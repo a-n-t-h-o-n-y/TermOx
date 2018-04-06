@@ -1,14 +1,14 @@
 #ifndef WIDGET_WIDGETS_CYCLE_BOX_HPP
 #define WIDGET_WIDGETS_CYCLE_BOX_HPP
+#include <string>
+#include <vector>
+
+#include <signals/signals.hpp>
+
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/layouts/horizontal_layout.hpp>
 #include <cppurses/widget/widgets/label.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
-
-#include <signals/signals.hpp>
-
-#include <string>
-#include <vector>
 
 namespace cppurses {
 

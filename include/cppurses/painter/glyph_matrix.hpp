@@ -1,10 +1,10 @@
 #ifndef PAINTER_GLYPH_MATRIX_HPP
 #define PAINTER_GLYPH_MATRIX_HPP
-#include <cppurses/painter/glyph.hpp>
-#include <cppurses/widget/point.hpp>
-
 #include <cstddef>
 #include <vector>
+
+#include <cppurses/painter/glyph.hpp>
+#include <cppurses/widget/point.hpp>
 
 namespace cppurses {
 

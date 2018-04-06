@@ -1,16 +1,16 @@
 #ifndef WIDGET_WIDGETS_LIST_HPP
 #define WIDGET_WIDGETS_LIST_HPP
-#include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/system/key.hpp>
-#include <cppurses/system/mouse_button.hpp>
-#include <cppurses/widget/widget.hpp>
-
-#include <signals/signals.hpp>
-
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <vector>
+
+#include <signals/signals.hpp>
+
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/system/mouse_button.hpp>
+#include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
 
@@ -167,9 +167,7 @@ sig::Slot<void()> rotate_properties(List<T>& list) {
 }
 
 }  // namespace slot
-
 }  // namespace cppurses
-
 #endif  // WIDGET_WIDGETS_LIST_HPP
 
 // Each property has its width that is the length of the longest string.

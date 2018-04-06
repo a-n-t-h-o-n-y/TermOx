@@ -1,10 +1,11 @@
-#include <cppurses/widget/point.hpp>
-#include <cppurses/widget/widgets/textbox_base.hpp>
 #include <cppurses/widget/widgets/textbox_base_slots.hpp>
+
+#include <cstddef>
 
 #include <signals/slot.hpp>
 
-#include <cstddef>
+#include <cppurses/widget/point.hpp>
+#include <cppurses/widget/widgets/textbox_base.hpp>
 
 namespace cppurses {
 
@@ -65,8 +66,7 @@ sig::Slot<void()> set_cursor(Textbox_base& tb, const Point& coords) {
 }
 
 sig::Slot<void(Point)> set_cursor(Textbox_base& tb) {
-    sig::Slot<void(Point)> slot{
-        [&tb](auto coords) { tb.set_cursor(coords); }};
+    sig::Slot<void(Point)> slot{[&tb](auto coords) { tb.set_cursor(coords); }};
     slot.track(tb.destroyed);
     return slot;
 }
