@@ -1,7 +1,8 @@
-#include <cppurses/painter/glyph.hpp>
 #include <cppurses/widget/border.hpp>
 
 #include <cstddef>
+
+#include <cppurses/painter/glyph.hpp>
 
 namespace cppurses {
 

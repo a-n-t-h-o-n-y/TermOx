@@ -1,11 +1,11 @@
 #ifndef WIDGET_WIDGETS_COLOR_SELECT_HPP
 #define WIDGET_WIDGETS_COLOR_SELECT_HPP
+#include <signals/signals.hpp>
+
 #include <cppurses/painter/color.hpp>
 #include <cppurses/widget/layouts/horizontal_layout.hpp>
 #include <cppurses/widget/layouts/vertical_layout.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
-
-#include <signals/signals.hpp>
 
 namespace cppurses {
 

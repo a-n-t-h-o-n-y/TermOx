@@ -1,11 +1,12 @@
-#include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/brush.hpp>
-
-#include <optional/optional.hpp>
 
 #include <cstddef>
 #include <cstdint>
 #include <vector>
+
+#include <optional/optional.hpp>
+
+#include <cppurses/painter/attribute.hpp>
 
 namespace cppurses {
 

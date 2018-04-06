@@ -1,9 +1,10 @@
-#include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/widgets/status_bar.hpp>
+
+#include <utility>
 
 #include <signals/signals.hpp>
 
-#include <utility>
+#include <cppurses/painter/glyph_string.hpp>
 
 namespace cppurses {
 

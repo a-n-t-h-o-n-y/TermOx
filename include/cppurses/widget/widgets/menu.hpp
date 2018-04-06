@@ -1,17 +1,17 @@
 #ifndef WIDGET_WIDGETS_MENU_HPP
 #define WIDGET_WIDGETS_MENU_HPP
+#include <cstddef>
+#include <cstdint>
+#include <functional>
+#include <vector>
+
+#include <signals/slot.hpp>
+
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/widget/layouts/vertical_layout.hpp>
 #include <cppurses/widget/widgets/blank_height.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
-
-#include <signals/slot.hpp>
-
-#include <cstddef>
-#include <cstdint>
-#include <functional>
-#include <vector>
 
 namespace cppurses {
 

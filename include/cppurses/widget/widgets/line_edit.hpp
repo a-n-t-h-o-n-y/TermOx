@@ -1,16 +1,16 @@
 #ifndef WIDGET_WIDGETS_LINE_EDIT_HPP
 #define WIDGET_WIDGETS_LINE_EDIT_HPP
+#include <cstddef>
+#include <cstdint>
+#include <string>
+
+#include <signals/signals.hpp>
+
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/mouse_button.hpp>
 #include <cppurses/widget/widgets/textbox.hpp>
-
-#include <signals/signals.hpp>
-
-#include <cstddef>
-#include <cstdint>
-#include <string>
 
 namespace cppurses {
 

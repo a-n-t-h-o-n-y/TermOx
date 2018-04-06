@@ -1,14 +1,14 @@
 #ifndef WIDGET_WIDGETS_PUSH_BUTTON_HPP
 #define WIDGET_WIDGETS_PUSH_BUTTON_HPP
+#include <cstddef>
+#include <cstdint>
+
+#include <signals/signals.hpp>
+
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/mouse_button.hpp>
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widgets/label.hpp>
-
-#include <signals/signals.hpp>
-
-#include <cstddef>
-#include <cstdint>
 
 namespace cppurses {
 

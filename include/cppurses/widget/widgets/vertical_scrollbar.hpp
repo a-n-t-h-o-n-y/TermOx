@@ -1,10 +1,10 @@
 #ifndef WIDGET_WIDGETS_VERTICAL_SCROLLBAR_HPP
 #define WIDGET_WIDGETS_VERTICAL_SCROLLBAR_HPP
+#include <signals/signal.hpp>
+
 #include <cppurses/widget/layouts/vertical_layout.hpp>
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
-
-#include <signals/signal.hpp>
 
 namespace cppurses {
 

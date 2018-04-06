@@ -2,6 +2,8 @@
 
 #include <map>
 
+#include <cppurses/system/key.hpp>
+
 namespace cppurses {
 
 std::map<Key, sig::Signal<void()>> Shortcuts::shortcuts_{};

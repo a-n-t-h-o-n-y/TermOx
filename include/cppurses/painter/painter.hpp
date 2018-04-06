@@ -1,9 +1,9 @@
 #ifndef PAINTER_PAINTER_HPP
 #define PAINTER_PAINTER_HPP
+#include <cstddef>
+
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/point.hpp>
-
-#include <cstddef>
 
 namespace cppurses {
 struct Border;

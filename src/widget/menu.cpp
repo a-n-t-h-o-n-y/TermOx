@@ -1,17 +1,18 @@
-#include <cppurses/painter/attribute.hpp>
-#include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/painter/painter.hpp>
-#include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/widgets/menu.hpp>
-#include <cppurses/widget/widgets/push_button.hpp>
-
-#include <signals/signals.hpp>
 
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
 #include <string>
 #include <utility>
+
+#include <signals/signals.hpp>
+
+#include <cppurses/painter/attribute.hpp>
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/painter/painter.hpp>
+#include <cppurses/widget/focus_policy.hpp>
+#include <cppurses/widget/widgets/push_button.hpp>
 
 namespace cppurses {
 
@@ -33,7 +34,7 @@ sig::Signal<void()>& Menu::add_item(Glyph_string label) {
     button_ref.height_policy.hint(1);
     auto& signal_ref{items_.back().selected};
     button_ref.clicked.connect(
-        [ this, index = items_.size() - 1 ] { items_[index].selected(); });
+        [this, index = items_.size() - 1] { items_[index].selected(); });
     this->update();
     return signal_ref;
 }

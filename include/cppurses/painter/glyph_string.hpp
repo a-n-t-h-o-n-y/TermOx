@@ -1,7 +1,5 @@
 #ifndef PAINTER_GLYPH_STRING_HPP
 #define PAINTER_GLYPH_STRING_HPP
-#include <cppurses/painter/glyph.hpp>
-
 #include <codecvt>
 #include <initializer_list>
 #include <locale>
@@ -9,6 +7,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <cppurses/painter/glyph.hpp>
 
 namespace cppurses {
 
@@ -34,13 +34,6 @@ class Glyph_string : private std::vector<Glyph> {
     Glyph_string(const char* symbols, Attributes&&... attrs) {  // NOLINT
         this->append(symbols, std::forward<Attributes>(attrs)...);
     }
-
-    // template <typename... Attributes>
-    // Glyph_string(char symbol, Attributes&&... attrs) {  // NOLINT
-    //     this->append(Glyph{symbol, std::forward<Attributes>(attrs)...});
-    // }
-
-    // constructor from const wchar_t* and from std::wstring and wchar_t
 
     template <typename... Attributes>
     Glyph_string(wchar_t symbol, Attributes&&... attrs) {  // NOLINT

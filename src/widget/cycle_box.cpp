@@ -1,11 +1,11 @@
 #include <cppurses/widget/widgets/cycle_box.hpp>
 
-#include <signals/signals.hpp>
-
 #include <algorithm>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <signals/signals.hpp>
 
 namespace cppurses {
 

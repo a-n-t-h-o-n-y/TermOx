@@ -1,9 +1,9 @@
 #ifndef PAINTER_DETAIL_NCURSES_PAINT_ENGINE_HPP
 #define PAINTER_DETAIL_NCURSES_PAINT_ENGINE_HPP
-#include <cppurses/painter/color.hpp>
-
 #include <cstddef>
 #include <cstdint>
+
+#include <cppurses/painter/color.hpp>
 
 /* Paint_engine Requires:
  *   void put_glyph(const Glyph& g);

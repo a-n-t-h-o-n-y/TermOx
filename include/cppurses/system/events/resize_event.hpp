@@ -1,9 +1,9 @@
 #ifndef SYSTEM_EVENTS_RESIZE_EVENT_HPP
 #define SYSTEM_EVENTS_RESIZE_EVENT_HPP
+#include <cstddef>
+
 #include <cppurses/system/event.hpp>
 #include <cppurses/widget/area.hpp>
-
-#include <cstddef>
 
 namespace cppurses {
 class Event_handler;

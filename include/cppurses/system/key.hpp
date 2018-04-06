@@ -245,5 +245,4 @@ enum class Key : short {
 char key_to_char(Key key);
 
 }  // namespace cppurses
-
 #endif  // SYSTEM_KEY_HPP

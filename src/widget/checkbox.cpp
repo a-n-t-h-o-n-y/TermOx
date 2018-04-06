@@ -1,10 +1,11 @@
+#include <cppurses/widget/widgets/checkbox.hpp>
+
+#include <utility>
+
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/system/mouse_button.hpp>
 #include <cppurses/widget/size_policy.hpp>
-#include <cppurses/widget/widgets/checkbox.hpp>
-
-#include <utility>
 
 namespace cppurses {
 

@@ -1,10 +1,11 @@
+#include <cppurses/widget/widgets/color_select.hpp>
+
+#include <signals/signals.hpp>
+
 #include <cppurses/painter/color.hpp>
 #include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget.hpp>
-#include <cppurses/widget/widgets/color_select.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
-
-#include <signals/signals.hpp>
 
 namespace cppurses {
 

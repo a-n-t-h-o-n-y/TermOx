@@ -1,11 +1,11 @@
 #ifndef WIDGET_WIDGETS_TEXT_DISPLAY_SLOTS_HPP
 #define WIDGET_WIDGETS_TEXT_DISPLAY_SLOTS_HPP
-#include <cppurses/painter/attribute.hpp>
-#include <cppurses/painter/glyph_string.hpp>
+#include <cstddef>
 
 #include <signals/slot.hpp>
 
-#include <cstddef>
+#include <cppurses/painter/attribute.hpp>
+#include <cppurses/painter/glyph_string.hpp>
 
 namespace cppurses {
 class Text_display;

@@ -1,12 +1,13 @@
+#include <cppurses/painter/paint_buffer.hpp>
+
+#include <cstddef>
+
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_matrix.hpp>
-#include <cppurses/painter/paint_buffer.hpp>
 #include <cppurses/painter/palette.hpp>
 #include <cppurses/system/focus.hpp>
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/widget.hpp>
-
-#include <cstddef>
 
 namespace cppurses {
 

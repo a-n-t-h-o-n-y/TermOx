@@ -1,14 +1,15 @@
-#include <cppurses/system/focus.hpp>
-#include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widgets/widget_stack.hpp>
-
-#include <signals/slot.hpp>
 
 #include <algorithm>
 #include <iterator>
 #include <memory>
 #include <utility>
 #include <vector>
+
+#include <signals/slot.hpp>
+
+#include <cppurses/system/focus.hpp>
+#include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
 

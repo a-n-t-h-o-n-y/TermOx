@@ -1,9 +1,9 @@
 #ifndef PAINTER_PALETTE_HPP
 #define PAINTER_PALETTE_HPP
-#include <cppurses/painter/color.hpp>
-
 #include <array>
 #include <cstdint>
+
+#include <cppurses/painter/color.hpp>
 
 namespace cppurses {
 

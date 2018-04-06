@@ -1,8 +1,9 @@
-#include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widgets/glyph_select.hpp>
 
 #include <cmath>
 #include <utility>
+
+#include <cppurses/widget/size_policy.hpp>
 
 namespace cppurses {
 

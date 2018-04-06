@@ -1,5 +1,14 @@
 #ifndef WIDGET_WIDGET_HPP
 #define WIDGET_WIDGET_HPP
+#include <algorithm>
+#include <cstddef>
+#include <memory>
+#include <queue>
+#include <signals/signal.hpp>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
@@ -9,15 +18,6 @@
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/size_policy.hpp>
-
-#include <algorithm>
-#include <cstddef>
-#include <memory>
-#include <queue>
-#include <signals/signal.hpp>
-#include <string>
-#include <utility>
-#include <vector>
 
 namespace cppurses {
 

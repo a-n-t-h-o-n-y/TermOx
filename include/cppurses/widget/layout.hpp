@@ -1,8 +1,8 @@
 #ifndef WIDGET_LAYOUT_HPP
 #define WIDGET_LAYOUT_HPP
-#include <cppurses/widget/widget.hpp>
-
 #include <cstddef>
+
+#include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
 

@@ -1,12 +1,12 @@
 #ifndef SYSTEM_EVENTS_MOUSE_EVENT_HPP
 #define SYSTEM_EVENTS_MOUSE_EVENT_HPP
+#include <cstddef>
+#include <cstdint>
+
 #include <cppurses/system/event.hpp>
 #include <cppurses/system/events/input_event.hpp>
 #include <cppurses/system/mouse_button.hpp>
 #include <cppurses/widget/point.hpp>
-
-#include <cstddef>
-#include <cstdint>
 
 namespace cppurses {
 class Event_handler;

@@ -1,11 +1,12 @@
+#include <cppurses/widget/widgets/cycle_stack.hpp>
+
+#include <signals/signal.hpp>
+
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/layouts/horizontal_layout.hpp>
 #include <cppurses/widget/widgets/cycle_box.hpp>
-#include <cppurses/widget/widgets/cycle_stack.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
-
-#include <signals/signal.hpp>
 
 namespace cppurses {
 

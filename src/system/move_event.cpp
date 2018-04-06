@@ -1,5 +1,6 @@
-#include <cppurses/system/event_handler.hpp>
 #include <cppurses/system/events/move_event.hpp>
+
+#include <cppurses/system/event_handler.hpp>
 #include <cppurses/widget/point.hpp>
 
 namespace cppurses {

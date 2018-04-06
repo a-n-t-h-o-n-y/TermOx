@@ -1,12 +1,12 @@
 #ifndef WIDGET_WIDGETS_TEXTBOX_BASE_HPP
 #define WIDGET_WIDGETS_TEXTBOX_BASE_HPP
-#include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/widget/point.hpp>
-#include <cppurses/widget/widgets/text_display.hpp>
+#include <cstddef>
 
 #include <signals/signal.hpp>
 
-#include <cstddef>
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/widget/point.hpp>
+#include <cppurses/widget/widgets/text_display.hpp>
 
 namespace cppurses {
 

@@ -1,12 +1,14 @@
 #ifndef CPPURSES_WIDGET_WIDGETS_CYCLE_STACK_HPP
 #define CPPURSES_WIDGET_WIDGETS_CYCLE_STACK_HPP
+#include <memory>
+#include <utility>
+
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/layouts/vertical_layout.hpp>
 #include <cppurses/widget/widget.hpp>
+#include <cppurses/widget/widgets/cycle_box.hpp>
+#include <cppurses/widget/widgets/push_button.hpp>
 #include <cppurses/widget/widgets/widget_stack.hpp>
-
-#include <memory>
-#include <utility>
 
 namespace cppurses {
 

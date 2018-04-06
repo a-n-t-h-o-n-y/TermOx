@@ -1,7 +1,8 @@
-#include <cppurses/painter/painter.hpp>
 #include <cppurses/widget/widgets/matrix_display.hpp>
 
 #include <cstddef>
+
+#include <cppurses/painter/painter.hpp>
 
 namespace cppurses {
 

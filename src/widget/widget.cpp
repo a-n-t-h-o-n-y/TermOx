@@ -1,3 +1,13 @@
+#include <cppurses/widget/widget.hpp>
+
+#include <cstddef>
+#include <iterator>
+#include <memory>
+#include <string>
+#include <utility>
+
+#include <signals/signal.hpp>
+
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/paint_buffer.hpp>
@@ -11,15 +21,7 @@
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/point.hpp>
-#include <cppurses/widget/widget.hpp>
 
-#include <signals/signal.hpp>
-
-#include <cstddef>
-#include <iterator>
-#include <memory>
-#include <string>
-#include <utility>
 #include <vector>
 
 namespace {

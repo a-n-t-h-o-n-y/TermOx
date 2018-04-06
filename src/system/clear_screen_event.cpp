@@ -1,5 +1,6 @@
-#include <cppurses/system/event_handler.hpp>
 #include <cppurses/system/events/clear_screen_event.hpp>
+
+#include <cppurses/system/event_handler.hpp>
 
 namespace cppurses {
 

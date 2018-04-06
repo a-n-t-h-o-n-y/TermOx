@@ -1,10 +1,11 @@
 #include <cppurses/system/detail/event_invoker.hpp>
-#include <cppurses/system/detail/event_queue.hpp>
-#include <cppurses/system/event.hpp>
 
 #include <iterator>
 #include <memory>
 #include <utility>
+
+#include <cppurses/system/detail/event_queue.hpp>
+#include <cppurses/system/event.hpp>
 
 namespace {
 using namespace cppurses;

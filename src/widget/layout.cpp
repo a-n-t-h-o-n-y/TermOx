@@ -1,8 +1,9 @@
+#include <cppurses/widget/layout.hpp>
+
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/system/events/move_event.hpp>
 #include <cppurses/system/events/resize_event.hpp>
 #include <cppurses/system/system.hpp>
-#include <cppurses/widget/layout.hpp>
 
 namespace cppurses {
 
