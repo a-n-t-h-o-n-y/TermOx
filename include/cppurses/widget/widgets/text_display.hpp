@@ -53,8 +53,12 @@ class Text_display : public Widget {
     std::size_t index_at(Point position) const;
     std::size_t index_at(std::size_t x, std::size_t y) const;
     Point display_position(std::size_t index) const;
-    Glyph_string contents() const { return contents_; }
+
+    Glyph_string& contents() { return contents_; }
+    const Glyph_string& contents() const { return contents_; }
+    Glyph& glyph_at(std::size_t index) { return contents_.at(index); }
     Glyph glyph_at(std::size_t index) const { return contents_.at(index); }
+
     std::size_t contents_size() const { return contents_.size(); }
     bool contents_empty() const { return contents_.empty(); }
     bool does_word_wrap() const { return word_wrap_; }
