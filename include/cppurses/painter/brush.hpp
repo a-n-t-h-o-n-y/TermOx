@@ -35,6 +35,9 @@ class Brush {
     void set_background(Color color) { background_color_ = color; }
     void set_foreground(Color color) { foreground_color_ = color; }
 
+    void remove_background() { background_color_ = opt::none; }
+    void remove_foreground() { foreground_color_ = opt::none; }
+
     std::vector<Attribute> attributes() const;
     const opt::Optional<Color>& background_color() const {
         return background_color_;
