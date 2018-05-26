@@ -16,7 +16,7 @@ add_subdirectory(src)
 add_subdirectory(demos)
 
 # ADD TESTS
-add_subdirectory(test)
+# add_subdirectory(test)
 
 # CLANG TIDY
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

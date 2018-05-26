@@ -10,30 +10,27 @@ set_property(TARGET gtest PROPERTY
 # GATHER SOURCES
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 add_executable(test_cppurses_system EXCLUDE_FROM_ALL
-    ""
     # system/system_test.cpp
-	# system/object_test.cpp
-	# system/event_loop_test.cpp
-	# system/event_test.cpp
-	# system/abstract_event_dispatcher_test.cpp
-	# system/thread_data_test.cpp
-	# system/posted_event_queue_test.cpp
-	# system/posted_event_test.cpp
-	# system/ncurses_event_dispatcher_test.cpp
+    # system/object_test.cpp
+    # system/event_loop_test.cpp
+    # system/event_test.cpp
+    # system/abstract_event_dispatcher_test.cpp
+    # system/thread_data_test.cpp
+    # system/posted_event_queue_test.cpp
+    # system/posted_event_test.cpp
+    # system/ncurses_event_dispatcher_test.cpp
 )
 
 add_executable(test_cppurses_widget EXCLUDE_FROM_ALL
-    ""
-	# widget/widget_test.cpp
+    # widget/widget_test.cpp
 )
 
 add_executable(test_cppurses_painter EXCLUDE_FROM_ALL
-    ""
-	# painter/glyph_test.cpp
-	# painter/glyph_string_test.cpp
-	# painter/brush_test.cpp
-	# painter/palette_test.cpp
-	# painter/glyph_matrix_test.cpp
+    # painter/glyph_test.cpp
+    # painter/glyph_string_test.cpp
+    # painter/brush_test.cpp
+    # painter/palette_test.cpp
+    # painter/glyph_matrix_test.cpp
 )
 
 # CREATE TESTS
