@@ -4,6 +4,7 @@
 
 namespace cppurses {
 
+/// Holds the look of a Widget's Border.
 struct Border {
     bool enabled{false};
 
@@ -26,16 +27,32 @@ struct Border {
     bool south_east_enabled{true};
 };
 
+/**
+ * @brief Change the Glyph for each the horizontal and vertical walls.
+ *
+ * @param b Border to be modified.
+ * @param horizontal Glyph used for each space on the horizontal wall.
+ * @param vertical Glyph used for each space on the vertical wall.
+ */
 void set_walls(Border& b, const Glyph& horizontal, const Glyph& vertical);
+
+/// Enable all walls of the border to display.
 void enable_walls(Border& b);
+
+/// Disable all walls of the border.
 void disable_walls(Border& b);
 
+/// Set the Glyphs to be used by each of the corners of the Border.
 void set_corners(Border& b,
                  const Glyph& nw,
                  const Glyph& ne,
                  const Glyph& sw,
                  const Glyph& se);
+
+/// Enables all four corners of the Border to be displayed.
 void enable_corners(Border& b);
+
+/// Disables all four corners of the Border.
 void disable_corners(Border& b);
 
 }  // namespace cppurses

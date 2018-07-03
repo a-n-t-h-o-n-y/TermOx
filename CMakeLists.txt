@@ -3,8 +3,8 @@ project(libcppurses LANGUAGES CXX)
 include(GNUInstallDirs)
 enable_testing()
 
-# set(CMAKE_BUILD_TYPE Release)
-set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Release)
+# set(CMAKE_BUILD_TYPE Debug)
 
 # ADD SIGNALS LIBRARY
 add_subdirectory(libs/Signals)
@@ -16,7 +16,7 @@ add_subdirectory(src)
 add_subdirectory(demos)
 
 # ADD TESTS
-add_subdirectory(test)
+# add_subdirectory(test)
 
 # CLANG TIDY
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -4,6 +4,7 @@
 
 namespace cppurses {
 
+/// Convinience data structure holding Widget size dimensions.
 struct Area {
     std::size_t width;
     std::size_t height;

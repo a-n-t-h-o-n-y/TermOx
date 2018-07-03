@@ -21,6 +21,8 @@ class Textbox : public Textbox_base {
     void set_wheel_speed(std::size_t lines);
     void set_wheel_speed_up(std::size_t lines);
     void set_wheel_speed_down(std::size_t lines);
+    void disable_input();
+    void enable_input();
 
    protected:
     bool key_press_event(Key key, char symbol) override;
@@ -31,6 +33,7 @@ class Textbox : public Textbox_base {
 
    private:
     bool scroll_wheel_{true};
+    bool takes_input_{true};
     std::size_t scroll_speed_up_{1};
     std::size_t scroll_speed_down_{1};
 };
