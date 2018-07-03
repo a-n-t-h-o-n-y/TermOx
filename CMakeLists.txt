@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 project(libcppurses LANGUAGES CXX)
 include(GNUInstallDirs)
-enable_testing()
+# enable_testing()
 
-set(CMAKE_BUILD_TYPE Release)
-# set(CMAKE_BUILD_TYPE Debug)
+# set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
 
 # ADD SIGNALS LIBRARY
 add_subdirectory(libs/Signals)
