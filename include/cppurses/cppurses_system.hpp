@@ -2,7 +2,6 @@
 #define CPPURSES_SYSTEM_HPP
 
 #include <cppurses/system/events/child_event.hpp>
-#include <cppurses/system/events/clear_screen_event.hpp>
 #include <cppurses/system/events/close_event.hpp>
 #include <cppurses/system/events/deferred_delete_event.hpp>
 #include <cppurses/system/events/disable_event.hpp>

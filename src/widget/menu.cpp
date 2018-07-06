@@ -99,13 +99,13 @@ std::size_t Menu::size() const {
     return items_.size();
 }
 
-bool Menu::paint_event() {
+bool Menu::paint_event(Painter& p) {
     for (Menu_item& item : items_) {
         item.button.get().brush.remove_attribute(Attribute::Inverse);
     }
     items_[selected_index_].button.get().brush.add_attributes(
         Attribute::Inverse);
-    return Vertical_layout::paint_event();
+    return Vertical_layout::paint_event(p);
 }
 
 bool Menu::key_press_event(Key key, char symbol) {

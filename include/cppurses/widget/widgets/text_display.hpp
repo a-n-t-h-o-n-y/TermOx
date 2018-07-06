@@ -70,7 +70,7 @@ class Text_display : public Widget {
     sig::Signal<void(const Glyph_string&)> text_changed;
 
    protected:
-    bool paint_event() override;
+    bool paint_event(Painter& p) override;
 
     std::size_t line_at(std::size_t index) const;
     std::size_t top_line() const;

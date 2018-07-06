@@ -26,7 +26,7 @@ class Checkbox : public Widget {
     sig::Signal<void()> toggled;
 
    protected:
-    bool paint_event() override;
+    bool paint_event(Painter& p) override;
     bool mouse_press_event(Mouse_button button,
                            Point global,
                            Point local,

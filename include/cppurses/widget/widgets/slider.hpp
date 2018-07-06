@@ -23,7 +23,7 @@ class Slider : public Widget {
     sig::Signal<void()> scrolled_down;
 
    protected:
-    bool paint_event() override;
+    bool paint_event(Painter& p) override;
     bool mouse_press_event(Mouse_button button,
                            Point global,
                            Point local,

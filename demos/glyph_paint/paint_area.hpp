@@ -41,7 +41,7 @@ class Paint_area : public Widget {
     sig::Signal<void()> erase_disabled;
 
    protected:
-    bool paint_event() override;
+    bool paint_event(Painter& p) override;
 
     bool mouse_press_event(Mouse_button button,
                            Point global,

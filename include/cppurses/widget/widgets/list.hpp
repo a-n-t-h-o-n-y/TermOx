@@ -28,7 +28,7 @@ class List : public Widget {
     sig::Signal<void(T&)> selected;
 
    protected:
-    bool paint_event() override;
+    bool paint_event(Painter& p) override;
     bool key_press_event(Key key, char symbol) override;
     bool mouse_press_event(Mouse_button button,
                            Point global,
@@ -76,11 +76,10 @@ void List<T>::rotate_properties() {
 }
 
 template <typename T>
-bool List<T>::paint_event() {
-    Painter p{this};
-    p.move_cursor_on_put = true;
-    for (const auto& prop : properties_) {
-        p.put(Glyph_string{prop.name}.append(" | "));
+bool List<T>::paint_event(Painter& p) {
+    // p.move_cursor_on_put = true;
+    for (const auto& prop : properties_) {  // below 0,0 might be wrong.
+        p.put(Glyph_string{prop.name}.append(" | "), 0, 0);
     }
     std::size_t count{1};
     for (const auto& item : items_) {
@@ -96,7 +95,7 @@ bool List<T>::paint_event() {
         ++count;
     }
     move_cursor(*this, 0, 0);
-    return Widget::paint_event();
+    return Widget::paint_event(p);
 }
 
 template <typename T>

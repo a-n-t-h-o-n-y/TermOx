@@ -2,6 +2,8 @@
 #define SYSTEM_EVENTS_PAINT_EVENT_HPP
 #include <cppurses/system/event.hpp>
 
+#include <cppurses/painter/painter.hpp>
+
 namespace cppurses {
 class Event_handler;
 
@@ -10,6 +12,9 @@ class Paint_event : public Event {
     explicit Paint_event(Event_handler* receiver);
     bool send() const override;
     bool filter_send(Event_handler* filter) const override;
+
+   private:
+    mutable Painter painter_;
 };
 
 }  // namespace cppurses

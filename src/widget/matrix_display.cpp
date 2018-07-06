@@ -12,8 +12,7 @@ Matrix_display::Matrix_display(Glyph_matrix matrix_)
 Matrix_display::Matrix_display(std::size_t width, std::size_t height)
     : matrix{width, height} {}
 
-bool Matrix_display::paint_event() {
-    Painter p{this};
+bool Matrix_display::paint_event(Painter& p) {
     std::size_t w{matrix.width() > this->width() ? this->width()
                                                  : matrix.width()};
     std::size_t h{matrix.height() > this->height() ? this->height()
@@ -23,7 +22,7 @@ bool Matrix_display::paint_event() {
             p.put(matrix(x, y), x, y);
         }
     }
-    return Widget::paint_event();
+    return Widget::paint_event(p);
 }
 
 }  // namespace cppurses

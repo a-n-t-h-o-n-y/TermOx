@@ -30,10 +30,9 @@ bool Animated_bit::animation_event() {
     return Widget::animation_event();
 }
 
-bool Animated_bit::paint_event() {
-    cppurses::Painter p{this};
+bool Animated_bit::paint_event(cppurses::Painter& p) {
     p.put(glyph_, coords_);
-    return Widget::paint_event();
+    return Widget::paint_event(p);
 }
 
 bool Animated_bit::mouse_press_event(cppurses::Mouse_button button,

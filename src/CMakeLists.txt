@@ -30,7 +30,6 @@ target_compile_options(libcppurses PUBLIC -Wall)
 # SYSTEM
 target_sources(libcppurses PRIVATE
 	system/child_event.cpp
-    system/clear_screen_event.cpp
     system/close_event.cpp
     system/deferred_delete_event.cpp
     system/disable_event.cpp

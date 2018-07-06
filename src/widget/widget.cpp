@@ -13,7 +13,6 @@
 #include <cppurses/painter/paint_buffer.hpp>
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/system/events/child_event.hpp>
-#include <cppurses/system/events/clear_screen_event.hpp>
 #include <cppurses/system/events/deferred_delete_event.hpp>
 #include <cppurses/system/events/on_tree_event.hpp>
 #include <cppurses/system/events/paint_event.hpp>
@@ -23,15 +22,6 @@
 #include <cppurses/widget/point.hpp>
 
 #include <vector>
-
-namespace {
-using namespace cppurses;
-
-void clear_screen(Widget& w) {
-    System::post_event<Clear_screen_event>(&w);
-}
-
-}  // namespace
 
 namespace cppurses {
 
@@ -188,7 +178,6 @@ bool Widget::on_tree() const {
 }
 
 void Widget::update() {
-    clear_screen(*this);
     System::post_event<Paint_event>(this);
 }
 
@@ -235,9 +224,8 @@ bool Widget::focus_out_event() {
     return true;
 }
 
-bool Widget::paint_event() {
+bool Widget::paint_event(Painter& p) {
     if (border.enabled) {
-        Painter p{this};
         p.border(border);
     }
     // Might not need below if focus widget sets this afterwards, on no focus?
@@ -245,12 +233,6 @@ bool Widget::paint_event() {
         System::paint_buffer()->move(this->x() + this->cursor_x(),
                                      this->y() + this->cursor_y());
     }
-    return true;
-}
-
-bool Widget::clear_screen_event() {
-    Painter p{this};
-    p.clear_screen();
     return true;
 }
 
@@ -353,7 +335,7 @@ bool Widget::animation_event() {
     p.clear_screen();
     cppurses::System::send_event(cppurses::Paint_event{this});
     if (this->visible() && cppurses::System::paint_buffer() != nullptr) {
-        cppurses::System::paint_buffer()->flush(true);  // *this box size
+        cppurses::System::paint_buffer()->flush(true);
     }
     return true;
 }

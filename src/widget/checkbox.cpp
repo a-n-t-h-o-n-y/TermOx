@@ -30,15 +30,14 @@ Glyph_string Checkbox::title() const {
     return title_;
 }
 
-bool Checkbox::paint_event() {
-    Painter p{this};
+bool Checkbox::paint_event(Painter& p) {
     if (this->is_checked()) {
-        p.put(checked_box_);
+        p.put(checked_box_, 0, 0);
     } else {
-        p.put(empty_box_);
+        p.put(empty_box_, 0, 0);
     }
     p.put(title_, padding_, 0);
-    return Widget::paint_event();
+    return Widget::paint_event(p);
 }
 
 bool Checkbox::mouse_press_event(Mouse_button button,

@@ -12,14 +12,14 @@ Layout::Layout() {
     this->focus_policy = Focus_policy::Click;
 }
 
-bool Layout::paint_event() {
+bool Layout::paint_event(Painter& p) {
     too_small_ = false;
     this->update_geometry();
     if (too_small_) {
         Painter p{this};
-        p.put("Screen too small.");
+        p.put("Screen too small.", 0, 0);
     }
-    return Widget::paint_event();
+    return Widget::paint_event(p);
 }
 
 // Free Functions

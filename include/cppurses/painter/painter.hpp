@@ -1,7 +1,9 @@
 #ifndef PAINTER_PAINTER_HPP
 #define PAINTER_PAINTER_HPP
 #include <cstddef>
+#include <map>
 
+#include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/point.hpp>
 
@@ -14,46 +16,67 @@ class Painter {
    public:
     explicit Painter(Widget* widget);
 
-    void put(const Glyph_string& text, Point position);
+    /// Put single glyph to local coordinates within Widget bounds.
+    void put(const Glyph& tile, std::size_t x, std::size_t y);
+
+    /// Put single glyph to local coordinates within Widget bounds.
+    void put(const Glyph& tile, Point position);
+
+    /// Put Glyph_string to local coordinates, within Widget bounds.
     void put(const Glyph_string& text, std::size_t x, std::size_t y);
-    void put(const Glyph_string& text);
 
-    bool move_cursor_on_put{false};
+    /// Put Glyph_string to local coordinates, within Widget bounds.
+    void put(const Glyph_string& text, Point position);
 
-    // Convinience functions
-    void fill(std::size_t x,
+    /// Retrieve pointer to the Widget you are painting to.
+    Widget* widget() const;
+
+    /// Paint a Border object around the Widget.
+    void border(const Border& b);
+
+    void fill(const Glyph& tile,
+              std::size_t x,
               std::size_t y,
               std::size_t width,
-              std::size_t height,
-              const Glyph& tile);
+              std::size_t height);
 
-    // Takes local coords
-    void line(std::size_t x1,
+    void fill(const Glyph& tile,
+              Point point,
+              std::size_t width,
+              std::size_t height);
+
+    void line(const Glyph& tile,
+              std::size_t x1,
               std::size_t y1,
               std::size_t x2,
-              std::size_t y2,
-              const Glyph_string& gs = "-");
+              std::size_t y2);
 
-    void border(const Border& b);
+    void line(const Glyph& tile, const Point& point_1, const Point& point_2);
 
     void clear_screen();
 
    private:
-    void unbound_put_string(const Point& point, const Glyph_string& gs);
-    void unbound_put_string(std::size_t glob_x,
-                            std::size_t glob_y,
-                            const Glyph_string& gs);
-    void unbound_line(const Point& point_1,
-                      const Point& point_2,
-                      const Glyph& symbol);
-    void unbound_line(std::size_t glob_x1,
-                      std::size_t glob_y1,
-                      std::size_t glob_x2,
-                      std::size_t glob_y2,
-                      const Glyph& symbol);
-    void add_default_attributes(Glyph* g);
+    /// Puts a single Glyph to the state container.
+    void put_global(Glyph tile, std::size_t x, std::size_t y);
+
+    /// Puts a single Glyph to the state container.
+    void put_global(const Glyph& tile, Point position);
+
+    void line_global(const Glyph& tile,
+                     std::size_t x1,
+                     std::size_t y1,
+                     std::size_t x2,
+                     std::size_t y2);
+
+    void line_global(const Glyph& tile,
+                     const Point& point_1,
+                     const Point& point_2);
+
+    /// Add default attributes of Widget to the Glyph.
+    Glyph add_default_attributes(const Glyph& tile);
 
     Widget* widget_;
+    std::map<Point, Glyph> state_;
 };
 
 }  // namespace cppurses

@@ -190,8 +190,7 @@ Point Text_display::display_position(std::size_t index) const {
     return position;
 }
 
-bool Text_display::paint_event() {
-    Painter p{this};
+bool Text_display::paint_event(Painter& p) {
     std::size_t line_n{0};
     auto paint = [&p, &line_n, this](const Line_info& line) {
         auto sub_begin = std::begin(this->contents_) + line.start_index;
@@ -219,10 +218,18 @@ bool Text_display::paint_event() {
     if (this->top_line() < display_state_.size()) {
         std::for_each(begin, end, paint);
     }
-    return Widget::paint_event();
+    return Widget::paint_event(p);
 }
 
-// TODO: Implement tab character.
+// TODO: Implement tab character. and newline?
+// if (glyph.symbol == L'\n') {
+//     move_cursor(*widget_, 0, widget_->cursor_y() + 1);
+//     return;
+// } else if (glyph.symbol == L'\t') {
+//     // TODO move cursor to next x coord divisible by tablength
+//     // textbox should account for it.
+//     return;
+// }
 void Text_display::update_display(std::size_t from_line) {
     std::size_t begin = display_state_.at(from_line).start_index;
     display_state_.clear();

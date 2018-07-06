@@ -168,15 +168,14 @@ void Paint_area::read(std::istream& is) {
     }
 }
 
-bool Paint_area::paint_event() {
-    Painter p{this};
+bool Paint_area::paint_event(Painter& p) {
     for (const auto& gc_pair : glyphs_painted_) {
         if (gc_pair.first.x < this->width() &&
             gc_pair.first.y < this->height()) {
             p.put(gc_pair.second, gc_pair.first);
         }
     }
-    return Widget::paint_event();
+    return Widget::paint_event(p);
 }
 
 bool Paint_area::mouse_press_event(Mouse_button button,

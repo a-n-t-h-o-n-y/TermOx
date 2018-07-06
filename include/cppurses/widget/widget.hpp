@@ -20,6 +20,7 @@
 #include <cppurses/widget/size_policy.hpp>
 
 namespace cppurses {
+class Painter;
 
 class Widget : public Event_handler {
    public:
@@ -109,11 +110,10 @@ class Widget : public Event_handler {
     sig::Signal<void(Color)> foreground_color_changed;
 
    protected:
-    bool paint_event() override;
+    bool paint_event(Painter& p) override;
     bool close_event() override;
     bool focus_in_event() override;
     bool focus_out_event() override;
-    bool clear_screen_event() override;
     bool deferred_delete_event(Event_handler* to_delete) override;
     bool child_added_event(Widget* child) override;
     bool child_removed_event(Widget* child) override;

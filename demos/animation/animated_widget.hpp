@@ -4,6 +4,7 @@
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
+#include <cppurses/painter/painter.hpp>
 #include <cppurses/widget/layouts/horizontal_layout.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
@@ -16,7 +17,7 @@ class Animated_bit : public cppurses::Horizontal_layout {
     Animated_bit(int rate);
 
     bool animation_event() override;
-    bool paint_event() override;
+    bool paint_event(cppurses::Painter& p) override;
 
     bool mouse_press_event(cppurses::Mouse_button button,
                            cppurses::Point global,

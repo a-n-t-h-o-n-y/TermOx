@@ -14,6 +14,7 @@
 
 namespace cppurses {
 class Widget;
+class Painter;
 
 Event_handler::~Event_handler() {
     destroyed(this);
@@ -245,11 +246,7 @@ bool Event_handler::deferred_delete_event_filter(Event_handler* receiver,
     return false;
 }
 
-bool Event_handler::paint_event_filter(Event_handler* receiver) {
-    return false;
-}
-
-bool Event_handler::clear_screen_event_filter(Event_handler* receiver) {
+bool Event_handler::paint_event_filter(Event_handler* receiver, Painter& p) {
     return false;
 }
 
