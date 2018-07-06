@@ -19,6 +19,9 @@ namespace cppurses {
 
 void Palette::initialize() {
     Paint_buffer* pb = System::paint_buffer();
+    if (pb == nullptr) {
+        return;
+    }
     pb->set_color(Color::Black, this->get_values(Color::Black));
     pb->set_color(Color::Dark_red, this->get_values(Color::Dark_red));
     pb->set_color(Color::Dark_blue, this->get_values(Color::Dark_blue));

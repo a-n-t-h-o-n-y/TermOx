@@ -69,6 +69,7 @@ class Event_handler {
     virtual bool deferred_delete_event(Event_handler* to_delete) = 0;
     virtual bool paint_event() = 0;
     virtual bool clear_screen_event() = 0;
+    virtual bool animation_event() = 0;
 
     // - - - - - - - - - - - Event Filter Handlers - - - - - - - - - - - - - - -
     virtual bool child_added_event_filter(Event_handler* receiver,
@@ -126,6 +127,7 @@ class Event_handler {
                                               Event_handler* to_delete);
     virtual bool paint_event_filter(Event_handler* receiver);
     virtual bool clear_screen_event_filter(Event_handler* receiver);
+    virtual bool animation_event_filter(Event_handler* receiver);
 
     // Signals
     sig::Signal<void(Event_handler*)> destroyed;

@@ -253,4 +253,8 @@ bool Event_handler::clear_screen_event_filter(Event_handler* receiver) {
     return false;
 }
 
+bool Event_handler::animation_event_filter(Event_handler* receiver) {
+    return false;
+}
+
 }  // namespace cppurses

@@ -82,6 +82,10 @@ class Widget : public Event_handler {
     bool north_border_disqualified() const;
     bool south_border_disqualified() const;
 
+    // Animation
+    void enable_animation(int frames_per_second);
+    void disable_animation();
+
     // Public Objects
     Border border;
     Size_policy width_policy{this};
@@ -119,6 +123,7 @@ class Widget : public Event_handler {
     bool on_tree_event(bool on_tree) override;
     bool move_event(Point new_position, Point old_position) override;
     bool resize_event(Area new_size, Area old_size) override;
+    bool animation_event() override;
 
    private:
     std::string name_;
@@ -146,7 +151,8 @@ class Widget : public Event_handler {
     void set_y(std::size_t global_y);
 };
 
-// - - - - - - - - - - - - - - Free Functions - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - Free Functions - - - - - - - - - - - - - - -
+// - -
 
 bool has_border(const Widget& w);
 void enable_border(Widget& w);
@@ -172,7 +178,8 @@ bool has_focus(const Widget& w);
 
 void toggle_cursor(Widget& w);
 
-// - - - - - - - - - - - - Template Implementations - - - - - - - - - - - - - -
+// - - - - - - - - - - - - Template Implementations - - - - - - - - - - - -
+// - -
 
 template <typename T, typename... Args>
 T& Widget::make_child(Args&&... args) {

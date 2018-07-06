@@ -35,7 +35,9 @@ void Painter::put(const Glyph_string& text, std::size_t x, std::size_t y) {
            // tabspace
            // should be here and textbox should just account for it.
         else {
-            System::paint_buffer()->stage(glob_x, glob_y, g);
+            if (System::paint_buffer() != nullptr) {
+                System::paint_buffer()->stage(glob_x, glob_y, g);
+            }
             move_cursor(*widget_, widget_->cursor_x() + 1, widget_->cursor_y());
         }
     }
@@ -272,7 +274,9 @@ void Painter::unbound_put_string(std::size_t glob_x,
     }
     for (Glyph g : gs) {
         add_default_attributes(&g);
-        System::paint_buffer()->stage(glob_x++, glob_y, g);
+        if (System::paint_buffer() != nullptr) {
+            System::paint_buffer()->stage(glob_x++, glob_y, g);
+        }
     }
 }
 

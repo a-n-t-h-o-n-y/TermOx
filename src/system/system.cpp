@@ -1,12 +1,14 @@
 #include <cppurses/system/system.hpp>
 
 #include <memory>
+#include <mutex>
 #include <utility>
 
 #include <signals/slot.hpp>
 
 #include <cppurses/painter/paint_buffer.hpp>
 #include <cppurses/painter/palette.hpp>
+#include <cppurses/system/animation_engine.hpp>
 #include <cppurses/system/detail/event_queue.hpp>
 #include <cppurses/system/detail/ncurses_event_listener.hpp>
 #include <cppurses/system/event.hpp>
@@ -26,6 +28,7 @@ sig::Slot<void()> System::quit = []() { System::exit(); };  // NOLINT
 
 Widget* System::head_ = nullptr;  // NOLINT
 Event_loop System::event_loop_;
+Animation_engine System::animation_engine_;
 std::unique_ptr<Paint_buffer> System::paint_buffer_ = nullptr;  // NOLINT
 std::unique_ptr<detail::Abstract_event_listener> System::event_listener_ =
     std::make_unique<detail::NCurses_event_listener>();  // NOLINT
@@ -37,6 +40,8 @@ void System::post_event(std::unique_ptr<Event> event) {
 }
 
 bool System::send_event(const Event& event) {
+    static std::recursive_mutex send_mtx;
+    std::lock_guard<std::recursive_mutex> guard{send_mtx};
     bool handled = event.send_to_all_filters();
     if (!handled) {
         event.send();
@@ -64,11 +69,17 @@ void System::set_paint_buffer(std::unique_ptr<Paint_buffer> buffer) {
 }
 
 unsigned System::max_width() {
-    return System::paint_buffer()->update_width();
+    if (System::paint_buffer() != nullptr) {
+        return System::paint_buffer()->update_width();
+    }
+    return 0;
 }
 
 unsigned System::max_height() {
-    return System::paint_buffer()->update_height();
+    if (System::paint_buffer() != nullptr) {
+        return System::paint_buffer()->update_height();
+    }
+    return 0;
 }
 
 Widget* System::head() {
@@ -115,6 +126,10 @@ void System::enable_ctrl_characters() {
 
 void System::disable_ctrl_characters() {
     event_listener_->disable_ctrl_characters();
+}
+
+Animation_engine& System::animation_engine() {
+    return animation_engine_;
 }
 
 int System::run() {

@@ -55,6 +55,9 @@ target_sources(libcppurses PRIVATE
     system/show_event.cpp
 	system/system.cpp
     system/shortcuts.cpp
+    system/async_trigger.cpp
+    system/animation_engine.cpp
+    system/animation_event.cpp
 )
 
 # PAINTER

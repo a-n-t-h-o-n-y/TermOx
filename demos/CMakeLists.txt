@@ -30,6 +30,11 @@ target_sources(demos PRIVATE
     glyph_paint/populated_glyph_stack.cpp
 )
 
+# ANIMATION
+target_sources(demos PRIVATE
+    animation/animated_widget.cpp
+)
+
 # NOTEPAD / MAIN MENU
 target_sources(demos PRIVATE
     demo.cpp
@@ -37,6 +42,8 @@ target_sources(demos PRIVATE
     notepad/notepad.cpp
 )
 
-target_link_libraries(demos PRIVATE libcppurses)
+find_package(Threads REQUIRED)
+
+target_link_libraries(demos PRIVATE libcppurses ${CMAKE_THREAD_LIBS_INIT})
 target_compile_features(demos PRIVATE cxx_std_14)
 

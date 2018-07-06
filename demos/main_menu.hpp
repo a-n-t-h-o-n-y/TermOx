@@ -2,6 +2,7 @@
 #define DEMOS_MAIN_MENU_HPP
 #include <cppurses/cppurses.hpp>
 
+#include "animation/animated_widget.hpp"
 #include "chess/src/chess_ui.hpp"
 #include "glyph_paint/glyph_paint.hpp"
 #include "notepad/notepad.hpp"
@@ -21,6 +22,8 @@ class Main_menu : public Vertical_layout {
     Chess_UI& chess{main_menu.make_page<Chess_UI>("Chess")};
     glyph_paint::Glyph_paint& glyph_paint{
         main_menu.make_page<glyph_paint::Glyph_paint>("Glyph Paint")};
+    animation::Animated_widget& animated_widget{
+        main_menu.make_page<animation::Animated_widget>("Animated Widget")};
 
    private:
     void initialize();

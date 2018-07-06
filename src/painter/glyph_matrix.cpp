@@ -1,6 +1,7 @@
 #include <cppurses/painter/glyph_matrix.hpp>
 
 #include <cstddef>
+#include <utility>
 #include <vector>
 
 #include <cppurses/painter/glyph.hpp>

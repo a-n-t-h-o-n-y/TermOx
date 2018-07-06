@@ -5,6 +5,7 @@
 
 #include <signals/slot.hpp>
 
+#include <cppurses/system/animation_engine.hpp>
 #include <cppurses/system/event_loop.hpp>
 
 namespace cppurses {
@@ -43,12 +44,13 @@ class System {
     static unsigned max_height();
     static detail::Abstract_event_listener* event_listener();
     static Paint_buffer* paint_buffer();
-    void set_paint_buffer(std::unique_ptr<Paint_buffer> buffer);
+    static void set_paint_buffer(std::unique_ptr<Paint_buffer> buffer);
     static void set_palette(std::unique_ptr<Palette> palette);
     static Palette* palette();
     static void set_head(Widget* head_widget);
     void enable_ctrl_characters();
     void disable_ctrl_characters();
+    static Animation_engine& animation_engine();
 
     // Slots
     static sig::Slot<void()> quit;
@@ -56,6 +58,7 @@ class System {
    private:
     static Widget* head_;
     static Event_loop event_loop_;
+    static Animation_engine animation_engine_;
     static std::unique_ptr<Paint_buffer> paint_buffer_;
     static std::unique_ptr<detail::Abstract_event_listener> event_listener_;
     static std::unique_ptr<Palette> system_palette_;

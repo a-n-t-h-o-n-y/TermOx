@@ -43,6 +43,10 @@ Widget::~Widget() {
     if (Focus::focus_widget() == this) {
         Focus::clear_focus();
     }
+    // Prevents the animation engine from sending events to destroyed widgets.
+    if (System::head() == this) {
+        System::animation_engine().shutdown();
+    }
 }
 
 void Widget::set_name(std::string name) {
@@ -204,14 +208,24 @@ bool Widget::south_border_disqualified() const {
     return south_border_disqualified_;
 }
 
+void Widget::enable_animation(int frames_per_second) {
+    System::animation_engine().register_widget(this, frames_per_second);
+}
+
+void Widget::disable_animation() {
+    System::animation_engine().deregister_widget(this);
+}
+
 bool Widget::close_event() {
     System::post_event<Deferred_delete_event>(this);
     return true;
 }
 
 bool Widget::focus_in_event() {
-    System::paint_buffer()->move(this->x() + this->cursor_x(),
-                                 this->y() + this->cursor_y());
+    if (System::paint_buffer() != nullptr) {
+        System::paint_buffer()->move(this->x() + this->cursor_x(),
+                                     this->y() + this->cursor_y());
+    }
     focused_in();
     return true;
 }
@@ -227,8 +241,10 @@ bool Widget::paint_event() {
         p.border(border);
     }
     // Might not need below if focus widget sets this afterwards, on no focus?
-    System::paint_buffer()->move(this->x() + this->cursor_x(),
-                                 this->y() + this->cursor_y());
+    if (System::paint_buffer() != nullptr) {
+        System::paint_buffer()->move(this->x() + this->cursor_x(),
+                                     this->y() + this->cursor_y());
+    }
     return true;
 }
 
@@ -268,6 +284,7 @@ bool Widget::show_event() {
 
 bool Widget::on_tree_event(bool on_tree) {
     on_tree_ = on_tree;
+    this->set_visible(on_tree);
     for (auto& child : children_) {
         System::post_event<On_tree_event>(child.get(), on_tree_);
     }
@@ -327,6 +344,17 @@ bool Widget::resize_event(Area new_size, Area old_size) {
 
     resized(width_, height_);
     this->update();
+    return true;
+}
+
+bool Widget::animation_event() {
+    // Paint Now
+    Painter p{this};
+    p.clear_screen();
+    cppurses::System::send_event(cppurses::Paint_event{this});
+    if (this->visible() && cppurses::System::paint_buffer() != nullptr) {
+        cppurses::System::paint_buffer()->flush(true);  // *this box size
+    }
     return true;
 }
 

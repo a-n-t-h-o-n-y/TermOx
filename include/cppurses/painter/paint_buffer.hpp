@@ -1,6 +1,7 @@
 #ifndef PAINTER_DETAIL_PAINT_BUFFER_HPP
 #define PAINTER_DETAIL_PAINT_BUFFER_HPP
 #include <cstddef>
+#include <mutex>
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/detail/ncurses_paint_engine.hpp>
@@ -28,6 +29,9 @@ class Paint_buffer {
     detail::NCurses_paint_engine engine_;
     Glyph_matrix backing_store_;
     Glyph_matrix staging_area_;
+
+    using Mutex_t = std::recursive_mutex;
+    mutable Mutex_t mutex_;
 
     bool commit(std::size_t x, std::size_t y);
     void resize(std::size_t width, std::size_t height);

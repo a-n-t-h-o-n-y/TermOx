@@ -30,7 +30,8 @@ class Event {
         ChildPolished,
         Enable,
         Disable,
-        DeferredDelete
+        DeferredDelete,
+        Animation
         // Timer,
         // Enter,
         // Leave,

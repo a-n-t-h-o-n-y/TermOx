@@ -26,7 +26,9 @@ void Event_loop::process_events() {
     invoker_.invoke(event_queue);
     if (!exit_) {
         invoker_.invoke(event_queue, Event::DeferredDelete);
-        System::paint_buffer()->flush(true);
+        if (System::paint_buffer() != nullptr) {
+            System::paint_buffer()->flush(true);
+        }
         // Blocking Call
         auto event_ptr = System::event_listener()->get_input();
         event_queue.append(std::move(event_ptr));

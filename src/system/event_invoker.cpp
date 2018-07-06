@@ -6,18 +6,7 @@
 
 #include <cppurses/system/detail/event_queue.hpp>
 #include <cppurses/system/event.hpp>
-
-namespace {
-using namespace cppurses;
-
-void send_event(const Event& event) {
-    bool handled = event.send_to_all_filters();
-    if (!handled) {
-        event.send();
-    }
-}
-
-}  // namespace
+#include <cppurses/system/system.hpp>
 
 namespace cppurses {
 class Event_handler;
@@ -45,7 +34,7 @@ void Event_invoker::invoke(Event_queue& queue,
         if (type_filter == Event::None || type_filter == type) {
             auto event = std::move(*event_iter);
             queue.queue_.erase(event_iter);
-            send_event(*event);
+            System::send_event(*event);
             event_iter = std::begin(queue.queue_);
             continue;
         }
