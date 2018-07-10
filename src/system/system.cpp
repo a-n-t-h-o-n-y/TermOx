@@ -29,7 +29,7 @@ sig::Slot<void()> System::quit = []() { System::exit(); };  // NOLINT
 Widget* System::head_ = nullptr;  // NOLINT
 Event_loop System::event_loop_;
 Animation_engine System::animation_engine_;
-std::unique_ptr<Paint_buffer> System::paint_buffer_ = nullptr;  // NOLINT
+Paint_buffer System::paint_buffer_;
 std::unique_ptr<detail::Abstract_event_listener> System::event_listener_ =
     std::make_unique<detail::NCurses_event_listener>();  // NOLINT
 
@@ -57,29 +57,18 @@ detail::Abstract_event_listener* System::event_listener() {
     return event_listener_.get();
 }
 
-Paint_buffer* System::paint_buffer() {
-    return paint_buffer_.get();
+Paint_buffer& System::paint_buffer() {
+    return paint_buffer_;
 }
 
-void System::set_paint_buffer(std::unique_ptr<Paint_buffer> buffer) {
-    paint_buffer_ = std::move(buffer);
-    if (paint_buffer_ != nullptr) {
-        System::post_event<Paint_event>(System::head());
-    }
+std::size_t System::max_width() {
+    System::paint_buffer().update_width();
+    return System::paint_buffer().screen_width();
 }
 
-unsigned System::max_width() {
-    if (System::paint_buffer() != nullptr) {
-        return System::paint_buffer()->update_width();
-    }
-    return 0;
-}
-
-unsigned System::max_height() {
-    if (System::paint_buffer() != nullptr) {
-        return System::paint_buffer()->update_height();
-    }
-    return 0;
+std::size_t System::max_height() {
+    System::paint_buffer().update_height();
+    return System::paint_buffer().screen_height();
 }
 
 Widget* System::head() {
@@ -96,13 +85,14 @@ Palette* System::palette() {
 }
 
 System::System() {
-    System::set_paint_buffer(std::make_unique<Paint_buffer>());
+    // System::set_paint_buffer(std::make_unique<Paint_buffer>());
     System::set_palette(std::make_unique<DawnBringer_palette>());
     this->disable_ctrl_characters();
 }
 
 System::~System() {
-    System::set_paint_buffer(nullptr);
+    // System::set_paint_buffer(nullptr);
+    animation_engine_.shutdown();
 }
 
 void System::set_head(Widget* head_widget) {

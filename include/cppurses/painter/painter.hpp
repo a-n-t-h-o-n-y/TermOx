@@ -1,8 +1,9 @@
 #ifndef PAINTER_PAINTER_HPP
 #define PAINTER_PAINTER_HPP
 #include <cstddef>
-#include <map>
+#include <unordered_map>
 
+#include <cppurses/painter/detail/glyph_and_bkgd_bool.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/point.hpp>
@@ -16,17 +17,33 @@ class Painter {
    public:
     explicit Painter(Widget* widget);
 
-    /// Put single glyph to local coordinates within Widget bounds.
-    void put(const Glyph& tile, std::size_t x, std::size_t y);
+    Painter(const Painter&) = default;
+    Painter(Painter&&) = default;
+    Painter& operator=(const Painter&) = default;
+    Painter& operator=(Painter&&) = default;
+
+    /// Sends painted data to the paint_buffer
+    ~Painter();
 
     /// Put single glyph to local coordinates within Widget bounds.
-    void put(const Glyph& tile, Point position);
+    void put(const Glyph& tile,
+             std::size_t x,
+             std::size_t y,
+             bool is_background = false);
+
+    /// Put single glyph to local coordinates within Widget bounds.
+    void put(const Glyph& tile, Point position, bool is_background = false);
 
     /// Put Glyph_string to local coordinates, within Widget bounds.
-    void put(const Glyph_string& text, std::size_t x, std::size_t y);
+    void put(const Glyph_string& text,
+             std::size_t x,
+             std::size_t y,
+             bool is_background = false);
 
     /// Put Glyph_string to local coordinates, within Widget bounds.
-    void put(const Glyph_string& text, Point position);
+    void put(const Glyph_string& text,
+             Point position,
+             bool is_background = false);
 
     /// Retrieve pointer to the Widget you are painting to.
     Widget* widget() const;
@@ -38,45 +55,60 @@ class Painter {
               std::size_t x,
               std::size_t y,
               std::size_t width,
-              std::size_t height);
+              std::size_t height,
+              bool is_background = false);
 
     void fill(const Glyph& tile,
               Point point,
               std::size_t width,
-              std::size_t height);
+              std::size_t height,
+              bool is_background = false);
 
     void line(const Glyph& tile,
               std::size_t x1,
               std::size_t y1,
               std::size_t x2,
-              std::size_t y2);
+              std::size_t y2,
+              bool is_background = false);
 
-    void line(const Glyph& tile, const Point& point_1, const Point& point_2);
+    void line(const Glyph& tile,
+              const Point& point_1,
+              const Point& point_2,
+              bool is_background = false);
 
     void clear_screen();
 
+    /// Add default attributes of Widget to the Glyph.
+    Glyph add_default_attributes(const Glyph& tile) const;
+
+    const std::unordered_map<Point, detail::Glyph_and_bkgd_bool>& state() const;
+
    private:
     /// Puts a single Glyph to the state container.
-    void put_global(Glyph tile, std::size_t x, std::size_t y);
+    void put_global(Glyph tile,
+                    std::size_t x,
+                    std::size_t y,
+                    bool is_background = false);
 
     /// Puts a single Glyph to the state container.
-    void put_global(const Glyph& tile, Point position);
+    void put_global(const Glyph& tile,
+                    Point position,
+                    bool is_background = false);
 
     void line_global(const Glyph& tile,
                      std::size_t x1,
                      std::size_t y1,
                      std::size_t x2,
-                     std::size_t y2);
+                     std::size_t y2,
+                     bool is_background = false);
 
     void line_global(const Glyph& tile,
                      const Point& point_1,
-                     const Point& point_2);
-
-    /// Add default attributes of Widget to the Glyph.
-    Glyph add_default_attributes(const Glyph& tile);
+                     const Point& point_2,
+                     bool is_background = false);
 
     Widget* widget_;
-    std::map<Point, Glyph> state_;
+    std::unordered_map<Point, detail::Glyph_and_bkgd_bool> state_;
 };
 
 }  // namespace cppurses

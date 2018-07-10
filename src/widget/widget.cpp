@@ -34,9 +34,11 @@ Widget::~Widget() {
         Focus::clear_focus();
     }
     // Prevents the animation engine from sending events to destroyed widgets.
-    if (System::head() == this) {
-        System::animation_engine().shutdown();
-    }
+    // But that should be taken care of by the slots tracking the lifetime of
+    // the objects.
+    // if (System::head() == this) {
+    //     System::animation_engine().shutdown();
+    // }
 }
 
 void Widget::set_name(std::string name) {
@@ -177,6 +179,45 @@ bool Widget::on_tree() const {
     return on_tree_;
 }
 
+void Widget::set_background_tile(const Glyph& tile) {
+    this->set_background_tile(opt::Optional<Glyph>{tile});
+}
+
+void Widget::set_background_tile(opt::Optional<Glyph> tile) {
+    background_tile_ = tile;
+    System::send_event(Paint_event{this, true});
+    this->update();
+}
+
+const opt::Optional<Glyph>& Widget::background_tile() const {
+    return background_tile_;
+}
+
+bool Widget::brush_alters_background() const {
+    return brush_alters_background_;
+}
+
+void Widget::set_brush_alters_background(bool alters) {
+    brush_alters_background_ = alters;
+    System::send_event(Paint_event(this, true));
+}
+
+// Called by Paint_event::send()
+void Widget::repaint_background() {
+    Glyph background;
+    if (background_tile_) {
+        background = *background_tile_;
+    } else {  // Use the global background tile in Paint_buffer.
+        background = System::paint_buffer().get_global_background_tile();
+    }
+    Painter p{this};
+    if (brush_alters_background_) {
+        background = p.add_default_attributes(background);
+    }
+    p.fill(background, this->x(), this->y(), this->width(), this->height(),
+           true);
+}
+
 void Widget::update() {
     System::post_event<Paint_event>(this);
 }
@@ -211,10 +252,8 @@ bool Widget::close_event() {
 }
 
 bool Widget::focus_in_event() {
-    if (System::paint_buffer() != nullptr) {
-        System::paint_buffer()->move(this->x() + this->cursor_x(),
-                                     this->y() + this->cursor_y());
-    }
+    System::paint_buffer().move_cursor(this->x() + this->cursor_x(),
+                                       this->y() + this->cursor_y());
     focused_in();
     return true;
 }
@@ -227,11 +266,6 @@ bool Widget::focus_out_event() {
 bool Widget::paint_event(Painter& p) {
     if (border.enabled) {
         p.border(border);
-    }
-    // Might not need below if focus widget sets this afterwards, on no focus?
-    if (System::paint_buffer() != nullptr) {
-        System::paint_buffer()->move(this->x() + this->cursor_x(),
-                                     this->y() + this->cursor_y());
     }
     return true;
 }
@@ -284,6 +318,7 @@ bool Widget::move_event(Point new_position, Point old_position) {
     this->set_y(new_position.y);
     moved(new_position);
     moved_xy(new_position.x, new_position.y);
+    System::send_event(Paint_event{this, true});
     this->update();
     return true;
 }
@@ -325,18 +360,14 @@ bool Widget::resize_event(Area new_size, Area old_size) {
               south_border_offset(*this);
 
     resized(width_, height_);
+    System::send_event(Paint_event{this, true});
     this->update();
     return true;
 }
 
 bool Widget::animation_event() {
-    // Paint Now
     Painter p{this};
-    p.clear_screen();
-    cppurses::System::send_event(cppurses::Paint_event{this});
-    if (this->visible() && cppurses::System::paint_buffer() != nullptr) {
-        cppurses::System::paint_buffer()->flush(true);
-    }
+    System::send_event(Paint_event{this});
     return true;
 }
 
@@ -464,13 +495,22 @@ void move_cursor(Widget& w, std::size_t x, std::size_t y) {
 
 void set_background(Widget& w, Color c) {
     w.brush.set_background(c);
+    w.repaint_background();
     w.background_color_changed(c);
     w.update();
 }
 
 void set_foreground(Widget& w, Color c) {
     w.brush.set_foreground(c);
+    w.repaint_background();
     w.foreground_color_changed(c);
+    w.update();
+}
+
+void clear_attributes(Widget& w) {
+    w.brush.clear_attributes();
+    w.repaint_background();
+    // attribute changed signal
     w.update();
 }
 

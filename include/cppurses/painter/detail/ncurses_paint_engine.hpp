@@ -8,7 +8,7 @@
 /* Paint_engine Requires:
  *   void put_glyph(const Glyph& g);
  *   void put(std::size_t x, std::size_t y, const Glyph& g) {
- *   void move(std::size_t x, std::size_t y);
+ *   void move_cursor(std::size_t x, std::size_t y);
  *   void show_cursor(bool show = true);
  *   void hide_cursor(bool hide = true);
  *   std::size_t screen_width();
@@ -28,13 +28,13 @@ class NCurses_paint_engine {
     ~NCurses_paint_engine();
 
     NCurses_paint_engine(const NCurses_paint_engine&) = delete;
-    NCurses_paint_engine(NCurses_paint_engine&&) = delete;
+    NCurses_paint_engine(NCurses_paint_engine&&) = default;
     NCurses_paint_engine& operator=(const NCurses_paint_engine&) = delete;
-    NCurses_paint_engine& operator=(NCurses_paint_engine&&) = delete;
+    NCurses_paint_engine& operator=(NCurses_paint_engine&&) = default;
 
     void put_glyph(const Glyph& g);
     void put(std::size_t x, std::size_t y, const Glyph& g);
-    void move(std::size_t x, std::size_t y);
+    void move_cursor(std::size_t x, std::size_t y);
 
     void show_cursor(bool show = true);
     void hide_cursor(bool hide = true);

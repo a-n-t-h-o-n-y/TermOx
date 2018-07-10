@@ -170,6 +170,9 @@ Widget* NCurses_event_listener::handle_keyboard_widget() const {
 std::unique_ptr<Event> NCurses_event_listener::handle_resize_event() const {
     return std::make_unique<Resize_event>(
         nullptr, Area{System::max_width(), System::max_height()});
+    // Tell paint_buffer that there are new cells. if the size has
+    // increased in either direction. height and width separate calls,
+    // sending a box along, which has a top left coord.
 }
 
 Widget* NCurses_event_listener::handle_resize_widget() const {

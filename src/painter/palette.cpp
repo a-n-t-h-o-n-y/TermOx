@@ -18,27 +18,29 @@ std::size_t translate(cppurses::Color c) {
 namespace cppurses {
 
 void Palette::initialize() {
-    Paint_buffer* pb = System::paint_buffer();
-    if (pb == nullptr) {
-        return;
-    }
-    pb->set_color(Color::Black, this->get_values(Color::Black));
-    pb->set_color(Color::Dark_red, this->get_values(Color::Dark_red));
-    pb->set_color(Color::Dark_blue, this->get_values(Color::Dark_blue));
-    pb->set_color(Color::Dark_gray, this->get_values(Color::Dark_gray));
-    pb->set_color(Color::Brown, this->get_values(Color::Brown));
-    pb->set_color(Color::Green, this->get_values(Color::Green));
-    pb->set_color(Color::Red, this->get_values(Color::Red));
-    pb->set_color(Color::Gray, this->get_values(Color::Gray));
-    pb->set_color(Color::Blue, this->get_values(Color::Blue));
-    pb->set_color(Color::Orange, this->get_values(Color::Orange));
-    pb->set_color(Color::Light_gray, this->get_values(Color::Light_gray));
-    pb->set_color(Color::Light_green, this->get_values(Color::Light_green));
-    pb->set_color(Color::Violet, this->get_values(Color::Violet));
-    pb->set_color(Color::Light_blue, this->get_values(Color::Light_blue));
-    pb->set_color(Color::Yellow, this->get_values(Color::Yellow));
-    pb->set_color(Color::White, this->get_values(Color::White));
-    pb->flush(false);
+    Paint_buffer& pb = System::paint_buffer();
+    pb.set_color_definition(Color::Black, this->get_values(Color::Black));
+    pb.set_color_definition(Color::Dark_red, this->get_values(Color::Dark_red));
+    pb.set_color_definition(Color::Dark_blue,
+                            this->get_values(Color::Dark_blue));
+    pb.set_color_definition(Color::Dark_gray,
+                            this->get_values(Color::Dark_gray));
+    pb.set_color_definition(Color::Brown, this->get_values(Color::Brown));
+    pb.set_color_definition(Color::Green, this->get_values(Color::Green));
+    pb.set_color_definition(Color::Red, this->get_values(Color::Red));
+    pb.set_color_definition(Color::Gray, this->get_values(Color::Gray));
+    pb.set_color_definition(Color::Blue, this->get_values(Color::Blue));
+    pb.set_color_definition(Color::Orange, this->get_values(Color::Orange));
+    pb.set_color_definition(Color::Light_gray,
+                            this->get_values(Color::Light_gray));
+    pb.set_color_definition(Color::Light_green,
+                            this->get_values(Color::Light_green));
+    pb.set_color_definition(Color::Violet, this->get_values(Color::Violet));
+    pb.set_color_definition(Color::Light_blue,
+                            this->get_values(Color::Light_blue));
+    pb.set_color_definition(Color::Yellow, this->get_values(Color::Yellow));
+    pb.set_color_definition(Color::White, this->get_values(Color::White));
+    pb.flush(false);
 }
 
 void Palette::set_color(Color c,

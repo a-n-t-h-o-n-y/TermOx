@@ -1,10 +1,12 @@
 #ifndef SYSTEM_SYSTEM_HPP
 #define SYSTEM_SYSTEM_HPP
+#include <cstddef>
 #include <memory>
 #include <utility>
 
 #include <signals/slot.hpp>
 
+#include <cppurses/painter/paint_buffer.hpp>
 #include <cppurses/system/animation_engine.hpp>
 #include <cppurses/system/event_loop.hpp>
 
@@ -40,11 +42,10 @@ class System {
 
     static void exit(int return_code = 0);
     static Widget* head();
-    static unsigned max_width();
-    static unsigned max_height();
+    static std::size_t max_width();
+    static std::size_t max_height();
     static detail::Abstract_event_listener* event_listener();
-    static Paint_buffer* paint_buffer();
-    static void set_paint_buffer(std::unique_ptr<Paint_buffer> buffer);
+    static Paint_buffer& paint_buffer();
     static void set_palette(std::unique_ptr<Palette> palette);
     static Palette* palette();
     static void set_head(Widget* head_widget);
@@ -59,7 +60,7 @@ class System {
     static Widget* head_;
     static Event_loop event_loop_;
     static Animation_engine animation_engine_;
-    static std::unique_ptr<Paint_buffer> paint_buffer_;
+    static Paint_buffer paint_buffer_;
     static std::unique_ptr<detail::Abstract_event_listener> event_listener_;
     static std::unique_ptr<Palette> system_palette_;
 };

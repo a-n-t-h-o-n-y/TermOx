@@ -19,7 +19,7 @@ Options_A::Options_A() {
 }
 
 Options_B::Options_B() {
-    space1.background_tile = L'─';
+    space1.set_background_tile(L'─');
 
     palette_label.set_alignment(Alignment::Center);
     palette_box.add_option("Dawn Bringer").connect([] {

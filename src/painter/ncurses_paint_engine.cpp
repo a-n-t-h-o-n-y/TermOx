@@ -137,11 +137,11 @@ void NCurses_paint_engine::put_glyph(const Glyph& g) {
 }
 
 void NCurses_paint_engine::put(std::size_t x, std::size_t y, const Glyph& g) {
-    this->move(x, y);
+    this->move_cursor(x, y);
     this->put_glyph(g);
 }
 
-void NCurses_paint_engine::move(std::size_t x, std::size_t y) {
+void NCurses_paint_engine::move_cursor(std::size_t x, std::size_t y) {
     ::wmove(::stdscr, static_cast<int>(y), static_cast<int>(x));
 }
 

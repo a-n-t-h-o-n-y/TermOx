@@ -5,6 +5,7 @@
 
 #include <signals/slot.hpp>
 
+#include <cppurses/painter/paint_buffer.hpp>
 #include <cppurses/system/async_trigger.hpp>
 #include <cppurses/system/events/animation_event.hpp>
 #include <cppurses/system/system.hpp>
@@ -22,10 +23,14 @@ namespace cppurses {
 namespace slot {
 
 sig::Slot<void()> animation_event(Widget* widg) {
-    // sig::Slot<void()> slot{[widg] { widg->animation_event(); }};
     sig::Slot<void()> slot{
         [widg] { System::send_event(Animation_event{widg}); }};
     slot.track(widg->destroyed);
+    return slot;
+}
+
+sig::Slot<void()> flush() {
+    sig::Slot<void()> slot{[] { System::paint_buffer().flush(true); }};
     return slot;
 }
 
@@ -37,15 +42,20 @@ void Animation_engine::register_widget(Widget* widg, int frames_per_second) {
         if (connections_.at(widg).connected()) {
             return;
         }
+        // Add to existing framerate Async trigger.
     } else if (const_framerate_triggers_.count(frames_per_second) == 1) {
         auto conn = const_framerate_triggers_.at(frames_per_second)
-                        .trigger.connect(slot::animation_event(widg));
+                        .trigger.connect(slot::animation_event(widg),
+                                         sig::Position::at_front);
         connections_[widg] = conn;
-    } else {
+    } else {  // Add new Async_trigger to map.
         const_framerate_triggers_[frames_per_second] =
             Async_trigger{fps_to_period(frames_per_second)};
         auto conn = const_framerate_triggers_.at(frames_per_second)
-                        .trigger.connect(slot::animation_event(widg));
+                        .trigger.connect(slot::animation_event(widg),
+                                         sig::Position::at_front);
+        const_framerate_triggers_.at(frames_per_second)
+            .trigger.connect(slot::flush(), sig::Position::at_back);
         const_framerate_triggers_[frames_per_second].start();
         connections_[widg] = conn;
     }
@@ -58,13 +68,15 @@ void Animation_engine::register_widget(Widget* widg,
         if (connections_.at(widg).connected()) {
             return;
         }
-    } else {
+    } else {  // Add new Async_trigger to vector.
         variable_framerate_triggers_.push_back(
             Async_trigger{[frames_per_second] {
                 return fps_to_period(frames_per_second());
             }});
         auto conn = variable_framerate_triggers_.back().trigger.connect(
             slot::animation_event(widg));
+        variable_framerate_triggers_.back().trigger.connect(
+            slot::flush(), sig::Position::at_back);
         variable_framerate_triggers_.back().start();
         connections_[widg] = conn;
     }

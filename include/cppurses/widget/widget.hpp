@@ -9,6 +9,8 @@
 #include <utility>
 #include <vector>
 
+#include <optional/optional.hpp>
+
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
@@ -76,6 +78,12 @@ class Widget : public Event_handler {
     void set_visible(bool visible, bool recursive = true);
     bool visible() const;
     bool on_tree() const;
+    void set_background_tile(const Glyph& tile);
+    void set_background_tile(opt::Optional<Glyph> tile);
+    const opt::Optional<Glyph>& background_tile() const;
+
+    void repaint_background();
+
     virtual void update();
 
     bool east_border_disqualified() const;
@@ -92,8 +100,11 @@ class Widget : public Event_handler {
     Size_policy width_policy{this};
     Size_policy height_policy{this};
     Focus_policy focus_policy{Focus_policy::None};
-    Glyph background_tile{L' '};
     Brush brush{background(Color::Black), foreground(Color::White)};
+
+    /// If true, the brush will paint the background tiles.
+    bool brush_alters_background() const;
+    void set_brush_alters_background(bool alters = true);
 
     // Signals
     sig::Signal<void(const std::string&)> name_changed;
@@ -135,6 +146,9 @@ class Widget : public Event_handler {
     Point cursor_position_;
     bool show_cursor_{false};
 
+    opt::Optional<Glyph> background_tile_;
+    bool brush_alters_background_{true};
+
     // Top left corner, relative to parent's coordinates.
     Point position_;
 
@@ -151,9 +165,7 @@ class Widget : public Event_handler {
     void set_y(std::size_t global_y);
 };
 
-// - - - - - - - - - - - - - - Free Functions - - - - - - - - - - - - - - -
-// - -
-
+// - - - - - - - - - - - - - - Free Functions - - - - - - - - - - - - - - - - -
 bool has_border(const Widget& w);
 void enable_border(Widget& w);
 void disable_border(Widget& w);
@@ -168,8 +180,15 @@ bool has_coordinates(Widget& w, std::size_t global_x, std::size_t global_y);
 void move_cursor(Widget& w, Point c);
 void move_cursor(Widget& w, std::size_t x, std::size_t y);
 
+// Eventually make Widget::brush private and only provide access through these
+// functions that update the background accordingly, though this is restrictive.
 void set_background(Widget& w, Color c);
 void set_foreground(Widget& w, Color c);
+template <typename... Attrs>
+void add_attributes(Widget& w, Attrs&... attrs);
+template <typename... Attrs>
+void remove_attributes(Widget& w, Attrs&... attrs);
+void clear_attributes(Widget& w);
 
 void set_background_recursive(Widget& w, Color c, bool single_level = false);
 void set_foreground_recursive(Widget& w, Color c, bool single_level = false);
@@ -178,8 +197,7 @@ bool has_focus(const Widget& w);
 
 void toggle_cursor(Widget& w);
 
-// - - - - - - - - - - - - Template Implementations - - - - - - - - - - - -
-// - -
+// - - - - - - - - - - - - Template Implementations - - - - - - - - - - - - - -
 
 template <typename T, typename... Args>
 T& Widget::make_child(Args&&... args) {
@@ -206,6 +224,24 @@ T* Widget::find_child(const std::string& name) const {
         }
     }
     return nullptr;
+}
+
+template <typename... Attrs>
+void add_attributes(Widget& w, Attrs&... attrs) {
+    w.brush.add_attributes(std::forward<Attrs>(attrs)...);
+    w.repaint_background();
+    // Attributes changed signal
+    w.update();
+}
+
+template <typename... Attrs>
+void remove_attributes(Widget& w, Attrs&... attrs) {
+    for (const auto& at : {attrs...}) {
+        w.brush.remove_attribute(at);
+    }
+    w.repaint_background();
+    // Attributes changed signal
+    w.update();
 }
 
 }  // namespace cppurses

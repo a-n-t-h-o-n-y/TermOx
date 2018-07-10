@@ -61,6 +61,7 @@ class Brush {
 
     void set_attr(Attribute attr);
 
+    // Data Members
     std::bitset<8> attributes_;
     opt::Optional<Color> background_color_;
     opt::Optional<Color> foreground_color_;
