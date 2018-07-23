@@ -1,5 +1,6 @@
 #include <cppurses/system/events/paint_event.hpp>
 
+#include <cppurses/painter/detail/is_not_paintable.hpp>
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/system/event_handler.hpp>
 #include <cppurses/widget/widget.hpp>
@@ -12,13 +13,13 @@ Paint_event::Paint_event(Event_handler* receiver, bool repaint_background)
 
 bool Paint_event::send() const {
     Widget* widg{static_cast<Widget*>(receiver_)};
-    if (widg->visible()) {
-        if (repaint_background_) {
-            widg->repaint_background();
-        }
-        return receiver_->paint_event(painter_);
+    if (detail::is_not_paintable(widg)) {
+        return false;
     }
-    return false;
+    if (repaint_background_) {
+        widg->repaint_background(painter_);
+    }
+    return receiver_->paint_event(painter_);
 }
 
 bool Paint_event::filter_send(Event_handler* filter) const {

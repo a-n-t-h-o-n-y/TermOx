@@ -57,6 +57,7 @@ target_sources(libcppurses PRIVATE
     system/async_trigger.cpp
     system/animation_engine.cpp
     system/animation_event.cpp
+    system/event_as_string.cpp
 )
 
 # PAINTER
@@ -71,6 +72,7 @@ target_sources(libcppurses PRIVATE
     painter/glyph_string.cpp
     painter/wchar_to_bytes.cpp
     painter/extended_char.cpp
+    painter/is_not_paintable.cpp
 )	
 
 # WIDGET

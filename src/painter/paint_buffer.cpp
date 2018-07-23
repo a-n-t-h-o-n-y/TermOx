@@ -4,6 +4,7 @@
 #include <mutex>
 
 #include <cppurses/painter/detail/glyph_and_bkgd_bool.hpp>
+#include <cppurses/painter/detail/is_not_paintable.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_matrix.hpp>
 #include <cppurses/painter/painter.hpp>
@@ -15,7 +16,7 @@
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/widget.hpp>
 
-#include <utility/log.hpp>  //temp
+// #include <utility/log.hpp>  //temp
 
 namespace {
 using namespace cppurses;
@@ -60,11 +61,6 @@ bool within_widg(const Point& point, const Widget* widg) {
     return true;
 }
 
-bool is_not_paintable(const Widget* w) {
-    return !w->on_tree() || !w->visible() || (w->width() == 0) ||
-           (w->height() == 0);
-}
-
 }  // namespace
 
 namespace cppurses {
@@ -84,7 +80,7 @@ void Paint_buffer::update_diff(const Painter& p) {
     //     l << "- - - - PAINTER.STATE ITERATED, COMPARED TO SCREEN_STATE\n";
     // }
     std::lock_guard<Mutex_t> guard{mutex_};
-    if (is_not_paintable(p.widget())) {
+    if (detail::is_not_paintable(p.widget())) {
         return;
     }
     for (const auto& point_glyph_pair : p.state()) {
@@ -93,6 +89,7 @@ void Paint_buffer::update_diff(const Painter& p) {
             point_glyph_pair.second};
         auto screen_at_point = screen_state_.find(point);
         // Overwrite existing glyph that is on the screen.
+        // if staged tile is found to already exist in screen_state
         if (screen_at_point != std::end(screen_state_)) {
             if (screen_at_point->second != painter_glyph.tile) {
                 staged_diff_[point] = painter_glyph;
@@ -129,7 +126,9 @@ void Paint_buffer::update_diff(const Painter& p) {
             Glyph background{p.widget()->background_tile()
                                  ? *p.widget()->background_tile()
                                  : global_background_tile_};
-            background = p.add_default_attributes(background);
+            if (p.widget()->brush_alters_background()) {
+                background = p.add_default_attributes(background);
+            }
             // if (screen_glyph != background) {
             staged_diff_[point] = detail::Glyph_and_bkgd_bool{background, true};
             // l << "x " << point.x << " y " << point.y << ' '
@@ -141,8 +140,13 @@ void Paint_buffer::update_diff(const Painter& p) {
 
 void Paint_buffer::flush(bool optimize) {
     std::lock_guard<Mutex_t> guard{mutex_};
+    // utility::Log l;
+    // int log_background_glyph{0};
+    // int log_foreground_glyph{0};
     // Completely redraw the screen if optimize == false
     if (!optimize) {  // this'll have to change. call on widgets to update fully
+        // might never be called except at construction and isnt needed there
+        // except maybe palette change?
         this->repaint_all_backgrounds();
         for (const auto& point_glyph_pair : screen_state_) {
             engine_.put(point_glyph_pair.first.x, point_glyph_pair.first.y,
@@ -160,7 +164,11 @@ void Paint_buffer::flush(bool optimize) {
         //   point_glyph_pair.second.symbol
         //   << std::endl;
         engine_.put(point.x, point.y, staged_glyph.tile);
+        // if (staged_glyph.is_background) {
+        //     ++log_background_glyph;
+        // }
         if (!staged_glyph.is_background) {
+            // ++log_foreground_glyph;
             screen_state_[point] = staged_glyph.tile;
         }
     }
@@ -182,6 +190,12 @@ void Paint_buffer::flush(bool optimize) {
         }
     }
     engine_.refresh();
+    // l << "Flush called: backgrounds printed: " << log_background_glyph <<
+    // '\n'; l << "              foregrounds printed: " << log_foreground_glyph
+    //   << std::endl;
+    // if (!optimize) {
+    //     l << "was not optimized." << std::endl;
+    // }
 }
 
 void Paint_buffer::move_cursor(std::size_t x, std::size_t y) {
@@ -206,14 +220,17 @@ const Glyph& Paint_buffer::at(std::size_t x, std::size_t y) const {
 void Paint_buffer::set_global_background_tile(const Glyph& tile) {
     std::lock_guard<Mutex_t> guard{mutex_};
     global_background_tile_ = tile;
-    for (std::size_t i{0}; i < width_; ++i) {
-        for (std::size_t j{0}; j < height_; ++j) {
-            if (screen_state_.count(Point{i, j}) == 0) {
-                engine_.put(i, j, global_background_tile_);
-                screen_state_[Point{i, j}] = global_background_tile_;
-            }
-        }
+    if (System::head() != nullptr) {
+        System::send_event(Paint_event{System::head(), true});
     }
+    // for (std::size_t i{0}; i < width_; ++i) {
+    //     for (std::size_t j{0}; j < height_; ++j) {
+    //         if (screen_state_.count(Point{i, j}) == 0) {
+    //             engine_.put(i, j, global_background_tile_);
+    //             screen_state_[Point{i, j}] = global_background_tile_;
+    //         }
+    //     }
+    // }
 }
 
 Glyph Paint_buffer::get_global_background_tile() const {

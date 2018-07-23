@@ -203,19 +203,17 @@ void Widget::set_brush_alters_background(bool alters) {
 }
 
 // Called by Paint_event::send()
-void Widget::repaint_background() {
+void Widget::repaint_background(Painter& p) {
     Glyph background;
     if (background_tile_) {
         background = *background_tile_;
-    } else {  // Use the global background tile in Paint_buffer.
+    } else {
         background = System::paint_buffer().get_global_background_tile();
     }
-    Painter p{this};
     if (brush_alters_background_) {
         background = p.add_default_attributes(background);
     }
-    p.fill(background, this->x(), this->y(), this->width(), this->height(),
-           true);
+    p.fill(background, 0, 0, this->width(), this->height(), true);
 }
 
 void Widget::update() {
@@ -495,23 +493,26 @@ void move_cursor(Widget& w, std::size_t x, std::size_t y) {
 
 void set_background(Widget& w, Color c) {
     w.brush.set_background(c);
-    w.repaint_background();
+    // w.repaint_background();
+    System::send_event(Paint_event(&w, true));
     w.background_color_changed(c);
-    w.update();
+    // w.update();
 }
 
 void set_foreground(Widget& w, Color c) {
     w.brush.set_foreground(c);
-    w.repaint_background();
+    // w.repaint_background();
+    System::send_event(Paint_event(&w, true));
     w.foreground_color_changed(c);
-    w.update();
+    // w.update();
 }
 
 void clear_attributes(Widget& w) {
     w.brush.clear_attributes();
-    w.repaint_background();
+    // w.repaint_background();
+    System::send_event(Paint_event(&w, true));
     // attribute changed signal
-    w.update();
+    // w.update();
 }
 
 void set_background_recursive(Widget& w, Color c, bool single_level) {

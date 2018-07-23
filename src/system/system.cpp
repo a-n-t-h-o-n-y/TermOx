@@ -19,6 +19,10 @@
 #include <cppurses/widget/layout.hpp>
 #include <cppurses/widget/widget.hpp>
 
+// Temps
+// #include <cppurses/system/detail/event_as_string.hpp>
+// #include <utility/log.hpp>
+
 namespace cppurses {
 namespace detail {
 class Abstract_event_listener;
@@ -41,11 +45,21 @@ void System::post_event(std::unique_ptr<Event> event) {
 
 bool System::send_event(const Event& event) {
     static std::recursive_mutex send_mtx;
+    // static int recursion_levels{0};
+    // static long call_n{0};
+
     std::lock_guard<std::recursive_mutex> guard{send_mtx};
+    // utility::Log l;
+    // ++call_n;
     bool handled = event.send_to_all_filters();
     if (!handled) {
-        event.send();
+        // l << call_n << " call to send_event()\n";
+        // l << recursion_levels++ << " Recursion Levels Deep.\n";
+        // l << "Event Type: " << detail::event_as_string(event) << '\n';
+        // l << "Event Receiver: " << event.receiver() << '\n' << std::endl;
+        handled = event.send();
     }
+    // --recursion_levels;
     return handled;
 }
 
@@ -85,13 +99,11 @@ Palette* System::palette() {
 }
 
 System::System() {
-    // System::set_paint_buffer(std::make_unique<Paint_buffer>());
     System::set_palette(std::make_unique<DawnBringer_palette>());
     this->disable_ctrl_characters();
 }
 
 System::~System() {
-    // System::set_paint_buffer(nullptr);
     animation_engine_.shutdown();
 }
 

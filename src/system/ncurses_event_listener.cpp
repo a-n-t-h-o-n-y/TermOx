@@ -4,8 +4,6 @@
 #include <memory>
 #include <vector>
 
-#include <ncurses.h>
-
 #include <cppurses/system/event.hpp>
 #include <cppurses/system/events/key_event.hpp>
 #include <cppurses/system/events/mouse_event.hpp>
@@ -17,6 +15,8 @@
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
+
+#include <ncurses.h>
 
 namespace {
 

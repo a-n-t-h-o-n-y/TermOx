@@ -52,8 +52,7 @@ class Paint_buffer {
     std::unordered_map<Point, detail::Glyph_and_bkgd_bool> staged_diff_;
     std::unordered_map<Point, Glyph> screen_state_;
 
-    Glyph global_background_tile_{L' ', background(Color::Black),
-                                  foreground(Color::White)};
+    Glyph global_background_tile_{L' '};
     std::size_t width_{0};
     std::size_t height_{0};
 

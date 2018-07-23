@@ -15,7 +15,9 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/system/event_handler.hpp>
+#include <cppurses/system/events/paint_event.hpp>
 #include <cppurses/system/key.hpp>
+#include <cppurses/system/system.hpp>
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/point.hpp>
@@ -82,7 +84,7 @@ class Widget : public Event_handler {
     void set_background_tile(opt::Optional<Glyph> tile);
     const opt::Optional<Glyph>& background_tile() const;
 
-    void repaint_background();
+    void repaint_background(Painter& p);
 
     virtual void update();
 
@@ -229,9 +231,10 @@ T* Widget::find_child(const std::string& name) const {
 template <typename... Attrs>
 void add_attributes(Widget& w, Attrs&... attrs) {
     w.brush.add_attributes(std::forward<Attrs>(attrs)...);
-    w.repaint_background();
+    System::send_event(Paint_event(&w, true));
+    // w.repaint_background();
     // Attributes changed signal
-    w.update();
+    // w.update();
 }
 
 template <typename... Attrs>
@@ -239,9 +242,10 @@ void remove_attributes(Widget& w, Attrs&... attrs) {
     for (const auto& at : {attrs...}) {
         w.brush.remove_attribute(at);
     }
-    w.repaint_background();
+    System::send_event(Paint_event(&w, true));
+    // w.repaint_background();
     // Attributes changed signal
-    w.update();
+    // w.update();
 }
 
 }  // namespace cppurses
