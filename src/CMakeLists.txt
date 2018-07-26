@@ -54,10 +54,15 @@ target_sources(libcppurses PRIVATE
     system/show_event.cpp
 	system/system.cpp
     system/shortcuts.cpp
-    system/async_trigger.cpp
+    # system/async_trigger.cpp
     system/animation_engine.cpp
     system/animation_event.cpp
     system/event_as_string.cpp
+    system/user_input_event_loop.cpp
+    system/animation_event_loop.cpp
+    system/chrono_duration_hash.cpp
+    system/repaint_event.cpp
+    system/repaint_all.cpp
 )
 
 # PAINTER
@@ -73,6 +78,8 @@ target_sources(libcppurses PRIVATE
     painter/wchar_to_bytes.cpp
     painter/extended_char.cpp
     painter/is_not_paintable.cpp
+    painter/flush.cpp
+    painter/add_default_attributes.cpp
 )	
 
 # WIDGET

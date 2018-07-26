@@ -1,29 +1,27 @@
 #include <cppurses/system/events/paint_event.hpp>
 
 #include <cppurses/painter/detail/is_not_paintable.hpp>
-#include <cppurses/painter/painter.hpp>
 #include <cppurses/system/event_handler.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
 Paint_event::Paint_event(Event_handler* receiver, bool repaint_background)
-    : Event{Event::Paint, receiver},
-      painter_{static_cast<Widget*>(receiver_)},
-      repaint_background_{repaint_background} {}
+    : Event{Event::Paint, receiver} {
+}  //, repaint_background_{repaint_background} {}
 
 bool Paint_event::send() const {
     Widget* widg{static_cast<Widget*>(receiver_)};
     if (detail::is_not_paintable(widg)) {
         return false;
     }
-    if (repaint_background_) {
-        widg->repaint_background(painter_);
-    }
-    return receiver_->paint_event(painter_);
+    // if (repaint_background_) {  // TODO this is its own event now, remove?
+    //     widg->repaint_background();
+    // }
+    return receiver_->paint_event();
 }
 
 bool Paint_event::filter_send(Event_handler* filter) const {
-    return filter->paint_event_filter(receiver_, painter_);
+    return filter->paint_event_filter(receiver_);
 }
 
 }  // namespace cppurses

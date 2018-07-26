@@ -13,6 +13,7 @@
 
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
+#include <cppurses/painter/detail/screen_state.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/system/event_handler.hpp>
 #include <cppurses/system/events/paint_event.hpp>
@@ -63,9 +64,13 @@ class Widget : public Event_handler {
     std::size_t x() const;
     std::size_t y() const;
 
-    // Dimensions(Not Including Border)
+    // Dimensions, not including border space.
     std::size_t width() const;
     std::size_t height() const;
+
+    /// Dimensions, including border space.
+    std::size_t outer_width() const;
+    std::size_t outer_height() const;
 
     // Cursor
     bool cursor_visible() const;
@@ -84,7 +89,7 @@ class Widget : public Event_handler {
     void set_background_tile(opt::Optional<Glyph> tile);
     const opt::Optional<Glyph>& background_tile() const;
 
-    void repaint_background(Painter& p);
+    void repaint_background();  // TODO you might not need this func.
 
     virtual void update();
 
@@ -108,6 +113,9 @@ class Widget : public Event_handler {
     bool brush_alters_background() const;
     void set_brush_alters_background(bool alters = true);
 
+    /// Returns the background tile used for this widget.
+    Glyph find_background_tile() const;
+
     // Signals
     sig::Signal<void(const std::string&)> name_changed;
     sig::Signal<void(std::size_t, std::size_t)> resized;
@@ -122,8 +130,12 @@ class Widget : public Event_handler {
     sig::Signal<void(Color)> background_color_changed;
     sig::Signal<void(Color)> foreground_color_changed;
 
+    Screen_state& screen_state();
+    const Screen_state& screen_state() const;
+
    protected:
-    bool paint_event(Painter& p) override;
+    bool paint_event() override;
+    bool repaint_event() override;
     bool close_event() override;
     bool focus_in_event() override;
     bool focus_out_event() override;
@@ -151,8 +163,10 @@ class Widget : public Event_handler {
     opt::Optional<Glyph> background_tile_;
     bool brush_alters_background_{true};
 
+    detail::Screen_state screen_state_;
+
     // Top left corner, relative to parent's coordinates.
-    Point position_;
+    Point position_;  // rename to top_left_?
 
     std::size_t width_{width_policy.hint()};
     std::size_t height_{height_policy.hint()};

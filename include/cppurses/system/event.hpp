@@ -19,6 +19,7 @@ class Event {
         FocusOut,
         ClearScreen,
         Paint,
+        Repaint,
         Move,
         Resize,
         Show,

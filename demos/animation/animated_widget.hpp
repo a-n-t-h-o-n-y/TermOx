@@ -17,7 +17,7 @@ class Animated_bit : public cppurses::Horizontal_layout {
     Animated_bit(int rate);
 
     bool animation_event() override;
-    bool paint_event(cppurses::Painter& p) override;
+    bool paint_event() override;
 
     bool mouse_press_event(cppurses::Mouse_button button,
                            cppurses::Point global,

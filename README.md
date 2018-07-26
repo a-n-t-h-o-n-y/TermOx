@@ -40,16 +40,17 @@ class Button : public Widget {
         return Widget::mouse_press_event(button, global, local, device_id);
     }
 
-    bool paint_event(Painter& p) override {
+    bool paint_event() override {
         // Calculate Center Position
         std::size_t x{(this->width() / 2) - (title_.length() / 2)};
         std::size_t y{this->height() / 2};
         Point position{x, y};
 
         // Put Title to Screen
+        Painter p{this};
         p.put(title_, position);
 
-        return Widget::paint_event(p);
+        return Widget::paint_event();
     }
 
    private:

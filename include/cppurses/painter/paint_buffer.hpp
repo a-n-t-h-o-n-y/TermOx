@@ -22,16 +22,16 @@ class Paint_buffer {
     Paint_buffer();
 
     /// Applies the painted space in p to the staged diff.
-    void update_diff(const Painter& p);
+    // void update_diff(const Painter& p);
 
     /// Apply staged_diff_ to the physical screen via engine_.
-    void flush(bool optimize);
+    // void flush(bool optimize);
 
     /// Returns the Glyph on the screen at point x, y.
-    const Glyph& at(const Point& point) const;
+    // const Glyph& at(const Point& point) const;
 
     /// Returns the Glyph on the screen at point x, y.
-    const Glyph& at(std::size_t x, std::size_t y) const;
+    // const Glyph& at(std::size_t x, std::size_t y) const;
 
     void move_cursor(std::size_t x, std::size_t y);
 
@@ -62,8 +62,9 @@ class Paint_buffer {
     void resize_width(std::size_t new_width);
     void resize_height(std::size_t new_height);
 
-    void paint_background(Point top_left, Area area);
-    void repaint_all_backgrounds();
+    // TODO dont need these?
+    // void paint_background(Point top_left, Area area);
+    // void repaint_all_backgrounds();
 };
 
 }  // namespace cppurses

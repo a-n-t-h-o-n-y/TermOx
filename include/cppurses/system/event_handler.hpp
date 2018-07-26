@@ -12,7 +12,6 @@
 
 namespace cppurses {
 class Widget;
-class Painter;
 
 class Event_handler {
    public:
@@ -68,7 +67,8 @@ class Event_handler {
     virtual bool focus_in_event();
     virtual bool focus_out_event();
     virtual bool deferred_delete_event(Event_handler* to_delete) = 0;
-    virtual bool paint_event(Painter& p) = 0;
+    virtual bool paint_event() = 0;
+    virtual bool repaint_event() = 0;
     virtual bool animation_event() = 0;
 
     // - - - - - - - - - - - Event Filter Handlers - - - - - - - - - - - - - - -
@@ -125,7 +125,8 @@ class Event_handler {
     virtual bool focus_out_event_filter(Event_handler* receiver);
     virtual bool deferred_delete_event_filter(Event_handler* receiver,
                                               Event_handler* to_delete);
-    virtual bool paint_event_filter(Event_handler* receiver, Painter& p);
+    virtual bool paint_event_filter(Event_handler* receiver);
+    virtual bool repaint_event_filter(Event_handler* receiver);
     virtual bool animation_event_filter(Event_handler* receiver);
 
     // Signals

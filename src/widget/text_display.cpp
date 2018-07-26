@@ -190,7 +190,8 @@ Point Text_display::display_position(std::size_t index) const {
     return position;
 }
 
-bool Text_display::paint_event(Painter& p) {
+bool Text_display::paint_event() {
+    Painter p{this};
     std::size_t line_n{0};
     auto paint = [&p, &line_n, this](const Line_info& line) {
         auto sub_begin = std::begin(this->contents_) + line.start_index;
@@ -218,7 +219,7 @@ bool Text_display::paint_event(Painter& p) {
     if (this->top_line() < display_state_.size()) {
         std::for_each(begin, end, paint);
     }
-    return Widget::paint_event(p);
+    return Widget::paint_event();
 }
 
 // TODO: Implement tab character. and newline?

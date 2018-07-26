@@ -24,7 +24,7 @@ namespace detail {
 
 class NCurses_paint_engine {
    public:
-    explicit NCurses_paint_engine();
+    NCurses_paint_engine();
     ~NCurses_paint_engine();
 
     NCurses_paint_engine(const NCurses_paint_engine&) = delete;

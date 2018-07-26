@@ -40,7 +40,6 @@ void Palette::initialize() {
                             this->get_values(Color::Light_blue));
     pb.set_color_definition(Color::Yellow, this->get_values(Color::Yellow));
     pb.set_color_definition(Color::White, this->get_values(Color::White));
-    pb.flush(false);
 }
 
 void Palette::set_color(Color c,

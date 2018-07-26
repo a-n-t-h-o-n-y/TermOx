@@ -12,7 +12,7 @@ class Matrix_display : public Widget {
     Glyph_matrix matrix;
 
    protected:
-    bool paint_event(Painter& p) override;
+    bool paint_event() override;
 };
 
 }  // namespace cppurses

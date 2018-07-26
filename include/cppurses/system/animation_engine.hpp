@@ -1,41 +1,44 @@
 #ifndef CPPURSES_SYSTEM_ANIMATION_ENGINE_HPP
 #define CPPURSES_SYSTEM_ANIMATION_ENGINE_HPP
+#include <chrono>
 #include <functional>
-#include <map>
+#include <unordered_map>
 #include <vector>
 
-#include <signals/connection.hpp>
-
-#include <cppurses/system/async_trigger.hpp>
+#include <cppurses/system/detail/animation_event_loop.hpp>
 
 namespace cppurses {
 class Widget;
 
-/// Sets up a trigger for any widget to have animation_event called at a
-/// given framerate. Keeps track of which Widgets are currently animated and
-/// will not double up animations if registered multiple times without
-/// deregistering first.
+Animation_event_loop::Period_t fps_to_period(int fps);
+
+/// Manages all Animation_event_loops, grouping by period.
 class Animation_engine {
    public:
-    /// Begins animation calls to the given widget at the given framerate.
-    // Checks first that the widget does not have an active connection.
-    void register_widget(Widget* widg, int frames_per_second);
+    using Period_t = Animation_event_loop::Period_t;
 
-    /// Begins animation calls to the given widget with the function
-    /// frames_per_second used to get the fps on each frame.
-    // Checks first that the widget does not have an active connection.
-    void register_widget(Widget* widg, std::function<int()> frames_per_second);
+    /// Begins posting Animation_events to the given Widget every period.
+    void register_widget(Widget& w, Period_t period);
 
-    /// Stops a widget from being animated
-    void deregister_widget(Widget* widg);
+    /// Begins posting Animation_events to the Widget with a variable period.
+    void register_widget(Widget& w, std::function<Period_t()> period_func);
 
-    /// sends stop signals to all async triggers and waits for them to shutdown.
+    /// Stop posting Animation_events to a given Widget.
+    void unregister_widget(Widget& w);
+
+    /// Sends stop signals to all event loops and waits for them to exit.
     void shutdown();
 
+    /// Starts sending Animation_events to all registered widgets.
+    ///
+    /// Only needed if shutdown() has been called.
+    void startup();
+
    private:
-    std::map<int, Async_trigger> const_framerate_triggers_;
-    std::vector<Async_trigger> variable_framerate_triggers_;
-    std::map<Widget*, sig::Connection> connections_;
+    void clean_up();
+
+    std::unordered_map<Period_t, Animation_event_loop> const_loops_;
+    std::vector<Animation_event_loop> variable_loops_;
 };
 
 }  // namespace cppurses

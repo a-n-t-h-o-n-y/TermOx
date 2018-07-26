@@ -10,12 +10,17 @@
 
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
+#include <cppurses/painter/detail/add_default_attributes.hpp>
+#include <cppurses/painter/detail/flush.hpp>
+#include <cppurses/painter/detail/staged_changes.hpp>
+#include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/paint_buffer.hpp>
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/system/events/child_event.hpp>
 #include <cppurses/system/events/deferred_delete_event.hpp>
 #include <cppurses/system/events/on_tree_event.hpp>
 #include <cppurses/system/events/paint_event.hpp>
+#include <cppurses/system/events/repaint_event.hpp>
 #include <cppurses/system/focus.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/border.hpp>
@@ -98,6 +103,7 @@ std::unique_ptr<Widget> Widget::remove_child(Widget* child) {
     std::unique_ptr<Widget> removed = std::move(*at);
     children_.erase(at);
     removed->set_parent(nullptr);
+    // TODO look into send_event()s below, is post_event() possible?
     System::send_event(Child_removed_event{this, child});
     System::send_event(On_tree_event{removed.get(), false});
     return removed;
@@ -129,6 +135,16 @@ std::size_t Widget::width() const {
 
 std::size_t Widget::height() const {
     return height_;
+}
+
+std::size_t outer_width() const {
+    return this->width() + west_border_offset(*this) +
+           east_border_offset(*this);
+}
+
+std::size_t outer_height() const {
+    return this->height() + north_border_offset(*this) +
+           south_border_offset(*this);
 }
 
 bool Widget::cursor_visible() const {
@@ -179,14 +195,13 @@ bool Widget::on_tree() const {
     return on_tree_;
 }
 
-void Widget::set_background_tile(const Glyph& tile) {
+void Widget::set_background_tile(const Glyph& tile) {  // TODO Prob not needed.
     this->set_background_tile(opt::Optional<Glyph>{tile});
 }
 
 void Widget::set_background_tile(opt::Optional<Glyph> tile) {
     background_tile_ = tile;
-    System::send_event(Paint_event{this, true});
-    this->update();
+    System::post_event(Repaint_event{this});
 }
 
 const opt::Optional<Glyph>& Widget::background_tile() const {
@@ -199,17 +214,28 @@ bool Widget::brush_alters_background() const {
 
 void Widget::set_brush_alters_background(bool alters) {
     brush_alters_background_ = alters;
-    System::send_event(Paint_event(this, true));
+    System::post_event(Repaint_event{this});
+}
+
+Glyph Widget::find_background_tile() const {
+    Glyph background{this->background_tile()
+                         ? *(this->background_tile())
+                         : System::paint_buffer().get_global_background_tile()};
+    if (this->brush_alters_background()) {
+        detail::add_default_attributes(background, this->brush);
+    }
+    return background;
 }
 
 // Called by Paint_event::send()
-void Widget::repaint_background(Painter& p) {
+void Widget::repaint_background() {
     Glyph background;
     if (background_tile_) {
         background = *background_tile_;
     } else {
         background = System::paint_buffer().get_global_background_tile();
     }
+    Painter p{this};
     if (brush_alters_background_) {
         background = p.add_default_attributes(background);
     }
@@ -261,11 +287,22 @@ bool Widget::focus_out_event() {
     return true;
 }
 
-bool Widget::paint_event(Painter& p) {
+bool Widget::paint_event() {
     if (border.enabled) {
+        Painter p{this};
         p.border(border);
     }
     return true;
+}
+
+bool Widget::repaint_event() {
+    detail::Staged_changes changes;
+    Painter p{this, changes};
+    Glyph bg{this->find_background_tile()};
+    p.fill(bg, 0, 0, this->outer_width(), this->outer_height());
+    detail::flush(changes, false);
+    this->screen_state_.clear();
+    this->update();
 }
 
 bool Widget::deferred_delete_event(Event_handler* to_delete) {
@@ -316,8 +353,7 @@ bool Widget::move_event(Point new_position, Point old_position) {
     this->set_y(new_position.y);
     moved(new_position);
     moved_xy(new_position.x, new_position.y);
-    System::send_event(Paint_event{this, true});
-    this->update();
+    System::post_event(Repaint_event{this});
     return true;
 }
 
@@ -358,14 +394,12 @@ bool Widget::resize_event(Area new_size, Area old_size) {
               south_border_offset(*this);
 
     resized(width_, height_);
-    System::send_event(Paint_event{this, true});
-    this->update();
+    System::post_event(Paint_event{this});
     return true;
 }
 
 bool Widget::animation_event() {
-    Painter p{this};
-    System::send_event(Paint_event{this});
+    this->update();
     return true;
 }
 
@@ -494,7 +528,7 @@ void move_cursor(Widget& w, std::size_t x, std::size_t y) {
 void set_background(Widget& w, Color c) {
     w.brush.set_background(c);
     // w.repaint_background();
-    System::send_event(Paint_event(&w, true));
+    System::post_event(Repaint_event{&w});
     w.background_color_changed(c);
     // w.update();
 }
@@ -502,7 +536,7 @@ void set_background(Widget& w, Color c) {
 void set_foreground(Widget& w, Color c) {
     w.brush.set_foreground(c);
     // w.repaint_background();
-    System::send_event(Paint_event(&w, true));
+    System::post_event(Repaint_event{&w});
     w.foreground_color_changed(c);
     // w.update();
 }
@@ -510,7 +544,7 @@ void set_foreground(Widget& w, Color c) {
 void clear_attributes(Widget& w) {
     w.brush.clear_attributes();
     // w.repaint_background();
-    System::send_event(Paint_event(&w, true));
+    System::post_event(Repaint_event{&w});
     // attribute changed signal
     // w.update();
 }
@@ -543,6 +577,14 @@ bool has_focus(const Widget& w) {
 
 void toggle_cursor(Widget& w) {
     w.show_cursor(!w.cursor_visible());
+}
+
+Screen_state& Widget::screen_state() {
+    return screen_state_;
+}
+
+const Screen_state& Widget::screen_state() const {
+    return screen_state_;
 }
 
 }  // namespace cppurses

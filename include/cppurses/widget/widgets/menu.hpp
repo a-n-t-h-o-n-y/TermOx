@@ -30,7 +30,7 @@ class Menu : public Vertical_layout {
     std::size_t size() const;
 
    protected:
-    bool paint_event(Painter& p) override;
+    bool paint_event() override;
 
     bool key_press_event(Key key, char symbol) override;
 

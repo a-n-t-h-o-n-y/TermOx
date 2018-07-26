@@ -6,11 +6,14 @@
 
 #include <signals/slot.hpp>
 
+#include <cppurses/painter/detail/ncurses_paint_engine.hpp>
 #include <cppurses/painter/paint_buffer.hpp>
 #include <cppurses/painter/palette.hpp>
 #include <cppurses/system/animation_engine.hpp>
 #include <cppurses/system/detail/event_queue.hpp>
 #include <cppurses/system/detail/ncurses_event_listener.hpp>
+#include <cppurses/system/detail/post_user_input.hpp>
+#include <cppurses/system/detail/repaint_all.hpp>
 #include <cppurses/system/event.hpp>
 #include <cppurses/system/event_loop.hpp>
 #include <cppurses/system/events/on_tree_event.hpp>
@@ -28,19 +31,19 @@ namespace detail {
 class Abstract_event_listener;
 }  // namespace detail
 
-sig::Slot<void()> System::quit = []() { System::exit(); };  // NOLINT
-
-Widget* System::head_ = nullptr;  // NOLINT
-Event_loop System::event_loop_;
+sig::Slot<void()> System::quit = []() { System::exit(); };
+Widget* System::head_ = nullptr;
+User_input_event_loop System::main_loop_;
 Animation_engine System::animation_engine_;
+detail::NCurses_paint_engine System::paint_engine_;
 Paint_buffer System::paint_buffer_;
 std::unique_ptr<detail::Abstract_event_listener> System::event_listener_ =
-    std::make_unique<detail::NCurses_event_listener>();  // NOLINT
-
-std::unique_ptr<Palette> System::system_palette_ = nullptr;  // NOLINT
+    std::make_unique<detail::NCurses_event_listener>();
+std::unique_ptr<Palette> System::system_palette_ = nullptr;
 
 void System::post_event(std::unique_ptr<Event> event) {
-    System::event_loop_.event_queue.append(std::move(event));
+    Event_loop& loop{System::find_event_loop()};
+    loop.event_queue.append(std::move(event));
 }
 
 bool System::send_event(const Event& event) {
@@ -64,7 +67,24 @@ bool System::send_event(const Event& event) {
 }
 
 void System::exit(int return_code) {
-    event_loop_.exit(return_code);
+    main_loop_.exit(return_code);
+}
+
+Event_loop& System::find_event_loop() {
+    std::thread::id id{std::thread::get_id()};
+    // Check with the main loop
+    if (main_loop_.get_thread_id() == id) {
+        return main_loop_;
+    }
+    // Check with animation Loops
+    // TODO Reimplement this cleanly
+    // System::animation_engine().find_loop(id);
+    // for (Animation_loop& al : System::animation_engine().loops) {
+    //     if (al.loop.get_thread_id() == id) {
+    //         return al.loop;
+    //     }
+    // }
+    return main_loop_;
 }
 
 detail::Abstract_event_listener* System::event_listener() {
@@ -92,6 +112,7 @@ Widget* System::head() {
 void System::set_palette(std::unique_ptr<Palette> palette) {
     system_palette_ = std::move(palette);
     system_palette_->initialize();
+    detail::repaint_all();
 }
 
 Palette* System::palette() {
@@ -134,8 +155,12 @@ Animation_engine& System::animation_engine() {
     return animation_engine_;
 }
 
+detail::NCurses_paint_engine& System::paint_engine() {
+    return paint_engine_;
+}
+
 int System::run() {
-    int return_code = event_loop_.run();
+    int return_code = main_loop_.run();
     return return_code;
 }
 
