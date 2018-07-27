@@ -12,7 +12,7 @@
 
 namespace cppurses {
 
-Event_loop::Event_loop(const std::function<void()> loop_function)
+Event_loop::Event_loop(const std::function<void()>& loop_function)
     : loop_func_{loop_function} {}
 
 int Event_loop::run() {

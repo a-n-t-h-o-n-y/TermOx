@@ -8,10 +8,10 @@
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
 // #include <cppurses/painter/detail/glyph_and_bkgd_bool.hpp>
+#include <cppurses/painter/detail/staged_changes.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/paint_buffer.hpp>
-#include <cppurses/system/detail/staged_changes.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/point.hpp>
@@ -289,7 +289,7 @@ void Painter::put_global(Glyph tile, std::size_t x, std::size_t y) {
 
 void Painter::put_global(const Glyph& tile, Point position) {
     // bool is_background) {
-    this->put_global(tile, position.x, position.y)  //, is_background);
+    this->put_global(tile, position.x, position.y);  //, is_background);
 }
 
 void Painter::line_global(const Glyph& tile,
@@ -321,11 +321,13 @@ void Painter::line_global(const Glyph& tile,
 
 // Glyph Painter::add_default_attributes(const Glyph& tile) const {
 //     Glyph result{tile};
-//     if (!result.brush.background_color() && widget_->brush.background_color()) {
+//     if (!result.brush.background_color() &&
+//     widget_->brush.background_color()) {
 //         result.brush.add_attributes(
 //             background(*widget_->brush.background_color()));
 //     }
-//     if (!result.brush.foreground_color() && widget_->brush.foreground_color()) {
+//     if (!result.brush.foreground_color() &&
+//     widget_->brush.foreground_color()) {
 //         result.brush.add_attributes(
 //             foreground(*widget_->brush.foreground_color()));
 //     }

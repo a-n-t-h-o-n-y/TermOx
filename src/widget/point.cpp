@@ -19,8 +19,7 @@ bool operator<(const Point& lhs, const Point& rhs) {
 }  // namespace cppurses
 
 namespace std {
-template <>
-hash<cppurses::Point>::result_type hash<cppurses::Point>::operator()(
+typename hash<cppurses::Point>::result_type hash<cppurses::Point>::operator()(
     const argument_type& point) const noexcept {
     const result_type h1(std::hash<decltype(point.x)>{}(point.x));
     const result_type h2(std::hash<decltype(point.y)>{}(point.y));

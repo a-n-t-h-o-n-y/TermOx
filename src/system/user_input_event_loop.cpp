@@ -3,10 +3,13 @@
 #include <memory>
 #include <utility>
 
+#include <cppurses/system/detail/abstract_event_listener.hpp>
 #include <cppurses/system/event.hpp>
 #include <cppurses/system/event_loop.hpp>
+#include <cppurses/system/system.hpp>
 
 namespace {
+using namespace cppurses;
 void get_and_post_user_input() {
     std::unique_ptr<cppurses::Event> event{
         System::event_listener()->get_input()};

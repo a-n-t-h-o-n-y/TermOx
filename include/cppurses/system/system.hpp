@@ -8,9 +8,9 @@
 
 #include <cppurses/painter/detail/ncurses_paint_engine.hpp>
 #include <cppurses/painter/paint_buffer.hpp>
-#include <cppurses/system/event_loop.hpp>
 #include <cppurses/system/animation_engine.hpp>
-#include <cppurses/system/user_input_event_loop.hpp>
+#include <cppurses/system/detail/user_input_event_loop.hpp>
+#include <cppurses/system/event_loop.hpp>
 
 namespace cppurses {
 namespace detail {
@@ -44,7 +44,7 @@ class System {
     // It might actually work as is since you are only posting events to the
     // loop from this function and that is something the base class handles.
     // Look over it though.
-    Event_loop& find_event_loop();
+    static Event_loop& find_event_loop();
 
     static bool send_event(const Event& event);
 
@@ -67,7 +67,7 @@ class System {
 
    private:
     static Widget* head_;
-    static User_input_event_loop main_loop_;
+    static detail::User_input_event_loop main_loop_;
     static Animation_engine animation_engine_;
     static Paint_buffer paint_buffer_;
     static std::unique_ptr<detail::Abstract_event_listener> event_listener_;

@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include <cppurses/system/events/repaint_event.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/widget.hpp>
 

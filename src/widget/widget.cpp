@@ -137,12 +137,12 @@ std::size_t Widget::height() const {
     return height_;
 }
 
-std::size_t outer_width() const {
+std::size_t Widget::outer_width() const {
     return this->width() + west_border_offset(*this) +
            east_border_offset(*this);
 }
 
-std::size_t outer_height() const {
+std::size_t Widget::outer_height() const {
     return this->height() + north_border_offset(*this) +
            south_border_offset(*this);
 }
@@ -201,7 +201,7 @@ void Widget::set_background_tile(const Glyph& tile) {  // TODO Prob not needed.
 
 void Widget::set_background_tile(opt::Optional<Glyph> tile) {
     background_tile_ = tile;
-    System::post_event(Repaint_event{this});
+    System::post_event<Repaint_event>(this);
 }
 
 const opt::Optional<Glyph>& Widget::background_tile() const {
@@ -214,7 +214,7 @@ bool Widget::brush_alters_background() const {
 
 void Widget::set_brush_alters_background(bool alters) {
     brush_alters_background_ = alters;
-    System::post_event(Repaint_event{this});
+    System::post_event<Repaint_event>(this);
 }
 
 Glyph Widget::find_background_tile() const {
@@ -228,19 +228,19 @@ Glyph Widget::find_background_tile() const {
 }
 
 // Called by Paint_event::send()
-void Widget::repaint_background() {
-    Glyph background;
-    if (background_tile_) {
-        background = *background_tile_;
-    } else {
-        background = System::paint_buffer().get_global_background_tile();
-    }
-    Painter p{this};
-    if (brush_alters_background_) {
-        background = p.add_default_attributes(background);
-    }
-    p.fill(background, 0, 0, this->width(), this->height(), true);
-}
+// void Widget::repaint_background() {
+//     Glyph background;
+//     if (background_tile_) {
+//         background = *background_tile_;
+//     } else {
+//         background = System::paint_buffer().get_global_background_tile();
+//     }
+//     Painter p{this};
+//     if (brush_alters_background_) {
+//         background = p.add_default_attributes(background);
+//     }
+//     p.fill(background, 0, 0, this->width(), this->height(), true);
+// }
 
 void Widget::update() {
     System::post_event<Paint_event>(this);
@@ -262,12 +262,17 @@ bool Widget::south_border_disqualified() const {
     return south_border_disqualified_;
 }
 
-void Widget::enable_animation(int frames_per_second) {
-    System::animation_engine().register_widget(this, frames_per_second);
+void Widget::enable_animation(Animation_engine::Period_t period) {
+    System::animation_engine().register_widget(*this, period);
+}
+
+void Widget::enable_animation(
+    const std::function<Animation_engine::Period_t()>& period_func) {
+    System::animation_engine().register_widget(*this, period_func);
 }
 
 void Widget::disable_animation() {
-    System::animation_engine().deregister_widget(this);
+    System::animation_engine().unregister_widget(*this);
 }
 
 bool Widget::close_event() {
@@ -300,9 +305,9 @@ bool Widget::repaint_event() {
     Painter p{this, changes};
     Glyph bg{this->find_background_tile()};
     p.fill(bg, 0, 0, this->outer_width(), this->outer_height());
-    detail::flush(changes, false);
-    this->screen_state_.clear();
+    detail::flush(changes, true);
     this->update();
+    return true;
 }
 
 bool Widget::deferred_delete_event(Event_handler* to_delete) {
@@ -353,7 +358,7 @@ bool Widget::move_event(Point new_position, Point old_position) {
     this->set_y(new_position.y);
     moved(new_position);
     moved_xy(new_position.x, new_position.y);
-    System::post_event(Repaint_event{this});
+    System::post_event<Repaint_event>(this);
     return true;
 }
 
@@ -394,7 +399,7 @@ bool Widget::resize_event(Area new_size, Area old_size) {
               south_border_offset(*this);
 
     resized(width_, height_);
-    System::post_event(Paint_event{this});
+    System::post_event<Repaint_event>(this);
     return true;
 }
 
@@ -528,7 +533,7 @@ void move_cursor(Widget& w, std::size_t x, std::size_t y) {
 void set_background(Widget& w, Color c) {
     w.brush.set_background(c);
     // w.repaint_background();
-    System::post_event(Repaint_event{&w});
+    System::post_event<Repaint_event>(&w);
     w.background_color_changed(c);
     // w.update();
 }
@@ -536,7 +541,7 @@ void set_background(Widget& w, Color c) {
 void set_foreground(Widget& w, Color c) {
     w.brush.set_foreground(c);
     // w.repaint_background();
-    System::post_event(Repaint_event{&w});
+    System::post_event<Repaint_event>(&w);
     w.foreground_color_changed(c);
     // w.update();
 }
@@ -544,7 +549,7 @@ void set_foreground(Widget& w, Color c) {
 void clear_attributes(Widget& w) {
     w.brush.clear_attributes();
     // w.repaint_background();
-    System::post_event(Repaint_event{&w});
+    System::post_event<Repaint_event>(&w);
     // attribute changed signal
     // w.update();
 }
@@ -579,11 +584,11 @@ void toggle_cursor(Widget& w) {
     w.show_cursor(!w.cursor_visible());
 }
 
-Screen_state& Widget::screen_state() {
+detail::Screen_state& Widget::screen_state() {
     return screen_state_;
 }
 
-const Screen_state& Widget::screen_state() const {
+const detail::Screen_state& Widget::screen_state() const {
     return screen_state_;
 }
 

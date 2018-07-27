@@ -13,12 +13,6 @@
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
-Animation_event_loop::Period_t fps_to_period(int fps) {
-    // TODO fix logic, should use the compile time ratio of Period_t??
-    return Animation_event_loop::Period_t(
-        static_cast<int>((1.0 / static_cast<double>(fps)) * 1'000));
-}
-
 // namespace slot {
 
 // sig::Slot<void()> animation_event(Widget* widg) {
@@ -37,10 +31,15 @@ Animation_event_loop::Period_t fps_to_period(int fps) {
 
 void Animation_engine::register_widget(Widget& w, Period_t period) {
     if (const_loops_.count(period) == 0) {
-        const_loops_.emplace(period, period);
-        const_loops_[period].run();
+        auto pair = const_loops_.emplace(period, period);
+        pair.first->second.run();
+        // const_loops_[period].run();
     }
-    const_loops_[period].register_widget(w);
+    auto iter = const_loops_.find(period);
+    if (iter != std::end(const_loops_)) {
+        iter->second.register_widget(w);
+    }
+    // const_loops_[period].register_widget(w);
 }
 
 // void Animation_engine::register_widget(Widget* widg, int frames_per_second) {
@@ -68,8 +67,9 @@ void Animation_engine::register_widget(Widget& w, Period_t period) {
 //     }
 // }
 
-void Animation_engine::register_widget(Widget& w,
-                                       std::function<Period_t()> period_func) {
+void Animation_engine::register_widget(
+    Widget& w,
+    const std::function<Period_t()>& period_func) {
     variable_loops_.emplace_back(period_func);
     variable_loops_.back().register_widget(w);
     variable_loops_.back().run();
@@ -98,25 +98,40 @@ void Animation_engine::register_widget(Widget& w,
 // }
 
 void Animation_engine::unregister_widget(Widget& w) {
-    for (auto& pair : const_loops_) {
-        pair.second.unregister(w);
+    // for (auto& pair : const_loops_) {
+    for (auto iter = std::begin(const_loops_); iter != std::end(const_loops_);
+         ++iter) {
+        if (iter->second.unregister_widget(w)) {
+            if (iter->second.empty()) {
+                const_loops_.erase(iter);
+                return;
+            }
+        }
     }
-    for (auto& loop : variable_loops_) {
-        loop.unregister(w);
+    // for (auto& loop : variable_loops_) {
+    for (auto iter = std::begin(variable_loops_);
+         iter != std::end(variable_loops_); ++iter) {
+        if (iter->unregister_widget(w)) {
+            if (iter->empty()) {
+                variable_loops_.erase(iter);
+                return;
+            }
+        }
     }
-    this->clean_up();
+    // this->clean_up();
 }
 
-void Animation_engine::clean_up() {
-    auto const_end_iter =
-        std::remove_if(std::begin(const_loops_), std::end(const_loops),
-                       [](const auto& pair) { return pair.second.empty(); });
-    const_loops_.erase(const_end_iter, std::end(const_loops_));
-    auto var_end_iter =
-        std::remove_if(std::begin(variable_loops_), std::end(variable_loops),
-                       [](const auto& loop) { return loop.empty(); });
-    variable_loops_.erase(var_end_iter, std::end(variable_loops_));
-}
+// void Animation_engine::clean_up() {
+//     auto const_end_iter =
+//         std::remove_if(std::begin(const_loops_), std::end(const_loops_),
+//                        [](const auto& pair) { return pair.second.empty(); });
+//     const_loops_.erase(const_end_iter, std::end(const_loops_));
+//     auto var_end_iter =
+//         std::remove_if(std::begin(variable_loops_),
+//         std::end(variable_loops_),
+//                        [](const auto& loop) { return loop.empty(); });
+//     variable_loops_.erase(var_end_iter, std::end(variable_loops_));
+// }
 
 // void Animation_engine::deregister_widget(Widget* widg) {
 //     if (connections_.count(widg) == 1) {

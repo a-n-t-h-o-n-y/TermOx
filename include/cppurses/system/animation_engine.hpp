@@ -6,22 +6,22 @@
 #include <vector>
 
 #include <cppurses/system/detail/animation_event_loop.hpp>
+#include <cppurses/system/detail/chrono_duration_hash.hpp>
 
 namespace cppurses {
 class Widget;
 
-Animation_event_loop::Period_t fps_to_period(int fps);
-
 /// Manages all Animation_event_loops, grouping by period.
 class Animation_engine {
    public:
-    using Period_t = Animation_event_loop::Period_t;
+    using Period_t = detail::Animation_event_loop::Period_t;
 
     /// Begins posting Animation_events to the given Widget every period.
     void register_widget(Widget& w, Period_t period);
 
     /// Begins posting Animation_events to the Widget with a variable period.
-    void register_widget(Widget& w, std::function<Period_t()> period_func);
+    void register_widget(Widget& w,
+                         const std::function<Period_t()>& period_func);
 
     /// Stop posting Animation_events to a given Widget.
     void unregister_widget(Widget& w);
@@ -35,10 +35,10 @@ class Animation_engine {
     void startup();
 
    private:
-    void clean_up();
+    // void clean_up();
 
-    std::unordered_map<Period_t, Animation_event_loop> const_loops_;
-    std::vector<Animation_event_loop> variable_loops_;
+    std::unordered_map<Period_t, detail::Animation_event_loop> const_loops_;
+    std::vector<detail::Animation_event_loop> variable_loops_;
 };
 
 }  // namespace cppurses

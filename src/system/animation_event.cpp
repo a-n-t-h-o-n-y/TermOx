@@ -16,7 +16,7 @@ bool Animation_event::send() const {
         return true;
     }
     bool result{receiver_->animation_event()};
-    System::paint_buffer().flush(true);
+    // System::paint_buffer().flush(true);
     return result;
 }
 

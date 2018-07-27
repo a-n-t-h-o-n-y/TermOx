@@ -12,8 +12,8 @@
 #include <cppurses/system/animation_engine.hpp>
 #include <cppurses/system/detail/event_queue.hpp>
 #include <cppurses/system/detail/ncurses_event_listener.hpp>
-#include <cppurses/system/detail/post_user_input.hpp>
 #include <cppurses/system/detail/repaint_all.hpp>
+#include <cppurses/system/detail/user_input_event_loop.hpp>
 #include <cppurses/system/event.hpp>
 #include <cppurses/system/event_loop.hpp>
 #include <cppurses/system/events/on_tree_event.hpp>
@@ -33,7 +33,7 @@ class Abstract_event_listener;
 
 sig::Slot<void()> System::quit = []() { System::exit(); };
 Widget* System::head_ = nullptr;
-User_input_event_loop System::main_loop_;
+detail::User_input_event_loop System::main_loop_;
 Animation_engine System::animation_engine_;
 detail::NCurses_paint_engine System::paint_engine_;
 Paint_buffer System::paint_buffer_;
@@ -71,7 +71,7 @@ void System::exit(int return_code) {
 }
 
 Event_loop& System::find_event_loop() {
-    std::thread::id id{std::thread::get_id()};
+    std::thread::id id{std::this_thread::get_id()};
     // Check with the main loop
     if (main_loop_.get_thread_id() == id) {
         return main_loop_;

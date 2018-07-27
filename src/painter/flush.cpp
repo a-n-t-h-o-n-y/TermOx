@@ -13,12 +13,13 @@
 namespace cppurses {
 namespace detail {
 
-void flush(const Staged_changes& changes, bool add_default_attrs) {
+void flush(const Staged_changes& changes, bool is_background) {
     static std::mutex mtx;
     std::lock_guard<std::mutex> lock{mtx};
 
     for (const auto& pair : changes) {
         Widget* widg{pair.first};
+        const Screen_descriptor& changes_map{pair.second};
         if (detail::is_not_paintable(widg)) {
             continue;
         }
@@ -26,9 +27,8 @@ void flush(const Staged_changes& changes, bool add_default_attrs) {
         std::vector<Point> to_delete;
         for (const auto& point_tile : widg->screen_state().tiles) {
             const Point& point{point_tile.first};
-            const Glyph& tile{point_tile.second};
             if (changes_map.count(point) == 0) {
-                Glyph background{widg->find_background_color()};
+                Glyph background{widg->find_background_tile()};
                 System::paint_engine().put(point.x, point.y, background);
                 to_delete.push_back(point);
             }
@@ -37,11 +37,10 @@ void flush(const Staged_changes& changes, bool add_default_attrs) {
             widg->screen_state().tiles.erase(p);
         }
         // NEW TILES PRINTED TO SCREEN
-        const Screen_descriptor& changes_map{pair.second};
         for (const auto& point_tile : changes_map) {
             const Point& point{point_tile.first};
-            const Glyph& tile{point_tile.second};
-            if (add_default_attrs) {
+            Glyph tile{point_tile.second};
+            if (!is_background) {
                 detail::add_default_attributes(tile, widg->brush);
             }
             auto screen_iter = widg->screen_state().tiles.find(point);
@@ -52,6 +51,9 @@ void flush(const Staged_changes& changes, bool add_default_attrs) {
                 System::paint_engine().put(point.x, point.y, tile);
                 widg->screen_state().tiles[point] = tile;
             }
+        }
+        if (is_background) {
+            widg->screen_state().tiles.clear();
         }
     }
     System::paint_engine().refresh();

@@ -1,5 +1,7 @@
 #ifndef CPPURSES_SYSTEM_DETAIL_CHRONO_DURATION_HASH_HPP
 #define CPPURSES_SYSTEM_DETAIL_CHRONO_DURATION_HASH_HPP
+#include <chrono>
+#include <cstddef>
 #include <functional>
 
 /// Custom specialization of std::hash for std::chrono::duration.
@@ -8,7 +10,9 @@ template <typename Tick, typename Ratio>
 struct hash<std::chrono::duration<Tick, Ratio>> {
     using argument_type = std::chrono::duration<Tick, Ratio>;
     using result_type = std::size_t;
-    result_type operator()(const argument_type& dur) const noexcept;
+    result_type operator()(const argument_type& dur) const noexcept {
+        return std::hash<Tick>{}(dur.count());
+    }
 };
 }  // namespace std
 #endif  // CPPURSES_SYSTEM_DETAIL_CHRONO_DURATION_HASH_HPP

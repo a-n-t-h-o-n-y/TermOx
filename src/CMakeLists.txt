@@ -60,9 +60,9 @@ target_sources(libcppurses PRIVATE
     system/event_as_string.cpp
     system/user_input_event_loop.cpp
     system/animation_event_loop.cpp
-    system/chrono_duration_hash.cpp
     system/repaint_event.cpp
     system/repaint_all.cpp
+    system/fps_to_period.cpp
 )
 
 # PAINTER

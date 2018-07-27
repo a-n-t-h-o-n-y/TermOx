@@ -47,8 +47,9 @@ class Paint_buffer {
     Glyph get_global_background_tile() const;
 
    private:
-    detail::NCurses_paint_engine engine_;
+    detail::NCurses_paint_engine engine_; // TODO is this the correct one?
 
+    // TODO Dont need the below two
     std::unordered_map<Point, detail::Glyph_and_bkgd_bool> staged_diff_;
     std::unordered_map<Point, Glyph> screen_state_;
 

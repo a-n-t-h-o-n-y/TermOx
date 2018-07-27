@@ -5,9 +5,9 @@
 
 #include <cppurses/painter/detail/glyph_and_bkgd_bool.hpp>
 #include <cppurses/painter/detail/screen_descriptor.hpp>
+#include <cppurses/painter/detail/staged_changes.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/system/detail/staged_changes.hpp>
 #include <cppurses/widget/point.hpp>
 
 namespace cppurses {
@@ -103,7 +103,7 @@ class Painter {
     // bool is_background = false);
 
     Widget* widget_;
-    Screen_descriptor& staged_changes_;
+    detail::Screen_descriptor& staged_changes_;
     // std::unordered_map<Point, detail::Glyph_and_bkgd_bool> state_;
 };
 

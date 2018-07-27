@@ -2,6 +2,7 @@
 #define WIDGET_WIDGET_HPP
 #include <algorithm>
 #include <cstddef>
+#include <functional>
 #include <memory>
 #include <queue>
 #include <signals/signal.hpp>
@@ -15,6 +16,7 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/detail/screen_state.hpp>
 #include <cppurses/painter/glyph.hpp>
+#include <cppurses/system/animation_engine.hpp>
 #include <cppurses/system/event_handler.hpp>
 #include <cppurses/system/events/paint_event.hpp>
 #include <cppurses/system/key.hpp>
@@ -89,7 +91,7 @@ class Widget : public Event_handler {
     void set_background_tile(opt::Optional<Glyph> tile);
     const opt::Optional<Glyph>& background_tile() const;
 
-    void repaint_background();  // TODO you might not need this func.
+    // void repaint_background();  // TODO you might not need this func.
 
     virtual void update();
 
@@ -99,7 +101,9 @@ class Widget : public Event_handler {
     bool south_border_disqualified() const;
 
     // Animation
-    void enable_animation(int frames_per_second);
+    void enable_animation(Animation_engine::Period_t period);
+    void enable_animation(
+        const std::function<Animation_engine::Period_t()>& period_func);
     void disable_animation();
 
     // Public Objects
@@ -130,8 +134,8 @@ class Widget : public Event_handler {
     sig::Signal<void(Color)> background_color_changed;
     sig::Signal<void(Color)> foreground_color_changed;
 
-    Screen_state& screen_state();
-    const Screen_state& screen_state() const;
+    detail::Screen_state& screen_state();
+    const detail::Screen_state& screen_state() const;
 
    protected:
     bool paint_event() override;

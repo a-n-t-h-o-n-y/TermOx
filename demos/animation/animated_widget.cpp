@@ -2,6 +2,7 @@
 
 #include <cppurses/painter/paint_buffer.hpp>
 #include <cppurses/painter/painter.hpp>
+#include <cppurses/system/detail/fps_to_period.hpp>
 #include <cppurses/system/events/paint_event.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/focus_policy.hpp>
@@ -11,7 +12,7 @@ namespace animation {
 
 Animated_bit::Animated_bit(int rate) {
     this->focus_policy = cppurses::Focus_policy::Strong;
-    this->enable_animation(rate);
+    this->enable_animation(cppurses::detail::fps_to_period(rate));
 }
 
 bool Animated_bit::animation_event() {
@@ -31,7 +32,7 @@ bool Animated_bit::animation_event() {
 }
 
 bool Animated_bit::paint_event() {
-    Painter p{this};
+    cppurses::Painter p{this};
     p.put(glyph_, coords_);
     return Widget::paint_event();
 }

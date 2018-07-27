@@ -23,6 +23,9 @@ class Animation_event_loop : public Event_loop {
     /// Create an Animation Loop with a constant period.
     Animation_event_loop(Period_t period);
 
+    // TODO implement move operator= and constructor etc.. can't copy/move a
+    // future so do it manually. Also is Signal moveable? probably.
+
     /// Launches the Event_loop::run() in a separate thread.
     void run();
 
@@ -39,13 +42,16 @@ class Animation_event_loop : public Event_loop {
     void register_widget(Widget& w);
 
     /// Stop a widget from recieving animation events for this loop.
-    void unregister_widget(Widget& w);
+    bool unregister_widget(Widget& w);
 
     /// Sets a new constant period for the animation loop.
     void set_period(Period_t period);
 
     /// Sets a new variable period for the animation loop.
     void set_period(const std::function<Period_t()>& period_function);
+
+    /// Returns true if no Widgets are registered with this event loop.
+    bool empty() const;
 
    private:
     void post_all();
@@ -54,6 +60,7 @@ class Animation_event_loop : public Event_loop {
     std::unordered_map<Widget*, sig::Connection> connections_;
     std::function<Period_t()> period_func_;
     std::future<int> fut_;
+    std::chrono::time_point<std::chrono::high_resolution_clock> last_time_;
 };
 
 }  // namespace detail

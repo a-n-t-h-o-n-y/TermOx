@@ -1,8 +1,6 @@
 #ifndef CPPURSES_PAINTER_HPP
 #define CPPURSES_PAINTER_HPP
 
-#include <cppurses/painter/detail/ncurses_paint_engine.hpp>
-
 #include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>

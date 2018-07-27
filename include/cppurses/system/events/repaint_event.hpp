@@ -7,7 +7,7 @@ class Event_handler;
 
 class Repaint_event : public Event {
    public:
-    explicit Paint_event(Event_handler* receiver);
+    explicit Repaint_event(Event_handler* receiver);
     bool send() const override;
     bool filter_send(Event_handler* filter) const override;
 };

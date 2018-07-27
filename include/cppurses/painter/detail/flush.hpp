@@ -5,7 +5,7 @@
 namespace cppurses {
 namespace detail {
 
-void flush(const Staged_changes& changes, bool add_default_attrs = true);
+void flush(const Staged_changes& changes, bool is_background = false);
 
 }  // namespace detail
 }  // namespace cppurses

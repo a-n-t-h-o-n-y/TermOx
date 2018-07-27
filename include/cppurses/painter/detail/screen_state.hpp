@@ -8,7 +8,7 @@ namespace detail {
 
 class Screen_state {
     Screen_descriptor tiles;
-    friend void flush(const Staged_changes&);
+    friend void flush(const Staged_changes&, bool);
 };
 
 }  // namespace detail
