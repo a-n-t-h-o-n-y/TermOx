@@ -22,8 +22,6 @@
 
 #include <ncurses.h>
 
-// #include <utility/log.hpp>
-
 namespace {
 
 cppurses::Widget* find_widget_at(std::size_t x, std::size_t y) {
@@ -51,65 +49,35 @@ namespace cppurses {
 namespace detail {
 
 std::unique_ptr<Event> NCurses_event_listener::get_input() const {
-    // utility::Log l;
-
     int input = ::getch();  // blocking call
-    // l << "Input Detected : ";
     std::unique_ptr<Event> event{nullptr};
     switch (input) {
         case KEY_MOUSE:
-            // l << "Mouse Input";
             event = parse_mouse_event();
             break;
 
         case KEY_RESIZE:
-            // l << "KEY_RESIZE";
-            // throw(5);
             event = handle_resize_event();
             event->set_receiver(handle_resize_widget());
             break;
 
         case ERR:
-            // l << "ERR - ";
-            // if (NCurses_data::resize_happened) {
-            //     l << "resize_happened";
-            // } else {
-            //     l << "SOME OTHER ERROR";
-            // }
-
-            // static bool second_err{false};
             if (NCurses_data::resize_happened) {
                 NCurses_data::resize_happened = false;
-                // second_err = true;
-                // } else {
-                // bit of hack since incorrect resize coords are sometimes sent,
-                // but after a second ERR, the coords should be correct.
-                // if (second_err) {
-                // second_err = false;
                 struct winsize w;
+                // Find window size
                 ioctl(fileno(stdin), TIOCGWINSZ, &w);
-                // if (ret == -1) {
-                // l << "ioctl failed ";
-                // } else {
                 NCurses_data::ncurses_mtx.lock();
                 ::resizeterm(w.ws_row, w.ws_col);
                 NCurses_data::ncurses_mtx.unlock();
-
-                // l << " rows: " << w.ws_row << " cols: " << w.ws_col;
-                // }
-                // event = handle_resize_event();
-                // event->set_receiver(handle_resize_widget());
-                // }
             }
             break;
 
         default:  // Key_event
-            // l << "Default Input - key event";
             event = handle_keyboard_event(input);
             event->set_receiver(handle_keyboard_widget());
             break;
     }
-    // l << std::endl;
     return event;
 }
 
@@ -125,7 +93,7 @@ void NCurses_event_listener::disable_ctrl_characters() {
 #undef border  // NCurses macro, naming conflict.
 
 std::unique_ptr<Event> NCurses_event_listener::parse_mouse_event() const {
-    ::MEVENT mouse_event;  // NOLINT
+    ::MEVENT mouse_event;
     if (::getmouse(&mouse_event) != OK) {
         return nullptr;
     }
@@ -218,9 +186,6 @@ Widget* NCurses_event_listener::handle_keyboard_widget() const {
 std::unique_ptr<Event> NCurses_event_listener::handle_resize_event() const {
     return std::make_unique<Resize_event>(
         nullptr, Area{System::max_width(), System::max_height()});
-    // Tell paint_buffer that there are new cells. if the size has
-    // increased in either direction. height and width separate calls,
-    // sending a box along, which has a top left coord.
 }
 
 Widget* NCurses_event_listener::handle_resize_widget() const {

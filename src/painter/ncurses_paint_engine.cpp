@@ -22,9 +22,6 @@
 #include <cppurses/painter/detail/extended_char.hpp>
 #endif
 
-// #include <utility/log.hpp>  // temp
-#include <fstream>
-
 namespace {
 attr_t color_to_int(cppurses::Color c) {
     return static_cast<attr_t>(c) - cppurses::detail::k_init_color;
@@ -129,14 +126,10 @@ void NCurses_paint_engine::put_glyph(const Glyph& g) {
     }
 
 #if defined(add_wchstr)
-    // cchar_t image{0, {g.symbol}};
     cchar_t image;
     wchar_t symb[2] = {g.symbol, L'\n'};
     ::setcchar(&image, symb, attributes, color_pair, nullptr);
-    // image.attr |= color_pair;
-    // image.attr |= attributes;
     ::wadd_wchnstr(::stdscr, &image, 1);
-    // ::add_wch(&image);
 #else  // no wchar_t support
     bool use_addch{false};
     chtype image{find_chtype(g.symbol, &use_addch)};
@@ -151,22 +144,11 @@ void NCurses_paint_engine::put_glyph(const Glyph& g) {
 }
 
 void NCurses_paint_engine::put(std::size_t x, std::size_t y, const Glyph& g) {
-    // TODO if()
     this->move_cursor(x, y);
     this->put_glyph(g);
 }
 
-// TODO could return false if trying to move outside the screen, then put
-// function does not actually put.
 void NCurses_paint_engine::move_cursor(std::size_t x, std::size_t y) {
-    // basic check, does not check if it is actually outside of screen, just
-    // outside of ncurses data.
-    // if (x >= this->screen_width() || y >= this->screen_height()) {
-    //     utility::Log l;
-    //     l << "Painting outside the lines " << x << ", " << y << '\n';
-    //     l << "width: " << this->screen_width()
-    //       << " height: " << this->screen_height() << std::endl;
-    // }
     ::wmove(::stdscr, static_cast<int>(y), static_cast<int>(x));
 }
 
@@ -189,12 +171,7 @@ std::size_t NCurses_paint_engine::screen_height() {
     return getmaxy(::stdscr);
 }
 
-// void NCurses_paint_engine::touch_all() {
-// ::touchwin(::stdscr);
-// }
-
 void NCurses_paint_engine::refresh() {
-    // std::lock_guard<std::mutex> lock{NCurses_data::ncurses_mtx};
     ::wrefresh(::stdscr);
 }
 
@@ -218,7 +195,6 @@ void handle_sigwinch(int sig) {
 void NCurses_paint_engine::setup_sigwinch() {
     struct sigaction sa;
     memset(&sa, 0, sizeof(struct sigaction));
-    // sa.sa_handler = [this](int sig) { this->handle_sigwinch(sig); };
     sa.sa_handler = handle_sigwinch;
     sigaction(SIGWINCH, &sa, NULL);
 }

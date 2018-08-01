@@ -14,7 +14,6 @@ class Event_queue {
 
    private:
     std::vector<std::unique_ptr<Event>> queue_;
-    void remove_dd_children(const Event& new_event);
 };
 
 }  // namespace detail

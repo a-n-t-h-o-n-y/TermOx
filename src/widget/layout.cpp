@@ -23,13 +23,6 @@ bool Layout::paint_event() {
     return Widget::paint_event();
 }
 
-// TODO remove this and place drawing around children in flush
-// bool Layout::repaint_event() {
-//     // System::find_event_loop().staged_changes()[this].repaint = true;
-//     this->update();
-//     return true;
-// }
-
 // Free Functions
 void set_background(Layout& l, Color c) {
     for (Widget* w : l.children()) {

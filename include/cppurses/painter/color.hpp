@@ -8,6 +8,7 @@ namespace detail {
 const int k_init_color{239};
 }  // namespace detail
 
+/// Color descriptions that can be applied to a Glyph.
 enum class Color : std::int16_t {
     Black = detail::k_init_color,
     Dark_red,

@@ -18,7 +18,7 @@
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/system/animation_engine.hpp>
 #include <cppurses/system/event_handler.hpp>
-#include <cppurses/system/events/paint_event.hpp>
+#include <cppurses/system/events/repaint_event.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/border.hpp>
@@ -97,8 +97,6 @@ class Widget : public Event_handler {
     void set_background_tile(opt::Optional<Glyph> tile);
     const opt::Optional<Glyph>& background_tile() const;
 
-    // void repaint_background();  // TODO you might not need this func.
-
     virtual void update();
 
     bool east_border_disqualified() const;
@@ -176,12 +174,8 @@ class Widget : public Event_handler {
 
     detail::Screen_state screen_state_;
 
-    // Top left corner, relative to parent's coordinates.
-    // Should just be the top left relative to screen/global top_left
-    // Point position_;  // rename to top_left_?
-
     // Top left point of *this, relative to the top left of the screen. Does not
-    // account for any borders.
+    // account for borders.
     Point top_left_position_;
 
     std::size_t width_{width_policy.hint()};
@@ -192,7 +186,6 @@ class Widget : public Event_handler {
     bool north_border_disqualified_{false};
     bool south_border_disqualified_{false};
 
-    // void delete_child(Widget* child);
     void set_x(std::size_t global_x);
     void set_y(std::size_t global_y);
 };
@@ -261,10 +254,7 @@ T* Widget::find_child(const std::string& name) const {
 template <typename... Attrs>
 void add_attributes(Widget& w, Attrs&... attrs) {
     w.brush.add_attributes(std::forward<Attrs>(attrs)...);
-    System::send_event(Paint_event(&w, true));
-    // w.repaint_background();
-    // Attributes changed signal
-    // w.update();
+    System::post_event<Repaint_event>(&w);
 }
 
 template <typename... Attrs>
@@ -272,10 +262,7 @@ void remove_attributes(Widget& w, Attrs&... attrs) {
     for (const auto& at : {attrs...}) {
         w.brush.remove_attribute(at);
     }
-    System::send_event(Paint_event(&w, true));
-    // w.repaint_background();
-    // Attributes changed signal
-    // w.update();
+    System::post_event<Repaint_event>(&w);
 }
 
 }  // namespace cppurses

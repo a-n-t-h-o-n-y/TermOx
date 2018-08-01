@@ -7,7 +7,6 @@
 
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
-// #include <cppurses/painter/detail/glyph_and_bkgd_bool.hpp>
 #include <cppurses/painter/detail/staged_changes.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
@@ -28,44 +27,30 @@ Painter::Painter(Widget* widg)
 Painter::Painter(Widget* widg, detail::Staged_changes& changes)
     : widget_{widg}, staged_changes_{changes[widg].screen_description} {}
 
-// Widget* Painter::widget() const {
-//     return widget_;
-// }
-
-// Painter::~Painter() {
-//     System::paint_buffer().update_diff(*this);
-// }
-
 void Painter::put(const Glyph& tile, std::size_t x, std::size_t y) {
-    // bool is_background) {
     if (x >= widget_->outer_width() || y >= widget_->outer_height()) {
         return;
     }
-    // std::size_t glob_x = widget_->x() + x;
     std::size_t glob_x = widget_->inner_x() + x;
-    // std::size_t glob_y = widget_->y() + y;
     std::size_t glob_y = widget_->inner_y() + y;
-    this->put_global(tile, glob_x, glob_y);  //, is_background);
+    this->put_global(tile, glob_x, glob_y);
 }
 
-void Painter::put(const Glyph& tile,
-                  Point position) {           //, bool is_background) {
-    this->put(tile, position.x, position.y);  //, is_background);
+void Painter::put(const Glyph& tile, Point position) {
+    this->put(tile, position.x, position.y);
 }
 
 void Painter::put(const Glyph_string& text, std::size_t x, std::size_t y) {
-    // bool is_background) {
     if (!widget_->on_tree() || !widget_->visible()) {
         return;
     }
     for (const Glyph& g : text) {
-        this->put(g, x++, y);  //, is_background);
+        this->put(g, x++, y);
     }
 }
 
 void Painter::put(const Glyph_string& text, Point position) {
-    // bool is_background) {
-    this->put(text, position.x, position.y);  //, is_background);
+    this->put(text, position.x, position.y);
 }
 
 void Painter::border(const Border& b) {
@@ -77,8 +62,6 @@ void Painter::border(const Border& b) {
     if (width < 1 || height < 1) {
         return;
     }
-    // const std::size_t widg_x = widget_->x() - west_border_offset(*widget_);
-    // const std::size_t widg_y = widget_->y() - north_border_offset(*widget_);
     const std::size_t widg_x = widget_->x();
     const std::size_t widg_y = widget_->y();
 
@@ -187,8 +170,6 @@ void Painter::border(const Border& b) {
 
     // Corners - Special Cases
     // North-West
-    // Point nw{widget_->x() - west_border_offset(*widget_),
-    //          widget_->y() - north_border_offset(*widget_)};
     Point nw{widget_->x(), widget_->y()};
     if (!b.north_west_enabled && !b.north_enabled && b.west_enabled) {
         this->put_global(b.west, nw);
@@ -196,9 +177,6 @@ void Painter::border(const Border& b) {
         this->put_global(b.north, nw);
     }
     // North-East
-    // Point ne{widget_->x() + widget_->width() - 1 +
-    // east_border_offset(*widget_),
-    //          widget_->y() - north_border_offset(*widget_)};
     Point ne{widget_->inner_x() + widget_->width() - 1 +
                  east_border_offset(*widget_),
              widget_->y()};
@@ -209,9 +187,6 @@ void Painter::border(const Border& b) {
     }
     // South-West
     // Point sw{
-    //     widget_->x() - west_border_offset(*widget_),
-    //     widget_->y() + widget_->height() - 1 +
-    //     south_border_offset(*widget_)};
     Point sw{widget_->x(), widget_->inner_y() + widget_->height() - 1 +
                                south_border_offset(*widget_)};
     if (!b.south_west_enabled && !b.south_enabled && b.west_enabled) {
@@ -220,10 +195,6 @@ void Painter::border(const Border& b) {
         this->put_global(b.south, sw);
     }
     // South-East
-    // Point se{
-    //     widget_->x() + widget_->width() - 1 + east_border_offset(*widget_),
-    //     widget_->y() + widget_->height() - 1 +
-    //     south_border_offset(*widget_)};
     Point se{widget_->inner_x() + widget_->width() - 1 +
                  east_border_offset(*widget_),
              widget_->inner_y() + widget_->height() - 1 +
@@ -240,13 +211,12 @@ void Painter::fill(const Glyph& tile,
                    std::size_t y,
                    std::size_t width,
                    std::size_t height) {
-    // bool is_background) {
     if (width == 0) {
         return;
     }
     const std::size_t y_limit{y + height};
     for (; y < y_limit; ++y) {
-        this->line(tile, x, y, width - 1, y);  //, is_background);
+        this->line(tile, x, y, width - 1, y);
     }
 }
 
@@ -254,8 +224,7 @@ void Painter::fill(const Glyph& tile,
                    Point point,
                    std::size_t width,
                    std::size_t height) {
-    // bool is_background) {
-    this->fill(tile, point.x, point.y, width, height);  //, is_background);
+    this->fill(tile, point.x, point.y, width, height);
 }
 
 // Does not call down to line_global because this needs bounds checking.
@@ -264,16 +233,15 @@ void Painter::line(const Glyph& tile,
                    std::size_t y1,
                    std::size_t x2,
                    std::size_t y2) {
-    // bool is_background) {
     // Horizontal
     if (y1 == y2) {
         for (; x1 <= x2; ++x1) {
-            this->put(tile, x1, y1);  //, is_background);
+            this->put(tile, x1, y1);
         }
     }  // Vertical
     else if (x1 == x2) {
         for (; y1 <= y2; ++y1) {
-            this->put(tile, x1, y1);  //, is_background);
+            this->put(tile, x1, y1);
         }
     }
 }
@@ -281,34 +249,17 @@ void Painter::line(const Glyph& tile,
 void Painter::line(const Glyph& tile,
                    const Point& point_1,
                    const Point& point_2) {
-    // bool is_background) {
-    this->line(tile, point_1.x, point_1.y, point_2.x,
-               point_2.y);  //, is_background);
+    this->line(tile, point_1.x, point_1.y, point_2.x, point_2.y);
 }
-
-// void Painter::clear_screen() {
-//     state_.clear();
-// }
-
-// const std::unordered_map<Point, detail::Glyph_and_bkgd_bool>&
-// Painter::state()
-//     const {
-//     return state_;
-// }
 
 // GLOBAL COORDINATES - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-void Painter::put_global(Glyph tile, std::size_t x, std::size_t y) {
-    // bool is_background) {
-    // staged_changes_[Point{x, y}] = detail::Glyph_and_bkgd_bool{
-    //     add_default_attributes(tile), is_background};
-    // staged_changes_[Point{x, y}] = add_default_attributes(tile);
+void Painter::put_global(const Glyph& tile, std::size_t x, std::size_t y) {
     staged_changes_[Point{x, y}] = tile;
 }
 
 void Painter::put_global(const Glyph& tile, Point position) {
-    // bool is_background) {
-    this->put_global(tile, position.x, position.y);  //, is_background);
+    this->put_global(tile, position.x, position.y);
 }
 
 void Painter::line_global(const Glyph& tile,
@@ -316,16 +267,15 @@ void Painter::line_global(const Glyph& tile,
                           std::size_t y1,
                           std::size_t x2,
                           std::size_t y2) {
-    // bool is_background) {
     // Horizontal
     if (y1 == y2) {
         for (; x1 <= x2; ++x1) {
-            put_global(tile, x1, y1);  //, is_background);
+            put_global(tile, x1, y1);
         }
     }  // Vertical
     else if (x1 == x2) {
         for (; y1 <= y2; ++y1) {
-            put_global(tile, x1, y1);  //, is_background);
+            put_global(tile, x1, y1);
         }
     }
 }
@@ -333,27 +283,7 @@ void Painter::line_global(const Glyph& tile,
 void Painter::line_global(const Glyph& tile,
                           const Point& point_1,
                           const Point& point_2) {
-    // bool is_background) {
     line_global(tile, point_1.x, point_1.y, point_2.x, point_2.y);
-    // is_background);
 }
-
-// Glyph Painter::add_default_attributes(const Glyph& tile) const {
-//     Glyph result{tile};
-//     if (!result.brush.background_color() &&
-//     widget_->brush.background_color()) {
-//         result.brush.add_attributes(
-//             background(*widget_->brush.background_color()));
-//     }
-//     if (!result.brush.foreground_color() &&
-//     widget_->brush.foreground_color()) {
-//         result.brush.add_attributes(
-//             foreground(*widget_->brush.foreground_color()));
-//     }
-//     for (const auto& attr : widget_->brush.attributes()) {
-//         result.brush.add_attributes(attr);
-//     }
-//     return result;
-// }
 
 }  // namespace cppurses

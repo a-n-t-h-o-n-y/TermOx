@@ -6,7 +6,6 @@
 
 #include <signals/slot.hpp>
 
-// #include <cppurses/painter/detail/ncurses_paint_engine.hpp>
 #include <cppurses/painter/paint_buffer.hpp>
 #include <cppurses/system/animation_engine.hpp>
 #include <cppurses/system/detail/user_input_event_loop.hpp>
@@ -26,8 +25,8 @@ class System {
     System();
     System(const System&) = delete;
     System& operator=(const System&) = delete;
-    System(System&&) noexcept = default;             // NOLINT
-    System& operator=(System&&) noexcept = default;  // NOLINT
+    System(System&&) noexcept = default;
+    System& operator=(System&&) noexcept = default;
     ~System();
 
     int run();
@@ -40,7 +39,6 @@ class System {
         System::post_event(std::move(event));
     }
 
-    // TODO make sure returning Event_loop ref is safe for derived types.
     static Event_loop& find_event_loop();
 
     static bool send_event(const Event& event);
@@ -57,7 +55,6 @@ class System {
     void enable_ctrl_characters();
     void disable_ctrl_characters();
     static Animation_engine& animation_engine();
-    // static detail::NCurses_paint_engine& paint_engine();
 
     // Slots
     static sig::Slot<void()> quit;
@@ -69,9 +66,6 @@ class System {
     static Paint_buffer paint_buffer_;
     static std::unique_ptr<detail::Abstract_event_listener> event_listener_;
     static std::unique_ptr<Palette> system_palette_;
-
-    // TODO This is in paint_buffer now remove this.
-    // static detail::NCurses_paint_engine paint_engine_;
 };
 
 }  // namespace cppurses

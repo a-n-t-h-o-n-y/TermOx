@@ -12,7 +12,7 @@
 
 namespace cppurses {
 
-Glyph_string::operator std::string() const {  // NOLINT
+Glyph_string::operator std::string() const {
     return this->str();
 }
 
@@ -22,7 +22,7 @@ std::string Glyph_string::str() const {
     return result;
 }
 
-Glyph_string::operator std::wstring() const {  // NOLINT
+Glyph_string::operator std::wstring() const {
     return this->w_str();
 }
 

@@ -425,13 +425,9 @@ void Vertical_layout::position_widgets(
         return;
     }
     std::size_t index{0};
-    // std::size_t x_offset{west_border_offset(*this)};
-    // std::size_t y_offset{north_border_offset(*this)};
     std::size_t x_offset{0};
     std::size_t y_offset{0};
     for (Widget* w : widgets) {
-        // std::size_t x_pos{this->x() - west_border_offset(*this) + x_offset};
-        // std::size_t y_pos{this->y() - north_border_offset(*this) + y_offset};
         std::size_t x_pos{this->x() + x_offset};
         std::size_t y_pos{this->y() + y_offset};
         System::post_event<Move_event>(w, Point{x_pos, y_pos});

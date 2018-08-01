@@ -5,6 +5,7 @@
 namespace cppurses {
 namespace detail {
 
+/// Converts frames per second \p fps to a period.
 typename detail::Animation_event_loop::Period_t fps_to_period(int fps);
 
 }  // namespace detail

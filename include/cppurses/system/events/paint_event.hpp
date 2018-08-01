@@ -7,13 +7,9 @@ class Event_handler;
 
 class Paint_event : public Event {
    public:
-    explicit Paint_event(Event_handler* receiver,
-                         bool repaint_background = false);  // TODO remove this?
+    explicit Paint_event(Event_handler* receiver);
     bool send() const override;
     bool filter_send(Event_handler* filter) const override;
-
-    // private:
-    //  bool repaint_background_;
 };
 
 }  // namespace cppurses

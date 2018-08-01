@@ -12,6 +12,11 @@
 
 namespace cppurses {
 
+// TODO This can either be a typedef of std::basic_string<Glyph> or inherit from
+// that instead of vector if you need added functionality. I'd suggest a
+// typedef, and free functions for added functionality if possible.
+
+/// Represents a string of Glyphs with similar interface to std::string
 class Glyph_string : private std::vector<Glyph> {
    public:
     Glyph_string() = default;
@@ -65,9 +70,10 @@ class Glyph_string : private std::vector<Glyph> {
         }
     }
 
-    operator std::string() const;  // NOLINT
+    // TODO probably do not want non explicit conversions.
+    operator std::string() const;
     std::string str() const;
-    operator std::wstring() const;  // NOLINT
+    operator std::wstring() const;
     std::wstring w_str() const;
 
     size_type length() const;

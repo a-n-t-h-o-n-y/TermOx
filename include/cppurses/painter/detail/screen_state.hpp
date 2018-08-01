@@ -7,6 +7,10 @@
 namespace cppurses {
 namespace detail {
 
+/// Holds a Screen_descriptor representing the current screen state of a Widget.
+///
+/// Widget is the owner of this object, but only the flush function can modify
+/// its state.
 class Screen_state {
     Screen_descriptor tiles;
     friend void Paint_buffer::flush(const Staged_changes&);

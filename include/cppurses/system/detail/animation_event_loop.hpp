@@ -29,9 +29,6 @@ class Animation_event_loop : public Event_loop {
     /// Create an Animation Loop with a constant period.
     Animation_event_loop(Period_t period);
 
-    // TODO implement move operator= and constructor etc.. can't copy/move a
-    // future so do it manually. Also is Signal moveable? probably.
-
     /// Launches the Event_loop::run() in a separate thread.
     void run();
 

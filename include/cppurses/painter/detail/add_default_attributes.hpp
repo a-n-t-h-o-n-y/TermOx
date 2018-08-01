@@ -6,6 +6,7 @@ struct Glyph;
 class Brush;
 namespace detail {
 
+/// Adds the attributes and colors from \p brush to \p tile.
 void add_default_attributes(Glyph& tile, const Brush& brush);
 
 }  // namespace detail

@@ -12,5 +12,4 @@ sig::Slot<void()> disable(Event_handler& eh);
 
 }  // namespace slot
 }  // namespace cppurses
-
 #endif  // SYSTEM_EVENT_HANDLER_SLOTS_HPP

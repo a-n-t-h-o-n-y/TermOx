@@ -6,7 +6,7 @@ namespace cppurses {
 class Event;
 namespace detail {
 
-/// Utility to help with logging.
+/// Utility to help with logging. Turns an event into a string description.
 std::string event_as_string(const Event& event);
 
 }  // namespace detail

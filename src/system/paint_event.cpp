@@ -5,18 +5,14 @@
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
-Paint_event::Paint_event(Event_handler* receiver, bool repaint_background)
-    : Event{Event::Paint, receiver} {
-}  //, repaint_background_{repaint_background} {}
+Paint_event::Paint_event(Event_handler* receiver)
+    : Event{Event::Paint, receiver} {}
 
 bool Paint_event::send() const {
     Widget* widg{static_cast<Widget*>(receiver_)};
     if (detail::is_not_paintable(widg)) {
         return false;
     }
-    // if (repaint_background_) {  // TODO this is its own event now, remove?
-    //     widg->repaint_background();
-    // }
     return receiver_->paint_event();
 }
 

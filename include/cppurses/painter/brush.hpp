@@ -1,6 +1,5 @@
 #ifndef PAINTER_BRUSH_HPP
 #define PAINTER_BRUSH_HPP
-#include <algorithm>
 #include <bitset>
 #include <utility>
 #include <vector>
@@ -12,6 +11,7 @@
 
 namespace cppurses {
 
+/// Holds the look of any paintable object with Attributes and Colors.
 class Brush {
    public:
     template <typename... Attributes>

@@ -54,7 +54,6 @@ target_sources(libcppurses PRIVATE
     system/show_event.cpp
 	system/system.cpp
     system/shortcuts.cpp
-    # system/async_trigger.cpp
     system/animation_engine.cpp
     system/animation_event.cpp
     system/event_as_string.cpp
@@ -78,10 +77,8 @@ target_sources(libcppurses PRIVATE
     painter/wchar_to_bytes.cpp
     painter/extended_char.cpp
     painter/is_not_paintable.cpp
-    # painter/flush.cpp
     painter/add_default_attributes.cpp
     painter/ncurses_data.cpp
-    # painter/sigwinch.cpp
 )	
 
 # WIDGET

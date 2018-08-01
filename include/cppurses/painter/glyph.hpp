@@ -1,9 +1,12 @@
 #ifndef PAINTER_GLYPH_HPP
 #define PAINTER_GLYPH_HPP
+#include <utility>
+
 #include <cppurses/painter/brush.hpp>
 
 namespace cppurses {
 
+/// Holds the description of a paintable tile on the screen.
 struct Glyph {
     // Data
     wchar_t symbol{L' '};

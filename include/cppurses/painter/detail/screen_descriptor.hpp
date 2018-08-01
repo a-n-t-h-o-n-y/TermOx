@@ -8,6 +8,7 @@
 namespace cppurses {
 namespace detail {
 
+/// Holds the screen state by Points on the screen and cooresponding Glyphs.
 using Screen_descriptor = std::unordered_map<Point, Glyph>;
 
 }  // namespace detail

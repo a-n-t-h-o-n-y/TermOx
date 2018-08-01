@@ -11,8 +11,6 @@
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/widget.hpp>
 
-// #include <utility/log.hpp>  //temp
-
 namespace cppurses {
 namespace slot {
 sig::Slot<void()> post_animation_event(Widget* w_ptr) {
@@ -82,10 +80,6 @@ bool Animation_event_loop::empty() const {
 
 void Animation_event_loop::post_all() {
     on_loop_();
-    // utility::Log l;
-    // l << "post_all called, Thread id: " << std::this_thread::get_id()
-    //   << std::endl;
-
     auto now = std::chrono::high_resolution_clock::now();
     auto time_passed = now - last_time_;
     auto time_to_sleep = period_func_() - time_passed;

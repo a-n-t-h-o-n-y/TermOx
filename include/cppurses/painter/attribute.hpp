@@ -4,6 +4,7 @@
 
 namespace cppurses {
 
+/// Attributes that can be applied to a Glyph.
 enum class Attribute : std::int8_t {
     Bold,
     Italic,

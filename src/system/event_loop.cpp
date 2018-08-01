@@ -40,16 +40,12 @@ void Event_loop::process_events() {
     mtx.lock();
     invoker_.invoke(event_queue);
     if (!exit_) {
-        // move below call to invoke to after call to flush()?
+        // TODO move below call to invoke to after call to flush()?
         invoker_.invoke(event_queue, Event::DeferredDelete);
-        // System::paint_buffer().flush(true);
         System::paint_buffer().flush(staged_changes_);
         mtx.unlock();
         staged_changes_.clear();
         loop_func_();
-        // Blocking Call
-        // auto event_ptr = System::event_listener()->get_input();
-        // event_queue.append(std::move(event_ptr));
     } else {
         mtx.unlock();
     }
