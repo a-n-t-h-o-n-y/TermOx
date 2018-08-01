@@ -1,9 +1,10 @@
 #include <cppurses/system/event_loop.hpp>
 
+#include <mutex>
 #include <thread>
 #include <utility>
 
-#include <cppurses/painter/detail/flush.hpp>
+// #include <cppurses/painter/detail/flush.hpp>
 #include <cppurses/painter/detail/staged_changes.hpp>
 #include <cppurses/painter/paint_buffer.hpp>
 #include <cppurses/system/detail/abstract_event_listener.hpp>
@@ -35,17 +36,22 @@ void Event_loop::exit(int return_code) {
 }
 
 void Event_loop::process_events() {
+    static std::mutex mtx;
+    mtx.lock();
     invoker_.invoke(event_queue);
     if (!exit_) {
         // move below call to invoke to after call to flush()?
         invoker_.invoke(event_queue, Event::DeferredDelete);
         // System::paint_buffer().flush(true);
-        detail::flush(staged_changes_);
+        System::paint_buffer().flush(staged_changes_);
+        mtx.unlock();
         staged_changes_.clear();
         loop_func_();
         // Blocking Call
         // auto event_ptr = System::event_listener()->get_input();
         // event_queue.append(std::move(event_ptr));
+    } else {
+        mtx.unlock();
     }
 }
 

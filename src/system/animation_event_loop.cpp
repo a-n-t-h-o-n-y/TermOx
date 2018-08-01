@@ -11,12 +11,13 @@
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/widget.hpp>
 
+// #include <utility/log.hpp>  //temp
+
 namespace cppurses {
 namespace slot {
 sig::Slot<void()> post_animation_event(Widget* w_ptr) {
-    sig::Slot<void()> slot{[w_ptr] {
-        System::post_event(std::make_unique<Animation_event>(w_ptr));
-    }};
+    sig::Slot<void()> slot{
+        [w_ptr] { System::post_event<Animation_event>(w_ptr); }};
     slot.track(w_ptr->destroyed);
     return slot;
 }
@@ -29,6 +30,11 @@ Animation_event_loop::Animation_event_loop(
 
 Animation_event_loop::Animation_event_loop(Period_t period)
     : Animation_event_loop{[period] { return period; }} {}
+
+Animation_event_loop::~Animation_event_loop() {
+    this->exit(0);
+    this->wait();
+}
 
 void Animation_event_loop::run() {
     fut_ = std::async(std::launch::async,
@@ -76,6 +82,10 @@ bool Animation_event_loop::empty() const {
 
 void Animation_event_loop::post_all() {
     on_loop_();
+    // utility::Log l;
+    // l << "post_all called, Thread id: " << std::this_thread::get_id()
+    //   << std::endl;
+
     auto now = std::chrono::high_resolution_clock::now();
     auto time_passed = now - last_time_;
     auto time_to_sleep = period_func_() - time_passed;

@@ -21,10 +21,12 @@ namespace cppurses {
 
 Painter::Painter(Widget* widg)
     : widget_{widg},
-      staged_changes_{System::find_event_loop().staged_changes()[widg]} {}
+      staged_changes_{
+          System::find_event_loop().staged_changes()[widg].screen_description} {
+}
 
 Painter::Painter(Widget* widg, detail::Staged_changes& changes)
-    : widget_{widg}, staged_changes_{changes[widg]} {}
+    : widget_{widg}, staged_changes_{changes[widg].screen_description} {}
 
 // Widget* Painter::widget() const {
 //     return widget_;
@@ -36,12 +38,13 @@ Painter::Painter(Widget* widg, detail::Staged_changes& changes)
 
 void Painter::put(const Glyph& tile, std::size_t x, std::size_t y) {
     // bool is_background) {
-    // you could hold onto outer width/height values in painter class less calcs
     if (x >= widget_->outer_width() || y >= widget_->outer_height()) {
         return;
     }
-    std::size_t glob_x = widget_->x() + x;
-    std::size_t glob_y = widget_->y() + y;
+    // std::size_t glob_x = widget_->x() + x;
+    std::size_t glob_x = widget_->inner_x() + x;
+    // std::size_t glob_y = widget_->y() + y;
+    std::size_t glob_y = widget_->inner_y() + y;
     this->put_global(tile, glob_x, glob_y);  //, is_background);
 }
 
@@ -74,8 +77,10 @@ void Painter::border(const Border& b) {
     if (width < 1 || height < 1) {
         return;
     }
-    const std::size_t widg_x = widget_->x() - west_border_offset(*widget_);
-    const std::size_t widg_y = widget_->y() - north_border_offset(*widget_);
+    // const std::size_t widg_x = widget_->x() - west_border_offset(*widget_);
+    // const std::size_t widg_y = widget_->y() - north_border_offset(*widget_);
+    const std::size_t widg_x = widget_->x();
+    const std::size_t widg_y = widget_->y();
 
     // Underflow Checks
     if (widg_x + width < 1 && (b.north_enabled || b.south_enabled)) {
@@ -182,34 +187,47 @@ void Painter::border(const Border& b) {
 
     // Corners - Special Cases
     // North-West
-    Point nw{widget_->x() - west_border_offset(*widget_),
-             widget_->y() - north_border_offset(*widget_)};
+    // Point nw{widget_->x() - west_border_offset(*widget_),
+    //          widget_->y() - north_border_offset(*widget_)};
+    Point nw{widget_->x(), widget_->y()};
     if (!b.north_west_enabled && !b.north_enabled && b.west_enabled) {
         this->put_global(b.west, nw);
     } else if (!b.north_west_enabled && !b.west_enabled && b.north_enabled) {
         this->put_global(b.north, nw);
     }
     // North-East
-    Point ne{widget_->x() + widget_->width() - 1 + east_border_offset(*widget_),
-             widget_->y() - north_border_offset(*widget_)};
+    // Point ne{widget_->x() + widget_->width() - 1 +
+    // east_border_offset(*widget_),
+    //          widget_->y() - north_border_offset(*widget_)};
+    Point ne{widget_->inner_x() + widget_->width() - 1 +
+                 east_border_offset(*widget_),
+             widget_->y()};
     if (!b.north_east_enabled && !b.north_enabled && b.east_enabled) {
         this->put_global(b.east, ne);
     } else if (!b.north_east_enabled && !b.east_enabled && b.north_enabled) {
         this->put_global(b.north, ne);
     }
     // South-West
-    Point sw{
-        widget_->x() - west_border_offset(*widget_),
-        widget_->y() + widget_->height() - 1 + south_border_offset(*widget_)};
+    // Point sw{
+    //     widget_->x() - west_border_offset(*widget_),
+    //     widget_->y() + widget_->height() - 1 +
+    //     south_border_offset(*widget_)};
+    Point sw{widget_->x(), widget_->inner_y() + widget_->height() - 1 +
+                               south_border_offset(*widget_)};
     if (!b.south_west_enabled && !b.south_enabled && b.west_enabled) {
         this->put_global(b.west, sw);
     } else if (!b.south_west_enabled && !b.west_enabled && b.south_enabled) {
         this->put_global(b.south, sw);
     }
     // South-East
-    Point se{
-        widget_->x() + widget_->width() - 1 + east_border_offset(*widget_),
-        widget_->y() + widget_->height() - 1 + south_border_offset(*widget_)};
+    // Point se{
+    //     widget_->x() + widget_->width() - 1 + east_border_offset(*widget_),
+    //     widget_->y() + widget_->height() - 1 +
+    //     south_border_offset(*widget_)};
+    Point se{widget_->inner_x() + widget_->width() - 1 +
+                 east_border_offset(*widget_),
+             widget_->inner_y() + widget_->height() - 1 +
+                 south_border_offset(*widget_)};
     if (!b.south_east_enabled && !b.south_enabled && b.east_enabled) {
         this->put_global(b.east, se);
     } else if (!b.south_east_enabled && !b.east_enabled && b.south_enabled) {
@@ -226,7 +244,8 @@ void Painter::fill(const Glyph& tile,
     if (width == 0) {
         return;
     }
-    for (; y < height; ++y) {
+    const std::size_t y_limit{y + height};
+    for (; y < y_limit; ++y) {
         this->line(tile, x, y, width - 1, y);  //, is_background);
     }
 }

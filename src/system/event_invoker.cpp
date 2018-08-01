@@ -2,6 +2,7 @@
 
 #include <iterator>
 #include <memory>
+#include <mutex>
 #include <utility>
 
 #include <cppurses/system/detail/event_queue.hpp>
@@ -15,6 +16,8 @@ namespace detail {
 void Event_invoker::invoke(Event_queue& queue,
                            Event::Type type_filter,
                            Event_handler* object_filter) {
+    // static std::mutex mtx_;
+    // std::lock_guard<std::mutex> lock{mtx_};
     auto event_iter = std::begin(queue.queue_);
     while (event_iter != std::end(queue.queue_)) {
         Event_handler* receiver = (*event_iter)->receiver();

@@ -14,6 +14,7 @@ void Brush::remove_attribute(Attribute attr) {
     attributes_.set(static_cast<std::int8_t>(attr), false);
 }
 
+// TODO this is creating a bit of extra work dynamically allocating a vector
 std::vector<Attribute> Brush::attributes() const {
     std::vector<Attribute> vec;
     vec.reserve(8);

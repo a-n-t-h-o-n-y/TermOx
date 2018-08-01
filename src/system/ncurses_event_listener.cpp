@@ -4,6 +4,10 @@
 #include <memory>
 #include <vector>
 
+#include <stdio.h>
+#include <sys/ioctl.h>
+
+#include <cppurses/painter/detail/ncurses_data.hpp>
 #include <cppurses/system/event.hpp>
 #include <cppurses/system/events/key_event.hpp>
 #include <cppurses/system/events/mouse_event.hpp>
@@ -17,6 +21,8 @@
 #include <cppurses/widget/widget.hpp>
 
 #include <ncurses.h>
+
+// #include <utility/log.hpp>
 
 namespace {
 
@@ -45,23 +51,65 @@ namespace cppurses {
 namespace detail {
 
 std::unique_ptr<Event> NCurses_event_listener::get_input() const {
+    // utility::Log l;
+
     int input = ::getch();  // blocking call
+    // l << "Input Detected : ";
     std::unique_ptr<Event> event{nullptr};
     switch (input) {
         case KEY_MOUSE:
+            // l << "Mouse Input";
             event = parse_mouse_event();
             break;
 
         case KEY_RESIZE:
+            // l << "KEY_RESIZE";
+            // throw(5);
             event = handle_resize_event();
             event->set_receiver(handle_resize_widget());
             break;
 
+        case ERR:
+            // l << "ERR - ";
+            // if (NCurses_data::resize_happened) {
+            //     l << "resize_happened";
+            // } else {
+            //     l << "SOME OTHER ERROR";
+            // }
+
+            // static bool second_err{false};
+            if (NCurses_data::resize_happened) {
+                NCurses_data::resize_happened = false;
+                // second_err = true;
+                // } else {
+                // bit of hack since incorrect resize coords are sometimes sent,
+                // but after a second ERR, the coords should be correct.
+                // if (second_err) {
+                // second_err = false;
+                struct winsize w;
+                ioctl(fileno(stdin), TIOCGWINSZ, &w);
+                // if (ret == -1) {
+                // l << "ioctl failed ";
+                // } else {
+                NCurses_data::ncurses_mtx.lock();
+                ::resizeterm(w.ws_row, w.ws_col);
+                NCurses_data::ncurses_mtx.unlock();
+
+                // l << " rows: " << w.ws_row << " cols: " << w.ws_col;
+                // }
+                // event = handle_resize_event();
+                // event->set_receiver(handle_resize_widget());
+                // }
+            }
+            break;
+
         default:  // Key_event
+            // l << "Default Input - key event";
             event = handle_keyboard_event(input);
             event->set_receiver(handle_keyboard_widget());
             break;
     }
+    // l << std::endl;
     return event;
 }
 
@@ -139,8 +187,8 @@ std::unique_ptr<Event> NCurses_event_listener::parse_mouse_event() const {
     // Location
     std::size_t mouse_x{static_cast<std::size_t>(mouse_event.x)};
     std::size_t mouse_y{static_cast<std::size_t>(mouse_event.y)};
-    std::size_t local_x = mouse_x - receiver->x();
-    std::size_t local_y = mouse_y - receiver->y();
+    std::size_t local_x = mouse_x - receiver->inner_x();
+    std::size_t local_y = mouse_y - receiver->inner_y();
 
     // Create Event
     std::unique_ptr<Event> event{nullptr};

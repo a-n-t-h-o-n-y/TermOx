@@ -420,15 +420,21 @@ void Horizontal_layout::collect_space(std::vector<Dimensions_reference> widgets,
 void Horizontal_layout::position_widgets(
     const std::vector<std::size_t>& widths) {
     std::vector<Widget*> widgets{this->children()};
+    // TODO remove this check if you can prove in your implementation
     if (widgets.size() != widths.size()) {
         return;
     }
     std::size_t index{0};
-    std::size_t y_offset{north_border_offset(*this)};
-    std::size_t x_offset{west_border_offset(*this)};
+    // std::size_t x_offset{west_border_offset(*this)};
+    // std::size_t y_offset{north_border_offset(*this)};
+    std::size_t x_offset{0};
+    std::size_t y_offset{0};
     for (Widget* w : widgets) {
-        std::size_t x_pos{this->x() - west_border_offset(*this) + x_offset};
-        std::size_t y_pos{this->y() - north_border_offset(*this) + y_offset};
+        // TODO remove the duplicate subtract of border offset
+        // std::size_t x_pos{this->x() - west_border_offset(*this) + x_offset};
+        // std::size_t y_pos{this->y() - north_border_offset(*this) + y_offset};
+        std::size_t x_pos{this->inner_x() + x_offset};
+        std::size_t y_pos{this->inner_y() + y_offset};
         System::post_event<Move_event>(w, Point{x_pos, y_pos});
         x_offset += widths.at(index++);
     }

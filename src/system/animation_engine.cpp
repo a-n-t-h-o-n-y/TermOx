@@ -12,6 +12,8 @@
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/widget.hpp>
 
+// #include <utility/log.hpp>  //temp
+
 namespace cppurses {
 // namespace slot {
 
@@ -143,13 +145,12 @@ void Animation_engine::unregister_widget(Widget& w) {
 // }
 
 void Animation_engine::shutdown() {
+    // Animation_event_loops will wait on the future at destruction.
     for (auto& pair : const_loops_) {
         pair.second.exit(0);
-        pair.second.wait();
     }
     for (auto& loop : variable_loops_) {
         loop.exit(0);
-        loop.wait();
     }
 }
 
@@ -160,6 +161,20 @@ void Animation_engine::startup() {
     for (auto& loop : variable_loops_) {
         loop.run();
     }
+}
+
+Event_loop* Animation_engine::get_event_loop(std::thread::id id) {
+    for (auto& pair : const_loops_) {
+        if (pair.second.get_thread_id() == id) {
+            return &pair.second;
+        }
+    }
+    for (auto& loop : variable_loops_) {
+        if (loop.get_thread_id() == id) {
+            return &loop;
+        }
+    }
+    return nullptr;
 }
 
 // void Animation_engine::shutdown() {

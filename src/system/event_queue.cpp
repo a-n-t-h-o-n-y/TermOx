@@ -8,6 +8,11 @@
 #include <cppurses/system/events/deferred_delete_event.hpp>
 #include <cppurses/widget/widget.hpp>
 
+// #include <cppurses/system/detail/event_as_string.hpp>  // temp
+// #include <utility/log.hpp>                             // temp
+// #include <utility/type_info.hpp>                       // temp
+// #include <thread>
+
 namespace cppurses {
 namespace detail {
 
@@ -17,8 +22,10 @@ void Event_queue::append(std::unique_ptr<Event> event) {
     }
     // Optimize out duplicate expensive events.
     Event::Type type = event->type();
-    if (type == Event::Paint || type == Event::Move || type == Event::Resize ||
-        type == Event::ClearScreen || type == Event::DeferredDelete) {
+    // This could almost be any duplicate event for the widget?
+    if (type == Event::Paint || type == Event::Repaint || type == Event::Move ||
+        type == Event::Resize || type == Event::ClearScreen ||
+        type == Event::DeferredDelete) {
         auto is_same_event = [&type, &event](const auto& e) {
             return (e->type() == type) && (e->receiver() == event->receiver());
         };
@@ -32,7 +39,12 @@ void Event_queue::append(std::unique_ptr<Event> event) {
             remove_dd_children(*event);
         }
     }
+    // utility::Log l;
+    // l << "thread id: " << std::this_thread::get_id();
+    // l << "\nEvent: " << detail::event_as_string(*event) << "\t|\t";
+    // l << "Widget: " << event->receiver() << std::endl;
     queue_.emplace_back(std::move(event));
+    // l << queue_.size() << '\n';
 }
 
 void Event_queue::remove_dd_children(const Event& new_event) {

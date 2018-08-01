@@ -12,9 +12,9 @@
 namespace demos {
 namespace animation {
 
-class Animated_bit : public cppurses::Horizontal_layout {
+class Animated_bit : public cppurses::Widget {
    public:
-    Animated_bit(int rate);
+    Animated_bit(int rate, bool ani = false);
 
     bool animation_event() override;
     bool paint_event() override;
@@ -39,11 +39,11 @@ class Animated_widget : public cppurses::Horizontal_layout {
     }
 
    private:
-    Animated_bit& bit_1_{this->make_child<Animated_bit>(5)};
-    Animated_bit& bit_2_{this->make_child<Animated_bit>(10)};
-    Animated_bit& bit_3_{this->make_child<Animated_bit>(20)};
-    Animated_bit& bit_4_{this->make_child<Animated_bit>(30)};
-    Animated_bit& bit_5_{this->make_child<Animated_bit>(60)};
+    Animated_bit& bit_1_{this->make_child<Animated_bit>(5, true)};
+    Animated_bit& bit_2_{this->make_child<Animated_bit>(10, true)};
+    Animated_bit& bit_3_{this->make_child<Animated_bit>(20, true)};
+    Animated_bit& bit_4_{this->make_child<Animated_bit>(30, true)};
+    Animated_bit& bit_5_{this->make_child<Animated_bit>(60, true)};
 };
 
 }  // namespace animation

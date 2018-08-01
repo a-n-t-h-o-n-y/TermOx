@@ -3,8 +3,11 @@
 #include <cstddef>
 #include <mutex>
 
+#include <cppurses/painter/detail/add_default_attributes.hpp>
 #include <cppurses/painter/detail/glyph_and_bkgd_bool.hpp>
 #include <cppurses/painter/detail/is_not_paintable.hpp>
+#include <cppurses/painter/detail/ncurses_data.hpp>
+#include <cppurses/painter/detail/staged_changes.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_matrix.hpp>
 #include <cppurses/painter/painter.hpp>
@@ -16,6 +19,22 @@
 #include <cppurses/widget/area.hpp>
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/widget.hpp>
+
+namespace {
+using namespace cppurses;
+
+bool child_has_point(Widget& w, std::size_t x, std::size_t y) {
+    std::vector<Widget*> children{w.children()};
+    for (Widget* child : children) {
+        if (x >= child->x() && x < (child->inner_x() + child->outer_width()) &&
+            y >= child->y() && y < (child->inner_y() + child->outer_height())) {
+            return true;
+        }
+    }
+    return false;
+}
+
+}  // namespace
 
 // #include <utility/log.hpp>  //temp
 
@@ -142,6 +161,109 @@ Paint_buffer::Paint_buffer() {
 //     }
 // }
 
+bool Paint_buffer::within_screen(const Point& p) {
+    if (p.x >= this->screen_width() || p.y >= this->screen_height()) {
+        return false;
+    }
+    return true;
+}
+
+void Paint_buffer::cover_with_background(Widget& w) {
+    Glyph background{w.find_background_tile()};
+    for (std::size_t y{w.y()}; y < (w.y() + w.outer_height()); ++y) {
+        for (std::size_t x{w.x()}; x < (w.x() + w.outer_width()); ++x) {
+            if (!child_has_point(w, x, y)) {
+                engine_.put(x, y, background);
+            }
+        }
+    }
+}
+
+void Paint_buffer::flush(const detail::Staged_changes& changes) {
+    // static std::mutex mtx;
+    // std::lock_guard<std::mutex> lock{mtx};
+    std::lock_guard<std::mutex> lock{detail::NCurses_data::ncurses_mtx};
+    bool refresh{false};
+
+    for (const auto& pair : changes) {
+        Widget* widg{pair.first};
+        const detail::Screen_descriptor& changes_map{
+            pair.second.screen_description};
+        if (detail::is_not_paintable(widg)) {
+            continue;
+        }
+        refresh = true;
+        // REPAINT ENTIRE BACKGROUND IF REQUESTED.
+        if (pair.second.repaint) {
+            cover_with_background(*widg);
+            widg->screen_state().tiles.clear();
+        }
+        // BACKGROUNDS COVER LEFTOVERS
+        // Make sure the leftover is not outside the physical screen.
+        std::vector<Point> to_delete;
+        for (const auto& point_tile : widg->screen_state().tiles) {
+            const Point& point{point_tile.first};
+            if (changes_map.count(point) == 0) {
+                Glyph background{widg->find_background_tile()};
+                if (within_screen(point)) {
+                    engine_.put(point.x, point.y, background);
+                }
+                to_delete.push_back(point);
+            }
+        }
+        for (const Point& p : to_delete) {
+            widg->screen_state().tiles.erase(p);
+        }
+        // NEW TILES PRINTED TO SCREEN
+        // if (pair.second.repaint) {
+        // utility::Log l;
+        // l << "Repaint flush, staged_changes for " << widg << " is ";
+        // l << changes_map.size() << " in length\n";
+        // l << "screen state is length: " << widg->screen_state().tiles.size()
+        // << '\n';
+        // }
+        // Make sure the new tile is not outside the physical screen.
+        // This could possibly happen with an animation thread that paints, then
+        // the main thread resizing, the then animaiton thread flushing with old
+        // screen state info.
+        for (const auto& point_tile : changes_map) {
+            const Point& point{point_tile.first};
+            Glyph tile{point_tile.second};
+            detail::add_default_attributes(tile, widg->brush);
+            auto screen_iter = widg->screen_state().tiles.find(point);
+            if (screen_iter != std::end(widg->screen_state().tiles) &&
+                screen_iter->second == tile) {
+                continue;
+            } else {
+                if (within_screen(point)) {
+                    engine_.put(point.x, point.y, tile);
+                    widg->screen_state().tiles[point] = tile;
+                }
+            }
+        }
+        // if (pair.second.repaint) {
+        //     utility::Log l;
+        //     l << "screen state is now length: "
+        //       << widg->screen_state().tiles.size() << '\n';
+        // }
+    }
+    Widget* focus_widg = Focus::focus_widget();
+    if (focus_widg == nullptr) {
+        engine_.hide_cursor();
+    } else {
+        bool cursor_visible{focus_widg->cursor_visible()};
+        engine_.show_cursor(cursor_visible);
+        if (cursor_visible) {
+            std::size_t x = focus_widg->inner_x() + focus_widg->cursor_x();
+            std::size_t y = focus_widg->inner_y() + focus_widg->cursor_y();
+            engine_.move_cursor(x, y);
+        }
+    }
+    if (refresh) {
+        engine_.refresh();
+    }
+}
+
 // void Paint_buffer::flush(bool optimize) {
 //     std::lock_guard<Mutex_t> guard{mutex_};
 //     // utility::Log l;
@@ -246,14 +368,16 @@ Glyph Paint_buffer::get_global_background_tile() const {
 }
 
 std::size_t Paint_buffer::update_width() {
-    std::lock_guard<Mutex_t> guard{mutex_};
+    std::lock_guard<std::mutex> guard{detail::NCurses_data::ncurses_mtx};
+    // std::lock_guard<Mutex_t> guard{mutex_};
     std::size_t new_width{engine_.screen_width()};
     this->resize_width(new_width);
     return new_width;
 }
 
 std::size_t Paint_buffer::update_height() {
-    std::lock_guard<Mutex_t> guard{mutex_};
+    std::lock_guard<std::mutex> guard{detail::NCurses_data::ncurses_mtx};
+    // std::lock_guard<Mutex_t> guard{mutex_};
     std::size_t new_height{engine_.screen_height()};
     this->resize_height(new_height);
     return new_height;

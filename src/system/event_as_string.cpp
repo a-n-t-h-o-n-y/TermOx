@@ -46,6 +46,9 @@ std::string event_as_string(const Event& event) {
         case Event::Paint:
             name = "Paint";
             break;
+        case Event::Repaint:
+            name = "Repaint";
+            break;
         case Event::Move:
             name = "Move";
             break;

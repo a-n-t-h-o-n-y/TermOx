@@ -13,6 +13,7 @@ class Layout : public Widget {
 
    protected:
     bool paint_event() override;
+    // bool repaint_event() override;
     virtual void update_geometry() = 0;
     bool too_small_{false};
 

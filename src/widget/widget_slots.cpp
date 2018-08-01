@@ -58,7 +58,7 @@ sig::Slot<void(Point, Mouse_button)> click(Widget& w) {
     sig::Slot<void(Point, Mouse_button)> slot{
         [&w](const Point& c, Mouse_button b) {
             System::send_event(Mouse_press_event{
-                &w, b, Point{w.x() + c.x, w.y() + c.y}, c, 0});
+                &w, b, Point{w.inner_x() + c.x, w.inner_y() + c.y}, c, 0});
         }};
     slot.track(w.destroyed);
     return slot;
@@ -66,8 +66,8 @@ sig::Slot<void(Point, Mouse_button)> click(Widget& w) {
 
 sig::Slot<void(Mouse_button)> click(Widget& w, Point c) {
     sig::Slot<void(Mouse_button)> slot{[&w, &c](Mouse_button b) {
-        System::send_event(
-            Mouse_press_event{&w, b, Point{w.x() + c.x, w.y() + c.y}, c, 0});
+        System::send_event(Mouse_press_event{
+            &w, b, Point{w.inner_x() + c.x, w.inner_y() + c.y}, c, 0});
     }};
     slot.track(w.destroyed);
     return slot;
@@ -75,8 +75,8 @@ sig::Slot<void(Mouse_button)> click(Widget& w, Point c) {
 
 sig::Slot<void(Point)> click(Widget& w, Mouse_button b) {
     sig::Slot<void(Point)> slot{[&w, b](const Point& c) {
-        System::send_event(
-            Mouse_press_event{&w, b, Point{w.x() + c.x, w.y() + c.y}, c, 0});
+        System::send_event(Mouse_press_event{
+            &w, b, Point{w.inner_x() + c.x, w.inner_y() + c.y}, c, 0});
     }};
     slot.track(w.destroyed);
     return slot;
@@ -84,8 +84,8 @@ sig::Slot<void(Point)> click(Widget& w, Mouse_button b) {
 
 sig::Slot<void()> click(Widget& w, Point c, Mouse_button b) {
     sig::Slot<void()> slot{[&w, &c, b] {
-        System::send_event(
-            Mouse_press_event{&w, b, Point{w.x() + c.x, w.y() + c.y}, c, 0});
+        System::send_event(Mouse_press_event{
+            &w, b, Point{w.inner_x() + c.x, w.inner_y() + c.y}, c, 0});
     }};
     slot.track(w.destroyed);
     return slot;

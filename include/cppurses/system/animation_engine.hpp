@@ -34,6 +34,10 @@ class Animation_engine {
     /// Only needed if shutdown() has been called.
     void startup();
 
+    /// Returns the event loop associated with the thread id, or nullptr is does
+    /// not exist.
+    Event_loop* get_event_loop(std::thread::id id);
+
    private:
     // void clean_up();
 

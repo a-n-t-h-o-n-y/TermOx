@@ -8,6 +8,7 @@
 namespace cppurses {
 
 Layout::Layout() {
+    // TODO is this necessary? To post a move event at construction?
     System::post_event<Move_event>(this, Point{0, 0});
     this->focus_policy = Focus_policy::Click;
 }
@@ -21,6 +22,13 @@ bool Layout::paint_event() {
     }
     return Widget::paint_event();
 }
+
+// TODO remove this and place drawing around children in flush
+// bool Layout::repaint_event() {
+//     // System::find_event_loop().staged_changes()[this].repaint = true;
+//     this->update();
+//     return true;
+// }
 
 // Free Functions
 void set_background(Layout& l, Color c) {

@@ -3,6 +3,11 @@
 #include <clocale>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
+#include <mutex>
+
+#include <signal.h>
+#include <string.h>
 
 #include <ncurses.h>
 #include <optional/optional.hpp>
@@ -10,18 +15,22 @@
 #include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
+#include <cppurses/painter/detail/ncurses_data.hpp>
 #include <cppurses/painter/glyph.hpp>
 
 #ifndef add_wchstr
 #include <cppurses/painter/detail/extended_char.hpp>
 #endif
 
+// #include <utility/log.hpp>  // temp
+#include <fstream>
+
 namespace {
 attr_t color_to_int(cppurses::Color c) {
     return static_cast<attr_t>(c) - cppurses::detail::k_init_color;
 }
 
-attr_t find_pair(cppurses::Color foreground, cppurses::Color background) {
+short find_pair(cppurses::Color foreground, cppurses::Color background) {
     const int color_n{16};
     return color_to_int(background) * color_n + color_to_int(foreground);
 }
@@ -78,8 +87,9 @@ namespace cppurses {
 namespace detail {
 
 NCurses_paint_engine::NCurses_paint_engine() {
-    setenv("TERM", "xterm-256color", 1);
+    setenv("TERM", "xterm-256color", 1);  // TODO not a great idea.
     std::setlocale(LC_ALL, "en_US.UTF-8");
+    this->setup_sigwinch();
 
     ::initscr();
     ::noecho();
@@ -109,20 +119,24 @@ void NCurses_paint_engine::put_glyph(const Glyph& g) {
     if (g.brush.foreground_color()) {
         fore_color = *g.brush.foreground_color();
     }
-    attr_t color_pair{COLOR_PAIR(find_pair(fore_color, back_color))};
+    // attr_t color_pair{COLOR_PAIR(find_pair(fore_color, back_color))};
+    short color_pair{find_pair(fore_color, back_color)};
 
     // Attributes
-    attr_t attributes{0};
+    attr_t attributes{A_NORMAL};
     for (const Attribute& attr : g.brush.attributes()) {
         attributes |= attr_to_int(attr);
     }
 
 #if defined(add_wchstr)
-    cchar_t image{0, {g.symbol}};
-    image.attr |= color_pair;
-    image.attr |= attributes;
+    // cchar_t image{0, {g.symbol}};
+    cchar_t image;
+    wchar_t symb[2] = {g.symbol, L'\n'};
+    ::setcchar(&image, symb, attributes, color_pair, nullptr);
+    // image.attr |= color_pair;
+    // image.attr |= attributes;
     ::wadd_wchnstr(::stdscr, &image, 1);
-
+    // ::add_wch(&image);
 #else  // no wchar_t support
     bool use_addch{false};
     chtype image{find_chtype(g.symbol, &use_addch)};
@@ -137,11 +151,22 @@ void NCurses_paint_engine::put_glyph(const Glyph& g) {
 }
 
 void NCurses_paint_engine::put(std::size_t x, std::size_t y, const Glyph& g) {
+    // TODO if()
     this->move_cursor(x, y);
     this->put_glyph(g);
 }
 
+// TODO could return false if trying to move outside the screen, then put
+// function does not actually put.
 void NCurses_paint_engine::move_cursor(std::size_t x, std::size_t y) {
+    // basic check, does not check if it is actually outside of screen, just
+    // outside of ncurses data.
+    // if (x >= this->screen_width() || y >= this->screen_height()) {
+    //     utility::Log l;
+    //     l << "Painting outside the lines " << x << ", " << y << '\n';
+    //     l << "width: " << this->screen_width()
+    //       << " height: " << this->screen_height() << std::endl;
+    // }
     ::wmove(::stdscr, static_cast<int>(y), static_cast<int>(x));
 }
 
@@ -164,11 +189,12 @@ std::size_t NCurses_paint_engine::screen_height() {
     return getmaxy(::stdscr);
 }
 
-void NCurses_paint_engine::touch_all() {
-    ::touchwin(::stdscr);
-}
+// void NCurses_paint_engine::touch_all() {
+// ::touchwin(::stdscr);
+// }
 
 void NCurses_paint_engine::refresh() {
+    // std::lock_guard<std::mutex> lock{NCurses_data::ncurses_mtx};
     ::wrefresh(::stdscr);
 }
 
@@ -183,6 +209,18 @@ void NCurses_paint_engine::set_rgb(Color c,
     std::int16_t g_{scale(g)};
     std::int16_t b_{scale(b)};
     ::init_color(static_cast<std::int16_t>(c), r_, g_, b_);
+}
+
+void handle_sigwinch(int sig) {
+    NCurses_data::resize_happened = true;
+}
+
+void NCurses_paint_engine::setup_sigwinch() {
+    struct sigaction sa;
+    memset(&sa, 0, sizeof(struct sigaction));
+    // sa.sa_handler = [this](int sig) { this->handle_sigwinch(sig); };
+    sa.sa_handler = handle_sigwinch;
+    sigaction(SIGWINCH, &sa, NULL);
 }
 
 }  // namespace detail

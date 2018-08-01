@@ -62,9 +62,15 @@ class Widget : public Event_handler {
     std::unique_ptr<Widget> remove_child(Widget* child);
     std::unique_ptr<Widget> remove_child(const std::string& name);
 
-    // Global Point(Including Border)
+    /// Top left point of the widget with respect to the top left point of the
+    /// screen, not accounting for border space.
     std::size_t x() const;
     std::size_t y() const;
+
+    /// Top left point of the widget with respect to the top left point of the
+    // screen, accounting for border space.
+    std::size_t inner_x() const;
+    std::size_t inner_y() const;
 
     // Dimensions, not including border space.
     std::size_t width() const;
@@ -161,6 +167,7 @@ class Widget : public Event_handler {
     bool visible_{true};
     bool on_tree_{false};
 
+    // Local Coordinates
     Point cursor_position_;
     bool show_cursor_{false};
 
@@ -170,7 +177,12 @@ class Widget : public Event_handler {
     detail::Screen_state screen_state_;
 
     // Top left corner, relative to parent's coordinates.
-    Point position_;  // rename to top_left_?
+    // Should just be the top left relative to screen/global top_left
+    // Point position_;  // rename to top_left_?
+
+    // Top left point of *this, relative to the top left of the screen. Does not
+    // account for any borders.
+    Point top_left_position_;
 
     std::size_t width_{width_policy.hint()};
     std::size_t height_{height_policy.hint()};

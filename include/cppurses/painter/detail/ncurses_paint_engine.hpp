@@ -41,10 +41,13 @@ class NCurses_paint_engine {
     std::size_t screen_width();
     std::size_t screen_height();
 
-    void touch_all();
+    // void touch_all();
     void refresh();
 
     void set_rgb(Color c, std::int16_t r, std::int16_t g, std::int16_t b);
+
+   private:
+    void setup_sigwinch();
 };
 
 }  // namespace detail

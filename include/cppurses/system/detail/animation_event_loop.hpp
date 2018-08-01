@@ -20,6 +20,12 @@ class Animation_event_loop : public Event_loop {
     /// Create an Animation Loop with a variable period.
     Animation_event_loop(std::function<Period_t()> period_func);
 
+    Animation_event_loop(Animation_event_loop&&) = default;
+    Animation_event_loop& operator=(Animation_event_loop&&) = default;
+
+    /// Sends exit signal and waits for return from async thread.
+    ~Animation_event_loop();
+
     /// Create an Animation Loop with a constant period.
     Animation_event_loop(Period_t period);
 

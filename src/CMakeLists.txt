@@ -78,8 +78,10 @@ target_sources(libcppurses PRIVATE
     painter/wchar_to_bytes.cpp
     painter/extended_char.cpp
     painter/is_not_paintable.cpp
-    painter/flush.cpp
+    # painter/flush.cpp
     painter/add_default_attributes.cpp
+    painter/ncurses_data.cpp
+    # painter/sigwinch.cpp
 )	
 
 # WIDGET

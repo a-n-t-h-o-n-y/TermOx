@@ -10,9 +10,11 @@
 namespace demos {
 namespace animation {
 
-Animated_bit::Animated_bit(int rate) {
+Animated_bit::Animated_bit(int rate, bool ani) {
     this->focus_policy = cppurses::Focus_policy::Strong;
-    this->enable_animation(cppurses::detail::fps_to_period(rate));
+    if (ani) {
+        this->enable_animation(cppurses::detail::fps_to_period(rate));
+    }
 }
 
 bool Animated_bit::animation_event() {
@@ -20,11 +22,17 @@ bool Animated_bit::animation_event() {
     if (next_x >= this->width() || next_x < 0) {
         x_direction *= -1;
         next_x = coords_.x + (1 * x_direction);
+        if (next_x >= this->width()) {
+            next_x = this->width() != 0 ? this->width() - 1 : 0;
+        }
     }
     int next_y = coords_.y + (1 * y_direction);
     if (next_y >= this->height() || next_y < 0) {
         y_direction *= -1;
         next_y = coords_.y + (1 * y_direction);
+        if (next_y >= this->height()) {
+            next_y = this->height() != 0 ? this->height() - 1 : 0;
+        }
     }
     coords_.x = next_x;
     coords_.y = next_y;

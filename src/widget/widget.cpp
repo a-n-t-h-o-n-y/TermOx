@@ -11,7 +11,7 @@
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/detail/add_default_attributes.hpp>
-#include <cppurses/painter/detail/flush.hpp>
+// #include <cppurses/painter/detail/flush.hpp>
 #include <cppurses/painter/detail/staged_changes.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/paint_buffer.hpp>
@@ -114,20 +114,36 @@ std::unique_ptr<Widget> Widget::remove_child(const std::string& name) {
 }
 
 std::size_t Widget::x() const {
-    Widget* parent = this->parent();
-    if (parent == nullptr) {
-        return this->position_.x + west_border_offset(*this);
-    }
-    return this->position_.x + parent->x() + west_border_offset(*this);
+    return top_left_position_.x;
 }
 
 std::size_t Widget::y() const {
-    Widget* parent = this->parent();
-    if (parent == nullptr) {
-        return this->position_.y + north_border_offset(*this);
-    }
-    return this->position_.y + parent->y() + north_border_offset(*this);
+    return top_left_position_.y;
 }
+
+std::size_t Widget::inner_x() const {
+    return top_left_position_.x + west_border_offset(*this);
+}
+
+std::size_t Widget::inner_y() const {
+    return top_left_position_.y + north_border_offset(*this);
+}
+
+// std::size_t Widget::x() const {
+//     Widget* parent = this->parent();
+//     if (parent == nullptr) {
+//         return this->position_.x + west_border_offset(*this);
+//     }
+//     return this->position_.x + parent->x() + west_border_offset(*this);
+// }
+
+// std::size_t Widget::y() const {
+//     Widget* parent = this->parent();
+//     if (parent == nullptr) {
+//         return this->position_.y + north_border_offset(*this);
+//     }
+//     return this->position_.y + parent->y() + north_border_offset(*this);
+// }
 
 std::size_t Widget::width() const {
     return width_;
@@ -281,8 +297,9 @@ bool Widget::close_event() {
 }
 
 bool Widget::focus_in_event() {
-    System::paint_buffer().move_cursor(this->x() + this->cursor_x(),
-                                       this->y() + this->cursor_y());
+    // TODO obsolete? flush takes care of this cursor movement
+    System::paint_buffer().move_cursor(this->inner_x() + this->cursor_x(),
+                                       this->inner_y() + this->cursor_y());
     focused_in();
     return true;
 }
@@ -301,12 +318,17 @@ bool Widget::paint_event() {
 }
 
 bool Widget::repaint_event() {
-    detail::Staged_changes changes;
-    Painter p{this, changes};
-    Glyph bg{this->find_background_tile()};
-    p.fill(bg, 0, 0, this->outer_width(), this->outer_height());
-    detail::flush(changes, true);
+    // detail::Staged_changes changes;
+    // Painter p{this, changes};
+    // Glyph bg{this->find_background_tile()};
+    // p.fill(bg, 0, 0, this->width() + east_border_offset(*this),
+    //        this->height() + south_border_offset(*this));
+    // detail::flush(changes, true);
+    // this->update();
+    // return true;
+    System::find_event_loop().staged_changes()[this].repaint = true;
     this->update();
+    // System::send_event(Paint_event{this});
     return true;
 }
 
@@ -419,42 +441,50 @@ void Widget::set_visible(bool visible, bool recursive) {
 }
 
 void Widget::set_x(std::size_t global_x) {
-    auto parent = this->parent();
-    auto screen_width = System::max_width();
-    if (global_x >= screen_width && screen_width > 0) {
-        global_x = screen_width - 1;
-    } else if (screen_width == 0) {
-        global_x = 0;
-    }
-    if (parent != nullptr) {
-        if (global_x >= parent->x()) {
-            position_.x = global_x - parent->x();
-        } else {
-            position_.x = 0;
-        }
-    } else {
-        position_.x = global_x;
-    }
+    top_left_position_.x = global_x;
 }
 
 void Widget::set_y(std::size_t global_y) {
-    auto parent = this->parent();
-    auto screen_height = System::max_height();
-    if (global_y >= screen_height && screen_height > 0) {
-        global_y = screen_height - 1;
-    } else if (screen_height == 0) {
-        global_y = 0;
-    }
-    if (parent != nullptr) {
-        if (global_y >= parent->y()) {
-            position_.y = global_y - parent->y();
-        } else {
-            position_.y = 0;
-        }
-    } else {
-        position_.y = global_y;
-    }
+    top_left_position_.y = global_y;
 }
+
+// void Widget::set_x(std::size_t global_x) {
+//     auto parent = this->parent();
+//     auto screen_width = System::max_width();
+//     if (global_x >= screen_width && screen_width > 0) {
+//         global_x = screen_width - 1;
+//     } else if (screen_width == 0) {
+//         global_x = 0;
+//     }
+//     if (parent != nullptr) {
+//         if (global_x >= parent->x()) {
+//             position_.x = global_x - parent->x();
+//         } else {
+//             position_.x = 0;
+//         }
+//     } else {
+//         position_.x = global_x;
+//     }
+// }
+
+// void Widget::set_y(std::size_t global_y) {
+//     auto parent = this->parent();
+//     auto screen_height = System::max_height();
+//     if (global_y >= screen_height && screen_height > 0) {
+//         global_y = screen_height - 1;
+//     } else if (screen_height == 0) {
+//         global_y = 0;
+//     }
+//     if (parent != nullptr) {
+//         if (global_y >= parent->y()) {
+//             position_.y = global_y - parent->y();
+//         } else {
+//             position_.y = 0;
+//         }
+//     } else {
+//         position_.y = global_y;
+//     }
+// }
 
 // - - - - - - - - - - - - - - Free Functions - - - - - - - - - - - - - - - - -
 
@@ -512,10 +542,10 @@ bool has_coordinates(Widget& w, std::size_t global_x, std::size_t global_y) {
     if (!w.enabled() || !w.visible()) {
         return false;
     }
-    bool within_west = global_x >= w.x();
-    bool within_east = global_x < (w.x() + w.width());
-    bool within_north = global_y >= w.y();
-    bool within_south = global_y < (w.y() + w.height());
+    bool within_west = global_x >= w.inner_x();
+    bool within_east = global_x < (w.inner_x() + w.width());
+    bool within_north = global_y >= w.inner_y();
+    bool within_south = global_y < (w.inner_y() + w.height());
     return within_west && within_east && within_north && within_south;
 }
 

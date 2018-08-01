@@ -6,7 +6,7 @@
 
 #include <signals/slot.hpp>
 
-#include <cppurses/painter/detail/ncurses_paint_engine.hpp>
+// #include <cppurses/painter/detail/ncurses_paint_engine.hpp>
 #include <cppurses/painter/paint_buffer.hpp>
 #include <cppurses/system/animation_engine.hpp>
 #include <cppurses/system/detail/user_input_event_loop.hpp>
@@ -40,10 +40,7 @@ class System {
         System::post_event(std::move(event));
     }
 
-    // TODO How do you handle mutliple event_loop types? virtual funcs?
-    // It might actually work as is since you are only posting events to the
-    // loop from this function and that is something the base class handles.
-    // Look over it though.
+    // TODO make sure returning Event_loop ref is safe for derived types.
     static Event_loop& find_event_loop();
 
     static bool send_event(const Event& event);
@@ -60,7 +57,7 @@ class System {
     void enable_ctrl_characters();
     void disable_ctrl_characters();
     static Animation_engine& animation_engine();
-    static detail::NCurses_paint_engine& paint_engine();
+    // static detail::NCurses_paint_engine& paint_engine();
 
     // Slots
     static sig::Slot<void()> quit;
@@ -74,7 +71,7 @@ class System {
     static std::unique_ptr<Palette> system_palette_;
 
     // TODO This is in paint_buffer now remove this.
-    static detail::NCurses_paint_engine paint_engine_;
+    // static detail::NCurses_paint_engine paint_engine_;
 };
 
 }  // namespace cppurses

@@ -63,6 +63,7 @@ class Painter {
               std::size_t height);
     // bool is_background = false);
 
+    /// Draws a line from x1,y1 to x2,y2 inclusive, no diagonals implemented.
     void line(const Glyph& tile,
               std::size_t x1,
               std::size_t y1,
