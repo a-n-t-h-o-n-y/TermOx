@@ -23,6 +23,12 @@
 #include <cppurses/painter/detail/extended_char.hpp>
 #endif
 
+#define SLOW_PAINT 10
+#ifdef SLOW_PAINT
+#include <chrono>
+#include <thread>
+#endif
+
 namespace {
 attr_t color_to_int(cppurses::Color c) {
     return static_cast<attr_t>(c) - cppurses::detail::k_init_color;
@@ -130,9 +136,17 @@ void NCurses_paint_engine::put_glyph(const Glyph& g) {
             attributes |= attr_to_int(a);
         }
     }
-    // for (const Attribute& attr : g.brush.attributes()) {
-    //     attributes |= attr_to_int(attr);
-    // }
+
+#if defined(SLOW_PAINT)
+    cchar_t indicate;
+    wchar_t symb2[2] = {L'X', L'\n'};
+    ::setcchar(&indicate, symb2, A_NORMAL,
+               find_pair(Color::White, Color::Black), nullptr);
+    ::wadd_wchnstr(::stdscr, &indicate, 1);
+
+    this->refresh();
+    std::this_thread::sleep_for(std::chrono::milliseconds(SLOW_PAINT));
+#endif
 
 #if defined(add_wchstr)
     cchar_t image;
@@ -149,6 +163,11 @@ void NCurses_paint_engine::put_glyph(const Glyph& g) {
     } else {
         ::waddchnstr(::stdscr, &image, 1);
     }
+#endif
+
+#if defined(SLOW_PAINT)
+    this->refresh();
+    std::this_thread::sleep_for(std::chrono::milliseconds(SLOW_PAINT));
 #endif
 }
 
