@@ -12,6 +12,7 @@
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/painter/palette.hpp>
 #include <cppurses/painter/rgb.hpp>
+#include <cppurses/system/detail/find_widget_at.hpp>
 #include <cppurses/system/detail/repaint_all.hpp>
 #include <cppurses/system/events/paint_event.hpp>
 #include <cppurses/system/focus.hpp>
@@ -22,10 +23,9 @@
 
 namespace {
 using namespace cppurses;
-
-bool child_has_point(Widget& w, std::size_t x, std::size_t y) {
-    std::vector<Widget*> children{w.children()};
-    for (Widget* child : children) {
+bool child_has_point(const Widget& w, std::size_t x, std::size_t y) {
+    const std::vector<std::unique_ptr<Widget>>& children{w.children()};
+    for (const std::unique_ptr<Widget>& child : children) {
         if (x >= child->x() && x < (child->inner_x() + child->outer_width()) &&
             y >= child->y() && y < (child->inner_y() + child->outer_height())) {
             return true;
@@ -33,7 +33,6 @@ bool child_has_point(Widget& w, std::size_t x, std::size_t y) {
     }
     return false;
 }
-
 }  // namespace
 
 namespace cppurses {
@@ -48,6 +47,19 @@ bool Paint_buffer::within_screen(const Point& p) {
         return false;
     }
     return true;
+}
+
+void Paint_buffer::cover_all_with_background() {
+    for (std::size_t y{0}; y < (System::max_height()); ++y) {
+        for (std::size_t x{0}; x < (System::max_width()); ++x) {
+            Widget* w{detail::find_widget_at(x, y)};
+            // TODO throw here if == nullptr, for debugging.
+            if (w != nullptr) {
+                Glyph background{w->find_background_tile()};
+                engine_.put(x, y, background);
+            }
+        }
+    }
 }
 
 void Paint_buffer::cover_with_background(Widget& w) {
@@ -65,6 +77,11 @@ void Paint_buffer::flush(const detail::Staged_changes& changes) {
     std::lock_guard<std::mutex> lock{detail::NCurses_data::ncurses_mtx};
     bool refresh{false};
 
+    // Repaint entire screen if requested.
+    if (repaint_all_) {
+        cover_all_with_background();
+    }
+
     for (const auto& pair : changes) {
         Widget* widg{pair.first};
         const detail::Screen_descriptor& changes_map{
@@ -74,8 +91,11 @@ void Paint_buffer::flush(const detail::Staged_changes& changes) {
         }
         refresh = true;
         // REPAINT ENTIRE BACKGROUND IF REQUESTED.
-        if (pair.second.repaint) {
+        if (!repaint_all_ && pair.second.repaint) {
             cover_with_background(*widg);
+            widg->screen_state().tiles.clear();
+        }
+        if (repaint_all_) {
             widg->screen_state().tiles.clear();
         }
         // BACKGROUNDS COVER LEFTOVERS
@@ -125,60 +145,65 @@ void Paint_buffer::flush(const detail::Staged_changes& changes) {
     if (refresh) {
         engine_.refresh();
     }
+    repaint_all_ = false;
+}
+
+void Paint_buffer::set_repaint_all() {
+    repaint_all_ = true;
 }
 
 void Paint_buffer::move_cursor(std::size_t x, std::size_t y) {
-    std::lock_guard<Mutex_t> guard{mutex_};
+    // std::lock_guard<Mutex_t> guard{mutex_};
     engine_.move_cursor(x, y);
 }
 
 void Paint_buffer::set_global_background_tile(const Glyph& tile) {
-    std::lock_guard<Mutex_t> guard{mutex_};
+    // std::lock_guard<Mutex_t> guard{mutex_};
     global_background_tile_ = tile;
     detail::repaint_all();
 }
 
 Glyph Paint_buffer::get_global_background_tile() const {
-    std::lock_guard<Mutex_t> guard{mutex_};
+    // std::lock_guard<Mutex_t> guard{mutex_};
     return global_background_tile_;
 }
 
 std::size_t Paint_buffer::update_width() {
-    std::lock_guard<std::mutex> guard{detail::NCurses_data::ncurses_mtx};
+    // std::lock_guard<std::mutex> guard{detail::NCurses_data::ncurses_mtx};
     std::size_t new_width{engine_.screen_width()};
     this->resize_width(new_width);
     return new_width;
 }
 
 std::size_t Paint_buffer::update_height() {
-    std::lock_guard<std::mutex> guard{detail::NCurses_data::ncurses_mtx};
+    // std::lock_guard<std::mutex> guard{detail::NCurses_data::ncurses_mtx};
     std::size_t new_height{engine_.screen_height()};
     this->resize_height(new_height);
     return new_height;
 }
 
 std::size_t Paint_buffer::screen_width() const {
-    std::lock_guard<Mutex_t> guard{mutex_};
+    // std::lock_guard<Mutex_t> guard{mutex_};
     return width_;
 }
 
 std::size_t Paint_buffer::screen_height() const {
-    std::lock_guard<Mutex_t> guard{mutex_};
+    // std::lock_guard<Mutex_t> guard{mutex_};
     return height_;
 }
 
 void Paint_buffer::set_color_definition(Color c, RGB values) {
-    std::lock_guard<Mutex_t> guard{mutex_};
+    // std::lock_guard<Mutex_t> guard{mutex_};
     engine_.set_rgb(c, values.red, values.green, values.blue);
 }
 
 void Paint_buffer::resize_width(std::size_t new_width) {
-    std::lock_guard<Mutex_t> guard{mutex_};
+    // std::lock_guard<Mutex_t> guard{mutex_};
     width_ = new_width;
 }
 
 void Paint_buffer::resize_height(std::size_t new_height) {
-    std::lock_guard<Mutex_t> guard{mutex_};
+    // std::lock_guard<Mutex_t> guard{mutex_};
     height_ = new_height;
 }
 

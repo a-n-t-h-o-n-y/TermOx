@@ -20,9 +20,9 @@ namespace cppurses {
 std::vector<std::size_t> Horizontal_layout::size_widgets() {
     std::vector<Dimensions> widgets;
     std::size_t total_stretch{0};
-    for (Widget* c : this->children()) {
+    for (const std::unique_ptr<Widget>& c : this->children()) {
         if (c->visible()) {
-            widgets.emplace_back(Dimensions{c, 0, 0});
+            widgets.emplace_back(Dimensions{c.get(), 0, 0});
             total_stretch += c->width_policy.stretch();
         }
     }
@@ -419,7 +419,7 @@ void Horizontal_layout::collect_space(std::vector<Dimensions_reference> widgets,
 
 void Horizontal_layout::position_widgets(
     const std::vector<std::size_t>& widths) {
-    std::vector<Widget*> widgets{this->children()};
+    const std::vector<std::unique_ptr<Widget>>& widgets{this->children()};
     // TODO remove this check if you can prove in your implementation
     if (widgets.size() != widths.size()) {
         return;
@@ -427,10 +427,10 @@ void Horizontal_layout::position_widgets(
     std::size_t index{0};
     std::size_t x_offset{0};
     std::size_t y_offset{0};
-    for (Widget* w : widgets) {
+    for (const std::unique_ptr<Widget>& w : widgets) {
         std::size_t x_pos{this->inner_x() + x_offset};
         std::size_t y_pos{this->inner_y() + y_offset};
-        System::post_event<Move_event>(w, Point{x_pos, y_pos});
+        System::post_event<Move_event>(w.get(), Point{x_pos, y_pos});
         x_offset += widths.at(index++);
     }
 }

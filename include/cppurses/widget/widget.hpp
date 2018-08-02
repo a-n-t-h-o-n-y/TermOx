@@ -50,7 +50,8 @@ class Widget : public Event_handler {
     // Children
     void add_child(std::unique_ptr<Widget> child);
     void insert_child(std::unique_ptr<Widget> child, std::size_t index);
-    std::vector<Widget*> children() const;
+    // std::vector<Widget*> children() const;
+    const std::vector<std::unique_ptr<Widget>>& children() const;
     bool contains_child(Widget* child);
 
     template <typename T, typename... Args>
@@ -234,8 +235,8 @@ T& Widget::make_child(Args&&... args) {
 template <typename T>
 T* Widget::find_child(const std::string& name) const {
     std::queue<Widget*> search_queue;
-    for (Widget* child : this->children()) {
-        search_queue.push(child);
+    for (const std::unique_ptr<Widget>& child : this->children()) {
+        search_queue.push(child.get());
     }
     while (!search_queue.empty()) {
         Widget* current = search_queue.front();
@@ -244,8 +245,8 @@ T* Widget::find_child(const std::string& name) const {
         if (cast_child != nullptr && current->name() == name) {
             return cast_child;
         }
-        for (Widget* child : current->children()) {
-            search_queue.push(child);
+        for (const std::unique_ptr<Widget>& child : current->children()) {
+            search_queue.push(child.get());
         }
     }
     return nullptr;

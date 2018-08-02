@@ -2,19 +2,18 @@
 
 #include <memory>
 
-#include <cppurses/system/events/repaint_event.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace {
 using namespace cppurses;
-void repaint_children(Widget* w) {
+void update_recursion(Widget* w) {
     if (w == nullptr) {
         return;
     }
-    for (Widget* wp : w->children()) {
-        System::post_event(std::make_unique<Repaint_event>(wp));
-        repaint_children(wp);
+    w->update();
+    for (const std::unique_ptr<Widget>& wp : w->children()) {
+        update_recursion(wp.get());
     }
 }
 }  // namespace
@@ -23,7 +22,8 @@ namespace cppurses {
 namespace detail {
 
 void repaint_all() {
-    repaint_children(System::head());
+    System::paint_buffer().set_repaint_all();
+    update_recursion(System::head());
 }
 
 }  // namespace detail

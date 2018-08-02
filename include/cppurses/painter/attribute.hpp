@@ -6,6 +6,7 @@ namespace cppurses {
 
 /// Attributes that can be applied to a Glyph.
 enum class Attribute : std::int8_t {
+    // Update ncurses_paint_engine::put_glyph() if you modify this enum.
     Bold,
     Italic,
     Underline,

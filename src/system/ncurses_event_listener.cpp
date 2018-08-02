@@ -8,6 +8,7 @@
 #include <sys/ioctl.h>
 
 #include <cppurses/painter/detail/ncurses_data.hpp>
+#include <cppurses/system/detail/find_widget_at.hpp>
 #include <cppurses/system/event.hpp>
 #include <cppurses/system/events/key_event.hpp>
 #include <cppurses/system/events/mouse_event.hpp>
@@ -21,29 +22,6 @@
 #include <cppurses/widget/widget.hpp>
 
 #include <ncurses.h>
-
-namespace {
-
-cppurses::Widget* find_widget_at(std::size_t x, std::size_t y) {
-    cppurses::Widget* widg = cppurses::System::head();
-    if (widg == nullptr || !has_coordinates(*widg, x, y)) {
-        return nullptr;
-    }
-    bool keep_going = true;
-    while (keep_going && !widg->children().empty()) {
-        for (cppurses::Widget* child : widg->children()) {
-            if (has_coordinates(*child, x, y) && child->enabled()) {
-                widg = child;
-                keep_going = true;
-                break;
-            }
-            keep_going = false;
-        }
-    }
-    return widg;
-}
-
-}  // namespace
 
 namespace cppurses {
 namespace detail {
@@ -98,7 +76,7 @@ std::unique_ptr<Event> NCurses_event_listener::parse_mouse_event() const {
         return nullptr;
     }
 
-    Widget* receiver = find_widget_at(mouse_event.x, mouse_event.y);
+    Widget* receiver = detail::find_widget_at(mouse_event.x, mouse_event.y);
     if (receiver == nullptr) {
         return nullptr;
     }

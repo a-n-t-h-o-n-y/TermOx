@@ -1,5 +1,6 @@
 #include <cppurses/painter/detail/ncurses_paint_engine.hpp>
 
+#include <array>
 #include <clocale>
 #include <cstddef>
 #include <cstdint>
@@ -106,7 +107,7 @@ NCurses_paint_engine::~NCurses_paint_engine() {
 
 void NCurses_paint_engine::put_glyph(const Glyph& g) {
     // Background Color
-    Color back_color{Color::Black};
+    Color back_color{Color::Black};  // intializaed color should never be used
     if (g.brush.background_color()) {
         back_color = *g.brush.background_color();
     }
@@ -116,14 +117,22 @@ void NCurses_paint_engine::put_glyph(const Glyph& g) {
     if (g.brush.foreground_color()) {
         fore_color = *g.brush.foreground_color();
     }
-    // attr_t color_pair{COLOR_PAIR(find_pair(fore_color, back_color))};
     short color_pair{find_pair(fore_color, back_color)};
 
     // Attributes
+    const std::array<Attribute, 8> attr_enums{
+        Attribute::Bold,      Attribute::Italic, Attribute::Underline,
+        Attribute::Standout,  Attribute::Dim,    Attribute::Inverse,
+        Attribute::Invisible, Attribute::Blink};
     attr_t attributes{A_NORMAL};
-    for (const Attribute& attr : g.brush.attributes()) {
-        attributes |= attr_to_int(attr);
+    for (Attribute a : attr_enums) {
+        if (g.brush.has_attribute(a)) {
+            attributes |= attr_to_int(a);
+        }
     }
+    // for (const Attribute& attr : g.brush.attributes()) {
+    //     attributes |= attr_to_int(attr);
+    // }
 
 #if defined(add_wchstr)
     cchar_t image;

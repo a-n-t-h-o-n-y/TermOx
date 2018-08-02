@@ -62,6 +62,7 @@ target_sources(libcppurses PRIVATE
     system/repaint_event.cpp
     system/repaint_all.cpp
     system/fps_to_period.cpp
+    system/find_widget_at.cpp
 )
 
 # PAINTER

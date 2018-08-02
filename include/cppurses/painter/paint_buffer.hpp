@@ -36,19 +36,19 @@ class Paint_buffer {
     std::size_t screen_width() const;
     std::size_t screen_height() const;
 
+    void set_repaint_all();
+
     void set_color_definition(Color c, RGB values);
 
     void set_global_background_tile(const Glyph& tile);
     Glyph get_global_background_tile() const;
 
    private:
-    // System or some global data object holds this instead. It is really only
-    // used by flush? Then you could make it a static member of the flush
-    // function? pretty out there stuff. Though there is probably a less
-    // invisible way to do it. TODO Plug plaette will need access to
-    // paint_engine. Or palette can make an event instead? but who would handle
-    // it?
+    // TODO Move to system or some shared object with limited access to flush
+    // and whoever holds set_color_definition()
     detail::NCurses_paint_engine engine_;
+
+    bool repaint_all_{false};
 
     // TODO where to put the global background tile?
     Glyph global_background_tile_{L' '};
@@ -70,6 +70,7 @@ class Paint_buffer {
     // you kept flush within a class, might have been the friend declaration on
     // Widget::screen_state? or something like that. or for the mutex in
     // ncurses_data.
+    void cover_all_with_background();
     void cover_with_background(Widget& w);
     bool within_screen(const Point& p);
 };

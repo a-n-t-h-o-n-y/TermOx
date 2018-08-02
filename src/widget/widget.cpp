@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include <signals/signal.hpp>
 
@@ -24,8 +25,6 @@
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/point.hpp>
-
-#include <vector>
 
 namespace cppurses {
 
@@ -70,11 +69,8 @@ void Widget::insert_child(std::unique_ptr<Widget> child, std::size_t index) {
     System::post_event<On_tree_event>(children_[index].get(), this->on_tree());
 }
 
-std::vector<Widget*> Widget::children() const {
-    std::vector<Widget*> ret;
-    std::transform(std::begin(children_), std::end(children_),
-                   std::back_inserter(ret), [](auto& up) { return up.get(); });
-    return ret;
+const std::vector<std::unique_ptr<Widget>>& Widget::children() const {
+    return children_;
 }
 
 bool Widget::contains_child(Widget* child) {
@@ -388,7 +384,7 @@ void Widget::set_visible(bool visible, bool recursive) {
     if (!recursive) {
         return;
     }
-    for (Widget* c : this->children()) {
+    for (const std::unique_ptr<Widget>& c : this->children()) {
         c->set_visible(visible, recursive);
     }
 }
@@ -494,7 +490,7 @@ void clear_attributes(Widget& w) {
 
 void set_background_recursive(Widget& w, Color c, bool single_level) {
     set_background(w, c);
-    for (Widget* child : w.children()) {
+    for (const std::unique_ptr<Widget>& child : w.children()) {
         if (single_level) {
             set_background(*child, c);
         } else {
@@ -505,7 +501,7 @@ void set_background_recursive(Widget& w, Color c, bool single_level) {
 
 void set_foreground_recursive(Widget& w, Color c, bool single_level) {
     set_foreground(w, c);
-    for (Widget* child : w.children()) {
+    for (const std::unique_ptr<Widget>& child : w.children()) {
         if (single_level) {
             set_foreground(*child, c);
         } else {

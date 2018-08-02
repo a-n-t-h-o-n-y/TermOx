@@ -1,5 +1,6 @@
 #ifndef PAINTER_BRUSH_HPP
 #define PAINTER_BRUSH_HPP
+#include <array>
 #include <bitset>
 #include <utility>
 #include <vector>
@@ -39,6 +40,9 @@ class Brush {
     void remove_foreground() { foreground_color_ = opt::none; }
 
     std::vector<Attribute> attributes() const;
+
+    bool has_attribute(Attribute attr) const;
+
     const opt::Optional<Color>& background_color() const {
         return background_color_;
     }
