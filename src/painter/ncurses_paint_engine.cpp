@@ -23,7 +23,7 @@
 #include <cppurses/painter/detail/extended_char.hpp>
 #endif
 
-#define SLOW_PAINT 10
+// #define SLOW_PAINT 10
 #ifdef SLOW_PAINT
 #include <chrono>
 #include <thread>

@@ -28,7 +28,7 @@ Painter::Painter(Widget* widg, detail::Staged_changes& changes)
     : widget_{widg}, staged_changes_{changes[widg].screen_description} {}
 
 void Painter::put(const Glyph& tile, std::size_t x, std::size_t y) {
-    if (x >= widget_->outer_width() || y >= widget_->outer_height()) {
+    if (x >= widget_->width() || y >= widget_->height()) {
         return;
     }
     std::size_t glob_x = widget_->inner_x() + x;

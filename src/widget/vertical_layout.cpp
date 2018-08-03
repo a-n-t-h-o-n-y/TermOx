@@ -428,8 +428,8 @@ void Vertical_layout::position_widgets(
     std::size_t x_offset{0};
     std::size_t y_offset{0};
     for (const std::unique_ptr<Widget>& w : widgets) {
-        std::size_t x_pos{this->x() + x_offset};
-        std::size_t y_pos{this->y() + y_offset};
+        std::size_t x_pos{this->inner_x() + x_offset};
+        std::size_t y_pos{this->inner_y() + y_offset};
         System::post_event<Move_event>(w.get(), Point{x_pos, y_pos});
         y_offset += heights.at(index++);
     }
