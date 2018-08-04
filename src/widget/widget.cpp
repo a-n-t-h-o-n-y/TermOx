@@ -16,6 +16,7 @@
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/paint_buffer.hpp>
 #include <cppurses/painter/painter.hpp>
+#include <cppurses/system/detail/repaint_all.hpp>
 #include <cppurses/system/events/child_event.hpp>
 #include <cppurses/system/events/deferred_delete_event.hpp>
 #include <cppurses/system/events/on_tree_event.hpp>
@@ -58,15 +59,15 @@ Widget* Widget::parent() const {
 void Widget::add_child(std::unique_ptr<Widget> child) {
     children_.emplace_back(std::move(child));
     children_.back()->set_parent(this);
-    System::post_event<Child_added_event>(this, children_.back().get());
     System::post_event<On_tree_event>(children_.back().get(), this->on_tree());
+    System::post_event<Child_added_event>(this, children_.back().get());
 }
 
 void Widget::insert_child(std::unique_ptr<Widget> child, std::size_t index) {
     children_.insert(std::begin(children_) + index, std::move(child));
     children_[index]->set_parent(this);
-    System::post_event<Child_added_event>(this, children_[index].get());
     System::post_event<On_tree_event>(children_[index].get(), this->on_tree());
+    System::post_event<Child_added_event>(this, children_[index].get());
 }
 
 const std::vector<std::unique_ptr<Widget>>& Widget::children() const {
@@ -288,6 +289,7 @@ bool Widget::deferred_delete_event(Event_handler* to_delete) {
 
 bool Widget::child_added_event(Widget* child) {
     child_added(child);
+    detail::post_repaint_recursive(child);
     this->update();
     return true;
 }
@@ -309,12 +311,16 @@ bool Widget::show_event() {
     return true;
 }
 
-bool Widget::on_tree_event(bool on_tree) {
-    on_tree_ = on_tree;
-    this->set_visible(on_tree);
-    for (auto& child : children_) {
-        System::post_event<On_tree_event>(child.get(), on_tree_);
+void Widget::on_tree_recursive(Widget* w, bool on_tree) const {
+    w->on_tree_ = on_tree;
+    w->set_visible(on_tree, false);
+    for (auto& child : w->children()) {
+        on_tree_recursive(child.get(), on_tree);
     }
+}
+
+bool Widget::on_tree_event(bool on_tree) {
+    on_tree_recursive(this, on_tree);
     return true;
 }
 
@@ -325,11 +331,14 @@ bool Widget::hide_event() {
 }
 
 bool Widget::move_event(Point new_position, Point old_position) {
+    old_position = top_left_position_;
     this->set_x(new_position.x);
     this->set_y(new_position.y);
-    moved(new_position);
-    moved_xy(new_position.x, new_position.y);
-    System::post_event<Repaint_event>(this);
+    if (old_position != top_left_position_) {
+        moved(new_position);
+        moved_xy(new_position.x, new_position.y);
+        System::post_event<Repaint_event>(this);
+    }
     return true;
 }
 
@@ -364,13 +373,18 @@ bool Widget::resize_event(Area new_size, Area old_size) {
         south_border_disqualified_ = true;
     }
 
+    old_size.width = width_;
+    old_size.height = height_;
+
     width_ =
         new_size.width - east_border_offset(*this) - west_border_offset(*this);
     height_ = new_size.height - north_border_offset(*this) -
               south_border_offset(*this);
 
-    resized(width_, height_);
-    System::post_event<Repaint_event>(this);
+    if (old_size.width != width_ || old_size.height != height_) {
+        resized(width_, height_);
+        System::post_event<Repaint_event>(this);
+    }
     return true;
 }
 

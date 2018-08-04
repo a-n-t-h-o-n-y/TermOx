@@ -12,6 +12,7 @@
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/widget/focus_policy.hpp>
+#include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 
 namespace cppurses {
@@ -101,10 +102,12 @@ std::size_t Menu::size() const {
 
 bool Menu::paint_event() {
     for (Menu_item& item : items_) {
-        item.button.get().brush.remove_attribute(Attribute::Inverse);
+        // work out way to not call this unless necessary, it causes a lot of
+        // painting. you could put this check in the remove_attributes()
+        // function, that's be even better.
+        remove_attributes(item.button.get(), Attribute::Inverse);
     }
-    items_[selected_index_].button.get().brush.add_attributes(
-        Attribute::Inverse);
+    add_attributes(items_[selected_index_].button.get(), Attribute::Inverse);
     return Vertical_layout::paint_event();
 }
 

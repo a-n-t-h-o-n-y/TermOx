@@ -2,6 +2,8 @@
 #define WIDGET_LAYOUT_HPP
 #include <cstddef>
 
+#include <cppurses/widget/area.hpp>
+#include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
@@ -12,10 +14,16 @@ class Layout : public Widget {
     Layout();
 
    protected:
+    bool child_added_event(Widget* child) override;
+    bool child_removed_event(Widget* child) override;
+    bool child_polished_event(Widget* child) override;
     bool paint_event() override;
-    // bool repaint_event() override;
     virtual void update_geometry() = 0;
     bool too_small_{false};
+    bool needs_update_{false};
+
+    Point last_inner_position_{0, 0};
+    Area last_inner_size_{0, 0};
 
     struct Dimensions {
         Widget* widget;

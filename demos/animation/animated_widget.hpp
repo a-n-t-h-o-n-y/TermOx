@@ -43,7 +43,7 @@ class Animated_widget : public cppurses::Horizontal_layout {
     Animated_bit& bit_2_{this->make_child<Animated_bit>(10, true)};
     Animated_bit& bit_3_{this->make_child<Animated_bit>(20, true)};
     Animated_bit& bit_4_{this->make_child<Animated_bit>(30, true)};
-    Animated_bit& bit_5_{this->make_child<Animated_bit>(60, true)};
+    // Animated_bit& bit_5_{this->make_child<Animated_bit>(60, true)};
 };
 
 }  // namespace animation

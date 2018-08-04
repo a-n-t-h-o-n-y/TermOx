@@ -11,7 +11,6 @@
 #include <cppurses/system/animation_engine.hpp>
 #include <cppurses/system/detail/event_queue.hpp>
 #include <cppurses/system/detail/ncurses_event_listener.hpp>
-#include <cppurses/system/detail/repaint_all.hpp>
 #include <cppurses/system/detail/user_input_event_loop.hpp>
 #include <cppurses/system/event.hpp>
 #include <cppurses/system/event_loop.hpp>
@@ -92,7 +91,6 @@ Widget* System::head() {
 void System::set_palette(std::unique_ptr<Palette> palette) {
     system_palette_ = std::move(palette);
     system_palette_->initialize();
-    detail::repaint_all();
 }
 
 Palette* System::palette() {

@@ -26,5 +26,15 @@ void repaint_all() {
     update_recursion(System::head());
 }
 
+void post_repaint_recursive(Widget* w) {
+    if (w == nullptr) {
+        return;
+    }
+    System::post_event<Repaint_event>(w);
+    for (const std::unique_ptr<Widget>& child : w->children()) {
+        post_repaint_recursive(child.get());
+    }
+}
+
 }  // namespace detail
 }  // namespace cppurses

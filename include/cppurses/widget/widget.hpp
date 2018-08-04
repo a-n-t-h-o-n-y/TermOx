@@ -166,6 +166,8 @@ class Widget : public Event_handler {
     bool visible_{true};
     bool on_tree_{false};
 
+    void on_tree_recursive(Widget* w, bool on_tree) const;
+
     // Local Coordinates
     Point cursor_position_;
     bool show_cursor_{false};
@@ -253,17 +255,28 @@ T* Widget::find_child(const std::string& name) const {
 }
 
 template <typename... Attrs>
-void add_attributes(Widget& w, Attrs&... attrs) {
-    w.brush.add_attributes(std::forward<Attrs>(attrs)...);
-    System::post_event<Repaint_event>(&w);
+void add_attributes(Widget& w, Attrs&&... attrs) {
+    for (Attribute a : {attrs...}) {
+        if (!w.brush.has_attribute(a)) {
+            w.brush.add_attributes(std::forward<Attrs>(attrs)...);
+            System::post_event<Repaint_event>(&w);
+            return;
+        }
+    }
 }
 
 template <typename... Attrs>
-void remove_attributes(Widget& w, Attrs&... attrs) {
-    for (const auto& at : {attrs...}) {
-        w.brush.remove_attribute(at);
+void remove_attributes(Widget& w, Attrs&&... attrs) {
+    bool repaint{false};
+    for (const auto& a : {attrs...}) {
+        if (w.brush.has_attribute(a)) {
+            w.brush.remove_attribute(a);
+            repaint = true;
+        }
     }
-    System::post_event<Repaint_event>(&w);
+    if (repaint) {
+        System::post_event<Repaint_event>(&w);
+    }
 }
 
 }  // namespace cppurses

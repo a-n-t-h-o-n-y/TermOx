@@ -23,11 +23,24 @@
 
 #include <ncurses.h>
 
+#include <fstream>  // temp
+
 namespace cppurses {
 namespace detail {
 
 std::unique_ptr<Event> NCurses_event_listener::get_input() const {
-    int input = ::getch();  // blocking call
+    int input{0};
+    while ((input = ::getch()) == ERR) {
+        if (NCurses_data::resize_happened) {
+            NCurses_data::resize_happened = false;
+            // Find window size
+            struct winsize w;
+            ioctl(fileno(stdin), TIOCGWINSZ, &w);
+            NCurses_data::ncurses_mtx.lock();
+            ::resizeterm(w.ws_row, w.ws_col);  // glitch here w/multi-thread?
+            NCurses_data::ncurses_mtx.unlock();
+        }
+    }
     std::unique_ptr<Event> event{nullptr};
     switch (input) {
         case KEY_MOUSE:
@@ -37,18 +50,6 @@ std::unique_ptr<Event> NCurses_event_listener::get_input() const {
         case KEY_RESIZE:
             event = handle_resize_event();
             event->set_receiver(handle_resize_widget());
-            break;
-
-        case ERR:
-            if (NCurses_data::resize_happened) {
-                NCurses_data::resize_happened = false;
-                struct winsize w;
-                // Find window size
-                ioctl(fileno(stdin), TIOCGWINSZ, &w);
-                NCurses_data::ncurses_mtx.lock();
-                ::resizeterm(w.ws_row, w.ws_col);
-                NCurses_data::ncurses_mtx.unlock();
-            }
             break;
 
         default:  // Key_event

@@ -4,7 +4,6 @@
 #include <thread>
 #include <utility>
 
-// #include <cppurses/painter/detail/flush.hpp>
 #include <cppurses/painter/detail/staged_changes.hpp>
 #include <cppurses/painter/paint_buffer.hpp>
 #include <cppurses/system/detail/abstract_event_listener.hpp>
