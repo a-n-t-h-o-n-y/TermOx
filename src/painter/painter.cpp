@@ -20,12 +20,10 @@ namespace cppurses {
 
 Painter::Painter(Widget* widg)
     : widget_{widg},
-      staged_changes_{
-          System::find_event_loop().staged_changes()[widg].screen_description} {
-}
+      staged_changes_{System::find_event_loop().staged_changes()[widg]} {}
 
 Painter::Painter(Widget* widg, detail::Staged_changes& changes)
-    : widget_{widg}, staged_changes_{changes[widg].screen_description} {}
+    : widget_{widg}, staged_changes_{changes[widg]} {}
 
 void Painter::put(const Glyph& tile, std::size_t x, std::size_t y) {
     if (x >= widget_->width() || y >= widget_->height()) {

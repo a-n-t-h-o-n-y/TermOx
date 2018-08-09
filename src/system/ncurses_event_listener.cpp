@@ -23,8 +23,6 @@
 
 #include <ncurses.h>
 
-#include <fstream>  // temp
-
 namespace cppurses {
 namespace detail {
 

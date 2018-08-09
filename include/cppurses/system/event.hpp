@@ -17,7 +17,7 @@ class Event {
         KeyRelease,
         FocusIn,
         FocusOut,
-        ClearScreen,
+        ClearScreen, // TODO remove?
         Paint,
         Repaint,
         Move,

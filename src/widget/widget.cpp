@@ -207,6 +207,9 @@ void Widget::set_brush_alters_background(bool alters) {
     System::post_event<Repaint_event>(this);
 }
 
+// TODO should have a mutex on it so events can't change background tile while
+// flushing the screen. or set_background_tile should have a mutex, or anything
+// that modifies the Glyph.
 Glyph Widget::find_background_tile() const {
     Glyph background{this->background_tile()
                          ? *(this->background_tile())
@@ -277,7 +280,7 @@ bool Widget::paint_event() {
 }
 
 bool Widget::repaint_event() {
-    System::find_event_loop().staged_changes()[this].repaint = true;
+    // System::find_event_loop().staged_changes()[this].repaint = true;
     this->update();
     return true;
 }
@@ -290,18 +293,21 @@ bool Widget::deferred_delete_event(Event_handler* to_delete) {
 bool Widget::child_added_event(Widget* child) {
     child_added(child);
     detail::post_repaint_recursive(child);
+    this->screen_state().child_event_happened = true;
     this->update();
     return true;
 }
 
 bool Widget::child_removed_event(Widget* child) {
     child_removed(child);
+    this->screen_state().child_event_happened = true;
     this->update();
     return true;
 }
 
 bool Widget::child_polished_event(Widget* child) {
     this->update();
+    this->screen_state().child_event_happened = true;
     return true;
 }
 
@@ -311,8 +317,13 @@ bool Widget::show_event() {
     return true;
 }
 
+// TODO this should post On_tree events to each child instead.
 void Widget::on_tree_recursive(Widget* w, bool on_tree) const {
     w->on_tree_ = on_tree;
+    w->screen_state().just_appeared = on_tree;
+    if (on_tree) {
+        w->update();
+    }
     w->set_visible(on_tree, false);
     for (auto& child : w->children()) {
         on_tree_recursive(child.get(), on_tree);
@@ -338,6 +349,7 @@ bool Widget::move_event(Point new_position, Point old_position) {
         moved(new_position);
         moved_xy(new_position.x, new_position.y);
         System::post_event<Repaint_event>(this);
+        this->screen_state().move_happened = true;
     }
     return true;
 }
@@ -384,6 +396,7 @@ bool Widget::resize_event(Area new_size, Area old_size) {
     if (old_size.width != width_ || old_size.height != height_) {
         resized(width_, height_);
         System::post_event<Repaint_event>(this);
+        this->screen_state().resize_happened = true;
     }
     return true;
 }

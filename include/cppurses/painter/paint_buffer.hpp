@@ -48,7 +48,7 @@ class Paint_buffer {
     // and whoever holds set_color_definition()
     detail::NCurses_paint_engine engine_;
 
-    bool repaint_all_{false};
+    bool repaint_all_{false};  // TODO remove?
 
     // TODO where to put the global background tile?
     Glyph global_background_tile_{L' '};
@@ -73,6 +73,17 @@ class Paint_buffer {
     void cover_all_with_background();
     void cover_with_background(Widget& w);
     bool within_screen(const Point& p);
+
+    void flush_background_changed(Widget* w,
+                                  const detail::Screen_descriptor& changes_map);
+    void flush_just_appeared(Widget* w,
+                             const detail::Screen_descriptor& changes_map);
+    void flush_child_event_happened(
+        Widget* w,
+        const detail::Screen_descriptor& changes_map);
+    void flush_move_resize_event(Widget* w,
+                                 const detail::Screen_descriptor& changes_map);
+    void flush_minimal(Widget* w, const detail::Screen_descriptor& changes_map);
 };
 
 }  // namespace cppurses
