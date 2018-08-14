@@ -13,7 +13,7 @@
 #include <cppurses/painter/palette.hpp>
 #include <cppurses/painter/rgb.hpp>
 #include <cppurses/system/detail/find_widget_at.hpp>
-#include <cppurses/system/detail/repaint_all.hpp>
+// #include <cppurses/system/detail/repaint_all.hpp>
 #include <cppurses/system/events/paint_event.hpp>
 #include <cppurses/system/focus.hpp>
 #include <cppurses/system/system.hpp>
@@ -24,7 +24,7 @@
 namespace {
 using namespace cppurses;
 bool child_has_point(const Widget& w, std::size_t x, std::size_t y) {
-    const std::vector<std::unique_ptr<Widget>>& children{w.children()};
+    const std::vector<std::unique_ptr<Widget>>& children{w.children.get()};
     for (const std::unique_ptr<Widget>& child : children) {
         if (x >= child->x() && x < (child->inner_x() + child->outer_width()) &&
             y >= child->y() && y < (child->inner_y() + child->outer_height())) {
@@ -62,36 +62,36 @@ Paint_buffer::Paint_buffer() {
     this->update_height();
 }
 
-bool Paint_buffer::within_screen(const Point& p) {
-    if (p.x >= this->screen_width() || p.y >= this->screen_height()) {
-        return false;
-    }
-    return true;
-}
+// bool Paint_buffer::within_screen(const Point& p) {
+//     if (p.x >= this->screen_width() || p.y >= this->screen_height()) {
+//         return false;
+//     }
+//     return true;
+// }
 
-void Paint_buffer::cover_all_with_background() {
-    for (std::size_t y{0}; y < (System::max_height()); ++y) {
-        for (std::size_t x{0}; x < (System::max_width()); ++x) {
-            Widget* w{detail::find_widget_at(x, y)};
-            // TODO throw here if == nullptr, for debugging.
-            if (w != nullptr) {
-                Glyph background{w->find_background_tile()};
-                engine_.put(x, y, background);
-            }
-        }
-    }
-}
+// void Paint_buffer::cover_all_with_background() {
+//     for (std::size_t y{0}; y < (System::max_height()); ++y) {
+//         for (std::size_t x{0}; x < (System::max_width()); ++x) {
+//             Widget* w{detail::find_widget_at(x, y)};
+//             // TODO throw here if == nullptr, for debugging.
+//             if (w != nullptr) {
+//                 Glyph background{w->find_background_tile()};
+//                 engine_.put(x, y, background);
+//             }
+//         }
+//     }
+// }
 
-void Paint_buffer::cover_with_background(Widget& w) {
-    Glyph background{w.find_background_tile()};
-    for (std::size_t y{w.y()}; y < (w.y() + w.outer_height()); ++y) {
-        for (std::size_t x{w.x()}; x < (w.x() + w.outer_width()); ++x) {
-            if (!child_has_point(w, x, y)) {
-                engine_.put(x, y, background);
-            }
-        }
-    }
-}
+// void Paint_buffer::cover_with_background(Widget& w) {
+//     Glyph background{w.find_background_tile()};
+//     for (std::size_t y{w.y()}; y < (w.y() + w.outer_height()); ++y) {
+//         for (std::size_t x{w.x()}; x < (w.x() + w.outer_width()); ++x) {
+//             if (!child_has_point(w, x, y)) {
+//                 engine_.put(x, y, background);
+//             }
+//         }
+//     }
+// }
 
 void Paint_buffer::flush_background_changed(
     Widget* w,
@@ -292,11 +292,11 @@ void Paint_buffer::flush(const detail::Staged_changes& changes) {
     if (focus_w == nullptr) {
         engine_.hide_cursor();
     } else if (!detail::is_not_paintable(focus_w)) {
-        bool cursor_visible{focus_w->cursor_visible()};
-        engine_.show_cursor(cursor_visible);
-        if (cursor_visible) {
-            std::size_t x = focus_w->inner_x() + focus_w->cursor_x();
-            std::size_t y = focus_w->inner_y() + focus_w->cursor_y();
+        bool cursor_enabled{focus_w->cursor.enabled()};
+        engine_.show_cursor(cursor_enabled);
+        if (cursor_enabled) {
+            std::size_t x = focus_w->inner_x() + focus_w->cursor.x();
+            std::size_t y = focus_w->inner_y() + focus_w->cursor.y();
             engine_.move_cursor(x, y);
         }
     }
@@ -380,9 +380,9 @@ void Paint_buffer::flush(const detail::Staged_changes& changes) {
 //     repaint_all_ = false;
 // }
 
-void Paint_buffer::set_repaint_all() {
-    repaint_all_ = true;
-}
+// void Paint_buffer::set_repaint_all() {
+//     repaint_all_ = true;
+// }
 
 void Paint_buffer::move_cursor(std::size_t x, std::size_t y) {
     // std::lock_guard<Mutex_t> guard{mutex_};
@@ -392,7 +392,7 @@ void Paint_buffer::move_cursor(std::size_t x, std::size_t y) {
 void Paint_buffer::set_global_background_tile(const Glyph& tile) {
     // std::lock_guard<Mutex_t> guard{mutex_};
     global_background_tile_ = tile;
-    detail::repaint_all();
+    // detail::repaint_all(); // TODO replace this with something.
 }
 
 Glyph Paint_buffer::get_global_background_tile() const {

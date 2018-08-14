@@ -36,7 +36,7 @@ class Paint_buffer {
     std::size_t screen_width() const;
     std::size_t screen_height() const;
 
-    void set_repaint_all();
+    // void set_repaint_all();
 
     void set_color_definition(Color c, RGB values);
 
@@ -48,7 +48,7 @@ class Paint_buffer {
     // and whoever holds set_color_definition()
     detail::NCurses_paint_engine engine_;
 
-    bool repaint_all_{false};  // TODO remove?
+    // bool repaint_all_{false};  // TODO remove?
 
     // TODO where to put the global background tile?
     Glyph global_background_tile_{L' '};
@@ -70,9 +70,9 @@ class Paint_buffer {
     // you kept flush within a class, might have been the friend declaration on
     // Widget::screen_state? or something like that. or for the mutex in
     // ncurses_data.
-    void cover_all_with_background();
-    void cover_with_background(Widget& w);
-    bool within_screen(const Point& p);
+    // void cover_all_with_background();
+    // void cover_with_background(Widget& w);
+    // bool within_screen(const Point& p);
 
     void flush_background_changed(Widget* w,
                                   const detail::Screen_descriptor& changes_map);

@@ -1,9 +1,10 @@
-#ifndef SYSTEM_EVENT_HANDLER_HPP
-#define SYSTEM_EVENT_HANDLER_HPP
+#ifndef CPPURSES_SYSTEM_EVENT_HANDLER_HPP
+#define CPPURSES_SYSTEM_EVENT_HANDLER_HPP
 #include <cstddef>
 #include <cstdint>
-#include <signals/signal.hpp>
 #include <vector>
+
+#include <signals/signal.hpp>
 
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/mouse_button.hpp>
@@ -22,20 +23,18 @@ class Event_handler {
     Event_handler& operator=(Event_handler&&) = delete;
     virtual ~Event_handler();
 
-    // Enable
     bool enabled() const;
-    void set_enabled(bool enabled);
 
     void install_event_filter(Event_handler* filter);
     void remove_event_filter(Event_handler* filter);
     const std::vector<Event_handler*>& get_event_filters() const;
 
     // - - - - - - - - - - - - - Event Handlers - - - - - - - - - - - - - - - -
+    virtual bool enable_event();
+    virtual bool disable_event();
     virtual bool child_added_event(Widget* child) = 0;
     virtual bool child_removed_event(Widget* child) = 0;
     virtual bool child_polished_event(Widget* child) = 0;
-    virtual bool enable_event();
-    virtual bool disable_event();
     virtual bool move_event(Point new_position, Point old_position) = 0;
     virtual bool resize_event(Area new_size, Area old_size) = 0;
     virtual bool mouse_press_event(Mouse_button button,
@@ -63,12 +62,10 @@ class Event_handler {
     virtual bool close_event() = 0;
     virtual bool show_event() = 0;
     virtual bool hide_event() = 0;
-    virtual bool on_tree_event(bool on_tree) = 0;
     virtual bool focus_in_event();
     virtual bool focus_out_event();
     virtual bool deferred_delete_event(Event_handler* to_delete) = 0;
     virtual bool paint_event() = 0;
-    virtual bool repaint_event() = 0;
     virtual bool animation_event() = 0;
 
     // - - - - - - - - - - - Event Filter Handlers - - - - - - - - - - - - - - -
@@ -142,8 +139,8 @@ class Event_handler {
 
    private:
     std::vector<Event_handler*> event_filters_;
-    bool enabled_ = true;
+    bool enabled_{true};
 };
 
 }  // namespace cppurses
-#endif  // SYSTEM_EVENT_HANDLER_HPP
+#endif  // CPPURSES_SYSTEM_EVENT_HANDLER_HPP

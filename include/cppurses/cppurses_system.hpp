@@ -14,7 +14,7 @@
 #include <cppurses/system/events/mouse_event.hpp>
 #include <cppurses/system/events/move_event.hpp>
 #include <cppurses/system/events/paint_event.hpp>
-#include <cppurses/system/events/repaint_event.hpp>
+// #include <cppurses/system/events/repaint_event.hpp>
 #include <cppurses/system/events/resize_event.hpp>
 #include <cppurses/system/events/show_event.hpp>
 

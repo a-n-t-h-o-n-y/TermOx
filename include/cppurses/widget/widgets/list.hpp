@@ -95,8 +95,9 @@ bool List<T>::paint_event() {
         p.put(display, 0, count);
         ++count;
     }
-    move_cursor(*this, 0, 0);
+    this->cursor.set_position(Point{0, 0});
     return Widget::paint_event();
+    move_cursor(*this, 0, 0);
 }
 
 template <typename T>

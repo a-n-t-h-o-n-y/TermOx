@@ -10,22 +10,27 @@
 
 namespace {
 using namespace cppurses;
+// TODO is the below really necessary - think about if a descendant and ancestor
+// both have dd events.
+// Removes deferred delete events from the queue if an ancestor of one is added.
 template <typename Queue_t>
-void remove_dd_children(const Event& new_event, Queue_t& queue) {
+void remove_deferred_delete_events(const Event& new_event, Queue_t& queue) {
     Widget* parent =
         static_cast<const Deferred_delete_event&>(new_event).to_delete();
-    auto is_child = [parent](const auto& event_ptr) {
+
+    auto is_descendants_event = [parent](const auto& event_ptr) {
         if (event_ptr == nullptr) {
             return false;
         }
         if (event_ptr->type() == Event::DeferredDelete) {
             Widget* child =
                 static_cast<Deferred_delete_event&>(*event_ptr).to_delete();
-            return parent->contains_child(child);
+            return parent->children.has_descendant(child);
         }
         return false;
     };
-    auto pos = std::remove_if(std::begin(queue), std::end(queue), is_child);
+    auto pos = std::remove_if(std::begin(queue), std::end(queue),
+                              is_descendants_event);
     queue.erase(pos, std::end(queue));
 }
 }  // namespace
@@ -52,7 +57,7 @@ void Event_queue::append(std::unique_ptr<Event> event) {
             queue_.erase(position);
         }
         if (type == Event::DeferredDelete) {
-            remove_dd_children(*event, queue_);
+            remove_deferred_delete_events(*event, queue_);
         }
     }
     queue_.emplace_back(std::move(event));

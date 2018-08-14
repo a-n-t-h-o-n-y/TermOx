@@ -50,13 +50,13 @@ bool Layout::paint_event() {
 
 // Free Functions
 void set_background(Layout& l, Color c) {
-    for (const std::unique_ptr<Widget>& w : l.children()) {
+    for (const std::unique_ptr<Widget>& w : l.children.get()) {
         set_background(*w, c);
     }
 }
 
 void set_foreground(Layout& l, Color c) {
-    for (const std::unique_ptr<Widget>& w : l.children()) {
+    for (const std::unique_ptr<Widget>& w : l.children.get()) {
         set_foreground(*w, c);
     }
 }

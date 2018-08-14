@@ -27,7 +27,7 @@ Widget* next_tab_focus() {
     while (i < widgets.size()) {
         Widget* current = widgets[i];
         const std::vector<std::unique_ptr<Widget>>& children =
-            current->children();
+            current->children.get();
         // TODO std::copy instead
         std::for_each(std::begin(children), std::end(children),
                       [&widgets](const std::unique_ptr<Widget>& p) {

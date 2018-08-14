@@ -20,7 +20,7 @@ namespace cppurses {
 std::vector<std::size_t> Horizontal_layout::size_widgets() {
     std::vector<Dimensions> widgets;
     std::size_t total_stretch{0};
-    for (const std::unique_ptr<Widget>& c : this->children()) {
+    for (const std::unique_ptr<Widget>& c : this->children.get()) {
         if (c->visible()) {
             widgets.emplace_back(Dimensions{c.get(), 0, 0});
             total_stretch += c->width_policy.stretch();
@@ -419,7 +419,7 @@ void Horizontal_layout::collect_space(std::vector<Dimensions_reference> widgets,
 
 void Horizontal_layout::position_widgets(
     const std::vector<std::size_t>& widths) {
-    const std::vector<std::unique_ptr<Widget>>& widgets{this->children()};
+    const std::vector<std::unique_ptr<Widget>>& widgets{this->children.get()};
     // TODO remove this check if you can prove in your implementation
     if (widgets.size() != widths.size()) {
         return;

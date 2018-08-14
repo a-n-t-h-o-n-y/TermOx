@@ -14,7 +14,9 @@
 #include <cppurses/system/detail/user_input_event_loop.hpp>
 #include <cppurses/system/event.hpp>
 #include <cppurses/system/event_loop.hpp>
-#include <cppurses/system/events/on_tree_event.hpp>
+// #include <cppurses/system/events/on_tree_event.hpp>
+#include <cppurses/system/events/disable_event.hpp>
+#include <cppurses/system/events/enable_event.hpp>
 #include <cppurses/system/events/paint_event.hpp>
 #include <cppurses/system/events/resize_event.hpp>
 #include <cppurses/widget/layout.hpp>
@@ -108,11 +110,16 @@ System::~System() {
 
 void System::set_head(Widget* head_widget) {
     if (head_ != nullptr) {
-        System::post_event<On_tree_event>(head_, false);
+        // System::post_event<On_tree_event>(head_, false);
+        // TODO above turns into disable_event
+        head_->disable();
+        // System::post_event<Disable_event>(head_);
     }
     head_ = head_widget;
     if (head_ != nullptr) {
-        System::post_event<On_tree_event>(head_, true);
+        // System::post_event<On_tree_event>(head_, true);
+        // TODO above turns into enable_event
+        System::post_event<Enable_event>(head_);
         // TODO Check if below call is still necessary.
         if (dynamic_cast<Layout*>(head_) != nullptr) {
             System::post_event<Resize_event>(

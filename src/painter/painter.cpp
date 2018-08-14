@@ -39,7 +39,7 @@ void Painter::put(const Glyph& tile, Point position) {
 }
 
 void Painter::put(const Glyph_string& text, std::size_t x, std::size_t y) {
-    if (!widget_->on_tree() || !widget_->visible()) {
+    if (!widget_->enabled() || !widget_->visible()) {
         return;
     }
     for (const Glyph& g : text) {
@@ -52,37 +52,32 @@ void Painter::put(const Glyph_string& text, Point position) {
 }
 
 void Painter::border(const Border& b) {
-    if (!b.enabled) {
+    if (!b.enabled || widget_->outer_width() == 0 ||
+        widget_->outer_height() == 0) {
         return;
     }
-    std::size_t width = widget_->width() + west_border_offset(*widget_);
-    std::size_t height = widget_->height() + north_border_offset(*widget_);
-    if (width < 1 || height < 1) {
-        return;
-    }
-    const std::size_t widg_x = widget_->x();
-    const std::size_t widg_y = widget_->y();
 
-    // Underflow Checks
-    if (widg_x + width < 1 && (b.north_enabled || b.south_enabled)) {
-        return;
-    }
-    if (widg_y + height < 1 && (b.east_enabled || b.west_enabled)) {
-        return;
-    }
+    // Disqualified borders
+    bool west_disqualified{widget_->outer_width() == 1};
+    bool east_disqualified{widget_->outer_width() <= 2};
+    bool north_disqualified{widget_->outer_height() == 1};
+    bool south_disqualified{widget_->outer_height() <= 2};
 
     // North Wall
-    Point north_left{widg_x + 1, widg_y};
-    Point north_right{widg_x + width - 1, widg_y};
+    Point north_left{widget_->inner_x(), widget_->y()};
+    Point north_right{north_left.x + widget_->width() - 1, north_left.y};
+
     // South Wall
-    Point south_left{widg_x + 1, widg_y + height};
-    Point south_right{widg_x + width - 1, widg_y + height};
+    Point south_left{north_left.x, widget_->y() + widget_->outer_height() - 1};
+    Point south_right{north_right.x, south_left.y};
+
     // West Wall
-    Point west_top{widg_x, widg_y + 1};
-    Point west_bottom{widg_x, widg_y + height - 1};
+    Point west_top{widget_->x(), widget_->inner_y()};
+    Point west_bottom{west_top.x, west_top.y + widget_->height() - 1};
+
     // East Wall
-    Point east_top{widg_x + width, widg_y + 1};
-    Point east_bottom{widg_x + width, widg_y + height - 1};
+    Point east_top{west_top.x + widget_->outer_width() - 1, west_top.y};
+    Point east_bottom{east_top.x, west_bottom.y};
 
     // Corners
     Point north_east{east_top.x, north_left.y};
@@ -90,117 +85,71 @@ void Painter::border(const Border& b) {
     Point south_east{east_bottom.x, south_left.y};
     Point south_west{west_bottom.x, south_right.y};
 
-    // Edge Cases:
-    // Height == 1
-    if (widget_->height() == 1 && widget_->north_border_disqualified()) {
-        west_top = Point{widg_x, widg_y};
-        west_bottom = west_top;
-        east_top = Point{widg_x + width, widg_y};
-        east_bottom = east_top;
-    } else if (widget_->height() == 1 && widget_->south_border_disqualified() &&
-               !widget_->north_border_disqualified()) {  // && b.north_enabled?
-        west_top = Point{widg_x, widg_y + 1};
-        west_bottom = west_top;
-        east_top = Point{widg_x + width, widg_y + 1};
-        east_bottom = east_top;
-    }
-
-    // Width == 1
-    if (widget_->width() == 1 && widget_->west_border_disqualified()) {
-        north_left = Point{widg_x, widg_y};
-        north_right = north_left;
-        south_left = Point{widg_x, widg_y + height /*- 1*/};
-        south_right = south_left;
-    } else if (widget_->width() == 1 && widget_->east_border_disqualified() &&
-               !widget_->west_border_disqualified()) {  // && b.west_enabled?
-        north_left = Point{widg_x + 1, widg_y};
-        north_right = north_left;
-        south_left = Point{widg_x + 1, widg_y + height /*- 1*/};
-        south_right = south_left;
-    }
-
     // North
-    if (b.north_enabled && !widget_->north_border_disqualified()) {
+    if (b.north_enabled && !north_disqualified) {
         this->line_global(b.north, north_left, north_right);
     }
     // South
-    if (b.south_enabled && !widget_->south_border_disqualified()) {
+    if (b.south_enabled && !south_disqualified) {
         this->line_global(b.south, south_left, south_right);
     }
     // West
-    if (b.west_enabled && !widget_->west_border_disqualified()) {
+    if (b.west_enabled && !west_disqualified) {
         this->line_global(b.west, west_top, west_bottom);
     }
     // East
-    if (b.east_enabled && !widget_->east_border_disqualified()) {
+    if (b.east_enabled && !east_disqualified) {
         this->line_global(b.east, east_top, east_bottom);
     }
     // North-West
-    if (b.north_west_enabled && !widget_->north_border_disqualified() &&
-        !widget_->west_border_disqualified()) {
+    if (b.north_west_enabled && !north_disqualified && !west_disqualified) {
         this->put_global(b.north_west, north_west);
     }
     // North-East
-    if (b.north_east_enabled && !widget_->north_border_disqualified() &&
-        !widget_->east_border_disqualified()) {
+    if (b.north_east_enabled && !north_disqualified && !east_disqualified) {
         this->put_global(b.north_east, north_east);
     }
     // South-West
-    if (b.south_west_enabled && !widget_->south_border_disqualified() &&
-        !widget_->west_border_disqualified()) {
+    if (b.south_west_enabled && !south_disqualified && !west_disqualified) {
         this->put_global(b.south_west, south_west);
     }
     // South-East
-    if (b.south_east_enabled && !widget_->south_border_disqualified() &&
-        !widget_->east_border_disqualified()) {
+    if (b.south_east_enabled && !south_disqualified && !east_disqualified) {
         this->put_global(b.south_east, south_east);
     }
 
     // Stop out of bounds drawing for special cases.
-    if (widget_->height() == 1 && widget_->north_border_disqualified() &&
-        widget_->south_border_disqualified()) {
+    if (widget_->height() == 1 && north_disqualified && south_disqualified) {
         return;
     }
-    if (widget_->width() == 1 && widget_->west_border_disqualified() &&
-        widget_->east_border_disqualified()) {
+    if (widget_->width() == 1 && west_disqualified && east_disqualified) {
         return;
     }
 
-    // Corners - Special Cases
+    // Corners - Special Case Glyph Change
     // North-West
-    Point nw{widget_->x(), widget_->y()};
     if (!b.north_west_enabled && !b.north_enabled && b.west_enabled) {
-        this->put_global(b.west, nw);
+        this->put_global(b.west, north_west);
     } else if (!b.north_west_enabled && !b.west_enabled && b.north_enabled) {
-        this->put_global(b.north, nw);
+        this->put_global(b.north, north_west);
     }
     // North-East
-    Point ne{widget_->inner_x() + widget_->width() - 1 +
-                 east_border_offset(*widget_),
-             widget_->y()};
     if (!b.north_east_enabled && !b.north_enabled && b.east_enabled) {
-        this->put_global(b.east, ne);
+        this->put_global(b.east, north_east);
     } else if (!b.north_east_enabled && !b.east_enabled && b.north_enabled) {
-        this->put_global(b.north, ne);
+        this->put_global(b.north, north_east);
     }
     // South-West
-    // Point sw{
-    Point sw{widget_->x(), widget_->inner_y() + widget_->height() - 1 +
-                               south_border_offset(*widget_)};
     if (!b.south_west_enabled && !b.south_enabled && b.west_enabled) {
-        this->put_global(b.west, sw);
+        this->put_global(b.west, south_west);
     } else if (!b.south_west_enabled && !b.west_enabled && b.south_enabled) {
-        this->put_global(b.south, sw);
+        this->put_global(b.south, south_west);
     }
     // South-East
-    Point se{widget_->inner_x() + widget_->width() - 1 +
-                 east_border_offset(*widget_),
-             widget_->inner_y() + widget_->height() - 1 +
-                 south_border_offset(*widget_)};
     if (!b.south_east_enabled && !b.south_enabled && b.east_enabled) {
-        this->put_global(b.east, se);
+        this->put_global(b.east, south_east);
     } else if (!b.south_east_enabled && !b.east_enabled && b.south_enabled) {
-        this->put_global(b.south, se);
+        this->put_global(b.south, south_east);
     }
 }
 

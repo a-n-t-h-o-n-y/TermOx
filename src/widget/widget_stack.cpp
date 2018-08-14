@@ -21,7 +21,8 @@ void Widget_stack::set_active_page(std::size_t index) {
         return;
     }
     // Remove current child & place back into pages_ container.
-    std::unique_ptr<Widget> removed{this->remove_child(active_page_)};
+    // TODO post show and hide events instead of adding and removing
+    std::unique_ptr<Widget> removed{this->children.remove(active_page_)};
     if (has_focus(*removed)) {
         Focus::clear_focus();
     }
@@ -32,7 +33,7 @@ void Widget_stack::set_active_page(std::size_t index) {
 
     // Set new active page from index.
     active_page_ = pages_[index].get();
-    this->add_child(std::move(pages_[index]));
+    this->children.add(std::move(pages_[index]));
     pages_[index] = nullptr;
     if (sets_focus_) {
         Focus::set_focus_to(active_page_);
@@ -62,7 +63,7 @@ void Widget_stack::insert_page(std::size_t index,
 std::unique_ptr<Widget> Widget_stack::remove_page(std::size_t index) {
     std::unique_ptr<Widget> removed{pages_[index].release()};
     if (removed == nullptr) {  // If nullptr, then this index is the active page
-        removed = this->remove_child(active_page_);
+        removed = this->children.remove(active_page_);
         active_page_ = nullptr;
     }
     pages_.erase(std::begin(pages_) + index);

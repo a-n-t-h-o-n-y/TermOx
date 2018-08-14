@@ -134,7 +134,7 @@ sig::Slot<void()> set_foreground(Widget& w, Color c) {
 }
 
 sig::Slot<void()> toggle_cursor(Widget& w) {
-    sig::Slot<void()> slot{[&w] { cppurses::toggle_cursor(w); }};
+    sig::Slot<void()> slot{[&w] { w.cursor.toggle(); }};
     slot.track(w.destroyed);
     return slot;
 }

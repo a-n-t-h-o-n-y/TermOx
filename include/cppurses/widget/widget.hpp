@@ -1,16 +1,13 @@
-#ifndef WIDGET_WIDGET_HPP
-#define WIDGET_WIDGET_HPP
-#include <algorithm>
+#ifndef CPPURSES_WIDGET_WIDGET_HPP
+#define CPPURSES_WIDGET_WIDGET_HPP
 #include <cstddef>
 #include <functional>
 #include <memory>
-#include <queue>
-#include <signals/signal.hpp>
 #include <string>
 #include <utility>
-#include <vector>
 
 #include <optional/optional.hpp>
+#include <signals/signal.hpp>
 
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
@@ -18,16 +15,14 @@
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/system/animation_engine.hpp>
 #include <cppurses/system/event_handler.hpp>
-#include <cppurses/system/events/repaint_event.hpp>
-#include <cppurses/system/key.hpp>
-#include <cppurses/system/system.hpp>
 #include <cppurses/widget/border.hpp>
+#include <cppurses/widget/children_data.hpp>
+#include <cppurses/widget/cursor_data.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/size_policy.hpp>
 
 namespace cppurses {
-class Painter;
 
 class Widget : public Event_handler {
    public:
@@ -43,25 +38,28 @@ class Widget : public Event_handler {
     std::string name() const;
     void set_name(std::string name);
 
+    // Enable
+    void enable(bool enable = true);
+    void disable(bool disable = true);
+
     // Parent
     Widget* parent() const;
-    void set_parent(Widget* parent);
 
-    // Children
-    void add_child(std::unique_ptr<Widget> child);
-    void insert_child(std::unique_ptr<Widget> child, std::size_t index);
-    // std::vector<Widget*> children() const;
-    const std::vector<std::unique_ptr<Widget>>& children() const;
-    bool contains_child(Widget* child);
+    /// Create a Widget and append it to the list of children. Returns a
+    /// reference to this newly created Widget.
+    template <typename Widg_t, typename... Args>
+    Widg_t& make_child(Args&&... args);
 
-    template <typename T, typename... Args>
-    T& make_child(Args&&... args);
+    /// Searches children by name and Widget type, returning a pointer to the
+    /// given type if found, or nullptr.
+    template <typename Widg_t = Widget>
+    Widg_t* find_child(const std::string& name) const;
 
-    template <typename T>
-    T* find_child(const std::string& name) const;
-
-    std::unique_ptr<Widget> remove_child(Widget* child);
-    std::unique_ptr<Widget> remove_child(const std::string& name);
+    /// Searches by name and Widget type for a specific descendant Widget,
+    /// breadth first ordering, returning a pointer to the given type if found,
+    /// or nullptr.
+    template <typename Widg_t = Widget>
+    Widg_t* find_descendant(const std::string& name) const;
 
     /// Top left point of the widget with respect to the top left point of the
     /// screen, not accounting for border space.
@@ -69,7 +67,7 @@ class Widget : public Event_handler {
     std::size_t y() const;
 
     /// Top left point of the widget with respect to the top left point of the
-    // screen, accounting for border space.
+    /// screen, accounting for border space.
     std::size_t inner_x() const;
     std::size_t inner_y() const;
 
@@ -81,29 +79,13 @@ class Widget : public Event_handler {
     std::size_t outer_width() const;
     std::size_t outer_height() const;
 
-    // Cursor
-    bool cursor_visible() const;
-    void show_cursor(bool show = true);
-    void hide_cursor(bool hide = true);
-    void move_cursor_x(std::size_t x);
-    void move_cursor_y(std::size_t y);
-    std::size_t cursor_x() const;
-    std::size_t cursor_y() const;
-    Point cursor_coordinates() const;
-
     void set_visible(bool visible, bool recursive = true);
     bool visible() const;
-    bool on_tree() const;
     void set_background_tile(const Glyph& tile);
     void set_background_tile(opt::Optional<Glyph> tile);
     const opt::Optional<Glyph>& background_tile() const;
 
     virtual void update();
-
-    bool east_border_disqualified() const;
-    bool west_border_disqualified() const;
-    bool north_border_disqualified() const;
-    bool south_border_disqualified() const;
 
     // Animation
     void enable_animation(Animation_engine::Period_t period);
@@ -113,9 +95,12 @@ class Widget : public Event_handler {
 
     // Public Objects
     Border border;
+    Children_data children{this};
+    Cursor_data cursor{this};
     Size_policy width_policy{this};
     Size_policy height_policy{this};
     Focus_policy focus_policy{Focus_policy::None};
+
     Brush brush{background(Color::Black), foreground(Color::White)};
 
     /// If true, the brush will paint the background tiles.
@@ -129,22 +114,21 @@ class Widget : public Event_handler {
     sig::Signal<void(const std::string&)> name_changed;
     sig::Signal<void(std::size_t, std::size_t)> resized;
     sig::Signal<void(Point)> moved;
-    sig::Signal<void(std::size_t, std::size_t)> moved_xy;
-    sig::Signal<void(Widget*)> child_added;
-    sig::Signal<void(Widget*)> child_removed;
+    sig::Signal<void(Event_handler*)> child_added;
+    sig::Signal<void(Event_handler*)> child_removed;
     sig::Signal<void()> focused_in;
     sig::Signal<void()> focused_out;
-    sig::Signal<void(Point)> cursor_moved;
-    sig::Signal<void(std::size_t, std::size_t)> cursor_moved_xy;
     sig::Signal<void(Color)> background_color_changed;
     sig::Signal<void(Color)> foreground_color_changed;
 
     detail::Screen_state& screen_state();
     const detail::Screen_state& screen_state() const;
 
+    // TODO move this once set_parent is in a sub-object
+    friend class Children_data;
+
    protected:
     bool paint_event() override;
-    bool repaint_event() override;
     bool close_event() override;
     bool focus_in_event() override;
     bool focus_out_event() override;
@@ -154,23 +138,14 @@ class Widget : public Event_handler {
     bool child_polished_event(Widget* child) override;
     bool show_event() override;
     bool hide_event() override;
-    bool on_tree_event(bool on_tree) override;
     bool move_event(Point new_position, Point old_position) override;
     bool resize_event(Area new_size, Area old_size) override;
     bool animation_event() override;
 
    private:
     std::string name_;
-    Widget* parent_ = nullptr;
-    std::vector<std::unique_ptr<Widget>> children_;
+    Widget* parent_{nullptr};
     bool visible_{true};
-    bool on_tree_{false};
-
-    void on_tree_recursive(Widget* w, bool on_tree) const;
-
-    // Local Coordinates
-    Point cursor_position_;
-    bool show_cursor_{false};
 
     opt::Optional<Glyph> background_tile_;
     bool brush_alters_background_{true};
@@ -181,16 +156,12 @@ class Widget : public Event_handler {
     // account for borders.
     Point top_left_position_;
 
-    std::size_t width_{width_policy.hint()};
-    std::size_t height_{height_policy.hint()};
-
-    bool east_border_disqualified_{false};
-    bool west_border_disqualified_{false};
-    bool north_border_disqualified_{false};
-    bool south_border_disqualified_{false};
+    std::size_t outer_width_{width_policy.hint()};
+    std::size_t outer_height_{height_policy.hint()};
 
     void set_x(std::size_t global_x);
     void set_y(std::size_t global_y);
+    void set_parent(Widget* parent);
 };
 
 // - - - - - - - - - - - - - - Free Functions - - - - - - - - - - - - - - - - -
@@ -198,18 +169,10 @@ bool has_border(const Widget& w);
 void enable_border(Widget& w);
 void disable_border(Widget& w);
 
-std::size_t west_border_offset(const Widget& w);
-std::size_t east_border_offset(const Widget& w);
-std::size_t north_border_offset(const Widget& w);
-std::size_t south_border_offset(const Widget& w);
-
 bool has_coordinates(Widget& w, std::size_t global_x, std::size_t global_y);
 
-void move_cursor(Widget& w, Point c);
-void move_cursor(Widget& w, std::size_t x, std::size_t y);
-
-// Eventually make Widget::brush private and only provide access through these
-// functions that update the background accordingly, though this is restrictive.
+// You should no longer need a repaint event for these functions, if the
+// background changes in a noticable way, it will be repainted by flush()
 void set_background(Widget& w, Color c);
 void set_foreground(Widget& w, Color c);
 template <typename... Attrs>
@@ -223,32 +186,30 @@ void set_foreground_recursive(Widget& w, Color c, bool single_level = false);
 
 bool has_focus(const Widget& w);
 
-void toggle_cursor(Widget& w);
-
 // - - - - - - - - - - - - Template Implementations - - - - - - - - - - - - - -
 
-template <typename T, typename... Args>
-T& Widget::make_child(Args&&... args) {
-    this->add_child(std::make_unique<T>(std::forward<Args>(args)...));
-    return static_cast<T&>(*children_.back());
+template <typename Widg_t, typename... Args>
+Widg_t& Widget::make_child(Args&&... args) {
+    this->children.add(std::make_unique<Widg_t>(std::forward<Args>(args)...));
+    return static_cast<Widg_t&>(*(this->children.get().back()));
 }
 
-// Breadth First Search
-template <typename T>
-T* Widget::find_child(const std::string& name) const {
-    std::queue<Widget*> search_queue;
-    for (const std::unique_ptr<Widget>& child : this->children()) {
-        search_queue.push(child.get());
-    }
-    while (!search_queue.empty()) {
-        Widget* current = search_queue.front();
-        search_queue.pop();
-        auto cast_child = dynamic_cast<T*>(current);
-        if (cast_child != nullptr && current->name() == name) {
-            return cast_child;
+template <typename Widg_t>
+Widg_t* Widget::find_child(const std::string& name) const {
+    for (const std::unique_ptr<Widget>& widg : this->children.get()) {
+        if (widg->name() == name &&
+            dynamic_cast<Widg_t*>(widg.get()) != nullptr) {
+            return widg.get();
         }
-        for (const std::unique_ptr<Widget>& child : current->children()) {
-            search_queue.push(child.get());
+    }
+    return nullptr;
+}
+
+template <typename Widg_t>
+Widg_t* Widget::find_descendant(const std::string& name) const {
+    for (Widget* widg : this->children.get_descendants()) {
+        if (widg->name() == name && dynamic_cast<Widg_t*>(widg != nullptr)) {
+            return widg;
         }
     }
     return nullptr;
@@ -259,7 +220,7 @@ void add_attributes(Widget& w, Attrs&&... attrs) {
     for (Attribute a : {attrs...}) {
         if (!w.brush.has_attribute(a)) {
             w.brush.add_attributes(std::forward<Attrs>(attrs)...);
-            System::post_event<Repaint_event>(&w);
+            w.update();
             return;
         }
     }
@@ -275,9 +236,9 @@ void remove_attributes(Widget& w, Attrs&&... attrs) {
         }
     }
     if (repaint) {
-        System::post_event<Repaint_event>(&w);
+        w.update();
     }
 }
 
 }  // namespace cppurses
-#endif  // WIDGET_WIDGET_HPP
+#endif  // CPPURSES_WIDGET_WIDGET_HPP

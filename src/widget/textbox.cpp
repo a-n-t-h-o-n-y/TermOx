@@ -87,7 +87,7 @@ bool Textbox::key_press_event(Key key, char symbol) {
             case Key::Enter: {
                 auto cursor_index = this->cursor_index();
                 this->insert('\n', cursor_index);
-                if (this->cursor_y() + 1 == this->height()) {
+                if (this->cursor.y() + 1 == this->height()) {
                     this->scroll_down(1);
                 }
                 this->set_cursor(cursor_index + 1);

@@ -57,7 +57,7 @@ void Menu::remove_item(std::size_t index) {
     if (index >= items_.size()) {
         return;
     }
-    this->remove_child(&items_[index].button.get());
+    this->children.remove(&items_[index].button.get());
     items_.erase(std::begin(items_) + index);
     this->update();
 }

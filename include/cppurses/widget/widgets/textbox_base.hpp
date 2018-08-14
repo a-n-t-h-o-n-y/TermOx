@@ -39,7 +39,7 @@ class Textbox_base : public Text_display {
     sig::Signal<void(std::size_t n)> cursor_moved_right;
     sig::Signal<void(std::size_t n)> cursor_moved_up;
     sig::Signal<void(std::size_t n)> cursor_moved_down;
-    sig::Signal<void(Point)> cursor_moved;
+    // sig::Signal<void(Point)> cursor_moved;  // TODO this is a duplicate
 
    private:
     void increment_cursor_right();

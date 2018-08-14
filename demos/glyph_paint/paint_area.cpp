@@ -196,7 +196,7 @@ bool Paint_area::mouse_press_event(Mouse_button button,
 }
 
 bool Paint_area::key_press_event(Key key, char symbol) {
-    if (!this->cursor_visible()) {
+    if (!this->cursor.enabled()) {
         if (!std::iscntrl(symbol)) {
             this->set_symbol(symbol);
         }
@@ -205,34 +205,34 @@ bool Paint_area::key_press_event(Key key, char symbol) {
     if (this->width() == 0 || this->height() == 0) {
         return Widget::key_press_event(key, symbol);
     }
-    std::size_t new_x{this->cursor_x() + 1};
-    std::size_t new_y{this->cursor_y() + 1};
+    std::size_t new_x{this->cursor.x() + 1};
+    std::size_t new_y{this->cursor.y() + 1};
     switch (key) {
         case Key::Arrow_right:
             if (new_x == this->width()) {
                 new_x = 0;
             }
-            this->move_cursor_x(new_x);
+            this->cursor.set_x(new_x);
             break;
         case Key::Arrow_left:
-            this->move_cursor_x(this->cursor_x() - 1);
+            this->cursor.set_x(this->cursor.x() - 1);
             break;
         case Key::Arrow_down:
             if (new_y == this->height()) {
                 new_y = 0;
             }
-            this->move_cursor_y(new_y);
+            this->cursor.set_y(new_y);
             break;
         case Key::Arrow_up:
-            this->move_cursor_y(this->cursor_y() - 1);
+            this->cursor.set_y(this->cursor.y() - 1);
             break;
         case Key::Enter:
-            this->place_glyph(this->cursor_x(), this->cursor_y());
+            this->place_glyph(this->cursor.x(), this->cursor.y());
             break;
         default:
             if (!std::iscntrl(symbol)) {
                 this->set_symbol(symbol);
-                this->place_glyph(this->cursor_x(), this->cursor_y());
+                this->place_glyph(this->cursor.x(), this->cursor.y());
                 this->update();
             }
             break;

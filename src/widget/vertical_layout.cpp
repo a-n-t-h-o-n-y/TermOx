@@ -20,7 +20,7 @@ namespace cppurses {
 std::vector<std::size_t> Vertical_layout::size_widgets() {
     std::vector<Dimensions> widgets;
     std::size_t total_stretch{0};
-    for (const std::unique_ptr<Widget>& c : this->children()) {
+    for (const std::unique_ptr<Widget>& c : this->children.get()) {
         if (c->visible()) {
             widgets.emplace_back(Dimensions{c.get(), 0, 0});
             total_stretch += c->height_policy.stretch();
@@ -420,7 +420,7 @@ void Vertical_layout::collect_space(std::vector<Dimensions_reference> widgets,
 
 void Vertical_layout::position_widgets(
     const std::vector<std::size_t>& heights) {
-    const std::vector<std::unique_ptr<Widget>>& widgets{this->children()};
+    const std::vector<std::unique_ptr<Widget>>& widgets{this->children.get()};
     if (widgets.size() != heights.size()) {
         return;
     }

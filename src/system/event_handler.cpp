@@ -1,13 +1,12 @@
 #include <cppurses/system/event_handler.hpp>
 
 #include <algorithm>
-#include <cstddef>
+#include <cstdint>
 #include <iterator>
-#include <signals/signals.hpp>
 #include <vector>
 
-#include <cppurses/system/events/disable_event.hpp>
-#include <cppurses/system/events/enable_event.hpp>
+#include <signals/signals.hpp>
+
 #include <cppurses/system/mouse_button.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/point.hpp>
@@ -17,15 +16,6 @@ class Widget;
 
 Event_handler::~Event_handler() {
     destroyed(this);
-}
-
-void Event_handler::set_enabled(bool enabled) {
-    enabled_ = enabled;
-    if (enabled) {
-        System::post_event<Enable_event>(this);
-    } else {
-        System::post_event<Disable_event>(this);
-    }
 }
 
 bool Event_handler::enabled() const {
@@ -61,11 +51,13 @@ const std::vector<Event_handler*>& Event_handler::get_event_filters() const {
 
 // - - - - - - - - - - - - - - Event Handlers - - - - - - - - - - - - - - - - -
 bool Event_handler::enable_event() {
-    return false;
+    enabled_ = true;
+    return true;
 }
 
 bool Event_handler::disable_event() {
-    return false;
+    enabled_ = false;
+    return true;
 }
 
 bool Event_handler::mouse_press_event(Mouse_button button,

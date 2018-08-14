@@ -48,7 +48,7 @@ target_sources(libcppurses PRIVATE
     system/mouse_event.cpp
 	system/move_event.cpp
     system/ncurses_event_listener.cpp
-    system/on_tree_event.cpp
+    # system/on_tree_event.cpp
     system/paint_event.cpp
 	system/resize_event.cpp
     system/show_event.cpp
@@ -59,8 +59,8 @@ target_sources(libcppurses PRIVATE
     system/event_as_string.cpp
     system/user_input_event_loop.cpp
     system/animation_event_loop.cpp
-    system/repaint_event.cpp
-    system/repaint_all.cpp
+    # system/repaint_event.cpp
+    # system/repaint_all.cpp
     system/fps_to_period.cpp
     system/find_widget_at.cpp
 )
@@ -121,6 +121,9 @@ target_sources(libcppurses PRIVATE
     widget/size_policy.cpp
     widget/blank_width.cpp
     widget/blank_height.cpp
+    widget/children_data.cpp
+    widget/border_offset.cpp
+    widget/cursor_data.cpp
 )
 
 # INSTALLATION
