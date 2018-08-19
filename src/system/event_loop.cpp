@@ -39,11 +39,11 @@ void Event_loop::process_events() {
     mtx.lock();
     invoker_.invoke(event_queue);
     if (!exit_) {
-        // TODO move below call to invoke to after call to flush()?
-        invoker_.invoke(event_queue, Event::DeferredDelete);
+        invoker_.invoke(event_queue, Event::Paint);
         System::paint_buffer().flush(staged_changes_);
-        mtx.unlock();
         staged_changes_.clear();
+        invoker_.invoke(event_queue, Event::Delete);
+        mtx.unlock();
         loop_func_();
     } else {
         mtx.unlock();

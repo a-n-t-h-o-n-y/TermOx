@@ -21,18 +21,25 @@ class Widget_stack : public Horizontal_layout {
 
     void add_page(std::unique_ptr<Widget> widget);
     void insert_page(std::size_t index, std::unique_ptr<Widget> widget);
-    std::unique_ptr<Widget> remove_page(std::size_t index);
+    void remove_page(std::size_t index);
     void clear();
 
     std::size_t size() const;
     Widget* active_page() const;
     std::size_t active_page_index() const;
 
+    /// Posts an Enable_event to this widget, and all descendants.
+    void enable(bool enable = true,
+                bool post_child_polished_event = true) override;
+
     // Signals
     sig::Signal<void(std::size_t)> page_changed;
 
+    // protected:
+    // bool paint_event() override;
+
    private:
-    std::vector<std::unique_ptr<Widget>> pages_;
+    // std::vector<std::unique_ptr<Widget>> pages_;
     Widget* active_page_{nullptr};
     bool sets_focus_{true};
 };
@@ -42,7 +49,8 @@ class Widget_stack : public Horizontal_layout {
 template <typename T, typename... Args>
 T& Widget_stack::make_page(Args&&... args) {
     this->add_page(std::make_unique<T>(std::forward<Args>(args)...));
-    return static_cast<T&>(*pages_.back());
+    return static_cast<T&>(*this->children.get().back());
+    // return static_cast<T&>(*pages_.back());
 }
 
 // - - - - - - - - - - - - - - - - Slots - - - - - - - - - - - - - - - - - - - -

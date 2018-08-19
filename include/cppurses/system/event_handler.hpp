@@ -23,7 +23,7 @@ class Event_handler {
     Event_handler& operator=(Event_handler&&) = delete;
     virtual ~Event_handler();
 
-    bool enabled() const;
+    virtual bool enabled() const;
 
     void install_event_filter(Event_handler* filter);
     void remove_event_filter(Event_handler* filter);
@@ -59,12 +59,9 @@ class Event_handler {
                                   std::uint8_t device_id);
     virtual bool key_press_event(Key key, char symbol);
     virtual bool key_release_event(Key key, char symbol);
-    virtual bool close_event() = 0;
-    virtual bool show_event() = 0;
-    virtual bool hide_event() = 0;
     virtual bool focus_in_event();
     virtual bool focus_out_event();
-    virtual bool deferred_delete_event(Event_handler* to_delete) = 0;
+    virtual bool delete_event();
     virtual bool paint_event() = 0;
     virtual bool animation_event() = 0;
 
@@ -114,16 +111,10 @@ class Event_handler {
     virtual bool key_release_event_filter(Event_handler* receiver,
                                           Key key,
                                           char symbol);
-    virtual bool close_event_filter(Event_handler* receiver);
-    virtual bool hide_event_filter(Event_handler* receiver);
-    virtual bool show_event_filter(Event_handler* receiver);
-    virtual bool on_tree_event_filter(Event_handler* receiver, bool on_tree);
     virtual bool focus_in_event_filter(Event_handler* receiver);
     virtual bool focus_out_event_filter(Event_handler* receiver);
-    virtual bool deferred_delete_event_filter(Event_handler* receiver,
-                                              Event_handler* to_delete);
+    virtual bool delete_event_filter(Event_handler* receiver);
     virtual bool paint_event_filter(Event_handler* receiver);
-    virtual bool repaint_event_filter(Event_handler* receiver);
     virtual bool animation_event_filter(Event_handler* receiver);
 
     // Signals
@@ -137,9 +128,11 @@ class Event_handler {
     sig::Signal<void(Key)> key_pressed;
     sig::Signal<void(Key)> key_released;
 
+   protected:
+    bool enabled_{false};
+
    private:
     std::vector<Event_handler*> event_filters_;
-    bool enabled_{true};
 };
 
 }  // namespace cppurses

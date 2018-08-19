@@ -21,12 +21,21 @@ void Children_data::add(std::unique_ptr<Widget> child) {
     }
     child->set_parent(parent_);
     children_.emplace_back(std::move(child));
+    if (parent_ != nullptr) {
+        children_.back()->enable(parent_->enabled());
+        System::post_event<Child_added_event>(parent_, children_.back().get());
+    }
 }
 
 void Children_data::insert(std::unique_ptr<Widget> child, std::size_t index) {
     if (index < children_.size()) {
         child->set_parent(parent_);
-        children_.insert(std::begin(children_) + index, std::move(child));
+        auto new_iter =
+            children_.insert(std::begin(children_) + index, std::move(child));
+        if (parent_ != nullptr) {
+            (*new_iter)->enable(parent_->enabled());
+            System::post_event<Child_added_event>(parent_, new_iter->get());
+        }
     }
 }
 
@@ -95,8 +104,17 @@ std::unique_ptr<Widget> Children_data::remove(Widget* child) {
         return nullptr;
     }
     std::unique_ptr<Widget> removed = std::move(*found);
-    removed->set_parent(nullptr);
     children_.erase(found);
+    removed->disable();
+    if (removed->parent() != nullptr) {
+        // TODO send or post??
+        // System::send_event(
+        //     Child_removed_event{removed->parent(), removed.get()});
+        // you are posting to the parent which is still alive, so no crash
+        System::post_event<Child_removed_event>(removed->parent(),
+                                                removed.get());
+    }
+    removed->set_parent(nullptr);
     return removed;
 }
 

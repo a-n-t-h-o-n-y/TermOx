@@ -18,7 +18,7 @@ class Move_event : public Event {
 
    protected:
     Point new_position_;
-    Point old_position_;
+    mutable Point old_position_;
 };
 
 }  // namespace cppurses

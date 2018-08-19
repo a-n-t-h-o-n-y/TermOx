@@ -108,6 +108,8 @@ bool Textbox::key_press_event(Key key, char symbol) {
                 }
         }
     }
+    // TODO maybe dont need because system does not necessarily change, update
+    // where the state of the cursor or internal text changes.
     this->update();
     return true;
 }

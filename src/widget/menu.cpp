@@ -24,7 +24,7 @@ Menu::Menu(Glyph_string title)
     this->focus_policy = Focus_policy::Strong;
     title_.set_alignment(Alignment::Center);
     title_.brush.add_attributes(Attribute::Bold);
-    space1.set_background_tile(L'─');
+    space1.wallpaper = L'─';
 }
 
 sig::Signal<void()>& Menu::add_item(Glyph_string label) {
@@ -57,7 +57,7 @@ void Menu::remove_item(std::size_t index) {
     if (index >= items_.size()) {
         return;
     }
-    this->children.remove(&items_[index].button.get());
+    items_[index].button.get().close();
     items_.erase(std::begin(items_) + index);
     this->update();
 }

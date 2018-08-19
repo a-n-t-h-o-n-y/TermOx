@@ -2,13 +2,10 @@
 
 #include <signals/slot.hpp>
 
-#include <cppurses/system/events/close_event.hpp>
-#include <cppurses/system/events/deferred_delete_event.hpp>
-#include <cppurses/system/events/hide_event.hpp>
+#include <cppurses/system/events/delete_event.hpp>
 #include <cppurses/system/events/key_event.hpp>
 #include <cppurses/system/events/mouse_event.hpp>
 #include <cppurses/system/events/paint_event.hpp>
-#include <cppurses/system/events/show_event.hpp>
 #include <cppurses/system/mouse_button.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/point.hpp>
@@ -17,33 +14,20 @@
 namespace cppurses {
 namespace slot {
 
+sig::Slot<void()> enable(Widget& w) {
+    sig::Slot<void()> slot{[&w] { w.enable(); }};
+    slot.track(w.destroyed);
+    return slot;
+}
+
+sig::Slot<void()> disable(Widget& w) {
+    sig::Slot<void()> slot{[&w] { w.disable(); }};
+    slot.track(w.destroyed);
+    return slot;
+}
+
 sig::Slot<void()> delete_later(Widget& w) {
-    sig::Slot<void()> slot{
-        [&w] { System::post_event<Deferred_delete_event>(&w); }};
-    slot.track(w.destroyed);
-    return slot;
-}
-
-sig::Slot<void()> close(Widget& w) {
-    sig::Slot<void()> slot{[&w] { System::post_event<Close_event>(&w); }};
-    slot.track(w.destroyed);
-    return slot;
-}
-
-sig::Slot<void()> hide(Widget& w) {
-    sig::Slot<void()> slot{[&w] { System::post_event<Hide_event>(&w); }};
-    slot.track(w.destroyed);
-    return slot;
-}
-
-sig::Slot<void()> show(Widget& w) {
-    sig::Slot<void()> slot{[&w] { System::post_event<Show_event>(&w); }};
-    slot.track(w.destroyed);
-    return slot;
-}
-
-sig::Slot<void()> repaint(Widget& w) {
-    sig::Slot<void()> slot{[&w] { System::send_event(Paint_event(&w)); }};
+    sig::Slot<void()> slot{[&w] { w.close(); }};
     slot.track(w.destroyed);
     return slot;
 }

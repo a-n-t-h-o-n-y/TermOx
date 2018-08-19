@@ -51,12 +51,10 @@ const std::vector<Event_handler*>& Event_handler::get_event_filters() const {
 
 // - - - - - - - - - - - - - - Event Handlers - - - - - - - - - - - - - - - - -
 bool Event_handler::enable_event() {
-    enabled_ = true;
     return true;
 }
 
 bool Event_handler::disable_event() {
-    enabled_ = false;
     return true;
 }
 
@@ -116,6 +114,10 @@ bool Event_handler::focus_in_event() {
 }
 
 bool Event_handler::focus_out_event() {
+    return true;
+}
+
+bool Event_handler::delete_event() {
     return true;
 }
 
@@ -207,23 +209,6 @@ bool Event_handler::key_release_event_filter(Event_handler* receiver,
     return false;
 }
 
-bool Event_handler::close_event_filter(Event_handler* receiver) {
-    return false;
-}
-
-bool Event_handler::hide_event_filter(Event_handler* receiver) {
-    return false;
-}
-
-bool Event_handler::show_event_filter(Event_handler* receiver) {
-    return false;
-}
-
-bool Event_handler::on_tree_event_filter(Event_handler* receiver,
-                                         bool on_tree) {
-    return false;
-}
-
 bool Event_handler::focus_in_event_filter(Event_handler* receiver) {
     return false;
 }
@@ -232,16 +217,11 @@ bool Event_handler::focus_out_event_filter(Event_handler* receiver) {
     return false;
 }
 
-bool Event_handler::deferred_delete_event_filter(Event_handler* receiver,
-                                                 Event_handler* to_delete) {
+bool Event_handler::delete_event_filter(Event_handler* receiver) {
     return false;
 }
 
 bool Event_handler::paint_event_filter(Event_handler* receiver) {
-    return false;
-}
-
-bool Event_handler::repaint_event_filter(Event_handler* receiver) {
     return false;
 }
 

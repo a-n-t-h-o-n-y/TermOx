@@ -30,28 +30,23 @@ target_compile_options(libcppurses PUBLIC -Wall)
 # SYSTEM
 target_sources(libcppurses PRIVATE
 	system/child_event.cpp
-    system/close_event.cpp
-    system/deferred_delete_event.cpp
+    system/delete_event.cpp
     system/disable_event.cpp
     system/enable_event.cpp
     system/event.cpp
     system/event_handler.cpp
-    system/event_handler_slots.cpp
     system/event_invoker.cpp
 	system/event_loop.cpp
     system/event_queue.cpp
     system/focus.cpp
     system/focus_event.cpp
-    system/hide_event.cpp
     system/key.cpp
     system/key_event.cpp
     system/mouse_event.cpp
 	system/move_event.cpp
     system/ncurses_event_listener.cpp
-    # system/on_tree_event.cpp
     system/paint_event.cpp
 	system/resize_event.cpp
-    system/show_event.cpp
 	system/system.cpp
     system/shortcuts.cpp
     system/animation_engine.cpp
@@ -59,8 +54,6 @@ target_sources(libcppurses PRIVATE
     system/event_as_string.cpp
     system/user_input_event_loop.cpp
     system/animation_event_loop.cpp
-    # system/repaint_event.cpp
-    # system/repaint_all.cpp
     system/fps_to_period.cpp
     system/find_widget_at.cpp
 )
@@ -80,6 +73,8 @@ target_sources(libcppurses PRIVATE
     painter/is_not_paintable.cpp
     painter/add_default_attributes.cpp
     painter/ncurses_data.cpp
+    painter/screen_mask.cpp
+    painter/find_empty_space.cpp
 )	
 
 # WIDGET

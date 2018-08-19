@@ -14,7 +14,7 @@ Slider::Slider() {
     this->height_policy.type(Size_policy::Fixed);
     this->height_policy.hint(1);
     this->focus_policy = Focus_policy::Strong;
-    this->set_background_tile(Glyph{L' ', background(Color::Light_gray)});
+    this->wallpaper = Glyph{L' ', background(Color::Light_gray)};
 }
 
 void Slider::set_percent(float percent) {

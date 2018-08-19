@@ -17,7 +17,7 @@
 #include <cppurses/painter/paint_buffer.hpp>
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/system/events/child_event.hpp>
-#include <cppurses/system/events/deferred_delete_event.hpp>
+#include <cppurses/system/events/delete_event.hpp>
 #include <cppurses/system/events/disable_event.hpp>
 #include <cppurses/system/events/enable_event.hpp>
 #include <cppurses/system/events/paint_event.hpp>
@@ -47,11 +47,6 @@ std::string Widget::name() const {
 }
 
 void Widget::set_parent(Widget* parent) {
-    if (parent != nullptr) {
-        System::post_event<Child_added_event>(parent, this);
-    } else if (this->parent() != nullptr) {
-        System::send_event(Child_removed_event{this->parent(), this});
-    }
     parent_ = parent;
 }
 
@@ -59,24 +54,26 @@ Widget* Widget::parent() const {
     return parent_;
 }
 
-void Widget::enable(bool enable) {
-    if (enable) {
-        System::post_event<Enable_event>(this);
-        for (Widget* w : this->children.get_descendants()) {
-            System::post_event<Enable_event>(w);
-        }
-    } else {
-        // System::send_event(Disable_event{this}); // TODO think on this?
-        // why do you have to send this in children_data::remove?
-        System::post_event<Disable_event>(this);
-        for (Widget* w : this->children.get_descendants()) {
-            System::post_event<Disable_event>(w);
-        }
+void Widget::enable(bool enable, bool post_child_polished_event) {
+    this->enable_and_post_events(enable, post_child_polished_event);
+    for (std::unique_ptr<Widget>& w : this->children.children_) {
+        w->enable(enable, post_child_polished_event);
     }
 }
 
-void Widget::disable(bool disable) {
-    this->enable(!disable);
+void Widget::disable(bool disable, bool post_child_polished_event) {
+    this->enable(!disable, post_child_polished_event);
+}
+
+void Widget::close() {
+    std::unique_ptr<Widget> removed;
+    if (this->parent() == nullptr) {
+        // Can't delete a widget that is not owned by the system.
+        return;
+    } else {
+        removed = this->parent()->children.remove(this);
+    }
+    System::post_event<Delete_event>(this, std::move(removed));
 }
 
 std::size_t Widget::x() const {
@@ -113,40 +110,23 @@ std::size_t Widget::outer_height() const {
     return outer_height_;
 }
 
-bool Widget::visible() const {
-    return visible_;
+bool Widget::brush_paints_wallpaper() const {
+    return brush_paints_wallpaper_;
 }
 
-void Widget::set_background_tile(const Glyph& tile) {  // TODO Prob not needed.
-    this->set_background_tile(opt::Optional<Glyph>{tile});
-}
-
-void Widget::set_background_tile(opt::Optional<Glyph> tile) {
-    background_tile_ = tile;
-    this->update();
-}
-
-const opt::Optional<Glyph>& Widget::background_tile() const {
-    return background_tile_;
-}
-
-bool Widget::brush_alters_background() const {
-    return brush_alters_background_;
-}
-
-void Widget::set_brush_alters_background(bool alters) {
-    brush_alters_background_ = alters;
+void Widget::set_brush_paints_wallpaper(bool paints) {
+    brush_paints_wallpaper_ = paints;
     this->update();
 }
 
 // TODO should have a mutex on it so events can't change background tile while
-// flushing the screen. or set_background_tile should have a mutex, or anything
+// flushing the screen. or wallpaper(?) should have a mutex, or anything
 // that modifies the Glyph.
-Glyph Widget::find_background_tile() const {
-    Glyph background{this->background_tile()
-                         ? *(this->background_tile())
+Glyph Widget::generate_wallpaper() const {
+    Glyph background{this->wallpaper
+                         ? *(this->wallpaper)
                          : System::paint_buffer().get_global_background_tile()};
-    if (this->brush_alters_background()) {
+    if (this->brush_paints_wallpaper()) {
         detail::add_default_attributes(background, this->brush);
     }
     return background;
@@ -169,11 +149,6 @@ void Widget::disable_animation() {
     System::animation_engine().unregister_widget(*this);
 }
 
-bool Widget::close_event() {
-    System::post_event<Deferred_delete_event>(this);
-    return true;
-}
-
 bool Widget::focus_in_event() {
     // TODO obsolete? flush takes care of this cursor movement
     System::paint_buffer().move_cursor(this->inner_x() + this->cursor.x(),
@@ -188,15 +163,8 @@ bool Widget::focus_out_event() {
 }
 
 bool Widget::paint_event() {
-    if (border.enabled) {
-        Painter p{this};
-        p.border(border);
-    }
-    return true;
-}
-
-bool Widget::deferred_delete_event(Event_handler* to_delete) {
-    this->children.remove(static_cast<Widget*>(to_delete));
+    Painter p{this};
+    p.border(border);  // this checks if border and widget are enabled, etc..
     return true;
 }
 
@@ -204,7 +172,6 @@ bool Widget::child_added_event(Widget* child) {
     child_added(child);
     this->screen_state().child_event_happened = true;
     this->update();
-    child->enable(this->enabled());
     return true;
 }
 
@@ -212,8 +179,6 @@ bool Widget::child_removed_event(Widget* child) {
     child_removed(child);
     this->screen_state().child_event_happened = true;
     this->update();
-    // System::post_event<Disable_event>(child);
-    System::send_event(Disable_event{child});
     return true;
 }
 
@@ -223,41 +188,33 @@ bool Widget::child_polished_event(Widget* child) {
     return true;
 }
 
-bool Widget::show_event() {
-    this->set_visible(true);
-    this->update();
-    return true;
-}
-
-bool Widget::hide_event() {
-    this->set_visible(false);
-    this->update();
-    return true;
-}
-
 bool Widget::move_event(Point new_position, Point old_position) {
-    old_position = top_left_position_;
-    this->set_x(new_position.x);
-    this->set_y(new_position.y);
-    if (old_position != top_left_position_) {
-        moved(new_position);
-        this->update();
-        this->screen_state().move_happened = true;
-    }
+    // this->set_x(new_position.x);
+    // this->set_y(new_position.y);
+    moved(new_position);
+    this->update();
+    this->screen_state().move_happened = true;
+    this->screen_state().tiles.clear();
     return true;
 }
 
 bool Widget::resize_event(Area new_size, Area old_size) {
-    old_size.width = outer_width_;
-    old_size.height = outer_height_;
+    // this->outer_width_ = new_size.width;
+    // this->outer_height_ = new_size.height;
 
-    this->outer_width_ = new_size.width;
-    this->outer_height_ = new_size.height;
-
-    if (old_size.width != outer_width_ || old_size.height != outer_height_) {
-        resized(outer_width_, outer_height_);  // TODO what w/h do you report?
-        this->update();
-        this->screen_state().resize_happened = true;
+    resized(outer_width_, outer_height_);
+    this->update();
+    this->screen_state().resize_happened = true;
+    auto end = std::end(this->screen_state().tiles);
+    auto iter = std::begin(this->screen_state().tiles);
+    while (iter != end) {
+        Point p{iter->first};
+        if (p.x >= this->x() + this->outer_width() ||
+            p.y >= this->y() + this->outer_height()) {
+            iter = this->screen_state().tiles.erase(iter);
+        } else {
+            ++iter;
+        }
     }
     return true;
 }
@@ -267,14 +224,30 @@ bool Widget::animation_event() {
     return true;
 }
 
-void Widget::set_visible(bool visible, bool recursive) {
-    visible_ = visible;
-    if (!recursive) {
-        return;
-    }
-    // TODO remove the recursion from here, and instead have it from call site.
-    for (const std::unique_ptr<Widget>& c : this->children.get()) {
-        c->set_visible(visible, recursive);
+bool Widget::disable_event() {
+    // TODO double check that layouts are not enabling/disabling every resize.
+    // invoker counts disable/enable events as the same and gets rid of them.
+    // The last one is the only one, because if disable is first, and you remove
+    // the last enable event, then it will not get an enable event though it is
+    // enabled now.
+    this->screen_state().tiles.clear();
+    return Event_handler::disable_event();
+}
+
+void Widget::enable_and_post_events(bool enable,
+                                    bool post_child_polished_event) {
+    if (enabled_ != enable) {
+        if (!enable) {
+            System::post_event<Disable_event>(this);
+        }
+        enabled_ = enable;
+        if (enable) {
+            System::post_event<Enable_event>(this);
+        }
+        if (post_child_polished_event && this->parent() != nullptr) {
+            System::post_event<Child_polished_event>(this->parent(), this);
+        }
+        this->update();
     }
 }
 
@@ -294,16 +267,16 @@ bool has_border(const Widget& w) {
 
 void enable_border(Widget& w) {
     w.border.enabled = true;
-    System::post_event<Child_polished_event>(w.parent(), &w);
+    // System::post_event<Child_polished_event>(w.parent(), &w);
 }
 
 void disable_border(Widget& w) {
     w.border.enabled = false;
-    System::post_event<Child_polished_event>(w.parent(), &w);
+    // System::post_event<Child_polished_event>(w.parent(), &w);
 }
 
 bool has_coordinates(Widget& w, std::size_t global_x, std::size_t global_y) {
-    if (!w.enabled() || !w.visible()) {
+    if (!w.enabled()) {
         return false;
     }
     bool within_west = global_x >= w.inner_x();

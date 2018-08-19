@@ -7,44 +7,54 @@
 
 namespace cppurses {
 
-Layout::Layout() {
-    // TODO is this necessary? To post a move event at construction?
-    System::post_event<Move_event>(this, Point{0, 0});
-    this->focus_policy = Focus_policy::Click;
+// Layout::Layout() {
+//     // TODO is this necessary? To post a move event at construction?
+//     // System::post_event<Move_event>(this, Point{0, 0});
+//     this->focus_policy = Focus_policy::Click;  // Why?
+// }
+
+bool Layout::enabled() const {
+    return Widget::enabled() || too_small_;
+}
+
+void Layout::set_too_small(bool too_small) {
+    too_small_ = too_small;
+    this->disable(too_small, false);  // false to not send child_polished event
+}
+
+bool Layout::move_event(Point new_position, Point old_position) {
+    // shift children positions with move events, without sending resize events
+    this->update_geometry();
+    return Widget::move_event(new_position, old_position);
+}
+
+bool Layout::resize_event(Area new_size, Area old_size) {
+    this->update_geometry();
+    return Widget::resize_event(new_size, old_size);
 }
 
 bool Layout::child_added_event(Widget* child) {
-    needs_update_ = true;
+    this->update_geometry();
     return Widget::child_added_event(child);
 }
 
 bool Layout::child_removed_event(Widget* child) {
-    needs_update_ = true;
+    this->update_geometry();
     return Widget::child_removed_event(child);
 }
 
 bool Layout::child_polished_event(Widget* child) {
-    needs_update_ = true;
+    this->update_geometry();
     return Widget::child_polished_event(child);
 }
 
 bool Layout::paint_event() {
-    too_small_ = false;
-    if (needs_update_ || last_inner_position_.x != this->inner_x() ||
-        last_inner_position_.y != this->inner_y() ||
-        last_inner_size_.width != this->width() ||
-        last_inner_size_.height != this->height()) {
-        this->update_geometry();
-    }
     if (too_small_) {
         Painter p{this};
-        // need to set repaint on this, but that will not do anything because
-        // flush will optimize it out because of children.
+        p.fill(' ', 0, 0, this->width(), this->height());
         p.put("Screen too small.", 0, 0);
     }
-    last_inner_position_ = Point{this->x(), this->y()};
-    last_inner_size_ = Area{this->width(), this->height()};
-    needs_update_ = false;
+    this->screen_state().is_layout = true;
     return Widget::paint_event();
 }
 

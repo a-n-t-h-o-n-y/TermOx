@@ -14,9 +14,7 @@
 #include <cppurses/system/detail/user_input_event_loop.hpp>
 #include <cppurses/system/event.hpp>
 #include <cppurses/system/event_loop.hpp>
-// #include <cppurses/system/events/on_tree_event.hpp>
 #include <cppurses/system/events/disable_event.hpp>
-#include <cppurses/system/events/enable_event.hpp>
 #include <cppurses/system/events/paint_event.hpp>
 #include <cppurses/system/events/resize_event.hpp>
 #include <cppurses/widget/layout.hpp>
@@ -42,6 +40,11 @@ void System::post_event(std::unique_ptr<Event> event) {
 }
 
 bool System::send_event(const Event& event) {
+    if (event.receiver() == nullptr ||
+        (!event.receiver()->enabled() &&
+         (event.type() != Event::Delete && event.type() != Event::Disable))) {
+        return false;
+    }
     bool handled = event.send_to_all_filters();
     if (!handled) {
         handled = event.send();
@@ -110,21 +113,13 @@ System::~System() {
 
 void System::set_head(Widget* head_widget) {
     if (head_ != nullptr) {
-        // System::post_event<On_tree_event>(head_, false);
-        // TODO above turns into disable_event
         head_->disable();
-        // System::post_event<Disable_event>(head_);
     }
     head_ = head_widget;
     if (head_ != nullptr) {
-        // System::post_event<On_tree_event>(head_, true);
-        // TODO above turns into enable_event
-        System::post_event<Enable_event>(head_);
-        // TODO Check if below call is still necessary.
-        if (dynamic_cast<Layout*>(head_) != nullptr) {
-            System::post_event<Resize_event>(
-                head_, Area{System::max_width(), System::max_height()});
-        }
+        head_->enable();
+        System::post_event<Resize_event>(
+            head_, Area{System::max_width(), System::max_height()});
         head_->update();
     }
 }
@@ -142,6 +137,9 @@ Animation_engine& System::animation_engine() {
 }
 
 int System::run() {
+    if (head_ == nullptr) {
+        return -1;
+    }
     int return_code = main_loop_.run();
     return return_code;
 }

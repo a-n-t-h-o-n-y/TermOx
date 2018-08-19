@@ -11,11 +11,9 @@ namespace cppurses {
 class Widget;
 namespace slot {
 
+sig::Slot<void()> enable(Widget& w);
+sig::Slot<void()> disable(Widget& w);
 sig::Slot<void()> delete_later(Widget& w);
-sig::Slot<void()> close(Widget& w);
-sig::Slot<void()> hide(Widget& w);
-sig::Slot<void()> show(Widget& w);
-sig::Slot<void()> repaint(Widget& w);
 sig::Slot<void()> update(Widget& w);
 sig::Slot<void(Point, Mouse_button)> click(Widget& w);
 sig::Slot<void(Mouse_button)> click(Widget& w, Point c);

@@ -8,8 +8,12 @@ namespace cppurses {
 namespace detail {
 
 std::string event_as_string(const Event& event) {
+    return event_type_as_string(event.type());
+}
+
+std::string event_type_as_string(Event::Type event_type) {
     std::string name;
-    switch (event.type()) {
+    switch (event_type) {
         case Event::None:
             name = "None";
             break;
@@ -40,32 +44,14 @@ std::string event_as_string(const Event& event) {
         case Event::FocusOut:
             name = "FocusOut";
             break;
-        case Event::ClearScreen:
-            name = "ClearScreen";
-            break;
         case Event::Paint:
             name = "Paint";
-            break;
-        case Event::Repaint:
-            name = "Repaint";
             break;
         case Event::Move:
             name = "Move";
             break;
         case Event::Resize:
             name = "Resize";
-            break;
-        case Event::Show:
-            name = "Show";
-            break;
-        case Event::Hide:
-            name = "Hide";
-            break;
-        case Event::OnTree:
-            name = "OnTree";
-            break;
-        case Event::Close:
-            name = "Close";
             break;
         case Event::ChildAdded:
             name = "ChildAdded";
@@ -82,8 +68,8 @@ std::string event_as_string(const Event& event) {
         case Event::Disable:
             name = "Disable";
             break;
-        case Event::DeferredDelete:
-            name = "DeferredDelete";
+        case Event::Delete:
+            name = "Delete";
             break;
         case Event::Animation:
             name = "Animation";

@@ -19,7 +19,7 @@ class Resize_event : public Event {
 
    protected:
     Area new_size_;
-    Area old_size_;
+    mutable Area old_size_;
 };
 
 }  // namespace cppurses

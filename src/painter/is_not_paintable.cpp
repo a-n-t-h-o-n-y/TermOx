@@ -9,8 +9,7 @@ namespace detail {
 // calls, since these could be modified while flushing.. and this is used while
 // flushing.
 bool is_not_paintable(const Widget* w) {
-    return !w->enabled() || !w->visible() || (w->width() == 0) ||
-           (w->height() == 0);
+    return !w->enabled() || (w->width() == 0) || (w->height() == 0);
 }
 
 }  // namespace detail

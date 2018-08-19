@@ -98,11 +98,8 @@ void Focus::set_focus_to(Widget* new_focus) {
         System::post_event(std::move(event));
     }
     focus_widget_ = new_focus;
-    if (focus_widget_ != nullptr) {
-        std::unique_ptr<Focus_in_event> event{
-            new Focus_in_event(focus_widget_)};
-        System::post_event(std::move(event));
-    }
+    std::unique_ptr<Focus_in_event> event{new Focus_in_event(focus_widget_)};
+    System::post_event(std::move(event));
 }
 
 void Focus::clear_focus() {

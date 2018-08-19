@@ -14,8 +14,8 @@ class Vertical_layout : public Layout {
     void update_geometry() override;
 
    private:
-    std::vector<std::size_t> size_widgets();
-    void position_widgets(const std::vector<std::size_t>& heights);
+    std::vector<Dimensions> calculate_widget_sizes();
+    void move_and_resize_children(const std::vector<Dimensions>& dimensions);
 
     void distribute_space(std::vector<Dimensions_reference> widgets,
                           int height_left);

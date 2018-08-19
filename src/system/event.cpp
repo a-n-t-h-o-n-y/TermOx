@@ -34,4 +34,8 @@ bool Event::send_to_all_filters() const {
     return handled;
 }
 
+bool Event::operator==(const Event& other) const {
+    return (this->type_ == other.type_) && (this->receiver_ == other.receiver_);
+}
+
 }  // namespace cppurses

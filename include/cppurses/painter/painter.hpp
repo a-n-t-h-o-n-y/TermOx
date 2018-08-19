@@ -34,24 +34,27 @@ class Painter {
     /// Paint a Border object around the Widget.
     void border(const Border& b);
 
+    /// Fill the Widget with \p tile, from top left point (x, y).
     void fill(const Glyph& tile,
               std::size_t x,
               std::size_t y,
               std::size_t width,
               std::size_t height);
 
+    /// Fill the Widget with \p tile, from top left \p point.
     void fill(const Glyph& tile,
               Point point,
               std::size_t width,
               std::size_t height);
 
-    /// Draws a line from x1,y1 to x2,y2 inclusive, no diagonals implemented.
+    /// Draws a line from x1, y1 to x2, y2 inclusive, no diagonals atm.
     void line(const Glyph& tile,
               std::size_t x1,
               std::size_t y1,
               std::size_t x2,
               std::size_t y2);
 
+    /// Draws a line from \p point_1 to \p point_2 inclusive, no diagonals atm.
     void line(const Glyph& tile, const Point& point_1, const Point& point_2);
 
    private:

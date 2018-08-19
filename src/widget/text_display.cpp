@@ -14,6 +14,8 @@
 
 namespace cppurses {
 
+// TODO why is this update_display here and not in paint_event? Must be a
+// reason? It'd be more efficient the other way.
 void Text_display::update() {
     this->update_display();
     Widget::update();

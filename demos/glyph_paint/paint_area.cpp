@@ -114,12 +114,12 @@ void Paint_area::disable_erase() {
 }
 
 void Paint_area::enable_grid() {
-    this->set_background_tile(Glyph{L'┼', foreground(Color::Dark_gray)});
+    this->wallpaper = Glyph{L'┼', foreground(Color::Dark_gray)};
     this->update();
 }
 
 void Paint_area::disable_grid() {
-    this->set_background_tile(L' ');
+    this->wallpaper = L' ';
     this->update();
 }
 

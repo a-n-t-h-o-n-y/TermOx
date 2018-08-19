@@ -5,59 +5,50 @@
 #include <memory>
 
 #include <cppurses/system/event.hpp>
-#include <cppurses/system/events/deferred_delete_event.hpp>
+#include <cppurses/system/events/delete_event.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace {
 using namespace cppurses;
-// TODO is the below really necessary - think about if a descendant and ancestor
-// both have dd events.
-// Removes deferred delete events from the queue if an ancestor of one is added.
-template <typename Queue_t>
-void remove_deferred_delete_events(const Event& new_event, Queue_t& queue) {
-    Widget* parent =
-        static_cast<const Deferred_delete_event&>(new_event).to_delete();
 
-    auto is_descendants_event = [parent](const auto& event_ptr) {
-        if (event_ptr == nullptr) {
-            return false;
-        }
-        if (event_ptr->type() == Event::DeferredDelete) {
-            Widget* child =
-                static_cast<Deferred_delete_event&>(*event_ptr).to_delete();
-            return parent->children.has_descendant(child);
-        }
-        return false;
+template <typename Queue_t>
+void remove_descendant_delete_events(const Event& new_event, Queue_t& queue) {
+    const Widget* receiver{static_cast<Widget*>(new_event.receiver())};
+    auto is_descendant = [receiver](const std::unique_ptr<Event>& on_queue) {
+        return receiver->children.has_descendant(
+            static_cast<Widget*>(on_queue->receiver()));
     };
-    auto pos = std::remove_if(std::begin(queue), std::end(queue),
-                              is_descendants_event);
-    queue.erase(pos, std::end(queue));
+    auto at = std::remove_if(std::begin(queue), std::end(queue), is_descendant);
+    queue.erase(at, std::end(queue));
 }
+
 }  // namespace
 
 namespace cppurses {
 namespace detail {
 
 void Event_queue::append(std::unique_ptr<Event> event) {
-    if (event == nullptr || event->receiver() == nullptr) {
+    if (event == nullptr || event->receiver() == nullptr ||
+        (!event->receiver()->enabled() &&
+         (event->type() != Event::Delete && event->type() != Event::Disable))) {
+        // TODO provide a check for Disable_event to the above too, like Delete.
+        // Then Disable event can post itself instead of sending. Add check to
+        // send_event too.
         return;
     }
-    // Optimize out duplicate expensive events.
-    Event::Type type = event->type();
-    if (type == Event::Paint || type == Event::Repaint || type == Event::Move ||
-        type == Event::Resize || type == Event::ClearScreen ||
-        type == Event::DeferredDelete) {
-        auto is_same_event = [&type, &event](const auto& e) {
-            return (e->type() == type) && (e->receiver() == event->receiver());
-        };
+    Event::Type type{event->type()};
+    // Optimize out expensive duplicate events.
+    if (type == Event::Paint || type == Event::Move || type == Event::Resize ||
+        type == Event::Disable || Event::Enable) {
         auto begin = std::begin(queue_);
         auto end = std::end(queue_);
-        auto position = std::find_if(begin, end, is_same_event);
-        if (position != end) {
-            queue_.erase(position);
-        }
-        if (type == Event::DeferredDelete) {
-            remove_deferred_delete_events(*event, queue_);
+        auto events_equal = [&event](const std::unique_ptr<Event>& on_queue) {
+            bool result{*event == *on_queue};
+            return result;
+        };
+        queue_.erase(std::remove_if(begin, end, events_equal), end);
+        if (type == Event::Delete) {
+            remove_descendant_delete_events(*event, queue_);
         }
     }
     queue_.emplace_back(std::move(event));

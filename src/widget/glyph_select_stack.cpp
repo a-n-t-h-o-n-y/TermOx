@@ -51,16 +51,16 @@ bool Glyph_select_stack::mouse_press_event_filter(Event_handler* receiver,
 }
 
 bool Glyph_select_stack::resize_event(Area new_size, Area old_size) {
-    Widget_stack::resize_event(new_size, old_size);
     this->update_stack();
-    return true;
+    return Widget_stack::resize_event(new_size, old_size);
 }
 
+// This is a bit of a mess.
 void Glyph_select_stack::update_stack() {
     if (this->width() == 0 || this->height() == 0) {
         return;
     }
-    this->clear();
+    this->clear();  // TODO this deletes everything, might be an issue?
     std::size_t count{0};
     do {
         Matrix_display& md{

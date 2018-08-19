@@ -22,7 +22,7 @@ class Widget_stack_menu : public Vertical_layout {
     void insert_page(Glyph_string title,
                      std::size_t index,
                      std::unique_ptr<Widget> widget);
-    std::unique_ptr<Widget> remove_page(std::size_t index);
+    void remove_page(std::size_t index);
 
     std::size_t size() const;
 

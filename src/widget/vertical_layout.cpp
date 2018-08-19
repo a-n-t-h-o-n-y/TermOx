@@ -15,19 +15,26 @@
 #include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget.hpp>
 
+#include <fstream>  // temp
+
 namespace cppurses {
 
-std::vector<std::size_t> Vertical_layout::size_widgets() {
+std::vector<Layout::Dimensions> Vertical_layout::calculate_widget_sizes() {
     std::vector<Dimensions> widgets;
     std::size_t total_stretch{0};
     for (const std::unique_ptr<Widget>& c : this->children.get()) {
-        if (c->visible()) {
-            widgets.emplace_back(Dimensions{c.get(), 0, 0});
+        if (c->enabled()) {
+            // widgets.emplace_back(Dimensions{c.get(), 0, 0});
+            widgets.emplace_back(Dimensions{c.get(), this->width(), 0});
             total_stretch += c->height_policy.stretch();
         }
     }
 
     int height_available = this->height();
+    if (height_available == 0) {
+        this->set_too_small(true);
+        return std::vector<Dimensions>();
+    }
 
     // VERTICAL
     // Set Fixed, Minimum and MinimumExpanding to height_hint
@@ -40,8 +47,9 @@ std::vector<std::size_t> Vertical_layout::size_widgets() {
         }
     }
     if (height_available < 0) {
-        too_small_ = true;
-        return std::vector<std::size_t>();
+        // too_small_ = true;
+        this->set_too_small(true);
+        return std::vector<Dimensions>();
     }
 
     // Set Size_policy::Ignored widgets to their stretch factor height value
@@ -96,8 +104,9 @@ std::vector<std::size_t> Vertical_layout::size_widgets() {
         if (policy == Size_policy::Fixed) {
             d.width = d.widget->width_policy.hint();
             if (d.width > this->width()) {
-                too_small_ = true;
-                return std::vector<std::size_t>();
+                // too_small_ = true;
+                this->set_too_small(true);
+                return std::vector<Dimensions>();
             }
         } else if (policy == Size_policy::Ignored ||
                    policy == Size_policy::Preferred ||
@@ -106,16 +115,18 @@ std::vector<std::size_t> Vertical_layout::size_widgets() {
             if (d.width > d.widget->width_policy.max()) {
                 d.width = d.widget->width_policy.max();
             } else if (d.width < d.widget->width_policy.min()) {
-                too_small_ = true;
-                return std::vector<std::size_t>();
+                // too_small_ = true;
+                this->set_too_small(true);
+                return std::vector<Dimensions>();
             }
         } else if (policy == Size_policy::Maximum) {
             d.width = this->width();
             if (d.width > d.widget->width_policy.hint()) {
                 d.width = d.widget->width_policy.hint();
             } else if (d.width < d.widget->width_policy.min()) {
-                too_small_ = true;
-                return std::vector<std::size_t>();
+                // too_small_ = true;
+                this->set_too_small(true);
+                return std::vector<Dimensions>();
             }
         } else if (policy == Size_policy::Minimum ||
                    policy == Size_policy::MinimumExpanding) {
@@ -125,22 +136,20 @@ std::vector<std::size_t> Vertical_layout::size_widgets() {
             }
             if (d.width > d.widget->width_policy.max() ||
                 d.width > this->width()) {
-                too_small_ = true;
-                return std::vector<std::size_t>();
+                // too_small_ = true;
+                this->set_too_small(true);
+                return std::vector<Dimensions>();
             }
         }
     }
 
-    // Post all Resize_events
-    for (Dimensions& d : widgets) {
-        System::post_event<Resize_event>(d.widget, Area{d.width, d.height});
-    }
-    std::vector<std::size_t> heights;
-    heights.reserve(widgets.size());
-    for (const Dimensions& d : widgets) {
-        heights.push_back(d.height);
-    }
-    return heights;
+    return widgets;
+    // std::vector<std::size_t> heights;
+    // heights.reserve(widgets.size());
+    // for (const Dimensions& d : widgets) {
+    //     heights.push_back(d.height);
+    // }
+    // return heights;
 }
 
 void Vertical_layout::distribute_space(
@@ -411,33 +420,35 @@ void Vertical_layout::collect_space(std::vector<Dimensions_reference> widgets,
             height_deductions.pop_front();
         }
     }
-    // Change this to distribute the space, it might not be too small
+    // TODO Change this to distribute the space, it might not be too small
     if (height_left != 0) {
-        too_small_ = true;
+        // too_small_ = true;
+        this->set_too_small(true);
         return;
     }
 }
 
-void Vertical_layout::position_widgets(
-    const std::vector<std::size_t>& heights) {
-    const std::vector<std::unique_ptr<Widget>>& widgets{this->children.get()};
-    if (widgets.size() != heights.size()) {
-        return;
-    }
-    std::size_t index{0};
-    std::size_t x_offset{0};
-    std::size_t y_offset{0};
-    for (const std::unique_ptr<Widget>& w : widgets) {
-        std::size_t x_pos{this->inner_x() + x_offset};
-        std::size_t y_pos{this->inner_y() + y_offset};
-        System::post_event<Move_event>(w.get(), Point{x_pos, y_pos});
-        y_offset += heights.at(index++);
+void Vertical_layout::move_and_resize_children(
+    const std::vector<Dimensions>& dimensions) {
+    const std::size_t parent_x{this->inner_x()};
+    const std::size_t parent_y{this->inner_y()};
+    const std::size_t parent_height{this->height()};
+    std::size_t y_pos{parent_y};
+    for (const Dimensions& d : dimensions) {
+        if (y_pos >= (parent_y + parent_height)) {
+            d.widget->disable(true, false);  // don't send child_polished_events
+        } else {
+            System::post_event<Move_event>(d.widget, Point{parent_x, y_pos});
+            System::post_event<Resize_event>(d.widget, Area{d.width, d.height});
+            y_pos += d.height;
+        }
     }
 }
 
 void Vertical_layout::update_geometry() {
-    auto heights = this->size_widgets();
-    this->position_widgets(heights);
+    this->set_too_small(false);
+    std::vector<Dimensions> heights{this->calculate_widget_sizes()};
+    this->move_and_resize_children(heights);
 }
 
 }  // namespace cppurses

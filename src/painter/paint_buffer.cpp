@@ -4,8 +4,10 @@
 #include <mutex>
 
 #include <cppurses/painter/detail/add_default_attributes.hpp>
+#include <cppurses/painter/detail/find_empty_space.hpp>
 #include <cppurses/painter/detail/is_not_paintable.hpp>
 #include <cppurses/painter/detail/ncurses_data.hpp>
+#include <cppurses/painter/detail/screen_mask.hpp>
 #include <cppurses/painter/detail/staged_changes.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_matrix.hpp>
@@ -13,13 +15,14 @@
 #include <cppurses/painter/palette.hpp>
 #include <cppurses/painter/rgb.hpp>
 #include <cppurses/system/detail/find_widget_at.hpp>
-// #include <cppurses/system/detail/repaint_all.hpp>
 #include <cppurses/system/events/paint_event.hpp>
 #include <cppurses/system/focus.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/area.hpp>
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/widget.hpp>
+
+#include <fstream>  //temp
 
 namespace {
 using namespace cppurses;
@@ -34,7 +37,7 @@ bool child_has_point(const Widget& w, std::size_t x, std::size_t y) {
     return false;
 }
 
-bool background_changed(const Glyph& first, const Glyph& second) {
+bool wallpaper_changed(const Glyph& first, const Glyph& second) {
     if (first == second) {
         return false;
         // attrs are same except foreground color)
@@ -51,6 +54,86 @@ bool background_changed(const Glyph& first, const Glyph& second) {
         }
     }
     return true;
+}
+
+void debug_child_size(const Widget* child) {
+    std::ofstream l{"child_size_log.txt", std::ios::app};
+    if (child == nullptr) {
+        // l << "child == nullptr" << std::endl;
+        return;
+    } else if (!child->enabled()) {
+        return;
+    }
+    if (child->parent() == nullptr) {
+        // head widget
+        if (child->x() + child->outer_width() > System::max_width()) {
+            l << "Head widget largest_x is too large" << std::endl;
+        }
+        if (child->y() + child->outer_height() > System::max_height()) {
+            l << "Head widget largest_y is too large" << std::endl;
+        }
+    } else {
+        const Widget* parent{child->parent()};
+        // make sure smallest x in child is within parents x range.
+        const std::size_t smallest_x{child->x()};
+        bool out_of_bounds{false};
+        if (smallest_x < parent->inner_x()) {
+            out_of_bounds = true;
+            // l << child << " child left x is less than parent left x\n";
+            // l << "child smallest_x: " << smallest_x << " parent smallest_x:
+            // "; l << parent->x() << std::endl;
+        }
+
+        // make sure largest x in child is within parents x range.
+        const std::size_t largest_x{child->x() + child->outer_width()};
+        if (largest_x > parent->inner_x() + parent->width()) {
+            out_of_bounds = true;
+            // l << child << " child largest_x is greater than parent
+            // largest_x\n"; l << "child largest_x: " << largest_x << " parent
+            // largest_x: "; l << parent->x() + parent->outer_width() <<
+            // std::endl;
+        }
+
+        // -------------------------------------------------------
+
+        // make sure smallest y in child is within parents y range.
+        const std::size_t smallest_y{child->y()};
+        if (smallest_y < parent->inner_y()) {
+            out_of_bounds = true;
+            // l << child << " child left y is less than parent left y\n";
+            // l << "child smallest_y: " << smallest_y << " parent smallest_y:
+            // "; l << parent->y() << std::endl;
+        }
+
+        // make sure largest y in child is within parents y range.
+        const std::size_t largest_y{child->y() + child->outer_height()};
+        if (largest_y > parent->inner_y() + parent->height()) {
+            out_of_bounds = true;
+            // l << child << " child largest_y is greater than parent
+            // largest_y\n"; l << "child largest_y: " << largest_y << " parent
+            // largest_y: "; l << parent->y() + parent->outer_height() <<
+            // std::endl;
+        }
+        if (out_of_bounds) {
+            // child
+            l << "child:\n";
+            l << "(" << child->x() << ", " << child->y() << ")" << std::endl;
+            l << "width: " << child->outer_width()
+              << "\nheight: " << child->outer_height() << '\n';
+            l << "---------\n";
+            l << "parent:\n";
+            l << "(" << parent->inner_x() << ", " << parent->inner_y() << ")" << std::endl;
+            l << "width: " << parent->width()
+              << "\nheight: " << parent->height() << '\n';
+            l << "===========" << std::endl;
+
+            // parent
+        }
+    }
+
+    for (const std::unique_ptr<Widget>& c : child->children.get()) {
+        debug_child_size(c.get());
+    }
 }
 
 }  // namespace
@@ -93,56 +176,129 @@ Paint_buffer::Paint_buffer() {
 //     }
 // }
 
-void Paint_buffer::flush_background_changed(
+void Paint_buffer::flush_wallpaper_changed(
     Widget* w,
-    const detail::Screen_descriptor& changes_map) {
-    const Glyph& current_background{w->find_background_tile()};
+    const detail::Screen_descriptor& changes) {
+    Glyph wallpaper{w->generate_wallpaper()};
+    // Paint layout empty space.
+    if (w->screen_state().is_layout) {
+        // create bitmask
+        detail::Screen_mask mask{detail::find_empty_space(*w)};
+
+        // iterate over bitmask and put wallpapers
+        for (std::size_t y{mask.offset().y};
+             y < mask.offset().y + mask.area().height; ++y) {
+            for (std::size_t x{mask.offset().x};
+                 x < mask.offset().x + mask.area().width; ++x) {
+                if (mask.at(x, y)) {
+                    engine_.put(x, y, wallpaper);
+                }
+            }
+        }
+    }
     for (std::size_t y{w->y()}; y < (w->y() + w->outer_height()); ++y) {
         for (std::size_t x{w->x()}; x < (w->x() + w->outer_width()); ++x) {
             Point p{x, y};
-            auto screen_iter = w->screen_state().tiles.find(p);
-            auto end_iter = std::end(w->screen_state().tiles);
-            // Staged Changes has a tile at this point.
-            if (changes_map.count(p) == 1) {
-                Glyph tile{changes_map.at(p)};
-                detail::add_default_attributes(tile, w->brush);
-                // Screen state does not have a tile, or is not equal to
-                // the one that is currently there.
-                // ADD TILE
-                if (screen_iter == end_iter ||
-                    (screen_iter != end_iter && screen_iter->second != tile)) {
-                    if (!child_has_point(*w, p.x, p.y)) {
-                        engine_.put(p.x, p.y, tile);
-                        w->screen_state().tiles[p] = tile;
+            if (changes.count(p) == 0 && !w->screen_state().is_layout) {
+                if (w->screen_state().tiles.count(p) == 1) {
+                    w->screen_state().tiles.erase(p);
+                }
+                engine_.put(p.x, p.y, wallpaper);
+            }
+            if (changes.count(p) == 1) {
+                Glyph new_tile{changes.at(p)};
+                detail::add_default_attributes(new_tile, w->brush);
+                if (w->screen_state().tiles.count(p) == 1) {
+                    if (w->screen_state().tiles[p] == new_tile) {
+                        // no-op
+                    }
+                    if (w->screen_state().tiles[p] != new_tile) {
+                        engine_.put(p.x, p.y, new_tile);
+                        w->screen_state().tiles[p] = new_tile;
                     }
                 }
-            } else {
-                // Staged Changes does not have a tile.
-                // But screen state might, put a background tile.
-                // ADD BACKGROUND
-                if (!child_has_point(*w, p.x, p.y)) {
-                    engine_.put(p.x, p.y, current_background);
+                if (w->screen_state().tiles.count(p) == 0) {
+                    engine_.put(p.x, p.y, new_tile);
+                    w->screen_state().tiles[p] = new_tile;
                 }
             }
         }
     }
 }
 
+            // Staged Changes has a tile at this point.
+            // if (changes_map.count(p) == 1) {
+            //     Glyph tile{changes_map.at(p)};
+            //     detail::add_default_attributes(tile, w->brush);
+            //     // Screen state does not have a tile, or is not equal to
+            //     // the one that is currently there.
+            //     // ADD TILE
+            //     if (screen_iter == end_iter ||
+            //         (screen_iter != end_iter && screen_iter->second != tile))
+            //         { if (!child_has_point(*w, p.x, p.y)) {
+            //             engine_.put(p.x, p.y, tile);
+            //             w->screen_state().tiles[p] = tile;
+            //         }
+            //     }
+            // } else {
+            //     // Staged Changes does not have a tile.
+            //     // But screen state might, put a background tile.
+            //     // ADD BACKGROUND
+            //     if (!child_has_point(*w, p.x, p.y)) {
+            //         engine_.put(p.x, p.y, current_wallpaper);
+            //     }
+            // }
+
+// void Paint_buffer::flush_wallpaper_changed(
+//     Widget* w,
+//     const detail::Screen_descriptor& changes_map) {
+//     const Glyph& current_wallpaper{w->generate_wallpaper()};
+//     for (std::size_t y{w->y()}; y < (w->y() + w->outer_height()); ++y) {
+//         for (std::size_t x{w->x()}; x < (w->x() + w->outer_width()); ++x) {
+//             Point p{x, y};
+//             auto screen_iter = w->screen_state().tiles.find(p);
+//             auto end_iter = std::end(w->screen_state().tiles);
+//             // Staged Changes has a tile at this point.
+//             if (changes_map.count(p) == 1) {
+//                 Glyph tile{changes_map.at(p)};
+//                 detail::add_default_attributes(tile, w->brush);
+//                 // Screen state does not have a tile, or is not equal to
+//                 // the one that is currently there.
+//                 // ADD TILE
+//                 if (screen_iter == end_iter ||
+//                     (screen_iter != end_iter && screen_iter->second != tile))
+//                     { if (!child_has_point(*w, p.x, p.y)) {
+//                         engine_.put(p.x, p.y, tile);
+//                         w->screen_state().tiles[p] = tile;
+//                     }
+//                 }
+//             } else {
+//                 // Staged Changes does not have a tile.
+//                 // But screen state might, put a background tile.
+//                 // ADD BACKGROUND
+//                 if (!child_has_point(*w, p.x, p.y)) {
+//                     engine_.put(p.x, p.y, current_wallpaper);
+//                 }
+//             }
+//         }
+//     }
+// }
+
 void Paint_buffer::flush_just_appeared(
     Widget* w,
     const detail::Screen_descriptor& changes_map) {
-    flush_background_changed(w, changes_map);
+    flush_wallpaper_changed(w, changes_map);
 }
 
 void Paint_buffer::flush_child_event_happened(
     Widget* w,
     const detail::Screen_descriptor& changes_map) {
-    flush_background_changed(w, changes_map);
+    flush_wallpaper_changed(w, changes_map);
 }
 
 void Paint_buffer::flush_minimal(Widget* w,
                                  const detail::Screen_descriptor& changes_map) {
-    const Glyph& current_background{w->find_background_tile()};
+    const Glyph& current_background{w->generate_wallpaper()};
     // BACKGROUNDS COVER LEFTOVERS
     std::vector<Point> to_delete;
     for (const auto& point_tile : w->screen_state().tiles) {
@@ -186,6 +342,8 @@ void Paint_buffer::flush(const detail::Staged_changes& changes) {
     std::lock_guard<std::mutex> lock{detail::NCurses_data::ncurses_mtx};
     bool refresh{false};
 
+    // debug_child_size(System::head());
+
     for (const auto& pair : changes) {
         Widget* w{pair.first};
         const detail::Screen_descriptor& changes_map{pair.second};
@@ -195,26 +353,27 @@ void Paint_buffer::flush(const detail::Staged_changes& changes) {
             continue;
         }
 
-        const Glyph& current_background{w->find_background_tile()};
-        Glyph& last_background{w->screen_state().background_tile};
+        const Glyph& current_wallpaper{w->generate_wallpaper()};
+        Glyph& last_wallpaper{w->screen_state().wallpaper};
 
         refresh = true;
 
-        if (background_changed(current_background, last_background)) {
-            flush_background_changed(w, changes_map);
-        } else if (w->screen_state().just_appeared) {
-            flush_just_appeared(w, changes_map);
-        } else if (w->screen_state().child_event_happened) {
-            flush_child_event_happened(w, changes_map);
-        } else if (w->screen_state().move_happened ||
-                   w->screen_state().resize_happened) {
-            flush_move_resize_event(w, changes_map);
-        } else {
-            flush_minimal(w, changes_map);
-        }
+        flush_wallpaper_changed(w, changes_map);
+        // if (wallpaper_changed(current_wallpaper, last_wallpaper)) {
+        //     flush_wallpaper_changed(w, changes_map);
+        // } else if (w->screen_state().just_appeared) {
+        //     flush_just_appeared(w, changes_map);
+        // } else if (w->screen_state().child_event_happened) {
+        //     flush_child_event_happened(w, changes_map);
+        // } else if (w->screen_state().move_happened ||
+        //            w->screen_state().resize_happened) {
+        //     flush_move_resize_event(w, changes_map);
+        // } else {
+        //     flush_minimal(w, changes_map);
+        // }
 
         // If background tile has changed or widget just appeared on screen.
-        // if (background_changed(current_background, last_background) ||
+        // if (wallpaper_changed(current_background, last_background) ||
         //     w->screen_state().just_appeared ||
         //     w->screen_state().child_event_happened) {
         //     if (w->screen_state().just_appeared) {
@@ -285,7 +444,7 @@ void Paint_buffer::flush(const detail::Staged_changes& changes) {
         //     }
         // }
 
-        last_background = current_background;
+        last_wallpaper = current_wallpaper;
     }
 
     Widget* focus_w = Focus::focus_widget();

@@ -7,6 +7,7 @@
 
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
+#include <cppurses/painter/detail/is_not_paintable.hpp>
 #include <cppurses/painter/detail/staged_changes.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
@@ -39,7 +40,7 @@ void Painter::put(const Glyph& tile, Point position) {
 }
 
 void Painter::put(const Glyph_string& text, std::size_t x, std::size_t y) {
-    if (!widget_->enabled() || !widget_->visible()) {
+    if (detail::is_not_paintable(widget_)) {
         return;
     }
     for (const Glyph& g : text) {
@@ -52,7 +53,7 @@ void Painter::put(const Glyph_string& text, Point position) {
 }
 
 void Painter::border(const Border& b) {
-    if (!b.enabled || widget_->outer_width() == 0 ||
+    if (!b.enabled || !widget_->enabled() || widget_->outer_width() == 0 ||
         widget_->outer_height() == 0) {
         return;
     }

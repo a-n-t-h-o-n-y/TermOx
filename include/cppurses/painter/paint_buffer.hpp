@@ -74,7 +74,7 @@ class Paint_buffer {
     // void cover_with_background(Widget& w);
     // bool within_screen(const Point& p);
 
-    void flush_background_changed(Widget* w,
+    void flush_wallpaper_changed(Widget* w,
                                   const detail::Screen_descriptor& changes_map);
     void flush_just_appeared(Widget* w,
                              const detail::Screen_descriptor& changes_map);

@@ -17,21 +17,15 @@ class Event {
         KeyRelease,
         FocusIn,
         FocusOut,
-        ClearScreen, // TODO remove?
         Paint,
-        Repaint,
         Move,
         Resize,
-        Show,
-        Hide,
-        OnTree,
-        Close,
         ChildAdded,
         ChildRemoved,
         ChildPolished,
         Enable,
         Disable,
-        DeferredDelete,
+        Delete,
         Animation
         // Timer,
         // Enter,
@@ -41,7 +35,7 @@ class Event {
     };
 
     // Special Member Functions
-    explicit Event(Type type, Event_handler* receiver);
+    Event(Type type, Event_handler* receiver);
     Event(const Event&) = default;
     Event& operator=(const Event&) = default;
     Event(Event&&) = default;
@@ -55,6 +49,8 @@ class Event {
     bool send_to_all_filters() const;
     virtual bool send() const = 0;
     virtual bool filter_send(Event_handler* filter) const = 0;
+
+    bool operator==(const Event& other) const;
 
    protected:
     Type type_;

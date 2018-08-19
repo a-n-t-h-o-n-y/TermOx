@@ -17,11 +17,11 @@
 
 namespace cppurses {
 
-std::vector<std::size_t> Horizontal_layout::size_widgets() {
+std::vector<Layout::Dimensions> Horizontal_layout::calculate_widget_sizes() {
     std::vector<Dimensions> widgets;
     std::size_t total_stretch{0};
     for (const std::unique_ptr<Widget>& c : this->children.get()) {
-        if (c->visible()) {
+        if (c->enabled()) {
             widgets.emplace_back(Dimensions{c.get(), 0, 0});
             total_stretch += c->width_policy.stretch();
         }
@@ -40,8 +40,9 @@ std::vector<std::size_t> Horizontal_layout::size_widgets() {
         }
     }
     if (width_available < 0) {
-        too_small_ = true;
-        return std::vector<std::size_t>();
+        // too_small_ = true;
+        this->set_too_small(true);
+        return std::vector<Dimensions>();
     }
 
     // Set Size_policy::Ignored widgets to their stretch factor width value
@@ -96,8 +97,9 @@ std::vector<std::size_t> Horizontal_layout::size_widgets() {
         if (policy == Size_policy::Fixed) {
             d.height = d.widget->height_policy.hint();
             if (d.height > this->height()) {
-                too_small_ = true;
-                return std::vector<std::size_t>();
+                // too_small_ = true;
+                this->set_too_small(true);
+                return std::vector<Dimensions>();
             }
         } else if (policy == Size_policy::Ignored ||
                    policy == Size_policy::Preferred ||
@@ -106,16 +108,18 @@ std::vector<std::size_t> Horizontal_layout::size_widgets() {
             if (d.height > d.widget->height_policy.max()) {
                 d.height = d.widget->height_policy.max();
             } else if (d.height < d.widget->height_policy.min()) {
-                too_small_ = true;
-                return std::vector<std::size_t>();
+                // too_small_ = true;
+                this->set_too_small(true);
+                return std::vector<Dimensions>();
             }
         } else if (policy == Size_policy::Maximum) {
             d.height = this->height();
             if (d.height > d.widget->height_policy.hint()) {
                 d.height = d.widget->height_policy.hint();
             } else if (d.height < d.widget->height_policy.min()) {
-                too_small_ = true;
-                return std::vector<std::size_t>();
+                // too_small_ = true;
+                this->set_too_small(true);
+                return std::vector<Dimensions>();
             }
         } else if (policy == Size_policy::Minimum ||
                    policy == Size_policy::MinimumExpanding) {
@@ -125,22 +129,20 @@ std::vector<std::size_t> Horizontal_layout::size_widgets() {
             }
             if (d.height > d.widget->height_policy.max() ||
                 d.height > this->height()) {
-                too_small_ = true;
-                return std::vector<std::size_t>();
+                // too_small_ = true;
+                this->set_too_small(true);
+                return std::vector<Dimensions>();
             }
         }
     }
 
-    // Post all Resize_events
-    for (Dimensions& d : widgets) {
-        System::post_event<Resize_event>(d.widget, Area{d.width, d.height});
-    }
-    std::vector<std::size_t> widths;
-    widths.reserve(widgets.size());
-    for (const Dimensions& d : widgets) {
-        widths.push_back(d.width);
-    }
-    return widths;
+    return widgets;
+    // std::vector<std::size_t> widths;
+    // widths.reserve(widgets.size());
+    // for (const Dimensions& d : widgets) {
+    //     widths.push_back(d.width);
+    // }
+    // return widths;
 }
 
 void Horizontal_layout::distribute_space(
@@ -412,32 +414,33 @@ void Horizontal_layout::collect_space(std::vector<Dimensions_reference> widgets,
     }
     // Change this to distribute the space, it might not be too small
     if (width_left != 0) {
-        too_small_ = true;
+        // too_small_ = true;
+        this->set_too_small(true);
         return;
     }
 }
 
-void Horizontal_layout::position_widgets(
-    const std::vector<std::size_t>& widths) {
-    const std::vector<std::unique_ptr<Widget>>& widgets{this->children.get()};
-    // TODO remove this check if you can prove in your implementation
-    if (widgets.size() != widths.size()) {
-        return;
-    }
-    std::size_t index{0};
-    std::size_t x_offset{0};
-    std::size_t y_offset{0};
-    for (const std::unique_ptr<Widget>& w : widgets) {
-        std::size_t x_pos{this->inner_x() + x_offset};
-        std::size_t y_pos{this->inner_y() + y_offset};
-        System::post_event<Move_event>(w.get(), Point{x_pos, y_pos});
-        x_offset += widths.at(index++);
+void Horizontal_layout::move_and_resize_children(
+    const std::vector<Dimensions>& dimensions) {
+    const std::size_t parent_x{this->inner_x()};
+    const std::size_t parent_y{this->inner_y()};
+    const std::size_t parent_width{this->width()};
+    std::size_t x_pos{parent_x};
+    for (const Dimensions& d : dimensions) {
+        if (x_pos >= (parent_x + parent_width)) {
+            d.widget->disable(true, false);  // don't send child_polished_events
+        } else {
+            System::post_event<Move_event>(d.widget, Point{x_pos, parent_y});
+            System::post_event<Resize_event>(d.widget, Area{d.width, d.height});
+            x_pos += d.width;
+        }
     }
 }
 
 void Horizontal_layout::update_geometry() {
-    auto widths = this->size_widgets();
-    this->position_widgets(widths);
+    this->set_too_small(false);
+    std::vector<Dimensions> widths{this->calculate_widget_sizes()};
+    this->move_and_resize_children(widths);
 }
 
 }  // namespace cppurses
