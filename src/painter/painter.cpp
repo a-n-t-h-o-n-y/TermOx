@@ -17,6 +17,8 @@
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 
+#include <fstream>  //temp
+
 namespace cppurses {
 
 Painter::Painter(Widget* widg)
@@ -203,6 +205,61 @@ void Painter::line(const Glyph& tile,
 // GLOBAL COORDINATES - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 void Painter::put_global(const Glyph& tile, std::size_t x, std::size_t y) {
+    std::size_t width{System::max_width()};
+    std::size_t height{System::max_height()};
+    if (x >= width || y >= height) {
+        std::ofstream l{"painter_log.txt", std::ios::app};
+        l << "widget: " << widget_->name() << '\n';
+        l << "Painting at: (" << x << ", " << y << ")\n";
+        l << "widget width: " << widget_->outer_width()
+          << " height: " << widget_->outer_height() << std::endl;
+        l << "widget x: " << widget_->x() << " y: " << widget_->y()
+          << std::endl;
+        if (widget_->parent() != nullptr) {
+            l << "parent: " << widget_->parent()->name() << '\n';
+            l << "parent width: " << widget_->parent()->outer_width()
+              << " height: " << widget_->parent()->outer_height() << std::endl;
+            l << "parent x: " << widget_->parent()->x();
+            l << " y: " << widget_->parent()->y() << '\n';
+            if (widget_->parent()->parent() != nullptr) {
+                l << "\tparent's parent: "
+                  << widget_->parent()->parent()->name() << '\n';
+                l << "\tparent's parent width: "
+                  << widget_->parent()->parent()->outer_width()
+                  << " height: " << widget_->parent()->parent()->outer_height()
+                  << std::endl;
+                l << "\tparent's parent x: "
+                  << widget_->parent()->parent()->x();
+                l << " y: " << widget_->parent()->parent()->y() << '\n';
+                l << "\tparent's parent inner_x: "
+                  << widget_->parent()->parent()->inner_x();
+                l << " inner_y: " << widget_->parent()->parent()->inner_y()
+                  << '\n';
+                if (widget_->parent()->parent()->parent() != nullptr) {
+                    l << "\t\tparent's parent's parent: "
+                      << widget_->parent()->parent()->parent()->name() << '\n';
+                    l << "\t\tparent's parent's parent width: "
+                      << widget_->parent()->parent()->parent()->outer_width()
+                      << " height: "
+                      << widget_->parent()->parent()->parent()->outer_height()
+                      << std::endl;
+                    l << "\t\tparent's parent's parent x: "
+                      << widget_->parent()->parent()->parent()->x();
+                    l << " y: " << widget_->parent()->parent()->parent()->y()
+                      << '\n';
+                    l << "\t\tparent's parent's parent inner_x: "
+                      << widget_->parent()->parent()->parent()->inner_x();
+                    l << " inner_y: "
+                      << widget_->parent()->parent()->parent()->inner_y()
+                      << '\n';
+                }
+            }
+        }
+        l << "Screen Boundaries. Width: " << width << " Height: " << height
+          << '\n';
+        l << "- - - - - - - - - - - - - -" << std::endl;
+        return;
+    }
     staged_changes_[Point{x, y}] = tile;
 }
 

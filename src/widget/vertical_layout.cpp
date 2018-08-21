@@ -15,15 +15,13 @@
 #include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget.hpp>
 
-#include <fstream>  // temp
-
 namespace cppurses {
 
 std::vector<Layout::Dimensions> Vertical_layout::calculate_widget_sizes() {
     std::vector<Dimensions> widgets;
     std::size_t total_stretch{0};
     for (const std::unique_ptr<Widget>& c : this->children.get()) {
-        if (c->enabled()) {
+        if (c->enabled()) {  // TODO do not include Ignored height policy widgs?
             // widgets.emplace_back(Dimensions{c.get(), 0, 0});
             widgets.emplace_back(Dimensions{c.get(), this->width(), 0});
             total_stretch += c->height_policy.stretch();
@@ -31,10 +29,6 @@ std::vector<Layout::Dimensions> Vertical_layout::calculate_widget_sizes() {
     }
 
     int height_available = this->height();
-    if (height_available == 0) {
-        this->set_too_small(true);
-        return std::vector<Dimensions>();
-    }
 
     // VERTICAL
     // Set Fixed, Minimum and MinimumExpanding to height_hint
@@ -46,11 +40,9 @@ std::vector<Layout::Dimensions> Vertical_layout::calculate_widget_sizes() {
             height_available -= d.height;
         }
     }
-    if (height_available < 0) {
-        // too_small_ = true;
-        this->set_too_small(true);
-        return std::vector<Dimensions>();
-    }
+    // if (height_available < 0) {
+    //     return widgets;
+    // }
 
     // Set Size_policy::Ignored widgets to their stretch factor height value
     for (Dimensions& d : widgets) {
@@ -79,6 +71,8 @@ std::vector<Layout::Dimensions> Vertical_layout::calculate_widget_sizes() {
         }
     }
 
+    /// DISTRIBUTE SPACE ------------------------------------------------------
+
     // create vector of size references for below if statements
     std::vector<Dimensions_reference> widgets_w_refs;
     widgets_w_refs.reserve(widgets.size());
@@ -98,58 +92,35 @@ std::vector<Layout::Dimensions> Vertical_layout::calculate_widget_sizes() {
         this->collect_space(widgets_w_refs, height_available);
     }
 
+    /// DISTRIBUTE SPACE ------------------------------------------------------
+
     // HORIZONTAL - repeat the above, but with horizontal properties
     for (Dimensions& d : widgets) {
         auto policy = d.widget->width_policy.type();
         if (policy == Size_policy::Fixed) {
             d.width = d.widget->width_policy.hint();
-            if (d.width > this->width()) {
-                // too_small_ = true;
-                this->set_too_small(true);
-                return std::vector<Dimensions>();
-            }
         } else if (policy == Size_policy::Ignored ||
                    policy == Size_policy::Preferred ||
                    policy == Size_policy::Expanding) {
-            d.width = this->width();
             if (d.width > d.widget->width_policy.max()) {
                 d.width = d.widget->width_policy.max();
             } else if (d.width < d.widget->width_policy.min()) {
-                // too_small_ = true;
-                this->set_too_small(true);
-                return std::vector<Dimensions>();
+                d.width = d.widget->width_policy.min();
             }
         } else if (policy == Size_policy::Maximum) {
-            d.width = this->width();
             if (d.width > d.widget->width_policy.hint()) {
                 d.width = d.widget->width_policy.hint();
-            } else if (d.width < d.widget->width_policy.min()) {
-                // too_small_ = true;
-                this->set_too_small(true);
-                return std::vector<Dimensions>();
             }
         } else if (policy == Size_policy::Minimum ||
                    policy == Size_policy::MinimumExpanding) {
-            d.width = this->width();
-            if (d.width < d.widget->width_policy.hint()) {
+            if (d.width > d.widget->width_policy.max()) {
+                d.width = d.widget->width_policy.max();
+            } else if (d.width < d.widget->width_policy.hint()) {
                 d.width = d.widget->width_policy.hint();
-            }
-            if (d.width > d.widget->width_policy.max() ||
-                d.width > this->width()) {
-                // too_small_ = true;
-                this->set_too_small(true);
-                return std::vector<Dimensions>();
             }
         }
     }
-
     return widgets;
-    // std::vector<std::size_t> heights;
-    // heights.reserve(widgets.size());
-    // for (const Dimensions& d : widgets) {
-    //     heights.push_back(d.height);
-    // }
-    // return heights;
 }
 
 void Vertical_layout::distribute_space(
@@ -422,8 +393,6 @@ void Vertical_layout::collect_space(std::vector<Dimensions_reference> widgets,
     }
     // TODO Change this to distribute the space, it might not be too small
     if (height_left != 0) {
-        // too_small_ = true;
-        this->set_too_small(true);
         return;
     }
 }
@@ -433,9 +402,16 @@ void Vertical_layout::move_and_resize_children(
     const std::size_t parent_x{this->inner_x()};
     const std::size_t parent_y{this->inner_y()};
     const std::size_t parent_height{this->height()};
+    const std::size_t parent_width{this->width()};
     std::size_t y_pos{parent_y};
     for (const Dimensions& d : dimensions) {
-        if (y_pos >= (parent_y + parent_height)) {
+        if ((y_pos + d.height) > (parent_y + parent_height) ||
+            (parent_x + d.width) > (parent_x + parent_width) || d.height == 0 ||
+            d.width == 0) {
+            // TODO this allows a large widget in the middle to disapear and
+            // smaller widgets from the end to reappear once that happens. Maybe
+            // you should stop sending events to any other widget once you get
+            // here and disable all that are left.
             d.widget->disable(true, false);  // don't send child_polished_events
         } else {
             System::post_event<Move_event>(d.widget, Point{parent_x, y_pos});
@@ -446,7 +422,7 @@ void Vertical_layout::move_and_resize_children(
 }
 
 void Vertical_layout::update_geometry() {
-    this->set_too_small(false);
+    this->enable(true, false);
     std::vector<Dimensions> heights{this->calculate_widget_sizes()};
     this->move_and_resize_children(heights);
 }

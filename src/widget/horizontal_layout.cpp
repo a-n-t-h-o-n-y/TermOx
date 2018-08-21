@@ -22,7 +22,7 @@ std::vector<Layout::Dimensions> Horizontal_layout::calculate_widget_sizes() {
     std::size_t total_stretch{0};
     for (const std::unique_ptr<Widget>& c : this->children.get()) {
         if (c->enabled()) {
-            widgets.emplace_back(Dimensions{c.get(), 0, 0});
+            widgets.emplace_back(Dimensions{c.get(), 0, this->height()});
             total_stretch += c->width_policy.stretch();
         }
     }
@@ -39,13 +39,11 @@ std::vector<Layout::Dimensions> Horizontal_layout::calculate_widget_sizes() {
             width_available -= d.width;
         }
     }
-    if (width_available < 0) {
-        // too_small_ = true;
-        this->set_too_small(true);
-        return std::vector<Dimensions>();
-    }
+    // if (width_available < 0) {
+    //     return widgets;
+    // }
 
-    // Set Size_policy::Ignored widgets to their stretch factor width value
+    // Set Size_policy::Ignored widgets to their stretch factor width value.
     for (Dimensions& d : widgets) {
         if (d.widget->width_policy.type() == Size_policy::Ignored) {
             const float percent = d.widget->width_policy.stretch() /
@@ -72,6 +70,8 @@ std::vector<Layout::Dimensions> Horizontal_layout::calculate_widget_sizes() {
         }
     }
 
+    /// DISTRIBUTE SPACE ------------------------------------------------------
+
     // create vector of size references for below if statements
     std::vector<Dimensions_reference> widgets_w_refs;
     widgets_w_refs.reserve(widgets.size());
@@ -91,59 +91,39 @@ std::vector<Layout::Dimensions> Horizontal_layout::calculate_widget_sizes() {
         this->collect_space(widgets_w_refs, width_available);
     }
 
+    /// DISTRIBUTE SPACE ------------------------------------------------------
+
     // VERTICAL - repeat the above, but with vertical properties
     for (Dimensions& d : widgets) {
         auto policy = d.widget->height_policy.type();
         if (policy == Size_policy::Fixed) {
             d.height = d.widget->height_policy.hint();
-            if (d.height > this->height()) {
-                // too_small_ = true;
-                this->set_too_small(true);
-                return std::vector<Dimensions>();
-            }
         } else if (policy == Size_policy::Ignored ||
                    policy == Size_policy::Preferred ||
                    policy == Size_policy::Expanding) {
-            d.height = this->height();
             if (d.height > d.widget->height_policy.max()) {
                 d.height = d.widget->height_policy.max();
             } else if (d.height < d.widget->height_policy.min()) {
-                // too_small_ = true;
-                this->set_too_small(true);
-                return std::vector<Dimensions>();
+                d.height = d.widget->height_policy.min();
             }
         } else if (policy == Size_policy::Maximum) {
-            d.height = this->height();
             if (d.height > d.widget->height_policy.hint()) {
                 d.height = d.widget->height_policy.hint();
-            } else if (d.height < d.widget->height_policy.min()) {
-                // too_small_ = true;
-                this->set_too_small(true);
-                return std::vector<Dimensions>();
             }
         } else if (policy == Size_policy::Minimum ||
                    policy == Size_policy::MinimumExpanding) {
-            d.height = this->height();
-            if (d.height < d.widget->height_policy.hint()) {
+            if (d.height > d.widget->height_policy.max()) {
+                d.height = d.widget->height_policy.max();
+            } else if (d.height < d.widget->height_policy.hint()) {
                 d.height = d.widget->height_policy.hint();
-            }
-            if (d.height > d.widget->height_policy.max() ||
-                d.height > this->height()) {
-                // too_small_ = true;
-                this->set_too_small(true);
-                return std::vector<Dimensions>();
             }
         }
     }
-
     return widgets;
-    // std::vector<std::size_t> widths;
-    // widths.reserve(widgets.size());
-    // for (const Dimensions& d : widgets) {
-    //     widths.push_back(d.width);
-    // }
-    // return widths;
 }
+
+// void Horizontal_layout::distribute_space(std::vector<Dimensions>& widgets,
+//                                          int width_left) {}
 
 void Horizontal_layout::distribute_space(
     std::vector<Dimensions_reference> widgets,
@@ -280,6 +260,135 @@ void Horizontal_layout::distribute_space(
     } while (width_check != width_left);
 }
 
+// void Horizontal_layout::collect_space(std::vector<Dimensions>& widgets,
+//                                       int width_left) {
+//     // Maximum, Preferred, Ignored
+//     // find maximum space that you can take back.
+//     int avaliable_retake_width{0};
+//     for (Dimensions& d : widgets) {
+//         Size_policy::Type policy = d.widget->width_policy.type();
+//         if (policy == Size_policy::Maximum ||
+//             policy == Size_policy::Preferred ||
+//             policy == Size_policy::Ignored) {
+//             avaliable_retake_width += d.width - d.widget->width_policy.min();
+//         }
+//     }
+//     if (avaliable_retake_width + width_left == 0) {
+//         // set everything to its min() in this group and return
+//         for (Dimensions& d : widgets) {
+//             Size_policy::Type policy = d.widget->width_policy.type();
+//             if (policy == Size_policy::Maximum ||
+//                 policy == Size_policy::Preferred ||
+//                 policy == Size_policy::Ignored) {
+//                 d.width = d.widget->width_policy.min();
+//             }
+//         }
+//         return;
+//     }
+//     if (avaliable_retake_width + width_left < 0) {
+//         // set everything to its min() and continue to expanding group
+//         for (Dimensions& d : widgets) {
+//             Size_policy::Type policy = d.widget->width_policy.type();
+//             if (policy == Size_policy::Maximum ||
+//                 policy == Size_policy::Preferred ||
+//                 policy == Size_policy::Ignored) {
+//                 d.width = d.widget->width_policy.min();
+//             }
+//         }
+//     }
+//     // just take away until width_left == 0
+//     if (avaliable_retake_width + width_left > 0) {
+//         // Ignored
+//         for (Dimensions& d : widgets) {
+//             Size_policy::Type policy = d.widget->width_policy.type();
+//             if (policy == Size_policy::Ignored) {
+//                 int potential_retake = d.width -
+//                 d.widget->width_policy.min();
+//                 // give it all
+//                 if (potential_retake + width_left < 0) {
+//                     d.width = d.widget->width_policy.min();
+//                 }
+//                 // only give enough and return
+//                 if (potential_retake + width_left >= 0) {
+//                     d.width += width_left;
+//                     return;
+//                 }
+//             }
+//         }
+//         // Maximum
+//         for (Dimensions& d : widgets) {
+//             Size_policy::Type policy = d.widget->width_policy.type();
+//             if (policy == Size_policy::Maximum) {
+//                 int potential_retake = d.width -
+//                 d.widget->width_policy.min();
+//                 // give it all
+//                 if (potential_retake + width_left < 0) {
+//                     d.width = d.widget->width_policy.min();
+//                 }
+//                 // only give enough and return
+//                 if (potential_retake + width_left >= 0) {
+//                     d.width += width_left;
+//                     return;
+//                 }
+//             }
+//         }
+//         // Preferred
+//         for (Dimensions& d : widgets) {
+//             Size_policy::Type policy = d.widget->width_policy.type();
+//             if (policy == Size_policy::Preferred) {
+//                 int potential_retake = d.width -
+//                 d.widget->width_policy.min();
+//                 // give it all
+//                 if (potential_retake + width_left < 0) {
+//                     d.width = d.widget->width_policy.min();
+//                 }
+//                 // only give enough and return
+//                 if (potential_retake + width_left >= 0) {
+//                     d.width += width_left;
+//                     return;
+//                 }
+//             }
+//         }
+//     }
+
+//     // Expanding
+//     avaliable_retake_width = 0;
+//     for (Dimensions& d : widgets) {
+//         Size_policy::Type policy = d.widget->width_policy.type();
+//         if (policy == Size_policy::Expanding) {
+//             avaliable_retake_width += d.width - d.widget->width_policy.min();
+//         }
+//     }
+//     if (avaliable_retake_width + width_left <= 0) {
+//         // set everything to its min() in this group and return
+//         for (Dimensions& d : widgets) {
+//             Size_policy::Type policy = d.widget->width_policy.type();
+//             if (policy == Size_policy::Expanding) {
+//                 d.width = d.widget->width_policy.min();
+//             }
+//         }
+//         return;
+//     }
+//     if (avaliable_retake_width + width_left > 0) {
+//         for (Dimensions& d : widgets) {
+//             Size_policy::Type policy = d.widget->width_policy.type();
+//             if (policy == Size_policy::Expanding) {
+//                 int potential_retake = d.width -
+//                 d.widget->width_policy.min();
+//                 // give it all
+//                 if (potential_retake + width_left < 0) {
+//                     d.width = d.widget->width_policy.min();
+//                 }
+//                 // only give enough and return
+//                 if (potential_retake + width_left >= 0) {
+//                     d.width += width_left;
+//                     return;
+//                 }
+//             }
+//         }
+//     }
+// }
+
 void Horizontal_layout::collect_space(std::vector<Dimensions_reference> widgets,
                                       int width_left) {
     if (width_left == 0) {
@@ -414,8 +523,6 @@ void Horizontal_layout::collect_space(std::vector<Dimensions_reference> widgets,
     }
     // Change this to distribute the space, it might not be too small
     if (width_left != 0) {
-        // too_small_ = true;
-        this->set_too_small(true);
         return;
     }
 }
@@ -425,9 +532,12 @@ void Horizontal_layout::move_and_resize_children(
     const std::size_t parent_x{this->inner_x()};
     const std::size_t parent_y{this->inner_y()};
     const std::size_t parent_width{this->width()};
+    const std::size_t parent_height{this->height()};
     std::size_t x_pos{parent_x};
     for (const Dimensions& d : dimensions) {
-        if (x_pos >= (parent_x + parent_width)) {
+        if ((x_pos + d.width) > (parent_x + parent_width) ||
+            (parent_y + d.height) > (parent_y + parent_height) ||
+            d.height == 0 || d.width == 0) {
             d.widget->disable(true, false);  // don't send child_polished_events
         } else {
             System::post_event<Move_event>(d.widget, Point{x_pos, parent_y});
@@ -438,7 +548,7 @@ void Horizontal_layout::move_and_resize_children(
 }
 
 void Horizontal_layout::update_geometry() {
-    this->set_too_small(false);
+    this->enable(true, false);
     std::vector<Dimensions> widths{this->calculate_widget_sizes()};
     this->move_and_resize_children(widths);
 }

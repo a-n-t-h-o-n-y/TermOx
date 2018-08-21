@@ -23,7 +23,7 @@ class Event_handler {
     Event_handler& operator=(Event_handler&&) = delete;
     virtual ~Event_handler();
 
-    virtual bool enabled() const;
+    bool enabled() const;
 
     void install_event_filter(Event_handler* filter);
     void remove_event_filter(Event_handler* filter);

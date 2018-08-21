@@ -30,6 +30,8 @@
 #include <thread>
 #endif
 
+#include <fstream>  //temp
+
 namespace {
 attr_t color_to_int(cppurses::Color c) {
     return static_cast<attr_t>(c) - cppurses::detail::k_init_color;
@@ -178,6 +180,12 @@ void NCurses_paint_engine::put(std::size_t x, std::size_t y, const Glyph& g) {
 }
 
 void NCurses_paint_engine::move_cursor(std::size_t x, std::size_t y) {
+    // if (x >= this->screen_width() || y >= this->screen_height()) {
+    //     std::ofstream l{"log.txt", std::ios::app};
+    //     l << "Cursor at: (" << x << ", " << y << ")\n";
+    //     l << "Screen Boundaries. Width: " << this->screen_width()
+    //       << " Height: " << this->screen_height() << std::endl;
+    // }
     ::wmove(::stdscr, static_cast<int>(y), static_cast<int>(x));
 }
 

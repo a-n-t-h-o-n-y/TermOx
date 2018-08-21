@@ -17,14 +17,16 @@ Resize_event::Resize_event(Event_handler* receiver,
 
 bool Resize_event::send() const {
     Widget* widg{static_cast<Widget*>(receiver_)};
-    if (widg->outer_width() != new_size_.width ||
-        widg->outer_height() != new_size_.height) {
-        old_size_.width = widg->outer_width();
-        old_size_.height = widg->outer_height();
-        widg->outer_width_ = new_size_.width;
-        widg->outer_height_ = new_size_.height;
-        return receiver_->resize_event(new_size_, old_size_);
-    }
+    // Removed below if because of enabling of children and optimizing out here
+    // would cause the children not to be disabled again.
+    // if (widg->outer_width() != new_size_.width ||
+    //     widg->outer_height() != new_size_.height) {
+    old_size_.width = widg->outer_width();
+    old_size_.height = widg->outer_height();
+    widg->outer_width_ = new_size_.width;
+    widg->outer_height_ = new_size_.height;
+    return receiver_->resize_event(new_size_, old_size_);
+    // }
     return true;
 }
 

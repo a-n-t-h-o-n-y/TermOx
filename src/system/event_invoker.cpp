@@ -9,7 +9,7 @@
 #include <cppurses/system/event.hpp>
 #include <cppurses/system/system.hpp>
 
-#define DEBUG_EVENT_INVOKER
+// #define DEBUG_EVENT_INVOKER
 
 #if defined(DEBUG_EVENT_INVOKER)
 #include <fstream>

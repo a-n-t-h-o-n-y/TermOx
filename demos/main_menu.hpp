@@ -14,7 +14,6 @@ class Main_menu : public Vertical_layout {
    public:
     Main_menu();
 
-    // Horizontal_layout& hl{this->make_child<Horizontal_layout>()};
     Titlebar& titlebar{this->make_child<Titlebar>("  C  P  P  U  R  S  E  S")};
     Widget_stack_menu& main_menu{
         this->make_child<Widget_stack_menu>("D e m o s")};
@@ -24,9 +23,6 @@ class Main_menu : public Vertical_layout {
         main_menu.make_page<glyph_paint::Glyph_paint>("Glyph Paint")};
     // animation::Animated_widget& animated_widget{
     //     main_menu.make_page<animation::Animated_widget>("Animated Widget")};
-
-   private:
-    void initialize();
 };
 
 }  // namespace demos

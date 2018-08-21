@@ -122,7 +122,8 @@ void debug_child_size(const Widget* child) {
               << "\nheight: " << child->outer_height() << '\n';
             l << "---------\n";
             l << "parent:\n";
-            l << "(" << parent->inner_x() << ", " << parent->inner_y() << ")" << std::endl;
+            l << "(" << parent->inner_x() << ", " << parent->inner_y() << ")"
+              << std::endl;
             l << "width: " << parent->width()
               << "\nheight: " << parent->height() << '\n';
             l << "===========" << std::endl;
@@ -226,28 +227,28 @@ void Paint_buffer::flush_wallpaper_changed(
     }
 }
 
-            // Staged Changes has a tile at this point.
-            // if (changes_map.count(p) == 1) {
-            //     Glyph tile{changes_map.at(p)};
-            //     detail::add_default_attributes(tile, w->brush);
-            //     // Screen state does not have a tile, or is not equal to
-            //     // the one that is currently there.
-            //     // ADD TILE
-            //     if (screen_iter == end_iter ||
-            //         (screen_iter != end_iter && screen_iter->second != tile))
-            //         { if (!child_has_point(*w, p.x, p.y)) {
-            //             engine_.put(p.x, p.y, tile);
-            //             w->screen_state().tiles[p] = tile;
-            //         }
-            //     }
-            // } else {
-            //     // Staged Changes does not have a tile.
-            //     // But screen state might, put a background tile.
-            //     // ADD BACKGROUND
-            //     if (!child_has_point(*w, p.x, p.y)) {
-            //         engine_.put(p.x, p.y, current_wallpaper);
-            //     }
-            // }
+// Staged Changes has a tile at this point.
+// if (changes_map.count(p) == 1) {
+//     Glyph tile{changes_map.at(p)};
+//     detail::add_default_attributes(tile, w->brush);
+//     // Screen state does not have a tile, or is not equal to
+//     // the one that is currently there.
+//     // ADD TILE
+//     if (screen_iter == end_iter ||
+//         (screen_iter != end_iter && screen_iter->second != tile))
+//         { if (!child_has_point(*w, p.x, p.y)) {
+//             engine_.put(p.x, p.y, tile);
+//             w->screen_state().tiles[p] = tile;
+//         }
+//     }
+// } else {
+//     // Staged Changes does not have a tile.
+//     // But screen state might, put a background tile.
+//     // ADD BACKGROUND
+//     if (!child_has_point(*w, p.x, p.y)) {
+//         engine_.put(p.x, p.y, current_wallpaper);
+//     }
+// }
 
 // void Paint_buffer::flush_wallpaper_changed(
 //     Widget* w,
@@ -458,6 +459,8 @@ void Paint_buffer::flush(const detail::Staged_changes& changes) {
             std::size_t y = focus_w->inner_y() + focus_w->cursor.y();
             engine_.move_cursor(x, y);
         }
+    } else {
+        engine_.hide_cursor();
     }
     if (refresh) {
         engine_.refresh();

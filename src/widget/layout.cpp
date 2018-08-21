@@ -13,14 +13,14 @@ namespace cppurses {
 //     this->focus_policy = Focus_policy::Click;  // Why?
 // }
 
-bool Layout::enabled() const {
-    return Widget::enabled() || too_small_;
-}
+// bool Layout::enabled() const {
+//     return Widget::enabled() || too_small_;
+// }
 
-void Layout::set_too_small(bool too_small) {
-    too_small_ = too_small;
-    this->disable(too_small, false);  // false to not send child_polished event
-}
+// void Layout::set_too_small(bool too_small) {
+//     too_small_ = too_small;
+//     this->disable(too_small, false);  // false to not send child_polished event
+// }
 
 bool Layout::move_event(Point new_position, Point old_position) {
     // shift children positions with move events, without sending resize events
@@ -49,11 +49,12 @@ bool Layout::child_polished_event(Widget* child) {
 }
 
 bool Layout::paint_event() {
-    if (too_small_) {
-        Painter p{this};
-        p.fill(' ', 0, 0, this->width(), this->height());
-        p.put("Screen too small.", 0, 0);
-    }
+    // if (too_small_) {
+    //     Painter p{this};
+    //     p.fill(' ', 0, 0, this->width(), this->height());
+    //     p.put("Screen too small.", 0, 0);
+    // }
+    // TODO get rid of this and remove event
     this->screen_state().is_layout = true;
     return Widget::paint_event();
 }

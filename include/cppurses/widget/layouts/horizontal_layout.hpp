@@ -22,6 +22,7 @@ class Horizontal_layout : public Layout {
 
     void collect_space(std::vector<Dimensions_reference> widgets,
                        int width_left);
+    // void collect_space(std::vector<Dimensions>& widgets, int width_left);
 };
 
 }  // namespace cppurses

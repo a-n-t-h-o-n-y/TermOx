@@ -135,3 +135,11 @@ export(
     FILE CPPursesLibraryConfig.cmake
 )
 
+# CLANG TIDY
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+add_custom_target(compile_commands ALL
+	COMMAND [ -f ${CMAKE_SOURCE_DIR}/build/compile_commands.json ] && mv
+        ${CMAKE_SOURCE_DIR}/build/compile_commands.json
+		${CMAKE_SOURCE_DIR}/compile_commands.json || :)
+
