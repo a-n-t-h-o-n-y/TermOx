@@ -30,6 +30,16 @@
 
 namespace {
 using namespace cppurses;
+
+bool has_children(const Widget* w) {
+    for (const std::unique_ptr<Widget>& child : w->children.get()) {
+        if (child->enabled()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool child_has_point(const Widget& w, std::size_t x, std::size_t y) {
     const std::vector<std::unique_ptr<Widget>>& children{w.children.get()};
     for (const std::unique_ptr<Widget>& child : children) {
@@ -183,12 +193,12 @@ Paint_buffer::Paint_buffer() {
 //     }
 // }
 
-void Paint_buffer::flush_wallpaper_changed(
-    Widget* w,
-    const detail::Screen_descriptor& changes) {
+void Paint_buffer::full_paint(Widget* w,
+                              const detail::Screen_descriptor& changes) {
     Glyph wallpaper{w->generate_wallpaper()};
     // Paint layout empty space.
-    if (w->screen_state().is_layout) {
+    // if (w->screen_state().is_layout) {
+    if (has_children(w)) {
         // create bitmask
         detail::Screen_mask mask{detail::find_empty_space(*w)};
 
@@ -206,7 +216,8 @@ void Paint_buffer::flush_wallpaper_changed(
     for (std::size_t y{w->y()}; y < (w->y() + w->outer_height()); ++y) {
         for (std::size_t x{w->x()}; x < (w->x() + w->outer_width()); ++x) {
             Point p{x, y};
-            if (changes.count(p) == 0 && !w->screen_state().is_layout) {
+            // if (changes.count(p) == 0 && !w->screen_state().is_layout) {
+            if (changes.count(p) == 0 && !has_children(w)) {
                 if (w->screen_state().tiles.count(p) == 1) {
                     w->screen_state().tiles.erase(p);
                 }
@@ -256,7 +267,7 @@ void Paint_buffer::flush_wallpaper_changed(
 //     }
 // }
 
-// void Paint_buffer::flush_wallpaper_changed(
+// void Paint_buffer::full_paint(
 //     Widget* w,
 //     const detail::Screen_descriptor& changes_map) {
 //     const Glyph& current_wallpaper{w->generate_wallpaper()};
@@ -291,20 +302,20 @@ void Paint_buffer::flush_wallpaper_changed(
 //     }
 // }
 
-void Paint_buffer::flush_just_appeared(
+void Paint_buffer::flush_just_enabled(
     Widget* w,
     const detail::Screen_descriptor& changes_map) {
-    flush_wallpaper_changed(w, changes_map);
+    full_paint(w, changes_map);
 }
 
 void Paint_buffer::flush_child_event_happened(
     Widget* w,
     const detail::Screen_descriptor& changes_map) {
-    flush_wallpaper_changed(w, changes_map);
+    full_paint(w, changes_map);
 }
 
-void Paint_buffer::flush_minimal(Widget* w,
-                                 const detail::Screen_descriptor& changes_map) {
+void Paint_buffer::basic_paint(Widget* w,
+                               const detail::Screen_descriptor& changes_map) {
     const Glyph& current_background{w->generate_wallpaper()};
     // BACKGROUNDS COVER LEFTOVERS
     std::vector<Point> to_delete;
@@ -342,7 +353,7 @@ void Paint_buffer::flush_minimal(Widget* w,
 void Paint_buffer::flush_move_resize_event(
     Widget* w,
     const detail::Screen_descriptor& changes_map) {
-    flush_minimal(w, changes_map);
+    basic_paint(w, changes_map);
 }
 
 void Paint_buffer::flush(const detail::Staged_changes& changes) {
@@ -363,22 +374,33 @@ void Paint_buffer::flush(const detail::Staged_changes& changes) {
         }
 
         const Glyph& current_wallpaper{w->generate_wallpaper()};
-        Glyph& last_wallpaper{w->screen_state().wallpaper};
+        Glyph& last_wallpaper{w->screen_state().optimize.wallpaper};
 
         refresh = true;
 
-        flush_wallpaper_changed(w, changes_map);
+        // full_paint(w, changes_map);
+
+        if (wallpaper_changed(current_wallpaper, last_wallpaper)) {
+            full_paint(w, changes_map);
+        } else {
+            basic_paint(w, changes_map);
+        }
+
         // if (wallpaper_changed(current_wallpaper, last_wallpaper)) {
-        //     flush_wallpaper_changed(w, changes_map);
-        // } else if (w->screen_state().just_appeared) {
-        //     flush_just_appeared(w, changes_map);
-        // } else if (w->screen_state().child_event_happened) {
+        //     full_paint(w, changes_map);
+        // } else if (w->screen_state().optimize.just_enabled) {
+        //     flush_just_enabled(w, changes_map);
+        //     w->screen_state().optimize.just_enabled = false;
+        // } else if (w->screen_state().optimize.child_event) {
         //     flush_child_event_happened(w, changes_map);
-        // } else if (w->screen_state().move_happened ||
-        //            w->screen_state().resize_happened) {
+        //     w->screen_state().optimize.child_event = false;
+        // } else if (w->screen_state().optimize.moved ||
+        //            w->screen_state().optimize.resized) {
         //     flush_move_resize_event(w, changes_map);
+        //     w->screen_state().optimize.moved = false;
+        //     w->screen_state().optimize.resized = false;
         // } else {
-        //     flush_minimal(w, changes_map);
+        //     basic_paint(w, changes_map);
         // }
 
         // If background tile has changed or widget just appeared on screen.

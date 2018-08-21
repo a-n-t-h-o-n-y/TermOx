@@ -9,6 +9,7 @@ class Widget;
 class Child_event : public Event {
    public:
     Child_event(Event::Type type, Event_handler* receiver, Widget* child);
+    bool send() const override;
 
    protected:
     Widget* child_;

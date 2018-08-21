@@ -19,7 +19,6 @@ class Layout : public Widget {
     bool child_added_event(Widget* child) override;
     bool child_removed_event(Widget* child) override;
     bool child_polished_event(Widget* child) override;
-    bool paint_event() override;
 
     struct Dimensions {
         Widget* widget;

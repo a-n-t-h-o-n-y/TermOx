@@ -36,7 +36,39 @@ void Event_queue::append(std::unique_ptr<Event> event) {
         // send_event too.
         return;
     }
+
+    // Remove Enable/Disable pairs
     Event::Type type{event->type()};
+    if (type == Event::Enable) {
+        auto begin = std::begin(queue_);
+        auto end = std::end(queue_);
+        auto is_disable_event =
+            [&event](const std::unique_ptr<Event>& on_queue) {
+                bool result{event->receiver() == on_queue->receiver() &&
+                            on_queue->type() == Event::Disable};
+                return result;
+            };
+        auto erase_iter = std::remove_if(begin, end, is_disable_event);
+        if (erase_iter != end) {
+            queue_.erase(erase_iter, end);
+            return;
+        }
+    } else if (type == Event::Disable) {
+        auto begin = std::begin(queue_);
+        auto end = std::end(queue_);
+        auto is_enable_event =
+            [&event](const std::unique_ptr<Event>& on_queue) {
+                bool result{event->receiver() == on_queue->receiver() &&
+                            on_queue->type() == Event::Enable};
+                return result;
+            };
+        auto erase_iter = std::remove_if(begin, end, is_enable_event);
+        if (erase_iter != end) {
+            queue_.erase(erase_iter, end);
+            return;
+        }
+    }
+
     // Optimize out expensive duplicate events.
     if (type == Event::Paint || type == Event::Move || type == Event::Resize ||
         type == Event::Disable || Event::Enable) {

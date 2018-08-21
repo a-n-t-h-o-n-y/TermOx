@@ -170,52 +170,31 @@ bool Widget::paint_event() {
 
 bool Widget::child_added_event(Widget* child) {
     child_added(child);
-    this->screen_state().child_event_happened = true;
     this->update();
     return true;
 }
 
 bool Widget::child_removed_event(Widget* child) {
     child_removed(child);
-    this->screen_state().child_event_happened = true;
     this->update();
     return true;
 }
 
 bool Widget::child_polished_event(Widget* child) {
     this->update();
-    this->screen_state().child_event_happened = true;
     return true;
 }
 
 bool Widget::move_event(Point new_position, Point old_position) {
-    // this->set_x(new_position.x);
-    // this->set_y(new_position.y);
     moved(new_position);
     this->update();
-    this->screen_state().move_happened = true;
-    this->screen_state().tiles.clear();
+    // this->screen_state().tiles.clear();
     return true;
 }
 
 bool Widget::resize_event(Area new_size, Area old_size) {
-    // this->outer_width_ = new_size.width;
-    // this->outer_height_ = new_size.height;
-
     resized(outer_width_, outer_height_);
     this->update();
-    this->screen_state().resize_happened = true;
-    auto end = std::end(this->screen_state().tiles);
-    auto iter = std::begin(this->screen_state().tiles);
-    while (iter != end) {
-        Point p{iter->first};
-        if (p.x >= this->x() + this->outer_width() ||
-            p.y >= this->y() + this->outer_height()) {
-            iter = this->screen_state().tiles.erase(iter);
-        } else {
-            ++iter;
-        }
-    }
     return true;
 }
 
@@ -225,12 +204,6 @@ bool Widget::animation_event() {
 }
 
 bool Widget::disable_event() {
-    // TODO double check that layouts are not enabling/disabling every resize.
-    // invoker counts disable/enable events as the same and gets rid of them.
-    // The last one is the only one, because if disable is first, and you remove
-    // the last enable event, then it will not get an enable event though it is
-    // enabled now.
-    this->screen_state().tiles.clear();
     return Event_handler::disable_event();
 }
 

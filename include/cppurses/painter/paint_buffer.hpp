@@ -74,16 +74,15 @@ class Paint_buffer {
     // void cover_with_background(Widget& w);
     // bool within_screen(const Point& p);
 
-    void flush_wallpaper_changed(Widget* w,
-                                  const detail::Screen_descriptor& changes_map);
-    void flush_just_appeared(Widget* w,
-                             const detail::Screen_descriptor& changes_map);
+    void full_paint(Widget* w, const detail::Screen_descriptor& changes_map);
+    void flush_just_enabled(Widget* w,
+                            const detail::Screen_descriptor& changes_map);
     void flush_child_event_happened(
         Widget* w,
         const detail::Screen_descriptor& changes_map);
     void flush_move_resize_event(Widget* w,
                                  const detail::Screen_descriptor& changes_map);
-    void flush_minimal(Widget* w, const detail::Screen_descriptor& changes_map);
+    void basic_paint(Widget* w, const detail::Screen_descriptor& changes_map);
 };
 
 }  // namespace cppurses

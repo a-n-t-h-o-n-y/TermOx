@@ -13,6 +13,9 @@ namespace detail {
 /// A 2D bitmask to indicate a binary feature for each point on a Widget.
 class Screen_mask {
    public:
+    /// Create an empty Screen_mask with size (0,0).
+    Screen_mask() = default;
+
     /// Create an empty Screen_mask with the dimensions and position of \p w.
     Screen_mask(const Widget& w);
 

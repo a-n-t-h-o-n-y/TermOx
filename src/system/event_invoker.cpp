@@ -77,7 +77,9 @@ void Event_invoker::invoke(Event_queue& queue,
         }
         l << '\n';
     }
-    l << "\n--->End Queue Invokation";
+    l << "\n--->End Queue Invokation. type_filter: "
+      << event_type_as_string(type_filter);
+    ;
     l << std::endl;
 #endif
 }

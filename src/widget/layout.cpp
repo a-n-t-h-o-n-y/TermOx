@@ -33,12 +33,6 @@ bool Layout::child_polished_event(Widget* child) {
     return Widget::child_polished_event(child);
 }
 
-bool Layout::paint_event() {
-    // TODO get rid of this and remove event
-    this->screen_state().is_layout = true;
-    return Widget::paint_event();
-}
-
 // Free Functions
 void set_background(Layout& l, Color c) {
     for (const std::unique_ptr<Widget>& w : l.children.get()) {
