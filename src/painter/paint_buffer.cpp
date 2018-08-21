@@ -22,7 +22,11 @@
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/widget.hpp>
 
-#include <fstream>  //temp
+// #define DEBUG_PAINT_BUFFER_CHILD_SIZES
+
+#if defined(DEBUG_PAINT_BUFFER_CHILD_SIZES)
+#include <fstream>
+#endif
 
 namespace {
 using namespace cppurses;
@@ -56,6 +60,7 @@ bool wallpaper_changed(const Glyph& first, const Glyph& second) {
     return true;
 }
 
+#if defined(DEBUG_PAINT_BUFFER_CHILD_SIZES)
 void debug_child_size(const Widget* child) {
     std::ofstream l{"child_size_log.txt", std::ios::app};
     if (child == nullptr) {
@@ -136,6 +141,7 @@ void debug_child_size(const Widget* child) {
         debug_child_size(c.get());
     }
 }
+#endif
 
 }  // namespace
 
@@ -343,7 +349,9 @@ void Paint_buffer::flush(const detail::Staged_changes& changes) {
     std::lock_guard<std::mutex> lock{detail::NCurses_data::ncurses_mtx};
     bool refresh{false};
 
-    // debug_child_size(System::head());
+#if defined(DEBUG_PAINT_BUFFER_CHILD_SIZES)
+    debug_child_size(System::head());
+#endif
 
     for (const auto& pair : changes) {
         Widget* w{pair.first};
@@ -564,16 +572,18 @@ Glyph Paint_buffer::get_global_background_tile() const {
 
 std::size_t Paint_buffer::update_width() {
     // std::lock_guard<std::mutex> guard{detail::NCurses_data::ncurses_mtx};
-    std::size_t new_width{engine_.screen_width()};
-    this->resize_width(new_width);
-    return new_width;
+    width_ = engine_.screen_width();
+    // std::size_t new_width{engine_.screen_width()};
+    // this->resize_width(new_width);
+    return width_;
 }
 
 std::size_t Paint_buffer::update_height() {
     // std::lock_guard<std::mutex> guard{detail::NCurses_data::ncurses_mtx};
-    std::size_t new_height{engine_.screen_height()};
-    this->resize_height(new_height);
-    return new_height;
+    height_ = engine_.screen_height();
+    // std::size_t new_height{engine_.screen_height()};
+    // this->resize_height(new_height);
+    return height_;
 }
 
 std::size_t Paint_buffer::screen_width() const {
@@ -591,14 +601,14 @@ void Paint_buffer::set_color_definition(Color c, RGB values) {
     engine_.set_rgb(c, values.red, values.green, values.blue);
 }
 
-void Paint_buffer::resize_width(std::size_t new_width) {
-    // std::lock_guard<Mutex_t> guard{mutex_};
-    width_ = new_width;
-}
+// void Paint_buffer::resize_width(std::size_t new_width) {
+//     // std::lock_guard<Mutex_t> guard{mutex_};
+//     width_ = new_width;
+// }
 
-void Paint_buffer::resize_height(std::size_t new_height) {
-    // std::lock_guard<Mutex_t> guard{mutex_};
-    height_ = new_height;
-}
+// void Paint_buffer::resize_height(std::size_t new_height) {
+//     // std::lock_guard<Mutex_t> guard{mutex_};
+//     height_ = new_height;
+// }
 
 }  // namespace cppurses

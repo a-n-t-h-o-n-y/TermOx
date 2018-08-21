@@ -80,12 +80,12 @@ Paint_buffer& System::paint_buffer() {
 }
 
 std::size_t System::max_width() {
-    System::paint_buffer().update_width();
+    // System::paint_buffer().update_width();
     return System::paint_buffer().screen_width();
 }
 
 std::size_t System::max_height() {
-    System::paint_buffer().update_height();
+    // System::paint_buffer().update_height();
     return System::paint_buffer().screen_height();
 }
 

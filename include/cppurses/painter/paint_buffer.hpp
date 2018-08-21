@@ -63,8 +63,8 @@ class Paint_buffer {
 
     // TODO These would no longer be needed, paint_engine just retrieves the
     // size, you don't tell it its size.
-    void resize_width(std::size_t new_width);
-    void resize_height(std::size_t new_height);
+    // void resize_width(std::size_t new_width);
+    // void resize_height(std::size_t new_height);
 
     // TODO these are used by flush, i think, keep them around. For some reason
     // you kept flush within a class, might have been the friend declaration on

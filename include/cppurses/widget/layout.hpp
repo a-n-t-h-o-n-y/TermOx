@@ -10,16 +10,9 @@ namespace cppurses {
 
 /// Base class for Layouts. Calls update_geometry virtual function when needed.
 class Layout : public Widget {
-   // public:
-    // Layout();
-    // bool enabled() const override;
-
    protected:
     /// Implement this in subclasses to send resize and move events to children.
     virtual void update_geometry() = 0;
-
-    /// Call from derived classes if screen is too small.
-    // void set_too_small(bool too_small);
 
     bool move_event(Point new_position, Point old_position) override;
     bool resize_event(Area new_size, Area old_size) override;
@@ -39,9 +32,6 @@ class Layout : public Widget {
         std::size_t* width;
         std::size_t* height;
     };
-
-   // private:
-   //  bool too_small_{false};
 };
 
 // Free Functions

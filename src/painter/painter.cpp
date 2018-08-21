@@ -17,7 +17,11 @@
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 
-#include <fstream>  //temp
+#define DEBUG_PAINTER_PUT_GLOBAL
+
+#if defined(DEBUG_PAINTER_PUT_GLOBAL)
+#include <fstream>
+#endif
 
 namespace cppurses {
 
@@ -205,10 +209,11 @@ void Painter::line(const Glyph& tile,
 // GLOBAL COORDINATES - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 void Painter::put_global(const Glyph& tile, std::size_t x, std::size_t y) {
+#if defined(DEBUG_PAINTER_PUT_GLOBAL)
     std::size_t width{System::max_width()};
     std::size_t height{System::max_height()};
     if (x >= width || y >= height) {
-        std::ofstream l{"painter_log.txt", std::ios::app};
+        std::ofstream l{"painter_put_global_log.txt", std::ios::app};
         l << "widget: " << widget_->name() << '\n';
         l << "Painting at: (" << x << ", " << y << ")\n";
         l << "widget width: " << widget_->outer_width()
@@ -260,6 +265,7 @@ void Painter::put_global(const Glyph& tile, std::size_t x, std::size_t y) {
         l << "- - - - - - - - - - - - - -" << std::endl;
         return;
     }
+#endif
     staged_changes_[Point{x, y}] = tile;
 }
 

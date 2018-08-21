@@ -161,8 +161,9 @@ Widget* NCurses_event_listener::handle_keyboard_widget() const {
 }
 
 std::unique_ptr<Event> NCurses_event_listener::handle_resize_event() const {
-    return std::make_unique<Resize_event>(
-        nullptr, Area{System::max_width(), System::max_height()});
+    std::size_t width{System::paint_buffer().update_width()};
+    std::size_t height{System::paint_buffer().update_height()};
+    return std::make_unique<Resize_event>(nullptr, Area{width, height});
 }
 
 Widget* NCurses_event_listener::handle_resize_widget() const {

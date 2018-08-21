@@ -1,11 +1,11 @@
 #include <cppurses/painter/detail/find_empty_space.hpp>
 
+#include <fstream>
 #include <memory>
+#include <stdexcept>
 
 #include <cppurses/painter/detail/screen_mask.hpp>
 #include <cppurses/widget/widget.hpp>
-
-#include <fstream>  //temp
 
 namespace cppurses {
 namespace detail {
@@ -28,10 +28,11 @@ Screen_mask find_empty_space(const Widget& w) {
                      x < child->outer_width() + child->x(); ++x) {
                     try {
                         result.at(x, y) = true;
-                    } catch (...) {
-                        // std::ofstream l{"log.txt", std::ios::app};
-                        // static int i{0};
-                        // l << "out of bounds child" << i++ << std::endl;
+                    } catch (std::out_of_range e) {
+                        std::ofstream l{"find_empty_space_log.txt",
+                                        std::ios::app};
+                        static int i{0};
+                        l << "out of bounds child " << i++ << std::endl;
                     }
                 }
             }

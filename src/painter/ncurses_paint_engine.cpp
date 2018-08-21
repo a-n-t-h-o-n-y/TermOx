@@ -23,14 +23,19 @@
 #include <cppurses/painter/detail/extended_char.hpp>
 #endif
 
-// #define SLOW_PAINT 9
+// #define SLOW_PAINT 7
 
-#ifdef SLOW_PAINT
+// #define PAINT_ENGINE_DEBUG_CURSOR_MOVEMENT
+
+#if defined(SLOW_PAINT)
 #include <chrono>
 #include <thread>
 #endif
 
-#include <fstream>  //temp
+#if defined(PAINT_ENGINE_DEBUG_CURSOR_MOVEMENT)
+#include <cppurses/system/system.hpp>
+#include <fstream>
+#endif
 
 namespace {
 attr_t color_to_int(cppurses::Color c) {
@@ -180,12 +185,16 @@ void NCurses_paint_engine::put(std::size_t x, std::size_t y, const Glyph& g) {
 }
 
 void NCurses_paint_engine::move_cursor(std::size_t x, std::size_t y) {
-    // if (x >= this->screen_width() || y >= this->screen_height()) {
-    //     std::ofstream l{"log.txt", std::ios::app};
-    //     l << "Cursor at: (" << x << ", " << y << ")\n";
-    //     l << "Screen Boundaries. Width: " << this->screen_width()
-    //       << " Height: " << this->screen_height() << std::endl;
-    // }
+#if defined(PAINT_ENGINE_DEBUG_CURSOR_MOVEMENT)
+    if (x >= System::max_width() || y >= System::max_height()) {
+        std::ofstream l{"move_cursor_log.txt", std::ios::app};
+        l << "Cursor at: (" << x << ", " << y << ")\n";
+        l << "Screen Boundaries. Width: " << this->screen_width()
+          << " Height: " << this->screen_height() << '\n';
+        l << " - - - - - - - - - - - - - - - - - - - " << std::endl;
+        return;
+    }
+#endif
     ::wmove(::stdscr, static_cast<int>(y), static_cast<int>(x));
 }
 
