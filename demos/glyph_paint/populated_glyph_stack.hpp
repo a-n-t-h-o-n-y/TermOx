@@ -18,7 +18,7 @@ class Populated_glyph_stack : public Cycle_stack {
     void make_connections(sig::Slot<void(Glyph)> slot);
 
    private:
-    std::vector<std::reference_wrapper<sig::Signal<void(Glyph)>>> signal_refs;
+    std::vector<std::reference_wrapper<sig::Signal<void(Glyph)>>> signal_refs_;
 };
 
 }  // namespace glyph_paint

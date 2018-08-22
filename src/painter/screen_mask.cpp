@@ -28,6 +28,14 @@ void Screen_mask::flip() {
     bits_.flip();
 }
 
+bool Screen_mask::empty() const {
+    return bits_.empty();
+}
+
+void Screen_mask::clear() {
+    bits_.clear();
+}
+
 typename std::vector<bool>::reference Screen_mask::at(std::size_t x,
                                                       std::size_t y) {
     // Bounds check

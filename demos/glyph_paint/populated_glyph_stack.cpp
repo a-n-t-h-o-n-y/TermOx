@@ -98,48 +98,48 @@ namespace demos {
 namespace glyph_paint {
 
 Populated_glyph_stack::Populated_glyph_stack() {
-    signal_refs.emplace_back(
+    signal_refs_.emplace_back(
         this->make_page<Glyph_select>("Latin-1", latin_1).glyph_selected);
 
-    signal_refs.emplace_back(
+    signal_refs_.emplace_back(
         this->make_page<Glyph_select>("Blocks", blocks).glyph_selected);
 
-    signal_refs.emplace_back(
+    signal_refs_.emplace_back(
         this->make_page<Glyph_select>("Color Blocks", color_blocks)
             .glyph_selected);
 
-    signal_refs.emplace_back(
+    signal_refs_.emplace_back(
         this->make_page<Glyph_select>("Box Drawing", box_drawing)
             .glyph_selected);
 
-    signal_refs.emplace_back(
+    signal_refs_.emplace_back(
         this->make_page<Glyph_select>("Tai Xuan Jing", tai_xuan_jing)
             .glyph_selected);
 
-    signal_refs.emplace_back(
+    signal_refs_.emplace_back(
         this->make_page<Glyph_select>("Unicode Sym.", unicode_symbols)
             .glyph_selected);
 
-    signal_refs.emplace_back(
+    signal_refs_.emplace_back(
         this->make_page<Glyph_select>("Currency", currency).glyph_selected);
 
-    signal_refs.emplace_back(
+    signal_refs_.emplace_back(
         this->make_page<Glyph_select>("Dwarf Fortress", dwarf_fortress)
             .glyph_selected);
 
-    signal_refs.emplace_back(
+    signal_refs_.emplace_back(
         this->make_page<Glyph_select>("Arrows", arrows).glyph_selected);
 
-    signal_refs.emplace_back(
+    signal_refs_.emplace_back(
         this->make_page<Glyph_select>("Math Operators", math_operators)
             .glyph_selected);
 
-    signal_refs.emplace_back(
+    signal_refs_.emplace_back(
         this->make_page<Glyph_select>("Geometric", geometric).glyph_selected);
 }
 
 void Populated_glyph_stack::make_connections(sig::Slot<void(Glyph)> slot) {
-    for (auto& signal_ref : signal_refs) {
+    for (auto& signal_ref : signal_refs_) {
         signal_ref.get().connect(slot);
     }
 }

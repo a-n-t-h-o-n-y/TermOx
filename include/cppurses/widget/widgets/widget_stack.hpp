@@ -35,11 +35,7 @@ class Widget_stack : public Horizontal_layout {
     // Signals
     sig::Signal<void(std::size_t)> page_changed;
 
-    // protected:
-    // bool paint_event() override;
-
    private:
-    // std::vector<std::unique_ptr<Widget>> pages_;
     Widget* active_page_{nullptr};
     bool sets_focus_{true};
 };
@@ -50,7 +46,6 @@ template <typename T, typename... Args>
 T& Widget_stack::make_page(Args&&... args) {
     this->add_page(std::make_unique<T>(std::forward<Args>(args)...));
     return static_cast<T&>(*this->children.get().back());
-    // return static_cast<T&>(*pages_.back());
 }
 
 // - - - - - - - - - - - - - - - - Slots - - - - - - - - - - - - - - - - - - - -

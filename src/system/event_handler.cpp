@@ -62,8 +62,8 @@ bool Event_handler::mouse_press_event(Mouse_button button,
                                       Point global,
                                       Point local,
                                       std::uint8_t device_id) {
-    clicked(global);
-    clicked_xy(global.x, global.y);
+    clicked(local);
+    clicked_xy(local.x, local.y);
     return true;
 }
 

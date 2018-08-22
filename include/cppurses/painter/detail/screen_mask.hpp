@@ -28,6 +28,12 @@ class Screen_mask {
     /// Flip all bits in the mask.
     void flip();
 
+    /// Returns true if this->Area{width: 0, height: 0}
+    bool empty() const;
+
+    /// Clear the contents to an empty state.
+    void clear();
+
     /// Retrieve the bit set at point \p p
     typename std::vector<bool>::reference at(std::size_t x, std::size_t y);
 

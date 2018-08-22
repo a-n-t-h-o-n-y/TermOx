@@ -18,11 +18,9 @@ namespace detail {
 /// Holds a Screen_descriptor representing the current screen state of a Widget.
 ///
 /// A Widget is the owner of this object, but only the flush function can modify
-/// its state.
+/// its state, as well as Event object that can inform flush about optimization
+/// opportunities.
 class Screen_state {
-    // holds global coordinates, set by flush.
-    Screen_descriptor tiles;
-
     struct Optimize {
         bool just_enabled{false};
         bool moved{false};
@@ -31,8 +29,16 @@ class Screen_state {
         Glyph wallpaper;
         detail::Screen_mask move_mask;
         detail::Screen_mask resize_mask;
+
+        /// Resets all flags to initial and clears state, except for wallpaper.
+        void reset();
     };
 
+    /// Holds a description of the widget's current screen state. In global
+    /// coordinates, and modified by Paint_buffer::flush() function.
+    Screen_descriptor tiles;
+
+    /// Holds flags and data structures used to optimize flushing to the screen.
     Optimize optimize;
 
     friend class cppurses::Paint_buffer;

@@ -74,15 +74,39 @@ class Paint_buffer {
     // void cover_with_background(Widget& w);
     // bool within_screen(const Point& p);
 
-    void full_paint(Widget* w, const detail::Screen_descriptor& changes_map);
-    void flush_just_enabled(Widget* w,
-                            const detail::Screen_descriptor& changes_map);
-    void flush_child_event_happened(
-        Widget* w,
-        const detail::Screen_descriptor& changes_map);
-    void flush_move_resize_event(Widget* w,
-                                 const detail::Screen_descriptor& changes_map);
-    void basic_paint(Widget* w, const detail::Screen_descriptor& changes_map);
+    /// Paints every point of \p w with wallpaper or from \p changes.
+    void full_paint(Widget* w, const detail::Screen_descriptor& changes);
+
+    /// Performs a full paint of a single tile at \p p.
+    void full_paint_point(Widget* w,
+                          const detail::Screen_descriptor& changes,
+                          const Point& p);
+
+    /// Used when a child has just been enabled after not being on the screen.
+    void paint_just_enabled(Widget* w,
+                            const detail::Screen_descriptor& changes);
+
+    /// Repaints the empty space of the layout, then a basic paint of \p w.
+    void paint_child_event(Widget* w, const detail::Screen_descriptor& changes);
+
+    ///
+    void paint_resize_event(Widget* w,
+                            const detail::Screen_descriptor& changes);
+
+    ///
+    void paint_move_event(Widget* w, const detail::Screen_descriptor& changes);
+
+    /// Covers points in w->screen_state that are not found in \p changes.
+    void cover_leftovers(Widget* w, const detail::Screen_descriptor& changes);
+
+    /// Paints tiles from \p changes, if needed, covers leftovers w/ wallpaper.
+    void basic_paint(Widget* w, const detail::Screen_descriptor& changes);
+
+    /// Performs a basic paint of a single point at \p p.
+    void basic_paint_point(Widget* w, const Point& p, Glyph tile);
+
+    /// Paints wallpaper on layouts where there is no child widget.
+    void paint_empty_tiles(Widget* w);
 };
 
 }  // namespace cppurses

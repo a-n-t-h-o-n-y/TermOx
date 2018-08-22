@@ -23,7 +23,7 @@
 #include <cppurses/painter/detail/extended_char.hpp>
 #endif
 
-#define SLOW_PAINT 7
+// #define SLOW_PAINT 7
 
 // #define PAINT_ENGINE_DEBUG_CURSOR_MOVEMENT
 

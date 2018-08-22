@@ -75,6 +75,7 @@ target_sources(libcppurses PRIVATE
     painter/ncurses_data.cpp
     painter/screen_mask.cpp
     painter/find_empty_space.cpp
+    painter/screen_state.cpp
 )	
 
 # WIDGET

@@ -7,6 +7,7 @@ namespace cppurses {
 
 class Glyph_select_stack : public Widget_stack {
    public:
+    Glyph_select_stack() { this->set_name("Glyph_select_stack"); }
     void set_symbols(Glyph_string symbols);
     void append_symbols(Glyph_string symbols);
 
@@ -16,12 +17,6 @@ class Glyph_select_stack : public Widget_stack {
     sig::Signal<void(Glyph)> glyph_selected;
 
    protected:
-    bool mouse_press_event_filter(Event_handler* receiver,
-                                  Mouse_button button,
-                                  Point global,
-                                  Point local,
-                                  std::uint8_t device_id) override;
-
     bool resize_event(Area new_size, Area old_size) override;
 
    private:

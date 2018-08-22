@@ -14,40 +14,18 @@
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/widget.hpp>
 
-// namespace {
-// using namespace cppurses;
-
-// void set_page_visible(Widget* page, bool visible) {
-//     page->set_visible(visible);
-//     for (const std::unique_ptr<Widget>& child : page->children.get()) {
-//         set_page_visible(child.get(), visible);
-//     }
-// }
-
-// }  // namespace
-
 namespace cppurses {
 
 void Widget_stack::set_active_page(std::size_t index) {
-    if (this->size() == 0 || index > this->size()) {
+    if (index > this->size()) {
         return;
     }
-    // Disable the active page
-    if (active_page_ != nullptr) {
-        active_page_->disable();
-    }
-    // Enable the new active page
     active_page_ = this->children.get()[index].get();
-    if (active_page_->parent() != nullptr &&
-        active_page_->parent()->enabled()) {
-        active_page_->enable();
-    }
-
+    this->enable(this->enabled(), false);
     if (sets_focus_) {
         Focus::set_focus_to(active_page_);
     }
     this->page_changed(index);
-    // this->update();
 }
 
 void Widget_stack::sets_focus_on_change(bool sets_focus) {
@@ -55,14 +33,14 @@ void Widget_stack::sets_focus_on_change(bool sets_focus) {
 }
 
 void Widget_stack::add_page(std::unique_ptr<Widget> widget) {
+    widget->disable();
     this->children.add(std::move(widget));
-    this->children.get().back()->disable();
 }
 
 void Widget_stack::insert_page(std::size_t index,
                                std::unique_ptr<Widget> widget) {
+    widget->disable();
     this->children.insert(std::move(widget), index);
-    this->children.get()[index]->disable();
 }
 
 void Widget_stack::remove_page(std::size_t index) {
@@ -78,10 +56,8 @@ void Widget_stack::remove_page(std::size_t index) {
 
 void Widget_stack::clear() {
     active_page_ = nullptr;
-    for (const std::unique_ptr<Widget>& w : this->children.get()) {
-        if (w != nullptr) {
-            w->close();
-        }
+    while (!this->children.get().empty()) {
+        this->children.get().front()->close();
     }
 }
 
@@ -107,21 +83,14 @@ std::size_t Widget_stack::active_page_index() const {
 
 void Widget_stack::enable(bool enable, bool post_child_polished_event) {
     this->enable_and_post_events(enable, post_child_polished_event);
-    if (active_page_ != nullptr) {
-        active_page_->enable(enable, post_child_polished_event);
+    for (const std::unique_ptr<Widget>& child : this->children.get()) {
+        if (child.get() == active_page_) {
+            child->enable(enable, post_child_polished_event);
+        } else {
+            child->disable();
+        }
     }
 }
-
-// bool Widget_stack::paint_event() {
-//     for (const std::unique_ptr<Widget>& page : this->children.get()) {
-//         if (active_page_ == page.get() && this->visible()) {
-//             set_page_visible(page.get(), true);
-//         } else {
-//             set_page_visible(page.get(), false);
-//         }
-//     }
-//     return Horizontal_layout::paint_event();
-// }
 
 namespace slot {
 
