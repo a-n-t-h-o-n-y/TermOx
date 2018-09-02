@@ -1,6 +1,5 @@
 #include "animated_widget.hpp"
 
-#include <cppurses/painter/paint_buffer.hpp>
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/system/detail/fps_to_period.hpp>
 #include <cppurses/system/events/paint_event.hpp>
@@ -17,7 +16,7 @@ Animated_bit::Animated_bit(int rate, bool ani) {
     }
 }
 
-bool Animated_bit::animation_event() {
+bool Animated_bit::timer_event() {
     int next_x = coords_.x + (1 * x_direction);
     if (next_x >= this->width() || next_x < 0) {
         x_direction *= -1;
@@ -36,7 +35,7 @@ bool Animated_bit::animation_event() {
     }
     coords_.x = next_x;
     coords_.y = next_y;
-    return Widget::animation_event();
+    return Widget::timer_event();
 }
 
 bool Animated_bit::paint_event() {

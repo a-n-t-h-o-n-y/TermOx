@@ -1,5 +1,6 @@
 #include <cppurses/system/events/focus_event.hpp>
 
+#include <cppurses/system/event.hpp>
 #include <cppurses/system/event_handler.hpp>
 
 namespace cppurses {

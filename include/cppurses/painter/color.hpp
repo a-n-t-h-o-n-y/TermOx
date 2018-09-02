@@ -1,5 +1,5 @@
-#ifndef PAINTER_COLOR_HPP
-#define PAINTER_COLOR_HPP
+#ifndef CPPURSES_PAINTER_COLOR_HPP
+#define CPPURSES_PAINTER_COLOR_HPP
 #include <cstdint>
 
 namespace cppurses {
@@ -8,7 +8,7 @@ namespace detail {
 const int k_init_color{239};
 }  // namespace detail
 
-/// Color descriptions that can be applied to a Glyph.
+/// Colors that can be applied to Glyphs.
 enum class Color : std::int16_t {
     Black = detail::k_init_color,
     Dark_red,
@@ -30,6 +30,8 @@ enum class Color : std::int16_t {
 
 namespace detail {
 
+// Used by add_attributes() in brush to overload on different Color types from a
+// parameter pack.
 enum class BackgroundColor : std::int16_t {
     Black = detail::k_init_color,
     Dark_red,
@@ -49,6 +51,8 @@ enum class BackgroundColor : std::int16_t {
     White
 };
 
+// Used by add_attributes() in brush to overload on different Color types from a
+// parameter pack.
 enum class ForegroundColor : std::int16_t {
     Black = detail::k_init_color,
     Dark_red,
@@ -70,13 +74,15 @@ enum class ForegroundColor : std::int16_t {
 
 }  // namespace detail
 
+/// Converts a Color into a detail::BackgroundColor to be used by Brush.
 inline detail::BackgroundColor background(Color c) {
     return static_cast<detail::BackgroundColor>(c);
 }
 
+/// Converts a Color into a detail::BackgroundColor to be used by Brush.
 inline detail::ForegroundColor foreground(Color c) {
     return static_cast<detail::ForegroundColor>(c);
 }
 
 }  // namespace cppurses
-#endif  // PAINTER_COLOR_HPP
+#endif  // CPPURSES_PAINTER_COLOR_HPP

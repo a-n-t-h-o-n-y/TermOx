@@ -1,5 +1,7 @@
 #include <cppurses/painter/detail/screen_state.hpp>
 
+#include <cppurses/painter/detail/screen_mask.hpp>
+
 namespace cppurses {
 namespace detail {
 

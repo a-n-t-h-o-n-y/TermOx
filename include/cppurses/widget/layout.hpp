@@ -1,12 +1,13 @@
-#ifndef WIDGET_LAYOUT_HPP
-#define WIDGET_LAYOUT_HPP
+#ifndef CPPURSES_WIDGET_LAYOUT_HPP
+#define CPPURSES_WIDGET_LAYOUT_HPP
 #include <cstddef>
 
-#include <cppurses/widget/area.hpp>
-#include <cppurses/widget/point.hpp>
+#include <cppurses/painter/color.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
+struct Area;
+struct Point;
 
 /// Base class for Layouts. Calls update_geometry virtual function when needed.
 class Layout : public Widget {
@@ -38,4 +39,4 @@ void set_background(Layout& l, Color c);
 void set_foreground(Layout& l, Color c);
 
 }  // namespace cppurses
-#endif  // WIDGET_LAYOUT_HPP
+#endif  // CPPURSES_WIDGET_LAYOUT_HPP

@@ -5,10 +5,12 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include <optional/optional.hpp>
 #include <signals/signal.hpp>
 
+#include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/detail/screen_state.hpp>
@@ -23,16 +25,16 @@
 #include <cppurses/widget/size_policy.hpp>
 
 namespace cppurses {
+struct Area;
 
 class Widget : public Event_handler {
    public:
     explicit Widget(std::string name = "");
-    ~Widget() override;
-
     Widget(const Widget&) = delete;
-    Widget& operator=(const Widget&) = delete;
     Widget(Widget&&) = delete;
+    Widget& operator=(const Widget&) = delete;
     Widget& operator=(Widget&&) = delete;
+    ~Widget() override;
 
     /// Return the name of the Widget.
     std::string name() const;
@@ -145,7 +147,7 @@ class Widget : public Event_handler {
     bool child_polished_event(Widget* child) override;
     bool move_event(Point new_position, Point old_position) override;
     bool resize_event(Area new_size, Area old_size) override;
-    bool animation_event() override;
+    bool timer_event() override;
     bool disable_event() override;
 
     void enable_and_post_events(bool enable, bool post_child_polished_event);

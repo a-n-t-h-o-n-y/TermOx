@@ -1,5 +1,5 @@
-#ifndef SYSTEM_EVENTS_KEY_EVENT_HPP
-#define SYSTEM_EVENTS_KEY_EVENT_HPP
+#ifndef CPPURSES_SYSTEM_EVENTS_KEY_EVENT_HPP
+#define CPPURSES_SYSTEM_EVENTS_KEY_EVENT_HPP
 #include <cppurses/system/event.hpp>
 #include <cppurses/system/events/input_event.hpp>
 #include <cppurses/system/key.hpp>
@@ -30,4 +30,4 @@ class Key_release_event : public Key_event {
 };
 
 }  // namespace cppurses
-#endif  // SYSTEM_EVENTS_KEY_EVENT_HPP
+#endif  // CPPURSES_SYSTEM_EVENTS_KEY_EVENT_HPP

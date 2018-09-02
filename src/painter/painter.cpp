@@ -1,36 +1,25 @@
 #include <cppurses/painter/painter.hpp>
 
 #include <cstddef>
-#include <cstring>
+#include <string>
+#include <unordered_map>
 
-#include <optional/optional.hpp>
-
-#include <cppurses/painter/brush.hpp>
-#include <cppurses/painter/color.hpp>
 #include <cppurses/painter/detail/is_not_paintable.hpp>
+#include <cppurses/painter/detail/screen_descriptor.hpp>
 #include <cppurses/painter/detail/staged_changes.hpp>
-#include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/painter/paint_buffer.hpp>
+#include <cppurses/system/event_loop.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/border.hpp>
+#include <cppurses/widget/detail/border_offset.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
-
-#define DEBUG_PAINTER_PUT_GLOBAL
-
-#if defined(DEBUG_PAINTER_PUT_GLOBAL)
-#include <fstream>
-#endif
 
 namespace cppurses {
 
 Painter::Painter(Widget* widg)
     : widget_{widg},
       staged_changes_{System::find_event_loop().staged_changes()[widg]} {}
-
-Painter::Painter(Widget* widg, detail::Staged_changes& changes)
-    : widget_{widg}, staged_changes_{changes[widg]} {}
 
 void Painter::put(const Glyph& tile, std::size_t x, std::size_t y) {
     if (x >= widget_->width() || y >= widget_->height()) {
@@ -41,7 +30,7 @@ void Painter::put(const Glyph& tile, std::size_t x, std::size_t y) {
     this->put_global(tile, glob_x, glob_y);
 }
 
-void Painter::put(const Glyph& tile, Point position) {
+void Painter::put(const Glyph& tile, const Point& position) {
     this->put(tile, position.x, position.y);
 }
 
@@ -54,7 +43,7 @@ void Painter::put(const Glyph_string& text, std::size_t x, std::size_t y) {
     }
 }
 
-void Painter::put(const Glyph_string& text, Point position) {
+void Painter::put(const Glyph_string& text, const Point& position) {
     this->put(text, position.x, position.y);
 }
 
@@ -65,10 +54,12 @@ void Painter::border(const Border& b) {
     }
 
     // Disqualified borders
-    bool west_disqualified{widget_->outer_width() == 1};
-    bool east_disqualified{widget_->outer_width() <= 2};
-    bool north_disqualified{widget_->outer_height() == 1};
-    bool south_disqualified{widget_->outer_height() <= 2};
+    bool west_disqualified{detail::Border_offset::west_disqualified(*widget_)};
+    bool east_disqualified{detail::Border_offset::east_disqualified(*widget_)};
+    bool north_disqualified{
+        detail::Border_offset::north_disqualified(*widget_)};
+    bool south_disqualified{
+        detail::Border_offset::south_disqualified(*widget_)};
 
     // North Wall
     Point north_left{widget_->inner_x(), widget_->y()};
@@ -158,6 +149,52 @@ void Painter::border(const Border& b) {
     } else if (!b.south_east_enabled && !b.east_enabled && b.south_enabled) {
         this->put_global(b.south, south_east);
     }
+
+    // Paint wallpaper over empty space that border causes.
+    // North Wallpaper
+    Glyph wallpaper{widget_->generate_wallpaper()};
+    if (detail::Border_offset::north(*widget_) == 1 && !b.north_enabled) {
+        this->line_global(wallpaper, north_left, north_right);
+    }
+
+    // South Wallpaper
+    if (detail::Border_offset::south(*widget_) == 1 && !b.south_enabled) {
+        this->line_global(wallpaper, south_left, south_right);
+    }
+
+    // East Wallpaper
+    if (detail::Border_offset::east(*widget_) == 1 && !b.east_enabled) {
+        this->line_global(wallpaper, east_top, east_bottom);
+    }
+
+    // West Wallpaper
+    if (detail::Border_offset::west(*widget_) == 1 && !b.west_enabled) {
+        this->line_global(wallpaper, west_top, west_bottom);
+    }
+
+    // North-West Wallpaper
+    if (detail::Border_offset::north(*widget_) == 1 &&
+        detail::Border_offset::west(*widget_) == 1 && !b.north_west_enabled) {
+        this->put_global(wallpaper, north_west);
+    }
+
+    // North-East Wallpaper
+    if (detail::Border_offset::north(*widget_) == 1 &&
+        detail::Border_offset::east(*widget_) == 1 && !b.north_east_enabled) {
+        this->put_global(wallpaper, north_east);
+    }
+
+    // South-West Wallpaper
+    if (detail::Border_offset::south(*widget_) == 1 &&
+        detail::Border_offset::west(*widget_) == 1 && !b.south_west_enabled) {
+        this->put_global(wallpaper, south_west);
+    }
+
+    // South-East Wallpaper
+    if (detail::Border_offset::south(*widget_) == 1 &&
+        detail::Border_offset::east(*widget_) == 1 && !b.south_east_enabled) {
+        this->put_global(wallpaper, south_east);
+    }
 }
 
 void Painter::fill(const Glyph& tile,
@@ -175,7 +212,7 @@ void Painter::fill(const Glyph& tile,
 }
 
 void Painter::fill(const Glyph& tile,
-                   Point point,
+                   const Point& point,
                    std::size_t width,
                    std::size_t height) {
     this->fill(tile, point.x, point.y, width, height);
@@ -200,76 +237,17 @@ void Painter::line(const Glyph& tile,
     }
 }
 
-void Painter::line(const Glyph& tile,
-                   const Point& point_1,
-                   const Point& point_2) {
-    this->line(tile, point_1.x, point_1.y, point_2.x, point_2.y);
+void Painter::line(const Glyph& tile, const Point& a, const Point& b) {
+    this->line(tile, a.x, a.y, b.x, b.y);
 }
 
 // GLOBAL COORDINATES - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 void Painter::put_global(const Glyph& tile, std::size_t x, std::size_t y) {
-#if defined(DEBUG_PAINTER_PUT_GLOBAL)
-    std::size_t width{System::max_width()};
-    std::size_t height{System::max_height()};
-    if (x >= width || y >= height) {
-        std::ofstream l{"painter_put_global_log.txt", std::ios::app};
-        l << "widget: " << widget_->name() << '\n';
-        l << "Painting at: (" << x << ", " << y << ")\n";
-        l << "widget width: " << widget_->outer_width()
-          << " height: " << widget_->outer_height() << std::endl;
-        l << "widget x: " << widget_->x() << " y: " << widget_->y()
-          << std::endl;
-        if (widget_->parent() != nullptr) {
-            l << "parent: " << widget_->parent()->name() << '\n';
-            l << "parent width: " << widget_->parent()->outer_width()
-              << " height: " << widget_->parent()->outer_height() << std::endl;
-            l << "parent x: " << widget_->parent()->x();
-            l << " y: " << widget_->parent()->y() << '\n';
-            if (widget_->parent()->parent() != nullptr) {
-                l << "\tparent's parent: "
-                  << widget_->parent()->parent()->name() << '\n';
-                l << "\tparent's parent width: "
-                  << widget_->parent()->parent()->outer_width()
-                  << " height: " << widget_->parent()->parent()->outer_height()
-                  << std::endl;
-                l << "\tparent's parent x: "
-                  << widget_->parent()->parent()->x();
-                l << " y: " << widget_->parent()->parent()->y() << '\n';
-                l << "\tparent's parent inner_x: "
-                  << widget_->parent()->parent()->inner_x();
-                l << " inner_y: " << widget_->parent()->parent()->inner_y()
-                  << '\n';
-                if (widget_->parent()->parent()->parent() != nullptr) {
-                    l << "\t\tparent's parent's parent: "
-                      << widget_->parent()->parent()->parent()->name() << '\n';
-                    l << "\t\tparent's parent's parent width: "
-                      << widget_->parent()->parent()->parent()->outer_width()
-                      << " height: "
-                      << widget_->parent()->parent()->parent()->outer_height()
-                      << std::endl;
-                    l << "\t\tparent's parent's parent x: "
-                      << widget_->parent()->parent()->parent()->x();
-                    l << " y: " << widget_->parent()->parent()->parent()->y()
-                      << '\n';
-                    l << "\t\tparent's parent's parent inner_x: "
-                      << widget_->parent()->parent()->parent()->inner_x();
-                    l << " inner_y: "
-                      << widget_->parent()->parent()->parent()->inner_y()
-                      << '\n';
-                }
-            }
-        }
-        l << "Screen Boundaries. Width: " << width << " Height: " << height
-          << '\n';
-        l << "- - - - - - - - - - - - - -" << std::endl;
-        return;
-    }
-#endif
     staged_changes_[Point{x, y}] = tile;
 }
 
-void Painter::put_global(const Glyph& tile, Point position) {
+void Painter::put_global(const Glyph& tile, const Point& position) {
     this->put_global(tile, position.x, position.y);
 }
 
@@ -281,20 +259,18 @@ void Painter::line_global(const Glyph& tile,
     // Horizontal
     if (y1 == y2) {
         for (; x1 <= x2; ++x1) {
-            put_global(tile, x1, y1);
+            this->put_global(tile, x1, y1);
         }
     }  // Vertical
     else if (x1 == x2) {
         for (; y1 <= y2; ++y1) {
-            put_global(tile, x1, y1);
+            this->put_global(tile, x1, y1);
         }
     }
 }
 
-void Painter::line_global(const Glyph& tile,
-                          const Point& point_1,
-                          const Point& point_2) {
-    line_global(tile, point_1.x, point_1.y, point_2.x, point_2.y);
+void Painter::line_global(const Glyph& tile, const Point& a, const Point& b) {
+    line_global(tile, a.x, a.y, b.x, b.y);
 }
 
 }  // namespace cppurses

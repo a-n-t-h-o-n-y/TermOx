@@ -142,7 +142,7 @@ void Paint_area::write(std::ostream& os) {
     for (const auto& cg_pair : glyphs_painted_) {
         insert_newline(previous_nl, cg_pair.first, os);
         insert_space(previous_s, cg_pair.first, os);
-        os << cppurses::utility::wchar_to_bytes(cg_pair.second);
+        os << cppurses::utility::wchar_to_bytes(cg_pair.second.symbol);
         previous_nl = cg_pair.first;
         previous_s = cg_pair.first;
     }

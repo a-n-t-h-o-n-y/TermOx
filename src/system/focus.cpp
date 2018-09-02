@@ -4,10 +4,13 @@
 #include <cstddef>
 #include <iterator>
 #include <memory>
+#include <utility>
 #include <vector>
 
+#include <cppurses/system/event.hpp>
 #include <cppurses/system/events/focus_event.hpp>
 #include <cppurses/system/system.hpp>
+#include <cppurses/widget/children_data.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/widget.hpp>
 

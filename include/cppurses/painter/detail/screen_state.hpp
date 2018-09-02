@@ -2,11 +2,9 @@
 #define CPPURSES_PAINTER_DETAIL_SCREEN_STATE_HPP
 #include <cppurses/painter/detail/screen_descriptor.hpp>
 #include <cppurses/painter/detail/screen_mask.hpp>
-#include <cppurses/painter/detail/staged_changes.hpp>
 #include <cppurses/painter/glyph.hpp>
 
 namespace cppurses {
-class Paint_buffer;
 class Layout;
 class Enable_event;
 class Disable_event;
@@ -35,13 +33,13 @@ class Screen_state {
     };
 
     /// Holds a description of the widget's current screen state. In global
-    /// coordinates, and modified by Paint_buffer::flush() function.
+    /// coordinates, and modified by Paint_middleman::flush() function.
     Screen_descriptor tiles;
 
     /// Holds flags and data structures used to optimize flushing to the screen.
     Optimize optimize;
 
-    friend class cppurses::Paint_buffer;
+    friend class Paint_middleman;
     friend class cppurses::Layout;
     friend class cppurses::Enable_event;
     friend class cppurses::Disable_event;

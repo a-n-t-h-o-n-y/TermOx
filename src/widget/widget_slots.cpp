@@ -2,12 +2,13 @@
 
 #include <signals/slot.hpp>
 
-#include <cppurses/system/events/delete_event.hpp>
+#include <cppurses/painter/color.hpp>
 #include <cppurses/system/events/key_event.hpp>
 #include <cppurses/system/events/mouse_event.hpp>
-#include <cppurses/system/events/paint_event.hpp>
+#include <cppurses/system/key.hpp>
 #include <cppurses/system/mouse_button.hpp>
 #include <cppurses/system/system.hpp>
+#include <cppurses/widget/cursor_data.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 

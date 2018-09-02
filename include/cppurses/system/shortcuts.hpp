@@ -1,5 +1,5 @@
-#ifndef SYSTEM_SHORTCUTS_HPP
-#define SYSTEM_SHORTCUTS_HPP
+#ifndef CPPURSES_SYSTEM_SHORTCUTS_HPP
+#define CPPURSES_SYSTEM_SHORTCUTS_HPP
 #include <map>
 
 #include <signals/signal.hpp>
@@ -20,4 +20,4 @@ class Shortcuts {
 };
 
 }  // namespace cppurses
-#endif  // SYSTEM_SHORTCUTS_HPP
+#endif  // CPPURSES_SYSTEM_SHORTCUTS_HPP

@@ -1,7 +1,11 @@
 #include <cppurses/system/events/delete_event.hpp>
 
+#include <utility>
+#include <vector>
+
+#include <cppurses/system/event.hpp>
 #include <cppurses/system/event_handler.hpp>
-#include <cppurses/system/system.hpp>
+#include <cppurses/widget/children_data.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {

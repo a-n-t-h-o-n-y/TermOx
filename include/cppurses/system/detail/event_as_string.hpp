@@ -7,10 +7,10 @@
 namespace cppurses {
 namespace detail {
 
-/// Utility to help with logging. Turns an event into a string description.
+/// Utility to help with logging, turning an Event into a string description.
 std::string event_as_string(const Event& event);
 
-/// Utility to help with logging. Turns an event type into a string description.
+/// Utility to help with logging, turning Event_type into a string description.
 std::string event_type_as_string(Event::Type event_type);
 
 }  // namespace detail

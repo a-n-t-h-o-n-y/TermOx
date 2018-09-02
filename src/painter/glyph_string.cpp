@@ -12,18 +12,10 @@
 
 namespace cppurses {
 
-Glyph_string::operator std::string() const {
-    return this->str();
-}
-
 std::string Glyph_string::str() const {
     const std::wstring wide_str{this->w_str()};
     std::string result = utility::wchar_to_bytes(wide_str);
     return result;
-}
-
-Glyph_string::operator std::wstring() const {
-    return this->w_str();
 }
 
 std::wstring Glyph_string::w_str() const {
@@ -63,7 +55,7 @@ bool operator!=(const Glyph_string& x, const Glyph_string& y) {
 }
 
 std::ostream& operator<<(std::ostream& os, const Glyph_string& gs) {
-    return os << static_cast<std::string>(gs);
+    return os << gs.str();
 }
 
 }  // namespace cppurses

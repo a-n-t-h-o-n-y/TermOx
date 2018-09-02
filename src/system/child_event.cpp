@@ -1,5 +1,7 @@
 #include <cppurses/system/events/child_event.hpp>
 
+#include <cppurses/painter/detail/screen_state.hpp>
+#include <cppurses/system/event.hpp>
 #include <cppurses/system/event_handler.hpp>
 #include <cppurses/widget/widget.hpp>
 

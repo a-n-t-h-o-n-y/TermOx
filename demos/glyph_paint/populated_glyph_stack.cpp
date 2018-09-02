@@ -1,6 +1,7 @@
 #include "populated_glyph_stack.hpp"
 
 #include <cstddef>
+#include <string>
 #include <vector>
 
 namespace {
@@ -73,10 +74,10 @@ Glyph_string generate_color_blocks() {
         Color::Brown,  Color::Green,      Color::Red,        Color::Gray,
         Color::Blue,   Color::Orange,     Color::Light_gray, Color::Light_green,
         Color::Violet, Color::Light_blue, Color::Yellow,     Color::White};
-    const Glyph_string rectangles{"░▒▓"};
+    const std::wstring rectangles{L"░▒▓"};
 
     Glyph_string str;
-    for (Glyph rect : rectangles) {
+    for (wchar_t rect : rectangles) {
         for (std::size_t i{0}; i < colors.size(); ++i) {
             for (std::size_t j{i + 1}; j < colors.size(); ++j) {
                 str.append(

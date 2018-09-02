@@ -8,10 +8,10 @@
 
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/mouse_button.hpp>
-#include <cppurses/widget/area.hpp>
-#include <cppurses/widget/point.hpp>
 
 namespace cppurses {
+struct Area;
+struct Point;
 class Widget;
 
 class Event_handler {
@@ -63,7 +63,7 @@ class Event_handler {
     virtual bool focus_out_event();
     virtual bool delete_event();
     virtual bool paint_event() = 0;
-    virtual bool animation_event() = 0;
+    virtual bool timer_event() = 0;
 
     // - - - - - - - - - - - Event Filter Handlers - - - - - - - - - - - - - - -
     virtual bool child_added_event_filter(Event_handler* receiver,
@@ -115,7 +115,7 @@ class Event_handler {
     virtual bool focus_out_event_filter(Event_handler* receiver);
     virtual bool delete_event_filter(Event_handler* receiver);
     virtual bool paint_event_filter(Event_handler* receiver);
-    virtual bool animation_event_filter(Event_handler* receiver);
+    virtual bool timer_event_filter(Event_handler* receiver);
 
     // Signals
     sig::Signal<void(Event_handler*)> destroyed;

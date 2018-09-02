@@ -16,7 +16,7 @@ class Animated_bit : public cppurses::Widget {
    public:
     Animated_bit(int rate, bool ani = false);
 
-    bool animation_event() override;
+    bool timer_event() override;
     bool paint_event() override;
 
     bool mouse_press_event(cppurses::Mouse_button button,
@@ -43,7 +43,7 @@ class Animated_widget : public cppurses::Horizontal_layout {
     Animated_bit& bit_2_{this->make_child<Animated_bit>(10, true)};
     Animated_bit& bit_3_{this->make_child<Animated_bit>(20, true)};
     Animated_bit& bit_4_{this->make_child<Animated_bit>(30, true)};
-    // Animated_bit& bit_5_{this->make_child<Animated_bit>(60, true)};
+    Animated_bit& bit_5_{this->make_child<Animated_bit>(60, true)};
 };
 
 }  // namespace animation

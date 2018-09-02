@@ -1,7 +1,6 @@
 #include <cppurses/widget/widget.hpp>
 
 #include <cstddef>
-#include <iterator>
 #include <memory>
 #include <string>
 #include <utility>
@@ -12,10 +11,10 @@
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/detail/add_default_attributes.hpp>
-#include <cppurses/painter/detail/staged_changes.hpp>
 #include <cppurses/painter/glyph.hpp>
-#include <cppurses/painter/paint_buffer.hpp>
 #include <cppurses/painter/painter.hpp>
+#include <cppurses/system/animation_engine.hpp>
+#include <cppurses/system/event_handler.hpp>
 #include <cppurses/system/events/child_event.hpp>
 #include <cppurses/system/events/delete_event.hpp>
 #include <cppurses/system/events/disable_event.hpp>
@@ -23,11 +22,17 @@
 #include <cppurses/system/events/paint_event.hpp>
 #include <cppurses/system/focus.hpp>
 #include <cppurses/system/system.hpp>
+#include <cppurses/widget/area.hpp>
 #include <cppurses/widget/border.hpp>
+#include <cppurses/widget/children_data.hpp>
+#include <cppurses/widget/cursor_data.hpp>
 #include <cppurses/widget/detail/border_offset.hpp>
 #include <cppurses/widget/point.hpp>
 
 namespace cppurses {
+namespace detail {
+class Screen_state;
+}
 
 Widget::Widget(std::string name) : name_{std::move(name)} {}
 
@@ -123,9 +128,8 @@ void Widget::set_brush_paints_wallpaper(bool paints) {
 // flushing the screen. or wallpaper(?) should have a mutex, or anything
 // that modifies the Glyph.
 Glyph Widget::generate_wallpaper() const {
-    Glyph background{this->wallpaper
-                         ? *(this->wallpaper)
-                         : System::paint_buffer().get_global_background_tile()};
+    Glyph background{this->wallpaper ? *(this->wallpaper)
+                                     : System::terminal.background_tile()};
     if (this->brush_paints_wallpaper()) {
         detail::add_default_attributes(background, this->brush);
     }
@@ -150,9 +154,6 @@ void Widget::disable_animation() {
 }
 
 bool Widget::focus_in_event() {
-    // TODO obsolete? flush takes care of this cursor movement
-    System::paint_buffer().move_cursor(this->inner_x() + this->cursor.x(),
-                                       this->inner_y() + this->cursor.y());
     focused_in();
     return true;
 }
@@ -198,7 +199,7 @@ bool Widget::resize_event(Area new_size, Area old_size) {
     return true;
 }
 
-bool Widget::animation_event() {
+bool Widget::timer_event() {
     this->update();
     return true;
 }

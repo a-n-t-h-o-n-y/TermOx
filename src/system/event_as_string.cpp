@@ -71,8 +71,8 @@ std::string event_type_as_string(Event::Type event_type) {
         case Event::Delete:
             name = "Delete";
             break;
-        case Event::Animation:
-            name = "Animation";
+        case Event::Timer:
+            name = "Timer";
             break;
         default:
             name = "Other Event";

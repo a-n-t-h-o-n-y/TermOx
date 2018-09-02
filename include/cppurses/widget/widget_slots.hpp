@@ -1,14 +1,14 @@
-#ifndef WIDGET_WIDGET_SLOTS_HPP
-#define WIDGET_WIDGET_SLOTS_HPP
+#ifndef CPPURSES_WIDGET_WIDGET_SLOTS_HPP
+#define CPPURSES_WIDGET_WIDGET_SLOTS_HPP
 #include <signals/slot.hpp>
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/mouse_button.hpp>
-#include <cppurses/widget/point.hpp>
 
 namespace cppurses {
 class Widget;
+struct Point;
 namespace slot {
 
 sig::Slot<void()> enable(Widget& w);
@@ -30,4 +30,4 @@ sig::Slot<void()> toggle_cursor(Widget& w);
 }  // namespace slot
 }  // namespace cppurses
 
-#endif  // WIDGET_WIDGET_SLOTS_HPP
+#endif  // CPPURSES_WIDGET_WIDGET_SLOTS_HPP

@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <vector>
 
+#include <cppurses/widget/area.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 

@@ -1,9 +1,12 @@
 #include <cppurses/widget/layout.hpp>
 
-#include <cppurses/painter/painter.hpp>
-#include <cppurses/system/events/move_event.hpp>
-#include <cppurses/system/events/resize_event.hpp>
-#include <cppurses/system/system.hpp>
+#include <memory>
+#include <vector>
+
+#include <cppurses/widget/area.hpp>
+#include <cppurses/widget/children_data.hpp>
+#include <cppurses/widget/point.hpp>
+#include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
 

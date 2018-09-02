@@ -2,33 +2,45 @@
 
 #include <algorithm>
 #include <fstream>
+#include <iterator>
 #include <memory>
 #include <numeric>
 #include <stdexcept>
 #include <vector>
 
 #include <cppurses/painter/detail/screen_mask.hpp>
+#include <cppurses/widget/children_data.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace {
 using namespace cppurses;
 
 bool is_width_equal_to_parent(const std::unique_ptr<Widget>& w) {
-    // parent should not be nullptr if you are here.
+    if (!w->enabled()) {
+        return true;
+    }
     return w->outer_width() == w->parent()->width();
 }
 
 bool is_height_equal_to_parent(const std::unique_ptr<Widget>& w) {
-    // parent should not be nullptr if you are here.
+    if (!w->enabled()) {
+        return true;
+    }
     return w->outer_height() == w->parent()->height();
 }
 
 std::size_t sum_widths(std::size_t sum, const std::unique_ptr<Widget>& w) {
-    return sum + w->outer_width();
+    if (w->enabled()) {
+        sum += w->outer_width();
+    }
+    return sum;
 }
 
 std::size_t sum_heights(std::size_t sum, const std::unique_ptr<Widget>& w) {
-    return sum + w->outer_height();
+    if (w->enabled()) {
+        sum += w->outer_height();
+    }
+    return sum;
 }
 
 }  // namespace
@@ -63,8 +75,6 @@ Screen_mask find_empty_space(const Widget& w) {
     // for loop over each child, only perform action if it is enabled
     for (const std::unique_ptr<Widget>& child : children) {
         if (child->enabled()) {
-            // Point child_offset{child->x(), child->y()};
-            // Area child_area{child->outer_width(), child->outer_height()};
             for (std::size_t y{child->y()};
                  y < child->outer_height() + child->y(); ++y) {
                 for (std::size_t x{child->x()};

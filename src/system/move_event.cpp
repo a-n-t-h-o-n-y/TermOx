@@ -1,6 +1,9 @@
 #include <cppurses/system/events/move_event.hpp>
 
+#include <cppurses/painter/detail/screen_descriptor.hpp>
 #include <cppurses/painter/detail/screen_mask.hpp>
+#include <cppurses/painter/detail/screen_state.hpp>
+#include <cppurses/system/event.hpp>
 #include <cppurses/system/event_handler.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
@@ -20,7 +23,7 @@ bool Move_event::send() const {
         widg->screen_state().optimize.moved = true;
         // Create and set move_mask in widg->screen_state()
         widg->screen_state().optimize.move_mask = detail::Screen_mask(*widg);
-        widg->screen_state().tiles.clear(); // TODO remove this once opt impl.
+        widg->screen_state().tiles.clear();  // TODO remove this once opt impl.
         old_position_.x = widg->x();
         old_position_.y = widg->y();
         widg->set_x(new_position_.x);

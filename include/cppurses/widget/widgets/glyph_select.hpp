@@ -1,7 +1,11 @@
 #ifndef CPPURSES_WIDGET_WIDGETS_GLYPH_SELECT_HPP
 #define CPPURSES_WIDGET_WIDGETS_GLYPH_SELECT_HPP
+#include <cstddef>
+
 #include <signals/signal.hpp>
 
+#include <cppurses/painter/color.hpp>
+#include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/layouts/horizontal_layout.hpp>
 #include <cppurses/widget/layouts/vertical_layout.hpp>

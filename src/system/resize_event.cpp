@@ -1,10 +1,18 @@
 #include <cppurses/system/events/resize_event.hpp>
 
 #include <cstddef>
+#include <iterator>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
+#include <cppurses/painter/detail/screen_descriptor.hpp>
 #include <cppurses/painter/detail/screen_mask.hpp>
+#include <cppurses/painter/detail/screen_state.hpp>
+#include <cppurses/system/event.hpp>
 #include <cppurses/system/event_handler.hpp>
 #include <cppurses/widget/area.hpp>
+#include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace {

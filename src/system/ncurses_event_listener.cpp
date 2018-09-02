@@ -2,7 +2,7 @@
 
 #include <cstddef>
 #include <memory>
-#include <vector>
+#include <mutex>
 
 #include <stdio.h>
 #include <sys/ioctl.h>
@@ -17,7 +17,7 @@
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/mouse_button.hpp>
 #include <cppurses/system/system.hpp>
-#include <cppurses/widget/border.hpp>
+#include <cppurses/widget/area.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 
@@ -56,15 +56,6 @@ std::unique_ptr<Event> NCurses_event_listener::get_input() const {
             break;
     }
     return event;
-}
-
-void NCurses_event_listener::enable_ctrl_characters() {
-    ::raw();
-}
-
-void NCurses_event_listener::disable_ctrl_characters() {
-    ::noraw();
-    ::cbreak();
 }
 
 #undef border  // NCurses macro, naming conflict.
@@ -161,8 +152,11 @@ Widget* NCurses_event_listener::handle_keyboard_widget() const {
 }
 
 std::unique_ptr<Event> NCurses_event_listener::handle_resize_event() const {
-    std::size_t width{System::paint_buffer().update_width()};
-    std::size_t height{System::paint_buffer().update_height()};
+    // TODO the below call is not thread safe. Should be updated when the event
+    // invoker is called for the main thread.
+    System::terminal.update_dimensions();
+    std::size_t width{System::terminal.width()};
+    std::size_t height{System::terminal.height()};
     return std::make_unique<Resize_event>(nullptr, Area{width, height});
 }
 

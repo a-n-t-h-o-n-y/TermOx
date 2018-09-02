@@ -3,14 +3,13 @@
 #include <array>
 #include <clocale>
 #include <cstddef>
-#include <cstdint>
-#include <functional>
-#include <mutex>
+#include <stdexcept>
 
 #include <signal.h>
 #include <string.h>
 
 #include <ncurses.h>
+
 #include <optional/optional.hpp>
 
 #include <cppurses/painter/attribute.hpp>
@@ -18,6 +17,7 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/detail/ncurses_data.hpp>
 #include <cppurses/painter/glyph.hpp>
+#include <cppurses/system/system.hpp>
 
 #ifndef add_wchstr
 #include <cppurses/painter/detail/extended_char.hpp>
@@ -25,16 +25,9 @@
 
 // #define SLOW_PAINT 7
 
-// #define PAINT_ENGINE_DEBUG_CURSOR_MOVEMENT
-
 #if defined(SLOW_PAINT)
 #include <chrono>
 #include <thread>
-#endif
-
-#if defined(PAINT_ENGINE_DEBUG_CURSOR_MOVEMENT)
-#include <cppurses/system/system.hpp>
-#include <fstream>
 #endif
 
 namespace {
@@ -76,6 +69,8 @@ attr_t attr_to_int(cppurses::Attribute attr) {
         case cppurses::Attribute::Blink:
             a = A_BLINK;
             break;
+        default:
+            throw std::domain_error{"Attribute enum not handled."};
     }
     return a;
 }
@@ -113,6 +108,7 @@ NCurses_paint_engine::NCurses_paint_engine() {
     ::assume_default_colors(k_init_color, k_init_color);
     initialize_color_pairs();
     this->hide_cursor();
+    System::terminal.update_dimensions();
 }
 
 NCurses_paint_engine::~NCurses_paint_engine() {
@@ -133,13 +129,8 @@ void NCurses_paint_engine::put_glyph(const Glyph& g) {
     }
     short color_pair{find_pair(fore_color, back_color)};
 
-    // Attributes
-    const std::array<Attribute, 8> attr_enums{
-        Attribute::Bold,      Attribute::Italic, Attribute::Underline,
-        Attribute::Standout,  Attribute::Dim,    Attribute::Inverse,
-        Attribute::Invisible, Attribute::Blink};
     attr_t attributes{A_NORMAL};
-    for (Attribute a : attr_enums) {
+    for (Attribute a : Attribute_list) {
         if (g.brush.has_attribute(a)) {
             attributes |= attr_to_int(a);
         }
@@ -185,16 +176,6 @@ void NCurses_paint_engine::put(std::size_t x, std::size_t y, const Glyph& g) {
 }
 
 void NCurses_paint_engine::move_cursor(std::size_t x, std::size_t y) {
-#if defined(PAINT_ENGINE_DEBUG_CURSOR_MOVEMENT)
-    if (x >= System::max_width() || y >= System::max_height()) {
-        std::ofstream l{"move_cursor_log.txt", std::ios::app};
-        l << "Cursor at: (" << x << ", " << y << ")\n";
-        l << "Screen Boundaries. Width: " << this->screen_width()
-          << " Height: " << this->screen_height() << '\n';
-        l << " - - - - - - - - - - - - - - - - - - - " << std::endl;
-        return;
-    }
-#endif
     ::wmove(::stdscr, static_cast<int>(y), static_cast<int>(x));
 }
 
@@ -209,29 +190,8 @@ void NCurses_paint_engine::hide_cursor(bool hide) {
     this->show_cursor(!hide);
 }
 
-std::size_t NCurses_paint_engine::screen_width() {
-    return getmaxx(::stdscr);
-}
-
-std::size_t NCurses_paint_engine::screen_height() {
-    return getmaxy(::stdscr);
-}
-
 void NCurses_paint_engine::refresh() {
     ::wrefresh(::stdscr);
-}
-
-void NCurses_paint_engine::set_rgb(Color c,
-                                   std::int16_t r,
-                                   std::int16_t g,
-                                   std::int16_t b) {
-    auto scale = [](std::int16_t i) {
-        return static_cast<std::int16_t>((static_cast<double>(i) / 255) * 999);
-    };
-    std::int16_t r_{scale(r)};
-    std::int16_t g_{scale(g)};
-    std::int16_t b_{scale(b)};
-    ::init_color(static_cast<std::int16_t>(c), r_, g_, b_);
 }
 
 void handle_sigwinch(int sig) {

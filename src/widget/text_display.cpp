@@ -8,6 +8,7 @@
 
 #include <signals/signal.hpp>
 
+#include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/widget/point.hpp>
@@ -36,8 +37,10 @@ void Text_display::insert(Glyph_string text, std::size_t index) {
         return;
     }
     for (auto& glyph : text) {
-        for (auto& attr : new_text_brush_.attributes()) {
-            glyph.brush.add_attributes(attr);
+        for (Attribute a : Attribute_list) {
+            if (new_text_brush_.has_attribute(a)) {
+                glyph.brush.add_attributes(a);
+            }
         }
     }
     contents_.insert(std::begin(contents_) + index, std::begin(text),
@@ -48,8 +51,10 @@ void Text_display::insert(Glyph_string text, std::size_t index) {
 
 void Text_display::append(Glyph_string text) {
     for (auto& glyph : text) {
-        for (auto& attr : new_text_brush_.attributes()) {
-            glyph.brush.add_attributes(attr);
+        for (Attribute a : Attribute_list) {
+            if (new_text_brush_.has_attribute(a)) {
+                glyph.brush.add_attributes(a);
+            }
         }
     }
     contents_.append(text);

@@ -1,13 +1,9 @@
 #include <cppurses/painter/glyph.hpp>
 
-#include <utility>
+#include <cppurses/painter/brush.hpp>
 
 namespace cppurses {
-Glyph::Glyph(wchar_t sym, Brush b) : symbol{sym}, brush{std::move(b)} {}
-
-Glyph::operator wchar_t() const {
-    return symbol;
-}
+Glyph::Glyph(wchar_t sym, const Brush& b) : symbol{sym}, brush{b} {}
 
 bool operator==(const Glyph& lhs, const Glyph& rhs) {
     return (lhs.symbol == rhs.symbol) && (lhs.brush == rhs.brush);

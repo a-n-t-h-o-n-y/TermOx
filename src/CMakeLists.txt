@@ -15,20 +15,20 @@ set_property(TARGET NCurses
 
 # CREATE CPPURSES LIBRARY
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-add_library(libcppurses STATIC "")
-target_link_libraries(libcppurses PUBLIC libsignals liboptional NCurses)
-target_include_directories(libcppurses
+add_library(cppurses STATIC "")
+target_link_libraries(cppurses PUBLIC signals optional PRIVATE NCurses)
+target_include_directories(cppurses
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
-target_compile_features(libcppurses PUBLIC cxx_std_14)
-target_compile_options(libcppurses PUBLIC -Wall)
+target_compile_features(cppurses PUBLIC cxx_std_14)
+target_compile_options(cppurses PRIVATE -Wall)
 
 # GATHER SOURCES
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # SYSTEM
-target_sources(libcppurses PRIVATE
+target_sources(cppurses PRIVATE
 	system/child_event.cpp
     system/delete_event.cpp
     system/disable_event.cpp
@@ -50,22 +50,22 @@ target_sources(libcppurses PRIVATE
 	system/system.cpp
     system/shortcuts.cpp
     system/animation_engine.cpp
-    system/animation_event.cpp
+    system/timer_event.cpp
     system/event_as_string.cpp
     system/user_input_event_loop.cpp
-    system/animation_event_loop.cpp
+    system/timer_event_loop.cpp
     system/fps_to_period.cpp
     system/find_widget_at.cpp
+    system/terminal_properties.cpp
 )
 
 # PAINTER
-target_sources(libcppurses PRIVATE
+target_sources(cppurses PRIVATE
     painter/ncurses_paint_engine.cpp
 	painter/painter.cpp
-	painter/palette.cpp
 	painter/glyph.cpp
 	painter/brush.cpp
-	painter/paint_buffer.cpp
+	painter/paint_middleman.cpp
     painter/glyph_matrix.cpp
     painter/glyph_string.cpp
     painter/wchar_to_bytes.cpp
@@ -76,10 +76,11 @@ target_sources(libcppurses PRIVATE
     painter/screen_mask.cpp
     painter/find_empty_space.cpp
     painter/screen_state.cpp
+    painter/palettes.cpp
 )	
 
 # WIDGET
-target_sources(libcppurses PRIVATE
+target_sources(cppurses PRIVATE
     widget/widget.cpp
     widget/widget_slots.cpp
     widget/widget_stack.cpp
@@ -124,7 +125,7 @@ target_sources(libcppurses PRIVATE
 
 # INSTALLATION
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-install(TARGETS libcppurses
+install(TARGETS cppurses
     EXPORT CPPursesLibraryConfig
     ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -132,7 +133,7 @@ install(TARGETS libcppurses
 install(DIRECTORY ../include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(EXPORT CPPursesLibraryConfig DESTINATION share/CPPursesLibrary/cmake)
 export(
-    TARGETS libcppurses libsignals liboptional
+    TARGETS cppurses signals optional
     FILE CPPursesLibraryConfig.cmake
 )
 

@@ -1,8 +1,10 @@
-#ifndef SYSTEM_EVENT_LOOP_HPP
-#define SYSTEM_EVENT_LOOP_HPP
-#include <functional>
+#ifndef CPPURSES_SYSTEM_EVENT_LOOP_HPP
+#define CPPURSES_SYSTEM_EVENT_LOOP_HPP
+#include <atomic>
+#include <future>
 #include <thread>
 
+#include <cppurses/painter/detail/paint_middleman.hpp>
 #include <cppurses/painter/detail/staged_changes.hpp>
 #include <cppurses/system/detail/event_invoker.hpp>
 #include <cppurses/system/detail/event_queue.hpp>
@@ -11,29 +13,70 @@ namespace cppurses {
 
 class Event_loop {
    public:
-    explicit Event_loop(const std::function<void()>& loop_function);
+    Event_loop() = default;
 
+    Event_loop(const Event_loop&) = delete;
+    Event_loop& operator=(const Event_loop&) = delete;
+
+    // exit_ member is not default movable
+    Event_loop(Event_loop&&);
+    Event_loop& operator=(Event_loop&&);
+
+    /// Makes sure the loop has exited and returned from async functions.
+    virtual ~Event_loop();
+
+    /// Start the event loop.
     int run();
+
+    /// Start the event loop in a separate thread.
+    void run_async();
+
+    /// Thread safe function that will call on the loop to exit at the next exit
+    /// point. the run() function will return the return_code or the future
+    /// returned from run_async() will contain the return_code at some point
+    /// after this call.
     void exit(int return_code);
 
+    /// Blocks until the async event loop returns.
+    /** Event_loop::exit(int) must be called to return from wait().
+     *  @return the return code passed to the call to exit(). */
+    int wait();
+
+    /// Gets the thread ID of thread that launched this loop. Useful for posting
+    /// events to the correct queue from System::post_event()
     std::thread::id get_thread_id() const;
 
+    /// Return the staged_changes object for this Event_loop and associated
+    // thread.
     const detail::Staged_changes& staged_changes() const;
     detail::Staged_changes& staged_changes();
 
-    detail::Event_queue event_queue;
+   protected:
+    /// Override this in derived classes to define Event_loop behavior.
+    /** This function will be called on once every loop iteration. It is
+     *  expected that is will post an event to the Event_queue. After this
+     *  function is called, the Event_queue is invoked, and then staged changes
+     *  for this Event_loop are flushed to the screen, and the loop begins
+     *  again. */
+    virtual void loop_function() = 0;
 
    private:
     void process_events();
 
-    int return_code_{0};
-    bool exit_{false};
-    bool running_{false};
-    detail::Event_invoker invoker_;
-    detail::Staged_changes staged_changes_;
+    std::future<int> fut_;
     std::thread::id thread_id_;
-    std::function<void()> loop_func_;
+    int return_code_{0};
+    std::atomic<bool> exit_{false};
+    bool running_{false};
+
+    detail::Event_queue event_queue_;
+    detail::Event_invoker invoker_;
+
+    detail::Staged_changes staged_changes_;
+    detail::Paint_middleman paint_middleman_;
+
+    friend class System;
 };
 
 }  // namespace cppurses
-#endif  // SYSTEM_EVENT_LOOP_HPP
+#endif  // CPPURSES_SYSTEM_EVENT_LOOP_HPP

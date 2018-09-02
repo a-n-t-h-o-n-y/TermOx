@@ -56,17 +56,16 @@ bool Textbox::key_press_event(Key key, char symbol) {
         case Key::Arrow_right:
             this->cursor_right(1);
             break;
-
         case Key::Arrow_left:
             this->cursor_left(1);
             break;
-
         case Key::Arrow_up:
             this->cursor_up(1);
             break;
-
         case Key::Arrow_down:
             this->cursor_down(1);
+            break;
+        default:
             break;
     }
 

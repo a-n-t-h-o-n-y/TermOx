@@ -2,8 +2,10 @@
 
 #include <cstddef>
 #include <memory>
+#include <vector>
 
 #include <cppurses/system/system.hpp>
+#include <cppurses/widget/children_data.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {

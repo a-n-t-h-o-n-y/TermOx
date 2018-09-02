@@ -1,8 +1,9 @@
-#ifndef WIDGET_WIDGETS_LINE_EDIT_HPP
-#define WIDGET_WIDGETS_LINE_EDIT_HPP
-#include <cstddef>
+#ifndef CPPURSES_WIDGET_WIDGETS_LINE_EDIT_HPP
+#define CPPURSES_WIDGET_WIDGETS_LINE_EDIT_HPP
 #include <cstdint>
+#include <functional>
 #include <string>
+#include <utility>
 
 #include <signals/signals.hpp>
 
@@ -13,6 +14,7 @@
 #include <cppurses/widget/widgets/textbox.hpp>
 
 namespace cppurses {
+struct Point;
 
 class Line_edit : public Textbox {
    public:
@@ -43,5 +45,4 @@ class Line_edit : public Textbox {
 };
 
 }  // namespace cppurses
-
-#endif  // WIDGET_WIDGETS_LINE_EDIT_HPP
+#endif  // CPPURSES_WIDGET_WIDGETS_LINE_EDIT_HPP

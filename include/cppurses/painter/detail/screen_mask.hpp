@@ -42,8 +42,8 @@ class Screen_mask {
                                                    std::size_t y) const;
 
    private:
-    Point offset_;  // subtract the offset from given point in at(Point)
-    Area area_;     // for coordinate 2d to 1d and viceversa calculations
+    Point offset_;
+    Area area_;
     std::vector<bool> bits_;
 };
 

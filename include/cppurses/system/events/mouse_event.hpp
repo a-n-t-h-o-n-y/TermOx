@@ -1,6 +1,5 @@
-#ifndef SYSTEM_EVENTS_MOUSE_EVENT_HPP
-#define SYSTEM_EVENTS_MOUSE_EVENT_HPP
-#include <cstddef>
+#ifndef CPPURSES_SYSTEM_EVENTS_MOUSE_EVENT_HPP
+#define CPPURSES_SYSTEM_EVENTS_MOUSE_EVENT_HPP
 #include <cstdint>
 
 #include <cppurses/system/event.hpp>
@@ -88,4 +87,4 @@ class Mouse_move_event : public Mouse_event {
 };
 
 }  // namespace cppurses
-#endif  // SYSTEM_EVENTS_MOUSE_EVENT_HPP
+#endif  // CPPURSES_SYSTEM_EVENTS_MOUSE_EVENT_HPP

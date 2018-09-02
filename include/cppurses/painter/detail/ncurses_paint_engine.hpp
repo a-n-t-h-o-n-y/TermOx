@@ -1,9 +1,6 @@
-#ifndef PAINTER_DETAIL_NCURSES_PAINT_ENGINE_HPP
-#define PAINTER_DETAIL_NCURSES_PAINT_ENGINE_HPP
+#ifndef CPPURSES_PAINTER_DETAIL_NCURSES_PAINT_ENGINE_HPP
+#define CPPURSES_PAINTER_DETAIL_NCURSES_PAINT_ENGINE_HPP
 #include <cstddef>
-#include <cstdint>
-
-#include <cppurses/painter/color.hpp>
 
 /* Paint_engine Requires:
  *   void put_glyph(const Glyph& g);
@@ -11,10 +8,7 @@
  *   void move_cursor(std::size_t x, std::size_t y);
  *   void show_cursor(bool show = true);
  *   void hide_cursor(bool hide = true);
- *   std::size_t screen_width();
- *   std::size_t screen_height();
  *   void refresh();
- *   void set_rgb(Color c, std::int16_t r, std::int16_t g, std::int16_t b);
  */
 
 namespace cppurses {
@@ -50,23 +44,14 @@ class NCurses_paint_engine {
     /// Turns the cursor display off.
     void hide_cursor(bool hide = true);
 
-    /// Retrieves the terminal screen width.
-    std::size_t screen_width();
-
-    /// Retrieves the terminal screen height.
-    std::size_t screen_height();
-
     /// Flushes all of the changes made by this class to the screen.
     void refresh();
 
-    /// Register a color definition, using values [0-256) for rgb values.
-    void set_rgb(Color c, std::int16_t r, std::int16_t g, std::int16_t b);
-
    private:
-    /// Registers a handlers for the window resize signal from the kernal.
+    /// Registers a handler for the window resize signal from the kernel.
     void setup_sigwinch();
 };
 
 }  // namespace detail
 }  // namespace cppurses
-#endif  // PAINTER_DETAIL_NCURSES_PAINT_ENGINE_HPP
+#endif  // CPPURSES_PAINTER_DETAIL_NCURSES_PAINT_ENGINE_HPP

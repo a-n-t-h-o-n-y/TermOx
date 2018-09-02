@@ -2,6 +2,8 @@
 
 #include <map>
 
+#include <signals/signal.hpp>
+
 #include <cppurses/system/key.hpp>
 
 namespace cppurses {

@@ -1,10 +1,13 @@
-#ifndef WIDGET_WIDGETS_WIDGET_STACK_HPP
-#define WIDGET_WIDGETS_WIDGET_STACK_HPP
+#ifndef CPPURSES_WIDGET_WIDGETS_WIDGET_STACK_HPP
+#define CPPURSES_WIDGET_WIDGETS_WIDGET_STACK_HPP
+#include <cstddef>
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include <signals/signals.hpp>
 
+#include <cppurses/widget/children_data.hpp>
 #include <cppurses/widget/layouts/horizontal_layout.hpp>
 
 namespace cppurses {
@@ -65,4 +68,4 @@ sig::Slot<void(std::unique_ptr<Widget>)> insert_page(Widget_stack& stack,
 }  // namespace slot
 
 }  // namespace cppurses
-#endif  // WIDGET_WIDGETS_WIDGET_STACK_HPP
+#endif  // CPPURSES_WIDGET_WIDGETS_WIDGET_STACK_HPP

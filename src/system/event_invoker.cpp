@@ -2,8 +2,8 @@
 
 #include <iterator>
 #include <memory>
-#include <mutex>
 #include <utility>
+#include <vector>
 
 #include <cppurses/system/detail/event_queue.hpp>
 #include <cppurses/system/event.hpp>

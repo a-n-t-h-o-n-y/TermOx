@@ -7,8 +7,8 @@
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_matrix.hpp>
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/painter/paint_buffer.hpp>
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/painter/palette.hpp>
+#include <cppurses/painter/palettes.hpp>
 
 #endif  // CPPURSES_PAINTER_HPP

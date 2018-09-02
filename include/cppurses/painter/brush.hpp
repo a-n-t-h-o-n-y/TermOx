@@ -1,9 +1,7 @@
-#ifndef PAINTER_BRUSH_HPP
-#define PAINTER_BRUSH_HPP
-#include <array>
+#ifndef CPPURSES_PAINTER_BRUSH_HPP
+#define CPPURSES_PAINTER_BRUSH_HPP
 #include <bitset>
 #include <utility>
-#include <vector>
 
 #include <optional/optional.hpp>
 
@@ -15,54 +13,56 @@ namespace cppurses {
 /// Holds the look of any paintable object with Attributes and Colors.
 class Brush {
    public:
+    /// Construct a Brush with given Attributes and Colors.
     template <typename... Attributes>
-    explicit Brush(Attributes... attrs) {
-        this->add_attributes(std::forward<Attributes>(attrs)...);
-    }
+    explicit Brush(Attributes... attrs);
 
     // Base Case
     void add_attributes() {}
 
-    // Recursive Case
+    /// Add a variable number of Attributes or Colors to the brush.
+    /** Use the (back/fore)ground_color(Color c) functions to add colors to the
+     *  list. */
     template <typename T, typename... Others>
-    void add_attributes(T attr, Others... others) {
-        this->set_attr(attr);
-        this->add_attributes(others...);
-    }
+    void add_attributes(T attr, Others... others);
 
-    void remove_attribute(Attribute attr);
-    void clear_attributes() { attributes_.reset(); }
-
+    /// Set the background color of this brush.
     void set_background(Color color) { background_color_ = color; }
+
+    /// Set the foreground color of this brush.
     void set_foreground(Color color) { foreground_color_ = color; }
 
-    void remove_background() { background_color_ = opt::none; }
-    void remove_foreground() { foreground_color_ = opt::none; }
+    /// Remove a specific Attribute, if it is set, otherwise no-op.
+    void remove_attribute(Attribute attr);
 
-    std::vector<Attribute> attributes() const;
+    /// Sets the background to not have a color, the default state.
+    void remove_background();
 
+    /// Sets the foreground to not have a color, the default state.
+    void remove_foreground();
+
+    /// Removes all of the set Attributes from the brush, not including colors.
+    void clear_attributes();
+
+    /// Provides a check if the brush has the provided Attribute \p attr.
     bool has_attribute(Attribute attr) const;
 
-    const opt::Optional<Color>& background_color() const {
-        return background_color_;
-    }
-    opt::Optional<Color>& background_color() { return background_color_; }
-    const opt::Optional<Color>& foreground_color() const {
-        return foreground_color_;
-    }
-    opt::Optional<Color>& foreground_color() { return foreground_color_; }
+    /// Returns the current background as an opt::Optional object.
+    opt::Optional<Color> background_color() const;
+
+    /// Returns the current foreground as an opt::Optional object.
+    opt::Optional<Color> foreground_color() const;
 
     friend bool operator==(const Brush& lhs, const Brush& rhs);
 
    private:
-    void set_attr(detail::BackgroundColor bc) {
-        this->set_background(static_cast<Color>(bc));
-    }
+    /// Used by add_attributes() to set a deail::BackgroundColor.
+    void set_attr(detail::BackgroundColor bc);
 
-    void set_attr(detail::ForegroundColor fc) {
-        this->set_foreground(static_cast<Color>(fc));
-    }
+    /// Used by add_attributes() to set a deail::ForegroundColor.
+    void set_attr(detail::ForegroundColor fc);
 
+    /// Used by add_attributes() to set an Attribute.
     void set_attr(Attribute attr);
 
     // Data Members
@@ -71,5 +71,20 @@ class Brush {
     opt::Optional<Color> foreground_color_;
 };
 
+/// Compares if the held attributes and back/foreground colors are equal.
+bool operator==(const Brush& lhs, const Brush& rhs);
+
+// TEMPLATE IMPLEMENTATIONS
+template <typename... Attributes>
+Brush::Brush(Attributes... attrs) {
+    this->add_attributes(std::forward<Attributes>(attrs)...);
+}
+
+template <typename T, typename... Others>
+void Brush::add_attributes(T attr, Others... others) {
+    this->set_attr(attr);
+    this->add_attributes(others...);
+}
+
 }  // namespace cppurses
-#endif  // PAINTER_BRUSH_HPP
+#endif  // CPPURSES_PAINTER_BRUSH_HPP

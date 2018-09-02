@@ -1,10 +1,11 @@
-#ifndef SYSTEM_EVENTS_FOCUS_EVENT_HPP
-#define SYSTEM_EVENTS_FOCUS_EVENT_HPP
+#ifndef CPPURSES_SYSTEM_EVENTS_FOCUS_EVENT_HPP
+#define CPPURSES_SYSTEM_EVENTS_FOCUS_EVENT_HPP
 #include <cppurses/system/event.hpp>
 
 namespace cppurses {
 class Event_handler;
 
+/// Sent to Widget that have just become the Widget in focus.
 class Focus_in_event : public Event {
    public:
     bool send() const override;
@@ -15,6 +16,7 @@ class Focus_in_event : public Event {
     explicit Focus_in_event(Event_handler* receiver);
 };
 
+/// Sent to Widget that have just lost the focus.
 class Focus_out_event : public Event {
    public:
     bool send() const override;
@@ -26,4 +28,4 @@ class Focus_out_event : public Event {
 };
 
 }  // namespace cppurses
-#endif  // SYSTEM_EVENTS_FOCUS_EVENT_HPP
+#endif  // CPPURSES_SYSTEM_EVENTS_FOCUS_EVENT_HPP

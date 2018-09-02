@@ -23,10 +23,10 @@ Options_B::Options_B() {
 
     palette_label.set_alignment(Alignment::Center);
     palette_box.add_option("Dawn Bringer").connect([] {
-        System::set_palette(std::make_unique<DawnBringer_palette>());
+        System::terminal.set_color_palette(Palettes::DawnBringer());
     });
     palette_box.add_option("Standard").connect([] {
-        System::set_palette(std::make_unique<Standard_palette>());
+        System::terminal.set_color_palette(Palettes::Standard());
     });
 
     set_background(back_btn, Color::Light_gray);

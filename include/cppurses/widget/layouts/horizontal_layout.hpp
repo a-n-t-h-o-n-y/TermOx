@@ -1,7 +1,6 @@
-#ifndef WIDGET_LAYOUTS_HORIZONTAL_LAYOUT_HPP
-#define WIDGET_LAYOUTS_HORIZONTAL_LAYOUT_HPP
+#ifndef CPPURSES_WIDGET_LAYOUTS_HORIZONTAL_LAYOUT_HPP
+#define CPPURSES_WIDGET_LAYOUTS_HORIZONTAL_LAYOUT_HPP
 #include <cstddef>
-#include <functional>
 #include <vector>
 
 #include <cppurses/widget/layout.hpp>
@@ -26,4 +25,4 @@ class Horizontal_layout : public Layout {
 };
 
 }  // namespace cppurses
-#endif  // WIDGET_LAYOUTS_HORIZONTAL_LAYOUT_HPP
+#endif  // CPPURSES_WIDGET_LAYOUTS_HORIZONTAL_LAYOUT_HPP

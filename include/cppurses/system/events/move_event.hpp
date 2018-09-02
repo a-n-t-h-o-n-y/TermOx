@@ -1,5 +1,5 @@
-#ifndef SYSTEM_EVENTS_MOVE_EVENT_HPP
-#define SYSTEM_EVENTS_MOVE_EVENT_HPP
+#ifndef CPPURSES_SYSTEM_EVENTS_MOVE_EVENT_HPP
+#define CPPURSES_SYSTEM_EVENTS_MOVE_EVENT_HPP
 #include <cppurses/system/event.hpp>
 #include <cppurses/widget/point.hpp>
 
@@ -22,4 +22,4 @@ class Move_event : public Event {
 };
 
 }  // namespace cppurses
-#endif  // SYSTEM_EVENTS_MOVE_EVENT_HPP
+#endif  // CPPURSES_SYSTEM_EVENTS_MOVE_EVENT_HPP

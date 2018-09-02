@@ -13,5 +13,4 @@ Screen_mask find_empty_space(const Widget& w);
 
 }  // namespace detail
 }  // namespace cppurses
-
 #endif  // CPPURSES_PAINTER_DETAIL_FIND_EMPTY_SPACE_HPP

@@ -2,12 +2,17 @@
 
 #include <cmath>
 #include <cstddef>
-#include <cstdint>
 #include <utility>
 
+#include <signals/signal.hpp>
+
+#include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_matrix.hpp>
-#include <cppurses/system/mouse_button.hpp>
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/widget/area.hpp>
+#include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widgets/matrix_display.hpp>
+#include <cppurses/widget/widgets/widget_stack.hpp>
 
 namespace cppurses {
 

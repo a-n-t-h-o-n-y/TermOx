@@ -1,9 +1,14 @@
 #ifndef CPPURSES_WIDGET_WIDGETS_GLYPH_SELECT_STACK_HPP
 #define CPPURSES_WIDGET_WIDGETS_GLYPH_SELECT_STACK_HPP
+#include <signals/signal.hpp>
+#include <signals/slot.hpp>
+
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/widgets/widget_stack.hpp>
 
 namespace cppurses {
+struct Area;
+struct Glyph;
 
 class Glyph_select_stack : public Widget_stack {
    public:

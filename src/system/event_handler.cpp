@@ -5,10 +5,12 @@
 #include <iterator>
 #include <vector>
 
-#include <signals/signals.hpp>
+#include <signals/signal.hpp>
+#include <signals/slot.hpp>
 
+#include <cppurses/system/key.hpp>
 #include <cppurses/system/mouse_button.hpp>
-#include <cppurses/system/system.hpp>
+#include <cppurses/widget/area.hpp>
 #include <cppurses/widget/point.hpp>
 
 namespace cppurses {
@@ -225,7 +227,7 @@ bool Event_handler::paint_event_filter(Event_handler* receiver) {
     return false;
 }
 
-bool Event_handler::animation_event_filter(Event_handler* receiver) {
+bool Event_handler::timer_event_filter(Event_handler* receiver) {
     return false;
 }
 

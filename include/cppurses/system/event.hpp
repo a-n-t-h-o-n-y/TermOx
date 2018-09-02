@@ -1,5 +1,5 @@
-#ifndef SYSTEM_EVENT_HPP
-#define SYSTEM_EVENT_HPP
+#ifndef CPPURSES_SYSTEM_EVENT_HPP
+#define CPPURSES_SYSTEM_EVENT_HPP
 
 namespace cppurses {
 class Event_handler;
@@ -26,12 +26,12 @@ class Event {
         Enable,
         Disable,
         Delete,
-        Animation
-        // Timer,
+        Timer,
+        Custom
         // Enter,
         // Leave,
         // Create,
-        // Destroy
+        // Destroy // TODO Possibly change Delete event to Destroy event?
     };
 
     // Special Member Functions
@@ -58,4 +58,4 @@ class Event {
 };
 
 }  // namespace cppurses
-#endif  // SYSTEM_EVENT_HPP
+#endif  // CPPURSES_SYSTEM_EVENT_HPP

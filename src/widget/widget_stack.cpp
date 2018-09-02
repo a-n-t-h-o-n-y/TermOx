@@ -8,10 +8,7 @@
 
 #include <signals/slot.hpp>
 
-#include <cppurses/system/events/disable_event.hpp>
-#include <cppurses/system/events/enable_event.hpp>
 #include <cppurses/system/focus.hpp>
-#include <cppurses/system/system.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
