@@ -1,7 +1,6 @@
 #ifndef CPPURSES_SYSTEM_HPP
 #define CPPURSES_SYSTEM_HPP
 
-#include <cppurses/system/events/animation_event.hpp>
 #include <cppurses/system/events/child_event.hpp>
 #include <cppurses/system/events/delete_event.hpp>
 #include <cppurses/system/events/disable_event.hpp>
@@ -13,6 +12,7 @@
 #include <cppurses/system/events/move_event.hpp>
 #include <cppurses/system/events/paint_event.hpp>
 #include <cppurses/system/events/resize_event.hpp>
+#include <cppurses/system/events/timer_event.hpp>
 
 #include <cppurses/system/animation_engine.hpp>
 #include <cppurses/system/event.hpp>
