@@ -138,7 +138,7 @@ void NCurses_paint_engine::put_glyph(const Glyph& g) {
 
 #if defined(SLOW_PAINT)
     cchar_t indicate;
-    wchar_t symb2[2] = {L'X', L'\n'};
+    wchar_t symb2[2] = {L'X', L'\0'};
     ::setcchar(&indicate, symb2, A_NORMAL,
                find_pair(Color::White, Color::Black), nullptr);
     ::wadd_wchnstr(::stdscr, &indicate, 1);
@@ -148,8 +148,8 @@ void NCurses_paint_engine::put_glyph(const Glyph& g) {
 #endif
 
 #if defined(add_wchstr)
+    const wchar_t symb[2] = {g.symbol, L'\0'};
     cchar_t image;
-    wchar_t symb[2] = {g.symbol, L'\n'};
     ::setcchar(&image, symb, attributes, color_pair, nullptr);
     ::wadd_wchnstr(::stdscr, &image, 1);
 #else  // no wchar_t support
