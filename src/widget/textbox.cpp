@@ -56,17 +56,16 @@ bool Textbox::key_press_event(Key key, char symbol) {
         case Key::Arrow_right:
             this->cursor_right(1);
             break;
-
         case Key::Arrow_left:
             this->cursor_left(1);
             break;
-
         case Key::Arrow_up:
             this->cursor_up(1);
             break;
-
         case Key::Arrow_down:
             this->cursor_down(1);
+            break;
+        default:
             break;
     }
 
@@ -87,7 +86,7 @@ bool Textbox::key_press_event(Key key, char symbol) {
             case Key::Enter: {
                 auto cursor_index = this->cursor_index();
                 this->insert('\n', cursor_index);
-                if (this->cursor_y() + 1 == this->height()) {
+                if (this->cursor.y() + 1 == this->height()) {
                     this->scroll_down(1);
                 }
                 this->set_cursor(cursor_index + 1);
@@ -108,6 +107,8 @@ bool Textbox::key_press_event(Key key, char symbol) {
                 }
         }
     }
+    // TODO maybe dont need because system does not necessarily change, update
+    // where the state of the cursor or internal text changes.
     this->update();
     return true;
 }

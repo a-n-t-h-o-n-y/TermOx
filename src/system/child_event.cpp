@@ -1,5 +1,7 @@
 #include <cppurses/system/events/child_event.hpp>
 
+#include <cppurses/painter/detail/screen_state.hpp>
+#include <cppurses/system/event.hpp>
 #include <cppurses/system/event_handler.hpp>
 #include <cppurses/widget/widget.hpp>
 
@@ -11,11 +13,17 @@ Child_event::Child_event(Event::Type type,
                          Widget* child)
     : Event{type, receiver}, child_{child} {}
 
+bool Child_event::send() const {
+    static_cast<Widget*>(receiver_)->screen_state().optimize.child_event = true;
+    return true;
+}
+
 // class Child_added_event
 Child_added_event::Child_added_event(Event_handler* receiver, Widget* child)
     : Child_event{Event::ChildAdded, receiver, child} {}
 
 bool Child_added_event::send() const {
+    Child_event::send();
     return receiver_->child_added_event(child_);
 }
 
@@ -28,6 +36,7 @@ Child_removed_event::Child_removed_event(Event_handler* receiver, Widget* child)
     : Child_event{Event::ChildRemoved, receiver, child} {}
 
 bool Child_removed_event::send() const {
+    Child_event::send();
     return receiver_->child_removed_event(child_);
 }
 
@@ -41,6 +50,7 @@ Child_polished_event::Child_polished_event(Event_handler* receiver,
     : Child_event{Event::ChildPolished, receiver, child} {}
 
 bool Child_polished_event::send() const {
+    Child_event::send();
     return receiver_->child_polished_event(child_);
 }
 

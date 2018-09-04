@@ -15,64 +15,73 @@ set_property(TARGET NCurses
 
 # CREATE CPPURSES LIBRARY
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-add_library(libcppurses STATIC "")
-target_link_libraries(libcppurses PUBLIC libsignals liboptional NCurses)
-target_include_directories(libcppurses
+add_library(cppurses STATIC "")
+target_link_libraries(cppurses PUBLIC signals optional PRIVATE NCurses)
+target_include_directories(cppurses
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
-target_compile_features(libcppurses PUBLIC cxx_std_14)
-target_compile_options(libcppurses PUBLIC -Wall)
+target_compile_features(cppurses PUBLIC cxx_std_14)
+target_compile_options(cppurses PRIVATE -Wall)
 
 # GATHER SOURCES
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # SYSTEM
-target_sources(libcppurses PRIVATE
+target_sources(cppurses PRIVATE
 	system/child_event.cpp
-    system/clear_screen_event.cpp
-    system/close_event.cpp
-    system/deferred_delete_event.cpp
+    system/delete_event.cpp
     system/disable_event.cpp
     system/enable_event.cpp
     system/event.cpp
     system/event_handler.cpp
-    system/event_handler_slots.cpp
     system/event_invoker.cpp
 	system/event_loop.cpp
     system/event_queue.cpp
     system/focus.cpp
     system/focus_event.cpp
-    system/hide_event.cpp
     system/key.cpp
     system/key_event.cpp
     system/mouse_event.cpp
 	system/move_event.cpp
     system/ncurses_event_listener.cpp
-    system/on_tree_event.cpp
     system/paint_event.cpp
 	system/resize_event.cpp
-    system/show_event.cpp
 	system/system.cpp
     system/shortcuts.cpp
+    system/animation_engine.cpp
+    system/timer_event.cpp
+    system/event_as_string.cpp
+    system/user_input_event_loop.cpp
+    system/timer_event_loop.cpp
+    system/fps_to_period.cpp
+    system/find_widget_at.cpp
+    system/terminal_properties.cpp
+    system/terminal_resize_event.cpp
 )
 
 # PAINTER
-target_sources(libcppurses PRIVATE
+target_sources(cppurses PRIVATE
     painter/ncurses_paint_engine.cpp
 	painter/painter.cpp
-	painter/palette.cpp
 	painter/glyph.cpp
 	painter/brush.cpp
-	painter/paint_buffer.cpp
+	painter/paint_middleman.cpp
     painter/glyph_matrix.cpp
     painter/glyph_string.cpp
     painter/wchar_to_bytes.cpp
     painter/extended_char.cpp
+    painter/is_not_paintable.cpp
+    painter/add_default_attributes.cpp
+    painter/ncurses_data.cpp
+    painter/screen_mask.cpp
+    painter/find_empty_space.cpp
+    painter/screen_state.cpp
+    painter/palettes.cpp
 )	
 
 # WIDGET
-target_sources(libcppurses PRIVATE
+target_sources(cppurses PRIVATE
     widget/widget.cpp
     widget/widget_slots.cpp
     widget/widget_stack.cpp
@@ -110,11 +119,14 @@ target_sources(libcppurses PRIVATE
     widget/size_policy.cpp
     widget/blank_width.cpp
     widget/blank_height.cpp
+    widget/children_data.cpp
+    widget/border_offset.cpp
+    widget/cursor_data.cpp
 )
 
 # INSTALLATION
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-install(TARGETS libcppurses
+install(TARGETS cppurses
     EXPORT CPPursesLibraryConfig
     ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -122,7 +134,15 @@ install(TARGETS libcppurses
 install(DIRECTORY ../include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(EXPORT CPPursesLibraryConfig DESTINATION share/CPPursesLibrary/cmake)
 export(
-    TARGETS libcppurses libsignals liboptional
+    TARGETS cppurses signals optional
     FILE CPPursesLibraryConfig.cmake
 )
+
+# CLANG TIDY
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+add_custom_target(compile_commands ALL
+	COMMAND [ -f ${CMAKE_SOURCE_DIR}/build/compile_commands.json ] && mv
+        ${CMAKE_SOURCE_DIR}/build/compile_commands.json
+		${CMAKE_SOURCE_DIR}/compile_commands.json || :)
 

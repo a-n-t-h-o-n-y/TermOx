@@ -1,5 +1,5 @@
-#ifndef SYSTEM_KEY_HPP
-#define SYSTEM_KEY_HPP
+#ifndef CPPURSES_SYSTEM_KEY_HPP
+#define CPPURSES_SYSTEM_KEY_HPP
 
 namespace cppurses {
 
@@ -245,4 +245,4 @@ enum class Key : short {
 char key_to_char(Key key);
 
 }  // namespace cppurses
-#endif  // SYSTEM_KEY_HPP
+#endif  // CPPURSES_SYSTEM_KEY_HPP

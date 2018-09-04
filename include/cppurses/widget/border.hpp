@@ -8,6 +8,7 @@ namespace cppurses {
 struct Border {
     bool enabled{false};
 
+    // TODO Can combine single Glyph and bool into an object(struct)
     Glyph north{L'─'};
     Glyph south{L'─'};
     Glyph east{L'│'};

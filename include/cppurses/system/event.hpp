@@ -1,5 +1,5 @@
-#ifndef SYSTEM_EVENT_HPP
-#define SYSTEM_EVENT_HPP
+#ifndef CPPURSES_SYSTEM_EVENT_HPP
+#define CPPURSES_SYSTEM_EVENT_HPP
 
 namespace cppurses {
 class Event_handler;
@@ -17,29 +17,26 @@ class Event {
         KeyRelease,
         FocusIn,
         FocusOut,
-        ClearScreen,
         Paint,
         Move,
         Resize,
-        Show,
-        Hide,
-        OnTree,
-        Close,
+        TerminalResize,
         ChildAdded,
         ChildRemoved,
         ChildPolished,
         Enable,
         Disable,
-        DeferredDelete
-        // Timer,
+        Delete,
+        Timer,
+        Custom
         // Enter,
         // Leave,
         // Create,
-        // Destroy
+        // Destroy // TODO Possibly change Delete event to Destroy event?
     };
 
     // Special Member Functions
-    explicit Event(Type type, Event_handler* receiver);
+    Event(Type type, Event_handler* receiver);
     Event(const Event&) = default;
     Event& operator=(const Event&) = default;
     Event(Event&&) = default;
@@ -54,10 +51,12 @@ class Event {
     virtual bool send() const = 0;
     virtual bool filter_send(Event_handler* filter) const = 0;
 
+    bool operator==(const Event& other) const;
+
    protected:
     Type type_;
     Event_handler* receiver_;
 };
 
 }  // namespace cppurses
-#endif  // SYSTEM_EVENT_HPP
+#endif  // CPPURSES_SYSTEM_EVENT_HPP

@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
+#include <unordered_map>
 
 using namespace cppurses;
 
@@ -51,7 +52,7 @@ class Paint_area : public Widget {
     bool key_press_event(Key key, char symbol) override;
 
    private:
-    std::map<Point, Glyph> glyphs_painted_;
+    std::unordered_map<Point, Glyph> glyphs_painted_;
     Glyph current_glyph_{L'x'};
     Glyph before_erase_{L'x'};
     bool clone_enabled_{false};

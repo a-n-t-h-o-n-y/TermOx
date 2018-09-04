@@ -1,8 +1,9 @@
 #include <cppurses/widget/widgets/line_edit.hpp>
 
-#include <cstddef>
 #include <cstdint>
 #include <utility>
+
+#include <signals/signal.hpp>
 
 #include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/color.hpp>
@@ -10,6 +11,7 @@
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/mouse_button.hpp>
+#include <cppurses/widget/point.hpp>
 #include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widgets/textbox.hpp>
 
@@ -55,13 +57,13 @@ void Line_edit::invisible_input(bool enabled) {
 
 void Line_edit::underline(bool enabled) {
     if (enabled) {
-        this->background_tile = Glyph{L' ', Attribute::Underline};
+        this->wallpaper = Glyph{L' ', Attribute::Underline};
         Glyph_string underlined_text{this->contents()};
         underlined_text.add_attributes(Attribute::Underline);
         this->set_text(std::move(underlined_text));
         this->add_new_text_attribute(Attribute::Underline);
     } else {
-        this->background_tile = Glyph{L' '};
+        this->wallpaper = L' ';
         Glyph_string non_underlined{this->contents()};
         non_underlined.remove_attribute(Attribute::Underline);
         this->set_text(std::move(non_underlined));

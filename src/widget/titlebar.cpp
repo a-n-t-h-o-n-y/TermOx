@@ -14,8 +14,8 @@
 namespace cppurses {
 
 Titlebar::Titlebar(const Glyph_string& title_)
-    : title{this->make_child<Push_button>(title_)},
-      exit_button{this->make_child<Push_button>("│✕ ")} {
+    : title{this->make_child<Label>(title_)},
+      exit_button{this->make_child<Push_button>(L"│✕ ")} {
     title.width_policy.type(Size_policy::Expanding);
     set_background(title, Color::White);
     set_foreground(title, Color::Black);

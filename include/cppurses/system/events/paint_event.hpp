@@ -1,5 +1,5 @@
-#ifndef SYSTEM_EVENTS_PAINT_EVENT_HPP
-#define SYSTEM_EVENTS_PAINT_EVENT_HPP
+#ifndef CPPURSES_SYSTEM_EVENTS_PAINT_EVENT_HPP
+#define CPPURSES_SYSTEM_EVENTS_PAINT_EVENT_HPP
 #include <cppurses/system/event.hpp>
 
 namespace cppurses {
@@ -13,4 +13,4 @@ class Paint_event : public Event {
 };
 
 }  // namespace cppurses
-#endif  // SYSTEM_EVENTS_PAINT_EVENT_HPP
+#endif  // CPPURSES_SYSTEM_EVENTS_PAINT_EVENT_HPP

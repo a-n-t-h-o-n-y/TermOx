@@ -78,9 +78,9 @@ void List<T>::rotate_properties() {
 template <typename T>
 bool List<T>::paint_event() {
     Painter p{this};
-    p.move_cursor_on_put = true;
-    for (const auto& prop : properties_) {
-        p.put(Glyph_string{prop.name}.append(" | "));
+    // p.move_cursor_on_put = true;
+    for (const auto& prop : properties_) {  // below 0,0 might be wrong.
+        p.put(Glyph_string{prop.name}.append(" | "), 0, 0);
     }
     std::size_t count{1};
     for (const auto& item : items_) {
@@ -95,8 +95,9 @@ bool List<T>::paint_event() {
         p.put(display, 0, count);
         ++count;
     }
-    move_cursor(*this, 0, 0);
+    this->cursor.set_position(Point{0, 0});
     return Widget::paint_event();
+    move_cursor(*this, 0, 0);
 }
 
 template <typename T>

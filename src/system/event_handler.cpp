@@ -1,15 +1,16 @@
 #include <cppurses/system/event_handler.hpp>
 
 #include <algorithm>
-#include <cstddef>
+#include <cstdint>
 #include <iterator>
-#include <signals/signals.hpp>
 #include <vector>
 
-#include <cppurses/system/events/disable_event.hpp>
-#include <cppurses/system/events/enable_event.hpp>
+#include <signals/signal.hpp>
+#include <signals/slot.hpp>
+
+#include <cppurses/system/key.hpp>
 #include <cppurses/system/mouse_button.hpp>
-#include <cppurses/system/system.hpp>
+#include <cppurses/widget/area.hpp>
 #include <cppurses/widget/point.hpp>
 
 namespace cppurses {
@@ -17,15 +18,6 @@ class Widget;
 
 Event_handler::~Event_handler() {
     destroyed(this);
-}
-
-void Event_handler::set_enabled(bool enabled) {
-    enabled_ = enabled;
-    if (enabled) {
-        System::post_event<Enable_event>(this);
-    } else {
-        System::post_event<Disable_event>(this);
-    }
 }
 
 bool Event_handler::enabled() const {
@@ -61,19 +53,19 @@ const std::vector<Event_handler*>& Event_handler::get_event_filters() const {
 
 // - - - - - - - - - - - - - - Event Handlers - - - - - - - - - - - - - - - - -
 bool Event_handler::enable_event() {
-    return false;
+    return true;
 }
 
 bool Event_handler::disable_event() {
-    return false;
+    return true;
 }
 
 bool Event_handler::mouse_press_event(Mouse_button button,
                                       Point global,
                                       Point local,
                                       std::uint8_t device_id) {
-    clicked(global);
-    clicked_xy(global.x, global.y);
+    clicked(local);
+    clicked_xy(local.x, local.y);
     return true;
 }
 
@@ -124,6 +116,10 @@ bool Event_handler::focus_in_event() {
 }
 
 bool Event_handler::focus_out_event() {
+    return true;
+}
+
+bool Event_handler::delete_event() {
     return true;
 }
 
@@ -215,23 +211,6 @@ bool Event_handler::key_release_event_filter(Event_handler* receiver,
     return false;
 }
 
-bool Event_handler::close_event_filter(Event_handler* receiver) {
-    return false;
-}
-
-bool Event_handler::hide_event_filter(Event_handler* receiver) {
-    return false;
-}
-
-bool Event_handler::show_event_filter(Event_handler* receiver) {
-    return false;
-}
-
-bool Event_handler::on_tree_event_filter(Event_handler* receiver,
-                                         bool on_tree) {
-    return false;
-}
-
 bool Event_handler::focus_in_event_filter(Event_handler* receiver) {
     return false;
 }
@@ -240,8 +219,7 @@ bool Event_handler::focus_out_event_filter(Event_handler* receiver) {
     return false;
 }
 
-bool Event_handler::deferred_delete_event_filter(Event_handler* receiver,
-                                                 Event_handler* to_delete) {
+bool Event_handler::delete_event_filter(Event_handler* receiver) {
     return false;
 }
 
@@ -249,7 +227,7 @@ bool Event_handler::paint_event_filter(Event_handler* receiver) {
     return false;
 }
 
-bool Event_handler::clear_screen_event_filter(Event_handler* receiver) {
+bool Event_handler::timer_event_filter(Event_handler* receiver) {
     return false;
 }
 

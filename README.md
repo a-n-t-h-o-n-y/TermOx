@@ -3,8 +3,15 @@ __CPPurses__ is a Terminal User Interface Library built on top of
 [ncurses](https://www.gnu.org/software/ncurses/). CPPurses defines
 a framework of Widgets, Layouts and Events that make user input
 and program output to the terminal simple and readable. The
-library comes with a set of pre-built Widgets, though it is easy
+library comes with a set of pre-defined Widgets, though it is easy
 to define new Widgets and to extend existing Widgets.
+
+This is a __work in progress__. The API may(probably will) change.
+
+<p align="center">
+  <img src="docs/images/regexplore_75.gif">
+</p>
+
 
 ## Usage
 ### Defining a New Widget
@@ -169,10 +176,18 @@ git submodule update --init --recursive --remote  # Pull in dependencies
 cmake ..             # Generate Makefiles
 make                 # Build library
 make demos           # Build demos(optional)
-make tests           # Build tests
 sudo make install    # Install header and library archive to system defaults
 ```
 For projects using CPPurses, link with cppurses, ncurses and pthreads.
+
+## Using the Library
+Point your build system to wherever the include directory is. Your program that
+uses CPPurses will have to link with ncurses, libcppurses, and the threading
+library on your system.
+-lncurses
+-lcppurses
+Installing the library with cmake will have places the headers and the library
+archive in the standard GNU install directories.
 
 ## Documentation
 Doxygen documentation can be found [here](
@@ -188,9 +203,6 @@ Notepad Demo
 ![alt text](docs/images/chess_demo_1.png)
 ![alt text](docs/images/chess_demo_2.png)
 Chess Demo
-
-## Tests
-CPPurses uses google test.
 
 ## License
 This software is distributed under the [MIT License](LICENSE.txt).

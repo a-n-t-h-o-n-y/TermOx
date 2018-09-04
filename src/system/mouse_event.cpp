@@ -1,11 +1,13 @@
 #include <cppurses/system/events/mouse_event.hpp>
 
-#include <cstddef>
 #include <cstdint>
 
+#include <cppurses/system/event.hpp>
 #include <cppurses/system/event_handler.hpp>
+#include <cppurses/system/events/input_event.hpp>
 #include <cppurses/system/focus.hpp>
 #include <cppurses/system/mouse_button.hpp>
+#include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {

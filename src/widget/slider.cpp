@@ -14,7 +14,7 @@ Slider::Slider() {
     this->height_policy.type(Size_policy::Fixed);
     this->height_policy.hint(1);
     this->focus_policy = Focus_policy::Strong;
-    this->background_tile = Glyph{L' ', background(Color::Light_gray)};
+    this->wallpaper = Glyph{L' ', background(Color::Light_gray)};
 }
 
 void Slider::set_percent(float percent) {
@@ -34,8 +34,8 @@ float Slider::percent() const {
 }
 
 bool Slider::paint_event() {
-    Painter p{this};
     std::size_t x{percent_to_position(percent_progress_)};
+    Painter p{this};
     p.put(indicator_, x, 0);
     return Widget::paint_event();
 }

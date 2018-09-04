@@ -33,9 +33,9 @@ Glyph_string Checkbox::title() const {
 bool Checkbox::paint_event() {
     Painter p{this};
     if (this->is_checked()) {
-        p.put(checked_box_);
+        p.put(checked_box_, 0, 0);
     } else {
-        p.put(empty_box_);
+        p.put(empty_box_, 0, 0);
     }
     p.put(title_, padding_, 0);
     return Widget::paint_event();

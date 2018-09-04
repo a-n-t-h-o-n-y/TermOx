@@ -1,7 +1,5 @@
-#ifndef SYSTEM_EVENTS_RESIZE_EVENT_HPP
-#define SYSTEM_EVENTS_RESIZE_EVENT_HPP
-#include <cstddef>
-
+#ifndef CPPURSES_SYSTEM_EVENTS_RESIZE_EVENT_HPP
+#define CPPURSES_SYSTEM_EVENTS_RESIZE_EVENT_HPP
 #include <cppurses/system/event.hpp>
 #include <cppurses/widget/area.hpp>
 
@@ -19,8 +17,8 @@ class Resize_event : public Event {
 
    protected:
     Area new_size_;
-    Area old_size_;
+    mutable Area old_size_;
 };
 
 }  // namespace cppurses
-#endif  // SYSTEM_EVENTS_RESIZE_EVENT_HPP
+#endif  // CPPURSES_SYSTEM_EVENTS_RESIZE_EVENT_HPP

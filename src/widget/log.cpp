@@ -1,9 +1,11 @@
 #include <cppurses/widget/widgets/log.hpp>
 
+#include <cstddef>
 #include <utility>
 
 #include <signals/slot.hpp>
 
+#include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/key.hpp>
 
 namespace cppurses {

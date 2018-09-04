@@ -1,12 +1,13 @@
-#ifndef WIDGET_WIDGETS_LOG_HPP
-#define WIDGET_WIDGETS_LOG_HPP
+#ifndef CPPURSES_WIDGET_WIDGETS_LOG_HPP
+#define CPPURSES_WIDGET_WIDGETS_LOG_HPP
 #include <signals/slot.hpp>
 
-#include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/key.hpp>
+#include <cppurses/widget/widgets/text_display.hpp>
 #include <cppurses/widget/widgets/textbox.hpp>
 
 namespace cppurses {
+class Glyph_string;
 
 class Log : public Textbox {
    public:
@@ -29,4 +30,4 @@ sig::Slot<void()> post_message(Log& log, const Glyph_string& message);
 
 }  // namespace slot
 }  // namespace cppurses
-#endif  // WIDGET_WIDGETS_LOG_HPP
+#endif  // CPPURSES_WIDGET_WIDGETS_LOG_HPP

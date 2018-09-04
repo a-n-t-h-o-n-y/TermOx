@@ -36,8 +36,8 @@ struct Options_B : public Vertical_layout {
 struct Options_stack : public Widget_stack {
     Options_stack();
 
-    Options_A& options_a{this->make_page<Options_A>()};
-    Options_B& options_b{this->make_page<Options_B>()};
+    Options_A& options_a{this->make_child<Options_A>()};
+    Options_B& options_b{this->make_child<Options_B>()};
 };
 
 }  // namespace glyph_paint

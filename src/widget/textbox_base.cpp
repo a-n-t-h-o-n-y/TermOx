@@ -14,7 +14,7 @@ namespace cppurses {
 
 Textbox_base::Textbox_base(Glyph_string contents)
     : Text_display{std::move(contents)} {
-    this->show_cursor();
+    this->cursor.enable();
 };
 
 void Textbox_base::set_cursor(Point pos) {
@@ -27,31 +27,30 @@ void Textbox_base::set_cursor(std::size_t x, std::size_t y) {
 
 void Textbox_base::set_cursor(std::size_t index) {
     auto coords = this->display_position(index);
-    move_cursor(*this, coords);
-    cursor_moved(coords);
+    this->cursor.set_position(coords);
 }
 
 std::size_t Textbox_base::cursor_index() const {
-    return this->index_at(this->cursor_coordinates());
+    return this->index_at(this->cursor.position());
 }
 
 void Textbox_base::cursor_up(std::size_t n) {
-    auto y = this->cursor_y() - n;
-    if (this->cursor_y() < n) {
+    auto y = this->cursor.y() - n;
+    if (this->cursor.y() < n) {
         if (this->does_scroll()) {
-            this->scroll_up(n - this->cursor_y());
+            this->scroll_up(n - this->cursor.y());
         }
         y = 0;
     }
-    this->set_cursor(this->cursor_x(), y);
+    this->set_cursor(this->cursor.x(), y);
     cursor_moved_up(n);
 }
 
 void Textbox_base::cursor_down(std::size_t n) {
-    if (this->cursor_y() + this->top_line() == this->last_line()) {
+    if (this->cursor.y() + this->top_line() == this->last_line()) {
         return;
     }
-    auto y = this->cursor_y() + n;
+    auto y = this->cursor.y() + n;
     if (y >= this->height()) {
         if (this->does_scroll()) {
             this->scroll_down(y - (this->height() - 1));
@@ -60,7 +59,7 @@ void Textbox_base::cursor_down(std::size_t n) {
             return;
         }
     }
-    this->set_cursor(this->cursor_x(), y);
+    this->set_cursor(this->cursor.x(), y);
     cursor_moved_down(n);
 }
 
@@ -73,7 +72,7 @@ void Textbox_base::cursor_left(std::size_t n) {
 
 void Textbox_base::increment_cursor_left() {
     auto next_index = this->cursor_index();
-    if (this->cursor_coordinates() == Point{0, 0}) {
+    if (this->cursor.position() == Point{0, 0}) {
         if (this->does_scroll()) {
             this->scroll_up(1);
         } else {
@@ -101,7 +100,7 @@ void Textbox_base::increment_cursor_right() {
     auto true_last_index = this->first_index_at(this->bottom_line() + 1) - 1;
     auto cursor_index = this->cursor_index();
     if (cursor_index == true_last_index &&
-        this->cursor_y() == this->height() - 1) {
+        this->cursor.y() == this->height() - 1) {
         if (this->does_scroll()) {
             this->scroll_down(1);
         } else {
@@ -116,22 +115,22 @@ void Textbox_base::scroll_up(std::size_t n) {
         return;
     }
     Text_display::scroll_up(n);
-    auto y = this->cursor_y() + n;
+    auto y = this->cursor.y() + n;
     if (y > this->height() - 1) {
         y = this->height() - 1;
     }
-    this->set_cursor(this->cursor_x(), y);
+    this->set_cursor(this->cursor.x(), y);
 }
 
 void Textbox_base::scroll_down(std::size_t n) {
     Text_display::scroll_down(n);
-    auto y = this->cursor_y();
+    auto y = this->cursor.y();
     if (y < n) {
         y = 0;
     } else {
         y -= n;
     }
-    this->set_cursor(this->cursor_x(), y);
+    this->set_cursor(this->cursor.x(), y);
 }
 
 void Textbox_base::enable_scrolling(bool enable) {
@@ -147,7 +146,7 @@ void Textbox_base::toggle_scrolling() {
 }
 
 bool Textbox_base::resize_event(Area new_size, Area old_size) {
-    const auto cursor_index = this->index_at(this->cursor_coordinates());
+    const auto cursor_index = this->index_at(this->cursor.position());
     Text_display::resize_event(new_size, old_size);
     // Scroll if old cursor index is now hidden.
     const auto cursor_line = this->line_at(cursor_index);

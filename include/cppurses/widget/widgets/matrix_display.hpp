@@ -1,5 +1,6 @@
 #ifndef CPPURSES_WIDGET_WIDGETS_MATRIX_DISPLAY_HPP
 #define CPPURSES_WIDGET_WIDGETS_MATRIX_DISPLAY_HPP
+#include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_matrix.hpp>
 #include <cppurses/widget/widget.hpp>
 
@@ -9,6 +10,7 @@ class Matrix_display : public Widget {
    public:
     explicit Matrix_display(Glyph_matrix matrix_ = Glyph_matrix{});
     Matrix_display(std::size_t width, std::size_t height);
+
     Glyph_matrix matrix;
 
    protected:

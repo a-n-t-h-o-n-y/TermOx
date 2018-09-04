@@ -1,43 +1,40 @@
 #include <cppurses/widget/widget.hpp>
 
 #include <cstddef>
-#include <iterator>
 #include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include <signals/signal.hpp>
 
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
-#include <cppurses/painter/paint_buffer.hpp>
+#include <cppurses/painter/detail/add_default_attributes.hpp>
+#include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/painter.hpp>
+#include <cppurses/system/animation_engine.hpp>
+#include <cppurses/system/event_handler.hpp>
 #include <cppurses/system/events/child_event.hpp>
-#include <cppurses/system/events/clear_screen_event.hpp>
-#include <cppurses/system/events/deferred_delete_event.hpp>
-#include <cppurses/system/events/on_tree_event.hpp>
+#include <cppurses/system/events/delete_event.hpp>
+#include <cppurses/system/events/disable_event.hpp>
+#include <cppurses/system/events/enable_event.hpp>
 #include <cppurses/system/events/paint_event.hpp>
 #include <cppurses/system/focus.hpp>
 #include <cppurses/system/system.hpp>
+#include <cppurses/widget/area.hpp>
 #include <cppurses/widget/border.hpp>
+#include <cppurses/widget/children_data.hpp>
+#include <cppurses/widget/cursor_data.hpp>
+#include <cppurses/widget/detail/border_offset.hpp>
 #include <cppurses/widget/point.hpp>
 
-#include <vector>
-
-namespace {
-using namespace cppurses;
-
-void clear_screen(Widget& w) {
-    System::post_event<Clear_screen_event>(&w);
-}
-
-}  // namespace
-
 namespace cppurses {
-
-Widget::Widget(std::string name) : name_{std::move(name)} {
-    this->update();
+namespace detail {
+class Screen_state;
 }
+
+Widget::Widget(std::string name) : name_{std::move(name)} {}
 
 Widget::~Widget() {
     if (Focus::focus_widget() == this) {
@@ -62,156 +59,101 @@ Widget* Widget::parent() const {
     return parent_;
 }
 
-void Widget::add_child(std::unique_ptr<Widget> child) {
-    children_.emplace_back(std::move(child));
-    children_.back()->set_parent(this);
-    System::post_event<Child_added_event>(this, children_.back().get());
-    System::post_event<On_tree_event>(children_.back().get(), this->on_tree());
-}
-
-void Widget::insert_child(std::unique_ptr<Widget> child, std::size_t index) {
-    children_.insert(std::begin(children_) + index, std::move(child));
-    children_[index]->set_parent(this);
-    System::post_event<Child_added_event>(this, children_[index].get());
-    System::post_event<On_tree_event>(children_[index].get(), this->on_tree());
-}
-
-std::vector<Widget*> Widget::children() const {
-    std::vector<Widget*> ret;
-    std::transform(std::begin(children_), std::end(children_),
-                   std::back_inserter(ret), [](auto& up) { return up.get(); });
-    return ret;
-}
-
-bool Widget::contains_child(Widget* child) {
-    for (const auto& w_ptr : children_) {
-        if (w_ptr.get() == child || w_ptr->contains_child(child)) {
-            return true;
-        }
+void Widget::enable(bool enable, bool post_child_polished_event) {
+    this->enable_and_post_events(enable, post_child_polished_event);
+    for (std::unique_ptr<Widget>& w : this->children.children_) {
+        w->enable(enable, post_child_polished_event);
     }
-    return false;
 }
 
-std::unique_ptr<Widget> Widget::remove_child(Widget* child) {
-    auto end_iter = std::end(children_);
-    auto at = std::find_if(std::begin(children_), end_iter,
-                           [child](auto& c) { return c.get() == child; });
-    if (at == end_iter) {
-        return nullptr;
+void Widget::disable(bool disable, bool post_child_polished_event) {
+    this->enable(!disable, post_child_polished_event);
+}
+
+void Widget::close() {
+    std::unique_ptr<Widget> removed;
+    if (this->parent() == nullptr) {
+        // Can't delete a widget that is not owned by the system.
+        return;
+    } else {
+        removed = this->parent()->children.remove(this);
     }
-    std::unique_ptr<Widget> removed = std::move(*at);
-    children_.erase(at);
-    removed->set_parent(nullptr);
-    System::send_event(Child_removed_event{this, child});
-    System::send_event(On_tree_event{removed.get(), false});
-    return removed;
-}
-
-std::unique_ptr<Widget> Widget::remove_child(const std::string& name) {
-    return this->remove_child(this->find_child<Widget>(name));
+    System::post_event<Delete_event>(this, std::move(removed));
 }
 
 std::size_t Widget::x() const {
-    Widget* parent = this->parent();
-    if (parent == nullptr) {
-        return this->position_.x + west_border_offset(*this);
-    }
-    return this->position_.x + parent->x() + west_border_offset(*this);
+    return top_left_position_.x;
 }
 
 std::size_t Widget::y() const {
-    Widget* parent = this->parent();
-    if (parent == nullptr) {
-        return this->position_.y + north_border_offset(*this);
-    }
-    return this->position_.y + parent->y() + north_border_offset(*this);
+    return top_left_position_.y;
+}
+
+std::size_t Widget::inner_x() const {
+    return top_left_position_.x + detail::Border_offset::west(*this);
+}
+
+std::size_t Widget::inner_y() const {
+    return top_left_position_.y + detail::Border_offset::north(*this);
 }
 
 std::size_t Widget::width() const {
-    return width_;
+    return this->outer_width() - detail::Border_offset::east(*this) -
+           detail::Border_offset::west(*this);
 }
 
 std::size_t Widget::height() const {
-    return height_;
+    return this->outer_height() - detail::Border_offset::north(*this) -
+           detail::Border_offset::south(*this);
 }
 
-bool Widget::cursor_visible() const {
-    return show_cursor_;
+std::size_t Widget::outer_width() const {
+    return outer_width_;
 }
 
-void Widget::show_cursor(bool show) {
-    show_cursor_ = show;
+std::size_t Widget::outer_height() const {
+    return outer_height_;
 }
 
-void Widget::hide_cursor(bool hide) {
-    show_cursor_ = !hide;
+bool Widget::brush_paints_wallpaper() const {
+    return brush_paints_wallpaper_;
 }
 
-void Widget::move_cursor_x(std::size_t x) {
-    if (x < this->width()) {
-        cursor_position_.x = x;
-    } else if (this->width() != 0) {
-        cursor_position_.x = this->width() - 1;
+void Widget::set_brush_paints_wallpaper(bool paints) {
+    brush_paints_wallpaper_ = paints;
+    this->update();
+}
+
+// TODO should have a mutex on it so events can't change background tile while
+// flushing the screen. or wallpaper(?) should have a mutex, or anything
+// that modifies the Glyph.
+Glyph Widget::generate_wallpaper() const {
+    Glyph background{this->wallpaper ? *(this->wallpaper)
+                                     : System::terminal.background_tile()};
+    if (this->brush_paints_wallpaper()) {
+        detail::add_default_attributes(background, this->brush);
     }
-}
-
-void Widget::move_cursor_y(std::size_t y) {
-    if (y < this->height()) {
-        cursor_position_.y = y;
-    } else if (this->height() != 0) {
-        cursor_position_.y = this->height() - 1;
-    }
-}
-
-std::size_t Widget::cursor_x() const {
-    return cursor_position_.x;
-}
-
-std::size_t Widget::cursor_y() const {
-    return cursor_position_.y;
-}
-
-Point Widget::cursor_coordinates() const {
-    return cursor_position_;
-}
-
-bool Widget::visible() const {
-    return visible_;
-}
-
-bool Widget::on_tree() const {
-    return on_tree_;
+    return background;
 }
 
 void Widget::update() {
-    clear_screen(*this);
     System::post_event<Paint_event>(this);
 }
 
-bool Widget::east_border_disqualified() const {
-    return east_border_disqualified_;
+void Widget::enable_animation(Animation_engine::Period_t period) {
+    System::animation_engine().register_widget(*this, period);
 }
 
-bool Widget::west_border_disqualified() const {
-    return west_border_disqualified_;
+void Widget::enable_animation(
+    const std::function<Animation_engine::Period_t()>& period_func) {
+    System::animation_engine().register_widget(*this, period_func);
 }
 
-bool Widget::north_border_disqualified() const {
-    return north_border_disqualified_;
-}
-
-bool Widget::south_border_disqualified() const {
-    return south_border_disqualified_;
-}
-
-bool Widget::close_event() {
-    System::post_event<Deferred_delete_event>(this);
-    return true;
+void Widget::disable_animation() {
+    System::animation_engine().unregister_widget(*this);
 }
 
 bool Widget::focus_in_event() {
-    System::paint_buffer()->move(this->x() + this->cursor_x(),
-                                 this->y() + this->cursor_y());
     focused_in();
     return true;
 }
@@ -222,24 +164,8 @@ bool Widget::focus_out_event() {
 }
 
 bool Widget::paint_event() {
-    if (border.enabled) {
-        Painter p{this};
-        p.border(border);
-    }
-    // Might not need below if focus widget sets this afterwards, on no focus?
-    System::paint_buffer()->move(this->x() + this->cursor_x(),
-                                 this->y() + this->cursor_y());
-    return true;
-}
-
-bool Widget::clear_screen_event() {
     Painter p{this};
-    p.clear_screen();
-    return true;
-}
-
-bool Widget::deferred_delete_event(Event_handler* to_delete) {
-    this->remove_child(static_cast<Widget*>(to_delete));
+    p.border(border);  // this checks if border and widget are enabled, etc..
     return true;
 }
 
@@ -260,122 +186,51 @@ bool Widget::child_polished_event(Widget* child) {
     return true;
 }
 
-bool Widget::show_event() {
-    this->set_visible(true);
-    this->update();
-    return true;
-}
-
-bool Widget::on_tree_event(bool on_tree) {
-    on_tree_ = on_tree;
-    for (auto& child : children_) {
-        System::post_event<On_tree_event>(child.get(), on_tree_);
-    }
-    return true;
-}
-
-bool Widget::hide_event() {
-    this->set_visible(false);
-    this->update();
-    return true;
-}
-
 bool Widget::move_event(Point new_position, Point old_position) {
-    this->set_x(new_position.x);
-    this->set_y(new_position.y);
     moved(new_position);
-    moved_xy(new_position.x, new_position.y);
     this->update();
+    // this->screen_state().tiles.clear();
     return true;
 }
 
 bool Widget::resize_event(Area new_size, Area old_size) {
-    east_border_disqualified_ = false;
-    west_border_disqualified_ = false;
-    north_border_disqualified_ = false;
-    south_border_disqualified_ = false;
-
-    // If new_size.width is too small for widget and borders, disqualify borders
-    if (new_size.width == 2) {
-        if (west_border_offset(*this) == 0) {
-            west_border_disqualified_ = true;
-        } else {
-            east_border_disqualified_ = true;
-        }
-    }
-    if (new_size.width <= 1) {
-        east_border_disqualified_ = true;
-        west_border_disqualified_ = true;
-    }
-
-    if (new_size.height == 2) {
-        if (north_border_offset(*this) == 0) {
-            north_border_disqualified_ = true;
-        } else {
-            south_border_disqualified_ = true;
-        }
-    }
-    if (new_size.height <= 1) {
-        north_border_disqualified_ = true;
-        south_border_disqualified_ = true;
-    }
-
-    width_ =
-        new_size.width - east_border_offset(*this) - west_border_offset(*this);
-    height_ = new_size.height - north_border_offset(*this) -
-              south_border_offset(*this);
-
-    resized(width_, height_);
+    resized(outer_width_, outer_height_);
     this->update();
     return true;
 }
 
-void Widget::set_visible(bool visible, bool recursive) {
-    visible_ = visible;
-    if (!recursive) {
-        return;
-    }
-    for (Widget* c : this->children()) {
-        c->set_visible(visible, recursive);
+bool Widget::timer_event() {
+    this->update();
+    return true;
+}
+
+bool Widget::disable_event() {
+    return Event_handler::disable_event();
+}
+
+void Widget::enable_and_post_events(bool enable,
+                                    bool post_child_polished_event) {
+    if (enabled_ != enable) {
+        if (!enable) {
+            System::post_event<Disable_event>(this);
+        }
+        enabled_ = enable;
+        if (enable) {
+            System::post_event<Enable_event>(this);
+        }
+        if (post_child_polished_event && this->parent() != nullptr) {
+            System::post_event<Child_polished_event>(this->parent(), this);
+        }
+        this->update();
     }
 }
 
 void Widget::set_x(std::size_t global_x) {
-    auto parent = this->parent();
-    auto screen_width = System::max_width();
-    if (global_x >= screen_width && screen_width > 0) {
-        global_x = screen_width - 1;
-    } else if (screen_width == 0) {
-        global_x = 0;
-    }
-    if (parent != nullptr) {
-        if (global_x >= parent->x()) {
-            position_.x = global_x - parent->x();
-        } else {
-            position_.x = 0;
-        }
-    } else {
-        position_.x = global_x;
-    }
+    top_left_position_.x = global_x;
 }
 
 void Widget::set_y(std::size_t global_y) {
-    auto parent = this->parent();
-    auto screen_height = System::max_height();
-    if (global_y >= screen_height && screen_height > 0) {
-        global_y = screen_height - 1;
-    } else if (screen_height == 0) {
-        global_y = 0;
-    }
-    if (parent != nullptr) {
-        if (global_y >= parent->y()) {
-            position_.y = global_y - parent->y();
-        } else {
-            position_.y = 0;
-        }
-    } else {
-        position_.y = global_y;
-    }
+    top_left_position_.y = global_y;
 }
 
 // - - - - - - - - - - - - - - Free Functions - - - - - - - - - - - - - - - - -
@@ -386,87 +241,45 @@ bool has_border(const Widget& w) {
 
 void enable_border(Widget& w) {
     w.border.enabled = true;
-    System::post_event<Child_polished_event>(w.parent(), &w);
+    // System::post_event<Child_polished_event>(w.parent(), &w);
 }
 
 void disable_border(Widget& w) {
     w.border.enabled = false;
-    System::post_event<Child_polished_event>(w.parent(), &w);
-}
-
-std::size_t west_border_offset(const Widget& w) {
-    const Border& b{w.border};
-    if (b.enabled && !w.west_border_disqualified() &&
-        (b.west_enabled || b.north_west_enabled || b.south_west_enabled)) {
-        return 1;
-    }
-    return 0;
-}
-
-std::size_t east_border_offset(const Widget& w) {
-    const Border& b{w.border};
-    if (b.enabled && !w.east_border_disqualified() &&
-        (b.east_enabled || b.north_east_enabled || b.south_east_enabled)) {
-        return 1;
-    }
-    return 0;
-}
-
-std::size_t north_border_offset(const Widget& w) {
-    const Border& b{w.border};
-    if (b.enabled && !w.north_border_disqualified() &&
-        (b.north_enabled || b.north_east_enabled || b.north_west_enabled)) {
-        return 1;
-    }
-    return 0;
-}
-
-std::size_t south_border_offset(const Widget& w) {
-    const Border& b{w.border};
-    if (b.enabled && !w.south_border_disqualified() &&
-        (b.south_enabled || b.south_east_enabled || b.south_west_enabled)) {
-        return 1;
-    }
-    return 0;
+    // System::post_event<Child_polished_event>(w.parent(), &w);
 }
 
 bool has_coordinates(Widget& w, std::size_t global_x, std::size_t global_y) {
-    if (!w.enabled() || !w.visible()) {
+    if (!w.enabled()) {
         return false;
     }
-    bool within_west = global_x >= w.x();
-    bool within_east = global_x < (w.x() + w.width());
-    bool within_north = global_y >= w.y();
-    bool within_south = global_y < (w.y() + w.height());
+    bool within_west = global_x >= w.inner_x();
+    bool within_east = global_x < (w.inner_x() + w.width());
+    bool within_north = global_y >= w.inner_y();
+    bool within_south = global_y < (w.inner_y() + w.height());
     return within_west && within_east && within_north && within_south;
-}
-
-void move_cursor(Widget& w, Point c) {
-    move_cursor(w, c.x, c.y);
-}
-
-void move_cursor(Widget& w, std::size_t x, std::size_t y) {
-    w.move_cursor_x(x);
-    w.move_cursor_y(y);
-    w.cursor_moved(Point{x, y});
-    w.cursor_moved_xy(x, y);
 }
 
 void set_background(Widget& w, Color c) {
     w.brush.set_background(c);
-    w.background_color_changed(c);
     w.update();
+    w.background_color_changed(c);
 }
 
 void set_foreground(Widget& w, Color c) {
     w.brush.set_foreground(c);
+    w.update();
     w.foreground_color_changed(c);
+}
+
+void clear_attributes(Widget& w) {
+    w.brush.clear_attributes();
     w.update();
 }
 
 void set_background_recursive(Widget& w, Color c, bool single_level) {
     set_background(w, c);
-    for (Widget* child : w.children()) {
+    for (const std::unique_ptr<Widget>& child : w.children.get()) {
         if (single_level) {
             set_background(*child, c);
         } else {
@@ -477,7 +290,7 @@ void set_background_recursive(Widget& w, Color c, bool single_level) {
 
 void set_foreground_recursive(Widget& w, Color c, bool single_level) {
     set_foreground(w, c);
-    for (Widget* child : w.children()) {
+    for (const std::unique_ptr<Widget>& child : w.children.get()) {
         if (single_level) {
             set_foreground(*child, c);
         } else {
@@ -490,8 +303,12 @@ bool has_focus(const Widget& w) {
     return Focus::focus_widget() == &w;
 }
 
-void toggle_cursor(Widget& w) {
-    w.show_cursor(!w.cursor_visible());
+detail::Screen_state& Widget::screen_state() {
+    return screen_state_;
+}
+
+const detail::Screen_state& Widget::screen_state() const {
+    return screen_state_;
 }
 
 }  // namespace cppurses

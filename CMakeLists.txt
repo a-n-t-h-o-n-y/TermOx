@@ -4,7 +4,8 @@ include(GNUInstallDirs)
 # enable_testing()
 
 # set(CMAKE_BUILD_TYPE Release)
-set(CMAKE_BUILD_TYPE Debug)
+# set(CMAKE_BUILD_TYPE Debug)
+message("Build Type: ${CMAKE_BUILD_TYPE}" )
 
 # ADD SIGNALS LIBRARY
 add_subdirectory(libs/Signals)

@@ -99,6 +99,11 @@ void Attrs_and_colors::initialize() {
 // Save Area
 Save_area::Save_area() {
     this->initialize();
+    // names
+    this->set_name("Save_area");
+    load_btn.set_name("Save_area - load_btn");
+    filename_edit.set_name("Save_area - filename_edit");
+    save_btn.set_name("Save_area - save_btn");
 }
 
 void Save_area::initialize() {
@@ -124,6 +129,7 @@ void Save_area::initialize() {
 Notepad::Notepad() {
     this->initialize();
     this->focus_policy = Focus_policy::Strong;
+    this->set_name("Notepad - main demo widget");
 }
 
 bool Notepad::focus_in_event() {
