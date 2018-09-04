@@ -1,6 +1,6 @@
 #ifndef CPPURSES_SYSTEM_SHORTCUTS_HPP
 #define CPPURSES_SYSTEM_SHORTCUTS_HPP
-#include <map>
+#include <unordered_map>
 
 #include <signals/signal.hpp>
 
@@ -11,12 +11,12 @@ namespace cppurses {
 class Shortcuts {
    public:
     static sig::Signal<void()>& add_shortcut(Key key);
-    void remove_shortcut(Key key);
-    void clear();
+    static void remove_shortcut(Key key);
+    static void clear();
     static bool send_key(Key key);
 
    private:
-    static std::map<Key, sig::Signal<void()>> shortcuts_;
+    static std::unordered_map<Key, sig::Signal<void()>> shortcuts_;
 };
 
 }  // namespace cppurses

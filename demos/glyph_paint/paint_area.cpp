@@ -20,7 +20,7 @@ using namespace cppurses;
 namespace {
 
 void insert_newline(Point first, Point second, std::ostream& os) {
-    if (first.y == second.y) {
+    if (first.y >= second.y) {
         return;
     }
     std::string newlines(second.y - first.y, '\n');

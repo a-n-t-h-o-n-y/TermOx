@@ -12,7 +12,7 @@
 #include <cppurses/painter/detail/add_default_attributes.hpp>
 #include <cppurses/painter/detail/find_empty_space.hpp>
 #include <cppurses/painter/detail/is_not_paintable.hpp>
-#include <cppurses/painter/detail/ncurses_data.hpp>
+// #include <cppurses/painter/detail/ncurses_data.hpp>
 #include <cppurses/painter/detail/ncurses_paint_engine.hpp>
 #include <cppurses/painter/detail/screen_descriptor.hpp>
 #include <cppurses/painter/detail/screen_mask.hpp>
@@ -53,7 +53,7 @@ namespace cppurses {
 namespace detail {
 
 void Paint_middleman::flush(const detail::Staged_changes& changes) {
-    std::lock_guard<std::mutex> lock{detail::NCurses_data::ncurses_mtx};
+    // std::lock_guard<std::mutex> lock{detail::NCurses_data::ncurses_mtx};
     bool refresh{false};
     for (const auto& point_tile : changes) {
         Widget* w{point_tile.first};

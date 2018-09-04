@@ -212,7 +212,7 @@ Glyph_string& Glyph_string::append(const Glyph& symbol, Attributes&&... attrs) {
 template <typename... Attributes>
 Glyph_string& Glyph_string::append(const char* symbols, Attributes&&... attrs) {
     std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-    std::wstring wide_string = converter.from_bytes(symbols);
+    std::wstring wide_string{converter.from_bytes(symbols)};
     this->reserve(this->size() + wide_string.size());
     for (wchar_t sym : wide_string) {
         this->append(Glyph{sym, std::forward<Attributes>(attrs)...});
