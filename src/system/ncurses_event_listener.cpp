@@ -4,15 +4,13 @@
 #include <memory>
 #include <mutex>
 
-#include <stdio.h>
-#include <sys/ioctl.h>
-
 #include <cppurses/painter/detail/ncurses_data.hpp>
 #include <cppurses/system/detail/find_widget_at.hpp>
 #include <cppurses/system/event.hpp>
 #include <cppurses/system/events/key_event.hpp>
 #include <cppurses/system/events/mouse_event.hpp>
 #include <cppurses/system/events/resize_event.hpp>
+#include <cppurses/system/events/terminal_resize_event.hpp>
 #include <cppurses/system/focus.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/mouse_button.hpp>
@@ -27,20 +25,22 @@ namespace cppurses {
 namespace detail {
 
 std::unique_ptr<Event> NCurses_event_listener::get_input() const {
-    int input{0};
-    while ((input = ::getch()) == ERR) {
-        if (NCurses_data::resize_happened) {
-            NCurses_data::resize_happened = false;
-            // Find window size
-            struct winsize w;
-            ioctl(fileno(stdin), TIOCGWINSZ, &w);
-            NCurses_data::ncurses_mtx.lock();
-            ::resizeterm(w.ws_row, w.ws_col);  // glitch here w/multi-thread?
-            NCurses_data::ncurses_mtx.unlock();
-        }
-    }
+    // TODO
+    // getch() calls wrefresh() internally, making this not thread safe with
+    // multiple event loops running. Either have to find a simpler function or
+    // handler input manually. Cannot use a mutex here, otherwise you have to
+    // wait for input before you can refresh the screen from anywhere else.
+    int input{::getch()};
     std::unique_ptr<Event> event{nullptr};
     switch (input) {
+        case ERR:
+            // Terminal Screen Resize
+            if (NCurses_data::resize_happened) {
+                NCurses_data::resize_happened = false;
+                event = std::make_unique<Terminal_resize_event>(System::head());
+            }
+            break;
+
         case KEY_MOUSE:
             event = parse_mouse_event();
             break;

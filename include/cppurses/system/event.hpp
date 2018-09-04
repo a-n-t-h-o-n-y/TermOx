@@ -20,6 +20,7 @@ class Event {
         Paint,
         Move,
         Resize,
+        TerminalResize,
         ChildAdded,
         ChildRemoved,
         ChildPolished,

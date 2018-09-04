@@ -22,7 +22,8 @@ class Main_menu : public Vertical_layout {
     glyph_paint::Glyph_paint& glyph_paint{
         main_menu.make_page<glyph_paint::Glyph_paint>("Glyph Paint")};
     animation::Animated_widget& animated_widget{
-        main_menu.make_page<animation::Animated_widget>("Animated Widget")};
+        main_menu.make_page<animation::Animated_widget>(
+            "Animated Widget(Experimental)")};
 };
 
 }  // namespace demos

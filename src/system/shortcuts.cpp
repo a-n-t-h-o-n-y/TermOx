@@ -1,6 +1,6 @@
 #include <cppurses/system/shortcuts.hpp>
 
-#include <map>
+#include <unordered_map>
 
 #include <signals/signal.hpp>
 
@@ -8,10 +8,14 @@
 
 namespace cppurses {
 
-std::map<Key, sig::Signal<void()>> Shortcuts::shortcuts_{};
+std::unordered_map<Key, sig::Signal<void()>> Shortcuts::shortcuts_;
 
 sig::Signal<void()>& Shortcuts::add_shortcut(Key key) {
-    return shortcuts_[key] = sig::Signal<void()>{};
+    if (shortcuts_.count(key) == 0) {
+        shortcuts_[key] = sig::Signal<void()>{};
+    }
+    // return shortcuts_[key];
+    return shortcuts_.at(key);
 }
 
 void Shortcuts::remove_shortcut(Key key) {

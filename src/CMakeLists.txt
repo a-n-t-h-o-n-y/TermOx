@@ -57,6 +57,7 @@ target_sources(cppurses PRIVATE
     system/fps_to_period.cpp
     system/find_widget_at.cpp
     system/terminal_properties.cpp
+    system/terminal_resize_event.cpp
 )
 
 # PAINTER
