@@ -107,10 +107,6 @@ std::unique_ptr<Widget> Children_data::remove(Widget* child) {
     children_.erase(found);
     removed->disable();
     if (removed->parent() != nullptr) {
-        // TODO send or post??
-        // System::send_event(
-        //     Child_removed_event{removed->parent(), removed.get()});
-        // you are posting to the parent which is still alive, so no crash
         System::post_event<Child_removed_event>(removed->parent(),
                                                 removed.get());
     }

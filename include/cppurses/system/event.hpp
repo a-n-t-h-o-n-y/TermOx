@@ -2,7 +2,7 @@
 #define CPPURSES_SYSTEM_EVENT_HPP
 
 namespace cppurses {
-class Event_handler;
+class Widget;
 
 class Event {
    public:
@@ -36,7 +36,7 @@ class Event {
     };
 
     // Special Member Functions
-    Event(Type type, Event_handler* receiver);
+    Event(Type type, Widget* receiver);
     Event(const Event&) = default;
     Event& operator=(const Event&) = default;
     Event(Event&&) = default;
@@ -44,18 +44,18 @@ class Event {
     virtual ~Event() = default;
 
     Type type() const;
-    Event_handler* receiver() const;
-    void set_receiver(Event_handler* receiver);
+    Widget* receiver() const;
+    void set_receiver(Widget* receiver);
 
     bool send_to_all_filters() const;
     virtual bool send() const = 0;
-    virtual bool filter_send(Event_handler* filter) const = 0;
+    virtual bool filter_send(Widget* filter) const = 0;
 
     bool operator==(const Event& other) const;
 
    protected:
     Type type_;
-    Event_handler* receiver_;
+    Widget* receiver_;
 };
 
 }  // namespace cppurses

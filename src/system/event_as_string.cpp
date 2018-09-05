@@ -74,6 +74,9 @@ std::string event_type_as_string(Event::Type event_type) {
         case Event::Timer:
             name = "Timer";
             break;
+        case Event::Custom:
+            name = "Custom";
+            break;
         default:
             name = "Other Event";
     }

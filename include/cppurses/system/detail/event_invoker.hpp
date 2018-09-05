@@ -3,7 +3,7 @@
 #include <cppurses/system/event.hpp>
 
 namespace cppurses {
-class Event_handler;
+class Widget;
 namespace detail {
 class Event_queue;
 
@@ -18,7 +18,7 @@ class Event_invoker {
    public:
     void invoke(Event_queue& queue,
                 Event::Type type_filter = Event::None,
-                Event_handler* object_filter = nullptr);
+                Widget* object_filter = nullptr);
 };
 
 }  // namespace detail

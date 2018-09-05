@@ -14,7 +14,6 @@ sig::Signal<void()>& Shortcuts::add_shortcut(Key key) {
     if (shortcuts_.count(key) == 0) {
         shortcuts_[key] = sig::Signal<void()>{};
     }
-    // return shortcuts_[key];
     return shortcuts_.at(key);
 }
 

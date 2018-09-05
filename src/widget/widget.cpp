@@ -1,5 +1,6 @@
 #include <cppurses/widget/widget.hpp>
 
+#include <algorithm>
 #include <cstddef>
 #include <memory>
 #include <string>
@@ -12,9 +13,7 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/detail/add_default_attributes.hpp>
 #include <cppurses/painter/glyph.hpp>
-#include <cppurses/painter/painter.hpp>
 #include <cppurses/system/animation_engine.hpp>
-#include <cppurses/system/event_handler.hpp>
 #include <cppurses/system/events/child_event.hpp>
 #include <cppurses/system/events/delete_event.hpp>
 #include <cppurses/system/events/disable_event.hpp>
@@ -22,12 +21,10 @@
 #include <cppurses/system/events/paint_event.hpp>
 #include <cppurses/system/focus.hpp>
 #include <cppurses/system/system.hpp>
-#include <cppurses/widget/area.hpp>
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/children_data.hpp>
 #include <cppurses/widget/cursor_data.hpp>
 #include <cppurses/widget/detail/border_offset.hpp>
-#include <cppurses/widget/point.hpp>
 
 namespace cppurses {
 namespace detail {
@@ -40,6 +37,7 @@ Widget::~Widget() {
     if (Focus::focus_widget() == this) {
         Focus::clear_focus();
     }
+    destroyed(this);
 }
 
 void Widget::set_name(std::string name) {
@@ -68,6 +66,10 @@ void Widget::enable(bool enable, bool post_child_polished_event) {
 
 void Widget::disable(bool disable, bool post_child_polished_event) {
     this->enable(!disable, post_child_polished_event);
+}
+
+bool Widget::enabled() const {
+    return enabled_;
 }
 
 void Widget::close() {
@@ -124,9 +126,6 @@ void Widget::set_brush_paints_wallpaper(bool paints) {
     this->update();
 }
 
-// TODO should have a mutex on it so events can't change background tile while
-// flushing the screen. or wallpaper(?) should have a mutex, or anything
-// that modifies the Glyph.
 Glyph Widget::generate_wallpaper() const {
     Glyph background{this->wallpaper ? *(this->wallpaper)
                                      : System::terminal.background_tile()};
@@ -140,6 +139,32 @@ void Widget::update() {
     System::post_event<Paint_event>(this);
 }
 
+void Widget::install_event_filter(Widget* filter) {
+    if (filter == this) {
+        return;
+    }
+    // Remove filter from list on destruction of filter
+    sig::Slot<void(Widget*)> remove_on_destroy{[this](Widget* being_destroyed) {
+        this->remove_event_filter(being_destroyed);
+    }};
+    remove_on_destroy.track(this->destroyed);
+    filter->destroyed.connect(remove_on_destroy);
+    event_filters_.push_back(filter);
+}
+
+void Widget::remove_event_filter(Widget* filter) {
+    auto begin = std::begin(event_filters_);
+    auto end = std::end(event_filters_);
+    auto position = std::find(begin, end, filter);
+    if (position != end) {
+        event_filters_.erase(position);
+    }
+}
+
+const std::vector<Widget*>& Widget::get_event_filters() const {
+    return event_filters_;
+}
+
 void Widget::enable_animation(Animation_engine::Period_t period) {
     System::animation_engine().register_widget(*this, period);
 }
@@ -151,61 +176,6 @@ void Widget::enable_animation(
 
 void Widget::disable_animation() {
     System::animation_engine().unregister_widget(*this);
-}
-
-bool Widget::focus_in_event() {
-    focused_in();
-    return true;
-}
-
-bool Widget::focus_out_event() {
-    focused_out();
-    return true;
-}
-
-bool Widget::paint_event() {
-    Painter p{this};
-    p.border(border);  // this checks if border and widget are enabled, etc..
-    return true;
-}
-
-bool Widget::child_added_event(Widget* child) {
-    child_added(child);
-    this->update();
-    return true;
-}
-
-bool Widget::child_removed_event(Widget* child) {
-    child_removed(child);
-    this->update();
-    return true;
-}
-
-bool Widget::child_polished_event(Widget* child) {
-    this->update();
-    return true;
-}
-
-bool Widget::move_event(Point new_position, Point old_position) {
-    moved(new_position);
-    this->update();
-    // this->screen_state().tiles.clear();
-    return true;
-}
-
-bool Widget::resize_event(Area new_size, Area old_size) {
-    resized(outer_width_, outer_height_);
-    this->update();
-    return true;
-}
-
-bool Widget::timer_event() {
-    this->update();
-    return true;
-}
-
-bool Widget::disable_event() {
-    return Event_handler::disable_event();
 }
 
 void Widget::enable_and_post_events(bool enable,

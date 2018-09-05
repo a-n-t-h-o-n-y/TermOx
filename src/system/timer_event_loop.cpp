@@ -25,8 +25,7 @@ Timer_event_loop::Timer_event_loop(std::function<Period_t()> period_func)
 
 void Timer_event_loop::register_widget(Widget& w) {
     registered_widgets_.emplace(&w);
-    w.destroyed.connect(
-        [this](Event_handler* eh) { registered_widgets_.erase(eh); });
+    w.destroyed.connect([this](Widget* d) { registered_widgets_.erase(d); });
 }
 
 bool Timer_event_loop::unregister_widget(Widget& w) {
@@ -47,7 +46,7 @@ bool Timer_event_loop::empty() const {
 }
 
 void Timer_event_loop::loop_function() {
-    for (Event_handler* widg : registered_widgets_) {
+    for (Widget* widg : registered_widgets_) {
         System::post_event<Timer_event>(widg);
     }
     auto now = std::chrono::high_resolution_clock::now();

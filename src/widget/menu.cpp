@@ -37,11 +37,10 @@ sig::Signal<void()>& Menu::add_item(Glyph_string label) {
     button_ref.height_policy.type(Size_policy::Fixed);
     button_ref.height_policy.hint(1);
     auto& signal_ref{items_.back().selected};
-    button_ref.clicked.connect(
-        [this, index = items_.size() - 1] {
-            this->select_item(index);
-            this->call_current_item();
-        });
+    button_ref.clicked.connect([this, index = items_.size() - 1] {
+        this->select_item(index);
+        this->call_current_item();
+    });
     this->update();
     return signal_ref;
 }
@@ -129,7 +128,7 @@ bool Menu::mouse_press_event(Mouse_button button,
     return Vertical_layout::mouse_press_event(button, global, local, device_id);
 }
 
-bool Menu::mouse_press_event_filter(Event_handler* receiver,
+bool Menu::mouse_press_event_filter(Widget* receiver,
                                     Mouse_button button,
                                     Point global,
                                     Point local,

@@ -3,7 +3,6 @@
 #include <cstdint>
 
 #include <cppurses/system/event.hpp>
-#include <cppurses/system/event_handler.hpp>
 #include <cppurses/system/events/input_event.hpp>
 #include <cppurses/system/focus.hpp>
 #include <cppurses/system/mouse_button.hpp>
@@ -14,7 +13,7 @@ namespace cppurses {
 
 // class Mouse_event
 Mouse_event::Mouse_event(Event::Type type,
-                         Event_handler* receiver,
+                         Widget* receiver,
                          Mouse_button button,
                          Point global,
                          Point local,
@@ -26,7 +25,7 @@ Mouse_event::Mouse_event(Event::Type type,
       device_id_{device_id} {}
 
 // class Mouse_press_event
-Mouse_press_event::Mouse_press_event(Event_handler* receiver,
+Mouse_press_event::Mouse_press_event(Widget* receiver,
                                      Mouse_button button,
                                      Point global,
                                      Point local,
@@ -41,20 +40,20 @@ Mouse_press_event::Mouse_press_event(Event_handler* receiver,
 bool Mouse_press_event::send() const {
     // Handle focus elsewhere.
     if (receiver_->enabled()) {
-        Focus::mouse_press(static_cast<Widget*>(receiver_));
+        Focus::mouse_press(receiver_);
         return receiver_->mouse_press_event(button_, global_, local_,
                                             device_id_);
     }
     return false;
 }
 
-bool Mouse_press_event::filter_send(Event_handler* filter) const {
+bool Mouse_press_event::filter_send(Widget* filter) const {
     return filter->mouse_press_event_filter(receiver_, button_, global_, local_,
                                             device_id_);
 }
 
 // class Mouse_release_event
-Mouse_release_event::Mouse_release_event(Event_handler* receiver,
+Mouse_release_event::Mouse_release_event(Widget* receiver,
                                          Mouse_button button,
                                          Point global,
                                          Point local,
@@ -74,13 +73,13 @@ bool Mouse_release_event::send() const {
     return false;
 }
 
-bool Mouse_release_event::filter_send(Event_handler* filter) const {
+bool Mouse_release_event::filter_send(Widget* filter) const {
     return filter->mouse_release_event_filter(receiver_, button_, global_,
                                               local_, device_id_);
 }
 
 // class Mouse_double_click_event
-Mouse_double_click_event::Mouse_double_click_event(Event_handler* receiver,
+Mouse_double_click_event::Mouse_double_click_event(Widget* receiver,
                                                    Mouse_button button,
                                                    Point global,
                                                    Point local,
@@ -100,13 +99,13 @@ bool Mouse_double_click_event::send() const {
     return false;
 }
 
-bool Mouse_double_click_event::filter_send(Event_handler* filter) const {
+bool Mouse_double_click_event::filter_send(Widget* filter) const {
     return filter->mouse_double_click_event_filter(receiver_, button_, global_,
                                                    local_, device_id_);
 }
 
 // class Mouse_wheel_event
-Mouse_wheel_event::Mouse_wheel_event(Event_handler* receiver,
+Mouse_wheel_event::Mouse_wheel_event(Widget* receiver,
                                      Mouse_button button,
                                      Point global,
                                      Point local,
@@ -122,13 +121,13 @@ bool Mouse_wheel_event::send() const {
     return false;
 }
 
-bool Mouse_wheel_event::filter_send(Event_handler* filter) const {
+bool Mouse_wheel_event::filter_send(Widget* filter) const {
     return filter->mouse_wheel_event_filter(receiver_, button_, global_, local_,
                                             device_id_);
 }
 
 // class Mouse_move_event
-Mouse_move_event::Mouse_move_event(Event_handler* receiver,
+Mouse_move_event::Mouse_move_event(Widget* receiver,
                                    Mouse_button button,
                                    Point global,
                                    Point local,
@@ -137,16 +136,14 @@ Mouse_move_event::Mouse_move_event(Event_handler* receiver,
                   global,           local,    device_id} {}
 
 bool Mouse_move_event::send() const {
-    if (receiver_->enabled()
-        // && static_cast<Widget*>(receiver_)->has_mouse_tracking()
-    ) {
+    if (receiver_->enabled() /* && receiver_->has_mouse_tracking() */) {
         return receiver_->mouse_move_event(button_, global_, local_,
                                            device_id_);
     }
     return false;
 }
 
-bool Mouse_move_event::filter_send(Event_handler* filter) const {
+bool Mouse_move_event::filter_send(Widget* filter) const {
     return filter->mouse_move_event_filter(receiver_, button_, global_, local_,
                                            device_id_);
 }

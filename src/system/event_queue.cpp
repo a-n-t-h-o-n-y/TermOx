@@ -6,7 +6,6 @@
 #include <utility>
 
 #include <cppurses/system/event.hpp>
-#include <cppurses/system/event_handler.hpp>
 #include <cppurses/widget/children_data.hpp>
 #include <cppurses/widget/widget.hpp>
 
@@ -15,10 +14,9 @@ using namespace cppurses;
 
 template <typename Queue_t>
 void remove_descendant_delete_events(const Event& new_event, Queue_t& queue) {
-    const Widget* receiver{static_cast<Widget*>(new_event.receiver())};
+    const Widget* receiver{new_event.receiver()};
     auto is_descendant = [receiver](const std::unique_ptr<Event>& on_queue) {
-        return receiver->children.has_descendant(
-            static_cast<Widget*>(on_queue->receiver()));
+        return receiver->children.has_descendant(on_queue->receiver());
     };
     auto at = std::remove_if(std::begin(queue), std::end(queue), is_descendant);
     queue.erase(at, std::end(queue));

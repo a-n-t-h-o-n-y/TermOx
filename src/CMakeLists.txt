@@ -34,7 +34,6 @@ target_sources(cppurses PRIVATE
     system/disable_event.cpp
     system/enable_event.cpp
     system/event.cpp
-    system/event_handler.cpp
     system/event_invoker.cpp
 	system/event_loop.cpp
     system/event_queue.cpp
@@ -83,6 +82,7 @@ target_sources(cppurses PRIVATE
 # WIDGET
 target_sources(cppurses PRIVATE
     widget/widget.cpp
+    widget/widget.event_handlers.cpp
     widget/widget_slots.cpp
     widget/widget_stack.cpp
     widget/widget_stack_menu.cpp

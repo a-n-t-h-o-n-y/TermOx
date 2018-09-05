@@ -21,19 +21,19 @@
 #endif
 
 namespace cppurses {
-class Event_handler;
+class Widget;
 namespace detail {
 
 void Event_invoker::invoke(Event_queue& queue,
                            Event::Type type_filter,
-                           Event_handler* object_filter) {
+                           Widget* object_filter) {
 #if defined(DEBUG_EVENT_INVOKER)
-    std::unordered_map<Event_handler*, std::vector<Event::Type>> widgs;
+    std::unordered_map<Widget*, std::vector<Event::Type>> widgs;
 #endif
 
     auto event_iter = std::begin(queue.queue_);
     while (event_iter != std::end(queue.queue_)) {
-        Event_handler* receiver = (*event_iter)->receiver();
+        Widget* receiver = (*event_iter)->receiver();
         auto event_type = (*event_iter)->type();
         // Paint Event Filter
         if (Event::Paint == event_type && Event::Paint != type_filter) {
@@ -67,7 +67,7 @@ void Event_invoker::invoke(Event_queue& queue,
     std::ofstream l{"events_log.txt", std::ios::app};
     for (const auto& w_events_pair : widgs) {
         l << w_events_pair.first;
-        std::string name{static_cast<Widget*>(w_events_pair.first)->name()};
+        std::string name{w_events_pair.first->name()};
         l << ' ' << name;
         l << ":\n\t";
         std::string seperator;

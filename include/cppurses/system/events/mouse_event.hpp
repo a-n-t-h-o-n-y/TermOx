@@ -8,12 +8,12 @@
 #include <cppurses/widget/point.hpp>
 
 namespace cppurses {
-class Event_handler;
+class Widget;
 
 class Mouse_event : public Input_event {
    public:
     Mouse_event(Event::Type type,
-                Event_handler* receiver,
+                Widget* receiver,
                 Mouse_button button,
                 Point global,
                 Point local,
@@ -28,62 +28,62 @@ class Mouse_event : public Input_event {
 
 class Mouse_press_event : public Mouse_event {
    public:
-    Mouse_press_event(Event_handler* receiver,
+    Mouse_press_event(Widget* receiver,
                       Mouse_button button,
                       Point global,
                       Point local,
                       std::uint8_t device_id);
 
     bool send() const override;
-    bool filter_send(Event_handler* filter) const override;
+    bool filter_send(Widget* filter) const override;
 };
 
 class Mouse_release_event : public Mouse_event {
    public:
-    Mouse_release_event(Event_handler* receiver,
+    Mouse_release_event(Widget* receiver,
                         Mouse_button button,
                         Point global,
                         Point local,
                         std::uint8_t device_id);
 
     bool send() const override;
-    bool filter_send(Event_handler* filter) const override;
+    bool filter_send(Widget* filter) const override;
 };
 
 class Mouse_double_click_event : public Mouse_event {
    public:
-    Mouse_double_click_event(Event_handler* receiver,
+    Mouse_double_click_event(Widget* receiver,
                              Mouse_button button,
                              Point global,
                              Point local,
                              std::uint8_t device_id);
 
     bool send() const override;
-    bool filter_send(Event_handler* filter) const override;
+    bool filter_send(Widget* filter) const override;
 };
 
 class Mouse_wheel_event : public Mouse_event {
    public:
-    Mouse_wheel_event(Event_handler* receiver,
+    Mouse_wheel_event(Widget* receiver,
                       Mouse_button button,
                       Point global,
                       Point local,
                       std::uint8_t device_id);
 
     bool send() const override;
-    bool filter_send(Event_handler* filter) const override;
+    bool filter_send(Widget* filter) const override;
 };
 
 class Mouse_move_event : public Mouse_event {
    public:
-    Mouse_move_event(Event_handler* receiver,
+    Mouse_move_event(Widget* receiver,
                      Mouse_button button,
                      Point global,
                      Point local,
                      std::uint8_t device_id);
 
     bool send() const override;
-    bool filter_send(Event_handler* filter) const override;
+    bool filter_send(Widget* filter) const override;
 };
 
 }  // namespace cppurses

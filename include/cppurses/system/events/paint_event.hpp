@@ -3,13 +3,13 @@
 #include <cppurses/system/event.hpp>
 
 namespace cppurses {
-class Event_handler;
+class Widget;
 
 class Paint_event : public Event {
    public:
-    explicit Paint_event(Event_handler* receiver);
+    explicit Paint_event(Widget* receiver);
     bool send() const override;
-    bool filter_send(Event_handler* filter) const override;
+    bool filter_send(Widget* filter) const override;
 };
 
 }  // namespace cppurses

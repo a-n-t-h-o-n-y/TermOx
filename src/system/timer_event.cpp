@@ -2,13 +2,11 @@
 
 #include <cppurses/painter/detail/is_not_paintable.hpp>
 #include <cppurses/system/event.hpp>
-#include <cppurses/system/event_handler.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
 
-Timer_event::Timer_event(Event_handler* receiver)
-    : Event{Event::Timer, receiver} {}
+Timer_event::Timer_event(Widget* receiver) : Event{Event::Timer, receiver} {}
 
 bool Timer_event::send() const {
     Widget* widg{static_cast<Widget*>(receiver_)};
@@ -19,7 +17,7 @@ bool Timer_event::send() const {
     return result;
 }
 
-bool Timer_event::filter_send(Event_handler* filter) const {
+bool Timer_event::filter_send(Widget* filter) const {
     return filter->timer_event_filter(receiver_);
 }
 

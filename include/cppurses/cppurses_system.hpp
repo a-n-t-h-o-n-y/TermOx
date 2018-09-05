@@ -16,7 +16,6 @@
 
 #include <cppurses/system/animation_engine.hpp>
 #include <cppurses/system/event.hpp>
-#include <cppurses/system/event_handler.hpp>
 #include <cppurses/system/event_loop.hpp>
 #include <cppurses/system/focus.hpp>
 #include <cppurses/system/key.hpp>

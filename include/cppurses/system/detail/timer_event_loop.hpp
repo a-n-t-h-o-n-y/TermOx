@@ -11,7 +11,6 @@
 
 namespace cppurses {
 class Widget;
-class Event_handler;
 namespace detail {
 
 /// Implements an Event_loop associated with a particular Period_t.
@@ -49,7 +48,7 @@ class Timer_event_loop : public Event_loop {
     void loop_function() override;
 
    private:
-    std::set<Event_handler*> registered_widgets_;
+    std::set<Widget*> registered_widgets_;
     std::function<Period_t()> period_func_;
     std::chrono::time_point<std::chrono::high_resolution_clock> last_time_;
 };

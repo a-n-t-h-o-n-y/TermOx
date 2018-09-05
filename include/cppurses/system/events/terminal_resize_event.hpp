@@ -3,13 +3,13 @@
 #include <cppurses/system/event.hpp>
 
 namespace cppurses {
-class Event_handler;
+class Widget;
 
 class Terminal_resize_event : public Event {
    public:
-    Terminal_resize_event(Event_handler* receiver);
+    Terminal_resize_event(Widget* receiver);
     bool send() const override;
-    bool filter_send(Event_handler* filter) const override;
+    bool filter_send(Widget* filter) const override;
 };
 
 }  // namespace cppurses

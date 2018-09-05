@@ -5,8 +5,9 @@
 #include <sys/ioctl.h>
 
 namespace cppurses {
+// class Widget;
 
-Terminal_resize_event::Terminal_resize_event(Event_handler* receiver)
+Terminal_resize_event::Terminal_resize_event(Widget* receiver)
     : Event{Event::TerminalResize, receiver} {}
 
 bool Terminal_resize_event::send() const {
@@ -16,7 +17,7 @@ bool Terminal_resize_event::send() const {
     return true;
 }
 
-bool Terminal_resize_event::filter_send(Event_handler* filter) const {
+bool Terminal_resize_event::filter_send(Widget* filter) const {
     return true;
 }
 

@@ -37,7 +37,7 @@ class Menu : public Vertical_layout {
                            Point local,
                            std::uint8_t device_id) override;
 
-    bool mouse_press_event_filter(Event_handler* receiver,
+    bool mouse_press_event_filter(Widget* receiver,
                                   Mouse_button button,
                                   Point global,
                                   Point local,

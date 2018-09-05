@@ -4,14 +4,12 @@
 #include <vector>
 
 #include <cppurses/system/event.hpp>
-#include <cppurses/system/event_handler.hpp>
 #include <cppurses/widget/children_data.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
 
-Delete_event::Delete_event(Event_handler* receiver,
-                           std::unique_ptr<Widget> removed)
+Delete_event::Delete_event(Widget* receiver, std::unique_ptr<Widget> removed)
     : Event{Event::Delete, receiver}, removed_{std::move(removed)} {}
 
 bool Delete_event::send() const {
@@ -26,7 +24,7 @@ bool Delete_event::send() const {
     return result;
 }
 
-bool Delete_event::filter_send(Event_handler* filter) const {
+bool Delete_event::filter_send(Widget* filter) const {
     return filter->delete_event_filter(receiver_);
 }
 

@@ -5,7 +5,6 @@
 #include <cppurses/system/event.hpp>
 
 namespace cppurses {
-class Event_handler;
 class Widget;
 
 /// Send to a Widget just before it is to be destroyed.
@@ -14,10 +13,10 @@ class Widget;
  *  as well. */
 class Delete_event : public Event {
    public:
-    Delete_event(Event_handler* receiver, std::unique_ptr<Widget> removed);
+    Delete_event(Widget* receiver, std::unique_ptr<Widget> removed);
 
     bool send() const override;
-    bool filter_send(Event_handler* filter) const override;
+    bool filter_send(Widget* filter) const override;
 
    private:
     mutable std::unique_ptr<Widget> removed_;

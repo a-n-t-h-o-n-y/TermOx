@@ -1,6 +1,7 @@
 #ifndef CPPURSES_WIDGET_WIDGET_HPP
 #define CPPURSES_WIDGET_WIDGET_HPP
 #include <cstddef>
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <string>
@@ -16,7 +17,8 @@
 #include <cppurses/painter/detail/screen_state.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/system/animation_engine.hpp>
-#include <cppurses/system/event_handler.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/system/mouse_button.hpp>
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/children_data.hpp>
 #include <cppurses/widget/cursor_data.hpp>
@@ -27,14 +29,14 @@
 namespace cppurses {
 struct Area;
 
-class Widget : public Event_handler {
+class Widget {
    public:
     explicit Widget(std::string name = "");
     Widget(const Widget&) = delete;
     Widget(Widget&&) = delete;
     Widget& operator=(const Widget&) = delete;
     Widget& operator=(Widget&&) = delete;
-    ~Widget() override;
+    virtual ~Widget();
 
     /// Return the name of the Widget.
     std::string name() const;
@@ -50,6 +52,9 @@ class Widget : public Event_handler {
 
     /// Posts a Disable_event to this widget, and all descendants.
     void disable(bool disable = true, bool post_child_polished_event = true);
+
+    /// Check whether the Widget is enabled.
+    bool enabled() const;
 
     /// Posts a Delete_event to this.
     void close();
@@ -93,6 +98,14 @@ class Widget : public Event_handler {
 
     virtual void update();
 
+    // Events
+    // event_filter.install();
+    // event_filter.remove();
+    // event_filter.get();
+    void install_event_filter(Widget* filter);
+    void remove_event_filter(Widget* filter);
+    const std::vector<Widget*>& get_event_filters() const;
+
     // Animation
     void enable_animation(Animation_engine::Period_t period);
     void enable_animation(
@@ -122,12 +135,21 @@ class Widget : public Event_handler {
     sig::Signal<void(const std::string&)> name_changed;
     sig::Signal<void(std::size_t, std::size_t)> resized;
     sig::Signal<void(Point)> moved;
-    sig::Signal<void(Event_handler*)> child_added;
-    sig::Signal<void(Event_handler*)> child_removed;
+    sig::Signal<void(Widget*)> child_added;
+    sig::Signal<void(Widget*)> child_removed;
     sig::Signal<void()> focused_in;
     sig::Signal<void()> focused_out;
     sig::Signal<void(Color)> background_color_changed;
     sig::Signal<void(Color)> foreground_color_changed;
+    sig::Signal<void(Widget*)> destroyed;
+    sig::Signal<void(Point)> clicked;
+    sig::Signal<void(std::size_t, std::size_t)> clicked_xy;
+    sig::Signal<void(Point)> click_released;
+    sig::Signal<void(std::size_t, std::size_t)> click_released_xy;
+    sig::Signal<void(Point)> double_clicked;
+    sig::Signal<void(std::size_t, std::size_t)> double_clicked_xy;
+    sig::Signal<void(Key)> key_pressed;
+    sig::Signal<void(Key)> key_released;
 
     detail::Screen_state& screen_state();
     const detail::Screen_state& screen_state() const;
@@ -138,27 +160,100 @@ class Widget : public Event_handler {
     friend class Resize_event;
     friend class Move_event;
 
-   protected:
-    bool paint_event() override;
-    bool focus_in_event() override;
-    bool focus_out_event() override;
-    bool child_added_event(Widget* child) override;
-    bool child_removed_event(Widget* child) override;
-    bool child_polished_event(Widget* child) override;
-    bool move_event(Point new_position, Point old_position) override;
-    bool resize_event(Area new_size, Area old_size) override;
-    bool timer_event() override;
-    bool disable_event() override;
+    // - - - - - - - - - - - - - Event Handlers - - - - - - - - - - - - - - - -
+    virtual bool enable_event();
+    virtual bool disable_event();
+    virtual bool child_added_event(Widget* child);
+    virtual bool child_removed_event(Widget* child);
+    virtual bool child_polished_event(Widget* child);
+    virtual bool move_event(Point new_position, Point old_position);
+    virtual bool resize_event(Area new_size, Area old_size);
+    virtual bool mouse_press_event(Mouse_button button,
+                                   Point global,
+                                   Point local,
+                                   std::uint8_t device_id);
+    virtual bool mouse_release_event(Mouse_button button,
+                                     Point global,
+                                     Point local,
+                                     std::uint8_t device_id);
+    virtual bool mouse_double_click_event(Mouse_button button,
+                                          Point global,
+                                          Point local,
+                                          std::uint8_t device_id);
+    virtual bool mouse_wheel_event(Mouse_button button,
+                                   Point global,
+                                   Point local,
+                                   std::uint8_t device_id);
+    virtual bool mouse_move_event(Mouse_button button,
+                                  Point global,
+                                  Point local,
+                                  std::uint8_t device_id);
+    virtual bool key_press_event(Key key, char symbol);
+    virtual bool key_release_event(Key key, char symbol);
+    virtual bool focus_in_event();
+    virtual bool focus_out_event();
+    virtual bool delete_event();
+    virtual bool paint_event();
+    virtual bool timer_event();
 
+    // - - - - - - - - - - - Event Filter Handlers - - - - - - - - - - - - - - -
+    virtual bool child_added_event_filter(Widget* receiver, Widget* child);
+    virtual bool child_removed_event_filter(Widget* receiver, Widget* child);
+    virtual bool child_polished_event_filter(Widget* receiver, Widget* child);
+    virtual bool enable_event_filter(Widget* receiver);
+    virtual bool disable_event_filter(Widget* receiver);
+    virtual bool move_event_filter(Widget* receiver,
+                                   Point new_position,
+                                   Point old_position);
+    virtual bool resize_event_filter(Widget* receiver,
+                                     Area new_size,
+                                     Area old_size);
+    virtual bool mouse_press_event_filter(Widget* receiver,
+                                          Mouse_button button,
+                                          Point global,
+                                          Point local,
+                                          std::uint8_t device_id);
+    virtual bool mouse_release_event_filter(Widget* receiver,
+                                            Mouse_button button,
+                                            Point global,
+                                            Point local,
+                                            std::uint8_t device_id);
+    virtual bool mouse_double_click_event_filter(Widget* receiver,
+                                                 Mouse_button button,
+                                                 Point global,
+                                                 Point local,
+                                                 std::uint8_t device_id);
+    virtual bool mouse_wheel_event_filter(Widget* receiver,
+                                          Mouse_button button,
+                                          Point global,
+                                          Point local,
+                                          std::uint8_t device_id);
+    virtual bool mouse_move_event_filter(Widget* receiver,
+                                         Mouse_button button,
+                                         Point global,
+                                         Point local,
+                                         std::uint8_t device_id);
+    virtual bool key_press_event_filter(Widget* receiver, Key key, char symbol);
+    virtual bool key_release_event_filter(Widget* receiver,
+                                          Key key,
+                                          char symbol);
+    virtual bool focus_in_event_filter(Widget* receiver);
+    virtual bool focus_out_event_filter(Widget* receiver);
+    virtual bool delete_event_filter(Widget* receiver);
+    virtual bool paint_event_filter(Widget* receiver);
+    virtual bool timer_event_filter(Widget* receiver);
+
+   protected:
     void enable_and_post_events(bool enable, bool post_child_polished_event);
 
    private:
     std::string name_;
     Widget* parent_{nullptr};
-
+    bool enabled_{false};
     bool brush_paints_wallpaper_{true};
-
     detail::Screen_state screen_state_;
+
+    std::vector<Widget*> event_filters_;
 
     // Top left point of *this, relative to the top left of the screen. Does not
     // account for borders.
@@ -179,7 +274,7 @@ void disable_border(Widget& w);
 
 bool has_coordinates(Widget& w, std::size_t global_x, std::size_t global_y);
 
-// You should no longer need a repaint event for these functions, if the
+// TODO You should no longer need a repaint event for these functions, if the
 // background changes in a noticable way, it will be repainted by flush()
 void set_background(Widget& w, Color c);
 void set_foreground(Widget& w, Color c);

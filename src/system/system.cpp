@@ -14,7 +14,6 @@
 #include <cppurses/system/detail/event_queue.hpp>
 #include <cppurses/system/detail/user_input_event_loop.hpp>
 #include <cppurses/system/event.hpp>
-#include <cppurses/system/event_handler.hpp>
 #include <cppurses/system/event_loop.hpp>
 #include <cppurses/system/events/resize_event.hpp>
 #include <cppurses/system/terminal_properties.hpp>

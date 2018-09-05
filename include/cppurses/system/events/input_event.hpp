@@ -3,14 +3,14 @@
 #include <cppurses/system/event.hpp>
 
 namespace cppurses {
-class Event_handler;
+class Widget;
 
 class Input_event : public Event {
    public:
     enum class KeyboardModifiers { None };
 
    protected:
-    Input_event(Event::Type type, Event_handler* receiver)
+    Input_event(Event::Type type, Widget* receiver)
         : Event{type, receiver}, modifiers_{KeyboardModifiers::None} {}
     KeyboardModifiers modifiers_;
 };
