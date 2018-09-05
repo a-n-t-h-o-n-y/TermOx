@@ -10,6 +10,7 @@
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/key.hpp>
+#include <cppurses/system/keyboard_data.hpp>
 #include <cppurses/system/mouse_button.hpp>
 #include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/point.hpp>
@@ -82,8 +83,8 @@ void Line_edit::set_ghost_color(Color c) {
     }
 }
 
-bool Line_edit::key_press_event(Key key, char symbol) {
-    if (key == Key::Enter) {
+bool Line_edit::key_press_event(const Keyboard_data& keyboard) {
+    if (keyboard.key == Key::Enter) {
         if (!on_initial_) {
             editing_finished(this->contents().str());
             if (clear_on_enter_) {
@@ -92,21 +93,21 @@ bool Line_edit::key_press_event(Key key, char symbol) {
         }
         return true;
     }
-    if (key == Key::Arrow_up || key == Key::Arrow_down) {
+    if (keyboard.key == Key::Arrow_up || keyboard.key == Key::Arrow_down) {
         return true;
     }
 
     // Validate
-    if (!validator_(symbol)) {
+    if (!validator_(keyboard.symbol)) {
         return true;
     }
 
     // First alph-num input
-    if (symbol != '\0' && on_initial_) {
+    if (keyboard.symbol != '\0' && on_initial_) {
         this->clear();
         on_initial_ = false;
     }
-    return Textbox::key_press_event(key, symbol);
+    return Textbox::key_press_event(keyboard);
 }
 
 bool Line_edit::mouse_press_event(const Mouse_data& mouse) {

@@ -4,6 +4,7 @@
 
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/system/key.hpp>
+#include <cppurses/system/keyboard_data.hpp>
 #include <cppurses/system/mouse_button.hpp>
 #include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/area.hpp>
@@ -75,13 +76,13 @@ bool Widget::mouse_move_event(const Mouse_data& mouse) {
     return false;
 }
 
-bool Widget::key_press_event(Key key, char symbol) {
-    key_pressed(key);
+bool Widget::key_press_event(const Keyboard_data& keyboard) {
+    key_pressed(keyboard.key);
     return true;
 }
 
-bool Widget::key_release_event(Key key, char symbol) {
-    key_released(key);
+bool Widget::key_release_event(const Keyboard_data& keyboard) {
+    key_released(keyboard.key);
     return false;
 }
 
@@ -169,11 +170,13 @@ bool Widget::mouse_move_event_filter(Widget* receiver,
     return false;
 }
 
-bool Widget::key_press_event_filter(Widget* receiver, Key key, char symbol) {
+bool Widget::key_press_event_filter(Widget* receiver,
+                                    const Keyboard_data& keyboard) {
     return false;
 }
 
-bool Widget::key_release_event_filter(Widget* receiver, Key key, char symbol) {
+bool Widget::key_release_event_filter(Widget* receiver,
+                                      const Keyboard_data& keyboard) {
     return false;
 }
 

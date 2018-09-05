@@ -191,19 +191,19 @@ bool Paint_area::mouse_press_event(const Mouse_data& mouse) {
     return Widget::mouse_press_event(mouse);
 }
 
-bool Paint_area::key_press_event(Key key, char symbol) {
+bool Paint_area::key_press_event(const Keyboard_data& keyboard) {
     if (!this->cursor.enabled()) {
-        if (!std::iscntrl(symbol)) {
-            this->set_symbol(symbol);
+        if (!std::iscntrl(keyboard.symbol)) {
+            this->set_symbol(keyboard.symbol);
         }
-        return Widget::key_press_event(key, symbol);
+        return Widget::key_press_event(keyboard);
     }
     if (this->width() == 0 || this->height() == 0) {
-        return Widget::key_press_event(key, symbol);
+        return Widget::key_press_event(keyboard);
     }
     std::size_t new_x{this->cursor.x() + 1};
     std::size_t new_y{this->cursor.y() + 1};
-    switch (key) {
+    switch (keyboard.key) {
         case Key::Arrow_right:
             if (new_x == this->width()) {
                 new_x = 0;
@@ -226,14 +226,14 @@ bool Paint_area::key_press_event(Key key, char symbol) {
             this->place_glyph(this->cursor.x(), this->cursor.y());
             break;
         default:
-            if (!std::iscntrl(symbol)) {
-                this->set_symbol(symbol);
+            if (!std::iscntrl(keyboard.symbol)) {
+                this->set_symbol(keyboard.symbol);
                 this->place_glyph(this->cursor.x(), this->cursor.y());
                 this->update();
             }
             break;
     }
-    return Widget::key_press_event(key, symbol);
+    return Widget::key_press_event(keyboard);
 }
 
 void Paint_area::place_glyph(std::size_t x, std::size_t y) {

@@ -46,7 +46,7 @@ class Paint_area : public Widget {
 
     bool mouse_press_event(const Mouse_data& mouse) override;
 
-    bool key_press_event(Key key, char symbol) override;
+    bool key_press_event(const Keyboard_data& keyboard) override;
 
    private:
     std::unordered_map<Point, Glyph> glyphs_painted_;

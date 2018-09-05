@@ -9,7 +9,7 @@
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/system/key.hpp>
+#include <cppurses/system/keyboard_data.hpp>
 #include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/widgets/textbox.hpp>
 
@@ -31,7 +31,7 @@ class Line_edit : public Textbox {
     sig::Signal<void(std::string)> editing_finished;
 
    protected:
-    bool key_press_event(Key key, char symbol) override;
+    bool key_press_event(const Keyboard_data& keyboard) override;
     bool mouse_press_event(const Mouse_data& mouse) override;
     bool focus_in_event() override;
 

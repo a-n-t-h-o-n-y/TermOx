@@ -7,6 +7,8 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/painter.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/system/keyboard_data.hpp>
 #include <cppurses/system/mouse_data.hpp>
 
 namespace cppurses {
@@ -52,16 +54,16 @@ bool Slider::mouse_press_event(const Mouse_data& mouse) {
     return Widget::mouse_press_event(mouse);
 }
 
-bool Slider::key_press_event(Key key, char symbol) {
+bool Slider::key_press_event(const Keyboard_data& keyboard) {
     std::size_t current_position = percent_to_position(percent_progress_);
-    if (key == Key::Arrow_right) {
+    if (keyboard.key == Key::Arrow_right) {
         this->set_percent(position_to_percent(current_position + 1));
-    } else if (key == Key::Arrow_left) {
+    } else if (keyboard.key == Key::Arrow_left) {
         if (current_position != 0) {
             this->set_percent(position_to_percent(current_position - 1));
         }
     }
-    return Widget::key_press_event(key, symbol);
+    return Widget::key_press_event(keyboard);
 }
 
 float Slider::position_to_percent(std::size_t position) {

@@ -9,6 +9,7 @@
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/key.hpp>
+#include <cppurses/system/keyboard_data.hpp>
 #include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/widget.hpp>
 
@@ -29,7 +30,7 @@ class List : public Widget {
 
    protected:
     bool paint_event() override;
-    bool key_press_event(Key key, char symbol) override;
+    bool key_press_event(const Keyboard_data& keyboard) override;
     bool mouse_press_event(const Mouse_data& mouse) override;
 
    private:
@@ -118,18 +119,19 @@ void List<T>::select_down(std::size_t n) {
 }
 
 template <typename T>
-bool List<T>::key_press_event(Key key, char symbol) {
-    if (key == Key::Arrow_down || key == Key::Arrow_left) {
+bool List<T>::key_press_event(const Keyboard_data& keyboard) {
+    if (keyboard.key == Key::Arrow_down || keyboard.key == Key::Arrow_left) {
         this->select_down(1);
-    } else if (key == Key::Arrow_up || key == Key::Arrow_right) {
+    } else if (keyboard.key == Key::Arrow_up ||
+               keyboard.key == Key::Arrow_right) {
         this->select_up(1);
-    } else if (key == Key::Enter) {
+    } else if (keyboard.key == Key::Enter) {
         if (!items_.empty()) {
             selected(items_.at(selected_index_ - 1));
         }
     }
     this->update();
-    return Widget::key_press_event(key, symbol);
+    return Widget::key_press_event(keyboard);
 }
 
 template <typename T>

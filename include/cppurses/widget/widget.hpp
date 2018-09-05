@@ -17,6 +17,7 @@
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/system/animation_engine.hpp>
 #include <cppurses/system/key.hpp>
+#include <cppurses/system/keyboard_data.hpp>
 #include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/children_data.hpp>
@@ -165,16 +166,15 @@ class Widget {
     virtual bool child_added_event(Widget* child);
     virtual bool child_removed_event(Widget* child);
     virtual bool child_polished_event(Widget* child);
-    virtual bool move_event(Point new_position, Point old_position);  // mvdata
-    virtual bool resize_event(Area new_size, Area old_size);  // resize_data
+    virtual bool move_event(Point new_position, Point old_position);
+    virtual bool resize_event(Area new_size, Area old_size);
     virtual bool mouse_press_event(const Mouse_data& mouse);
     virtual bool mouse_release_event(const Mouse_data& mouse);
     virtual bool mouse_double_click_event(const Mouse_data& mouse);
     virtual bool mouse_wheel_event(const Mouse_data& mouse);
     virtual bool mouse_move_event(const Mouse_data& mouse);
-    // virtual bool key_press_event(Keyboard_data keyboard);
-    virtual bool key_press_event(Key key, char symbol);
-    virtual bool key_release_event(Key key, char symbol);
+    virtual bool key_press_event(const Keyboard_data& keyboard);
+    virtual bool key_release_event(const Keyboard_data& keyboard);
     virtual bool focus_in_event();
     virtual bool focus_out_event();
     virtual bool delete_event();
@@ -203,10 +203,10 @@ class Widget {
                                           const Mouse_data& mouse);
     virtual bool mouse_move_event_filter(Widget* receiver,
                                          const Mouse_data& mouse);
-    virtual bool key_press_event_filter(Widget* receiver, Key key, char symbol);
+    virtual bool key_press_event_filter(Widget* receiver,
+                                        const Keyboard_data& keyboard);
     virtual bool key_release_event_filter(Widget* receiver,
-                                          Key key,
-                                          char symbol);
+                                          const Keyboard_data& keyboard);
     virtual bool focus_in_event_filter(Widget* receiver);
     virtual bool focus_out_event_filter(Widget* receiver);
     virtual bool delete_event_filter(Widget* receiver);

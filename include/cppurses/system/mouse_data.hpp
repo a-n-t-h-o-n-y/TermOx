@@ -5,6 +5,7 @@
 
 namespace cppurses {
 
+/// Holds data from a Mouse Input Event.
 struct Mouse_data {
     Mouse_button button;
     Point global;

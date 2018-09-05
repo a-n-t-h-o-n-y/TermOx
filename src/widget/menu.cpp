@@ -11,6 +11,8 @@
 #include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/system/keyboard_data.hpp>
 #include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/widget.hpp>
@@ -106,12 +108,12 @@ std::size_t Menu::size() const {
     return items_.size();
 }
 
-bool Menu::key_press_event(Key key, char symbol) {
-    if (key == Key::Arrow_down || key == Key::j) {
+bool Menu::key_press_event(const Keyboard_data& keyboard) {
+    if (keyboard.key == Key::Arrow_down || keyboard.key == Key::j) {
         this->select_down();
-    } else if (key == Key::Arrow_up || key == Key::k) {
+    } else if (keyboard.key == Key::Arrow_up || keyboard.key == Key::k) {
         this->select_up();
-    } else if (key == Key::Enter) {
+    } else if (keyboard.key == Key::Enter) {
         this->call_current_item();
     }
     return true;

@@ -4,7 +4,7 @@
 #include <cstdint>
 
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/system/key.hpp>
+#include <cppurses/system/keyboard_data.hpp>
 #include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/widgets/textbox_base.hpp>
 
@@ -25,7 +25,7 @@ class Textbox : public Textbox_base {
     void enable_input();
 
    protected:
-    bool key_press_event(Key key, char symbol) override;
+    bool key_press_event(const Keyboard_data& keyboard) override;
     bool mouse_press_event(const Mouse_data& mouse) override;
 
    private:

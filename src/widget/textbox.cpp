@@ -5,6 +5,7 @@
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/key.hpp>
+#include <cppurses/system/keyboard_data.hpp>
 #include <cppurses/system/mouse_button.hpp>
 #include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/focus_policy.hpp>
@@ -52,8 +53,8 @@ void Textbox::enable_input() {
     takes_input_ = true;
 }
 
-bool Textbox::key_press_event(Key key, char symbol) {
-    switch (key) {
+bool Textbox::key_press_event(const Keyboard_data& keyboard) {
+    switch (keyboard.key) {
         case Key::Arrow_right:
             this->cursor_right(1);
             break;
@@ -71,7 +72,7 @@ bool Textbox::key_press_event(Key key, char symbol) {
     }
 
     if (takes_input_) {
-        switch (key) {
+        switch (keyboard.key) {
             case Key::Backspace: {
                 auto cursor_index = this->cursor_index();
                 if (cursor_index == 0) {
@@ -98,7 +99,7 @@ bool Textbox::key_press_event(Key key, char symbol) {
                 break;
 
             default:  // Insert text
-                char text = symbol;
+                char text = keyboard.symbol;
                 if (text != '\0') {
                     // TODO Cursor Movement for Alignments other than left
                     auto cursor_index = this->cursor_index();
@@ -108,9 +109,7 @@ bool Textbox::key_press_event(Key key, char symbol) {
                 }
         }
     }
-    // TODO maybe dont need because system does not necessarily change, update
-    // where the state of the cursor or internal text changes.
-    this->update();
+    // this->update();
     return true;
 }
 
