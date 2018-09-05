@@ -14,6 +14,7 @@
 #include <cppurses/system/focus.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/mouse_button.hpp>
+#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/area.hpp>
 #include <cppurses/widget/point.hpp>
@@ -130,12 +131,12 @@ std::unique_ptr<Event> NCurses_event_listener::parse_mouse_event() const {
     std::unique_ptr<Event> event{nullptr};
     if (type == Event::MouseButtonPress) {
         event = std::make_unique<Mouse_press_event>(
-            receiver, button, Point{mouse_x, mouse_y}, Point{local_x, local_y},
-            mouse_event.id);
+            receiver, Mouse_data{button, Point{mouse_x, mouse_y},
+                                 Point{local_x, local_y}, mouse_event.id});
     } else if (type == Event::MouseButtonRelease) {
         event = std::make_unique<Mouse_release_event>(
-            receiver, button, Point{mouse_x, mouse_y}, Point{local_x, local_y},
-            mouse_event.id);
+            receiver, Mouse_data{button, Point{mouse_x, mouse_y},
+                                 Point{local_x, local_y}, mouse_event.id});
     } else {
         return nullptr;
     }

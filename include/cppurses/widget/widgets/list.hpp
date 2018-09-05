@@ -9,7 +9,7 @@
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/key.hpp>
-#include <cppurses/system/mouse_button.hpp>
+#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
@@ -30,10 +30,7 @@ class List : public Widget {
    protected:
     bool paint_event() override;
     bool key_press_event(Key key, char symbol) override;
-    bool mouse_press_event(Mouse_button button,
-                           Point global,
-                           Point local,
-                           std::uint8_t device_id) override;
+    bool mouse_press_event(const Mouse_data& mouse) override;
 
    private:
     struct Property {
@@ -136,11 +133,8 @@ bool List<T>::key_press_event(Key key, char symbol) {
 }
 
 template <typename T>
-bool List<T>::mouse_press_event(Mouse_button button,
-                                Point global,
-                                Point local,
-                                std::uint8_t device_id) {
-    return Widget::mouse_press_event(button, global, local, device_id);
+bool List<T>::mouse_press_event(const Mouse_data& mouse) {
+    return Widget::mouse_press_event(mouse);
 }
 
 namespace slot {

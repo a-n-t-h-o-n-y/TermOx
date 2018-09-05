@@ -6,7 +6,7 @@
 #include <signals/signals.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/system/mouse_button.hpp>
+#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widgets/label.hpp>
 
@@ -20,10 +20,7 @@ class Push_button : public Label {
     sig::Signal<void()> clicked;
 
    protected:
-    bool mouse_press_event(Mouse_button button,
-                           Point global,
-                           Point local,
-                           std::uint8_t device_id) override;
+    bool mouse_press_event(const Mouse_data& mouse) override;
 };
 
 namespace slot {

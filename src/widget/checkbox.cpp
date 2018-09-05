@@ -41,14 +41,11 @@ bool Checkbox::paint_event() {
     return Widget::paint_event();
 }
 
-bool Checkbox::mouse_press_event(Mouse_button button,
-                                 Point global,
-                                 Point local,
-                                 std::uint8_t device_id) {
-    if (button == Mouse_button::Left) {
+bool Checkbox::mouse_press_event(const Mouse_data& mouse) {
+    if (mouse.button == Mouse_button::Left) {
         this->toggle();
     }
-    return true;
+    return Widget::mouse_press_event(mouse);
 }
 
 void check(Checkbox& cb) {

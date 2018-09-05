@@ -1,12 +1,12 @@
 #ifndef DEMOS_GLYPH_PAINT_PAINT_AREA_HPP
 #define DEMOS_GLYPH_PAINT_PAINT_AREA_HPP
-#include <cppurses/cppurses.hpp>
-#include <signals/signals.hpp>
-
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
 #include <unordered_map>
+
+#include <cppurses/cppurses.hpp>
+#include <signals/signals.hpp>
 
 using namespace cppurses;
 
@@ -44,10 +44,7 @@ class Paint_area : public Widget {
    protected:
     bool paint_event() override;
 
-    bool mouse_press_event(Mouse_button button,
-                           Point global,
-                           Point local,
-                           std::uint8_t device_id) override;
+    bool mouse_press_event(const Mouse_data& mouse) override;
 
     bool key_press_event(Key key, char symbol) override;
 

@@ -10,7 +10,7 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/key.hpp>
-#include <cppurses/system/mouse_button.hpp>
+#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/widgets/textbox.hpp>
 
 namespace cppurses {
@@ -32,10 +32,7 @@ class Line_edit : public Textbox {
 
    protected:
     bool key_press_event(Key key, char symbol) override;
-    bool mouse_press_event(Mouse_button button,
-                           Point global,
-                           Point local,
-                           std::uint8_t device_id) override;
+    bool mouse_press_event(const Mouse_data& mouse) override;
     bool focus_in_event() override;
 
    private:

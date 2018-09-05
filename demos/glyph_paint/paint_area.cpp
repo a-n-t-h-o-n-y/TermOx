@@ -1,10 +1,5 @@
 #include "paint_area.hpp"
 
-#include <cppurses/cppurses.hpp>
-#include <cppurses/painter/utility/wchar_to_bytes.hpp>
-#include <optional/optional.hpp>
-#include <signals/slot.hpp>
-
 #include <cctype>
 #include <codecvt>
 #include <cstddef>
@@ -14,6 +9,10 @@
 #include <locale>
 #include <string>
 #include <utility>
+
+#include <cppurses/cppurses.hpp>
+#include <optional/optional.hpp>
+#include <signals/slot.hpp>
 
 using namespace cppurses;
 
@@ -179,20 +178,17 @@ bool Paint_area::paint_event() {
     return Widget::paint_event();
 }
 
-bool Paint_area::mouse_press_event(Mouse_button button,
-                                   Point global,
-                                   Point local,
-                                   std::uint8_t device_id) {
-    if (button == Mouse_button::Right) {
-        this->remove_glyph(local);
-    } else if (button == Mouse_button::Middle) {
-        if (glyphs_painted_.count(local) == 1) {
-            this->set_glyph(glyphs_painted_[local]);
+bool Paint_area::mouse_press_event(const Mouse_data& mouse) {
+    if (mouse.button == Mouse_button::Right) {
+        this->remove_glyph(mouse.local);
+    } else if (mouse.button == Mouse_button::Middle) {
+        if (glyphs_painted_.count(mouse.local) == 1) {
+            this->set_glyph(glyphs_painted_[mouse.local]);
         }
     } else {
-        this->place_glyph(local.x, local.y);
+        this->place_glyph(mouse.local.x, mouse.local.y);
     }
-    return Widget::mouse_press_event(button, global, local, device_id);
+    return Widget::mouse_press_event(mouse);
 }
 
 bool Paint_area::key_press_event(Key key, char symbol) {

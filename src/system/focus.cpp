@@ -73,6 +73,9 @@ Widget* Focus::focus_widget() {
 }
 
 void Focus::mouse_press(Widget* clicked) {
+    if (clicked == focus_widget_) {
+        return;
+    }
     if (clicked->focus_policy == Focus_policy::Click ||
         clicked->focus_policy == Focus_policy::Strong) {
         Focus::set_focus_to(clicked);
@@ -90,6 +93,9 @@ bool Focus::tab_press() {
 }
 
 void Focus::set_focus_to(Widget* new_focus) {
+    if (new_focus == focus_widget_) {
+        return;
+    }
     if (new_focus == nullptr || new_focus->focus_policy == Focus_policy::None) {
         Focus::clear_focus();
         return;

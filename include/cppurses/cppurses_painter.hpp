@@ -10,5 +10,6 @@
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/painter/palette.hpp>
 #include <cppurses/painter/palettes.hpp>
+#include <cppurses/painter/utility/wchar_to_bytes.hpp>
 
 #endif  // CPPURSES_PAINTER_HPP

@@ -6,6 +6,7 @@
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/mouse_button.hpp>
+#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 
 namespace cppurses {
@@ -113,23 +114,20 @@ bool Textbox::key_press_event(Key key, char symbol) {
     return true;
 }
 
-bool Textbox::mouse_press_event(Mouse_button button,
-                                Point global,
-                                Point local,
-                                std::uint8_t device_id) {
-    if (button == Mouse_button::Left) {
-        this->set_cursor(local.x, local.y);
-    } else if (button == Mouse_button::ScrollUp) {
+bool Textbox::mouse_press_event(const Mouse_data& mouse) {
+    if (mouse.button == Mouse_button::Left) {
+        this->set_cursor(mouse.local.x, mouse.local.y);
+    } else if (mouse.button == Mouse_button::ScrollUp) {
         if (scroll_wheel_) {
             this->scroll_up(scroll_speed_up_);
         }
-    } else if (button == Mouse_button::ScrollDown) {
+    } else if (mouse.button == Mouse_button::ScrollDown) {
         if (scroll_wheel_) {
             this->scroll_down(scroll_speed_down_);
         }
     }
     this->update();
-    return true;
+    return Widget::mouse_press_event(mouse);
 }
 
 }  // namespace cppurses

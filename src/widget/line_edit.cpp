@@ -11,6 +11,7 @@
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/mouse_button.hpp>
+#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widgets/textbox.hpp>
@@ -108,15 +109,12 @@ bool Line_edit::key_press_event(Key key, char symbol) {
     return Textbox::key_press_event(key, symbol);
 }
 
-bool Line_edit::mouse_press_event(Mouse_button button,
-                                  Point global,
-                                  Point local,
-                                  std::uint8_t device_id) {
-    if (button == Mouse_button::ScrollUp ||
-        button == Mouse_button::ScrollDown) {
+bool Line_edit::mouse_press_event(const Mouse_data& mouse) {
+    if (mouse.button == Mouse_button::ScrollUp ||
+        mouse.button == Mouse_button::ScrollDown) {
         return true;
     }
-    return Textbox::mouse_press_event(button, global, local, device_id);
+    return Textbox::mouse_press_event(mouse);
 }
 
 bool Line_edit::focus_in_event() {

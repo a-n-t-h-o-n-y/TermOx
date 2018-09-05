@@ -1,7 +1,6 @@
 #ifndef CPPURSES_WIDGET_WIDGET_HPP
 #define CPPURSES_WIDGET_WIDGET_HPP
 #include <cstddef>
-#include <cstdint>
 #include <functional>
 #include <memory>
 #include <string>
@@ -18,7 +17,7 @@
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/system/animation_engine.hpp>
 #include <cppurses/system/key.hpp>
-#include <cppurses/system/mouse_button.hpp>
+#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/children_data.hpp>
 #include <cppurses/widget/cursor_data.hpp>
@@ -166,28 +165,14 @@ class Widget {
     virtual bool child_added_event(Widget* child);
     virtual bool child_removed_event(Widget* child);
     virtual bool child_polished_event(Widget* child);
-    virtual bool move_event(Point new_position, Point old_position);
-    virtual bool resize_event(Area new_size, Area old_size);
-    virtual bool mouse_press_event(Mouse_button button,
-                                   Point global,
-                                   Point local,
-                                   std::uint8_t device_id);
-    virtual bool mouse_release_event(Mouse_button button,
-                                     Point global,
-                                     Point local,
-                                     std::uint8_t device_id);
-    virtual bool mouse_double_click_event(Mouse_button button,
-                                          Point global,
-                                          Point local,
-                                          std::uint8_t device_id);
-    virtual bool mouse_wheel_event(Mouse_button button,
-                                   Point global,
-                                   Point local,
-                                   std::uint8_t device_id);
-    virtual bool mouse_move_event(Mouse_button button,
-                                  Point global,
-                                  Point local,
-                                  std::uint8_t device_id);
+    virtual bool move_event(Point new_position, Point old_position);  // mvdata
+    virtual bool resize_event(Area new_size, Area old_size);  // resize_data
+    virtual bool mouse_press_event(const Mouse_data& mouse);
+    virtual bool mouse_release_event(const Mouse_data& mouse);
+    virtual bool mouse_double_click_event(const Mouse_data& mouse);
+    virtual bool mouse_wheel_event(const Mouse_data& mouse);
+    virtual bool mouse_move_event(const Mouse_data& mouse);
+    // virtual bool key_press_event(Keyboard_data keyboard);
     virtual bool key_press_event(Key key, char symbol);
     virtual bool key_release_event(Key key, char symbol);
     virtual bool focus_in_event();
@@ -209,30 +194,15 @@ class Widget {
                                      Area new_size,
                                      Area old_size);
     virtual bool mouse_press_event_filter(Widget* receiver,
-                                          Mouse_button button,
-                                          Point global,
-                                          Point local,
-                                          std::uint8_t device_id);
+                                          const Mouse_data& mouse);
     virtual bool mouse_release_event_filter(Widget* receiver,
-                                            Mouse_button button,
-                                            Point global,
-                                            Point local,
-                                            std::uint8_t device_id);
+                                            const Mouse_data& mouse);
     virtual bool mouse_double_click_event_filter(Widget* receiver,
-                                                 Mouse_button button,
-                                                 Point global,
-                                                 Point local,
-                                                 std::uint8_t device_id);
+                                                 const Mouse_data& mouse);
     virtual bool mouse_wheel_event_filter(Widget* receiver,
-                                          Mouse_button button,
-                                          Point global,
-                                          Point local,
-                                          std::uint8_t device_id);
+                                          const Mouse_data& mouse);
     virtual bool mouse_move_event_filter(Widget* receiver,
-                                         Mouse_button button,
-                                         Point global,
-                                         Point local,
-                                         std::uint8_t device_id);
+                                         const Mouse_data& mouse);
     virtual bool key_press_event_filter(Widget* receiver, Key key, char symbol);
     virtual bool key_release_event_filter(Widget* receiver,
                                           Key key,

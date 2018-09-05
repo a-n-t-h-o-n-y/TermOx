@@ -6,6 +6,7 @@
 #include <signals/signals.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/layouts/horizontal_layout.hpp>
 #include <cppurses/widget/widgets/label.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
@@ -26,10 +27,7 @@ class Cycle_box : public Label {
     sig::Signal<void(std::string)> option_changed;
 
    protected:
-    bool mouse_press_event(Mouse_button button,
-                           Point global,
-                           Point local,
-                           std::uint8_t device_id) override;
+    bool mouse_press_event(const Mouse_data& mouse) override;
 
    private:
     struct Option {

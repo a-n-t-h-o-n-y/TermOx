@@ -7,6 +7,7 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/painter.hpp>
+#include <cppurses/system/mouse_data.hpp>
 
 namespace cppurses {
 
@@ -40,18 +41,15 @@ bool Slider::paint_event() {
     return Widget::paint_event();
 }
 
-bool Slider::mouse_press_event(Mouse_button button,
-                               Point global,
-                               Point local,
-                               std::uint8_t device_id) {
-    if (button == Mouse_button::Left) {
-        this->set_percent(position_to_percent(local.x));
-    } else if (button == Mouse_button::ScrollUp) {
+bool Slider::mouse_press_event(const Mouse_data& mouse) {
+    if (mouse.button == Mouse_button::Left) {
+        this->set_percent(position_to_percent(mouse.local.x));
+    } else if (mouse.button == Mouse_button::ScrollUp) {
         scrolled_up();
-    } else if (button == Mouse_button::ScrollDown) {
+    } else if (mouse.button == Mouse_button::ScrollDown) {
         scrolled_down();
     }
-    return Widget::mouse_press_event(button, global, local, device_id);
+    return Widget::mouse_press_event(mouse);
 }
 
 bool Slider::key_press_event(Key key, char symbol) {

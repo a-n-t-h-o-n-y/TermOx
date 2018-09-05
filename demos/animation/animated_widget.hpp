@@ -2,12 +2,7 @@
 #define CPPURSES_DEMOS_ANIMATION_ANIMATED_WIDGET_HPP
 #include <cstdint>
 
-#include <cppurses/painter/color.hpp>
-#include <cppurses/painter/glyph.hpp>
-#include <cppurses/painter/painter.hpp>
-#include <cppurses/widget/layouts/horizontal_layout.hpp>
-#include <cppurses/widget/point.hpp>
-#include <cppurses/widget/widget.hpp>
+#include <cppurses/cppurses.hpp>
 
 namespace demos {
 namespace animation {
@@ -19,10 +14,7 @@ class Animated_bit : public cppurses::Widget {
     bool timer_event() override;
     bool paint_event() override;
 
-    bool mouse_press_event(cppurses::Mouse_button button,
-                           cppurses::Point global,
-                           cppurses::Point local,
-                           std::uint8_t device_id) override;
+    bool mouse_press_event(const cppurses::Mouse_data& mouse) override;
 
    private:
     cppurses::Glyph glyph_{'X', cppurses::foreground(cppurses::Color::Yellow)};

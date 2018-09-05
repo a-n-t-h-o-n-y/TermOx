@@ -5,6 +5,7 @@
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/mouse_button.hpp>
+#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/area.hpp>
 #include <cppurses/widget/point.hpp>
 
@@ -48,44 +49,29 @@ bool Widget::resize_event(Area new_size, Area old_size) {
     return true;
 }
 
-bool Widget::mouse_press_event(Mouse_button button,
-                               Point global,
-                               Point local,
-                               std::uint8_t device_id) {
-    clicked(local);
-    clicked_xy(local.x, local.y);
+bool Widget::mouse_press_event(const Mouse_data& mouse) {
+    clicked(mouse.local);
+    clicked_xy(mouse.local.x, mouse.local.y);
     return true;
 }
 
-bool Widget::mouse_release_event(Mouse_button button,
-                                 Point global,
-                                 Point local,
-                                 std::uint8_t device_id) {
-    click_released(global);
-    click_released_xy(global.x, global.y);
+bool Widget::mouse_release_event(const Mouse_data& mouse) {
+    click_released(mouse.global);
+    click_released_xy(mouse.global.x, mouse.global.y);
     return true;
 }
 
-bool Widget::mouse_double_click_event(Mouse_button button,
-                                      Point global,
-                                      Point local,
-                                      std::uint8_t device_id) {
-    double_clicked(global);
-    double_clicked_xy(global.x, global.y);
+bool Widget::mouse_double_click_event(const Mouse_data& mouse) {
+    double_clicked(mouse.global);
+    double_clicked_xy(mouse.global.x, mouse.global.y);
     return true;
 }
 
-bool Widget::mouse_wheel_event(Mouse_button button,
-                               Point global,
-                               Point local,
-                               std::uint8_t device_id) {
+bool Widget::mouse_wheel_event(const Mouse_data& mouse) {
     return false;
 }
 
-bool Widget::mouse_move_event(Mouse_button button,
-                              Point global,
-                              Point local,
-                              std::uint8_t device_id) {
+bool Widget::mouse_move_event(const Mouse_data& mouse) {
     return false;
 }
 
@@ -159,42 +145,27 @@ bool Widget::resize_event_filter(Widget* receiver,
 }
 
 bool Widget::mouse_press_event_filter(Widget* receiver,
-                                      Mouse_button button,
-                                      Point global,
-                                      Point local,
-                                      std::uint8_t device_id) {
+                                      const Mouse_data& mouse) {
     return false;
 }
 
 bool Widget::mouse_release_event_filter(Widget* receiver,
-                                        Mouse_button button,
-                                        Point global,
-                                        Point local,
-                                        std::uint8_t device_id) {
+                                        const Mouse_data& mouse) {
     return false;
 }
 
 bool Widget::mouse_double_click_event_filter(Widget* receiver,
-                                             Mouse_button button,
-                                             Point global,
-                                             Point local,
-                                             std::uint8_t device_id) {
+                                             const Mouse_data& mouse) {
     return false;
 }
 
 bool Widget::mouse_wheel_event_filter(Widget* receiver,
-                                      Mouse_button button,
-                                      Point global,
-                                      Point local,
-                                      std::uint8_t device_id) {
+                                      const Mouse_data& mouse) {
     return false;
 }
 
 bool Widget::mouse_move_event_filter(Widget* receiver,
-                                     Mouse_button button,
-                                     Point global,
-                                     Point local,
-                                     std::uint8_t device_id) {
+                                     const Mouse_data& mouse) {
     return false;
 }
 
