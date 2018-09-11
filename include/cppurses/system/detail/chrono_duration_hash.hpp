@@ -5,8 +5,9 @@
 
 #include <cppurses/system/detail/timer_event_loop.hpp>
 
-/// Specialization of std::hash for duration type used within Timer_event_loop.
 namespace std {
+
+/// Specialization of std::hash for duration type used within Timer_event_loop.
 template <>
 struct hash<cppurses::detail::Timer_event_loop::Period_t> {
     using argument_type = cppurses::detail::Timer_event_loop::Period_t;
@@ -15,5 +16,6 @@ struct hash<cppurses::detail::Timer_event_loop::Period_t> {
         return std::hash<argument_type::rep>{}(duration.count());
     }
 };
+
 }  // namespace std
 #endif  // CPPURSES_SYSTEM_DETAIL_CHRONO_DURATION_HASH_HPP
