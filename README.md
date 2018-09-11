@@ -1,8 +1,11 @@
 # TUI Library
 __CPPurses__ is a Terminal User Interface(TUI) Library built on top of
 [ncurses](https://www.gnu.org/software/ncurses/). It defines a framework of
-Widgets, Layouts, and Events that let you focus on user interface design, while
-boilerplate common to ncurses applications is handled behind the scenes.
+[Widgets](https://github.com/a-n-t-h-o-n-y/CPPurses/wiki/Widgets),
+[Layouts](https://github.com/a-n-t-h-o-n-y/CPPurses/wiki/Layouts), and
+[Events](https://github.com/a-n-t-h-o-n-y/CPPurses/wiki/Events) that let you focus on
+user interface design, while boilerplate common to ncurses applications is
+handled behind the scenes.
 
 CPPurses contains a collection of common Widgets that can be pieced together to
 create a composite application. It is also possible to expand and build on top
@@ -65,18 +68,18 @@ Reference documentation can be found [here](
 https://a-n-t-h-o-n-y.github.io/CPPurses/annotated.html).
 
 ## Screenshots
+Notepad Demo
 <p align="center">
   <img src="docs/images/notepad_demo.png">
 </p>
-Notepad Demo ^
 
+Chess Demo
 <p align="center">
   <img src="docs/images/chess_demo_1.png">
 </p>
 <p align="center">
   <img src="docs/images/chess_demo_2.png">
 </p>
-Chess Demo ^
 
 ## License
 This software is distributed under the [MIT License](LICENSE.txt).
