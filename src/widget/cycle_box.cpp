@@ -7,6 +7,8 @@
 
 #include <signals/signals.hpp>
 
+#include <cppurses/system/mouse_data.hpp>
+
 namespace cppurses {
 
 Cycle_box::Cycle_box() {
@@ -62,16 +64,14 @@ void Cycle_box::cycle_backward() {
     }
 }
 
-bool Cycle_box::mouse_press_event(Mouse_button button,
-                                  Point global,
-                                  Point local,
-                                  std::uint8_t device_id) {
-    if (button == Mouse_button::Left || button == Mouse_button::ScrollUp) {
+bool Cycle_box::mouse_press_event(const Mouse_data& mouse) {
+    if (mouse.button == Mouse_button::Left ||
+        mouse.button == Mouse_button::ScrollUp) {
         this->cycle_forward();
-    } else if (button == Mouse_button::ScrollDown) {
+    } else if (mouse.button == Mouse_button::ScrollDown) {
         this->cycle_backward();
     }
-    return Label::mouse_press_event(button, global, local, device_id);
+    return Label::mouse_press_event(mouse);
 }
 
 Cycle_box::Option::Option(Glyph_string name_) : name{std::move(name_)} {}

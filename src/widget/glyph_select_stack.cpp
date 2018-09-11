@@ -2,12 +2,17 @@
 
 #include <cmath>
 #include <cstddef>
-#include <cstdint>
 #include <utility>
 
+#include <signals/signal.hpp>
+
+#include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_matrix.hpp>
-#include <cppurses/system/mouse_button.hpp>
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/widget/area.hpp>
+#include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widgets/matrix_display.hpp>
+#include <cppurses/widget/widgets/widget_stack.hpp>
 
 namespace cppurses {
 
@@ -22,7 +27,6 @@ void Glyph_select_stack::append_symbols(Glyph_string symbols) {
 }
 
 void Glyph_select_stack::set_page_percent(float percent) {
-    // set active page by determining the page from the percent
     percent_ = percent;
     std::size_t size{this->size()};
     if (size == 0) {
@@ -33,27 +37,9 @@ void Glyph_select_stack::set_page_percent(float percent) {
     this->set_active_page(page_index);
 }
 
-bool Glyph_select_stack::mouse_press_event_filter(Event_handler* receiver,
-                                                  Mouse_button button,
-                                                  Point global,
-                                                  Point local,
-                                                  std::uint8_t device_id) {
-    if (button == Mouse_button::Left) {
-        auto* md = static_cast<Matrix_display*>(this->active_page());
-        if (md != nullptr) {
-            Glyph_matrix& matrix{md->matrix};
-            if (matrix(local.x, local.y) != Glyph{L' '}) {
-                glyph_selected(matrix(local.x, local.y));
-            }
-        }
-    }
-    return Widget_stack::mouse_press_event(button, global, local, device_id);
-}
-
 bool Glyph_select_stack::resize_event(Area new_size, Area old_size) {
-    Widget_stack::resize_event(new_size, old_size);
     this->update_stack();
-    return true;
+    return Widget_stack::resize_event(new_size, old_size);
 }
 
 void Glyph_select_stack::update_stack() {
@@ -61,27 +47,31 @@ void Glyph_select_stack::update_stack() {
         return;
     }
     this->clear();
-    std::size_t count{0};
-    do {
-        Matrix_display& md{
+
+    std::size_t symbols_index{0};
+    while (symbols_index < symbols_.size()) {
+        Matrix_display& symbol_page{
             this->make_page<Matrix_display>(this->width(), this->height())};
-        md.install_event_filter(this);
-        Glyph_matrix& matrix{md.matrix};
-        for (std::size_t y{0}; y < matrix.height(); ++y) {
-            for (std::size_t x{0}; x < matrix.width(); ++x) {
-                if (count < symbols_.size()) {
-                    matrix(x, y) = symbols_.at(count++);
+        // Attach to glyph clicked signal in Matrix_display
+        symbol_page.clicked.connect([this, &symbol_page](const Point& p) {
+            const Glyph& g{symbol_page.matrix.at(p.x, p.y)};
+            if (g != Glyph{L' '}) {
+                this->glyph_selected(symbol_page.matrix.at(p.x, p.y));
+            }
+        });
+        for (std::size_t y{0}; y < this->height(); ++y) {
+            for (std::size_t x{0}; x < this->width(); ++x) {
+                if (symbols_index < symbols_.size()) {
+                    symbol_page.matrix.at(x, y) = symbols_.at(symbols_index);
+                    ++symbols_index;
                 } else {
-                    this->update();
-                    this->set_page_percent(percent_);
-                    return;
+                    goto endloop;
                 }
             }
         }
-    } while (count < symbols_.size());
-    if (this->size() > 0) {
-        this->set_page_percent(percent_);
     }
+endloop:
+    this->set_page_percent(percent_);
     this->update();
 }
 
@@ -101,5 +91,4 @@ sig::Slot<void()> set_page_percent(Glyph_select_stack& gss, float percent) {
 }
 
 }  // namespace slot
-
 }  // namespace cppurses

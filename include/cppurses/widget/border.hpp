@@ -1,5 +1,5 @@
-#ifndef WIDGET_BORDER_HPP
-#define WIDGET_BORDER_HPP
+#ifndef CPPURSES_WIDGET_BORDER_HPP
+#define CPPURSES_WIDGET_BORDER_HPP
 #include <cppurses/painter/glyph.hpp>
 
 namespace cppurses {
@@ -8,6 +8,7 @@ namespace cppurses {
 struct Border {
     bool enabled{false};
 
+    // TODO Can combine single Glyph and bool into an object(struct)
     Glyph north{L'─'};
     Glyph south{L'─'};
     Glyph east{L'│'};
@@ -56,4 +57,4 @@ void enable_corners(Border& b);
 void disable_corners(Border& b);
 
 }  // namespace cppurses
-#endif  // WIDGET_BORDER_HPP
+#endif  // CPPURSES_WIDGET_BORDER_HPP

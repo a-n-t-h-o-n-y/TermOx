@@ -1,5 +1,5 @@
-#ifndef WIDGET_WIDGETS_TEXTBOX_SLOTS_HPP
-#define WIDGET_WIDGETS_TEXTBOX_SLOTS_HPP
+#ifndef CPPURSES_WIDGET_WIDGETS_TEXTBOX_SLOTS_HPP
+#define CPPURSES_WIDGET_WIDGETS_TEXTBOX_SLOTS_HPP
 #include <cstddef>
 
 #include <signals/slot.hpp>
@@ -25,7 +25,5 @@ sig::Slot<void()> set_wheel_speed_down(Textbox& tb, std::size_t lines);
 sig::Slot<void(std::size_t)> set_wheel_speed_down(Textbox& tb);
 
 }  // namespace slot
-
 }  // namespace cppurses
-
-#endif  // WIDGET_WIDGETS_TEXTBOX_SLOTS_HPP
+#endif  // CPPURSES_WIDGET_WIDGETS_TEXTBOX_SLOTS_HPP

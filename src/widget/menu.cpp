@@ -11,7 +11,11 @@
 #include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/system/keyboard_data.hpp>
+#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/focus_policy.hpp>
+#include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 
 namespace cppurses {
@@ -23,18 +27,23 @@ Menu::Menu(Glyph_string title)
     this->focus_policy = Focus_policy::Strong;
     title_.set_alignment(Alignment::Center);
     title_.brush.add_attributes(Attribute::Bold);
-    space1.background_tile = L'─';
+    space1.wallpaper = L'─';
 }
 
 sig::Signal<void()>& Menu::add_item(Glyph_string label) {
     Push_button& button_ref{this->make_child<Push_button>(std::move(label))};
     button_ref.install_event_filter(this);
     items_.emplace_back(button_ref);
+    if (items_.size() == 1) {
+        this->select_item(0);
+    }
     button_ref.height_policy.type(Size_policy::Fixed);
     button_ref.height_policy.hint(1);
     auto& signal_ref{items_.back().selected};
-    button_ref.clicked.connect(
-        [this, index = items_.size() - 1] { items_[index].selected(); });
+    button_ref.clicked.connect([this, index = items_.size() - 1] {
+        this->select_item(index);
+        this->call_current_item();
+    });
     this->update();
     return signal_ref;
 }
@@ -46,6 +55,9 @@ sig::Signal<void()>& Menu::insert_item(Glyph_string label, std::size_t index) {
     button_ptr->height_policy.hint(1);
     Push_button& new_button{*button_ptr};
     items_.insert(std::begin(items_) + index, Menu_item{new_button});
+    if (items_.size() == 1) {
+        this->select_item(0);
+    }
     auto& signal_ref{items_[index].selected};
     new_button.clicked.connect([this, index] { items_[index].selected(); });
     this->update();
@@ -56,42 +68,39 @@ void Menu::remove_item(std::size_t index) {
     if (index >= items_.size()) {
         return;
     }
-    this->remove_child(&items_[index].button.get());
+    items_[index].button.get().close();
     items_.erase(std::begin(items_) + index);
+    if (index == selected_index_) {
+        this->select_item(0);
+    }
     this->update();
 }
 
 void Menu::select_up(std::size_t n) {
-    if (selected_index_ > n) {
-        selected_index_ -= n;
+    std::size_t new_index{selected_index_};
+    if (new_index > n) {
+        new_index -= n;
     } else {
-        selected_index_ = 0;
+        new_index = 0;
     }
-    this->update();
+    this->select_item(new_index);
 }
 
 void Menu::select_down(std::size_t n) {
-    if (items_.empty()) {
-        return;
-    }
-    std::size_t new_index{selected_index_ + n};
-    if (new_index >= items_.size()) {
-        selected_index_ = items_.size() - 1;
-    } else {
-        selected_index_ = new_index;
-    }
-    this->update();
+    this->select_item(selected_index_ + n);
 }
 
 void Menu::select_item(std::size_t index) {
     if (items_.empty()) {
         return;
     }
+    remove_attributes(items_[selected_index_].button.get(), Attribute::Inverse);
     if (index >= items_.size()) {
         selected_index_ = items_.size() - 1;
     } else {
         selected_index_ = index;
     }
+    add_attributes(items_[selected_index_].button.get(), Attribute::Inverse);
     this->update();
 }
 
@@ -99,48 +108,32 @@ std::size_t Menu::size() const {
     return items_.size();
 }
 
-bool Menu::paint_event() {
-    for (Menu_item& item : items_) {
-        item.button.get().brush.remove_attribute(Attribute::Inverse);
-    }
-    items_[selected_index_].button.get().brush.add_attributes(
-        Attribute::Inverse);
-    return Vertical_layout::paint_event();
-}
-
-bool Menu::key_press_event(Key key, char symbol) {
-    if (key == Key::Arrow_down || key == Key::j) {
+bool Menu::key_press_event(const Keyboard_data& keyboard) {
+    if (keyboard.key == Key::Arrow_down || keyboard.key == Key::j) {
         this->select_down();
-    } else if (key == Key::Arrow_up || key == Key::k) {
+    } else if (keyboard.key == Key::Arrow_up || keyboard.key == Key::k) {
         this->select_up();
-    } else if (key == Key::Enter) {
+    } else if (keyboard.key == Key::Enter) {
         this->call_current_item();
     }
     return true;
 }
 
-bool Menu::mouse_press_event(Mouse_button button,
-                             Point global,
-                             Point local,
-                             std::uint8_t device_id) {
-    if (button == Mouse_button::ScrollUp) {
+bool Menu::mouse_press_event(const Mouse_data& mouse) {
+    if (mouse.button == Mouse_button::ScrollUp) {
         this->select_up();
-    } else if (button == Mouse_button::ScrollDown) {
+    } else if (mouse.button == Mouse_button::ScrollDown) {
         this->select_down();
     }
-    return Widget::mouse_press_event(button, global, local, device_id);
+    return Vertical_layout::mouse_press_event(mouse);
 }
 
-bool Menu::mouse_press_event_filter(Event_handler* receiver,
-                                    Mouse_button button,
-                                    Point global,
-                                    Point local,
-                                    std::uint8_t device_id) {
-    if (button == Mouse_button::ScrollUp) {
+bool Menu::mouse_press_event_filter(Widget* receiver, const Mouse_data& mouse) {
+    if (mouse.button == Mouse_button::ScrollUp) {
         this->select_up();
         return true;
     }
-    if (button == Mouse_button::ScrollDown) {
+    if (mouse.button == Mouse_button::ScrollDown) {
         this->select_down();
         return true;
     }

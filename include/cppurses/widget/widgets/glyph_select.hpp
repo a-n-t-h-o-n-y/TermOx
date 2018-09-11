@@ -1,7 +1,11 @@
 #ifndef CPPURSES_WIDGET_WIDGETS_GLYPH_SELECT_HPP
 #define CPPURSES_WIDGET_WIDGETS_GLYPH_SELECT_HPP
+#include <cstddef>
+
 #include <signals/signal.hpp>
 
+#include <cppurses/painter/color.hpp>
+#include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/layouts/horizontal_layout.hpp>
 #include <cppurses/widget/layouts/vertical_layout.hpp>
@@ -11,6 +15,8 @@
 
 namespace cppurses {
 
+/// Holds pages of Glyphs that can be cycled through and selected.
+/** When a Glyph is selected a Signal is emitted with that Glyph sent along. */
 class Glyph_select : public Vertical_layout {
    public:
     explicit Glyph_select(Glyph_string symbols = "");
@@ -35,5 +41,4 @@ class Glyph_select : public Vertical_layout {
 };
 
 }  // namespace cppurses
-
 #endif  // CPPURSES_WIDGET_WIDGETS_GLYPH_SELECT_HPP

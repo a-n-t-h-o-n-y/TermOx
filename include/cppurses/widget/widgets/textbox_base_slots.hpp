@@ -1,5 +1,5 @@
-#ifndef WIDGET_WIDGETS_TEXTBOX_BASE_SLOTS_HPP
-#define WIDGET_WIDGETS_TEXTBOX_BASE_SLOTS_HPP
+#ifndef CPPURSES_WIDGET_WIDGETS_TEXTBOX_BASE_SLOTS_HPP
+#define CPPURSES_WIDGET_WIDGETS_TEXTBOX_BASE_SLOTS_HPP
 #include <cstddef>
 
 #include <signals/slot.hpp>
@@ -39,6 +39,5 @@ sig::Slot<void()> toggle_scrolling(Textbox_base& tb);
 sig::Slot<void(bool)> set_scrolling(Textbox_base& tb);
 
 }  // namespace slot
-
 }  // namespace cppurses
-#endif  // WIDGET_WIDGETS_TEXTBOX_BASE_SLOTS_HPP
+#endif  // CPPURSES_WIDGET_WIDGETS_TEXTBOX_BASE_SLOTS_HPP

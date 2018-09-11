@@ -6,7 +6,8 @@
 #include <signals/signals.hpp>
 
 #include <cppurses/painter/glyph.hpp>
-#include <cppurses/system/mouse_button.hpp>
+#include <cppurses/system/keyboard_data.hpp>
+#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
@@ -24,11 +25,8 @@ class Slider : public Widget {
 
    protected:
     bool paint_event() override;
-    bool mouse_press_event(Mouse_button button,
-                           Point global,
-                           Point local,
-                           std::uint8_t device_id) override;
-    bool key_press_event(Key key, char symbol) override;
+    bool mouse_press_event(const Mouse_data& mouse) override;
+    bool key_press_event(const Keyboard_data& keyboard) override;
 
    private:
     Glyph indicator_{L'░'};
@@ -45,7 +43,5 @@ sig::Slot<void(float)> set_percent(Slider& s);
 sig::Slot<void()> set_percent(Slider& s, float percent);
 
 }  // namespace slot
-
 }  // namespace cppurses
-
 #endif  // CPPURSES_WIDGET_WIDGETS_SLIDER_HPP

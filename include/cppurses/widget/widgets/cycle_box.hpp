@@ -1,17 +1,19 @@
-#ifndef WIDGET_WIDGETS_CYCLE_BOX_HPP
-#define WIDGET_WIDGETS_CYCLE_BOX_HPP
+#ifndef CPPURSES_WIDGET_WIDGETS_CYCLE_BOX_HPP
+#define CPPURSES_WIDGET_WIDGETS_CYCLE_BOX_HPP
 #include <string>
 #include <vector>
 
 #include <signals/signals.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/layouts/horizontal_layout.hpp>
 #include <cppurses/widget/widgets/label.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 
 namespace cppurses {
 
+/// A Label with a rotating set of label strings that can be cycled through.
 class Cycle_box : public Label {
    public:
     Cycle_box();
@@ -26,10 +28,7 @@ class Cycle_box : public Label {
     sig::Signal<void(std::string)> option_changed;
 
    protected:
-    bool mouse_press_event(Mouse_button button,
-                           Point global,
-                           Point local,
-                           std::uint8_t device_id) override;
+    bool mouse_press_event(const Mouse_data& mouse) override;
 
    private:
     struct Option {
@@ -54,4 +53,4 @@ sig::Slot<void()> cycle_backward(Cycle_box& cb);
 
 }  // namespace slot
 }  // namespace cppurses
-#endif  // WIDGET_WIDGETS_CYCLE_BOX_HPP
+#endif  // CPPURSES_WIDGET_WIDGETS_CYCLE_BOX_HPP

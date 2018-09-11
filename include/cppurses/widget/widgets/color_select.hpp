@@ -1,5 +1,5 @@
-#ifndef WIDGET_WIDGETS_COLOR_SELECT_HPP
-#define WIDGET_WIDGETS_COLOR_SELECT_HPP
+#ifndef CPPURSES_WIDGET_WIDGETS_COLOR_SELECT_HPP
+#define CPPURSES_WIDGET_WIDGETS_COLOR_SELECT_HPP
 #include <signals/signals.hpp>
 
 #include <cppurses/painter/color.hpp>
@@ -9,6 +9,7 @@
 
 namespace cppurses {
 
+/// Provides a visual display of the 16 colors and sends Signals on clicks.
 class Color_select : public Vertical_layout {
    public:
     Color_select();
@@ -42,4 +43,4 @@ class Color_select : public Vertical_layout {
 };
 
 }  // namespace cppurses
-#endif  // WIDGET_WIDGETS_COLOR_SELECT_HPP
+#endif  // CPPURSES_WIDGET_WIDGETS_COLOR_SELECT_HPP

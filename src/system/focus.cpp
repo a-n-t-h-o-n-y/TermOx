@@ -4,10 +4,13 @@
 #include <cstddef>
 #include <iterator>
 #include <memory>
+#include <utility>
 #include <vector>
 
+#include <cppurses/system/event.hpp>
 #include <cppurses/system/events/focus_event.hpp>
 #include <cppurses/system/system.hpp>
+#include <cppurses/widget/children_data.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/widget.hpp>
 
@@ -26,10 +29,13 @@ Widget* next_tab_focus() {
     std::size_t i{0};
     while (i < widgets.size()) {
         Widget* current = widgets[i];
-        auto children = current->children();
+        const std::vector<std::unique_ptr<Widget>>& children =
+            current->children.get();
         // TODO std::copy instead
         std::for_each(std::begin(children), std::end(children),
-                      [&widgets](Widget* p) { widgets.push_back(p); });
+                      [&widgets](const std::unique_ptr<Widget>& p) {
+                          widgets.push_back(p.get());
+                      });
         ++i;
     }
 
@@ -67,6 +73,9 @@ Widget* Focus::focus_widget() {
 }
 
 void Focus::mouse_press(Widget* clicked) {
+    if (clicked == focus_widget_) {
+        return;
+    }
     if (clicked->focus_policy == Focus_policy::Click ||
         clicked->focus_policy == Focus_policy::Strong) {
         Focus::set_focus_to(clicked);
@@ -84,6 +93,9 @@ bool Focus::tab_press() {
 }
 
 void Focus::set_focus_to(Widget* new_focus) {
+    if (new_focus == focus_widget_) {
+        return;
+    }
     if (new_focus == nullptr || new_focus->focus_policy == Focus_policy::None) {
         Focus::clear_focus();
         return;
@@ -95,11 +107,8 @@ void Focus::set_focus_to(Widget* new_focus) {
         System::post_event(std::move(event));
     }
     focus_widget_ = new_focus;
-    if (focus_widget_ != nullptr) {
-        std::unique_ptr<Focus_in_event> event{
-            new Focus_in_event(focus_widget_)};
-        System::post_event(std::move(event));
-    }
+    std::unique_ptr<Focus_in_event> event{new Focus_in_event(focus_widget_)};
+    System::post_event(std::move(event));
 }
 
 void Focus::clear_focus() {

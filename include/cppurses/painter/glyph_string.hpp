@@ -1,142 +1,108 @@
-#ifndef PAINTER_GLYPH_STRING_HPP
-#define PAINTER_GLYPH_STRING_HPP
+#ifndef CPPURSES_PAINTER_GLYPH_STRING_HPP
+#define CPPURSES_PAINTER_GLYPH_STRING_HPP
 #include <codecvt>
 #include <initializer_list>
 #include <locale>
+#include <memory>
 #include <ostream>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/glyph.hpp>
 
 namespace cppurses {
 
+/// Holds a collection of Glyphs with a similar interface to std::string.
 class Glyph_string : private std::vector<Glyph> {
    public:
+    /// Default constructs an empty Glyph_string.
     Glyph_string() = default;
 
-    // Used as 'Until the end of the string'
+    /// Used to indicate 'Until the end of the string'.
     static const std::size_t npos = -1;
 
-    // Iterators
+    /// Construct with iterators from any container providing Input Iterators.
     template <typename InputIterator>
-    Glyph_string(InputIterator first, InputIterator last)
-        : vector<Glyph>::vector(first, last) {}
+    Glyph_string(InputIterator first, InputIterator last);
 
+    /// Construct with \p symbols, each having given Attributes applied to them.
     template <typename... Attributes>
-    Glyph_string(const std::string& symbols, Attributes&&... attrs)  // NOLINT
-        : vector<Glyph>::vector() {
-        this->append(symbols, std::forward<Attributes>(attrs)...);
-    }
+    Glyph_string(const std::string& symbols, Attributes&&... attrs);
 
+    /// Construct with \p symbols, each having given Attributes applied to them.
     template <typename... Attributes>
-    Glyph_string(const char* symbols, Attributes&&... attrs) {  // NOLINT
-        this->append(symbols, std::forward<Attributes>(attrs)...);
-    }
+    Glyph_string(const char* symbols, Attributes&&... attrs);
 
+    /// Construct with \p symbol, having given Attributes applied to it.
     template <typename... Attributes>
-    Glyph_string(wchar_t symbol, Attributes&&... attrs) {  // NOLINT
-        this->append(Glyph{symbol, std::forward<Attributes>(attrs)...});
-    }
+    Glyph_string(wchar_t symbol, Attributes&&... attrs);
 
+    /// Construct with \p symbols, each having given Attributes applied to them.
     template <typename... Attributes>
-    Glyph_string(const wchar_t* symbols, Attributes&&... attrs) {  // NOLINT
-        this->append(symbols, std::forward<Attributes>(attrs)...);
-    }
+    Glyph_string(const wchar_t* symbols, Attributes&&... attrs);
 
+    /// Construct with \p symbols, each having given Attributes applied to them.
     template <typename... Attributes>
-    Glyph_string(const std::wstring& symbols, Attributes&&... attrs)  // NOLINT
-        : vector<Glyph>::vector() {
-        this->append(symbols, std::forward<Attributes>(attrs)...);
-    }
+    Glyph_string(const std::wstring& symbols, Attributes&&... attrs);
 
+    /// Construct with \p glyph, adding given Attributes to it.
     template <typename... Attributes>
-    Glyph_string(const Glyph& glyph, Attributes&&... attrs) {  // NOLINT
-        this->append(glyph, std::forward<Attributes>(attrs)...);
-    }
+    Glyph_string(const Glyph& glyph, Attributes&&... attrs);
 
+    /// Construct with a std::initializer_list of Glyphs, with \p attrs applied.
     template <typename... Attributes>
     Glyph_string(const std::initializer_list<Glyph>& glyphs,
-                 Attributes&&... attrs) {
-        this->reserve(glyphs.size());
-        for (const Glyph& g : glyphs) {
-            this->append(g, std::forward<Attributes>(attrs)...);
-        }
-    }
+                 Attributes&&... attrs);
 
-    operator std::string() const;  // NOLINT
+    /// Convert to a std::string, each Glyph being a char.
     std::string str() const;
-    operator std::wstring() const;  // NOLINT
+
+    /// Convert to a std::wstring, each Glyph being a wchar_t.
     std::wstring w_str() const;
 
+    /// Returns the length in Glyphs of the Glyph_string.
     size_type length() const;
 
+    /// Compound concatenation assignment operator to append a Glyph.
     Glyph_string& operator+=(const Glyph& glyph);
+
+    /// Concatenation operator to append a Glyph_string.
     Glyph_string operator+(const Glyph_string& gs) const;
 
+    /// Append single Glyph to the end of the Glyph_string w/given Attributes.
     template <typename... Attributes>
-    Glyph_string& append(const Glyph& symbol, Attributes&&... attrs) {
-        this->push_back(symbol);
-        this->back().brush.add_attributes(std::forward<Attributes>(attrs)...);
-        return *this;
-    }
+    Glyph_string& append(const Glyph& symbol, Attributes&&... attrs);
 
-    // Multi-byte char compatibility.
-    // Converts to wchar_t string, then converts each char32 to a byte string
+    /// Append a c-string with given Attributes to the end of the Glyph_string.
     template <typename... Attributes>
-    Glyph_string& append(const char* symbols, Attributes&&... attrs) {
-        std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-        std::wstring wide_string = converter.from_bytes(symbols);
-        this->reserve(this->size() + wide_string.size());
-        for (wchar_t sym : wide_string) {
-            this->append(Glyph{sym, std::forward<Attributes>(attrs)...});
-        }
-        return *this;
-    }
+    Glyph_string& append(const char* symbols, Attributes&&... attrs);
 
+    /// Append std::string with given Attributes to the end of the Glyph_string.
     template <typename... Attributes>
-    Glyph_string& append(const std::string& symbols, Attributes&&... attrs) {
-        return this->append(symbols.c_str(),
-                            std::forward<Attributes>(attrs)...);
-    }
+    Glyph_string& append(const std::string& symbols, Attributes&&... attrs);
 
+    /// Append a wide c-string with given Attributes to the end of Glyph_string.
     template <typename... Attributes>
-    Glyph_string& append(const wchar_t* symbols, Attributes&&... attrs) {
-        std::size_t i{0};
-        while (symbols[i] != L'\0') {
-            this->append(Glyph{symbols[i], std::forward<Attributes>(attrs)...});
-            ++i;
-        }
-        return *this;
-    }
+    Glyph_string& append(const wchar_t* symbols, Attributes&&... attrs);
 
+    /// Append std::wstring with given Attributes to the end of Glyph_string.
     template <typename... Attributes>
-    Glyph_string& append(const std::wstring& symbols, Attributes&&... attrs) {
-        for (wchar_t sym : symbols) {
-            this->append(Glyph{sym, std::forward<Attributes>(attrs)...});
-        }
-        return *this;
-    }
+    Glyph_string& append(const std::wstring& symbols, Attributes&&... attrs);
 
+    /// Append another Glyph_string with Attributes to the end of Glyph_string.
     template <typename... Attributes>
-    Glyph_string& append(const Glyph_string& gs, Attributes&&... attrs) {
-        for (const Glyph& glyph : gs) {
-            this->append(glyph, std::forward<Attributes>(attrs)...);
-        }
-        return *this;
-    }
+    Glyph_string& append(const Glyph_string& gs, Attributes&&... attrs);
 
+    /// Add a list of Attributes to every Glyph within the Glyph_string.
     template <typename... Attributes>
-    void add_attributes(Attributes&&... attrs) {
-        for (auto& glyph : *this) {
-            glyph.brush.add_attributes(std::forward<Attributes>(attrs)...);
-        }
-    }
+    void add_attributes(Attributes&&... attrs);
 
+    /// Remove a single Attribute from every Glyph within the Glyph_string.
     void remove_attribute(Attribute attr);
 
-    // Functions from std::vector<Glyph>
+    // Import member functions from std::vector<Glyph>
     using std::vector<Glyph>::value_type;
     using std::vector<Glyph>::allocator_type;
     using std::vector<Glyph>::size_type;
@@ -179,11 +145,122 @@ class Glyph_string : private std::vector<Glyph> {
     using std::vector<Glyph>::pop_back;
     using std::vector<Glyph>::resize;
     using std::vector<Glyph>::swap;
-};  // namespace cppurses
+};
 
+/// Equality comparison on each Glyph in the Glyph_strings.
 bool operator==(const Glyph_string& x, const Glyph_string& y);
+
+/// Inequality comparison on each Glyph in the Glyph_strings.
 bool operator!=(const Glyph_string& x, const Glyph_string& y);
+
+/// stream output operator for Glyph_string, outputs the Glyphs as chars to os.
 std::ostream& operator<<(std::ostream& os, const Glyph_string& gs);
 
+// TEMPLATE IMPLEMENTATIONS
+template <typename InputIterator>
+Glyph_string::Glyph_string(InputIterator first, InputIterator last)
+    : vector<Glyph>::vector(first, last) {}
+
+template <typename... Attributes>
+Glyph_string::Glyph_string(const std::string& symbols, Attributes&&... attrs)
+    : vector<Glyph>::vector() {
+    this->append(symbols, std::forward<Attributes>(attrs)...);
+}
+
+template <typename... Attributes>
+Glyph_string::Glyph_string(const char* symbols, Attributes&&... attrs) {
+    this->append(symbols, std::forward<Attributes>(attrs)...);
+}
+
+template <typename... Attributes>
+Glyph_string::Glyph_string(wchar_t symbol, Attributes&&... attrs) {
+    this->append(Glyph{symbol, std::forward<Attributes>(attrs)...});
+}
+
+template <typename... Attributes>
+Glyph_string::Glyph_string(const wchar_t* symbols, Attributes&&... attrs) {
+    this->append(symbols, std::forward<Attributes>(attrs)...);
+}
+
+template <typename... Attributes>
+Glyph_string::Glyph_string(const std::wstring& symbols, Attributes&&... attrs)
+    : vector<Glyph>::vector() {
+    this->append(symbols, std::forward<Attributes>(attrs)...);
+}
+
+template <typename... Attributes>
+Glyph_string::Glyph_string(const Glyph& glyph, Attributes&&... attrs) {
+    this->append(glyph, std::forward<Attributes>(attrs)...);
+}
+
+template <typename... Attributes>
+Glyph_string::Glyph_string(const std::initializer_list<Glyph>& glyphs,
+                           Attributes&&... attrs) {
+    this->reserve(glyphs.size());
+    for (const Glyph& g : glyphs) {
+        this->append(g, std::forward<Attributes>(attrs)...);
+    }
+}
+
+template <typename... Attributes>
+Glyph_string& Glyph_string::append(const Glyph& symbol, Attributes&&... attrs) {
+    this->push_back(symbol);
+    this->back().brush.add_attributes(std::forward<Attributes>(attrs)...);
+    return *this;
+}
+
+template <typename... Attributes>
+Glyph_string& Glyph_string::append(const char* symbols, Attributes&&... attrs) {
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+    std::wstring wide_string{converter.from_bytes(symbols)};
+    this->reserve(this->size() + wide_string.size());
+    for (wchar_t sym : wide_string) {
+        this->append(Glyph{sym, std::forward<Attributes>(attrs)...});
+    }
+    return *this;
+}
+
+template <typename... Attributes>
+Glyph_string& Glyph_string::append(const std::string& symbols,
+                                   Attributes&&... attrs) {
+    return this->append(symbols.c_str(), std::forward<Attributes>(attrs)...);
+}
+
+template <typename... Attributes>
+Glyph_string& Glyph_string::append(const wchar_t* symbols,
+                                   Attributes&&... attrs) {
+    std::size_t i{0};
+    while (symbols[i] != L'\0') {
+        this->append(Glyph{symbols[i], std::forward<Attributes>(attrs)...});
+        ++i;
+    }
+    return *this;
+}
+
+template <typename... Attributes>
+Glyph_string& Glyph_string::append(const std::wstring& symbols,
+                                   Attributes&&... attrs) {
+    for (wchar_t sym : symbols) {
+        this->append(Glyph{sym, std::forward<Attributes>(attrs)...});
+    }
+    return *this;
+}
+
+template <typename... Attributes>
+Glyph_string& Glyph_string::append(const Glyph_string& gs,
+                                   Attributes&&... attrs) {
+    for (const Glyph& glyph : gs) {
+        this->append(glyph, std::forward<Attributes>(attrs)...);
+    }
+    return *this;
+}
+
+template <typename... Attributes>
+void Glyph_string::add_attributes(Attributes&&... attrs) {
+    for (auto& glyph : *this) {
+        glyph.brush.add_attributes(std::forward<Attributes>(attrs)...);
+    }
+}
+
 }  // namespace cppurses
-#endif  // PAINTER_GLYPH_STRING_HPP
+#endif  // CPPURSES_PAINTER_GLYPH_STRING_HPP

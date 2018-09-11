@@ -1,8 +1,10 @@
-#ifndef SYSTEM_KEY_HPP
-#define SYSTEM_KEY_HPP
+#ifndef CPPURSES_SYSTEM_KEY_HPP
+#define CPPURSES_SYSTEM_KEY_HPP
 
 namespace cppurses {
 
+/// Enums for key codes from the keyboard with descriptive names.
+/** Names taken from ncurses. */
 enum class Key : short {
     // Control Characters
     Null = 0,    // Ctrl + Space, or Ctrl + 2, OR Ctrl + @
@@ -242,7 +244,9 @@ enum class Key : short {
     Undo
 };
 
+/// Translate a keycode \p key into its char representation.
+/** Returns '\0' if \p key does not have a printable representation. */
 char key_to_char(Key key);
 
 }  // namespace cppurses
-#endif  // SYSTEM_KEY_HPP
+#endif  // CPPURSES_SYSTEM_KEY_HPP

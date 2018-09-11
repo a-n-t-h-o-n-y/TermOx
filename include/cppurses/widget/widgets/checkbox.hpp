@@ -1,5 +1,5 @@
-#ifndef WIDGET_WIDGETS_CHECKBOX_HPP
-#define WIDGET_WIDGETS_CHECKBOX_HPP
+#ifndef CPPURSES_WIDGET_WIDGETS_CHECKBOX_HPP
+#define CPPURSES_WIDGET_WIDGETS_CHECKBOX_HPP
 #include <cstddef>
 #include <cstdint>
 
@@ -7,11 +7,12 @@
 
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/system/mouse_button.hpp>
+#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
 
+/// On/Off state checkbox, using mouse input.
 class Checkbox : public Widget {
    public:
     explicit Checkbox(Glyph_string title = "", int padding = 3);
@@ -27,10 +28,7 @@ class Checkbox : public Widget {
 
    protected:
     bool paint_event() override;
-    bool mouse_press_event(Mouse_button button,
-                           Point global,
-                           Point local,
-                           std::uint8_t device_id) override;
+    bool mouse_press_event(const Mouse_data& mouse) override;
 
    private:
     Glyph empty_box_{L'☐'};
@@ -51,4 +49,4 @@ sig::Slot<void()> uncheck(Checkbox& cb);
 
 }  // namespace slot
 }  // namespace cppurses
-#endif  // WIDGET_WIDGETS_CHECKBOX_HPP
+#endif  // CPPURSES_WIDGET_WIDGETS_CHECKBOX_HPP

@@ -1,5 +1,5 @@
-#ifndef WIDGET_WIDGETS_HORIZONTAL_SCROLLBAR
-#define WIDGET_WIDGETS_HORIZONTAL_SCROLLBAR
+#ifndef CPPURSES_WIDGET_WIDGETS_HORIZONTAL_SCROLLBAR
+#define CPPURSES_WIDGET_WIDGETS_HORIZONTAL_SCROLLBAR
 #include <signals/signal.hpp>
 
 #include <cppurses/widget/layouts/horizontal_layout.hpp>
@@ -22,5 +22,4 @@ class Horizontal_scrollbar : public Horizontal_layout {
 };
 
 }  // namespace cppurses
-
-#endif  // WIDGET_WIDGETS_HORIZONTAL_SCROLLBAR
+#endif  // CPPURSES_WIDGET_WIDGETS_HORIZONTAL_SCROLLBAR

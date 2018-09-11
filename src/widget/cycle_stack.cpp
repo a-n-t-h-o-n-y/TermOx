@@ -2,11 +2,16 @@
 
 #include <signals/signal.hpp>
 
+#include <cppurses/painter/attribute.hpp>
+#include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/widget/layouts/horizontal_layout.hpp>
+#include <cppurses/widget/size_policy.hpp>
+#include <cppurses/widget/widget.hpp>
+#include <cppurses/widget/widget_free_functions.hpp>
 #include <cppurses/widget/widgets/cycle_box.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
+#include <cppurses/widget/widgets/widget_stack.hpp>
 
 namespace cppurses {
 

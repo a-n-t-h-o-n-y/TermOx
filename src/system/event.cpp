@@ -3,22 +3,21 @@
 #include <cstddef>
 #include <vector>
 
-#include <cppurses/system/event_handler.hpp>
+#include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
 
-Event::Event(Type type, Event_handler* receiver)
-    : type_{type}, receiver_{receiver} {}
+Event::Event(Type type, Widget* receiver) : type_{type}, receiver_{receiver} {}
 
 Event::Type Event::type() const {
     return type_;
 }
 
-Event_handler* Event::receiver() const {
+Widget* Event::receiver() const {
     return receiver_;
 }
 
-void Event::set_receiver(Event_handler* receiver) {
+void Event::set_receiver(Widget* receiver) {
     receiver_ = receiver;
 }
 
@@ -32,6 +31,10 @@ bool Event::send_to_all_filters() const {
         }
     }
     return handled;
+}
+
+bool Event::operator==(const Event& other) const {
+    return (this->type_ == other.type_) && (this->receiver_ == other.receiver_);
 }
 
 }  // namespace cppurses

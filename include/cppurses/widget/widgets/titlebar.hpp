@@ -1,5 +1,5 @@
-#ifndef WIDGET_WIDGETS_TITLEBAR_HPP
-#define WIDGET_WIDGETS_TITLEBAR_HPP
+#ifndef CPPURSES_WIDGET_WIDGETS_TITLEBAR_HPP
+#define CPPURSES_WIDGET_WIDGETS_TITLEBAR_HPP
 #include <signals/slot.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
@@ -25,7 +25,5 @@ sig::Slot<void()> set_title(Titlebar& tb, const Glyph_string& title);
 sig::Slot<void(Glyph_string)> set_title(Titlebar& tb);
 
 }  // namespace slot
-
 }  // namespace cppurses
-
-#endif  // WIDGET_WIDGETS_TITLEBAR_HPP
+#endif  // CPPURSES_WIDGET_WIDGETS_TITLEBAR_HPP

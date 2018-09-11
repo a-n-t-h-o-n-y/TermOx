@@ -8,12 +8,15 @@
 
 #include <signals/signal.hpp>
 
+#include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/widget/point.hpp>
 
 namespace cppurses {
 
+// TODO why is this update_display here and not in paint_event? Must be a
+// reason? It'd be more efficient the other way.
 void Text_display::update() {
     this->update_display();
     Widget::update();
@@ -34,8 +37,10 @@ void Text_display::insert(Glyph_string text, std::size_t index) {
         return;
     }
     for (auto& glyph : text) {
-        for (auto& attr : new_text_brush_.attributes()) {
-            glyph.brush.add_attributes(attr);
+        for (Attribute a : Attribute_list) {
+            if (new_text_brush_.has_attribute(a)) {
+                glyph.brush.add_attributes(a);
+            }
         }
     }
     contents_.insert(std::begin(contents_) + index, std::begin(text),
@@ -46,8 +51,10 @@ void Text_display::insert(Glyph_string text, std::size_t index) {
 
 void Text_display::append(Glyph_string text) {
     for (auto& glyph : text) {
-        for (auto& attr : new_text_brush_.attributes()) {
-            glyph.brush.add_attributes(attr);
+        for (Attribute a : Attribute_list) {
+            if (new_text_brush_.has_attribute(a)) {
+                glyph.brush.add_attributes(a);
+            }
         }
     }
     contents_.append(text);
@@ -79,8 +86,8 @@ void Text_display::pop_back() {
 
 void Text_display::clear() {
     contents_.clear();
-    this->move_cursor_x(0);
-    this->move_cursor_y(0);
+    this->cursor.set_x(0);
+    this->cursor.set_y(0);
     this->update();
     text_changed(contents_);
 }
@@ -222,7 +229,15 @@ bool Text_display::paint_event() {
     return Widget::paint_event();
 }
 
-// TODO: Implement tab character.
+// TODO: Implement tab character. and newline?
+// if (glyph.symbol == L'\n') {
+//     move_cursor(*widget_, 0, widget_->cursor_y() + 1);
+//     return;
+// } else if (glyph.symbol == L'\t') {
+//     // TODO move cursor to next x coord divisible by tablength
+//     // textbox should account for it.
+//     return;
+// }
 void Text_display::update_display(std::size_t from_line) {
     std::size_t begin = display_state_.at(from_line).start_index;
     display_state_.clear();

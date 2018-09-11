@@ -1,5 +1,5 @@
-#ifndef WIDGET_WIDGETS_LIST_HPP
-#define WIDGET_WIDGETS_LIST_HPP
+#ifndef CPPURSES_WIDGET_WIDGETS_LIST_HPP
+#define CPPURSES_WIDGET_WIDGETS_LIST_HPP
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
@@ -9,7 +9,8 @@
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/key.hpp>
-#include <cppurses/system/mouse_button.hpp>
+#include <cppurses/system/keyboard_data.hpp>
+#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
@@ -29,11 +30,8 @@ class List : public Widget {
 
    protected:
     bool paint_event() override;
-    bool key_press_event(Key key, char symbol) override;
-    bool mouse_press_event(Mouse_button button,
-                           Point global,
-                           Point local,
-                           std::uint8_t device_id) override;
+    bool key_press_event(const Keyboard_data& keyboard) override;
+    bool mouse_press_event(const Mouse_data& mouse) override;
 
    private:
     struct Property {
@@ -78,9 +76,9 @@ void List<T>::rotate_properties() {
 template <typename T>
 bool List<T>::paint_event() {
     Painter p{this};
-    p.move_cursor_on_put = true;
-    for (const auto& prop : properties_) {
-        p.put(Glyph_string{prop.name}.append(" | "));
+    // p.move_cursor_on_put = true;
+    for (const auto& prop : properties_) {  // below 0,0 might be wrong.
+        p.put(Glyph_string{prop.name}.append(" | "), 0, 0);
     }
     std::size_t count{1};
     for (const auto& item : items_) {
@@ -95,8 +93,9 @@ bool List<T>::paint_event() {
         p.put(display, 0, count);
         ++count;
     }
-    move_cursor(*this, 0, 0);
+    this->cursor.set_position(Point{0, 0});
     return Widget::paint_event();
+    move_cursor(*this, 0, 0);
 }
 
 template <typename T>
@@ -120,26 +119,24 @@ void List<T>::select_down(std::size_t n) {
 }
 
 template <typename T>
-bool List<T>::key_press_event(Key key, char symbol) {
-    if (key == Key::Arrow_down || key == Key::Arrow_left) {
+bool List<T>::key_press_event(const Keyboard_data& keyboard) {
+    if (keyboard.key == Key::Arrow_down || keyboard.key == Key::Arrow_left) {
         this->select_down(1);
-    } else if (key == Key::Arrow_up || key == Key::Arrow_right) {
+    } else if (keyboard.key == Key::Arrow_up ||
+               keyboard.key == Key::Arrow_right) {
         this->select_up(1);
-    } else if (key == Key::Enter) {
+    } else if (keyboard.key == Key::Enter) {
         if (!items_.empty()) {
             selected(items_.at(selected_index_ - 1));
         }
     }
     this->update();
-    return Widget::key_press_event(key, symbol);
+    return Widget::key_press_event(keyboard);
 }
 
 template <typename T>
-bool List<T>::mouse_press_event(Mouse_button button,
-                                Point global,
-                                Point local,
-                                std::uint8_t device_id) {
-    return Widget::mouse_press_event(button, global, local, device_id);
+bool List<T>::mouse_press_event(const Mouse_data& mouse) {
+    return Widget::mouse_press_event(mouse);
 }
 
 namespace slot {
@@ -168,9 +165,4 @@ sig::Slot<void()> rotate_properties(List<T>& list) {
 
 }  // namespace slot
 }  // namespace cppurses
-#endif  // WIDGET_WIDGETS_LIST_HPP
-
-// Each property has its width that is the length of the longest string.
-// values of properties should be centered or have the option of left/right alin
-// Some kind of table widget that you could use, that provides all the logic,
-// you just add the text.
+#endif  // CPPURSES_WIDGET_WIDGETS_LIST_HPP

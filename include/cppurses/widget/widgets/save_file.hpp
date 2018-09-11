@@ -36,7 +36,7 @@ Save_file<CharT>::Save_file() {
     save_btn.width_policy.type(Size_policy::Fixed);
     save_btn.width_policy.hint(4);
     set_background(save_btn, Color::Blue);
-    seperator.background_tile = L'⏵';
+    seperator.wallpaper = L'⏵';
     set_background(filename_edit, Color::White);
     set_foreground(filename_edit, Color::Black);
     filename_edit.set_ghost_color(Color::Dark_gray);
@@ -51,5 +51,4 @@ void Save_file<CharT>::notify() {
 }
 
 }  // namespace cppurses
-
 #endif  // CPPURSES_WIDGET_WIDGETS_SAVE_FILE_HPP

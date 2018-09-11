@@ -1,11 +1,11 @@
-#ifndef WIDGET_WIDGETS_TEXTBOX_HPP
-#define WIDGET_WIDGETS_TEXTBOX_HPP
+#ifndef CPPURSES_WIDGET_WIDGETS_TEXTBOX_HPP
+#define CPPURSES_WIDGET_WIDGETS_TEXTBOX_HPP
 #include <cstddef>
 #include <cstdint>
 
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/system/key.hpp>
-#include <cppurses/system/mouse_button.hpp>
+#include <cppurses/system/keyboard_data.hpp>
+#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/widgets/textbox_base.hpp>
 
 namespace cppurses {
@@ -25,11 +25,8 @@ class Textbox : public Textbox_base {
     void enable_input();
 
    protected:
-    bool key_press_event(Key key, char symbol) override;
-    bool mouse_press_event(Mouse_button button,
-                           Point global,
-                           Point local,
-                           std::uint8_t device_id) override;
+    bool key_press_event(const Keyboard_data& keyboard) override;
+    bool mouse_press_event(const Mouse_data& mouse) override;
 
    private:
     bool scroll_wheel_{true};
@@ -39,4 +36,4 @@ class Textbox : public Textbox_base {
 };
 
 }  // namespace cppurses
-#endif  // WIDGET_WIDGETS_TEXTBOX_HPP
+#endif  // CPPURSES_WIDGET_WIDGETS_TEXTBOX_HPP

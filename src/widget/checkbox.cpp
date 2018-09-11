@@ -33,22 +33,19 @@ Glyph_string Checkbox::title() const {
 bool Checkbox::paint_event() {
     Painter p{this};
     if (this->is_checked()) {
-        p.put(checked_box_);
+        p.put(checked_box_, 0, 0);
     } else {
-        p.put(empty_box_);
+        p.put(empty_box_, 0, 0);
     }
     p.put(title_, padding_, 0);
     return Widget::paint_event();
 }
 
-bool Checkbox::mouse_press_event(Mouse_button button,
-                                 Point global,
-                                 Point local,
-                                 std::uint8_t device_id) {
-    if (button == Mouse_button::Left) {
+bool Checkbox::mouse_press_event(const Mouse_data& mouse) {
+    if (mouse.button == Mouse_button::Left) {
         this->toggle();
     }
-    return true;
+    return Widget::mouse_press_event(mouse);
 }
 
 void check(Checkbox& cb) {

@@ -7,6 +7,9 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/painter.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/system/keyboard_data.hpp>
+#include <cppurses/system/mouse_data.hpp>
 
 namespace cppurses {
 
@@ -14,7 +17,7 @@ Slider::Slider() {
     this->height_policy.type(Size_policy::Fixed);
     this->height_policy.hint(1);
     this->focus_policy = Focus_policy::Strong;
-    this->background_tile = Glyph{L' ', background(Color::Light_gray)};
+    this->wallpaper = Glyph{L' ', background(Color::Light_gray)};
 }
 
 void Slider::set_percent(float percent) {
@@ -34,36 +37,33 @@ float Slider::percent() const {
 }
 
 bool Slider::paint_event() {
-    Painter p{this};
     std::size_t x{percent_to_position(percent_progress_)};
+    Painter p{this};
     p.put(indicator_, x, 0);
     return Widget::paint_event();
 }
 
-bool Slider::mouse_press_event(Mouse_button button,
-                               Point global,
-                               Point local,
-                               std::uint8_t device_id) {
-    if (button == Mouse_button::Left) {
-        this->set_percent(position_to_percent(local.x));
-    } else if (button == Mouse_button::ScrollUp) {
+bool Slider::mouse_press_event(const Mouse_data& mouse) {
+    if (mouse.button == Mouse_button::Left) {
+        this->set_percent(position_to_percent(mouse.local.x));
+    } else if (mouse.button == Mouse_button::ScrollUp) {
         scrolled_up();
-    } else if (button == Mouse_button::ScrollDown) {
+    } else if (mouse.button == Mouse_button::ScrollDown) {
         scrolled_down();
     }
-    return Widget::mouse_press_event(button, global, local, device_id);
+    return Widget::mouse_press_event(mouse);
 }
 
-bool Slider::key_press_event(Key key, char symbol) {
+bool Slider::key_press_event(const Keyboard_data& keyboard) {
     std::size_t current_position = percent_to_position(percent_progress_);
-    if (key == Key::Arrow_right) {
+    if (keyboard.key == Key::Arrow_right) {
         this->set_percent(position_to_percent(current_position + 1));
-    } else if (key == Key::Arrow_left) {
+    } else if (keyboard.key == Key::Arrow_left) {
         if (current_position != 0) {
             this->set_percent(position_to_percent(current_position - 1));
         }
     }
-    return Widget::key_press_event(key, symbol);
+    return Widget::key_press_event(keyboard);
 }
 
 float Slider::position_to_percent(std::size_t position) {

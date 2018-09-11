@@ -5,7 +5,9 @@
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/key.hpp>
+#include <cppurses/system/keyboard_data.hpp>
 #include <cppurses/system/mouse_button.hpp>
+#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 
 namespace cppurses {
@@ -51,27 +53,26 @@ void Textbox::enable_input() {
     takes_input_ = true;
 }
 
-bool Textbox::key_press_event(Key key, char symbol) {
-    switch (key) {
+bool Textbox::key_press_event(const Keyboard_data& keyboard) {
+    switch (keyboard.key) {
         case Key::Arrow_right:
             this->cursor_right(1);
             break;
-
         case Key::Arrow_left:
             this->cursor_left(1);
             break;
-
         case Key::Arrow_up:
             this->cursor_up(1);
             break;
-
         case Key::Arrow_down:
             this->cursor_down(1);
+            break;
+        default:
             break;
     }
 
     if (takes_input_) {
-        switch (key) {
+        switch (keyboard.key) {
             case Key::Backspace: {
                 auto cursor_index = this->cursor_index();
                 if (cursor_index == 0) {
@@ -87,7 +88,7 @@ bool Textbox::key_press_event(Key key, char symbol) {
             case Key::Enter: {
                 auto cursor_index = this->cursor_index();
                 this->insert('\n', cursor_index);
-                if (this->cursor_y() + 1 == this->height()) {
+                if (this->cursor.y() + 1 == this->height()) {
                     this->scroll_down(1);
                 }
                 this->set_cursor(cursor_index + 1);
@@ -98,7 +99,7 @@ bool Textbox::key_press_event(Key key, char symbol) {
                 break;
 
             default:  // Insert text
-                char text = symbol;
+                char text = keyboard.symbol;
                 if (text != '\0') {
                     // TODO Cursor Movement for Alignments other than left
                     auto cursor_index = this->cursor_index();
@@ -108,27 +109,24 @@ bool Textbox::key_press_event(Key key, char symbol) {
                 }
         }
     }
-    this->update();
+    // this->update();
     return true;
 }
 
-bool Textbox::mouse_press_event(Mouse_button button,
-                                Point global,
-                                Point local,
-                                std::uint8_t device_id) {
-    if (button == Mouse_button::Left) {
-        this->set_cursor(local.x, local.y);
-    } else if (button == Mouse_button::ScrollUp) {
+bool Textbox::mouse_press_event(const Mouse_data& mouse) {
+    if (mouse.button == Mouse_button::Left) {
+        this->set_cursor(mouse.local.x, mouse.local.y);
+    } else if (mouse.button == Mouse_button::ScrollUp) {
         if (scroll_wheel_) {
             this->scroll_up(scroll_speed_up_);
         }
-    } else if (button == Mouse_button::ScrollDown) {
+    } else if (mouse.button == Mouse_button::ScrollDown) {
         if (scroll_wheel_) {
             this->scroll_down(scroll_speed_down_);
         }
     }
     this->update();
-    return true;
+    return Widget::mouse_press_event(mouse);
 }
 
 }  // namespace cppurses

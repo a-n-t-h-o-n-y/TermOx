@@ -3,53 +3,85 @@
 #include <iterator>
 #include <memory>
 #include <utility>
+#include <vector>
 
 #include <cppurses/system/detail/event_queue.hpp>
 #include <cppurses/system/event.hpp>
+#include <cppurses/system/system.hpp>
 
-namespace {
-using namespace cppurses;
+// #define DEBUG_EVENT_INVOKER
 
-void send_event(const Event& event) {
-    bool handled = event.send_to_all_filters();
-    if (!handled) {
-        event.send();
-    }
-}
+#if defined(DEBUG_EVENT_INVOKER)
+#include <fstream>
+#include <string>
+#include <unordered_map>
 
-}  // namespace
+#include <cppurses/system/detail/event_as_string.hpp>
+#include <cppurses/widget/widget.hpp>
+#endif
 
 namespace cppurses {
-class Event_handler;
+class Widget;
 namespace detail {
 
 void Event_invoker::invoke(Event_queue& queue,
                            Event::Type type_filter,
-                           Event_handler* object_filter) {
+                           Widget* object_filter) {
+#if defined(DEBUG_EVENT_INVOKER)
+    std::unordered_map<Widget*, std::vector<Event::Type>> widgs;
+#endif
+
     auto event_iter = std::begin(queue.queue_);
     while (event_iter != std::end(queue.queue_)) {
-        Event_handler* receiver = (*event_iter)->receiver();
-        auto type = (*event_iter)->type();
+        Widget* receiver = (*event_iter)->receiver();
+        auto event_type = (*event_iter)->type();
+        // Paint Event Filter
+        if (Event::Paint == event_type && Event::Paint != type_filter) {
+            ++event_iter;
+            continue;
+        }
         // Object Filter
         if (receiver != object_filter && object_filter != nullptr) {
             ++event_iter;
             continue;
         }
-        // Deferred Delete Filter
-        if (Event::DeferredDelete == type &&
-            Event::DeferredDelete != type_filter) {
+        // Delete Event Filter
+        if (Event::Delete == event_type && Event::Delete != type_filter) {
             ++event_iter;
             continue;
         }
         // Event Filter Match OR No Event Filter - Send Event
-        if (type_filter == Event::None || type_filter == type) {
-            auto event = std::move(*event_iter);
+        if (type_filter == Event::None || type_filter == event_type) {
+#if defined(DEBUG_EVENT_INVOKER)
+            widgs[receiver].push_back(event_type);
+#endif
+            std::unique_ptr<Event> event = std::move(*event_iter);
             queue.queue_.erase(event_iter);
-            send_event(*event);
+            // Below call will might add to the queue_, invalidating iterators.
+            System::send_event(*event);
             event_iter = std::begin(queue.queue_);
             continue;
         }
     }
+#if defined(DEBUG_EVENT_INVOKER)
+    std::ofstream l{"events_log.txt", std::ios::app};
+    for (const auto& w_events_pair : widgs) {
+        l << w_events_pair.first;
+        std::string name{w_events_pair.first->name()};
+        l << ' ' << name;
+        l << ":\n\t";
+        std::string seperator;
+        for (Event::Type event_t : w_events_pair.second) {
+            l << seperator << detail::event_type_as_string(event_t);
+            seperator = ", ";
+        }
+        l << '\n';
+    }
+    l << "\n--->End Queue Invokation. type_filter: "
+      << event_type_as_string(type_filter);
+    ;
+    l << std::endl;
+#endif
 }
 
 }  // namespace detail

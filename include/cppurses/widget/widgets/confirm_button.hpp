@@ -8,6 +8,7 @@
 
 namespace cppurses {
 
+/// Provides a button with a double check confirmation interface.
 struct Confirm_button : public Widget_stack {
     explicit Confirm_button(Glyph_string title,
                             Glyph_string confirm_text = "Confirm");
@@ -21,5 +22,4 @@ struct Confirm_button : public Widget_stack {
 };
 
 }  // namespace cppurses
-
 #endif  // CPPURSES_WIDGET_WIDGETS_CONFIRM_BUTTON_HPP

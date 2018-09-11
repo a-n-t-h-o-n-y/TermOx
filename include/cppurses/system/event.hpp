@@ -1,11 +1,17 @@
-#ifndef SYSTEM_EVENT_HPP
-#define SYSTEM_EVENT_HPP
+#ifndef CPPURSES_SYSTEM_EVENT_HPP
+#define CPPURSES_SYSTEM_EVENT_HPP
 
 namespace cppurses {
-class Event_handler;
+class Widget;
 
+/// Base class for types passed around by the Event system.
+/** Events encapsulate a behavior to apply to a Widget. Events are created and
+ *  passed to the Event_queue to be processed at a later time. */
 class Event {
    public:
+    /// Event type descriptors for derived types.
+    /** Event_queue relies on these for optimizations and Event_invoker relies
+     *  on these for filtering of Events it will process. */
     enum Type {
         None,
         MouseButtonPress,
@@ -17,47 +23,64 @@ class Event {
         KeyRelease,
         FocusIn,
         FocusOut,
-        ClearScreen,
         Paint,
         Move,
         Resize,
-        Show,
-        Hide,
-        OnTree,
-        Close,
+        TerminalResize,
         ChildAdded,
         ChildRemoved,
         ChildPolished,
         Enable,
         Disable,
-        DeferredDelete
-        // Timer,
-        // Enter,
-        // Leave,
-        // Create,
-        // Destroy
+        Delete,
+        Timer,
+        Custom
     };
 
-    // Special Member Functions
-    explicit Event(Type type, Event_handler* receiver);
+    /// Initializes the \p type and the \p receiver of the Event.
+    Event(Type type, Widget* receiver);
+
     Event(const Event&) = default;
     Event& operator=(const Event&) = default;
     Event(Event&&) = default;
     Event& operator=(Event&&) = default;
     virtual ~Event() = default;
 
+    /// Return a Type enum describing the derived type of the Event.
     Type type() const;
-    Event_handler* receiver() const;
-    void set_receiver(Event_handler* receiver);
 
+    /// Return a pointer to the Widget that will receiver the Event.
+    Widget* receiver() const;
+
+    /// Set the Widget that will receiver the event.
+    /** Used only by NCurses_event_listener. */
+    void set_receiver(Widget* receiver);
+
+    /// Calls filter_send() on each installed event filter object in receiver_.
+    /** Event filters can be set up with Widget::install_event_filter(). Filters
+     *  are used to intercept Events on other Widgets. The first filter to
+     *  accept the event by returning true from filter_send stops any other
+     *  object from receiving the Event. */
     bool send_to_all_filters() const;
+
+    /// Calls the appropriate event function on the receiver.
+    /** Override in derived classes to call on the appropriate member function
+     *  event handler on receiver. */
     virtual bool send() const = 0;
-    virtual bool filter_send(Event_handler* filter) const = 0;
+
+    /// Receives Event calls originally destined for another Widget.
+    /** Override in derived classes to call on the appropriate event handler
+     *  filter on \p filter, passing in receiver_ as argument. */
+    virtual bool filter_send(Widget* filter) const = 0;
+
+    /// Equality on the type_ and recevier_ member objects.
+    /** Used to optimize away duplicate events in Event_queue::append() */
+    bool operator==(const Event& other) const;
 
    protected:
     Type type_;
-    Event_handler* receiver_;
+    Widget* receiver_;
 };
 
 }  // namespace cppurses
-#endif  // SYSTEM_EVENT_HPP
+#endif  // CPPURSES_SYSTEM_EVENT_HPP

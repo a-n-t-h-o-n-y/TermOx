@@ -1,5 +1,5 @@
-#ifndef WIDGET_WIDGETS_TEXTBOX_BASE_HPP
-#define WIDGET_WIDGETS_TEXTBOX_BASE_HPP
+#ifndef CPPURSES_WIDGET_WIDGETS_TEXTBOX_BASE_HPP
+#define CPPURSES_WIDGET_WIDGETS_TEXTBOX_BASE_HPP
 #include <cstddef>
 
 #include <signals/signal.hpp>
@@ -39,7 +39,6 @@ class Textbox_base : public Text_display {
     sig::Signal<void(std::size_t n)> cursor_moved_right;
     sig::Signal<void(std::size_t n)> cursor_moved_up;
     sig::Signal<void(std::size_t n)> cursor_moved_down;
-    sig::Signal<void(Point)> cursor_moved;
 
    private:
     void increment_cursor_right();
@@ -51,4 +50,4 @@ class Textbox_base : public Text_display {
 };
 
 }  // namespace cppurses
-#endif  // WIDGET_WIDGETS_TEXTBOX_BASE_HPP
+#endif  // CPPURSES_WIDGET_WIDGETS_TEXTBOX_BASE_HPP

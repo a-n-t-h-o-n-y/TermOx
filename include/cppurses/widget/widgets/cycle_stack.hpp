@@ -1,17 +1,20 @@
 #ifndef CPPURSES_WIDGET_WIDGETS_CYCLE_STACK_HPP
 #define CPPURSES_WIDGET_WIDGETS_CYCLE_STACK_HPP
 #include <memory>
+#include <string>
 #include <utility>
 
 #include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/widget/layouts/horizontal_layout.hpp>
 #include <cppurses/widget/layouts/vertical_layout.hpp>
-#include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widgets/cycle_box.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 #include <cppurses/widget/widgets/widget_stack.hpp>
 
 namespace cppurses {
+class Widget;
 
+/// A Widget_stack with an interface to cycle through each Widget in the stack.
 class Cycle_stack : public Vertical_layout {
    public:
     Cycle_stack();

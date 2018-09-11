@@ -1,15 +1,19 @@
 #include <cppurses/widget/widgets/line_edit.hpp>
 
-#include <cstddef>
 #include <cstdint>
 #include <utility>
+
+#include <signals/signal.hpp>
 
 #include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/key.hpp>
+#include <cppurses/system/keyboard_data.hpp>
 #include <cppurses/system/mouse_button.hpp>
+#include <cppurses/system/mouse_data.hpp>
+#include <cppurses/widget/point.hpp>
 #include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widgets/textbox.hpp>
 
@@ -55,13 +59,13 @@ void Line_edit::invisible_input(bool enabled) {
 
 void Line_edit::underline(bool enabled) {
     if (enabled) {
-        this->background_tile = Glyph{L' ', Attribute::Underline};
+        this->wallpaper = Glyph{L' ', Attribute::Underline};
         Glyph_string underlined_text{this->contents()};
         underlined_text.add_attributes(Attribute::Underline);
         this->set_text(std::move(underlined_text));
         this->add_new_text_attribute(Attribute::Underline);
     } else {
-        this->background_tile = Glyph{L' '};
+        this->wallpaper = L' ';
         Glyph_string non_underlined{this->contents()};
         non_underlined.remove_attribute(Attribute::Underline);
         this->set_text(std::move(non_underlined));
@@ -79,8 +83,8 @@ void Line_edit::set_ghost_color(Color c) {
     }
 }
 
-bool Line_edit::key_press_event(Key key, char symbol) {
-    if (key == Key::Enter) {
+bool Line_edit::key_press_event(const Keyboard_data& keyboard) {
+    if (keyboard.key == Key::Enter) {
         if (!on_initial_) {
             editing_finished(this->contents().str());
             if (clear_on_enter_) {
@@ -89,32 +93,29 @@ bool Line_edit::key_press_event(Key key, char symbol) {
         }
         return true;
     }
-    if (key == Key::Arrow_up || key == Key::Arrow_down) {
+    if (keyboard.key == Key::Arrow_up || keyboard.key == Key::Arrow_down) {
         return true;
     }
 
     // Validate
-    if (!validator_(symbol)) {
+    if (!validator_(keyboard.symbol)) {
         return true;
     }
 
     // First alph-num input
-    if (symbol != '\0' && on_initial_) {
+    if (keyboard.symbol != '\0' && on_initial_) {
         this->clear();
         on_initial_ = false;
     }
-    return Textbox::key_press_event(key, symbol);
+    return Textbox::key_press_event(keyboard);
 }
 
-bool Line_edit::mouse_press_event(Mouse_button button,
-                                  Point global,
-                                  Point local,
-                                  std::uint8_t device_id) {
-    if (button == Mouse_button::ScrollUp ||
-        button == Mouse_button::ScrollDown) {
+bool Line_edit::mouse_press_event(const Mouse_data& mouse) {
+    if (mouse.button == Mouse_button::ScrollUp ||
+        mouse.button == Mouse_button::ScrollDown) {
         return true;
     }
-    return Textbox::mouse_press_event(button, global, local, device_id);
+    return Textbox::mouse_press_event(mouse);
 }
 
 bool Line_edit::focus_in_event() {

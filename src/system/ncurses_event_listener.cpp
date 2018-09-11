@@ -2,52 +2,46 @@
 
 #include <cstddef>
 #include <memory>
-#include <vector>
+#include <mutex>
 
-#include <ncurses.h>
-
+#include <cppurses/painter/detail/ncurses_data.hpp>
+#include <cppurses/system/detail/find_widget_at.hpp>
 #include <cppurses/system/event.hpp>
 #include <cppurses/system/events/key_event.hpp>
 #include <cppurses/system/events/mouse_event.hpp>
 #include <cppurses/system/events/resize_event.hpp>
+#include <cppurses/system/events/terminal_resize_event.hpp>
 #include <cppurses/system/focus.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/mouse_button.hpp>
+#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/system/system.hpp>
-#include <cppurses/widget/border.hpp>
+#include <cppurses/widget/area.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 
-namespace {
-
-cppurses::Widget* find_widget_at(std::size_t x, std::size_t y) {
-    cppurses::Widget* widg = cppurses::System::head();
-    if (widg == nullptr || !has_coordinates(*widg, x, y)) {
-        return nullptr;
-    }
-    bool keep_going = true;
-    while (keep_going && !widg->children().empty()) {
-        for (cppurses::Widget* child : widg->children()) {
-            if (has_coordinates(*child, x, y) && child->enabled()) {
-                widg = child;
-                keep_going = true;
-                break;
-            }
-            keep_going = false;
-        }
-    }
-    return widg;
-}
-
-}  // namespace
+#include <ncurses.h>
 
 namespace cppurses {
 namespace detail {
 
 std::unique_ptr<Event> NCurses_event_listener::get_input() const {
-    int input = ::getch();  // blocking call
+    // TODO
+    // getch() calls wrefresh() internally, making this not thread safe with
+    // multiple event loops running. Either have to find a simpler function or
+    // handler input manually. Cannot use a mutex here, otherwise you have to
+    // wait for input before you can refresh the screen from anywhere else.
+    int input{::getch()};
     std::unique_ptr<Event> event{nullptr};
     switch (input) {
+        case ERR:
+            // Terminal Screen Resize
+            if (NCurses_data::resize_happened) {
+                NCurses_data::resize_happened = false;
+                event = std::make_unique<Terminal_resize_event>(System::head());
+            }
+            break;
+
         case KEY_MOUSE:
             event = parse_mouse_event();
             break;
@@ -65,24 +59,15 @@ std::unique_ptr<Event> NCurses_event_listener::get_input() const {
     return event;
 }
 
-void NCurses_event_listener::enable_ctrl_characters() {
-    ::raw();
-}
-
-void NCurses_event_listener::disable_ctrl_characters() {
-    ::noraw();
-    ::cbreak();
-}
-
 #undef border  // NCurses macro, naming conflict.
 
 std::unique_ptr<Event> NCurses_event_listener::parse_mouse_event() const {
-    ::MEVENT mouse_event;  // NOLINT
+    ::MEVENT mouse_event;
     if (::getmouse(&mouse_event) != OK) {
         return nullptr;
     }
 
-    Widget* receiver = find_widget_at(mouse_event.x, mouse_event.y);
+    Widget* receiver = detail::find_widget_at(mouse_event.x, mouse_event.y);
     if (receiver == nullptr) {
         return nullptr;
     }
@@ -139,19 +124,19 @@ std::unique_ptr<Event> NCurses_event_listener::parse_mouse_event() const {
     // Location
     std::size_t mouse_x{static_cast<std::size_t>(mouse_event.x)};
     std::size_t mouse_y{static_cast<std::size_t>(mouse_event.y)};
-    std::size_t local_x = mouse_x - receiver->x();
-    std::size_t local_y = mouse_y - receiver->y();
+    std::size_t local_x = mouse_x - receiver->inner_x();
+    std::size_t local_y = mouse_y - receiver->inner_y();
 
     // Create Event
     std::unique_ptr<Event> event{nullptr};
     if (type == Event::MouseButtonPress) {
         event = std::make_unique<Mouse_press_event>(
-            receiver, button, Point{mouse_x, mouse_y}, Point{local_x, local_y},
-            mouse_event.id);
+            receiver, Mouse_data{button, Point{mouse_x, mouse_y},
+                                 Point{local_x, local_y}, mouse_event.id});
     } else if (type == Event::MouseButtonRelease) {
         event = std::make_unique<Mouse_release_event>(
-            receiver, button, Point{mouse_x, mouse_y}, Point{local_x, local_y},
-            mouse_event.id);
+            receiver, Mouse_data{button, Point{mouse_x, mouse_y},
+                                 Point{local_x, local_y}, mouse_event.id});
     } else {
         return nullptr;
     }
@@ -168,8 +153,12 @@ Widget* NCurses_event_listener::handle_keyboard_widget() const {
 }
 
 std::unique_ptr<Event> NCurses_event_listener::handle_resize_event() const {
-    return std::make_unique<Resize_event>(
-        nullptr, Area{System::max_width(), System::max_height()});
+    // TODO the below call is not thread safe. Should be updated when the event
+    // invoker is called for the main thread.
+    System::terminal.update_dimensions();
+    std::size_t width{System::terminal.width()};
+    std::size_t height{System::terminal.height()};
+    return std::make_unique<Resize_event>(nullptr, Area{width, height});
 }
 
 Widget* NCurses_event_listener::handle_resize_widget() const {

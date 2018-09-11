@@ -1,10 +1,13 @@
 #include <cppurses/widget/widgets/log.hpp>
 
+#include <cstddef>
 #include <utility>
 
 #include <signals/slot.hpp>
 
+#include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/key.hpp>
+#include <cppurses/system/keyboard_data.hpp>
 
 namespace cppurses {
 
@@ -23,10 +26,10 @@ void Log::post_message(Glyph_string message) {
     this->set_cursor(this->contents_size());
 }
 
-bool Log::key_press_event(Key key, char symbol) {
-    if (key == Key::Arrow_right || key == Key::Arrow_up ||
-        key == Key::Arrow_down || key == Key::Arrow_left) {
-        return Textbox::key_press_event(key, symbol);
+bool Log::key_press_event(const Keyboard_data& keyboard) {
+    if (keyboard.key == Key::Arrow_right || keyboard.key == Key::Arrow_up ||
+        keyboard.key == Key::Arrow_down || keyboard.key == Key::Arrow_left) {
+        return Textbox::key_press_event(keyboard);
     }
     return true;
 }

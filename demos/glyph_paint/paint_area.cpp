@@ -1,10 +1,5 @@
 #include "paint_area.hpp"
 
-#include <cppurses/cppurses.hpp>
-#include <cppurses/painter/utility/wchar_to_bytes.hpp>
-#include <optional/optional.hpp>
-#include <signals/slot.hpp>
-
 #include <cctype>
 #include <codecvt>
 #include <cstddef>
@@ -15,12 +10,16 @@
 #include <string>
 #include <utility>
 
+#include <cppurses/cppurses.hpp>
+#include <optional/optional.hpp>
+#include <signals/slot.hpp>
+
 using namespace cppurses;
 
 namespace {
 
 void insert_newline(Point first, Point second, std::ostream& os) {
-    if (first.y == second.y) {
+    if (first.y >= second.y) {
         return;
     }
     std::string newlines(second.y - first.y, '\n');
@@ -114,12 +113,12 @@ void Paint_area::disable_erase() {
 }
 
 void Paint_area::enable_grid() {
-    this->background_tile = Glyph{L'┼', foreground(Color::Dark_gray)};
+    this->wallpaper = Glyph{L'┼', foreground(Color::Dark_gray)};
     this->update();
 }
 
 void Paint_area::disable_grid() {
-    this->background_tile = L' ';
+    this->wallpaper = L' ';
     this->update();
 }
 
@@ -142,7 +141,7 @@ void Paint_area::write(std::ostream& os) {
     for (const auto& cg_pair : glyphs_painted_) {
         insert_newline(previous_nl, cg_pair.first, os);
         insert_space(previous_s, cg_pair.first, os);
-        os << cppurses::utility::wchar_to_bytes(cg_pair.second);
+        os << cppurses::utility::wchar_to_bytes(cg_pair.second.symbol);
         previous_nl = cg_pair.first;
         previous_s = cg_pair.first;
     }
@@ -179,65 +178,62 @@ bool Paint_area::paint_event() {
     return Widget::paint_event();
 }
 
-bool Paint_area::mouse_press_event(Mouse_button button,
-                                   Point global,
-                                   Point local,
-                                   std::uint8_t device_id) {
-    if (button == Mouse_button::Right) {
-        this->remove_glyph(local);
-    } else if (button == Mouse_button::Middle) {
-        if (glyphs_painted_.count(local) == 1) {
-            this->set_glyph(glyphs_painted_[local]);
+bool Paint_area::mouse_press_event(const Mouse_data& mouse) {
+    if (mouse.button == Mouse_button::Right) {
+        this->remove_glyph(mouse.local);
+    } else if (mouse.button == Mouse_button::Middle) {
+        if (glyphs_painted_.count(mouse.local) == 1) {
+            this->set_glyph(glyphs_painted_[mouse.local]);
         }
     } else {
-        this->place_glyph(local.x, local.y);
+        this->place_glyph(mouse.local.x, mouse.local.y);
     }
-    return Widget::mouse_press_event(button, global, local, device_id);
+    return Widget::mouse_press_event(mouse);
 }
 
-bool Paint_area::key_press_event(Key key, char symbol) {
-    if (!this->cursor_visible()) {
-        if (!std::iscntrl(symbol)) {
-            this->set_symbol(symbol);
+bool Paint_area::key_press_event(const Keyboard_data& keyboard) {
+    if (!this->cursor.enabled()) {
+        if (!std::iscntrl(keyboard.symbol)) {
+            this->set_symbol(keyboard.symbol);
         }
-        return Widget::key_press_event(key, symbol);
+        return Widget::key_press_event(keyboard);
     }
     if (this->width() == 0 || this->height() == 0) {
-        return Widget::key_press_event(key, symbol);
+        return Widget::key_press_event(keyboard);
     }
-    std::size_t new_x{this->cursor_x() + 1};
-    std::size_t new_y{this->cursor_y() + 1};
-    switch (key) {
+    std::size_t new_x{this->cursor.x() + 1};
+    std::size_t new_y{this->cursor.y() + 1};
+    switch (keyboard.key) {
         case Key::Arrow_right:
             if (new_x == this->width()) {
                 new_x = 0;
             }
-            this->move_cursor_x(new_x);
+            this->cursor.set_x(new_x);
             break;
         case Key::Arrow_left:
-            this->move_cursor_x(this->cursor_x() - 1);
+            this->cursor.set_x(this->cursor.x() - 1);
             break;
         case Key::Arrow_down:
             if (new_y == this->height()) {
                 new_y = 0;
             }
-            this->move_cursor_y(new_y);
+            this->cursor.set_y(new_y);
             break;
         case Key::Arrow_up:
-            this->move_cursor_y(this->cursor_y() - 1);
+            this->cursor.set_y(this->cursor.y() - 1);
             break;
         case Key::Enter:
-            this->place_glyph(this->cursor_x(), this->cursor_y());
+            this->place_glyph(this->cursor.x(), this->cursor.y());
             break;
         default:
-            if (!std::iscntrl(symbol)) {
-                this->set_symbol(symbol);
-                this->place_glyph(this->cursor_x(), this->cursor_y());
+            if (!std::iscntrl(keyboard.symbol)) {
+                this->set_symbol(keyboard.symbol);
+                this->place_glyph(this->cursor.x(), this->cursor.y());
                 this->update();
             }
             break;
     }
-    return Widget::key_press_event(key, symbol);
+    return Widget::key_press_event(keyboard);
 }
 
 void Paint_area::place_glyph(std::size_t x, std::size_t y) {

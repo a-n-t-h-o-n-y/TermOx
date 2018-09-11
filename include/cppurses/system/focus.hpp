@@ -1,8 +1,11 @@
-#ifndef SYSTEM_FOCUS_HPP
-#define SYSTEM_FOCUS_HPP
+#ifndef CPPURSES_SYSTEM_FOCUS_HPP
+#define CPPURSES_SYSTEM_FOCUS_HPP
 
 namespace cppurses {
 class Widget;
+
+// TODO This is an implementation detail, should be in detail, and private to
+// who uses it. Users will interact with Focus through a widget's Focus_policy.
 
 class Focus {
    public:
@@ -18,4 +21,4 @@ class Focus {
 };
 
 }  // namespace cppurses
-#endif  // SYSTEM_FOCUS_HPP
+#endif  // CPPURSES_SYSTEM_FOCUS_HPP
