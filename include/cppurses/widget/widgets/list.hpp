@@ -15,6 +15,7 @@
 
 namespace cppurses {
 
+/// Incomplete implementation, do not use.
 template <typename T>
 class List : public Widget {
    public:
