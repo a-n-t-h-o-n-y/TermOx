@@ -31,10 +31,9 @@ class Event_loop {
     /// Start the event loop in a separate thread.
     void run_async();
 
-    /// Thread safe function that will call on the loop to exit at the next exit
-    /// point. the run() function will return the return_code or the future
-    /// returned from run_async() will contain the return_code at some point
-    /// after this call.
+    /// Calls on the loop to exit at the next exit point.
+    /** The return code value is used when returning from run() or wait(). This
+     *  function is thread safe. */
     void exit(int return_code);
 
     /// Blocks until the async event loop returns.
@@ -42,13 +41,14 @@ class Event_loop {
      *  @return the return code passed to the call to exit(). */
     int wait();
 
-    /// Gets the thread ID of thread that launched this loop. Useful for posting
-    /// events to the correct queue from System::post_event()
+    /// Returns the thread ID of thread that launched this loop.
+    /** Used for posting events to the correct queue in System::post_event() */
     std::thread::id get_thread_id() const;
 
-    /// Return the staged_changes object for this Event_loop and associated
-    // thread.
+    /// Returns the Staged_changes of this loop/thread.
     const detail::Staged_changes& staged_changes() const;
+
+    /// Returns the Staged_changes of this loop/thread.
     detail::Staged_changes& staged_changes();
 
    protected:

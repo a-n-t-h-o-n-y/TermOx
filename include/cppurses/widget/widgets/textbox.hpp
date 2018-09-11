@@ -1,5 +1,5 @@
-#ifndef WIDGET_WIDGETS_TEXTBOX_HPP
-#define WIDGET_WIDGETS_TEXTBOX_HPP
+#ifndef CPPURSES_WIDGET_WIDGETS_TEXTBOX_HPP
+#define CPPURSES_WIDGET_WIDGETS_TEXTBOX_HPP
 #include <cstddef>
 #include <cstdint>
 
@@ -36,4 +36,4 @@ class Textbox : public Textbox_base {
 };
 
 }  // namespace cppurses
-#endif  // WIDGET_WIDGETS_TEXTBOX_HPP
+#endif  // CPPURSES_WIDGET_WIDGETS_TEXTBOX_HPP

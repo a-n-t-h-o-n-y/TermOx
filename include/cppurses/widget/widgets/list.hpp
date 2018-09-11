@@ -1,5 +1,5 @@
-#ifndef WIDGET_WIDGETS_LIST_HPP
-#define WIDGET_WIDGETS_LIST_HPP
+#ifndef CPPURSES_WIDGET_WIDGETS_LIST_HPP
+#define CPPURSES_WIDGET_WIDGETS_LIST_HPP
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
@@ -165,9 +165,4 @@ sig::Slot<void()> rotate_properties(List<T>& list) {
 
 }  // namespace slot
 }  // namespace cppurses
-#endif  // WIDGET_WIDGETS_LIST_HPP
-
-// Each property has its width that is the length of the longest string.
-// values of properties should be centered or have the option of left/right alin
-// Some kind of table widget that you could use, that provides all the logic,
-// you just add the text.
+#endif  // CPPURSES_WIDGET_WIDGETS_LIST_HPP

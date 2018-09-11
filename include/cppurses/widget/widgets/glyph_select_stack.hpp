@@ -37,7 +37,5 @@ sig::Slot<void(float)> set_page_percent(Glyph_select_stack& gss);
 sig::Slot<void()> set_page_percent(Glyph_select_stack& gss, float percent);
 
 }  // namespace slot
-
 }  // namespace cppurses
-
 #endif  // CPPURSES_WIDGET_WIDGETS_GLYPH_SELECT_STACK_HPP

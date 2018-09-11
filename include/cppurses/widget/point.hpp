@@ -5,6 +5,9 @@
 
 namespace cppurses {
 
+/// Represents a 2D point in space.
+/** Usually taken to be relative to the top-left corner of a Widget, or of the
+ *  Terminal screen. */
 struct Point {
     std::size_t x = 0;
     std::size_t y = 0;

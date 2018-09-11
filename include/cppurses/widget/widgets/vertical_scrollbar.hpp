@@ -1,5 +1,5 @@
-#ifndef WIDGET_WIDGETS_VERTICAL_SCROLLBAR_HPP
-#define WIDGET_WIDGETS_VERTICAL_SCROLLBAR_HPP
+#ifndef CPPURSES_WIDGET_WIDGETS_VERTICAL_SCROLLBAR_HPP
+#define CPPURSES_WIDGET_WIDGETS_VERTICAL_SCROLLBAR_HPP
 #include <signals/signal.hpp>
 
 #include <cppurses/widget/layouts/vertical_layout.hpp>
@@ -27,4 +27,4 @@ class Vertical_scrollbar : public Vertical_layout {
 };
 
 }  // namespace cppurses
-#endif  // WIDGET_WIDGETS_VERTICAL_SCROLLBAR_HPP
+#endif  // CPPURSES_WIDGET_WIDGETS_VERTICAL_SCROLLBAR_HPP

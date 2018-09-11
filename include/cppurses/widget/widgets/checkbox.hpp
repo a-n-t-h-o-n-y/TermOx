@@ -1,5 +1,5 @@
-#ifndef WIDGET_WIDGETS_CHECKBOX_HPP
-#define WIDGET_WIDGETS_CHECKBOX_HPP
+#ifndef CPPURSES_WIDGET_WIDGETS_CHECKBOX_HPP
+#define CPPURSES_WIDGET_WIDGETS_CHECKBOX_HPP
 #include <cstddef>
 #include <cstdint>
 
@@ -12,6 +12,7 @@
 
 namespace cppurses {
 
+/// On/Off state checkbox, using mouse input.
 class Checkbox : public Widget {
    public:
     explicit Checkbox(Glyph_string title = "", int padding = 3);
@@ -48,4 +49,4 @@ sig::Slot<void()> uncheck(Checkbox& cb);
 
 }  // namespace slot
 }  // namespace cppurses
-#endif  // WIDGET_WIDGETS_CHECKBOX_HPP
+#endif  // CPPURSES_WIDGET_WIDGETS_CHECKBOX_HPP

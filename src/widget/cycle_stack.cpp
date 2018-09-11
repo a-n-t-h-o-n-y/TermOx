@@ -8,6 +8,7 @@
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget.hpp>
+#include <cppurses/widget/widget_free_functions.hpp>
 #include <cppurses/widget/widgets/cycle_box.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 #include <cppurses/widget/widgets/widget_stack.hpp>

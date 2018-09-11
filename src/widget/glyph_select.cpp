@@ -9,6 +9,7 @@
 #include <cppurses/widget/layouts/horizontal_layout.hpp>
 #include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget.hpp>
+#include <cppurses/widget/widget_free_functions.hpp>
 #include <cppurses/widget/widgets/glyph_select_stack.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 #include <cppurses/widget/widgets/slider.hpp>

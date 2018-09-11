@@ -11,5 +11,4 @@ class Label : public Text_display {
 };
 
 }  // namespace cppurses
-
 #endif  // CPPURSES_WIDGET_WIDGETS_LABEL_HPP

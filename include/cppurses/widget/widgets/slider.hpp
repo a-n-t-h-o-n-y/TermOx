@@ -43,7 +43,5 @@ sig::Slot<void(float)> set_percent(Slider& s);
 sig::Slot<void()> set_percent(Slider& s, float percent);
 
 }  // namespace slot
-
 }  // namespace cppurses
-
 #endif  // CPPURSES_WIDGET_WIDGETS_SLIDER_HPP

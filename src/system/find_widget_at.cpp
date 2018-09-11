@@ -7,6 +7,7 @@
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/children_data.hpp>
 #include <cppurses/widget/widget.hpp>
+#include <cppurses/widget/widget_free_functions.hpp>
 
 namespace cppurses {
 namespace detail {

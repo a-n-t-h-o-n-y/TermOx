@@ -8,6 +8,8 @@
 
 namespace cppurses {
 
+Size_policy::Size_policy(Widget* owner) : owner_{owner} {}
+
 void Size_policy::type(Size_policy::Type type) {
     type_ = type;
     this->notify_parent();
@@ -52,8 +54,6 @@ void Size_policy::max(std::size_t value) {
 std::size_t Size_policy::max() const {
     return max_;
 }
-
-Size_policy::Size_policy(Widget* owner) : owner_{owner} {}
 
 void Size_policy::notify_parent() const {
     System::post_event<Child_polished_event>(owner_->parent(), owner_);

@@ -122,6 +122,7 @@ target_sources(cppurses PRIVATE
     widget/children_data.cpp
     widget/border_offset.cpp
     widget/cursor_data.cpp
+    widget/widget_free_functions.cpp
 )
 
 # INSTALLATION

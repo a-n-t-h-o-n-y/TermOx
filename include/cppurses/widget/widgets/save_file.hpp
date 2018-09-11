@@ -51,5 +51,4 @@ void Save_file<CharT>::notify() {
 }
 
 }  // namespace cppurses
-
 #endif  // CPPURSES_WIDGET_WIDGETS_SAVE_FILE_HPP

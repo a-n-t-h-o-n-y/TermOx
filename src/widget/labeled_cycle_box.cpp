@@ -7,6 +7,8 @@
 
 #include <signals/signals.hpp>
 
+#include <cppurses/widget/widget_free_functions.hpp>
+
 namespace cppurses {
 
 Labeled_cycle_box::Labeled_cycle_box(Glyph_string title) {

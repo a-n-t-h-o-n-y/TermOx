@@ -1,5 +1,5 @@
-#ifndef WIDGET_WIDGETS_MENU_HPP
-#define WIDGET_WIDGETS_MENU_HPP
+#ifndef CPPURSES_WIDGET_WIDGETS_MENU_HPP
+#define CPPURSES_WIDGET_WIDGETS_MENU_HPP
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -67,4 +67,4 @@ sig::Slot<void()> select_item(Menu& m, std::size_t index);
 
 }  // namespace slot
 }  // namespace cppurses
-#endif  // WIDGET_WIDGETS_MENU_HPP
+#endif  // CPPURSES_WIDGET_WIDGETS_MENU_HPP

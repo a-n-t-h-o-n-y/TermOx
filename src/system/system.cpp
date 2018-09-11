@@ -3,13 +3,13 @@
 #include <algorithm>
 #include <memory>
 #include <mutex>
+#include <stdexcept>
 #include <thread>
 #include <utility>
 
 #include <signals/slot.hpp>
 
 #include <cppurses/painter/palette.hpp>
-#include <cppurses/painter/palettes.hpp>
 #include <cppurses/system/animation_engine.hpp>
 #include <cppurses/system/detail/event_queue.hpp>
 #include <cppurses/system/detail/user_input_event_loop.hpp>
@@ -55,29 +55,21 @@ bool System::exit_requested() {
 
 void System::exit(int return_code) {
     animation_engine_.shutdown();
-    main_loop_.exit(return_code);
+    std::lock_guard<std::mutex> lock{running_loops_mtx_};
+    for (Event_loop* loop : running_event_loops_) {
+        loop->exit(return_code);
+    }
     System::exit_requested_ = true;
 }
 
 Event_loop& System::find_event_loop() {
     std::lock_guard<std::mutex> lock{running_loops_mtx_};
     std::thread::id id{std::this_thread::get_id()};
-    // Check with the main loop
-    // if (main_loop_.get_thread_id() == id) {
-    //     return main_loop_;
-    // }
-    // Check with animation Loops
-    // Event_loop* loop_ptr = System::animation_engine().get_event_loop(id);
-    // if (loop_ptr != nullptr) {
-    //     return *loop_ptr;
-    // }
-    // return main_loop_;
     for (Event_loop* loop : running_event_loops_) {
         if (loop->get_thread_id() == id) {
             return *loop;
         }
     }
-    // should not get here
     return main_loop_;
 }
 
@@ -97,11 +89,6 @@ void System::deregister_event_loop(Event_loop* loop) {
 
 Widget* System::head() {
     return head_;
-}
-
-System::System() {
-    System::terminal.set_color_palette(Palettes::DawnBringer());
-    System::terminal.handle_control_characters(false);
 }
 
 System::~System() {
@@ -129,8 +116,7 @@ int System::run() {
     if (head_ == nullptr) {
         return -1;
     }
-    int return_code = main_loop_.run();
-    return return_code;
+    return main_loop_.run();
 }
 
 }  // namespace cppurses

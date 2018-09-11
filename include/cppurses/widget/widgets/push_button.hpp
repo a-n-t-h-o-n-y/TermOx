@@ -1,5 +1,5 @@
-#ifndef WIDGET_WIDGETS_PUSH_BUTTON_HPP
-#define WIDGET_WIDGETS_PUSH_BUTTON_HPP
+#ifndef CPPURSES_WIDGET_WIDGETS_PUSH_BUTTON_HPP
+#define CPPURSES_WIDGET_WIDGETS_PUSH_BUTTON_HPP
 #include <cstddef>
 #include <cstdint>
 
@@ -29,4 +29,4 @@ sig::Slot<void()> click(Push_button& pb);
 
 }  // namespace slot
 }  // namespace cppurses
-#endif  // WIDGET_WIDGETS_PUSH_BUTTON_HPP
+#endif  // CPPURSES_WIDGET_WIDGETS_PUSH_BUTTON_HPP

@@ -14,6 +14,7 @@
 namespace cppurses {
 class Widget;
 
+/// A Widget_stack with an interface to cycle through each Widget in the stack.
 class Cycle_stack : public Vertical_layout {
    public:
     Cycle_stack();

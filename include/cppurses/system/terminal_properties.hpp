@@ -32,9 +32,8 @@ class Terminal_properties {
     void set_color_palette(const Palette& palette);
 
     /// If set true, terminal will pass control characters to your program.
-    ///
-    /// Otherwise the terminal will interpret these characters and not pass them
-    /// on to CPPurses. On intialization of CPPurses this is set false.
+    /** Otherwise the terminal will interpret these characters and not pass them
+     *  on to CPPurses. On intialization this is set false. */
     void handle_control_characters(bool handle);
 
    private:

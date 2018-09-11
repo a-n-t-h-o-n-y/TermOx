@@ -1,5 +1,5 @@
-#ifndef WIDGET_WIDGETS_CYCLE_BOX_HPP
-#define WIDGET_WIDGETS_CYCLE_BOX_HPP
+#ifndef CPPURSES_WIDGET_WIDGETS_CYCLE_BOX_HPP
+#define CPPURSES_WIDGET_WIDGETS_CYCLE_BOX_HPP
 #include <string>
 #include <vector>
 
@@ -13,6 +13,7 @@
 
 namespace cppurses {
 
+/// A Label with a rotating set of label strings that can be cycled through.
 class Cycle_box : public Label {
    public:
     Cycle_box();
@@ -52,4 +53,4 @@ sig::Slot<void()> cycle_backward(Cycle_box& cb);
 
 }  // namespace slot
 }  // namespace cppurses
-#endif  // WIDGET_WIDGETS_CYCLE_BOX_HPP
+#endif  // CPPURSES_WIDGET_WIDGETS_CYCLE_BOX_HPP

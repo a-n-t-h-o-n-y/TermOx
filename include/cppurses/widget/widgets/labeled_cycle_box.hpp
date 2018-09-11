@@ -1,5 +1,5 @@
-#ifndef WIDGET_WIDGETS_LABELED_CYCLE_BOX_HPP
-#define WIDGET_WIDGETS_LABELED_CYCLE_BOX_HPP
+#ifndef CPPURSES_WIDGET_WIDGETS_LABELED_CYCLE_BOX_HPP
+#define CPPURSES_WIDGET_WIDGETS_LABELED_CYCLE_BOX_HPP
 #include <string>
 #include <vector>
 
@@ -29,5 +29,4 @@ class Labeled_cycle_box : public Horizontal_layout {
 };
 
 }  // namespace cppurses
-
-#endif  // WIDGET_WIDGETS_LABELED_CYCLE_BOX_HPP
+#endif  // CPPURSES_WIDGET_WIDGETS_LABELED_CYCLE_BOX_HPP

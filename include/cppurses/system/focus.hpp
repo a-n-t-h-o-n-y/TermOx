@@ -4,8 +4,9 @@
 namespace cppurses {
 class Widget;
 
-/// This is an implementation detail, should be in detail, and private to who
-/// uses it. Users will interact with Focus through a widget's Focus_policy.
+// TODO This is an implementation detail, should be in detail, and private to
+// who uses it. Users will interact with Focus through a widget's Focus_policy.
+
 class Focus {
    public:
     static Widget* focus_widget();

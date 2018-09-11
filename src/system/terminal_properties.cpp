@@ -5,6 +5,7 @@
 #include <ncurses.h>
 
 #include <cppurses/painter/glyph.hpp>
+#include <cppurses/painter/palettes.hpp>
 
 namespace {
 
@@ -19,6 +20,8 @@ namespace cppurses {
 Terminal_properties::Terminal_properties() {
     // TODO Integrate this with Paint_engine constructor into an init function.
     this->update_dimensions();
+    this->set_color_palette(Palettes::DawnBringer());
+    this->handle_control_characters(false);
 }
 
 std::size_t Terminal_properties::width() const {

@@ -1,5 +1,5 @@
-#ifndef WIDGET_WIDGETS_TEXT_DISPLAY_SLOTS_HPP
-#define WIDGET_WIDGETS_TEXT_DISPLAY_SLOTS_HPP
+#ifndef CPPURSES_WIDGET_WIDGETS_TEXT_DISPLAY_SLOTS_HPP
+#define CPPURSES_WIDGET_WIDGETS_TEXT_DISPLAY_SLOTS_HPP
 #include <cstddef>
 
 #include <signals/slot.hpp>
@@ -57,6 +57,5 @@ sig::Slot<void(Attribute)> remove_new_text_attribute(Text_display& td);
 sig::Slot<void()> clear_new_text_attributes(Text_display& td);
 
 }  // namespace slot
-
 }  // namespace cppurses
-#endif  // WIDGET_WIDGETS_TEXT_DISPLAY_SLOTS_HPP
+#endif  // CPPURSES_WIDGET_WIDGETS_TEXT_DISPLAY_SLOTS_HPP

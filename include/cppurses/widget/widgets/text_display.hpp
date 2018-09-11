@@ -1,5 +1,5 @@
-#ifndef WIDGET_WIDGETS_TEXT_DISPLAY_HPP
-#define WIDGET_WIDGETS_TEXT_DISPLAY_HPP
+#ifndef CPPURSES_WIDGET_WIDGETS_TEXT_DISPLAY_HPP
+#define CPPURSES_WIDGET_WIDGETS_TEXT_DISPLAY_HPP
 #include <cstddef>
 #include <vector>
 
@@ -102,4 +102,4 @@ class Text_display : public Widget {
 };
 
 }  // namespace cppurses
-#endif  // WIDGET_WIDGETS_TEXT_DISPLAY_HPP
+#endif  // CPPURSES_WIDGET_WIDGETS_TEXT_DISPLAY_HPP

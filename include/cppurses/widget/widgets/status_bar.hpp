@@ -1,5 +1,5 @@
-#ifndef WIDGET_WIDGETS_STATUS_HPP
-#define WIDGET_WIDGETS_STATUS_HPP
+#ifndef CPPURSES_WIDGET_WIDGETS_STATUS_HPP
+#define CPPURSES_WIDGET_WIDGETS_STATUS_HPP
 #include <signals/signals.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
@@ -22,7 +22,5 @@ sig::Slot<void(Glyph_string)> update_status(Status_bar& sb);
 sig::Slot<void()> update_status(Status_bar& sb, const Glyph_string& message);
 
 }  // namespace slot
-
 }  // namespace cppurses
-
-#endif  // WIDGET_WIDGETS_STATUS_HPP
+#endif  // CPPURSES_WIDGET_WIDGETS_STATUS_HPP

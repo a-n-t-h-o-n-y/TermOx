@@ -66,6 +66,5 @@ sig::Slot<void(std::unique_ptr<Widget>)> insert_page(Widget_stack& stack,
                                                      std::size_t index);
 
 }  // namespace slot
-
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_WIDGETS_WIDGET_STACK_HPP
