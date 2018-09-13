@@ -47,9 +47,9 @@ includes them as git submodules. You'll need NCurses installed on your system.
 git clone https://github.com/a-n-t-h-o-n-y/CPPurses.git
 mkdir CPPurses/build && cd CPPurses/build
 git submodule update --init --recursive --remote  # Pull in dependencies
-cmake ..             # Generate Makefiles
-make                 # Build library
-make demos           # Build demos(optional)
+cmake -DCMAKE_BUILD_TYPE=Release ..               # Generate Makefiles
+make                                              # Build library
+make demos                                        # Build demos(optional)
 sudo make install    # Install header and library archive to system defaults
 ```
 Installing the library with CMake will place the headers and the library
