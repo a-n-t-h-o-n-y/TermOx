@@ -8,7 +8,6 @@
 
 #include <signals/signals.hpp>
 
-#include <cppurses/system/event_handler.hpp>
 #include <cppurses/system/event_loop.hpp>
 #include <cppurses/system/events/timer_event.hpp>
 #include <cppurses/system/system.hpp>
