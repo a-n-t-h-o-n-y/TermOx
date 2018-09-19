@@ -10,6 +10,7 @@
 #include <cppurses/widget/widgets/blank_width.hpp>
 #include <cppurses/widget/widgets/line_edit.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
+#include <cppurses/widget/widget_free_functions.hpp>
 
 namespace cppurses {
 
