@@ -71,7 +71,7 @@ void Event_queue::append(std::unique_ptr<Event> event) {
 
     // Optimize out expensive duplicate events.
     if (type == Event::Paint || type == Event::Move || type == Event::Resize ||
-        type == Event::Disable || Event::Enable) {
+        type == Event::Disable || type == Event::Enable) {
         auto begin = std::begin(queue_);
         auto end = std::end(queue_);
         auto events_equal = [&event](const std::unique_ptr<Event>& on_queue) {
