@@ -81,7 +81,7 @@ Screen_mask find_empty_space(const Widget& w) {
                      x < child->outer_width() + child->x(); ++x) {
                     try {
                         result.at(x, y) = true;
-                    } catch (std::out_of_range e) {
+                    } catch (std::out_of_range& e) {
                         std::ofstream l{"find_empty_space_log.txt",
                                         std::ios::app};
                         static int i{0};
