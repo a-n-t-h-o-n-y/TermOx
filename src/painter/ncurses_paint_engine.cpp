@@ -108,7 +108,6 @@ NCurses_paint_engine::NCurses_paint_engine() {
     ::assume_default_colors(k_init_color, k_init_color);
     initialize_color_pairs();
     this->hide_cursor();
-    System::terminal.update_dimensions();
 }
 
 NCurses_paint_engine::~NCurses_paint_engine() {
