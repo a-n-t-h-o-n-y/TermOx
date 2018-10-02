@@ -14,7 +14,8 @@ class NCurses_paint_engine;
 /// Responsible for getting and setting properties of the terminal screen.
 class Terminal_properties {
    public:
-    Terminal_properties();
+    // Terminal_properties();
+    void initialize();
 
     /// Returns the width of the terminal screen.
     std::size_t width() const;

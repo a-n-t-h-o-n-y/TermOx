@@ -12,5 +12,9 @@ NCurses_paint_engine& NCurses_data::paint_engine() {
     return engine;
 }
 
+void NCurses_data::initialize() {
+    paint_engine();
+}
+
 }  // namespace detail
 }  // namespace cppurses

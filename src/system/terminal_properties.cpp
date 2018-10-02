@@ -17,7 +17,7 @@ std::int16_t scale(std::int16_t value) {
 
 namespace cppurses {
 
-Terminal_properties::Terminal_properties() {
+void Terminal_properties::initialize() {
     // TODO Integrate this with Paint_engine constructor into an init function.
     this->update_dimensions();
     this->set_color_palette(Palettes::DawnBringer());

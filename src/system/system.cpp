@@ -9,6 +9,7 @@
 
 #include <signals/slot.hpp>
 
+#include <cppurses/painter/detail/ncurses_data.hpp>
 #include <cppurses/painter/palette.hpp>
 #include <cppurses/system/animation_engine.hpp>
 #include <cppurses/system/detail/event_queue.hpp>
@@ -89,6 +90,11 @@ void System::deregister_event_loop(Event_loop* loop) {
 
 Widget* System::head() {
     return head_;
+}
+
+System::System() {
+    detail::NCurses_data::initialize();
+    terminal.initialize();
 }
 
 System::~System() {

@@ -22,7 +22,7 @@ class Event_loop;
  *  Manages the head Widget and the main User_input_event_loop. */
 class System {
    public:
-    System() = default;
+    System();
     System(const System&) = delete;
     System& operator=(const System&) = delete;
     System(System&&) = default;
