@@ -3,6 +3,7 @@
 #include <cppurses/painter/detail/ncurses_paint_engine.hpp>
 
 namespace cppurses {
+class System;
 namespace detail {
 
 /// Shared data for ncurses calls.
@@ -13,10 +14,14 @@ class NCurses_data {
     /// Return a reference to the only NCurses_paint_engine object.
     static NCurses_paint_engine& paint_engine();
 
+    /// Ensures the static NCurses_paint_engine is constructed.
+    static void initialize();
+
     // Only these classes and function have access to this object.
     friend class Paint_middleman;
     friend class NCurses_paint_engine;
     friend class NCurses_event_listener;
+    friend class cppurses::System;
     friend void handle_sigwinch(int);
 };
 
