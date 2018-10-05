@@ -49,5 +49,10 @@ target_sources(demos PRIVATE
 find_package(Threads REQUIRED)
 
 target_link_libraries(demos PRIVATE cppurses ${CMAKE_THREAD_LIBS_INIT})
-target_compile_features(demos PRIVATE cxx_std_14)
+
+if(${CMAKE_VERSION} VERSION_LESS "3.8")
+    set(CMAKE_CXX_STANDARD 14)
+else()
+    target_compile_features(demos INTERFACE cxx_std_14)
+endif()
 
