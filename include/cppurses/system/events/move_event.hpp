@@ -11,7 +11,10 @@ class Move_event : public Event {
     // In global Point.
     Move_event(Widget* receiver,
                Point new_position,
-               Point old_position = Point{0, 0});
+               Point old_position = Point{0, 0})
+        : Event{Event::Move, receiver},
+          new_position_{new_position},
+          old_position_{old_position} {}
 
     bool send() const override;
     bool filter_send(Widget* filter) const override;

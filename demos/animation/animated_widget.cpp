@@ -40,7 +40,7 @@ bool Animated_bit::timer_event() {
 }
 
 bool Animated_bit::paint_event() {
-    cppurses::Painter p{this};
+    cppurses::Painter p{*this};
     p.put(glyph_, coords_);
     return Widget::paint_event();
 }

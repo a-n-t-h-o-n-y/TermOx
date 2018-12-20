@@ -14,7 +14,7 @@ using namespace cppurses;
 
 template <typename Queue_t>
 void remove_descendant_delete_events(const Event& new_event, Queue_t& queue) {
-    const Widget* receiver{new_event.receiver()};
+    const auto* receiver = new_event.receiver();
     auto is_descendant = [receiver](const std::unique_ptr<Event>& on_queue) {
         return receiver->children.has_descendant(on_queue->receiver());
     };
@@ -38,7 +38,7 @@ void Event_queue::append(std::unique_ptr<Event> event) {
     }
 
     // Remove Enable/Disable pairs
-    Event::Type type{event->type()};
+    auto type = event->type();
     if (type == Event::Enable) {
         auto begin = std::begin(queue_);
         auto end = std::end(queue_);

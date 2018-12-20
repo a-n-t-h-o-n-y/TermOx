@@ -12,47 +12,6 @@
 
 namespace cppurses {
 
-Textbox::Textbox(Glyph_string contents) : Textbox_base{std::move(contents)} {
-    this->focus_policy = Focus_policy::Strong;
-}
-
-void Textbox::enable_scrollwheel(bool enable) {
-    scroll_wheel_ = enable;
-}
-
-void Textbox::disable_scrollwheel(bool disable) {
-    scroll_wheel_ = !disable;
-}
-
-void Textbox::toggle_scrollwheel() {
-    scroll_wheel_ = !scroll_wheel_;
-}
-
-bool Textbox::does_scrollwheel() const {
-    return scroll_wheel_;
-}
-
-void Textbox::set_wheel_speed(std::size_t lines) {
-    this->set_wheel_speed_up(lines);
-    this->set_wheel_speed_down(lines);
-}
-
-void Textbox::set_wheel_speed_up(std::size_t lines) {
-    scroll_speed_up_ = lines;
-}
-
-void Textbox::set_wheel_speed_down(std::size_t lines) {
-    scroll_speed_down_ = lines;
-}
-
-void Textbox::disable_input() {
-    takes_input_ = false;
-}
-
-void Textbox::enable_input() {
-    takes_input_ = true;
-}
-
 bool Textbox::key_press_event(const Keyboard_data& keyboard) {
     switch (keyboard.key) {
         case Key::Arrow_right:

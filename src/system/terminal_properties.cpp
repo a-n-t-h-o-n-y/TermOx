@@ -24,20 +24,9 @@ void Terminal_properties::initialize() {
     this->handle_control_characters(false);
 }
 
-std::size_t Terminal_properties::width() const {
-    return width_;
-}
-std::size_t Terminal_properties::height() const {
-    return height_;
-}
-
 void Terminal_properties::set_background_tile(const Glyph& tile) {
     default_background_ = tile;
     // TODO should notify the paint system to repaint every widget.
-}
-
-const Glyph& Terminal_properties::background_tile() const {
-    return default_background_;
 }
 
 void Terminal_properties::set_color_palette(const Palette& palette) {

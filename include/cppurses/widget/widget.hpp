@@ -22,6 +22,7 @@
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/children_data.hpp>
 #include <cppurses/widget/cursor_data.hpp>
+#include <cppurses/widget/detail/border_offset.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/size_policy.hpp>
@@ -32,7 +33,7 @@ struct Area;
 class Widget {
    public:
     /// Initialize with \p name.
-    explicit Widget(std::string name = "");
+    explicit Widget(std::string name = "") : name_{std::move(name)} {}
 
     Widget(const Widget&) = delete;
     Widget(Widget&&) = delete;
@@ -41,7 +42,7 @@ class Widget {
     virtual ~Widget();
 
     /// Return the name of the Widget.
-    std::string name() const;
+    std::string name() const { return name_; }
 
     /// Set the identifying name of the Widget.
     void set_name(std::string name);
@@ -62,10 +63,12 @@ class Widget {
     /** Will only post a Child_polished_event to the parent if requested. Useful
      *  for disabling a child Widget from a parent's Child_polished_event
      *  handler. */
-    void disable(bool disable = true, bool post_child_polished_event = true);
+    void disable(bool disable = true, bool post_child_polished_event = true) {
+        this->enable(!disable, post_child_polished_event);
+    }
 
     /// Check whether the Widget is enabled.
-    bool enabled() const;
+    bool enabled() const { return enabled_; }
 
     /// Posts a Delete_event to this, deleting the object when safe to do so.
     void close();
@@ -73,56 +76,86 @@ class Widget {
     /// Returns the Widget's parent pointer.
     /** The parent is the Widget that owns *this, it  is in charge of
      *  positioning and resizing this Widget. */
-    Widget* parent() const;
+    Widget* parent() const { return parent_; }
 
     /// Create a Widget and append it to the list of children.
     /** Returns a reference to this newly created Widget. */
     template <typename Widg_t, typename... Args>
-    Widg_t& make_child(Args&&... args);
+    Widg_t& make_child(Args&&... args) {
+        this->children.add(
+            std::make_unique<Widg_t>(std::forward<Args>(args)...));
+        return static_cast<Widg_t&>(*(this->children.get().back()));
+    }
 
     /// Searches children by name and Widget type.
     /** Returns a pointer to the given type, if found, or nullptr. */
     template <typename Widg_t = Widget>
-    Widg_t* find_child(const std::string& name) const;
+    Widg_t* find_child(const std::string& name) const {
+        for (const std::unique_ptr<Widget>& widg : this->children.get()) {
+            if (widg->name() == name &&
+                dynamic_cast<Widg_t*>(widg.get()) != nullptr) {
+                return widg.get();
+            }
+        }
+        return nullptr;
+    }
 
     /// Searches matching on \p name and Widg_t type for a descendant Widget.
     /** Searches with breadth first ordering over the 'Widget tree'. Returns a
      *  Widg_t* if found, otherwise a nullptr is returned. Returns the first
      *  matching descendant. */
     template <typename Widg_t = Widget>
-    Widg_t* find_descendant(const std::string& name) const;
+    Widg_t* find_descendant(const std::string& name) const {
+        for (Widget* widg : this->children.get_descendants()) {
+            if (widg->name() == name &&
+                dynamic_cast<Widg_t*>(widg != nullptr)) {
+                return widg;
+            }
+        }
+        return nullptr;
+    }
 
     /// x coordinate for the top left point of this Widget.
     /** Given with relation to the top left of the terminal screen. */
-    std::size_t x() const;
+    std::size_t x() const { return top_left_position_.x; }
 
     /// y coordinate for the top left point of this Widget.
     /** Given with relation to the top left of the terminal screen. */
-    std::size_t y() const;
+    std::size_t y() const { return top_left_position_.y; }
 
     /// x coordinate for the top left point of this Widget, beyond the Border.
     /** Given with relation to the top left of the terminal screen. This is the
      *  coordinate that marks the beginning of the space that is availiable for
      *  use by the Widget. */
-    std::size_t inner_x() const;
+    std::size_t inner_x() const {
+        return top_left_position_.x + detail::Border_offset::west(*this);
+    }
 
     /// y coordinate for the top left point of this Widget, beyond the Border.
     /** Given with relation to the top left of the terminal screen. This is the
      *  coordinate that marks the beginning of the space that is availiable for
      *  use by the Widget. */
-    std::size_t inner_y() const;
+    std::size_t inner_y() const {
+        return top_left_position_.y + detail::Border_offset::north(*this);
+    }
 
     /// Returns the inner width dimension, this does not include Border space.
-    std::size_t width() const;
+    std::size_t width() const {
+        return this->outer_width() - detail::Border_offset::east(*this) -
+               detail::Border_offset::west(*this);
+    }
 
     /// Returns the inner height dimension, this does not include Border space.
-    std::size_t height() const;
+    std::size_t height() const {
+        return this->outer_height() - detail::Border_offset::north(*this) -
+               detail::Border_offset::south(*this);
+    }
 
     /// Returns the width dimension, this includes Border space.
-    std::size_t outer_width() const;
+    std::size_t outer_width() const { return outer_width_; }
 
     /// Returns the height dimension, this includes Border space.
-    std::size_t outer_height() const;
+    std::size_t outer_height() const { return outer_height_; }
 
     /// Posts a paint event to itself.
     /** Useful to prompt an update of the Widget when the state of the Widget
@@ -142,7 +175,9 @@ class Widget {
     void remove_event_filter(Widget* filter);
 
     /// Return the list of Event filter Widgets.
-    const std::vector<Widget*>& get_event_filters() const;
+    const std::vector<Widget*>& get_event_filters() const {
+        return event_filters_;
+    }
 
     /// Enables animation on this Widget.
     /** Animated widgets receiver a Timer_event every \p period. This Timer
@@ -163,6 +198,10 @@ class Widget {
     /** This Widget will be unregistered from the Animation_engine held by
      *  System. */
     void disable_animation();
+
+    /// Make this widget the current in focus.
+    /** Can be overridden by derived classes to modify how focus is set. */
+    virtual void give_focus();
 
     // Public Objects
     /// Describes the visual border of this Widget.
@@ -190,10 +229,13 @@ class Widget {
     Brush brush{background(Color::Black), foreground(Color::White)};
 
     /// If true, the brush will paint to the wallpaper Glyph.
-    bool brush_paints_wallpaper() const;
+    bool brush_paints_wallpaper() const { return brush_paints_wallpaper_; }
 
     /// Set if the brush is applied to the wallpaper Glyph.
-    void set_brush_paints_wallpaper(bool alters = true);
+    void set_brush_paints_wallpaper(bool paints = true) {
+        brush_paints_wallpaper_ = paints;
+        this->update();
+    }
 
     /// Returns the wallpaper Glyph.
     /** The Glyph has the brush applied to it, if brush_paints_wallpaper is set
@@ -201,10 +243,10 @@ class Widget {
     Glyph generate_wallpaper() const;
 
     /// Returns the current Screen_state of this Widget, as it appears.
-    detail::Screen_state& screen_state();
+    detail::Screen_state& screen_state() { return screen_state_; }
 
     /// Returns the current Screen_state of this Widget, as it appears.
-    const detail::Screen_state& screen_state() const;
+    const detail::Screen_state& screen_state() const { return screen_state_; }
 
     // Signals
     sig::Signal<void(const std::string&)> name_changed;
@@ -382,64 +424,12 @@ class Widget {
     std::size_t outer_width_{width_policy.hint()};
     std::size_t outer_height_{height_policy.hint()};
 
-    void set_x(std::size_t global_x);
-    void set_y(std::size_t global_y);
-    void set_parent(Widget* parent);
+    void set_x(std::size_t global_x) { top_left_position_.x = global_x; }
+
+    void set_y(std::size_t global_y) { top_left_position_.y = global_y; }
+
+    void set_parent(Widget* parent) { parent_ = parent; }
 };
-
-// - - - - - - - - - - - - Template Implementations - - - - - - - - - - - - - -
-
-template <typename Widg_t, typename... Args>
-Widg_t& Widget::make_child(Args&&... args) {
-    this->children.add(std::make_unique<Widg_t>(std::forward<Args>(args)...));
-    return static_cast<Widg_t&>(*(this->children.get().back()));
-}
-
-template <typename Widg_t>
-Widg_t* Widget::find_child(const std::string& name) const {
-    for (const std::unique_ptr<Widget>& widg : this->children.get()) {
-        if (widg->name() == name &&
-            dynamic_cast<Widg_t*>(widg.get()) != nullptr) {
-            return widg.get();
-        }
-    }
-    return nullptr;
-}
-
-template <typename Widg_t>
-Widg_t* Widget::find_descendant(const std::string& name) const {
-    for (Widget* widg : this->children.get_descendants()) {
-        if (widg->name() == name && dynamic_cast<Widg_t*>(widg != nullptr)) {
-            return widg;
-        }
-    }
-    return nullptr;
-}
-
-template <typename... Attrs>
-void add_attributes(Widget& w, Attrs&&... attrs) {
-    for (Attribute a : {attrs...}) {
-        if (!w.brush.has_attribute(a)) {
-            w.brush.add_attributes(std::forward<Attrs>(attrs)...);
-            w.update();
-            return;
-        }
-    }
-}
-
-template <typename... Attrs>
-void remove_attributes(Widget& w, Attrs&&... attrs) {
-    bool repaint{false};
-    for (const auto& a : {attrs...}) {
-        if (w.brush.has_attribute(a)) {
-            w.brush.remove_attribute(a);
-            repaint = true;
-        }
-    }
-    if (repaint) {
-        w.update();
-    }
-}
 
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_WIDGET_HPP

@@ -5,12 +5,12 @@
 namespace cppurses {
 
 namespace detail {
-const int k_init_color{239};
+const int first_color_value{239};
 }  // namespace detail
 
 /// Colors that can be applied to Glyphs.
 enum class Color : std::int16_t {
-    Black = detail::k_init_color,
+    Black = detail::first_color_value,
     Dark_red,
     Dark_blue,
     Dark_gray,
@@ -33,7 +33,7 @@ namespace detail {
 // Used by add_attributes() in brush to overload on different Color types from a
 // parameter pack.
 enum class BackgroundColor : std::int16_t {
-    Black = detail::k_init_color,
+    Black = detail::first_color_value,
     Dark_red,
     Dark_blue,
     Dark_gray,
@@ -54,7 +54,7 @@ enum class BackgroundColor : std::int16_t {
 // Used by add_attributes() in brush to overload on different Color types from a
 // parameter pack.
 enum class ForegroundColor : std::int16_t {
-    Black = detail::k_init_color,
+    Black = detail::first_color_value,
     Dark_red,
     Dark_blue,
     Dark_gray,
@@ -75,12 +75,12 @@ enum class ForegroundColor : std::int16_t {
 }  // namespace detail
 
 /// Converts a Color into a detail::BackgroundColor to be used by Brush.
-inline detail::BackgroundColor background(Color c) {
+inline constexpr detail::BackgroundColor background(Color c) {
     return static_cast<detail::BackgroundColor>(c);
 }
 
 /// Converts a Color into a detail::BackgroundColor to be used by Brush.
-inline detail::ForegroundColor foreground(Color c) {
+inline constexpr detail::ForegroundColor foreground(Color c) {
     return static_cast<detail::ForegroundColor>(c);
 }
 

@@ -76,7 +76,7 @@ void List<T>::rotate_properties() {
 
 template <typename T>
 bool List<T>::paint_event() {
-    Painter p{this};
+    Painter p{*this};
     // p.move_cursor_on_put = true;
     for (const auto& prop : properties_) {  // below 0,0 might be wrong.
         p.put(Glyph_string{prop.name}.append(" | "), 0, 0);

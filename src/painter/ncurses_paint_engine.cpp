@@ -31,62 +31,113 @@
 #endif
 
 namespace {
-attr_t color_to_int(cppurses::Color c) {
-    return static_cast<attr_t>(c) - cppurses::detail::k_init_color;
+using namespace cppurses;
+
+attr_t color_value(Color c) {
+    return static_cast<attr_t>(c) - detail::first_color_value;
 }
 
-short find_pair(cppurses::Color foreground, cppurses::Color background) {
-    const int color_n{16};
-    return color_to_int(background) * color_n + color_to_int(foreground);
+short find_pair(Color foreground, Color background) {
+    const auto color_count = 16;
+    return color_value(background) * color_count + color_value(foreground);
 }
 
-attr_t attr_to_int(cppurses::Attribute attr) {
-    attr_t a = A_NORMAL;
+short find_pair(const Brush& brush) {
+    auto bg_color = Color::Black;
+    if (brush.background_color()) {
+        bg_color = *(brush.background_color());
+    }
+    auto fg_color = Color::Black;
+    if (brush.foreground_color()) {
+        fg_color = *(brush.foreground_color());
+    }
+    return find_pair(fg_color, bg_color);
+}
+
+attr_t attribute_to_attr_t(Attribute attr) {
+    auto result = A_NORMAL;
     switch (attr) {
-        case cppurses::Attribute::Bold:
-            a = A_BOLD;
+        case Attribute::Bold:
+            result = A_BOLD;
             break;
-        case cppurses::Attribute::Italic:
+        case Attribute::Underline:
+            result = A_UNDERLINE;
+            break;
+        case Attribute::Standout:
+            result = A_STANDOUT;
+            break;
+        case Attribute::Dim:
+            result = A_DIM;
+            break;
+        case Attribute::Inverse:
+            result = A_REVERSE;
+            break;
+        case Attribute::Invisible:
+            result = A_INVIS;
+            break;
+        case Attribute::Blink:
+            result = A_BLINK;
+            break;
+        case Attribute::Italic:
 #if defined(A_ITALIC)
-            a = A_ITALIC;
+            result = A_ITALIC;
 #endif
-            break;
-        case cppurses::Attribute::Underline:
-            a = A_UNDERLINE;
-            break;
-        case cppurses::Attribute::Standout:
-            a = A_STANDOUT;
-            break;
-        case cppurses::Attribute::Dim:
-            a = A_DIM;
-            break;
-        case cppurses::Attribute::Inverse:
-            a = A_REVERSE;
-            break;
-        case cppurses::Attribute::Invisible:
-            a = A_INVIS;
-            break;
-        case cppurses::Attribute::Blink:
-            a = A_BLINK;
             break;
         default:
             throw std::domain_error{"Attribute enum not handled."};
     }
-    return a;
+    return result;
+}
+
+attr_t find_attr_t(const Brush& brush) {
+    auto result = A_NORMAL;
+    for (Attribute a : Attribute_list) {
+        if (brush.has_attribute(a)) {
+            result |= attribute_to_attr_t(a);
+        }
+    }
+    return result;
 }
 
 void initialize_color_pairs() {
-    int pair{0};
-    const int end_color{cppurses::detail::k_init_color + 16};
-    for (int i{cppurses::detail::k_init_color}; i < end_color; ++i) {
-        for (int j{cppurses::detail::k_init_color}; j < end_color; ++j) {
-            if (pair != 0) {
-                ::init_pair(pair, j, i);
+    using detail::first_color_value;
+    const auto last_color_value = first_color_value + 16;
+    short pair_n = 0;
+    for (auto bg = first_color_value; bg < last_color_value; ++bg) {
+        for (auto fg = first_color_value; fg < last_color_value; ++fg) {
+            if (pair_n != 0) {
+                ::init_pair(pair_n, fg, bg);
             }
-            ++pair;
+            ++pair_n;
         }
     }
 }
+
+#if defined(add_wchstr)
+/// Adds \p glyph's symbol, with attributes, to the screen at cursor position.
+void add_as_wchar(const Glyph& glyph) {
+    const auto color_pair = find_pair(glyph.brush);
+    const auto attributes = find_attr_t(glyph.brush);
+    const wchar_t symbol[2] = {glyph.symbol, L'\0'};
+
+    auto symbol_and_attributes = cchar_t{' '};
+    ::setcchar(&symbol_and_attributes, symbol, attributes, color_pair, nullptr);
+    ::wadd_wchnstr(::stdscr, &symbol_and_attributes, 1);
+}
+#else
+/// Adds \p glyph's symbol, with attributes, to the screen at cursor position.
+void add_as_char(const Glyph& glyph) {
+    auto use_addch = false;
+    auto symbol_and_attributes = detail::get_chtype(glyph.symbol, use_addch);
+    symbol_and_attributes |= find_pair(glyph.brush);
+    symbol_and_attributes |= find_attr_t(glyph.brush);
+    if (use_addch) {
+        ::waddch(::stdscr, symbol_and_attributes);
+    } else {
+        ::waddchnstr(::stdscr, &symbol_and_attributes, 1);
+    }
+}
+#endif
 
 }  // namespace
 
@@ -97,7 +148,6 @@ NCurses_paint_engine::NCurses_paint_engine() {
     setenv("TERM", "xterm-256color", 1);  // TODO not a great idea.
     std::setlocale(LC_ALL, "en_US.UTF-8");
     this->setup_sigwinch();
-
     ::initscr();
     ::noecho();
     ::keypad(::stdscr, true);
@@ -105,7 +155,7 @@ NCurses_paint_engine::NCurses_paint_engine() {
     ::mousemask(ALL_MOUSE_EVENTS, nullptr);
     ::mouseinterval(0);
     ::start_color();
-    ::assume_default_colors(k_init_color, k_init_color);
+    ::assume_default_colors(first_color_value, first_color_value);
     initialize_color_pairs();
     this->hide_cursor();
 }
@@ -115,63 +165,19 @@ NCurses_paint_engine::~NCurses_paint_engine() {
 }
 
 void NCurses_paint_engine::put_glyph(const Glyph& g) {
-    // Background Color
-    Color back_color{Color::Black};  // intializaed color should never be used
-    if (g.brush.background_color()) {
-        back_color = *g.brush.background_color();
-    }
-
-    // Foreground Color
-    Color fore_color{Color::Black};
-    if (g.brush.foreground_color()) {
-        fore_color = *g.brush.foreground_color();
-    }
-    short color_pair{find_pair(fore_color, back_color)};
-
-    attr_t attributes{A_NORMAL};
-    for (Attribute a : Attribute_list) {
-        if (g.brush.has_attribute(a)) {
-            attributes |= attr_to_int(a);
-        }
-    }
-
 #if defined(SLOW_PAINT)
-    cchar_t indicate;
-    wchar_t symb2[2] = {L'X', L'\0'};
-    ::setcchar(&indicate, symb2, A_NORMAL,
-               find_pair(Color::White, Color::Black), nullptr);
-    ::wadd_wchnstr(::stdscr, &indicate, 1);
-
-    this->refresh();
-    std::this_thread::sleep_for(std::chrono::milliseconds(SLOW_PAINT));
+    paint_temporary(L'X');
 #endif
-
 #if defined(add_wchstr)
-    const wchar_t symb[2] = {g.symbol, L'\0'};
-    cchar_t image;
-    ::setcchar(&image, symb, attributes, color_pair, nullptr);
-    ::wadd_wchnstr(::stdscr, &image, 1);
-#else  // no wchar_t support
-    bool use_addch{false};
-    chtype image{find_chtype(g.symbol, &use_addch)};
-    image |= color_pair;
-    image |= attributes;
-    if (use_addch) {  // For extended chars
-        ::waddch(::stdscr, image);
-    } else {
-        ::waddchnstr(::stdscr, &image, 1);
-    }
+    add_as_wchar(g);
+#else
+    // If no wchar_t support in ncurses.
+    add_as_char(g);
 #endif
-
 #if defined(SLOW_PAINT)
     this->refresh();
     std::this_thread::sleep_for(std::chrono::milliseconds(SLOW_PAINT));
 #endif
-}
-
-void NCurses_paint_engine::put(std::size_t x, std::size_t y, const Glyph& g) {
-    this->move_cursor(x, y);
-    this->put_glyph(g);
 }
 
 void NCurses_paint_engine::move_cursor(std::size_t x, std::size_t y) {
@@ -179,14 +185,7 @@ void NCurses_paint_engine::move_cursor(std::size_t x, std::size_t y) {
 }
 
 void NCurses_paint_engine::show_cursor(bool show) {
-    if (show) {
-        ::curs_set(1);
-    } else {
-        ::curs_set(0);
-    }
-}
-void NCurses_paint_engine::hide_cursor(bool hide) {
-    this->show_cursor(!hide);
+    show ? ::curs_set(1) : ::curs_set(0);
 }
 
 void NCurses_paint_engine::refresh() {
@@ -202,6 +201,18 @@ void NCurses_paint_engine::setup_sigwinch() {
     memset(&sa, 0, sizeof(struct sigaction));
     sa.sa_handler = handle_sigwinch;
     sigaction(SIGWINCH, &sa, NULL);
+}
+
+void NCurses_paint_engine::paint_temporary(wchar_t display) {
+    const wchar_t temp_sym[2] = {display, L'\0'};
+    const auto temp_color_pair = find_pair(Color::White, Color::Black);
+    auto temp_display = cchar_t{' '};
+    ::setcchar(&temp_display, temp_sym, A_NORMAL, temp_color_pair, nullptr);
+    ::wadd_wchnstr(::stdscr, &temp_display, 1);
+    this->refresh();
+#if defined(SLOW_PAINT)
+    std::this_thread::sleep_for(std::chrono::milliseconds(SLOW_PAINT));
+#endif
 }
 
 }  // namespace detail

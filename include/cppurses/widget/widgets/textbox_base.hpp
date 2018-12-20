@@ -12,27 +12,38 @@ namespace cppurses {
 
 class Textbox_base : public Text_display {
    public:
-    explicit Textbox_base(Glyph_string contents = "");
+    explicit Textbox_base(Glyph_string contents = "")
+        : Text_display{std::move(contents)} {
+        this->cursor.enable();
+    }
 
     // Scrolling
     void scroll_up(std::size_t n = 1) override;
     void scroll_down(std::size_t n = 1) override;
-    void enable_scrolling(bool enable = true);
-    void disable_scrolling(bool disable = true);
-    void toggle_scrolling();
+    void enable_scrolling(bool enable = true) { scroll_ = enable; }
+    void disable_scrolling(bool disable = true) { scroll_ = !disable; }
+    void toggle_scrolling() { scroll_ = !scroll_; }
 
     // Cursor Movement
     void cursor_up(std::size_t n = 1);
     void cursor_down(std::size_t n = 1);
     void cursor_left(std::size_t n = 1);
     void cursor_right(std::size_t n = 1);
-    void set_cursor(Point pos);
-    void set_cursor(std::size_t x, std::size_t y);
+
+    void set_cursor(Point pos) { this->set_cursor(pos.x, pos.y); }
+
+    void set_cursor(std::size_t x, std::size_t y) {
+        this->set_cursor(this->index_at(x, y));
+    }
+
     void set_cursor(std::size_t index);
 
     // Query Functions
     bool does_scroll() const { return scroll_; }
-    std::size_t cursor_index() const;
+
+    std::size_t cursor_index() const {
+        return this->index_at(this->cursor.position());
+    }
 
     // Signals
     sig::Signal<void(std::size_t n)> cursor_moved_left;

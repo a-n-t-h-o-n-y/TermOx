@@ -12,11 +12,12 @@ struct Glyph {
     Glyph() = default;
 
     /// Construct a Glyph with the provided wchar_t and Brush.
-    Glyph(wchar_t sym, const Brush& b);
+    Glyph(wchar_t sym, const Brush& b) : symbol{sym}, brush{b} {}
 
     /// Construct with the provided wchar_t and list of Attributes and Colors.
     template <typename... Attributes>
-    Glyph(wchar_t sym, Attributes&&... attrs);
+    Glyph(wchar_t sym, Attributes&&... attrs)
+        : symbol{sym}, brush{std::forward<Attributes>(attrs)...} {}
 
     /// The Glyph's symbol is the wide character that will be displayed.
     wchar_t symbol{L' '};
@@ -26,15 +27,14 @@ struct Glyph {
 };
 
 /// Compares if each symbol and brush are equal.
-bool operator==(const Glyph& lhs, const Glyph& rhs);
+inline bool operator==(const Glyph& lhs, const Glyph& rhs) {
+    return (lhs.symbol == rhs.symbol) && (lhs.brush == rhs.brush);
+}
 
 /// Compares if each symbol and brush are not equal.
-bool operator!=(const Glyph& lhs, const Glyph& rhs);
-
-// TEMPLATE IMPLEMENTATIONS
-template <typename... Attributes>
-Glyph::Glyph(wchar_t sym, Attributes&&... attrs)
-    : symbol{sym}, brush{std::forward<Attributes>(attrs)...} {}
+inline bool operator!=(const Glyph& lhs, const Glyph& rhs) {
+    return !(lhs == rhs);
+}
 
 }  // namespace cppurses
 #endif  // CPPURSES_PAINTER_GLYPH_HPP

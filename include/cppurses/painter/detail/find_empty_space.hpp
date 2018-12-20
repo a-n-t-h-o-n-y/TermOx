@@ -6,9 +6,9 @@ namespace cppurses {
 class Widget;
 namespace detail {
 
-/// Returns a screen mask for the Widget \p w, where a set bit means you have no
-/// enabled child owning that point. Used to find where a Layout should paint
-/// wallpaper tiles.
+/// Returns a screen mask representing empty space for the Widget \p w.
+/** Where a set bit means you have no enabled child owning that point. Used to
+ *  find where a Layout should paint wallpaper tiles. */
 Screen_mask find_empty_space(const Widget& w);
 
 }  // namespace detail

@@ -101,8 +101,8 @@ bool Widget::delete_event() {
 }
 
 bool Widget::paint_event() {
-    Painter p{this};
-    p.border(border);
+    Painter p{*this};
+    p.border();
     return true;
 }
 

@@ -13,6 +13,9 @@ namespace detail {
 /// A 2D bitmask to indicate a binary feature for each point on a Widget.
 class Screen_mask {
    public:
+    using Reference = typename std::vector<bool>::reference;
+    using Const_reference = typename std::vector<bool>::const_reference;
+
     /// Create an empty Screen_mask with size (0,0).
     Screen_mask() = default;
 
@@ -20,31 +23,38 @@ class Screen_mask {
     Screen_mask(const Widget& w);
 
     /// Return the offset of the Widget on the screen, top left point.
-    Point offset() const;
+    Point offset() const { return offset_; }
 
     /// Return the area of the screen mask. Width and Height.
-    Area area() const;
+    Area area() const { return area_; }
 
     /// Flip all bits in the mask.
-    void flip();
+    void flip() { bits_.flip(); }
 
     /// Returns true if this->Area{width: 0, height: 0}
-    bool empty() const;
+    bool empty() const { return bits_.empty(); }
 
     /// Clear the contents to an empty state.
-    void clear();
+    void clear() { bits_.clear(); }
 
     /// Retrieve the bit set at point \p p
-    typename std::vector<bool>::reference at(std::size_t x, std::size_t y);
+    Reference at(std::size_t x, std::size_t y) { return bits_[index_at(x, y)]; }
 
     /// Retrieve the bit set at point \p p
-    typename std::vector<bool>::const_reference at(std::size_t x,
-                                                   std::size_t y) const;
+    Const_reference at(std::size_t x, std::size_t y) const {
+        return bits_[index_at(x, y)];
+    }
 
    private:
     Point offset_;
     Area area_;
     std::vector<bool> bits_;
+
+    std::size_t index_at(std::size_t x, std::size_t y) const {
+        x -= offset_.x;
+        y -= offset_.y;
+        return (y * area_.width) + x;
+    }
 };
 
 }  // namespace detail

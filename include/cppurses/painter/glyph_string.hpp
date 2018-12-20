@@ -11,6 +11,7 @@
 
 #include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/glyph.hpp>
+#include <cppurses/painter/utility/wchar_to_bytes.hpp>
 
 namespace cppurses {
 
@@ -57,16 +58,16 @@ class Glyph_string : private std::vector<Glyph> {
                  Attributes&&... attrs);
 
     /// Convert to a std::string, each Glyph being a char.
-    std::string str() const;
+    std::string str() const { return utility::wchar_to_bytes(this->w_str()); }
 
     /// Convert to a std::wstring, each Glyph being a wchar_t.
     std::wstring w_str() const;
 
     /// Returns the length in Glyphs of the Glyph_string.
-    size_type length() const;
+    size_type length() const { return this->size(); }
 
     /// Compound concatenation assignment operator to append a Glyph.
-    Glyph_string& operator+=(const Glyph& glyph);
+    Glyph_string& operator+=(const Glyph& glyph) { return this->append(glyph); }
 
     /// Concatenation operator to append a Glyph_string.
     Glyph_string operator+(const Glyph_string& gs) const;
@@ -151,10 +152,14 @@ class Glyph_string : private std::vector<Glyph> {
 bool operator==(const Glyph_string& x, const Glyph_string& y);
 
 /// Inequality comparison on each Glyph in the Glyph_strings.
-bool operator!=(const Glyph_string& x, const Glyph_string& y);
+inline bool operator!=(const Glyph_string& x, const Glyph_string& y) {
+    return !(x == y);
+}
 
 /// stream output operator for Glyph_string, outputs the Glyphs as chars to os.
-std::ostream& operator<<(std::ostream& os, const Glyph_string& gs);
+inline std::ostream& operator<<(std::ostream& os, const Glyph_string& gs) {
+    return os << gs.str();
+}
 
 // TEMPLATE IMPLEMENTATIONS
 template <typename InputIterator>
@@ -229,10 +234,8 @@ Glyph_string& Glyph_string::append(const std::string& symbols,
 template <typename... Attributes>
 Glyph_string& Glyph_string::append(const wchar_t* symbols,
                                    Attributes&&... attrs) {
-    std::size_t i{0};
-    while (symbols[i] != L'\0') {
+    for (auto i = std::size_t{0}; symbols[i] != L'\0'; ++i) {
         this->append(Glyph{symbols[i], std::forward<Attributes>(attrs)...});
-        ++i;
     }
     return *this;
 }

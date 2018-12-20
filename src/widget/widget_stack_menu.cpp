@@ -19,7 +19,6 @@ Widget_stack_menu::Widget_stack_menu(Glyph_string title)
 }
 
 void Widget_stack_menu::initialize() {
-    this->focus_policy = Focus_policy::Strong;
     stack_.page_changed.connect(sig::Slot<void(std::size_t)>{page_changed});
     stack_.set_active_page(0);
     auto& esc_short = Shortcuts::add_shortcut(Key::Escape);
@@ -32,7 +31,6 @@ void Widget_stack_menu::add_page(Glyph_string title,
     stack_.add_page(std::move(widget));
     auto& signal = menu_.add_item(std::move(title));
     signal.connect(slot::set_active_page(stack_, this->size() - 1));
-    // this->update(); // Child_added_event will take care of this
 }
 
 void Widget_stack_menu::insert_page(Glyph_string title,
@@ -41,13 +39,14 @@ void Widget_stack_menu::insert_page(Glyph_string title,
     stack_.insert_page(index, std::move(widget));
     auto& signal = menu_.insert_item(std::move(title), index);
     signal.connect(slot::set_active_page(stack_, index));
-    // this->update();
 }
 
 void Widget_stack_menu::remove_page(std::size_t index) {
     menu_.remove_item(index);
-    // this->update();
-    // return stack_.remove_page(index);
+}
+
+void Widget_stack_menu::give_focus() {
+    Focus::set_focus_to(&menu_);
 }
 
 std::size_t Widget_stack_menu::size() const {

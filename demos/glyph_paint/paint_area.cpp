@@ -168,7 +168,7 @@ void Paint_area::read(std::istream& is) {
 }
 
 bool Paint_area::paint_event() {
-    Painter p{this};
+    Painter p{*this};
     for (const auto& gc_pair : glyphs_painted_) {
         if (gc_pair.first.x < this->width() &&
             gc_pair.first.y < this->height()) {

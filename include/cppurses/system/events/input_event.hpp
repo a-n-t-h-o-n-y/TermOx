@@ -12,6 +12,7 @@ class Input_event : public Event {
    protected:
     Input_event(Event::Type type, Widget* receiver)
         : Event{type, receiver}, modifiers_{KeyboardModifiers::None} {}
+
     KeyboardModifiers modifiers_;
 };
 
