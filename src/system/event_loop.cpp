@@ -13,6 +13,7 @@
 namespace cppurses {
 
 // You can remove these if you replace the std::atomic<bool> exit_ member.
+// needed for animation engine holding container of loops.
 Event_loop::Event_loop(Event_loop&& other)
     : fut_{std::move(other.fut_)},
       thread_id_{std::move(other.thread_id_)},
@@ -22,7 +23,7 @@ Event_loop::Event_loop(Event_loop&& other)
       event_queue_{std::move(other.event_queue_)},
       invoker_{std::move(other.invoker_)},
       staged_changes_{std::move(other.staged_changes_)},
-      paint_middleman_{std::move(other.paint_middleman_)} {}
+      screen_{std::move(other.screen_)} {}
 
 Event_loop& Event_loop::operator=(Event_loop&& other) {
     if (this != &other) {
@@ -34,14 +35,9 @@ Event_loop& Event_loop::operator=(Event_loop&& other) {
         event_queue_ = std::move(other.event_queue_);
         invoker_ = std::move(other.invoker_);
         staged_changes_ = std::move(other.staged_changes_);
-        paint_middleman_ = std::move(other.paint_middleman_);
+        screen_ = std::move(other.screen_);
     }
     return *this;
-}
-
-Event_loop::~Event_loop() {
-    this->exit(0);
-    this->wait();
 }
 
 int Event_loop::run() {
@@ -71,11 +67,6 @@ int Event_loop::wait() {
     return -1;
 }
 
-void Event_loop::exit(int return_code) {
-    return_code_ = return_code;
-    exit_ = true;
-}
-
 void Event_loop::process_events() {
     // only one event loop at a time can be invoking its queue.
     static std::mutex mtx;
@@ -83,8 +74,8 @@ void Event_loop::process_events() {
     invoker_.invoke(event_queue_);
     if (!exit_) {
         invoker_.invoke(event_queue_, Event::Paint);
-        paint_middleman_.flush(staged_changes_);
-        paint_middleman_.set_cursor_on_focus_widget();
+        screen_.flush(staged_changes_);
+        screen_.set_cursor_on_focus_widget();
         staged_changes_.clear();
         invoker_.invoke(event_queue_, Event::Delete);
         mtx.unlock();
@@ -92,18 +83,6 @@ void Event_loop::process_events() {
     } else {
         mtx.unlock();
     }
-}
-
-std::thread::id Event_loop::get_thread_id() const {
-    return thread_id_;
-}
-
-const detail::Staged_changes& Event_loop::staged_changes() const {
-    return staged_changes_;
-}
-
-detail::Staged_changes& Event_loop::staged_changes() {
-    return staged_changes_;
 }
 
 }  // namespace cppurses

@@ -17,14 +17,6 @@ sig::Signal<void()>& Shortcuts::add_shortcut(Key key) {
     return shortcuts_.at(key);
 }
 
-void Shortcuts::remove_shortcut(Key key) {
-    shortcuts_.erase(key);
-}
-
-void Shortcuts::clear() {
-    shortcuts_.clear();
-}
-
 bool Shortcuts::send_key(Key key) {
     if (shortcuts_.count(key) == 1) {
         shortcuts_[key]();

@@ -12,13 +12,16 @@ class NCurses_data {
     static bool resize_happened;
 
     /// Return a reference to the only NCurses_paint_engine object.
-    static NCurses_paint_engine& paint_engine();
+    static NCurses_paint_engine& paint_engine() {
+        static NCurses_paint_engine engine;
+        return engine;
+    }
 
     /// Ensures the static NCurses_paint_engine is constructed.
-    static void initialize();
+    static void initialize() { paint_engine(); }
 
     // Only these classes and function have access to this object.
-    friend class Paint_middleman;
+    friend class Screen;
     friend class NCurses_paint_engine;
     friend class NCurses_event_listener;
     friend class cppurses::System;

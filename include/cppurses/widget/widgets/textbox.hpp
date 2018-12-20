@@ -12,17 +12,23 @@ namespace cppurses {
 
 class Textbox : public Textbox_base {
    public:
-    explicit Textbox(Glyph_string contents = "");
+    explicit Textbox(Glyph_string contents = "")
+        : Textbox_base{std::move(contents)} {
+        this->focus_policy = Focus_policy::Strong;
+    }
 
-    void enable_scrollwheel(bool enable = true);
-    void disable_scrollwheel(bool disable = true);
-    void toggle_scrollwheel();
-    bool does_scrollwheel() const;
-    void set_wheel_speed(std::size_t lines);
-    void set_wheel_speed_up(std::size_t lines);
-    void set_wheel_speed_down(std::size_t lines);
-    void disable_input();
-    void enable_input();
+    void enable_scrollwheel(bool enable = true) { scroll_wheel_ = enable; }
+    void disable_scrollwheel(bool disable = true) { scroll_wheel_ = !disable; }
+    void toggle_scrollwheel() { scroll_wheel_ = !scroll_wheel_; }
+    bool does_scrollwheel() const { return scroll_wheel_; }
+    void set_wheel_speed(std::size_t lines) {
+        this->set_wheel_speed_up(lines);
+        this->set_wheel_speed_down(lines);
+    }
+    void set_wheel_speed_up(std::size_t lines) { scroll_speed_up_ = lines; }
+    void set_wheel_speed_down(std::size_t lines) { scroll_speed_down_ = lines; }
+    void disable_input() { takes_input_ = false; }
+    void enable_input() { takes_input_ = true; }
 
    protected:
     bool key_press_event(const Keyboard_data& keyboard) override;

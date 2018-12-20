@@ -5,9 +5,9 @@
 namespace cppurses {
 
 char key_to_char(Key key) {
-    const std::int16_t alpha_low = 32;
-    const std::int16_t alpha_high = 126;
-    auto value = static_cast<std::int16_t>(key);
+    const auto alpha_low = std::int16_t{32};
+    const auto alpha_high = std::int16_t{126};
+    const auto value = static_cast<std::int16_t>(key);
     if (value < alpha_low || value > alpha_high) {
         return '\0';
     }

@@ -14,10 +14,9 @@ class Resize_event;
 namespace detail {
 
 /// Holds a Screen_descriptor representing the current screen state of a Widget.
-///
-/// A Widget is the owner of this object, but only the flush function can modify
-/// its state, as well as Event object that can inform flush about optimization
-/// opportunities.
+/** A Widget is the owner of this object, but only the flush function can modify
+ *  its state, as well as Event object that can inform flush about optimization
+ *  opportunities. */
 class Screen_state {
     struct Optimize {
         bool just_enabled{false};
@@ -33,13 +32,13 @@ class Screen_state {
     };
 
     /// Holds a description of the widget's current screen state. In global
-    /// coordinates, and modified by Paint_middleman::flush() function.
+    /// coordinates, and modified by Screen::flush() function.
     Screen_descriptor tiles;
 
     /// Holds flags and data structures used to optimize flushing to the screen.
     Optimize optimize;
 
-    friend class Paint_middleman;
+    friend class Screen;
     friend class cppurses::Layout;
     friend class cppurses::Enable_event;
     friend class cppurses::Disable_event;

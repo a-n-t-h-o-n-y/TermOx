@@ -14,22 +14,22 @@ bool has_border(const Widget& w) {
 
 void enable_border(Widget& w) {
     w.border.enabled = true;
-    // System::post_event<Child_polished_event>(w.parent(), &w);
 }
 
 void disable_border(Widget& w) {
     w.border.enabled = false;
-    // System::post_event<Child_polished_event>(w.parent(), &w);
 }
 
-bool has_coordinates(Widget& w, std::size_t global_x, std::size_t global_y) {
+bool has_coordinates(const Widget& w,
+                     std::size_t global_x,
+                     std::size_t global_y) {
     if (!w.enabled()) {
         return false;
     }
-    bool within_west = global_x >= w.inner_x();
-    bool within_east = global_x < (w.inner_x() + w.width());
-    bool within_north = global_y >= w.inner_y();
-    bool within_south = global_y < (w.inner_y() + w.height());
+    const bool within_west = global_x >= w.inner_x();
+    const bool within_east = global_x < (w.inner_x() + w.width());
+    const bool within_north = global_y >= w.inner_y();
+    const bool within_south = global_y < (w.inner_y() + w.height());
     return within_west && within_east && within_north && within_south;
 }
 

@@ -13,11 +13,17 @@ struct Point {
     std::size_t y = 0;
 };
 
-bool operator==(const Point& lhs, const Point& rhs);
+inline bool operator==(const Point& lhs, const Point& rhs) {
+    return lhs.x == rhs.x && lhs.y == rhs.y;
+}
 
-bool operator!=(const Point& lhs, const Point& rhs);
+inline bool operator!=(const Point& lhs, const Point& rhs) {
+    return !(lhs == rhs);
+}
 
-bool operator<(const Point& lhs, const Point& rhs);
+inline bool operator<(const Point& lhs, const Point& rhs) {
+    return (lhs.y < rhs.y) || (lhs.y == rhs.y && lhs.x < rhs.x);
+}
 
 }  // namespace cppurses
 

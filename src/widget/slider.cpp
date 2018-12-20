@@ -38,7 +38,7 @@ float Slider::percent() const {
 
 bool Slider::paint_event() {
     std::size_t x{percent_to_position(percent_progress_)};
-    Painter p{this};
+    Painter p{*this};
     p.put(indicator_, x, 0);
     return Widget::paint_event();
 }

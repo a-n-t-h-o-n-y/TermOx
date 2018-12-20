@@ -21,7 +21,7 @@ bool Matrix_display::paint_event() {
                                                  : matrix.width()};
     std::size_t h{matrix.height() > this->height() ? this->height()
                                                    : matrix.height()};
-    Painter p{this};
+    Painter p{*this};
     for (std::size_t y{0}; y < h; ++y) {
         for (std::size_t x{0}; x < w; ++x) {
             p.put(matrix(x, y), x, y);

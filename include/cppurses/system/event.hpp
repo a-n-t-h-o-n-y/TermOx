@@ -38,7 +38,7 @@ class Event {
     };
 
     /// Initializes the \p type and the \p receiver of the Event.
-    Event(Type type, Widget* receiver);
+    Event(Type type, Widget* receiver) : type_{type}, receiver_{receiver} {}
 
     Event(const Event&) = default;
     Event& operator=(const Event&) = default;
@@ -47,14 +47,14 @@ class Event {
     virtual ~Event() = default;
 
     /// Return a Type enum describing the derived type of the Event.
-    Type type() const;
+    Type type() const { return type_; }
 
     /// Return a pointer to the Widget that will receiver the Event.
-    Widget* receiver() const;
+    Widget* receiver() const { return receiver_; }
 
     /// Set the Widget that will receiver the event.
     /** Used only by NCurses_event_listener. */
-    void set_receiver(Widget* receiver);
+    void set_receiver(Widget* receiver) { receiver_ = receiver; }
 
     /// Calls filter_send() on each installed event filter object in receiver_.
     /** Event filters can be set up with Widget::install_event_filter(). Filters
@@ -75,7 +75,10 @@ class Event {
 
     /// Equality on the type_ and recevier_ member objects.
     /** Used to optimize away duplicate events in Event_queue::append() */
-    bool operator==(const Event& other) const;
+    bool operator==(const Event& other) const {
+        return (this->type_ == other.type_) &&
+               (this->receiver_ == other.receiver_);
+    }
 
    protected:
     Type type_;

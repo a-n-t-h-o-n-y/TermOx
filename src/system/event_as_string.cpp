@@ -7,12 +7,8 @@
 namespace cppurses {
 namespace detail {
 
-std::string event_as_string(const Event& event) {
-    return event_type_as_string(event.type());
-}
-
 std::string event_type_as_string(Event::Type event_type) {
-    std::string name;
+    auto name = std::string{""};
     switch (event_type) {
         case Event::None:
             name = "None";

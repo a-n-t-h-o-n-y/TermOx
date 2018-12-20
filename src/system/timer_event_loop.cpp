@@ -16,32 +16,9 @@
 namespace cppurses {
 namespace detail {
 
-Timer_event_loop::Timer_event_loop(Period_t period)
-    : period_func_{[period] { return period; }} {}
-
-Timer_event_loop::Timer_event_loop(std::function<Period_t()> period_func)
-    : period_func_{period_func} {}
-
 void Timer_event_loop::register_widget(Widget& w) {
     registered_widgets_.emplace(&w);
     w.destroyed.connect([this](Widget* d) { registered_widgets_.erase(d); });
-}
-
-bool Timer_event_loop::unregister_widget(Widget& w) {
-    return registered_widgets_.erase(&w) == 1;
-}
-
-void Timer_event_loop::set_period(Period_t period) {
-    period_func_ = [period] { return period; };
-}
-
-void Timer_event_loop::set_period(
-    const std::function<Period_t()>& period_function) {
-    period_func_ = period_function;
-}
-
-bool Timer_event_loop::empty() const {
-    return registered_widgets_.empty();
 }
 
 void Timer_event_loop::loop_function() {

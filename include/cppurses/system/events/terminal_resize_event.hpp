@@ -7,9 +7,12 @@ class Widget;
 
 class Terminal_resize_event : public Event {
    public:
-    Terminal_resize_event(Widget* receiver);
+    Terminal_resize_event(Widget* receiver)
+        : Event{Event::TerminalResize, receiver} {}
+
     bool send() const override;
-    bool filter_send(Widget* filter) const override;
+
+    bool filter_send(Widget* filter) const override { return true; }
 };
 
 }  // namespace cppurses

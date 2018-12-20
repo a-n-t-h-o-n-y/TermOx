@@ -33,7 +33,7 @@ Terminal_properties System::terminal;
 bool System::exit_requested_{false};
 
 void System::post_event(std::unique_ptr<Event> event) {
-    Event_loop& loop{System::find_event_loop()};
+    auto& loop = System::find_event_loop();
     loop.event_queue_.append(std::move(event));
 }
 
@@ -48,10 +48,6 @@ bool System::send_event(const Event& event) {
         handled = event.send();
     }
     return handled;
-}
-
-bool System::exit_requested() {
-    return exit_requested_;
 }
 
 void System::exit(int return_code) {
@@ -88,10 +84,6 @@ void System::deregister_event_loop(Event_loop* loop) {
     }
 }
 
-Widget* System::head() {
-    return head_;
-}
-
 System::System() {
     detail::NCurses_data::initialize();
     terminal.initialize();
@@ -112,10 +104,6 @@ void System::set_head(Widget* head_widget) {
             head_, Area{System::terminal.width(), System::terminal.height()});
         head_->update();
     }
-}
-
-Animation_engine& System::animation_engine() {
-    return animation_engine_;
 }
 
 int System::run() {

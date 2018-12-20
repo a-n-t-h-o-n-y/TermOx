@@ -31,7 +31,7 @@ Glyph_string Checkbox::title() const {
 }
 
 bool Checkbox::paint_event() {
-    Painter p{this};
+    Painter p{*this};
     if (this->is_checked()) {
         p.put(checked_box_, 0, 0);
     } else {

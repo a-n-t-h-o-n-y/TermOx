@@ -12,26 +12,9 @@
 
 namespace cppurses {
 
-Textbox_base::Textbox_base(Glyph_string contents)
-    : Text_display{std::move(contents)} {
-    this->cursor.enable();
-};
-
-void Textbox_base::set_cursor(Point pos) {
-    this->set_cursor(pos.x, pos.y);
-}
-
-void Textbox_base::set_cursor(std::size_t x, std::size_t y) {
-    this->set_cursor(this->index_at(x, y));
-}
-
 void Textbox_base::set_cursor(std::size_t index) {
     auto coords = this->display_position(index);
     this->cursor.set_position(coords);
-}
-
-std::size_t Textbox_base::cursor_index() const {
-    return this->index_at(this->cursor.position());
 }
 
 void Textbox_base::cursor_up(std::size_t n) {
@@ -131,18 +114,6 @@ void Textbox_base::scroll_down(std::size_t n) {
         y -= n;
     }
     this->set_cursor(this->cursor.x(), y);
-}
-
-void Textbox_base::enable_scrolling(bool enable) {
-    scroll_ = enable;
-}
-
-void Textbox_base::disable_scrolling(bool disable) {
-    scroll_ = !disable;
-}
-
-void Textbox_base::toggle_scrolling() {
-    scroll_ = !scroll_;
 }
 
 bool Textbox_base::resize_event(Area new_size, Area old_size) {

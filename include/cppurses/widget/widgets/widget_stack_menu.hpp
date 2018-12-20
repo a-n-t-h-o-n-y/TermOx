@@ -28,6 +28,8 @@ class Widget_stack_menu : public Vertical_layout {
                      std::unique_ptr<Widget> widget);
     void remove_page(std::size_t index);
 
+    void give_focus() override;
+
     std::size_t size() const;
 
     Menu& menu();

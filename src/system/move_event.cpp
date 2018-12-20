@@ -9,11 +9,6 @@
 
 namespace cppurses {
 
-Move_event::Move_event(Widget* receiver, Point new_position, Point old_position)
-    : Event{Event::Move, receiver},
-      new_position_{new_position},
-      old_position_{old_position} {}
-
 bool Move_event::send() const {
     if (receiver_->x() != new_position_.x ||
         receiver_->y() != new_position_.y) {

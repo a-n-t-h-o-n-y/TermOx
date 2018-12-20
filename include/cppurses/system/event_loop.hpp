@@ -4,7 +4,7 @@
 #include <future>
 #include <thread>
 
-#include <cppurses/painter/detail/paint_middleman.hpp>
+#include <cppurses/painter/detail/screen.hpp>
 #include <cppurses/painter/detail/staged_changes.hpp>
 #include <cppurses/system/detail/event_invoker.hpp>
 #include <cppurses/system/detail/event_queue.hpp>
@@ -23,7 +23,10 @@ class Event_loop {
     Event_loop& operator=(Event_loop&&);
 
     /// Makes sure the loop has exited and returned from async functions.
-    virtual ~Event_loop();
+    virtual ~Event_loop() {
+        this->exit(0);
+        this->wait();
+    }
 
     /// Start the event loop.
     int run();
@@ -34,7 +37,10 @@ class Event_loop {
     /// Calls on the loop to exit at the next exit point.
     /** The return code value is used when returning from run() or wait(). This
      *  function is thread safe. */
-    void exit(int return_code);
+    void exit(int return_code) {
+        return_code_ = return_code;
+        exit_ = true;
+    }
 
     /// Blocks until the async event loop returns.
     /** Event_loop::exit(int) must be called to return from wait().
@@ -43,13 +49,15 @@ class Event_loop {
 
     /// Returns the thread ID of thread that launched this loop.
     /** Used for posting events to the correct queue in System::post_event() */
-    std::thread::id get_thread_id() const;
+    std::thread::id get_thread_id() const { return thread_id_; }
 
     /// Returns the Staged_changes of this loop/thread.
-    const detail::Staged_changes& staged_changes() const;
+    const detail::Staged_changes& staged_changes() const {
+        return staged_changes_;
+    }
 
     /// Returns the Staged_changes of this loop/thread.
-    detail::Staged_changes& staged_changes();
+    detail::Staged_changes& staged_changes() { return staged_changes_; }
 
    protected:
     /// Override this in derived classes to define Event_loop behavior.
@@ -73,7 +81,7 @@ class Event_loop {
     detail::Event_invoker invoker_;
 
     detail::Staged_changes staged_changes_;
-    detail::Paint_middleman paint_middleman_;
+    detail::Screen screen_;
 
     friend class System;
 };

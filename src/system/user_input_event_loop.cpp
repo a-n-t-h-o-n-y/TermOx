@@ -11,7 +11,7 @@ namespace cppurses {
 namespace detail {
 
 void User_input_event_loop::loop_function() {
-    std::unique_ptr<cppurses::Event> event{event_listener_.get_input()};
+    auto event = event_listener_.get_input();
     System::post_event(std::move(event));
 }
 

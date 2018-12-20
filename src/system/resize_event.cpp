@@ -47,11 +47,6 @@ detail::Screen_mask build_resize_mask(const Widget* w,
 
 namespace cppurses {
 
-Resize_event::Resize_event(Widget* receiver, Area new_size, Area old_size)
-    : Event{Event::Resize, receiver},
-      new_size_{new_size},
-      old_size_{old_size} {}
-
 // Cannot optimize out this call if size is the same, layouts need to
 // enable/disable their children.
 bool Resize_event::send() const {

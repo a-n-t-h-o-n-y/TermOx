@@ -22,12 +22,11 @@ void Text_display::update() {
     Widget::update();
 }
 
-Text_display::Text_display(Glyph_string content)
-    : contents_{std::move(content)} {}
-
 void Text_display::set_text(Glyph_string text) {
     contents_ = std::move(text);
     this->update();
+    top_line_ = 0;
+    this->cursor.set_position({0, 0});
     text_changed(contents_);
 }
 
@@ -92,15 +91,6 @@ void Text_display::clear() {
     text_changed(contents_);
 }
 
-void Text_display::set_alignment(Alignment type) {
-    alignment_ = type;
-    this->update();
-}
-
-Alignment Text_display::alignment() const {
-    return alignment_;
-}
-
 void Text_display::scroll_up(std::size_t n) {
     if (n > this->top_line()) {
         top_line_ = 0;
@@ -123,46 +113,15 @@ void Text_display::scroll_down(std::size_t n) {
     scrolled();
 }
 
-void Text_display::enable_word_wrap(bool enable) {
-    word_wrap_ = enable;
-    this->update();
-}
-
-void Text_display::disable_word_wrap(bool disable) {
-    word_wrap_ = !disable;
-    this->update();
-}
-
-void Text_display::toggle_word_wrap() {
-    word_wrap_ = !word_wrap_;
-    this->update();
-}
-
-void Text_display::add_new_text_attribute(Attribute attr) {
-    new_text_brush_.add_attributes(attr);
-}
-
-void Text_display::remove_new_text_attribute(Attribute attr) {
-    new_text_brush_.remove_attribute(attr);
-}
-
-void Text_display::clear_new_text_attributes() {
-    new_text_brush_.clear_attributes();
-}
-
 std::size_t Text_display::row_length(std::size_t y) const {
-    auto line = this->top_line() + y;
+    const auto line = this->top_line() + y;
     return this->line_length(line);
-}
-
-std::size_t Text_display::index_at(Point position) const {
-    return this->index_at(position.x, position.y);
 }
 
 std::size_t Text_display::index_at(std::size_t x, std::size_t y) const {
     auto line = this->top_line() + y;
     if (line >= display_state_.size()) {
-        return contents_size();
+        return this->contents_size();
     }
     auto info = display_state_.at(line);
     if (x >= info.length) {
@@ -171,7 +130,7 @@ std::size_t Text_display::index_at(std::size_t x, std::size_t y) const {
         } else if (this->top_line() + y != this->last_line()) {
             return this->first_index_at(this->top_line() + y + 1) - 1;
         } else if (this->top_line() + y == this->last_line()) {
-            return contents_size();
+            return this->contents_size();
         } else {
             x = info.length - 1;
         }
@@ -198,7 +157,7 @@ Point Text_display::display_position(std::size_t index) const {
 }
 
 bool Text_display::paint_event() {
-    Painter p{this};
+    Painter p{*this};
     std::size_t line_n{0};
     auto paint = [&p, &line_n, this](const Line_info& line) {
         auto sub_begin = std::begin(this->contents_) + line.start_index;
@@ -211,7 +170,6 @@ bool Text_display::paint_event() {
             case Alignment::Center:
                 start = (this->width() - line.length) / 2;
                 break;
-
             case Alignment::Right:
                 start = this->width() - line.length;
                 break;
@@ -221,7 +179,7 @@ bool Text_display::paint_event() {
     auto begin = std::begin(display_state_) + this->top_line();
     auto end = std::end(display_state_);
     if (display_state_.size() > this->top_line() + this->height()) {
-        end = begin + this->height();
+        end = begin + this->height();  // maybe make this the initial value?
     }
     if (this->top_line() < display_state_.size()) {
         std::for_each(begin, end, paint);
@@ -295,22 +253,6 @@ std::size_t Text_display::display_height() const {
     return difference;
 }
 
-std::size_t Text_display::top_line() const {
-    return top_line_;
-}
-
-std::size_t Text_display::bottom_line() const {
-    return this->top_line() + this->display_height() - 1;
-}
-
-std::size_t Text_display::last_line() const {
-    return display_state_.size() - 1;
-}
-
-std::size_t Text_display::n_of_lines() const {
-    return display_state_.size();
-}
-
 std::size_t Text_display::first_index_at(std::size_t line) const {
     if (line >= display_state_.size()) {
         line = display_state_.size() - 1;
@@ -331,13 +273,6 @@ std::size_t Text_display::line_length(std::size_t line) const {
         line = display_state_.size() - 1;
     }
     return display_state_.at(line).length;
-}
-
-std::size_t Text_display::end_index() const {
-    if (this->contents_empty()) {
-        return 0;
-    }
-    return this->contents_size() - 1;
 }
 
 }  // namespace cppurses

@@ -11,7 +11,6 @@
 #include <cppurses/system/terminal_properties.hpp>
 
 namespace cppurses {
-namespace detail {}  // namespace detail
 class Widget;
 class Event;
 class Animation_engine;
@@ -46,7 +45,10 @@ class System {
      *  the non-templated function of the same name once the object has been
      *  constructed. */
     template <typename T, typename... Args>
-    static void post_event(Args&&... args);
+    static void post_event(Args&&... args) {
+        auto event = std::make_unique<T>(std::forward<Args>(args)...);
+        System::post_event(std::move(event));
+    }
 
     /// Returns the Event_loop associated with the calling thread.
     /** Each currently running Event_loop has to be run on its own thread, this
@@ -76,7 +78,7 @@ class System {
     /// Returns a pointer to the head Widget.
     /** This is the Widget that has no parent and is the ancestor of every
      *  Widget on the tree of Widgets that are part of System. */
-    static Widget* head();
+    static Widget* head() { return head_; }
 
     /// Sets the head Widget for the System.
     /** Calling this function with a new Widget as the head will change the
@@ -85,10 +87,10 @@ class System {
 
     /// Returns a reference to the Animation_engine in System.
     /** This manages animation on each of the Widgets that enables it. */
-    static Animation_engine& animation_engine();
+    static Animation_engine& animation_engine() { return animation_engine_; }
 
     /// Returns whether System has gotten an exit request, set by System::exit()
-    static bool exit_requested();
+    static bool exit_requested() { return exit_requested_; }
 
     // Slots
     static sig::Slot<void()> quit;
@@ -107,12 +109,6 @@ class System {
     /** Unsafe to use if System object has not been initialized */
     static Terminal_properties terminal;
 };
-
-template <typename T, typename... Args>
-void System::post_event(Args&&... args) {
-    auto event = std::make_unique<T>(std::forward<Args>(args)...);
-    System::post_event(std::move(event));
-}
 
 }  // namespace cppurses
 #endif  // CPPURSES_SYSTEM_SYSTEM_HPP

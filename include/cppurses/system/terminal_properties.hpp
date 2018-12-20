@@ -18,16 +18,16 @@ class Terminal_properties {
     void initialize();
 
     /// Returns the width of the terminal screen.
-    std::size_t width() const;
+    std::size_t width() const { return width_; }
 
     /// Returns the height of the terminal screen.
-    std::size_t height() const;
+    std::size_t height() const { return height_; }
 
     /// Set the Glyph used as background for each Widget, if doesn't have one.
     void set_background_tile(const Glyph& tile);
 
     /// Retrieve the currently used background tile.
-    const Glyph& background_tile() const;
+    const Glyph& background_tile() const { return default_background_; }
 
     /// Sets color definitions for the entire terminal.
     void set_color_palette(const Palette& palette);

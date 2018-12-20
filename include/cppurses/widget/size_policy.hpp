@@ -30,40 +30,55 @@ class Size_policy {
     /// Constructs a size policy with \p owner.
     /** \p owner is needed to notify its parent whenever a value has been
      *  changed, this is done by posting a Child_polished_event. */
-    explicit Size_policy(Widget* owner);
+    explicit Size_policy(Widget* owner) : owner_{owner} {}
 
     /// Set the Type of the Size_policy.
-    void type(Size_policy::Type type);
+    void type(Size_policy::Type type) {
+        type_ = type;
+        this->notify_parent();
+    }
 
     /// Retrieve the type of Size_policy currently being used.
-    Size_policy::Type type() const;
+    Size_policy::Type type() const { return type_; }
 
     /// Sets the stretch factor.
     /** Used to fit adjacent Widgets within a length. The stretch is used to
      *  compute a percentage of length the Widget should receive by dividing it
      *  by the total stretch of all Widgets in the layout. */
-    void stretch(std::size_t value);
+    void stretch(std::size_t value) {
+        stretch_ = value;
+        this->notify_parent();
+    }
 
     /// Retrieve the stretch factor currently being used.
-    std::size_t stretch() const;
+    std::size_t stretch() const { return stretch_; }
 
     /// Set the size hint, used in accordance to the Type enum.
-    void hint(std::size_t value);
+    void hint(std::size_t value) {
+        hint_ = value;
+        this->notify_parent();
+    }
 
     /// Retrieve the size hint currently being used.
-    std::size_t hint() const;
+    std::size_t hint() const { return hint_; }
 
     /// Set the minimum length that the owning Widget should be.
-    void min(std::size_t value);
+    void min(std::size_t value) {
+        min_ = value;
+        this->notify_parent();
+    }
 
     /// Retrieve the minimum length currently set.
-    std::size_t min() const;
+    std::size_t min() const { return min_; }
 
     /// Set the maximum length that the owning Widget should be.
-    void max(std::size_t value);
+    void max(std::size_t value) {
+        max_ = value;
+        this->notify_parent();
+    }
 
     /// Retrieve the maximum length currently set.
-    std::size_t max() const;
+    std::size_t max() const { return max_; }
 
    private:
     Size_policy::Type type_{Type::Ignored};

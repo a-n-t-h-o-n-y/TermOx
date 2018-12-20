@@ -5,9 +5,9 @@
 namespace cppurses {
 namespace detail {
 
-/// Retrieve a character that is equivalent to /p sym. For ncurses
-/// implementations that do not support wide characters.
-chtype find_chtype(wchar_t sym, bool* use_addch);
+/// Retrieve a character that is equivalent to /p sym.
+/** For ncurses implementations that do not support wide characters. */
+chtype get_chtype(wchar_t sym, bool* use_addch);
 
 }  // namespace detail
 }  // namespace cppurses

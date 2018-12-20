@@ -33,7 +33,10 @@ class NCurses_paint_engine {
     void put_glyph(const Glyph& g);
 
     /// Places a Glyph \p g at coordinates \p x , \p y. (0,0) is top left.
-    void put(std::size_t x, std::size_t y, const Glyph& g);
+    void put(std::size_t x, std::size_t y, const Glyph& g) {
+        this->move_cursor(x, y);
+        this->put_glyph(g);
+    }  // namespace detail
 
     /// Moves the cursor to point \p x , \p y on screen. (0,0) is top left.
     void move_cursor(std::size_t x, std::size_t y);
@@ -42,7 +45,7 @@ class NCurses_paint_engine {
     void show_cursor(bool show = true);
 
     /// Turns the cursor display off.
-    void hide_cursor(bool hide = true);
+    void hide_cursor(bool hide = true) { this->show_cursor(!hide); }
 
     /// Flushes all of the changes made by this class to the screen.
     void refresh();
@@ -50,6 +53,9 @@ class NCurses_paint_engine {
    private:
     /// Registers a handler for the window resize signal from the kernel.
     void setup_sigwinch();
+
+    /// paints a character to the screen and waits for SLOW_PAINT time.
+    void paint_temporary(wchar_t display);
 };
 
 }  // namespace detail

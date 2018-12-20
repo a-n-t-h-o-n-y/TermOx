@@ -20,10 +20,12 @@ class Timer_event_loop : public Event_loop {
     using Period_t = std::chrono::milliseconds;
 
     /// Create a Timer Loop with a constant period.
-    explicit Timer_event_loop(Period_t period);
+    explicit Timer_event_loop(Period_t period)
+        : period_func_{[period] { return period; }} {}
 
     /// Create a Timer_loop with a variable period.
-    explicit Timer_event_loop(std::function<Period_t()> period_func);
+    explicit Timer_event_loop(std::function<Period_t()> period_func)
+        : period_func_{period_func} {}
 
     Timer_event_loop(Timer_event_loop&&) = default;
     Timer_event_loop& operator=(Timer_event_loop&&) = default;
@@ -33,16 +35,22 @@ class Timer_event_loop : public Event_loop {
     void register_widget(Widget& w);
 
     /// Stop a widget from recieving Timer_events for this loop.
-    bool unregister_widget(Widget& w);
+    bool unregister_widget(Widget& w) {
+        return registered_widgets_.erase(&w) == 1;
+    }
 
     /// Sets a new constant period for the Timer loop.
-    void set_period(Period_t period);
+    void set_period(Period_t period) {
+        period_func_ = [period] { return period; };
+    }
 
     /// Sets a new variable period for the Timer loop.
-    void set_period(const std::function<Period_t()>& period_function);
+    void set_period(const std::function<Period_t()>& period_function) {
+        period_func_ = period_function;
+    }
 
     /// Returns true if no Widgets are registered with this event loop.
-    bool empty() const;
+    bool empty() const { return registered_widgets_.empty(); }
 
    protected:
     void loop_function() override;

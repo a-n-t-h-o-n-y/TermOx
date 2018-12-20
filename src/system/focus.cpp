@@ -22,44 +22,23 @@ Widget* next_tab_focus() {
     if (System::head() == nullptr) {
         return nullptr;
     }
-    std::vector<Widget*> widgets;
-
-    // Populate widgets vector
-    widgets.push_back(System::head());
-    std::size_t i{0};
-    while (i < widgets.size()) {
-        Widget* current = widgets[i];
-        const std::vector<std::unique_ptr<Widget>>& children =
-            current->children.get();
-        // TODO std::copy instead
-        std::for_each(std::begin(children), std::end(children),
-                      [&widgets](const std::unique_ptr<Widget>& p) {
-                          widgets.push_back(p.get());
-                      });
-        ++i;
-    }
-
-    // Rearrange widgets vector
-    const Widget* const current_focus_widget = Focus::focus_widget();
-    if (current_focus_widget != nullptr) {
-        auto current_iter = std::find(std::begin(widgets), std::end(widgets),
-                                      current_focus_widget);
-        if (current_iter != std::end(widgets)) {
-            std::move(std::begin(widgets), current_iter + 1,
-                      std::back_inserter(widgets));
+    auto widg_tree = System::head()->children.get_descendants();
+    widg_tree.insert(std::begin(widg_tree), System::head());
+    auto* const focus_widg = Focus::focus_widget();
+    if (focus_widg != nullptr) {
+        const auto iter =
+            std::find(std::begin(widg_tree), std::end(widg_tree), focus_widg);
+        if (iter != std::end(widg_tree)) {
+            std::rotate(std::begin(widg_tree), iter, std::end(widg_tree));
         }
     }
-
-    // Find the next focus widget
-    for (Widget* child : widgets) {
-        if (child != nullptr) {
-            if (child->focus_policy == Focus_policy::Tab ||
-                child->focus_policy == Focus_policy::Strong) {
-                return child;
-            }
-        }
-    }
-    return nullptr;
+    auto is_focusable = [](const auto* widg) {
+        return widg->enabled() && (widg->focus_policy == Focus_policy::Tab ||
+                                   widg->focus_policy == Focus_policy::Strong);
+    };
+    const auto next_focus = std::find_if(std::next(std::begin(widg_tree)),
+                                         std::end(widg_tree), is_focusable);
+    return next_focus != std::end(widg_tree) ? *next_focus : focus_widg;
 }
 
 }  // namespace
@@ -67,10 +46,6 @@ Widget* next_tab_focus() {
 namespace cppurses {
 
 Widget* Focus::focus_widget_ = nullptr;
-
-Widget* Focus::focus_widget() {
-    return focus_widget_;
-}
 
 void Focus::mouse_press(Widget* clicked) {
     if (clicked == focus_widget_) {

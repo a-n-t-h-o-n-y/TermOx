@@ -42,30 +42,23 @@ target_compile_options(cppurses PRIVATE -Wall)
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # SYSTEM
 target_sources(cppurses PRIVATE
-	system/child_event.cpp
     system/delete_event.cpp
-    system/disable_event.cpp
-    system/enable_event.cpp
     system/event.cpp
     system/event_invoker.cpp
 	system/event_loop.cpp
     system/event_queue.cpp
     system/focus.cpp
-    system/focus_event.cpp
     system/key.cpp
     system/key_event.cpp
-    system/mouse_event.cpp
 	system/move_event.cpp
     system/ncurses_event_listener.cpp
-    system/paint_event.cpp
 	system/resize_event.cpp
 	system/system.cpp
     system/shortcuts.cpp
     system/animation_engine.cpp
-    system/timer_event.cpp
     system/event_as_string.cpp
-    system/user_input_event_loop.cpp
     system/timer_event_loop.cpp
+    system/user_input_event_loop.cpp
     system/fps_to_period.cpp
     system/find_widget_at.cpp
     system/terminal_properties.cpp
@@ -76,15 +69,12 @@ target_sources(cppurses PRIVATE
 target_sources(cppurses PRIVATE
     painter/ncurses_paint_engine.cpp
 	painter/painter.cpp
-	painter/glyph.cpp
 	painter/brush.cpp
-	painter/paint_middleman.cpp
+	painter/screen.cpp
     painter/glyph_matrix.cpp
     painter/glyph_string.cpp
     painter/wchar_to_bytes.cpp
     painter/extended_char.cpp
-    painter/is_not_paintable.cpp
-    painter/add_default_attributes.cpp
     painter/ncurses_data.cpp
     painter/screen_mask.cpp
     painter/find_empty_space.cpp

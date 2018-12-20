@@ -13,8 +13,6 @@
 
 namespace cppurses {
 
-Children_data::Children_data(Widget* parent) : parent_{parent} {}
-
 void Children_data::add(std::unique_ptr<Widget> child) {
     if (child == nullptr) {
         return;
@@ -75,20 +73,15 @@ bool Children_data::has_descendant(const std::string& name) const {
     return false;
 }
 
-const std::vector<std::unique_ptr<Widget>>& Children_data::get() const {
-    return children_;
-}
-
 std::vector<Widget*> Children_data::get_descendants() const {
     std::vector<Widget*> descendants;
-    for (const std::unique_ptr<Widget>& child : children_) {
-        descendants.push_back(child.get());
+    for (const auto& child_ptr : children_) {
+        descendants.push_back(child_ptr.get());
     }
     std::size_t index{0};
     while (index < descendants.size()) {
-        for (const std::unique_ptr<Widget>& child :
-             descendants[index]->children.get()) {
-            descendants.push_back(child.get());
+        for (const auto& child_ptr : descendants[index]->children.get()) {
+            descendants.push_back(child_ptr.get());
         }
         ++index;
     }

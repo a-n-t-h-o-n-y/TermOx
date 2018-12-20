@@ -11,7 +11,6 @@
 
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
-#include <cppurses/painter/detail/add_default_attributes.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/system/animation_engine.hpp>
 #include <cppurses/system/events/child_event.hpp>
@@ -24,14 +23,11 @@
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/children_data.hpp>
 #include <cppurses/widget/cursor_data.hpp>
-#include <cppurses/widget/detail/border_offset.hpp>
 
 namespace cppurses {
 namespace detail {
 class Screen_state;
-}
-
-Widget::Widget(std::string name) : name_{std::move(name)} {}
+}  // namespace detail
 
 Widget::~Widget() {
     if (Focus::focus_widget() == this) {
@@ -45,31 +41,11 @@ void Widget::set_name(std::string name) {
     name_changed(name_);
 }
 
-std::string Widget::name() const {
-    return name_;
-}
-
-void Widget::set_parent(Widget* parent) {
-    parent_ = parent;
-}
-
-Widget* Widget::parent() const {
-    return parent_;
-}
-
 void Widget::enable(bool enable, bool post_child_polished_event) {
     this->enable_and_post_events(enable, post_child_polished_event);
     for (std::unique_ptr<Widget>& w : this->children.children_) {
         w->enable(enable, post_child_polished_event);
     }
-}
-
-void Widget::disable(bool disable, bool post_child_polished_event) {
-    this->enable(!disable, post_child_polished_event);
-}
-
-bool Widget::enabled() const {
-    return enabled_;
 }
 
 void Widget::close() {
@@ -83,54 +59,11 @@ void Widget::close() {
     System::post_event<Delete_event>(this, std::move(removed));
 }
 
-std::size_t Widget::x() const {
-    return top_left_position_.x;
-}
-
-std::size_t Widget::y() const {
-    return top_left_position_.y;
-}
-
-std::size_t Widget::inner_x() const {
-    return top_left_position_.x + detail::Border_offset::west(*this);
-}
-
-std::size_t Widget::inner_y() const {
-    return top_left_position_.y + detail::Border_offset::north(*this);
-}
-
-std::size_t Widget::width() const {
-    return this->outer_width() - detail::Border_offset::east(*this) -
-           detail::Border_offset::west(*this);
-}
-
-std::size_t Widget::height() const {
-    return this->outer_height() - detail::Border_offset::north(*this) -
-           detail::Border_offset::south(*this);
-}
-
-std::size_t Widget::outer_width() const {
-    return outer_width_;
-}
-
-std::size_t Widget::outer_height() const {
-    return outer_height_;
-}
-
-bool Widget::brush_paints_wallpaper() const {
-    return brush_paints_wallpaper_;
-}
-
-void Widget::set_brush_paints_wallpaper(bool paints) {
-    brush_paints_wallpaper_ = paints;
-    this->update();
-}
-
 Glyph Widget::generate_wallpaper() const {
     Glyph background{this->wallpaper ? *(this->wallpaper)
                                      : System::terminal.background_tile()};
     if (this->brush_paints_wallpaper()) {
-        detail::add_default_attributes(background, this->brush);
+        imprint(this->brush, background.brush);
     }
     return background;
 }
@@ -161,10 +94,6 @@ void Widget::remove_event_filter(Widget* filter) {
     }
 }
 
-const std::vector<Widget*>& Widget::get_event_filters() const {
-    return event_filters_;
-}
-
 void Widget::enable_animation(Animation_engine::Period_t period) {
     System::animation_engine().register_widget(*this, period);
 }
@@ -176,6 +105,10 @@ void Widget::enable_animation(
 
 void Widget::disable_animation() {
     System::animation_engine().unregister_widget(*this);
+}
+
+void Widget::give_focus() {
+    Focus::set_focus_to(this);
 }
 
 void Widget::enable_and_post_events(bool enable,
@@ -193,22 +126,6 @@ void Widget::enable_and_post_events(bool enable,
         }
         this->update();
     }
-}
-
-void Widget::set_x(std::size_t global_x) {
-    top_left_position_.x = global_x;
-}
-
-void Widget::set_y(std::size_t global_y) {
-    top_left_position_.y = global_y;
-}
-
-detail::Screen_state& Widget::screen_state() {
-    return screen_state_;
-}
-
-const detail::Screen_state& Widget::screen_state() const {
-    return screen_state_;
 }
 
 }  // namespace cppurses
