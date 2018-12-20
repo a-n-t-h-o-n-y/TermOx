@@ -29,7 +29,13 @@ target_include_directories(cppurses
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
-target_compile_features(cppurses PUBLIC cxx_std_14)
+
+if(${CMAKE_VERSION} VERSION_LESS "3.8")
+    set(CMAKE_CXX_STANDARD 14)
+else()
+    target_compile_features(cppurses INTERFACE cxx_std_14)
+endif()
+
 target_compile_options(cppurses PRIVATE -Wall)
 
 # GATHER SOURCES
