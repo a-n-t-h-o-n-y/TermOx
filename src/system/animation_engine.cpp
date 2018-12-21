@@ -15,7 +15,8 @@ class Event_loop;
 
 void Animation_engine::register_widget(Widget& w, Period_t period) {
     if (const_loops_.count(period) == 0) {
-        auto pair = const_loops_.emplace(period, period);
+        auto pair =
+            const_loops_.emplace(period, detail::Timer_event_loop{period});
         pair.first->second.run_async();
     }
     auto iter = const_loops_.find(period);
