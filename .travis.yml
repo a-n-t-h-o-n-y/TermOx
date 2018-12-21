@@ -1,0 +1,21 @@
+dist: xenial
+sudo: required
+language: cpp
+
+addons:
+  apt:
+    update: true
+    packages:
+        - ncurses-dev
+
+compiler:
+    - clang
+    - gcc
+
+script:
+    - mkdir build && cd build
+    - cmake -DCMAKE_BUILD_TYPE=Release ..
+    - cmake --build . --target demos
+
+notifications:
+    email: false
