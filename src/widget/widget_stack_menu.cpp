@@ -16,6 +16,7 @@ namespace cppurses {
 Widget_stack_menu::Widget_stack_menu(Glyph_string title)
     : menu_{stack_.make_page<Menu>(std::move(title))} {
     this->initialize();
+    this->focus_policy = Focus_policy::Strong;
 }
 
 void Widget_stack_menu::initialize() {
