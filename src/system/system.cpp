@@ -40,7 +40,8 @@ void System::post_event(std::unique_ptr<Event> event) {
 bool System::send_event(const Event& event) {
     if (event.receiver() == nullptr ||
         (!event.receiver()->enabled() &&
-         (event.type() != Event::Delete && event.type() != Event::Disable))) {
+         (event.type() != Event::Delete && event.type() != Event::Disable &&
+          event.type() != Event::FocusOut))) {
         return false;
     }
     bool handled = event.send_to_all_filters();

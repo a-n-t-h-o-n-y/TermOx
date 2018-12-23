@@ -15,7 +15,7 @@ bool Move_event::send() const {
         receiver_->screen_state().optimize.moved = true;
         // Create and set move_mask in receiver_->screen_state()
         receiver_->screen_state().optimize.move_mask =
-            detail::Screen_mask(*receiver_);
+            detail::Screen_mask(*receiver_, detail::Screen_mask::Outer);
         receiver_->screen_state()
             .tiles.clear();  // TODO remove this once opt impl.
         old_position_.x = receiver_->x();

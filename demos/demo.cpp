@@ -7,6 +7,6 @@ int main() {
     demos::Main_menu mm_widget;
 
     sys.set_head(&mm_widget);
-    mm_widget.main_menu.give_focus();
+    Focus::set_focus_to(&(mm_widget.main_menu));
     return sys.run();
 }

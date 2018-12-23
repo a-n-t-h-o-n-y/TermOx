@@ -16,11 +16,13 @@ class Screen_mask {
     using Reference = typename std::vector<bool>::reference;
     using Const_reference = typename std::vector<bool>::const_reference;
 
+    enum Constructor_tag { Outer, Inner };
+
     /// Create an empty Screen_mask with size (0,0).
     Screen_mask() = default;
 
     /// Create an empty Screen_mask with the dimensions and position of \p w.
-    Screen_mask(const Widget& w);
+    Screen_mask(const Widget& w, Constructor_tag tag);
 
     /// Return the offset of the Widget on the screen, top left point.
     Point offset() const { return offset_; }

@@ -4,6 +4,7 @@
 
 #include "animation/animated_widget.hpp"
 #include "chess/src/chess_ui.hpp"
+#include "focus/focus_demo.hpp"
 #include "glyph_paint/glyph_paint.hpp"
 #include "notepad/notepad.hpp"
 
@@ -15,12 +16,20 @@ class Main_menu : public Vertical_layout {
     Main_menu();
 
     Titlebar& titlebar{this->make_child<Titlebar>("  C  P  P  U  R  S  E  S")};
+
     Widget_stack_menu& main_menu{
         this->make_child<Widget_stack_menu>("D e m o s")};
+
     Notepad& notepad{main_menu.make_page<Notepad>("Notepad")};
+
     Chess_UI& chess{main_menu.make_page<Chess_UI>("Chess")};
+
     glyph_paint::Glyph_paint& glyph_paint{
         main_menu.make_page<glyph_paint::Glyph_paint>("Glyph Paint")};
+
+    focus::Focus_demo& focus_demo{
+        main_menu.make_page<focus::Focus_demo>("Focus")};
+
     animation::Animated_widget& animated_widget{
         main_menu.make_page<animation::Animated_widget>(
             "Animated Widget(Experimental)")};

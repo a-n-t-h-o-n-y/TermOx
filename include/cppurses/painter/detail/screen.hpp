@@ -12,7 +12,7 @@ namespace detail {
 
 /// Writes uncommitted changes to the underlying paint engine.
 /** Also enables the cursor on the widget in focus. Implements optimizations
- *  if the tile already exists onscreen. */
+ *  if the tile already exists onscreen. All coordinates are global. */
 class Screen {
    public:
     /// Puts the state of \p changes onto the physical screen.

@@ -1,6 +1,7 @@
 #ifndef CPPURSES_WIDGET_WIDGET_HPP
 #define CPPURSES_WIDGET_WIDGET_HPP
 #include <cstddef>
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <string>
@@ -33,7 +34,7 @@ struct Area;
 class Widget {
    public:
     /// Initialize with \p name.
-    explicit Widget(std::string name = "") : name_{std::move(name)} {}
+    explicit Widget(std::string name = "");
 
     Widget(const Widget&) = delete;
     Widget(Widget&&) = delete;
@@ -43,6 +44,9 @@ class Widget {
 
     /// Return the name of the Widget.
     std::string name() const { return name_; }
+
+    /// Return the ID number unique to this Widget.
+    std::uint16_t unique_id() const { return unique_id_; }
 
     /// Set the identifying name of the Widget.
     void set_name(std::string name);
@@ -198,10 +202,6 @@ class Widget {
     /** This Widget will be unregistered from the Animation_engine held by
      *  System. */
     void disable_animation();
-
-    /// Make this widget the current in focus.
-    /** Can be overridden by derived classes to modify how focus is set. */
-    virtual void give_focus();
 
     // Public Objects
     /// Describes the visual border of this Widget.
@@ -411,6 +411,7 @@ class Widget {
 
    private:
     std::string name_;
+    const std::uint16_t unique_id_;
     Widget* parent_{nullptr};
     bool enabled_{false};
     bool brush_paints_wallpaper_{true};

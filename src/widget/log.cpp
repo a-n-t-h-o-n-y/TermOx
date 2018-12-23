@@ -50,5 +50,4 @@ sig::Slot<void()> post_message(Log& log, const Glyph_string& message) {
 }
 
 }  // namespace slot
-
 }  // namespace cppurses

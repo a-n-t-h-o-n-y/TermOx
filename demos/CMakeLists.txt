@@ -39,6 +39,11 @@ target_sources(demos PRIVATE
     animation/animated_widget.cpp
 )
 
+# FOCUS
+target_sources(demos PRIVATE
+    focus/focus_base.cpp
+)
+
 # NOTEPAD / MAIN MENU
 target_sources(demos PRIVATE
     demo.cpp

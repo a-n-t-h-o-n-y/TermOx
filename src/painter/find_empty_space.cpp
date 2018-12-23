@@ -69,12 +69,12 @@ bool children_completely_cover(const Widget& w) {
 
 /// Returns the lowest y coordinate of the widget in global coordinates.
 std::size_t height_end(const std::unique_ptr<Widget>& w) {
-    return w->outer_height() + w->y();
+    return w->y() + w->outer_height();
 }
 
 /// Returns the right-most x coordinate of the widget in global coordinates.
 std::size_t width_end(const std::unique_ptr<Widget>& w) {
-    return w->outer_width() + w->x();
+    return w->x() + w->outer_width();
 }
 
 /// Set \p mask to true at each point where a child of \p w covers \p w.
@@ -96,11 +96,12 @@ void mark_covered_tiles(const Widget& w, detail::Screen_mask& mask) {
 namespace cppurses {
 namespace detail {
 
+//  Should not consider border space, since that will never be empty.
 Screen_mask find_empty_space(const Widget& w) {
     if (children_completely_cover(w)) {
         return Screen_mask{};
     }
-    auto mask = Screen_mask{w};
+    auto mask = Screen_mask{w, Screen_mask::Inner};
     mark_covered_tiles(w, mask);
     mask.flip();
     return mask;

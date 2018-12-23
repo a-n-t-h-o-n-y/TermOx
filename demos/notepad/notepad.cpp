@@ -134,9 +134,8 @@ Notepad::Notepad() {
 
 bool Notepad::focus_in_event() {
     Focus::set_focus_to(&txt_attr.textbox);
-    return Vertical_layout::focus_in_event();
+    return true;
 }
-
 void Notepad::initialize() {
     // Signals
     save_area.load_btn.clicked.connect([this] {

@@ -2,7 +2,9 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <cstdint>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <utility>
 #include <vector>
@@ -24,11 +26,22 @@
 #include <cppurses/widget/children_data.hpp>
 #include <cppurses/widget/cursor_data.hpp>
 
+namespace {
+std::uint16_t get_unique_id() {
+    static std::mutex mtx;
+    static std::uint16_t current{0};
+    std::lock_guard<std::mutex> lock{mtx};
+    return ++current;
+}
+}  // namespace
+
 namespace cppurses {
 namespace detail {
 class Screen_state;
 }  // namespace detail
 
+Widget::Widget(std::string name)
+    : name_{std::move(name)}, unique_id_{get_unique_id()} {}
 Widget::~Widget() {
     if (Focus::focus_widget() == this) {
         Focus::clear_focus();
@@ -105,10 +118,6 @@ void Widget::enable_animation(
 
 void Widget::disable_animation() {
     System::animation_engine().unregister_widget(*this);
-}
-
-void Widget::give_focus() {
-    Focus::set_focus_to(this);
 }
 
 void Widget::enable_and_post_events(bool enable,

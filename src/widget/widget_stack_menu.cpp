@@ -45,10 +45,6 @@ void Widget_stack_menu::remove_page(std::size_t index) {
     menu_.remove_item(index);
 }
 
-void Widget_stack_menu::give_focus() {
-    Focus::set_focus_to(&menu_);
-}
-
 std::size_t Widget_stack_menu::size() const {
     return stack_.size();
 }

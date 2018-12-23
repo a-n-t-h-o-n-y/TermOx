@@ -3,6 +3,7 @@
 #include <cstdint>
 
 #include <cppurses/painter/painter.hpp>
+#include <cppurses/system/focus.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/keyboard_data.hpp>
 #include <cppurses/system/mouse_button.hpp>
@@ -18,6 +19,9 @@ bool Widget::enable_event() {
 }
 
 bool Widget::disable_event() {
+    if (this == Focus::focus_widget()) {
+        Focus::clear_focus();
+    }
     return true;
 }
 
