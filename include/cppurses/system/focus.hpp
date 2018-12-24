@@ -15,6 +15,8 @@ class Focus {
 
     static bool tab_press();
 
+    static bool shift_tab_press();
+
     static void set_focus_to(Widget* new_focus);
 
     static void clear_focus();
