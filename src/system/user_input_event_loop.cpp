@@ -12,7 +12,9 @@ namespace detail {
 
 void User_input_event_loop::loop_function() {
     auto event = event_listener_.get_input();
-    System::post_event(std::move(event));
+    if (event != nullptr) {
+        System::post_event(std::move(event));
+    }
 }
 
 }  // namespace detail

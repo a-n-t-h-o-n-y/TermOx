@@ -9,18 +9,18 @@
 namespace cppurses {
 
 /// Send to a Widget just before it is to be destroyed.
-/** The Widget will have already be removed from its parent Widget by the time
+/** The Widget will have already been removed from its parent Widget by the time
  *  it receives this event. All children of the receiver will receive this Event
- *  as well. */
+ *  type as well. */
 class Delete_event : public Event {
    public:
-    Delete_event(Widget* receiver, std::unique_ptr<Widget> removed)
+    Delete_event(Widget& receiver, std::unique_ptr<Widget> removed)
         : Event{Event::Delete, receiver}, removed_{std::move(removed)} {}
 
     bool send() const override;
 
-    bool filter_send(Widget* filter) const override {
-        return filter->delete_event_filter(receiver_);
+    bool filter_send(Widget& filter) const override {
+        return filter.delete_event_filter(receiver_);
     }
 
    private:

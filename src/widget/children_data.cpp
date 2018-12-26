@@ -21,7 +21,8 @@ void Children_data::add(std::unique_ptr<Widget> child) {
     children_.emplace_back(std::move(child));
     if (parent_ != nullptr) {
         children_.back()->enable(parent_->enabled());
-        System::post_event<Child_added_event>(parent_, children_.back().get());
+        System::post_event<Child_added_event>(*parent_,
+                                              *children_.back().get());
     }
 }
 
@@ -32,7 +33,7 @@ void Children_data::insert(std::unique_ptr<Widget> child, std::size_t index) {
             children_.insert(std::begin(children_) + index, std::move(child));
         if (parent_ != nullptr) {
             (*new_iter)->enable(parent_->enabled());
-            System::post_event<Child_added_event>(parent_, new_iter->get());
+            System::post_event<Child_added_event>(*parent_, *new_iter->get());
         }
     }
 }
@@ -100,8 +101,8 @@ std::unique_ptr<Widget> Children_data::remove(Widget* child) {
     children_.erase(found);
     removed->disable();
     if (removed->parent() != nullptr) {
-        System::post_event<Child_removed_event>(removed->parent(),
-                                                removed.get());
+        System::post_event<Child_removed_event>(*removed->parent(),
+                                                *removed.get());
     }
     removed->set_parent(nullptr);
     return removed;

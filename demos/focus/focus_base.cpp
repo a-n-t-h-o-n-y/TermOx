@@ -50,7 +50,7 @@ namespace focus {
 Focus_base::Focus_base(cppurses::Focus_policy policy) {
     this->set_policy(policy);
     title_.set_alignment(cppurses::Alignment::Center);
-    title_.install_event_filter(this);
+    title_.install_event_filter(*this);
     enable_border(*this);
 }
 
@@ -68,7 +68,7 @@ bool Focus_base::focus_out_event() {
     return Widget::focus_out_event();
 }
 
-bool Focus_base::focus_in_event_filter(Widget* receiver) {
+bool Focus_base::focus_in_event_filter(Widget& receiver) {
     Focus::set_focus_to(this);
     return true;
 }

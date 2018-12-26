@@ -33,24 +33,32 @@ std::unique_ptr<Event> NCurses_event_listener::get_input() const {
     // wait for input before you can refresh the screen from anywhere else.
     const auto input = ::getch();
     auto event = std::unique_ptr<Event>{nullptr};
+    Widget* receiver = nullptr;
     switch (input) {
         case ERR:
             // Terminal Screen Resize
             if (NCurses_data::resize_happened) {
                 NCurses_data::resize_happened = false;
-                event = std::make_unique<Terminal_resize_event>(System::head());
+                if (System::head() != nullptr) {
+                    event = std::make_unique<Terminal_resize_event>(
+                        *System::head());
+                }
             }
             break;
         case KEY_MOUSE:
             event = parse_mouse_event();
             break;
         case KEY_RESIZE:
-            event = handle_resize_event();
-            event->set_receiver(handle_resize_widget());
+            receiver = handle_resize_widget();
+            if (receiver != nullptr) {
+                event = handle_resize_event(*receiver);
+            }
             break;
         default:  // Key_event
-            event = handle_keyboard_event(input);
-            event->set_receiver(handle_keyboard_widget());
+            receiver = handle_keyboard_widget();
+            if (receiver != nullptr) {
+                event = handle_keyboard_event(*receiver, input);
+            }
             break;
     }
     return event;
@@ -126,12 +134,12 @@ std::unique_ptr<Event> NCurses_event_listener::parse_mouse_event() const {
     auto event = std::unique_ptr<Event>{nullptr};
     if (type == Event::MouseButtonPress) {
         event = std::make_unique<Mouse_press_event>(
-            receiver, Mouse_data{button, Point{mouse_x, mouse_y},
-                                 Point{local_x, local_y}, mouse_event.id});
+            *receiver, Mouse_data{button, Point{mouse_x, mouse_y},
+                                  Point{local_x, local_y}, mouse_event.id});
     } else if (type == Event::MouseButtonRelease) {
         event = std::make_unique<Mouse_release_event>(
-            receiver, Mouse_data{button, Point{mouse_x, mouse_y},
-                                 Point{local_x, local_y}, mouse_event.id});
+            *receiver, Mouse_data{button, Point{mouse_x, mouse_y},
+                                  Point{local_x, local_y}, mouse_event.id});
     } else {
         return nullptr;
     }
@@ -139,21 +147,23 @@ std::unique_ptr<Event> NCurses_event_listener::parse_mouse_event() const {
 }
 
 std::unique_ptr<Event> NCurses_event_listener::handle_keyboard_event(
+    Widget& receiver,
     int input) const {
-    return std::make_unique<Key_press_event>(nullptr, static_cast<Key>(input));
+    return std::make_unique<Key_press_event>(receiver, static_cast<Key>(input));
 }
 
 Widget* NCurses_event_listener::handle_keyboard_widget() const {
     return Focus::focus_widget();
 }
 
-std::unique_ptr<Event> NCurses_event_listener::handle_resize_event() const {
+std::unique_ptr<Event> NCurses_event_listener::handle_resize_event(
+    Widget& receiver) const {
     // TODO the below call is not thread safe. Should be updated when the event
     // invoker is called for the main thread.
     System::terminal.update_dimensions();
     const auto width = System::terminal.width();
     const auto height = System::terminal.height();
-    return std::make_unique<Resize_event>(nullptr, Area{width, height});
+    return std::make_unique<Resize_event>(receiver, Area{width, height});
 }
 
 Widget* NCurses_event_listener::handle_resize_widget() const {

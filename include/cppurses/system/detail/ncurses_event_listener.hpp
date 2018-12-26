@@ -20,9 +20,10 @@ class NCurses_event_listener : public Abstract_event_listener {
    private:
     std::unique_ptr<Event> parse_mouse_event() const;
 
-    std::unique_ptr<Event> handle_keyboard_event(int input) const;
+    std::unique_ptr<Event> handle_keyboard_event(Widget& receiver,
+                                                 int input) const;
     Widget* handle_keyboard_widget() const;
-    std::unique_ptr<Event> handle_resize_event() const;
+    std::unique_ptr<Event> handle_resize_event(Widget& receiver) const;
     Widget* handle_resize_widget() const;
 };
 

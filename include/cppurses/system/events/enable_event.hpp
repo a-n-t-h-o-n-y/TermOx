@@ -10,15 +10,15 @@ namespace cppurses {
 /** Enabled Widget receive Events and are painted to the screen. */
 class Enable_event : public Event {
    public:
-    explicit Enable_event(Widget* receiver) : Event{Event::Enable, receiver} {}
+    explicit Enable_event(Widget& receiver) : Event{Event::Enable, receiver} {}
 
     bool send() const override {
-        receiver_->screen_state().optimize.just_enabled = true;
-        return receiver_->enable_event();
+        receiver_.screen_state().optimize.just_enabled = true;
+        return receiver_.enable_event();
     }
 
-    bool filter_send(Widget* filter) const override {
-        return filter->enable_event_filter(receiver_);
+    bool filter_send(Widget& filter) const override {
+        return filter.enable_event_filter(receiver_);
     }
 };
 

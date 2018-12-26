@@ -9,15 +9,14 @@ class Widget;
 
 class Timer_event : public Event {
    public:
-    Timer_event(Widget* receiver) : Event{Event::Timer, receiver} {}
+    Timer_event(Widget& receiver) : Event{Event::Timer, receiver} {}
 
     bool send() const override {
-        auto* widg = static_cast<Widget*>(receiver_);
-        return detail::is_paintable(*widg) ? receiver_->timer_event() : true;
+        return detail::is_paintable(receiver_) ? receiver_.timer_event() : true;
     }
 
-    bool filter_send(Widget* filter) const override {
-        return filter->timer_event_filter(receiver_);
+    bool filter_send(Widget& filter) const override {
+        return filter.timer_event_filter(receiver_);
     }
 };
 

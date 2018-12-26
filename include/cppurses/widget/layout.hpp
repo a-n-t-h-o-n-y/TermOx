@@ -32,17 +32,17 @@ class Layout : public Widget {
         return Widget::resize_event(new_size, old_size);
     }
 
-    bool child_added_event(Widget* child) override {
+    bool child_added_event(Widget& child) override {
         this->update_geometry();
         return Widget::child_added_event(child);
     }
 
-    bool child_removed_event(Widget* child) override {
+    bool child_removed_event(Widget& child) override {
         this->update_geometry();
         return Widget::child_removed_event(child);
     }
 
-    bool child_polished_event(Widget* child) override {
+    bool child_polished_event(Widget& child) override {
         this->update_geometry();
         return Widget::child_polished_event(child);
     }

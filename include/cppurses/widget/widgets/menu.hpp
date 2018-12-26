@@ -35,7 +35,7 @@ class Menu : public Vertical_layout {
 
     bool mouse_press_event(const Mouse_data& mouse) override;
 
-    bool mouse_press_event_filter(Widget* receiver,
+    bool mouse_press_event_filter(Widget& receiver,
                                   const Mouse_data& mouse) override;
 
    private:

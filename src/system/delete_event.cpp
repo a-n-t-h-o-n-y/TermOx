@@ -8,7 +8,7 @@
 namespace cppurses {
 
 bool Delete_event::send() const {
-    const bool result{receiver_->delete_event()};
+    const auto result = receiver_.delete_event();
     if (removed_ == nullptr) {
         return result;
     }

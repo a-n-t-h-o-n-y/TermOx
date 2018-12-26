@@ -9,7 +9,9 @@
 namespace cppurses {
 
 void Size_policy::notify_parent() const {
-    System::post_event<Child_polished_event>(owner_->parent(), owner_);
+    if (owner_->parent() != nullptr) {
+        System::post_event<Child_polished_event>(*(owner_->parent()), *owner_);
+    }
 }
 
 }  // namespace cppurses

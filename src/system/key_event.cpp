@@ -18,7 +18,7 @@ bool Key_press_event::send() const {
     if (key_code_ == Key::Back_tab && Focus::shift_tab_press()) {
         return true;
     }
-    return receiver_->key_press_event(
+    return receiver_.key_press_event(
         Keyboard_data{key_code_, key_to_char(key_code_)});
 }
 

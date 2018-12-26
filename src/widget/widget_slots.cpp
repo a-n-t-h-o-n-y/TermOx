@@ -45,7 +45,7 @@ sig::Slot<void(Point, Mouse_button)> click(Widget& w) {
     sig::Slot<void(Point, Mouse_button)> slot{[&w](const Point& c,
                                                    Mouse_button b) {
         System::send_event(Mouse_press_event{
-            &w,
+            w,
             Mouse_data{b, Point{w.inner_x() + c.x, w.inner_y() + c.y}, c, 0}});
     }};
     slot.track(w.destroyed);
@@ -55,7 +55,7 @@ sig::Slot<void(Point, Mouse_button)> click(Widget& w) {
 sig::Slot<void(Mouse_button)> click(Widget& w, Point c) {
     sig::Slot<void(Mouse_button)> slot{[&w, &c](Mouse_button b) {
         System::send_event(Mouse_press_event{
-            &w,
+            w,
             Mouse_data{b, Point{w.inner_x() + c.x, w.inner_y() + c.y}, c, 0}});
     }};
     slot.track(w.destroyed);
@@ -65,7 +65,7 @@ sig::Slot<void(Mouse_button)> click(Widget& w, Point c) {
 sig::Slot<void(Point)> click(Widget& w, Mouse_button b) {
     sig::Slot<void(Point)> slot{[&w, b](const Point& c) {
         System::send_event(Mouse_press_event{
-            &w,
+            w,
             Mouse_data{b, Point{w.inner_x() + c.x, w.inner_y() + c.y}, c, 0}});
     }};
     slot.track(w.destroyed);
@@ -75,7 +75,7 @@ sig::Slot<void(Point)> click(Widget& w, Mouse_button b) {
 sig::Slot<void()> click(Widget& w, Point c, Mouse_button b) {
     sig::Slot<void()> slot{[&w, &c, b] {
         System::send_event(Mouse_press_event{
-            &w,
+            w,
             Mouse_data{b, Point{w.inner_x() + c.x, w.inner_y() + c.y}, c, 0}});
     }};
     slot.track(w.destroyed);
@@ -84,7 +84,7 @@ sig::Slot<void()> click(Widget& w, Point c, Mouse_button b) {
 
 sig::Slot<void(Key)> keypress(Widget& w) {
     sig::Slot<void(Key)> slot{[&w](Key k) {
-        System::send_event(Key_press_event{&w, k});
+        System::send_event(Key_press_event{w, k});
     }};
     slot.track(w.destroyed);
     return slot;
@@ -92,7 +92,7 @@ sig::Slot<void(Key)> keypress(Widget& w) {
 
 sig::Slot<void()> keypress(Widget& w, Key k) {
     sig::Slot<void()> slot{[&w, k] {
-        System::send_event(Key_press_event{&w, k});
+        System::send_event(Key_press_event{w, k});
     }};
     slot.track(w.destroyed);
     return slot;

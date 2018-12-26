@@ -42,11 +42,12 @@ class Screen_state;
 
 Widget::Widget(std::string name)
     : name_{std::move(name)}, unique_id_{get_unique_id()} {}
+
 Widget::~Widget() {
     if (Focus::focus_widget() == this) {
         Focus::clear_focus();
     }
-    destroyed(this);
+    destroyed(*this);
 }
 
 void Widget::set_name(std::string name) {
@@ -69,7 +70,7 @@ void Widget::close() {
     } else {
         removed = this->parent()->children.remove(this);
     }
-    System::post_event<Delete_event>(this, std::move(removed));
+    System::post_event<Delete_event>(*this, std::move(removed));
 }
 
 Glyph Widget::generate_wallpaper() const {
@@ -82,26 +83,26 @@ Glyph Widget::generate_wallpaper() const {
 }
 
 void Widget::update() {
-    System::post_event<Paint_event>(this);
+    System::post_event<Paint_event>(*this);
 }
 
-void Widget::install_event_filter(Widget* filter) {
-    if (filter == this) {
+void Widget::install_event_filter(Widget& filter) {
+    if (&filter == this) {
         return;
     }
     // Remove filter from list on destruction of filter
-    sig::Slot<void(Widget*)> remove_on_destroy{[this](Widget* being_destroyed) {
+    sig::Slot<void(Widget&)> remove_on_destroy{[this](Widget& being_destroyed) {
         this->remove_event_filter(being_destroyed);
     }};
     remove_on_destroy.track(this->destroyed);
-    filter->destroyed.connect(remove_on_destroy);
-    event_filters_.push_back(filter);
+    filter.destroyed.connect(remove_on_destroy);
+    event_filters_.push_back(&filter);
 }
 
-void Widget::remove_event_filter(Widget* filter) {
+void Widget::remove_event_filter(Widget& filter) {
     auto begin = std::begin(event_filters_);
     auto end = std::end(event_filters_);
-    auto position = std::find(begin, end, filter);
+    auto position = std::find(begin, end, &filter);
     if (position != end) {
         event_filters_.erase(position);
     }
@@ -124,14 +125,14 @@ void Widget::enable_and_post_events(bool enable,
                                     bool post_child_polished_event) {
     if (enabled_ != enable) {
         if (!enable) {
-            System::post_event<Disable_event>(this);
+            System::post_event<Disable_event>(*this);
         }
         enabled_ = enable;
         if (enable) {
-            System::post_event<Enable_event>(this);
+            System::post_event<Enable_event>(*this);
         }
         if (post_child_polished_event && this->parent() != nullptr) {
-            System::post_event<Child_polished_event>(this->parent(), this);
+            System::post_event<Child_polished_event>(*this->parent(), *this);
         }
         this->update();
     }

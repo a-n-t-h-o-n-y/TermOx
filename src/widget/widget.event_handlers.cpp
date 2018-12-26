@@ -25,19 +25,19 @@ bool Widget::disable_event() {
     return true;
 }
 
-bool Widget::child_added_event(Widget* child) {
-    child_added(child);
+bool Widget::child_added_event(Widget& child) {
+    child_added(&child);
     this->update();
     return true;
 }
 
-bool Widget::child_removed_event(Widget* child) {
-    child_removed(child);
+bool Widget::child_removed_event(Widget& child) {
+    child_removed(&child);
     this->update();
     return true;
 }
 
-bool Widget::child_polished_event(Widget* child) {
+bool Widget::child_polished_event(Widget& child) {
     this->update();
     return true;
 }
@@ -117,90 +117,90 @@ bool Widget::timer_event() {
 
 // - - - - - - - - - - - - Event Filter Handlers - - - - - - - - - - - - - - - -
 
-bool Widget::child_added_event_filter(Widget* receiver, Widget* child) {
+bool Widget::child_added_event_filter(Widget& receiver, Widget& child) {
     return false;
 }
 
-bool Widget::child_removed_event_filter(Widget* receiver, Widget* child) {
+bool Widget::child_removed_event_filter(Widget& receiver, Widget& child) {
     return false;
 }
 
-bool Widget::child_polished_event_filter(Widget* receiver, Widget* child) {
+bool Widget::child_polished_event_filter(Widget& receiver, Widget& child) {
     return false;
 }
 
-bool Widget::enable_event_filter(Widget* receiver) {
+bool Widget::enable_event_filter(Widget& receiver) {
     return false;
 }
 
-bool Widget::disable_event_filter(Widget* receiver) {
+bool Widget::disable_event_filter(Widget& receiver) {
     return false;
 }
 
-bool Widget::move_event_filter(Widget* receiver,
+bool Widget::move_event_filter(Widget& receiver,
                                Point new_position,
                                Point old_position) {
     return false;
 }
 
-bool Widget::resize_event_filter(Widget* receiver,
+bool Widget::resize_event_filter(Widget& receiver,
                                  Area new_size,
                                  Area old_size) {
     return false;
 }
 
-bool Widget::mouse_press_event_filter(Widget* receiver,
+bool Widget::mouse_press_event_filter(Widget& receiver,
                                       const Mouse_data& mouse) {
     return false;
 }
 
-bool Widget::mouse_release_event_filter(Widget* receiver,
+bool Widget::mouse_release_event_filter(Widget& receiver,
                                         const Mouse_data& mouse) {
     return false;
 }
 
-bool Widget::mouse_double_click_event_filter(Widget* receiver,
+bool Widget::mouse_double_click_event_filter(Widget& receiver,
                                              const Mouse_data& mouse) {
     return false;
 }
 
-bool Widget::mouse_wheel_event_filter(Widget* receiver,
+bool Widget::mouse_wheel_event_filter(Widget& receiver,
                                       const Mouse_data& mouse) {
     return false;
 }
 
-bool Widget::mouse_move_event_filter(Widget* receiver,
+bool Widget::mouse_move_event_filter(Widget& receiver,
                                      const Mouse_data& mouse) {
     return false;
 }
 
-bool Widget::key_press_event_filter(Widget* receiver,
+bool Widget::key_press_event_filter(Widget& receiver,
                                     const Keyboard_data& keyboard) {
     return false;
 }
 
-bool Widget::key_release_event_filter(Widget* receiver,
+bool Widget::key_release_event_filter(Widget& receiver,
                                       const Keyboard_data& keyboard) {
     return false;
 }
 
-bool Widget::focus_in_event_filter(Widget* receiver) {
+bool Widget::focus_in_event_filter(Widget& receiver) {
     return false;
 }
 
-bool Widget::focus_out_event_filter(Widget* receiver) {
+bool Widget::focus_out_event_filter(Widget& receiver) {
     return false;
 }
 
-bool Widget::delete_event_filter(Widget* receiver) {
+bool Widget::delete_event_filter(Widget& receiver) {
     return false;
 }
 
-bool Widget::paint_event_filter(Widget* receiver) {
+bool Widget::paint_event_filter(Widget& receiver) {
     return false;
 }
 
-bool Widget::timer_event_filter(Widget* receiver) {
+bool Widget::timer_event_filter(Widget& receiver) {
     return false;
 }
 

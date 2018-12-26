@@ -33,7 +33,7 @@ Menu::Menu(Glyph_string title)
 
 sig::Signal<void()>& Menu::add_item(Glyph_string label) {
     Push_button& button_ref{this->make_child<Push_button>(std::move(label))};
-    button_ref.install_event_filter(this);
+    button_ref.install_event_filter(*this);
     items_.emplace_back(button_ref);
     if (items_.size() == 1) {
         this->select_item(0);
@@ -51,7 +51,7 @@ sig::Signal<void()>& Menu::add_item(Glyph_string label) {
 
 sig::Signal<void()>& Menu::insert_item(Glyph_string label, std::size_t index) {
     auto button_ptr = std::make_unique<Push_button>(std::move(label));
-    button_ptr->install_event_filter(this);
+    button_ptr->install_event_filter(*this);
     button_ptr->height_policy.type(Size_policy::Fixed);
     button_ptr->height_policy.hint(1);
     auto& new_button = *button_ptr;
@@ -129,7 +129,7 @@ bool Menu::mouse_press_event(const Mouse_data& mouse) {
     return Vertical_layout::mouse_press_event(mouse);
 }
 
-bool Menu::mouse_press_event_filter(Widget* receiver, const Mouse_data& mouse) {
+bool Menu::mouse_press_event_filter(Widget& receiver, const Mouse_data& mouse) {
     if (mouse.button == Mouse_button::ScrollUp) {
         this->select_up();
         return true;

@@ -38,10 +38,9 @@ void System::post_event(std::unique_ptr<Event> event) {
 }
 
 bool System::send_event(const Event& event) {
-    if (event.receiver() == nullptr ||
-        (!event.receiver()->enabled() &&
-         (event.type() != Event::Delete && event.type() != Event::Disable &&
-          event.type() != Event::FocusOut))) {
+    if (!event.receiver().enabled() &&
+        (event.type() != Event::Delete && event.type() != Event::Disable &&
+         event.type() != Event::FocusOut)) {
         return false;
     }
     bool handled = event.send_to_all_filters();
@@ -102,7 +101,7 @@ void System::set_head(Widget* head_widget) {
     if (head_ != nullptr) {
         head_->enable();
         System::post_event<Resize_event>(
-            head_, Area{System::terminal.width(), System::terminal.height()});
+            *head_, Area{System::terminal.width(), System::terminal.height()});
         head_->update();
     }
 }

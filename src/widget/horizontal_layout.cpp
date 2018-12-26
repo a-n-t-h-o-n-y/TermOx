@@ -539,8 +539,9 @@ void Horizontal_layout::move_and_resize_children(
             d.height == 0 || d.width == 0) {
             d.widget->disable(true, false);  // don't send child_polished_events
         } else {
-            System::post_event<Move_event>(d.widget, Point{x_pos, parent_y});
-            System::post_event<Resize_event>(d.widget, Area{d.width, d.height});
+            System::post_event<Move_event>(*(d.widget), Point{x_pos, parent_y});
+            System::post_event<Resize_event>(*(d.widget),
+                                             Area{d.width, d.height});
             x_pos += d.width;
         }
     }

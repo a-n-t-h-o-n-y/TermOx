@@ -16,7 +16,7 @@ class Focus_base : public cppurses::Horizontal_layout {
     void set_policy(cppurses::Focus_policy policy);
 
     // Intercept title_'s events so mouse clicks give focus to *this.
-    bool focus_in_event_filter(Widget* receiver) override;
+    bool focus_in_event_filter(Widget& receiver) override;
 
    protected:
     cppurses::Label& title_{this->make_child<cppurses::Label>()};

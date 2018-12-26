@@ -111,18 +111,18 @@ void Focus::set_focus_to(Widget* new_focus) {
     if (focus_widget_ != nullptr) {
         // Focus_out_event has private constructor, can't use make_unique.
         std::unique_ptr<Focus_out_event> event{
-            new Focus_out_event(focus_widget_)};
+            new Focus_out_event(*focus_widget_)};
         System::post_event(std::move(event));
     }
     focus_widget_ = new_focus;
-    std::unique_ptr<Focus_in_event> event{new Focus_in_event(focus_widget_)};
+    std::unique_ptr<Focus_in_event> event{new Focus_in_event(*focus_widget_)};
     System::post_event(std::move(event));
 }
 
 void Focus::clear_focus() {
     if (focus_widget_ != nullptr) {
         std::unique_ptr<Focus_out_event> event{
-            new Focus_out_event(focus_widget_)};
+            new Focus_out_event(*focus_widget_)};
         System::post_event(std::move(event));
         focus_widget_ = nullptr;
     }

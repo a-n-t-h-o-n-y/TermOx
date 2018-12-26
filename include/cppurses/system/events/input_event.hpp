@@ -10,7 +10,7 @@ class Input_event : public Event {
     enum class KeyboardModifiers { None };
 
    protected:
-    Input_event(Event::Type type, Widget* receiver)
+    Input_event(Event::Type type, Widget& receiver)
         : Event{type, receiver}, modifiers_{KeyboardModifiers::None} {}
 
     KeyboardModifiers modifiers_;

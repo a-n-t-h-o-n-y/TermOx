@@ -413,8 +413,9 @@ void Vertical_layout::move_and_resize_children(
             // here and disable all that are left.
             d.widget->disable(true, false);  // don't send child_polished_events
         } else {
-            System::post_event<Move_event>(d.widget, Point{parent_x, y_pos});
-            System::post_event<Resize_event>(d.widget, Area{d.width, d.height});
+            System::post_event<Move_event>(*(d.widget), Point{parent_x, y_pos});
+            System::post_event<Resize_event>(*(d.widget),
+                                             Area{d.width, d.height});
             y_pos += d.height;
         }
     }

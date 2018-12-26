@@ -172,11 +172,11 @@ class Widget {
      *  that calls to this function are made. They are handed the Event in that
      *  same order. If one Widget indicates that it has handled the event it can
      *  return true and no other Widget, including *this, will get the Event. */
-    void install_event_filter(Widget* filter);
+    void install_event_filter(Widget& filter);
 
     /// Remove a Widget from the Event filter list.
     /** No-op if \p filter is not already installed. */
-    void remove_event_filter(Widget* filter);
+    void remove_event_filter(Widget& filter);
 
     /// Return the list of Event filter Widgets.
     const std::vector<Widget*>& get_event_filters() const {
@@ -258,7 +258,7 @@ class Widget {
     sig::Signal<void()> focused_out;
     sig::Signal<void(Color)> background_color_changed;
     sig::Signal<void(Color)> foreground_color_changed;
-    sig::Signal<void(Widget*)> destroyed;
+    sig::Signal<void(Widget&)> destroyed;
     sig::Signal<void(Point)> clicked;
     sig::Signal<void(std::size_t, std::size_t)> clicked_xy;
     sig::Signal<void(Point)> click_released;
@@ -282,13 +282,13 @@ class Widget {
     virtual bool disable_event();
 
     /// Handles Child_added_event objects.
-    virtual bool child_added_event(Widget* child);
+    virtual bool child_added_event(Widget& child);
 
     /// Handles Child_removed_event objects.
-    virtual bool child_removed_event(Widget* child);
+    virtual bool child_removed_event(Widget& child);
 
     /// Handles Child_polished_event objects.
-    virtual bool child_polished_event(Widget* child);
+    virtual bool child_polished_event(Widget& child);
 
     /// Handles Move_event objects.
     virtual bool move_event(Point new_position, Point old_position);
@@ -334,72 +334,72 @@ class Widget {
 
     // - - - - - - - - - - - Event Filter Handlers - - - - - - - - - - - - - - -
     /// Handles Child_added_event objects filtered from other Widgets.
-    virtual bool child_added_event_filter(Widget* receiver, Widget* child);
+    virtual bool child_added_event_filter(Widget& receiver, Widget& child);
 
     /// Handles Child_removed_event objects filtered from other Widgets.
-    virtual bool child_removed_event_filter(Widget* receiver, Widget* child);
+    virtual bool child_removed_event_filter(Widget& receiver, Widget& child);
 
     /// Handles Child_polished_event objects filtered from other Widgets.
-    virtual bool child_polished_event_filter(Widget* receiver, Widget* child);
+    virtual bool child_polished_event_filter(Widget& receiver, Widget& child);
 
     /// Handles Enable_event objects filtered from other Widgets.
-    virtual bool enable_event_filter(Widget* receiver);
+    virtual bool enable_event_filter(Widget& receiver);
 
     /// Handles Disable_event objects filtered from other Widgets.
-    virtual bool disable_event_filter(Widget* receiver);
+    virtual bool disable_event_filter(Widget& receiver);
 
     /// Handles Move_event objects filtered from other Widgets.
-    virtual bool move_event_filter(Widget* receiver,
+    virtual bool move_event_filter(Widget& receiver,
                                    Point new_position,
                                    Point old_position);
 
     /// Handles Resize_event objects filtered from other Widgets.
-    virtual bool resize_event_filter(Widget* receiver,
+    virtual bool resize_event_filter(Widget& receiver,
                                      Area new_size,
                                      Area old_size);
 
     /// Handles Mouse_press_event objects filtered from other Widgets.
-    virtual bool mouse_press_event_filter(Widget* receiver,
+    virtual bool mouse_press_event_filter(Widget& receiver,
                                           const Mouse_data& mouse);
 
     /// Handles Mouse_release_event objects filtered from other Widgets.
-    virtual bool mouse_release_event_filter(Widget* receiver,
+    virtual bool mouse_release_event_filter(Widget& receiver,
                                             const Mouse_data& mouse);
 
     /// Handles Mouse_double_click_event objects filtered from other Widgets.
-    virtual bool mouse_double_click_event_filter(Widget* receiver,
+    virtual bool mouse_double_click_event_filter(Widget& receiver,
                                                  const Mouse_data& mouse);
 
     /// Handles Mouse_wheel_event objects filtered from other Widgets.
-    virtual bool mouse_wheel_event_filter(Widget* receiver,
+    virtual bool mouse_wheel_event_filter(Widget& receiver,
                                           const Mouse_data& mouse);
 
     /// Handles Mouse_move_event objects filtered from other Widgets.
-    virtual bool mouse_move_event_filter(Widget* receiver,
+    virtual bool mouse_move_event_filter(Widget& receiver,
                                          const Mouse_data& mouse);
 
     /// Handles Key_press_event objects filtered from other Widgets.
-    virtual bool key_press_event_filter(Widget* receiver,
+    virtual bool key_press_event_filter(Widget& receiver,
                                         const Keyboard_data& keyboard);
 
     /// Handles Key_release_event objects filtered from other Widgets.
-    virtual bool key_release_event_filter(Widget* receiver,
+    virtual bool key_release_event_filter(Widget& receiver,
                                           const Keyboard_data& keyboard);
 
     /// Handles Focus_in_event objects filtered from other Widgets.
-    virtual bool focus_in_event_filter(Widget* receiver);
+    virtual bool focus_in_event_filter(Widget& receiver);
 
     /// Handles Focus_out_event objects filtered from other Widgets.
-    virtual bool focus_out_event_filter(Widget* receiver);
+    virtual bool focus_out_event_filter(Widget& receiver);
 
     /// Handles Delete_event objects filtered from other Widgets.
-    virtual bool delete_event_filter(Widget* receiver);
+    virtual bool delete_event_filter(Widget& receiver);
 
     /// Handles Paint_event objects filtered from other Widgets.
-    virtual bool paint_event_filter(Widget* receiver);
+    virtual bool paint_event_filter(Widget& receiver);
 
     /// Handles Timer_event objects filtered from other Widgets.
-    virtual bool timer_event_filter(Widget* receiver);
+    virtual bool timer_event_filter(Widget& receiver);
 
    protected:
     /// Enables this Widget and possibly notifies the parent of the change.

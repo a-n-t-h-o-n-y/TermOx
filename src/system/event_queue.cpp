@@ -14,9 +14,9 @@ using namespace cppurses;
 
 template <typename Queue_t>
 void remove_descendant_delete_events(const Event& new_event, Queue_t& queue) {
-    const auto* receiver = new_event.receiver();
-    auto is_descendant = [receiver](const std::unique_ptr<Event>& on_queue) {
-        return receiver->children.has_descendant(on_queue->receiver());
+    const Widget& receiver = new_event.receiver();
+    auto is_descendant = [&receiver](const std::unique_ptr<Event>& on_queue) {
+        return receiver.children.has_descendant(&(on_queue->receiver()));
     };
     auto at = std::remove_if(std::begin(queue), std::end(queue), is_descendant);
     queue.erase(at, std::end(queue));
@@ -28,8 +28,8 @@ namespace cppurses {
 namespace detail {
 
 void Event_queue::append(std::unique_ptr<Event> event) {
-    if (event == nullptr || event->receiver() == nullptr ||
-        (!event->receiver()->enabled() &&
+    if (event == nullptr ||
+        (!event->receiver().enabled() &&
          (event->type() != Event::Delete && event->type() != Event::Disable &&
           event->type() != Event::FocusOut))) {
         // TODO provide a check for Disable_event to the above too, like Delete.
@@ -45,7 +45,7 @@ void Event_queue::append(std::unique_ptr<Event> event) {
         auto end = std::end(queue_);
         auto is_disable_event =
             [&event](const std::unique_ptr<Event>& on_queue) {
-                bool result{event->receiver() == on_queue->receiver() &&
+                bool result{&event->receiver() == &on_queue->receiver() &&
                             on_queue->type() == Event::Disable};
                 return result;
             };
@@ -59,7 +59,7 @@ void Event_queue::append(std::unique_ptr<Event> event) {
         auto end = std::end(queue_);
         auto is_enable_event =
             [&event](const std::unique_ptr<Event>& on_queue) {
-                bool result{event->receiver() == on_queue->receiver() &&
+                bool result{&event->receiver() == &on_queue->receiver() &&
                             on_queue->type() == Event::Enable};
                 return result;
             };

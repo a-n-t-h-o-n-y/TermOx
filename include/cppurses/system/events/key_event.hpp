@@ -10,7 +10,7 @@ namespace cppurses {
 
 class Key_event : public Input_event {
    public:
-    Key_event(Event::Type type, Widget* receiver, Key key_code)
+    Key_event(Event::Type type, Widget& receiver, Key key_code)
         : Input_event{type, receiver}, key_code_{key_code} {}
 
    protected:
@@ -19,29 +19,29 @@ class Key_event : public Input_event {
 
 class Key_press_event : public Key_event {
    public:
-    Key_press_event(Widget* receiver, Key key_code)
+    Key_press_event(Widget& receiver, Key key_code)
         : Key_event{Event::KeyPress, receiver, key_code} {}
 
     bool send() const override;
 
-    bool filter_send(Widget* filter) const override {
-        return filter->key_press_event_filter(
+    bool filter_send(Widget& filter) const override {
+        return filter.key_press_event_filter(
             receiver_, Keyboard_data{key_code_, key_to_char(key_code_)});
     }
 };
 
 class Key_release_event : public Key_event {
    public:
-    Key_release_event(Widget* receiver, Key key_code)
+    Key_release_event(Widget& receiver, Key key_code)
         : Key_event{Event::KeyRelease, receiver, key_code} {}
 
     bool send() const override {
-        return receiver_->key_release_event(
+        return receiver_.key_release_event(
             Keyboard_data{key_code_, key_to_char(key_code_)});
     }
 
-    bool filter_send(Widget* filter) const override {
-        return filter->key_release_event_filter(
+    bool filter_send(Widget& filter) const override {
+        return filter.key_release_event_filter(
             receiver_, Keyboard_data{key_code_, key_to_char(key_code_)});
     }
 };

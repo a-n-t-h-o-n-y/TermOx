@@ -31,8 +31,8 @@ bool is_ignorable(Event::Type event, Event::Type filter) {
     return ignore_paint || ignore_delete;
 }
 
-bool is_ignorable(const Widget* object, const Widget* filter) {
-    return (filter != nullptr && object != filter);
+bool is_ignorable(const Widget& object, const Widget* filter) {
+    return (filter != nullptr && (&object) != filter);
 }
 
 }  // namespace
@@ -49,7 +49,7 @@ void Event_invoker::invoke(Event_queue& queue,
 #endif
     auto event_iter = std::begin(queue.queue_);
     while (event_iter != std::end(queue.queue_)) {
-        auto* receiver = (*event_iter)->receiver();
+        auto& receiver = (*event_iter)->receiver();
         auto event_type = (*event_iter)->type();
         if (is_ignorable(event_type, type_filter) ||
             is_ignorable(receiver, object_filter)) {

@@ -38,23 +38,19 @@ class Event {
     };
 
     /// Initializes the \p type and the \p receiver of the Event.
-    Event(Type type, Widget* receiver) : type_{type}, receiver_{receiver} {}
+    Event(Type type, Widget& receiver) : type_{type}, receiver_{receiver} {}
 
-    Event(const Event&) = default;
-    Event& operator=(const Event&) = default;
-    Event(Event&&) = default;
-    Event& operator=(Event&&) = default;
+    Event(const Event&) = delete;
+    Event& operator=(const Event&) = delete;
+    Event(Event&&) = delete;
+    Event& operator=(Event&&) = delete;
     virtual ~Event() = default;
 
     /// Return a Type enum describing the derived type of the Event.
     Type type() const { return type_; }
 
     /// Return a pointer to the Widget that will receiver the Event.
-    Widget* receiver() const { return receiver_; }
-
-    /// Set the Widget that will receiver the event.
-    /** Used only by NCurses_event_listener. */
-    void set_receiver(Widget* receiver) { receiver_ = receiver; }
+    Widget& receiver() const { return receiver_; }
 
     /// Calls filter_send() on each installed event filter object in receiver_.
     /** Event filters can be set up with Widget::install_event_filter(). Filters
@@ -71,18 +67,18 @@ class Event {
     /// Receives Event calls originally destined for another Widget.
     /** Override in derived classes to call on the appropriate event handler
      *  filter on \p filter, passing in receiver_ as argument. */
-    virtual bool filter_send(Widget* filter) const = 0;
+    virtual bool filter_send(Widget& filter) const = 0;
 
     /// Equality on the type_ and recevier_ member objects.
     /** Used to optimize away duplicate events in Event_queue::append() */
     bool operator==(const Event& other) const {
         return (this->type_ == other.type_) &&
-               (this->receiver_ == other.receiver_);
+               (&(this->receiver_) == &(other.receiver_));
     }
 
    protected:
     Type type_;
-    Widget* receiver_;
+    Widget& receiver_;
 };
 
 }  // namespace cppurses

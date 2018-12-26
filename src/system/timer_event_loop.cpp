@@ -18,12 +18,12 @@ namespace detail {
 
 void Timer_event_loop::register_widget(Widget& w) {
     registered_widgets_.emplace(&w);
-    w.destroyed.connect([this](Widget* d) { registered_widgets_.erase(d); });
+    w.destroyed.connect([this](Widget& d) { registered_widgets_.erase(&d); });
 }
 
 void Timer_event_loop::loop_function() {
     for (Widget* widg : registered_widgets_) {
-        System::post_event<Timer_event>(widg);
+        System::post_event<Timer_event>(*widg);
     }
     auto now = std::chrono::high_resolution_clock::now();
     auto time_passed = now - last_time_;
