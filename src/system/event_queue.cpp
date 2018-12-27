@@ -14,13 +14,35 @@ namespace {
 using namespace cppurses;
 
 template <typename Queue_t>
-void remove_descendant_delete_events(const Event& new_event, Queue_t& queue) {
-    const Widget& receiver = new_event.receiver();
+void remove_descendant_events(const Widget& receiver, Queue_t& queue) {
     auto is_descendant = [&receiver](const std::unique_ptr<Event>& on_queue) {
         return receiver.children.has_descendant(&(on_queue->receiver()));
     };
     auto at = std::remove_if(std::begin(queue), std::end(queue), is_descendant);
     queue.erase(at, std::end(queue));
+}
+
+auto is(const Widget& receiver, Event::Type event_type) {
+    return [event_type, &receiver](const std::unique_ptr<Event>& on_queue) {
+        return &receiver == &(on_queue->receiver()) &&
+               on_queue->type() == event_type;
+    };
+}
+
+// Returns true if an event was removed from the queue.
+template <typename Queue_t>
+bool remove(const Widget& receiver, Event::Type type, Queue_t& queue) {
+    const auto begin = std::begin(queue);
+    const auto end = std::end(queue);
+    const auto erase_iter = std::remove_if(begin, end, is(receiver, type));
+    queue.erase(erase_iter, end);
+    return erase_iter != end;
+}
+
+bool is_expensive(Event::Type type) {
+    return type == Event::Paint || type == Event::Move ||
+           type == Event::Resize || type == Event::Disable ||
+           type == Event::Enable;
 }
 
 }  // namespace
@@ -32,51 +54,24 @@ void Event_queue::append(std::unique_ptr<Event> event) {
     if (event == nullptr || !is_sendable(*event)) {
         return;
     }
-    // Remove Enable/Disable pairs
+    // Remove canceling out Enable/Disable pairs.
     auto type = event->type();
     if (type == Event::Enable) {
-        auto begin = std::begin(queue_);
-        auto end = std::end(queue_);
-        auto is_disable_event =
-            [&event](const std::unique_ptr<Event>& on_queue) {
-                bool result{&event->receiver() == &on_queue->receiver() &&
-                            on_queue->type() == Event::Disable};
-                return result;
-            };
-        auto erase_iter = std::remove_if(begin, end, is_disable_event);
-        if (erase_iter != end) {
-            queue_.erase(erase_iter, end);
+        bool event_removed = remove(event->receiver(), Event::Disable, queue_);
+        if (event_removed) {
             return;
         }
     } else if (type == Event::Disable) {
-        auto begin = std::begin(queue_);
-        auto end = std::end(queue_);
-        auto is_enable_event =
-            [&event](const std::unique_ptr<Event>& on_queue) {
-                bool result{&event->receiver() == &on_queue->receiver() &&
-                            on_queue->type() == Event::Enable};
-                return result;
-            };
-        auto erase_iter = std::remove_if(begin, end, is_enable_event);
-        if (erase_iter != end) {
-            queue_.erase(erase_iter, end);
+        bool event_removed = remove(event->receiver(), Event::Enable, queue_);
+        if (event_removed) {
             return;
         }
     }
-
-    // Optimize out expensive duplicate events.
-    if (type == Event::Paint || type == Event::Move || type == Event::Resize ||
-        type == Event::Disable || type == Event::Enable) {
-        auto begin = std::begin(queue_);
-        auto end = std::end(queue_);
-        auto events_equal = [&event](const std::unique_ptr<Event>& on_queue) {
-            bool result{*event == *on_queue};
-            return result;
-        };
-        queue_.erase(std::remove_if(begin, end, events_equal), end);
-        if (type == Event::Delete) {
-            remove_descendant_delete_events(*event, queue_);
-        }
+    if (is_expensive(type)) {
+        remove(event->receiver(), type, queue_);
+    }
+    if (type == Event::Delete) {
+        remove_descendant_events(event->receiver(), queue_);
     }
     queue_.emplace_back(std::move(event));
 }

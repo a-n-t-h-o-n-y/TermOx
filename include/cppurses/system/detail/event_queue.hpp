@@ -16,7 +16,7 @@ class Event_queue {
     /// Moves \p event onto the Event_queue for later processing.
     /** This function implements optimizations on a few Event::Types. In these
      *  cases any previous Events of the same Event::Type and with the same
-     *  receiver will be removed and the new \p event moved into the end of the
+     *  receiver will be removed and the new \p event inserted at the end of the
      *  Event_queue. */
     void append(std::unique_ptr<Event> event);
 

@@ -56,7 +56,7 @@ void Event_invoker::invoke(Event_queue& queue,
             ++event_iter;
         } else if (type_filter == Event::None || type_filter == event_type) {
 #if defined(DEBUG_EVENT_INVOKER)
-            widgs[receiver].push_back(event_type);
+            widgs[&receiver].push_back(event_type);
 #endif
             auto event = std::move(*event_iter);
             queue.queue_.erase(event_iter);
