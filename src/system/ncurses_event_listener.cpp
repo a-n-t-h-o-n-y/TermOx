@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <memory>
 #include <mutex>
+#include <utility>
 
 #include <cppurses/painter/detail/ncurses_data.hpp>
 #include <cppurses/system/detail/find_widget_at.hpp>
@@ -22,43 +23,95 @@
 
 #include <ncurses.h>
 
+namespace {
+using namespace cppurses;
+
+std::unique_ptr<Event> make_keyboard_event(int input) {
+    Widget* const receiver = Focus::focus_widget();
+    return receiver != nullptr ? std::make_unique<Key_press_event>(
+                                     *receiver, static_cast<Key>(input))
+                               : nullptr;
+}
+
+// Checks if mouse_event is a button_mask type of event.
+template <typename Mask_t>
+bool is(Mask_t button_mask, const ::MEVENT& mouse_event) {
+    return static_cast<bool>(mouse_event.bstate & button_mask);
+}
+
+std::pair<Event::Type, Mouse_button> extract_data(const ::MEVENT& mouse_event) {
+    auto type_button = std::make_pair(Event::None, Mouse_button::None);
+    auto& type = type_button.first;
+    auto& button = type_button.second;
+    // Button 1 / Left Button
+    if (is(BUTTON1_PRESSED, mouse_event)) {
+        type = Event::MouseButtonPress;
+        button = Mouse_button::Left;
+    } else if (is(BUTTON1_RELEASED, mouse_event)) {
+        type = Event::MouseButtonRelease;
+        button = Mouse_button::Left;
+    }
+    // Button 2 / Middle Button
+    else if (is(BUTTON2_PRESSED, mouse_event)) {
+        type = Event::MouseButtonPress;
+        button = Mouse_button::Middle;
+    } else if (is(BUTTON2_RELEASED, mouse_event)) {
+        type = Event::MouseButtonRelease;
+        button = Mouse_button::Middle;
+    }
+    // Button 3 / Right Button
+    else if (is(BUTTON3_PRESSED, mouse_event)) {
+        type = Event::MouseButtonPress;
+        button = Mouse_button::Right;
+    } else if (is(BUTTON3_RELEASED, mouse_event)) {
+        type = Event::MouseButtonRelease;
+        button = Mouse_button::Right;
+    }
+    // Button 4 / Scroll Up
+    else if (is(BUTTON4_PRESSED, mouse_event)) {
+        type = Event::MouseButtonPress;
+        button = Mouse_button::ScrollUp;
+    } else if (is(BUTTON4_RELEASED, mouse_event)) {
+        type = Event::MouseButtonRelease;
+        button = Mouse_button::ScrollUp;
+    }
+    // Button 5 / Scroll Down
+#if defined(BUTTON5_PRESSED) && defined(BUTTON5_RELEASED)
+    else if (is(BUTTON5_PRESSED, mouse_event)) {
+        type = Event::MouseButtonPress;
+        button = Mouse_button::ScrollDown;
+    } else if (is(BUTTON5_RELEASED, mouse_event)) {
+        type = Event::MouseButtonRelease;
+        button = Mouse_button::ScrollDown;
+    }
+#endif
+    return type_button;
+}
+
+}  // namespace
+
 namespace cppurses {
 namespace detail {
 
+// TODO
+// getch() calls wrefresh() internally, making this not thread safe with
+// multiple event loops running. Either have to find a simpler function or
+// handle input manually w/o ncurses.
 std::unique_ptr<Event> NCurses_event_listener::get_input() const {
-    // TODO
-    // getch() calls wrefresh() internally, making this not thread safe with
-    // multiple event loops running. Either have to find a simpler function or
-    // handler input manually. Cannot use a mutex here, otherwise you have to
-    // wait for input before you can refresh the screen from anywhere else.
-    const auto input = ::getch();
+    const auto input = int{::getch()};
     auto event = std::unique_ptr<Event>{nullptr};
-    Widget* receiver = nullptr;
     switch (input) {
-        case ERR:
-            // Terminal Screen Resize
-            if (NCurses_data::resize_happened) {
-                NCurses_data::resize_happened = false;
-                if (System::head() != nullptr) {
-                    event = std::make_unique<Terminal_resize_event>(
-                        *System::head());
-                }
-            }
+        case ERR:  // Terminal Screen Resize
+            event = make_terminal_resize_event();
             break;
         case KEY_MOUSE:
             event = parse_mouse_event();
             break;
         case KEY_RESIZE:
-            receiver = handle_resize_widget();
-            if (receiver != nullptr) {
-                event = handle_resize_event(*receiver);
-            }
+            event = make_resize_event();
             break;
         default:  // Key_event
-            receiver = handle_keyboard_widget();
-            if (receiver != nullptr) {
-                event = handle_keyboard_event(*receiver, input);
-            }
+            event = make_keyboard_event(input);
             break;
     }
     return event;
@@ -66,108 +119,59 @@ std::unique_ptr<Event> NCurses_event_listener::get_input() const {
 
 #undef border  // NCurses macro, naming conflict.
 
-std::unique_ptr<Event> NCurses_event_listener::parse_mouse_event() const {
+std::unique_ptr<Event> NCurses_event_listener::parse_mouse_event() {
     auto mouse_event = ::MEVENT{};
     if (::getmouse(&mouse_event) != OK) {
         return nullptr;
     }
-    auto* receiver = detail::find_widget_at(mouse_event.x, mouse_event.y);
+    Widget* receiver = find_widget_at(mouse_event.x, mouse_event.y);
     if (receiver == nullptr) {
         return nullptr;
     }
-    // Parse NCurses Event
-    auto type = Event::None;
-    auto button = Mouse_button::None;
-    // Button 1 / Left Button
-    if (static_cast<bool>(mouse_event.bstate & BUTTON1_PRESSED)) {
-        type = Event::MouseButtonPress;
-        button = Mouse_button::Left;
-    } else if (static_cast<bool>(mouse_event.bstate & BUTTON1_RELEASED)) {
-        type = Event::MouseButtonRelease;
-        button = Mouse_button::Left;
-    }
-    // Button 2 / Middle Button
-    else if (static_cast<bool>(mouse_event.bstate & BUTTON2_PRESSED)) {
-        type = Event::MouseButtonPress;
-        button = Mouse_button::Middle;
-    } else if (static_cast<bool>(mouse_event.bstate & BUTTON2_RELEASED)) {
-        type = Event::MouseButtonRelease;
-        button = Mouse_button::Middle;
-    }
-    // Button 3 / Right Button
-    else if (static_cast<bool>(mouse_event.bstate & BUTTON3_PRESSED)) {
-        type = Event::MouseButtonPress;
-        button = Mouse_button::Right;
-    } else if (static_cast<bool>(mouse_event.bstate & BUTTON3_RELEASED)) {
-        type = Event::MouseButtonRelease;
-        button = Mouse_button::Right;
-    }
-    // Button 4 / Scroll Up
-    else if (static_cast<bool>(mouse_event.bstate & BUTTON4_PRESSED)) {
-        type = Event::MouseButtonPress;
-        button = Mouse_button::ScrollUp;
-    } else if (static_cast<bool>(mouse_event.bstate & BUTTON4_RELEASED)) {
-        type = Event::MouseButtonRelease;
-        button = Mouse_button::ScrollUp;
-    }
-    // Button 5 / Scroll Down
-#if defined(BUTTON5_PRESSED) && defined(BUTTON5_RELEASED)
-    else if (static_cast<bool>(mouse_event.bstate & BUTTON5_PRESSED)) {
-        type = Event::MouseButtonPress;
-        button = Mouse_button::ScrollDown;
-    } else if (static_cast<bool>(mouse_event.bstate & BUTTON5_RELEASED)) {
-        type = Event::MouseButtonRelease;
-        button = Mouse_button::ScrollDown;
-    }
-#endif
-    else {
-        return nullptr;
-    }
 
-    // Location
-    const auto mouse_x = static_cast<std::size_t>(mouse_event.x);
-    const auto mouse_y = static_cast<std::size_t>(mouse_event.y);
-    const auto local_x = mouse_x - receiver->inner_x();
-    const auto local_y = mouse_y - receiver->inner_y();
+    // Coordinates
+    const auto global = Point{static_cast<std::size_t>(mouse_event.x),
+                              static_cast<std::size_t>(mouse_event.y)};
+    const auto local =
+        Point{global.x - receiver->inner_x(), global.y - receiver->inner_y()};
 
     // Create Event
+    const auto type_button = extract_data(mouse_event);
+    const auto type = type_button.first;
+    const auto button = type_button.second;
     auto event = std::unique_ptr<Event>{nullptr};
     if (type == Event::MouseButtonPress) {
         event = std::make_unique<Mouse_press_event>(
-            *receiver, Mouse_data{button, Point{mouse_x, mouse_y},
-                                  Point{local_x, local_y}, mouse_event.id});
+            *receiver, Mouse_data{button, global, local, mouse_event.id});
     } else if (type == Event::MouseButtonRelease) {
         event = std::make_unique<Mouse_release_event>(
-            *receiver, Mouse_data{button, Point{mouse_x, mouse_y},
-                                  Point{local_x, local_y}, mouse_event.id});
-    } else {
-        return nullptr;
+            *receiver, Mouse_data{button, global, local, mouse_event.id});
     }
     return event;
 }
 
-std::unique_ptr<Event> NCurses_event_listener::handle_keyboard_event(
-    Widget& receiver,
-    int input) const {
-    return std::make_unique<Key_press_event>(receiver, static_cast<Key>(input));
+std::unique_ptr<Event> NCurses_event_listener::make_resize_event() {
+    Widget* const receiver = System::head();
+    if (receiver != nullptr) {
+        // The below call is not thread safe. Should be updated when the
+        // event invoker is called for the main thread.
+        System::terminal.update_dimensions();
+        const auto width = System::terminal.width();
+        const auto height = System::terminal.height();
+        return std::make_unique<Resize_event>(*receiver, Area{width, height});
+    }
+    return nullptr;
 }
 
-Widget* NCurses_event_listener::handle_keyboard_widget() const {
-    return Focus::focus_widget();
-}
-
-std::unique_ptr<Event> NCurses_event_listener::handle_resize_event(
-    Widget& receiver) const {
-    // TODO the below call is not thread safe. Should be updated when the event
-    // invoker is called for the main thread.
-    System::terminal.update_dimensions();
-    const auto width = System::terminal.width();
-    const auto height = System::terminal.height();
-    return std::make_unique<Resize_event>(receiver, Area{width, height});
-}
-
-Widget* NCurses_event_listener::handle_resize_widget() const {
-    return System::head();
+std::unique_ptr<Event> NCurses_event_listener::make_terminal_resize_event() {
+    if (NCurses_data::resize_happened) {
+        NCurses_data::resize_happened = false;
+        Widget* const receiver = System::head();
+        if (receiver != nullptr) {
+            return std::make_unique<Terminal_resize_event>(*receiver);
+        }
+    }
+    return nullptr;
 }
 
 }  // namespace detail

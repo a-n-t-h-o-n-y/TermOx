@@ -1,11 +1,13 @@
 #include <cppurses/system/system.hpp>
 
 #include <algorithm>
+#include <iterator>
 #include <memory>
 #include <mutex>
 #include <stdexcept>
 #include <thread>
 #include <utility>
+#include <vector>
 
 #include <signals/slot.hpp>
 

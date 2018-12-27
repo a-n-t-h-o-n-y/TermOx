@@ -15,16 +15,13 @@ namespace detail {
 class NCurses_event_listener : public Abstract_event_listener {
    public:
     /// Blocks on NCurses getch(), parses input and returns an Event object.
+    /** Will return a nullptr if getting input failed in some way. */
     std::unique_ptr<Event> get_input() const override;
 
    private:
-    std::unique_ptr<Event> parse_mouse_event() const;
-
-    std::unique_ptr<Event> handle_keyboard_event(Widget& receiver,
-                                                 int input) const;
-    Widget* handle_keyboard_widget() const;
-    std::unique_ptr<Event> handle_resize_event(Widget& receiver) const;
-    Widget* handle_resize_widget() const;
+    static std::unique_ptr<Event> parse_mouse_event();
+    static std::unique_ptr<Event> make_resize_event();
+    static std::unique_ptr<Event> make_terminal_resize_event();
 };
 
 }  // namespace detail

@@ -1,9 +1,9 @@
 #ifndef CPPURSES_SYSTEM_SYSTEM_HPP
 #define CPPURSES_SYSTEM_SYSTEM_HPP
-#include <cstddef>
 #include <memory>
 #include <mutex>
 #include <utility>
+#include <vector>
 
 #include <signals/slot.hpp>
 

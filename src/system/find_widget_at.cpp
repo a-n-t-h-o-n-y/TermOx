@@ -13,7 +13,7 @@ namespace cppurses {
 namespace detail {
 
 Widget* find_widget_at(std::size_t x, std::size_t y) {
-    auto* widg = System::head();
+    Widget* widg = System::head();
     if (widg == nullptr || !has_coordinates(*widg, x, y)) {
         return nullptr;
     }
