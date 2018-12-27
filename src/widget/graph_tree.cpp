@@ -3,8 +3,6 @@
 #include <fstream>
 #include <string>
 
-#include <utility/type_info.hpp>
-
 #include <cppurses/widget/widget.hpp>
 
 namespace {
@@ -31,11 +29,9 @@ void add_label(std::ofstream& file,
 }
 
 std::string make_label_text(const Widget& w) {
-    // auto type_name = std::string{utility::get_type_info<decltype(w)>()};
     auto id = std::to_string(w.unique_id());
     auto name = w.name();
     auto is_enabled = w.enabled() ? "enabled" : "disabled";
-    // return type_name + " " + id + " " + name;
     return id + "\n" + name + "\n" + is_enabled;
 }
 
@@ -57,7 +53,6 @@ void make_connections_to_children(std::ofstream& file, const Widget& parent) {
 namespace cppurses {
 namespace detail {
 
-/// Outputs filename.gz graph description of widget tree hierarchy.
 void graph_tree(const Widget& w, const std::string& filename) {
     auto file = std::ofstream{filename + ".gv"};
     begin_graph(file, filename);

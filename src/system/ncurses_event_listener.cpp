@@ -17,6 +17,7 @@
 #include <cppurses/system/mouse_button.hpp>
 #include <cppurses/system/mouse_data.hpp>
 #include <cppurses/system/system.hpp>
+#include <cppurses/system/tree.hpp>
 #include <cppurses/widget/area.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
@@ -151,7 +152,7 @@ std::unique_ptr<Event> NCurses_event_listener::parse_mouse_event() {
 }
 
 std::unique_ptr<Event> NCurses_event_listener::make_resize_event() {
-    Widget* const receiver = System::head();
+    Widget* const receiver = Tree::head();
     if (receiver != nullptr) {
         // The below call is not thread safe. Should be updated when the
         // event invoker is called for the main thread.
@@ -166,7 +167,7 @@ std::unique_ptr<Event> NCurses_event_listener::make_resize_event() {
 std::unique_ptr<Event> NCurses_event_listener::make_terminal_resize_event() {
     if (NCurses_data::resize_happened) {
         NCurses_data::resize_happened = false;
-        Widget* const receiver = System::head();
+        Widget* const receiver = Tree::head();
         if (receiver != nullptr) {
             return std::make_unique<Terminal_resize_event>(*receiver);
         }

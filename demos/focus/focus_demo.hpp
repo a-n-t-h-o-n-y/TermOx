@@ -36,9 +36,7 @@ struct Center : cppurses::Vertical_layout {
 };
 
 struct Right_side : cppurses::Vertical_layout {
-    Right_side() {
-        two.height_policy.stretch(2);
-    }
+    Right_side() { two.height_policy.stretch(2); }
     Focus_click& one{this->make_child<Focus_click>()};
     Sub_boxes_three& two{this->make_child<Sub_boxes_three>()};
     Focus_strong& three{this->make_child<Focus_strong>()};

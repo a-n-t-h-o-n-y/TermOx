@@ -5,6 +5,7 @@
 #include <memory>
 #include <utility>
 
+#include <cppurses/system/detail/is_sendable.hpp>
 #include <cppurses/system/event.hpp>
 #include <cppurses/widget/children_data.hpp>
 #include <cppurses/widget/widget.hpp>
@@ -28,16 +29,9 @@ namespace cppurses {
 namespace detail {
 
 void Event_queue::append(std::unique_ptr<Event> event) {
-    if (event == nullptr ||
-        (!event->receiver().enabled() &&
-         (event->type() != Event::Delete && event->type() != Event::Disable &&
-          event->type() != Event::FocusOut))) {
-        // TODO provide a check for Disable_event to the above too, like Delete.
-        // Then Disable event can post itself instead of sending. Add check to
-        // send_event too.
+    if (event == nullptr || !is_sendable(*event)) {
         return;
     }
-
     // Remove Enable/Disable pairs
     auto type = event->type();
     if (type == Event::Enable) {

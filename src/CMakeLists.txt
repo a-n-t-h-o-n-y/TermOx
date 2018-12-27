@@ -63,6 +63,7 @@ target_sources(cppurses PRIVATE
     system/find_widget_at.cpp
     system/terminal_properties.cpp
     system/terminal_resize_event.cpp
+    system/tree.cpp
 )
 
 # PAINTER
@@ -126,7 +127,7 @@ target_sources(cppurses PRIVATE
     widget/border_offset.cpp
     widget/cursor_data.cpp
     widget/widget_free_functions.cpp
-    # widget/graph_tree.cpp
+    widget/graph_tree.cpp
 )
 
 # INSTALLATION

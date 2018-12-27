@@ -11,7 +11,6 @@
 #include <cppurses/system/terminal_properties.hpp>
 
 namespace cppurses {
-class Widget;
 class Event;
 class Animation_engine;
 class Event_loop;
@@ -75,16 +74,6 @@ class System {
      *  this function returns. */
     static void exit(int return_code = 0);
 
-    /// Returns a pointer to the head Widget.
-    /** This is the Widget that has no parent and is the ancestor of every
-     *  Widget on the tree of Widgets that are part of System. */
-    static Widget* head() { return head_; }
-
-    /// Sets the head Widget for the System.
-    /** Calling this function with a new Widget as the head will change the
-     *  working set of Widgets that System uses to run the TUI. */
-    static void set_head(Widget* head_widget);
-
     /// Returns a reference to the Animation_engine in System.
     /** This manages animation on each of the Widgets that enables it. */
     static Animation_engine& animation_engine() { return animation_engine_; }
@@ -99,7 +88,6 @@ class System {
     static std::vector<Event_loop*> running_event_loops_;
     static std::mutex running_loops_mtx_;
 
-    static Widget* head_;
     static bool exit_requested_;
     static detail::User_input_event_loop main_loop_;
     static Animation_engine animation_engine_;

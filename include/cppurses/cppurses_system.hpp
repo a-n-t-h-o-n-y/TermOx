@@ -24,5 +24,6 @@
 #include <cppurses/system/mouse_data.hpp>
 #include <cppurses/system/shortcuts.hpp>
 #include <cppurses/system/system.hpp>
+#include <cppurses/system/tree.hpp>
 
 #endif  // CPPURSES_SYSTEM_HPP

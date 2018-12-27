@@ -15,11 +15,13 @@
 #include <cppurses/painter/palette.hpp>
 #include <cppurses/system/animation_engine.hpp>
 #include <cppurses/system/detail/event_queue.hpp>
+#include <cppurses/system/detail/is_sendable.hpp>
 #include <cppurses/system/detail/user_input_event_loop.hpp>
 #include <cppurses/system/event.hpp>
 #include <cppurses/system/event_loop.hpp>
 #include <cppurses/system/events/resize_event.hpp>
 #include <cppurses/system/terminal_properties.hpp>
+#include <cppurses/system/tree.hpp>
 #include <cppurses/widget/area.hpp>
 #include <cppurses/widget/widget.hpp>
 
@@ -28,7 +30,6 @@ namespace cppurses {
 sig::Slot<void()> System::quit = []() { System::exit(); };
 std::vector<Event_loop*> System::running_event_loops_;
 std::mutex System::running_loops_mtx_;
-Widget* System::head_ = nullptr;
 detail::User_input_event_loop System::main_loop_;
 Animation_engine System::animation_engine_;
 Terminal_properties System::terminal;
@@ -40,9 +41,7 @@ void System::post_event(std::unique_ptr<Event> event) {
 }
 
 bool System::send_event(const Event& event) {
-    if (!event.receiver().enabled() &&
-        (event.type() != Event::Delete && event.type() != Event::Disable &&
-         event.type() != Event::FocusOut)) {
+    if (!detail::is_sendable(event)) {
         return false;
     }
     bool handled = event.send_to_all_filters();
@@ -95,21 +94,8 @@ System::~System() {
     animation_engine_.shutdown();
 }
 
-void System::set_head(Widget* head_widget) {
-    if (head_ != nullptr) {
-        head_->disable();
-    }
-    head_ = head_widget;
-    if (head_ != nullptr) {
-        head_->enable();
-        System::post_event<Resize_event>(
-            *head_, Area{System::terminal.width(), System::terminal.height()});
-        head_->update();
-    }
-}
-
 int System::run() {
-    if (head_ == nullptr) {
+    if (Tree::head() == nullptr) {
         return -1;
     }
     return main_loop_.run();
