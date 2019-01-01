@@ -1,3 +1,7 @@
+if(${CMAKE_VERSION} VERSION_LESS "3.8")
+    set(CMAKE_CXX_STANDARD 14)
+endif()
+
 add_executable(demos EXCLUDE_FROM_ALL "")
 
 # CHESS
@@ -55,9 +59,6 @@ find_package(Threads REQUIRED)
 
 target_link_libraries(demos PRIVATE cppurses ${CMAKE_THREAD_LIBS_INIT})
 
-if(${CMAKE_VERSION} VERSION_LESS "3.8")
-    set(CMAKE_CXX_STANDARD 14)
-else()
+if(NOT ${CMAKE_VERSION} VERSION_LESS "3.8")
     target_compile_features(demos INTERFACE cxx_std_14)
 endif()
-
