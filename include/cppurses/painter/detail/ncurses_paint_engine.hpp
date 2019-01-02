@@ -55,7 +55,7 @@ class NCurses_paint_engine {
     void setup_sigwinch();
 
     /// paints a character to the screen and waits for SLOW_PAINT time.
-    void paint_temporary(wchar_t display);
+    void paint_temporary(char display);
 };
 
 }  // namespace detail

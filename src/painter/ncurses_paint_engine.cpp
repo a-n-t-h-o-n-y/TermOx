@@ -129,7 +129,7 @@ void add_as_wchar(const Glyph& glyph) {
 void add_as_char(const Glyph& glyph) {
     auto use_addch = false;
     auto symbol_and_attributes = detail::get_chtype(glyph.symbol, use_addch);
-    symbol_and_attributes |= find_pair(glyph.brush);
+    symbol_and_attributes |= COLOR_PAIR(find_pair(glyph.brush));
     symbol_and_attributes |= find_attr_t(glyph.brush);
     if (use_addch) {
         ::waddch(::stdscr, symbol_and_attributes);
@@ -166,7 +166,7 @@ NCurses_paint_engine::~NCurses_paint_engine() {
 
 void NCurses_paint_engine::put_glyph(const Glyph& g) {
 #if defined(SLOW_PAINT)
-    paint_temporary(L'X');
+    paint_temporary('X');
 #endif
 #if defined(add_wchstr)
     add_as_wchar(g);
@@ -203,12 +203,17 @@ void NCurses_paint_engine::setup_sigwinch() {
     sigaction(SIGWINCH, &sa, NULL);
 }
 
-void NCurses_paint_engine::paint_temporary(wchar_t display) {
-    const wchar_t temp_sym[2] = {display, L'\0'};
+void NCurses_paint_engine::paint_temporary(char display) {
     const auto temp_color_pair = find_pair(Color::White, Color::Black);
+    const auto temp_attributes = A_NORMAL;
+#if defined(add_wchstr)
+    const wchar_t temp_sym[2] = {display, L'\0'};
     auto temp_display = cchar_t{' '};
-    ::setcchar(&temp_display, temp_sym, A_NORMAL, temp_color_pair, nullptr);
+    ::setcchar(&temp_display, temp_sym, temp_attributes, temp_color_pair, nullptr);
     ::wadd_wchnstr(::stdscr, &temp_display, 1);
+#else
+    ::waddch(::stdscr, display | COLOR_PAIR(temp_color_pair) | temp_attributes);
+#endif
     this->refresh();
 #if defined(SLOW_PAINT)
     std::this_thread::sleep_for(std::chrono::milliseconds(SLOW_PAINT));

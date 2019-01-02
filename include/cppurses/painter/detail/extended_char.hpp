@@ -7,7 +7,7 @@ namespace detail {
 
 /// Retrieve a character that is equivalent to /p sym.
 /** For ncurses implementations that do not support wide characters. */
-chtype get_chtype(wchar_t sym, bool* use_addch);
+chtype get_chtype(wchar_t sym, bool& use_addch);
 
 }  // namespace detail
 }  // namespace cppurses
