@@ -99,8 +99,14 @@
 
 include(CheckLibraryExists)
 
-find_library(CURSES_NCURSESW_LIBRARY NAMES ncursesw
-  DOC "Path to libncursesw.so or .lib or .a")
+if(${OSX_BREW_NCURSES})
+  find_library(CURSES_NCURSESW_LIBRARY NAMES ncursesw
+    HINTS /usr/local/opt/ncurses/lib
+    DOC "Path to libncursesw.so or .lib or .a")
+else()
+  find_library(CURSES_NCURSESW_LIBRARY NAMES ncursesw
+    DOC "Path to libncursesw.so or .lib or .a")
+endif()
 
 set(CURSES_USE_NCURSES FALSE)
 set(CURSES_USE_NCURSESW FALSE)
