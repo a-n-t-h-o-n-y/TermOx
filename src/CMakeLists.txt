@@ -1,6 +1,6 @@
 # FIND LOCAL NCURSES
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/Modules/")
 set(CURSES_NEED_NCURSE TRUE)
 find_package(Ncursesw REQUIRED)
 add_library(NCurses INTERFACE IMPORTED)
