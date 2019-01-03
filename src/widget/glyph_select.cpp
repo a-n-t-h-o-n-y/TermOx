@@ -11,8 +11,8 @@
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widget_free_functions.hpp>
 #include <cppurses/widget/widgets/glyph_select_stack.hpp>
+#include <cppurses/widget/widgets/horizontal_slider.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
-#include <cppurses/widget/widgets/slider.hpp>
 
 namespace cppurses {
 

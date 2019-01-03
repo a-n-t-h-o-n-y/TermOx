@@ -7,6 +7,7 @@
 #include "focus/focus_demo.hpp"
 #include "glyph_paint/glyph_paint.hpp"
 #include "notepad/notepad.hpp"
+#include "palette/palette_demo.hpp"
 
 using namespace cppurses;
 namespace demos {
@@ -29,6 +30,9 @@ class Main_menu : public Vertical_layout {
 
     focus::Focus_demo& focus_demo{
         main_menu.make_page<focus::Focus_demo>("Focus")};
+
+    palette::Palette_demo& palette_demo{
+        main_menu.make_page<palette::Palette_demo>("Color Palette")};
 
     animation::Animated_widget& animated_widget{
         main_menu.make_page<animation::Animated_widget>(
