@@ -4,13 +4,20 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 set(CURSES_NEED_NCURSE TRUE)
 find_package(Ncursesw REQUIRED)
 add_library(NCurses INTERFACE IMPORTED)
+message(STATUS CURSES_INCLUDE_DIR:${CURSES_INCLUDE_DIR})
 if(CURSES_HAVE_NCURSESW_NCURSES_H AND NCURSESW_FOUND)
-    set(NCURSES_INCLUDE_PATH ${CURSES_INCLUDE_DIR}/ncursesw)
+    if(${OSX_BREW_NCURSES})
+      set(NCURSES_INCLUDE_PATH ${CURSES_INCLUDE_DIR})
+    else()
+      set(NCURSES_INCLUDE_PATH ${CURSES_INCLUDE_DIR}/ncursesw)
+    endif()
 elseif(CURSES_HAVE_NCURSES_NCURSES_H)
     set(NCURSES_INCLUDE_PATH ${CURSES_INCLUDE_DIR}/ncurses)
 elseif(CURSES_HAVE_NCURSES_H)
     set(NCURSES_INCLUDE_PATH ${CURSES_INCLUDE_DIR})
 endif()
+message(STATUS NCURSES_INCLUDE_PATH:${NCURSES_INCLUDE_PATH})
+message(STATUS CURSES_LIBRARIES:${CURSES_LIBRARIES})
 set_property(TARGET NCurses
     PROPERTY
     INTERFACE_INCLUDE_DIRECTORIES ${NCURSES_INCLUDE_PATH}
@@ -45,15 +52,15 @@ target_sources(cppurses PRIVATE
     system/delete_event.cpp
     system/event.cpp
     system/event_invoker.cpp
-	system/event_loop.cpp
+    system/event_loop.cpp
     system/event_queue.cpp
     system/focus.cpp
     system/key.cpp
     system/key_event.cpp
-	system/move_event.cpp
+    system/move_event.cpp
     system/ncurses_event_listener.cpp
-	system/resize_event.cpp
-	system/system.cpp
+    system/resize_event.cpp
+    system/system.cpp
     system/shortcuts.cpp
     system/animation_engine.cpp
     system/event_as_string.cpp
@@ -69,9 +76,9 @@ target_sources(cppurses PRIVATE
 # PAINTER
 target_sources(cppurses PRIVATE
     painter/ncurses_paint_engine.cpp
-	painter/painter.cpp
-	painter/brush.cpp
-	painter/screen.cpp
+    painter/painter.cpp
+    painter/brush.cpp
+    painter/screen.cpp
     painter/glyph_matrix.cpp
     painter/glyph_string.cpp
     painter/wchar_to_bytes.cpp
@@ -94,15 +101,15 @@ target_sources(cppurses PRIVATE
     widget/glyph_select.cpp
     widget/cycle_stack.cpp
     widget/label.cpp
-	widget/layout.cpp
+    widget/layout.cpp
     widget/line_edit.cpp
     widget/log.cpp
     widget/confirm_button.cpp
     widget/labeled_cycle_box.cpp
-	widget/horizontal_layout.cpp
+    widget/horizontal_layout.cpp
     widget/matrix_display.cpp
     widget/point.cpp
-	widget/border.cpp
+    widget/border.cpp
     widget/cycle_box.cpp
     widget/vertical_layout.cpp
     widget/status_bar.cpp
