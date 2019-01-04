@@ -8,27 +8,23 @@
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/widget/widget.hpp>
 
+#include "detail/slider_logic.hpp"
+
 namespace cppurses {
 
 class Vertical_slider : public Widget {
    public:
-    /// Create a slider with [0, n) possible values.
-    Vertical_slider(std::size_t n);
+    /// Create a slider with [0, limit) possible values.
+    Vertical_slider(std::size_t limit);
 
-    /// Manually set the value of the slider, clamped to [0, n).
-    void set_value(std::size_t value);
+    /// Manually set the value of the slider, clamped to [0, limit).
+    void set_value(std::size_t value) { logic_.set_value(value); }
 
-    /// Retrieve the position of the Slider as a value from [0, 1].
-    float position() const { return position_; }
+    /// Retrieve the current value of the slider.
+    std::size_t value() const { return logic_.value(); }
 
-    /// Set the value to increment by on scrolling and arrow key presses.
-    void set_increment(float increment) { increment_ = increment; }
-
-    /// Retrieve the currently set increment value.
-    float increment() const { return increment_; }
-
-    /// Signal emitted every time the position has changed.
-    sig::Signal<void(float)> position_changed;
+    /// Signal emitted every time the slider value has changed.
+    sig::Signal<void(std::size_t)> value_changed;
 
    protected:
     bool paint_event() override;
@@ -36,16 +32,14 @@ class Vertical_slider : public Widget {
     bool key_press_event(const Keyboard_data& keyboard) override;
 
    private:
-    std::size_t size_n_;
-    std::size_t current_value_{0};
+    detail::Slider_logic logic_;
 
-    float position_{0.0};
-    float increment_{0.005};
     Glyph upper_{L' ', background(Color::Black)};
-    std::vector<Glyph> middle_{L'░', L'▒', L'▓', L'█'};
+    // std::vector<Glyph> middle_{L'░', L'▒', L'▓', L'█'};
+    Glyph middle_{L' ', background(Color::White)};
     Glyph lower_{L' ', background(Color::White)};
 
-    std::size_t middle_index() const;
+    // std::size_t middle_index() const;
 };
 
 }  // namespace cppurses
