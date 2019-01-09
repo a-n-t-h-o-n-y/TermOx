@@ -48,6 +48,11 @@ target_sources(demos PRIVATE
     focus/focus_base.cpp
 )
 
+# PALETTE
+target_sources(demos PRIVATE
+    palette/palette_demo.cpp
+)
+
 # NOTEPAD / MAIN MENU
 target_sources(demos PRIVATE
     demo.cpp

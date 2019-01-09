@@ -8,8 +8,12 @@ using namespace cppurses;
 
 class Palette_demo : public Horizontal_layout {
    public:
+    Palette_demo();
+
    private:
-    Vertical_slider& slider{this->make_child<Vertical_slider>(256)};
+    Vertical_slider& slider1{this->make_child<Vertical_slider>(-1000, 1000)};
+    Vertical_slider& slider2{this->make_child<Vertical_slider>(0, 255)};
+    Vertical_slider& slider3{this->make_child<Vertical_slider>(50, 55)};
 };
 
 }  // namespace palette

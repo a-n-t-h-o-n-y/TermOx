@@ -115,7 +115,6 @@ target_sources(cppurses PRIVATE
     widget/status_bar.cpp
     widget/textbox.cpp
     widget/textbox_slots.cpp
-    widget/vertical_slider.cpp
     widget/horizontal_slider.cpp
     widget/textbox_base.cpp
     widget/textbox_base_slots.cpp
@@ -136,6 +135,9 @@ target_sources(cppurses PRIVATE
     widget/cursor_data.cpp
     widget/widget_free_functions.cpp
     widget/graph_tree.cpp
+    widget/nearly_equal.cpp
+    widget/vertical_slider.cpp
+    widget/slider_logic.cpp
 )
 
 # INSTALLATION
