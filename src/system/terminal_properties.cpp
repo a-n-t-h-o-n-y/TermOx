@@ -35,6 +35,7 @@ void Terminal_properties::set_color_palette(const Palette& palette) {
         ::init_color(ncurses_color_number, scale(def.values.red),
                      scale(def.values.green), scale(def.values.blue));
     }
+    palette_ = palette;
 }
 
 void Terminal_properties::handle_control_characters(bool handle) {

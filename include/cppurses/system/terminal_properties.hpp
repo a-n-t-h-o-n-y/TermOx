@@ -32,6 +32,10 @@ class Terminal_properties {
     /// Sets color definitions for the entire terminal.
     void set_color_palette(const Palette& palette);
 
+    /// Retrieve a copy of the currently set color palette.
+    /// Todo return const Palette& ?
+    Palette current_palette() const { return palette_; }
+
     /// If set true, terminal will pass control characters to your program.
     /** Otherwise the terminal will interpret these characters and not pass them
      *  on to CPPurses. On intialization this is set false. */
@@ -42,6 +46,7 @@ class Terminal_properties {
     std::size_t height_{0};
 
     Glyph default_background_{L' '};
+    Palette palette_;
 
     void update_dimensions();
     friend detail::NCurses_event_listener;

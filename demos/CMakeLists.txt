@@ -51,6 +51,13 @@ target_sources(demos PRIVATE
 # PALETTE
 target_sources(demos PRIVATE
     palette/palette_demo.cpp
+    palette/value_control.cpp
+    palette/color_definition_setter.cpp
+    palette/color_control.cpp
+    palette/palette_helpers.cpp
+    palette/export_panel.cpp
+    palette/color_display.cpp
+    palette/all_colors_display.cpp
 )
 
 # NOTEPAD / MAIN MENU

@@ -1,6 +1,7 @@
 #ifndef CPPURSES_PAINTER_COLOR_HPP
 #define CPPURSES_PAINTER_COLOR_HPP
 #include <cstdint>
+#include <string>
 
 namespace cppurses {
 
@@ -83,6 +84,9 @@ inline constexpr detail::BackgroundColor background(Color c) {
 inline constexpr detail::ForegroundColor foreground(Color c) {
     return static_cast<detail::ForegroundColor>(c);
 }
+
+/// Get the name of the color as a string.
+std::string color_to_string(Color c);
 
 }  // namespace cppurses
 #endif  // CPPURSES_PAINTER_COLOR_HPP

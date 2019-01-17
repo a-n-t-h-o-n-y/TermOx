@@ -88,6 +88,7 @@ target_sources(cppurses PRIVATE
     painter/find_empty_space.cpp
     painter/screen_state.cpp
     painter/palettes.cpp
+    painter/color.cpp
 )	
 
 # WIDGET
