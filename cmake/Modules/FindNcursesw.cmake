@@ -122,6 +122,9 @@ if(CURSES_USE_NCURSESW)
 
   if(${OSX_BREW_NCURSES})
     set(CURSES_INCLUDE_PATH /usr/local/opt/ncurses/include)
+    if (APPLE)
+      add_definitions(-D_XOPEN_SOURCE_EXTENDED)
+    endif()
   else()
     find_path(CURSES_INCLUDE_PATH
       NAMES ncursesw/ncurses.h ncursesw/curses.h ncurses.h curses.h
