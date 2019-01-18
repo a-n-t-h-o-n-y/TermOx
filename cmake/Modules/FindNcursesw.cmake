@@ -120,10 +120,17 @@ if(CURSES_USE_NCURSESW)
   get_filename_component(_cursesLibDir "${CURSES_NCURSESW_LIBRARY}" PATH)
   get_filename_component(_cursesParentDir "${_cursesLibDir}" PATH)
 
-  find_path(CURSES_INCLUDE_PATH
-    NAMES ncursesw/ncurses.h ncursesw/curses.h ncurses.h curses.h
-    HINTS "${_cursesParentDir}/include"
+  if(${OSX_BREW_NCURSES})
+    set(CURSES_INCLUDE_PATH /usr/local/opt/ncurses/include)
+    if (APPLE)
+      add_definitions(-D_XOPEN_SOURCE_EXTENDED)
+    endif()
+  else()
+    find_path(CURSES_INCLUDE_PATH
+      NAMES ncursesw/ncurses.h ncursesw/curses.h ncurses.h curses.h
+      HINTS "${_cursesParentDir}/include"
     )
+  endif()
 
   # Previous versions of FindCurses provided these values.
   if(NOT DEFINED CURSES_LIBRARY)
