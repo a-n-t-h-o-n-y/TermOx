@@ -228,7 +228,7 @@ class Widget {
     /// A Brush that is applied to every Glyph painted by this Widget.
     Brush brush{background(Color::Black), foreground(Color::White)};
 
-    /// If true, the brush will paint to the wallpaper Glyph.
+    /// If true, the brush will apply to the wallpaper Glyph.
     bool brush_paints_wallpaper() const { return brush_paints_wallpaper_; }
 
     /// Set if the brush is applied to the wallpaper Glyph.

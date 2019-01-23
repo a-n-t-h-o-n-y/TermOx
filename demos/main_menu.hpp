@@ -2,9 +2,10 @@
 #define DEMOS_MAIN_MENU_HPP
 #include <cppurses/cppurses.hpp>
 
-#include "animation/animated_widget.hpp"
+// #include "animation/animated_widget.hpp"
 #include "chess/src/chess_ui.hpp"
 #include "focus/focus_demo.hpp"
+#include "game_of_life/gol_demo.hpp"
 #include "glyph_paint/glyph_paint.hpp"
 #include "notepad/notepad.hpp"
 #include "palette/palette_demo.hpp"
@@ -21,22 +22,25 @@ class Main_menu : public Vertical_layout {
     Widget_stack_menu& main_menu{
         this->make_child<Widget_stack_menu>("D e m o s")};
 
-    Notepad& notepad{main_menu.make_page<Notepad>("Notepad")};
+    gol::GoL_demo& game_of_life_demo{
+        main_menu.make_page<gol::GoL_demo>("Game of Life")};
+
+    palette::Palette_demo& palette_demo{
+        main_menu.make_page<palette::Palette_demo>("Color Palette")};
+
+    focus::Focus_demo& focus_demo{
+        main_menu.make_page<focus::Focus_demo>("Focus")};
 
     Chess_UI& chess{main_menu.make_page<Chess_UI>("Chess")};
 
     glyph_paint::Glyph_paint& glyph_paint{
         main_menu.make_page<glyph_paint::Glyph_paint>("Glyph Paint")};
 
-    focus::Focus_demo& focus_demo{
-        main_menu.make_page<focus::Focus_demo>("Focus")};
+    Notepad& notepad{main_menu.make_page<Notepad>("Notepad")};
 
-    palette::Palette_demo& palette_demo{
-        main_menu.make_page<palette::Palette_demo>("Color Palette")};
-
-    animation::Animated_widget& animated_widget{
-        main_menu.make_page<animation::Animated_widget>(
-            "Animated Widget(Experimental)")};
+    // animation::Animated_widget& animated_widget{
+    //     main_menu.make_page<animation::Animated_widget>(
+    //         "Animated Widget(Experimental)")};
 };
 
 }  // namespace demos

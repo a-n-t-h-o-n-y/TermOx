@@ -67,6 +67,21 @@ target_sources(demos PRIVATE
     notepad/notepad.cpp
 )
 
+# GAME OF LIFE
+target_sources(demos PRIVATE
+    game_of_life/game_of_life_engine.cpp
+    game_of_life/gol_widget.cpp
+    game_of_life/gol_demo.cpp
+    game_of_life/importers.cpp
+    game_of_life/exporters.cpp
+    game_of_life/filetype.cpp
+    game_of_life/settings_box.cpp
+    game_of_life/examples_info_box.cpp
+    game_of_life/files_box.cpp
+    game_of_life/offset_control_widget.cpp
+    game_of_life/side_panel.cpp
+)
+
 find_package(Threads REQUIRED)
 
 target_link_libraries(demos PRIVATE cppurses ${CMAKE_THREAD_LIBS_INIT})
