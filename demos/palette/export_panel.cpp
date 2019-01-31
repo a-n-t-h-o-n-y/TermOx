@@ -6,7 +6,7 @@
 
 #include <cppurses/painter/rgb.hpp>
 #include <cppurses/system/system.hpp>
-#include <cppurses/system/terminal_properties.hpp>
+#include <cppurses/terminal/terminal.hpp>
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget_free_functions.hpp>

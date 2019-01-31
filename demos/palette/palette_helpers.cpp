@@ -9,7 +9,8 @@
 #include <cppurses/painter/palette.hpp>
 #include <cppurses/painter/rgb.hpp>
 #include <cppurses/system/system.hpp>
-#include <cppurses/system/terminal_properties.hpp>
+#include <cppurses/terminal/terminal.hpp>
+
 using namespace cppurses;
 
 namespace palette {
