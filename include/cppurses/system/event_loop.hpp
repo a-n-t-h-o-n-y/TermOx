@@ -11,6 +11,8 @@
 
 namespace cppurses {
 
+/// Processes the Event_queue and flushes changes to the Terminal at each iter.
+/** Specialized by providing a loop_function to be run at each iteration. */
 class Event_loop {
    public:
     Event_loop() = default;
@@ -37,7 +39,7 @@ class Event_loop {
     /// Calls on the loop to exit at the next exit point.
     /** The return code value is used when returning from run() or wait(). This
      *  function is thread safe. */
-    void exit(int return_code) {
+    virtual void exit(int return_code) {
         return_code_ = return_code;
         exit_ = true;
     }

@@ -1,11 +1,11 @@
-#include <cppurses/system/detail/ncurses_event_listener.hpp>
+#include <cppurses/terminal/input.hpp>
 
 #include <cstddef>
 #include <memory>
-#include <mutex>
 #include <utility>
 
-#include <cppurses/painter/detail/ncurses_data.hpp>
+#include <ncurses.h>
+
 #include <cppurses/system/detail/find_widget_at.hpp>
 #include <cppurses/system/event.hpp>
 #include <cppurses/system/events/key_event.hpp>
@@ -22,25 +22,32 @@
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 
-#include <ncurses.h>
-
 namespace {
 using namespace cppurses;
+// #undef border  // NCurses macro, naming conflict. REMOVE THIS
 
-std::unique_ptr<Event> make_keyboard_event(int input) {
-    Widget* const receiver = Focus::focus_widget();
-    return receiver != nullptr ? std::make_unique<Key_press_event>(
-                                     *receiver, static_cast<Key>(input))
-                               : nullptr;
+bool resize_happened{false};
+
+/// If a resize actually occured, return event with the head Widget as receiver.
+std::unique_ptr<Event> make_terminal_resize_event() {
+    if (resize_happened) {
+        resize_happened = false;
+        Widget* const receiver = Tree::head();
+        if (receiver != nullptr) {
+            return std::make_unique<Terminal_resize_event>(*receiver);
+        }
+    }
+    return nullptr;
 }
 
-// Checks if mouse_event is a button_mask type of event.
+/// Checks if mouse_event is a button_mask type of event.
 template <typename Mask_t>
 bool is(Mask_t button_mask, const ::MEVENT& mouse_event) {
     return static_cast<bool>(mouse_event.bstate & button_mask);
 }
 
-std::pair<Event::Type, Mouse_button> extract_data(const ::MEVENT& mouse_event) {
+/// Extracts the Event type and Mouse_button from a given MEVENT object.
+std::pair<Event::Type, Mouse_button> extract_info(const ::MEVENT& mouse_event) {
     auto type_button = std::make_pair(Event::None, Mouse_button::None);
     auto& type = type_button.first;
     auto& button = type_button.second;
@@ -89,43 +96,12 @@ std::pair<Event::Type, Mouse_button> extract_data(const ::MEVENT& mouse_event) {
     return type_button;
 }
 
-}  // namespace
-
-namespace cppurses {
-namespace detail {
-
-// TODO
-// getch() calls wrefresh() internally, making this not thread safe with
-// multiple event loops running. Either have to find a simpler function or
-// handle input manually w/o ncurses.
-std::unique_ptr<Event> NCurses_event_listener::get_input() const {
-    const auto input = int{::getch()};
-    auto event = std::unique_ptr<Event>{nullptr};
-    switch (input) {
-        case ERR:  // Terminal Screen Resize
-            event = make_terminal_resize_event();
-            break;
-        case KEY_MOUSE:
-            event = parse_mouse_event();
-            break;
-        case KEY_RESIZE:
-            event = make_resize_event();
-            break;
-        default:  // Key_event
-            event = make_keyboard_event(input);
-            break;
-    }
-    return event;
-}
-
-#undef border  // NCurses macro, naming conflict.
-
-std::unique_ptr<Event> NCurses_event_listener::parse_mouse_event() {
+std::unique_ptr<Event> make_mouse_event() {
     auto mouse_event = ::MEVENT{};
     if (::getmouse(&mouse_event) != OK) {
         return nullptr;
     }
-    Widget* receiver = find_widget_at(mouse_event.x, mouse_event.y);
+    Widget* receiver = detail::find_widget_at(mouse_event.x, mouse_event.y);
     if (receiver == nullptr) {
         return nullptr;
     }
@@ -137,7 +113,7 @@ std::unique_ptr<Event> NCurses_event_listener::parse_mouse_event() {
         Point{global.x - receiver->inner_x(), global.y - receiver->inner_y()};
 
     // Create Event
-    const auto type_button = extract_data(mouse_event);
+    const auto type_button = extract_info(mouse_event);
     const auto type = type_button.first;
     const auto button = type_button.second;
     auto event = std::unique_ptr<Event>{nullptr};
@@ -151,12 +127,9 @@ std::unique_ptr<Event> NCurses_event_listener::parse_mouse_event() {
     return event;
 }
 
-std::unique_ptr<Event> NCurses_event_listener::make_resize_event() {
+std::unique_ptr<Event> make_resize_event() {
     Widget* const receiver = Tree::head();
     if (receiver != nullptr) {
-        // The below call is not thread safe. Should be updated when the
-        // event invoker is called for the main thread.
-        System::terminal.update_dimensions();
         const auto width = System::terminal.width();
         const auto height = System::terminal.height();
         return std::make_unique<Resize_event>(*receiver, Area{width, height});
@@ -164,16 +137,44 @@ std::unique_ptr<Event> NCurses_event_listener::make_resize_event() {
     return nullptr;
 }
 
-std::unique_ptr<Event> NCurses_event_listener::make_terminal_resize_event() {
-    if (NCurses_data::resize_happened) {
-        NCurses_data::resize_happened = false;
-        Widget* const receiver = Tree::head();
-        if (receiver != nullptr) {
-            return std::make_unique<Terminal_resize_event>(*receiver);
-        }
+std::unique_ptr<Event> make_keyboard_event(int input) {
+    Widget* const receiver = Focus::focus_widget();
+    return receiver != nullptr ? std::make_unique<Key_press_event>(
+                                     *receiver, static_cast<Key>(input))
+                               : nullptr;
+}
+}  // namespace
+
+namespace cppurses {
+namespace input {
+
+// TODO
+// getch() calls wrefresh() internally, making this not thread safe with
+// multiple event loops running. Either have to find a simpler function or
+// handle input manually w/o ncurses.
+std::unique_ptr<Event> get() {
+    const auto input = int{::getch()};
+    auto event = std::unique_ptr<Event>{nullptr};
+    switch (input) {
+        case ERR:  // Terminal Screen Resize
+            event = make_terminal_resize_event();
+            break;
+        case KEY_MOUSE:
+            event = make_mouse_event();
+            break;
+        case KEY_RESIZE:
+            event = make_resize_event();
+            break;
+        default:  // Key_event
+            event = make_keyboard_event(input);
+            break;
     }
-    return nullptr;
+    return event;
 }
 
-}  // namespace detail
+void indicate_resize(int) {
+    resize_happened = true;
+}
+
+}  // namespace input
 }  // namespace cppurses

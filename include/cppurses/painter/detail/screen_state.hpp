@@ -23,7 +23,7 @@ class Screen_state {
         bool moved{false};
         bool resized{false};
         bool child_event{false};
-        Glyph wallpaper;
+        Glyph wallpaper;  // previous wallpaper
         detail::Screen_mask move_mask;
         detail::Screen_mask resize_mask;
 

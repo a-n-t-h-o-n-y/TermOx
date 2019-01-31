@@ -58,7 +58,7 @@ target_sources(cppurses PRIVATE
     system/key.cpp
     system/key_event.cpp
     system/move_event.cpp
-    system/ncurses_event_listener.cpp
+    # system/ncurses_event_listener.cpp
     system/resize_event.cpp
     system/system.cpp
     system/shortcuts.cpp
@@ -68,14 +68,14 @@ target_sources(cppurses PRIVATE
     system/user_input_event_loop.cpp
     system/fps_to_period.cpp
     system/find_widget_at.cpp
-    system/terminal_properties.cpp
+    # system/terminal_properties.cpp
     system/terminal_resize_event.cpp
     system/tree.cpp
 )
 
 # PAINTER
 target_sources(cppurses PRIVATE
-    painter/ncurses_paint_engine.cpp
+    # painter/ncurses_paint_engine.cpp
     painter/painter.cpp
     painter/brush.cpp
     painter/screen.cpp
@@ -83,7 +83,7 @@ target_sources(cppurses PRIVATE
     painter/glyph_string.cpp
     painter/wchar_to_bytes.cpp
     painter/extended_char.cpp
-    painter/ncurses_data.cpp
+    # painter/ncurses_data.cpp
     painter/screen_mask.cpp
     painter/find_empty_space.cpp
     painter/screen_state.cpp
@@ -135,6 +135,13 @@ target_sources(cppurses PRIVATE
     widget/cursor_data.cpp
     widget/widget_free_functions.cpp
     widget/graph_tree.cpp
+)
+
+# TERMINAL
+target_sources(cppurses PRIVATE
+    terminal/terminal.cpp
+    terminal/output.cpp
+    terminal/input.cpp
 )
 
 # INSTALLATION

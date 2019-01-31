@@ -8,7 +8,7 @@
 #include <signals/slot.hpp>
 
 #include <cppurses/system/detail/user_input_event_loop.hpp>
-#include <cppurses/system/terminal_properties.hpp>
+#include <cppurses/terminal/terminal.hpp>
 
 namespace cppurses {
 class Event;
@@ -20,7 +20,7 @@ class Event_loop;
  *  Manages the head Widget and the main User_input_event_loop. */
 class System {
    public:
-    System();
+    System() = default;
     System(const System&) = delete;
     System& operator=(const System&) = delete;
     System(System&&) = default;
@@ -94,8 +94,7 @@ class System {
 
    public:
     /// Provides access to and modification of global terminal properties.
-    /** Unsafe to use if System object has not been initialized */
-    static Terminal_properties terminal;
+    static Terminal terminal;
 };
 
 }  // namespace cppurses

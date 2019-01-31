@@ -1,7 +1,5 @@
 #ifndef CPPURSES_PAINTER_DETAIL_SCREEN_HPP
 #define CPPURSES_PAINTER_DETAIL_SCREEN_HPP
-#include <cppurses/painter/detail/ncurses_data.hpp>
-#include <cppurses/painter/detail/ncurses_paint_engine.hpp>
 #include <cppurses/painter/detail/screen_descriptor.hpp>
 #include <cppurses/painter/detail/staged_changes.hpp>
 
@@ -22,8 +20,6 @@ class Screen {
     void set_cursor_on_focus_widget();
 
    private:
-    NCurses_paint_engine* engine_{&NCurses_data::paint_engine()};
-
     /// Covers space unowned by any child widget with wallpaper.
     /** Does nothing if w has no children. */
     void paint_empty_tiles(const Widget& widg);

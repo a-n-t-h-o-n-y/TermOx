@@ -22,6 +22,7 @@
 #include <cppurses/system/events/paint_event.hpp>
 #include <cppurses/system/focus.hpp>
 #include <cppurses/system/system.hpp>
+#include <cppurses/terminal/terminal.hpp>
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/children_data.hpp>
 #include <cppurses/widget/cursor_data.hpp>
@@ -75,7 +76,7 @@ void Widget::close() {
 
 Glyph Widget::generate_wallpaper() const {
     Glyph background{this->wallpaper ? *(this->wallpaper)
-                                     : System::terminal.background_tile()};
+                                     : System::terminal.background()};
     if (this->brush_paints_wallpaper()) {
         imprint(this->brush, background.brush);
     }

@@ -6,8 +6,6 @@
  *   void put_glyph(const Glyph& g);
  *   void put(std::size_t x, std::size_t y, const Glyph& g) {
  *   void move_cursor(std::size_t x, std::size_t y);
- *   void show_cursor(bool show = true);
- *   void hide_cursor(bool hide = true);
  *   void refresh();
  */
 
@@ -29,14 +27,14 @@ class NCurses_paint_engine {
     NCurses_paint_engine& operator=(const NCurses_paint_engine&) = delete;
     NCurses_paint_engine& operator=(NCurses_paint_engine&&) = default;
 
-    /// Places a Glyph \p g on the screen at the current cursor position.
+   /// Places a Glyph \p g on the screen at the current cursor position.
     void put_glyph(const Glyph& g);
 
     /// Places a Glyph \p g at coordinates \p x , \p y. (0,0) is top left.
     void put(std::size_t x, std::size_t y, const Glyph& g) {
         this->move_cursor(x, y);
         this->put_glyph(g);
-    }  // namespace detail
+    }
 
     /// Moves the cursor to point \p x , \p y on screen. (0,0) is top left.
     void move_cursor(std::size_t x, std::size_t y);
