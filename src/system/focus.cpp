@@ -101,6 +101,7 @@ bool Focus::shift_tab_press() {
     return false;
 }
 
+// TODO should take a reference, you have clear_focus() if you need that.
 void Focus::set_focus_to(Widget* new_focus) {
     if (new_focus == focus_widget_) {
         return;
@@ -120,6 +121,7 @@ void Focus::set_focus_to(Widget* new_focus) {
     System::post_event(std::move(event));
 }
 
+// TODO rename to clear() ?
 void Focus::clear_focus() {
     if (focus_widget_ != nullptr) {
         std::unique_ptr<Focus_out_event> event{

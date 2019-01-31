@@ -39,8 +39,11 @@ void Terminal_properties::set_color_palette(const Palette& palette) {
 }
 
 void Terminal_properties::handle_control_characters(bool handle) {
+    // raw mode - you get no signals, only characters
     if (handle) {
+        ::nocbreak();
         ::raw();
+        // cbreak mode you get signals instead of some characters
     } else {
         ::noraw();
         ::cbreak();

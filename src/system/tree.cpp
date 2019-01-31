@@ -4,7 +4,7 @@
 
 #include <cppurses/system/events/resize_event.hpp>
 #include <cppurses/system/system.hpp>
-#include <cppurses/system/terminal_properties.hpp>
+#include <cppurses/terminal/terminal.hpp>
 #include <cppurses/widget/area.hpp>
 #include <cppurses/widget/widget.hpp>
 
@@ -21,7 +21,6 @@ void Tree::set_head(Widget* new_head) {
         head_->enable();
         System::post_event<Resize_event>(
             *head_, Area{System::terminal.width(), System::terminal.height()});
-        head_->update();
     }
 }
 

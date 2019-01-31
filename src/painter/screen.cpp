@@ -1,8 +1,6 @@
 #include <cppurses/painter/detail/screen.hpp>
 
-#include <cstddef>
 #include <iterator>
-#include <mutex>
 
 #include <optional/optional.hpp>
 
@@ -11,12 +9,14 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/detail/find_empty_space.hpp>
 #include <cppurses/painter/detail/is_paintable.hpp>
-#include <cppurses/painter/detail/ncurses_paint_engine.hpp>
 #include <cppurses/painter/detail/screen_descriptor.hpp>
 #include <cppurses/painter/detail/screen_mask.hpp>
 #include <cppurses/painter/detail/staged_changes.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/system/focus.hpp>
+#include <cppurses/system/system.hpp>
+#include <cppurses/terminal/output.hpp>
+#include <cppurses/terminal/terminal.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 
@@ -64,19 +64,19 @@ void Screen::flush(const Staged_changes& changes) {
         }
     }
     if (refresh) {
-        engine_->refresh();
+        output::refresh();
     }
 }
 
 void Screen::set_cursor_on_focus_widget() {
     auto* focus = Focus::focus_widget();
     if (focus != nullptr && focus->cursor.enabled() && is_paintable(*focus)) {
-        engine_->show_cursor();
+        System::terminal.show_cursor();
         const auto x_global = focus->inner_x() + focus->cursor.x();
         const auto y_global = focus->inner_y() + focus->cursor.y();
-        engine_->move_cursor(x_global, y_global);
+        output::move_cursor(x_global, y_global);
     } else {
-        engine_->hide_cursor();
+        System::terminal.show_cursor(false);
     }
 }
 
@@ -95,7 +95,7 @@ void Screen::paint_empty_tiles(const Widget& widg) {
     for (auto y = y_begin; y < y_end; ++y) {
         for (auto x = x_begin; x < x_end; ++x) {
             if (empty_space.at(x, y)) {
-                engine_->put(x, y, wallpaper);
+                output::put(x, y, wallpaper);
             }
         }
     }
@@ -109,7 +109,7 @@ void Screen::cover_leftovers(Widget& widg,
          iter != std::end(existing_tiles);) {
         const auto& point = iter->first;
         if (!contains(point, staged_tiles)) {
-            engine_->put(point.x, point.y, wallpaper);
+            output::put(point.x, point.y, wallpaper);
             iter = existing_tiles.erase(iter);
         } else {
             ++iter;
@@ -123,7 +123,7 @@ void Screen::full_paint_single_point(Widget& widg,
     auto& existing_tiles = widg.screen_state().tiles;
     if (!contains(point, staged_tiles)) {
         if (!has_children(widg)) {
-            engine_->put(point.x, point.y, widg.generate_wallpaper());
+            output::put(point.x, point.y, widg.generate_wallpaper());
             existing_tiles.erase(point);
         }
         return;
@@ -131,7 +131,7 @@ void Screen::full_paint_single_point(Widget& widg,
     auto tile = staged_tiles.at(point);
     imprint(widg.brush, tile.brush);
     if (!(contains(point, existing_tiles) && existing_tiles[point] == tile)) {
-        engine_->put(point.x, point.y, tile);
+        output::put(point.x, point.y, tile);
         existing_tiles[point] = tile;
     }
 }
@@ -142,7 +142,7 @@ void Screen::basic_paint_single_point(Widget& widg,
     imprint(widg.brush, tile.brush);
     auto& existing_tiles = widg.screen_state().tiles;
     if (!(contains(point, existing_tiles) && existing_tiles[point] == tile)) {
-        engine_->put(point.x, point.y, tile);
+        output::put(point.x, point.y, tile);
         existing_tiles[point] = tile;
     }
 }

@@ -11,7 +11,6 @@
 
 #include <signals/slot.hpp>
 
-#include <cppurses/painter/detail/ncurses_data.hpp>
 #include <cppurses/painter/palette.hpp>
 #include <cppurses/system/animation_engine.hpp>
 #include <cppurses/system/detail/event_queue.hpp>
@@ -20,8 +19,8 @@
 #include <cppurses/system/event.hpp>
 #include <cppurses/system/event_loop.hpp>
 #include <cppurses/system/events/resize_event.hpp>
-#include <cppurses/system/terminal_properties.hpp>
 #include <cppurses/system/tree.hpp>
+#include <cppurses/terminal/terminal.hpp>
 #include <cppurses/widget/area.hpp>
 #include <cppurses/widget/widget.hpp>
 
@@ -32,7 +31,7 @@ std::vector<Event_loop*> System::running_event_loops_;
 std::mutex System::running_loops_mtx_;
 detail::User_input_event_loop System::main_loop_;
 Animation_engine System::animation_engine_;
-Terminal_properties System::terminal;
+Terminal System::terminal;
 bool System::exit_requested_{false};
 
 void System::post_event(std::unique_ptr<Event> event) {
@@ -85,20 +84,20 @@ void System::deregister_event_loop(Event_loop* loop) {
     }
 }
 
-System::System() {
-    detail::NCurses_data::initialize();
-    terminal.initialize();
-}
-
 System::~System() {
-    animation_engine_.shutdown();
+    System::exit(0);
 }
 
 int System::run() {
     if (Tree::head() == nullptr) {
         return -1;
     }
-    return main_loop_.run();
+    terminal.initialize();
+    System::post_event<Resize_event>(*Tree::head(),
+                                     Area{terminal.width(), terminal.height()});
+    const auto exit_code = main_loop_.run();
+    terminal.uninitialize();
+    return exit_code;
 }
 
 }  // namespace cppurses
