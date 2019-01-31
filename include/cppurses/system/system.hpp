@@ -11,9 +11,10 @@
 #include <cppurses/terminal/terminal.hpp>
 
 namespace cppurses {
-class Event;
 class Animation_engine;
+class Event;
 class Event_loop;
+class Widget;
 
 /// Organizes the highest level of the TUI framework.
 /** Constructing an instance of this class initializes the display system.
@@ -26,6 +27,16 @@ class System {
     System(System&&) = default;
     System& operator=(System&&) = default;
     ~System();
+
+    /// Sets a new head Widget for the entire system.
+    /** Will disable the previous head widget and enable \p new_head, if not
+     *  nullptr. Will also send Resize_event and Paint_events to \p new_head. */
+    static void set_head(Widget* new_head);
+
+    /// Returns a pointer to the head Widget.
+    /** This Widget is the ancestor of every other widget that will be displayed
+     *  on the screen. */
+    static Widget* head() { return head_; }
 
     /// Launches the main Event_loop and starts processing Events.
     int run();
@@ -88,6 +99,7 @@ class System {
     static std::vector<Event_loop*> running_event_loops_;
     static std::mutex running_loops_mtx_;
 
+    static Widget* head_;
     static bool exit_requested_;
     static detail::User_input_event_loop main_loop_;
     static Animation_engine animation_engine_;

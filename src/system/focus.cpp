@@ -10,7 +10,6 @@
 #include <cppurses/system/event.hpp>
 #include <cppurses/system/events/focus_event.hpp>
 #include <cppurses/system/system.hpp>
-#include <cppurses/system/tree.hpp>
 #include <cppurses/widget/children_data.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/widget.hpp>
@@ -30,10 +29,10 @@ const auto is_tab_focusable = [](const auto* widg) {
     return widg->enabled() && is_tab_focus_policy(widg->focus_policy);
 };
 
-// Returns a widg tree from Tree::head() if focus_widget is nullptr.
+// Returns a widg tree from System::head() if focus_widget is nullptr.
 auto gen_focus_front_widg_tree() {
-    auto widg_tree = Tree::head()->children.get_descendants();
-    widg_tree.insert(std::begin(widg_tree), Tree::head());
+    auto widg_tree = System::head()->children.get_descendants();
+    widg_tree.insert(std::begin(widg_tree), System::head());
     auto* const focus_widg = Focus::focus_widget();
     if (focus_widg != nullptr) {
         const auto begin = std::begin(widg_tree);
@@ -47,7 +46,7 @@ auto gen_focus_front_widg_tree() {
 }
 
 Widget* next_tab_focus() {
-    if (Tree::head() == nullptr) {
+    if (System::head() == nullptr) {
         return nullptr;
     }
     const auto widg_tree = gen_focus_front_widg_tree();
@@ -58,7 +57,7 @@ Widget* next_tab_focus() {
 }
 
 Widget* previous_tab_focus() {
-    if (Tree::head() == nullptr) {
+    if (System::head() == nullptr) {
         return nullptr;
     }
     const auto widg_tree = gen_focus_front_widg_tree();
