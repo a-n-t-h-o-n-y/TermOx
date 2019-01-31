@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 
-#include <cppurses/system/tree.hpp>
+#include <cppurses/system/system.hpp>
 #include <cppurses/widget/children_data.hpp>
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widget_free_functions.hpp>
@@ -13,7 +13,7 @@ namespace cppurses {
 namespace detail {
 
 Widget* find_widget_at(std::size_t x, std::size_t y) {
-    Widget* widg = Tree::head();
+    Widget* widg = System::head();
     if (widg == nullptr || !has_coordinates(*widg, x, y)) {
         return nullptr;
     }

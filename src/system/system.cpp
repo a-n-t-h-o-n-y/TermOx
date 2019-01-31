@@ -19,7 +19,7 @@
 #include <cppurses/system/event.hpp>
 #include <cppurses/system/event_loop.hpp>
 #include <cppurses/system/events/resize_event.hpp>
-#include <cppurses/system/tree.hpp>
+#include <cppurses/system/system.hpp>
 #include <cppurses/terminal/terminal.hpp>
 #include <cppurses/widget/area.hpp>
 #include <cppurses/widget/widget.hpp>
@@ -29,10 +29,11 @@ namespace cppurses {
 sig::Slot<void()> System::quit = []() { System::exit(); };
 std::vector<Event_loop*> System::running_event_loops_;
 std::mutex System::running_loops_mtx_;
+Widget* System::head_{nullptr};
+bool System::exit_requested_{false};
 detail::User_input_event_loop System::main_loop_;
 Animation_engine System::animation_engine_;
 Terminal System::terminal;
-bool System::exit_requested_{false};
 
 void System::post_event(std::unique_ptr<Event> event) {
     auto& loop = System::find_event_loop();
@@ -88,12 +89,24 @@ System::~System() {
     System::exit(0);
 }
 
+void System::set_head(Widget* new_head) {
+    if (head_ != nullptr) {
+        head_->disable();
+    }
+    head_ = new_head;
+    if (head_ != nullptr) {
+        head_->enable();
+        post_event<Resize_event>(*head_,
+                                 Area{terminal.width(), terminal.height()});
+    }
+}
+
 int System::run() {
-    if (Tree::head() == nullptr) {
+    if (System::head() == nullptr) {
         return -1;
     }
     terminal.initialize();
-    System::post_event<Resize_event>(*Tree::head(),
+    System::post_event<Resize_event>(*System::head(),
                                      Area{terminal.width(), terminal.height()});
     const auto exit_code = main_loop_.run();
     terminal.uninitialize();

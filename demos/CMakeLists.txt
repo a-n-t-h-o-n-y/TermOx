@@ -26,7 +26,7 @@ target_sources(demos PRIVATE
     chess/src/player_human.cpp
     chess/src/chess_event_loop.cpp
     chess/src/chess_move_request_event.cpp
-    # chess/src/shared_move.cpp
+    chess/src/shared_move.cpp
 )
 
 # GLYPH PAINT

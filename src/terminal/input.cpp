@@ -17,7 +17,6 @@
 #include <cppurses/system/mouse_button.hpp>
 #include <cppurses/system/mouse_data.hpp>
 #include <cppurses/system/system.hpp>
-#include <cppurses/system/tree.hpp>
 #include <cppurses/widget/area.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
@@ -32,7 +31,7 @@ bool resize_happened{false};
 std::unique_ptr<Event> make_terminal_resize_event() {
     if (resize_happened) {
         resize_happened = false;
-        Widget* const receiver = Tree::head();
+        Widget* const receiver = System::head();
         if (receiver != nullptr) {
             return std::make_unique<Terminal_resize_event>(*receiver);
         }
@@ -128,7 +127,7 @@ std::unique_ptr<Event> make_mouse_event() {
 }
 
 std::unique_ptr<Event> make_resize_event() {
-    Widget* const receiver = Tree::head();
+    Widget* const receiver = System::head();
     if (receiver != nullptr) {
         const auto width = System::terminal.width();
         const auto height = System::terminal.height();
