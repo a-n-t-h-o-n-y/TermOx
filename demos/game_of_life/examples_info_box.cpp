@@ -3,20 +3,21 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/widget/size_policy.hpp>
 
+using namespace cppurses;
 namespace gol {
 
 Examples_box::Examples_box() {
-    to_info_btn.height_policy.type(cppurses::Size_policy::Fixed);
+    to_info_btn.height_policy.type(Size_policy::Fixed);
     to_info_btn.height_policy.hint(1);
-    to_info_btn.brush.set_background(cppurses::Color::Light_gray);
-    to_info_btn.brush.set_foreground(cppurses::Color::Black);
+    to_info_btn.brush.set_background(Color::Light_gray);
+    to_info_btn.brush.set_foreground(Color::Black);
 }
 
 Info_box::Info_box() {
-    to_examples_btn.height_policy.type(cppurses::Size_policy::Fixed);
+    to_examples_btn.height_policy.type(Size_policy::Fixed);
     to_examples_btn.height_policy.hint(1);
-    to_examples_btn.brush.set_background(cppurses::Color::Light_gray);
-    to_examples_btn.brush.set_foreground(cppurses::Color::Black);
+    to_examples_btn.brush.set_background(Color::Light_gray);
+    to_examples_btn.brush.set_foreground(Color::Black);
 }
 
 Examples_info_box::Examples_info_box() {

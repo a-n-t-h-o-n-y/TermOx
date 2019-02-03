@@ -35,7 +35,14 @@ void export_as_life_1_05(const std::string& filename,
 }
 
 void export_as_life_1_06(const std::string& filename,
-                         const Game_of_life_engine& engine) {}
+                         const Game_of_life_engine& engine) {
+    std::ofstream file{filename};
+    file << "#Life 1.06\n";
+    for (const auto& coord_cell : engine) {
+        const Coordinate& coord = coord_cell.first;
+        file << coord.x << ' ' << coord.y << '\n';
+    }
+}
 
 void export_as_plaintext(const std::string& filename,
                          const Game_of_life_engine& engine) {}

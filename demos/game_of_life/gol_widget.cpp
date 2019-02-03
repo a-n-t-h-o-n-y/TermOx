@@ -1,7 +1,9 @@
 #include "gol_widget.hpp"
 
+#include <algorithm>
 #include <chrono>
 #include <cstddef>
+#include <iterator>
 #include <string>
 #include <vector>
 
@@ -37,13 +39,23 @@ std::vector<int> to_vec_int(const std::string& values) {
     return result;
 }
 
+using gol::Coordinate;
+
+template <typename Container_t>
+void apply(Coordinate offset, Container_t& cells) {
+    std::transform(std::begin(cells), std::end(cells), std::begin(cells),
+                   [offset](Coordinate cell) -> Coordinate {
+                       return {cell.x + offset.x, cell.y + offset.y};
+                   });
+}
 }  // namespace
 
+using namespace cppurses;
 namespace gol {
 
 GoL_widget::GoL_widget() {
     this->set_dead(L' ');
-    this->focus_policy = cppurses::Focus_policy::Strong;
+    this->focus_policy = Focus_policy::Strong;
 }
 
 void GoL_widget::set_period(Period_t period) {
@@ -58,7 +70,7 @@ void GoL_widget::start() {
     }
 }
 
-void GoL_widget::stop() {
+void GoL_widget::pause() {
     if (running_) {
         this->disable_animation();
         running_ = false;
@@ -69,11 +81,11 @@ void GoL_widget::step() {
     if (running_) {
         return;
     }
-    engine_.next_iteration();
+    engine_.get_next_generation();
     this->update();
 }
 
-void GoL_widget::set_dead(const cppurses::Glyph& dead_look) {
+void GoL_widget::set_dead(const Glyph& dead_look) {
     this->wallpaper = dead_look;
     dead_look_ = dead_look;
     this->update();
@@ -98,8 +110,7 @@ void GoL_widget::clear() {
 void GoL_widget::toggle_grid() {
     grid_ = !grid_;
     if (grid_) {
-        this->wallpaper = cppurses::Glyph{
-            L'┼', cppurses::foreground(cppurses::Color::Dark_gray)};
+        this->wallpaper = Glyph{L'┼', foreground(Color::Dark_gray)};
     } else {
         this->set_dead(dead_look_);
     }
@@ -108,18 +119,18 @@ void GoL_widget::toggle_grid() {
 
 void GoL_widget::import(const std::string& filename) {
     const auto ft = get_filetype(filename);
-    // std::set<Coordinate> get_as_life_1_05(filename);
-    // Apply offset to each.
-    // set in engine with iter import function.
+    std::vector<Coordinate> cells;
     if (ft == FileType::Life_1_05) {
-        import_as_life_1_05(filename, engine_);
+        cells = get_life_1_05(filename);
     } else if (ft == FileType::Life_1_06) {
-        import_as_life_1_06(filename, engine_);
+        cells = get_life_1_06(filename);
     } else if (ft == FileType::Plaintext) {
-        import_as_plaintext(filename, engine_);
+        cells = get_plaintext(filename);
     } else if (ft == FileType::RLE) {
-        import_as_rle(filename, engine_);
+        cells = get_RLE(filename);
     }
+    apply(offset_, cells);
+    engine_.import(cells);
     this->update();
 }
 
@@ -138,11 +149,12 @@ void GoL_widget::export_as(const std::string& filename) {
 
 void GoL_widget::set_offset(Coordinate offset) {
     offset_ = offset;
+    offset_changed(offset_);
     this->update();
 }
 
 bool GoL_widget::paint_event() {
-    cppurses::Painter p{*this};
+    Painter p{*this};
     for (const auto& coord_cell : engine_) {
         p.put(this->get_look(coord_cell.second.age),
               transform_from_engine(coord_cell.first));
@@ -150,9 +162,9 @@ bool GoL_widget::paint_event() {
     return Widget::paint_event();
 }
 
-bool GoL_widget::mouse_press_event(const cppurses::Mouse_data& mouse) {
+bool GoL_widget::mouse_press_event(const Mouse_data& mouse) {
     const Coordinate engine_position = transform_from_display(mouse.local);
-    if (mouse.button == cppurses::Mouse_button::Right) {
+    if (mouse.button == Mouse_button::Right) {
         engine_.kill(engine_position);
     } else {
         engine_.give_life(engine_position);
@@ -162,20 +174,20 @@ bool GoL_widget::mouse_press_event(const cppurses::Mouse_data& mouse) {
 }
 
 bool GoL_widget::timer_event() {
-    engine_.next_iteration();
+    engine_.get_next_generation();
     this->update();
     return Widget::timer_event();
 }
 
-bool GoL_widget::key_press_event(const cppurses::Keyboard_data& keyboard) {
+bool GoL_widget::key_press_event(const Keyboard_data& keyboard) {
     auto new_offset = this->offset();
-    if (keyboard.key == cppurses::Key::Arrow_left) {
+    if (keyboard.key == Key::Arrow_left) {
         --new_offset.x;
-    } else if (keyboard.key == cppurses::Key::Arrow_right) {
+    } else if (keyboard.key == Key::Arrow_right) {
         ++new_offset.x;
-    } else if (keyboard.key == cppurses::Key::Arrow_up) {
+    } else if (keyboard.key == Key::Arrow_up) {
         --new_offset.y;
-    } else if (keyboard.key == cppurses::Key::Arrow_down) {
+    } else if (keyboard.key == Key::Arrow_down) {
         ++new_offset.y;
     }
     this->set_offset(new_offset);
@@ -189,17 +201,16 @@ void GoL_widget::update_period() {
     }
 }
 
-cppurses::Point GoL_widget::transform_from_engine(Coordinate position) const {
+Point GoL_widget::transform_from_engine(Coordinate position) const {
     const int x{position.x + static_cast<int>(this->width() / 2) - offset_.x};
     const int y{position.y + static_cast<int>(this->height() / 2) - offset_.y};
     if (x >= 0 && x < this->width() && y >= 0 && y < this->height()) {
-        return cppurses::Point{static_cast<std::size_t>(x),
-                               static_cast<std::size_t>(y)};
+        return Point{static_cast<std::size_t>(x), static_cast<std::size_t>(y)};
     }
-    return cppurses::Point{std::size_t(-1), std::size_t(-1)};
+    return Point{std::size_t(-1), std::size_t(-1)};
 }
 
-Coordinate GoL_widget::transform_from_display(cppurses::Point p) const {
+Coordinate GoL_widget::transform_from_display(Point p) const {
     const int x{static_cast<int>(p.x) - static_cast<int>(this->width() / 2) +
                 offset_.x};
     const int y{static_cast<int>(p.y) - static_cast<int>(this->height() / 2) +
@@ -207,8 +218,8 @@ Coordinate GoL_widget::transform_from_display(cppurses::Point p) const {
     return {x, y};
 }
 
-cppurses::Glyph GoL_widget::get_look(typename Cell::Age_t age) const {
-    cppurses::Glyph look{L'█'};
+Glyph GoL_widget::get_look(typename Cell::Age_t age) const {
+    Glyph look{L'█'};
     if (fade_) {
         if (age == 1) {
             look = L'▓';

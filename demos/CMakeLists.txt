@@ -81,6 +81,7 @@ target_sources(demos PRIVATE
     game_of_life/files_box.cpp
     game_of_life/offset_control_widget.cpp
     game_of_life/side_panel.cpp
+    game_of_life/status_box.cpp
 )
 
 find_package(Threads REQUIRED)

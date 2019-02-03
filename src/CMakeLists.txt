@@ -134,6 +134,7 @@ target_sources(cppurses PRIVATE
     widget/nearly_equal.cpp
     widget/vertical_slider.cpp
     widget/slider_logic.cpp
+    widget/toggle_button.cpp
 )
 
 # TERMINAL

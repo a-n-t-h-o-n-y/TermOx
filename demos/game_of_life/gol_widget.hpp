@@ -3,6 +3,8 @@
 #include <chrono>
 #include <string>
 
+#include <signals/signal.hpp>
+
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/system/keyboard_data.hpp>
 #include <cppurses/system/mouse_data.hpp>
@@ -25,8 +27,8 @@ class GoL_widget : public cppurses::Widget {
     /// Start animation, no-op if already running.
     void start();
 
-    /// Stop animation.
-    void stop();
+    /// Pause auto generation increment.
+    void pause();
 
     /// Progress to the next iteration of the game.
     void step();
@@ -68,6 +70,8 @@ class GoL_widget : public cppurses::Widget {
     /// Return the engine coordinates that are at the center of the screen.
     Coordinate offset() const { return offset_; }
 
+    sig::Signal<void(Coordinate)> offset_changed;
+
    protected:
     bool paint_event() override;
     bool mouse_press_event(const cppurses::Mouse_data& mouse) override;
@@ -80,7 +84,7 @@ class GoL_widget : public cppurses::Widget {
     bool running_{false};
     bool fade_{true};
     bool grid_{false};
-    Period_t period_{200};
+    Period_t period_{120};
     Coordinate offset_{0, 0};
 
     /// Update the period if currently running.
@@ -97,6 +101,10 @@ class GoL_widget : public cppurses::Widget {
 
     /// Return a Glyph to represent a Cell of a given \p age.
     cppurses::Glyph get_look(typename Cell::Age_t age) const;
+
+   public:
+    sig::Signal<void(std::uint32_t)>& generation_count_changed{
+        engine_.generation_count_changed};
 };
 }  // namespace gol
 #endif  // CPPURSES_DEMOS_GAME_OF_LIFE_GOL_WIDGET_HPP

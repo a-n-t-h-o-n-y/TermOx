@@ -22,21 +22,21 @@ class Main_menu : public Vertical_layout {
     Widget_stack_menu& main_menu{
         this->make_child<Widget_stack_menu>("D e m o s")};
 
+    Notepad& notepad{main_menu.make_page<Notepad>("Notepad")};
+
     gol::GoL_demo& game_of_life_demo{
         main_menu.make_page<gol::GoL_demo>("Game of Life")};
 
     palette::Palette_demo& palette_demo{
         main_menu.make_page<palette::Palette_demo>("Color Palette")};
 
+    Chess_UI& chess{main_menu.make_page<Chess_UI>("Chess")};
+
     focus::Focus_demo& focus_demo{
         main_menu.make_page<focus::Focus_demo>("Focus")};
 
-    Chess_UI& chess{main_menu.make_page<Chess_UI>("Chess")};
-
     glyph_paint::Glyph_paint& glyph_paint{
         main_menu.make_page<glyph_paint::Glyph_paint>("Glyph Paint")};
-
-    Notepad& notepad{main_menu.make_page<Notepad>("Notepad")};
 
     // animation::Animated_widget& animated_widget{
     //     main_menu.make_page<animation::Animated_widget>(

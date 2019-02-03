@@ -2,20 +2,22 @@
 
 #include <fstream>
 #include <string>
+#include <vector>
 
-#include "game_of_life_engine.hpp"
+#include "coordinate.hpp"
 
 namespace gol {
 
-void import_as_life_1_05(const std::string& filename,
-                         Game_of_life_engine& engine) {}
+std::vector<Coordinate> get_life_1_05(const std::string& filename) {
+    return {};
+}
 
-void import_as_life_1_06(const std::string& filename,
-                         Game_of_life_engine& engine) {
+std::vector<Coordinate> get_life_1_06(const std::string& filename) {
     std::ifstream file{filename};
     if (file.fail()) {
-        return;
+        return {};
     }
+    std::vector<Coordinate> cells;
     std::string first_line;
     std::getline(file, first_line);
     while (file) {
@@ -29,13 +31,17 @@ void import_as_life_1_06(const std::string& filename,
         if (!file.good()) {
             break;
         }
-        engine.give_life({x, y});
+        cells.push_back({x, y});
     }
+    return cells;
 }
 
-void import_as_plaintext(const std::string& filename,
-                         Game_of_life_engine& engine) {}
+std::vector<Coordinate> get_plaintext(const std::string& filename) {
+    return {};
+}
 
-void import_as_rle(const std::string& filename, Game_of_life_engine& engine) {}
+std::vector<Coordinate> get_RLE(const std::string& filename) {
+    return {};
+}
 
 }  // namespace gol

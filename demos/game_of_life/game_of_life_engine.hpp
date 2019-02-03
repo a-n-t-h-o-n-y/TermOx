@@ -1,8 +1,11 @@
 #ifndef CPPURSES_DEMOS_GAME_OF_LIFE_GAME_OF_LIFE_ENGINE_HPP
 #define CPPURSES_DEMOS_GAME_OF_LIFE_GAME_OF_LIFE_ENGINE_HPP
+#include <cstdint>
 #include <iterator>
 #include <map>
 #include <set>
+
+#include <signals/signal.hpp>
 
 #include "cell.hpp"
 #include "coordinate.hpp"
@@ -12,22 +15,24 @@ namespace gol {
 /// Holds game state and provides an interface to update to the next pattern.
 class Game_of_life_engine {
    public:
-    /// Updates the engine to the next iteration of the state.
-    void next_iteration();
+    /// Updates the engine state to the next generation of cells.
+    void get_next_generation();
 
-    /// Create a living cell at the given Coordinate.
+    /// Create a living cell at \p position and reset the generation count.
+    /** No-op if already alive at \p position. */
     void give_life(Coordinate position);
 
-    /// Kill a cell at the given Coordinate.
-    void kill(Coordinate cell);
+    /// Kill cell at \p position and reset the generation count.
+    /** No-op if no cell alive at \p position. */
+    void kill(Coordinate position);
 
-    /// Removes all living cells from the pattern.
+    /// Removes all living cells from the pattern and resets generation count.
     void kill_all();
 
     /// Checks if a cell is alive at the given Coordinate.
     bool alive_at(Coordinate position) const;
 
-    /// Returns the number of neighbors the given cell Coordinate has.
+    /// Returns the number of alive neighbors the given \p position has.
     int alive_neighbor_count(Coordinate position) const;
 
     /// Return const bidirectional iterator to beginning of [Coordinate, Cell].
@@ -35,6 +40,15 @@ class Game_of_life_engine {
 
     /// Return const bidirectional iterator to ending of [Coordinate, Cell].
     auto end() const { return std::end(alive_cells_); }
+
+    /// Import a container of alive cell positions, reset the generation count.
+    template <typename Container_t>
+    void import(const Container_t& cells) {
+        for (Coordinate cell : cells) {
+            this->add_cell_at(cell);
+        }
+        this->reset_generation_count();
+    }
 
     /// Set the neighbor counts that allow survival for a living cell.
     template <typename Container_t>
@@ -49,26 +63,31 @@ class Game_of_life_engine {
         birth_rule_ = {std::begin(neighbor_counts), std::end(neighbor_counts)};
     }
 
-    /// Reset the game state to the Coordinates from [first, last).
-    template <typename Forward_iter_t>
-    void import(Forward_iter_t first, Forward_iter_t last) {
-        this->kill_all();
-        while (first != last) {
-            this->give_life(*first);
-        }
-    }
+    sig::Signal<void(std::uint32_t)> generation_count_changed;
 
    private:
     std::map<Coordinate, Cell> alive_cells_;
     std::set<Coordinate> volatiles_;
     std::set<int> birth_rule_{3};
     std::set<int> survival_rule_{2, 3};
+    std::uint32_t generation_count_{0};
 
     /// Add \p cell and its neighbors to the volatiles_ container.
     /** Volatiles are Coordinates that can potentially change state in the next
      *  iteration. */
     void add_volatiles(Coordinate cell);
-};
 
+    /// Sets the generation count to 0 and emits generation_count_changed.
+    void reset_generation_count();
+
+    /// Increments the generation count by 1 and emits generation_count_changed.
+    void increment_generation_count();
+
+    /// Adds an alive cell at the given position.
+    void add_cell_at(Coordinate position);
+
+    /// Removes an alive cell at the given position.
+    void remove_cell_at(Coordinate position);
+};
 }  // namespace gol
 #endif  // CPPURSES_DEMOS_GAME_OF_LIFE_GAME_OF_LIFE_ENGINE_HPP
