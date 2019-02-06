@@ -40,6 +40,9 @@ class Terminal {
     /// Sets terminal color definitions for the 16 Colors in CPPurses.
     void set_color_palette(const Palette& palette);
 
+    /// Retrieve a copy of the currently set color palette.
+    Palette current_palette() const { return palette_; }
+
     /// Sets whether or not the cursor is visible on screen.
     void show_cursor(bool show = true);
 

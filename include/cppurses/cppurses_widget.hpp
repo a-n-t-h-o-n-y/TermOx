@@ -24,7 +24,6 @@
 #include <cppurses/widget/widgets/open_file.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 #include <cppurses/widget/widgets/save_file.hpp>
-#include <cppurses/widget/widgets/slider.hpp>
 #include <cppurses/widget/widgets/status_bar.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
 #include <cppurses/widget/widgets/text_display_slots.hpp>
@@ -34,6 +33,7 @@
 #include <cppurses/widget/widgets/textbox_slots.hpp>
 #include <cppurses/widget/widgets/titlebar.hpp>
 #include <cppurses/widget/widgets/vertical_scrollbar.hpp>
+#include <cppurses/widget/widgets/vertical_slider.hpp>
 #include <cppurses/widget/widgets/widget_stack.hpp>
 #include <cppurses/widget/widgets/widget_stack_menu.hpp>
 

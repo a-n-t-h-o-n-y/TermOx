@@ -83,6 +83,7 @@ target_sources(cppurses PRIVATE
     painter/find_empty_space.cpp
     painter/screen_state.cpp
     painter/palettes.cpp
+    painter/color.cpp
 )	
 
 # WIDGET
@@ -110,7 +111,7 @@ target_sources(cppurses PRIVATE
     widget/status_bar.cpp
     widget/textbox.cpp
     widget/textbox_slots.cpp
-    widget/slider.cpp
+    widget/horizontal_slider.cpp
     widget/textbox_base.cpp
     widget/textbox_base_slots.cpp
     widget/push_button.cpp
@@ -130,6 +131,17 @@ target_sources(cppurses PRIVATE
     widget/cursor_data.cpp
     widget/widget_free_functions.cpp
     widget/graph_tree.cpp
+    widget/nearly_equal.cpp
+    widget/vertical_slider.cpp
+    widget/slider_logic.cpp
+    widget/toggle_button.cpp
+)
+
+# TERMINAL
+target_sources(cppurses PRIVATE
+    terminal/terminal.cpp
+    terminal/output.cpp
+    terminal/input.cpp
 )
 
 # TERMINAL

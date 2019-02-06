@@ -1,5 +1,5 @@
-#ifndef CPPURSES_WIDGET_WIDGETS_SLIDER_HPP
-#define CPPURSES_WIDGET_WIDGETS_SLIDER_HPP
+#ifndef CPPURSES_WIDGET_WIDGETS_HORIZONTAL_SLIDER_HPP
+#define CPPURSES_WIDGET_WIDGETS_HORIZONTAL_SLIDER_HPP
 #include <cstddef>
 #include <cstdint>
 
@@ -12,9 +12,9 @@
 
 namespace cppurses {
 
-class Slider : public Widget {
+class Horizontal_slider : public Widget {
    public:
-    Slider();
+    Horizontal_slider();
     void set_percent(float percent);
     float percent() const;
 
@@ -38,10 +38,10 @@ class Slider : public Widget {
 
 namespace slot {
 
-sig::Slot<void(float)> set_percent(Slider& s);
+sig::Slot<void(float)> set_percent(Horizontal_slider& s);
 
-sig::Slot<void()> set_percent(Slider& s, float percent);
+sig::Slot<void()> set_percent(Horizontal_slider& s, float percent);
 
 }  // namespace slot
 }  // namespace cppurses
-#endif  // CPPURSES_WIDGET_WIDGETS_SLIDER_HPP
+#endif  // CPPURSES_WIDGET_WIDGETS_HORIZONTAL_SLIDER_HPP

@@ -49,11 +49,42 @@ target_sources(demos PRIVATE
     focus/focus_base.cpp
 )
 
+# PALETTE
+target_sources(demos PRIVATE
+    palette/palette_demo.cpp
+    palette/value_control.cpp
+    palette/color_definition_setter.cpp
+    palette/color_control.cpp
+    palette/palette_helpers.cpp
+    palette/export_panel.cpp
+    palette/color_display.cpp
+    palette/all_colors_display.cpp
+)
+
 # NOTEPAD / MAIN MENU
 target_sources(demos PRIVATE
     demo.cpp
     main_menu.cpp
     notepad/notepad.cpp
+)
+
+# GAME OF LIFE
+target_sources(demos PRIVATE
+    game_of_life/game_of_life_engine.cpp
+    game_of_life/gol_widget.cpp
+    game_of_life/gol_demo.cpp
+    game_of_life/exporters.cpp
+    game_of_life/filetype.cpp
+    game_of_life/settings_box.cpp
+    game_of_life/examples_info_box.cpp
+    game_of_life/files_box.cpp
+    game_of_life/offset_control_widget.cpp
+    game_of_life/side_panel.cpp
+    game_of_life/status_box.cpp
+    game_of_life/get_rle.cpp
+    game_of_life/get_life_1_05.cpp
+    game_of_life/get_life_1_06.cpp
+    game_of_life/get_plaintext.cpp
 )
 
 find_package(Threads REQUIRED)

@@ -1,5 +1,6 @@
 #include <cppurses/widget/widgets/line_edit.hpp>
 
+#include <cctype>
 #include <cstdint>
 #include <utility>
 
@@ -85,23 +86,23 @@ void Line_edit::set_ghost_color(Color c) {
 
 bool Line_edit::key_press_event(const Keyboard_data& keyboard) {
     if (keyboard.key == Key::Enter) {
-        if (!on_initial_) {
-            editing_finished(this->contents().str());
-            if (clear_on_enter_) {
-                this->clear();
-            }
+        editing_finished(this->contents().str());
+        if (clear_on_enter_) {
+            this->clear();
+        }
+        if (on_initial_) {
+            on_initial_ = false;
         }
         return true;
     }
     if (keyboard.key == Key::Arrow_up || keyboard.key == Key::Arrow_down) {
         return true;
     }
-
     // Validate
-    if (!validator_(keyboard.symbol)) {
+    if ((std::isprint(keyboard.symbol) || std::isspace(keyboard.symbol)) &&
+        !validator_(keyboard.symbol)) {
         return true;
     }
-
     // First alph-num input
     if (keyboard.symbol != '\0' && on_initial_) {
         this->clear();

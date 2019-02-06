@@ -10,8 +10,8 @@
 #include <cppurses/widget/layouts/horizontal_layout.hpp>
 #include <cppurses/widget/layouts/vertical_layout.hpp>
 #include <cppurses/widget/widgets/glyph_select_stack.hpp>
+#include <cppurses/widget/widgets/horizontal_slider.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
-#include <cppurses/widget/widgets/slider.hpp>
 
 namespace cppurses {
 
@@ -31,7 +31,7 @@ class Glyph_select : public Vertical_layout {
     Horizontal_layout& bottom_row{this->make_child<Horizontal_layout>()};
     Push_button& left_btn{bottom_row.make_child<Push_button>(
         Glyph{L'⏴', foreground(Color::Black)})};
-    Slider& slider{bottom_row.make_child<Slider>()};
+    Horizontal_slider& slider{bottom_row.make_child<Horizontal_slider>()};
     Push_button& right_btn{bottom_row.make_child<Push_button>(
         Glyph{L'⏵', foreground(Color::Black)})};
 
