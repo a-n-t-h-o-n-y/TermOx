@@ -5,6 +5,8 @@
 #include <map>
 #include <set>
 
+#include <fstream>
+
 #include <signals/signal.hpp>
 
 #include "cell.hpp"
@@ -55,6 +57,9 @@ class Game_of_life_engine {
     void set_survival_rule(const Container_t& neighbor_counts) {
         survival_rule_ = {std::begin(neighbor_counts),
                           std::end(neighbor_counts)};
+        if (survival_rule_.empty()) {
+            survival_rule_.insert(9); 
+        }
     }
 
     /// Set the neighbor counts that allow new cells to form from dead cells.

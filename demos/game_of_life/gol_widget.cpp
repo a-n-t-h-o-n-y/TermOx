@@ -1,6 +1,7 @@
 #include "gol_widget.hpp"
 
 #include <algorithm>
+#include <cctype>
 #include <chrono>
 #include <cstddef>
 #include <iterator>
@@ -21,7 +22,10 @@
 #include "coordinate.hpp"
 #include "exporters.hpp"
 #include "filetype.hpp"
-#include "importers.hpp"
+#include "get_life_1_05.hpp"
+#include "get_life_1_06.hpp"
+#include "get_plaintext.hpp"
+#include "get_rle.hpp"
 
 namespace {
 /// Convert char single digit to int value.
@@ -96,10 +100,16 @@ void GoL_widget::enable_fade(bool enabled) {
     this->update();
 }
 
-void GoL_widget::set_rules(const std::string& birth,
-                           const std::string& survival) {
-    engine_.set_birth_rule(to_vec_int(birth));
-    engine_.set_survival_rule(to_vec_int(survival));
+void GoL_widget::set_rules(const std::string& rule_string) {
+    auto delim = std::find_if(std::begin(rule_string), std::end(rule_string),
+                              [](char c) { return !std::isdigit(c); });
+    if (delim != std::end(rule_string)) {
+        const std::string birth{std::begin(rule_string), delim};
+        const std::string survival{std::next(delim), std::end(rule_string)};
+        engine_.set_birth_rule(to_vec_int(birth));
+        engine_.set_survival_rule(to_vec_int(survival));
+        rule_changed(rule_string);
+    }
 }
 
 void GoL_widget::clear() {
@@ -120,6 +130,7 @@ void GoL_widget::toggle_grid() {
 void GoL_widget::import(const std::string& filename) {
     const auto ft = get_filetype(filename);
     std::vector<Coordinate> cells;
+    std::string rule{"3/23"};
     if (ft == FileType::Life_1_05) {
         cells = get_life_1_05(filename);
     } else if (ft == FileType::Life_1_06) {
@@ -127,8 +138,11 @@ void GoL_widget::import(const std::string& filename) {
     } else if (ft == FileType::Plaintext) {
         cells = get_plaintext(filename);
     } else if (ft == FileType::RLE) {
-        cells = get_RLE(filename);
+        auto cells_rule = get_RLE(filename);
+        cells = cells_rule.first;
+        rule = cells_rule.second;
     }
+    this->set_rules(rule);
     apply(offset_, cells);
     engine_.import(cells);
     this->update();

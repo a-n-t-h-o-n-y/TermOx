@@ -37,7 +37,7 @@ FileType get_filetype(const std::string& filename) {
                first_line[0] == '#') {
             std::getline(input_file, first_line);
         }
-        if (first_line.size() > 3 && first_line.substr(0, 3) == "x = ") {
+        if (first_line.size() > 3 && first_line.substr(0, 3) == "x =") {
             result = FileType::RLE;
         }
     }

@@ -29,16 +29,8 @@ Rule_edit::Rule_edit() {
     edit_box.set_ghost_color(Color::Dark_gray);
 
     edit_box.set_validator([](char c) { return std::isdigit(c) || c == '/'; });
-    edit_box.editing_finished.connect([this](std::string rule_text) {
-        if (!rule_text.empty()) {
-            auto div = rule_text.find('/');
-            if (div != std::string::npos) {
-                const std::string birth{rule_text.substr(0, div)};
-                const std::string survival{rule_text.substr(div + 1)};
-                rule_change(birth, survival);
-            }
-        }
-    });
+    edit_box.editing_finished.connect(
+        [this](std::string rule_text) { rule_change(rule_text); });
 
     label.set_alignment(Alignment::Center);
 }

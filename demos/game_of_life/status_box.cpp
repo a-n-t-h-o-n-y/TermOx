@@ -19,6 +19,7 @@ namespace gol {
 Generation_count::Generation_count() {
     this->height_policy.type(Size_policy::Fixed);
     this->height_policy.hint(1);
+    this->cursor.disable();
 }
 
 void Generation_count::update_count(std::uint32_t count) {

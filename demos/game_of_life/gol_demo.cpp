@@ -8,9 +8,13 @@ namespace gol {
 
 GoL_demo::GoL_demo() {
     side_panel.settings.rule_change.connect(
-        [this](const std::string& birth, const std::string& survival) {
-            gol_display.set_rules(birth, survival);
+        [this](const std::string& rule_str) {
+            gol_display.set_rules(rule_str);
         });
+    gol_display.rule_changed.connect([this](const std::string& rule_str) {
+        side_panel.settings.rule_edit.edit_box.set_text(rule_str);
+        side_panel.settings.rule_edit.edit_box.set_cursor(rule_str.size());
+    });
     side_panel.settings.period_set.connect(
         [this](std::chrono::milliseconds period) {
             gol_display.set_period(period);

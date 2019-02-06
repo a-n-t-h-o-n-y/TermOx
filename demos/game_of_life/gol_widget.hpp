@@ -42,10 +42,10 @@ class GoL_widget : public cppurses::Widget {
     /// Alternate between fade set and not set.
     void toggle_fade() { this->enable_fade(!fade_); }
 
-    /// Set the survival/birth neighbor counts.
-    /** Provide lists of numbers as strings, each number is a neighbor count.
-     *  No seperators between neighbor counts. */
-    void set_rules(const std::string& birth, const std::string& survival);
+    /// Set the birth/survivor neighbor counts.
+    /** Provide two sets of numbers separated by a '/' or any non-digit
+     *  separator. Each number is a neighbor count. */
+    void set_rules(const std::string& rule_string);
 
     /// Clear the screen and reset the pattern to be all dead cells.
     void clear();
@@ -71,6 +71,7 @@ class GoL_widget : public cppurses::Widget {
     Coordinate offset() const { return offset_; }
 
     sig::Signal<void(Coordinate)> offset_changed;
+    sig::Signal<void(const std::string&)> rule_changed;
 
    protected:
     bool paint_event() override;

@@ -73,7 +73,6 @@ target_sources(demos PRIVATE
     game_of_life/game_of_life_engine.cpp
     game_of_life/gol_widget.cpp
     game_of_life/gol_demo.cpp
-    game_of_life/importers.cpp
     game_of_life/exporters.cpp
     game_of_life/filetype.cpp
     game_of_life/settings_box.cpp
@@ -82,6 +81,10 @@ target_sources(demos PRIVATE
     game_of_life/offset_control_widget.cpp
     game_of_life/side_panel.cpp
     game_of_life/status_box.cpp
+    game_of_life/get_rle.cpp
+    game_of_life/get_life_1_05.cpp
+    game_of_life/get_life_1_06.cpp
+    game_of_life/get_plaintext.cpp
 )
 
 find_package(Threads REQUIRED)

@@ -17,7 +17,7 @@ few virtual functions.
 This is a __work in progress__. The API is not stable.
 
 <p align="center">
-  <img src="docs/images/regexplore_75.gif">
+  <img src="docs/images/regexplore.gif">
 </p>
 
 
@@ -69,13 +69,13 @@ for most Linux distributions.
 Reference documentation can be found [here](
 https://a-n-t-h-o-n-y.github.io/CPPurses/annotated.html).
 
-## Screenshots
-Notepad Demo
+## Gallery
+Game of Life
 <p align="center">
-  <img src="docs/images/notepad_demo.png">
+  <img src="docs/images/gol_demo.png">
 </p>
 
-Chess Demo
+Chess
 <p align="center">
   <img src="docs/images/chess_demo_1.png">
 </p>

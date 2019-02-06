@@ -1,5 +1,4 @@
-#include "importers.hpp"
-
+#include "get_life_1_06.hpp"
 #include <fstream>
 #include <string>
 #include <vector>
@@ -7,10 +6,6 @@
 #include "coordinate.hpp"
 
 namespace gol {
-
-std::vector<Coordinate> get_life_1_05(const std::string& filename) {
-    return {};
-}
 
 std::vector<Coordinate> get_life_1_06(const std::string& filename) {
     std::ifstream file{filename};
@@ -35,13 +30,4 @@ std::vector<Coordinate> get_life_1_06(const std::string& filename) {
     }
     return cells;
 }
-
-std::vector<Coordinate> get_plaintext(const std::string& filename) {
-    return {};
-}
-
-std::vector<Coordinate> get_RLE(const std::string& filename) {
-    return {};
-}
-
 }  // namespace gol

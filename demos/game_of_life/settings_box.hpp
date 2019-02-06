@@ -37,7 +37,7 @@ struct Rule_edit : cppurses::Vertical_layout {
     cppurses::Line_edit& edit_box{
         this->make_child<cppurses::Line_edit>("3/23")};
 
-    sig::Signal<void(const std::string&, const std::string&)> rule_change;
+    sig::Signal<void(const std::string&)> rule_change;
 };
 
 struct Start_pause_btns : cppurses::Toggle_button {
@@ -74,8 +74,7 @@ struct Settings_box : cppurses::Vertical_layout {
     Grid_fade& grid_fade{this->make_child<Grid_fade>()};
     Rule_edit& rule_edit{this->make_child<Rule_edit>()};
 
-    sig::Signal<void(const std::string&, const std::string&)>& rule_change{
-        rule_edit.rule_change};
+    sig::Signal<void(const std::string&)>& rule_change{rule_edit.rule_change};
     sig::Signal<void(std::chrono::milliseconds)> period_set;
     sig::Signal<void()>& grid_toggled{grid_fade.grid_box.toggled};
     sig::Signal<void()>& fade_toggled{grid_fade.fade_box.toggled};
