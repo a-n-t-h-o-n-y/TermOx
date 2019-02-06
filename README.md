@@ -72,7 +72,7 @@ https://a-n-t-h-o-n-y.github.io/CPPurses/annotated.html).
 ## Gallery
 Game of Life
 <p align="center">
-  <img src="docs/images/gol_demo.png">
+  <img src="docs/images/gol_demo.gif">
 </p>
 
 Chess
