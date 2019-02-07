@@ -74,7 +74,7 @@ bool Focus_base::focus_in_event_filter(Widget& receiver) {
 }
 
 void Focus_base::set_policy(Focus_policy policy) {
-    title_.set_text(to_text(policy));
+    title_.set_contents(to_text(policy));
     this->focus_policy = policy;
 }
 

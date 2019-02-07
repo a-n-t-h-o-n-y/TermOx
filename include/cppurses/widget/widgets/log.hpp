@@ -20,7 +20,7 @@ class Log : public Textbox {
     using Text_display::erase;
     using Text_display::insert;
     using Text_display::pop_back;
-    using Text_display::set_text;
+    using Text_display::set_contents;
 };
 
 namespace slot {

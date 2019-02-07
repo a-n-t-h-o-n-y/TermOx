@@ -32,7 +32,7 @@ class Number_edit : public Line_edit {
     void set_value(Number_t value) {
         std::stringstream ss;
         ss << value;
-        this->set_text(ss.str());
+        this->set_contents(ss.str());
     }
 
     sig::Signal<void(Number_t)> value_set;
@@ -56,7 +56,7 @@ struct Labeled_number_edit : cppurses::Horizontal_layout {
         this->height_policy.type(cppurses::Size_policy::Fixed);
         this->height_policy.hint(1);
         label.width_policy.type(cppurses::Size_policy::Fixed);
-        label.width_policy.hint(label.contents_size());
+        label.width_policy.hint(label.contents().size());
 
         number_edit.brush.set_background(cppurses::Color::White);
         number_edit.brush.set_foreground(cppurses::Color::Black);

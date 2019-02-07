@@ -120,7 +120,6 @@ target_sources(cppurses PRIVATE
     widget/checkbox.cpp
     widget/titlebar.cpp
     widget/text_display.cpp
-    widget/text_display_slots.cpp
     widget/color_select.cpp
     widget/menu.cpp
     widget/size_policy.cpp

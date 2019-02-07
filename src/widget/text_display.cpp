@@ -15,29 +15,32 @@
 
 namespace cppurses {
 
-// TODO why is this update_display here and not in paint_event? Must be a
-// reason? It'd be more efficient the other way.
+// This call to update_display is required here, and not in paint_event.
+// Could probably be refactored so this can be in paint_event, more efficient.
 void Text_display::update() {
     this->update_display();
     Widget::update();
 }
 
-void Text_display::set_text(Glyph_string text) {
+void Text_display::set_contents(Glyph_string text) {
     contents_ = std::move(text);
     this->update();
     top_line_ = 0;
     this->cursor.set_position({0, 0});
-    text_changed(contents_);
+    contents_modified(contents_);
 }
 
 void Text_display::insert(Glyph_string text, std::size_t index) {
+    if (index > contents_.size()) {
+        return;
+    }
     if (contents_.empty()) {
         this->append(std::move(text));
         return;
     }
     for (auto& glyph : text) {
         for (Attribute a : Attribute_list) {
-            if (new_text_brush_.has_attribute(a)) {
+            if (this->insert_brush.has_attribute(a)) {
                 glyph.brush.add_attributes(a);
             }
         }
@@ -45,20 +48,20 @@ void Text_display::insert(Glyph_string text, std::size_t index) {
     contents_.insert(std::begin(contents_) + index, std::begin(text),
                      std::end(text));
     this->update();
-    text_changed(contents_);
+    contents_modified(contents_);
 }
 
 void Text_display::append(Glyph_string text) {
     for (auto& glyph : text) {
         for (Attribute a : Attribute_list) {
-            if (new_text_brush_.has_attribute(a)) {
+            if (this->insert_brush.has_attribute(a)) {
                 glyph.brush.add_attributes(a);
             }
         }
     }
     contents_.append(text);
     this->update();
-    text_changed(contents_);
+    contents_modified(contents_);
 }
 
 void Text_display::erase(std::size_t index, std::size_t length) {
@@ -71,7 +74,7 @@ void Text_display::erase(std::size_t index, std::size_t length) {
     }
     contents_.erase(std::begin(contents_) + index, end);
     this->update();
-    text_changed(contents_);
+    contents_modified(contents_);
 }
 
 void Text_display::pop_back() {
@@ -80,7 +83,7 @@ void Text_display::pop_back() {
     }
     contents_.pop_back();
     this->update();
-    text_changed(contents_);
+    contents_modified(contents_);
 }
 
 void Text_display::clear() {
@@ -88,7 +91,12 @@ void Text_display::clear() {
     this->cursor.set_x(0);
     this->cursor.set_y(0);
     this->update();
-    text_changed(contents_);
+    contents_modified(contents_);
+}
+
+void Text_display::set_alignment(Alignment type) {
+    alignment_ = type;
+    this->update();
 }
 
 void Text_display::scroll_up(std::size_t n) {
@@ -99,7 +107,6 @@ void Text_display::scroll_up(std::size_t n) {
     }
     this->update();
     scrolled_up(n);
-    scrolled();
 }
 
 void Text_display::scroll_down(std::size_t n) {
@@ -110,7 +117,21 @@ void Text_display::scroll_down(std::size_t n) {
     }
     this->update();
     scrolled_down(n);
-    scrolled();
+}
+
+void Text_display::enable_word_wrap(bool enable) {
+    word_wrap_enabled_ = enable;
+    this->update();
+}
+
+void Text_display::disable_word_wrap(bool disable) {
+    word_wrap_enabled_ = !disable;
+    this->update();
+}
+
+void Text_display::toggle_word_wrap() {
+    word_wrap_enabled_ = !word_wrap_enabled_;
+    this->update();
 }
 
 std::size_t Text_display::row_length(std::size_t y) const {
@@ -118,24 +139,24 @@ std::size_t Text_display::row_length(std::size_t y) const {
     return this->line_length(line);
 }
 
-std::size_t Text_display::index_at(std::size_t x, std::size_t y) const {
-    auto line = this->top_line() + y;
+std::size_t Text_display::index_at(Point position) const {
+    auto line = this->top_line() + position.y;
     if (line >= display_state_.size()) {
-        return this->contents_size();
+        return this->contents().size();
     }
     auto info = display_state_.at(line);
-    if (x >= info.length) {
+    if (position.x >= info.length) {
         if (info.length == 0) {
-            x = 0;
-        } else if (this->top_line() + y != this->last_line()) {
-            return this->first_index_at(this->top_line() + y + 1) - 1;
-        } else if (this->top_line() + y == this->last_line()) {
-            return this->contents_size();
+            position.x = 0;
+        } else if (this->top_line() + position.y != this->last_line()) {
+            return this->first_index_at(this->top_line() + position.y + 1) - 1;
+        } else if (this->top_line() + position.y == this->last_line()) {
+            return this->contents().size();
         } else {
-            x = info.length - 1;
+            position.x = info.length - 1;
         }
     }
-    return info.start_index + x;
+    return info.start_index + position.x;
 }
 
 Point Text_display::display_position(std::size_t index) const {
@@ -148,8 +169,8 @@ Point Text_display::display_position(std::size_t index) const {
     if (line > last_shown_line) {
         line = last_shown_line;
         index = this->last_index_at(line);
-    } else if (index > this->contents_size()) {
-        index = this->contents_size();
+    } else if (index > this->contents().size()) {
+        index = this->contents().size();
     }
     position.y = line - this->top_line();
     position.x = index - this->first_index_at(line);
@@ -196,6 +217,7 @@ bool Text_display::paint_event() {
 //     // textbox should account for it.
 //     return;
 // }
+
 void Text_display::update_display(std::size_t from_line) {
     std::size_t begin = display_state_.at(from_line).start_index;
     display_state_.clear();
@@ -208,7 +230,7 @@ void Text_display::update_display(std::size_t from_line) {
     std::size_t last_space{0};
     for (std::size_t i{begin}; i < contents_.size(); ++i) {
         ++length;
-        if (word_wrap_ && contents_.at(i).symbol == L' ') {
+        if (this->word_wrap_enabled() && contents_.at(i).symbol == L' ') {
             last_space = length;
         }
         if (contents_.at(i).symbol == L'\n') {
@@ -216,7 +238,7 @@ void Text_display::update_display(std::size_t from_line) {
             start_index += length;
             length = 0;
         } else if (length == this->width()) {
-            if (this->does_word_wrap() && last_space > 0) {
+            if (this->word_wrap_enabled() && last_space > 0) {
                 i -= length - last_space;
                 length = last_space;
                 last_space = 0;
@@ -274,5 +296,4 @@ std::size_t Text_display::line_length(std::size_t line) const {
     }
     return display_state_.at(line).length;
 }
-
 }  // namespace cppurses

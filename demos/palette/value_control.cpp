@@ -36,13 +36,13 @@ Value_control::Value_control(const Glyph_string& label)
             } else {
                 slider.set_value(std::stoi(value_str));
             }
-            edit_box.set_text(std::to_string(slider.value()));
-            edit_box.set_cursor(edit_box.contents_size());
+            edit_box.set_contents(std::to_string(slider.value()));
+            edit_box.set_cursor(edit_box.contents().size());
         });
 
     slider.value_changed.connect([&edit_box](int value) {
-        edit_box.set_text(std::to_string(value));
-        edit_box.set_cursor(edit_box.contents_size());
+        edit_box.set_contents(std::to_string(value));
+        edit_box.set_cursor(edit_box.contents().size());
     });
 
     label_.set_alignment(cppurses::Alignment::Center);

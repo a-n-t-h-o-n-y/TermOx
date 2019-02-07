@@ -6,97 +6,124 @@
 
 #include <signals/signal.hpp>
 
-#include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/brush.hpp>
-#include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
 
+/// Used to define the alignment of text in a Text_display Widget.
 enum class Alignment { Left, Center, Right };
 
+/// Non-interactive box to display a given Glyph_string.
+/** Provides operations to change the text, wrap words on spaces, change the
+ *  alignment of the text and scroll through the text, among others. */
 class Text_display : public Widget {
    public:
+    /// Construct a Text_display with initial Glyph_string \p content.
+    /** By default, wraps text, and has left alignment. */
     explicit Text_display(Glyph_string content = "")
-        : contents_{std::move(content)} {}
+        : contents_{std::move(content)} {
+        this->set_name("Text_display");
+    }
 
-    void update() override;
+    /// Replace the current contents with \p text.
+    /** Resets the display to show the first line at the top of the screen and
+     *  the cursor at the first Glyph, or where the first Glyph would be. */
+    void set_contents(Glyph_string text);
 
-    // Text Modification
-    void set_text(Glyph_string text);
+    /// Inserts \p text starting at \p index into the current contents.
+    /** Applys insert_brush to each Glyph added. Index can be one past the
+     *  current length of the contents, to append. No-op if index is larger than
+     *  one past the current length of contents. */
     void insert(Glyph_string text, std::size_t index);
+
+    /// Inserts \p text to the end of the current contents.
+    /** Applys insert_brush to each Glyph inserted. */
     void append(Glyph_string text);
+
+    /// Remove Glyphs from contents starting at \p index, for \p length Glyphs.
     void erase(std::size_t index, std::size_t length = Glyph_string::npos);
+
+    /// Remove the last Glyph from the current contents. No-op if this->empty();
     void pop_back();
+
+    /// Remove all Glyphs from the this text display.
+    /** this->empty() is true after call. */
     void clear();
 
-    void set_alignment(Alignment type) {
-        alignment_ = type;
-        this->update();
-    }
+    /// Set the Alignment, changing how the contents are displayed.
+    /** Not fully implemented at the moment, Left alignment is currently
+     *  supported. */
+    void set_alignment(Alignment type);
 
+    /// Return the currently used Alignment.
     Alignment alignment() const { return alignment_; }
 
-    // Scrolling
+    /// Scroll the display up by \p n lines.
+    /** Tops out at the first line displayed at the top of the display. */
     virtual void scroll_up(std::size_t n = 1);
+
+    /// Scroll the display down by \p n lines.
+    /** Bottoms out at the last line displaying at the top of the display. */
     virtual void scroll_down(std::size_t n = 1);
 
-    // Word Wrapping
-    void enable_word_wrap(bool enable = true) {
-        word_wrap_ = enable;
-        this->update();
-    }
+    /// Enable word wrapping on spaces if \p enable is true, else disable it.
+    void enable_word_wrap(bool enable = true);
 
-    void disable_word_wrap(bool disable = true) {
-        word_wrap_ = !disable;
-        this->update();
-    }
+    /// Disable word wrapping if \disable is true, otherwise enable it.
+    void disable_word_wrap(bool disable = true);
 
-    void toggle_word_wrap() {
-        word_wrap_ = !word_wrap_;
-        this->update();
-    }
+    /// Toggle word wrap between enabled/disabled depending on current state.
+    void toggle_word_wrap();
 
-    // Incoming Text Attributes
-    void add_new_text_attribute(Attribute attr) {
-        new_text_brush_.add_attributes(attr);
-    }
+    /// Brush to be applied to all new incoming Glyphs, but not existing Glyphs.
+    /** Widget::brush is applied after this Brush. */
+    Brush insert_brush{this->brush};
 
-    void remove_new_text_attribute(Attribute attr) {
-        new_text_brush_.remove_attribute(attr);
-    }
-
-    void clear_new_text_attributes() { new_text_brush_.clear_attributes(); }
-
-    // Query Functions
+    /// Return the length of the line at row \p y.
+    /** Index 0 is the top of the Widget. */
     std::size_t row_length(std::size_t y) const;
+
+    /// Return the number of lines currently displayed.
     std::size_t display_height() const;
 
-    std::size_t index_at(Point position) const {
-        return this->index_at(position.x, position.y);
-    }
+    /// Return the index into the contents from a physical Point on the Widget.
+    /** If \p position is past any text on the cooresponding line, then returns
+     *  index of the last Glyph on that line. If Point is past displayed lines,
+     *  returns the index of the last Glyph in contents. */
+    std::size_t index_at(Point position) const;
 
-    std::size_t index_at(std::size_t x, std::size_t y) const;
+    /// Return the position of the Glyph at \p index.
+    /** If \p index is not currently displayed on screen, returns the
+     *  closest Glyph position to \p index that is displayed on screen. */
     Point display_position(std::size_t index) const;
 
+    /// Return the entire contents of the Text_display.
+    /** Provided as a non-const reference so contents can be modified without
+     *  limitation from the Text_display interface. Be sure to call
+     *  Text_display::update() after modifying the contents directly. */
     Glyph_string& contents() { return contents_; }
+
+    /// Return the entire contents of the Text_display.
     const Glyph_string& contents() const { return contents_; }
-    Glyph& glyph_at(std::size_t index) { return contents_.at(index); }
-    Glyph glyph_at(std::size_t index) const { return contents_.at(index); }
 
-    std::size_t contents_size() const { return contents_.size(); }
-    bool contents_empty() const { return contents_.empty(); }
-    bool does_word_wrap() const { return word_wrap_; }
+    /// Return whether word wrapping is enabled.
+    bool word_wrap_enabled() const { return word_wrap_enabled_; }
 
-    // Signals
+    /// Emitted when text is scrolled up. Sends number of lines scrolled by.
     sig::Signal<void(std::size_t n)> scrolled_up;
+
+    /// Emitted when text is scrolled down. Sends number of lines scrolled by.
     sig::Signal<void(std::size_t n)> scrolled_down;
-    sig::Signal<void()> scrolled;
-    sig::Signal<void(const Glyph_string&)> text_changed;
+
+    /// Emitted when contents are modified. Sends a reference to the contents.
+    sig::Signal<void(const Glyph_string&)> contents_modified;
 
    protected:
+    void update() override;
+
     bool paint_event() override;
 
     std::size_t line_at(std::size_t index) const;
@@ -118,7 +145,7 @@ class Text_display : public Widget {
     std::size_t line_length(std::size_t line) const;
 
     std::size_t end_index() const {
-        return this->contents_empty() ? 0 : this->contents_size() - 1;
+        return this->contents().empty() ? 0 : this->contents().size() - 1;
     }
 
     void update_display(std::size_t from_line = 0);
@@ -132,9 +159,8 @@ class Text_display : public Widget {
     std::vector<Line_info> display_state_{Line_info{0, 0}};
 
     std::size_t top_line_{0};
-    bool word_wrap_{true};
+    bool word_wrap_enabled_{true};
     Glyph_string contents_;
-    Brush new_text_brush_{this->brush};  // TODO possibly make public member
     Alignment alignment_{Alignment::Left};
 };
 

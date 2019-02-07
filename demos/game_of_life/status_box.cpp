@@ -23,7 +23,7 @@ Generation_count::Generation_count() {
 }
 
 void Generation_count::update_count(std::uint32_t count) {
-    count_.set_text(std::to_string(count));
+    count_.set_contents(std::to_string(count));
 }
 
 Labeled_line_edit::Labeled_line_edit(Glyph_string label_text,
@@ -31,7 +31,7 @@ Labeled_line_edit::Labeled_line_edit(Glyph_string label_text,
     : label{this->make_child<Label>(std::move(label_text))},
       value_display{this->make_child<Line_edit>(std::move(initial))} {
     label.width_policy.type(Size_policy::Fixed);
-    label.width_policy.hint(label.contents_size());
+    label.width_policy.hint(label.contents().size());
     value_display.set_ghost_color(Color::White);
     value_display.set_validator([](char c) { return std::isdigit(c); });
 }

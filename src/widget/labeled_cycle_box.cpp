@@ -22,7 +22,7 @@ Labeled_cycle_box::Labeled_cycle_box(Glyph_string title) {
 }
 
 void Labeled_cycle_box::set_title(Glyph_string title) {
-    label.set_text(std::move(title));
+    label.set_contents(std::move(title));
     this->resize_label();
 }
 

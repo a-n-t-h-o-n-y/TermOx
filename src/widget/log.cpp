@@ -12,7 +12,7 @@
 namespace cppurses {
 
 void Log::post_message(Glyph_string message) {
-    if (!this->contents_empty()) {
+    if (!this->contents().empty()) {
         this->append('\n');
     }
     this->append(std::move(message));
@@ -23,7 +23,7 @@ void Log::post_message(Glyph_string message) {
     if (tl + h < nol) {
         this->scroll_down(nol - tl - h);
     }
-    this->set_cursor(this->contents_size());
+    this->set_cursor(this->contents().size());
 }
 
 bool Log::key_press_event(const Keyboard_data& keyboard) {

@@ -10,6 +10,8 @@
 
 namespace cppurses {
 
+/// Standard text input and display Widget.
+/** Cont */
 class Textbox : public Textbox_base {
    public:
     explicit Textbox(Glyph_string contents = "")

@@ -30,7 +30,7 @@ Titlebar::Titlebar(const Glyph_string& title_)
     title.set_alignment(Alignment::Center);
 }
 void Titlebar::set_title(Glyph_string title_) {
-    title.set_text(std::move(title_));
+    title.set_contents(std::move(title_));
 }
 
 namespace slot {

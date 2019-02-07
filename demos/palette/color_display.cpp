@@ -34,7 +34,7 @@ Color_display::Color_display(Color color) {
 }
 
 void Color_display::set_color(Color color) {
-    text.name.set_text(color_to_string(color));
+    text.name.set_contents(color_to_string(color));
     square.set_color(color);
 }
 }  // namespace palette

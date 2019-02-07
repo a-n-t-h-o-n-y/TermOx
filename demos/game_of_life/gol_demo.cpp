@@ -12,7 +12,7 @@ GoL_demo::GoL_demo() {
             gol_display.set_rules(rule_str);
         });
     gol_display.rule_changed.connect([this](const std::string& rule_str) {
-        side_panel.settings.rule_edit.edit_box.set_text(rule_str);
+        side_panel.settings.rule_edit.edit_box.set_contents(rule_str);
         side_panel.settings.rule_edit.edit_box.set_cursor(rule_str.size());
     });
     side_panel.settings.period_set.connect(
@@ -58,9 +58,9 @@ GoL_demo::GoL_demo() {
     });
 
     gol_display.offset_changed.connect([this](Coordinate c) {
-        side_panel.status.center_offset.x_coords.value_display.set_text(
+        side_panel.status.center_offset.x_coords.value_display.set_contents(
             std::to_string(c.x));
-        side_panel.status.center_offset.y_coords.value_display.set_text(
+        side_panel.status.center_offset.y_coords.value_display.set_contents(
             std::to_string(c.y));
     });
     side_panel.status.center_offset.x_coords.value_display.editing_finished

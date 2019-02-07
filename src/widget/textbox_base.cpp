@@ -77,7 +77,7 @@ void Textbox_base::cursor_right(std::size_t n) {
 }
 
 void Textbox_base::increment_cursor_right() {
-    if (this->cursor_index() == this->contents_size()) {
+    if (this->cursor_index() == this->contents().size()) {
         return;
     }
     auto true_last_index = this->first_index_at(this->bottom_line() + 1) - 1;

@@ -49,37 +49,43 @@ void Text_and_attributes::initialize() {
     ac_select.fg_select.color_changed.connect(slot::set_foreground(textbox));
     ac_select.bg_select.color_changed.connect(slot::set_background(textbox));
 
-    // Signals -- Add Attributes
+    // Add Attributes
     ac_select.attr_select.bold.checked.connect(
-        slot::add_new_text_attribute(textbox, Attribute::Bold));
+        [this]() { textbox.insert_brush.add_attributes(Attribute::Bold); });
     ac_select.attr_select.italic.checked.connect(
-        slot::add_new_text_attribute(textbox, Attribute::Italic));
-    ac_select.attr_select.underline.checked.connect(
-        slot::add_new_text_attribute(textbox, Attribute::Underline));
+        [this]() { textbox.insert_brush.add_attributes(Attribute::Italic); });
+    ac_select.attr_select.underline.checked.connect([this]() {
+        textbox.insert_brush.add_attributes(Attribute::Underline);
+    });
     ac_select.attr_select.standout.checked.connect(
-        slot::add_new_text_attribute(textbox, Attribute::Standout));
+        [this]() { textbox.insert_brush.add_attributes(Attribute::Standout); });
     ac_select.attr_select.dim.checked.connect(
-        slot::add_new_text_attribute(textbox, Attribute::Dim));
+        [this]() { textbox.insert_brush.add_attributes(Attribute::Dim); });
     ac_select.attr_select.inverse.checked.connect(
-        slot::add_new_text_attribute(textbox, Attribute::Inverse));
-    ac_select.attr_select.invisible.checked.connect(
-        slot::add_new_text_attribute(textbox, Attribute::Invisible));
+        [this]() { textbox.insert_brush.add_attributes(Attribute::Inverse); });
+    ac_select.attr_select.invisible.checked.connect([this]() {
+        textbox.insert_brush.add_attributes(Attribute::Invisible);
+    });
 
     // Signals -- Remove Attributes
     ac_select.attr_select.bold.unchecked.connect(
-        slot::remove_new_text_attribute(textbox, Attribute::Bold));
+        [this]() { textbox.insert_brush.remove_attribute(Attribute::Bold); });
     ac_select.attr_select.italic.unchecked.connect(
-        slot::remove_new_text_attribute(textbox, Attribute::Italic));
-    ac_select.attr_select.underline.unchecked.connect(
-        slot::remove_new_text_attribute(textbox, Attribute::Underline));
-    ac_select.attr_select.standout.unchecked.connect(
-        slot::remove_new_text_attribute(textbox, Attribute::Standout));
+        [this]() { textbox.insert_brush.remove_attribute(Attribute::Italic); });
+    ac_select.attr_select.underline.unchecked.connect([this]() {
+        textbox.insert_brush.remove_attribute(Attribute::Underline);
+    });
+    ac_select.attr_select.standout.unchecked.connect([this]() {
+        textbox.insert_brush.remove_attribute(Attribute::Standout);
+    });
     ac_select.attr_select.dim.unchecked.connect(
-        slot::remove_new_text_attribute(textbox, Attribute::Dim));
-    ac_select.attr_select.inverse.unchecked.connect(
-        slot::remove_new_text_attribute(textbox, Attribute::Inverse));
-    ac_select.attr_select.invisible.unchecked.connect(
-        slot::remove_new_text_attribute(textbox, Attribute::Invisible));
+        [this]() { textbox.insert_brush.remove_attribute(Attribute::Dim); });
+    ac_select.attr_select.inverse.unchecked.connect([this]() {
+        textbox.insert_brush.remove_attribute(Attribute::Inverse);
+    });
+    ac_select.attr_select.invisible.unchecked.connect([this]() {
+        textbox.insert_brush.remove_attribute(Attribute::Invisible);
+    });
 }
 
 // Attribute and Color Selections
@@ -140,7 +146,7 @@ bool Notepad::focus_in_event() {
 void Notepad::initialize() {
     // Signals
     save_area.load_btn.clicked.connect([this] {
-        txt_attr.textbox.set_text(
+        txt_attr.textbox.set_contents(
             ::load_file(save_area.filename_edit.contents().str()));
     });
 

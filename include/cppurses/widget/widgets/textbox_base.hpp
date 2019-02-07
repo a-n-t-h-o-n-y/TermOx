@@ -33,7 +33,7 @@ class Textbox_base : public Text_display {
     void set_cursor(Point pos) { this->set_cursor(pos.x, pos.y); }
 
     void set_cursor(std::size_t x, std::size_t y) {
-        this->set_cursor(this->index_at(x, y));
+        this->set_cursor(this->index_at({x, y}));
     }
 
     void set_cursor(std::size_t index);

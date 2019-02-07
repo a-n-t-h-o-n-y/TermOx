@@ -19,7 +19,7 @@ Cycle_box::Cycle_box() {
 sig::Signal<void()>& Cycle_box::add_option(Glyph_string option) {
     options_.emplace_back(std::move(option));
     if (options_.size() == 1) {
-        this->set_text(options_.front().name);
+        this->set_contents(options_.front().name);
     }
     this->update();
     return options_.back().enabled;
@@ -46,7 +46,7 @@ void Cycle_box::cycle_forward() {
     if (options_.size() > 1) {
         auto begin = std::begin(options_);
         std::rotate(begin, begin + 1, std::end(options_));
-        this->set_text(this->current_option());
+        this->set_contents(this->current_option());
         this->option_changed(this->current_option().str());
         options_.front().enabled();
         this->update();
@@ -57,7 +57,7 @@ void Cycle_box::cycle_backward() {
     if (options_.size() > 1) {
         auto begin = std::rbegin(options_);
         std::rotate(begin, begin + 1, std::rend(options_));
-        this->set_text(this->current_option());
+        this->set_contents(this->current_option());
         this->option_changed(this->current_option().str());
         options_.front().enabled();
         this->update();
