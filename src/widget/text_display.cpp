@@ -257,6 +257,7 @@ void Text_display::update_display(std::size_t from_line) {
 
 std::size_t Text_display::line_at(std::size_t index) const {
     std::size_t line{0};
+    // TODO Can you binary search this?
     for (const auto& info : display_state_) {
         if (info.start_index <= index) {
             ++line;

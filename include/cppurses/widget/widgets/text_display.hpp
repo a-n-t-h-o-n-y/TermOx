@@ -122,45 +122,63 @@ class Text_display : public Widget {
     sig::Signal<void(const Glyph_string&)> contents_modified;
 
    protected:
+    /// Adds call to Text_display::update_display() before posting Paint_event.
     void update() override;
 
+    /// Paints the portion of contents that is currently visible on screen.
     bool paint_event() override;
 
+    /// Return the line number that contains \p index.
     std::size_t line_at(std::size_t index) const;
 
+    /// Return the line number that is being displayed at the top of the Widget.
     std::size_t top_line() const { return top_line_; }
 
+    /// Return line number that is being displayed at the bottom of the Widget.
     std::size_t bottom_line() const {
         return this->top_line() + this->display_height() - 1;
     }
 
+    /// Return the index into display_state_ of the last line.
     std::size_t last_line() const { return display_state_.size() - 1; }
 
-    std::size_t n_of_lines() const { return display_state_.size(); }
+    /// Return the total number of lines in display_state_.
+    std::size_t line_count() const { return display_state_.size(); }
 
+    /// Return the index of the first Glyph at line number \p line.
     std::size_t first_index_at(std::size_t line) const;
 
+    /// Return the index of the last Glyph at line number \p line.
     std::size_t last_index_at(std::size_t line) const;
 
+    /// Return the number of Glyphs contained at line index \p line
     std::size_t line_length(std::size_t line) const;
 
+    /// Return the index of the last Glyph in contents.
+    /** Can give an incorrect result if contents is empty. */
     std::size_t end_index() const {
         return this->contents().empty() ? 0 : this->contents().size() - 1;
     }
 
+    /// Recalculate the text layout via display_state_.
+    /** This updates display_state_, depends on the Widget's dimensions, if word
+     *  wrap is enabled, and the contents.*/
     void update_display(std::size_t from_line = 0);
 
    private:
+    /// Provides a start index into contents and total length for a text line.
     struct Line_info {
         std::size_t start_index;
         std::size_t length;
     };
 
     std::vector<Line_info> display_state_{Line_info{0, 0}};
-
-    std::size_t top_line_{0};
-    bool word_wrap_enabled_{true};
     Glyph_string contents_;
+
+    /// Index into display_state_.
+    std::size_t top_line_{0};
+
+    bool word_wrap_enabled_{true};
     Alignment alignment_{Alignment::Left};
 };
 

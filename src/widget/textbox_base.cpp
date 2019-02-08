@@ -7,7 +7,6 @@
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/point.hpp>
-#include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
 
 namespace cppurses {
