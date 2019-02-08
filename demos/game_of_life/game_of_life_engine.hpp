@@ -28,13 +28,13 @@ class Game_of_life_engine {
     /** No-op if no cell alive at \p position. */
     void kill(Coordinate position);
 
-    /// Removes all living cells from the pattern and resets generation count.
+    /// Remove all living cells from the pattern and reset the generation count.
     void kill_all();
 
-    /// Checks if a cell is alive at the given Coordinate.
+    /// Check if a cell is alive at the given Coordinate.
     bool alive_at(Coordinate position) const;
 
-    /// Returns the number of alive neighbors the given \p position has.
+    /// Return the number of alive neighbors the given \p position has.
     int alive_neighbor_count(Coordinate position) const;
 
     /// Return const bidirectional iterator to beginning of [Coordinate, Cell].
@@ -82,16 +82,16 @@ class Game_of_life_engine {
      *  iteration. */
     void add_volatiles(Coordinate cell);
 
-    /// Sets the generation count to 0 and emits generation_count_changed.
+    /// Set the generation count to 0 and emit generation_count_changed.
     void reset_generation_count();
 
-    /// Increments the generation count by 1 and emits generation_count_changed.
+    /// Increment the generation count by 1 and emit generation_count_changed.
     void increment_generation_count();
 
-    /// Adds an alive cell at the given position.
+    /// Add an alive cell at the given position.
     void add_cell_at(Coordinate position);
 
-    /// Removes an alive cell at the given position.
+    /// Remove an alive cell at the given position.
     void remove_cell_at(Coordinate position);
 };
 }  // namespace gol

@@ -19,7 +19,7 @@ void Log::post_message(Glyph_string message) {
     this->update_display();
     std::size_t tl = this->top_line();
     std::size_t h = this->height();
-    std::size_t nol = this->n_of_lines();
+    std::size_t nol = this->line_count();
     if (tl + h < nol) {
         this->scroll_down(nol - tl - h);
     }

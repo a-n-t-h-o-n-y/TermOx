@@ -1,6 +1,12 @@
 #include "notepad.hpp"
 
-#include <cppurses/cppurses.hpp>
+#include <cppurses/painter/attribute.hpp>
+#include <cppurses/painter/color.hpp>
+#include <cppurses/system/focus.hpp>
+#include <cppurses/widget/border.hpp>
+#include <cppurses/widget/focus_policy.hpp>
+#include <cppurses/widget/size_policy.hpp>
+#include <cppurses/widget/widget_slots.hpp>
 
 #include <fstream>
 #include <sstream>
@@ -41,8 +47,8 @@ Text_and_attributes::Text_and_attributes() {
 }
 
 void Text_and_attributes::initialize() {
-    set_background(textbox, Color::Dark_gray);
-    enable_border(textbox);
+    textbox.brush.set_background(Color::Dark_gray);
+    textbox.border.enabled = true;
     set_corners(textbox.border, L'╭', L'╮', L'╰', L'╯');
 
     // Signals -- Colors
@@ -119,17 +125,17 @@ void Save_area::initialize() {
     // Load Button
     load_btn.width_policy.type(Size_policy::Fixed);
     load_btn.width_policy.hint(6);
-    set_background(load_btn, Color::Blue);
+    load_btn.brush.set_background(Color::Blue);
 
     // Filename Text Edit
     filename_edit.disable_scrollwheel();
-    set_background(filename_edit, Color::White);
-    set_foreground(filename_edit, Color::Black);
+    filename_edit.brush.set_background(Color::White);
+    filename_edit.brush.set_foreground(Color::Black);
 
     // Save Button
     save_btn.width_policy.type(Size_policy::Fixed);
     save_btn.width_policy.hint(6);
-    set_background(save_btn, Color::Blue);
+    save_btn.brush.set_background(Color::Blue);
 }
 
 Notepad::Notepad() {
@@ -155,5 +161,4 @@ void Notepad::initialize() {
                     txt_attr.textbox.contents().str());
     });
 }
-
 }  // namespace demos

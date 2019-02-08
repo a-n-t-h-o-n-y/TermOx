@@ -6,10 +6,9 @@
 #include "color_definition_setter.hpp"
 
 namespace palette {
-using namespace cppurses;
 
 /// Provides a user interface to the color palette system.
-class Palette_demo : public Horizontal_layout {
+class Palette_demo : public cppurses::Horizontal_layout {
     Color_definition_setter& color_setter_{
         this->make_child<Color_definition_setter>()};
     All_colors_display& all_colors_display_{

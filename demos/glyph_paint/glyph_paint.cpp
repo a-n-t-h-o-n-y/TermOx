@@ -1,5 +1,9 @@
 #include "glyph_paint.hpp"
 
+#include <cppurses/widget/widget_slots.hpp>
+
+using namespace cppurses;
+
 namespace demos {
 namespace glyph_paint {
 
@@ -39,39 +43,28 @@ Glyph_paint::Glyph_paint() {
 
     paint_area.glyph_changed.connect(
         cppurses::slot::update_status(side_pane.show_glyph));
-
     side_pane.options_box.options_a.clone_btn.clicked.connect(
         slot::toggle_clone(paint_area));
-
     side_pane.options_box.options_a.clone_btn.clicked.connect(
         cppurses::slot::update_status(
             side_pane.show_glyph,
             Glyph_string{"Clone", foreground(Color::Light_gray)}));
-
     side_pane.options_box.options_a.clear_btn.clicked.connect(
         slot::clear(paint_area));
-
     side_pane.options_box.options_a.cursor_box.toggled.connect(
         cppurses::slot::toggle_cursor(paint_area));
-
     paint_area.erase_disabled.connect(
         cppurses::slot::uncheck(side_pane.options_box.options_a.eraser_box));
-
     paint_area.erase_enabled.connect(
         cppurses::slot::check(side_pane.options_box.options_a.eraser_box));
-
     side_pane.options_box.options_a.eraser_box.checked.connect(
         slot::enable_erase(paint_area));
-
     side_pane.options_box.options_a.eraser_box.unchecked.connect(
         slot::disable_erase(paint_area));
-
     side_pane.options_box.options_a.grid_box.checked.connect(
         slot::enable_grid(paint_area));
-
     side_pane.options_box.options_a.grid_box.unchecked.connect(
         slot::disable_grid(paint_area));
-
     side_pane.options_box.options_b.save_file.save_requested.connect(
         slot::write(paint_area));
     side_pane.options_box.options_b.open_file.open_requested.connect(

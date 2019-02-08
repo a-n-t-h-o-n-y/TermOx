@@ -23,24 +23,24 @@ class Children_data {
     /** Contains bound checking for index, will no-op if out of range. */
     void insert(std::unique_ptr<Widget> child, std::size_t index);
 
-    /// Checks if the owning Widget is the parent to \p child.
+    /// Check if the owning Widget is the parent to \p child.
     bool has(Widget* child) const;
 
-    /// Checks if the owning Widget has the child with \p name.
+    /// Check if the owning Widget has the child with \p name.
     bool has(const std::string& name) const;
 
-    /// Checks if the owning Widget recursively owns \p descendant.
+    /// Check if the owning Widget recursively owns \p descendant.
     bool has_descendant(Widget* descendant) const;
 
-    /// Checks if the owning Widget has the descendent with \p name.
+    /// Check if the owning Widget has the descendent with \p name.
     bool has_descendant(const std::string& name) const;
 
-    /// Returns a reference to the list of children.
+    /// Return a reference to the list of children.
     const std::vector<std::unique_ptr<Widget>>& get() const {
         return children_;
     }
 
-    /// Returns a list of all descendants in breadth first order.
+    /// Return a list of all descendants in breadth first order.
     /** Descendants are children, or children of children to any level down. */
     std::vector<Widget*> get_descendants() const;
 

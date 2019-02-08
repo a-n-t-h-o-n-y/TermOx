@@ -77,21 +77,21 @@ class Painter {
     }
 
    private:
-    /// Puts a single Glyph to the staged_changes_ container.
+    /// Put a single Glyph to the staged_changes_ container.
     /** No bounds checking, used internally for all painting. Main entry point
      *  for modifying the staged_changes_ object. */
     void put_global(const Glyph& tile, std::size_t x, std::size_t y) {
         staged_changes_[Point{x, y}] = tile;
     }
 
-    /// Puts a single Glyph to the staged_changes_ container.
+    /// Put a single Glyph to the staged_changes_ container.
     /** No bounds checking, used internally for all painting. Main entry point
      *  for modifying the staged_changes_ object. */
     void put_global(const Glyph& tile, const Point& position) {
         this->put_global(tile, position.x, position.y);
     }
 
-    /// Paints a line from [x1, y1] to [x2, y2] using global coordinates.
+    /// Paint a line from [x1, y1] to [x2, y2] using global coordinates.
     /** No bounds checking, used internally for Border object painting. */
     void line_global(const Glyph& tile,
                      std::size_t x1,
@@ -99,14 +99,13 @@ class Painter {
                      std::size_t x2,
                      std::size_t y2);
 
-    /// Paints a line from \p a to \p b inclusive using global coordinates.
+    /// Paint a line from \p a to \p b inclusive using global coordinates.
     /** No bounds checking, used internally for Border object painting. */
     void line_global(const Glyph& tile, const Point& a, const Point& b) {
         line_global(tile, a.x, a.y, b.x, b.y);
     }
 
-    /// Pointer to Widget that will be painted.
-    // Widget* const widget_;
+    /// Widget that will be painted to.
     const Widget& widget_;
 
     /// Reference to container that holds onto the painting until flush().

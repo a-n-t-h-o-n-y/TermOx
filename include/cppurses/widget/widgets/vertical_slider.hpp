@@ -49,7 +49,7 @@ class Vertical_slider : public Widget {
     /** Modifies minimum to be max - 1 if minimum >= max. */
     void set_maximum(Value_t max);
 
-    /// Retrieve the current value of the slider.
+    /// Return the current value of the slider.
     Value_t value() const { return logic_.value(); }
 
     /// Return the smallest possible value for the slider.
@@ -65,7 +65,7 @@ class Vertical_slider : public Widget {
         this->update();
     };
 
-    /// Returns if slider is inverted.
+    /// Return if slider is inverted.
     bool is_inverted() const { return inverted_; }
 
     /// Set the upper glyph represetation.
@@ -83,13 +83,13 @@ class Vertical_slider : public Widget {
      *  repeats is true. */
     void set_lower(const Glyph_string& symbols, bool repeats = true);
 
-    /// Retrieve the upper representation of the Slider.
+    /// Return the upper representation of the Slider.
     const Glyph_string& upper() const { return upper_; }
 
-    /// Retrieve the indicator's representation.
+    /// Return the indicator's representation.
     const Glyph_string& indicator() const { return indicator_; }
 
-    /// Retrieve the lower representation of the Slider.
+    /// Return the lower representation of the Slider.
     const Glyph_string& lower() const { return lower_; }
 
     /// Signal emitted every time the slider value has changed.

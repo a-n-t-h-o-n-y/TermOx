@@ -21,7 +21,7 @@ Buffered_edit_box::Buffered_edit_box() {
 }
 }  // namespace detail
 
-// Sets up value_edit_ and slider_ to be consistent with each other.
+// Set up value_edit_ and slider_ to be consistent with each other.
 Value_control::Value_control(const Glyph_string& label)
     : label_{this->make_child<cppurses::Label>(label)} {
     this->width_policy.type(Size_policy::Maximum);

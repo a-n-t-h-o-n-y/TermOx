@@ -52,19 +52,19 @@ class Event {
     /// Return a pointer to the Widget that will receiver the Event.
     Widget& receiver() const { return receiver_; }
 
-    /// Calls filter_send() on each installed event filter object in receiver_.
+    /// Call filter_send() on each installed event filter object in receiver_.
     /** Event filters can be set up with Widget::install_event_filter(). Filters
      *  are used to intercept Events on other Widgets. The first filter to
      *  accept the event by returning true from filter_send stops any other
      *  object from receiving the Event. */
     bool send_to_all_filters() const;
 
-    /// Calls the appropriate event function on the receiver.
+    /// Call the appropriate event function on the receiver.
     /** Override in derived classes to call on the appropriate member function
      *  event handler on receiver. */
     virtual bool send() const = 0;
 
-    /// Receives Event calls originally destined for another Widget.
+    /// Receive Event calls originally destined for another Widget.
     /** Override in derived classes to call on the appropriate event handler
      *  filter on \p filter, passing in receiver_ as argument. */
     virtual bool filter_send(Widget& filter) const = 0;

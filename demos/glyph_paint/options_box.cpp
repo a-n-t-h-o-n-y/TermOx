@@ -1,6 +1,11 @@
 #include "options_box.hpp"
 
-#include <cppurses/cppurses.hpp>
+#include <cppurses/painter/color.hpp>
+#include <cppurses/painter/glyph.hpp>
+#include <cppurses/painter/palettes.hpp>
+#include <cppurses/system/system.hpp>
+#include <cppurses/widget/size_policy.hpp>
+#include <cppurses/widget/widgets/text_display.hpp>
 
 using namespace cppurses;
 
@@ -29,11 +34,11 @@ Options_B::Options_B() {
         System::terminal.set_color_palette(Palettes::Standard());
     });
 
-    set_background(back_btn, Color::Light_gray);
-    set_foreground(back_btn, Color::Black);
+    back_btn.brush.set_background(Color::Light_gray);
+    back_btn.brush.set_foreground(Color::Black);
 
-    set_background(palette_box, Color::White);
-    set_foreground(palette_box, Color::Black);
+    palette_box.brush.set_background(Color::White);
+    palette_box.brush.set_foreground(Color::Black);
 }
 
 Options_stack::Options_stack() {
@@ -47,6 +52,5 @@ Options_stack::Options_stack() {
     options_b.back_btn.clicked.connect(
         cppurses::slot::set_active_page(*this, 0));
 }
-
 }  // namespace glyph_paint
 }  // namespace demos

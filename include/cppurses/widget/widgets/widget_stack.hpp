@@ -31,7 +31,7 @@ class Widget_stack : public Horizontal_layout {
     Widget* active_page() const;
     std::size_t active_page_index() const;
 
-    /// Posts an Enable_event to this widget, and all descendants.
+    /// Post an Enable_event to this widget, and all descendants.
     void enable(bool enable = true,
                 bool post_child_polished_event = true) override;
 

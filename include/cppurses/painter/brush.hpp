@@ -42,24 +42,24 @@ class Brush {
         attributes_.set(static_cast<std::int8_t>(attr), false);
     }
 
-    /// Sets the background to not have a color, the default state.
+    /// Set the background to not have a color, the default state.
     void remove_background() { background_color_ = opt::none; }
 
-    /// Sets the foreground to not have a color, the default state.
+    /// Set the foreground to not have a color, the default state.
     void remove_foreground() { foreground_color_ = opt::none; }
 
-    /// Removes all of the set Attributes from the brush, not including colors.
+    /// Remove all of the set Attributes from the brush, not including colors.
     void clear_attributes() { attributes_.reset(); }
 
-    /// Provides a check if the brush has the provided Attribute \p attr.
+    /// Provide a check of whether the brush has the provided Attribute \p attr.
     bool has_attribute(Attribute attr) const {
         return attributes_[static_cast<std::size_t>(attr)];
     }
 
-    /// Returns the current background as an opt::Optional object.
+    /// Return the current background as an opt::Optional object.
     opt::Optional<Color> background_color() const { return background_color_; }
 
-    /// Returns the current foreground as an opt::Optional object.
+    /// Return the current foreground as an opt::Optional object.
     opt::Optional<Color> foreground_color() const { return foreground_color_; }
 
     friend bool operator==(const Brush& lhs, const Brush& rhs);
@@ -89,7 +89,7 @@ class Brush {
 /// Compares if the held attributes and (back/fore)ground colors are equal.
 bool operator==(const Brush& lhs, const Brush& rhs);
 
-/// Adds Attributes and Colors from \p from to \p to.
+/// Add Attributes and Colors from \p from to \p to.
 /** Does not overwrite existing colors in \p to. */
 void imprint(const Brush& from, Brush& to);
 

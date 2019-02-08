@@ -29,7 +29,7 @@ class Text_display : public Widget {
     }
 
     /// Replace the current contents with \p text.
-    /** Resets the display to show the first line at the top of the screen and
+    /** Reset the display to show the first line at the top of the screen and
      *  the cursor at the first Glyph, or where the first Glyph would be. */
     void set_contents(Glyph_string text);
 
@@ -90,14 +90,14 @@ class Text_display : public Widget {
     std::size_t display_height() const;
 
     /// Return the index into the contents from a physical Point on the Widget.
-    /** If \p position is past any text on the cooresponding line, then returns
+    /** If \p position is past any text on the cooresponding line, then return
      *  index of the last Glyph on that line. If Point is past displayed lines,
-     *  returns the index of the last Glyph in contents. */
+     *  return the index of the last Glyph in contents. */
     std::size_t index_at(Point position) const;
 
     /// Return the position of the Glyph at \p index.
-    /** If \p index is not currently displayed on screen, returns the
-     *  closest Glyph position to \p index that is displayed on screen. */
+    /** If \p index is not currently displayed on screen, return the closest
+     *  Glyph position to \p index that is displayed on screen. */
     Point display_position(std::size_t index) const;
 
     /// Return the entire contents of the Text_display.
@@ -122,10 +122,10 @@ class Text_display : public Widget {
     sig::Signal<void(const Glyph_string&)> contents_modified;
 
    protected:
-    /// Adds call to Text_display::update_display() before posting Paint_event.
+    /// Add call to Text_display::update_display() before posting Paint_event.
     void update() override;
 
-    /// Paints the portion of contents that is currently visible on screen.
+    /// Paint the portion of contents that is currently visible on screen.
     bool paint_event() override;
 
     /// Return the line number that contains \p index.

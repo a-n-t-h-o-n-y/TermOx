@@ -38,7 +38,7 @@ class Slider_logic {
         this->set_value(this->value() - amount);
     }
 
-    /// Directly sets the ratio as a value from [0.0, 1.0].
+    /// Directly set the ratio as a value from [0.0, 1.0].
     void set_ratio(Ratio_t ratio);
 
     /// Return the position of the current value in the slider as a ratio.
@@ -50,7 +50,7 @@ class Slider_logic {
     /// Return the current value.
     Value_t value() const;
 
-    /// Returns the distance between the maximum and minimum.
+    /// Return the distance between the maximum and minimum.
     Value_t length() const { return maximum_ - minimum_; }
 
     /// Signal emitted every time the value is changed.

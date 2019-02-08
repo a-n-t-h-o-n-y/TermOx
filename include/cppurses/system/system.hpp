@@ -28,29 +28,29 @@ class System {
     System& operator=(System&&) = default;
     ~System();
 
-    /// Sets a new head Widget for the entire system.
+    /// Set a new head Widget for the entire system.
     /** Will disable the previous head widget and enable \p new_head, if not
      *  nullptr. Will also send Resize_event and Paint_events to \p new_head. */
     static void set_head(Widget* new_head);
 
-    /// Returns a pointer to the head Widget.
+    /// Return a pointer to the head Widget.
     /** This Widget is the ancestor of every other widget that will be displayed
      *  on the screen. */
     static Widget* head() { return head_; }
 
-    /// Launches the main Event_loop and starts processing Events.
+    /// Launch the main Event_loop and start processing Events.
     int run();
 
-    /// Immediately sends the Event filters and then to the intended receiver.
+    /// Immediately send the event filters and then to the intended receiver.
     static bool send_event(const Event& event);
 
-    /// Appends the event to the Event_queue for the thread it was called on.
+    /// Append the event to the Event_queue for the thread it was called on.
     /** The Event_queue is processed once per iteration of the Event_loop. When
      *  the Event is pulled from the Event_queue, it is processed by
      *  System::send_event() */
     static void post_event(std::unique_ptr<Event> event);
 
-    /// Appends a newly created Event of type T onto the Event_queue.
+    /// Append a newly created Event of type T onto the Event_queue.
     /** \p args... are passed onto the constructor of T. Has same behavior as
      *  the non-templated function of the same name once the object has been
      *  constructed. */
@@ -60,36 +60,36 @@ class System {
         System::post_event(std::move(event));
     }
 
-    /// Returns the Event_loop associated with the calling thread.
+    /// Return the Event_loop associated with the calling thread.
     /** Each currently running Event_loop has to be run on its own thread, this
      *  function will find and return the Event_loop that is currently running
      *  on the calling thread. Used by Painter to get the staged_changes owned
      *  by Event_loop. */
     static Event_loop& find_event_loop();
 
-    /// Adds an Event_loop* to a list of currently running Event_loops.
+    /// Add an Event_loop* to a list of currently running Event_loops.
     /** Used by Event_loop::run() to automatically register itself to the list
      *  of running Event_loops when the loop begins. */
     static void register_event_loop(Event_loop* loop);
 
-    /// Removes the given Event_loop* from list of running Event_loops.
+    /// Remove the given Event_loop* from list of running Event_loops.
     /** Used by Event_loop::run() to automatically deregister itself from the
      *  list of running Event_loops when the loops exits. No-op if Event_loop*
      * is not registered. */
     static void deregister_event_loop(Event_loop* loop);
 
-    /// Sends an exit signal to each of the currently running Event_loops.
-    /** Also calls shutdown() on the Animation_engine and sets
+    /// Send an exit signal to each of the currently running Event_loops.
+    /** Also call shutdown() on the Animation_engine and set
      *  System::exit_requested_ to true. Though it sends the exit signal to each
      *  of the Event_loops, they are not guaranteed to be stopped by the time
      *  this function returns. */
     static void exit(int return_code = 0);
 
-    /// Returns a reference to the Animation_engine in System.
+    /// Return a reference to the Animation_engine in System.
     /** This manages animation on each of the Widgets that enables it. */
     static Animation_engine& animation_engine() { return animation_engine_; }
 
-    /// Returns whether System has gotten an exit request, set by System::exit()
+    /// Return whether System has gotten an exit request, set by System::exit()
     static bool exit_requested() { return exit_requested_; }
 
     // Slots

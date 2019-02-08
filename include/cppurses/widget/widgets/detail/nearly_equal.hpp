@@ -19,13 +19,13 @@ Result_t reinterpret(const Input_t& value) {
     return result;
 }
 
-/// Returns true if there are no floating point values between \p a and \p b.
+/// Return true if there are no floating point values between \p a and \p b.
 bool is_nearly_equal(double a, double b);
 
-/// Returns true if \p value is nearly equal to the next greatest whole number.
+/// Return true if \p value is nearly equal to the next greatest whole number.
 bool is_nearly_whole(double value);
 
-/// Rounds up towards the nearest whole number greater than \p value.
+/// Round up towards the nearest whole number greater than \p value.
 /** Only rounds up if there are no floating point values between \p value and
  *  the next whole number. */
 double ceil_if_nearly_whole(double value);

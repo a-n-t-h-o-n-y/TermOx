@@ -39,17 +39,17 @@ class Timer_event_loop : public Event_loop {
         return registered_widgets_.erase(&w) == 1;
     }
 
-    /// Sets a new constant period for the Timer loop.
+    /// Set a new constant period for the Timer loop.
     void set_period(Period_t period) {
         period_func_ = [period] { return period; };
     }
 
-    /// Sets a new variable period for the Timer loop.
+    /// Set a new variable period for the Timer loop.
     void set_period(const std::function<Period_t()>& period_function) {
         period_func_ = period_function;
     }
 
-    /// Returns true if no Widgets are registered with this event loop.
+    /// Return true if no Widgets are registered with this event loop.
     bool empty() const { return registered_widgets_.empty(); }
 
    protected:

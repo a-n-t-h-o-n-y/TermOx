@@ -29,7 +29,7 @@ auto is(const Widget& receiver, Event::Type event_type) {
     };
 }
 
-// Returns true if an event was removed from the queue.
+// Return true if an event was removed from the queue.
 template <typename Queue_t>
 bool remove(const Widget& receiver, Event::Type type, Queue_t& queue) {
     const auto begin = std::begin(queue);

@@ -92,7 +92,7 @@ class GoL_widget : public cppurses::Widget {
     void update_period();
 
     /// Convert signed Coordinates from engine to display positions.
-    /** Engine coordinate (0,0) is at the center of the display. Returns max
+    /** Engine coordinate (0,0) is at the center of the display. Return max
      *  values for x and y if transformation cannot fit on the display. */
     cppurses::Point transform_from_engine(Coordinate position) const;
 

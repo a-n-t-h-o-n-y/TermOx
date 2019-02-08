@@ -22,10 +22,10 @@ class Textbox_base : public Text_display {
     /// Set the cursor to the Glyph at \p index into contents.
     void set_cursor(std::size_t index);
 
-    /// Adds cursor movement to Text_display::scroll_up.
+    /// Add cursor movement to Text_display::scroll_up.
     void scroll_up(std::size_t n = 1) override;
 
-    /// Adds cursor movement to Text_display::scroll_down.
+    /// Add cursor movement to Text_display::scroll_down.
     void scroll_down(std::size_t n = 1) override;
 
     /// Move the cursor up \p n lines, scroll if at the top line.
@@ -39,11 +39,11 @@ class Textbox_base : public Text_display {
     void cursor_down(std::size_t n = 1);
 
     /// Move the cursor \p n indicies towards the beginning of contents.
-    /** Scrolls up if moving past the top-left position. */
+    /** Scroll up if moving past the top-left position. */
     void cursor_left(std::size_t n = 1);
 
     /// Move the cursor \p n indicies towards the end of contents.
-    /** Scrolls down if moving past the bottom-right position. */
+    /** Scroll down if moving past the bottom-right position. */
     void cursor_right(std::size_t n = 1);
 
     /// Emitted when the cursor moves left, passes along \n positions moved.
@@ -59,7 +59,7 @@ class Textbox_base : public Text_display {
     sig::Signal<void(std::size_t n)> cursor_moved_down;
 
    protected:
-    /// Construct with initial \p contents, enables cursor.
+    /// Construct with initial \p contents, enable cursor.
     explicit Textbox_base(Glyph_string contents = "");
 
     /// Return the index into contents that the cursor is located at.
@@ -67,7 +67,7 @@ class Textbox_base : public Text_display {
         return this->index_at(this->cursor.position());
     }
 
-    /// Scrolls to make the cursor visible if no longer on screen after resize.
+    /// Scroll to make the cursor visible if no longer on screen after resize.
     bool resize_event(Area new_size, Area old_size) override;
 
    private:

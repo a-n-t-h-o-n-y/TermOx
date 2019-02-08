@@ -20,15 +20,15 @@ class Glyph_matrix {
      *  bounds of the matrix will be destructed. */
     void resize(std::size_t width, std::size_t height);
 
-    /// Removes all Glyphs from the matrix and sets width/height to 0.
+    /// Remove all Glyphs from the matrix and set width/height to 0.
     void clear() { matrix_.clear(); }
 
-    /// Returns the width of the matrix.
+    /// Return the width of the matrix.
     std::size_t width() const {
         return matrix_.empty() ? 0 : matrix_.at(0).size();
     }
 
-    /// Returns the height of the matrix.
+    /// Return the height of the matrix.
     std::size_t height() const { return matrix_.size(); }
 
     /// Glyph access operator. (0, 0) is top left. x grows south and y east.

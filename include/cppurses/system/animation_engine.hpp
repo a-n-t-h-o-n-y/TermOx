@@ -27,10 +27,10 @@ class Animation_engine {
     /// Stop posting Timer_events to a given Widget.
     void unregister_widget(Widget& w);
 
-    /// Sends stop signals to all event loops and waits for them to exit.
+    /// Send stop signals to all event loops and wait for them to exit.
     void shutdown();
 
-    /// Starts sending Timer_events to all registered widgets.
+    /// Start sending Timer_events to all registered widgets.
     /** Only needed if shutdown() has been called. */
     void startup();
 

@@ -50,10 +50,10 @@ void set_corners(Border& b,
                  const Glyph& sw,
                  const Glyph& se);
 
-/// Enables all four corners of the Border to be displayed.
+/// Enable all four corners of the Border to be displayed.
 void enable_corners(Border& b);
 
-/// Disables all four corners of the Border.
+/// Disable all four corners of the Border.
 void disable_corners(Border& b);
 
 }  // namespace cppurses

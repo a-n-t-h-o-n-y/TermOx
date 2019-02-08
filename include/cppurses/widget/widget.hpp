@@ -51,7 +51,7 @@ class Widget {
     /// Set the identifying name of the Widget.
     void set_name(std::string name);
 
-    /// Posts an Enable_event to this widget, and all descendants.
+    /// Post an Enable_event to this widget, and all descendants.
     /** Will only post a Child_polished_event to the parent if requested. Useful
      *  for enabling a child Widget from a parent's Child_polished_event
      *  handler. This function can be overridden to change the implementation of
@@ -63,7 +63,7 @@ class Widget {
     virtual void enable(bool enable = true,
                         bool post_child_polished_event = true);
 
-    /// Posts a Disable_event to this widget, and all descendants.
+    /// Post a Disable_event to this widget, and all descendants.
     /** Will only post a Child_polished_event to the parent if requested. Useful
      *  for disabling a child Widget from a parent's Child_polished_event
      *  handler. */
@@ -74,16 +74,16 @@ class Widget {
     /// Check whether the Widget is enabled.
     bool enabled() const { return enabled_; }
 
-    /// Posts a Delete_event to this, deleting the object when safe to do so.
+    /// Post a Delete_event to this, deleting the object when safe to do so.
     void close();
 
-    /// Returns the Widget's parent pointer.
+    /// Return the Widget's parent pointer.
     /** The parent is the Widget that owns *this, it  is in charge of
      *  positioning and resizing this Widget. */
     Widget* parent() const { return parent_; }
 
     /// Create a Widget and append it to the list of children.
-    /** Returns a reference to this newly created Widget. */
+    /** Return a reference to this newly created Widget. */
     template <typename Widg_t, typename... Args>
     Widg_t& make_child(Args&&... args) {
         this->children.add(
@@ -91,8 +91,8 @@ class Widget {
         return static_cast<Widg_t&>(*(this->children.get().back()));
     }
 
-    /// Searches children by name and Widget type.
-    /** Returns a pointer to the given type, if found, or nullptr. */
+    /// Search children by name and Widget type.
+    /** Return a pointer to the given type, if found, or nullptr. */
     template <typename Widg_t = Widget>
     Widg_t* find_child(const std::string& name) const {
         for (const std::unique_ptr<Widget>& widg : this->children.get()) {
@@ -104,9 +104,9 @@ class Widget {
         return nullptr;
     }
 
-    /// Searches matching on \p name and Widg_t type for a descendant Widget.
-    /** Searches with breadth first ordering over the 'Widget tree'. Returns a
-     *  Widg_t* if found, otherwise a nullptr is returned. Returns the first
+    /// Search matching on \p name and Widg_t type for a descendant Widget.
+    /** Search with breadth first ordering over the 'Widget tree'. Return a
+     *  Widg_t* if found, otherwise a nullptr is returned. Return the first
      *  matching descendant. */
     template <typename Widg_t = Widget>
     Widg_t* find_descendant(const std::string& name) const {
@@ -143,25 +143,25 @@ class Widget {
         return top_left_position_.y + detail::Border_offset::north(*this);
     }
 
-    /// Returns the inner width dimension, this does not include Border space.
+    /// Return the inner width dimension, this does not include Border space.
     std::size_t width() const {
         return this->outer_width() - detail::Border_offset::east(*this) -
                detail::Border_offset::west(*this);
     }
 
-    /// Returns the inner height dimension, this does not include Border space.
+    /// Return the inner height dimension, this does not include Border space.
     std::size_t height() const {
         return this->outer_height() - detail::Border_offset::north(*this) -
                detail::Border_offset::south(*this);
     }
 
-    /// Returns the width dimension, this includes Border space.
+    /// Return the width dimension, this includes Border space.
     std::size_t outer_width() const { return outer_width_; }
 
-    /// Returns the height dimension, this includes Border space.
+    /// Return the height dimension, this includes Border space.
     std::size_t outer_height() const { return outer_height_; }
 
-    /// Posts a paint event to itself.
+    /// Post a paint event to this Widget.
     /** Useful to prompt an update of the Widget when the state of the Widget
      *  has changed. */
     virtual void update();
@@ -183,7 +183,7 @@ class Widget {
         return event_filters_;
     }
 
-    /// Enables animation on this Widget.
+    /// Enable animation on this Widget.
     /** Animated widgets receiver a Timer_event every \p period. This Timer
      *  Event should be used to update the state of the Widget. The animation
      *  system will also post a paint event to this Widget so the Widget can
@@ -192,13 +192,13 @@ class Widget {
      *  it paints to to avoid shared data issues. */
     void enable_animation(Animation_engine::Period_t period);
 
-    /// Enables variable animation on this Widget.
+    /// Enable variable animation on this Widget.
     /** Animated widgets receiver a Timer_event every \p period_func(). This
      *  enables a variable rate animation. */
     void enable_animation(
         const std::function<Animation_engine::Period_t()>& period_func);
 
-    /// Turns off animation, no more Timer_events will be sent to this Widget.
+    /// Turn off animation, no more Timer_events will be sent to this Widget.
     /** This Widget will be unregistered from the Animation_engine held by
      *  System. */
     void disable_animation();
@@ -237,15 +237,15 @@ class Widget {
         this->update();
     }
 
-    /// Returns the wallpaper Glyph.
+    /// Return the wallpaper Glyph.
     /** The Glyph has the brush applied to it, if brush_paints_wallpaper is set
      *  to true. */
     Glyph generate_wallpaper() const;
 
-    /// Returns the current Screen_state of this Widget, as it appears.
+    /// Return the current Screen_state of this Widget, as it appears.
     detail::Screen_state& screen_state() { return screen_state_; }
 
-    /// Returns the current Screen_state of this Widget, as it appears.
+    /// Return the current Screen_state of this Widget, as it appears.
     const detail::Screen_state& screen_state() const { return screen_state_; }
 
     // Signals
@@ -402,7 +402,7 @@ class Widget {
     virtual bool timer_event_filter(Widget& receiver);
 
    protected:
-    /// Enables this Widget and possibly notifies the parent of the change.
+    /// Enable this Widget and possibly notify the parent of the change.
     /** This function is useful if you want to override enable() function within
      *  your own derived Widget class. In those cases you could use this
      *  function to enable that Widget and then call enable() on only the

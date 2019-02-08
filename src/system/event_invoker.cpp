@@ -23,7 +23,7 @@
 namespace {
 using namespace cppurses;
 
-/// Checks whether you can ignore an Event, based on the filter type.
+/// Check whether you can ignore an Event, based on the filter type.
 bool is_ignorable(Event::Type event, Event::Type filter) {
     const bool ignore_paint = (event == Event::Paint && filter != Event::Paint);
     const bool ignore_delete =

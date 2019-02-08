@@ -21,10 +21,10 @@ class Shortcuts {
     /** No-op if key is not an existing shortcut. */
     static void remove_shortcut(Key key) { shortcuts_.erase(key); }
 
-    /// Removes all shortcuts from the system.
+    /// Remove all shortcuts from the system.
     static void clear() { shortcuts_.clear(); }
 
-    /// Calls on the associated Signal if \p key exists as a shortcut.
+    /// Call on the associated Signal if \p key exists as a shortcut.
     static bool send_key(Key key);
 
    private:

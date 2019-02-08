@@ -39,13 +39,13 @@ std::unique_ptr<Event> make_terminal_resize_event() {
     return nullptr;
 }
 
-/// Checks if mouse_event is a button_mask type of event.
+/// Check if mouse_event is a button_mask type of event.
 template <typename Mask_t>
 bool is(Mask_t button_mask, const ::MEVENT& mouse_event) {
     return static_cast<bool>(mouse_event.bstate & button_mask);
 }
 
-/// Extracts the Event type and Mouse_button from a given MEVENT object.
+/// Extract the Event type and Mouse_button from a given MEVENT object.
 std::pair<Event::Type, Mouse_button> extract_info(const ::MEVENT& mouse_event) {
     auto type_button = std::make_pair(Event::None, Mouse_button::None);
     auto& type = type_button.first;

@@ -38,10 +38,10 @@ class Size_policy {
         this->notify_parent();
     }
 
-    /// Retrieve the type of Size_policy currently being used.
+    /// Return the type of Size_policy currently being used.
     Size_policy::Type type() const { return type_; }
 
-    /// Sets the stretch factor.
+    /// Set the stretch factor.
     /** Used to fit adjacent Widgets within a length. The stretch is used to
      *  compute a percentage of length the Widget should receive by dividing it
      *  by the total stretch of all Widgets in the layout. */
@@ -50,7 +50,7 @@ class Size_policy {
         this->notify_parent();
     }
 
-    /// Retrieve the stretch factor currently being used.
+    /// Return the stretch factor currently being used.
     std::size_t stretch() const { return stretch_; }
 
     /// Set the size hint, used in accordance to the Type enum.
@@ -59,7 +59,7 @@ class Size_policy {
         this->notify_parent();
     }
 
-    /// Retrieve the size hint currently being used.
+    /// Return the size hint currently being used.
     std::size_t hint() const { return hint_; }
 
     /// Set the minimum length that the owning Widget should be.
@@ -68,7 +68,7 @@ class Size_policy {
         this->notify_parent();
     }
 
-    /// Retrieve the minimum length currently set.
+    /// Return the minimum length currently set.
     std::size_t min() const { return min_; }
 
     /// Set the maximum length that the owning Widget should be.
@@ -77,7 +77,7 @@ class Size_policy {
         this->notify_parent();
     }
 
-    /// Retrieve the maximum length currently set.
+    /// Return the maximum length currently set.
     std::size_t max() const { return max_; }
 
    private:
@@ -88,7 +88,7 @@ class Size_policy {
     std::size_t max_{std::numeric_limits<std::size_t>::max()};
     Widget* owner_;
 
-    /// Posts a Child_polished_event to the parent of owner_.
+    /// Post a Child_polished_event to the parent of owner_.
     void notify_parent() const;
 };
 

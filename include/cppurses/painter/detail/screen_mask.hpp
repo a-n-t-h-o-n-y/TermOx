@@ -33,16 +33,16 @@ class Screen_mask {
     /// Flip all bits in the mask.
     void flip() { bits_.flip(); }
 
-    /// Returns true if this->Area{width: 0, height: 0}
+    /// Return true if this->Area == {width: 0, height: 0}
     bool empty() const { return bits_.empty(); }
 
     /// Clear the contents to an empty state.
     void clear() { bits_.clear(); }
 
-    /// Retrieve the bit set at point \p p
+    /// Return the bit set at point \p p
     Reference at(std::size_t x, std::size_t y) { return bits_[index_at(x, y)]; }
 
-    /// Retrieve the bit set at point \p p
+    /// Return the bit set at point \p p
     Const_reference at(std::size_t x, std::size_t y) const {
         return bits_[index_at(x, y)];
     }

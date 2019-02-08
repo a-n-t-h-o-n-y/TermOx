@@ -1,6 +1,8 @@
 #ifndef DEMOS_MAIN_MENU_HPP
 #define DEMOS_MAIN_MENU_HPP
-#include <cppurses/cppurses.hpp>
+#include <cppurses/widget/layouts/vertical_layout.hpp>
+#include <cppurses/widget/widgets/titlebar.hpp>
+#include <cppurses/widget/widgets/widget_stack_menu.hpp>
 
 // #include "animation/animated_widget.hpp"
 #include "chess/src/chess_ui.hpp"
@@ -10,17 +12,17 @@
 #include "notepad/notepad.hpp"
 #include "palette/palette_demo.hpp"
 
-using namespace cppurses;
 namespace demos {
 
-class Main_menu : public Vertical_layout {
+class Main_menu : public cppurses::Vertical_layout {
    public:
     Main_menu();
 
-    Titlebar& titlebar{this->make_child<Titlebar>("  C  P  P  U  R  S  E  S")};
+    cppurses::Titlebar& titlebar{
+        this->make_child<cppurses::Titlebar>("  C  P  P  U  R  S  E  S")};
 
-    Widget_stack_menu& main_menu{
-        this->make_child<Widget_stack_menu>("D e m o s")};
+    cppurses::Widget_stack_menu& main_menu{
+        this->make_child<cppurses::Widget_stack_menu>("D e m o s")};
 
     Notepad& notepad{main_menu.make_page<Notepad>("Notepad")};
 
@@ -42,7 +44,5 @@ class Main_menu : public Vertical_layout {
     //     main_menu.make_page<animation::Animated_widget>(
     //         "Animated Widget(Experimental)")};
 };
-
 }  // namespace demos
-
 #endif  // DEMOS_MAIN_MENU_HPP

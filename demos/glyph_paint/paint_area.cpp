@@ -10,7 +10,21 @@
 #include <string>
 #include <utility>
 
-#include <cppurses/cppurses.hpp>
+#include <cppurses/painter/attribute.hpp>
+#include <cppurses/painter/brush.hpp>
+#include <cppurses/painter/color.hpp>
+#include <cppurses/painter/glyph.hpp>
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/painter/painter.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/system/keyboard_data.hpp>
+#include <cppurses/system/mouse_button.hpp>
+#include <cppurses/system/mouse_data.hpp>
+#include <cppurses/widget/border.hpp>
+#include <cppurses/widget/focus_policy.hpp>
+#include <cppurses/widget/point.hpp>
+#include <cppurses/widget/widget.hpp>
+
 #include <optional/optional.hpp>
 #include <signals/slot.hpp>
 
@@ -41,7 +55,7 @@ namespace demos {
 namespace glyph_paint {
 
 Paint_area::Paint_area() {
-    enable_border(*this);
+    this->border.enabled = true;
     disable_walls(this->border);
     disable_corners(this->border);
     this->border.east_enabled = true;

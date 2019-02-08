@@ -7,7 +7,7 @@
 
 namespace {
 using namespace cppurses;
-/// Enables only the east wall of given a border, \p b. Also enables the border.
+/// Enable only the east wall of given a border, \p b. Also enables the border.
 void enable_east_wall(Border& b) {
     b.enabled = true;
     disable_walls(b);

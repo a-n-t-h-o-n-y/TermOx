@@ -1,8 +1,12 @@
 #ifndef CPPURSES_DEMOS_ANIMATION_ANIMATED_WIDGET_HPP
 #define CPPURSES_DEMOS_ANIMATION_ANIMATED_WIDGET_HPP
-#include <cstdint>
-
-#include <cppurses/cppurses.hpp>
+#include <cppurses/painter/color.hpp>
+#include <cppurses/painter/glyph.hpp>
+#include <cppurses/system/mouse_data.hpp>
+#include <cppurses/widget/border.hpp>
+#include <cppurses/widget/layouts/horizontal_layout.hpp>
+#include <cppurses/widget/point.hpp>
+#include <cppurses/widget/widget.hpp>
 
 namespace demos {
 namespace animation {
@@ -26,8 +30,8 @@ class Animated_bit : public cppurses::Widget {
 class Animated_widget : public cppurses::Horizontal_layout {
    public:
     Animated_widget() {
-        cppurses::enable_border(bit_2_);
-        cppurses::enable_border(bit_4_);
+        bit_2_.border.enabled = true;
+        bit_4_.border.enabled = true;
     }
 
    private:
@@ -37,7 +41,6 @@ class Animated_widget : public cppurses::Horizontal_layout {
     Animated_bit& bit_4_{this->make_child<Animated_bit>(30, true)};
     Animated_bit& bit_5_{this->make_child<Animated_bit>(60, true)};
 };
-
 }  // namespace animation
 }  // namespace demos
 #endif  // CPPURSES_DEMOS_ANIMATION_ANIMATED_WIDGET_HPP

@@ -1,5 +1,10 @@
 #include "side_pane.hpp"
-#include <cppurses/cppurses.hpp>
+
+#include <cppurses/painter/color.hpp>
+#include <cppurses/painter/glyph.hpp>
+#include <cppurses/widget/size_policy.hpp>
+#include <cppurses/widget/widget_free_functions.hpp>
+#include <cppurses/widget/widgets/text_display.hpp>
 
 using namespace cppurses;
 
@@ -25,6 +30,5 @@ Side_pane::Side_pane() {
     show_glyph.height_policy.hint(1);
     show_glyph.set_alignment(Alignment::Center);
 }
-
 }  // namespace glyph_paint
 }  // namespace demos

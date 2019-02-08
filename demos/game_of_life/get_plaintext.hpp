@@ -7,7 +7,7 @@
 
 namespace gol {
 
-/// Retrieve cell Coordinates from plaintext file.
+/// Return cell Coordinates from plaintext file.
 std::vector<Coordinate> get_plaintext(const std::string& filename);
 
 }  // namespace gol

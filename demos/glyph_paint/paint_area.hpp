@@ -5,28 +5,32 @@
 #include <iostream>
 #include <unordered_map>
 
-#include <cppurses/cppurses.hpp>
-#include <signals/signals.hpp>
+#include <cppurses/painter/attribute.hpp>
+#include <cppurses/painter/color.hpp>
+#include <cppurses/painter/glyph.hpp>
+#include <cppurses/system/keyboard_data.hpp>
+#include <cppurses/system/mouse_data.hpp>
+#include <cppurses/widget/widget.hpp>
 
-using namespace cppurses;
+#include <signals/signals.hpp>
 
 namespace demos {
 namespace glyph_paint {
 
-class Paint_area : public Widget {
+class Paint_area : public cppurses::Widget {
    public:
     Paint_area();
 
-    void set_glyph(Glyph glyph);
-    void set_symbol(const Glyph& symbol);
-    void set_foreground_color(Color c);
-    void set_background_color(Color c);
-    void set_attribute(Attribute attr);
-    void remove_attribute(Attribute attr);
+    void set_glyph(cppurses::Glyph glyph);
+    void set_symbol(const cppurses::Glyph& symbol);
+    void set_foreground_color(cppurses::Color c);
+    void set_background_color(cppurses::Color c);
+    void set_attribute(cppurses::Attribute attr);
+    void remove_attribute(cppurses::Attribute attr);
 
     void clear();
 
-    Glyph glyph() const;
+    cppurses::Glyph glyph() const;
     void toggle_clone();
     void enable_erase();
     void disable_erase();
@@ -37,47 +41,47 @@ class Paint_area : public Widget {
     void read(std::istream& is);
 
     // Signals
-    sig::Signal<void(Glyph)> glyph_changed;
+    sig::Signal<void(cppurses::Glyph)> glyph_changed;
     sig::Signal<void()> erase_enabled;
     sig::Signal<void()> erase_disabled;
 
    protected:
     bool paint_event() override;
 
-    bool mouse_press_event(const Mouse_data& mouse) override;
+    bool mouse_press_event(const cppurses::Mouse_data& mouse) override;
 
-    bool key_press_event(const Keyboard_data& keyboard) override;
+    bool key_press_event(const cppurses::Keyboard_data& keyboard) override;
 
    private:
-    std::unordered_map<Point, Glyph> glyphs_painted_;
-    Glyph current_glyph_{L'x'};
-    Glyph before_erase_{L'x'};
+    std::unordered_map<cppurses::Point, cppurses::Glyph> glyphs_painted_;
+    cppurses::Glyph current_glyph_{L'x'};
+    cppurses::Glyph before_erase_{L'x'};
     bool clone_enabled_{false};
     bool erase_enabled_{false};
 
     void place_glyph(std::size_t x, std::size_t y);
-    void remove_glyph(Point coords);
+    void remove_glyph(cppurses::Point coords);
 };
 
 namespace slot {
 
-sig::Slot<void(Glyph)> set_glyph(Paint_area& pa);
-sig::Slot<void()> set_glyph(Paint_area& pa, const Glyph& glyph);
+sig::Slot<void(cppurses::Glyph)> set_glyph(Paint_area& pa);
+sig::Slot<void()> set_glyph(Paint_area& pa, const cppurses::Glyph& glyph);
 
-sig::Slot<void(Glyph)> set_symbol(Paint_area& pa);
-sig::Slot<void()> set_symbol(Paint_area& pa, const Glyph& symbol);
+sig::Slot<void(cppurses::Glyph)> set_symbol(Paint_area& pa);
+sig::Slot<void()> set_symbol(Paint_area& pa, const cppurses::Glyph& symbol);
 
-sig::Slot<void(Color)> set_foreground_color(Paint_area& pa);
-sig::Slot<void()> set_foreground_color(Paint_area& pa, Color c);
+sig::Slot<void(cppurses::Color)> set_foreground_color(Paint_area& pa);
+sig::Slot<void()> set_foreground_color(Paint_area& pa, cppurses::Color c);
 
-sig::Slot<void(Color)> set_background_color(Paint_area& pa);
-sig::Slot<void()> set_background_color(Paint_area& pa, Color c);
+sig::Slot<void(cppurses::Color)> set_background_color(Paint_area& pa);
+sig::Slot<void()> set_background_color(Paint_area& pa, cppurses::Color c);
 
-sig::Slot<void(Attribute)> set_attribute(Paint_area& pa);
-sig::Slot<void()> set_attribute(Paint_area& pa, Attribute attr);
+sig::Slot<void(cppurses::Attribute)> set_attribute(Paint_area& pa);
+sig::Slot<void()> set_attribute(Paint_area& pa, cppurses::Attribute attr);
 
-sig::Slot<void(Attribute)> remove_attribute(Paint_area& pa);
-sig::Slot<void()> remove_attribute(Paint_area& pa, Attribute attr);
+sig::Slot<void(cppurses::Attribute)> remove_attribute(Paint_area& pa);
+sig::Slot<void()> remove_attribute(Paint_area& pa, cppurses::Attribute attr);
 
 sig::Slot<void()> toggle_clone(Paint_area& pa);
 

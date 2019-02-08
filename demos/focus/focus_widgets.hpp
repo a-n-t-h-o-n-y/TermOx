@@ -13,7 +13,7 @@ struct Focus_none : Focus_base {
 
 struct Focus_click : Focus_base {
     Focus_click() : Focus_base{cppurses::Focus_policy::Click} {
-        title_.focus_policy = Focus_policy::Click;
+        title_.focus_policy = cppurses::Focus_policy::Click;
     }
 };
 
@@ -23,7 +23,7 @@ struct Focus_tab : Focus_base {
 
 struct Focus_strong : Focus_base {
     Focus_strong() : Focus_base{cppurses::Focus_policy::Strong} {
-        title_.focus_policy = Focus_policy::Click;
+        title_.focus_policy = cppurses::Focus_policy::Click;
     }
 };
 

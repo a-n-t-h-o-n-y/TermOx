@@ -3,14 +3,12 @@
 #include "paint_area.hpp"
 #include "side_pane.hpp"
 
-#include <cppurses/cppurses.hpp>
-
-using namespace cppurses;
+#include <cppurses/widget/layouts/horizontal_layout.hpp>
 
 namespace demos {
 namespace glyph_paint {
 
-class Glyph_paint : public Horizontal_layout {
+class Glyph_paint : public cppurses::Horizontal_layout {
    public:
     Glyph_paint();
 

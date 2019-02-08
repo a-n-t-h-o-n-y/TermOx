@@ -106,7 +106,7 @@ void paint_indicator(char symbol) {
 #endif
 
 #ifdef add_wchstr
-/// Adds \p glyph's symbol, with attributes, to the screen at cursor position.
+/// Add \p glyph's symbol, with attributes, to the screen at cursor position.
 void put_as_wchar(const Glyph& glyph) {
     const auto color_pair = find_pair(glyph.brush);
     const auto attributes = find_attr_t(glyph.brush);
@@ -118,7 +118,7 @@ void put_as_wchar(const Glyph& glyph) {
 }
 #else
 
-/// Adds \p glyph's symbol, with attributes, to the screen at cursor position.
+/// Add \p glyph's symbol, with attributes, to the screen at cursor position.
 void put_as_char(const Glyph& glyph) {
     auto use_addch = false;
     auto symbol_and_attributes = detail::get_chtype(glyph.symbol, use_addch);
