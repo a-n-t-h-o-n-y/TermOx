@@ -6,13 +6,13 @@
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/keyboard_data.hpp>
 #include <cppurses/system/mouse_data.hpp>
-#include <cppurses/widget/widgets/textbox_base.hpp>
+#include <cppurses/widget/widgets/detail/textbox_base.hpp>
 
 namespace cppurses {
 
 /// Standard text input and display Widget.
 /** Cont */
-class Textbox : public Textbox_base {
+class Textbox : public detail::Textbox_base {
    public:
     explicit Textbox(Glyph_string contents = "")
         : Textbox_base{std::move(contents)} {

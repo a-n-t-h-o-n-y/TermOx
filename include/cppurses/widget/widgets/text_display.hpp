@@ -21,10 +21,10 @@ enum class Alignment { Left, Center, Right };
  *  alignment of the text and scroll through the text, among others. */
 class Text_display : public Widget {
    public:
-    /// Construct a Text_display with initial Glyph_string \p content.
+    /// Construct a Text_display with initial Glyph_string \p contents.
     /** By default, wraps text, and has left alignment. */
-    explicit Text_display(Glyph_string content = "")
-        : contents_{std::move(content)} {
+    explicit Text_display(Glyph_string contents = "")
+        : contents_{std::move(contents)} {
         this->set_name("Text_display");
     }
 

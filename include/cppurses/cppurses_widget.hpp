@@ -28,8 +28,6 @@
 #include <cppurses/widget/widgets/status_bar.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
 #include <cppurses/widget/widgets/textbox.hpp>
-#include <cppurses/widget/widgets/textbox_base.hpp>
-#include <cppurses/widget/widgets/textbox_base_slots.hpp>
 #include <cppurses/widget/widgets/textbox_slots.hpp>
 #include <cppurses/widget/widgets/titlebar.hpp>
 #include <cppurses/widget/widgets/vertical_scrollbar.hpp>

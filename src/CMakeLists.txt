@@ -113,7 +113,6 @@ target_sources(cppurses PRIVATE
     widget/textbox_slots.cpp
     widget/horizontal_slider.cpp
     widget/textbox_base.cpp
-    widget/textbox_base_slots.cpp
     widget/push_button.cpp
     widget/horizontal_scrollbar.cpp
     widget/vertical_scrollbar.cpp

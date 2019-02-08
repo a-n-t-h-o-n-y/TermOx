@@ -4,19 +4,11 @@
 #include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widget_free_functions.hpp>
-#include <cppurses/widget/widgets/textbox_base.hpp>
-#include <cppurses/widget/widgets/textbox_base_slots.hpp>
 
 namespace cppurses {
 
 Vertical_scrollbar::Vertical_scrollbar() {
     this->initialize();
-}
-
-Vertical_scrollbar::Vertical_scrollbar(Textbox_base& tb) {
-    this->initialize();
-    up.connect(slot::scroll_up(tb, 1));
-    down.connect(slot::scroll_down(tb, 1));
 }
 
 void Vertical_scrollbar::initialize() {

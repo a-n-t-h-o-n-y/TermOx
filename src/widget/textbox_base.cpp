@@ -1,4 +1,4 @@
-#include <cppurses/widget/widgets/textbox_base.hpp>
+#include <cppurses/widget/widgets/detail/textbox_base.hpp>
 
 #include <cstddef>
 #include <utility>
@@ -11,6 +11,7 @@
 #include <cppurses/widget/widgets/text_display.hpp>
 
 namespace cppurses {
+namespace detail {
 
 void Textbox_base::set_cursor(std::size_t index) {
     auto coords = this->display_position(index);
@@ -20,12 +21,10 @@ void Textbox_base::set_cursor(std::size_t index) {
 void Textbox_base::cursor_up(std::size_t n) {
     auto y = this->cursor.y() - n;
     if (this->cursor.y() < n) {
-        if (this->does_scroll()) {
-            this->scroll_up(n - this->cursor.y());
-        }
+        this->scroll_up(n - this->cursor.y());
         y = 0;
     }
-    this->set_cursor(this->cursor.x(), y);
+    this->set_cursor({this->cursor.x(), y});
     cursor_moved_up(n);
 }
 
@@ -35,14 +34,10 @@ void Textbox_base::cursor_down(std::size_t n) {
     }
     auto y = this->cursor.y() + n;
     if (y >= this->height()) {
-        if (this->does_scroll()) {
-            this->scroll_down(y - (this->height() - 1));
-            y = this->height() - 1;
-        } else {
-            return;
-        }
+        this->scroll_down(y - (this->height() - 1));
+        y = this->height() - 1;
     }
-    this->set_cursor(this->cursor.x(), y);
+    this->set_cursor({this->cursor.x(), y});
     cursor_moved_down(n);
 }
 
@@ -53,22 +48,6 @@ void Textbox_base::cursor_left(std::size_t n) {
     cursor_moved_left(n);
 }
 
-void Textbox_base::increment_cursor_left() {
-    auto next_index = this->cursor_index();
-    if (this->cursor.position() == Point{0, 0}) {
-        if (this->does_scroll()) {
-            this->scroll_up(1);
-        } else {
-            return;
-        }
-    }
-    if (next_index == 0) {
-        return;
-    }
-    --next_index;
-    this->set_cursor(next_index);
-}
-
 void Textbox_base::cursor_right(std::size_t n) {
     for (std::size_t i{0}; i < n; ++i) {
         this->increment_cursor_right();
@@ -76,21 +55,9 @@ void Textbox_base::cursor_right(std::size_t n) {
     cursor_moved_right(n);
 }
 
-void Textbox_base::increment_cursor_right() {
-    if (this->cursor_index() == this->contents().size()) {
-        return;
-    }
-    auto true_last_index = this->first_index_at(this->bottom_line() + 1) - 1;
-    auto cursor_index = this->cursor_index();
-    if (cursor_index == true_last_index &&
-        this->cursor.y() == this->height() - 1) {
-        if (this->does_scroll()) {
-            this->scroll_down(1);
-        } else {
-            return;
-        }
-    }
-    this->set_cursor(cursor_index + 1);
+Textbox_base::Textbox_base(Glyph_string contents)
+    : Text_display{std::move(contents)} {
+    this->cursor.enable();
 }
 
 void Textbox_base::scroll_up(std::size_t n) {
@@ -102,7 +69,7 @@ void Textbox_base::scroll_up(std::size_t n) {
     if (y > this->height() - 1) {
         y = this->height() - 1;
     }
-    this->set_cursor(this->cursor.x(), y);
+    this->set_cursor({this->cursor.x(), y});
 }
 
 void Textbox_base::scroll_down(std::size_t n) {
@@ -113,7 +80,7 @@ void Textbox_base::scroll_down(std::size_t n) {
     } else {
         y -= n;
     }
-    this->set_cursor(this->cursor.x(), y);
+    this->set_cursor({this->cursor.x(), y});
 }
 
 bool Textbox_base::resize_event(Area new_size, Area old_size) {
@@ -130,4 +97,30 @@ bool Textbox_base::resize_event(Area new_size, Area old_size) {
     return Text_display::resize_event(new_size, old_size);
 }
 
+void Textbox_base::increment_cursor_left() {
+    auto next_index = this->cursor_index();
+    if (this->cursor.position() == Point{0, 0}) {
+        this->scroll_up(1);
+    }
+    if (next_index == 0) {
+        return;
+    }
+    --next_index;
+    this->set_cursor(next_index);
+}
+
+void Textbox_base::increment_cursor_right() {
+    if (this->cursor_index() == this->contents().size()) {
+        return;
+    }
+    auto true_last_index = this->first_index_at(this->bottom_line() + 1) - 1;
+    auto cursor_index = this->cursor_index();
+    if (cursor_index == true_last_index &&
+        this->cursor.y() == this->height() - 1) {
+        this->scroll_down(1);
+    }
+    this->set_cursor(cursor_index + 1);
+}
+
+}  // namespace detail
 }  // namespace cppurses

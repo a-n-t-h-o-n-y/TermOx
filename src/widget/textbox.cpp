@@ -74,7 +74,7 @@ bool Textbox::key_press_event(const Keyboard_data& keyboard) {
 
 bool Textbox::mouse_press_event(const Mouse_data& mouse) {
     if (mouse.button == Mouse_button::Left) {
-        this->set_cursor(mouse.local.x, mouse.local.y);
+        this->set_cursor({mouse.local.x, mouse.local.y});
     } else if (mouse.button == Mouse_button::ScrollUp) {
         if (scroll_wheel_) {
             this->scroll_up(scroll_speed_up_);
