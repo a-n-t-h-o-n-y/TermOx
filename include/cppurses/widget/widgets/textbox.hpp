@@ -1,7 +1,6 @@
 #ifndef CPPURSES_WIDGET_WIDGETS_TEXTBOX_HPP
 #define CPPURSES_WIDGET_WIDGETS_TEXTBOX_HPP
 #include <cstddef>
-#include <cstdint>
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/keyboard_data.hpp>
@@ -10,30 +9,48 @@
 
 namespace cppurses {
 
-/// Standard text input and display Widget.
-/** Cont */
+/// Interactive Glyph_string display.
+/** Provides common text interaction and presentation options as well as proper
+ *  cursor movement for these interactions. */
 class Textbox : public detail::Textbox_base {
    public:
-    explicit Textbox(Glyph_string contents = "")
-        : Textbox_base{std::move(contents)} {
-        this->focus_policy = Focus_policy::Strong;
-    }
+    /// Construct a Textbox with initial \p contents and strong focus.
+    explicit Textbox(Glyph_string contents = "");
 
+    /// Enable the mouse scroll wheel to scroll the display up and down.
+    /** Enabled by default at construction. */
     void enable_scrollwheel(bool enable = true) { scroll_wheel_ = enable; }
+
+    /// Disable the mouse scroll wheel from scrolling the display up and down.
     void disable_scrollwheel(bool disable = true) { scroll_wheel_ = !disable; }
-    void toggle_scrollwheel() { scroll_wheel_ = !scroll_wheel_; }
-    bool does_scrollwheel() const { return scroll_wheel_; }
-    void set_wheel_speed(std::size_t lines) {
-        this->set_wheel_speed_up(lines);
-        this->set_wheel_speed_down(lines);
-    }
+
+    /// Return if the mouse scroll wheel is enabled.
+    bool scrollwheel_enabled() const { return scroll_wheel_; }
+
+    /// Set the number of lines a single scroll will move the display by.
+    /** Default wheel speed is 1. */
+    void set_wheel_speed(std::size_t lines);
+
+    /// Set the number of lines a single scroll up will move the display by.
+    /** Default wheel speed is 1. */
     void set_wheel_speed_up(std::size_t lines) { scroll_speed_up_ = lines; }
+
+    /// Set the number of lines a single scroll down will move the display by.
+    /** Default wheel speed is 1. */
     void set_wheel_speed_down(std::size_t lines) { scroll_speed_down_ = lines; }
-    void disable_input() { takes_input_ = false; }
+
+    /// Enable the Textbox to take keyboard input.
+    /** Enabled by default at construction. */
     void enable_input() { takes_input_ = true; }
 
+    /// Disable the Textbox from taking keyboard input.
+    void disable_input() { takes_input_ = false; }
+
    protected:
+    /// Either input a Glyph from the Key, or move the cursor on arrow presses.
     bool key_press_event(const Keyboard_data& keyboard) override;
+
+    /// Move the cursor to the pressed, or nearest cell, that contains a Glyph.
     bool mouse_press_event(const Mouse_data& mouse) override;
 
    private:
