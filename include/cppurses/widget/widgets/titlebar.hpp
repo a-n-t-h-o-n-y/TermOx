@@ -1,29 +1,25 @@
 #ifndef CPPURSES_WIDGET_WIDGETS_TITLEBAR_HPP
 #define CPPURSES_WIDGET_WIDGETS_TITLEBAR_HPP
-#include <signals/slot.hpp>
-
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/layouts/horizontal_layout.hpp>
-#include <cppurses/widget/widgets/label.hpp>
-#include <cppurses/widget/widgets/push_button.hpp>
 
 namespace cppurses {
 class Push_button;
+class Label;
 
-class Titlebar : public Horizontal_layout {
-   public:
-    explicit Titlebar(const Glyph_string& title_ = "");
-    void set_title(Glyph_string title_);
+/// Provides a centered title and flush-right exit button.
+/** The exit button will call System::quit() when pressed. Titlebar is fixed at
+ *  a height of 1. */
+struct Titlebar : public Horizontal_layout {
+    /// Construct a Titlebar with centered \p title.
+    explicit Titlebar(Glyph_string title_ = "");
 
+    /// The centered title Widget.
     Label& title;
+
+    /// The exit button Widget.
     Push_button& exit_button;
 };
 
-namespace slot {
-
-sig::Slot<void()> set_title(Titlebar& tb, const Glyph_string& title);
-sig::Slot<void(Glyph_string)> set_title(Titlebar& tb);
-
-}  // namespace slot
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_WIDGETS_TITLEBAR_HPP
