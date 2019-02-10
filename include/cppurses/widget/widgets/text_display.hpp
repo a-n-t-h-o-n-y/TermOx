@@ -1,7 +1,6 @@
 #ifndef CPPURSES_WIDGET_WIDGETS_TEXT_DISPLAY_HPP
 #define CPPURSES_WIDGET_WIDGETS_TEXT_DISPLAY_HPP
 #include <cstddef>
-#include <utility>
 #include <vector>
 
 #include <signals/signal.hpp>
@@ -23,10 +22,7 @@ class Text_display : public Widget {
    public:
     /// Construct a Text_display with initial Glyph_string \p contents.
     /** By default, wraps text, and has left alignment. */
-    explicit Text_display(Glyph_string contents = "")
-        : contents_{std::move(contents)} {
-        this->set_name("Text_display");
-    }
+    explicit Text_display(Glyph_string contents = "");
 
     /// Replace the current contents with \p text.
     /** Reset the display to show the first line at the top of the screen and

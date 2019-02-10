@@ -42,8 +42,8 @@ struct Rule_edit : cppurses::Vertical_layout {
 
 struct Start_pause_btns : cppurses::Toggle_button {
     Start_pause_btns();
-    sig::Signal<void()>& start_requested{first_btn.clicked};
-    sig::Signal<void()>& pause_requested{second_btn.clicked};
+    sig::Signal<void()>& start_requested{top.clicked};
+    sig::Signal<void()>& pause_requested{bottom.clicked};
 };
 
 struct Period_box : cppurses::Horizontal_layout {

@@ -8,14 +8,18 @@
 
 namespace cppurses {
 
+/// A button with two alternating states.
+/** The top state is active first. State is changed to the non-active state on
+ *  press of the currently active button. */
 struct Toggle_button : Widget_stack {
-    Toggle_button(Glyph_string first_label, Glyph_string second_label);
+    /// Construct with cooresponding labels.
+    Toggle_button(Glyph_string top_label, Glyph_string bottom_label);
 
-    Push_button& first_btn;
-    Push_button& second_btn;
+    Push_button& top;
+    Push_button& bottom;
 
-    sig::Signal<void()>& first_clicked{first_btn.clicked};
-    sig::Signal<void()>& second_clicked{second_btn.clicked};
+    sig::Signal<void()>& top_clicked{top.clicked};
+    sig::Signal<void()>& bottom_clicked{bottom.clicked};
 };
 
 }  // namespace cppurses

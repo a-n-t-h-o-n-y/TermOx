@@ -38,10 +38,10 @@ Rule_edit::Rule_edit() {
 Start_pause_btns::Start_pause_btns() : Toggle_button{"Start", "Pause"} {
     this->height_policy.type(Size_policy::Fixed);
     this->height_policy.hint(1);
-    first_btn.brush.set_background(Color::Light_green);
-    first_btn.brush.set_foreground(Color::Black);
-    second_btn.brush.set_background(Color::Gray);
-    second_btn.brush.set_foreground(Color::White);
+    top.brush.set_background(Color::Light_green);
+    top.brush.set_foreground(Color::Black);
+    bottom.brush.set_background(Color::Gray);
+    bottom.brush.set_foreground(Color::White);
 }
 
 Period_box::Period_box() {

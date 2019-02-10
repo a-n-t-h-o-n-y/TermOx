@@ -14,6 +14,7 @@
 namespace cppurses {
 
 Textbox::Textbox(Glyph_string contents) : Textbox_base{std::move(contents)} {
+    this->set_name("Textbox");
     this->focus_policy = Focus_policy::Strong;
 }
 

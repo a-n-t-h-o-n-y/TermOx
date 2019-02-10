@@ -28,6 +28,7 @@ Titlebar::Titlebar(Glyph_string title_)
     exit_button.width_policy.type(Size_policy::Fixed);
     exit_button.width_policy.hint(3);
 
+    this->set_name("Titlebar");
     this->height_policy.type(Size_policy::Fixed);
     this->height_policy.hint(1);
 }

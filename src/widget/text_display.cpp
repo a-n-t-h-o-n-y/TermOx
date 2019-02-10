@@ -15,6 +15,11 @@
 
 namespace cppurses {
 
+Text_display::Text_display(Glyph_string contents)
+    : contents_{std::move(contents)} {
+    this->set_name("Text_display");
+}
+
 // This call to update_display is required here, and not in paint_event.
 // Could probably be refactored so this can be in paint_event, more efficient.
 void Text_display::update() {
