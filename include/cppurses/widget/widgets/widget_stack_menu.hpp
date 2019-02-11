@@ -7,14 +7,14 @@
 #include <signals/signal.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/widget/layouts/vertical_layout.hpp>
+#include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/widgets/menu.hpp>
 #include <cppurses/widget/widgets/widget_stack.hpp>
 
 namespace cppurses {
 class Widget;
 
-class Widget_stack_menu : public Vertical_layout {
+class Widget_stack_menu : public layout::Vertical {
    public:
     Widget_stack_menu(Glyph_string title = "");
 

@@ -9,6 +9,7 @@
 #include <cppurses/widget/widget_free_functions.hpp>
 
 namespace cppurses {
+namespace layout {
 
 // Free Functions
 void set_background(Layout& l, Color c) {
@@ -23,4 +24,5 @@ void set_foreground(Layout& l, Color c) {
     }
 }
 
+}  // namespace layout
 }  // namespace cppurses

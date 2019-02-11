@@ -4,7 +4,7 @@
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/border.hpp>
-#include <cppurses/widget/layouts/horizontal_layout.hpp>
+#include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 
@@ -27,7 +27,7 @@ class Animated_bit : public cppurses::Widget {
     int y_direction{1};
 };
 
-class Animated_widget : public cppurses::Horizontal_layout {
+class Animated_widget : public cppurses::layout::Horizontal {
    public:
     Animated_widget() {
         bit_2_.border.enabled = true;

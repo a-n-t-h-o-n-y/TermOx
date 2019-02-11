@@ -4,14 +4,14 @@
 
 #include <signals/signal.hpp>
 
-#include <cppurses/widget/layouts/vertical_layout.hpp>
+#include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/widgets/confirm_button.hpp>
 #include <cppurses/widget/widgets/line_edit.hpp>
 
 namespace gol {
 
 /// Provides interface to input filename and to Signal on that filename.
-class File_widget : public cppurses::Vertical_layout {
+class File_widget : public cppurses::layout::Vertical {
     cppurses::Line_edit& filename_box_{
         this->make_child<cppurses::Line_edit>("Filename")};
     cppurses::Confirm_button& confirm_btn_;
@@ -22,7 +22,7 @@ class File_widget : public cppurses::Vertical_layout {
     sig::Signal<void(const std::string&)> filename_given;
 };
 
-struct Files_box : cppurses::Vertical_layout {
+struct Files_box : cppurses::layout::Vertical {
     Files_box();
 
     File_widget& import_btn{this->make_child<File_widget>("Import")};

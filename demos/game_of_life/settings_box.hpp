@@ -7,8 +7,8 @@
 
 #include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/widget/layouts/horizontal_layout.hpp>
-#include <cppurses/widget/layouts/vertical_layout.hpp>
+#include <cppurses/widget/layouts/horizontal.hpp>
+#include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/widgets/checkbox.hpp>
 #include <cppurses/widget/widgets/confirm_button.hpp>
 #include <cppurses/widget/widgets/label.hpp>
@@ -19,7 +19,7 @@
 
 namespace gol {
 
-struct Clear_step_box : cppurses::Vertical_layout {
+struct Clear_step_box : cppurses::layout::Vertical {
     Clear_step_box();
 
     cppurses::Push_button& step_btn{
@@ -29,7 +29,7 @@ struct Clear_step_box : cppurses::Vertical_layout {
         this->make_child<cppurses::Confirm_button>("Clear")};
 };
 
-struct Rule_edit : cppurses::Vertical_layout {
+struct Rule_edit : cppurses::layout::Vertical {
     Rule_edit();
 
     cppurses::Label& label{this->make_child<cppurses::Label>(
@@ -46,7 +46,7 @@ struct Start_pause_btns : cppurses::Toggle_button {
     sig::Signal<void()>& pause_requested{bottom.clicked};
 };
 
-struct Period_box : cppurses::Horizontal_layout {
+struct Period_box : cppurses::layout::Horizontal {
     Period_box();
 
     cppurses::Labeled_number_edit<unsigned>& value_edit{
@@ -57,7 +57,7 @@ struct Period_box : cppurses::Horizontal_layout {
     sig::Signal<void(unsigned)>& value_set{value_edit.value_set};
 };
 
-struct Grid_fade : cppurses::Horizontal_layout {
+struct Grid_fade : cppurses::layout::Horizontal {
     Grid_fade();
 
     cppurses::Checkbox& grid_box{
@@ -66,7 +66,7 @@ struct Grid_fade : cppurses::Horizontal_layout {
         this->make_child<cppurses::Checkbox>("Fade", 2)};
 };
 
-struct Settings_box : cppurses::Vertical_layout {
+struct Settings_box : cppurses::layout::Vertical {
     Settings_box();
 
     Period_box& period_edit{this->make_child<Period_box>()};

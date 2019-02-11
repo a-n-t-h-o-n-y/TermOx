@@ -4,7 +4,7 @@
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/widget/layouts/horizontal_layout.hpp>
+#include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widgets/label.hpp>
 #include <cppurses/widget/widgets/number_edit.hpp>
@@ -13,7 +13,7 @@ namespace cppurses {
 
 /// Number_edit with preceding Label arranged horizontally.
 template <typename Number_t = int>
-struct Labeled_number_edit : cppurses::Horizontal_layout {
+struct Labeled_number_edit : cppurses::layout::Horizontal {
     cppurses::Label& label;
     cppurses::Number_edit<Number_t>& number_edit;
 

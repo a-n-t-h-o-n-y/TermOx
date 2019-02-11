@@ -4,14 +4,14 @@
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/widget/layouts/horizontal_layout.hpp>
+#include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/widget_free_functions.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 #include <cppurses/widget/widgets/widget_stack.hpp>
 
 namespace cppurses {
 
-struct Confirm_button::Confirm_screen : public Horizontal_layout {
+struct Confirm_button::Confirm_screen : public layout::Horizontal {
     explicit Confirm_screen(Glyph_string confirm_text)
         : confirm_btn{this->make_child<Push_button>(confirm_text)} {
         x_btn.width_policy.type(Size_policy::Fixed);

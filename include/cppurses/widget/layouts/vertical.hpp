@@ -1,5 +1,5 @@
-#ifndef CPPURSES_WIDGET_LAYOUTS_HORIZONTAL_LAYOUT_HPP
-#define CPPURSES_WIDGET_LAYOUTS_HORIZONTAL_LAYOUT_HPP
+#ifndef CPPURSES_WIDGET_LAYOUTS_VERTICAL_HPP
+#define CPPURSES_WIDGET_LAYOUTS_VERTICAL_HPP
 #include <cstddef>
 #include <vector>
 
@@ -7,8 +7,9 @@
 
 namespace cppurses {
 class Widget;
+namespace layout {
 
-class Horizontal_layout : public Layout {
+class Vertical : public layout::Layout {
    protected:
     void update_geometry() override;
 
@@ -17,12 +18,12 @@ class Horizontal_layout : public Layout {
     void move_and_resize_children(const std::vector<Dimensions>& dimensions);
 
     void distribute_space(std::vector<Dimensions_reference> widgets,
-                          int width_left);
+                          int height_left);
 
     void collect_space(std::vector<Dimensions_reference> widgets,
-                       int width_left);
-    // void collect_space(std::vector<Dimensions>& widgets, int width_left);
+                       int height_left);
 };
 
+}  // namespace layout
 }  // namespace cppurses
-#endif  // CPPURSES_WIDGET_LAYOUTS_HORIZONTAL_LAYOUT_HPP
+#endif  // CPPURSES_WIDGET_LAYOUTS_VERTICAL_HPP

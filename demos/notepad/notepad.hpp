@@ -1,7 +1,7 @@
 #ifndef DEMOS_NOTEPAD_NOTEPAD_HPP
 #define DEMOS_NOTEPAD_NOTEPAD_HPP
-#include <cppurses/widget/layouts/horizontal_layout.hpp>
-#include <cppurses/widget/layouts/vertical_layout.hpp>
+#include <cppurses/widget/layouts/horizontal.hpp>
+#include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/widgets/checkbox.hpp>
 #include <cppurses/widget/widgets/color_select.hpp>
 #include <cppurses/widget/widgets/label.hpp>
@@ -10,7 +10,7 @@
 
 namespace demos {
 
-struct Attribute_select : cppurses::Vertical_layout {
+struct Attribute_select : cppurses::layout::Vertical {
     // Widgets
     cppurses::Checkbox& bold = this->make_child<cppurses::Checkbox>("Bold");
     cppurses::Checkbox& italic =
@@ -26,7 +26,7 @@ struct Attribute_select : cppurses::Vertical_layout {
         this->make_child<cppurses::Checkbox>("Invisible");
 };
 
-class Attrs_and_colors : public cppurses::Vertical_layout {
+class Attrs_and_colors : public cppurses::layout::Vertical {
    public:
     Attrs_and_colors();
 
@@ -43,7 +43,7 @@ class Attrs_and_colors : public cppurses::Vertical_layout {
     void initialize();
 };
 
-class Text_and_attributes : public cppurses::Horizontal_layout {
+class Text_and_attributes : public cppurses::layout::Horizontal {
    public:
     Text_and_attributes();
 
@@ -55,7 +55,7 @@ class Text_and_attributes : public cppurses::Horizontal_layout {
     void initialize();
 };
 
-class Save_area : public cppurses::Horizontal_layout {
+class Save_area : public cppurses::layout::Horizontal {
    public:
     Save_area();
 
@@ -70,7 +70,7 @@ class Save_area : public cppurses::Horizontal_layout {
     void initialize();
 };
 
-class Notepad : public cppurses::Vertical_layout {
+class Notepad : public cppurses::layout::Vertical {
    public:
     Notepad();
 

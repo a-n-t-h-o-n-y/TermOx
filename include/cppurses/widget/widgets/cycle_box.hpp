@@ -7,7 +7,7 @@
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/mouse_data.hpp>
-#include <cppurses/widget/layouts/horizontal_layout.hpp>
+#include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/widgets/label.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 

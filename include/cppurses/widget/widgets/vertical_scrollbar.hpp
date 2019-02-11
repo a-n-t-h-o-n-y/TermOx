@@ -3,13 +3,13 @@
 #include <signals/signal.hpp>
 #include <signals/slot.hpp>
 
-#include <cppurses/widget/layouts/vertical_layout.hpp>
+#include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 
 namespace cppurses {
 
-class Vertical_scrollbar : public Vertical_layout {
+class Vertical_scrollbar : public layout::Vertical {
    public:
     Vertical_scrollbar();
 

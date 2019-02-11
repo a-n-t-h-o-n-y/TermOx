@@ -1,6 +1,6 @@
 #ifndef DEMOS_MAIN_MENU_HPP
 #define DEMOS_MAIN_MENU_HPP
-#include <cppurses/widget/layouts/vertical_layout.hpp>
+#include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/widgets/titlebar.hpp>
 #include <cppurses/widget/widgets/widget_stack_menu.hpp>
 
@@ -14,7 +14,7 @@
 
 namespace demos {
 
-class Main_menu : public cppurses::Vertical_layout {
+class Main_menu : public cppurses::layout::Vertical {
    public:
     Main_menu();
 

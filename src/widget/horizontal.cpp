@@ -1,4 +1,4 @@
-#include <cppurses/widget/layouts/horizontal_layout.hpp>
+#include <cppurses/widget/layouts/horizontal.hpp>
 
 #include <cstddef>
 #include <deque>
@@ -15,8 +15,9 @@
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
+namespace layout {
 
-std::vector<Layout::Dimensions> Horizontal_layout::calculate_widget_sizes() {
+std::vector<Layout::Dimensions> Horizontal::calculate_widget_sizes() {
     std::vector<Dimensions> widgets;
     std::size_t total_stretch{0};
     for (const std::unique_ptr<Widget>& c : this->children.get()) {
@@ -121,12 +122,11 @@ std::vector<Layout::Dimensions> Horizontal_layout::calculate_widget_sizes() {
     return widgets;
 }
 
-// void Horizontal_layout::distribute_space(std::vector<Dimensions>& widgets,
+// void Horizontal::distribute_space(std::vector<Dimensions>& widgets,
 //                                          int width_left) {}
 
-void Horizontal_layout::distribute_space(
-    std::vector<Dimensions_reference> widgets,
-    int width_left) {
+void Horizontal::distribute_space(std::vector<Dimensions_reference> widgets,
+                                  int width_left) {
     // Find total stretch of first group
     std::size_t total_stretch{0};
     for (const Dimensions_reference& d : widgets) {
@@ -259,7 +259,7 @@ void Horizontal_layout::distribute_space(
     } while (width_check != width_left);
 }
 
-// void Horizontal_layout::collect_space(std::vector<Dimensions>& widgets,
+// void Horizontal::collect_space(std::vector<Dimensions>& widgets,
 //                                       int width_left) {
 //     // Maximum, Preferred, Ignored
 //     // find maximum space that you can take back.
@@ -388,8 +388,8 @@ void Horizontal_layout::distribute_space(
 //     }
 // }
 
-void Horizontal_layout::collect_space(std::vector<Dimensions_reference> widgets,
-                                      int width_left) {
+void Horizontal::collect_space(std::vector<Dimensions_reference> widgets,
+                               int width_left) {
     if (width_left == 0) {
         return;
     }
@@ -526,7 +526,7 @@ void Horizontal_layout::collect_space(std::vector<Dimensions_reference> widgets,
     }
 }
 
-void Horizontal_layout::move_and_resize_children(
+void Horizontal::move_and_resize_children(
     const std::vector<Dimensions>& dimensions) {
     const std::size_t parent_x{this->inner_x()};
     const std::size_t parent_y{this->inner_y()};
@@ -547,10 +547,11 @@ void Horizontal_layout::move_and_resize_children(
     }
 }
 
-void Horizontal_layout::update_geometry() {
+void Horizontal::update_geometry() {
     this->enable(true, false);
     std::vector<Dimensions> widths{this->calculate_widget_sizes()};
     this->move_and_resize_children(widths);
 }
 
+}  // namespace layout
 }  // namespace cppurses

@@ -5,7 +5,7 @@
 #include "populated_glyph_stack.hpp"
 
 #include <cppurses/painter/attribute.hpp>
-#include <cppurses/widget/layouts/vertical_layout.hpp>
+#include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/widgets/blank_height.hpp>
 #include <cppurses/widget/widgets/color_select.hpp>
 #include <cppurses/widget/widgets/cycle_stack.hpp>
@@ -14,7 +14,7 @@
 namespace demos {
 namespace glyph_paint {
 
-struct Side_pane : cppurses::Vertical_layout {
+struct Side_pane : cppurses::layout::Vertical {
     Side_pane();
 
     Populated_glyph_stack& glyph_select{

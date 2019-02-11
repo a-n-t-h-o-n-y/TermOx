@@ -1,6 +1,6 @@
 #ifndef DEMOS_GLYPH_PAINT_OPTIONS_BOX_HPP
 #define DEMOS_GLYPH_PAINT_OPTIONS_BOX_HPP
-#include <cppurses/widget/layouts/vertical_layout.hpp>
+#include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/widgets/blank_height.hpp>
 #include <cppurses/widget/widgets/checkbox.hpp>
 #include <cppurses/widget/widgets/confirm_button.hpp>
@@ -14,7 +14,7 @@
 namespace demos {
 namespace glyph_paint {
 
-struct Options_A : public cppurses::Vertical_layout {
+struct Options_A : public cppurses::layout::Vertical {
     Options_A();
 
     cppurses::Push_button& clone_btn{
@@ -31,7 +31,7 @@ struct Options_A : public cppurses::Vertical_layout {
         this->make_child<cppurses::Push_button>("More Options")};
 };
 
-struct Options_B : public cppurses::Vertical_layout {
+struct Options_B : public cppurses::layout::Vertical {
     Options_B();
 
     cppurses::Label& palette_label{

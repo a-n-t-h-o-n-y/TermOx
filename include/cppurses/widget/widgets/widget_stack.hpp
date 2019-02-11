@@ -8,12 +8,12 @@
 #include <signals/signals.hpp>
 
 #include <cppurses/widget/children_data.hpp>
-#include <cppurses/widget/layouts/horizontal_layout.hpp>
+#include <cppurses/widget/layouts/horizontal.hpp>
 
 namespace cppurses {
 class Widget;
 
-class Widget_stack : public Horizontal_layout {
+class Widget_stack : public layout::Horizontal {
    public:
     void set_active_page(std::size_t index);
 

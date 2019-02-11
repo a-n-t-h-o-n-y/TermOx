@@ -1,4 +1,4 @@
-#include <cppurses/widget/layouts/vertical_layout.hpp>
+#include <cppurses/widget/layouts/vertical.hpp>
 
 #include <cstddef>
 #include <deque>
@@ -15,8 +15,9 @@
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
+namespace layout {
 
-std::vector<Layout::Dimensions> Vertical_layout::calculate_widget_sizes() {
+std::vector<Layout::Dimensions> Vertical::calculate_widget_sizes() {
     std::vector<Dimensions> widgets;
     std::size_t total_stretch{0};
     for (const std::unique_ptr<Widget>& c : this->children.get()) {
@@ -122,7 +123,7 @@ std::vector<Layout::Dimensions> Vertical_layout::calculate_widget_sizes() {
     return widgets;
 }
 
-void Vertical_layout::distribute_space(
+void Vertical::distribute_space(
     std::vector<Dimensions_reference> widgets,
     int height_left) {
     // Find total stretch of first group
@@ -258,7 +259,7 @@ void Vertical_layout::distribute_space(
     } while (height_check != height_left);
 }
 
-void Vertical_layout::collect_space(std::vector<Dimensions_reference> widgets,
+void Vertical::collect_space(std::vector<Dimensions_reference> widgets,
                                     int height_left) {
     if (height_left == 0) {
         return;
@@ -396,7 +397,7 @@ void Vertical_layout::collect_space(std::vector<Dimensions_reference> widgets,
     }
 }
 
-void Vertical_layout::move_and_resize_children(
+void Vertical::move_and_resize_children(
     const std::vector<Dimensions>& dimensions) {
     const std::size_t parent_x{this->inner_x()};
     const std::size_t parent_y{this->inner_y()};
@@ -421,10 +422,11 @@ void Vertical_layout::move_and_resize_children(
     }
 }
 
-void Vertical_layout::update_geometry() {
+void Vertical::update_geometry() {
     this->enable(true, false);
     std::vector<Dimensions> heights{this->calculate_widget_sizes()};
     this->move_and_resize_children(heights);
 }
 
+}  // namespace layout
 }  // namespace cppurses

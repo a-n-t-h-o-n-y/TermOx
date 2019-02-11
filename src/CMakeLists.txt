@@ -102,12 +102,12 @@ target_sources(cppurses PRIVATE
     widget/log.cpp
     widget/confirm_button.cpp
     widget/labeled_cycle_box.cpp
-    widget/horizontal_layout.cpp
+    widget/horizontal.cpp
     widget/matrix_display.cpp
     widget/point.cpp
     widget/border.cpp
     widget/cycle_box.cpp
-    widget/vertical_layout.cpp
+    widget/vertical.cpp
     widget/status_bar.cpp
     widget/textbox.cpp
     widget/horizontal_slider.cpp

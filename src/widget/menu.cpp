@@ -126,7 +126,7 @@ bool Menu::mouse_press_event(const Mouse_data& mouse) {
     } else if (mouse.button == Mouse_button::ScrollDown) {
         this->select_down();
     }
-    return Vertical_layout::mouse_press_event(mouse);
+    return layout::Vertical::mouse_press_event(mouse);
 }
 
 bool Menu::mouse_press_event_filter(Widget& receiver, const Mouse_data& mouse) {

@@ -1,8 +1,8 @@
 #ifndef CPPURSES_DEMOS_PALETTE_COLOR_DISPLAY_HPP
 #define CPPURSES_DEMOS_PALETTE_COLOR_DISPLAY_HPP
 #include <cppurses/painter/color.hpp>
-#include <cppurses/widget/layouts/horizontal_layout.hpp>
-#include <cppurses/widget/layouts/vertical_layout.hpp>
+#include <cppurses/widget/layouts/horizontal.hpp>
+#include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
 
@@ -15,7 +15,7 @@ struct Color_patch : cppurses::Widget {
 };
 
 /// Title and name display of a given Color.
-struct Color_name : cppurses::Vertical_layout {
+struct Color_name : cppurses::layout::Vertical {
     cppurses::Text_display& title{
         this->make_child<cppurses::Text_display>("Color:")};
     cppurses::Text_display& name{
@@ -23,7 +23,7 @@ struct Color_name : cppurses::Vertical_layout {
 };
 
 /// Displays a text name and a square visual of a given Color.
-struct Color_display : cppurses::Horizontal_layout {
+struct Color_display : cppurses::layout::Horizontal {
     explicit Color_display(cppurses::Color color);
 
     /// Change the currently displayed color.

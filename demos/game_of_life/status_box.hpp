@@ -3,8 +3,8 @@
 #include <cstdint>
 
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/widget/layouts/horizontal_layout.hpp>
-#include <cppurses/widget/layouts/vertical_layout.hpp>
+#include <cppurses/widget/layouts/horizontal.hpp>
+#include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/widgets/label.hpp>
 #include <cppurses/widget/widgets/labeled_number_edit.hpp>
 #include <cppurses/widget/widgets/line_edit.hpp>
@@ -12,7 +12,7 @@
 
 namespace gol {
 
-class Generation_count : public cppurses::Horizontal_layout {
+class Generation_count : public cppurses::layout::Horizontal {
    public:
     Generation_count();
 
@@ -24,7 +24,7 @@ class Generation_count : public cppurses::Horizontal_layout {
         this->make_child<cppurses::Text_display>("0")};
 };
 
-struct Center_offset : cppurses::Vertical_layout {
+struct Center_offset : cppurses::layout::Vertical {
     Center_offset();
 
     cppurses::Label& title_{
@@ -36,7 +36,7 @@ struct Center_offset : cppurses::Vertical_layout {
         this->make_child<cppurses::Labeled_number_edit<>>("y: ", 0)};
 };
 
-struct Status_box : cppurses::Vertical_layout {
+struct Status_box : cppurses::layout::Vertical {
     Status_box();
 
     Generation_count& gen_count{this->make_child<Generation_count>()};

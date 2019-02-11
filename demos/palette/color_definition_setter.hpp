@@ -5,7 +5,7 @@
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/painter.hpp>
-#include <cppurses/widget/layouts/vertical_layout.hpp>
+#include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget_free_functions.hpp>
 #include <cppurses/widget/widgets/confirm_button.hpp>
@@ -19,7 +19,7 @@
 namespace palette {
 
 /// Provides interface and implementation of setting a specific color value.
-class Color_definition_setter : public cppurses::Vertical_layout {
+class Color_definition_setter : public cppurses::layout::Vertical {
     cppurses::Color current_color_{cppurses::Color::White};
 
     Color_display& color_display_{

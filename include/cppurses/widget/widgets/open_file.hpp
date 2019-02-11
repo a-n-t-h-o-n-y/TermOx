@@ -5,7 +5,7 @@
 #include <signals/signal.hpp>
 
 #include <cppurses/painter/color.hpp>
-#include <cppurses/widget/layouts/horizontal_layout.hpp>
+#include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widgets/blank_width.hpp>
 #include <cppurses/widget/widgets/line_edit.hpp>
@@ -15,7 +15,7 @@
 namespace cppurses {
 
 template <typename CharT = char>
-struct Open_file : public Horizontal_layout {
+struct Open_file : public layout::Horizontal {
     Open_file();
 
     Push_button& open_btn{this->make_child<Push_button>("Open")};
