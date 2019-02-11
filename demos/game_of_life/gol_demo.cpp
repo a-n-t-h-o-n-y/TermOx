@@ -58,20 +58,16 @@ GoL_demo::GoL_demo() {
     });
 
     gol_display.offset_changed.connect([this](Coordinate c) {
-        side_panel.status.center_offset.x_coords.value_display.set_contents(
-            std::to_string(c.x));
-        side_panel.status.center_offset.y_coords.value_display.set_contents(
-            std::to_string(c.y));
+        side_panel.status.center_offset.x_coords.set_value(c.x);
+        side_panel.status.center_offset.y_coords.set_value(c.y);
     });
-    side_panel.status.center_offset.x_coords.value_display.editing_finished
-        .connect([this](std::string s) {
-            gol_display.set_offset({std::stoi(s), gol_display.offset().y});
-        });
+    side_panel.status.center_offset.x_coords.value_set.connect([this](int x) {
+        gol_display.set_offset({x, gol_display.offset().y});
+    });
 
-    side_panel.status.center_offset.y_coords.value_display.editing_finished
-        .connect([this](std::string s) {
-            gol_display.set_offset({gol_display.offset().x, std::stoi(s)});
-        });
+    side_panel.status.center_offset.y_coords.value_set.connect([this](int y) {
+        gol_display.set_offset({gol_display.offset().x, y});
+    });
 
     gol_display.generation_count_changed.connect([this](std::uint32_t count) {
         side_panel.status.gen_count.update_count(count);

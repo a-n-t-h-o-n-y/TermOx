@@ -29,7 +29,7 @@ Rule_edit::Rule_edit() {
     edit_box.set_ghost_color(Color::Dark_gray);
 
     edit_box.set_validator([](char c) { return std::isdigit(c) || c == '/'; });
-    edit_box.editing_finished.connect(
+    edit_box.edit_finished.connect(
         [this](std::string rule_text) { rule_change(rule_text); });
 
     label.set_alignment(Alignment::Center);

@@ -26,18 +26,14 @@ void Generation_count::update_count(std::uint32_t count) {
     count_.set_contents(std::to_string(count));
 }
 
-Labeled_line_edit::Labeled_line_edit(Glyph_string label_text,
-                                     Glyph_string initial)
-    : label{this->make_child<Label>(std::move(label_text))},
-      value_display{this->make_child<Line_edit>(std::move(initial))} {
-    label.width_policy.type(Size_policy::Fixed);
-    label.width_policy.hint(label.contents().size());
-    value_display.set_ghost_color(Color::White);
-    value_display.set_validator([](char c) { return std::isdigit(c); });
-}
-
 Center_offset::Center_offset() {
     title_.set_alignment(Alignment::Center);
+    x_coords.number_edit.brush.set_background(cppurses::Color::Black);
+    x_coords.number_edit.brush.set_foreground(cppurses::Color::White);
+    x_coords.number_edit.set_ghost_color(Color::White);
+    y_coords.number_edit.brush.set_background(cppurses::Color::Black);
+    y_coords.number_edit.brush.set_foreground(cppurses::Color::White);
+    y_coords.number_edit.set_ghost_color(Color::White);
 }
 
 Status_box::Status_box() {

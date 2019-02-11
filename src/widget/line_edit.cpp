@@ -1,7 +1,7 @@
 #include <cppurses/widget/widgets/line_edit.hpp>
 
 #include <cctype>
-#include <cstdint>
+#include <functional>
 #include <utility>
 
 #include <signals/signal.hpp>
@@ -22,6 +22,7 @@ namespace cppurses {
 
 Line_edit::Line_edit(Glyph_string initial_text)
     : Textbox{std::move(initial_text)} {
+    this->set_name("Line_edit");
     this->set_ghost_color(Color::Light_gray);
     this->height_policy.type(Size_policy::Fixed);
     this->height_policy.hint(1);
@@ -86,7 +87,7 @@ void Line_edit::set_ghost_color(Color c) {
 
 bool Line_edit::key_press_event(const Keyboard_data& keyboard) {
     if (keyboard.key == Key::Enter) {
-        editing_finished(this->contents().str());
+        edit_finished(this->contents().str());
         if (clear_on_enter_) {
             this->clear();
         }
@@ -125,5 +126,4 @@ bool Line_edit::focus_in_event() {
     }
     return Textbox::focus_in_event();
 }
-
 }  // namespace cppurses

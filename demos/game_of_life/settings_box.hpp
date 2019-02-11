@@ -12,8 +12,8 @@
 #include <cppurses/widget/widgets/checkbox.hpp>
 #include <cppurses/widget/widgets/confirm_button.hpp>
 #include <cppurses/widget/widgets/label.hpp>
+#include <cppurses/widget/widgets/labeled_number_edit.hpp>
 #include <cppurses/widget/widgets/line_edit.hpp>
-#include <cppurses/widget/widgets/number_edit.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 #include <cppurses/widget/widgets/toggle_button.hpp>
 
@@ -49,11 +49,12 @@ struct Start_pause_btns : cppurses::Toggle_button {
 struct Period_box : cppurses::Horizontal_layout {
     Period_box();
 
-    cppurses::Labeled_number_edit<>& value_edit{
-        this->make_child<cppurses::Labeled_number_edit<>>("▸Period ", 120)};
+    cppurses::Labeled_number_edit<unsigned>& value_edit{
+        this->make_child<cppurses::Labeled_number_edit<unsigned>>("▸Period ",
+                                                                  120)};
     cppurses::Label& units{this->make_child<cppurses::Label>("ms")};
 
-    sig::Signal<void(int)>& value_set{value_edit.value_set};
+    sig::Signal<void(unsigned)>& value_set{value_edit.value_set};
 };
 
 struct Grid_fade : cppurses::Horizontal_layout {

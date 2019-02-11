@@ -6,6 +6,7 @@
 #include <cppurses/widget/layouts/horizontal_layout.hpp>
 #include <cppurses/widget/layouts/vertical_layout.hpp>
 #include <cppurses/widget/widgets/label.hpp>
+#include <cppurses/widget/widgets/labeled_number_edit.hpp>
 #include <cppurses/widget/widgets/line_edit.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
 
@@ -23,24 +24,16 @@ class Generation_count : public cppurses::Horizontal_layout {
         this->make_child<cppurses::Text_display>("0")};
 };
 
-struct Labeled_line_edit : cppurses::Horizontal_layout {
-    Labeled_line_edit(cppurses::Glyph_string label_text,
-                      cppurses::Glyph_string initial);
-
-    cppurses::Label& label;
-    cppurses::Line_edit& value_display;
-};
-
 struct Center_offset : cppurses::Vertical_layout {
     Center_offset();
 
     cppurses::Label& title_{
         this->make_child<cppurses::Label>(cppurses::Glyph_string{
             "Center Offset", cppurses::Attribute::Underline})};
-    Labeled_line_edit& x_coords{
-        this->make_child<Labeled_line_edit>("x: ", "0")};
-    Labeled_line_edit& y_coords{
-        this->make_child<Labeled_line_edit>("y: ", "0")};
+    cppurses::Labeled_number_edit<>& x_coords{
+        this->make_child<cppurses::Labeled_number_edit<>>("x: ", 0)};
+    cppurses::Labeled_number_edit<>& y_coords{
+        this->make_child<cppurses::Labeled_number_edit<>>("y: ", 0)};
 };
 
 struct Status_box : cppurses::Vertical_layout {
