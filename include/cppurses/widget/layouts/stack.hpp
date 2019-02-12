@@ -1,5 +1,5 @@
-#ifndef CPPURSES_WIDGET_WIDGETS_WIDGET_STACK_HPP
-#define CPPURSES_WIDGET_WIDGETS_WIDGET_STACK_HPP
+#ifndef CPPURSES_WIDGET_LAYOUTS_STACK_HPP
+#define CPPURSES_WIDGET_LAYOUTS_STACK_HPP
 #include <cstddef>
 #include <memory>
 #include <utility>
@@ -12,8 +12,9 @@
 
 namespace cppurses {
 class Widget;
+namespace layout {
 
-class Widget_stack : public layout::Horizontal {
+class Stack : public layout::Horizontal {
    public:
     void set_active_page(std::size_t index);
 
@@ -46,25 +47,27 @@ class Widget_stack : public layout::Horizontal {
 // - - - - - - - - - - - - Template Implementations - - - - - - - - - - - - - -
 
 template <typename T, typename... Args>
-T& Widget_stack::make_page(Args&&... args) {
+T& Stack::make_page(Args&&... args) {
     this->add_page(std::make_unique<T>(std::forward<Args>(args)...));
     return static_cast<T&>(*this->children.get().back());
 }
 
+}  // namespace layout
+
 // - - - - - - - - - - - - - - - - Slots - - - - - - - - - - - - - - - - - - - -
 namespace slot {
 
-sig::Slot<void(std::size_t)> set_active_page(Widget_stack& stack);
-sig::Slot<void()> set_active_page(Widget_stack& stack, std::size_t index);
+sig::Slot<void(std::size_t)> set_active_page(layout::Stack& stack);
+sig::Slot<void()> set_active_page(layout::Stack& stack, std::size_t index);
 
-sig::Slot<void(std::size_t)> remove_page(Widget_stack& stack);
-sig::Slot<void()> remove_page(Widget_stack& stack, std::size_t index);
+sig::Slot<void(std::size_t)> remove_page(layout::Stack& stack);
+sig::Slot<void()> remove_page(layout::Stack& stack, std::size_t index);
 
 sig::Slot<void(std::size_t, std::unique_ptr<Widget>)> insert_page(
-    Widget_stack& stack);
-sig::Slot<void(std::unique_ptr<Widget>)> insert_page(Widget_stack& stack,
+    layout::Stack& stack);
+sig::Slot<void(std::unique_ptr<Widget>)> insert_page(layout::Stack& stack,
                                                      std::size_t index);
 
 }  // namespace slot
 }  // namespace cppurses
-#endif  // CPPURSES_WIDGET_WIDGETS_WIDGET_STACK_HPP
+#endif  // CPPURSES_WIDGET_LAYOUTS_STACK_HPP

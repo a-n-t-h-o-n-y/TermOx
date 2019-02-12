@@ -1,5 +1,6 @@
 #ifndef DEMOS_GLYPH_PAINT_OPTIONS_BOX_HPP
 #define DEMOS_GLYPH_PAINT_OPTIONS_BOX_HPP
+#include <cppurses/widget/layouts/stack.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/widgets/blank_height.hpp>
 #include <cppurses/widget/widgets/checkbox.hpp>
@@ -9,7 +10,6 @@
 #include <cppurses/widget/widgets/open_file.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 #include <cppurses/widget/widgets/save_file.hpp>
-#include <cppurses/widget/widgets/widget_stack.hpp>
 
 namespace demos {
 namespace glyph_paint {
@@ -47,7 +47,7 @@ struct Options_B : public cppurses::layout::Vertical {
         this->make_child<cppurses::Push_button>("Back")};
 };
 
-struct Options_stack : public cppurses::Widget_stack {
+struct Options_stack : public cppurses::layout::Stack {
     Options_stack();
 
     Options_A& options_a{this->make_child<Options_A>()};

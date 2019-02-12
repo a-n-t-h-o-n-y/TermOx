@@ -3,15 +3,15 @@
 #include <signals/signal.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/widget/layouts/stack.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
-#include <cppurses/widget/widgets/widget_stack.hpp>
 
 namespace cppurses {
 
 /// A button with two alternating states.
 /** The top state is active first. State is changed to the non-active state on
  *  press of the currently active button. */
-struct Toggle_button : Widget_stack {
+struct Toggle_button : layout::Stack {
     /// Construct with cooresponding labels.
     Toggle_button(Glyph_string top_label, Glyph_string bottom_label);
 

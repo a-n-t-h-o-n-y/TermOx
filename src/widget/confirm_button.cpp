@@ -5,9 +5,9 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
+#include <cppurses/widget/layouts/stack.hpp>
 #include <cppurses/widget/widget_free_functions.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
-#include <cppurses/widget/widgets/widget_stack.hpp>
 
 namespace cppurses {
 

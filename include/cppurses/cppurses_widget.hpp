@@ -2,6 +2,7 @@
 #define CPPURSES_WIDGET_HPP
 
 #include <cppurses/widget/layouts/horizontal.hpp>
+#include <cppurses/widget/layouts/stack.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
 
 #include <cppurses/widget/widgets/blank_height.hpp>
@@ -32,7 +33,6 @@
 #include <cppurses/widget/widgets/titlebar.hpp>
 #include <cppurses/widget/widgets/vertical_scrollbar.hpp>
 #include <cppurses/widget/widgets/vertical_slider.hpp>
-#include <cppurses/widget/widgets/widget_stack.hpp>
 #include <cppurses/widget/widgets/widget_stack_menu.hpp>
 
 #include <cppurses/widget/area.hpp>

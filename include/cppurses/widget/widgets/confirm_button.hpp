@@ -3,13 +3,13 @@
 #include <signals/signal.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/widget/layouts/stack.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
-#include <cppurses/widget/widgets/widget_stack.hpp>
 
 namespace cppurses {
 
 /// Provides a button with a double check confirmation interface.
-struct Confirm_button : public Widget_stack {
+struct Confirm_button : public layout::Stack {
     explicit Confirm_button(Glyph_string title,
                             Glyph_string confirm_text = "Confirm");
 

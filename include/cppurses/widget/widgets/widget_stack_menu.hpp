@@ -7,9 +7,9 @@
 #include <signals/signal.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/widget/layouts/stack.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/widgets/menu.hpp>
-#include <cppurses/widget/widgets/widget_stack.hpp>
 
 namespace cppurses {
 class Widget;
@@ -40,7 +40,7 @@ class Widget_stack_menu : public layout::Vertical {
     bool focus_in_event() override;
 
    private:
-    Widget_stack& stack_{this->make_child<Widget_stack>()};
+    layout::Stack& stack_{this->make_child<layout::Stack>()};
     Menu& menu_;
 
     void initialize();

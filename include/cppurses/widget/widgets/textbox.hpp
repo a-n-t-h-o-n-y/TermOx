@@ -3,11 +3,11 @@
 #include <cstddef>
 
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/system/keyboard_data.hpp>
-#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/widgets/detail/textbox_base.hpp>
 
 namespace cppurses {
+struct Keyboard_data;
+struct Mouse_data;
 
 /// Interactive Glyph_string display.
 /** Provides common text interaction and presentation options as well as proper

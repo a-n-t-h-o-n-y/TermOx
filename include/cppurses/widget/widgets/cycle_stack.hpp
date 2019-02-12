@@ -6,15 +6,15 @@
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
+#include <cppurses/widget/layouts/stack.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/widgets/cycle_box.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
-#include <cppurses/widget/widgets/widget_stack.hpp>
 
 namespace cppurses {
 class Widget;
 
-/// A Widget_stack with an interface to cycle through each Widget in the stack.
+/// A layout::Stack with an interface to cycle through each Widget in the stack.
 class Cycle_stack : public layout::Vertical {
    public:
     Cycle_stack();
@@ -32,7 +32,7 @@ class Cycle_stack : public layout::Vertical {
     };
 
     Top_row& top_row;
-    Widget_stack& stack{this->make_child<Widget_stack>()};
+    layout::Stack& stack{this->make_child<layout::Stack>()};
 };
 
 // - - - - - - - - - - - - Template Implementations - - - - - - - - - - - - - -

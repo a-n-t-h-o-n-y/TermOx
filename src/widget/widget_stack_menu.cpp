@@ -8,9 +8,9 @@
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/shortcuts.hpp>
 #include <cppurses/widget/focus_policy.hpp>
+#include <cppurses/widget/layouts/stack.hpp>
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widgets/menu.hpp>
-#include <cppurses/widget/widgets/widget_stack.hpp>
 
 namespace cppurses {
 Widget_stack_menu::Widget_stack_menu(Glyph_string title)

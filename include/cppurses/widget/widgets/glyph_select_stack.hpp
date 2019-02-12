@@ -4,13 +4,13 @@
 #include <signals/slot.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/widget/widgets/widget_stack.hpp>
+#include <cppurses/widget/layouts/stack.hpp>
 
 namespace cppurses {
 struct Area;
 struct Glyph;
 
-class Glyph_select_stack : public Widget_stack {
+class Glyph_select_stack : public layout::Stack {
    public:
     Glyph_select_stack() { this->set_name("Glyph_select_stack"); }
     void set_symbols(Glyph_string symbols);

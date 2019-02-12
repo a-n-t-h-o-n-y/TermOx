@@ -1,9 +1,9 @@
 #ifndef CPPURSES_DEMOS_GAME_OF_LIFE_EXAMPLES_INFO_BOX_HPP
 #define CPPURSES_DEMOS_GAME_OF_LIFE_EXAMPLES_INFO_BOX_HPP
+#include <cppurses/widget/layouts/stack.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
-#include <cppurses/widget/widgets/widget_stack.hpp>
 
 namespace gol {
 
@@ -45,7 +45,7 @@ struct Info_box : cppurses::layout::Vertical {
 };
 
 /// Patterns_rulesets_box
-struct Examples_info_box : public cppurses::Widget_stack {
+struct Examples_info_box : public cppurses::layout::Stack {
     Examples_info_box();
 
     Examples_box& examples{this->make_page<Examples_box>()};
