@@ -1,8 +1,8 @@
 #ifndef DEMOS_MAIN_MENU_HPP
 #define DEMOS_MAIN_MENU_HPP
 #include <cppurses/widget/layouts/vertical.hpp>
+#include <cppurses/widget/widgets/menu_stack.hpp>
 #include <cppurses/widget/widgets/titlebar.hpp>
-#include <cppurses/widget/widgets/widget_stack_menu.hpp>
 
 // #include "animation/animated_widget.hpp"
 #include "chess/src/chess_ui.hpp"
@@ -21,8 +21,8 @@ class Main_menu : public cppurses::layout::Vertical {
     cppurses::Titlebar& titlebar{
         this->make_child<cppurses::Titlebar>("  C  P  P  U  R  S  E  S")};
 
-    cppurses::Widget_stack_menu& main_menu{
-        this->make_child<cppurses::Widget_stack_menu>("D e m o s")};
+    cppurses::Menu_stack& main_menu{
+        this->make_child<cppurses::Menu_stack>("D e m o s")};
 
     Notepad& notepad{main_menu.make_page<Notepad>("Notepad")};
 

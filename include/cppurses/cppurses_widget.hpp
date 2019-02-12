@@ -23,6 +23,7 @@
 #include <cppurses/widget/widgets/log.hpp>
 #include <cppurses/widget/widgets/matrix_display.hpp>
 #include <cppurses/widget/widgets/menu.hpp>
+#include <cppurses/widget/widgets/menu_stack.hpp>
 #include <cppurses/widget/widgets/number_edit.hpp>
 #include <cppurses/widget/widgets/open_file.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
@@ -33,7 +34,6 @@
 #include <cppurses/widget/widgets/titlebar.hpp>
 #include <cppurses/widget/widgets/vertical_scrollbar.hpp>
 #include <cppurses/widget/widgets/vertical_slider.hpp>
-#include <cppurses/widget/widgets/widget_stack_menu.hpp>
 
 #include <cppurses/widget/area.hpp>
 #include <cppurses/widget/border.hpp>

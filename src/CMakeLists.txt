@@ -92,7 +92,7 @@ target_sources(cppurses PRIVATE
     widget/widget.event_handlers.cpp
     widget/widget_slots.cpp
     widget/stack.cpp
-    widget/widget_stack_menu.cpp
+    widget/menu_stack.cpp
     widget/glyph_select_stack.cpp
     widget/glyph_select.cpp
     widget/cycle_stack.cpp
