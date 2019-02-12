@@ -75,6 +75,9 @@ class Widget {
     bool enabled() const { return enabled_; }
 
     /// Post a Delete_event to this, deleting the object when safe to do so.
+    /** This Widget is immediately removed from its parent's Children_data
+     *  object. The Widget is owned by a Delete_event object until it can be
+     *  safely removed without leaving dangling references in event system. */
     void close();
 
     /// Return the Widget's parent pointer.

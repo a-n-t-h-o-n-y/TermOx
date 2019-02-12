@@ -44,9 +44,9 @@ class Children_data {
     /** Descendants are children, or children of children to any level down. */
     std::vector<Widget*> get_descendants() const;
 
-    /// Remove a child from the list, by pointer value, and return it.
-    /** Useful if you need to move a child widget into another widget. Use
-     *  Widget::close() if you want to remove a widget for good. Letting the
+    /// Remove \p child from the list, by pointer value, and return it.
+    /** Useful if you need to move a child Widget into another Widget. Use
+     *  Widget::close() if you want to remove a Widget for good. Letting the
      *  returned Widget destroy itself will potentially leave dangling pointers
      *  in the event system. */
     std::unique_ptr<Widget> remove(Widget* child);
