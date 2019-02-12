@@ -5,13 +5,13 @@
 #include <cppurses/widget/layouts/stack.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
 
-#include <cppurses/widget/widgets/blank_height.hpp>
-#include <cppurses/widget/widgets/blank_width.hpp>
 #include <cppurses/widget/widgets/checkbox.hpp>
 #include <cppurses/widget/widgets/color_select.hpp>
 #include <cppurses/widget/widgets/confirm_button.hpp>
 #include <cppurses/widget/widgets/cycle_box.hpp>
 #include <cppurses/widget/widgets/cycle_stack.hpp>
+#include <cppurses/widget/widgets/fixed_height.hpp>
+#include <cppurses/widget/widgets/fixed_width.hpp>
 #include <cppurses/widget/widgets/glyph_select.hpp>
 #include <cppurses/widget/widgets/glyph_select_stack.hpp>
 #include <cppurses/widget/widgets/horizontal_scrollbar.hpp>

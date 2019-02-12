@@ -6,9 +6,9 @@
 
 #include <cppurses/painter/attribute.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
-#include <cppurses/widget/widgets/blank_height.hpp>
 #include <cppurses/widget/widgets/color_select.hpp>
 #include <cppurses/widget/widgets/cycle_stack.hpp>
+#include <cppurses/widget/widgets/fixed_height.hpp>
 #include <cppurses/widget/widgets/status_bar.hpp>
 
 namespace demos {
@@ -19,7 +19,7 @@ struct Side_pane : cppurses::layout::Vertical {
 
     Populated_glyph_stack& glyph_select{
         this->make_child<Populated_glyph_stack>()};
-    cppurses::Blank_height& space1{this->make_child<cppurses::Blank_height>(1)};
+    cppurses::Fixed_height& space1{this->make_child<cppurses::Fixed_height>(1)};
 
     cppurses::Cycle_stack& color_select_stack{
         this->make_child<cppurses::Cycle_stack>()};
@@ -35,7 +35,7 @@ struct Side_pane : cppurses::layout::Vertical {
     cppurses::Status_bar& show_glyph{
         this->make_child<cppurses::Status_bar>("x")};
 
-    cppurses::Blank_height& space2{this->make_child<cppurses::Blank_height>(1)};
+    cppurses::Fixed_height& space2{this->make_child<cppurses::Fixed_height>(1)};
     Options_stack& options_box{this->make_child<Options_stack>()};
 };
 

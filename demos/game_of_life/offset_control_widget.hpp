@@ -7,7 +7,7 @@
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/widget.hpp>
-#include <cppurses/widget/widgets/blank_height.hpp>
+#include <cppurses/widget/widgets/fixed_height.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 
 namespace gol {
@@ -38,7 +38,7 @@ struct Scroll_btn : cppurses::Push_button {
 struct Horizontal_arrow : cppurses::layout::Vertical {
     Horizontal_arrow(cppurses::Glyph_string title);
 
-    cppurses::Blank_height& space{this->make_child<cppurses::Blank_height>(1)};
+    cppurses::Fixed_height& space{this->make_child<cppurses::Fixed_height>(1)};
     Scroll_btn& arrow;
 };
 

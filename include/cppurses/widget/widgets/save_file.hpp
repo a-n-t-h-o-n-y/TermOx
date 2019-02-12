@@ -8,7 +8,7 @@
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget_free_functions.hpp>
-#include <cppurses/widget/widgets/blank_width.hpp>
+#include <cppurses/widget/widgets/fixed_width.hpp>
 #include <cppurses/widget/widgets/line_edit.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 
@@ -19,7 +19,7 @@ struct Save_file : public layout::Horizontal {
     Save_file();
 
     Push_button& save_btn{this->make_child<Push_button>("Save")};
-    Blank_width& seperator{this->make_child<Blank_width>(1)};
+    Fixed_width& seperator{this->make_child<Fixed_width>(1)};
     Line_edit& filename_edit{this->make_child<Line_edit>("Filename")};
 
     // Signals

@@ -11,7 +11,7 @@
 #include <cppurses/system/keyboard_data.hpp>
 #include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
-#include <cppurses/widget/widgets/blank_height.hpp>
+#include <cppurses/widget/widgets/fixed_height.hpp>
 #include <cppurses/widget/widgets/label.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 
@@ -50,7 +50,7 @@ class Menu : public layout::Vertical {
     std::size_t selected_index_{0};
 
     Label& title_;
-    Blank_height& space1{this->make_child<Blank_height>(1)};
+    Fixed_height& space1{this->make_child<Fixed_height>(1)};
 
     void call_current_item();
 };

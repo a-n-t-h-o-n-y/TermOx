@@ -17,13 +17,17 @@ class Widget;
 /// A layout::Stack with an interface to cycle through each Widget in the stack.
 class Cycle_stack : public layout::Vertical {
    public:
-    Cycle_stack();
-
+    /// Construct a new T object and add it to the end of the Stack.
+    /** Returns a reference to this newly created page. \p title is passed to
+     *  the Cycle_box to display when this page is active. */
     template <typename T, typename... Args>
     T& make_page(Glyph_string title, Args&&... args);
 
+    /// Append a page to the Stack.
+    /** \p title is passed to the Cycle_box associated with this page. */
     void add_page(Glyph_string title, std::unique_ptr<Widget> widget);
 
+    /// User interface to cycle through the pages of the Stack.
     struct Top_row : public layout::Horizontal {
         Top_row();
         Push_button& left_btn{this->make_child<Push_button>("⏴")};
@@ -31,7 +35,7 @@ class Cycle_stack : public layout::Vertical {
         Push_button& right_btn{this->make_child<Push_button>("⏵")};
     };
 
-    Top_row& top_row;
+    Top_row& top_row{this->make_child<Top_row>()};
     layout::Stack& stack{this->make_child<layout::Stack>()};
 };
 

@@ -1,12 +1,13 @@
-#include <cppurses/widget/widgets/blank_width.hpp>
+#include <cppurses/widget/widgets/fixed_width.hpp>
 
 #include <cstddef>
 
+#include <cppurses/widget/size_policy.hpp>
+
 namespace cppurses {
 
-Blank_width::Blank_width(std::size_t width) {
+Fixed_width::Fixed_width(std::size_t width) {
     this->width_policy.type(Size_policy::Fixed);
     this->width_policy.hint(width);
 }
-
 }  // namespace cppurses

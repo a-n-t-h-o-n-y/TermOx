@@ -5,7 +5,7 @@
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
-#include <cppurses/widget/widgets/blank_width.hpp>
+#include <cppurses/widget/widgets/fixed_width.hpp>
 #include <cppurses/widget/widgets/label.hpp>
 #include <cppurses/widget/widgets/line_edit.hpp>
 #include <cppurses/widget/widgets/vertical_slider.hpp>
@@ -14,7 +14,7 @@ namespace palette {
 namespace detail {
 /// Vertical_slider with extra space around the sides.
 struct Buffered_slider : cppurses::layout::Horizontal {
-    using Bar_t = cppurses::Blank_width;
+    using Bar_t = cppurses::Fixed_width;
     using Slider_t = cppurses::Vertical_slider;
 
     Bar_t& left{this->make_child<Bar_t>(1)};
@@ -25,7 +25,7 @@ struct Buffered_slider : cppurses::layout::Horizontal {
 /// Line_edit with extra space on the left side.
 struct Buffered_edit_box : cppurses::layout::Horizontal {
     Buffered_edit_box();
-    cppurses::Blank_width& left{this->make_child<cppurses::Blank_width>(1)};
+    cppurses::Fixed_width& left{this->make_child<cppurses::Fixed_width>(1)};
     cppurses::Line_edit& box{this->make_child<cppurses::Line_edit>("0")};
 };
 }  // namespace detail

@@ -121,8 +121,8 @@ target_sources(cppurses PRIVATE
     widget/color_select.cpp
     widget/menu.cpp
     widget/size_policy.cpp
-    widget/blank_width.cpp
-    widget/blank_height.cpp
+    widget/fixed_width.cpp
+    widget/fixed_height.cpp
     widget/children_data.cpp
     widget/border_offset.cpp
     widget/cursor_data.cpp

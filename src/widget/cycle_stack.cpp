@@ -33,8 +33,6 @@ Cycle_stack::Top_row::Top_row() {
     cycle_box.brush.add_attributes(Attribute::Bold);
 }
 
-Cycle_stack::Cycle_stack() : top_row{this->make_child<Top_row>()} {}
-
 void Cycle_stack::add_page(Glyph_string title, std::unique_ptr<Widget> widget) {
     sig::Signal<void()>& signal{top_row.cycle_box.add_option(std::move(title))};
     signal.connect(slot::set_active_page(stack, stack.size()));

@@ -7,10 +7,10 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/size_policy.hpp>
-#include <cppurses/widget/widgets/blank_width.hpp>
+#include <cppurses/widget/widget_free_functions.hpp>
+#include <cppurses/widget/widgets/fixed_width.hpp>
 #include <cppurses/widget/widgets/line_edit.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
-#include <cppurses/widget/widget_free_functions.hpp>
 
 namespace cppurses {
 
@@ -19,7 +19,7 @@ struct Open_file : public layout::Horizontal {
     Open_file();
 
     Push_button& open_btn{this->make_child<Push_button>("Open")};
-    Blank_width& seperator{this->make_child<Blank_width>(1)};
+    Fixed_width& seperator{this->make_child<Fixed_width>(1)};
     Line_edit& filename_edit{this->make_child<Line_edit>("Filename")};
 
     // Signals
