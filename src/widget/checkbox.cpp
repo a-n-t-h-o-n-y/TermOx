@@ -9,25 +9,57 @@
 
 namespace cppurses {
 
-Checkbox::Checkbox(Glyph_string title, int padding)
-    : title_{std::move(title)}, padding_{padding} {
+Checkbox::Checkbox(Glyph_string label, int padding)
+    : label_{std::move(label)}, padding_{padding} {
     this->height_policy.type(Size_policy::Fixed);
     this->height_policy.hint(1);
 }
 
 void Checkbox::toggle() {
-    is_checked_ = !is_checked_;
+    checked_ = !checked_;
     toggled();
-    is_checked_ ? checked() : unchecked();
+    checked_ ? checked() : unchecked();
     this->update();
 }
 
-bool Checkbox::is_checked() const {
-    return is_checked_;
+void Checkbox::check() {
+    if (checked_) {
+        return;
+    }
+    this->toggle();
 }
 
-Glyph_string Checkbox::title() const {
-    return title_;
+void Checkbox::uncheck() {
+    if (!checked_) {
+        return;
+    }
+    this->toggle();
+}
+
+bool Checkbox::is_checked() const {
+    return checked_;
+}
+
+void Checkbox::set_check_look(const Glyph& symbol) {
+    checked_box_ = symbol;
+    this->update();
+}
+
+void Checkbox::set_uncheck_look(const Glyph& symbol) {
+    unchecked_box_ = symbol;
+    this->update();
+}
+
+const Glyph& Checkbox::check_look() const {
+    return checked_box_;
+}
+
+const Glyph& Checkbox::uncheck_look() const {
+    return unchecked_box_;
+}
+
+const Glyph_string& Checkbox::label() const {
+    return label_;
 }
 
 bool Checkbox::paint_event() {
@@ -35,9 +67,9 @@ bool Checkbox::paint_event() {
     if (this->is_checked()) {
         p.put(checked_box_, 0, 0);
     } else {
-        p.put(empty_box_, 0, 0);
+        p.put(unchecked_box_, 0, 0);
     }
-    p.put(title_, padding_, 0);
+    p.put(label_, padding_, 0);
     return Widget::paint_event();
 }
 
@@ -46,20 +78,6 @@ bool Checkbox::mouse_press_event(const Mouse_data& mouse) {
         this->toggle();
     }
     return Widget::mouse_press_event(mouse);
-}
-
-void check(Checkbox& cb) {
-    if (!cb.is_checked()) {
-        cb.toggle();
-    }
-    cb.update();
-}
-
-void uncheck(Checkbox& cb) {
-    if (cb.is_checked()) {
-        cb.toggle();
-    }
-    cb.update();
 }
 
 namespace slot {
@@ -71,13 +89,13 @@ sig::Slot<void()> toggle(Checkbox& cb) {
 }
 
 sig::Slot<void()> check(Checkbox& cb) {
-    sig::Slot<void()> slot{[&cb]() { cppurses::check(cb); }};
+    sig::Slot<void()> slot{[&cb]() { cb.check(); }};
     slot.track(cb.destroyed);
     return slot;
 }
 
 sig::Slot<void()> uncheck(Checkbox& cb) {
-    sig::Slot<void()> slot{[&cb]() { cppurses::uncheck(cb); }};
+    sig::Slot<void()> slot{[&cb]() { cb.uncheck(); }};
     slot.track(cb.destroyed);
     return slot;
 }

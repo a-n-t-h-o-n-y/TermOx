@@ -12,18 +12,47 @@
 
 namespace cppurses {
 
-/// On/Off state checkbox, using mouse input.
+/// Checkbox Widget that is either checked or not checked.
+/** Uses mouse left button click to toggle between states. */
 class Checkbox : public Widget {
    public:
-    explicit Checkbox(Glyph_string title = "", int padding = 3);
+    /// Construct a Checkbox with \p label and \p padding between label and box.
+    explicit Checkbox(Glyph_string label = "", int padding = 3);
 
+    /// Change state to be unchecked if initially checked, checked otherwise.
     void toggle();
-    bool is_checked() const;
-    Glyph_string title() const;
 
-    // Signals
+    /// Set the state to be checked.
+    void check();
+
+    /// Set the state to be unchecked.
+    void uncheck();
+
+    /// Return whether Checkbox is currently checked.
+    bool is_checked() const;
+
+    /// Return the current label.
+    const Glyph_string& label() const;
+
+    /// Set the Glyph used for a checked box.
+    void set_check_look(const Glyph& symbol);
+
+    /// Set the Glyph used for an unchecked box.
+    void set_uncheck_look(const Glyph& symbol);
+
+    /// Return the Glyph representing the checked state.
+    const Glyph& check_look() const;
+
+    /// Return the Glyph representing the unchecked state.
+    const Glyph& uncheck_look() const;
+
+    /// Emitted only when box becomes checked.
     sig::Signal<void()> checked;
+
+    /// Emitted only when box becomes unchecked.
     sig::Signal<void()> unchecked;
+
+    /// Emitted every time the box changes state.
     sig::Signal<void()> toggled;
 
    protected:
@@ -31,15 +60,12 @@ class Checkbox : public Widget {
     bool mouse_press_event(const Mouse_data& mouse) override;
 
    private:
-    Glyph empty_box_{L'☐'};
+    Glyph unchecked_box_{L'☐'};
     Glyph checked_box_{L'☒'};
-    bool is_checked_{false};
-    Glyph_string title_;
+    bool checked_{false};
+    Glyph_string label_;
     int padding_;
 };
-
-void check(Checkbox& cb);
-void uncheck(Checkbox& cb);
 
 namespace slot {
 
