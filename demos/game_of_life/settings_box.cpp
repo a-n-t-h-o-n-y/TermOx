@@ -15,7 +15,7 @@ namespace gol {
 Clear_step_box::Clear_step_box() {
     this->height_policy.type(Size_policy::Fixed);
     this->height_policy.hint(2);
-    clear_btn.title_btn_.brush.set_background(Color::Gray);
+    clear_btn.main_btn.brush.set_background(Color::Gray);
     step_btn.brush.set_background(Color::Light_gray);
     step_btn.brush.set_foreground(Color::Black);
 }

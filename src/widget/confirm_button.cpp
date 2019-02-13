@@ -1,5 +1,6 @@
 #include <cppurses/widget/widgets/confirm_button.hpp>
 
+#include <cstddef>
 #include <utility>
 
 #include <cppurses/painter/color.hpp>
@@ -9,37 +10,40 @@
 #include <cppurses/widget/widget_free_functions.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 
+namespace {
+const std::size_t front_page{0};
+const std::size_t confirm_page{1};
+}  // namespace
+
 namespace cppurses {
 
 struct Confirm_button::Confirm_screen : public layout::Horizontal {
     explicit Confirm_screen(Glyph_string confirm_text)
-        : confirm_btn{this->make_child<Push_button>(confirm_text)} {
-        x_btn.width_policy.type(Size_policy::Fixed);
-        x_btn.width_policy.hint(3);
-        set_background(x_btn, Color::Gray);
-        set_foreground(x_btn, Color::Black);
+        : confirm_btn{this->make_child<Push_button>(std::move(confirm_text))} {
+        this->set_name("Confirm_screen");
+        exit_btn.width_policy.type(Size_policy::Fixed);
+        exit_btn.width_policy.hint(3);
+        set_background(exit_btn, Color::Gray);
+        set_foreground(exit_btn, Color::Black);
         set_background(confirm_btn, Color::Blue);
         set_foreground(confirm_btn, Color::Black);
     }
 
     Push_button& confirm_btn;
-    Push_button& x_btn{this->make_child<Push_button>("✕")};
+    Push_button& exit_btn{this->make_child<Push_button>("✕")};
 };
 
-Confirm_button::Confirm_button(Glyph_string title, Glyph_string confirm_text)
-    : title_btn_{this->make_page<Push_button>(std::move(title))},
-      confirm_screen_{
-          this->make_page<Confirm_screen>(std::move(confirm_text))} {
-    title_btn_.clicked.connect([this] { this->set_active_page(1); });
-
-    confirm_screen_.confirm_btn.clicked.connect([this] {
+Confirm_button::Confirm_button(Glyph_string label, Glyph_string confirm_text)
+    : main_btn{this->make_page<Push_button>(std::move(label))},
+      confirm_screen{this->make_page<Confirm_screen>(std::move(confirm_text))} {
+    this->set_name("Confirm_button");
+    this->set_active_page(front_page);
+    main_btn.clicked.connect([this] { this->set_active_page(confirm_page); });
+    confirm_screen.confirm_btn.clicked.connect([this] {
         this->clicked();
-        this->set_active_page(0);
+        this->set_active_page(front_page);
     });
-
-    confirm_screen_.x_btn.clicked.connect([this] { this->set_active_page(0); });
-
-    this->set_active_page(0);
+    confirm_screen.exit_btn.clicked.connect(
+        [this] { this->set_active_page(front_page); });
 }
-
 }  // namespace cppurses

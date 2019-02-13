@@ -14,10 +14,10 @@ class Color_select : public layout::Vertical {
    public:
     Color_select();
 
-    // Signals
+    /// Emitted on left mouse button press, sends along the Color clicked on.
     sig::Signal<void(Color)> color_changed;
 
-   protected:
+   private:
     layout::Horizontal& row1_{this->make_child<layout::Horizontal>()};
     layout::Horizontal& row2_{this->make_child<layout::Horizontal>()};
 
@@ -38,9 +38,7 @@ class Color_select : public layout::Vertical {
     Push_button& yellow_{row2_.make_child<Push_button>()};
     Push_button& white_{row2_.make_child<Push_button>()};
 
-   private:
     void initialize();
 };
-
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_WIDGETS_COLOR_SELECT_HPP
