@@ -1,19 +1,23 @@
 #include <cppurses/widget/widgets/cycle_box.hpp>
 
 #include <algorithm>
+#include <iterator>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include <signals/signals.hpp>
 
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/system/mouse_button.hpp>
 #include <cppurses/system/mouse_data.hpp>
+#include <cppurses/widget/widgets/text_display.hpp>
 
 namespace cppurses {
 
 Cycle_box::Cycle_box() {
+    this->set_name("Cycle_box");
     this->set_alignment(Alignment::Center);  // might be default
-    this->disable_word_wrap();
 }
 
 sig::Signal<void()>& Cycle_box::add_option(Glyph_string option) {
@@ -25,10 +29,10 @@ sig::Signal<void()>& Cycle_box::add_option(Glyph_string option) {
     return options_.back().enabled;
 }
 
-void Cycle_box::remove_option(const std::string& option) {
+void Cycle_box::remove_option(const Glyph_string& option) {
     auto iter = std::find_if(
         std::begin(options_), std::end(options_),
-        [&option](const Option& opt) { return opt.name.str() == option; });
+        [&option](const Option& opt) { return opt.name == option; });
     if (iter != std::end(options_)) {
         options_.erase(iter);
     }
@@ -115,6 +119,5 @@ sig::Slot<void()> cycle_backward(Cycle_box& cb) {
     slot.track(cb.destroyed);
     return slot;
 }
-
 }  // namespace slot
 }  // namespace cppurses

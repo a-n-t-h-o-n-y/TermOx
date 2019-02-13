@@ -7,6 +7,7 @@
 namespace cppurses {
 
 Fixed_width::Fixed_width(std::size_t width) {
+    this->set_name("Fixed_width");
     this->width_policy.type(Size_policy::Fixed);
     this->width_policy.hint(width);
 }

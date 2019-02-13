@@ -11,6 +11,7 @@ namespace cppurses {
 
 Checkbox::Checkbox(Glyph_string label, int padding)
     : label_{std::move(label)}, padding_{padding} {
+    this->set_name("Checkbox");
     this->height_policy.type(Size_policy::Fixed);
     this->height_policy.hint(1);
 }
