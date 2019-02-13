@@ -6,6 +6,9 @@
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/system/key.hpp>
+#include <cppurses/system/keyboard_data.hpp>
+#include <cppurses/system/mouse_button.hpp>
+#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widgets/detail/nearly_equal.hpp>

@@ -9,6 +9,7 @@
 #include <cppurses/painter/detail/staged_changes.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/event_loop.hpp>
+#include <cppurses/system/system.hpp>
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/detail/border_offset.hpp>
 #include <cppurses/widget/point.hpp>
@@ -25,6 +26,10 @@ bool border_is_paintable(const Widget& widg) {
 }  // namespace
 
 namespace cppurses {
+
+Painter::Painter(Widget& widg)
+    : widget_{widg},
+      staged_changes_{System::find_event_loop().staged_changes()[&widg]} {}
 
 void Painter::put(const Glyph& tile, std::size_t x, std::size_t y) {
     if (x >= widget_.width() || y >= widget_.height()) {

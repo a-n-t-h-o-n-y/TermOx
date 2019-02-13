@@ -1,21 +1,20 @@
 #ifndef CPPURSES_WIDGET_WIDGETS_MENU_HPP
 #define CPPURSES_WIDGET_WIDGETS_MENU_HPP
 #include <cstddef>
-#include <cstdint>
 #include <functional>
 #include <vector>
 
 #include <signals/slot.hpp>
 
-#include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/system/keyboard_data.hpp>
-#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/widgets/fixed_height.hpp>
-#include <cppurses/widget/widgets/label.hpp>
-#include <cppurses/widget/widgets/push_button.hpp>
 
 namespace cppurses {
+class Glyph_string;
+class Push_button;
+struct Keyboard_data;
+struct Mouse_data;
+struct Label;
 
 class Menu : public layout::Vertical {
    public:

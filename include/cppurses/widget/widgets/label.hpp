@@ -8,8 +8,7 @@ namespace cppurses {
 /// A simple Text_display with fixed height 1 and no word wrapping.
 /** Common use case of Text_display where you only intend to display a word or
  *  two and don't want to mess with the boilerplate every time. */
-class Label : public Text_display {
-   public:
+struct Label : Text_display {
     explicit Label(Glyph_string text = "");
 };
 

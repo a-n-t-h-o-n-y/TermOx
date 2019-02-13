@@ -1,4 +1,4 @@
-#include <cppurses/widget/widgets/glyph_select.hpp>
+#include "glyph_select.hpp"
 
 #include <cmath>
 #include <utility>
@@ -10,11 +10,14 @@
 #include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widget_free_functions.hpp>
-#include <cppurses/widget/widgets/glyph_select_stack.hpp>
 #include <cppurses/widget/widgets/horizontal_slider.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 
-namespace cppurses {
+#include "glyph_select_stack.hpp"
+
+using namespace cppurses;
+namespace demos {
+namespace glyph_paint {
 
 Glyph_select::Glyph_select(Glyph_string symbols) {
     glyph_stack.set_symbols(std::move(symbols));
@@ -73,4 +76,5 @@ void Glyph_select::flip_page_backward() {
     slider.set_percent(new_percent);
 }
 
-}  // namespace cppurses
+}  // namespace glyph_paint
+}  // namespace demos

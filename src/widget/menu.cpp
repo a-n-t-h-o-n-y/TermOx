@@ -17,6 +17,7 @@
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widget_free_functions.hpp>
+#include <cppurses/widget/widgets/label.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 
 namespace cppurses {

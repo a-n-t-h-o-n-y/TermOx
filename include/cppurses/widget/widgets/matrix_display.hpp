@@ -1,6 +1,7 @@
 #ifndef CPPURSES_WIDGET_WIDGETS_MATRIX_DISPLAY_HPP
 #define CPPURSES_WIDGET_WIDGETS_MATRIX_DISPLAY_HPP
-#include <cppurses/painter/glyph.hpp>
+#include <cstddef>
+
 #include <cppurses/painter/glyph_matrix.hpp>
 #include <cppurses/widget/widget.hpp>
 

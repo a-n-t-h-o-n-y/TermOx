@@ -18,8 +18,6 @@
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/system/animation_engine.hpp>
 #include <cppurses/system/key.hpp>
-#include <cppurses/system/keyboard_data.hpp>
-#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/children_data.hpp>
 #include <cppurses/widget/cursor_data.hpp>
@@ -30,6 +28,8 @@
 
 namespace cppurses {
 struct Area;
+struct Keyboard_data;
+struct Mouse_data;
 
 class Widget {
    public:

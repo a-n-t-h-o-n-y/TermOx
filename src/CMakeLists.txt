@@ -43,7 +43,7 @@ if(NOT ${CMAKE_VERSION} VERSION_LESS "3.8")
     target_compile_features(cppurses INTERFACE cxx_std_14)
 endif()
 
-target_compile_options(cppurses PRIVATE -Wall)
+target_compile_options(cppurses PRIVATE -Wall -Wextra -Wpedantic)
 
 # GATHER SOURCES
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -64,6 +64,7 @@ target_sources(cppurses PRIVATE
     system/animation_engine.cpp
     system/event_as_string.cpp
     system/timer_event_loop.cpp
+    system/timer_event.cpp
     system/user_input_event_loop.cpp
     system/fps_to_period.cpp
     system/find_widget_at.cpp
@@ -93,8 +94,6 @@ target_sources(cppurses PRIVATE
     widget/widget_slots.cpp
     widget/stack.cpp
     widget/menu_stack.cpp
-    widget/glyph_select_stack.cpp
-    widget/glyph_select.cpp
     widget/cycle_stack.cpp
     widget/label.cpp
     widget/layout.cpp

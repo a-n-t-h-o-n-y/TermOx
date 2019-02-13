@@ -1,22 +1,18 @@
 #ifndef CPPURSES_WIDGET_WIDGETS_VERTICAL_SLIDER_HPP
 #define CPPURSES_WIDGET_WIDGETS_VERTICAL_SLIDER_HPP
-#include <cmath>
 #include <vector>
 
 #include <signals/signal.hpp>
 
 #include <cppurses/painter/color.hpp>
-#include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/painter/painter.hpp>
-#include <cppurses/system/key.hpp>
-#include <cppurses/widget/focus_policy.hpp>
-#include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget.hpp>
 
 #include "detail/slider_logic.hpp"
 
 namespace cppurses {
+struct Keyboard_data;
+struct Mouse_data;
 
 class Vertical_slider : public Widget {
     detail::Slider_logic logic_;

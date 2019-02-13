@@ -4,12 +4,10 @@
 
 #include <cppurses/painter/detail/screen_descriptor.hpp>
 #include <cppurses/painter/detail/staged_changes.hpp>
-#include <cppurses/system/system.hpp>
 
 namespace cppurses {
 class Glyph_string;
 struct Point;
-struct Border;
 struct Glyph;
 class Widget;
 
@@ -18,9 +16,7 @@ class Widget;
 class Painter {
    public:
     /// Construct an object ready to paint Glyphs to \p *widg.
-    explicit Painter(Widget& widg)
-        : widget_{widg},
-          staged_changes_{System::find_event_loop().staged_changes()[&widg]} {}
+    explicit Painter(Widget& widg);
 
     Painter(const Painter&) = delete;
     Painter(Painter&&) = delete;

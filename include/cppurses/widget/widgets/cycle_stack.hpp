@@ -1,7 +1,6 @@
 #ifndef CPPURSES_WIDGET_WIDGETS_CYCLE_STACK_HPP
 #define CPPURSES_WIDGET_WIDGETS_CYCLE_STACK_HPP
 #include <memory>
-#include <string>
 #include <utility>
 
 #include <cppurses/painter/glyph_string.hpp>

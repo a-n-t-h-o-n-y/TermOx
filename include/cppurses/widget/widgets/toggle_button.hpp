@@ -2,11 +2,11 @@
 #define CPPURSES_WIDGET_WIDGETS_TOGGLE_BUTTON_HPP
 #include <signals/signal.hpp>
 
-#include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/layouts/stack.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 
 namespace cppurses {
+class Glyph_string;
 
 /// A button with two alternating states.
 /** The top state is active first. State is changed to the non-active state on

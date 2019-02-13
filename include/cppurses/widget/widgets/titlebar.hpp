@@ -5,7 +5,7 @@
 
 namespace cppurses {
 class Push_button;
-class Label;
+struct Label;
 
 /// Provides a centered title and flush-right exit button.
 /** The exit button will call System::quit() when pressed. Titlebar is fixed at

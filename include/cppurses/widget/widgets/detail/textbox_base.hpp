@@ -5,10 +5,10 @@
 #include <signals/signal.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
 
 namespace cppurses {
+struct Point;
 namespace detail {
 
 /// Implements cursor movement on top of a Text_display, for use by Textbox.

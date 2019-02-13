@@ -7,10 +7,10 @@
 
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
+struct Point;
 
 /// Used to define the alignment of text in a Text_display Widget.
 enum class Alignment { Left, Center, Right };

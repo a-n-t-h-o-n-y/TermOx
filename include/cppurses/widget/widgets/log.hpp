@@ -2,12 +2,12 @@
 #define CPPURSES_WIDGET_WIDGETS_LOG_HPP
 #include <signals/slot.hpp>
 
-#include <cppurses/system/keyboard_data.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
 #include <cppurses/widget/widgets/textbox.hpp>
 
 namespace cppurses {
 class Glyph_string;
+struct Keyboard_data;
 
 class Log : public Textbox {
    public:

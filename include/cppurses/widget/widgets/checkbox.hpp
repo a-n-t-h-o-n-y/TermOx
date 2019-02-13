@@ -7,10 +7,10 @@
 
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
+struct Mouse_data;
 
 /// Checkbox Widget that is either checked or not checked.
 /** Uses mouse left button click to toggle between states. */

@@ -1,6 +1,7 @@
 #ifndef CPPURSES_PAINTER_BRUSH_HPP
 #define CPPURSES_PAINTER_BRUSH_HPP
 #include <bitset>
+#include <cstdint>
 #include <utility>
 
 #include <optional/optional.hpp>

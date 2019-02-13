@@ -5,6 +5,7 @@
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/system/mouse_button.hpp>
+#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/size_policy.hpp>
 
 namespace cppurses {
