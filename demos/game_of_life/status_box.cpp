@@ -8,7 +8,6 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widgets/label.hpp>
 #include <cppurses/widget/widgets/line_edit.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
@@ -17,8 +16,7 @@ using namespace cppurses;
 namespace gol {
 
 Generation_count::Generation_count() {
-    this->height_policy.type(Size_policy::Fixed);
-    this->height_policy.hint(1);
+    this->height_policy.fixed(1);
     this->cursor.disable();
 }
 
@@ -37,8 +35,7 @@ Center_offset::Center_offset() {
 }
 
 Status_box::Status_box() {
-    this->height_policy.type(Size_policy::Fixed);
-    this->height_policy.hint(5);
+    this->height_policy.fixed(5);
 
     this->border.enable();
     this->border.segments.disable_all();

@@ -10,7 +10,6 @@
 #include <cppurses/system/mouse_button.hpp>
 #include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/focus_policy.hpp>
-#include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widgets/detail/nearly_equal.hpp>
 
 namespace cppurses {

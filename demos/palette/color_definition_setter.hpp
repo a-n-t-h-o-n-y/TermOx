@@ -6,7 +6,6 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
-#include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget_free_functions.hpp>
 #include <cppurses/widget/widgets/confirm_button.hpp>
 #include <cppurses/widget/widgets/line_edit.hpp>

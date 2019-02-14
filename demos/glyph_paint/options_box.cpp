@@ -4,7 +4,6 @@
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/palettes.hpp>
 #include <cppurses/system/system.hpp>
-#include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
 
 using namespace cppurses;
@@ -43,8 +42,7 @@ Options_B::Options_B() {
 
 Options_stack::Options_stack() {
     this->set_active_page(0);
-    this->height_policy.type(Size_policy::Fixed);
-    this->height_policy.hint(6);
+    this->height_policy.fixed(6);
 
     options_a.more_btn.clicked.connect(
         cppurses::slot::set_active_page(*this, 1));

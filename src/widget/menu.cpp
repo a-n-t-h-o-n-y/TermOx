@@ -39,8 +39,7 @@ sig::Signal<void()>& Menu::add_item(Glyph_string label) {
     if (items_.size() == 1) {
         this->select_item(0);
     }
-    button_ref.height_policy.type(Size_policy::Fixed);
-    button_ref.height_policy.hint(1);
+    button_ref.height_policy.fixed(1);
     auto& signal_ref{items_.back().selected};
     button_ref.clicked.connect([this, index = items_.size() - 1] {
         this->select_item(index);
@@ -53,8 +52,7 @@ sig::Signal<void()>& Menu::add_item(Glyph_string label) {
 sig::Signal<void()>& Menu::insert_item(Glyph_string label, std::size_t index) {
     auto button_ptr = std::make_unique<Push_button>(std::move(label));
     button_ptr->install_event_filter(*this);
-    button_ptr->height_policy.type(Size_policy::Fixed);
-    button_ptr->height_policy.hint(1);
+    button_ptr->height_policy.fixed(1);
     auto& new_button = *button_ptr;
     items_.insert(std::begin(items_) + index, Menu_item{new_button});
     if (items_.size() == 1) {

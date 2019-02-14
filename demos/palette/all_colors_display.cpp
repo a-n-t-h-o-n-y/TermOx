@@ -57,17 +57,9 @@ Bottom_shades::Bottom_shades() {
 
 All_colors_display::All_colors_display() {
     const auto width = 48;
-
-    color_select.width_policy.type(cppurses::Size_policy::Maximum);
-    color_select.width_policy.hint(width);
-    color_select.height_policy.type(cppurses::Size_policy::Maximum);
-    color_select.height_policy.hint(6);
-
-    top_shades.width_policy.type(cppurses::Size_policy::Maximum);
-    top_shades.width_policy.hint(width);
-
-    bottom_shades.width_policy.type(cppurses::Size_policy::Maximum);
-    bottom_shades.width_policy.hint(width);
+    color_select.width_policy.maximum(width);
+    color_select.height_policy.maximum(6);
+    top_shades.width_policy.maximum(width);
+    bottom_shades.width_policy.maximum(width);
 }
-
 }  // namespace palette

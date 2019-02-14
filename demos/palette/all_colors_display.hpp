@@ -2,7 +2,6 @@
 #define CPPURSES_DEMOS_PALETTE_COLOR_DISPLAY_PANEL_HPP
 #include <cppurses/painter/color.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
-#include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widgets/color_select.hpp>
 

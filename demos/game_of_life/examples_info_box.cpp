@@ -1,21 +1,18 @@
 #include "examples_info_box.hpp"
 
 #include <cppurses/painter/color.hpp>
-#include <cppurses/widget/size_policy.hpp>
 
 using namespace cppurses;
 namespace gol {
 
 Examples_box::Examples_box() {
-    to_info_btn.height_policy.type(Size_policy::Fixed);
-    to_info_btn.height_policy.hint(1);
+    to_info_btn.height_policy.fixed(1);
     to_info_btn.brush.set_background(Color::Light_gray);
     to_info_btn.brush.set_foreground(Color::Black);
 }
 
 Info_box::Info_box() {
-    to_examples_btn.height_policy.type(Size_policy::Fixed);
-    to_examples_btn.height_policy.hint(1);
+    to_examples_btn.height_policy.fixed(1);
     to_examples_btn.brush.set_background(Color::Light_gray);
     to_examples_btn.brush.set_foreground(Color::Black);
 }

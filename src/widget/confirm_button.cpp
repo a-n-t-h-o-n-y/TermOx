@@ -21,8 +21,7 @@ struct Confirm_button::Confirm_screen : public layout::Horizontal {
     explicit Confirm_screen(Glyph_string confirm_text)
         : confirm_btn{this->make_child<Push_button>(std::move(confirm_text))} {
         this->set_name("Confirm_screen");
-        exit_btn.width_policy.type(Size_policy::Fixed);
-        exit_btn.width_policy.hint(3);
+        exit_btn.width_policy.fixed(3);
         set_background(exit_btn, Color::Gray);
         set_foreground(exit_btn, Color::Black);
         set_background(confirm_btn, Color::Blue);

@@ -14,8 +14,7 @@
 namespace cppurses {
 
 Horizontal_slider::Horizontal_slider() {
-    this->height_policy.type(Size_policy::Fixed);
-    this->height_policy.hint(1);
+    this->height_policy.fixed(1);
     this->focus_policy = Focus_policy::Strong;
     this->wallpaper = Glyph{L' ', background(Color::Light_gray)};
 }

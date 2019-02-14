@@ -49,10 +49,10 @@ std::vector<Layout::Dimensions> Horizontal::calculate_widget_sizes() {
             const float percent = d.widget->width_policy.stretch() /
                                   static_cast<float>(total_stretch);
             std::size_t width = percent * this->width();
-            if (width < d.widget->width_policy.min()) {
-                width = d.widget->width_policy.min();
-            } else if (width > d.widget->width_policy.max()) {
-                width = d.widget->width_policy.max();
+            if (width < d.widget->width_policy.min_size()) {
+                width = d.widget->width_policy.min_size();
+            } else if (width > d.widget->width_policy.max_size()) {
+                width = d.widget->width_policy.max_size();
             }
             d.width = width;
             width_available -= width;
@@ -101,10 +101,10 @@ std::vector<Layout::Dimensions> Horizontal::calculate_widget_sizes() {
         } else if (policy == Size_policy::Ignored ||
                    policy == Size_policy::Preferred ||
                    policy == Size_policy::Expanding) {
-            if (d.height > d.widget->height_policy.max()) {
-                d.height = d.widget->height_policy.max();
-            } else if (d.height < d.widget->height_policy.min()) {
-                d.height = d.widget->height_policy.min();
+            if (d.height > d.widget->height_policy.max_size()) {
+                d.height = d.widget->height_policy.max_size();
+            } else if (d.height < d.widget->height_policy.min_size()) {
+                d.height = d.widget->height_policy.min_size();
             }
         } else if (policy == Size_policy::Maximum) {
             if (d.height > d.widget->height_policy.hint()) {
@@ -112,8 +112,8 @@ std::vector<Layout::Dimensions> Horizontal::calculate_widget_sizes() {
             }
         } else if (policy == Size_policy::Minimum ||
                    policy == Size_policy::MinimumExpanding) {
-            if (d.height > d.widget->height_policy.max()) {
-                d.height = d.widget->height_policy.max();
+            if (d.height > d.widget->height_policy.max_size()) {
+                d.height = d.widget->height_policy.max_size();
             } else if (d.height < d.widget->height_policy.hint()) {
                 d.height = d.widget->height_policy.hint();
             }
@@ -150,9 +150,9 @@ void Horizontal::distribute_space(std::vector<Dimensions_reference> widgets,
                                        static_cast<double>(total_stretch)) *
                                       to_distribute);
             if ((*d.width + width_additions.back()) >
-                d.widget->width_policy.max()) {
-                width_left -= d.widget->width_policy.max() - *d.width;
-                *d.width = d.widget->width_policy.max();
+                d.widget->width_policy.max_size()) {
+                width_left -= d.widget->width_policy.max_size() - *d.width;
+                *d.width = d.widget->width_policy.max_size();
                 widgets.erase(std::begin(widgets) + index);
                 return distribute_space(widgets, width_left);
             }
@@ -199,9 +199,9 @@ void Horizontal::distribute_space(std::vector<Dimensions_reference> widgets,
                                        static_cast<double>(total_stretch)) *
                                       to_distribute);
             if ((*d.width + width_additions.back()) >
-                d.widget->width_policy.max()) {
-                width_left -= d.widget->width_policy.max() - *d.width;
-                *d.width = d.widget->width_policy.max();
+                d.widget->width_policy.max_size()) {
+                width_left -= d.widget->width_policy.max_size() - *d.width;
+                *d.width = d.widget->width_policy.max_size();
                 widgets.erase(std::begin(widgets) + index);
                 return distribute_space(widgets, width_left);
             }
@@ -233,7 +233,7 @@ void Horizontal::distribute_space(std::vector<Dimensions_reference> widgets,
             if ((policy == Size_policy::Expanding ||
                  policy == Size_policy::MinimumExpanding) &&
                 width_left > 0) {
-                if (*d.width + 1 <= d.widget->width_policy.max()) {
+                if (*d.width + 1 <= d.widget->width_policy.max_size()) {
                     *d.width += 1;
                     width_left -= 1;
                 }
@@ -250,7 +250,7 @@ void Horizontal::distribute_space(std::vector<Dimensions_reference> widgets,
                  policy == Size_policy::Minimum ||
                  policy == Size_policy::Ignored) &&
                 width_left > 0) {
-                if (*d.width + 1 <= d.widget->width_policy.max()) {
+                if (*d.width + 1 <= d.widget->width_policy.max_size()) {
                     *d.width += 1;
                     width_left -= 1;
                 }
@@ -432,9 +432,9 @@ void Horizontal::collect_space(std::vector<Dimensions_reference> widgets,
                  static_cast<double>(total_inverse)) *
                 (to_collect * -1));
             if ((*d.width - width_deductions.back()) <
-                d.widget->width_policy.min()) {
-                width_left += *d.width - d.widget->width_policy.min();
-                *d.width = d.widget->width_policy.min();
+                d.widget->width_policy.min_size()) {
+                width_left += *d.width - d.widget->width_policy.min_size();
+                *d.width = d.widget->width_policy.min_size();
                 widgets.erase(std::begin(widgets) + index);
                 return collect_space(widgets, width_left);
             }
@@ -496,9 +496,9 @@ void Horizontal::collect_space(std::vector<Dimensions_reference> widgets,
                  static_cast<double>(total_inverse)) *
                 (to_collect * -1));
             if ((*d.width - width_deductions.back()) <
-                d.widget->width_policy.min()) {
-                width_left += *d.width - d.widget->width_policy.min();
-                *d.width = d.widget->width_policy.min();
+                d.widget->width_policy.min_size()) {
+                width_left += *d.width - d.widget->width_policy.min_size();
+                *d.width = d.widget->width_policy.min_size();
                 widgets.erase(std::begin(widgets) + index);
                 return collect_space(widgets, width_left);
             }

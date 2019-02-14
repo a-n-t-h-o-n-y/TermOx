@@ -7,7 +7,6 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/layouts/stack.hpp>
-#include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widget_free_functions.hpp>
 #include <cppurses/widget/widgets/cycle_box.hpp>
@@ -16,13 +15,9 @@
 namespace cppurses {
 
 Cycle_stack::Top_row::Top_row() {
-    this->height_policy.type(Size_policy::Fixed);
-    this->height_policy.hint(1);
-
-    left_btn.width_policy.type(Size_policy::Fixed);
-    left_btn.width_policy.hint(1);
-    right_btn.width_policy.type(Size_policy::Fixed);
-    right_btn.width_policy.hint(1);
+    this->height_policy.fixed(1);
+    left_btn.width_policy.fixed(1);
+    right_btn.width_policy.fixed(1);
 
     set_background_recursive(*this, Color::Light_gray);
     set_foreground_recursive(*this, Color::Black);

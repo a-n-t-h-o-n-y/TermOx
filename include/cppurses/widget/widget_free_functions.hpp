@@ -10,12 +10,6 @@
 namespace cppurses {
 class Widget;
 
-bool has_border(const Widget& w);
-
-void enable_border(Widget& w);
-
-void disable_border(Widget& w);
-
 bool has_coordinates(const Widget& w, std::size_t global_x, std::size_t global_y);
 
 // TODO You should no longer need a repaint event for these functions, if the

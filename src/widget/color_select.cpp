@@ -3,7 +3,6 @@
 #include <signals/signals.hpp>
 
 #include <cppurses/painter/color.hpp>
-#include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widget_free_functions.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
@@ -15,10 +14,8 @@ Color_select::Color_select() {
 }
 
 void Color_select::initialize() {
-    this->width_policy.hint(16);
-    this->width_policy.type(Size_policy::Fixed);
-    this->height_policy.hint(2);
-    this->height_policy.type(Size_policy::Fixed);
+    this->width_policy.fixed(16);
+    this->height_policy.fixed(2);
 
     set_background(black_, Color::Black);
     set_background(dark_red_, Color::Dark_red);

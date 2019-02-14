@@ -6,7 +6,6 @@
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
-#include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget_free_functions.hpp>
 #include <cppurses/widget/widgets/fixed_width.hpp>
 #include <cppurses/widget/widgets/line_edit.hpp>
@@ -31,17 +30,13 @@ struct Save_file : public layout::Horizontal {
 
 template <typename CharT>
 Save_file<CharT>::Save_file() {
-    this->height_policy.type(Size_policy::Fixed);
-    this->height_policy.hint(1);
-
-    save_btn.width_policy.type(Size_policy::Fixed);
-    save_btn.width_policy.hint(4);
+    this->height_policy.fixed(1);
+    save_btn.width_policy.fixed(4);
     set_background(save_btn, Color::Blue);
     seperator.wallpaper = L'⏵';
     set_background(filename_edit, Color::White);
     set_foreground(filename_edit, Color::Black);
     filename_edit.set_ghost_color(Color::Dark_gray);
-
     save_btn.clicked.connect([this] { this->notify(); });
 }
 

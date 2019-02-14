@@ -15,7 +15,6 @@
 #include <cppurses/system/mouse_button.hpp>
 #include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/point.hpp>
-#include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widgets/textbox.hpp>
 
 namespace cppurses {
@@ -24,8 +23,7 @@ Line_edit::Line_edit(Glyph_string initial_text)
     : Textbox{std::move(initial_text)} {
     this->set_name("Line_edit");
     this->set_ghost_color(Color::Light_gray);
-    this->height_policy.type(Size_policy::Fixed);
-    this->height_policy.hint(1);
+    this->height_policy.fixed(1);
     this->disable_word_wrap();
 }
 

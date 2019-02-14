@@ -7,7 +7,6 @@
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
-#include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widget_free_functions.hpp>
 #include <cppurses/widget/widgets/horizontal_slider.hpp>
@@ -21,14 +20,11 @@ namespace glyph_paint {
 
 Glyph_select::Glyph_select(Glyph_string symbols) {
     glyph_stack.set_symbols(std::move(symbols));
-    bottom_row.height_policy.type(Size_policy::Fixed);
-    bottom_row.height_policy.hint(1);
-    left_btn.width_policy.type(Size_policy::Fixed);
-    left_btn.width_policy.hint(1);
+    bottom_row.height_policy.fixed(1);
+    left_btn.width_policy.fixed(1);
     set_background(left_btn, Color::Light_gray);
     set_foreground(left_btn, Color::Black);
-    right_btn.width_policy.type(Size_policy::Fixed);
-    right_btn.width_policy.hint(1);
+    right_btn.width_policy.fixed(1);
     set_background(right_btn, Color::Light_gray);
     set_foreground(right_btn, Color::Black);
 

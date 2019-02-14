@@ -8,7 +8,6 @@
 #include <cppurses/system/system.hpp>
 #include <cppurses/terminal/terminal.hpp>
 #include <cppurses/widget/border.hpp>
-#include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget_free_functions.hpp>
 
 namespace {
@@ -60,10 +59,7 @@ namespace palette {
 
 Export_panel::Export_panel() {
     using namespace cppurses;
-
-    this->height_policy.type(Size_policy::Fixed);
-    this->height_policy.hint(3);
-
+    this->height_policy.fixed(3);
     this->border.enable();
     this->border.segments.disable_all();
     this->border.segments.north.enable();

@@ -5,7 +5,6 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
-#include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widgets/label.hpp>
 #include <cppurses/widget/widgets/number_edit.hpp>
 
@@ -33,10 +32,8 @@ Labeled_number_edit<Number_t>::Labeled_number_edit(Glyph_string title,
                                                    Number_t initial)
     : label{this->make_child<cppurses::Label>(std::move(title))},
       number_edit{this->make_child<cppurses::Number_edit<Number_t>>(initial)} {
-    this->height_policy.type(cppurses::Size_policy::Fixed);
-    this->height_policy.hint(1);
-    label.width_policy.type(cppurses::Size_policy::Fixed);
-    label.width_policy.hint(label.contents().size());
+    this->height_policy.fixed(1);
+    label.width_policy.fixed(label.contents().size());
     number_edit.brush.set_background(cppurses::Color::White);
     number_edit.brush.set_foreground(cppurses::Color::Black);
     number_edit.set_ghost_color(cppurses::Color::Gray);

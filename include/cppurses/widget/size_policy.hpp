@@ -32,6 +32,51 @@ class Size_policy {
      *  changed, this is done by posting a Child_polished_event. */
     explicit Size_policy(Widget* owner) : owner_{owner} {}
 
+    /// Set the type to Fixed with size hint of \p hint.
+    void fixed(std::size_t hint) {
+        type_ = Type::Fixed;
+        hint_ = hint;
+        this->notify_parent();
+    }
+
+    /// Set the type to Minimum with size hint of \p hint.
+    void minimum(std::size_t hint) {
+        type_ = Type::Minimum;
+        hint_ = hint;
+        this->notify_parent();
+    }
+
+    /// Set the type to Maximum with size hint of \p hint.
+    void maximum(std::size_t hint) {
+        type_ = Type::Maximum;
+        hint_ = hint;
+        this->notify_parent();
+    }
+
+    /// Set the type to Preferred with size hint of \p hint.
+    void preferred(std::size_t hint) {
+        type_ = Type::Preferred;
+        hint_ = hint;
+        this->notify_parent();
+    }
+
+    /// Set the type to Expanding with size hint of \p hint.
+    void expanding(std::size_t hint) {
+        type_ = Type::Expanding;
+        hint_ = hint;
+        this->notify_parent();
+    }
+
+    /// Set the type to MinimumExpanding with size hint of \p hint.
+    void minimumExpanding(std::size_t hint) {
+        type_ = Type::MinimumExpanding;
+        hint_ = hint;
+        this->notify_parent();
+    }
+
+    /// Set the type to Ignored.
+    void ignored() { this->type(Type::Ignored); }
+
     /// Set the Type of the Size_policy.
     void type(Size_policy::Type type) {
         type_ = type;
@@ -63,22 +108,22 @@ class Size_policy {
     std::size_t hint() const { return hint_; }
 
     /// Set the minimum length that the owning Widget should be.
-    void min(std::size_t value) {
+    void min_size(std::size_t value) {
         min_ = value;
         this->notify_parent();
     }
 
     /// Return the minimum length currently set.
-    std::size_t min() const { return min_; }
+    std::size_t min_size() const { return min_; }
 
-    /// Set the maximum length that the owning Widget should be.
-    void max(std::size_t value) {
+    /// Set the maximum length/height that the owning Widget can be.
+    void max_size(std::size_t value) {
         max_ = value;
         this->notify_parent();
     }
 
     /// Return the maximum length currently set.
-    std::size_t max() const { return max_; }
+    std::size_t max_size() const { return max_; }
 
    private:
     Size_policy::Type type_{Type::Ignored};

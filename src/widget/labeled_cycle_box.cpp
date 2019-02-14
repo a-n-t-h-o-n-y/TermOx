@@ -26,8 +26,7 @@ void Labeled_cycle_box::set_title(Glyph_string title) {
 }
 
 void Labeled_cycle_box::resize_label() {
-    label.width_policy.hint(label.contents().size() + 2);
-    label.width_policy.type(Size_policy::Fixed);
+    label.width_policy.fixed(label.contents().size() + 2);
     this->update();
 }
 

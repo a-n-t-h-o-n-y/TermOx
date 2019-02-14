@@ -5,7 +5,6 @@
 #include <cppurses/system/focus.hpp>
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/focus_policy.hpp>
-#include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget_slots.hpp>
 
 #include <fstream>
@@ -107,8 +106,7 @@ Attrs_and_colors::Attrs_and_colors() {
 }
 
 void Attrs_and_colors::initialize() {
-    this->width_policy.type(Size_policy::Fixed);
-    this->width_policy.hint(16);
+    this->width_policy.fixed(16);
 }
 
 // Save Area
@@ -122,12 +120,10 @@ Save_area::Save_area() {
 }
 
 void Save_area::initialize() {
-    this->height_policy.type(Size_policy::Fixed);
-    this->height_policy.hint(1);
+    this->height_policy.fixed(1);
 
     // Load Button
-    load_btn.width_policy.type(Size_policy::Fixed);
-    load_btn.width_policy.hint(6);
+    load_btn.width_policy.fixed(6);
     load_btn.brush.set_background(Color::Blue);
 
     // Filename Text Edit
@@ -136,8 +132,7 @@ void Save_area::initialize() {
     filename_edit.brush.set_foreground(Color::Black);
 
     // Save Button
-    save_btn.width_policy.type(Size_policy::Fixed);
-    save_btn.width_policy.hint(6);
+    save_btn.width_policy.fixed(6);
     save_btn.brush.set_background(Color::Blue);
 }
 

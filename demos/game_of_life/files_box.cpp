@@ -3,7 +3,6 @@
 #include <string>
 
 #include <cppurses/painter/color.hpp>
-#include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widgets/confirm_button.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 
@@ -19,9 +18,7 @@ File_widget::File_widget(const std::string& btn_text)
 }
 
 Files_box::Files_box() {
-    this->height_policy.type(Size_policy::Fixed);
-    this->height_policy.hint(5);
-
+    this->height_policy.fixed(5);
     this->border.enable();
     this->border.segments.disable_all();
     this->border.segments.north.enable();

@@ -4,19 +4,18 @@
 
 #include "palette_helpers.hpp"
 
+using namespace cppurses;
+
 namespace palette {
 
 // Initializes color control_object to set color definitions.
 Color_definition_setter::Color_definition_setter() {
-    using namespace cppurses;
-
-    this->change_current_color(Color::White);
-    this->width_policy.type(Size_policy::Maximum);
-    this->width_policy.hint(18);
-
+    this->width_policy.maximum(18);
     this->border.enable();
     this->border.segments.disable_all();
     this->border.segments.east.enable();
+
+    this->change_current_color(Color::White);
 
     using namespace palette::detail;
     color_control_.red_changed.connect(
@@ -27,7 +26,7 @@ Color_definition_setter::Color_definition_setter() {
         [this](int blue_value) { set_blue(current_color_, blue_value); });
 }
 
-void Color_definition_setter::change_current_color(cppurses::Color color) {
+void Color_definition_setter::change_current_color(Color color) {
     current_color_ = color;
     color_display_.set_color(color);
     color_control_.set_sliders(color);
