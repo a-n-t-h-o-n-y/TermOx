@@ -9,15 +9,15 @@
 namespace cppurses {
 
 bool has_border(const Widget& w) {
-    return w.border.enabled;
+    return w.border.enabled();
 }
 
 void enable_border(Widget& w) {
-    w.border.enabled = true;
+    w.border.enable();
 }
 
 void disable_border(Widget& w) {
-    w.border.enabled = false;
+    w.border.disable();
 }
 
 bool has_coordinates(const Widget& w,

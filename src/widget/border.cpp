@@ -6,50 +6,53 @@
 
 namespace cppurses {
 
-void set_walls(Border& b, const Glyph& horizontal, const Glyph& vertical) {
-    b.north = horizontal;
-    b.south = horizontal;
-    b.east = vertical;
-    b.west = vertical;
+void Border::Segments::enable_all() {
+    north.enable();
+    south.enable();
+    east.enable();
+    west.enable();
+    north_west.enable();
+    north_east.enable();
+    south_west.enable();
+    south_east.enable();
 }
 
-void enable_walls(Border& b) {
-    b.north_enabled = true;
-    b.south_enabled = true;
-    b.west_enabled = true;
-    b.east_enabled = true;
+void Border::Segments::disable_all() {
+    north.disable();
+    south.disable();
+    east.disable();
+    west.disable();
+    north_west.disable();
+    north_east.disable();
+    south_west.disable();
+    south_east.disable();
 }
 
-void disable_walls(Border& b) {
-    b.north_enabled = false;
-    b.south_enabled = false;
-    b.west_enabled = false;
-    b.east_enabled = false;
+void Border::Segments::enable_corners() {
+    north_west.enable();
+    north_east.enable();
+    south_west.enable();
+    south_east.enable();
 }
 
-void set_corners(Border& b,
-                 const Glyph& nw,
-                 const Glyph& ne,
-                 const Glyph& sw,
-                 const Glyph& se) {
-    b.north_west = nw;
-    b.north_east = ne;
-    b.south_west = sw;
-    b.south_east = se;
+void Border::Segments::disable_corners() {
+    north_west.disable();
+    north_east.disable();
+    south_west.disable();
+    south_east.disable();
 }
 
-void enable_corners(Border& b) {
-    b.north_west_enabled = true;
-    b.north_east_enabled = true;
-    b.south_west_enabled = true;
-    b.south_east_enabled = true;
+void Border::Segments::enable_sides() {
+    north.enable();
+    south.enable();
+    east.enable();
+    west.enable();
 }
 
-void disable_corners(Border& b) {
-    b.north_west_enabled = false;
-    b.north_east_enabled = false;
-    b.south_west_enabled = false;
-    b.south_east_enabled = false;
+void Border::Segments::disable_sides() {
+    north.disable();
+    south.disable();
+    east.disable();
+    west.disable();
 }
-
 }  // namespace cppurses

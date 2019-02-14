@@ -3,7 +3,6 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/painter.hpp>
-#include <cppurses/widget/border.hpp>
 
 namespace palette {
 

@@ -10,10 +10,10 @@ namespace gol {
 Side_panel::Side_panel() {
     this->width_policy.type(Size_policy::Fixed);
     this->width_policy.hint(16);
-    this->border.enabled = true;
-    disable_walls(this->border);
-    disable_corners(this->border);
-    this->border.east_enabled = true;
-    this->border.east = Glyph{L'│', foreground(Color::Blue)};
+
+    this->border.enable();
+    this->border.segments.disable_all();
+    this->border.segments.east.enable();
+    this->border.segments.east = Glyph{L'│', foreground(Color::Blue)};
 }
 }  // namespace gol

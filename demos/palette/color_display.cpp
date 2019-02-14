@@ -25,10 +25,9 @@ Color_display::Color_display(Color color) {
     this->height_policy.type(Size_policy::Maximum);
     this->height_policy.hint(3);
 
-    this->border.enabled = true;
-    disable_walls(this->border);
-    disable_corners(this->border);
-    this->border.south_enabled = true;
+    this->border.enable();
+    this->border.segments.disable_all();
+    this->border.segments.south.enable();
 
     this->set_color(color);
 }

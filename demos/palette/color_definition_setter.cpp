@@ -14,10 +14,9 @@ Color_definition_setter::Color_definition_setter() {
     this->width_policy.type(Size_policy::Maximum);
     this->width_policy.hint(18);
 
-    this->border.enabled = true;
-    disable_walls(this->border);
-    disable_corners(this->border);
-    this->border.east_enabled = true;
+    this->border.enable();
+    this->border.segments.disable_all();
+    this->border.segments.east.enable();
 
     using namespace palette::detail;
     color_control_.red_changed.connect(

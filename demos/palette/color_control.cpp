@@ -10,10 +10,9 @@ namespace {
 using namespace cppurses;
 /// Enable only the east wall of given a border, \p b. Also enables the border.
 void enable_east_wall(Border& b) {
-    b.enabled = true;
-    disable_walls(b);
-    disable_corners(b);
-    b.east_enabled = true;
+    b.enable();
+    b.segments.disable_all();
+    b.segments.east.enable();
 }
 }  // namespace
 

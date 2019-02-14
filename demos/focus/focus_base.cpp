@@ -21,25 +21,25 @@ std::string to_text(Focus_policy policy) {
 }
 
 void set_background(Border& border, Color color) {
-    border.north.brush.set_background(color);
-    border.south.brush.set_background(color);
-    border.east.brush.set_background(color);
-    border.west.brush.set_background(color);
-    border.north_east.brush.set_background(color);
-    border.north_west.brush.set_background(color);
-    border.south_east.brush.set_background(color);
-    border.south_west.brush.set_background(color);
+    border.segments.north.brush.set_background(color);
+    border.segments.south.brush.set_background(color);
+    border.segments.east.brush.set_background(color);
+    border.segments.west.brush.set_background(color);
+    border.segments.north_east.brush.set_background(color);
+    border.segments.north_west.brush.set_background(color);
+    border.segments.south_east.brush.set_background(color);
+    border.segments.south_west.brush.set_background(color);
 }
 
 void set_foreground(Border& border, Color color) {
-    border.north.brush.set_foreground(color);
-    border.south.brush.set_foreground(color);
-    border.east.brush.set_foreground(color);
-    border.west.brush.set_foreground(color);
-    border.north_east.brush.set_foreground(color);
-    border.north_west.brush.set_foreground(color);
-    border.south_east.brush.set_foreground(color);
-    border.south_west.brush.set_foreground(color);
+    border.segments.north.brush.set_foreground(color);
+    border.segments.south.brush.set_foreground(color);
+    border.segments.east.brush.set_foreground(color);
+    border.segments.west.brush.set_foreground(color);
+    border.segments.north_east.brush.set_foreground(color);
+    border.segments.north_west.brush.set_foreground(color);
+    border.segments.south_east.brush.set_foreground(color);
+    border.segments.south_west.brush.set_foreground(color);
 }
 
 }  // namespace
@@ -51,7 +51,7 @@ Focus_base::Focus_base(cppurses::Focus_policy policy) {
     this->set_policy(policy);
     title_.set_alignment(cppurses::Alignment::Center);
     title_.install_event_filter(*this);
-    enable_border(*this);
+    this->border.enable();
 }
 
 bool Focus_base::focus_in_event() {

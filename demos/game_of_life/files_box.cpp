@@ -21,10 +21,10 @@ File_widget::File_widget(const std::string& btn_text)
 Files_box::Files_box() {
     this->height_policy.type(Size_policy::Fixed);
     this->height_policy.hint(5);
-    this->border.enabled = true;
-    disable_corners(this->border);
-    disable_walls(this->border);
-    this->border.north_enabled = true;
-    this->border.north = Glyph{L'─', foreground(Color::Blue)};
+
+    this->border.enable();
+    this->border.segments.disable_all();
+    this->border.segments.north.enable();
+    this->border.segments.north = Glyph{L'─', foreground(Color::Blue)};
 }
 }  // namespace gol

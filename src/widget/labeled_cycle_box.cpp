@@ -14,11 +14,10 @@ namespace cppurses {
 Labeled_cycle_box::Labeled_cycle_box(Glyph_string title) {
     this->set_title(std::move(title));
 
-    disable_walls(label.border);
-    disable_corners(label.border);
-    label.border.east_enabled = true;
-    label.border.east = L'├';
-    enable_border(label);
+    label.border.enable();
+    label.border.segments.disable_all();
+    label.border.segments.east.enable();
+    label.border.segments.east = L'├';
 }
 
 void Labeled_cycle_box::set_title(Glyph_string title) {
@@ -33,7 +32,7 @@ void Labeled_cycle_box::resize_label() {
 }
 
 void Labeled_cycle_box::set_divider(const Glyph& divider) {
-    label.border.east = divider;
+    label.border.segments.east = divider;
     this->update();
 }
 

@@ -4,57 +4,81 @@
 
 namespace cppurses {
 
-/// Holds the look of a Widget's Border.
-struct Border {
-    bool enabled{false};
+/// Provides representation of a Widget's visible, surrounding border.
+class Border {
+   public:
+    /// Holds enabled state and appearance for a Border Segment.
+    class Segment : public Glyph {
+       public:
+        /// Construct a Border Segment with \g for appearance.
+        Segment(const Glyph& g) : Glyph{g} {}
 
-    // TODO Can combine single Glyph and bool into an object(struct)
-    Glyph north{L'─'};
-    Glyph south{L'─'};
-    Glyph east{L'│'};
-    Glyph west{L'│'};
-    Glyph north_west{L'┌'};
-    Glyph north_east{L'┐'};
-    Glyph south_west{L'└'};
-    Glyph south_east{L'┘'};
+        /// Enable the Segment to be displayable.
+        void enable() { enabled_ = true; }
 
-    bool north_enabled{true};
-    bool south_enabled{true};
-    bool east_enabled{true};
-    bool west_enabled{true};
-    bool north_west_enabled{true};
-    bool north_east_enabled{true};
-    bool south_west_enabled{true};
-    bool south_east_enabled{true};
+        /// Disable the Segment, making it non-displayable.
+        void disable() { enabled_ = false; }
+
+        /// Return whether or not the border is enabled.
+        bool enabled() const { return enabled_; }
+
+        /// Can assign to this as if it is a Glyph.
+        using Glyph::operator=;
+
+       private:
+        bool enabled_{true};
+    };
+
+    /// Holds all 8 Segments that a Border is made up of.
+    struct Segments {
+        Segment north{L'─'};
+        Segment south{L'─'};
+        Segment east{L'│'};
+        Segment west{L'│'};
+        Segment north_west{L'┌'};
+        Segment north_east{L'┐'};
+        Segment south_west{L'└'};
+        Segment south_east{L'┘'};
+
+        /// Enable all Segments, allowing them to be displayed.
+        void enable_all();
+
+        /// Disable all Segments.
+        void disable_all();
+
+        /// Enable all corners.
+        /** Corners are north_west, north_east, south_west, and south_east. */
+        void enable_corners();
+
+        /// Disable all corners.
+        /** Corners are north_west, north_east, south_west, and south_east. */
+        void disable_corners();
+
+        /// Enable all sides.
+        /** Sides are north, south, east, and west. */
+        void enable_sides();
+
+        /// Disable all sides.
+        /** Sides are north, south, east, and west. */
+        void disable_sides();
+    };
+
+    /// Contains the look/appearance and enabled state for each segment.
+    Segments segments;
+
+    /// Enable the Border.
+    /** This will give it space within its Widget and make it displayable.
+     *  Segments are only displayed if their Border is enabled. */
+    void enable() { enabled_ = true; }
+
+    /// Disable the Border.
+    void disable() { enabled_ = false; }
+
+    /// Return whether the border is enabled.
+    bool enabled() const { return enabled_; }
+
+   private:
+    bool enabled_{false};
 };
-
-/**
- * @brief Change the Glyph for each the horizontal and vertical walls.
- *
- * @param b Border to be modified.
- * @param horizontal Glyph used for each space on the horizontal wall.
- * @param vertical Glyph used for each space on the vertical wall.
- */
-void set_walls(Border& b, const Glyph& horizontal, const Glyph& vertical);
-
-/// Enable all walls of the border to display.
-void enable_walls(Border& b);
-
-/// Disable all walls of the border.
-void disable_walls(Border& b);
-
-/// Set the Glyphs to be used by each of the corners of the Border.
-void set_corners(Border& b,
-                 const Glyph& nw,
-                 const Glyph& ne,
-                 const Glyph& sw,
-                 const Glyph& se);
-
-/// Enable all four corners of the Border to be displayed.
-void enable_corners(Border& b);
-
-/// Disable all four corners of the Border.
-void disable_corners(Border& b);
-
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_BORDER_HPP

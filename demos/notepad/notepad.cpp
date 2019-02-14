@@ -48,8 +48,11 @@ Text_and_attributes::Text_and_attributes() {
 
 void Text_and_attributes::initialize() {
     textbox.brush.set_background(Color::Dark_gray);
-    textbox.border.enabled = true;
-    set_corners(textbox.border, L'╭', L'╮', L'╰', L'╯');
+    textbox.border.enable();
+    textbox.border.segments.north_west = L'╭';
+    textbox.border.segments.north_east = L'╮';
+    textbox.border.segments.south_west = L'╰';
+    textbox.border.segments.south_east = L'╯';
 
     // Signals -- Colors
     ac_select.fg_select.color_changed.connect(slot::set_foreground(textbox));

@@ -30,8 +30,8 @@ class Animated_bit : public cppurses::Widget {
 class Animated_widget : public cppurses::layout::Horizontal {
    public:
     Animated_widget() {
-        bit_2_.border.enabled = true;
-        bit_4_.border.enabled = true;
+        bit_2_.border.enable();
+        bit_4_.border.enable();
     }
 
    private:

@@ -55,11 +55,11 @@ namespace demos {
 namespace glyph_paint {
 
 Paint_area::Paint_area() {
-    this->border.enabled = true;
-    disable_walls(this->border);
-    disable_corners(this->border);
-    this->border.east_enabled = true;
     this->focus_policy = Focus_policy::Strong;
+
+    this->border.enable();
+    this->border.segments.disable_all();
+    this->border.segments.east.enable();
 }
 
 void Paint_area::set_glyph(Glyph glyph) {
