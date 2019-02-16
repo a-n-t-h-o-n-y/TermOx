@@ -3,10 +3,9 @@
 #include <cstdint>
 
 #include <cppurses/painter/painter.hpp>
-#include <cppurses/system/focus.hpp>
-#include <cppurses/system/key.hpp>
-#include <cppurses/system/keyboard_data.hpp>
+#include <cppurses/system/events/keyboard.hpp>
 #include <cppurses/system/events/mouse.hpp>
+#include <cppurses/system/focus.hpp>
 #include <cppurses/widget/area.hpp>
 #include <cppurses/widget/point.hpp>
 
@@ -79,12 +78,12 @@ bool Widget::mouse_move_event(const Mouse::State& mouse) {
     return false;
 }
 
-bool Widget::key_press_event(const Keyboard_data& keyboard) {
+bool Widget::key_press_event(const Keyboard::State& keyboard) {
     key_pressed(keyboard.key);
     return true;
 }
 
-bool Widget::key_release_event(const Keyboard_data& keyboard) {
+bool Widget::key_release_event(const Keyboard::State& keyboard) {
     key_released(keyboard.key);
     return false;
 }
@@ -174,12 +173,12 @@ bool Widget::mouse_move_event_filter(Widget& receiver,
 }
 
 bool Widget::key_press_event_filter(Widget& receiver,
-                                    const Keyboard_data& keyboard) {
+                                    const Keyboard::State& keyboard) {
     return false;
 }
 
 bool Widget::key_release_event_filter(Widget& receiver,
-                                      const Keyboard_data& keyboard) {
+                                      const Keyboard::State& keyboard) {
     return false;
 }
 

@@ -30,8 +30,7 @@ struct Mouse {
 
    private:
     /// Mouse Event Base Class.
-    class Event : public Input_event {
-       public:
+    struct Event : Input_event {
         Event(Input_event::Type type, Widget& receiver, const State& data);
 
        protected:

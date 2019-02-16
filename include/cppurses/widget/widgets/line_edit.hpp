@@ -7,11 +7,11 @@
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/system/events/keyboard.hpp>
 #include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/widgets/textbox.hpp>
 
 namespace cppurses {
-struct Keyboard_data;
 struct Point;
 
 // TODO input_mask option, which shows outline of acceptable text in ghost color
@@ -52,7 +52,7 @@ class Line_edit : public Textbox {
     sig::Signal<void(std::string)> edit_finished;
 
    protected:
-    bool key_press_event(const Keyboard_data& keyboard) override;
+    bool key_press_event(const Keyboard::State& keyboard) override;
     bool mouse_press_event(const Mouse::State& mouse) override;
     bool focus_in_event() override;
 

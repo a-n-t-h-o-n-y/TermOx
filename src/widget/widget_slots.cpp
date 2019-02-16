@@ -3,7 +3,7 @@
 #include <signals/slot.hpp>
 
 #include <cppurses/painter/color.hpp>
-#include <cppurses/system/events/key_event.hpp>
+#include <cppurses/system/events/keyboard.hpp>
 #include <cppurses/system/events/mouse.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/system.hpp>
@@ -82,7 +82,7 @@ sig::Slot<void()> click(Widget& w, Point c, Mouse::Button b) {
 
 sig::Slot<void(Key)> keypress(Widget& w) {
     sig::Slot<void(Key)> slot{[&w](Key k) {
-        System::send_event(Key_press_event{w, k});
+        System::send_event(Keyboard::Press{w, k});
     }};
     slot.track(w.destroyed);
     return slot;
@@ -90,7 +90,7 @@ sig::Slot<void(Key)> keypress(Widget& w) {
 
 sig::Slot<void()> keypress(Widget& w, Key k) {
     sig::Slot<void()> slot{[&w, k] {
-        System::send_event(Key_press_event{w, k});
+        System::send_event(Keyboard::Press{w, k});
     }};
     slot.track(w.destroyed);
     return slot;

@@ -8,7 +8,7 @@
 
 #include <cppurses/system/detail/find_widget_at.hpp>
 #include <cppurses/system/event.hpp>
-#include <cppurses/system/events/key_event.hpp>
+#include <cppurses/system/events/keyboard.hpp>
 #include <cppurses/system/events/mouse.hpp>
 #include <cppurses/system/events/resize_event.hpp>
 #include <cppurses/system/events/terminal_resize_event.hpp>
@@ -137,7 +137,7 @@ std::unique_ptr<Event> make_resize_event() {
 
 std::unique_ptr<Event> make_keyboard_event(int input) {
     Widget* const receiver = Focus::focus_widget();
-    return receiver != nullptr ? std::make_unique<Key_press_event>(
+    return receiver != nullptr ? std::make_unique<Keyboard::Press>(
                                      *receiver, static_cast<Key>(input))
                                : nullptr;
 }

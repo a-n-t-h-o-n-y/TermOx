@@ -5,9 +5,9 @@
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
+#include <cppurses/system/events/keyboard.hpp>
 #include <cppurses/system/events/mouse.hpp>
 #include <cppurses/system/key.hpp>
-#include <cppurses/system/keyboard_data.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/widgets/detail/nearly_equal.hpp>
 
@@ -122,7 +122,7 @@ bool Vertical_slider::mouse_press_event(const Mouse::State& mouse) {
     return Widget::mouse_press_event(mouse);
 }
 
-bool Vertical_slider::key_press_event(const Keyboard_data& keyboard) {
+bool Vertical_slider::key_press_event(const Keyboard::State& keyboard) {
     switch (keyboard.key) {
         case Key::Arrow_up:
             this->increment();

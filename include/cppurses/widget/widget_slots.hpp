@@ -3,6 +3,7 @@
 #include <signals/slot.hpp>
 
 #include <cppurses/painter/color.hpp>
+#include <cppurses/system/events/keyboard.hpp>
 #include <cppurses/system/events/mouse.hpp>
 #include <cppurses/system/key.hpp>
 

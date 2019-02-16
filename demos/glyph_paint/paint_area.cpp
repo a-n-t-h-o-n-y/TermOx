@@ -16,9 +16,9 @@
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
+#include <cppurses/system/events/keyboard.hpp>
 #include <cppurses/system/events/mouse.hpp>
 #include <cppurses/system/key.hpp>
-#include <cppurses/system/keyboard_data.hpp>
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/point.hpp>
@@ -204,7 +204,7 @@ bool Paint_area::mouse_press_event(const Mouse::State& mouse) {
     return Widget::mouse_press_event(mouse);
 }
 
-bool Paint_area::key_press_event(const Keyboard_data& keyboard) {
+bool Paint_area::key_press_event(const Keyboard::State& keyboard) {
     if (!this->cursor.enabled()) {
         if (!std::iscntrl(keyboard.symbol)) {
             this->set_symbol(keyboard.symbol);

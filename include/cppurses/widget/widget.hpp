@@ -17,6 +17,7 @@
 #include <cppurses/painter/detail/screen_state.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/system/animation_engine.hpp>
+#include <cppurses/system/events/keyboard.hpp>
 #include <cppurses/system/events/mouse.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/widget/border.hpp>
@@ -29,7 +30,6 @@
 
 namespace cppurses {
 struct Area;
-struct Keyboard_data;
 
 class Widget {
    public:
@@ -314,11 +314,11 @@ class Widget {
     /// Handles Mouse::Move objects.
     virtual bool mouse_move_event(const Mouse::State& mouse);
 
-    /// Handles Key_press_event objects.
-    virtual bool key_press_event(const Keyboard_data& keyboard);
+    /// Handles Keyboard::Press objects.
+    virtual bool key_press_event(const Keyboard::State& keyboard);
 
-    /// Handles Key_release_event objects.
-    virtual bool key_release_event(const Keyboard_data& keyboard);
+    /// Handles Keyboard::Release objects.
+    virtual bool key_release_event(const Keyboard::State& keyboard);
 
     /// Handles Focus_in_event objects.
     virtual bool focus_in_event();
@@ -381,13 +381,13 @@ class Widget {
     virtual bool mouse_move_event_filter(Widget& receiver,
                                          const Mouse::State& mouse);
 
-    /// Handles Key_press_event objects filtered from other Widgets.
+    /// Handles Keyboard::Press objects filtered from other Widgets.
     virtual bool key_press_event_filter(Widget& receiver,
-                                        const Keyboard_data& keyboard);
+                                        const Keyboard::State& keyboard);
 
-    /// Handles Key_release_event objects filtered from other Widgets.
+    /// Handles Keyboard::Release objects filtered from other Widgets.
     virtual bool key_release_event_filter(Widget& receiver,
-                                          const Keyboard_data& keyboard);
+                                          const Keyboard::State& keyboard);
 
     /// Handles Focus_in_event objects filtered from other Widgets.
     virtual bool focus_in_event_filter(Widget& receiver);

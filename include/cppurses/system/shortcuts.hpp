@@ -4,6 +4,7 @@
 
 #include <signals/signal.hpp>
 
+#include <cppurses/system/events/keyboard.hpp>
 #include <cppurses/system/key.hpp>
 
 namespace cppurses {

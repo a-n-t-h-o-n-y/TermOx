@@ -6,7 +6,7 @@
 
 namespace cppurses {
 
-/// Enums for key codes from the keyboard with descriptive names.
+/// Enum for key codes from the keyboard with descriptive names.
 /** Names taken from ncurses. */
 enum class Key : short {
     // Control Characters
@@ -265,5 +265,4 @@ struct hash<cppurses::Key> {
     }
 };
 }  // namespace std
-
 #endif  // CPPURSES_SYSTEM_KEY_HPP

@@ -10,9 +10,9 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/system/events/keyboard.hpp>
 #include <cppurses/system/events/mouse.hpp>
 #include <cppurses/system/key.hpp>
-#include <cppurses/system/keyboard_data.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widgets/textbox.hpp>
 
@@ -82,7 +82,7 @@ void Line_edit::set_ghost_color(Color c) {
     }
 }
 
-bool Line_edit::key_press_event(const Keyboard_data& keyboard) {
+bool Line_edit::key_press_event(const Keyboard::State& keyboard) {
     if (keyboard.key == Key::Enter) {
         edit_finished(this->contents().str());
         if (clear_on_enter_) {

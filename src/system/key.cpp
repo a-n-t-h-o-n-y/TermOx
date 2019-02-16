@@ -13,5 +13,4 @@ char key_to_char(Key key) {
     }
     return static_cast<char>(value);
 }
-
 }  // namespace cppurses

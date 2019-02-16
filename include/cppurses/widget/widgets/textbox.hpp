@@ -3,11 +3,11 @@
 #include <cstddef>
 
 #include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/system/events/keyboard.hpp>
 #include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/widgets/detail/textbox_base.hpp>
 
 namespace cppurses {
-struct Keyboard_data;
 
 /// Interactive Glyph_string display.
 /** Provides common text interaction and presentation options as well as proper
@@ -48,7 +48,7 @@ class Textbox : public detail::Textbox_base {
 
    protected:
     /// Either input a Glyph from the Key, or move the cursor on arrow presses.
-    bool key_press_event(const Keyboard_data& keyboard) override;
+    bool key_press_event(const Keyboard::State& keyboard) override;
 
     /// Move the cursor to the pressed, or nearest cell, that contains a Glyph.
     bool mouse_press_event(const Mouse::State& mouse) override;

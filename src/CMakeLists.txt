@@ -55,8 +55,6 @@ target_sources(cppurses PRIVATE
     system/event_loop.cpp
     system/event_queue.cpp
     system/focus.cpp
-    system/key.cpp
-    system/key_event.cpp
     system/move_event.cpp
     system/resize_event.cpp
     system/system.cpp
@@ -70,6 +68,8 @@ target_sources(cppurses PRIVATE
     system/find_widget_at.cpp
     system/terminal_resize_event.cpp
     system/mouse.cpp
+    system/key.cpp
+    system/keyboard.cpp
 )
 
 # PAINTER

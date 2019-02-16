@@ -2,19 +2,19 @@
 #define CPPURSES_WIDGET_WIDGETS_LOG_HPP
 #include <signals/slot.hpp>
 
+#include <cppurses/system/events/keyboard.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
 #include <cppurses/widget/widgets/textbox.hpp>
 
 namespace cppurses {
 class Glyph_string;
-struct Keyboard_data;
 
 class Log : public Textbox {
    public:
     void post_message(Glyph_string message);
 
    protected:
-    bool key_press_event(const Keyboard_data& keyboard) override;
+    bool key_press_event(const Keyboard::State& keyboard) override;
 
     using Text_display::append;
     using Text_display::erase;
