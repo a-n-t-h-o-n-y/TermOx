@@ -8,12 +8,11 @@
 
 #include <cppurses/system/detail/find_widget_at.hpp>
 #include <cppurses/system/event.hpp>
-#include <cppurses/system/events/keyboard.hpp>
+#include <cppurses/system/events/key.hpp>
 #include <cppurses/system/events/mouse.hpp>
 #include <cppurses/system/events/resize_event.hpp>
 #include <cppurses/system/events/terminal_resize_event.hpp>
 #include <cppurses/system/focus.hpp>
-#include <cppurses/system/key.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/area.hpp>
 #include <cppurses/widget/point.hpp>
@@ -137,8 +136,8 @@ std::unique_ptr<Event> make_resize_event() {
 
 std::unique_ptr<Event> make_keyboard_event(int input) {
     Widget* const receiver = Focus::focus_widget();
-    return receiver != nullptr ? std::make_unique<Keyboard::Press>(
-                                     *receiver, static_cast<Key>(input))
+    return receiver != nullptr ? std::make_unique<Key::Press>(
+                                     *receiver, static_cast<Key::Code>(input))
                                : nullptr;
 }
 }  // namespace

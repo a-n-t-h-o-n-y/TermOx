@@ -5,7 +5,6 @@
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/focus.hpp>
-#include <cppurses/system/key.hpp>
 #include <cppurses/system/shortcuts.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/focus_policy.hpp>

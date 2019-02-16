@@ -3,9 +3,8 @@
 #include <signals/slot.hpp>
 
 #include <cppurses/painter/color.hpp>
-#include <cppurses/system/events/keyboard.hpp>
+#include <cppurses/system/events/key.hpp>
 #include <cppurses/system/events/mouse.hpp>
-#include <cppurses/system/key.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/cursor_data.hpp>
 #include <cppurses/widget/point.hpp>
@@ -80,18 +79,16 @@ sig::Slot<void()> click(Widget& w, Point c, Mouse::Button b) {
     return slot;
 }
 
-sig::Slot<void(Key)> keypress(Widget& w) {
-    sig::Slot<void(Key)> slot{[&w](Key k) {
-        System::send_event(Keyboard::Press{w, k});
+sig::Slot<void(Key::Code)> keypress(Widget& w) {
+    sig::Slot<void(Key::Code)> slot{[&w](Key::Code k) {
+        System::send_event(Key::Press{w, k});
     }};
     slot.track(w.destroyed);
     return slot;
 }
 
-sig::Slot<void()> keypress(Widget& w, Key k) {
-    sig::Slot<void()> slot{[&w, k] {
-        System::send_event(Keyboard::Press{w, k});
-    }};
+sig::Slot<void()> keypress(Widget& w, Key::Code k) {
+    sig::Slot<void()> slot{[&w, k] { System::send_event(Key::Press{w, k}); }};
     slot.track(w.destroyed);
     return slot;
 }

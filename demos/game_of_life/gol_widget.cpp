@@ -11,9 +11,8 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/painter.hpp>
-#include <cppurses/system/events/keyboard.hpp>
+#include <cppurses/system/events/key.hpp>
 #include <cppurses/system/events/mouse.hpp>
-#include <cppurses/system/key.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
@@ -193,7 +192,7 @@ bool GoL_widget::timer_event() {
     return Widget::timer_event();
 }
 
-bool GoL_widget::key_press_event(const Keyboard::State& keyboard) {
+bool GoL_widget::key_press_event(const Key::State& keyboard) {
     auto new_offset = this->offset();
     if (keyboard.key == Key::Arrow_left) {
         --new_offset.x;

@@ -2,7 +2,7 @@
 #define CPPURSES_WIDGET_WIDGETS_LOG_HPP
 #include <signals/slot.hpp>
 
-#include <cppurses/system/events/keyboard.hpp>
+#include <cppurses/system/events/key.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
 #include <cppurses/widget/widgets/textbox.hpp>
 
@@ -14,7 +14,7 @@ class Log : public Textbox {
     void post_message(Glyph_string message);
 
    protected:
-    bool key_press_event(const Keyboard::State& keyboard) override;
+    bool key_press_event(const Key::State& keyboard) override;
 
     using Text_display::append;
     using Text_display::erase;

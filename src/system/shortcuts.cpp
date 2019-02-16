@@ -4,21 +4,20 @@
 
 #include <signals/signal.hpp>
 
-#include <cppurses/system/events/keyboard.hpp>
-#include <cppurses/system/key.hpp>
+#include <cppurses/system/events/key.hpp>
 
 namespace cppurses {
 
-std::unordered_map<Key, sig::Signal<void()>> Shortcuts::shortcuts_;
+std::unordered_map<Key::Code, sig::Signal<void()>> Shortcuts::shortcuts_;
 
-sig::Signal<void()>& Shortcuts::add_shortcut(Key key) {
+sig::Signal<void()>& Shortcuts::add_shortcut(Key::Code key) {
     if (shortcuts_.count(key) == 0) {
         shortcuts_[key] = sig::Signal<void()>{};
     }
     return shortcuts_.at(key);
 }
 
-bool Shortcuts::send_key(Key key) {
+bool Shortcuts::send_key(Key::Code key) {
     if (shortcuts_.count(key) == 1) {
         shortcuts_[key]();
         return true;

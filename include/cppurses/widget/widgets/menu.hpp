@@ -6,7 +6,7 @@
 
 #include <signals/slot.hpp>
 
-#include <cppurses/system/events/keyboard.hpp>
+#include <cppurses/system/events/key.hpp>
 #include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/widgets/fixed_height.hpp>
@@ -31,7 +31,7 @@ class Menu : public layout::Vertical {
     std::size_t size() const;
 
    protected:
-    bool key_press_event(const Keyboard::State& keyboard) override;
+    bool key_press_event(const Key::State& keyboard) override;
 
     bool mouse_press_event(const Mouse::State& mouse) override;
 

@@ -4,9 +4,8 @@
 #include <utility>
 
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/system/events/keyboard.hpp>
+#include <cppurses/system/events/key.hpp>
 #include <cppurses/system/events/mouse.hpp>
-#include <cppurses/system/key.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/widgets/detail/textbox_base.hpp>
 
@@ -22,7 +21,7 @@ void Textbox::set_wheel_speed(std::size_t lines) {
     this->set_wheel_speed_down(lines);
 }
 
-bool Textbox::key_press_event(const Keyboard::State& keyboard) {
+bool Textbox::key_press_event(const Key::State& keyboard) {
     switch (keyboard.key) {
         case Key::Arrow_right:
             this->cursor_right(1);

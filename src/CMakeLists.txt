@@ -69,7 +69,6 @@ target_sources(cppurses PRIVATE
     system/terminal_resize_event.cpp
     system/mouse.cpp
     system/key.cpp
-    system/keyboard.cpp
 )
 
 # PAINTER

@@ -7,7 +7,7 @@
 #include <cppurses/system/events/enable_event.hpp>
 #include <cppurses/system/events/focus_event.hpp>
 #include <cppurses/system/events/input_event.hpp>
-#include <cppurses/system/events/keyboard.hpp>
+#include <cppurses/system/events/key.hpp>
 #include <cppurses/system/events/mouse.hpp>
 #include <cppurses/system/events/move_event.hpp>
 #include <cppurses/system/events/paint_event.hpp>

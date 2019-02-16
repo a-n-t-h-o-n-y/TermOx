@@ -17,9 +17,8 @@
 #include <cppurses/painter/detail/screen_state.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/system/animation_engine.hpp>
-#include <cppurses/system/events/keyboard.hpp>
+#include <cppurses/system/events/key.hpp>
 #include <cppurses/system/events/mouse.hpp>
-#include <cppurses/system/key.hpp>
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/children_data.hpp>
 #include <cppurses/widget/cursor_data.hpp>
@@ -268,8 +267,8 @@ class Widget {
     sig::Signal<void(std::size_t, std::size_t)> click_released_xy;
     sig::Signal<void(Point)> double_clicked;
     sig::Signal<void(std::size_t, std::size_t)> double_clicked_xy;
-    sig::Signal<void(Key)> key_pressed;
-    sig::Signal<void(Key)> key_released;
+    sig::Signal<void(Key::Code)> key_pressed;
+    sig::Signal<void(Key::Code)> key_released;
 
     // TODO move this once set_parent is in a sub-object
     friend class Children_data;
@@ -314,11 +313,11 @@ class Widget {
     /// Handles Mouse::Move objects.
     virtual bool mouse_move_event(const Mouse::State& mouse);
 
-    /// Handles Keyboard::Press objects.
-    virtual bool key_press_event(const Keyboard::State& keyboard);
+    /// Handles Key::Press objects.
+    virtual bool key_press_event(const Key::State& keyboard);
 
-    /// Handles Keyboard::Release objects.
-    virtual bool key_release_event(const Keyboard::State& keyboard);
+    /// Handles Key::Release objects.
+    virtual bool key_release_event(const Key::State& keyboard);
 
     /// Handles Focus_in_event objects.
     virtual bool focus_in_event();
@@ -381,13 +380,13 @@ class Widget {
     virtual bool mouse_move_event_filter(Widget& receiver,
                                          const Mouse::State& mouse);
 
-    /// Handles Keyboard::Press objects filtered from other Widgets.
+    /// Handles Key::Press objects filtered from other Widgets.
     virtual bool key_press_event_filter(Widget& receiver,
-                                        const Keyboard::State& keyboard);
+                                        const Key::State& keyboard);
 
-    /// Handles Keyboard::Release objects filtered from other Widgets.
+    /// Handles Key::Release objects filtered from other Widgets.
     virtual bool key_release_event_filter(Widget& receiver,
-                                          const Keyboard::State& keyboard);
+                                          const Key::State& keyboard);
 
     /// Handles Focus_in_event objects filtered from other Widgets.
     virtual bool focus_in_event_filter(Widget& receiver);

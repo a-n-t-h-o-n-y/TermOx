@@ -6,7 +6,7 @@
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/system/events/keyboard.hpp>
+#include <cppurses/system/events/key.hpp>
 #include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/widget.hpp>
 
@@ -97,7 +97,7 @@ class Vertical_slider : public Widget {
    protected:
     bool paint_event() override;
     bool mouse_press_event(const Mouse::State& mouse) override;
-    bool key_press_event(const Keyboard::State& keyboard) override;
+    bool key_press_event(const Key::State& keyboard) override;
 
    private:
     // candidate for struct
