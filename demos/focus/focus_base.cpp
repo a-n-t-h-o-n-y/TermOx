@@ -68,7 +68,7 @@ bool Focus_base::focus_out_event() {
     return Widget::focus_out_event();
 }
 
-bool Focus_base::focus_in_event_filter(Widget& receiver) {
+bool Focus_base::focus_in_event_filter(Widget& /* receiver */) {
     Focus::set_focus_to(this);
     return true;
 }
@@ -77,6 +77,5 @@ void Focus_base::set_policy(Focus_policy policy) {
     title_.set_contents(to_text(policy));
     this->focus_policy = policy;
 }
-
 }  // namespace focus
 }  // namespace demos

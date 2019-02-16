@@ -111,7 +111,7 @@ void put_as_wchar(const Glyph& glyph) {
     const auto color_pair = find_pair(glyph.brush);
     const auto attributes = find_attr_t(glyph.brush);
     const wchar_t symbol[2] = {glyph.symbol, L'\0'};
-    auto symbol_and_attributes = cchar_t{' '};
+    auto symbol_and_attributes = cchar_t{};
 
     ::setcchar(&symbol_and_attributes, symbol, attributes, color_pair, nullptr);
     ::wadd_wchnstr(::stdscr, &symbol_and_attributes, 1);

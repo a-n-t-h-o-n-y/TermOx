@@ -216,9 +216,11 @@ void GoL_widget::update_period() {
 }
 
 Point GoL_widget::transform_from_engine(Coordinate position) const {
-    const int x{position.x + static_cast<int>(this->width() / 2) - offset_.x};
-    const int y{position.y + static_cast<int>(this->height() / 2) - offset_.y};
-    if (x >= 0 && x < this->width() && y >= 0 && y < this->height()) {
+    const int height = static_cast<int>(this->height());
+    const int width = static_cast<int>(this->width());
+    const int x{position.x + static_cast<int>(width / 2) - offset_.x};
+    const int y{position.y + static_cast<int>(height / 2) - offset_.y};
+    if (x >= 0 && x < width && y >= 0 && y < height) {
         return Point{static_cast<std::size_t>(x), static_cast<std::size_t>(y)};
     }
     return Point{std::size_t(-1), std::size_t(-1)};

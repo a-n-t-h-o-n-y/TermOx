@@ -29,12 +29,12 @@ void Vertical_slider::set_ratio(Ratio_t ratio) {
 }
 
 void Vertical_slider::increment(Value_t amount) {
-    inverted_ ? logic_.decrement() : logic_.increment();
+    inverted_ ? logic_.decrement(amount) : logic_.increment(amount);
     this->update();
 }
 
 void Vertical_slider::decrement(Value_t amount) {
-    inverted_ ? logic_.increment() : logic_.decrement();
+    inverted_ ? logic_.increment(amount) : logic_.decrement(amount);
     this->update();
 }
 
@@ -75,7 +75,7 @@ bool Vertical_slider::paint_event() {
     const auto upper_limit = indicator_y - 1;
     for (auto y = indicator_y - 1; y < indicator_y; --y) {
         const auto upper_index = (upper_limit - y) % upper_gs.size();
-        for (auto x = 0; x < width; ++x) {
+        for (auto x = std::size_t{0}; x < width; ++x) {
             p.put(upper_gs[upper_index], x, y);
         }
         if (!up_repeats && (indicator_y - y) == upper_gs.size()) {
@@ -84,7 +84,7 @@ bool Vertical_slider::paint_event() {
     }
     // Middle
     const std::size_t index = this->indicator_index();
-    for (auto x = 0; x < width; ++x) {
+    for (auto x = std::size_t{0}; x < width; ++x) {
         p.put(indicator_[index], x, indicator_y);
     }
     // Lower
@@ -94,7 +94,7 @@ bool Vertical_slider::paint_event() {
     const auto lower_offset = indicator_y + 1;
     for (auto y = indicator_y + 1; y < height; ++y) {
         const auto lower_index = (y - lower_offset) % lower_gs.size();
-        for (auto x = 0; x < width; ++x) {
+        for (auto x = std::size_t{0}; x < width; ++x) {
             p.put(lower_gs[lower_index], x, y);
         }
         if (!low_repeats && (y - indicator_y) == lower_gs.size()) {

@@ -128,7 +128,7 @@ bool Menu::mouse_press_event(const Mouse::State& mouse) {
     return layout::Vertical::mouse_press_event(mouse);
 }
 
-bool Menu::mouse_press_event_filter(Widget& receiver,
+bool Menu::mouse_press_event_filter(Widget& /* receiver */,
                                     const Mouse::State& mouse) {
     if (mouse.button == Mouse::Button::ScrollUp) {
         this->select_up();

@@ -17,7 +17,7 @@ Vertical_arrows::Vertical_arrows() {
     down_btn.brush.set_background(Color::Light_gray);
 }
 
-bool Vertical_arrows::mouse_press_event_filter(Widget& receiver,
+bool Vertical_arrows::mouse_press_event_filter(Widget& /* receiver */,
                                                const Mouse::State& mouse) {
     if (mouse.button == Mouse::Button::ScrollUp) {
         up_btn.clicked();
