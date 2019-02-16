@@ -5,8 +5,7 @@
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
-#include <cppurses/system/mouse_button.hpp>
-#include <cppurses/system/mouse_data.hpp>
+#include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
@@ -20,8 +19,8 @@ void Push_button::set_label(Glyph_string label) {
     this->update();
 }
 
-bool Push_button::mouse_press_event(const Mouse_data& mouse) {
-    if (mouse.button == Mouse_button::Left) {
+bool Push_button::mouse_press_event(const Mouse::State& mouse) {
+    if (mouse.button == Mouse::Button::Left) {
         clicked();
     }
     return Widget::mouse_press_event(mouse);

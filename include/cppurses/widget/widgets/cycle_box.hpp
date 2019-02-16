@@ -6,10 +6,10 @@
 #include <signals/signals.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/widgets/label.hpp>
 
 namespace cppurses {
-struct Mouse_data;
 
 /// A rotating set of labels, emitting a Signal when the label is changed.
 /** Labels are cycled forwards by a left click or scroll up, cycled backwards
@@ -41,7 +41,7 @@ class Cycle_box : public Label {
     sig::Signal<void(std::string)> option_changed;
 
    protected:
-    bool mouse_press_event(const Mouse_data& mouse) override;
+    bool mouse_press_event(const Mouse::State& mouse) override;
 
    private:
     /// Holds an Option's Signal and name.

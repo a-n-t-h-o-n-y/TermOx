@@ -2,8 +2,8 @@
 
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/system/detail/fps_to_period.hpp>
+#include <cppurses/system/events/mouse.hpp>
 #include <cppurses/system/events/paint_event.hpp>
-#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 
@@ -45,7 +45,7 @@ bool Animated_bit::paint_event() {
     return Widget::paint_event();
 }
 
-bool Animated_bit::mouse_press_event(const cppurses::Mouse_data& mouse) {
+bool Animated_bit::mouse_press_event(const cppurses::Mouse::State& mouse) {
     coords_ = mouse.local;
     this->update();
     return Widget::mouse_press_event(mouse);

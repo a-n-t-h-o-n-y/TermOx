@@ -16,10 +16,9 @@
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
+#include <cppurses/system/events/mouse.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/keyboard_data.hpp>
-#include <cppurses/system/mouse_button.hpp>
-#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/point.hpp>
@@ -192,10 +191,10 @@ bool Paint_area::paint_event() {
     return Widget::paint_event();
 }
 
-bool Paint_area::mouse_press_event(const Mouse_data& mouse) {
-    if (mouse.button == Mouse_button::Right) {
+bool Paint_area::mouse_press_event(const Mouse::State& mouse) {
+    if (mouse.button == Mouse::Button::Right) {
         this->remove_glyph(mouse.local);
-    } else if (mouse.button == Mouse_button::Middle) {
+    } else if (mouse.button == Mouse::Button::Middle) {
         if (glyphs_painted_.count(mouse.local) == 1) {
             this->set_glyph(glyphs_painted_[mouse.local]);
         }

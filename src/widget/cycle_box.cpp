@@ -9,8 +9,7 @@
 #include <signals/signals.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/system/mouse_button.hpp>
-#include <cppurses/system/mouse_data.hpp>
+#include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
 
 namespace cppurses {
@@ -68,11 +67,11 @@ void Cycle_box::cycle_backward() {
     }
 }
 
-bool Cycle_box::mouse_press_event(const Mouse_data& mouse) {
-    if (mouse.button == Mouse_button::Left ||
-        mouse.button == Mouse_button::ScrollUp) {
+bool Cycle_box::mouse_press_event(const Mouse::State& mouse) {
+    if (mouse.button == Mouse::Button::Left ||
+        mouse.button == Mouse::Button::ScrollUp) {
         this->cycle_forward();
-    } else if (mouse.button == Mouse_button::ScrollDown) {
+    } else if (mouse.button == Mouse::Button::ScrollDown) {
         this->cycle_backward();
     }
     return Label::mouse_press_event(mouse);

@@ -11,9 +11,9 @@
 #include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
+#include <cppurses/system/events/mouse.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/keyboard_data.hpp>
-#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widget_free_functions.hpp>
@@ -119,21 +119,22 @@ bool Menu::key_press_event(const Keyboard_data& keyboard) {
     return true;
 }
 
-bool Menu::mouse_press_event(const Mouse_data& mouse) {
-    if (mouse.button == Mouse_button::ScrollUp) {
+bool Menu::mouse_press_event(const Mouse::State& mouse) {
+    if (mouse.button == Mouse::Button::ScrollUp) {
         this->select_up();
-    } else if (mouse.button == Mouse_button::ScrollDown) {
+    } else if (mouse.button == Mouse::Button::ScrollDown) {
         this->select_down();
     }
     return layout::Vertical::mouse_press_event(mouse);
 }
 
-bool Menu::mouse_press_event_filter(Widget& receiver, const Mouse_data& mouse) {
-    if (mouse.button == Mouse_button::ScrollUp) {
+bool Menu::mouse_press_event_filter(Widget& receiver,
+                                    const Mouse::State& mouse) {
+    if (mouse.button == Mouse::Button::ScrollUp) {
         this->select_up();
         return true;
     }
-    if (mouse.button == Mouse_button::ScrollDown) {
+    if (mouse.button == Mouse::Button::ScrollDown) {
         this->select_down();
         return true;
     }

@@ -5,10 +5,9 @@
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
+#include <cppurses/system/events/mouse.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/keyboard_data.hpp>
-#include <cppurses/system/mouse_button.hpp>
-#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/widgets/detail/nearly_equal.hpp>
 
@@ -105,16 +104,16 @@ bool Vertical_slider::paint_event() {
     return Widget::paint_event();
 }
 
-bool Vertical_slider::mouse_press_event(const Mouse_data& mouse) {
+bool Vertical_slider::mouse_press_event(const Mouse::State& mouse) {
     switch (mouse.button) {
-        case Mouse_button::Left:
+        case Mouse::Button::Left:
             logic_.set_ratio(this->ratio_at(mouse.local.y));
             this->update();
             break;
-        case Mouse_button::ScrollUp:
+        case Mouse::Button::ScrollUp:
             this->increment();
             break;
-        case Mouse_button::ScrollDown:
+        case Mouse::Button::ScrollDown:
             this->decrement();
             break;
         default:

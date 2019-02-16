@@ -7,10 +7,10 @@
 
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
-struct Mouse_data;
 
 /// Checkbox Widget that is either checked or not checked.
 /** Uses mouse left button click to toggle between states. */
@@ -57,7 +57,7 @@ class Checkbox : public Widget {
 
    protected:
     bool paint_event() override;
-    bool mouse_press_event(const Mouse_data& mouse) override;
+    bool mouse_press_event(const Mouse::State& mouse) override;
 
    private:
     Glyph unchecked_box_{L'☐'};

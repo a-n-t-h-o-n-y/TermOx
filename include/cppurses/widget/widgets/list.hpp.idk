@@ -8,9 +8,9 @@
 #include <signals/signals.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/system/events/mouse.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/keyboard_data.hpp>
-#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
@@ -32,7 +32,7 @@ class List : public Widget {
    protected:
     bool paint_event() override;
     bool key_press_event(const Keyboard_data& keyboard) override;
-    bool mouse_press_event(const Mouse_data& mouse) override;
+    bool mouse_press_event(const Mouse::State& mouse) override;
 
    private:
     struct Property {
@@ -136,7 +136,7 @@ bool List<T>::key_press_event(const Keyboard_data& keyboard) {
 }
 
 template <typename T>
-bool List<T>::mouse_press_event(const Mouse_data& mouse) {
+bool List<T>::mouse_press_event(const Mouse::State& mouse) {
     return Widget::mouse_press_event(mouse);
 }
 

@@ -10,10 +10,9 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/system/events/mouse.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/keyboard_data.hpp>
-#include <cppurses/system/mouse_button.hpp>
-#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widgets/textbox.hpp>
 
@@ -110,9 +109,9 @@ bool Line_edit::key_press_event(const Keyboard_data& keyboard) {
     return Textbox::key_press_event(keyboard);
 }
 
-bool Line_edit::mouse_press_event(const Mouse_data& mouse) {
-    if (mouse.button == Mouse_button::ScrollUp ||
-        mouse.button == Mouse_button::ScrollDown) {
+bool Line_edit::mouse_press_event(const Mouse::State& mouse) {
+    if (mouse.button == Mouse::Button::ScrollUp ||
+        mouse.button == Mouse::Button::ScrollDown) {
         return true;
     }
     return Textbox::mouse_press_event(mouse);

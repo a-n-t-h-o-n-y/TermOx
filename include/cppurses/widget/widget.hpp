@@ -17,6 +17,7 @@
 #include <cppurses/painter/detail/screen_state.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/system/animation_engine.hpp>
+#include <cppurses/system/events/mouse.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/children_data.hpp>
@@ -29,7 +30,6 @@
 namespace cppurses {
 struct Area;
 struct Keyboard_data;
-struct Mouse_data;
 
 class Widget {
    public:
@@ -299,20 +299,20 @@ class Widget {
     /// Handles Resize_event objects.
     virtual bool resize_event(Area new_size, Area old_size);
 
-    /// Handles Mouse_press_event objects.
-    virtual bool mouse_press_event(const Mouse_data& mouse);
+    /// Handles Mouse::Press objects.
+    virtual bool mouse_press_event(const Mouse::State& mouse);
 
-    /// Handles Mouse_release_event objects.
-    virtual bool mouse_release_event(const Mouse_data& mouse);
+    /// Handles Mouse::Release objects.
+    virtual bool mouse_release_event(const Mouse::State& mouse);
 
-    /// Handles Mouse_double_click_event objects.
-    virtual bool mouse_double_click_event(const Mouse_data& mouse);
+    /// Handles Mouse::Double_click objects.
+    virtual bool mouse_double_click_event(const Mouse::State& mouse);
 
-    /// Handles Mouse_wheel_event objects.
-    virtual bool mouse_wheel_event(const Mouse_data& mouse);
+    /// Handles Mouse::Wheel objects.
+    virtual bool mouse_wheel_event(const Mouse::State& mouse);
 
-    /// Handles Mouse_move_event objects.
-    virtual bool mouse_move_event(const Mouse_data& mouse);
+    /// Handles Mouse::Move objects.
+    virtual bool mouse_move_event(const Mouse::State& mouse);
 
     /// Handles Key_press_event objects.
     virtual bool key_press_event(const Keyboard_data& keyboard);
@@ -361,25 +361,25 @@ class Widget {
                                      Area new_size,
                                      Area old_size);
 
-    /// Handles Mouse_press_event objects filtered from other Widgets.
+    /// Handles Mouse::Press objects filtered from other Widgets.
     virtual bool mouse_press_event_filter(Widget& receiver,
-                                          const Mouse_data& mouse);
+                                          const Mouse::State& mouse);
 
-    /// Handles Mouse_release_event objects filtered from other Widgets.
+    /// Handles Mouse::Release objects filtered from other Widgets.
     virtual bool mouse_release_event_filter(Widget& receiver,
-                                            const Mouse_data& mouse);
+                                            const Mouse::State& mouse);
 
-    /// Handles Mouse_double_click_event objects filtered from other Widgets.
+    /// Handles Mouse::Double_click objects filtered from other Widgets.
     virtual bool mouse_double_click_event_filter(Widget& receiver,
-                                                 const Mouse_data& mouse);
+                                                 const Mouse::State& mouse);
 
-    /// Handles Mouse_wheel_event objects filtered from other Widgets.
+    /// Handles Mouse::Wheel objects filtered from other Widgets.
     virtual bool mouse_wheel_event_filter(Widget& receiver,
-                                          const Mouse_data& mouse);
+                                          const Mouse::State& mouse);
 
-    /// Handles Mouse_move_event objects filtered from other Widgets.
+    /// Handles Mouse::Move objects filtered from other Widgets.
     virtual bool mouse_move_event_filter(Widget& receiver,
-                                         const Mouse_data& mouse);
+                                         const Mouse::State& mouse);
 
     /// Handles Key_press_event objects filtered from other Widgets.
     virtual bool key_press_event_filter(Widget& receiver,

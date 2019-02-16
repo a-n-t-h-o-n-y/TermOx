@@ -4,10 +4,9 @@
 #include <utility>
 
 #include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/system/events/mouse.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/keyboard_data.hpp>
-#include <cppurses/system/mouse_button.hpp>
-#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/widgets/detail/textbox_base.hpp>
 
@@ -82,14 +81,14 @@ bool Textbox::key_press_event(const Keyboard_data& keyboard) {
     return true;
 }
 
-bool Textbox::mouse_press_event(const Mouse_data& mouse) {
-    if (mouse.button == Mouse_button::Left) {
+bool Textbox::mouse_press_event(const Mouse::State& mouse) {
+    if (mouse.button == Mouse::Button::Left) {
         this->set_cursor({mouse.local.x, mouse.local.y});
-    } else if (mouse.button == Mouse_button::ScrollUp) {
+    } else if (mouse.button == Mouse::Button::ScrollUp) {
         if (scroll_wheel_) {
             this->scroll_up(scroll_speed_up_);
         }
-    } else if (mouse.button == Mouse_button::ScrollDown) {
+    } else if (mouse.button == Mouse::Button::ScrollDown) {
         if (scroll_wheel_) {
             this->scroll_down(scroll_speed_down_);
         }

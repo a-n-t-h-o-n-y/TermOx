@@ -3,7 +3,7 @@
 #include <signals/signals.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/system/mouse_data.hpp>
+#include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/widget.hpp>
@@ -22,7 +22,7 @@ struct Vertical_arrows : cppurses::layout::Vertical {
 
    protected:
     bool mouse_press_event_filter(cppurses::Widget& receiver,
-                                  const cppurses::Mouse_data& mouse) override;
+                                  const cppurses::Mouse::State& mouse) override;
 };
 
 struct Scroll_btn : cppurses::Push_button {
@@ -32,7 +32,7 @@ struct Scroll_btn : cppurses::Push_button {
     sig::Signal<void()> scrolled_down;
 
    protected:
-    bool mouse_press_event(const cppurses::Mouse_data& mouse) override;
+    bool mouse_press_event(const cppurses::Mouse::State& mouse) override;
 };
 
 struct Horizontal_arrow : cppurses::layout::Vertical {

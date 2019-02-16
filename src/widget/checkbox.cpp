@@ -4,8 +4,7 @@
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
-#include <cppurses/system/mouse_button.hpp>
-#include <cppurses/system/mouse_data.hpp>
+#include <cppurses/system/events/mouse.hpp>
 
 namespace cppurses {
 
@@ -73,8 +72,8 @@ bool Checkbox::paint_event() {
     return Widget::paint_event();
 }
 
-bool Checkbox::mouse_press_event(const Mouse_data& mouse) {
-    if (mouse.button == Mouse_button::Left) {
+bool Checkbox::mouse_press_event(const Mouse::State& mouse) {
+    if (mouse.button == Mouse::Button::Left) {
         this->toggle();
     }
     return Widget::mouse_press_event(mouse);

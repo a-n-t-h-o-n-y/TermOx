@@ -11,9 +11,9 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/painter.hpp>
+#include <cppurses/system/events/mouse.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/keyboard_data.hpp>
-#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
@@ -176,9 +176,9 @@ bool GoL_widget::paint_event() {
     return Widget::paint_event();
 }
 
-bool GoL_widget::mouse_press_event(const Mouse_data& mouse) {
+bool GoL_widget::mouse_press_event(const Mouse::State& mouse) {
     const Coordinate engine_position = transform_from_display(mouse.local);
-    if (mouse.button == Mouse_button::Right) {
+    if (mouse.button == Mouse::Button::Right) {
         engine_.kill(engine_position);
     } else {
         engine_.give_life(engine_position);

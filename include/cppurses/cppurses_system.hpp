@@ -8,7 +8,7 @@
 #include <cppurses/system/events/focus_event.hpp>
 #include <cppurses/system/events/input_event.hpp>
 #include <cppurses/system/events/key_event.hpp>
-#include <cppurses/system/events/mouse_event.hpp>
+#include <cppurses/system/events/mouse.hpp>
 #include <cppurses/system/events/move_event.hpp>
 #include <cppurses/system/events/paint_event.hpp>
 #include <cppurses/system/events/resize_event.hpp>
@@ -20,8 +20,6 @@
 #include <cppurses/system/focus.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/keyboard_data.hpp>
-#include <cppurses/system/mouse_button.hpp>
-#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/system/shortcuts.hpp>
 #include <cppurses/system/system.hpp>
 

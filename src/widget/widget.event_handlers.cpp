@@ -6,8 +6,7 @@
 #include <cppurses/system/focus.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/keyboard_data.hpp>
-#include <cppurses/system/mouse_button.hpp>
-#include <cppurses/system/mouse_data.hpp>
+#include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/area.hpp>
 #include <cppurses/widget/point.hpp>
 
@@ -54,29 +53,29 @@ bool Widget::resize_event(Area new_size, Area old_size) {
     return true;
 }
 
-bool Widget::mouse_press_event(const Mouse_data& mouse) {
+bool Widget::mouse_press_event(const Mouse::State& mouse) {
     clicked(mouse.local);
     clicked_xy(mouse.local.x, mouse.local.y);
     return true;
 }
 
-bool Widget::mouse_release_event(const Mouse_data& mouse) {
+bool Widget::mouse_release_event(const Mouse::State& mouse) {
     click_released(mouse.global);
     click_released_xy(mouse.global.x, mouse.global.y);
     return true;
 }
 
-bool Widget::mouse_double_click_event(const Mouse_data& mouse) {
+bool Widget::mouse_double_click_event(const Mouse::State& mouse) {
     double_clicked(mouse.global);
     double_clicked_xy(mouse.global.x, mouse.global.y);
     return true;
 }
 
-bool Widget::mouse_wheel_event(const Mouse_data& mouse) {
+bool Widget::mouse_wheel_event(const Mouse::State& mouse) {
     return false;
 }
 
-bool Widget::mouse_move_event(const Mouse_data& mouse) {
+bool Widget::mouse_move_event(const Mouse::State& mouse) {
     return false;
 }
 
@@ -150,27 +149,27 @@ bool Widget::resize_event_filter(Widget& receiver,
 }
 
 bool Widget::mouse_press_event_filter(Widget& receiver,
-                                      const Mouse_data& mouse) {
+                                      const Mouse::State& mouse) {
     return false;
 }
 
 bool Widget::mouse_release_event_filter(Widget& receiver,
-                                        const Mouse_data& mouse) {
+                                        const Mouse::State& mouse) {
     return false;
 }
 
 bool Widget::mouse_double_click_event_filter(Widget& receiver,
-                                             const Mouse_data& mouse) {
+                                             const Mouse::State& mouse) {
     return false;
 }
 
 bool Widget::mouse_wheel_event_filter(Widget& receiver,
-                                      const Mouse_data& mouse) {
+                                      const Mouse::State& mouse) {
     return false;
 }
 
 bool Widget::mouse_move_event_filter(Widget& receiver,
-                                     const Mouse_data& mouse) {
+                                     const Mouse::State& mouse) {
     return false;
 }
 

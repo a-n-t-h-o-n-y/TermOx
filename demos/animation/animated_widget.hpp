@@ -2,7 +2,7 @@
 #define CPPURSES_DEMOS_ANIMATION_ANIMATED_WIDGET_HPP
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
-#include <cppurses/system/mouse_data.hpp>
+#include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/point.hpp>
@@ -18,7 +18,7 @@ class Animated_bit : public cppurses::Widget {
     bool timer_event() override;
     bool paint_event() override;
 
-    bool mouse_press_event(const cppurses::Mouse_data& mouse) override;
+    bool mouse_press_event(const cppurses::Mouse::State& mouse) override;
 
    private:
     cppurses::Glyph glyph_{'X', cppurses::foreground(cppurses::Color::Yellow)};

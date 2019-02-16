@@ -7,9 +7,9 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/painter.hpp>
+#include <cppurses/system/events/mouse.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/keyboard_data.hpp>
-#include <cppurses/system/mouse_data.hpp>
 
 namespace cppurses {
 
@@ -42,12 +42,12 @@ bool Horizontal_slider::paint_event() {
     return Widget::paint_event();
 }
 
-bool Horizontal_slider::mouse_press_event(const Mouse_data& mouse) {
-    if (mouse.button == Mouse_button::Left) {
+bool Horizontal_slider::mouse_press_event(const Mouse::State& mouse) {
+    if (mouse.button == Mouse::Button::Left) {
         this->set_percent(position_to_percent(mouse.local.x));
-    } else if (mouse.button == Mouse_button::ScrollUp) {
+    } else if (mouse.button == Mouse::Button::ScrollUp) {
         scrolled_up();
-    } else if (mouse.button == Mouse_button::ScrollDown) {
+    } else if (mouse.button == Mouse::Button::ScrollDown) {
         scrolled_down();
     }
     return Widget::mouse_press_event(mouse);

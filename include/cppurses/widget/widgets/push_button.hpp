@@ -3,10 +3,10 @@
 #include <signals/signal.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
-struct Mouse_data;
 
 /// Button widget that emits Signal on a left mouse button press.
 class Push_button : public Widget {
@@ -27,7 +27,7 @@ class Push_button : public Widget {
     sig::Signal<void()> clicked;
 
    protected:
-    bool mouse_press_event(const Mouse_data& mouse) override;
+    bool mouse_press_event(const Mouse::State& mouse) override;
     bool paint_event() override;
 
    private:
