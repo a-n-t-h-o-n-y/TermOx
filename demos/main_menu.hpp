@@ -43,6 +43,9 @@ class Main_menu : public cppurses::layout::Vertical {
     // animation::Animated_widget& animated_widget{
     //     main_menu.make_page<animation::Animated_widget>(
     //         "Animated Widget(Experimental)")};
+
+   protected:
+    bool focus_in_event() override;
 };
 }  // namespace demos
 #endif  // DEMOS_MAIN_MENU_HPP

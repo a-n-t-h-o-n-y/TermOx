@@ -7,12 +7,14 @@
 #include <cppurses/system/focus.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/shortcuts.hpp>
+#include <cppurses/system/system.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/layouts/stack.hpp>
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widgets/menu.hpp>
 
 namespace cppurses {
+
 Menu_stack::Menu_stack(Glyph_string title)
     : menu_{stack_.make_page<Menu>(std::move(title))} {
     this->initialize();
@@ -59,6 +61,7 @@ const Menu& Menu_stack::menu() const {
 
 bool Menu_stack::focus_in_event() {
     Focus::set_focus_to(&menu_);
-    return true;
+    return layout::Vertical::focus_in_event();
+    ;
 }
 }  // namespace cppurses

@@ -38,7 +38,21 @@ class System {
      *  on the screen. */
     static Widget* head() { return head_; }
 
+    /// Create a Widget_t object, set it as head widget and call System::run().
+    /** \p args... are passed on to the Widget_t constructor. Blocks until
+     *  System::exit() is called, returns the exit code. */
+    template <typename Widget_t, typename... Args>
+    int run(Args&&... args) {
+        Widget_t head_widget(std::forward<Args>(args)...);
+        System::set_head(&head_widget);
+        return this->run();
+    }
+
+    /// Set \p head as head widget and call System::run().
+    int run(Widget& head);
+
     /// Launch the main Event_loop and start processing Events.
+    /** Blocks until System::exit() is called, returns the exit code. */
     int run();
 
     /// Immediately send the event filters and then to the intended receiver.
@@ -83,7 +97,7 @@ class System {
      *  System::exit_requested_ to true. Though it sends the exit signal to each
      *  of the Event_loops, they are not guaranteed to be stopped by the time
      *  this function returns. */
-    static void exit(int return_code = 0);
+    static void exit(int exit_code = 0);
 
     /// Return a reference to the Animation_engine in System.
     /** This manages animation on each of the Widgets that enables it. */
