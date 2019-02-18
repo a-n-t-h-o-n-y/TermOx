@@ -7,15 +7,13 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/painter.hpp>
-#include <cppurses/system/key.hpp>
-#include <cppurses/system/keyboard_data.hpp>
-#include <cppurses/system/mouse_data.hpp>
+#include <cppurses/system/events/key.hpp>
+#include <cppurses/system/events/mouse.hpp>
 
 namespace cppurses {
 
 Horizontal_slider::Horizontal_slider() {
-    this->height_policy.type(Size_policy::Fixed);
-    this->height_policy.hint(1);
+    this->height_policy.fixed(1);
     this->focus_policy = Focus_policy::Strong;
     this->wallpaper = Glyph{L' ', background(Color::Light_gray)};
 }
@@ -43,18 +41,18 @@ bool Horizontal_slider::paint_event() {
     return Widget::paint_event();
 }
 
-bool Horizontal_slider::mouse_press_event(const Mouse_data& mouse) {
-    if (mouse.button == Mouse_button::Left) {
+bool Horizontal_slider::mouse_press_event(const Mouse::State& mouse) {
+    if (mouse.button == Mouse::Button::Left) {
         this->set_percent(position_to_percent(mouse.local.x));
-    } else if (mouse.button == Mouse_button::ScrollUp) {
+    } else if (mouse.button == Mouse::Button::ScrollUp) {
         scrolled_up();
-    } else if (mouse.button == Mouse_button::ScrollDown) {
+    } else if (mouse.button == Mouse::Button::ScrollDown) {
         scrolled_down();
     }
     return Widget::mouse_press_event(mouse);
 }
 
-bool Horizontal_slider::key_press_event(const Keyboard_data& keyboard) {
+bool Horizontal_slider::key_press_event(const Key::State& keyboard) {
     std::size_t current_position = percent_to_position(percent_progress_);
     if (keyboard.key == Key::Arrow_right) {
         this->set_percent(position_to_percent(current_position + 1));

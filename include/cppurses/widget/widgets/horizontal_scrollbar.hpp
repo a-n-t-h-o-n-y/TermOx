@@ -2,13 +2,13 @@
 #define CPPURSES_WIDGET_WIDGETS_HORIZONTAL_SCROLLBAR
 #include <signals/signal.hpp>
 
-#include <cppurses/widget/layouts/horizontal_layout.hpp>
+#include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 
 namespace cppurses {
 
-class Horizontal_scrollbar : public Horizontal_layout {
+class Horizontal_scrollbar : public layout::Horizontal {
    public:
     Horizontal_scrollbar();
 

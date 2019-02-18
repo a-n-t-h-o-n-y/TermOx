@@ -10,7 +10,19 @@
 #include <string>
 #include <utility>
 
-#include <cppurses/cppurses.hpp>
+#include <cppurses/painter/attribute.hpp>
+#include <cppurses/painter/brush.hpp>
+#include <cppurses/painter/color.hpp>
+#include <cppurses/painter/glyph.hpp>
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/painter/painter.hpp>
+#include <cppurses/system/events/key.hpp>
+#include <cppurses/system/events/mouse.hpp>
+#include <cppurses/widget/border.hpp>
+#include <cppurses/widget/focus_policy.hpp>
+#include <cppurses/widget/point.hpp>
+#include <cppurses/widget/widget.hpp>
+
 #include <optional/optional.hpp>
 #include <signals/slot.hpp>
 
@@ -41,11 +53,11 @@ namespace demos {
 namespace glyph_paint {
 
 Paint_area::Paint_area() {
-    enable_border(*this);
-    disable_walls(this->border);
-    disable_corners(this->border);
-    this->border.east_enabled = true;
     this->focus_policy = Focus_policy::Strong;
+
+    this->border.enable();
+    this->border.segments.disable_all();
+    this->border.segments.east.enable();
 }
 
 void Paint_area::set_glyph(Glyph glyph) {
@@ -96,7 +108,7 @@ void Paint_area::set_attribute(Attribute attr) {
 }
 
 void Paint_area::remove_attribute(Attribute attr) {
-    current_glyph_.brush.remove_attribute(attr);
+    current_glyph_.brush.remove_attributes(attr);
     if (!erase_enabled_) {
         glyph_changed(current_glyph_);
     }
@@ -178,10 +190,10 @@ bool Paint_area::paint_event() {
     return Widget::paint_event();
 }
 
-bool Paint_area::mouse_press_event(const Mouse_data& mouse) {
-    if (mouse.button == Mouse_button::Right) {
+bool Paint_area::mouse_press_event(const Mouse::State& mouse) {
+    if (mouse.button == Mouse::Button::Right) {
         this->remove_glyph(mouse.local);
-    } else if (mouse.button == Mouse_button::Middle) {
+    } else if (mouse.button == Mouse::Button::Middle) {
         if (glyphs_painted_.count(mouse.local) == 1) {
             this->set_glyph(glyphs_painted_[mouse.local]);
         }
@@ -191,7 +203,7 @@ bool Paint_area::mouse_press_event(const Mouse_data& mouse) {
     return Widget::mouse_press_event(mouse);
 }
 
-bool Paint_area::key_press_event(const Keyboard_data& keyboard) {
+bool Paint_area::key_press_event(const Key::State& keyboard) {
     if (!this->cursor.enabled()) {
         if (!std::iscntrl(keyboard.symbol)) {
             this->set_symbol(keyboard.symbol);

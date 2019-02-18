@@ -9,7 +9,7 @@ namespace detail {
 /** Uses ncurses internally to get input. */
 class User_input_event_loop : public Event_loop {
    protected:
-    /// Waits on input::get(), and posts the result.
+    /// Wait on input::get(), and post the result.
     void loop_function() override;
 };
 

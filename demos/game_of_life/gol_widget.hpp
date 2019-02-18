@@ -6,8 +6,8 @@
 #include <signals/signal.hpp>
 
 #include <cppurses/painter/glyph.hpp>
-#include <cppurses/system/keyboard_data.hpp>
-#include <cppurses/system/mouse_data.hpp>
+#include <cppurses/system/events/key.hpp>
+#include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 
@@ -75,9 +75,9 @@ class GoL_widget : public cppurses::Widget {
 
    protected:
     bool paint_event() override;
-    bool mouse_press_event(const cppurses::Mouse_data& mouse) override;
+    bool mouse_press_event(const cppurses::Mouse::State& mouse) override;
     bool timer_event() override;
-    bool key_press_event(const cppurses::Keyboard_data& keyboard) override;
+    bool key_press_event(const cppurses::Key::State& keyboard) override;
 
    private:
     Game_of_life_engine engine_;
@@ -92,7 +92,7 @@ class GoL_widget : public cppurses::Widget {
     void update_period();
 
     /// Convert signed Coordinates from engine to display positions.
-    /** Engine coordinate (0,0) is at the center of the display. Returns max
+    /** Engine coordinate (0,0) is at the center of the display. Return max
      *  values for x and y if transformation cannot fit on the display. */
     cppurses::Point transform_from_engine(Coordinate position) const;
 

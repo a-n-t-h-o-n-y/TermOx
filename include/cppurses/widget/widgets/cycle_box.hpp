@@ -6,37 +6,50 @@
 #include <signals/signals.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/system/mouse_data.hpp>
-#include <cppurses/widget/layouts/horizontal_layout.hpp>
+#include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/widgets/label.hpp>
-#include <cppurses/widget/widgets/push_button.hpp>
 
 namespace cppurses {
 
-/// A Label with a rotating set of label strings that can be cycled through.
+/// A rotating set of labels, emitting a Signal when the label is changed.
+/** Labels are cycled forwards by a left click or scroll up, cycled backwards
+ *  by a scroll down button press. */
 class Cycle_box : public Label {
    public:
     Cycle_box();
 
+    /// Add an option/label to the Cycle_box.
+    /** The returned Signal reference will be emitted every time this option is
+     *  enabled. */
     sig::Signal<void()>& add_option(Glyph_string option);
-    void remove_option(const std::string& option);
+
+    /// Remove an option/label identified by its text.
+    /** No-op if does no match found. Only removes the first option found if
+     *  there are multiple options with identical text. */
+    void remove_option(const Glyph_string& option);
+
+    /// Return the current option's text.
     Glyph_string current_option() const;
+
+    /// Move forward one option.
     void cycle_forward();
+
+    /// Move backward one option.
     void cycle_backward();
 
-    // Signals
+    /// Emitted when the option is changed, sends the new option's string rep.
     sig::Signal<void(std::string)> option_changed;
 
    protected:
-    bool mouse_press_event(const Mouse_data& mouse) override;
+    bool mouse_press_event(const Mouse::State& mouse) override;
 
    private:
+    /// Holds an Option's Signal and name.
     struct Option {
         explicit Option(Glyph_string name_);
-        sig::Signal<void()> enabled;
         Glyph_string name;
+        sig::Signal<void()> enabled;
     };
-
     std::vector<Option> options_;
 };
 

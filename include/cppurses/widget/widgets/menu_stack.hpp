@@ -1,5 +1,5 @@
-#ifndef CPPURSES_WIDGET_WIDGETS_WIDGET_STACK_MENU_HPP
-#define CPPURSES_WIDGET_WIDGETS_WIDGET_STACK_MENU_HPP
+#ifndef CPPURSES_WIDGET_WIDGETS_MENU_STACK_HPP
+#define CPPURSES_WIDGET_WIDGETS_MENU_STACK_HPP
 #include <cstddef>
 #include <memory>
 #include <utility>
@@ -7,16 +7,16 @@
 #include <signals/signal.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/widget/layouts/vertical_layout.hpp>
+#include <cppurses/widget/layouts/stack.hpp>
+#include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/widgets/menu.hpp>
-#include <cppurses/widget/widgets/widget_stack.hpp>
 
 namespace cppurses {
 class Widget;
 
-class Widget_stack_menu : public Vertical_layout {
+class Menu_stack : public layout::Vertical {
    public:
-    Widget_stack_menu(Glyph_string title = "");
+    Menu_stack(Glyph_string title = "");
 
     template <typename T, typename... Args>
     T& make_page(Glyph_string title, Args&&... args);
@@ -40,7 +40,7 @@ class Widget_stack_menu : public Vertical_layout {
     bool focus_in_event() override;
 
    private:
-    Widget_stack& stack_{this->make_child<Widget_stack>()};
+    layout::Stack& stack_{this->make_child<layout::Stack>()};
     Menu& menu_;
 
     void initialize();
@@ -49,7 +49,7 @@ class Widget_stack_menu : public Vertical_layout {
 // - - - - - - - - - - - - Template Implementations - - - - - - - - - - - - - -
 
 template <typename T, typename... Args>
-T& Widget_stack_menu::make_page(Glyph_string title, Args&&... args) {
+T& Menu_stack::make_page(Glyph_string title, Args&&... args) {
     auto& ret = stack_.make_page<T>(std::forward<Args>(args)...);
     auto& signal = menu_.add_item(std::move(title));
     signal.connect(slot::set_active_page(stack_, this->size() - 1));
@@ -58,4 +58,4 @@ T& Widget_stack_menu::make_page(Glyph_string title, Args&&... args) {
 }
 
 }  // namespace cppurses
-#endif  // CPPURSES_WIDGET_WIDGETS_WIDGET_STACK_MENU_HPP
+#endif  // CPPURSES_WIDGET_WIDGETS_MENU_STACK_HPP

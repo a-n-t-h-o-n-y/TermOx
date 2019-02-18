@@ -1,13 +1,13 @@
 #ifndef CPPURSES_DEMOS_FOCUS_FOCUS_BASE_HPP
 #define CPPURSES_DEMOS_FOCUS_FOCUS_BASE_HPP
 #include <cppurses/widget/focus_policy.hpp>
-#include <cppurses/widget/layouts/horizontal_layout.hpp>
+#include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/widgets/label.hpp>
 
 namespace demos {
 namespace focus {
 
-class Focus_base : public cppurses::Horizontal_layout {
+class Focus_base : public cppurses::layout::Horizontal {
    public:
     Focus_base(cppurses::Focus_policy policy);
 

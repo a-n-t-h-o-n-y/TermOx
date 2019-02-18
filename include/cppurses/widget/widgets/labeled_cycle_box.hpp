@@ -1,20 +1,15 @@
 #ifndef CPPURSES_WIDGET_WIDGETS_LABELED_CYCLE_BOX_HPP
 #define CPPURSES_WIDGET_WIDGETS_LABELED_CYCLE_BOX_HPP
-#include <string>
-#include <vector>
-
-#include <signals/signals.hpp>
-
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/widget/layouts/horizontal_layout.hpp>
+#include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/widgets/cycle_box.hpp>
 #include <cppurses/widget/widgets/label.hpp>
-#include <cppurses/widget/widgets/push_button.hpp>
 
 namespace cppurses {
 struct Glyph;
 
-class Labeled_cycle_box : public Horizontal_layout {
+/// A label on the left and a Cycle_box on the right.
+class Labeled_cycle_box : public layout::Horizontal {
    public:
     explicit Labeled_cycle_box(Glyph_string title = "");
 

@@ -29,7 +29,7 @@ const auto is_tab_focusable = [](const auto* widg) {
     return widg->enabled() && is_tab_focus_policy(widg->focus_policy);
 };
 
-// Returns a widg tree from System::head() if focus_widget is nullptr.
+// Return a widg tree from System::head() if focus_widget is nullptr.
 auto gen_focus_front_widg_tree() {
     auto widg_tree = System::head()->children.get_descendants();
     widg_tree.insert(std::begin(widg_tree), System::head());

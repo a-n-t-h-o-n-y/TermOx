@@ -3,8 +3,8 @@
 #include <signals/slot.hpp>
 
 #include <cppurses/painter/color.hpp>
-#include <cppurses/system/key.hpp>
-#include <cppurses/system/mouse_button.hpp>
+#include <cppurses/system/events/key.hpp>
+#include <cppurses/system/events/mouse.hpp>
 
 namespace cppurses {
 class Widget;
@@ -19,17 +19,17 @@ sig::Slot<void()> delete_later(Widget& w);
 
 sig::Slot<void()> update(Widget& w);
 
-sig::Slot<void(Point, Mouse_button)> click(Widget& w);
+sig::Slot<void(Point, Mouse::Button)> click(Widget& w);
 
-sig::Slot<void(Mouse_button)> click(Widget& w, Point c);
+sig::Slot<void(Mouse::Button)> click(Widget& w, Point c);
 
-sig::Slot<void(Point)> click(Widget& w, Mouse_button b);
+sig::Slot<void(Point)> click(Widget& w, Mouse::Button b);
 
-sig::Slot<void()> click(Widget& w, Point c, Mouse_button b);
+sig::Slot<void()> click(Widget& w, Point c, Mouse::Button b);
 
-sig::Slot<void(Key)> keypress(Widget& w);
+sig::Slot<void(Key::Code)> keypress(Widget& w);
 
-sig::Slot<void()> keypress(Widget& w, Key k);
+sig::Slot<void()> keypress(Widget& w, Key::Code k);
 
 sig::Slot<void(Color)> set_background(Widget& w);
 

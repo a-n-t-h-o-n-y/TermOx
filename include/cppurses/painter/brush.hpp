@@ -1,6 +1,7 @@
 #ifndef CPPURSES_PAINTER_BRUSH_HPP
 #define CPPURSES_PAINTER_BRUSH_HPP
 #include <bitset>
+#include <cstdint>
 #include <utility>
 
 #include <optional/optional.hpp>
@@ -19,16 +20,28 @@ class Brush {
         this->add_attributes(std::forward<Attributes>(attrs)...);
     }
 
-    // Base Case
+    // Zero element base Case
     void add_attributes() {}
 
     /// Add a variable number of Attributes or Colors to the brush.
     /** Use the (back/fore)ground_color(Color c) functions to add colors to the
      *  list. */
-    template <typename T, typename... Others>
-    void add_attributes(T attr, Others... others) {
-        this->set_attr(attr);
-        this->add_attributes(others...);
+    template <typename Attr_t, typename... Tail>
+    void add_attributes(Attr_t attribute, Tail... tail) {
+        this->set_attr(attribute);
+        this->add_attributes(tail...);
+    }
+
+    /// Zero element base case.
+    void remove_attributes() {}
+
+    /// Remove a variable number of Attributes from the brush.
+    /** Cannot remove foreground or background colors with this. */
+    template <typename... Attr_t>
+    void remove_attributes(Attr_t... attributes) {
+        for (Attribute a : {attributes...}) {
+            this->unset_attr(a);
+        }
     }
 
     /// Set the background color of this brush.
@@ -37,29 +50,24 @@ class Brush {
     /// Set the foreground color of this brush.
     void set_foreground(Color color) { foreground_color_ = color; }
 
-    /// Remove a specific Attribute, if it is set, otherwise no-op.
-    void remove_attribute(Attribute attr) {
-        attributes_.set(static_cast<std::int8_t>(attr), false);
-    }
-
-    /// Sets the background to not have a color, the default state.
+    /// Set the background to not have a color, the default state.
     void remove_background() { background_color_ = opt::none; }
 
-    /// Sets the foreground to not have a color, the default state.
+    /// Set the foreground to not have a color, the default state.
     void remove_foreground() { foreground_color_ = opt::none; }
 
-    /// Removes all of the set Attributes from the brush, not including colors.
+    /// Remove all of the set Attributes from the brush, not including colors.
     void clear_attributes() { attributes_.reset(); }
 
-    /// Provides a check if the brush has the provided Attribute \p attr.
+    /// Provide a check of whether the brush has the provided Attribute \p attr.
     bool has_attribute(Attribute attr) const {
         return attributes_[static_cast<std::size_t>(attr)];
     }
 
-    /// Returns the current background as an opt::Optional object.
+    /// Return the current background as an opt::Optional object.
     opt::Optional<Color> background_color() const { return background_color_; }
 
-    /// Returns the current foreground as an opt::Optional object.
+    /// Return the current foreground as an opt::Optional object.
     opt::Optional<Color> foreground_color() const { return foreground_color_; }
 
     friend bool operator==(const Brush& lhs, const Brush& rhs);
@@ -80,6 +88,11 @@ class Brush {
         attributes_.set(static_cast<std::int8_t>(attr));
     }
 
+    /// Remove a specific Attribute, if it is set, otherwise no-op.
+    void unset_attr(Attribute attr) {
+        attributes_.set(static_cast<std::int8_t>(attr), false);
+    }
+
     // Data Members
     std::bitset<8> attributes_;
     opt::Optional<Color> background_color_;
@@ -89,7 +102,7 @@ class Brush {
 /// Compares if the held attributes and (back/fore)ground colors are equal.
 bool operator==(const Brush& lhs, const Brush& rhs);
 
-/// Adds Attributes and Colors from \p from to \p to.
+/// Add Attributes and Colors from \p from to \p to.
 /** Does not overwrite existing colors in \p to. */
 void imprint(const Brush& from, Brush& to);
 

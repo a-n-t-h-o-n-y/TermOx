@@ -8,8 +8,6 @@
 #include <cppurses/system/system.hpp>
 #include <cppurses/terminal/terminal.hpp>
 #include <cppurses/widget/border.hpp>
-#include <cppurses/widget/size_policy.hpp>
-#include <cppurses/widget/widget_free_functions.hpp>
 
 namespace {
 std::string rgb_to_str(const cppurses::RGB& rgb) {
@@ -60,14 +58,10 @@ namespace palette {
 
 Export_panel::Export_panel() {
     using namespace cppurses;
-
-    this->height_policy.type(Size_policy::Fixed);
-    this->height_policy.hint(3);
-
-    this->border.enabled = true;
-    disable_walls(this->border);
-    disable_corners(this->border);
-    this->border.north_enabled = true;
+    this->height_policy.fixed(3);
+    this->border.enable();
+    this->border.segments.disable_all();
+    this->border.segments.north.enable();
 
     name_edit_.brush.set_background(Color::Dark_gray);
     name_edit_.set_ghost_color(Color::Light_gray);

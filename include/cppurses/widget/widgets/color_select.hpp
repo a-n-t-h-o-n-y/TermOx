@@ -3,23 +3,23 @@
 #include <signals/signals.hpp>
 
 #include <cppurses/painter/color.hpp>
-#include <cppurses/widget/layouts/horizontal_layout.hpp>
-#include <cppurses/widget/layouts/vertical_layout.hpp>
+#include <cppurses/widget/layouts/horizontal.hpp>
+#include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 
 namespace cppurses {
 
 /// Provides a visual display of the 16 colors and sends Signals on clicks.
-class Color_select : public Vertical_layout {
+class Color_select : public layout::Vertical {
    public:
     Color_select();
 
-    // Signals
+    /// Emitted on left mouse button press, sends along the Color clicked on.
     sig::Signal<void(Color)> color_changed;
 
-   protected:
-    Horizontal_layout& row1_{this->make_child<Horizontal_layout>()};
-    Horizontal_layout& row2_{this->make_child<Horizontal_layout>()};
+   private:
+    layout::Horizontal& row1_{this->make_child<layout::Horizontal>()};
+    layout::Horizontal& row2_{this->make_child<layout::Horizontal>()};
 
     Push_button& black_{row1_.make_child<Push_button>()};
     Push_button& dark_red_{row1_.make_child<Push_button>()};
@@ -38,9 +38,7 @@ class Color_select : public Vertical_layout {
     Push_button& yellow_{row2_.make_child<Push_button>()};
     Push_button& white_{row2_.make_child<Push_button>()};
 
-   private:
     void initialize();
 };
-
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_WIDGETS_COLOR_SELECT_HPP

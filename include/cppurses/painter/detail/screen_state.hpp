@@ -27,7 +27,7 @@ class Screen_state {
         detail::Screen_mask move_mask;
         detail::Screen_mask resize_mask;
 
-        /// Resets all flags to initial and clears state, except for wallpaper.
+        /// Reset all flags to initial and clear state, except for wallpaper.
         void reset();
     };
 

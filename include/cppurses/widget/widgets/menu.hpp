@@ -1,22 +1,22 @@
 #ifndef CPPURSES_WIDGET_WIDGETS_MENU_HPP
 #define CPPURSES_WIDGET_WIDGETS_MENU_HPP
 #include <cstddef>
-#include <cstdint>
 #include <functional>
 #include <vector>
 
 #include <signals/slot.hpp>
 
-#include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/system/keyboard_data.hpp>
-#include <cppurses/system/mouse_data.hpp>
-#include <cppurses/widget/layouts/vertical_layout.hpp>
-#include <cppurses/widget/widgets/blank_height.hpp>
-#include <cppurses/widget/widgets/push_button.hpp>
+#include <cppurses/system/events/key.hpp>
+#include <cppurses/system/events/mouse.hpp>
+#include <cppurses/widget/layouts/vertical.hpp>
+#include <cppurses/widget/widgets/fixed_height.hpp>
 
 namespace cppurses {
+class Glyph_string;
+class Push_button;
+struct Label;
 
-class Menu : public Vertical_layout {
+class Menu : public layout::Vertical {
    public:
     explicit Menu(Glyph_string title);
 
@@ -31,12 +31,12 @@ class Menu : public Vertical_layout {
     std::size_t size() const;
 
    protected:
-    bool key_press_event(const Keyboard_data& keyboard) override;
+    bool key_press_event(const Key::State& keyboard) override;
 
-    bool mouse_press_event(const Mouse_data& mouse) override;
+    bool mouse_press_event(const Mouse::State& mouse) override;
 
     bool mouse_press_event_filter(Widget& receiver,
-                                  const Mouse_data& mouse) override;
+                                  const Mouse::State& mouse) override;
 
    private:
     struct Menu_item {
@@ -49,7 +49,7 @@ class Menu : public Vertical_layout {
     std::size_t selected_index_{0};
 
     Label& title_;
-    Blank_height& space1{this->make_child<Blank_height>(1)};
+    Fixed_height& space1{this->make_child<Fixed_height>(1)};
 
     void call_current_item();
 };

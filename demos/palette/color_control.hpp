@@ -2,14 +2,14 @@
 #define CPPURSES_DEMOS_PALETTE_COLOR_CONTROL_HPP
 #include <signals/signal.hpp>
 
-#include <cppurses/widget/layouts/horizontal_layout.hpp>
+#include <cppurses/widget/layouts/horizontal.hpp>
 
 #include "value_control.hpp"
 
 namespace palette {
 
 /// Holds Value_control objects for red, green, and blue color values.
-class Color_control : public cppurses::Horizontal_layout {
+class Color_control : public cppurses::layout::Horizontal {
     Value_control& slider_red_{this->make_child<Value_control>("R")};
     Value_control& slider_green_{this->make_child<Value_control>("G")};
     Value_control& slider_blue_{this->make_child<Value_control>("B")};

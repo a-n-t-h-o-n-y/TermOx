@@ -7,7 +7,7 @@
 
 namespace gol {
 
-/// Retrieve cell Coordinates from Life 1.05 file.
+/// Return cell Coordinates from Life 1.05 file.
 std::vector<Coordinate> get_life_1_05(const std::string& filename);
 
 }  // namespace gol

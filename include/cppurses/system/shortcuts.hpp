@@ -4,7 +4,7 @@
 
 #include <signals/signal.hpp>
 
-#include <cppurses/system/key.hpp>
+#include <cppurses/system/events/key.hpp>
 
 namespace cppurses {
 
@@ -15,20 +15,20 @@ class Shortcuts {
     /** Key has combined key presses defined for multi-key shortcuts. The
      *  returned Signal reference will be called each time the keyboard shortcut
      *  is encountered. */
-    static sig::Signal<void()>& add_shortcut(Key key);
+    static sig::Signal<void()>& add_shortcut(Key::Code key);
 
     /// Stop \p key and its associated Signal from being called.
     /** No-op if key is not an existing shortcut. */
-    static void remove_shortcut(Key key) { shortcuts_.erase(key); }
+    static void remove_shortcut(Key::Code key) { shortcuts_.erase(key); }
 
-    /// Removes all shortcuts from the system.
+    /// Remove all shortcuts from the system.
     static void clear() { shortcuts_.clear(); }
 
-    /// Calls on the associated Signal if \p key exists as a shortcut.
-    static bool send_key(Key key);
+    /// Call on the associated Signal if \p key exists as a shortcut.
+    static bool send_key(Key::Code key);
 
    private:
-    static std::unordered_map<Key, sig::Signal<void()>> shortcuts_;
+    static std::unordered_map<Key::Code, sig::Signal<void()>> shortcuts_;
 };
 
 }  // namespace cppurses

@@ -1,13 +1,13 @@
 #ifndef CPPURSES_DEMOS_PALETTE_EXPORT_PANEL_HPP
 #define CPPURSES_DEMOS_PALETTE_EXPORT_PANEL_HPP
-#include <cppurses/widget/layouts/vertical_layout.hpp>
+#include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/widgets/confirm_button.hpp>
 #include <cppurses/widget/widgets/line_edit.hpp>
 
 namespace palette {
 
 /// Holds interface to export the Palette as a C++ header file.
-class Export_panel : public cppurses::Vertical_layout {
+class Export_panel : public cppurses::layout::Vertical {
     cppurses::Line_edit& name_edit_{
         this->make_child<cppurses::Line_edit>("Enter name...")};
 

@@ -14,7 +14,7 @@
 namespace {
 using namespace cppurses;
 
-/// Returns the sum total height of all widgets from [first, last).
+/// Return the sum total height of all widgets from [first, last).
 template <typename Iter_t>
 std::size_t heights(Iter_t first, Iter_t last) {
     auto sum_heights = [](auto sum, const auto& widget) {
@@ -23,7 +23,7 @@ std::size_t heights(Iter_t first, Iter_t last) {
     return std::accumulate(first, last, std::size_t{0}, sum_heights);
 }
 
-/// Returns the sum total width of all widgets from [first, last).
+/// Return the sum total width of all widgets from [first, last).
 template <typename Iter_t>
 std::size_t widths(Iter_t first, Iter_t last) {
     auto sum_widths = [](auto sum, const auto& widget) {
@@ -32,7 +32,7 @@ std::size_t widths(Iter_t first, Iter_t last) {
     return std::accumulate(first, last, std::size_t{0}, sum_widths);
 }
 
-/// Checks if each Widget from [first, last) has width equal to \p width.
+/// Check if each Widget from [first, last) has width equal to \p width.
 template <typename Iter_t>
 auto all_widths_equal_to(Iter_t first, Iter_t last, std::size_t width) {
     auto widths_equal = [width](const std::unique_ptr<Widget>& w) {
@@ -41,7 +41,7 @@ auto all_widths_equal_to(Iter_t first, Iter_t last, std::size_t width) {
     return std::all_of(first, last, widths_equal);
 }
 
-/// Checks if each Widget from [first,last) has height equal to \p height.
+/// Check if each Widget from [first,last) has height equal to \p height.
 template <typename Iter_t>
 auto all_heights_equal_to(Iter_t first, Iter_t last, std::size_t height) {
     auto heights_equal = [height](const std::unique_ptr<Widget>& w) {
@@ -50,7 +50,7 @@ auto all_heights_equal_to(Iter_t first, Iter_t last, std::size_t height) {
     return std::all_of(first, last, heights_equal);
 }
 
-/// Checks whether \p w's children completely cover \p w.
+/// Check whether \p w's children completely cover \p w.
 bool children_completely_cover(const Widget& w) {
     const auto first = std::begin(w.children.get());
     const auto last = std::end(w.children.get());
@@ -67,12 +67,12 @@ bool children_completely_cover(const Widget& w) {
     return false;
 }
 
-/// Returns the lowest y coordinate of the widget in global coordinates.
+/// Return the lowest y coordinate of the widget in global coordinates.
 std::size_t height_end(const std::unique_ptr<Widget>& w) {
     return w->y() + w->outer_height();
 }
 
-/// Returns the right-most x coordinate of the widget in global coordinates.
+/// Return the right-most x coordinate of the widget in global coordinates.
 std::size_t width_end(const std::unique_ptr<Widget>& w) {
     return w->x() + w->outer_width();
 }

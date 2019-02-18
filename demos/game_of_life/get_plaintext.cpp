@@ -8,7 +8,7 @@
 
 namespace gol {
 
-std::vector<Coordinate> get_plaintext(const std::string& filename) {
+std::vector<Coordinate> get_plaintext(const std::string& /* filename */) {
     return {};
 }
 

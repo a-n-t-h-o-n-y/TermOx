@@ -1,8 +1,7 @@
 #ifndef CPPURSES_DEMOS_PALETTE_COLOR_DISPLAY_PANEL_HPP
 #define CPPURSES_DEMOS_PALETTE_COLOR_DISPLAY_PANEL_HPP
 #include <cppurses/painter/color.hpp>
-#include <cppurses/widget/layouts/horizontal_layout.hpp>
-#include <cppurses/widget/size_policy.hpp>
+#include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widgets/color_select.hpp>
 
@@ -25,7 +24,7 @@ class Shade_display : public cppurses::Widget {
 };
 
 /// Top bank of shades to display, the first 8 colors.
-struct Top_shades : cppurses::Horizontal_layout {
+struct Top_shades : cppurses::layout::Horizontal {
     Shade_display& black_shade{
         this->make_child<Shade_display>(cppurses::Color::Black)};
     Shade_display& dark_red_shade{
@@ -45,7 +44,7 @@ struct Top_shades : cppurses::Horizontal_layout {
 };
 
 /// Bottom bank of shades to display, the last 8 colors.
-struct Bottom_shades : cppurses::Horizontal_layout {
+struct Bottom_shades : cppurses::layout::Horizontal {
     Bottom_shades();
 
     Shade_display& blue_shade{
@@ -67,7 +66,7 @@ struct Bottom_shades : cppurses::Horizontal_layout {
 };
 
 /// Holds both the pure colors and the various shades.
-struct All_colors_display : cppurses::Vertical_layout {
+struct All_colors_display : cppurses::layout::Vertical {
     All_colors_display();
 
     Top_shades& top_shades{this->make_child<Top_shades>()};

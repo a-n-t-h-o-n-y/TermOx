@@ -1,12 +1,12 @@
 #ifndef CPPURSES_DEMOS_GAME_OF_LIFE_GOL_DEMO_HPP
 #define CPPURSES_DEMOS_GAME_OF_LIFE_GOL_DEMO_HPP
-#include <cppurses/widget/layouts/horizontal_layout.hpp>
+#include <cppurses/widget/layouts/horizontal.hpp>
 
 #include "gol_widget.hpp"
 #include "side_panel.hpp"
 
 namespace gol {
-struct GoL_demo : cppurses::Horizontal_layout {
+struct GoL_demo : cppurses::layout::Horizontal {
     GoL_demo();
 
     Side_panel& side_panel{this->make_child<Side_panel>()};

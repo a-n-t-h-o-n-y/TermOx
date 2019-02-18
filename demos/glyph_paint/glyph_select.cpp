@@ -1,4 +1,4 @@
-#include <cppurses/widget/widgets/glyph_select.hpp>
+#include "glyph_select.hpp"
 
 #include <cmath>
 #include <utility>
@@ -6,28 +6,26 @@
 #include <signals/signal.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/widget/layouts/horizontal_layout.hpp>
-#include <cppurses/widget/size_policy.hpp>
+#include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/widget.hpp>
-#include <cppurses/widget/widget_free_functions.hpp>
-#include <cppurses/widget/widgets/glyph_select_stack.hpp>
 #include <cppurses/widget/widgets/horizontal_slider.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 
-namespace cppurses {
+#include "glyph_select_stack.hpp"
+
+using namespace cppurses;
+namespace demos {
+namespace glyph_paint {
 
 Glyph_select::Glyph_select(Glyph_string symbols) {
     glyph_stack.set_symbols(std::move(symbols));
-    bottom_row.height_policy.type(Size_policy::Fixed);
-    bottom_row.height_policy.hint(1);
-    left_btn.width_policy.type(Size_policy::Fixed);
-    left_btn.width_policy.hint(1);
-    set_background(left_btn, Color::Light_gray);
-    set_foreground(left_btn, Color::Black);
-    right_btn.width_policy.type(Size_policy::Fixed);
-    right_btn.width_policy.hint(1);
-    set_background(right_btn, Color::Light_gray);
-    set_foreground(right_btn, Color::Black);
+    bottom_row.height_policy.fixed(1);
+    left_btn.brush.set_background(Color::Light_gray);
+    left_btn.brush.set_foreground(Color::Black);
+    left_btn.width_policy.fixed(1);
+    right_btn.brush.set_background(Color::Light_gray);
+    right_btn.brush.set_foreground(Color::Black);
+    right_btn.width_policy.fixed(1);
 
     glyph_stack.glyph_selected.connect(
         [this](Glyph glyph) { this->glyph_selected(std::move(glyph)); });
@@ -73,4 +71,5 @@ void Glyph_select::flip_page_backward() {
     slider.set_percent(new_percent);
 }
 
-}  // namespace cppurses
+}  // namespace glyph_paint
+}  // namespace demos

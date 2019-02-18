@@ -7,7 +7,7 @@
 
 namespace gol {
 
-std::vector<Coordinate> get_life_1_05(const std::string& filename) {
+std::vector<Coordinate> get_life_1_05(const std::string& /* filename */) {
     return {};
 }
 

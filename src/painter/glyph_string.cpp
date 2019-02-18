@@ -24,7 +24,7 @@ Glyph_string Glyph_string::operator+(const Glyph_string& gs) const {
 
 void Glyph_string::remove_attribute(Attribute attr) {
     for (Glyph& glyph : *this) {
-        glyph.brush.remove_attribute(attr);
+        glyph.brush.remove_attributes(attr);
     }
 }
 

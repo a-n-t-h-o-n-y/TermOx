@@ -12,7 +12,7 @@ class Terminal_resize_event : public Event {
 
     bool send() const override;
 
-    bool filter_send(Widget& filter) const override { return true; }
+    bool filter_send(Widget& /* filter */) const override { return true; }
 };
 
 }  // namespace cppurses

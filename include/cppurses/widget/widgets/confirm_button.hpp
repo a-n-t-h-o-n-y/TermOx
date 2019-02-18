@@ -3,23 +3,27 @@
 #include <signals/signal.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/widget/widgets/push_button.hpp>
-#include <cppurses/widget/widgets/widget_stack.hpp>
+#include <cppurses/widget/layouts/stack.hpp>
 
 namespace cppurses {
+class Push_button;
 
-/// Provides a button with a double check confirmation interface.
-struct Confirm_button : public Widget_stack {
-    explicit Confirm_button(Glyph_string title,
+/// A Push_button with a confirm screen after the initial click.
+/** Clicked signal is only emitted after confirmation. */
+struct Confirm_button : public layout::Stack {
+    /// Construct a Push_button with \p label and cooresponding \p confirm_text.
+    explicit Confirm_button(Glyph_string label,
                             Glyph_string confirm_text = "Confirm");
 
-    struct Confirm_screen;
-    Push_button& title_btn_;
-    Confirm_screen& confirm_screen_;
+    /// Front facing button.
+    Push_button& main_btn;
 
-    // Signals
+    /// Confirmation button.
+    struct Confirm_screen;
+    Confirm_screen& confirm_screen;
+
+    /// Emitted once confirmation has been made.
     sig::Signal<void()> clicked;
 };
-
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_WIDGETS_CONFIRM_BUTTON_HPP

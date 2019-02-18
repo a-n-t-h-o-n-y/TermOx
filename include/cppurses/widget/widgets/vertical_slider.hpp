@@ -1,17 +1,13 @@
 #ifndef CPPURSES_WIDGET_WIDGETS_VERTICAL_SLIDER_HPP
 #define CPPURSES_WIDGET_WIDGETS_VERTICAL_SLIDER_HPP
-#include <cmath>
 #include <vector>
 
 #include <signals/signal.hpp>
 
 #include <cppurses/painter/color.hpp>
-#include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/painter/painter.hpp>
-#include <cppurses/system/key.hpp>
-#include <cppurses/widget/focus_policy.hpp>
-#include <cppurses/widget/size_policy.hpp>
+#include <cppurses/system/events/key.hpp>
+#include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/widget.hpp>
 
 #include "detail/slider_logic.hpp"
@@ -49,7 +45,7 @@ class Vertical_slider : public Widget {
     /** Modifies minimum to be max - 1 if minimum >= max. */
     void set_maximum(Value_t max);
 
-    /// Retrieve the current value of the slider.
+    /// Return the current value of the slider.
     Value_t value() const { return logic_.value(); }
 
     /// Return the smallest possible value for the slider.
@@ -65,7 +61,7 @@ class Vertical_slider : public Widget {
         this->update();
     };
 
-    /// Returns if slider is inverted.
+    /// Return if slider is inverted.
     bool is_inverted() const { return inverted_; }
 
     /// Set the upper glyph represetation.
@@ -83,13 +79,13 @@ class Vertical_slider : public Widget {
      *  repeats is true. */
     void set_lower(const Glyph_string& symbols, bool repeats = true);
 
-    /// Retrieve the upper representation of the Slider.
+    /// Return the upper representation of the Slider.
     const Glyph_string& upper() const { return upper_; }
 
-    /// Retrieve the indicator's representation.
+    /// Return the indicator's representation.
     const Glyph_string& indicator() const { return indicator_; }
 
-    /// Retrieve the lower representation of the Slider.
+    /// Return the lower representation of the Slider.
     const Glyph_string& lower() const { return lower_; }
 
     /// Signal emitted every time the slider value has changed.
@@ -100,8 +96,8 @@ class Vertical_slider : public Widget {
 
    protected:
     bool paint_event() override;
-    bool mouse_press_event(const Mouse_data& mouse) override;
-    bool key_press_event(const Keyboard_data& keyboard) override;
+    bool mouse_press_event(const Mouse::State& mouse) override;
+    bool key_press_event(const Key::State& keyboard) override;
 
    private:
     // candidate for struct

@@ -43,7 +43,7 @@ if(NOT ${CMAKE_VERSION} VERSION_LESS "3.8")
     target_compile_features(cppurses INTERFACE cxx_std_14)
 endif()
 
-target_compile_options(cppurses PRIVATE -Wall)
+target_compile_options(cppurses PRIVATE -Wall -Wextra -Wpedantic)
 
 # GATHER SOURCES
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -55,8 +55,6 @@ target_sources(cppurses PRIVATE
     system/event_loop.cpp
     system/event_queue.cpp
     system/focus.cpp
-    system/key.cpp
-    system/key_event.cpp
     system/move_event.cpp
     system/resize_event.cpp
     system/system.cpp
@@ -64,10 +62,13 @@ target_sources(cppurses PRIVATE
     system/animation_engine.cpp
     system/event_as_string.cpp
     system/timer_event_loop.cpp
+    system/timer_event.cpp
     system/user_input_event_loop.cpp
     system/fps_to_period.cpp
     system/find_widget_at.cpp
     system/terminal_resize_event.cpp
+    system/mouse.cpp
+    system/key.cpp
 )
 
 # PAINTER
@@ -91,45 +92,38 @@ target_sources(cppurses PRIVATE
     widget/widget.cpp
     widget/widget.event_handlers.cpp
     widget/widget_slots.cpp
-    widget/widget_stack.cpp
-    widget/widget_stack_menu.cpp
-    widget/glyph_select_stack.cpp
-    widget/glyph_select.cpp
+    widget/stack.cpp
+    widget/menu_stack.cpp
     widget/cycle_stack.cpp
     widget/label.cpp
-    widget/layout.cpp
     widget/line_edit.cpp
     widget/log.cpp
     widget/confirm_button.cpp
     widget/labeled_cycle_box.cpp
-    widget/horizontal_layout.cpp
+    widget/horizontal.cpp
     widget/matrix_display.cpp
     widget/point.cpp
     widget/border.cpp
     widget/cycle_box.cpp
-    widget/vertical_layout.cpp
+    widget/vertical.cpp
     widget/status_bar.cpp
     widget/textbox.cpp
-    widget/textbox_slots.cpp
     widget/horizontal_slider.cpp
     widget/textbox_base.cpp
-    widget/textbox_base_slots.cpp
     widget/push_button.cpp
     widget/horizontal_scrollbar.cpp
     widget/vertical_scrollbar.cpp
     widget/checkbox.cpp
     widget/titlebar.cpp
     widget/text_display.cpp
-    widget/text_display_slots.cpp
     widget/color_select.cpp
     widget/menu.cpp
     widget/size_policy.cpp
-    widget/blank_width.cpp
-    widget/blank_height.cpp
+    widget/fixed_width.cpp
+    widget/fixed_height.cpp
     widget/children_data.cpp
     widget/border_offset.cpp
     widget/cursor_data.cpp
-    widget/widget_free_functions.cpp
     widget/graph_tree.cpp
     widget/nearly_equal.cpp
     widget/vertical_slider.cpp

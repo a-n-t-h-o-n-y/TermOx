@@ -1,32 +1,38 @@
 #ifndef CPPURSES_WIDGET_WIDGETS_PUSH_BUTTON_HPP
 #define CPPURSES_WIDGET_WIDGETS_PUSH_BUTTON_HPP
-#include <cstddef>
-#include <cstdint>
-
-#include <signals/signals.hpp>
+#include <signals/signal.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/system/mouse_data.hpp>
+#include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/widget.hpp>
-#include <cppurses/widget/widgets/label.hpp>
 
 namespace cppurses {
 
-class Push_button : public Label {
+/// Button widget that emits Signal on a left mouse button press.
+class Push_button : public Widget {
    public:
-    explicit Push_button(Glyph_string name = "");
+    /// Construct a Push_button with centered \p label.
+    explicit Push_button(Glyph_string label = "");
 
-    // Signals
+    /// Set the label and repaint.
+    void set_label(Glyph_string label);
+
+    /// Return the current label.
+    const Glyph_string& label() const { return label_; }
+
+    /// Return the current label.
+    Glyph_string& label() { return label_; }
+
+    // Emitted when this Widget recieves a left mouse button press event.
     sig::Signal<void()> clicked;
 
    protected:
-    bool mouse_press_event(const Mouse_data& mouse) override;
+    bool mouse_press_event(const Mouse::State& mouse) override;
+    bool paint_event() override;
+
+   private:
+    Glyph_string label_;
 };
 
-namespace slot {
-
-sig::Slot<void()> click(Push_button& pb);
-
-}  // namespace slot
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_WIDGETS_PUSH_BUTTON_HPP

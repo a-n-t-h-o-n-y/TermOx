@@ -32,7 +32,7 @@ class Cursor_data {
     /// Disable the cursor(do not show on screen).
     void disable(bool disable = true) { this->enable(!disable); }
 
-    /// Enables the cursor if disabled, or disables if enabled.
+    /// Enable the cursor if disabled, or disable it if enabled.
     void toggle() { this->enable(!this->enabled()); }
 
     /// Set the local x coordinate of the cursor.

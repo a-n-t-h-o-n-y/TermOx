@@ -51,11 +51,11 @@ bool System::send_event(const Event& event) {
     return handled;
 }
 
-void System::exit(int return_code) {
+void System::exit(int exit_code) {
     animation_engine_.shutdown();
     std::lock_guard<std::mutex> lock{running_loops_mtx_};
     for (Event_loop* loop : running_event_loops_) {
-        loop->exit(return_code);
+        loop->exit(exit_code);
     }
     System::exit_requested_ = true;
 }
@@ -99,6 +99,11 @@ void System::set_head(Widget* new_head) {
         post_event<Resize_event>(*head_,
                                  Area{terminal.width(), terminal.height()});
     }
+}
+
+int System::run(Widget& head) {
+    System::set_head(&head);
+    return this->run();
 }
 
 int System::run() {

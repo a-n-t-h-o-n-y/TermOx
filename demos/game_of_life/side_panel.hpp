@@ -1,6 +1,6 @@
 #ifndef CPPURSES_DEMOS_GAME_OF_LIFE_SIDE_PANEL_HPP
 #define CPPURSES_DEMOS_GAME_OF_LIFE_SIDE_PANEL_HPP
-#include <cppurses/widget/layouts/vertical_layout.hpp>
+#include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/widget.hpp>
 
 // #include "examples_info_box.hpp"
@@ -11,7 +11,7 @@
 
 namespace gol {
 
-struct Side_panel : cppurses::Vertical_layout {
+struct Side_panel : cppurses::layout::Vertical {
     Side_panel();
 
     // Examples_info_box& examples_info{this->make_child<Examples_info_box>()};

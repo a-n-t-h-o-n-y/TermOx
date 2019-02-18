@@ -1,4 +1,4 @@
-#include <cppurses/widget/layouts/vertical_layout.hpp>
+#include <cppurses/widget/layouts/vertical.hpp>
 
 #include <cstddef>
 #include <deque>
@@ -15,8 +15,9 @@
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
+namespace layout {
 
-std::vector<Layout::Dimensions> Vertical_layout::calculate_widget_sizes() {
+std::vector<Layout::Dimensions> Vertical::calculate_widget_sizes() {
     std::vector<Dimensions> widgets;
     std::size_t total_stretch{0};
     for (const std::unique_ptr<Widget>& c : this->children.get()) {
@@ -49,10 +50,10 @@ std::vector<Layout::Dimensions> Vertical_layout::calculate_widget_sizes() {
             const float percent = d.widget->height_policy.stretch() /
                                   static_cast<float>(total_stretch);
             std::size_t height = percent * this->height();
-            if (height < d.widget->height_policy.min()) {
-                height = d.widget->height_policy.min();
-            } else if (height > d.widget->height_policy.max()) {
-                height = d.widget->height_policy.max();
+            if (height < d.widget->height_policy.min_size()) {
+                height = d.widget->height_policy.min_size();
+            } else if (height > d.widget->height_policy.max_size()) {
+                height = d.widget->height_policy.max_size();
             }
             d.height = height;
             height_available -= height;
@@ -101,10 +102,10 @@ std::vector<Layout::Dimensions> Vertical_layout::calculate_widget_sizes() {
         } else if (policy == Size_policy::Ignored ||
                    policy == Size_policy::Preferred ||
                    policy == Size_policy::Expanding) {
-            if (d.width > d.widget->width_policy.max()) {
-                d.width = d.widget->width_policy.max();
-            } else if (d.width < d.widget->width_policy.min()) {
-                d.width = d.widget->width_policy.min();
+            if (d.width > d.widget->width_policy.max_size()) {
+                d.width = d.widget->width_policy.max_size();
+            } else if (d.width < d.widget->width_policy.min_size()) {
+                d.width = d.widget->width_policy.min_size();
             }
         } else if (policy == Size_policy::Maximum) {
             if (d.width > d.widget->width_policy.hint()) {
@@ -112,8 +113,8 @@ std::vector<Layout::Dimensions> Vertical_layout::calculate_widget_sizes() {
             }
         } else if (policy == Size_policy::Minimum ||
                    policy == Size_policy::MinimumExpanding) {
-            if (d.width > d.widget->width_policy.max()) {
-                d.width = d.widget->width_policy.max();
+            if (d.width > d.widget->width_policy.max_size()) {
+                d.width = d.widget->width_policy.max_size();
             } else if (d.width < d.widget->width_policy.hint()) {
                 d.width = d.widget->width_policy.hint();
             }
@@ -122,9 +123,8 @@ std::vector<Layout::Dimensions> Vertical_layout::calculate_widget_sizes() {
     return widgets;
 }
 
-void Vertical_layout::distribute_space(
-    std::vector<Dimensions_reference> widgets,
-    int height_left) {
+void Vertical::distribute_space(std::vector<Dimensions_reference> widgets,
+                                int height_left) {
     // Find total stretch of first group
     std::size_t total_stretch{0};
     for (const Dimensions_reference& d : widgets) {
@@ -148,9 +148,9 @@ void Vertical_layout::distribute_space(
                                         static_cast<double>(total_stretch)) *
                                        to_distribute);
             if ((*d.height + height_additions.back()) >
-                d.widget->height_policy.max()) {
-                height_left += d.widget->height_policy.max() - *d.height;
-                *d.height = d.widget->height_policy.max();
+                d.widget->height_policy.max_size()) {
+                height_left += d.widget->height_policy.max_size() - *d.height;
+                *d.height = d.widget->height_policy.max_size();
                 widgets.erase(std::begin(widgets) + index);
                 return distribute_space(widgets, height_left);
             }
@@ -198,9 +198,9 @@ void Vertical_layout::distribute_space(
                                         static_cast<double>(total_stretch)) *
                                        to_distribute);
             if ((*d.height + height_additions.back()) >
-                d.widget->height_policy.max()) {
-                height_left -= d.widget->height_policy.max() - *d.height;
-                *d.height = d.widget->height_policy.max();
+                d.widget->height_policy.max_size()) {
+                height_left -= d.widget->height_policy.max_size() - *d.height;
+                *d.height = d.widget->height_policy.max_size();
                 widgets.erase(std::begin(widgets) + index);
                 return distribute_space(widgets, height_left);
             }
@@ -232,7 +232,7 @@ void Vertical_layout::distribute_space(
             if ((policy == Size_policy::Expanding ||
                  policy == Size_policy::MinimumExpanding) &&
                 height_left > 0) {
-                if (*d.height + 1 <= d.widget->height_policy.max()) {
+                if (*d.height + 1 <= d.widget->height_policy.max_size()) {
                     *d.height += 1;
                     height_left -= 1;
                 }
@@ -249,7 +249,7 @@ void Vertical_layout::distribute_space(
                  policy == Size_policy::Minimum ||
                  policy == Size_policy::Ignored) &&
                 height_left > 0) {
-                if (*d.height + 1 <= d.widget->height_policy.max()) {
+                if (*d.height + 1 <= d.widget->height_policy.max_size()) {
                     *d.height += 1;
                     height_left -= 1;
                 }
@@ -258,8 +258,8 @@ void Vertical_layout::distribute_space(
     } while (height_check != height_left);
 }
 
-void Vertical_layout::collect_space(std::vector<Dimensions_reference> widgets,
-                                    int height_left) {
+void Vertical::collect_space(std::vector<Dimensions_reference> widgets,
+                             int height_left) {
     if (height_left == 0) {
         return;
     }
@@ -302,9 +302,9 @@ void Vertical_layout::collect_space(std::vector<Dimensions_reference> widgets,
                  static_cast<double>(total_inverse)) *
                 (to_collect * -1));
             if ((*d.height - height_deductions.back()) <
-                d.widget->height_policy.min()) {
-                height_left -= *d.height - d.widget->height_policy.min();
-                *d.height = d.widget->height_policy.min();
+                d.widget->height_policy.min_size()) {
+                height_left -= *d.height - d.widget->height_policy.min_size();
+                *d.height = d.widget->height_policy.min_size();
                 widgets.erase(std::begin(widgets) + index);
                 return collect_space(widgets, height_left);
             }
@@ -366,9 +366,9 @@ void Vertical_layout::collect_space(std::vector<Dimensions_reference> widgets,
                  static_cast<double>(total_inverse)) *
                 (to_collect * -1));
             if ((*d.height - height_deductions.back()) <
-                d.widget->height_policy.min()) {
-                height_left += *d.height - d.widget->height_policy.min();
-                *d.height = d.widget->height_policy.min();
+                d.widget->height_policy.min_size()) {
+                height_left += *d.height - d.widget->height_policy.min_size();
+                *d.height = d.widget->height_policy.min_size();
                 widgets.erase(std::begin(widgets) + index);
                 return collect_space(widgets, height_left);
             }
@@ -396,7 +396,7 @@ void Vertical_layout::collect_space(std::vector<Dimensions_reference> widgets,
     }
 }
 
-void Vertical_layout::move_and_resize_children(
+void Vertical::move_and_resize_children(
     const std::vector<Dimensions>& dimensions) {
     const std::size_t parent_x{this->inner_x()};
     const std::size_t parent_y{this->inner_y()};
@@ -421,10 +421,11 @@ void Vertical_layout::move_and_resize_children(
     }
 }
 
-void Vertical_layout::update_geometry() {
+void Vertical::update_geometry() {
     this->enable(true, false);
     std::vector<Dimensions> heights{this->calculate_widget_sizes()};
     this->move_and_resize_children(heights);
 }
 
+}  // namespace layout
 }  // namespace cppurses

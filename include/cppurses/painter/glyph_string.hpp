@@ -63,7 +63,7 @@ class Glyph_string : private std::vector<Glyph> {
     /// Convert to a std::wstring, each Glyph being a wchar_t.
     std::wstring w_str() const;
 
-    /// Returns the length in Glyphs of the Glyph_string.
+    /// Return the length in Glyphs of the Glyph_string.
     size_type length() const { return this->size(); }
 
     /// Compound concatenation assignment operator to append a Glyph.

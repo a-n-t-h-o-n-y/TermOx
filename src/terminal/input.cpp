@@ -8,14 +8,11 @@
 
 #include <cppurses/system/detail/find_widget_at.hpp>
 #include <cppurses/system/event.hpp>
-#include <cppurses/system/events/key_event.hpp>
-#include <cppurses/system/events/mouse_event.hpp>
+#include <cppurses/system/events/key.hpp>
+#include <cppurses/system/events/mouse.hpp>
 #include <cppurses/system/events/resize_event.hpp>
 #include <cppurses/system/events/terminal_resize_event.hpp>
 #include <cppurses/system/focus.hpp>
-#include <cppurses/system/key.hpp>
-#include <cppurses/system/mouse_button.hpp>
-#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/area.hpp>
 #include <cppurses/widget/point.hpp>
@@ -39,57 +36,58 @@ std::unique_ptr<Event> make_terminal_resize_event() {
     return nullptr;
 }
 
-/// Checks if mouse_event is a button_mask type of event.
+/// Check if mouse_event is a button_mask type of event.
 template <typename Mask_t>
 bool is(Mask_t button_mask, const ::MEVENT& mouse_event) {
     return static_cast<bool>(mouse_event.bstate & button_mask);
 }
 
-/// Extracts the Event type and Mouse_button from a given MEVENT object.
-std::pair<Event::Type, Mouse_button> extract_info(const ::MEVENT& mouse_event) {
-    auto type_button = std::make_pair(Event::None, Mouse_button::None);
+/// Extract the Event type and Mouse::Button from a given MEVENT object.
+std::pair<Event::Type, Mouse::Button> extract_info(
+    const ::MEVENT& mouse_event) {
+    auto type_button = std::make_pair(Event::None, Mouse::Button::None);
     auto& type = type_button.first;
     auto& button = type_button.second;
     // Button 1 / Left Button
     if (is(BUTTON1_PRESSED, mouse_event)) {
         type = Event::MouseButtonPress;
-        button = Mouse_button::Left;
+        button = Mouse::Button::Left;
     } else if (is(BUTTON1_RELEASED, mouse_event)) {
         type = Event::MouseButtonRelease;
-        button = Mouse_button::Left;
+        button = Mouse::Button::Left;
     }
     // Button 2 / Middle Button
     else if (is(BUTTON2_PRESSED, mouse_event)) {
         type = Event::MouseButtonPress;
-        button = Mouse_button::Middle;
+        button = Mouse::Button::Middle;
     } else if (is(BUTTON2_RELEASED, mouse_event)) {
         type = Event::MouseButtonRelease;
-        button = Mouse_button::Middle;
+        button = Mouse::Button::Middle;
     }
     // Button 3 / Right Button
     else if (is(BUTTON3_PRESSED, mouse_event)) {
         type = Event::MouseButtonPress;
-        button = Mouse_button::Right;
+        button = Mouse::Button::Right;
     } else if (is(BUTTON3_RELEASED, mouse_event)) {
         type = Event::MouseButtonRelease;
-        button = Mouse_button::Right;
+        button = Mouse::Button::Right;
     }
     // Button 4 / Scroll Up
     else if (is(BUTTON4_PRESSED, mouse_event)) {
         type = Event::MouseButtonPress;
-        button = Mouse_button::ScrollUp;
+        button = Mouse::Button::ScrollUp;
     } else if (is(BUTTON4_RELEASED, mouse_event)) {
         type = Event::MouseButtonRelease;
-        button = Mouse_button::ScrollUp;
+        button = Mouse::Button::ScrollUp;
     }
     // Button 5 / Scroll Down
 #if defined(BUTTON5_PRESSED) && defined(BUTTON5_RELEASED)
     else if (is(BUTTON5_PRESSED, mouse_event)) {
         type = Event::MouseButtonPress;
-        button = Mouse_button::ScrollDown;
+        button = Mouse::Button::ScrollDown;
     } else if (is(BUTTON5_RELEASED, mouse_event)) {
         type = Event::MouseButtonRelease;
-        button = Mouse_button::ScrollDown;
+        button = Mouse::Button::ScrollDown;
     }
 #endif
     return type_button;
@@ -117,11 +115,11 @@ std::unique_ptr<Event> make_mouse_event() {
     const auto button = type_button.second;
     auto event = std::unique_ptr<Event>{nullptr};
     if (type == Event::MouseButtonPress) {
-        event = std::make_unique<Mouse_press_event>(
-            *receiver, Mouse_data{button, global, local, mouse_event.id});
+        event = std::make_unique<Mouse::Press>(
+            *receiver, Mouse::State{button, global, local, mouse_event.id});
     } else if (type == Event::MouseButtonRelease) {
-        event = std::make_unique<Mouse_release_event>(
-            *receiver, Mouse_data{button, global, local, mouse_event.id});
+        event = std::make_unique<Mouse::Release>(
+            *receiver, Mouse::State{button, global, local, mouse_event.id});
     }
     return event;
 }
@@ -138,8 +136,8 @@ std::unique_ptr<Event> make_resize_event() {
 
 std::unique_ptr<Event> make_keyboard_event(int input) {
     Widget* const receiver = Focus::focus_widget();
-    return receiver != nullptr ? std::make_unique<Key_press_event>(
-                                     *receiver, static_cast<Key>(input))
+    return receiver != nullptr ? std::make_unique<Key::Press>(
+                                     *receiver, static_cast<Key::Code>(input))
                                : nullptr;
 }
 }  // namespace

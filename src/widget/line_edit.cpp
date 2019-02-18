@@ -1,7 +1,7 @@
 #include <cppurses/widget/widgets/line_edit.hpp>
 
 #include <cctype>
-#include <cstdint>
+#include <functional>
 #include <utility>
 
 #include <signals/signal.hpp>
@@ -10,21 +10,18 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/system/key.hpp>
-#include <cppurses/system/keyboard_data.hpp>
-#include <cppurses/system/mouse_button.hpp>
-#include <cppurses/system/mouse_data.hpp>
+#include <cppurses/system/events/key.hpp>
+#include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/point.hpp>
-#include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widgets/textbox.hpp>
 
 namespace cppurses {
 
 Line_edit::Line_edit(Glyph_string initial_text)
     : Textbox{std::move(initial_text)} {
+    this->set_name("Line_edit");
     this->set_ghost_color(Color::Light_gray);
-    this->height_policy.type(Size_policy::Fixed);
-    this->height_policy.hint(1);
+    this->height_policy.fixed(1);
     this->disable_word_wrap();
 }
 
@@ -38,9 +35,9 @@ void Line_edit::clear_on_enter(bool enable) {
 
 void Line_edit::invisible_input(bool enabled) {
     if (enabled) {
-        this->add_new_text_attribute(Attribute::Invisible);
+        this->insert_brush.add_attributes(Attribute::Invisible);
     } else {
-        this->remove_new_text_attribute(Attribute::Invisible);
+        this->insert_brush.remove_attributes(Attribute::Invisible);
     }
     if (on_initial_) {
         return;
@@ -48,12 +45,12 @@ void Line_edit::invisible_input(bool enabled) {
     if (enabled) {
         Glyph_string invisible_text{this->contents()};
         invisible_text.add_attributes(Attribute::Invisible);
-        this->set_text(std::move(invisible_text));
+        this->set_contents(std::move(invisible_text));
 
     } else {
         Glyph_string visible_text{this->contents()};
         visible_text.remove_attribute(Attribute::Invisible);
-        this->set_text(std::move(visible_text));
+        this->set_contents(std::move(visible_text));
     }
     this->update();
 }
@@ -63,14 +60,14 @@ void Line_edit::underline(bool enabled) {
         this->wallpaper = Glyph{L' ', Attribute::Underline};
         Glyph_string underlined_text{this->contents()};
         underlined_text.add_attributes(Attribute::Underline);
-        this->set_text(std::move(underlined_text));
-        this->add_new_text_attribute(Attribute::Underline);
+        this->set_contents(std::move(underlined_text));
+        this->insert_brush.add_attributes(Attribute::Underline);
     } else {
         this->wallpaper = L' ';
         Glyph_string non_underlined{this->contents()};
         non_underlined.remove_attribute(Attribute::Underline);
-        this->set_text(std::move(non_underlined));
-        this->remove_new_text_attribute(Attribute::Underline);
+        this->set_contents(std::move(non_underlined));
+        this->insert_brush.remove_attributes(Attribute::Underline);
     }
     this->update();
 }
@@ -79,14 +76,14 @@ void Line_edit::set_ghost_color(Color c) {
     if (on_initial_) {
         Glyph_string ghost_text{this->contents()};
         ghost_text.add_attributes(foreground(c));
-        this->set_text(std::move(ghost_text));
+        this->set_contents(std::move(ghost_text));
         this->update();
     }
 }
 
-bool Line_edit::key_press_event(const Keyboard_data& keyboard) {
+bool Line_edit::key_press_event(const Key::State& keyboard) {
     if (keyboard.key == Key::Enter) {
-        editing_finished(this->contents().str());
+        edit_finished(this->contents().str());
         if (clear_on_enter_) {
             this->clear();
         }
@@ -111,9 +108,9 @@ bool Line_edit::key_press_event(const Keyboard_data& keyboard) {
     return Textbox::key_press_event(keyboard);
 }
 
-bool Line_edit::mouse_press_event(const Mouse_data& mouse) {
-    if (mouse.button == Mouse_button::ScrollUp ||
-        mouse.button == Mouse_button::ScrollDown) {
+bool Line_edit::mouse_press_event(const Mouse::State& mouse) {
+    if (mouse.button == Mouse::Button::ScrollUp ||
+        mouse.button == Mouse::Button::ScrollDown) {
         return true;
     }
     return Textbox::mouse_press_event(mouse);
@@ -125,5 +122,4 @@ bool Line_edit::focus_in_event() {
     }
     return Textbox::focus_in_event();
 }
-
 }  // namespace cppurses

@@ -8,7 +8,7 @@
 
 namespace gol {
 
-/// Retrieve cell Coordinates and rule string from RLE file.
+/// Return cell Coordinates and rule string from RLE file.
 std::pair<std::vector<Coordinate>, std::string> get_RLE(
     const std::string& filename);
 

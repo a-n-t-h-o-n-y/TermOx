@@ -7,7 +7,21 @@
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/children_data.hpp>
 #include <cppurses/widget/widget.hpp>
-#include <cppurses/widget/widget_free_functions.hpp>
+
+namespace {
+bool has_coordinates(const cppurses::Widget& w,
+                     std::size_t global_x,
+                     std::size_t global_y) {
+    if (!w.enabled()) {
+        return false;
+    }
+    const bool within_west = global_x >= w.inner_x();
+    const bool within_east = global_x < (w.inner_x() + w.width());
+    const bool within_north = global_y >= w.inner_y();
+    const bool within_south = global_y < (w.inner_y() + w.height());
+    return within_west && within_east && within_north && within_south;
+}
+}  // namespace
 
 namespace cppurses {
 namespace detail {

@@ -2,8 +2,8 @@
 
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/system/detail/fps_to_period.hpp>
+#include <cppurses/system/events/mouse.hpp>
 #include <cppurses/system/events/paint_event.hpp>
-#include <cppurses/system/mouse_data.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 
@@ -19,19 +19,21 @@ Animated_bit::Animated_bit(int rate, bool ani) {
 
 bool Animated_bit::timer_event() {
     int next_x = coords_.x + (1 * x_direction);
-    if (next_x >= this->width() || next_x < 0) {
+    const int width = static_cast<int>(this->width());
+    if (next_x >= width || next_x < 0) {
         x_direction *= -1;
         next_x = coords_.x + (1 * x_direction);
-        if (next_x >= this->width()) {
-            next_x = this->width() != 0 ? this->width() - 1 : 0;
+        if (next_x >= width) {
+            next_x = width != 0 ? width - 1 : 0;
         }
     }
     int next_y = coords_.y + (1 * y_direction);
-    if (next_y >= this->height() || next_y < 0) {
+    const int height = static_cast<int>(this->height());
+    if (next_y >= height || next_y < 0) {
         y_direction *= -1;
         next_y = coords_.y + (1 * y_direction);
-        if (next_y >= this->height()) {
-            next_y = this->height() != 0 ? this->height() - 1 : 0;
+        if (next_y >= height) {
+            next_y = height != 0 ? height - 1 : 0;
         }
     }
     coords_.x = next_x;
@@ -45,7 +47,7 @@ bool Animated_bit::paint_event() {
     return Widget::paint_event();
 }
 
-bool Animated_bit::mouse_press_event(const cppurses::Mouse_data& mouse) {
+bool Animated_bit::mouse_press_event(const cppurses::Mouse::State& mouse) {
     coords_ = mouse.local;
     this->update();
     return Widget::mouse_press_event(mouse);

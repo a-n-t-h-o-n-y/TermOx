@@ -6,8 +6,8 @@
 #include <signals/signals.hpp>
 
 #include <cppurses/painter/glyph.hpp>
-#include <cppurses/system/keyboard_data.hpp>
-#include <cppurses/system/mouse_data.hpp>
+#include <cppurses/system/events/key.hpp>
+#include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
@@ -25,8 +25,8 @@ class Horizontal_slider : public Widget {
 
    protected:
     bool paint_event() override;
-    bool mouse_press_event(const Mouse_data& mouse) override;
-    bool key_press_event(const Keyboard_data& keyboard) override;
+    bool mouse_press_event(const Mouse::State& mouse) override;
+    bool key_press_event(const Key::State& keyboard) override;
 
    private:
     Glyph indicator_{L'░'};

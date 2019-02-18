@@ -3,6 +3,7 @@ if(${CMAKE_VERSION} VERSION_LESS "3.8")
 endif()
 
 add_executable(demos EXCLUDE_FROM_ALL "")
+target_compile_options(demos PRIVATE -Wall -Wextra -Wpedantic)
 
 # CHESS
 # TODO can you include subdirectory instead?
@@ -37,6 +38,8 @@ target_sources(demos PRIVATE
     glyph_paint/attribute_box.cpp
     glyph_paint/options_box.cpp
     glyph_paint/populated_glyph_stack.cpp
+    glyph_paint/glyph_select_stack.cpp
+    glyph_paint/glyph_select.cpp
 )
 
 # ANIMATION

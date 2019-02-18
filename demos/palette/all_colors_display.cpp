@@ -3,7 +3,6 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/painter.hpp>
-#include <cppurses/widget/border.hpp>
 
 namespace palette {
 
@@ -19,16 +18,19 @@ bool Shade_display::paint_event() {
     Glyph mid_shade{L'▒', background(base_)};
     const auto color_n = 16;
 
-    int y_begin = inverted_ ? 0 : this->height() - 1;
-    auto y_end = [this](int y) {
-        return inverted_ ? y < this->height() : y >= 0;
+    const int height = static_cast<int>(this->height());
+    const int width = static_cast<int>(this->width());
+
+    int y_begin = inverted_ ? 0 : height - 1;
+    auto y_end = [this, height](int y) {
+        return inverted_ ? y < height : y >= 0;
     };
     auto increment = [this](int& y) { inverted_ ? ++y : --y; };
 
     Painter p{*this};
     auto& shade = light_shade;
     for (auto y = y_begin, i = 0; y_end(y); increment(y)) {
-        for (auto x = 0; x < this->width() && i < (2 * color_n); ++x, ++i) {
+        for (auto x = 0; x < width && i < (2 * color_n); ++x, ++i) {
             if (i == color_n) {
                 shade = mid_shade;
             }
@@ -58,17 +60,9 @@ Bottom_shades::Bottom_shades() {
 
 All_colors_display::All_colors_display() {
     const auto width = 48;
-
-    color_select.width_policy.type(cppurses::Size_policy::Maximum);
-    color_select.width_policy.hint(width);
-    color_select.height_policy.type(cppurses::Size_policy::Maximum);
-    color_select.height_policy.hint(6);
-
-    top_shades.width_policy.type(cppurses::Size_policy::Maximum);
-    top_shades.width_policy.hint(width);
-
-    bottom_shades.width_policy.type(cppurses::Size_policy::Maximum);
-    bottom_shades.width_policy.hint(width);
+    color_select.width_policy.maximum(width);
+    color_select.height_policy.maximum(6);
+    top_shades.width_policy.maximum(width);
+    bottom_shades.width_policy.maximum(width);
 }
-
 }  // namespace palette

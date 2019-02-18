@@ -9,6 +9,7 @@
 namespace cppurses {
 struct Area;
 struct Point;
+namespace layout {
 
 /// Provided as a uniform interface for arranging child Widgets.
 /** The update_geometry() function will be called each time there is a reason to
@@ -59,10 +60,6 @@ class Layout : public Widget {
         std::size_t* height;
     };
 };
-
-// Free Functions
-void set_background(Layout& l, Color c);
-void set_foreground(Layout& l, Color c);
-
+}  // namespace layout
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_LAYOUT_HPP

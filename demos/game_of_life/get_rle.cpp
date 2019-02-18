@@ -38,7 +38,7 @@ void seek_past_comments(std::ifstream& file) {
     }
 }
 
-/// Returns the top left coordinate of the pattern.
+/// Return the top left coordinate of the pattern.
 Coordinate get_offset(std::ifstream& file) {
     file.seekg(4, std::ios_base::cur);  // "x = "
     int width{0};
@@ -49,7 +49,7 @@ Coordinate get_offset(std::ifstream& file) {
     return {-1 * (width / 2), -1 * (height / 2)};
 }
 
-/// Extracts the rule to use from the file.
+/// Extract the rule to use from the file.
 std::string get_rule(std::ifstream& file) {
     if (file.peek() != ',') {
         return "3/23";

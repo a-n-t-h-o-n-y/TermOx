@@ -3,16 +3,12 @@
 #include <signals/slot.hpp>
 
 #include <cppurses/painter/color.hpp>
-#include <cppurses/system/events/key_event.hpp>
-#include <cppurses/system/events/mouse_event.hpp>
-#include <cppurses/system/key.hpp>
-#include <cppurses/system/mouse_button.hpp>
-#include <cppurses/system/mouse_data.hpp>
+#include <cppurses/system/events/key.hpp>
+#include <cppurses/system/events/mouse.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/cursor_data.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
-#include <cppurses/widget/widget_free_functions.hpp>
 
 namespace cppurses {
 namespace slot {
@@ -41,85 +37,93 @@ sig::Slot<void()> update(Widget& w) {
     return slot;
 }
 
-sig::Slot<void(Point, Mouse_button)> click(Widget& w) {
-    sig::Slot<void(Point, Mouse_button)> slot{[&w](const Point& c,
-                                                   Mouse_button b) {
-        System::send_event(Mouse_press_event{
-            w,
-            Mouse_data{b, Point{w.inner_x() + c.x, w.inner_y() + c.y}, c, 0}});
+sig::Slot<void(Point, Mouse::Button)> click(Widget& w) {
+    sig::Slot<void(Point, Mouse::Button)> slot{
+        [&w](const Point& c, Mouse::Button b) {
+            System::send_event(Mouse::Press{
+                w, Mouse::State{b, Point{w.inner_x() + c.x, w.inner_y() + c.y},
+                                c, 0}});
+        }};
+    slot.track(w.destroyed);
+    return slot;
+}
+
+sig::Slot<void(Mouse::Button)> click(Widget& w, Point c) {
+    sig::Slot<void(Mouse::Button)> slot{[&w, &c](Mouse::Button b) {
+        System::send_event(Mouse::Press{
+            w, Mouse::State{b, Point{w.inner_x() + c.x, w.inner_y() + c.y}, c,
+                            0}});
     }};
     slot.track(w.destroyed);
     return slot;
 }
 
-sig::Slot<void(Mouse_button)> click(Widget& w, Point c) {
-    sig::Slot<void(Mouse_button)> slot{[&w, &c](Mouse_button b) {
-        System::send_event(Mouse_press_event{
-            w,
-            Mouse_data{b, Point{w.inner_x() + c.x, w.inner_y() + c.y}, c, 0}});
-    }};
-    slot.track(w.destroyed);
-    return slot;
-}
-
-sig::Slot<void(Point)> click(Widget& w, Mouse_button b) {
+sig::Slot<void(Point)> click(Widget& w, Mouse::Button b) {
     sig::Slot<void(Point)> slot{[&w, b](const Point& c) {
-        System::send_event(Mouse_press_event{
-            w,
-            Mouse_data{b, Point{w.inner_x() + c.x, w.inner_y() + c.y}, c, 0}});
+        System::send_event(Mouse::Press{
+            w, Mouse::State{b, Point{w.inner_x() + c.x, w.inner_y() + c.y}, c,
+                            0}});
     }};
     slot.track(w.destroyed);
     return slot;
 }
 
-sig::Slot<void()> click(Widget& w, Point c, Mouse_button b) {
+sig::Slot<void()> click(Widget& w, Point c, Mouse::Button b) {
     sig::Slot<void()> slot{[&w, &c, b] {
-        System::send_event(Mouse_press_event{
-            w,
-            Mouse_data{b, Point{w.inner_x() + c.x, w.inner_y() + c.y}, c, 0}});
+        System::send_event(Mouse::Press{
+            w, Mouse::State{b, Point{w.inner_x() + c.x, w.inner_y() + c.y}, c,
+                            0}});
     }};
     slot.track(w.destroyed);
     return slot;
 }
 
-sig::Slot<void(Key)> keypress(Widget& w) {
-    sig::Slot<void(Key)> slot{[&w](Key k) {
-        System::send_event(Key_press_event{w, k});
+sig::Slot<void(Key::Code)> keypress(Widget& w) {
+    sig::Slot<void(Key::Code)> slot{[&w](Key::Code k) {
+        System::send_event(Key::Press{w, k});
     }};
     slot.track(w.destroyed);
     return slot;
 }
 
-sig::Slot<void()> keypress(Widget& w, Key k) {
-    sig::Slot<void()> slot{[&w, k] {
-        System::send_event(Key_press_event{w, k});
-    }};
+sig::Slot<void()> keypress(Widget& w, Key::Code k) {
+    sig::Slot<void()> slot{[&w, k] { System::send_event(Key::Press{w, k}); }};
     slot.track(w.destroyed);
     return slot;
 }
 
 sig::Slot<void(Color)> set_background(Widget& w) {
-    sig::Slot<void(Color)> slot{
-        [&w](Color c) { cppurses::set_background(w, c); }};
+    sig::Slot<void(Color)> slot{[&w](Color c) {
+        w.brush.set_background(c);
+        w.update();
+    }};
     slot.track(w.destroyed);
     return slot;
 }
 
 sig::Slot<void()> set_background(Widget& w, Color c) {
-    sig::Slot<void()> slot{[&w, &c] { cppurses::set_background(w, c); }};
+    sig::Slot<void()> slot{[&w, &c] {
+        w.brush.set_background(c);
+        w.update();
+    }};
     slot.track(w.destroyed);
     return slot;
 }
 
 sig::Slot<void(Color)> set_foreground(Widget& w) {
-    sig::Slot<void(Color)> slot{
-        [&w](Color c) { cppurses::set_foreground(w, c); }};
+    sig::Slot<void(Color)> slot{[&w](Color c) {
+        w.brush.set_foreground(c);
+        w.update();
+    }};
     slot.track(w.destroyed);
     return slot;
 }
 
 sig::Slot<void()> set_foreground(Widget& w, Color c) {
-    sig::Slot<void()> slot{[&w, &c] { cppurses::set_foreground(w, c); }};
+    sig::Slot<void()> slot{[&w, &c] {
+        w.brush.set_foreground(c);
+        w.update();
+    }};
     slot.track(w.destroyed);
     return slot;
 }

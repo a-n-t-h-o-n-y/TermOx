@@ -1,4 +1,4 @@
-#include <cppurses/widget/widgets/widget_stack.hpp>
+#include <cppurses/widget/layouts/stack.hpp>
 
 #include <algorithm>
 #include <iterator>
@@ -12,8 +12,9 @@
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
+namespace layout {
 
-void Widget_stack::set_active_page(std::size_t index) {
+void Stack::set_active_page(std::size_t index) {
     if (index > this->size()) {
         return;
     }
@@ -25,22 +26,21 @@ void Widget_stack::set_active_page(std::size_t index) {
     this->page_changed(index);
 }
 
-void Widget_stack::sets_focus_on_change(bool sets_focus) {
+void Stack::give_focus_on_change(bool sets_focus) {
     sets_focus_ = sets_focus;
 }
 
-void Widget_stack::add_page(std::unique_ptr<Widget> widget) {
+void Stack::add_page(std::unique_ptr<Widget> widget) {
     widget->disable();
     this->children.add(std::move(widget));
 }
 
-void Widget_stack::insert_page(std::size_t index,
-                               std::unique_ptr<Widget> widget) {
+void Stack::insert_page(std::size_t index, std::unique_ptr<Widget> widget) {
     widget->disable();
     this->children.insert(std::move(widget), index);
 }
 
-void Widget_stack::remove_page(std::size_t index) {
+void Stack::delete_page(std::size_t index) {
     if (index >= this->size()) {
         return;
     }
@@ -51,22 +51,38 @@ void Widget_stack::remove_page(std::size_t index) {
     at_index->close();
 }
 
-void Widget_stack::clear() {
+std::unique_ptr<Widget> Stack::remove_page(std::size_t index) {
+    std::unique_ptr<Widget> removed{nullptr};
+    if (index >= this->size()) {
+        return removed;
+    }
+    Widget* at_index{this->children.get()[index].get()};
+    if (at_index == this->active_page()) {
+        active_page_ = nullptr;
+    }
+    Widget* parent = this->parent();
+    if (parent != nullptr) {
+        removed = parent->children.remove(at_index);
+    }
+    return removed;
+}
+
+void Stack::clear() {
     active_page_ = nullptr;
     while (!this->children.get().empty()) {
         this->children.get().front()->close();
     }
 }
 
-std::size_t Widget_stack::size() const {
+std::size_t Stack::size() const {
     return this->children.get().size();
 }
 
-Widget* Widget_stack::active_page() const {
+Widget* Stack::active_page() const {
     return active_page_;
 }
 
-std::size_t Widget_stack::active_page_index() const {
+std::size_t Stack::active_page_index() const {
     if (active_page_ == nullptr) {
         return 0;  // TODO need better value here.
     }
@@ -78,7 +94,7 @@ std::size_t Widget_stack::active_page_index() const {
     return std::distance(std::begin(child_vec), at);
 }
 
-void Widget_stack::enable(bool enable, bool post_child_polished_event) {
+void Stack::enable(bool enable, bool post_child_polished_event) {
     this->enable_and_post_events(enable, post_child_polished_event);
     for (const std::unique_ptr<Widget>& child : this->children.get()) {
         if (child.get() == active_page_) {
@@ -88,37 +104,38 @@ void Widget_stack::enable(bool enable, bool post_child_polished_event) {
         }
     }
 }
+}  // namespace layout
 
 namespace slot {
 
-sig::Slot<void(std::size_t)> set_active_page(Widget_stack& stack) {
+sig::Slot<void(std::size_t)> set_active_page(layout::Stack& stack) {
     sig::Slot<void(std::size_t)> slot{
         [&stack](auto index) { stack.set_active_page(index); }};
     slot.track(stack.destroyed);
     return slot;
 }
 
-sig::Slot<void()> set_active_page(Widget_stack& stack, std::size_t index) {
+sig::Slot<void()> set_active_page(layout::Stack& stack, std::size_t index) {
     sig::Slot<void()> slot{[&stack, index] { stack.set_active_page(index); }};
     slot.track(stack.destroyed);
     return slot;
 }
 
-sig::Slot<void(std::size_t)> remove_page(Widget_stack& stack) {
+sig::Slot<void(std::size_t)> delete_page(layout::Stack& stack) {
     sig::Slot<void(std::size_t)> slot{
-        [&stack](auto index) { stack.remove_page(index); }};
+        [&stack](auto index) { stack.delete_page(index); }};
     slot.track(stack.destroyed);
     return slot;
 }
 
-sig::Slot<void()> remove_page(Widget_stack& stack, std::size_t index) {
-    sig::Slot<void()> slot{[&stack, index] { stack.remove_page(index); }};
+sig::Slot<void()> delete_page(layout::Stack& stack, std::size_t index) {
+    sig::Slot<void()> slot{[&stack, index] { stack.delete_page(index); }};
     slot.track(stack.destroyed);
     return slot;
 }
 
 sig::Slot<void(std::size_t, std::unique_ptr<Widget>)> insert_page(
-    Widget_stack& stack) {
+    layout::Stack& stack) {
     sig::Slot<void(std::size_t, std::unique_ptr<Widget>)> slot{
         [&stack](auto index, auto widget) {
             stack.insert_page(index, std::move(widget));
@@ -127,7 +144,7 @@ sig::Slot<void(std::size_t, std::unique_ptr<Widget>)> insert_page(
     return slot;
 }
 
-sig::Slot<void(std::unique_ptr<Widget>)> insert_page(Widget_stack& stack,
+sig::Slot<void(std::unique_ptr<Widget>)> insert_page(layout::Stack& stack,
                                                      std::size_t index) {
     sig::Slot<void(std::unique_ptr<Widget>)> slot{[&stack, index](auto widget) {
         stack.insert_page(index, std::move(widget));

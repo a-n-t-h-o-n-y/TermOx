@@ -1,6 +1,11 @@
 #include "notepad.hpp"
 
-#include <cppurses/cppurses.hpp>
+#include <cppurses/painter/attribute.hpp>
+#include <cppurses/painter/color.hpp>
+#include <cppurses/system/focus.hpp>
+#include <cppurses/widget/border.hpp>
+#include <cppurses/widget/focus_policy.hpp>
+#include <cppurses/widget/widget_slots.hpp>
 
 #include <fstream>
 #include <sstream>
@@ -41,45 +46,55 @@ Text_and_attributes::Text_and_attributes() {
 }
 
 void Text_and_attributes::initialize() {
-    set_background(textbox, Color::Dark_gray);
-    enable_border(textbox);
-    set_corners(textbox.border, L'╭', L'╮', L'╰', L'╯');
+    textbox.brush.set_background(Color::Dark_gray);
+    textbox.border.enable();
+    textbox.border.segments.north_west = L'╭';
+    textbox.border.segments.north_east = L'╮';
+    textbox.border.segments.south_west = L'╰';
+    textbox.border.segments.south_east = L'╯';
 
     // Signals -- Colors
     ac_select.fg_select.color_changed.connect(slot::set_foreground(textbox));
     ac_select.bg_select.color_changed.connect(slot::set_background(textbox));
 
-    // Signals -- Add Attributes
+    // Add Attributes
     ac_select.attr_select.bold.checked.connect(
-        slot::add_new_text_attribute(textbox, Attribute::Bold));
+        [this]() { textbox.insert_brush.add_attributes(Attribute::Bold); });
     ac_select.attr_select.italic.checked.connect(
-        slot::add_new_text_attribute(textbox, Attribute::Italic));
-    ac_select.attr_select.underline.checked.connect(
-        slot::add_new_text_attribute(textbox, Attribute::Underline));
+        [this]() { textbox.insert_brush.add_attributes(Attribute::Italic); });
+    ac_select.attr_select.underline.checked.connect([this]() {
+        textbox.insert_brush.add_attributes(Attribute::Underline);
+    });
     ac_select.attr_select.standout.checked.connect(
-        slot::add_new_text_attribute(textbox, Attribute::Standout));
+        [this]() { textbox.insert_brush.add_attributes(Attribute::Standout); });
     ac_select.attr_select.dim.checked.connect(
-        slot::add_new_text_attribute(textbox, Attribute::Dim));
+        [this]() { textbox.insert_brush.add_attributes(Attribute::Dim); });
     ac_select.attr_select.inverse.checked.connect(
-        slot::add_new_text_attribute(textbox, Attribute::Inverse));
-    ac_select.attr_select.invisible.checked.connect(
-        slot::add_new_text_attribute(textbox, Attribute::Invisible));
+        [this]() { textbox.insert_brush.add_attributes(Attribute::Inverse); });
+    ac_select.attr_select.invisible.checked.connect([this]() {
+        textbox.insert_brush.add_attributes(Attribute::Invisible);
+    });
 
     // Signals -- Remove Attributes
     ac_select.attr_select.bold.unchecked.connect(
-        slot::remove_new_text_attribute(textbox, Attribute::Bold));
-    ac_select.attr_select.italic.unchecked.connect(
-        slot::remove_new_text_attribute(textbox, Attribute::Italic));
-    ac_select.attr_select.underline.unchecked.connect(
-        slot::remove_new_text_attribute(textbox, Attribute::Underline));
-    ac_select.attr_select.standout.unchecked.connect(
-        slot::remove_new_text_attribute(textbox, Attribute::Standout));
+        [this]() { textbox.insert_brush.remove_attributes(Attribute::Bold); });
+    ac_select.attr_select.italic.unchecked.connect([this]() {
+        textbox.insert_brush.remove_attributes(Attribute::Italic);
+    });
+    ac_select.attr_select.underline.unchecked.connect([this]() {
+        textbox.insert_brush.remove_attributes(Attribute::Underline);
+    });
+    ac_select.attr_select.standout.unchecked.connect([this]() {
+        textbox.insert_brush.remove_attributes(Attribute::Standout);
+    });
     ac_select.attr_select.dim.unchecked.connect(
-        slot::remove_new_text_attribute(textbox, Attribute::Dim));
-    ac_select.attr_select.inverse.unchecked.connect(
-        slot::remove_new_text_attribute(textbox, Attribute::Inverse));
-    ac_select.attr_select.invisible.unchecked.connect(
-        slot::remove_new_text_attribute(textbox, Attribute::Invisible));
+        [this]() { textbox.insert_brush.remove_attributes(Attribute::Dim); });
+    ac_select.attr_select.inverse.unchecked.connect([this]() {
+        textbox.insert_brush.remove_attributes(Attribute::Inverse);
+    });
+    ac_select.attr_select.invisible.unchecked.connect([this]() {
+        textbox.insert_brush.remove_attributes(Attribute::Invisible);
+    });
 }
 
 // Attribute and Color Selections
@@ -92,8 +107,7 @@ Attrs_and_colors::Attrs_and_colors() {
 }
 
 void Attrs_and_colors::initialize() {
-    this->width_policy.type(Size_policy::Fixed);
-    this->width_policy.hint(16);
+    this->width_policy.fixed(16);
 }
 
 // Save Area
@@ -107,23 +121,20 @@ Save_area::Save_area() {
 }
 
 void Save_area::initialize() {
-    this->height_policy.type(Size_policy::Fixed);
-    this->height_policy.hint(1);
+    this->height_policy.fixed(1);
 
     // Load Button
-    load_btn.width_policy.type(Size_policy::Fixed);
-    load_btn.width_policy.hint(6);
-    set_background(load_btn, Color::Blue);
+    load_btn.width_policy.fixed(6);
+    load_btn.brush.set_background(Color::Blue);
 
     // Filename Text Edit
     filename_edit.disable_scrollwheel();
-    set_background(filename_edit, Color::White);
-    set_foreground(filename_edit, Color::Black);
+    filename_edit.brush.set_background(Color::White);
+    filename_edit.brush.set_foreground(Color::Black);
 
     // Save Button
-    save_btn.width_policy.type(Size_policy::Fixed);
-    save_btn.width_policy.hint(6);
-    set_background(save_btn, Color::Blue);
+    save_btn.width_policy.fixed(6);
+    save_btn.brush.set_background(Color::Blue);
 }
 
 Notepad::Notepad() {
@@ -140,7 +151,7 @@ bool Notepad::focus_in_event() {
 void Notepad::initialize() {
     // Signals
     save_area.load_btn.clicked.connect([this] {
-        txt_attr.textbox.set_text(
+        txt_attr.textbox.set_contents(
             ::load_file(save_area.filename_edit.contents().str()));
     });
 
@@ -149,5 +160,4 @@ void Notepad::initialize() {
                     txt_attr.textbox.contents().str());
     });
 }
-
 }  // namespace demos

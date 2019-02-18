@@ -1,4 +1,4 @@
-#include <cppurses/widget/widgets/glyph_select_stack.hpp>
+#include "glyph_select_stack.hpp"
 
 #include <cmath>
 #include <cstddef>
@@ -10,11 +10,13 @@
 #include <cppurses/painter/glyph_matrix.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/area.hpp>
+#include <cppurses/widget/layouts/stack.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widgets/matrix_display.hpp>
-#include <cppurses/widget/widgets/widget_stack.hpp>
 
-namespace cppurses {
+using namespace cppurses;
+namespace demos {
+namespace glyph_paint {
 
 void Glyph_select_stack::set_symbols(Glyph_string symbols) {
     symbols_ = std::move(symbols);
@@ -39,7 +41,7 @@ void Glyph_select_stack::set_page_percent(float percent) {
 
 bool Glyph_select_stack::resize_event(Area new_size, Area old_size) {
     this->update_stack();
-    return Widget_stack::resize_event(new_size, old_size);
+    return layout::Stack::resize_event(new_size, old_size);
 }
 
 void Glyph_select_stack::update_stack() {
@@ -91,4 +93,5 @@ sig::Slot<void()> set_page_percent(Glyph_select_stack& gss, float percent) {
 }
 
 }  // namespace slot
-}  // namespace cppurses
+}  // namespace glyph_paint
+}  // namespace demos

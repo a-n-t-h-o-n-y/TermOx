@@ -5,10 +5,10 @@
 namespace cppurses {
 namespace utility {
 
-/// Returns a string of char/bytes representing the wchar_t \p ch.
+/// Return a string of char/bytes representing the wchar_t \p ch.
 std::string wchar_to_bytes(wchar_t ch);
 
-/// Returns a string of char/bytes representing the wstring \p w_str.
+/// Return a string of char/bytes representing the wstring \p w_str.
 std::string wchar_to_bytes(std::wstring w_str);
 
 }  // namespace utility

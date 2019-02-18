@@ -1,38 +1,41 @@
 #ifndef CPPURSES_WIDGET_WIDGETS_CYCLE_STACK_HPP
 #define CPPURSES_WIDGET_WIDGETS_CYCLE_STACK_HPP
 #include <memory>
-#include <string>
 #include <utility>
 
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/widget/layouts/horizontal_layout.hpp>
-#include <cppurses/widget/layouts/vertical_layout.hpp>
+#include <cppurses/widget/layouts/horizontal.hpp>
+#include <cppurses/widget/layouts/stack.hpp>
+#include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/widgets/cycle_box.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
-#include <cppurses/widget/widgets/widget_stack.hpp>
 
 namespace cppurses {
 class Widget;
 
-/// A Widget_stack with an interface to cycle through each Widget in the stack.
-class Cycle_stack : public Vertical_layout {
+/// A layout::Stack with an interface to cycle through each Widget in the stack.
+class Cycle_stack : public layout::Vertical {
    public:
-    Cycle_stack();
-
+    /// Construct a new T object and add it to the end of the Stack.
+    /** Returns a reference to this newly created page. \p title is passed to
+     *  the Cycle_box to display when this page is active. */
     template <typename T, typename... Args>
     T& make_page(Glyph_string title, Args&&... args);
 
+    /// Append a page to the Stack.
+    /** \p title is passed to the Cycle_box associated with this page. */
     void add_page(Glyph_string title, std::unique_ptr<Widget> widget);
 
-    struct Top_row : public Horizontal_layout {
+    /// User interface to cycle through the pages of the Stack.
+    struct Top_row : public layout::Horizontal {
         Top_row();
         Push_button& left_btn{this->make_child<Push_button>("⏴")};
         Cycle_box& cycle_box{this->make_child<Cycle_box>()};
         Push_button& right_btn{this->make_child<Push_button>("⏵")};
     };
 
-    Top_row& top_row;
-    Widget_stack& stack{this->make_child<Widget_stack>()};
+    Top_row& top_row{this->make_child<Top_row>()};
+    layout::Stack& stack{this->make_child<layout::Stack>()};
 };
 
 // - - - - - - - - - - - - Template Implementations - - - - - - - - - - - - - -

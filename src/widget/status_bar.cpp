@@ -12,7 +12,7 @@ Status_bar::Status_bar(Glyph_string initial_message)
     : Label{std::move(initial_message)} {}
 
 void Status_bar::update_status(Glyph_string message) {
-    this->set_text(std::move(message));
+    this->set_contents(std::move(message));
     status_updated(this->contents());
 }
 

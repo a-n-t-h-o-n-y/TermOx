@@ -11,9 +11,8 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/painter.hpp>
-#include <cppurses/system/key.hpp>
-#include <cppurses/system/keyboard_data.hpp>
-#include <cppurses/system/mouse_data.hpp>
+#include <cppurses/system/events/key.hpp>
+#include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
@@ -176,9 +175,9 @@ bool GoL_widget::paint_event() {
     return Widget::paint_event();
 }
 
-bool GoL_widget::mouse_press_event(const Mouse_data& mouse) {
+bool GoL_widget::mouse_press_event(const Mouse::State& mouse) {
     const Coordinate engine_position = transform_from_display(mouse.local);
-    if (mouse.button == Mouse_button::Right) {
+    if (mouse.button == Mouse::Button::Right) {
         engine_.kill(engine_position);
     } else {
         engine_.give_life(engine_position);
@@ -193,7 +192,7 @@ bool GoL_widget::timer_event() {
     return Widget::timer_event();
 }
 
-bool GoL_widget::key_press_event(const Keyboard_data& keyboard) {
+bool GoL_widget::key_press_event(const Key::State& keyboard) {
     auto new_offset = this->offset();
     if (keyboard.key == Key::Arrow_left) {
         --new_offset.x;
@@ -216,9 +215,11 @@ void GoL_widget::update_period() {
 }
 
 Point GoL_widget::transform_from_engine(Coordinate position) const {
-    const int x{position.x + static_cast<int>(this->width() / 2) - offset_.x};
-    const int y{position.y + static_cast<int>(this->height() / 2) - offset_.y};
-    if (x >= 0 && x < this->width() && y >= 0 && y < this->height()) {
+    const int height = static_cast<int>(this->height());
+    const int width = static_cast<int>(this->width());
+    const int x{position.x + static_cast<int>(width / 2) - offset_.x};
+    const int y{position.y + static_cast<int>(height / 2) - offset_.y};
+    if (x >= 0 && x < width && y >= 0 && y < height) {
         return Point{static_cast<std::size_t>(x), static_cast<std::size_t>(y)};
     }
     return Point{std::size_t(-1), std::size_t(-1)};
