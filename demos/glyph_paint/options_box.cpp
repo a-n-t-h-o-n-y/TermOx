@@ -12,14 +12,14 @@ namespace demos {
 namespace glyph_paint {
 
 Options_A::Options_A() {
-    set_background(clone_btn, Color::White);
-    set_foreground(clone_btn, Color::Black);
+    clone_btn.brush.set_background(Color::White);
+    clone_btn.brush.set_foreground(Color::Black);
 
-    set_background(clear_btn, Color::White);
-    set_foreground(clear_btn, Color::Black);
+    clear_btn.main_btn.brush.set_background(Color::White);
+    clear_btn.main_btn.brush.set_foreground(Color::Black);
 
-    set_background(more_btn, Color::Light_gray);
-    set_foreground(more_btn, Color::Black);
+    more_btn.brush.set_background(Color::Light_gray);
+    more_btn.brush.set_foreground(Color::Black);
 }
 
 Options_B::Options_B() {

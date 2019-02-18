@@ -8,7 +8,6 @@
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/layouts/stack.hpp>
 #include <cppurses/widget/widget.hpp>
-#include <cppurses/widget/widget_free_functions.hpp>
 #include <cppurses/widget/widgets/cycle_box.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 
@@ -19,8 +18,10 @@ Cycle_stack::Top_row::Top_row() {
     left_btn.width_policy.fixed(1);
     right_btn.width_policy.fixed(1);
 
-    set_background_recursive(*this, Color::Light_gray);
-    set_foreground_recursive(*this, Color::Black);
+    for (auto& child : this->children.get()) {
+        child->brush.set_background(Color::Light_gray);
+        child->brush.set_foreground(Color::Black);
+    }
 
     left_btn.clicked.connect(slot::cycle_backward(cycle_box));
     right_btn.clicked.connect(slot::cycle_forward(cycle_box));

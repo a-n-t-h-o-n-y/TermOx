@@ -9,10 +9,8 @@ namespace demos {
 
 Main_menu::Main_menu() {
     this->set_name("Main_menu - head widget");
-    this->focus_policy = Focus_policy::Strong;
     titlebar.set_name("Titlebar in Main_menu");
     main_menu.set_name("Menu_stack in Main_menu");
     main_menu.menu().set_name("Menu in Main Widget Stack Menu");
 }
-
 }  // namespace demos

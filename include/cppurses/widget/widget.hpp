@@ -258,8 +258,6 @@ class Widget {
     sig::Signal<void(Widget*)> child_removed;
     sig::Signal<void()> focused_in;
     sig::Signal<void()> focused_out;
-    sig::Signal<void(Color)> background_color_changed;
-    sig::Signal<void(Color)> foreground_color_changed;
     sig::Signal<void(Widget&)> destroyed;
     sig::Signal<void(Point)> clicked;
     sig::Signal<void(std::size_t, std::size_t)> clicked_xy;

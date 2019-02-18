@@ -7,7 +7,6 @@
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/layouts/stack.hpp>
-#include <cppurses/widget/widget_free_functions.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 
 namespace {
@@ -22,10 +21,10 @@ struct Confirm_button::Confirm_screen : public layout::Horizontal {
         : confirm_btn{this->make_child<Push_button>(std::move(confirm_text))} {
         this->set_name("Confirm_screen");
         exit_btn.width_policy.fixed(3);
-        set_background(exit_btn, Color::Gray);
-        set_foreground(exit_btn, Color::Black);
-        set_background(confirm_btn, Color::Blue);
-        set_foreground(confirm_btn, Color::Black);
+        exit_btn.brush.set_background(Color::Gray);
+        exit_btn.brush.set_foreground(Color::Black);
+        confirm_btn.brush.set_background(Color::Blue);
+        confirm_btn.brush.set_foreground(Color::Black);
     }
 
     Push_button& confirm_btn;

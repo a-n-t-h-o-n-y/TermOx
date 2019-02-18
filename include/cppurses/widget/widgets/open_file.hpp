@@ -6,7 +6,6 @@
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
-#include <cppurses/widget/widget_free_functions.hpp>
 #include <cppurses/widget/widgets/fixed_width.hpp>
 #include <cppurses/widget/widgets/line_edit.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
@@ -32,10 +31,10 @@ template <typename CharT>
 Open_file<CharT>::Open_file() {
     this->height_policy.fixed(1);
     open_btn.width_policy.fixed(4);
-    set_background(open_btn, Color::Blue);
+    open_btn.brush.set_background(Color::Blue);
     seperator.wallpaper = L'⏵';
-    set_background(filename_edit, Color::White);
-    set_foreground(filename_edit, Color::Black);
+    filename_edit.brush.set_background(Color::White);
+    filename_edit.brush.set_foreground(Color::Black);
     filename_edit.set_ghost_color(Color::Dark_gray);
     open_btn.clicked.connect([this] { this->notify(); });
 }

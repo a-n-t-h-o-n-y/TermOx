@@ -40,7 +40,6 @@
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget.hpp>
-#include <cppurses/widget/widget_free_functions.hpp>
 #include <cppurses/widget/widget_slots.hpp>
 
 #endif  // CPPURSES_WIDGET_HPP

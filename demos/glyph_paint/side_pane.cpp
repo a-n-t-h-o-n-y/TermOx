@@ -2,7 +2,6 @@
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
-#include <cppurses/widget/widget_free_functions.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
 
 using namespace cppurses;
@@ -17,10 +16,12 @@ Side_pane::Side_pane() {
     space2.wallpaper = L'─';
 
     glyph_select.height_policy.preferred(6);
-
     color_select_stack.height_policy.fixed(3);
-    set_background_recursive(color_select_stack.top_row, Color::Light_gray);
-    set_foreground_recursive(color_select_stack.top_row, Color::Black);
+
+    for (auto& child : color_select_stack.top_row.children.get()) {
+        child->brush.set_background(Color::Light_gray);
+        child->brush.set_foreground(Color::Black);
+    }
 
     show_glyph.height_policy.fixed(1);
     show_glyph.set_alignment(Alignment::Center);

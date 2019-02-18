@@ -3,7 +3,6 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget.hpp>
-#include <cppurses/widget/widget_free_functions.hpp>
 
 namespace cppurses {
 
@@ -18,7 +17,7 @@ void Vertical_scrollbar::initialize() {
     up_button.height_policy.fixed(1);
 
     middle.height_policy.type(Size_policy::Expanding);
-    set_background(middle, Color::Light_gray);
+    middle.brush.set_background(Color::Light_gray);
 
     down_button.height_policy.fixed(1);
 }

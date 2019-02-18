@@ -8,7 +8,6 @@
 #include <cppurses/system/system.hpp>
 #include <cppurses/terminal/terminal.hpp>
 #include <cppurses/widget/border.hpp>
-#include <cppurses/widget/widget_free_functions.hpp>
 
 namespace {
 std::string rgb_to_str(const cppurses::RGB& rgb) {

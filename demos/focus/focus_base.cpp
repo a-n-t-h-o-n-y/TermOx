@@ -1,7 +1,6 @@
 #include "focus_base.hpp"
 
 #include <cppurses/system/focus.hpp>
-#include <cppurses/widget/widget_free_functions.hpp>
 
 namespace {
 using namespace cppurses;

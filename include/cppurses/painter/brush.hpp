@@ -20,16 +20,28 @@ class Brush {
         this->add_attributes(std::forward<Attributes>(attrs)...);
     }
 
-    // Base Case
+    // Zero element base Case
     void add_attributes() {}
 
     /// Add a variable number of Attributes or Colors to the brush.
     /** Use the (back/fore)ground_color(Color c) functions to add colors to the
      *  list. */
-    template <typename T, typename... Others>
-    void add_attributes(T attr, Others... others) {
-        this->set_attr(attr);
-        this->add_attributes(others...);
+    template <typename Attr_t, typename... Tail>
+    void add_attributes(Attr_t attribute, Tail... tail) {
+        this->set_attr(attribute);
+        this->add_attributes(tail...);
+    }
+
+    /// Zero element base case.
+    void remove_attributes() {}
+
+    /// Remove a variable number of Attributes from the brush.
+    /** Cannot remove foreground or background colors with this. */
+    template <typename... Attr_t>
+    void remove_attributes(Attr_t... attributes) {
+        for (Attribute a : {attributes...}) {
+            this->unset_attr(a);
+        }
     }
 
     /// Set the background color of this brush.
@@ -37,11 +49,6 @@ class Brush {
 
     /// Set the foreground color of this brush.
     void set_foreground(Color color) { foreground_color_ = color; }
-
-    /// Remove a specific Attribute, if it is set, otherwise no-op.
-    void remove_attribute(Attribute attr) {
-        attributes_.set(static_cast<std::int8_t>(attr), false);
-    }
 
     /// Set the background to not have a color, the default state.
     void remove_background() { background_color_ = opt::none; }
@@ -79,6 +86,11 @@ class Brush {
     /// Used by add_attributes() to set an Attribute.
     void set_attr(Attribute attr) {
         attributes_.set(static_cast<std::int8_t>(attr));
+    }
+
+    /// Remove a specific Attribute, if it is set, otherwise no-op.
+    void unset_attr(Attribute attr) {
+        attributes_.set(static_cast<std::int8_t>(attr), false);
     }
 
     // Data Members

@@ -37,7 +37,7 @@ void Line_edit::invisible_input(bool enabled) {
     if (enabled) {
         this->insert_brush.add_attributes(Attribute::Invisible);
     } else {
-        this->insert_brush.remove_attribute(Attribute::Invisible);
+        this->insert_brush.remove_attributes(Attribute::Invisible);
     }
     if (on_initial_) {
         return;
@@ -67,7 +67,7 @@ void Line_edit::underline(bool enabled) {
         Glyph_string non_underlined{this->contents()};
         non_underlined.remove_attribute(Attribute::Underline);
         this->set_contents(std::move(non_underlined));
-        this->insert_brush.remove_attribute(Attribute::Underline);
+        this->insert_brush.remove_attributes(Attribute::Underline);
     }
     this->update();
 }

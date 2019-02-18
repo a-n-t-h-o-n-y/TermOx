@@ -5,23 +5,24 @@
 
 #include <cppurses/painter/color.hpp>
 
-#include <cppurses/widget/widget_free_functions.hpp>
-
 using namespace cppurses;
 
 namespace palette {
 namespace detail {
+
 Buffered_edit_box::Buffered_edit_box() {
     this->height_policy.fixed(1);
     this->box.set_validator([](char c) { return std::isdigit(c); });
-    this->box.set_ghost_color(cppurses::Color::White);
-    set_background_recursive(*this, cppurses::Color::Blue);
+    this->box.set_ghost_color(Color::White);
+    for (auto& child : this->children.get()) {
+        child->brush.set_background(Color::Blue);
+    }
 }
 }  // namespace detail
 
 // Set up value_edit_ and slider_ to be consistent with each other.
 Value_control::Value_control(const Glyph_string& label)
-    : label_{this->make_child<cppurses::Label>(label)} {
+    : label_{this->make_child<Label>(label)} {
     this->width_policy.maximum(5);
     auto& slider = this->slider_.slider;
     auto& edit_box = this->value_edit_.box;
@@ -42,6 +43,6 @@ Value_control::Value_control(const Glyph_string& label)
         edit_box.set_cursor(edit_box.contents().size());
     });
 
-    label_.set_alignment(cppurses::Alignment::Center);
+    label_.set_alignment(Alignment::Center);
 }
 }  // namespace palette

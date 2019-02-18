@@ -108,7 +108,7 @@ void Paint_area::set_attribute(Attribute attr) {
 }
 
 void Paint_area::remove_attribute(Attribute attr) {
-    current_glyph_.brush.remove_attribute(attr);
+    current_glyph_.brush.remove_attributes(attr);
     if (!erase_enabled_) {
         glyph_changed(current_glyph_);
     }

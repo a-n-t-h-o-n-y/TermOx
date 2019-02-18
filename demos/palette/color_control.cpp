@@ -2,7 +2,6 @@
 
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/border.hpp>
-#include <cppurses/widget/widget_free_functions.hpp>
 
 #include "palette_helpers.hpp"
 

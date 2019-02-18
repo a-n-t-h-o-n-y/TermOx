@@ -9,7 +9,6 @@
 #include <cppurses/widget/cursor_data.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
-#include <cppurses/widget/widget_free_functions.hpp>
 
 namespace cppurses {
 namespace slot {
@@ -94,27 +93,37 @@ sig::Slot<void()> keypress(Widget& w, Key::Code k) {
 }
 
 sig::Slot<void(Color)> set_background(Widget& w) {
-    sig::Slot<void(Color)> slot{
-        [&w](Color c) { cppurses::set_background(w, c); }};
+    sig::Slot<void(Color)> slot{[&w](Color c) {
+        w.brush.set_background(c);
+        w.update();
+    }};
     slot.track(w.destroyed);
     return slot;
 }
 
 sig::Slot<void()> set_background(Widget& w, Color c) {
-    sig::Slot<void()> slot{[&w, &c] { cppurses::set_background(w, c); }};
+    sig::Slot<void()> slot{[&w, &c] {
+        w.brush.set_background(c);
+        w.update();
+    }};
     slot.track(w.destroyed);
     return slot;
 }
 
 sig::Slot<void(Color)> set_foreground(Widget& w) {
-    sig::Slot<void(Color)> slot{
-        [&w](Color c) { cppurses::set_foreground(w, c); }};
+    sig::Slot<void(Color)> slot{[&w](Color c) {
+        w.brush.set_foreground(c);
+        w.update();
+    }};
     slot.track(w.destroyed);
     return slot;
 }
 
 sig::Slot<void()> set_foreground(Widget& w, Color c) {
-    sig::Slot<void()> slot{[&w, &c] { cppurses::set_foreground(w, c); }};
+    sig::Slot<void()> slot{[&w, &c] {
+        w.brush.set_foreground(c);
+        w.update();
+    }};
     slot.track(w.destroyed);
     return slot;
 }

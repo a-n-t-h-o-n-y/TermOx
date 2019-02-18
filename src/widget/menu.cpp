@@ -15,7 +15,6 @@
 #include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/widget.hpp>
-#include <cppurses/widget/widget_free_functions.hpp>
 #include <cppurses/widget/widgets/label.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 
@@ -93,14 +92,17 @@ void Menu::select_item(std::size_t index) {
     if (items_.empty()) {
         return;
     }
-    remove_attributes(items_[selected_index_].button.get(), Attribute::Inverse);
+    auto& previous_btn = items_[selected_index_].button.get();
+    previous_btn.brush.remove_attributes(Attribute::Inverse);
+    previous_btn.update();
     if (index >= items_.size()) {
         selected_index_ = items_.size() - 1;
     } else {
         selected_index_ = index;
     }
-    add_attributes(items_[selected_index_].button.get(), Attribute::Inverse);
-    this->update();
+    auto& current_btn = items_[selected_index_].button.get();
+    current_btn.brush.add_attributes(Attribute::Inverse);
+    current_btn.update();
 }
 
 std::size_t Menu::size() const {

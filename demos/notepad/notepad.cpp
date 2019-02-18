@@ -77,22 +77,23 @@ void Text_and_attributes::initialize() {
 
     // Signals -- Remove Attributes
     ac_select.attr_select.bold.unchecked.connect(
-        [this]() { textbox.insert_brush.remove_attribute(Attribute::Bold); });
-    ac_select.attr_select.italic.unchecked.connect(
-        [this]() { textbox.insert_brush.remove_attribute(Attribute::Italic); });
+        [this]() { textbox.insert_brush.remove_attributes(Attribute::Bold); });
+    ac_select.attr_select.italic.unchecked.connect([this]() {
+        textbox.insert_brush.remove_attributes(Attribute::Italic);
+    });
     ac_select.attr_select.underline.unchecked.connect([this]() {
-        textbox.insert_brush.remove_attribute(Attribute::Underline);
+        textbox.insert_brush.remove_attributes(Attribute::Underline);
     });
     ac_select.attr_select.standout.unchecked.connect([this]() {
-        textbox.insert_brush.remove_attribute(Attribute::Standout);
+        textbox.insert_brush.remove_attributes(Attribute::Standout);
     });
     ac_select.attr_select.dim.unchecked.connect(
-        [this]() { textbox.insert_brush.remove_attribute(Attribute::Dim); });
+        [this]() { textbox.insert_brush.remove_attributes(Attribute::Dim); });
     ac_select.attr_select.inverse.unchecked.connect([this]() {
-        textbox.insert_brush.remove_attribute(Attribute::Inverse);
+        textbox.insert_brush.remove_attributes(Attribute::Inverse);
     });
     ac_select.attr_select.invisible.unchecked.connect([this]() {
-        textbox.insert_brush.remove_attribute(Attribute::Invisible);
+        textbox.insert_brush.remove_attributes(Attribute::Invisible);
     });
 }
 

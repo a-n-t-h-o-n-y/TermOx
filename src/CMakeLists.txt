@@ -96,7 +96,6 @@ target_sources(cppurses PRIVATE
     widget/menu_stack.cpp
     widget/cycle_stack.cpp
     widget/label.cpp
-    widget/layout.cpp
     widget/line_edit.cpp
     widget/log.cpp
     widget/confirm_button.cpp
@@ -125,7 +124,6 @@ target_sources(cppurses PRIVATE
     widget/children_data.cpp
     widget/border_offset.cpp
     widget/cursor_data.cpp
-    widget/widget_free_functions.cpp
     widget/graph_tree.cpp
     widget/nearly_equal.cpp
     widget/vertical_slider.cpp
