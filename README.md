@@ -1,4 +1,5 @@
-[![Build Status](https://travis-ci.org/a-n-t-h-o-n-y/CPPurses.svg?branch=master)](https://travis-ci.org/a-n-t-h-o-n-y/CPPurses)
+[![Build Status](https://travis-ci.org/a-n-t-h-o-n-y/CPPurses.svg?branch=master)](https://travis-ci.org/a-n-t-h-o-n-y/CPPurses) [![Join the chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/CPPurses/Lobby) [![Read the Wiki](https://img.shields.io/badge/-Wiki-yellow.svg)](https://github.com/a-n-t-h-o-n-y/CPPurses/wiki) [![Read the Reference](https://img.shields.io/badge/-API%20Reference-blue.svg)](https://a-n-t-h-o-n-y.github.io/CPPurses/hierarchy.html)
+
 
 # TUI Library
 __CPPurses__ is a Terminal User Interface(TUI) Library built on top of
@@ -24,50 +25,67 @@ This is a __work in progress__. The API is not stable.
 ## Usage
 See the [wiki](https://github.com/a-n-t-h-o-n-y/CPPurses/wiki) for examples.
 
+Reference documentation can be found [here](
+https://a-n-t-h-o-n-y.github.io/CPPurses/annotated.html).
+
 ## Features
-- UTF-8 support.
-- Mouse and keyboard input.
-- Library of generic Widget types.
-- Easy Widget reuse and expansion through inheritance.
-- Simple and configurable layout system.
-- Signals and Slots for inter-Widget communication.
+- Simple event system interface for handling mouse, keyboard
+and animation events, among others.
+- Library of commonly used Widget types.
+- Widget reuse and expansion through inheritance.
+- Layout Widgets which automatically resize and move their children.
+- Signals and Slots for communication between Widgets.
 - Extensible color palettes.
-- Simple border drawing and manipulation.
-- Experimental animation support.
+- Border drawing and customization.
 
-## TODO
-- Mouse Move Events
-- Hovering Widget Layout
-- Dialog Box Widget
-- Tabs Widget
-- More Documentation
-
-## Installation
+## Build Instructions
 CPPurses depends on two header only libraries, this repo
 includes them as git submodules. You'll need NCurses installed on your system.
 ```
 git clone https://github.com/a-n-t-h-o-n-y/CPPurses.git
 mkdir CPPurses/build && cd CPPurses/build
-git submodule update --init --recursive --remote  # Pull in dependencies
-cmake -DCMAKE_BUILD_TYPE=Release ..               # Generate Makefiles
-make                                              # Build library
-make demos                                        # Build demos(optional)
+git submodule update --init --recursive   # Pull in dependencies
+cmake -DCMAKE_BUILD_TYPE=Release ..       # Generate Makefiles
+make                                      # Build library
+make demos                                # Build demos(optional)
 sudo make install    # Install header and library archive to system defaults
 ```
 Installing the library with CMake will place the headers and the library
 archive in the standard GNU install directories.
 
 ## Using the Library
-For projects using CPPurses, link with cppurses, ncurses and your system's
-thread library. If you have installed the library your linker flags will be:
+As a submodule:
+```cmake
+# CMakeLists.txt
+cmake_minimum_required(VERSION 3.2)
+add_executable(foo foo.cpp ...)
+
+# CPPurses is cloned into a directory named external/
+add_subdirectory(external/CPPurses)
+target_link_libraries(foo cppurses)
+```
+
+As an installed library:
+```cmake
+# CMakeLists.txt
+cmake_minimum_required(VERSION 3.2)
+add_executable(foo foo.cpp ...)
+
+# CPPurses is installed on your system and linker can find cppurses:
+target_compile_features(foo PRIVATE cxx_std_14)
+target_link_libraries(foo cppurses ncurses pthread)
+```
+
+Without CMake, link with cppurses, ncurses and your system's
+thread library. If the library is installed your linker flags will be
+something like:
 ```
 -lcppurses -lncurses -pthread
 ```
-for most Linux distributions.
+C++14 or above will need to be used.
 
-## Documentation
-Reference documentation can be found [here](
-https://a-n-t-h-o-n-y.github.io/CPPurses/annotated.html).
+## License
+This software is distributed under the [MIT License](LICENSE.txt).
 
 ## Gallery
 Game of Life
@@ -82,6 +100,3 @@ Chess
 <p align="center">
   <img src="docs/images/chess_demo_2.png">
 </p>
-
-## License
-This software is distributed under the [MIT License](LICENSE.txt).

@@ -90,9 +90,7 @@ target_sources(demos PRIVATE
     game_of_life/get_plaintext.cpp
 )
 
-find_package(Threads REQUIRED)
-
-target_link_libraries(demos PRIVATE cppurses ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(demos PRIVATE cppurses)
 
 if(NOT ${CMAKE_VERSION} VERSION_LESS "3.8")
     target_compile_features(demos INTERFACE cxx_std_14)
