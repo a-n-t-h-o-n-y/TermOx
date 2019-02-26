@@ -136,8 +136,12 @@ std::unique_ptr<Event> make_resize_event() {
 
 std::unique_ptr<Event> make_keyboard_event(int input) {
     Widget* const receiver = Focus::focus_widget();
-    return receiver != nullptr ? std::make_unique<Key::Press>(
-                                     *receiver, static_cast<Key::Code>(input))
+    const auto code = static_cast<Key::Code>(input);
+    if (code == Key::Ctrl_c) {
+        System::exit(0);
+        return nullptr;
+    }
+    return receiver != nullptr ? std::make_unique<Key::Press>(*receiver, code)
                                : nullptr;
 }
 }  // namespace

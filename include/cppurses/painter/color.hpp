@@ -5,12 +5,15 @@
 
 namespace cppurses {
 
+using Underlying_color_t = std::int16_t;
+
 namespace detail {
-const int first_color_value{239};
+const Underlying_color_t first_color_value{239};
+const Underlying_color_t last_color_value{first_color_value + 16};
 }  // namespace detail
 
 /// Colors that can be applied to Glyphs.
-enum class Color : std::int16_t {
+enum class Color : Underlying_color_t {
     Black = detail::first_color_value,
     Dark_red,
     Dark_blue,
@@ -33,7 +36,7 @@ namespace detail {
 
 // Used by add_attributes() in brush to overload on different Color types from a
 // parameter pack.
-enum class BackgroundColor : std::int16_t {
+enum class BackgroundColor : Underlying_color_t {
     Black = detail::first_color_value,
     Dark_red,
     Dark_blue,
@@ -54,7 +57,7 @@ enum class BackgroundColor : std::int16_t {
 
 // Used by add_attributes() in brush to overload on different Color types from a
 // parameter pack.
-enum class ForegroundColor : std::int16_t {
+enum class ForegroundColor : Underlying_color_t {
     Black = detail::first_color_value,
     Dark_red,
     Dark_blue,
