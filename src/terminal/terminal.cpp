@@ -18,7 +18,7 @@
 
 extern "C" void handle_sigint(int /* sig*/) {
     cppurses::System::terminal.uninitialize();
-    std::exit(0);
+    std::quick_exit(0);
 }
 
 namespace {
@@ -58,9 +58,8 @@ void Terminal::initialize() {
         return;
     }
     std::signal(SIGINT, &handle_sigint);
-    setenv("TERM", "xterm-256color", 1);
-    std::setlocale(LC_ALL, "en_US.UTF-8");
     this->setup_resize_signal_handler();
+    std::setlocale(LC_ALL, "en_US.UTF-8");
 
     ::initscr();
     is_initialized_ = true;
