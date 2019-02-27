@@ -20,7 +20,6 @@
 
 namespace {
 using namespace cppurses;
-// #undef border  // NCurses macro, naming conflict. REMOVE THIS
 
 bool resize_happened{false};
 
@@ -137,10 +136,6 @@ std::unique_ptr<Event> make_resize_event() {
 std::unique_ptr<Event> make_keyboard_event(int input) {
     Widget* const receiver = Focus::focus_widget();
     const auto code = static_cast<Key::Code>(input);
-    if (code == Key::Ctrl_c) {
-        System::exit(0);
-        return nullptr;
-    }
     return receiver != nullptr ? std::make_unique<Key::Press>(*receiver, code)
                                : nullptr;
 }

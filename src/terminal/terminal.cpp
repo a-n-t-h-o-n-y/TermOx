@@ -1,7 +1,9 @@
 #include <cppurses/terminal/terminal.hpp>
 
 #include <clocale>
+#include <csignal>
 #include <cstddef>
+#include <cstdlib>
 
 #include <ncurses.h>
 #include <signal.h>
@@ -11,7 +13,13 @@
 #include <cppurses/painter/color_definition.hpp>
 #include <cppurses/painter/palette.hpp>
 #include <cppurses/painter/rgb.hpp>
+#include <cppurses/system/system.hpp>
 #include <cppurses/terminal/input.hpp>
+
+extern "C" void handle_sigint(int /* sig*/) {
+    cppurses::System::terminal.uninitialize();
+    std::exit(0);
+}
 
 namespace {
 using namespace cppurses;
@@ -49,6 +57,7 @@ void Terminal::initialize() {
     if (is_initialized_) {
         return;
     }
+    std::signal(SIGINT, &handle_sigint);
     setenv("TERM", "xterm-256color", 1);
     std::setlocale(LC_ALL, "en_US.UTF-8");
     this->setup_resize_signal_handler();

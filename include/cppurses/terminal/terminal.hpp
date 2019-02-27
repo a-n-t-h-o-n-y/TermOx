@@ -66,7 +66,7 @@ class Terminal {
     bool show_cursor_{false};
     Glyph background_{L' '};
     Palette palette_{Palettes::DawnBringer()};
-    bool raw_mode_{true};
+    bool raw_mode_{false};
 
     /// Register the input::indicate_resize signal handler for sigwinch signal.
     void setup_resize_signal_handler() const;
