@@ -61,7 +61,16 @@ void Terminal::initialize() {
     this->setup_resize_signal_handler();
     std::setlocale(LC_ALL, "en_US.UTF-8");
 
-    ::initscr();
+    //::initscr(); // would print error message and call exit() on fail                      
+    // newterm() is equivalent to ::initscr(), but returns NULL on fail 
+    if (::newterm(::getenv("TERM"), stdout, stdin) == NULL) {
+	    if (::newterm("xterm-256color", stdout, stdin) == NULL) {
+		    // TODO: HANDLE UNABLE TO INITIALIZE SCR ERROR HERE !!!
+		    fprintf(stderr, "Error: Could not initialize screen\n");
+		    exit(EXIT_FAILURE);
+	    }
+    }
+
     is_initialized_ = true;
     ::noecho();
     ::keypad(::stdscr, true);
