@@ -69,8 +69,8 @@ attr_t attribute_to_attr_t(Attribute attr) {
         case Attribute::Blink:
             result = A_BLINK;
             break;
-        case Attribute::Italic:
 #ifdef A_ITALIC
+        case Attribute::Italic:
             result = A_ITALIC;
             break;
 #endif

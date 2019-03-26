@@ -11,6 +11,8 @@
 #include <cppurses/painter/palette.hpp>
 #include <cppurses/terminal/input.hpp>
 
+#include <clocale>
+
 namespace {
 std::int16_t scale(std::int16_t value) {
     const auto value_max = 255;
