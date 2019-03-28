@@ -3,7 +3,9 @@
 #include <clocale>
 #include <csignal>
 #include <cstddef>
+#include <cstdio>
 #include <cstdlib>
+#include <stdexcept>
 
 #include <ncurses.h>
 #include <signal.h>
@@ -61,7 +63,12 @@ void Terminal::initialize() {
     this->setup_resize_signal_handler();
     std::setlocale(LC_ALL, "en_US.UTF-8");
 
-    ::initscr();
+    if (::newterm(std::getenv("TERM"), stdout, stdin) == nullptr) {
+        if (::newterm("xterm-256color", stdout, stdin) == nullptr) {
+            throw std::runtime_error{"Unable to initialize screen."};
+        }
+    }
+
     is_initialized_ = true;
     ::noecho();
     ::keypad(::stdscr, true);
