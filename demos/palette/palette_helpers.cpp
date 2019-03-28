@@ -43,19 +43,19 @@ void set_definition(Color color, RGB values) {
 namespace palette {
 namespace detail {
 
-void set_red(Color color, std::int16_t red_value) {
+void set_red(Color color, Underlying_color_t red_value) {
     auto palette = System::terminal.current_palette();
     const auto& def = extract_definition(palette, color);
     set_definition(color, {red_value, def.values.green, def.values.blue});
 }
 
-void set_green(Color color, std::int16_t green_value) {
+void set_green(Color color, Underlying_color_t green_value) {
     auto palette = System::terminal.current_palette();
     const auto& def = extract_definition(palette, color);
     set_definition(color, {def.values.red, green_value, def.values.blue});
 }
 
-void set_blue(Color color, std::int16_t blue_value) {
+void set_blue(Color color, Underlying_color_t blue_value) {
     auto palette = System::terminal.current_palette();
     const auto& def = extract_definition(palette, color);
     set_definition(color, {def.values.red, def.values.green, blue_value});

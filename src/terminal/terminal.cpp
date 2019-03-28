@@ -1,33 +1,49 @@
 #include <cppurses/terminal/terminal.hpp>
 
+#include <clocale>
+#include <csignal>
 #include <cstddef>
-#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <stdexcept>
 
 #include <ncurses.h>
 #include <signal.h>
 #include <string.h>
 
+#include <cppurses/painter/color.hpp>
 #include <cppurses/painter/color_definition.hpp>
 #include <cppurses/painter/palette.hpp>
+#include <cppurses/painter/rgb.hpp>
+#include <cppurses/system/system.hpp>
 #include <cppurses/terminal/input.hpp>
 
-#include <clocale>
+extern "C" void handle_sigint(int /* sig*/) {
+    cppurses::System::terminal.uninitialize();
+    std::quick_exit(0);
+}
 
 namespace {
-std::int16_t scale(std::int16_t value) {
+using namespace cppurses;
+
+/// Returns the grayscale value to be used for RGB values for color number \p c.
+Underlying_color_t grayscale_value(Underlying_color_t c) {
+    return (c - 232) * 10 + 8;
+}
+
+Underlying_color_t scale(Underlying_color_t value) {
     const auto value_max = 255;
-    const auto ncurses_max = 999;
-    return static_cast<std::int16_t>((static_cast<double>(value) / value_max) *
-                                     ncurses_max);
+    const auto ncurses_max = 1000;
+    return static_cast<Underlying_color_t>(
+        (static_cast<double>(value) / value_max) * ncurses_max);
 }
 
 void initialize_color_pairs() {
-    using cppurses::detail::first_color_value;
-    const auto color_count = 16;
-    const auto last_color_value = first_color_value + color_count;
     short pair_n = 0;
-    for (auto bg = first_color_value; bg < last_color_value; ++bg) {
-        for (auto fg = first_color_value; fg < last_color_value; ++fg) {
+    for (auto bg = detail::first_color_value; bg < detail::last_color_value;
+         ++bg) {
+        for (auto fg = detail::first_color_value; fg < detail::last_color_value;
+             ++fg) {
             if (pair_n != 0) {
                 ::init_pair(pair_n, fg, bg);
             }
@@ -43,11 +59,16 @@ void Terminal::initialize() {
     if (is_initialized_) {
         return;
     }
-    setenv("TERM", "xterm-256color", 1);
-    std::setlocale(LC_ALL, "en_US.UTF-8");
+    std::signal(SIGINT, &handle_sigint);
     this->setup_resize_signal_handler();
+    std::setlocale(LC_ALL, "en_US.UTF-8");
 
-    ::initscr();
+    if (::newterm(std::getenv("TERM"), stdout, stdin) == nullptr) {
+        if (::newterm("xterm-256color", stdout, stdin) == nullptr) {
+            throw std::runtime_error{"Unable to initialize screen."};
+        }
+    }
+
     is_initialized_ = true;
     ::noecho();
     ::keypad(::stdscr, true);
@@ -56,11 +77,11 @@ void Terminal::initialize() {
     ::mouseinterval(0);
     if (this->has_color()) {
         ::start_color();
-        using detail::first_color_value;
-        ::assume_default_colors(first_color_value, first_color_value);
+        ::assume_default_colors(detail::first_color_value,
+                                detail::first_color_value);
         initialize_color_pairs();
+        this->ncurses_set_palette(palette_);
     }
-    this->ncurses_set_palette();
     this->ncurses_set_raw_mode();
     this->ncurses_set_cursor();
 }
@@ -69,6 +90,8 @@ void Terminal::uninitialize() {
     if (!is_initialized_) {
         return;
     }
+    this->reset_palette();
+    ::wrefresh(::stdscr);
     is_initialized_ = false;
     ::endwin();
 }
@@ -105,10 +128,10 @@ void Terminal::set_background(const Glyph& tile) {
     }
 }
 
-void Terminal::set_color_palette(const Palette& palette) {
-    palette_ = palette;
-    if (is_initialized_) {
-        this->ncurses_set_palette();
+void Terminal::set_color_palette(const Palette& colors) {
+    palette_ = colors;
+    if (is_initialized_ && this->has_color()) {
+        this->ncurses_set_palette(palette_);
     }
 }
 
@@ -147,15 +170,24 @@ void Terminal::setup_resize_signal_handler() const {
     sigaction(SIGWINCH, &sa, NULL);
 }
 
-void Terminal::ncurses_set_palette() const {
-    if (!this->can_change_colors()) {
-        return;
-    }
-    for (const Color_definition& def : palette_) {
-        std::int16_t ncurses_color_number{static_cast<std::int16_t>(def.color)};
+void Terminal::ncurses_set_palette(const Palette& colors) {
+    for (const Color_definition& def : colors) {
+        Underlying_color_t ncurses_color_number{
+            static_cast<Underlying_color_t>(def.color)};
         ::init_color(ncurses_color_number, scale(def.values.red),
                      scale(def.values.green), scale(def.values.blue));
     }
+}
+
+void Terminal::reset_palette() {
+    Palette initial_palette;
+    for (auto c = detail::first_color_value; c != detail::last_color_value;
+         ++c) {
+        auto value = grayscale_value(c);
+        Color_definition def{static_cast<Color>(c), {value, value, value}};
+        initial_palette[c - detail::first_color_value] = def;
+    }
+    this->ncurses_set_palette(initial_palette);
 }
 
 void Terminal::ncurses_set_raw_mode() const {

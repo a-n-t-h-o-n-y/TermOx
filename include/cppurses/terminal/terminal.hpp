@@ -38,7 +38,7 @@ class Terminal {
     const Glyph& background() const { return background_; }
 
     /// Set terminal color definitions for the 16 Colors in CPPurses.
-    void set_color_palette(const Palette& palette);
+    void set_color_palette(const Palette& colors);
 
     /// Return a copy of the currently set color palette.
     Palette current_palette() const { return palette_; }
@@ -71,8 +71,11 @@ class Terminal {
     /// Register the input::indicate_resize signal handler for sigwinch signal.
     void setup_resize_signal_handler() const;
 
-    /// Actually set the palette via ncurses using the state of palette_.
-    void ncurses_set_palette() const;
+    /// Actually set the palette via ncurses using the state of \p colors.
+    static void ncurses_set_palette(const Palette& colors);
+
+    /// Reset used color values to their defaults, from before program start.
+    void reset_palette();
 
     /// Actually set raw/noraw mode via ncurses using the state of raw_mode_.
     void ncurses_set_raw_mode() const;

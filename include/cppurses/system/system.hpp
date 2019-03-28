@@ -40,7 +40,8 @@ class System {
 
     /// Create a Widget_t object, set it as head widget and call System::run().
     /** \p args... are passed on to the Widget_t constructor. Blocks until
-     *  System::exit() is called, returns the exit code. */
+     *  System::exit() is called, returns the exit code. Will throw a
+     *  std::runtime_error if screen cannot be initialized. */
     template <typename Widget_t, typename... Args>
     int run(Args&&... args) {
         Widget_t head_widget(std::forward<Args>(args)...);
@@ -49,10 +50,12 @@ class System {
     }
 
     /// Set \p head as head widget and call System::run().
+    /** Will throw a std::runtime_error if screen cannot be initialized. */
     int run(Widget& head);
 
     /// Launch the main Event_loop and start processing Events.
-    /** Blocks until System::exit() is called, returns the exit code. */
+    /** Blocks until System::exit() is called, returns the exit code. Will throw
+     *  a std::runtime_error if screen cannot be initialized. */
     int run();
 
     /// Immediately send the event filters and then to the intended receiver.
