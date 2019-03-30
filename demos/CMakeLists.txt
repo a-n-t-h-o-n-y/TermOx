@@ -6,7 +6,7 @@ add_executable(demos EXCLUDE_FROM_ALL "")
 target_compile_options(demos PRIVATE -Wall -Wextra -Wpedantic)
 
 # CHESS
-# TODO can you include subdirectory instead?
+# TODO Include subdirectory instead.
 target_sources(demos PRIVATE
     chess/src/chessboard_widget.cpp
     chess/src/position.cpp
