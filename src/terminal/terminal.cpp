@@ -20,7 +20,11 @@
 
 extern "C" void handle_sigint(int /* sig*/) {
     cppurses::System::terminal.uninitialize();
-    std::quick_exit(0);
+#if !defined __APPLE__
+  std::quick_exit(0);
+#else
+  std::exit(0);
+#endif
 }
 
 namespace {
