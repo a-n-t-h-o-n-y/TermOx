@@ -8,28 +8,32 @@ namespace cppurses {
 using Underlying_color_t = std::int16_t;
 
 namespace detail {
-const Underlying_color_t first_color_value{239};
+// const Underlying_color_t first_color_value{239};
+const Underlying_color_t first_color_value{0};
 const Underlying_color_t last_color_value{first_color_value + 16};
 }  // namespace detail
 
 /// Colors that can be applied to Glyphs.
 enum class Color : Underlying_color_t {
+    // Compatability Colors
     Black = detail::first_color_value,
+    Red,
+    Green,
+    Yellow,
+    Blue,
+    Violet,
+    Light_blue,
+    White,
+
+    // Extended Colors
     Dark_red,
     Dark_blue,
     Dark_gray,
     Brown,
-    Green,
-    Red,
     Gray,
-    Blue,
     Orange,
     Light_gray,
-    Light_green,
-    Violet,
-    Light_blue,
-    Yellow,
-    White
+    Light_green
 };
 
 namespace detail {
@@ -37,43 +41,49 @@ namespace detail {
 // Used by add_attributes() in brush to overload on different Color types from a
 // parameter pack.
 enum class BackgroundColor : Underlying_color_t {
+    // Compatability Colors
     Black = detail::first_color_value,
+    Red,
+    Green,
+    Yellow,
+    Blue,
+    Violet,
+    Light_blue,
+    White,
+
+    // Extended Colors
     Dark_red,
     Dark_blue,
     Dark_gray,
     Brown,
-    Green,
-    Red,
     Gray,
-    Blue,
     Orange,
     Light_gray,
-    Light_green,
-    Violet,
-    Light_blue,
-    Yellow,
-    White
+    Light_green
 };
 
 // Used by add_attributes() in brush to overload on different Color types from a
 // parameter pack.
 enum class ForegroundColor : Underlying_color_t {
+    // Compatability Colors
     Black = detail::first_color_value,
+    Red,
+    Green,
+    Yellow,
+    Blue,
+    Violet,
+    Light_blue,
+    White,
+
+    // Extended Colors
     Dark_red,
     Dark_blue,
     Dark_gray,
     Brown,
-    Green,
-    Red,
     Gray,
-    Blue,
     Orange,
     Light_gray,
-    Light_green,
-    Violet,
-    Light_blue,
-    Yellow,
-    White
+    Light_green
 };
 
 }  // namespace detail

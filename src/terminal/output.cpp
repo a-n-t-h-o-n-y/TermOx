@@ -16,6 +16,7 @@
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
+#include <cppurses/system/system.hpp>
 
 #ifndef add_wchstr
 #include <cppurses/painter/detail/extended_char.hpp>
@@ -24,16 +25,12 @@
 namespace {
 using namespace cppurses;
 
-attr_t color_attr_t(Color c) {
-    return static_cast<attr_t>(c) - detail::first_color_value;
+short color_index(Color fg, Color bg) {
+    return System::terminal.color_index(static_cast<Underlying_color_t>(fg),
+                                        static_cast<Underlying_color_t>(bg));
 }
 
-short find_pair(Color foreground, Color background) {
-    const auto color_count = 16;
-    return color_attr_t(background) * color_count + color_attr_t(foreground);
-}
-
-short find_pair(const Brush& brush) {
+short color_index(const Brush& brush) {
     auto background = Color::Black;
     if (brush.background_color()) {
         background = *(brush.background_color());
@@ -42,7 +39,7 @@ short find_pair(const Brush& brush) {
     if (brush.foreground_color()) {
         foreground = *(brush.foreground_color());
     }
-    return find_pair(foreground, background);
+    return color_index(foreground, background);
 }
 
 attr_t attribute_to_attr_t(Attribute attr) {
@@ -90,7 +87,7 @@ attr_t find_attr_t(const Brush& brush) {
 
 #ifdef SLOW_PAINT
 void paint_indicator(char symbol) {
-    const auto color_pair = find_pair(Color::White, Color::Black);
+    const auto color_pair = color_index(Color::White, Color::Black);
     const auto attributes = A_NORMAL;
 #ifdef add_wchstr
     const wchar_t temp_sym[2] = {symbol, L'\0'};
@@ -108,7 +105,7 @@ void paint_indicator(char symbol) {
 #ifdef add_wchstr
 /// Add \p glyph's symbol, with attributes, to the screen at cursor position.
 void put_as_wchar(const Glyph& glyph) {
-    const auto color_pair = find_pair(glyph.brush);
+    const auto color_pair = color_index(glyph.brush);
     const auto attributes = find_attr_t(glyph.brush);
     const wchar_t symbol[2] = {glyph.symbol, L'\0'};
     auto symbol_and_attributes = cchar_t{};
@@ -122,7 +119,7 @@ void put_as_wchar(const Glyph& glyph) {
 void put_as_char(const Glyph& glyph) {
     auto use_addch = false;
     auto symbol_and_attributes = detail::get_chtype(glyph.symbol, use_addch);
-    symbol_and_attributes |= COLOR_PAIR(find_pair(glyph.brush));
+    symbol_and_attributes |= COLOR_PAIR(color_index(glyph.brush));
     symbol_and_attributes |= find_attr_t(glyph.brush);
     if (use_addch) {
         ::waddch(::stdscr, symbol_and_attributes);
