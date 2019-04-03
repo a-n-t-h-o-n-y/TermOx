@@ -59,6 +59,9 @@ class Terminal {
     /// Return whether this terminal can display up to 16 colors.
     bool has_extended_colors() const;
 
+    /// Return the number of colors this terminal supports.
+    short color_count() const;
+
     /// Return whether this terminal can change color definitions.
     /** This is required for the color Palette to be changed. Return false if
      *  the Terminal hasn't been initialized yet. */
@@ -86,9 +89,6 @@ class Terminal {
 
     /// Actually set the palette via ncurses using the state of \p colors.
     void ncurses_set_palette(const Palette& colors);
-
-    /// Reset used color values to their defaults, from before program start.
-    // void reset_palette();
 
     /// Actually set raw/noraw mode via ncurses using the state of raw_mode_.
     void ncurses_set_raw_mode() const;

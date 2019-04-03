@@ -30,11 +30,6 @@ extern "C" void handle_sigint(int /* sig*/) {
 namespace {
 using namespace cppurses;
 
-/// Returns the grayscale value to be used for RGB values for color number \p c.
-// Underlying_color_t grayscale_value(Underlying_color_t c) {
-//     return (c - 232) * 10 + 8;
-// }
-
 Underlying_color_t scale(Underlying_color_t value) {
     const auto value_max = 255;
     const auto ncurses_max = 1000;
@@ -78,7 +73,6 @@ void Terminal::uninitialize() {
     if (!is_initialized_) {
         return;
     }
-    // this->reset_palette();
     ::wrefresh(::stdscr);
     is_initialized_ = false;
     ::endwin();
@@ -151,6 +145,13 @@ bool Terminal::has_extended_colors() const {
     return false;
 }
 
+short Terminal::color_count() const {
+    if (is_initialized_) {
+        return COLORS;
+    }
+    return 0;
+}
+
 bool Terminal::can_change_colors() const {
     if (is_initialized_) {
         return ::can_change_color() == TRUE;
@@ -168,6 +169,9 @@ short Terminal::color_pair_count() const {
 short Terminal::color_index(short fg, short bg) const {
     if (fg == 7 && bg == 0) {
         return 0;
+    }
+    if (fg == 15 && bg == 0) {
+        return 128;
     }
     const short max_color = this->has_extended_colors() ? 16 : 8;
     return ((max_color - 1) - fg) * max_color + bg;
@@ -197,17 +201,6 @@ void Terminal::ncurses_set_palette(const Palette& colors) {
         }
     }
 }
-
-// void Terminal::reset_palette() {
-//     Palette initial_palette;
-//     for (auto c = detail::first_color_value; c != detail::last_color_value;
-//          ++c) {
-//         auto value = grayscale_value(c);
-//         Color_definition def{static_cast<Color>(c), {value, value, value}};
-//         initial_palette[c - detail::first_color_value] = def;
-//     }
-//     this->ncurses_set_palette(initial_palette);
-// }
 
 void Terminal::ncurses_set_raw_mode() const {
     if (raw_mode_) {
