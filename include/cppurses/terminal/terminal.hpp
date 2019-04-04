@@ -74,8 +74,8 @@ class Terminal {
     /// Map pairs of colors to a unique index between [0, 255]
     short color_index(short fg, short bg) const;
 
-    /// Use the default colors of the terminal for Black and White.
-    void use_default_colors();
+    /// Use the default colors of the terminal for bg Black and fg White.
+    void use_default_colors(bool use = true);
 
    private:
     bool is_initialized_{false};
@@ -96,7 +96,14 @@ class Terminal {
     /// Actually set show_cursor via ncurses using the state of show_cursor_.
     void ncurses_set_cursor() const;
 
+    /// Assign all color pairs.
     void initialize_color_pairs() const;
+
+    /// Assign background Black and foreground White as color -1
+    void init_default_pairs() const;
+
+    /// Assign background Black and foreground White as color 0 and 7 resp.
+    void uninit_default_pairs() const;
 };
 
 }  // namespace cppurses

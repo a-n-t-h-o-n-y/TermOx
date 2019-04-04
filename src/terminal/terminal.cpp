@@ -177,8 +177,17 @@ short Terminal::color_index(short fg, short bg) const {
     return ((max_color - 1) - fg) * max_color + bg;
 }
 
-void Terminal::use_default_colors() {
-    ::use_default_colors();
+void Terminal::use_default_colors(bool use) {
+    if (!is_initialized_) {
+        return;
+    }
+    if (use) {
+        ::assume_default_colors(-1, -1);
+        init_default_pairs();
+    } else {
+        ::assume_default_colors(7, 0);
+        uninit_default_pairs();
+    }
 }
 
 void Terminal::setup_resize_signal_handler() const {
@@ -217,9 +226,9 @@ void Terminal::ncurses_set_cursor() const {
 }
 
 void Terminal::initialize_color_pairs() const {
-    // Compatability Colors
-    for (short fg = 0; fg < 8; ++fg) {
-        for (short bg = 0; bg < 8; ++bg) {
+    Underlying_color_t max_color = this->has_extended_colors() ? 16 : 8;
+    for (short fg = 0; fg < max_color; ++fg) {
+        for (short bg = 0; bg < max_color; ++bg) {
             const auto index = color_index(fg, bg);
             if (index == 0) {
                 continue;
@@ -227,26 +236,28 @@ void Terminal::initialize_color_pairs() const {
             ::init_pair(index, fg, bg);
         }
     }
-    if (!this->has_extended_colors()) {
-        return;
+}
+
+void Terminal::init_default_pairs() const {
+    Underlying_color_t max_color = this->has_extended_colors() ? 16 : 8;
+    for (Underlying_color_t bg = 1; bg < max_color; ++bg) {
+        ::init_pair(color_index(7, bg), -1, bg);
     }
-    // Extended Colors
-    // Right Side
-    for (short fg = 8; fg < 16; ++fg) {
-        for (short bg = 0; bg < 8; ++bg) {
-            ::init_pair(color_index(fg, bg), fg, bg);
+    for (Underlying_color_t fg = 0; fg < max_color; ++fg) {
+        if (fg != 7) {
+            ::init_pair(color_index(fg, 0), fg, -1);
         }
     }
-    // Bottom
-    for (short fg = 0; fg < 8; ++fg) {
-        for (short bg = 8; bg < 16; ++bg) {
-            ::init_pair(color_index(fg, bg), fg, bg);
-        }
+}
+
+void Terminal::uninit_default_pairs() const {
+    Underlying_color_t max_color = this->has_extended_colors() ? 16 : 8;
+    for (Underlying_color_t bg = 0; bg < max_color; ++bg) {
+        ::init_pair(color_index(7, bg), 7, bg);
     }
-    // Corner
-    for (short fg = 8; fg < 16; ++fg) {
-        for (short bg = 8; bg < 16; ++bg) {
-            ::init_pair(color_index(fg, bg), fg, bg);
+    for (Underlying_color_t fg = 0; fg < max_color; ++fg) {
+        if (fg != 7) {
+            ::init_pair(color_index(fg, 0), fg, 0);
         }
     }
 }

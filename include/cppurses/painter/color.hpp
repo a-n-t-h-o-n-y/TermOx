@@ -26,14 +26,14 @@ enum class Color : Underlying_color_t {
     White,
 
     // Extended Colors
-    Dark_red,
-    Dark_blue,
     Dark_gray,
+    Dark_red,
+    Light_green,
     Brown,
-    Gray,
+    Dark_blue,
     Orange,
-    Light_gray,
-    Light_green
+    Gray,
+    Light_gray
 };
 
 namespace detail {
