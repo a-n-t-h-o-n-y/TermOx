@@ -5,7 +5,9 @@
 #include <cppurses/painter/glyph.hpp>
 
 namespace cppurses {
+namespace layout {
 class Layout;
+}
 class Enable_event;
 class Disable_event;
 class Child_event;
@@ -39,7 +41,7 @@ class Screen_state {
     Optimize optimize;
 
     friend class Screen;
-    friend class cppurses::Layout;
+    friend class cppurses::layout::Layout;
     friend class cppurses::Enable_event;
     friend class cppurses::Disable_event;
     friend class cppurses::Child_event;

@@ -60,6 +60,7 @@ class Layout : public Widget {
         std::size_t* height;
     };
 };
+
 }  // namespace layout
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_LAYOUT_HPP

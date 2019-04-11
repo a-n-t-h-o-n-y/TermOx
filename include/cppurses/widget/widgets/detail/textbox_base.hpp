@@ -38,11 +38,11 @@ class Textbox_base : public Text_display {
      *  extend as far as the current cursor column position. */
     void cursor_down(std::size_t n = 1);
 
-    /// Move the cursor \p n indicies towards the beginning of contents.
+    /// Move the cursor \p n indices towards the beginning of contents.
     /** Scroll up if moving past the top-left position. */
     void cursor_left(std::size_t n = 1);
 
-    /// Move the cursor \p n indicies towards the end of contents.
+    /// Move the cursor \p n indices towards the end of contents.
     /** Scroll down if moving past the bottom-right position. */
     void cursor_right(std::size_t n = 1);
 

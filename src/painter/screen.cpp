@@ -130,10 +130,10 @@ void Screen::full_paint_single_point(Widget& widg,
     }
     auto tile = staged_tiles.at(point);
     imprint(widg.brush, tile.brush);
-    if (!(contains(point, existing_tiles) && existing_tiles[point] == tile)) {
+    // if (!(contains(point, existing_tiles) && existing_tiles[point] == tile)) {
         output::put(point.x, point.y, tile);
         existing_tiles[point] = tile;
-    }
+    // }
 }
 
 void Screen::basic_paint_single_point(Widget& widg,
@@ -216,7 +216,8 @@ void Screen::delegate_paint(Widget& widg,
     } else if (optimization_info.moved) {
         paint_move_event(widg, staged_tiles);
     } else if (optimization_info.resized) {
-        paint_resize_event(widg, staged_tiles);
+        // paint_resize_event(widg, staged_tiles);
+        full_paint(widg, staged_tiles);
     } else if (optimization_info.child_event) {
         paint_child_event(widg, staged_tiles);
     } else {

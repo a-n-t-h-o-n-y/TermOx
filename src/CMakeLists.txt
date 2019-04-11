@@ -140,13 +140,7 @@ target_sources(cppurses PRIVATE
     widget/vertical_slider.cpp
     widget/slider_logic.cpp
     widget/toggle_button.cpp
-)
-
-# TERMINAL
-target_sources(cppurses PRIVATE
-    terminal/terminal.cpp
-    terminal/output.cpp
-    terminal/input.cpp
+    widget/layout.cpp
 )
 
 # TERMINAL
