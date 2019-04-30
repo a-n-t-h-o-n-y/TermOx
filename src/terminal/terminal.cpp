@@ -44,8 +44,6 @@ void Terminal::initialize() {
     if (is_initialized_) {
         return;
     }
-    std::signal(SIGINT, &handle_sigint);
-    this->setup_resize_signal_handler();
     std::setlocale(LC_ALL, "en_US.UTF-8");
 
     if (::newterm(std::getenv("TERM"), stdout, stdin) == nullptr) {
@@ -53,6 +51,8 @@ void Terminal::initialize() {
             throw std::runtime_error{"Unable to initialize screen."};
         }
     }
+    std::signal(SIGINT, &handle_sigint);
+    this->setup_resize_signal_handler();
 
     is_initialized_ = true;
     ::noecho();
@@ -261,5 +261,4 @@ void Terminal::uninit_default_pairs() const {
         }
     }
 }
-
 }  // namespace cppurses
