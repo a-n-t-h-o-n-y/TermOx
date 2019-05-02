@@ -3,7 +3,6 @@
 #include <cstdint>
 
 #include <cppurses/system/focus.hpp>
-#include <cppurses/system/shortcuts.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
@@ -15,9 +14,6 @@ Key::Press::Press(Widget& receiver, Code key)
     : Key::Event{Event::KeyPress, receiver, key} {}
 
 bool Key::Press::send() const {
-    if (Shortcuts::send_key(key_)) {
-        return true;
-    }
     if (key_ == Code::Tab && Focus::tab_press()) {
         return true;
     }
