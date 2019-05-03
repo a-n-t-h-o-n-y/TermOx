@@ -88,7 +88,7 @@ class Widget {
     /** Return a reference to this newly created Widget. */
     template <typename Widg_t, typename... Args>
     Widg_t& make_child(Args&&... args) {
-        this->children.add(
+        this->children.append(
             std::make_unique<Widg_t>(std::forward<Args>(args)...));
         return static_cast<Widg_t&>(*(this->children.get().back()));
     }

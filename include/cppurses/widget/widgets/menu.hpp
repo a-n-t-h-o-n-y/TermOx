@@ -20,7 +20,7 @@ class Menu : public layout::Vertical {
    public:
     explicit Menu(Glyph_string title);
 
-    sig::Signal<void()>& add_item(Glyph_string label);
+    sig::Signal<void()>& add_item(Glyph_string label); // TODO append_item
     sig::Signal<void()>& insert_item(Glyph_string label, std::size_t index);
     void remove_item(std::size_t index);
 

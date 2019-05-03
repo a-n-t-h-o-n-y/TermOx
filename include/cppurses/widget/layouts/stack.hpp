@@ -28,31 +28,31 @@ class Stack : public layout::Horizontal {
     /** Enabled by default. */
     void give_focus_on_change(bool sets_focus = true);
 
-    /// Construct a new page in the Stack, with constructor arguments \p args.
-    /** This will construct a new child Widget of type T and automatically
-     *  disable it. Returns a reference to the created child Widget. Page is
-     *  appended to the list of children. */
+    /// Construct and append a page to the Stack.
+    /** This will construct a child Widget of type T, using \p args passed to
+     *  T's constructor, and then automatically disable it. Returns a reference
+     *  to the created child Widget. */
     template <typename T, typename... Args>
     T& make_page(Args&&... args);
 
     /// Add an existing Widget as a page to the end of the Stack.
-    void add_page(std::unique_ptr<Widget> widget);
+    void append_page(std::unique_ptr<Widget> widget);
 
-    /// Insert an existing Widget at \p index.
+    /// Insert a Widget at \p index.
     /** No-op if \p index is larger than children.get().size(). */
     void insert_page(std::size_t index, std::unique_ptr<Widget> widget);
 
     /// Remove a page from the list, by \p index value, and delete it.
-    /** No-op if index is not in valid range. Sets active page to nullptr if
+    /** No-op if index is not valid. Sets active page to nullptr if current
      *  active page is being deleted. */
     void delete_page(std::size_t index);
 
     /// Remove a page from the list, by \p index value, and return it.
     /** Useful if you need to move a page into another Widget. Use
-     *  Stack::delete_page() if you want to remove a page for good. Letting the
-     *  returned Widget destroy itself will potentially leave dangling pointers
-     *  in the event system. No-op if index is not in valid range. Sets active
-     *  page to nullptr if active page is being removed. */
+     *  Stack::delete_page() if you want to remove a page and destroy it.
+     *  Letting the returned Widget destroy itself will potentially leave
+     *  dangling pointers in the event system. No-op if index is not valid. Sets
+     *  active page to nullptr if active page is being removed. */
     std::unique_ptr<Widget> remove_page(std::size_t index);
 
     /// Remove and delete all pages.
@@ -84,7 +84,7 @@ class Stack : public layout::Horizontal {
 
 template <typename T, typename... Args>
 T& Stack::make_page(Args&&... args) {
-    this->add_page(std::make_unique<T>(std::forward<Args>(args)...));
+    this->append_page(std::make_unique<T>(std::forward<Args>(args)...));
     return static_cast<T&>(*this->children.get().back());
 }
 

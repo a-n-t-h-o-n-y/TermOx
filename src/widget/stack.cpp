@@ -30,9 +30,9 @@ void Stack::give_focus_on_change(bool sets_focus) {
     sets_focus_ = sets_focus;
 }
 
-void Stack::add_page(std::unique_ptr<Widget> widget) {
+void Stack::append_page(std::unique_ptr<Widget> widget) {
     widget->disable();
-    this->children.add(std::move(widget));
+    this->children.append(std::move(widget));
 }
 
 void Stack::insert_page(std::size_t index, std::unique_ptr<Widget> widget) {

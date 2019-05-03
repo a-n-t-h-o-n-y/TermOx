@@ -17,7 +17,7 @@ class Children_data {
 
     /// Add a Widget as a child to the owning Widget.
     /** \p child is inserted at the end of the list of children. */
-    void add(std::unique_ptr<Widget> child);
+    void append(std::unique_ptr<Widget> child);
 
     /// Insert a Widget as a child into the owning Widget at a specified index.
     /** Contains bound checking for index, will no-op if out of range. */

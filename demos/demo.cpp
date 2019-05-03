@@ -1,5 +1,6 @@
 #include <cppurses/system/focus.hpp>
 #include <cppurses/system/system.hpp>
+#include <cppurses/widget/widgets/menu.hpp>
 
 #include "main_menu.hpp"
 

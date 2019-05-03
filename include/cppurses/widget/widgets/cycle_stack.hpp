@@ -24,7 +24,7 @@ class Cycle_stack : public layout::Vertical {
 
     /// Append a page to the Stack.
     /** \p title is passed to the Cycle_box associated with this page. */
-    void add_page(Glyph_string title, std::unique_ptr<Widget> widget);
+    void append_page(Glyph_string title, std::unique_ptr<Widget> widget);
 
     /// User interface to cycle through the pages of the Stack.
     struct Top_row : public layout::Horizontal {
@@ -44,7 +44,7 @@ template <typename T, typename... Args>
 T& Cycle_stack::make_page(Glyph_string title, Args&&... args) {
     std::unique_ptr<T> u_ptr = std::make_unique<T>(std::forward<Args>(args)...);
     T& ref{*u_ptr};
-    this->add_page(std::move(title), std::move(u_ptr));
+    this->append_page(std::move(title), std::move(u_ptr));
     return ref;
 }
 

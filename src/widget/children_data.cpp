@@ -13,7 +13,7 @@
 
 namespace cppurses {
 
-void Children_data::add(std::unique_ptr<Widget> child) {
+void Children_data::append(std::unique_ptr<Widget> child) {
     if (child == nullptr) {
         return;
     }
