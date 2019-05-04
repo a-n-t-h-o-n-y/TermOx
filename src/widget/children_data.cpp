@@ -27,14 +27,15 @@ void Children_data::append(std::unique_ptr<Widget> child) {
 }
 
 void Children_data::insert(std::unique_ptr<Widget> child, std::size_t index) {
-    if (index < children_.size()) {
-        child->set_parent(parent_);
-        auto new_iter =
-            children_.insert(std::begin(children_) + index, std::move(child));
-        if (parent_ != nullptr) {
-            (*new_iter)->enable(parent_->enabled());
-            System::post_event<Child_added_event>(*parent_, *new_iter->get());
-        }
+    if (index > children_.size()) {
+        return;
+    }
+    child->set_parent(parent_);
+    auto new_iter =
+        children_.emplace(std::begin(children_) + index, std::move(child));
+    if (parent_ != nullptr) {
+        (*new_iter)->enable(parent_->enabled());
+        System::post_event<Child_added_event>(*parent_, *new_iter->get());
     }
 }
 

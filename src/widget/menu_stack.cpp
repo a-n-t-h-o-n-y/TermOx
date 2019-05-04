@@ -36,12 +36,12 @@ void Menu_stack::insert_page(Glyph_string title,
 }
 
 void Menu_stack::delete_page(std::size_t index) {
-    this->remove_from_menu(index);
+    this->remove_from_menu(index + 1);
     this->Stack::delete_page(index + 1);
 }
 
 std::unique_ptr<Widget> Menu_stack::remove_page(std::size_t index) {
-    this->remove_from_menu(index);
+    this->remove_from_menu(index + 1);
     return this->Stack::remove_page(index + 1);
 }
 
@@ -66,14 +66,14 @@ bool Menu_stack::focus_in_event() {
 }
 
 void Menu_stack::remove_from_menu(std::size_t index) {
-    menu_.remove_item(index);
-    if (this->Stack::active_page_index() == ++index) {
+    menu_.remove_item(index - 1);
+    if (this->Stack::active_page_index() == index) {
         this->Stack::set_active_page(menu_index);
     }
 }
 
 void Menu_stack::connect_to_menu(Glyph_string title, std::size_t index) {
-    auto& signal = menu_.add_item(std::move(title));
+    auto& signal = menu_.insert_item(std::move(title), index - 1);
     signal.connect(slot::set_active_page(*this, index));
 }
 }  // namespace cppurses

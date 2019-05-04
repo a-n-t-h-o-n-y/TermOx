@@ -66,7 +66,7 @@ class Menu_stack : public layout::Stack {
     void set_active_page(std::size_t index);
 
    private:
-    /// Remove item at \p index from menu, with index 0 as the first page.
+    /// Remove item at \p index from menu, where index 0 is the menu.
     /** Reset menu as active page if the current active page is being removed.*/
     void remove_from_menu(std::size_t index);
 

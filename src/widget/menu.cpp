@@ -20,45 +20,34 @@
 
 namespace cppurses {
 
-Menu::Menu_item::Menu_item(Push_button& ref) : button{ref} {}
-
-Menu::Menu(Glyph_string title)
-    : title_{this->make_child<Label>(std::move(title))} {
+Menu::Menu(Glyph_string title_text)
+    : title{this->make_child<Label>(std::move(title_text))} {
     this->focus_policy = Focus_policy::Strong;
-    title_.set_alignment(Alignment::Center);
-    title_.brush.add_attributes(Attribute::Bold);
-    space1.wallpaper = L'─';
+    title.set_alignment(Alignment::Center);
+    title.brush.add_attributes(Attribute::Bold);
+    line_break.wallpaper = L'─';
 }
 
-sig::Signal<void()>& Menu::add_item(Glyph_string label) {
-    Push_button& button_ref{this->make_child<Push_button>(std::move(label))};
-    button_ref.install_event_filter(*this);
-    items_.emplace_back(button_ref);
-    if (items_.size() == 1) {
-        this->select_item(0);
-    }
-    button_ref.height_policy.fixed(1);
-    auto& signal_ref{items_.back().selected};
-    button_ref.clicked.connect([this, index = items_.size() - 1] {
-        this->select_item(index);
-        this->call_current_item();
-    });
-    this->update();
-    return signal_ref;
+sig::Signal<void()>& Menu::append_item(Glyph_string label) {
+    return this->insert_item(std::move(label), this->size());
 }
 
 sig::Signal<void()>& Menu::insert_item(Glyph_string label, std::size_t index) {
     auto button_ptr = std::make_unique<Push_button>(std::move(label));
-    button_ptr->install_event_filter(*this);
-    button_ptr->height_policy.fixed(1);
-    auto& new_button = *button_ptr;
-    items_.insert(std::begin(items_) + index, Menu_item{new_button});
+    Push_button& new_button = *button_ptr;
+    this->children.insert(std::move(button_ptr), index + 2);
+    items_.emplace(std::begin(items_) + index, new_button);
+    new_button.install_event_filter(*this);
+    new_button.height_policy.fixed(1);
+
     if (items_.size() == 1) {
         this->select_item(0);
     }
     auto& signal_ref = items_[index].selected;
-    new_button.clicked.connect([this, index] { items_[index].selected(); });
-    this->update();
+    new_button.clicked.connect([this, index] {
+        this->select_item(index);
+        this->send_selected_signal();
+    });
     return signal_ref;
 }
 
@@ -71,16 +60,10 @@ void Menu::remove_item(std::size_t index) {
     if (index == selected_index_) {
         this->select_item(0);
     }
-    this->update();
 }
 
 void Menu::select_up(std::size_t n) {
-    auto new_index = selected_index_;
-    if (new_index > n) {
-        new_index -= n;
-    } else {
-        new_index = 0;
-    }
+    const auto new_index = selected_index_ > n ? selected_index_ - n : 0;
     this->select_item(new_index);
 }
 
@@ -93,20 +76,51 @@ void Menu::select_item(std::size_t index) {
         return;
     }
     auto& previous_btn = items_[selected_index_].button.get();
-    previous_btn.brush.remove_attributes(Attribute::Inverse);
+    previous_btn.brush.remove_attributes(selected_attr_);
     previous_btn.update();
-    if (index >= items_.size()) {
-        selected_index_ = items_.size() - 1;
-    } else {
-        selected_index_ = index;
-    }
+
+    selected_index_ = index >= items_.size() ? items_.size() - 1 : index;
+
     auto& current_btn = items_[selected_index_].button.get();
-    current_btn.brush.add_attributes(Attribute::Inverse);
+    current_btn.brush.add_attributes(selected_attr_);
     current_btn.update();
 }
 
-std::size_t Menu::size() const {
-    return items_.size();
+void Menu::set_selected_attribute(const Attribute& attr) {
+    auto& selected_btn = items_[selected_index_].button.get();
+    selected_btn.brush.remove_attributes(selected_attr_);
+    selected_attr_ = attr;
+    selected_btn.brush.add_attributes(selected_attr_);
+    selected_btn.update();
+}
+
+void Menu::hide_title() {
+    title_enabled_ = false;
+    this->enable(this->enabled());
+}
+
+void Menu::show_title() {
+    title_enabled_ = true;
+    this->enable(this->enabled());
+}
+
+void Menu::hide_line_break() {
+    line_break_enabled_ = false;
+    this->enable(this->enabled());
+}
+
+void Menu::show_line_break() {
+    line_break_enabled_ = true;
+    this->enable(this->enabled());
+}
+
+void Menu::enable(bool enable, bool post_child_polished_event) {
+    this->enable_and_post_events(enable, post_child_polished_event);
+    line_break.enable(line_break_enabled_ && enable, post_child_polished_event);
+    title.enable(title_enabled_ && enable, post_child_polished_event);
+    for (Menu_item& item : items_) {
+        item.button.get().enable(enable, post_child_polished_event);
+    }
 }
 
 bool Menu::key_press_event(const Key::State& keyboard) {
@@ -115,7 +129,7 @@ bool Menu::key_press_event(const Key::State& keyboard) {
     } else if (keyboard.key == Key::Arrow_up || keyboard.key == Key::k) {
         this->select_up();
     } else if (keyboard.key == Key::Enter) {
-        this->call_current_item();
+        this->send_selected_signal();
     }
     return true;
 }
@@ -134,15 +148,14 @@ bool Menu::mouse_press_event_filter(Widget& /* receiver */,
     if (mouse.button == Mouse::Button::ScrollUp) {
         this->select_up();
         return true;
-    }
-    if (mouse.button == Mouse::Button::ScrollDown) {
+    } else if (mouse.button == Mouse::Button::ScrollDown) {
         this->select_down();
         return true;
     }
     return false;
 }
 
-void Menu::call_current_item() {
+void Menu::send_selected_signal() {
     if (!items_.empty()) {
         items_[selected_index_].selected();
     }
@@ -186,6 +199,5 @@ sig::Slot<void()> select_item(Menu& m, std::size_t index) {
     slot.track(m.destroyed);
     return slot;
 }
-
 }  // namespace slot
 }  // namespace cppurses

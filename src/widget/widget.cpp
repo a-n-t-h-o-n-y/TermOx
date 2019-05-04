@@ -123,19 +123,19 @@ void Widget::disable_animation() {
 
 void Widget::enable_and_post_events(bool enable,
                                     bool post_child_polished_event) {
-    if (enabled_ != enable) {
-        if (!enable) {
-            System::post_event<Disable_event>(*this);
-        }
-        enabled_ = enable;
-        if (enable) {
-            System::post_event<Enable_event>(*this);
-        }
-        if (post_child_polished_event && this->parent() != nullptr) {
-            System::post_event<Child_polished_event>(*this->parent(), *this);
-        }
-        this->update();
+    if (enabled_ == enable) {
+        return;
     }
+    if (!enable) {
+        System::post_event<Disable_event>(*this);
+    }
+    enabled_ = enable;
+    if (enable) {
+        System::post_event<Enable_event>(*this);
+    }
+    if (post_child_polished_event && this->parent() != nullptr) {
+        System::post_event<Child_polished_event>(*this->parent(), *this);
+    }
+    this->update();
 }
-
 }  // namespace cppurses
