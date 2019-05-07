@@ -43,12 +43,11 @@ sig::Signal<void()>& Menu::insert_item(Glyph_string label, std::size_t index) {
     if (items_.size() == 1) {
         this->select_item(0);
     }
-    auto& signal_ref = items_[index].selected;
     new_button.clicked.connect([this, index] {
         this->select_item(index);
         this->send_selected_signal();
     });
-    return signal_ref;
+    return items_[index].selected;
 }
 
 void Menu::remove_item(std::size_t index) {

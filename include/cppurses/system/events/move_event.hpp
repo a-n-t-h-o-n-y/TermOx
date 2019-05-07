@@ -9,19 +9,14 @@ class Widget;
 class Move_event : public Event {
    public:
     // In global Point.
-    Move_event(Widget& receiver,
-               Point new_position,
-               Point old_position = Point{0, 0})
-        : Event{Event::Move, receiver},
-          new_position_{new_position},
-          old_position_{old_position} {}
+    Move_event(Widget& receiver, Point new_position)
+        : Event{Event::Move, receiver}, new_position_{new_position} {}
 
     bool send() const override;
     bool filter_send(Widget& filter) const override;
 
    protected:
     Point new_position_;
-    mutable Point old_position_;
 };
 
 }  // namespace cppurses
