@@ -57,14 +57,12 @@ namespace cppurses {
 // enable/disable their children.
 bool Resize_event::send() const {
     receiver_.screen_state().optimize.resized = true;
-
-    // Set old size from current receiver_et size.
-    old_size_.width = receiver_.outer_width();
-    old_size_.height = receiver_.outer_height();
+    const auto old_area =
+        Area{receiver_.outer_width(), receiver_.outer_height()};
 
     // Set receiver_ to new size.
-    receiver_.outer_width_ = new_size_.width;
-    receiver_.outer_height_ = new_size_.height;
+    receiver_.outer_width_ = new_area_.width;
+    receiver_.outer_height_ = new_area_.height;
 
     // Remove screen_state tiles if they are outside the new dimensions.
     auto iter = std::begin(receiver_.screen_state().tiles);
@@ -80,17 +78,18 @@ bool Resize_event::send() const {
     }
 
     // Create resize_mask for screen_state.optimize
-    detail::Screen_mask mask{
-        build_resize_mask(receiver_, old_size_, new_size_)};
+    detail::Screen_mask mask{build_resize_mask(receiver_, old_area, new_area_)};
     receiver_.screen_state().optimize.resize_mask = std::move(mask);
 
-    return receiver_.resize_event(new_size_, old_size_);
+    return receiver_.resize_event(new_area_, old_area);
 }
 
 bool Resize_event::filter_send(Widget& filter) const {
-    if (receiver_.outer_width() != new_size_.width ||
-        receiver_.outer_height() != new_size_.height) {
-        return filter.resize_event_filter(receiver_, new_size_, old_size_);
+    if (receiver_.outer_width() != new_area_.width ||
+        receiver_.outer_height() != new_area_.height) {
+        const auto old_area =
+            Area{receiver_.outer_width(), receiver_.outer_height()};
+        return filter.resize_event_filter(receiver_, new_area_, old_area);
     }
     return true;
 }
