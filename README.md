@@ -73,14 +73,14 @@ add_executable(foo foo.cpp ...)
 
 # CPPurses is installed on your system and linker can find cppurses:
 target_compile_features(foo PRIVATE cxx_std_14)
-target_link_libraries(foo cppurses ncurses pthread)
+target_link_libraries(foo cppurses ncursesw pthread)
 ```
 
-Without CMake, link with cppurses, ncurses and your system's
-thread library. If the library is installed your linker flags will be
-something like:
+Without CMake, link with cppurses, ncursesw(or ncurses if ncursesw
+is not availiable) and your system's thread library. If the library
+is installed your linker flags will be something like:
 ```
--lcppurses -lncurses -pthread
+-lcppurses -lncursesw -pthread
 ```
 C++14 or above will need to be used.
 
