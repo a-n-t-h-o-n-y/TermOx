@@ -71,7 +71,8 @@ Widget* previous_tab_focus() {
 
 namespace cppurses {
 
-Widget* Focus::focus_widget_ = nullptr;
+Widget* Focus::focus_widget_{nullptr};
+bool Focus::tab_enabled_{true};
 
 void Focus::mouse_press(Widget* clicked) {
     if (clicked == focus_widget_) {
@@ -83,7 +84,7 @@ void Focus::mouse_press(Widget* clicked) {
 }
 
 bool Focus::tab_press() {
-    if (is_tab_focus_policy(focus_widget_->focus_policy)) {
+    if (tab_enabled_ && is_tab_focus_policy(focus_widget_->focus_policy)) {
         Widget* next = next_tab_focus();
         Focus::set_focus_to(next);
         return true;
@@ -92,7 +93,7 @@ bool Focus::tab_press() {
 }
 
 bool Focus::shift_tab_press() {
-    if (is_tab_focus_policy(focus_widget_->focus_policy)) {
+    if (tab_enabled_ && is_tab_focus_policy(focus_widget_->focus_policy)) {
         Widget* previous = previous_tab_focus();
         Focus::set_focus_to(previous);
         return true;
