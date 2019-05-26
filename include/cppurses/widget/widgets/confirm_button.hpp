@@ -11,7 +11,7 @@ class Push_button;
 /// A Push_button with a confirm screen after the initial click.
 /** Clicked signal is only emitted after confirmation. */
 struct Confirm_button : public layout::Stack {
-    /// Construct a Push_button with \p label and cooresponding \p confirm_text.
+    /// Construct a Push_button with \p label and corresponding \p confirm_text.
     explicit Confirm_button(Glyph_string label,
                             Glyph_string confirm_text = "Confirm");
 

@@ -23,7 +23,7 @@ class Push_button : public Widget {
     /// Return the current label.
     Glyph_string& label() { return label_; }
 
-    // Emitted when this Widget recieves a left mouse button press event.
+    // Emitted when this Widget receives a left mouse button press event.
     sig::Signal<void()> clicked;
 
    protected:

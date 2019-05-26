@@ -34,7 +34,7 @@ class Timer_event_loop : public Event_loop {
     /** No-op if widget is already registered. */
     void register_widget(Widget& w);
 
-    /// Stop a widget from recieving Timer_events for this loop.
+    /// Stop a widget from receiving Timer_events for this loop.
     bool unregister_widget(Widget& w) {
         return registered_widgets_.erase(&w) == 1;
     }

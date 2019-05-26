@@ -15,7 +15,7 @@ const Underlying_color_t last_color_value{first_color_value + 16};
 
 /// Colors that can be applied to Glyphs.
 enum class Color : Underlying_color_t {
-    // Compatability Colors
+    // Compatibility Colors
     Black = detail::first_color_value,
     Red,
     Green,
@@ -41,7 +41,7 @@ namespace detail {
 // Used by add_attributes() in brush to overload on different Color types from a
 // parameter pack.
 enum class BackgroundColor : Underlying_color_t {
-    // Compatability Colors
+    // Compatibility Colors
     Black = detail::first_color_value,
     Red,
     Green,
@@ -65,7 +65,7 @@ enum class BackgroundColor : Underlying_color_t {
 // Used by add_attributes() in brush to overload on different Color types from a
 // parameter pack.
 enum class ForegroundColor : Underlying_color_t {
-    // Compatability Colors
+    // Compatibility Colors
     Black = detail::first_color_value,
     Red,
     Green,

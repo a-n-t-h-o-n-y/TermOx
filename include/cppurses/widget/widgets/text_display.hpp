@@ -86,7 +86,7 @@ class Text_display : public Widget {
     std::size_t display_height() const;
 
     /// Return the index into the contents from a physical Point on the Widget.
-    /** If \p position is past any text on the cooresponding line, then return
+    /** If \p position is past any text on the corresponding line, then return
      *  index of the last Glyph on that line. If Point is past displayed lines,
      *  return the index of the last Glyph in contents. */
     std::size_t index_at(Point position) const;

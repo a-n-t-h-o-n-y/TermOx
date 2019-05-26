@@ -12,7 +12,7 @@ class Glyph_string;
 /** The top state is active first. State is changed to the non-active state on
  *  press of the currently active button. */
 struct Toggle_button : layout::Stack {
-    /// Construct with cooresponding labels.
+    /// Construct with corresponding labels.
     Toggle_button(Glyph_string top_label, Glyph_string bottom_label);
 
     Push_button& top;

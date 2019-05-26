@@ -17,7 +17,7 @@ struct Save_file : public layout::Horizontal {
     Save_file();
 
     Push_button& save_btn{this->make_child<Push_button>("Save")};
-    Fixed_width& seperator{this->make_child<Fixed_width>(1)};
+    Fixed_width& separator{this->make_child<Fixed_width>(1)};
     Line_edit& filename_edit{this->make_child<Line_edit>("Filename")};
 
     // Signals

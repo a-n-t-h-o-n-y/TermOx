@@ -17,7 +17,7 @@ struct Open_file : public layout::Horizontal {
     Open_file();
 
     Push_button& open_btn{this->make_child<Push_button>("Open")};
-    Fixed_width& seperator{this->make_child<Fixed_width>(1)};
+    Fixed_width& separator{this->make_child<Fixed_width>(1)};
     Line_edit& filename_edit{this->make_child<Line_edit>("Filename")};
 
     // Signals

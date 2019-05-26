@@ -131,7 +131,7 @@ class Widget {
 
     /// x coordinate for the top left point of this Widget, beyond the Border.
     /** Given with relation to the top left of the terminal screen. This is the
-     *  coordinate that marks the beginning of the space that is availiable for
+     *  coordinate that marks the beginning of the space that is available for
      *  use by the Widget. */
     std::size_t inner_x() const {
         return top_left_position_.x + detail::Border_offset::west(*this);
@@ -139,7 +139,7 @@ class Widget {
 
     /// y coordinate for the top left point of this Widget, beyond the Border.
     /** Given with relation to the top left of the terminal screen. This is the
-     *  coordinate that marks the beginning of the space that is availiable for
+     *  coordinate that marks the beginning of the space that is available for
      *  use by the Widget. */
     std::size_t inner_y() const {
         return top_left_position_.y + detail::Border_offset::north(*this);

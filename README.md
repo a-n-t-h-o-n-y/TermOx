@@ -77,7 +77,7 @@ target_link_libraries(foo cppurses ncursesw pthread)
 ```
 
 Without CMake, link with cppurses, ncursesw(or ncurses if ncursesw
-is not availiable) and your system's thread library. If the library
+is not available) and your system's thread library. If the library
 is installed your linker flags will be something like:
 ```
 -lcppurses -lncursesw -pthread
