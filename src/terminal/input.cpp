@@ -24,7 +24,7 @@ using namespace cppurses;
 
 bool resize_happened{false};
 
-/// If a resize actually occured, return event with the head Widget as receiver.
+/// If a resize actually occurred, return event with the head Widget as receiver.
 std::unique_ptr<Event> make_terminal_resize_event() {
     if (resize_happened) {
         resize_happened = false;

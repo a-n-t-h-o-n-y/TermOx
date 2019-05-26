@@ -70,10 +70,10 @@ void Event_invoker::invoke(Event_queue& queue,
         l << widg_event.first;
         l << ' ' << widg_event.first->name();
         l << ":\n\t";
-        auto seperator = std::string{""};
+        auto separator = std::string{""};
         for (Event::Type event_t : widg_event.second) {
-            l << seperator << event_type_as_string(event_t);
-            seperator = ", ";
+            l << separator << event_type_as_string(event_t);
+            separator = ", ";
         }
         l << '\n';
     }

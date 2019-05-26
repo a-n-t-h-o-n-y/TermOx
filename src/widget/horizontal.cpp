@@ -263,16 +263,16 @@ void Horizontal::distribute_space(std::vector<Dimensions_reference> widgets,
 //                                       int width_left) {
 //     // Maximum, Preferred, Ignored
 //     // find maximum space that you can take back.
-//     int avaliable_retake_width{0};
+//     int available_retake_width{0};
 //     for (Dimensions& d : widgets) {
 //         Size_policy::Type policy = d.widget->width_policy.type();
 //         if (policy == Size_policy::Maximum ||
 //             policy == Size_policy::Preferred ||
 //             policy == Size_policy::Ignored) {
-//             avaliable_retake_width += d.width - d.widget->width_policy.min();
+//             available_retake_width += d.width - d.widget->width_policy.min();
 //         }
 //     }
-//     if (avaliable_retake_width + width_left == 0) {
+//     if (available_retake_width + width_left == 0) {
 //         // set everything to its min() in this group and return
 //         for (Dimensions& d : widgets) {
 //             Size_policy::Type policy = d.widget->width_policy.type();
@@ -284,7 +284,7 @@ void Horizontal::distribute_space(std::vector<Dimensions_reference> widgets,
 //         }
 //         return;
 //     }
-//     if (avaliable_retake_width + width_left < 0) {
+//     if (available_retake_width + width_left < 0) {
 //         // set everything to its min() and continue to expanding group
 //         for (Dimensions& d : widgets) {
 //             Size_policy::Type policy = d.widget->width_policy.type();
@@ -296,7 +296,7 @@ void Horizontal::distribute_space(std::vector<Dimensions_reference> widgets,
 //         }
 //     }
 //     // just take away until width_left == 0
-//     if (avaliable_retake_width + width_left > 0) {
+//     if (available_retake_width + width_left > 0) {
 //         // Ignored
 //         for (Dimensions& d : widgets) {
 //             Size_policy::Type policy = d.widget->width_policy.type();
@@ -351,14 +351,14 @@ void Horizontal::distribute_space(std::vector<Dimensions_reference> widgets,
 //     }
 
 //     // Expanding
-//     avaliable_retake_width = 0;
+//     available_retake_width = 0;
 //     for (Dimensions& d : widgets) {
 //         Size_policy::Type policy = d.widget->width_policy.type();
 //         if (policy == Size_policy::Expanding) {
-//             avaliable_retake_width += d.width - d.widget->width_policy.min();
+//             available_retake_width += d.width - d.widget->width_policy.min();
 //         }
 //     }
-//     if (avaliable_retake_width + width_left <= 0) {
+//     if (available_retake_width + width_left <= 0) {
 //         // set everything to its min() in this group and return
 //         for (Dimensions& d : widgets) {
 //             Size_policy::Type policy = d.widget->width_policy.type();
@@ -368,7 +368,7 @@ void Horizontal::distribute_space(std::vector<Dimensions_reference> widgets,
 //         }
 //         return;
 //     }
-//     if (avaliable_retake_width + width_left > 0) {
+//     if (available_retake_width + width_left > 0) {
 //         for (Dimensions& d : widgets) {
 //             Size_policy::Type policy = d.widget->width_policy.type();
 //             if (policy == Size_policy::Expanding) {
