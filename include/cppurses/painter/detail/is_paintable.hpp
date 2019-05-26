@@ -11,7 +11,7 @@ namespace detail {
 
 /// A check for whether a widget is in a state that can be painted.
 inline bool is_paintable(const Widget& w) {
-    return w.enabled() && (w.width() != 0) && (w.height() != 0);
+    return w.enabled() && (w.outer_width() != 0) && (w.outer_height() != 0);
 }
 
 }  // namespace detail
