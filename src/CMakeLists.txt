@@ -51,7 +51,7 @@ target_include_directories(cppurses
         $<INSTALL_INTERFACE:include>
 )
 if(NOT ${CMAKE_VERSION} VERSION_LESS "3.8")
-    target_compile_features(cppurses INTERFACE cxx_std_14)
+    target_compile_features(cppurses PUBLIC cxx_std_14)
 endif()
 
 target_compile_options(cppurses PRIVATE -Wall -Wextra -Wpedantic)
