@@ -10,6 +10,7 @@ set_property(TARGET gtest PROPERTY
 # GATHER SOURCES
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 add_executable(cppurses_test EXCLUDE_FROM_ALL
+    system/event_queue.test.cpp
     # system/system_test.cpp
     # system/object_test.cpp
     # system/event_loop_test.cpp
