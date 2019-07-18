@@ -5,8 +5,10 @@
 #include <utility>
 #include <vector>
 
+#include <signals/signal.hpp>
 #include <signals/slot.hpp>
 
+#include <cppurses/system/detail/is_sendable.hpp>
 #include <cppurses/system/detail/user_input_event_loop.hpp>
 #include <cppurses/terminal/terminal.hpp>
 
@@ -21,10 +23,10 @@ class Widget;
  *  Manages the head Widget and the main User_input_event_loop. */
 class System {
    public:
-    System() = default;
+    System()              = default;
     System(const System&) = delete;
     System& operator=(const System&) = delete;
-    System(System&&) = default;
+    System(System&&)                 = default;
     System& operator=(System&&) = default;
     ~System();
 
@@ -43,7 +45,8 @@ class System {
      *  System::exit() is called, returns the exit code. Will throw a
      *  std::runtime_error if screen cannot be initialized. */
     template <typename Widget_t, typename... Args>
-    int run(Args&&... args) {
+    int run(Args&&... args)
+    {
         Widget_t head_widget(std::forward<Args>(args)...);
         System::set_head(&head_widget);
         return this->run();
@@ -59,7 +62,15 @@ class System {
     int run();
 
     /// Immediately send the event filters and then to the intended receiver.
-    static bool send_event(const Event& event);
+    static auto send_event(const Event& event) -> bool
+    {
+        if (!detail::is_sendable(event))
+            return false;
+        bool handled = event.send_to_all_filters();
+        if (!handled)
+            handled = event.send();
+        return handled;
+    }
 
     /// Append the event to the Event_queue for the thread it was called on.
     /** The Event_queue is processed once per iteration of the Event_loop. When
@@ -72,28 +83,11 @@ class System {
      *  the non-templated function of the same name once the object has been
      *  constructed. */
     template <typename T, typename... Args>
-    static void post_event(Args&&... args) {
+    static void post_event(Args&&... args)
+    {
         auto event = std::make_unique<T>(std::forward<Args>(args)...);
         System::post_event(std::move(event));
     }
-
-    /// Return the Event_loop associated with the calling thread.
-    /** Each currently running Event_loop has to be run on its own thread, this
-     *  function will find and return the Event_loop that is currently running
-     *  on the calling thread. Used by Painter to get the staged_changes owned
-     *  by Event_loop. */
-    static Event_loop& find_event_loop();
-
-    /// Add an Event_loop* to a list of currently running Event_loops.
-    /** Used by Event_loop::run() to automatically register itself to the list
-     *  of running Event_loops when the loop begins. */
-    static void register_event_loop(Event_loop* loop);
-
-    /// Remove the given Event_loop* from list of running Event_loops.
-    /** Used by Event_loop::run() to automatically deregister itself from the
-     *  list of running Event_loops when the loops exits. No-op if Event_loop*
-     * is not registered. */
-    static void deregister_event_loop(Event_loop* loop);
 
     /// Send an exit signal to each of the currently running Event_loops.
     /** Also call shutdown() on the Animation_engine and set
@@ -109,16 +103,17 @@ class System {
     /// Return whether System has gotten an exit request, set by System::exit()
     static bool exit_requested() { return exit_requested_; }
 
+    /// Emitted when System::exit is called. Should call Event_loop::exit.
+    /** Passes along the exit_code System::exit() was called with. */
+    static sig::Signal<void(int)> exit_signal;
+
     // Slots
     static sig::Slot<void()> quit;
 
    private:
-    static std::vector<Event_loop*> running_event_loops_;
-    static std::mutex running_loops_mtx_;
-
     static Widget* head_;
     static bool exit_requested_;
-    static detail::User_input_event_loop main_loop_;
+    static detail::User_input_event_loop user_input_loop_;
     static Animation_engine animation_engine_;
 
    public:

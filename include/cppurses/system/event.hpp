@@ -10,8 +10,7 @@ class Widget;
 class Event {
    public:
     /// Event type descriptors for derived types.
-    /** Event_queue relies on these for optimizations and Event_invoker relies
-     *  on these for filtering of Events it will process. */
+    /** Event_queue relies on these for optimizations */
     enum Type {
         None,
         MouseButtonPress,
@@ -42,9 +41,9 @@ class Event {
 
     Event(const Event&) = delete;
     Event& operator=(const Event&) = delete;
-    Event(Event&&) = delete;
+    Event(Event&&)                 = delete;
     Event& operator=(Event&&) = delete;
-    virtual ~Event() = default;
+    virtual ~Event()          = default;
 
     /// Return a Type enum describing the derived type of the Event.
     Type type() const { return type_; }
@@ -71,7 +70,8 @@ class Event {
 
     /// Equality on the type_ and recevier_ member objects.
     /** Used to optimize away duplicate events in Event_queue::append() */
-    bool operator==(const Event& other) const {
+    bool operator==(const Event& other) const
+    {
         return (this->type_ == other.type_) &&
                (&(this->receiver_) == &(other.receiver_));
     }

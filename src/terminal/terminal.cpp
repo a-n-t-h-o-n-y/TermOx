@@ -5,7 +5,10 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
+#include <mutex>
 #include <stdexcept>
+
+#include <fstream> //temp
 
 #include <ncurses.h>
 #include <signal.h>
@@ -17,8 +20,10 @@
 #include <cppurses/painter/rgb.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/terminal/input.hpp>
+#include <cppurses/terminal/ncurses_mutex.hpp>
 
-extern "C" void handle_sigint(int /* sig*/) {
+extern "C" void handle_sigint(int /* sig*/)
+{
     cppurses::System::terminal.uninitialize();
 #if !defined __APPLE__
     std::quick_exit(0);
@@ -30,8 +35,9 @@ extern "C" void handle_sigint(int /* sig*/) {
 namespace {
 using namespace cppurses;
 
-Underlying_color_t scale(Underlying_color_t value) {
-    const auto value_max = 255;
+Underlying_color_t scale(Underlying_color_t value)
+{
+    const auto value_max   = 255;
     const auto ncurses_max = 1000;
     return static_cast<Underlying_color_t>(
         (static_cast<double>(value) / value_max) * ncurses_max);
@@ -40,7 +46,8 @@ Underlying_color_t scale(Underlying_color_t value) {
 
 namespace cppurses {
 
-void Terminal::initialize() {
+void Terminal::initialize()
+{
     if (is_initialized_) {
         return;
     }
@@ -69,7 +76,8 @@ void Terminal::initialize() {
     this->ncurses_set_cursor();
 }
 
-void Terminal::uninitialize() {
+void Terminal::uninitialize()
+{
     if (!is_initialized_) {
         return;
     }
@@ -79,94 +87,118 @@ void Terminal::uninitialize() {
 }
 
 // getmaxx/getmaxy are non-standard.
-std::size_t Terminal::width() const {
+std::size_t Terminal::width() const
+{
     int y{0};
     int x{0};
     if (is_initialized_) {
+        // std::lock_guard<std::mutex> lock{ncurses_mutex()};
         getmaxyx(::stdscr, y, x);
     }
     return x;
 }
 
-std::size_t Terminal::height() const {
+std::size_t Terminal::height() const
+{
     int y{0};
     int x{0};
     if (is_initialized_) {
+        // std::lock_guard<std::mutex> lock{ncurses_mutex()};
         getmaxyx(::stdscr, y, x);
     }
     return y;
 }
 
-void Terminal::resize(std::size_t width, std::size_t height) {
+void Terminal::resize(std::size_t width, std::size_t height)
+{
     if (is_initialized_) {
+        std::ofstream l{"log", std::ios::app};
+        l << "locking terminal::resize()" << std::endl;
+        std::lock_guard<std::mutex> lock{ncurses_mutex()};
         ::resizeterm(height, width);  // glitch here w/multi-thread?
+        l << "unlocking terminal::resize()" << std::endl;
     }
 }
 
-void Terminal::set_background(const Glyph& tile) {
+void Terminal::set_background(const Glyph& tile)
+{
     background_ = tile;
     if (is_initialized_) {
         // TODO Notify Screen::flush() to repaint everything.
     }
 }
 
-void Terminal::set_color_palette(const Palette& colors) {
+void Terminal::set_color_palette(const Palette& colors)
+{
     palette_ = colors;
     if (is_initialized_ && this->has_color()) {
         this->ncurses_set_palette(palette_);
     }
 }
 
-void Terminal::show_cursor(bool show) {
+void Terminal::show_cursor(bool show)
+{
     show_cursor_ = show;
     if (is_initialized_) {
         this->ncurses_set_cursor();
     }
 }
 
-void Terminal::raw_mode(bool enable) {
+void Terminal::raw_mode(bool enable)
+{
     raw_mode_ = enable;
     if (is_initialized_) {
         this->ncurses_set_raw_mode();
     }
 }
 
-bool Terminal::has_color() const {
+bool Terminal::has_color() const
+{
     if (is_initialized_) {
+        // std::lock_guard<std::mutex> lock{ncurses_mutex()};
         return ::has_colors() == TRUE;
     }
     return false;
 }
 
-bool Terminal::has_extended_colors() const {
+bool Terminal::has_extended_colors() const
+{
     if (is_initialized_) {
+        // std::lock_guard<std::mutex> lock{ncurses_mutex()};
         return COLORS >= 16;
     }
     return false;
 }
 
-short Terminal::color_count() const {
+short Terminal::color_count() const
+{
     if (is_initialized_) {
+        // std::lock_guard<std::mutex> lock{ncurses_mutex()};
         return COLORS;
     }
     return 0;
 }
 
-bool Terminal::can_change_colors() const {
+bool Terminal::can_change_colors() const
+{
     if (is_initialized_) {
+        // std::lock_guard<std::mutex> lock{ncurses_mutex()};
         return ::can_change_color() == TRUE;
     }
     return false;
 }
 
-short Terminal::color_pair_count() const {
+short Terminal::color_pair_count() const
+{
     if (is_initialized_) {
+        // std::lock_guard<std::mutex> lock{ncurses_mutex()};
         return COLOR_PAIRS;
     }
     return 0;
 }
 
-short Terminal::color_index(short fg, short bg) const {
+short Terminal::color_index(short fg, short bg) const
+{
     if (fg == 7 && bg == 0) {
         return 0;
     }
@@ -177,33 +209,39 @@ short Terminal::color_index(short fg, short bg) const {
     return ((max_color - 1) - fg) * max_color + bg;
 }
 
-void Terminal::use_default_colors(bool use) {
+void Terminal::use_default_colors(bool use)
+{
     if (!is_initialized_) {
         return;
     }
+    // std::lock_guard<std::mutex> lock{ncurses_mutex()};
     if (use) {
         ::assume_default_colors(-1, -1);
         init_default_pairs();
-    } else {
+    }
+    else {
         ::assume_default_colors(7, 0);
         uninit_default_pairs();
     }
 }
 
-void Terminal::setup_resize_signal_handler() const {
+void Terminal::setup_resize_signal_handler() const
+{
     struct sigaction sa;
     memset(&sa, 0, sizeof(struct sigaction));
     sa.sa_handler = input::indicate_resize;
     sigaction(SIGWINCH, &sa, NULL);
 }
 
-void Terminal::ncurses_set_palette(const Palette& colors) {
+void Terminal::ncurses_set_palette(const Palette& colors)
+{
     if (this->can_change_colors()) {
         for (const Color_definition& def : colors) {
             const auto max_color = this->has_extended_colors() ? 16 : 8;
             const auto ncurses_color_number =
                 static_cast<Underlying_color_t>(def.color);
             if (ncurses_color_number < max_color) {
+                // std::lock_guard<std::mutex> lock{ncurses_mutex()};
                 ::init_color(ncurses_color_number, scale(def.values.red),
                              scale(def.values.green), scale(def.values.blue));
             }
@@ -211,21 +249,27 @@ void Terminal::ncurses_set_palette(const Palette& colors) {
     }
 }
 
-void Terminal::ncurses_set_raw_mode() const {
+void Terminal::ncurses_set_raw_mode() const
+{
+    // std::lock_guard<std::mutex> lock{ncurses_mutex()};
     if (raw_mode_) {
         ::nocbreak();
         ::raw();
-    } else {
+    }
+    else {
         ::noraw();
         ::cbreak();
     }
 }
 
-void Terminal::ncurses_set_cursor() const {
+void Terminal::ncurses_set_cursor() const
+{
+    // std::lock_guard<std::mutex> lock{ncurses_mutex()};
     show_cursor_ ? ::curs_set(1) : ::curs_set(0);
 }
 
-void Terminal::initialize_color_pairs() const {
+void Terminal::initialize_color_pairs() const
+{
     Underlying_color_t max_color = this->has_extended_colors() ? 16 : 8;
     for (short fg = 0; fg < max_color; ++fg) {
         for (short bg = 0; bg < max_color; ++bg) {
@@ -233,13 +277,16 @@ void Terminal::initialize_color_pairs() const {
             if (index == 0) {
                 continue;
             }
+            // std::lock_guard<std::mutex> lock{ncurses_mutex()};
             ::init_pair(index, fg, bg);
         }
     }
 }
 
-void Terminal::init_default_pairs() const {
+void Terminal::init_default_pairs() const
+{
     Underlying_color_t max_color = this->has_extended_colors() ? 16 : 8;
+    // std::lock_guard<std::mutex> lock{ncurses_mutex()};
     for (Underlying_color_t bg = 1; bg < max_color; ++bg) {
         ::init_pair(color_index(7, bg), -1, bg);
     }
@@ -250,8 +297,10 @@ void Terminal::init_default_pairs() const {
     }
 }
 
-void Terminal::uninit_default_pairs() const {
+void Terminal::uninit_default_pairs() const
+{
     Underlying_color_t max_color = this->has_extended_colors() ? 16 : 8;
+    // std::lock_guard<std::mutex> lock{ncurses_mutex()};
     for (Underlying_color_t bg = 0; bg < max_color; ++bg) {
         ::init_pair(color_index(7, bg), 7, bg);
     }

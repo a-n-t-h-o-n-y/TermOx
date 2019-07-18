@@ -27,9 +27,6 @@ class Timer_event_loop : public Event_loop {
     explicit Timer_event_loop(std::function<Period_t()> period_func)
         : period_func_{period_func} {}
 
-    Timer_event_loop(Timer_event_loop&&) = default;
-    Timer_event_loop& operator=(Timer_event_loop&&) = default;
-
     /// Register a widget to have a Timer_event posted to it every period.
     /** No-op if widget is already registered. */
     void register_widget(Widget& w);

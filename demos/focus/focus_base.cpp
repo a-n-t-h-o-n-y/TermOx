@@ -15,6 +15,8 @@ std::string to_text(Focus_policy policy) {
             return "Click";
         case Focus_policy::Strong:
             return "Strong";
+        case Focus_policy::Direct:
+            return "Direct";
     }
     return "";
 }

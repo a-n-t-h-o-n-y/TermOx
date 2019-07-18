@@ -62,9 +62,7 @@ target_compile_options(cppurses PRIVATE -Wall -Wextra -Wpedantic)
 target_sources(cppurses PRIVATE
     system/delete_event.cpp
     system/event.cpp
-    system/event_invoker.cpp
     system/event_loop.cpp
-    system/event_queue.cpp
     system/focus.cpp
     system/move_event.cpp
     system/resize_event.cpp

@@ -1,6 +1,7 @@
 #ifndef CPPURSES_SYSTEM_ANIMATION_ENGINE_HPP
 #define CPPURSES_SYSTEM_ANIMATION_ENGINE_HPP
 #include <functional>
+#include <memory>
 #include <thread>
 #include <unordered_map>
 #include <vector>
@@ -35,8 +36,9 @@ class Animation_engine {
     void startup();
 
    private:
-    std::unordered_map<Period_t, detail::Timer_event_loop> const_loops_;
-    std::vector<detail::Timer_event_loop> variable_loops_;
+    using Loop_t = std::unique_ptr<detail::Timer_event_loop>;
+    std::unordered_map<Period_t, Loop_t> const_loops_;
+    std::vector<Loop_t> variable_loops_;
 };
 
 }  // namespace cppurses

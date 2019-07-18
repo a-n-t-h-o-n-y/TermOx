@@ -16,7 +16,8 @@
 #include <cppurses/widget/widget.hpp>
 
 namespace {
-bool border_is_paintable(const cppurses::Widget& widg) {
+bool border_is_paintable(const cppurses::Widget& widg)
+{
     return widg.border.enabled() && widg.enabled() && widg.outer_width() != 0 &&
            widg.outer_height() != 0;
 }
@@ -26,10 +27,11 @@ bool border_is_paintable(const cppurses::Widget& widg) {
 namespace cppurses {
 
 Painter::Painter(Widget& widg)
-    : widget_{widg},
-      staged_changes_{System::find_event_loop().staged_changes()[&widg]} {}
+    : widget_{widg}, staged_changes_{detail::Staged_changes::get()[&widg]}
+{}
 
-void Painter::put(const Glyph& tile, std::size_t x, std::size_t y) {
+void Painter::put(const Glyph& tile, std::size_t x, std::size_t y)
+{
     if (x >= widget_.width() || y >= widget_.height()) {
         return;
     }
@@ -38,7 +40,8 @@ void Painter::put(const Glyph& tile, std::size_t x, std::size_t y) {
     this->put_global(tile, x_global, y_global);
 }
 
-void Painter::put(const Glyph_string& text, std::size_t x, std::size_t y) {
+void Painter::put(const Glyph_string& text, std::size_t x, std::size_t y)
+{
     if (!detail::is_paintable(widget_)) {
         return;
     }
@@ -47,14 +50,15 @@ void Painter::put(const Glyph_string& text, std::size_t x, std::size_t y) {
     }
 }
 
-void Painter::border() {
+void Painter::border()
+{
     if (!border_is_paintable(widget_)) {
         return;
     }
     // Disqualified borders
     using detail::Border_offset;
-    const bool west_disqualified = Border_offset::west_disqualified(widget_);
-    const bool east_disqualified = Border_offset::east_disqualified(widget_);
+    const bool west_disqualified  = Border_offset::west_disqualified(widget_);
+    const bool east_disqualified  = Border_offset::east_disqualified(widget_);
     const bool north_disqualified = Border_offset::north_disqualified(widget_);
     const bool south_disqualified = Border_offset::south_disqualified(widget_);
 
@@ -133,7 +137,8 @@ void Painter::border() {
     if (!b.north_west.enabled()) {
         if (b.north.enabled() && !b.west.enabled()) {
             put_global(b.north, north_west);
-        } else if (b.west.enabled() && !b.north.enabled()) {
+        }
+        else if (b.west.enabled() && !b.north.enabled()) {
             put_global(b.west, north_west);
         }
     }
@@ -141,7 +146,8 @@ void Painter::border() {
     if (!b.north_east.enabled()) {
         if (b.north.enabled() && !b.east.enabled()) {
             put_global(b.north, north_east);
-        } else if (b.east.enabled() && !b.north.enabled()) {
+        }
+        else if (b.east.enabled() && !b.north.enabled()) {
             put_global(b.east, north_east);
         }
     }
@@ -149,7 +155,8 @@ void Painter::border() {
     if (!b.south_west.enabled()) {
         if (b.south.enabled() && !b.west.enabled()) {
             put_global(b.south, south_west);
-        } else if (b.west.enabled() && !b.south.enabled()) {
+        }
+        else if (b.west.enabled() && !b.south.enabled()) {
             put_global(b.west, south_west);
         }
     }
@@ -157,7 +164,8 @@ void Painter::border() {
     if (!b.south_east.enabled()) {
         if (b.south.enabled() && !b.east.enabled()) {
             put_global(b.south, south_east);
-        } else if (b.east.enabled() && !b.south.enabled()) {
+        }
+        else if (b.east.enabled() && !b.south.enabled()) {
             put_global(b.east, south_east);
         }
     }
@@ -213,7 +221,8 @@ void Painter::fill(const Glyph& tile,
                    std::size_t x,
                    std::size_t y,
                    std::size_t width,
-                   std::size_t height) {
+                   std::size_t height)
+{
     if (width == 0) {
         return;
     }
@@ -226,7 +235,8 @@ void Painter::fill(const Glyph& tile,
 void Painter::fill(const Glyph& tile,
                    const Point& point,
                    std::size_t width,
-                   std::size_t height) {
+                   std::size_t height)
+{
     this->fill(tile, point.x, point.y, width, height);
 }
 
@@ -235,7 +245,8 @@ void Painter::line(const Glyph& tile,
                    std::size_t x1,
                    std::size_t y1,
                    std::size_t x2,
-                   std::size_t y2) {
+                   std::size_t y2)
+{
     // Horizontal
     if (y1 == y2) {
         for (; x1 <= x2; ++x1) {
@@ -254,7 +265,8 @@ void Painter::line_global(const Glyph& tile,
                           std::size_t x1,
                           std::size_t y1,
                           std::size_t x2,
-                          std::size_t y2) {
+                          std::size_t y2)
+{
     // Horizontal
     if (y1 == y2) {
         for (; x1 <= x2; ++x1) {

@@ -4,28 +4,23 @@
 #include <future>
 #include <thread>
 
+#include <signals/signal.hpp>
+#include <signals/slot.hpp>
+
 #include <cppurses/painter/detail/screen.hpp>
 #include <cppurses/painter/detail/staged_changes.hpp>
-#include <cppurses/system/detail/event_invoker.hpp>
-#include <cppurses/system/detail/event_queue.hpp>
 
 namespace cppurses {
 
-/// Processes the Event_queue and flushes changes to the Terminal at each iter.
+/// Waits on loop_function() and then processes the event queue.
 /** Specialized by providing a loop_function to be run at each iteration. */
 class Event_loop {
    public:
-    Event_loop() = default;
-
-    Event_loop(const Event_loop&) = delete;
-    Event_loop& operator=(const Event_loop&) = delete;
-
-    // exit_ member is not default movable
-    Event_loop(Event_loop&&);
-    Event_loop& operator=(Event_loop&&);
+    Event_loop() { this->connect_to_system_exit(); }
 
     /// Make sure the loop has exited and returned from async functions.
-    virtual ~Event_loop() {
+    virtual ~Event_loop()
+    {
         this->exit(0);
         this->wait();
     }
@@ -39,27 +34,16 @@ class Event_loop {
     /// Call on the loop to exit at the next exit point.
     /** The return code value is used when returning from run() or wait(). This
      *  function is thread safe. */
-    virtual void exit(int return_code) {
+    virtual void exit(int return_code)
+    {
         return_code_ = return_code;
-        exit_ = true;
+        exit_        = true;
     }
 
     /// Block until the async event loop returns.
     /** Event_loop::exit(int) must be called to return from wait().
      *  @return the return code passed to the call to exit(). */
     int wait();
-
-    /// Return the thread ID of thread that launched this loop.
-    /** Used for posting events to the correct queue in System::post_event() */
-    std::thread::id get_thread_id() const { return thread_id_; }
-
-    /// Return the Staged_changes of this loop/thread.
-    const detail::Staged_changes& staged_changes() const {
-        return staged_changes_;
-    }
-
-    /// Return the Staged_changes of this loop/thread.
-    detail::Staged_changes& staged_changes() { return staged_changes_; }
 
    protected:
     /// Override this in derived classes to define Event_loop behavior.
@@ -74,18 +58,16 @@ class Event_loop {
     void process_events();
 
     std::future<int> fut_;
-    std::thread::id thread_id_;
     int return_code_{0};
     std::atomic<bool> exit_{false};
     bool running_{false};
 
-    detail::Event_queue event_queue_;
-    detail::Event_invoker invoker_;
-
-    detail::Staged_changes staged_changes_;
-    detail::Screen screen_;
+    sig::Signal<void()> lifetime;
 
     friend class System;
+
+    /// Connect to the System::exit_signal so loop can exit with System.
+    auto connect_to_system_exit() -> void;
 };
 
 }  // namespace cppurses
