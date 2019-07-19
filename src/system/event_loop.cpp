@@ -10,26 +10,30 @@
 
 namespace cppurses {
 
-int Event_loop::run()
+auto Event_loop::run() -> int
 {
     if (running_)
         return -1;
-    exit_    = false;
-    running_ = true;
+    exit_       = false;
+    running_    = true;
+    auto notify = true;
     while (!exit_) {
-        detail::Event_engine::get().process_queue();
-        this->loop_function();
+        if (notify)
+            detail::Event_engine::get().notify();
+        if (is_main_thread_)
+            detail::Event_engine::get().process();
+        notify = this->loop_function();
     }
     running_ = false;
     return return_code_;
 }
 
-void Event_loop::run_async()
+auto Event_loop::run_async() -> void
 {
     fut_ = std::async(std::launch::async, [this] { return this->run(); });
 }
 
-int Event_loop::wait()
+auto Event_loop::wait() -> int
 {
     if (fut_.valid())
         return fut_.get();
@@ -62,5 +66,4 @@ auto Event_loop::connect_to_system_exit() -> void
     exit_loop.track(lifetime);
     System::exit_signal.connect(exit_loop);
 }
-
 }  // namespace cppurses

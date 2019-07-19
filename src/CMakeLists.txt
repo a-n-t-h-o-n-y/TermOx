@@ -69,13 +69,12 @@ target_sources(cppurses PRIVATE
     system/system.cpp
     system/shortcuts.cpp
     system/animation_engine.cpp
-    system/event_as_string.cpp
     system/timer_event_loop.cpp
     system/timer_event.cpp
     system/user_input_event_loop.cpp
     system/fps_to_period.cpp
     system/find_widget_at.cpp
-    system/terminal_resize_event.cpp
+    # system/terminal_resize_event.cpp
     system/mouse.cpp
     system/key.cpp
 )

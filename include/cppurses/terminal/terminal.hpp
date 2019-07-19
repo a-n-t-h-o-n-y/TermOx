@@ -26,10 +26,6 @@ class Terminal {
     /// Return the height of the terminal screen.
     std::size_t height() const;
 
-    /// Resize the terminal's internal data structures to be of the given size.
-    /** Does not actually resize your terminal's window. */
-    void resize(std::size_t width, std::size_t height);
-
     /// Set the default background/wallpaper tiles to be used.
     /** This is used if a Widget has no assigned wallpaper. */
     void set_background(const Glyph& tile);
@@ -80,12 +76,9 @@ class Terminal {
    private:
     bool is_initialized_{false};
     bool show_cursor_{false};
+    bool raw_mode_{false};
     Glyph background_{L' '};
     Palette palette_{Palettes::DawnBringer()};
-    bool raw_mode_{false};
-
-    /// Register the input::indicate_resize signal handler for sigwinch signal.
-    void setup_resize_signal_handler() const;
 
     /// Actually set the palette via ncurses using the state of \p colors.
     void ncurses_set_palette(const Palette& colors);

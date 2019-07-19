@@ -3,8 +3,6 @@
 #include <iterator>
 #include <mutex>
 
-#include <fstream> //temp
-
 #include <optional/optional.hpp>
 
 #include <cppurses/painter/attribute.hpp>
@@ -18,7 +16,6 @@
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/system/focus.hpp>
 #include <cppurses/system/system.hpp>
-#include <cppurses/terminal/ncurses_mutex.hpp>
 #include <cppurses/terminal/output.hpp>
 #include <cppurses/terminal/terminal.hpp>
 #include <cppurses/widget/point.hpp>
@@ -82,11 +79,7 @@ void Screen::set_cursor_on_focus_widget()
         System::terminal.show_cursor();
         const auto x_global = focus->inner_x() + focus->cursor.x();
         const auto y_global = focus->inner_y() + focus->cursor.y();
-        std::ofstream l{"log", std::ios::app};
-        l << "locking Screen::set_cursor_on_focus_widget()" << std::endl;
-        std::lock_guard<std::mutex> lock{ncurses_mutex()};
         output::move_cursor(x_global, y_global);
-        l << "unlocking Screen::set_cursor_on_focus_widget()" << std::endl;
     }
     else {
         System::terminal.show_cursor(false);

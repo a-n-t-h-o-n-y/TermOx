@@ -26,10 +26,21 @@ class Event_queue {
     auto append(std::unique_ptr<Event> event) -> void
     {
         Guard_t g{mtx_};
-        if (is_expensive(event->type()))
-            this->remove_duplicates(*event);
+        // TODO how to optimize out duplicates?
+        // if (is_expensive(event->type()))
+        //     this->remove_duplicates(*event);
         events_.emplace_back(std::move(event));
     }
+
+    // temp
+    auto size() const -> std::size_t
+    {
+        return std::count_if(std::begin(events_), std::end(events_),
+                             [](const auto& e) { return e != nullptr; });
+    }
+
+    // temp
+    auto size_all() const -> std::size_t { return events_.size(); }
 
     // Accessor Types ----------------------------------------------------------
 

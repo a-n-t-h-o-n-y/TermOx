@@ -75,9 +75,7 @@ int System::run()
     terminal.initialize();
     System::post_event<Resize_event>(*System::head(),
                                      Area{terminal.width(), terminal.height()});
-    detail::Event_engine::get().launch();
     const auto exit_code = user_input_loop_.run();
-    detail::Event_engine::get().exit();
     terminal.uninitialize();
     return exit_code;
 }

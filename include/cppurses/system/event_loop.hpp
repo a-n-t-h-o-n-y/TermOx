@@ -12,7 +12,7 @@
 
 namespace cppurses {
 
-/// Waits on loop_function() and then processes the event queue.
+/// Waits on loop_function() and then notifies Event_engine if event is posted.
 /** Specialized by providing a loop_function to be run at each iteration. */
 class Event_loop {
    public:
@@ -26,15 +26,15 @@ class Event_loop {
     }
 
     /// Start the event loop.
-    int run();
+    auto run() -> int;
 
     /// Start the event loop in a separate thread.
-    void run_async();
+    auto run_async() -> void;
 
     /// Call on the loop to exit at the next exit point.
     /** The return code value is used when returning from run() or wait(). This
      *  function is thread safe. */
-    virtual void exit(int return_code)
+    virtual auto exit(int return_code) -> void
     {
         return_code_ = return_code;
         exit_        = true;
@@ -43,19 +43,20 @@ class Event_loop {
     /// Block until the async event loop returns.
     /** Event_loop::exit(int) must be called to return from wait().
      *  @return the return code passed to the call to exit(). */
-    int wait();
+    auto wait() -> int;
 
    protected:
     /// Override this in derived classes to define Event_loop behavior.
-    /** This function will be called on once every loop iteration. It is
-     *  expected that is will post an event to the Event_queue. After this
-     *  function is called, the Event_queue is invoked, and then staged changes
-     *  for this Event_loop are flushed to the screen, and the loop begins
-     *  again. */
-    virtual void loop_function() = 0;
+    /** This function will be called on once every loop iteration. If it posts
+     *  any events via System::post_event(), then it should return true,
+     *  indicating that the event queue should be processed. */
+    virtual auto loop_function() -> bool = 0;
+
+    bool is_main_thread_{false};
 
    private:
-    void process_events();
+    /// Connect to the System::exit_signal so loop can exit with System.
+    auto connect_to_system_exit() -> void;
 
     std::future<int> fut_;
     int return_code_{0};
@@ -65,9 +66,6 @@ class Event_loop {
     sig::Signal<void()> lifetime;
 
     friend class System;
-
-    /// Connect to the System::exit_signal so loop can exit with System.
-    auto connect_to_system_exit() -> void;
 };
 
 }  // namespace cppurses

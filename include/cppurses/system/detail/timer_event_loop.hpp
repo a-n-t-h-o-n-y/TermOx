@@ -21,28 +21,33 @@ class Timer_event_loop : public Event_loop {
 
     /// Create a Timer Loop with a constant period.
     explicit Timer_event_loop(Period_t period)
-        : period_func_{[period] { return period; }} {}
+        : period_func_{[period] { return period; }}
+    {}
 
     /// Create a Timer_loop with a variable period.
     explicit Timer_event_loop(std::function<Period_t()> period_func)
-        : period_func_{period_func} {}
+        : period_func_{period_func}
+    {}
 
     /// Register a widget to have a Timer_event posted to it every period.
     /** No-op if widget is already registered. */
     void register_widget(Widget& w);
 
     /// Stop a widget from receiving Timer_events for this loop.
-    bool unregister_widget(Widget& w) {
+    bool unregister_widget(Widget& w)
+    {
         return registered_widgets_.erase(&w) == 1;
     }
 
     /// Set a new constant period for the Timer loop.
-    void set_period(Period_t period) {
+    void set_period(Period_t period)
+    {
         period_func_ = [period] { return period; };
     }
 
     /// Set a new variable period for the Timer loop.
-    void set_period(const std::function<Period_t()>& period_function) {
+    void set_period(const std::function<Period_t()>& period_function)
+    {
         period_func_ = period_function;
     }
 
@@ -50,7 +55,7 @@ class Timer_event_loop : public Event_loop {
     bool empty() const { return registered_widgets_.empty(); }
 
    protected:
-    void loop_function() override;
+    auto loop_function() -> bool override;
 
    private:
     std::set<Widget*> registered_widgets_;
