@@ -74,7 +74,6 @@ target_sources(cppurses PRIVATE
     system/user_input_event_loop.cpp
     system/fps_to_period.cpp
     system/find_widget_at.cpp
-    # system/terminal_resize_event.cpp
     system/mouse.cpp
     system/key.cpp
 )

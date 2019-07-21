@@ -3,7 +3,7 @@
 
 #include <gtest/gtest.h>
 
-#include <cppurses/system/detail/event_queue.new.hpp>
+#include <cppurses/system/detail/event_queue.hpp>
 #include <cppurses/system/event.hpp>
 #include <cppurses/system/events/delete_event.hpp>
 #include <cppurses/system/events/focus_event.hpp>
@@ -49,7 +49,9 @@ auto make_rand_event() -> std::unique_ptr<Event>
 }  // namespace
 
 using namespace cppurses::detail;
-using View = Event_queue::Filter_view;
+using General_view = Event_queue::View<Event::None>;
+using Paint_view   = Event_queue::View<Event::Paint>;
+using Delete_view  = Event_queue::View<Event::Delete>;
 
 TEST(EventQueue, GeneralUse)
 {
@@ -65,22 +67,22 @@ TEST(EventQueue, GeneralUse)
     queue.append(make_event(Event::Delete));
 
     auto general_count = 0;
-    for (std::unique_ptr<Event> event : View{queue, Event::None}) {
-        EXPECT_TRUE(event->type() != Event::Paint ||
+    for (std::unique_ptr<Event> event : General_view{queue}) {
+        EXPECT_TRUE(event->type() != Event::Paint &&
                     event->type() != Event::Delete);
         ++general_count;
     }
     EXPECT_TRUE(general_count == 4);
 
     auto paint_count = 0;
-    for (std::unique_ptr<Event> event : View{queue, Event::Paint}) {
+    for (std::unique_ptr<Event> event : Paint_view{queue}) {
         EXPECT_TRUE(event->type() == Event::Paint);
         ++paint_count;
     }
-    EXPECT_TRUE(paint_count == 1);  // Not 2, because of append optimizations.
+    EXPECT_TRUE(paint_count == 1);
 
     auto delete_count = 0;
-    for (std::unique_ptr<Event> event : View{queue, Event::Delete}) {
+    for (std::unique_ptr<Event> event : Delete_view{queue}) {
         EXPECT_TRUE(event->type() == Event::Delete);
         ++delete_count;
     }
@@ -90,43 +92,43 @@ TEST(EventQueue, GeneralUse)
 TEST(EventQueue, EventsRemovedOnUse)
 {
     Event_queue queue{};
-    constexpr auto count = 10'000;
+    constexpr auto count = 100'000;
     for (auto i = 0; i < count; ++i) {
         queue.append(make_rand_event());
     }
 
     auto paint_count = 0;
-    for (std::unique_ptr<Event> event : View{queue, Event::Paint}) {
+    for (std::unique_ptr<Event> event : Paint_view{queue}) {
         ++paint_count;
     }
     const auto previous_paint_count = paint_count;
-    for (std::unique_ptr<Event> event : View{queue, Event::Paint}) {
+    for (std::unique_ptr<Event> event : Paint_view{queue}) {
         ++paint_count;
     }
     EXPECT_TRUE(paint_count == previous_paint_count);
-    View{queue, Event::Paint}.cleanup();
+    queue.clean();
 
     auto delete_count = 0;
-    for (std::unique_ptr<Event> event : View{queue, Event::Delete}) {
+    for (std::unique_ptr<Event> event : Delete_view{queue}) {
         ++delete_count;
     }
     const auto previous_delete_count = delete_count;
-    for (std::unique_ptr<Event> event : View{queue, Event::Delete}) {
+    for (std::unique_ptr<Event> event : Delete_view{queue}) {
         ++delete_count;
     }
     EXPECT_TRUE(delete_count == previous_delete_count);
-    View{queue, Event::Delete}.cleanup();
+    queue.clean();
 
     auto general_count = 0;
-    for (std::unique_ptr<Event> event : View{queue, Event::None}) {
+    for (std::unique_ptr<Event> event : General_view{queue}) {
         ++general_count;
     }
     auto previous_general_count = general_count;
-    for (std::unique_ptr<Event> event : View{queue, Event::None}) {
+    for (std::unique_ptr<Event> event : General_view{queue}) {
         ++general_count;
     }
     EXPECT_TRUE(general_count == previous_general_count);
-    View{queue, Event::None}.cleanup();
+    queue.clean();
 }
 
 TEST(EventQueue, EmptyQueue)
@@ -134,19 +136,19 @@ TEST(EventQueue, EmptyQueue)
     Event_queue queue{};
 
     auto general_count = 0;
-    for (std::unique_ptr<Event> event : View{queue, Event::None}) {
+    for (std::unique_ptr<Event> event : General_view{queue}) {
         ++general_count;
     }
     EXPECT_TRUE(general_count == 0);
 
     auto paint_count = 0;
-    for (std::unique_ptr<Event> event : View{queue, Event::Paint}) {
+    for (std::unique_ptr<Event> event : Paint_view{queue}) {
         ++paint_count;
     }
     EXPECT_TRUE(paint_count == 0);
 
     auto delete_count = 0;
-    for (std::unique_ptr<Event> event : View{queue, Event::Delete}) {
+    for (std::unique_ptr<Event> event : Delete_view{queue}) {
         ++delete_count;
     }
     EXPECT_TRUE(delete_count == 0);
@@ -160,7 +162,7 @@ TEST(EventQueue, EmptyView)
     queue.append(make_event(Event::None));
 
     auto delete_count = 0;
-    for (std::unique_ptr<Event> event : View{queue, Event::Delete}) {
+    for (std::unique_ptr<Event> event : Delete_view{queue}) {
         ++delete_count;
     }
     EXPECT_TRUE(delete_count == 0);
@@ -176,7 +178,7 @@ TEST(EventQueue, AppendWhileIterating)
     queue.append(make_event(Event::Delete));
 
     auto general_count = 0;
-    for (std::unique_ptr<Event> event : View{queue, Event::None}) {
+    for (std::unique_ptr<Event> event : General_view{queue}) {
         if (general_count < 2) {
             queue.append(make_event(Event::None));
             queue.append(make_event(Event::Paint));
@@ -186,13 +188,13 @@ TEST(EventQueue, AppendWhileIterating)
     EXPECT_TRUE(general_count == 5);  // 3 original plus 2 appended general.
 
     auto paint_count = 0;
-    for (std::unique_ptr<Event> event : View{queue, Event::Paint}) {
+    for (std::unique_ptr<Event> event : Paint_view{queue}) {
         ++paint_count;
     }
-    EXPECT_TRUE(paint_count == 1);  // added ones are optimized out
+    EXPECT_TRUE(paint_count == 1);
 
     auto delete_count = 0;
-    for (std::unique_ptr<Event> event : View{queue, Event::Delete}) {
+    for (std::unique_ptr<Event> event : Delete_view{queue}) {
         ++delete_count;
     }
     EXPECT_TRUE(delete_count == 1);
@@ -207,17 +209,17 @@ TEST(EventQueue, RemoveEventsOf)
     queue.append(make_event(Event::None));
     queue.append(std::make_unique<Focus_in_event>(w));
 
-    View{queue, Event::None}.remove_events_of(&w);
+    queue.remove_events_of(&w);
 
     auto general_count = 0;
-    for (std::unique_ptr<Event> event : View{queue, Event::None}) {
+    for (std::unique_ptr<Event> event : General_view{queue}) {
         EXPECT_TRUE(&(event->receiver()) == &get_widg());
         ++general_count;
     }
     EXPECT_TRUE(general_count == 1);
 
     auto paint_count = 0;
-    for (std::unique_ptr<Event> event : View{queue, Event::Paint}) {
+    for (std::unique_ptr<Event> event : Paint_view{queue}) {
         EXPECT_TRUE(&(event->receiver()) == &get_widg());
         ++paint_count;
     }
