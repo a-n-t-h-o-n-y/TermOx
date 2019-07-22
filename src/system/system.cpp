@@ -41,7 +41,6 @@ void System::post_event(std::unique_ptr<Event> event)
 
 void System::exit(int exit_code)
 {
-    // animation_engine_.shutdown();
     System::exit_requested_ = true;
     System::exit_signal(exit_code);
 }

@@ -1,5 +1,6 @@
 #ifndef CPPURSES_TERMINAL_TERMINAL_HPP
 #define CPPURSES_TERMINAL_TERMINAL_HPP
+#include <chrono>
 #include <cstddef>
 
 #include <cppurses/painter/glyph.hpp>
@@ -25,6 +26,11 @@ class Terminal {
 
     /// Return the height of the terminal screen.
     std::size_t height() const;
+
+    /// Set the rate at which the screen will update.
+    /** User input will immediately flush, but other event loops are only
+     *  processed every refresh rate. Default is 33ms. */
+    auto set_refresh_rate(std::chrono::milliseconds duration) -> void;
 
     /// Set the default background/wallpaper tiles to be used.
     /** This is used if a Widget has no assigned wallpaper. */
@@ -79,6 +85,7 @@ class Terminal {
     bool raw_mode_{false};
     Glyph background_{L' '};
     Palette palette_{Palettes::DawnBringer()};
+    std::chrono::milliseconds refresh_rate_{33};
 
     /// Actually set the palette via ncurses using the state of \p colors.
     void ncurses_set_palette(const Palette& colors);

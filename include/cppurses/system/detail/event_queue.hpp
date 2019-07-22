@@ -8,6 +8,7 @@
 #include <vector>
 
 #include <cppurses/system/event.hpp>
+#include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
 namespace detail {
@@ -54,21 +55,9 @@ class Event_queue {
         Guard_t g{mtx_};
         remove_receiver(general_events_, receiver);
         remove_receiver(paint_events_, receiver);
-        // remove_descendants(general_events_, receiver);
-        // remove_descendants(paint_events_, receiver);
+        remove_descendants(general_events_, receiver);
+        remove_descendants(paint_events_, receiver);
     }
-    // TODO Should this^^ also remove events to descendants?
-    // template <typename Queue_t>
-    // void remove_descendant_events(const Widget& receiver, Queue_t& queue)
-    // {
-    //     auto is_descendant = [&receiver](const std::unique_ptr<Event>&
-    //     on_queue) {
-    //         return
-    //         receiver.children.has_descendant(&(on_queue->receiver()));
-    //     };
-    //     auto at = std::remove_if(std::begin(queue), std::end(queue),
-    //     is_descendant); queue.erase(at, std::end(queue));
-    // }
 
     // Accessor Types ----------------------------------------------------------
 
@@ -195,17 +184,6 @@ class Event_queue {
         auto end() -> Move_iterator { return Move_iterator{queue_, 0}; };
     };
 
-    // static auto is_expensive(Event::Type type) -> bool
-    // {
-    //     switch (type) {
-    //         case Event::Paint:
-    //         case Event::Move:
-    //         case Event::Resize:
-    //         case Event::Disable:
-    //         case Event::Enable: return true;
-    //         default: return false;
-    //     }
-    // }
    private:
     /// Remove all nullptrs from \p events queue.
     static auto remove_nulls(Queue_t& events) -> void
@@ -221,6 +199,18 @@ class Event_queue {
         for (auto& event : events) {
             if (event != nullptr && &(event->receiver()) == receiver)
                 event.reset(nullptr);
+        }
+    }
+
+    /// Remove from \p events where event.reciever() is an ancestor of receiver.
+    static auto remove_descendants(Queue_t& events, const Widget* receiver)
+        -> void
+    {
+        for (auto& event : events) {
+            if (event != nullptr &&
+                receiver->children.has_descendant(&(event->receiver()))) {
+                event.reset(nullptr);
+            }
         }
     }
 };

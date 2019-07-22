@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <mutex>
+#include <chrono>
 #include <stdexcept>
 
 #include <ncurses.h>
@@ -61,7 +62,7 @@ void Terminal::initialize()
     ::ESCDELAY = 1;
     ::mousemask(ALL_MOUSE_EVENTS, nullptr);
     ::mouseinterval(0);
-    ::timeout(33);
+    this->set_refresh_rate(refresh_rate_);
     if (this->has_color()) {
         ::start_color();
         this->initialize_color_pairs();
@@ -97,6 +98,13 @@ std::size_t Terminal::height() const
     if (is_initialized_)
         getmaxyx(::stdscr, y, x);
     return y;
+}
+
+auto Terminal::set_refresh_rate(std::chrono::milliseconds duration) -> void
+{
+    refresh_rate_ = duration;
+    if (is_initialized_)
+        ::timeout(refresh_rate_.count());
 }
 
 void Terminal::set_background(const Glyph& tile)

@@ -11,7 +11,6 @@
 #include <cppurses/system/events/key.hpp>
 #include <cppurses/system/events/mouse.hpp>
 #include <cppurses/system/events/resize_event.hpp>
-// #include <cppurses/system/events/terminal_resize_event.hpp>
 #include <cppurses/system/focus.hpp>
 #include <cppurses/system/shortcuts.hpp>
 #include <cppurses/system/system.hpp>
@@ -24,13 +23,14 @@ using namespace cppurses;
 
 /// Check if mouse_event is a button_mask type of event.
 template <typename Mask_t>
-bool is(Mask_t button_mask, const ::MEVENT& mouse_event)
+auto is(Mask_t button_mask, const ::MEVENT& mouse_event) -> bool
 {
     return static_cast<bool>(mouse_event.bstate & button_mask);
 }
 
 /// Extract the Event type and Mouse::Button from a given MEVENT object.
-std::pair<Event::Type, Mouse::Button> extract_info(const ::MEVENT& mouse_event)
+auto extract_info(const ::MEVENT& mouse_event)
+    -> std::pair<Event::Type, Mouse::Button>
 {
     auto type_button = std::make_pair(Event::None, Mouse::Button::None);
     auto& type       = type_button.first;
@@ -85,16 +85,14 @@ std::pair<Event::Type, Mouse::Button> extract_info(const ::MEVENT& mouse_event)
     return type_button;
 }
 
-std::unique_ptr<Event> make_mouse_event()
+auto make_mouse_event() -> std::unique_ptr<Event>
 {
     auto mouse_event = ::MEVENT{};
-    if (::getmouse(&mouse_event) != OK) {
+    if (::getmouse(&mouse_event) != OK)
         return nullptr;
-    }
     Widget* receiver = detail::find_widget_at(mouse_event.x, mouse_event.y);
-    if (receiver == nullptr) {
+    if (receiver == nullptr)
         return nullptr;
-    }
 
     // Coordinates
     const auto global = Point{static_cast<std::size_t>(mouse_event.x),
@@ -106,19 +104,18 @@ std::unique_ptr<Event> make_mouse_event()
     const auto type_button = extract_info(mouse_event);
     const auto type        = type_button.first;
     const auto button      = type_button.second;
-    auto event             = std::unique_ptr<Event>{nullptr};
     if (type == Event::MouseButtonPress) {
-        event = std::make_unique<Mouse::Press>(
+        return std::make_unique<Mouse::Press>(
             *receiver, Mouse::State{button, global, local, mouse_event.id});
     }
-    else if (type == Event::MouseButtonRelease) {
-        event = std::make_unique<Mouse::Release>(
+    if (type == Event::MouseButtonRelease) {
+        return std::make_unique<Mouse::Release>(
             *receiver, Mouse::State{button, global, local, mouse_event.id});
     }
-    return event;
+    return nullptr;
 }
 
-std::unique_ptr<Event> make_resize_event()
+auto make_resize_event() -> std::unique_ptr<Event>
 {
     Widget* const receiver = System::head();
     if (receiver != nullptr) {
@@ -129,10 +126,10 @@ std::unique_ptr<Event> make_resize_event()
     return nullptr;
 }
 
-std::unique_ptr<Event> make_keyboard_event(int input)
+auto make_keyboard_event(int input) -> std::unique_ptr<Event>
 {
     const auto code = static_cast<Key::Code>(input);
-    Widget* receiver =
+    Widget* const receiver =
         Shortcuts::send_key(code) ? nullptr : Focus::focus_widget();
     return receiver == nullptr ? nullptr
                                : std::make_unique<Key::Press>(*receiver, code);
@@ -144,21 +141,13 @@ namespace input {
 
 auto get() -> std::unique_ptr<Event>
 {
-    const auto input = int{::getch()};
-    auto event       = std::unique_ptr<Event>{nullptr};
+    const auto input = ::getch();
     switch (input) {
-        // err should just return nullptr
-        case ERR:  // This will now be a reached end of timer with no input.
-            // event = make_terminal_resize_event();
-            // event = nullptr;
-            break;
-        case KEY_MOUSE: event = make_mouse_event(); break;
-        case KEY_RESIZE: event = make_resize_event(); break;
-        default:  // Key_event
-            event = make_keyboard_event(input);
-            break;
+        case ERR: return nullptr;  // Timeout and no event.
+        case KEY_MOUSE: return make_mouse_event();
+        case KEY_RESIZE: return make_resize_event();
+        default: return make_keyboard_event(input);  // Key_event
     }
-    return event;
 }
 
 }  // namespace input
