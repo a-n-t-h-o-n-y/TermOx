@@ -62,22 +62,18 @@ target_compile_options(cppurses PRIVATE -Wall -Wextra -Wpedantic)
 target_sources(cppurses PRIVATE
     system/delete_event.cpp
     system/event.cpp
-    system/event_invoker.cpp
     system/event_loop.cpp
-    system/event_queue.cpp
     system/focus.cpp
     system/move_event.cpp
     system/resize_event.cpp
     system/system.cpp
     system/shortcuts.cpp
     system/animation_engine.cpp
-    system/event_as_string.cpp
     system/timer_event_loop.cpp
     system/timer_event.cpp
     system/user_input_event_loop.cpp
     system/fps_to_period.cpp
     system/find_widget_at.cpp
-    system/terminal_resize_event.cpp
     system/mouse.cpp
     system/key.cpp
 )

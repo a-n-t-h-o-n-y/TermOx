@@ -10,11 +10,13 @@
 namespace cppurses {
 namespace detail {
 
-void User_input_event_loop::loop_function() {
+auto User_input_event_loop::loop_function() -> bool
+{
     auto event = input::get();
-    if (event != nullptr) {
-        System::post_event(std::move(event));
-    }
+    if (event == nullptr)
+        return false;
+    System::post_event(std::move(event));
+    return true;
 }
 
 }  // namespace detail
