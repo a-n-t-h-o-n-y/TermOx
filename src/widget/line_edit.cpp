@@ -3,6 +3,7 @@
 #include <cctype>
 #include <functional>
 #include <utility>
+#include <vector>
 
 #include <signals/signal.hpp>
 
@@ -18,51 +19,37 @@
 namespace cppurses {
 
 Line_edit::Line_edit(Glyph_string initial_text)
-    : Textbox{std::move(initial_text)} {
+    : Textbox{std::move(initial_text)}
+{
     this->set_name("Line_edit");
     this->set_ghost_color(Color::Light_gray);
     this->height_policy.fixed(1);
     this->disable_word_wrap();
 }
 
-void Line_edit::set_validator(std::function<bool(char)> validator) {
+void Line_edit::set_validator(std::function<bool(char)> validator)
+{
     validator_ = std::move(validator);
 }
 
-void Line_edit::clear_on_enter(bool enable) {
-    clear_on_enter_ = enable;
-}
+void Line_edit::clear_on_enter(bool enable) { clear_on_enter_ = enable; }
 
-void Line_edit::invisible_input(bool enabled) {
-    if (enabled) {
-        this->insert_brush.add_attributes(Attribute::Invisible);
-    } else {
-        this->insert_brush.remove_attributes(Attribute::Invisible);
-    }
-    if (on_initial_) {
-        return;
-    }
-    if (enabled) {
-        Glyph_string invisible_text{this->contents()};
-        invisible_text.add_attributes(Attribute::Invisible);
-        this->set_contents(std::move(invisible_text));
-
-    } else {
-        Glyph_string visible_text{this->contents()};
-        visible_text.remove_attribute(Attribute::Invisible);
-        this->set_contents(std::move(visible_text));
-    }
+auto Line_edit::veil_text(bool enable) -> void
+{
+    is_veiled_ = enable;
     this->update();
 }
 
-void Line_edit::underline(bool enabled) {
+void Line_edit::underline(bool enabled)
+{
     if (enabled) {
         this->wallpaper = Glyph{L' ', Attribute::Underline};
         Glyph_string underlined_text{this->contents()};
         underlined_text.add_attributes(Attribute::Underline);
         this->set_contents(std::move(underlined_text));
         this->insert_brush.add_attributes(Attribute::Underline);
-    } else {
+    }
+    else {
         this->wallpaper = L' ';
         Glyph_string non_underlined{this->contents()};
         non_underlined.remove_attribute(Attribute::Underline);
@@ -72,7 +59,8 @@ void Line_edit::underline(bool enabled) {
     this->update();
 }
 
-void Line_edit::set_ghost_color(Color c) {
+void Line_edit::set_ghost_color(Color c)
+{
     if (on_initial_) {
         Glyph_string ghost_text{this->contents()};
         ghost_text.add_attributes(foreground(c));
@@ -81,7 +69,8 @@ void Line_edit::set_ghost_color(Color c) {
     }
 }
 
-bool Line_edit::key_press_event(const Key::State& keyboard) {
+bool Line_edit::key_press_event(const Key::State& keyboard)
+{
     if (keyboard.key == Key::Enter) {
         edit_finished(this->contents().str());
         if (clear_on_enter_) {
@@ -108,7 +97,8 @@ bool Line_edit::key_press_event(const Key::State& keyboard) {
     return Textbox::key_press_event(keyboard);
 }
 
-bool Line_edit::mouse_press_event(const Mouse::State& mouse) {
+bool Line_edit::mouse_press_event(const Mouse::State& mouse)
+{
     if (mouse.button == Mouse::Button::ScrollUp ||
         mouse.button == Mouse::Button::ScrollDown) {
         return true;
@@ -116,10 +106,20 @@ bool Line_edit::mouse_press_event(const Mouse::State& mouse) {
     return Textbox::mouse_press_event(mouse);
 }
 
-bool Line_edit::focus_in_event() {
-    if (on_initial_) {
+bool Line_edit::focus_in_event()
+{
+    if (on_initial_)
         this->clear();
-    }
     return Textbox::focus_in_event();
 }
+
+auto Line_edit::paint_event() -> bool
+{
+    if (is_veiled_) {
+        const auto vc = std::vector<Glyph>(this->contents().size(), veil_);
+        this->set_contents(Glyph_string{std::begin(vc), std::end(vc)});
+    }
+    return Textbox::paint_event();
+}
+
 }  // namespace cppurses
