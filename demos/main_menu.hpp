@@ -1,11 +1,12 @@
 #ifndef DEMOS_MAIN_MENU_HPP
 #define DEMOS_MAIN_MENU_HPP
+#include <cppurses/system/focus.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/widgets/menu_stack.hpp>
 #include <cppurses/widget/widgets/titlebar.hpp>
 
-// #include "animation/animated_widget.hpp"
-#include "chess/src/chess_ui.hpp"
+#include "animation/animated_widget.hpp"
+// #include "chess/src/chess_ui.hpp"
 #include "focus/focus_demo.hpp"
 #include "game_of_life/gol_demo.hpp"
 #include "glyph_paint/glyph_paint.hpp"
@@ -32,7 +33,7 @@ class Main_menu : public cppurses::layout::Vertical {
     palette::Palette_demo& palette_demo{
         main_menu.make_page<palette::Palette_demo>("Color Palette")};
 
-    Chess_UI& chess{main_menu.make_page<Chess_UI>("Chess")};
+    // Chess_UI& chess{main_menu.make_page<Chess_UI>("Chess")};
 
     focus::Focus_demo& focus_demo{
         main_menu.make_page<focus::Focus_demo>("Focus")};
@@ -40,9 +41,8 @@ class Main_menu : public cppurses::layout::Vertical {
     glyph_paint::Glyph_paint& glyph_paint{
         main_menu.make_page<glyph_paint::Glyph_paint>("Glyph Paint")};
 
-    // animation::Animated_widget& animated_widget{
-    //     main_menu.make_page<animation::Animated_widget>(
-    //         "Animated Widget(Experimental)")};
+    animation::Animated_widget& animated_widget{
+        main_menu.make_page<animation::Animated_widget>("Animated Widget")};
 };
 }  // namespace demos
 #endif  // DEMOS_MAIN_MENU_HPP

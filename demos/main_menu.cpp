@@ -11,6 +11,7 @@ using namespace cppurses;
 namespace demos {
 
 Main_menu::Main_menu() {
+    this->focus_policy = Focus_policy::Direct;
     this->set_name("Main_menu - head widget");
     titlebar.set_name("Titlebar in Main_menu");
     main_menu.set_name("Menu_stack in Main_menu");

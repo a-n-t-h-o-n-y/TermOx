@@ -10,12 +10,11 @@
 
 #include <cppurses/system/detail/is_sendable.hpp>
 #include <cppurses/system/detail/user_input_event_loop.hpp>
+#include <cppurses/system/event.hpp>
 #include <cppurses/terminal/terminal.hpp>
 
 namespace cppurses {
 class Animation_engine;
-class Event;
-class Event_loop;
 class Widget;
 
 /// Organizes the highest level of the TUI framework.
@@ -39,6 +38,13 @@ class System {
     /** This Widget is the ancestor of every other widget that will be displayed
      *  on the screen. */
     static Widget* head() { return head_; }
+
+    /// Set the Widget to receive focus on run().
+    /** Needed because focus has to be set after a widget is enabled. */
+    static auto set_initial_focus(Widget* target) -> void
+    {
+        initial_focus_ = target;
+    }
 
     /// Create a Widget_t object, set it as head widget and call System::run().
     /** \p args... are passed on to the Widget_t constructor. Blocks until
@@ -112,6 +118,7 @@ class System {
 
    private:
     static Widget* head_;
+    static Widget* initial_focus_;
     static bool exit_requested_;
     static detail::User_input_event_loop user_input_loop_;
     static Animation_engine animation_engine_;

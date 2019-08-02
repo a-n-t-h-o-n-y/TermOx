@@ -65,7 +65,7 @@ class Menu : public layout::Vertical {
     void show_line_break();
 
     /// Only enables title and line_break if they are enabled.
-    void enable(bool enable = true,
+    void enable(bool enable                    = true,
                 bool post_child_polished_event = true) override;
 
     /// Menu Title Widget

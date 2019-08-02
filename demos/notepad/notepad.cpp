@@ -14,23 +14,22 @@
 
 namespace {
 
-void save_file(const std::string& filename, const std::string& output) {
+void save_file(const std::string& filename, const std::string& output)
+{
     std::ofstream ofs(filename);
-    if (!ofs.fail()) {
+    if (!ofs.fail())
         ofs << output;
-    }
 }
 
-std::string load_file(const std::string& filename) {
+std::string load_file(const std::string& filename)
+{
     std::ifstream ifs(filename);
-    if (ifs.fail()) {
+    if (ifs.fail())
         return "";
-    }
     std::ostringstream oss;
     ifs >> oss.rdbuf();
-    if (ifs.fail() && !ifs.eof()) {
+    if (ifs.fail() && !ifs.eof())
         return "";
-    }
     return oss.str();
 }
 
@@ -41,11 +40,10 @@ using namespace cppurses;
 namespace demos {
 
 // Textbox and Attribute/Color Selection
-Text_and_attributes::Text_and_attributes() {
-    this->initialize();
-}
+Text_and_attributes::Text_and_attributes() { this->initialize(); }
 
-void Text_and_attributes::initialize() {
+void Text_and_attributes::initialize()
+{
     textbox.brush.set_background(Color::Dark_gray);
     textbox.border.enable();
     textbox.border.segments.north_west = L'╭';
@@ -98,7 +96,8 @@ void Text_and_attributes::initialize() {
 }
 
 // Attribute and Color Selections
-Attrs_and_colors::Attrs_and_colors() {
+Attrs_and_colors::Attrs_and_colors()
+{
     this->initialize();
     fg_label.brush.add_attributes(Attribute::Bold);
     fg_label.set_alignment(Alignment::Center);
@@ -106,12 +105,11 @@ Attrs_and_colors::Attrs_and_colors() {
     bg_label.set_alignment(Alignment::Center);
 }
 
-void Attrs_and_colors::initialize() {
-    this->width_policy.fixed(16);
-}
+void Attrs_and_colors::initialize() { this->width_policy.fixed(16); }
 
 // Save Area
-Save_area::Save_area() {
+Save_area::Save_area()
+{
     this->initialize();
     // names
     this->set_name("Save_area");
@@ -120,7 +118,8 @@ Save_area::Save_area() {
     save_btn.set_name("Save_area - save_btn");
 }
 
-void Save_area::initialize() {
+void Save_area::initialize()
+{
     this->height_policy.fixed(1);
 
     // Load Button
@@ -137,18 +136,21 @@ void Save_area::initialize() {
     save_btn.brush.set_background(Color::Blue);
 }
 
-Notepad::Notepad() {
+Notepad::Notepad()
+{
     this->initialize();
     this->focus_policy = Focus_policy::Strong;
     this->set_name("Notepad - main demo widget");
 }
 
-bool Notepad::focus_in_event() {
+bool Notepad::focus_in_event()
+{
     Focus::set_focus_to(&txt_attr.textbox);
     return true;
 }
 
-void Notepad::initialize() {
+void Notepad::initialize()
+{
     // Signals
     save_area.load_btn.clicked.connect([this] {
         txt_attr.textbox.set_contents(

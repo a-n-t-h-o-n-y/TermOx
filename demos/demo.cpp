@@ -5,9 +5,11 @@
 #include "main_menu.hpp"
 
 using namespace cppurses;
-int main() {
+
+int main()
+{
     System sys;
     demos::Main_menu demo_menu;
-    Focus::set_focus_to(&demo_menu.main_menu.menu());
+    System::set_initial_focus(&demo_menu.main_menu);
     return sys.run(demo_menu);
 }
