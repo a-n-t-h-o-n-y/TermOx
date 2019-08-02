@@ -74,7 +74,7 @@ int System::run()
         return -1;
     if (initial_focus_ != nullptr) {
         initial_focus_->enable(true, false);
-        Focus::set_focus_to(initial_focus_);
+        Focus::set_focus_to(*initial_focus_);
         System::send_event(Focus_in_event{*initial_focus_});
     }
     terminal.initialize();

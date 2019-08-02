@@ -70,7 +70,7 @@ bool Focus_base::focus_out_event() {
 }
 
 bool Focus_base::focus_in_event_filter(Widget& /* receiver */) {
-    Focus::set_focus_to(this);
+    Focus::set_focus_to(*this);
     return true;
 }
 

@@ -66,7 +66,7 @@ void Menu_stack::set_active_page(std::size_t index)
 
 bool Menu_stack::focus_in_event()
 {
-    Focus::set_focus_to(&menu_);
+    Focus::set_focus_to(menu_);
     return Stack::focus_in_event();
 }
 

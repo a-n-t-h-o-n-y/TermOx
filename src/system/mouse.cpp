@@ -12,7 +12,7 @@ Mouse::Press::Press(Widget& receiver, const State& data)
     : Mouse::Event{Input_event::MouseButtonPress, receiver, data} {}
 
 bool Mouse::Press::send() const {
-    Focus::mouse_press(&receiver_);
+    Focus::mouse_press(receiver_);
     return receiver_.mouse_press_event(data_);
 }
 

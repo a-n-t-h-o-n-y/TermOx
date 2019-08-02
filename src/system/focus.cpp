@@ -76,11 +76,11 @@ namespace cppurses {
 Widget* Focus::focus_widget_{nullptr};
 bool Focus::tab_enabled_{true};
 
-void Focus::mouse_press(Widget* clicked)
+void Focus::mouse_press(Widget& clicked)
 {
-    if (clicked == focus_widget_)
+    if (&clicked == focus_widget_)
         return;
-    if (is_click_focus_policy(clicked->focus_policy))
+    if (is_click_focus_policy(clicked.focus_policy))
         Focus::set_focus_to(clicked);
 }
 
@@ -88,7 +88,10 @@ bool Focus::tab_press()
 {
     if (tab_enabled_ && is_tab_focus_policy(focus_widget_->focus_policy)) {
         Widget* next = next_tab_focus();
-        Focus::set_focus_to(next);
+        if (next == nullptr)
+            Focus::clear();
+        else
+            Focus::set_focus_to(*next);
         return true;
     }
     return false;
@@ -98,41 +101,41 @@ bool Focus::shift_tab_press()
 {
     if (tab_enabled_ && is_tab_focus_policy(focus_widget_->focus_policy)) {
         Widget* previous = previous_tab_focus();
-        Focus::set_focus_to(previous);
+        if (previous == nullptr)
+            Focus::clear();
+        else
+            Focus::set_focus_to(*previous);
         return true;
     }
     return false;
 }
 
-// TODO should take a reference, you have clear_focus() if you need that.
-void Focus::set_focus_to(Widget* new_focus)
+void Focus::set_focus_to(Widget& new_focus)
 {
-    if (new_focus == focus_widget_)
+    if (&new_focus == focus_widget_)
         return;
-    if (new_focus == nullptr || new_focus->focus_policy == Focus_policy::None) {
-        Focus::clear_focus();
+    if (new_focus.focus_policy == Focus_policy::None) {
+        Focus::clear();
         return;
     }
     if (focus_widget_ != nullptr) {
         // Focus_out_event has private constructor, can't use make_unique.
         std::unique_ptr<Focus_out_event> event{
-            new Focus_out_event(*focus_widget_)};
+            new Focus_out_event{*focus_widget_}};
         System::post_event(std::move(event));
     }
-    focus_widget_ = new_focus;
-    std::unique_ptr<Focus_in_event> event{new Focus_in_event(*focus_widget_)};
+    focus_widget_ = &new_focus;
+    std::unique_ptr<Focus_in_event> event{new Focus_in_event{*focus_widget_}};
     System::post_event(std::move(event));
 }
 
-// TODO rename to clear() ?
-void Focus::clear_focus()
+void Focus::clear()
 {
-    if (focus_widget_ != nullptr) {
-        std::unique_ptr<Focus_out_event> event{
-            new Focus_out_event(*focus_widget_)};
-        System::post_event(std::move(event));
-        focus_widget_ = nullptr;
-    }
+    if (focus_widget_ == nullptr)
+        return;
+    std::unique_ptr<Focus_out_event> event{new Focus_out_event(*focus_widget_)};
+    System::post_event(std::move(event));
+    focus_widget_ = nullptr;
 }
 
 }  // namespace cppurses

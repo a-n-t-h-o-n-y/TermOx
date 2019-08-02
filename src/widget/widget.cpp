@@ -49,7 +49,7 @@ Widget::Widget(std::string name)
 Widget::~Widget()
 {
     if (Focus::focus_widget() == this)
-        Focus::clear_focus();
+        Focus::clear();
     destroyed(*this);
 }
 
