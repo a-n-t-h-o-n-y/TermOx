@@ -87,8 +87,8 @@ class Event_queue {
             /// Construct an iterator pointing to the first element in \p view.
             Move_iterator(Event_queue& queue)
                 : mtx_{queue.mtx_},
-                  events_{get_events<filter_type>(queue)},
-                  at_{this->find_next<filter_type>(static_cast<Size_t>(-1))}
+                  events_{get_events(queue)},
+                  at_{this->find_next(static_cast<Size_t>(-1))}
             {}
 
             /// Construct an end iterator.
@@ -102,7 +102,7 @@ class Event_queue {
             /// Increment to the next element in queue that passes the filter.
             auto operator++() -> Move_iterator&
             {
-                at_ = find_next<filter_type>(at_);
+                at_ = find_next(at_);
                 return *this;
             }
 
@@ -114,25 +114,12 @@ class Event_queue {
 
            private:
             /// Retrieve the inner vector of events for the given event filter.
-            template <Event::Type f>
             static auto get_events(Event_queue& queue) -> Queue_t&
             {
                 return queue.general_events_;
             }
-            template <>
-            static auto get_events<Event::Paint>(Event_queue& queue) -> Queue_t&
-            {
-                return queue.paint_events_;
-            }
-            template <>
-            static auto get_events<Event::Delete>(Event_queue& queue)
-                -> Queue_t&
-            {
-                return queue.delete_events_;
-            }
 
             /// Return the next valid index after \p from for filter.
-            template <Event::Type f>
             auto find_next(Size_t from) -> Size_t
             {
                 Guard_t g{mtx_};
@@ -140,25 +127,6 @@ class Event_queue {
                 if (from == end)
                     return from;
                 while (++from != end && events_[from] == nullptr) {}
-                return from;
-            }
-            template <>
-            auto find_next<Event::Paint>(Size_t from) -> Size_t
-            {
-                Guard_t g{mtx_};
-                const auto end = events_.size();
-                if (from == end)
-                    return from;
-                while (++from != end) {
-                    if (events_[from] == nullptr)
-                        continue;
-                    if (already_sent_.count(&(events_[from]->receiver())) > 0) {
-                        events_[from].reset(nullptr);
-                        continue;
-                    }
-                    already_sent_.insert(&(events_[from]->receiver()));
-                    break;
-                }
                 return from;
             }
 
@@ -214,6 +182,41 @@ class Event_queue {
         }
     }
 };
+
+template <>
+inline auto Event_queue::View<Event::Paint>::Move_iterator::get_events(
+    Event_queue& queue) -> Queue_t&
+{
+    return queue.paint_events_;
+}
+
+template <>
+inline auto Event_queue::View<Event::Delete>::Move_iterator::get_events(
+    Event_queue& queue) -> Queue_t&
+{
+    return queue.delete_events_;
+}
+
+template <>
+inline auto Event_queue::View<Event::Paint>::Move_iterator::find_next(
+    Size_t from) -> Size_t
+{
+    Guard_t g{mtx_};
+    const auto end = events_.size();
+    if (from == end)
+        return from;
+    while (++from != end) {
+        if (events_[from] == nullptr)
+            continue;
+        if (already_sent_.count(&(events_[from]->receiver())) > 0) {
+            events_[from].reset(nullptr);
+            continue;
+        }
+        already_sent_.insert(&(events_[from]->receiver()));
+        break;
+    }
+    return from;
+}
 
 }  // namespace detail
 }  // namespace cppurses
