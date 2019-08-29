@@ -4,6 +4,7 @@
 
 #include <cppurses/painter/detail/screen_descriptor.hpp>
 #include <cppurses/painter/detail/staged_changes.hpp>
+#include <cppurses/widget/area.hpp>
 
 namespace cppurses {
 class Glyph_string;
@@ -73,11 +74,19 @@ class Painter {
     }
 
    private:
+    const Widget& widget_;
+    const Area inner_area_;
+    const bool is_paintable_;
+
+    /// Reference to container that holds onto the painting until flush().
+    /** Each Event_loop/thread has a Screen_descriptor for each Widget. */
+    detail::Screen_descriptor& staged_changes_;
+
     /// Put a single Glyph to the staged_changes_ container.
     /** No bounds checking, used internally for all painting. Main entry point
      *  for modifying the staged_changes_ object. */
     void put_global(const Glyph& tile, std::size_t x, std::size_t y) {
-        staged_changes_[Point{x, y}] = tile;
+        staged_changes_[{x, y}] = tile;
     }
 
     /// Put a single Glyph to the staged_changes_ container.
@@ -100,13 +109,6 @@ class Painter {
     void line_global(const Glyph& tile, const Point& a, const Point& b) {
         line_global(tile, a.x, a.y, b.x, b.y);
     }
-
-    /// Widget that will be painted to.
-    const Widget& widget_;
-
-    /// Reference to container that holds onto the painting until flush().
-    /** Each Event_loop/thread has a Screen_descriptor for each Widget. */
-    detail::Screen_descriptor& staged_changes_;
 };
 
 }  // namespace cppurses

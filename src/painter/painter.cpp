@@ -27,14 +27,16 @@ bool border_is_paintable(const cppurses::Widget& widg)
 namespace cppurses {
 
 Painter::Painter(Widget& widg)
-    : widget_{widg}, staged_changes_{detail::Staged_changes::get()[&widg]}
+    : widget_{widg},
+      inner_area_{widget_.width(), widget_.height()},
+      is_paintable_{detail::is_paintable(widget_)},
+      staged_changes_{detail::Staged_changes::get()[&widg]}
 {}
 
 void Painter::put(const Glyph& tile, std::size_t x, std::size_t y)
 {
-    if (x >= widget_.width() || y >= widget_.height()) {
+    if (x >= inner_area_.width || y >= inner_area_.height)
         return;
-    }
     const auto x_global = widget_.inner_x() + x;
     const auto y_global = widget_.inner_y() + y;
     this->put_global(tile, x_global, y_global);
@@ -42,9 +44,8 @@ void Painter::put(const Glyph& tile, std::size_t x, std::size_t y)
 
 void Painter::put(const Glyph_string& text, std::size_t x, std::size_t y)
 {
-    if (!detail::is_paintable(widget_)) {
+    if (!is_paintable_)
         return;
-    }
     for (const Glyph& g : text) {
         this->put(g, x++, y);
     }
@@ -52,169 +53,127 @@ void Painter::put(const Glyph_string& text, std::size_t x, std::size_t y)
 
 void Painter::border()
 {
-    if (!border_is_paintable(widget_)) {
+    using Offset = detail::Border_offset;
+    if (!border_is_paintable(widget_))
         return;
-    }
     // Disqualified borders
-    using detail::Border_offset;
-    const bool west_disqualified  = Border_offset::west_disqualified(widget_);
-    const bool east_disqualified  = Border_offset::east_disqualified(widget_);
-    const bool north_disqualified = Border_offset::north_disqualified(widget_);
-    const bool south_disqualified = Border_offset::south_disqualified(widget_);
+    auto const west_dq  = Offset::west_disqualified(widget_);
+    auto const east_dq  = Offset::east_disqualified(widget_);
+    auto const north_dq = Offset::north_disqualified(widget_);
+    auto const south_dq = Offset::south_disqualified(widget_);
 
     // North Wall
-    const auto north_left = Point{widget_.inner_x(), widget_.y()};
-    const auto north_right =
-        Point{north_left.x + widget_.width() - 1, north_left.y};
+    auto const north_left = Point{widget_.inner_x(), widget_.y()};
+    auto const north_right =
+        Point{north_left.x + inner_area_.width - 1, north_left.y};
 
     // South Wall
-    const auto south_left =
+    auto const south_left =
         Point{north_left.x, widget_.y() + widget_.outer_height() - 1};
-    const auto south_right = Point{north_right.x, south_left.y};
+    auto const south_right = Point{north_right.x, south_left.y};
 
     // West Wall
-    const auto west_top = Point{widget_.x(), widget_.inner_y()};
-    const auto west_bottom =
-        Point{west_top.x, west_top.y + widget_.height() - 1};
+    auto const west_top = Point{widget_.x(), widget_.inner_y()};
+    auto const west_bottom =
+        Point{west_top.x, west_top.y + inner_area_.height - 1};
 
     // East Wall
-    const auto east_top =
+    auto const east_top =
         Point{west_top.x + widget_.outer_width() - 1, west_top.y};
-    const auto east_bottom = Point{east_top.x, west_bottom.y};
+    auto const east_bottom = Point{east_top.x, west_bottom.y};
 
     // Corners
-    const auto north_east = Point{east_top.x, north_left.y};
-    const auto north_west = Point{west_top.x, north_right.y};
-    const auto south_east = Point{east_bottom.x, south_left.y};
-    const auto south_west = Point{west_bottom.x, south_right.y};
+    auto const north_east = Point{east_top.x, north_left.y};
+    auto const north_west = Point{west_top.x, north_right.y};
+    auto const south_east = Point{east_bottom.x, south_left.y};
+    auto const south_west = Point{west_bottom.x, south_right.y};
 
-    const auto& b = widget_.border.segments;
+    // General Border Construction/Painting
+    auto const& b = widget_.border.segments;
 
-    // General Border Construction/Painting.
-    // North
-    if (b.north.enabled() && !north_disqualified) {
+    if (b.north.enabled() && !north_dq)
         this->line_global(b.north, north_left, north_right);
-    }
-    // South
-    if (b.south.enabled() && !south_disqualified) {
+    if (b.south.enabled() && !south_dq)
         this->line_global(b.south, south_left, south_right);
-    }
-    // West
-    if (b.west.enabled() && !west_disqualified) {
+    if (b.west.enabled() && !west_dq)
         this->line_global(b.west, west_top, west_bottom);
-    }
-    // East
-    if (b.east.enabled() && !east_disqualified) {
+    if (b.east.enabled() && !east_dq)
         this->line_global(b.east, east_top, east_bottom);
-    }
-    // North-West
-    if (b.north_west.enabled() && !north_disqualified && !west_disqualified) {
+    if (b.north_west.enabled() && !north_dq && !west_dq)
         this->put_global(b.north_west, north_west);
-    }
-    // North-East
-    if (b.north_east.enabled() && !north_disqualified && !east_disqualified) {
+    if (b.north_east.enabled() && !north_dq && !east_dq)
         this->put_global(b.north_east, north_east);
-    }
-    // South-West
-    if (b.south_west.enabled() && !south_disqualified && !west_disqualified) {
+    if (b.south_west.enabled() && !south_dq && !west_dq)
         this->put_global(b.south_west, south_west);
-    }
-    // South-East
-    if (b.south_east.enabled() && !south_disqualified && !east_disqualified) {
+    if (b.south_east.enabled() && !south_dq && !east_dq)
         this->put_global(b.south_east, south_east);
-    }
 
     // Stop out of bounds drawing for special cases.
-    if (widget_.height() == 1 && north_disqualified && south_disqualified) {
+    if (north_dq && south_dq && inner_area_.height == 1)
         return;
-    }
-    if (widget_.width() == 1 && west_disqualified && east_disqualified) {
+    if (west_dq && east_dq && inner_area_.width == 1)
         return;
-    }
 
     // Extend Walls into Unused Corners
     // North-West
     if (!b.north_west.enabled()) {
-        if (b.north.enabled() && !b.west.enabled()) {
+        if (b.north.enabled() && !b.west.enabled())
             put_global(b.north, north_west);
-        }
-        else if (b.west.enabled() && !b.north.enabled()) {
+        else if (b.west.enabled() && !b.north.enabled())
             put_global(b.west, north_west);
-        }
     }
     // North-East
     if (!b.north_east.enabled()) {
-        if (b.north.enabled() && !b.east.enabled()) {
+        if (b.north.enabled() && !b.east.enabled())
             put_global(b.north, north_east);
-        }
-        else if (b.east.enabled() && !b.north.enabled()) {
+        else if (b.east.enabled() && !b.north.enabled())
             put_global(b.east, north_east);
-        }
     }
     // South-West
     if (!b.south_west.enabled()) {
-        if (b.south.enabled() && !b.west.enabled()) {
+        if (b.south.enabled() && !b.west.enabled())
             put_global(b.south, south_west);
-        }
-        else if (b.west.enabled() && !b.south.enabled()) {
+        else if (b.west.enabled() && !b.south.enabled())
             put_global(b.west, south_west);
-        }
     }
     // South-East
     if (!b.south_east.enabled()) {
-        if (b.south.enabled() && !b.east.enabled()) {
+        if (b.south.enabled() && !b.east.enabled())
             put_global(b.south, south_east);
-        }
-        else if (b.east.enabled() && !b.south.enabled()) {
+        else if (b.east.enabled() && !b.south.enabled())
             put_global(b.east, south_east);
-        }
     }
 
     // Paint wallpaper over empty space that a missing border can cause
+    auto const wallpaper = widget_.generate_wallpaper();
     // North Wallpaper
-    const auto wallpaper = widget_.generate_wallpaper();
-    if (Border_offset::north(widget_) == 1 && !b.north.enabled()) {
+    if (Offset::north(widget_) == 1 && !b.north.enabled())
         this->line_global(wallpaper, north_left, north_right);
-    }
-
     // South Wallpaper
-    if (Border_offset::south(widget_) == 1 && !b.south.enabled()) {
+    if (Offset::south(widget_) == 1 && !b.south.enabled())
         this->line_global(wallpaper, south_left, south_right);
-    }
-
     // East Wallpaper
-    if (Border_offset::east(widget_) == 1 && !b.east.enabled()) {
+    if (Offset::east(widget_) == 1 && !b.east.enabled())
         this->line_global(wallpaper, east_top, east_bottom);
-    }
-
     // West Wallpaper
-    if (Border_offset::west(widget_) == 1 && !b.west.enabled()) {
+    if (Offset::west(widget_) == 1 && !b.west.enabled())
         this->line_global(wallpaper, west_top, west_bottom);
-    }
-
     // North-West Wallpaper
-    if (Border_offset::north(widget_) == 1 &&
-        Border_offset::west(widget_) == 1 && !b.north_west.enabled()) {
+    if (Offset::north(widget_) == 1 && Offset::west(widget_) == 1 &&
+        !b.north_west.enabled())
         this->put_global(wallpaper, north_west);
-    }
-
     // North-East Wallpaper
-    if (Border_offset::north(widget_) == 1 &&
-        Border_offset::east(widget_) == 1 && !b.north_east.enabled()) {
+    if (Offset::north(widget_) == 1 && Offset::east(widget_) == 1 &&
+        !b.north_east.enabled())
         this->put_global(wallpaper, north_east);
-    }
-
     // South-West Wallpaper
-    if (Border_offset::south(widget_) == 1 &&
-        Border_offset::west(widget_) == 1 && !b.south_west.enabled()) {
+    if (Offset::south(widget_) == 1 && Offset::west(widget_) == 1 &&
+        !b.south_west.enabled())
         this->put_global(wallpaper, south_west);
-    }
-
     // South-East Wallpaper
-    if (Border_offset::south(widget_) == 1 &&
-        Border_offset::east(widget_) == 1 && !b.south_east.enabled()) {
+    if (Offset::south(widget_) == 1 && Offset::east(widget_) == 1 &&
+        !b.south_east.enabled())
         this->put_global(wallpaper, south_east);
-    }
 }
 
 void Painter::fill(const Glyph& tile,
