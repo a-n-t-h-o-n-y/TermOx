@@ -57,6 +57,8 @@ class Glyph_string : private std::vector<Glyph> {
     Glyph_string(const std::initializer_list<Glyph>& glyphs,
                  Attributes&&... attrs);
 
+    Glyph_string& operator=(const Glyph_string&) = default;
+
     /// Convert to a std::string, each Glyph being a char.
     std::string str() const { return utility::wchar_to_bytes(this->w_str()); }
 
@@ -117,7 +119,6 @@ class Glyph_string : private std::vector<Glyph> {
     using std::vector<Glyph>::reverse_iterator;
     using std::vector<Glyph>::const_reverse_iterator;
 
-    using std::vector<Glyph>::operator=;
     using std::vector<Glyph>::operator[];
     using std::vector<Glyph>::size;
     using std::vector<Glyph>::assign;

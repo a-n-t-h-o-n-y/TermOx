@@ -22,7 +22,6 @@ auto Event::send_to_all_filters() const -> bool
 auto to_string(Event::Type type) -> std::string
 {
     switch (type) {
-        case Event::None: return "None";
         case Event::MouseButtonPress: return "MouseButtonPress";
         case Event::MouseButtonRelease: return "MouseButtonRelease";
         case Event::MouseButtonDblClick: return "MouseButtonDblClick";
@@ -44,6 +43,7 @@ auto to_string(Event::Type type) -> std::string
         case Event::Delete: return "Delete";
         case Event::Timer: return "Timer";
         case Event::Custom: return "Custom";
+        default: return "None";
     }
 }
 }  // namespace cppurses

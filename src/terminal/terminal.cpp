@@ -1,12 +1,12 @@
 #include <cppurses/terminal/terminal.hpp>
 
+#include <chrono>
 #include <clocale>
 #include <csignal>
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
 #include <mutex>
-#include <chrono>
 #include <stdexcept>
 
 #include <ncurses.h>

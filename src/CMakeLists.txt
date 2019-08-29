@@ -54,7 +54,19 @@ if(NOT ${CMAKE_VERSION} VERSION_LESS "3.8")
     target_compile_features(cppurses PUBLIC cxx_std_14)
 endif()
 
-target_compile_options(cppurses PRIVATE -Wall -Wextra -Wpedantic)
+target_compile_options(cppurses
+    PRIVATE
+        -Wall
+        -Wextra
+)
+
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+target_compile_options(cppurses
+    PUBLIC
+        -Wno-maybe-uninitialized
+        -Wno-unused-but-set-variable
+)
+endif()
 
 # GATHER SOURCES
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
