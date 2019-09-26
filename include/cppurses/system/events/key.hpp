@@ -186,7 +186,7 @@ struct Key {
         Arrow_left,
         Arrow_right,
         Home,
-        Backspace_2,  // unused? int 263
+        Backspace_2, // numpad backspace and backspace on some laptops
 
         // Function keys, up to 63.
         // Add fn number to enum for more. ex) F15 key = Key::Function + 15;
