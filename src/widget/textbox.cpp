@@ -42,7 +42,8 @@ bool Textbox::key_press_event(const Key::State& keyboard) {
         return true;
     }
     switch (keyboard.key) {
-        case Key::Backspace: {
+        case Key::Backspace: 
+        case Key::Backspace_2: {
             auto cursor_index = this->cursor_index();
             if (cursor_index == 0) {
                 break;
