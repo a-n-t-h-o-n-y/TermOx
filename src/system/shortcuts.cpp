@@ -10,15 +10,19 @@ namespace cppurses {
 
 std::unordered_map<Key::Code, sig::Signal<void()>> Shortcuts::shortcuts_;
 
-sig::Signal<void()>& Shortcuts::add_shortcut(Key::Code key) {
+bool Shortcuts::enabled_{true};
+
+auto Shortcuts::add_shortcut(Key::Code key) -> sig::Signal<void()>&
+{
     if (shortcuts_.count(key) == 0) {
         shortcuts_[key] = sig::Signal<void()>{};
     }
     return shortcuts_.at(key);
 }
 
-bool Shortcuts::send_key(Key::Code key) {
-    if (shortcuts_.count(key) == 1) {
+auto Shortcuts::send_key(Key::Code key) -> bool
+{
+    if (enabled_ && shortcuts_.count(key) == 1) {
         shortcuts_[key]();
         return true;
     }
