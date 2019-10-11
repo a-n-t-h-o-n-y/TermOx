@@ -4,9 +4,9 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <set>
 #include <string>
 #include <utility>
-#include <vector>
 
 #include <optional/optional.hpp>
 #include <signals/signal.hpp>
@@ -36,7 +36,7 @@ class Widget {
     explicit Widget(std::string name = "");
 
     Widget(const Widget&) = delete;
-    Widget(Widget&&) = delete;
+    Widget(Widget&&)      = delete;
     Widget& operator=(const Widget&) = delete;
     Widget& operator=(Widget&&) = delete;
     virtual ~Widget();
@@ -59,14 +59,15 @@ class Widget {
      *  one at a time, then the enable() function can be overridden to enable
      *  itself and then only pass on enable() calls to the children that it
      *  wants to enable. */
-    virtual void enable(bool enable = true,
+    virtual void enable(bool enable                    = true,
                         bool post_child_polished_event = true);
 
     /// Post a Disable_event to this widget, and all descendants.
     /** Will only post a Child_polished_event to the parent if requested. Useful
      *  for disabling a child Widget from a parent's Child_polished_event
      *  handler. */
-    void disable(bool disable = true, bool post_child_polished_event = true) {
+    void disable(bool disable = true, bool post_child_polished_event = true)
+    {
         this->enable(!disable, post_child_polished_event);
     }
 
@@ -87,7 +88,8 @@ class Widget {
     /// Create a Widget and append it to the list of children.
     /** Return a reference to this newly created Widget. */
     template <typename Widg_t, typename... Args>
-    Widg_t& make_child(Args&&... args) {
+    Widg_t& make_child(Args&&... args)
+    {
         this->children.append(
             std::make_unique<Widg_t>(std::forward<Args>(args)...));
         return static_cast<Widg_t&>(*(this->children.get().back()));
@@ -96,7 +98,8 @@ class Widget {
     /// Search children by name and Widget type.
     /** Return a pointer to the given type, if found, or nullptr. */
     template <typename Widg_t = Widget>
-    Widg_t* find_child(const std::string& name) const {
+    Widg_t* find_child(const std::string& name) const
+    {
         for (const std::unique_ptr<Widget>& widg : this->children.get()) {
             if (widg->name() == name &&
                 dynamic_cast<Widg_t*>(widg.get()) != nullptr) {
@@ -111,7 +114,8 @@ class Widget {
      *  Widg_t* if found, otherwise a nullptr is returned. Return the first
      *  matching descendant. */
     template <typename Widg_t = Widget>
-    Widg_t* find_descendant(const std::string& name) const {
+    Widg_t* find_descendant(const std::string& name) const
+    {
         for (Widget* widg : this->children.get_descendants()) {
             if (widg->name() == name &&
                 dynamic_cast<Widg_t*>(widg != nullptr)) {
@@ -133,7 +137,8 @@ class Widget {
     /** Given with relation to the top left of the terminal screen. This is the
      *  coordinate that marks the beginning of the space that is available for
      *  use by the Widget. */
-    std::size_t inner_x() const {
+    std::size_t inner_x() const
+    {
         return top_left_position_.x + detail::Border_offset::west(*this);
     }
 
@@ -141,18 +146,21 @@ class Widget {
     /** Given with relation to the top left of the terminal screen. This is the
      *  coordinate that marks the beginning of the space that is available for
      *  use by the Widget. */
-    std::size_t inner_y() const {
+    std::size_t inner_y() const
+    {
         return top_left_position_.y + detail::Border_offset::north(*this);
     }
 
     /// Return the inner width dimension, this does not include Border space.
-    std::size_t width() const {
+    std::size_t width() const
+    {
         return this->outer_width() - detail::Border_offset::east(*this) -
                detail::Border_offset::west(*this);
     }
 
     /// Return the inner height dimension, this does not include Border space.
-    std::size_t height() const {
+    std::size_t height() const
+    {
         return this->outer_height() - detail::Border_offset::north(*this) -
                detail::Border_offset::south(*this);
     }
@@ -181,7 +189,8 @@ class Widget {
     void remove_event_filter(Widget& filter);
 
     /// Return the list of Event filter Widgets.
-    const std::vector<Widget*>& get_event_filters() const {
+    auto get_event_filters() const -> const std::set<Widget*>&
+    {
         return event_filters_;
     }
 
@@ -234,7 +243,8 @@ class Widget {
     bool brush_paints_wallpaper() const { return brush_paints_wallpaper_; }
 
     /// Set if the brush is applied to the wallpaper Glyph.
-    void set_brush_paints_wallpaper(bool paints = true) {
+    void set_brush_paints_wallpaper(bool paints = true)
+    {
         brush_paints_wallpaper_ = paints;
         this->update();
     }
@@ -416,7 +426,7 @@ class Widget {
     bool enabled_{false};
     bool brush_paints_wallpaper_{true};
     detail::Screen_state screen_state_;
-    std::vector<Widget*> event_filters_;
+    std::set<Widget*> event_filters_;
 
     // Top left point of *this, relative to the top left of the screen. Does not
     // account for borders.

@@ -92,23 +92,21 @@ void Widget::install_event_filter(Widget& filter)
 {
     if (&filter == this)
         return;
-    // Remove filter from list on destruction of filter
-    sig::Slot<void(Widget&)> remove_on_destroy{[this](Widget& being_destroyed) {
-        this->remove_event_filter(being_destroyed);
-    }};
-    remove_on_destroy.track(this->destroyed);
-    filter.destroyed.connect(remove_on_destroy);
-    event_filters_.push_back(&filter);
+    auto const result = event_filters_.insert(&filter);
+    if(result.second) { // if insert happened
+        // Remove filter from list on destruction of filter
+        auto remove_on_destroy =
+            sig::Slot<void(Widget&)>{[this](Widget& being_destroyed) {
+                this->remove_event_filter(being_destroyed);
+            }};
+        remove_on_destroy.track(this->destroyed);
+        filter.destroyed.connect(remove_on_destroy);
+    }
 }
 
 void Widget::remove_event_filter(Widget& filter)
 {
-    auto begin    = std::begin(event_filters_);
-    auto end      = std::end(event_filters_);
-    auto position = std::find(begin, end, &filter);
-    if (position != end) {
-        event_filters_.erase(position);
-    }
+    event_filters_.erase(&filter);
 }
 
 void Widget::enable_animation(Animation_engine::Period_t period)

@@ -9,11 +9,9 @@ namespace cppurses {
 
 auto Event::send_to_all_filters() const -> bool
 {
-    const auto& filters = receiver_.get_event_filters();
-    // Index iteration: filters variable might change size and reallocate.
-    for (auto i = 0ul; i < filters.size(); ++i) {
-        auto& widg = *filters[i];
-        if (widg.enabled() && this->filter_send(widg))
+    auto const& filters = receiver_.get_event_filters();
+    for (Widget* filter : filters) {
+        if (filter->enabled() && this->filter_send(*filter))
             return true;
     }
     return false;
