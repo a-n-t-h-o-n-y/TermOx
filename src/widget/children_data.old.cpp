@@ -49,6 +49,7 @@ bool Children_data::has(Widget* child) const {
 }
 
 bool Children_data::has(const std::string& name) const {
+    // std::any_of(...);
     for (const std::unique_ptr<Widget>& widg : children_) {
         if (widg->name() == name) {
             return true;
@@ -59,7 +60,7 @@ bool Children_data::has(const std::string& name) const {
 
 bool Children_data::has_descendant(Widget* descendant) const {
     for (const std::unique_ptr<Widget>& widg : children_) {
-        if (widg.get() == descendant || widg->children.has(descendant)) {
+        if (widg.get() == descendant || widg->children.has_descendant(descendant)) {
             return true;
         }
     }
@@ -67,8 +68,9 @@ bool Children_data::has_descendant(Widget* descendant) const {
 }
 
 bool Children_data::has_descendant(const std::string& name) const {
+    // std::any_of(...);
     for (const std::unique_ptr<Widget>& widg : children_) {
-        if (widg->name() == name || widg->children.has(name)) {
+        if (widg->name() == name || widg->children.has_descendant(name)) {
             return true;
         }
     }

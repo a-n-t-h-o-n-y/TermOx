@@ -6,6 +6,7 @@
 
 namespace cppurses {
 namespace layout {
+template <typename Widget_t>
 class Layout;
 }
 class Enable_event;
@@ -41,6 +42,7 @@ class Screen_state {
     Optimize optimize;
 
     friend class Screen;
+    template <typename Widget_t>
     friend class cppurses::layout::Layout;
     friend class cppurses::Enable_event;
     friend class cppurses::Disable_event;

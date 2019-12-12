@@ -21,28 +21,30 @@
 namespace cppurses {
 
 Menu::Menu(Glyph_string title_text)
-    : title{this->make_child<Label>(std::move(title_text))} {
+    : title{this->make_child<Label>(std::move(title_text))}
+{
     this->focus_policy = Focus_policy::Strong;
     title.set_alignment(Alignment::Center);
     title.brush.add_attributes(Attribute::Bold);
     line_break.wallpaper = L'─';
 }
 
-sig::Signal<void()>& Menu::append_item(Glyph_string label) {
+sig::Signal<void()>& Menu::append_item(Glyph_string label)
+{
     return this->insert_item(std::move(label), this->size());
 }
 
-sig::Signal<void()>& Menu::insert_item(Glyph_string label, std::size_t index) {
-    auto button_ptr = std::make_unique<Push_button>(std::move(label));
+sig::Signal<void()>& Menu::insert_item(Glyph_string label, std::size_t index)
+{
+    auto button_ptr         = std::make_unique<Push_button>(std::move(label));
     Push_button& new_button = *button_ptr;
-    this->children.insert(std::move(button_ptr), index + 2);
+    this->insert_child(std::move(button_ptr), index + 2);
     items_.emplace(std::begin(items_) + index, new_button);
     new_button.install_event_filter(*this);
     new_button.height_policy.fixed(1);
 
-    if (items_.size() == 1) {
+    if (items_.size() == 1)
         this->select_item(0);
-    }
     new_button.clicked.connect([this, index] {
         this->select_item(index);
         this->send_selected_signal();
@@ -50,7 +52,8 @@ sig::Signal<void()>& Menu::insert_item(Glyph_string label, std::size_t index) {
     return items_[index].selected;
 }
 
-void Menu::remove_item(std::size_t index) {
+void Menu::remove_item(std::size_t index)
+{
     if (index >= items_.size()) {
         return;
     }
@@ -61,16 +64,19 @@ void Menu::remove_item(std::size_t index) {
     }
 }
 
-void Menu::select_up(std::size_t n) {
+void Menu::select_up(std::size_t n)
+{
     const auto new_index = selected_index_ > n ? selected_index_ - n : 0;
     this->select_item(new_index);
 }
 
-void Menu::select_down(std::size_t n) {
+void Menu::select_down(std::size_t n)
+{
     this->select_item(selected_index_ + n);
 }
 
-void Menu::select_item(std::size_t index) {
+void Menu::select_item(std::size_t index)
+{
     if (items_.empty()) {
         return;
     }
@@ -85,7 +91,8 @@ void Menu::select_item(std::size_t index) {
     current_btn.update();
 }
 
-void Menu::set_selected_attribute(const Attribute& attr) {
+void Menu::set_selected_attribute(const Attribute& attr)
+{
     auto& selected_btn = items_[selected_index_].button.get();
     selected_btn.brush.remove_attributes(selected_attr_);
     selected_attr_ = attr;
@@ -93,27 +100,32 @@ void Menu::set_selected_attribute(const Attribute& attr) {
     selected_btn.update();
 }
 
-void Menu::hide_title() {
+void Menu::hide_title()
+{
     title_enabled_ = false;
     this->enable(this->enabled());
 }
 
-void Menu::show_title() {
+void Menu::show_title()
+{
     title_enabled_ = true;
     this->enable(this->enabled());
 }
 
-void Menu::hide_line_break() {
+void Menu::hide_line_break()
+{
     line_break_enabled_ = false;
     this->enable(this->enabled());
 }
 
-void Menu::show_line_break() {
+void Menu::show_line_break()
+{
     line_break_enabled_ = true;
     this->enable(this->enabled());
 }
 
-void Menu::enable(bool enable, bool post_child_polished_event) {
+void Menu::enable(bool enable, bool post_child_polished_event)
+{
     this->enable_and_post_events(enable, post_child_polished_event);
     line_break.enable(line_break_enabled_ && enable, post_child_polished_event);
     title.enable(title_enabled_ && enable, post_child_polished_event);
@@ -122,39 +134,47 @@ void Menu::enable(bool enable, bool post_child_polished_event) {
     }
 }
 
-bool Menu::key_press_event(const Key::State& keyboard) {
+bool Menu::key_press_event(const Key::State& keyboard)
+{
     if (keyboard.key == Key::Arrow_down || keyboard.key == Key::j) {
         this->select_down();
-    } else if (keyboard.key == Key::Arrow_up || keyboard.key == Key::k) {
+    }
+    else if (keyboard.key == Key::Arrow_up || keyboard.key == Key::k) {
         this->select_up();
-    } else if (keyboard.key == Key::Enter) {
+    }
+    else if (keyboard.key == Key::Enter) {
         this->send_selected_signal();
     }
     return true;
 }
 
-bool Menu::mouse_press_event(const Mouse::State& mouse) {
+bool Menu::mouse_press_event(const Mouse::State& mouse)
+{
     if (mouse.button == Mouse::Button::ScrollUp) {
         this->select_up();
-    } else if (mouse.button == Mouse::Button::ScrollDown) {
+    }
+    else if (mouse.button == Mouse::Button::ScrollDown) {
         this->select_down();
     }
-    return layout::Vertical::mouse_press_event(mouse);
+    return layout::Vertical<>::mouse_press_event(mouse);
 }
 
 bool Menu::mouse_press_event_filter(Widget& /* receiver */,
-                                    const Mouse::State& mouse) {
+                                    const Mouse::State& mouse)
+{
     if (mouse.button == Mouse::Button::ScrollUp) {
         this->select_up();
         return true;
-    } else if (mouse.button == Mouse::Button::ScrollDown) {
+    }
+    else if (mouse.button == Mouse::Button::ScrollDown) {
         this->select_down();
         return true;
     }
     return false;
 }
 
-void Menu::send_selected_signal() {
+void Menu::send_selected_signal()
+{
     if (!items_.empty()) {
         items_[selected_index_].selected();
     }
@@ -162,38 +182,44 @@ void Menu::send_selected_signal() {
 
 namespace slot {
 
-sig::Slot<void(std::size_t)> select_up(Menu& m) {
+sig::Slot<void(std::size_t)> select_up(Menu& m)
+{
     sig::Slot<void(std::size_t)> slot{[&m](auto n) { m.select_up(n); }};
     slot.track(m.destroyed);
     return slot;
 }
 
-sig::Slot<void()> select_up(Menu& m, std::size_t n) {
+sig::Slot<void()> select_up(Menu& m, std::size_t n)
+{
     sig::Slot<void()> slot{[&m, n] { m.select_up(n); }};
     slot.track(m.destroyed);
     return slot;
 }
 
-sig::Slot<void(std::size_t)> select_down(Menu& m) {
+sig::Slot<void(std::size_t)> select_down(Menu& m)
+{
     sig::Slot<void(std::size_t)> slot{[&m](auto n) { m.select_down(n); }};
     slot.track(m.destroyed);
     return slot;
 }
 
-sig::Slot<void()> select_down(Menu& m, std::size_t n) {
+sig::Slot<void()> select_down(Menu& m, std::size_t n)
+{
     sig::Slot<void()> slot{[&m, n] { m.select_down(n); }};
     slot.track(m.destroyed);
     return slot;
 }
 
-sig::Slot<void(std::size_t)> select_item(Menu& m) {
+sig::Slot<void(std::size_t)> select_item(Menu& m)
+{
     sig::Slot<void(std::size_t)> slot{
         [&m](auto index) { m.select_item(index); }};
     slot.track(m.destroyed);
     return slot;
 }
 
-sig::Slot<void()> select_item(Menu& m, std::size_t index) {
+sig::Slot<void()> select_item(Menu& m, std::size_t index)
+{
     sig::Slot<void()> slot{[&m, index] { m.select_item(index); }};
     slot.track(m.destroyed);
     return slot;

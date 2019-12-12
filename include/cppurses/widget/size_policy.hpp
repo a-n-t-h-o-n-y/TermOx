@@ -33,42 +33,48 @@ class Size_policy {
     explicit Size_policy(Widget* owner) : owner_{owner} {}
 
     /// Set the type to Fixed with size hint of \p hint.
-    void fixed(std::size_t hint) {
+    void fixed(std::size_t hint)
+    {
         type_ = Type::Fixed;
         hint_ = hint;
         this->notify_parent();
     }
 
     /// Set the type to Minimum with size hint of \p hint.
-    void minimum(std::size_t hint) {
+    void minimum(std::size_t hint)
+    {
         type_ = Type::Minimum;
         hint_ = hint;
         this->notify_parent();
     }
 
     /// Set the type to Maximum with size hint of \p hint.
-    void maximum(std::size_t hint) {
+    void maximum(std::size_t hint)
+    {
         type_ = Type::Maximum;
         hint_ = hint;
         this->notify_parent();
     }
 
     /// Set the type to Preferred with size hint of \p hint.
-    void preferred(std::size_t hint) {
+    void preferred(std::size_t hint)
+    {
         type_ = Type::Preferred;
         hint_ = hint;
         this->notify_parent();
     }
 
     /// Set the type to Expanding with size hint of \p hint.
-    void expanding(std::size_t hint) {
+    void expanding(std::size_t hint)
+    {
         type_ = Type::Expanding;
         hint_ = hint;
         this->notify_parent();
     }
 
     /// Set the type to MinimumExpanding with size hint of \p hint.
-    void minimumExpanding(std::size_t hint) {
+    void minimumExpanding(std::size_t hint)
+    {
         type_ = Type::MinimumExpanding;
         hint_ = hint;
         this->notify_parent();
@@ -78,7 +84,8 @@ class Size_policy {
     void ignored() { this->type(Type::Ignored); }
 
     /// Set the Type of the Size_policy.
-    void type(Size_policy::Type type) {
+    void type(Size_policy::Type type)
+    {
         type_ = type;
         this->notify_parent();
     }
@@ -90,7 +97,8 @@ class Size_policy {
     /** Used to fit adjacent Widgets within a length. The stretch is used to
      *  compute a percentage of length the Widget should receive by dividing it
      *  by the total stretch of all Widgets in the layout. */
-    void stretch(std::size_t value) {
+    void stretch(std::size_t value)
+    {
         stretch_ = value;
         this->notify_parent();
     }
@@ -99,7 +107,8 @@ class Size_policy {
     std::size_t stretch() const { return stretch_; }
 
     /// Set the size hint, used in accordance to the Type enum.
-    void hint(std::size_t value) {
+    void hint(std::size_t value)
+    {
         hint_ = value;
         this->notify_parent();
     }
@@ -108,7 +117,8 @@ class Size_policy {
     std::size_t hint() const { return hint_; }
 
     /// Set the minimum length that the owning Widget should be.
-    void min_size(std::size_t value) {
+    void min_size(std::size_t value)
+    {
         min_ = value;
         this->notify_parent();
     }
@@ -117,7 +127,8 @@ class Size_policy {
     std::size_t min_size() const { return min_; }
 
     /// Set the maximum length/height that the owning Widget can be.
-    void max_size(std::size_t value) {
+    void max_size(std::size_t value)
+    {
         max_ = value;
         this->notify_parent();
     }

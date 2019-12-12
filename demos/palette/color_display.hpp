@@ -15,15 +15,13 @@ struct Color_patch : cppurses::Widget {
 };
 
 /// Title and name display of a given Color.
-struct Color_name : cppurses::layout::Vertical {
-    cppurses::Text_display& title{
-        this->make_child<cppurses::Text_display>("Color:")};
-    cppurses::Text_display& name{
-        this->make_child<cppurses::Text_display>("White")};
+struct Color_name : cppurses::layout::Vertical<cppurses::Text_display> {
+    cppurses::Text_display& title{this->make_child("Color:")};
+    cppurses::Text_display& name{this->make_child("White")};
 };
 
 /// Displays a text name and a square visual of a given Color.
-struct Color_display : cppurses::layout::Horizontal {
+struct Color_display : cppurses::layout::Horizontal<> {
     explicit Color_display(cppurses::Color color);
 
     /// Change the currently displayed color.

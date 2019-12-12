@@ -6,23 +6,19 @@
 
 namespace palette {
 
-Shade_display::Shade_display(cppurses::Color base) : base_{base} {}
 
-void Shade_display::invert() {
-    inverted_ = true;
-}
-
-bool Shade_display::paint_event() {
+bool Shade_display::paint_event()
+{
     using namespace cppurses;
-    Glyph light_shade{L'░', background(base_)};
-    Glyph mid_shade{L'▒', background(base_)};
-    const auto color_n = 16;
+    auto light_shade   = Glyph{L'░', background(base_)};
+    auto mid_shade     = Glyph{L'▒', background(base_)};
+    auto const color_n = 16;
 
-    const int height = static_cast<int>(this->height());
-    const int width = static_cast<int>(this->width());
+    int const height = static_cast<int>(this->height());
+    int const width  = static_cast<int>(this->width());
 
     int y_begin = inverted_ ? 0 : height - 1;
-    auto y_end = [this, height](int y) {
+    auto y_end  = [this, height](int y) {
         return inverted_ ? y < height : y >= 0;
     };
     auto increment = [this](int& y) { inverted_ ? ++y : --y; };
@@ -31,14 +27,13 @@ bool Shade_display::paint_event() {
     auto& shade = light_shade;
     for (auto y = y_begin, i = 0; y_end(y); increment(y)) {
         for (auto x = 0; x < width && i < (2 * color_n); ++x, ++i) {
-            if (i == color_n) {
+            if (i == color_n)
                 shade = mid_shade;
-            }
-            auto foreground =
+            auto const foreground =
                 static_cast<Color>(detail::first_color_value + (i % 16));
-            if (foreground == base_) {
+            if (foreground == base_)
                 --x;
-            } else {
+            else {
                 shade.brush.set_foreground(foreground);
                 p.put(shade, x, y);
             }
@@ -47,7 +42,8 @@ bool Shade_display::paint_event() {
     return Widget::paint_event();
 }
 
-Bottom_shades::Bottom_shades() {
+Bottom_shades::Bottom_shades()
+{
     blue_shade.invert();
     orange_shade.invert();
     light_gray_shade.invert();
@@ -58,8 +54,9 @@ Bottom_shades::Bottom_shades() {
     white_shade.invert();
 }
 
-All_colors_display::All_colors_display() {
-    const auto width = 48;
+All_colors_display::All_colors_display()
+{
+    auto const width = 48;
     color_select.width_policy.maximum(width);
     color_select.height_policy.maximum(6);
     top_shades.width_policy.maximum(width);

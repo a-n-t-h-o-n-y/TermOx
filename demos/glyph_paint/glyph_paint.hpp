@@ -8,7 +8,7 @@
 namespace demos {
 namespace glyph_paint {
 
-class Glyph_paint : public cppurses::layout::Horizontal {
+class Glyph_paint : public cppurses::layout::Horizontal<> {
    public:
     Glyph_paint();
 

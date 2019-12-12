@@ -171,12 +171,11 @@ class Event_queue {
     }
 
     /// Remove from \p events where event.reciever() is an ancestor of receiver.
-    static auto remove_descendants(Queue_t& events, const Widget* receiver)
-        -> void
+    static void remove_descendants(Queue_t& events, const Widget* receiver)
     {
         for (auto& event : events) {
             if (event != nullptr &&
-                receiver->children.has_descendant(&(event->receiver()))) {
+                receiver->is_ancestor_of(&(event->receiver()))) {
                 event.reset(nullptr);
             }
         }

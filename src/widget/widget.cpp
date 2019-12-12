@@ -24,11 +24,10 @@
 #include <cppurses/system/system.hpp>
 #include <cppurses/terminal/terminal.hpp>
 #include <cppurses/widget/border.hpp>
-#include <cppurses/widget/children_data.hpp>
 #include <cppurses/widget/cursor_data.hpp>
 
 namespace {
-std::uint16_t get_unique_id()
+auto get_unique_id() -> std::uint16_t
 {
     static std::mutex mtx;
     static std::uint16_t current{0};
@@ -62,8 +61,8 @@ void Widget::set_name(std::string name)
 void Widget::enable(bool enable, bool post_child_polished_event)
 {
     this->enable_and_post_events(enable, post_child_polished_event);
-    for (std::unique_ptr<Widget>& w : this->children.children_) {
-        w->enable(enable, post_child_polished_event);
+    for (Widget& w : this->get_children()) {
+        w.enable(enable, post_child_polished_event);
     }
 }
 
@@ -73,11 +72,11 @@ void Widget::close()
     if (this->parent() == nullptr)
         return;  // Can't delete a widget that is not owned by another Widget.
     else
-        removed = this->parent()->children.remove(this);
+        removed = this->parent()->children_.remove(this);
     System::post_event<Delete_event>(*this, std::move(removed));
 }
 
-Glyph Widget::generate_wallpaper() const
+auto Widget::generate_wallpaper() const -> Glyph
 {
     Glyph background{this->wallpaper ? *(this->wallpaper)
                                      : System::terminal.background()};
@@ -93,7 +92,7 @@ void Widget::install_event_filter(Widget& filter)
     if (&filter == this)
         return;
     auto const result = event_filters_.insert(&filter);
-    if(result.second) { // if insert happened
+    if (result.second) {  // if insert happened
         // Remove filter from list on destruction of filter
         auto remove_on_destroy =
             sig::Slot<void(Widget&)>{[this](Widget& being_destroyed) {
@@ -115,7 +114,7 @@ void Widget::enable_animation(Animation_engine::Period_t period)
 }
 
 void Widget::enable_animation(
-    const std::function<Animation_engine::Period_t()>& period_func)
+    std::function<Animation_engine::Period_t()> const& period_func)
 {
     System::animation_engine().register_widget(*this, period_func);
 }

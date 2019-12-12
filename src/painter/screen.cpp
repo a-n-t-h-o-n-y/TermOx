@@ -30,7 +30,7 @@ bool contains(const typename Map_t::key_type& value, const Map_t& map)
     return map.count(value) > 0;
 }
 
-bool has_children(const Widget& widg) { return !(widg.children.get().empty()); }
+bool has_children(Widget const& widg) { return !(widg.get_children().empty()); }
 
 bool is_whitespace_equal(const Brush& a, const Brush& b)
 {
@@ -90,9 +90,8 @@ void Screen::set_cursor_on_focus_widget()
 
 void Screen::paint_empty_tiles(const Widget& widg)
 {
-    if (!has_children(widg)) {
+    if (!has_children(widg))
         return;
-    }
     const auto wallpaper   = widg.generate_wallpaper();
     const auto empty_space = find_empty_space(widg);
     const auto y_begin     = empty_space.offset().y;

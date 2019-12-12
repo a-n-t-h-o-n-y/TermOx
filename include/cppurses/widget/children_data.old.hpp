@@ -36,9 +36,12 @@ class Children_data {
     bool has_descendant(const std::string& name) const;
 
     /// Return a reference to the list of children.
-    const std::vector<std::unique_ptr<Widget>>& get() const {
+    auto get() const -> std::vector<std::unique_ptr<Widget>> const&
+    {
         return children_;
     }
+
+    auto get() -> std::vector<std::unique_ptr<Widget>>& { return children_; }
 
     /// Return a list of all descendants in breadth first order.
     /** Descendants are children, or children of children to any level down. */

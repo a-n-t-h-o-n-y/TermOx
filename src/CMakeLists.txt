@@ -88,6 +88,7 @@ target_sources(cppurses PRIVATE
     system/find_widget_at.cpp
     system/mouse.cpp
     system/key.cpp
+    system/child_event.cpp
 )
 
 # PAINTER
@@ -104,27 +105,21 @@ target_sources(cppurses PRIVATE
     painter/screen_state.cpp
     painter/palettes.cpp
     painter/color.cpp
-)	
+)
 
 # WIDGET
 target_sources(cppurses PRIVATE
     widget/widget.cpp
     widget/widget.event_handlers.cpp
     widget/widget_slots.cpp
-    widget/stack.cpp
-    widget/menu_stack.cpp
-    widget/cycle_stack.cpp
     widget/label.cpp
     widget/line_edit.cpp
     widget/log.cpp
     widget/confirm_button.cpp
-    widget/labeled_cycle_box.cpp
-    widget/horizontal.cpp
     widget/matrix_display.cpp
     widget/point.cpp
     widget/border.cpp
     widget/cycle_box.cpp
-    widget/vertical.cpp
     widget/status_bar.cpp
     widget/textbox.cpp
     widget/horizontal_slider.cpp
@@ -135,20 +130,16 @@ target_sources(cppurses PRIVATE
     widget/checkbox.cpp
     widget/titlebar.cpp
     widget/text_display.cpp
-    widget/color_select.cpp
     widget/menu.cpp
     widget/size_policy.cpp
     widget/fixed_width.cpp
     widget/fixed_height.cpp
-    widget/children_data.cpp
     widget/border_offset.cpp
     widget/cursor_data.cpp
     widget/graph_tree.cpp
     widget/nearly_equal.cpp
     widget/vertical_slider.cpp
     widget/slider_logic.cpp
-    widget/toggle_button.cpp
-    widget/layout.cpp
 )
 
 # TERMINAL

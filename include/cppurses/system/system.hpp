@@ -8,7 +8,6 @@
 #include <signals/signal.hpp>
 #include <signals/slot.hpp>
 
-#include <cppurses/system/detail/is_sendable.hpp>
 #include <cppurses/system/detail/user_input_event_loop.hpp>
 #include <cppurses/system/event.hpp>
 #include <cppurses/terminal/terminal.hpp>
@@ -68,15 +67,7 @@ class System {
     int run();
 
     /// Immediately send the event filters and then to the intended receiver.
-    static auto send_event(const Event& event) -> bool
-    {
-        if (!detail::is_sendable(event))
-            return false;
-        bool handled = event.send_to_all_filters();
-        if (!handled)
-            handled = event.send();
-        return handled;
-    }
+    static auto send_event(const Event& event) -> bool;
 
     /// Append the event to the Event_queue for the thread it was called on.
     /** The Event_queue is processed once per iteration of the Event_loop. When

@@ -7,7 +7,7 @@
 namespace demos {
 namespace focus {
 
-class Focus_base : public cppurses::layout::Horizontal {
+class Focus_base : public cppurses::layout::Horizontal<cppurses::Label> {
    public:
     Focus_base(cppurses::Focus_policy policy);
 
@@ -19,7 +19,7 @@ class Focus_base : public cppurses::layout::Horizontal {
     bool focus_in_event_filter(Widget& receiver) override;
 
    protected:
-    cppurses::Label& title_{this->make_child<cppurses::Label>()};
+    cppurses::Label& title_{this->make_child()};
 };
 
 }  // namespace focus

@@ -17,7 +17,7 @@
 namespace palette {
 
 /// Provides interface and implementation of setting a specific color value.
-class Color_definition_setter : public cppurses::layout::Vertical {
+class Color_definition_setter : public cppurses::layout::Vertical<> {
     cppurses::Color current_color_{cppurses::Color::White};
 
     Color_display& color_display_{
@@ -34,7 +34,7 @@ class Color_definition_setter : public cppurses::layout::Vertical {
     void change_current_color(cppurses::Color color);
 
     /// Return the color you are setting the definition of.
-    cppurses::Color current_color() const { return current_color_; }
+    auto current_color() const -> cppurses::Color { return current_color_; }
 };
 
 }  // namespace palette

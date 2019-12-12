@@ -13,8 +13,8 @@
 namespace palette {
 namespace detail {
 /// Vertical_slider with extra space around the sides.
-struct Buffered_slider : cppurses::layout::Horizontal {
-    using Bar_t = cppurses::Fixed_width;
+struct Buffered_slider : cppurses::layout::Horizontal<> {
+    using Bar_t    = cppurses::Fixed_width;
     using Slider_t = cppurses::Vertical_slider;
 
     Bar_t& left{this->make_child<Bar_t>(1)};
@@ -23,7 +23,7 @@ struct Buffered_slider : cppurses::layout::Horizontal {
 };
 
 /// Line_edit with extra space on the left side.
-struct Buffered_edit_box : cppurses::layout::Horizontal {
+struct Buffered_edit_box : cppurses::layout::Horizontal<> {
     Buffered_edit_box();
     cppurses::Fixed_width& left{this->make_child<cppurses::Fixed_width>(1)};
     cppurses::Line_edit& box{this->make_child<cppurses::Line_edit>("0")};
@@ -32,7 +32,7 @@ struct Buffered_edit_box : cppurses::layout::Horizontal {
 
 /// Provides user interface to change a color value from [0, 255].
 /** Emits signal when changed. */
-class Value_control : public cppurses::layout::Vertical {
+class Value_control : public cppurses::layout::Vertical<> {
     detail::Buffered_slider& slider_{
         this->make_child<detail::Buffered_slider>()};
 

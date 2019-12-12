@@ -9,10 +9,10 @@
 namespace palette {
 
 /// Holds Value_control objects for red, green, and blue color values.
-class Color_control : public cppurses::layout::Horizontal {
-    Value_control& slider_red_{this->make_child<Value_control>("R")};
-    Value_control& slider_green_{this->make_child<Value_control>("G")};
-    Value_control& slider_blue_{this->make_child<Value_control>("B")};
+class Color_control : public cppurses::layout::Horizontal<Value_control> {
+    Value_control& slider_red_{this->make_child("R")};
+    Value_control& slider_green_{this->make_child("G")};
+    Value_control& slider_blue_{this->make_child("B")};
 
    public:
     Color_control();

@@ -1,9 +1,10 @@
 #ifndef CPPURSES_WIDGET_LAYOUT_HPP
 #define CPPURSES_WIDGET_LAYOUT_HPP
 #include <cstddef>
+#include <memory>
+#include <type_traits>
+#include <utility>
 
-#include <cppurses/painter/color.hpp>
-#include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
@@ -12,38 +13,85 @@ struct Point;
 namespace layout {
 
 /// Provided as a uniform interface for arranging child Widgets.
-/** The update_geometry() function will be called each time there is a reason to
- *  believe that the children Widgets of this Widget will want to change
- *  position and size. */
+/** Layout is limited to holding Child_t objects, which much be Widget or some
+ *  derived type. */
+template <typename Child_t = Widget>
 class Layout : public Widget {
    protected:
+    /// Create a Widget and append it to the list of children.
+    /** Return a reference to this newly created Widget. */
+    template <typename Widget_t = Child_t, typename... Args>
+    auto make_child(Args&&... args) -> Widget_t&
+    {
+        static_assert(std::is_base_of<Child_t, Widget_t>::value,
+                      "Layout::make_child: Widget_t must be a Child_t type");
+        return static_cast<Widget_t&>(this->Widget::children_.append(
+            std::make_unique<Widget_t>(std::forward<Args>(args)...)));
+    }
+
+    auto insert_child(std::unique_ptr<Child_t> child_ptr, std::size_t index)
+        -> Child_t&
+    {
+        return this->Widget::children_.insert(std::move(child_ptr), index);
+    }
+
+    auto append_child(std::unique_ptr<Child_t> child_ptr) -> Child_t&
+    {
+        return this->Widget::children_.append(std::move(child_ptr));
+    }
+
+    auto remove_child(Widget const* child_ptr) -> std::unique_ptr<Widget>
+    {
+        return this->Widget::children_.remove(child_ptr);
+    }
+
+    auto remove_child(std::size_t index) -> std::unique_ptr<Widget>
+    {
+        return this->Widget::children_.remove(index);
+    }
+
+    /// Return a Widget::Range<Child_t> of all children.
+    auto get_children() { return children_.get_children<Child_t>(); }
+
+    /// Return a Widget::Const_range<Child_t> of all children.
+    auto get_children() const { return children_.get_children<Child_t>(); }
+
+    // void swap_children(std::size_t index_a, std::size_t index_b);
+
+    // void move_child(std::size_t initial_index, std::size_t end_index);
+
     /// Clients override this to post Resize and Move events to children.
     /** This will be called each time the children Widgets possibly need to be
      *  rearranged. Triggered by Move_event, Resize_event, Child_added_event,
      *  Child_removed_event, and Child_polished_event. */
     virtual void update_geometry() = 0;
 
-    bool move_event(Point new_position, Point old_position) override {
+    bool move_event(Point new_position, Point old_position) override
+    {
         this->update_geometry();
         return Widget::move_event(new_position, old_position);
     }
 
-    bool resize_event(Area new_size, Area old_size) override {
+    bool resize_event(Area new_size, Area old_size) override
+    {
         this->update_geometry();
         return Widget::resize_event(new_size, old_size);
     }
 
-    bool child_added_event(Widget& child) override {
+    bool child_added_event(Widget& child) override
+    {
         this->update_geometry();
         return Widget::child_added_event(child);
     }
 
-    bool child_removed_event(Widget& child) override {
+    bool child_removed_event(Widget& child) override
+    {
         this->update_geometry();
         return Widget::child_removed_event(child);
     }
 
-    bool child_polished_event(Widget& child) override {
+    bool child_polished_event(Widget& child) override
+    {
         this->update_geometry();
         return Widget::child_polished_event(child);
     }
@@ -60,6 +108,12 @@ class Layout : public Widget {
         std::size_t* height;
     };
 };
+
+template <typename Child_t>
+void Layout<Child_t>::update_geometry()
+{
+    this->screen_state().optimize.child_event = true;
+}
 
 }  // namespace layout
 }  // namespace cppurses

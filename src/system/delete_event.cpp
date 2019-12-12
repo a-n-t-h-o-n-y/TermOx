@@ -2,17 +2,16 @@
 
 #include <vector>
 
-#include <cppurses/widget/children_data.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
 
-bool Delete_event::send() const {
+bool Delete_event::send() const
+{
     const auto result = receiver_.delete_event();
-    if (removed_ == nullptr) {
+    if (removed_ == nullptr)
         return result;
-    }
-    for (Widget* w : removed_->children.get_descendants()) {
+    for (Widget* w : removed_->get_descendants()) {
         w->delete_event();
     }
     removed_.reset();

@@ -26,6 +26,19 @@
 #include <cppurses/widget/area.hpp>
 #include <cppurses/widget/widget.hpp>
 
+namespace {
+
+/// Indicates if the receiver of the Event is able to have the Event sent to it.
+auto is_sendable(cppurses::Event const& event) -> bool
+{
+    using Event = cppurses::Event;
+    return event.receiver().enabled() ||
+           (event.type() == Event::Delete || event.type() == Event::Disable ||
+            event.type() == Event::FocusOut);
+}
+
+}  // namespace
+
 namespace cppurses {
 
 sig::Slot<void()> System::quit = []() { System::exit(); };
@@ -83,6 +96,16 @@ int System::run()
     const auto exit_code = user_input_loop_.run();
     terminal.uninitialize();
     return exit_code;
+}
+
+auto System::send_event(const Event& event) -> bool
+{
+    if (!is_sendable(event))
+        return false;
+    bool handled = event.send_to_all_filters();
+    if (!handled)
+        handled = event.send();
+    return handled;
 }
 
 }  // namespace cppurses

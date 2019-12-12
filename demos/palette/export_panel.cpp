@@ -10,8 +10,9 @@
 #include <cppurses/widget/border.hpp>
 
 namespace {
-std::string rgb_to_str(const cppurses::RGB& rgb) {
-    std::string result{"{"};
+auto rgb_to_str(cppurses::RGB const& rgb) -> std::string
+{
+    auto result = std::string{"{"};
     result += std::to_string(rgb.red);
     result += ", ";
     result += std::to_string(rgb.green);
@@ -22,16 +23,17 @@ std::string rgb_to_str(const cppurses::RGB& rgb) {
 }
 
 /// Overwrites name.hpp with functions returning the current palette.
-void export_current_palette(const std::string& name) {
+void export_current_palette(std::string const& name)
+{
     auto file = std::ofstream{name + ".hpp"};
-    auto pal = cppurses::System::terminal.current_palette();
+    auto pal  = cppurses::System::terminal.current_palette();
 
     file << R"(#include <cppurses/painter/color.hpp>)" << '\n'
          << R"(#include <cppurses/painter/palette.hpp>)"
          << "\n\n"
          << "cppurses::Palette " << name << "() {" << '\n';
 
-    const auto prefix = std::string{"             {cppurses::Color::"};
+    auto const prefix = std::string{"             {cppurses::Color::"};
     file << "    return {{{cppurses::Color::Black, "
          << rgb_to_str(pal[0].values) << "},\n"
          << prefix << "Dark_red, " << rgb_to_str(pal[1].values) << "},\n"
@@ -56,7 +58,8 @@ void export_current_palette(const std::string& name) {
 
 namespace palette {
 
-Export_panel::Export_panel() {
+Export_panel::Export_panel()
+{
     using namespace cppurses;
     this->height_policy.fixed(3);
     this->border.enable();

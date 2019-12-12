@@ -6,7 +6,8 @@
 
 namespace gol {
 
-GoL_demo::GoL_demo() {
+GoL_demo::GoL_demo()
+{
     side_panel.settings.rule_change.connect(
         [this](const std::string& rule_str) {
             gol_display.set_rules(rule_str);

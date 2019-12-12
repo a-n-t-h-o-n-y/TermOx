@@ -12,17 +12,16 @@
 
 namespace gol {
 
-struct Vertical_arrows : cppurses::layout::Vertical {
+struct Vertical_arrows : cppurses::layout::Vertical<cppurses::Push_button> {
     Vertical_arrows();
 
-    cppurses::Push_button& up_btn{
-        this->make_child<cppurses::Push_button>(L'▲')};
-    cppurses::Push_button& down_btn{
-        this->make_child<cppurses::Push_button>(L'▼')};
+    cppurses::Push_button& up_btn{this->make_child(L'▲')};
+    cppurses::Push_button& down_btn{this->make_child(L'▼')};
 
    protected:
-    bool mouse_press_event_filter(cppurses::Widget& receiver,
-                                  const cppurses::Mouse::State& mouse) override;
+    auto mouse_press_event_filter(cppurses::Widget& receiver,
+                                  cppurses::Mouse::State const& mouse)
+        -> bool override;
 };
 
 struct Scroll_btn : cppurses::Push_button {
@@ -32,17 +31,18 @@ struct Scroll_btn : cppurses::Push_button {
     sig::Signal<void()> scrolled_down;
 
    protected:
-    bool mouse_press_event(const cppurses::Mouse::State& mouse) override;
+    auto mouse_press_event(cppurses::Mouse::State const& mouse)
+        -> bool override;
 };
 
-struct Horizontal_arrow : cppurses::layout::Vertical {
+struct Horizontal_arrow : cppurses::layout::Vertical<> {
     Horizontal_arrow(cppurses::Glyph_string title);
 
     cppurses::Fixed_height& space{this->make_child<cppurses::Fixed_height>(1)};
     Scroll_btn& arrow;
 };
 
-struct Offset_control_widget : cppurses::layout::Horizontal {
+struct Offset_control_widget : cppurses::layout::Horizontal<> {
     Offset_control_widget();
 
     Horizontal_arrow& left_arrow{this->make_child<Horizontal_arrow>(L'⯇')};

@@ -10,23 +10,17 @@
 
 namespace demos {
 
-struct Attribute_select : cppurses::layout::Vertical {
-    // Widgets
-    cppurses::Checkbox& bold = this->make_child<cppurses::Checkbox>("Bold");
-    cppurses::Checkbox& italic =
-        this->make_child<cppurses::Checkbox>("Italics");
-    cppurses::Checkbox& underline =
-        this->make_child<cppurses::Checkbox>("Underline");
-    cppurses::Checkbox& standout =
-        this->make_child<cppurses::Checkbox>("Standout");
-    cppurses::Checkbox& dim = this->make_child<cppurses::Checkbox>("Dim");
-    cppurses::Checkbox& inverse =
-        this->make_child<cppurses::Checkbox>("Inverse");
-    cppurses::Checkbox& invisible =
-        this->make_child<cppurses::Checkbox>("Invisible");
+struct Attribute_select : cppurses::layout::Vertical<cppurses::Checkbox> {
+    cppurses::Checkbox& bold      = this->make_child("Bold");
+    cppurses::Checkbox& italic    = this->make_child("Italics");
+    cppurses::Checkbox& underline = this->make_child("Underline");
+    cppurses::Checkbox& standout  = this->make_child("Standout");
+    cppurses::Checkbox& dim       = this->make_child("Dim");
+    cppurses::Checkbox& inverse   = this->make_child("Inverse");
+    cppurses::Checkbox& invisible = this->make_child("Invisible");
 };
 
-class Attrs_and_colors : public cppurses::layout::Vertical {
+class Attrs_and_colors : public cppurses::layout::Vertical<> {
    public:
     Attrs_and_colors();
 
@@ -43,7 +37,7 @@ class Attrs_and_colors : public cppurses::layout::Vertical {
     void initialize();
 };
 
-class Text_and_attributes : public cppurses::layout::Horizontal {
+class Text_and_attributes : public cppurses::layout::Horizontal<> {
    public:
     Text_and_attributes();
 
@@ -55,7 +49,7 @@ class Text_and_attributes : public cppurses::layout::Horizontal {
     void initialize();
 };
 
-class Save_area : public cppurses::layout::Horizontal {
+class Save_area : public cppurses::layout::Horizontal<> {
    public:
     Save_area();
 
@@ -70,7 +64,7 @@ class Save_area : public cppurses::layout::Horizontal {
     void initialize();
 };
 
-class Notepad : public cppurses::layout::Vertical {
+class Notepad : public cppurses::layout::Vertical<> {
    public:
     Notepad();
 

@@ -13,7 +13,6 @@ target_sources(demos PRIVATE
     chess/src/chess_engine.cpp
     chess/src/rules.cpp
     chess/src/state.cpp
-    chess/src/chessboard_borders.cpp
     chess/src/chess_ui.cpp
     chess/src/side_pane.cpp
     chess/src/settings_pane.cpp
@@ -34,8 +33,6 @@ target_sources(demos PRIVATE
 target_sources(demos PRIVATE
     glyph_paint/glyph_paint.cpp
     glyph_paint/paint_area.cpp
-    glyph_paint/side_pane.cpp
-    glyph_paint/attribute_box.cpp
     glyph_paint/options_box.cpp
     glyph_paint/populated_glyph_stack.cpp
     glyph_paint/glyph_select_stack.cpp
@@ -54,7 +51,6 @@ target_sources(demos PRIVATE
 
 # PALETTE
 target_sources(demos PRIVATE
-    palette/palette_demo.cpp
     palette/value_control.cpp
     palette/color_definition_setter.cpp
     palette/color_control.cpp
@@ -82,7 +78,6 @@ target_sources(demos PRIVATE
     game_of_life/examples_info_box.cpp
     game_of_life/files_box.cpp
     game_of_life/offset_control_widget.cpp
-    game_of_life/side_panel.cpp
     game_of_life/status_box.cpp
     game_of_life/get_rle.cpp
     game_of_life/get_life_1_05.cpp

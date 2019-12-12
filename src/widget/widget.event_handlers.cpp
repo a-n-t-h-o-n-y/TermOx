@@ -12,106 +12,103 @@
 namespace cppurses {
 
 // - - - - - - - - - - - - - - Event Handlers - - - - - - - - - - - - - - - - -
-bool Widget::enable_event() { return true; }
+auto Widget::enable_event() -> bool { return true; }
 
-bool Widget::disable_event() { return true; }
+auto Widget::disable_event() -> bool { return true; }
 
-bool Widget::child_added_event(Widget& child)
+auto Widget::child_added_event(Widget& child) -> bool
 {
     child_added(&child);
     this->update();
     return true;
 }
 
-bool Widget::child_removed_event(Widget& child)
+auto Widget::child_removed_event(Widget& child) -> bool
 {
     child_removed(&child);
     this->update();
     return true;
 }
 
-bool Widget::child_polished_event(Widget& /* child */)
+auto Widget::child_polished_event(Widget&) -> bool
 {
     this->update();
     return true;
 }
 
-bool Widget::move_event(Point new_position, Point /* old_position */)
+auto Widget::move_event(Point new_position, Point) -> bool
 {
     moved(new_position);
     this->update();
     return true;
 }
 
-bool Widget::resize_event(Area /* new_size */, Area /* old_size */)
+auto Widget::resize_event(Area, Area) -> bool
 {
     resized(outer_width_, outer_height_);
     this->update();
     return true;
 }
 
-bool Widget::mouse_press_event(const Mouse::State& mouse)
+auto Widget::mouse_press_event(Mouse::State const& mouse) -> bool
 {
     clicked(mouse.local);
     clicked_xy(mouse.local.x, mouse.local.y);
     return true;
 }
 
-bool Widget::mouse_release_event(const Mouse::State& mouse)
+auto Widget::mouse_release_event(Mouse::State const& mouse) -> bool
 {
     click_released(mouse.global);
     click_released_xy(mouse.global.x, mouse.global.y);
     return true;
 }
 
-bool Widget::mouse_double_click_event(const Mouse::State& mouse)
+auto Widget::mouse_double_click_event(Mouse::State const& mouse) -> bool
 {
     double_clicked(mouse.global);
     double_clicked_xy(mouse.global.x, mouse.global.y);
     return true;
 }
 
-bool Widget::mouse_wheel_event(const Mouse::State& /* mouse */)
-{
-    return false;
-}
+auto Widget::mouse_wheel_event(Mouse::State const&) -> bool { return false; }
 
-bool Widget::mouse_move_event(const Mouse::State& /* mouse */) { return false; }
+auto Widget::mouse_move_event(Mouse::State const&) -> bool { return false; }
 
-bool Widget::key_press_event(const Key::State& keyboard)
+auto Widget::key_press_event(Key::State const& keyboard) -> bool
 {
     key_pressed(keyboard.key);
     return true;
 }
 
-bool Widget::key_release_event(const Key::State& keyboard)
+auto Widget::key_release_event(Key::State const& keyboard) -> bool
 {
     key_released(keyboard.key);
     return false;
 }
 
-bool Widget::focus_in_event()
+auto Widget::focus_in_event() -> bool
 {
     focused_in();
     return true;
 }
 
-bool Widget::focus_out_event()
+auto Widget::focus_out_event() -> bool
 {
     focused_out();
     return true;
 }
 
-bool Widget::delete_event() { return true; }
+auto Widget::delete_event() -> bool { return true; }
 
-bool Widget::paint_event()
+auto Widget::paint_event() -> bool
 {
     Painter p{*this};
     p.border();
     return true;
 }
 
-bool Widget::timer_event()
+auto Widget::timer_event() -> bool
 {
     this->update();
     return true;
@@ -119,91 +116,73 @@ bool Widget::timer_event()
 
 // - - - - - - - - - - - - Event Filter Handlers - - - - - - - - - - - - - - - -
 
-bool Widget::child_added_event_filter(Widget& /* receiver */,
-                                      Widget& /* child */)
+auto Widget::child_added_event_filter(Widget&, Widget&) -> bool
 {
     return false;
 }
 
-bool Widget::child_removed_event_filter(Widget& /* receiver */,
-                                        Widget& /* child */)
+auto Widget::child_removed_event_filter(Widget&, Widget&) -> bool
 {
     return false;
 }
 
-bool Widget::child_polished_event_filter(Widget& /* receiver */,
-                                         Widget& /* child */)
+auto Widget::child_polished_event_filter(Widget&, Widget&) -> bool
 {
     return false;
 }
 
-bool Widget::enable_event_filter(Widget& /* receiver */) { return false; }
+auto Widget::enable_event_filter(Widget&) -> bool { return false; }
 
-bool Widget::disable_event_filter(Widget& /* receiver */) { return false; }
+auto Widget::disable_event_filter(Widget&) -> bool { return false; }
 
-bool Widget::move_event_filter(Widget& /* receiver */,
-                               Point /* new_position */,
-                               Point /* old_position */)
+auto Widget::move_event_filter(Widget&, Point, Point) -> bool { return false; }
+
+auto Widget::resize_event_filter(Widget&, Area, Area) -> bool { return false; }
+
+auto Widget::mouse_press_event_filter(Widget&, Mouse::State const&) -> bool
 {
     return false;
 }
 
-bool Widget::resize_event_filter(Widget& /* receiver */,
-                                 Area /* new_size */,
-                                 Area /* old_size */)
+auto Widget::mouse_release_event_filter(Widget&, Mouse::State const&) -> bool
 {
     return false;
 }
 
-bool Widget::mouse_press_event_filter(Widget& /* receiver */,
-                                      const Mouse::State& /* mouse */)
+auto Widget::mouse_double_click_event_filter(Widget&, Mouse::State const&)
+    -> bool
 {
     return false;
 }
 
-bool Widget::mouse_release_event_filter(Widget& /* receiver */,
-                                        const Mouse::State& /* mouse */)
+auto Widget::mouse_wheel_event_filter(Widget&, Mouse::State const&) -> bool
 {
     return false;
 }
 
-bool Widget::mouse_double_click_event_filter(Widget& /* receiver */,
-                                             const Mouse::State& /* mouse */)
+auto Widget::mouse_move_event_filter(Widget&, Mouse::State const&) -> bool
 {
     return false;
 }
 
-bool Widget::mouse_wheel_event_filter(Widget& /* receiver */,
-                                      const Mouse::State& /* mouse */)
+auto Widget::key_press_event_filter(Widget&, Key::State const&) -> bool
 {
     return false;
 }
 
-bool Widget::mouse_move_event_filter(Widget& /* receiver */,
-                                     const Mouse::State& /* mouse */)
+auto Widget::key_release_event_filter(Widget&, Key::State const&) -> bool
 {
     return false;
 }
 
-bool Widget::key_press_event_filter(Widget& /* receiver */,
-                                    const Key::State& /* keyboard */)
-{
-    return false;
-}
+auto Widget::focus_in_event_filter(Widget&) -> bool { return false; }
 
-bool Widget::key_release_event_filter(Widget& /* receiver */,
-                                      const Key::State& /* keyboard */)
-{
-    return false;
-}
+auto Widget::focus_out_event_filter(Widget&) -> bool { return false; }
 
-bool Widget::focus_in_event_filter(Widget& /* receiver */) { return false; }
+auto Widget::delete_event_filter(Widget&) -> bool { return false; }
 
-bool Widget::focus_out_event_filter(Widget& /* receiver */) { return false; }
+auto Widget::paint_event_filter(Widget&) -> bool { return false; }
 
-bool Widget::delete_event_filter(Widget& /* receiver */) { return false; }
+auto Widget::timer_event_filter(Widget&) -> bool { return false; }
 
-bool Widget::paint_event_filter(Widget& /* receiver */) { return false; }
-
-bool Widget::timer_event_filter(Widget& /* receiver */) { return false; }
 }  // namespace cppurses

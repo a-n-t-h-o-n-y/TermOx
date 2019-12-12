@@ -4,51 +4,92 @@
 #include <memory>
 #include <utility>
 
+#include <signals/signal.hpp>
+#include <signals/slot.hpp>
+
 #include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/system/focus.hpp>
+#include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/layouts/stack.hpp>
+#include <cppurses/widget/widgets/menu.hpp>
 
 namespace cppurses {
-class Widget;
-class Menu;
 
 /// A Stack layout with a Menu to switch between pages.
 /** Menu Widget is not counted as a Stack index, pages start from index 0. */
-class Menu_stack : public layout::Stack {
+class Menu_stack : public layout::Stack<Widget> {
     Menu& menu_;
+    static std::size_t const menu_index_{0u};
 
    public:
     /// Construct an empty Menu_stack with \p title passed to Menu constructor.
-    Menu_stack(Glyph_string title = "");
+    Menu_stack(Glyph_string title = "")
+        : menu_{this->Stack::make_page<Menu>(std::move(title))}
+    {
+        this->Stack::set_active_page(menu_index_);
+        this->focus_policy = Focus_policy::Direct;
+    }
 
     /// Construct and append a page to the Stack.
-    /** This will construct a child Widget of type T, using \p args passed to
-     *  T's constructor, and then automatically disable it. Creates a menu item
-     *  with \p title. Returns a reference to the created child Widget.*/
-    template <typename T, typename... Args>
-    T& make_page(Glyph_string title, Args&&... args);
+    /** This will construct a child Widget of type Widget_t, using \p args
+     *  passed to Widget_t's constructor, and then automatically disable it.
+     *  Creates a menu item with \p title. Returns a reference to the created
+     *  child Widget.*/
+    template <typename Widget_t = Widget, typename... Args>
+    auto make_page(Glyph_string title, Args&&... args) -> Widget_t&
+    {
+        static_assert(std::is_base_of<Widget, Widget_t>::value,
+                      "Menu_stack::make_page: Widget_t must be a Widget type");
+        auto& child =
+            this->Stack::make_page<Widget_t>(std::forward<Args>(args)...);
+        this->connect_to_menu(std::move(title), this->Stack::size() - 1);
+        return child;
+    }
 
     /// Add an existing Widget as a page to the end of the Stack.
-    void append_page(Glyph_string title, std::unique_ptr<Widget> widget);
+    void append_page(Glyph_string title, std::unique_ptr<Widget> widget)
+    {
+        this->Stack::append_page(std::move(widget));
+        this->connect_to_menu(std::move(title), this->Stack::size() - 1);
+    }
 
     /// Insert a Widget at \p index.
-    /** No-op if \p index is larger than children.get().size() - 1. */
+    /** No-op if \p index is larger than Widget::child_count() - 1. */
     void insert_page(Glyph_string title,
-                     std::size_t index,
-                     std::unique_ptr<Widget> widget);
+                     std::unique_ptr<Widget> widget,
+                     std::size_t index)
+    {
+        this->Stack::insert_page(std::move(widget), index + 1);
+        this->connect_to_menu(std::move(title), index + 1);
+    }
 
     /// Remove a page from the Stack, by \p index value, and delete it.
     /** No-op if index is not valid. Sets active page to the menu if current
      *  active page is being deleted. */
-    void delete_page(std::size_t index);
+    void delete_page(std::size_t index)
+    {
+        this->remove_from_menu(index + 1);
+        this->Stack::delete_page(index + 1);
+    }
 
     /// Remove a page from the Stack, by \p index value, and return it.
     /** Useful if you need to move a page into another Widget. Use delete_page()
      *  if you want to remove a page and destroy it. No-op if index is not
      *  valid. Sets active page to menu if active page is being removed. */
-    std::unique_ptr<Widget> remove_page(std::size_t index);
+    auto remove_page(std::size_t index) -> std::unique_ptr<Widget>
+    {
+        this->remove_from_menu(index + 1);
+        return this->Stack::remove_page(index + 1);
+    }
 
     /// Remove and delete all pages except menu.
-    void clear();
+    void clear()
+    {
+        this->goto_menu();
+        // Can't use a range-for loop, Widget::close modifies the child_list_
+        while (this->child_count() > 1)
+            this->delete_page(1);
+    }
 
     /// Return the number of pages in this Stack, not including the Menu Widget.
     std::size_t size() const { return this->Stack::size() - 1; }
@@ -60,29 +101,39 @@ class Menu_stack : public layout::Stack {
     const Menu& menu() const { return menu_; }
 
     /// Set the active page to the menu, useful to control returning to menu.
-    void goto_menu();
+    void goto_menu() { this->Stack::set_active_page(menu_index_); }
 
     /// Set the active page, first page is index 0, etc...
-    void set_active_page(std::size_t index);
+    void set_active_page(std::size_t index)
+    {
+        this->Stack::set_active_page(index + 1);
+    }
 
    private:
     /// Remove item at \p index from menu, where index 0 is the menu.
     /** Reset menu as active page if the current active page is being removed.*/
-    void remove_from_menu(std::size_t index);
+    void remove_from_menu(std::size_t index)
+    {
+        menu_.remove_item(index - 1);
+        if (this->Stack::active_page_index() == index)
+            this->Stack::set_active_page(menu_index_);
+    }
 
     /// Insert new menu item and connect its signal to set index as active page.
     /** Used with menu as index 0. */
-    void connect_to_menu(Glyph_string title, std::size_t index);
+    void connect_to_menu(Glyph_string title, std::size_t index)
+    {
+        auto& signal = menu_.insert_item(std::move(title), index - 1);
+        signal.connect(slot::set_active_page(*this, index));
+    }
 
    protected:
-    bool focus_in_event() override;
+    bool focus_in_event() override
+    {
+        Focus::set_focus_to(menu_);
+        return Stack::focus_in_event();
+    }
 };
 
-template <typename T, typename... Args>
-T& Menu_stack::make_page(Glyph_string title, Args&&... args) {
-    auto& ret = this->Stack::make_page<T>(std::forward<Args>(args)...);
-    connect_to_menu(std::move(title), this->Stack::size() - 1);
-    return ret;
-}
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_WIDGETS_MENU_STACK_HPP

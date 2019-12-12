@@ -8,14 +8,20 @@
 namespace palette {
 
 /// Provides a user interface to the color palette system.
-class Palette_demo : public cppurses::layout::Horizontal {
+class Palette_demo : public cppurses::layout::Horizontal<> {
     Color_definition_setter& color_setter_{
         this->make_child<Color_definition_setter>()};
     All_colors_display& all_colors_display_{
         this->make_child<All_colors_display>()};
 
    public:
-    Palette_demo();
+    Palette_demo()
+    {
+        all_colors_display_.color_select.color_selected.connect(
+            [this](cppurses::Color c) {
+                color_setter_.change_current_color(c);
+            });
+    }
 };
 
 }  // namespace palette

@@ -14,7 +14,7 @@
 namespace demos {
 namespace glyph_paint {
 
-struct Options_A : public cppurses::layout::Vertical {
+struct Options_A : public cppurses::layout::Vertical<> {
     Options_A();
 
     cppurses::Push_button& clone_btn{
@@ -31,7 +31,7 @@ struct Options_A : public cppurses::layout::Vertical {
         this->make_child<cppurses::Push_button>("More Options")};
 };
 
-struct Options_B : public cppurses::layout::Vertical {
+struct Options_B : public cppurses::layout::Vertical<> {
     Options_B();
 
     cppurses::Label& palette_label{
@@ -47,7 +47,7 @@ struct Options_B : public cppurses::layout::Vertical {
         this->make_child<cppurses::Push_button>("Back")};
 };
 
-struct Options_stack : public cppurses::layout::Stack {
+struct Options_stack : public cppurses::layout::Stack<> {
     Options_stack();
 
     Options_A& options_a{this->make_child<Options_A>()};

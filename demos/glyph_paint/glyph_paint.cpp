@@ -7,23 +7,24 @@ using namespace cppurses;
 namespace demos {
 namespace glyph_paint {
 
-Glyph_paint::Glyph_paint() {
+Glyph_paint::Glyph_paint()
+{
     this->set_name("Glyph_paint - main demo widget");
     side_pane.glyph_select.make_connections(slot::set_symbol(paint_area));
 
-    side_pane.color_select_foreground.color_changed.connect(
+    side_pane.color_pages.foreground.color_selected.connect(
         slot::set_foreground_color(paint_area));
-    side_pane.color_select_background.color_changed.connect(
+    side_pane.color_pages.background.color_selected.connect(
         slot::set_background_color(paint_area));
 
-    side_pane.attribute_box.bold_box.checked.connect(
+    side_pane.attribute_box.top_row.bold_box.checked.connect(
         slot::set_attribute(paint_area, Attribute::Bold));
-    side_pane.attribute_box.bold_box.unchecked.connect(
+    side_pane.attribute_box.top_row.bold_box.unchecked.connect(
         slot::remove_attribute(paint_area, Attribute::Bold));
 
-    side_pane.attribute_box.dim_box.checked.connect(
+    side_pane.attribute_box.top_row.dim_box.checked.connect(
         slot::set_attribute(paint_area, Attribute::Dim));
-    side_pane.attribute_box.dim_box.unchecked.connect(
+    side_pane.attribute_box.top_row.dim_box.unchecked.connect(
         slot::remove_attribute(paint_area, Attribute::Dim));
 
     side_pane.attribute_box.inverse_box.checked.connect(

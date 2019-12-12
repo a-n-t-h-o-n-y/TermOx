@@ -11,15 +11,15 @@
 namespace demos {
 namespace glyph_paint {
 
-class Populated_glyph_stack : public cppurses::Cycle_stack {
+class Populated_glyph_stack : public cppurses::Cycle_stack<> {
    public:
     Populated_glyph_stack();
+
     void make_connections(sig::Slot<void(cppurses::Glyph)> slot);
 
    private:
     template <typename Function_t>
     using Signal_ref_t = std::reference_wrapper<sig::Signal<Function_t>>;
-
     std::vector<Signal_ref_t<void(cppurses::Glyph)>> signal_refs_;
 };
 

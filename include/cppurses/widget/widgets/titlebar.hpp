@@ -10,7 +10,7 @@ struct Label;
 /// Provides a centered title and flush-right exit button.
 /** The exit button will call System::quit() when pressed. Titlebar is fixed at
  *  a height of 1. */
-struct Titlebar : public layout::Horizontal {
+struct Titlebar : public layout::Horizontal<> {
     /// Construct a Titlebar with centered \p title.
     explicit Titlebar(Glyph_string title_ = "");
 

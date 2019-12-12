@@ -13,21 +13,21 @@
 namespace {
 using namespace cppurses;
 
-const Glyph_string box_drawing{
+auto const box_drawing = Glyph_string{
     L"─ ━ │ ┃ ┄ ┅ ┆ ┇ ┈ ┉ ┊ ┋ ┌ ┍ ┎ ┏ ┐ ┑ ┒ ┓ └ ┕ ┖ ┗ ┘ ┙ ┚ ┛ ├ ┝ ┞ ┟ ┠ ┡ ┢ ┣ "
     L"┤ ┥ ┦ ┧ ┨ ┩ ┪ ┫ ┬ ┭ ┮ ┯ ┰ ┱ ┲ ┳ ┴ ┵ ┶ ┷ ┸ ┹ ┺ ┻ ┼ ┽ ┾ ┿ ╀ ╁ ╂ ╃ ╄ ╅ ╆ ╇ "
     L"╈ ╉ ╊ ╋ ╌ ╍ ╎ ╏ ═ ║ ╒ ╓ ╔ ╕ ╖ ╗ ╘ ╙ ╚ ╛ ╜ ╝ ╞ ╟ ╠ ╡ ╢ ╣ ╤ ╥ ╦ ╧ ╨ ╩ ╪ ╫ "
     L"╬ ╭ ╮ ╯ ╰ ╱ ╲ ╳ ╴ ╵ ╶ ╷ ╸ ╹ ╺ ╻ ╼ ╽ ╾ ╿ "};
 
-const Glyph_string blocks{
+auto const blocks = Glyph_string{
     L"▀ ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▉ ▊ ▋ ▌ ▍ ▎ ▏ ▐ ░ ▒ ▓ ▔ ▕ ▖ ▗ ▘ ▙ ▚ ▛ ▜ ▝ ▞ ▟ "};
 
-const Glyph_string tai_xuan_jing{
+auto const tai_xuan_jing = Glyph_string{
     L"𝌀 𝌁 𝌂 𝌃 𝌄 𝌅 𝌆 𝌇 𝌈 𝌉 𝌊 𝌋 𝌌 𝌍 𝌎 𝌏 𝌐 𝌑 𝌒 𝌓 𝌔 𝌕 𝌖 𝌗 𝌘 𝌙 𝌚 𝌛 𝌜 𝌝 𝌞 𝌟 𝌠 𝌡 𝌢 𝌣 "
     L"𝌤 𝌥 𝌦 𝌧 𝌨 𝌩 𝌪 𝌫 𝌬 𝌭 𝌮 𝌯 𝌰 𝌱 𝌲 𝌳 𝌴 𝌵 𝌶 𝌷 𝌸 𝌹 𝌺 𝌻 𝌼 𝌽 𝌾 𝌿 𝍀 𝍁 𝍂 𝍃 𝍄 𝍅 𝍆 𝍇 "
     L"𝍈 𝍉 𝍊 𝍋 𝍌 𝍍 𝍎 𝍏 𝍐 𝍑 𝍒 𝍓 𝍔 𝍕 𝍖 "};
 
-const Glyph_string dwarf_fortress{
+auto const dwarf_fortress = Glyph_string{
     L"☺ ☻ ♥ ♦ ♣ ♠ • ◘ ○ ◙ ♂ ♀ ♪ ♫ ☼ ► ◄ ↕ ‼ ¶ § ▬ ↨ ↑ ↓ → ← ∟ ↔ ▲ ▼ ! \" # $ % "
     L"& ' ( ) * + , - . / 0 1 2 3 4 5 6 7 8 9 : ; < = > ? @ A B C D E F G H I "
     L"J K L M N O P Q R S T U V W X Y Z [ ] ^ _ ` a b c d e f g h i j k l m n "
@@ -36,29 +36,30 @@ const Glyph_string dwarf_fortress{
     L"╖ ╕ ╣ ║ ╗ ╝ ╜ ╛ ┐ └ ┴ ┬ ├ ─ ┼ ╞ ╟ ╚ ╔ ╩ ╦ ╠ ═ ╬ ╧ ╨ ╤ ╥ ╙ ╘ ╒ ╓ ╫ ╪ ┘ ┌ "
     L"█ ▄ ▌ ▐ ▀ α ß Γ π Σ σ µ τ Φ Θ Ω δ ∞ φ ε ∩ ≡ ± ≥ ≤ ⌠ ⌡ ÷ ≈ ° ∙ · √ ⁿ ² ■"};
 
-const Glyph_string latin_1{
+auto const latin_1 = Glyph_string{
     L"¡ ¢ £ ¤ ¥ ¦ § ¨ © ª « ¬ ­ ® ¯ ° ± ² ³ ´ µ ¶ · ¸ ¹ º » ¼ ½ ¾ ¿ À Á Â Ã Ä "
     L"Å Æ Ç È É Ê Ë Ì Í Î Ï Ð Ñ Ò Ó Ô Õ Ö × Ø Ù Ú Û Ü Ý Þ ß à á â ã ä å æ ç è "
     L"é ê ë ì í î ï ð ñ ò ó ô õ ö ÷ ø ù ú û ü ý þ ÿ"};
 
-const Glyph_string unicode_symbols{
+auto const unicode_symbols = Glyph_string{
     L"‐ ‑ ‒ – — ― ‖ ‗ ‘ ’ ‚ ‛ “ ” „ ‟ † ‡ • ‣ ․ ‥ … ‧ ‰ ‱ ′ ″ ‴ ‵ ‶ ‷ ‸ ‹ › ※ "
     L"‼ ‽ ‾ ‿ ⁀ ⁁ ⁂ ⁃ ⁄ ⁅ ⁆ ⁇ ⁈ ⁉ ⁊ ⁋ ⁌ ⁍ ⁎ ⁏ ⁐ ⁑ ⁒ ⁓ ⁔ ⁕ ⁖ ⁗ ⁘ ⁙ ⁚ ⁛ ⁜ ⁝ ⁞ "};
 
-const Glyph_string currency{
-    L"₠ ₡ ₢ ₣ ₤ ₥ ₦ ₧ ₨ ₩ ₪ ₫ € ₭ ₮ ₯ ₰ ₱ ₲ ₳ ₴ ₵ ₶ ₷ ₸ ₹ ₺ ₻ "
+auto const currency = Glyph_string{
+    L"₠ ₡ ₢ ₣ ₤ ₥ ₦ ₧ ₨ ₩ ₪ ₫ € ₭ ₮ ₯ ₰ ₱ ₲ ₳ ₴ ₵ ₶ ₷ ₸ ₹ ₺ "
+    L"₻ "
     L"₼ "
     L"₽ "
     L"₾ "
     L"₿"};
 
-const Glyph_string arrows{
+auto const arrows = Glyph_string{
     L"← ↑ → ↓ ↔ ↕ ↖ ↗ ↘ ↙ ↚ ↛ ↜ ↝ ↞ ↟ ↠ ↡ ↢ ↣ ↤ ↥ ↦ ↧ ↨ ↩ ↪ ↫ ↬ ↭ ↮ ↯ ↰ ↱ ↲ ↳ "
     L"↴ ↵ ↶ ↷ ↸ ↹ ↺ ↻ ↼ ↽ ↾ ↿ ⇀ ⇁ ⇂ ⇃ ⇄ ⇅ ⇆ ⇇ ⇈ ⇉ ⇊ ⇋ ⇌ ⇍ ⇎ ⇏ ⇐ ⇑ ⇒ ⇓ ⇔ ⇕ ⇖ ⇗ "
     L"⇘ ⇙ ⇚ ⇛ ⇜ ⇝ ⇞ ⇟ ⇠ ⇡ ⇢ ⇣ ⇤ ⇥ ⇦ ⇧ ⇨ ⇩ ⇪ ⇫ ⇬ ⇭ ⇮ ⇯ ⇰ ⇱ ⇲ ⇳ ⇴ ⇵ ⇶ ⇷ ⇸ ⇹ ⇺ ⇻ "
     L"⇼ ⇽ ⇾ ⇿"};
 
-const Glyph_string math_operators{
+auto const math_operators = Glyph_string{
     L"∀ ∁ ∂ ∃ ∄ ∅ ∆ ∇ ∈ ∉ ∊ ∋ ∌ ∍ ∎ ∏ ∐ ∑ − ∓ ∔ ∕ ∖ ∗ ∘ ∙ √ ∛ ∜ ∝ ∞ ∟ ∠ ∡ "
     L"∢ ∣ ∤ ∥ ∦ ∧ ∨ ∩ ∪ ∫ ∮ ∱ ∲ ∳ ∴ ∵ ∶ ∷ ∸ ∹ ∺ ∻ ∼ ∽ ∾ ∿ ≀ ≁ ≂ ≃ ≄ ≅ ≆ ≇ ≈ ≉ "
     L"≊ ≋ ≌ ≍ ≎ ≏ ≐ ≑ ≒ ≓ ≔ ≕ ≖ ≗ ≘ ≙ ≚ ≛ ≜ ≝ ≞ ≟ ≠ ≡ ≢ ≣ ≤ ≥ ≦ ≧ ≨ ≩ ≪ ≫ "
@@ -68,23 +69,24 @@ const Glyph_string math_operators{
     L"⋘ ⋙ ⋚ ⋛ ⋜ ⋝ ⋞ ⋟ ⋠ ⋡ ⋢ ⋣ ⋤ ⋥ ⋦ ⋧ ⋨ ⋩ ⋪ ⋫ ⋬ ⋭ ⋮ ⋯ ⋰ ⋱ ⋲ ⋳ ⋴ ⋵ ⋶ ⋷ ⋸ ⋹ ⋺ ⋻ "
     L"⋼ ⋽ ⋾ ⋿"};
 
-const Glyph_string geometric{
+auto const geometric = Glyph_string{
     L"■ □ ▢ ▣ ▤ ▥ ▦ ▧ ▨ ▩ ▪ ▫ ▬ ▭ ▮ ▯ ▰ ▱ ▲ △ ▴ ▵ ▶ ▷ ▸ ▹ ► ▻ ▼ ▽ ▾ ▿ ◀ ◁ ◂ ◃ "
     L"◄ ◅ ◆ ◇ ◈ ◉ ◊ ○ ◌ ◍ ◎ ● ◐ ◑ ◒ ◓ ◔ ◕ ◖◗ ◘ ◙ ◚ ◛ ◜ ◝ ◞ ◟ ◠ ◡ ◢ ◣ ◤ ◥ ◦ ◧ ◨ "
     L"◩ ◪ ◫ ◬ ◭ ◮ ◯ ◰ ◱ ◲ ◳ ◴ ◵ ◶ ◷ ◸ ◹ ◺ ◻ ◼ ◽ ◾ ◿"};
 
-Glyph_string generate_color_blocks() {
-    const std::vector<Color> colors{
+auto generate_color_blocks() -> Glyph_string
+{
+    auto const colors = std::vector<Color>{
         Color::Black,  Color::Dark_red,   Color::Dark_blue,  Color::Dark_gray,
         Color::Brown,  Color::Green,      Color::Red,        Color::Gray,
         Color::Blue,   Color::Orange,     Color::Light_gray, Color::Light_green,
         Color::Violet, Color::Light_blue, Color::Yellow,     Color::White};
-    const std::wstring rectangles{L"░▒▓"};
+    auto const rectangles = std::wstring{L"░▒▓"};
 
-    Glyph_string str;
+    auto str = Glyph_string{};
     for (wchar_t rect : rectangles) {
-        for (std::size_t i{0}; i < colors.size(); ++i) {
-            for (std::size_t j{i + 1}; j < colors.size(); ++j) {
+        for (auto i = std::size_t{0}; i < colors.size(); ++i) {
+            for (auto j = std::size_t{i + 1}; j < colors.size(); ++j) {
                 str.append(
                     Glyph{rect, background(colors[i]), foreground(colors[j])});
             }
@@ -96,14 +98,15 @@ Glyph_string generate_color_blocks() {
     return str;
 }
 
-const Glyph_string color_blocks{generate_color_blocks()};
+auto const color_blocks = generate_color_blocks();
 
 }  // namespace
 
 namespace demos {
 namespace glyph_paint {
 
-Populated_glyph_stack::Populated_glyph_stack() {
+Populated_glyph_stack::Populated_glyph_stack()
+{
     signal_refs_.emplace_back(
         this->make_page<Glyph_select>("Latin-1", latin_1).glyph_selected);
 
@@ -144,7 +147,8 @@ Populated_glyph_stack::Populated_glyph_stack() {
         this->make_page<Glyph_select>("Geometric", geometric).glyph_selected);
 }
 
-void Populated_glyph_stack::make_connections(sig::Slot<void(Glyph)> slot) {
+void Populated_glyph_stack::make_connections(sig::Slot<void(Glyph)> slot)
+{
     for (auto& signal_ref : signal_refs_) {
         signal_ref.get().connect(slot);
     }

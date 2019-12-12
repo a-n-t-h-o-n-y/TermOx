@@ -2,7 +2,6 @@
 #define CPPURSES_SYSTEM_EVENTS_PAINT_EVENT_HPP
 #include <cppurses/painter/detail/is_paintable.hpp>
 #include <cppurses/system/event.hpp>
-#include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
 class Widget;

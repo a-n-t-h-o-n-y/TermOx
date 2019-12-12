@@ -7,7 +7,8 @@
 
 namespace cppurses {
 
-Horizontal_scrollbar::Horizontal_scrollbar() {
+Horizontal_scrollbar::Horizontal_scrollbar()
+{
     this->height_policy.fixed(1);
     this->width_policy.type(Size_policy::Expanding);
 
@@ -18,4 +19,5 @@ Horizontal_scrollbar::Horizontal_scrollbar() {
 
     right_button.width_policy.fixed(1);
 }
+
 }  // namespace cppurses

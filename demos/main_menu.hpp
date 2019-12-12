@@ -15,7 +15,7 @@
 
 namespace demos {
 
-class Main_menu : public cppurses::layout::Vertical {
+class Main_menu : public cppurses::layout::Vertical<> {
    public:
     Main_menu();
 

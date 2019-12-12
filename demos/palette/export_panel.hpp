@@ -7,7 +7,7 @@
 namespace palette {
 
 /// Holds interface to export the Palette as a C++ header file.
-class Export_panel : public cppurses::layout::Vertical {
+class Export_panel : public cppurses::layout::Vertical<> {
     cppurses::Line_edit& name_edit_{
         this->make_child<cppurses::Line_edit>("Enter name...")};
 

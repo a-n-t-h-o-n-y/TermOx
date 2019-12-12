@@ -9,12 +9,13 @@
 
 namespace cppurses {
 
-class Vertical_scrollbar : public layout::Vertical {
+class Vertical_scrollbar : public layout::Vertical<> {
    public:
-    Vertical_scrollbar();
+    Vertical_scrollbar() { this->initialize(); }
 
     template <typename Scrollable_t>
-    Vertical_scrollbar(Scrollable_t& tb) {
+    Vertical_scrollbar(Scrollable_t& tb)
+    {
         this->initialize();
         sig::Slot<void()> scroll_up{[&tb]() { tb.scroll_up(); }};
         scroll_up.track(tb.destroyed);
@@ -25,12 +26,12 @@ class Vertical_scrollbar : public layout::Vertical {
         down.connect(scroll_down);
     }
 
-    Push_button& up_button = this->make_child<Push_button>("▴");
-    Widget& middle = this->make_child<Widget>();
-    Push_button& down_button = this->make_child<Push_button>("▾");
+    Push_button& up_button{this->make_child<Push_button>("▴")};
+    Widget& middle{this->make_child<Widget>()};
+    Push_button& down_button{this->make_child<Push_button>("▾")};
 
     // Signals
-    sig::Signal<void()>& up = up_button.clicked;
+    sig::Signal<void()>& up   = up_button.clicked;
     sig::Signal<void()>& down = down_button.clicked;
 
    private:

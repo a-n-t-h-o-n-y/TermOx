@@ -19,7 +19,7 @@
 
 namespace gol {
 
-struct Clear_step_box : cppurses::layout::Vertical {
+struct Clear_step_box : cppurses::layout::Vertical<> {
     Clear_step_box();
 
     cppurses::Push_button& step_btn{
@@ -29,7 +29,7 @@ struct Clear_step_box : cppurses::layout::Vertical {
         this->make_child<cppurses::Confirm_button>("Clear")};
 };
 
-struct Rule_edit : cppurses::layout::Vertical {
+struct Rule_edit : cppurses::layout::Vertical<> {
     Rule_edit();
 
     cppurses::Label& label{this->make_child<cppurses::Label>(
@@ -46,7 +46,7 @@ struct Start_pause_btns : cppurses::Toggle_button {
     sig::Signal<void()>& pause_requested{bottom.clicked};
 };
 
-struct Period_box : cppurses::layout::Horizontal {
+struct Period_box : cppurses::layout::Horizontal<> {
     Period_box();
 
     cppurses::Labeled_number_edit<unsigned>& value_edit{
@@ -57,16 +57,14 @@ struct Period_box : cppurses::layout::Horizontal {
     sig::Signal<void(unsigned)>& value_set{value_edit.value_set};
 };
 
-struct Grid_fade : cppurses::layout::Horizontal {
+struct Grid_fade : cppurses::layout::Horizontal<cppurses::Checkbox> {
     Grid_fade();
 
-    cppurses::Checkbox& grid_box{
-        this->make_child<cppurses::Checkbox>("Grid", 2)};
-    cppurses::Checkbox& fade_box{
-        this->make_child<cppurses::Checkbox>("Fade", 2)};
+    cppurses::Checkbox& grid_box{this->make_child("Grid", 2)};
+    cppurses::Checkbox& fade_box{this->make_child("Fade", 2)};
 };
 
-struct Settings_box : cppurses::layout::Vertical {
+struct Settings_box : cppurses::layout::Vertical<> {
     Settings_box();
 
     Period_box& period_edit{this->make_child<Period_box>()};
@@ -82,5 +80,6 @@ struct Settings_box : cppurses::layout::Vertical {
     sig::Signal<void()>& clear_request{clear_step_btns.clear_btn.clicked};
     sig::Signal<void()>& step_request{clear_step_btns.step_btn.clicked};
 };
+
 }  // namespace gol
 #endif  // CPPURSES_DEMOS_GAME_OF_LIFE_SETTINGS_BOX_HPP

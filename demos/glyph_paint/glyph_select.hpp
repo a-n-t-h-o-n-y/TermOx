@@ -19,7 +19,19 @@ namespace glyph_paint {
 
 /// Holds pages of Glyphs that can be cycled through and selected.
 /** When a Glyph is selected a Signal is emitted with that Glyph sent along. */
-class Glyph_select : public cppurses::layout::Vertical {
+class Glyph_select : public cppurses::layout::Vertical<> {
+    struct Bottom_row : cppurses::layout::Horizontal<> {
+        Bottom_row();
+
+        cppurses::Push_button& left_btn{this->make_child<cppurses::Push_button>(
+            cppurses::Glyph{L'⏴', foreground(cppurses::Color::Black)})};
+        cppurses::Horizontal_slider& slider{
+            this->make_child<cppurses::Horizontal_slider>()};
+        cppurses::Push_button& right_btn{
+            this->make_child<cppurses::Push_button>(
+                cppurses::Glyph{L'⏵', foreground(cppurses::Color::Black)})};
+    };
+
    public:
     /// Construct with \p symbols has contents.
     explicit Glyph_select(cppurses::Glyph_string symbols = "");
@@ -32,16 +44,7 @@ class Glyph_select : public cppurses::layout::Vertical {
 
    private:
     Glyph_select_stack& glyph_stack{this->make_child<Glyph_select_stack>()};
-    cppurses::layout::Horizontal& bottom_row{
-        this->make_child<cppurses::layout::Horizontal>()};
-    cppurses::Push_button& left_btn{
-        bottom_row.make_child<cppurses::Push_button>(
-            cppurses::Glyph{L'⏴', foreground(cppurses::Color::Black)})};
-    cppurses::Horizontal_slider& slider{
-        bottom_row.make_child<cppurses::Horizontal_slider>()};
-    cppurses::Push_button& right_btn{
-        bottom_row.make_child<cppurses::Push_button>(
-            cppurses::Glyph{L'⏵', foreground(cppurses::Color::Black)})};
+    Bottom_row& bottom_row{this->make_child<Bottom_row>()};
 
     std::size_t current_index();
     void flip_page_forward();

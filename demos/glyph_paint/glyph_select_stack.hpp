@@ -5,6 +5,7 @@
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/layouts/stack.hpp>
+#include <cppurses/widget/widgets/matrix_display.hpp>
 
 namespace cppurses {
 struct Area;
@@ -14,7 +15,8 @@ struct Glyph;
 namespace demos {
 namespace glyph_paint {
 
-class Glyph_select_stack : public cppurses::layout::Stack {
+class Glyph_select_stack
+    : public cppurses::layout::Stack<cppurses::Matrix_display> {
    public:
     Glyph_select_stack() { this->set_name("Glyph_select_stack"); }
     void set_symbols(cppurses::Glyph_string symbols);

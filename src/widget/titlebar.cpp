@@ -16,7 +16,8 @@ namespace cppurses {
 
 Titlebar::Titlebar(Glyph_string title_)
     : title{this->make_child<Label>(std::move(title_))},
-      exit_button{this->make_child<Push_button>(L"│✕ ")} {
+      exit_button{this->make_child<Push_button>(L"│✕ ")}
+{
     this->set_name("Titlebar");
     this->height_policy.fixed(1);
 

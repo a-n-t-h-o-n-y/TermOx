@@ -52,8 +52,8 @@ void Text_and_attributes::initialize()
     textbox.border.segments.south_east = L'╯';
 
     // Signals -- Colors
-    ac_select.fg_select.color_changed.connect(slot::set_foreground(textbox));
-    ac_select.bg_select.color_changed.connect(slot::set_background(textbox));
+    ac_select.fg_select.color_selected.connect(slot::set_foreground(textbox));
+    ac_select.bg_select.color_selected.connect(slot::set_background(textbox));
 
     // Add Attributes
     ac_select.attr_select.bold.checked.connect(
@@ -99,8 +99,13 @@ void Text_and_attributes::initialize()
 Attrs_and_colors::Attrs_and_colors()
 {
     this->initialize();
+    fg_select.width_policy.fixed(16);
+    fg_select.height_policy.fixed(2);
     fg_label.brush.add_attributes(Attribute::Bold);
     fg_label.set_alignment(Alignment::Center);
+
+    bg_select.width_policy.fixed(16);
+    bg_select.height_policy.fixed(2);
     bg_label.brush.add_attributes(Attribute::Bold);
     bg_label.set_alignment(Alignment::Center);
 }

@@ -19,7 +19,7 @@ struct Label;
 
 /// Displays a list of items, sending an associated Signal on user input.
 /** Signal sent to selected on Key::Enter press or */
-class Menu : public layout::Vertical {
+class Menu : public layout::Vertical<> {
    public:
     /// Construct an empty Menu with \p title_text.
     explicit Menu(Glyph_string title_text);

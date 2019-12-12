@@ -6,11 +6,12 @@
 #include "side_panel.hpp"
 
 namespace gol {
-struct GoL_demo : cppurses::layout::Horizontal {
+struct GoL_demo : cppurses::layout::Horizontal<> {
     GoL_demo();
 
     Side_panel& side_panel{this->make_child<Side_panel>()};
     GoL_widget& gol_display{this->make_child<GoL_widget>()};
 };
+
 }  // namespace gol
 #endif  // CPPURSES_DEMOS_GAME_OF_LIFE_GOL_DEMO_HPP

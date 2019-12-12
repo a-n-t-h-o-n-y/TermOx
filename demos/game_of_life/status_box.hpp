@@ -12,7 +12,7 @@
 
 namespace gol {
 
-class Generation_count : public cppurses::layout::Horizontal {
+class Generation_count : public cppurses::layout::Horizontal<> {
    public:
     Generation_count();
 
@@ -24,7 +24,7 @@ class Generation_count : public cppurses::layout::Horizontal {
         this->make_child<cppurses::Text_display>("0")};
 };
 
-struct Center_offset : cppurses::layout::Vertical {
+struct Center_offset : cppurses::layout::Vertical<> {
     Center_offset();
 
     cppurses::Label& title_{
@@ -36,7 +36,7 @@ struct Center_offset : cppurses::layout::Vertical {
         this->make_child<cppurses::Labeled_number_edit<>>("y: ", 0)};
 };
 
-struct Status_box : cppurses::layout::Vertical {
+struct Status_box : cppurses::layout::Vertical<> {
     Status_box();
 
     Generation_count& gen_count{this->make_child<Generation_count>()};

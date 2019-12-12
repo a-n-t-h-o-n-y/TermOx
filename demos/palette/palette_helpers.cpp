@@ -16,7 +16,8 @@ using namespace cppurses;
 namespace palette {
 namespace detail {
 
-Color_definition& extract_definition(Palette& palette, Color color) {
+Color_definition& extract_definition(Palette& palette, Color color)
+{
     auto at = std::find_if(
         std::begin(palette), std::end(palette),
         [color](const Color_definition& def) { return def.color == color; });
@@ -32,9 +33,10 @@ namespace {
 using namespace palette::detail;
 
 /// Set a color definition for the terminal.
-void set_definition(Color color, RGB values) {
-    auto palette = cppurses::System::terminal.current_palette();
-    auto& definition = extract_definition(palette, color);
+void set_definition(Color color, RGB values)
+{
+    auto palette      = cppurses::System::terminal.current_palette();
+    auto& definition  = extract_definition(palette, color);
     definition.values = values;
     cppurses::System::terminal.set_color_palette(palette);
 }
@@ -43,20 +45,23 @@ void set_definition(Color color, RGB values) {
 namespace palette {
 namespace detail {
 
-void set_red(Color color, Underlying_color_t red_value) {
-    auto palette = System::terminal.current_palette();
+void set_red(Color color, Underlying_color_t red_value)
+{
+    auto palette    = System::terminal.current_palette();
     const auto& def = extract_definition(palette, color);
     set_definition(color, {red_value, def.values.green, def.values.blue});
 }
 
-void set_green(Color color, Underlying_color_t green_value) {
-    auto palette = System::terminal.current_palette();
+void set_green(Color color, Underlying_color_t green_value)
+{
+    auto palette    = System::terminal.current_palette();
     const auto& def = extract_definition(palette, color);
     set_definition(color, {def.values.red, green_value, def.values.blue});
 }
 
-void set_blue(Color color, Underlying_color_t blue_value) {
-    auto palette = System::terminal.current_palette();
+void set_blue(Color color, Underlying_color_t blue_value)
+{
+    auto palette    = System::terminal.current_palette();
     const auto& def = extract_definition(palette, color);
     set_definition(color, {def.values.red, def.values.green, blue_value});
 }

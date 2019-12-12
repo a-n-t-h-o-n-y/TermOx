@@ -1,5 +1,7 @@
 #ifndef CPPURSES_WIDGET_WIDGETS_COLOR_SELECT_HPP
 #define CPPURSES_WIDGET_WIDGETS_COLOR_SELECT_HPP
+#include <initializer_list>
+
 #include <signals/signals.hpp>
 
 #include <cppurses/painter/color.hpp>
@@ -9,36 +11,42 @@
 
 namespace cppurses {
 
-/// Provides a visual display of the 16 colors and sends Signals on clicks.
-class Color_select : public layout::Vertical {
-   public:
-    Color_select();
+struct Color_bar : layout::Horizontal<Push_button> {
+    sig::Signal<void(Color)> color_selected;
 
+    Color_bar(std::initializer_list<Color> colors)
+    {
+        for (auto c : colors) {
+            auto& btn = this->make_child();
+            btn.brush.set_background(c);
+            btn.clicked.connect([this, c] { this->color_selected(c); });
+        }
+    }
+};
+
+/// Provides a visual display of the 16 colors and sends a Signal on clicks.
+class Color_select : public layout::Vertical<Color_bar> {
+   public:
     /// Emitted on left mouse button press, sends along the Color clicked on.
-    sig::Signal<void(Color)> color_changed;
+    sig::Signal<void(Color)> color_selected;
+
+    Color_select()
+    {
+        row_one_.color_selected.connect(
+            [this](Color c) { this->color_selected(c); });
+        row_two_.color_selected.connect(
+            [this](Color c) { this->color_selected(c); });
+    }
 
    private:
-    layout::Horizontal& row1_{this->make_child<layout::Horizontal>()};
-    layout::Horizontal& row2_{this->make_child<layout::Horizontal>()};
-
-    Push_button& black_{row1_.make_child<Push_button>()};
-    Push_button& dark_red_{row1_.make_child<Push_button>()};
-    Push_button& dark_blue_{row1_.make_child<Push_button>()};
-    Push_button& dark_gray_{row1_.make_child<Push_button>()};
-    Push_button& brown_{row1_.make_child<Push_button>()};
-    Push_button& green_{row1_.make_child<Push_button>()};
-    Push_button& red_{row1_.make_child<Push_button>()};
-    Push_button& gray_{row1_.make_child<Push_button>()};
-    Push_button& blue_{row2_.make_child<Push_button>()};
-    Push_button& orange_{row2_.make_child<Push_button>()};
-    Push_button& light_gray_{row2_.make_child<Push_button>()};
-    Push_button& light_green_{row2_.make_child<Push_button>()};
-    Push_button& violet_{row2_.make_child<Push_button>()};
-    Push_button& light_blue_{row2_.make_child<Push_button>()};
-    Push_button& yellow_{row2_.make_child<Push_button>()};
-    Push_button& white_{row2_.make_child<Push_button>()};
-
-    void initialize();
+    using Init_list = std::initializer_list<Color>;
+    Color_bar& row_one_{this->make_child(Init_list{
+        Color::Black, Color::Dark_red, Color::Dark_blue, Color::Dark_gray,
+        Color::Brown, Color::Green, Color::Red, Color::Gray})};
+    Color_bar& row_two_{this->make_child(Init_list{
+        Color::Blue, Color::Orange, Color::Light_gray, Color::Light_green,
+        Color::Violet, Color::Light_blue, Color::Yellow, Color::White})};
 };
+
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_WIDGETS_COLOR_SELECT_HPP
