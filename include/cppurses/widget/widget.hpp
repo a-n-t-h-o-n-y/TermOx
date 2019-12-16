@@ -85,6 +85,10 @@ class Widget {
             {
                 return static_cast<Widget_t const&>(*child_list_[index]);
             }
+            auto back() const -> Widget_t const&
+            {
+                return static_cast<Widget_t const&>(*child_list_.back());
+            }
         };
 
         /// Provides Widget_t& access to underlying child objects.
@@ -128,6 +132,10 @@ class Widget {
             auto operator[](std::size_t index) const -> Widget_t&
             {
                 return static_cast<Widget_t&>(*child_list_[index]);
+            }
+            auto back() const -> Widget_t&
+            {
+                return static_cast<Widget_t&>(*child_list_.back());
             }
         };
 
