@@ -51,7 +51,7 @@ class Widget {
             List_t const& child_list_;
 
             class Iterator : public std::iterator<
-                                 std::forward_iterator_tag,
+                                 std::bidirectional_iterator_tag,
                                  typename List_t::const_iterator::value_type> {
                 List_t::const_iterator iter_;
 
@@ -104,7 +104,7 @@ class Widget {
             List_t& child_list_;
 
             class Iterator
-                : public std::iterator<std::forward_iterator_tag,
+                : public std::iterator<std::bidirectional_iterator_tag,
                                        typename List_t::iterator::value_type> {
                 List_t::iterator iter_;
 
