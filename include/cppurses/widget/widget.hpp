@@ -66,6 +66,11 @@ class Widget {
                     ++iter_;
                     return *this;
                 }
+                auto operator--() -> Iterator&
+                {
+                    --iter_;
+                    return *this;
+                }
                 auto operator==(Iterator other) const -> bool
                 {
                     return this->iter_ == other.iter_;
@@ -112,6 +117,11 @@ class Widget {
                 auto operator++() -> Iterator&
                 {
                     ++iter_;
+                    return *this;
+                }
+                auto operator--() -> Iterator&
+                {
+                    --iter_;
                     return *this;
                 }
                 auto operator==(Iterator other) const -> bool
