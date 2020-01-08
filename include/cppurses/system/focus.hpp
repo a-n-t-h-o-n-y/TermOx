@@ -33,9 +33,19 @@ class Focus {
     /// Disable Tab/Back_tab keys from changing focus Widget.
     static void disable_tab_focus() { tab_enabled_ = false; }
 
+    /// Stops a Tab or Back_tab from changing focus to the next Widget.
+    static void suppress_tab() { tab_suppressed_ = true; }
+
+    /// Re-enable a Tab or Back_tab to change focus to the next Widget.
+    static void unsuppress_tab() { tab_suppressed_ = false; }
+
+    ///
+    static void reset_tab_suppression();
+
    private:
     static Widget* focus_widget_;
     static bool tab_enabled_;
+    static bool tab_suppressed_;
 };
 
 }  // namespace cppurses

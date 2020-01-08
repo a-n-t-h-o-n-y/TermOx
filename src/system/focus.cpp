@@ -74,6 +74,7 @@ namespace cppurses {
 
 Widget* Focus::focus_widget_{nullptr};
 bool Focus::tab_enabled_{true};
+bool Focus::tab_suppressed_{false};
 
 void Focus::mouse_press(Widget& clicked)
 {
@@ -85,7 +86,7 @@ void Focus::mouse_press(Widget& clicked)
 
 bool Focus::tab_press()
 {
-    if (tab_enabled_ && is_tab_focus_policy(focus_widget_->focus_policy)) {
+    if (tab_enabled_ && !tab_suppressed_) {
         Widget* next = next_tab_focus();
         if (next == nullptr)
             Focus::clear();
@@ -93,12 +94,13 @@ bool Focus::tab_press()
             Focus::set_focus_to(*next);
         return true;
     }
+    tab_suppressed_ = false;
     return false;
 }
 
 bool Focus::shift_tab_press()
 {
-    if (tab_enabled_ && is_tab_focus_policy(focus_widget_->focus_policy)) {
+    if (tab_enabled_ && !tab_suppressed_) {
         Widget* previous = previous_tab_focus();
         if (previous == nullptr)
             Focus::clear();
@@ -106,6 +108,7 @@ bool Focus::shift_tab_press()
             Focus::set_focus_to(*previous);
         return true;
     }
+    tab_suppressed_ = false;
     return false;
 }
 

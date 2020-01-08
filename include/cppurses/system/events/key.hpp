@@ -25,7 +25,9 @@ struct Key {
 
     /// Key Event Base Class.
     struct Event : Input_event {
-        Event(Input_event::Type type, Widget& receiver, Code key);
+        Event(Input_event::Type type, Widget& receiver, Code key)
+            : Input_event{type, receiver}, key_{key}
+        {}
 
        protected:
         const Code key_;
@@ -33,14 +35,18 @@ struct Key {
 
     /// Key Press Event.
     struct Press : Key::Event {
-        Press(Widget& receiver, Code key);
+        Press(Widget& receiver, Code key)
+            : Key::Event{Event::KeyPress, receiver, key}
+        {}
         bool send() const override;
         bool filter_send(Widget& filter) const override;
     };
 
     // Key Release Event.
     struct Release : Key::Event {
-        Release(Widget& receiver, Code key);
+        Release(Widget& receiver, Code key)
+            : Key::Event{Event::KeyRelease, receiver, key}
+        {}
         bool send() const override;
         bool filter_send(Widget& filter) const override;
     };
@@ -186,7 +192,7 @@ struct Key {
         Arrow_left,
         Arrow_right,
         Home,
-        Backspace_2, // numpad backspace and backspace on some laptops
+        Backspace_2,  // numpad backspace and backspace on some laptops
 
         // Function keys, up to 63.
         // Add fn number to enum for more. ex) F15 key = Key::Function + 15;
@@ -287,10 +293,6 @@ struct Key {
     };
 };
 
-/// Translate a keycode \p key into its char representation.
-/** Return '\0' if \p key does not have a printable representation. */
-char key_to_char(Key::Code key);
-
 }  // namespace cppurses
 
 // Required for gcc < 6.1 && sometimes clang 7?
@@ -298,9 +300,10 @@ namespace std {
 template <>
 struct hash<cppurses::Key::Code> {
     using argument_type = cppurses::Key::Code;
-    using result_type = std::size_t;
-    using underlying_t = std::underlying_type_t<argument_type>;
-    result_type operator()(const argument_type& key) const noexcept {
+    using result_type   = std::size_t;
+    using underlying_t  = std::underlying_type_t<argument_type>;
+    result_type operator()(const argument_type& key) const noexcept
+    {
         return std::hash<underlying_t>{}(static_cast<underlying_t>(key));
     }
 };
