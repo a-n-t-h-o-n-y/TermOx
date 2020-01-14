@@ -10,6 +10,7 @@ namespace cppurses {
 
 std::wstring Glyph_string::w_str() const {
     auto result = std::wstring{L""};
+    result.reserve(this->length());
     for (const auto& glyph : *this) {
         result.push_back(glyph.symbol);
     }
