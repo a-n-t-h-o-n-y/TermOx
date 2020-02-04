@@ -30,7 +30,7 @@ set_property(TARGET NCurses
 # CREATE CPPURSES LIBRARY
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 if(${CMAKE_VERSION} VERSION_LESS "3.8")
-    set(CMAKE_CXX_STANDARD 14)
+    set(CMAKE_CXX_STANDARD 17)
 endif()
 
 add_library(cppurses STATIC "")
@@ -51,7 +51,7 @@ target_include_directories(cppurses
         $<INSTALL_INTERFACE:include>
 )
 if(NOT ${CMAKE_VERSION} VERSION_LESS "3.8")
-    target_compile_features(cppurses PUBLIC cxx_std_14)
+    target_compile_features(cppurses PUBLIC cxx_std_17)
 endif()
 
 target_compile_options(cppurses
