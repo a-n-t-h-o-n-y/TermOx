@@ -14,7 +14,7 @@ class Log : public Textbox {
     void post_message(Glyph_string message);
 
    protected:
-    bool key_press_event(const Key::State& keyboard) override;
+    auto key_press_event(Key::State const& keyboard) -> bool override;
 
     using Text_display::append;
     using Text_display::erase;
@@ -25,8 +25,8 @@ class Log : public Textbox {
 
 namespace slot {
 
-sig::Slot<void(Glyph_string)> post_message(Log& log);
-sig::Slot<void()> post_message(Log& log, const Glyph_string& message);
+auto post_message(Log& log) -> sig::Slot<void(Glyph_string)>;
+auto post_message(Log& log, Glyph_string const& message) -> sig::Slot<void()>;
 
 }  // namespace slot
 }  // namespace cppurses

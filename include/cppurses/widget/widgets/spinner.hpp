@@ -9,16 +9,18 @@
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
-// Single cell animated spinner
+
+/// Single cell animated spinner.
 class Spinner : public Widget {
    public:
     using Period_t = Animation_engine::Period_t;
 
+   public:
     /// Each glyph in frames is a frame, offset is starting index into frames.
     Spinner(Glyph_string frames,
             Period_t period    = Period_t{100},
             std::size_t offset = 0)
-        : frames_{std::move(frames)}, period_{period}, index_{offset}
+        : index_{offset}, period_{period}, frames_{std::move(frames)}
     {
         height_policy.fixed(1);
         width_policy.fixed(1);
@@ -69,10 +71,10 @@ class Spinner : public Widget {
     }
 
    private:
-    bool started_{false};
-    Glyph_string frames_;
+    std::size_t index_ = 0;
+    bool started_      = false;
     Period_t period_;
-    std::size_t index_{0};
+    Glyph_string frames_;
 };
 
 /// Specific Spinners
@@ -173,6 +175,7 @@ struct Spinner_cross : Spinner {
 };
 
 struct Spinner_vertical_pass : Spinner {
+   public:
     Spinner_vertical_pass(Period_t period = Period_t{100})
         : Spinner{first() + second() + " ", period}
     {}
@@ -188,6 +191,7 @@ struct Spinner_vertical_pass : Spinner {
 };
 
 struct Spinner_horizontal_pass : Spinner {
+   public:
     Spinner_horizontal_pass(Period_t period = Period_t{100})
         : Spinner{first() + second() + " ", period}
     {}

@@ -14,8 +14,12 @@ class Glyph_string;
 /// A Push_button with two alternating sides.
 /** The top button is active first, switching between the two sides on clicks */
 class Toggle_button : public layout::Stack<Push_button> {
-    static auto const top_index    = 0;
-    static auto const bottom_index = 1;
+   public:
+    Push_button& top;
+    Push_button& bottom;
+
+    sig::Signal<void()>& top_clicked    = top.clicked;
+    sig::Signal<void()>& bottom_clicked = bottom.clicked;
 
    public:
     /// Construct with corresponding labels.
@@ -23,17 +27,14 @@ class Toggle_button : public layout::Stack<Push_button> {
         : top{this->make_page(std::move(top_label))},
           bottom{this->make_page(std::move(bottom_label))}
     {
-        this->set_name("Toggle_button");
         top.clicked.connect([this]() { this->set_active_page(bottom_index); });
         bottom.clicked.connect([this]() { this->set_active_page(top_index); });
         this->set_active_page(top_index);
     }
 
-    Push_button& top;
-    Push_button& bottom;
-
-    sig::Signal<void()>& top_clicked{top.clicked};
-    sig::Signal<void()>& bottom_clicked{bottom.clicked};
+   private:
+    static auto constexpr top_index    = 0;
+    static auto constexpr bottom_index = 1;
 };
 
 }  // namespace cppurses

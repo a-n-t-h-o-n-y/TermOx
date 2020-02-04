@@ -15,29 +15,29 @@ using namespace cppurses;
 
 /// Return the sum total height of all widgets from [first, last).
 template <typename Iter_t>
-std::size_t heights(Iter_t begin, Iter_t end)
+auto heights(Iter_t begin, Iter_t end) -> std::size_t
 {
-    auto sum_heights = [](auto sum, auto const& widget) {
+    auto const sum_heights = [](auto sum, auto const& widget) {
         return widget.enabled() ? sum += widget.outer_height() : sum;
     };
-    return std::accumulate(begin, end, std::size_t{0}, sum_heights);
+    return std::accumulate(begin, end, 0uL, sum_heights);
 }
 
 /// Return the sum total width of all widgets from [first, last).
 template <typename Iter_t>
-std::size_t widths(Iter_t first, Iter_t last)
+auto widths(Iter_t first, Iter_t last) -> std::size_t
 {
-    auto sum_widths = [](auto sum, const auto& widget) {
+    auto const sum_widths = [](auto sum, auto const& widget) {
         return widget.enabled() ? sum += widget.outer_width() : sum;
     };
-    return std::accumulate(first, last, std::size_t{0}, sum_widths);
+    return std::accumulate(first, last, 0uL, sum_widths);
 }
 
 /// Check if each Widget from [first, last) has width equal to \p width.
 template <typename Iter_t>
 auto all_widths_equal_to(Iter_t first, Iter_t last, std::size_t width)
 {
-    auto widths_equal = [width](const Widget& w) {
+    auto const widths_equal = [width](Widget const& w) {
         return w.enabled() ? w.outer_width() == width : true;
     };
     return std::all_of(first, last, widths_equal);
@@ -47,24 +47,24 @@ auto all_widths_equal_to(Iter_t first, Iter_t last, std::size_t width)
 template <typename Iter_t>
 auto all_heights_equal_to(Iter_t first, Iter_t last, std::size_t height)
 {
-    auto heights_equal = [height](const Widget& w) {
+    auto const heights_equal = [height](Widget const& w) {
         return w.enabled() ? w.outer_height() == height : true;
     };
     return std::all_of(first, last, heights_equal);
 }
 
 /// Check whether \p w's children completely cover \p w.
-bool children_completely_cover(const Widget& w)
+auto children_completely_cover(Widget const& w) -> bool
 {
-    const auto begin = std::begin(w.get_children());
-    const auto end   = std::end(w.get_children());
+    auto const begin = std::cbegin(w.get_children());
+    auto const end   = std::cend(w.get_children());
     // Vertical Layout
-    if (heights(begin, end) == w.height() &&
+    if (heights(begin, end) == w.height() and
         all_widths_equal_to(begin, end, w.width())) {
         return true;
     }
     // Horizontal Layout
-    if (widths(begin, end) == w.width() &&
+    if (widths(begin, end) == w.width() and
         all_heights_equal_to(begin, end, w.height())) {
         return true;
     }
@@ -72,15 +72,21 @@ bool children_completely_cover(const Widget& w)
 }
 
 /// Return the lowest y coordinate of the widget in global coordinates.
-std::size_t height_end(Widget const& w) { return w.y() + w.outer_height(); }
+auto height_end(Widget const& w) -> std::size_t
+{
+    return w.y() + w.outer_height();
+}
 
 /// Return the right-most x coordinate of the widget in global coordinates.
-std::size_t width_end(Widget const& w) { return w.x() + w.outer_width(); }
+auto width_end(Widget const& w) -> std::size_t
+{
+    return w.x() + w.outer_width();
+}
 
 /// Set \p mask to true at each point where a child of \p w covers \p w.
-void mark_covered_tiles(const Widget& w, detail::Screen_mask& mask)
+void mark_covered_tiles(Widget const& w, detail::Screen_mask& mask)
 {
-    for (const auto& child : w.get_children()) {
+    for (auto const& child : w.get_children()) {
         if (!child.enabled())
             continue;
         for (auto y = child.y(); y < height_end(child); ++y) {
@@ -97,11 +103,10 @@ namespace cppurses {
 namespace detail {
 
 //  Should not consider border space, since that will never be empty.
-Screen_mask find_empty_space(const Widget& w)
+auto find_empty_space(Widget const& w) -> Screen_mask
 {
-    if (children_completely_cover(w)) {
+    if (children_completely_cover(w))
         return Screen_mask{};
-    }
     auto mask = Screen_mask{w, Screen_mask::Inner};
     mark_covered_tiles(w, mask);
     mask.flip();

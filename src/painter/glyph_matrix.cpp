@@ -6,11 +6,12 @@
 
 namespace cppurses {
 
-void Glyph_matrix::resize(std::size_t width, std::size_t height) {
+void Glyph_matrix::resize(std::size_t width, std::size_t height)
+{
     matrix_.resize(height);
     matrix_.shrink_to_fit();
     for (auto& row : matrix_) {
-        row.resize(width, Glyph{L' '});
+        row.resize(width, L' '_g);
         row.shrink_to_fit();
     }
 }

@@ -50,7 +50,7 @@ bool Glyph_select_stack::resize_event(Area new_size, Area old_size)
 
 void Glyph_select_stack::update_stack()
 {
-    if (this->width() == 0 || this->height() == 0) {
+    if (this->width() == 0 or this->height() == 0) {
         return;
     }
     this->clear();
@@ -62,7 +62,7 @@ void Glyph_select_stack::update_stack()
         // Attach to glyph clicked signal in Matrix_display
         symbol_page.clicked.connect([this, &symbol_page](const Point& p) {
             const Glyph& g{symbol_page.matrix.at(p.x, p.y)};
-            if (g != Glyph{L' '}) {
+            if (g != L' '_g) {
                 this->glyph_selected(symbol_page.matrix.at(p.x, p.y));
             }
         });

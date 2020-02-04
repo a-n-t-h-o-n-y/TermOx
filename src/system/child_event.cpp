@@ -17,7 +17,7 @@ auto Child_added_event::send() const -> bool
     return receiver_.child_added_event(child_);
 }
 
-bool Child_added_event::filter_send(Widget& filter) const
+auto Child_added_event::filter_send(Widget& filter) const -> bool
 {
     return filter.child_added_event_filter(receiver_, child_);
 }

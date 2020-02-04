@@ -18,7 +18,6 @@ namespace glyph_paint {
 class Glyph_select_stack
     : public cppurses::layout::Stack<cppurses::Matrix_display> {
    public:
-    Glyph_select_stack() { this->set_name("Glyph_select_stack"); }
     void set_symbols(cppurses::Glyph_string symbols);
     void append_symbols(cppurses::Glyph_string symbols);
 

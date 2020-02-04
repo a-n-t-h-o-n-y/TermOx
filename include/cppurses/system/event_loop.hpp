@@ -3,6 +3,7 @@
 #include <atomic>
 #include <future>
 #include <thread>
+#include <utility>
 
 #include <signals/signal.hpp>
 #include <signals/slot.hpp>
@@ -29,12 +30,15 @@ class Event_loop {
     auto run() -> int;
 
     /// Start the event loop in a separate thread.
-    auto run_async() -> void;
+    void run_async()
+    {
+        fut_ = std::async(std::launch::async, [this] { return this->run(); });
+    }
 
     /// Call on the loop to exit at the next exit point.
     /** The return code value is used when returning from run() or wait(). This
      *  function is thread safe. */
-    virtual auto exit(int return_code) -> void
+    virtual void exit(int return_code)
     {
         return_code_ = return_code;
         exit_        = true;
@@ -43,7 +47,7 @@ class Event_loop {
     /// Block until the async event loop returns.
     /** Event_loop::exit(int) must be called to return from wait().
      *  @return the return code passed to the call to exit(). */
-    auto wait() -> int;
+    auto wait() -> int { return fut_.valid() ? fut_.get() : -1; }
 
    protected:
     /// Override this in derived classes to define Event_loop behavior.
@@ -52,18 +56,19 @@ class Event_loop {
      *  indicating that the event queue should be processed. */
     virtual auto loop_function() -> bool = 0;
 
-    bool is_main_thread_{false};
+   protected:
+    bool is_main_thread_ = false;
 
    private:
     /// Connect to the System::exit_signal so loop can exit with System.
     auto connect_to_system_exit() -> void;
 
+   private:
     std::future<int> fut_;
-    int return_code_{0};
+    int return_code_ = 0;
+    bool running_    = false;
     std::atomic<bool> exit_{false};
-    bool running_{false};
-
-    sig::Signal<void()> lifetime;
+    sig::Signal<void()> lifetime_;
 
     friend class System;
 };

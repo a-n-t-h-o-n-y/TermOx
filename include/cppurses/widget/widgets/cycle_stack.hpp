@@ -22,16 +22,23 @@ namespace cppurses {
 /// A layout::Stack with an interface to cycle through each Widget in the stack.
 template <typename Child_t = Widget>
 class Cycle_stack : public layout::Vertical<Widget> {
+   private:
     /// User interface to cycle through the pages of the Stack.
-    struct Top_row : public layout::Horizontal<Widget> {
+    class Top_row : public layout::Horizontal<Widget> {
+       public:
+        Push_button& left_btn  = this->make_child<Push_button>("<");
+        Cycle_box& cycle_box   = this->make_child<Cycle_box>();
+        Push_button& right_btn = this->make_child<Push_button>(">");
+
+       public:
         Top_row()
         {
             this->height_policy.fixed(1);
             left_btn.width_policy.fixed(1);
-            left_btn.clicked.connect(slot::cycle_backward(cycle_box));
+            left_btn.clicked.connect(slot::previous(cycle_box));
 
             right_btn.width_policy.fixed(1);
-            right_btn.clicked.connect(slot::cycle_forward(cycle_box));
+            right_btn.clicked.connect(slot::next(cycle_box));
 
             cycle_box.brush.add_attributes(Attribute::Bold);
 
@@ -40,11 +47,11 @@ class Cycle_stack : public layout::Vertical<Widget> {
                 child.brush.set_foreground(Color::Black);
             }
         }
-
-        Push_button& left_btn{this->make_child<Push_button>("⏴")};
-        Cycle_box& cycle_box{this->make_child<Cycle_box>()};
-        Push_button& right_btn{this->make_child<Push_button>("⏵")};
     };
+
+   public:
+    Top_row& top_row              = this->make_child<Top_row>();
+    layout::Stack<Child_t>& stack = this->make_child<layout::Stack<Child_t>>();
 
    public:
     /// Construct a new Widget_t object and add it to the end of the Stack.
@@ -73,9 +80,6 @@ class Cycle_stack : public layout::Vertical<Widget> {
             stack.set_active_page(0);
         return child;
     }
-
-    Top_row& top_row{this->make_child<Top_row>()};
-    layout::Stack<Child_t>& stack{this->make_child<layout::Stack<Child_t>>()};
 };
 
 }  // namespace cppurses

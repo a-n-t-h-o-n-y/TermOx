@@ -38,8 +38,8 @@ struct Key {
         Press(Widget& receiver, Code key)
             : Key::Event{Event::KeyPress, receiver, key}
         {}
-        bool send() const override;
-        bool filter_send(Widget& filter) const override;
+        auto send() const -> bool override;
+        auto filter_send(Widget& filter) const -> bool override;
     };
 
     // Key Release Event.
@@ -47,8 +47,8 @@ struct Key {
         Release(Widget& receiver, Code key)
             : Key::Event{Event::KeyRelease, receiver, key}
         {}
-        bool send() const override;
-        bool filter_send(Widget& filter) const override;
+        auto send() const -> bool override;
+        auto filter_send(Widget& filter) const -> bool override;
     };
 
     /// Enum for key codes from the keyboard with descriptive names.
@@ -295,14 +295,14 @@ struct Key {
 
 }  // namespace cppurses
 
-// Required for gcc < 6.1 && sometimes clang 7?
+// Required for gcc < 6.1 and sometimes clang 7?
 namespace std {
 template <>
 struct hash<cppurses::Key::Code> {
     using argument_type = cppurses::Key::Code;
     using result_type   = std::size_t;
     using underlying_t  = std::underlying_type_t<argument_type>;
-    result_type operator()(const argument_type& key) const noexcept
+    auto operator()(const argument_type& key) const noexcept -> result_type
     {
         return std::hash<underlying_t>{}(static_cast<underlying_t>(key));
     }

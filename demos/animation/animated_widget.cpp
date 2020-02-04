@@ -21,7 +21,7 @@ bool Animated_bit::timer_event()
 {
     int next_x      = coords_.x + (1 * x_direction);
     const int width = static_cast<int>(this->width());
-    if (next_x >= width || next_x < 0) {
+    if (next_x >= width or next_x < 0) {
         x_direction *= -1;
         next_x = coords_.x + (1 * x_direction);
         if (next_x >= width)
@@ -29,7 +29,7 @@ bool Animated_bit::timer_event()
     }
     int next_y       = coords_.y + (1 * y_direction);
     const int height = static_cast<int>(this->height());
-    if (next_y >= height || next_y < 0) {
+    if (next_y >= height or next_y < 0) {
         y_direction *= -1;
         next_y = coords_.y + (1 * y_direction);
         if (next_y >= height)
@@ -37,6 +37,7 @@ bool Animated_bit::timer_event()
     }
     coords_.x = next_x;
     coords_.y = next_y;
+    this->update();
     return Widget::timer_event();
 }
 

@@ -24,6 +24,6 @@ Files_box::Files_box()
     this->border.enable();
     this->border.segments.disable_all();
     this->border.segments.north.enable();
-    this->border.segments.north = Glyph{L'─', foreground(Color::Blue)};
+    this->border.segments.north = L'─'_g | foreground(Color::Blue);
 }
 }  // namespace gol

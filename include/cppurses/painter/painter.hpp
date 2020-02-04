@@ -19,22 +19,24 @@ class Painter {
     /// Construct an object ready to paint Glyphs to \p *widg.
     explicit Painter(Widget& widg);
 
-    Painter(const Painter&) = delete;
-    Painter(Painter&&) = delete;
+    Painter(Painter const&) = delete;
+    Painter(Painter&&)      = delete;
 
     /// Put single Glyph to local coordinates, no-op if out of Widget's bounds.
-    void put(const Glyph& tile, std::size_t x, std::size_t y);
+    void put(Glyph const& tile, std::size_t x, std::size_t y);
 
     /// Put single Glyph to local coordinates, no-op if out of Widget's bounds.
-    void put(const Glyph& tile, const Point& position) {
+    void put(Glyph const& tile, Point const& position)
+    {
         this->put(tile, position.x, position.y);
     }
 
     /// Put Glyph_string to local coordinates, no-op if out of Widget's bounds
-    void put(const Glyph_string& text, std::size_t x, std::size_t y);
+    void put(Glyph_string const& text, std::size_t x, std::size_t y);
 
     /// Put Glyph_string to local coordinates, no-op if out of Widget's bounds
-    void put(const Glyph_string& text, const Point& position) {
+    void put(Glyph_string const& text, Point const& position)
+    {
         this->put(text, position.x, position.y);
     }
 
@@ -46,7 +48,7 @@ class Painter {
 
     /// Fill the Widget with \p tile Glyphs, from the top left point (x, y).
     /** \p x and \p y are in Widget local coordinates. */
-    void fill(const Glyph& tile,
+    void fill(Glyph const& tile,
               std::size_t x,
               std::size_t y,
               std::size_t width,
@@ -54,14 +56,14 @@ class Painter {
 
     /// Fill the Widget with \p tile Glyphs starting at the top left \p point.
     /** \p point is in Widget local coordinates. */
-    void fill(const Glyph& tile,
-              const Point& point,
+    void fill(Glyph const& tile,
+              Point const& point,
               std::size_t width,
               std::size_t height);
 
     /// Draw a straight line from [x1, y1] to [x2, y2] in local coordinates.
     /** Diagonal lines are not implemented yet. */
-    void line(const Glyph& tile,
+    void line(Glyph const& tile,
               std::size_t x1,
               std::size_t y1,
               std::size_t x2,
@@ -69,36 +71,31 @@ class Painter {
 
     /// Draw a straight line from \p a to \p b, inclusive, in local coordinates.
     /** Diagonal lines are not implemented yet. */
-    void line(const Glyph& tile, const Point& a, const Point& b) {
+    void line(Glyph const& tile, Point const& a, Point const& b)
+    {
         this->line(tile, a.x, a.y, b.x, b.y);
     }
 
    private:
-    const Widget& widget_;
-    const Area inner_area_;
-    const bool is_paintable_;
-
-    /// Reference to container that holds onto the painting until flush().
-    /** Each Event_loop/thread has a Screen_descriptor for each Widget. */
-    detail::Screen_descriptor& staged_changes_;
-
     /// Put a single Glyph to the staged_changes_ container.
     /** No bounds checking, used internally for all painting. Main entry point
      *  for modifying the staged_changes_ object. */
-    void put_global(const Glyph& tile, std::size_t x, std::size_t y) {
+    void put_global(Glyph const& tile, std::size_t x, std::size_t y)
+    {
         staged_changes_[{x, y}] = tile;
     }
 
     /// Put a single Glyph to the staged_changes_ container.
     /** No bounds checking, used internally for all painting. Main entry point
      *  for modifying the staged_changes_ object. */
-    void put_global(const Glyph& tile, const Point& position) {
+    void put_global(Glyph const& tile, Point const& position)
+    {
         this->put_global(tile, position.x, position.y);
     }
 
     /// Paint a line from [x1, y1] to [x2, y2] using global coordinates.
     /** No bounds checking, used internally for Border object painting. */
-    void line_global(const Glyph& tile,
+    void line_global(Glyph const& tile,
                      std::size_t x1,
                      std::size_t y1,
                      std::size_t x2,
@@ -106,9 +103,19 @@ class Painter {
 
     /// Paint a line from \p a to \p b inclusive using global coordinates.
     /** No bounds checking, used internally for Border object painting. */
-    void line_global(const Glyph& tile, const Point& a, const Point& b) {
+    void line_global(Glyph const& tile, Point const& a, Point const& b)
+    {
         line_global(tile, a.x, a.y, b.x, b.y);
     }
+
+   private:
+    Widget const& widget_;
+    Area const inner_area_;
+    bool const is_paintable_;
+
+    /// Reference to container that holds onto the painting until flush().
+    /** Each Event_loop/thread has a Screen_descriptor for each Widget. */
+    detail::Screen_descriptor& staged_changes_;
 };
 
 }  // namespace cppurses

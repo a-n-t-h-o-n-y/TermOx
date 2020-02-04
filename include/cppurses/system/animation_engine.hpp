@@ -18,12 +18,13 @@ class Animation_engine {
    public:
     using Period_t = detail::Timer_event_loop::Period_t;
 
+   public:
     /// Begins posting Timer_events to the given Widget every period.
     void register_widget(Widget& w, Period_t period);
 
     /// Begins posting Timer_events to the Widget with a variable period.
     void register_widget(Widget& w,
-                         const std::function<Period_t()>& period_func);
+                         std::function<Period_t()> const& period_func);
 
     /// Stop posting Timer_events to a given Widget.
     void unregister_widget(Widget& w);

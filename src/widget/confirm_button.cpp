@@ -10,17 +10,18 @@
 #include <cppurses/widget/widgets/push_button.hpp>
 
 namespace {
-std::size_t const front_page{0};
-std::size_t const confirm_page{1};
+
+auto constexpr front_page   = 0uL;
+auto constexpr confirm_page = 1uL;
+
 }  // namespace
 
 namespace cppurses {
 
 struct Confirm_button::Confirm_screen : public layout::Horizontal<Push_button> {
     explicit Confirm_screen(Glyph_string confirm_text)
-        : confirm_btn{this->make_child<Push_button>(std::move(confirm_text))}
+        : confirm_btn{this->make_child(std::move(confirm_text))}
     {
-        this->set_name("Confirm_screen");
         exit_btn.width_policy.fixed(3);
         exit_btn.brush.set_background(Color::Gray);
         exit_btn.brush.set_foreground(Color::Black);
@@ -29,14 +30,13 @@ struct Confirm_button::Confirm_screen : public layout::Horizontal<Push_button> {
     }
 
     Push_button& confirm_btn;
-    Push_button& exit_btn{this->make_child<Push_button>("✕")};
+    Push_button& exit_btn = this->make_child("✕");
 };
 
 Confirm_button::Confirm_button(Glyph_string label, Glyph_string confirm_text)
     : main_btn{this->make_page<Push_button>(std::move(label))},
       confirm_screen{this->make_page<Confirm_screen>(std::move(confirm_text))}
 {
-    this->set_name("Confirm_button");
     this->set_active_page(front_page);
     main_btn.clicked.connect([this] { this->set_active_page(confirm_page); });
     confirm_screen.confirm_btn.clicked.connect([this] {
@@ -46,4 +46,5 @@ Confirm_button::Confirm_button(Glyph_string label, Glyph_string confirm_text)
     confirm_screen.exit_btn.clicked.connect(
         [this] { this->set_active_page(front_page); });
 }
+
 }  // namespace cppurses

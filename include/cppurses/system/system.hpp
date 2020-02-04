@@ -21,12 +21,24 @@ class Widget;
  *  Manages the head Widget and the main User_input_event_loop. */
 class System {
    public:
+    /// Emitted when System::exit is called. Should call Event_loop::exit.
+    /** Passes along the exit_code System::exit() was called with. */
+    static sig::Signal<void(int)> exit_signal;
+
+    // Slots
+    static sig::Slot<void()> quit;
+
+    /// Provides access to and modification of global terminal properties.
+    static Terminal terminal;
+
+   public:
     System()              = default;
-    System(const System&) = delete;
-    System& operator=(const System&) = delete;
+    System(System const&) = delete;
+    System& operator=(System const&) = delete;
     System(System&&)                 = default;
     System& operator=(System&&) = default;
-    ~System();
+
+    ~System() { System::exit(0); }
 
     /// Set a new head Widget for the entire system.
     /** Will disable the previous head widget and enable \p new_head, if not
@@ -36,38 +48,39 @@ class System {
     /// Return a pointer to the head Widget.
     /** This Widget is the ancestor of every other widget that will be displayed
      *  on the screen. */
-    static Widget* head() { return head_; }
+    static auto head() -> Widget* { return head_; }
 
     /// Set the Widget to receive focus on run().
     /** Needed because focus has to be set after a widget is enabled. */
-    static auto set_initial_focus(Widget* target) -> void
-    {
-        initial_focus_ = target;
-    }
+    static void set_initial_focus(Widget* target) { initial_focus_ = target; }
 
     /// Create a Widget_t object, set it as head widget and call System::run().
     /** \p args... are passed on to the Widget_t constructor. Blocks until
      *  System::exit() is called, returns the exit code. Will throw a
      *  std::runtime_error if screen cannot be initialized. */
     template <typename Widget_t, typename... Args>
-    int run(Args&&... args)
+    auto run(Args&&... args) -> int
     {
-        Widget_t head_widget(std::forward<Args>(args)...);
-        System::set_head(&head_widget);
+        auto head = Widget_t(std::forward<Args>(args)...);
+        System::set_head(&head);
         return this->run();
     }
 
     /// Set \p head as head widget and call System::run().
     /** Will throw a std::runtime_error if screen cannot be initialized. */
-    int run(Widget& head);
+    auto run(Widget& head) -> int
+    {
+        System::set_head(&head);
+        return this->run();
+    }
 
     /// Launch the main Event_loop and start processing Events.
     /** Blocks until System::exit() is called, returns the exit code. Will throw
      *  a std::runtime_error if screen cannot be initialized. */
-    int run();
+    auto run() -> int;
 
     /// Immediately send the event filters and then to the intended receiver.
-    static auto send_event(const Event& event) -> bool;
+    static auto send_event(Event const& event) -> bool;
 
     /// Append the event to the Event_queue for the thread it was called on.
     /** The Event_queue is processed once per iteration of the Event_loop. When
@@ -95,17 +108,13 @@ class System {
 
     /// Return a reference to the Animation_engine in System.
     /** This manages animation on each of the Widgets that enables it. */
-    static Animation_engine& animation_engine() { return animation_engine_; }
+    static auto animation_engine() -> Animation_engine&
+    {
+        return animation_engine_;
+    }
 
     /// Return whether System has gotten an exit request, set by System::exit()
-    static bool exit_requested() { return exit_requested_; }
-
-    /// Emitted when System::exit is called. Should call Event_loop::exit.
-    /** Passes along the exit_code System::exit() was called with. */
-    static sig::Signal<void(int)> exit_signal;
-
-    // Slots
-    static sig::Slot<void()> quit;
+    static auto exit_requested() -> bool { return exit_requested_; }
 
    private:
     static Widget* head_;
@@ -113,10 +122,6 @@ class System {
     static bool exit_requested_;
     static detail::User_input_event_loop user_input_loop_;
     static Animation_engine animation_engine_;
-
-   public:
-    /// Provides access to and modification of global terminal properties.
-    static Terminal terminal;
 };
 
 }  // namespace cppurses

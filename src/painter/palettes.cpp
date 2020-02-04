@@ -5,7 +5,8 @@
 
 namespace cppurses {
 
-Palette Palettes::Standard() {
+Palette Palettes::Standard()
+{
     return {{{Color::Black, {0, 0, 0}},
              {Color::Dark_red, {128, 0, 0}},
              {Color::Dark_blue, {0, 0, 128}},
@@ -24,7 +25,8 @@ Palette Palettes::Standard() {
              {Color::White, {255, 255, 255}}}};
 }
 
-Palette Palettes::DawnBringer() {
+Palette Palettes::DawnBringer()
+{
     return {{{Color::Black, {20, 12, 28}},
              {Color::Dark_red, {68, 36, 52}},
              {Color::Dark_blue, {48, 52, 109}},

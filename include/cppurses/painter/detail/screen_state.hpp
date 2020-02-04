@@ -21,26 +21,28 @@ namespace detail {
  *  its state, as well as Event object that can inform flush about optimization
  *  opportunities. */
 class Screen_state {
-    struct Optimize {
-        bool just_enabled{false};
-        bool moved{false};
-        bool resized{false};
-        bool child_event{false};
-        Glyph wallpaper;  // previous wallpaper
-        detail::Screen_mask move_mask;
-        detail::Screen_mask resize_mask;
-
-        /// Reset all flags to initial and clear state, except for wallpaper.
-        void reset();
-    };
-
+   private:
     /// Holds a description of the widget's current screen state. In global
     /// coordinates, and modified by Screen::flush() function.
     Screen_descriptor tiles;
 
     /// Holds flags and data structures used to optimize flushing to the screen.
-    Optimize optimize;
+    struct Optimize {
+       public:
+        bool just_enabled = false;
+        bool moved        = false;
+        bool resized      = false;
+        bool child_event  = false;
+        Glyph wallpaper;  // previous wallpaper
+        detail::Screen_mask move_mask;
+        detail::Screen_mask resize_mask;
 
+       public:
+        /// Reset all flags to initial and clear state, except for wallpaper.
+        void reset();
+    } optimize;
+
+   private:
     friend class Screen;
     template <typename Widget_t>
     friend class cppurses::layout::Layout;
@@ -50,6 +52,16 @@ class Screen_state {
     friend class cppurses::Move_event;
     friend class cppurses::Resize_event;
 };
+
+inline void Screen_state::Optimize::reset()
+{
+    this->just_enabled = false;
+    this->moved        = false;
+    this->resized      = false;
+    this->child_event  = false;
+    this->move_mask.clear();
+    this->resize_mask.clear();
+}
 
 }  // namespace detail
 }  // namespace cppurses

@@ -8,72 +8,77 @@
 namespace cppurses {
 namespace detail {
 
-bool Border_offset::west_disqualified(const Widget& w) {
+auto Border_offset::west_disqualified(Widget const& w) -> bool
+{
     return w.outer_width() <= 1;
 }
 
-bool Border_offset::east_disqualified(const Widget& w) {
-    if (w.outer_width() <= 1) {
+auto Border_offset::east_disqualified(Widget const& w) -> bool
+{
+    if (w.outer_width() <= 1)
         return true;
-    }
-    if (w.outer_width() == 2 && w.border.segments.west.enabled()) {
+    if (w.outer_width() == 2 and w.border.segments.west.enabled())
         return true;
-    }
     return false;
 }
 
-bool Border_offset::north_disqualified(const Widget& w) {
+auto Border_offset::north_disqualified(Widget const& w) -> bool
+{
     return w.outer_height() <= 1;
 }
 
-bool Border_offset::south_disqualified(const Widget& w) {
-    if (w.outer_height() <= 1) {
+auto Border_offset::south_disqualified(Widget const& w) -> bool
+{
+    if (w.outer_height() <= 1)
         return true;
-    }
-    if (w.outer_height() == 2 && w.border.segments.north.enabled()) {
+    if (w.outer_height() == 2 and w.border.segments.north.enabled())
         return true;
-    }
     return false;
 }
 
-std::size_t Border_offset::west(const Widget& w) {
-    const auto& b = w.border.segments;
-    if (w.border.enabled() && !west_disqualified(w) &&
-        (b.west.enabled() || b.north_west.enabled() ||
+auto Border_offset::west(Widget const& w) -> std::size_t
+{
+    auto const& b = w.border.segments;
+    if (w.border.enabled() and !west_disqualified(w) and
+        (b.west.enabled() or b.north_west.enabled() or
          b.south_west.enabled())) {
         return 1;
     }
     return 0;
 }
 
-std::size_t Border_offset::east(const Widget& w) {
-    const auto& b = w.border.segments;
-    if (w.border.enabled() && !east_disqualified(w) &&
-        (b.east.enabled() || b.north_east.enabled() ||
+auto Border_offset::east(Widget const& w) -> std::size_t
+{
+    auto const& b = w.border.segments;
+    if (w.border.enabled() and !east_disqualified(w) and
+        (b.east.enabled() or b.north_east.enabled() or
          b.south_east.enabled())) {
         return 1;
     }
     return 0;
 }
 
-std::size_t Border_offset::north(const Widget& w) {
-    const auto& b = w.border.segments;
-    if (w.border.enabled() && !north_disqualified(w) &&
-        (b.north.enabled() || b.north_east.enabled() ||
+auto Border_offset::north(Widget const& w) -> std::size_t
+{
+    auto const& b = w.border.segments;
+    if (w.border.enabled() and !north_disqualified(w) and
+        (b.north.enabled() or b.north_east.enabled() or
          b.north_west.enabled())) {
         return 1;
     }
     return 0;
 }
 
-std::size_t Border_offset::south(const Widget& w) {
-    const auto& b = w.border.segments;
-    if (w.border.enabled() && !south_disqualified(w) &&
-        (b.south.enabled() || b.south_east.enabled() ||
+auto Border_offset::south(Widget const& w) -> std::size_t
+{
+    auto const& b = w.border.segments;
+    if (w.border.enabled() and !south_disqualified(w) and
+        (b.south.enabled() or b.south_east.enabled() or
          b.south_west.enabled())) {
         return 1;
     }
     return 0;
 }
+
 }  // namespace detail
 }  // namespace cppurses

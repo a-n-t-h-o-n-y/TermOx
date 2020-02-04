@@ -3,7 +3,10 @@
 #include <signals/signal.hpp>
 #include <signals/slot.hpp>
 
+#include <cppurses/painter/brush.hpp>
+#include <cppurses/painter/color.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
+#include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 
@@ -11,31 +14,42 @@ namespace cppurses {
 
 class Vertical_scrollbar : public layout::Vertical<> {
    public:
+    Push_button& up_button   = this->make_child<Push_button>("▴");
+    Widget& middle           = this->make_child<Widget>();
+    Push_button& down_button = this->make_child<Push_button>("▾");
+
+    sig::Signal<void()>& up   = up_button.clicked;
+    sig::Signal<void()>& down = down_button.clicked;
+
+   public:
     Vertical_scrollbar() { this->initialize(); }
 
     template <typename Scrollable_t>
     Vertical_scrollbar(Scrollable_t& tb)
     {
         this->initialize();
-        sig::Slot<void()> scroll_up{[&tb]() { tb.scroll_up(); }};
+        auto scroll_up = sig::Slot<void()>{[&tb]() { tb.scroll_up(); }};
         scroll_up.track(tb.destroyed);
         up.connect(scroll_up);
 
-        sig::Slot<void()> scroll_down{[&tb]() { tb.scroll_down(); }};
+        auto scroll_down = sig::Slot<void()>{[&tb]() { tb.scroll_down(); }};
         scroll_down.track(tb.destroyed);
         down.connect(scroll_down);
     }
 
-    Push_button& up_button{this->make_child<Push_button>("▴")};
-    Widget& middle{this->make_child<Widget>()};
-    Push_button& down_button{this->make_child<Push_button>("▾")};
-
-    // Signals
-    sig::Signal<void()>& up   = up_button.clicked;
-    sig::Signal<void()>& down = down_button.clicked;
-
    private:
-    void initialize();
+    void initialize()
+    {
+        this->width_policy.fixed(1);
+        this->height_policy.type(Size_policy::Expanding);
+
+        up_button.height_policy.fixed(1);
+
+        middle.height_policy.type(Size_policy::Expanding);
+        middle.brush.set_background(Color::Light_gray);
+
+        down_button.height_policy.fixed(1);
+    }
 };
 
 }  // namespace cppurses

@@ -31,46 +31,58 @@ struct Mouse {
    private:
     /// Mouse Event Base Class.
     struct Event : Input_event {
-        Event(Input_event::Type type, Widget& receiver, const State& data);
+        Event(Input_event::Type type, Widget& receiver, State const& data)
+            : Input_event{type, receiver}, data_{data}
+        {}
 
        protected:
-        const State data_;
+        State const data_;
     };
 
    public:
     /// Mouse Press Event.
     struct Press : Mouse::Event {
-        Press(Widget& receiver, const State& data);
-        bool send() const override;
-        bool filter_send(Widget& filter) const override;
+        Press(Widget& receiver, State const& data)
+            : Mouse::Event{Input_event::MouseButtonPress, receiver, data}
+        {}
+        auto send() const -> bool override;
+        auto filter_send(Widget& filter) const -> bool override;
     };
 
     /// Mouse Release Event.
     struct Release : Mouse::Event {
-        Release(Widget& receiver, const State& data);
-        bool send() const override;
-        bool filter_send(Widget& filter) const override;
+        Release(Widget& receiver, State const& data)
+            : Mouse::Event{Input_event::MouseButtonRelease, receiver, data}
+        {}
+        auto send() const -> bool override;
+        auto filter_send(Widget& filter) const -> bool override;
     };
 
     /// Mouse Double Click Event. Not currently implemented.
     struct Double_click : Mouse::Event {
-        Double_click(Widget& receiver, const State& data);
-        bool send() const override;
-        bool filter_send(Widget& filter) const override;
+        Double_click(Widget& receiver, State const& data)
+            : Mouse::Event{Input_event::MouseButtonDblClick, receiver, data}
+        {}
+        auto send() const -> bool override;
+        auto filter_send(Widget& filter) const -> bool override;
     };
 
     /// Mouse Wheel Event. Not currently implemented.
     struct Wheel : Mouse::Event {
-        Wheel(Widget& receiver, const State& data);
-        bool send() const override;
-        bool filter_send(Widget& filter) const override;
+        Wheel(Widget& receiver, State const& data)
+            : Mouse::Event{Input_event::MouseWheel, receiver, data}
+        {}
+        auto send() const -> bool override;
+        auto filter_send(Widget& filter) const -> bool override;
     };
 
     /// Mouse Move Event. Not currently implemented.
     struct Move : Mouse::Event {
-        Move(Widget& receiver, const State& data);
-        bool send() const override;
-        bool filter_send(Widget& filter) const override;
+        Move(Widget& receiver, State const& data)
+            : Mouse::Event{Input_event::MouseMove, receiver, data}
+        {}
+        auto send() const -> bool override;
+        auto filter_send(Widget& filter) const -> bool override;
     };
 };
 }  // namespace cppurses

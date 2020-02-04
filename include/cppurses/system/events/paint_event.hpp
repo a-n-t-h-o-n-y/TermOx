@@ -10,11 +10,14 @@ class Paint_event : public Event {
    public:
     explicit Paint_event(Widget& receiver) : Event{Event::Paint, receiver} {}
 
-    bool send() const override {
+    auto send() const -> bool override
+    {
         return !detail::is_paintable(receiver_) ? false
                                                 : receiver_.paint_event();
     }
-    bool filter_send(Widget& filter) const override {
+
+    auto filter_send(Widget& filter) const -> bool override
+    {
         return filter.paint_event_filter(receiver_);
     }
 };

@@ -14,28 +14,28 @@ namespace detail {
  *  taking from the Widget. */
 class Border_offset {
     /// Calculate west border offset, either 1 or 0.
-    static std::size_t west(const Widget& w);
+    static auto west(Widget const& w) -> std::size_t;
 
     /// Calculate east border offset, either 1 or 0.
-    static std::size_t east(const Widget& w);
+    static auto east(Widget const& w) -> std::size_t;
 
     /// Calculate north border offset, either 1 or 0.
-    static std::size_t north(const Widget& w);
+    static auto north(Widget const& w) -> std::size_t;
 
     /// Calculate south border offset, either 1 or 0.
-    static std::size_t south(const Widget& w);
+    static auto south(Widget const& w) -> std::size_t;
 
     /// Calculate whether or not \p w is too small to display the west border.
-    static bool west_disqualified(const Widget& w);
+    static auto west_disqualified(Widget const& w) -> bool;
 
     /// Calculate whether or not \p w is too small to display the east border.
-    static bool east_disqualified(const Widget& w);
+    static auto east_disqualified(Widget const& w) -> bool;
 
     /// Calculate whether or not \p w is too small to display the north border.
-    static bool north_disqualified(const Widget& w);
+    static auto north_disqualified(Widget const& w) -> bool;
 
     /// Calculate whether or not \p w is too small to display the south border.
-    static bool south_disqualified(const Widget& w);
+    static auto south_disqualified(Widget const& w) -> bool;
 
     friend class cppurses::Widget;
     friend class cppurses::Painter;

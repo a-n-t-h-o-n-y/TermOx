@@ -55,7 +55,7 @@ std::string get_rule(std::ifstream& file) {
         return "3/23";
     }
     file.seekg(9, std::ios_base::cur);
-    if (file.peek() == 'B' || file.peek() == 'b') {
+    if (file.peek() == 'B' or file.peek() == 'b') {
         file.seekg(1, std::ios_base::cur);
     }
     int birth{9};
@@ -63,7 +63,7 @@ std::string get_rule(std::ifstream& file) {
         file >> birth;
     }
     file.seekg(1, std::ios_base::cur);
-    if (file.peek() == 'S' || file.peek() == 's') {
+    if (file.peek() == 'S' or file.peek() == 's') {
         file.seekg(1, std::ios_base::cur);
     }
     int survival{9};

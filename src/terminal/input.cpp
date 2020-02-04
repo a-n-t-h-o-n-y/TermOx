@@ -5,6 +5,7 @@
 #include <utility>
 
 #include <ncurses.h>
+#undef border
 
 #include <cppurses/system/detail/find_widget_at.hpp>
 #include <cppurses/system/event.hpp>
@@ -23,13 +24,13 @@ using namespace cppurses;
 
 /// Check if mouse_event is a button_mask type of event.
 template <typename Mask_t>
-auto is(Mask_t button_mask, const ::MEVENT& mouse_event) -> bool
+auto is(Mask_t button_mask, ::MEVENT const& mouse_event) -> bool
 {
     return static_cast<bool>(mouse_event.bstate & button_mask);
 }
 
 /// Extract the Event type and Mouse::Button from a given MEVENT object.
-auto extract_info(const ::MEVENT& mouse_event)
+auto extract_info(::MEVENT const& mouse_event)
     -> std::pair<Event::Type, Mouse::Button>
 {
     auto type_button = std::make_pair(Event::None, Mouse::Button::None);
@@ -72,7 +73,7 @@ auto extract_info(const ::MEVENT& mouse_event)
         button = Mouse::Button::ScrollUp;
     }
     // Button 5 / Scroll Down
-#if defined(BUTTON5_PRESSED) && defined(BUTTON5_RELEASED)
+#if defined(BUTTON5_PRESSED) and defined(BUTTON5_RELEASED)
     else if (is(BUTTON5_PRESSED, mouse_event)) {
         type   = Event::MouseButtonPress;
         button = Mouse::Button::ScrollDown;
@@ -95,15 +96,15 @@ auto make_mouse_event() -> std::unique_ptr<Event>
         return nullptr;
 
     // Coordinates
-    const auto global = Point{static_cast<std::size_t>(mouse_event.x),
+    auto const global = Point{static_cast<std::size_t>(mouse_event.x),
                               static_cast<std::size_t>(mouse_event.y)};
-    const auto local =
+    auto const local =
         Point{global.x - receiver->inner_x(), global.y - receiver->inner_y()};
 
     // Create Event
-    const auto type_button = extract_info(mouse_event);
-    const auto type        = type_button.first;
-    const auto button      = type_button.second;
+    auto const type_button = extract_info(mouse_event);
+    auto const type        = type_button.first;
+    auto const button      = type_button.second;
     if (type == Event::MouseButtonPress) {
         return std::make_unique<Mouse::Press>(
             *receiver, Mouse::State{button, global, local, mouse_event.id});
@@ -117,10 +118,10 @@ auto make_mouse_event() -> std::unique_ptr<Event>
 
 auto make_resize_event() -> std::unique_ptr<Event>
 {
-    Widget* const receiver = System::head();
+    auto* const receiver = System::head();
     if (receiver != nullptr) {
-        const auto width  = System::terminal.width();
-        const auto height = System::terminal.height();
+        auto const width  = System::terminal.width();
+        auto const height = System::terminal.height();
         return std::make_unique<Resize_event>(*receiver, Area{width, height});
     }
     return nullptr;
@@ -128,12 +129,13 @@ auto make_resize_event() -> std::unique_ptr<Event>
 
 auto make_keyboard_event(int input) -> std::unique_ptr<Event>
 {
-    const auto code = static_cast<Key::Code>(input);
-    Widget* const receiver =
+    auto const code = static_cast<Key::Code>(input);
+    auto* const receiver =
         Shortcuts::send_key(code) ? nullptr : Focus::focus_widget();
     return receiver == nullptr ? nullptr
                                : std::make_unique<Key::Press>(*receiver, code);
 }
+
 }  // namespace
 
 namespace cppurses {
@@ -141,7 +143,7 @@ namespace input {
 
 auto get() -> std::unique_ptr<Event>
 {
-    const auto input = ::getch();
+    auto const input = ::getch();
     switch (input) {
         case ERR: return nullptr;  // Timeout and no event.
         case KEY_MOUSE: return make_mouse_event();

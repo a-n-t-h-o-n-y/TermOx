@@ -1,6 +1,5 @@
 #include <cppurses/widget/widgets/log.hpp>
 
-#include <cstddef>
 #include <utility>
 
 #include <signals/slot.hpp>
@@ -10,40 +9,45 @@
 
 namespace cppurses {
 
-void Log::post_message(Glyph_string message) {
-    if (!this->contents().empty()) {
+void Log::post_message(Glyph_string message)
+{
+    if (!this->contents().empty())
         this->append('\n');
-    }
     this->append(std::move(message));
     this->update_display();
-    std::size_t tl = this->top_line();
-    std::size_t h = this->height();
-    std::size_t nol = this->line_count();
-    if (tl + h < nol) {
-        this->scroll_down(nol - tl - h);
-    }
+    auto const tl = this->top_line();
+    auto const h  = this->height();
+    auto const lc = this->line_count();
+    if (tl + h < lc)
+        this->scroll_down(lc - tl - h);
     this->set_cursor(this->contents().size());
 }
 
-bool Log::key_press_event(const Key::State& keyboard) {
-    if (keyboard.key == Key::Arrow_right || keyboard.key == Key::Arrow_up ||
-        keyboard.key == Key::Arrow_down || keyboard.key == Key::Arrow_left) {
-        return Textbox::key_press_event(keyboard);
+auto Log::key_press_event(Key::State const& keyboard) -> bool
+{
+    switch (keyboard.key) {
+        case Key::Arrow_right:
+        case Key::Arrow_left:
+        case Key::Arrow_up:
+        case Key::Arrow_down: return Textbox::key_press_event(keyboard);
+        default: return true;
     }
-    return true;
 }
 
 namespace slot {
 
-sig::Slot<void(Glyph_string)> post_message(Log& log) {
-    sig::Slot<void(Glyph_string)> slot{
+auto post_message(Log& log) -> sig::Slot<void(Glyph_string)>
+{
+    auto slot = sig::Slot<void(Glyph_string)>{
         [&log](Glyph_string message) { log.post_message(std::move(message)); }};
     slot.track(log.destroyed);
     return slot;
 }
 
-sig::Slot<void()> post_message(Log& log, const Glyph_string& message) {
-    sig::Slot<void()> slot{[&log, message] { log.post_message(message); }};
+auto post_message(Log& log, Glyph_string const& message) -> sig::Slot<void()>
+{
+    auto slot =
+        sig::Slot<void()>{[&log, message] { log.post_message(message); }};
     slot.track(log.destroyed);
     return slot;
 }

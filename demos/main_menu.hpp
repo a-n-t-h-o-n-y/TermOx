@@ -10,6 +10,7 @@
 #include "focus/focus_demo.hpp"
 #include "game_of_life/gol_demo.hpp"
 #include "glyph_paint/glyph_paint.hpp"
+#include "layout/layout_demo.hpp"
 #include "notepad/notepad.hpp"
 #include "palette/palette_demo.hpp"
 
@@ -19,30 +20,33 @@ class Main_menu : public cppurses::layout::Vertical<> {
    public:
     Main_menu();
 
-    cppurses::Titlebar& titlebar{
-        this->make_child<cppurses::Titlebar>("  C  P  P  U  R  S  E  S")};
+    cppurses::Titlebar& titlebar =
+        this->make_child<cppurses::Titlebar>("  C  P  P  U  R  S  E  S");
 
-    cppurses::Menu_stack& main_menu{
-        this->make_child<cppurses::Menu_stack>("D e m o s")};
+    cppurses::Menu_stack& main_menu =
+        this->make_child<cppurses::Menu_stack>("D e m o s");
 
-    Notepad& notepad{main_menu.make_page<Notepad>("Notepad")};
+    layout_demo::Layout_demo& layout_demo =
+        main_menu.make_page<layout_demo::Layout_demo>("Layouts");
 
-    gol::GoL_demo& game_of_life_demo{
-        main_menu.make_page<gol::GoL_demo>("Game of Life")};
+    Notepad& notepad = main_menu.make_page<Notepad>("Notepad");
 
-    palette::Palette_demo& palette_demo{
-        main_menu.make_page<palette::Palette_demo>("Color Palette")};
+    gol::GoL_demo& game_of_life_demo =
+        main_menu.make_page<gol::GoL_demo>("Game of Life");
 
-    // Chess_UI& chess{main_menu.make_page<Chess_UI>("Chess")};
+    palette::Palette_demo& palette_demo =
+        main_menu.make_page<palette::Palette_demo>("Color Palette");
 
-    focus::Focus_demo& focus_demo{
-        main_menu.make_page<focus::Focus_demo>("Focus")};
+    // Chess_UI& chess = main_menu.make_page<Chess_UI>("Chess");
 
-    glyph_paint::Glyph_paint& glyph_paint{
-        main_menu.make_page<glyph_paint::Glyph_paint>("Glyph Paint")};
+    focus::Focus_demo& focus_demo =
+        main_menu.make_page<focus::Focus_demo>("Focus");
 
-    animation::Animated_widget& animated_widget{
-        main_menu.make_page<animation::Animated_widget>("Animated Widget")};
+    glyph_paint::Glyph_paint& glyph_paint =
+        main_menu.make_page<glyph_paint::Glyph_paint>("Glyph Paint");
+
+    animation::Animated_widget& animated_widget =
+        main_menu.make_page<animation::Animated_widget>("Animated Widget");
 };
 }  // namespace demos
 #endif  // DEMOS_MAIN_MENU_HPP

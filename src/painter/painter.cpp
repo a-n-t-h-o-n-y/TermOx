@@ -16,12 +16,11 @@
 #include <cppurses/widget/widget.hpp>
 
 namespace {
-bool border_is_paintable(const cppurses::Widget& widg)
+auto border_is_paintable(cppurses::Widget const& widg) -> bool
 {
-    return widg.border.enabled() && widg.enabled() && widg.outer_width() != 0 &&
-           widg.outer_height() != 0;
+    return widg.border.enabled() and widg.enabled() and
+           widg.outer_width() != 0 and widg.outer_height() != 0;
 }
-
 }  // namespace
 
 namespace cppurses {
@@ -33,20 +32,20 @@ Painter::Painter(Widget& widg)
       staged_changes_{detail::Staged_changes::get()[&widg]}
 {}
 
-void Painter::put(const Glyph& tile, std::size_t x, std::size_t y)
+void Painter::put(Glyph const& tile, std::size_t x, std::size_t y)
 {
-    if (x >= inner_area_.width || y >= inner_area_.height)
+    if (x >= inner_area_.width or y >= inner_area_.height)
         return;
-    const auto x_global = widget_.inner_x() + x;
-    const auto y_global = widget_.inner_y() + y;
+    auto const x_global = widget_.inner_x() + x;
+    auto const y_global = widget_.inner_y() + y;
     this->put_global(tile, x_global, y_global);
 }
 
-void Painter::put(const Glyph_string& text, std::size_t x, std::size_t y)
+void Painter::put(Glyph_string const& text, std::size_t x, std::size_t y)
 {
-    if (!is_paintable_)
+    if (not is_paintable_)
         return;
-    for (const Glyph& g : text) {
+    for (Glyph const& g : text) {
         this->put(g, x++, y);
     }
 }
@@ -54,7 +53,7 @@ void Painter::put(const Glyph_string& text, std::size_t x, std::size_t y)
 void Painter::border()
 {
     using Offset = detail::Border_offset;
-    if (!border_is_paintable(widget_))
+    if (not border_is_paintable(widget_))
         return;
     // Disqualified borders
     auto const west_dq  = Offset::west_disqualified(widget_);
@@ -91,108 +90,107 @@ void Painter::border()
     // General Border Construction/Painting
     auto const& b = widget_.border.segments;
 
-    if (b.north.enabled() && !north_dq)
+    if (b.north.enabled() and !north_dq)
         this->line_global(b.north, north_left, north_right);
-    if (b.south.enabled() && !south_dq)
+    if (b.south.enabled() and !south_dq)
         this->line_global(b.south, south_left, south_right);
-    if (b.west.enabled() && !west_dq)
+    if (b.west.enabled() and !west_dq)
         this->line_global(b.west, west_top, west_bottom);
-    if (b.east.enabled() && !east_dq)
+    if (b.east.enabled() and !east_dq)
         this->line_global(b.east, east_top, east_bottom);
-    if (b.north_west.enabled() && !north_dq && !west_dq)
+    if (b.north_west.enabled() and !north_dq and !west_dq)
         this->put_global(b.north_west, north_west);
-    if (b.north_east.enabled() && !north_dq && !east_dq)
+    if (b.north_east.enabled() and !north_dq and !east_dq)
         this->put_global(b.north_east, north_east);
-    if (b.south_west.enabled() && !south_dq && !west_dq)
+    if (b.south_west.enabled() and !south_dq and !west_dq)
         this->put_global(b.south_west, south_west);
-    if (b.south_east.enabled() && !south_dq && !east_dq)
+    if (b.south_east.enabled() and !south_dq and !east_dq)
         this->put_global(b.south_east, south_east);
 
     // Stop out of bounds drawing for special cases.
-    if (north_dq && south_dq && inner_area_.height == 1)
+    if (north_dq and south_dq and inner_area_.height == 1)
         return;
-    if (west_dq && east_dq && inner_area_.width == 1)
+    if (west_dq and east_dq and inner_area_.width == 1)
         return;
 
     // Extend Walls into Unused Corners
     // North-West
     if (!b.north_west.enabled()) {
-        if (b.north.enabled() && !b.west.enabled())
+        if (b.north.enabled() and !b.west.enabled())
             put_global(b.north, north_west);
-        else if (b.west.enabled() && !b.north.enabled())
+        else if (b.west.enabled() and !b.north.enabled())
             put_global(b.west, north_west);
     }
     // North-East
     if (!b.north_east.enabled()) {
-        if (b.north.enabled() && !b.east.enabled())
+        if (b.north.enabled() and !b.east.enabled())
             put_global(b.north, north_east);
-        else if (b.east.enabled() && !b.north.enabled())
+        else if (b.east.enabled() and !b.north.enabled())
             put_global(b.east, north_east);
     }
     // South-West
     if (!b.south_west.enabled()) {
-        if (b.south.enabled() && !b.west.enabled())
+        if (b.south.enabled() and !b.west.enabled())
             put_global(b.south, south_west);
-        else if (b.west.enabled() && !b.south.enabled())
+        else if (b.west.enabled() and !b.south.enabled())
             put_global(b.west, south_west);
     }
     // South-East
     if (!b.south_east.enabled()) {
-        if (b.south.enabled() && !b.east.enabled())
+        if (b.south.enabled() and !b.east.enabled())
             put_global(b.south, south_east);
-        else if (b.east.enabled() && !b.south.enabled())
+        else if (b.east.enabled() and !b.south.enabled())
             put_global(b.east, south_east);
     }
 
     // Paint wallpaper over empty space that a missing border can cause
     auto const wallpaper = widget_.generate_wallpaper();
     // North Wallpaper
-    if (Offset::north(widget_) == 1 && !b.north.enabled())
+    if (Offset::north(widget_) == 1 and !b.north.enabled())
         this->line_global(wallpaper, north_left, north_right);
     // South Wallpaper
-    if (Offset::south(widget_) == 1 && !b.south.enabled())
+    if (Offset::south(widget_) == 1 and !b.south.enabled())
         this->line_global(wallpaper, south_left, south_right);
     // East Wallpaper
-    if (Offset::east(widget_) == 1 && !b.east.enabled())
+    if (Offset::east(widget_) == 1 and !b.east.enabled())
         this->line_global(wallpaper, east_top, east_bottom);
     // West Wallpaper
-    if (Offset::west(widget_) == 1 && !b.west.enabled())
+    if (Offset::west(widget_) == 1 and !b.west.enabled())
         this->line_global(wallpaper, west_top, west_bottom);
     // North-West Wallpaper
-    if (Offset::north(widget_) == 1 && Offset::west(widget_) == 1 &&
+    if (Offset::north(widget_) == 1 and Offset::west(widget_) == 1 and
         !b.north_west.enabled())
         this->put_global(wallpaper, north_west);
     // North-East Wallpaper
-    if (Offset::north(widget_) == 1 && Offset::east(widget_) == 1 &&
+    if (Offset::north(widget_) == 1 and Offset::east(widget_) == 1 and
         !b.north_east.enabled())
         this->put_global(wallpaper, north_east);
     // South-West Wallpaper
-    if (Offset::south(widget_) == 1 && Offset::west(widget_) == 1 &&
+    if (Offset::south(widget_) == 1 and Offset::west(widget_) == 1 and
         !b.south_west.enabled())
         this->put_global(wallpaper, south_west);
     // South-East Wallpaper
-    if (Offset::south(widget_) == 1 && Offset::east(widget_) == 1 &&
+    if (Offset::south(widget_) == 1 and Offset::east(widget_) == 1 and
         !b.south_east.enabled())
         this->put_global(wallpaper, south_east);
 }
 
-void Painter::fill(const Glyph& tile,
+void Painter::fill(Glyph const& tile,
                    std::size_t x,
                    std::size_t y,
                    std::size_t width,
                    std::size_t height)
 {
-    if (width == 0) {
+    if (width == 0)
         return;
-    }
-    const auto y_limit = y + height;
+    auto const y_limit = y + height;
     for (; y < y_limit; ++y) {
         this->line(tile, x, y, width - 1, y);
     }
 }
 
-void Painter::fill(const Glyph& tile,
-                   const Point& point,
+void Painter::fill(Glyph const& tile,
+                   Point const& point,
                    std::size_t width,
                    std::size_t height)
 {
@@ -200,7 +198,7 @@ void Painter::fill(const Glyph& tile,
 }
 
 // Does not call down to line_global because this needs bounds checking.
-void Painter::line(const Glyph& tile,
+void Painter::line(Glyph const& tile,
                    std::size_t x1,
                    std::size_t y1,
                    std::size_t x2,
@@ -220,7 +218,7 @@ void Painter::line(const Glyph& tile,
 }
 
 // GLOBAL COORDINATES - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-void Painter::line_global(const Glyph& tile,
+void Painter::line_global(Glyph const& tile,
                           std::size_t x1,
                           std::size_t y1,
                           std::size_t x2,

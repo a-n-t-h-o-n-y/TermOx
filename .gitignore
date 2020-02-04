@@ -2,6 +2,7 @@ build*/
 docs/html
 notes
 tags
+.clangd/
 *.[ao]
 *.so
 *.out

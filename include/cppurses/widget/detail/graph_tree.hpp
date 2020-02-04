@@ -7,7 +7,7 @@ class Widget;
 namespace detail {
 
 /// Outputs filename.gz graph description of widget tree hierarchy.
-void graph_tree(const Widget& w, const std::string& filename);
+void graph_tree(Widget const& w, std::string const& filename);
 
 }  // namespace detail
 }  // namespace cppurses

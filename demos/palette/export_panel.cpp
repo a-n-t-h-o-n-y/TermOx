@@ -69,7 +69,7 @@ Export_panel::Export_panel()
     name_edit_.brush.set_background(Color::Dark_gray);
     name_edit_.set_ghost_color(Color::Light_gray);
     name_edit_.set_validator(
-        [](char c) { return !std::iscntrl(c) || !std::isspace(c); });
+        [](char c) { return !std::iscntrl(c) or !std::isspace(c); });
 
     export_btn_.brush.set_background(Color::White);
     export_btn_.brush.set_foreground(Color::Black);

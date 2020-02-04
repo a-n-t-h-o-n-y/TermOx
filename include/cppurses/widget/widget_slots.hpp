@@ -11,35 +11,35 @@ class Widget;
 struct Point;
 namespace slot {
 
-sig::Slot<void()> enable(Widget& w);
+auto enable(Widget& w) -> sig::Slot<void()>;
 
-sig::Slot<void()> disable(Widget& w);
+auto disable(Widget& w) -> sig::Slot<void()>;
 
-sig::Slot<void()> delete_later(Widget& w);
+auto delete_later(Widget& w) -> sig::Slot<void()>;
 
-sig::Slot<void()> update(Widget& w);
+auto update(Widget& w) -> sig::Slot<void()>;
 
-sig::Slot<void(Point, Mouse::Button)> click(Widget& w);
+auto click(Widget& w) -> sig::Slot<void(Point, Mouse::Button)>;
 
-sig::Slot<void(Mouse::Button)> click(Widget& w, Point c);
+auto click(Widget& w, Point p) -> sig::Slot<void(Mouse::Button)>;
 
-sig::Slot<void(Point)> click(Widget& w, Mouse::Button b);
+auto click(Widget& w, Mouse::Button b) -> sig::Slot<void(Point)>;
 
-sig::Slot<void()> click(Widget& w, Point c, Mouse::Button b);
+auto click(Widget& w, Point p, Mouse::Button b) -> sig::Slot<void()>;
 
-sig::Slot<void(Key::Code)> keypress(Widget& w);
+auto keypress(Widget& w) -> sig::Slot<void(Key::Code)>;
 
-sig::Slot<void()> keypress(Widget& w, Key::Code k);
+auto keypress(Widget& w, Key::Code k) -> sig::Slot<void()>;
 
-sig::Slot<void(Color)> set_background(Widget& w);
+auto set_background(Widget& w) -> sig::Slot<void(Color)>;
 
-sig::Slot<void()> set_background(Widget& w, Color c);
+auto set_background(Widget& w, Color c) -> sig::Slot<void()>;
 
-sig::Slot<void(Color)> set_foreground(Widget& w);
+auto set_foreground(Widget& w) -> sig::Slot<void(Color)>;
 
-sig::Slot<void()> set_foreground(Widget& w, Color c);
+auto set_foreground(Widget& w, Color c) -> sig::Slot<void()>;
 
-sig::Slot<void()> toggle_cursor(Widget& w);
+auto toggle_cursor(Widget& w) -> sig::Slot<void()>;
 
 }  // namespace slot
 }  // namespace cppurses

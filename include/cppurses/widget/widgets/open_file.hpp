@@ -12,32 +12,32 @@
 
 namespace cppurses {
 
-template <typename CharT = char>
+template <typename Char_t = char>
 class Open_file : public layout::Horizontal<> {
+   public:
+    Push_button& open_btn    = this->make_child<Push_button>("Open");
+    Fixed_width& separator   = this->make_child<Fixed_width>(1);
+    Line_edit& filename_edit = this->make_child<Line_edit>("Filename");
+
+    sig::Signal<void(std::basic_ifstream<Char_t>&)> open_requested;
+
    public:
     Open_file()
     {
         this->height_policy.fixed(1);
         open_btn.width_policy.fixed(4);
         open_btn.brush.set_background(Color::Blue);
-        separator.wallpaper = L'⏵';
+        separator.wallpaper = L'>';
         filename_edit.brush.set_background(Color::White);
         filename_edit.brush.set_foreground(Color::Black);
         filename_edit.set_ghost_color(Color::Dark_gray);
         open_btn.clicked.connect([this] { this->notify(); });
     }
 
-    Push_button& open_btn{this->make_child<Push_button>("Open")};
-    Fixed_width& separator{this->make_child<Fixed_width>(1)};
-    Line_edit& filename_edit{this->make_child<Line_edit>("Filename")};
-
-    // Signals
-    sig::Signal<void(std::basic_ifstream<CharT>&)> open_requested;
-
    private:
     void notify()
     {
-        std::basic_ifstream<CharT> ifs{filename_edit.contents().str()};
+        auto ifs = std::basic_ifstream<Char_t>{filename_edit.contents().str()};
         open_requested(ifs);
     }
 };

@@ -12,10 +12,15 @@ namespace cppurses {
 
 /// Number_edit with preceding Label arranged horizontally.
 template <typename Number_t = int>
-struct Labeled_number_edit : cppurses::layout::Horizontal<> {
+class Labeled_number_edit : public cppurses::layout::Horizontal<> {
+   public:
     cppurses::Label& label;
     cppurses::Number_edit<Number_t>& number_edit;
 
+    /// Emitted on Enter Key press, sends along the current value.
+    sig::Signal<void(Number_t)>& value_set = number_edit.value_set;
+
+   public:
     /// Construct with \p title for Label text and \p initial value.
     Labeled_number_edit(Glyph_string title, Number_t initial)
         : label{this->make_child<cppurses::Label>(std::move(title))},
@@ -32,9 +37,6 @@ struct Labeled_number_edit : cppurses::layout::Horizontal<> {
     /// Manually set the value of the Number_edit.
     /** Does not emit a value_set Signal. Forwards to number_edit object.*/
     void set_value(Number_t value) { number_edit.set_value(value); }
-
-    /// Emitted on Enter Key press, sends along the current value.
-    sig::Signal<void(Number_t)>& value_set{number_edit.value_set};
 };
 
 }  // namespace cppurses

@@ -37,6 +37,7 @@ class Event {
         Custom
     };
 
+   public:
     /// Initializes the \p type and the \p receiver of the Event.
     Event(Type type, Widget& receiver) : type_{type}, receiver_{receiver} {}
 
@@ -67,9 +68,9 @@ class Event {
 
     /// Equality on the type_ and recevier_ member objects.
     /** Used to optimize away duplicate events in Event_queue::append() */
-    auto operator==(const Event& other) const -> bool
+    auto operator==(Event const& other) const -> bool
     {
-        return (type_ == other.type_) && (&receiver_ == &other.receiver_);
+        return (type_ == other.type_) and (&receiver_ == &other.receiver_);
     }
 
    protected:

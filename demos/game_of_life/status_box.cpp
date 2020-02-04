@@ -15,16 +15,19 @@
 using namespace cppurses;
 namespace gol {
 
-Generation_count::Generation_count() {
+Generation_count::Generation_count()
+{
     this->height_policy.fixed(1);
     this->cursor.disable();
 }
 
-void Generation_count::update_count(std::uint32_t count) {
+void Generation_count::update_count(std::uint32_t count)
+{
     count_.set_contents(std::to_string(count));
 }
 
-Center_offset::Center_offset() {
+Center_offset::Center_offset()
+{
     title_.set_alignment(Alignment::Center);
     x_coords.number_edit.brush.set_background(cppurses::Color::Black);
     x_coords.number_edit.brush.set_foreground(cppurses::Color::White);
@@ -34,12 +37,13 @@ Center_offset::Center_offset() {
     y_coords.number_edit.set_ghost_color(Color::White);
 }
 
-Status_box::Status_box() {
+Status_box::Status_box()
+{
     this->height_policy.fixed(5);
 
     this->border.enable();
     this->border.segments.disable_all();
     this->border.segments.north.enable();
-    this->border.segments.north = Glyph{L'─', foreground(Color::Blue)};
+    this->border.segments.north = L'─'_g | foreground(Color::Blue);
 }
 }  // namespace gol

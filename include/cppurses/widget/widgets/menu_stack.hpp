@@ -18,8 +18,9 @@ namespace cppurses {
 /// A Stack layout with a Menu to switch between pages.
 /** Menu Widget is not counted as a Stack index, pages start from index 0. */
 class Menu_stack : public layout::Stack<Widget> {
+   private:
     Menu& menu_;
-    static std::size_t const menu_index_{0u};
+    static auto constexpr menu_index_ = 0uL;
 
    public:
     /// Construct an empty Menu_stack with \p title passed to Menu constructor.
@@ -92,13 +93,13 @@ class Menu_stack : public layout::Stack<Widget> {
     }
 
     /// Return the number of pages in this Stack, not including the Menu Widget.
-    std::size_t size() const { return this->Stack::size() - 1; }
+    auto size() const -> std::size_t { return this->Stack::size() - 1; }
 
     /// Return reference to the Menu Widget at the front of the Stack.
-    Menu& menu() { return menu_; }
+    auto menu() -> Menu& { return menu_; }
 
     /// Return const reference to the Menu Widget at the front of the Stack.
-    const Menu& menu() const { return menu_; }
+    auto menu() const -> Menu const& { return menu_; }
 
     /// Set the active page to the menu, useful to control returning to menu.
     void goto_menu() { this->Stack::set_active_page(menu_index_); }
@@ -107,6 +108,13 @@ class Menu_stack : public layout::Stack<Widget> {
     void set_active_page(std::size_t index)
     {
         this->Stack::set_active_page(index + 1);
+    }
+
+   protected:
+    auto focus_in_event() -> bool override
+    {
+        Focus::set_focus_to(menu_);
+        return Stack::focus_in_event();
     }
 
    private:
@@ -125,13 +133,6 @@ class Menu_stack : public layout::Stack<Widget> {
     {
         auto& signal = menu_.insert_item(std::move(title), index - 1);
         signal.connect(slot::set_active_page(*this, index));
-    }
-
-   protected:
-    bool focus_in_event() override
-    {
-        Focus::set_focus_to(menu_);
-        return Stack::focus_in_event();
     }
 };
 

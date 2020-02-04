@@ -24,6 +24,10 @@ namespace layout {
 template <typename Child_t = Widget>
 class Stack : public layout::Horizontal<Child_t> {
    public:
+    /// Emitted when the active page is changed, sends the new index along.
+    sig::Signal<void(std::size_t)> page_changed;
+
+   public:
     /// Set child Widget to be enabled/visible via its index into child vector.
     /** The index is typically the same order as child Widgets were added.
      *  Throws std::out_of_range if \p index is invalid. */
@@ -151,14 +155,11 @@ class Stack : public layout::Horizontal<Child_t> {
     }
 
     /// Used to indicate an error on return values of index type.
-    static std::size_t const invalid_index{static_cast<std::size_t>(-1)};
-
-    /// Emitted when the active page is changed, sends the new index along.
-    sig::Signal<void(std::size_t)> page_changed;
+    static auto constexpr invalid_index = static_cast<std::size_t>(-1);
 
    private:
-    Child_t* active_page_{nullptr};
-    bool sets_focus_{true};
+    Child_t* active_page_ = nullptr;
+    bool sets_focus_      = true;
 };
 
 }  // namespace layout

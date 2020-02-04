@@ -9,10 +9,11 @@ class Widget;
 class Resize_event : public Event {
    public:
     Resize_event(Widget& receiver, Area new_size)
-        : Event{Event::Resize, receiver}, new_area_{new_size} {}
+        : Event{Event::Resize, receiver}, new_area_{new_size}
+    {}
 
-    bool send() const override;
-    bool filter_send(Widget& filter) const override;
+    auto send() const -> bool override;
+    auto filter_send(Widget& filter) const -> bool override;
 
    protected:
     Area new_area_;

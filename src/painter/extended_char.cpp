@@ -6,7 +6,9 @@
 #include <ncurses.h>
 
 namespace {
-const std::map<wchar_t, chtype> extended_chars {
+
+auto const extended_chars = std::map<wchar_t, chtype>{
+    // clang-format off
     {L'┌', ACS_ULCORNER},   {L'┍', ACS_ULCORNER},   {L'┎', ACS_ULCORNER},
     {L'┏', ACS_ULCORNER},   {L'╒', ACS_ULCORNER},   {L'╓', ACS_ULCORNER},
     {L'╔', ACS_ULCORNER},   {L'╭', ACS_ULCORNER},
@@ -161,7 +163,9 @@ const std::map<wchar_t, chtype> extended_chars {
     {L'ᵃ', 'a'},            {L'ᵇ', 'b'},            {L'ᶜ', 'c'},
     {L'ᵈ', 'd'},            {L'ᵉ', 'e'},            {L'ᶠ', 'f'},
     {L'ᵍ', 'g'},            {L'ʰ', 'h'}
-    };
+    // clang-format on
+};
+
 }  // namespace
 
 namespace cppurses {
@@ -170,15 +174,16 @@ namespace detail {
 /// Find a chtype representation of wchar_t \p symbol.
 /** \p use_addch is set to true if ncurses addch function is needed to display
  *  the symbol. */
-chtype get_chtype(wchar_t symbol, bool& use_addch) {
-    auto result = chtype{'?'};
-    if (symbol <= std::numeric_limits<signed char>::max()) {
-        result = symbol;
-    } else if (extended_chars.count(symbol) != 0) {
+auto get_chtype(wchar_t symbol, bool& use_addch) -> chtype
+{
+    if (symbol <= std::numeric_limits<signed char>::max())
+        return symbol;
+    auto const iter = extended_chars.find(symbol);
+    if (iter != std::end(extended_chars)) {
         use_addch = true;
-        result = extended_chars.find(symbol)->second;
+        return extended_chars.find(symbol)->second;
     }
-    return result;
+    return '?';
 }
 
 }  // namespace detail

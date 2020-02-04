@@ -9,7 +9,6 @@ namespace glyph_paint {
 
 Glyph_paint::Glyph_paint()
 {
-    this->set_name("Glyph_paint - main demo widget");
     side_pane.glyph_select.make_connections(slot::set_symbol(paint_area));
 
     side_pane.color_pages.foreground.color_selected.connect(

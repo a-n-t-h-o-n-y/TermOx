@@ -82,9 +82,7 @@ target_sources(cppurses PRIVATE
     system/shortcuts.cpp
     system/animation_engine.cpp
     system/timer_event_loop.cpp
-    system/timer_event.cpp
     system/user_input_event_loop.cpp
-    system/fps_to_period.cpp
     system/find_widget_at.cpp
     system/mouse.cpp
     system/key.cpp
@@ -94,52 +92,32 @@ target_sources(cppurses PRIVATE
 # PAINTER
 target_sources(cppurses PRIVATE
     painter/painter.cpp
-    painter/brush.cpp
     painter/screen.cpp
     painter/glyph_matrix.cpp
-    painter/glyph_string.cpp
-    painter/wchar_to_bytes.cpp
     painter/extended_char.cpp
     painter/screen_mask.cpp
     painter/find_empty_space.cpp
-    painter/screen_state.cpp
     painter/palettes.cpp
-    painter/color.cpp
 )
 
 # WIDGET
 target_sources(cppurses PRIVATE
     widget/widget.cpp
-    widget/widget.event_handlers.cpp
     widget/widget_slots.cpp
-    widget/label.cpp
     widget/line_edit.cpp
     widget/log.cpp
     widget/confirm_button.cpp
-    widget/matrix_display.cpp
-    widget/point.cpp
     widget/border.cpp
     widget/cycle_box.cpp
-    widget/status_bar.cpp
     widget/textbox.cpp
     widget/horizontal_slider.cpp
     widget/textbox_base.cpp
-    widget/push_button.cpp
-    widget/horizontal_scrollbar.cpp
-    widget/vertical_scrollbar.cpp
-    widget/checkbox.cpp
-    widget/titlebar.cpp
     widget/text_display.cpp
     widget/menu.cpp
-    widget/size_policy.cpp
-    widget/fixed_width.cpp
-    widget/fixed_height.cpp
     widget/border_offset.cpp
     widget/cursor_data.cpp
     widget/graph_tree.cpp
-    widget/nearly_equal.cpp
     widget/vertical_slider.cpp
-    widget/slider_logic.cpp
 )
 
 # TERMINAL

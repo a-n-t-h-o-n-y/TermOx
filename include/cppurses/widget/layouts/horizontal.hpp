@@ -32,6 +32,7 @@ class Horizontal : public Layout<Child_t> {
     using Dimensions           = typename Layout<Child_t>::Dimensions;
     using Dimensions_reference = typename Layout<Child_t>::Dimensions_reference;
 
+   private:
     auto calculate_widget_sizes()
         -> std::vector<typename Layout<Child_t>::Dimensions>
     {
@@ -50,8 +51,8 @@ class Horizontal : public Layout<Child_t> {
         // Set Fixed, Minimum and MinimumExpanding to width_hint
         for (auto& dimension : widgets) {
             auto policy = dimension.widget->width_policy.type();
-            if (policy == Size_policy::Fixed ||
-                policy == Size_policy::Minimum ||
+            if (policy == Size_policy::Fixed or
+                policy == Size_policy::Minimum or
                 policy == Size_policy::MinimumExpanding) {
                 dimension.width = dimension.widget->width_policy.hint();
                 width_available -= dimension.width;
@@ -79,8 +80,8 @@ class Horizontal : public Layout<Child_t> {
         // Set Maximum, Preferred and Expanding to width_hint
         for (auto& dimension : widgets) {
             auto policy = dimension.widget->width_policy.type();
-            if (policy == Size_policy::Maximum ||
-                policy == Size_policy::Preferred ||
+            if (policy == Size_policy::Maximum or
+                policy == Size_policy::Preferred or
                 policy == Size_policy::Expanding) {
                 dimension.width = dimension.widget->width_policy.hint();
                 width_available -= dimension.width;
@@ -116,8 +117,8 @@ class Horizontal : public Layout<Child_t> {
             auto policy = d.widget->height_policy.type();
             if (policy == Size_policy::Fixed)
                 d.height = d.widget->height_policy.hint();
-            else if (policy == Size_policy::Ignored ||
-                     policy == Size_policy::Preferred ||
+            else if (policy == Size_policy::Ignored or
+                     policy == Size_policy::Preferred or
                      policy == Size_policy::Expanding) {
                 if (d.height > d.widget->height_policy.max_size())
                     d.height = d.widget->height_policy.max_size();
@@ -128,7 +129,7 @@ class Horizontal : public Layout<Child_t> {
                 if (d.height > d.widget->height_policy.hint())
                     d.height = d.widget->height_policy.hint();
             }
-            else if (policy == Size_policy::Minimum ||
+            else if (policy == Size_policy::Minimum or
                      policy == Size_policy::MinimumExpanding) {
                 if (d.height > d.widget->height_policy.max_size())
                     d.height = d.widget->height_policy.max_size();
@@ -140,7 +141,7 @@ class Horizontal : public Layout<Child_t> {
     }
 
     void move_and_resize_children(
-        const std::vector<typename Layout<Child_t>::Dimensions>& dimensions)
+        std::vector<typename Layout<Child_t>::Dimensions> const& dimensions)
     {
         auto const parent_x      = this->inner_x();
         auto const parent_y      = this->inner_y();
@@ -148,11 +149,11 @@ class Horizontal : public Layout<Child_t> {
         auto const parent_height = this->height();
         auto x_pos               = parent_x;
         for (auto const& d : dimensions) {
-            if ((x_pos + d.width) > (parent_x + parent_width) ||
-                (parent_y + d.height) > (parent_y + parent_height) ||
-                d.height == 0 || d.width == 0) {
-                d.widget->disable(true,
-                                  false);  // don't send child_polished_events
+            if ((x_pos + d.width) > (parent_x + parent_width) or
+                (parent_y + d.height) > (parent_y + parent_height) or
+                d.height == 0 or d.width == 0) {
+                // Don't send child_polished_events
+                d.widget->disable(true, false);
             }
             else {
                 System::post_event<Move_event>(*(d.widget),
@@ -172,7 +173,7 @@ class Horizontal : public Layout<Child_t> {
         std::size_t total_stretch{0};
         for (auto const& d : widgets) {
             auto policy = d.widget->width_policy.type();
-            if (policy == Size_policy::Expanding ||
+            if (policy == Size_policy::Expanding or
                 policy == Size_policy::MinimumExpanding) {
                 total_stretch += d.widget->width_policy.stretch();
             }
@@ -186,7 +187,7 @@ class Horizontal : public Layout<Child_t> {
         auto to_distribute   = width_left;
         for (auto const& d : widgets) {
             auto policy = d.widget->width_policy.type();
-            if (policy == Size_policy::Expanding ||
+            if (policy == Size_policy::Expanding or
                 policy == Size_policy::MinimumExpanding) {
                 width_additions.push_back((d.widget->width_policy.stretch() /
                                            static_cast<double>(total_stretch)) *
@@ -205,7 +206,7 @@ class Horizontal : public Layout<Child_t> {
         // If it has gotten this far, no widgets were over space, assign values
         for (auto& d : widgets) {
             auto policy = d.widget->width_policy.type();
-            if (policy == Size_policy::Expanding ||
+            if (policy == Size_policy::Expanding or
                 policy == Size_policy::MinimumExpanding) {
                 *d.width += width_additions.front();
                 width_left -= width_additions.front();
@@ -221,8 +222,8 @@ class Horizontal : public Layout<Child_t> {
         total_stretch = 0;
         for (auto const& d : widgets) {
             auto policy = d.widget->width_policy.type();
-            if (policy == Size_policy::Preferred ||
-                policy == Size_policy::Minimum ||
+            if (policy == Size_policy::Preferred or
+                policy == Size_policy::Minimum or
                 policy == Size_policy::Ignored) {
                 total_stretch += d.widget->width_policy.stretch();
             }
@@ -236,8 +237,8 @@ class Horizontal : public Layout<Child_t> {
         to_distribute = width_left;
         for (auto const& d : widgets) {
             auto policy = d.widget->width_policy.type();
-            if (policy == Size_policy::Preferred ||
-                policy == Size_policy::Minimum ||
+            if (policy == Size_policy::Preferred or
+                policy == Size_policy::Minimum or
                 policy == Size_policy::Ignored) {
                 width_additions.push_back((d.widget->width_policy.stretch() /
                                            static_cast<double>(total_stretch)) *
@@ -256,8 +257,8 @@ class Horizontal : public Layout<Child_t> {
         // If it has gotten this far, no widgets were over space, assign values
         for (auto& d : widgets) {
             auto policy = d.widget->width_policy.type();
-            if (policy == Size_policy::Preferred ||
-                policy == Size_policy::Minimum ||
+            if (policy == Size_policy::Preferred or
+                policy == Size_policy::Minimum or
                 policy == Size_policy::Ignored) {
                 *d.width += width_additions.front();
                 width_left -= width_additions.front();
@@ -274,8 +275,8 @@ class Horizontal : public Layout<Child_t> {
             width_check = width_left;
             for (auto& d : widgets) {
                 auto policy = d.widget->width_policy.type();
-                if ((policy == Size_policy::Expanding ||
-                     policy == Size_policy::MinimumExpanding) &&
+                if ((policy == Size_policy::Expanding or
+                     policy == Size_policy::MinimumExpanding) and
                     width_left > 0) {
                     if (*d.width + 1 <= d.widget->width_policy.max_size()) {
                         *d.width += 1;
@@ -290,9 +291,9 @@ class Horizontal : public Layout<Child_t> {
             width_check = width_left;
             for (auto& d : widgets) {
                 auto policy = d.widget->width_policy.type();
-                if ((policy == Size_policy::Preferred ||
-                     policy == Size_policy::Minimum ||
-                     policy == Size_policy::Ignored) &&
+                if ((policy == Size_policy::Preferred or
+                     policy == Size_policy::Minimum or
+                     policy == Size_policy::Ignored) and
                     width_left > 0) {
                     if (*d.width + 1 <= d.widget->width_policy.max_size()) {
                         *d.width += 1;
@@ -313,8 +314,8 @@ class Horizontal : public Layout<Child_t> {
         auto total_stretch = std::size_t{0};
         for (auto const& d : widgets) {
             auto policy = d.widget->width_policy.type();
-            if (policy == Size_policy::Maximum ||
-                policy == Size_policy::Preferred ||
+            if (policy == Size_policy::Maximum or
+                policy == Size_policy::Preferred or
                 policy == Size_policy::Ignored) {
                 total_stretch += d.widget->width_policy.stretch();
             }
@@ -324,8 +325,8 @@ class Horizontal : public Layout<Child_t> {
         double total_inverse{0};
         for (auto const& d : widgets) {
             auto policy = d.widget->width_policy.type();
-            if (policy == Size_policy::Maximum ||
-                policy == Size_policy::Preferred ||
+            if (policy == Size_policy::Maximum or
+                policy == Size_policy::Preferred or
                 policy == Size_policy::Ignored) {
                 total_inverse += 1 / (d.widget->width_policy.stretch() /
                                       static_cast<double>(total_stretch));
@@ -340,8 +341,8 @@ class Horizontal : public Layout<Child_t> {
         auto to_collect = width_left;
         for (auto const& d : widgets) {
             auto policy = d.widget->width_policy.type();
-            if (policy == Size_policy::Maximum ||
-                policy == Size_policy::Preferred ||
+            if (policy == Size_policy::Maximum or
+                policy == Size_policy::Preferred or
                 policy == Size_policy::Ignored) {
                 width_deductions.push_back(
                     ((1 / (d.widget->width_policy.stretch() /
@@ -363,8 +364,8 @@ class Horizontal : public Layout<Child_t> {
         // calculated values
         for (auto& d : widgets) {
             auto policy = d.widget->width_policy.type();
-            if (policy == Size_policy::Maximum ||
-                policy == Size_policy::Preferred ||
+            if (policy == Size_policy::Maximum or
+                policy == Size_policy::Preferred or
                 policy == Size_policy::Ignored) {
                 if (*d.width >= width_deductions.front()) {
                     *d.width -= width_deductions.front();

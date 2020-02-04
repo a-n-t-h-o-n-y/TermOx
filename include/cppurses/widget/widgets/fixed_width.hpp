@@ -8,7 +8,11 @@ namespace cppurses {
 
 /// Empty space Widget with fixed width.
 struct Fixed_width : Widget {
-    explicit Fixed_width(std::size_t width = 1);
+    explicit Fixed_width(std::size_t width = 1)
+    {
+        this->width_policy.fixed(width);
+    }
 };
+
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_WIDGETS_FIXED_WIDTH_HPP

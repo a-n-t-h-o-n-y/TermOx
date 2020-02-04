@@ -28,7 +28,7 @@ std::string load_file(const std::string& filename)
         return "";
     std::ostringstream oss;
     ifs >> oss.rdbuf();
-    if (ifs.fail() && !ifs.eof())
+    if (ifs.fail() and !ifs.eof())
         return "";
     return oss.str();
 }
@@ -113,15 +113,7 @@ Attrs_and_colors::Attrs_and_colors()
 void Attrs_and_colors::initialize() { this->width_policy.fixed(16); }
 
 // Save Area
-Save_area::Save_area()
-{
-    this->initialize();
-    // names
-    this->set_name("Save_area");
-    load_btn.set_name("Save_area - load_btn");
-    filename_edit.set_name("Save_area - filename_edit");
-    save_btn.set_name("Save_area - save_btn");
-}
+Save_area::Save_area() { this->initialize(); }
 
 void Save_area::initialize()
 {
@@ -145,7 +137,6 @@ Notepad::Notepad()
 {
     this->initialize();
     this->focus_policy = Focus_policy::Strong;
-    this->set_name("Notepad - main demo widget");
 }
 
 bool Notepad::focus_in_event()

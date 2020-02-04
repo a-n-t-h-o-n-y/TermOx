@@ -10,15 +10,14 @@ namespace detail {
 
 /// Global map holds the changes to be flushed to the screen.
 class Staged_changes {
-    Staged_changes() = default;
-
    public:
     using Map_t = std::unordered_map<Widget*, Screen_descriptor>;
 
+   public:
     /// Return the global Staged_changes map object.
     static auto get() -> Map_t&
     {
-        static Map_t changes;
+        static auto changes = Map_t{};
         return changes;
     }
 };

@@ -10,10 +10,10 @@ namespace {
 /** Return '\0' if \p key does not have a printable representation. */
 auto key_to_char(cppurses::Key::Code key) -> char
 {
-    constexpr auto alpha_low  = std::int16_t{32};
-    constexpr auto alpha_high = std::int16_t{126};
-    const auto value          = static_cast<std::int16_t>(key);
-    if (value < alpha_low || value > alpha_high)
+    auto constexpr alpha_low  = std::int16_t{32};
+    auto constexpr alpha_high = std::int16_t{126};
+    auto const value          = static_cast<std::int16_t>(key);
+    if (value < alpha_low or value > alpha_high)
         return '\0';
     return static_cast<char>(value);
 }
@@ -26,9 +26,9 @@ namespace cppurses {
 auto Key::Press::send() const -> bool
 {
     bool r = receiver_.key_press_event(Key::State{key_, key_to_char(key_)});
-    if (key_ == Code::Tab && Focus::tab_press())
+    if (key_ == Code::Tab and Focus::tab_press())
         return true;
-    if (key_ == Code::Back_tab && Focus::shift_tab_press())
+    if (key_ == Code::Back_tab and Focus::shift_tab_press())
         return true;
     return r;
 }

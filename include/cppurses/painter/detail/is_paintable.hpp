@@ -6,8 +6,9 @@ namespace cppurses {
 namespace detail {
 
 /// A check for whether a widget is in a state that can be painted.
-inline bool is_paintable(const Widget& w) {
-    return w.enabled() && (w.outer_width() != 0) && (w.outer_height() != 0);
+inline auto is_paintable(Widget const& w) -> bool
+{
+    return w.enabled() and (w.outer_width() != 0) and (w.outer_height() != 0);
 }
 
 }  // namespace detail

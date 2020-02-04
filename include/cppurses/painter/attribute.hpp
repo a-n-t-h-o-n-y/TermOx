@@ -23,7 +23,7 @@ enum class Attribute : std::int8_t {
  *  a query about a specific Attribute quick. Returning a list of all set
  *  Attributes is expensive, requiring an allocation if using std::vector. Might
  *  change in the future to give a better interface. */
-constexpr std::array<Attribute, 8> Attribute_list{
+auto constexpr Attribute_list = std::array<Attribute, 8>{
     Attribute::Bold,      Attribute::Italic, Attribute::Underline,
     Attribute::Standout,  Attribute::Dim,    Attribute::Inverse,
     Attribute::Invisible, Attribute::Blink};

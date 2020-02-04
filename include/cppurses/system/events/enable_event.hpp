@@ -12,12 +12,14 @@ class Enable_event : public Event {
    public:
     explicit Enable_event(Widget& receiver) : Event{Event::Enable, receiver} {}
 
-    bool send() const override {
+    auto send() const -> bool override
+    {
         receiver_.screen_state().optimize.just_enabled = true;
         return receiver_.enable_event();
     }
 
-    bool filter_send(Widget& filter) const override {
+    auto filter_send(Widget& filter) const -> bool override
+    {
         return filter.enable_event_filter(receiver_);
     }
 };

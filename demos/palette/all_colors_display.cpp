@@ -6,12 +6,11 @@
 
 namespace palette {
 
-
 bool Shade_display::paint_event()
 {
     using namespace cppurses;
-    auto light_shade   = Glyph{L'░', background(base_)};
-    auto mid_shade     = Glyph{L'▒', background(base_)};
+    auto light_shade   = L'░'_g | background(base_);
+    auto mid_shade     = L'▒'_g | background(base_);
     auto const color_n = 16;
 
     int const height = static_cast<int>(this->height());
@@ -26,7 +25,7 @@ bool Shade_display::paint_event()
     Painter p{*this};
     auto& shade = light_shade;
     for (auto y = y_begin, i = 0; y_end(y); increment(y)) {
-        for (auto x = 0; x < width && i < (2 * color_n); ++x, ++i) {
+        for (auto x = 0; x < width and i < (2 * color_n); ++x, ++i) {
             if (i == color_n)
                 shade = mid_shade;
             auto const foreground =

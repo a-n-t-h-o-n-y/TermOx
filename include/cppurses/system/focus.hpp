@@ -9,16 +9,16 @@ class Widget;
 
 class Focus {
    public:
-    static Widget* focus_widget() { return focus_widget_; }
+    static auto focus_widget() -> Widget* { return focus_widget_; }
 
     /// Sets the focus to \p clicked if it has a Focus_policy::Mouse/Strong.
     static void mouse_press(Widget& clicked);
 
     /// Find the next Focus_policy::Tab/Strong Widget and set focus to it.
-    static bool tab_press();
+    static auto tab_press() -> bool;
 
     /// Find the previous Focus_policy::Tab/Strong Widget and set focus to it.
-    static bool shift_tab_press();
+    static auto shift_tab_press() -> bool;
 
     /// Set focus to \p new_focus.
     /** If \p new_focus has Focus_policy::None, calls Focus::clear(). */
@@ -38,9 +38,6 @@ class Focus {
 
     /// Re-enable a Tab or Back_tab to change focus to the next Widget.
     static void unsuppress_tab() { tab_suppressed_ = false; }
-
-    ///
-    static void reset_tab_suppression();
 
    private:
     static Widget* focus_widget_;

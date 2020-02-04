@@ -11,7 +11,7 @@ namespace detail {
  *  Return the deepest child Widget that owns the coordinates. If a parent owns
  *  the coordinates, it is checked if any of the children own it as well before
  *  returning. Used only by input::get at the moment. */
-Widget* find_widget_at(std::size_t x, std::size_t y);
+auto find_widget_at(std::size_t x, std::size_t y) -> Widget*;
 
 }  // namespace detail
 }  // namespace cppurses

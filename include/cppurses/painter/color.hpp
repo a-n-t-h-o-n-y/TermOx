@@ -8,9 +8,10 @@ namespace cppurses {
 using Underlying_color_t = std::int16_t;
 
 namespace detail {
-// const Underlying_color_t first_color_value{239};
-const Underlying_color_t first_color_value{0};
-const Underlying_color_t last_color_value{first_color_value + 16};
+
+auto constexpr first_color_value = Underlying_color_t{0};
+auto constexpr last_color_value  = Underlying_color_t{first_color_value + 16};
+
 }  // namespace detail
 
 /// Colors that can be applied to Glyphs.
@@ -52,14 +53,14 @@ enum class BackgroundColor : Underlying_color_t {
     White,
 
     // Extended Colors
-    Dark_red,
-    Dark_blue,
     Dark_gray,
+    Dark_red,
+    Light_green,
     Brown,
-    Gray,
+    Dark_blue,
     Orange,
-    Light_gray,
-    Light_green
+    Gray,
+    Light_gray
 };
 
 // Used by add_attributes() in brush to overload on different Color types from a
@@ -76,30 +77,52 @@ enum class ForegroundColor : Underlying_color_t {
     White,
 
     // Extended Colors
-    Dark_red,
-    Dark_blue,
     Dark_gray,
+    Dark_red,
+    Light_green,
     Brown,
-    Gray,
+    Dark_blue,
     Orange,
-    Light_gray,
-    Light_green
+    Gray,
+    Light_gray
 };
 
 }  // namespace detail
 
 /// Converts a Color into a detail::BackgroundColor to be used by Brush.
-inline constexpr detail::BackgroundColor background(Color c) {
+inline auto constexpr background(Color c) -> detail::BackgroundColor
+{
     return static_cast<detail::BackgroundColor>(c);
 }
 
 /// Converts a Color into a detail::BackgroundColor to be used by Brush.
-inline constexpr detail::ForegroundColor foreground(Color c) {
+inline auto constexpr foreground(Color c) -> detail::ForegroundColor
+{
     return static_cast<detail::ForegroundColor>(c);
 }
 
 /// Get the name of the color as a string.
-std::string color_to_string(Color c);
+inline auto color_to_string(Color c) -> std::string
+{
+    switch (c) {
+        case Color::Black: return "Black";
+        case Color::Dark_red: return "Dark Red";
+        case Color::Dark_blue: return "Dark Blue";
+        case Color::Dark_gray: return "Dark Gray";
+        case Color::Brown: return "Brown";
+        case Color::Green: return "Green";
+        case Color::Red: return "Red";
+        case Color::Gray: return "Gray";
+        case Color::Blue: return "Blue";
+        case Color::Orange: return "Orange";
+        case Color::Light_gray: return "Light Gray";
+        case Color::Light_green: return "Light Green";
+        case Color::Violet: return "Violet";
+        case Color::Light_blue: return "Light Blue";
+        case Color::Yellow: return "Yellow";
+        case Color::White: return "White";
+    }
+}
 
 }  // namespace cppurses
 #endif  // CPPURSES_PAINTER_COLOR_HPP

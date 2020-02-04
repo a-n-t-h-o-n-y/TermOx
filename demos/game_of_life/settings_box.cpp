@@ -27,7 +27,7 @@ Rule_edit::Rule_edit()
     edit_box.brush.set_foreground(Color::Black);
     edit_box.set_ghost_color(Color::Dark_gray);
 
-    edit_box.set_validator([](char c) { return std::isdigit(c) || c == '/'; });
+    edit_box.set_validator([](char c) { return std::isdigit(c) or c == '/'; });
     edit_box.edit_finished.connect(
         [this](std::string rule_text) { rule_change(rule_text); });
 
@@ -63,7 +63,7 @@ Settings_box::Settings_box()
     this->border.enable();
     this->border.segments.disable_all();
     this->border.segments.north.enable();
-    this->border.segments.north = Glyph{L'─', foreground(Color::Blue)};
+    this->border.segments.north = L'─'_g | foreground(Color::Blue);
 
     period_edit.value_set.connect(
         [this](int value) { period_set(std::chrono::milliseconds{value}); });

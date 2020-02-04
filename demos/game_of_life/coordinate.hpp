@@ -8,8 +8,9 @@ struct Coordinate {
 };
 
 /// Increases from left to right, top to bottom.
-inline bool operator<(Coordinate lhs, Coordinate rhs) {
-    return (lhs.y < rhs.y) || (lhs.y == rhs.y && lhs.x < rhs.x);
+inline bool operator<(Coordinate lhs, Coordinate rhs)
+{
+    return (lhs.y < rhs.y) or (lhs.y == rhs.y and lhs.x < rhs.x);
 }
 
 }  // namespace gol

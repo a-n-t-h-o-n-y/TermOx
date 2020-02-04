@@ -32,8 +32,8 @@ namespace {
 auto is_sendable(cppurses::Event const& event) -> bool
 {
     using Event = cppurses::Event;
-    return event.receiver().enabled() ||
-           (event.type() == Event::Delete || event.type() == Event::Disable ||
+    return event.receiver().enabled() or
+           (event.type() == Event::Delete or event.type() == Event::Disable or
             event.type() == Event::FocusOut);
 }
 
@@ -43,9 +43,9 @@ namespace cppurses {
 
 sig::Slot<void()> System::quit = []() { System::exit(); };
 sig::Signal<void(int)> System::exit_signal{};
-Widget* System::head_{nullptr};
-Widget* System::initial_focus_{nullptr};
-bool System::exit_requested_{false};
+Widget* System::head_          = nullptr;
+Widget* System::initial_focus_ = nullptr;
+bool System::exit_requested_   = false;
 detail::User_input_event_loop System::user_input_loop_;
 Animation_engine System::animation_engine_;
 Terminal System::terminal;
@@ -61,7 +61,6 @@ void System::exit(int exit_code)
     System::exit_signal(exit_code);
 }
 
-System::~System() { System::exit(0); }
 
 void System::set_head(Widget* new_head)
 {
@@ -73,12 +72,6 @@ void System::set_head(Widget* new_head)
         post_event<Resize_event>(*head_,
                                  Area{terminal.width(), terminal.height()});
     }
-}
-
-int System::run(Widget& head)
-{
-    System::set_head(&head);
-    return this->run();
 }
 
 int System::run()
@@ -93,12 +86,12 @@ int System::run()
     terminal.initialize();
     System::post_event<Resize_event>(*System::head(),
                                      Area{terminal.width(), terminal.height()});
-    const auto exit_code = user_input_loop_.run();
+    auto const exit_code = user_input_loop_.run();
     terminal.uninitialize();
     return exit_code;
 }
 
-auto System::send_event(const Event& event) -> bool
+auto System::send_event(Event const& event) -> bool
 {
     if (!is_sendable(event))
         return false;

@@ -15,11 +15,13 @@ namespace cppurses {
 class Delete_event : public Event {
    public:
     Delete_event(Widget& receiver, std::unique_ptr<Widget> removed)
-        : Event{Event::Delete, receiver}, removed_{std::move(removed)} {}
+        : Event{Event::Delete, receiver}, removed_{std::move(removed)}
+    {}
 
-    bool send() const override;
+    auto send() const -> bool override;
 
-    bool filter_send(Widget& filter) const override {
+    auto filter_send(Widget& filter) const -> bool override
+    {
         return filter.delete_event_filter(receiver_);
     }
 

@@ -19,14 +19,14 @@ void Animation_engine::register_widget(Widget& w, Period_t period)
             period, std::make_unique<detail::Timer_event_loop>(period));
         pair.first->second->run_async();
     }
-    auto iter = const_loops_.find(period);
+    auto const iter = const_loops_.find(period);
     if (iter != std::end(const_loops_))
         iter->second->register_widget(w);
 }
 
 void Animation_engine::register_widget(
     Widget& w,
-    const std::function<Period_t()>& period_func)
+    std::function<Period_t()> const& period_func)
 {
     variable_loops_.emplace_back(
         std::make_unique<detail::Timer_event_loop>(period_func));

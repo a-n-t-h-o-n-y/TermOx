@@ -32,6 +32,7 @@ class Vertical : public Layout<Child_t> {
     using Dimensions           = typename Layout<Child_t>::Dimensions;
     using Dimensions_reference = typename Layout<Child_t>::Dimensions_reference;
 
+   private:
     auto calculate_widget_sizes()
         -> std::vector<typename Layout<Child_t>::Dimensions>
     {
@@ -39,7 +40,7 @@ class Vertical : public Layout<Child_t> {
         std::size_t total_stretch{0};
         for (auto& child : this->get_children()) {
             if (child.enabled()) {  // TODO do not include Ignored height policy
-                                 // widgs?
+                                    // widgs?
                 // widgets.emplace_back(Dimensions{c.get(), 0, 0});
                 widgets.emplace_back(Dimensions{&child, this->width(), 0});
                 total_stretch += child.height_policy.stretch();
@@ -52,8 +53,8 @@ class Vertical : public Layout<Child_t> {
         // Set Fixed, Minimum and MinimumExpanding to height_hint
         for (Dimensions& d : widgets) {
             auto policy = d.widget->height_policy.type();
-            if (policy == Size_policy::Fixed ||
-                policy == Size_policy::Minimum ||
+            if (policy == Size_policy::Fixed or
+                policy == Size_policy::Minimum or
                 policy == Size_policy::MinimumExpanding) {
                 d.height = d.widget->height_policy.hint();
                 height_available -= d.height;
@@ -66,15 +67,14 @@ class Vertical : public Layout<Child_t> {
         // Set Size_policy::Ignored widgets to their stretch factor height value
         for (Dimensions& d : widgets) {
             if (d.widget->height_policy.type() == Size_policy::Ignored) {
-                const float percent = d.widget->height_policy.stretch() /
+                float const percent = d.widget->height_policy.stretch() /
                                       static_cast<float>(total_stretch);
-                std::size_t height = percent * this->height();
-                if (height < d.widget->height_policy.min_size()) {
+                auto height =
+                    static_cast<std::size_t>(percent * this->height());
+                if (height < d.widget->height_policy.min_size())
                     height = d.widget->height_policy.min_size();
-                }
-                else if (height > d.widget->height_policy.max_size()) {
+                else if (height > d.widget->height_policy.max_size())
                     height = d.widget->height_policy.max_size();
-                }
                 d.height = height;
                 height_available -= height;
             }
@@ -83,8 +83,8 @@ class Vertical : public Layout<Child_t> {
         // Set Maximum, Preferred and Expanding to height_hint
         for (Dimensions& d : widgets) {
             auto policy = d.widget->height_policy.type();
-            if (policy == Size_policy::Maximum ||
-                policy == Size_policy::Preferred ||
+            if (policy == Size_policy::Maximum or
+                policy == Size_policy::Preferred or
                 policy == Size_policy::Expanding) {
                 d.height = d.widget->height_policy.hint();
                 height_available -= d.height;
@@ -122,52 +122,47 @@ class Vertical : public Layout<Child_t> {
             if (policy == Size_policy::Fixed) {
                 d.width = d.widget->width_policy.hint();
             }
-            else if (policy == Size_policy::Ignored ||
-                     policy == Size_policy::Preferred ||
+            else if (policy == Size_policy::Ignored or
+                     policy == Size_policy::Preferred or
                      policy == Size_policy::Expanding) {
-                if (d.width > d.widget->width_policy.max_size()) {
+                if (d.width > d.widget->width_policy.max_size())
                     d.width = d.widget->width_policy.max_size();
-                }
-                else if (d.width < d.widget->width_policy.min_size()) {
+                else if (d.width < d.widget->width_policy.min_size())
                     d.width = d.widget->width_policy.min_size();
-                }
             }
             else if (policy == Size_policy::Maximum) {
-                if (d.width > d.widget->width_policy.hint()) {
+                if (d.width > d.widget->width_policy.hint())
                     d.width = d.widget->width_policy.hint();
-                }
             }
-            else if (policy == Size_policy::Minimum ||
+            else if (policy == Size_policy::Minimum or
                      policy == Size_policy::MinimumExpanding) {
-                if (d.width > d.widget->width_policy.max_size()) {
+                if (d.width > d.widget->width_policy.max_size())
                     d.width = d.widget->width_policy.max_size();
-                }
-                else if (d.width < d.widget->width_policy.hint()) {
+                else if (d.width < d.widget->width_policy.hint())
                     d.width = d.widget->width_policy.hint();
-                }
             }
         }
         return widgets;
     }
 
     void move_and_resize_children(
-        const std::vector<typename Layout<Child_t>::Dimensions>& dimensions)
+        std::vector<typename Layout<Child_t>::Dimensions> const& dimensions)
     {
         auto const parent_x      = this->inner_x();
         auto const parent_y      = this->inner_y();
         auto const parent_height = this->height();
         auto const parent_width  = this->width();
         auto y_pos               = parent_y;
-        for (const Dimensions& d : dimensions) {
-            if ((y_pos + d.height) > (parent_y + parent_height) ||
-                (parent_x + d.width) > (parent_x + parent_width) ||
-                d.height == 0 || d.width == 0) {
+        for (Dimensions const& d : dimensions) {
+            if ((y_pos + d.height) > (parent_y + parent_height) or
+                (parent_x + d.width) > (parent_x + parent_width) or
+                d.height == 0 or d.width == 0) {
                 // TODO this allows a large widget in the middle to disapear and
                 // smaller widgets from the end to reappear once that happens.
                 // Maybe you should stop sending events to any other widget once
                 // you get here and disable all that are left.
-                d.widget->disable(true,
-                                  false);  // don't send child_polished_events
+                // Don't send child_polished_events
+                d.widget->disable(true, false);
             }
             else {
                 System::post_event<Move_event>(*(d.widget),
@@ -185,9 +180,9 @@ class Vertical : public Layout<Child_t> {
     {
         // Find total stretch of first group
         std::size_t total_stretch{0};
-        for (const Dimensions_reference& d : widgets) {
+        for (Dimensions_reference const& d : widgets) {
             auto policy = d.widget->height_policy.type();
-            if (policy == Size_policy::Expanding ||
+            if (policy == Size_policy::Expanding or
                 policy == Size_policy::MinimumExpanding) {
                 total_stretch += d.widget->height_policy.stretch();
             }
@@ -199,9 +194,9 @@ class Vertical : public Layout<Child_t> {
         std::deque<std::size_t> height_additions;
         int index{0};
         auto to_distribute = height_left;
-        for (const Dimensions_reference& d : widgets) {
+        for (Dimensions_reference const& d : widgets) {
             auto policy = d.widget->height_policy.type();
-            if (policy == Size_policy::Expanding ||
+            if (policy == Size_policy::Expanding or
                 policy == Size_policy::MinimumExpanding) {
                 height_additions.push_back(
                     (d.widget->height_policy.stretch() /
@@ -223,7 +218,7 @@ class Vertical : public Layout<Child_t> {
         // calculated values
         for (Dimensions_reference& d : widgets) {
             auto policy = d.widget->height_policy.type();
-            if (policy == Size_policy::Expanding ||
+            if (policy == Size_policy::Expanding or
                 policy == Size_policy::MinimumExpanding) {
                 *d.height += height_additions.front();
                 height_left -= height_additions.front();
@@ -233,15 +228,14 @@ class Vertical : public Layout<Child_t> {
 
         // SECOND GROUP - duplicate of above dependent on Policies to work with.
         // Preferred and Minimum
-        if (height_left == 0) {
+        if (height_left == 0)
             return;
-        }
         // Find total stretch
         total_stretch = 0;
-        for (const Dimensions_reference& d : widgets) {
+        for (Dimensions_reference const& d : widgets) {
             auto policy = d.widget->height_policy.type();
-            if (policy == Size_policy::Preferred ||
-                policy == Size_policy::Minimum ||
+            if (policy == Size_policy::Preferred or
+                policy == Size_policy::Minimum or
                 policy == Size_policy::Ignored) {
                 total_stretch += d.widget->height_policy.stretch();
             }
@@ -253,10 +247,10 @@ class Vertical : public Layout<Child_t> {
         height_additions.clear();
         index         = 0;
         to_distribute = height_left;
-        for (const Dimensions_reference& d : widgets) {
-            auto policy = d.widget->height_policy.type();
-            if (policy == Size_policy::Preferred ||
-                policy == Size_policy::Minimum ||
+        for (Dimensions_reference const& d : widgets) {
+            auto const policy = d.widget->height_policy.type();
+            if (policy == Size_policy::Preferred or
+                policy == Size_policy::Minimum or
                 policy == Size_policy::Ignored) {
                 height_additions.push_back(
                     (d.widget->width_policy.stretch() /
@@ -277,27 +271,27 @@ class Vertical : public Layout<Child_t> {
         // If it has gotten this far, no widgets were over space, assign
         // calculated values
         for (Dimensions_reference& d : widgets) {
-            auto policy = d.widget->height_policy.type();
-            if (policy == Size_policy::Preferred ||
-                policy == Size_policy::Minimum ||
+            auto const policy = d.widget->height_policy.type();
+            if (policy == Size_policy::Preferred or
+                policy == Size_policy::Minimum or
                 policy == Size_policy::Ignored) {
                 *d.height += height_additions.front();
                 height_left -= height_additions.front();
                 height_additions.pop_front();
             }
         }
-        if (height_left == 0) {
+        if (height_left == 0)
             return;
-        }
         // Rounding error extra
         // First Group
-        auto height_check{0};
+        // Does this shadow function parameter height_check?
+        auto height_check = 0;
         do {
             height_check = height_left;
             for (Dimensions_reference& d : widgets) {
                 auto policy = d.widget->height_policy.type();
-                if ((policy == Size_policy::Expanding ||
-                     policy == Size_policy::MinimumExpanding) &&
+                if ((policy == Size_policy::Expanding or
+                     policy == Size_policy::MinimumExpanding) and
                     height_left > 0) {
                     if (*d.height + 1 <= d.widget->height_policy.max_size()) {
                         *d.height += 1;
@@ -312,9 +306,9 @@ class Vertical : public Layout<Child_t> {
             height_check = height_left;
             for (Dimensions_reference& d : widgets) {
                 auto policy = d.widget->height_policy.type();
-                if ((policy == Size_policy::Preferred ||
-                     policy == Size_policy::Minimum ||
-                     policy == Size_policy::Ignored) &&
+                if ((policy == Size_policy::Preferred or
+                     policy == Size_policy::Minimum or
+                     policy == Size_policy::Ignored) and
                     height_left > 0) {
                     if (*d.height + 1 <= d.widget->height_policy.max_size()) {
                         *d.height += 1;
@@ -332,11 +326,11 @@ class Vertical : public Layout<Child_t> {
         if (height_left == 0)
             return;
         // Find total stretch of first group
-        std::size_t total_stretch{0};
-        for (const Dimensions_reference& d : widgets) {
+        auto total_stretch = 0uL;
+        for (Dimensions_reference const& d : widgets) {
             auto policy = d.widget->height_policy.type();
-            if (policy == Size_policy::Maximum ||
-                policy == Size_policy::Preferred ||
+            if (policy == Size_policy::Maximum or
+                policy == Size_policy::Preferred or
                 policy == Size_policy::Ignored) {
                 total_stretch += d.widget->height_policy.stretch();
             }
@@ -344,10 +338,10 @@ class Vertical : public Layout<Child_t> {
 
         // Find total of inverse of percentages
         double total_inverse{0};
-        for (const Dimensions_reference& d : widgets) {
+        for (Dimensions_reference const& d : widgets) {
             auto policy = d.widget->height_policy.type();
-            if (policy == Size_policy::Maximum ||
-                policy == Size_policy::Preferred ||
+            if (policy == Size_policy::Maximum or
+                policy == Size_policy::Preferred or
                 policy == Size_policy::Ignored) {
                 total_inverse += 1 / (d.widget->height_policy.stretch() /
                                       static_cast<double>(total_stretch));
@@ -357,13 +351,13 @@ class Vertical : public Layout<Child_t> {
         // Calculate new heights of widgets in new group, if any go under
         // min_height then assign min value and recurse without that widget in
         // vector.
-        std::deque<std::size_t> height_deductions;
-        int index{0};
-        auto to_collect = height_left;
-        for (const Dimensions_reference& d : widgets) {
+        auto height_deductions = std::deque<std::size_t>{};
+        auto index             = 0;
+        auto to_collect        = height_left;
+        for (Dimensions_reference const& d : widgets) {
             auto policy = d.widget->height_policy.type();
-            if (policy == Size_policy::Maximum ||
-                policy == Size_policy::Preferred ||
+            if (policy == Size_policy::Maximum or
+                policy == Size_policy::Preferred or
                 policy == Size_policy::Ignored) {
                 height_deductions.push_back(
                     ((1 / (d.widget->height_policy.stretch() /
@@ -386,36 +380,32 @@ class Vertical : public Layout<Child_t> {
         // calculated values
         for (Dimensions_reference& d : widgets) {
             auto policy = d.widget->height_policy.type();
-            if (policy == Size_policy::Maximum ||
-                policy == Size_policy::Preferred ||
+            if (policy == Size_policy::Maximum or
+                policy == Size_policy::Preferred or
                 policy == Size_policy::Ignored) {
-                if (*d.height >= height_deductions.front()) {
+                if (*d.height >= height_deductions.front())
                     *d.height -= height_deductions.front();
-                }
-                else {
+                else
                     *d.height = 0;
-                }
                 height_left += height_deductions.front();
                 height_deductions.pop_front();
             }
         }
 
         // SECOND GROUP - duplicate of above dependent on Policies to work with.
-        if (height_left == 0) {
+        if (height_left == 0)
             return;
-        }
         // Find total stretch
         total_stretch = 0;
-        for (const Dimensions_reference& d : widgets) {
+        for (Dimensions_reference const& d : widgets) {
             auto policy = d.widget->height_policy.type();
-            if (policy == Size_policy::Expanding) {
+            if (policy == Size_policy::Expanding)
                 total_stretch += d.widget->height_policy.stretch();
-            }
         }
 
         // Find total of inverse of percentages
         total_inverse = 0;
-        for (const Dimensions_reference& d : widgets) {
+        for (Dimensions_reference const& d : widgets) {
             auto policy = d.widget->height_policy.type();
             if (policy == Size_policy::Expanding) {
                 total_inverse += 1 / (d.widget->height_policy.stretch() /
@@ -429,7 +419,7 @@ class Vertical : public Layout<Child_t> {
         height_deductions.clear();
         index      = 0;
         to_collect = height_left;
-        for (const Dimensions_reference& d : widgets) {
+        for (Dimensions_reference const& d : widgets) {
             auto policy = d.widget->height_policy.type();
             if (policy == Size_policy::Expanding) {
                 height_deductions.push_back(
@@ -454,20 +444,17 @@ class Vertical : public Layout<Child_t> {
         for (Dimensions_reference& d : widgets) {
             auto policy = d.widget->height_policy.type();
             if (policy == Size_policy::Expanding) {
-                if (*d.height >= height_deductions.front()) {
+                if (*d.height >= height_deductions.front())
                     *d.height -= height_deductions.front();
-                }
-                else {
+                else
                     *d.height = 0;
-                }
                 height_left += height_deductions.front();
                 height_deductions.pop_front();
             }
         }
         // TODO Change this to distribute the space, it might not be too small
-        if (height_left != 0) {
+        if (height_left != 0)
             return;
-        }
     }
 };
 

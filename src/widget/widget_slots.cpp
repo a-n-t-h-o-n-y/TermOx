@@ -13,87 +13,100 @@
 namespace cppurses {
 namespace slot {
 
-sig::Slot<void()> enable(Widget& w) {
-    sig::Slot<void()> slot{[&w] { w.enable(); }};
+auto enable(Widget& w) -> sig::Slot<void()>
+{
+    auto slot = sig::Slot<void()>{[&w] { w.enable(); }};
     slot.track(w.destroyed);
     return slot;
 }
 
-sig::Slot<void()> disable(Widget& w) {
-    sig::Slot<void()> slot{[&w] { w.disable(); }};
+auto disable(Widget& w) -> sig::Slot<void()>
+{
+    auto slot = sig::Slot<void()>{[&w] { w.disable(); }};
     slot.track(w.destroyed);
     return slot;
 }
 
-sig::Slot<void()> delete_later(Widget& w) {
-    sig::Slot<void()> slot{[&w] { w.close(); }};
+auto delete_later(Widget& w) -> sig::Slot<void()>
+{
+    auto slot = sig::Slot<void()>{[&w] { w.close(); }};
     slot.track(w.destroyed);
     return slot;
 }
 
-sig::Slot<void()> update(Widget& w) {
-    sig::Slot<void()> slot{[&w] { w.update(); }};
+auto update(Widget& w) -> sig::Slot<void()>
+{
+    auto slot = sig::Slot<void()>{[&w] { w.update(); }};
     slot.track(w.destroyed);
     return slot;
 }
 
-sig::Slot<void(Point, Mouse::Button)> click(Widget& w) {
-    sig::Slot<void(Point, Mouse::Button)> slot{
-        [&w](const Point& c, Mouse::Button b) {
+auto click(Widget& w) -> sig::Slot<void(Point, Mouse::Button)>
+{
+    auto slot = sig::Slot<void(Point, Mouse::Button)>{
+        [&w](const Point& p, Mouse::Button b) {
             System::send_event(Mouse::Press{
-                w, Mouse::State{b, Point{w.inner_x() + c.x, w.inner_y() + c.y},
-                                c, 0}});
+                w, Mouse::State{b, Point{w.inner_x() + p.x, w.inner_y() + p.y},
+                                p, 0}});
         }};
     slot.track(w.destroyed);
     return slot;
 }
 
-sig::Slot<void(Mouse::Button)> click(Widget& w, Point c) {
-    sig::Slot<void(Mouse::Button)> slot{[&w, &c](Mouse::Button b) {
+auto click(Widget& w, Point p) -> sig::Slot<void(Mouse::Button)>
+{
+    auto slot = sig::Slot<void(Mouse::Button)>{[&w, p](Mouse::Button b) {
         System::send_event(Mouse::Press{
-            w, Mouse::State{b, Point{w.inner_x() + c.x, w.inner_y() + c.y}, c,
+            w, Mouse::State{b, Point{w.inner_x() + p.x, w.inner_y() + p.y}, p,
                             0}});
     }};
     slot.track(w.destroyed);
     return slot;
 }
 
-sig::Slot<void(Point)> click(Widget& w, Mouse::Button b) {
-    sig::Slot<void(Point)> slot{[&w, b](const Point& c) {
+auto click(Widget& w, Mouse::Button b) -> sig::Slot<void(Point)>
+{
+    auto slot = sig::Slot<void(Point)>{[&w, b](Point p) {
         System::send_event(Mouse::Press{
-            w, Mouse::State{b, Point{w.inner_x() + c.x, w.inner_y() + c.y}, c,
+            w, Mouse::State{b, Point{w.inner_x() + p.x, w.inner_y() + p.y}, p,
                             0}});
     }};
     slot.track(w.destroyed);
     return slot;
 }
 
-sig::Slot<void()> click(Widget& w, Point c, Mouse::Button b) {
-    sig::Slot<void()> slot{[&w, &c, b] {
+auto click(Widget& w, Point p, Mouse::Button b) -> sig::Slot<void()>
+{
+    auto slot = sig::Slot<void()>{[&w, p, b] {
         System::send_event(Mouse::Press{
-            w, Mouse::State{b, Point{w.inner_x() + c.x, w.inner_y() + c.y}, c,
+            w, Mouse::State{b, Point{w.inner_x() + p.x, w.inner_y() + p.y}, p,
                             0}});
     }};
     slot.track(w.destroyed);
     return slot;
 }
 
-sig::Slot<void(Key::Code)> keypress(Widget& w) {
-    sig::Slot<void(Key::Code)> slot{[&w](Key::Code k) {
+auto keypress(Widget& w) -> sig::Slot<void(Key::Code)>
+{
+    auto slot = sig::Slot<void(Key::Code)>{[&w](Key::Code k) {
         System::send_event(Key::Press{w, k});
     }};
     slot.track(w.destroyed);
     return slot;
 }
 
-sig::Slot<void()> keypress(Widget& w, Key::Code k) {
-    sig::Slot<void()> slot{[&w, k] { System::send_event(Key::Press{w, k}); }};
+auto keypress(Widget& w, Key::Code k) -> sig::Slot<void()>
+{
+    auto slot = sig::Slot<void()>{[&w, k] {
+        System::send_event(Key::Press{w, k});
+    }};
     slot.track(w.destroyed);
     return slot;
 }
 
-sig::Slot<void(Color)> set_background(Widget& w) {
-    sig::Slot<void(Color)> slot{[&w](Color c) {
+auto set_background(Widget& w) -> sig::Slot<void(Color)>
+{
+    auto slot = sig::Slot<void(Color)>{[&w](Color c) {
         w.brush.set_background(c);
         w.update();
     }};
@@ -101,8 +114,9 @@ sig::Slot<void(Color)> set_background(Widget& w) {
     return slot;
 }
 
-sig::Slot<void()> set_background(Widget& w, Color c) {
-    sig::Slot<void()> slot{[&w, &c] {
+auto set_background(Widget& w, Color c) -> sig::Slot<void()>
+{
+    auto slot = sig::Slot<void()>{[&w, c] {
         w.brush.set_background(c);
         w.update();
     }};
@@ -110,8 +124,9 @@ sig::Slot<void()> set_background(Widget& w, Color c) {
     return slot;
 }
 
-sig::Slot<void(Color)> set_foreground(Widget& w) {
-    sig::Slot<void(Color)> slot{[&w](Color c) {
+auto set_foreground(Widget& w) -> sig::Slot<void(Color)>
+{
+    auto slot = sig::Slot<void(Color)>{[&w](Color c) {
         w.brush.set_foreground(c);
         w.update();
     }};
@@ -119,8 +134,9 @@ sig::Slot<void(Color)> set_foreground(Widget& w) {
     return slot;
 }
 
-sig::Slot<void()> set_foreground(Widget& w, Color c) {
-    sig::Slot<void()> slot{[&w, &c] {
+auto set_foreground(Widget& w, Color c) -> sig::Slot<void()>
+{
+    auto slot = sig::Slot<void()>{[&w, c] {
         w.brush.set_foreground(c);
         w.update();
     }};
@@ -128,8 +144,9 @@ sig::Slot<void()> set_foreground(Widget& w, Color c) {
     return slot;
 }
 
-sig::Slot<void()> toggle_cursor(Widget& w) {
-    sig::Slot<void()> slot{[&w] { w.cursor.toggle(); }};
+auto toggle_cursor(Widget& w) -> sig::Slot<void()>
+{
+    auto slot = sig::Slot<void()>{[&w] { w.cursor.toggle(); }};
     slot.track(w.destroyed);
     return slot;
 }

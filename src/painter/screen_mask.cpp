@@ -8,12 +8,14 @@ namespace {
 using namespace cppurses;
 using namespace cppurses::detail;
 
-Point make_offset(const Widget& w, Screen_mask::Constructor_tag tag) {
+auto make_offset(Widget const& w, Screen_mask::Constructor_tag tag) -> Point
+{
     return tag == Screen_mask::Outer ? Point{w.x(), w.y()}
                                      : Point{w.inner_x(), w.inner_y()};
 }
 
-Area make_area(const Widget& w, Screen_mask::Constructor_tag tag) {
+auto make_area(Widget const& w, Screen_mask::Constructor_tag tag) -> Area
+{
     return tag == Screen_mask::Outer ? Area{w.outer_width(), w.outer_height()}
                                      : Area{w.width(), w.height()};
 }
@@ -23,10 +25,12 @@ Area make_area(const Widget& w, Screen_mask::Constructor_tag tag) {
 namespace cppurses {
 namespace detail {
 
-Screen_mask::Screen_mask(const Widget& w, Constructor_tag tag)
+/// Can't put in header, Widget depends on Screen_mask
+Screen_mask::Screen_mask(Widget const& w, Constructor_tag tag)
     : offset_{make_offset(w, tag)},
       area_{make_area(w, tag)},
-      bits_(area_.width * area_.height) {}
+      bits_(area_.width * area_.height)
+{}
 
 }  // namespace detail
 }  // namespace cppurses

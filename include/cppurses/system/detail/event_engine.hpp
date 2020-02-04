@@ -14,15 +14,12 @@ namespace detail {
 
 /// Orchestrates all event processing and queueing.
 class Event_engine {
-    Event_queue queue_;
-    std::atomic<bool> notified_{false};  // Whether should process events/flush
-
    public:
     /// Event_loop uses this to let main thread know it should process events.
-    auto notify() -> void { notified_ = true; }
+    void notify() { notified_ = true; }
 
     /// Invokes events and flush the screen.
-    auto process() -> void
+    void process()
     {
         invoke_events(queue_);
         flush_screen();
@@ -42,7 +39,7 @@ class Event_engine {
     Event_engine() = default;
 
     /// Flushes all of the staged changes to the screen and sets the cursor.
-    static auto flush_screen() -> void
+    static void flush_screen()
     {
         auto& staged_changes = Staged_changes::get();
         Screen::flush(staged_changes);
@@ -52,17 +49,16 @@ class Event_engine {
 
     /// Send all \p type events in queue to their Widgets.
     template <Event::Type filter>
-    static auto send_all(Event_queue& queue) -> void
+    static void send_all(Event_queue& queue)
     {
-        using Event_ptr = std::unique_ptr<Event>;
-        for (Event_ptr event : Event_queue::View<filter>{queue}) {
+        for (std::unique_ptr<Event> event : Event_queue::View<filter>{queue}) {
             System::send_event(*event);
         }
     }
 
     /// Send all delete events to their Widgets.
     /** Removes any events to the receiver if another thread posted them. */
-    static auto send_all_deletes(Event_queue& queue) -> void
+    static void send_all_deletes(Event_queue& queue)
     {
         auto view = Event_queue::View<Event::Delete>{queue};
         for (std::unique_ptr<Event> event : view) {
@@ -73,13 +69,17 @@ class Event_engine {
     }
 
     /// Sends each event in \p queue to its receiver to be processed.
-    static auto invoke_events(Event_queue& queue) -> void
+    static void invoke_events(Event_queue& queue)
     {
         send_all<Event::None>(queue);
         send_all<Event::Paint>(queue);
         send_all_deletes(queue);
         queue.clean();
     }
+
+   private:
+    Event_queue queue_;
+    std::atomic<bool> notified_{false};  // Whether should process events/flush
 };
 
 }  // namespace detail

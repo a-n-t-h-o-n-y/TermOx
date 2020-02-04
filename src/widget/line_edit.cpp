@@ -12,46 +12,23 @@
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/events/key.hpp>
-#include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widgets/textbox.hpp>
 
 namespace cppurses {
 
-Line_edit::Line_edit(Glyph_string initial_text)
-    : Textbox{std::move(initial_text)}
-{
-    this->set_name("Line_edit");
-    this->set_ghost_color(Color::Light_gray);
-    this->height_policy.fixed(1);
-    this->disable_word_wrap();
-}
-
-void Line_edit::set_validator(std::function<bool(char)> validator)
-{
-    validator_ = std::move(validator);
-}
-
-void Line_edit::clear_on_enter(bool enable) { clear_on_enter_ = enable; }
-
-auto Line_edit::veil_text(bool enable) -> void
-{
-    is_veiled_ = enable;
-    this->update();
-}
-
 void Line_edit::underline(bool enabled)
 {
     if (enabled) {
-        this->wallpaper = Glyph{L' ', Attribute::Underline};
-        Glyph_string underlined_text{this->contents()};
+        this->wallpaper      = {L' ', Attribute::Underline};
+        auto underlined_text = this->contents();
         underlined_text.add_attributes(Attribute::Underline);
         this->set_contents(std::move(underlined_text));
         this->insert_brush.add_attributes(Attribute::Underline);
     }
     else {
-        this->wallpaper = L' ';
-        Glyph_string non_underlined{this->contents()};
+        this->wallpaper     = L' ';
+        auto non_underlined = this->contents();
         non_underlined.remove_attribute(Attribute::Underline);
         this->set_contents(std::move(non_underlined));
         this->insert_brush.remove_attributes(Attribute::Underline);
@@ -61,65 +38,40 @@ void Line_edit::underline(bool enabled)
 
 void Line_edit::set_ghost_color(Color c)
 {
-    if (on_initial_) {
-        Glyph_string ghost_text{this->contents()};
-        ghost_text.add_attributes(foreground(c));
-        this->set_contents(std::move(ghost_text));
-        this->update();
-    }
+    if (not on_initial_)
+        return;
+    auto ghost_text = this->contents();
+    ghost_text.add_attributes(foreground(c));
+    this->set_contents(std::move(ghost_text));
+    this->update();
 }
 
-bool Line_edit::key_press_event(const Key::State& keyboard)
+bool Line_edit::key_press_event(Key::State const& keyboard)
 {
-    if (keyboard.key == Key::Enter) {
-        edit_finished(this->contents().str());
-        if (clear_on_enter_) {
-            this->clear();
-        }
-        if (on_initial_) {
-            on_initial_ = false;
-        }
-        return true;
+    switch (keyboard.key) {
+        case Key::Enter:
+            edit_finished(this->contents().str());
+            if (clear_on_enter_)
+                this->clear();
+            if (on_initial_)
+                on_initial_ = false;
+            return true;
+        case Key::Arrow_up:
+        case Key::Arrow_down: return true;
+        default: break;
     }
-    if (keyboard.key == Key::Arrow_up || keyboard.key == Key::Arrow_down) {
+    auto const is_printable = [](char c) {
+        return std::isprint(c) or std::isspace(c);
+    };
+    if (not is_printable(keyboard.symbol))
+        return Textbox::key_press_event(keyboard);
+    if (not validator_(keyboard.symbol))
         return true;
-    }
-    // Validate
-    if ((std::isprint(keyboard.symbol) || std::isspace(keyboard.symbol)) &&
-        !validator_(keyboard.symbol)) {
-        return true;
-    }
-    // First alph-num input
-    if (keyboard.symbol != '\0' && on_initial_) {
+    if (keyboard.symbol != '\0' and on_initial_) {  // First alpha-num input
         this->clear();
         on_initial_ = false;
     }
     return Textbox::key_press_event(keyboard);
-}
-
-bool Line_edit::mouse_press_event(const Mouse::State& mouse)
-{
-    if (mouse.button == Mouse::Button::ScrollUp ||
-        mouse.button == Mouse::Button::ScrollDown) {
-        return true;
-    }
-    return Textbox::mouse_press_event(mouse);
-}
-
-bool Line_edit::focus_in_event()
-{
-    if (on_initial_)
-        this->clear();
-    return Textbox::focus_in_event();
-}
-
-auto Line_edit::paint_event() -> bool
-{
-    if (is_veiled_) {
-        const auto vc = std::vector<Glyph>(this->contents().size(), veil_);
-        this->set_contents(Glyph_string{std::begin(vc), std::end(vc)});
-    }
-    return Textbox::paint_event();
 }
 
 }  // namespace cppurses

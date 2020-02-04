@@ -13,9 +13,14 @@ struct Glyph;
 /// A label on the left and a Cycle_box on the right.
 class Labeled_cycle_box : public layout::Horizontal<Label> {
    public:
+    Label& label         = this->make_child();
+    Cycle_box& cycle_box = this->make_child<Cycle_box>();
+
+   public:
     explicit Labeled_cycle_box(Glyph_string title = "")
     {
         this->set_title(std::move(title));
+        this->height_policy.fixed(1);
 
         label.border.enable();
         label.border.segments.disable_all();
@@ -29,14 +34,11 @@ class Labeled_cycle_box : public layout::Horizontal<Label> {
         this->resize_label();
     }
 
-    void set_divider(const Glyph& divider)
+    void set_divider(Glyph const& divider)
     {
         label.border.segments.east = divider;
         this->update();
     }
-
-    Label& label{this->make_child()};
-    Cycle_box& cycle_box{this->make_child<Cycle_box>()};
 
    private:
     void resize_label()

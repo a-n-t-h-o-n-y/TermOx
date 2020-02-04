@@ -8,7 +8,7 @@
 namespace {
 using namespace cppurses;
 
-void begin_graph(std::ofstream& file, const std::string& graph_name)
+void begin_graph(std::ofstream& file, std::string const& graph_name)
 {
     file << "digraph " << graph_name << " {\n";
 }
@@ -16,28 +16,28 @@ void begin_graph(std::ofstream& file, const std::string& graph_name)
 void end_graph(std::ofstream& file) { file << "}"; }
 
 void add_connection(std::ofstream& file,
-                    const std::string& from,
-                    const std::string& to)
+                    std::string const& from,
+                    std::string const& to)
 {
     file << from << " -> " << to << '\n';
 }
 
 void add_label(std::ofstream& file,
-               const std::string& id,
-               const std::string& label)
+               std::string const& id,
+               std::string const& label)
 {
     file << id << " [label=\"" << label << "\"];\n";
 }
 
-std::string make_label_text(const Widget& w)
+auto make_label_text(const Widget& w) -> std::string
 {
-    auto id         = std::to_string(w.unique_id());
-    auto name       = w.name();
-    auto is_enabled = w.enabled() ? "enabled" : "disabled";
+    auto const id         = std::to_string(w.unique_id());
+    auto const name       = w.name();
+    auto const is_enabled = w.enabled() ? "enabled" : "disabled";
     return id + "\n" + name + "\n" + is_enabled;
 }
 
-void make_connections_to_children(std::ofstream& file, const Widget& parent)
+void make_connections_to_children(std::ofstream& file, Widget const& parent)
 {
     add_label(file, std::to_string(parent.unique_id()),
               make_label_text(parent));
@@ -55,7 +55,7 @@ void make_connections_to_children(std::ofstream& file, const Widget& parent)
 namespace cppurses {
 namespace detail {
 
-void graph_tree(const Widget& w, const std::string& filename)
+void graph_tree(Widget const& w, std::string const& filename)
 {
     auto file = std::ofstream{filename + ".gv"};
     begin_graph(file, filename);

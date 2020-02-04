@@ -15,21 +15,17 @@ namespace detail {
 
 /// Holds Events to be processed, concurrent append
 class Event_queue {
+   private:
     using Mutex_t = std::mutex;
     using Guard_t = std::lock_guard<Event_queue::Mutex_t>;
     using Queue_t = std::vector<std::unique_ptr<Event>>;
 
-    Queue_t general_events_;
-    Queue_t paint_events_;
-    Queue_t delete_events_;
-    Mutex_t mtx_;
-
    public:
     /// Place \p event at the back of the queue.
-    auto append(std::unique_ptr<Event> event) -> void
+    void append(std::unique_ptr<Event> event)
     {
         Guard_t g{mtx_};
-        const auto type = event->type();
+        auto const type = event->type();
         if (type == Event::Paint)
             paint_events_.emplace_back(std::move(event));
         else if (type == Event::Delete)
@@ -39,7 +35,7 @@ class Event_queue {
     }
 
     /// Remove all nullptr Events.
-    auto clean() -> void
+    void clean()
     {
         Guard_t g{mtx_};
         remove_nulls(general_events_);
@@ -50,7 +46,7 @@ class Event_queue {
     /// Remove all events that have a receiver of \p receiver from queue.
     /** To be called when sending delete events so that other threads may
      *  not crash the app by posting events to deleted Widgets.*/
-    auto remove_events_of(Widget* receiver) -> void
+    void remove_events_of(Widget* receiver)
     {
         Guard_t g{mtx_};
         remove_receiver(general_events_, receiver);
@@ -76,12 +72,9 @@ class Event_queue {
 
         /// Provides a forward iterator capable of moving events out of a view.
         class Move_iterator {
+           private:
             using Size_t = View::Size_t;
             using Set_t  = std::set<Widget*>;
-            Mutex_t& mtx_;
-            Set_t already_sent_;
-            Queue_t& events_;
-            Size_t at_;
 
            public:
             /// Construct an iterator pointing to the first element in \p view.
@@ -107,7 +100,7 @@ class Event_queue {
             }
 
             /// Returns whether or not this iterator is at the end of the queue.
-            auto operator!=(const Move_iterator&) const -> bool
+            auto operator!=(Move_iterator const&) const -> bool
             {
                 return at_ != this->size();
             }
@@ -123,10 +116,10 @@ class Event_queue {
             auto find_next(Size_t from) -> Size_t
             {
                 Guard_t g{mtx_};
-                const auto end = events_.size();
+                auto const end = events_.size();
                 if (from == end)
                     return from;
-                while (++from != end && events_[from] == nullptr) {}
+                while (++from != end and events_[from] == nullptr) {}
                 return from;
             }
 
@@ -143,6 +136,12 @@ class Event_queue {
                 Guard_t g{mtx_};
                 return events_.size();
             }
+
+           private:
+            Mutex_t& mtx_;
+            Set_t already_sent_;
+            Queue_t& events_;
+            Size_t at_;
         };
 
         /// Return iterator the first element in queue.
@@ -154,7 +153,7 @@ class Event_queue {
 
    private:
     /// Remove all nullptrs from \p events queue.
-    static auto remove_nulls(Queue_t& events) -> void
+    static void remove_nulls(Queue_t& events)
     {
         auto iter = std::find(std::rbegin(events), std::rend(events), nullptr);
         if (iter != std::rend(events))
@@ -162,26 +161,33 @@ class Event_queue {
     }
 
     /// Remove any items from \p events that would be send to \p receiver.
-    static auto remove_receiver(Queue_t& events, const Widget* receiver) -> void
+    static void remove_receiver(Queue_t& events, Widget const* receiver)
     {
         for (auto& event : events) {
-            if (event != nullptr && &(event->receiver()) == receiver)
+            if (event != nullptr and &(event->receiver()) == receiver)
                 event.reset(nullptr);
         }
     }
 
     /// Remove from \p events where event.reciever() is an ancestor of receiver.
-    static void remove_descendants(Queue_t& events, const Widget* receiver)
+    static void remove_descendants(Queue_t& events, Widget const* receiver)
     {
         for (auto& event : events) {
-            if (event != nullptr &&
+            if (event != nullptr and
                 receiver->is_ancestor_of(&(event->receiver()))) {
                 event.reset(nullptr);
             }
         }
     }
+
+   private:
+    Queue_t general_events_;
+    Queue_t paint_events_;
+    Queue_t delete_events_;
+    Mutex_t mtx_;
 };
 
+// Explicit Template Instantiations
 template <>
 inline auto Event_queue::View<Event::Paint>::Move_iterator::get_events(
     Event_queue& queue) -> Queue_t&
@@ -201,7 +207,7 @@ inline auto Event_queue::View<Event::Paint>::Move_iterator::find_next(
     Size_t from) -> Size_t
 {
     Guard_t g{mtx_};
-    const auto end = events_.size();
+    auto const end = events_.size();
     if (from == end)
         return from;
     while (++from != end) {

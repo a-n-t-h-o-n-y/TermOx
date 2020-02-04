@@ -6,7 +6,7 @@
 
 namespace cppurses {
 
-bool Delete_event::send() const
+auto Delete_event::send() const -> bool
 {
     const auto result = receiver_.delete_event();
     if (removed_ == nullptr)

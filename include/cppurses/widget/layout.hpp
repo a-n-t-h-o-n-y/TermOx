@@ -66,31 +66,31 @@ class Layout : public Widget {
      *  Child_removed_event, and Child_polished_event. */
     virtual void update_geometry() = 0;
 
-    bool move_event(Point new_position, Point old_position) override
+    auto move_event(Point new_position, Point old_position) -> bool override
     {
         this->update_geometry();
         return Widget::move_event(new_position, old_position);
     }
 
-    bool resize_event(Area new_size, Area old_size) override
+    auto resize_event(Area new_size, Area old_size) -> bool override
     {
         this->update_geometry();
         return Widget::resize_event(new_size, old_size);
     }
 
-    bool child_added_event(Widget& child) override
+    auto child_added_event(Widget& child) -> bool override
     {
         this->update_geometry();
         return Widget::child_added_event(child);
     }
 
-    bool child_removed_event(Widget& child) override
+    auto child_removed_event(Widget& child) -> bool override
     {
         this->update_geometry();
         return Widget::child_removed_event(child);
     }
 
-    bool child_polished_event(Widget& child) override
+    auto child_polished_event(Widget& child) -> bool override
     {
         this->update_geometry();
         return Widget::child_polished_event(child);

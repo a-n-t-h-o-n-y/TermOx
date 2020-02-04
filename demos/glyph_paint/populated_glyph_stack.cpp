@@ -93,7 +93,7 @@ auto generate_color_blocks() -> Glyph_string
         }
     }
     for (Color c : colors) {
-        str.append(Glyph{L'█', foreground(c)});
+        str.append(L'█'_g | foreground(c));
     }
     return str;
 }

@@ -33,10 +33,10 @@ extern "C" void handle_sigint(int /* sig*/)
 namespace {
 using namespace cppurses;
 
-Underlying_color_t scale(Underlying_color_t value)
+auto scale(Underlying_color_t value) -> Underlying_color_t
 {
-    const auto value_max   = 255;
-    const auto ncurses_max = 1000;
+    auto constexpr value_max   = 255;
+    auto constexpr ncurses_max = 1000;
     return static_cast<Underlying_color_t>(
         (static_cast<double>(value) / value_max) * ncurses_max);
 }
@@ -50,7 +50,7 @@ void Terminal::initialize()
         return;
     std::setlocale(LC_ALL, "en_US.UTF-8");
 
-    if (::newterm(std::getenv("TERM"), stdout, stdin) == nullptr &&
+    if (::newterm(std::getenv("TERM"), stdout, stdin) == nullptr and
         ::newterm("xterm-256color", stdout, stdin) == nullptr) {
         throw std::runtime_error{"Unable to initialize screen."};
     }
@@ -82,32 +82,32 @@ void Terminal::uninitialize()
 }
 
 // getmaxx/getmaxy are non-standard.
-std::size_t Terminal::width() const
+auto Terminal::width() const -> std::size_t
 {
-    int y{0};
-    int x{0};
+    auto y = 0;
+    auto x = 0;
     if (is_initialized_)
         getmaxyx(::stdscr, y, x);
     return x;
 }
 
-std::size_t Terminal::height() const
+auto Terminal::height() const -> std::size_t
 {
-    int y{0};
-    int x{0};
+    auto y = 0;
+    auto x = 0;
     if (is_initialized_)
         getmaxyx(::stdscr, y, x);
     return y;
 }
 
-auto Terminal::set_refresh_rate(std::chrono::milliseconds duration) -> void
+void Terminal::set_refresh_rate(std::chrono::milliseconds duration)
 {
     refresh_rate_ = duration;
     if (is_initialized_)
         ::timeout(refresh_rate_.count());
 }
 
-void Terminal::set_background(const Glyph& tile)
+void Terminal::set_background(Glyph const& tile)
 {
     background_ = tile;
     if (is_initialized_) {
@@ -118,7 +118,7 @@ void Terminal::set_background(const Glyph& tile)
 void Terminal::set_color_palette(const Palette& colors)
 {
     palette_ = colors;
-    if (is_initialized_ && this->has_color())
+    if (is_initialized_ and this->has_color())
         this->ncurses_set_palette(palette_);
 }
 
@@ -136,48 +136,48 @@ void Terminal::raw_mode(bool enable)
         this->ncurses_set_raw_mode();
 }
 
-bool Terminal::has_color() const
+auto Terminal::has_color() const -> bool
 {
     if (is_initialized_)
         return ::has_colors() == TRUE;
     return false;
 }
 
-bool Terminal::has_extended_colors() const
+auto Terminal::has_extended_colors() const -> bool
 {
     if (is_initialized_)
         return COLORS >= 16;
     return false;
 }
 
-short Terminal::color_count() const
+auto Terminal::color_count() const -> short
 {
     if (is_initialized_)
         return COLORS;
     return 0;
 }
 
-bool Terminal::can_change_colors() const
+auto Terminal::can_change_colors() const -> bool
 {
     if (is_initialized_)
         return ::can_change_color() == TRUE;
     return false;
 }
 
-short Terminal::color_pair_count() const
+auto Terminal::color_pair_count() const -> short
 {
     if (is_initialized_)
         return COLOR_PAIRS;
     return 0;
 }
 
-short Terminal::color_index(short fg, short bg) const
+auto Terminal::color_index(short fg, short bg) const -> short
 {
-    if (fg == 7 && bg == 0)
+    if (fg == 7 and bg == 0)
         return 0;
-    if (fg == 15 && bg == 0)
+    if (fg == 15 and bg == 0)
         return 128;
-    const short max_color = this->has_extended_colors() ? 16 : 8;
+    short const max_color = this->has_extended_colors() ? 16 : 8;
     return ((max_color - 1) - fg) * max_color + bg;
 }
 
@@ -195,12 +195,12 @@ void Terminal::use_default_colors(bool use)
     }
 }
 
-void Terminal::ncurses_set_palette(const Palette& colors)
+void Terminal::ncurses_set_palette(Palette const& colors)
 {
     if (this->can_change_colors()) {
-        for (const Color_definition& def : colors) {
-            const auto max_color = this->has_extended_colors() ? 16 : 8;
-            const auto ncurses_color_number =
+        for (Color_definition const& def : colors) {
+            auto const max_color = this->has_extended_colors() ? 16 : 8;
+            auto const ncurses_color_number =
                 static_cast<Underlying_color_t>(def.color);
             if (ncurses_color_number < max_color) {
                 ::init_color(ncurses_color_number, scale(def.values.red),
@@ -232,7 +232,7 @@ void Terminal::initialize_color_pairs() const
     Underlying_color_t max_color = this->has_extended_colors() ? 16 : 8;
     for (short fg = 0; fg < max_color; ++fg) {
         for (short bg = 0; bg < max_color; ++bg) {
-            const auto index = color_index(fg, bg);
+            auto const index = color_index(fg, bg);
             if (index == 0)
                 continue;
             ::init_pair(index, fg, bg);
@@ -263,4 +263,5 @@ void Terminal::uninit_default_pairs() const
             ::init_pair(color_index(fg, 0), fg, 0);
     }
 }
+
 }  // namespace cppurses

@@ -1,46 +1,63 @@
 #ifndef CPPURSES_WIDGET_WIDGETS_HORIZONTAL_SLIDER_HPP
 #define CPPURSES_WIDGET_WIDGETS_HORIZONTAL_SLIDER_HPP
 #include <cstddef>
-#include <cstdint>
 
 #include <signals/signals.hpp>
 
+#include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
+#include <cppurses/painter/painter.hpp>
 #include <cppurses/system/events/key.hpp>
 #include <cppurses/system/events/mouse.hpp>
+#include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
 
 class Horizontal_slider : public Widget {
    public:
-    Horizontal_slider();
-    void set_percent(float percent);
-    float percent() const;
-
-    // Signals
     sig::Signal<void(float)> percent_changed;
     sig::Signal<void()> scrolled_up;
     sig::Signal<void()> scrolled_down;
 
+   public:
+    Horizontal_slider()
+    {
+        this->height_policy.fixed(1);
+        this->focus_policy = Focus_policy::Strong;
+        this->wallpaper    = L' '_g | background(Color::Light_gray);
+    }
+
+    void set_percent(float percent);
+
+    auto percent() const -> float { return percent_progress_; }
+
    protected:
-    bool paint_event() override;
-    bool mouse_press_event(const Mouse::State& mouse) override;
-    bool key_press_event(const Key::State& keyboard) override;
+    auto paint_event() -> bool override
+    {
+        auto const x = percent_to_position(percent_progress_);
+        Painter{*this}.put(indicator_, x, 0);
+        return Widget::paint_event();
+    }
+
+    auto mouse_press_event(Mouse::State const& mouse) -> bool override;
+
+    auto key_press_event(Key::State const& keyboard) -> bool override;
 
    private:
-    Glyph indicator_{L'░'};
-    float percent_progress_{0.0};
+    Glyph indicator_        = L'░';
+    float percent_progress_ = 0.0;
 
-    float position_to_percent(std::size_t position);
-    std::size_t percent_to_position(float percent);
+   private:
+    auto position_to_percent(std::size_t position) -> float;
+    auto percent_to_position(float percent) -> std::size_t;
 };
 
 namespace slot {
 
-sig::Slot<void(float)> set_percent(Horizontal_slider& s);
+auto set_percent(Horizontal_slider& s) -> sig::Slot<void(float)>;
 
-sig::Slot<void()> set_percent(Horizontal_slider& s, float percent);
+auto set_percent(Horizontal_slider& s, float percent) -> sig::Slot<void(void)>;
 
 }  // namespace slot
 }  // namespace cppurses

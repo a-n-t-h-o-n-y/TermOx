@@ -1,6 +1,7 @@
 #include <cppurses/widget/widget.hpp>
 
 #include <algorithm>
+
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -14,48 +15,44 @@
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
-#include <cppurses/system/animation_engine.hpp>
 #include <cppurses/system/events/child_event.hpp>
 #include <cppurses/system/events/delete_event.hpp>
 #include <cppurses/system/events/disable_event.hpp>
 #include <cppurses/system/events/enable_event.hpp>
 #include <cppurses/system/events/paint_event.hpp>
-#include <cppurses/system/focus.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/terminal/terminal.hpp>
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/cursor_data.hpp>
 
 namespace {
+
 auto get_unique_id() -> std::uint16_t
 {
     static std::mutex mtx;
-    static std::uint16_t current{0};
+    static auto current = std::uint16_t{0};
     std::lock_guard<std::mutex> lock{mtx};
     return ++current;
 }
+
+void post_child_polished(cppurses::Widget& w)
+{
+    using namespace cppurses;
+    auto* parent = w.parent();
+    if (parent != nullptr)
+        System::post_event<Child_polished_event>(*parent, w);
+}
+
 }  // namespace
 
 namespace cppurses {
-namespace detail {
-class Screen_state;
-}  // namespace detail
 
 Widget::Widget(std::string name)
     : name_{std::move(name)}, unique_id_{get_unique_id()}
-{}
-
-Widget::~Widget()
 {
-    if (Focus::focus_widget() == this)
-        Focus::clear();
-    destroyed(*this);
-}
-
-void Widget::set_name(std::string name)
-{
-    name_ = std::move(name);
-    name_changed(name_);
+    width_policy.policy_updated.connect([this] { post_child_polished(*this); });
+    height_policy.policy_updated.connect(
+        [this] { post_child_polished(*this); });
 }
 
 void Widget::enable(bool enable, bool post_child_polished_event)
@@ -71,21 +68,21 @@ void Widget::close()
     std::unique_ptr<Widget> removed;
     if (this->parent() == nullptr)
         return;  // Can't delete a widget that is not owned by another Widget.
-    else
-        removed = this->parent()->children_.remove(this);
+    removed = this->parent()->children_.remove(this);
     System::post_event<Delete_event>(*this, std::move(removed));
 }
 
+// This is here because including paint_event.hpp in widget.hpp causes issues.
+void Widget::update() { System::post_event<Paint_event>(*this); }
+
 auto Widget::generate_wallpaper() const -> Glyph
 {
-    Glyph background{this->wallpaper ? *(this->wallpaper)
-                                     : System::terminal.background()};
+    auto bg_glyph =
+        this->wallpaper ? *(this->wallpaper) : System::terminal.background();
     if (this->brush_paints_wallpaper())
-        imprint(this->brush, background.brush);
-    return background;
+        imprint(this->brush, bg_glyph.brush);
+    return bg_glyph;
 }
-
-void Widget::update() { System::post_event<Paint_event>(*this); }
 
 void Widget::install_event_filter(Widget& filter)
 {
@@ -103,27 +100,6 @@ void Widget::install_event_filter(Widget& filter)
     }
 }
 
-void Widget::remove_event_filter(Widget& filter)
-{
-    event_filters_.erase(&filter);
-}
-
-void Widget::enable_animation(Animation_engine::Period_t period)
-{
-    System::animation_engine().register_widget(*this, period);
-}
-
-void Widget::enable_animation(
-    std::function<Animation_engine::Period_t()> const& period_func)
-{
-    System::animation_engine().register_widget(*this, period_func);
-}
-
-void Widget::disable_animation()
-{
-    System::animation_engine().unregister_widget(*this);
-}
-
 void Widget::enable_and_post_events(bool enable, bool post_child_polished_event)
 {
     if (enabled_ == enable)
@@ -133,8 +109,9 @@ void Widget::enable_and_post_events(bool enable, bool post_child_polished_event)
     enabled_ = enable;
     if (enable)
         System::post_event<Enable_event>(*this);
-    if (post_child_polished_event && this->parent() != nullptr)
+    if (post_child_polished_event and this->parent() != nullptr)
         System::post_event<Child_polished_event>(*this->parent(), *this);
     this->update();
 }
+
 }  // namespace cppurses

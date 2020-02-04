@@ -10,10 +10,11 @@ class Move_event : public Event {
    public:
     // In global Point.
     Move_event(Widget& receiver, Point new_position)
-        : Event{Event::Move, receiver}, new_position_{new_position} {}
+        : Event{Event::Move, receiver}, new_position_{new_position}
+    {}
 
-    bool send() const override;
-    bool filter_send(Widget& filter) const override;
+    auto send() const -> bool override;
+    auto filter_send(Widget& filter) const -> bool override;
 
    protected:
     Point new_position_;

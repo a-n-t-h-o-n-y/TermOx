@@ -13,7 +13,8 @@ class Glyph_matrix {
     /// Construct with a set width and height, or defaults to 0 for each.
     /** Glyphs default constructed(space char with no colors or attributes). */
     explicit Glyph_matrix(std::size_t width = 0, std::size_t height = 0)
-        : matrix_{height, std::vector<Glyph>(width, Glyph{L' '})} {}
+        : matrix_{height, std::vector<Glyph>(width, L' '_g)}
+    {}
 
     /// Resize the width and height of the matrix.
     /** New Glyphs will be default constructed, Glyphs no longer within the
@@ -24,7 +25,8 @@ class Glyph_matrix {
     void clear() { matrix_.clear(); }
 
     /// Return the width of the matrix.
-    std::size_t width() const {
+    std::size_t width() const
+    {
         return matrix_.empty() ? 0 : matrix_.at(0).size();
     }
 
@@ -37,7 +39,8 @@ class Glyph_matrix {
 
     /// Glyph access operator. (0, 0) is top left. x grows south and y east.
     /** Provides no bounds checking. */
-    const Glyph& operator()(std::size_t x, std::size_t y) const {
+    const Glyph& operator()(std::size_t x, std::size_t y) const
+    {
         return matrix_[y][x];
     }
 
@@ -47,7 +50,8 @@ class Glyph_matrix {
 
     /// Glyph access operator. (0, 0) is top left. x grows south and y east.
     /** Has bounds checking and throws std::out_of_range if not within range. */
-    const Glyph& at(std::size_t x, std::size_t y) const {
+    const Glyph& at(std::size_t x, std::size_t y) const
+    {
         return matrix_.at(y).at(x);
     }
 

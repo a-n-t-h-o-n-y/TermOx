@@ -6,12 +6,12 @@ namespace cppurses {
 
 /// Provides representation of a Widget's visible, surrounding border.
 class Border {
-   public:
+   private:
     /// Holds enabled state and appearance for a Border Segment.
     class Segment : public Glyph {
        public:
         /// Construct a Border Segment with \g for appearance.
-        Segment(const Glyph& g) : Glyph{g} {}
+        Segment(Glyph const& g) : Glyph{g} {}
 
         /// Enable the Segment to be displayable.
         void enable() { enabled_ = true; }
@@ -20,25 +20,25 @@ class Border {
         void disable() { enabled_ = false; }
 
         /// Return whether or not the border is enabled.
-        bool enabled() const { return enabled_; }
+        auto enabled() const -> bool { return enabled_; }
 
         /// Can assign to this as if it is a Glyph.
         using Glyph::operator=;
 
        private:
-        bool enabled_{true};
+        bool enabled_ = true;
     };
 
     /// Holds all 8 Segments that a Border is made up of.
     struct Segments {
-        Segment north{L'─'};
-        Segment south{L'─'};
-        Segment east{L'│'};
-        Segment west{L'│'};
-        Segment north_west{L'┌'};
-        Segment north_east{L'┐'};
-        Segment south_west{L'└'};
-        Segment south_east{L'┘'};
+        Segment north      = L'─'_g;
+        Segment south      = L'─'_g;
+        Segment east       = L'│'_g;
+        Segment west       = L'│'_g;
+        Segment north_west = L'┌'_g;
+        Segment north_east = L'┐'_g;
+        Segment south_west = L'└'_g;
+        Segment south_east = L'┘'_g;
 
         /// Enable all Segments, allowing them to be displayed.
         void enable_all();
@@ -63,9 +63,11 @@ class Border {
         void disable_sides();
     };
 
+   public:
     /// Contains the look/appearance and enabled state for each segment.
     Segments segments;
 
+   public:
     /// Enable the Border.
     /** This will give it space within its Widget and make it displayable.
      *  Segments are only displayed if their Border is enabled. */
@@ -75,10 +77,10 @@ class Border {
     void disable() { enabled_ = false; }
 
     /// Return whether the border is enabled.
-    bool enabled() const { return enabled_; }
+    auto enabled() const -> bool { return enabled_; }
 
    private:
-    bool enabled_{false};
+    bool enabled_ = false;
 };
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_BORDER_HPP
