@@ -10,6 +10,7 @@
 #include "focus/focus_demo.hpp"
 #include "game_of_life/gol_demo.hpp"
 #include "glyph_paint/glyph_paint.hpp"
+#include "graph/graph_demo.hpp"
 #include "layout/layout_demo.hpp"
 #include "notepad/notepad.hpp"
 #include "palette/palette_demo.hpp"
@@ -25,6 +26,9 @@ class Main_menu : public cppurses::layout::Vertical<> {
 
     cppurses::Menu_stack& main_menu =
         this->make_child<cppurses::Menu_stack>("D e m o s");
+
+    graph::Graph_demo& graph_demo =
+        main_menu.make_page<graph::Graph_demo>("Graph");
 
     layout_demo::Layout_demo& layout_demo =
         main_menu.make_page<layout_demo::Layout_demo>("Layouts");
