@@ -37,7 +37,10 @@ class Event_loop {
 
     /// Call on the loop to exit at the next exit point.
     /** The return code value is used when returning from run() or wait(). This
-     *  function is thread safe. */
+     *  will wait for the calling loop_function to return before exiting.
+     *  Implement a timeout loop_function() if you need to exit quickly. Not
+     *  valid to call this method if run() is not currently executing. Only
+     *  valid to call once per call to run(). */
     virtual void exit(int return_code)
     {
         return_code_ = return_code;

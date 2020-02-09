@@ -38,8 +38,11 @@ void Animation_engine::unregister_widget(Widget& w)
 {
     for (auto iter = std::begin(const_loops_); iter != std::end(const_loops_);
          ++iter) {
-        if (iter->second->unregister_widget(w)) {
-            if (iter->second->empty()) {
+        auto& [period, event_loop] = *iter;
+        if (event_loop->unregister_widget(w)) {
+            if (event_loop->empty()) {
+                event_loop->exit(0);
+                event_loop->wait();
                 const_loops_.erase(iter);
                 return;
             }

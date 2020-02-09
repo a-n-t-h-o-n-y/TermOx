@@ -9,7 +9,6 @@ auto Event_loop::run() -> int
 {
     if (running_)
         return -1;
-    exit_       = false;
     running_    = true;
     auto notify = true;
     while (not exit_) {
@@ -20,6 +19,7 @@ auto Event_loop::run() -> int
         notify = this->loop_function();
     }
     running_ = false;
+    exit_    = false;
     return return_code_;
 }
 

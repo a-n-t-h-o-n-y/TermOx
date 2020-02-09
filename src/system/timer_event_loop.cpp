@@ -1,5 +1,6 @@
 #include <cppurses/system/detail/timer_event_loop.hpp>
 
+#include <algorithm>
 #include <chrono>
 #include <iterator>
 #include <set>
@@ -18,22 +19,35 @@ namespace detail {
 
 void Timer_event_loop::register_widget(Widget& w)
 {
-    registered_widgets_.emplace(&w);
-    w.destroyed.connect([this](Widget& d) { registered_widgets_.erase(&d); });
+    {
+        auto const guard = Guard_t{mtx_registered_widgets_};
+        registered_widgets_.emplace(&w);
+    }
+    w.destroyed.connect([this](Widget& w) { this->unregister_widget(w); });
 }
 
 auto Timer_event_loop::loop_function() -> bool
 {
-    for (Widget* widg : registered_widgets_) {
-        System::post_event<Timer_event>(*widg);
+    {
+        auto const guard = Guard_t{mtx_registered_widgets_};
+        for (Widget* widg : registered_widgets_) {
+            System::post_event<Timer_event>(*widg);
+        }
     }
-    auto const now           = std::chrono::high_resolution_clock::now();
-    auto const time_passed   = now - last_time_;
-    auto const time_to_sleep = period_func_() - time_passed;
-    if (time_to_sleep > Period_t::zero())
-        std::this_thread::sleep_for(time_to_sleep);
-    last_time_ = std::chrono::high_resolution_clock::now();
-    return not registered_widgets_.empty();
+    this->wait_on_timer();
+    return not this->empty();
+}
+
+void Timer_event_loop::wait_on_timer()
+{
+    auto const time_to_sleep = [this] {
+        auto const now         = Clock_t::now();
+        auto const time_passed = now - last_time_;
+        auto const guard       = Guard_t{mtx_get_period_};
+        return std::max(Clock_t::duration::zero(), get_period_() - time_passed);
+    }();
+    std::this_thread::sleep_for(time_to_sleep);
+    last_time_ = Clock_t::now();
 }
 
 }  // namespace detail
