@@ -1,5 +1,5 @@
 if(${CMAKE_VERSION} VERSION_LESS "3.8")
-    set(CMAKE_CXX_STANDARD 14)
+    set(CMAKE_CXX_STANDARD 17)
 endif()
 
 add_executable(demos EXCLUDE_FROM_ALL "")
@@ -88,5 +88,5 @@ target_sources(demos PRIVATE
 target_link_libraries(demos PRIVATE cppurses)
 
 if(NOT ${CMAKE_VERSION} VERSION_LESS "3.8")
-    target_compile_features(demos INTERFACE cxx_std_14)
+    target_compile_features(demos INTERFACE cxx_std_17)
 endif()
