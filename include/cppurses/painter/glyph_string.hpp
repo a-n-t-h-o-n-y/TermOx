@@ -84,7 +84,11 @@ class Glyph_string : private std::vector<Glyph> {
         }
     }
 
+    Glyph_string(Glyph_string const&) = default;
+    Glyph_string(Glyph_string&&)      = default;
+
     auto operator=(Glyph_string const&) -> Glyph_string& = default;
+    auto operator=(Glyph_string &&) -> Glyph_string& = default;
 
     /// Convert to a std::string, each Glyph being a char.
     auto str() const -> std::string
