@@ -1,6 +1,6 @@
 #ifndef CPPURSES_DEMOS_LAYOUT_LAYOUT_DEMO_HPP
 #define CPPURSES_DEMOS_LAYOUT_LAYOUT_DEMO_HPP
-#include <boost/signals2/signal.hpp>
+#include <signals/signal.hpp>
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/painter.hpp>
@@ -49,7 +49,7 @@ struct Meta_widget : cppurses::Widget {
 };
 
 struct Workspace : cppurses::layout::Horizontal<Meta_widget> {
-    boost::signals2::signal<void(Meta_widget*)> selected;
+    sig::Signal<void(Meta_widget*)> selected;
 
     auto add_widget() -> Meta_widget*
     {
@@ -158,7 +158,7 @@ struct Size_policy_settings : cppurses::layout::Vertical<> {
         max.set_value(policy.max_size());
     }
 
-    boost::signals2::signal<void(cppurses::Size_policy const&)> policy_updated;
+    sig::Signal<void(cppurses::Size_policy const&)> policy_updated;
 
    private:
     cppurses::Size_policy size_policy_;
@@ -222,10 +222,9 @@ struct Settings : cppurses::layout::Vertical<> {
         width_policy_settings.reset(w->width_policy);
     }
 
-    boost::signals2::signal<void()> add_widget;
-    boost::signals2::signal<void()> remove_selected;
-    boost::signals2::signal<void(cppurses::Size_policy const&)>
-        width_policy_updated;
+    sig::Signal<void()> add_widget;
+    sig::Signal<void()> remove_selected;
+    sig::Signal<void(cppurses::Size_policy const&)> width_policy_updated;
 };
 
 struct Layout_demo : cppurses::layout::Horizontal<> {
