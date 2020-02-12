@@ -59,7 +59,7 @@ void Terminal::initialize()
     is_initialized_ = true;
     ::noecho();
     ::keypad(::stdscr, true);
-    ::ESCDELAY = 1;
+    ::set_escdelay(1);
     ::mousemask(ALL_MOUSE_EVENTS, nullptr);
     ::mouseinterval(0);
     this->set_refresh_rate(refresh_rate_);
