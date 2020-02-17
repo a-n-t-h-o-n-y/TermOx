@@ -24,11 +24,11 @@ class Horizontal_scrollbar : public layout::Horizontal<> {
     Horizontal_scrollbar()
     {
         this->height_policy.fixed(1);
-        this->width_policy.type(Size_policy::Expanding);
+        this->width_policy.expanding(0);
 
         left_button.width_policy.fixed(1);
 
-        middle.width_policy.type(Size_policy::Expanding);
+        middle.width_policy.expanding(0);
         middle.brush.set_background(Color::Light_gray);
 
         right_button.width_policy.fixed(1);

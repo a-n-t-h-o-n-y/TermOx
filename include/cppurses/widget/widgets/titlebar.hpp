@@ -31,7 +31,6 @@ class Titlebar : public layout::Horizontal<> {
     {
         this->height_policy.fixed(1);
 
-        title.width_policy.type(Size_policy::Expanding);
         title.brush.set_background(Color::White);
         title.brush.set_foreground(Color::Black);
         title.set_alignment(Alignment::Center);

@@ -1,13 +1,13 @@
 #include <cppurses/system/events/mouse.hpp>
 
-#include <cppurses/system/focus.hpp>
+#include <cppurses/system/detail/focus.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
 
 auto Mouse::Press::send() const -> bool
 {
-    Focus::mouse_press(receiver_);
+    detail::Focus::mouse_press(receiver_);
     return receiver_.mouse_press_event(data_);
 }
 

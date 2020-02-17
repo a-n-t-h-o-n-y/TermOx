@@ -40,19 +40,22 @@ class System {
 
     ~System() { System::exit(0); }
 
+    /// Give program focus to \p w.
+    /** Sends Focus_out_event to Widget in focus, and Focus_in_event to \p w.*/
+    static void set_focus(Widget& w);
+
+    /// Removes focus from the currently in focus Widget.
+    static void clear_focus();
+
     /// Set a new head Widget for the entire system.
-    /** Will disable the previous head widget and enable \p new_head, if not
-     *  nullptr. Will also send Resize_event and Paint_events to \p new_head. */
+    /** Will disable the previous head widget if not nullptr. Only valid to call
+     *  before System::run or after System::exit. */
     static void set_head(Widget* new_head);
 
     /// Return a pointer to the head Widget.
     /** This Widget is the ancestor of every other widget that will be displayed
      *  on the screen. */
     static auto head() -> Widget* { return head_; }
-
-    /// Set the Widget to receive focus on run().
-    /** Needed because focus has to be set after a widget is enabled. */
-    static void set_initial_focus(Widget* target) { initial_focus_ = target; }
 
     /// Create a Widget_t object, set it as head widget and call System::run().
     /** \p args... are passed on to the Widget_t constructor. Blocks until
@@ -76,7 +79,8 @@ class System {
 
     /// Launch the main Event_loop and start processing Events.
     /** Blocks until System::exit() is called, returns the exit code. Will throw
-     *  a std::runtime_error if screen cannot be initialized. */
+     *  a std::runtime_error if screen cannot be initialized. Enables and sets
+     *  focus to the head Widget.*/
     auto run() -> int;
 
     /// Immediately send the event filters and then to the intended receiver.
@@ -118,7 +122,6 @@ class System {
 
    private:
     static Widget* head_;
-    static Widget* initial_focus_;
     static bool exit_requested_;
     static detail::User_input_event_loop user_input_loop_;
     static Animation_engine animation_engine_;

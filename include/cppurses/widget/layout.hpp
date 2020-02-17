@@ -25,8 +25,8 @@ class Layout : public Widget {
     {
         static_assert(std::is_base_of<Child_t, Widget_t>::value,
                       "Layout::make_child: Widget_t must be a Child_t type");
-        return static_cast<Widget_t&>(this->Widget::children_.append(
-            std::make_unique<Widget_t>(std::forward<Args>(args)...)));
+        return this->Widget::children_.append(
+            std::make_unique<Widget_t>(std::forward<Args>(args)...));
     }
 
     auto insert_child(std::unique_ptr<Child_t> child_ptr, std::size_t index)
@@ -60,6 +60,7 @@ class Layout : public Widget {
 
     // void move_child(std::size_t initial_index, std::size_t end_index);
 
+    // TODO Remove this method
     /// Clients override this to post Resize and Move events to children.
     /** This will be called each time the children Widgets possibly need to be
      *  rearranged. Triggered by Move_event, Resize_event, Child_added_event,

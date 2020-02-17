@@ -2,7 +2,7 @@
 
 #include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/color.hpp>
-#include <cppurses/system/focus.hpp>
+#include <cppurses/system/system.hpp>
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/widget_slots.hpp>
@@ -141,7 +141,7 @@ Notepad::Notepad()
 
 bool Notepad::focus_in_event()
 {
-    Focus::set_focus_to(txt_attr.textbox);
+    System::set_focus(txt_attr.textbox);
     return true;
 }
 

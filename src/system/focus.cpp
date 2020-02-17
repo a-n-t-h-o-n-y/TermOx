@@ -1,4 +1,4 @@
-#include <cppurses/system/focus.hpp>
+#include <cppurses/system/detail/focus.hpp>
 
 #include <algorithm>
 #include <cstddef>
@@ -15,6 +15,7 @@
 
 namespace {
 using namespace cppurses;
+using namespace cppurses::detail;
 
 auto is_tab_focus_policy(Focus_policy policy) -> bool
 {
@@ -31,7 +32,7 @@ auto const is_tab_focusable = [](auto const* widg) {
 };
 
 // Return a widg tree from System::head() if focus_widget is nullptr.
-auto gen_focus_front_widg_tree() -> std::vector<Widget*>
+auto gen_focus_front_widg_tree() -> std::vector<cppurses::Widget*>
 {
     auto widg_tree = System::head()->get_descendants();
     widg_tree.insert(std::begin(widg_tree), System::head());
@@ -46,7 +47,7 @@ auto gen_focus_front_widg_tree() -> std::vector<Widget*>
     return widg_tree;
 }
 
-auto next_tab_focus() -> Widget*
+auto next_tab_focus() -> cppurses::Widget*
 {
     if (System::head() == nullptr)
         return nullptr;
@@ -57,7 +58,7 @@ auto next_tab_focus() -> Widget*
     return (next_focus != end) ? *next_focus : Focus::focus_widget();
 }
 
-auto previous_tab_focus() -> Widget*
+auto previous_tab_focus() -> cppurses::Widget*
 {
     if (System::head() == nullptr)
         return nullptr;
@@ -70,18 +71,18 @@ auto previous_tab_focus() -> Widget*
 
 }  // namespace
 
-namespace cppurses {
+namespace cppurses::detail {
 
-Widget* Focus::focus_widget_ = nullptr;
-bool Focus::tab_enabled_     = true;
-bool Focus::tab_suppressed_  = false;
+cppurses::Widget* Focus::focus_widget_ = nullptr;
+bool Focus::tab_enabled_               = true;
+bool Focus::tab_suppressed_            = false;
 
-void Focus::mouse_press(Widget& clicked)
+void Focus::mouse_press(cppurses::Widget& clicked)
 {
     if (&clicked == focus_widget_)
         return;
     if (is_click_focus_policy(clicked.focus_policy))
-        Focus::set_focus_to(clicked);
+        Focus::set(clicked);
 }
 
 auto Focus::tab_press() -> bool
@@ -91,7 +92,7 @@ auto Focus::tab_press() -> bool
         if (next == nullptr)
             Focus::clear();
         else
-            Focus::set_focus_to(*next);
+            Focus::set(*next);
         return true;
     }
     tab_suppressed_ = false;
@@ -105,14 +106,14 @@ auto Focus::shift_tab_press() -> bool
         if (previous == nullptr)
             Focus::clear();
         else
-            Focus::set_focus_to(*previous);
+            Focus::set(*previous);
         return true;
     }
     tab_suppressed_ = false;
     return false;
 }
 
-void Focus::set_focus_to(Widget& new_focus)
+void Focus::set(cppurses::Widget& new_focus)
 {
     if (&new_focus == focus_widget_)
         return;
@@ -126,9 +127,7 @@ void Focus::set_focus_to(Widget& new_focus)
             new Focus_out_event{*focus_widget_}};
         System::post_event(std::move(event));
     }
-    focus_widget_ = &new_focus;
-    auto event =
-        std::unique_ptr<Focus_in_event>{new Focus_in_event{*focus_widget_}};
+    auto event = std::unique_ptr<Focus_in_event>{new Focus_in_event{new_focus}};
     System::post_event(std::move(event));
 }
 
@@ -142,4 +141,4 @@ void Focus::clear()
     focus_widget_ = nullptr;
 }
 
-}  // namespace cppurses
+}  // namespace cppurses::detail

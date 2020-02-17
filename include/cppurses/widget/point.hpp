@@ -13,17 +13,17 @@ struct Point {
     std::size_t y = 0;
 };
 
-inline bool operator==(const Point& lhs, const Point& rhs)
+inline auto operator==(Point const& lhs, Point const& rhs) -> bool
 {
     return lhs.x == rhs.x and lhs.y == rhs.y;
 }
 
-inline bool operator!=(const Point& lhs, const Point& rhs)
+inline auto operator!=(Point const& lhs, Point const& rhs) -> bool
 {
     return !(lhs == rhs);
 }
 
-inline bool operator<(const Point& lhs, const Point& rhs)
+inline auto operator<(Point const& lhs, Point const& rhs) -> bool
 {
     return (lhs.y < rhs.y) or (lhs.y == rhs.y and lhs.x < rhs.x);
 }
@@ -36,7 +36,7 @@ template <>
 struct hash<cppurses::Point> {
     using argument_type = cppurses::Point;
     using result_type   = std::size_t;
-    auto operator()(const argument_type& point) const noexcept -> result_type
+    auto operator()(argument_type const& point) const noexcept -> result_type
     {
         auto const h1 = std::hash<decltype(point.x)>{}(point.x);
         auto const h2 = std::hash<decltype(point.y)>{}(point.y);

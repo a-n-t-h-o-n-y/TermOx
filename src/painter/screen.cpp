@@ -14,7 +14,7 @@
 #include <cppurses/painter/detail/screen_mask.hpp>
 #include <cppurses/painter/detail/staged_changes.hpp>
 #include <cppurses/painter/glyph.hpp>
-#include <cppurses/system/focus.hpp>
+#include <cppurses/system/detail/focus.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/terminal/output.hpp>
 #include <cppurses/terminal/terminal.hpp>
@@ -74,7 +74,7 @@ void Screen::flush(Staged_changes::Map_t const& changes)
 
 void Screen::set_cursor_on_focus_widget()
 {
-    auto const* focus = Focus::focus_widget();
+    auto const* focus = detail::Focus::focus_widget();
     if (focus != nullptr and focus->cursor.enabled() and is_paintable(*focus)) {
         System::terminal.show_cursor();
         auto const x_global = focus->inner_x() + focus->cursor.x();

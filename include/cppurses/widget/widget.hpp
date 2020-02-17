@@ -21,10 +21,10 @@
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/system/animation_engine.hpp>
+#include <cppurses/system/detail/focus.hpp>
 #include <cppurses/system/events/child_event.hpp>
 #include <cppurses/system/events/key.hpp>
 #include <cppurses/system/events/mouse.hpp>
-#include <cppurses/system/focus.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/cursor_data.hpp>
@@ -55,6 +55,30 @@ class Widget {
     sig::Signal<void(Key::Code)> key_pressed;
     sig::Signal<void(Key::Code)> key_released;
 
+    /// Describes the visual border of this Widget.
+    Border border;
+
+    /// Provides information on where the cursor is and if it is enabled.
+    Cursor_data cursor{this};
+
+    /// Describes how the width of this Widget should be modified by a Layout.
+    Size_policy width_policy;
+
+    /// Describes how the height of this Widget should be modified by a Layout.
+    Size_policy height_policy;
+
+    /// Describes how focus is given to this Widget.
+    Focus_policy focus_policy{Focus_policy::None};
+
+    /// Used to fill in empty space that is not filled in by paint_event().
+    opt::Optional<Glyph> wallpaper;
+
+    /// A Brush that is applied to every Glyph painted by this Widget.
+    Brush brush{background(Color::Black), foreground(Color::White)};
+
+    friend class Resize_event;
+    friend class Move_event;
+
    public:
     /// Initialize with \p name.
     explicit Widget(std::string name = "");
@@ -66,8 +90,8 @@ class Widget {
 
     virtual ~Widget()
     {
-        if (Focus::focus_widget() == this)
-            Focus::clear();
+        if (detail::Focus::focus_widget() == this)
+            detail::Focus::clear();
         destroyed(*this);
     }
 
@@ -119,6 +143,15 @@ class Widget {
      *  positioning and resizing this Widget. */
     auto parent() const -> Widget* { return parent_; }
 
+    /// Return the global top left corner of this widget.
+    auto top_left() const -> Point { return top_left_position_; }
+
+    /// Return the global top left corner of this widget, not including border.
+    auto inner_top_left() const -> Point
+    {
+        return {this->inner_x(), this->inner_y()};
+    }
+
     /// x coordinate for the top left point of this Widget.
     /** Given with relation to the top left of the terminal screen. */
     auto x() const -> std::size_t { return top_left_position_.x; }
@@ -145,6 +178,9 @@ class Widget {
         return top_left_position_.y + detail::Border_offset::north(*this);
     }
 
+    /// Return the area the widget occupies, not including the Border.
+    auto area() const -> Area { return {this->width(), this->height()}; }
+
     /// Return the inner width dimension, this does not include Border space.
     auto width() const -> std::size_t
     {
@@ -158,6 +194,9 @@ class Widget {
         return this->outer_height() - detail::Border_offset::north(*this) -
                detail::Border_offset::south(*this);
     }
+
+    /// Return the area the widget occupies, including Border space.
+    auto outer_area() const -> Area { return {outer_width_, outer_height_}; }
 
     /// Return the width dimension, this includes Border space.
     auto outer_width() const -> std::size_t { return outer_width_; }
@@ -242,60 +281,11 @@ class Widget {
     /// Return the number of children held by this Widget.
     auto child_count() const -> std::size_t { return children_.size(); }
 
-    /// Describes the visual border of this Widget.
-    Border border;
-
-    // TODO figure out if these should be removed
-    /// Search children by name and Widget type.
-    // [>* Return a pointer to the given type, if found, or nullptr. <]
-    // template <typename Widg_t = Widget>
-    // auto find_child(std::string const& name) const -> Widg_t*
-    // {
-    //     for (std::unique_ptr<Widget> const& widg : this->children.get()) {
-    //         if (widg->name() == name and
-    //             dynamic_cast<Widg_t*>(widg.get()) != nullptr) {
-    //             return widg.get();
-    //         }
-    //     }
-    //     return nullptr;
-    // }
-
-    /// Search matching on \p name and Widg_t type for a descendant Widget.
-    // * Search with breadth first ordering over the 'Widget tree'. Return a
-    // Widg_t* if found, otherwise a nullptr is returned. Return the first
-    // matching descendant.
-    // template <typename Widg_t = Widget>
-    // auto find_descendant(std::string const& name) const -> Widg_t*
-    // {
-    //     for (Widget* widg : this->children.get_descendants()) {
-    //         if (widg->name() == name and
-    //             dynamic_cast<Widg_t*>(widg != nullptr)) {
-    //             return widg;
-    //         }
-    //     }
-    //     return nullptr;
-    // }
-
-    /// Provides information on where the cursor is and if it is enabled.
-    Cursor_data cursor{this};
-
-    /// Describes how the width of this Widget should be modified by a Layout.
-    Size_policy width_policy;
-
-    /// Describes how the height of this Widget should be modified by a Layout.
-    Size_policy height_policy;
-
-    /// Describes how focus is given to this Widget.
-    Focus_policy focus_policy{Focus_policy::None};
-
-    /// Used to fill in empty space that is not filled in by paint_event().
-    opt::Optional<Glyph> wallpaper;
-
-    /// A Brush that is applied to every Glyph painted by this Widget.
-    Brush brush{background(Color::Black), foreground(Color::White)};
-
     /// If true, the brush will apply to the wallpaper Glyph.
-    bool brush_paints_wallpaper() const { return brush_paints_wallpaper_; }
+    auto brush_paints_wallpaper() const -> bool
+    {
+        return brush_paints_wallpaper_;
+    }
 
     /// Set if the brush is applied to the wallpaper Glyph.
     void set_brush_paints_wallpaper(bool paints = true)
@@ -317,9 +307,6 @@ class Widget {
     {
         return screen_state_;
     }
-
-    friend class Resize_event;
-    friend class Move_event;
 
     // - - - - - - - - - - - - - Event Handlers - - - - - - - - - - - - - - - -
     /// Handles Enable_event objects.
@@ -598,6 +585,9 @@ class Widget {
         class Const_range {
             static_assert(std::is_base_of<Widget, Widget_t>::value,
                           "Widget_t must be a Widget type.");
+            // TODO std::iterator is deprecated in C++17, use explicit type
+            // aliases instead.
+            // https://www.fluentcpp.com/2018/05/08/std-iterator-deprecated/
             class Iterator : public std::iterator<
                                  std::bidirectional_iterator_tag,
                                  typename List_t::const_iterator::value_type> {
@@ -652,11 +642,14 @@ class Widget {
             List_t const& child_list_;
         };
 
+        // TODO this is a view, it is non-owning and has reference semantics,
+        // change the name to View?
         /// Provides Widget_t& access to underlying child objects.
         template <typename Widget_t>
         class Range {
             static_assert(std::is_base_of<Widget, Widget_t>::value,
                           "Widget_t must be a Widget type.");
+            // TODO std::iterator is deprecated in C++17, as above
             class Iterator
                 : public std::iterator<std::bidirectional_iterator_tag,
                                        typename List_t::iterator::value_type> {
@@ -694,6 +687,7 @@ class Widget {
             auto begin() const -> Iterator { return {std::begin(child_list_)}; }
             auto end() const -> Iterator { return {std::end(child_list_)}; }
             auto empty() const -> bool { return child_list_.empty(); }
+            auto size() const -> bool { return child_list_.size(); }
             auto operator[](std::size_t index) const -> Widget_t&
             {
                 return static_cast<Widget_t&>(*child_list_[index]);

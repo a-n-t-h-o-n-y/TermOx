@@ -33,7 +33,8 @@ class Size_policy {
     };
 
    public:
-    // Does not copy/replace the policy_updated Signal
+    // None of these copies/replaces the policy_updated Signal.
+    // Signal is attached to the Widget, not the Size_policy.
     Size_policy() = default;
     Size_policy(Size_policy const& x) : data_{x.data_} {}
     Size_policy(Size_policy&& x) : data_{std::move(x.data_)} {}
@@ -53,8 +54,11 @@ class Size_policy {
     /// Set the type to Fixed with size hint of \p hint.
     void fixed(std::size_t hint)
     {
-        data_.type = Type::Fixed;
-        data_.hint = hint;
+        data_.type    = Type::Fixed;
+        data_.hint    = hint;
+        data_.min     = hint;
+        data_.max     = hint;
+        data_.stretch = 1;
         this->policy_updated();
     }
 
@@ -63,6 +67,9 @@ class Size_policy {
     {
         data_.type = Type::Minimum;
         data_.hint = hint;
+        data_.min  = hint;  // TODO set_min() does the check
+        if (data_.max < data_.min)
+            data_.max = data_.min;
         this->policy_updated();
     }
 
@@ -71,6 +78,9 @@ class Size_policy {
     {
         data_.type = Type::Maximum;
         data_.hint = hint;
+        data_.max  = hint;  // TODO this->set_max() which does the check
+        if (data_.min > data_.max)
+            data_.min = data_.max;
         this->policy_updated();
     }
 
@@ -79,37 +89,49 @@ class Size_policy {
     {
         data_.type = Type::Preferred;
         data_.hint = hint;
+        if (data_.hint < data_.min)
+            data_.min = data_.hint;
+        if (data_.hint > data_.max)
+            data_.max = data_.hint;
         this->policy_updated();
     }
 
     /// Set the type to Expanding with size hint of \p hint.
     void expanding(std::size_t hint)
     {
-        data_.type = Type::Expanding;
-        data_.hint = hint;
+        data_.type    = Type::Expanding;
+        data_.stretch = std::numeric_limits<decltype(data_.stretch)>::max();
+        data_.hint    = hint;
+        if (data_.hint < data_.min)
+            data_.min = data_.hint;
+        if (data_.hint > data_.max)
+            data_.max = data_.hint;
         this->policy_updated();
     }
 
     /// Set the type to MinimumExpanding with size hint of \p hint.
+    // TODO remove this or make it underscore separated..
     void minimumExpanding(std::size_t hint)
     {
-        data_.type = Type::MinimumExpanding;
-        data_.hint = hint;
+        data_.type    = Type::MinimumExpanding;
+        data_.stretch = std::numeric_limits<decltype(data_.stretch)>::max();
+        data_.hint    = hint;
+        data_.min     = hint;  // TODO set_min_size()
         this->policy_updated();
     }
 
-    /// Set the Type of the Size_policy.
-    void type(Size_policy::Type type)
+    /// Set the type to Ignored.
+    void ignored()
     {
-        data_.type = type;
+        data_.hint = 0;
+        data_.min  = 0;
+        data_.max  = std::numeric_limits<decltype(data_.max)>::max();
+        data_.type = Type::Ignored;
         this->policy_updated();
     }
 
     /// Return the type of Size_policy currently being used.
     auto type() const -> Size_policy::Type { return data_.type; }
-
-    /// Set the type to Ignored.
-    void ignored() { this->type(Type::Ignored); }
 
     /// Set the stretch factor.
     /** Used to fit adjacent Widgets within a length. The stretch is used to
@@ -117,6 +139,8 @@ class Size_policy {
      *  by the total stretch of all Widgets in the layout. */
     void stretch(std::size_t value)
     {
+        if (value == 0)
+            return;
         data_.stretch = value;
         this->policy_updated();
     }
@@ -138,6 +162,8 @@ class Size_policy {
     void min_size(std::size_t value)
     {
         data_.min = value;
+        if (data_.max < data_.min)
+            data_.max = data_.min;
         this->policy_updated();
     }
 
@@ -148,6 +174,8 @@ class Size_policy {
     void max_size(std::size_t value)
     {
         data_.max = value;
+        if (data_.min > data_.max)
+            data_.min = data_.max;
         this->policy_updated();
     }
 

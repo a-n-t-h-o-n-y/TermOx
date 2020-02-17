@@ -8,7 +8,7 @@
 #include <signals/slot.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/system/focus.hpp>
+#include <cppurses/system/system.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/layouts/stack.hpp>
 #include <cppurses/widget/widgets/menu.hpp>
@@ -19,7 +19,6 @@ namespace cppurses {
 /** Menu Widget is not counted as a Stack index, pages start from index 0. */
 class Menu_stack : public layout::Stack<Widget> {
    private:
-    Menu& menu_;
     static auto constexpr menu_index_ = 0uL;
 
    public:
@@ -113,9 +112,12 @@ class Menu_stack : public layout::Stack<Widget> {
    protected:
     auto focus_in_event() -> bool override
     {
-        Focus::set_focus_to(menu_);
+        System::set_focus(menu_);
         return Stack::focus_in_event();
     }
+
+   private:
+    Menu& menu_;
 
    private:
     /// Remove item at \p index from menu, where index 0 is the menu.

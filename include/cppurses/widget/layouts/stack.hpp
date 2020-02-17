@@ -11,8 +11,10 @@
 
 #include <signals/signals.hpp>
 
-#include <cppurses/system/focus.hpp>
-#include <cppurses/widget/layouts/horizontal.hpp>
+#include <cppurses/system/events/move_event.hpp>
+#include <cppurses/system/events/resize_event.hpp>
+#include <cppurses/system/system.hpp>
+#include <cppurses/widget/layout.hpp>
 
 namespace cppurses {
 namespace layout {
@@ -22,7 +24,7 @@ namespace layout {
  *  one at a time within the Stack. The active page determines which child
  *  Widget is currently displayed. */
 template <typename Child_t = Widget>
-class Stack : public layout::Horizontal<Child_t> {
+class Stack : public Layout<Child_t> {
    public:
     /// Emitted when the active page is changed, sends the new index along.
     sig::Signal<void(std::size_t)> page_changed;
@@ -36,9 +38,11 @@ class Stack : public layout::Horizontal<Child_t> {
         if (index > this->Stack::size())
             throw std::out_of_range{"Stack::set_active_page: index is invalid"};
         active_page_ = &(this->Layout<Child_t>::get_children()[index]);
-        this->enable(this->enabled(), false);
+        this->enable(this->enabled(), false);  // sends enable/disable events
+        this->move_active_page();
+        this->resize_active_page();
         if (sets_focus_)
-            Focus::set_focus_to(*active_page_);
+            System::set_focus(*active_page_);
         this->page_changed(index);
     }
 
@@ -157,9 +161,37 @@ class Stack : public layout::Horizontal<Child_t> {
     /// Used to indicate an error on return values of index type.
     static auto constexpr invalid_index = static_cast<std::size_t>(-1);
 
+   protected:
+    auto move_event(Point new_position, Point old_position) -> bool override
+    {
+        this->move_active_page();
+        return Layout<Child_t>::move_event(new_position, old_position);
+    }
+
+    auto resize_event(Area new_size, Area old_size) -> bool override
+    {
+        this->resize_active_page();
+        return Layout<Child_t>::resize_event(new_size, old_size);
+    }
+
+    void update_geometry() override { Layout<Child_t>::update_geometry(); }
+
    private:
     Child_t* active_page_ = nullptr;
     bool sets_focus_      = true;
+
+   private:
+    void move_active_page()
+    {
+        if (active_page_ != nullptr)
+            System::post_event<Move_event>(*active_page_, this->top_left());
+    }
+
+    void resize_active_page()
+    {
+        if (active_page_ != nullptr)
+            System::post_event<Resize_event>(*active_page_, this->outer_area());
+    }
 };
 
 }  // namespace layout

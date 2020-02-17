@@ -1,5 +1,6 @@
 #ifndef CPPURSES_SYSTEM_EVENTS_FOCUS_EVENT_HPP
 #define CPPURSES_SYSTEM_EVENTS_FOCUS_EVENT_HPP
+#include <cppurses/system/detail/focus.hpp>
 #include <cppurses/system/event.hpp>
 #include <cppurses/widget/widget.hpp>
 
@@ -10,7 +11,11 @@ struct Focus_in_event : Event {
     explicit Focus_in_event(Widget& receiver) : Event{Event::FocusIn, receiver}
     {}
 
-    auto send() const -> bool override { return receiver_.focus_in_event(); }
+    auto send() const -> bool override
+    {
+        detail::Focus::focus_widget_ = &receiver_;
+        return receiver_.focus_in_event();
+    }
 
     auto filter_send(Widget& filter) const -> bool override
     {

@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-#include <cppurses/system/focus.hpp>
+#include <cppurses/system/detail/focus.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace {
@@ -26,9 +26,9 @@ namespace cppurses {
 auto Key::Press::send() const -> bool
 {
     bool r = receiver_.key_press_event(Key::State{key_, key_to_char(key_)});
-    if (key_ == Code::Tab and Focus::tab_press())
+    if (key_ == Code::Tab and detail::Focus::tab_press())
         return true;
-    if (key_ == Code::Back_tab and Focus::shift_tab_press())
+    if (key_ == Code::Back_tab and detail::Focus::shift_tab_press())
         return true;
     return r;
 }

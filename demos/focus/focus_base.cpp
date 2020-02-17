@@ -1,6 +1,6 @@
 #include "focus_base.hpp"
 
-#include <cppurses/system/focus.hpp>
+#include <cppurses/system/system.hpp>
 
 namespace {
 using namespace cppurses;
@@ -72,7 +72,7 @@ bool Focus_base::focus_out_event()
 
 bool Focus_base::focus_in_event_filter(Widget& /* receiver */)
 {
-    Focus::set_focus_to(*this);
+    System::set_focus(*this);
     return true;
 }
 

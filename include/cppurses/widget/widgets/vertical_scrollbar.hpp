@@ -41,11 +41,11 @@ class Vertical_scrollbar : public layout::Vertical<> {
     void initialize()
     {
         this->width_policy.fixed(1);
-        this->height_policy.type(Size_policy::Expanding);
+        this->height_policy.expanding(0);
 
         up_button.height_policy.fixed(1);
 
-        middle.height_policy.type(Size_policy::Expanding);
+        middle.height_policy.expanding(0);
         middle.brush.set_background(Color::Light_gray);
 
         down_button.height_policy.fixed(1);

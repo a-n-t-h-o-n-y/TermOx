@@ -41,9 +41,13 @@ struct Meta_widget : cppurses::Widget {
     {
         auto const w = std::to_string(this->width());
         auto const h = std::to_string(this->height());
+        auto const x = std::to_string(this->parent()->x());
+        auto const y = std::to_string(this->parent()->y());
         cppurses::Painter p{*this};
-        p.put("W " + w, 0, 0);
-        p.put("H " + h, 0, 1);
+        p.put("X " + x, 0, 0);
+        p.put("Y " + y, 0, 1);
+        p.put("W " + w, 0, 2);
+        p.put("H " + h, 0, 3);
         return Widget::paint_event();
     }
 };
@@ -94,10 +98,10 @@ struct Size_policy_settings : cppurses::layout::Vertical<> {
         title.height_policy.fixed(1);
         title.brush.set_background(cppurses::Color::Dark_gray);
 
-        types_box.type_updated.connect([this](auto type) {
-            size_policy_.type(type);
-            this->notify();
-        });
+        // types_box.type_updated.connect([this](auto type) {
+        //     size_policy_.type(type);
+        //     this->notify();
+        // });
         types_box.label.brush.set_background(cppurses::Color::Dark_gray);
         types_box.cycle_box.brush.set_background(cppurses::Color::Dark_gray);
 
@@ -192,7 +196,8 @@ struct Settings : cppurses::layout::Vertical<> {
 
     Settings()
     {
-        this->width_policy.maximum(20);
+        // this->width_policy.maximum(20);
+        this->width_policy.fixed(20);
 
         title.height_policy.fixed(1);
         title.set_alignment(cppurses::Alignment::Center);

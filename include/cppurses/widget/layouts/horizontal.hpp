@@ -5,6 +5,8 @@
 #include <iterator>
 #include <vector>
 
+// #include <iostream>  //temp
+
 #include <cppurses/system/events/move_event.hpp>
 #include <cppurses/system/events/resize_event.hpp>
 #include <cppurses/system/system.hpp>
@@ -15,130 +17,237 @@
 #include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget.hpp>
 
-namespace cppurses {
-namespace layout {
+#include "detail/layout_range.hpp"
+
+namespace cppurses::layout {
 
 template <typename Child_t = Widget>
 class Horizontal : public Layout<Child_t> {
-   protected:
-    void update_geometry() override
-    {
-        this->enable(true, false);
-        auto widths = this->calculate_widget_sizes();
-        this->move_and_resize_children(widths);
-    }
-
    private:
     using Dimensions           = typename Layout<Child_t>::Dimensions;
     using Dimensions_reference = typename Layout<Child_t>::Dimensions_reference;
 
-   private:
-    auto calculate_widget_sizes()
-        -> std::vector<typename Layout<Child_t>::Dimensions>
+   protected:
+    void update_geometry() override
     {
-        auto widgets = std::vector<typename Layout<Child_t>::Dimensions>{};
-        auto total_stretch = std::size_t{0};
+        // Was important for Stack, but you can remove now.
+        // Assume this is in charge of determining who is enabled and who is not
+        // this->enable(true, false);
+        // TODO the below might not disable widgets then..
+        if (this->Widget::width() == 0uL)
+            return;
+
+        auto lengths = this->calculate_lengths();
+
+        // temp - transforms vector of size_t to vector of Dimensions
+        auto widths       = std::vector<Dimensions>{};
+        auto i            = 0;
+        auto const height = this->height();
         for (auto& child : this->get_children()) {
-            if (child.enabled()) {
-                widgets.emplace_back(Dimensions{&child, 0, this->height()});
-                total_stretch += child.width_policy.stretch();
-            }
+            widths.push_back(Dimensions{&child, lengths[i], height});
+            ++i;
         }
+        // temp end
 
-        auto width_available = this->width();
-
-        // HORIZONTAL
-        // Set Fixed, Minimum and MinimumExpanding to width_hint
-        for (auto& dimension : widgets) {
-            auto policy = dimension.widget->width_policy.type();
-            if (policy == Size_policy::Fixed or
-                policy == Size_policy::Minimum or
-                policy == Size_policy::MinimumExpanding) {
-                dimension.width = dimension.widget->width_policy.hint();
-                width_available -= dimension.width;
-            }
-        }
-        // if (width_available < 0) {
-        //     return widgets;
-        // }
-
-        // Set Size_policy::Ignored widgets to their stretch factor width value.
-        for (auto& dimension : widgets) {
-            if (dimension.widget->width_policy.type() == Size_policy::Ignored) {
-                float const percent = dimension.widget->width_policy.stretch() /
-                                      static_cast<float>(total_stretch);
-                auto width = static_cast<std::size_t>(percent * this->width());
-                if (width < dimension.widget->width_policy.min_size())
-                    width = dimension.widget->width_policy.min_size();
-                else if (width > dimension.widget->width_policy.max_size())
-                    width = dimension.widget->width_policy.max_size();
-                dimension.width = width;
-                width_available -= width;
-            }
-        }
-
-        // Set Maximum, Preferred and Expanding to width_hint
-        for (auto& dimension : widgets) {
-            auto policy = dimension.widget->width_policy.type();
-            if (policy == Size_policy::Maximum or
-                policy == Size_policy::Preferred or
-                policy == Size_policy::Expanding) {
-                dimension.width = dimension.widget->width_policy.hint();
-                width_available -= dimension.width;
-            }
-        }
-
-        /// DISTRIBUTE SPACE
-        /// ------------------------------------------------------
-
-        // create vector of size references for below if statements
-        auto widgets_w_refs =
-            std::vector<typename Layout<Child_t>::Dimensions_reference>{};
-        widgets_w_refs.reserve(widgets.size());
-        for (auto& d : widgets) {
-            widgets_w_refs.emplace_back(
-                Dimensions_reference{d.widget, &d.width, &d.height});
-        }
-        // If space left, fill in expanding and min_expanding, then if still,
-        // preferred and min
-        if (width_available > 0)
-            this->distribute_space(widgets_w_refs, width_available);
-
-        // if negative space left, subtract from max and preferred, then if
-        // still needed, expanding
-        if (width_available < 0)
-            this->collect_space(widgets_w_refs, width_available);
-
-        /// DISTRIBUTE SPACE
-        /// ------------------------------------------------------
-
-        // VERTICAL - repeat the above, but with vertical properties
-        for (auto& d : widgets) {
-            auto policy = d.widget->height_policy.type();
-            if (policy == Size_policy::Fixed)
-                d.height = d.widget->height_policy.hint();
-            else if (policy == Size_policy::Ignored or
-                     policy == Size_policy::Preferred or
-                     policy == Size_policy::Expanding) {
-                if (d.height > d.widget->height_policy.max_size())
-                    d.height = d.widget->height_policy.max_size();
-                else if (d.height < d.widget->height_policy.min_size())
-                    d.height = d.widget->height_policy.min_size();
-            }
-            else if (policy == Size_policy::Maximum) {
-                if (d.height > d.widget->height_policy.hint())
-                    d.height = d.widget->height_policy.hint();
-            }
-            else if (policy == Size_policy::Minimum or
-                     policy == Size_policy::MinimumExpanding) {
-                if (d.height > d.widget->height_policy.max_size())
-                    d.height = d.widget->height_policy.max_size();
-                else if (d.height < d.widget->height_policy.hint())
-                    d.height = d.widget->height_policy.hint();
-            }
-        }
-        return widgets;
+        this->move_and_resize_children(widths);
     }
+
+   private:
+    /// Result vector matches up with Widget::get_children() view
+    auto calculate_lengths() -> std::vector<std::size_t>
+    {
+        // Construct length helper, will initialize with hints
+        auto range = detail::Layout_range{
+            this->get_children(), [](Widget const& w) -> Size_policy const& {
+                return w.width_policy;
+            }};
+
+        auto const surplus = static_cast<int>(this->Widget::width()) -
+                             static_cast<int>(range.entire_length());
+        // std::cerr << "width: " << this->Widget::width() << '\n';
+        // std::cerr << "entire_length: " << range.entire_length() << '\n';
+        // std::cerr << "surplus: " << surplus << '\n';
+
+        if (surplus > 0)
+            this->disperse_surplus(range, surplus);
+        // else if (surplus < 0)
+        //     this->reclaim_length(range, surplus);
+
+        return range.get_each_length();
+    }
+
+    // TODO could be static?
+    /** total stretch cannot be zero, since you have to use a setter method to
+     * set it, and default value is one. */
+    template <typename Get_policy_t>
+    void disperse_surplus(detail::Layout_range<Get_policy_t>& range,
+                          int surplus)
+    {
+        auto given_away = -1;
+        while (given_away != 0) {
+            given_away = 0;
+            for (auto iter = range.begin_max(); iter != range.end(); ++iter) {
+                auto const stretch_ratio =
+                    static_cast<double>(iter.get_policy().stretch()) /
+                    range.total_stretch();
+                auto to_add = static_cast<std::size_t>(stretch_ratio * surplus);
+                if ((iter->length + to_add) > iter.get_policy().max_size())
+                    to_add = iter.get_policy().max_size() - iter->length;
+                iter->length += to_add;
+                given_away += to_add;
+            }
+            surplus -= given_away;
+            // std::cerr << "given_away: " << given_away << '\n';
+        }
+        // std::cerr << "-------------------------------------\n";
+
+        // for (auto& child : this->get_children()) {
+        // auto const stretch_ratio =
+        //     static_cast<double>(child.width_policy.stretch()) /
+        //     total_stretch;
+        // auto to_add = static_cast<std::size_t>(stretch_ratio * surplus);
+        // if ((lengths[i] + to_add) > child.width_policy.max_size())
+        //     to_add = child.width_policy.max_size() - lengths[i];
+        // lengths[i] += to_add;
+        // given_away += to_add;
+        // ++i;
+        // }
+        // std::cerr << "given_away: " << given_away << ' ' << this <<
+        // std::endl; std::cerr << "total width: " << this->width() <<
+        // std::endl;
+        // if (given_away == 0)
+        //     this->final_disperse(lengths, surplus, total_stretch);
+        // else
+        //     this->disperse_surplus(lengths, (surplus - given_away),
+        //                            total_stretch);
+    }
+
+    void reclaim_length(std::vector<std::size_t>& lengths, int length)
+    {
+        // TODO
+        // auto i = 0uL;
+        // for (auto& child : this->get_children()) {
+        //     lengths[i] -= 1;
+        //     if (lengths[i] < child.width_policy.min)
+        //         lengths[i] = child.width_policy.min;
+        //     ++i;
+        // }
+    }
+
+    void final_disperse(std::vector<std::size_t>& lengths,
+                        int surplus,
+                        std::size_t total_stretch)
+    {}
+
+    // auto calculate_widget_sizes()
+    //     -> std::vector<typename Layout<Child_t>::Dimensions>
+    // {
+    //     auto widgets = std::vector<typename Layout<Child_t>::Dimensions>{};
+    //     auto total_stretch = std::size_t{0};
+    //     for (auto& child : this->get_children()) {
+    //         if (child.enabled()) {
+    //             widgets.emplace_back(Dimensions{&child, 0, this->height()});
+    //             total_stretch += child.width_policy.stretch();
+    //         }
+    //     }
+
+    //     auto width_available = this->width();
+
+    //     // HORIZONTAL
+    //     // Set Fixed, Minimum and MinimumExpanding to width_hint
+    //     for (auto& dimension : widgets) {
+    //         auto policy = dimension.widget->width_policy.type();
+    //         if (policy == Size_policy::Fixed or
+    //             policy == Size_policy::Minimum or
+    //             policy == Size_policy::MinimumExpanding) {
+    //             dimension.width = dimension.widget->width_policy.hint();
+    //             width_available -= dimension.width;
+    //         }
+    //     }
+    //     // if (width_available < 0) {
+    //     //     return widgets;
+    //     // }
+
+    //     // Set Size_policy::Ignored widgets to their stretch factor width
+    //     value. for (auto& dimension : widgets) {
+    //         if (dimension.widget->width_policy.type() ==
+    //         Size_policy::Ignored) {
+    //             float const percent =
+    //             dimension.widget->width_policy.stretch() /
+    //                                   static_cast<float>(total_stretch);
+    //             auto width = static_cast<std::size_t>(percent *
+    //             this->width()); if (width <
+    //             dimension.widget->width_policy.min_size())
+    //                 width = dimension.widget->width_policy.min_size();
+    //             else if (width > dimension.widget->width_policy.max_size())
+    //                 width = dimension.widget->width_policy.max_size();
+    //             dimension.width = width;
+    //             width_available -= width;
+    //         }
+    //     }
+
+    //     // Set Maximum, Preferred and Expanding to width_hint
+    //     for (auto& dimension : widgets) {
+    //         auto policy = dimension.widget->width_policy.type();
+    //         if (policy == Size_policy::Maximum or
+    //             policy == Size_policy::Preferred or
+    //             policy == Size_policy::Expanding) {
+    //             dimension.width = dimension.widget->width_policy.hint();
+    //             width_available -= dimension.width;
+    //         }
+    //     }
+
+    //     /// DISTRIBUTE SPACE
+    //     /// ------------------------------------------------------
+
+    //     // create vector of size references for below if statements
+    //     auto widgets_w_refs =
+    //         std::vector<typename Layout<Child_t>::Dimensions_reference>{};
+    //     widgets_w_refs.reserve(widgets.size());
+    //     for (auto& d : widgets) {
+    //         widgets_w_refs.emplace_back(
+    //             Dimensions_reference{d.widget, &d.width, &d.height});
+    //     }
+    //     // If space left, fill in expanding and min_expanding, then if still,
+    //     // preferred and min
+    //     if (width_available > 0)
+    //         this->distribute_space(widgets_w_refs, width_available);
+
+    //     // if negative space left, subtract from max and preferred, then if
+    //     // still needed, expanding
+    //     if (width_available < 0)
+    //         this->collect_space(widgets_w_refs, width_available);
+
+    //     /// DISTRIBUTE SPACE
+    //     /// ------------------------------------------------------
+
+    //     // VERTICAL - repeat the above, but with vertical properties
+    //     for (auto& d : widgets) {
+    //         auto policy = d.widget->height_policy.type();
+    //         if (policy == Size_policy::Fixed)
+    //             d.height = d.widget->height_policy.hint();
+    //         else if (policy == Size_policy::Ignored or
+    //                  policy == Size_policy::Preferred or
+    //                  policy == Size_policy::Expanding) {
+    //             if (d.height > d.widget->height_policy.max_size())
+    //                 d.height = d.widget->height_policy.max_size();
+    //             else if (d.height < d.widget->height_policy.min_size())
+    //                 d.height = d.widget->height_policy.min_size();
+    //         }
+    //         else if (policy == Size_policy::Maximum) {
+    //             if (d.height > d.widget->height_policy.hint())
+    //                 d.height = d.widget->height_policy.hint();
+    //         }
+    //         else if (policy == Size_policy::Minimum or
+    //                  policy == Size_policy::MinimumExpanding) {
+    //             if (d.height > d.widget->height_policy.max_size())
+    //                 d.height = d.widget->height_policy.max_size();
+    //             else if (d.height < d.widget->height_policy.hint())
+    //                 d.height = d.widget->height_policy.hint();
+    //         }
+    //     }
+    //     return widgets;
+    // }
 
     void move_and_resize_children(
         std::vector<typename Layout<Child_t>::Dimensions> const& dimensions)
@@ -443,6 +552,5 @@ class Horizontal : public Layout<Child_t> {
     }
 };
 
-}  // namespace layout
-}  // namespace cppurses
+}  // namespace cppurses::layout
 #endif  // CPPURSES_WIDGET_LAYOUTS_HORIZONTAL_HPP

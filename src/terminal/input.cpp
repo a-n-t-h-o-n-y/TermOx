@@ -8,11 +8,11 @@
 #undef border
 
 #include <cppurses/system/detail/find_widget_at.hpp>
+#include <cppurses/system/detail/focus.hpp>
 #include <cppurses/system/event.hpp>
 #include <cppurses/system/events/key.hpp>
 #include <cppurses/system/events/mouse.hpp>
 #include <cppurses/system/events/resize_event.hpp>
-#include <cppurses/system/focus.hpp>
 #include <cppurses/system/shortcuts.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/area.hpp>
@@ -131,7 +131,7 @@ auto make_keyboard_event(int input) -> std::unique_ptr<Event>
 {
     auto const code = static_cast<Key::Code>(input);
     auto* const receiver =
-        Shortcuts::send_key(code) ? nullptr : Focus::focus_widget();
+        Shortcuts::send_key(code) ? nullptr : detail::Focus::focus_widget();
     return receiver == nullptr ? nullptr
                                : std::make_unique<Key::Press>(*receiver, code);
 }

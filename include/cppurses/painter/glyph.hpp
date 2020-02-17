@@ -8,6 +8,14 @@ namespace cppurses {
 
 /// Holds a description of a paintable tile on the screen.
 struct Glyph {
+   public:
+    /// The Glyph's symbol is the wide character that will be displayed.
+    wchar_t symbol = L' ';
+
+    /// The Brush that will determine the Attributes and Colors of the symbol.
+    Brush brush;
+
+   public:
     /// Construct an invisible Glyph, defaults to space and no attrs/colors.
     Glyph() = default;
 
@@ -19,12 +27,6 @@ struct Glyph {
     Glyph(wchar_t sym, Attributes&&... attrs)
         : symbol{sym}, brush{std::forward<Attributes>(attrs)...}
     {}
-
-    /// The Glyph's symbol is the wide character that will be displayed.
-    wchar_t symbol = L' ';
-
-    /// The Brush that will determine the Attributes and Colors of the symbol.
-    Brush brush;
 };
 
 inline auto operator""_g(wchar_t c) -> Glyph { return {c}; }

@@ -62,8 +62,7 @@ target_sources(demos PRIVATE
 
 # NOTEPAD / MAIN MENU
 target_sources(demos PRIVATE
-    demo.cpp
-    main_menu.cpp
+    demo.main.cpp
     notepad/notepad.cpp
 )
 
