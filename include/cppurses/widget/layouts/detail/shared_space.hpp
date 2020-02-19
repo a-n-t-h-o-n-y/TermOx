@@ -31,7 +31,7 @@ class Shared_space {
         if (difference > 0)
             this->disperse(children, difference);
         else if (difference < 0)
-            this->reclaim(children, difference);
+            this->reclaim(children, -1 * difference);
 
         return children.get_each_length();
     }
@@ -64,8 +64,7 @@ class Shared_space {
                 auto const& policy    = iter.get_policy();
                 auto const max_length = policy.max_size();
                 auto const stretch_ratio =
-                    static_cast<double>(policy.stretch()) /
-                    children.total_stretch();
+                    policy.stretch() / children.total_stretch();
                 auto to_add = static_cast<std::size_t>(stretch_ratio * surplus);
                 if ((iter->length + to_add) > max_length)
                     to_add = max_length - iter->length;
@@ -89,13 +88,12 @@ class Shared_space {
                 auto const& policy    = iter.get_policy();
                 auto const min_length = policy.min_size();
                 auto const inverse_stretch_ratio =
-                    static_cast<double>(policy.stretch()) /
-                    children.total_inverse_stretch();
+                    policy.stretch() / children.total_inverse_stretch();
                 auto to_sub =
                     static_cast<std::size_t>(inverse_stretch_ratio * deficit);
                 if ((static_cast<int>(iter->length) - to_sub) < min_length)
                     to_sub = static_cast<int>(iter->length) - min_length;
-                iter->length -= to_sub;
+                iter->length += to_sub;
                 taken_back += to_sub;
             }
             deficit -= taken_back;

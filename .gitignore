@@ -1,4 +1,5 @@
 build*/
+out.*/
 docs/html
 notes
 tags

@@ -22,7 +22,8 @@ class Event_loop {
     /// Make sure the loop has exited and returned from async functions.
     virtual ~Event_loop()
     {
-        this->exit(0);
+        this->exit(0);  // TODO Error this is a virtual call in a destructor
+        // ubsan will find it on shutdown.
         this->wait();
     }
 

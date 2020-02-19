@@ -58,7 +58,7 @@ class Size_policy {
         data_.hint    = hint;
         data_.min     = hint;
         data_.max     = hint;
-        data_.stretch = 1;
+        data_.stretch = 1.;
         this->policy_updated();
     }
 
@@ -100,7 +100,7 @@ class Size_policy {
     void expanding(std::size_t hint)
     {
         data_.type    = Type::Expanding;
-        data_.stretch = std::numeric_limits<decltype(data_.stretch)>::max();
+        data_.stretch = 10'000.;
         data_.hint    = hint;
         if (data_.hint < data_.min)
             data_.min = data_.hint;
@@ -114,7 +114,7 @@ class Size_policy {
     void minimumExpanding(std::size_t hint)
     {
         data_.type    = Type::MinimumExpanding;
-        data_.stretch = std::numeric_limits<decltype(data_.stretch)>::max();
+        data_.stretch = 10'000.;
         data_.hint    = hint;
         data_.min     = hint;  // TODO set_min_size()
         this->policy_updated();
@@ -137,19 +137,16 @@ class Size_policy {
     /** Used to fit adjacent Widgets within a length. The stretch is used to
      *  compute a percentage of length the Widget should receive by dividing it
      *  by the total stretch of all Widgets in the layout. */
-    void stretch(std::size_t value)
+    void stretch(double value)
     {
-        // TODO cannot be less than zero or zero, for when type is double
-        // Have to make sure it cannot be zero, used in division. I guess double
-        // division by zero is not a crash. It is undefined... okay.
-        if (value == 0)
+        if (value <= 0)
             return;
         data_.stretch = value;
         this->policy_updated();
     }
 
     /// Return the stretch factor currently being used.
-    auto stretch() const -> std::size_t { return data_.stretch; }
+    auto stretch() const -> double { return data_.stretch; }
 
     /// Set the size hint, used in accordance to the Type enum.
     void hint(std::size_t value)
@@ -188,7 +185,7 @@ class Size_policy {
    private:
     struct Data {
         Size_policy::Type type = Type::Ignored;
-        std::size_t stretch    = 1; // TODO should be double, calculations need it
+        double stretch         = 1.;
         std::size_t hint       = 0;
         std::size_t min        = 0;
         std::size_t max        = std::numeric_limits<std::size_t>::max();

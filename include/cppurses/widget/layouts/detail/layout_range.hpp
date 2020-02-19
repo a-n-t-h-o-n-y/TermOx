@@ -149,7 +149,7 @@ class Layout_range : private std::vector<Dimension> {
 
     auto end() -> Container_t::iterator { return this->vector::end(); }
 
-    auto total_stretch() const -> std::size_t { return total_stretch_; }
+    auto total_stretch() const -> double { return total_stretch_; }
 
     auto total_inverse_stretch() const -> double
     {
@@ -182,7 +182,7 @@ class Layout_range : private std::vector<Dimension> {
 
    private:
     Get_policy_t get_policy_;
-    mutable std::size_t total_stretch_    = 0;
+    mutable double total_stretch_         = 0.;
     mutable double total_inverse_stretch_ = 0.;
 
    private:
@@ -204,9 +204,9 @@ class Layout_range : private std::vector<Dimension> {
         return result;
     }
 
-    auto calculate_total_stretch() const -> std::size_t
+    auto calculate_total_stretch() const -> double
     {
-        auto sum       = 0uL;
+        auto sum       = 0.;
         auto const end = this->vector::end();
         for (auto iter = this->vector::begin(); iter != end; ++iter) {
             if (iter->widget != nullptr)

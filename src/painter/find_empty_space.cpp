@@ -7,6 +7,8 @@
 #include <numeric>
 #include <vector>
 
+// #include <iostream>  //temp
+
 #include <cppurses/painter/detail/screen_mask.hpp>
 #include <cppurses/widget/widget.hpp>
 
@@ -86,11 +88,28 @@ auto width_end(Widget const& w) -> std::size_t
 /// Set \p mask to true at each point where a child of \p w covers \p w.
 void mark_covered_tiles(Widget const& w, detail::Screen_mask& mask)
 {
+    // auto const parent_x = w.inner_x();
+    // auto const parent_y = w.inner_y();
+    // auto const parent_w = w.width();
+    // auto const parent_h = w.height();
+    // std::cerr << "-------------------------------\n";
     for (auto const& child : w.get_children()) {
         if (!child.enabled())
             continue;
         for (auto y = child.y(); y < height_end(child); ++y) {
             for (auto x = child.x(); x < width_end(child); ++x) {
+                // if (x < parent_x or x >= parent_x + parent_w or y < parent_y or
+                //     y >= parent_y + parent_h) {
+                //     std::cerr << "out of bounds:\n"
+                //         << "parent_x: " << parent_x
+                //         << "\nparent_y: " << parent_y
+                //         << "\nparent_w: " << parent_w
+                //         << "\nparent_h: " << parent_h
+                //         << "\nx: " << x
+                //         << "\ny: " << y
+                //         << '\n'
+                //         << '\n';
+                // }
                 mask.at(x, y) = true;
             }
         }
@@ -106,7 +125,7 @@ namespace detail {
 auto find_empty_space(Widget const& w) -> Screen_mask
 {
     if (children_completely_cover(w))
-        return Screen_mask{};
+        return {};
     auto mask = Screen_mask{w, Screen_mask::Inner};
     mark_covered_tiles(w, mask);
     mask.flip();

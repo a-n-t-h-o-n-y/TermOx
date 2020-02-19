@@ -43,13 +43,19 @@ class Screen_mask {
     /// Return the bit set at point \p p
     auto at(std::size_t x, std::size_t y) -> Reference
     {
-        return bits_[index_at(x, y)];
+        auto index = index_at(x, y);
+        if (index > bits_.size())  // TODO temp silent failure
+            index = 0;
+        return bits_[index];
     }
 
     /// Return the bit set at point \p p
     auto at(std::size_t x, std::size_t y) const -> Const_reference
     {
-        return bits_[index_at(x, y)];
+        auto index = index_at(x, y);
+        if (index > bits_.size())  // TODO temp silent failure
+            index = 0;
+        return bits_[index];
     }
 
    private:
