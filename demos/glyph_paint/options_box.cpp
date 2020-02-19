@@ -11,7 +11,8 @@ using namespace cppurses;
 namespace demos {
 namespace glyph_paint {
 
-Options_A::Options_A() {
+Options_A::Options_A()
+{
     clone_btn.brush.set_background(Color::White);
     clone_btn.brush.set_foreground(Color::Black);
 
@@ -22,7 +23,8 @@ Options_A::Options_A() {
     more_btn.brush.set_foreground(Color::Black);
 }
 
-Options_B::Options_B() {
+Options_B::Options_B()
+{
     space1.wallpaper = L'─';
 
     palette_label.set_alignment(Alignment::Center);
@@ -40,9 +42,10 @@ Options_B::Options_B() {
     palette_box.brush.set_foreground(Color::Black);
 }
 
-Options_stack::Options_stack() {
+Options_stack::Options_stack()
+{
     this->set_active_page(0);
-    this->height_policy.fixed(6);
+    this->height_policy.maximum(6);
 
     options_a.more_btn.clicked.connect(
         cppurses::slot::set_active_page(*this, 1));

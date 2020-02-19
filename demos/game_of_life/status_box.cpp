@@ -13,18 +13,8 @@
 #include <cppurses/widget/widgets/text_display.hpp>
 
 using namespace cppurses;
+
 namespace gol {
-
-Generation_count::Generation_count()
-{
-    this->height_policy.fixed(1);
-    this->cursor.disable();
-}
-
-void Generation_count::update_count(std::uint32_t count)
-{
-    count_.set_contents(std::to_string(count));
-}
 
 Center_offset::Center_offset()
 {

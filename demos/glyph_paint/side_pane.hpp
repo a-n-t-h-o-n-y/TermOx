@@ -19,7 +19,7 @@ namespace glyph_paint {
 
 class Side_pane : public cppurses::layout::Vertical<> {
     struct Color_pages : cppurses::Cycle_stack<cppurses::Color_select> {
-        Color_pages() { this->height_policy.fixed(3); }
+        Color_pages() { this->height_policy.maximum(3); }
         cppurses::Color_select& foreground{this->make_page(
             cppurses::Glyph_string{"Foreground", cppurses::Attribute::Bold})};
         cppurses::Color_select& background{this->make_page(
@@ -39,6 +39,7 @@ class Side_pane : public cppurses::layout::Vertical<> {
 
     Populated_glyph_stack& glyph_select{
         this->make_child<Populated_glyph_stack>()};
+
     cppurses::Fixed_height& space1{this->make_child<cppurses::Fixed_height>(1)};
 
     Color_pages& color_pages{this->make_child<Color_pages>()};
@@ -49,6 +50,7 @@ class Side_pane : public cppurses::layout::Vertical<> {
         this->make_child<cppurses::Status_bar>("x")};
 
     cppurses::Fixed_height& space2{this->make_child<cppurses::Fixed_height>(1)};
+
     Options_stack& options_box{this->make_child<Options_stack>()};
 };
 

@@ -61,4 +61,5 @@ All_colors_display::All_colors_display()
     top_shades.width_policy.maximum(width);
     bottom_shades.width_policy.maximum(width);
 }
+
 }  // namespace palette

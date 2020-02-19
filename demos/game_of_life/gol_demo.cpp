@@ -37,26 +37,6 @@ GoL_demo::GoL_demo()
         [this](const std::string& filename) {
             gol_display.export_as(filename);
         });
-    side_panel.offset_control.up_request.connect([this]() {
-        Coordinate new_offset = gol_display.offset();
-        --new_offset.y;
-        gol_display.set_offset(new_offset);
-    });
-    side_panel.offset_control.down_request.connect([this]() {
-        Coordinate new_offset = gol_display.offset();
-        ++new_offset.y;
-        gol_display.set_offset(new_offset);
-    });
-    side_panel.offset_control.left_request.connect([this]() {
-        Coordinate new_offset = gol_display.offset();
-        --new_offset.x;
-        gol_display.set_offset(new_offset);
-    });
-    side_panel.offset_control.right_request.connect([this]() {
-        Coordinate new_offset = gol_display.offset();
-        ++new_offset.x;
-        gol_display.set_offset(new_offset);
-    });
 
     gol_display.offset_changed.connect([this](Coordinate c) {
         side_panel.status.center_offset.x_coords.set_value(c.x);

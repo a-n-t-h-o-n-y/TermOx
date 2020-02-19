@@ -5,7 +5,7 @@
 namespace {
 using namespace cppurses;
 
-std::string to_text(Focus_policy policy)
+auto to_text(Focus_policy policy) -> std::string
 {
     switch (policy) {
         case Focus_policy::None: return "None";
@@ -49,12 +49,10 @@ namespace focus {
 Focus_base::Focus_base(cppurses::Focus_policy policy)
 {
     this->set_policy(policy);
-    title_.set_alignment(cppurses::Alignment::Center);
-    title_.install_event_filter(*this);
     this->border.enable();
 }
 
-bool Focus_base::focus_in_event()
+auto Focus_base::focus_in_event() -> bool
 {
     set_background(this->border, cppurses::Color::Red);
     set_foreground(this->border, cppurses::Color::Light_green);
@@ -62,7 +60,7 @@ bool Focus_base::focus_in_event()
     return Widget::focus_in_event();
 }
 
-bool Focus_base::focus_out_event()
+auto Focus_base::focus_out_event() -> bool
 {
     set_background(this->border, cppurses::Color::Black);
     set_foreground(this->border, cppurses::Color::White);
@@ -70,16 +68,11 @@ bool Focus_base::focus_out_event()
     return Widget::focus_out_event();
 }
 
-bool Focus_base::focus_in_event_filter(Widget& /* receiver */)
-{
-    System::set_focus(*this);
-    return true;
-}
-
 void Focus_base::set_policy(Focus_policy policy)
 {
-    title_.set_contents(to_text(policy));
+    title_ = to_text(policy);
     this->focus_policy = policy;
 }
+
 }  // namespace focus
 }  // namespace demos

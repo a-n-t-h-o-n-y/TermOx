@@ -76,7 +76,6 @@ target_sources(demos PRIVATE
     game_of_life/settings_box.cpp
     game_of_life/examples_info_box.cpp
     game_of_life/files_box.cpp
-    game_of_life/offset_control_widget.cpp
     game_of_life/status_box.cpp
     game_of_life/get_rle.cpp
     game_of_life/get_life_1_05.cpp

@@ -13,7 +13,7 @@ namespace gol {
 
 Clear_step_box::Clear_step_box()
 {
-    this->height_policy.fixed(2);
+    this->height_policy.maximum(2);
     clear_btn.main_btn.brush.set_background(Color::Gray);
     step_btn.brush.set_background(Color::Light_gray);
     step_btn.brush.set_foreground(Color::Black);
@@ -21,7 +21,7 @@ Clear_step_box::Clear_step_box()
 
 Rule_edit::Rule_edit()
 {
-    this->height_policy.fixed(2);
+    this->height_policy.maximum(2);
 
     edit_box.brush.set_background(Color::White);
     edit_box.brush.set_foreground(Color::Black);
@@ -59,7 +59,7 @@ Grid_fade::Grid_fade()
 
 Settings_box::Settings_box()
 {
-    this->height_policy.fixed(8);
+    this->height_policy.maximum(8);
     this->border.enable();
     this->border.segments.disable_all();
     this->border.segments.north.enable();
@@ -68,4 +68,5 @@ Settings_box::Settings_box()
     period_edit.value_set.connect(
         [this](int value) { period_set(std::chrono::milliseconds{value}); });
 }
+
 }  // namespace gol

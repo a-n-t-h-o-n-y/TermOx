@@ -61,7 +61,7 @@ namespace palette {
 Export_panel::Export_panel()
 {
     using namespace cppurses;
-    this->height_policy.fixed(3);
+    this->height_policy.maximum(3);
     this->border.enable();
     this->border.segments.disable_all();
     this->border.segments.north.enable();

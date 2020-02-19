@@ -1,25 +1,32 @@
 #ifndef CPPURSES_DEMOS_FOCUS_FOCUS_BASE_HPP
 #define CPPURSES_DEMOS_FOCUS_FOCUS_BASE_HPP
+#include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/painter/painter.hpp>
 #include <cppurses/widget/focus_policy.hpp>
-#include <cppurses/widget/layouts/horizontal.hpp>
-#include <cppurses/widget/widgets/label.hpp>
+#include <cppurses/widget/widget.hpp>
 
 namespace demos {
 namespace focus {
 
-class Focus_base : public cppurses::layout::Horizontal<cppurses::Label> {
+class Focus_base : public cppurses::Widget {
    public:
     Focus_base(cppurses::Focus_policy policy);
 
-    bool focus_in_event() override;
-    bool focus_out_event() override;
+   protected:
     void set_policy(cppurses::Focus_policy policy);
 
-    // Intercept title_'s events so mouse clicks give focus to *this.
-    bool focus_in_event_filter(Widget& receiver) override;
+    auto focus_in_event() -> bool override;
 
-   protected:
-    cppurses::Label& title_{this->make_child()};
+    auto focus_out_event() -> bool override;
+
+    auto paint_event() -> bool override
+    {
+        cppurses::Painter{*this}.put(title_, 0, 0);
+        return Widget::paint_event();
+    }
+
+   private:
+    cppurses::Glyph_string title_;
 };
 
 }  // namespace focus

@@ -107,6 +107,7 @@ namespace glyph_paint {
 
 Populated_glyph_stack::Populated_glyph_stack()
 {
+    this->height_policy.expanding(9);
     signal_refs_.emplace_back(
         this->make_page<Glyph_select>("Latin-1", latin_1).glyph_selected);
 

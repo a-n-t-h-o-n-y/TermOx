@@ -20,7 +20,7 @@ class Attribute_box : public cppurses::layout::Vertical<> {
     };
 
    public:
-    Attribute_box() { this->height_policy.fixed(4); }
+    Attribute_box() { this->height_policy.maximum(4); }
 
     Top_row& top_row{this->make_child<Top_row>()};
 
