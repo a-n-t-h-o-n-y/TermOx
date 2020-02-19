@@ -18,7 +18,7 @@ struct Dimension {
 };
 
 // TODO rename to something with Length? Length_range? Length_view?
-// Length_helper_range?
+// Length_helper_range? Layout_span? since it edits, its not a view.
 /// Helper range to iterate over a widget's children, providing layout info.
 /** Shrinks on each iteration by dropping elements that have reached some limit.
  *  \p Get_policy_t Is a function <Size_policy const&(Widget const&)>
@@ -109,20 +109,28 @@ class Layout_range : private std::vector<Dimension> {
 
    public:
     template <typename Child_view_t>
-    Layout_range(Child_view_t children, Get_policy_t&& get_policy)
-        : vector{Layout_range::build_dimensions(children, get_policy)},
+    Layout_range(Child_view_t children,
+                 std::size_t primary_length,
+                 Get_policy_t&& get_policy)
+        : vector{Layout_range::build_dimensions(children,
+                                                primary_length,
+                                                get_policy)},
           get_policy_{std::forward<Get_policy_t>(get_policy)}
     {}
 
     /// Return iterator to the first element, will skip when length == max
+    /** Size_policy::max will be used as limit. */
     auto begin_max()
     {
+        total_stretch_ = this->calculate_total_stretch();
         return this->begin([](Size_policy const& p) { return p.max_size(); });
     }
 
     /// Return iterator to the first element, will skip when length == min
+    /** Size_policy::min will be used as limit. */
     auto begin_min()
     {
+        total_inverse_stretch_ = this->calculate_total_inverse_stretch();
         return this->begin([](Size_policy const& p) { return p.min_size(); });
     }
 
@@ -131,7 +139,6 @@ class Layout_range : private std::vector<Dimension> {
     template <typename Get_limit_t>
     auto begin(Get_limit_t get_limit)
     {
-        total_stretch_   = this->calculate_total_stretch();
         auto const begin = this->vector::begin();
         auto const end   = this->vector::end();
         auto temp        = Iterator{begin, end, get_policy_, get_limit};
@@ -142,7 +149,12 @@ class Layout_range : private std::vector<Dimension> {
 
     auto end() -> Container_t::iterator { return this->vector::end(); }
 
-    auto total_stretch() const { return total_stretch_; }
+    auto total_stretch() const -> std::size_t { return total_stretch_; }
+
+    auto total_inverse_stretch() const -> double
+    {
+        return total_inverse_stretch_;
+    }
 
     auto entire_length() const -> std::size_t
     {
@@ -170,28 +182,46 @@ class Layout_range : private std::vector<Dimension> {
 
    private:
     Get_policy_t get_policy_;
-    mutable std::size_t total_stretch_ = 0;
+    mutable std::size_t total_stretch_    = 0;
+    mutable double total_inverse_stretch_ = 0.;
 
    private:
     template <typename Child_view_t>
-    static auto build_dimensions(Child_view_t children, Get_policy_t get_policy)
-        -> Container_t
+    static auto build_dimensions(Child_view_t children,
+                                 std::size_t primary_length,
+                                 Get_policy_t get_policy) -> Container_t
     {
         auto result = Container_t{};
         result.reserve(children.size());
+        auto min_running_total = 0uL;
         for (auto& child : children) {
-            result.push_back({&child, get_policy(child).hint()});
+            min_running_total += get_policy(child).min_size();
+            if (min_running_total > primary_length)
+                result.push_back({nullptr, 0uL});
+            else
+                result.push_back({&child, get_policy(child).hint()});
         }
         return result;
     }
 
     auto calculate_total_stretch() const -> std::size_t
     {
-        auto sum       = 0;
+        auto sum       = 0uL;
         auto const end = this->vector::end();
         for (auto iter = this->vector::begin(); iter != end; ++iter) {
             if (iter->widget != nullptr)
                 sum += get_policy_(*iter->widget).stretch();
+        }
+        return sum;
+    }
+
+    auto calculate_total_inverse_stretch() const -> double
+    {
+        auto sum       = 0.;
+        auto const end = this->vector::end();
+        for (auto iter = this->vector::begin(); iter != end; ++iter) {
+            if (iter->widget != nullptr)
+                sum += (1. / get_policy_(*iter->widget).stretch());
         }
         return sum;
     }

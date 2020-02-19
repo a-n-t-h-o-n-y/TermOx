@@ -687,7 +687,7 @@ class Widget {
             auto begin() const -> Iterator { return {std::begin(child_list_)}; }
             auto end() const -> Iterator { return {std::end(child_list_)}; }
             auto empty() const -> bool { return child_list_.empty(); }
-            auto size() const -> bool { return child_list_.size(); }
+            auto size() const -> std::size_t { return child_list_.size(); }
             auto operator[](std::size_t index) const -> Widget_t&
             {
                 return static_cast<Widget_t&>(*child_list_[index]);

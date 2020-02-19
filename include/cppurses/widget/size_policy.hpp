@@ -139,6 +139,9 @@ class Size_policy {
      *  by the total stretch of all Widgets in the layout. */
     void stretch(std::size_t value)
     {
+        // TODO cannot be less than zero or zero, for when type is double
+        // Have to make sure it cannot be zero, used in division. I guess double
+        // division by zero is not a crash. It is undefined... okay.
         if (value == 0)
             return;
         data_.stretch = value;
@@ -185,7 +188,7 @@ class Size_policy {
    private:
     struct Data {
         Size_policy::Type type = Type::Ignored;
-        std::size_t stretch    = 1;
+        std::size_t stretch    = 1; // TODO should be double, calculations need it
         std::size_t hint       = 0;
         std::size_t min        = 0;
         std::size_t max        = std::numeric_limits<std::size_t>::max();
