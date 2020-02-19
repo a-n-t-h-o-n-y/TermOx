@@ -6,7 +6,7 @@
 #include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget.hpp>
 
-#include "layout_range.hpp"
+#include "layout_span.hpp"
 
 namespace cppurses::layout::detail {
 
@@ -20,7 +20,7 @@ class Shared_space {
    public:
     auto calculate_lengths(Widget& parent) -> Length_list
     {
-        auto children = detail::Layout_range{
+        auto children = detail::Layout_span{
             parent.get_children(), parameters_.primary.get_length(parent),
             [](Widget const& w) -> Size_policy const& {
                 return parameters_.primary.get_policy(w);
@@ -33,7 +33,7 @@ class Shared_space {
         else if (difference < 0)
             this->reclaim(children, -1 * difference);
 
-        return children.get_each_length();
+        return children.get_results();
     }
 
     /// Returns local primary dimension positions, starting at zero.
@@ -62,7 +62,7 @@ class Shared_space {
             for (auto iter = children.begin_max(); iter != children.end();
                  ++iter) {
                 auto const& policy    = iter.get_policy();
-                auto const max_length = policy.max_size();
+                auto const max_length = policy.max();
                 auto const stretch_ratio =
                     policy.stretch() / children.total_stretch();
                 auto to_add = static_cast<std::size_t>(stretch_ratio * surplus);
@@ -86,14 +86,13 @@ class Shared_space {
             for (auto iter = children.begin_min(); iter != children.end();
                  ++iter) {
                 auto const& policy    = iter.get_policy();
-                auto const min_length = policy.min_size();
+                auto const min_length = static_cast<int>(policy.min());
                 auto const inverse_stretch_ratio =
-                    policy.stretch() / children.total_inverse_stretch();
-                auto to_sub =
-                    static_cast<std::size_t>(inverse_stretch_ratio * deficit);
+                    (1. / policy.stretch()) / children.total_inverse_stretch();
+                auto to_sub = static_cast<int>(inverse_stretch_ratio * deficit);
                 if ((static_cast<int>(iter->length) - to_sub) < min_length)
                     to_sub = static_cast<int>(iter->length) - min_length;
-                iter->length += to_sub;
+                iter->length -= to_sub;
                 taken_back += to_sub;
             }
             deficit -= taken_back;

@@ -55,7 +55,7 @@ class Demos : public cppurses::layout::Vertical<> {
     auto focus_in_event() -> bool override
     {
         cppurses::System::set_focus(menu);
-        return Vertical<>::focus_in_event();
+        return cppurses::layout::Vertical<>::focus_in_event();
     }
 };
 

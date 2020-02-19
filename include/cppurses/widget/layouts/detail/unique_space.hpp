@@ -22,9 +22,9 @@ class Unique_space {
         auto const limit = parameters_.secondary.get_length(parent);
         for (auto const& child : parent.get_children()) {
             auto const& policy = parameters_.secondary.get_policy(child);
-            if (limit > policy.max_size())
-                result.push_back(policy.max_size());
-            else if (limit < policy.min_size())
+            if (limit > policy.max())
+                result.push_back(policy.max());
+            else if (limit < policy.min())
                 result.push_back(0);
             else
                 result.push_back(limit);

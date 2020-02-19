@@ -37,6 +37,7 @@ Confirm_button::Confirm_button(Glyph_string label, Glyph_string confirm_text)
     : main_btn{this->make_page<Push_button>(std::move(label))},
       confirm_screen{this->make_page<Confirm_screen>(std::move(confirm_text))}
 {
+    this->height_policy.fixed(1);
     this->set_active_page(front_page);
     main_btn.clicked.connect([this] { this->set_active_page(confirm_page); });
     confirm_screen.confirm_btn.clicked.connect([this] {

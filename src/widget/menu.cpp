@@ -103,7 +103,7 @@ auto Menu::key_press_event(Key::State const& keyboard) -> bool
         case Key::Enter: this->send_selected_signal();
         default: break;
     }
-    return Vertical<>::key_press_event(keyboard);
+    return layout::Vertical<>::key_press_event(keyboard);
 }
 
 auto Menu::mouse_press_event(Mouse::State const& mouse) -> bool
@@ -113,7 +113,7 @@ auto Menu::mouse_press_event(Mouse::State const& mouse) -> bool
         case Mouse::Button::ScrollDown: this->select_down(); break;
         default: break;
     }
-    return Vertical<>::mouse_press_event(mouse);
+    return layout::Vertical<>::mouse_press_event(mouse);
 }
 
 auto Menu::mouse_press_event_filter(Widget& /* receiver */,

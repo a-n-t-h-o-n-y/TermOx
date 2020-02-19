@@ -65,30 +65,31 @@ struct Workspace : cppurses::layout::Horizontal<Meta_widget> {
 };
 
 struct Size_policy_settings : cppurses::layout::Vertical<> {
-   private:
-    struct Policy_type_box : cppurses::Labeled_cycle_box {
-        Policy_type_box() : Labeled_cycle_box{"Policy"}
-        {
-            using cppurses::Size_policy;
-            this->add_option(Size_policy::Ignored);
-            this->add_option(Size_policy::Preferred);
-            this->add_option(Size_policy::Fixed);
-            this->add_option(Size_policy::Minimum);
-            this->add_option(Size_policy::Maximum);
-            this->add_option(Size_policy::Expanding);
-            this->add_option(Size_policy::MinimumExpanding);
-        }
+    // private:
+    //  struct Policy_type_box : cppurses::Labeled_cycle_box {
+    //      Policy_type_box() : Labeled_cycle_box{"Policy"}
+    //      {
+    //          using cppurses::Size_policy;
+    //          this->add_option(Size_policy::Ignored);
+    //          this->add_option(Size_policy::Preferred);
+    //          this->add_option(Size_policy::Fixed);
+    //          this->add_option(Size_policy::Minimum);
+    //          this->add_option(Size_policy::Maximum);
+    //          this->add_option(Size_policy::Expanding);
+    //          this->add_option(Size_policy::MinimumExpanding);
+    //      }
 
-        sig::Signal<void(cppurses::Size_policy::Type)> type_updated;
+    //      sig::Signal<void(cppurses::Size_policy::Type)> type_updated;
 
-       private:
-        void add_option(cppurses::Size_policy::Type type)
-        {
-            this->cycle_box.add_option(to_string(type)).connect([this, type] {
-                type_updated(type);
-            });
-        }
-    };
+    //     private:
+    //      void add_option(cppurses::Size_policy::Type type)
+    //      {
+    //          this->cycle_box.add_option(to_string(type)).connect([this, type]
+    //          {
+    //              type_updated(type);
+    //          });
+    //      }
+    //  };
 
    public:
     Size_policy_settings()
@@ -102,10 +103,10 @@ struct Size_policy_settings : cppurses::layout::Vertical<> {
         //     size_policy_.type(type);
         //     this->notify();
         // });
-        types_box.label.brush.set_background(cppurses::Color::Dark_gray);
-        types_box.cycle_box.brush.set_background(cppurses::Color::Dark_gray);
+        // types_box.label.brush.set_background(cppurses::Color::Dark_gray);
+        // types_box.cycle_box.brush.set_background(cppurses::Color::Dark_gray);
 
-        stretch.value_set.connect([this](std::size_t value) {
+        stretch.value_set.connect([this](double value) {
             size_policy_.stretch(value);
             this->notify();
         });
@@ -118,13 +119,13 @@ struct Size_policy_settings : cppurses::layout::Vertical<> {
         hint.label.brush.set_background(cppurses::Color::Dark_gray);
 
         min.value_set.connect([this](std::size_t value) {
-            size_policy_.min_size(value);
+            size_policy_.min(value);
             this->notify();
         });
         min.label.brush.set_background(cppurses::Color::Dark_gray);
 
         max.value_set.connect([this](std::size_t value) {
-            size_policy_.max_size(value);
+            size_policy_.max(value);
             this->notify();
         });
         max.label.brush.set_background(cppurses::Color::Dark_gray);
@@ -133,11 +134,11 @@ struct Size_policy_settings : cppurses::layout::Vertical<> {
     cppurses::Text_display& title{
         this->make_child<cppurses::Text_display>("[-] Width Policy")};
 
-    Policy_type_box& types_box{this->make_child<Policy_type_box>()};
+    // Policy_type_box& types_box{this->make_child<Policy_type_box>()};
 
-    cppurses::Labeled_number_edit<std::size_t>& stretch{
-        this->make_child<cppurses::Labeled_number_edit<std::size_t>>("Stretch ",
-                                                                     1)};
+    cppurses::Labeled_number_edit<double>& stretch{
+        this->make_child<cppurses::Labeled_number_edit<double>>("Stretch ",
+                                                                1.)};
 
     cppurses::Labeled_number_edit<std::size_t>& hint{
         this->make_child<cppurses::Labeled_number_edit<std::size_t>>("Hint    ",
@@ -155,11 +156,11 @@ struct Size_policy_settings : cppurses::layout::Vertical<> {
     void reset(cppurses::Size_policy const& policy)
     {
         size_policy_ = policy;
-        types_box.cycle_box.set_current_to(to_string(policy.type()));
+        // types_box.cycle_box.set_current_to(to_string(policy.type()));
         stretch.set_value(policy.stretch());
         hint.set_value(policy.hint());
-        min.set_value(policy.min_size());
-        max.set_value(policy.max_size());
+        min.set_value(policy.min());
+        max.set_value(policy.max());
     }
 
     sig::Signal<void(cppurses::Size_policy const&)> policy_updated;
@@ -169,19 +170,19 @@ struct Size_policy_settings : cppurses::layout::Vertical<> {
 
     void notify() { this->policy_updated(size_policy_); }
 
-    static auto to_string(cppurses::Size_policy::Type type) -> std::string
-    {
-        using cppurses::Size_policy;
-        switch (type) {
-            case Size_policy::Fixed: return "Fixed";
-            case Size_policy::Minimum: return "Minimum";
-            case Size_policy::Maximum: return "Maximum";
-            case Size_policy::Preferred: return "Preferred";
-            case Size_policy::Expanding: return "Expanding";
-            case Size_policy::MinimumExpanding: return "MinExpanding";
-            case Size_policy::Ignored: return "Ignored";
-        }
-    }
+    // static auto to_string(cppurses::Size_policy::Type type) -> std::string
+    // {
+    //     using cppurses::Size_policy;
+    //     switch (type) {
+    //         case Size_policy::Fixed: return "Fixed";
+    //         case Size_policy::Minimum: return "Minimum";
+    //         case Size_policy::Maximum: return "Maximum";
+    //         case Size_policy::Preferred: return "Preferred";
+    //         case Size_policy::Expanding: return "Expanding";
+    //         case Size_policy::MinimumExpanding: return "MinExpanding";
+    //         case Size_policy::Ignored: return "Ignored";
+    //     }
+    // }
 };
 
 struct Settings : cppurses::layout::Vertical<> {

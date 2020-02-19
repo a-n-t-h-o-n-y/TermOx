@@ -1,5 +1,5 @@
-#ifndef CPPURSES_WIDGET_LAYOUTS_DETAIL_LAYOUT_RANGE_HPP
-#define CPPURSES_WIDGET_LAYOUTS_DETAIL_LAYOUT_RANGE_HPP
+#ifndef CPPURSES_WIDGET_LAYOUTS_DETAIL_LAYOUT_SPAN_HPP
+#define CPPURSES_WIDGET_LAYOUTS_DETAIL_LAYOUT_SPAN_HPP
 #include <algorithm>
 #include <cstddef>
 #include <iterator>
@@ -17,19 +17,16 @@ struct Dimension {
     std::size_t length;
 };
 
-// TODO rename to something with Length? Length_range? Length_view?
-// Length_helper_range? Layout_span? since it edits, its not a view.
-/// Helper range to iterate over a widget's children, providing layout info.
+/// Container view to iterate over a Widget's children, yielding layout info.
 /** Shrinks on each iteration by dropping elements that have reached some limit.
- *  \p Get_policy_t Is a function <Size_policy const&(Widget const&)>
- *  Get_policy_t is used to retrieve a size policy to work with and Get_limit_t
- *  is used to drop out widgets when their length gets to that limit. */
+ *  \p Get_policy_t: A functor type <Size_policy const&(Widget const&)>
+ *                   Used to retrieve a Size_policy to work with. */
 template <typename Get_policy_t>
-class Layout_range : private std::vector<Dimension> {
+class Layout_span {
    private:
     using Container_t = std::vector<Dimension>;
 
-    /// \p Get_limit_t Is a function <std::size_t(Size_policy const&)>
+    /// \p Get_limit_t Is a functor type <std::size_t(Size_policy const&)>
     template <typename Get_limit_t>
     class Iterator {
        private:
@@ -54,7 +51,7 @@ class Layout_range : private std::vector<Dimension> {
               get_limit_{get_limit}
         {
             while (iter_ != end && iter_->widget == nullptr)
-                ++iter_;  // Do not call to operator++, it assumes not nullptr
+                ++iter_;
         }
 
         Iterator()                = delete;
@@ -101,20 +98,20 @@ class Layout_range : private std::vector<Dimension> {
 
     // For Clang
     template <typename Get_limit_t>
-    Iterator(typename Layout_range::Container_t::iterator iter,
-             typename Layout_range::Container_t::iterator end,
+    Iterator(typename Layout_span::Container_t::iterator iter,
+             typename Layout_span::Container_t::iterator end,
              Get_policy_t get_policy,
              Get_limit_t get_limit)
         ->Iterator<decltype(get_limit)>;
 
    public:
     template <typename Child_view_t>
-    Layout_range(Child_view_t children,
-                 std::size_t primary_length,
-                 Get_policy_t&& get_policy)
-        : vector{Layout_range::build_dimensions(children,
-                                                primary_length,
-                                                get_policy)},
+    Layout_span(Child_view_t children,
+                std::size_t primary_length,
+                Get_policy_t&& get_policy)
+        : dimensions_{Layout_span::build_dimensions(children,
+                                                    primary_length,
+                                                    get_policy)},
           get_policy_{std::forward<Get_policy_t>(get_policy)}
     {}
 
@@ -123,7 +120,7 @@ class Layout_range : private std::vector<Dimension> {
     auto begin_max()
     {
         total_stretch_ = this->calculate_total_stretch();
-        return this->begin([](Size_policy const& p) { return p.max_size(); });
+        return this->begin([](Size_policy const& p) { return p.max(); });
     }
 
     /// Return iterator to the first element, will skip when length == min
@@ -131,23 +128,10 @@ class Layout_range : private std::vector<Dimension> {
     auto begin_min()
     {
         total_inverse_stretch_ = this->calculate_total_inverse_stretch();
-        return this->begin([](Size_policy const& p) { return p.min_size(); });
+        return this->begin([](Size_policy const& p) { return p.min(); });
     }
 
-    /// \p Get_limit_t Is a function <std::size_t(Size_policy const&)>
-    /** Calculates and stores total stretch when called. */
-    template <typename Get_limit_t>
-    auto begin(Get_limit_t get_limit)
-    {
-        auto const begin = this->vector::begin();
-        auto const end   = this->vector::end();
-        auto temp        = Iterator{begin, end, get_policy_, get_limit};
-        while (temp != end)
-            ++temp;  // Invalidates elements that are at limit.
-        return Iterator{begin, end, get_policy_, get_limit};
-    }
-
-    auto end() -> Container_t::iterator { return this->vector::end(); }
+    auto end() -> Container_t::iterator { return dimensions_.end(); }
 
     auto total_stretch() const -> double { return total_stretch_; }
 
@@ -158,7 +142,7 @@ class Layout_range : private std::vector<Dimension> {
 
     auto entire_length() const -> std::size_t
     {
-        return std::accumulate(this->vector::begin(), this->vector::end(), 0uL,
+        return std::accumulate(dimensions_.begin(), dimensions_.end(), 0uL,
                                [](std::size_t total, Dimension const& d) {
                                    return total + d.length;
                                });
@@ -166,21 +150,22 @@ class Layout_range : private std::vector<Dimension> {
 
     auto size() const -> std::size_t
     {
-        return std::count_if(this->vector::begin(), this->vector::end(),
+        return std::count_if(dimensions_.begin(), dimensions_.end(),
                              [](auto const& d) { return d.widget != nullptr; });
     }
 
-    auto get_each_length() const -> std::vector<std::size_t>
+    auto get_results() const -> std::vector<std::size_t>
     {
-        auto result    = std::vector<std::size_t>{};
-        auto const end = this->vector::end();
-        for (auto iter = this->vector::begin(); iter != end; ++iter) {
-            result.push_back(iter->length);
-        }
+        auto result = std::vector<std::size_t>{};
+        result.reserve(dimensions_.size());
+        std::transform(dimensions_.begin(), dimensions_.end(),
+                       std::back_inserter(result),
+                       [](auto const& d) { return d.length; });
         return result;
     }
 
    private:
+    Container_t dimensions_;
     Get_policy_t get_policy_;
     mutable double total_stretch_         = 0.;
     mutable double total_inverse_stretch_ = 0.;
@@ -195,7 +180,7 @@ class Layout_range : private std::vector<Dimension> {
         result.reserve(children.size());
         auto min_running_total = 0uL;
         for (auto& child : children) {
-            min_running_total += get_policy(child).min_size();
+            min_running_total += get_policy(child).min();
             if (min_running_total > primary_length)
                 result.push_back({nullptr, 0uL});
             else
@@ -204,11 +189,24 @@ class Layout_range : private std::vector<Dimension> {
         return result;
     }
 
+    /// \p Get_limit_t Is a functor type <std::size_t(Size_policy const&)>
+    /** Calculates and stores total stretch when called. */
+    template <typename Get_limit_t>
+    auto begin(Get_limit_t get_limit)
+    {
+        auto const begin = dimensions_.begin();
+        auto const end   = dimensions_.end();
+        auto temp        = Iterator{begin, end, get_policy_, get_limit};
+        while (temp != end)
+            ++temp;  // This call invalidates elements that are at limit.
+        return Iterator{begin, end, get_policy_, get_limit};
+    }
+
     auto calculate_total_stretch() const -> double
     {
         auto sum       = 0.;
-        auto const end = this->vector::end();
-        for (auto iter = this->vector::begin(); iter != end; ++iter) {
+        auto const end = dimensions_.end();
+        for (auto iter = dimensions_.begin(); iter != end; ++iter) {
             if (iter->widget != nullptr)
                 sum += get_policy_(*iter->widget).stretch();
         }
@@ -218,8 +216,8 @@ class Layout_range : private std::vector<Dimension> {
     auto calculate_total_inverse_stretch() const -> double
     {
         auto sum       = 0.;
-        auto const end = this->vector::end();
-        for (auto iter = this->vector::begin(); iter != end; ++iter) {
+        auto const end = dimensions_.end();
+        for (auto iter = dimensions_.begin(); iter != end; ++iter) {
             if (iter->widget != nullptr)
                 sum += (1. / get_policy_(*iter->widget).stretch());
         }
@@ -228,8 +226,8 @@ class Layout_range : private std::vector<Dimension> {
 
     auto find_valid_begin() const
     {
-        auto const end = this->vector::end();
-        for (auto iter = this->vector::begin(); iter != end; ++iter) {
+        auto const end = dimensions_.end();
+        for (auto iter = dimensions_.begin(); iter != end; ++iter) {
             if (iter->widget != nullptr)
                 return iter;
         }
@@ -238,4 +236,4 @@ class Layout_range : private std::vector<Dimension> {
 };
 
 }  // namespace cppurses::layout::detail
-#endif  // CPPURSES_WIDGET_LAYOUTS_DETAIL_LAYOUT_RANGE_HPP
+#endif  // CPPURSES_WIDGET_LAYOUTS_DETAIL_LAYOUT_SPAN_HPP
