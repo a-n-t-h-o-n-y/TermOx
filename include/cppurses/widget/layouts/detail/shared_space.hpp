@@ -73,8 +73,18 @@ class Shared_space {
             }
             surplus -= given_away;
         }
-        // TODO
-        // Give away leftovers that don't divide evenly into remaining widgets
+        if (surplus != 0 && children.size() != 0)
+            this->disperse_leftovers(children, surplus);
+    }
+
+    /// Stretch ratio can't split small surplus values into values > 1.0
+    template <typename Children_span>
+    void disperse_leftovers(Children_span& children, int surplus)
+    {
+        for (auto iter = children.begin_max();
+             iter != children.end() && surplus != 0; ++iter, --surplus) {
+            iter->length += 1;
+        }
     }
 
     template <typename Children_span>
@@ -97,8 +107,18 @@ class Shared_space {
             }
             deficit -= taken_back;
         }
-        // TODO
-        // reclaim leftovers that don't divide evenly into remaining widgets
+        if (deficit != 0 && children.size() != 0)
+            this->reclaim_leftovers(children, deficit);
+    }
+
+    /// Stretch ratio can't split small deficit values into values > 1.0
+    template <typename Children_span>
+    void reclaim_leftovers(Children_span& children, int deficit)
+    {
+        for (auto iter = children.begin_min();
+             iter != children.end() && deficit != 0; ++iter, --deficit) {
+            iter->length -= 1;
+        }
     }
 
     template <typename Children_span>
