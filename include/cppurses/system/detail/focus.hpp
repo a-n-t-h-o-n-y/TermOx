@@ -6,11 +6,9 @@ class Widget;
 struct Focus_in_event;
 namespace detail {
 
-// TODO This is an implementation detail, should be in detail, and private to
-// who uses it. Users will interact with Focus through a widget's Focus_policy.
-
 class Focus {
    public:
+    /// Return a pointer to the currently focused Widget.
     static auto focus_widget() -> cppurses::Widget* { return focus_widget_; }
 
     /// Sets the focus to \p clicked if it has a Focus_policy::Mouse/Strong.

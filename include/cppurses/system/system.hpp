@@ -40,12 +40,21 @@ class System {
 
     ~System() { System::exit(0); }
 
+    /// Return a pointer to the currently focused Widget.
+    static auto focus_widget() -> cppurses::Widget*;
+
     /// Give program focus to \p w.
     /** Sends Focus_out_event to Widget in focus, and Focus_in_event to \p w.*/
     static void set_focus(Widget& w);
 
     /// Removes focus from the currently in focus Widget.
     static void clear_focus();
+
+    /// Enable Tab/Back_tab keys to change the focus Widget.
+    static void enable_tab_focus();
+
+    /// Disable Tab/Back_tab keys from changing focus Widget.
+    static void disable_tab_focus();
 
     /// Set a new head Widget for the entire system.
     /** Will disable the previous head widget if not nullptr. Only valid to call

@@ -41,9 +41,18 @@ auto is_sendable(cppurses::Event const& event) -> bool
 
 namespace cppurses {
 
+auto System::focus_widget() -> cppurses::Widget*
+{
+    return detail::Focus::focus_widget();
+}
+
 void System::set_focus(Widget& w) { detail::Focus::set(w); }
 
 void System::clear_focus() { detail::Focus::clear(); }
+
+void System::enable_tab_focus() { detail::Focus::enable_tab_focus(); }
+
+void System::disable_tab_focus() { detail::Focus::disable_tab_focus(); }
 
 void System::post_event(std::unique_ptr<Event> event)
 {
