@@ -62,6 +62,12 @@ class Size_policy {
     /// Return the stretch value currently being used.
     auto stretch() const -> double { return data_.stretch; }
 
+    /// Set if min can be ignored for the last displayed widget in a layout.
+    void can_ignore_min(bool enable) { data_.can_ignore_min = enable; }
+
+    /// Return if min can be ignored for the last displayed widget in a layout.
+    auto can_ignore_min() const -> bool { return data_.can_ignore_min; }
+
     /* _Helper Methods_ */
     /// Fixed: \p hint is the only acceptable size.
     void fixed(std::size_t hint)
@@ -146,10 +152,11 @@ class Size_policy {
 
    private:
     struct Data {
-        std::size_t hint = 0;
-        std::size_t min  = 0;
-        std::size_t max  = most_max_;
-        double stretch   = 1.;
+        std::size_t hint    = 0;
+        std::size_t min     = 0;
+        std::size_t max     = most_max_;
+        double stretch      = 1.;
+        bool can_ignore_min = true;
     } data_;
 
     static auto constexpr most_max_ =

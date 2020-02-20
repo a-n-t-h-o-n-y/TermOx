@@ -25,7 +25,7 @@ class Glyph_matrix {
     void clear() { matrix_.clear(); }
 
     /// Return the width of the matrix.
-    std::size_t width() const
+    auto width() const -> std::size_t
     {
         return matrix_.empty() ? 0 : matrix_.at(0).size();
     }
@@ -35,22 +35,28 @@ class Glyph_matrix {
 
     /// Glyph access operator. (0, 0) is top left. x grows south and y east.
     /** Provides no bounds checking. */
-    Glyph& operator()(std::size_t x, std::size_t y) { return matrix_[y][x]; }
+    auto operator()(std::size_t x, std::size_t y) -> Glyph&
+    {
+        return matrix_[y][x];
+    }
 
     /// Glyph access operator. (0, 0) is top left. x grows south and y east.
     /** Provides no bounds checking. */
-    const Glyph& operator()(std::size_t x, std::size_t y) const
+    auto operator()(std::size_t x, std::size_t y) const -> Glyph const&
     {
         return matrix_[y][x];
     }
 
     /// Glyph access operator. (0, 0) is top left. x grows south and y east.
     /** Has bounds checking and throws std::out_of_range if not within range. */
-    Glyph& at(std::size_t x, std::size_t y) { return matrix_.at(y).at(x); }
+    auto at(std::size_t x, std::size_t y) -> Glyph&
+    {
+        return matrix_.at(y).at(x);
+    }
 
     /// Glyph access operator. (0, 0) is top left. x grows south and y east.
     /** Has bounds checking and throws std::out_of_range if not within range. */
-    const Glyph& at(std::size_t x, std::size_t y) const
+    auto at(std::size_t x, std::size_t y) const -> Glyph const&
     {
         return matrix_.at(y).at(x);
     }

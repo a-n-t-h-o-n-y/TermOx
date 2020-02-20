@@ -29,7 +29,7 @@ class Matrix_display : public Widget {
         auto const height =
             matrix.height() > this->height() ? this->height() : matrix.height();
 
-        Painter p{*this};
+        auto p = Painter{*this};
         for (auto y = 0uL; y < height; ++y) {
             for (auto x = 0uL; x < width; ++x) {
                 p.put(matrix(x, y), x, y);

@@ -171,22 +171,92 @@ class Layout_span {
     mutable double total_inverse_stretch_ = 0.;
 
    private:
+    /// Generate a Dimensions container initialized with child Widget pointers.
+    template <typename Child_view_t>
+    static auto generate_init_dimensions(Child_view_t& children) -> Container_t
+    {
+        auto result = Container_t{};
+        result.reserve(children.size());
+        std::transform(std::begin(children), std::end(children),
+                       std::back_inserter(result),
+                       [](auto& child) -> Dimension {
+                           return {&child, 0uL};
+                       });
+        return result;
+    }
+
+    template <typename Iter_t>  // Dimension iterator
+    static void handle_edge(Iter_t first,
+                            Iter_t last,
+                            std::size_t leftover,
+                            bool can_ignore_min)
+    {
+        // First iter is edge, can assume it is not last.
+        if (can_ignore_min)
+            first->length = leftover;
+        else
+            first->length = 0uL;
+        ++first;
+        while (first != last) {
+            first->length = 0uL;
+            ++first;
+        }
+    }
+
+    static void invalidate_each(Container_t& dimensions)
+    {
+        for (auto& d : dimensions)
+            d.widget = nullptr;
+    }
+
+    /// Set each Dimension to the cooresponding Widget's min.
+    /** If the running total of min goes over \p length, then give that edge
+     *  widget the last of the space(if Size_policy::ignore_min is true). Next,
+     *  set all following widgets to length zero. If the total of min does not
+     *  exceed \p length, then return false. */
+    static auto set_each_to_min(Container_t& dimensions,
+                                std::size_t length,
+                                Get_policy_t get_policy) -> bool
+    {
+        // Can assume all Dimension::widget pointers are valid.
+        auto min_sum   = 0uL;
+        auto const end = std::end(dimensions);
+        for (auto iter = std::begin(dimensions); iter != end; ++iter) {
+            auto const& policy = get_policy(*(iter->widget));
+            min_sum += policy.min();
+            if (min_sum > length) {
+                auto const leftover = length - (min_sum - policy.min());
+                handle_edge(iter, end, leftover, policy.can_ignore_min());
+                invalidate_each(dimensions);
+                return true;
+            }
+            else
+                iter->length = policy.min();
+        }
+        return false;
+    }
+
+    /// Set each Dimension to the cooresponding Widget's hint.
+    static auto set_each_to_hint(Container_t& dimensions,
+                                 Get_policy_t get_policy)
+    {
+        // Can assume all Dimension::widget pointers are valid.
+        std::for_each(std::begin(dimensions), std::end(dimensions),
+                      [get_policy](auto& dimension) {
+                          dimension.length =
+                              get_policy(*dimension.widget).hint();
+                      });
+    }
+
     template <typename Child_view_t>
     static auto build_dimensions(Child_view_t children,
                                  std::size_t primary_length,
                                  Get_policy_t get_policy) -> Container_t
     {
-        auto result = Container_t{};
-        result.reserve(children.size());
-        auto min_running_total = 0uL;
-        for (auto& child : children) {
-            min_running_total += get_policy(child).min();
-            if (min_running_total > primary_length)
-                result.push_back({nullptr, 0uL});
-            else
-                result.push_back({&child, get_policy(child).hint()});
-        }
-        return result;
+        auto dimensions = generate_init_dimensions(children);
+        if (not set_each_to_min(dimensions, primary_length, get_policy))
+            set_each_to_hint(dimensions, get_policy);
+        return dimensions;
     }
 
     /// \p Get_limit_t Is a functor type <std::size_t(Size_policy const&)>
