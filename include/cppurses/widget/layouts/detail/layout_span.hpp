@@ -59,6 +59,7 @@ class Layout_span {
         Iterator(Iterator&&)      = delete;
         auto operator=(Iterator const&) -> Iterator& = delete;
         auto operator=(Iterator &&) -> Iterator& = delete;
+        ~Iterator()                              = default;
 
         auto operator++() -> Iterator&
         {
@@ -84,7 +85,7 @@ class Layout_span {
             return this->iter_ != other;
         }
 
-        auto get_policy() const -> Size_policy const&
+        [[nodiscard]] auto get_policy() const -> Size_policy const&
         {
             return get_policy_(*iter_->widget);
         }
@@ -96,20 +97,26 @@ class Layout_span {
         Get_limit_t get_limit_;
     };
 
-    // For Clang
+    // Needed for clang, GCC finds Constructor without this, but class scope
+    // deduction guide breaks GCC.
+#ifdef __clang__
     template <typename Get_limit_t>
     Iterator(typename Layout_span::Container_t::iterator iter,
              typename Layout_span::Container_t::iterator end,
              Get_policy_t get_policy,
              Get_limit_t get_limit)
         ->Iterator<decltype(get_limit)>;
+#endif
 
    public:
-    template <typename Child_view_t>
-    Layout_span(Child_view_t children,
+    /// Construct, only considers children from \p first up to \p last.
+    template <typename Iter_t>
+    Layout_span(Iter_t first,
+                Iter_t last,
                 std::size_t primary_length,
                 Get_policy_t&& get_policy)
-        : dimensions_{Layout_span::build_dimensions(children,
+        : dimensions_{Layout_span::build_dimensions(first,
+                                                    last,
                                                     primary_length,
                                                     get_policy)},
           get_policy_{std::forward<Get_policy_t>(get_policy)}
@@ -172,13 +179,13 @@ class Layout_span {
 
    private:
     /// Generate a Dimensions container initialized with child Widget pointers.
-    template <typename Child_view_t>
-    static auto generate_init_dimensions(Child_view_t& children) -> Container_t
+    template <typename Iter_t>
+    static auto generate_init_dimensions(Iter_t first, Iter_t last)
+        -> Container_t
     {
         auto result = Container_t{};
-        result.reserve(children.size());
-        std::transform(std::begin(children), std::end(children),
-                       std::back_inserter(result),
+        result.reserve(std::distance(first, last));
+        std::transform(first, last, std::back_inserter(result),
                        [](auto& child) -> Dimension {
                            return {&child, 0uL};
                        });
@@ -230,8 +237,7 @@ class Layout_span {
                 invalidate_each(dimensions);
                 return true;
             }
-            else
-                iter->length = policy.min();
+            iter->length = policy.min();
         }
         return false;
     }
@@ -248,12 +254,13 @@ class Layout_span {
                       });
     }
 
-    template <typename Child_view_t>
-    static auto build_dimensions(Child_view_t children,
+    template <typename Iter_t>
+    static auto build_dimensions(Iter_t first,
+                                 Iter_t last,
                                  std::size_t primary_length,
                                  Get_policy_t get_policy) -> Container_t
     {
-        auto dimensions = generate_init_dimensions(children);
+        auto dimensions = generate_init_dimensions(first, last);
         if (not set_each_to_min(dimensions, primary_length, get_policy))
             set_each_to_hint(dimensions, get_policy);
         return dimensions;

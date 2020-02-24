@@ -12,8 +12,8 @@ namespace cppurses::layout::detail {
 template <typename Get_policy_t, typename Get_length_t, typename Get_offset_t>
 struct Dimension_parameters {
     Get_policy_t get_policy;  // Size_policy const&(Widget const&)
-    Get_length_t get_length;  // std::size_t(Widget const&)
-    Get_offset_t get_offset;  // std::size_t(Widget const&)
+    Get_length_t get_length;  // std::size_t(Widget const&) [width/height]
+    Get_offset_t get_offset;  // std::size_t(Widget const&) [global x/y]
 };
 
 template <typename Primary_t,
@@ -47,14 +47,28 @@ class Linear_layout : public Layout<Child_t> {
         this->send_move_events(primary_pos, secondary_pos);
     }
 
+    /// Return the child Widget offset, the first widget included in the layout.
+    auto get_offset() const -> std::size_t { return offset_; }
+
+    /// Sets the child Widget offset, does not do bounds checking.
+    auto set_offset(std::size_t index)
+    {
+        offset_ = index;
+        shared_space_.set_offset(index);
+        unique_space_.set_offset(index);
+        this->update_geometry();
+    }
+
    private:
+    using Length_list   = std::vector<std::size_t>;
+    using Position_list = std::vector<std::size_t>;
+
     inline static auto const parameters_ = Parameters{};
+
+    std::size_t offset_ = 0uL;
 
     Shared_space<Parameters> shared_space_;
     Unique_space<Parameters> unique_space_;
-
-    using Length_list   = std::vector<std::size_t>;
-    using Position_list = std::vector<std::size_t>;
 
    private:
     void send_enable_disable_events(Length_list const& primary,
@@ -63,13 +77,15 @@ class Linear_layout : public Layout<Child_t> {
         /* TODO temporary */
         if (primary.size() != secondary.size())
             throw std::logic_error{"Linear_layout::send_...events"};
-        auto const children = this->get_children();
-        if (children.size() != primary.size())
-            throw std::logic_error{"Linear_layout::send_...events"};
         /* TODO temporary */
 
+        auto const children = this->get_children();
+        for (auto i = 0uL; i < offset_; ++i) {
+            if (children[i].enabled())
+                children[i].disable(true, false);
+        }
         for (auto i = 0uL; i < primary.size(); ++i) {
-            auto& child = children[i];
+            auto& child = children[offset_ + i];
             if (is_valid(primary[i], secondary[i])) {
                 if (not child.enabled())
                     child.enable(true, false);
@@ -86,10 +102,11 @@ class Linear_layout : public Layout<Child_t> {
     {
         auto const children = this->get_children();
         for (auto i = 0uL; i < primary.size(); ++i) {
-            if (children[i].enabled()) {
+            auto& child = children[offset_ + i];
+            if (child.enabled()) {
                 auto const area =
                     parameters_.get_area(primary[i], secondary[i]);
-                System::post_event<Resize_event>(children[i], area);
+                System::post_event<Resize_event>(child, area);
             }
         }
     }
@@ -101,11 +118,12 @@ class Linear_layout : public Layout<Child_t> {
         auto const primary_offset   = parameters_.primary.get_offset(*this);
         auto const secondary_offset = parameters_.secondary.get_offset(*this);
         for (auto i = 0uL; i < primary.size(); ++i) {
-            if (children[i].enabled()) {
+            auto& child = children[offset_ + i];
+            if (child.enabled()) {
                 auto const point =
                     parameters_.get_point(primary[i] + primary_offset,
                                           secondary[i] + secondary_offset);
-                System::post_event<Move_event>(children[i], point);
+                System::post_event<Move_event>(child, point);
             }
         }
     }

@@ -20,11 +20,15 @@ class Shared_space {
    public:
     auto calculate_lengths(Widget& parent) -> Length_list
     {
-        auto children = detail::Layout_span{
-            parent.get_children(), parameters_.primary.get_length(parent),
-            [](Widget const& w) -> Size_policy const& {
-                return parameters_.primary.get_policy(w);
-            }};
+        auto children = [&parent, this] {
+            auto const temp = parent.get_children();
+            return detail::Layout_span{
+                std::next(std::begin(temp), offset_), std::end(temp),
+                parameters_.primary.get_length(parent),
+                [](Widget const& w) -> Size_policy const& {
+                    return parameters_.primary.get_policy(w);
+                }};
+        }();
 
         auto const difference = this->find_length_difference(parent, children);
 
@@ -49,8 +53,16 @@ class Shared_space {
         return result;
     }
 
+    /// Return the child Widget offset, the first widget included in the layout.
+    [[nodiscard]] auto get_offset() const -> std::size_t { return offset_; }
+
+    /// Sets the child Widget offset, does not do bounds checking.
+    auto set_offset(std::size_t index) { offset_ = index; }
+
    private:
-    inline static auto const parameters_ = Parameters{};
+    inline static auto constexpr parameters_ = Parameters{};
+
+    std::size_t offset_ = 0uL;
 
    private:
     template <typename Children_span>

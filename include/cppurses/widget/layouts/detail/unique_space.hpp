@@ -1,6 +1,7 @@
 #ifndef CPPURSES_WIDGET_LAYOUTS_DETAIL_UNIQUE_SPACE_HPP
 #define CPPURSES_WIDGET_LAYOUTS_DETAIL_UNIQUE_SPACE_HPP
 #include <cstddef>
+#include <utility>
 #include <vector>
 
 #include <cppurses/widget/widget.hpp>
@@ -17,17 +18,22 @@ class Unique_space {
    public:
     auto calculate_lengths(Widget& parent) -> Length_list
     {
-        auto result = Length_list{};
-        result.reserve(parent.child_count());
+        auto result      = Length_list{};
         auto const limit = parameters_.secondary.get_length(parent);
-        for (auto const& child : parent.get_children()) {
-            auto const& policy = parameters_.secondary.get_policy(child);
+        auto children    = parent.get_children();
+        auto begin       = std::next(std::begin(children), offset_);
+        auto const end   = std::end(children);
+        result.reserve(std::distance(begin, end));
+
+        while (begin != end) {
+            auto const& policy = parameters_.secondary.get_policy(*begin);
             if (limit > policy.max())
                 result.push_back(policy.max());
             else if (limit < policy.min())
                 result.push_back(0);
             else
                 result.push_back(limit);
+            ++begin;
         }
         return result;
     }
@@ -37,8 +43,16 @@ class Unique_space {
         return Position_list(lengths.size(), 0uL);
     }
 
+    /// Return the child Widget offset, the first widget included in the layout.
+    auto get_offset() const -> std::size_t { return offset_; }
+
+    /// Sets the child Widget offset, does not do bounds checking.
+    auto set_offset(std::size_t index) { offset_ = index; }
+
    private:
     inline static auto const parameters_ = Parameters{};
+
+    std::size_t offset_ = 0uL;
 };
 
 }  // namespace cppurses::layout::detail

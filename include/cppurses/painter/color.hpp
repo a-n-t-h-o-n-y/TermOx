@@ -1,6 +1,7 @@
 #ifndef CPPURSES_PAINTER_COLOR_HPP
 #define CPPURSES_PAINTER_COLOR_HPP
 #include <cstdint>
+#include <stdexcept>
 #include <string>
 
 namespace cppurses {
@@ -122,6 +123,7 @@ inline auto color_to_string(Color c) -> std::string
         case Color::Yellow: return "Yellow";
         case Color::White: return "White";
     }
+    throw std::logic_error{"Unreachable"};
 }
 
 }  // namespace cppurses
