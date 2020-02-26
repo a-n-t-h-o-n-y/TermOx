@@ -74,11 +74,6 @@ class Linear_layout : public Layout<Child_t> {
     void send_enable_disable_events(Length_list const& primary,
                                     Length_list const& secondary)
     {
-        /* TODO temporary */
-        if (primary.size() != secondary.size())
-            throw std::logic_error{"Linear_layout::send_...events"};
-        /* TODO temporary */
-
         auto const children = this->get_children();
         for (auto i = 0uL; i < offset_; ++i) {
             if (children[i].enabled())
