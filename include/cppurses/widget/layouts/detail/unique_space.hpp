@@ -29,7 +29,7 @@ class Unique_space {
             auto const& policy = parameters_.secondary.get_policy(*begin);
             if (limit > policy.max())
                 result.push_back(policy.max());
-            else if (limit < policy.min())
+            else if (limit < policy.min() and !policy.can_ignore_min())
                 result.push_back(0);
             else
                 result.push_back(limit);
