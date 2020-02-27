@@ -11,9 +11,9 @@ namespace cppurses::layout::detail {
 
 template <typename Get_policy_t, typename Get_length_t, typename Get_offset_t>
 struct Dimension_parameters {
-    Get_policy_t get_policy;  // Size_policy const&(Widget const&)
-    Get_length_t get_length;  // std::size_t(Widget const&) [width/height]
-    Get_offset_t get_offset;  // std::size_t(Widget const&) [global x/y]
+    using get_policy = Get_policy_t;  // Size_policy const&(Widget const&)
+    using get_length = Get_length_t;  // std::size_t(Widget const&) [w/h]
+    using get_offset = Get_offset_t;  // std::size_t(Widget const&) [global x/y]
 };
 
 template <typename Primary_t,
@@ -21,10 +21,10 @@ template <typename Primary_t,
           typename Get_area_t,
           typename Get_point_t>
 struct Linear_layout_parameters {
-    Primary_t primary;
-    Secondary_t secondary;
-    Get_area_t get_area;    // Area(std::size_t primary, std::size_t secondary)
-    Get_point_t get_point;  // Point(std::size_t primary, std::size_t secondary)
+    using Primary   = Primary_t;
+    using Secondary = Secondary_t;
+    using get_area  = Get_area_t;   // Area(size_t primary, size_t secondary)
+    using get_point = Get_point_t;  // Point(size_t primary, size_t secondary)
 };
 
 /// Lays out Widgets in 2D, sharing space in a primary dimension.
@@ -63,8 +63,6 @@ class Linear_layout : public Layout<Child_t> {
     using Length_list   = std::vector<std::size_t>;
     using Position_list = std::vector<std::size_t>;
 
-    inline static auto const parameters_ = Parameters{};
-
     std::size_t offset_ = 0uL;
 
     Shared_space<Parameters> shared_space_;
@@ -100,7 +98,7 @@ class Linear_layout : public Layout<Child_t> {
             auto& child = children[offset_ + i];
             if (child.enabled()) {
                 auto const area =
-                    parameters_.get_area(primary[i], secondary[i]);
+                    typename Parameters::get_area{}(primary[i], secondary[i]);
                 System::post_event<Resize_event>(child, area);
             }
         }
@@ -109,15 +107,17 @@ class Linear_layout : public Layout<Child_t> {
     void send_move_events(Position_list const& primary,
                           Position_list const& secondary)
     {
-        auto const children         = this->get_children();
-        auto const primary_offset   = parameters_.primary.get_offset(*this);
-        auto const secondary_offset = parameters_.secondary.get_offset(*this);
+        auto const children = this->get_children();
+        auto const primary_offset =
+            typename Parameters::Primary::get_offset{}(*this);
+        auto const secondary_offset =
+            typename Parameters::Secondary::get_offset{}(*this);
         for (auto i = 0uL; i < primary.size(); ++i) {
             auto& child = children[offset_ + i];
             if (child.enabled()) {
-                auto const point =
-                    parameters_.get_point(primary[i] + primary_offset,
-                                          secondary[i] + secondary_offset);
+                auto const point = typename Parameters::get_point{}(
+                    primary[i] + primary_offset,
+                    secondary[i] + secondary_offset);
                 System::post_event<Move_event>(child, point);
             }
         }

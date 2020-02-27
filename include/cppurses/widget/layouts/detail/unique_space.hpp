@@ -19,14 +19,15 @@ class Unique_space {
     auto calculate_lengths(Widget& parent) -> Length_list
     {
         auto result      = Length_list{};
-        auto const limit = parameters_.secondary.get_length(parent);
+        auto const limit = typename Parameters::Secondary::get_length{}(parent);
         auto children    = parent.get_children();
         auto begin       = std::next(std::begin(children), offset_);
         auto const end   = std::end(children);
         result.reserve(std::distance(begin, end));
 
         while (begin != end) {
-            auto const& policy = parameters_.secondary.get_policy(*begin);
+            auto const& policy =
+                typename Parameters::Secondary::get_policy{}(*begin);
             if (limit > policy.max())
                 result.push_back(policy.max());
             else if (limit < policy.min() and !policy.can_ignore_min())
@@ -50,8 +51,6 @@ class Unique_space {
     auto set_offset(std::size_t index) { offset_ = index; }
 
    private:
-    inline static auto const parameters_ = Parameters{};
-
     std::size_t offset_ = 0uL;
 };
 

@@ -24,9 +24,9 @@ class Shared_space {
             auto const temp = parent.get_children();
             return detail::Layout_span{
                 std::next(std::begin(temp), offset_), std::end(temp),
-                parameters_.primary.get_length(parent),
+                typename Parameters::Primary::get_length{}(parent),
                 [](Widget const& w) -> Size_policy const& {
-                    return parameters_.primary.get_policy(w);
+                    return typename Parameters::Primary::get_policy{}(w);
                 }};
         }();
 
@@ -60,8 +60,6 @@ class Shared_space {
     auto set_offset(std::size_t index) { offset_ = index; }
 
    private:
-    inline static auto constexpr parameters_ = Parameters{};
-
     std::size_t offset_ = 0uL;
 
    private:
@@ -137,8 +135,8 @@ class Shared_space {
     static auto find_length_difference(Widget const& parent,
                                        Children_span const& span) -> int
     {
-        auto const parent_length =
-            static_cast<int>(Parameters{}.primary.get_length(parent));
+        auto const parent_length = static_cast<int>(
+            typename Parameters::Primary::get_length{}(parent));
         auto const children_entire_length =
             static_cast<int>(span.entire_length());
         return parent_length - children_entire_length;
