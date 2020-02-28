@@ -58,6 +58,10 @@ namespace cppurses {
 // enable/disable their children.
 auto Resize_event::send() const -> bool
 {
+    if (receiver_.outer_width() == new_area_.width and
+        receiver_.outer_height() == new_area_.height)
+        return true;
+
     receiver_.screen_state().optimize.resized = true;
     const auto old_area =
         Area{receiver_.outer_width(), receiver_.outer_height()};
@@ -88,13 +92,12 @@ auto Resize_event::send() const -> bool
 
 auto Resize_event::filter_send(Widget& filter) const -> bool
 {
-    if (receiver_.outer_width() != new_area_.width or
-        receiver_.outer_height() != new_area_.height) {
-        auto const old_area =
-            Area{receiver_.outer_width(), receiver_.outer_height()};
-        return filter.resize_event_filter(receiver_, new_area_, old_area);
-    }
-    return true;
+    if (receiver_.outer_width() == new_area_.width and
+        receiver_.outer_height() == new_area_.height)
+        return true;
+    auto const old_area =
+        Area{receiver_.outer_width(), receiver_.outer_height()};
+    return filter.resize_event_filter(receiver_, new_area_, old_area);
 }
 
 }  // namespace cppurses

@@ -56,7 +56,6 @@ target_sources(demos PRIVATE
     palette/color_control.cpp
     palette/palette_helpers.cpp
     palette/export_panel.cpp
-    palette/color_display.cpp
     palette/all_colors_display.cpp
 )
 

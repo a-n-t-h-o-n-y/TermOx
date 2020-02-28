@@ -67,6 +67,12 @@ class Layout : public Widget {
      *  Child_removed_event, and Child_polished_event. */
     virtual void update_geometry() = 0;
 
+    auto enable_event() -> bool override
+    {
+        this->update_geometry();
+        return Widget::enable_event();
+    }
+
     auto move_event(Point new_position, Point old_position) -> bool override
     {
         this->update_geometry();

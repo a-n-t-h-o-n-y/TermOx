@@ -310,7 +310,11 @@ class Widget {
 
     // - - - - - - - - - - - - - Event Handlers - - - - - - - - - - - - - - - -
     /// Handles Enable_event objects.
-    virtual auto enable_event() -> bool { return true; }
+    virtual auto enable_event() -> bool
+    {
+        this->update();
+        return true;
+    }
 
     /// Handles Disable_event objects.
     virtual auto disable_event() -> bool { return true; }
@@ -341,6 +345,7 @@ class Widget {
         -> bool
     {
         moved(new_position);
+        this->update();
         return true;
     }
 
