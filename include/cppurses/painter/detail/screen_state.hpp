@@ -26,6 +26,7 @@ class Screen_state {
     /// coordinates, and modified by Screen::flush() function.
     Screen_descriptor tiles;
 
+   public:
     /// Holds flags and data structures used to optimize flushing to the screen.
     struct Optimize {
        public:
@@ -39,7 +40,15 @@ class Screen_state {
 
        public:
         /// Reset all flags to initial and clear state, except for wallpaper.
-        void reset();
+        void reset()
+        {
+            this->just_enabled = false;
+            this->moved        = false;
+            this->resized      = false;
+            this->child_event  = false;
+            this->move_mask.clear();
+            this->resize_mask.clear();
+        }
     } optimize;
 
    private:
@@ -52,16 +61,6 @@ class Screen_state {
     friend class cppurses::Move_event;
     friend class cppurses::Resize_event;
 };
-
-inline void Screen_state::Optimize::reset()
-{
-    this->just_enabled = false;
-    this->moved        = false;
-    this->resized      = false;
-    this->child_event  = false;
-    this->move_mask.clear();
-    this->resize_mask.clear();
-}
 
 }  // namespace detail
 }  // namespace cppurses

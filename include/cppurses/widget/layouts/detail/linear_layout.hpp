@@ -1,5 +1,6 @@
 #ifndef CPPURSES_WIDGET_LAYOUTS_DETAIL_LINEAR_LAYOUT_HPP
 #define CPPURSES_WIDGET_LAYOUTS_DETAIL_LINEAR_LAYOUT_HPP
+#include <cppurses/painter/painter.hpp>
 #include <cppurses/system/events/move_event.hpp>
 #include <cppurses/system/events/resize_event.hpp>
 #include <cppurses/widget/layout.hpp>
@@ -57,6 +58,7 @@ class Linear_layout : public Layout<Child_t> {
         shared_space_.set_offset(index);
         unique_space_.set_offset(index);
         this->update_geometry();
+        this->force_repaint_empty_space();
     }
 
    private:
@@ -69,6 +71,13 @@ class Linear_layout : public Layout<Child_t> {
     Unique_space<Parameters> unique_space_;
 
    private:
+    // Hack until the paint system is updated and treats layouts accordingly.
+    void force_repaint_empty_space()
+    {
+        this->screen_state().optimize.child_event = true;
+        Painter{*this};
+    }
+
     void send_enable_disable_events(Length_list const& primary,
                                     Length_list const& secondary)
     {

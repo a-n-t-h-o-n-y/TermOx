@@ -60,12 +60,12 @@ void Widget::enable(bool enable, bool post_child_polished_event)
     this->enable_and_post_events(enable, post_child_polished_event);
     // This counters the fact that layouts are notified of enabled events but
     // not disable events. So this has to disable children b/c layout will not.
-    if (not enable) {
+    // if (not enable) {
         for (Widget& w : this->get_children()) {
-            if (w.enabled())
+            // if (w.enabled())
                 w.enable(enable, post_child_polished_event);
         }
-    }
+    // }
 }
 
 void Widget::close()
