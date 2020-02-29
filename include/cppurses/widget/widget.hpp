@@ -360,8 +360,15 @@ class Widget {
     /// Handles Mouse::Press objects.
     virtual auto mouse_press_event(Mouse::State const& mouse) -> bool
     {
-        clicked(mouse.local);
-        clicked_xy(mouse.local.x, mouse.local.y);
+        switch (mouse.button) {
+            case Mouse::Button::Left:
+            case Mouse::Button::Middle:
+            case Mouse::Button::Right:
+                clicked(mouse.local);
+                clicked_xy(mouse.local.x, mouse.local.y);
+                break;
+            default: break;
+        }
         return true;
     }
 
