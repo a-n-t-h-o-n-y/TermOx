@@ -114,29 +114,18 @@ class Brush {
     std::bitset<8> attributes_;
     opt::Optional<Color> background_color_;
     opt::Optional<Color> foreground_color_;
+    friend void imprint(Brush const&, Brush&);
 };
 
 /// Add Attributes and Colors from \p from to \p to.
 /** Does not overwrite existing colors in \p to. */
 inline void imprint(Brush const& from, Brush& to)
 {
-    auto const add_background = [](Brush const& from, Brush& to) {
-        if (!to.background_color() and from.background_color())
-            to.add_attributes(background(*from.background_color()));
-    };
-    auto const add_foreground = [](Brush const& from, Brush& to) {
-        if (!to.foreground_color() and from.foreground_color())
-            to.add_attributes(foreground(*from.foreground_color()));
-    };
-    auto const copy_attributes = [](Brush const& from, Brush& to) {
-        for (Attribute a : Attribute_list) {
-            if (from.has_attribute(a))
-                to.add_attributes(a);
-        }
-    };
-    add_background(from, to);
-    add_foreground(from, to);
-    copy_attributes(from, to);
+    if (!to.background_color_ and from.background_color_)
+        to.background_color_ = *from.background_color_;
+    if (!to.foreground_color_ and from.foreground_color_)
+        to.foreground_color_ = *from.foreground_color_;
+    to.attributes_ |= from.attributes_;
 }
 
 }  // namespace cppurses

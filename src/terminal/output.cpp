@@ -94,8 +94,8 @@ void paint_indicator(char symbol)
 /// Add \p glyph's symbol, with attributes, to the screen at cursor position.
 void put_as_wchar(Glyph const& glyph)
 {
-    auto const color_pair      = color_index(glyph.brush);
-    auto const attributes      = find_attr_t(glyph.brush);
+    auto const color_pair      = color_index(glyph.brush); // 3%
+    auto const attributes      = find_attr_t(glyph.brush); // 3%
     wchar_t const symbol[2]    = {glyph.symbol, L'\0'};
     auto symbol_and_attributes = cchar_t{};
 

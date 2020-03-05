@@ -87,9 +87,13 @@ void Screen::set_cursor_on_focus_widget()
 
 void Screen::paint_empty_tiles(Widget const& widg)
 {
+    Screen::paint_empty_tiles(widg, widg.generate_wallpaper());
+}
+
+void Screen::paint_empty_tiles(Widget const& widg, Glyph const& wallpaper)
+{
     if (!has_children(widg))
         return;
-    auto const wallpaper   = widg.generate_wallpaper();
     auto const empty_space = find_empty_space(widg);
     auto const y_begin     = empty_space.offset().y;
     auto const x_begin     = empty_space.offset().x;
@@ -155,14 +159,23 @@ void Screen::basic_paint_single_point(Widget& widg,
 
 void Screen::full_paint(Widget& widg, Screen_descriptor const& staged_tiles)
 {
-    paint_empty_tiles(widg);
-    auto const y_begin = widg.y();
-    auto const x_begin = widg.x();
-    auto const y_end   = y_begin + widg.outer_height();
-    auto const x_end   = x_begin + widg.outer_width();
+    auto const wallpaper = widg.generate_wallpaper();
+    paint_empty_tiles(widg, wallpaper);
+    auto const y_begin   = widg.y();
+    auto const x_begin   = widg.x();
+    auto const y_end     = y_begin + widg.outer_height();
+    auto const x_end     = x_begin + widg.outer_width();
+    auto const is_layout = has_children(widg);
     for (auto y = y_begin; y < y_end; ++y) {
         for (auto x = x_begin; x < x_end; ++x) {
-            full_paint_single_point(widg, staged_tiles, Point{x, y});
+            auto const point = Point{x, y};
+            if (contains(point, staged_tiles)) {
+                auto tile = staged_tiles.at(point);
+                imprint(widg.brush, tile.brush);
+                output::put(x, y, tile);
+            }
+            else if (not is_layout)
+                output::put(x, y, wallpaper);
         }
     }
 }
@@ -213,25 +226,26 @@ void Screen::paint_resize_event(Widget& widg,
 
 void Screen::delegate_paint(Widget& widg, Screen_descriptor const& staged_tiles)
 {
-    auto& optimization_info       = widg.screen_state().optimize;
-    auto& previous_wallpaper      = optimization_info.wallpaper;
-    auto const& current_wallpaper = widg.generate_wallpaper();
-    if (optimization_info.just_enabled)
-        paint_just_enabled(widg, staged_tiles);
-    else if (!has_same_display(current_wallpaper, previous_wallpaper))
-        full_paint(widg, staged_tiles);
-    else if (optimization_info.moved)
-        paint_move_event(widg, staged_tiles);
-    else if (optimization_info.resized) {
-        // paint_resize_event(widg, staged_tiles); // should be this
-        full_paint(widg, staged_tiles);
-    }
-    else if (optimization_info.child_event)
-        paint_child_event(widg, staged_tiles);
-    else
-        basic_paint(widg, staged_tiles);
-    optimization_info.reset();
-    previous_wallpaper = current_wallpaper;
+    full_paint(widg, staged_tiles);
+    // auto& optimization_info       = widg.screen_state().optimize;
+    // auto& previous_wallpaper      = optimization_info.wallpaper;
+    // auto const& current_wallpaper = widg.generate_wallpaper();
+    // if (optimization_info.just_enabled)
+    //     paint_just_enabled(widg, staged_tiles);
+    // else if (!has_same_display(current_wallpaper, previous_wallpaper))
+    //     full_paint(widg, staged_tiles);
+    // else if (optimization_info.moved)
+    //     paint_move_event(widg, staged_tiles);
+    // else if (optimization_info.resized) {
+    //     // paint_resize_event(widg, staged_tiles); // should be this
+    //     full_paint(widg, staged_tiles);
+    // }
+    // else if (optimization_info.child_event)
+    //     paint_child_event(widg, staged_tiles);
+    // else
+    //     basic_paint(widg, staged_tiles);
+    // optimization_info.reset();
+    // previous_wallpaper = current_wallpaper;
 }
 
 }  // namespace detail

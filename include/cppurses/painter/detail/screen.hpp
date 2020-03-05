@@ -23,8 +23,12 @@ class Screen {
 
    private:
     /// Covers space unowned by any child widget with wallpaper.
-    /** Does nothing if w has no children. */
+    /** Does nothing if w has no children. Generates wallpaper from \p widg */
     static void paint_empty_tiles(Widget const& widg);
+
+    /// Covers space unowned by any child widget with wallpaper.
+    /** Optimized version where caller has the wallpaper.*/
+    static void paint_empty_tiles(Widget const& widg, Glyph const& wallpaper);
 
     // Covers points in w->screen_state that are not found in \p staged_tiles.
     // Paints over tiles that existed on previous iteration but not on current.
