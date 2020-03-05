@@ -58,13 +58,13 @@ auto Horizontal_slider::position_to_percent(std::size_t position) -> float
         return 0.f;
     if (position >= (width - 1))
         return 1.f;
-    return static_cast<float>(position) / (width - 1);
+    return static_cast<float>(position) / static_cast<float>(width - 1);
 }
 
 auto Horizontal_slider::percent_to_position(float percent) -> std::size_t
 {
     auto const width = this->width();
-    return width == 0 ? 0 : std::round(percent * (width - 1));
+    return width == 0 ? 0 : std::round(percent * static_cast<float>(width - 1));
 }
 
 namespace slot {

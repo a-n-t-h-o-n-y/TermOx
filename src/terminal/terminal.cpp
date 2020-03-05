@@ -10,8 +10,6 @@
 #include <stdexcept>
 
 #include <ncurses.h>
-#include <signal.h>
-#include <string.h>
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/color_definition.hpp>

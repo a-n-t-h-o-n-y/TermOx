@@ -121,23 +121,16 @@ void Focus::set(cppurses::Widget& new_focus)
         Focus::clear();
         return;
     }
-    if (focus_widget_ != nullptr) {
-        // Focus_out_event has private constructor, can't use make_unique.
-        auto event = std::unique_ptr<Focus_out_event>{
-            new Focus_out_event{*focus_widget_}};
-        System::post_event(std::move(event));
-    }
-    auto event = std::unique_ptr<Focus_in_event>{new Focus_in_event{new_focus}};
-    System::post_event(std::move(event));
+    if (focus_widget_ != nullptr)
+        System::post_event<Focus_out_event>(*focus_widget_);
+    System::post_event<Focus_in_event>(new_focus);
 }
 
 void Focus::clear()
 {
     if (focus_widget_ == nullptr)
         return;
-    auto event =
-        std::unique_ptr<Focus_out_event>{new Focus_out_event(*focus_widget_)};
-    System::post_event(std::move(event));
+    System::post_event<Focus_out_event>(*focus_widget_);
     focus_widget_ = nullptr;
 }
 

@@ -90,7 +90,7 @@ class System {
     /** Blocks until System::exit() is called, returns the exit code. Will throw
      *  a std::runtime_error if screen cannot be initialized. Enables and sets
      *  focus to the head Widget.*/
-    auto run() -> int;
+    static auto run() -> int;
 
     /// Immediately send the event filters and then to the intended receiver.
     static auto send_event(Event const& event) -> bool;

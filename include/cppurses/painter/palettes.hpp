@@ -6,8 +6,8 @@ namespace cppurses {
 
 /// A collection of pre-defined Palettes from the library.
 struct Palettes {
-    static Palette Standard();
-    static Palette DawnBringer();
+    static auto Standard() -> Palette;
+    static auto DawnBringer() -> Palette;
 };
 
 }  // namespace cppurses

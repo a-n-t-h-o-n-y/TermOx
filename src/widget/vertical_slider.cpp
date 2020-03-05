@@ -10,7 +10,7 @@
 
 namespace cppurses {
 
-bool Vertical_slider::paint_event()
+auto Vertical_slider::paint_event() -> bool
 {
     Painter p{*this};
     auto const indicator_y = indicator_position();
@@ -51,7 +51,7 @@ bool Vertical_slider::paint_event()
     return Widget::paint_event();
 }
 
-bool Vertical_slider::mouse_press_event(const Mouse::State& mouse)
+auto Vertical_slider::mouse_press_event(const Mouse::State& mouse) -> bool
 {
     switch (mouse.button) {
         case Mouse::Button::Left:

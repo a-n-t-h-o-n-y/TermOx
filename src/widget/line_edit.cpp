@@ -46,7 +46,7 @@ void Line_edit::set_ghost_color(Color c)
     this->update();
 }
 
-bool Line_edit::key_press_event(Key::State const& keyboard)
+auto Line_edit::key_press_event(Key::State const& keyboard) -> bool
 {
     switch (keyboard.key) {
         case Key::Enter:

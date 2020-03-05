@@ -14,8 +14,7 @@
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/widget.hpp>
 
-namespace cppurses {
-namespace detail {
+namespace cppurses::detail {
 
 void Timer_event_loop::register_widget(Widget& w)
 {
@@ -50,5 +49,4 @@ void Timer_event_loop::wait_on_timer()
     last_time_ = Clock_t::now();
 }
 
-}  // namespace detail
-}  // namespace cppurses
+}  // namespace cppurses::detail

@@ -72,7 +72,7 @@ void System::set_head(Widget* new_head)
     head_ = new_head;
 }
 
-int System::run()
+auto System::run() -> int
 {
     if (head_ == nullptr)
         return -1;
@@ -97,7 +97,7 @@ auto System::send_event(Event const& event) -> bool
 }
 
 sig::Slot<void()> System::quit = []() { System::exit(); };
-sig::Signal<void(int)> System::exit_signal{};
+sig::Signal<void(int)> System::exit_signal;
 Widget* System::head_        = nullptr;
 bool System::exit_requested_ = false;
 detail::User_input_event_loop System::user_input_loop_;
