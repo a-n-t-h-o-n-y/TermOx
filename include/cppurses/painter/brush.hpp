@@ -1,9 +1,8 @@
 #ifndef CPPURSES_PAINTER_BRUSH_HPP
 #define CPPURSES_PAINTER_BRUSH_HPP
+#include <optional>
 #include <tuple>
 #include <utility>
-
-#include <optional/optional.hpp>
 
 #include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/color.hpp>
@@ -49,10 +48,10 @@ class Brush {
     void set_foreground(Color color) { foreground_color_ = color; }
 
     /// Set the background to not have a color, the default state.
-    void remove_background() { background_color_ = opt::none; }
+    void remove_background() { background_color_ = std::nullopt; }
 
     /// Set the foreground to not have a color, the default state.
-    void remove_foreground() { foreground_color_ = opt::none; }
+    void remove_foreground() { foreground_color_ = std::nullopt; }
 
     /// Remove all of the set Attributes from the brush, not including colors.
     void clear_attributes() { attributes_ = 0; }
@@ -64,14 +63,14 @@ class Brush {
         return (attributes_ & mask) != 0;
     }
 
-    /// Return the current background as an opt::Optional object.
-    auto background_color() const -> opt::Optional<Color>
+    /// Return the current background as a std::optional object.
+    auto background_color() const -> std::optional<Color> const&
     {
         return background_color_;
     }
 
-    /// Return the current foreground as an opt::Optional object.
-    auto foreground_color() const -> opt::Optional<Color>
+    /// Return the current foreground as an std::optional object.
+    auto foreground_color() const -> std::optional<Color> const&
     {
         return foreground_color_;
     }
@@ -112,8 +111,8 @@ class Brush {
    private:
     using Byte_t       = unsigned char;
     Byte_t attributes_ = 0;
-    opt::Optional<Color> background_color_;
-    opt::Optional<Color> foreground_color_;
+    std::optional<Color> background_color_;
+    std::optional<Color> foreground_color_;
     friend void imprint(Brush const&, Brush&);
 };
 

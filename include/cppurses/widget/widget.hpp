@@ -6,12 +6,12 @@
 #include <functional>
 #include <iterator>
 #include <memory>
+#include <optional>
 #include <set>
 #include <stdexcept>
 #include <string>
 #include <utility>
 
-#include <optional/optional.hpp>
 #include <signals/signal.hpp>
 
 #include <cppurses/painter/attribute.hpp>
@@ -71,7 +71,7 @@ class Widget {
     Focus_policy focus_policy{Focus_policy::None};
 
     /// Used to fill in empty space that is not filled in by paint_event().
-    opt::Optional<Glyph> wallpaper;
+    std::optional<Glyph> wallpaper;
 
     /// A Brush that is applied to every Glyph painted by this Widget.
     Brush brush{background(Color::Black), foreground(Color::White)};

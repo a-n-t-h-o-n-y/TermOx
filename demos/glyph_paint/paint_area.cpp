@@ -7,6 +7,7 @@
 #include <iostream>
 #include <iterator>
 #include <locale>
+#include <optional>
 #include <string>
 #include <utility>
 
@@ -23,7 +24,6 @@
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 
-#include <optional/optional.hpp>
 #include <signals/slot.hpp>
 
 using namespace cppurses;
@@ -80,11 +80,11 @@ void Paint_area::set_symbol(const Glyph& sym)
         erase_disabled();
     }
     current_glyph_.symbol = sym.symbol;
-    opt::Optional<Color> sym_bg{sym.brush.background_color()};
+    std::optional<Color> sym_bg{sym.brush.background_color()};
     if (sym_bg) {
         current_glyph_.brush.set_background(*sym_bg);
     }
-    opt::Optional<Color> sym_fg{sym.brush.foreground_color()};
+    std::optional<Color> sym_fg{sym.brush.foreground_color()};
     if (sym_fg) {
         current_glyph_.brush.set_foreground(*sym_fg);
     }
