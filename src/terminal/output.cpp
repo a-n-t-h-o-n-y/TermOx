@@ -63,7 +63,8 @@ auto attribute_to_attr_t(Attribute attr) -> attr_t
 auto find_attr_t(Brush const& brush) -> attr_t
 {
     auto result = A_NORMAL;
-    for (Attribute a : Attribute_list) {
+    for (auto i = 0; i < Attribute_count; ++i) {
+        auto const a = static_cast<Attribute>(i);
         if (brush.has_attribute(a))
             result |= attribute_to_attr_t(a);
     }
@@ -92,8 +93,8 @@ void paint_indicator(char symbol)
 /// Add \p glyph's symbol, with attributes, to the screen at cursor position.
 void put_as_wchar(Glyph const& glyph)
 {
-    auto const color_pair      = color_index(glyph.brush); // 3%
-    auto const attributes      = find_attr_t(glyph.brush); // 3%
+    auto const color_pair      = color_index(glyph.brush);
+    auto const attributes      = find_attr_t(glyph.brush);
     wchar_t const symbol[2]    = {glyph.symbol, L'\0'};
     auto symbol_and_attributes = cchar_t{};
 

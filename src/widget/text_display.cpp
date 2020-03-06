@@ -24,7 +24,8 @@ void Text_display::insert(Glyph_string text, std::size_t index)
         return;
     }
     for (auto& glyph : text) {
-        for (Attribute a : Attribute_list) {
+        for (auto i = 0; i < Attribute_count; ++i) {
+            auto const a = static_cast<Attribute>(i);
             if (this->insert_brush.has_attribute(a))
                 glyph.brush.add_attributes(a);
         }
@@ -38,7 +39,8 @@ void Text_display::insert(Glyph_string text, std::size_t index)
 void Text_display::append(Glyph_string text)
 {
     for (auto& glyph : text) {
-        for (Attribute a : Attribute_list) {
+        for (auto i = 0; i < Attribute_count; ++i) {
+            auto const a = static_cast<Attribute>(i);
             if (this->insert_brush.has_attribute(a))
                 glyph.brush.add_attributes(a);
         }

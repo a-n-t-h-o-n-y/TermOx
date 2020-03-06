@@ -8,8 +8,8 @@
 #include <cppurses/widget/widgets/menu_stack.hpp>
 #include <cppurses/widget/widgets/titlebar.hpp>
 
-// #include "chess/src/chess_ui.hpp"
 #include "animation/animated_widget.hpp"
+#include "chess/src/chess_ui.hpp"
 #include "focus/focus_demo.hpp"
 #include "game_of_life/gol_demo.hpp"
 #include "glyph_paint/glyph_paint.hpp"
@@ -34,10 +34,10 @@ class Demo_menu : public cppurses::Menu_stack {
         this->make_page<Notepad>("Notepad");
         this->make_page<gol::GoL_demo>("Game of Life");
         this->make_page<palette::Palette_demo>("Color Palette");
+        this->make_page<Chess_UI>("Chess");
         this->make_page<focus::Focus_demo>("Focus");
         this->make_page<glyph_paint::Glyph_paint>("Glyph Paint");
         this->make_page<animation::Animated_widget>("Animated Widget");
-        // this->make_page<Chess_UI>("Chess");
     }
 };
 
