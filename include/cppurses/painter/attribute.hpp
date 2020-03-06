@@ -1,12 +1,11 @@
 #ifndef CPPURSES_PAINTER_ATTRIBUTE_HPP
 #define CPPURSES_PAINTER_ATTRIBUTE_HPP
 #include <array>
-#include <cstdint>
 
 namespace cppurses {
 
 /// Attributes that can be applied to alter the appearance of a Glyph object.
-enum class Attribute : std::int8_t {
+enum class Attribute : unsigned char {
     Bold,
     Italic,
     Underline,

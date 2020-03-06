@@ -1,7 +1,5 @@
 #ifndef CPPURSES_PAINTER_BRUSH_HPP
 #define CPPURSES_PAINTER_BRUSH_HPP
-#include <bitset>
-#include <cstdint>
 #include <tuple>
 #include <utility>
 
@@ -57,12 +55,13 @@ class Brush {
     void remove_foreground() { foreground_color_ = opt::none; }
 
     /// Remove all of the set Attributes from the brush, not including colors.
-    void clear_attributes() { attributes_.reset(); }
+    void clear_attributes() { attributes_ = 0; }
 
     /// Provide a check of whether the brush has the provided Attribute \p attr.
     auto has_attribute(Attribute attr) const -> bool
     {
-        return attributes_[static_cast<std::size_t>(attr)];
+        auto const mask = 1 << static_cast<Byte_t>(attr);
+        return (attributes_ & mask) != 0;
     }
 
     /// Return the current background as an opt::Optional object.
@@ -101,17 +100,18 @@ class Brush {
     /// Used by add_attributes() to set an Attribute.
     void set_attr(Attribute attr)
     {
-        attributes_.set(static_cast<std::int8_t>(attr));
+        attributes_ |= 1 << static_cast<Byte_t>(attr);
     }
 
     /// Remove a specific Attribute, if it is set, otherwise no-op.
     void unset_attr(Attribute attr)
     {
-        attributes_.set(static_cast<std::int8_t>(attr), false);
+        attributes_ &= ~(1 << static_cast<Byte_t>(attr));
     }
 
    private:
-    std::bitset<8> attributes_;
+    using Byte_t       = unsigned char;
+    Byte_t attributes_ = 0;
     opt::Optional<Color> background_color_;
     opt::Optional<Color> foreground_color_;
     friend void imprint(Brush const&, Brush&);
