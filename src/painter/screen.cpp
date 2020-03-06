@@ -3,8 +3,6 @@
 #include <iterator>
 #include <mutex>
 
-#include <optional/optional.hpp>
-
 #include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>

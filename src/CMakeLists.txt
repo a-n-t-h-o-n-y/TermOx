@@ -40,7 +40,6 @@ find_package(Threads REQUIRED)
 target_link_libraries(cppurses
     PUBLIC
         signals
-        optional
         ${CMAKE_THREAD_LIBS_INIT}
     PRIVATE
         NCurses)
@@ -137,6 +136,6 @@ install(TARGETS cppurses
 install(DIRECTORY ../include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(EXPORT CPPursesLibraryConfig DESTINATION share/CPPursesLibrary/cmake)
 export(
-    TARGETS cppurses signals optional
+    TARGETS cppurses signals
     FILE CPPursesLibraryConfig.cmake
 )
