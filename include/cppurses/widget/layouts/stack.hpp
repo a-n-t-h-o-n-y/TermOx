@@ -174,7 +174,7 @@ class Stack : public Layout<Child_t> {
         return Layout<Child_t>::resize_event(new_size, old_size);
     }
 
-    void update_geometry() override { Layout<Child_t>::update_geometry(); }
+    void update_geometry() override {}
 
    private:
     Child_t* active_page_ = nullptr;

@@ -72,11 +72,7 @@ class Linear_layout : public Layout<Child_t> {
 
    private:
     // Hack until the paint system is updated and treats layouts accordingly.
-    void force_repaint_empty_space()
-    {
-        this->screen_state().optimize.child_event = true;
-        Painter{*this};
-    }
+    void force_repaint_empty_space() { Painter{*this}; }
 
     void send_enable_disable_events(Length_list const& primary,
                                     Length_list const& secondary)

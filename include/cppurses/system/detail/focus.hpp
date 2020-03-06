@@ -8,7 +8,7 @@ namespace detail {
 
 class Focus {
    public:
-    /// Return a pointer to the currently focused Widget.
+    /// Return a pointer to the currently focused Widget, can return nullptr.
     static auto focus_widget() -> cppurses::Widget* { return focus_widget_; }
 
     /// Sets the focus to \p clicked if it has a Focus_policy::Mouse/Strong.

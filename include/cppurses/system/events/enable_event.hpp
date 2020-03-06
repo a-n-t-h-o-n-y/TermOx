@@ -1,6 +1,5 @@
 #ifndef CPPURSES_SYSTEM_EVENTS_ENABLE_EVENT_HPP
 #define CPPURSES_SYSTEM_EVENTS_ENABLE_EVENT_HPP
-#include <cppurses/painter/detail/screen_state.hpp>
 #include <cppurses/system/event.hpp>
 #include <cppurses/widget/widget.hpp>
 
@@ -12,11 +11,7 @@ class Enable_event : public Event {
    public:
     explicit Enable_event(Widget& receiver) : Event{Event::Enable, receiver} {}
 
-    auto send() const -> bool override
-    {
-        receiver_.screen_state().optimize.just_enabled = true;
-        return receiver_.enable_event();
-    }
+    auto send() const -> bool override { return receiver_.enable_event(); }
 
     auto filter_send(Widget& filter) const -> bool override
     {

@@ -1,7 +1,6 @@
 #ifndef CPPURSES_SYSTEM_EVENTS_DISABLE_EVENT_HPP
 #define CPPURSES_SYSTEM_EVENTS_DISABLE_EVENT_HPP
 #include <cppurses/painter/detail/screen_descriptor.hpp>
-#include <cppurses/painter/detail/screen_state.hpp>
 #include <cppurses/system/event.hpp>
 #include <cppurses/widget/widget.hpp>
 
@@ -17,7 +16,7 @@ class Disable_event : public Event {
 
     auto send() const -> bool override
     {
-        receiver_.screen_state().tiles.clear();
+        receiver_.screen_state().clear();
         return receiver_.disable_event();
     }
 

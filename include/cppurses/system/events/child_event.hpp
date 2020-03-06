@@ -12,7 +12,7 @@ class Child_event : public Event {
         : Event{type, receiver}, child_{child}
     {}
 
-    auto send() const -> bool override;
+    auto send() const -> bool override { return true; }
 
    protected:
     Widget& child_;

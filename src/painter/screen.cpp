@@ -33,20 +33,45 @@ auto has_children(Widget const& widg) -> bool
     return !(widg.get_children().empty());
 }
 
-auto is_whitespace_equal(Brush const& a, Brush const& b) -> bool
+/// Covers space unowned by any child widget with wallpaper.
+void paint_unowned_tiles(Widget const& layout, Glyph const& wallpaper)
 {
-    using Atr_t = Attribute;
-    for (auto attr : {Atr_t::Underline, Atr_t::Standout, Atr_t::Inverse}) {
-        if (a.has_attribute(attr) == b.has_attribute(attr))
-            return false;
+    auto const empty_space = detail::find_empty_space(layout);
+    auto const y_begin     = empty_space.offset().y;
+    auto const x_begin     = empty_space.offset().x;
+    auto const y_end       = y_begin + empty_space.area().height;
+    auto const x_end       = x_begin + empty_space.area().width;
+    for (auto y = y_begin; y < y_end; ++y) {
+        for (auto x = x_begin; x < x_end; ++x) {
+            if (empty_space.at(x, y))
+                output::put(x, y, wallpaper);
+        }
     }
-    return a.background_color() == b.background_color();
 }
 
-auto has_same_display(const Glyph& a, const Glyph& b) -> bool
+// Paint every point of \p widg with wallpaper or from \p staged_tiles.
+void paint_to_terminal(Widget& widg,
+                       detail::Screen_descriptor const& staged_tiles)
 {
-    return a == b or (a.symbol == L' ' and b.symbol == L' ' and
-                      is_whitespace_equal(a.brush, b.brush));
+    auto const wallpaper = widg.generate_wallpaper();
+    auto const y_begin   = widg.y();
+    auto const x_begin   = widg.x();
+    auto const y_end     = y_begin + widg.outer_height();
+    auto const x_end     = x_begin + widg.outer_width();
+    auto const is_layout = has_children(widg);
+    if (is_layout)
+        paint_unowned_tiles(widg, wallpaper);
+    for (auto y = y_begin; y < y_end; ++y) {
+        for (auto x = x_begin; x < x_end; ++x) {
+            if (contains({x, y}, staged_tiles)) {
+                auto tile = staged_tiles.at({x, y});
+                imprint(widg.brush, tile.brush);
+                output::put(x, y, tile);
+            }
+            else if (not is_layout)
+                output::put(x, y, wallpaper);
+        }
+    }
 }
 
 }  // namespace
@@ -60,11 +85,11 @@ void Screen::flush(Staged_changes::Map_t const& changes)
     for (auto const& widg_description : changes) {
         auto& widget = *widg_description.first;
         if (is_paintable(widget)) {
-            delegate_paint(widget, widg_description.second);
+            paint_to_terminal(widget, widg_description.second);
             refresh = true;
         }
         else
-            widget.screen_state().tiles.clear();
+            widget.screen_state().clear();
     }
     if (refresh)
         output::refresh();
@@ -81,169 +106,6 @@ void Screen::set_cursor_on_focus_widget()
     }
     else
         System::terminal.show_cursor(false);
-}
-
-void Screen::paint_empty_tiles(Widget const& widg)
-{
-    Screen::paint_empty_tiles(widg, widg.generate_wallpaper());
-}
-
-void Screen::paint_empty_tiles(Widget const& widg, Glyph const& wallpaper)
-{
-    if (!has_children(widg))
-        return;
-    auto const empty_space = find_empty_space(widg);
-    auto const y_begin     = empty_space.offset().y;
-    auto const x_begin     = empty_space.offset().x;
-    auto const y_end       = y_begin + empty_space.area().height;
-    auto const x_end       = x_begin + empty_space.area().width;
-    for (auto y = y_begin; y < y_end; ++y) {
-        for (auto x = x_begin; x < x_end; ++x) {
-            if (empty_space.at(x, y))
-                output::put(x, y, wallpaper);
-        }
-    }
-}
-
-void Screen::cover_leftovers(Widget& widg,
-                             Screen_descriptor const& staged_tiles)
-{
-    auto const& wallpaper = widg.generate_wallpaper();
-    auto& existing_tiles  = widg.screen_state().tiles;
-    for (auto iter = std::begin(existing_tiles);
-         iter != std::end(existing_tiles);) {
-        auto const& point = iter->first;
-        if (contains(point, staged_tiles))
-            ++iter;
-        else {
-            output::put(point.x, point.y, wallpaper);
-            iter = existing_tiles.erase(iter);
-        }
-    }
-}
-
-void Screen::full_paint_single_point(Widget& widg,
-                                     Screen_descriptor const& staged_tiles,
-                                     Point const& point)
-{
-    auto& existing_tiles = widg.screen_state().tiles;
-    if (!contains(point, staged_tiles)) {
-        if (!has_children(widg)) {
-            output::put(point.x, point.y, widg.generate_wallpaper());
-            existing_tiles.erase(point);
-        }
-        return;
-    }
-    auto tile = staged_tiles.at(point);
-    imprint(widg.brush, tile.brush);
-    // if (!(contains(point, existing_tiles) and existing_tiles[point] == tile))
-    // {
-    output::put(point.x, point.y, tile);
-    existing_tiles[point] = tile;
-    // }
-}
-
-void Screen::basic_paint_single_point(Widget& widg,
-                                      Point const& point,
-                                      Glyph tile)
-{
-    imprint(widg.brush, tile.brush);
-    auto& existing_tiles = widg.screen_state().tiles;
-    if (!(contains(point, existing_tiles) and existing_tiles[point] == tile)) {
-        output::put(point.x, point.y, tile);
-        existing_tiles[point] = tile;
-    }
-}
-
-void Screen::full_paint(Widget& widg, Screen_descriptor const& staged_tiles)
-{
-    auto const wallpaper = widg.generate_wallpaper();
-    paint_empty_tiles(widg, wallpaper);
-    auto const y_begin   = widg.y();
-    auto const x_begin   = widg.x();
-    auto const y_end     = y_begin + widg.outer_height();
-    auto const x_end     = x_begin + widg.outer_width();
-    auto const is_layout = has_children(widg);
-    for (auto y = y_begin; y < y_end; ++y) {
-        for (auto x = x_begin; x < x_end; ++x) {
-            auto const point = Point{x, y};
-            if (contains(point, staged_tiles)) {
-                auto tile = staged_tiles.at(point);
-                imprint(widg.brush, tile.brush);
-                output::put(x, y, tile);
-            }
-            else if (not is_layout)
-                output::put(x, y, wallpaper);
-        }
-    }
-}
-
-void Screen::basic_paint(Widget& widg, Screen_descriptor const& staged_tiles)
-{
-    cover_leftovers(widg, staged_tiles);
-    for (auto const& point_tile : staged_tiles) {
-        basic_paint_single_point(widg, point_tile.first, point_tile.second);
-    }
-}
-
-void Screen::paint_just_enabled(Widget& widg,
-                                Screen_descriptor const& staged_tiles)
-{
-    full_paint(widg, staged_tiles);
-}
-
-void Screen::paint_child_event(Widget& widg,
-                               const Screen_descriptor& staged_tiles)
-{
-    paint_empty_tiles(widg);
-    basic_paint(widg, staged_tiles);
-}
-
-void Screen::paint_resize_event(Widget& widg,
-                                const Screen_descriptor& staged_tiles)
-{
-    paint_empty_tiles(widg);
-    cover_leftovers(widg, staged_tiles);
-    const auto& new_space = widg.screen_state().optimize.resize_mask;
-    const auto y_begin    = new_space.offset().y;
-    const auto x_begin    = new_space.offset().x;
-    const auto y_end      = y_begin + new_space.area().height;
-    const auto x_end      = x_begin + new_space.area().width;
-    for (auto y = y_begin; y < y_end; ++y) {
-        for (auto x = x_begin; x < x_end; ++x) {
-            const Point point{x, y};
-            if (new_space.at(x, y)) {
-                full_paint_single_point(widg, staged_tiles, point);
-            }
-            else if (contains(point, staged_tiles)) {
-                basic_paint_single_point(widg, point, staged_tiles.at(point));
-            }
-        }
-    }
-}
-
-void Screen::delegate_paint(Widget& widg, Screen_descriptor const& staged_tiles)
-{
-    full_paint(widg, staged_tiles);
-    // auto& optimization_info       = widg.screen_state().optimize;
-    // auto& previous_wallpaper      = optimization_info.wallpaper;
-    // auto const& current_wallpaper = widg.generate_wallpaper();
-    // if (optimization_info.just_enabled)
-    //     paint_just_enabled(widg, staged_tiles);
-    // else if (!has_same_display(current_wallpaper, previous_wallpaper))
-    //     full_paint(widg, staged_tiles);
-    // else if (optimization_info.moved)
-    //     paint_move_event(widg, staged_tiles);
-    // else if (optimization_info.resized) {
-    //     // paint_resize_event(widg, staged_tiles); // should be this
-    //     full_paint(widg, staged_tiles);
-    // }
-    // else if (optimization_info.child_event)
-    //     paint_child_event(widg, staged_tiles);
-    // else
-    //     basic_paint(widg, staged_tiles);
-    // optimization_info.reset();
-    // previous_wallpaper = current_wallpaper;
 }
 
 }  // namespace detail

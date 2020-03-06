@@ -17,7 +17,6 @@
 #include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
-#include <cppurses/painter/detail/screen_state.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/system/animation_engine.hpp>
@@ -299,11 +298,11 @@ class Widget {
      *  to true. */
     auto generate_wallpaper() const -> Glyph;
 
-    /// Return the current Screen_state of this Widget, as it appears.
-    auto screen_state() -> detail::Screen_state& { return screen_state_; }
+    /// Return the current Screen_descriptor of this Widget, as it appears.
+    auto screen_state() -> detail::Screen_descriptor& { return screen_state_; }
 
-    /// Return the current Screen_state of this Widget, as it appears.
-    auto screen_state() const -> detail::Screen_state const&
+    /// Return the current Screen_descriptor of this Widget, as it appears.
+    auto screen_state() const -> detail::Screen_descriptor const&
     {
         return screen_state_;
     }
@@ -869,7 +868,7 @@ class Widget {
     Widget* parent_              = nullptr;
     bool enabled_                = false;
     bool brush_paints_wallpaper_ = true;
-    detail::Screen_state screen_state_;
+    detail::Screen_descriptor screen_state_;
     std::set<Widget*> event_filters_;
 
     // Top left point of *this, relative to the top left of the screen. Does not

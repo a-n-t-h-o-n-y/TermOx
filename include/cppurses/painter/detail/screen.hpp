@@ -22,61 +22,9 @@ class Screen {
     static void set_cursor_on_focus_widget();
 
    private:
-    /// Covers space unowned by any child widget with wallpaper.
-    /** Does nothing if w has no children. Generates wallpaper from \p widg */
-    static void paint_empty_tiles(Widget const& widg);
-
-    /// Covers space unowned by any child widget with wallpaper.
-    /** Optimized version where caller has the wallpaper.*/
     static void paint_empty_tiles(Widget const& widg, Glyph const& wallpaper);
 
-    // Covers points in w->screen_state that are not found in \p staged_tiles.
-    // Paints over tiles that existed on previous iteration but not on current.
-    static void cover_leftovers(Widget& widg,
-                                Screen_descriptor const& staged_tiles);
-
-    // Performs a full paint of a single tile at \p point.
-    // Paints either a wallpaper or staged change tile, unless the staged tile
-    // is the same as what is currently on screen.
-    static void full_paint_single_point(Widget& widg,
-                                        Screen_descriptor const& staged_tiles,
-                                        Point const& point);
-
-    // Performs a basic paint of a single \p point.
-    // Only paints if the staged change tile is different from what is onscreen.
-    static void basic_paint_single_point(Widget& widg,
-                                         Point const& point,
-                                         Glyph tile);
-
-    // Paint every point of \p widg with wallpaper or from \p staged_tiles.
     static void full_paint(Widget& widg, Screen_descriptor const& staged_tiles);
-
-    // Paint \p staged_tiles(if needed), and covers leftovers w/wallpaper.
-    static void basic_paint(Widget& widg,
-                            Screen_descriptor const& staged_tiles);
-
-    // Used when a child has just been enabled after not being on the screen.
-    static void paint_just_enabled(Widget& widg,
-                                   Screen_descriptor const& staged_tiles);
-
-    // Repaint the empty space of the layout, then a basic paint of \p widg.
-    static void paint_child_event(Widget& widg,
-                                  Screen_descriptor const& staged_tiles);
-
-    // Paint tiles based on a Screen_mask created by Resize_event::send();
-    static void paint_resize_event(Widget& widg,
-                                   Screen_descriptor const& staged_tiles);
-
-    // TODO Implement with optimizations, currently performs full repaint.
-    static void paint_move_event(Widget& widg,
-                                 Screen_descriptor const& staged_tiles)
-    {
-        full_paint(widg, staged_tiles);
-    }
-
-    // Call on the correct optimizing function to paint.
-    static void delegate_paint(Widget& widg,
-                               Screen_descriptor const& staged_tiles);
 };
 
 }  // namespace detail

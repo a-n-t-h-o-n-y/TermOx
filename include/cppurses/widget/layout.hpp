@@ -116,12 +116,6 @@ class Layout : public Widget {
     };
 };
 
-template <typename Child_t>
-void Layout<Child_t>::update_geometry()
-{
-    this->screen_state().optimize.child_event = true;
-}
-
 }  // namespace layout
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_LAYOUT_HPP

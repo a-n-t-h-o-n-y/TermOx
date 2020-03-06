@@ -1,15 +1,8 @@
 #include <cppurses/system/events/child_event.hpp>
 
-#include <cppurses/painter/detail/screen_state.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
-
-auto Child_event::send() const -> bool
-{
-    receiver_.screen_state().optimize.child_event = true;
-    return true;
-}
 
 auto Child_added_event::send() const -> bool
 {

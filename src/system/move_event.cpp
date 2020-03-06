@@ -1,8 +1,6 @@
 #include <cppurses/system/events/move_event.hpp>
 
 #include <cppurses/painter/detail/screen_descriptor.hpp>
-#include <cppurses/painter/detail/screen_mask.hpp>
-#include <cppurses/painter/detail/screen_state.hpp>
 #include <cppurses/system/event.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
@@ -13,15 +11,7 @@ auto Move_event::send() const -> bool
 {
     if (receiver_.x() == new_position_.x and receiver_.y() == new_position_.y)
         return true;
-
-    receiver_.screen_state().optimize.moved = true;
-    // Create and set move_mask in receiver_.screen_state()
-    receiver_.screen_state().optimize.move_mask =
-        detail::Screen_mask(receiver_, detail::Screen_mask::Outer);
-
-    // TODO remove this once opt impl.
-    receiver_.screen_state().tiles.clear();
-
+    receiver_.screen_state().clear();
     auto const old_position = Point{receiver_.x(), receiver_.y()};
     receiver_.set_x(new_position_.x);
     receiver_.set_y(new_position_.y);
