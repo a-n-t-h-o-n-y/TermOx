@@ -139,7 +139,7 @@ class Stack : public Layout<Child_t> {
         if (active_page_ == nullptr)
             return Stack::invalid_index;
         auto const begin = std::cbegin(this->get_children());
-        auto const end   = std::cbegin(this->get_children());
+        auto const end   = std::cend(this->get_children());
         auto iter        = std::find_if(
             begin, end, [this](auto const& w) { return &w == active_page_; });
         return std::distance(begin, iter);
