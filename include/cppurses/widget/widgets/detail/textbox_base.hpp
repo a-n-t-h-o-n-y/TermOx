@@ -116,18 +116,6 @@ class Textbox_base : public Text_display {
     /// Move the cursor one position to the right.
     void increment_cursor_right()
     {
-        auto next_index = this->cursor_index();
-        if (this->cursor.position() == Point{0, 0})
-            this->scroll_up(1);
-        if (next_index == 0)
-            return;
-        --next_index;
-        this->set_cursor(next_index);
-    }
-
-    /// Move the cursor one position to the left.
-    void increment_cursor_left()
-    {
         if (this->cursor_index() == this->contents().size())
             return;
         auto const true_last_index =
@@ -138,6 +126,18 @@ class Textbox_base : public Text_display {
             this->scroll_down(1);
         }
         this->set_cursor(cursor_index + 1);
+    }
+
+    /// Move the cursor one position to the left.
+    void increment_cursor_left()
+    {
+        auto next_index = this->cursor_index();
+        if (this->cursor.position() == Point{0, 0})
+            this->scroll_up(1);
+        if (next_index == 0)
+            return;
+        --next_index;
+        this->set_cursor(next_index);
     }
 };
 
