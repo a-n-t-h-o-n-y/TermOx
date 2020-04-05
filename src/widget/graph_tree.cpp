@@ -33,7 +33,7 @@ auto make_label_text(const Widget& w) -> std::string
 {
     auto const id         = std::to_string(w.unique_id());
     auto const name       = w.name();
-    auto const is_enabled = w.enabled() ? "enabled" : "disabled";
+    auto const is_enabled = w.is_enabled() ? "enabled" : "disabled";
     return id + "\n" + name + "\n" + is_enabled;
 }
 

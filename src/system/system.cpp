@@ -32,7 +32,7 @@ namespace {
 auto is_sendable(cppurses::Event const& event) -> bool
 {
     using Event = cppurses::Event;
-    return event.receiver().enabled() or
+    return event.receiver().is_enabled() or
            (event.type() == Event::Delete or event.type() == Event::Disable or
             event.type() == Event::FocusOut);
 }

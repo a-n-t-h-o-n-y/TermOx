@@ -11,7 +11,7 @@ auto Event::send_to_all_filters() const -> bool
 {
     auto const& filters = receiver_.get_event_filters();
     for (Widget* filter : filters) {
-        if (filter->enabled() and this->filter_send(*filter))
+        if (filter->is_enabled() and this->filter_send(*filter))
             return true;
     }
     return false;

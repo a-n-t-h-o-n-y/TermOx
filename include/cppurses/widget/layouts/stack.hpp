@@ -38,7 +38,7 @@ class Stack : public Layout<Child_t> {
         if (index > this->Stack::size())
             throw std::out_of_range{"Stack::set_active_page: index is invalid"};
         active_page_ = &(this->Layout<Child_t>::get_children()[index]);
-        this->enable(this->enabled(), false);  // sends enable/disable events
+        this->enable(this->is_enabled(), false);  // sends enable/disable events
         this->move_active_page();
         this->resize_active_page();
         if (sets_focus_)

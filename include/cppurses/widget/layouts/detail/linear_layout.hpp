@@ -79,17 +79,17 @@ class Linear_layout : public Layout<Child_t> {
     {
         auto const children = this->get_children();
         for (auto i = 0uL; i < offset_; ++i) {
-            if (children[i].enabled())
+            if (children[i].is_enabled())
                 children[i].disable(true, false);
         }
         for (auto i = 0uL; i < primary.size(); ++i) {
             auto& child = children[offset_ + i];
             if (is_valid(primary[i], secondary[i])) {
-                if (not child.enabled())
+                if (not child.is_enabled())
                     child.enable(true, false);
             }
             else {
-                if (child.enabled())
+                if (child.is_enabled())
                     child.disable(true, false);
             }
         }
@@ -101,7 +101,7 @@ class Linear_layout : public Layout<Child_t> {
         auto const children = this->get_children();
         for (auto i = 0uL; i < primary.size(); ++i) {
             auto& child = children[offset_ + i];
-            if (child.enabled()) {
+            if (child.is_enabled()) {
                 auto const area =
                     typename Parameters::get_area{}(primary[i], secondary[i]);
                 System::post_event<Resize_event>(child, area);
@@ -119,7 +119,7 @@ class Linear_layout : public Layout<Child_t> {
             typename Parameters::Secondary::get_offset{}(*this);
         for (auto i = 0uL; i < primary.size(); ++i) {
             auto& child = children[offset_ + i];
-            if (child.enabled()) {
+            if (child.is_enabled()) {
                 auto const point = typename Parameters::get_point{}(
                     primary[i] + primary_offset,
                     secondary[i] + secondary_offset);

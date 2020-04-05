@@ -36,23 +36,33 @@ namespace cppurses {
 struct Area;
 
 class Widget {
+   private:
+    template <typename Signature>
+    using Signal = sig::Signal<Signature>;
+
    public:
-    sig::Signal<void(std::string const&)> name_changed;
-    sig::Signal<void(std::size_t, std::size_t)> resized;
-    sig::Signal<void(Point)> moved;
-    sig::Signal<void(Widget*)> child_added;
-    sig::Signal<void(Widget*)> child_removed;
-    sig::Signal<void()> focused_in;
-    sig::Signal<void()> focused_out;
-    sig::Signal<void(Widget&)> destroyed;
-    sig::Signal<void(Point)> clicked;
-    sig::Signal<void(std::size_t, std::size_t)> clicked_xy;
-    sig::Signal<void(Point)> click_released;
-    sig::Signal<void(std::size_t, std::size_t)> click_released_xy;
-    sig::Signal<void(Point)> double_clicked;
-    sig::Signal<void(std::size_t, std::size_t)> double_clicked_xy;
-    sig::Signal<void(Key::Code)> key_pressed;
-    sig::Signal<void(Key::Code)> key_released;
+    // Event Signals - Alternatives to overriding virtual event handlers.
+    /* Called after event handlers are invoked. Parameters are in same order as
+     * matching event handler function's parameters. */
+    Signal<void()> enabled;
+    Signal<void()> disabled;
+    Signal<void(Widget&)> child_added;
+    Signal<void(Widget&)> child_removed;
+    Signal<void(Widget&)> child_polished;
+    Signal<void(Point const&, Point const&)> moved;
+    Signal<void(Area const&, Area const&)> resized;
+    Signal<void(Mouse::State const&)> mouse_pressed;
+    Signal<void(Mouse::State const&)> mouse_released;
+    Signal<void(Mouse::State const&)> mouse_double_clicked;
+    Signal<void(Mouse::State const&)> mouse_moved;
+    Signal<void(Key::State const&)> key_pressed;
+    Signal<void(Key::State const&)> key_released;
+    Signal<void()> focused_in;
+    Signal<void()> focused_out;
+    Signal<void()> deleted;
+    Signal<void()> painted;
+    Signal<void()> timer;
+    Signal<void()> destroyed;
 
     /// Describes the visual border of this Widget.
     Border border;
@@ -91,7 +101,7 @@ class Widget {
     {
         if (detail::Focus::focus_widget() == this)
             detail::Focus::clear();
-        destroyed(*this);
+        destroyed();
     }
 
     /// Return the name of the Widget.
@@ -101,11 +111,7 @@ class Widget {
     auto unique_id() const -> std::uint16_t { return unique_id_; }
 
     /// Set the identifying name of the Widget.
-    void set_name(std::string name)
-    {
-        name_ = std::move(name);
-        name_changed(name_);
-    }
+    void set_name(std::string name) { name_ = std::move(name); }
 
     /// Post an Enable_event to this widget, and all descendants.
     /** Will only post a Child_polished_event to the parent if requested. Useful
@@ -129,7 +135,7 @@ class Widget {
     }
 
     /// Check whether the Widget is enabled.
-    auto enabled() const -> bool { return enabled_; }
+    auto is_enabled() const -> bool { return enabled_; }
 
     /// Post a Delete_event to this, deleting the object when safe to do so.
     /** This Widget is immediately removed from its parent. The Widget is owned
@@ -312,78 +318,73 @@ class Widget {
     virtual auto enable_event() -> bool
     {
         this->update();
+        enabled();
         return true;
     }
 
     /// Handles Disable_event objects.
-    virtual auto disable_event() -> bool { return true; }
+    virtual auto disable_event() -> bool
+    {
+        disabled();
+        return true;
+    }
 
     /// Handles Child_added_event objects.
     virtual auto child_added_event(Widget& child) -> bool
     {
-        child_added(&child);
+        child_added(child);
         return true;
     }
 
     /// Handles Child_removed_event objects.
     virtual auto child_removed_event(Widget& child) -> bool
     {
-        child_removed(&child);
+        child_removed(child);
         return true;
     }
 
     /// Handles Child_polished_event objects.
-    virtual auto child_polished_event(Widget & /* child */) -> bool
+    virtual auto child_polished_event(Widget& child) -> bool
     {
         this->update();
+        child_polished(child);
         return true;
     }
 
     /// Handles Move_event objects.
-    virtual auto move_event(Point new_position, Point /* old_position */)
-        -> bool
+    virtual auto move_event(Point new_position, Point old_position) -> bool
     {
-        moved(new_position);
         this->update();
+        moved(new_position, old_position);
         return true;
     }
 
     /// Handles Resize_event objects.
-    virtual auto resize_event(Area /* new_size */, Area /* old_size */) -> bool
+    virtual auto resize_event(Area new_size, Area old_size) -> bool
     {
-        resized(outer_width_, outer_height_);
         this->update();
+        resized(new_size, old_size);
         return true;
     }
 
     /// Handles Mouse::Press objects.
     virtual auto mouse_press_event(Mouse::State const& mouse) -> bool
     {
-        switch (mouse.button) {
-            case Mouse::Button::Left:
-            case Mouse::Button::Middle:
-            case Mouse::Button::Right:
-                clicked(mouse.local);
-                clicked_xy(mouse.local.x, mouse.local.y);
-                break;
-            default: break;
-        }
+        mouse_pressed(mouse);
         return true;
     }
 
     /// Handles Mouse::Release objects.
     virtual auto mouse_release_event(Mouse::State const& mouse) -> bool
     {
-        click_released(mouse.global);
-        click_released_xy(mouse.global.x, mouse.global.y);
+        mouse_released(mouse);
         return true;
     }
 
     /// Handles Mouse::Double_click objects.
     virtual auto mouse_double_click_event(Mouse::State const& mouse) -> bool
     {
-        double_clicked(mouse.global);
-        double_clicked_xy(mouse.global.x, mouse.global.y);
+        mouse_double_clicked(mouse);
         return true;
     }
 
@@ -395,22 +396,23 @@ class Widget {
     }
 
     /// Handles Mouse::Move objects.
-    virtual auto mouse_move_event(Mouse::State const & /* mouse */) -> bool
+    virtual auto mouse_move_event(Mouse::State const& mouse) -> bool
     {
+        mouse_moved(mouse);
         return false;
     }
 
     /// Handles Key::Press objects.
     virtual auto key_press_event(Key::State const& keyboard) -> bool
     {
-        key_pressed(keyboard.key);
+        key_pressed(keyboard);
         return true;
     }
 
     /// Handles Key::Release objects.
     virtual auto key_release_event(Key::State const& keyboard) -> bool
     {
-        key_released(keyboard.key);
+        key_released(keyboard);
         return false;
     }
 
@@ -429,7 +431,11 @@ class Widget {
     }
 
     /// Handles Delete_event objects.
-    virtual auto delete_event() -> bool { return true; }
+    virtual auto delete_event() -> bool
+    {
+        deleted();
+        return true;
+    }
 
     /// Handles Paint_event objects.
     virtual auto paint_event() -> bool
@@ -736,7 +742,7 @@ class Widget {
             auto const pos = std::next(std::cbegin(child_list_), index);
             Widget& child  = **child_list_.emplace(pos, std::move(child_ptr));
             child.set_parent(self_);
-            child.enable(self_->enabled());
+            child.enable(self_->is_enabled());
             System::post_event<Child_added_event>(*self_, child);
             return static_cast<Child_t&>(child);
         }

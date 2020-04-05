@@ -18,7 +18,7 @@ template <typename Iter_t>
 auto heights(Iter_t begin, Iter_t end) -> std::size_t
 {
     auto const sum_heights = [](auto sum, auto const& widget) {
-        return widget.enabled() ? sum += widget.outer_height() : sum;
+        return widget.is_enabled() ? sum += widget.outer_height() : sum;
     };
     return std::accumulate(begin, end, 0uL, sum_heights);
 }
@@ -28,7 +28,7 @@ template <typename Iter_t>
 auto widths(Iter_t first, Iter_t last) -> std::size_t
 {
     auto const sum_widths = [](auto sum, auto const& widget) {
-        return widget.enabled() ? sum += widget.outer_width() : sum;
+        return widget.is_enabled() ? sum += widget.outer_width() : sum;
     };
     return std::accumulate(first, last, 0uL, sum_widths);
 }
@@ -38,7 +38,7 @@ template <typename Iter_t>
 auto all_widths_equal_to(Iter_t first, Iter_t last, std::size_t width)
 {
     auto const widths_equal = [width](Widget const& w) {
-        return w.enabled() ? w.outer_width() == width : true;
+        return w.is_enabled() ? w.outer_width() == width : true;
     };
     return std::all_of(first, last, widths_equal);
 }
@@ -48,7 +48,7 @@ template <typename Iter_t>
 auto all_heights_equal_to(Iter_t first, Iter_t last, std::size_t height)
 {
     auto const heights_equal = [height](Widget const& w) {
-        return w.enabled() ? w.outer_height() == height : true;
+        return w.is_enabled() ? w.outer_height() == height : true;
     };
     return std::all_of(first, last, heights_equal);
 }
@@ -87,7 +87,7 @@ auto width_end(Widget const& w) -> std::size_t
 void mark_covered_tiles(Widget const& w, detail::Screen_mask& mask)
 {
     for (auto const& child : w.get_children()) {
-        if (!child.enabled())
+        if (!child.is_enabled())
             continue;
         for (auto y = child.y(); y < height_end(child); ++y) {
             for (auto x = child.x(); x < width_end(child); ++x) {

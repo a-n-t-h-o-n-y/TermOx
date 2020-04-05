@@ -22,7 +22,7 @@ void Timer_event_loop::register_widget(Widget& w)
         auto const guard = Guard_t{mtx_registered_widgets_};
         registered_widgets_.emplace(&w);
     }
-    w.destroyed.connect([this](Widget& w) { this->unregister_widget(w); });
+    w.destroyed.connect([this, &w] { this->unregister_widget(w); });
 }
 
 auto Timer_event_loop::loop_function() -> bool

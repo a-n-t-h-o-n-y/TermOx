@@ -28,7 +28,7 @@ auto is_click_focus_policy(Focus_policy policy) -> bool
 }
 
 auto const is_tab_focusable = [](auto const* widg) {
-    return widg->enabled() and is_tab_focus_policy(widg->focus_policy);
+    return widg->is_enabled() and is_tab_focus_policy(widg->focus_policy);
 };
 
 // Return a widg tree from System::head() if focus_widget is nullptr.

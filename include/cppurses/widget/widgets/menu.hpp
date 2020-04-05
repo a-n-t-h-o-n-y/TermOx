@@ -75,28 +75,28 @@ class Menu : public layout::Vertical<> {
     void hide_title()
     {
         title_enabled_ = false;
-        this->enable(this->enabled());
+        this->enable(this->is_enabled());
     }
 
     /// Show the Menu's title.
     void show_title()
     {
         title_enabled_ = true;
-        this->enable(this->enabled());
+        this->enable(this->is_enabled());
     }
 
     /// Hide the line break just under the title.
     void hide_line_break()
     {
         line_break_enabled_ = false;
-        this->enable(this->enabled());
+        this->enable(this->is_enabled());
     }
 
     /// Show the line break just under the title.
     void show_line_break()
     {
         line_break_enabled_ = true;
-        this->enable(this->enabled());
+        this->enable(this->is_enabled());
     }
 
     /// Only enables title and line_break if they are enabled.

@@ -13,7 +13,7 @@ auto has_coordinates(cppurses::Widget const& w,
                      std::size_t global_x,
                      std::size_t global_y) -> bool
 {
-    if (!w.enabled())
+    if (!w.is_enabled())
         return false;
     bool const within_west  = global_x >= w.inner_x();
     bool const within_east  = global_x < (w.inner_x() + w.width());
@@ -35,7 +35,7 @@ auto find_widget_at(std::size_t x, std::size_t y) -> Widget*
     auto keep_going = true;
     while (keep_going and not widg->get_children().empty()) {
         for (auto& child : widg->get_children()) {
-            if (has_coordinates(child, x, y) and child.enabled()) {
+            if (has_coordinates(child, x, y) and child.is_enabled()) {
                 widg       = &child;
                 keep_going = true;
                 break;

@@ -58,8 +58,8 @@ struct Workspace : cppurses::layout::Horizontal<Meta_widget> {
     auto add_widget() -> Meta_widget*
     {
         auto& child = this->make_child();
-        child.clicked.connect(
-            [&child, this](cppurses::Point) { this->selected(&child); });
+        child.mouse_pressed.connect(
+            [&child, this](auto const&) { this->selected(&child); });
         return &child;
     }
 };

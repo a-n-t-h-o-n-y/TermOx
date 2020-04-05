@@ -61,10 +61,10 @@ void Widget::enable(bool enable, bool post_child_polished_event)
     // This counters the fact that layouts are notified of enabled events but
     // not disable events. So this has to disable children b/c layout will not.
     // if (not enable) {
-        for (Widget& w : this->get_children()) {
-            // if (w.enabled())
-                w.enable(enable, post_child_polished_event);
-        }
+    for (Widget& w : this->get_children()) {
+        // if (w.enabled())
+        w.enable(enable, post_child_polished_event);
+    }
     // }
 }
 
@@ -96,10 +96,9 @@ void Widget::install_event_filter(Widget& filter)
     auto const result = event_filters_.insert(&filter);
     if (result.second) {  // if insert happened
         // Remove filter from list on destruction of filter
-        auto remove_on_destroy =
-            sig::Slot<void(Widget&)>{[this](Widget& being_destroyed) {
-                this->remove_event_filter(being_destroyed);
-            }};
+        auto remove_on_destroy = sig::Slot<void()>{
+            [this, &filter]() { this->remove_event_filter(filter); }};
+        // In case *this has been destroyed and the filter has not.
         remove_on_destroy.track(this->destroyed);
         filter.destroyed.connect(remove_on_destroy);
     }

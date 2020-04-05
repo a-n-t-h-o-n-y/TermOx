@@ -60,10 +60,11 @@ void Glyph_select_stack::update_stack()
         Matrix_display& symbol_page{
             this->make_page<Matrix_display>(this->width(), this->height())};
         // Attach to glyph clicked signal in Matrix_display
-        symbol_page.clicked.connect([this, &symbol_page](const Point& p) {
-            const Glyph& g{symbol_page.matrix.at(p.x, p.y)};
+        symbol_page.mouse_pressed.connect([this, &symbol_page](auto const& m) {
+            const Glyph& g{symbol_page.matrix.at(m.local.x, m.local.y)};
             if (g != L' '_g) {
-                this->glyph_selected(symbol_page.matrix.at(p.x, p.y));
+                this->glyph_selected(
+                    symbol_page.matrix.at(m.local.x, m.local.y));
             }
         });
         for (std::size_t y{0}; y < this->height(); ++y) {

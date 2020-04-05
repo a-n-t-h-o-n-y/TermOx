@@ -18,7 +18,7 @@
 namespace {
 auto border_is_paintable(cppurses::Widget const& widg) -> bool
 {
-    return widg.border.enabled() and widg.enabled() and
+    return widg.border.enabled() and widg.is_enabled() and
            widg.outer_width() != 0 and widg.outer_height() != 0;
 }
 }  // namespace

@@ -22,7 +22,7 @@ class Push_button : public Widget {
 
    public:
     /// Construct a Push_button with centered \p label.
-    explicit Push_button(Glyph_string label = "") : label_{std::move(label)} {}
+    explicit Push_button(Glyph_string label = L"") : label_{std::move(label)} {}
 
     /// Set the label and repaint.
     void set_label(Glyph_string label)
