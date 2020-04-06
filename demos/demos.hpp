@@ -10,6 +10,7 @@
 
 #include "animation/animated_widget.hpp"
 #include "chess/src/chess_ui.hpp"
+#include "composites/composites.hpp"
 #include "focus/focus_demo.hpp"
 #include "game_of_life/gol_demo.hpp"
 #include "glyph_paint/glyph_paint.hpp"
@@ -29,6 +30,7 @@ class Demo_menu : public cppurses::Menu_stack {
             this->Menu_stack::goto_menu();
         });
 
+        this->make_page<comp::Composites>("Composites");
         this->make_page<graph::Graph_demo>("Graph");
         this->make_page<layout_demo::Layout_demo>("Layouts");
         this->make_page<Notepad>("Notepad");
