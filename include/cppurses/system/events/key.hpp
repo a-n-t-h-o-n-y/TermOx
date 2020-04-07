@@ -42,15 +42,6 @@ struct Key {
         auto filter_send(Widget& filter) const -> bool override;
     };
 
-    // Key Release Event.
-    struct Release : Key::Event {
-        Release(Widget& receiver, Code key)
-            : Key::Event{Event::KeyRelease, receiver, key}
-        {}
-        auto send() const -> bool override;
-        auto filter_send(Widget& filter) const -> bool override;
-    };
-
     /// Enum for key codes from the keyboard with descriptive names.
     /** Names taken from ncurses. */
     enum Code : short {

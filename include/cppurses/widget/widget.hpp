@@ -425,13 +425,6 @@ class Widget {
         return true;
     }
 
-    /// Handles Key::Release objects.
-    virtual auto key_release_event(Key::State const& keyboard) -> bool
-    {
-        key_released(keyboard);
-        return false;
-    }
-
     /// Handles Focus_in_event objects.
     virtual auto focus_in_event() -> bool
     {
@@ -562,14 +555,6 @@ class Widget {
     virtual auto key_press_event_filter(Widget& /* receiver */,
                                         Key::State const &
                                         /* keyboard */) -> bool
-    {
-        return false;
-    }
-
-    /// Handles Key::Release objects filtered from other Widgets.
-    virtual auto key_release_event_filter(Widget& /* receiver */,
-                                          Key::State const &
-                                          /* keyboard */) -> bool
     {
         return false;
     }

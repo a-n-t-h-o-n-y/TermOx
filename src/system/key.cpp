@@ -39,15 +39,4 @@ auto Key::Press::filter_send(Widget& filter) const -> bool
                                          Key::State{key_, key_to_char(key_)});
 }
 
-auto Key::Release::send() const -> bool
-{
-    return receiver_.key_release_event(Key::State{key_, key_to_char(key_)});
-}
-
-auto Key::Release::filter_send(Widget& filter) const -> bool
-{
-    return filter.key_release_event_filter(receiver_,
-                                           Key::State{key_, key_to_char(key_)});
-}
-
 }  // namespace cppurses
