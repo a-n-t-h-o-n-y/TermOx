@@ -62,7 +62,8 @@ class Widget {
     Signal<void()> deleted;
     Signal<void()> painted;
     Signal<void()> timer;
-    Signal<void()> destroyed;
+
+    Signal<void()> destroyed;  // Called by destructor
 
     /// Describes the visual border of this Widget.
     Border border;
@@ -78,9 +79,6 @@ class Widget {
 
     /// Describes how focus is given to this Widget.
     Focus_policy focus_policy{Focus_policy::None};
-
-    /// Used to fill in empty space that is not filled in by paint_event().
-    std::optional<Glyph> wallpaper;
 
     /// A Brush that is applied to every Glyph painted by this Widget.
     Brush brush{background(Color::Black), foreground(Color::White)};
@@ -104,14 +102,33 @@ class Widget {
         destroyed();
     }
 
+    /// Set the identifying name of the Widget.
+    void set_name(std::string name) { name_ = std::move(name); }
+
     /// Return the name of the Widget.
     auto name() const -> std::string { return name_; }
 
     /// Return the ID number unique to this Widget.
     auto unique_id() const -> std::uint16_t { return unique_id_; }
 
-    /// Set the identifying name of the Widget.
-    void set_name(std::string name) { name_ = std::move(name); }
+    /// Used to fill in empty space that is not filled in by paint_event().
+    void set_wallpaper(Glyph g)
+    {
+        wallpaper_ = g;
+        this->update();
+    }
+
+    void set_wallpaper(std::nullopt_t)
+    {
+        wallpaper_.reset();
+        this->update();
+    }
+
+    /// Return the currently in use wallpaper or std::nullopt if none.
+    auto get_wallpaper() const -> std::optional<Glyph>
+    {
+        return wallpaper_;
+    }
 
     /// Post an Enable_event to this widget, and all descendants.
     /** Will only post a Child_polished_event to the parent if requested. Useful
@@ -441,11 +458,16 @@ class Widget {
     virtual auto paint_event() -> bool
     {
         Painter{*this}.border();
+        painted();
         return true;
     }
 
     /// Handles Timer_event objects.
-    virtual auto timer_event() -> bool { return true; }
+    virtual auto timer_event() -> bool
+    {
+        timer();
+        return true;
+    }
 
     // - - - - - - - - - - - Event Filter Handlers - - - - - - - - - - - - - - -
     /// Handles Child_added_event objects filtered from other Widgets.
@@ -591,11 +613,12 @@ class Widget {
      *  children Widgets that you want enabled. */
     void enable_and_post_events(bool enable, bool post_child_polished_event);
 
-   private:
+   public:
     /// Owns all children of the owning Widget as a sequential list.
     /** Provides basic modification of the sequential list and access to its
      *  elements via Range and Const_range. */
     class Children {
+       public:
         using List_t = std::vector<std::unique_ptr<Widget>>;
         /// Provides Widget_t const& access to underlying child objects.
         template <typename Widget_t>
@@ -874,6 +897,8 @@ class Widget {
     Widget* parent_              = nullptr;
     bool enabled_                = false;
     bool brush_paints_wallpaper_ = true;
+    std::optional<Glyph> wallpaper_;
+
     detail::Screen_descriptor screen_state_;
     std::set<Widget*> event_filters_;
 

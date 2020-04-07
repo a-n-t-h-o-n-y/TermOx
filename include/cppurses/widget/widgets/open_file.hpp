@@ -27,7 +27,7 @@ class Open_file : public layout::Horizontal<> {
         this->height_policy.fixed(1);
         open_btn.width_policy.fixed(4);
         open_btn.brush.set_background(Color::Blue);
-        separator.wallpaper = L'>';
+        separator.set_wallpaper(L'>');
         filename_edit.brush.set_background(Color::White);
         filename_edit.brush.set_foreground(Color::Black);
         filename_edit.set_ghost_color(Color::Dark_gray);

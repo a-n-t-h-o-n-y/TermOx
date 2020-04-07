@@ -2,6 +2,7 @@
 #define CPPURSES_DEMOS_GAME_OF_LIFE_SIDE_PANEL_HPP
 #include <cppurses/painter/color.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
+#include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/widget.hpp>
 
 // #include "examples_info_box.hpp"
@@ -23,12 +24,13 @@ struct Side_panel : cppurses::layout::Vertical<> {
     Side_panel()
     {
         this->width_policy.fixed(16);
-        this->border.enable();
-        this->border.segments.disable_all();
-        this->border.segments.east.enable();
-        this->border.segments.east.brush.set_foreground(cppurses::Color::Blue);
 
-        empty_space.height_policy.expanding(0);
+        using namespace cppurses;
+        using namespace cppurses::pipe;
+
+        *this | east_border() | east_wall(foreground(Color::Blue));
+
+        empty_space | expanding_height(0);
     }
 };
 }  // namespace gol

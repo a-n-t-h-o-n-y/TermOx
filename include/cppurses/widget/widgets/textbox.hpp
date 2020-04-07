@@ -59,12 +59,10 @@ class Textbox : public detail::Textbox_base {
     void disable_input() { takes_input_ = false; }
 
    protected:
-    /// Either input a Glyph from the Key, or move the cursor on arrow
-    /// presses.
+    /// Either input a Glyph from the Key, or move the cursor on arrow presses.
     auto key_press_event(Key::State const& keyboard) -> bool override;
 
-    /// Move the cursor to the pressed, or nearest cell, that contains a
-    /// Glyph.
+    /// Move the cursor to the pressed, or nearest cell, that contains a Glyph.
     auto mouse_press_event(Mouse::State const& mouse) -> bool override;
 
    private:

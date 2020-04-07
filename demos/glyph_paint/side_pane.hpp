@@ -30,8 +30,8 @@ class Side_pane : public cppurses::layout::Vertical<> {
     Side_pane()
     {
         this->width_policy.fixed(16);
-        space1.wallpaper = L'─';
-        space2.wallpaper = L'─';
+        space1.set_wallpaper(L'─');
+        space2.set_wallpaper(L'─');
         glyph_select.height_policy.preferred(6);
         show_glyph.height_policy.fixed(1);
         show_glyph.set_alignment(cppurses::Alignment::Center);

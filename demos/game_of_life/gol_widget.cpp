@@ -95,8 +95,8 @@ void GoL_widget::step()
 
 void GoL_widget::set_dead(const Glyph& dead_look)
 {
-    this->wallpaper = dead_look;
-    dead_look_      = dead_look;
+    this->set_wallpaper(dead_look);
+    dead_look_ = dead_look;
     this->update();
 }
 
@@ -129,7 +129,7 @@ void GoL_widget::toggle_grid()
 {
     grid_ = !grid_;
     if (grid_)
-        this->wallpaper = L'┼'_g | foreground(Color::Dark_gray);
+        this->set_wallpaper(L'┼'_g | foreground(Color::Dark_gray));
     else
         this->set_dead(dead_look_);
     this->update();

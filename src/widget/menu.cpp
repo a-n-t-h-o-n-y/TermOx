@@ -26,7 +26,7 @@ Menu::Menu(Glyph_string title_text)
     this->focus_policy = Focus_policy::Strong;
     title.set_alignment(Alignment::Center);
     title.brush.add_attributes(Attribute::Bold);
-    line_break.wallpaper = L'─';
+    line_break.set_wallpaper(L'─');
 }
 
 auto Menu::insert_item(Glyph_string label, std::size_t index)

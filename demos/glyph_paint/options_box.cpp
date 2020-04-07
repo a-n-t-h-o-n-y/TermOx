@@ -25,7 +25,7 @@ Options_A::Options_A()
 
 Options_B::Options_B()
 {
-    space1.wallpaper = L'─';
+    space1.set_wallpaper(L'─');
 
     palette_label.set_alignment(Alignment::Center);
     palette_box.add_option("Dawn Bringer").connect([] {

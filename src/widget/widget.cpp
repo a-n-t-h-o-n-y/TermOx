@@ -83,7 +83,7 @@ void Widget::update() { System::post_event<Paint_event>(*this); }
 auto Widget::generate_wallpaper() const -> Glyph
 {
     auto bg_glyph =
-        this->wallpaper ? *(this->wallpaper) : System::terminal.background();
+        wallpaper_ ? *(wallpaper_) : System::terminal.background();
     if (this->brush_paints_wallpaper())
         imprint(this->brush, bg_glyph.brush);
     return bg_glyph;

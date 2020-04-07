@@ -154,7 +154,6 @@ class Text_display : public Widget {
     /// Return whether word wrapping is enabled.
     auto word_wrap_enabled() const -> bool { return word_wrap_enabled_; }
 
-   protected:
     /// Add call to Text_display::update_display() before posting Paint_event.
     void update() override
     {
@@ -165,6 +164,7 @@ class Text_display : public Widget {
         Widget::update();
     }
 
+   protected:
     /// Paint the portion of contents that is currently visible on screen.
     auto paint_event() -> bool override;
 

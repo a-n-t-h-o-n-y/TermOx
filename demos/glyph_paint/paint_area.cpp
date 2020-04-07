@@ -137,13 +137,13 @@ void Paint_area::disable_erase()
 
 void Paint_area::enable_grid()
 {
-    this->wallpaper = L'┼'_g | foreground(Color::Dark_gray);
+    this->set_wallpaper(L'┼'_g | foreground(Color::Dark_gray));
     this->update();
 }
 
 void Paint_area::disable_grid()
 {
-    this->wallpaper = L' ';
+    this->set_wallpaper(std::nullopt);
     this->update();
 }
 

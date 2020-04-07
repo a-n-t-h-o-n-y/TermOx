@@ -20,14 +20,14 @@ namespace cppurses {
 void Line_edit::underline(bool enabled)
 {
     if (enabled) {
-        this->wallpaper      = {L' ', Attribute::Underline};
+        this->set_wallpaper({L' ', Attribute::Underline});
         auto underlined_text = this->contents();
         underlined_text.add_attributes(Attribute::Underline);
         this->set_contents(std::move(underlined_text));
         this->insert_brush.add_attributes(Attribute::Underline);
     }
     else {
-        this->wallpaper     = L' ';
+        this->set_wallpaper(L' ');
         auto non_underlined = this->contents();
         non_underlined.remove_attribute(Attribute::Underline);
         this->set_contents(std::move(non_underlined));

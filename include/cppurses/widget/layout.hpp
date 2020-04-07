@@ -17,6 +17,13 @@ namespace layout {
  *  derived type. */
 template <typename Child_t = Widget>
 class Layout : public Widget {
+   public:
+    /// Return a Widget::Range<Child_t> of all children.
+    auto get_children() { return children_.get_children<Child_t>(); }
+
+    /// Return a Widget::Const_range<Child_t> of all children.
+    auto get_children() const { return children_.get_children<Child_t>(); }
+
    protected:
     /// Create a Widget and append it to the list of children.
     /** Return a reference to this newly created Widget. */
@@ -49,12 +56,6 @@ class Layout : public Widget {
     {
         return this->Widget::children_.remove(index);
     }
-
-    /// Return a Widget::Range<Child_t> of all children.
-    auto get_children() { return children_.get_children<Child_t>(); }
-
-    /// Return a Widget::Const_range<Child_t> of all children.
-    auto get_children() const { return children_.get_children<Child_t>(); }
 
     // void swap_children(std::size_t index_a, std::size_t index_b);
 

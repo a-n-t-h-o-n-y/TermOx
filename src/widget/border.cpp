@@ -6,18 +6,6 @@
 
 namespace cppurses {
 
-void Border::Segments::enable_all()
-{
-    north.enable();
-    south.enable();
-    east.enable();
-    west.enable();
-    north_west.enable();
-    north_east.enable();
-    south_west.enable();
-    south_east.enable();
-}
-
 void Border::Segments::disable_all()
 {
     north.disable();

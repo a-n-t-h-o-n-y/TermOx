@@ -40,9 +40,6 @@ class Border {
         Segment south_west = L'└'_g;
         Segment south_east = L'┘'_g;
 
-        /// Enable all Segments, allowing them to be displayed.
-        void enable_all();
-
         /// Disable all Segments.
         void disable_all();
 

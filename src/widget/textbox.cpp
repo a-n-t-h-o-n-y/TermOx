@@ -15,7 +15,7 @@ auto Textbox::key_press_event(Key::State const& keyboard) -> bool
         default: break;
     }
     if (!takes_input_)
-        return true;
+        return Textbox_base::key_press_event(keyboard);
     switch (keyboard.key) {
         case Key::Backspace:
         case Key::Backspace_2: {
@@ -50,7 +50,7 @@ auto Textbox::key_press_event(Key::State const& keyboard) -> bool
                 this->set_cursor(cursor_index + 1);
             }
     }
-    return true;
+    return Textbox_base::key_press_event(keyboard);;
 }
 
 auto Textbox::mouse_press_event(Mouse::State const& mouse) -> bool
@@ -69,7 +69,6 @@ auto Textbox::mouse_press_event(Mouse::State const& mouse) -> bool
             break;
         default: break;
     }
-    this->update();
     return Widget::mouse_press_event(mouse);
 }
 

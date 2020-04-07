@@ -25,7 +25,7 @@ class Horizontal_slider : public Widget {
     {
         this->height_policy.fixed(1);
         this->focus_policy = Focus_policy::Strong;
-        this->wallpaper    = L' '_g | background(Color::Light_gray);
+        this->set_wallpaper(L' '_g | background(Color::Light_gray));
     }
 
     void set_percent(float percent);
