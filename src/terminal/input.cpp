@@ -45,6 +45,10 @@ auto extract_info(::MEVENT const& mouse_event)
         type   = Event::MouseButtonRelease;
         button = Mouse::Button::Left;
     }
+    else if (is(BUTTON1_DOUBLE_CLICKED, mouse_event)) {
+        type   = Event::MouseButtonDblClick;
+        button = Mouse::Button::Left;
+    }
     // Button 2 / Middle Button
     else if (is(BUTTON2_PRESSED, mouse_event)) {
         type   = Event::MouseButtonPress;
@@ -54,6 +58,10 @@ auto extract_info(::MEVENT const& mouse_event)
         type   = Event::MouseButtonRelease;
         button = Mouse::Button::Middle;
     }
+    else if (is(BUTTON2_DOUBLE_CLICKED, mouse_event)) {
+        type   = Event::MouseButtonDblClick;
+        button = Mouse::Button::Middle;
+    }
     // Button 3 / Right Button
     else if (is(BUTTON3_PRESSED, mouse_event)) {
         type   = Event::MouseButtonPress;
@@ -61,6 +69,10 @@ auto extract_info(::MEVENT const& mouse_event)
     }
     else if (is(BUTTON3_RELEASED, mouse_event)) {
         type   = Event::MouseButtonRelease;
+        button = Mouse::Button::Right;
+    }
+    else if (is(BUTTON3_DOUBLE_CLICKED, mouse_event)) {
+        type   = Event::MouseButtonDblClick;
         button = Mouse::Button::Right;
     }
     // Button 4 / Scroll Up
@@ -125,6 +137,10 @@ auto make_mouse_event() -> std::unique_ptr<Event>
     }
     else if (type == Event::MouseButtonRelease) {
         return std::make_unique<Mouse::Release>(
+            *receiver, Mouse::State{button, global, local, mouse_event.id});
+    }
+    else if (type == Event::MouseButtonDblClick) {
+        return std::make_unique<Mouse::Double_click>(
             *receiver, Mouse::State{button, global, local, mouse_event.id});
     }
     return nullptr;

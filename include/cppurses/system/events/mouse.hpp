@@ -16,6 +16,8 @@ struct Mouse {
         /// The mouse button used for the input event.
         Button button;
 
+        // TODO add key modifiers shift ctrl alt
+
         /// The terminal screen global coordinate of the input event.
         /** Top left of screen is (x:0, y:0). */
         Point global;
