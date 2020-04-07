@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <memory>
+#include <tuple>
 #include <utility>
 
 #include <ncurses.h>
@@ -31,11 +32,13 @@ auto is(Mask_t button_mask, ::MEVENT const& mouse_event) -> bool
 
 /// Extract the Event type and Mouse::Button from a given MEVENT object.
 auto extract_info(::MEVENT const& mouse_event)
-    -> std::pair<Event::Type, Mouse::Button>
+    -> std::tuple<Event::Type, Mouse::Button, Mouse::State::Modifiers>
 {
-    auto type_button = std::make_pair(Event::None, Mouse::Button::None);
-    auto& type       = type_button.first;
-    auto& button     = type_button.second;
+    auto type_button_mod = std::make_tuple(Event::None, Mouse::Button::None,
+                                           Mouse::State::Modifiers{});
+    auto& type           = std::get<0>(type_button_mod);
+    auto& button         = std::get<1>(type_button_mod);
+    auto& mod            = std::get<2>(type_button_mod);
     // Button 1 / Left Button
     if (is(BUTTON1_PRESSED, mouse_event)) {
         type   = Event::MouseButtonPress;
@@ -95,7 +98,11 @@ auto extract_info(::MEVENT const& mouse_event)
         button = Mouse::Button::ScrollDown;
     }
 #endif
-    return type_button;
+    // Modifier Keys
+    mod.shift = is(BUTTON_SHIFT, mouse_event);
+    mod.ctrl  = is(BUTTON_CTRL, mouse_event);
+    mod.alt   = is(BUTTON_ALT, mouse_event);
+    return type_button_mod;
 }
 
 auto make_mouse_event() -> std::unique_ptr<Event>
@@ -114,34 +121,34 @@ auto make_mouse_event() -> std::unique_ptr<Event>
         Point{global.x - receiver->inner_x(), global.y - receiver->inner_y()};
 
     // Create Event
-    auto const type_button = extract_info(mouse_event);
-    auto const type        = type_button.first;
-    auto const button      = type_button.second;
+    auto const [type, button, modifiers] = extract_info(mouse_event);
     if (type == Event::MouseButtonPress) {
         switch (button) {
             case Mouse::Button::ScrollUp:
             case Mouse::Button::ScrollDown:
                 return std::make_unique<Mouse::Wheel>(
-                    *receiver,
-                    Mouse::State{button, global, local, mouse_event.id});
+                    *receiver, Mouse::State{button, modifiers, global, local,
+                                            mouse_event.id});
                 break;
             case Mouse::Button::Left:
             case Mouse::Button::Middle:
             case Mouse::Button::Right:
                 return std::make_unique<Mouse::Press>(
-                    *receiver,
-                    Mouse::State{button, global, local, mouse_event.id});
+                    *receiver, Mouse::State{button, modifiers, global, local,
+                                            mouse_event.id});
                 break;
             default: break;
         }
     }
     else if (type == Event::MouseButtonRelease) {
         return std::make_unique<Mouse::Release>(
-            *receiver, Mouse::State{button, global, local, mouse_event.id});
+            *receiver,
+            Mouse::State{button, modifiers, global, local, mouse_event.id});
     }
     else if (type == Event::MouseButtonDblClick) {
         return std::make_unique<Mouse::Double_click>(
-            *receiver, Mouse::State{button, global, local, mouse_event.id});
+            *receiver,
+            Mouse::State{button, modifiers, global, local, mouse_event.id});
     }
     return nullptr;
 }

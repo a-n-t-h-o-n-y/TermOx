@@ -236,7 +236,10 @@ struct Composites : App {
 
         // txbx | bordered() | block_walls_3() | north_west_walls(L'▓');
         txbx | bordered() | asterisk_walls() | plus_corners();
-        load | on_mouse_double_click([&](auto) { txbx | bg(Color::Orange); });
+        load | on_mouse_press([&](auto const& m) {
+            if (m.modifiers.ctrl)
+                txbx | bg(Color::Orange);
+        });
     }
 };
 

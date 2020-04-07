@@ -43,12 +43,12 @@ auto update(Widget& w) -> sig::Slot<void()>
 
 auto click(Widget& w) -> sig::Slot<void(Point, Mouse::Button)>
 {
-    auto slot = sig::Slot<void(Point, Mouse::Button)>{
-        [&w](const Point& p, Mouse::Button b) {
-            System::send_event(Mouse::Press{
-                w, Mouse::State{b, Point{w.inner_x() + p.x, w.inner_y() + p.y},
-                                p, 0}});
-        }};
+    auto slot = sig::Slot<void(Point, Mouse::Button)>{[&w](const Point& p,
+                                                           Mouse::Button b) {
+        System::send_event(Mouse::Press{
+            w, Mouse::State{
+                   b, {}, Point{w.inner_x() + p.x, w.inner_y() + p.y}, p, 0}});
+    }};
     slot.track(w.destroyed);
     return slot;
 }
@@ -57,8 +57,8 @@ auto click(Widget& w, Point p) -> sig::Slot<void(Mouse::Button)>
 {
     auto slot = sig::Slot<void(Mouse::Button)>{[&w, p](Mouse::Button b) {
         System::send_event(Mouse::Press{
-            w, Mouse::State{b, Point{w.inner_x() + p.x, w.inner_y() + p.y}, p,
-                            0}});
+            w, Mouse::State{
+                   b, {}, Point{w.inner_x() + p.x, w.inner_y() + p.y}, p, 0}});
     }};
     slot.track(w.destroyed);
     return slot;
@@ -68,8 +68,8 @@ auto click(Widget& w, Mouse::Button b) -> sig::Slot<void(Point)>
 {
     auto slot = sig::Slot<void(Point)>{[&w, b](Point p) {
         System::send_event(Mouse::Press{
-            w, Mouse::State{b, Point{w.inner_x() + p.x, w.inner_y() + p.y}, p,
-                            0}});
+            w, Mouse::State{
+                   b, {}, Point{w.inner_x() + p.x, w.inner_y() + p.y}, p, 0}});
     }};
     slot.track(w.destroyed);
     return slot;
@@ -79,8 +79,8 @@ auto click(Widget& w, Point p, Mouse::Button b) -> sig::Slot<void()>
 {
     auto slot = sig::Slot<void()>{[&w, p, b] {
         System::send_event(Mouse::Press{
-            w, Mouse::State{b, Point{w.inner_x() + p.x, w.inner_y() + p.y}, p,
-                            0}});
+            w, Mouse::State{
+                   b, {}, Point{w.inner_x() + p.x, w.inner_y() + p.y}, p, 0}});
     }};
     slot.track(w.destroyed);
     return slot;

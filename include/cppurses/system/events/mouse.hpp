@@ -9,14 +9,18 @@ class Widget;
 /// Provides qualifying name for Mouse Event related classes.
 struct Mouse {
     /// Standard mouse buttons to distinguish input.
-    enum Button { None, Left, Middle, Right, ScrollUp, ScrollDown };
+    enum class Button { None, Left, Middle, Right, ScrollUp, ScrollDown };
 
     /// Holds data from a Mouse Input Event.
     struct State {
         /// The mouse button used for the input event.
         Button button;
 
-        // TODO add key modifiers shift ctrl alt
+        struct Modifiers {
+            bool shift = false;
+            bool ctrl  = false;
+            bool alt   = false;
+        } modifiers;
 
         /// The terminal screen global coordinate of the input event.
         /** Top left of screen is (x:0, y:0). */
