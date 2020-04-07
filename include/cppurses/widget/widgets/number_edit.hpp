@@ -48,14 +48,14 @@ class Number_edit : public Line_edit {
     }
 
    protected:
-    auto mouse_press_event(Mouse::State const& mouse) -> bool override
+    auto mouse_wheel_event(Mouse::State const& mouse) -> bool override
     {
         switch (mouse.button) {
             case Mouse::Button::ScrollUp: this->increment(); break;
             case Mouse::Button::ScrollDown: this->decrement(); break;
             default: break;
         }
-        return Line_edit::mouse_press_event(mouse);
+        return Line_edit::mouse_wheel_event(mouse);
     }
 
    private:

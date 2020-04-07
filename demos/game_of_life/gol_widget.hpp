@@ -76,6 +76,7 @@ class GoL_widget : public cppurses::Widget {
    protected:
     bool paint_event() override;
     bool mouse_press_event(const cppurses::Mouse::State& mouse) override;
+    bool mouse_wheel_event(const cppurses::Mouse::State& mouse) override;
     bool timer_event() override;
     bool key_press_event(const cppurses::Key::State& keyboard) override;
 

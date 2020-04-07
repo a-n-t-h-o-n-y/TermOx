@@ -24,15 +24,19 @@ void Horizontal_slider::set_percent(float percent)
 
 auto Horizontal_slider::mouse_press_event(Mouse::State const& mouse) -> bool
 {
+    if (mouse.button == Mouse::Button::Left)
+        this->set_percent(position_to_percent(mouse.local.x));
+    return Widget::mouse_press_event(mouse);
+}
+
+auto Horizontal_slider::mouse_wheel_event(Mouse::State const& mouse) -> bool
+{
     switch (mouse.button) {
-        case Mouse::Button::Left:
-            this->set_percent(position_to_percent(mouse.local.x));
-            break;
         case Mouse::Button::ScrollUp: scrolled_up(); break;
         case Mouse::Button::ScrollDown: scrolled_down(); break;
         default: break;
     }
-    return Widget::mouse_press_event(mouse);
+    return Widget::mouse_wheel_event(mouse);
 }
 
 auto Horizontal_slider::key_press_event(Key::State const& keyboard) -> bool

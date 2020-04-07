@@ -87,13 +87,21 @@ class Cycle_box : public Label {
     auto mouse_press_event(Mouse::State const& mouse) -> bool override
     {
         switch (mouse.button) {
-            case Mouse::Button::Left:
-            case Mouse::Button::ScrollDown: this->next(); break;
-            case Mouse::Button::Right:
-            case Mouse::Button::ScrollUp: this->previous(); break;
+            case Mouse::Button::Left: this->next(); break;
+            case Mouse::Button::Right: this->previous(); break;
             default: break;
         }
         return Label::mouse_press_event(mouse);
+    }
+
+    auto mouse_wheel_event(Mouse::State const& mouse) -> bool override
+    {
+        switch (mouse.button) {
+            case Mouse::Button::ScrollDown: this->next(); break;
+            case Mouse::Button::ScrollUp: this->previous(); break;
+            default: break;
+        }
+        return Label::mouse_wheel_event(mouse);
     }
 
     auto key_press_event(Key::State const& keyboard) -> bool override

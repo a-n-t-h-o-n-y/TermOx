@@ -67,7 +67,7 @@ struct Mouse {
         auto filter_send(Widget& filter) const -> bool override;
     };
 
-    /// Mouse Wheel Event. Not currently implemented.
+    /// Mouse Wheel Event.
     struct Wheel : Mouse::Event {
         Wheel(Widget& receiver, State const& data)
             : Mouse::Event{Input_event::MouseWheel, receiver, data}

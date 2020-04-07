@@ -65,6 +65,9 @@ class Textbox : public detail::Textbox_base {
     /// Move the cursor to the pressed, or nearest cell, that contains a Glyph.
     auto mouse_press_event(Mouse::State const& mouse) -> bool override;
 
+    /// Scroll
+    auto mouse_wheel_event(Mouse::State const& mouse) -> bool override;
+
    private:
     bool scroll_wheel_             = true;
     bool takes_input_              = true;

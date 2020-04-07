@@ -108,10 +108,10 @@ class Menu : public layout::Vertical<> {
     auto key_press_event(Key::State const& keyboard) -> bool override;
 
     /// Selects up/down on scroll wheel.
-    auto mouse_press_event(Mouse::State const& mouse) -> bool override;
+    auto mouse_wheel_event(Mouse::State const& mouse) -> bool override;
 
     /// Selects up/down on scroll wheel.
-    auto mouse_press_event_filter(Widget& /* receiver */,
+    auto mouse_wheel_event_filter(Widget& /* receiver */,
                                   Mouse::State const& mouse) -> bool override;
 
    private:

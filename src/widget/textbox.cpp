@@ -50,15 +50,20 @@ auto Textbox::key_press_event(Key::State const& keyboard) -> bool
                 this->set_cursor(cursor_index + 1);
             }
     }
-    return Textbox_base::key_press_event(keyboard);;
+    return Textbox_base::key_press_event(keyboard);
+    ;
 }
 
 auto Textbox::mouse_press_event(Mouse::State const& mouse) -> bool
 {
+    if (mouse.button == Mouse::Button::Left)
+        this->set_cursor({mouse.local.x, mouse.local.y});
+    return Textbox_base::mouse_press_event(mouse);
+}
+
+auto Textbox::mouse_wheel_event(Mouse::State const& mouse) -> bool
+{
     switch (mouse.button) {
-        case Mouse::Button::Left:
-            this->set_cursor({mouse.local.x, mouse.local.y});
-            break;
         case Mouse::Button::ScrollUp:
             if (scroll_wheel_)
                 this->scroll_up(scroll_speed_up_);
@@ -69,7 +74,7 @@ auto Textbox::mouse_press_event(Mouse::State const& mouse) -> bool
             break;
         default: break;
     }
-    return Widget::mouse_press_event(mouse);
+    return Textbox_base::mouse_wheel_event(mouse);
 }
 
 }  // namespace cppurses

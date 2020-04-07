@@ -53,16 +53,21 @@ auto Vertical_slider::paint_event() -> bool
 
 auto Vertical_slider::mouse_press_event(const Mouse::State& mouse) -> bool
 {
+    if (mouse.button == Mouse::Button::Left) {
+        logic_.set_ratio(this->ratio_at(mouse.local.y));
+        this->update();
+    }
+    return Widget::mouse_press_event(mouse);
+}
+
+auto Vertical_slider::mouse_wheel_event(Mouse::State const& mouse) -> bool
+{
     switch (mouse.button) {
-        case Mouse::Button::Left:
-            logic_.set_ratio(this->ratio_at(mouse.local.y));
-            this->update();
-            break;
         case Mouse::Button::ScrollUp: this->increment(); break;
         case Mouse::Button::ScrollDown: this->decrement(); break;
         default: break;
     }
-    return Widget::mouse_press_event(mouse);
+    return Widget::mouse_wheel_event(mouse);
 }
 
 auto Vertical_slider::ratio_at(std::size_t position) const -> Ratio_t

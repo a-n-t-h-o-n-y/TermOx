@@ -106,17 +106,17 @@ auto Menu::key_press_event(Key::State const& keyboard) -> bool
     return layout::Vertical<>::key_press_event(keyboard);
 }
 
-auto Menu::mouse_press_event(Mouse::State const& mouse) -> bool
+auto Menu::mouse_wheel_event(Mouse::State const& mouse) -> bool
 {
     switch (mouse.button) {
         case Mouse::Button::ScrollUp: this->select_up(); break;
         case Mouse::Button::ScrollDown: this->select_down(); break;
         default: break;
     }
-    return layout::Vertical<>::mouse_press_event(mouse);
+    return layout::Vertical<>::mouse_wheel_event(mouse);
 }
 
-auto Menu::mouse_press_event_filter(Widget& /* receiver */,
+auto Menu::mouse_wheel_event_filter(Widget& /* receiver */,
                                     Mouse::State const& mouse) -> bool
 {
     switch (mouse.button) {

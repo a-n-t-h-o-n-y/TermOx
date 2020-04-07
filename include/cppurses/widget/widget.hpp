@@ -405,7 +405,6 @@ class Widget {
         return true;
     }
 
-    // TODO Remove mouse_wheel_event
     /// Handles Mouse::Wheel objects.
     virtual auto mouse_wheel_event(Mouse::State const & /* mouse */) -> bool
     {

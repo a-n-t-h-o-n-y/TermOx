@@ -106,10 +106,24 @@ auto make_mouse_event() -> std::unique_ptr<Event>
     auto const type        = type_button.first;
     auto const button      = type_button.second;
     if (type == Event::MouseButtonPress) {
-        return std::make_unique<Mouse::Press>(
-            *receiver, Mouse::State{button, global, local, mouse_event.id});
+        switch (button) {
+            case Mouse::Button::ScrollUp:
+            case Mouse::Button::ScrollDown:
+                return std::make_unique<Mouse::Wheel>(
+                    *receiver,
+                    Mouse::State{button, global, local, mouse_event.id});
+                break;
+            case Mouse::Button::Left:
+            case Mouse::Button::Middle:
+            case Mouse::Button::Right:
+                return std::make_unique<Mouse::Press>(
+                    *receiver,
+                    Mouse::State{button, global, local, mouse_event.id});
+                break;
+            default: break;
+        }
     }
-    if (type == Event::MouseButtonRelease) {
+    else if (type == Event::MouseButtonRelease) {
         return std::make_unique<Mouse::Release>(
             *receiver, Mouse::State{button, global, local, mouse_event.id});
     }

@@ -81,13 +81,9 @@ class Line_edit : public Textbox {
    protected:
     auto key_press_event(Key::State const& keyboard) -> bool override;
 
-    auto mouse_press_event(Mouse::State const& mouse) -> bool override
+    auto mouse_wheel_event(Mouse::State const&) -> bool override
     {
-        switch (mouse.button) {
-            case Mouse::Button::ScrollUp:
-            case Mouse::Button::ScrollDown: return true;
-            default: return Textbox::mouse_press_event(mouse);
-        }
+        return true;
     }
 
     auto focus_in_event() -> bool override

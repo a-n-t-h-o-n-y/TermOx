@@ -207,6 +207,13 @@ bool GoL_widget::mouse_press_event(const Mouse::State& mouse)
     return Widget::mouse_press_event(mouse);
 }
 
+bool GoL_widget::mouse_wheel_event(const Mouse::State& mouse)
+{
+    engine_.give_life(transform_from_display(mouse.local));
+    this->update();
+    return Widget::mouse_wheel_event(mouse);
+}
+
 bool GoL_widget::timer_event()
 {
     engine_.get_next_generation();
