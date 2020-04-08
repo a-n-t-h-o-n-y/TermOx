@@ -91,13 +91,13 @@ enum class ForegroundColor : Underlying_color_t {
 }  // namespace detail
 
 /// Converts a Color into a detail::BackgroundColor to be used by Brush.
-inline auto constexpr background(Color c) -> detail::BackgroundColor
+inline constexpr auto background(Color c) -> detail::BackgroundColor
 {
     return static_cast<detail::BackgroundColor>(c);
 }
 
 /// Converts a Color into a detail::BackgroundColor to be used by Brush.
-inline auto constexpr foreground(Color c) -> detail::ForegroundColor
+inline constexpr auto foreground(Color c) -> detail::ForegroundColor
 {
     return static_cast<detail::ForegroundColor>(c);
 }

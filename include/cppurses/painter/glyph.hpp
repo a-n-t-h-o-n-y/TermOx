@@ -13,89 +13,83 @@ struct Glyph {
     wchar_t symbol = L' ';
 
     /// The Brush that will determine the Attributes and Colors of the symbol.
-    Brush brush;
+    Brush brush{};
 
    public:
     /// Construct an invisible Glyph, defaults to space and no attrs/colors.
-    Glyph() = default;
+    constexpr Glyph() = default;
 
     /// Construct a Glyph with the provided wchar_t and Brush.
-    Glyph(wchar_t sym, Brush const& b) : symbol{sym}, brush{b} {}
+    constexpr Glyph(wchar_t sym, Brush const& b) : symbol{sym}, brush{b} {}
 
     /// Construct with the provided wchar_t and list of Attributes and Colors.
     template <typename... Attributes>
-    Glyph(wchar_t sym, Attributes&&... attrs)
+    constexpr Glyph(wchar_t sym, Attributes&&... attrs)
         : symbol{sym}, brush{std::forward<Attributes>(attrs)...}
     {}
 };
 
-inline auto operator""_g(wchar_t c) -> Glyph { return {c}; }
+constexpr auto operator""_g(wchar_t c) -> Glyph { return {c}; }
 
-inline auto operator|(Glyph&& g, Attribute attr) -> Glyph
-{
-    g.brush.add_attributes(attr);
-    return std::move(g);
-}
-
-inline auto operator|(Glyph const& g, Attribute attr) -> Glyph
-{
-    auto result = g;
-    result.brush.add_attributes(attr);
-    return result;
-}
-
-inline auto operator|=(Glyph& g, Attribute attr) -> Glyph&
+// Attribute -------------------------------------------------------------------
+constexpr auto operator|(Glyph& g, Attribute attr) -> Glyph&
 {
     g.brush.add_attributes(attr);
     return g;
 }
 
-inline auto operator|(Glyph&& g, detail::BackgroundColor c) -> Glyph
+constexpr auto operator|(Glyph&& g, Attribute attr) -> Glyph
 {
-    g.brush.add_attributes(c);
-    return std::move(g);
+    return g | attr;
 }
 
-inline auto operator|(Glyph const& g, detail::BackgroundColor c) -> Glyph
+constexpr auto operator|(wchar_t g, Attribute attr) -> Glyph
 {
-    auto result = g;
-    result.brush.add_attributes(c);
-    return result;
+    return Glyph{g} | attr;
 }
 
-inline auto operator|=(Glyph& g, detail::BackgroundColor c) -> Glyph&
-{
-    g.brush.add_attributes(c);
-    return g;
-}
-
-inline auto operator|(Glyph&& g, detail::ForegroundColor c) -> Glyph
-{
-    g.brush.add_attributes(c);
-    return std::move(g);
-}
-
-inline auto operator|(Glyph const& g, detail::ForegroundColor c) -> Glyph
-{
-    auto result = g;
-    result.brush.add_attributes(c);
-    return result;
-}
-
-inline auto operator|=(Glyph& g, detail::ForegroundColor c) -> Glyph&
+// BackgroundColor -------------------------------------------------------------
+constexpr auto operator|(Glyph& g, detail::BackgroundColor c) -> Glyph&
 {
     g.brush.add_attributes(c);
     return g;
 }
 
-/// Compares if each symbol and brush are equal.
-inline bool operator==(Glyph const& lhs, Glyph const& rhs)
+constexpr auto operator|(Glyph&& g, detail::BackgroundColor c) -> Glyph
+{
+    return g | c;
+}
+
+constexpr auto operator|(wchar_t g, detail::BackgroundColor c) -> Glyph
+{
+    return Glyph{g} | c;
+}
+
+// ForegroundColor -------------------------------------------------------------
+constexpr auto operator|(Glyph& g, detail::ForegroundColor c) -> Glyph&
+{
+    g.brush.add_attributes(c);
+    return g;
+}
+
+constexpr auto operator|(Glyph&& g, detail::ForegroundColor c) -> Glyph
+{
+    return g | c;
+}
+
+constexpr auto operator|(wchar_t g, detail::ForegroundColor c) -> Glyph
+{
+    return Glyph{g} | c;
+}
+
+/// Compares symbol and brush for equality.
+constexpr auto operator==(Glyph const& lhs, Glyph const& rhs) -> bool
 {
     return (lhs.symbol == rhs.symbol) and (lhs.brush == rhs.brush);
 }
 
-/// Compares if each symbol and brush are not equal.
-inline bool operator!=(Glyph const& lhs, Glyph const& rhs)
+/// Compares symbol and brush for inequality.
+constexpr auto operator!=(Glyph const& lhs, Glyph const& rhs) -> bool
 {
     return !(lhs == rhs);
 }
