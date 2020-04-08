@@ -27,10 +27,11 @@ class Status_bar : public Label {
 
 namespace slot {
 
-inline auto update_status(Status_bar& sb) -> sig::Slot<void(Glyph_string)>
+inline auto update_status(Status_bar& sb) -> sig::Slot<void(Glyph)>
 {
-    auto slot = sig::Slot<void(Glyph_string)>{
-        [&sb](Glyph_string message) { sb.update_status(std::move(message)); }};
+    auto slot = sig::Slot<void(Glyph)>{[&sb](Glyph message) {
+        sb.update_status(Glyph_string{std::move(message)});
+    }};
     slot.track(sb.destroyed);
     return slot;
 }

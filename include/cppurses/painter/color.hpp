@@ -38,8 +38,6 @@ enum class Color : Underlying_color_t {
     Light_gray
 };
 
-namespace detail {
-
 // Used by add_attributes() in brush to overload on different Color types from a
 // parameter pack.
 enum class BackgroundColor : Underlying_color_t {
@@ -88,18 +86,16 @@ enum class ForegroundColor : Underlying_color_t {
     Light_gray
 };
 
-}  // namespace detail
-
-/// Converts a Color into a detail::BackgroundColor to be used by Brush.
-inline constexpr auto background(Color c) -> detail::BackgroundColor
+/// Converts a Color into a BackgroundColor to be used by Brush.
+inline constexpr auto background(Color c) -> BackgroundColor
 {
-    return static_cast<detail::BackgroundColor>(c);
+    return static_cast<BackgroundColor>(c);
 }
 
-/// Converts a Color into a detail::BackgroundColor to be used by Brush.
-inline constexpr auto foreground(Color c) -> detail::ForegroundColor
+/// Converts a Color into a BackgroundColor to be used by Brush.
+inline constexpr auto foreground(Color c) -> ForegroundColor
 {
-    return static_cast<detail::ForegroundColor>(c);
+    return static_cast<ForegroundColor>(c);
 }
 
 /// Get the name of the color as a string.

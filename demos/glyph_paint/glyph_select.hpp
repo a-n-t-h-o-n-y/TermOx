@@ -24,13 +24,15 @@ class Glyph_select : public cppurses::layout::Vertical<> {
         Bottom_row();
 
         cppurses::Push_button& left_btn =
-            this->make_child<cppurses::Push_button>(
-                cppurses::Glyph{L'⏴', foreground(cppurses::Color::Black)});
+            this->make_child<cppurses::Push_button>(cppurses::Glyph_string{
+                L'⏴' | foreground(cppurses::Color::Black), 1});
+
         cppurses::Horizontal_slider& slider =
             this->make_child<cppurses::Horizontal_slider>();
+
         cppurses::Push_button& right_btn =
-            this->make_child<cppurses::Push_button>(
-                cppurses::Glyph{L'⏵', foreground(cppurses::Color::Black)});
+            this->make_child<cppurses::Push_button>(cppurses::Glyph_string{
+                L'⏵' | foreground(cppurses::Color::Black), 1});
     };
 
    public:

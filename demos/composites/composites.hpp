@@ -149,8 +149,6 @@ struct Composites : App {
         auto& load = btns.get<1>();
         auto& txbx = this->get<0>();
 
-        auto r = L'r' | cppurses::Attribute::Inverse;
-
         using namespace cppurses;
         using namespace cppurses::pipe;
         btns | fixed_height(1);
@@ -242,7 +240,8 @@ struct Composites : App {
             if (m.modifiers.ctrl)
                 txbx | bg(Color::Orange);
         });
-        constexpr auto g = L'G' | Attribute::Bold;
+        // constexpr auto g = L'G' | Attribute::Bold;
+        auto gs = "hello" | Attribute::Inverse;
     }
 };
 

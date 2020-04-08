@@ -85,13 +85,13 @@ class Brush {
 
    private:
     /// Used by add_attributes() to set a deail::BackgroundColor.
-    constexpr void set_attr(detail::BackgroundColor bc)
+    constexpr void set_attr(BackgroundColor bc)
     {
         this->set_background(static_cast<Color>(bc));
     }
 
     /// Used by add_attributes() to set a deail::ForegroundColor.
-    constexpr void set_attr(detail::ForegroundColor fc)
+    constexpr void set_attr(ForegroundColor fc)
     {
         this->set_foreground(static_cast<Color>(fc));
     }
