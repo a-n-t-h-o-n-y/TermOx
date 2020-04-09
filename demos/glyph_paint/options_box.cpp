@@ -4,6 +4,7 @@
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/palettes.hpp>
 #include <cppurses/system/system.hpp>
+#include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
 
 using namespace cppurses;
@@ -13,14 +14,16 @@ namespace glyph_paint {
 
 Options_A::Options_A()
 {
-    clone_btn.brush.set_background(Color::White);
-    clone_btn.brush.set_foreground(Color::Black);
+    using namespace cppurses::pipe;
+    clone_btn | bg(Color::White) | fg(Color::Black);
+    clear_btn.main_btn | bg(Color::White) | fg(Color::Black);
+    more_btn | bg(Color::Light_gray) | fg(Color::Black);
 
-    clear_btn.main_btn.brush.set_background(Color::White);
-    clear_btn.main_btn.brush.set_foreground(Color::Black);
-
-    more_btn.brush.set_background(Color::Light_gray);
-    more_btn.brush.set_foreground(Color::Black);
+    eraser_box.padding | fixed_width(2);
+    cursor_box.padding | fixed_width(2);
+    grid_box.padding | fixed_width(2);
+    // *this | children() | filter<Checkbox>() |
+    //     transform([](auto& c) { c.padding | fixed_width(2); });
 }
 
 Options_B::Options_B()

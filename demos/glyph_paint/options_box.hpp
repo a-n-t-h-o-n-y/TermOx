@@ -14,21 +14,23 @@
 namespace demos {
 namespace glyph_paint {
 
-struct Options_A : public cppurses::layout::Vertical<> {
-    Options_A();
+class Options_A : public cppurses::layout::Vertical<> {
+   private:
+    using Checkbox = cppurses::Labeled_checkbox;
 
-    cppurses::Push_button& clone_btn{
-        this->make_child<cppurses::Push_button>("Clone Tool")};
-    cppurses::Checkbox& eraser_box{
-        this->make_child<cppurses::Checkbox>("Eraser")};
-    cppurses::Checkbox& cursor_box{
-        this->make_child<cppurses::Checkbox>("Show Cursor")};
-    cppurses::Checkbox& grid_box{
-        this->make_child<cppurses::Checkbox>("Show Grid")};
-    cppurses::Confirm_button& clear_btn{
-        this->make_child<cppurses::Confirm_button>("Clear Painting")};
-    cppurses::Push_button& more_btn{
-        this->make_child<cppurses::Push_button>("More Options")};
+   public:
+    cppurses::Push_button& clone_btn =
+        this->make_child<cppurses::Push_button>("Clone Tool");
+    Checkbox& eraser_box = this->make_child<Checkbox>("Eraser");
+    Checkbox& cursor_box = this->make_child<Checkbox>("Show Cursor");
+    Checkbox& grid_box   = this->make_child<Checkbox>("Show Grid");
+    cppurses::Confirm_button& clear_btn =
+        this->make_child<cppurses::Confirm_button>("Clear Painting");
+    cppurses::Push_button& more_btn =
+        this->make_child<cppurses::Push_button>("More Options");
+
+   public:
+    Options_A();
 };
 
 struct Options_B : public cppurses::layout::Vertical<> {

@@ -33,6 +33,9 @@ struct Linear_layout_parameters {
 template <typename Child_t, typename Parameters>
 class Linear_layout : public Layout<Child_t> {
    protected:
+    using Child = Child_t;
+
+   protected:
     void update_geometry() override
     {
         auto const primary_lengths = shared_space_.calculate_lengths(*this);

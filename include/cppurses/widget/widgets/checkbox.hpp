@@ -9,7 +9,10 @@
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/detail/tracks_lifetime.hpp>
+#include <cppurses/widget/layouts/horizontal.hpp>
+#include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/widget.hpp>
+#include <cppurses/widget/widgets/label.hpp>
 
 namespace cppurses {
 
@@ -17,81 +20,75 @@ namespace cppurses {
 /** Uses mouse left button click to toggle between states. */
 class Checkbox : public Widget {
    public:
-    /// Emitted only when box becomes checked.
+    /// Emitted when box becomes checked.
     sig::Signal<void()> checked;
 
-    /// Emitted only when box becomes unchecked.
+    /// Emitted when box becomes unchecked.
     sig::Signal<void()> unchecked;
 
     /// Emitted every time the box changes state.
     sig::Signal<void()> toggled;
 
    public:
-    /// Construct a Checkbox with \p label and \p padding between label and box.
-    explicit Checkbox(Glyph_string label = "", int padding = 3)
-        : label_{std::move(label)}, padding_{padding}
+    /// Construct a Checkbox.
+    explicit Checkbox(bool is_checked = false,
+                      Glyph checked   = L'☒',
+                      Glyph unchecked = L'☐')
+        : is_checked_{is_checked}, checked_{checked}, unchecked_{unchecked}
     {
-        this->height_policy.fixed(1);
+        *this | pipe::fixed_height(1) | pipe::fixed_width(1);
     }
 
     /// Change state to be unchecked if initially checked, checked otherwise.
     void toggle()
     {
-        checked_ = !checked_;
+        is_checked_ = !is_checked_;
         toggled();
-        checked_ ? checked() : unchecked();
+        is_checked_ ? checked() : unchecked();
         this->update();
     }
 
     /// Set the state to be checked.
     void check()
     {
-        if (not checked_)
+        if (not is_checked_)
             this->toggle();
     }
 
     /// Set the state to be unchecked.
     void uncheck()
     {
-        if (checked_)
+        if (is_checked_)
             this->toggle();
     }
 
     /// Return whether Checkbox is currently checked.
-    auto is_checked() const -> bool { return checked_; }
-
-    /// Return the current label.
-    auto label() const -> Glyph_string const& { return label_; }
+    auto is_checked() const -> bool { return is_checked_; }
 
     /// Set the Glyph used for a checked box.
-    void set_check_look(Glyph const& symbol)
+    void set_checked_glyph(Glyph const& symbol)
     {
-        checked_box_ = symbol;
+        checked_ = symbol;
         this->update();
     }
 
     /// Set the Glyph used for an unchecked box.
-    void set_uncheck_look(Glyph const& symbol)
+    void set_unchecked_glyph(Glyph const& symbol)
     {
-        unchecked_box_ = symbol;
+        unchecked_ = symbol;
         this->update();
     }
 
     /// Return the Glyph representing the checked state.
-    auto checked_glyph() const -> Glyph const& { return checked_box_; }
+    auto get_checked_glyph() const -> Glyph const& { return checked_; }
 
     /// Return the Glyph representing the unchecked state.
-    auto unchecked_glyph() const -> Glyph const& { return unchecked_box_; }
+    auto get_unchecked_glyph() const -> Glyph const& { return unchecked_; }
 
    protected:
     auto paint_event() -> bool override
     {
-        Painter p{*this};
-        if (this->is_checked())
-            p.put(checked_box_, 0, 0);
-        else
-            p.put(unchecked_box_, 0, 0);
-        p.put(label_, padding_, 0);
+        Painter{*this}.put(this->is_checked() ? checked_ : unchecked_, 0, 0);
         return Widget::paint_event();
     }
 
@@ -103,11 +100,22 @@ class Checkbox : public Widget {
     }
 
    private:
-    Glyph unchecked_box_ = L'☐';
-    Glyph checked_box_   = L'☒';
-    bool checked_        = false;
-    Glyph_string label_;
-    int padding_;
+    bool is_checked_ = false;
+    Glyph checked_;
+    Glyph unchecked_;
+};
+
+class Labeled_checkbox : public cppurses::Label_right<cppurses::Checkbox> {
+   public:
+    Checkbox& checkbox = Label_right::wrapped;
+
+   public:
+    Labeled_checkbox(Glyph_string label_) : Label_right{std::move(label_)}
+    {
+        using namespace cppurses::pipe;
+        Label_right::label | on_mouse_press([&](auto) { checkbox.toggle(); });
+        Label_right::padding | on_mouse_press([&](auto) { checkbox.toggle(); });
+    }
 };
 
 namespace slot {

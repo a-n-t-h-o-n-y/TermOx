@@ -10,14 +10,24 @@
 
 namespace demos {
 
-struct Attribute_select : cppurses::layout::Vertical<cppurses::Checkbox> {
-    cppurses::Checkbox& bold      = this->make_child("Bold");
-    cppurses::Checkbox& italic    = this->make_child("Italics");
-    cppurses::Checkbox& underline = this->make_child("Underline");
-    cppurses::Checkbox& standout  = this->make_child("Standout");
-    cppurses::Checkbox& dim       = this->make_child("Dim");
-    cppurses::Checkbox& inverse   = this->make_child("Inverse");
-    cppurses::Checkbox& invisible = this->make_child("Invisible");
+class Attribute_select
+    : public cppurses::layout::Vertical<cppurses::Labeled_checkbox> {
+   public:
+    cppurses::Labeled_checkbox& bold      = this->make_child("Bold");
+    cppurses::Labeled_checkbox& italic    = this->make_child("Italics");
+    cppurses::Labeled_checkbox& underline = this->make_child("Underline");
+    cppurses::Labeled_checkbox& standout  = this->make_child("Standout");
+    cppurses::Labeled_checkbox& dim       = this->make_child("Dim");
+    cppurses::Labeled_checkbox& inverse   = this->make_child("Inverse");
+    cppurses::Labeled_checkbox& invisible = this->make_child("Invisible");
+
+   public:
+    Attribute_select()
+    {
+        using namespace cppurses::pipe;
+        *this | children() |
+            transform([](auto& c) { c.padding | fixed_width(2); });
+    }
 };
 
 class Attrs_and_colors : public cppurses::layout::Vertical<> {

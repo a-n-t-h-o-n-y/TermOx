@@ -16,7 +16,7 @@
 
 namespace cppurses {
 class Push_button;
-struct Label;
+class Label;
 
 /// Displays a list of items, sending an associated Signal on user input.
 /** Signal sent to selected on Key::Enter press or */

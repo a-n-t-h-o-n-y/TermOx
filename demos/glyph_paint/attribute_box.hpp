@@ -5,12 +5,13 @@
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/widgets/checkbox.hpp>
+#include <cppurses/widget/widgets/label.hpp>
 
 namespace demos {
 namespace glyph_paint {
 
 class Attribute_box : public cppurses::layout::Vertical<> {
-    using Checkbox = cppurses::Checkbox;
+    using Checkbox = cppurses::Labeled_checkbox;
     using Gs       = cppurses::Glyph_string;
     struct Top_row : cppurses::layout::Horizontal<Checkbox> {
         Checkbox& bold_box{
@@ -22,16 +23,13 @@ class Attribute_box : public cppurses::layout::Vertical<> {
    public:
     Attribute_box() { this->height_policy.maximum(4); }
 
-    Top_row& top_row{this->make_child<Top_row>()};
-
-    Checkbox& inverse_box{this->make_child<Checkbox>(
-        Gs{"Inverse", cppurses::Attribute::Inverse})};
-
-    Checkbox& italic_box{
-        this->make_child<Checkbox>(Gs{"Italic", cppurses::Attribute::Italic})};
-
-    Checkbox& underline_box{this->make_child<Checkbox>(
-        Gs{"Underline", cppurses::Attribute::Underline})};
+    Top_row& top_row = this->make_child<Top_row>();
+    Checkbox& inverse_box =
+        this->make_child<Checkbox>(Gs{"Inverse", cppurses::Attribute::Inverse});
+    Checkbox& italic_box =
+        this->make_child<Checkbox>(Gs{"Italic", cppurses::Attribute::Italic});
+    Checkbox& underline_box = this->make_child<Checkbox>(
+        Gs{"Underline", cppurses::Attribute::Underline});
 };
 
 }  // namespace glyph_paint

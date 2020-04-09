@@ -6,6 +6,7 @@
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
+#include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
 
 using namespace cppurses;
@@ -53,8 +54,11 @@ Period_box::Period_box()
 
 Grid_fade::Grid_fade()
 {
-    fade_box.toggle();
-    this->height_policy.fixed(1);
+    using namespace cppurses::pipe;
+    *this | fixed_height(1) | children() |
+        transform([](auto& c) { c.padding | fixed_width(1); });
+
+    fade_box.checkbox.toggle();
 }
 
 Settings_box::Settings_box()
