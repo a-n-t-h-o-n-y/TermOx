@@ -8,6 +8,7 @@
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/system/events/mouse.hpp>
+#include <cppurses/widget/detail/tracks_lifetime.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
@@ -113,23 +114,17 @@ namespace slot {
 
 inline auto toggle(Checkbox& cb) -> sig::Slot<void()>
 {
-    auto slot = sig::Slot<void()>{[&cb]() { cb.toggle(); }};
-    slot.track(cb.destroyed);
-    return slot;
+    return tracks_lifetime(cb, [&cb] { cb.toggle(); });
 }
 
 inline auto check(Checkbox& cb) -> sig::Slot<void()>
 {
-    auto slot = sig::Slot<void()>{[&cb]() { cb.check(); }};
-    slot.track(cb.destroyed);
-    return slot;
+    return tracks_lifetime(cb, [&cb] { cb.check(); });
 }
 
 inline auto uncheck(Checkbox& cb) -> sig::Slot<void()>
 {
-    auto slot = sig::Slot<void()>{[&cb]() { cb.uncheck(); }};
-    slot.track(cb.destroyed);
-    return slot;
+    return tracks_lifetime(cb, [&cb] { cb.uncheck(); });
 }
 
 }  // namespace slot

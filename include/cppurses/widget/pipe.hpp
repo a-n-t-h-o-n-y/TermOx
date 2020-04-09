@@ -134,7 +134,7 @@ inline auto wallpaper_with_brush()
 {
     return [](auto& w) -> auto&
     {
-        w.set_brush_paints_wallpaper(true);
+        w.paint_wallpaper_with_brush(true);
         return w;
     };
 }
@@ -143,7 +143,7 @@ inline auto wallpaper_without_brush()
 {
     return [](auto& w) -> auto&
     {
-        w.set_brush_paints_wallpaper(false);
+        w.paint_wallpaper_with_brush(false);
         return w;
     };
 }

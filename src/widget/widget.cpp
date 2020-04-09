@@ -84,7 +84,7 @@ auto Widget::generate_wallpaper() const -> Glyph
 {
     auto bg_glyph =
         wallpaper_ ? *(wallpaper_) : System::terminal.background();
-    if (this->brush_paints_wallpaper())
+    if (this->does_paint_wallpaper_with_brush())
         imprint(this->brush, bg_glyph.brush);
     return bg_glyph;
 }

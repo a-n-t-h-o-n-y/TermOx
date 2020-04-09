@@ -125,10 +125,7 @@ class Widget {
     }
 
     /// Return the currently in use wallpaper or std::nullopt if none.
-    auto get_wallpaper() const -> std::optional<Glyph>
-    {
-        return wallpaper_;
-    }
+    auto get_wallpaper() const -> std::optional<Glyph> { return wallpaper_; }
 
     /// Post an Enable_event to this widget, and all descendants.
     /** Will only post a Child_polished_event to the parent if requested. Useful
@@ -304,13 +301,13 @@ class Widget {
     auto child_count() const -> std::size_t { return children_.size(); }
 
     /// If true, the brush will apply to the wallpaper Glyph.
-    auto brush_paints_wallpaper() const -> bool
+    auto does_paint_wallpaper_with_brush() const -> bool
     {
         return brush_paints_wallpaper_;
     }
 
     /// Set if the brush is applied to the wallpaper Glyph.
-    void set_brush_paints_wallpaper(bool paints = true)
+    void paint_wallpaper_with_brush(bool paints = true)
     {
         brush_paints_wallpaper_ = paints;
         this->update();
