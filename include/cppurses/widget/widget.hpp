@@ -663,8 +663,6 @@ class Widget {
             List_t const& child_list_;
         };
 
-        // TODO this is a view, it is non-owning and has reference semantics,
-        // change the name to View?
         /// Provides Widget_t& access to underlying child objects.
         template <typename Widget_t>
         class Range {
