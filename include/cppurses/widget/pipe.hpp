@@ -55,6 +55,17 @@ inline auto descendants()
     return [](auto& w) { return w.get_descendants(); };
 }
 
+// Generic Modifier ------------------------------------------------------------
+template <typename F>
+auto transform(F&& f)
+{
+    return [&](auto& w) -> auto&
+    {
+        std::forward<F>(f)(w);
+        return w;
+    };
+}
+
 // Widget Modifiers ------------------------------------------------------------
 inline auto name(std::string const& name)
 {
