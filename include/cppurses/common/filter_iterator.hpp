@@ -1,17 +1,26 @@
 #ifndef CPPURSES_COMMON_FILTER_ITERATOR_HPP
 #define CPPURSES_COMMON_FILTER_ITERATOR_HPP
+#include <iterator>
+
 namespace cppurses {
 
 /// operator++ skips underlying elements of \p it that do not satisfy predicate.
 template <typename Iter, typename Iter_end, typename F>
 class Filter_iterator {
    public:
+    using iterator_category = std::forward_iterator_tag;
+    using value_type        = typename Iter::value_type;
+    using difference_type   = typename Iter::difference_type;
+    using pointer           = typename Iter::pointer;
+    using reference         = typename Iter::reference;
+
+   public:
     /// Pass in the iterator to begin at, end iter, and predicate to test with.
     /** This increments \p it until the end or predicate is true. */
     Filter_iterator(Iter it, Iter_end end, F predicate)
         : it_{it}, end_{end}, predicate_{predicate}
     {
-        this->increment_if_invalid;
+        this->increment_if_invalid();
     }
 
     auto operator++() -> Filter_iterator&

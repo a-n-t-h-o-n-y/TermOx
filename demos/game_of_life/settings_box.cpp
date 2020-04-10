@@ -56,8 +56,7 @@ Grid_fade::Grid_fade()
 {
     using namespace cppurses::pipe;
     *this | fixed_height(1) | children() |
-        transform([](auto& c) { c.padding | fixed_width(1); });
-
+        for_each([](auto& c) { c.padding | fixed_width(1); });
     fade_box.checkbox.toggle();
 }
 

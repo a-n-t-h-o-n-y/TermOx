@@ -30,7 +30,6 @@ class Checkbox : public Widget {
     sig::Signal<void()> toggled;
 
    public:
-    /// Construct a Checkbox.
     explicit Checkbox(bool is_checked = false,
                       Glyph checked   = L'☒',
                       Glyph unchecked = L'☐')
@@ -39,7 +38,7 @@ class Checkbox : public Widget {
         *this | pipe::fixed_height(1) | pipe::fixed_width(1);
     }
 
-    /// Change state to be unchecked if initially checked, checked otherwise.
+    /// Change state to be unchecked if currently checked, checked otherwise.
     void toggle()
     {
         is_checked_ = !is_checked_;
@@ -108,6 +107,10 @@ class Checkbox : public Widget {
 class Labeled_checkbox : public cppurses::Label_right<cppurses::Checkbox> {
    public:
     Checkbox& checkbox = Label_right::wrapped;
+
+    sig::Signal<void()>& checked   = checkbox.checked;
+    sig::Signal<void()>& unchecked = checkbox.unchecked;
+    sig::Signal<void()>& toggled   = checkbox.toggled;
 
    public:
     Labeled_checkbox(Glyph_string label_) : Label_right{std::move(label_)}

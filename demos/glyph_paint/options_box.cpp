@@ -18,12 +18,6 @@ Options_A::Options_A()
     clone_btn | bg(Color::White) | fg(Color::Black);
     clear_btn.main_btn | bg(Color::White) | fg(Color::Black);
     more_btn | bg(Color::Light_gray) | fg(Color::Black);
-
-    eraser_box.padding | fixed_width(2);
-    cursor_box.padding | fixed_width(2);
-    grid_box.padding | fixed_width(2);
-    // *this | children() | filter<Checkbox>() |
-    //     transform([](auto& c) { c.padding | fixed_width(2); });
 }
 
 Options_B::Options_B()

@@ -26,7 +26,7 @@ class Attribute_select
     {
         using namespace cppurses::pipe;
         *this | children() |
-            transform([](auto& c) { c.padding | fixed_width(2); });
+            for_each([](auto& c) { c.padding | fixed_width(2); });
     }
 };
 

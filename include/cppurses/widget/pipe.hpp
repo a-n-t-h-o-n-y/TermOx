@@ -5,6 +5,8 @@
 #include <utility>
 #include <vector>
 
+#include <cppurses/common/filter_iterator.hpp>
+#include <cppurses/common/map_iterator.hpp>
 #include <cppurses/common/range.hpp>
 #include <cppurses/system/animation_engine.hpp>
 #include <cppurses/widget/focus_policy.hpp>
@@ -12,6 +14,26 @@
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses::pipe {
+namespace detail {
+
+/// Used to call operator| overload to create a new Range from filter predicate
+template <typename Predicate>
+class Filter_predicate {
+   public:
+    Filter_predicate(Predicate p) : predicate{p} {}
+
+   public:
+    Predicate predicate;
+};
+
+/// Used to call operator| overload to create a new Range from filter predicate
+template <typename W>
+class Dynamic_filter_predicate {
+   public:
+    using Widget_t = W;
+};
+
+}  // namespace detail
 
 /// Pipe operator for use with Widget.
 template <
@@ -32,6 +54,31 @@ auto operator|(Range<Iter_1, Iter_2> children, F&& op) -> Range<Iter_1, Iter_2>
     return children;
 }
 
+/// Overload to create a filtered range.
+template <typename Iter_1, typename Iter_2, typename F>
+auto operator|(Range<Iter_1, Iter_2> children, detail::Filter_predicate<F>&& p)
+{
+    return Range{Filter_iterator{children.begin(), children.end(),
+                                 std::forward<F>(p.predicate)},
+                 children.end()};
+}
+
+// clang-format off
+// clang format can't handle this one at the moment.
+/// Overload to create a filtered range with upcast.
+template <typename Iter_1, typename Iter_2, typename Widget_t>
+auto operator|(Range<Iter_1, Iter_2> children,
+               detail::Dynamic_filter_predicate<Widget_t>)
+{
+    return Range{
+            Map_iterator{
+                Filter_iterator{ children.begin(), children.end(),
+                [](auto& w) { return dynamic_cast<Widget_t*>(&w) != nullptr; }},
+                [](auto& w) -> auto& {return static_cast<Widget_t&>(w); }
+                }, children.end()};
+}
+// clang-format on
+
 /// Pipe operator for use with Widget::get_descendants.
 template <typename F>
 auto operator|(std::vector<Widget*> const& descendants, F&& op)
@@ -43,7 +90,7 @@ auto operator|(std::vector<Widget*> const& descendants, F&& op)
 }
 
 // Widget Accessors ------------------------------------------------------------
-/// Widget -> Widget::Children::Range<Widget_t>
+/// Widget -> Range<Children>
 inline auto children()
 {
     return [](auto& w) {
@@ -58,15 +105,29 @@ inline auto descendants()
     return [](auto& w) { return w.get_descendants(); };
 }
 
-// Generic Modifier ------------------------------------------------------------
+// Generic Tools ---------------------------------------------------------------
 template <typename F>
-auto transform(F&& f)
+auto for_each(F&& f)
 {
     return [&](auto& w) -> auto&
     {
         std::forward<F>(f)(w);
         return w;
     };
+}
+
+/// Container -> Container
+template <typename F>
+auto filter(F&& predicate)
+{
+    return detail::Filter_predicate{predicate};
+}
+
+/// Dynamic cast, be aware.
+template <typename Widget_t>
+auto filter()
+{
+    return detail::Dynamic_filter_predicate<Widget_t>{};
 }
 
 // Widget Modifiers ------------------------------------------------------------
