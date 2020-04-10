@@ -4,6 +4,7 @@
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
+#include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/pair.hpp>
 #include <cppurses/widget/widgets/fixed_width.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
@@ -56,6 +57,40 @@ class Label_right : public layout::Horizontal<> {
     {
         this->height_policy.fixed(1);
     }
+};
+
+/// Wraps a Widget_t object with a label on the top.
+template <typename Widget_t>
+class Label_top : public layout::Vertical<> {
+   public:
+    Label& label;
+    Fixed_width& padding = this->make_child<Fixed_width>(0);
+    Widget_t& wrapped;
+
+   public:
+    /// Constructs Label with \p label_, and Widget_t with args...
+    template <typename... Args>
+    Label_top(Glyph_string label_, Args&&... args)
+        : label{this->make_child<Label>(std::move(label_))},
+          wrapped{this->make_child<Widget_t>(std::forward<Args>(args)...)}
+    {}
+};
+
+/// Wraps a Widget_t object with a label on the bottom.
+template <typename Widget_t>
+class Label_bottom : public layout::Vertical<> {
+   public:
+    Widget_t& wrapped;
+    Fixed_width& padding = this->make_child<Fixed_width>(0);
+    Label& label;
+
+   public:
+    /// Constructs Label with \p label_, and Widget_t with args...
+    template <typename... Args>
+    Label_bottom(Glyph_string label_, Args&&... args)
+        : wrapped{this->make_child<Widget_t>(std::forward<Args>(args)...)},
+          label{this->make_child<Label>(std::move(label_))}
+    {}
 };
 
 }  // namespace cppurses

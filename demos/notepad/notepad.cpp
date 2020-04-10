@@ -56,41 +56,41 @@ void Text_and_attributes::initialize()
     ac_select.bg_select.color_selected.connect(slot::set_background(textbox));
 
     // Add Attributes
-    ac_select.attr_select.bold.checkbox.checked.connect(
+    ac_select.attr_select.bold.checked.connect(
         [this]() { textbox.insert_brush.add_attributes(Attribute::Bold); });
-    ac_select.attr_select.italic.checkbox.checked.connect(
+    ac_select.attr_select.italic.checked.connect(
         [this]() { textbox.insert_brush.add_attributes(Attribute::Italic); });
-    ac_select.attr_select.underline.checkbox.checked.connect([this]() {
+    ac_select.attr_select.underline.checked.connect([this]() {
         textbox.insert_brush.add_attributes(Attribute::Underline);
     });
-    ac_select.attr_select.standout.checkbox.checked.connect(
+    ac_select.attr_select.standout.checked.connect(
         [this]() { textbox.insert_brush.add_attributes(Attribute::Standout); });
-    ac_select.attr_select.dim.checkbox.checked.connect(
+    ac_select.attr_select.dim.checked.connect(
         [this]() { textbox.insert_brush.add_attributes(Attribute::Dim); });
-    ac_select.attr_select.inverse.checkbox.checked.connect(
+    ac_select.attr_select.inverse.checked.connect(
         [this]() { textbox.insert_brush.add_attributes(Attribute::Inverse); });
-    ac_select.attr_select.invisible.checkbox.checked.connect([this]() {
+    ac_select.attr_select.invisible.checked.connect([this]() {
         textbox.insert_brush.add_attributes(Attribute::Invisible);
     });
 
     // Signals -- Remove Attributes
-    ac_select.attr_select.bold.checkbox.unchecked.connect(
+    ac_select.attr_select.bold.unchecked.connect(
         [this]() { textbox.insert_brush.remove_attributes(Attribute::Bold); });
-    ac_select.attr_select.italic.checkbox.unchecked.connect([this]() {
+    ac_select.attr_select.italic.unchecked.connect([this]() {
         textbox.insert_brush.remove_attributes(Attribute::Italic);
     });
-    ac_select.attr_select.underline.checkbox.unchecked.connect([this]() {
+    ac_select.attr_select.underline.unchecked.connect([this]() {
         textbox.insert_brush.remove_attributes(Attribute::Underline);
     });
-    ac_select.attr_select.standout.checkbox.unchecked.connect([this]() {
+    ac_select.attr_select.standout.unchecked.connect([this]() {
         textbox.insert_brush.remove_attributes(Attribute::Standout);
     });
-    ac_select.attr_select.dim.checkbox.unchecked.connect(
+    ac_select.attr_select.dim.unchecked.connect(
         [this]() { textbox.insert_brush.remove_attributes(Attribute::Dim); });
-    ac_select.attr_select.inverse.checkbox.unchecked.connect([this]() {
+    ac_select.attr_select.inverse.unchecked.connect([this]() {
         textbox.insert_brush.remove_attributes(Attribute::Inverse);
     });
-    ac_select.attr_select.invisible.checkbox.unchecked.connect([this]() {
+    ac_select.attr_select.invisible.unchecked.connect([this]() {
         textbox.insert_brush.remove_attributes(Attribute::Invisible);
     });
 }

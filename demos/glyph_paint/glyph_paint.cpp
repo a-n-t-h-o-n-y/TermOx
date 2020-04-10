@@ -50,19 +50,19 @@ Glyph_paint::Glyph_paint()
             Glyph_string{"Clone", foreground(Color::Light_gray)}));
     side_pane.options_box.options_a.clear_btn.clicked.connect(
         slot::clear(paint_area));
-    side_pane.options_box.options_a.cursor_box.checkbox.toggled.connect(
+    side_pane.options_box.options_a.cursor_box.toggled.connect(
         cppurses::slot::toggle_cursor(paint_area));
     paint_area.erase_disabled.connect(cppurses::slot::uncheck(
         side_pane.options_box.options_a.eraser_box.checkbox));
     paint_area.erase_enabled.connect(cppurses::slot::check(
         side_pane.options_box.options_a.eraser_box.checkbox));
-    side_pane.options_box.options_a.eraser_box.checkbox.checked.connect(
+    side_pane.options_box.options_a.eraser_box.checked.connect(
         slot::enable_erase(paint_area));
-    side_pane.options_box.options_a.eraser_box.checkbox.unchecked.connect(
+    side_pane.options_box.options_a.eraser_box.unchecked.connect(
         slot::disable_erase(paint_area));
-    side_pane.options_box.options_a.grid_box.checkbox.checked.connect(
+    side_pane.options_box.options_a.grid_box.checked.connect(
         slot::enable_grid(paint_area));
-    side_pane.options_box.options_a.grid_box.checkbox.unchecked.connect(
+    side_pane.options_box.options_a.grid_box.unchecked.connect(
         slot::disable_grid(paint_area));
     side_pane.options_box.options_b.save_file.save_requested.connect(
         slot::write(paint_area));

@@ -87,8 +87,8 @@ struct Settings_box : cppurses::layout::Vertical<> {
    public:
     sig::Signal<void(const std::string&)>& rule_change = rule_edit.rule_change;
     sig::Signal<void(std::chrono::milliseconds)> period_set;
-    sig::Signal<void()>& grid_toggled  = grid_fade.grid_box.checkbox.toggled;
-    sig::Signal<void()>& fade_toggled  = grid_fade.fade_box.checkbox.toggled;
+    sig::Signal<void()>& grid_toggled  = grid_fade.grid_box.toggled;
+    sig::Signal<void()>& fade_toggled  = grid_fade.fade_box.toggled;
     sig::Signal<void()>& clear_request = clear_step_btns.clear_btn.clicked;
     sig::Signal<void()>& step_request  = clear_step_btns.step_btn.clicked;
 

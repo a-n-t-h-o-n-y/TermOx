@@ -35,7 +35,8 @@ class Checkbox : public Widget {
                       Glyph unchecked = L'☐')
         : is_checked_{is_checked}, checked_{checked}, unchecked_{unchecked}
     {
-        *this | pipe::fixed_height(1) | pipe::fixed_width(1);
+        using namespace pipe;
+        *this | fixed_height(1) | fixed_width(1);
     }
 
     /// Change state to be unchecked if currently checked, checked otherwise.
@@ -104,7 +105,7 @@ class Checkbox : public Widget {
     Glyph unchecked_;
 };
 
-class Labeled_checkbox : public cppurses::Label_right<cppurses::Checkbox> {
+class Labeled_checkbox : public Label_right<Checkbox> {
    public:
     Checkbox& checkbox = Label_right::wrapped;
 
@@ -115,7 +116,7 @@ class Labeled_checkbox : public cppurses::Label_right<cppurses::Checkbox> {
    public:
     Labeled_checkbox(Glyph_string label_) : Label_right{std::move(label_)}
     {
-        using namespace cppurses::pipe;
+        using namespace pipe;
         Label_right::label | on_mouse_press([&](auto) { checkbox.toggle(); });
         Label_right::padding | on_mouse_press([&](auto) { checkbox.toggle(); });
     }

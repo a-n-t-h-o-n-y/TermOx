@@ -7,20 +7,39 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
+#include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/widgets/push_button.hpp>
 
 namespace cppurses {
+namespace pipe {
 
+template <typename Handler>
+auto on_color_selected(Handler&& op)
+{
+    return [&](auto& w) -> auto&
+    {
+        w.color_selected.connect(std::forward<Handler>(op));
+        return w;
+    };
+}
+
+}  // namespace pipe
+
+/// A single line of colored buttons.
 template <std::size_t Color_count>
-struct Color_bar : layout::Horizontal<Push_button> {
+class Color_bar : public layout::Horizontal<Push_button> {
+   public:
     sig::Signal<void(Color)> color_selected;
 
+   public:
     Color_bar(std::array<Color, Color_count> colors)
     {
+        using namespace pipe;
         for (auto c : colors) {
-            auto& btn = this->make_child();
-            btn.brush.set_background(c);
-            btn.clicked.connect([this, c] { this->color_selected(c); });
+            this->make_child() | bg(c) | on_mouse_press([this, c](auto& m) {
+                if (m.button == Mouse::Button::Left)
+                    this->color_selected(c);
+            });
         }
     }
 };
@@ -34,10 +53,9 @@ class Color_select : public layout::Vertical<Color_bar<8>> {
    public:
     Color_select()
     {
-        row_one_.color_selected.connect(
-            [this](Color c) { this->color_selected(c); });
-        row_two_.color_selected.connect(
-            [this](Color c) { this->color_selected(c); });
+        using namespace pipe;
+        *this | children() |
+            on_color_selected([this](auto c) { this->color_selected(c); });
     }
 
    private:

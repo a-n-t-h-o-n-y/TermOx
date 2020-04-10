@@ -3,75 +3,52 @@
 #include <algorithm>
 #include <cstddef>
 #include <iterator>
-#include <memory>
 #include <numeric>
-#include <vector>
 
 #include <cppurses/painter/detail/screen_mask.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace {
-
-/// std:: algorithms can't handle two different Iter types.
-template <typename Iter_1, typename Iter_2, typename F>
-auto accumulate(Iter_1 first, Iter_2 last, F&& predicate) -> std::size_t
-{
-    auto sum = 0uL;
-    for (; first != last; ++first)
-        sum = std::forward<F>(predicate)(sum, *first);
-    return sum;
-}
-
-template <typename Iter_1, typename Iter_2, typename F>
-auto all_of(Iter_1 first, Iter_2 last, F&& predicate) -> bool
-{
-    for (; first != last; ++first) {
-        if (!std::forward<F>(predicate)(*first))
-            return false;
-    }
-    return true;
-}
-
 using namespace cppurses;
 
 /// Return the sum total height of all widgets from [first, last).
-template <typename Iter_1, typename Iter_2>
-auto heights(Iter_1 begin, Iter_2 end) -> std::size_t
+template <typename Iter>
+auto heights(Iter first, Iter last) -> std::size_t
 {
     auto const sum_heights = [](auto sum, auto const& widget) {
         return widget.is_enabled() ? sum += widget.outer_height() : sum;
     };
-    return accumulate(begin, end, sum_heights);
+    return std::accumulate(first, last, 0uL, sum_heights);
 }
 
 /// Return the sum total width of all widgets from [first, last).
-template <typename Iter_1, typename Iter_2>
-auto widths(Iter_1 first, Iter_2 last) -> std::size_t
+template <typename Iter>
+auto widths(Iter first, Iter last) -> std::size_t
 {
     auto const sum_widths = [](auto sum, auto const& widget) {
         return widget.is_enabled() ? sum += widget.outer_width() : sum;
     };
-    return accumulate(first, last, sum_widths);
+    return std::accumulate(first, last, 0uL, sum_widths);
 }
 
 /// Check if each Widget from [first, last) has width equal to \p width.
-template <typename Iter_1, typename Iter_2>
-auto all_widths_equal_to(Iter_1 first, Iter_2 last, std::size_t width)
+template <typename Iter>
+auto all_widths_equal_to(Iter first, Iter last, std::size_t width)
 {
     auto const widths_equal = [width](Widget const& w) {
         return w.is_enabled() ? w.outer_width() == width : true;
     };
-    return all_of(first, last, widths_equal);
+    return std::all_of(first, last, widths_equal);
 }
 
 /// Check if each Widget from [first,last) has height equal to \p height.
-template <typename Iter_1, typename Iter_2>
-auto all_heights_equal_to(Iter_1 first, Iter_2 last, std::size_t height)
+template <typename Iter>
+auto all_heights_equal_to(Iter first, Iter last, std::size_t height)
 {
     auto const heights_equal = [height](Widget const& w) {
         return w.is_enabled() ? w.outer_height() == height : true;
     };
-    return all_of(first, last, heights_equal);
+    return std::all_of(first, last, heights_equal);
 }
 
 /// Check whether \p w's children completely cover \p w.
@@ -120,8 +97,7 @@ void mark_covered_tiles(Widget const& w, detail::Screen_mask& mask)
 
 }  // namespace
 
-namespace cppurses {
-namespace detail {
+namespace cppurses::detail {
 
 //  Should not consider border space, since that will never be empty.
 auto find_empty_space(Widget const& w) -> Screen_mask
@@ -134,5 +110,4 @@ auto find_empty_space(Widget const& w) -> Screen_mask
     return mask;
 }
 
-}  // namespace detail
-}  // namespace cppurses
+}  // namespace cppurses::detail

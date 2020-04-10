@@ -52,8 +52,6 @@ class Map_iterator {
         return it_ != other;
     }
 
-    auto underlying() const -> Iter { return it_; }
-
    private:
     Iter it_;
     F map_;

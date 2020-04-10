@@ -600,9 +600,11 @@ class Widget {
 
    public:
     /// Owns all children of the owning Widget as a sequential list.
-    /** Provides basic modification of the sequential list and access to its
-     *  elements via Range and Const_range. */
+    /** Provides a non-modifying View type. */
     class Children {
+       public:
+        using value_type = Widget;
+
        public:
         using List_t = std::vector<std::unique_ptr<Widget>>;
 
@@ -614,11 +616,14 @@ class Widget {
                           "Widget_t must be a Widget type.");
 
            public:
+            using value_type = Widget_t;
+
+           public:
             View(Children_t& children) : children_{children} {}
 
             auto begin() const { return children_.template begin<Widget_t>(); }
 
-            auto end() const { return children_.end(); }
+            auto end() const { return children_.template end<Widget_t>(); }
 
             auto empty() const -> bool { return children_.empty(); }
 
@@ -649,26 +654,29 @@ class Widget {
         template <typename Widget_t>
         auto begin()
         {
-            return Map_iterator{
-                Map_iterator{std::begin(child_list_),
-                             [](auto& ptr) -> auto& { return *ptr; }},
-                [](auto& w) -> auto& { return static_cast<Widget_t&>(w); }};
+            return this->make_deref_and_cast_iter<Widget_t>(
+                std::begin(child_list_));
         }
 
         template <typename Widget_t>
         auto begin() const
         {
-            return Map_iterator{
-                Map_iterator{std::cbegin(child_list_),
-                             [](auto const& ptr) -> auto const& { return *ptr; }},
-                [](auto const& w) -> auto const&{ return static_cast<Widget_t const&>(w); }};
+            return this->make_const_deref_and_cast_iter<Widget_t>(
+                std::cbegin(child_list_));
         }
 
-        auto end() -> List_t::iterator { return std::end(child_list_); }
-
-        auto end() const -> List_t::const_iterator
+        template <typename Widget_t>
+        auto end()
         {
-            return std::cend(child_list_);
+            return this->make_deref_and_cast_iter<Widget_t>(
+                std::end(child_list_));
+        }
+
+        template <typename Widget_t>
+        auto end() const
+        {
+            return this->make_const_deref_and_cast_iter<Widget_t>(
+                std::cend(child_list_));
         }
 
         /// Return true is contains no child Widgets.
@@ -842,6 +850,38 @@ class Widget {
        private:
         List_t child_list_;
         Widget* self_;  // The parent of the children
+
+        static auto constexpr deref = [](auto& ptr) -> auto& { return *ptr; };
+
+        static auto constexpr deref_const = [](auto const& ptr) -> auto const&
+        {
+            return *ptr;
+        };
+
+        template <typename Widget_t>
+        static auto constexpr cast = [](auto& w) -> auto&
+        {
+            return static_cast<Widget_t&>(w);
+        };
+
+        template <typename Widget_t>
+        static auto constexpr cast_const = [](auto const& w) -> auto const&
+        {
+            return static_cast<Widget_t const&>(w);
+        };
+
+        template <typename Widget_t, typename Iter>
+        static auto make_deref_and_cast_iter(Iter i)
+        {
+            return Map_iterator{Map_iterator{i, deref}, cast<Widget_t>};
+        }
+
+        template <typename Widget_t, typename Iter>
+        static auto make_const_deref_and_cast_iter(Iter i)
+        {
+            return Map_iterator{Map_iterator{i, deref_const},
+                                cast_const<Widget_t>};
+        }
     };
 
    protected:
@@ -872,5 +912,6 @@ class Widget {
 
     void set_parent(Widget* parent) { parent_ = parent; }
 };
+
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_WIDGET_HPP

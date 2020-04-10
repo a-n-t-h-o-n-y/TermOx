@@ -34,6 +34,8 @@ auto find_widget_at(std::size_t x, std::size_t y) -> Widget*
         return nullptr;
     auto keep_going = true;
     while (keep_going and not widg->get_children().empty()) {
+        // TODO pipe::children() | filter(if...) | for_each([&]..);
+        // but it has a break, see if there is some algorithm that can be used.
         for (auto& child : widg->get_children()) {
             if (has_coordinates(child, x, y) and child.is_enabled()) {
                 widg       = &child;
