@@ -23,9 +23,8 @@ class Unique_space {
         auto children    = parent.get_children();
         auto begin       = std::next(std::begin(children), offset_);
         auto const end   = std::end(children);
-        result.reserve(std::distance(begin, end));
 
-        while (begin != end) {
+        for (; begin != end; ++begin) {
             auto const& policy =
                 typename Parameters::Secondary::get_policy{}(*begin);
             if (limit > policy.max())
@@ -34,7 +33,6 @@ class Unique_space {
                 result.push_back(0);
             else
                 result.push_back(limit);
-            ++begin;
         }
         return result;
     }

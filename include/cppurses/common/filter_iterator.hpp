@@ -39,6 +39,18 @@ class Filter_iterator {
         return it_ != other.it_;
     }
 
+    template <typename T>
+    auto operator==(T const& other) const -> bool
+    {
+        return it_ == other;
+    }
+
+    template <typename T>
+    auto operator!=(T const& other) const -> bool
+    {
+        return it_ != other;
+    }
+
    private:
     Iter it_;
     Iter_end end_;

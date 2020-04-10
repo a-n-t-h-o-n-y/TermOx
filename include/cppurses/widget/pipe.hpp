@@ -5,6 +5,7 @@
 #include <utility>
 #include <vector>
 
+#include <cppurses/common/range.hpp>
 #include <cppurses/system/animation_engine.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/point.hpp>
@@ -23,9 +24,8 @@ auto operator|(Widget_t& w, F&& op) -> std::invoke_result_t<F, Widget_t&>
 }
 
 /// Pipe operator for use with Widget::get_children.
-template <typename Widget_t, typename F>
-auto operator|(Widget::Children::template Range<Widget_t> children, F&& op)
-    -> Widget::Children::Range<Widget_t>
+template <typename Iter_1, typename Iter_2, typename F>
+auto operator|(Range<Iter_1, Iter_2> children, F&& op) -> Range<Iter_1, Iter_2>
 {
     for (auto& child : children)
         std::forward<F>(op)(child);
@@ -46,7 +46,10 @@ auto operator|(std::vector<Widget*> const& descendants, F&& op)
 /// Widget -> Widget::Children::Range<Widget_t>
 inline auto children()
 {
-    return [](auto& w) { return w.get_children(); };
+    return [](auto& w) {
+        auto c = w.get_children();
+        return Range{c.begin(), c.end()};
+    };
 }
 
 /// Widget -> std::vector<Widget*>

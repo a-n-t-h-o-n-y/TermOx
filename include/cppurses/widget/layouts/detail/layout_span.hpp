@@ -110,9 +110,9 @@ class Layout_span {
 
    public:
     /// Construct, only considers children from \p first up to \p last.
-    template <typename Iter_t>
-    Layout_span(Iter_t first,
-                Iter_t last,
+    template <typename Iter_1, typename Iter_2>
+    Layout_span(Iter_1 first,
+                Iter_2 last,
                 std::size_t primary_length,
                 Get_policy_t&& get_policy)
         : dimensions_{Layout_span::build_dimensions(first,
@@ -179,16 +179,14 @@ class Layout_span {
 
    private:
     /// Generate a Dimensions container initialized with child Widget pointers.
-    template <typename Iter_t>
-    static auto generate_init_dimensions(Iter_t first, Iter_t last)
+    template <typename Iter_1, typename Iter_2>
+    static auto generate_init_dimensions(Iter_1 first, Iter_2 last)
         -> Container_t
     {
         auto result = Container_t{};
-        result.reserve(std::distance(first, last));
-        std::transform(first, last, std::back_inserter(result),
-                       [](auto& child) -> Dimension {
-                           return {&child, 0uL};
-                       });
+        for (; first != last; ++first) {
+            result.push_back({&(*first), 0uL});
+        }
         return result;
     }
 
@@ -254,9 +252,9 @@ class Layout_span {
                       });
     }
 
-    template <typename Iter_t>
-    static auto build_dimensions(Iter_t first,
-                                 Iter_t last,
+    template <typename Iter_1, typename Iter_2>
+    static auto build_dimensions(Iter_1 first,
+                                 Iter_2 last,
                                  std::size_t primary_length,
                                  Get_policy_t get_policy) -> Container_t
     {

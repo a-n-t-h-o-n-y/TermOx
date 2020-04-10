@@ -138,11 +138,16 @@ class Stack : public Layout<Child_t> {
     {
         if (active_page_ == nullptr)
             return Stack::invalid_index;
-        auto const begin = std::cbegin(this->get_children());
-        auto const end   = std::cend(this->get_children());
-        auto iter        = std::find_if(
-            begin, end, [this](auto const& w) { return &w == active_page_; });
-        return std::distance(begin, iter);
+        auto begin     = std::cbegin(this->get_children());
+        auto const end = std::cend(this->get_children());
+        auto distance  = 0uL;
+        for (; begin != end; ++begin) {
+            if (&(*begin) != active_page_)
+                ++distance;
+            else
+                break;
+        }
+        return distance;
     }
 
     /// Post an Enable_event or Disable_event to the active page.

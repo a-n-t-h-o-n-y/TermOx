@@ -19,10 +19,16 @@ template <typename Child_t = Widget>
 class Layout : public Widget {
    public:
     /// Return a Widget::Range<Child_t> of all children.
-    auto get_children() { return children_.get_children<Child_t>(); }
+    auto get_children()
+    {
+        return Children::View<Child_t, Widget::Children>{children_};
+    }
 
     /// Return a Widget::Const_range<Child_t> of all children.
-    auto get_children() const { return children_.get_children<Child_t>(); }
+    auto get_children() const
+    {
+        return Children::View<Child_t, Widget::Children const>{children_};
+    }
 
    protected:
     /// Create a Widget and append it to the list of children.

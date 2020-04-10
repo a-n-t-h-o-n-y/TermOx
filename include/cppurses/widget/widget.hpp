@@ -14,6 +14,7 @@
 
 #include <signals/signal.hpp>
 
+#include <cppurses/common/map_iterator.hpp>
 #include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
@@ -280,10 +281,13 @@ class Widget {
     }
 
     /// Get a range containing Widget& to each child.
-    auto get_children() { return children_.get_children<Widget>(); }
+    auto get_children() { return Children::View<Widget, Children>{children_}; }
 
     /// Get a const range containing Widget& to each child.
-    auto get_children() const { return children_.get_children<Widget>(); }
+    auto get_children() const
+    {
+        return Children::View<Widget, Children const>{children_};
+    }
 
     /// Return true if \p descendant exists within the widg. tree owned by this.
     auto is_ancestor_of(Widget const* descendant) const -> bool
@@ -601,131 +605,113 @@ class Widget {
     class Children {
        public:
         using List_t = std::vector<std::unique_ptr<Widget>>;
-        /// Provides Widget_t const& access to underlying child objects.
-        template <typename Widget_t>
-        class Const_range {
+
+        /// Provides limited view of the underlying Children object.
+        /** Children_t for const/non-const versions. */
+        template <typename Widget_t, typename Children_t>
+        class View {
             static_assert(std::is_base_of<Widget, Widget_t>::value,
                           "Widget_t must be a Widget type.");
-            // TODO std::iterator is deprecated in C++17, use explicit type
-            // aliases instead.
-            // https://www.fluentcpp.com/2018/05/08/std-iterator-deprecated/
-            class Iterator : public std::iterator<
-                                 std::bidirectional_iterator_tag,
-                                 typename List_t::const_iterator::value_type> {
-               public:
-                Iterator(List_t::const_iterator iter) : iter_{iter} {}
-                auto operator*() const -> Widget_t const&
-                {
-                    return static_cast<Widget_t const&>(**iter_);
-                }
-                auto operator++() -> Iterator&
-                {
-                    ++iter_;
-                    return *this;
-                }
-                auto operator--() -> Iterator&
-                {
-                    --iter_;
-                    return *this;
-                }
-                auto operator==(Iterator other) const -> bool
-                {
-                    return this->iter_ == other.iter_;
-                }
-                auto operator!=(Iterator other) const -> bool
-                {
-                    return this->iter_ != other.iter_;
-                }
-
-               private:
-                List_t::const_iterator iter_;
-            };
 
            public:
-            Const_range(List_t const& child_list) : child_list_{child_list} {}
-            auto begin() const -> Iterator { return {std::begin(child_list_)}; }
-            auto end() const -> Iterator { return {std::end(child_list_)}; }
-            auto empty() const -> bool { return child_list_.empty(); }
-            auto operator[](std::size_t index) const -> Widget_t const&
+            View(Children_t& children) : children_{children} {}
+
+            auto begin() const { return children_.template begin<Widget_t>(); }
+
+            auto end() const { return children_.end(); }
+
+            auto empty() const -> bool { return children_.empty(); }
+
+            auto size() const -> std::size_t { return children_.size(); }
+
+            auto operator[](std::size_t index) const -> auto&
             {
-                return static_cast<Widget_t const&>(*child_list_[index]);
+                return children_.template operator[]<Widget_t>(index);
             }
-            auto front() const -> Widget_t const&
+
+            auto front() const -> auto&
             {
-                return static_cast<Widget_t const&>(*child_list_.front());
+                return children_.template front<Widget_t>();
             }
-            auto back() const -> Widget_t const&
+
+            auto back() const -> auto&
             {
-                return static_cast<Widget_t const&>(*child_list_.back());
+                return children_.template back<Widget_t>();
             }
 
            private:
-            List_t const& child_list_;
-        };
-
-        /// Provides Widget_t& access to underlying child objects.
-        template <typename Widget_t>
-        class Range {
-            static_assert(std::is_base_of<Widget, Widget_t>::value,
-                          "Widget_t must be a Widget type.");
-            // TODO std::iterator is deprecated in C++17, as above
-            class Iterator
-                : public std::iterator<std::bidirectional_iterator_tag,
-                                       typename List_t::iterator::value_type> {
-               public:
-                Iterator(List_t::iterator iter) : iter_{iter} {}
-                auto operator*() const -> Widget_t&
-                {
-                    return static_cast<Widget_t&>(**iter_);
-                }
-                auto operator++() -> Iterator&
-                {
-                    ++iter_;
-                    return *this;
-                }
-                auto operator--() -> Iterator&
-                {
-                    --iter_;
-                    return *this;
-                }
-                auto operator==(Iterator other) const -> bool
-                {
-                    return this->iter_ == other.iter_;
-                }
-                auto operator!=(Iterator other) const -> bool
-                {
-                    return this->iter_ != other.iter_;
-                }
-
-               private:
-                List_t::iterator iter_;
-            };
-
-           public:
-            Range(List_t& child_list) : child_list_{child_list} {}
-            auto begin() const -> Iterator { return {std::begin(child_list_)}; }
-            auto end() const -> Iterator { return {std::end(child_list_)}; }
-            auto empty() const -> bool { return child_list_.empty(); }
-            auto size() const -> std::size_t { return child_list_.size(); }
-            auto operator[](std::size_t index) const -> Widget_t&
-            {
-                return static_cast<Widget_t&>(*child_list_[index]);
-            }
-            auto front() const -> Widget_t&
-            {
-                return static_cast<Widget_t&>(*child_list_.front());
-            }
-            auto back() const -> Widget_t&
-            {
-                return static_cast<Widget_t&>(*child_list_.back());
-            }
-
-           private:
-            List_t& child_list_;
+            Children_t& children_;
         };
 
        public:
         Children(Widget* self) : self_{self} {}
+
+        template <typename Widget_t>
+        auto begin()
+        {
+            return Map_iterator{
+                Map_iterator{std::begin(child_list_),
+                             [](auto& ptr) -> auto& { return *ptr; }},
+                [](auto& w) -> auto& { return static_cast<Widget_t&>(w); }};
+        }
+
+        template <typename Widget_t>
+        auto begin() const
+        {
+            return Map_iterator{
+                Map_iterator{std::cbegin(child_list_),
+                             [](auto const& ptr) -> auto const& { return *ptr; }},
+                [](auto const& w) -> auto const&{ return static_cast<Widget_t const&>(w); }};
+        }
+
+        auto end() -> List_t::iterator { return std::end(child_list_); }
+
+        auto end() const -> List_t::const_iterator
+        {
+            return std::cend(child_list_);
+        }
+
+        /// Return true is contains no child Widgets.
+        auto empty() const -> bool { return child_list_.empty(); }
+
+        /// Return the number of children.
+        auto size() const -> std::size_t { return child_list_.size(); }
+
+        template <typename Widget_t>
+        auto operator[](std::size_t index) -> Widget_t&
+        {
+            return static_cast<Widget_t&>(*child_list_[index]);
+        }
+
+        template <typename Widget_t>
+        auto operator[](std::size_t index) const -> Widget_t const&
+        {
+            return static_cast<Widget_t const&>(*child_list_[index]);
+        }
+
+        template <typename Widget_t>
+        auto front() -> Widget_t&
+        {
+            return static_cast<Widget_t&>(*child_list_.front());
+        }
+
+        template <typename Widget_t>
+        auto front() const -> Widget_t const&
+        {
+            return static_cast<Widget_t const&>(*child_list_.front());
+        }
+
+        template <typename Widget_t>
+        auto back() -> Widget_t&
+        {
+            return static_cast<Widget_t&>(*child_list_.back());
+        }
+
+        template <typename Widget_t>
+        auto back() const -> Widget_t const&
+        {
+            return static_cast<Widget_t const&>(*child_list_.back());
+        }
 
         /// Move \p child directly before \p index in underlying vector.
         /** Throws std::invalid_argument if \p child is nullptr.
@@ -757,8 +743,8 @@ class Widget {
         }
 
         /// Removes and returns the child pointed to by \p child_ptr.
-        /** Throws std::invalid_argument if \p child_ptr doesn't point to a
-         *  child of self_. */
+        /** Throws std::invalid_argument if \p child_ptr doesn't point
+         * to a child of self_. */
         auto remove(Widget const* child_ptr) -> std::unique_ptr<Widget>
         {
             auto const child_iter = this->find_child(child_ptr);
@@ -767,8 +753,10 @@ class Widget {
             return this->remove(child_iter);
         }
 
-        /// Removes and returns the child at \p index in the child_list_.
-        /** Throws std::out_of_range if \p index is not within child_list_. */
+        /// Removes and returns the child at \p index in the
+        /// child_list_.
+        /** Throws std::out_of_range if \p index is not within
+         * child_list_. */
         auto remove(std::size_t index) -> std::unique_ptr<Widget>
         {
             if (index >= this->size())
@@ -783,19 +771,8 @@ class Widget {
             return this->find_child(child_ptr) != std::end(child_list_);
         }
 
-        template <typename Widget_t>
-        auto get_children() -> Range<Widget_t>
-        {
-            return Range<Widget_t>{child_list_};
-        }
-
-        template <typename Widget_t>
-        auto get_children() const -> Const_range<Widget_t>
-        {
-            return Const_range<Widget_t>{child_list_};
-        }
-
-        /// Return true if \p descendant exists somewhere in the tree of self_.
+        /// Return true if \p descendant exists somewhere in the tree of
+        /// self_.
         auto contains_descendant(Widget const* descendant) const -> bool
         {
             auto const begin = std::begin(child_list_);
@@ -818,9 +795,6 @@ class Widget {
             return descendants;
         }
 
-        /// Return the number of children.
-        auto size() const -> std::size_t { return child_list_.size(); }
-
        private:
         template <typename Child_t>
         constexpr void assert_is_widget()
@@ -829,7 +803,8 @@ class Widget {
                           "Child_t must be a Widget type");
         }
 
-        /// Return iterator to \p child_ptr in child_list_, or end if not found.
+        /// Return iterator to \p child_ptr in child_list_, or end if
+        /// not found.
         auto find_child(Widget const* child_ptr) const -> List_t::const_iterator
         {
             auto const end          = std::cend(child_list_);
@@ -840,7 +815,8 @@ class Widget {
             return std::find_if(begin, end, is_given_ptr);
         }
 
-        /// Return iterator to \p child_ptr in child_list_, or end if not found.
+        /// Return iterator to \p child_ptr in child_list_, or end if
+        /// not found.
         auto find_child(Widget const* child_ptr) -> List_t::iterator
         {
             auto const end          = std::end(child_list_);
@@ -851,7 +827,8 @@ class Widget {
             return std::find_if(begin, end, is_given_ptr);
         }
 
-        /// Removes and returns child at \p child_iter, assumes is valid iter.
+        /// Removes and returns child at \p child_iter, assumes is valid
+        /// iter.
         auto remove(List_t::iterator child_iter) -> std::unique_ptr<Widget>
         {
             auto removed = std::unique_ptr<Widget>{std::move(*child_iter)};
@@ -868,7 +845,7 @@ class Widget {
     };
 
    protected:
-    Children children_ = {this};
+    Children children_{this};
 
    private:
     std::string name_;
@@ -881,8 +858,8 @@ class Widget {
     detail::Screen_descriptor screen_state_;
     std::set<Widget*> event_filters_;
 
-    // Top left point of *this, relative to the top left of the screen. Does not
-    // account for borders.
+    // Top left point of *this, relative to the top left of the screen.
+    // Does not account for borders.
     Point top_left_position_ = {0, 0};
 
     std::size_t outer_width_  = width_policy.hint();
