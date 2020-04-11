@@ -5,6 +5,7 @@
 #include <cppurses/widget/layouts/stack.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
 
+#include <cppurses/widget/widgets/button.hpp>
 #include <cppurses/widget/widgets/checkbox.hpp>
 #include <cppurses/widget/widgets/color_select.hpp>
 #include <cppurses/widget/widgets/confirm_button.hpp>
@@ -24,7 +25,6 @@
 #include <cppurses/widget/widgets/menu_stack.hpp>
 #include <cppurses/widget/widgets/number_edit.hpp>
 #include <cppurses/widget/widgets/open_file.hpp>
-#include <cppurses/widget/widgets/push_button.hpp>
 #include <cppurses/widget/widgets/save_file.hpp>
 #include <cppurses/widget/widgets/status_bar.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>

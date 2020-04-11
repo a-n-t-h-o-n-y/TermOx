@@ -1,5 +1,6 @@
 #ifndef CPPURSES_WIDGET_PIPE_HPP
 #define CPPURSES_WIDGET_PIPE_HPP
+#include <cstddef>
 #include <functional>
 #include <type_traits>
 #include <utility>
@@ -1617,6 +1618,19 @@ auto on_mouse_press(Handler&& op)
 }
 
 template <typename Handler>
+auto on_left_click(Handler&& op)
+{
+    return [=](auto& w) -> auto&
+    {
+        w.mouse_pressed.connect([op](auto const& m) {
+            if (m.button == Mouse::Button::Left)
+                op();
+        });
+        return w;
+    };
+}
+
+template <typename Handler>
 auto on_mouse_release(Handler&& op)
 {
     return [&](auto& w) -> auto&
@@ -1652,17 +1666,6 @@ auto on_key_press(Handler&& op)
     return [&](auto& w) -> auto&
     {
         w.key_pressed.connect(std::forward<Handler>(op));
-        return w;
-    };
-}
-
-// TODO Remove
-template <typename Handler>
-auto on_key_release(Handler&& op)
-{
-    return [&](auto& w) -> auto&
-    {
-        w.key_released.connect(std::forward<Handler>(op));
         return w;
     };
 }
@@ -1723,6 +1726,27 @@ auto on_destroy(Handler&& op)
     return [&](auto& w) -> auto&
     {
         w.timer.connect(std::forward<Handler>(op));
+        return w;
+    };
+}
+
+// Derived Widget::Signals -----------------------------------------------------
+
+template <typename Handler>
+auto on_color_selected(Handler&& op)
+{
+    return [&](auto& w) -> auto&
+    {
+        w.color_selected.connect(std::forward<Handler>(op));
+        return w;
+    };
+}
+
+inline auto active_page(std::size_t p)
+{
+    return [=](auto& w) -> auto&
+    {
+        w.set_active_page(p);
         return w;
     };
 }

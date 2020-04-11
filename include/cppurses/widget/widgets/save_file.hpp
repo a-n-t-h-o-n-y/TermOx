@@ -6,16 +6,16 @@
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
+#include <cppurses/widget/widgets/button.hpp>
 #include <cppurses/widget/widgets/fixed_width.hpp>
 #include <cppurses/widget/widgets/line_edit.hpp>
-#include <cppurses/widget/widgets/push_button.hpp>
 
 namespace cppurses {
 
 template <typename Char_t = char>
 class Save_file : public layout::Horizontal<> {
    public:
-    Push_button& save_btn    = this->make_child<Push_button>("Save");
+    Button& save_btn         = this->make_child<Button>("Save");
     Fixed_width& separator   = this->make_child<Fixed_width>(1);
     Line_edit& filename_edit = this->make_child<Line_edit>("Filename");
 

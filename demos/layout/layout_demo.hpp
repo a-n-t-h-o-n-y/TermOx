@@ -10,9 +10,9 @@
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget.hpp>
+#include <cppurses/widget/widgets/button.hpp>
 #include <cppurses/widget/widgets/labeled_cycle_box.hpp>
 #include <cppurses/widget/widgets/labeled_number_edit.hpp>
-#include <cppurses/widget/widgets/push_button.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
 
 #include <cppurses/widget/widgets/vertical_scrollbar.hpp>
@@ -190,10 +190,9 @@ struct Settings : cppurses::layout::Vertical<> {
         cppurses::Glyph_string{"Settings", cppurses::Attribute::Bold})};
     Size_policy_settings& width_policy_settings{
         this->make_child<Size_policy_settings>()};
-    cppurses::Push_button& add_btn{
-        this->make_child<cppurses::Push_button>("Add Widget")};
-    cppurses::Push_button& remove_btn{
-        this->make_child<cppurses::Push_button>("Remove Selected")};
+    cppurses::Button& add_btn{this->make_child<cppurses::Button>("Add Widget")};
+    cppurses::Button& remove_btn{
+        this->make_child<cppurses::Button>("Remove Selected")};
 
     Settings()
     {

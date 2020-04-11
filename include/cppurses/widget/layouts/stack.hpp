@@ -96,7 +96,7 @@ class Stack : public Layout<Child_t> {
         if (index >= this->Stack::size())
             throw std::out_of_range{"Stack::delete_page: index is invalid"};
         auto* page_to_delete = &(this->Layout<Child_t>::get_children()[index]);
-        if (page_to_delete == this->active_page())
+        if (page_to_delete == this->get_active_page())
             active_page_ = nullptr;
         page_to_delete->close();
     }
@@ -112,7 +112,7 @@ class Stack : public Layout<Child_t> {
         if (index >= this->size())
             throw std::out_of_range{"Stack::remove_page: index is invalid."};
         auto* page_to_remove = &(this->Layout<Child_t>::get_children()[index]);
-        if (page_to_remove == this->active_page())
+        if (page_to_remove == this->get_active_page())
             active_page_ = nullptr;
         return this->Layout<Child_t>::remove_child(page_to_remove);
     }
@@ -130,7 +130,7 @@ class Stack : public Layout<Child_t> {
     auto size() const -> std::size_t { return this->child_count(); }
 
     /// Return a pointer to the current active page, or nullptr if none.
-    auto active_page() const -> Child_t* { return active_page_; }
+    auto get_active_page() const -> Child_t* { return active_page_; }
 
     /// Return the index of the current active page.
     /** Returns Stack::invalid_index if active_page_ is nullptr. */

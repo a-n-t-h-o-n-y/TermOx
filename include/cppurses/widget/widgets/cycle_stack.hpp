@@ -14,8 +14,8 @@
 #include <cppurses/widget/layouts/stack.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/widget.hpp>
+#include <cppurses/widget/widgets/button.hpp>
 #include <cppurses/widget/widgets/cycle_box.hpp>
-#include <cppurses/widget/widgets/push_button.hpp>
 
 namespace cppurses {
 
@@ -26,9 +26,9 @@ class Cycle_stack : public layout::Vertical<Widget> {
     /// User interface to cycle through the pages of the Stack.
     class Top_row : public layout::Horizontal<Widget> {
        public:
-        Push_button& left_btn  = this->make_child<Push_button>("<");
-        Cycle_box& cycle_box   = this->make_child<Cycle_box>();
-        Push_button& right_btn = this->make_child<Push_button>(">");
+        Button& left_btn     = this->make_child<Button>("<");
+        Cycle_box& cycle_box = this->make_child<Cycle_box>();
+        Button& right_btn    = this->make_child<Button>(">");
 
        public:
         Top_row()

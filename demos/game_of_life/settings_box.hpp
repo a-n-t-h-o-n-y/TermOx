@@ -9,20 +9,19 @@
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
+#include <cppurses/widget/widgets/button.hpp>
 #include <cppurses/widget/widgets/checkbox.hpp>
 #include <cppurses/widget/widgets/confirm_button.hpp>
 #include <cppurses/widget/widgets/label.hpp>
 #include <cppurses/widget/widgets/labeled_number_edit.hpp>
 #include <cppurses/widget/widgets/line_edit.hpp>
-#include <cppurses/widget/widgets/push_button.hpp>
 #include <cppurses/widget/widgets/toggle_button.hpp>
 
 namespace gol {
 
 struct Clear_step_box : cppurses::layout::Vertical<> {
    public:
-    cppurses::Push_button& step_btn =
-        this->make_child<cppurses::Push_button>("Step>");
+    cppurses::Button& step_btn = this->make_child<cppurses::Button>("Step>");
 
     cppurses::Confirm_button& clear_btn =
         this->make_child<cppurses::Confirm_button>("Clear");

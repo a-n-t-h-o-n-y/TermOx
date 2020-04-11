@@ -9,8 +9,8 @@
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
+#include <cppurses/widget/widgets/button.hpp>
 #include <cppurses/widget/widgets/horizontal_slider.hpp>
-#include <cppurses/widget/widgets/push_button.hpp>
 
 #include "glyph_select_stack.hpp"
 
@@ -23,15 +23,15 @@ class Glyph_select : public cppurses::layout::Vertical<> {
     struct Bottom_row : cppurses::layout::Horizontal<> {
         Bottom_row();
 
-        cppurses::Push_button& left_btn =
-            this->make_child<cppurses::Push_button>(cppurses::Glyph_string{
+        cppurses::Button& left_btn =
+            this->make_child<cppurses::Button>(cppurses::Glyph_string{
                 L'⏴' | foreground(cppurses::Color::Black), 1});
 
         cppurses::Horizontal_slider& slider =
             this->make_child<cppurses::Horizontal_slider>();
 
-        cppurses::Push_button& right_btn =
-            this->make_child<cppurses::Push_button>(cppurses::Glyph_string{
+        cppurses::Button& right_btn =
+            this->make_child<cppurses::Button>(cppurses::Glyph_string{
                 L'⏵' | foreground(cppurses::Color::Black), 1});
     };
 

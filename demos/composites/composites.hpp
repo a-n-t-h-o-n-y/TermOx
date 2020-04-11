@@ -8,7 +8,7 @@
 #include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/tuple.hpp>
 #include <cppurses/widget/widget.hpp>
-#include <cppurses/widget/widgets/push_button.hpp>
+#include <cppurses/widget/widgets/button.hpp>
 #include <cppurses/widget/widgets/textbox.hpp>
 
 namespace comp {
@@ -67,10 +67,10 @@ namespace comp {
 
 // using Foo = cppurses::Tuple<
 //     cppurses::layout::Horizontal<>,
-//     cppurses::Push_button,
-//     Background<cppurses::Push_button, cppurses::Color::Orange>,
+//     cppurses::Button,
+//     Background<cppurses::Button, cppurses::Color::Orange>,
 //     Background<Border_east<cppurses::Textbox>, cppurses::Color::Violet>,
-//     cppurses::Push_button>;
+//     cppurses::Button>;
 
 // struct Composites : Foo {
 //     Composites()
@@ -130,13 +130,13 @@ auto label(cppurses::Glyph_string l)
 // }
 
 // struct Btn : cppurses::layout::Horizontal<> {
-//     cppurses::Push_button& btn =
-//         this->make_child<cppurses::Push_button>() | label("btn") |
+//     cppurses::Button& btn =
+//         this->make_child<cppurses::Button>() | label("btn") |
 //         comp::background(cppurses::Color::Red) | comp::border();
 // };
 
 using Btns =
-    cppurses::Array<cppurses::layout::Horizontal<>, cppurses::Push_button, 2>;
+    cppurses::Array<cppurses::layout::Horizontal<>, cppurses::Button, 2>;
 
 using App =
     cppurses::Tuple<cppurses::layout::Vertical<>, cppurses::Textbox, Btns>;
@@ -188,7 +188,6 @@ struct Composites : App {
         load | on_mouse_press([&](auto) { load | bg(Color::Light_gray); });
         load | on_mouse_release([&](auto) { load | bg(Color::Dark_gray); });
         txbx | on_key_press([&](auto) { txbx | bg(Color::Light_blue); });
-        txbx | on_key_release([&](auto) { txbx | bg(Color::Violet); });
 
         using namespace std::literals;
         save | animate([]() { return 34ms; }) | wallpaper(L'X') |

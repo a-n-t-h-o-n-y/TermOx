@@ -1,5 +1,5 @@
-#ifndef CPPURSES_WIDGET_WIDGETS_PUSH_BUTTON_HPP
-#define CPPURSES_WIDGET_WIDGETS_PUSH_BUTTON_HPP
+#ifndef CPPURSES_WIDGET_WIDGETS_BUTTON_HPP
+#define CPPURSES_WIDGET_WIDGETS_BUTTON_HPP
 #include <utility>
 
 #include <signals/signal.hpp>
@@ -15,14 +15,14 @@
 namespace cppurses {
 
 /// Button widget that emits Signal on a left mouse button press.
-class Push_button : public Widget {
+class Button : public Widget {
    public:
     // Emitted when this Widget receives a left mouse button press event.
     sig::Signal<void()> clicked;
 
    public:
-    /// Construct a Push_button with centered \p label.
-    explicit Push_button(Glyph_string label = L"") : label_{std::move(label)} {}
+    /// Construct a Button with centered \p label.
+    explicit Button(Glyph_string label = L"") : label_{std::move(label)} {}
 
     /// Set the label and repaint.
     void set_label(Glyph_string label)
@@ -59,4 +59,4 @@ class Push_button : public Widget {
 };
 
 }  // namespace cppurses
-#endif  // CPPURSES_WIDGET_WIDGETS_PUSH_BUTTON_HPP
+#endif  // CPPURSES_WIDGET_WIDGETS_BUTTON_HPP

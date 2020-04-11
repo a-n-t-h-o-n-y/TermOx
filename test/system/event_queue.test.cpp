@@ -8,14 +8,14 @@
 #include <cppurses/system/events/delete_event.hpp>
 #include <cppurses/system/events/focus_event.hpp>
 #include <cppurses/system/events/paint_event.hpp>
-#include <cppurses/widget/widgets/push_button.hpp>
+#include <cppurses/widget/widgets/button.hpp>
 
 namespace {
 using namespace cppurses;
 
-auto get_widg() -> Push_button&
+auto get_widg() -> Button&
 {
-    static Push_button w;
+    static Button w;
     return w;
 }
 
@@ -202,7 +202,7 @@ TEST(EventQueue, AppendWhileIterating)
 
 TEST(EventQueue, RemoveEventsOf)
 {
-    Push_button w;
+    Button w;
     Event_queue queue{};
     queue.append(std::make_unique<Paint_event>(w));
     queue.append(make_event(Event::Paint));

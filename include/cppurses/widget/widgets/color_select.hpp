@@ -8,26 +8,13 @@
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/pipe.hpp>
-#include <cppurses/widget/widgets/push_button.hpp>
+#include <cppurses/widget/widgets/button.hpp>
 
 namespace cppurses {
-namespace pipe {
-
-template <typename Handler>
-auto on_color_selected(Handler&& op)
-{
-    return [&](auto& w) -> auto&
-    {
-        w.color_selected.connect(std::forward<Handler>(op));
-        return w;
-    };
-}
-
-}  // namespace pipe
 
 /// A single line of colored buttons.
 template <std::size_t Color_count>
-class Color_bar : public layout::Horizontal<Push_button> {
+class Color_bar : public layout::Horizontal<Button> {
    public:
     sig::Signal<void(Color)> color_selected;
 

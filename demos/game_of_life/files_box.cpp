@@ -3,8 +3,8 @@
 #include <string>
 
 #include <cppurses/painter/color.hpp>
+#include <cppurses/widget/widgets/button.hpp>
 #include <cppurses/widget/widgets/confirm_button.hpp>
-#include <cppurses/widget/widgets/push_button.hpp>
 
 using namespace cppurses;
 namespace gol {

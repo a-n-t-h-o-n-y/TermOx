@@ -105,7 +105,6 @@ target_sources(cppurses PRIVATE
     widget/widget_slots.cpp
     widget/line_edit.cpp
     widget/log.cpp
-    widget/confirm_button.cpp
     widget/border.cpp
     widget/cycle_box.cpp
     widget/textbox.cpp

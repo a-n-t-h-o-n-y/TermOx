@@ -7,15 +7,15 @@
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget.hpp>
-#include <cppurses/widget/widgets/push_button.hpp>
+#include <cppurses/widget/widgets/button.hpp>
 
 namespace cppurses {
 
 class Horizontal_scrollbar : public layout::Horizontal<> {
    public:
-    Push_button& left_button  = this->make_child<Push_button>("<");
-    Widget& middle            = this->make_child<Widget>();
-    Push_button& right_button = this->make_child<Push_button>(">");
+    Button& left_button  = this->make_child<Button>("<");
+    Widget& middle       = this->make_child<Widget>();
+    Button& right_button = this->make_child<Button>(">");
 
     sig::Signal<void()>& left  = left_button.clicked;
     sig::Signal<void()>& right = right_button.clicked;

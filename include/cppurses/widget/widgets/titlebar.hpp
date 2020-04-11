@@ -7,8 +7,8 @@
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/size_policy.hpp>
+#include <cppurses/widget/widgets/button.hpp>
 #include <cppurses/widget/widgets/label.hpp>
-#include <cppurses/widget/widgets/push_button.hpp>
 
 namespace cppurses {
 
@@ -21,13 +21,13 @@ class Titlebar : public layout::Horizontal<> {
     Label& title;
 
     /// The exit button Widget.
-    Push_button& exit_button;
+    Button& exit_button;
 
    public:
     /// Construct a Titlebar with centered \p title.
     explicit Titlebar(Glyph_string title_ = "")
         : title{this->make_child<Label>(std::move(title_))},
-          exit_button{this->make_child<Push_button>(L"│✕ ")}
+          exit_button{this->make_child<Button>(L"│✕ ")}
     {
         this->height_policy.fixed(1);
 

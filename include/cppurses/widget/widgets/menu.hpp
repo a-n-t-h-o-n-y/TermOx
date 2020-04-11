@@ -15,7 +15,7 @@
 #include <cppurses/widget/widgets/fixed_height.hpp>
 
 namespace cppurses {
-class Push_button;
+class Button;
 class Label;
 
 /// Displays a list of items, sending an associated Signal on user input.
@@ -115,10 +115,10 @@ class Menu : public layout::Vertical<> {
                                   Mouse::State const& mouse) -> bool override;
 
    private:
-    /// Holds reference to Push_button used to display item, and its Signal.
+    /// Holds reference to Button used to display item, and its Signal.
     struct Menu_item {
-        explicit Menu_item(Push_button& ref) : button{ref} {};
-        std::reference_wrapper<Push_button> button;
+        explicit Menu_item(Button& ref) : button{ref} {};
+        std::reference_wrapper<Button> button;
         sig::Signal<void()> selected;
     };
 

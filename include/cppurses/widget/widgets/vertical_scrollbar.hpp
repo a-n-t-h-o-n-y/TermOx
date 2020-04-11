@@ -8,15 +8,15 @@
 #include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget.hpp>
-#include <cppurses/widget/widgets/push_button.hpp>
+#include <cppurses/widget/widgets/button.hpp>
 
 namespace cppurses {
 
 class Vertical_scrollbar : public layout::Vertical<> {
    public:
-    Push_button& up_button   = this->make_child<Push_button>("▴");
-    Widget& middle           = this->make_child<Widget>();
-    Push_button& down_button = this->make_child<Push_button>("▾");
+    Button& up_button   = this->make_child<Button>("▴");
+    Widget& middle      = this->make_child<Widget>();
+    Button& down_button = this->make_child<Button>("▾");
 
     sig::Signal<void()>& up   = up_button.clicked;
     sig::Signal<void()>& down = down_button.clicked;

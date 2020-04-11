@@ -2,10 +2,10 @@
 #define DEMOS_NOTEPAD_NOTEPAD_HPP
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
+#include <cppurses/widget/widgets/button.hpp>
 #include <cppurses/widget/widgets/checkbox.hpp>
 #include <cppurses/widget/widgets/color_select.hpp>
 #include <cppurses/widget/widgets/label.hpp>
-#include <cppurses/widget/widgets/push_button.hpp>
 #include <cppurses/widget/widgets/textbox.hpp>
 
 namespace demos {
@@ -64,11 +64,9 @@ class Save_area : public cppurses::layout::Horizontal<> {
     Save_area();
 
     // Widgets
-    cppurses::Push_button& load_btn{
-        this->make_child<cppurses::Push_button>("Load")};
+    cppurses::Button& load_btn{this->make_child<cppurses::Button>("Load")};
     cppurses::Textbox& filename_edit{this->make_child<cppurses::Textbox>()};
-    cppurses::Push_button& save_btn{
-        this->make_child<cppurses::Push_button>("Save")};
+    cppurses::Button& save_btn{this->make_child<cppurses::Button>("Save")};
 
    private:
     void initialize();

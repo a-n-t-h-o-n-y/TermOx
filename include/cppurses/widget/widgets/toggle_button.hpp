@@ -6,17 +6,17 @@
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/layouts/stack.hpp>
-#include <cppurses/widget/widgets/push_button.hpp>
+#include <cppurses/widget/widgets/button.hpp>
 
 namespace cppurses {
 class Glyph_string;
 
-/// A Push_button with two alternating sides.
+/// A Button with two alternating sides.
 /** The top button is active first, switching between the two sides on clicks */
-class Toggle_button : public layout::Stack<Push_button> {
+class Toggle_button : public layout::Stack<Button> {
    public:
-    Push_button& top;
-    Push_button& bottom;
+    Button& top;
+    Button& bottom;
 
     sig::Signal<void()>& top_clicked    = top.clicked;
     sig::Signal<void()>& bottom_clicked = bottom.clicked;

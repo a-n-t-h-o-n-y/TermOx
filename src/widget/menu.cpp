@@ -15,8 +15,8 @@
 #include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/widget.hpp>
+#include <cppurses/widget/widgets/button.hpp>
 #include <cppurses/widget/widgets/label.hpp>
-#include <cppurses/widget/widgets/push_button.hpp>
 
 namespace cppurses {
 
@@ -32,8 +32,8 @@ Menu::Menu(Glyph_string title_text)
 auto Menu::insert_item(Glyph_string label, std::size_t index)
     -> sig::Signal<void()>&
 {
-    auto button_ptr         = std::make_unique<Push_button>(std::move(label));
-    Push_button& new_button = *button_ptr;
+    auto button_ptr    = std::make_unique<Button>(std::move(label));
+    Button& new_button = *button_ptr;
     this->insert_child(std::move(button_ptr), index + 2);
     items_.emplace(std::begin(items_) + index, new_button);
     new_button.install_event_filter(*this);

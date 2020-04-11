@@ -8,8 +8,8 @@
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/widget.hpp>
+#include <cppurses/widget/widgets/button.hpp>
 #include <cppurses/widget/widgets/horizontal_slider.hpp>
-#include <cppurses/widget/widgets/push_button.hpp>
 
 #include "glyph_select_stack.hpp"
 
