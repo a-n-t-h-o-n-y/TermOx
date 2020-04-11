@@ -10,7 +10,7 @@
 
 namespace demos {
 
-class Attribute_select
+class Trait_select
     : public cppurses::layout::Vertical<cppurses::Labeled_checkbox> {
    public:
     cppurses::Labeled_checkbox& bold      = this->make_child("Bold");
@@ -22,7 +22,7 @@ class Attribute_select
     cppurses::Labeled_checkbox& invisible = this->make_child("Invisible");
 
    public:
-    Attribute_select()
+    Trait_select()
     {
         using namespace cppurses::pipe;
         *this | children() |
@@ -30,9 +30,9 @@ class Attribute_select
     }
 };
 
-class Attrs_and_colors : public cppurses::layout::Vertical<> {
+class Traits_and_colors : public cppurses::layout::Vertical<> {
    public:
-    Attrs_and_colors();
+    Traits_and_colors();
 
     // Widgets
     cppurses::Label& fg_label{this->make_child<cppurses::Label>("Foreground⤵")};
@@ -41,19 +41,19 @@ class Attrs_and_colors : public cppurses::layout::Vertical<> {
     cppurses::Label& bg_label{this->make_child<cppurses::Label>("Background⤵")};
     cppurses::Color_select& bg_select{
         this->make_child<cppurses::Color_select>()};
-    Attribute_select& attr_select{this->make_child<Attribute_select>()};
+    Trait_select& trait_select{this->make_child<Trait_select>()};
 
    private:
     void initialize();
 };
 
-class Text_and_attributes : public cppurses::layout::Horizontal<> {
+class Text_and_traits : public cppurses::layout::Horizontal<> {
    public:
-    Text_and_attributes();
+    Text_and_traits();
 
     // Widgets
     cppurses::Textbox& textbox{this->make_child<cppurses::Textbox>()};
-    Attrs_and_colors& ac_select{this->make_child<Attrs_and_colors>()};
+    Traits_and_colors& ac_select{this->make_child<Traits_and_colors>()};
 
    private:
     void initialize();
@@ -80,7 +80,7 @@ class Notepad : public cppurses::layout::Vertical<> {
     bool focus_in_event() override;
 
    private:
-    Text_and_attributes& txt_attr{this->make_child<Text_and_attributes>()};
+    Text_and_traits& txt_trait{this->make_child<Text_and_traits>()};
     Save_area& save_area{this->make_child<Save_area>()};
     void initialize();
 };

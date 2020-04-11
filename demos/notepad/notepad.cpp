@@ -1,7 +1,7 @@
 #include "notepad.hpp"
 
-#include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/color.hpp>
+#include <cppurses/painter/trait.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/focus_policy.hpp>
@@ -39,10 +39,10 @@ using namespace cppurses;
 
 namespace demos {
 
-// Textbox and Attribute/Color Selection
-Text_and_attributes::Text_and_attributes() { this->initialize(); }
+// Textbox and Trait/Color Selection
+Text_and_traits::Text_and_traits() { this->initialize(); }
 
-void Text_and_attributes::initialize()
+void Text_and_traits::initialize()
 {
     textbox.brush.set_background(Color::Dark_gray);
     textbox.border.enable();
@@ -55,62 +55,55 @@ void Text_and_attributes::initialize()
     ac_select.fg_select.color_selected.connect(slot::set_foreground(textbox));
     ac_select.bg_select.color_selected.connect(slot::set_background(textbox));
 
-    // Add Attributes
-    ac_select.attr_select.bold.checked.connect(
-        [this]() { textbox.insert_brush.add_attributes(Attribute::Bold); });
-    ac_select.attr_select.italic.checked.connect(
-        [this]() { textbox.insert_brush.add_attributes(Attribute::Italic); });
-    ac_select.attr_select.underline.checked.connect([this]() {
-        textbox.insert_brush.add_attributes(Attribute::Underline);
-    });
-    ac_select.attr_select.standout.checked.connect(
-        [this]() { textbox.insert_brush.add_attributes(Attribute::Standout); });
-    ac_select.attr_select.dim.checked.connect(
-        [this]() { textbox.insert_brush.add_attributes(Attribute::Dim); });
-    ac_select.attr_select.inverse.checked.connect(
-        [this]() { textbox.insert_brush.add_attributes(Attribute::Inverse); });
-    ac_select.attr_select.invisible.checked.connect([this]() {
-        textbox.insert_brush.add_attributes(Attribute::Invisible);
-    });
+    // Add Traits
+    ac_select.trait_select.bold.checked.connect(
+        [this]() { textbox.insert_brush.add_traits(Trait::Bold); });
+    ac_select.trait_select.italic.checked.connect(
+        [this]() { textbox.insert_brush.add_traits(Trait::Italic); });
+    ac_select.trait_select.underline.checked.connect(
+        [this]() { textbox.insert_brush.add_traits(Trait::Underline); });
+    ac_select.trait_select.standout.checked.connect(
+        [this]() { textbox.insert_brush.add_traits(Trait::Standout); });
+    ac_select.trait_select.dim.checked.connect(
+        [this]() { textbox.insert_brush.add_traits(Trait::Dim); });
+    ac_select.trait_select.inverse.checked.connect(
+        [this]() { textbox.insert_brush.add_traits(Trait::Inverse); });
+    ac_select.trait_select.invisible.checked.connect(
+        [this]() { textbox.insert_brush.add_traits(Trait::Invisible); });
 
-    // Signals -- Remove Attributes
-    ac_select.attr_select.bold.unchecked.connect(
-        [this]() { textbox.insert_brush.remove_attributes(Attribute::Bold); });
-    ac_select.attr_select.italic.unchecked.connect([this]() {
-        textbox.insert_brush.remove_attributes(Attribute::Italic);
-    });
-    ac_select.attr_select.underline.unchecked.connect([this]() {
-        textbox.insert_brush.remove_attributes(Attribute::Underline);
-    });
-    ac_select.attr_select.standout.unchecked.connect([this]() {
-        textbox.insert_brush.remove_attributes(Attribute::Standout);
-    });
-    ac_select.attr_select.dim.unchecked.connect(
-        [this]() { textbox.insert_brush.remove_attributes(Attribute::Dim); });
-    ac_select.attr_select.inverse.unchecked.connect([this]() {
-        textbox.insert_brush.remove_attributes(Attribute::Inverse);
-    });
-    ac_select.attr_select.invisible.unchecked.connect([this]() {
-        textbox.insert_brush.remove_attributes(Attribute::Invisible);
-    });
+    // Signals -- Remove Traits
+    ac_select.trait_select.bold.unchecked.connect(
+        [this]() { textbox.insert_brush.remove_traits(Trait::Bold); });
+    ac_select.trait_select.italic.unchecked.connect(
+        [this]() { textbox.insert_brush.remove_traits(Trait::Italic); });
+    ac_select.trait_select.underline.unchecked.connect(
+        [this]() { textbox.insert_brush.remove_traits(Trait::Underline); });
+    ac_select.trait_select.standout.unchecked.connect(
+        [this]() { textbox.insert_brush.remove_traits(Trait::Standout); });
+    ac_select.trait_select.dim.unchecked.connect(
+        [this]() { textbox.insert_brush.remove_traits(Trait::Dim); });
+    ac_select.trait_select.inverse.unchecked.connect(
+        [this]() { textbox.insert_brush.remove_traits(Trait::Inverse); });
+    ac_select.trait_select.invisible.unchecked.connect(
+        [this]() { textbox.insert_brush.remove_traits(Trait::Invisible); });
 }
 
-// Attribute and Color Selections
-Attrs_and_colors::Attrs_and_colors()
+// Trait and Color Selections
+Traits_and_colors::Traits_and_colors()
 {
     this->initialize();
     fg_select.width_policy.fixed(16);
     fg_select.height_policy.fixed(2);
-    fg_label.brush.add_attributes(Attribute::Bold);
-    fg_label.set_alignment(Alignment::Center);
+    fg_label.brush.add_traits(Trait::Bold);
+    fg_label.set_alignment(Align::Center);
 
     bg_select.width_policy.fixed(16);
     bg_select.height_policy.fixed(2);
-    bg_label.brush.add_attributes(Attribute::Bold);
-    bg_label.set_alignment(Alignment::Center);
+    bg_label.brush.add_traits(Trait::Bold);
+    bg_label.set_alignment(Align::Center);
 }
 
-void Attrs_and_colors::initialize() { this->width_policy.fixed(16); }
+void Traits_and_colors::initialize() { this->width_policy.fixed(16); }
 
 // Save Area
 Save_area::Save_area() { this->initialize(); }
@@ -141,21 +134,21 @@ Notepad::Notepad()
 
 bool Notepad::focus_in_event()
 {
-    System::set_focus(txt_attr.textbox);
+    System::set_focus(txt_trait.textbox);
     return true;
 }
 
 void Notepad::initialize()
 {
     // Signals
-    save_area.load_btn.clicked.connect([this] {
-        txt_attr.textbox.set_contents(
+    save_area.load_btn.pressed.connect([this] {
+        txt_trait.textbox.set_contents(
             ::load_file(save_area.filename_edit.contents().str()));
     });
 
-    save_area.save_btn.clicked.connect([this] {
+    save_area.save_btn.pressed.connect([this] {
         ::save_file(save_area.filename_edit.contents().str(),
-                    txt_attr.textbox.contents().str());
+                    txt_trait.textbox.contents().str());
     });
 }
 }  // namespace demos

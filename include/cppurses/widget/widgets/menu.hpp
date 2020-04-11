@@ -7,8 +7,8 @@
 
 #include <signals/slot.hpp>
 
-#include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/painter/trait.hpp>
 #include <cppurses/system/events/key.hpp>
 #include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
@@ -68,8 +68,8 @@ class Menu : public layout::Vertical<> {
     /// Return the number of items in the Menu.
     auto size() const -> std::size_t { return items_.size(); }
 
-    /// Set the Attribute applied to the selected item.
-    void set_selected_attribute(Attribute const& attr);
+    /// Set the Trait applied to the selected item.
+    void set_selected_trait(Trait const& t);
 
     /// Hide the Menu's title.
     void hide_title()
@@ -124,7 +124,7 @@ class Menu : public layout::Vertical<> {
 
     std::vector<Menu_item> items_;
     std::size_t selected_index_ = 0;
-    Attribute selected_attr_    = Attribute::Inverse;
+    Trait selected_trait_       = Trait::Inverse;
     bool title_enabled_         = true;
     bool line_break_enabled_    = true;
 

@@ -1,12 +1,12 @@
 #ifndef DEMOS_GLYPH_PAINT_SIDE_PANE_HPP
 #define DEMOS_GLYPH_PAINT_SIDE_PANE_HPP
-#include "attribute_box.hpp"
 #include "options_box.hpp"
 #include "populated_glyph_stack.hpp"
+#include "trait_box.hpp"
 
-#include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
+#include <cppurses/painter/trait.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/widgets/color_select.hpp>
 #include <cppurses/widget/widgets/cycle_stack.hpp>
@@ -21,9 +21,9 @@ class Side_pane : public cppurses::layout::Vertical<> {
     struct Color_pages : cppurses::Cycle_stack<cppurses::Color_select> {
         Color_pages() { this->height_policy.maximum(3); }
         cppurses::Color_select& foreground{this->make_page(
-            cppurses::Glyph_string{"Foreground", cppurses::Attribute::Bold})};
+            cppurses::Glyph_string{"Foreground", cppurses::Trait::Bold})};
         cppurses::Color_select& background{this->make_page(
-            cppurses::Glyph_string{"Background", cppurses::Attribute::Bold})};
+            cppurses::Glyph_string{"Background", cppurses::Trait::Bold})};
     };
 
    public:
@@ -34,7 +34,7 @@ class Side_pane : public cppurses::layout::Vertical<> {
         space2.set_wallpaper(L'─');
         glyph_select.height_policy.preferred(6);
         show_glyph.height_policy.fixed(1);
-        show_glyph.set_alignment(cppurses::Alignment::Center);
+        show_glyph.set_alignment(cppurses::Align::Center);
     }
 
     Populated_glyph_stack& glyph_select{
@@ -44,7 +44,7 @@ class Side_pane : public cppurses::layout::Vertical<> {
 
     Color_pages& color_pages{this->make_child<Color_pages>()};
 
-    Attribute_box& attribute_box{this->make_child<Attribute_box>()};
+    Trait_box& trait_box{this->make_child<Trait_box>()};
 
     cppurses::Status_bar& show_glyph{
         this->make_child<cppurses::Status_bar>("x")};

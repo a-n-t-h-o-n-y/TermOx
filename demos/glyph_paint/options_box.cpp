@@ -24,7 +24,7 @@ Options_B::Options_B()
 {
     space1.set_wallpaper(L'─');
 
-    palette_label.set_alignment(Alignment::Center);
+    palette_label.set_alignment(Align::Center);
     palette_box.add_option("Dawn Bringer").connect([] {
         System::terminal.set_color_palette(Palettes::DawnBringer());
     });
@@ -44,10 +44,10 @@ Options_stack::Options_stack()
     this->set_active_page(0);
     this->height_policy.maximum(6);
 
-    options_a.more_btn.clicked.connect(
+    options_a.more_btn.pressed.connect(
         cppurses::slot::set_active_page(*this, 1));
 
-    options_b.back_btn.clicked.connect(
+    options_b.back_btn.pressed.connect(
         cppurses::slot::set_active_page(*this, 0));
 }
 }  // namespace glyph_paint

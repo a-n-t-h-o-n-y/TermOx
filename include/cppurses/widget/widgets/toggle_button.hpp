@@ -18,8 +18,9 @@ class Toggle_button : public layout::Stack<Button> {
     Button& top;
     Button& bottom;
 
-    sig::Signal<void()>& top_clicked    = top.clicked;
-    sig::Signal<void()>& bottom_clicked = bottom.clicked;
+   public:
+    sig::Signal<void()>& top_pressed    = top.pressed;
+    sig::Signal<void()>& bottom_pressed = bottom.pressed;
 
    public:
     /// Construct with corresponding labels.
@@ -27,14 +28,14 @@ class Toggle_button : public layout::Stack<Button> {
         : top{this->make_page(std::move(top_label))},
           bottom{this->make_page(std::move(bottom_label))}
     {
-        top.clicked.connect([this]() { this->set_active_page(bottom_index); });
-        bottom.clicked.connect([this]() { this->set_active_page(top_index); });
-        this->set_active_page(top_index);
+        top.pressed.connect([this]() { this->set_active_page(bottom_index_); });
+        bottom.pressed.connect([this]() { this->set_active_page(top_index_); });
+        this->set_active_page(top_index_);
     }
 
    private:
-    static auto constexpr top_index    = 0;
-    static auto constexpr bottom_index = 1;
+    static auto constexpr top_index_    = 0;
+    static auto constexpr bottom_index_ = 1;
 };
 
 }  // namespace cppurses

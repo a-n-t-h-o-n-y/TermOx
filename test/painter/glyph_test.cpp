@@ -1,24 +1,23 @@
-#include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
+#include <cppurses/painter/trait.hpp>
 
 #include <gtest/gtest.h>
 
 #include <string>
 
-using cppurses::Attribute;
 using cppurses::background;
 using cppurses::Brush;
 using cppurses::Color;
 using cppurses::foreground;
 using cppurses::Glyph;
+using cppurses::Trait;
 
-std::string foo(const Glyph& g) {
-    return g.str();
-}
+std::string foo(const Glyph& g) { return g.str(); }
 
-TEST(GlyphTest, StringConstructor) {
+TEST(GlyphTest, StringConstructor)
+{
     EXPECT_NO_THROW(Glyph("H"));
     EXPECT_NO_THROW(Glyph("5"));
     EXPECT_NO_THROW(Glyph('j'));
@@ -27,14 +26,16 @@ TEST(GlyphTest, StringConstructor) {
     EXPECT_NO_THROW(Glyph("ↈ"));
 }
 
-TEST(GlyphTest, StringAndAttributesConstructor) {
-    EXPECT_NO_THROW(Glyph("#", Attribute::Bold));
-    EXPECT_NO_THROW(Glyph("1", background(Color::Blue), Attribute::Underline,
-                          Attribute::Bold, Attribute::Underline));
-    EXPECT_NO_THROW(Glyph("ޒ", Attribute::Standout));
+TEST(GlyphTest, StringAndTraitsConstructor)
+{
+    EXPECT_NO_THROW(Glyph("#", Trait::Bold));
+    EXPECT_NO_THROW(Glyph("1", background(Color::Blue), Trait::Underline,
+                          Trait::Bold, Trait::Underline));
+    EXPECT_NO_THROW(Glyph("ޒ", Trait::Standout));
 }
 
-TEST(GlyphTest, Symbol) {
+TEST(GlyphTest, Symbol)
+{
     Glyph glf_1("H");
     Glyph glf_2("ↈ");
     Glyph glf_3("6");
@@ -44,10 +45,11 @@ TEST(GlyphTest, Symbol) {
     EXPECT_EQ("6", glf_3.str());
 }
 
-TEST(GlyphTest, SetSymbol) {
+TEST(GlyphTest, SetSymbol)
+{
     Glyph g1 = "ੴ";
-    Glyph g2 = {"ആ", Attribute::Italic, background(Color::Green)};
-    Glyph g3{"g", foreground(Color::Red), Attribute::Dim};
+    Glyph g2 = {"ആ", Trait::Italic, background(Color::Green)};
+    Glyph g3{"g", foreground(Color::Red), Trait::Dim};
 
     EXPECT_EQ("ੴ", g1.str());
     EXPECT_EQ("ആ", g2.str());
@@ -62,17 +64,18 @@ TEST(GlyphTest, SetSymbol) {
     EXPECT_EQ("ᛥ", g3.str());
 }
 
-TEST(GlyphTest, SetBrush) {
+TEST(GlyphTest, SetBrush)
+{
     Glyph g1{"ៀ"};
-    Glyph g2("ᯣ", Attribute::Italic, background(Color::White));
+    Glyph g2("ᯣ", Trait::Italic, background(Color::White));
 
     EXPECT_EQ(Brush{}, g1.brush());
-    EXPECT_EQ((Brush{Attribute::Italic, background(Color::White)}), g2.brush());
+    EXPECT_EQ((Brush{Trait::Italic, background(Color::White)}), g2.brush());
 
     g2.brush().set_foreground(Color::Yellow);
-    g2.brush().add_attributes(Attribute::Standout);
+    g2.brush().add_traits(Trait::Standout);
 
-    EXPECT_EQ((Brush{Attribute::Standout, Attribute::Italic,
-                     background(Color::White), foreground(Color::Yellow)}),
+    EXPECT_EQ((Brush{Trait::Standout, Trait::Italic, background(Color::White),
+                     foreground(Color::Yellow)}),
               g2.brush());
 }

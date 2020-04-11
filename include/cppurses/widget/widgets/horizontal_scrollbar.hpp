@@ -5,6 +5,7 @@
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
+#include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widgets/button.hpp>
@@ -13,25 +14,22 @@ namespace cppurses {
 
 class Horizontal_scrollbar : public layout::Horizontal<> {
    public:
-    Button& left_button  = this->make_child<Button>("<");
-    Widget& middle       = this->make_child<Widget>();
-    Button& right_button = this->make_child<Button>(">");
+    Button& left_btn  = this->make_child<Button>("<");
+    Widget& middle    = this->make_child<Widget>();
+    Button& right_btn = this->make_child<Button>(">");
 
-    sig::Signal<void()>& left  = left_button.clicked;
-    sig::Signal<void()>& right = right_button.clicked;
+    sig::Signal<void()>& left  = left_btn.pressed;
+    sig::Signal<void()>& right = right_btn.pressed;
 
    public:
     Horizontal_scrollbar()
     {
-        this->height_policy.fixed(1);
-        this->width_policy.expanding(0);
+        using namespace pipe;
+        *this | fixed_height(1) | expanding_width(0);
 
-        left_button.width_policy.fixed(1);
-
-        middle.width_policy.expanding(0);
-        middle.brush.set_background(Color::Light_gray);
-
-        right_button.width_policy.fixed(1);
+        left_btn | fixed_width(1);
+        middle | expanding_width(0) | bg(Color::Light_gray);
+        right_btn | fixed_width(1);
     }
 };
 

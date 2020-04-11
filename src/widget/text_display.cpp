@@ -8,9 +8,9 @@
 
 #include <signals/signal.hpp>
 
-#include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
+#include <cppurses/painter/trait.hpp>
 #include <cppurses/widget/point.hpp>
 
 namespace cppurses {
@@ -24,10 +24,10 @@ void Text_display::insert(Glyph_string text, std::size_t index)
         return;
     }
     for (auto& glyph : text) {
-        for (auto i = 0; i < Attribute_count; ++i) {
-            auto const a = static_cast<Attribute>(i);
-            if (this->insert_brush.has_attribute(a))
-                glyph.brush.add_attributes(a);
+        for (auto i = 0; i < Trait_count; ++i) {
+            auto const a = static_cast<Trait>(i);
+            if (this->insert_brush.has_trait(a))
+                glyph.brush.add_traits(a);
         }
     }
     contents_.insert(std::begin(contents_) + index, std::begin(text),
@@ -39,10 +39,10 @@ void Text_display::insert(Glyph_string text, std::size_t index)
 void Text_display::append(Glyph_string text)
 {
     for (auto& glyph : text) {
-        for (auto i = 0; i < Attribute_count; ++i) {
-            auto const a = static_cast<Attribute>(i);
-            if (this->insert_brush.has_attribute(a))
-                glyph.brush.add_attributes(a);
+        for (auto i = 0; i < Trait_count; ++i) {
+            auto const a = static_cast<Trait>(i);
+            if (this->insert_brush.has_trait(a))
+                glyph.brush.add_traits(a);
         }
     }
     contents_.append(text);
@@ -147,11 +147,11 @@ auto Text_display::paint_event() -> bool
         auto const sub_end   = sub_begin + line.length;
         auto start           = 0uL;
         switch (alignment_) {
-            case Alignment::Left: start = 0; break;
-            case Alignment::Center:
+            case Align::Left: start = 0; break;
+            case Align::Center:
                 start = (this->width() - line.length) / 2;
                 break;
-            case Alignment::Right: start = this->width() - line.length; break;
+            case Align::Right: start = this->width() - line.length; break;
         }
         p.put(Glyph_string(sub_begin, sub_end), start, line_n++);
     };

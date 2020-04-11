@@ -27,7 +27,7 @@ class Number_edit : public Line_edit {
     Number_edit(Number_t initial = 0)
         : Line_edit{std::to_string(initial)}, value_{initial}
     {
-        // this->set_alignment(Alignment::Right); // TODO Once alignment works
+        // this->set_alignment(Align::Right); // TODO Once alignment works
         this->set_validator(
             [](char c) { return Number_edit::is_valid_input(c); });
         this->edit_finished.connect([this](std::string text) {

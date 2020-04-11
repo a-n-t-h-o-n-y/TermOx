@@ -3,7 +3,6 @@
 #include <iterator>
 #include <mutex>
 
-#include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/detail/find_empty_space.hpp>
@@ -12,6 +11,7 @@
 #include <cppurses/painter/detail/screen_mask.hpp>
 #include <cppurses/painter/detail/staged_changes.hpp>
 #include <cppurses/painter/glyph.hpp>
+#include <cppurses/painter/trait.hpp>
 #include <cppurses/system/detail/focus.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/terminal/output.hpp>

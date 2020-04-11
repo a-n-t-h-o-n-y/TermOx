@@ -38,7 +38,7 @@ enum class Color : Underlying_color_t {
     Light_gray
 };
 
-// Used by add_attributes() in brush to overload on different Color types from a
+// Used by add_traits() in brush to overload on different Color types from a
 // parameter pack.
 enum class BackgroundColor : Underlying_color_t {
     // Compatibility Colors
@@ -62,7 +62,7 @@ enum class BackgroundColor : Underlying_color_t {
     Light_gray
 };
 
-// Used by add_attributes() in brush to overload on different Color types from a
+// Used by add_traits() in brush to overload on different Color types from a
 // parameter pack.
 enum class ForegroundColor : Underlying_color_t {
     // Compatibility Colors

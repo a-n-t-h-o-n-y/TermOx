@@ -59,7 +59,7 @@ void Glyph_select_stack::update_stack()
     while (symbols_index < symbols_.size()) {
         Matrix_display& symbol_page{
             this->make_page<Matrix_display>(this->width(), this->height())};
-        // Attach to glyph clicked signal in Matrix_display
+        // Attach to glyph pressed signal in Matrix_display
         symbol_page.mouse_pressed.connect([this, &symbol_page](auto const& m) {
             const Glyph& g{symbol_page.matrix.at(m.local.x, m.local.y)};
             if (g != L' '_g) {

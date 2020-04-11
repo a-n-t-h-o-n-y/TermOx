@@ -85,10 +85,9 @@ class Graph : public cppurses::Widget {
     auto paint_event() -> bool override
     {
         // Only relies on map_, call regenerate_map() if you need a new size
-        cppurses::Painter p{*this};
-        for (auto [point, bitmap] : map_) {
+        auto p = cppurses::Painter{*this};
+        for (auto [point, bitmap] : map_)
             p.put(to_symbol(bitmap), point);
-        }
         return Widget::paint_event();
     }
 
@@ -194,9 +193,8 @@ class Graph : public cppurses::Widget {
     void regenerate_map()
     {
         map_.clear();
-        for (auto coord : coordinates_) {
+        for (auto coord : coordinates_)
             this->initialize_bitmap(coord);
-        }
     }
 };
 

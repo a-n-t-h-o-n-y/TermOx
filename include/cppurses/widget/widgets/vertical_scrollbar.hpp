@@ -18,8 +18,8 @@ class Vertical_scrollbar : public layout::Vertical<> {
     Widget& middle      = this->make_child<Widget>();
     Button& down_button = this->make_child<Button>("▾");
 
-    sig::Signal<void()>& up   = up_button.clicked;
-    sig::Signal<void()>& down = down_button.clicked;
+    sig::Signal<void()>& up   = up_button.pressed;
+    sig::Signal<void()>& down = down_button.pressed;
 
    public:
     Vertical_scrollbar() { this->initialize(); }

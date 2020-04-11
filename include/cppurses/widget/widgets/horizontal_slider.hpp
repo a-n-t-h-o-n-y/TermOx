@@ -10,6 +10,7 @@
 #include <cppurses/system/events/key.hpp>
 #include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/focus_policy.hpp>
+#include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
@@ -23,9 +24,9 @@ class Horizontal_slider : public Widget {
    public:
     Horizontal_slider()
     {
-        this->height_policy.fixed(1);
-        this->focus_policy = Focus_policy::Strong;
-        this->set_wallpaper(L' '_g | background(Color::Light_gray));
+        using namespace pipe;
+        *this | fixed_height(1) | strong_focus() |
+            wallpaper(L' ' | background(Color::Light_gray));
     }
 
     void set_percent(float percent);

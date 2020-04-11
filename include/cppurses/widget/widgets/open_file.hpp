@@ -31,7 +31,7 @@ class Open_file : public layout::Horizontal<> {
         filename_edit.brush.set_background(Color::White);
         filename_edit.brush.set_foreground(Color::Black);
         filename_edit.set_ghost_color(Color::Dark_gray);
-        open_btn.clicked.connect([this] { this->notify(); });
+        open_btn.pressed.connect([this] { this->notify(); });
     }
 
    private:

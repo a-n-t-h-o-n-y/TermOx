@@ -11,7 +11,7 @@ namespace cppurses {
 class Glyph_matrix {
    public:
     /// Construct with a set width and height, or defaults to 0 for each.
-    /** Glyphs default constructed(space char with no colors or attributes). */
+    /** Glyphs default constructed(space char with no colors or traits). */
     explicit Glyph_matrix(std::size_t width = 0, std::size_t height = 0)
         : matrix_{height, std::vector<Glyph>(width, L' '_g)}
     {}

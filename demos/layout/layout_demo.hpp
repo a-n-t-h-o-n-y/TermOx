@@ -187,7 +187,7 @@ struct Size_policy_settings : cppurses::layout::Vertical<> {
 
 struct Settings : cppurses::layout::Vertical<> {
     cppurses::Text_display& title{this->make_child<cppurses::Text_display>(
-        cppurses::Glyph_string{"Settings", cppurses::Attribute::Bold})};
+        cppurses::Glyph_string{"Settings", cppurses::Trait::Bold})};
     Size_policy_settings& width_policy_settings{
         this->make_child<Size_policy_settings>()};
     cppurses::Button& add_btn{this->make_child<cppurses::Button>("Add Widget")};
@@ -200,7 +200,7 @@ struct Settings : cppurses::layout::Vertical<> {
         this->width_policy.fixed(20);
 
         title.height_policy.fixed(1);
-        title.set_alignment(cppurses::Alignment::Center);
+        title.set_alignment(cppurses::Align::Center);
         title.brush.set_background(cppurses::Color::Dark_gray);
 
         width_policy_settings.policy_updated.connect(
@@ -208,12 +208,12 @@ struct Settings : cppurses::layout::Vertical<> {
                 this->width_policy_updated(p);
             });
 
-        add_btn.clicked.connect([this] { this->add_widget(); });
+        add_btn.pressed.connect([this] { this->add_widget(); });
         add_btn.height_policy.fixed(3);
         add_btn.brush.set_background(cppurses::Color::Light_blue);
         add_btn.brush.set_foreground(cppurses::Color::Black);
 
-        remove_btn.clicked.connect([this] { this->remove_selected(); });
+        remove_btn.pressed.connect([this] { this->remove_selected(); });
         remove_btn.height_policy.fixed(3);
         remove_btn.brush.set_background(cppurses::Color::Violet);
         remove_btn.brush.set_foreground(cppurses::Color::Black);

@@ -22,9 +22,9 @@ Info_box::Info_box()
 Examples_info_box::Examples_info_box()
 {
     this->set_active_page(0);
-    examples.to_info_btn.clicked.connect(
+    examples.to_info_btn.pressed.connect(
         [this]() { this->set_active_page(1); });
-    info.to_examples_btn.clicked.connect(
+    info.to_examples_btn.pressed.connect(
         [this]() { this->set_active_page(0); });
 }
 }  // namespace gol

@@ -31,7 +31,7 @@ class Save_file : public layout::Horizontal<> {
         filename_edit.brush.set_background(Color::White);
         filename_edit.brush.set_foreground(Color::Black);
         filename_edit.set_ghost_color(Color::Dark_gray);
-        save_btn.clicked.connect([this] { this->notify(); });
+        save_btn.pressed.connect([this] { this->notify(); });
     }
 
    private:

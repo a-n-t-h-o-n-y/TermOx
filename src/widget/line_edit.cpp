@@ -7,10 +7,10 @@
 
 #include <signals/signal.hpp>
 
-#include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/painter/trait.hpp>
 #include <cppurses/system/events/key.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widgets/textbox.hpp>
@@ -20,18 +20,18 @@ namespace cppurses {
 void Line_edit::underline(bool enabled)
 {
     if (enabled) {
-        this->set_wallpaper({L' ', Attribute::Underline});
+        this->set_wallpaper({L' ', Trait::Underline});
         auto underlined_text = this->contents();
-        underlined_text.add_attributes(Attribute::Underline);
+        underlined_text.add_traits(Trait::Underline);
         this->set_contents(std::move(underlined_text));
-        this->insert_brush.add_attributes(Attribute::Underline);
+        this->insert_brush.add_traits(Trait::Underline);
     }
     else {
         this->set_wallpaper(L' ');
         auto non_underlined = this->contents();
-        non_underlined.remove_attribute(Attribute::Underline);
+        non_underlined.remove_traits(Trait::Underline);
         this->set_contents(std::move(non_underlined));
-        this->insert_brush.remove_attributes(Attribute::Underline);
+        this->insert_brush.remove_traits(Trait::Underline);
     }
     this->update();
 }
@@ -41,7 +41,7 @@ void Line_edit::set_ghost_color(Color c)
     if (not on_initial_)
         return;
     auto ghost_text = this->contents();
-    ghost_text.add_attributes(foreground(c));
+    ghost_text.add_traits(foreground(c));
     this->set_contents(std::move(ghost_text));
     this->update();
 }

@@ -73,7 +73,7 @@ Export_panel::Export_panel()
 
     export_btn_.brush.set_background(Color::White);
     export_btn_.brush.set_foreground(Color::Black);
-    export_btn_.clicked.connect(
+    export_btn_.pressed.connect(
         [this]() { export_current_palette(name_edit_.contents().str()); });
 }
 }  // namespace palette

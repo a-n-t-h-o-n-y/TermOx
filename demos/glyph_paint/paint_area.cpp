@@ -11,12 +11,12 @@
 #include <string>
 #include <utility>
 
-#include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
+#include <cppurses/painter/trait.hpp>
 #include <cppurses/system/events/key.hpp>
 #include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/border.hpp>
@@ -32,9 +32,8 @@ namespace {
 
 void insert_newline(Point first, Point second, std::ostream& os)
 {
-    if (first.y >= second.y) {
+    if (first.y >= second.y)
         return;
-    }
     std::string newlines(second.y - first.y, '\n');
     os << newlines;
 }
@@ -42,9 +41,8 @@ void insert_newline(Point first, Point second, std::ostream& os)
 void insert_space(Point first, Point second, std::ostream& os)
 {
     std::size_t spaces_n{second.x};
-    if (first.y == second.y) {
+    if (first.y == second.y)
         spaces_n -= first.x + 1;
-    }
     std::string spaces(spaces_n, ' ');
     os << spaces;
 }
@@ -81,46 +79,40 @@ void Paint_area::set_symbol(const Glyph& sym)
     }
     current_glyph_.symbol = sym.symbol;
     std::optional<Color> sym_bg{sym.brush.background_color()};
-    if (sym_bg) {
+    if (sym_bg)
         current_glyph_.brush.set_background(*sym_bg);
-    }
     std::optional<Color> sym_fg{sym.brush.foreground_color()};
-    if (sym_fg) {
+    if (sym_fg)
         current_glyph_.brush.set_foreground(*sym_fg);
-    }
     glyph_changed(current_glyph_);
 }
 
 void Paint_area::set_foreground_color(Color c)
 {
     current_glyph_.brush.set_foreground(c);
-    if (!erase_enabled_) {
+    if (!erase_enabled_)
         glyph_changed(current_glyph_);
-    }
 }
 
 void Paint_area::set_background_color(Color c)
 {
     current_glyph_.brush.set_background(c);
-    if (!erase_enabled_) {
+    if (!erase_enabled_)
         glyph_changed(current_glyph_);
-    }
 }
 
-void Paint_area::set_attribute(Attribute attr)
+void Paint_area::set_trait(Trait t)
 {
-    current_glyph_.brush.add_attributes(attr);
-    if (!erase_enabled_) {
+    current_glyph_.brush.add_traits(t);
+    if (!erase_enabled_)
         glyph_changed(current_glyph_);
-    }
 }
 
-void Paint_area::remove_attribute(Attribute attr)
+void Paint_area::remove_traits(Trait t)
 {
-    current_glyph_.brush.remove_attributes(attr);
-    if (!erase_enabled_) {
+    current_glyph_.brush.remove_traits(t);
+    if (!erase_enabled_)
         glyph_changed(current_glyph_);
-    }
 }
 
 void Paint_area::enable_erase()
@@ -180,9 +172,8 @@ void Paint_area::read(std::istream& is)
     Glyph_string file_glyphs{file_text};
     for (const Glyph& glyph : file_glyphs) {
         const wchar_t sym{glyph.symbol};
-        if (sym != L' ' and sym != L'\n' and sym != L'\r') {
+        if (sym != L' ' and sym != L'\n' and sym != L'\r')
             glyphs_painted_[current] = glyph;
-        }
         ++current.x;
         if (sym == L'\n') {
             ++current.y;
@@ -205,45 +196,38 @@ bool Paint_area::paint_event()
 
 bool Paint_area::mouse_press_event(const Mouse::State& mouse)
 {
-    if (mouse.button == Mouse::Button::Right) {
+    if (mouse.button == Mouse::Button::Right)
         this->remove_glyph(mouse.local);
-    }
     else if (mouse.button == Mouse::Button::Middle) {
-        if (glyphs_painted_.count(mouse.local) == 1) {
+        if (glyphs_painted_.count(mouse.local) == 1)
             this->set_glyph(glyphs_painted_[mouse.local]);
-        }
     }
-    else {
+    else
         this->place_glyph(mouse.local.x, mouse.local.y);
-    }
     return Widget::mouse_press_event(mouse);
 }
 
 bool Paint_area::key_press_event(const Key::State& keyboard)
 {
     if (!this->cursor.enabled()) {
-        if (!std::iscntrl(keyboard.symbol)) {
+        if (!std::iscntrl(keyboard.symbol))
             this->set_symbol(keyboard.symbol);
-        }
         return Widget::key_press_event(keyboard);
     }
-    if (this->width() == 0 or this->height() == 0) {
+    if (this->width() == 0 or this->height() == 0)
         return Widget::key_press_event(keyboard);
-    }
     std::size_t new_x{this->cursor.x() + 1};
     std::size_t new_y{this->cursor.y() + 1};
     switch (keyboard.key) {
         case Key::Arrow_right:
-            if (new_x == this->width()) {
+            if (new_x == this->width())
                 new_x = 0;
-            }
             this->cursor.set_x(new_x);
             break;
         case Key::Arrow_left: this->cursor.set_x(this->cursor.x() - 1); break;
         case Key::Arrow_down:
-            if (new_y == this->height()) {
+            if (new_y == this->height())
                 new_y = 0;
-            }
             this->cursor.set_y(new_y);
             break;
         case Key::Arrow_up: this->cursor.set_y(this->cursor.y() - 1); break;
@@ -269,9 +253,8 @@ void Paint_area::place_glyph(std::size_t x, std::size_t y)
             this->toggle_clone();
         }
     }
-    else if (erase_enabled_) {
+    else if (erase_enabled_)
         this->remove_glyph(Point{x, y});
-    }
     else {
         glyphs_painted_[Point{x, y}] = current_glyph_;
         this->update();
@@ -343,32 +326,30 @@ sig::Slot<void()> set_background_color(Paint_area& pa, Color c)
     return slot;
 }
 
-sig::Slot<void(Attribute)> set_attribute(Paint_area& pa)
+sig::Slot<void(Trait)> set_trait(Paint_area& pa)
 {
-    sig::Slot<void(Attribute)> slot{
-        [&pa](Attribute attr) { pa.set_attribute(attr); }};
+    sig::Slot<void(Trait)> slot{[&pa](Trait t) { pa.set_trait(t); }};
     slot.track(pa.destroyed);
     return slot;
 }
 
-sig::Slot<void()> set_attribute(Paint_area& pa, Attribute attr)
+sig::Slot<void()> set_trait(Paint_area& pa, Trait t)
 {
-    sig::Slot<void()> slot{[&pa, attr] { pa.set_attribute(attr); }};
+    sig::Slot<void()> slot{[&pa, t] { pa.set_trait(t); }};
     slot.track(pa.destroyed);
     return slot;
 }
 
-sig::Slot<void(Attribute)> remove_attribute(Paint_area& pa)
+sig::Slot<void(Trait)> remove_traits(Paint_area& pa)
 {
-    sig::Slot<void(Attribute)> slot{
-        [&pa](Attribute attr) { pa.remove_attribute(attr); }};
+    sig::Slot<void(Trait)> slot{[&pa](Trait t) { pa.remove_traits(t); }};
     slot.track(pa.destroyed);
     return slot;
 }
 
-sig::Slot<void()> remove_attribute(Paint_area& pa, Attribute attr)
+sig::Slot<void()> remove_traits(Paint_area& pa, Trait t)
 {
-    sig::Slot<void()> slot{[&pa, attr] { pa.remove_attribute(attr); }};
+    sig::Slot<void()> slot{[&pa, t] { pa.remove_traits(t); }};
     slot.track(pa.destroyed);
     return slot;
 }

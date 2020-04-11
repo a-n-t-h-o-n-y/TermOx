@@ -9,7 +9,9 @@
 #include <cppurses/common/filter_iterator.hpp>
 #include <cppurses/common/map_iterator.hpp>
 #include <cppurses/common/range.hpp>
+#include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/animation_engine.hpp>
+#include <cppurses/widget/align.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
@@ -265,31 +267,31 @@ inline auto remove_foreground()
     };
 }
 
-inline auto add(Attribute attr)
+inline auto add(Trait t)
 {
     return [=](auto& w) -> auto&
     {
-        w.brush.add_attributes(attr);
+        w.brush.add_traits(t);
         w.update();
         return w;
     };
 }
 
-inline auto remove(Attribute attr)
+inline auto remove(Trait t)
 {
     return [=](auto& w) -> auto&
     {
-        w.brush.remove_attributes(attr);
+        w.brush.remove_traits(t);
         w.update();
         return w;
     };
 }
 
-inline auto clear_attributes()
+inline auto clear_traits()
 {
     return [](auto& w) -> auto&
     {
-        w.brush.clear_attributes();
+        w.brush.clear_traits();
         w.update();
         return w;
     };
@@ -879,12 +881,12 @@ auto north_wall(G g)
     };
 }
 
-template <typename... Attributes>
-auto north_wall(Attributes... a)
+template <typename... Traits>
+auto north_wall(Traits... a)
 {
     return [=](auto& w) -> auto&
     {
-        w.border.segments.north.brush.add_attributes(a...);
+        w.border.segments.north.brush.add_traits(a...);
         w.update();
         return w;
     };
@@ -901,12 +903,12 @@ auto south_wall(G g)
     };
 }
 
-template <typename... Attributes>
-auto south_wall(Attributes... a)
+template <typename... Traits>
+auto south_wall(Traits... a)
 {
     return [=](auto& w) -> auto&
     {
-        w.border.segments.south.brush.add_attributes(a...);
+        w.border.segments.south.brush.add_traits(a...);
         w.update();
         return w;
     };
@@ -923,12 +925,12 @@ auto east_wall(G g)
     };
 }
 
-template <typename... Attributes>
-auto east_wall(Attributes... a)
+template <typename... Traits>
+auto east_wall(Traits... a)
 {
     return [=](auto& w) -> auto&
     {
-        w.border.segments.east.brush.add_attributes(a...);
+        w.border.segments.east.brush.add_traits(a...);
         w.update();
         return w;
     };
@@ -945,12 +947,12 @@ auto west_wall(G g)
     };
 }
 
-template <typename... Attributes>
-auto west_wall(Attributes... a)
+template <typename... Traits>
+auto west_wall(Traits... a)
 {
     return [=](auto& w) -> auto&
     {
-        w.border.segments.west.brush.add_attributes(a...);
+        w.border.segments.west.brush.add_traits(a...);
         w.update();
         return w;
     };
@@ -968,13 +970,13 @@ auto north_south_walls(G g)
     };
 }
 
-template <typename... Attributes>
-auto north_south_walls(Attributes... a)
+template <typename... Traits>
+auto north_south_walls(Traits... a)
 {
     return [=](auto& w) -> auto&
     {
-        w.border.segments.north.brush.add_attributes(a...);
-        w.border.segments.south.brush.add_attributes(a...);
+        w.border.segments.north.brush.add_traits(a...);
+        w.border.segments.south.brush.add_traits(a...);
         w.update();
         return w;
     };
@@ -992,13 +994,13 @@ auto east_west_walls(G g)
     };
 }
 
-template <typename... Attributes>
-auto east_west_walls(Attributes... a)
+template <typename... Traits>
+auto east_west_walls(Traits... a)
 {
     return [=](auto& w) -> auto&
     {
-        w.border.segments.east.brush.add_attributes(a...);
-        w.border.segments.west.brush.add_attributes(a...);
+        w.border.segments.east.brush.add_traits(a...);
+        w.border.segments.west.brush.add_traits(a...);
         w.update();
         return w;
     };
@@ -1015,12 +1017,12 @@ auto north_east_corner(G g)
     };
 }
 
-template <typename... Attributes>
-auto north_east_corner(Attributes... a)
+template <typename... Traits>
+auto north_east_corner(Traits... a)
 {
     return [=](auto& w) -> auto&
     {
-        w.border.segments.north_east.brush.add_attributes(a...);
+        w.border.segments.north_east.brush.add_traits(a...);
         w.update();
         return w;
     };
@@ -1039,14 +1041,14 @@ auto north_east_walls(G g)
     };
 }
 
-template <typename... Attributes>
-auto north_east_walls(Attributes... a)
+template <typename... Traits>
+auto north_east_walls(Traits... a)
 {
     return [=](auto& w) -> auto&
     {
-        w.border.segments.north.brush.add_attributes(a...);
-        w.border.segments.north_east.brush.add_attributes(a...);
-        w.border.segments.east.brush.add_attributes(a...);
+        w.border.segments.north.brush.add_traits(a...);
+        w.border.segments.north_east.brush.add_traits(a...);
+        w.border.segments.east.brush.add_traits(a...);
         w.update();
         return w;
     };
@@ -1063,12 +1065,12 @@ auto north_west_corner(G g)
     };
 }
 
-template <typename... Attributes>
-auto north_west_corner(Attributes... a)
+template <typename... Traits>
+auto north_west_corner(Traits... a)
 {
     return [=](auto& w) -> auto&
     {
-        w.border.segments.north_west.brush.add_attributes(a...);
+        w.border.segments.north_west.brush.add_traits(a...);
         w.update();
         return w;
     };
@@ -1087,14 +1089,14 @@ auto north_west_walls(G g)
     };
 }
 
-template <typename... Attributes>
-auto north_west_walls(Attributes... a)
+template <typename... Traits>
+auto north_west_walls(Traits... a)
 {
     return [=](auto& w) -> auto&
     {
-        w.border.segments.north.brush.add_attributes(a...);
-        w.border.segments.north_west.brush.add_attributes(a...);
-        w.border.segments.west.brush.add_attributes(a...);
+        w.border.segments.north.brush.add_traits(a...);
+        w.border.segments.north_west.brush.add_traits(a...);
+        w.border.segments.west.brush.add_traits(a...);
         w.update();
         return w;
     };
@@ -1111,12 +1113,12 @@ auto south_east_corner(G g)
     };
 }
 
-template <typename... Attributes>
-auto south_east_corner(Attributes... a)
+template <typename... Traits>
+auto south_east_corner(Traits... a)
 {
     return [=](auto& w) -> auto&
     {
-        w.border.segments.south_east.brush.add_attributes(a...);
+        w.border.segments.south_east.brush.add_traits(a...);
         w.update();
         return w;
     };
@@ -1135,14 +1137,14 @@ auto south_east_walls(G g)
     };
 }
 
-template <typename... Attributes>
-auto south_east_walls(Attributes... a)
+template <typename... Traits>
+auto south_east_walls(Traits... a)
 {
     return [=](auto& w) -> auto&
     {
-        w.border.segments.south.brush.add_attributes(a...);
-        w.border.segments.south_east.brush.add_attributes(a...);
-        w.border.segments.east.brush.add_attributes(a...);
+        w.border.segments.south.brush.add_traits(a...);
+        w.border.segments.south_east.brush.add_traits(a...);
+        w.border.segments.east.brush.add_traits(a...);
         w.update();
         return w;
     };
@@ -1159,12 +1161,12 @@ auto south_west_corner(G g)
     };
 }
 
-template <typename... Attributes>
-auto south_west_corner(Attributes... a)
+template <typename... Traits>
+auto south_west_corner(Traits... a)
 {
     return [=](auto& w) -> auto&
     {
-        w.border.segments.south_west.brush.add_attributes(a...);
+        w.border.segments.south_west.brush.add_traits(a...);
         w.update();
         return w;
     };
@@ -1183,14 +1185,14 @@ auto south_west_walls(G g)
     };
 }
 
-template <typename... Attributes>
-auto south_west_walls(Attributes... a)
+template <typename... Traits>
+auto south_west_walls(Traits... a)
 {
     return [=](auto& w) -> auto&
     {
-        w.border.segments.south.brush.add_attributes(a...);
-        w.border.segments.south_west.brush.add_attributes(a...);
-        w.border.segments.west.brush.add_attributes(a...);
+        w.border.segments.south.brush.add_traits(a...);
+        w.border.segments.south_west.brush.add_traits(a...);
+        w.border.segments.west.brush.add_traits(a...);
         w.update();
         return w;
     };
@@ -1463,9 +1465,9 @@ inline auto half_block_walls()
 {
     return [=](auto& w) -> auto&
     {
-        w.border.segments.north      = Glyph{L'▄', Attribute::Inverse};
+        w.border.segments.north      = Glyph{L'▄', Trait::Inverse};
         w.border.segments.south      = L'▄';
-        w.border.segments.east       = Glyph{L'▌', Attribute::Inverse};
+        w.border.segments.east       = Glyph{L'▌', Trait::Inverse};
         w.border.segments.west       = L'▌';
         w.border.segments.north_east = L'▜';
         w.border.segments.north_west = L'▛';
@@ -1481,9 +1483,9 @@ inline auto half_block_inner_walls_1()
     return [=](auto& w) -> auto&
     {
         w.border.segments.north      = L'▄';
-        w.border.segments.south      = Glyph{L'▄', Attribute::Inverse};
+        w.border.segments.south      = Glyph{L'▄', Trait::Inverse};
         w.border.segments.east       = L'▌';
-        w.border.segments.west       = Glyph{L'▌', Attribute::Inverse};
+        w.border.segments.west       = Glyph{L'▌', Trait::Inverse};
         w.border.segments.north_east = L'▖';
         w.border.segments.north_west = L'▗';
         w.border.segments.south_east = L'▘';
@@ -1498,9 +1500,9 @@ inline auto half_block_inner_walls_2()
     return [=](auto& w) -> auto&
     {
         w.border.segments.north      = L'▄';
-        w.border.segments.south      = Glyph{L'▄', Attribute::Inverse};
+        w.border.segments.south      = Glyph{L'▄', Trait::Inverse};
         w.border.segments.east       = L'▌';
-        w.border.segments.west       = Glyph{L'▌', Attribute::Inverse};
+        w.border.segments.west       = Glyph{L'▌', Trait::Inverse};
         w.border.segments.north_east = L'▞';
         w.border.segments.north_west = L'▚';
         w.border.segments.south_east = L'▚';
@@ -1631,6 +1633,32 @@ auto on_left_click(Handler&& op)
 }
 
 template <typename Handler>
+auto on_middle_click(Handler&& op)
+{
+    return [=](auto& w) -> auto&
+    {
+        w.mouse_pressed.connect([op](auto const& m) {
+            if (m.button == Mouse::Button::Middle)
+                op();
+        });
+        return w;
+    };
+}
+
+template <typename Handler>
+auto on_right_click(Handler&& op)
+{
+    return [=](auto& w) -> auto&
+    {
+        w.mouse_pressed.connect([op](auto const& m) {
+            if (m.button == Mouse::Button::Right)
+                op();
+        });
+        return w;
+    };
+}
+
+template <typename Handler>
 auto on_mouse_release(Handler&& op)
 {
     return [&](auto& w) -> auto&
@@ -1731,7 +1759,6 @@ auto on_destroy(Handler&& op)
 }
 
 // Derived Widget::Signals -----------------------------------------------------
-
 template <typename Handler>
 auto on_color_selected(Handler&& op)
 {
@@ -1742,11 +1769,76 @@ auto on_color_selected(Handler&& op)
     };
 }
 
+template <typename Handler>
+auto on_press(Handler&& op)
+{
+    return [&](auto& w) -> auto&
+    {
+        w.pressed.connect(std::forward<Handler>(op));
+        return w;
+    };
+}
+
+// Derived Widget Modifiers ----------------------------------------------------
 inline auto active_page(std::size_t p)
 {
     return [=](auto& w) -> auto&
     {
         w.set_active_page(p);
+        return w;
+    };
+}
+
+inline auto label(Glyph_string const& x)
+{
+    return [=](auto& w) -> auto&
+    {
+        w.set_label(x);
+        return w;
+    };
+}
+
+inline auto word_wrap(bool enable)
+{
+    return [=](auto& w) -> auto&
+    {
+        w.enable_word_wrap(enable);
+        return w;
+    };
+}
+
+inline auto contents(Glyph_string x)
+{
+    return [=](auto& w) -> auto&
+    {
+        w.set_contents(x);
+        return w;
+    };
+}
+
+inline auto align_left()
+{
+    return [=](auto& w) -> auto&
+    {
+        w.set_alignment(Align::Left);
+        return w;
+    };
+}
+
+inline auto align_center()
+{
+    return [=](auto& w) -> auto&
+    {
+        w.set_alignment(Align::Center);
+        return w;
+    };
+}
+
+inline auto align_right()
+{
+    return [=](auto& w) -> auto&
+    {
+        w.set_alignment(Align::Right);
         return w;
     };
 }

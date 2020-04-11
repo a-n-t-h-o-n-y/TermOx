@@ -33,9 +33,8 @@ class Generation_count : public cppurses::layout::Horizontal<> {
 
 struct Center_offset : cppurses::layout::Vertical<> {
    public:
-    cppurses::Label& title_ =
-        this->make_child<cppurses::Label>(cppurses::Glyph_string{
-            "Center Offset", cppurses::Attribute::Underline});
+    cppurses::Label& title_ = this->make_child<cppurses::Label>(
+        cppurses::Glyph_string{"Center Offset", cppurses::Trait::Underline});
     cppurses::Labeled_number_edit<>& x_coords =
         this->make_child<cppurses::Labeled_number_edit<>>("x: ", 0);
     cppurses::Labeled_number_edit<>& y_coords =

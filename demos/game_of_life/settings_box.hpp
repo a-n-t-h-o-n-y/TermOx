@@ -5,8 +5,8 @@
 
 #include <signals/signal.hpp>
 
-#include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/painter/trait.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/widgets/button.hpp>
@@ -33,7 +33,7 @@ struct Clear_step_box : cppurses::layout::Vertical<> {
 struct Rule_edit : cppurses::layout::Vertical<> {
    public:
     cppurses::Label& label = this->make_child<cppurses::Label>(
-        cppurses::Glyph_string{"Rules[B/S]", cppurses::Attribute::Underline});
+        cppurses::Glyph_string{"Rules[B/S]", cppurses::Trait::Underline});
 
     cppurses::Line_edit& edit_box =
         this->make_child<cppurses::Line_edit>("3/23");
@@ -46,8 +46,8 @@ struct Rule_edit : cppurses::layout::Vertical<> {
 
 struct Start_pause_btns : cppurses::Toggle_button {
    public:
-    sig::Signal<void()>& start_requested = top.clicked;
-    sig::Signal<void()>& pause_requested = bottom.clicked;
+    sig::Signal<void()>& start_requested = top.pressed;
+    sig::Signal<void()>& pause_requested = bottom.pressed;
 
    public:
     Start_pause_btns();
@@ -88,8 +88,8 @@ struct Settings_box : cppurses::layout::Vertical<> {
     sig::Signal<void(std::chrono::milliseconds)> period_set;
     sig::Signal<void()>& grid_toggled  = grid_fade.grid_box.toggled;
     sig::Signal<void()>& fade_toggled  = grid_fade.fade_box.toggled;
-    sig::Signal<void()>& clear_request = clear_step_btns.clear_btn.clicked;
-    sig::Signal<void()>& step_request  = clear_step_btns.step_btn.clicked;
+    sig::Signal<void()>& clear_request = clear_step_btns.clear_btn.pressed;
+    sig::Signal<void()>& step_request  = clear_step_btns.step_btn.pressed;
 
    public:
     Settings_box();

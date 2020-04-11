@@ -6,13 +6,14 @@
 
 #include <signals/signal.hpp>
 
-#include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/painter/trait.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/layouts/stack.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
+#include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widgets/button.hpp>
 #include <cppurses/widget/widgets/cycle_box.hpp>
@@ -33,19 +34,13 @@ class Cycle_stack : public layout::Vertical<Widget> {
        public:
         Top_row()
         {
-            this->height_policy.fixed(1);
-            left_btn.width_policy.fixed(1);
-            left_btn.clicked.connect(slot::previous(cycle_box));
+            using namespace pipe;
+            *this | fixed_height(1) | children() | bg(Color::Light_gray) |
+                fg(Color::Black);
 
-            right_btn.width_policy.fixed(1);
-            right_btn.clicked.connect(slot::next(cycle_box));
-
-            cycle_box.brush.add_attributes(Attribute::Bold);
-
-            for (auto& child : this->get_children()) {
-                child.brush.set_background(Color::Light_gray);
-                child.brush.set_foreground(Color::Black);
-            }
+            left_btn | fixed_width(1) | on_press(slot::previous(cycle_box));
+            right_btn | fixed_width(1) | on_press(slot::next(cycle_box));
+            cycle_box | add(Trait::Bold);
         }
     };
 

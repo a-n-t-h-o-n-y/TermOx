@@ -32,7 +32,7 @@ Rule_edit::Rule_edit()
     edit_box.edit_finished.connect(
         [this](std::string rule_text) { rule_change(rule_text); });
 
-    label.set_alignment(Alignment::Center);
+    label.set_alignment(Align::Center);
 }
 
 Start_pause_btns::Start_pause_btns() : Toggle_button{"Start", "Pause"}

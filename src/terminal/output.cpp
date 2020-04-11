@@ -12,10 +12,10 @@
 #include <ncurses.h>
 #undef border
 
-#include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
+#include <cppurses/painter/trait.hpp>
 #include <cppurses/system/system.hpp>
 
 #ifndef add_wchstr
@@ -42,19 +42,19 @@ auto color_index(Brush const& brush) -> short
     return color_index(foreground, background);
 }
 
-auto attribute_to_attr_t(Attribute attr) -> attr_t
+auto trait_to_attr_t(Trait t) -> attr_t
 {
     auto result = A_NORMAL;
-    switch (attr) {
-        case Attribute::Bold: result = A_BOLD; break;
-        case Attribute::Underline: result = A_UNDERLINE; break;
-        case Attribute::Standout: result = A_STANDOUT; break;
-        case Attribute::Dim: result = A_DIM; break;
-        case Attribute::Inverse: result = A_REVERSE; break;
-        case Attribute::Invisible: result = A_INVIS; break;
-        case Attribute::Blink: result = A_BLINK; break;
+    switch (t) {
+        case Trait::Bold: result = A_BOLD; break;
+        case Trait::Underline: result = A_UNDERLINE; break;
+        case Trait::Standout: result = A_STANDOUT; break;
+        case Trait::Dim: result = A_DIM; break;
+        case Trait::Inverse: result = A_REVERSE; break;
+        case Trait::Invisible: result = A_INVIS; break;
+        case Trait::Blink: result = A_BLINK; break;
 #ifdef A_ITALIC
-        case Attribute::Italic: result = A_ITALIC; break;
+        case Trait::Italic: result = A_ITALIC; break;
 #endif
     }
     return result;
@@ -63,10 +63,10 @@ auto attribute_to_attr_t(Attribute attr) -> attr_t
 auto find_attr_t(Brush const& brush) -> attr_t
 {
     auto result = A_NORMAL;
-    for (auto i = 0; i < Attribute_count; ++i) {
-        auto const a = static_cast<Attribute>(i);
-        if (brush.has_attribute(a))
-            result |= attribute_to_attr_t(a);
+    for (auto i = 0; i < Trait_count; ++i) {
+        auto const a = static_cast<Trait>(i);
+        if (brush.has_trait(a))
+            result |= trait_to_attr_t(a);
     }
     return result;
 }
@@ -75,14 +75,14 @@ auto find_attr_t(Brush const& brush) -> attr_t
 void paint_indicator(char symbol)
 {
     auto const color_pair = color_index(Color::White, Color::Black);
-    auto const attributes = A_NORMAL;
+    auto const traits     = A_NORMAL;
 #    ifdef add_wchstr
     wchar_t const temp_sym[2] = {symbol, L'\0'};
     auto temp_display         = cchar_t{' '};
-    ::setcchar(&temp_display, temp_sym, attributes, color_pair, nullptr);
+    ::setcchar(&temp_display, temp_sym, traits, color_pair, nullptr);
     ::wadd_wchnstr(::stdscr, &temp_display, 1);
 #    else
-    ::waddch(::stdscr, symbol | COLOR_PAIR(color_pair) | attributes);
+    ::waddch(::stdscr, symbol | COLOR_PAIR(color_pair) | traits);
 #    endif
     refresh();
     std::this_thread::sleep_for(std::chrono::milliseconds(SLOW_PAINT));
@@ -90,30 +90,30 @@ void paint_indicator(char symbol)
 #endif
 
 #ifdef add_wchstr
-/// Add \p glyph's symbol, with attributes, to the screen at cursor position.
+/// Add \p glyph's symbol, with traits, to the screen at cursor position.
 void put_as_wchar(Glyph const& glyph)
 {
-    auto const color_pair      = color_index(glyph.brush);
-    auto const attributes      = find_attr_t(glyph.brush);
-    wchar_t const symbol[2]    = {glyph.symbol, L'\0'};
-    auto symbol_and_attributes = cchar_t{};
+    auto const color_pair   = color_index(glyph.brush);
+    auto const traits       = find_attr_t(glyph.brush);
+    wchar_t const symbol[2] = {glyph.symbol, L'\0'};
+    auto symbol_and_traits  = cchar_t{};
 
-    ::setcchar(&symbol_and_attributes, symbol, attributes, color_pair, nullptr);
-    ::wadd_wchnstr(::stdscr, &symbol_and_attributes, 1);
+    ::setcchar(&symbol_and_traits, symbol, traits, color_pair, nullptr);
+    ::wadd_wchnstr(::stdscr, &symbol_and_traits, 1);
 }
 #else
 
-/// Add \p glyph's symbol, with attributes, to the screen at cursor position.
+/// Add \p glyph's symbol, with traits, to the screen at cursor position.
 void put_as_char(Glyph const& glyph)
 {
-    auto use_addch             = false;
-    auto symbol_and_attributes = detail::get_chtype(glyph.symbol, use_addch);
-    symbol_and_attributes |= COLOR_PAIR(color_index(glyph.brush));
-    symbol_and_attributes |= find_attr_t(glyph.brush);
+    auto use_addch         = false;
+    auto symbol_and_traits = detail::get_chtype(glyph.symbol, use_addch);
+    symbol_and_traits |= COLOR_PAIR(color_index(glyph.brush));
+    symbol_and_traits |= find_attr_t(glyph.brush);
     if (use_addch)
-        ::waddch(::stdscr, symbol_and_attributes);
+        ::waddch(::stdscr, symbol_and_traits);
     else
-        ::waddchnstr(::stdscr, &symbol_and_attributes, 1);
+        ::waddchnstr(::stdscr, &symbol_and_traits, 1);
 }
 #endif
 }  // namespace

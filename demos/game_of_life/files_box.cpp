@@ -13,7 +13,7 @@ File_widget::File_widget(std::string const& btn_text)
     : confirm_btn_{this->make_child<Confirm_button>(btn_text)}
 {
     this->height_policy.maximum(2);
-    confirm_btn_.clicked.connect(
+    confirm_btn_.pressed.connect(
         [this]() { filename_given(filename_box_.contents().str()); });
     confirm_btn_.main_btn.brush.set_background(Color::White);
     confirm_btn_.main_btn.brush.set_foreground(Color::Dark_gray);

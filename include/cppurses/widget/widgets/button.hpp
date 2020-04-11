@@ -9,16 +9,13 @@
 #include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/widget.hpp>
 
-#include <cppurses/system/events/mouse.hpp>
-#include <cppurses/widget/widget.hpp>
-
 namespace cppurses {
 
 /// Button widget that emits Signal on a left mouse button press.
 class Button : public Widget {
    public:
     // Emitted when this Widget receives a left mouse button press event.
-    sig::Signal<void()> clicked;
+    sig::Signal<void()> pressed;
 
    public:
     /// Construct a Button with centered \p label.
@@ -32,16 +29,16 @@ class Button : public Widget {
     }
 
     /// Return the current label.
-    auto label() const -> Glyph_string const& { return label_; }
+    auto get_label() const -> Glyph_string const& { return label_; }
 
     /// Return the current label.
-    auto label() -> Glyph_string& { return label_; }
+    auto get_label() -> Glyph_string& { return label_; }
 
    protected:
     auto mouse_press_event(Mouse::State const& mouse) -> bool override
     {
         if (mouse.button == Mouse::Button::Left)
-            clicked();
+            this->pressed();
         return Widget::mouse_press_event(mouse);
     }
 

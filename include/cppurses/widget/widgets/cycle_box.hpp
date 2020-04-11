@@ -13,9 +13,10 @@
 #include <cppurses/system/events/key.hpp>
 #include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/focus_policy.hpp>
+#include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/widgets/label.hpp>
 
-// TODO Indicate in focus with color or attribute change.
+// TODO Indicate in focus with color or trait change.
 namespace cppurses {
 
 /// A rotating set of labels, emitting a Signal when the label is changed.
@@ -27,11 +28,7 @@ class Cycle_box : public Label {
     sig::Signal<void(std::string)> option_changed;
 
    public:
-    Cycle_box()
-    {
-        this->Text_display::set_alignment(Alignment::Center);
-        this->focus_policy = Focus_policy::Strong;
-    }
+    Cycle_box() { *this | pipe::align_center() | pipe::strong_focus(); }
 
     /// Add an option/label to the Cycle_box.
     /** The returned Signal reference will be emitted every time this option is
@@ -40,7 +37,7 @@ class Cycle_box : public Label {
     {
         options_.emplace_back(std::move(label));
         if (this->size() == 1)
-            this->set_current_to(0);
+            this->set_current_option(0);
         return options_.back().enabled;
     }
 
@@ -49,9 +46,10 @@ class Cycle_box : public Label {
      *  there are multiple options with identical text. */
     void remove_option(Glyph_string const& label)
     {
-        if (label.str() == this->current_option_label().str())
-            this->set_current_to(0);
-        auto const iter = this->find(label.str());
+        auto const& label_str = label.str();
+        if (label_str == this->current_option_label().str())
+            this->set_current_option(0);
+        auto const iter = this->find(label_str);
         if (iter != std::end(options_))
             options_.erase(iter);
     }
@@ -64,20 +62,20 @@ class Cycle_box : public Label {
 
     /// Set the current option to the option with \p label identifier.
     /** Does not emit the option's signal. No-op if label is not an option. */
-    void set_current_to(std::string const& label)
+    void set_current_option(std::string const& label)
     {
         auto const iter = this->find(label);
         if (iter != std::end(options_))
-            this->set_current_to(std::distance(std::begin(options_), iter));
+            this->set_current_option(std::distance(std::begin(options_), iter));
     }
 
     /// Set the current option to the one at \p index.
     /** Does not emit the option's signal.
      * Input Constraints: \p index < options_.size() */
-    void set_current_to(std::size_t index)
+    void set_current_option(std::size_t index)
     {
         index_ = index;
-        this->set_contents(options_[index_].name);
+        *this | pipe::contents(options_[index_].name);
     }
 
     /// Return the number of options in the Cycle_box.

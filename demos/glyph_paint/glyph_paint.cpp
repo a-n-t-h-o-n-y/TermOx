@@ -15,40 +15,40 @@ Glyph_paint::Glyph_paint()
     side_pane.color_pages.background.color_selected.connect(
         slot::set_background_color(paint_area));
 
-    side_pane.attribute_box.top_row.bold_box.wrapped.checked.connect(
-        slot::set_attribute(paint_area, Attribute::Bold));
-    side_pane.attribute_box.top_row.bold_box.wrapped.unchecked.connect(
-        slot::remove_attribute(paint_area, Attribute::Bold));
+    side_pane.trait_box.top_row.bold_box.wrapped.checked.connect(
+        slot::set_trait(paint_area, Trait::Bold));
+    side_pane.trait_box.top_row.bold_box.wrapped.unchecked.connect(
+        slot::remove_traits(paint_area, Trait::Bold));
 
-    side_pane.attribute_box.top_row.dim_box.wrapped.checked.connect(
-        slot::set_attribute(paint_area, Attribute::Dim));
-    side_pane.attribute_box.top_row.dim_box.wrapped.unchecked.connect(
-        slot::remove_attribute(paint_area, Attribute::Dim));
+    side_pane.trait_box.top_row.dim_box.wrapped.checked.connect(
+        slot::set_trait(paint_area, Trait::Dim));
+    side_pane.trait_box.top_row.dim_box.wrapped.unchecked.connect(
+        slot::remove_traits(paint_area, Trait::Dim));
 
-    side_pane.attribute_box.inverse_box.wrapped.checked.connect(
-        slot::set_attribute(paint_area, Attribute::Inverse));
-    side_pane.attribute_box.inverse_box.wrapped.unchecked.connect(
-        slot::remove_attribute(paint_area, Attribute::Inverse));
+    side_pane.trait_box.inverse_box.wrapped.checked.connect(
+        slot::set_trait(paint_area, Trait::Inverse));
+    side_pane.trait_box.inverse_box.wrapped.unchecked.connect(
+        slot::remove_traits(paint_area, Trait::Inverse));
 
-    side_pane.attribute_box.italic_box.wrapped.checked.connect(
-        slot::set_attribute(paint_area, Attribute::Italic));
-    side_pane.attribute_box.italic_box.wrapped.unchecked.connect(
-        slot::remove_attribute(paint_area, Attribute::Italic));
+    side_pane.trait_box.italic_box.wrapped.checked.connect(
+        slot::set_trait(paint_area, Trait::Italic));
+    side_pane.trait_box.italic_box.wrapped.unchecked.connect(
+        slot::remove_traits(paint_area, Trait::Italic));
 
-    side_pane.attribute_box.underline_box.wrapped.checked.connect(
-        slot::set_attribute(paint_area, Attribute::Underline));
-    side_pane.attribute_box.underline_box.wrapped.unchecked.connect(
-        slot::remove_attribute(paint_area, Attribute::Underline));
+    side_pane.trait_box.underline_box.wrapped.checked.connect(
+        slot::set_trait(paint_area, Trait::Underline));
+    side_pane.trait_box.underline_box.wrapped.unchecked.connect(
+        slot::remove_traits(paint_area, Trait::Underline));
 
     paint_area.glyph_changed.connect(
         cppurses::slot::update_status(side_pane.show_glyph));
-    side_pane.options_box.options_a.clone_btn.clicked.connect(
+    side_pane.options_box.options_a.clone_btn.pressed.connect(
         slot::toggle_clone(paint_area));
-    side_pane.options_box.options_a.clone_btn.clicked.connect(
+    side_pane.options_box.options_a.clone_btn.pressed.connect(
         cppurses::slot::update_status(
             side_pane.show_glyph,
             Glyph_string{"Clone", foreground(Color::Light_gray)}));
-    side_pane.options_box.options_a.clear_btn.clicked.connect(
+    side_pane.options_box.options_a.clear_btn.pressed.connect(
         slot::clear(paint_area));
     side_pane.options_box.options_a.cursor_box.toggled.connect(
         cppurses::slot::toggle_cursor(paint_area));

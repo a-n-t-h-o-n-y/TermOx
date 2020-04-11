@@ -288,7 +288,7 @@ struct Spinner_vertical_pass : Spinner {
     auto second() -> Glyph_string
     {
         auto result = first();
-        result.add_attributes(Attribute::Inverse);
+        result.add_traits(Trait::Inverse);
         return result;
     }
 };
@@ -306,7 +306,7 @@ struct Spinner_horizontal_pass : Spinner {
     auto second() -> Glyph_string
     {
         auto result = first();
-        result.add_attributes(Attribute::Inverse);
+        result.add_traits(Trait::Inverse);
         return result;
     }
 };

@@ -33,9 +33,9 @@ class Titlebar : public layout::Horizontal<> {
 
         title.brush.set_background(Color::White);
         title.brush.set_foreground(Color::Black);
-        title.set_alignment(Alignment::Center);
+        title.set_alignment(Align::Center);
 
-        exit_button.clicked.connect(System::quit);
+        exit_button.pressed.connect(System::quit);
         exit_button.brush.set_background(Color::White);
         exit_button.brush.set_foreground(Color::Black);
         exit_button.width_policy.fixed(3);

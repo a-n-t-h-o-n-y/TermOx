@@ -18,7 +18,7 @@ namespace gol {
 
 Center_offset::Center_offset()
 {
-    title_.set_alignment(Alignment::Center);
+    title_.set_alignment(Align::Center);
     x_coords.number_edit.brush.set_background(cppurses::Color::Black);
     x_coords.number_edit.brush.set_foreground(cppurses::Color::White);
     x_coords.number_edit.set_ghost_color(Color::White);

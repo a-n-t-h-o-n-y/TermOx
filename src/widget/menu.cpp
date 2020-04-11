@@ -8,9 +8,9 @@
 
 #include <signals/signals.hpp>
 
-#include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
+#include <cppurses/painter/trait.hpp>
 #include <cppurses/system/events/key.hpp>
 #include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/focus_policy.hpp>
@@ -24,8 +24,8 @@ Menu::Menu(Glyph_string title_text)
     : title{this->make_child<Label>(std::move(title_text))}
 {
     this->focus_policy = Focus_policy::Strong;
-    title.set_alignment(Alignment::Center);
-    title.brush.add_attributes(Attribute::Bold);
+    title.set_alignment(Align::Center);
+    title.brush.add_traits(Trait::Bold);
     line_break.set_wallpaper(L'─');
 }
 
@@ -41,7 +41,7 @@ auto Menu::insert_item(Glyph_string label, std::size_t index)
 
     if (items_.size() == 1)
         this->select_item(0);
-    new_button.clicked.connect([this, index] {
+    new_button.pressed.connect([this, index] {
         this->select_item(index);
         this->send_selected_signal();
     });
@@ -63,22 +63,22 @@ void Menu::select_item(std::size_t index)
     if (items_.empty())
         return;
     auto& previous_btn = items_[selected_index_].button.get();
-    previous_btn.brush.remove_attributes(selected_attr_);
+    previous_btn.brush.remove_traits(selected_trait_);
     previous_btn.update();
 
     selected_index_ = index >= items_.size() ? items_.size() - 1 : index;
 
     auto& current_btn = items_[selected_index_].button.get();
-    current_btn.brush.add_attributes(selected_attr_);
+    current_btn.brush.add_traits(selected_trait_);
     current_btn.update();
 }
 
-void Menu::set_selected_attribute(Attribute const& attr)
+void Menu::set_selected_trait(Trait const& trait)
 {
     auto& selected_btn = items_[selected_index_].button.get();
-    selected_btn.brush.remove_attributes(selected_attr_);
-    selected_attr_ = attr;
-    selected_btn.brush.add_attributes(selected_attr_);
+    selected_btn.brush.remove_traits(selected_trait_);
+    selected_trait_ = trait;
+    selected_btn.brush.add_traits(selected_trait_);
     selected_btn.update();
 }
 

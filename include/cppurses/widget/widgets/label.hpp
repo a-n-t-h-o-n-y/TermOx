@@ -6,6 +6,7 @@
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/pair.hpp>
+#include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/widgets/fixed_width.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
 
@@ -16,8 +17,7 @@ class Label : public Text_display {
    public:
     explicit Label(Glyph_string text = "") : Text_display{std::move(text)}
     {
-        this->height_policy.fixed(1);
-        this->disable_word_wrap();
+        *this | pipe::fixed_height(1) | pipe::word_wrap(false);
     }
 };
 
@@ -36,7 +36,7 @@ class Label_left : public layout::Horizontal<> {
         : label{this->make_child<Label>(std::move(label_))},
           wrapped{this->make_child<Widget_t>(std::forward<Args>(args)...)}
     {
-        this->height_policy.fixed(1);
+        *this | pipe::fixed_height(1);
     }
 };
 
@@ -55,7 +55,7 @@ class Label_right : public layout::Horizontal<> {
         : wrapped{this->make_child<Widget_t>(std::forward<Args>(args)...)},
           label{this->make_child<Label>(std::move(label_))}
     {
-        this->height_policy.fixed(1);
+        *this | pipe::fixed_height(1);
     }
 };
 

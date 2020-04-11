@@ -13,7 +13,7 @@
 
 namespace cppurses {
 
-/// A Button with a confirm screen after the initial click.
+/// A Button with a confirm screen after the initial press.
 /** Clicked signal is only emitted after confirmation. */
 class Confirm_button : public layout::Stack<> {
    private:
@@ -34,7 +34,7 @@ class Confirm_button : public layout::Stack<> {
 
    public:
     /// Emitted once confirmation has been made.
-    sig::Signal<void()> clicked;
+    sig::Signal<void()> pressed;
 
    public:
     Button& main_btn;
@@ -54,7 +54,7 @@ class Confirm_button : public layout::Stack<> {
             on_left_click([this] { *this | active_page(confirm_page_); });
 
         confirm_page.confirm_btn | on_left_click([this] {
-            clicked();
+            pressed();
             *this | active_page(front_page_);
         });
 

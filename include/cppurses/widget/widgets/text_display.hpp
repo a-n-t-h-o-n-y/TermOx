@@ -8,13 +8,11 @@
 
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/widget/align.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
 struct Point;
-
-/// Used to define the alignment of text in a Text_display Widget.
-enum class Alignment { Left, Center, Right };
 
 /// Non-interactive box to display a given Glyph_string.
 /** Provides operations to change the text, wrap words on spaces, change the
@@ -76,14 +74,14 @@ class Text_display : public Widget {
     /// Set the Alignment, changing how the contents are displayed.
     /** Not fully implemented at the moment, Left alignment is currently
      *  supported. */
-    void set_alignment(Alignment type)
+    void set_alignment(Align type)
     {
         alignment_ = type;
         this->update();
     }
 
     /// Return the currently used Alignment.
-    auto alignment() const -> Alignment { return alignment_; }
+    auto alignment() const -> Align { return alignment_; }
 
     /// Scroll the display up by \p n lines.
     /** Tops out at the first line displayed at the top of the display. */
@@ -233,7 +231,7 @@ class Text_display : public Widget {
     /// Index into display_state_.
     std::size_t top_line_   = 0;
     bool word_wrap_enabled_ = true;
-    Alignment alignment_    = Alignment::Left;
+    Align alignment_        = Align::Left;
     Glyph_string contents_;
     std::vector<Line_info> display_state_ = {Line_info{0, 0}};
 };

@@ -162,18 +162,17 @@ struct Composites : App {
         save | remove_background();  // TODO maybe clear_bg?
         txbx | remove_foreground();
 
-        // save | add_attr(Attribute::Bold, Attribute::Underline);
-        // save.brush.add_attributes(Attribute::Bold, Attribute::Underline);
-        save | add(Attribute::Bold) | add(Attribute::Underline);
-        load | add(Attribute::Bold) | add(Attribute::Underline);
+        // save | add_trait(Trait::Bold, Trait::Underline);
+        // save.brush.add_traits(Trait::Bold, Trait::Underline);
+        save | add(Trait::Bold) | add(Trait::Underline);
+        load | add(Trait::Bold) | add(Trait::Underline);
 
-        // TODO change Attribute to Trait
         // save | add(Trait::Bold) | add(Trait::Underline);
         // save | add(Trait::Bold | Trait::Underline);
 
-        // save | remove_attr(Attribute::Underline);
-        save | remove(Attribute::Underline);
-        save | clear_attributes();
+        // save | remove_traits(Trait::Underline);
+        save | remove(Trait::Underline);
+        save | clear_traits();
         save | on_enable([&txbx]() { txbx.set_contents("Save Enabled"); });
         save | on_child_added([](Widget& w) { w.border.enable(); });
 
@@ -239,8 +238,8 @@ struct Composites : App {
             if (m.modifiers.ctrl)
                 txbx | bg(Color::Orange);
         });
-        // constexpr auto g = L'G' | Attribute::Bold;
-        auto gs = "hello" | Attribute::Inverse;
+        // constexpr auto g = L'G' | Trait::Bold;
+        auto gs = "hello" | Trait::Inverse;
     }
 };
 

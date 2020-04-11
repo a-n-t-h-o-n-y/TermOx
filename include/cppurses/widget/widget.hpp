@@ -15,11 +15,11 @@
 #include <signals/signal.hpp>
 
 #include <cppurses/common/map_iterator.hpp>
-#include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/painter.hpp>
+#include <cppurses/painter/trait.hpp>
 #include <cppurses/system/animation_engine.hpp>
 #include <cppurses/system/detail/focus.hpp>
 #include <cppurses/system/events/child_event.hpp>

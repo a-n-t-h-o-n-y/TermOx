@@ -44,6 +44,6 @@ Value_control::Value_control(const Glyph_string& label)
         edit_box.set_cursor(edit_box.contents().size());
     });
 
-    label_.set_alignment(Alignment::Center);
+    label_.set_alignment(Align::Center);
 }
 }  // namespace palette

@@ -35,8 +35,8 @@ Glyph_select::Glyph_select(Glyph_string symbols)
     glyph_stack.glyph_selected.connect(
         [this](Glyph glyph) { this->glyph_selected(std::move(glyph)); });
 
-    bottom_row.left_btn.clicked.connect([this] { this->flip_page_backward(); });
-    bottom_row.right_btn.clicked.connect([this] { this->flip_page_forward(); });
+    bottom_row.left_btn.pressed.connect([this] { this->flip_page_backward(); });
+    bottom_row.right_btn.pressed.connect([this] { this->flip_page_forward(); });
     bottom_row.slider.scrolled_up.connect(
         [this] { this->flip_page_backward(); });
     bottom_row.slider.scrolled_down.connect(

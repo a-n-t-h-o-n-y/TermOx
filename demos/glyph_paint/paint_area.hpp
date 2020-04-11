@@ -5,9 +5,9 @@
 #include <iostream>
 #include <unordered_map>
 
-#include <cppurses/painter/attribute.hpp>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
+#include <cppurses/painter/trait.hpp>
 #include <cppurses/system/events/key.hpp>
 #include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/widget.hpp>
@@ -25,8 +25,8 @@ class Paint_area : public cppurses::Widget {
     void set_symbol(const cppurses::Glyph& symbol);
     void set_foreground_color(cppurses::Color c);
     void set_background_color(cppurses::Color c);
-    void set_attribute(cppurses::Attribute attr);
-    void remove_attribute(cppurses::Attribute attr);
+    void set_trait(cppurses::Trait t);
+    void remove_traits(cppurses::Trait t);
 
     void clear();
 
@@ -77,11 +77,11 @@ sig::Slot<void()> set_foreground_color(Paint_area& pa, cppurses::Color c);
 sig::Slot<void(cppurses::Color)> set_background_color(Paint_area& pa);
 sig::Slot<void()> set_background_color(Paint_area& pa, cppurses::Color c);
 
-sig::Slot<void(cppurses::Attribute)> set_attribute(Paint_area& pa);
-sig::Slot<void()> set_attribute(Paint_area& pa, cppurses::Attribute attr);
+sig::Slot<void(cppurses::Trait)> set_trait(Paint_area& pa);
+sig::Slot<void()> set_trait(Paint_area& pa, cppurses::Trait t);
 
-sig::Slot<void(cppurses::Attribute)> remove_attribute(Paint_area& pa);
-sig::Slot<void()> remove_attribute(Paint_area& pa, cppurses::Attribute attr);
+sig::Slot<void(cppurses::Trait)> remove_traits(Paint_area& pa);
+sig::Slot<void()> remove_traits(Paint_area& pa, cppurses::Trait t);
 
 sig::Slot<void()> toggle_clone(Paint_area& pa);
 

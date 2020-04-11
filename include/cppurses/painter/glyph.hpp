@@ -12,46 +12,40 @@ struct Glyph {
     /// The Glyph's symbol is the wide character that will be displayed.
     wchar_t symbol = L' ';
 
-    /// The Brush that will determine the Attributes and Colors of the symbol.
+    /// The Brush that will determine the Traits and Colors of the symbol.
     Brush brush{};
 
    public:
-    /// Construct an invisible Glyph, defaults to space and no attrs/colors.
+    /// Construct an invisible Glyph, defaults to space and no traits/colors.
     constexpr Glyph() = default;
 
     /// Construct a Glyph with the provided wchar_t and Brush.
     constexpr Glyph(wchar_t sym, Brush const& b) : symbol{sym}, brush{b} {}
 
-    /// Construct with the provided wchar_t and list of Attributes and Colors.
-    template <typename... Attributes>
-    constexpr Glyph(wchar_t sym, Attributes&&... attrs)
-        : symbol{sym}, brush{std::forward<Attributes>(attrs)...}
+    /// Construct with the provided wchar_t and list of Traits and Colors.
+    template <typename... Traits>
+    constexpr Glyph(wchar_t sym, Traits&&... traits)
+        : symbol{sym}, brush{std::forward<Traits>(traits)...}
     {}
 };
 
 constexpr auto operator""_g(wchar_t c) -> Glyph { return {c}; }
 
-// Attribute -------------------------------------------------------------------
-constexpr auto operator|(Glyph& g, Attribute attr) -> Glyph&
+// Trait -------------------------------------------------------------------
+constexpr auto operator|(Glyph& g, Trait t) -> Glyph&
 {
-    g.brush.add_attributes(attr);
+    g.brush.add_traits(t);
     return g;
 }
 
-constexpr auto operator|(Glyph&& g, Attribute attr) -> Glyph
-{
-    return g | attr;
-}
+constexpr auto operator|(Glyph&& g, Trait t) -> Glyph { return g | t; }
 
-constexpr auto operator|(wchar_t g, Attribute attr) -> Glyph
-{
-    return Glyph{g} | attr;
-}
+constexpr auto operator|(wchar_t g, Trait t) -> Glyph { return Glyph{g} | t; }
 
 // BackgroundColor -------------------------------------------------------------
 constexpr auto operator|(Glyph& g, BackgroundColor c) -> Glyph&
 {
-    g.brush.add_attributes(c);
+    g.brush.add_traits(c);
     return g;
 }
 
@@ -68,7 +62,7 @@ constexpr auto operator|(wchar_t g, BackgroundColor c) -> Glyph
 // ForegroundColor -------------------------------------------------------------
 constexpr auto operator|(Glyph& g, ForegroundColor c) -> Glyph&
 {
-    g.brush.add_attributes(c);
+    g.brush.add_traits(c);
     return g;
 }
 
