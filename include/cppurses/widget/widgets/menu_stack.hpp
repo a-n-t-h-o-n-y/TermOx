@@ -35,7 +35,7 @@ class Menu_stack : public layout::Stack<Widget> {
      *  passed to Widget_t's constructor, and then automatically disable it.
      *  Creates a menu item with \p title. Returns a reference to the created
      *  child Widget.*/
-    template <typename Widget_t = Widget, typename... Args>
+    template <typename Widget_t, typename... Args>
     auto make_page(Glyph_string title, Args&&... args) -> Widget_t&
     {
         static_assert(std::is_base_of<Widget, Widget_t>::value,

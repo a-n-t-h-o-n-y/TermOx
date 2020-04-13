@@ -19,6 +19,23 @@ class Label : public Text_display {
     {
         *this | pipe::fixed_height(1) | pipe::word_wrap(false);
     }
+
+    /// Whether or not the width should be locked to the length of the text.
+    void set_dynamic_width(bool enable)
+    {
+        dynamic_ = enable;
+        this->set_contents(this->contents());
+    }
+
+    void set_contents(Glyph_string text)
+    {
+        if (dynamic_)
+            *this | pipe::fixed_width(text.size());
+        this->Text_display::set_contents(std::move(text));
+    }
+
+   private:
+    bool dynamic_ = false;
 };
 
 /// Wraps a Widget_t object with a label on the left.

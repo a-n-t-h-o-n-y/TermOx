@@ -8,6 +8,7 @@
 
 namespace cppurses {
 
+/// Displays a Glyph_matrix object
 class Matrix_display : public Widget {
    public:
     Glyph_matrix matrix;
@@ -31,9 +32,8 @@ class Matrix_display : public Widget {
 
         auto p = Painter{*this};
         for (auto y = 0uL; y < height; ++y) {
-            for (auto x = 0uL; x < width; ++x) {
+            for (auto x = 0uL; x < width; ++x)
                 p.put(matrix(x, y), x, y);
-            }
         }
         return Widget::paint_event();
     }

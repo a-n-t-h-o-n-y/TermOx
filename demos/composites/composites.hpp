@@ -13,128 +13,6 @@
 
 namespace comp {
 
-// TODO namespace for these policy(?) types?
-
-// template <typename Widget_t>
-// struct Border : Widget_t {
-//     Border() { this->border.enable(); }
-// };
-
-// template <typename Widget_t>
-// struct Border_east : Widget_t {
-//     Border_east()
-//     {
-//         this->border.enable();
-//         this->border.segments.disable_all();
-//         this->border.segments.east.enable();
-//     }
-// };
-
-// template <typename Widget_t>
-// struct Border_west : Widget_t {
-//     Border_west()
-//     {
-//         this->border.enable();
-//         this->border.segments.disable_all();
-//         this->border.segments.west.enable();
-//     }
-// };
-
-// template <typename Widget_t>
-// struct Border_north : Widget_t {
-//     Border_north()
-//     {
-//         this->border.enable();
-//         this->border.segments.disable_all();
-//         this->border.segments.north.enable();
-//     }
-// };
-
-// template <typename Widget_t>
-// struct Border_south : Widget_t {
-//     Border_south()
-//     {
-//         this->border.enable();
-//         this->border.segments.disable_all();
-//         this->border.segments.south.enable();
-//     }
-// };
-
-// template <typename Widget_t, cppurses::Color Bg>
-// struct Background : Widget_t {
-//     Background() { this->brush.set_background(Bg); }
-// };
-
-// using Foo = cppurses::Tuple<
-//     cppurses::layout::Horizontal<>,
-//     cppurses::Button,
-//     Background<cppurses::Button, cppurses::Color::Orange>,
-//     Background<Border_east<cppurses::Textbox>, cppurses::Color::Violet>,
-//     cppurses::Button>;
-
-// struct Composites : Foo {
-//     Composites()
-//     {
-//         auto& btn_1 = this->get<0>();
-//         auto& btn_2 = this->get<1>();
-//         auto& txbx  = this->get<2>();
-//         auto& btn_3 = this->get<3>();
-
-//         using namespace cppurses;
-//         btn_1.brush.set_background(Color::Light_blue);
-//         btn_1.set_label(L"X");
-//         btn_2.set_label(L"Y");
-//         txbx.set_contents("HeLLO");
-//         btn_3.set_label(L"Z");
-//     }
-// };
-
-// TODO
-// SFINAE so it doesn't ... make member of Widget?
-// but then you can't return a more derived type.
-// TODO need namespace for all of this
-auto label(cppurses::Glyph_string l)
-{
-    return [label = std::move(l)](auto& w) -> auto&
-    {
-        w.set_label(std::move(label));
-        return w;
-    };
-}
-
-// auto border()
-// {
-//     return [](auto& w) -> auto&
-//     {
-//         w.order.enable();
-//         return w;
-//     };
-// }
-
-// auto fixed_width(std::size_t amount)
-// {
-//     return [amount](auto& w) -> auto&
-//     {
-//         w.width_policy.fixed(amount);
-//         return w;
-//     };
-// }
-
-// auto fixed_height(std::size_t amount)
-// {
-//     return [amount](auto& w) -> auto&
-//     {
-//         w.height_policy.fixed(amount);
-//         return w;
-//     };
-// }
-
-// struct Btn : cppurses::layout::Horizontal<> {
-//     cppurses::Button& btn =
-//         this->make_child<cppurses::Button>() | label("btn") |
-//         comp::background(cppurses::Color::Red) | comp::border();
-// };
-
 using Btns =
     cppurses::Array<cppurses::layout::Horizontal<>, cppurses::Button, 2>;
 
@@ -152,8 +30,8 @@ struct Composites : App {
         using namespace cppurses;
         using namespace cppurses::pipe;
         btns | fixed_height(1);
-        save | label("Save") | bg(Color::Light_blue);
-        load | label("Load") | bg(Color::Light_green);
+        // save | label("Save") | bg(Color::Light_blue);
+        // load | label("Load") | bg(Color::Light_green);
         txbx | bg(Color::White) | fg(Color::Black);
 
         // *this | children() | fixed_height(4);

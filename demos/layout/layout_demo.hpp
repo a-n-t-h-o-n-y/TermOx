@@ -11,11 +11,9 @@
 #include <cppurses/widget/size_policy.hpp>
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widgets/button.hpp>
-#include <cppurses/widget/widgets/labeled_cycle_box.hpp>
-#include <cppurses/widget/widgets/labeled_number_edit.hpp>
+#include <cppurses/widget/widgets/cycle_box.hpp>
+#include <cppurses/widget/widgets/number_edit.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
-
-#include <cppurses/widget/widgets/vertical_scrollbar.hpp>
 
 namespace layout_demo {
 

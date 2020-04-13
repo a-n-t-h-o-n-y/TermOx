@@ -13,8 +13,8 @@
 #include <cppurses/widget/widgets/checkbox.hpp>
 #include <cppurses/widget/widgets/confirm_button.hpp>
 #include <cppurses/widget/widgets/label.hpp>
-#include <cppurses/widget/widgets/labeled_number_edit.hpp>
 #include <cppurses/widget/widgets/line_edit.hpp>
+#include <cppurses/widget/widgets/number_edit.hpp>
 #include <cppurses/widget/widgets/toggle_button.hpp>
 
 namespace gol {

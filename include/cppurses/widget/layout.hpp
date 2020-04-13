@@ -18,6 +18,13 @@ namespace layout {
 template <typename Child_t = Widget>
 class Layout : public Widget {
    public:
+    /// Adds each given Widget as a child to this Layout.
+    template <typename... Widgets>
+    Layout(std::unique_ptr<Widgets>... children)
+    {
+        (this->append_child(std::move(children)), ...);
+    }
+
     /// Return a Widget::Range<Child_t> of all children.
     auto get_children()
     {

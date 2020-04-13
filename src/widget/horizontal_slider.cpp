@@ -7,6 +7,7 @@
 
 #include <cppurses/system/events/key.hpp>
 #include <cppurses/system/events/mouse.hpp>
+#include <cppurses/widget/detail/tracks_lifetime.hpp>
 
 namespace cppurses {
 
@@ -72,20 +73,16 @@ auto Horizontal_slider::percent_to_position(float percent) -> std::size_t
 }
 
 namespace slot {
+using namespace detail;
 
 auto set_percent(Horizontal_slider& s) -> sig::Slot<void(float)>
 {
-    auto slot =
-        sig::Slot<void(float)>{[&s](float percent) { s.set_percent(percent); }};
-    slot.track(s.destroyed);
-    return slot;
+    return tracks_lifetime(s, [&s](float percent) { s.set_percent(percent); });
 }
 
 auto set_percent(Horizontal_slider& s, float percent) -> sig::Slot<void()>
 {
-    auto slot = sig::Slot<void()>{[&s, percent] { s.set_percent(percent); }};
-    slot.track(s.destroyed);
-    return slot;
+    return tracks_lifetime(s, [&s, percent] { s.set_percent(percent); });
 }
 
 }  // namespace slot

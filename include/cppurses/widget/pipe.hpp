@@ -48,6 +48,18 @@ auto operator|(Widget_t& w, F&& op) -> std::invoke_result_t<F, Widget_t&>
     return std::forward<F>(op)(w);
 }
 
+/// Pipe operator for use with std::unique_ptr<Widget_t>.
+template <
+    typename Widget_t,
+    typename F,
+    typename std::enable_if_t<std::is_base_of_v<Widget, Widget_t>, int> = 0>
+auto operator|(std::unique_ptr<Widget_t> w_ptr, F&& op)
+    -> std::unique_ptr<Widget_t>
+{
+    std::forward<F>(op)(*w_ptr);
+    return std::move(w_ptr);
+}
+
 /// Pipe operator for use with Widget::get_children.
 template <typename Iter_1, typename Iter_2, typename F>
 auto operator|(Range<Iter_1, Iter_2> children, F&& op) -> Range<Iter_1, Iter_2>
@@ -1719,16 +1731,6 @@ auto on_focus_out(Handler&& op)
 }
 
 template <typename Handler>
-auto on_delete(Handler&& op)
-{
-    return [&](auto& w) -> auto&
-    {
-        w.deleted.connect(std::forward<Handler>(op));
-        return w;
-    };
-}
-
-template <typename Handler>
 auto on_paint(Handler&& op)
 {
     return [&](auto& w) -> auto&
@@ -1798,6 +1800,16 @@ inline auto label(Glyph_string const& x)
     };
 }
 
+// Labeled_cycle_box
+inline auto divider(Glyph x)
+{
+    return [=](auto& w) -> auto&
+    {
+        w.set_divider(x);
+        return w;
+    };
+}
+
 inline auto word_wrap(bool enable)
 {
     return [=](auto& w) -> auto&
@@ -1839,6 +1851,25 @@ inline auto align_right()
     return [=](auto& w) -> auto&
     {
         w.set_alignment(Align::Right);
+        return w;
+    };
+}
+
+inline auto ghost(Color c)
+{
+    return [=](auto& w) -> auto&
+    {
+        w.set_ghost_color(c);
+        return w;
+    };
+}
+
+// Label
+inline auto dynamic_width(bool enable)
+{
+    return [=](auto& w) -> auto&
+    {
+        w.set_dynamic_width(enable);
         return w;
     };
 }

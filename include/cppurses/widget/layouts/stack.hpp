@@ -30,6 +30,8 @@ class Stack : public Layout<Child_t> {
     sig::Signal<void(std::size_t)> page_changed;
 
    public:
+    using Layout<Child_t>::Layout;
+
     /// Set child Widget to be enabled/visible via its index into child vector.
     /** The index is typically the same order as child Widgets were added.
      *  Throws std::out_of_range if \p index is invalid. */

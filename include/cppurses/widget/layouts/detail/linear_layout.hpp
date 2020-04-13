@@ -32,6 +32,9 @@ struct Linear_layout_parameters {
 /** The secondary dimension does not share space among Widgets. */
 template <typename Child_t, typename Parameters>
 class Linear_layout : public Layout<Child_t> {
+   public:
+    using Layout<Child_t>::Layout;
+
    protected:
     using Child = Child_t;
 

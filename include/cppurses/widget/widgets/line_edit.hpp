@@ -12,6 +12,7 @@
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/events/key.hpp>
 #include <cppurses/system/events/mouse.hpp>
+#include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/widgets/textbox.hpp>
 
 namespace cppurses {
@@ -38,9 +39,8 @@ class Line_edit : public Textbox {
     explicit Line_edit(Glyph_string initial_text = "")
         : Textbox{std::move(initial_text)}
     {
-        this->set_ghost_color(Color::Light_gray);
-        this->height_policy.fixed(1);
-        this->disable_word_wrap();
+        using namespace pipe;
+        *this | fixed_height(1) | ghost(Color::Light_gray) | word_wrap(false);
     }
 
     /// Set the input validator, allowing or disallowing specific char types.
@@ -95,10 +95,8 @@ class Line_edit : public Textbox {
 
     auto paint_event() -> bool override
     {
-        if (is_veiled_) {
-            auto const vc = std::vector<Glyph>(this->contents().size(), veil_);
-            this->set_contents(Glyph_string{std::begin(vc), std::end(vc)});
-        }
+        if (is_veiled_)
+            this->set_contents(Glyph_string{veil_, this->contents().size()});
         return Textbox::paint_event();
     }
 

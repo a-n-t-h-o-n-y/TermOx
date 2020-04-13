@@ -19,6 +19,10 @@
 #include "notepad/notepad.hpp"
 #include "palette/palette_demo.hpp"
 
+#include <signals/signal.hpp>
+
+#include <cppurses/widget/layouts/vertical.hpp>
+
 namespace demos {
 
 class Demo_menu : public cppurses::Menu_stack {
@@ -30,7 +34,44 @@ class Demo_menu : public cppurses::Menu_stack {
             this->Menu_stack::goto_menu();
         });
 
-        this->make_page<comp::Composites>("Composites");
+        // TODO make overload that determines the type of Widget_t instead of
+        // Args.. and moves the widget in insert() method that takes a Widget_t&&
+        // instead of creating a new object. But move constructor will
+        // invalidate any signals with references. Also once you have the
+        // destroyed signal wired back up it would stop functionality but it
+        // wouldn't crash.
+        // this->make_page<layout::Vertical<>>("Composites",
+        //     layout::Vertical<>
+        //     {
+        //         Checkbox{},
+        //         Labeled_checkbox{"A Box"}
+        //     }
+        // );
+
+        using namespace pipe;
+
+        this->append_page("Composites",
+            make<layout::Vertical<>>
+            (
+                make<Checkbox>(),
+                make<Checkbox>(),
+                make<Textbox>("WOW!") | bg(Color::Green),
+                make<layout::Horizontal<>>
+                (
+                    make<Textbox>("Left") | bg(Color::Light_blue),
+                    make<Textbox>("Right") | bg(Color::Violet)
+                ),
+                make<Checkbox>(),
+                make<Labeled_checkbox>("A Box")
+            ));
+        // Can use find() methods and name() pipe to connect signals after
+        // you build up the widget to quick prototype.
+        // think about find() instead of find_child() and find_descendants() but
+        // you still want to differentiate. do this:
+        // find_child() - restricted search, have to ask for it
+        // find() - searches all descendants, default
+
+        this->make_page<comp::Composites>("Composites 2");
         this->make_page<graph::Graph_demo>("Graph");
         this->make_page<layout_demo::Layout_demo>("Layouts");
         this->make_page<Notepad>("Notepad");

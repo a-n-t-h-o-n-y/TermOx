@@ -13,10 +13,16 @@
 #include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/widgets/fixed_height.hpp>
+#include <cppurses/widget/widgets/label.hpp>
 
 namespace cppurses {
 class Button;
-class Label;
+
+// inherit from Label_top
+// Label_top(Glyph_string label_, Args&&... args)
+// Just add a Labeled_menu widget type under menu, replace all Menu uses with
+// Labeled_menu
+// move line break operations into the labeled one.
 
 /// Displays a list of items, sending an associated Signal on user input.
 /** Signal sent to selected on Key::Enter press or */

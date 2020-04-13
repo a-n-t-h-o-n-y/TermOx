@@ -9,12 +9,17 @@
 
 #include <signals/signals.hpp>
 
+#include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/events/key.hpp>
 #include <cppurses/system/events/mouse.hpp>
+#include <cppurses/widget/detail/tracks_lifetime.hpp>
 #include <cppurses/widget/focus_policy.hpp>
+#include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/pipe.hpp>
+#include <cppurses/widget/widgets/cycle_box.hpp>
 #include <cppurses/widget/widgets/label.hpp>
+#include <cppurses/widget/widgets/tile.hpp>
 
 // TODO Indicate in focus with color or trait change.
 namespace cppurses {
@@ -151,20 +156,69 @@ class Cycle_box : public Label {
     }
 };
 
+/// A label on the left and a Cycle_box on the right.
+class Labeled_cycle_box : public layout::Horizontal<> {
+   public:
+    Label& label         = this->make_child<Label>();
+    Tile& div            = this->make_child<Tile>(L'├');
+    Cycle_box& cycle_box = this->make_child<Cycle_box>();
+
+   public:
+    explicit Labeled_cycle_box(Glyph_string title = "")
+    {
+        *this | pipe::fixed_height(1) | pipe::label(std::move(title));
+    }
+
+    void set_label(Glyph_string title)
+    {
+        label.set_contents(std::move(title));
+        this->resize_label();
+    }
+
+    void set_divider(Glyph divider) { div.set(divider); }
+
+   private:
+    void resize_label()
+    {
+        label | pipe::fixed_width(label.contents().size() + 1);
+    }
+};
+
 namespace slot {
 
-auto add_option(Cycle_box& cb) -> sig::Slot<void(Glyph_string)>;
+inline auto add_option(Cycle_box& cb) -> sig::Slot<void(Glyph_string)>
+{
+    return tracks_lifetime(
+        cb, [&cb](Glyph_string label) { cb.add_option(std::move(label)); });
+}
 
-auto add_option(Cycle_box& cb, Glyph_string const& label) -> sig::Slot<void()>;
+inline auto add_option(Cycle_box& cb, Glyph_string const& label)
+    -> sig::Slot<void()>
+{
+    return tracks_lifetime(cb, [&cb, label] { cb.add_option(label); });
+}
 
-auto remove_option(Cycle_box& cb) -> sig::Slot<void(std::string const&)>;
+inline auto remove_option(Cycle_box& cb) -> sig::Slot<void(std::string const&)>
+{
+    return tracks_lifetime(
+        cb, [&cb](std::string const& label) { cb.remove_option(label); });
+}
 
-auto remove_option(Cycle_box& cb, std::string const& label)
-    -> sig::Slot<void()>;
+inline auto remove_option(Cycle_box& cb, std::string const& label)
+    -> sig::Slot<void()>
+{
+    return tracks_lifetime(cb, [&cb, label] { cb.remove_option(label); });
+}
 
-auto next(Cycle_box& cb) -> sig::Slot<void()>;
+inline auto next(Cycle_box& cb) -> sig::Slot<void()>
+{
+    return tracks_lifetime(cb, [&cb]() { cb.next(); });
+}
 
-auto previous(Cycle_box& cb) -> sig::Slot<void()>;
+inline auto previous(Cycle_box& cb) -> sig::Slot<void()>
+{
+    return tracks_lifetime(cb, [&cb]() { cb.previous(); });
+}
 
 }  // namespace slot
 }  // namespace cppurses

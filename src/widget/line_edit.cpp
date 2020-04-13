@@ -20,10 +20,8 @@ namespace cppurses {
 void Line_edit::underline(bool enabled)
 {
     if (enabled) {
-        this->set_wallpaper({L' ', Trait::Underline});
-        auto underlined_text = this->contents();
-        underlined_text.add_traits(Trait::Underline);
-        this->set_contents(std::move(underlined_text));
+        this->set_wallpaper(L' ' | Trait::Underline);
+        this->set_contents(this->contents() | Trait::Underline);
         this->insert_brush.add_traits(Trait::Underline);
     }
     else {
@@ -40,9 +38,7 @@ void Line_edit::set_ghost_color(Color c)
 {
     if (not on_initial_)
         return;
-    auto ghost_text = this->contents();
-    ghost_text.add_traits(foreground(c));
-    this->set_contents(std::move(ghost_text));
+    this->set_contents(this->contents() | foreground(c));
     this->update();
 }
 

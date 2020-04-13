@@ -5,15 +5,13 @@
 #include <memory>
 #include <vector>
 
-#include <iostream>  //temp
-
 #include <signals/signal.hpp>
 
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
+#include <cppurses/widget/widgets/cycle_box.hpp>
 #include <cppurses/widget/widgets/graph.hpp>
-#include <cppurses/widget/widgets/labeled_cycle_box.hpp>
-#include <cppurses/widget/widgets/labeled_number_edit.hpp>
+#include <cppurses/widget/widgets/number_edit.hpp>
 
 namespace graph {
 
@@ -126,10 +124,10 @@ class Circle final : public Graph_generator {
         return implicit_points(
             [](double x, double y) {
                 // return std::pow(x, 2.) + std::pow(y, 2.) - radius_;
-            // Biology
+                // Biology
                 // return std::sin(std::sin(x) + std::cos(y)) -
                 //        std::cos(std::sin(x * y) + std::cos(x));
-            // Dizzy
+                // Dizzy
                 return std::abs(std::sin(std::pow(x, 2) - std::pow(y, 2))) -
                        (std::sin(x + y) + std::cos(x * y));
             },

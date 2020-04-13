@@ -16,8 +16,6 @@
 #include <cppurses/widget/widgets/graph.hpp>
 #include <cppurses/widget/widgets/horizontal_scrollbar.hpp>
 #include <cppurses/widget/widgets/label.hpp>
-#include <cppurses/widget/widgets/labeled_cycle_box.hpp>
-#include <cppurses/widget/widgets/labeled_number_edit.hpp>
 #include <cppurses/widget/widgets/line_edit.hpp>
 #include <cppurses/widget/widgets/log.hpp>
 #include <cppurses/widget/widgets/matrix_display.hpp>

@@ -1,13 +1,9 @@
 #include <cppurses/widget/widgets/cycle_box.hpp>
 
 #include <cstddef>
-#include <string>
-
-#include <signals/signals.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/events/mouse.hpp>
-#include <cppurses/widget/detail/tracks_lifetime.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
 
 namespace {
@@ -46,39 +42,4 @@ void Cycle_box::previous()
     this->emit_signals();
 }
 
-namespace slot {
-using namespace detail;
-
-auto add_option(Cycle_box& cb) -> sig::Slot<void(Glyph_string)>
-{
-    return tracks_lifetime(
-        cb, [&cb](Glyph_string label) { cb.add_option(std::move(label)); });
-}
-
-auto add_option(Cycle_box& cb, Glyph_string const& label) -> sig::Slot<void()>
-{
-    return tracks_lifetime(cb, [&cb, label] { cb.add_option(label); });
-}
-
-auto remove_option(Cycle_box& cb) -> sig::Slot<void(std::string const&)>
-{
-    return tracks_lifetime(
-        cb, [&cb](std::string const& label) { cb.remove_option(label); });
-}
-
-auto remove_option(Cycle_box& cb, std::string const& label) -> sig::Slot<void()>
-{
-    return tracks_lifetime(cb, [&cb, label] { cb.remove_option(label); });
-}
-
-auto next(Cycle_box& cb) -> sig::Slot<void()>
-{
-    return tracks_lifetime(cb, [&cb]() { cb.next(); });
-}
-
-auto previous(Cycle_box& cb) -> sig::Slot<void()>
-{
-    return tracks_lifetime(cb, [&cb]() { cb.previous(); });
-}
-}  // namespace slot
 }  // namespace cppurses

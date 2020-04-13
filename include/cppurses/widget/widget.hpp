@@ -60,11 +60,9 @@ class Widget {
     Signal<void(Key::State const&)> key_released;
     Signal<void()> focused_in;
     Signal<void()> focused_out;
-    Signal<void()> deleted;
+    Signal<void()> destroyed;
     Signal<void()> painted;
     Signal<void()> timer;
-
-    Signal<void()> destroyed;  // Called by destructor
 
     /// Describes the visual border of this Widget.
     Border border;
@@ -100,7 +98,6 @@ class Widget {
     {
         if (detail::Focus::focus_widget() == this)
             detail::Focus::clear();
-        destroyed();
     }
 
     /// Set the identifying name of the Widget.
@@ -443,7 +440,7 @@ class Widget {
     /// Handles Delete_event objects.
     virtual auto delete_event() -> bool
     {
-        deleted();
+        destroyed();
         return true;
     }
 
@@ -912,6 +909,13 @@ class Widget {
 
     void set_parent(Widget* parent) { parent_ = parent; }
 };
+
+/// Create a Widget wrapped in a std::unique_ptr for runtime building of widgets
+template <typename Widget_t, typename... Args>
+auto make(Args&&... args) -> std::unique_ptr<Widget_t>
+{
+    return std::make_unique<Widget_t>(std::forward<Args>(args)...);
+}
 
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_WIDGET_HPP

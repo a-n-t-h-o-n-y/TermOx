@@ -6,8 +6,8 @@
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/widgets/label.hpp>
-#include <cppurses/widget/widgets/labeled_number_edit.hpp>
 #include <cppurses/widget/widgets/line_edit.hpp>
+#include <cppurses/widget/widgets/number_edit.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
 
 namespace gol {

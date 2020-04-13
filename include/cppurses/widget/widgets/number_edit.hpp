@@ -9,6 +9,8 @@
 #include <signals/signal.hpp>
 
 #include <cppurses/system/events/mouse.hpp>
+#include <cppurses/widget/pipe.hpp>
+#include <cppurses/widget/widgets/label.hpp>
 #include <cppurses/widget/widgets/line_edit.hpp>
 
 namespace cppurses {
@@ -67,11 +69,11 @@ class Number_edit : public Line_edit {
     {
         auto is_separator = false;
         if (std::is_floating_point<Number_t>::value)
-            is_separator = (c == '.' or c == ',');
+            is_separator = (c == '.' || c == ',');
         auto is_sign = (c == '+');
         if (not std::is_unsigned<Number_t>::value)
             is_sign |= (c == '-');
-        return std::isdigit(c) or is_separator or is_sign;
+        return std::isdigit(c) || is_separator || is_sign;
     }
 
     void display_value()
@@ -100,6 +102,36 @@ class Number_edit : public Line_edit {
         this->display_value();
         this->emit_signal();
     }
+};
+
+/// Number_edit with preceding Label arranged horizontally.
+template <typename Number_t = int>
+class Labeled_number_edit : public Label_left<Number_edit<Number_t>> {
+   private:
+    using Base = Label_left<Number_edit<Number_t>>;
+
+   public:
+    Label& label                       = Base::label;
+    Number_edit<Number_t>& number_edit = Base::wrapped;
+
+   public:
+    /// Emitted on Enter Key press, sends along the current value.
+    sig::Signal<void(Number_t)>& value_set = number_edit.value_set;
+
+   public:
+    /// Construct with \p title for Label text and \p initial value.
+    Labeled_number_edit(Glyph_string title, Number_t initial)
+        : Base(std::move(title), initial)
+    {
+        using namespace pipe;
+        *this | fixed_height(1);
+        label | dynamic_width(true);
+        number_edit | bg(Color::White) | fg(Color::Black) | ghost(Color::Gray);
+    }
+
+    /// Manually set the value of the Number_edit.
+    /** Does not emit a value_set Signal. */
+    void set_value(Number_t value) { number_edit.set_value(value); }
 };
 
 }  // namespace cppurses
