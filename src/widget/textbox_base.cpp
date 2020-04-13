@@ -109,17 +109,18 @@ void Textbox_base::increment_cursor_left() {
 }
 
 void Textbox_base::increment_cursor_right() {
-    if (this->cursor_index() == this->contents().size()) {
+    if (this->cursor_index() == this->contents().size())
         return;
-    }
-    auto true_last_index = this->first_index_at(this->bottom_line() + 1) - 1;
-    auto cursor_index = this->cursor_index();
-    if (cursor_index == true_last_index &&
+    auto const true_last_index =
+        this->first_index_at(this->bottom_line() + 1) - 1;
+    auto const cursor_index = this->cursor_index();
+    if (cursor_index == true_last_index and
         this->cursor.y() == this->height() - 1) {
         this->scroll_down(1);
     }
     this->set_cursor(cursor_index + 1);
 }
+
 
 }  // namespace detail
 }  // namespace cppurses
