@@ -16,8 +16,7 @@
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 
-namespace cppurses::pipe {
-namespace detail {
+namespace cppurses::pipe::detail {
 
 /// Used to call operator| overload to create a new Range from filter predicate
 template <typename Predicate>
@@ -36,7 +35,9 @@ class Dynamic_filter_predicate {
     using Widget_t = W;
 };
 
-}  // namespace detail
+}  // namespace cppurses::pipe::detail
+
+namespace cppurses {
 
 /// Pipe operator for use with Widget.
 template <
@@ -71,7 +72,8 @@ auto operator|(Range<Iter_1, Iter_2> children, F&& op) -> Range<Iter_1, Iter_2>
 
 /// Overload to create a filtered range.
 template <typename Iter_1, typename Iter_2, typename F>
-auto operator|(Range<Iter_1, Iter_2> children, detail::Filter_predicate<F>&& p)
+auto operator|(Range<Iter_1, Iter_2> children,
+               pipe::detail::Filter_predicate<F>&& p)
 {
     return Range{Filter_iterator{children.begin(), children.end(),
                                  std::forward<F>(p.predicate)},
@@ -83,7 +85,7 @@ auto operator|(Range<Iter_1, Iter_2> children, detail::Filter_predicate<F>&& p)
 /// Overload to create a filtered range with upcast.
 template <typename Iter_1, typename Iter_2, typename Widget_t>
 auto operator|(Range<Iter_1, Iter_2> children,
-               detail::Dynamic_filter_predicate<Widget_t>)
+               pipe::detail::Dynamic_filter_predicate<Widget_t>)
 {
     return Range{
             Map_iterator{
@@ -103,6 +105,10 @@ auto operator|(std::vector<Widget*> const& descendants, F&& op)
         std::forward<F>(op)(*d);
     return descendants;
 }
+
+}  // namespace cppurses
+
+namespace cppurses::pipe {
 
 // Widget Accessors ------------------------------------------------------------
 /// Widget -> Range<Children>
