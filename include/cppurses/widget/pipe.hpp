@@ -482,6 +482,15 @@ inline auto cannot_ignore_width_min()
     };
 }
 
+inline auto passive_width(bool x = true)
+{
+    return [=](auto& w) -> auto&
+    {
+        w.width_policy.passive(x);
+        return w;
+    };
+}
+
 // Height Policy Modifiers -----------------------------------------------------
 
 inline auto fixed_height(std::size_t hint)
@@ -597,6 +606,15 @@ inline auto cannot_ignore_height_min()
     return [](auto& w) -> auto&
     {
         w.height_policy.can_ignore_min(false);
+        return w;
+    };
+}
+
+inline auto passive_height(bool x = true)
+{
+    return [=](auto& w) -> auto&
+    {
+        w.height_policy.passive(x);
         return w;
     };
 }
@@ -1712,6 +1730,19 @@ auto on_key_press(Handler&& op)
     return [&](auto& w) -> auto&
     {
         w.key_pressed.connect(std::forward<Handler>(op));
+        return w;
+    };
+}
+
+template <typename Handler>
+auto bind_key(Key::Code key, Handler&& op)
+{
+    return [ op = std::forward<Handler>(op), key ](auto& w) -> auto&
+    {
+        w.key_pressed.connect([&w, &op, key](auto const& keyboard) {
+            if (keyboard.key == key)
+                op(w);
+        });
         return w;
     };
 }

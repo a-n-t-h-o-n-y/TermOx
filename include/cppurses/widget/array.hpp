@@ -7,9 +7,13 @@
 
 namespace cppurses {
 
-/// Homogeneous collection of Widgets within a Layout_t.
-template <typename Layout_t, typename Widget_t, std::size_t N>
+/// Homogeneous collection of Widgets within a Layout_t<Widget_t>.
+/** Depends on Layout_t::make_child(args...) to construct the Widget_t. */
+template <typename Layout_t, std::size_t N>
 class Array : public Layout_t {
+   public:
+    using Base = Layout_t;
+
    public:
     /// \p args will be copied into each Widget's constructor call.
     template <typename... Args>
@@ -32,14 +36,16 @@ class Array : public Layout_t {
     }
 
    private:
-    using References = std::array<std::reference_wrapper<Widget_t>, N>;
+    using References =
+        std::array<std::reference_wrapper<typename Layout_t::Child>, N>;
     References refs_;
 
    private:
     template <typename... Args>
-    auto make_child_with_index(std::size_t, Args const&... args) -> Widget_t&
+    auto make_child_with_index(std::size_t, Args const&... args) ->
+        typename Layout_t::Child&
     {
-        return this->template make_child<Widget_t>(args...);
+        return this->make_child(args...);
     }
 
     template <std::size_t... I, typename... Args>

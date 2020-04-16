@@ -20,6 +20,7 @@ class Shared_space {
    public:
     auto calculate_lengths(Widget& parent) -> Length_list
     {
+        // Disperse initial min() space to each child Widget.
         auto children = [&parent, this] {
             auto const temp = parent.get_children();
             return detail::Layout_span{
@@ -27,9 +28,11 @@ class Shared_space {
                 typename Parameters::Primary::get_length{}(parent),
                 [](Widget const& w) -> Size_policy const& {
                     return typename Parameters::Primary::get_policy{}(w);
-                }};
+                },
+                Parameters::Primary::direction};
         }();
 
+        // Have you gone over or under the avaliable space?
         auto const difference = this->find_length_difference(parent, children);
 
         if (difference > 0)
@@ -71,7 +74,9 @@ class Shared_space {
             given_away = 0;
             for (auto iter = children.begin_max(); iter != children.end();
                  ++iter) {
-                auto const& policy    = iter.get_policy();
+                auto const& policy = iter.get_policy();
+                if (policy.is_passive())
+                    continue;
                 auto const max_length = policy.max();
                 auto const stretch_ratio =
                     policy.stretch() / children.total_stretch();
@@ -93,6 +98,8 @@ class Shared_space {
     {
         for (auto iter = children.begin_max();
              iter != children.end() && surplus != 0; ++iter, --surplus) {
+            if (iter.get_policy().is_passive())
+                continue;
             iter->length += 1;
         }
     }

@@ -301,6 +301,9 @@ class Widget {
     /// Return the number of children held by this Widget.
     auto child_count() const -> std::size_t { return children_.size(); }
 
+    /// Return the number of children held by this Widget.
+    auto child_offset() const -> std::size_t { return children_.get_offset(); }
+
     /// If true, the brush will apply to the wallpaper Glyph.
     auto does_paint_wallpaper_with_brush() const -> bool
     {
@@ -682,6 +685,15 @@ class Widget {
         /// Return the number of children.
         auto size() const -> std::size_t { return child_list_.size(); }
 
+        /// Return the child offset, the first widget included in the layout.
+        auto get_offset() const -> std::size_t { return offset_; }
+
+        /// Sets the child Widget offset, does not do bounds checking.
+        void set_offset(std::size_t index)
+        {
+            offset_ = index;
+        }
+
         template <typename Widget_t>
         auto operator[](std::size_t index) -> Widget_t&
         {
@@ -847,6 +859,9 @@ class Widget {
        private:
         List_t child_list_;
         Widget* self_;  // The parent of the children
+
+        /// Index into child_list_ that is the beginning of the layout display.
+        std::size_t offset_ = 0uL;
 
         static auto constexpr deref = [](auto& ptr) -> auto& { return *ptr; };
 

@@ -11,6 +11,9 @@ namespace cppurses {
 template <typename Layout_t, typename... Widget_t>
 class Tuple : public Layout_t {
    public:
+    using Base = Layout_t;
+
+   public:
     /// Get child by index.
     template <std::size_t Index>
     auto get() -> auto&

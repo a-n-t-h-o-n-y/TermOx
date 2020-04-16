@@ -1,26 +1,31 @@
 #ifndef CPPURSES_DEMOS_COMPOSITES_COMPOSITES_HPP
 #define CPPURSES_DEMOS_COMPOSITES_COMPOSITES_HPP
+#include <string>
 #include <utility>
 
+#include <cppurses/system/events/key.hpp>
 #include <cppurses/widget/array.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
+#include <cppurses/widget/layouts/selecting.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
+#include <cppurses/widget/pair.hpp>
 #include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/tuple.hpp>
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widgets/button.hpp>
+#include <cppurses/widget/widgets/checkbox.hpp>
+#include <cppurses/widget/widgets/selectable.hpp>
 #include <cppurses/widget/widgets/textbox.hpp>
 
 namespace comp {
 
-using Btns =
-    cppurses::Array<cppurses::layout::Horizontal<>, cppurses::Button, 2>;
+using Btns = cppurses::Array<cppurses::layout::Horizontal<cppurses::Button>, 2>;
 
 using App =
     cppurses::Tuple<cppurses::layout::Vertical<>, cppurses::Textbox, Btns>;
 
-struct Composites : App {
-    Composites()
+struct Composites_old : App {
+    Composites_old()
     {
         auto& btns = this->get<1>();
         auto& save = btns.get<0>();
@@ -118,6 +123,40 @@ struct Composites : App {
         });
         // constexpr auto g = L'G' | Trait::Bold;
         auto gs = "hello" | Trait::Inverse;
+    }
+};
+
+using namespace cppurses;
+
+using Check      = Selectable<Labeled_checkbox>;
+using Check_list = Array<layout::Selecting<layout::Vertical<Check>>, 15>;
+
+struct My_check_list : Check_list {
+    My_check_list()
+    {
+        using namespace cppurses;
+        using namespace pipe;
+
+        this->set_increment_selection_keys({Key::Arrow_down, Key::j});
+        this->set_decrement_selection_keys({Key::Arrow_up, Key::k});
+        this->set_increment_scroll_keys({Key::J});
+        this->set_decrement_scroll_keys({Key::K});
+
+        *this | /* passive_height() |*/ bordered() | children() |
+            for_each([i = 0uL](auto& w) mutable {
+                w.label.set_contents("number: " + std::to_string(i++));
+            });
+        *this | bind_key(Key::Enter,
+                         [](auto& w) { w.selected_child().checkbox.toggle(); });
+    }
+};
+
+struct Two_lists : Pair<layout::Vertical<My_check_list>> {
+    Two_lists()
+    {
+        *this | pipe::strong_focus() | pipe::on_focus_in([this] {
+            cppurses::System::set_focus(this->get_children().front());
+        });
     }
 };
 

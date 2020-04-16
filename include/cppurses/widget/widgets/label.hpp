@@ -55,6 +55,14 @@ class Label_left : public layout::Horizontal<> {
     {
         *this | pipe::fixed_height(1);
     }
+
+   protected:
+    /// Forward's Focus to wrapped.
+    auto focus_in_event() -> bool override
+    {
+        System::set_focus(wrapped);
+        return layout::Horizontal<>::focus_in_event();
+    }
 };
 
 /// Wraps a Widget_t object with a label on the right.
@@ -72,7 +80,15 @@ class Label_right : public layout::Horizontal<> {
         : wrapped{this->make_child<Widget_t>(std::forward<Args>(args)...)},
           label{this->make_child<Label>(std::move(label_))}
     {
-        *this | pipe::fixed_height(1);
+        this->height_policy = wrapped.height_policy;
+    }
+
+   protected:
+    /// Forward's Focus to wrapped.
+    auto focus_in_event() -> bool override
+    {
+        System::set_focus(wrapped);
+        return layout::Horizontal<>::focus_in_event();
     }
 };
 
@@ -91,6 +107,14 @@ class Label_top : public layout::Vertical<> {
         : label{this->make_child<Label>(std::move(label_))},
           wrapped{this->make_child<Widget_t>(std::forward<Args>(args)...)}
     {}
+
+   protected:
+    /// Forward's Focus to wrapped.
+    auto focus_in_event() -> bool override
+    {
+        System::set_focus(wrapped);
+        return layout::Vertical<>::focus_in_event();
+    }
 };
 
 /// Wraps a Widget_t object with a label on the bottom.
@@ -108,6 +132,14 @@ class Label_bottom : public layout::Vertical<> {
         : wrapped{this->make_child<Widget_t>(std::forward<Args>(args)...)},
           label{this->make_child<Label>(std::move(label_))}
     {}
+
+   protected:
+    /// Forward's Focus to wrapped.
+    auto focus_in_event() -> bool override
+    {
+        System::set_focus(wrapped);
+        return layout::Vertical<>::focus_in_event();
+    }
 };
 
 }  // namespace cppurses

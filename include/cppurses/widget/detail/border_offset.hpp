@@ -13,6 +13,7 @@ namespace detail {
  *  display a Border. Offsets are interpreted as the space that a border will be
  *  taking from the Widget. */
 class Border_offset {
+   public:
     /// Calculate west border offset, either 1 or 0.
     static auto west(Widget const& w) -> std::size_t;
 
@@ -37,8 +38,17 @@ class Border_offset {
     /// Calculate whether or not \p w is too small to display the south border.
     static auto south_disqualified(Widget const& w) -> bool;
 
-    friend class cppurses::Widget;
-    friend class cppurses::Painter;
+    /// Returns whether or not all west-like segements are enabled.
+    static auto west_enabled(Widget const& w) -> bool;
+
+    /// Returns whether or not all west-like segements are enabled.
+    static auto east_enabled(Widget const& w) -> bool;
+
+    /// Returns whether or not all west-like segements are enabled.
+    static auto north_enabled(Widget const& w) -> bool;
+
+    /// Returns whether or not all west-like segements are enabled.
+    static auto south_enabled(Widget const& w) -> bool;
 };
 
 }  // namespace detail

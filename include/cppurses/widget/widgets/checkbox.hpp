@@ -114,7 +114,7 @@ class Labeled_checkbox : public Label_right<Checkbox> {
     sig::Signal<void()>& toggled   = checkbox.toggled;
 
    public:
-    Labeled_checkbox(Glyph_string label_) : Label_right{std::move(label_)}
+    Labeled_checkbox(Glyph_string label_ = "") : Label_right{std::move(label_)}
     {
         using namespace pipe;
         Label_right::label | on_mouse_press([&](auto) { checkbox.toggle(); });

@@ -68,6 +68,17 @@ class Size_policy {
     /// Return if min can be ignored for the last displayed widget in a layout.
     auto can_ignore_min() const -> bool { return data_.can_ignore_min; }
 
+    /// Passive: Takes the sum of child Widget's hints as its fixed length.
+    /** Assumes each child has a fixed() Size_policy. */
+    void passive(bool x)
+    {
+        data_.passive = x;
+        this->policy_updated();
+    }
+
+    /// Return true if Size_policy is passive.
+    auto is_passive() const -> bool { return data_.passive; }
+
     /* _Helper Methods_ */
     /// Fixed: \p hint is the only acceptable size.
     void fixed(std::size_t hint)
@@ -76,20 +87,23 @@ class Size_policy {
         data_.min     = hint;
         data_.max     = hint;
         data_.stretch = 1.;
+        data_.passive = false;
         this->policy_updated();
     }
 
     /// Minimum: \p hint is the minimum acceptable size, may be larger.
     void minimum(std::size_t hint)
     {
-        data_.hint = hint;
+        data_.hint    = hint;
+        data_.passive = false;
         this->min(hint);
     }
 
     /// Maximum: \p hint is the maximum acceptable size, may be smaller.
     void maximum(std::size_t hint)
     {
-        data_.hint = hint;
+        data_.hint    = hint;
+        data_.passive = false;
         this->max(hint);
     }
 
@@ -101,6 +115,7 @@ class Size_policy {
             data_.min = hint;
         if (hint > data_.max)
             data_.max = hint;
+        data_.passive = false;
         this->policy_updated();
     }
 
@@ -113,6 +128,7 @@ class Size_policy {
             data_.min = hint;
         if (hint > data_.max)
             data_.max = hint;
+        data_.passive = false;
         this->policy_updated();
     }
 
@@ -121,15 +137,17 @@ class Size_policy {
     {
         data_.stretch = 100'000.;
         data_.hint    = hint;
+        data_.passive = false;
         this->min(hint);
     }
 
     /// Ignored: Stretch is the only consideration.
     void ignored()
     {
-        data_.hint = 0;
-        data_.min  = 0;
-        data_.max  = most_max_;
+        data_.hint    = 0;
+        data_.min     = 0;
+        data_.max     = max_max_;
+        data_.passive = false;
         this->policy_updated();
     }
 
@@ -154,14 +172,18 @@ class Size_policy {
     struct Data {
         std::size_t hint    = 0;
         std::size_t min     = 0;
-        std::size_t max     = most_max_;
+        std::size_t max     = max_max_;
         double stretch      = 1.;
         bool can_ignore_min = true;
+        bool passive        = false;
     } data_;
 
-    static auto constexpr most_max_ =
+    static auto constexpr max_max_ =
         std::numeric_limits<decltype(data_.max)>::max();
 };
+
+/// Implementation Helper
+enum class Policy_direction { Vertical, Horizontal };
 
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_SIZE_POLICY_HPP

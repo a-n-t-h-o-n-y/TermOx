@@ -10,11 +10,15 @@
 
 namespace cppurses::layout::detail {
 
-template <typename Get_policy_t, typename Get_length_t, typename Get_offset_t>
+template <typename Get_policy_t,
+          typename Get_length_t,
+          typename Get_offset_t,
+          Policy_direction d>
 struct Dimension_parameters {
     using get_policy = Get_policy_t;  // Size_policy const&(Widget const&)
     using get_length = Get_length_t;  // std::size_t(Widget const&) [w/h]
     using get_offset = Get_offset_t;  // std::size_t(Widget const&) [global x/y]
+    static auto const direction = d;
 };
 
 template <typename Primary_t,
@@ -30,13 +34,14 @@ struct Linear_layout_parameters {
 
 /// Lays out Widgets in 2D, sharing space in a primary dimension.
 /** The secondary dimension does not share space among Widgets. */
-template <typename Child_t, typename Parameters>
+template <typename Child_t, typename Parameters_t>
 class Linear_layout : public Layout<Child_t> {
    public:
     using Layout<Child_t>::Layout;
 
    protected:
-    using Child = Child_t;
+    using Child      = Child_t;
+    using Parameters = Parameters_t;
 
    protected:
     void update_geometry() override
@@ -54,24 +59,41 @@ class Linear_layout : public Layout<Child_t> {
         this->send_move_events(primary_pos, secondary_pos);
     }
 
-    /// Return the child Widget offset, the first widget included in the layout.
-    auto get_offset() const -> std::size_t { return offset_; }
+    auto child_polished_event(Widget& child) -> bool override
+    {
+        if (this->width_policy.is_passive()) {
+            Widget* parent = this->parent();
+            // Find first parent that is not passive.
+            while (parent != nullptr && parent->width_policy.is_passive())
+                parent = parent->parent();
+            if (parent != nullptr)
+                System::post_event<Child_polished_event>(*parent, *this);
+        }
+        if (this->height_policy.is_passive()) {
+            Widget* parent = this->parent();
+            // Find first parent that is not passive.
+            while (parent != nullptr && parent->height_policy.is_passive())
+                parent = parent->parent();
+            if (parent != nullptr)
+                System::post_event<Child_polished_event>(*parent, *this);
+        }
+        this->update_geometry();
+        return Widget::child_polished_event(child);
+    }
 
     /// Sets the child Widget offset, does not do bounds checking.
     auto set_offset(std::size_t index)
     {
-        offset_ = index;
+        this->Widget::children_.set_offset(index);
         shared_space_.set_offset(index);
         unique_space_.set_offset(index);
-        this->update_geometry();
+        System::post_event<Child_polished_event>(*this, *this);
         this->force_repaint_empty_space();
     }
 
    private:
     using Length_list   = std::vector<std::size_t>;
     using Position_list = std::vector<std::size_t>;
-
-    std::size_t offset_ = 0uL;
 
     Shared_space<Parameters> shared_space_;
     Unique_space<Parameters> unique_space_;
@@ -83,13 +105,14 @@ class Linear_layout : public Layout<Child_t> {
     void send_enable_disable_events(Length_list const& primary,
                                     Length_list const& secondary)
     {
-        auto const children = this->get_children();
-        for (auto i = 0uL; i < offset_; ++i) {
+        auto const children = this->Widget::get_children();
+        auto const offset   = this->Widget::child_offset();
+        for (auto i = 0uL; i < offset; ++i) {
             if (children[i].is_enabled())
                 children[i].disable(true, false);
         }
         for (auto i = 0uL; i < primary.size(); ++i) {
-            auto& child = children[offset_ + i];
+            auto& child = children[offset + i];
             if (is_valid(primary[i], secondary[i])) {
                 if (not child.is_enabled())
                     child.enable(true, false);
@@ -104,9 +127,10 @@ class Linear_layout : public Layout<Child_t> {
     void send_resize_events(Length_list const& primary,
                             Length_list const& secondary)
     {
-        auto const children = this->get_children();
+        auto const children = this->Widget::get_children();
+        auto const offset   = this->Widget::child_offset();
         for (auto i = 0uL; i < primary.size(); ++i) {
-            auto& child = children[offset_ + i];
+            auto& child = children[offset + i];
             if (child.is_enabled()) {
                 auto const area =
                     typename Parameters::get_area{}(primary[i], secondary[i]);
@@ -118,13 +142,14 @@ class Linear_layout : public Layout<Child_t> {
     void send_move_events(Position_list const& primary,
                           Position_list const& secondary)
     {
-        auto const children = this->get_children();
+        auto const children = this->Widget::get_children();
+        auto const offset   = this->Widget::child_offset();
         auto const primary_offset =
             typename Parameters::Primary::get_offset{}(*this);
         auto const secondary_offset =
             typename Parameters::Secondary::get_offset{}(*this);
         for (auto i = 0uL; i < primary.size(); ++i) {
-            auto& child = children[offset_ + i];
+            auto& child = children[offset + i];
             if (child.is_enabled()) {
                 auto const point = typename Parameters::get_point{}(
                     primary[i] + primary_offset,
