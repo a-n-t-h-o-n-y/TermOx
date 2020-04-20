@@ -72,7 +72,7 @@ class Stack : public Layout<Child_t> {
     /** Returns a reference to the appended Widget as Child_t&. */
     auto append_page(std::unique_ptr<Child_t> child) -> Child_t&
     {
-        auto& result = this->Layout<Child_t>::append_child(std::move(child));
+        auto& result = this->Layout<Child_t>::append(std::move(child));
         result.disable();
         return result;
     }
@@ -84,8 +84,7 @@ class Stack : public Layout<Child_t> {
     auto insert_page(std::unique_ptr<Child_t> child, std::size_t index)
         -> Child_t&
     {
-        auto& result =
-            this->Layout<Child_t>::insert_child(std::move(child), index);
+        auto& result = this->Layout<Child_t>::insert(std::move(child), index);
         result.disable();
         return result;
     }
@@ -116,7 +115,7 @@ class Stack : public Layout<Child_t> {
         auto* page_to_remove = &(this->Layout<Child_t>::get_children()[index]);
         if (page_to_remove == this->get_active_page())
             active_page_ = nullptr;
-        return this->Layout<Child_t>::remove_child(page_to_remove);
+        return this->Layout<Child_t>::remove(page_to_remove);
     }
 
     /// Remove and delete all pages.

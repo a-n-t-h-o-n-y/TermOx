@@ -1,5 +1,6 @@
 #ifndef CPPURSES_WIDGET_LAYOUT_HPP
 #define CPPURSES_WIDGET_LAYOUT_HPP
+#include <algorithm>
 #include <cstddef>
 #include <memory>
 #include <type_traits>
@@ -15,14 +16,17 @@ namespace layout {
 /// Provided as a uniform interface for arranging child Widgets.
 /** Layout is limited to holding Child_t objects, which much be Widget or some
  *  derived type. */
-template <typename Child_t = Widget>
+template <typename Child = Widget>
 class Layout : public Widget {
+   public:
+    using Child_t = Child;
+
    public:
     /// Adds each given Widget as a child to this Layout.
     template <typename... Widgets>
     Layout(std::unique_ptr<Widgets>... children)
     {
-        (this->append_child(std::move(children)), ...);
+        (this->append(std::move(children)), ...);
     }
 
     /// Return a Widget::Range<Child_t> of all children.
@@ -37,43 +41,68 @@ class Layout : public Widget {
         return Children::View<Child_t, Widget::Children const>{children_};
     }
 
-   protected:
+   public:
     /// Create a Widget and append it to the list of children.
     /** Return a reference to this newly created Widget. */
     template <typename Widget_t = Child_t, typename... Args>
     auto make_child(Args&&... args) -> Widget_t&
     {
-        static_assert(std::is_base_of<Child_t, Widget_t>::value,
+        static_assert(std::is_base_of_v<Child_t, Widget_t>,
                       "Layout::make_child: Widget_t must be a Child_t type");
-        return this->Widget::children_.append(
+        return this->append(
             std::make_unique<Widget_t>(std::forward<Args>(args)...));
     }
 
-    auto insert_child(std::unique_ptr<Child_t> child_ptr, std::size_t index)
-        -> Child_t&
+    template <typename Widget_t>
+    auto insert(std::unique_ptr<Widget_t> child, std::size_t index) -> Widget_t&
     {
-        return this->Widget::children_.insert(std::move(child_ptr), index);
+        return this->Widget::children_.insert(std::move(child), index);
     }
 
-    auto append_child(std::unique_ptr<Child_t> child_ptr) -> Child_t&
+    /// Move \p child to end of underlying vector.
+    template <typename Widget_t>
+    auto append(std::unique_ptr<Widget_t> child) -> Widget_t&
     {
-        return this->Widget::children_.append(std::move(child_ptr));
+        return this->insert(std::move(child), this->child_count());
     }
 
-    auto remove_child(Widget const* child_ptr) -> std::unique_ptr<Widget>
+    auto remove(Widget const* child) -> std::unique_ptr<Widget>
     {
-        return this->Widget::children_.remove(child_ptr);
+        return this->Widget::children_.remove(child);
     }
 
-    auto remove_child(std::size_t index) -> std::unique_ptr<Widget>
+    auto remove(std::size_t index) -> std::unique_ptr<Widget>
     {
         return this->Widget::children_.remove(index);
     }
 
-    // void swap_children(std::size_t index_a, std::size_t index_b);
+    /// Erase first element that satisfies \p pred. Return true if erase happens
+    template <typename Unary_predicate_t,
+              std::enable_if_t<
+                  std::is_invocable_v<Unary_predicate_t,
+                                      std::add_lvalue_reference_t<Child_t>>,
+                  int> = 0>
+    auto erase(Unary_predicate_t&& pred) -> bool
+    {
+        auto child =
+            this->get_children().find(std::forward<Unary_predicate_t>(pred));
+        if (child == nullptr)
+            return false;
+        this->erase(child);
+        return true;
+    }
 
-    // void move_child(std::size_t initial_index, std::size_t end_index);
+    void erase(Widget const* child) { this->Widget::children_.erase(child); }
 
+    void erase(std::size_t index) { this->Widget::children_.erase(index); }
+
+    void clear() { this->Widget::children_.clear(); }
+
+    // TODO - or allow std::algorithms to operate on a layout's Children.
+    // void swap(std::size_t index_a, std::size_t index_b);
+    // void move(std::size_t initial_index, std::size_t end_index);
+
+   protected:
     // TODO Remove this method
     /// Clients override this to post Resize and Move events to children.
     /** This will be called each time the children Widgets possibly need to be
@@ -117,6 +146,7 @@ class Layout : public Widget {
         return Widget::child_polished_event(child);
     }
 
+   protected:
     struct Dimensions {
         Widget* widget;
         std::size_t width;

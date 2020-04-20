@@ -17,7 +17,6 @@
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/pipe.hpp>
-#include <cppurses/widget/widgets/cycle_box.hpp>
 #include <cppurses/widget/widgets/label.hpp>
 #include <cppurses/widget/widgets/tile.hpp>
 

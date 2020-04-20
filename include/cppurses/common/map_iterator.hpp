@@ -20,6 +20,17 @@ class Map_iterator {
    public:
     Map_iterator(Iter it, F map) : it_{it}, map_{map} {}
 
+    Map_iterator(Map_iterator const&) = default;
+    Map_iterator(Map_iterator&&)      = default;
+
+    Map_iterator& operator=(Map_iterator const& other)
+    {
+        it_ = other.it_;
+        return *this;
+    }
+    Map_iterator& operator=(Map_iterator&&) = default;
+
+   public:
     auto operator++() -> Map_iterator&
     {
         ++it_;
@@ -51,6 +62,8 @@ class Map_iterator {
     {
         return it_ != other;
     }
+
+    auto underlying() const -> Iter { return it_; }
 
    private:
     Iter it_;

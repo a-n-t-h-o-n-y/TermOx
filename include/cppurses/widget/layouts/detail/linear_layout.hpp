@@ -34,14 +34,13 @@ struct Linear_layout_parameters {
 
 /// Lays out Widgets in 2D, sharing space in a primary dimension.
 /** The secondary dimension does not share space among Widgets. */
-template <typename Child_t, typename Parameters_t>
-class Linear_layout : public Layout<Child_t> {
+template <typename Child, typename Parameters>
+class Linear_layout : public Layout<Child> {
    public:
-    using Layout<Child_t>::Layout;
+    using Layout<Child>::Layout;
 
    protected:
-    using Child      = Child_t;
-    using Parameters = Parameters_t;
+    using Parameters_t = Parameters;
 
    protected:
     void update_geometry() override

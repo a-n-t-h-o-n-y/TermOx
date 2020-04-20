@@ -39,8 +39,8 @@ class Selectable<Widget_t, void, void> : public Widget_t {
     /// Change visual to mark as unselected.
     void unselect()
     {
-        *this | pipe::remove(Trait::Standout);
-        *this | pipe::descendants() | pipe::remove(Trait::Standout);
+        *this | pipe::discard(Trait::Standout);
+        *this | pipe::descendants() | pipe::discard(Trait::Standout);
     }
 };
 

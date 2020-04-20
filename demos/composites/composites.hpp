@@ -54,7 +54,7 @@ struct Composites_old : App {
         // save | add(Trait::Bold | Trait::Underline);
 
         // save | remove_traits(Trait::Underline);
-        save | remove(Trait::Underline);
+        save | discard(Trait::Underline);
         save | clear_traits();
         save | on_enable([&txbx]() { txbx.set_contents("Save Enabled"); });
         save | on_child_added([](Widget& w) { w.border.enable(); });
@@ -157,6 +157,15 @@ struct Two_lists : Pair<layout::Vertical<My_check_list>> {
         *this | pipe::strong_focus() | pipe::on_focus_in([this] {
             cppurses::System::set_focus(this->get_children().front());
         });
+        this->get_children().find(
+            [](My_check_list const& l) { return l.name().empty(); });
+        this->foo();
+    }
+
+    void foo() const
+    {
+        this->get_children().find(
+            [](My_check_list const& l) { return l.name().empty(); });
     }
 };
 

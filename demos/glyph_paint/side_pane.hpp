@@ -18,12 +18,13 @@ namespace demos {
 namespace glyph_paint {
 
 class Side_pane : public cppurses::layout::Vertical<> {
+   private:
     struct Color_pages : cppurses::Cycle_stack<cppurses::Color_select> {
         Color_pages() { this->height_policy.maximum(3); }
-        cppurses::Color_select& foreground{this->make_page(
-            cppurses::Glyph_string{"Foreground", cppurses::Trait::Bold})};
-        cppurses::Color_select& background{this->make_page(
-            cppurses::Glyph_string{"Background", cppurses::Trait::Bold})};
+        cppurses::Color_select& foreground = this->make_page(
+            cppurses::Glyph_string{"Foreground", cppurses::Trait::Bold});
+        cppurses::Color_select& background = this->make_page(
+            cppurses::Glyph_string{"Background", cppurses::Trait::Bold});
     };
 
    public:

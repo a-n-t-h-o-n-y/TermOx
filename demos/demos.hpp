@@ -69,10 +69,6 @@ class Demo_menu : public cppurses::Menu_stack {
 
         // Can use find() methods and name() pipe to connect signals after
         // you build up the widget to quick prototype.
-        // think about find() instead of find_child() and find_descendants() but
-        // you still want to differentiate. do this:
-        // find_child() - restricted search, have to ask for it
-        // find() - searches all descendants, default
 
         this->make_page<comp::Two_lists>("Check Lists");
         this->make_page<graph::Graph_demo>("Graph");

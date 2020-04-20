@@ -68,8 +68,8 @@ struct Period_box : cppurses::layout::Horizontal<> {
 
 struct Grid_fade : cppurses::layout::Horizontal<cppurses::Labeled_checkbox> {
    public:
-    Child& grid_box = this->make_child("Grid");
-    Child& fade_box = this->make_child("Fade");
+    Child_t& grid_box = this->make_child("Grid");
+    Child_t& fade_box = this->make_child("Fade");
 
    public:
     Grid_fade();

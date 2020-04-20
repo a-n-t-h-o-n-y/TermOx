@@ -21,7 +21,7 @@
 namespace cppurses {
 
 /// A layout::Stack with an interface to cycle through each Widget in the stack.
-template <typename Child_t = Widget>
+template <typename Child = Widget>
 class Cycle_stack : public layout::Vertical<Widget> {
    private:
     /// User interface to cycle through the pages of the Stack.
@@ -45,19 +45,18 @@ class Cycle_stack : public layout::Vertical<Widget> {
     };
 
    public:
-    Top_row& top_row              = this->make_child<Top_row>();
-    layout::Stack<Child_t>& stack = this->make_child<layout::Stack<Child_t>>();
+    Top_row& top_row            = this->make_child<Top_row>();
+    layout::Stack<Child>& stack = this->make_child<layout::Stack<Child>>();
 
    public:
     /// Construct a new Widget_t object and add it to the end of the Stack.
     /** Returns a reference to this newly created page. \p title is passed to
      *  the Cycle_box to display when this page is active. */
-    template <typename Widget_t = Child_t, typename... Args>
+    template <typename Widget_t = Child, typename... Args>
     auto make_page(Glyph_string title, Args&&... args) -> Widget_t&
     {
-        static_assert(
-            std::is_base_of<Child_t, Widget_t>::value,
-            "Cycle_stack::make_page: Widget_t must be a Child_t type");
+        static_assert(std::is_base_of<Child, Widget_t>::value,
+                      "Cycle_stack::make_page: Widget_t must be a Child type");
         auto child = std::make_unique<Widget_t>(std::forward<Args>(args)...);
         return static_cast<Widget_t&>(
             this->append_page(std::move(title), std::move(child)));
@@ -65,8 +64,8 @@ class Cycle_stack : public layout::Vertical<Widget> {
 
     /// Append a page to the Stack.
     /** \p title is passed to the Cycle_box associated with this page. */
-    auto append_page(Glyph_string title, std::unique_ptr<Child_t> widget)
-        -> Child_t&
+    auto append_page(Glyph_string title, std::unique_ptr<Child> widget)
+        -> Child&
     {
         auto& signal = top_row.cycle_box.add_option(std::move(title));
         signal.connect(slot::set_active_page(stack, stack.size()));

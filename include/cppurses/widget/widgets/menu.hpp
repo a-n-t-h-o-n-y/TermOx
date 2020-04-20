@@ -12,6 +12,7 @@
 #include <cppurses/system/events/key.hpp>
 #include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
+#include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widgets/fixed_height.hpp>
 #include <cppurses/widget/widgets/label.hpp>
 

@@ -1,9 +1,8 @@
 #ifndef CPPURSES_WIDGET_LAYOUTS_SELECTING_HPP
 #define CPPURSES_WIDGET_LAYOUTS_SELECTING_HPP
 #include <algorithm>
+#include <type_traits>
 #include <vector>
-
-#include <iostream>//temp
 
 #include <cppurses/system/events/key.hpp>
 #include <cppurses/widget/pipe.hpp>
@@ -55,16 +54,54 @@ class Selecting : public Layout_t {
         decrement_scroll_keys_ = std::move(keys);
     }
 
-    // Return the currently selected child, UB if no children in Layout.
-    auto selected_child() const -> typename Layout_t::Child const&
+    /// Return the currently selected child, UB if no children in Layout.
+    auto selected_child() const -> typename Layout_t::Child_t const&
     {
         return this->get_children()[selected_];
     }
 
-    // Return the currently selected child, UB if no children in Layout.
-    auto selected_child() -> typename Layout_t::Child&
+    /// Return the currently selected child, UB if no children in Layout.
+    auto selected_child() -> typename Layout_t::Child_t&
     {
         return this->get_children()[selected_];
+    }
+
+    /// Return the index into get_children() corresponding to the selected child
+    auto selected_row() const -> std::size_t { return selected_; }
+
+    /// Erase first element that satisfies \p pred. Return true if erase happens
+    template <
+        typename Unary_predicate_t,
+        std::enable_if_t<std::is_invocable_v<Unary_predicate_t,
+                                             std::add_lvalue_reference_t<
+                                                 typename Layout_t::Child_t>>,
+                         int> = 0>
+    auto erase(Unary_predicate_t&& pred) -> bool
+    {
+        auto child =
+            this->get_children().find(std::forward<Unary_predicate_t>(pred));
+        if (child == nullptr)
+            return false;
+        this->erase(child);
+        return true;
+    }
+
+    /// Erase the given widget and reset selected to the Layout's offset.
+    void erase(Widget const* child)
+    {
+        auto const was_selected = &this->selected_child() == child;
+        this->Widget::children_.erase(child);
+        if (was_selected && this->child_count() > 0)
+            this->set_selected(this->children_.get_offset());
+    }
+
+    /// Erase child at \p index and reset selected to the Layout's offset.
+    void erase(std::size_t index)
+    {
+        auto const was_selected = selected_ == index;
+        this->Widget::children_.erase(index);
+        if (was_selected && this->child_count() > 0)
+            this->set_selected(this->children_.get_offset());
     }
 
    protected:
@@ -113,6 +150,21 @@ class Selecting : public Layout_t {
         if (this->child_count() != 0)
             this->selected_child().unselect();
         return Layout_t::focus_out_event();
+    }
+
+    auto disable_event() -> bool override
+    {
+        if (this->Widget::child_count() == 0)
+            return true;
+        this->Layout_t::get_children()[selected_].unselect();
+        return Layout_t::disable_event();
+    }
+
+    auto enable_event() -> bool override
+    {
+        if (System::focus_widget() == this)
+            this->Layout_t::get_children()[selected_].select();
+        return Layout_t::enable_event();
     }
 
    private:

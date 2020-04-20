@@ -19,8 +19,8 @@ class Pair : public Layout_t {
 template <typename Layout_t>
 class Pair<Layout_t, void, void> : public Layout_t {
    public:
-    typename Layout_t::Child& first  = this->template make_child();
-    typename Layout_t::Child& second = this->template make_child();
+    typename Layout_t::Child_t& first  = this->template make_child();
+    typename Layout_t::Child_t& second = this->template make_child();
 
    public:
     using Base = Layout_t;

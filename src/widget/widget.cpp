@@ -58,14 +58,8 @@ Widget::Widget(std::string name)
 void Widget::enable(bool enable, bool post_child_polished_event)
 {
     this->enable_and_post_events(enable, post_child_polished_event);
-    // This counters the fact that layouts are notified of enabled events but
-    // not disable events. So this has to disable children b/c layout will not.
-    // if (not enable) {
-    for (Widget& w : this->get_children()) {
-        // if (w.enabled())
+    for (Widget& w : this->get_children())
         w.enable(enable, post_child_polished_event);
-    }
-    // }
 }
 
 void Widget::close()
@@ -73,8 +67,33 @@ void Widget::close()
     std::unique_ptr<Widget> removed;
     if (this->parent() == nullptr)
         return;  // Can't delete a widget that is not owned by another Widget.
-    removed = this->parent()->children_.remove(this);
-    System::post_event<Delete_event>(*this, std::move(removed));
+    this->parent()->children_.erase(this);
+}
+
+void Widget::Children::erase(Widget const* child)
+{
+    auto const child_iter = this->find_impl(child);
+    if (child_iter == std::end(child_list_))
+        throw std::invalid_argument{"Children::remove: No Child Found"};
+    std::unique_ptr<Widget> removed = this->remove_impl(child_iter);
+    System::post_event<Delete_event>(*self_, std::move(removed));
+}
+
+void Widget::Children::erase(std::size_t index)
+{
+    this->erase(std::next(std::begin(child_list_), index)->get());
+}
+
+void Widget::Children::clear()
+{
+    for (auto& child : child_list_) {
+        auto removed = std::move(child);
+        removed->disable();
+        System::post_event<Child_removed_event>(*self_, *removed);
+        removed->set_parent(nullptr);
+        System::post_event<Delete_event>(*self_, std::move(removed));
+    }
+    child_list_.clear();
 }
 
 // This is here because including paint_event.hpp in widget.hpp causes issues.
@@ -82,8 +101,7 @@ void Widget::update() { System::post_event<Paint_event>(*this); }
 
 auto Widget::generate_wallpaper() const -> Glyph
 {
-    auto bg_glyph =
-        wallpaper_ ? *(wallpaper_) : System::terminal.background();
+    auto bg_glyph = wallpaper_ ? *(wallpaper_) : System::terminal.background();
     if (this->does_paint_wallpaper_with_brush())
         imprint(this->brush, bg_glyph.brush);
     return bg_glyph;

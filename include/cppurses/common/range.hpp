@@ -20,4 +20,4 @@ struct Range {
 };
 
 }  // namespace cppurses
-#endif  // CPPURSES_WIDGET_RANGE_HPP
+#endif  // CPPURSES_COMMON_RANGE_HPP

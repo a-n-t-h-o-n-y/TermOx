@@ -37,13 +37,13 @@ class Array : public Layout_t {
 
    private:
     using References =
-        std::array<std::reference_wrapper<typename Layout_t::Child>, N>;
+        std::array<std::reference_wrapper<typename Layout_t::Child_t>, N>;
     References refs_;
 
    private:
     template <typename... Args>
     auto make_child_with_index(std::size_t, Args const&... args) ->
-        typename Layout_t::Child&
+        typename Layout_t::Child_t&
     {
         return this->make_child(args...);
     }

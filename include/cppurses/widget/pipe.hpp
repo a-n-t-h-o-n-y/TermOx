@@ -295,7 +295,7 @@ inline auto add(Trait t)
     };
 }
 
-inline auto remove(Trait t)
+inline auto discard(Trait t)
 {
     return [=](auto& w) -> auto&
     {
