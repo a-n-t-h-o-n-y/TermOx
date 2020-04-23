@@ -64,7 +64,6 @@ void Widget::enable(bool enable, bool post_child_polished_event)
 
 void Widget::close()
 {
-    std::unique_ptr<Widget> removed;
     if (this->parent() == nullptr)
         return;  // Can't delete a widget that is not owned by another Widget.
     this->parent()->children_.erase(this);
