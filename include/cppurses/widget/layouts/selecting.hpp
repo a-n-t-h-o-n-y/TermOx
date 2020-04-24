@@ -154,16 +154,15 @@ class Selecting : public Layout_t {
 
     auto disable_event() -> bool override
     {
-        if (this->Widget::child_count() == 0)
-            return true;
-        this->Layout_t::get_children()[selected_].unselect();
+        if (this->child_count() != 0)
+            this->selected_child().unselect();
         return Layout_t::disable_event();
     }
 
     auto enable_event() -> bool override
     {
-        if (System::focus_widget() == this)
-            this->Layout_t::get_children()[selected_].select();
+        if (this->child_count() != 0 && System::focus_widget() == this)
+            this->selected_child().select();
         return Layout_t::enable_event();
     }
 
@@ -177,9 +176,7 @@ class Selecting : public Layout_t {
    private:
     void increment_selected()
     {
-        if (this->child_count() == 0)
-            return;
-        if (selected_ + 1 == this->child_count())
+        if (this->child_count() == 0 || selected_ + 1 == this->child_count())
             return;
         this->set_selected(selected_ + 1);
     }
@@ -193,9 +190,7 @@ class Selecting : public Layout_t {
 
     void decrement_selected()
     {
-        if (this->child_count() == 0)
-            return;
-        if (selected_ == 0)
+        if (this->child_count() == 0 || selected_ == 0)
             return;
         this->set_selected(selected_ - 1);
     }
@@ -243,12 +238,10 @@ class Selecting : public Layout_t {
     /// unselect() the currently selected child, select() the child at \p index.
     void set_selected(std::size_t index)
     {
-        auto const children    = this->get_children();
-        auto const is_in_focus = System::focus_widget() == this;
-        if (is_in_focus) {
-            children[selected_].unselect();
+        if (System::focus_widget() == this) {
+            this->selected_child().unselect();
             selected_ = index;
-            children[selected_].select();
+            this->selected_child().select();
         }
     }
 
