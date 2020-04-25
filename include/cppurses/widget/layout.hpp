@@ -29,6 +29,7 @@ class Layout : public Widget {
         (this->append(std::move(children)), ...);
     }
 
+   public:
     /// Return a Widget::Range<Child_t> of all children.
     auto get_children()
     {
@@ -41,7 +42,6 @@ class Layout : public Widget {
         return Children::View<Child_t, Widget::Children const>{children_};
     }
 
-   public:
     /// Create a Widget and append it to the list of children.
     /** Return a reference to this newly created Widget. */
     template <typename Widget_t = Child_t, typename... Args>
