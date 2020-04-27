@@ -14,7 +14,7 @@ namespace cppurses::layout {
  *  Depends on the Child Widgets of Layout_t to have a select() and unselect()
  *  method. Inherit from this and override key_press_event to perform actions on
  *  the selected_child(). Scroll action also moves the selected child index. */
-template <typename Layout_t>
+template <typename Layout_t, bool unselect_on_focus_out = true>
 class Selecting : public Layout_t {
    private:
     using Key_codes = std::vector<Key::Code>;
@@ -147,8 +147,10 @@ class Selecting : public Layout_t {
 
     auto focus_out_event() -> bool override
     {
-        if (this->child_count() != 0)
-            this->selected_child().unselect();
+        if constexpr (unselect_on_focus_out) {
+            if (this->child_count() != 0)
+                this->selected_child().unselect();
+        }
         return Layout_t::focus_out_event();
     }
 
