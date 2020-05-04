@@ -240,11 +240,10 @@ class Selecting : public Layout_t {
     /// unselect() the currently selected child, select() the child at \p index.
     void set_selected(std::size_t index)
     {
-        if (System::focus_widget() == this) {
+        if (selected_ < this->child_count())
             this->selected_child().unselect();
-            selected_ = index;
-            this->selected_child().select();
-        }
+        selected_ = index;
+        this->selected_child().select();
     }
 
     /// Find the child index of the last displayed Data_row.
