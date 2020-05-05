@@ -90,7 +90,7 @@ class Selecting : public Layout_t {
     void erase(Widget const* child)
     {
         auto const was_selected = &this->selected_child() == child;
-        this->Widget::children_.erase(child);
+        this->Layout_t::erase(child);
         if (was_selected && this->child_count() > 0)
             this->set_selected(this->children_.get_offset());
     }
@@ -99,7 +99,7 @@ class Selecting : public Layout_t {
     void erase(std::size_t index)
     {
         auto const was_selected = selected_ == index;
-        this->Widget::children_.erase(index);
+        this->Layout_t::erase(index);
         if (was_selected && this->child_count() > 0)
             this->set_selected(this->children_.get_offset());
     }

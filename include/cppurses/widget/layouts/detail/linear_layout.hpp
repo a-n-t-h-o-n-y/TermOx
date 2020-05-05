@@ -37,7 +37,38 @@ struct Linear_layout_parameters {
 template <typename Child, typename Parameters>
 class Linear_layout : public Layout<Child> {
    public:
+    using Child_t = Child;
+
+   private:
+    using Base_t = Layout<Child_t>;
+
+   public:
     using Layout<Child>::Layout;
+
+   public:
+    /// Erase first element that satisfies \p pred. Return true if erase happens
+    template <typename Unary_predicate_t,
+              std::enable_if_t<
+                  std::is_invocable_v<Unary_predicate_t,
+                                      std::add_lvalue_reference_t<Child_t>>,
+                  int> = 0>
+    auto erase(Unary_predicate_t&& pred) -> bool
+    {
+        this->Base_t::erase(std::forward<Unary_predicate_t>(pred));
+        this->reset_offset_if_out_of_bounds();
+    }
+
+    void erase(Widget const* child)
+    {
+        this->Base_t::children_.erase(child);
+        this->reset_offset_if_out_of_bounds();
+    }
+
+    void erase(std::size_t index)
+    {
+        this->Base_t::children_.erase(index);
+        this->reset_offset_if_out_of_bounds();
+    }
 
    protected:
     using Parameters_t = Parameters;
@@ -163,6 +194,13 @@ class Linear_layout : public Layout<Child> {
     static auto is_valid(std::size_t primary, std::size_t secondary) -> bool
     {
         return primary != 0 && secondary != 0;
+    }
+
+    void reset_offset_if_out_of_bounds()
+    {
+        auto const count = this->child_count();
+        if (count != 0 && this->children_.get_offset() >= count)
+            this->set_offset(count - 1);
     }
 };
 
