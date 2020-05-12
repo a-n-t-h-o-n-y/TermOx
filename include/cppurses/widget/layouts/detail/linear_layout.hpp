@@ -54,8 +54,9 @@ class Linear_layout : public Layout<Child> {
                   int> = 0>
     auto erase(Unary_predicate_t&& pred) -> bool
     {
-        this->Base_t::erase(std::forward<Unary_predicate_t>(pred));
+        auto r = this->Base_t::erase(std::forward<Unary_predicate_t>(pred));
         this->reset_offset_if_out_of_bounds();
+        return r;
     }
 
     void erase(Widget const* child)

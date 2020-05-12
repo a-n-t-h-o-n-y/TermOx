@@ -47,10 +47,10 @@ class Brush {
     constexpr void set_foreground(Color color) { foreground_color_ = color; }
 
     /// Set the background to not have a color, the default state.
-    constexpr void remove_background() { background_color_ = std::nullopt; }
+    void remove_background() { background_color_ = std::nullopt; }
 
     /// Set the foreground to not have a color, the default state.
-    constexpr void remove_foreground() { foreground_color_ = std::nullopt; }
+    void remove_foreground() { foreground_color_ = std::nullopt; }
 
     /// Remove all of the set Traits from the brush, not including colors.
     constexpr void clear_traits() { traits_ = 0; }
