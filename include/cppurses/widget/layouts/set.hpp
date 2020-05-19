@@ -23,6 +23,11 @@ class Set : public Layout_t {
    public:
     using Child_t = typename Layout_t::Child_t;
 
+    using Key_t =
+        std::invoke_result_t<Projection,
+                             std::add_const_t<std::add_lvalue_reference_t<
+                                 typename Layout_t::Child_t>>>;
+
    public:
     /// Insert \p child into correct position based on Projection and Comparison
     auto insert(std::unique_ptr<Child_t> child) -> Child_t&
@@ -47,6 +52,15 @@ class Set : public Layout_t {
             "layout::Set::make_child: Widget_t must be a Child_t type");
         return this->insert(
             std::make_unique<Widget_t>(std::forward<Args>(args)...));
+    }
+
+    /// Find a child widget by its key type(the result of the Projection fn).
+    /** Uses the Projection function on each child until a result equal to \p
+     *  key is found. Retuns nullptr if no child found. */
+    auto find(Key_t const& key) -> Child_t*
+    {
+        return this->get_children().find(
+            [&key](auto const& c) { return Projection{}(c) == key; });
     }
 
    private:
