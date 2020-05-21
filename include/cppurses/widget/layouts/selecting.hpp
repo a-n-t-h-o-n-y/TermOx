@@ -63,6 +63,12 @@ class Selecting : public Layout_t {
     /// Return the currently selected child, UB if no children in Layout.
     auto selected_child() -> typename Layout_t::Child_t&
     {
+        if (selected_ >= this->child_count()) {
+            // Getting intermitent crash because of outside access.
+            throw std::runtime_error{
+                "Selecting::selected_child();" + std::to_string(selected_) +
+                ">= " + std::to_string(this->child_count())};
+        }
         return this->get_children()[selected_];
     }
 
