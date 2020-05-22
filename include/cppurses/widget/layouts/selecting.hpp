@@ -192,8 +192,10 @@ class Selecting : public Layout_t {
     void increment_selected_and_scroll_if_necessary()
     {
         this->increment_selected();
-        if (!this->selected_child().is_enabled())
+        while (!this->selected_child().is_enabled()) {
             this->increment_offset();
+            this->update_geometry();
+        }
     }
 
     void decrement_selected()
