@@ -19,6 +19,13 @@ class Selecting : public Layout_t {
    private:
     using Key_codes = std::vector<Key::Code>;
 
+    template <typename Unary_predicate>
+    using Enable_if_invocable_with_child_t = std::enable_if_t<
+        std::is_invocable_v<Unary_predicate,
+                            std::add_const_t<std::add_lvalue_reference_t<
+                                typename Layout_t::Child_t>>>,
+        int>;
+
    public:
     Selecting() { *this | pipe::strong_focus(); }
 
@@ -76,16 +83,12 @@ class Selecting : public Layout_t {
     auto selected_row() const -> std::size_t { return selected_; }
 
     /// Erase first element that satisfies \p pred. Return true if erase happens
-    template <
-        typename Unary_predicate_t,
-        std::enable_if_t<std::is_invocable_v<Unary_predicate_t,
-                                             std::add_lvalue_reference_t<
-                                                 typename Layout_t::Child_t>>,
-                         int> = 0>
-    auto erase(Unary_predicate_t&& pred) -> bool
+    template <typename Unary_predicate,
+              Enable_if_invocable_with_child_t<Unary_predicate> = 0>
+    auto erase(Unary_predicate&& pred) -> bool
     {
         auto child =
-            this->get_children().find(std::forward<Unary_predicate_t>(pred));
+            this->get_children().find(std::forward<Unary_predicate>(pred));
         if (child == nullptr)
             return false;
         this->erase(child);
