@@ -21,7 +21,7 @@
 extern "C" void handle_sigint(int /* sig*/)
 {
     cppurses::System::terminal.uninitialize();
-#if !defined __APPLE__
+#if !defined __APPLE__ && !defined __MINGW32__
     std::quick_exit(0);
 #else
     std::exit(0);
