@@ -11,7 +11,7 @@ bool Shade_display::paint_event()
     using namespace cppurses;
     auto light_shade   = L'░'_g | background(base_);
     auto mid_shade     = L'▒'_g | background(base_);
-    auto const color_n = 16;
+    auto const color_n = cppurses::System::terminal.get_ansi_color_count();
 
     int const height = static_cast<int>(this->height());
     int const width  = static_cast<int>(this->width());
@@ -22,18 +22,17 @@ bool Shade_display::paint_event()
     };
     auto increment = [this](int& y) { inverted_ ? ++y : --y; };
 
-    Painter p{*this};
+    auto p      = Painter{*this};
     auto& shade = light_shade;
     for (auto y = y_begin, i = 0; y_end(y); increment(y)) {
-        for (auto x = 0; x < width and i < (2 * color_n); ++x, ++i) {
+        for (auto x = 0; x < width && i < (2 * color_n); ++x, ++i) {
             if (i == color_n)
                 shade = mid_shade;
-            auto const foreground =
-                static_cast<Color>(detail::first_color_value + (i % 16));
-            if (foreground == base_)
+            auto const fg = Color{static_cast<Color::Value_t>(i % color_n)};
+            if (fg == base_)
                 --x;
             else {
-                shade.brush.set_foreground(foreground);
+                shade.brush.set_foreground(fg);
                 p.put(shade, x, y);
             }
         }

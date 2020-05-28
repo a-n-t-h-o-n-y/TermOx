@@ -96,7 +96,7 @@ target_sources(cppurses PRIVATE
     painter/extended_char.cpp
     painter/screen_mask.cpp
     painter/find_empty_space.cpp
-    painter/palettes.cpp
+    painter/color.cpp
 )
 
 # WIDGET

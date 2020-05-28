@@ -11,7 +11,6 @@
 
 #include <signals/slot.hpp>
 
-#include <cppurses/painter/palette.hpp>
 #include <cppurses/system/animation_engine.hpp>
 #include <cppurses/system/detail/event_engine.hpp>
 #include <cppurses/system/detail/event_queue.hpp>

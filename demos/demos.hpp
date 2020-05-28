@@ -1,5 +1,6 @@
 #ifndef DEMOS_DEMOS_HPP
 #define DEMOS_DEMOS_HPP
+#include <cppurses/painter/palette/en4.hpp>
 #include <cppurses/system/events/key.hpp>
 #include <cppurses/system/shortcuts.hpp>
 #include <cppurses/system/system.hpp>
@@ -10,6 +11,7 @@
 
 #include "animation/animated_widget.hpp"
 #include "chess/src/chess_ui.hpp"
+#include "colors/palette_view.hpp"
 #include "composites/composites.hpp"
 #include "focus/focus_demo.hpp"
 #include "game_of_life/gol_demo.hpp"
@@ -70,6 +72,7 @@ class Demo_menu : public cppurses::Menu_stack {
         // Can use find() methods and name() pipe to connect signals after
         // you build up the widget to quick prototype.
 
+        this->make_page<colors::Palette_view>("Colors", en4::palette);
         this->make_page<comp::Two_lists>("Check Lists");
         this->make_page<graph::Graph_demo>("Graph");
         this->make_page<layout_demo::Layout_demo>("Layouts");

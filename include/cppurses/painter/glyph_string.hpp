@@ -247,36 +247,36 @@ inline auto operator|(wchar_t const* gs, Trait t) -> Glyph_string
     return Glyph_string{gs} | t;
 }
 
-// BackgroundColor -------------------------------------------------------------
-inline auto operator|(Glyph_string& gs, BackgroundColor c) -> Glyph_string&
+// Background_color ------------------------------------------------------------
+inline auto operator|(Glyph_string& gs, Background_color c) -> Glyph_string&
 {
     gs.add_traits(c);
     return gs;
 }
 
-inline auto operator|(Glyph_string&& gs, BackgroundColor c) -> Glyph_string
+inline auto operator|(Glyph_string&& gs, Background_color c) -> Glyph_string
 {
     return gs | c;
 }
 
-inline auto operator|(wchar_t const* gs, BackgroundColor c) -> Glyph_string
+inline auto operator|(wchar_t const* gs, Background_color c) -> Glyph_string
 {
     return Glyph_string{gs} | c;
 }
 
-// ForegroundColor -------------------------------------------------------------
-inline auto operator|(Glyph_string& gs, ForegroundColor c) -> Glyph_string&
+// Foreground_color ------------------------------------------------------------
+inline auto operator|(Glyph_string& gs, Foreground_color c) -> Glyph_string&
 {
     gs.add_traits(c);
     return gs;
 }
 
-inline auto operator|(Glyph_string&& gs, ForegroundColor c) -> Glyph_string
+inline auto operator|(Glyph_string&& gs, Foreground_color c) -> Glyph_string
 {
     return gs | c;
 }
 
-inline auto operator|(wchar_t const* gs, ForegroundColor c) -> Glyph_string
+inline auto operator|(wchar_t const* gs, Foreground_color c) -> Glyph_string
 {
     return Glyph_string{gs} | c;
 }

@@ -27,8 +27,7 @@ using namespace cppurses;
 
 auto color_index(Color fg, Color bg) -> short
 {
-    return System::terminal.color_index(static_cast<Underlying_color_t>(fg),
-                                        static_cast<Underlying_color_t>(bg));
+    return System::terminal.color_index(fg.value, bg.value);
 }
 
 auto color_index(Brush const& brush) -> short

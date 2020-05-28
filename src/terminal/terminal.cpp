@@ -1,22 +1,26 @@
 #include <cppurses/terminal/terminal.hpp>
 
+#include <algorithm>
 #include <chrono>
 #include <clocale>
 #include <csignal>
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
+#include <iterator>
 #include <mutex>
 #include <stdexcept>
 
 #include <ncurses.h>
 
 #include <cppurses/painter/color.hpp>
-#include <cppurses/painter/color_definition.hpp>
-#include <cppurses/painter/palette.hpp>
+#include <cppurses/painter/palette/basic.hpp>
+#include <cppurses/painter/palette/basic8.hpp>
+#include <cppurses/painter/palette/dawn_bringer16.hpp>
 #include <cppurses/painter/rgb.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/terminal/input.hpp>
+#include <cppurses/terminal/terminal_error.hpp>
 
 extern "C" void handle_sigint(int /* sig*/)
 {
@@ -31,13 +35,14 @@ extern "C" void handle_sigint(int /* sig*/)
 namespace {
 using namespace cppurses;
 
-auto scale(Underlying_color_t value) -> Underlying_color_t
+auto scale(RGB::Value_t value) -> short
 {
-    auto constexpr value_max   = 255;
-    auto constexpr ncurses_max = 1000;
-    return static_cast<Underlying_color_t>(
-        (static_cast<double>(value) / value_max) * ncurses_max);
+    auto constexpr value_max   = RGB::Value_t{255};
+    auto constexpr ncurses_max = short{1000};
+    return static_cast<short>((static_cast<double>(value) / value_max) *
+                              ncurses_max);
 }
+
 }  // namespace
 
 namespace cppurses {
@@ -63,8 +68,15 @@ void Terminal::initialize()
     this->set_refresh_rate(refresh_rate_);
     if (this->has_color()) {
         ::start_color();
-        this->initialize_color_pairs();
-        this->ncurses_set_palette(palette_);
+        try {
+            this->set_palette(dawn_bringer16::palette);
+        }
+        catch (Terminal_error) {
+            if (this->has_extended_colors())
+                this->set_palette(basic::palette);
+            else
+                this->set_palette(basic8::palette);
+        }
     }
     this->ncurses_set_raw_mode();
     this->ncurses_set_cursor();
@@ -113,11 +125,35 @@ void Terminal::set_background(Glyph const& tile)
     }
 }
 
-void Terminal::set_color_palette(const Palette& colors)
+void Terminal::set_palette(ANSI_palette const& colors)
 {
-    palette_ = colors;
-    if (is_initialized_ and this->has_color())
-        this->ncurses_set_palette(palette_);
+    if (!is_initialized_ or !this->has_color())
+        return;
+    palette_           = colors;
+    auto const color_n = this->get_ansi_color_count();
+    for (auto fg = Color::Value_t{0}; fg < color_n; ++fg) {
+        for (auto bg = Color::Value_t{0}; bg < color_n; ++bg) {
+            ::init_pair(this->color_index(fg, bg), this->get_ansi_value(fg),
+                        this->get_ansi_value(bg));
+        }
+    }
+}
+
+void Terminal::set_palette(True_color_palette const& colors)
+{
+    if (!is_initialized_)
+        return;
+    if (!this->has_color() || !this->can_change_colors())
+        throw Terminal_error{"Terminal cannot re-define color values."};
+    auto ansi_pal = ANSI_palette{};
+    ansi_pal.reserve(colors.size());
+    std::transform(std::cbegin(colors), std::cend(colors),
+                   std::back_inserter(ansi_pal),
+                   [](auto const& tcd) { return tcd.ansi_def; });
+    this->set_palette(ansi_pal);
+    for (auto const& color : colors)
+        this->set_color_definition(color);
+    tc_palette_ = colors;
 }
 
 void Terminal::show_cursor(bool show)
@@ -169,43 +205,22 @@ auto Terminal::color_pair_count() const -> short
     return 0;
 }
 
-auto Terminal::color_index(short fg, short bg) const -> short
+auto Terminal::color_index(Color::Value_t fg, Color::Value_t bg) const -> short
 {
-    if (fg == 7 and bg == 0)
-        return 0;
-    if (fg == 15 and bg == 0)
-        return 128;
-    short const max_color = this->has_extended_colors() ? 16 : 8;
-    return ((max_color - 1) - fg) * max_color + bg;
+    // Can use ansi_color_count because this is set even with true color palette
+    short const color_n = this->get_ansi_color_count();
+    short const offset  = 1;
+    short const fg_mod  = fg % color_n;
+    short const bg_mod  = bg % color_n;
+    return offset + fg_mod * color_n + bg_mod;
 }
 
-void Terminal::use_default_colors(bool use)
+void Terminal::set_color_definition(True_color_definition const& def)
 {
-    if (!is_initialized_)
+    if (!this->can_change_colors())
         return;
-    if (use) {
-        ::assume_default_colors(-1, -1);
-        init_default_pairs();
-    }
-    else {
-        ::assume_default_colors(7, 0);
-        uninit_default_pairs();
-    }
-}
-
-void Terminal::ncurses_set_palette(Palette const& colors)
-{
-    if (this->can_change_colors()) {
-        for (Color_definition const& def : colors) {
-            auto const max_color = this->has_extended_colors() ? 16 : 8;
-            auto const ncurses_color_number =
-                static_cast<Underlying_color_t>(def.color);
-            if (ncurses_color_number < max_color) {
-                ::init_color(ncurses_color_number, scale(def.values.red),
-                             scale(def.values.green), scale(def.values.blue));
-            }
-        }
-    }
+    ::init_color(def.ansi_def.ansi.value, scale(def.color_value.red()),
+                 scale(def.color_value.green()), scale(def.color_value.blue()));
 }
 
 void Terminal::ncurses_set_raw_mode() const
@@ -225,41 +240,13 @@ void Terminal::ncurses_set_cursor() const
     show_cursor_ ? ::curs_set(1) : ::curs_set(0);
 }
 
-void Terminal::initialize_color_pairs() const
+auto Terminal::get_ansi_value(Color::Value_t c) -> ANSI::Value_t
 {
-    Underlying_color_t max_color = this->has_extended_colors() ? 16 : 8;
-    for (short fg = 0; fg < max_color; ++fg) {
-        for (short bg = 0; bg < max_color; ++bg) {
-            auto const index = color_index(fg, bg);
-            if (index == 0)
-                continue;
-            ::init_pair(index, fg, bg);
-        }
-    }
-}
-
-void Terminal::init_default_pairs() const
-{
-    Underlying_color_t max_color = this->has_extended_colors() ? 16 : 8;
-    for (Underlying_color_t bg = 1; bg < max_color; ++bg) {
-        ::init_pair(color_index(7, bg), -1, bg);
-    }
-    for (Underlying_color_t fg = 0; fg < max_color; ++fg) {
-        if (fg != 7)
-            ::init_pair(color_index(fg, 0), fg, -1);
-    }
-}
-
-void Terminal::uninit_default_pairs() const
-{
-    Underlying_color_t max_color = this->has_extended_colors() ? 16 : 8;
-    for (Underlying_color_t bg = 0; bg < max_color; ++bg) {
-        ::init_pair(color_index(7, bg), 7, bg);
-    }
-    for (Underlying_color_t fg = 0; fg < max_color; ++fg) {
-        if (fg != 7)
-            ::init_pair(color_index(fg, 0), fg, 0);
-    }
+    auto const iter = std::find_if(std::cbegin(palette_), std::cend(palette_),
+                                   [c](auto x) { return x.color.value == c; });
+    if (iter == std::cend(palette_))
+        throw std::runtime_error{"Missing Color in Palette."};
+    return iter->ansi.value;
 }
 
 }  // namespace cppurses

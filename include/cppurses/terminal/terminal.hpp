@@ -3,9 +3,9 @@
 #include <chrono>
 #include <cstddef>
 
+#include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
-#include <cppurses/painter/palette.hpp>
-#include <cppurses/painter/palettes.hpp>
+#include <cppurses/painter/rgb.hpp>
 
 namespace cppurses {
 
@@ -39,11 +39,17 @@ class Terminal {
     /// Return the default background/wallpaper currently in use.
     auto background() const -> Glyph const& { return background_; }
 
-    /// Set terminal color definitions for the 16 Colors in CPPurses.
-    void set_color_palette(Palette const& colors);
+    /// Set ANSI terminal color definitions for CPPurses Colors.
+    void set_palette(ANSI_palette const& colors);
+
+    /// Set True Color definitions for CPPurses Colors and ANSI values.
+    void set_palette(True_color_palette const& colors);
 
     /// Return a copy of the currently set color palette.
-    auto current_palette() const -> Palette { return palette_; }
+    auto current_palette() const -> ANSI_palette const& { return palette_; }
+
+    /// Set the RGB value of an ANSI color.
+    void set_color_definition(True_color_definition const& def);
 
     /// Set whether or not the cursor is visible on screen.
     void show_cursor(bool show = true);
@@ -74,36 +80,37 @@ class Terminal {
     auto color_pair_count() const -> short;
 
     /// Map pairs of colors to a unique index between [0, 255]
-    auto color_index(short fg, short bg) const -> short;
+    auto color_index(Color::Value_t fg, Color::Value_t bg) const -> short;
 
-    /// Use the default colors of the terminal for bg Black and fg White.
-    void use_default_colors(bool use = true);
+    /// Returns the number of colors in the currently set ANSI_palette.
+    auto get_ansi_color_count() const -> Color::Value_t
+    {
+        return static_cast<Color::Value_t>(palette_.size());
+    }
+
+    /// Returns the number of colors in the currently set True_color_palette.
+    auto get_true_color_count() const -> Color::Value_t
+    {
+        return static_cast<Color::Value_t>(tc_palette_.size());
+    }
 
    private:
     bool is_initialized_ = false;
     bool show_cursor_    = false;
     bool raw_mode_       = false;
     Glyph background_    = L' ';
-    Palette palette_     = Palettes::DawnBringer();
+    ANSI_palette palette_;
+    True_color_palette tc_palette_;
     std::chrono::milliseconds refresh_rate_{33};
 
-    /// Actually set the palette via ncurses using the state of \p colors.
-    void ncurses_set_palette(Palette const& colors);
-
+   private:
     /// Actually set raw/noraw mode via ncurses using the state of raw_mode_.
     void ncurses_set_raw_mode() const;
 
     /// Actually set show_cursor via ncurses using the state of show_cursor_.
     void ncurses_set_cursor() const;
 
-    /// Assign all color pairs.
-    void initialize_color_pairs() const;
-
-    /// Assign background Black and foreground White as color -1
-    void init_default_pairs() const;
-
-    /// Assign background Black and foreground White as color 0 and 7 resp.
-    void uninit_default_pairs() const;
+    auto get_ansi_value(Color::Value_t c) -> ANSI::Value_t;
 };
 
 }  // namespace cppurses

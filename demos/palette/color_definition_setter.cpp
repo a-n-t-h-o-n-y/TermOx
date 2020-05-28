@@ -19,12 +19,12 @@ Color_definition_setter::Color_definition_setter()
     this->change_current_color(Color::White);
 
     using namespace palette::detail;
-    color_control_.red_changed.connect(
-        [this](int red_value) { set_red(current_color_, red_value); });
-    color_control_.green_changed.connect(
-        [this](int green_value) { set_green(current_color_, green_value); });
-    color_control_.blue_changed.connect(
-        [this](int blue_value) { set_blue(current_color_, blue_value); });
+    // color_control_.red_changed.connect(
+    //     [this](int red_value) { set_red(current_color_, red_value); });
+    // color_control_.green_changed.connect(
+    //     [this](int green_value) { set_green(current_color_, green_value); });
+    // color_control_.blue_changed.connect(
+    //     [this](int blue_value) { set_blue(current_color_, blue_value); });
 }
 
 void Color_definition_setter::change_current_color(Color color)

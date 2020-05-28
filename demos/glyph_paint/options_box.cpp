@@ -2,7 +2,6 @@
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
-#include <cppurses/painter/palettes.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
@@ -25,12 +24,12 @@ Options_B::Options_B()
     space1.set_wallpaper(L'─');
 
     palette_label.set_alignment(Align::Center);
-    palette_box.add_option("Dawn Bringer").connect([] {
-        System::terminal.set_color_palette(Palettes::DawnBringer());
-    });
-    palette_box.add_option("Standard").connect([] {
-        System::terminal.set_color_palette(Palettes::Standard());
-    });
+    // palette_box.add_option("Dawn Bringer").connect([] {
+    //     System::terminal.set_color_palette(Palettes::DawnBringer());
+    // });
+    // palette_box.add_option("Standard").connect([] {
+    //     System::terminal.set_color_palette(Palettes::Standard());
+    // });
 
     back_btn.brush.set_background(Color::Light_gray);
     back_btn.brush.set_foreground(Color::Black);

@@ -42,36 +42,36 @@ constexpr auto operator|(Glyph&& g, Trait t) -> Glyph { return g | t; }
 
 constexpr auto operator|(wchar_t g, Trait t) -> Glyph { return Glyph{g} | t; }
 
-// BackgroundColor -------------------------------------------------------------
-constexpr auto operator|(Glyph& g, BackgroundColor c) -> Glyph&
+// Background_color ------------------------------------------------------------
+constexpr auto operator|(Glyph& g, Background_color c) -> Glyph&
 {
     g.brush.add_traits(c);
     return g;
 }
 
-constexpr auto operator|(Glyph&& g, BackgroundColor c) -> Glyph
+constexpr auto operator|(Glyph&& g, Background_color c) -> Glyph
 {
     return g | c;
 }
 
-constexpr auto operator|(wchar_t g, BackgroundColor c) -> Glyph
+constexpr auto operator|(wchar_t g, Background_color c) -> Glyph
 {
     return Glyph{g} | c;
 }
 
-// ForegroundColor -------------------------------------------------------------
-constexpr auto operator|(Glyph& g, ForegroundColor c) -> Glyph&
+// Foreground_color ------------------------------------------------------------
+constexpr auto operator|(Glyph& g, Foreground_color c) -> Glyph&
 {
     g.brush.add_traits(c);
     return g;
 }
 
-constexpr auto operator|(Glyph&& g, ForegroundColor c) -> Glyph
+constexpr auto operator|(Glyph&& g, Foreground_color c) -> Glyph
 {
     return g | c;
 }
 
-constexpr auto operator|(wchar_t g, ForegroundColor c) -> Glyph
+constexpr auto operator|(wchar_t g, Foreground_color c) -> Glyph
 {
     return Glyph{g} | c;
 }

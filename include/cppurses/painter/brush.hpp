@@ -82,16 +82,16 @@ class Brush {
     }
 
    private:
-    /// Used by add_traits() to set a deail::BackgroundColor.
-    constexpr void set_trait(BackgroundColor bc)
+    /// Used by add_traits() to set a deail::Background_color.
+    constexpr void set_trait(Background_color bg)
     {
-        this->set_background(static_cast<Color>(bc));
+        this->set_background(Color{bg.value});
     }
 
-    /// Used by add_traits() to set a deail::ForegroundColor.
-    constexpr void set_trait(ForegroundColor fc)
+    /// Used by add_traits() to set a deail::Foreground_color.
+    constexpr void set_trait(Foreground_color fg)
     {
-        this->set_foreground(static_cast<Color>(fc));
+        this->set_foreground(Color{fg.value});
     }
 
     /// Used by add_traits() to set an Trait.

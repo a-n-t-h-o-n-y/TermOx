@@ -3,24 +3,25 @@
 #include <cstdint>
 
 #include <cppurses/painter/color.hpp>
-#include <cppurses/painter/color_definition.hpp>
-#include <cppurses/painter/palette.hpp>
+// #include <cppurses/painter/palette.hpp>
 
 namespace palette {
 namespace detail {
 
-/// Return the current Color_definition of \p color in \p palette.
-cppurses::Color_definition& extract_definition(cppurses::Palette& palette,
-                                               cppurses::Color color);
+/// Return the current ANSI_definition of \p color in \p palette.
+// cppurses::ANSI_definition& extract_definition(cppurses::Palette& palette,
+//                                                cppurses::Color color);
 
 /// Set the red value of \p color and update the display.
-void set_red(cppurses::Color color, cppurses::Underlying_color_t red_value);
+// void set_red(cppurses::Color color, cppurses::Underlying_color_t red_value);
 
-/// Set the green value of \p color and update the display.
-void set_green(cppurses::Color color, cppurses::Underlying_color_t green_value);
+// /// Set the green value of \p color and update the display.
+// void set_green(cppurses::Color color, cppurses::Underlying_color_t
+// green_value);
 
-/// Set the blue value of \p color and update the display.
-void set_blue(cppurses::Color color, cppurses::Underlying_color_t blue_value);
+// /// Set the blue value of \p color and update the display.
+// void set_blue(cppurses::Color color, cppurses::Underlying_color_t
+// blue_value);
 
 }  // namespace detail
 }  // namespace palette
