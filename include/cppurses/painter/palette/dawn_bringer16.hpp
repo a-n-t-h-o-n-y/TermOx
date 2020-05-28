@@ -21,8 +21,8 @@ constexpr auto Orange      = Color{13};
 constexpr auto Gray        = Color{14};
 constexpr auto Light_gray  = Color{15};
 
-/* clang-format off */
 inline auto const palette = True_color_palette{{
+    /* clang-format off */
     {{Black,       ANSI{16}}, True_color{0x140c1c}},
     {{Red,         ANSI{17}}, True_color{0xd04648}},
     {{Green,       ANSI{18}}, True_color{0x346524}},
@@ -39,6 +39,7 @@ inline auto const palette = True_color_palette{{
     {{Orange,      ANSI{29}}, True_color{0xd27d2c}},
     {{Gray,        ANSI{30}}, True_color{0x757161}},
     {{Light_gray,  ANSI{31}}, True_color{0x8595a1}},
+    /* clang-format on */
 }};
-}  // namespace cppurses::dawn_bringer
+}  // namespace cppurses::dawn_bringer16
 #endif  // CPPURSES_PAINTER_PALETTE_DAWN_BRINGER16_HPP

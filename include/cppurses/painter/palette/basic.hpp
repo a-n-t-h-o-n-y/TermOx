@@ -21,8 +21,8 @@ constexpr auto Fuchsia = Color{13};
 constexpr auto Aqua    = Color{14};
 constexpr auto White   = Color{15};
 
-/* clang-format off */
 inline auto const palette = ANSI_palette{{
+    /* clang-format off */
     {Black,   ANSI{0}},
     {Maroon,  ANSI{1}},
     {Green,   ANSI{2}},
@@ -39,8 +39,8 @@ inline auto const palette = ANSI_palette{{
     {Fuchsia, ANSI{13}},
     {Aqua,    ANSI{14}},
     {White,   ANSI{15}},
+    /* clang-format on */
 }};
-/* clang-format on */
 
 }  // namespace cppurses::basic
 #endif  // CPPURSES_PAINTER_PALETTE_BASIC_HPP
