@@ -1,6 +1,6 @@
 #ifndef DEMOS_DEMOS_HPP
 #define DEMOS_DEMOS_HPP
-#include <cppurses/painter/palette/en4.hpp>
+#include <cppurses/painter/palette/dawn_bringer16.hpp>
 #include <cppurses/system/events/key.hpp>
 #include <cppurses/system/shortcuts.hpp>
 #include <cppurses/system/system.hpp>
@@ -72,7 +72,8 @@ class Demo_menu : public cppurses::Menu_stack {
         // Can use find() methods and name() pipe to connect signals after
         // you build up the widget to quick prototype.
 
-        this->make_page<colors::Palette_view>("Colors", en4::palette);
+        this->make_page<colors::Palette_view>("Colors",
+                                              dawn_bringer16::palette);
         this->make_page<comp::Two_lists>("Check Lists");
         this->make_page<graph::Graph_demo>("Graph");
         this->make_page<layout_demo::Layout_demo>("Layouts");
