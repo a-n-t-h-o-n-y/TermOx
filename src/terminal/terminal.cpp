@@ -12,6 +12,7 @@
 #include <stdexcept>
 
 #include <ncurses.h>
+#undef border
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/palette/basic.hpp>
@@ -21,6 +22,7 @@
 #include <cppurses/system/system.hpp>
 #include <cppurses/terminal/input.hpp>
 #include <cppurses/terminal/terminal_error.hpp>
+#include <cppurses/widget/widget.hpp>
 
 extern "C" void handle_sigint(int /* sig*/)
 {
@@ -120,23 +122,23 @@ void Terminal::set_refresh_rate(std::chrono::milliseconds duration)
 void Terminal::set_background(Glyph const& tile)
 {
     background_ = tile;
-    if (is_initialized_) {
-        // TODO Notify Screen::flush() to repaint everything.
-    }
+    if (is_initialized_)
+        this->repaint_all();
 }
 
 void Terminal::set_palette(ANSI_palette const& colors)
 {
     if (!is_initialized_ or !this->has_color())
         return;
-    palette_           = colors;
-    auto const color_n = this->get_ansi_color_count();
-    for (auto fg = Color::Value_t{0}; fg < color_n; ++fg) {
-        for (auto bg = Color::Value_t{0}; bg < color_n; ++bg) {
-            ::init_pair(this->color_index(fg, bg), this->get_ansi_value(fg),
-                        this->get_ansi_value(bg));
+    palette_ = colors;
+    for (auto const& foreground : colors) {
+        for (auto const& background : colors) {
+            ::init_pair(this->color_index(foreground.color, background.color),
+                        this->get_ansi_value(foreground.color),
+                        this->get_ansi_value(background.color));
         }
     }
+    this->repaint_all();
 }
 
 void Terminal::set_palette(True_color_palette const& colors)
@@ -205,13 +207,13 @@ auto Terminal::color_pair_count() const -> short
     return 0;
 }
 
-auto Terminal::color_index(Color::Value_t fg, Color::Value_t bg) const -> short
+auto Terminal::color_index(Color fg, Color bg) const -> short
 {
     // Can use ansi_color_count because this is set even with true color palette
     short const color_n = this->get_ansi_color_count();
     short const offset  = 1;
-    short const fg_mod  = fg % color_n;
-    short const bg_mod  = bg % color_n;
+    short const fg_mod  = fg.value % color_n;
+    short const bg_mod  = bg.value % color_n;
     return offset + fg_mod * color_n + bg_mod;
 }
 
@@ -240,13 +242,20 @@ void Terminal::ncurses_set_cursor() const
     show_cursor_ ? ::curs_set(1) : ::curs_set(0);
 }
 
-auto Terminal::get_ansi_value(Color::Value_t c) -> ANSI::Value_t
+auto Terminal::get_ansi_value(Color c) -> ANSI::Value_t
 {
     auto const iter = std::find_if(std::cbegin(palette_), std::cend(palette_),
-                                   [c](auto x) { return x.color.value == c; });
+                                   [c](auto x) { return x.color == c; });
     if (iter == std::cend(palette_))
         throw std::runtime_error{"Missing Color in Palette."};
     return iter->ansi.value;
+}
+
+void Terminal::repaint_all()
+{
+    auto* const head = System::head();
+    if (head)
+        head->update();
 }
 
 }  // namespace cppurses

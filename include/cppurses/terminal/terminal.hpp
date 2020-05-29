@@ -80,7 +80,7 @@ class Terminal {
     auto color_pair_count() const -> short;
 
     /// Map pairs of colors to a unique index between [0, 255]
-    auto color_index(Color::Value_t fg, Color::Value_t bg) const -> short;
+    auto color_index(Color fg, Color bg) const -> short;
 
     /// Returns the number of colors in the currently set ANSI_palette.
     auto get_ansi_color_count() const -> Color::Value_t
@@ -110,7 +110,10 @@ class Terminal {
     /// Actually set show_cursor via ncurses using the state of show_cursor_.
     void ncurses_set_cursor() const;
 
-    auto get_ansi_value(Color::Value_t c) -> ANSI::Value_t;
+    auto get_ansi_value(Color c) -> ANSI::Value_t;
+
+    /// Repaint All Widgets
+    void repaint_all();
 };
 
 }  // namespace cppurses
