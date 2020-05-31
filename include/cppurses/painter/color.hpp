@@ -14,21 +14,21 @@ struct Color {
 
     // Default Color Names
     static Color const Black;
-    static Color const Red;
-    static Color const Green;
-    static Color const Yellow;
-    static Color const Blue;
-    static Color const Violet;
-    static Color const Light_blue;
-    static Color const White;
-    static Color const Dark_gray;
     static Color const Dark_red;
-    static Color const Light_green;
+    static Color const Green;
     static Color const Brown;
     static Color const Dark_blue;
+    static Color const Violet;
+    static Color const Light_blue;
+    static Color const Light_gray;
+    static Color const Dark_gray;
+    static Color const Red;
+    static Color const Light_green;
+    static Color const Yellow;
+    static Color const Blue;
     static Color const Orange;
     static Color const Gray;
-    static Color const Light_gray;
+    static Color const White;
 };
 inline auto operator==(Color x, Color y) -> bool { return x.value == y.value; }
 inline auto operator!=(Color x, Color y) -> bool { return !(x == y); }
