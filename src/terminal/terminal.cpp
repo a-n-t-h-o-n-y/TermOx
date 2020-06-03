@@ -254,8 +254,10 @@ auto Terminal::get_ansi_value(Color c) -> ANSI::Value_t
 void Terminal::repaint_all()
 {
     auto* const head = System::head();
-    if (head)
-        head->update();
+    if (head == nullptr)
+        return;
+    for (auto* const d : head->get_descendants())
+        d->update();
 }
 
 }  // namespace cppurses
