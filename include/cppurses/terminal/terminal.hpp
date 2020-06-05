@@ -77,7 +77,7 @@ class Terminal {
 
     /// Return the number of color pairs in this terminal.
     /** Always returns 0 ...*/
-    auto color_pair_count() const -> short;
+    auto color_pair_count() const -> int;
 
     /// Map pairs of colors to a unique index between [0, 255]
     auto color_index(Color fg, Color bg) const -> short;

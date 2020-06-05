@@ -200,7 +200,7 @@ auto Terminal::can_change_colors() const -> bool
     return false;
 }
 
-auto Terminal::color_pair_count() const -> short
+auto Terminal::color_pair_count() const -> int
 {
     if (is_initialized_)
         return COLOR_PAIRS;
