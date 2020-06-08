@@ -47,8 +47,6 @@ auto System::focus_widget() -> cppurses::Widget*
 
 void System::set_focus(Widget& w) { detail::Focus::set(w); }
 
-void System::forward_focus(Widget& w) { detail::Focus::set_now(w); }
-
 void System::clear_focus() { detail::Focus::clear(); }
 
 void System::enable_tab_focus() { detail::Focus::enable_tab_focus(); }

@@ -113,7 +113,7 @@ class Menu_stack : public layout::Stack<Widget> {
     auto focus_in_event() -> bool override
     {
         System::set_focus(menu_);
-        return Stack::focus_in_event();
+        return true;
     }
 
    private:

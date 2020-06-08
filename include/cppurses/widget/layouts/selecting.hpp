@@ -87,24 +87,6 @@ class Selecting : public Layout_t {
     /// Return the index into get_children() corresponding to the selected child
     auto selected_row() const -> std::size_t { return selected_; }
 
-    template <typename Widget_t>
-    auto insert(std::unique_ptr<Widget_t> child, std::size_t index) -> Widget_t&
-    {
-        auto& result = this->Layout_t::insert(std::move(child), index);
-        if (this->child_count() == 1 && System::focus_widget() == this)
-            result.select();
-        return result;
-    }
-
-    template <typename Widget_t>
-    auto append(std::unique_ptr<Widget_t> child) -> Widget_t&
-    {
-        auto& result = this->Layout_t::append(std::move(child));
-        if (this->child_count() == 1 && System::focus_widget() == this)
-            result.select();
-        return result;
-    }
-
     /// Erase first element that satisfies \p pred. Return true if erase happens
     template <typename Unary_predicate,
               Enable_if_invocable_with_child_t<Unary_predicate> = 0>

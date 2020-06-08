@@ -61,7 +61,7 @@ class Label_left : public layout::Horizontal<> {
     auto focus_in_event() -> bool override
     {
         System::set_focus(wrapped);
-        return layout::Horizontal<>::focus_in_event();
+        return true;
     }
 };
 
@@ -88,7 +88,7 @@ class Label_right : public layout::Horizontal<> {
     auto focus_in_event() -> bool override
     {
         System::set_focus(wrapped);
-        return layout::Horizontal<>::focus_in_event();
+        return true;
     }
 };
 
@@ -113,7 +113,7 @@ class Label_top : public layout::Vertical<> {
     auto focus_in_event() -> bool override
     {
         System::set_focus(wrapped);
-        return layout::Vertical<>::focus_in_event();
+        return true;
     }
 };
 
@@ -138,7 +138,7 @@ class Label_bottom : public layout::Vertical<> {
     auto focus_in_event() -> bool override
     {
         System::set_focus(wrapped);
-        return layout::Vertical<>::focus_in_event();
+        return true;
     }
 };
 
