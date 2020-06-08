@@ -20,8 +20,14 @@ class Focus {
     /// Find the previous Focus_policy::Tab/Strong Widget and set focus to it.
     static auto shift_tab_press() -> bool;
 
-    /// Set focus to \p new_focus.
+    /// Set focus immediately to \p new_focus.
     /** If \p new_focus has Focus_policy::None, calls Focus::clear(). */
+    static void set_now(cppurses::Widget& new_focus);
+
+    /// Set focus to \p new_focus.
+    /** If \p new_focus has Focus_policy::None, calls Focus::clear().
+     *  Note: this posts an event which will cause problems with forwarding
+     * and order of function calls. */
     static void set(cppurses::Widget& new_focus);
 
     /// Set the focus widget to nullptr.

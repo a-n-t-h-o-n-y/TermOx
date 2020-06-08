@@ -113,6 +113,19 @@ auto Focus::shift_tab_press() -> bool
     return false;
 }
 
+void Focus::set_now(cppurses::Widget& new_focus)
+{
+    if (&new_focus == focus_widget_)
+        return;
+    if (new_focus.focus_policy == Focus_policy::None) {
+        Focus::clear();
+        return;
+    }
+    if (focus_widget_ != nullptr)
+        System::send_event(Focus_out_event{*focus_widget_});
+    System::send_event(Focus_in_event{new_focus});
+}
+
 void Focus::set(cppurses::Widget& new_focus)
 {
     if (&new_focus == focus_widget_)

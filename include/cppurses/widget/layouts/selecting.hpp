@@ -1,10 +1,14 @@
 #ifndef CPPURSES_WIDGET_LAYOUTS_SELECTING_HPP
 #define CPPURSES_WIDGET_LAYOUTS_SELECTING_HPP
 #include <algorithm>
+#include <cstddef>
+#include <memory>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 #include <cppurses/system/events/key.hpp>
+#include <cppurses/system/system.hpp>
 #include <cppurses/widget/pipe.hpp>
 
 namespace cppurses::layout {
@@ -41,6 +45,7 @@ class Selecting : public Layout_t {
         *this | pipe::strong_focus();
     }
 
+   public:
     void set_increment_selection_keys(Key_codes keys)
     {
         increment_selection_keys_ = std::move(keys);
@@ -81,6 +86,24 @@ class Selecting : public Layout_t {
 
     /// Return the index into get_children() corresponding to the selected child
     auto selected_row() const -> std::size_t { return selected_; }
+
+    template <typename Widget_t>
+    auto insert(std::unique_ptr<Widget_t> child, std::size_t index) -> Widget_t&
+    {
+        auto& result = this->Layout_t::insert(std::move(child), index);
+        if (this->child_count() == 1 && System::focus_widget() == this)
+            result.select();
+        return result;
+    }
+
+    template <typename Widget_t>
+    auto append(std::unique_ptr<Widget_t> child) -> Widget_t&
+    {
+        auto& result = this->Layout_t::append(std::move(child));
+        if (this->child_count() == 1 && System::focus_widget() == this)
+            result.select();
+        return result;
+    }
 
     /// Erase first element that satisfies \p pred. Return true if erase happens
     template <typename Unary_predicate,

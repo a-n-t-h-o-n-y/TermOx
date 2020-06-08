@@ -44,8 +44,14 @@ class System {
     static auto focus_widget() -> cppurses::Widget*;
 
     /// Give program focus to \p w.
-    /** Sends Focus_out_event to Widget in focus, and Focus_in_event to \p w.*/
+    /** Sends Focus_out_event to Widget in focus, and Focus_in_event to \p w.
+     *  Note: Use forward_focus(...) to send focus from one widget's
+     *  focus_in_event(...) to a child widget. */
     static void set_focus(Widget& w);
+
+    /// Forward program focus to \p w, acts immediately.
+    /** Sends Focus_out_event to Widget in focus, and Focus_in_event to \p w.*/
+    static void forward_focus(Widget& w);
 
     /// Removes focus from the currently in focus Widget.
     static void clear_focus();
