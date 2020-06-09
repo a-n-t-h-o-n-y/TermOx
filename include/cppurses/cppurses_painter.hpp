@@ -7,7 +7,6 @@
 #include <cppurses/painter/glyph_matrix.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
-#include <cppurses/painter/palettes.hpp>
 #include <cppurses/painter/trait.hpp>
 #include <cppurses/painter/utility/wchar_to_bytes.hpp>
 

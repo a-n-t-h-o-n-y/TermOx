@@ -66,7 +66,6 @@ target_sources(cppurses PRIVATE
     painter/painter.cpp
     painter/screen.cpp
     painter/glyph_matrix.cpp
-    painter/extended_char.cpp
     painter/screen_mask.cpp
     painter/find_empty_space.cpp
     painter/color.cpp
