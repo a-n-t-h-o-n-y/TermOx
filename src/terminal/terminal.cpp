@@ -11,7 +11,7 @@
 #include <mutex>
 #include <stdexcept>
 
-#include <ncurses.h>
+#include <ncursesw/ncurses.h>
 #undef border
 
 #include <cppurses/painter/color.hpp>

@@ -1,32 +1,3 @@
-# FIND LOCAL NCURSES
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/Modules/")
-set(CURSES_NEED_NCURSE TRUE)
-find_package(Ncursesw REQUIRED)
-add_library(NCurses INTERFACE IMPORTED)
-message(STATUS CURSES_INCLUDE_DIR:${CURSES_INCLUDE_DIR})
-if(CURSES_HAVE_NCURSESW_NCURSES_H AND NCURSESW_FOUND)
-    if(${OSX_BREW_NCURSES})
-      set(NCURSES_INCLUDE_PATH ${CURSES_INCLUDE_DIR})
-    else()
-      set(NCURSES_INCLUDE_PATH ${CURSES_INCLUDE_DIR}/ncursesw)
-    endif()
-elseif(CURSES_HAVE_NCURSES_NCURSES_H)
-    set(NCURSES_INCLUDE_PATH ${CURSES_INCLUDE_DIR}/ncurses)
-elseif(CURSES_HAVE_NCURSES_H)
-    set(NCURSES_INCLUDE_PATH ${CURSES_INCLUDE_DIR})
-endif()
-message(STATUS NCURSES_INCLUDE_PATH:${NCURSES_INCLUDE_PATH})
-message(STATUS CURSES_LIBRARIES:${CURSES_LIBRARIES})
-set_property(TARGET NCurses
-    PROPERTY
-    INTERFACE_INCLUDE_DIRECTORIES ${NCURSES_INCLUDE_PATH}
-)
-set_property(TARGET NCurses
-    PROPERTY
-        INTERFACE_LINK_LIBRARIES ${CURSES_LIBRARIES}
-)
-
 # CREATE CPPURSES LIBRARY
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 if(${CMAKE_VERSION} VERSION_LESS "3.8")
@@ -42,13 +13,15 @@ target_link_libraries(cppurses
         signals
         ${CMAKE_THREAD_LIBS_INIT}
     PRIVATE
-        NCurses)
+        nc
+)
 
 target_include_directories(cppurses
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
+
 if(NOT ${CMAKE_VERSION} VERSION_LESS "3.8")
     target_compile_features(cppurses PUBLIC cxx_std_17)
 endif()

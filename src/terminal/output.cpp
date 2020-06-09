@@ -9,7 +9,7 @@
 
 #include <cstddef>
 
-#include <ncurses.h>
+#include <ncursesw/ncurses.h>
 #undef border
 
 #include <cppurses/painter/brush.hpp>
@@ -18,6 +18,7 @@
 #include <cppurses/painter/trait.hpp>
 #include <cppurses/system/system.hpp>
 
+// TODO remove non-wide char support
 #ifndef add_wchstr
 #    include <cppurses/painter/detail/extended_char.hpp>
 #endif

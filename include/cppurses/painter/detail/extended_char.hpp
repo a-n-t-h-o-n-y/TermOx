@@ -1,7 +1,7 @@
 #ifndef CPPURSES_PAINTER_DETAIL_EXTENDED_CHAR_HPP
 #define CPPURSES_PAINTER_DETAIL_EXTENDED_CHAR_HPP
 // This file is only included in terminal/output.cpp, so ncurses.h is fine here.
-#include <ncurses.h>
+#include <ncursesw/ncurses.h>
 
 namespace cppurses {
 namespace detail {

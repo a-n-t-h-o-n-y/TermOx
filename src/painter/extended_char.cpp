@@ -3,10 +3,11 @@
 #include <map>
 #include <limits>
 
-#include <ncurses.h>
+#include <ncursesw/ncurses.h>
 
 namespace {
 
+// TODO Can probably be deleted
 auto const extended_chars = std::map<wchar_t, chtype>{
     // clang-format off
     {L'┌', ACS_ULCORNER},   {L'┍', ACS_ULCORNER},   {L'┎', ACS_ULCORNER},

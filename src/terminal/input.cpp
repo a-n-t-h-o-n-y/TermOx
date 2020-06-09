@@ -5,7 +5,7 @@
 #include <tuple>
 #include <utility>
 
-#include <ncurses.h>
+#include <ncursesw/ncurses.h>
 #undef border
 
 #include <cppurses/system/detail/find_widget_at.hpp>

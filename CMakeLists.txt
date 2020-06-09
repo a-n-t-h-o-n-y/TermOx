@@ -43,6 +43,9 @@ if(${CMAKE_VERSION} VERSION_LESS "3.8")
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
 
+# ADD NCURSES
+add_subdirectory(external)
+
 # ADD SIGNALS LIBRARY
 add_subdirectory(libs/Signals)
 
