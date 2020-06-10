@@ -100,9 +100,36 @@ class Glyph_string : private std::vector<Glyph> {
     }
 
     /// Concatenation operator to append a Glyph_string.
+    auto operator+(Glyph const& g) const -> Glyph_string
+    {
+        return Glyph_string{*this}.append(g);
+    }
+
+    /// Concatenation operator to append a Glyph_string.
+    friend auto operator+(Glyph const& lhs, Glyph_string const& rhs)
+        -> Glyph_string
+    {
+        return Glyph_string{lhs}.append(rhs);
+    }
+
+    /// Concatenation operator to append a Glyph_string.
     auto operator+(Glyph_string const& gs) const -> Glyph_string
     {
         return Glyph_string{*this}.append(gs);
+    }
+
+    /// Concatenation operator to append a Glyph_string.
+    friend auto operator+(wchar_t const* lhs, Glyph_string const& rhs)
+        -> Glyph_string
+    {
+        return Glyph_string{lhs}.append(rhs);
+    }
+
+    /// Concatenation operator to append a Glyph_string.
+    friend auto operator+(std::wstring const& lhs, Glyph_string const& rhs)
+        -> Glyph_string
+    {
+        return Glyph_string{lhs}.append(rhs);
     }
 
     /// Append single Glyph to the end of the Glyph_string w/given Traits.
