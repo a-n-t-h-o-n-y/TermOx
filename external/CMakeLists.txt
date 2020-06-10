@@ -17,8 +17,7 @@ add_custom_command(
     COMMAND "${LIB_PATH}/configure" "--prefix=${LIB_PATH}/output"
             --without-shared --with-normal --without-debug --without-ada
             --enable-widec --enable-ext-colors --enable-ext-mouse
-            --without-cxx-binding --without-manpages --without-progs
-            --without-tack --without-tests
+            --without-cxx-binding --without-manpages --without-tests
             &&
             make install
 
