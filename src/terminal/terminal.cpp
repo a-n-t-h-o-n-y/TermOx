@@ -11,6 +11,9 @@
 #include <mutex>
 #include <stdexcept>
 
+#ifndef _XOPEN_SOURCE_EXTENDED
+#define _XOPEN_SOURCE_EXTENDED
+#endif
 #include <ncursesw/ncurses.h>
 #undef border
 
