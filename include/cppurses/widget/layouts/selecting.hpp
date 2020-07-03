@@ -3,9 +3,12 @@
 #include <algorithm>
 #include <cstddef>
 #include <memory>
+#include <stdexcept>
 #include <type_traits>
 #include <utility>
 #include <vector>
+
+#include <iostream>  //temp
 
 #include <cppurses/system/events/key.hpp>
 #include <cppurses/system/system.hpp>
@@ -13,8 +16,9 @@
 
 namespace cppurses::layout {
 
-/// Adds 'Selected Child' concept to a layout.
-/** Keyboard and mouse selecting ability, scrolls when selection is off screeen.
+/// Adds a 'Selected Child' concept to Layout_t.
+/** There is only a single selected child at a time.
+ *  Keyboard and mouse selecting ability, scrolls when selection is off screeen.
  *  Depends on the Child Widgets of Layout_t to have a select() and unselect()
  *  method. Inherit from this and override key_press_event to perform actions on
  *  the selected_child(). Scroll action also moves the selected child index. */
@@ -66,56 +70,39 @@ class Selecting : public Layout_t {
         decrement_scroll_keys_ = std::move(keys);
     }
 
+   public:
+    /// Return whether or not a child widget is currently selected.
+    /** Useful to call before selected_child(), if you don't want to catch. */
+    auto has_selected_child() const -> bool { return selected_ != nullptr; }
+
     /// Return the currently selected child, UB if no children in Layout.
     auto selected_child() const -> typename Layout_t::Child_t const&
     {
-        return this->get_children()[selected_];
+        if (selected_ != nullptr)
+            return *selected_;
+        throw std::out_of_range{"Selecting::select_child(): No Child Selected"};
     }
 
     /// Return the currently selected child, UB if no children in Layout.
     auto selected_child() -> typename Layout_t::Child_t&
     {
-        if (selected_ >= this->child_count()) {
-            // Getting intermitent crash because of outside access.
-            throw std::runtime_error{
-                "Selecting::selected_child();" + std::to_string(selected_) +
-                ">= " + std::to_string(this->child_count())};
-        }
-        return this->get_children()[selected_];
+        if (selected_ != nullptr)
+            return *selected_;
+        throw std::out_of_range{"Selecting::select_child(): No Child Selected"};
     }
 
     /// Return the index into get_children() corresponding to the selected child
-    auto selected_row() const -> std::size_t { return selected_; }
-
-    /// Erase first element that satisfies \p pred. Return true if erase happens
-    template <typename Unary_predicate,
-              Enable_if_invocable_with_child_t<Unary_predicate> = 0>
-    auto erase(Unary_predicate&& pred) -> bool
+    /** Returns this->Widget::child_count() if no child is selected. */
+    auto selected_index() const -> std::size_t
     {
-        auto child =
-            this->get_children().find(std::forward<Unary_predicate>(pred));
-        if (child == nullptr)
-            return false;
-        this->erase(child);
-        return true;
+        return this->get_children().find_by_pointer(selected_);
     }
 
-    /// Erase the given widget and reset selected to the Layout's offset.
-    void erase(Widget const* child)
+    /// Set the first visible child as the selected child.
+    void select_first_child()
     {
-        auto const was_selected = &this->selected_child() == child;
-        this->Layout_t::erase(child);
-        if (was_selected && this->child_count() > 0)
-            this->set_selected(this->children_.get_offset());
-    }
-
-    /// Erase child at \p index and reset selected to the Layout's offset.
-    void erase(std::size_t index)
-    {
-        auto const was_selected = selected_ == index;
-        this->Layout_t::erase(index);
-        if (was_selected && this->child_count() > 0)
-            this->set_selected(this->children_.get_offset());
+        if (this->child_count() > 0)
+            this->set_selected_by_index(this->children_.get_offset());
     }
 
    protected:
@@ -141,49 +128,52 @@ class Selecting : public Layout_t {
         return base_result;
     }
 
-    /// If selected_child is off the screen, select() the last displayed widget.
-    void reset_selected_if_necessary()
-    {
-        if (this->Layout_t::child_count() == 0 ||
-            this->selected_child().is_enabled()) {
-            return;
-        }
-        this->set_selected(this->find_bottom_row());
-    }
-
     auto focus_in_event() -> bool override
     {
         this->reset_selected_if_necessary();
-        if (this->child_count() != 0)
+        if (this->has_selected_child())
             this->selected_child().select();
+        else if (this->child_count() > 0uL)
+            this->select_first_child();
         return Layout_t::focus_in_event();
     }
 
     auto focus_out_event() -> bool override
     {
         if constexpr (unselect_on_focus_out) {
-            if (this->child_count() != 0)
+            if (this->has_selected_child())
                 this->selected_child().unselect();
         }
         return Layout_t::focus_out_event();
     }
 
-    auto disable_event() -> bool override
-    {
-        if (this->child_count() != 0)
-            this->selected_child().unselect();
-        return Layout_t::disable_event();
-    }
-
     auto enable_event() -> bool override
     {
-        if (this->child_count() != 0 && System::focus_widget() == this)
+        if (this->has_selected_child() && System::focus_widget() == this)
             this->selected_child().select();
         return Layout_t::enable_event();
     }
 
+    auto disable_event() -> bool override
+    {
+        if (this->has_selected_child())
+            this->selected_child().unselect();
+        return Layout_t::disable_event();
+    }
+
+    auto child_removed_event(Widget& child) -> bool override
+    {
+        if (&child == selected_) {
+            if (this->child_count() > 0uL)
+                this->set_selected_by_index(this->children_.get_offset());
+            else
+                selected_ = nullptr;
+        }
+        return Layout_t::child_removed_event(child);
+    }
+
    private:
-    std::size_t selected_ = 0uL;
+    typename Layout_t::Child_t* selected_{nullptr};
     Key_codes increment_selection_keys_;
     Key_codes decrement_selection_keys_;
     Key_codes increment_scroll_keys_;
@@ -192,13 +182,16 @@ class Selecting : public Layout_t {
    private:
     void increment_selected()
     {
-        if (this->child_count() == 0 || selected_ + 1 == this->child_count())
+        auto const next = this->selected_index() + 1;
+        if (next >= this->child_count())
             return;
-        this->set_selected(selected_ + 1);
+        this->set_selected_by_index(next);
     }
 
     void increment_selected_and_scroll_if_necessary()
     {
+        if (!this->has_selected_child())
+            return;
         this->increment_selected();
         while (!this->selected_child().is_enabled()) {
             this->increment_offset();
@@ -208,13 +201,16 @@ class Selecting : public Layout_t {
 
     void decrement_selected()
     {
-        if (this->child_count() == 0 || selected_ == 0)
+        auto const current = this->selected_index();
+        if (current == 0)
             return;
-        this->set_selected(selected_ - 1);
+        this->set_selected_by_index(current - 1);
     }
 
     void decrement_selected_and_scroll_if_necessary()
     {
+        if (!this->has_selected_child())
+            return;
         this->decrement_selected();
         if (!this->selected_child().is_enabled())
             this->decrement_offset();
@@ -254,17 +250,27 @@ class Selecting : public Layout_t {
     }
 
     /// unselect() the currently selected child, select() the child at \p index.
-    void set_selected(std::size_t index)
+    /** Throws std::out_of_range if \p index is invalid. */
+    void set_selected_by_index(std::size_t index)
     {
-        if (selected_ < this->child_count())
-            this->selected_child().unselect();
-        selected_ = index;
-        this->selected_child().select();
+        if (index < this->child_count())
+            this->set_selected_by_pointer(&(this->get_children()[index]));
+        else
+            throw std::out_of_range{"Selecting::set_selected_by_index"};
+    }
+
+    /// unselect() the currently selected child, if any, and select() \p child.
+    void set_selected_by_pointer(typename Layout_t::Child_t* child)
+    {
+        if (this->has_selected_child())
+            selected_->unselect();
+        selected_ = child;
+        selected_->select();
     }
 
     /// Find the child index of the last displayed Data_row.
     /** Assumes child_count() > 0. Returns child_offset if all are disabled. */
-    auto find_bottom_row() const -> std::size_t
+    auto find_bottom_row_index() const -> std::size_t
     {
         auto const children = this->Widget::get_children();
         auto const count    = this->child_count();
@@ -272,9 +278,21 @@ class Selecting : public Layout_t {
         for (auto i = offset + 1; i < count; ++i) {
             if (children[i].is_enabled())
                 continue;
-            return i - 1;
+            else
+                return i - 1;
         }
         return offset;
+    }
+
+    /// If selected_child is off the screen, select() the last displayed widget.
+    void reset_selected_if_necessary()
+    {
+        if (this->has_selected_child()) {
+            if (this->selected_child().is_enabled())
+                return;
+            else
+                this->set_selected_by_index(this->find_bottom_row_index());
+        }
     }
 
     /// Return true if \p codes contains the value \p key.

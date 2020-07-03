@@ -642,7 +642,9 @@ class Widget {
                 return children_.template back<Widget_t>();
             }
 
-            /// Find first child satisfying \p pred. Nullptr if no child found.
+            /// Find first child satisfying \p pred.
+            /** \p pred takes a const Widget_t reference and returns a bool
+             *  Returns nullptr if no child is found. */
             template <typename Unary_predicate_t>
             auto find(Unary_predicate_t&& pred) const -> decltype(auto)
             {
@@ -650,6 +652,16 @@ class Widget {
                     std::find_if(this->begin(), this->end(),
                                  std::forward<Unary_predicate_t>(pred));
                 return iter == this->end() ? nullptr : &(*iter);
+            }
+
+            /// Find a child's position given its pointer.
+            /** Returns Widget::child_count() if no child is found. */
+            auto find_by_pointer(Widget const* child) const -> std::size_t
+            {
+                auto const iter = std::find_if(
+                    this->begin(), this->end(),
+                    [child](Widget const& x) { return &x == child; });
+                return std::distance(this->begin(), iter);
             }
 
            private:
@@ -714,6 +726,8 @@ class Widget {
         void clear();
 
        public:  // Accessors
+        /// Returns the begin iterator to the child widgets.
+        /** Returns a reference to Widget_t when dereferenced. */
         template <typename Widget_t>
         auto begin()
         {
@@ -721,6 +735,8 @@ class Widget {
                 std::begin(child_list_));
         }
 
+        /// Returns the begin iterator to the child widgets.
+        /** Returns a reference to Widget_t when dereferenced. */
         template <typename Widget_t>
         auto begin() const
         {
@@ -865,7 +881,7 @@ class Widget {
         {
             w.set_parent(self_);
             w.enable(self_->is_enabled());
-            System::post_event<Child_added_event>(*self_, w);
+            System::send_event(Child_added_event{*self_, w});
         }
 
         /// Removes and returns child at \p child_iter, assumes is valid iter.
