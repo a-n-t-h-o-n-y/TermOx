@@ -180,6 +180,13 @@ class Stack : public Layout<Child_t> {
         return Layout<Child_t>::resize_event(new_size, old_size);
     }
 
+    auto focus_in_event() -> bool override
+    {
+        if (active_page_ != nullptr)
+            cppurses::System::set_focus(*active_page_);
+        return this->Layout<Child_t>::focus_in_event();
+    }
+
     void update_geometry() override {}
 
    private:
