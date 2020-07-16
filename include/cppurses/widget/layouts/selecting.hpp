@@ -8,8 +8,6 @@
 #include <utility>
 #include <vector>
 
-#include <iostream>  //temp
-
 #include <cppurses/system/events/key.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/pipe.hpp>
