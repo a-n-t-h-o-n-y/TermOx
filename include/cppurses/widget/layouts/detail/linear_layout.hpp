@@ -192,6 +192,8 @@ class Linear_layout : public Layout<Child> {
 
     /// Determine whether a widget is valid to display from its lengths
     /** A length of zero in any dimension means the Widget will be disabled. */
+    // TODO This is ambiguous, what is a zero width/height wants to be enabled?
+    // Need another data member to tell if something should be enabled or not.
     static auto is_valid(std::size_t primary, std::size_t secondary) -> bool
     {
         return primary != 0 && secondary != 0;
