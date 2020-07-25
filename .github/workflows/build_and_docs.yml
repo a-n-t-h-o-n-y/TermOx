@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.1
+        with:
+          submodules: recursive
       - run: |
           mkdir build && cd build
           cmake .. && make
@@ -16,9 +18,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.1
-        with:
-          submodules: true
-          fetch-depth: 0
       - name: Doxygen Action
         uses: mattnotmitt/doxygen-action@v1.1.0
         with:
