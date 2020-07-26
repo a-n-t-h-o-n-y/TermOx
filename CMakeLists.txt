@@ -47,7 +47,7 @@ endif()
 add_subdirectory(external)
 
 # ADD SIGNALS LIBRARY
-add_subdirectory(libs/Signals)
+add_subdirectory(external/Signals)
 
 # ADD CPPURSES LIBRARY
 add_subdirectory(src)

@@ -17,7 +17,7 @@ class File_widget : public cppurses::layout::Vertical<> {
     cppurses::Confirm_button& confirm_btn_;
 
    public:
-    File_widget(std::string const& btn_text);
+    explicit File_widget(std::string const& btn_text);
 
     sig::Signal<void(std::string const&)> filename_given;
 };
