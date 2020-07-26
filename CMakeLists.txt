@@ -44,7 +44,7 @@ if(${CMAKE_VERSION} VERSION_LESS "3.8")
 endif()
 
 # ADD NCURSES
-add_subdirectory(external)
+add_subdirectory(external/ncurses-snapshots)
 
 # ADD SIGNALS LIBRARY
 add_subdirectory(external/Signals)
