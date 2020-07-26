@@ -22,7 +22,7 @@ namespace cppurses::pipe::detail {
 template <typename Predicate>
 class Filter_predicate {
    public:
-    Filter_predicate(Predicate p) : predicate{p} {}
+    explicit Filter_predicate(Predicate p) : predicate{p} {}
 
    public:
     Predicate predicate;

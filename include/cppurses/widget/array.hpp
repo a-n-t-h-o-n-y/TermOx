@@ -17,7 +17,7 @@ class Array : public Layout_t {
    public:
     /// \p args will be copied into each Widget's constructor call.
     template <typename... Args>
-    Array(Args const&... args)
+    explicit Array(Args const&... args)
         : refs_{create_n_children(std::make_index_sequence<N>(), args...)}
     {}
 

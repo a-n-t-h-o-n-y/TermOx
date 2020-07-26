@@ -8,7 +8,7 @@ namespace cppurses {
 
 class Timer_event : public Event {
    public:
-    Timer_event(Widget& receiver) : Event{Event::Timer, receiver} {}
+    explicit Timer_event(Widget& receiver) : Event{Event::Timer, receiver} {}
 
     auto send() const -> bool override
     {

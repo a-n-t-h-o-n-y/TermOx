@@ -25,7 +25,7 @@ class Vertical_scrollbar : public layout::Vertical<> {
     Vertical_scrollbar() { this->initialize(); }
 
     template <typename Scrollable_t>
-    Vertical_scrollbar(Scrollable_t& tb)
+    explicit Vertical_scrollbar(Scrollable_t& tb)
     {
         this->initialize();
         auto scroll_up = sig::Slot<void()>{[&tb]() { tb.scroll_up(); }};

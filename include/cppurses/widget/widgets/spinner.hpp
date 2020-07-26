@@ -17,10 +17,10 @@ class Spinner : public Widget {
 
    public:
     /// Each glyph in frames is a frame, offset is starting index into frames.
-    Spinner(Glyph_string frames,
-            Period_t period    = Period_t{100},
-            std::size_t width  = 1,
-            std::size_t offset = 0)
+    explicit Spinner(Glyph_string frames,
+                     Period_t period    = Period_t{100},
+                     std::size_t width  = 1,
+                     std::size_t offset = 0)
         : frames_{std::move(frames)},
           period_{period},
           width_{width},

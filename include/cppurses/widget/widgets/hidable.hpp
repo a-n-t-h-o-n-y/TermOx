@@ -20,7 +20,7 @@ class Hidable : public layout::Stack<> {
     /// Forward constructor arguments for the Widget_t that is being wrapped.
     /** Wrapped Widget is in visible state when constructed. Access via w. */
     template <typename... Args>
-    Hidable(Args&&... args)
+    explicit Hidable(Args&&... args)
         : w{this->Stack::make_page<Widget_t>(std::forward<Args>(args)...)}
     {
         this->Stack::set_active_page(widget_index_);

@@ -99,9 +99,8 @@ void Terminal::uninitialize()
 // getmaxx/getmaxy are non-standard.
 auto Terminal::width() const -> std::size_t
 {
-    auto y = 0;
     auto x = 0;
-    if (is_initialized_)
+    if (auto y = 0; is_initialized_)
         getmaxyx(::stdscr, y, x);
     return x;
 }
@@ -109,8 +108,7 @@ auto Terminal::width() const -> std::size_t
 auto Terminal::height() const -> std::size_t
 {
     auto y = 0;
-    auto x = 0;
-    if (is_initialized_)
+    if (auto x = 0; is_initialized_)
         getmaxyx(::stdscr, y, x);
     return y;
 }

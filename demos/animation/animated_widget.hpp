@@ -13,7 +13,7 @@ namespace animation {
 
 class Animated_bit : public cppurses::Widget {
    public:
-    Animated_bit(int rate, bool ani = false);
+    explicit Animated_bit(int rate, bool ani = false);
 
     bool timer_event() override;
     bool paint_event() override;

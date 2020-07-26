@@ -16,7 +16,7 @@ class Cursor_data {
     sig::Signal<void(Point)> moved;
 
    public:
-    Cursor_data(Widget const* owner) : owner_{owner} {}
+    explicit Cursor_data(Widget const* owner) : owner_{owner} {}
 
     /// Query if the cursor is enabled.
     auto enabled() const -> bool { return enabled_; }

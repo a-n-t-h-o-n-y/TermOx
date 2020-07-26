@@ -187,7 +187,7 @@ class Graph_core : public cppurses::Graph<double> {
 
    public:
     template <typename Generator_t = Sine, typename... Args>
-    Graph_core(Args&&... args)
+    explicit Graph_core(Args&&... args)
     {
         this->set_generator<Generator_t>(std::forward<Args>(args)...);
         // this->enable_animation(std::chrono::milliseconds{16});

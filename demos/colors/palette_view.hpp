@@ -14,7 +14,10 @@ namespace colors {
 
 class Color_tile : public cppurses::Widget {
    public:
-    Color_tile(cppurses::Color c) : c_{c} { *this | cppurses::pipe::bg(c); }
+    explicit Color_tile(cppurses::Color c) : c_{c}
+    {
+        *this | cppurses::pipe::bg(c);
+    }
 
    protected:
     auto paint_event() -> bool override
@@ -30,7 +33,7 @@ class Color_tile : public cppurses::Widget {
 class Color_line : public cppurses::layout::Horizontal<Color_tile> {
    public:
     template <typename... Colors>
-    Color_line(Colors... colors)
+    explicit Color_line(Colors... colors)
     {
         (this->make_child(colors), ...);
     }
@@ -39,7 +42,7 @@ class Color_line : public cppurses::layout::Horizontal<Color_tile> {
 /// Displays each color of a Palette.
 class Palette_view : public cppurses::layout::Vertical<Color_line> {
    public:
-    Palette_view(cppurses::ANSI_palette const& palette)
+    explicit Palette_view(cppurses::ANSI_palette const& palette)
         : is_ansi_{true}, ansi_palette_{palette}
     {
         this->focus_policy = cppurses::Focus_policy::Strong;
@@ -59,7 +62,7 @@ class Palette_view : public cppurses::layout::Vertical<Color_line> {
         }
     }
 
-    Palette_view(cppurses::True_color_palette const& palette)
+    explicit Palette_view(cppurses::True_color_palette const& palette)
         : is_ansi_{false}, tc_palette_{palette}
     {
         this->focus_policy = cppurses::Focus_policy::Strong;

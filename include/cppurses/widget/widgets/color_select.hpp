@@ -19,7 +19,7 @@ class Color_bar : public layout::Horizontal<Button> {
     sig::Signal<void(Color)> color_selected;
 
    public:
-    Color_bar(std::array<Color, Color_count> colors)
+    explicit Color_bar(std::array<Color, Color_count> colors)
     {
         using namespace pipe;
         for (auto c : colors) {

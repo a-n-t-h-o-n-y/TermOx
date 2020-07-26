@@ -10,7 +10,7 @@ namespace focus {
 
 class Focus_base : public cppurses::Widget {
    public:
-    Focus_base(cppurses::Focus_policy policy);
+    explicit Focus_base(cppurses::Focus_policy policy);
 
    protected:
     void set_policy(cppurses::Focus_policy policy);

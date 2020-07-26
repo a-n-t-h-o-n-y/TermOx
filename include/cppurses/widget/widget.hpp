@@ -617,7 +617,7 @@ class Widget {
             using value_type = Widget_t;
 
            public:
-            View(Children_t& children) : children_{children} {}
+            explicit View(Children_t& children) : children_{children} {}
 
             auto begin() const { return children_.template begin<Widget_t>(); }
 
@@ -669,7 +669,7 @@ class Widget {
         };
 
        public:
-        Children(Widget* self) : self_{self} {}
+        explicit Children(Widget* self) : self_{self} {}
 
        public:  // Modifiers
         /// Move \p child to \p index in underlying vector.

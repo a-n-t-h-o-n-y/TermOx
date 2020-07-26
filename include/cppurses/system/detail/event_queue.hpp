@@ -68,7 +68,7 @@ class Event_queue {
 
        public:
         /// Construct a view over \p queue that will only access \p filter type.
-        View(Event_queue& queue) : queue_{queue} {}
+        explicit View(Event_queue& queue) : queue_{queue} {}
 
         /// Provides a forward iterator capable of moving events out of a view.
         class Move_iterator {
@@ -78,7 +78,7 @@ class Event_queue {
 
            public:
             /// Construct an iterator pointing to the first element in \p view.
-            Move_iterator(Event_queue& queue)
+            explicit Move_iterator(Event_queue& queue)
                 : mtx_{queue.mtx_},
                   events_{get_events(queue)},
                   at_{this->find_next(static_cast<Size_t>(-1))}
