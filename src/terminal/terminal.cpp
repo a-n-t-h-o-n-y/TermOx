@@ -12,7 +12,7 @@
 #include <stdexcept>
 
 #ifndef _XOPEN_SOURCE_EXTENDED
-#define _XOPEN_SOURCE_EXTENDED
+#    define _XOPEN_SOURCE_EXTENDED
 #endif
 #include <ncursesw/ncurses.h>
 #undef border
@@ -76,7 +76,7 @@ void Terminal::initialize()
         try {
             this->set_palette(dawn_bringer16::palette);
         }
-        catch (Terminal_error) {
+        catch (Terminal_error const&) {
             if (this->has_extended_colors())
                 this->set_palette(basic::palette);
             else

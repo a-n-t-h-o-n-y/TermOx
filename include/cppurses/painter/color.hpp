@@ -30,8 +30,13 @@ struct Color {
     static Color const Gray;
     static Color const White;
 };
-inline auto operator==(Color x, Color y) -> bool { return x.value == y.value; }
-inline auto operator!=(Color x, Color y) -> bool { return !(x == y); }
+
+constexpr auto operator==(Color x, Color y) -> bool
+{
+    return x.value == y.value;
+}
+
+constexpr auto operator!=(Color x, Color y) -> bool { return !(x == y); }
 
 struct Background_color {
     Color::Value_t value;

@@ -58,7 +58,7 @@ auto operator|(std::unique_ptr<Widget_t> w_ptr, F&& op)
     -> std::unique_ptr<Widget_t>
 {
     std::forward<F>(op)(*w_ptr);
-    return std::move(w_ptr);
+    return w_ptr;
 }
 
 /// Pipe operator for use with Widget::get_children.

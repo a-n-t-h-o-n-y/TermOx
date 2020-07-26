@@ -41,10 +41,16 @@ class Brush {
     constexpr void remove_traits() {}
 
     /// Set the background color of this brush.
-    constexpr void set_background(Color color) { background_color_ = color; }
+    constexpr void set_background(Color color)
+    {
+        background_color_ = std::optional{color};  // Makes it constexpr in GCC
+    }
 
     /// Set the foreground color of this brush.
-    constexpr void set_foreground(Color color) { foreground_color_ = color; }
+    constexpr void set_foreground(Color color)
+    {
+        foreground_color_ = std::optional{color};  // Makes it constexpr in GCC
+    }
 
     /// Set the background to not have a color, the default state.
     void remove_background() { background_color_ = std::nullopt; }

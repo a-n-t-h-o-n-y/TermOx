@@ -10,20 +10,20 @@
 #include <cppurses/widget/border.hpp>
 
 namespace {
-auto rgb_to_str(cppurses::RGB const& rgb) -> std::string
-{
-    auto result = std::string{"{"};
-    result += std::to_string(rgb.red);
-    result += ", ";
-    result += std::to_string(rgb.green);
-    result += ", ";
-    result += std::to_string(rgb.blue);
-    result += "}";
-    return result;
-}
+// auto rgb_to_str(cppurses::RGB const& rgb) -> std::string
+// {
+//     auto result = std::string{"{"};
+//     result += std::to_string(rgb.red);
+//     result += ", ";
+//     result += std::to_string(rgb.green);
+//     result += ", ";
+//     result += std::to_string(rgb.blue);
+//     result += "}";
+//     return result;
+// }
 
 /// Overwrites name.hpp with functions returning the current palette.
-void export_current_palette(std::string const& name)
+void export_current_palette(std::string const& /* name */)
 {
     // auto file = std::ofstream{name + ".hpp"};
     // auto pal  = cppurses::System::terminal.current_palette();
