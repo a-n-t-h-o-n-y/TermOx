@@ -1,0 +1,1 @@
+# Vertical Slider Widget

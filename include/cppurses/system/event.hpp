@@ -37,10 +37,11 @@ class Event {
         Custom
     };
 
-   public:
+   protected:
     /// Initializes the \p type and the \p receiver of the Event.
     Event(Type type, Widget& receiver) : type_{type}, receiver_{receiver} {}
 
+   public:
     virtual ~Event() = default;
 
     /// Return a Type enum describing the derived type of the Event.

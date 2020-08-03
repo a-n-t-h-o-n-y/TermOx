@@ -55,9 +55,9 @@ class Widget {
     Signal<void(Mouse::State const&)> mouse_pressed;
     Signal<void(Mouse::State const&)> mouse_released;
     Signal<void(Mouse::State const&)> mouse_double_clicked;
+    Signal<void(Mouse::State const&)> mouse_wheel_scrolled;
     Signal<void(Mouse::State const&)> mouse_moved;
     Signal<void(Key::State const&)> key_pressed;
-    Signal<void(Key::State const&)> key_released;
     Signal<void()> focused_in;
     Signal<void()> focused_out;
     Signal<void()> destroyed;
@@ -407,9 +407,10 @@ class Widget {
     }
 
     /// Handles Mouse::Wheel objects.
-    virtual auto mouse_wheel_event(Mouse::State const & /* mouse */) -> bool
+    virtual auto mouse_wheel_event(Mouse::State const& mouse) -> bool
     {
-        return false;
+        mouse_wheel_scrolled(mouse);
+        return true;
     }
 
     /// Handles Mouse::Move objects.

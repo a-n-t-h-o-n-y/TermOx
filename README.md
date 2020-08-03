@@ -1,4 +1,6 @@
-[![Build Status](https://travis-ci.org/a-n-t-h-o-n-y/CPPurses.svg?branch=master)](https://travis-ci.org/a-n-t-h-o-n-y/CPPurses) [![Join the chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/CPPurses/Lobby) [![Read the Wiki](https://img.shields.io/badge/-Wiki-yellow.svg)](https://github.com/a-n-t-h-o-n-y/CPPurses/wiki) [![Read the Reference](https://img.shields.io/badge/-API%20Reference-blue.svg)](https://a-n-t-h-o-n-y.github.io/CPPurses/hierarchy.html)
+[![Build Status](https://github.com/a-n-t-h-o-n-y/CPPurses/workflows/build/badge.svg)](https://github.com/a-n-t-h-o-n-y/CPPurses/actions?query=workflow%3Abuild)
+[![Read the Manual](https://img.shields.io/badge/-Manual-yellow.svg)](docs/manual/index.md)
+[![Read the Reference](https://img.shields.io/badge/-API%20Reference-blue.svg)](https://a-n-t-h-o-n-y.github.io/CPPurses/hierarchy.html)
 
 
 # TUI Library
@@ -21,6 +23,9 @@ This is a __work in progress__. The API is not stable.
   <img src="docs/images/regexplore.gif">
 </p>
 
+
+<!-- ## TODO - neat example code -->
+<!-- ### Both make<> prototyping and class building styles -->
 
 ## Usage
 See the [wiki](https://github.com/a-n-t-h-o-n-y/CPPurses/wiki) for examples.
