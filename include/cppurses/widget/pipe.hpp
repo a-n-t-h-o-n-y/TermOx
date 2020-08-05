@@ -1576,7 +1576,7 @@ inline auto floating_block_corners()
 
 // Widget::Signals -------------------------------------------------------------
 template <typename Handler>
-auto on_enable(Handler&& op)
+inline auto on_enable(Handler&& op)
 {
     return [&](auto& w) -> auto&
     {
@@ -1586,7 +1586,7 @@ auto on_enable(Handler&& op)
 }
 
 template <typename Handler>
-auto on_disable(Handler&& op)
+inline auto on_disable(Handler&& op)
 {
     return [&](auto& w) -> auto&
     {
@@ -1596,7 +1596,7 @@ auto on_disable(Handler&& op)
 }
 
 template <typename Handler>
-auto on_child_added(Handler&& op)
+inline auto on_child_added(Handler&& op)
 {
     return [&](auto& w) -> auto&
     {
@@ -1606,7 +1606,7 @@ auto on_child_added(Handler&& op)
 }
 
 template <typename Handler>
-auto on_child_removed(Handler&& op)
+inline auto on_child_removed(Handler&& op)
 {
     return [&](auto& w) -> auto&
     {
@@ -1616,7 +1616,7 @@ auto on_child_removed(Handler&& op)
 }
 
 template <typename Handler>
-auto on_child_polished(Handler&& op)
+inline auto on_child_polished(Handler&& op)
 {
     return [&](auto& w) -> auto&
     {
@@ -1626,7 +1626,7 @@ auto on_child_polished(Handler&& op)
 }
 
 template <typename Handler>
-auto on_move(Handler&& op)
+inline auto on_move(Handler&& op)
 {
     return [&](auto& w) -> auto&
     {
@@ -1636,7 +1636,7 @@ auto on_move(Handler&& op)
 }
 
 template <typename Handler>
-auto on_resize(Handler&& op)
+inline auto on_resize(Handler&& op)
 {
     return [&](auto& w) -> auto&
     {
@@ -1646,7 +1646,7 @@ auto on_resize(Handler&& op)
 }
 
 template <typename Handler>
-auto on_mouse_press(Handler&& op)
+inline auto on_mouse_press(Handler&& op)
 {
     return [&](auto& w) -> auto&
     {
@@ -1656,7 +1656,7 @@ auto on_mouse_press(Handler&& op)
 }
 
 template <typename Handler>
-auto on_left_click(Handler&& op)
+inline auto on_left_click(Handler&& op)
 {
     return [=](auto& w) -> auto&
     {
@@ -1669,7 +1669,7 @@ auto on_left_click(Handler&& op)
 }
 
 template <typename Handler>
-auto on_middle_click(Handler&& op)
+inline auto on_middle_click(Handler&& op)
 {
     return [=](auto& w) -> auto&
     {
@@ -1682,7 +1682,7 @@ auto on_middle_click(Handler&& op)
 }
 
 template <typename Handler>
-auto on_right_click(Handler&& op)
+inline auto on_right_click(Handler&& op)
 {
     return [=](auto& w) -> auto&
     {
@@ -1695,7 +1695,7 @@ auto on_right_click(Handler&& op)
 }
 
 template <typename Handler>
-auto on_mouse_release(Handler&& op)
+inline auto on_mouse_release(Handler&& op)
 {
     return [&](auto& w) -> auto&
     {
@@ -1705,7 +1705,7 @@ auto on_mouse_release(Handler&& op)
 }
 
 template <typename Handler>
-auto on_mouse_double_click(Handler&& op)
+inline auto on_mouse_double_click(Handler&& op)
 {
     return [&](auto& w) -> auto&
     {
@@ -1715,7 +1715,7 @@ auto on_mouse_double_click(Handler&& op)
 }
 
 template <typename Handler>
-auto on_mouse_move(Handler&& op)
+inline auto on_mouse_move(Handler&& op)
 {
     return [&](auto& w) -> auto&
     {
@@ -1725,7 +1725,7 @@ auto on_mouse_move(Handler&& op)
 }
 
 template <typename Handler>
-auto on_key_press(Handler&& op)
+inline auto on_key_press(Handler&& op)
 {
     return [&](auto& w) -> auto&
     {
@@ -1735,7 +1735,7 @@ auto on_key_press(Handler&& op)
 }
 
 template <typename Handler>
-auto bind_key(Key::Code key, Handler&& op)
+inline auto bind_key(Key::Code key, Handler&& op)
 {
     return [ op = std::forward<Handler>(op), key ](auto& w) -> auto&
     {
@@ -1748,7 +1748,7 @@ auto bind_key(Key::Code key, Handler&& op)
 }
 
 template <typename Handler>
-auto on_focus_in(Handler&& op)
+inline auto on_focus_in(Handler&& op)
 {
     return [&](auto& w) -> auto&
     {
@@ -1758,7 +1758,7 @@ auto on_focus_in(Handler&& op)
 }
 
 template <typename Handler>
-auto on_focus_out(Handler&& op)
+inline auto on_focus_out(Handler&& op)
 {
     return [&](auto& w) -> auto&
     {
@@ -1768,7 +1768,7 @@ auto on_focus_out(Handler&& op)
 }
 
 template <typename Handler>
-auto on_paint(Handler&& op)
+inline auto on_paint(Handler&& op)
 {
     return [&](auto& w) -> auto&
     {
@@ -1778,7 +1778,7 @@ auto on_paint(Handler&& op)
 }
 
 template <typename Handler>
-auto on_timer(Handler&& op)
+inline auto on_timer(Handler&& op)
 {
     return [&](auto& w) -> auto&
     {
@@ -1788,18 +1788,18 @@ auto on_timer(Handler&& op)
 }
 
 template <typename Handler>
-auto on_destroy(Handler&& op)
+inline auto on_destroyed(Handler&& op)
 {
     return [&](auto& w) -> auto&
     {
-        w.timer.connect(std::forward<Handler>(op));
+        w.destroyed.connect(std::forward<Handler>(op));
         return w;
     };
 }
 
 // Derived Widget::Signals -----------------------------------------------------
 template <typename Handler>
-auto on_color_selected(Handler&& op)
+inline auto on_color_selected(Handler&& op)
 {
     return [&](auto& w) -> auto&
     {
@@ -1809,7 +1809,7 @@ auto on_color_selected(Handler&& op)
 }
 
 template <typename Handler>
-auto on_press(Handler&& op)
+inline auto on_press(Handler&& op)
 {
     return [&](auto& w) -> auto&
     {
