@@ -189,12 +189,9 @@ void Painter::fill(Glyph const& tile,
     }
 }
 
-void Painter::fill(Glyph const& tile,
-                   Point const& point,
-                   std::size_t width,
-                   std::size_t height)
+void Painter::fill(Glyph const& tile, Point const& point, Area const& area)
 {
-    this->fill(tile, point.x, point.y, width, height);
+    this->fill(tile, point.x, point.y, area.width, area.height);
 }
 
 // Does not call down to line_global because this needs bounds checking.

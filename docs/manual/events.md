@@ -1,19 +1,17 @@
 # Events
 
--  An Event is an action that happens to a specific Widget.
+- An Event is an action that happens to a specific Widget.
 
--  An Event is handled by overriding the particular event handler virtual
-   function from the `Widget` class for that Event type.
+- Event handlers are automatically invoked by CPPurses in response to Events.
 
--  Events are generated automatically by CPPurses and sent to the receiving
-   Widget.
+- An Event can be 'handled' by overriding the cooresponding virtual function in
+  the `Widget` class for that Event type.
 
 - Custom Events can be created for situations where Signals are not a good fit.
 
 - Most Events have a cooresponding signal that might be more convinient that
-  overriding a virtual function, but it does not allow you to stop or override a
-  base class implementation if that is what is needed. It is emitted after the
-  event handler has been invoked.
+  overriding a virtual function, but it does not allow you to override a base
+  class implementation. It is emitted after the event handler has been invoked.
 
 - Event Filters can be installed to intercept events from other Widgets.
 
@@ -27,8 +25,8 @@ If the event handler returns true, that tells the event system that the event
 was successfully processed. In certain situations an unsuccessful event will be
 sent to its parent for processing.
 
-Most event handlers should call down to the base class' implementation, unless
-that is not the desired behavior.
+Most event handlers should call down to the base class' implementation before
+returning, unless that is not the desired behavior.
 
 ## Event class
 
@@ -39,16 +37,16 @@ class Event {
    public:
     enum Type;
 
-   protected:
     Event(Type type, Widget& receiver);
-
-    virtual auto send() const -> bool = 0;
-
-    virtual auto filter_send(Widget& filter) const -> bool = 0;
 
     auto type() const -> Type;
 
     auto receiver() const -> Widget&;
+
+   protected:
+    virtual auto send() const -> bool = 0;
+
+    virtual auto filter_send(Widget& filter) const -> bool = 0;
 };
 ```
 
@@ -63,27 +61,36 @@ A Widget can act as an Event filter on another Widget by installing itself as a
 filter on the reciever of the Events that need to be intercepted. Once
 installed, all events bound for the receiving Widget will first be sent to the
 Event filter Widget via its `..._filter()` virtual function, depending on the
-event type. The filter function is passed a reference to the original receiver
-of the Event, as well as any event specific parameters that would normally be
-passed in. If the filter function returns true, then the event will not be sent
-to the recieving Widget, or any other Event filters. Any number of Widgets can
-be installed as filters on a single Widget, they are sent the Event in the order
-that the Widgets were installed as filters.
+event type.
+
+The filter function is passed a reference to the original receiver of the Event,
+as well as any event specific parameters that would normally be passed in. If
+the filter function returns true, then the event will not be sent to the
+recieving Widget, or any other Event filters.
+
+Any number of Widgets can be installed as filters on a single Widget, they are
+sent the Event in the order that the Widgets were installed as filters.
 
 ## Custom Events
 
 The `Event` class can be extended to create new event types. This is done by
 inheriting publicly from the `Event` class and overriding the two virtual
-functions. The new Event type's constructor will need to call down to the
-`Event` base class constructor, passing in the `Event::Type::Custom` enum and
-a reference to the receiving Widget. The `send` virtual override will be called
-when the event it processed, this should call some member function of the
-receivier, the `Event::receiver()` method can be used to get a reference to the
+functions.
+
+The new Event type's constructor will need to call down to the `Event` base
+class constructor, passing in the `Event::Type::Custom` enum and a reference to
+the receiving Widget.
+
+The `send` virtual override will be called when the event it processed, this
+should call some member function of the receivier to handle the response to the
+Event.
+
+The `Event::receiver()` method can be used to get a reference to the
 receiver widget, but this is a reference to a `Widget` class object, if you need
 a more concrete type than this, then capture the object by its concrete type in
 the event's constructor and store it within the new event class.
 
-Events can be posted to the Event Queue by calling:
+Events can be posted to the Event Queue by calling on:
 
 ```cpp
 class System {

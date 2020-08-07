@@ -56,10 +56,7 @@ class Painter {
 
     /// Fill the Widget with \p tile Glyphs starting at the top left \p point.
     /** \p point is in Widget local coordinates. */
-    void fill(Glyph const& tile,
-              Point const& point,
-              std::size_t width,
-              std::size_t height);
+    void fill(Glyph const& tile, Point const& point, Area const& area);
 
     /// Draw a straight line from [x1, y1] to [x2, y2] in local coordinates.
     /** Diagonal lines are not implemented yet. */

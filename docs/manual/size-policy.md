@@ -118,3 +118,39 @@ the layout with this enabled is the one to shrink.
 If a Layout enables this, then it will set the sum of its children's Size Policy
 hints as its own fixed size. This assumes that all children have a fixed Size
 Policy.
+
+## Pipe Methods
+
+### Width
+
+- `fixed_width(std::size_t hint)`
+- `minimum_width(std::size_t hint)`
+- `maximum_width(std::size_t hint)`
+- `preferred_width(std::size_t hint)`
+- `expanding_width(std::size_t hint)`
+- `minimum_expanding_width(std::size_t hint)`
+- `ignored_width()`
+- `width_hint(std::size_t hint)`
+- `width_min(std::size_t min)`
+- `width_max(std::size_t max)`
+- `width_stretch(double stretch)`
+- `can_ignore_width_min()`
+- `cannot_ignore_width_min()`
+- `passive_width(bool x = true)`
+
+### Height
+
+- `fixed_height(std::size_t hint)`
+- `minimum_height(std::size_t hint)`
+- `maximum_height(std::size_t hint)`
+- `preferred_height(std::size_t hint)`
+- `expanding_height(std::size_t hint)`
+- `minimum_expanding_height(std::size_t hint)`
+- `ignored_height()`
+- `height_hint(std::size_t hint)`
+- `height_min(std::size_t min)`
+- `height_max(std::size_t max)`
+- `height_stretch(double stretch)`
+- `can_ignore_height_min()`
+- `cannot_ignore_height_min()`
+- `passive_height(bool x = true)`

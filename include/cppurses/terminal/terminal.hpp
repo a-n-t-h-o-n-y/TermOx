@@ -13,8 +13,8 @@ class Terminal {
    public:
     /// Initializes the terminal screen into curses mode.
     /** Must be called before any input/output can occur. Also initializes
-     *  various proerties that are modifiable from this Terminal class. No-op if
-     *  already initialized. */
+     *  various properties that are modifiable from this Terminal class. No-op
+     *  if already initialized. */
     void initialize();
 
     /// Reset the terminal to its state before initialize() was called.
