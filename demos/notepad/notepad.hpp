@@ -1,5 +1,6 @@
 #ifndef DEMOS_NOTEPAD_NOTEPAD_HPP
 #define DEMOS_NOTEPAD_NOTEPAD_HPP
+#include <chrono>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/trait.hpp>
 #include <cppurses/system/system.hpp>
@@ -8,6 +9,7 @@
 #include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/widget_slots.hpp>
+#include <cppurses/widget/widgets/banner.hpp>
 #include <cppurses/widget/widgets/button.hpp>
 #include <cppurses/widget/widgets/checkbox.hpp>
 #include <cppurses/widget/widgets/color_select.hpp>
@@ -157,22 +159,21 @@ class Save_area : public cppurses::layout::Horizontal<> {
     cppurses::Button& save_btn   = this->make_child<cppurses::Button>("Save");
 };
 
-class File_status_bar : public cppurses::Label {
+class File_status_bar : public cppurses::Cascade_banner {
    public:
-    File_status_bar() { *this | cppurses::pipe::fixed_height(1); }
+    File_status_bar() : Cascade_banner{std::chrono::milliseconds{30}} {}
 
    public:
     void fail(cppurses::Glyph_string message)
     {
         using namespace cppurses;
-        this->Label::set_contents(std::move(message | foreground(Color::Red)));
+        this->set_message(std::move(message | foreground(Color::Red)));
     }
 
     void success(cppurses::Glyph_string message)
     {
         using namespace cppurses;
-        this->Label::set_contents(
-            std::move(message | foreground(Color::Light_green)));
+        this->set_message(std::move(message | foreground(Color::Light_green)));
     }
 };
 
