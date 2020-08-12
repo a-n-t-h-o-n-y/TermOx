@@ -4,7 +4,7 @@
 #include <fstream>
 #include <string>
 
-#include <cppurses/painter/rgb.hpp>
+// #include <cppurses/painter/rgb.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/terminal/terminal.hpp>
 #include <cppurses/widget/border.hpp>

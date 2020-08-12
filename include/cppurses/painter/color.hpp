@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <stdexcept>
 #include <string>
+#include <variant>
 #include <vector>
 
 namespace cppurses {
@@ -52,25 +53,29 @@ constexpr auto background(Color c) -> Background_color { return {c.value}; }
 /// Converts a Color into a Background_color to be used by Brush.
 constexpr auto foreground(Color c) -> Foreground_color { return {c.value}; }
 
-/* --------------------------- ANSI Color Palette ----------------------------*/
+/* ----------------------------- Color Palette -------------------------------*/
 /// ANSI color numbers [0 - 255].
 struct ANSI {
     using Value_t = std::uint8_t;
     Value_t value;
 };
-inline auto operator==(ANSI x, ANSI y) -> bool { return x.value == y.value; }
-inline auto operator!=(ANSI x, ANSI y) -> bool { return !(x == y); }
 
-struct ANSI_definition {
-    Color color;
-    ANSI ansi;
+/// Holds Red, Green, and Blue values, valid range of [0-255].
+struct RGB {
+    using Value_t = std::uint8_t;
+    Value_t red;
+    Value_t green;
+    Value_t blue;
 };
 
-/// Max size of 181 colors in a palette
-/** 181 colors will need 32,761 pairs, max_pairs in ncurses is 32,767. */
-using ANSI_palette = std::vector<ANSI_definition>;
+/// Holds Hue, Saturation, Lightness values of a color.
+struct HSL {
+    std::uint16_t hue;        // [0, 359] degrees
+    std::uint8_t saturation;  // [0, 100] %
+    std::uint8_t lightness;   // [0, 100] %
+};
 
-/* --------------------------- True Color Palette ----------------------------*/
+/// Holds a True Color definition in terms of RGB values.
 class True_color {
    public:
     using Value_t = std::uint32_t;
@@ -78,11 +83,9 @@ class True_color {
    public:
     constexpr True_color(Value_t hex) : value_{hex} {}
 
-    constexpr True_color(std::uint8_t red,
-                         std::uint8_t green,
-                         std::uint8_t blue)
-        : value_{merge(red, green, blue)}
-    {}
+    constexpr True_color(RGB x) : value_{merge(x)} {}
+
+    constexpr True_color(HSL x) : value_{merge(hsl_to_rgb(x))} {}
 
    public:
     /// Returns the red component value [0, 255]
@@ -101,23 +104,94 @@ class True_color {
     Value_t value_;
 
    private:
-    /// Merge rgb values into single 24 bit value
-    static constexpr auto merge(std::uint8_t r, std::uint8_t g, std::uint8_t b)
-        -> Value_t
+    /// Merge RGB values into single 24 bit value
+    static constexpr auto merge(RGB x) -> Value_t
     {
-        return (r << 16) + (g << 8) + b;
+        return (x.red << 16) + (x.green << 8) + x.blue;
+    }
+
+    template <typename T>
+    static constexpr auto abs(T x) -> T
+    {
+        return (x == T(0) ? T(0) : x < T(0) ? -x : x);
+    }
+
+    template <typename T>
+    static constexpr auto fmod(const T x, const T y) -> T
+    {
+        return (x - T(static_cast<long long>(x / y)) * y);
+    }
+
+    static constexpr auto hsl_to_rgb(HSL v) -> RGB
+    {
+        double const lightness  = v.lightness / 100.;
+        double const saturation = v.saturation / 100.;
+
+        auto const c         = (1 - abs((2 * lightness) - 1.)) * saturation;
+        double const h_prime = v.hue / 60.;
+        double const x       = c * (1. - abs(fmod(h_prime, 2.) - 1.));
+        double const m       = lightness - (c / 2.);
+
+        auto const c_ = static_cast<RGB::Value_t>((c + m) * 255);
+        auto const x_ = static_cast<RGB::Value_t>((x + m) * 255);
+        auto const m_ = static_cast<RGB::Value_t>(m * 255);
+
+        if (v.hue < 60.)
+            return {c_, x_, m_};
+        if (v.hue < 120.)
+            return {x_, c_, m_};
+        if (v.hue < 180.)
+            return {m_, c_, x_};
+        if (v.hue < 240.)
+            return {m_, x_, c_};
+        if (v.hue < 300.)
+            return {x_, m_, c_};
+        if (v.hue < 360.)
+            return {c_, m_, x_};
+        else
+            return {0, 0, 0};
     }
 };
 
-/// Ties an ANSI color and cppurses::Color to a True_color value.
-struct True_color_definition {
-    ANSI_definition ansi_def;
-    True_color color_value;
+/// Returns a True_color from RGB values. Convinience for defining palettes.
+constexpr auto rgb(RGB::Value_t r, RGB::Value_t g, RGB::Value_t b) -> True_color
+{
+    return {RGB{r, g, b}};
+}
+
+/// Returns a True_color from HSL values. Convinience for defining palettes.
+constexpr auto hsl(std::uint16_t h, std::uint8_t s, std::uint8_t l)
+    -> True_color
+{
+    return {HSL{h, s, l}};
+}
+
+/* ---------------------------------------------------------------------------*/
+
+/// Used to define a single color for a Color_palette.
+class Color_definition {
+   public:
+    using Value_t =
+        std::variant<std::monostate, True_color /*, Dynamic_color*/>;
+
+   public:
+    Color color;
+    ANSI ansi;
+    Value_t value;
+
+   public:
+    Color_definition(Color c, ANSI a)
+        : color{c}, ansi{a}, value{std::monostate{}}
+    {}
+
+    Color_definition(Color c, ANSI a, Value_t v)
+        : color{c}, ansi{a}, value{std::move(v)}
+    {}
 };
 
 /// Max size of 181 colors in a palette
 /** 181 colors will need 32,761 pairs, max_pairs in ncurses is 32,767. */
-using True_color_palette = std::vector<True_color_definition>;
+using Color_palette = std::vector<Color_definition>;
 
 /* ---------------------------------------------------------------------------*/
 
@@ -141,7 +215,7 @@ inline auto color_to_string(Color c) -> std::string
         case 13: return "Orange";
         case 14: return "Gray";
         case 15: return "Light Gray";
-        default: throw std::logic_error{"color_to_string: Unreachable"};
+        default: return "";
     }
 }
 

@@ -3,13 +3,17 @@
 #include <chrono>
 #include <cstddef>
 
+#include <signals/signal.hpp>
+
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
-#include <cppurses/painter/rgb.hpp>
 
 namespace cppurses {
 
 class Terminal {
+   public:
+    sig::Signal<void(Color_palette const&)> palette_changed;
+
    public:
     /// Initializes the terminal screen into curses mode.
     /** Must be called before any input/output can occur. Also initializes
@@ -39,17 +43,24 @@ class Terminal {
     /// Return the default background/wallpaper currently in use.
     auto background() const -> Glyph const& { return background_; }
 
-    /// Set ANSI terminal color definitions for CPPurses Colors.
-    void set_palette(ANSI_palette const& colors);
+    /// Change Color definitions.
+    void set_palette(Color_palette const& colors);
 
-    /// Set True Color definitions for CPPurses Colors and ANSI values.
-    void set_palette(True_color_palette const& colors);
+    /// Set a single ANSI Color value.
+    void set_color_definition(Color c, ANSI a, std::monostate);
 
-    /// Return a copy of the currently set color palette.
-    auto current_palette() const -> ANSI_palette const& { return palette_; }
+    /// Set a single True_Color value.
+    void set_color_definition(Color c, ANSI a, True_color value);
+
+    /// Lock a Color and ANSI value together, with all possible combinations.
+    /** Relies on the palette_ objects being accurate. */
+    void initialize_pairs(Color c, ANSI a);
+
+    /// Return a copy of the currently set ANSI color palette.
+    auto current_palette() const -> Color_palette const& { return palette_; }
 
     /// Set the RGB value of an ANSI color.
-    void set_color_definition(True_color_definition const& def);
+    void term_set_color(ANSI a, True_color value);
 
     /// Set whether or not the cursor is visible on screen.
     void show_cursor(bool show = true);
@@ -83,15 +94,9 @@ class Terminal {
     auto color_index(Color fg, Color bg) const -> short;
 
     /// Returns the number of colors in the currently set ANSI_palette.
-    auto get_ansi_color_count() const -> Color::Value_t
+    auto get_palette_color_count() const -> Color::Value_t
     {
         return static_cast<Color::Value_t>(palette_.size());
-    }
-
-    /// Returns the number of colors in the currently set True_color_palette.
-    auto get_true_color_count() const -> Color::Value_t
-    {
-        return static_cast<Color::Value_t>(tc_palette_.size());
     }
 
    private:
@@ -99,8 +104,7 @@ class Terminal {
     bool show_cursor_    = false;
     bool raw_mode_       = false;
     Glyph background_    = L' ';
-    ANSI_palette palette_;
-    True_color_palette tc_palette_;
+    Color_palette palette_;
     std::chrono::milliseconds refresh_rate_{33};
 
    private:
@@ -109,8 +113,6 @@ class Terminal {
 
     /// Actually set show_cursor via ncurses using the state of show_cursor_.
     void ncurses_set_cursor() const;
-
-    auto get_ansi_value(Color c) -> ANSI::Value_t;
 
     /// Repaint All Widgets
     void repaint_all();

@@ -250,6 +250,8 @@ class Widget {
      *  update itself. This is all handled on a separate thread from the main
      *  user input thread, and therefore has its own staged_changes object that
      *  it paints to to avoid shared data issues. */
+    // TODO Animation engine should not post paint events, timer_event can do
+    // that if it needs to.
     void enable_animation(Animation_engine::Period_t period)
     {
         System::animation_engine().register_widget(*this, period);
@@ -723,7 +725,7 @@ class Widget {
         /// Removes and deletes a child.
         void erase(std::size_t index);
 
-        /// Removes and sends to delete event each child.
+        /// Removes and sends delete event each child.
         void clear();
 
        public:  // Accessors

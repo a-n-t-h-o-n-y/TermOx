@@ -21,7 +21,6 @@
 #include <cppurses/painter/palette/basic.hpp>
 #include <cppurses/painter/palette/basic8.hpp>
 #include <cppurses/painter/palette/dawn_bringer16.hpp>
-#include <cppurses/painter/rgb.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/terminal/input.hpp>
 #include <cppurses/terminal/terminal_error.hpp>
@@ -127,36 +126,39 @@ void Terminal::set_background(Glyph const& tile)
         this->repaint_all();
 }
 
-void Terminal::set_palette(ANSI_palette const& colors)
+void Terminal::set_palette(Color_palette const& colors)
 {
     if (!is_initialized_ or !this->has_color())
         return;
     palette_ = colors;
-    for (auto const& foreground : colors) {
-        for (auto const& background : colors) {
-            ::init_pair(this->color_index(foreground.color, background.color),
-                        this->get_ansi_value(foreground.color),
-                        this->get_ansi_value(background.color));
-        }
+    for (auto const& def : colors) {
+        std::visit(
+            [&](auto const& d) {
+                this->set_color_definition(def.color, def.ansi, d);
+            },
+            def.value);
     }
     this->repaint_all();
+    palette_changed(palette_);
 }
 
-void Terminal::set_palette(True_color_palette const& colors)
+void Terminal::initialize_pairs(Color c, ANSI a)
 {
-    if (!is_initialized_)
-        return;
-    if (!this->has_color() || !this->can_change_colors())
-        throw Terminal_error{"Terminal cannot re-define color values."};
-    auto ansi_pal = ANSI_palette{};
-    ansi_pal.reserve(colors.size());
-    std::transform(std::cbegin(colors), std::cend(colors),
-                   std::back_inserter(ansi_pal),
-                   [](auto const& tcd) { return tcd.ansi_def; });
-    this->set_palette(ansi_pal);
-    for (auto const& color : colors)
-        this->set_color_definition(color);
-    tc_palette_ = colors;
+    for (auto const& def : palette_) {
+        ::init_pair(this->color_index(c, def.color), a.value, def.ansi.value);
+        ::init_pair(this->color_index(def.color, c), def.ansi.value, a.value);
+    }
+}
+
+void Terminal::set_color_definition(Color c, ANSI a, std::monostate)
+{
+    this->initialize_pairs(c, a);
+}
+
+void Terminal::set_color_definition(Color c, ANSI a, True_color value)
+{
+    this->initialize_pairs(c, a);
+    this->term_set_color(a, value);
 }
 
 void Terminal::show_cursor(bool show)
@@ -210,20 +212,20 @@ auto Terminal::color_pair_count() const -> int
 
 auto Terminal::color_index(Color fg, Color bg) const -> short
 {
-    // Can use ansi_color_count because this is set even with true color palette
-    short const color_n = this->get_ansi_color_count();
+    short const color_n = this->get_palette_color_count();
     short const offset  = 1;
     short const fg_mod  = fg.value % color_n;
     short const bg_mod  = bg.value % color_n;
     return offset + fg_mod * color_n + bg_mod;
 }
 
-void Terminal::set_color_definition(True_color_definition const& def)
+void Terminal::term_set_color(ANSI a, True_color value)
 {
     if (!this->can_change_colors())
-        return;
-    ::init_color(def.ansi_def.ansi.value, scale(def.color_value.red()),
-                 scale(def.color_value.green()), scale(def.color_value.blue()));
+        throw Terminal_error{"Terminal cannot re-define color values."};
+
+    ::init_color(a.value, scale(value.red()), scale(value.green()),
+                 scale(value.blue()));
 }
 
 void Terminal::ncurses_set_raw_mode() const
@@ -241,15 +243,6 @@ void Terminal::ncurses_set_raw_mode() const
 void Terminal::ncurses_set_cursor() const
 {
     show_cursor_ ? ::curs_set(1) : ::curs_set(0);
-}
-
-auto Terminal::get_ansi_value(Color c) -> ANSI::Value_t
-{
-    auto const iter = std::find_if(std::cbegin(palette_), std::cend(palette_),
-                                   [c](auto x) { return x.color == c; });
-    if (iter == std::cend(palette_))
-        throw std::runtime_error{"Missing Color in Palette."};
-    return iter->ansi.value;
 }
 
 void Terminal::repaint_all()

@@ -7,6 +7,7 @@
 #include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/pair.hpp>
 #include <cppurses/widget/pipe.hpp>
+#include <cppurses/widget/widgets/fixed_height.hpp>
 #include <cppurses/widget/widgets/fixed_width.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
 
@@ -97,7 +98,7 @@ template <typename Widget_t>
 class Label_top : public layout::Vertical<> {
    public:
     Label& label;
-    Fixed_width& padding = this->make_child<Fixed_width>(0);
+    Fixed_height& padding = this->make_child<Fixed_height>(0);
     Widget_t& wrapped;
 
    public:
@@ -122,7 +123,7 @@ template <typename Widget_t>
 class Label_bottom : public layout::Vertical<> {
    public:
     Widget_t& wrapped;
-    Fixed_width& padding = this->make_child<Fixed_width>(0);
+    Fixed_height& padding = this->make_child<Fixed_height>(0);
     Label& label;
 
    public:

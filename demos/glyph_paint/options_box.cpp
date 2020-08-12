@@ -5,6 +5,11 @@
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
+#include "cppurses/painter/palette/basic.hpp"
+#include "cppurses/painter/palette/basic8.hpp"
+#include "cppurses/painter/palette/dawn_bringer16.hpp"
+#include "cppurses/painter/palette/dawn_bringer32.hpp"
+#include "cppurses/painter/palette/en4.hpp"
 
 using namespace cppurses;
 
@@ -24,12 +29,19 @@ Options_B::Options_B()
     space1.set_wallpaper(L'─');
 
     palette_label.set_alignment(Align::Center);
-    // palette_box.add_option("Dawn Bringer").connect([] {
-    //     System::terminal.set_color_palette(Palettes::DawnBringer());
-    // });
-    // palette_box.add_option("Standard").connect([] {
-    //     System::terminal.set_color_palette(Palettes::Standard());
-    // });
+    palette_box.add_option("Dawn Bringer 16").connect([] {
+        System::terminal.set_palette(dawn_bringer16::palette);
+    });
+    palette_box.add_option("Dawn Bringer 32").connect([] {
+        System::terminal.set_palette(dawn_bringer32::palette);
+    });
+    palette_box.add_option("Basic 16").connect([] {
+        System::terminal.set_palette(basic::palette);
+    });
+    palette_box.add_option("Basic 8").connect(
+        [] { System::terminal.set_palette(basic8::palette); });
+    palette_box.add_option("EN 4").connect(
+        [] { System::terminal.set_palette(en4::palette); });
 
     back_btn.brush.set_background(Color::Light_gray);
     back_btn.brush.set_foreground(Color::Black);

@@ -1,6 +1,10 @@
 #ifndef DEMOS_NOTEPAD_NOTEPAD_HPP
 #define DEMOS_NOTEPAD_NOTEPAD_HPP
 #include <chrono>
+#include <cmath>
+
+#include <signals/signal.hpp>
+
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/trait.hpp>
 #include <cppurses/system/system.hpp>
@@ -15,8 +19,6 @@
 #include <cppurses/widget/widgets/color_select.hpp>
 #include <cppurses/widget/widgets/label.hpp>
 #include <cppurses/widget/widgets/textbox.hpp>
-
-#include <signals/signal.hpp>
 
 namespace demos {
 
@@ -59,17 +61,30 @@ class Trait_boxes : public cppurses::layout::Vertical<Trait_checkbox> {
 class Labeled_color_select
     : public cppurses::Label_top<cppurses::Color_select> {
    public:
-    sig::Signal<void(cppurses::Color)>& color_selected{wrapped.color_selected};
+    sig::Signal<void(cppurses::Color)>& color_selected = wrapped.color_selected;
 
    public:
     Labeled_color_select(cppurses::Glyph_string label)
         : Label_top{std::move(label)}
     {
+        using namespace cppurses;
         using namespace cppurses::pipe;
 
-        *this | fixed_height(3);
-        this->wrapped | fixed_height(2);
-        this->label | add(cppurses::Trait::Bold) | align_center();
+        System::terminal.palette_changed.connect(
+            [this](auto const& pal) { this->set_heights(pal); });
+
+        this->set_heights(System::terminal.current_palette());
+        this->label | add(Trait::Bold) | align_center();
+    }
+
+   private:
+    /// Sets Widget heights based on number of colors in palette.
+    void set_heights(cppurses::Color_palette const& pal)
+    {
+        using namespace cppurses::pipe;
+        auto const height = std::ceil(pal.size() / 8.) + 1;
+        *this | fixed_height(height);
+        this->wrapped | fixed_height(height);
     }
 };
 
@@ -159,9 +174,9 @@ class Save_area : public cppurses::layout::Horizontal<> {
     cppurses::Button& save_btn   = this->make_child<cppurses::Button>("Save");
 };
 
-class File_status_bar : public cppurses::Cascade_banner {
+class File_status_bar : public cppurses::Scan_banner {
    public:
-    File_status_bar() : Cascade_banner{std::chrono::milliseconds{30}} {}
+    File_status_bar() : Scan_banner{std::chrono::milliseconds{30}} {}
 
    public:
     void fail(cppurses::Glyph_string message)

@@ -1,102 +1,101 @@
 #ifndef CPPURSES_DEMOS_COLORS_COLORS_DISPLAY_HPP
 #define CPPURSES_DEMOS_COLORS_COLORS_DISPLAY_HPP
-#include <cmath>
-#include <string>
+#include <signals/signal.hpp>
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/painter.hpp>
+#include <cppurses/painter/palette/basic.hpp>
+#include <cppurses/painter/palette/basic8.hpp>
+#include <cppurses/painter/palette/dawn_bringer16.hpp>
+#include <cppurses/painter/palette/dawn_bringer32.hpp>
+#include <cppurses/painter/palette/en4.hpp>
+#include <cppurses/system/system.hpp>
+#include <cppurses/terminal/terminal.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/widget.hpp>
+#include <cppurses/widget/widgets/button.hpp>
+#include <cppurses/widget/widgets/cycle_box.hpp>
 
 namespace colors {
 
-class Color_tile : public cppurses::Widget {
-   public:
-    explicit Color_tile(cppurses::Color c) : c_{c}
-    {
-        *this | cppurses::pipe::bg(c);
-    }
-
-   protected:
-    auto paint_event() -> bool override
-    {
-        cppurses::Painter{*this}.put(std::to_string(c_.value), 0, 0);
-        return Widget::paint_event();
-    }
-
-   private:
-    cppurses::Color c_;
+struct Color_tile : cppurses::Button {
+    explicit Color_tile(cppurses::Color c) { *this | cppurses::pipe::bg(c); }
 };
 
-class Color_line : public cppurses::layout::Horizontal<Color_tile> {
-   public:
-    template <typename... Colors>
-    explicit Color_line(Colors... colors)
-    {
-        (this->make_child(colors), ...);
-    }
-};
+using Color_line = cppurses::layout::Horizontal<Color_tile>;
 
-/// Displays each color of a Palette.
+/// Displays each color of the current palette.
+/** Updates when Terminal::set_pallete() succeeds. */
 class Palette_view : public cppurses::layout::Vertical<Color_line> {
    public:
-    explicit Palette_view(cppurses::ANSI_palette const& palette)
-        : is_ansi_{true}, ansi_palette_{palette}
+    sig::Signal<void(cppurses::Color)> color_selected;
+
+   public:
+    Palette_view()
     {
-        this->focus_policy = cppurses::Focus_policy::Strong;
-
-        auto const size       = palette.size();
-        auto const row_length = std::floor(std::sqrt(size));
-        auto count            = 0uL;
-        while (true) {
-            auto& color_line = this->make_child();
-            for (auto i = 0uL; i < row_length; ++i, ++count) {
-                if (count == size)
-                    break;
-                color_line.make_child(palette[count].color);
-            }
-            if (count == size)
-                break;
-        }
-    }
-
-    explicit Palette_view(cppurses::True_color_palette const& palette)
-        : is_ansi_{false}, tc_palette_{palette}
-    {
-        this->focus_policy = cppurses::Focus_policy::Strong;
-
-        auto const size       = palette.size();
-        auto const row_length = std::floor(std::sqrt(size));
-        auto count            = 0uL;
-        while (true) {
-            auto& color_line = this->make_child();
-            for (auto i = 0uL; i < row_length; ++i, ++count) {
-                if (count == size)
-                    break;
-                color_line.make_child(palette[count].ansi_def.color);
-            }
-            if (count == size)
-                break;
-        }
-    }
-
-   protected:
-    auto focus_in_event() -> bool override
-    {
-        using namespace cppurses;
-        if (is_ansi_)
-            System::terminal.set_palette(ansi_palette_);
-        else
-            System::terminal.set_palette(tc_palette_);
-        return cppurses::layout::Vertical<Color_line>::focus_in_event();
+        using namespace cppurses::pipe;
+        *this | strong_focus();
+        cppurses::System::terminal.palette_changed.connect(
+            [this](auto const& pal) { this->set_palette(pal); });
     }
 
    private:
-    bool is_ansi_;
-    cppurses::ANSI_palette ansi_palette_;
-    cppurses::True_color_palette tc_palette_;
+    void set_palette(cppurses::Color_palette const& pal)
+    {
+        this->Layout::clear();
+        auto const size           = pal.size();
+        auto constexpr row_length = 8uL;
+        auto count                = 0uL;
+
+        while (count != size) {
+            auto& color_line = this->make_child();
+            for (auto i = 0uL; i < row_length && count != size; ++i, ++count) {
+                using namespace cppurses::pipe;
+                auto const color = pal[count].color;
+                color_line.make_child(color) |
+                    on_press([this, color]() { color_selected(color); });
+            }
+        }
+    }
+};
+
+class Palette_picker : public cppurses::Labeled_cycle_box {
+   public:
+    sig::Signal<void(cppurses::Color_palette)> palette_picked;
+
+   public:
+    Palette_picker() : Labeled_cycle_box{"Palette"}
+    {
+        this->cycle_box.add_option("Dawn Bringer 16").connect([this]() {
+            palette_picked(cppurses::dawn_bringer16::palette);
+        });
+        this->cycle_box.add_option("Dawn Bringer 32").connect([this]() {
+            palette_picked(cppurses::dawn_bringer32::palette);
+        });
+        this->cycle_box.add_option("Basic 16").connect([this]() {
+            palette_picked(cppurses::basic::palette);
+        });
+        this->cycle_box.add_option("Basic 8").connect(
+            [this]() { palette_picked(cppurses::basic8::palette); });
+        this->cycle_box.add_option("EN 4").connect(
+            [this]() { palette_picked(cppurses::en4::palette); });
+    }
+};
+
+class Palette_demo : public cppurses::layout::Vertical<> {
+   public:
+    Palette_view& palette_view     = this->make_child<Palette_view>();
+    Palette_picker& palette_picker = this->make_child<Palette_picker>();
+
+   public:
+    Palette_demo()
+    {
+        palette_picker.palette_picked.connect([](auto const& pal) {
+            cppurses::System::terminal.set_palette(pal);
+        });
+    }
 };
 
 }  // namespace colors

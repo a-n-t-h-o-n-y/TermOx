@@ -11,7 +11,7 @@ bool Shade_display::paint_event()
     using namespace cppurses;
     auto light_shade   = L'░'_g | background(base_);
     auto mid_shade     = L'▒'_g | background(base_);
-    auto const color_n = cppurses::System::terminal.get_ansi_color_count();
+    auto const color_n = cppurses::System::terminal.get_palette_color_count();
 
     int const height = static_cast<int>(this->height());
     int const width  = static_cast<int>(this->width());

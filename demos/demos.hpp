@@ -72,8 +72,7 @@ class Demo_menu : public cppurses::Menu_stack {
         // Can use find() methods and name() pipe to connect signals after
         // you build up the widget to quick prototype.
 
-        this->make_page<colors::Palette_view>("Colors",
-                                              dawn_bringer16::palette);
+        this->make_page<colors::Palette_demo>("Color Palettes");
         this->make_page<comp::Two_lists>("Check Lists");
         this->make_page<graph::Graph_demo>("Graph");
         this->make_page<layout_demo::Layout_demo>("Layouts");
