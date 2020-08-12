@@ -35,8 +35,6 @@ class Palette_view : public cppurses::layout::Vertical<Color_line> {
    public:
     Palette_view()
     {
-        using namespace cppurses::pipe;
-        *this | strong_focus();
         cppurses::System::terminal.palette_changed.connect(
             [this](auto const& pal) { this->set_palette(pal); });
     }
@@ -92,6 +90,8 @@ class Palette_demo : public cppurses::layout::Vertical<> {
    public:
     Palette_demo()
     {
+        using namespace cppurses::pipe;
+        *this | strong_focus();
         palette_picker.palette_picked.connect([](auto const& pal) {
             cppurses::System::terminal.set_palette(pal);
         });

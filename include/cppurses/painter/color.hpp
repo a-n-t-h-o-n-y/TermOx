@@ -1,6 +1,8 @@
 #ifndef CPPURSES_PAINTER_COLOR_HPP
 #define CPPURSES_PAINTER_COLOR_HPP
+#include <chrono>
 #include <cstdint>
+#include <functional>
 #include <stdexcept>
 #include <string>
 #include <variant>
@@ -53,12 +55,15 @@ constexpr auto background(Color c) -> Background_color { return {c.value}; }
 /// Converts a Color into a Background_color to be used by Brush.
 constexpr auto foreground(Color c) -> Foreground_color { return {c.value}; }
 
-/* ----------------------------- Color Palette -------------------------------*/
+/* --------------------------- ANSI/XTERM Color ------------------------------*/
+
 /// ANSI color numbers [0 - 255].
 struct ANSI {
     using Value_t = std::uint8_t;
     Value_t value;
 };
+
+/* ------------------------------- True Color --------------------------------*/
 
 /// Holds Red, Green, and Blue values, valid range of [0-255].
 struct RGB {
@@ -154,25 +159,74 @@ class True_color {
 };
 
 /// Returns a True_color from RGB values. Convinience for defining palettes.
-constexpr auto rgb(RGB::Value_t r, RGB::Value_t g, RGB::Value_t b) -> True_color
+inline constexpr auto rgb(RGB::Value_t r, RGB::Value_t g, RGB::Value_t b)
+    -> True_color
 {
     return {RGB{r, g, b}};
 }
 
 /// Returns a True_color from HSL values. Convinience for defining palettes.
-constexpr auto hsl(std::uint16_t h, std::uint8_t s, std::uint8_t l)
+inline constexpr auto hsl(std::uint16_t h, std::uint8_t s, std::uint8_t l)
     -> True_color
 {
     return {HSL{h, s, l}};
 }
 
-/* ---------------------------------------------------------------------------*/
+/* ----------------------------- Dynamic Color -------------------------------*/
+
+/// Defines an animated color
+/** get_value() is called every period and used to update the color. */
+struct Dynamic_color {
+    using Period_t = std::chrono::milliseconds;
+    Period_t period;
+    std::function<True_color()> get_value;
+};
+
+/// Dynamic_color type that cycles through every hue value in HSL color wheel.
+class Rainbow {
+   public:
+    /// Creates a Rainbow Dynamic Color w/fixed saturation and lightness values.
+    Rainbow(std::uint8_t saturation, std::uint8_t lightness)
+        : saturation_{saturation}, lightness_{lightness}
+    {}
+
+   public:
+    auto operator()() -> True_color
+    {
+        return {HSL{this->postincrement_hue(), saturation_, lightness_}};
+    }
+
+   private:
+    std::uint16_t hue_ = 0;
+    std::uint8_t saturation_;
+    std::uint8_t lightness_;
+
+   private:
+    // Increments hue_, then returns the previous value, wraps at 360.
+    auto postincrement_hue() -> std::uint16_t
+    {
+        auto const old = hue_;
+        if (++hue_ == 360)
+            hue_ = 0;
+        return old;
+    }
+};
+
+/// Returns a Rainbow Dynamic_color object. Convinience for defining palettes.
+inline auto rainbow(
+    Dynamic_color::Period_t period = std::chrono::milliseconds{40},
+    std::uint8_t saturation        = 50,
+    std::uint8_t lightness         = 50) -> Dynamic_color
+{
+    return {period, Rainbow{saturation, lightness}};
+}
+
+/* ----------------------------- Color Palette -------------------------------*/
 
 /// Used to define a single color for a Color_palette.
 class Color_definition {
    public:
-    using Value_t =
-        std::variant<std::monostate, True_color /*, Dynamic_color*/>;
+    using Value_t = std::variant<std::monostate, True_color, Dynamic_color>;
 
    public:
     Color color;

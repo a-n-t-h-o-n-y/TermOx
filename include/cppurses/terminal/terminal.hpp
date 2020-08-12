@@ -49,8 +49,11 @@ class Terminal {
     /// Set a single ANSI Color value.
     void set_color_definition(Color c, ANSI a, std::monostate);
 
-    /// Set a single True_Color value.
+    /// Set a single True_color value.
     void set_color_definition(Color c, ANSI a, True_color value);
+
+    /// Set a single Dynamic_color value.
+    void set_color_definition(Color c, ANSI a, Dynamic_color value);
 
     /// Lock a Color and ANSI value together, with all possible combinations.
     /** Relies on the palette_ objects being accurate. */

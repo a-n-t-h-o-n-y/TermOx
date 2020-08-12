@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <iterator>
 #include <memory>
 #include <optional>
@@ -245,25 +244,19 @@ class Widget {
 
     /// Enable animation on this Widget.
     /** Animated widgets receiver a Timer_event every \p period. This Timer
-     *  Event should be used to update the state of the Widget. The animation
-     *  system will also post a paint event to this Widget so the Widget can
-     *  update itself. This is all handled on a separate thread from the main
-     *  user input thread, and therefore has its own staged_changes object that
-     *  it paints to to avoid shared data issues. */
-    // TODO Animation engine should not post paint events, timer_event can do
-    // that if it needs to.
+     *  Event should be used to update the state of the Widget. This is all
+     *  handled on a separate thread from the main user input thread, and has
+     *  its own staged_changes object that it paints to to avoid shared data
+     *  issues. */
     void enable_animation(Animation_engine::Period_t period)
     {
         System::animation_engine().register_widget(*this, period);
     }
 
-    /// Enable variable animation on this Widget.
-    /** Animated widgets receiver a Timer_event every \p period_func(). This
-     *  enables a variable rate animation. */
-    void enable_animation(
-        std::function<Animation_engine::Period_t()> const& period_func)
+    /// Enable animation with a frames-per-second value.
+    void enable_animation(FPS fps)
     {
-        System::animation_engine().register_widget(*this, period_func);
+        System::animation_engine().register_widget(*this, fps);
     }
 
     /// Turn off animation, no more Timer_events will be sent to this Widget.

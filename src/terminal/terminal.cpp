@@ -130,6 +130,7 @@ void Terminal::set_palette(Color_palette const& colors)
 {
     if (!is_initialized_ or !this->has_color())
         return;
+    // dynamic_color_engine.clear(); // TODO
     palette_ = colors;
     for (auto const& def : colors) {
         std::visit(
@@ -159,6 +160,12 @@ void Terminal::set_color_definition(Color c, ANSI a, True_color value)
 {
     this->initialize_pairs(c, a);
     this->term_set_color(a, value);
+}
+
+void Terminal::set_color_definition(Color c, ANSI a, Dynamic_color value)
+{
+    this->initialize_pairs(c, a);
+    // dynamic_color_engine.register(a, value); // makes calls to term_set_color
 }
 
 void Terminal::show_cursor(bool show)

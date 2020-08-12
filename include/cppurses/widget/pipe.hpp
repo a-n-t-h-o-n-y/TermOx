@@ -1,7 +1,6 @@
 #ifndef CPPURSES_WIDGET_PIPE_HPP
 #define CPPURSES_WIDGET_PIPE_HPP
 #include <cstddef>
-#include <functional>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -188,12 +187,11 @@ inline auto animate(Animation_engine::Period_t period)
     };
 }
 
-inline auto animate(
-    std::function<Animation_engine::Period_t()> const& period_func)
+inline auto animate(FPS fps)
 {
-    return [&](auto& w) -> auto&
+    return [=](auto& w) -> auto&
     {
-        w.enable_animation(period_func);
+        w.enable_animation(fps);
         return w;
     };
 }

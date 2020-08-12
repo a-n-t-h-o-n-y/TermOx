@@ -25,8 +25,6 @@ class Color_select : public cppurses::layout::Vertical<Color_line> {
    public:
     Color_select()
     {
-        using namespace cppurses::pipe;
-        *this | strong_focus();
         cppurses::System::terminal.palette_changed.connect(
             [this](auto const& pal) { this->set_palette(pal); });
     }

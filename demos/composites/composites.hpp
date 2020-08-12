@@ -72,8 +72,7 @@ struct Composites_old : App {
         txbx | on_key_press([&](auto) { txbx | bg(Color::Light_blue); });
 
         using namespace std::literals;
-        save | animate([]() { return 34ms; }) | wallpaper(L'X') |
-            wallpaper(std::nullopt);
+        save | animate(34ms) | wallpaper(L'X') | wallpaper(std::nullopt);
         load | wallpaper({L'-', foreground(Color::Red)});
         load | wallpaper_without_brush() | wallpaper_with_brush();
 
