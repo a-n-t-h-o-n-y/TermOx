@@ -11,6 +11,7 @@ class Screen {
    public:
     Screen() = delete;
 
+   public:
     /// Puts the state of \p changes onto the physical screen.
     static void flush(Staged_changes::Map_t const& changes);
 

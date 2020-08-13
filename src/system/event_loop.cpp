@@ -9,14 +9,11 @@ auto Event_loop::run() -> int
 {
     if (running_)
         return -1;
-    running_    = true;
-    auto notify = true;
-    while (not exit_) {
-        if (notify)
-            detail::Event_engine::get().notify();
+    running_ = true;
+    while (!exit_) {
         if (is_main_thread_)
             detail::Event_engine::get().process();
-        notify = this->loop_function();
+        this->loop_function();
     }
     running_ = false;
     exit_    = false;

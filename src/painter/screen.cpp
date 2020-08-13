@@ -76,8 +76,7 @@ void paint_to_terminal(Widget& widg,
 
 }  // namespace
 
-namespace cppurses {
-namespace detail {
+namespace cppurses::detail {
 
 void Screen::flush(Staged_changes::Map_t const& changes)
 {
@@ -108,5 +107,4 @@ void Screen::set_cursor_on_focus_widget()
         System::terminal.show_cursor(false);
 }
 
-}  // namespace detail
-}  // namespace cppurses
+}  // namespace cppurses::detail

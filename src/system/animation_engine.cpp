@@ -33,7 +33,7 @@ void Animation_engine::unregister_widget(Widget& w)
 
     // If an event loop was found, and it is now empty, shutdown that event loop
     if (iter != std::end(loops_)) {
-        if (auto& loop = *iter; loop->empty()) {
+        if (auto& loop = *iter; loop->is_empty()) {
             loop->exit(0);
             loop->wait();
             loops_.erase(iter);

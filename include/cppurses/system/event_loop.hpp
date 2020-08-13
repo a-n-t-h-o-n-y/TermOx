@@ -55,10 +55,8 @@ class Event_loop {
 
    protected:
     /// Override this in derived classes to define Event_loop behavior.
-    /** This function will be called on once every loop iteration. If it posts
-     *  any events via System::post_event(), then it should return true,
-     *  indicating that the event queue should be processed. */
-    virtual auto loop_function() -> bool = 0;
+    /** This function will be called on once every loop iteration. */
+    virtual void loop_function() = 0;
 
    protected:
     bool is_main_thread_ = false;

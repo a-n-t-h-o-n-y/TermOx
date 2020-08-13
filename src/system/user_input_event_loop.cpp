@@ -7,17 +7,13 @@
 #include <cppurses/system/system.hpp>
 #include <cppurses/terminal/input.hpp>
 
-namespace cppurses {
-namespace detail {
+namespace cppurses::detail {
 
-auto User_input_event_loop::loop_function() -> bool
+void User_input_event_loop::loop_function()
 {
     auto event = input::get();
-    if (event == nullptr)
-        return false;
-    System::post_event(std::move(event));
-    return true;
+    if (event != nullptr)
+        System::post_event(std::move(event));
 }
 
-}  // namespace detail
-}  // namespace cppurses
+}  // namespace cppurses::detail

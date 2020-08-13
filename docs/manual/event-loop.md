@@ -12,13 +12,11 @@ an event to the correct Widget.
 ## Creating New Event Loops
 
 A new Event Loop can be created by publicly inheriting from the `Event_loop`
-class and overriding the `virtual bool loop_function()` method. This overridden
+class and overriding the `virtual void loop_function()` method. This overridden
 method should wait for some sort of event to occur, once it does, it can post
-that event with the `System::post_event(...)` method, and then return `true`. If
-no event occurs, but the loop function still needs to return, it can return
-`false` so that the event queue is not processed. The new Event Loop can be
+that event with the `System::post_event(...)` method. The new Event Loop can be
 owned by a Widget, the `void Event_loop::run_async()` method can be used to
 launch the loop in a new thread.
 
-Only one Event Loop is able to process its Event Queue at a time. This provides
-thread safely, as event handlers are able to modify Widgets.
+All Event Loops post their events to the same queue, the main thread is the only
+thread that processes the Event Queue.

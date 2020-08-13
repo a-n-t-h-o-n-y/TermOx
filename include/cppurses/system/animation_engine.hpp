@@ -23,12 +23,12 @@ class Animation_engine {
     /// Stop posting Timer_events to a given Widget.
     void unregister_widget(Widget& w);
 
-    /// Send stop signals to all event loops and wait for them to exit.
-    void shutdown();
-
     // Start sending Timer_events to all registered widgets.
     /** Only needed if shutdown() has been called. */
     void startup();
+
+    /// Send stop signals to all event loops and wait for them to exit.
+    void shutdown();
 
    private:
     // Using a std::unique_ptr because Event_loops can't be copied.

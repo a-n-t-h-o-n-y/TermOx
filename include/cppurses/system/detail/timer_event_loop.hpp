@@ -43,14 +43,14 @@ class Timer_event_loop : public Interval_event_loop {
     }
 
     /// Return true if no Widgets are registered with this event loop.
-    auto empty() const -> bool
+    auto is_empty() const -> bool
     {
         auto const guard = Guard_t{mtx_registered_widgets_};
         return registered_widgets_.empty();
     }
 
    protected:
-    auto loop_function() -> bool override;
+    void loop_function() override;
 
    private:
     std::set<Widget*> registered_widgets_;

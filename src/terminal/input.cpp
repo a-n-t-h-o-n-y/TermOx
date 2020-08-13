@@ -6,7 +6,7 @@
 #include <utility>
 
 #ifndef _XOPEN_SOURCE_EXTENDED
-#define _XOPEN_SOURCE_EXTENDED
+#    define _XOPEN_SOURCE_EXTENDED
 #endif
 #include <ncursesw/ncurses.h>
 #undef border
@@ -178,8 +178,7 @@ auto make_keyboard_event(int input) -> std::unique_ptr<Event>
 
 }  // namespace
 
-namespace cppurses {
-namespace input {
+namespace cppurses::input {
 
 auto get() -> std::unique_ptr<Event>
 {
@@ -192,5 +191,4 @@ auto get() -> std::unique_ptr<Event>
     }
 }
 
-}  // namespace input
-}  // namespace cppurses
+}  // namespace cppurses::input

@@ -14,7 +14,7 @@ class User_input_event_loop : public Event_loop {
 
    protected:
     /// Wait on input::get(), and post the result.
-    auto loop_function() -> bool override;
+    void loop_function() override;
 };
 
 }  // namespace detail

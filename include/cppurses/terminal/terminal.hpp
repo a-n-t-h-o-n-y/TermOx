@@ -7,6 +7,7 @@
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
+#include <cppurses/terminal/dynamic_color_engine.hpp>
 
 namespace cppurses {
 
@@ -109,6 +110,7 @@ class Terminal {
     Glyph background_    = L' ';
     Color_palette palette_;
     std::chrono::milliseconds refresh_rate_{33};
+    Dynamic_color_engine dynamic_color_engine_;
 
    private:
     /// Actually set raw/noraw mode via ncurses using the state of raw_mode_.

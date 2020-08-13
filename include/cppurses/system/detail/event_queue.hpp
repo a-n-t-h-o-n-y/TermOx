@@ -14,6 +14,14 @@ namespace cppurses {
 namespace detail {
 
 /// Holds Events to be processed, concurrent append
+/** There is a single Event_queue for the entire application. Any Event_loop can
+ *  post events to the queue, but only the main User_input_event_loop thread can
+ *  process the events and flush the screen. The User_input_event_loop waits for
+ *  the refresh_rate period for input, if there is not input, then it processes
+ *  the event queue and flushes the screen, if any other event loop threads have
+ *  posted events to the queue. Listening for user input and painting to the
+ *  screen can't happen at the same time because ncurses internals are not
+ *  thread-safe, therefore the refresh rate creates a non-blocking listen. */
 class Event_queue {
    private:
     using Mutex_t = std::mutex;
@@ -53,6 +61,13 @@ class Event_queue {
         remove_receiver(paint_events_, receiver);
         remove_descendants(general_events_, receiver);
         remove_descendants(paint_events_, receiver);
+    }
+
+    /// Return true if there are no Events on the Queue.
+    auto empty() const -> bool
+    {
+        return general_events_.empty() && paint_events_.empty() &&
+               delete_events_.empty();
     }
 
     // Accessor Types ----------------------------------------------------------
@@ -119,7 +134,7 @@ class Event_queue {
                 auto const end = events_.size();
                 if (from == end)
                     return from;
-                while (++from != end and events_[from] == nullptr) {}
+                while (++from != end && events_[from] == nullptr) {}
                 return from;
             }
 

@@ -43,11 +43,7 @@ class Interval_event_loop : public Event_loop {
 
    protected:
     /// Tells the event engine to not processes the event queue.
-    auto loop_function() -> bool override
-    {
-        this->wait_on_interval();
-        return false;
-    }
+    void loop_function() override { this->wait_on_interval(); }
 
    private:
     using Clock_t = std::chrono::high_resolution_clock;

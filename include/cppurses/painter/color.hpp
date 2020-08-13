@@ -63,6 +63,9 @@ struct ANSI {
     Value_t value;
 };
 
+inline auto operator==(ANSI a, ANSI b) -> bool { return a.value == b.value; }
+inline auto operator!=(ANSI a, ANSI b) -> bool { return a.value != b.value; }
+
 /* ------------------------------- True Color --------------------------------*/
 
 /// Holds Red, Green, and Blue values, valid range of [0-255].
@@ -193,13 +196,14 @@ class Rainbow {
    public:
     auto operator()() -> True_color
     {
-        return {HSL{this->postincrement_hue(), saturation_, lightness_}};
+        return True_color{
+            HSL{this->postincrement_hue(), saturation_, lightness_}};
     }
 
    private:
     std::uint16_t hue_ = 0;
-    std::uint8_t saturation_;
-    std::uint8_t lightness_;
+    std::uint8_t const saturation_;
+    std::uint8_t const lightness_;
 
    private:
     // Increments hue_, then returns the previous value, wraps at 360.
@@ -215,8 +219,8 @@ class Rainbow {
 /// Returns a Rainbow Dynamic_color object. Convinience for defining palettes.
 inline auto rainbow(
     Dynamic_color::Period_t period = std::chrono::milliseconds{40},
-    std::uint8_t saturation        = 50,
-    std::uint8_t lightness         = 50) -> Dynamic_color
+    std::uint8_t saturation        = 75,
+    std::uint8_t lightness         = 75) -> Dynamic_color
 {
     return {period, Rainbow{saturation, lightness}};
 }

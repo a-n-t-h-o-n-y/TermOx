@@ -95,6 +95,7 @@ target_sources(cppurses PRIVATE
     terminal/terminal.cpp
     terminal/output.cpp
     terminal/input.cpp
+    terminal/dynamic_color_engine.cpp
 )
 
 # INSTALLATION

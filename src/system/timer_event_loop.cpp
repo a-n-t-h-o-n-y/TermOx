@@ -15,7 +15,7 @@ void Timer_event_loop::register_widget(Widget& w)
     w.destroyed.connect([this, &w] { this->unregister_widget(w); });
 }
 
-auto Timer_event_loop::loop_function() -> bool
+void Timer_event_loop::loop_function()
 {
     {
         auto const guard = Guard_t{mtx_registered_widgets_};
@@ -23,7 +23,6 @@ auto Timer_event_loop::loop_function() -> bool
             System::post_event<Timer_event>(*widg);
     }
     Interval_event_loop::loop_function();
-    return !this->empty();
 }
 
 }  // namespace cppurses::detail

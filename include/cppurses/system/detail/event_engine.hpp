@@ -1,6 +1,5 @@
 #ifndef CPPURSES_SYSTEM_DETAIL_EVENT_ENGINE_HPP
 #define CPPURSES_SYSTEM_DETAIL_EVENT_ENGINE_HPP
-#include <atomic>
 #include <memory>
 
 #include <cppurses/painter/detail/screen.hpp>
@@ -9,18 +8,16 @@
 #include <cppurses/system/event.hpp>
 #include <cppurses/system/system.hpp>
 
-namespace cppurses {
-namespace detail {
+namespace cppurses::detail {
 
 /// Orchestrates all event processing and queueing.
 class Event_engine {
    public:
-    /// Event_loop uses this to let main thread know it should process events.
-    void notify() { notified_ = true; }
-
     /// Invokes events and flush the screen.
     void process()
     {
+        if (queue_.empty())
+            return;
         invoke_events(queue_);
         flush_screen();
     }
@@ -31,7 +28,7 @@ class Event_engine {
     /// Get the global Event_engine instantiation.
     static auto get() -> Event_engine&
     {
-        static Event_engine engine;
+        static auto engine = Event_engine{};
         return engine;
     }
 
@@ -51,9 +48,8 @@ class Event_engine {
     template <Event::Type filter>
     static void send_all(Event_queue& queue)
     {
-        for (std::unique_ptr<Event> event : Event_queue::View<filter>{queue}) {
+        for (std::unique_ptr<Event> event : Event_queue::View<filter>{queue})
             System::send_event(*event);
-        }
     }
 
     /// Send all delete events to their Widgets.
@@ -79,9 +75,7 @@ class Event_engine {
 
    private:
     Event_queue queue_;
-    std::atomic<bool> notified_{false};  // Whether should process events/flush
 };
 
-}  // namespace detail
-}  // namespace cppurses
+}  // namespace cppurses::detail
 #endif  // CPPURSES_SYSTEM_DETAIL_EVENT_ENGINE_HPP
