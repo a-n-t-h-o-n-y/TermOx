@@ -95,13 +95,13 @@ class Dynamic_color_engine {
     /// Add a dynamic color at \p interval.
     void register_color(ANSI ansi, Dynamic_color const& dynamic)
     {
-        if (!this->has_loop_with(dynamic.period)) {
+        if (!this->has_loop_with(dynamic.interval)) {
             loops_.emplace_back(
                 std::make_unique<detail::Dynamic_color_event_loop>(
-                    dynamic.period));
+                    dynamic.interval));
             loops_.back()->run_async();
         }
-        this->get_loop_with(dynamic.period).register_color(ansi, dynamic);
+        this->get_loop_with(dynamic.interval).register_color(ansi, dynamic);
     }
 
     /// Removes a dynamic color from the system.

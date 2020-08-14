@@ -1,6 +1,7 @@
 #ifndef CPPURSES_PAINTER_PALETTE_DAWN_BRINGER16_HPP
 #define CPPURSES_PAINTER_PALETTE_DAWN_BRINGER16_HPP
 #include <cppurses/painter/color.hpp>
+#include <cppurses/painter/dynamic_colors.hpp>
 
 namespace cppurses::dawn_bringer16 {
 

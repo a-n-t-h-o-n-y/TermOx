@@ -5,6 +5,7 @@
 #include <clocale>
 #include <csignal>
 #include <cstddef>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <iterator>
@@ -166,6 +167,30 @@ void Terminal::set_color_definition(Color c, ANSI a, Dynamic_color value)
 {
     this->initialize_pairs(c, a);
     dynamic_color_engine_.register_color(a, value);
+}
+
+auto Terminal::get_ansi(Color c) -> short
+{
+    auto const iter =
+        std::find_if(std::begin(palette_), std::end(palette_),
+                     [c](auto const& def) { return def.color == c; });
+    if (iter != std::end(palette_))
+        return iter->ansi.value;
+    throw std::runtime_error("get_ansi: Color not found in palette.");
+}
+
+auto Terminal::color_content(ANSI ansi) -> RGB
+{
+    short r, g, b;
+    ::color_content(ansi.value, &r, &g, &b);
+    auto const scale_to_256 = [](short x) -> std::uint8_t {
+        return x / 1000. * 256;
+    };
+    return {
+        scale_to_256(r),
+        scale_to_256(b),
+        scale_to_256(b),
+    };
 }
 
 void Terminal::show_cursor(bool show)

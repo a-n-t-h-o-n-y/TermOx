@@ -56,6 +56,11 @@ class Terminal {
     /// Set a single Dynamic_color value.
     void set_color_definition(Color c, ANSI a, Dynamic_color value);
 
+    auto get_ansi(Color c) -> short;
+
+    /// Retrieve the RGB values of a given ANSI color.
+    auto color_content(ANSI c) -> RGB;
+
     /// Lock a Color and ANSI value together, with all possible combinations.
     /** Relies on the palette_ objects being accurate. */
     void initialize_pairs(Color c, ANSI a);
