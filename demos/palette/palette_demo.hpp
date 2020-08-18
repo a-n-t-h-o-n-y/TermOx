@@ -7,6 +7,14 @@
 
 namespace palette {
 
+/// TODO set aside black and white for utility colors that are not part of the
+//palette, create a new palette, append new colors, define those colors with
+// tools that let you set rgb or hsl or hex values, or a box for dynamic colors,
+// rainbow, or fades with parameters editable. give names to each color,
+// otherwise numbers are used, default the name to the number for the display.
+// save palette by creating a text file .hpp for the palette(with palette name
+// as file name) just don't save the black and white utility colors.
+
 /// Provides a user interface to the color palette system.
 class Palette_demo : public cppurses::layout::Horizontal<> {
    public:

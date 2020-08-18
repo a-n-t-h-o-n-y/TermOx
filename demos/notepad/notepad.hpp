@@ -174,21 +174,22 @@ class Save_area : public cppurses::layout::Horizontal<> {
     cppurses::Button& save_btn   = this->make_child<cppurses::Button>("Save");
 };
 
-class File_status_bar : public cppurses::Scan_banner {
+class File_status_bar
+    : public cppurses::Banner<cppurses::animator::Unscramble> {
    public:
-    File_status_bar() : Scan_banner{std::chrono::milliseconds{30}} {}
+    File_status_bar() : Banner{std::chrono::milliseconds{50}} {}
 
    public:
     void fail(cppurses::Glyph_string message)
     {
         using namespace cppurses;
-        this->set_message(std::move(message | foreground(Color::Red)));
+        this->set_text(std::move(message | foreground(Color::Red)));
     }
 
     void success(cppurses::Glyph_string message)
     {
         using namespace cppurses;
-        this->set_message(std::move(message | foreground(Color::Light_green)));
+        this->set_text(std::move(message | foreground(Color::Light_green)));
     }
 };
 

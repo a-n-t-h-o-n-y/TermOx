@@ -39,6 +39,9 @@ class Label : public Text_display {
     bool dynamic_ = false;
 };
 
+// TODO Label<(Left, Right, Top, Bottom), Widget> with if constexpr to set up
+// each case? Think about it. Might need to give a different though.
+
 /// Wraps a Widget_t object with a label on the left.
 template <typename Widget_t>
 class Label_left : public layout::Horizontal<> {

@@ -144,6 +144,21 @@ void Terminal::set_palette(Color_palette const& colors)
     palette_changed(palette_);
 }
 
+auto Terminal::palette_append(Color_definition::Value_t value) -> Color
+{
+    auto pal = this->current_palette();
+    if (pal.empty())
+        pal.push_back({Color{0}, ANSI{16}, value});
+    else {
+        pal.push_back(
+            {Color{static_cast<Color::Value_t>(pal.back().color.value + 1)},
+             ANSI{static_cast<ANSI::Value_t>(pal.back().ansi.value + 1)},
+             value});
+    }
+    this->set_palette(pal);
+    return pal.back().color;
+}
+
 void Terminal::initialize_pairs(Color c, ANSI a)
 {
     for (auto const& def : palette_) {

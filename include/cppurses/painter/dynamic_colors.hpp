@@ -9,7 +9,7 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/system/system.hpp>
 
-namespace cppurses {
+namespace cppurses::dynamic {
 
 /// Dynamic_color type that cycles through every hue value in HSL color wheel.
 class Rainbow {
@@ -256,5 +256,5 @@ inline auto fade(True_color a,
                        resolution, interval);
 }
 
-}  // namespace cppurses
+}  // namespace cppurses::dynamic
 #endif  // CPPURSES_PAINTER_DYNAMIC_COLORS_HPP

@@ -11,7 +11,7 @@
 
 namespace cppurses {
 
-/// Color numbers [0 - 15] TODO add up to 36? requires 1296 color pairs
+/// Color numbers [0 - 15]
 struct Color {
     using Value_t = std::uint8_t;
     Value_t value;
@@ -246,6 +246,17 @@ class Color_definition {
 /** 181 colors will need 32,761 pairs, max_pairs in ncurses is 32,767. */
 using Color_palette = std::vector<Color_definition>;
 
+/// Create a Color_palette by pairing Color_definition::Value_t with Colors.
+/** Colors are paired in order Color_definition::Value_t's are added,
+ *  starting with Color{0}. */
+template <typename... ColorValues>
+static auto make_palette(ColorValues... values) -> Color_palette
+{
+    auto c = Color::Value_t{0};
+    auto a = ANSI::Value_t{16};
+    return {Color_definition{Color{c++}, ANSI{a++}, values}...};
+}
+
 /* ---------------------------------------------------------------------------*/
 
 /// Get the default name of the color as a string.
@@ -253,21 +264,21 @@ inline auto color_to_string(Color c) -> std::string
 {
     switch (c.value) {
         case 0: return "Black";
-        case 1: return "Red";
+        case 1: return "Dark Red";
         case 2: return "Green";
-        case 3: return "Yellow";
-        case 4: return "Blue";
+        case 3: return "Brown";
+        case 4: return "Dark Blue";
         case 5: return "Violet";
         case 6: return "Light Blue";
-        case 7: return "White";
+        case 7: return "Light Gray";
         case 8: return "Dark Gray";
-        case 9: return "Dark Red";
+        case 9: return "Red";
         case 10: return "Light Green";
-        case 11: return "Brown";
-        case 12: return "Dark Blue";
+        case 11: return "Yellow";
+        case 12: return "Blue";
         case 13: return "Orange";
         case 14: return "Gray";
-        case 15: return "Light Gray";
+        case 15: return "White Gray";
         default: return "";
     }
 }

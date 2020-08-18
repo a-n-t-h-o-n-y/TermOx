@@ -47,6 +47,14 @@ class Terminal {
     /// Change Color definitions.
     void set_palette(Color_palette const& colors);
 
+    /// Append a Color_definition::Value_t to the current color palette.
+    /** Returns the Color that \p def was paired with. Picks the Color by
+     *  incrementing the last color in the current palette. */
+    auto palette_append(Color_definition::Value_t value) -> Color;
+
+    /// Return a copy of the currently set ANSI color palette.
+    auto current_palette() const -> Color_palette const& { return palette_; }
+
     /// Set a single ANSI Color value.
     void set_color_definition(Color c, ANSI a, std::monostate);
 
@@ -64,9 +72,6 @@ class Terminal {
     /// Lock a Color and ANSI value together, with all possible combinations.
     /** Relies on the palette_ objects being accurate. */
     void initialize_pairs(Color c, ANSI a);
-
-    /// Return a copy of the currently set ANSI color palette.
-    auto current_palette() const -> Color_palette const& { return palette_; }
 
     /// Set the RGB value of an ANSI color.
     void term_set_color(ANSI a, True_color value);
