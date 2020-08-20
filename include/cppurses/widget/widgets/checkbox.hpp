@@ -105,6 +105,13 @@ class Checkbox : public Widget {
     Glyph unchecked_;
 };
 
+/// Helper function to create an instance.
+template <typename... Args>
+auto checkbox(Args&&... args) -> std::unique_ptr<Checkbox>
+{
+    return std::make_unique<Checkbox>(std::forward<Args>(args)...);
+}
+
 class Labeled_checkbox : public Label_right<Checkbox> {
    public:
     Checkbox& checkbox = Label_right::wrapped;
@@ -121,6 +128,13 @@ class Labeled_checkbox : public Label_right<Checkbox> {
         Label_right::padding | on_mouse_press([&](auto) { checkbox.toggle(); });
     }
 };
+
+/// Helper function to create an instance.
+template <typename... Args>
+auto labeled_checkbox(Args&&... args) -> std::unique_ptr<Labeled_checkbox>
+{
+    return std::make_unique<Labeled_checkbox>(std::forward<Args>(args)...);
+}
 
 namespace slot {
 

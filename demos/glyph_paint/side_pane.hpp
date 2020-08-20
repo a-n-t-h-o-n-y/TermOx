@@ -10,7 +10,6 @@
 #include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/widgets/color_select.hpp>
 #include <cppurses/widget/widgets/cycle_stack.hpp>
-#include <cppurses/widget/widgets/fixed_height.hpp>
 #include <cppurses/widget/widgets/status_bar.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
 
@@ -41,7 +40,7 @@ class Side_pane : public cppurses::layout::Vertical<> {
     Populated_glyph_stack& glyph_select{
         this->make_child<Populated_glyph_stack>()};
 
-    cppurses::Fixed_height& space1{this->make_child<cppurses::Fixed_height>(1)};
+    Widget& space1 = this->make_child() | cppurses::pipe::fixed_height(1);
 
     Color_pages& color_pages{this->make_child<Color_pages>()};
 
@@ -50,7 +49,7 @@ class Side_pane : public cppurses::layout::Vertical<> {
     cppurses::Status_bar& show_glyph{
         this->make_child<cppurses::Status_bar>("x")};
 
-    cppurses::Fixed_height& space2{this->make_child<cppurses::Fixed_height>(1)};
+    Widget& space2 = this->make_child() | cppurses::pipe::fixed_height(1);
 
     Options_stack& options_box{this->make_child<Options_stack>()};
 };

@@ -104,6 +104,13 @@ class Number_edit : public Line_edit {
     }
 };
 
+/// Helper function to create an instance.
+template <typename Number_t = int, typename... Args>
+auto number_edit(Args&&... args) -> std::unique_ptr<Number_edit<Number_t>>
+{
+    return std::make_unique<Number_edit<Number_t>>(std::forward<Args>(args)...);
+}
+
 /// Number_edit with preceding Label arranged horizontally.
 template <typename Number_t = int>
 class Labeled_number_edit : public Label_left<Number_edit<Number_t>> {
@@ -133,6 +140,15 @@ class Labeled_number_edit : public Label_left<Number_edit<Number_t>> {
     /** Does not emit a value_set Signal. */
     void set_value(Number_t value) { number_edit.set_value(value); }
 };
+
+/// Helper function to create an instance.
+template <typename Number_t = int, typename... Args>
+auto labeled_number_edit(Args&&... args)
+    -> std::unique_ptr<Labeled_number_edit<Number_t>>
+{
+    return std::make_unique<Labeled_number_edit<Number_t>>(
+        std::forward<Args>(args)...);
+}
 
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_WIDGETS_NUMBER_EDIT_HPP

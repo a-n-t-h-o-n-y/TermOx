@@ -25,6 +25,13 @@ class Status_bar : public Label {
     }
 };
 
+/// Helper function to create an instance.
+template <typename... Args>
+auto status_bar(Args&&... args) -> std::unique_ptr<Status_bar>
+{
+    return std::make_unique<Status_bar>(std::forward<Args>(args)...);
+}
+
 namespace slot {
 
 inline auto update_status(Status_bar& sb) -> sig::Slot<void(Glyph)>

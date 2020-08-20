@@ -180,5 +180,12 @@ class Vertical_slider : public Widget {
     auto indicator_index() const -> std::size_t;
 };
 
+/// Helper function to create an instance.
+template <typename... Args>
+auto vertical_slider(Args&&... args) -> std::unique_ptr<Vertical_slider>
+{
+    return std::make_unique<Vertical_slider>(std::forward<Args>(args)...);
+}
+
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_WIDGETS_VERTICAL_SLIDER_HPP

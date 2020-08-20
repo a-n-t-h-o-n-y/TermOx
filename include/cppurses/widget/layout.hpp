@@ -22,7 +22,6 @@ class Layout : public Widget {
     using Child_t = Child;
 
    public:
-    /// Adds each given Widget as a child to this Layout.
     template <typename... Widgets>
     Layout(std::unique_ptr<Widgets>... children)
     {
@@ -40,6 +39,13 @@ class Layout : public Widget {
     auto get_children() const
     {
         return Children::View<Child_t, Widget::Children const>{children_};
+    }
+
+    /// Find a child widget by name, returns nullptr if not found.
+    auto find(std::string const& name) -> Child_t*
+    {
+        return this->get_children().find(
+            [&](auto const& w) { return w.name() == name; });
     }
 
     /// Create a Widget and append it to the list of children.

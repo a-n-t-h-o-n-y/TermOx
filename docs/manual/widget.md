@@ -42,8 +42,6 @@ inheriting from them and expanding their functionality.
 - [Checkbox](widgets/checkbox.md)
 - [Color_select](widgets/color-select.md)
 - [Cycle_box](widgets/cycle-box.md)
-- [Fixed_height](widgets/fixed-height.md)
-- [Fixed_width](widgets/fixed-width.md)
 - [Graph](widgets/graph.md)
 - [Matrix_display](widgets/matrix-display.md)
 - [Menu](widgets/menu.md)

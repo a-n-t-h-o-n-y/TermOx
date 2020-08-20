@@ -155,6 +155,13 @@ class Cycle_box : public Label {
     }
 };
 
+/// Helper function to create an instance.
+template <typename... Args>
+auto cycle_box(Args&&... args) -> std::unique_ptr<Cycle_box>
+{
+    return std::make_unique<Cycle_box>(std::forward<Args>(args)...);
+}
+
 /// A label on the left and a Cycle_box on the right.
 class Labeled_cycle_box : public layout::Horizontal<> {
    public:
@@ -182,6 +189,13 @@ class Labeled_cycle_box : public layout::Horizontal<> {
         label | pipe::fixed_width(label.contents().size() + 1);
     }
 };
+
+/// Helper function to create an instance.
+template <typename... Args>
+auto labeled_cycle_box(Args&&... args) -> std::unique_ptr<Labeled_cycle_box>
+{
+    return std::make_unique<Labeled_cycle_box>(std::forward<Args>(args)...);
+}
 
 namespace slot {
 

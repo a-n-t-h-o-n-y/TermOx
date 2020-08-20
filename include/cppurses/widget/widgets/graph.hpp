@@ -198,5 +198,12 @@ class Graph : public cppurses::Widget {
     }
 };
 
+/// Helper function to create an instance.
+template <typename Number_t = double, typename... Args>
+auto graph(Args&&... args) -> std::unique_ptr<Graph<Number_t>>
+{
+    return std::make_unique<Graph<Number_t>>(std::forward<Args>(args)...);
+}
+
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_WIDGETS_GRAPH_HPP

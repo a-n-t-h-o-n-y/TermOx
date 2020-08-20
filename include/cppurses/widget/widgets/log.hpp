@@ -23,6 +23,13 @@ class Log : public Textbox {
     using Text_display::set_contents;
 };
 
+/// Helper function to create an instance.
+template <typename... Args>
+auto log(Args&&... args) -> std::unique_ptr<Log>
+{
+    return std::make_unique<Log>(std::forward<Args>(args)...);
+}
+
 namespace slot {
 
 auto post_message(Log& log) -> sig::Slot<void(Glyph_string)>;

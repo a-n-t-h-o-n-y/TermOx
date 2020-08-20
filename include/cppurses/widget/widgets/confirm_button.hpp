@@ -67,5 +67,12 @@ class Confirm_button : public layout::Stack<> {
     static auto constexpr confirm_page_ = 1uL;
 };
 
+/// Helper function to create an instance.
+template <typename... Args>
+auto confirm_button(Args&&... args) -> std::unique_ptr<Confirm_button>
+{
+    return std::make_unique<Confirm_button>(std::forward<Args>(args)...);
+}
+
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_WIDGETS_CONFIRM_BUTTON_HPP

@@ -107,5 +107,13 @@ class Line_edit : public Textbox {
     Glyph veil_            = L'*';
     Validator_t validator_ = [](char) { return true; };
 };
+
+/// Helper function to create an instance.
+template <typename... Args>
+auto line_edit(Args&&... args) -> std::unique_ptr<Line_edit>
+{
+    return std::make_unique<Line_edit>(std::forward<Args>(args)...);
+}
+
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_WIDGETS_LINE_EDIT_HPP

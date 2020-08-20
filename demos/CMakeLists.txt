@@ -39,16 +39,6 @@ target_sources(demos PRIVATE
     glyph_paint/glyph_select.cpp
 )
 
-# ANIMATION
-target_sources(demos PRIVATE
-    animation/animated_widget.cpp
-)
-
-# FOCUS
-target_sources(demos PRIVATE
-    focus/focus_base.cpp
-)
-
 # PALETTE
 target_sources(demos PRIVATE
     palette/value_control.cpp

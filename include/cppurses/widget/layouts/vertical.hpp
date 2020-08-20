@@ -1,6 +1,7 @@
 #ifndef CPPURSES_WIDGET_LAYOUTS_VERTICAL_HPP
 #define CPPURSES_WIDGET_LAYOUTS_VERTICAL_HPP
 #include <cstddef>
+#include <memory>
 
 #include "detail/linear_layout.hpp"
 
@@ -75,6 +76,12 @@ using Vertical_parameters =
 template <typename Child_t = Widget>
 using Vertical = detail::Linear_layout<Child_t, v_detail::Vertical_parameters>;
 
-}  // namespace cppurses::layout
+/// Helper function to create an instance.
+template <typename Widget_t = Widget, typename... Args>
+auto vertical(Args&&... args) -> std::unique_ptr<Vertical<Widget_t>>
+{
+    return std::make_unique<Vertical<Widget_t>>(std::forward<Args>(args)...);
+}
 
+}  // namespace cppurses::layout
 #endif  // CPPURSES_WIDGET_LAYOUTS_VERTICAL_HPP

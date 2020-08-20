@@ -12,8 +12,8 @@
 #include <cppurses/system/events/key.hpp>
 #include <cppurses/system/events/mouse.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
+#include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/widget.hpp>
-#include <cppurses/widget/widgets/fixed_height.hpp>
 #include <cppurses/widget/widgets/label.hpp>
 
 namespace cppurses {
@@ -33,7 +33,7 @@ class Menu : public layout::Vertical<> {
     Label& title;
 
     /// Line Break Widget under Title
-    Fixed_height& line_break = this->make_child<Fixed_height>(1);
+    Widget& line_break = this->make_child() | pipe::fixed_height(1);
 
    public:
     /// Construct an empty Menu with \p title_text.
@@ -144,6 +144,13 @@ class Menu : public layout::Vertical<> {
             items_[selected_index_].selected();
     }
 };
+
+/// Helper function to create an instance.
+template <typename... Args>
+auto menu(Args&&... args) -> std::unique_ptr<Menu>
+{
+    return std::make_unique<Menu>(std::forward<Args>(args)...);
+}
 
 namespace slot {
 

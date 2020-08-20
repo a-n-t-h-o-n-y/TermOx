@@ -75,5 +75,12 @@ class Textbox : public detail::Textbox_base {
     std::size_t scroll_speed_down_ = 1;
 };
 
+/// Helper function to create an instance.
+template <typename... Args>
+auto textbox(Args&&... args) -> std::unique_ptr<Textbox>
+{
+    return std::make_unique<Textbox>(std::forward<Args>(args)...);
+}
+
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_WIDGETS_TEXTBOX_HPP

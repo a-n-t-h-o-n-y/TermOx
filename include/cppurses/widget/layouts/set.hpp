@@ -67,5 +67,19 @@ class Set : public Layout_t {
     using Layout_t::append;
 };
 
+/// Helper function to create an instance.
+template <typename Layout_t,
+          typename Projection = Identity,
+          typename Comparison = std::less<
+              std::invoke_result_t<Projection,
+                                   std::add_const_t<std::add_lvalue_reference_t<
+                                       typename Layout_t::Child_t>>>>,
+          typename... Args>
+auto set(Args&&... args) -> std::unique_ptr<Set<Projection, Comparison>>
+{
+    return std::make_unique<Set<Projection, Comparison>>(
+        std::forward<Args>(args)...);
+}
+
 }  // namespace cppurses::layout
 #endif  // CPPURSES_WIDGET_LAYOUTS_SET_HPP

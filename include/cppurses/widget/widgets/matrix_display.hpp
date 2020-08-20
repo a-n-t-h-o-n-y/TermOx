@@ -39,5 +39,12 @@ class Matrix_display : public Widget {
     }
 };
 
+/// Helper function to create an instance.
+template <typename... Args>
+auto matrix_display(Args&&... args) -> std::unique_ptr<Matrix_display>
+{
+    return std::make_unique<Matrix_display>(std::forward<Args>(args)...);
+}
+
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_WIDGETS_MATRIX_DISPLAY_HPP

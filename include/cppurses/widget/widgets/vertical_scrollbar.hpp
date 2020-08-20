@@ -52,5 +52,12 @@ class Vertical_scrollbar : public layout::Vertical<> {
     }
 };
 
+/// Helper function to create an instance.
+template <typename... Args>
+auto vertical_scrollbar(Args&&... args) -> std::unique_ptr<Vertical_scrollbar>
+{
+    return std::make_unique<Vertical_scrollbar>(std::forward<Args>(args)...);
+}
+
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_WIDGETS_VERTICAL_SCROLLBAR_HPP

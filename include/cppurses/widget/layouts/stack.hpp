@@ -70,11 +70,23 @@ class Stack : public Layout<Child_t> {
 
     /// Add an existing Widget as a page to the end of the Stack.
     /** Returns a reference to the appended Widget as Child_t&. */
-    auto append_page(std::unique_ptr<Child_t> child) -> Child_t&
+    template <typename Widget_t>
+    auto append_page(std::unique_ptr<Widget_t> w_ptr) -> Widget_t&
     {
-        auto& result = this->Layout<Child_t>::append(std::move(child));
+        static_assert(std::is_base_of<Child_t, Widget_t>::value,
+                      "Stack::append_page: Widget_t must be a Child_t type");
+        auto& result = this->Layout<Child_t>::append(std::move(w_ptr));
         result.disable();
         return result;
+    }
+
+    /// Add an existing Widget as a page to the end of the Stack.
+    /** Returns a reference to the appended Widget as Child_t&. */
+    template <typename Widget_t>
+    auto append_page(Widget_t&& w) -> Child_t&
+    {
+        return this->append_page(
+            std::make_unique<Widget_t>(std::forward<Widget_t>(w)));
     }
 
     /// Insert an existing Widget \p child at \p index.
@@ -206,6 +218,13 @@ class Stack : public Layout<Child_t> {
             System::post_event<Resize_event>(*active_page_, this->outer_area());
     }
 };
+
+/// Helper function to create an instance.
+template <typename Widget_t = Widget, typename... Args>
+auto stack(Args&&... args) -> std::unique_ptr<Stack<Widget_t>>
+{
+    return std::make_unique<Stack<Widget_t>>(std::forward<Args>(args)...);
+}
 
 }  // namespace layout
 

@@ -123,6 +123,13 @@ class Banner : public Widget {
     }
 };
 
+/// Helper function to create an instance.
+template <typename Animator, typename... Args>
+auto banner(Args&&... args) -> std::unique_ptr<Banner<Animator>>
+{
+    return std::make_unique<Banner<Animator>>(std::forward<Args>(args)...);
+}
+
 namespace animator {
 
 class Animator_base {

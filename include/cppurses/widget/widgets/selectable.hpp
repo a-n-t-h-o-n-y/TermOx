@@ -12,7 +12,9 @@ template <typename Widget_t,
 class Selectable : public Widget_t {
    public:
     /// Provide two methods to modify Widget_t. Signature: void(Widget_t&);
-    Selectable(Select_method s, Unselect_method u) : select_{s}, unselect_{u} {}
+    Selectable(Select_method s, Unselect_method u)
+        : select_{std::move(s)}, unselect_{std::move(u)}
+    {}
 
     /// Change visual to mark as selected.
     void select() { select_(*this); }
@@ -24,6 +26,16 @@ class Selectable : public Widget_t {
     Select_method select_;
     Unselect_method unselect_;
 };
+
+/// Helper function to create an instance.
+template <typename Widget_t, typename Select_method, typename Unselect_method>
+auto selectable(Select_method s, Unselect_method u)
+    -> std::unique_ptr<Selectable<Widget_t, Select_method, Unselect_method>>
+{
+    return std::make_unique<
+        Selectable<Widget_t, Select_method, Unselect_method>>(std::move(s),
+                                                              std::move(u));
+}
 
 /// Default overload that set's Widget_t's brush to Trait::Standout.
 template <typename Widget_t>
@@ -43,6 +55,13 @@ class Selectable<Widget_t, void, void> : public Widget_t {
         *this | pipe::descendants() | pipe::discard(Trait::Standout);
     }
 };
+
+/// Helper function to create an instance.
+template <typename Widget_t>
+auto selectable() -> std::unique_ptr<Selectable<Widget_t>>
+{
+    return std::make_unique<Selectable<Widget_t>>();
+}
 
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_WIDGETS_SELECTABLE_HPP

@@ -236,5 +236,12 @@ class Text_display : public Widget {
     std::vector<Line_info> display_state_ = {Line_info{0, 0}};
 };
 
+/// Helper function to create an instance.
+template <typename... Args>
+auto text_display(Args&&... args) -> std::unique_ptr<Text_display>
+{
+    return std::make_unique<Text_display>(std::forward<Args>(args)...);
+}
+
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_WIDGETS_TEXT_DISPLAY_HPP

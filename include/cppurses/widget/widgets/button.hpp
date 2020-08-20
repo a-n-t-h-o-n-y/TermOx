@@ -55,5 +55,12 @@ class Button : public Widget {
     Glyph_string label_;
 };
 
+/// Helper function to create an instance.
+template <typename... Args>
+auto button(Args&&... args) -> std::unique_ptr<Button>
+{
+    return std::make_unique<Button>(std::forward<Args>(args)...);
+}
+
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_WIDGETS_BUTTON_HPP

@@ -1,5 +1,5 @@
-#ifndef CPPURSES_WIDGET_WIDGETS_HIDABLE_HPP
-#define CPPURSES_WIDGET_WIDGETS_HIDABLE_HPP
+#ifndef CPPURSES_WIDGET_WIDGETS_HIDEABLE_HPP
+#define CPPURSES_WIDGET_WIDGETS_HIDEABLE_HPP
 #include <utility>
 
 #include <cppurses/widget/layouts/stack.hpp>
@@ -7,9 +7,9 @@
 
 namespace cppurses {
 
-/// Policy to make any Widget or Layout hidable with a hide() and show() method.
+/// Policy to make any Widget or Layout hideable with a hide() and show() method
 template <typename Widget_t>
-class Hidable : public layout::Stack<> {
+class Hideable : public layout::Stack<> {
    private:
     Widget& blank_ = this->Stack::make_page();
 
@@ -20,7 +20,7 @@ class Hidable : public layout::Stack<> {
     /// Forward constructor arguments for the Widget_t that is being wrapped.
     /** Wrapped Widget is in visible state when constructed. Access via w. */
     template <typename... Args>
-    explicit Hidable(Args&&... args)
+    explicit Hideable(Args&&... args)
         : w{this->Stack::make_page<Widget_t>(std::forward<Args>(args)...)}
     {
         this->Stack::set_active_page(widget_index_);
@@ -45,5 +45,12 @@ class Hidable : public layout::Stack<> {
     static constexpr auto widget_index_ = 1uL;
 };
 
+/// Helper function to create an instance.
+template <typename Widget_t, typename... Args>
+auto hideable(Args&&... args) -> std::unique_ptr<Hideable<Widget_t>>
+{
+    return std::make_unique<Hideable<Widget_t>>(std::forward<Args>(args)...);
+}
+
 }  // namespace cppurses
-#endif  // CPPURSES_WIDGET_WIDGETS_HIDABLE_HPP
+#endif  // CPPURSES_WIDGET_WIDGETS_HIDEABLE_HPP

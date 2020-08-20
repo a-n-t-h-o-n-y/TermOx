@@ -26,14 +26,20 @@ class Tile : public Widget {
    protected:
     auto paint_event() -> bool override
     {
-        auto p = Painter{*this};
-        p.put(display_, 0, 0);
+        Painter{*this}.put(display_, 0, 0);
         return Widget::paint_event();
     }
 
    private:
     Glyph display_;
 };
+
+/// Helper function to create an instance.
+template <typename... Args>
+auto tile(Args&&... args) -> std::unique_ptr<Tile>
+{
+    return std::make_unique<Tile>(std::forward<Args>(args)...);
+}
 
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_WIDGETS_TILE_HPP

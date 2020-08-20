@@ -42,5 +42,12 @@ class Titlebar : public layout::Horizontal<> {
     }
 };
 
+/// Helper function to create an instance.
+template <typename... Args>
+auto titlebar(Args&&... args) -> std::unique_ptr<Titlebar>
+{
+    return std::make_unique<Titlebar>(std::forward<Args>(args)...);
+}
+
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_WIDGETS_TITLEBAR_HPP

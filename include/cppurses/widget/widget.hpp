@@ -956,11 +956,11 @@ class Widget {
     void set_parent(Widget* parent) { parent_ = parent; }
 };
 
-/// Create a Widget wrapped in a std::unique_ptr for runtime building of widgets
-template <typename Widget_t, typename... Args>
-auto make(Args&&... args) -> std::unique_ptr<Widget_t>
+/// Helper function to create an instance.
+template <typename... Args>
+auto widget(Args&&... args) -> std::unique_ptr<Widget>
 {
-    return std::make_unique<Widget_t>(std::forward<Args>(args)...);
+    return std::make_unique<Widget>(std::forward<Args>(args)...);
 }
 
 }  // namespace cppurses

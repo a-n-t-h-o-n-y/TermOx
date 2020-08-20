@@ -170,6 +170,7 @@ my_widget | children() | for_each([](auto& w){ log(w.name()); });
 
 #### Border Glyph and Trait Setters
 
+- `walls(Trait...)`
 - `north_wall(Glyph)`
 - `north_wall(Trait...)`
 - `south_wall(Glyph)`

@@ -301,5 +301,16 @@ class Selecting : public Layout_t {
     }
 };
 
+/// Helper function to create an instance.
+template <typename Layout_t,
+          bool unselect_on_focus_out = true,
+          typename... Args>
+auto selecting(Args&&... args)
+    -> std::unique_ptr<Selecting<Layout_t, unselect_on_focus_out>>
+{
+    return std::make_unique<Selecting<Layout_t, unselect_on_focus_out>>(
+        std::forward<Args>(args)...);
+}
+
 }  // namespace cppurses::layout
 #endif  // CPPURSES_WIDGET_LAYOUTS_SELECTING_HPP

@@ -47,10 +47,21 @@ class Menu_stack : public layout::Stack<Widget> {
     }
 
     /// Add an existing Widget as a page to the end of the Stack.
-    void append_page(Glyph_string title, std::unique_ptr<Widget> widget)
+    template <typename Widget_t>
+    void append_page(Glyph_string title, std::unique_ptr<Widget_t> w_ptr)
     {
-        this->Stack::append_page(std::move(widget));
+        static_assert(
+            std::is_base_of<Child_t, Widget_t>::value,
+            "Menu_stack::append_page: Widget_t must be a Child_t type");
+        this->Stack::append_page(std::move(w_ptr));
         this->connect_to_menu(std::move(title), this->Stack::size() - 1);
+    }
+
+    template <typename Widget_t>
+    void append_page(Glyph_string title, Widget_t&& w)
+    {
+        this->append_page(std::move(title), std::make_unique<Widget_t>(
+                                                std::forward<Widget_t>(w)));
     }
 
     /// Insert a Widget at \p index.
@@ -137,6 +148,13 @@ class Menu_stack : public layout::Stack<Widget> {
         signal.connect(slot::set_active_page(*this, index));
     }
 };
+
+/// Helper function to create an instance.
+template <typename... Args>
+auto menu_stack(Args&&... args) -> std::unique_ptr<Menu_stack>
+{
+    return std::make_unique<Menu_stack>(std::forward<Args>(args)...);
+}
 
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_WIDGETS_MENU_STACK_HPP

@@ -56,6 +56,13 @@ class Horizontal_slider : public Widget {
     auto percent_to_position(float percent) -> std::size_t;
 };
 
+/// Helper function to create an instance.
+template <typename... Args>
+auto horizontal_slider(Args&&... args) -> std::unique_ptr<Horizontal_slider>
+{
+    return std::make_unique<Horizontal_slider>(std::forward<Args>(args)...);
+}
+
 namespace slot {
 
 auto set_percent(Horizontal_slider& s) -> sig::Slot<void(float)>;

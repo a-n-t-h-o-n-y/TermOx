@@ -38,5 +38,12 @@ class Toggle_button : public layout::Stack<Button> {
     static auto constexpr bottom_index_ = 1;
 };
 
+/// Helper function to create an instance.
+template <typename... Args>
+auto toggle_button(Args&&... args) -> std::unique_ptr<Toggle_button>
+{
+    return std::make_unique<Toggle_button>(std::forward<Args>(args)...);
+}
+
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_WIDGETS_TOGGLE_BUTTON_HPP

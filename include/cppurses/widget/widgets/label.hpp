@@ -7,8 +7,6 @@
 #include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/pair.hpp>
 #include <cppurses/widget/pipe.hpp>
-#include <cppurses/widget/widgets/fixed_height.hpp>
-#include <cppurses/widget/widgets/fixed_width.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
 
 namespace cppurses {
@@ -39,15 +37,19 @@ class Label : public Text_display {
     bool dynamic_ = false;
 };
 
-// TODO Label<(Left, Right, Top, Bottom), Widget> with if constexpr to set up
-// each case? Think about it. Might need to give a different though.
+/// Helper function to create an instance.
+template <typename... Args>
+auto label(Args&&... args) -> std::unique_ptr<Label>
+{
+    return std::make_unique<Label>(std::forward<Args>(args)...);
+}
 
 /// Wraps a Widget_t object with a label on the left.
 template <typename Widget_t>
 class Label_left : public layout::Horizontal<> {
    public:
     Label& label;
-    Fixed_width& padding = this->make_child<Fixed_width>(1);
+    Widget& padding = this->make_child() | pipe::fixed_width(1);
     Widget_t& wrapped;
 
    public:
@@ -69,12 +71,19 @@ class Label_left : public layout::Horizontal<> {
     }
 };
 
+/// Helper function to create an instance.
+template <typename Widget_t, typename... Args>
+auto label_left(Args&&... args) -> std::unique_ptr<Label_left<Widget_t>>
+{
+    return std::make_unique<Label_left<Widget_t>>(std::forward<Args>(args)...);
+}
+
 /// Wraps a Widget_t object with a label on the right.
 template <typename Widget_t>
 class Label_right : public layout::Horizontal<> {
    public:
     Widget_t& wrapped;
-    Fixed_width& padding = this->make_child<Fixed_width>(1);
+    Widget& padding = this->make_child() | pipe::fixed_width(1);
     Label& label;
 
    public:
@@ -96,12 +105,19 @@ class Label_right : public layout::Horizontal<> {
     }
 };
 
+/// Helper function to create an instance.
+template <typename Widget_t, typename... Args>
+auto label_right(Args&&... args) -> std::unique_ptr<Label_right<Widget_t>>
+{
+    return std::make_unique<Label_right<Widget_t>>(std::forward<Args>(args)...);
+}
+
 /// Wraps a Widget_t object with a label on the top.
 template <typename Widget_t>
 class Label_top : public layout::Vertical<> {
    public:
     Label& label;
-    Fixed_height& padding = this->make_child<Fixed_height>(0);
+    Widget& padding = this->make_child() | pipe::fixed_height(0);
     Widget_t& wrapped;
 
    public:
@@ -121,12 +137,19 @@ class Label_top : public layout::Vertical<> {
     }
 };
 
+/// Helper function to create an instance.
+template <typename Widget_t, typename... Args>
+auto label_top(Args&&... args) -> std::unique_ptr<Label_top<Widget_t>>
+{
+    return std::make_unique<Label_top<Widget_t>>(std::forward<Args>(args)...);
+}
+
 /// Wraps a Widget_t object with a label on the bottom.
 template <typename Widget_t>
 class Label_bottom : public layout::Vertical<> {
    public:
     Widget_t& wrapped;
-    Fixed_height& padding = this->make_child<Fixed_height>(0);
+    Widget& padding = this->make_child() | pipe::fixed_height(0);
     Label& label;
 
    public:
@@ -145,6 +168,14 @@ class Label_bottom : public layout::Vertical<> {
         return true;
     }
 };
+
+/// Helper function to create an instance.
+template <typename Widget_t, typename... Args>
+auto label_bottom(Args&&... args) -> std::unique_ptr<Label_bottom<Widget_t>>
+{
+    return std::make_unique<Label_bottom<Widget_t>>(
+        std::forward<Args>(args)...);
+}
 
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_WIDGETS_LABEL_HPP

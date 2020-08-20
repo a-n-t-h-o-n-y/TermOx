@@ -22,10 +22,10 @@ namespace cppurses {
 
 /// A layout::Stack with an interface to cycle through each Widget in the stack.
 template <typename Child = Widget>
-class Cycle_stack : public layout::Vertical<Widget> {
+class Cycle_stack : public layout::Vertical<> {
    private:
     /// User interface to cycle through the pages of the Stack.
-    class Top_row : public layout::Horizontal<Widget> {
+    class Top_row : public layout::Horizontal<> {
        public:
         Button& left_btn     = this->make_child<Button>("<");
         Cycle_box& cycle_box = this->make_child<Cycle_box>();
@@ -75,6 +75,13 @@ class Cycle_stack : public layout::Vertical<Widget> {
         return child;
     }
 };
+
+/// Helper function to create an instance.
+template <typename Child = Widget, typename... Args>
+auto cycle_stack(Args&&... args) -> std::unique_ptr<Cycle_stack<Child>>
+{
+    return std::make_unique<Cycle_stack<Child>>(std::forward<Args>(args)...);
+}
 
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_WIDGETS_CYCLE_STACK_HPP

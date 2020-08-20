@@ -33,5 +33,13 @@ class Horizontal_scrollbar : public layout::Horizontal<> {
     }
 };
 
+/// Helper function to create an instance.
+template <typename... Args>
+auto horizontal_scrollbar(Args&&... args)
+    -> std::unique_ptr<Horizontal_scrollbar>
+{
+    return std::make_unique<Horizontal_scrollbar>(std::forward<Args>(args)...);
+}
+
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_WIDGETS_HORIZONTAL_SCROLLBAR

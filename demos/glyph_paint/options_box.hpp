@@ -6,10 +6,10 @@
 #include <cppurses/widget/widgets/checkbox.hpp>
 #include <cppurses/widget/widgets/confirm_button.hpp>
 #include <cppurses/widget/widgets/cycle_box.hpp>
-#include <cppurses/widget/widgets/fixed_height.hpp>
 #include <cppurses/widget/widgets/label.hpp>
 #include <cppurses/widget/widgets/open_file.hpp>
 #include <cppurses/widget/widgets/save_file.hpp>
+#include "cppurses/widget/pipe.hpp"
 
 namespace demos {
 namespace glyph_paint {
@@ -40,7 +40,7 @@ struct Options_B : public cppurses::layout::Vertical<> {
         this->make_child<cppurses::Label>("Color  Palette")};
     cppurses::Cycle_box& palette_box{this->make_child<cppurses::Cycle_box>()};
 
-    cppurses::Fixed_height& space1{this->make_child<cppurses::Fixed_height>(1)};
+    Widget& space1 = this->make_child() | cppurses::pipe::fixed_height(1);
 
     cppurses::Save_file<>& save_file{this->make_child<cppurses::Save_file<>>()};
     cppurses::Open_file<>& open_file{this->make_child<cppurses::Open_file<>>()};
