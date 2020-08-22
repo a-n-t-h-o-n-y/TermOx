@@ -5,6 +5,8 @@
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/painter/painter.hpp>
+#include <cppurses/painter/trait.hpp>
 #include <cppurses/widget/layouts/detail/linear_layout.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/layouts/opposite.hpp>
@@ -13,6 +15,7 @@
 #include <cppurses/widget/widgets/text_display.hpp>
 
 namespace cppurses {
+
 /// Layout_t is the Layout to use for the Bar, not Accordion.
 template <typename Layout_t>
 class Bar : public Layout_t {
@@ -52,39 +55,79 @@ class Bar : public Layout_t {
         Glyph_string x_ = L"[+]";
     };
 
-    class Buffer : public Widget {
+    class Centered_text : public Widget {
        public:
-        Buffer()
+        Centered_text(Glyph_string text) : text_{L' ' + std::move(text) + L' '}
         {
-            using namespace pipe;
             if constexpr (layout::is_vertical_v<Layout_t>)
-                *this | fixed_height(length_);
+                *this | pipe::wallpaper(L'│' | foreground(Color::Dark_gray));
             else
-                *this | fixed_width(length_);
+                *this | pipe::wallpaper(L'─' | foreground(Color::Dark_gray));
+        }
+
+       protected:
+        auto paint_event() -> bool override
+        {
+            auto p = Painter{*this};
+            if constexpr (layout::is_vertical_v<Layout_t>) {
+                for (auto i = 0uL; i < text_.size(); ++i)
+                    p.put(text_[i], {0uL, offset_ + i});
+            }
+            else
+                p.put(text_, {offset_, 0uL});
+            return Widget::paint_event();
+        }
+
+        auto resize_event(Area new_size, Area old_size) -> bool override
+        {
+            auto length = std::size_t{};
+            if constexpr (layout::is_vertical_v<Layout_t>)
+                length = this->height();
+            else
+                length = this->width();
+            offset_ = center_offset(text_.length(), length + extra_length_);
+            return Widget::resize_event(new_size, old_size);
         }
 
        private:
-        inline static constexpr auto length_ = 3uL;
+        Glyph_string const text_;
+        std::size_t offset_ = 0uL;
+
+        // Indicator Length / 2
+        inline static auto constexpr extra_length_ =
+            layout::is_vertical_v<Layout_t> ? 0uL : 1uL;
+
+       private:
+        static auto center_offset(std::size_t string_length,
+                                  std::size_t total_length)
+        {
+            if (string_length > total_length)
+                return 0uL;
+            else
+                return (total_length / 2) - (string_length / 2);
+        }
     };
 
-    // TODO make a text display type widget that centers the text, working with
-    // the Layout_t, if Horizontal, then it just finds the offset of center and
-    // places the text, if it is vertical then it loops through the glyph string
-    // and finds the center offset and places glyphs one at a time, incrementing
-    // the y coordinate.
     class Title_line : public layout::Opposite_t<Layout_t> {
+       public:
+        sig::Signal<void()> clicked;
+
        public:
         Title_line(Glyph_string title)
         {
+            title | Trait::Bold;
             using namespace cppurses::pipe;
             if constexpr (layout::is_vertical_v<layout::Opposite_t<Layout_t>>) {
-                this->template make_child<Text_display>(std::move(title)) |
+                this->template make_child<Centered_text>(std::move(title)) |
                     fixed_height(1uL);
             }
             else {
-                this->template make_child<Widget>();
-                this->template make_child<Text_display>(std::move(title));
-                this->template make_child<Widget>();
+                this->template make_child<Widget>() |
+                    on_mouse_press([this](auto const&) { this->clicked(); });
+                this->template make_child<Centered_text>(std::move(title)) |
+                    on_mouse_press([this](auto const&) { this->clicked(); });
+                this->template make_child<Widget>() |
+                    on_mouse_press([this](auto const&) { this->clicked(); });
                 *this | children() | fixed_width(1);
             }
         }
@@ -102,11 +145,12 @@ class Bar : public Layout_t {
             *this | fixed_width(3uL);
         else
             *this | fixed_height(1uL);
+
         this->collapse();
+
         indicator_.mouse_pressed.connect(
             [this](auto const&) { this->toggle_request(); });
-
-        // *this | descendants() | bg(Color::Gray);
+        text_.clicked.connect([this] { this->toggle_request(); });
     }
 
    public:
@@ -116,7 +160,6 @@ class Bar : public Layout_t {
 
    private:
     Indicator& indicator_ = this->template make_child<Indicator>();
-    Buffer& buffer_       = this->template make_child<Buffer>();
     Title_line& text_;
 };
 
@@ -137,7 +180,7 @@ class Accordion : public Layout_t {
               this->template make_child<Widget_t>(std::forward<Args>(args)...)}
     {
         if constexpr (wrapped_index_ == 0uL)
-            this->Layout::swap(0uL, 1uL);
+            this->Layout_t::swap(0uL, 1uL);
 
         if constexpr (layout::is_vertical_v<Layout_t>)
             *this | pipe::passive_height();
@@ -194,14 +237,14 @@ class Accordion : public Layout_t {
     {
         if (w_storage_ == nullptr)
             return;
-        this->Layout::insert(std::move(w_storage_), wrapped_index_);
+        this->Layout_t::insert(std::move(w_storage_), wrapped_index_);
         w_storage_ = nullptr;
     }
 
     void extract_wrapped()
     {
         if (w_storage_ == nullptr)
-            w_storage_ = this->Layout::remove(wrapped_index_);
+            w_storage_ = this->Layout_t::remove(wrapped_index_);
     }
 };
 
