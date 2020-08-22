@@ -29,7 +29,7 @@ class Number_edit : public Line_edit {
     Number_edit(Number_t initial = 0)
         : Line_edit{std::to_string(initial)}, value_{initial}
     {
-        // this->set_alignment(Align::Right); // TODO Once alignment works
+        // this->set_alignment(Align::Right); // TODO Once alignment works w/ed
         this->set_validator(
             [](char c) { return Number_edit::is_valid_input(c); });
         this->edit_finished.connect([this](std::string text) {
@@ -68,10 +68,10 @@ class Number_edit : public Line_edit {
     static auto is_valid_input(char c) -> bool
     {
         auto is_separator = false;
-        if (std::is_floating_point<Number_t>::value)
+        if constexpr (std::is_floating_point<Number_t>::value)
             is_separator = (c == '.' || c == ',');
         auto is_sign = (c == '+');
-        if (not std::is_unsigned<Number_t>::value)
+        if constexpr (!std::is_unsigned<Number_t>::value)
             is_sign |= (c == '-');
         return std::isdigit(c) || is_separator || is_sign;
     }

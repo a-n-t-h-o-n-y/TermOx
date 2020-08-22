@@ -53,7 +53,7 @@ class Demo_menu : public cppurses::Menu_stack {
 
         this->make_page<Notepad>("Notepad");
         this->append_page("Focus", focus::build_demo());
-        this->make_page<animation::Animation_demo>("Animated Widget");
+        this->append_page("Animated Widget", animation::build_demo());
 
         this->make_page<graph::Graph_demo>("Graph");
         this->make_page<gol::GoL_demo>("Game of Life");

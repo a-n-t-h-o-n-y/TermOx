@@ -36,7 +36,7 @@ class Graph : public cppurses::Widget {
     template <typename Range_t>
     void add(Range_t const& values)
     {
-        this->add(std::begin(values), std::end(values));
+        this->add(std::cbegin(values), std::cend(values));
     }
 
     template <typename Iter_t>
@@ -46,12 +46,11 @@ class Graph : public cppurses::Widget {
             std::is_same_v<typename std::iterator_traits<Iter_t>::value_type,
                            Coordinates>,
             "Must add with a container of Coordinates.");
-        for (; first != last; ++first) {
+        for (; first != last; ++first)
             this->add(*first);
-        }
     }
 
-    void add(Coordinates c)
+    void add(Coordinates const& c)
     {
         coordinates_.push_back(c);
         this->initialize_bitmap(c);
@@ -86,7 +85,7 @@ class Graph : public cppurses::Widget {
     {
         // Only relies on map_, call regenerate_map() if you need a new size
         auto p = cppurses::Painter{*this};
-        for (auto [point, bitmap] : map_)
+        for (auto const& [point, bitmap] : map_)
             p.put(to_symbol(bitmap), point);
         return Widget::paint_event();
     }
@@ -124,6 +123,8 @@ class Graph : public cppurses::Widget {
     std::map<cppurses::Point, Bitmap> map_;
     std::vector<Coordinates> coordinates_;
     Boundary boundary_;
+    Number_t interval_w_ = 0;
+    Number_t interval_h_ = 0;
 
    private:
     static auto to_symbol(Bitmap b) -> cppurses::Glyph
@@ -137,32 +138,33 @@ class Graph : public cppurses::Widget {
         return larger - smaller;
     }
 
+    // Update horizontal and vertical intervals used for bitmap calcs.
+    /* Called by resize_event and boundary change. This _will_ be incorrect for
+     * border changes, but that should be rare, since border updates from resize
+     * events should be accounted for. */
+    void update_intervals()
+    {
+        auto const domain_w = distance(boundary_.west, boundary_.east);
+        interval_w_         = domain_w / this->width();
+        auto const domain_h = distance(boundary_.north, boundary_.south);
+        interval_h_         = domain_h / this->height();
+    }
+
     /// User provided Coordinates to visual cppurses::Point on Widget.
-    void initialize_bitmap(Coordinates c)
+    void initialize_bitmap(Coordinates const& c)
     {
         auto const visual_width  = this->width();
         auto const visual_height = this->height();
-        if (visual_width == 0 or visual_height == 0)
+        if (visual_width == 0 || visual_height == 0)
             return;
-        auto const horizontal_offset = [this, &c, visual_width] {
-            auto const domain_width = distance(boundary_.west, boundary_.east);
-            auto const interval     = domain_width / visual_width;
-            // TODO make interval (h/v) a class member updated on resize or
-            // boundary change.
-            if (interval == 0)
-                return Number_t{0};
-            return distance(boundary_.west, c.x) / interval;
-        }();
-        auto const vertical_offset = [this, &c, visual_height] {
-            auto const domain_height =
-                distance(boundary_.north, boundary_.south);
-            auto const interval = domain_height / visual_height;
-            if (interval == 0)
-                return Number_t{0};
-            auto const distance_from_bottom =
-                distance(boundary_.north, c.y) / interval;
-            return visual_height - distance_from_bottom;  // Invert
-        }();
+
+        auto const horizontal_offset =
+            interval_w_ == 0 ? 0 : distance(boundary_.west, c.x) / interval_w_;
+
+        auto const distance_from_bottom =
+            interval_h_ == 0 ? 0 : distance(boundary_.north, c.y) / interval_h_;
+        auto const vertical_offset = visual_height - distance_from_bottom;
+
         auto& bitmap = map_[{static_cast<std::size_t>(horizontal_offset),
                              static_cast<std::size_t>(vertical_offset)}];
 
@@ -192,6 +194,7 @@ class Graph : public cppurses::Widget {
 
     void regenerate_map()
     {
+        this->update_intervals();
         map_.clear();
         for (auto coord : coordinates_)
             this->initialize_bitmap(coord);

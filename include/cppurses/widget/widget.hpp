@@ -721,6 +721,14 @@ class Widget {
         /// Removes and sends delete event each child.
         void clear();
 
+        /// Swap two child widgets, no index range check.
+        void swap(std::size_t index_a, std::size_t index_b)
+        {
+            auto const begin = std::begin(child_list_);
+            std::iter_swap(std::next(begin, index_a),
+                           std::next(begin, index_b));
+        }
+
        public:  // Accessors
         /// Returns the begin iterator to the child widgets.
         /** Returns a reference to Widget_t when dereferenced. */

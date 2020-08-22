@@ -8,6 +8,7 @@ struct Range {
    public:
     Range(Iter_1 begin, Iter_2 end) : begin_{begin}, end_{end} {}
 
+   public:
     /// Return the iterator to the beginning of the Range.
     auto begin() const { return begin_; }
 

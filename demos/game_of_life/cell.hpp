@@ -5,7 +5,7 @@
 namespace gol {
 
 struct Cell {
-    using Age_t = std::uint64_t;
+    using Age_t = std::uint32_t;
     Age_t age{0};
 };
 

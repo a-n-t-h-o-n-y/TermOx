@@ -40,9 +40,8 @@ class Sine final : public Graph_generator {
     auto generate() -> std::vector<cppurses::Graph<>::Coordinates> override
     {
         auto result = std::vector<cppurses::Graph<>::Coordinates>{};
-        for (auto i = -3.14; i <= 3.14; i += 0.001) {
+        for (auto i = -3.14; i <= 3.14; i += 0.001)
             result.push_back({i, std::sin(i * t_)});
-        }
         return result;
     }
 

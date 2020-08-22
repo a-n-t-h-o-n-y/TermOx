@@ -13,6 +13,7 @@
 #include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/widget_slots.hpp>
+#include <cppurses/widget/widgets/accordion.hpp>
 #include <cppurses/widget/widgets/banner.hpp>
 #include <cppurses/widget/widgets/button.hpp>
 #include <cppurses/widget/widgets/checkbox.hpp>
@@ -102,10 +103,15 @@ class Side_pane : public cppurses::layout::Vertical<> {
     Side_pane() { *this | cppurses::pipe::fixed_width(16); }
 };
 
+using Side_pane_accordion = cppurses::Accordion<cppurses::layout::Horizontal<>,
+                                                Side_pane,
+                                                cppurses::Bar_position::Last>;
+
 class Text_and_side_pane : public cppurses::layout::Horizontal<> {
    public:
     cppurses::Textbox& textbox = this->make_child<cppurses::Textbox>();
-    Side_pane& side_pane       = this->make_child<Side_pane>();
+    Side_pane_accordion& side_pane =
+        this->make_child<Side_pane_accordion>("Settings");
 
    public:
     Text_and_side_pane()
@@ -115,14 +121,14 @@ class Text_and_side_pane : public cppurses::layout::Horizontal<> {
 
         textbox | bordered() | rounded_corners() | bg(Color::Dark_gray);
 
-        side_pane.fg_select.color_selected.connect(
+        side_pane.wrapped().fg_select.color_selected.connect(
             cppurses::slot::set_foreground(textbox));
-        side_pane.bg_select.color_selected.connect(
+        side_pane.wrapped().bg_select.color_selected.connect(
             cppurses::slot::set_background(textbox));
 
-        side_pane.trait_boxes.trait_enabled.connect(
+        side_pane.wrapped().trait_boxes.trait_enabled.connect(
             [this](Trait t) { textbox.insert_brush.add_traits(t); });
-        side_pane.trait_boxes.trait_disabled.connect(
+        side_pane.wrapped().trait_boxes.trait_disabled.connect(
             [this](Trait t) { textbox.insert_brush.remove_traits(t); });
     }
 };

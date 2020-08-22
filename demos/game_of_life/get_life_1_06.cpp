@@ -7,25 +7,24 @@
 
 namespace gol {
 
-std::vector<Coordinate> get_life_1_06(const std::string& filename) {
-    std::ifstream file{filename};
-    if (file.fail()) {
+std::vector<Coordinate> get_life_1_06(const std::string& filename)
+{
+    auto file = std::ifstream{filename};
+    if (file.fail())
         return {};
-    }
-    std::vector<Coordinate> cells;
-    std::string first_line;
+
+    auto cells      = std::vector<Coordinate>{};
+    auto first_line = std::string{};
     std::getline(file, first_line);
     while (file) {
-        int x{0};
+        auto x = 0;
         file >> x;
-        if (!file) {
+        if (!file)
             break;
-        }
-        int y{0};
+        auto y = 0;
         file >> y;
-        if (!file.good()) {
+        if (!file.good())
             break;
-        }
         cells.push_back({x, y});
     }
     return cells;

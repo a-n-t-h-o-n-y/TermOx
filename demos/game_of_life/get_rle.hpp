@@ -9,8 +9,8 @@
 namespace gol {
 
 /// Return cell Coordinates and rule string from RLE file.
-std::pair<std::vector<Coordinate>, std::string> get_RLE(
-    const std::string& filename);
+auto get_RLE(const std::string& filename)
+    -> std::pair<std::vector<Coordinate>, std::string>;
 
 }  // namespace gol
 #endif  // CPPURSES_DEMOS_GAME_OF_LIFE_GET_RLE_HPP

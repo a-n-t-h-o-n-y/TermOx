@@ -15,22 +15,28 @@
 #include <cppurses/widget/widgets/number_edit.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
 
+// TODO Rethink - Come up with a fresh plan, use the existing code to get
+// familiar with the idea, but don't try to clean up that code, starting fresh
+// will be quicker and lead to better ideas.
+
 namespace layout_demo {
 
-struct Meta_widget : cppurses::Widget {
+class Meta_widget : public cppurses::Widget {
+   public:
     Meta_widget() {}
 
+   public:
     void select()
     {
-        this->brush.set_background(cppurses::Color::White);
-        this->brush.set_foreground(cppurses::Color::Black);
+        using namespace cppurses;
+        *this | pipe::bg(Color::White) | pipe::fg(Color::Black);
         this->update();
     }
 
     void unselect()
     {
-        this->brush.set_background(cppurses::Color::Black);
-        this->brush.set_foreground(cppurses::Color::White);
+        using namespace cppurses;
+        *this | pipe::bg(Color::Black) | pipe::fg(Color::White);
         this->update();
     }
 
@@ -41,7 +47,8 @@ struct Meta_widget : cppurses::Widget {
         auto const h = std::to_string(this->height());
         auto const x = std::to_string(this->parent()->x());
         auto const y = std::to_string(this->parent()->y());
-        cppurses::Painter p{*this};
+
+        auto p = cppurses::Painter{*this};
         p.put("X " + x, 0, 0);
         p.put("Y " + y, 0, 1);
         p.put("W " + w, 0, 2);
@@ -50,9 +57,11 @@ struct Meta_widget : cppurses::Widget {
     }
 };
 
-struct Workspace : cppurses::layout::Horizontal<Meta_widget> {
+class Workspace : public cppurses::layout::Horizontal<Meta_widget> {
+   public:
     sig::Signal<void(Meta_widget*)> selected;
 
+   public:
     auto add_widget() -> Meta_widget*
     {
         auto& child = this->make_child();

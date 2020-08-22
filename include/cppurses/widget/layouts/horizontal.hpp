@@ -83,5 +83,14 @@ auto horizontal(Args&&... args) -> std::unique_ptr<Horizontal<Widget_t>>
     return std::make_unique<Horizontal<Widget_t>>(std::forward<Args>(args)...);
 }
 
+template <typename T>
+struct Is_horizontal : std::false_type {};
+
+template <typename Child_t>
+struct Is_horizontal<layout::Horizontal<Child_t>> : std::true_type {};
+
+template <typename Layout_t>
+constexpr bool is_horizontal_v = Is_horizontal<Layout_t>::value;
+
 }  // namespace cppurses::layout
 #endif  // CPPURSES_WIDGET_LAYOUTS_HORIZONTAL_HPP

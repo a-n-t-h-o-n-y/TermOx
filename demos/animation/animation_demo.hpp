@@ -65,10 +65,10 @@ class Animated_box : public cppurses::Widget {
    private:
     cppurses::FPS const fps_;
 
-    cppurses::Glyph glyph_{L'X' | foreground(cppurses::Color::Yellow)};
-    cppurses::Point xy_{0uL, 0uL};
-    int x_direction_ = 1;
-    int y_direction_ = 1;
+    cppurses::Glyph glyph_ = L'X' | foreground(cppurses::Color::Yellow);
+    cppurses::Point xy_    = cppurses::Point{0uL, 0uL};
+    int x_direction_       = 1;
+    int y_direction_       = 1;
 
    private:
     /// Increments by \p direction, if 0 or \p max, flips the direction.
@@ -96,21 +96,16 @@ class Animated_box : public cppurses::Widget {
 };
 
 /// Contains a few Animated_boxes at various animation rates.
-class Animation_demo : public cppurses::layout::Horizontal<Animated_box> {
-   public:
-    Animation_demo()
-    {
-        box_2_.border.enable();
-        box_4_.border.enable();
-    }
-
-   private:
-    Child_t& box_1_ = this->make_child(cppurses::FPS{5});
-    Child_t& box_2_ = this->make_child(cppurses::FPS{10});
-    Child_t& box_3_ = this->make_child(cppurses::FPS{20});
-    Child_t& box_4_ = this->make_child(cppurses::FPS{30});
-    Child_t& box_5_ = this->make_child(cppurses::FPS{60});
-};
+auto build_demo() -> std::unique_ptr<cppurses::Widget>
+{
+    using namespace cppurses;
+    return layout::horizontal<Animated_box>(
+        std::make_unique<Animated_box>(FPS{5}),
+        std::make_unique<Animated_box>(FPS{10}) | pipe::bordered(),
+        std::make_unique<Animated_box>(FPS{20}),
+        std::make_unique<Animated_box>(FPS{30}) | pipe::bordered(),
+        std::make_unique<Animated_box>(FPS{60}));
+}
 
 }  // namespace demos::animation
 #endif  // CPPURSES_DEMOS_ANIMATION_ANIMATED_WIDGET_HPP

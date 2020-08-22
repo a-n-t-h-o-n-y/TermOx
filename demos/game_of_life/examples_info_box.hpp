@@ -7,34 +7,41 @@
 
 namespace gol {
 
-struct Examples_box : cppurses::layout::Vertical<cppurses::Button> {
-    Examples_box();
+class Examples_box : public cppurses::layout::Vertical<cppurses::Button> {
+   public:
+    Child_t& example_1   = this->make_child("Example 1");
+    Child_t& example_2   = this->make_child("Example 2");
+    Child_t& example_3   = this->make_child("Example 3");
+    Child_t& example_4   = this->make_child("Example 4");
+    Child_t& example_5   = this->make_child("Example 5");
+    Child_t& example_6   = this->make_child("Example 6");
+    Child_t& example_7   = this->make_child("Example 7");
+    Child_t& to_info_btn = this->make_child("Rulesets");
 
-    cppurses::Button& example_1   = this->make_child("Example 1");
-    cppurses::Button& example_2   = this->make_child("Example 2");
-    cppurses::Button& example_3   = this->make_child("Example 3");
-    cppurses::Button& example_4   = this->make_child("Example 4");
-    cppurses::Button& example_5   = this->make_child("Example 5");
-    cppurses::Button& example_6   = this->make_child("Example 6");
-    cppurses::Button& example_7   = this->make_child("Example 7");
-    cppurses::Button& to_info_btn = this->make_child("Rulesets");
+   public:
+    Examples_box();
 };
 
-struct Info_box : cppurses::layout::Vertical<> {
-    Info_box();
+class Info_box : public cppurses::layout::Vertical<> {
+   public:
+    cppurses::Text_display& info =
+        this->make_child<cppurses::Text_display>("Rulesets go here");
 
-    cppurses::Text_display& info{
-        this->make_child<cppurses::Text_display>("Rulesets go here")};
-    cppurses::Button& to_examples_btn{
-        this->make_child<cppurses::Button>("Patterns")};
+    cppurses::Button& to_examples_btn =
+        this->make_child<cppurses::Button>("Patterns");
+
+   public:
+    Info_box();
 };
 
 /// Patterns_rulesets_box
-struct Examples_info_box : public cppurses::layout::Stack<> {
-    Examples_info_box();
+class Examples_info_box : public cppurses::layout::Stack<> {
+   public:
+    Examples_box& examples = this->make_page<Examples_box>();
+    Info_box& info         = this->make_page<Info_box>();
 
-    Examples_box& examples{this->make_page<Examples_box>()};
-    Info_box& info{this->make_page<Info_box>()};
+   public:
+    Examples_info_box();
 };
 
 }  // namespace gol

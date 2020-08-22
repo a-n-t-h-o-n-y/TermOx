@@ -104,8 +104,12 @@ class Layout : public Widget {
 
     void clear() { this->Widget::children_.clear(); }
 
-    // TODO - or allow std::algorithms to operate on a layout's Children.
-    // void swap(std::size_t index_a, std::size_t index_b);
+    void swap(std::size_t index_a, std::size_t index_b)
+    {
+        this->Widget::children_.swap(index_a, index_b);
+    }
+
+    // TODO
     // void move(std::size_t initial_index, std::size_t end_index);
 
    protected:
@@ -113,7 +117,7 @@ class Layout : public Widget {
     /// Clients override this to post Resize and Move events to children.
     /** This will be called each time the children Widgets possibly need to be
      *  rearranged. Triggered by Move_event, Resize_event, Child_added_event,
-     *  Child_removed_event, and Child_polished_event. */
+     *  Child_removed_event, Child_polished_event, and Enable_even\. */
     virtual void update_geometry() = 0;
 
     auto enable_event() -> bool override
