@@ -36,23 +36,27 @@ class Options_A : public cppurses::layout::Vertical<> {
 struct Options_B : public cppurses::layout::Vertical<> {
     Options_B();
 
-    cppurses::Label& palette_label{
-        this->make_child<cppurses::Label>("Color  Palette")};
-    cppurses::Cycle_box& palette_box{this->make_child<cppurses::Cycle_box>()};
+    cppurses::HLabel& palette_label =
+        this->make_child<cppurses::HLabel>({"Color  Palette"});
+
+    cppurses::Cycle_box& palette_box = this->make_child<cppurses::Cycle_box>();
 
     Widget& space1 = this->make_child() | cppurses::pipe::fixed_height(1);
 
-    cppurses::Save_file<>& save_file{this->make_child<cppurses::Save_file<>>()};
-    cppurses::Open_file<>& open_file{this->make_child<cppurses::Open_file<>>()};
+    cppurses::Save_file<>& save_file =
+        this->make_child<cppurses::Save_file<>>();
 
-    cppurses::Button& back_btn{this->make_child<cppurses::Button>("Back")};
+    cppurses::Open_file<>& open_file =
+        this->make_child<cppurses::Open_file<>>();
+
+    cppurses::Button& back_btn = this->make_child<cppurses::Button>("Back");
 };
 
 struct Options_stack : public cppurses::layout::Stack<> {
     Options_stack();
 
-    Options_A& options_a{this->make_child<Options_A>()};
-    Options_B& options_b{this->make_child<Options_B>()};
+    Options_A& options_a = this->make_child<Options_A>();
+    Options_B& options_b = this->make_child<Options_B>();
 };
 
 }  // namespace glyph_paint

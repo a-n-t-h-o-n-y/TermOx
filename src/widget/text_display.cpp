@@ -147,10 +147,12 @@ auto Text_display::paint_event() -> bool
         auto const sub_end   = sub_begin + line.length;
         auto start           = 0uL;
         switch (alignment_) {
+            case Align::Top:
             case Align::Left: start = 0; break;
             case Align::Center:
                 start = (this->width() - line.length) / 2;
                 break;
+            case Align::Bottom:
             case Align::Right: start = this->width() - line.length; break;
         }
         p.put(Glyph_string(sub_begin, sub_end), start, line_n++);

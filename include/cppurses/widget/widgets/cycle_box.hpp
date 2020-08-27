@@ -26,13 +26,16 @@ namespace cppurses {
 /// A rotating set of labels, emitting a Signal when the label is changed.
 /** Labels are cycled forwards by a left click or scroll up, cycled backwards
  *  by a scroll down button press, or arrow keys. */
-class Cycle_box : public Label {
+class Cycle_box : public HLabel {
    public:
     /// Emitted when the option is changed, sends the new option's string rep.
     sig::Signal<void(std::string)> option_changed;
 
    public:
-    Cycle_box() { *this | pipe::align_center() | pipe::strong_focus(); }
+    Cycle_box() : HLabel{{L""}}
+    {
+        *this | pipe::align_center() | pipe::strong_focus();
+    }
 
     /// Add an option/label to the Cycle_box.
     /** The returned Signal reference will be emitted every time this option is
@@ -79,7 +82,7 @@ class Cycle_box : public Label {
     void set_current_option(std::size_t index)
     {
         index_ = index;
-        *this | pipe::contents(options_[index_].name);
+        *this | pipe::text(options_[index_].name);
     }
 
     /// Return the number of options in the Cycle_box.
@@ -93,7 +96,7 @@ class Cycle_box : public Label {
             case Mouse::Button::Right: this->previous(); break;
             default: break;
         }
-        return Label::mouse_press_event(mouse);
+        return HLabel::mouse_press_event(mouse);
     }
 
     auto mouse_wheel_event(Mouse::State const& mouse) -> bool override
@@ -103,7 +106,7 @@ class Cycle_box : public Label {
             case Mouse::Button::ScrollUp: this->previous(); break;
             default: break;
         }
-        return Label::mouse_wheel_event(mouse);
+        return HLabel::mouse_wheel_event(mouse);
     }
 
     auto key_press_event(Key::State const& keyboard) -> bool override
@@ -115,7 +118,7 @@ class Cycle_box : public Label {
             case Key::j: this->next(); break;
             default: break;
         }
-        return Label::key_press_event(keyboard);
+        return HLabel::key_press_event(keyboard);
     }
 
    private:
@@ -165,7 +168,8 @@ auto cycle_box(Args&&... args) -> std::unique_ptr<Cycle_box>
 /// A label on the left and a Cycle_box on the right.
 class Labeled_cycle_box : public layout::Horizontal<> {
    public:
-    Label& label         = this->make_child<Label>();
+    HLabel& label = this->make_child<HLabel>({L""});
+
     Tile& div            = this->make_child<Tile>(L'├');
     Cycle_box& cycle_box = this->make_child<Cycle_box>();
 
@@ -177,16 +181,17 @@ class Labeled_cycle_box : public layout::Horizontal<> {
 
     void set_label(Glyph_string title)
     {
-        label.set_contents(std::move(title));
+        label.set_text(std::move(title));
         this->resize_label();
     }
 
     void set_divider(Glyph divider) { div.set(divider); }
 
    private:
+    // TODO remove and set label as dynamic
     void resize_label()
     {
-        label | pipe::fixed_width(label.contents().size() + 1);
+        label | pipe::fixed_width(label.get_text().size() + 1);
     }
 };
 

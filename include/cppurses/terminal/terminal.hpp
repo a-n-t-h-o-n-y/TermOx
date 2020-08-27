@@ -45,7 +45,7 @@ class Terminal {
     auto background() const -> Glyph const& { return background_; }
 
     /// Change Color definitions.
-    void set_palette(Color_palette const& colors);
+    void set_palette(Color_palette colors);
 
     /// Append a Color_definition::Value_t to the current color palette.
     /** Returns the Color that \p def was paired with. Picks the Color by

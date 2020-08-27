@@ -4,6 +4,7 @@
 #include <string>
 
 #include <cppurses/painter/color.hpp>
+#include "cppurses/widget/layouts/horizontal.hpp"
 
 using namespace cppurses;
 
@@ -23,7 +24,7 @@ Buffered_edit_box::Buffered_edit_box()
 
 // Set up value_edit_ and slider_ to be consistent with each other.
 Value_control::Value_control(const Glyph_string& label)
-    : label_{this->make_child<Label>(label)}
+    : label_{this->make_child<HLabel>({label})}
 {
     this->width_policy.maximum(5);
     auto& slider   = this->slider_.slider;

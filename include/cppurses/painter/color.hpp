@@ -11,28 +11,37 @@
 
 namespace cppurses {
 
-/// Color numbers [0 - 15]
-struct Color {
+/// Color numbers [0 - 180] are valid.
+class Color {
+   public:
     using Value_t = std::uint8_t;
     Value_t value;
 
-    // Default Color Names
-    static Color const Black;
-    static Color const Dark_red;
-    static Color const Green;
-    static Color const Brown;
-    static Color const Dark_blue;
-    static Color const Violet;
-    static Color const Light_blue;
-    static Color const Light_gray;
-    static Color const Dark_gray;
-    static Color const Red;
-    static Color const Light_green;
-    static Color const Yellow;
-    static Color const Blue;
-    static Color const Orange;
-    static Color const Gray;
-    static Color const White;
+   public:
+    enum Name : Value_t {
+        Background  = 0,
+        Black       = 0,
+        Dark_red    = 1,
+        Green       = 2,
+        Brown       = 3,
+        Dark_blue   = 4,
+        Violet      = 5,
+        Light_blue  = 6,
+        Light_gray  = 7,
+        Dark_gray   = 8,
+        Red         = 9,
+        Light_green = 10,
+        Yellow      = 11,
+        Blue        = 12,
+        Orange      = 13,
+        Gray        = 14,
+        White       = 15,
+        Foreground  = 15,
+    };
+
+   public:
+    constexpr Color(Name n) : value{static_cast<Value_t>(n)} {}
+    constexpr explicit Color(Value_t v) : value{v} {}
 };
 
 constexpr auto operator==(Color x, Color y) -> bool

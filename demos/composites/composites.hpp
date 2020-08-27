@@ -143,7 +143,7 @@ struct My_check_list : Check_list {
 
         *this | /* passive_height() |*/ bordered() | children() |
             for_each([i = 0uL](auto& w) mutable {
-                w.label.set_contents("number: " + std::to_string(i++));
+                w.label.set_text("number: " + std::to_string(i++));
             });
         *this | bind_key(Key::Enter,
                          [](auto& w) { w.selected_child().checkbox.toggle(); });

@@ -1801,10 +1801,19 @@ inline auto word_wrap(bool enable)
     };
 }
 
+// TODO remove and replace with text()
 inline auto contents(Glyph_string x)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).set_contents(x);
+        return std::forward<decltype(w)>(w);
+    };
+}
+
+inline auto text(Glyph_string x)
+{
+    return [=](auto&& w) -> decltype(auto) {
+        get(w).set_text(x);
         return std::forward<decltype(w)>(w);
     };
 }
@@ -1842,10 +1851,10 @@ inline auto ghost(Color c)
 }
 
 // Label
-inline auto dynamic_width(bool enable)
+inline auto dynamic_size(bool enable)
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).set_dynamic_width(enable);
+        get(w).set_dynamic_size(enable);
         return std::forward<decltype(w)>(w);
     };
 }

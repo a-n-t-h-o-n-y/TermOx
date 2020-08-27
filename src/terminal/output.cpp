@@ -10,7 +10,7 @@
 #include <cstddef>
 
 #ifndef _XOPEN_SOURCE_EXTENDED
-#define _XOPEN_SOURCE_EXTENDED
+#    define _XOPEN_SOURCE_EXTENDED
 #endif
 #include <ncursesw/ncurses.h>
 #undef border
@@ -31,10 +31,10 @@ auto color_index(Color fg, Color bg) -> short
 
 auto color_index(Brush const& brush) -> short
 {
-    auto background = Color::Black;
+    auto background = Color{Color::Black};
     if (brush.background_color())
         background = *(brush.background_color());
-    auto foreground = Color::Black;
+    auto foreground = Color{Color::Black};
     if (brush.foreground_color())
         foreground = *(brush.foreground_color());
     return color_index(foreground, background);

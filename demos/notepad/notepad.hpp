@@ -8,6 +8,7 @@
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/trait.hpp>
 #include <cppurses/system/system.hpp>
+#include <cppurses/widget/align.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
@@ -60,13 +61,14 @@ class Trait_boxes : public cppurses::layout::Vertical<Trait_checkbox> {
 };
 
 class Labeled_color_select
-    : public cppurses::Label_top<cppurses::Color_select> {
+    : public cppurses::Label_top<cppurses::layout::Horizontal<>,
+                                 cppurses::Color_select> {
    public:
     sig::Signal<void(cppurses::Color)>& color_selected = wrapped.color_selected;
 
    public:
     Labeled_color_select(cppurses::Glyph_string label)
-        : Label_top{std::move(label)}
+        : Label_top{{std::move(label)}}
     {
         using namespace cppurses;
         using namespace cppurses::pipe;
@@ -103,15 +105,15 @@ class Side_pane : public cppurses::layout::Vertical<> {
     Side_pane() { *this | cppurses::pipe::fixed_width(16); }
 };
 
-using Side_pane_accordion = cppurses::Accordion<cppurses::layout::Horizontal<>,
-                                                Side_pane,
-                                                cppurses::Bar_position::Last>;
+using Side_pane_accordion =
+    cppurses::HAccordion<Side_pane, cppurses::Bar_position::Last>;
 
 class Text_and_side_pane : public cppurses::layout::Horizontal<> {
    public:
     cppurses::Textbox& textbox = this->make_child<cppurses::Textbox>();
-    Side_pane_accordion& side_pane =
-        this->make_child<Side_pane_accordion>("Settings");
+    Side_pane& side_pane       = this->make_child<Side_pane_accordion>(
+                                   {L"Settings", cppurses::Align::Center})
+                               .wrapped();
 
    public:
     Text_and_side_pane()
@@ -121,14 +123,14 @@ class Text_and_side_pane : public cppurses::layout::Horizontal<> {
 
         textbox | bordered() | rounded_corners() | bg(Color::Dark_gray);
 
-        side_pane.wrapped().fg_select.color_selected.connect(
+        side_pane.fg_select.color_selected.connect(
             cppurses::slot::set_foreground(textbox));
-        side_pane.wrapped().bg_select.color_selected.connect(
+        side_pane.bg_select.color_selected.connect(
             cppurses::slot::set_background(textbox));
 
-        side_pane.wrapped().trait_boxes.trait_enabled.connect(
+        side_pane.trait_boxes.trait_enabled.connect(
             [this](Trait t) { textbox.insert_brush.add_traits(t); });
-        side_pane.wrapped().trait_boxes.trait_disabled.connect(
+        side_pane.trait_boxes.trait_disabled.connect(
             [this](Trait t) { textbox.insert_brush.remove_traits(t); });
     }
 };

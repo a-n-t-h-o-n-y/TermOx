@@ -8,8 +8,7 @@
 
 #include <cppurses/widget/widgets/detail/nearly_equal.hpp>
 
-namespace cppurses {
-namespace detail {
+namespace cppurses::detail {
 
 /// Holds the ratio of a slider like Widget and calculates current value.
 class Slider_logic {
@@ -118,6 +117,5 @@ class Slider_logic {
     Ratio_t ratio_   = 0.;
 };
 
-}  // namespace detail
-}  // namespace cppurses
+}  // namespace cppurses::detail
 #endif  // CPPURSES_WIDGET_WIDGETS_DETAIL_SLIDER_LOGIC_HPP

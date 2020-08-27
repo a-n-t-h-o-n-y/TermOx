@@ -127,13 +127,13 @@ void Terminal::set_background(Glyph const& tile)
         this->repaint_all();
 }
 
-void Terminal::set_palette(Color_palette const& colors)
+void Terminal::set_palette(Color_palette colors)
 {
     if (!is_initialized_ or !this->has_color())
         return;
     dynamic_color_engine_.clear();
-    palette_ = colors;
-    for (auto const& def : colors) {
+    palette_ = std::move(colors);
+    for (auto const& def : palette_) {
         std::visit(
             [&](auto const& d) {
                 this->set_color_definition(def.color, def.ansi, d);
@@ -259,11 +259,8 @@ auto Terminal::color_pair_count() const -> int
 
 auto Terminal::color_index(Color fg, Color bg) const -> short
 {
-    short const color_n = this->get_palette_color_count();
-    short const offset  = 1;
-    short const fg_mod  = fg.value % color_n;
-    short const bg_mod  = bg.value % color_n;
-    return offset + fg_mod * color_n + bg_mod;
+    auto constexpr color_count = 181uL;
+    return 1 + (fg.value * color_count) + bg.value;
 }
 
 void Terminal::term_set_color(ANSI a, True_color value)

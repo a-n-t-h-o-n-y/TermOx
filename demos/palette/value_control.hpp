@@ -42,7 +42,7 @@ class Value_control : public cppurses::layout::Vertical<> {
     detail::Buffered_edit_box& value_edit_{
         this->make_child<detail::Buffered_edit_box>()};
 
-    cppurses::Label& label_;
+    cppurses::HLabel& label_;
 
    public:
     explicit Value_control(const cppurses::Glyph_string& label);

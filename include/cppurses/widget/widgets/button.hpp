@@ -11,6 +11,11 @@
 
 namespace cppurses {
 
+// TODO
+// Make a push_button or something, reactive_button, that changes color on mouse
+// press and back to original color at mouse release, and emits the signal on
+// the release. Or just provide two signals.
+
 /// Button widget that emits Signal on a left mouse button press.
 class Button : public Widget {
    public:

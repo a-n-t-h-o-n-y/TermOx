@@ -68,7 +68,6 @@ target_sources(cppurses PRIVATE
     painter/glyph_matrix.cpp
     painter/screen_mask.cpp
     painter/find_empty_space.cpp
-    painter/color.cpp
 )
 
 # WIDGET

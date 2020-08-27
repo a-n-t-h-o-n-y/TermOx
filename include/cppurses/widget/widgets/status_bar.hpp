@@ -6,22 +6,23 @@
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/widgets/label.hpp>
+#include "cppurses/widget/layouts/horizontal.hpp"
 
 namespace cppurses {
 
-class Status_bar : public Label {
+class Status_bar : public HLabel {
    public:
     sig::Signal<void(Glyph_string const&)> status_updated;
 
    public:
     explicit Status_bar(Glyph_string initial_message = "")
-        : Label{std::move(initial_message)}
+        : HLabel{{std::move(initial_message)}}
     {}
 
     void update_status(Glyph_string message)
     {
-        this->set_contents(std::move(message));
-        status_updated(this->contents());
+        this->set_text(std::move(message));
+        status_updated(this->get_text());
     }
 };
 

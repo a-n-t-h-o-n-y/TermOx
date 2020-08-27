@@ -1,5 +1,6 @@
 #ifndef DEMOS_DEMO_MENU_HPP
 #define DEMOS_DEMO_MENU_HPP
+#include <cppurses/painter/palette/dawn_bringer16.hpp>
 #include <cppurses/system/events/key.hpp>
 #include <cppurses/system/shortcuts.hpp>
 #include <cppurses/system/system.hpp>
@@ -12,6 +13,7 @@
 #include "chess/src/chess_ui.hpp"
 #include "colors/palette_view.hpp"
 #include "composites/composites.hpp"
+#include "cppurses/painter/palette/dawn_bringer16.hpp"
 #include "focus/focus_demo.hpp"
 #include "game_of_life/gol_demo.hpp"
 #include "glyph_paint/glyph_paint.hpp"
@@ -24,12 +26,13 @@ namespace demos {
 
 class Demo_menu : public cppurses::Menu_stack {
    public:
-    Demo_menu() : Menu_stack{"D e m o s"}
+    Demo_menu() : Menu_stack{"Demos"}
     {
         using namespace cppurses;
         using namespace cppurses::pipe;
 
         Shortcuts::add_shortcut(Key::Escape).connect([this] {
+            System::terminal.set_palette(cppurses::dawn_bringer16::palette);
             this->Menu_stack::goto_menu();
         });
 
@@ -72,7 +75,7 @@ class Demos : public cppurses::layout::Vertical<> {
    public:
     using Titlebar = cppurses::Titlebar;
 
-    Titlebar& title_ = this->make_child<Titlebar>("  C  P  P  U  R  S  E  S");
+    Titlebar& title_ = this->make_child<Titlebar>("~ GlyphBox ~");
     Demo_menu& menu  = this->make_child<Demo_menu>();
 
    public:

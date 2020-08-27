@@ -12,6 +12,7 @@
 #include <cppurses/widget/layouts/opposite.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/pipe.hpp>
+#include <cppurses/widget/widgets/label.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
 
 namespace cppurses {
@@ -55,93 +56,59 @@ class Bar : public Layout_t {
         Glyph_string x_ = L"[+]";
     };
 
-    class Centered_text : public Widget {
+    class Title : public layout::Opposite_t<Layout_t> {
        public:
-        Centered_text(Glyph_string text) : text_{L' ' + std::move(text) + L' '}
-        {
-            if constexpr (layout::is_vertical_v<Layout_t>)
-                *this | pipe::wallpaper(L'│' | foreground(Color::Dark_gray));
-            else
-                *this | pipe::wallpaper(L'─' | foreground(Color::Dark_gray));
-        }
+        struct Parameters {
+            Glyph_string title;
+            Align alignment = is_vertical ? Align::Left : Align::Top;
+            Glyph wallpaper = is_vertical ? L'─' : L'│';
+        };
 
-       protected:
-        auto paint_event() -> bool override
-        {
-            auto p = Painter{*this};
-            if constexpr (layout::is_vertical_v<Layout_t>) {
-                for (auto i = 0uL; i < text_.size(); ++i)
-                    p.put(text_[i], {0uL, offset_ + i});
-            }
-            else
-                p.put(text_, {offset_, 0uL});
-            return Widget::paint_event();
-        }
-
-        auto resize_event(Area new_size, Area old_size) -> bool override
-        {
-            auto length = std::size_t{};
-            if constexpr (layout::is_vertical_v<Layout_t>)
-                length = this->height();
-            else
-                length = this->width();
-            offset_ = center_offset(text_.length(), length + extra_length_);
-            return Widget::resize_event(new_size, old_size);
-        }
-
-       private:
-        Glyph_string const text_;
-        std::size_t offset_ = 0uL;
-
-        // Indicator Length / 2
-        inline static auto constexpr extra_length_ =
-            layout::is_vertical_v<Layout_t> ? 0uL : 1uL;
-
-       private:
-        static auto center_offset(std::size_t string_length,
-                                  std::size_t total_length)
-        {
-            if (string_length > total_length)
-                return 0uL;
-            else
-                return (total_length / 2) - (string_length / 2);
-        }
-    };
-
-    class Title_line : public layout::Opposite_t<Layout_t> {
        public:
         sig::Signal<void()> clicked;
 
        public:
-        Title_line(Glyph_string title)
+        Title(Parameters p)
+            : centered_text_{this->template make_child<Label<Layout_t>>(
+                  {L' ' + std::move(p.title) + L' ' | Trait::Bold, p.alignment,
+                   extra_left})}
         {
-            title | Trait::Bold;
             using namespace cppurses::pipe;
-            if constexpr (layout::is_vertical_v<layout::Opposite_t<Layout_t>>) {
-                this->template make_child<Centered_text>(std::move(title)) |
-                    fixed_height(1uL);
-            }
+            if constexpr (is_vertical)
+                centered_text_ | fixed_height(1uL);
             else {
-                this->template make_child<Widget>() |
-                    on_mouse_press([this](auto const&) { this->clicked(); });
-                this->template make_child<Centered_text>(std::move(title)) |
-                    on_mouse_press([this](auto const&) { this->clicked(); });
-                this->template make_child<Widget>() |
-                    on_mouse_press([this](auto const&) { this->clicked(); });
-                *this | children() | fixed_width(1);
+                this->insert(widget(), 0uL);
+                this->insert(widget(), 2uL);
+                *this | children() | fixed_width(1uL);
             }
+            *this | children() |
+                on_mouse_press([this](auto const&) { this->clicked(); });
+            centered_text_.set_wallpaper(p.wallpaper);
         }
+
+       private:
+        Label<Layout_t>& centered_text_;
+
+        static auto constexpr is_vertical =
+            layout::is_vertical_v<layout::Opposite_t<Layout_t>>;
+
+        static auto constexpr extra_left = is_vertical ? 3uL : 1uL;
     };
+
+   private:
+    static auto constexpr is_vertical = layout::is_vertical_v<Layout_t>;
+
+   public:
+    using Parameters = typename Title::Parameters;
 
    public:
     sig::Signal<void()> toggle_request;
 
    public:
-    Bar(Glyph_string title)
-        : text_{this->template make_child<Title_line>(std::move(title))}
+    Bar(Parameters p) : text_{this->template make_child<Title>(std::move(p))}
     {
         using namespace pipe;
-        if constexpr (layout::is_vertical_v<Layout_t>)
+        if constexpr (is_vertical)
             *this | fixed_width(3uL);
         else
             *this | fixed_height(1uL);
@@ -160,7 +127,7 @@ class Bar : public Layout_t {
 
    private:
     Indicator& indicator_ = this->template make_child<Indicator>();
-    Title_line& text_;
+    Title& text_;
 };
 
 enum class Bar_position { First, Last };
@@ -169,20 +136,26 @@ template <typename Layout_t,
           typename Widget_t,
           Bar_position position = Bar_position::First>
 class Accordion : public Layout_t {
+    static_assert(layout::is_vertical_v<Layout_t> ||
+                  layout::is_horizontal_v<Layout_t>);
+
    private:
     using Bar_t = Bar<layout::Opposite_t<Layout_t>>;
 
    public:
+    using Parameters = typename Bar_t::Parameters;
+
+   public:
     template <typename... Args>
-    Accordion(Glyph_string title, Args&&... args)
-        : bar_{this->template make_child<Bar_t>(std::move(title))},
+    Accordion(Parameters p, Args&&... args)
+        : bar_{this->template make_child<Bar_t>(std::move(p))},
           wrapped_{
               this->template make_child<Widget_t>(std::forward<Args>(args)...)}
     {
         if constexpr (wrapped_index_ == 0uL)
             this->Layout_t::swap(0uL, 1uL);
 
-        if constexpr (layout::is_vertical_v<Layout_t>)
+        if constexpr (is_vertical)
             *this | pipe::passive_height();
         else
             *this | pipe::passive_width();
@@ -229,8 +202,10 @@ class Accordion : public Layout_t {
     bool expanded_                     = true;
     std::unique_ptr<Widget> w_storage_ = nullptr;
 
-    inline static constexpr auto wrapped_index_ =
+    static auto constexpr wrapped_index_ =
         position == Bar_position::First ? 1uL : 0uL;
+
+    static auto constexpr is_vertical = layout::is_vertical_v<Layout_t>;
 
    private:
     void reinsert_wrapped()
@@ -248,6 +223,12 @@ class Accordion : public Layout_t {
     }
 };
 
+template <typename Widget_t, Bar_position position = Bar_position::First>
+using HAccordion = Accordion<layout::Horizontal<>, Widget_t, position>;
+
+template <typename Widget_t, Bar_position position = Bar_position::First>
+using VAccordion = Accordion<layout::Vertical<>, Widget_t, position>;
+
 template <typename Layout_t,
           typename Widget_t,
           Bar_position position = Bar_position::First,
@@ -256,6 +237,26 @@ auto accordion(Args&&... args)
     -> std::unique_ptr<Accordion<Layout_t, Widget_t, position>>
 {
     return std::make_unique<Accordion<Layout_t, Widget_t, position>>(
+        std::forward<Args>(args)...);
+}
+
+template <typename Widget_t,
+          Bar_position position = Bar_position::First,
+          typename... Args>
+auto v_accordion(Args&&... args)
+    -> std::unique_ptr<VAccordion<Widget_t, position>>
+{
+    return std::make_unique<VAccordion<Widget_t, position>>(
+        std::forward<Args>(args)...);
+}
+
+template <typename Widget_t,
+          Bar_position position = Bar_position::First,
+          typename... Args>
+auto h_accordion(Args&&... args)
+    -> std::unique_ptr<HAccordion<Widget_t, position>>
+{
+    return std::make_unique<HAccordion<Widget_t, position>>(
         std::forward<Args>(args)...);
 }
 

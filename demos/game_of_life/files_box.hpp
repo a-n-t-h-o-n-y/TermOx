@@ -4,22 +4,45 @@
 
 #include <signals/signal.hpp>
 
+#include <cppurses/painter/color.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
+#include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/widgets/confirm_button.hpp>
 #include <cppurses/widget/widgets/line_edit.hpp>
+
+#include "colors.hpp"
 
 namespace gol {
 
 /// Provides interface to input filename and to Signal on that filename.
 class File_widget : public cppurses::layout::Vertical<> {
+   public:
     cppurses::Line_edit& filename_box_ =
         this->make_child<cppurses::Line_edit>("Filename");
+
     cppurses::Confirm_button& confirm_btn_;
 
    public:
-    explicit File_widget(std::string const& btn_text);
+    sig::Signal<void(std::string const&)> file_request;
 
-    sig::Signal<void(std::string const&)> filename_given;
+   public:
+    explicit File_widget(std::string const& btn_text)
+        : confirm_btn_{this->make_child<cppurses::Confirm_button>(btn_text)}
+    {
+        using namespace cppurses;
+        using namespace cppurses::pipe;
+
+        *this | fixed_height(2);
+
+        confirm_btn_ | on_press([this]() {
+            file_request(filename_box_.contents().str());
+        });
+
+        confirm_btn_.main_btn | bg(color::Teal) | fg(color::White);
+        confirm_btn_.confirm_page.confirm_btn | bg(color::Green) |
+            fg(color::Black);
+        confirm_btn_.confirm_page.exit_btn | bg(color::Teal) | fg(color::White);
+    }
 };
 
 struct Files_box : cppurses::layout::Vertical<File_widget> {
@@ -27,13 +50,14 @@ struct Files_box : cppurses::layout::Vertical<File_widget> {
     File_widget& import_btn = this->make_child("Import");
     File_widget& export_btn = this->make_child("Export");
 
+   public:
     sig::Signal<void(std::string const&)>& import_request =
-        import_btn.filename_given;
+        import_btn.file_request;
     sig::Signal<void(std::string const&)>& export_request =
-        export_btn.filename_given;
+        export_btn.file_request;
 
    public:
-    Files_box();
+    Files_box() { *this | cppurses::pipe::fixed_height(4uL); }
 };
 }  // namespace gol
 #endif  // CPPURSES_DEMOS_GAME_OF_LIFE_FILES_BOX_HPP

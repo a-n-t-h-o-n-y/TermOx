@@ -8,7 +8,6 @@
 #include <string>
 #include <vector>
 
-#include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/system/events/key.hpp>
@@ -18,6 +17,7 @@
 #include <cppurses/widget/widget.hpp>
 
 #include "cell.hpp"
+#include "colors.hpp"
 #include "coordinate.hpp"
 #include "exporters.hpp"
 #include "filetype.hpp"
@@ -129,7 +129,7 @@ void GoL_widget::toggle_grid()
 {
     grid_ = !grid_;
     if (grid_)
-        this->set_wallpaper(L'┼'_g | foreground(Color::Dark_gray));
+        this->set_wallpaper(L'┼'_g | foreground(color::Teal));
     else
         this->set_dead(dead_look_);
     this->update();

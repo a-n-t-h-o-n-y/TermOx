@@ -4,34 +4,58 @@
 #include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/widget.hpp>
+#include <cppurses/widget/widgets/accordion.hpp>
 
-// #include "examples_info_box.hpp"
+#include "colors.hpp"
 #include "files_box.hpp"
+#include "patterns_rulesets_box.hpp"
 #include "settings_box.hpp"
 #include "status_box.hpp"
 
 namespace gol {
 
 struct Side_panel : cppurses::layout::Vertical<> {
+   private:
+    using Examples_info = cppurses::VAccordion<Patterns_rulesets_box>;
+    using Files         = cppurses::VAccordion<Files_box>;
+    using Settings      = cppurses::VAccordion<Settings_box>;
+    using Status        = cppurses::VAccordion<Status_box>;
+
    public:
-    // Examples_info_box& examples_info{this->make_child<Examples_info_box>()};
-    cppurses::Widget& empty_space = this->make_child<cppurses::Widget>();
-    Files_box& files              = this->make_child<Files_box>();
-    Settings_box& settings        = this->make_child<Settings_box>();
-    Status_box& status            = this->make_child<Status_box>();
+    Patterns_rulesets_box& patterns_rulesets =
+        this->make_child<Examples_info>(
+                {L"Examples", cppurses::Align::Left, line})
+            .wrapped();
+
+    Files_box& files =
+        this->make_child<Files>({L"Files", cppurses::Align::Left, line})
+            .wrapped();
+
+    Settings& settings_accordion =
+        this->make_child<Settings>({L"Controls", cppurses::Align::Left, line});
+
+    Settings_box& settings = settings_accordion.wrapped();
+
+    Status_box& status =
+        this->make_child<Status>({L"Status", cppurses::Align::Left, line})
+            .wrapped();
+
+    cppurses::Widget& empty_space = this->make_child();
 
    public:
     Side_panel()
     {
-        this->width_policy.fixed(16);
-
         using namespace cppurses;
         using namespace cppurses::pipe;
 
-        *this | east_border() | east_wall(foreground(Color::Blue));
+        *this | fixed_width(16uL);
 
-        empty_space | expanding_height(0);
+        empty_space | expanding_height(0uL);
+        settings_accordion.expand();
     }
+
+   private:
+    inline static auto const line = L'─' | foreground(color::Light_green);
 };
 }  // namespace gol
 #endif  // CPPURSES_DEMOS_GAME_OF_LIFE_SIDE_PANEL_HPP

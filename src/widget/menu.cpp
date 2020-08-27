@@ -17,11 +17,12 @@
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widgets/button.hpp>
 #include <cppurses/widget/widgets/label.hpp>
+#include "cppurses/widget/layouts/horizontal.hpp"
 
 namespace cppurses {
 
 Menu::Menu(Glyph_string title_text)
-    : title{this->make_child<Label>(std::move(title_text))}
+    : title{this->make_child<HLabel>({std::move(title_text)})}
 {
     this->focus_policy = Focus_policy::Strong;
     title.set_alignment(Align::Center);

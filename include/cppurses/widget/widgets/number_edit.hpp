@@ -12,6 +12,7 @@
 #include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/widgets/label.hpp>
 #include <cppurses/widget/widgets/line_edit.hpp>
+#include "cppurses/widget/layouts/horizontal.hpp"
 
 namespace cppurses {
 
@@ -113,12 +114,13 @@ auto number_edit(Args&&... args) -> std::unique_ptr<Number_edit<Number_t>>
 
 /// Number_edit with preceding Label arranged horizontally.
 template <typename Number_t = int>
-class Labeled_number_edit : public Label_left<Number_edit<Number_t>> {
+class Labeled_number_edit
+    : public Label_left<layout::Horizontal<>, Number_edit<Number_t>> {
    private:
-    using Base = Label_left<Number_edit<Number_t>>;
+    using Base = Label_left<layout::Horizontal<>, Number_edit<Number_t>>;
 
    public:
-    Label& label                       = Base::label;
+    HLabel& label                      = Base::label;
     Number_edit<Number_t>& number_edit = Base::wrapped;
 
    public:
@@ -128,11 +130,11 @@ class Labeled_number_edit : public Label_left<Number_edit<Number_t>> {
    public:
     /// Construct with \p title for Label text and \p initial value.
     Labeled_number_edit(Glyph_string title, Number_t initial)
-        : Base(std::move(title), initial)
+        : Base({std::move(title)}, initial)
     {
         using namespace pipe;
         *this | fixed_height(1);
-        label | dynamic_width(true);
+        label | dynamic_size(true);
         number_edit | bg(Color::White) | fg(Color::Black) | ghost(Color::Gray);
     }
 

@@ -15,6 +15,7 @@
 #include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widgets/label.hpp>
+#include "cppurses/widget/layouts/horizontal.hpp"
 
 namespace cppurses {
 class Button;
@@ -30,7 +31,7 @@ class Button;
 class Menu : public layout::Vertical<> {
    public:
     /// Menu Title Widget
-    Label& title;
+    Label<layout::Horizontal<>>& title;
 
     /// Line Break Widget under Title
     Widget& line_break = this->make_child() | pipe::fixed_height(1);

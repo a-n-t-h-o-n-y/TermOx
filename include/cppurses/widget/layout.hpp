@@ -59,6 +59,16 @@ class Layout : public Widget {
             std::make_unique<Widget_t>(std::forward<Args>(args)...));
     }
 
+    /// Helper so Parameters type does not have to be specified at call site.
+    template <typename Widget_t,
+              typename SFINAE = typename Widget_t::Parameters>
+    auto make_child(typename Widget_t::Parameters p) -> Widget_t&
+    {
+        static_assert(std::is_base_of_v<Child_t, Widget_t>,
+                      "Layout::make_child: Widget_t must be a Child_t type");
+        return this->append(std::make_unique<Widget_t>(std::move(p)));
+    }
+
     template <typename Widget_t>
     auto insert(std::unique_ptr<Widget_t> child, std::size_t index) -> Widget_t&
     {

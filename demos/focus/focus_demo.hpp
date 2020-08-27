@@ -16,13 +16,12 @@ namespace demos::focus {
 auto focus_box(cppurses::Focus_policy policy)
     -> std::unique_ptr<cppurses::Widget>
 {
-    using namespace cppurses;
     using namespace cppurses::pipe;
 
     /// Focus_policy to string
     auto to_string = [](cppurses::Focus_policy p) -> wchar_t const* {
-        using namespace cppurses;
         switch (p) {
+            using namespace cppurses;
             case Focus_policy::None: return L"None";
             case Focus_policy::Tab: return L"Tab";
             case Focus_policy::Click: return L"Click";
@@ -32,8 +31,9 @@ auto focus_box(cppurses::Focus_policy policy)
     };
 
     /// Remove tab focus from \p p.
-    auto const narrow = [](Focus_policy p) {
+    auto const narrow = [](cppurses::Focus_policy p) {
         switch (p) {
+            using namespace cppurses;
             case Focus_policy::None:
             case Focus_policy::Tab: return Focus_policy::None;
             case Focus_policy::Click:
@@ -44,24 +44,24 @@ auto focus_box(cppurses::Focus_policy policy)
 
     // clang-format off
     auto box_ptr =
-        layout::vertical
+        cppurses::layout::vertical
         (
-            label(to_string(policy))
+            cppurses::label<cppurses::layout::Horizontal<>>({to_string(policy)})
                 | name("l")
                 | align_center()
                 | fixed_height(1)
-                | pipe::focus(narrow(policy)),
-            widget()
+                | cppurses::pipe::focus(narrow(policy)),
+            cppurses::widget()
                 | name("w")
-                | pipe::focus(policy)
+                | cppurses::pipe::focus(policy)
         ) | bordered();
 
     box_ptr | children() | find("l")
-            | on_focus_in([w = box_ptr->find("w")]{ System::set_focus(*w); });
+            | on_focus_in([w = box_ptr->find("w")]{ cppurses::System::set_focus(*w); });
 
     box_ptr | children() | find("w")
-            | on_focus_in( [&w = *box_ptr]{ w | walls(foreground(Color::Red)); })
-            | on_focus_out([&w = *box_ptr]{ w | walls(foreground(Color::White)); });
+            | on_focus_in( [&w = *box_ptr]{ w | walls(foreground(cppurses::Color::Red)); })
+            | on_focus_out([&w = *box_ptr]{ w | walls(foreground(cppurses::Color::White)); });
     // clang-format on
 
     return box_ptr;
