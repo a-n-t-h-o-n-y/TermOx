@@ -71,6 +71,30 @@ class Linear_layout : public Layout<Child> {
         this->reset_offset_if_out_of_bounds();
     }
 
+    /// Sets the child Widget offset, does not do bounds checking.
+    void set_offset(std::size_t index)
+    {
+        this->Widget::children_.set_offset(index);
+        shared_space_.set_offset(index);
+        unique_space_.set_offset(index);
+        System::post_event<Child_polished_event>(*this, *this);
+        this->force_repaint_empty_space();
+    }
+
+    void decrement_offset()
+    {
+        if (this->Widget::child_offset() == 0uL)
+            return;
+        this->set_offset(this->Widget::child_offset() - 1uL);
+    }
+
+    void increment_offset()
+    {
+        if (this->Widget::child_offset() + 1uL >= this->child_count())
+            return;
+        this->set_offset(this->Widget::child_offset() + 1uL);
+    }
+
    protected:
     using Parameters_t = Parameters;
 
@@ -110,16 +134,6 @@ class Linear_layout : public Layout<Child> {
         }
         this->update_geometry();
         return Widget::child_polished_event(child);
-    }
-
-    /// Sets the child Widget offset, does not do bounds checking.
-    auto set_offset(std::size_t index)
-    {
-        this->Widget::children_.set_offset(index);
-        shared_space_.set_offset(index);
-        unique_space_.set_offset(index);
-        System::post_event<Child_polished_event>(*this, *this);
-        this->force_repaint_empty_space();
     }
 
    private:

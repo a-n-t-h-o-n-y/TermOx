@@ -30,10 +30,17 @@ namespace {
 /// Indicates if the receiver of the Event is able to have the Event sent to it.
 auto is_sendable(cppurses::Event const& event) -> bool
 {
-    using Event = cppurses::Event;
-    return event.receiver().is_enabled() or
-           (event.type() == Event::Delete or event.type() == Event::Disable or
-            event.type() == Event::FocusOut);
+    if (event.receiver().is_enabled())
+        return true;
+    switch (event.type()) {
+        using Event = cppurses::Event;
+        case Event::ChildAdded:
+        case Event::ChildRemoved:
+        case Event::Delete:
+        case Event::Disable:
+        case Event::FocusOut: return true;
+        default: return false;
+    }
 }
 
 }  // namespace

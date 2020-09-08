@@ -73,6 +73,7 @@ class Demo_menu : public cppurses::Menu_stack {
 
 class Demos : public cppurses::layout::Vertical<> {
    public:
+    // TODO add a back button to left side of titlebar that appears in demos
     using Titlebar = cppurses::Titlebar;
 
     Titlebar& title_ = this->make_child<Titlebar>("~ GlyphBox ~");

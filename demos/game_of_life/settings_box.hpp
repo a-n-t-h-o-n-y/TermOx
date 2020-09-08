@@ -133,9 +133,10 @@ struct Grid_fade : cppurses::layout::Horizontal<cppurses::Labeled_checkbox> {
     }
 };
 
+// TODO rename to Controls_box, also file rename
 struct Settings_box : cppurses::layout::Vertical<> {
    public:
-    Widget& break_                    = this->append(make_break());
+    // Widget& break_                    = this->append(make_break());
     Interval_box& interval_edit        = this->make_child<Interval_box>();
     Widget& break_0                    = this->append(make_break());
     Start_pause_btns& start_pause_btns = this->make_child<Start_pause_btns>();
@@ -158,7 +159,7 @@ struct Settings_box : cppurses::layout::Vertical<> {
     Settings_box()
     {
         using namespace cppurses::pipe;
-        *this | fixed_height(11uL);
+        *this | fixed_height(10uL);
 
         interval_edit.value_set.connect([this](int value) {
             interval_set(std::chrono::milliseconds{value});

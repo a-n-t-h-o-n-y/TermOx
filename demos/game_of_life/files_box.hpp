@@ -11,6 +11,7 @@
 #include <cppurses/widget/widgets/line_edit.hpp>
 
 #include "colors.hpp"
+#include "make_break.hpp"
 
 namespace gol {
 
@@ -39,7 +40,7 @@ class File_widget : public cppurses::layout::Vertical<> {
         });
 
         confirm_btn_.main_btn | bg(color::Teal) | fg(color::White);
-        confirm_btn_.confirm_page.confirm_btn | bg(color::Green) |
+        confirm_btn_.confirm_page.confirm_btn | bg(color::Light_green) |
             fg(color::Black);
         confirm_btn_.confirm_page.exit_btn | bg(color::Teal) | fg(color::White);
     }
@@ -49,6 +50,7 @@ struct Files_box : cppurses::layout::Vertical<File_widget> {
    public:
     File_widget& import_btn = this->make_child("Import");
     File_widget& export_btn = this->make_child("Export");
+    Widget& break_          = this->append(make_break());
 
    public:
     sig::Signal<void(std::string const&)>& import_request =
@@ -57,7 +59,7 @@ struct Files_box : cppurses::layout::Vertical<File_widget> {
         export_btn.file_request;
 
    public:
-    Files_box() { *this | cppurses::pipe::fixed_height(4uL); }
+    Files_box() { *this | cppurses::pipe::fixed_height(5uL); }
 };
 }  // namespace gol
 #endif  // CPPURSES_DEMOS_GAME_OF_LIFE_FILES_BOX_HPP

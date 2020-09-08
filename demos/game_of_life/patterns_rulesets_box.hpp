@@ -1,50 +1,84 @@
 #ifndef CPPURSES_DEMOS_GAME_OF_LIFE_PATTERNS_RULESETS_BOX_HPP
 #define CPPURSES_DEMOS_GAME_OF_LIFE_PATTERNS_RULESETS_BOX_HPP
+#include <string>
+#include <utility>
+
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/layouts/stack.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/widgets/button.hpp>
+#include <cppurses/widget/widgets/scrollbar.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
-
-#include <cppurses/widget/widgets/horizontal_scrollbar.hpp>
+#include <cppurses/widget/widgets/textbox.hpp>
 
 #include "colors.hpp"
+#include "make_break.hpp"
 
 namespace gol {
 
-/// Layout Wrapper to make children scrollable and hooks up scrollbar.
-template <typename Layout_t>
-class Scrollable : public cppurses::layout::Horizontal<> {
+class Thin_btn : public cppurses::Button {
    public:
-   private:
-    cppurses::HScrollbar& s = this->make_child<cppurses::HScrollbar>();
-};
-
-class Patterns_box : public cppurses::layout::Vertical<cppurses::Button> {
-   public:
-    Child_t& example_1   = this->make_child("Example 1");
-    Child_t& example_2   = this->make_child("Example 2");
-    Child_t& example_3   = this->make_child("Example 3");
-    Child_t& example_4   = this->make_child("Example 4");
-    Child_t& example_5   = this->make_child("Example 5");
-    Child_t& example_6   = this->make_child("Example 6");
-    Child_t& example_7   = this->make_child("Example 7");
-    Child_t& to_info_btn = this->make_child("Rulesets");
-
-   public:
-    Patterns_box()
+    Thin_btn(cppurses::Glyph_string text) : Button{std::move(text)}
     {
-        using namespace cppurses::pipe;
-        to_info_btn | fixed_height(1) | bg(color::Light_green) |
-            fg(color::Teal);
+        *this | cppurses::pipe::fixed_height(1uL);
     }
 };
 
+class Patterns_list : public cppurses::layout::Horizontal<> {
+    class Patterns_list_impl : public cppurses::layout::Vertical<Thin_btn> {
+       public:
+        sig::Signal<void(std::wstring const& name)> pattern_chosen;
+
+       public:
+        void add_pattern(std::wstring const& name)
+        {
+            this->Layout::append(std::make_unique<Thin_btn>(name))
+                .pressed.connect([this, name] { pattern_chosen(name); });
+        }
+    };
+
+   public:
+    cppurses::VScrollbar& scrollbar = this->make_child<cppurses::VScrollbar>();
+
+    Patterns_list_impl& list = this->make_child<Patterns_list_impl>();
+
+   public:
+    sig::Signal<void(std::wstring const& name)>& pattern_chosen =
+        list.pattern_chosen;
+
+   public:
+    Patterns_list() { link(scrollbar, list); }
+
+   public:
+    void add_pattern(std::wstring const& name) { list.add_pattern(name); }
+};
+
+class Patterns_box : public cppurses::layout::Vertical<> {
+   public:
+    Patterns_list& list         = this->make_child<Patterns_list>();
+    Widget& break_              = this->append(make_break());
+    Thin_btn& goto_rulesets_btn = this->make_child<Thin_btn>(L"Rulesets") |
+                                  cppurses::pipe::bg(color::Light_green) |
+                                  cppurses::pipe::fg(color::Teal);
+
+   public:
+    sig::Signal<void(std::wstring const& name)>& pattern_chosen =
+        list.pattern_chosen;
+
+   public:
+    void add_pattern(std::wstring const& name) { list.add_pattern(name); }
+};
+
+class Rules_list {};
 class Rulesets_box : public cppurses::layout::Vertical<> {
    public:
-    cppurses::Text_display& info =
-        this->make_child<cppurses::Text_display>("Rulesets go here");
+    cppurses::Text_display& td =
+        this->make_child<cppurses::Text_display>("Rulesets here.");
+
+    cppurses::HScrollbar& bar = this->make_child<cppurses::HScrollbar>();
+
+    Widget& break_ = this->append(make_break());
 
     cppurses::Button& to_examples_btn =
         this->make_child<cppurses::Button>("Patterns");
@@ -68,18 +102,18 @@ class Patterns_rulesets_box : public cppurses::layout::Stack<> {
     {
         using namespace cppurses::pipe;
 
-        *this | active_page(0uL) | fixed_height(8uL);
+        *this | active_page(patterns_index) | fixed_height(16uL);
 
-        patterns.to_info_btn |
-            on_press([this]() { this->set_active_page(info_index); });
+        patterns.goto_rulesets_btn |
+            on_press([this]() { this->set_active_page(rulesets_index); });
 
         rulesets.to_examples_btn |
-            on_press([this]() { this->set_active_page(examples_index); });
+            on_press([this]() { this->set_active_page(patterns_index); });
     }
 
    private:
-    static auto constexpr examples_index = 0uL;
-    static auto constexpr info_index     = 1uL;
+    static auto constexpr patterns_index = 0uL;
+    static auto constexpr rulesets_index = 1uL;
 };
 
 }  // namespace gol

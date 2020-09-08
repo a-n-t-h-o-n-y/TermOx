@@ -32,7 +32,7 @@ class Event_queue {
     /// Place \p event at the back of the queue.
     void append(std::unique_ptr<Event> event)
     {
-        Guard_t g{mtx_};
+        auto const g    = Guard_t{mtx_};
         auto const type = event->type();
         if (type == Event::Paint)
             paint_events_.emplace_back(std::move(event));
@@ -45,7 +45,7 @@ class Event_queue {
     /// Remove all nullptr Events.
     void clean()
     {
-        Guard_t g{mtx_};
+        auto const g = Guard_t{mtx_};
         remove_nulls(general_events_);
         remove_nulls(paint_events_);
         remove_nulls(delete_events_);
@@ -56,7 +56,7 @@ class Event_queue {
      *  not crash the app by posting events to deleted Widgets.*/
     void remove_events_of(Widget* receiver)
     {
-        Guard_t g{mtx_};
+        auto const g = Guard_t{mtx_};
         remove_receiver(general_events_, receiver);
         remove_receiver(paint_events_, receiver);
         remove_descendants(general_events_, receiver);
@@ -130,7 +130,7 @@ class Event_queue {
             /// Return the next valid index after \p from for filter.
             auto find_next(Size_t from) -> Size_t
             {
-                Guard_t g{mtx_};
+                auto const g   = Guard_t{mtx_};
                 auto const end = events_.size();
                 if (from == end)
                     return from;
@@ -141,14 +141,14 @@ class Event_queue {
             /// Remove and return the Event at \p at in events_.
             auto remove(Size_t at) -> std::unique_ptr<Event>
             {
-                Guard_t g{mtx_};
+                auto const g = Guard_t{mtx_};
                 return std::move(events_[at]);
             }
 
             /// Retrieve the size of events_, including null-ed items.
             auto size() const -> Size_t
             {
-                Guard_t g{mtx_};
+                auto const g = Guard_t{mtx_};
                 return events_.size();
             }
 
@@ -221,7 +221,7 @@ template <>
 inline auto Event_queue::View<Event::Paint>::Move_iterator::find_next(
     Size_t from) -> Size_t
 {
-    Guard_t g{mtx_};
+    auto const g   = Guard_t{mtx_};
     auto const end = events_.size();
     if (from == end)
         return from;

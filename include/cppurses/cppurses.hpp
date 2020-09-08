@@ -44,7 +44,6 @@
 #include <cppurses/widget/widgets/cycle_box.hpp>
 #include <cppurses/widget/widgets/cycle_stack.hpp>
 #include <cppurses/widget/widgets/graph.hpp>
-#include <cppurses/widget/widgets/horizontal_scrollbar.hpp>
 #include <cppurses/widget/widgets/label.hpp>
 #include <cppurses/widget/widgets/line_edit.hpp>
 #include <cppurses/widget/widgets/log.hpp>
@@ -58,7 +57,6 @@
 #include <cppurses/widget/widgets/text_display.hpp>
 #include <cppurses/widget/widgets/textbox.hpp>
 #include <cppurses/widget/widgets/titlebar.hpp>
-#include <cppurses/widget/widgets/vertical_scrollbar.hpp>
 #include <cppurses/widget/widgets/vertical_slider.hpp>
 
 #include <cppurses/widget/area.hpp>

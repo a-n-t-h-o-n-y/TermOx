@@ -59,5 +59,33 @@ GoL_demo::GoL_demo()
     gol_display.generation_count_changed.connect([this](std::uint32_t count) {
         side_panel.status.gen_count.update_count(count);
     });
+
+    // TODO make this a free function that takes the patterns object and the
+    // gol_display object and adds and hooks up everything
+    auto& patterns = side_panel.patterns_rulesets.patterns;
+    patterns.add_pattern(L"Pattern 1");
+    patterns.add_pattern(L"Pattern 2");
+    patterns.add_pattern(L"Pattern 3");
+    patterns.add_pattern(L"Pattern 4");
+    patterns.add_pattern(L"Pattern 5");
+    patterns.add_pattern(L"Pattern 6");
+    patterns.add_pattern(L"Pattern 7");
+
+    patterns.pattern_chosen.connect([](auto const& name) {
+        if (name == L"Pattern 1")
+            ;
+        // gol_display.import(
+        //     "Pattern 1");  // TODO make import take some structure in
+        // memory, then have a store for these structure,
+        // and instead of the if/else if here, put that
+        // in the store lookup and just pass the result
+        // to gol_display.import();
+        else if (name == L"Pattern 2")
+            ;
+        else if (name == L"Pattern 3")
+            ;
+        else if (name == L"Pattern 4")
+            ;
+    });
 }
 }  // namespace gol

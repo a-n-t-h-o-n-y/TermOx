@@ -45,6 +45,7 @@ class Glyph_string : private std::vector<Glyph> {
         this->append(symbols, traits...);
     }
 
+    // TODO make this explicit, to encourage wchar_t strings so no conversions
     /// Construct with \p symbols, each having given Traits applied to them.
     template <typename... Traits>
     Glyph_string(std::string const& symbols, Traits... traits)
@@ -52,6 +53,7 @@ class Glyph_string : private std::vector<Glyph> {
         this->append(symbols, traits...);
     }
 
+    // TODO make this explicit, to encourage wchar_t strings so no conversions
     /// Construct with \p symbols, each having given Traits applied to them.
     template <typename... Traits>
     Glyph_string(char const* symbols, Traits... traits)

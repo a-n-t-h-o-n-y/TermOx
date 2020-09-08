@@ -150,13 +150,19 @@ class Layout : public Widget {
 
     auto child_added_event(Widget& child) -> bool override
     {
-        this->update_geometry();
+        // Child_added_event can be sent even if receivier is disabled, and
+        // update_geometry() is capable of enabling child widgets, so don't call
+        if (this->is_enabled())
+            this->update_geometry();
         return Widget::child_added_event(child);
     }
 
     auto child_removed_event(Widget& child) -> bool override
     {
-        this->update_geometry();
+        // Child_removed_event can be sent even if receivier is disabled, and
+        // update_geometry() is capable of enabling child widgets, so don't call
+        if (this->is_enabled())
+            this->update_geometry();
         return Widget::child_removed_event(child);
     }
 

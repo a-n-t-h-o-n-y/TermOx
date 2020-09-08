@@ -16,14 +16,14 @@ namespace gol {
 
 struct Side_panel : cppurses::layout::Vertical<> {
    private:
-    using Examples_info = cppurses::VAccordion<Patterns_rulesets_box>;
-    using Files         = cppurses::VAccordion<Files_box>;
-    using Settings      = cppurses::VAccordion<Settings_box>;
-    using Status        = cppurses::VAccordion<Status_box>;
+    using Pattern_rulesets = cppurses::VAccordion<Patterns_rulesets_box>;
+    using Files            = cppurses::VAccordion<Files_box>;
+    using Settings         = cppurses::VAccordion<Settings_box>;
+    using Status           = cppurses::VAccordion<Status_box>;
 
    public:
     Patterns_rulesets_box& patterns_rulesets =
-        this->make_child<Examples_info>(
+        this->make_child<Pattern_rulesets>(
                 {L"Examples", cppurses::Align::Left, line})
             .wrapped();
 

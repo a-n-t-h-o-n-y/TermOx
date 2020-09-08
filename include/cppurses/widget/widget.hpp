@@ -63,6 +63,8 @@ class Widget {
     Signal<void()> painted;
     Signal<void()> timer;
 
+    Signal<void(Widget&, Mouse::State const&)> mouse_wheel_filter;
+
     /// Describes the visual border of this Widget.
     Border border;
 
@@ -79,7 +81,7 @@ class Widget {
     Focus_policy focus_policy{Focus_policy::None};
 
     /// A Brush that is applied to every Glyph painted by this Widget.
-    Brush brush{background(Color::Black), foreground(Color::White)};
+    Brush brush{background(Color::Background), foreground(Color::Foreground)};
 
     friend class Resize_event;
     friend class Move_event;
@@ -296,7 +298,7 @@ class Widget {
     /// Return the number of children held by this Widget.
     auto child_count() const -> std::size_t { return children_.size(); }
 
-    /// Return the number of children held by this Widget.
+    /// Return the index of the first child displayed by this Widget.
     auto child_offset() const -> std::size_t { return children_.get_offset(); }
 
     /// If true, the brush will apply to the wallpaper Glyph.
@@ -509,10 +511,10 @@ class Widget {
     }
 
     /// Handles Mouse::Press objects filtered from other Widgets.
-    virtual auto mouse_press_event_filter(Widget& /* receiver */,
-                                          Mouse::State const &
-                                          /* mouse */) -> bool
+    virtual auto mouse_press_event_filter(Widget& receiver,
+                                          Mouse::State const& mouse) -> bool
     {
+        mouse_wheel_filter(receiver, mouse);
         return false;
     }
 
@@ -885,7 +887,7 @@ class Widget {
         {
             w.set_parent(self_);
             w.enable(self_->is_enabled());
-            System::send_event(Child_added_event{*self_, w});
+            System::post_event<Child_added_event>(*self_, w);
         }
 
         /// Removes and returns child at \p child_iter, assumes is valid iter.

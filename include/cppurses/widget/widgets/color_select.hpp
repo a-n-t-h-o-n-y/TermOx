@@ -1,5 +1,8 @@
 #ifndef CPPURSES_WIDGET_WIDGETS_COLOR_SELECT_HPP
 #define CPPURSES_WIDGET_WIDGETS_COLOR_SELECT_HPP
+#include <memory>
+#include <utility>
+
 #include <signals/signals.hpp>
 
 #include <cppurses/painter/color.hpp>

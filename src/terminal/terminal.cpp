@@ -129,7 +129,7 @@ void Terminal::set_background(Glyph const& tile)
 
 void Terminal::set_palette(Color_palette colors)
 {
-    if (!is_initialized_ or !this->has_color())
+    if (!is_initialized_ || !this->has_color())
         return;
     dynamic_color_engine_.clear();
     palette_ = std::move(colors);
