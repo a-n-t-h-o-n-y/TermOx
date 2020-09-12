@@ -7,8 +7,8 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/painter.hpp>
-#include <cppurses/system/events/key.hpp>
-#include <cppurses/system/events/mouse.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/system/mouse.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/widget.hpp>
@@ -41,11 +41,11 @@ class Horizontal_slider : public Widget {
         return Widget::paint_event();
     }
 
-    auto mouse_press_event(Mouse::State const& mouse) -> bool override;
+    auto mouse_press_event(Mouse const& m) -> bool override;
 
-    auto mouse_wheel_event(Mouse::State const& mouse) -> bool override;
+    auto mouse_wheel_event(Mouse const& m) -> bool override;
 
-    auto key_press_event(Key::State const& keyboard) -> bool override;
+    auto key_press_event(Key k) -> bool override;
 
    private:
     Glyph indicator_        = L'░';

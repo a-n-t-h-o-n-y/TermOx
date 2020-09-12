@@ -5,9 +5,6 @@
 
 #include <cppurses/system/detail/event_queue.hpp>
 #include <cppurses/system/event.hpp>
-#include <cppurses/system/events/delete_event.hpp>
-#include <cppurses/system/events/focus_event.hpp>
-#include <cppurses/system/events/paint_event.hpp>
 #include <cppurses/widget/widgets/button.hpp>
 
 namespace {

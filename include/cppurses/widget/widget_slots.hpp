@@ -3,8 +3,8 @@
 #include <signals/slot.hpp>
 
 #include <cppurses/painter/color.hpp>
-#include <cppurses/system/events/key.hpp>
-#include <cppurses/system/events/mouse.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/system/mouse.hpp>
 
 namespace cppurses {
 class Widget;
@@ -27,9 +27,9 @@ auto click(Widget& w, Mouse::Button b) -> sig::Slot<void(Point)>;
 
 auto click(Widget& w, Point p, Mouse::Button b) -> sig::Slot<void()>;
 
-auto keypress(Widget& w) -> sig::Slot<void(Key::Code)>;
+auto keypress(Widget& w) -> sig::Slot<void(Key)>;
 
-auto keypress(Widget& w, Key::Code k) -> sig::Slot<void()>;
+auto keypress(Widget& w, Key k) -> sig::Slot<void()>;
 
 auto set_background(Widget& w) -> sig::Slot<void(Color)>;
 

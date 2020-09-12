@@ -1,6 +1,5 @@
 #ifndef CPPURSES_SYSTEM_SYSTEM_HPP
 #define CPPURSES_SYSTEM_SYSTEM_HPP
-#include <memory>
 #include <mutex>
 #include <utility>
 #include <vector>
@@ -9,7 +8,7 @@
 #include <signals/slot.hpp>
 
 #include <cppurses/system/detail/user_input_event_loop.hpp>
-#include <cppurses/system/event.hpp>
+#include <cppurses/system/event_fwd.hpp>
 #include <cppurses/terminal/terminal.hpp>
 
 namespace cppurses {
@@ -23,13 +22,13 @@ class System {
    public:
     /// Emitted when System::exit is called. Should call Event_loop::exit.
     /** Passes along the exit_code System::exit() was called with. */
-    static sig::Signal<void(int)> exit_signal;
+    inline static sig::Signal<void(int)> exit_signal;
 
     // Slots
     static sig::Slot<void()> quit;
 
     /// Provides access to and modification of global terminal properties.
-    static Terminal terminal;
+    inline static Terminal terminal;
 
    public:
     System()              = default;
@@ -93,24 +92,19 @@ class System {
     static auto run() -> int;
 
     /// Immediately send the event filters and then to the intended receiver.
-    static auto send_event(Event const& event) -> bool;
+    static void send_event(Event e);
+
+    // Minor optimization.
+    static void send_event(Paint_event e);
+
+    // Minor optimization.
+    static void send_event(Delete_event e);
 
     /// Append the event to the Event_queue for the thread it was called on.
     /** The Event_queue is processed once per iteration of the Event_loop. When
      *  the Event is pulled from the Event_queue, it is processed by
      *  System::send_event() */
-    static void post_event(std::unique_ptr<Event> event);
-
-    /// Append a newly created Event of type T onto the Event_queue.
-    /** \p args... are passed onto the constructor of T. Has same behavior as
-     *  the non-templated function of the same name once the object has been
-     *  constructed. */
-    template <typename T, typename... Args>
-    static void post_event(Args&&... args)
-    {
-        auto event = std::make_unique<T>(std::forward<Args>(args)...);
-        System::post_event(std::move(event));
-    }
+    static void post_event(Event e);
 
     /// Send an exit signal to each of the currently running Event_loops.
     /** Also call shutdown() on the Animation_engine and set
@@ -130,9 +124,9 @@ class System {
     static auto exit_requested() -> bool { return exit_requested_; }
 
    private:
-    static Widget* head_;
-    static bool exit_requested_;
-    static detail::User_input_event_loop user_input_loop_;
+    inline static Widget* head_        = nullptr;
+    inline static bool exit_requested_ = false;
+    inline static detail::User_input_event_loop user_input_loop_;
     static Animation_engine animation_engine_;
 };
 

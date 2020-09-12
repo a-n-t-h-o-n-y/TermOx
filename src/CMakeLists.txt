@@ -44,21 +44,13 @@ endif()
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # SYSTEM
 target_sources(cppurses PRIVATE
-    system/delete_event.cpp
-    system/event.cpp
     system/event_loop.cpp
     system/focus.cpp
-    system/move_event.cpp
-    system/resize_event.cpp
     system/system.cpp
-    system/shortcuts.cpp
     system/animation_engine.cpp
     system/timer_event_loop.cpp
     system/user_input_event_loop.cpp
     system/find_widget_at.cpp
-    system/mouse.cpp
-    system/key.cpp
-    system/child_event.cpp
 )
 
 # PAINTER

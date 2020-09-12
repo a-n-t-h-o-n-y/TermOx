@@ -8,8 +8,8 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/trait.hpp>
-#include <cppurses/system/events/key.hpp>
-#include <cppurses/system/events/mouse.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/system/mouse.hpp>
 #include <cppurses/widget/widget.hpp>
 
 #include <signals/signals.hpp>
@@ -48,9 +48,9 @@ class Paint_area : public cppurses::Widget {
    protected:
     bool paint_event() override;
 
-    bool mouse_press_event(const cppurses::Mouse::State& mouse) override;
+    bool mouse_press_event(const cppurses::Mouse& m) override;
 
-    bool key_press_event(const cppurses::Key::State& keyboard) override;
+    bool key_press_event(cppurses::Key k) override;
 
    private:
     std::unordered_map<cppurses::Point, cppurses::Glyph> glyphs_painted_;

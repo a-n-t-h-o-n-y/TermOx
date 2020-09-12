@@ -6,8 +6,8 @@
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/system/events/key.hpp>
-#include <cppurses/system/events/mouse.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/system/mouse.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/widget.hpp>
 
@@ -139,18 +139,18 @@ class Vertical_slider : public Widget {
    protected:
     auto paint_event() -> bool override;
 
-    auto mouse_press_event(Mouse::State const& mouse) -> bool override;
+    auto mouse_press_event(Mouse const& m) -> bool override;
 
-    auto mouse_wheel_event(Mouse::State const& mouse) -> bool override;
+    auto mouse_wheel_event(Mouse const& m) -> bool override;
 
-    auto key_press_event(Key::State const& keyboard) -> bool override
+    auto key_press_event(Key k) -> bool override
     {
-        switch (keyboard.key) {
+        switch (k) {
             case Key::Arrow_up: this->increment(); break;
             case Key::Arrow_down: this->decrement(); break;
             default: break;
         }
-        return Widget::key_press_event(keyboard);
+        return Widget::key_press_event(k);
     }
 
    private:

@@ -14,7 +14,7 @@ namespace detail {
 class Dynamic_color_event_loop : public detail::Interval_event_loop {
    private:
     using Mutex_t = std::mutex;
-    using Guard_t = std::lock_guard<Mutex_t>;
+    using Guard_t = std::scoped_lock<Mutex_t>;
 
    public:
     using Interval_event_loop::Interval_event_loop;

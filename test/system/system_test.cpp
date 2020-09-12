@@ -10,27 +10,27 @@
 #include <memory>
 #include <utility>
 
-using cppurses::detail::Posted_event;
-using cppurses::detail::Posted_event_queue;
-using cppurses::detail::Thread_data;
 using cppurses::Event;
 using cppurses::Object;
 using cppurses::System;
+using cppurses::detail::Posted_event;
+using cppurses::detail::Posted_event_queue;
+using cppurses::detail::Thread_data;
 
-TEST(SystemTest, DefaultConstructor) {
-    System system;
-}
+TEST(SystemTest, DefaultConstructor) { System system; }
 
-TEST(SystemTest, PostEvent) {
+TEST(SystemTest, PostEvent)
+{
     System system;
     Object obj;
-    auto event = std::make_unique<Event>(Event::None);
+    auto event     = std::make_unique<Event>(Event::None);
     auto event_ptr = event.get();
     System::post_event(&obj, std::move(event));
     System::remove_posted_event(event_ptr);
 }
 
-TEST(SystemTest, RemovePostedEvent) {
+TEST(SystemTest, RemovePostedEvent)
+{
     System system;
     Posted_event_queue& queue = Thread_data::current().event_queue;
     EXPECT_TRUE(queue.empty());
@@ -47,25 +47,25 @@ TEST(SystemTest, RemovePostedEvent) {
 
     Object object3;
     auto event3 = std::make_unique<Event>(Event::None);  // change once abstract
-    auto ptr3 = event3.get();
+    auto ptr3   = event3.get();
     Posted_event pe3{&object3, std::move(event3), 1};
     queue.add_event(std::move(pe3));
 
     Object object4;
     auto event4 = std::make_unique<Event>(Event::None);  // change once abstract
-    auto ptr4 = event4.get();
+    auto ptr4   = event4.get();
     Posted_event pe4{&object4, std::move(event4), -9};
     queue.add_event(std::move(pe4));
 
     Object object5;
     auto event5 = std::make_unique<Event>(Event::None);  // change once abstract
-    auto ptr5 = event5.get();
+    auto ptr5   = event5.get();
     Posted_event pe5{&object5, std::move(event5), 100};
     queue.add_event(std::move(pe5));
 
     Object object6;
     auto event6 = std::make_unique<Event>(Event::None);  // change once abstract
-    auto ptr6 = event6.get();
+    auto ptr6   = event6.get();
     Posted_event pe6{&object6, std::move(event6), 0};
     queue.add_event(std::move(pe6));
 

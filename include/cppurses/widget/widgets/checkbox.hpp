@@ -7,7 +7,7 @@
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
-#include <cppurses/system/events/mouse.hpp>
+#include <cppurses/system/mouse.hpp>
 #include <cppurses/widget/detail/tracks_lifetime.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/pipe.hpp>
@@ -92,11 +92,11 @@ class Checkbox : public Widget {
         return Widget::paint_event();
     }
 
-    auto mouse_press_event(Mouse::State const& mouse) -> bool override
+    auto mouse_press_event(Mouse const& m) -> bool override
     {
-        if (mouse.button == Mouse::Button::Left)
+        if (m.button == Mouse::Button::Left)
             this->toggle();
-        return Widget::mouse_press_event(mouse);
+        return Widget::mouse_press_event(m);
     }
 
    private:

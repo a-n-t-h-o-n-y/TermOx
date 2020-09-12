@@ -5,7 +5,7 @@
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
-#include <cppurses/system/events/mouse.hpp>
+#include <cppurses/system/mouse.hpp>
 #include <cppurses/widget/widgets/detail/nearly_equal.hpp>
 
 namespace cppurses {
@@ -51,23 +51,23 @@ auto Vertical_slider::paint_event() -> bool
     return Widget::paint_event();
 }
 
-auto Vertical_slider::mouse_press_event(const Mouse::State& mouse) -> bool
+auto Vertical_slider::mouse_press_event(const Mouse& m) -> bool
 {
-    if (mouse.button == Mouse::Button::Left) {
-        logic_.set_ratio(this->ratio_at(mouse.local.y));
+    if (m.button == Mouse::Button::Left) {
+        logic_.set_ratio(this->ratio_at(m.local.y));
         this->update();
     }
-    return Widget::mouse_press_event(mouse);
+    return Widget::mouse_press_event(m);
 }
 
-auto Vertical_slider::mouse_wheel_event(Mouse::State const& mouse) -> bool
+auto Vertical_slider::mouse_wheel_event(Mouse const& m) -> bool
 {
-    switch (mouse.button) {
+    switch (m.button) {
         case Mouse::Button::ScrollUp: this->increment(); break;
         case Mouse::Button::ScrollDown: this->decrement(); break;
         default: break;
     }
-    return Widget::mouse_wheel_event(mouse);
+    return Widget::mouse_wheel_event(m);
 }
 
 auto Vertical_slider::ratio_at(std::size_t position) const -> Ratio_t

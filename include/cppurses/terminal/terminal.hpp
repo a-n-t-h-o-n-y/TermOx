@@ -26,6 +26,9 @@ class Terminal {
     /** No-op if already uninitialized. */
     void uninitialize();
 
+    /// Return the Area of the terminal screen.
+    auto area() const -> Area { return {this->width(), this->height()}; }
+
     /// Return the width of the terminal screen.
     auto width() const -> std::size_t;
 

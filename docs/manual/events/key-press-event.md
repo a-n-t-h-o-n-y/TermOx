@@ -11,7 +11,7 @@ class Widget {
     ...
    protected:
     // Called on key press
-    virtual bool key_press_event(Key::State const& keyboard);
+    virtual bool key_press_event(Key k);
     ...
 };
 
@@ -35,7 +35,7 @@ struct Key {
 class Widget {
     ...
    public:
-    Signal<void(Key::State const&)> key_pressed;
+    Signal<void(Key)> key_pressed;
     ...
 };
 ```
@@ -46,11 +46,11 @@ class Widget {
 class Widget {
     ...
    protected:
-    virtual bool key_press_event_filter(Widget& receiver, Key::State const& keyboard);
+    virtual bool key_press_event_filter(Widget& receiver, Key k);
     ...
 };
 ```
 
 ## See Also
 
-[Source File](../../../include/cppurses/system/events/key.hpp)
+[Source File](../../../include/cppurses/system/key.hpp)

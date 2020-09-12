@@ -53,11 +53,10 @@ void paint_unowned_tiles(Widget const& layout, Glyph const& wallpaper)
 void paint_to_terminal(Widget& widg,
                        detail::Screen_descriptor const& staged_tiles)
 {
-    auto const wallpaper = widg.generate_wallpaper();
-    auto const y_begin   = widg.y();
-    auto const x_begin   = widg.x();
-    auto const y_end     = y_begin + widg.outer_height();
-    auto const x_end     = x_begin + widg.outer_width();
+    auto const wallpaper          = widg.generate_wallpaper();
+    auto const [x_begin, y_begin] = std::pair{widg.x(), widg.y()};
+    auto const [x_end, y_end] =
+        std::pair{x_begin + widg.outer_width(), y_begin + widg.outer_height()};
     auto const is_layout = has_children(widg);
     if (is_layout)
         paint_unowned_tiles(widg, wallpaper);

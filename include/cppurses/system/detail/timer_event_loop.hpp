@@ -12,13 +12,15 @@
 
 namespace cppurses {
 class Widget;
-namespace detail {
+}  // namespace cppurses
+
+namespace cppurses::detail {
 
 /// Event loop for sending Timer_events at a given interval.
 class Timer_event_loop : public Interval_event_loop {
    private:
     using Mutex_t = std::mutex;
-    using Guard_t = std::lock_guard<Mutex_t>;
+    using Guard_t = std::scoped_lock<Mutex_t>;
 
    public:
     using Interval_event_loop::Interval_event_loop;
@@ -57,6 +59,5 @@ class Timer_event_loop : public Interval_event_loop {
     mutable Mutex_t mtx_registered_widgets_;
 };
 
-}  // namespace detail
-}  // namespace cppurses
+}  // namespace cppurses::detail
 #endif  // CPPURSES_SYSTEM_DETAIL_TIMER_EVENT_LOOP_HPP

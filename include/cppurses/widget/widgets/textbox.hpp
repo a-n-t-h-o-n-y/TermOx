@@ -4,8 +4,8 @@
 #include <utility>
 
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/system/events/key.hpp>
-#include <cppurses/system/events/mouse.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/system/mouse.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/widgets/detail/textbox_base.hpp>
 
@@ -60,13 +60,13 @@ class Textbox : public detail::Textbox_base {
 
    protected:
     /// Either input a Glyph from the Key, or move the cursor on arrow presses.
-    auto key_press_event(Key::State const& keyboard) -> bool override;
+    auto key_press_event(Key k) -> bool override;
 
     /// Move the cursor to the pressed, or nearest cell, that contains a Glyph.
-    auto mouse_press_event(Mouse::State const& mouse) -> bool override;
+    auto mouse_press_event(Mouse const& m) -> bool override;
 
     /// Scroll
-    auto mouse_wheel_event(Mouse::State const& mouse) -> bool override;
+    auto mouse_wheel_event(Mouse const& m) -> bool override;
 
    private:
     bool scroll_wheel_             = true;

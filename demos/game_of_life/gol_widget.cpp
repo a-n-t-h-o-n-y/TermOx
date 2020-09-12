@@ -10,8 +10,8 @@
 
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/painter.hpp>
-#include <cppurses/system/events/key.hpp>
-#include <cppurses/system/events/mouse.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/system/mouse.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
@@ -194,24 +194,22 @@ bool GoL_widget::paint_event()
     return Widget::paint_event();
 }
 
-bool GoL_widget::mouse_press_event(const Mouse::State& mouse)
+bool GoL_widget::mouse_press_event(const Mouse& m)
 {
-    const Coordinate engine_position = transform_from_display(mouse.local);
-    if (mouse.button == Mouse::Button::Right) {
+    const Coordinate engine_position = transform_from_display(m.local);
+    if (m.button == Mouse::Button::Right)
         engine_.kill(engine_position);
-    }
-    else {
+    else
         engine_.give_life(engine_position);
-    }
     this->update();
-    return Widget::mouse_press_event(mouse);
+    return Widget::mouse_press_event(m);
 }
 
-bool GoL_widget::mouse_wheel_event(const Mouse::State& mouse)
+bool GoL_widget::mouse_wheel_event(const Mouse& m)
 {
-    engine_.give_life(transform_from_display(mouse.local));
+    engine_.give_life(transform_from_display(m.local));
     this->update();
-    return Widget::mouse_wheel_event(mouse);
+    return Widget::mouse_wheel_event(m);
 }
 
 bool GoL_widget::timer_event()
@@ -221,23 +219,18 @@ bool GoL_widget::timer_event()
     return Widget::timer_event();
 }
 
-bool GoL_widget::key_press_event(const Key::State& keyboard)
+bool GoL_widget::key_press_event(Key k)
 {
     auto new_offset = this->offset();
-    if (keyboard.key == Key::Arrow_left) {
-        --new_offset.x;
-    }
-    else if (keyboard.key == Key::Arrow_right) {
-        ++new_offset.x;
-    }
-    else if (keyboard.key == Key::Arrow_up) {
-        --new_offset.y;
-    }
-    else if (keyboard.key == Key::Arrow_down) {
-        ++new_offset.y;
+    switch (k) {
+        case Key::Arrow_left: --new_offset.x; break;
+        case Key::Arrow_right: ++new_offset.x; break;
+        case Key::Arrow_up: --new_offset.y; break;
+        case Key::Arrow_down: ++new_offset.y; break;
+        default: break;
     }
     this->set_offset(new_offset);
-    return Widget::key_press_event(keyboard);
+    return Widget::key_press_event(k);
 }
 
 void GoL_widget::update_period()

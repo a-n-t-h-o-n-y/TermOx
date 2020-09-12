@@ -10,37 +10,27 @@
 
 namespace cppurses::detail {
 
-class Dynamic_color_event : public cppurses::Event {
-   public:
-    Dynamic_color_event(std::vector<Dynamic_color_event_loop::Def>& colors,
-                        std::mutex& colors_mtx)
-        : Event{Event::Custom, *System::head()},
-          colors_{colors},
-          colors_mtx_{colors_mtx}
-    {}
+namespace {
 
-   public:
-    auto send() const -> bool override
-    {
+/// Create a Custom_event to update color definitions.
+auto dynamic_color_event(std::vector<Dynamic_color_event_loop::Def>& colors,
+                         std::mutex& colors_mtx) -> Custom_event
+{
+    return {[&] {
         {
-            auto const guard = std::lock_guard{colors_mtx_};
-            for (auto& c : colors_)
+            auto const guard = std::scoped_lock{colors_mtx};
+            for (auto& c : colors)
                 System::terminal.term_set_color(c.ansi, c.dynamic.get_value());
         }
         cppurses::output::refresh();
-        return true;
-    }
+    }};
+}
 
-    auto filter_send(Widget&) const -> bool override { return true; }
-
-   private:
-    std::vector<Dynamic_color_event_loop::Def>& colors_;
-    std::mutex& colors_mtx_;
-};
+}  // namespace
 
 void Dynamic_color_event_loop::loop_function()
 {
-    System::post_event<Dynamic_color_event>(colors_, colors_mtx_);
+    System::post_event(dynamic_color_event(colors_, colors_mtx_));
     Interval_event_loop::loop_function();
 }
 

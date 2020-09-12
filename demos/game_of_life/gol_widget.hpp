@@ -6,8 +6,8 @@
 #include <signals/signal.hpp>
 
 #include <cppurses/painter/glyph.hpp>
-#include <cppurses/system/events/key.hpp>
-#include <cppurses/system/events/mouse.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/system/mouse.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 
@@ -75,10 +75,10 @@ class GoL_widget : public cppurses::Widget {
 
    protected:
     bool paint_event() override;
-    bool mouse_press_event(const cppurses::Mouse::State& mouse) override;
-    bool mouse_wheel_event(const cppurses::Mouse::State& mouse) override;
+    bool mouse_press_event(const cppurses::Mouse& m) override;
+    bool mouse_wheel_event(const cppurses::Mouse& m) override;
     bool timer_event() override;
-    bool key_press_event(const cppurses::Key::State& keyboard) override;
+    bool key_press_event(cppurses::Key k) override;
 
    private:
     Game_of_life_engine engine_;

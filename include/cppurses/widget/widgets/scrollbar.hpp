@@ -4,8 +4,6 @@
 #include <memory>
 #include <utility>
 
-#include <iostream>//temp
-
 #include <signals/signal.hpp>
 
 #include <cppurses/painter/color.hpp>
@@ -60,7 +58,7 @@ class Scrollbar : public Layout_t {
             if (parameters_.length == 0uL)
                 return Widget::paint_event();
 
-            Painter{*this}.put(L'🬰', {0,0});
+            Painter{*this}.put(L'🬰', {0, 0});
             // std::wcerr << bar << L'\n';
             // Painter{*this}.line(
             //     bar, point(parameters_.position),
@@ -201,10 +199,10 @@ class Scrollbar : public Layout_t {
     }
 
    protected:
-    virtual auto mouse_wheel_event_filter(Widget&, Mouse::State const& mouse)
+    virtual auto mouse_wheel_event_filter(Widget&, Mouse const& m)
         -> bool override
     {
-        return this->handle_wheel(mouse.button);
+        return this->handle_wheel(m.button);
     }
 
    private:

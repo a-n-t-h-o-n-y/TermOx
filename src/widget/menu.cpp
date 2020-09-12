@@ -11,8 +11,8 @@
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/painter/trait.hpp>
-#include <cppurses/system/events/key.hpp>
-#include <cppurses/system/events/mouse.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/system/mouse.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widgets/button.hpp>
@@ -94,9 +94,9 @@ void Menu::enable(bool enable, bool post_child_polished_event)
     }
 }
 
-auto Menu::key_press_event(Key::State const& keyboard) -> bool
+auto Menu::key_press_event(Key k) -> bool
 {
-    switch (keyboard.key) {
+    switch (k) {
         case Key::Arrow_down:
         case Key::j: this->select_down(); break;
         case Key::Arrow_up:
@@ -104,23 +104,23 @@ auto Menu::key_press_event(Key::State const& keyboard) -> bool
         case Key::Enter: this->send_selected_signal();
         default: break;
     }
-    return layout::Vertical<>::key_press_event(keyboard);
+    return layout::Vertical<>::key_press_event(k);
 }
 
-auto Menu::mouse_wheel_event(Mouse::State const& mouse) -> bool
+auto Menu::mouse_wheel_event(Mouse const& m) -> bool
 {
-    switch (mouse.button) {
+    switch (m.button) {
         case Mouse::Button::ScrollUp: this->select_up(); break;
         case Mouse::Button::ScrollDown: this->select_down(); break;
         default: break;
     }
-    return layout::Vertical<>::mouse_wheel_event(mouse);
+    return layout::Vertical<>::mouse_wheel_event(m);
 }
 
-auto Menu::mouse_wheel_event_filter(Widget& /* receiver */,
-                                    Mouse::State const& mouse) -> bool
+auto Menu::mouse_wheel_event_filter(Widget& /* receiver */, Mouse const& m)
+    -> bool
 {
-    switch (mouse.button) {
+    switch (m.button) {
         case Mouse::Button::ScrollUp: this->select_up(); return true;
         case Mouse::Button::ScrollDown: this->select_down(); return true;
         default: return false;

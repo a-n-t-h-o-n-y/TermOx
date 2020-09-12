@@ -5,7 +5,7 @@
 #include <signals/slot.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/system/events/key.hpp>
+#include <cppurses/system/key.hpp>
 
 namespace cppurses {
 
@@ -23,13 +23,13 @@ void Log::post_message(Glyph_string message)
     this->set_cursor(this->contents().size());
 }
 
-auto Log::key_press_event(Key::State const& keyboard) -> bool
+auto Log::key_press_event(Key k) -> bool
 {
-    switch (keyboard.key) {
+    switch (k) {
         case Key::Arrow_right:
         case Key::Arrow_left:
         case Key::Arrow_up:
-        case Key::Arrow_down: return Textbox::key_press_event(keyboard);
+        case Key::Arrow_down: return Textbox::key_press_event(k);
         default: return true;
     }
 }

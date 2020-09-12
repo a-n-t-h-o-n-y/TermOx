@@ -11,7 +11,7 @@
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/trait.hpp>
-#include <cppurses/system/events/key.hpp>
+#include <cppurses/system/key.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widgets/textbox.hpp>
 
@@ -42,9 +42,9 @@ void Line_edit::set_ghost_color(Color c)
     this->update();
 }
 
-auto Line_edit::key_press_event(Key::State const& keyboard) -> bool
+auto Line_edit::key_press_event(Key k) -> bool
 {
-    switch (keyboard.key) {
+    switch (k) {
         case Key::Enter:
             edit_finished(this->contents().str());
             if (clear_on_enter_)
@@ -59,15 +59,16 @@ auto Line_edit::key_press_event(Key::State const& keyboard) -> bool
     auto const is_printable = [](char c) {
         return std::isprint(c) or std::isspace(c);
     };
-    if (not is_printable(keyboard.symbol))
-        return Textbox::key_press_event(keyboard);
-    if (not validator_(keyboard.symbol))
+    auto const symbol = to_wchar(k);
+    if (!is_printable(symbol))
+        return Textbox::key_press_event(k);
+    if (!validator_(symbol))
         return true;
-    if (keyboard.symbol != '\0' and on_initial_) {  // First alpha-num input
+    if (symbol != L'\0' && on_initial_) {  // First alpha-num input
         this->clear();
         on_initial_ = false;
     }
-    return Textbox::key_press_event(keyboard);
+    return Textbox::key_press_event(k);
 }
 
 }  // namespace cppurses

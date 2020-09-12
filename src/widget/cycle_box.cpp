@@ -3,7 +3,7 @@
 #include <cstddef>
 
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/system/events/mouse.hpp>
+#include <cppurses/system/mouse.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
 
 namespace {

@@ -11,10 +11,12 @@
 
 #include <signals/signals.hpp>
 
-#include <cppurses/system/events/move_event.hpp>
-#include <cppurses/system/events/resize_event.hpp>
+#include <cppurses/system/event.hpp>
 #include <cppurses/system/system.hpp>
+#include <cppurses/widget/area.hpp>
 #include <cppurses/widget/layout.hpp>
+#include <cppurses/widget/point.hpp>
+#include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
 namespace layout {
@@ -209,13 +211,13 @@ class Stack : public Layout<Child_t> {
     void move_active_page()
     {
         if (active_page_ != nullptr)
-            System::post_event<Move_event>(*active_page_, this->top_left());
+            System::post_event(Move_event{*active_page_, this->top_left()});
     }
 
     void resize_active_page()
     {
         if (active_page_ != nullptr)
-            System::post_event<Resize_event>(*active_page_, this->outer_area());
+            System::post_event(Resize_event{*active_page_, this->outer_area()});
     }
 };
 

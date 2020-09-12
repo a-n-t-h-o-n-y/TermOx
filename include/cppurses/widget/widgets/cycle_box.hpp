@@ -11,8 +11,8 @@
 
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/system/events/key.hpp>
-#include <cppurses/system/events/mouse.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/system/mouse.hpp>
 #include <cppurses/widget/detail/tracks_lifetime.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
@@ -89,36 +89,36 @@ class Cycle_box : public HLabel {
     auto size() const -> std::size_t { return options_.size(); }
 
    protected:
-    auto mouse_press_event(Mouse::State const& mouse) -> bool override
+    auto mouse_press_event(Mouse const& m) -> bool override
     {
-        switch (mouse.button) {
+        switch (m.button) {
             case Mouse::Button::Left: this->next(); break;
             case Mouse::Button::Right: this->previous(); break;
             default: break;
         }
-        return HLabel::mouse_press_event(mouse);
+        return HLabel::mouse_press_event(m);
     }
 
-    auto mouse_wheel_event(Mouse::State const& mouse) -> bool override
+    auto mouse_wheel_event(Mouse const& m) -> bool override
     {
-        switch (mouse.button) {
+        switch (m.button) {
             case Mouse::Button::ScrollDown: this->next(); break;
             case Mouse::Button::ScrollUp: this->previous(); break;
             default: break;
         }
-        return HLabel::mouse_wheel_event(mouse);
+        return HLabel::mouse_wheel_event(m);
     }
 
-    auto key_press_event(Key::State const& keyboard) -> bool override
+    auto key_press_event(Key k) -> bool override
     {
-        switch (keyboard.key) {
+        switch (k) {
             case Key::Arrow_up:
             case Key::k: this->previous(); break;
             case Key::Arrow_down:
             case Key::j: this->next(); break;
             default: break;
         }
-        return HLabel::key_press_event(keyboard);
+        return HLabel::key_press_event(k);
     }
 
    private:

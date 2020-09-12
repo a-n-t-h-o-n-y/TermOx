@@ -5,8 +5,8 @@
 
 #include <signals/signals.hpp>
 
-#include <cppurses/system/events/key.hpp>
-#include <cppurses/system/events/mouse.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/system/mouse.hpp>
 #include <cppurses/widget/detail/tracks_lifetime.hpp>
 
 namespace cppurses {
@@ -23,27 +23,27 @@ void Horizontal_slider::set_percent(float percent)
     this->update();
 }
 
-auto Horizontal_slider::mouse_press_event(Mouse::State const& mouse) -> bool
+auto Horizontal_slider::mouse_press_event(Mouse const& m) -> bool
 {
-    if (mouse.button == Mouse::Button::Left)
-        this->set_percent(position_to_percent(mouse.local.x));
-    return Widget::mouse_press_event(mouse);
+    if (m.button == Mouse::Button::Left)
+        this->set_percent(position_to_percent(m.local.x));
+    return Widget::mouse_press_event(m);
 }
 
-auto Horizontal_slider::mouse_wheel_event(Mouse::State const& mouse) -> bool
+auto Horizontal_slider::mouse_wheel_event(Mouse const& m) -> bool
 {
-    switch (mouse.button) {
+    switch (m.button) {
         case Mouse::Button::ScrollUp: scrolled_up(); break;
         case Mouse::Button::ScrollDown: scrolled_down(); break;
         default: break;
     }
-    return Widget::mouse_wheel_event(mouse);
+    return Widget::mouse_wheel_event(m);
 }
 
-auto Horizontal_slider::key_press_event(Key::State const& keyboard) -> bool
+auto Horizontal_slider::key_press_event(Key k) -> bool
 {
     auto const current_position = percent_to_position(percent_progress_);
-    switch (keyboard.key) {
+    switch (k) {
         case Key::Arrow_right:
             this->set_percent(position_to_percent(current_position + 1));
             break;
@@ -53,7 +53,7 @@ auto Horizontal_slider::key_press_event(Key::State const& keyboard) -> bool
             break;
         default: break;
     }
-    return Widget::key_press_event(keyboard);
+    return Widget::key_press_event(k);
 }
 
 auto Horizontal_slider::position_to_percent(std::size_t position) -> float

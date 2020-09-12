@@ -3,7 +3,7 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/painter.hpp>
-#include <cppurses/system/events/mouse.hpp>
+#include <cppurses/system/mouse.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/point.hpp>
@@ -47,11 +47,11 @@ class Animated_box : public cppurses::Widget {
         return Widget::disable_event();
     }
 
-    auto mouse_press_event(const cppurses::Mouse::State& mouse) -> bool override
+    auto mouse_press_event(const cppurses::Mouse& m) -> bool override
     {
-        xy_ = mouse.local;
+        xy_ = m.local;
         this->update();
-        return Widget::mouse_press_event(mouse);
+        return Widget::mouse_press_event(m);
     }
 
     auto resize_event(cppurses::Area new_size, cppurses::Area old_size)

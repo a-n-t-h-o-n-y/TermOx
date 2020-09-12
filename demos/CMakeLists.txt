@@ -25,7 +25,6 @@ target_sources(demos PRIVATE
     chess/src/shared_user_input.cpp
     chess/src/player_human.cpp
     chess/src/chess_event_loop.cpp
-    chess/src/chess_move_request_event.cpp
     chess/src/shared_move.cpp
 )
 

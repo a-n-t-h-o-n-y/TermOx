@@ -21,10 +21,10 @@
 #include <cppurses/painter/trait.hpp>
 #include <cppurses/system/animation_engine.hpp>
 #include <cppurses/system/detail/focus.hpp>
-#include <cppurses/system/events/child_event.hpp>
-#include <cppurses/system/events/key.hpp>
-#include <cppurses/system/events/mouse.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/system/mouse.hpp>
 #include <cppurses/system/system.hpp>
+#include <cppurses/widget/area.hpp>
 #include <cppurses/widget/border.hpp>
 #include <cppurses/widget/cursor_data.hpp>
 #include <cppurses/widget/detail/border_offset.hpp>
@@ -33,7 +33,6 @@
 #include <cppurses/widget/size_policy.hpp>
 
 namespace cppurses {
-struct Area;
 
 class Widget {
    private:
@@ -51,19 +50,20 @@ class Widget {
     Signal<void(Widget&)> child_polished;
     Signal<void(Point const&, Point const&)> moved;
     Signal<void(Area const&, Area const&)> resized;
-    Signal<void(Mouse::State const&)> mouse_pressed;
-    Signal<void(Mouse::State const&)> mouse_released;
-    Signal<void(Mouse::State const&)> mouse_double_clicked;
-    Signal<void(Mouse::State const&)> mouse_wheel_scrolled;
-    Signal<void(Mouse::State const&)> mouse_moved;
-    Signal<void(Key::State const&)> key_pressed;
+    Signal<void(Mouse const&)> mouse_pressed;
+    Signal<void(Mouse const&)> mouse_released;
+    Signal<void(Mouse const&)> mouse_double_clicked;
+    Signal<void(Mouse const&)> mouse_wheel_scrolled;
+    Signal<void(Mouse const&)> mouse_moved;
+    Signal<void(Key)> key_pressed;
     Signal<void()> focused_in;
     Signal<void()> focused_out;
     Signal<void()> destroyed;
     Signal<void()> painted;
     Signal<void()> timer;
 
-    Signal<void(Widget&, Mouse::State const&)> mouse_wheel_filter;
+    // TODO add rest of _filter signals
+    Signal<void(Widget&, Mouse const&)> mouse_wheel_filter;
 
     /// Describes the visual border of this Widget.
     Border border;
@@ -83,9 +83,6 @@ class Widget {
     /// A Brush that is applied to every Glyph painted by this Widget.
     Brush brush{background(Color::Background), foreground(Color::Foreground)};
 
-    friend class Resize_event;
-    friend class Move_event;
-
    public:
     /// Initialize with \p name.
     explicit Widget(std::string name = "");
@@ -101,25 +98,20 @@ class Widget {
             detail::Focus::clear();
     }
 
+   public:
     /// Set the identifying name of the Widget.
     void set_name(std::string name) { name_ = std::move(name); }
 
     /// Return the name of the Widget.
-    auto name() const -> std::string { return name_; }
+    auto name() const -> std::string const& { return name_; }
 
     /// Return the ID number unique to this Widget.
     auto unique_id() const -> std::uint16_t { return unique_id_; }
 
     /// Used to fill in empty space that is not filled in by paint_event().
-    void set_wallpaper(Glyph g)
+    void set_wallpaper(std::optional<Glyph> g)
     {
         wallpaper_ = g;
-        this->update();
-    }
-
-    void set_wallpaper(std::nullopt_t)
-    {
-        wallpaper_.reset();
         this->update();
     }
 
@@ -214,13 +206,13 @@ class Widget {
     }
 
     /// Return the area the widget occupies, including Border space.
-    auto outer_area() const -> Area { return {outer_width_, outer_height_}; }
+    auto outer_area() const -> Area { return outer_area_; }
 
     /// Return the width dimension, this includes Border space.
-    auto outer_width() const -> std::size_t { return outer_width_; }
+    auto outer_width() const -> std::size_t { return outer_area_.width; }
 
     /// Return the height dimension, this includes Border space.
-    auto outer_height() const -> std::size_t { return outer_height_; }
+    auto outer_height() const -> std::size_t { return outer_area_.height; }
 
     // TODO remove virtual
     /// Post a paint event to this Widget.
@@ -382,45 +374,45 @@ class Widget {
         return true;
     }
 
-    /// Handles Mouse::Press objects.
-    virtual auto mouse_press_event(Mouse::State const& mouse) -> bool
+    /// Handles Mouse_press_event objects.
+    virtual auto mouse_press_event(Mouse const& m) -> bool
     {
-        mouse_pressed(mouse);
+        mouse_pressed(m);
         return true;
     }
 
-    /// Handles Mouse::Release objects.
-    virtual auto mouse_release_event(Mouse::State const& mouse) -> bool
+    /// Handles Mouse_release_event objects.
+    virtual auto mouse_release_event(Mouse const& m) -> bool
     {
-        mouse_released(mouse);
+        mouse_released(m);
         return true;
     }
 
-    /// Handles Mouse::Double_click objects.
-    virtual auto mouse_double_click_event(Mouse::State const& mouse) -> bool
+    /// Handles Mouse_double_click_event objects.
+    virtual auto mouse_double_click_event(Mouse const& m) -> bool
     {
-        mouse_double_clicked(mouse);
+        mouse_double_clicked(m);
         return true;
     }
 
-    /// Handles Mouse::Wheel objects.
-    virtual auto mouse_wheel_event(Mouse::State const& mouse) -> bool
+    /// Handles Mouse_wheel_event objects.
+    virtual auto mouse_wheel_event(Mouse const& m) -> bool
     {
-        mouse_wheel_scrolled(mouse);
+        mouse_wheel_scrolled(m);
         return true;
     }
 
-    /// Handles Mouse::Move objects.
-    virtual auto mouse_move_event(Mouse::State const& mouse) -> bool
+    /// Handles Mouse_move_event objects.
+    virtual auto mouse_move_event(Mouse const& m) -> bool
     {
-        mouse_moved(mouse);
+        mouse_moved(m);
         return false;
     }
 
-    /// Handles Key::Press objects.
-    virtual auto key_press_event(Key::State const& keyboard) -> bool
+    /// Handles Key_press_event objects.
+    virtual auto key_press_event(Key k) -> bool
     {
-        key_pressed(keyboard);
+        key_pressed(k);
         return true;
     }
 
@@ -510,50 +502,47 @@ class Widget {
         return false;
     }
 
-    /// Handles Mouse::Press objects filtered from other Widgets.
-    virtual auto mouse_press_event_filter(Widget& receiver,
-                                          Mouse::State const& mouse) -> bool
+    /// Handles Mouse_press_event objects filtered from other Widgets.
+    virtual auto mouse_press_event_filter(Widget& receiver, Mouse const& m)
+        -> bool
     {
-        mouse_wheel_filter(receiver, mouse);
+        mouse_wheel_filter(receiver, m);
         return false;
     }
 
-    /// Handles Mouse::Release objects filtered from other Widgets.
+    /// Handles Mouse_release_event objects filtered from other Widgets.
     virtual auto mouse_release_event_filter(Widget& /* receiver */,
-                                            Mouse::State const &
-                                            /* mouse */) -> bool
+                                            Mouse const &
+                                            /* m */) -> bool
     {
         return false;
     }
 
-    /// Handles Mouse::Double_click objects filtered from other Widgets.
+    /// Handles Mouse_double_click_event objects filtered from other Widgets.
     virtual auto mouse_double_click_event_filter(Widget& /* receiver */,
-                                                 Mouse::State const &
-                                                 /* mouse */) -> bool
+                                                 Mouse const &
+                                                 /* m */) -> bool
     {
         return false;
     }
 
-    /// Handles Mouse::Wheel objects filtered from other Widgets.
-    virtual auto mouse_wheel_event_filter(Widget& /* receiver */,
-                                          Mouse::State const &
-                                          /* mouse */) -> bool
+    /// Handles Mouse_wheel_event objects filtered from other Widgets.
+    virtual auto mouse_wheel_event_filter(Widget& /* receiver */, Mouse const &
+                                          /* m */) -> bool
     {
         return false;
     }
 
-    /// Handles Mouse::Move objects filtered from other Widgets.
-    virtual auto mouse_move_event_filter(Widget& /* receiver */,
-                                         Mouse::State const &
-                                         /* mouse */) -> bool
+    /// Handles Mouse_move_event objects filtered from other Widgets.
+    virtual auto mouse_move_event_filter(Widget& /* receiver */, Mouse const &
+                                         /* m */) -> bool
     {
         return false;
     }
 
-    /// Handles Key::Press objects filtered from other Widgets.
-    virtual auto key_press_event_filter(Widget& /* receiver */,
-                                        Key::State const &
-                                        /* keyboard */) -> bool
+    /// Handles Key_press_event objects filtered from other Widgets.
+    virtual auto key_press_event_filter(Widget& /* receiver */, Key const &
+                                        /* k */) -> bool
     {
         return false;
     }
@@ -883,23 +872,11 @@ class Widget {
         }
 
         /// Setup \p w to be a child of self_.
-        void init_new_child(Widget& w)
-        {
-            w.set_parent(self_);
-            w.enable(self_->is_enabled());
-            System::post_event<Child_added_event>(*self_, w);
-        }
+        void init_new_child(Widget& w);
 
         /// Removes and returns child at \p child_iter, assumes is valid iter.
-        auto remove_impl(List_t::iterator child_iter) -> std::unique_ptr<Widget>
-        {
-            auto removed = std::unique_ptr<Widget>{std::move(*child_iter)};
-            child_list_.erase(child_iter);
-            removed->disable();
-            System::post_event<Child_removed_event>(*self_, *removed);
-            removed->set_parent(nullptr);
-            return removed;
-        }
+        auto remove_impl(List_t::iterator child_iter)
+            -> std::unique_ptr<Widget>;
 
         template <typename Widget_t, typename Iter>
         static auto make_deref_and_cast_iter(Iter i)
@@ -952,16 +929,18 @@ class Widget {
     std::set<Widget*> event_filters_;
 
     // Top left point of *this, relative to the top left of the screen.
-    // Does not account for borders.
-    Point top_left_position_ = {0, 0};
+    // This Point is the same with or without a border enabled.
+    Point top_left_position_{0uL, 0uL};
 
-    std::size_t outer_width_  = width_policy.hint();
-    std::size_t outer_height_ = height_policy.hint();
+    // The entire area of the widget, including any border space.
+    Area outer_area_{width_policy.hint(), height_policy.hint()};
 
-   private:
-    void set_x(std::size_t global_x) { top_left_position_.x = global_x; }
+   public:
+    /// Should only be used by Move_event send() function.
+    void set_top_left(Point p) { top_left_position_ = p; }
 
-    void set_y(std::size_t global_y) { top_left_position_.y = global_y; }
+    /// Should only be used by Resize_event send() function.
+    void set_outer_area(Area a) { outer_area_ = a; }
 
     void set_parent(Widget* parent) { parent_ = parent; }
 };

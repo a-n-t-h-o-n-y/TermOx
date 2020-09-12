@@ -1,7 +1,7 @@
 #ifndef DEMOS_DEMO_MENU_HPP
 #define DEMOS_DEMO_MENU_HPP
 #include <cppurses/painter/palette/dawn_bringer16.hpp>
-#include <cppurses/system/events/key.hpp>
+#include <cppurses/system/key.hpp>
 #include <cppurses/system/shortcuts.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/focus_policy.hpp>

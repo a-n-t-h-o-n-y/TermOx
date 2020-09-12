@@ -3,8 +3,9 @@
 #include <signals/slot.hpp>
 
 #include <cppurses/painter/color.hpp>
-#include <cppurses/system/events/key.hpp>
-#include <cppurses/system/events/mouse.hpp>
+#include <cppurses/system/event.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/system/mouse.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/cursor_data.hpp>
 #include <cppurses/widget/point.hpp>
@@ -43,12 +44,11 @@ auto update(Widget& w) -> sig::Slot<void()>
 
 auto click(Widget& w) -> sig::Slot<void(Point, Mouse::Button)>
 {
-    auto slot = sig::Slot<void(Point, Mouse::Button)>{[&w](const Point& p,
-                                                           Mouse::Button b) {
-        System::send_event(Mouse::Press{
-            w, Mouse::State{
-                   b, {}, Point{w.inner_x() + p.x, w.inner_y() + p.y}, p, 0}});
-    }};
+    auto slot = sig::Slot<void(Point, Mouse::Button)>{
+        [&w](Point const& p, Mouse::Button b) {
+            System::send_event(Mouse_press_event{
+                w, Mouse{b, {}, {w.inner_x() + p.x, w.inner_y() + p.y}, p, 0}});
+        }};
     slot.track(w.destroyed);
     return slot;
 }
@@ -56,9 +56,8 @@ auto click(Widget& w) -> sig::Slot<void(Point, Mouse::Button)>
 auto click(Widget& w, Point p) -> sig::Slot<void(Mouse::Button)>
 {
     auto slot = sig::Slot<void(Mouse::Button)>{[&w, p](Mouse::Button b) {
-        System::send_event(Mouse::Press{
-            w, Mouse::State{
-                   b, {}, Point{w.inner_x() + p.x, w.inner_y() + p.y}, p, 0}});
+        System::send_event(Mouse_press_event{
+            w, Mouse{b, {}, {w.inner_x() + p.x, w.inner_y() + p.y}, p, 0}});
     }};
     slot.track(w.destroyed);
     return slot;
@@ -67,9 +66,8 @@ auto click(Widget& w, Point p) -> sig::Slot<void(Mouse::Button)>
 auto click(Widget& w, Mouse::Button b) -> sig::Slot<void(Point)>
 {
     auto slot = sig::Slot<void(Point)>{[&w, b](Point p) {
-        System::send_event(Mouse::Press{
-            w, Mouse::State{
-                   b, {}, Point{w.inner_x() + p.x, w.inner_y() + p.y}, p, 0}});
+        System::send_event(Mouse_press_event{
+            w, Mouse{b, {}, {w.inner_x() + p.x, w.inner_y() + p.y}, p, 0}});
     }};
     slot.track(w.destroyed);
     return slot;
@@ -78,27 +76,26 @@ auto click(Widget& w, Mouse::Button b) -> sig::Slot<void(Point)>
 auto click(Widget& w, Point p, Mouse::Button b) -> sig::Slot<void()>
 {
     auto slot = sig::Slot<void()>{[&w, p, b] {
-        System::send_event(Mouse::Press{
-            w, Mouse::State{
-                   b, {}, Point{w.inner_x() + p.x, w.inner_y() + p.y}, p, 0}});
+        System::send_event(Mouse_press_event{
+            w, Mouse{b, {}, {w.inner_x() + p.x, w.inner_y() + p.y}, p, 0}});
     }};
     slot.track(w.destroyed);
     return slot;
 }
 
-auto keypress(Widget& w) -> sig::Slot<void(Key::Code)>
+auto keypress(Widget& w) -> sig::Slot<void(Key)>
 {
-    auto slot = sig::Slot<void(Key::Code)>{[&w](Key::Code k) {
-        System::send_event(Key::Press{w, k});
+    auto slot = sig::Slot<void(Key)>{[&w](Key k) {
+        System::send_event(Key_press_event{w, k});
     }};
     slot.track(w.destroyed);
     return slot;
 }
 
-auto keypress(Widget& w, Key::Code k) -> sig::Slot<void()>
+auto keypress(Widget& w, Key k) -> sig::Slot<void()>
 {
     auto slot = sig::Slot<void()>{[&w, k] {
-        System::send_event(Key::Press{w, k});
+        System::send_event(Key_press_event{w, k});
     }};
     slot.track(w.destroyed);
     return slot;

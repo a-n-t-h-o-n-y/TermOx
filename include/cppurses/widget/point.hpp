@@ -1,7 +1,7 @@
 #ifndef CPPURSES_WIDGET_POINT_HPP
 #define CPPURSES_WIDGET_POINT_HPP
 #include <cstddef>
-#include <functional>  // std::hash
+#include <functional>
 
 namespace cppurses {
 
@@ -15,7 +15,7 @@ struct Point {
 
 inline auto operator==(Point const& lhs, Point const& rhs) -> bool
 {
-    return lhs.x == rhs.x and lhs.y == rhs.y;
+    return lhs.x == rhs.x && lhs.y == rhs.y;
 }
 
 inline auto operator!=(Point const& lhs, Point const& rhs) -> bool
@@ -23,9 +23,15 @@ inline auto operator!=(Point const& lhs, Point const& rhs) -> bool
     return !(lhs == rhs);
 }
 
+/// Only useful for total ordering, is not accurate a true less than.
 inline auto operator<(Point const& lhs, Point const& rhs) -> bool
 {
-    return (lhs.y < rhs.y) or (lhs.y == rhs.y and lhs.x < rhs.x);
+    return (lhs.y < rhs.y) || (lhs.y == rhs.y && lhs.x < rhs.x);
+}
+
+inline auto operator+(Point const& lhs, Point const& rhs) -> Point
+{
+    return {lhs.x + rhs.x, lhs.y + rhs.y};
 }
 
 }  // namespace cppurses

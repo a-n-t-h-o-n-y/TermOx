@@ -3,7 +3,7 @@
 #include <string>
 #include <utility>
 
-#include <cppurses/system/events/key.hpp>
+#include <cppurses/system/key.hpp>
 #include <cppurses/widget/array.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/layouts/selecting.hpp>

@@ -8,7 +8,7 @@
 #include <utility>
 #include <vector>
 
-#include <cppurses/system/events/key.hpp>
+#include <cppurses/system/key.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/pipe.hpp>
 
@@ -23,7 +23,7 @@ namespace cppurses::layout {
 template <typename Layout_t, bool unselect_on_focus_out = true>
 class Selecting : public Layout_t {
    private:
-    using Key_codes = std::vector<Key::Code>;
+    using Key_codes = std::vector<Key>;
 
     template <typename Unary_predicate>
     using Enable_if_invocable_with_child_t = std::enable_if_t<
@@ -104,17 +104,17 @@ class Selecting : public Layout_t {
     }
 
    protected:
-    auto key_press_event(Key::State const& keyboard) -> bool override
+    auto key_press_event(Key k) -> bool override
     {
-        if (contains(keyboard.key, increment_selection_keys_))
+        if (contains(k, increment_selection_keys_))
             this->increment_selected_and_scroll_if_necessary();
-        else if (contains(keyboard.key, decrement_selection_keys_))
+        else if (contains(k, decrement_selection_keys_))
             this->decrement_selected_and_scroll_if_necessary();
-        else if (contains(keyboard.key, increment_scroll_keys_))
+        else if (contains(k, increment_scroll_keys_))
             this->increment_offset_and_increment_selected();
-        else if (contains(keyboard.key, decrement_scroll_keys_))
+        else if (contains(k, decrement_scroll_keys_))
             this->decrement_offset_and_decrement_selected();
-        return Layout_t::key_press_event(keyboard);
+        return Layout_t::key_press_event(k);
     }
 
     /// Reset the selected child if needed.
@@ -294,10 +294,10 @@ class Selecting : public Layout_t {
     }
 
     /// Return true if \p codes contains the value \p key.
-    static auto contains(Key::Code key, Key_codes const& codes) -> bool
+    static auto contains(Key k, Key_codes const& codes) -> bool
     {
         return std::any_of(std::begin(codes), std::end(codes),
-                           [=](auto k) { return k == key; });
+                           [=](auto code) { return code == k; });
     }
 };
 

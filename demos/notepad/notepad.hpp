@@ -146,11 +146,11 @@ class Filename_edit : public cppurses::Textbox {
     }
 
    protected:
-    auto key_press_event(cppurses::Key::State const& keyboard) -> bool override
+    auto key_press_event(cppurses::Key k) -> bool override
     {
-        if (keyboard.key == cppurses::Key::Enter)
+        if (k == cppurses::Key::Enter)
             return true;
-        return Textbox::key_press_event(keyboard);
+        return Textbox::key_press_event(k);
     }
 };
 

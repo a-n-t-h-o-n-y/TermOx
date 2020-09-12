@@ -1,7 +1,6 @@
 #include <cppurses/widget/widget.hpp>
 
 #include <algorithm>
-
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -15,11 +14,7 @@
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
-#include <cppurses/system/events/child_event.hpp>
-#include <cppurses/system/events/delete_event.hpp>
-#include <cppurses/system/events/disable_event.hpp>
-#include <cppurses/system/events/enable_event.hpp>
-#include <cppurses/system/events/paint_event.hpp>
+#include <cppurses/system/event.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/terminal/terminal.hpp>
 #include <cppurses/widget/border.hpp>
@@ -29,9 +24,9 @@ namespace {
 
 auto get_unique_id() -> std::uint16_t
 {
-    static std::mutex mtx;
+    static auto mtx     = std::mutex{};
     static auto current = std::uint16_t{0};
-    std::lock_guard<std::mutex> lock{mtx};
+    auto const lock     = std::scoped_lock{mtx};
     return ++current;
 }
 
@@ -40,7 +35,7 @@ void post_child_polished(cppurses::Widget& w)
     using namespace cppurses;
     auto* parent = w.parent();
     if (parent != nullptr)
-        System::post_event<Child_polished_event>(*parent, w);
+        System::post_event(Child_polished_event{*parent, w});
 }
 
 }  // namespace
@@ -75,7 +70,7 @@ void Widget::Children::erase(Widget const* child)
     if (child_iter == std::end(child_list_))
         throw std::invalid_argument{"Children::remove: No Child Found"};
     std::unique_ptr<Widget> removed = this->remove_impl(child_iter);
-    System::post_event<Delete_event>(*self_, std::move(removed));
+    System::post_event(Delete_event{std::move(removed)});
 }
 
 void Widget::Children::erase(std::size_t index)
@@ -88,15 +83,33 @@ void Widget::Children::clear()
     for (auto& child : child_list_) {
         auto removed = std::move(child);
         removed->disable();
-        System::post_event<Child_removed_event>(*self_, *removed);
+        System::post_event(Child_removed_event{*self_, *removed});
         removed->set_parent(nullptr);
-        System::post_event<Delete_event>(*self_, std::move(removed));
+        System::post_event(Delete_event{std::move(removed)});
     }
     child_list_.clear();
 }
 
-// This is here because including paint_event.hpp in widget.hpp causes issues.
-void Widget::update() { System::post_event<Paint_event>(*this); }
+void Widget::Children::init_new_child(Widget& w)
+{
+    w.set_parent(self_);
+    w.enable(self_->is_enabled());
+    System::post_event(Child_added_event{*self_, w});
+}
+
+auto Widget::Children::remove_impl(List_t::iterator child_iter)
+    -> std::unique_ptr<Widget>
+{
+    auto removed = std::unique_ptr<Widget>{std::move(*child_iter)};
+    child_list_.erase(child_iter);
+    removed->disable();
+    System::post_event(Child_removed_event{*self_, *removed});
+    removed->set_parent(nullptr);
+    return removed;
+}
+
+// Don't want to include system/event.hpp in widget.hpp
+void Widget::update() { System::post_event(Paint_event{*this}); }
 
 auto Widget::generate_wallpaper() const -> Glyph
 {
@@ -126,12 +139,12 @@ void Widget::enable_and_post_events(bool enable, bool post_child_polished_event)
     if (enabled_ == enable)
         return;
     if (!enable)
-        System::post_event<Disable_event>(*this);
+        System::post_event(Disable_event{*this});
     enabled_ = enable;
     if (enable)
-        System::post_event<Enable_event>(*this);
+        System::post_event(Enable_event{*this});
     if (post_child_polished_event and this->parent() != nullptr)
-        System::post_event<Child_polished_event>(*this->parent(), *this);
+        System::post_event(Child_polished_event{*this->parent(), *this});
     this->update();
 }
 

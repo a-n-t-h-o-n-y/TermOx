@@ -1,86 +1,130 @@
 #ifndef CPPURSES_SYSTEM_EVENT_HPP
 #define CPPURSES_SYSTEM_EVENT_HPP
-#include <string>
+#include <functional>
+#include <memory>
+#include <variant>
+
+#include <cppurses/system/key.hpp>
+#include <cppurses/system/mouse.hpp>
+#include <cppurses/widget/area.hpp>
+#include <cppurses/widget/point.hpp>
+#include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
-class Widget;
 
-/// Base class for types passed around by the Event system.
-/** Events encapsulate a behavior to apply to a Widget. Events are created and
- *  passed to the Event_queue to be processed at a later time. */
-class Event {
-   public:
-    /// Event type descriptors for derived types.
-    /** Event_queue relies on these for optimizations */
-    enum Type {
-        None,
-        MouseButtonPress,
-        MouseButtonRelease,
-        MouseButtonDblClick,
-        MouseWheel,
-        MouseMove,
-        KeyPress,
-        KeyRelease,
-        FocusIn,
-        FocusOut,
-        Paint,
-        Move,
-        Resize,
-        TerminalResize,
-        ChildAdded,
-        ChildRemoved,
-        ChildPolished,
-        Enable,
-        Disable,
-        Delete,
-        Timer,
-        Custom
-    };
+using Widget_ref = std::reference_wrapper<Widget>;
 
-   protected:
-    /// Initializes the \p type and the \p receiver of the Event.
-    Event(Type type, Widget& receiver) : type_{type}, receiver_{receiver} {}
-
-   public:
-    virtual ~Event() = default;
-
-    /// Return a Type enum describing the derived type of the Event.
-    auto type() const -> Type { return type_; }
-
-    /// Return a pointer to the Widget that will receiver the Event.
-    auto receiver() const -> Widget& { return receiver_; }
-
-    /// Call filter_send() on each installed event filter object in receiver_.
-    /** Event filters can be set up with Widget::install_event_filter(). Filters
-     *  are used to intercept Events on other Widgets. The first filter to
-     *  accept the event by returning true from filter_send stops any other
-     *  object from receiving the Event. */
-    auto send_to_all_filters() const -> bool;
-
-    /// Call the appropriate event function on the receiver.
-    /** Override in derived classes to call on the appropriate member function
-     *  event handler on receiver. */
-    virtual auto send() const -> bool = 0;
-
-    /// Receive Event calls originally destined for another Widget.
-    /** Override in derived classes to call on the appropriate event handler
-     *  filter on \p filter, passing in receiver_ as argument. */
-    virtual auto filter_send(Widget& filter) const -> bool = 0;
-
-    /// Equality on the type_ and recevier_ member objects.
-    /** Used to optimize away duplicate events in Event_queue::append() */
-    auto operator==(Event const& other) const -> bool
-    {
-        return (type_ == other.type_) and (&receiver_ == &other.receiver_);
-    }
-
-   protected:
-    Type type_;
-    Widget& receiver_;
+struct Paint_event {
+    Widget_ref receiver;
 };
 
-/// Convert event enum to string.
-auto to_string(Event::Type type) -> std::string;
+struct Key_press_event {
+    Widget_ref receiver;
+    cppurses::Key key;
+};
+
+struct Mouse_press_event {
+    Widget_ref receiver;
+    Mouse data;
+};
+
+struct Mouse_release_event {
+    Widget_ref receiver;
+    Mouse data;
+};
+
+struct Mouse_double_click_event {
+    Widget_ref receiver;
+    Mouse data;
+};
+
+struct Mouse_wheel_event {
+    Widget_ref receiver;
+    Mouse data;
+};
+
+struct Mouse_move_event {
+    Widget_ref receiver;
+    Mouse data;
+};
+
+struct Child_added_event {
+    Widget_ref receiver;
+    Widget_ref child;
+};
+
+struct Child_removed_event {
+    Widget_ref receiver;
+    Widget_ref child;
+};
+
+struct Child_polished_event {
+    Widget_ref receiver;
+    Widget_ref child;
+};
+
+struct Delete_event {
+    std::unique_ptr<Widget> removed;
+};
+
+struct Disable_event {
+    Widget_ref receiver;
+};
+
+struct Enable_event {
+    Widget_ref receiver;
+};
+
+struct Focus_in_event {
+    Widget_ref receiver;
+};
+
+struct Focus_out_event {
+    Widget_ref receiver;
+};
+
+struct Move_event {
+    Widget_ref receiver;
+    Point new_position;
+};
+
+struct Resize_event {
+    Widget_ref receiver;
+    Area new_area;
+};
+
+struct Timer_event {
+    Widget_ref receiver;
+};
+
+/** \p send will be called to send the event, typically would call on a member
+ *  function of some receiving Widget type. \p filter_send should call whatever
+ *  filter method on each installed filter, and return true if one of the
+ *  filters handled the event. */
+struct Custom_event {
+    std::function<void()> send;
+    std::function<bool()> filter_send = [] { return false; };
+};
+
+using Event = std::variant<Paint_event,
+                           Key_press_event,
+                           Mouse_press_event,
+                           Mouse_release_event,
+                           Mouse_double_click_event,
+                           Mouse_wheel_event,
+                           Mouse_move_event,
+                           Child_added_event,
+                           Child_removed_event,
+                           Child_polished_event,
+                           Delete_event,
+                           Disable_event,
+                           Enable_event,
+                           Focus_in_event,
+                           Focus_out_event,
+                           Move_event,
+                           Resize_event,
+                           Timer_event,
+                           Custom_event>;
 
 }  // namespace cppurses
 #endif  // CPPURSES_SYSTEM_EVENT_HPP

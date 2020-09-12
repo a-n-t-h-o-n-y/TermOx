@@ -2,8 +2,7 @@
 #define CPPURSES_SYSTEM_DETAIL_USER_INPUT_EVENT_LOOP_HPP
 #include <cppurses/system/event_loop.hpp>
 
-namespace cppurses {
-namespace detail {
+namespace cppurses::detail {
 
 /// Event loop that blocks for user input on each iteration.
 /** Uses ncurses internally to get input. This is will also process the
@@ -17,6 +16,5 @@ class User_input_event_loop : public Event_loop {
     void loop_function() override;
 };
 
-}  // namespace detail
-}  // namespace cppurses
+}  // namespace cppurses::detail
 #endif  // CPPURSES_SYSTEM_DETAIL_USER_INPUT_EVENT_LOOP_HPP

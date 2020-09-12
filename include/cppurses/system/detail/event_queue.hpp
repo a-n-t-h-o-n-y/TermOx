@@ -1,243 +1,148 @@
 #ifndef CPPURSES_SYSTEM_DETAIL_EVENT_QUEUE_HPP
 #define CPPURSES_SYSTEM_DETAIL_EVENT_QUEUE_HPP
-#include <algorithm>
-#include <cstddef>
 #include <memory>
 #include <mutex>
 #include <set>
+#include <utility>
+#include <variant>
 #include <vector>
 
+#include <cppurses/common/lockable.hpp>
 #include <cppurses/system/event.hpp>
+#include <cppurses/system/system.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
-namespace detail {
+inline auto operator<(Paint_event const& x, Paint_event const& y) -> bool
+{
+    return std::addressof(x.receiver.get()) < std::addressof(y.receiver.get());
+}
+}  // namespace cppurses
 
-/// Holds Events to be processed, concurrent append
-/** There is a single Event_queue for the entire application. Any Event_loop can
- *  post events to the queue, but only the main User_input_event_loop thread can
- *  process the events and flush the screen. The User_input_event_loop waits for
- *  the refresh_rate period for input, if there is not input, then it processes
- *  the event queue and flushes the screen, if any other event loop threads have
- *  posted events to the queue. Listening for user input and painting to the
- *  screen can't happen at the same time because ncurses internals are not
- *  thread-safe, therefore the refresh rate creates a non-blocking listen. */
-class Event_queue {
-   private:
-    using Mutex_t = std::mutex;
-    using Guard_t = std::lock_guard<Event_queue::Mutex_t>;
-    using Queue_t = std::vector<std::unique_ptr<Event>>;
+namespace cppurses::detail {
 
+class Paint_queue : public Lockable<std::mutex> {
    public:
-    /// Place \p event at the back of the queue.
-    void append(std::unique_ptr<Event> event)
+    void append(Paint_event e)
     {
-        auto const g    = Guard_t{mtx_};
-        auto const type = event->type();
-        if (type == Event::Paint)
-            paint_events_.emplace_back(std::move(event));
-        else if (type == Event::Delete)
-            delete_events_.emplace_back(std::move(event));
-        else
-            general_events_.emplace_back(std::move(event));
+        auto const lock = this->Lockable::lock();
+        paints_.insert(std::move(e));
     }
 
-    /// Remove all nullptr Events.
-    void clean()
+    void send_all()
     {
-        auto const g = Guard_t{mtx_};
-        remove_nulls(general_events_);
-        remove_nulls(paint_events_);
-        remove_nulls(delete_events_);
-    }
-
-    /// Remove all events that have a receiver of \p receiver from queue.
-    /** To be called when sending delete events so that other threads may
-     *  not crash the app by posting events to deleted Widgets.*/
-    void remove_events_of(Widget* receiver)
-    {
-        auto const g = Guard_t{mtx_};
-        remove_receiver(general_events_, receiver);
-        remove_receiver(paint_events_, receiver);
-        remove_descendants(general_events_, receiver);
-        remove_descendants(paint_events_, receiver);
-    }
-
-    /// Return true if there are no Events on the Queue.
-    auto empty() const -> bool
-    {
-        return general_events_.empty() && paint_events_.empty() &&
-               delete_events_.empty();
-    }
-
-    // Accessor Types ----------------------------------------------------------
-
-    /// Provides iterator access to \p filter_ type elements in an Event_queue.
-    /** filter: None - gives you all event types except Paint and Delete.
-     *  This type is for exclusive use by Event_engine class, single thread. */
-    template <Event::Type filter_type>
-    class View {
-        using Guard_t = Event_queue::Guard_t;
-        using Size_t  = Event_queue::Queue_t::size_type;
-        Event_queue& queue_;
-
-       public:
-        /// Construct a view over \p queue that will only access \p filter type.
-        explicit View(Event_queue& queue) : queue_{queue} {}
-
-        /// Provides a forward iterator capable of moving events out of a view.
-        class Move_iterator {
-           private:
-            using Size_t = View::Size_t;
-            using Set_t  = std::set<Widget*>;
-
-           public:
-            /// Construct an iterator pointing to the first element in \p view.
-            explicit Move_iterator(Event_queue& queue)
-                : mtx_{queue.mtx_},
-                  events_{get_events(queue)},
-                  at_{this->find_next(static_cast<Size_t>(-1))}
-            {}
-
-            /// Construct an end iterator.
-            Move_iterator(Event_queue& queue, int)
-                : mtx_{queue.mtx_}, events_{queue.general_events_}, at_{0}
-            {}
-
-            /// Move the currently pointed to Event object out of the queue.
-            auto operator*() -> std::unique_ptr<Event> { return remove(at_); }
-
-            /// Increment to the next element in queue that passes the filter.
-            auto operator++() -> Move_iterator&
-            {
-                at_ = find_next(at_);
-                return *this;
-            }
-
-            /// Returns whether or not this iterator is at the end of the queue.
-            auto operator!=(Move_iterator const&) const -> bool
-            {
-                return at_ != this->size();
-            }
-
-           private:
-            /// Retrieve the inner vector of events for the given event filter.
-            static auto get_events(Event_queue& queue) -> Queue_t&
-            {
-                return queue.general_events_;
-            }
-
-            /// Return the next valid index after \p from for filter.
-            auto find_next(Size_t from) -> Size_t
-            {
-                auto const g   = Guard_t{mtx_};
-                auto const end = events_.size();
-                if (from == end)
-                    return from;
-                while (++from != end && events_[from] == nullptr) {}
-                return from;
-            }
-
-            /// Remove and return the Event at \p at in events_.
-            auto remove(Size_t at) -> std::unique_ptr<Event>
-            {
-                auto const g = Guard_t{mtx_};
-                return std::move(events_[at]);
-            }
-
-            /// Retrieve the size of events_, including null-ed items.
-            auto size() const -> Size_t
-            {
-                auto const g = Guard_t{mtx_};
-                return events_.size();
-            }
-
-           private:
-            Mutex_t& mtx_;
-            Set_t already_sent_;
-            Queue_t& events_;
-            Size_t at_;
-        };
-
-        /// Return iterator the first element in queue.
-        auto begin() -> Move_iterator { return Move_iterator{queue_}; }
-
-        /// Return iterator to one past the last element in queue.
-        auto end() -> Move_iterator { return Move_iterator{queue_, 0}; };
-    };
-
-   private:
-    /// Remove all nullptrs from \p events queue.
-    static void remove_nulls(Queue_t& events)
-    {
-        auto iter = std::find(std::rbegin(events), std::rend(events), nullptr);
-        if (iter != std::rend(events))
-            events.erase(std::begin(events), iter.base());
-    }
-
-    /// Remove any items from \p events that would be send to \p receiver.
-    static void remove_receiver(Queue_t& events, Widget const* receiver)
-    {
-        for (auto& event : events) {
-            if (event != nullptr and &(event->receiver()) == receiver)
-                event.reset(nullptr);
-        }
-    }
-
-    /// Remove from \p events where event.reciever() is an ancestor of receiver.
-    static void remove_descendants(Queue_t& events, Widget const* receiver)
-    {
-        for (auto& event : events) {
-            if (event != nullptr and
-                receiver->is_ancestor_of(&(event->receiver()))) {
-                event.reset(nullptr);
-            }
-        }
+        auto const lock = this->Lockable::lock();
+        for (auto& p : paints_)
+            System::send_event(std::move(p));
+        paints_.clear();
     }
 
    private:
-    Queue_t general_events_;
-    Queue_t paint_events_;
-    Queue_t delete_events_;
-    Mutex_t mtx_;
+    std::set<Paint_event> paints_;
 };
 
-// Explicit Template Instantiations
-template <>
-inline auto Event_queue::View<Event::Paint>::Move_iterator::get_events(
-    Event_queue& queue) -> Queue_t&
-{
-    return queue.paint_events_;
-}
-
-template <>
-inline auto Event_queue::View<Event::Delete>::Move_iterator::get_events(
-    Event_queue& queue) -> Queue_t&
-{
-    return queue.delete_events_;
-}
-
-template <>
-inline auto Event_queue::View<Event::Paint>::Move_iterator::find_next(
-    Size_t from) -> Size_t
-{
-    auto const g   = Guard_t{mtx_};
-    auto const end = events_.size();
-    if (from == end)
-        return from;
-    while (++from != end) {
-        if (events_[from] == nullptr)
-            continue;
-        if (already_sent_.count(&(events_[from]->receiver())) > 0) {
-            events_[from].reset(nullptr);
-            continue;
-        }
-        already_sent_.insert(&(events_[from]->receiver()));
-        break;
+class Delete_queue : public Lockable<std::mutex> {
+   public:
+    void append(Delete_event e)
+    {
+        auto const lock = this->Lockable::lock();
+        deletes_.push_back(std::move(e));
     }
-    return from;
-}
 
-}  // namespace detail
-}  // namespace cppurses
+    void send_all()
+    {
+        auto const lock = this->Lockable::lock();
+        for (auto& d : deletes_)
+            System::send_event(std::move(d));
+        deletes_.clear();
+    }
+
+   private:
+    std::vector<Delete_event> deletes_;
+};
+
+// Mutex/Threading Notes
+// The main thread is the only thread that can call Event_queue::send_all()
+// Events are removed from the queue which a lock, then processed without a lock
+// This does not require a recursive mutex because event is processed w/o lock.
+// Paint and Delete Events should not be accessing functions that access the
+// queue, so they can remain locked while processing.
+
+class Basic_queue : public Lockable<std::mutex> {
+   public:
+    void append(Event e)
+    {
+        auto const lock = this->Lockable::lock();
+        basics_.push_back(std::move(e));
+    }
+
+    void send_all()
+    {
+        // Allows for send(e) appending to the queue and invalidating iterators.
+        for (auto index = this->get_begin_index(); index != -1uL;
+             index      = this->increment_index(index)) {
+            auto event = this->get_event(index);
+            System::send_event(std::move(event));
+        }
+        auto const lock = this->Lockable::lock();
+        basics_.clear();
+    }
+
+   private:
+    std::vector<Event> basics_;
+
+   private:
+    auto get_event(std::size_t index) -> Event
+    {
+        auto const lock = this->Lockable::lock();
+        return std::move(basics_[index]);
+    }
+
+    auto increment_index(std::size_t current) -> std::size_t
+    {
+        auto const lock = this->Lockable::lock();
+        return current + 1uL < basics_.size() ? current + 1uL : -1uL;
+    }
+
+    auto get_begin_index() -> std::size_t
+    {
+        auto const lock = this->Lockable::lock();
+        return basics_.empty() ? -1uL : 0uL;
+    }
+};
+
+class Event_queue {
+   public:
+    /// Adds the given event with priority for the concrete event type.
+    void append(Event e)
+    {
+        std::visit([this](auto&& e) { this->add_to_a_queue(std::move(e)); },
+                   std::move(e));
+    }
+
+    void send_all()
+    {
+        basics_.send_all();
+        paints_.send_all();
+        deletes_.send_all();
+    }
+
+   private:
+    Basic_queue basics_;
+    Paint_queue paints_;
+    Delete_queue deletes_;
+
+   private:
+    template <typename T>
+    void add_to_a_queue(T e)
+    {
+        basics_.append(std::move(e));
+    }
+
+    void add_to_a_queue(Paint_event e) { paints_.append(std::move(e)); }
+
+    void add_to_a_queue(Delete_event e) { deletes_.append(std::move(e)); }
+};
+
+}  // namespace cppurses::detail
 #endif  // CPPURSES_SYSTEM_DETAIL_EVENT_QUEUE_HPP

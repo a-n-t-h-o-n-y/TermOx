@@ -14,36 +14,17 @@
 #include <cppurses/system/animation_engine.hpp>
 #include <cppurses/system/detail/event_engine.hpp>
 #include <cppurses/system/detail/event_queue.hpp>
+#include <cppurses/system/detail/filter_send.hpp>
 #include <cppurses/system/detail/focus.hpp>
+#include <cppurses/system/detail/is_sendable.hpp>
+#include <cppurses/system/detail/send.hpp>
 #include <cppurses/system/detail/user_input_event_loop.hpp>
 #include <cppurses/system/event.hpp>
 #include <cppurses/system/event_loop.hpp>
-#include <cppurses/system/events/focus_event.hpp>
-#include <cppurses/system/events/resize_event.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/terminal/terminal.hpp>
 #include <cppurses/widget/area.hpp>
 #include <cppurses/widget/widget.hpp>
-
-namespace {
-
-/// Indicates if the receiver of the Event is able to have the Event sent to it.
-auto is_sendable(cppurses::Event const& event) -> bool
-{
-    if (event.receiver().is_enabled())
-        return true;
-    switch (event.type()) {
-        using Event = cppurses::Event;
-        case Event::ChildAdded:
-        case Event::ChildRemoved:
-        case Event::Delete:
-        case Event::Disable:
-        case Event::FocusOut: return true;
-        default: return false;
-    }
-}
-
-}  // namespace
 
 namespace cppurses {
 
@@ -60,9 +41,9 @@ void System::enable_tab_focus() { detail::Focus::enable_tab_focus(); }
 
 void System::disable_tab_focus() { detail::Focus::disable_tab_focus(); }
 
-void System::post_event(std::unique_ptr<Event> event)
+void System::post_event(Event e)
 {
-    detail::Event_engine::get().queue().append(std::move(event));
+    detail::Event_engine::get().queue().append(std::move(e));
 }
 
 void System::exit(int exit_code)
@@ -84,30 +65,40 @@ auto System::run() -> int
         return -1;
     terminal.initialize();
     head_->enable();
-    System::post_event<Resize_event>(*System::head(),
-                                     Area{terminal.width(), terminal.height()});
+    System::post_event(Resize_event{*System::head(), terminal.area()});
     detail::Focus::set(*head_);
     auto const exit_code = user_input_loop_.run();
     terminal.uninitialize();
     return exit_code;
 }
 
-auto System::send_event(Event const& event) -> bool
+void System::send_event(Event e)
 {
-    if (!is_sendable(event))
-        return false;
-    auto handled = event.send_to_all_filters();
+    if (!std::visit([](auto const& e) { return detail::is_sendable(e); }, e))
+        return;
+    auto const handled =
+        std::visit([](auto const& e) { return detail::filter_send(e); }, e);
     if (!handled)
-        handled = event.send();
-    return handled;
+        std::visit([](auto e) { detail::send(std::move(e)); }, std::move(e));
 }
 
-sig::Slot<void()> System::quit = []() { System::exit(); };
-sig::Signal<void(int)> System::exit_signal;
-Widget* System::head_        = nullptr;
-bool System::exit_requested_ = false;
-detail::User_input_event_loop System::user_input_loop_;
+void System::send_event(Paint_event e)
+{
+    if (!detail::is_sendable(e))
+        return;
+    auto const handled = detail::filter_send(e);
+    if (!handled)
+        detail::send(std::move(e));
+}
+
+void System::send_event(Delete_event e)
+{
+    auto const handled = detail::filter_send(e);
+    if (!handled)
+        detail::send(std::move(e));
+}
+
+sig::Slot<void()> System::quit = [] { System::exit(); };
 Animation_engine System::animation_engine_;
-Terminal System::terminal;
 
 }  // namespace cppurses

@@ -9,8 +9,8 @@
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/trait.hpp>
-#include <cppurses/system/events/key.hpp>
-#include <cppurses/system/events/mouse.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/system/mouse.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/widget.hpp>
@@ -113,14 +113,14 @@ class Menu : public layout::Vertical<> {
 
    protected:
     /// Arrow keys up/down will select up/down, Enter key will send Signal.
-    auto key_press_event(Key::State const& keyboard) -> bool override;
+    auto key_press_event(Key k) -> bool override;
 
     /// Selects up/down on scroll wheel.
-    auto mouse_wheel_event(Mouse::State const& mouse) -> bool override;
+    auto mouse_wheel_event(Mouse const& m) -> bool override;
 
     /// Selects up/down on scroll wheel.
     auto mouse_wheel_event_filter(Widget& /* receiver */,
-                                  Mouse::State const& mouse) -> bool override;
+                                  Mouse const& m) -> bool override;
 
    private:
     /// Holds reference to Button used to display item, and its Signal.

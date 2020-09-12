@@ -8,7 +8,7 @@
 
 #include <signals/signal.hpp>
 
-#include <cppurses/system/events/mouse.hpp>
+#include <cppurses/system/mouse.hpp>
 #include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/widgets/label.hpp>
 #include <cppurses/widget/widgets/line_edit.hpp>
@@ -51,14 +51,14 @@ class Number_edit : public Line_edit {
     }
 
    protected:
-    auto mouse_wheel_event(Mouse::State const& mouse) -> bool override
+    auto mouse_wheel_event(Mouse const& m) -> bool override
     {
-        switch (mouse.button) {
+        switch (m.button) {
             case Mouse::Button::ScrollUp: this->increment(); break;
             case Mouse::Button::ScrollDown: this->decrement(); break;
             default: break;
         }
-        return Line_edit::mouse_wheel_event(mouse);
+        return Line_edit::mouse_wheel_event(m);
     }
 
    private:

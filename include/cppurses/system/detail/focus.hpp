@@ -20,7 +20,7 @@ class Focus {
     /// Find the previous Focus_policy::Tab/Strong Widget and set focus to it.
     static auto shift_tab_press() -> bool;
 
-    /// Immediately sets focus to \p new_focus.
+    /// Sets focus to \p new_focus, via a posted Focus_in event.
     /** If \p new_focus has Focus_policy::None, calls Focus::clear(). */
     static void set(cppurses::Widget& new_focus);
 
@@ -39,7 +39,9 @@ class Focus {
     /// Re-enable a Tab or Back_tab to change focus to the next Widget.
     static void unsuppress_tab() { tab_suppressed_ = false; }
 
-    friend Focus_in_event;
+    /// Directly sets the focus widget without sending any events.
+    /** Only for use by send(Focus_in_event). */
+    static void direct_set_focus(cppurses::Widget& w) { focus_widget_ = &w; }
 
    private:
     static cppurses::Widget* focus_widget_;

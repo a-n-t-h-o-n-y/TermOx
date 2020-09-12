@@ -286,8 +286,8 @@ struct Layout_demo : cppurses::layout::Horizontal<> {
         if (selected_ == nullptr)
             return;
         selected_->width_policy = p;
-        cppurses::System::post_event<cppurses::Child_polished_event>(
-            workspace, *selected_);
+        cppurses::System::post_event(
+            cppurses::Child_polished_event{workspace, *selected_});
     }
 
    private:

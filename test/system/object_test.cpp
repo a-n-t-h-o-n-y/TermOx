@@ -1,7 +1,7 @@
-#include <system/object.hpp>
+#include <system/event.hpp>
 #include <system/event_loop.hpp>
+#include <system/object.hpp>
 #include <system/system.hpp>
-#include <system/events/child_event.hpp>
 #include <widget/widget.hpp>
 
 #include <gtest/gtest.h>
@@ -9,14 +9,15 @@
 #include <string>
 #include <utility>
 
+using cppurses::Child_event;
+using cppurses::Event;
+using cppurses::Event_loop;
 using cppurses::Object;
 using cppurses::System;
 using cppurses::Widget;
-using cppurses::Event_loop;
-using cppurses::Event;
-using cppurses::Child_event;
 
-TEST(ObjectTest, DefaultConstructor) {
+TEST(ObjectTest, DefaultConstructor)
+{
     System system;
     Object obj;
     EXPECT_TRUE(obj.children().empty());
@@ -25,7 +26,8 @@ TEST(ObjectTest, DefaultConstructor) {
     EXPECT_EQ(std::string{}, obj.name());
 }
 
-TEST(ObjectTest, NameConstructor) {
+TEST(ObjectTest, NameConstructor)
+{
     System system;
     Object obj;
     obj.set_name("My Widget");
@@ -41,7 +43,8 @@ TEST(ObjectTest, MoveAssignmentOperator) {}
 
 class Test_widg : public Widget {
    public:
-    Test_widg() {
+    Test_widg()
+    {
         this->set_x(0);
         this->set_y(0);
         this->geometry().set_width(10);
@@ -49,7 +52,8 @@ class Test_widg : public Widget {
     }
 };
 
-TEST(ObjectTest, MakeChild) {
+TEST(ObjectTest, MakeChild)
+{
     System system;
     Object obj;
     obj.set_name("An Object");
@@ -63,7 +67,8 @@ TEST(ObjectTest, MakeChild) {
     EXPECT_EQ(2, obj.children().size());
 }
 
-TEST(ObjectTest, Children) {
+TEST(ObjectTest, Children)
+{
     System system;
     Object obj;
     auto& child1 = obj.make_child<Widget>();
@@ -84,7 +89,8 @@ TEST(ObjectTest, Children) {
     EXPECT_TRUE(children[2]->enabled());
 }
 
-TEST(ObjectTest, AddChild) {
+TEST(ObjectTest, AddChild)
+{
     System system;
     Object obj;
     auto c1 = std::make_unique<Widget>();
@@ -107,7 +113,8 @@ TEST(ObjectTest, AddChild) {
     EXPECT_EQ("Widget 2", children[1]->name());
 }
 
-TEST(ObjectTest, FindChild) {
+TEST(ObjectTest, FindChild)
+{
     System system;
     Object obj;
     obj.set_name("Parent");
@@ -168,7 +175,8 @@ TEST(ObjectTest, FindChild) {
     EXPECT_EQ(nullptr, obj.find_child<Widget>("Child 2 - Child 1 - Child 1"));
 }
 
-TEST(ObjectTest, ConstFindChild) {
+TEST(ObjectTest, ConstFindChild)
+{
     System system;
     Object obj;
     obj.set_name("Parent");
@@ -225,38 +233,37 @@ TEST(ObjectTest, ConstFindChild) {
     EXPECT_EQ(&c1_c2, obj_const.find_child<const Widget>("Child 1 - Child 2"));
     EXPECT_EQ(&c1_c3,
               obj_const.find_child<const Event_loop>("Child 1 - Child 3"));
-    EXPECT_EQ(
-        nullptr,
-        obj_const.find_child<const Widget>("Child 1 - Child 3 - Child 1"));
-    EXPECT_EQ(
-        &c1_c3_c1,
-        obj_const.find_child<const Object>("Child 1 - Child 3 - Child 1"));
+    EXPECT_EQ(nullptr, obj_const.find_child<const Widget>(
+                           "Child 1 - Child 3 - Child 1"));
+    EXPECT_EQ(&c1_c3_c1, obj_const.find_child<const Object>(
+                             "Child 1 - Child 3 - Child 1"));
     EXPECT_EQ(&c2_c1, obj_const.find_child<const Widget>("Child 2 - Child 1"));
-    EXPECT_EQ(
-        &c2_c1_c1,
-        obj_const.find_child<const Object>("Child 2 - Child 1 - Child 1"));
-    EXPECT_EQ(
-        nullptr,
-        obj_const.find_child<const Widget>("Child 2 - Child 1 - Child 1"));
+    EXPECT_EQ(&c2_c1_c1, obj_const.find_child<const Object>(
+                             "Child 2 - Child 1 - Child 1"));
+    EXPECT_EQ(nullptr, obj_const.find_child<const Widget>(
+                           "Child 2 - Child 1 - Child 1"));
 }
 
 int glob_test_int{0};
 
 class Event_filter_test : public Widget {
    public:
-    Event_filter_test() {
+    Event_filter_test()
+    {
         this->set_x(0);
         this->set_y(0);
         this->geometry().set_width(5);
         this->geometry().set_height(3);
     }
-    bool event_filter(Object* watched, const Event& event) override {
+    bool event_filter(Object* watched, const Event& event) override
+    {
         ++glob_test_int;
         return true;
     }
 };
 
-TEST(ObjectTest, InstallEventFilter) {
+TEST(ObjectTest, InstallEventFilter)
+{
     System system;
     Event_filter_test test_obj;
     test_obj.install_event_filter(&test_obj);  // Does nothing
@@ -276,7 +283,8 @@ TEST(ObjectTest, InstallEventFilter) {
     EXPECT_EQ(1, glob_test_int);
 }
 
-TEST(ObjectTest, RemoveEventFilter) {
+TEST(ObjectTest, RemoveEventFilter)
+{
     System system;
     Event_filter_test test_obj;
     Widget widg;
@@ -296,7 +304,8 @@ TEST(ObjectTest, RemoveEventFilter) {
     EXPECT_EQ(2, glob_test_int);
 }
 
-TEST(ObjectTest, SignalObjectNameChanged) {
+TEST(ObjectTest, SignalObjectNameChanged)
+{
     System system;
     Object obj;
     obj.set_name("NameOne");
@@ -307,7 +316,8 @@ TEST(ObjectTest, SignalObjectNameChanged) {
     EXPECT_EQ(1, i);
 }
 
-TEST(ObjectTest, SignalDestroyed) {
+TEST(ObjectTest, SignalDestroyed)
+{
     System system;
     auto obj = std::make_shared<Object>();
     int i{0};
@@ -316,7 +326,8 @@ TEST(ObjectTest, SignalDestroyed) {
     EXPECT_EQ(1, i);
 }
 
-TEST(ObjectTest, SlotSetEnable) {
+TEST(ObjectTest, SlotSetEnable)
+{
     System system;
     Object obj;
 

@@ -6,7 +6,7 @@
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
-#include <cppurses/system/events/mouse.hpp>
+#include <cppurses/system/mouse.hpp>
 #include <cppurses/widget/widget.hpp>
 
 namespace cppurses {
@@ -40,11 +40,11 @@ class Button : public Widget {
     auto get_label() -> Glyph_string& { return label_; }
 
    protected:
-    auto mouse_press_event(Mouse::State const& mouse) -> bool override
+    auto mouse_press_event(Mouse const& m) -> bool override
     {
-        if (mouse.button == Mouse::Button::Left)
+        if (m.button == Mouse::Button::Left)
             this->pressed();
-        return Widget::mouse_press_event(mouse);
+        return Widget::mouse_press_event(m);
     }
 
     auto paint_event() -> bool override

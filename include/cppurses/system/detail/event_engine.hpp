@@ -16,9 +16,7 @@ class Event_engine {
     /// Invokes events and flush the screen.
     void process()
     {
-        if (queue_.empty())
-            return;
-        invoke_events(queue_);
+        queue_.send_all();
         flush_screen();
     }
 
@@ -42,35 +40,6 @@ class Event_engine {
         Screen::flush(staged_changes);
         staged_changes.clear();
         Screen::set_cursor_on_focus_widget();
-    }
-
-    /// Send all \p type events in queue to their Widgets.
-    template <Event::Type filter>
-    static void send_all(Event_queue& queue)
-    {
-        for (std::unique_ptr<Event> event : Event_queue::View<filter>{queue})
-            System::send_event(*event);
-    }
-
-    /// Send all delete events to their Widgets.
-    /** Removes any events to the receiver if another thread posted them. */
-    static void send_all_deletes(Event_queue& queue)
-    {
-        auto view = Event_queue::View<Event::Delete>{queue};
-        for (std::unique_ptr<Event> event : view) {
-            Widget* receiver = &(event->receiver());
-            System::send_event(*event);
-            queue.remove_events_of(receiver);
-        }
-    }
-
-    /// Sends each event in \p queue to its receiver to be processed.
-    static void invoke_events(Event_queue& queue)
-    {
-        send_all<Event::None>(queue);
-        send_all<Event::Paint>(queue);
-        send_all_deletes(queue);
-        queue.clean();
     }
 
    private:

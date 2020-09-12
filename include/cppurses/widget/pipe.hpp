@@ -1692,11 +1692,11 @@ inline auto on_key_press(Handler&& op)
 }
 
 template <typename Handler>
-inline auto bind_key(Key::Code key, Handler&& op)
+inline auto bind_key(Key key, Handler&& op)
 {
     return [op = std::forward<Handler>(op), key](auto&& w) -> decltype(auto) {
-        get(w).key_pressed.connect([&w, &op, key](auto const& keyboard) {
-            if (keyboard.key == key)
+        get(w).key_pressed.connect([&w, &op, key](auto pressed) {
+            if (pressed == key)
                 op(w);
         });
         return std::forward<decltype(w)>(w);

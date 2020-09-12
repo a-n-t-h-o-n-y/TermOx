@@ -8,7 +8,6 @@
 #include <vector>
 
 #include <cppurses/system/event.hpp>
-#include <cppurses/system/events/focus_event.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/widget.hpp>
@@ -19,16 +18,16 @@ using namespace cppurses::detail;
 
 auto is_tab_focus_policy(Focus_policy policy) -> bool
 {
-    return policy == Focus_policy::Strong or policy == Focus_policy::Tab;
+    return policy == Focus_policy::Strong || policy == Focus_policy::Tab;
 }
 
 auto is_click_focus_policy(Focus_policy policy) -> bool
 {
-    return policy == Focus_policy::Strong or policy == Focus_policy::Click;
+    return policy == Focus_policy::Strong || policy == Focus_policy::Click;
 }
 
 auto const is_tab_focusable = [](auto const* widg) {
-    return widg->is_enabled() and is_tab_focus_policy(widg->focus_policy);
+    return widg->is_enabled() && is_tab_focus_policy(widg->focus_policy);
 };
 
 // Return a widg tree from System::head() if focus_widget is nullptr.
@@ -87,7 +86,7 @@ void Focus::mouse_press(cppurses::Widget& clicked)
 
 auto Focus::tab_press() -> bool
 {
-    if (tab_enabled_ and not tab_suppressed_) {
+    if (tab_enabled_ && !tab_suppressed_) {
         auto* next = next_tab_focus();
         if (next == nullptr)
             Focus::clear();
@@ -101,7 +100,7 @@ auto Focus::tab_press() -> bool
 
 auto Focus::shift_tab_press() -> bool
 {
-    if (tab_enabled_ and not tab_suppressed_) {
+    if (tab_enabled_ && !tab_suppressed_) {
         auto* previous = previous_tab_focus();
         if (previous == nullptr)
             Focus::clear();
@@ -130,7 +129,7 @@ void Focus::clear()
 {
     if (focus_widget_ == nullptr)
         return;
-    System::post_event<Focus_out_event>(*focus_widget_);
+    System::post_event(Focus_out_event{*focus_widget_});
     focus_widget_ = nullptr;
 }
 

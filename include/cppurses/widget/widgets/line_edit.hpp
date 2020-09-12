@@ -10,8 +10,8 @@
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/system/events/key.hpp>
-#include <cppurses/system/events/mouse.hpp>
+#include <cppurses/system/key.hpp>
+#include <cppurses/system/mouse.hpp>
 #include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/widgets/textbox.hpp>
 
@@ -79,12 +79,9 @@ class Line_edit : public Textbox {
     void set_ghost_color(Color c);
 
    protected:
-    auto key_press_event(Key::State const& keyboard) -> bool override;
+    auto key_press_event(Key k) -> bool override;
 
-    auto mouse_wheel_event(Mouse::State const&) -> bool override
-    {
-        return true;
-    }
+    auto mouse_wheel_event(Mouse const&) -> bool override { return true; }
 
     auto focus_in_event() -> bool override
     {

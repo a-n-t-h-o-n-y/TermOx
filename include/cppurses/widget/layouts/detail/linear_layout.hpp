@@ -1,8 +1,7 @@
 #ifndef CPPURSES_WIDGET_LAYOUTS_DETAIL_LINEAR_LAYOUT_HPP
 #define CPPURSES_WIDGET_LAYOUTS_DETAIL_LINEAR_LAYOUT_HPP
 #include <cppurses/painter/painter.hpp>
-#include <cppurses/system/events/move_event.hpp>
-#include <cppurses/system/events/resize_event.hpp>
+#include <cppurses/system/event.hpp>
 #include <cppurses/widget/layout.hpp>
 
 #include "shared_space.hpp"
@@ -77,7 +76,7 @@ class Linear_layout : public Layout<Child> {
         this->Widget::children_.set_offset(index);
         shared_space_.set_offset(index);
         unique_space_.set_offset(index);
-        System::post_event<Child_polished_event>(*this, *this);
+        System::post_event(Child_polished_event{*this, *this});
         this->force_repaint_empty_space();
     }
 
@@ -122,7 +121,7 @@ class Linear_layout : public Layout<Child> {
             while (parent != nullptr && parent->width_policy.is_passive())
                 parent = parent->parent();
             if (parent != nullptr)
-                System::post_event<Child_polished_event>(*parent, *this);
+                System::post_event(Child_polished_event{*parent, *this});
         }
         if (this->height_policy.is_passive()) {
             Widget* parent = this->parent();
@@ -130,7 +129,7 @@ class Linear_layout : public Layout<Child> {
             while (parent != nullptr && parent->height_policy.is_passive())
                 parent = parent->parent();
             if (parent != nullptr)
-                System::post_event<Child_polished_event>(*parent, *this);
+                System::post_event(Child_polished_event{*parent, *this});
         }
         this->update_geometry();
         return Widget::child_polished_event(child);
@@ -179,7 +178,7 @@ class Linear_layout : public Layout<Child> {
             if (child.is_enabled()) {
                 auto const area =
                     typename Parameters::get_area{}(primary[i], secondary[i]);
-                System::post_event<Resize_event>(child, area);
+                System::post_event(Resize_event{child, area});
             }
         }
     }
@@ -199,7 +198,7 @@ class Linear_layout : public Layout<Child> {
                 auto const point = typename Parameters::get_point{}(
                     primary[i] + primary_offset,
                     secondary[i] + secondary_offset);
-                System::post_event<Move_event>(child, point);
+                System::post_event(Move_event{child, point});
             }
         }
     }
