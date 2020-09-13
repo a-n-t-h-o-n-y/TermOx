@@ -101,4 +101,9 @@ void System::send_event(Delete_event e)
 sig::Slot<void()> System::quit = [] { System::exit(); };
 Animation_engine System::animation_engine_;
 
+// GCC requires this here, it can't find the default constructor when it's in
+// system.hpp for whatever reason...
+sig::Signal<void(int)> System::exit_signal;
+detail::User_input_event_loop System::user_input_loop_;
+
 }  // namespace cppurses

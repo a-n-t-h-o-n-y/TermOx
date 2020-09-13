@@ -28,6 +28,7 @@ auto focus_box(cppurses::Focus_policy policy)
             case Focus_policy::Strong: return L"Strong";
             case Focus_policy::Direct: return L"Direct";
         }
+        return L"";
     };
 
     /// Remove tab focus from \p p.
@@ -40,6 +41,7 @@ auto focus_box(cppurses::Focus_policy policy)
             case Focus_policy::Strong: return Focus_policy::Click;
             case Focus_policy::Direct: return Focus_policy::Direct;
         }
+        return cppurses::Focus_policy::None;
     };
 
     // clang-format off

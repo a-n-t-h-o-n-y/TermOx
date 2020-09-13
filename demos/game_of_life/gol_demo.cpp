@@ -71,21 +71,21 @@ GoL_demo::GoL_demo()
     patterns.add_pattern(L"Pattern 6");
     patterns.add_pattern(L"Pattern 7");
 
-    patterns.pattern_chosen.connect([](auto const& name) {
-        if (name == L"Pattern 1")
-            ;
+    patterns.pattern_chosen.connect([](auto const& /* name */) {
+        // if (name == L"Pattern 1")
+        //     ;
         // gol_display.import(
         //     "Pattern 1");  // TODO make import take some structure in
         // memory, then have a store for these structure,
         // and instead of the if/else if here, put that
         // in the store lookup and just pass the result
         // to gol_display.import();
-        else if (name == L"Pattern 2")
-            ;
-        else if (name == L"Pattern 3")
-            ;
-        else if (name == L"Pattern 4")
-            ;
+        // else if (name == L"Pattern 2")
+        //     ;
+        // else if (name == L"Pattern 3")
+        //     ;
+        // else if (name == L"Pattern 4")
+        //     ;
     });
 }
 }  // namespace gol

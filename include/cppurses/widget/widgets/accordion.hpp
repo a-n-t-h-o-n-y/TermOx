@@ -70,8 +70,8 @@ class Bar : public Layout_t {
        public:
         Title(Parameters p)
             : centered_text_{this->template make_child<Label<Layout_t>>(
-                  {L' ' + std::move(p.title) + L' ' | Trait::Bold, p.alignment,
-                   extra_left})}
+                  {(L' ' + std::move(p.title) + L' ') | Trait::Bold,
+                   p.alignment, extra_left})}
         {
             using namespace cppurses::pipe;
             if constexpr (is_vertical)

@@ -22,7 +22,7 @@ class System {
    public:
     /// Emitted when System::exit is called. Should call Event_loop::exit.
     /** Passes along the exit_code System::exit() was called with. */
-    inline static sig::Signal<void(int)> exit_signal;
+    static sig::Signal<void(int)> exit_signal;
 
     // Slots
     static sig::Slot<void()> quit;
@@ -126,7 +126,7 @@ class System {
    private:
     inline static Widget* head_        = nullptr;
     inline static bool exit_requested_ = false;
-    inline static detail::User_input_event_loop user_input_loop_;
+    static detail::User_input_event_loop user_input_loop_;
     static Animation_engine animation_engine_;
 };
 

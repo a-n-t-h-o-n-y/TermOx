@@ -165,6 +165,7 @@ class Label : public Widget {
             case Align::Bottom:
                 return right_bottom_offset(text_length, box_length);
         }
+        return 0uL;
     }
 
     static auto left_top_offset() -> std::size_t { return 0uL; }
