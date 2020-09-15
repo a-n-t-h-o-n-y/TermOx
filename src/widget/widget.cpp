@@ -1,24 +1,15 @@
 #include <cppurses/widget/widget.hpp>
 
-#include <algorithm>
-#include <cstddef>
 #include <cstdint>
-#include <memory>
 #include <mutex>
 #include <string>
 #include <utility>
-#include <vector>
-
-#include <signals/signal.hpp>
 
 #include <cppurses/painter/brush.hpp>
-#include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/system/event.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/terminal/terminal.hpp>
-#include <cppurses/widget/border.hpp>
-#include <cppurses/widget/cursor_data.hpp>
 
 namespace {
 
@@ -55,57 +46,6 @@ void Widget::enable(bool enable, bool post_child_polished_event)
     this->enable_and_post_events(enable, post_child_polished_event);
     for (Widget& w : this->get_children())
         w.enable(enable, post_child_polished_event);
-}
-
-void Widget::close()
-{
-    if (this->parent() == nullptr)
-        return;  // Can't delete a widget that is not owned by another Widget.
-    this->parent()->children_.erase(this);
-}
-
-void Widget::Children::erase(Widget const* child)
-{
-    auto const child_iter = this->find_impl(child);
-    if (child_iter == std::end(child_list_))
-        throw std::invalid_argument{"Children::remove: No Child Found"};
-    std::unique_ptr<Widget> removed = this->remove_impl(child_iter);
-    System::post_event(Delete_event{std::move(removed)});
-}
-
-void Widget::Children::erase(std::size_t index)
-{
-    this->erase(std::next(std::begin(child_list_), index)->get());
-}
-
-void Widget::Children::clear()
-{
-    for (auto& child : child_list_) {
-        auto removed = std::move(child);
-        removed->disable();
-        System::post_event(Child_removed_event{*self_, *removed});
-        removed->set_parent(nullptr);
-        System::post_event(Delete_event{std::move(removed)});
-    }
-    child_list_.clear();
-}
-
-void Widget::Children::init_new_child(Widget& w)
-{
-    w.set_parent(self_);
-    w.enable(self_->is_enabled());
-    System::post_event(Child_added_event{*self_, w});
-}
-
-auto Widget::Children::remove_impl(List_t::iterator child_iter)
-    -> std::unique_ptr<Widget>
-{
-    auto removed = std::unique_ptr<Widget>{std::move(*child_iter)};
-    child_list_.erase(child_iter);
-    removed->disable();
-    System::post_event(Child_removed_event{*self_, *removed});
-    removed->set_parent(nullptr);
-    return removed;
 }
 
 // Don't want to include system/event.hpp in widget.hpp

@@ -41,7 +41,7 @@ class Stack : public Layout<Child_t> {
     {
         if (index > this->Stack::size())
             throw std::out_of_range{"Stack::set_active_page: index is invalid"};
-        active_page_ = &(this->Layout<Child_t>::get_children()[index]);
+        active_page_ = &(this->get_children()[index]);
         this->enable(this->is_enabled(), false);  // sends enable/disable events
         this->move_active_page();
         this->resize_active_page();
@@ -77,7 +77,7 @@ class Stack : public Layout<Child_t> {
     {
         static_assert(std::is_base_of<Child_t, Widget_t>::value,
                       "Stack::append_page: Widget_t must be a Child_t type");
-        auto& result = this->Layout<Child_t>::append(std::move(w_ptr));
+        auto& result = this->append_child(std::move(w_ptr));
         result.disable();
         return result;
     }
@@ -98,7 +98,7 @@ class Stack : public Layout<Child_t> {
     auto insert_page(std::unique_ptr<Child_t> child, std::size_t index)
         -> Child_t&
     {
-        auto& result = this->Layout<Child_t>::insert(std::move(child), index);
+        auto& result = this->insert_child(std::move(child), index);
         result.disable();
         return result;
     }
@@ -110,10 +110,10 @@ class Stack : public Layout<Child_t> {
     {
         if (index >= this->Stack::size())
             throw std::out_of_range{"Stack::delete_page: index is invalid"};
-        auto* page_to_delete = &(this->Layout<Child_t>::get_children()[index]);
+        auto* page_to_delete = std::addressof(this->get_children()[index]);
         if (page_to_delete == this->get_active_page())
             active_page_ = nullptr;
-        page_to_delete->close();
+        this->remove_and_delete_child(page_to_delete);
     }
 
     /// Remove page at \p index from the list and return it.
@@ -126,16 +126,16 @@ class Stack : public Layout<Child_t> {
     {
         if (index >= this->size())
             throw std::out_of_range{"Stack::remove_page: index is invalid."};
-        auto* page_to_remove = &(this->Layout<Child_t>::get_children()[index]);
+        auto* page_to_remove = &(this->get_children()[index]);
         if (page_to_remove == this->get_active_page())
             active_page_ = nullptr;
-        return this->Layout<Child_t>::remove(page_to_remove);
+        return this->remove_child(page_to_remove);
     }
 
     /// Remove and delete all pages.
     void clear()
     {
-        // Can't use a range-for loop, Widget::close modifies the child_list_
+        // Can't use a range-for loop, delete_page modifies the child_list_
         while (!this->get_children().empty())
             this->delete_page(0);
     }

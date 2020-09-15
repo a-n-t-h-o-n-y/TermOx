@@ -136,16 +136,16 @@ struct Grid_fade : cppurses::layout::Horizontal<cppurses::Labeled_checkbox> {
 // TODO rename to Controls_box, also file rename
 struct Settings_box : cppurses::layout::Vertical<> {
    public:
-    // Widget& break_                    = this->append(make_break());
+    // Widget& break_                    = this->append_child(make_break());
     Interval_box& interval_edit        = this->make_child<Interval_box>();
-    Widget& break_0                    = this->append(make_break());
+    Widget& break_0                    = this->append_child(make_break());
     Start_pause_btns& start_pause_btns = this->make_child<Start_pause_btns>();
     Clear_step_box& clear_step_btns    = this->make_child<Clear_step_box>();
-    Widget& break_1                    = this->append(make_break());
+    Widget& break_1                    = this->append_child(make_break());
     Grid_fade& grid_fade               = this->make_child<Grid_fade>();
-    Widget& break_2                    = this->append(make_break());
+    Widget& break_2                    = this->append_child(make_break());
     Rule_edit& rule_edit               = this->make_child<Rule_edit>();
-    Widget& break_3                    = this->append(make_break());
+    Widget& break_3                    = this->append_child(make_break());
 
    public:
     sig::Signal<void(std::string const&)>& rule_change = rule_edit.rule_change;

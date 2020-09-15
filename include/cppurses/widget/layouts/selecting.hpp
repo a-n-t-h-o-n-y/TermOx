@@ -93,14 +93,14 @@ class Selecting : public Layout_t {
     /** Returns this->Widget::child_count() if no child is selected. */
     auto selected_index() const -> std::size_t
     {
-        return this->get_children().find_by_pointer(selected_);
+        return this->find_child_position(selected_);
     }
 
     /// Set the first visible child as the selected child.
     void select_first_child()
     {
         if (this->child_count() > 0)
-            this->set_selected_by_index(this->children_.get_offset());
+            this->set_selected_by_index(this->get_child_offset());
     }
 
    protected:
@@ -163,7 +163,7 @@ class Selecting : public Layout_t {
     {
         if (&child == selected_) {
             if (this->child_count() > 0uL)
-                this->set_selected_by_index(this->children_.get_offset());
+                this->set_selected_by_index(this->get_child_offset());
             else
                 selected_ = nullptr;
         }
@@ -220,8 +220,8 @@ class Selecting : public Layout_t {
         auto const child_n = this->child_count();
         if (child_n == 0)
             return;
-        if (auto const offset = this->child_offset(); offset + 1 != child_n)
-            this->set_offset(offset + 1);
+        if (auto const offset = this->get_child_offset(); offset + 1 != child_n)
+            this->set_child_offset(offset + 1);
     }
 
     void increment_offset_and_increment_selected()
@@ -235,13 +235,13 @@ class Selecting : public Layout_t {
     {
         if (this->child_count() == 0)
             return;
-        if (auto const offset = this->child_offset(); offset != 0)
-            this->set_offset(offset - 1);
+        if (auto const offset = this->get_child_offset(); offset != 0)
+            this->set_child_offset(offset - 1);
     }
 
     void decrement_offset_and_decrement_selected()
     {
-        if (this->child_offset() == 0)
+        if (this->get_child_offset() == 0)
             return;
         this->decrement_offset();
         this->decrement_selected();
@@ -272,7 +272,7 @@ class Selecting : public Layout_t {
     {
         auto const children = this->Widget::get_children();
         auto const count    = this->child_count();
-        auto const offset   = this->child_offset();
+        auto const offset   = this->get_child_offset();
         for (auto i = offset + 1; i < count; ++i) {
             if (children[i].is_enabled())
                 continue;

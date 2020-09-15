@@ -74,7 +74,7 @@ class Layout_span {
 
         auto operator*() const -> reference { return *iter_; }
 
-        auto operator-> () const -> pointer { return iter_.operator->(); }
+        auto operator->() const -> pointer { return iter_.operator->(); }
 
         auto operator==(Container_t::iterator other) const -> bool
         {
@@ -105,8 +105,7 @@ class Layout_span {
     Iterator(typename Layout_span::Container_t::iterator iter,
              typename Layout_span::Container_t::iterator end,
              Get_policy_t get_policy,
-             Get_limit_t get_limit)
-        ->Iterator<decltype(get_limit)>;
+             Get_limit_t get_limit) -> Iterator<decltype(get_limit)>;
 #endif
 
    public:
@@ -273,7 +272,7 @@ class Layout_span {
                                  Policy_direction d) -> Container_t
     {
         auto dimensions = generate_zero_init_dimensions(first, last);
-        if (not set_each_to_min(dimensions, primary_length, get_policy, d))
+        if (!set_each_to_min(dimensions, primary_length, get_policy, d))
             set_each_to_hint(dimensions, get_policy);
         return dimensions;
     }
@@ -332,7 +331,7 @@ class Layout_span {
         // the same layout type as the parent.
         auto sum            = 0uL;
         auto const children = w.get_children();
-        for (auto i = w.child_offset(); i < w.child_count(); ++i) {
+        for (auto i = w.get_child_offset(); i < w.child_count(); ++i) {
             auto const& policy = get_policy(children[i]);
             if (policy.is_passive())
                 sum += sum_child_mins(children[i], get_policy, d);

@@ -33,7 +33,7 @@ class Patterns_list : public cppurses::layout::Horizontal<> {
        public:
         void add_pattern(std::wstring const& name)
         {
-            this->Layout::append(std::make_unique<Thin_btn>(name))
+            this->append_child(std::make_unique<Thin_btn>(name))
                 .pressed.connect([this, name] { pattern_chosen(name); });
         }
     };
@@ -57,7 +57,7 @@ class Patterns_list : public cppurses::layout::Horizontal<> {
 class Patterns_box : public cppurses::layout::Vertical<> {
    public:
     Patterns_list& list         = this->make_child<Patterns_list>();
-    Widget& break_              = this->append(make_break());
+    Widget& break_              = this->append_child(make_break());
     Thin_btn& goto_rulesets_btn = this->make_child<Thin_btn>(L"Rulesets") |
                                   cppurses::pipe::bg(color::Light_green) |
                                   cppurses::pipe::fg(color::Teal);
@@ -78,7 +78,7 @@ class Rulesets_box : public cppurses::layout::Vertical<> {
 
     cppurses::HScrollbar& bar = this->make_child<cppurses::HScrollbar>();
 
-    Widget& break_ = this->append(make_break());
+    Widget& break_ = this->append_child(make_break());
 
     cppurses::Button& to_examples_btn =
         this->make_child<cppurses::Button>("Patterns");

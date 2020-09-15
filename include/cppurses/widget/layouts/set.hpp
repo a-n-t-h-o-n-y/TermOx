@@ -30,16 +30,16 @@ class Set : public Layout_t {
 
    public:
     /// Insert \p child into correct position based on Projection and Comparison
-    auto insert(std::unique_ptr<Child_t> child) -> Child_t&
+    auto insert_child(std::unique_ptr<Child_t> child) -> Child_t&
     {
-        auto const comp = [&](Child_t const& a, Child_t const& b) {
+        auto constexpr comp = [&](Child_t const& a, Child_t const& b) {
             return Comparison{}(Projection{}(a), Projection{}(b));
         };
         auto const children = this->get_children();
         auto iter =
             std::upper_bound(children.begin(), children.end(), *child, comp);
-        return this->Widget::children_.insert(std::move(child),
-                                              iter.underlying().underlying());
+        return this->Layout_t::insert_child(std::move(child),
+                                            iter.underlying().underlying());
     }
 
     /// Create a Widget and insert it into the list of children.
@@ -50,21 +50,21 @@ class Set : public Layout_t {
         static_assert(
             std::is_base_of_v<Child_t, Widget_t>,
             "layout::Set::make_child: Widget_t must be a Child_t type");
-        return this->insert(
+        return this->insert_child(
             std::make_unique<Widget_t>(std::forward<Args>(args)...));
     }
 
     /// Find a child widget by its key type(the result of the Projection fn).
     /** Uses the Projection function on each child until a result equal to \p
      *  key is found. Retuns nullptr if no child found. */
-    auto find(Key_t const& key) -> Child_t*
+    auto find_child(Key_t const& key) -> Child_t*
     {
         return this->get_children().find(
             [&key](auto const& c) { return Projection{}(c) == key; });
     }
 
    private:
-    using Layout_t::append;
+    using Layout_t::append_child;
 };
 
 /// Helper function to create an instance.

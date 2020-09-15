@@ -46,11 +46,11 @@ class File_widget : public cppurses::layout::Vertical<> {
     }
 };
 
-struct Files_box : cppurses::layout::Vertical<File_widget> {
+struct Files_box : cppurses::layout::Vertical<> {
    public:
-    File_widget& import_btn = this->make_child("Import");
-    File_widget& export_btn = this->make_child("Export");
-    Widget& break_          = this->append(make_break());
+    File_widget& import_btn = this->make_child<File_widget>("Import");
+    File_widget& export_btn = this->make_child<File_widget>("Export");
+    Widget& break_          = this->append_child(make_break());
 
    public:
     sig::Signal<void(std::string const&)>& import_request =

@@ -35,7 +35,7 @@ auto Menu::insert_item(Glyph_string label, std::size_t index)
 {
     auto button_ptr    = std::make_unique<Button>(std::move(label));
     Button& new_button = *button_ptr;
-    this->Layout::insert(std::move(button_ptr), index + 2);
+    this->insert_child(std::move(button_ptr), index + 2uL);
     items_.emplace(std::begin(items_) + index, new_button);
     new_button.install_event_filter(*this);
     new_button.height_policy.fixed(1);
@@ -53,7 +53,7 @@ void Menu::remove_item(std::size_t index)
 {
     if (index >= items_.size())
         return;
-    items_[index].button.get().close();
+    this->remove_and_delete_child(std::addressof(items_[index].button.get()));
     items_.erase(std::begin(items_) + index);
     if (index == selected_index_)
         this->select_item(0);

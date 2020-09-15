@@ -15,10 +15,6 @@
 #include <cppurses/widget/widgets/number_edit.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
 
-// TODO Rethink - Come up with a fresh plan, use the existing code to get
-// familiar with the idea, but don't try to clean up that code, starting fresh
-// will be quicker and lead to better ideas.
-
 namespace layout_demo {
 
 class Meta_widget : public cppurses::Widget {
@@ -268,7 +264,7 @@ struct Layout_demo : cppurses::layout::Horizontal<> {
     {
         if (selected_ == nullptr)
             return;
-        selected_->close();
+        workspace.remove_and_delete_child(selected_);
         selected_ = nullptr;
     }
 

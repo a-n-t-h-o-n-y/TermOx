@@ -97,7 +97,7 @@ class Menu_stack : public layout::Stack<Widget> {
     void clear()
     {
         this->goto_menu();
-        // Can't use a range-for loop, Widget::close modifies the child_list_
+        // Can't use a range-for loop, delete_page modifies the child_list_
         while (this->child_count() > 1)
             this->delete_page(1);
     }

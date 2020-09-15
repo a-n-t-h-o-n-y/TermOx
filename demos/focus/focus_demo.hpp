@@ -59,7 +59,7 @@ auto focus_box(cppurses::Focus_policy policy)
         ) | bordered();
 
     box_ptr | children() | find("l")
-            | on_focus_in([w = box_ptr->find("w")]{ cppurses::System::set_focus(*w); });
+            | on_focus_in([w = box_ptr->find_child_by_name("w")]{ cppurses::System::set_focus(*w); });
 
     box_ptr | children() | find("w")
             | on_focus_in( [&w = *box_ptr]{ w | walls(foreground(cppurses::Color::Red)); })

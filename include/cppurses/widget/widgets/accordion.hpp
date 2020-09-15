@@ -77,8 +77,8 @@ class Bar : public Layout_t {
             if constexpr (is_vertical)
                 centered_text_ | fixed_height(1uL);
             else {
-                this->insert(widget(), 0uL);
-                this->insert(widget(), 2uL);
+                this->insert_child(widget(), 0uL);
+                this->insert_child(widget(), 2uL);
                 *this | children() | fixed_width(1uL);
             }
             *this | children() |
@@ -153,7 +153,7 @@ class Accordion : public Layout_t {
               this->template make_child<Widget_t>(std::forward<Args>(args)...)}
     {
         if constexpr (wrapped_index_ == 0uL)
-            this->Layout_t::swap(0uL, 1uL);
+            this->swap_children(0uL, 1uL);
 
         if constexpr (is_vertical)
             *this | pipe::passive_height();
@@ -212,14 +212,14 @@ class Accordion : public Layout_t {
     {
         if (w_storage_ == nullptr)
             return;
-        this->Layout_t::insert(std::move(w_storage_), wrapped_index_);
+        this->insert_child(std::move(w_storage_), wrapped_index_);
         w_storage_ = nullptr;
     }
 
     void extract_wrapped()
     {
         if (w_storage_ == nullptr)
-            w_storage_ = this->Layout_t::remove(wrapped_index_);
+            w_storage_ = this->remove_child_at(wrapped_index_);
     }
 };
 

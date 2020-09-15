@@ -41,39 +41,91 @@ class Linear_layout : public Layout<Child> {
    private:
     using Base_t = Layout<Child_t>;
 
+    template <typename UnaryPredicate>
+    using enable_if_invocable = std::enable_if_t<
+        std::is_invocable_v<UnaryPredicate,
+                            std::add_lvalue_reference_t<Child_t>>,
+        int>;
+
    public:
     using Layout<Child>::Layout;
 
    public:
-    /// Erase first element that satisfies \p pred. Return true if erase happens
-    template <typename Unary_predicate_t,
-              std::enable_if_t<
-                  std::is_invocable_v<Unary_predicate_t,
-                                      std::add_lvalue_reference_t<Child_t>>,
-                  int> = 0>
-    auto erase(Unary_predicate_t&& pred) -> bool
+    // Forwarding functions so that child_offset can be updated. Currently you
+    // don't hold generic Layout pointers anywhere, so these do not have to be
+    // virtual, but keep this in mind if you every hold Layouts and Widgets
+    // separately.
+
+    auto remove_child(Child_t const* child) -> std::unique_ptr<Widget>
     {
-        auto r = this->Base_t::erase(std::forward<Unary_predicate_t>(pred));
+        auto result = this->Base_t::remove_child(child);
         this->reset_offset_if_out_of_bounds();
-        return r;
+        return result;
     }
 
-    void erase(Widget const* child)
+    /// Removes and returns the first child where predicate(child) returns true.
+    /** If no child is found, returns nullptr. */
+    template <typename UnaryPredicate,
+              typename = enable_if_invocable<UnaryPredicate>>
+    auto remove_child_if(UnaryPredicate&& predicate) -> std::unique_ptr<Widget>
     {
-        this->Base_t::children_.erase(child);
+        auto result = this->Base_t::remove_child_if(
+            std::forward<UnaryPredicate>(predicate));
         this->reset_offset_if_out_of_bounds();
+        return result;
     }
 
-    void erase(std::size_t index)
+    /// Removes and returns the child at \p index in the child container.
+    /** Returns nullptr if \p index is out of range. */
+    auto remove_child_at(std::size_t index) -> std::unique_ptr<Widget>
     {
-        this->Base_t::children_.erase(index);
+        auto result = this->Base_t::remove_child_at(index);
         this->reset_offset_if_out_of_bounds();
+        return result;
     }
 
+    /// Removes the child with given pointer and sends a Delete_event to it.
+    /** Returns false if \p child is not found and deleted. */
+    auto remove_and_delete_child(Child_t const* child) -> bool
+    {
+        auto const result = this->Base_t::remove_and_delete_child(child);
+        this->reset_offset_if_out_of_bounds();
+        return result;
+    }
+
+    /// Erase first element that satisfies \p pred.
+    /** Returns true if a child is found and deleted. */
+    template <typename UnaryPredicate,
+              typename = enable_if_invocable<UnaryPredicate>>
+    auto remove_and_delete_child_if(UnaryPredicate&& predicate) -> bool
+    {
+        auto const result = this->Base_t::remove_and_delete_child_if(
+            std::forward<UnaryPredicate>(predicate));
+        this->reset_offset_if_out_of_bounds();
+        return result;
+    }
+
+    /// Removes the child at \p index and sends a Delete_event to it.
+    /** Returns false if \p index is out of range. */
+    auto remove_and_delete_child_at(std::size_t index) -> bool
+    {
+        auto const result = this->Base_t::remove_and_delete_child_at(index);
+        this->reset_offset_if_out_of_bounds();
+        return result;
+    }
+
+    /// Removes all children and sends Delete_events to each.
+    void delete_all_children()
+    {
+        this->Base_t::delete_all_children();
+        this->set_child_offset(0uL);
+    }
+
+   public:
     /// Sets the child Widget offset, does not do bounds checking.
-    void set_offset(std::size_t index)
+    void set_child_offset(std::size_t index)
     {
-        this->Widget::children_.set_offset(index);
+        Widget::child_offset_ = index;
         shared_space_.set_offset(index);
         unique_space_.set_offset(index);
         System::post_event(Child_polished_event{*this, *this});
@@ -82,16 +134,18 @@ class Linear_layout : public Layout<Child> {
 
     void decrement_offset()
     {
-        if (this->Widget::child_offset() == 0uL)
+        auto const offset = this->get_child_offset();
+        if (offset == 0uL)
             return;
-        this->set_offset(this->Widget::child_offset() - 1uL);
+        this->set_child_offset(offset - 1uL);
     }
 
     void increment_offset()
     {
-        if (this->Widget::child_offset() + 1uL >= this->child_count())
+        auto const offset = this->get_child_offset();
+        if (offset + 1uL >= this->child_count())
             return;
-        this->set_offset(this->Widget::child_offset() + 1uL);
+        this->set_child_offset(offset + 1uL);
     }
 
    protected:
@@ -149,8 +203,8 @@ class Linear_layout : public Layout<Child> {
     void send_enable_disable_events(Length_list const& primary,
                                     Length_list const& secondary)
     {
-        auto const children = this->Widget::get_children();
-        auto const offset   = this->Widget::child_offset();
+        auto const children = this->get_children();
+        auto const offset   = this->get_child_offset();
         for (auto i = 0uL; i < offset; ++i) {
             if (children[i].is_enabled())
                 children[i].disable(true, false);
@@ -158,7 +212,7 @@ class Linear_layout : public Layout<Child> {
         for (auto i = 0uL; i < primary.size(); ++i) {
             auto& child = children[offset + i];
             if (is_valid(primary[i], secondary[i])) {
-                if (not child.is_enabled())
+                if (!child.is_enabled())
                     child.enable(true, false);
             }
             else {
@@ -171,8 +225,8 @@ class Linear_layout : public Layout<Child> {
     void send_resize_events(Length_list const& primary,
                             Length_list const& secondary)
     {
-        auto const children = this->Widget::get_children();
-        auto const offset   = this->Widget::child_offset();
+        auto const children = this->get_children();
+        auto const offset   = this->get_child_offset();
         for (auto i = 0uL; i < primary.size(); ++i) {
             auto& child = children[offset + i];
             if (child.is_enabled()) {
@@ -186,8 +240,8 @@ class Linear_layout : public Layout<Child> {
     void send_move_events(Position_list const& primary,
                           Position_list const& secondary)
     {
-        auto const children = this->Widget::get_children();
-        auto const offset   = this->Widget::child_offset();
+        auto const children = this->get_children();
+        auto const offset   = this->get_child_offset();
         auto const primary_offset =
             typename Parameters::Primary::get_offset{}(*this);
         auto const secondary_offset =
@@ -212,11 +266,14 @@ class Linear_layout : public Layout<Child> {
         return primary != 0 && secondary != 0;
     }
 
+    /// After a remove_child or remove_and_delete_child this is called.
     void reset_offset_if_out_of_bounds()
     {
         auto const count = this->child_count();
-        if (count != 0 && this->children_.get_offset() >= count)
-            this->set_offset(count - 1);
+        if (count == 0uL)
+            this->set_child_offset(0uL);
+        else if (this->get_child_offset() >= count)
+            this->set_child_offset(count - 1);
     }
 };
 

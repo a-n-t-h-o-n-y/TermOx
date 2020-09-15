@@ -15,8 +15,6 @@ auto enable(Widget& w) -> sig::Slot<void()>;
 
 auto disable(Widget& w) -> sig::Slot<void()>;
 
-auto delete_later(Widget& w) -> sig::Slot<void()>;
-
 auto update(Widget& w) -> sig::Slot<void()>;
 
 auto click(Widget& w) -> sig::Slot<void(Point, Mouse::Button)>;

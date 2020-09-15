@@ -8,8 +8,8 @@
 #include <vector>
 
 #include <cppurses/common/filter_iterator.hpp>
-#include <cppurses/common/map_iterator.hpp>
 #include <cppurses/common/range.hpp>
+#include <cppurses/common/transform_iterator.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/animation_engine.hpp>
 #include <cppurses/widget/align.hpp>
@@ -108,7 +108,7 @@ auto operator|(Range<Iter_1, Iter_2> children,
                pipe::detail::Dynamic_filter_predicate<Widget_t>)
 {
     return Range{
-            Map_iterator{
+            Transform_iterator{
                 Filter_iterator{ children.begin(), children.end(),
                 [](auto& w) { return dynamic_cast<Widget_t*>(&w) != nullptr; }},
                 [](auto& w) -> auto& {return static_cast<Widget_t&>(w); }

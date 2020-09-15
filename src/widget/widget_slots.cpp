@@ -28,13 +28,6 @@ auto disable(Widget& w) -> sig::Slot<void()>
     return slot;
 }
 
-auto delete_later(Widget& w) -> sig::Slot<void()>
-{
-    auto slot = sig::Slot<void()>{[&w] { w.close(); }};
-    slot.track(w.destroyed);
-    return slot;
-}
-
 auto update(Widget& w) -> sig::Slot<void()>
 {
     auto slot = sig::Slot<void()>{[&w] { w.update(); }};

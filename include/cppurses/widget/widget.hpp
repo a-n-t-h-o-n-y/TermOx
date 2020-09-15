@@ -1,19 +1,18 @@
 #ifndef CPPURSES_WIDGET_WIDGET_HPP
 #define CPPURSES_WIDGET_WIDGET_HPP
-#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
 #include <memory>
 #include <optional>
 #include <set>
-#include <stdexcept>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include <signals/signal.hpp>
 
-#include <cppurses/common/map_iterator.hpp>
+#include <cppurses/common/casting_view.hpp>
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
@@ -142,12 +141,6 @@ class Widget {
     /// Check whether the Widget is enabled.
     auto is_enabled() const -> bool { return enabled_; }
 
-    /// Post a Delete_event to this, deleting the object when safe to do so.
-    /** This Widget is immediately removed from its parent. The Widget is owned
-     *  by a Delete_event object until it can be safely removed without leaving
-     *  dangling references in event system. */
-    void close();
-
     /// Return the Widget's parent pointer.
     /** The parent is the Widget that owns *this, it  is in charge of
      *  positioning and resizing this Widget. */
@@ -261,37 +254,24 @@ class Widget {
         System::animation_engine().unregister_widget(*this);
     }
 
-    auto is_parent_of(Widget const* child) const -> bool
-    {
-        return children_.contains(child);
-    }
-
     /// Get a range containing Widget& to each child.
-    auto get_children() { return Children::View<Widget, Children>{children_}; }
+    auto get_children() { return casting_view<Widget>(children_); }
 
     /// Get a const range containing Widget& to each child.
-    auto get_children() const
-    {
-        return Children::View<Widget, Children const>{children_};
-    }
-
-    /// Return true if \p descendant exists within the widg. tree owned by this.
-    auto is_ancestor_of(Widget const* descendant) const -> bool
-    {
-        return children_.contains_descendant(descendant);
-    }
+    auto get_children() const { return casting_view<Widget const>(children_); }
 
     /// Return container of all descendants of self_.
     auto get_descendants() const -> std::vector<Widget*>
     {
-        return children_.get_descendants();
+        auto descendants = std::vector<Widget*>{};
+        for (auto const& w_ptr : children_) {
+            descendants.push_back(w_ptr.get());
+            auto branch = w_ptr->get_descendants();
+            descendants.insert(std::end(descendants), std::begin(branch),
+                               std::end(branch));
+        }
+        return descendants;
     }
-
-    /// Return the number of children held by this Widget.
-    auto child_count() const -> std::size_t { return children_.size(); }
-
-    /// Return the index of the first child displayed by this Widget.
-    auto child_offset() const -> std::size_t { return children_.get_offset(); }
 
     /// If true, the brush will apply to the wallpaper Glyph.
     auto does_paint_wallpaper_with_brush() const -> bool
@@ -319,6 +299,15 @@ class Widget {
     {
         return screen_state_;
     }
+
+    // TODO These two below are here instead of in Layout_linear because of
+    // Layout_span::sum_child_mins, that function knows too much?
+
+    /// Return the index of the first child displayed by this Widget.
+    auto get_child_offset() const -> std::size_t { return child_offset_; }
+
+    /// Return the number of children held by this Widget.
+    auto child_count() const -> std::size_t { return children_.size(); }
 
     // - - - - - - - - - - - - - Event Handlers - - - - - - - - - - - - - - - -
     /// Handles Enable_event objects.
@@ -585,337 +574,10 @@ class Widget {
      *  children Widgets that you want enabled. */
     void enable_and_post_events(bool enable, bool post_child_polished_event);
 
-   public:
-    /// Owns all children of the owning Widget as a sequential list.
-    /** Provides a non-modifying View type. */
-    class Children {
-       public:
-        using value_type = Widget;
-        using List_t     = std::vector<std::unique_ptr<Widget>>;
-
-        /// Provides limited view of the underlying Children object.
-        /** Children_t for const/non-const versions. */
-        template <typename Widget_t, typename Children_t>
-        class View {
-            static_assert(std::is_base_of<Widget, Widget_t>::value,
-                          "Widget_t must be a Widget type.");
-
-           public:
-            using value_type = Widget_t;
-
-           public:
-            explicit View(Children_t& children) : children_{children} {}
-
-            auto begin() const { return children_.template begin<Widget_t>(); }
-
-            auto end() const { return children_.template end<Widget_t>(); }
-
-            auto empty() const -> bool { return children_.empty(); }
-
-            auto size() const -> std::size_t { return children_.size(); }
-
-            auto operator[](std::size_t index) const -> auto&
-            {
-                return children_.template operator[]<Widget_t>(index);
-            }
-
-            auto front() const -> auto&
-            {
-                return children_.template front<Widget_t>();
-            }
-
-            auto back() const -> auto&
-            {
-                return children_.template back<Widget_t>();
-            }
-
-            /// Find first child satisfying \p pred.
-            /** \p pred takes a const Widget_t reference and returns a bool
-             *  Returns nullptr if no child is found. */
-            template <typename Unary_predicate_t>
-            auto find(Unary_predicate_t&& pred) const -> decltype(auto)
-            {
-                auto const iter =
-                    std::find_if(this->begin(), this->end(),
-                                 std::forward<Unary_predicate_t>(pred));
-                return iter == this->end() ? nullptr : &(*iter);
-            }
-
-            /// Find a child's position given its pointer.
-            /** Returns Widget::child_count() if no child is found. */
-            auto find_by_pointer(Widget const* child) const -> std::size_t
-            {
-                auto const iter = std::find_if(
-                    this->begin(), this->end(),
-                    [child](Widget const& x) { return &x == child; });
-                return std::distance(this->begin(), iter);
-            }
-
-           private:
-            Children_t& children_;
-        };
-
-       public:
-        explicit Children(Widget* self) : self_{self} {}
-
-       public:  // Modifiers
-        /// Move \p child to \p index in underlying vector.
-        /** Inserts at end of container if \p index is out of range.
-         *  Returns a reference to the inserted Child_t object. */
-        template <typename Child_t>
-        auto insert(std::unique_ptr<Child_t> child, std::size_t index)
-            -> Child_t&
-        {
-            assert_is_widget<Child_t>();
-            if (index > this->size())
-                index = this->size();
-            Widget& inserted_child = this->insert_impl(std::move(child), index);
-            this->init_new_child(inserted_child);
-            return static_cast<Child_t&>(inserted_child);
-        }
-
-        template <typename Child_t>
-        auto insert(std::unique_ptr<Child_t> child, List_t::iterator at)
-            -> Child_t&
-        {
-            Child_t& result = *child;
-            child_list_.insert(at, std::move(child));
-            return result;
-        }
-
-        /// Removes and returns the child pointed to by \p child.
-        /** Throws std::invalid_argument if \p child isn't a child. */
-        auto remove(Widget const* child) -> std::unique_ptr<Widget>
-        {
-            auto const child_iter = this->find_impl(child);
-            if (child_iter == std::end(child_list_))
-                throw std::invalid_argument{"Children::remove: No Child Found"};
-            return this->remove_impl(child_iter);
-        }
-
-        /// Removes and returns the child at \p index in the child_list_.
-        /** Throws std::out_of_range if \p index is out of range.. */
-        auto remove(std::size_t index) -> std::unique_ptr<Widget>
-        {
-            if (index >= this->size())
-                throw std::out_of_range{"Children::remove: Invalid Index"};
-            auto const child_iter = std::next(std::begin(child_list_), index);
-            return this->remove_impl(child_iter);
-        }
-
-        /// Removes and deletes a child.
-        void erase(Widget const* child);
-
-        /// Removes and deletes a child.
-        void erase(std::size_t index);
-
-        /// Removes and sends delete event each child.
-        void clear();
-
-        /// Swap two child widgets, no index range check.
-        void swap(std::size_t index_a, std::size_t index_b)
-        {
-            auto const begin = std::begin(child_list_);
-            std::iter_swap(std::next(begin, index_a),
-                           std::next(begin, index_b));
-        }
-
-       public:  // Accessors
-        /// Returns the begin iterator to the child widgets.
-        /** Returns a reference to Widget_t when dereferenced. */
-        template <typename Widget_t>
-        auto begin()
-        {
-            return this->make_deref_and_cast_iter<Widget_t>(
-                std::begin(child_list_));
-        }
-
-        /// Returns the begin iterator to the child widgets.
-        /** Returns a reference to Widget_t when dereferenced. */
-        template <typename Widget_t>
-        auto begin() const
-        {
-            return this->make_const_deref_and_cast_iter<Widget_t>(
-                std::cbegin(child_list_));
-        }
-
-        template <typename Widget_t>
-        auto end()
-        {
-            return this->make_deref_and_cast_iter<Widget_t>(
-                std::end(child_list_));
-        }
-
-        template <typename Widget_t>
-        auto end() const
-        {
-            return this->make_const_deref_and_cast_iter<Widget_t>(
-                std::cend(child_list_));
-        }
-
-        /// Return true is contains no child Widgets.
-        auto empty() const -> bool { return child_list_.empty(); }
-
-        /// Return the number of children.
-        auto size() const -> std::size_t { return child_list_.size(); }
-
-        template <typename Widget_t>
-        auto operator[](std::size_t index) -> Widget_t&
-        {
-            return static_cast<Widget_t&>(*child_list_[index]);
-        }
-
-        template <typename Widget_t>
-        auto operator[](std::size_t index) const -> Widget_t const&
-        {
-            return static_cast<Widget_t const&>(*child_list_[index]);
-        }
-
-        template <typename Widget_t>
-        auto front() -> Widget_t&
-        {
-            return static_cast<Widget_t&>(*child_list_.front());
-        }
-
-        template <typename Widget_t>
-        auto front() const -> Widget_t const&
-        {
-            return static_cast<Widget_t const&>(*child_list_.front());
-        }
-
-        template <typename Widget_t>
-        auto back() -> Widget_t&
-        {
-            return static_cast<Widget_t&>(*child_list_.back());
-        }
-
-        template <typename Widget_t>
-        auto back() const -> Widget_t const&
-        {
-            return static_cast<Widget_t const&>(*child_list_.back());
-        }
-
-        /// Return the child offset, the first widget included in the layout.
-        auto get_offset() const -> std::size_t { return offset_; }
-
-        /// Sets the child Widget offset, does not do bounds checking.
-        void set_offset(std::size_t index) { offset_ = index; }
-
-        /// Return true if \p child points to a child of self_.
-        auto contains(Widget const* child) const -> bool
-        {
-            return this->find_impl(child) != std::end(child_list_);
-        }
-
-        /// Return true if \p descendant exists somewhere in the tree of self_.
-        auto contains_descendant(Widget const* descendant) const -> bool
-        {
-            auto const begin = std::begin(child_list_);
-            auto const end   = std::end(child_list_);
-            return std::any_of(begin, end, [descendant](auto const& w) {
-                return w.get() == descendant or w->is_ancestor_of(descendant);
-            });
-        }
-
-        /// Return container of all descendants of self_.
-        auto get_descendants() const -> std::vector<Widget*>
-        {
-            auto descendants = std::vector<Widget*>{};
-            for (auto const& child_ptr : child_list_) {
-                descendants.push_back(child_ptr.get());
-                auto branch = child_ptr->get_descendants();
-                descendants.insert(std::end(descendants), std::begin(branch),
-                                   std::end(branch));
-            }
-            return descendants;
-        }
-
-       private:
-        List_t child_list_;
-        Widget* self_;  // The owning parent Widget
-
-        /// Index into child_list_ that is the beginning of the layout display.
-        std::size_t offset_ = 0uL;
-
-        static auto constexpr deref = [](auto& ptr) -> auto& { return *ptr; };
-
-        static auto constexpr deref_const = [](auto const& ptr) -> auto const&
-        {
-            return *ptr;
-        };
-
-        template <typename Widget_t>
-        static auto constexpr cast = [](auto& w) -> auto&
-        {
-            return static_cast<Widget_t&>(w);
-        };
-
-        template <typename Widget_t>
-        static auto constexpr cast_const = [](auto const& w) -> auto const&
-        {
-            return static_cast<Widget_t const&>(w);
-        };
-
-       private:
-        template <typename Child_t>
-        constexpr void assert_is_widget()
-        {
-            static_assert(std::is_base_of<Widget, Child_t>::value,
-                          "Child_t must be a Widget type");
-        }
-
-        auto insert_impl(std::unique_ptr<Widget> child, std::size_t index)
-            -> Widget&
-        {
-            auto const pos = std::next(std::cbegin(child_list_), index);
-            return **(child_list_.emplace(pos, std::move(child)));
-        }
-
-        /// Setup \p w to be a child of self_.
-        void init_new_child(Widget& w);
-
-        /// Removes and returns child at \p child_iter, assumes is valid iter.
-        auto remove_impl(List_t::iterator child_iter)
-            -> std::unique_ptr<Widget>;
-
-        template <typename Widget_t, typename Iter>
-        static auto make_deref_and_cast_iter(Iter i)
-        {
-            return Map_iterator{Map_iterator{i, deref}, cast<Widget_t>};
-        }
-
-        template <typename Widget_t, typename Iter>
-        static auto make_const_deref_and_cast_iter(Iter i)
-        {
-            return Map_iterator{Map_iterator{i, deref_const},
-                                cast_const<Widget_t>};
-        }
-
-        /// Return iterator to \p target in child_list_, or end if not found.
-        auto find_impl(Widget const* target) const -> List_t::const_iterator
-        {
-            auto const end       = std::cend(child_list_);
-            auto const begin     = std::cbegin(child_list_);
-            auto const is_target = [target](auto const& w) -> bool {
-                return w.get() == target;
-            };
-            return std::find_if(begin, end, is_target);
-        }
-
-        /// Return iterator to \p target in child_list_, or end if not found.
-        auto find_impl(Widget const* target) -> List_t::iterator
-        {
-            auto const end       = std::end(child_list_);
-            auto const begin     = std::begin(child_list_);
-            auto const is_target = [target](auto const& w) -> bool {
-                return w.get() == target;
-            };
-            return std::find_if(begin, end, is_target);
-        }
-    };
-
    protected:
-    Children children_{this};
+    using Children_t = std::vector<std::unique_ptr<Widget>>;
+    Children_t children_;
+    std::size_t child_offset_ = 0uL;
 
    private:
     std::string name_;

@@ -66,7 +66,7 @@ struct Center_offset : cppurses::layout::Vertical<> {
 struct Status_box : cppurses::layout::Vertical<> {
    public:
     Generation_count& gen_count  = this->make_child<Generation_count>();
-    Widget& break_               = this->append(make_break());
+    Widget& break_               = this->append_child(make_break());
     Center_offset& center_offset = this->make_child<Center_offset>();
 
    public:

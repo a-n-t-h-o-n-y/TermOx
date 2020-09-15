@@ -35,7 +35,7 @@ class Color_select : public cppurses::layout::Vertical<Color_line> {
    private:
     void set_palette(cppurses::Color_palette const& pal)
     {
-        this->Layout::clear();
+        this->delete_all_children();
         auto const size           = pal.size();
         auto constexpr row_length = 8uL;
         auto count                = 0uL;

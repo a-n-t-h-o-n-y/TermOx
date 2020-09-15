@@ -245,7 +245,7 @@ void link(Scrollbar<Layout_t>& scrollbar,
     scrollbar.set_size(layout.child_count());
 
     scrollbar.new_position.connect(
-        [&](std::size_t p) { layout.set_offset(p); });
+        [&](std::size_t p) { layout.set_child_offset(p); });
 
     layout.child_added.connect([&](auto&) { scrollbar.increment_size(); });
     layout.child_removed.connect([&](auto&) { scrollbar.decrement_size(); });

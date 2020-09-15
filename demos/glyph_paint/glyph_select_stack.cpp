@@ -50,9 +50,8 @@ bool Glyph_select_stack::resize_event(Area new_size, Area old_size)
 
 void Glyph_select_stack::update_stack()
 {
-    if (this->width() == 0 or this->height() == 0) {
+    if (this->width() == 0 || this->height() == 0)
         return;
-    }
     this->clear();
 
     std::size_t symbols_index{0};
