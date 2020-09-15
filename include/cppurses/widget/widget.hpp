@@ -12,7 +12,7 @@
 
 #include <signals/signal.hpp>
 
-#include <cppurses/common/casting_view.hpp>
+#include <cppurses/common/transform_view.hpp>
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
@@ -255,10 +255,22 @@ class Widget {
     }
 
     /// Get a range containing Widget& to each child.
-    auto get_children() { return casting_view<Widget>(children_); }
+    auto get_children()
+    {
+        auto constexpr dereference = [](auto& widg_ptr) -> Widget& {
+            return *widg_ptr;
+        };
+        return Transform_view(children_, dereference);
+    }
 
     /// Get a const range containing Widget& to each child.
-    auto get_children() const { return casting_view<Widget const>(children_); }
+    auto get_children() const
+    {
+        auto constexpr dereference = [](auto const& widg_ptr) -> Widget const& {
+            return *widg_ptr;
+        };
+        return Transform_view(children_, dereference);
+    }
 
     /// Return container of all descendants of self_.
     auto get_descendants() const -> std::vector<Widget*>

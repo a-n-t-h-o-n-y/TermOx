@@ -6,7 +6,7 @@
 #include <type_traits>
 #include <utility>
 
-#include <cppurses/common/casting_view.hpp>
+#include <cppurses/common/transform_view.hpp>
 #include <cppurses/system/event.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/widget.hpp>
@@ -45,10 +45,22 @@ class Layout : public Widget {
 
    public:
     /// Return a View of all children.
-    auto get_children() { return casting_view<Child_t>(children_); }
+    auto get_children()
+    {
+        auto constexpr downcast = [](auto& widg_ptr) -> Child_t& {
+            return static_cast<Child_t&>(*widg_ptr);
+        };
+        return Transform_view(children_, downcast);
+    }
 
     /// Return a const View of all children.
-    auto get_children() const { return casting_view<Child_t const>(children_); }
+    auto get_children() const
+    {
+        auto constexpr downcast = [](auto const& widg_ptr) -> Child_t const& {
+            return static_cast<Child_t const&>(*widg_ptr);
+        };
+        return Transform_view(children_, downcast);
+    }
 
     /// Inserts \p w at \p index, sending child added event to *this.
     /** Widget_t must be a Child_t or derived object. Inserts at end of
