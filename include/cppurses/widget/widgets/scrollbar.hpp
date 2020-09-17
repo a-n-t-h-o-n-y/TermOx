@@ -1,5 +1,6 @@
 #ifndef CPPURSES_WIDGET_WIDGETS_SCROLLBAR_HPP
 #define CPPURSES_WIDGET_WIDGETS_SCROLLBAR_HPP
+#include <cmath>
 #include <cstddef>
 #include <memory>
 #include <utility>
@@ -20,70 +21,151 @@ namespace cppurses {
 
 /// Scrollbar to display progress through some structure, and control progress.
 /** Provides an increment, decrement, and new_position Signals to notify of
-    changes. The size parameter tells the scrollbar how many units of scroll
-    there are to the scructure it is linked with, and the current position the
-    scrollbar is at is emitted with the new_position signal. */
+ *  changes. The size parameter tells the scrollbar how many units of scroll
+ *  there are to the scructure it is linked with, and the current position the
+ *  scrollbar is at is emitted with the new_position signal. */
 template <typename Layout_t>
 class Scrollbar : public Layout_t {
    private:
     class Middle : public Widget {
        public:
+        static auto constexpr invalid_position = -1uL;
+
+       public:
         struct Parameters {
+            std::size_t size;
             std::size_t position;
-            std::size_t length;
         };
 
        public:
         Middle(Parameters p = {0uL, 0uL}) : parameters_{p}
         {
-            *this | pipe::bg(Color::Light_gray);
+            this->set_bar_fg(Color::Foreground);
+            this->set_bar_bg(Color::Dark_gray);
         }
 
        public:
         void set_position(std::size_t p)
         {
             parameters_.position = p;
+            this->update_length_and_position();
             this->update();
         }
 
-        void set_length(std::size_t l)
+        void set_size(std::size_t s)
         {
-            parameters_.length = l;
+            parameters_.size = s;
+            this->update_length_and_position();
             this->update();
+        }
+
+        void set_bar_fg(Color c)
+        {
+            bar_ | foreground(c);
+            this->update();
+        }
+
+        void set_bar_bg(Color c)
+        {
+            if constexpr (is_vertical)
+                *this | pipe::bg(c);
+            else
+                *this | pipe::wallpaper(L'▬' | foreground(c));
+            this->update();
+        }
+
+        /// Finds the scroll position from a physical point on the bar.
+        auto find_position_from_point(Point p) -> std::size_t
+        {
+            if (parameters_.size == 0uL)
+                return 0uL;
+            auto const point              = is_vertical ? p.y : p.x;
+            double const length_available = this->max_length() - slider_length_;
+            if (length_available == 0uL)
+                return 0uL;
+            auto const result =
+                std::ceil(double(point * parameters_.size) / length_available);
+            if (result >= parameters_.size && parameters_.size != 0uL)
+                return parameters_.size - 1;
+            else
+                return result;
         }
 
        protected:
         auto paint_event() -> bool override
         {
-            if (parameters_.length == 0uL)
+            if (parameters_.size == 0uL ||
+                parameters_.position == invalid_position) {
                 return Widget::paint_event();
-
-            Painter{*this}.put(L'🬰', {0, 0});
-            // std::wcerr << bar << L'\n';
-            // Painter{*this}.line(
-            //     bar, point(parameters_.position),
-            //     point(parameters_.position + parameters_.length));
+            }
+            auto const begin  = point(slider_position_);
+            auto const length = point(slider_length_);
+            Painter{*this}.line(bar_, begin, begin + length);
             return Widget::paint_event();
+        }
+
+        auto resize_event(Area new_size, Area old_size) -> bool override
+        {
+            this->update_length_and_position();
+            return Widget::resize_event(new_size, old_size);
         }
 
        private:
         static auto constexpr is_vertical = layout::is_vertical_v<Layout_t>;
-        static auto constexpr bar =
-            is_vertical
-                ? L'🬰' | Trait::Inverse | foreground(Color::Foreground)
-                : L' ' | background(Color::Foreground);
-        // set wallpaper to skinny too
 
        private:
         Parameters parameters_;
+        Glyph bar_ = is_vertical ? L'█' : L'▬';
+
+        std::size_t slider_position_;
+        std::size_t slider_length_;
 
        private:
+        void update_length_and_position()
+        {
+            // Order Matters, position depends on length
+            auto const length = this->max_length();
+            slider_length_    = slider_length(length, parameters_.size);
+            slider_position_  = slider_position(
+                length, parameters_.size, parameters_.position, slider_length_);
+        }
+
         static auto constexpr point(std::size_t position) -> Point
         {
             if constexpr (is_vertical)
                 return {0uL, position};
             else
                 return {position, 0uL};
+        }
+
+        static auto constexpr slider_position(std::size_t max_length,
+                                              double scrollable_size,
+                                              double position,
+                                              std::size_t slider_length)
+            -> std::size_t
+        {
+            if (scrollable_size == 0.)
+                return 0uL;
+            double const ratio = position / scrollable_size;
+            return ratio * (max_length - slider_length);
+        }
+
+        static auto constexpr slider_length(double max_length,
+                                            double scrollable_size)
+            -> std::size_t
+        {
+            if (max_length == 0. || scrollable_size == 0.)
+                return max_length;
+            double const ratio = 1. / ((scrollable_size / max_length) * 2.);
+            return ratio * max_length;
+        }
+
+        auto max_length() const -> std::size_t
+        {
+            if constexpr (is_vertical)
+                return this->height();
+            else
+                return this->width();
         }
     };
 
@@ -100,7 +182,7 @@ class Scrollbar : public Layout_t {
     Button& decrement_btn =
         this->template make_child<Button>(Glyph_string{top_symbol_});
 
-    Middle& middle = this->template make_child<Middle>({5uL, 2uL});
+    Middle& middle = this->template make_child<Middle>({0uL, invalid_position});
 
     Button& increment_btn =
         this->template make_child<Button>(Glyph_string{bottom_symbol_});
@@ -145,7 +227,7 @@ class Scrollbar : public Layout_t {
             this->set_position(0uL);
         else if (parameters_.position >= parameters_.size)
             this->set_position(parameters_.size - 1uL);
-        // TODO tell middle section about the change
+        middle.set_size(s);
     }
 
     void increment_size() { this->set_size(this->get_size() + 1uL); }
@@ -161,12 +243,12 @@ class Scrollbar : public Layout_t {
 
     void set_position(std::size_t p)
     {
+        if (parameters_.size == 0uL)
+            return;
         parameters_.position =
             p < parameters_.size ? p : parameters_.size - 1uL;
         new_position(parameters_.position);
-        // TODO tell middle section about the change
-        // can maybe hook up signal to slider's signal if you make slider work
-        // in a similar way instead of with floating point.
+        middle.set_position(p);
     }
 
     void decrement_position()
@@ -199,10 +281,18 @@ class Scrollbar : public Layout_t {
     }
 
    protected:
-    virtual auto mouse_wheel_event_filter(Widget&, Mouse const& m)
-        -> bool override
+    auto mouse_wheel_event_filter(Widget&, Mouse const& m) -> bool override
     {
         return this->handle_wheel(m.button);
+    }
+
+    auto mouse_press_event_filter(Widget& w, Mouse const& m) -> bool override
+    {
+        if (&w != &middle)
+            return false;
+        if (m.button == Mouse::Button::Left)
+            this->set_position(middle.find_position_from_point(m.local));
+        return true;
     }
 
    private:
@@ -210,8 +300,8 @@ class Scrollbar : public Layout_t {
 
    private:
     static auto constexpr is_vertical    = layout::is_vertical_v<Layout_t>;
-    static auto constexpr top_symbol_    = is_vertical ? L'▴' : L'<';
-    static auto constexpr bottom_symbol_ = is_vertical ? L'▾' : L'>';
+    static auto constexpr top_symbol_    = is_vertical ? L'▴' : L'◂';
+    static auto constexpr bottom_symbol_ = is_vertical ? L'▾' : L'▸';
 };
 
 using HScrollbar = Scrollbar<layout::Horizontal<>>;

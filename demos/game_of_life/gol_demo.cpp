@@ -63,15 +63,27 @@ GoL_demo::GoL_demo()
     // TODO make this a free function that takes the patterns object and the
     // gol_display object and adds and hooks up everything
     auto& patterns = side_panel.patterns_rulesets.patterns;
-    patterns.add_pattern(L"Pattern 1");
-    patterns.add_pattern(L"Pattern 2");
-    patterns.add_pattern(L"Pattern 3");
-    patterns.add_pattern(L"Pattern 4");
-    patterns.add_pattern(L"Pattern 5");
-    patterns.add_pattern(L"Pattern 6");
-    patterns.add_pattern(L"Pattern 7");
+    patterns.add_option(L"Pattern 1");
+    patterns.add_option(L"Pattern 2");
+    patterns.add_option(L"Pattern 3");
+    patterns.add_option(L"Pattern 4");
+    patterns.add_option(L"Pattern 5");
+    patterns.add_option(L"Pattern 6");
+    patterns.add_option(L"Pattern 7");
 
-    patterns.pattern_chosen.connect([](auto const& /* name */) {
+    auto& rules = side_panel.patterns_rulesets.rulesets;
+    rules.add_option(L"Rule 1");
+    rules.add_option(L"Rule 2");
+    rules.add_option(L"Rule 3");
+    rules.add_option(L"Rule 4");
+    rules.add_option(L"Rule 5");
+    rules.add_option(L"Rule 6");
+    rules.add_option(L"Rule 7");
+    rules.add_option(L"Rule 8");
+    rules.add_option(L"Rule 9");
+    rules.add_option(L"Rule 10");
+
+    patterns.selection_made.connect([](auto const& /* name */) {
         // if (name == L"Pattern 1")
         //     ;
         // gol_display.import(

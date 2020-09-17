@@ -3,111 +3,71 @@
 #include <string>
 #include <utility>
 
-#include <cppurses/widget/layouts/horizontal.hpp>
+#include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/layouts/stack.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/widgets/button.hpp>
-#include <cppurses/widget/widgets/scrollbar.hpp>
-#include <cppurses/widget/widgets/text_display.hpp>
-#include <cppurses/widget/widgets/textbox.hpp>
+#include <cppurses/widget/widgets/button_list.hpp>
 
 #include "colors.hpp"
 #include "make_break.hpp"
 
 namespace gol {
 
+/// Custom Button.
 class Thin_btn : public cppurses::Button {
    public:
-    Thin_btn(cppurses::Glyph_string text) : Button{std::move(text)}
-    {
-        *this | cppurses::pipe::fixed_height(1uL);
-    }
-};
-
-class Patterns_list : public cppurses::layout::Horizontal<> {
-    class Patterns_list_impl : public cppurses::layout::Vertical<Thin_btn> {
-       public:
-        sig::Signal<void(std::wstring const& name)> pattern_chosen;
-
-       public:
-        void add_pattern(std::wstring const& name)
-        {
-            this->append_child(std::make_unique<Thin_btn>(name))
-                .pressed.connect([this, name] { pattern_chosen(name); });
-        }
-    };
-
-   public:
-    cppurses::VScrollbar& scrollbar = this->make_child<cppurses::VScrollbar>();
-
-    Patterns_list_impl& list = this->make_child<Patterns_list_impl>();
-
-   public:
-    sig::Signal<void(std::wstring const& name)>& pattern_chosen =
-        list.pattern_chosen;
-
-   public:
-    Patterns_list() { link(scrollbar, list); }
-
-   public:
-    void add_pattern(std::wstring const& name) { list.add_pattern(name); }
-};
-
-class Patterns_box : public cppurses::layout::Vertical<> {
-   public:
-    Patterns_list& list         = this->make_child<Patterns_list>();
-    Widget& break_              = this->append_child(make_break());
-    Thin_btn& goto_rulesets_btn = this->make_child<Thin_btn>(L"Rulesets") |
-                                  cppurses::pipe::bg(color::Light_green) |
-                                  cppurses::pipe::fg(color::Teal);
-
-   public:
-    sig::Signal<void(std::wstring const& name)>& pattern_chosen =
-        list.pattern_chosen;
-
-   public:
-    void add_pattern(std::wstring const& name) { list.add_pattern(name); }
-};
-
-class Rules_list {};
-class Rulesets_box : public cppurses::layout::Vertical<> {
-   public:
-    cppurses::Text_display& td =
-        this->make_child<cppurses::Text_display>("Rulesets here.");
-
-    cppurses::HScrollbar& bar = this->make_child<cppurses::HScrollbar>();
-
-    Widget& break_ = this->append_child(make_break());
-
-    cppurses::Button& to_examples_btn =
-        this->make_child<cppurses::Button>("Patterns");
-
-   public:
-    Rulesets_box()
+    Thin_btn(cppurses::Glyph_string name) : Button{std::move(name)}
     {
         using namespace cppurses::pipe;
-        to_examples_btn | fixed_height(1uL) | bg(color::Light_green) |
-            fg(color::Teal);
+        *this | fixed_height(1uL) | cppurses::pipe::bg(color::Light_green) |
+            cppurses::pipe::fg(color::Teal);
     }
 };
 
-class Patterns_rulesets_box : public cppurses::layout::Stack<> {
+/// A Button_list, line break, and goto Button in Vertical layout.
+class Selection_page : public cppurses::layout::Vertical<> {
+   private:
+    using Selection_list = cppurses::Button_list<cppurses::layout::Vertical>;
+
    public:
-    Patterns_box& patterns = this->make_page<Patterns_box>();
-    Rulesets_box& rulesets = this->make_page<Rulesets_box>();
+    Selection_list& list = this->make_child<Selection_list>();
+    Thin_btn& goto_btn;
+
+   public:
+    Selection_page(cppurses::Glyph_string goto_btn_name)
+        : goto_btn{this->make_child<Thin_btn>(std::move(goto_btn_name))}
+    {
+        list.set_scrollbar_bg(color::Teal);
+        list.set_scrollbar_fg(color::Light_green);
+    }
+
+   public:
+    sig::Signal<void(std::wstring const& name)>& selection_made =
+        list.button_pressed;
+
+   public:
+    void add_option(std::wstring const& name) { list.add_button(name); }
+};
+
+/// Stack of patterns and rules pages.
+class Patterns_rulesets_box : public cppurses::layout::Stack<Selection_page> {
+   public:
+    // The String is for the GoTo Button
+    Selection_page& patterns = this->make_page(L"Rulesets");
+    Selection_page& rulesets = this->make_page(L"Patterns");
 
    public:
     Patterns_rulesets_box()
     {
         using namespace cppurses::pipe;
+        *this | active_page(patterns_index) | fixed_height(10);
 
-        *this | active_page(patterns_index) | fixed_height(16uL);
-
-        patterns.goto_rulesets_btn |
+        patterns.goto_btn |
             on_press([this]() { this->set_active_page(rulesets_index); });
 
-        rulesets.to_examples_btn |
+        rulesets.goto_btn |
             on_press([this]() { this->set_active_page(patterns_index); });
     }
 
