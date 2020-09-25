@@ -1,19 +1,20 @@
 #include "get_life_1_06.hpp"
+
 #include <fstream>
 #include <string>
-#include <vector>
 
 #include "coordinate.hpp"
+#include "pattern.hpp"
 
 namespace gol {
 
-std::vector<Coordinate> get_life_1_06(const std::string& filename)
+auto get_life_1_06(std::string const& filename) -> Pattern
 {
     auto file = std::ifstream{filename};
     if (file.fail())
         return {};
 
-    auto cells      = std::vector<Coordinate>{};
+    auto cells      = Pattern::Cells{};
     auto first_line = std::string{};
     std::getline(file, first_line);
     while (file) {
@@ -27,6 +28,7 @@ std::vector<Coordinate> get_life_1_06(const std::string& filename)
             break;
         cells.push_back({x, y});
     }
-    return cells;
+    return {cells, parse_rule_string("B3/S23")};
 }
+
 }  // namespace gol

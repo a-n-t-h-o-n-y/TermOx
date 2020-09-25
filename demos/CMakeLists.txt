@@ -56,8 +56,8 @@ target_sources(demos PRIVATE
 
 # GAME OF LIFE
 target_sources(demos PRIVATE
-    game_of_life/game_of_life_engine.cpp
     game_of_life/gol_widget.cpp
+    game_of_life/patterns.cpp
     game_of_life/gol_demo.cpp
     game_of_life/exporters.cpp
     game_of_life/filetype.cpp

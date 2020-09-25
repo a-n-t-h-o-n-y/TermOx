@@ -2,14 +2,16 @@
 
 #include <fstream>
 #include <string>
-#include <vector>
 
 #include "coordinate.hpp"
+#include "pattern.hpp"
 
 namespace gol {
 
-std::vector<Coordinate> get_plaintext(const std::string& /* filename */) {
-    return {};
+// TODO Implement
+auto get_plaintext(std::string const & /* filename */) -> Pattern
+{
+    return {{}, parse_rule_string("B3/S23")};
 }
 
 }  // namespace gol

@@ -5,6 +5,8 @@
 
 #include "colors.hpp"
 #include "gol_widget.hpp"
+#include "pattern_store.hpp"
+#include "rule_store.hpp"
 #include "side_panel.hpp"
 
 namespace gol {
@@ -30,6 +32,23 @@ class GoL_demo : public cppurses::layout::Horizontal<> {
     {
         cppurses::System::terminal.set_palette(gol_palette);
         return cppurses::layout::Horizontal<>::focus_in_event();
+    }
+
+   private:
+    Rule_store rule_store_;
+    Pattern_store pattern_store_;
+
+   private:
+    void add_rule_example(Rule_store::Name name, std::string_view rule_string)
+    {
+        rule_store_.add_rule(name, parse_rule_string(rule_string));
+        side_panel.patterns_rulesets.rulesets.add_option(std::wstring{name});
+    }
+
+    void add_pattern_example(Pattern_store::Name name, Pattern pattern)
+    {
+        pattern_store_.add_pattern(name, pattern);
+        side_panel.patterns_rulesets.patterns.add_option(std::wstring{name});
     }
 };
 

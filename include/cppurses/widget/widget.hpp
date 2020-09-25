@@ -237,13 +237,19 @@ class Widget {
      *  issues. */
     void enable_animation(Animation_engine::Period_t period)
     {
+        if (is_animated_)
+            return;
         System::animation_engine().register_widget(*this, period);
+        is_animated_ = true;
     }
 
     /// Enable animation with a frames-per-second value.
     void enable_animation(FPS fps)
     {
+        if (is_animated_)
+            return;
         System::animation_engine().register_widget(*this, fps);
+        is_animated_ = true;
     }
 
     /// Turn off animation, no more Timer_events will be sent to this Widget.
@@ -251,8 +257,14 @@ class Widget {
      *  System. */
     void disable_animation()
     {
+        if (!is_animated_)
+            return;
         System::animation_engine().unregister_widget(*this);
+        is_animated_ = false;
     }
+
+    /// Return true if this Widget has animation enabled.
+    auto is_animated() const -> bool { return is_animated_; }
 
     /// Get a range containing Widget& to each child.
     auto get_children()
@@ -597,6 +609,7 @@ class Widget {
     Widget* parent_              = nullptr;
     bool enabled_                = false;
     bool brush_paints_wallpaper_ = true;
+    bool is_animated_            = false;
     std::optional<Glyph> wallpaper_;
 
     detail::Screen_descriptor screen_state_;

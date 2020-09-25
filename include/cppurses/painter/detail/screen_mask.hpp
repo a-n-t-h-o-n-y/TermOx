@@ -45,7 +45,8 @@ class Screen_mask {
     {
         auto index = index_at(x, y);
         if (index > bits_.size())  // TODO temp silent failure
-            index = 0;
+            throw 5;
+        //     index = 0;
         return bits_[index];
     }
 
@@ -54,7 +55,8 @@ class Screen_mask {
     {
         auto index = index_at(x, y);
         if (index > bits_.size())  // TODO temp silent failure
-            index = 0;
+            throw 5;
+        //     index = 0;
         return bits_[index];
     }
 

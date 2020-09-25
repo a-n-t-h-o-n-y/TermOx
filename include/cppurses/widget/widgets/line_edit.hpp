@@ -31,8 +31,9 @@ class Line_edit : public Textbox {
    public:
     using Validator_t = std::function<bool(char)>;
 
+   public:
     /// Emitted on Enter Key press, sends along the current contents.
-    sig::Signal<void(std::string)> edit_finished;
+    sig::Signal<void(std::string const&)> edit_finished;
 
    public:
     /// Construct a Line_edit object with \p initial_text in ghost color.

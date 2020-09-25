@@ -2,16 +2,17 @@
 
 #include <cctype>
 #include <fstream>
+#include <istream>
 #include <string>
 #include <utility>
-#include <vector>
 
 #include "coordinate.hpp"
+#include "pattern.hpp"
 
 namespace {
 using namespace gol;
 
-int extract_int(std::string& run_length)
+auto extract_int(std::string& run_length) -> int
 {
     auto count = 1;
     if (!run_length.empty()) {
@@ -29,49 +30,39 @@ void next_row(Coordinate& insert_position, std::string& run_length, int begin_x)
         insert_position.y += 1;
 }
 
-void seek_past_comments(std::ifstream& file)
+void seek_past_comments(std::istream& is)
 {
-    while (file.peek() == '#') {
+    while (is.peek() == '#') {
         auto tmp = std::string{};
-        std::getline(file, tmp);
+        std::getline(is, tmp);
     }
 }
 
 /// Return the top left coordinate of the pattern.
-Coordinate get_offset(std::ifstream& file)
+auto get_offset(std::istream& is) -> Coordinate
 {
-    file.seekg(4, std::ios_base::cur);  // "x = "
+    is.seekg(4, std::ios_base::cur);  // "x = "
     auto width = 0;
-    file >> width;
-    file.seekg(6, std::ios_base::cur);  // ", y = "
+    is >> width;
+    is.seekg(6, std::ios_base::cur);  // ", y = "
     auto height = 0;
-    file >> height;
+    is >> height;
     return {-1 * (width / 2), -1 * (height / 2)};
 }
 
 /// Extract the rule to use from the file.
-std::string get_rule(std::ifstream& file)
+auto get_rule_string(std::istream& is) -> std::string
 {
-    if (file.peek() != ',')
-        return "3/23";
+    if (is.peek() != ',')
+        return "B3/S23";
 
-    file.seekg(9, std::ios_base::cur);
-    if (file.peek() == 'B' or file.peek() == 'b')
-        file.seekg(1, std::ios_base::cur);
-
-    auto birth = 9;
-    if (std::isdigit(file.peek()))
-        file >> birth;
-
-    file.seekg(1, std::ios_base::cur);
-    if (file.peek() == 'S' || file.peek() == 's')
-        file.seekg(1, std::ios_base::cur);
-
-    auto survival = 9;
-    if (std::isdigit(file.peek()))
-        file >> survival;
-
-    return std::to_string(birth) + '/' + std::to_string(survival);
+    auto result = std::string{};
+    is.seekg(9, std::ios_base::cur);
+    while (is && is.peek() != '\n') {
+        result += is.peek();
+        is.seekg(1, std::ios_base::cur);
+    }
+    return result;
 }
 
 template <typename Container_t>
@@ -92,24 +83,28 @@ void insert_dead(Coordinate& insert_position, int count)
 
 namespace gol {
 
-auto get_RLE(const std::string& filename)
-    -> std::pair<std::vector<Coordinate>, std::string>
+auto get_RLE(std::string const& filename) -> Pattern
 {
-    auto file    = std::ifstream{filename};
-    auto pattern = std::vector<Coordinate>{};
+    auto fs = std::ifstream{filename};
+    return parse_rle(fs);
+}
 
-    seek_past_comments(file);
-    auto const offset    = get_offset(file);
-    auto insert_position = offset;
+auto parse_rle(std::istream& is) -> Pattern
+{
+    // Call Order Matters
+    seek_past_comments(is);
+    auto const offset = get_offset(is);
+    auto const rule   = parse_rule_string(get_rule_string(is));
+
     auto run_length      = std::string{};
+    auto insert_position = offset;
+    auto cells           = Pattern::Cells{};
 
-    auto const rule = get_rule(file);
-
-    while (file) {
+    while (is) {
         auto c = '\0';
-        file >> c;
+        is >> c;
         if (c == 'o')  // alive cell
-            insert_alive(pattern, insert_position, extract_int(run_length));
+            insert_alive(cells, insert_position, extract_int(run_length));
         else if (c == 'b')  // dead cell
             insert_dead(insert_position, extract_int(run_length));
         else if (std::isdigit(c))
@@ -121,7 +116,7 @@ auto get_RLE(const std::string& filename)
         else if (c == '!')
             break;
     }
-    return {pattern, rule};
+    return {cells, rule};
 }
 
 }  // namespace gol

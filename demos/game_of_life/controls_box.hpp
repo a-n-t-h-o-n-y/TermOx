@@ -26,6 +26,7 @@
 
 #include "colors.hpp"
 #include "make_break.hpp"
+#include "rule.hpp"
 
 namespace gol {
 
@@ -51,17 +52,9 @@ struct Clear_step_box : cppurses::layout::Vertical<> {
     }
 };
 
-struct Rule_edit : cppurses::layout::Vertical<> {
+class Rule_edit : public cppurses::layout::Vertical<> {
    public:
     sig::Signal<void(std::string const&)> rule_change;
-
-   public:
-    cppurses::HLabel& label = this->make_child<cppurses::HLabel>(
-        {L"Rules[B/S]" | cppurses::Trait::Underline | cppurses::Trait::Bold,
-         cppurses::Align::Center});
-
-    cppurses::Line_edit& edit_box =
-        this->make_child<cppurses::Line_edit>(L"3/23");
 
    public:
     Rule_edit()
@@ -70,14 +63,34 @@ struct Rule_edit : cppurses::layout::Vertical<> {
         using namespace cppurses::pipe;
 
         *this | fixed_height(2uL);
-        edit_box | bg(color::White) | fg(color::Black) | ghost(color::Teal);
+        edit_box_ | bg(color::White) | fg(color::Black) | ghost(color::Teal);
 
-        edit_box.set_validator(
-            [](char c) { return std::isdigit(c) || c == '/'; });
+        edit_box_.set_validator([](char c) {
+            return std::isdigit(c) || c == '/' || c == 'B' || c == 'b' ||
+                   c == 'S' || c == 's';
+        });
 
-        edit_box.edit_finished.connect(
+        edit_box_.edit_finished.connect(
             [this](std::string rule_text) { rule_change(rule_text); });
+
+        this->set_rule(parse_rule_string("B3/S23"));
     }
+
+   public:
+    void set_rule(Rule r)
+    {
+        auto const rs = to_rule_string(r);
+        edit_box_.set_contents(rs);
+        edit_box_.set_cursor(rs.size());
+    }
+
+   private:
+    cppurses::HLabel& label = this->make_child<cppurses::HLabel>(
+        {L"RuleString[B/S]" | cppurses::Trait::Underline |
+             cppurses::Trait::Bold,
+         cppurses::Align::Center});
+
+    cppurses::Line_edit& edit_box_ = this->make_child<cppurses::Line_edit>();
 };
 
 struct Start_pause_btns : cppurses::Toggle_button {
@@ -101,7 +114,7 @@ struct Interval_box : cppurses::layout::Horizontal<> {
    public:
     cppurses::Labeled_number_edit<unsigned>& value_edit =
         this->make_child<cppurses::Labeled_number_edit<unsigned>>("Interval ",
-                                                                  120);
+                                                                  40);
 
     cppurses::HLabel& units = this->make_child<cppurses::HLabel>({L"ms"});
 
@@ -118,23 +131,22 @@ struct Interval_box : cppurses::layout::Horizontal<> {
     }
 };
 
-struct Grid_fade : cppurses::layout::Horizontal<cppurses::Labeled_checkbox> {
+struct Grid_hi_res : cppurses::layout::Horizontal<cppurses::Labeled_checkbox> {
    public:
-    Child_t& grid_box = this->make_child("Grid");
-    Child_t& fade_box = this->make_child("Fade");
+    Child_t& grid_box   = this->make_child("Grid");
+    Child_t& hi_res_box = this->make_child("Hi-Res");
 
    public:
-    Grid_fade()
+    Grid_hi_res()
     {
         using namespace cppurses::pipe;
         *this | fixed_height(1uL) | children() |
             for_each([](auto& c) { c.padding | fixed_width(1uL); });
-        fade_box.checkbox.toggle();
+        hi_res_box.checkbox.toggle();
     }
 };
 
-// TODO rename to Controls_box, also file rename
-struct Settings_box : cppurses::layout::Vertical<> {
+struct Controls_box : cppurses::layout::Vertical<> {
    public:
     // Widget& break_                    = this->append_child(make_break());
     Interval_box& interval_edit        = this->make_child<Interval_box>();
@@ -142,24 +154,28 @@ struct Settings_box : cppurses::layout::Vertical<> {
     Start_pause_btns& start_pause_btns = this->make_child<Start_pause_btns>();
     Clear_step_box& clear_step_btns    = this->make_child<Clear_step_box>();
     Widget& break_1                    = this->append_child(make_break());
-    Grid_fade& grid_fade               = this->make_child<Grid_fade>();
-    Widget& break_2                    = this->append_child(make_break());
-    Rule_edit& rule_edit               = this->make_child<Rule_edit>();
-    Widget& break_3                    = this->append_child(make_break());
+    Grid_hi_res& grid_hi_res           = this->make_child<Grid_hi_res>();
+    cppurses::Labeled_checkbox& rainbow_btn =
+        this->make_child<cppurses::Labeled_checkbox>("Rainbow Mode") |
+        cppurses::pipe::fixed_height(1uL);
+    Widget& break_2      = this->append_child(make_break());
+    Rule_edit& rule_edit = this->make_child<Rule_edit>();
+    Widget& break_3      = this->append_child(make_break());
 
    public:
     sig::Signal<void(std::string const&)>& rule_change = rule_edit.rule_change;
     sig::Signal<void(std::chrono::milliseconds)> interval_set;
-    sig::Signal<void()>& grid_toggled  = grid_fade.grid_box.toggled;
-    sig::Signal<void()>& fade_toggled  = grid_fade.fade_box.toggled;
-    sig::Signal<void()>& clear_request = clear_step_btns.clear_btn.pressed;
-    sig::Signal<void()>& step_request  = clear_step_btns.step_btn.pressed;
+    sig::Signal<void()>& grid_toggled   = grid_hi_res.grid_box.toggled;
+    sig::Signal<void()>& hi_res_toggled = grid_hi_res.hi_res_box.toggled;
+    sig::Signal<void()>& clear_request  = clear_step_btns.clear_btn.pressed;
+    sig::Signal<void()>& step_request   = clear_step_btns.step_btn.pressed;
+    sig::Signal<void()>& rainbow_toggle = rainbow_btn.toggled;
 
    public:
-    Settings_box()
+    Controls_box()
     {
         using namespace cppurses::pipe;
-        *this | fixed_height(10uL);
+        *this | fixed_height(12uL);
 
         interval_edit.value_set.connect([this](int value) {
             interval_set(std::chrono::milliseconds{value});

@@ -3,8 +3,8 @@
 #include <cmath>
 #include <cstddef>
 #include <iterator>
-#include <map>
 #include <type_traits>
+#include <unordered_map>
 #include <vector>
 
 #include <cppurses/painter/glyph.hpp>
@@ -15,7 +15,7 @@
 namespace cppurses {
 
 template <typename Number_t = double>
-class Graph : public cppurses::Widget {
+class Graph : public Widget {
    public:
     struct Coordinates {
         Number_t x;
@@ -84,7 +84,7 @@ class Graph : public cppurses::Widget {
     auto paint_event() -> bool override
     {
         // Only relies on map_, call regenerate_map() if you need a new size
-        auto p = cppurses::Painter{*this};
+        auto p = Painter{*this};
         for (auto const& [point, bitmap] : map_)
             p.put(to_symbol(bitmap), point);
         return Widget::paint_event();
@@ -120,14 +120,14 @@ class Graph : public cppurses::Widget {
     };
 
    private:
-    std::map<cppurses::Point, Bitmap> map_;
+    std::unordered_map<Point, Bitmap> map_;
     std::vector<Coordinates> coordinates_;
     Boundary boundary_;
     Number_t interval_w_ = 0;
     Number_t interval_h_ = 0;
 
    private:
-    static auto to_symbol(Bitmap b) -> cppurses::Glyph
+    static auto to_symbol(Bitmap b) -> Glyph
     {
         auto constexpr initial_braille = L'⠀';
         return wchar_t{initial_braille + b.get()};
@@ -150,7 +150,7 @@ class Graph : public cppurses::Widget {
         interval_h_         = domain_h / this->height();
     }
 
-    /// User provided Coordinates to visual cppurses::Point on Widget.
+    /// User provided Coordinates to visual Point on Widget.
     void initialize_bitmap(Coordinates const& c)
     {
         auto const visual_width  = this->width();

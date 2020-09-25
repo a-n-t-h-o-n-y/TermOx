@@ -7,9 +7,9 @@
 #include <cppurses/widget/widgets/accordion.hpp>
 
 #include "colors.hpp"
+#include "controls_box.hpp"
 #include "files_box.hpp"
 #include "patterns_rulesets_box.hpp"
-#include "settings_box.hpp"
 #include "status_box.hpp"
 
 namespace gol {
@@ -18,7 +18,7 @@ struct Side_panel : cppurses::layout::Vertical<> {
    private:
     using Pattern_rulesets = cppurses::VAccordion<Patterns_rulesets_box>;
     using Files            = cppurses::VAccordion<Files_box>;
-    using Settings         = cppurses::VAccordion<Settings_box>;
+    using Settings         = cppurses::VAccordion<Controls_box>;
     using Status           = cppurses::VAccordion<Status_box>;
 
    public:
@@ -34,7 +34,7 @@ struct Side_panel : cppurses::layout::Vertical<> {
     Settings& settings_accordion =
         this->make_child<Settings>({L"Controls", cppurses::Align::Left, line});
 
-    Settings_box& settings = settings_accordion.wrapped();
+    Controls_box& settings = settings_accordion.wrapped();
 
     Status_box& status =
         this->make_child<Status>({L"Status", cppurses::Align::Left, line})
