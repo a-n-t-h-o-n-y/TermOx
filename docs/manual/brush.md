@@ -1,14 +1,13 @@
 # Brush
 
-A `Brush` is used to define the look of `Glyph`s on the terminal screen.  It
-contains Colors and Traits. Both `Glyph` and `Widget` have a Brush. A Widget's
-Brush will be imprinted onto each Glyph placed by that Widget. This
-imprinting acts as a default look. If a Glyph does not have a background color
-defined, it will take the Widget's background color, etc...
+A `Brush` is used to define the look of `Glyph`s on the terminal screen.  A
+Brush contains a list of [Traits](traits.md) (such as Bold, Inverse, Italic,
+...), and a background and foreground [Color](colors.md).
 
-A Brush contains a list of Traits (such as Bold, Inverse, Italic...), a
-background Color, and a foreground Color. The Colors are optional, deferring to
-defaults if not set.
+Each Glyph has its own Brush. Widget also owns a Brush, which is applied to each
+Glyph painted by the Widget; if the Glyph's Brush does not have a color set, it
+takes the Widget Brush's Color, and imprints its Traits on top of the Glyph's
+Traits.
 
 ## Modifying Methods
 
@@ -63,6 +62,7 @@ Removes all Traits, not Colors.
 
 ## See Also
 
-- [Wallpaper](wallpaper.md)
+- [Reference](https://a-n-t-h-o-n-y.github.io/CPPurses/classcppurses_1_1Brush.html)
 - [Traits](traits.md)
 - [Colors](colors.md)
+- [Wallpaper](wallpaper.md)

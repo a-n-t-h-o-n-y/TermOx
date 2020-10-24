@@ -43,10 +43,10 @@ class Open_file : public layout::Horizontal<> {
 };
 
 /// Helper function to create an instance.
-template <typename Char_t = char, typename... Args>
-auto open_file(Args&&... args) -> std::unique_ptr<Open_file<Char_t>>
+template <typename Char_t = char>
+inline auto open_file() -> std::unique_ptr<Open_file<Char_t>>
 {
-    return std::make_unique<Open_file<Char_t>>(std::forward<Args>(args)...);
+    return std::make_unique<Open_file<Char_t>>();
 }
 
 }  // namespace cppurses

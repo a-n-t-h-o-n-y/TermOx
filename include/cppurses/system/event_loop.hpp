@@ -58,19 +58,19 @@ class Event_loop {
     /** This function will be called on once every loop iteration. */
     virtual void loop_function() = 0;
 
-   protected:
-    bool is_main_thread_ = false;
-
    private:
     /// Connect to the System::exit_signal so loop can exit with System.
     auto connect_to_system_exit() -> void;
 
    private:
     std::future<int> fut_;
+    sig::Signal<void()> lifetime_;
     int return_code_ = 0;
     bool running_    = false;
     std::atomic<bool> exit_{false};
-    sig::Signal<void()> lifetime_;
+
+   protected:
+    bool is_main_thread_ = false;
 
     friend class System;
 };

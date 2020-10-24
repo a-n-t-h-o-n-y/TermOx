@@ -234,22 +234,22 @@ class Fade {
 
 /// Returns a Fade Dynamic_color object. Convinience for defining palettes.
 template <typename Shape>
-inline auto fade(HSL a,
-                 HSL b,
-                 unsigned resolution              = 300,
-                 Dynamic_color::Period_t interval = std::chrono::milliseconds{
-                     40}) -> Dynamic_color
+auto fade(HSL a,
+          HSL b,
+          unsigned resolution              = 400,
+          Dynamic_color::Period_t interval = std::chrono::milliseconds{40})
+    -> Dynamic_color
 {
     return {interval, Fade{a, b, Shape{resolution}}};
 }
 
 /// Returns a Fade Dynamic_color object. Convinience for defining palettes.
 template <typename Shape>
-inline auto fade(True_color a,
-                 True_color b,
-                 unsigned resolution              = 400,
-                 Dynamic_color::Period_t interval = std::chrono::milliseconds{
-                     40}) -> Dynamic_color
+auto fade(True_color a,
+          True_color b,
+          unsigned resolution              = 400,
+          Dynamic_color::Period_t interval = std::chrono::milliseconds{40})
+    -> Dynamic_color
 {
     return fade<Shape>(True_color::rgb_to_hsl({a.red(), a.green(), a.blue()}),
                        True_color::rgb_to_hsl({b.red(), b.green(), b.blue()}),

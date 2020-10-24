@@ -39,7 +39,7 @@ class Event_engine {
         auto& staged_changes = Staged_changes::get();
         Screen::flush(staged_changes);
         staged_changes.clear();
-        Screen::set_cursor_on_focus_widget();
+        Screen::display_cursor();
     }
 
    private:

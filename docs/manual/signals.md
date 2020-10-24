@@ -76,4 +76,3 @@ library, but is within the `sig` namespace.
 
 The full Signals Library and documentation can be found
 [here](https://github.com/a-n-t-h-o-n-y/Signals).
-

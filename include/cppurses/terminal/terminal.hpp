@@ -117,13 +117,13 @@ class Terminal {
     }
 
    private:
-    bool is_initialized_ = false;
-    bool show_cursor_    = false;
-    bool raw_mode_       = false;
-    Glyph background_    = L' ';
     Color_palette palette_;
     std::chrono::milliseconds refresh_rate_{33};
     Dynamic_color_engine dynamic_color_engine_;
+    Glyph background_    = L' ';
+    bool is_initialized_ = false;
+    bool show_cursor_    = false;
+    bool raw_mode_       = false;
 
    private:
     /// Actually set raw/noraw mode via ncurses using the state of raw_mode_.

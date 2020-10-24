@@ -159,10 +159,9 @@ class Cycle_box : public HLabel {
 };
 
 /// Helper function to create an instance.
-template <typename... Args>
-auto cycle_box(Args&&... args) -> std::unique_ptr<Cycle_box>
+inline auto cycle_box() -> std::unique_ptr<Cycle_box>
 {
-    return std::make_unique<Cycle_box>(std::forward<Args>(args)...);
+    return std::make_unique<Cycle_box>();
 }
 
 /// A label on the left and a Cycle_box on the right.

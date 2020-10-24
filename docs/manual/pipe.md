@@ -79,7 +79,7 @@ my_widget | children() | for_each([](auto& w){ log(w.name()); });
 ### Animation
 
 - `animate(Animation_engine::Period_t period)`
-- `animate(std::function<Animation_engine::Period_t()> period_func)`
+- `animate(FPS fps)`
 - `disanimate()`
 
 ### Wallpaper

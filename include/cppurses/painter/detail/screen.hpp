@@ -16,7 +16,7 @@ class Screen {
     static void flush(Staged_changes::Map_t const& changes);
 
     /// Moves the cursor to the currently focused widget, if cursor enabled.
-    static void set_cursor_on_focus_widget();
+    static void display_cursor();
 };
 
 }  // namespace cppurses::detail

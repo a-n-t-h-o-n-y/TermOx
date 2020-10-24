@@ -76,7 +76,6 @@ target_sources(cppurses PRIVATE
     widget/text_display.cpp
     widget/menu.cpp
     widget/border_offset.cpp
-    widget/cursor_data.cpp
     widget/graph_tree.cpp
     widget/vertical_slider.cpp
 )

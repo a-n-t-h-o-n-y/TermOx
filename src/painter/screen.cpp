@@ -16,6 +16,7 @@
 #include <cppurses/system/system.hpp>
 #include <cppurses/terminal/output.hpp>
 #include <cppurses/terminal/terminal.hpp>
+#include <cppurses/widget/area.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 
@@ -73,6 +74,29 @@ void paint_to_terminal(Widget& widg,
     }
 }
 
+void set_cursor(Point offset, Cursor const& cursor)
+{
+    System::terminal.show_cursor();
+    auto const x_global = offset.x + cursor.x();
+    auto const y_global = offset.y + cursor.y();
+    output::move_cursor(x_global, y_global);
+}
+
+auto cursor_is_within_area(Cursor const& cursor, Area const& a) -> bool
+{
+    return cursor.x() < a.width && cursor.y() < a.height;
+}
+
+auto has_valid_cursor(Widget const* w) -> bool
+{
+    if (w == nullptr)
+        return false;
+    return w->cursor.enabled() && detail::is_paintable(*w) &&
+           cursor_is_within_area(w->cursor, w->area());
+}
+
+void remove_cursor() { System::terminal.show_cursor(false); }
+
 }  // namespace
 
 namespace cppurses::detail {
@@ -93,17 +117,13 @@ void Screen::flush(Staged_changes::Map_t const& changes)
         output::refresh();
 }
 
-void Screen::set_cursor_on_focus_widget()
+void Screen::display_cursor()
 {
     auto const* focus = detail::Focus::focus_widget();
-    if (focus != nullptr and focus->cursor.enabled() and is_paintable(*focus)) {
-        System::terminal.show_cursor();
-        auto const x_global = focus->inner_x() + focus->cursor.x();
-        auto const y_global = focus->inner_y() + focus->cursor.y();
-        output::move_cursor(x_global, y_global);
-    }
+    if (has_valid_cursor(focus))
+        set_cursor(focus->inner_top_left(), focus->cursor);
     else
-        System::terminal.show_cursor(false);
+        remove_cursor();
 }
 
 }  // namespace cppurses::detail

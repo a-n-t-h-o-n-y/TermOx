@@ -10,14 +10,12 @@ namespace cppurses {
 class Widget;
 
 /// Holds and provides access to all data relevant to a Widget's cursor.
-class Cursor_data {
+class Cursor {
    public:
     /// Signal called when the cursor is moved, passing along the new position.
     sig::Signal<void(Point)> moved;
 
    public:
-    explicit Cursor_data(Widget const* owner) : owner_{owner} {}
-
     /// Query if the cursor is enabled.
     auto enabled() const -> bool { return enabled_; }
 
@@ -40,10 +38,18 @@ class Cursor_data {
     void toggle() { this->enable(!this->enabled()); }
 
     /// Set the local x coordinate of the cursor.
-    void set_x(std::size_t x);
+    void set_x(std::size_t x)
+    {
+        position_.x = x;
+        this->moved(position_);
+    }
 
     /// Set the local y coordinate of the cursor.
-    void set_y(std::size_t y);
+    void set_y(std::size_t y)
+    {
+        position_.y = y;
+        this->moved(position_);
+    }
 
     /// Set the local position of the cursor.
     void set_position(Point p)
@@ -55,7 +61,6 @@ class Cursor_data {
    private:
     Point position_ = {0, 0};
     bool enabled_   = false;
-    Widget const* owner_;
 };
 
 }  // namespace cppurses

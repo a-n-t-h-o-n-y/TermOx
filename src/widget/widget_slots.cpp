@@ -7,7 +7,7 @@
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/mouse.hpp>
 #include <cppurses/system/system.hpp>
-#include <cppurses/widget/cursor_data.hpp>
+#include <cppurses/widget/cursor.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 
@@ -40,7 +40,7 @@ auto click(Widget& w) -> sig::Slot<void(Point, Mouse::Button)>
     auto slot = sig::Slot<void(Point, Mouse::Button)>{
         [&w](Point const& p, Mouse::Button b) {
             System::send_event(Mouse_press_event{
-                w, Mouse{b, {}, {w.inner_x() + p.x, w.inner_y() + p.y}, p, 0}});
+                w, Mouse{{w.inner_x() + p.x, w.inner_y() + p.y}, p, b, 0, {}}});
         }};
     slot.track(w.destroyed);
     return slot;
@@ -50,7 +50,7 @@ auto click(Widget& w, Point p) -> sig::Slot<void(Mouse::Button)>
 {
     auto slot = sig::Slot<void(Mouse::Button)>{[&w, p](Mouse::Button b) {
         System::send_event(Mouse_press_event{
-            w, Mouse{b, {}, {w.inner_x() + p.x, w.inner_y() + p.y}, p, 0}});
+            w, Mouse{{w.inner_x() + p.x, w.inner_y() + p.y}, p, b, 0, {}}});
     }};
     slot.track(w.destroyed);
     return slot;
@@ -60,7 +60,7 @@ auto click(Widget& w, Mouse::Button b) -> sig::Slot<void(Point)>
 {
     auto slot = sig::Slot<void(Point)>{[&w, b](Point p) {
         System::send_event(Mouse_press_event{
-            w, Mouse{b, {}, {w.inner_x() + p.x, w.inner_y() + p.y}, p, 0}});
+            w, Mouse{{w.inner_x() + p.x, w.inner_y() + p.y}, p, b, 0, {}}});
     }};
     slot.track(w.destroyed);
     return slot;
@@ -70,7 +70,7 @@ auto click(Widget& w, Point p, Mouse::Button b) -> sig::Slot<void()>
 {
     auto slot = sig::Slot<void()>{[&w, p, b] {
         System::send_event(Mouse_press_event{
-            w, Mouse{b, {}, {w.inner_x() + p.x, w.inner_y() + p.y}, p, 0}});
+            w, Mouse{{w.inner_x() + p.x, w.inner_y() + p.y}, p, b, 0, {}}});
     }};
     slot.track(w.destroyed);
     return slot;

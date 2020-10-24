@@ -58,8 +58,10 @@ int main()
 - `external/CPPurses/external/Signals/include/`
 - `external/ncurses-snapshots/output/include/`
 
-## See Next
+## Next
 
+- [Getting Started with Widgets](getting-started-with-widgets.md)
 - [Building with Existing Widgets](building-with-existing-widgets.md)
 - [Creating New Widgets](creating-new-widgets.md)
 - [`main()` Function](main-function.md)
+- [Quick Prototyping](quick-prototyping.md)

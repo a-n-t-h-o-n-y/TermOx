@@ -36,7 +36,10 @@ int main()
 }
 ```
 
-## See Also
+## Next
 
-- [System](system.md)
-- [Terminal](terminal.md)
+- [Quick Prototyping](quick-prototyping.md)
+
+## Previous
+
+- [Creating New Widgets](creating-new-widgets.md)

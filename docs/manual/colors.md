@@ -25,55 +25,26 @@ Colors beyond these can be created by constructing a `Color` with a value
 between [16 - 255], though these are only useful with a Color Palette that
 supports more than 16 colors.
 
-Colors can be renamed, just create a new variable with the desired color name:
-
-```cpp
-auto constexpr Turquoise = Color{4};
-```
-
-Colors can be applied as either background or foreground colors to the default
-Brush of a Widget, or to individual Glyphs.
+Colors can be applied to any Brush as either a background or a foreground color.
 
 ## Color Palette
 
-Color palettes can be used to redefine what color is displayed for each `Color`
-value. There are two ways to define a color palette in CPPurses, the first
-method uses the pre-defined 256 colors that ANSI/XTerm terminals provide, and
-the second method allows RGB/Hex true color values to be specified for each
-`Color`.
+Color Palettes can be used to define which color is attached to each `Color`
+value.
 
-Both palette types can be set by calling the `System::terminal.set_palette(...)`
-method.
+`Color_definition`s are used to define Colors. There are three ways to use this
+struct:
 
-Palettes support up to 181 colors at once.
+- ANSI/XTERM Color
+- True Color
+- Dynamic Color
 
-### ANSI / XTerm
+All three can be mixed together in a `Color_palette`, which is a type alias for
+`std::vector<Color_definition>`.
 
-An `ANSI_palette` is created by pairing each `Color` with an `ANSI` color value.
+### ANSI/XTERM Values
 
-```cpp
-auto const my_palette = ANSI_palette{{
-    {Color::Black,       ANSI{234}},
-    {Color::Dark_red,    ANSI{88}},
-    {Color::Green,       ANSI{28}},
-    {Color::Brown,       ANSI{94}},
-    {Color::Dark_blue,   ANSI{18}},
-    {Color{5},           ANSI{90}},
-    {Color{6},           ANSI{45}},
-    {Color::Light_gray,  ANSI{250}},
-    {Color::Dark_gray,   ANSI{239}},
-    {Color::Red,         ANSI{160}},
-    {Color::Light_green, ANSI{46}},
-    {Color::Yellow,      ANSI{227}},
-    {Color::Blue,        ANSI{27}},
-    {Color::Orange,      ANSI{214}},
-    {Color::Gray,        ANSI{246}},
-    {Color::White,       ANSI{231}},
-}};
-
-System::terminal.set_palette(my_palette);
-```
-
+The first method uses the 256 colors that ANSI/XTERM terminals provide.
 
 A listing of the 256 ANSI colors can be found
 [here](https://wikipedia.org/wiki/ANSI_escape_code#Colors), under the 8-bit
@@ -82,36 +53,88 @@ heading.
 [This](https://jonasjacek.github.io/colors/) is another useful chart, with the
 values used for each color.
 
-### True Color
-
-A `True_color_palette` pairs an ANSI color definition with a `True_color` value,
-either in RBG or Hex. This is similar to the above ANSI definition, but with a
-third column. R, G, and B values must be between [0 - 255].
-
 ```cpp
-auto const my_palette = True_color_palette{{
-    {{Color{0},      ANSI{16}}, True_color{0x050505}},
-    {{Color{1},          {17}},           {0xff0040}},
-    {{Color::Green,      {18}},           {0x5ac54f}},
-    {{Color{3},          {19}},           {0xdad45e}},
-    {{Color{4},          {20}},           {0xfdfff7}},
-    {{Color{5},          {21}}, True_color{30, 0, 205}},
-    {{Color::Light_blue, {22}},           {0xfef4b6}},
-    {{Color::Light_gray, {23}},           {0xb4b4b4}},
-    {{Color{8},          {24}},           {0x1a1a1a}},
-    {{Color{9},          {25}},           {0x48b6fc}},
-    {{Color{10},         {26}},           {0xd6d4ce}},
-    {{Color{11},         {27}},           {0xa0893f}},
-    {{Color{12},         {28}},           {0x0f0f0f}},
-    {{Color{13},         {29}},           {0xfcbf8d}},
-    {{Color{14},         {30}},           {0x90d4d4}},
-    {{Color{15},         {31}},           {0xffffff}},
-}};
-
-
-System::terminal.set_palette(my_palette);
+auto const green = Color_definition{Color::Green, ANSI{28}};
 ```
 
-The ANSI value is the terminal color value that is being altered and is needed
-for flexiblity. When switching between multiple palettes at runtime, this may be
-useful to control.
+The above line of code will tie the `Color::Green` with the ANSI color at 28.
+
+### True Color
+
+The second use of `Color_definition` uses true color values, this allows the
+program to redefine ANSI color values with RGB, HSL, or HEX values.
+
+```cpp
+auto const green = Color_definition{Color::Green,  ANSI{18}, 0x5ac54f};
+auto const grey  = Color_definition{Color::Gray,   ANSI{19}, RGB{123, 123, 123}};
+auto const pink  = Color_definition{Color::Violet, ANSI{20}, HSL{324, 100, 50}};
+```
+
+In the above code, the ANSI values are the terminal color values that are being
+re-defined. Some terminals do not reset these when the program exits, so it is
+suggested to not use the terminal's default colors (ANSI values 0-15), since
+this will overwrite those.
+
+### Dynamic Colors
+
+Dynamic Colors are animated colors. Defined as a struct containing an interval
+(in ms) and a `std::function<True_color()>` to get the color after the interval
+has passed.
+
+These take a bit of work to define, so the library provides a few pre-defined
+dynamic colors:
+
+- [Rainbow](rainbow.md)
+- [Fade](fade.md)
+
+```cpp
+auto const rb  = Color_definition{Color{45}, ANSI{100},
+                    dynamic::rainbow(period, saturation, lightness)};
+
+auto const fd  = Color_definition{Color{46}, ANSI{101},
+                    dynamic::fade<dynamic::Sine>(HSL{50, 25, 25}, HSL{100, 50, 50})};
+```
+
+### Example Color Palette Use
+
+Creating a `Color_palette` with each of the three `Color_definition` types and
+custom Color names:
+
+```cpp
+namespace three_color {
+
+constexpr auto Yellow  = Color{0};
+constexpr auto Blue    = Color{1};
+constexpr auto Rainbow = Color{2};
+
+inline auto const palette = Color_palette {
+    {Yellow,  ANSI{228}                     },
+    {Blue,    ANSI{16}, True_color{0x20283d}},
+    {Rainbow, ANSI{17}, dynamic::rainbow()  }
+};
+
+} // namespace three_color
+
+// Later...
+System::terminal.set_palette(three_color::palette);
+
+// Later...
+auto const glyph = L'X' | bg(three_color::Rainbow);
+```
+
+Palettes can support up to 181 colors at once. They can be set by calling the
+`System::terminal.set_palette(...)` method.
+
+### Library Color Palettes
+
+Currently there are 5 pre-defined palettes in the library:
+
+- basic
+- basic8
+- dawn_bringer16
+- dawn_bringer32
+- en4
+
+## See Also
+
+- [Reference](https://a-n-t-h-o-n-y.github.io/CPPurses/structcppurses_1_1Color.html)

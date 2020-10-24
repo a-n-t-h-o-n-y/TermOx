@@ -237,17 +237,17 @@ class Color_definition {
     using Value_t = std::variant<std::monostate, True_color, Dynamic_color>;
 
    public:
+    Value_t value;
     Color color;
     ANSI ansi;
-    Value_t value;
 
    public:
     Color_definition(Color c, ANSI a)
-        : color{c}, ansi{a}, value{std::monostate{}}
+        : value{std::monostate{}}, color{c}, ansi{a}
     {}
 
     Color_definition(Color c, ANSI a, Value_t v)
-        : color{c}, ansi{a}, value{std::move(v)}
+        : value{std::move(v)}, color{c}, ansi{a}
     {}
 };
 

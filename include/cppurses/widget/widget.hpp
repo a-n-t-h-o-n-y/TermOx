@@ -25,7 +25,7 @@
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/area.hpp>
 #include <cppurses/widget/border.hpp>
-#include <cppurses/widget/cursor_data.hpp>
+#include <cppurses/widget/cursor.hpp>
 #include <cppurses/widget/detail/border_offset.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/point.hpp>
@@ -67,17 +67,17 @@ class Widget {
     /// Describes the visual border of this Widget.
     Border border;
 
+    /// Describes how focus is given to this Widget.
+    Focus_policy focus_policy{Focus_policy::None};
+
     /// Provides information on where the cursor is and if it is enabled.
-    Cursor_data cursor{this};
+    Cursor cursor;
 
     /// Describes how the width of this Widget should be modified by a Layout.
     Size_policy width_policy;
 
     /// Describes how the height of this Widget should be modified by a Layout.
     Size_policy height_policy;
-
-    /// Describes how focus is given to this Widget.
-    Focus_policy focus_policy{Focus_policy::None};
 
     /// A Brush that is applied to every Glyph painted by this Widget.
     Brush brush{background(Color::Background), foreground(Color::Foreground)};
@@ -598,6 +598,11 @@ class Widget {
      *  children Widgets that you want enabled. */
     void enable_and_post_events(bool enable, bool post_child_polished_event);
 
+   private:
+    bool enabled_                = false;
+    bool brush_paints_wallpaper_ = true;
+    bool is_animated_            = false;
+
    protected:
     using Children_t = std::vector<std::unique_ptr<Widget>>;
     Children_t children_;
@@ -605,13 +610,8 @@ class Widget {
 
    private:
     std::string name_;
-    std::uint16_t const unique_id_;
-    Widget* parent_              = nullptr;
-    bool enabled_                = false;
-    bool brush_paints_wallpaper_ = true;
-    bool is_animated_            = false;
+    Widget* parent_ = nullptr;
     std::optional<Glyph> wallpaper_;
-
     detail::Screen_descriptor screen_state_;
     std::set<Widget*> event_filters_;
 
@@ -621,6 +621,8 @@ class Widget {
 
     // The entire area of the widget, including any border space.
     Area outer_area_{width_policy.hint(), height_policy.hint()};
+
+    std::uint16_t const unique_id_;
 
    public:
     /// Should only be used by Move_event send() function.

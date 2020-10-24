@@ -5,6 +5,7 @@
 #include <functional>
 #include <utility>
 
+// TODO place in layout namespace
 namespace cppurses {
 
 /// Homogeneous collection of Widgets within a Layout_t<Widget_t>.

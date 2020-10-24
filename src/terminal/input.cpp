@@ -132,7 +132,7 @@ auto make_mouse_event() -> std::optional<Event>
 
     auto const modifiers = extract_modifiers(mouse_event);
     auto const button    = extract_button(mouse_event);
-    auto const mouse = Mouse{button, modifiers, global, local, mouse_event.id};
+    auto const mouse = Mouse{global, local, button, mouse_event.id, modifiers};
 
     return make_event(*receiver, mouse, mouse_event);
 }

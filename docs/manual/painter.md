@@ -43,3 +43,7 @@ bool paint_event() override
     return Widget::paint_event();
 }
 ```
+
+## See Also
+
+- [Reference](https://a-n-t-h-o-n-y.github.io/CPPurses/classcppurses_1_1Painter.html)

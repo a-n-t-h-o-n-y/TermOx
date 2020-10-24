@@ -1,1 +1,0 @@
-# Vertical Scrollbar Widget

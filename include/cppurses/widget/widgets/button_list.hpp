@@ -1,5 +1,6 @@
 #ifndef CPPURSES_WIDGET_WIDGETS_BUTTON_LIST_HPP
 #define CPPURSES_WIDGET_WIDGETS_BUTTON_LIST_HPP
+#include <memory>
 #include <string>
 
 #include <cppurses/widget/layouts/opposite.hpp>
@@ -69,6 +70,13 @@ class Button_list : public layout::Opposite_t<Layout_t<Widget>> {
     /// Set the foreground color of the Scrollbar.
     void set_scrollbar_fg(Color c) { scrollbar.middle.set_bar_fg(c); }
 };
+
+/// Helper function to create an instance.
+template <template <typename> class Layout_t>
+auto button_list() -> std::unique_ptr<Button_list<Layout_t>>
+{
+    return std::make_unique<Button_list<Layout_t>>();
+}
 
 }  // namespace cppurses
 #endif  // CPPURSES_WIDGET_WIDGETS_BUTTON_LIST_HPP
