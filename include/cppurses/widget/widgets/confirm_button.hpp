@@ -49,6 +49,7 @@ class Confirm_button : public layout::Stack<> {
     {
         using namespace pipe;
         *this | fixed_height(1) | active_page(front_page_);
+        this->give_focus_on_change(false);
 
         main_btn |
             on_left_click([this] { *this | active_page(confirm_page_); });

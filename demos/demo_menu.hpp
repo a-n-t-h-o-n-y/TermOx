@@ -25,6 +25,7 @@
 #include "notepad/notepad.hpp"
 #include "palette/palette_demo.hpp"
 #include "signals/optional_last_value.hpp"
+#include "snake/snake.hpp"
 
 namespace demos {
 
@@ -39,6 +40,9 @@ class Demo_menu : public cppurses::Menu_stack {
             System::terminal.set_palette(cppurses::dawn_bringer16::palette);
             this->Menu_stack::goto_menu();
         });
+
+        this->make_page<comp::Idea>("Idea");
+        this->make_page<snake::Snake_game>("Snake Game");
 
         // clang-format off
         this->append_page("Composites",

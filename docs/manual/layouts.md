@@ -53,6 +53,23 @@ auto ten_textboxes = Array<layout::Stack<Textbox>, 10>;
 The first template parameter is the Layout type to be used, and the second is
 the number of child Widgets to build.
 
+### Tuple
+
+A `Tuple` type Layout helper is available, this template takes a Layout type,
+and a list of Widgets that will be placed within that Layout. This is helpful to
+quickly create collections of Widgets, and it also provides access to the held
+Widgets by their full type. This type will only default construct its child
+Widgets at the moment.
+
+```cpp
+using Btns = Array<layout::Horizontal<Button>, 2>;
+using App  = Tuple<layout::Vertical<>, Textbox, Btns>;
+
+auto app      = App{};
+Textbox& txbx = app.get<0>();
+Button&  btn0 = app.get<1>().get<0>();
+```
+
 ### Set
 
 A `Set` Layout will take a Layout type, a `Projection` function and a

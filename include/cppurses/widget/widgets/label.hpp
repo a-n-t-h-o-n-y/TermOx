@@ -12,6 +12,7 @@
 
 namespace cppurses {
 
+// TODO template type Layout_t should be a template template parameter
 /// A single line of text with alignment, non-editable.
 /** Can be either Vertical or Horizontal by passing in a Layout type. */
 template <typename Layout_t>
@@ -30,7 +31,7 @@ class Label : public Widget {
 
    public:
     /// Create a new Label with given parameters.
-    explicit Label(Parameters p) : params_{std::move(p)}
+    explicit Label(Parameters p = {}) : params_{std::move(p)}
     {
         if constexpr (is_vertical)
             *this | pipe::fixed_width(1uL);

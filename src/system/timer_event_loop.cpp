@@ -17,12 +17,12 @@ void Timer_event_loop::register_widget(Widget& w)
 
 void Timer_event_loop::loop_function()
 {
+    Interval_event_loop::loop_function();
     {
         auto const guard = Guard_t{mtx_registered_widgets_};
         for (Widget* widg : registered_widgets_)
             System::post_event(Timer_event{*widg});
     }
-    Interval_event_loop::loop_function();
 }
 
 }  // namespace cppurses::detail

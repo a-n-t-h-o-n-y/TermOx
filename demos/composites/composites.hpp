@@ -16,6 +16,7 @@
 #include <cppurses/widget/widgets/checkbox.hpp>
 #include <cppurses/widget/widgets/selectable.hpp>
 #include <cppurses/widget/widgets/textbox.hpp>
+#include "cppurses/widget/widgets/cycle_box.hpp"
 
 namespace comp {
 
@@ -165,6 +166,44 @@ struct Two_lists : Pair<layout::Vertical<My_check_list>> {
     {
         this->find_child_if(
             [](My_check_list const& l) { return l.name().empty(); });
+    }
+};
+
+using Settings_box =
+    cppurses::Tuple<cppurses::layout::Vertical<>,
+                    cppurses::Button,
+                    cppurses::Label<cppurses::layout::Horizontal<>>,
+                    cppurses::Checkbox,
+                    cppurses::Cycle_box>;
+
+class Idea : public Settings_box {
+   public:
+    Idea()
+    {
+        using namespace cppurses::pipe;
+        using namespace cppurses;
+
+        this->get<0>().set_label(L"I'm a BUTTON");
+        this->get<0>() | on_press([this] { this->get<2>().toggle(); });
+
+        this->get<1>().set_text(L"I'm a LABEL");
+        this->get<2>().check();
+
+        this->get<3>() | bg(Color::Dark_gray);
+
+        // this->get<3>() | add_option(L"Option BLACK", [this] {
+        //     this->get<0>() | bg(Color::Black);
+        // });
+
+        this->get<3>().add_option(L"Option BLACK").connect([this] {
+            this->get<0>() | bg(Color::Black);
+        });
+        this->get<3>().add_option(L"Option RED").connect([this] {
+            this->get<0>() | bg(Color::Red);
+        });
+        this->get<3>().add_option(L"Option GREEN").connect([this] {
+            this->get<0>() | bg(Color::Green);
+        });
     }
 };
 

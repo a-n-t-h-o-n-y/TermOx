@@ -31,6 +31,22 @@ class Toggle_button : public layout::Stack<Button> {
         top.pressed.connect([this]() { this->set_active_page(bottom_index_); });
         bottom.pressed.connect([this]() { this->set_active_page(top_index_); });
         this->set_active_page(top_index_);
+        this->give_focus_on_change(false);
+    }
+
+    /// Display the top button, without emitting any Signals.
+    void show_top() { this->set_active_page(top_index_); }
+
+    /// Display the bottom button, without emitting any Signals.
+    void show_bottom() { this->set_active_page(bottom_index_); }
+
+    /// Change the displayed button without emitting any signals.
+    void toggle()
+    {
+        if (this->active_page_index() == top_index_)
+            this->set_active_page(bottom_index_);
+        else
+            this->set_active_page(top_index_);
     }
 
    private:
