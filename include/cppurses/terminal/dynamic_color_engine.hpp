@@ -140,8 +140,10 @@ class Dynamic_color_engine {
     /// Stop all threads.
     void shutdown()
     {
-        for (auto& loop : loops_)
+        for (auto& loop : loops_) {
             loop->exit(0);
+            loop->wait();
+        }
     }
 
    private:

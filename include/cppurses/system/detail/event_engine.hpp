@@ -23,16 +23,7 @@ class Event_engine {
     /// Return a reference to the internal Event_queue.
     auto queue() -> Event_queue& { return queue_; }
 
-    /// Get the global Event_engine instantiation.
-    static auto get() -> Event_engine&
-    {
-        static auto engine = Event_engine{};
-        return engine;
-    }
-
    private:
-    Event_engine() = default;
-
     /// Flushes all of the staged changes to the screen and sets the cursor.
     static void flush_screen()
     {

@@ -45,8 +45,10 @@ void Animation_engine::shutdown()
 {
     /* Timer_event_loops will wait on the future at destruction.
      * Because shutdown is called from Event_loop and will wait forever. */
-    for (auto& loop : loops_)
+    for (auto& loop : loops_) {
         loop->exit(0);
+        loop->wait();
+    }
 }
 
 void Animation_engine::startup()

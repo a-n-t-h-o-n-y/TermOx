@@ -14,6 +14,9 @@
 namespace cppurses {
 class Animation_engine;
 class Widget;
+namespace detail {
+class Event_engine;
+}
 
 /// Organizes the highest level of the TUI framework.
 /** Constructing an instance of this class initializes the display system.
@@ -113,6 +116,12 @@ class System {
      *  this function returns. */
     static void exit(int exit_code = 0);
 
+    /// Returns a reference to the single Event_engine that owns the queue.
+    static auto event_engine() -> detail::Event_engine&
+    {
+        return event_engine_;
+    }
+
     /// Return a reference to the Animation_engine in System.
     /** This manages animation on each of the Widgets that enables it. */
     static auto animation_engine() -> Animation_engine&
@@ -127,6 +136,7 @@ class System {
     inline static Widget* head_        = nullptr;
     inline static bool exit_requested_ = false;
     static detail::User_input_event_loop user_input_loop_;
+    static detail::Event_engine event_engine_;
     static Animation_engine animation_engine_;
 };
 

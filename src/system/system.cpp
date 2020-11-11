@@ -43,7 +43,7 @@ void System::disable_tab_focus() { detail::Focus::disable_tab_focus(); }
 
 void System::post_event(Event e)
 {
-    detail::Event_engine::get().queue().append(std::move(e));
+    System::event_engine().queue().append(std::move(e));
 }
 
 void System::exit(int exit_code)
@@ -99,6 +99,7 @@ void System::send_event(Delete_event e)
 }
 
 sig::Slot<void()> System::quit = [] { System::exit(); };
+detail::Event_engine System::event_engine_;
 Animation_engine System::animation_engine_;
 
 // GCC requires this here, it can't find the default constructor when it's in

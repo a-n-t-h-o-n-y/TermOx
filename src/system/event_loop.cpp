@@ -12,7 +12,7 @@ auto Event_loop::run() -> int
     running_ = true;
     while (!exit_) {
         if (is_main_thread_)
-            detail::Event_engine::get().process();
+            System::event_engine().process();
         this->loop_function();
     }
     running_ = false;
