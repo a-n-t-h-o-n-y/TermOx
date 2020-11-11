@@ -29,7 +29,7 @@ class Glyph_string : private std::vector<Glyph> {
     Glyph_string(Glyph_string const&) = default;
     Glyph_string(Glyph_string&&)      = default;
     auto operator=(Glyph_string const&) -> Glyph_string& = default;
-    auto operator=(Glyph_string &&) -> Glyph_string& = default;
+    auto operator=(Glyph_string&&) -> Glyph_string& = default;
 
     /// Construct with \p symbols, each having given Traits applied to them.
     template <typename... Traits>
@@ -302,12 +302,33 @@ inline auto operator|(Glyph_string& gs, Foreground_color c) -> Glyph_string&
 
 inline auto operator|(Glyph_string&& gs, Foreground_color c) -> Glyph_string
 {
-    return gs | c;
+    return gs | c;  // TODO doesn't this just call the l value version?
 }
 
 inline auto operator|(wchar_t const* gs, Foreground_color c) -> Glyph_string
 {
     return Glyph_string{gs} | c;
+}
+
+// Brush ------------------------------------------------------------
+/// Assigns the Brush \p b to each Glyph in \p gs.
+inline auto operator|(Glyph_string& gs, Brush b) -> Glyph_string&
+{
+    for (auto& g : gs)
+        g.brush = b;
+    return gs;
+}
+
+/// Assigns the Brush \p b to each Glyph in \p gs.
+inline auto operator|(Glyph_string&& gs, Brush b) -> Glyph_string
+{
+    return gs | b;
+}
+
+/// Assigns the Brush \p b to each Glyph in \p gs.
+inline auto operator|(wchar_t const* gs, Brush b) -> Glyph_string
+{
+    return Glyph_string{gs} | b;
 }
 
 /// Equality comparison on each Glyph in the Glyph_strings.

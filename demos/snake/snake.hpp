@@ -15,6 +15,7 @@
 #include <chrono>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/dynamic_colors.hpp>
+#include <cppurses/painter/palette/stormy6.hpp>
 #include <cppurses/painter/trait.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/system.hpp>
@@ -296,43 +297,33 @@ class Engine {
 
 namespace color {
 
-inline auto constexpr Black          = cppurses::Color::Background;
-inline auto constexpr White          = cppurses::Color::Foreground;
-inline auto constexpr Apple          = cppurses::Color{16};
-inline auto constexpr Snake          = cppurses::Color{17};
-inline auto constexpr Border         = cppurses::Color{18};
-inline auto constexpr Start_bg       = cppurses::Color{19};
-inline auto constexpr Pause_bg       = cppurses::Color{20};
-inline auto constexpr Size_bg        = cppurses::Color{21};
-inline auto constexpr Yellow         = cppurses::Color{22};
-inline auto constexpr Instruction_fg = White;
-inline auto constexpr Instruction_bg = Border;
+inline auto constexpr Fade    = cppurses::Color{16};
+inline auto constexpr Rainbow = cppurses::Color{17};
+
+inline auto constexpr Apple            = Fade;
+inline auto constexpr Snake            = Rainbow;
+inline auto constexpr Border           = cppurses::stormy6::Teal;
+inline auto constexpr Instruction_fg   = cppurses::stormy6::White;
+inline auto constexpr Instruction_bg   = cppurses::stormy6::Teal;
+inline auto constexpr Start_bg         = cppurses::stormy6::Green;
+inline auto constexpr Pause_bg         = cppurses::stormy6::Red;
+inline auto constexpr Size_bg          = cppurses::stormy6::White;
+inline auto constexpr Size_fg          = cppurses::stormy6::Black;
+inline auto constexpr Score_bg         = cppurses::stormy6::White;
+inline auto constexpr Score_fg         = cppurses::stormy6::Black;
+inline auto constexpr Instruction_text = cppurses::stormy6::Orange;
 
 }  // namespace color
 
-// make this a palette
-// assign colors to sematic names, add rainbow and fade as colors and semantic
-// names. Use the semantic names in the code. only have direct color names to
-// semantic name assignments, not color definitions to semantic names.
-// but you do have to add the rainbow and fade as part of the palette, you can
-// have a set_palette function that calls set palette, then append palette.
-// Actually instead, you can create a new palette by just appending the rainbow
-// and fade onto an existing palette container.
-
-inline auto const snake_palette = cppurses::Color_palette{
-    /* clang-format off */
-        {color::Black,    cppurses::ANSI{16}, 0x242828},
-        {color::White,    cppurses::ANSI{17}, 0xf8eebf},
-        {color::Apple,    cppurses::ANSI{18},
-            cppurses::dynamic::fade<cppurses::dynamic::Sine>(0x7f9860, 0xa95a3f)},
-        {color::Snake,    cppurses::ANSI{19}, cppurses::dynamic::rainbow()},
-        {color::Border,   cppurses::ANSI{20}, 0x3a5043},
-        {color::Start_bg, cppurses::ANSI{21}, 0x7f9860},
-        {color::Pause_bg, cppurses::ANSI{22}, 0xa95a3f},
-        {color::Size_bg,  cppurses::ANSI{23}, 0xf8eebf},
-        {color::Yellow,   cppurses::ANSI{24}, 0xedbb70},
-    /* clang-format on */
-};
+inline auto const snake_palette = [] {
+    auto pal = cppurses::stormy6::palette;
+    pal.push_back(
+        {color::Fade, cppurses::ANSI{22},
+         cppurses::dynamic::fade<cppurses::dynamic::Sine>(0x7f9860, 0xa95a3f)});
+    pal.push_back(
+        {color::Rainbow, cppurses::ANSI{23}, cppurses::dynamic::rainbow()});
+    return pal;
+}();
 
 /// Main Game Widget
 class Game_space : public cppurses::Widget {
@@ -579,12 +570,14 @@ class Instructions : public cppurses::Text_display {
     static auto get_text() -> cppurses::Glyph_string
     {
         using namespace cppurses;
+        auto const standout =
+            Brush{foreground(color::Instruction_text), Trait::Bold};
         auto result = Glyph_string{L"Start/Stop "};
-        result.append(L"Space Bar" | Trait::Bold | foreground(color::Yellow));
+        result.append(L"Space Bar" | standout);
         result.append(L" - Movement ");
-        result.append(L"Arrow Keys" | Trait::Bold | foreground(color::Yellow));
+        result.append(L"Arrow Keys" | standout);
         result.append(L" or ");
-        result.append(L"'hjkl'" | Trait::Bold | foreground(color::Yellow));
+        result.append(L"'hjkl'" | standout);
         return result;
     }
 };
@@ -596,9 +589,9 @@ class Button_bar : public cppurses::layout::Horizontal<> {
         using namespace cppurses::pipe;
         sizes_ | fixed_width(16uL);
 
-        sizes_.label | bg(color::Size_bg) | fg(color::Black);
-        sizes_.div | bg(color::Size_bg) | fg(color::Black);
-        sizes_.cycle_box | bg(color::Size_bg) | fg(color::Black);
+        sizes_.label | bg(color::Size_bg) | fg(color::Size_fg);
+        sizes_.div | bg(color::Size_bg) | fg(color::Size_fg);
+        sizes_.cycle_box | bg(color::Size_bg) | fg(color::Size_fg);
 
         sizes_.cycle_box | no_focus();
         sizes_.cycle_box.add_option(L"Small").connect(
@@ -641,8 +634,8 @@ class Score : public cppurses::layout::Horizontal<> {
     Score()
     {
         using namespace cppurses::pipe;
-        *this | fixed_width(12uL) | children() | bg(color::White) |
-            fg(color::Black);
+        *this | fixed_width(12uL) | children() | bg(color::Score_bg) |
+            fg(color::Score_fg);
     }
 
    public:

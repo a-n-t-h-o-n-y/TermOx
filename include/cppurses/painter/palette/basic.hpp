@@ -4,7 +4,7 @@
 
 namespace cppurses::basic {
 
-constexpr auto Black   = Color{0};
+constexpr auto Black   = Color::Background;
 constexpr auto Maroon  = Color{1};
 constexpr auto Green   = Color{2};
 constexpr auto Olive   = Color{3};
@@ -19,8 +19,9 @@ constexpr auto Yellow  = Color{11};
 constexpr auto Blue    = Color{12};
 constexpr auto Fuchsia = Color{13};
 constexpr auto Aqua    = Color{14};
-constexpr auto White   = Color{15};
+constexpr auto White   = Color::Foreground;
 
+/// The Built-in Default Terminal 16 Color Palette
 inline auto const palette = Color_palette{
     /* clang-format off */
     {Black,   ANSI{0}},
