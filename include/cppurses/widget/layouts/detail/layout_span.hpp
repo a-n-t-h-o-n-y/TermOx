@@ -59,8 +59,8 @@ class Layout_span {
         Iterator(Iterator const&) = delete;
         Iterator(Iterator&&)      = delete;
         auto operator=(Iterator const&) -> Iterator& = delete;
-        auto operator=(Iterator &&) -> Iterator& = delete;
-        ~Iterator()                              = default;
+        auto operator=(Iterator&&) -> Iterator& = delete;
+        ~Iterator()                             = default;
 
         auto operator++() -> Iterator&
         {

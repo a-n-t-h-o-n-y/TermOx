@@ -197,7 +197,7 @@ class True_color {
                 return 60. * (((b_prime - r_prime) / delta) + 2.);
             if (c_max == b_prime)
                 return 60. * (((r_prime - g_prime) / delta) + 4.);
-            throw 5;
+            return .0;
         }();
         return {static_cast<std::uint16_t>(hue),
                 static_cast<std::uint8_t>(saturation * 100),

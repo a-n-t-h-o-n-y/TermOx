@@ -3,6 +3,8 @@
 #include <cstddef>
 #include <vector>
 
+#include <iostream>  //temp
+
 #include <cppurses/widget/area.hpp>
 #include <cppurses/widget/point.hpp>
 
@@ -43,21 +45,13 @@ class Screen_mask {
     /// Return the bit set at point \p p
     auto at(std::size_t x, std::size_t y) -> Reference
     {
-        auto index = index_at(x, y);
-        if (index > bits_.size())  // TODO temp silent failure
-            throw 5;
-        //     index = 0;
-        return bits_[index];
+        return bits_[index_at(x, y)];
     }
 
     /// Return the bit set at point \p p
     auto at(std::size_t x, std::size_t y) const -> Const_reference
     {
-        auto index = index_at(x, y);
-        if (index > bits_.size())  // TODO temp silent failure
-            throw 5;
-        //     index = 0;
-        return bits_[index];
+        return bits_[index_at(x, y)];
     }
 
    private:

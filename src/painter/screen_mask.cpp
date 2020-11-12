@@ -22,8 +22,7 @@ auto make_area(Widget const& w, Screen_mask::Constructor_tag tag) -> Area
 
 }  // namespace
 
-namespace cppurses {
-namespace detail {
+namespace cppurses::detail {
 
 /// Can't put in header, Widget depends on Screen_mask
 Screen_mask::Screen_mask(Widget const& w, Constructor_tag tag)
@@ -32,5 +31,4 @@ Screen_mask::Screen_mask(Widget const& w, Constructor_tag tag)
       bits_(area_.width * area_.height)
 {}
 
-}  // namespace detail
-}  // namespace cppurses
+}  // namespace cppurses::detail

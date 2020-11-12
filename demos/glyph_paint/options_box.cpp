@@ -53,7 +53,7 @@ Options_B::Options_B()
 Options_stack::Options_stack()
 {
     this->set_active_page(0);
-    this->height_policy.maximum(6);
+    this->height_policy.fixed(6);
 
     options_a.more_btn.pressed.connect(
         cppurses::slot::set_active_page(*this, 1));
@@ -61,5 +61,6 @@ Options_stack::Options_stack()
     options_b.back_btn.pressed.connect(
         cppurses::slot::set_active_page(*this, 0));
 }
+
 }  // namespace glyph_paint
 }  // namespace demos

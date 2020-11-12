@@ -69,13 +69,13 @@ auto children_completely_cover(Widget const& w) -> bool
     return false;
 }
 
-/// Return the lowest y coordinate of the widget in global coordinates.
+/// Return one past the last y coordinate of the given widget, in global coords.
 auto height_end(Widget const& w) -> std::size_t
 {
     return w.y() + w.outer_height();
 }
 
-/// Return the right-most x coordinate of the widget in global coordinates.
+/// Return one past the last x coordinate of the given widget, in global coords.
 auto width_end(Widget const& w) -> std::size_t
 {
     return w.x() + w.outer_width();

@@ -19,7 +19,7 @@ class Trait_box : public cppurses::layout::Vertical<> {
     };
 
    public:
-    Trait_box() { this->height_policy.maximum(4); }
+    Trait_box() { this->height_policy.fixed(4); }
 
     Top_row& top_row = this->make_child<Top_row>();
     Checkbox& inverse_box =

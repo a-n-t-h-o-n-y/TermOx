@@ -102,8 +102,7 @@ auto const color_blocks = generate_color_blocks();
 
 }  // namespace
 
-namespace demos {
-namespace glyph_paint {
+namespace demos::glyph_paint {
 
 Populated_glyph_stack::Populated_glyph_stack()
 {
@@ -150,10 +149,8 @@ Populated_glyph_stack::Populated_glyph_stack()
 
 void Populated_glyph_stack::make_connections(sig::Slot<void(Glyph)> slot)
 {
-    for (auto& signal_ref : signal_refs_) {
+    for (auto& signal_ref : signal_refs_)
         signal_ref.get().connect(slot);
-    }
 }
 
-}  // namespace glyph_paint
-}  // namespace demos
+}  // namespace demos::glyph_paint

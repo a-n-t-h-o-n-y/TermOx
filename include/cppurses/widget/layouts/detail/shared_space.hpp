@@ -132,9 +132,11 @@ class Shared_space {
     template <typename Children_span>
     void reclaim_leftovers(Children_span& children, int deficit)
     {
-        for (auto iter = children.begin_min();
-             iter != children.end() && deficit != 0; ++iter, --deficit) {
-            iter->length -= 1;
+        while (children.size() != 0uL && deficit != 0) {
+            for (auto iter = children.begin_min();
+                 iter != children.end() && deficit != 0; ++iter, --deficit) {
+                iter->length -= 1;
+            }
         }
     }
 

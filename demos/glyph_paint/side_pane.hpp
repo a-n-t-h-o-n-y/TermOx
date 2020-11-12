@@ -13,17 +13,17 @@
 #include <cppurses/widget/widgets/status_bar.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
 
-namespace demos {
-namespace glyph_paint {
+namespace demos::glyph_paint {
 
 class Side_pane : public cppurses::layout::Vertical<> {
    private:
     struct Color_pages : cppurses::Cycle_stack<cppurses::Color_select> {
-        Color_pages() { this->height_policy.maximum(3); }
-        cppurses::Color_select& foreground = this->make_page(
-            cppurses::Glyph_string{"Foreground", cppurses::Trait::Bold});
-        cppurses::Color_select& background = this->make_page(
-            cppurses::Glyph_string{"Background", cppurses::Trait::Bold});
+        Color_pages() { this->height_policy.fixed(3); }
+
+        cppurses::Color_select& foreground =
+            this->make_page(L"Foreground" | cppurses::Trait::Bold);
+        cppurses::Color_select& background =
+            this->make_page(L"Background" | cppurses::Trait::Bold);
     };
 
    public:
@@ -32,28 +32,30 @@ class Side_pane : public cppurses::layout::Vertical<> {
         this->width_policy.fixed(16);
         space1.set_wallpaper(L'─');
         space2.set_wallpaper(L'─');
+
         glyph_select.height_policy.preferred(6);
+
         show_glyph.height_policy.fixed(1);
         show_glyph.set_alignment(cppurses::Align::Center);
     }
 
-    Populated_glyph_stack& glyph_select{
-        this->make_child<Populated_glyph_stack>()};
+   public:
+    Populated_glyph_stack& glyph_select =
+        this->make_child<Populated_glyph_stack>();
 
     Widget& space1 = this->make_child() | cppurses::pipe::fixed_height(1);
 
-    Color_pages& color_pages{this->make_child<Color_pages>()};
+    Color_pages& color_pages = this->make_child<Color_pages>();
 
-    Trait_box& trait_box{this->make_child<Trait_box>()};
+    Trait_box& trait_box = this->make_child<Trait_box>();
 
-    cppurses::Status_bar& show_glyph{
-        this->make_child<cppurses::Status_bar>("x")};
+    cppurses::Status_bar& show_glyph =
+        this->make_child<cppurses::Status_bar>("x");
 
     Widget& space2 = this->make_child() | cppurses::pipe::fixed_height(1);
 
-    Options_stack& options_box{this->make_child<Options_stack>()};
+    Options_stack& options_box = this->make_child<Options_stack>();
 };
 
-}  // namespace glyph_paint
-}  // namespace demos
+}  // namespace demos::glyph_paint
 #endif  // DEMOS_GLYPH_PAINT_SIDE_PANE_HPP
