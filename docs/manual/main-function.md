@@ -12,7 +12,7 @@ The simplest form looks something like this
 int main() { return cppurses::System{}.run<App_widget>(); }
 ```
 
-This constructs the System object, creates an instance of the `App_widget` and
+This constructs the `System` object, creates an instance of the `App_widget` and
 sets it as the head Widget, it then runs the event loop.
 
 If you need to change any Terminal options, or construct a widget and manually

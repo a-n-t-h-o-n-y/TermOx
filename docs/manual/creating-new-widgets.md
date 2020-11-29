@@ -13,7 +13,7 @@ class Canvas : public cppurses::Widget {
    public:
     Canvas()
     {
-        using namespace cppurses;
+        using cppurses::Color;
         using namespace cppurses::pipe;
         *this | bordered() | bold_walls()
               | bg(Color::Light_blue) | fg(Color::Blue);
@@ -24,6 +24,7 @@ class Canvas : public cppurses::Widget {
     {
         if (m.button == cppurses::Mouse::Button::Left)
             points_.push_back(m.local);
+        this->update();   // post a paint event to *this
         return Widget::mouse_press_event(m);
     }
 
@@ -75,8 +76,8 @@ class  Focus_indicator_textbox : public cppurses::Textbox {
     }
 
    private:
-    cppurses::Color focus_color_   = cppurses::Color::Red;
-    cppurses::Color unfocus_color_ = cppurses::Color::Blue;
+    constexpr static auto focus_color_   = cppurses::Color::Red;
+    constexpr static auto unfocus_color_ = cppurses::Color::Blue;
 };
 ```
 

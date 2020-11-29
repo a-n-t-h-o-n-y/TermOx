@@ -1,6 +1,6 @@
 # Brush
 
-A `Brush` is used to define the look of `Glyph`s on the terminal screen.  A
+A `Brush` is used to define the look of Glyphs on the terminal screen.  A
 Brush contains a list of [Traits](traits.md) (such as Bold, Inverse, Italic,
 ...), and a background and foreground [Color](colors.md).
 

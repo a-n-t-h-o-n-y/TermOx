@@ -1,7 +1,7 @@
 # Traits
 
-The `Trait` enum is used within `Brush` objects to alter the appearance of
-Glyphs on screen.
+The `Trait` enum is used within Brush objects to alter the appearance of Glyphs
+on screen.
 
 Not all Traits are supported by all terminals.
 

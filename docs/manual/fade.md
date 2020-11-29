@@ -6,12 +6,6 @@ fade between two given color values.
 
 ```cpp
 template <typename Shape>
-auto fade(HSL a,
-          HSL b,
-          unsigned resolution              = 400,
-          Dynamic_color::Period_t interval = std::chrono::milliseconds{40}) -> Dynamic_color;
-
-template <typename Shape>
 auto fade(True_color a,
           True_color b,
           unsigned resolution              = 400,
@@ -29,13 +23,28 @@ where between the two colors `a` and `b` the fade is currently at.
 `resolution` is the number of steps the `Shape` will increment through before
 repeating itself, a new step is calculated every `interval`.
 
+## Shapes
+
+- `Triangle`
+- `Sine`
+- `Sawtooth_up`
+- `Sawtooth_down`
+- `Square`
+- `Random`
+
+## Shape Modifiers
+
+- `Invert`
+- `Concave`
+- `Convex`
+
 ## Creating New Shapes
 
 To create a new Shape type, you'll need to create a type with a public `auto
-operator() -> double` overloaded that will be interpreted as the ratio between
-the two colors that are being faded between. This ratio is applied to the
-difference of each of the Hue, Saturation, and Lightness between the two colors.
-The call operator will be called on each step of the animation.
+operator() -> double` overload that will be interpreted as the ratio between the
+two colors that are being faded between. This ratio is applied to the difference
+of each of the Hue, Saturation, and Lightness between the two colors. The call
+operator will be called on each step of the animation.
 
 It will also need a constructor that takes an `unsigned` resolution parameter.
 

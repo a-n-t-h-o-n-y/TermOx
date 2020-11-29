@@ -64,9 +64,13 @@ auto read_write_textbox() -> std::unique_ptr<layout::Vertical<>>
         ) | fixed_height(1) | name("btn-container")
     );
 
+// TODO verify, also find_by_name returns a pointer, it'll need to be casted,
+really not useful unless you have an example where you know the type. or where
+you don't need useful connections, maybe change widget features like border or
+background color.
     // Connect Signals
-    auto& textbox = w.find_child_by_name("textbox");
-    auto& btns    = w.find_child_by_name("btn-container");
+    auto* textbox = w->find_child_by_name("textbox");
+    auto* btns    = w->find_child_by_name("btn-container");
     btns.find_child_by_name("read-btn") | on_read([&](auto& fs) {
         auto buffer = std::stringstream{};
         buffer << fs.rdbuf();

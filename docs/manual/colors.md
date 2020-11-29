@@ -21,15 +21,15 @@ example `Color::Red`.
 - `Gray`
 - `White`
 
-Colors beyond these can be created by constructing a `Color` with a value
-between [16 - 255], though these are only useful with a Color Palette that
-supports more than 16 colors.
+Colors beyond these can be created by constructing a Color with a value between
+[16 - 255], though these are only useful with a Color Palette that supports more
+than 16 colors.
 
 Colors can be applied to any Brush as either a background or a foreground color.
 
 ## Color Palette
 
-Color Palettes can be used to define which color is attached to each `Color`
+Color Palettes can be used to define which color is attached to each Color
 value.
 
 `Color_definition`s are used to define Colors. There are three ways to use this
@@ -57,7 +57,7 @@ values used for each color.
 auto const green = Color_definition{Color::Green, ANSI{28}};
 ```
 
-The above line of code will tie the `Color::Green` with the ANSI color at 28.
+The above line of code will tie `Color::Green` with the ANSI color at 28.
 
 ### True Color
 
@@ -95,7 +95,7 @@ auto const fd  = Color_definition{Color{46}, ANSI{101},
                     dynamic::fade<dynamic::Sine>(HSL{50, 25, 25}, HSL{100, 50, 50})};
 ```
 
-### Example Color Palette Use
+### Example Color Palette
 
 Creating a `Color_palette` with each of the three `Color_definition` types and
 custom Color names:
@@ -127,13 +127,32 @@ Palettes can support up to 181 colors at once. They can be set by calling the
 
 ### Library Color Palettes
 
-Currently there are 5 pre-defined palettes in the library:
+There are 24 pre-defined palettes in the library:
 
+- amstrad_cpc
+- apple_ii
+- ashes
 - basic
 - basic8
+- cga
+- commodore_64
+- commodore_vic20
 - dawn_bringer16
 - dawn_bringer32
 - en4
+- gameboy
+- gameboy_pocket
+- macintosh_ii
+- msx
+- nes
+- savanna
+- secam
+- stormy6
+- teletext
+- thomson_m05
+- windows
+- windows_console
+- zx_spectrum
 
 ## See Also
 
