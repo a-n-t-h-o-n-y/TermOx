@@ -4,6 +4,7 @@ docs/html
 notes
 tags
 .clangd/
+.cache/
 *.[ao]
 *.so
 *.out

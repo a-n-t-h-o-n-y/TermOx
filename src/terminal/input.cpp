@@ -36,7 +36,7 @@ auto extract_modifiers(::MEVENT const& mouse_event) -> Mouse::Modifiers
             is(BUTTON_ALT, mouse_event)};
 }
 
-auto extract_button(::MEVENT const& state) -> Mouse::Button
+auto extract_button(::MEVENT const& state) -> std::optional<Mouse::Button>
 {
     if (is(BUTTON1_PRESSED, state))
         return Mouse::Button::Left;
@@ -71,7 +71,7 @@ auto extract_button(::MEVENT const& state) -> Mouse::Button
         return Mouse::Button::ScrollDown;
 #endif
 
-    return Mouse::Button::Left;  // shouldn't reach this
+    return std::nullopt;
 }
 
 auto make_event(Widget& receiver, Mouse const& mouse, ::MEVENT const& state)
@@ -132,8 +132,9 @@ auto make_mouse_event() -> std::optional<Event>
 
     auto const modifiers = extract_modifiers(mouse_event);
     auto const button    = extract_button(mouse_event);
-    auto const mouse = Mouse{global, local, button, mouse_event.id, modifiers};
-
+    if (!button.has_value())
+        return std::nullopt;
+    auto const mouse = Mouse{global, local, *button, mouse_event.id, modifiers};
     return make_event(*receiver, mouse, mouse_event);
 }
 

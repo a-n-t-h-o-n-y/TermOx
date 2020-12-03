@@ -61,9 +61,27 @@ class Widget {
     Signal<void()> painted;
     Signal<void()> timer;
 
-    // TODO add rest of _filter signals
-    Signal<void(Widget&, Mouse const&)> mouse_wheel_filter;
+    // Event filter Signals. The first parameter is the original receiver.
+    Signal<void(Widget&)> enabled_filter;
+    Signal<void(Widget&)> disabled_filter;
+    Signal<void(Widget&, Widget&)> child_added_filter;
+    Signal<void(Widget&, Widget&)> child_removed_filter;
+    Signal<void(Widget&, Widget&)> child_polished_filter;
+    Signal<void(Widget&, Point const&, Point const&)> moved_filter;
+    Signal<void(Widget&, Area const&, Area const&)> resized_filter;
+    Signal<void(Widget&, Mouse const&)> mouse_pressed_filter;
+    Signal<void(Widget&, Mouse const&)> mouse_released_filter;
+    Signal<void(Widget&, Mouse const&)> mouse_double_clicked_filter;
+    Signal<void(Widget&, Mouse const&)> mouse_wheel_scrolled_filter;
+    Signal<void(Widget&, Mouse const&)> mouse_moved_filter;
+    Signal<void(Widget&, Key)> key_pressed_filter;
+    Signal<void(Widget&)> focused_in_filter;
+    Signal<void(Widget&)> focused_out_filter;
+    Signal<void(Widget&)> destroyed_filter;
+    Signal<void(Widget&)> painted_filter;
+    Signal<void(Widget&)> timer_filter;
 
+   public:
     /// Describes the visual border of this Widget.
     Border border;
 
@@ -466,52 +484,60 @@ class Widget {
     }
 
     // - - - - - - - - - - - Event Filter Handlers - - - - - - - - - - - - - - -
-    /// Handles Child_added_event objects filtered from other Widgets.
-    virtual auto child_added_event_filter(Widget& /* receiver */, Widget &
-                                          /* child */) -> bool
-    {
-        return false;
-    }
-
-    /// Handles Child_removed_event objects filtered from other Widgets.
-    virtual auto child_removed_event_filter(Widget& /* receiver */, Widget &
-                                            /* child */) -> bool
-    {
-        return false;
-    }
-
-    /// Handles Child_polished_event objects filtered from other Widgets.
-    virtual auto child_polished_event_filter(Widget& /* receiver */, Widget &
-                                             /* child */) -> bool
-    {
-        return false;
-    }
-
     /// Handles Enable_event objects filtered from other Widgets.
-    virtual auto enable_event_filter(Widget & /* receiver */) -> bool
+    virtual auto enable_event_filter(Widget& receiver) -> bool
     {
+        enabled_filter(receiver);
+
         return false;
     }
 
     /// Handles Disable_event objects filtered from other Widgets.
-    virtual auto disable_event_filter(Widget & /* receiver */) -> bool
+    virtual auto disable_event_filter(Widget& receiver) -> bool
     {
+        disabled_filter(receiver);
+        return false;
+    }
+
+    /// Handles Child_added_event objects filtered from other Widgets.
+    virtual auto child_added_event_filter(Widget& receiver, Widget& child)
+        -> bool
+    {
+        child_added_filter(receiver, child);
+        return false;
+    }
+
+    /// Handles Child_removed_event objects filtered from other Widgets.
+    virtual auto child_removed_event_filter(Widget& receiver, Widget& child)
+        -> bool
+    {
+        child_removed_filter(receiver, child);
+        return false;
+    }
+
+    /// Handles Child_polished_event objects filtered from other Widgets.
+    virtual auto child_polished_event_filter(Widget& receiver, Widget& child)
+        -> bool
+    {
+        child_polished_filter(receiver, child);
         return false;
     }
 
     /// Handles Move_event objects filtered from other Widgets.
-    virtual auto move_event_filter(Widget& /* receiver */,
-                                   Point /* new_position */,
-                                   Point /* old_position */) -> bool
+    virtual auto move_event_filter(Widget& receiver,
+                                   Point new_position,
+                                   Point old_position) -> bool
     {
+        moved_filter(receiver, new_position, old_position);
         return false;
     }
 
     /// Handles Resize_event objects filtered from other Widgets.
-    virtual auto resize_event_filter(Widget& /* receiver */,
-                                     Area /* new_size */,
-                                     Area /* old_size */) -> bool
+    virtual auto resize_event_filter(Widget& receiver,
+                                     Area new_size,
+                                     Area old_size) -> bool
     {
+        resized_filter(receiver, new_size, old_size);
         return false;
     }
 
@@ -519,74 +545,81 @@ class Widget {
     virtual auto mouse_press_event_filter(Widget& receiver, Mouse const& m)
         -> bool
     {
-        mouse_wheel_filter(receiver, m);
+        mouse_pressed_filter(receiver, m);
         return false;
     }
 
     /// Handles Mouse_release_event objects filtered from other Widgets.
-    virtual auto mouse_release_event_filter(Widget& /* receiver */,
-                                            Mouse const &
-                                            /* m */) -> bool
+    virtual auto mouse_release_event_filter(Widget& receiver, Mouse const& m)
+        -> bool
     {
+        mouse_released_filter(receiver, m);
         return false;
     }
 
     /// Handles Mouse_double_click_event objects filtered from other Widgets.
-    virtual auto mouse_double_click_event_filter(Widget& /* receiver */,
-                                                 Mouse const &
-                                                 /* m */) -> bool
+    virtual auto mouse_double_click_event_filter(Widget& receiver,
+                                                 Mouse const& m) -> bool
     {
+        mouse_double_clicked_filter(receiver, m);
         return false;
     }
 
     /// Handles Mouse_wheel_event objects filtered from other Widgets.
-    virtual auto mouse_wheel_event_filter(Widget& /* receiver */, Mouse const &
-                                          /* m */) -> bool
+    virtual auto mouse_wheel_event_filter(Widget& receiver, Mouse const& m)
+        -> bool
     {
+        mouse_wheel_scrolled_filter(receiver, m);
         return false;
     }
 
     /// Handles Mouse_move_event objects filtered from other Widgets.
-    virtual auto mouse_move_event_filter(Widget& /* receiver */, Mouse const &
-                                         /* m */) -> bool
+    virtual auto mouse_move_event_filter(Widget& receiver, Mouse const& m)
+        -> bool
     {
+        mouse_moved_filter(receiver, m);
         return false;
     }
 
     /// Handles Key_press_event objects filtered from other Widgets.
-    virtual auto key_press_event_filter(Widget& /* receiver */, Key const &
-                                        /* k */) -> bool
+    virtual auto key_press_event_filter(Widget& receiver, Key const& k) -> bool
     {
+        key_pressed_filter(receiver, k);
         return false;
     }
 
     /// Handles Focus_in_event objects filtered from other Widgets.
-    virtual auto focus_in_event_filter(Widget & /* receiver */) -> bool
+    virtual auto focus_in_event_filter(Widget& receiver) -> bool
     {
+        focused_in_filter(receiver);
         return false;
     }
 
     /// Handles Focus_out_event objects filtered from other Widgets.
-    virtual auto focus_out_event_filter(Widget & /* receiver */) -> bool
+    virtual auto focus_out_event_filter(Widget& receiver) -> bool
     {
+        focused_out_filter(receiver);
         return false;
     }
 
     /// Handles Delete_event objects filtered from other Widgets.
-    virtual auto delete_event_filter(Widget & /* receiver */) -> bool
+    virtual auto delete_event_filter(Widget& receiver) -> bool
     {
+        destroyed_filter(receiver);
         return false;
     }
 
     /// Handles Paint_event objects filtered from other Widgets.
-    virtual auto paint_event_filter(Widget & /* receiver */) -> bool
+    virtual auto paint_event_filter(Widget& receiver) -> bool
     {
+        painted_filter(receiver);
         return false;
     }
 
     /// Handles Timer_event objects filtered from other Widgets.
-    virtual auto timer_event_filter(Widget & /* receiver */) -> bool
+    virtual auto timer_event_filter(Widget& receiver) -> bool
     {
+        timer_filter(receiver);
         return false;
     }
 

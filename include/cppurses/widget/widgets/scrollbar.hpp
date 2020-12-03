@@ -342,9 +342,10 @@ void link(Scrollbar<Layout_t>& scrollbar,
     if (hijack_scroll) {
         layout.child_added.connect(
             [&](auto& child) { child.install_event_filter(scrollbar); });
-        scrollbar.mouse_wheel_filter.connect([&](auto&, auto const& mouse) {
-            scrollbar.handle_wheel(mouse.button);
-        });
+        scrollbar.mouse_wheel_scrolled_filter.connect(
+            [&](auto&, auto const& mouse) {
+                scrollbar.handle_wheel(mouse.button);
+            });
         layout.mouse_wheel_scrolled.connect(
             [&](auto const& mouse) { scrollbar.handle_wheel(mouse.button); });
     }
