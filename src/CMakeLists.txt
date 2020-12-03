@@ -11,16 +11,13 @@ find_package(Threads REQUIRED)
 target_link_libraries(cppurses
     PUBLIC
         signals
+        signals-light
         ${CMAKE_THREAD_LIBS_INIT}
     PRIVATE
         nc
 )
 
-target_include_directories(cppurses
-    PUBLIC
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>
-)
+target_include_directories(cppurses PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
 if(NOT ${CMAKE_VERSION} VERSION_LESS "3.8")
     target_compile_features(cppurses PUBLIC cxx_std_17)
@@ -86,18 +83,4 @@ target_sources(cppurses PRIVATE
     terminal/output.cpp
     terminal/input.cpp
     terminal/dynamic_color_engine.cpp
-)
-
-# INSTALLATION
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-install(TARGETS cppurses
-    EXPORT CPPursesLibraryConfig
-    ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
-install(DIRECTORY ../include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-install(EXPORT CPPursesLibraryConfig DESTINATION share/CPPursesLibrary/cmake)
-export(
-    TARGETS cppurses signals
-    FILE CPPursesLibraryConfig.cmake
 )

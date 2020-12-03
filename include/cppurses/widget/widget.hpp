@@ -12,6 +12,8 @@
 
 #include <signals/signal.hpp>
 
+#include <signals_light/signal.hpp>
+
 #include <cppurses/common/transform_view.hpp>
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
@@ -42,7 +44,7 @@ class Widget {
     // Event Signals - Alternatives to overriding virtual event handlers.
     /* Called after event handlers are invoked. Parameters are in same order as
      * matching event handler function's parameters. */
-    Signal<void()> enabled;
+    sl::Signal<void()> enabled;
     Signal<void()> disabled;
     Signal<void(Widget&)> child_added;
     Signal<void(Widget&)> child_removed;

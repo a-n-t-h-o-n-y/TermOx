@@ -82,9 +82,6 @@ make                                      # Build library
 make demos                                # Build demos(optional)
 ```
 
-Installing the library with CMake will place the headers and the library
-archive in the standard GNU install directories.
-
 ## Using the Library
 
 It is recommended to clone this library into your project and use it as a
