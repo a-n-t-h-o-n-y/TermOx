@@ -3,10 +3,10 @@
 #include <functional>
 #include <vector>
 
+#include <signals_light/signal.hpp>
+
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/widget/widgets/cycle_stack.hpp>
-
-#include <signals/slot.hpp>
 
 namespace demos::glyph_paint {
 
@@ -15,11 +15,11 @@ class Populated_glyph_stack : public cppurses::Cycle_stack<> {
     Populated_glyph_stack();
 
    public:
-    void make_connections(sig::Slot<void(cppurses::Glyph)> slot);
+    void make_connections(sl::Slot<void(cppurses::Glyph)> slot);
 
    private:
     template <typename Function_t>
-    using Signal_ref_t = std::reference_wrapper<sig::Signal<Function_t>>;
+    using Signal_ref_t = std::reference_wrapper<sl::Signal<Function_t>>;
 
     std::vector<Signal_ref_t<void(cppurses::Glyph)>> signal_refs_;
 };

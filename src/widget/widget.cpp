@@ -5,6 +5,8 @@
 #include <string>
 #include <utility>
 
+#include <signals_light/signal.hpp>
+
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/system/event.hpp>
@@ -66,10 +68,10 @@ void Widget::install_event_filter(Widget& filter)
     auto const result = event_filters_.insert(&filter);
     if (result.second) {  // if insert happened
         // Remove filter from list on destruction of filter
-        auto remove_on_destroy = sig::Slot<void()>{
+        auto remove_on_destroy = sl::Slot<void()>{
             [this, &filter]() { this->remove_event_filter(filter); }};
         // In case *this has been destroyed and the filter has not.
-        remove_on_destroy.track(this->destroyed);
+        remove_on_destroy.track(this->lifetime);
         filter.destroyed.connect(remove_on_destroy);
     }
 }

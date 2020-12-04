@@ -4,7 +4,7 @@
 #include <utility>
 #include <vector>
 
-#include <signals/signal.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/glyph_string.hpp>
@@ -24,13 +24,13 @@ class Text_display : public Widget {
     Brush insert_brush = this->brush;
 
     /// Emitted when text is scrolled up. Sends number of lines scrolled by.
-    sig::Signal<void(std::size_t n)> scrolled_up;
+    sl::Signal<void(std::size_t n)> scrolled_up;
 
     /// Emitted when text is scrolled down. Sends number of lines scrolled by.
-    sig::Signal<void(std::size_t n)> scrolled_down;
+    sl::Signal<void(std::size_t n)> scrolled_down;
 
     /// Emitted when contents are modified. Sends a reference to the contents.
-    sig::Signal<void(Glyph_string const&)> contents_modified;
+    sl::Signal<void(Glyph_string const&)> contents_modified;
 
    public:
     /// Construct a Text_display with initial Glyph_string \p contents.

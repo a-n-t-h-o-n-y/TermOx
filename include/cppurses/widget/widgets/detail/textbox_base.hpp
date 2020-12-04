@@ -3,29 +3,28 @@
 #include <cstddef>
 #include <utility>
 
-#include <signals/signal.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
 
-namespace cppurses {
-namespace detail {
+namespace cppurses::detail {
 
 /// Implements cursor movement on top of a Text_display, for use by Textbox.
 class Textbox_base : public Text_display {
    public:
     /// Emitted when the cursor moves left, passes along \n positions moved.
-    sig::Signal<void(std::size_t n)> cursor_moved_left;
+    sl::Signal<void(std::size_t n)> cursor_moved_left;
 
     /// Emitted when the cursor moves right, passes along \n positions moved.
-    sig::Signal<void(std::size_t n)> cursor_moved_right;
+    sl::Signal<void(std::size_t n)> cursor_moved_right;
 
     /// Emitted when the cursor moves up, passes along \n positions moved.
-    sig::Signal<void(std::size_t n)> cursor_moved_up;
+    sl::Signal<void(std::size_t n)> cursor_moved_up;
 
     /// Emitted when the cursor moves down, passes along \n positions moved.
-    sig::Signal<void(std::size_t n)> cursor_moved_down;
+    sl::Signal<void(std::size_t n)> cursor_moved_down;
 
    public:
     /// Set the cursor to \p position, or the nearest Glyph if no glyph there.
@@ -141,6 +140,5 @@ class Textbox_base : public Text_display {
     }
 };
 
-}  // namespace detail
-}  // namespace cppurses
+}  // namespace cppurses::detail
 #endif  // CPPURSES_WIDGET_WIDGETS_DETAIL_TEXTBOX_BASE_HPP

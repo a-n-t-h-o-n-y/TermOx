@@ -6,7 +6,7 @@
 #include <string>
 #include <type_traits>
 
-#include <signals/signal.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/system/mouse.hpp>
 #include <cppurses/widget/pipe.hpp>
@@ -23,7 +23,7 @@ template <typename Number_t = int>
 class Number_edit : public Line_edit {
    public:
     /// Emitted on Enter Key press, sends along the current value.
-    sig::Signal<void(Number_t)> value_set;
+    sl::Signal<void(Number_t)> value_set;
 
    public:
     /// Construct a Number_edit with \p initial value.
@@ -125,7 +125,7 @@ class Labeled_number_edit
 
    public:
     /// Emitted on Enter Key press, sends along the current value.
-    sig::Signal<void(Number_t)>& value_set = number_edit.value_set;
+    sl::Signal<void(Number_t)>& value_set = number_edit.value_set;
 
    public:
     /// Construct with \p title for Label text and \p initial value.

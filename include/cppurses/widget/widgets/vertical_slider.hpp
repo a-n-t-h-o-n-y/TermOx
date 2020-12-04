@@ -2,7 +2,7 @@
 #define CPPURSES_WIDGET_WIDGETS_VERTICAL_SLIDER_HPP
 #include <vector>
 
-#include <signals/signal.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph_string.hpp>
@@ -21,10 +21,10 @@ class Vertical_slider : public Widget {
     using Ratio_t = detail::Slider_logic::Ratio_t;
 
     /// Signal emitted every time the slider value has changed.
-    sig::Signal<void(Value_t)>& value_changed = logic_.value_changed;
+    sl::Signal<void(Value_t)>& value_changed = logic_.value_changed;
 
     /// Signal emitted every time the slider ratio has changed.
-    sig::Signal<void(Ratio_t)>& ratio_changed = logic_.ratio_changed;
+    sl::Signal<void(Ratio_t)>& ratio_changed = logic_.ratio_changed;
 
    public:
     /// Create a slider with [minimum, maximum] possible values.

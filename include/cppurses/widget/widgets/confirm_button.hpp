@@ -2,7 +2,7 @@
 #define CPPURSES_WIDGET_WIDGETS_CONFIRM_BUTTON_HPP
 #include <utility>
 
-#include <signals/signal.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph_string.hpp>
@@ -34,7 +34,7 @@ class Confirm_button : public layout::Stack<> {
 
    public:
     /// Emitted once confirmation has been made.
-    sig::Signal<void()> pressed;
+    sl::Signal<void()> pressed;
 
    public:
     Button& main_btn;

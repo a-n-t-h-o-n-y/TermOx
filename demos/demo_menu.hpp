@@ -1,7 +1,6 @@
 #ifndef DEMOS_DEMO_MENU_HPP
 #define DEMOS_DEMO_MENU_HPP
-#include <string>
-
+#include <cppurses/painter/detail/screen_descriptor.hpp>
 #include <cppurses/painter/palette/dawn_bringer16.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/shortcuts.hpp>
@@ -15,8 +14,6 @@
 #include "chess/src/chess_ui.hpp"
 #include "colors/palette_view.hpp"
 #include "composites/composites.hpp"
-#include "cppurses/painter/detail/screen_descriptor.hpp"
-#include "cppurses/painter/palette/dawn_bringer16.hpp"
 #include "focus/focus_demo.hpp"
 #include "game_of_life/gol_demo.hpp"
 #include "glyph_paint/glyph_paint.hpp"
@@ -24,7 +21,6 @@
 #include "layout/layout_demo.hpp"
 #include "notepad/notepad.hpp"
 #include "palette/palette_demo.hpp"
-#include "signals/optional_last_value.hpp"
 #include "snake/snake.hpp"
 
 namespace demos {

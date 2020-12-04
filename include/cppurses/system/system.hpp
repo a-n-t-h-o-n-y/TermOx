@@ -4,8 +4,7 @@
 #include <utility>
 #include <vector>
 
-#include <signals/signal.hpp>
-#include <signals/slot.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/system/detail/user_input_event_loop.hpp>
 #include <cppurses/system/event_fwd.hpp>
@@ -14,9 +13,13 @@
 namespace cppurses {
 class Animation_engine;
 class Widget;
-namespace detail {
+}  // namespace cppurses
+
+namespace cppurses::detail {
 class Event_engine;
-}
+}  // namespace cppurses::detail
+
+namespace cppurses {
 
 /// Organizes the highest level of the TUI framework.
 /** Constructing an instance of this class initializes the display system.
@@ -25,10 +28,10 @@ class System {
    public:
     /// Emitted when System::exit is called. Should call Event_loop::exit.
     /** Passes along the exit_code System::exit() was called with. */
-    static sig::Signal<void(int)> exit_signal;
+    static sl::Signal<void(int)> exit_signal;
 
     // Slots
-    static sig::Slot<void()> quit;
+    static sl::Slot<void()> quit;
 
     /// Provides access to and modification of global terminal properties.
     inline static Terminal terminal;

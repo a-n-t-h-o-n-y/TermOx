@@ -3,8 +3,6 @@
 #include <cmath>
 #include <utility>
 
-#include <signals/signal.hpp>
-
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/widget.hpp>
@@ -14,8 +12,7 @@
 #include "glyph_select_stack.hpp"
 
 using namespace cppurses;
-namespace demos {
-namespace glyph_paint {
+namespace demos::glyph_paint {
 
 Glyph_select::Bottom_row::Bottom_row()
 {
@@ -80,5 +77,4 @@ void Glyph_select::flip_page_backward()
     bottom_row.slider.set_percent(new_percent);
 }
 
-}  // namespace glyph_paint
-}  // namespace demos
+}  // namespace demos::glyph_paint

@@ -4,7 +4,7 @@
 #include <limits>
 #include <stdexcept>
 
-#include <signals/signal.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/widget/widgets/detail/nearly_equal.hpp>
 
@@ -17,10 +17,10 @@ class Slider_logic {
     using Ratio_t = double;
 
     /// Signal emitted every time the value is changed.
-    sig::Signal<void(Value_t)> value_changed;
+    sl::Signal<void(Value_t)> value_changed;
 
     /// Signal emitted every time the ratio is changed.
-    sig::Signal<void(Ratio_t)> ratio_changed;
+    sl::Signal<void(Ratio_t)> ratio_changed;
 
    public:
     /// Initialize with range of acceptable values and minimum current value.

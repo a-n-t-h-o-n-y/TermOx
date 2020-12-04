@@ -3,11 +3,11 @@
 #include <cmath>
 #include <cstddef>
 
-#include <signals/signals.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/mouse.hpp>
-#include <cppurses/widget/detail/tracks_lifetime.hpp>
+#include <cppurses/widget/detail/link_lifetimes.hpp>
 
 namespace cppurses {
 
@@ -72,18 +72,18 @@ auto Horizontal_slider::percent_to_position(float percent) -> std::size_t
     return width == 0 ? 0 : std::round(percent * static_cast<float>(width - 1));
 }
 
-namespace slot {
-using namespace detail;
-
-auto set_percent(Horizontal_slider& s) -> sig::Slot<void(float)>
-{
-    return tracks_lifetime(s, [&s](float percent) { s.set_percent(percent); });
-}
-
-auto set_percent(Horizontal_slider& s, float percent) -> sig::Slot<void()>
-{
-    return tracks_lifetime(s, [&s, percent] { s.set_percent(percent); });
-}
-
-}  // namespace slot
 }  // namespace cppurses
+
+namespace cppurses::slot {
+
+auto set_percent(Horizontal_slider& s) -> sl::Slot<void(float)>
+{
+    return link_lifetimes([&s](float percent) { s.set_percent(percent); }, s);
+}
+
+auto set_percent(Horizontal_slider& s, float percent) -> sl::Slot<void()>
+{
+    return link_lifetimes([&s, percent] { s.set_percent(percent); }, s);
+}
+
+}  // namespace cppurses::slot

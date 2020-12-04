@@ -14,6 +14,15 @@ class Animation_engine {
     using Period_t = detail::Timer_event_loop::Period_t;
 
    public:
+    ~Animation_engine()
+    {
+        for (auto& loop : loops_) {
+            loop->exit(0);
+            loop->wait();
+        }
+    }
+
+   public:
     /// Begins posting Timer_events to the given Widget every period.
     void register_widget(Widget& w, Period_t interval);
 

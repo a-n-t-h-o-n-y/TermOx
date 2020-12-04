@@ -3,6 +3,8 @@
 #include <memory>
 #include <utility>
 
+#include <signals_light/signal.hpp>
+
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
@@ -65,7 +67,7 @@ class Bar : public Layout_t {
         };
 
        public:
-        sig::Signal<void()> clicked;
+        sl::Signal<void()> clicked;
 
        public:
         Title(Parameters p)
@@ -102,7 +104,7 @@ class Bar : public Layout_t {
     using Parameters = typename Title::Parameters;
 
    public:
-    sig::Signal<void()> toggle_request;
+    sl::Signal<void()> toggle_request;
 
    public:
     Bar(Parameters p) : text_{this->template make_child<Title>(std::move(p))}

@@ -5,8 +5,6 @@
 #include <utility>
 #include <vector>
 
-#include <signals/signal.hpp>
-
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>

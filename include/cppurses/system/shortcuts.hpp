@@ -2,7 +2,7 @@
 #define CPPURSES_SYSTEM_SHORTCUTS_HPP
 #include <unordered_map>
 
-#include <signals/signal.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/system/key.hpp>
 
@@ -15,10 +15,10 @@ class Shortcuts {
     /** Key has combined key presses defined for multi-key shortcuts. The
      *  returned Signal reference will be called each time the keyboard shortcut
      *  is encountered. */
-    static auto add_shortcut(Key k) -> sig::Signal<void()>&
+    static auto add_shortcut(Key k) -> sl::Signal<void()>&
     {
         if (shortcuts_.count(k) == 0uL)
-            shortcuts_[k] = sig::Signal<void()>{};
+            shortcuts_[k] = sl::Signal<void()>{};
         return shortcuts_.at(k);
     }
 
@@ -47,7 +47,7 @@ class Shortcuts {
     static void enable_all() { enabled_ = true; }
 
    private:
-    using Map_t = std::unordered_map<Key, sig::Signal<void()>>;
+    using Map_t = std::unordered_map<Key, sl::Signal<void()>>;
     inline static Map_t shortcuts_;
     inline static bool enabled_ = true;
 };

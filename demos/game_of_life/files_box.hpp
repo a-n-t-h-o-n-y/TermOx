@@ -2,7 +2,7 @@
 #define CPPURSES_DEMOS_GAME_OF_LIFE_FILES_BOX_HPP
 #include <string>
 
-#include <signals/signal.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
@@ -24,7 +24,7 @@ class File_widget : public cppurses::layout::Vertical<> {
     cppurses::Confirm_button& confirm_btn_;
 
    public:
-    sig::Signal<void(std::string const&)> file_request;
+    sl::Signal<void(std::string const&)> file_request;
 
    public:
     explicit File_widget(std::string const& btn_text)
@@ -53,9 +53,9 @@ struct Files_box : cppurses::layout::Vertical<> {
     Widget& break_          = this->append_child(make_break());
 
    public:
-    sig::Signal<void(std::string const&)>& import_request =
+    sl::Signal<void(std::string const&)>& import_request =
         import_btn.file_request;
-    sig::Signal<void(std::string const&)>& export_request =
+    sl::Signal<void(std::string const&)>& export_request =
         export_btn.file_request;
 
    public:

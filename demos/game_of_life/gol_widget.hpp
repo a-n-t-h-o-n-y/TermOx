@@ -5,7 +5,7 @@
 #include <string>
 #include <string_view>
 
-#include <signals/signal.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/painter.hpp>
@@ -416,9 +416,9 @@ class GoL_widget : public cppurses::Widget {
     }
 
    public:
-    sig::Signal<void(Coordinate)> offset_changed;
-    sig::Signal<void(Rule)> rule_changed;
-    sig::Signal<void(std::uint32_t)>& generation_count_changed{
+    sl::Signal<void(Coordinate)> offset_changed;
+    sl::Signal<void(Rule)> rule_changed;
+    sl::Signal<void(std::uint32_t)>& generation_count_changed{
         engine_.generation_count_changed};
 };
 

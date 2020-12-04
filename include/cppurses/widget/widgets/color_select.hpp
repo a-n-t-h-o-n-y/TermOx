@@ -4,7 +4,7 @@
 #include <string>
 #include <utility>
 
-#include <signals/signals.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph_string.hpp>
@@ -45,7 +45,7 @@ using Color_line = layout::Horizontal<Color_tile>;
 /** Updates when Terminal::set_pallete() succeeds. */
 class Color_select : public layout::Vertical<Color_line> {
    public:
-    sig::Signal<void(Color)> color_selected;
+    sl::Signal<void(Color)> color_selected;
 
    public:
     explicit Color_select(bool display_numbers = false)

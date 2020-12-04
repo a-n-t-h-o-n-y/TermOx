@@ -11,6 +11,8 @@
 #include <string>
 #include <utility>
 
+#include <signals_light/signal.hpp>
+
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
@@ -20,11 +22,10 @@
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/mouse.hpp>
 #include <cppurses/widget/border.hpp>
+#include <cppurses/widget/detail/link_lifetimes.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
-
-#include <signals/slot.hpp>
 
 using namespace cppurses;
 
@@ -49,8 +50,7 @@ void insert_space(Point first, Point second, std::ostream& os)
 
 }  // namespace
 
-namespace demos {
-namespace glyph_paint {
+namespace demos::glyph_paint {
 
 Paint_area::Paint_area()
 {
@@ -268,151 +268,111 @@ void Paint_area::remove_glyph(Point coords)
     this->update();
 }
 
-namespace slot {
+}  // namespace demos::glyph_paint
 
-sig::Slot<void(Glyph)> set_glyph(Paint_area& pa)
+namespace demos::glyph_paint::slot {
+
+using cppurses::slot::link_lifetimes;
+
+auto set_glyph(Paint_area& pa) -> sl::Slot<void(Glyph)>
 {
-    sig::Slot<void(Glyph)> slot{[&pa](Glyph g) { pa.set_glyph(std::move(g)); }};
-    slot.track(pa.destroyed);
-    return slot;
+    return link_lifetimes([&pa](Glyph g) { pa.set_glyph(std::move(g)); }, pa);
 }
 
-sig::Slot<void()> set_glyph(Paint_area& pa, const Glyph& glyph)
+auto set_glyph(Paint_area& pa, const Glyph& glyph) -> sl::Slot<void()>
 {
-    sig::Slot<void()> slot{[&pa, glyph] { pa.set_glyph(glyph); }};
-    slot.track(pa.destroyed);
-    return slot;
+    return link_lifetimes([&pa, glyph] { pa.set_glyph(glyph); }, pa);
 }
 
-sig::Slot<void(Glyph)> set_symbol(Paint_area& pa)
+auto set_symbol(Paint_area& pa) -> sl::Slot<void(Glyph)>
 {
-    sig::Slot<void(Glyph)> slot{
-        [&pa](Glyph symbol) { pa.set_symbol(std::move(symbol)); }};
-    slot.track(pa.destroyed);
-    return slot;
+    return link_lifetimes(
+        [&pa](Glyph symbol) { pa.set_symbol(std::move(symbol)); }, pa);
 }
 
-sig::Slot<void()> set_symbol(Paint_area& pa, const Glyph& symbol)
+auto set_symbol(Paint_area& pa, const Glyph& symbol) -> sl::Slot<void()>
 {
-    sig::Slot<void()> slot{[&pa, symbol] { pa.set_symbol(symbol); }};
-    slot.track(pa.destroyed);
-    return slot;
+    return link_lifetimes([&pa, symbol] { pa.set_symbol(symbol); }, pa);
 }
 
-sig::Slot<void(Color)> set_foreground_color(Paint_area& pa)
+auto set_foreground_color(Paint_area& pa) -> sl::Slot<void(Color)>
 {
-    sig::Slot<void(Color)> slot{[&pa](Color c) { pa.set_foreground_color(c); }};
-    slot.track(pa.destroyed);
-    return slot;
+    return link_lifetimes([&pa](Color c) { pa.set_foreground_color(c); }, pa);
 }
 
-sig::Slot<void()> set_foreground_color(Paint_area& pa, Color c)
+auto set_foreground_color(Paint_area& pa, Color c) -> sl::Slot<void()>
 {
-    sig::Slot<void()> slot{[&pa, c] { pa.set_foreground_color(c); }};
-    slot.track(pa.destroyed);
-    return slot;
+    return link_lifetimes([&pa, c] { pa.set_foreground_color(c); }, pa);
 }
 
-sig::Slot<void(Color)> set_background_color(Paint_area& pa)
+auto set_background_color(Paint_area& pa) -> sl::Slot<void(Color)>
 {
-    sig::Slot<void(Color)> slot{[&pa](Color c) { pa.set_background_color(c); }};
-    slot.track(pa.destroyed);
-    return slot;
+    return link_lifetimes([&pa](Color c) { pa.set_background_color(c); }, pa);
 }
 
-sig::Slot<void()> set_background_color(Paint_area& pa, Color c)
+auto set_background_color(Paint_area& pa, Color c) -> sl::Slot<void()>
 {
-    sig::Slot<void()> slot{[&pa, c] { pa.set_background_color(c); }};
-    slot.track(pa.destroyed);
-    return slot;
+    return link_lifetimes([&pa, c] { pa.set_background_color(c); }, pa);
 }
 
-sig::Slot<void(Trait)> set_trait(Paint_area& pa)
+auto set_trait(Paint_area& pa) -> sl::Slot<void(Trait)>
 {
-    sig::Slot<void(Trait)> slot{[&pa](Trait t) { pa.set_trait(t); }};
-    slot.track(pa.destroyed);
-    return slot;
+    return link_lifetimes([&pa](Trait t) { pa.set_trait(t); }, pa);
 }
 
-sig::Slot<void()> set_trait(Paint_area& pa, Trait t)
+auto set_trait(Paint_area& pa, Trait t) -> sl::Slot<void()>
 {
-    sig::Slot<void()> slot{[&pa, t] { pa.set_trait(t); }};
-    slot.track(pa.destroyed);
-    return slot;
+    return link_lifetimes([&pa, t] { pa.set_trait(t); }, pa);
 }
 
-sig::Slot<void(Trait)> remove_traits(Paint_area& pa)
+auto remove_traits(Paint_area& pa) -> sl::Slot<void(Trait)>
 {
-    sig::Slot<void(Trait)> slot{[&pa](Trait t) { pa.remove_traits(t); }};
-    slot.track(pa.destroyed);
-    return slot;
+    return link_lifetimes([&pa](Trait t) { pa.remove_traits(t); }, pa);
 }
 
-sig::Slot<void()> remove_traits(Paint_area& pa, Trait t)
+auto remove_traits(Paint_area& pa, Trait t) -> sl::Slot<void()>
 {
-    sig::Slot<void()> slot{[&pa, t] { pa.remove_traits(t); }};
-    slot.track(pa.destroyed);
-    return slot;
+    return link_lifetimes([&pa, t] { pa.remove_traits(t); }, pa);
 }
 
-sig::Slot<void()> toggle_clone(Paint_area& pa)
+auto toggle_clone(Paint_area& pa) -> sl::Slot<void()>
 {
-    sig::Slot<void()> slot{[&pa] { pa.toggle_clone(); }};
-    slot.track(pa.destroyed);
-    return slot;
+    return link_lifetimes([&pa] { pa.toggle_clone(); }, pa);
 }
 
-sig::Slot<void()> clear(Paint_area& pa)
+auto clear(Paint_area& pa) -> sl::Slot<void()>
 {
-    sig::Slot<void()> slot{[&pa] { pa.clear(); }};
-    slot.track(pa.destroyed);
-    return slot;
+    return link_lifetimes([&pa] { pa.clear(); }, pa);
 }
 
-sig::Slot<void()> enable_erase(Paint_area& pa)
+auto enable_erase(Paint_area& pa) -> sl::Slot<void()>
 {
-    sig::Slot<void()> slot{[&pa] { pa.enable_erase(); }};
-    slot.track(pa.destroyed);
-    return slot;
+    return link_lifetimes([&pa] { pa.enable_erase(); }, pa);
 }
 
-sig::Slot<void()> disable_erase(Paint_area& pa)
+auto disable_erase(Paint_area& pa) -> sl::Slot<void()>
 {
-    sig::Slot<void()> slot{[&pa] { pa.disable_erase(); }};
-    slot.track(pa.destroyed);
-    return slot;
+    return link_lifetimes([&pa] { pa.disable_erase(); }, pa);
 }
 
-sig::Slot<void()> enable_grid(Paint_area& pa)
+auto enable_grid(Paint_area& pa) -> sl::Slot<void()>
 {
-    sig::Slot<void()> slot{[&pa] { pa.enable_grid(); }};
-    slot.track(pa.destroyed);
-    return slot;
+    return link_lifetimes([&pa] { pa.enable_grid(); }, pa);
 }
 
-sig::Slot<void()> disable_grid(Paint_area& pa)
+auto disable_grid(Paint_area& pa) -> sl::Slot<void()>
 {
-    sig::Slot<void()> slot{[&pa] { pa.disable_grid(); }};
-    slot.track(pa.destroyed);
-    return slot;
+    return link_lifetimes([&pa] { pa.disable_grid(); }, pa);
 }
 
-sig::Slot<void(std::ostream&)> write(Paint_area& pa)
+auto write(Paint_area& pa) -> sl::Slot<void(std::ostream&)>
 {
-    sig::Slot<void(std::ostream&)> slot{
-        [&pa](std::ostream& os) { pa.write(os); }};
-    slot.track(pa.destroyed);
-    return slot;
+    return link_lifetimes([&pa](std::ostream& os) { pa.write(os); }, pa);
 }
 
-sig::Slot<void(std::istream&)> read(Paint_area& pa)
+auto read(Paint_area& pa) -> sl::Slot<void(std::istream&)>
 {
-    sig::Slot<void(std::istream&)> slot{
-        [&pa](std::istream& is) { pa.read(is); }};
-    slot.track(pa.destroyed);
-    return slot;
+    return link_lifetimes([&pa](std::istream& is) { pa.read(is); }, pa);
 }
 
-}  // namespace slot
-}  // namespace glyph_paint
-}  // namespace demos
+}  // namespace demos::glyph_paint::slot

@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 
-#include <signals/signal.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
@@ -182,7 +182,7 @@ class Circle final : public Graph_generator {
 
 class Graph_core : public cppurses::Graph<double> {
    public:
-    sig::Signal<void(Graph::Boundary)> boundary_changed;
+    sl::Signal<void(Graph::Boundary)> boundary_changed;
 
    public:
     template <typename Generator_t = Sine, typename... Args>
@@ -226,8 +226,8 @@ class Graph_demo : public cppurses::layout::Horizontal<> {
    private:
     struct Settings : cppurses::layout::Vertical<> {
        public:
-        sig::Signal<void(std::string)> graph_changed;
-        sig::Signal<void(int)> step_interval_changed;
+        sl::Signal<void(std::string)> graph_changed;
+        sl::Signal<void(int)> step_interval_changed;
 
         cppurses::Labeled_cycle_box& graph_box{
             this->make_child<cppurses::Labeled_cycle_box>("Graph")};

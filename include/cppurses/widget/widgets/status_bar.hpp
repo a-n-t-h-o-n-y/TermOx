@@ -2,17 +2,18 @@
 #define CPPURSES_WIDGET_WIDGETS_STATUS_HPP
 #include <utility>
 
-#include <signals/signals.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
+#include <cppurses/widget/detail/link_lifetimes.hpp>
+#include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/widgets/label.hpp>
-#include "cppurses/widget/layouts/horizontal.hpp"
 
 namespace cppurses {
 
 class Status_bar : public HLabel {
    public:
-    sig::Signal<void(Glyph_string const&)> status_updated;
+    sl::Signal<void(Glyph_string const&)> status_updated;
 
    public:
     explicit Status_bar(Glyph_string initial_message = "")
@@ -33,26 +34,24 @@ auto status_bar(Args&&... args) -> std::unique_ptr<Status_bar>
     return std::make_unique<Status_bar>(std::forward<Args>(args)...);
 }
 
-namespace slot {
+}  // namespace cppurses
 
-inline auto update_status(Status_bar& sb) -> sig::Slot<void(Glyph)>
+namespace cppurses::slot {
+
+inline auto update_status(Status_bar& sb) -> sl::Slot<void(Glyph)>
 {
-    auto slot = sig::Slot<void(Glyph)>{[&sb](Glyph message) {
-        sb.update_status(Glyph_string{std::move(message)});
-    }};
-    slot.track(sb.destroyed);
-    return slot;
+    return link_lifetimes(
+        [&sb](Glyph message) {
+            sb.update_status(Glyph_string{std::move(message)});
+        },
+        sb);
 }
 
 inline auto update_status(Status_bar& sb, Glyph_string const& message)
-    -> sig::Slot<void()>
+    -> sl::Slot<void()>
 {
-    auto slot =
-        sig::Slot<void()>{[&sb, message] { sb.update_status(message); }};
-    slot.track(sb.destroyed);
-    return slot;
+    return link_lifetimes([&sb, message] { sb.update_status(message); }, sb);
 }
 
-}  // namespace slot
-}  // namespace cppurses
+}  // namespace cppurses::slot
 #endif  // CPPURSES_WIDGET_WIDGETS_STATUS_HPP

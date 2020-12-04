@@ -5,7 +5,7 @@
 #include <utility>
 #include <vector>
 
-#include <signals/slot.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/trait.hpp>
@@ -42,7 +42,7 @@ class Menu : public layout::Vertical<> {
 
     /// Append item to the end of list, displayed with \p label.
     /** Returns a Signal ref which will be called when this item is selected. */
-    auto append_item(Glyph_string label) -> sig::Signal<void()>&
+    auto append_item(Glyph_string label) -> sl::Signal<void()>&
     {
         return this->insert_item(std::move(label), this->size());
     }
@@ -50,7 +50,7 @@ class Menu : public layout::Vertical<> {
     /// Insert item at \p index into the Menu, displayed with \p label.
     /** Returns a Signal ref which will be called when this item is selected. */
     auto insert_item(Glyph_string label, std::size_t index)
-        -> sig::Signal<void()>&;
+        -> sl::Signal<void()>&;
 
     /// Remove item a \p index in the Menu, no-op if \p index is invalid.
     void remove_item(std::size_t index);
@@ -119,15 +119,15 @@ class Menu : public layout::Vertical<> {
     auto mouse_wheel_event(Mouse const& m) -> bool override;
 
     /// Selects up/down on scroll wheel.
-    auto mouse_wheel_event_filter(Widget& /* receiver */,
-                                  Mouse const& m) -> bool override;
+    auto mouse_wheel_event_filter(Widget& /* receiver */, Mouse const& m)
+        -> bool override;
 
    private:
     /// Holds reference to Button used to display item, and its Signal.
     struct Menu_item {
         explicit Menu_item(Button& ref) : button{ref} {};
         std::reference_wrapper<Button> button;
-        sig::Signal<void()> selected;
+        sl::Signal<void()> selected;
     };
 
     std::vector<Menu_item> items_;
@@ -153,17 +153,18 @@ auto menu(Args&&... args) -> std::unique_ptr<Menu>
     return std::make_unique<Menu>(std::forward<Args>(args)...);
 }
 
-namespace slot {
-
-auto select_up(Menu& m) -> sig::Slot<void(std::size_t)>;
-auto select_up(Menu& m, std::size_t n) -> sig::Slot<void()>;
-
-auto select_down(Menu& m) -> sig::Slot<void(std::size_t)>;
-auto select_down(Menu& m, std::size_t n) -> sig::Slot<void()>;
-
-auto select_item(Menu& m) -> sig::Slot<void(std::size_t)>;
-auto select_item(Menu& m, std::size_t index) -> sig::Slot<void()>;
-
-}  // namespace slot
 }  // namespace cppurses
+
+namespace cppurses::slot {
+
+auto select_up(Menu& m) -> sl::Slot<void(std::size_t)>;
+auto select_up(Menu& m, std::size_t n) -> sl::Slot<void()>;
+
+auto select_down(Menu& m) -> sl::Slot<void(std::size_t)>;
+auto select_down(Menu& m, std::size_t n) -> sl::Slot<void()>;
+
+auto select_item(Menu& m) -> sl::Slot<void(std::size_t)>;
+auto select_item(Menu& m, std::size_t index) -> sl::Slot<void()>;
+
+}  // namespace cppurses::slot
 #endif  // CPPURSES_WIDGET_WIDGETS_MENU_HPP

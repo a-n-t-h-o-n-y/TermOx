@@ -2,11 +2,11 @@
 #define CPPURSES_SYSTEM_EVENT_LOOP_HPP
 #include <atomic>
 #include <future>
+#include <stdexcept>
 #include <thread>
 #include <utility>
 
-#include <signals/signal.hpp>
-#include <signals/slot.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/painter/detail/screen.hpp>
 #include <cppurses/painter/detail/staged_changes.hpp>
@@ -14,18 +14,15 @@
 namespace cppurses {
 
 /// Waits on loop_function() and then notifies Event_engine if event is posted.
-/** Specialized by providing a loop_function to be run at each iteration. */
+/** Specialized by providing a loop_function to be run at each iteration. The
+ *  owner of the event loop is responsible for making sure its async thread is
+ *  shutdown: exit() then wait(). */
 class Event_loop {
    public:
     Event_loop() { this->connect_to_system_exit(); }
 
     /// Make sure the loop has exited and returned from async functions.
-    virtual ~Event_loop()
-    {
-        this->exit(0);  // TODO Error this is a virtual call in a destructor
-        // ubsan will find it on shutdown.
-        this->wait();
-    }
+    virtual ~Event_loop() = default;
 
     /// Start the event loop.
     auto run() -> int;
@@ -42,7 +39,7 @@ class Event_loop {
      *  Implement a timeout loop_function() if you need to exit quickly. Not
      *  valid to call this method if run() is not currently executing. Only
      *  valid to call once per call to run(). */
-    virtual void exit(int return_code)
+    void exit(int return_code)
     {
         return_code_ = return_code;
         exit_        = true;
@@ -64,7 +61,7 @@ class Event_loop {
 
    private:
     std::future<int> fut_;
-    sig::Signal<void()> lifetime_;
+    sl::Lifetime lifetime_;
     int return_code_ = 0;
     bool running_    = false;
     std::atomic<bool> exit_{false};

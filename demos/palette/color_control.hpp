@@ -1,6 +1,6 @@
 #ifndef CPPURSES_DEMOS_PALETTE_COLOR_CONTROL_HPP
 #define CPPURSES_DEMOS_PALETTE_COLOR_CONTROL_HPP
-#include <signals/signal.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/widget/layouts/horizontal.hpp>
 
@@ -10,9 +10,9 @@ namespace palette {
 
 /// Holds Value_control objects for red, green, and blue color values.
 class Color_control : public cppurses::layout::Horizontal<Value_control> {
-    Value_control& slider_red_{this->make_child("R")};
-    Value_control& slider_green_{this->make_child("G")};
-    Value_control& slider_blue_{this->make_child("B")};
+    Value_control& slider_red_   = this->make_child("R");
+    Value_control& slider_green_ = this->make_child("G");
+    Value_control& slider_blue_  = this->make_child("B");
 
    public:
     Color_control();
@@ -29,9 +29,9 @@ class Color_control : public cppurses::layout::Horizontal<Value_control> {
     /// Set all sliders to the respective RGB color value.
     void set_sliders(cppurses::Color color);
 
-    sig::Signal<void(int)>& red_changed{slider_red_.value_changed};
-    sig::Signal<void(int)>& green_changed{slider_green_.value_changed};
-    sig::Signal<void(int)>& blue_changed{slider_blue_.value_changed};
+    sl::Signal<void(int)>& red_changed   = slider_red_.value_changed;
+    sl::Signal<void(int)>& green_changed = slider_green_.value_changed;
+    sl::Signal<void(int)>& blue_changed  = slider_blue_.value_changed;
 };
 
 }  // namespace palette

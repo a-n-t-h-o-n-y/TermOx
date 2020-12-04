@@ -4,19 +4,20 @@
 #include <cstddef>
 #include <utility>
 
-#include <signals/signal.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_matrix.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/area.hpp>
+#include <cppurses/widget/detail/link_lifetimes.hpp>
 #include <cppurses/widget/layouts/stack.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widgets/matrix_display.hpp>
 
 using namespace cppurses;
-namespace demos {
-namespace glyph_paint {
+
+namespace demos::glyph_paint {
 
 void Glyph_select_stack::set_symbols(Glyph_string symbols)
 {
@@ -82,23 +83,23 @@ endloop:
     this->update();
 }
 
-namespace slot {
+}  // namespace demos::glyph_paint
 
-sig::Slot<void(float)> set_page_percent(Glyph_select_stack& gss)
+namespace demos::glyph_paint::slot {
+
+using cppurses::slot::link_lifetimes;
+
+auto set_page_percent(Glyph_select_stack& gss) -> sl::Slot<void(float)>
 {
-    sig::Slot<void(float)> slot{
-        [&gss](float percent) { gss.set_page_percent(percent); }};
-    slot.track(gss.destroyed);
-    return slot;
+    return link_lifetimes(
+        [&gss](float percent) { gss.set_page_percent(percent); }, gss);
 }
 
-sig::Slot<void()> set_page_percent(Glyph_select_stack& gss, float percent)
+auto set_page_percent(Glyph_select_stack& gss, float percent)
+    -> sl::Slot<void()>
 {
-    sig::Slot<void()> slot{[&gss, percent] { gss.set_page_percent(percent); }};
-    slot.track(gss.destroyed);
-    return slot;
+    return link_lifetimes([&gss, percent] { gss.set_page_percent(percent); },
+                          gss);
 }
 
-}  // namespace slot
-}  // namespace glyph_paint
-}  // namespace demos
+}  // namespace demos::glyph_paint::slot

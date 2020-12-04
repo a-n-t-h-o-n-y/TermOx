@@ -10,8 +10,6 @@
 #include <utility>
 #include <vector>
 
-#include <signals/signal.hpp>
-
 #include <signals_light/signal.hpp>
 
 #include <cppurses/common/transform_view.hpp>
@@ -38,13 +36,13 @@ namespace cppurses {
 class Widget {
    private:
     template <typename Signature>
-    using Signal = sig::Signal<Signature>;
+    using Signal = sl::Signal<Signature>;
 
    public:
     // Event Signals - Alternatives to overriding virtual event handlers.
     /* Called after event handlers are invoked. Parameters are in same order as
      * matching event handler function's parameters. */
-    sl::Signal<void()> enabled;
+    Signal<void()> enabled;
     Signal<void()> disabled;
     Signal<void(Widget&)> child_added;
     Signal<void(Widget&)> child_removed;
@@ -101,6 +99,9 @@ class Widget {
 
     /// A Brush that is applied to every Glyph painted by this Widget.
     Brush brush{background(Color::Background), foreground(Color::Foreground)};
+
+    /// Slots can track this object's lifetime to disable Slot invocations.
+    sl::Lifetime lifetime;
 
    public:
     /// Initialize with \p name.

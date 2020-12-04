@@ -67,7 +67,7 @@ target_sources(demos PRIVATE
     game_of_life/get_plaintext.cpp
 )
 
-target_link_libraries(demos PRIVATE cppurses)
+target_link_libraries(demos PUBLIC cppurses)
 
 if(NOT ${CMAKE_VERSION} VERSION_LESS "3.8")
     target_compile_features(demos INTERFACE cxx_std_17)

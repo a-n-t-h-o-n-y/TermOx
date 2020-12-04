@@ -3,6 +3,8 @@
 #include <memory>
 #include <string>
 
+#include <signals_light/signal.hpp>
+
 #include <cppurses/widget/layouts/opposite.hpp>
 #include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/widget.hpp>
@@ -27,7 +29,7 @@ class Button_list : public layout::Opposite_t<Layout_t<Widget>> {
         static auto constexpr is_vertical = layout::is_vertical_v<Base_t>;
 
        public:
-        sig::Signal<void(std::wstring const& name)> button_pressed;
+        sl::Signal<void(std::wstring const& name)> button_pressed;
 
        public:
         auto add_button(std::wstring const& name) -> Button&
@@ -50,7 +52,7 @@ class Button_list : public layout::Opposite_t<Layout_t<Widget>> {
     Button_list_impl& btn_list = this->template make_child<Button_list_impl>();
 
    public:
-    sig::Signal<void(std::wstring const& name)>& button_pressed =
+    sl::Signal<void(std::wstring const& name)>& button_pressed =
         btn_list.button_pressed;
 
    public:

@@ -2,7 +2,7 @@
 #define CPPURSES_WIDGET_WIDGETS_HORIZONTAL_SLIDER_HPP
 #include <cstddef>
 
-#include <signals/signals.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
@@ -17,9 +17,9 @@ namespace cppurses {
 
 class Horizontal_slider : public Widget {
    public:
-    sig::Signal<void(float)> percent_changed;
-    sig::Signal<void()> scrolled_up;
-    sig::Signal<void()> scrolled_down;
+    sl::Signal<void(float)> percent_changed;
+    sl::Signal<void()> scrolled_up;
+    sl::Signal<void()> scrolled_down;
 
    public:
     Horizontal_slider()
@@ -65,9 +65,9 @@ auto horizontal_slider(Args&&... args) -> std::unique_ptr<Horizontal_slider>
 
 namespace slot {
 
-auto set_percent(Horizontal_slider& s) -> sig::Slot<void(float)>;
+auto set_percent(Horizontal_slider& s) -> sl::Slot<void(float)>;
 
-auto set_percent(Horizontal_slider& s, float percent) -> sig::Slot<void(void)>;
+auto set_percent(Horizontal_slider& s, float percent) -> sl::Slot<void(void)>;
 
 }  // namespace slot
 }  // namespace cppurses

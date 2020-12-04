@@ -5,9 +5,6 @@
 #include <mutex>
 #include <set>
 
-#include <signals/connection.hpp>
-#include <signals/signal.hpp>
-
 #include <cppurses/system/detail/interval_event_loop.hpp>
 
 namespace cppurses {
@@ -21,6 +18,14 @@ class Timer_event_loop : public Interval_event_loop {
    private:
     using Mutex_t = std::mutex;
     using Guard_t = std::scoped_lock<Mutex_t>;
+
+   public:
+    ~Timer_event_loop()
+    {
+        // Have to end the thread here, since it uses the std::set<...>
+        this->exit(0);
+        this->wait();
+    }
 
    public:
     using Interval_event_loop::Interval_event_loop;

@@ -5,7 +5,7 @@ basic info about the cursor for the given Widget.
 
 ## Reference
 
-#### `sig::Signal<void(Point)> moved;`
+#### `sl::Signal<void(Point)> moved;`
 
 This signal is called every time the cursor is moved.
 

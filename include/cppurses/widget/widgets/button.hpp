@@ -2,7 +2,7 @@
 #define CPPURSES_WIDGET_WIDGETS_BUTTON_HPP
 #include <utility>
 
-#include <signals/signal.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
@@ -20,7 +20,7 @@ namespace cppurses {
 class Button : public Widget {
    public:
     // Emitted when this Widget receives a left mouse button press event.
-    sig::Signal<void()> pressed;
+    sl::Signal<void()> pressed;
 
    public:
     /// Construct a Button with centered \p label.

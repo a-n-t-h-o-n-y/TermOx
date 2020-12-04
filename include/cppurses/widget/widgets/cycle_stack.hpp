@@ -4,8 +4,6 @@
 #include <type_traits>
 #include <utility>
 
-#include <signals/signal.hpp>
-
 #include <cppurses/painter/brush.hpp>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph_string.hpp>

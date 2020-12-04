@@ -2,7 +2,7 @@
 #define CPPURSES_WIDGET_WIDGETS_TOGGLE_BUTTON_HPP
 #include <utility>
 
-#include <signals/signal.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/layouts/stack.hpp>
@@ -19,8 +19,8 @@ class Toggle_button : public layout::Stack<Button> {
     Button& bottom;
 
    public:
-    sig::Signal<void()>& top_pressed    = top.pressed;
-    sig::Signal<void()>& bottom_pressed = bottom.pressed;
+    sl::Signal<void()>& top_pressed    = top.pressed;
+    sl::Signal<void()>& bottom_pressed = bottom.pressed;
 
    public:
     /// Construct with corresponding labels.

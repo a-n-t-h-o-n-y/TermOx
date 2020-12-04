@@ -9,7 +9,7 @@
 #include <utility>
 #include <vector>
 
-#include <signals/signal.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
@@ -134,8 +134,8 @@ namespace animator {
 
 class Animator_base {
    public:
-    sig::Signal<void()> start;
-    sig::Signal<void()> stop;
+    sl::Signal<void()> start;
+    sl::Signal<void()> stop;
 
    public:
     void set_max_length(std::size_t x) { max_length_ = x; }

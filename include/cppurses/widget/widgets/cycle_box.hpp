@@ -7,13 +7,13 @@
 #include <utility>
 #include <vector>
 
-#include <signals/signals.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/mouse.hpp>
-#include <cppurses/widget/detail/tracks_lifetime.hpp>
+#include <cppurses/widget/detail/link_lifetimes.hpp>
 #include <cppurses/widget/focus_policy.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/pipe.hpp>
@@ -29,7 +29,7 @@ namespace cppurses {
 class Cycle_box : public HLabel {
    public:
     /// Emitted when the option is changed, sends the new option's string rep.
-    sig::Signal<void(std::string)> option_changed;
+    sl::Signal<void(std::string)> option_changed;
 
    public:
     Cycle_box() : HLabel{{L""}}
@@ -40,7 +40,7 @@ class Cycle_box : public HLabel {
     /// Add an option/label to the Cycle_box.
     /** The returned Signal reference will be emitted every time this option is
      *  enabled. \p label's string representation is the identifying param. */
-    auto add_option(Glyph_string label) -> sig::Signal<void()>&
+    auto add_option(Glyph_string label) -> sl::Signal<void()>&
     {
         options_.emplace_back(std::move(label));
         if (this->size() == 1)
@@ -126,7 +126,7 @@ class Cycle_box : public HLabel {
     struct Option {
         explicit Option(Glyph_string name_) : name{std::move(name_)} {}
         Glyph_string name;
-        sig::Signal<void()> enabled;
+        sl::Signal<void()> enabled;
     };
     std::vector<Option> options_;
     std::size_t index_ = 0uL;
@@ -201,42 +201,43 @@ auto labeled_cycle_box(Args&&... args) -> std::unique_ptr<Labeled_cycle_box>
     return std::make_unique<Labeled_cycle_box>(std::forward<Args>(args)...);
 }
 
-namespace slot {
+}  // namespace cppurses
 
-inline auto add_option(Cycle_box& cb) -> sig::Slot<void(Glyph_string)>
+namespace cppurses::slot {
+
+inline auto add_option(Cycle_box& cb) -> sl::Slot<void(Glyph_string)>
 {
-    return tracks_lifetime(
-        cb, [&cb](Glyph_string label) { cb.add_option(std::move(label)); });
+    return link_lifetimes(
+        [&cb](Glyph_string label) { cb.add_option(std::move(label)); }, cb);
 }
 
 inline auto add_option(Cycle_box& cb, Glyph_string const& label)
-    -> sig::Slot<void()>
+    -> sl::Slot<void()>
 {
-    return tracks_lifetime(cb, [&cb, label] { cb.add_option(label); });
+    return link_lifetimes([&cb, label] { cb.add_option(label); }, cb);
 }
 
-inline auto remove_option(Cycle_box& cb) -> sig::Slot<void(std::string const&)>
+inline auto remove_option(Cycle_box& cb) -> sl::Slot<void(std::string const&)>
 {
-    return tracks_lifetime(
-        cb, [&cb](std::string const& label) { cb.remove_option(label); });
+    return link_lifetimes(
+        [&cb](std::string const& label) { cb.remove_option(label); }, cb);
 }
 
 inline auto remove_option(Cycle_box& cb, std::string const& label)
-    -> sig::Slot<void()>
+    -> sl::Slot<void()>
 {
-    return tracks_lifetime(cb, [&cb, label] { cb.remove_option(label); });
+    return link_lifetimes([&cb, label] { cb.remove_option(label); }, cb);
 }
 
-inline auto next(Cycle_box& cb) -> sig::Slot<void()>
+inline auto next(Cycle_box& cb) -> sl::Slot<void()>
 {
-    return tracks_lifetime(cb, [&cb]() { cb.next(); });
+    return link_lifetimes([&cb]() { cb.next(); }, cb);
 }
 
-inline auto previous(Cycle_box& cb) -> sig::Slot<void()>
+inline auto previous(Cycle_box& cb) -> sl::Slot<void()>
 {
-    return tracks_lifetime(cb, [&cb]() { cb.previous(); });
+    return link_lifetimes([&cb]() { cb.previous(); }, cb);
 }
 
-}  // namespace slot
-}  // namespace cppurses
+}  // namespace cppurses::slot
 #endif  // CPPURSES_WIDGET_WIDGETS_CYCLE_BOX_HPP

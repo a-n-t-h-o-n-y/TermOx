@@ -9,17 +9,17 @@
 #include <utility>
 #include <vector>
 
-#include <signals/signals.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/system/event.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/area.hpp>
+#include <cppurses/widget/detail/link_lifetimes.hpp>
 #include <cppurses/widget/layout.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 
-namespace cppurses {
-namespace layout {
+namespace cppurses::layout {
 
 /// A Layout enabling only a single Widget at a time.
 /** A Stack is made up of pages, which are child Widgets that can be displayed
@@ -29,7 +29,7 @@ template <typename Child_t = Widget>
 class Stack : public Layout<Child_t> {
    public:
     /// Emitted when the active page is changed, sends the new index along.
-    sig::Signal<void(std::size_t)> page_changed;
+    sl::Signal<void(std::size_t)> page_changed;
 
    public:
     using Layout<Child_t>::Layout;
@@ -228,74 +228,62 @@ auto stack(Args&&... args) -> std::unique_ptr<Stack<Widget_t>>
     return std::make_unique<Stack<Widget_t>>(std::forward<Args>(args)...);
 }
 
-}  // namespace layout
+}  // namespace cppurses::layout
 
 // - - - - - - - - - - - - - - - - Slots - - - - - - - - - - - - - - - - - - - -
-namespace slot {
+namespace cppurses::slot {
 
 template <typename Child_t>
 auto set_active_page(layout::Stack<Child_t>& stack)
-    -> sig::Slot<void(std::size_t)>
+    -> sl::Slot<void(std::size_t)>
 {
-    auto slot = sig::Slot<void(std::size_t)>{
-        [&stack](auto index) { stack.set_active_page(index); }};
-    slot.track(stack.destroyed);
-    return slot;
+    return link_lifetimes(
+        [&stack](auto index) { stack.set_active_page(index); }, stack);
 }
 
 template <typename Child_t>
 auto set_active_page(layout::Stack<Child_t>& stack, std::size_t index)
-    -> sig::Slot<void()>
+    -> sl::Slot<void()>
 {
-    auto slot =
-        sig::Slot<void()>{[&stack, index] { stack.set_active_page(index); }};
-    slot.track(stack.destroyed);
-    return slot;
+    return link_lifetimes([&stack, index] { stack.set_active_page(index); },
+                          stack);
 }
 
 template <typename Child_t>
-auto delete_page(layout::Stack<Child_t>& stack) -> sig::Slot<void(std::size_t)>
+auto delete_page(layout::Stack<Child_t>& stack) -> sl::Slot<void(std::size_t)>
 {
-    auto slot = sig::Slot<void(std::size_t)>{
-        [&stack](auto index) { stack.delete_page(index); }};
-    slot.track(stack.destroyed);
-    return slot;
+    return link_lifetimes([&stack](auto index) { stack.delete_page(index); },
+                          stack);
 }
 
 template <typename Child_t>
 auto delete_page(layout::Stack<Child_t>& stack, std::size_t index)
-    -> sig::Slot<void()>
+    -> sl::Slot<void()>
 {
-    auto slot =
-        sig::Slot<void()>{[&stack, index] { stack.delete_page(index); }};
-    slot.track(stack.destroyed);
-    return slot;
+    return link_lifetimes([&stack, index] { stack.delete_page(index); }, stack);
 }
 
 template <typename Child_t>
 auto insert_page(layout::Stack<Child_t>& stack)
-    -> sig::Slot<void(std::size_t, std::unique_ptr<Widget>)>
+    -> sl::Slot<void(std::size_t, std::unique_ptr<Widget>)>
 {
-    auto slot = sig::Slot<void(std::size_t, std::unique_ptr<Widget>)>{
+    return link_lifetimes(
         [&stack](auto index, auto widget) {
             stack.insert_page(index, std::move(widget));
-        }};
-    slot.track(stack.destroyed);
-    return slot;
+        },
+        stack);
 }
 
 template <typename Child_t>
 auto insert_page(layout::Stack<Child_t>& stack, std::size_t index)
-    -> sig::Slot<void(std::unique_ptr<Widget>)>
+    -> sl::Slot<void(std::unique_ptr<Widget>)>
 {
-    auto slot =
-        sig::Slot<void(std::unique_ptr<Widget>)>{[&stack, index](auto widget) {
+    return link_lifetimes(
+        [&stack, index](auto widget) {
             stack.insert_page(index, std::move(widget));
-        }};
-    slot.track(stack.destroyed);
-    return slot;
+        },
+        stack);
 }
 
-}  // namespace slot
-}  // namespace cppurses
+}  // namespace cppurses::slot
 #endif  // CPPURSES_WIDGET_LAYOUTS_STACK_HPP

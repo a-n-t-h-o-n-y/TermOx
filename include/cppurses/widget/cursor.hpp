@@ -2,7 +2,7 @@
 #define CPPURSES_WIDGET_CURSOR_DATA_HPP
 #include <cstddef>
 
-#include <signals/signal.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/widget/point.hpp>
 
@@ -13,7 +13,7 @@ class Widget;
 class Cursor {
    public:
     /// Signal called when the cursor is moved, passing along the new position.
-    sig::Signal<void(Point)> moved;
+    sl::Signal<void(Point)> moved;
 
    public:
     /// Query if the cursor is enabled.

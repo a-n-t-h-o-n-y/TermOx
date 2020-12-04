@@ -1,6 +1,6 @@
 #ifndef CPPURSES_WIDGET_WIDGETS_LOG_HPP
 #define CPPURSES_WIDGET_WIDGETS_LOG_HPP
-#include <signals/slot.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/system/key.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
@@ -30,11 +30,12 @@ auto log(Args&&... args) -> std::unique_ptr<Log>
     return std::make_unique<Log>(std::forward<Args>(args)...);
 }
 
-namespace slot {
-
-auto post_message(Log& log) -> sig::Slot<void(Glyph_string)>;
-auto post_message(Log& log, Glyph_string const& message) -> sig::Slot<void()>;
-
-}  // namespace slot
 }  // namespace cppurses
+
+namespace cppurses::slot {
+
+auto post_message(Log& log) -> sl::Slot<void(Glyph_string)>;
+auto post_message(Log& log, Glyph_string const& message) -> sl::Slot<void()>;
+
+}  // namespace cppurses::slot
 #endif  // CPPURSES_WIDGET_WIDGETS_LOG_HPP

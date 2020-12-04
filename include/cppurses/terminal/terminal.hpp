@@ -3,7 +3,7 @@
 #include <chrono>
 #include <cstddef>
 
-#include <signals/signal.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
@@ -13,7 +13,7 @@ namespace cppurses {
 
 class Terminal {
    public:
-    sig::Signal<void(Color_palette const&)> palette_changed;
+    sl::Signal<void(Color_palette const&)> palette_changed;
 
    public:
     /// Initializes the terminal screen into curses mode.

@@ -2,7 +2,7 @@
 #define CPPURSES_DEMOS_GLYPH_PAINT_GLYPH_SELECT_HPP
 #include <cstddef>
 
-#include <signals/signal.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
@@ -14,8 +14,7 @@
 
 #include "glyph_select_stack.hpp"
 
-namespace demos {
-namespace glyph_paint {
+namespace demos::glyph_paint {
 
 /// Holds pages of Glyphs that can be cycled through and selected.
 /** When a Glyph is selected a Signal is emitted with that Glyph sent along. */
@@ -43,7 +42,7 @@ class Glyph_select : public cppurses::layout::Vertical<> {
     void set_symbols(cppurses::Glyph_string symbols);
 
     /// Emitted when a Glyph is clicked, sending along the glyph.
-    sig::Signal<void(cppurses::Glyph)> glyph_selected;
+    sl::Signal<void(cppurses::Glyph)> glyph_selected;
 
    private:
     Glyph_select_stack& glyph_stack{this->make_child<Glyph_select_stack>()};
@@ -54,6 +53,5 @@ class Glyph_select : public cppurses::layout::Vertical<> {
     void flip_page_backward();
 };
 
-}  // namespace glyph_paint
-}  // namespace demos
+}  // namespace demos::glyph_paint
 #endif  // CPPURSES_DEMOS_GLYPH_PAINT_GLYPH_SELECT_HPP

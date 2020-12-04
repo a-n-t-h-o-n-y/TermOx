@@ -2,13 +2,13 @@
 #define CPPURSES_WIDGET_WIDGETS_CHECKBOX_HPP
 #include <utility>
 
-#include <signals/signals.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/system/mouse.hpp>
-#include <cppurses/widget/detail/tracks_lifetime.hpp>
+#include <cppurses/widget/detail/link_lifetimes.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/pipe.hpp>
 #include <cppurses/widget/widget.hpp>
@@ -21,13 +21,13 @@ namespace cppurses {
 class Checkbox : public Widget {
    public:
     /// Emitted when box becomes checked.
-    sig::Signal<void()> checked;
+    sl::Signal<void()> checked;
 
     /// Emitted when box becomes unchecked.
-    sig::Signal<void()> unchecked;
+    sl::Signal<void()> unchecked;
 
     /// Emitted every time the box changes state.
-    sig::Signal<void()> toggled;
+    sl::Signal<void()> toggled;
 
    public:
     explicit Checkbox(bool is_checked = false,
@@ -116,9 +116,9 @@ class Labeled_checkbox : public Label_right<layout::Horizontal<>, Checkbox> {
    public:
     Checkbox& checkbox = Label_right::wrapped;
 
-    sig::Signal<void()>& checked   = checkbox.checked;
-    sig::Signal<void()>& unchecked = checkbox.unchecked;
-    sig::Signal<void()>& toggled   = checkbox.toggled;
+    sl::Signal<void()>& checked   = checkbox.checked;
+    sl::Signal<void()>& unchecked = checkbox.unchecked;
+    sl::Signal<void()>& toggled   = checkbox.toggled;
 
    public:
     Labeled_checkbox(Glyph_string label_ = "")
@@ -137,23 +137,24 @@ auto labeled_checkbox(Args&&... args) -> std::unique_ptr<Labeled_checkbox>
     return std::make_unique<Labeled_checkbox>(std::forward<Args>(args)...);
 }
 
-namespace slot {
-
-inline auto toggle(Checkbox& cb) -> sig::Slot<void()>
-{
-    return tracks_lifetime(cb, [&cb] { cb.toggle(); });
-}
-
-inline auto check(Checkbox& cb) -> sig::Slot<void()>
-{
-    return tracks_lifetime(cb, [&cb] { cb.check(); });
-}
-
-inline auto uncheck(Checkbox& cb) -> sig::Slot<void()>
-{
-    return tracks_lifetime(cb, [&cb] { cb.uncheck(); });
-}
-
-}  // namespace slot
 }  // namespace cppurses
+
+namespace cppurses::slot {
+
+inline auto toggle(Checkbox& cb) -> sl::Slot<void()>
+{
+    return link_lifetimes([&cb] { cb.toggle(); }, cb);
+}
+
+inline auto check(Checkbox& cb) -> sl::Slot<void()>
+{
+    return link_lifetimes([&cb] { cb.check(); }, cb);
+}
+
+inline auto uncheck(Checkbox& cb) -> sl::Slot<void()>
+{
+    return link_lifetimes([&cb] { cb.uncheck(); }, cb);
+}
+
+}  // namespace cppurses::slot
 #endif  // CPPURSES_WIDGET_WIDGETS_CHECKBOX_HPP

@@ -5,6 +5,8 @@
 #include <iostream>
 #include <unordered_map>
 
+#include <signals_light/signal.hpp>
+
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/trait.hpp>
@@ -12,10 +14,7 @@
 #include <cppurses/system/mouse.hpp>
 #include <cppurses/widget/widget.hpp>
 
-#include <signals/signals.hpp>
-
-namespace demos {
-namespace glyph_paint {
+namespace demos::glyph_paint {
 
 class Paint_area : public cppurses::Widget {
    public:
@@ -41,9 +40,9 @@ class Paint_area : public cppurses::Widget {
     void read(std::istream& is);
 
     // Signals
-    sig::Signal<void(cppurses::Glyph)> glyph_changed;
-    sig::Signal<void()> erase_enabled;
-    sig::Signal<void()> erase_disabled;
+    sl::Signal<void(cppurses::Glyph)> glyph_changed;
+    sl::Signal<void()> erase_enabled;
+    sl::Signal<void()> erase_disabled;
 
    protected:
     bool paint_event() override;
@@ -63,40 +62,53 @@ class Paint_area : public cppurses::Widget {
     void remove_glyph(cppurses::Point coords);
 };
 
-namespace slot {
+}  // namespace demos::glyph_paint
 
-sig::Slot<void(cppurses::Glyph)> set_glyph(Paint_area& pa);
-sig::Slot<void()> set_glyph(Paint_area& pa, const cppurses::Glyph& glyph);
+namespace demos::glyph_paint::slot {
 
-sig::Slot<void(cppurses::Glyph)> set_symbol(Paint_area& pa);
-sig::Slot<void()> set_symbol(Paint_area& pa, const cppurses::Glyph& symbol);
+auto set_glyph(Paint_area& pa) -> sl::Slot<void(cppurses::Glyph)>;
 
-sig::Slot<void(cppurses::Color)> set_foreground_color(Paint_area& pa);
-sig::Slot<void()> set_foreground_color(Paint_area& pa, cppurses::Color c);
+auto set_glyph(Paint_area& pa, const cppurses::Glyph& glyph)
+    -> sl::Slot<void()>;
 
-sig::Slot<void(cppurses::Color)> set_background_color(Paint_area& pa);
-sig::Slot<void()> set_background_color(Paint_area& pa, cppurses::Color c);
+auto set_symbol(Paint_area& pa) -> sl::Slot<void(cppurses::Glyph)>;
 
-sig::Slot<void(cppurses::Trait)> set_trait(Paint_area& pa);
-sig::Slot<void()> set_trait(Paint_area& pa, cppurses::Trait t);
+auto set_symbol(Paint_area& pa, const cppurses::Glyph& symbol)
+    -> sl::Slot<void()>;
 
-sig::Slot<void(cppurses::Trait)> remove_traits(Paint_area& pa);
-sig::Slot<void()> remove_traits(Paint_area& pa, cppurses::Trait t);
+auto set_foreground_color(Paint_area& pa) -> sl::Slot<void(cppurses::Color)>;
 
-sig::Slot<void()> toggle_clone(Paint_area& pa);
+auto set_foreground_color(Paint_area& pa, cppurses::Color c)
+    -> sl::Slot<void()>;
 
-sig::Slot<void()> clear(Paint_area& pa);
+auto set_background_color(Paint_area& pa) -> sl::Slot<void(cppurses::Color)>;
 
-sig::Slot<void()> enable_erase(Paint_area& pa);
-sig::Slot<void()> disable_erase(Paint_area& pa);
+auto set_background_color(Paint_area& pa, cppurses::Color c)
+    -> sl::Slot<void()>;
 
-sig::Slot<void()> enable_grid(Paint_area& pa);
-sig::Slot<void()> disable_grid(Paint_area& pa);
+auto set_trait(Paint_area& pa) -> sl::Slot<void(cppurses::Trait)>;
 
-sig::Slot<void(std::ostream&)> write(Paint_area& pa);
-sig::Slot<void(std::istream&)> read(Paint_area& pa);
+auto set_trait(Paint_area& pa, cppurses::Trait t) -> sl::Slot<void()>;
 
-}  // namespace slot
-}  // namespace glyph_paint
-}  // namespace demos
+auto remove_traits(Paint_area& pa) -> sl::Slot<void(cppurses::Trait)>;
+
+auto remove_traits(Paint_area& pa, cppurses::Trait t) -> sl::Slot<void()>;
+
+auto toggle_clone(Paint_area& pa) -> sl::Slot<void()>;
+
+auto clear(Paint_area& pa) -> sl::Slot<void()>;
+
+auto enable_erase(Paint_area& pa) -> sl::Slot<void()>;
+
+auto disable_erase(Paint_area& pa) -> sl::Slot<void()>;
+
+auto enable_grid(Paint_area& pa) -> sl::Slot<void()>;
+
+auto disable_grid(Paint_area& pa) -> sl::Slot<void()>;
+
+auto write(Paint_area& pa) -> sl::Slot<void(std::ostream&)>;
+
+auto read(Paint_area& pa) -> sl::Slot<void(std::istream&)>;
+
+}  // namespace demos::glyph_paint::slot
 #endif  // DEMOS_GLYPH_PAINT_PAINT_AREA_HPP

@@ -92,6 +92,15 @@ class Dynamic_color_engine {
     using Period_t = detail::Dynamic_color_event_loop::Period_t;
 
    public:
+    ~Dynamic_color_engine()
+    {
+        for (auto& loop : loops_) {
+            loop->exit(0);
+            loop->wait();
+        }
+    }
+
+   public:
     /// Add a dynamic color at \p interval.
     void register_color(ANSI ansi, Dynamic_color const& dynamic)
     {

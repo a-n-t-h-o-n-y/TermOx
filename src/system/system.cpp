@@ -9,7 +9,7 @@
 #include <utility>
 #include <vector>
 
-#include <signals/slot.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/system/animation_engine.hpp>
 #include <cppurses/system/detail/event_engine.hpp>
@@ -98,13 +98,13 @@ void System::send_event(Delete_event e)
         detail::send(std::move(e));
 }
 
-sig::Slot<void()> System::quit = [] { System::exit(); };
+sl::Slot<void()> System::quit = [] { System::exit(); };
 detail::Event_engine System::event_engine_;
 Animation_engine System::animation_engine_;
 
 // GCC requires this here, it can't find the default constructor when it's in
 // system.hpp for whatever reason...
-sig::Signal<void(int)> System::exit_signal;
+sl::Signal<void(int)> System::exit_signal;
 detail::User_input_event_loop System::user_input_loop_;
 
 }  // namespace cppurses

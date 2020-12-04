@@ -1,6 +1,6 @@
 #ifndef CPPURSES_DEMOS_PALETTE_VALUE_CONTROL_HPP
 #define CPPURSES_DEMOS_PALETTE_VALUE_CONTROL_HPP
-#include <signals/signal.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
@@ -10,8 +10,7 @@
 #include <cppurses/widget/widgets/vertical_slider.hpp>
 #include "cppurses/widget/pipe.hpp"
 
-namespace palette {
-namespace detail {
+namespace palette::detail {
 
 /// Vertical_slider with extra space around the sides.
 struct Buffered_slider : cppurses::layout::Horizontal<> {
@@ -31,7 +30,9 @@ class Buffered_edit_box : public cppurses::layout::Horizontal<> {
     Widget& left = this->make_child() | cppurses::pipe::fixed_width(1);
     cppurses::Line_edit& box = this->make_child<cppurses::Line_edit>("0");
 };
-}  // namespace detail
+}  // namespace palette::detail
+
+namespace palette {
 
 /// Provides user interface to change a color value from [0, 255].
 /** Emits signal when changed. */
@@ -50,7 +51,8 @@ class Value_control : public cppurses::layout::Vertical<> {
     /// Set the current value being held.
     void set_value(int value) { slider_.slider.set_value(value); }
 
-    sig::Signal<void(int)>& value_changed{slider_.slider.value_changed};
+    sl::Signal<void(int)>& value_changed{slider_.slider.value_changed};
 };
+
 }  // namespace palette
 #endif  // CPPURSES_DEMOS_PALETTE_VALUE_CONTROL_HPP

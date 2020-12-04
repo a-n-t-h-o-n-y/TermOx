@@ -4,7 +4,7 @@
 #include <limits>
 #include <utility>
 
-#include <signals/signal.hpp>
+#include <signals_light/signal.hpp>
 
 namespace cppurses {
 
@@ -12,7 +12,7 @@ namespace cppurses {
 class Size_policy {
    public:
     /// Emitted on any changes to the Size_policy.
-    sig::Signal<void()> policy_updated;
+    sl::Signal<void()> policy_updated;
 
    public:
     /// Set the size hint, used as the initial value in calculations.

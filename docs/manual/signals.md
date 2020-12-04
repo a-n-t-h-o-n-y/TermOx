@@ -13,7 +13,7 @@ with the same parameter that the Signal was emitted with.
 
 ```cpp
 // Create a Signal
-auto activated = sig::Signal<void(char)>{};
+auto activated = sl::Signal<void(char)>{};
 
 // Connect a Slot/Function to the Signal
 auto print = [](char c){ std::cout << c; };
@@ -52,8 +52,8 @@ struct Foo_bar : layout::Horizontal<Button> {
     Button& foo_btn = this->make_child("Do Foo");
     Button& bar_btn = this->make_child("Do Bar");
 
-    sig::Signal<void()>& foo = foo_btn.pressed;
-    sig::Signal<void()>& bar = bar_btn.pressed;
+    sl::Signal<void()>& foo = foo_btn.pressed;
+    sl::Signal<void()>& bar = bar_btn.pressed;
 };
 
 struct App : layout::Vertical<> {
@@ -71,8 +71,5 @@ struct App : layout::Vertical<> {
 };
 ```
 
-The Signals library used in CPPurses has the same API as the boost Signals2
-library, but is within the `sig` namespace.
-
 The full Signals Library and documentation can be found
-[here](https://github.com/a-n-t-h-o-n-y/Signals).
+[here](https://github.com/a-n-t-h-o-n-y/signals-light).

@@ -1,7 +1,6 @@
 #ifndef CPPURSES_DEMOS_GLYPH_PAINT_GLYPH_SELECT_STACK_HPP
 #define CPPURSES_DEMOS_GLYPH_PAINT_GLYPH_SELECT_STACK_HPP
-#include <signals/signal.hpp>
-#include <signals/slot.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/layouts/stack.hpp>
@@ -12,8 +11,7 @@ struct Area;
 struct Glyph;
 }  // namespace cppurses
 
-namespace demos {
-namespace glyph_paint {
+namespace demos::glyph_paint {
 
 class Glyph_select_stack
     : public cppurses::layout::Stack<cppurses::Matrix_display> {
@@ -24,7 +22,7 @@ class Glyph_select_stack
     void set_page_percent(float percent);
 
     // Signals
-    sig::Signal<void(cppurses::Glyph)> glyph_selected;
+    sl::Signal<void(cppurses::Glyph)> glyph_selected;
 
    protected:
     bool resize_event(cppurses::Area new_size,
@@ -37,12 +35,14 @@ class Glyph_select_stack
     void update_stack();
 };
 
-namespace slot {
+}  // namespace demos::glyph_paint
 
-sig::Slot<void(float)> set_page_percent(Glyph_select_stack& gss);
-sig::Slot<void()> set_page_percent(Glyph_select_stack& gss, float percent);
+namespace demos::glyph_paint::slot {
 
-}  // namespace slot
-}  // namespace glyph_paint
-}  // namespace demos
+auto set_page_percent(Glyph_select_stack& gss) -> sl::Slot<void(float)>;
+
+auto set_page_percent(Glyph_select_stack& gss, float percent)
+    -> sl::Slot<void()>;
+
+}  // namespace demos::glyph_paint::slot
 #endif  // CPPURSES_DEMOS_GLYPH_PAINT_GLYPH_SELECT_STACK_HPP

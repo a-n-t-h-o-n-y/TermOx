@@ -4,9 +4,6 @@
 #include <memory>
 #include <utility>
 
-#include <signals/signal.hpp>
-#include <signals/slot.hpp>
-
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/focus_policy.hpp>

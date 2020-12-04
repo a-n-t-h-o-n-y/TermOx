@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include <signals/signal.hpp>
+#include <signals_light/signal.hpp>
 
 #include "bitset.hpp"
 #include "cell.hpp"
@@ -20,7 +20,7 @@ namespace gol {
 /// Holds game state and provides an interface to update to the next pattern.
 class Game_of_life_engine {
    public:
-    sig::Signal<void(std::uint32_t)> generation_count_changed;
+    sl::Signal<void(std::uint32_t)> generation_count_changed;
 
    public:
     /// Updates the engine state to the next generation of cells.

@@ -2,10 +2,11 @@
 
 #include <utility>
 
-#include <signals/slot.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/system/key.hpp>
+#include <cppurses/widget/detail/link_lifetimes.hpp>
 
 namespace cppurses {
 
@@ -34,23 +35,20 @@ auto Log::key_press_event(Key k) -> bool
     }
 }
 
-namespace slot {
-
-auto post_message(Log& log) -> sig::Slot<void(Glyph_string)>
-{
-    auto slot = sig::Slot<void(Glyph_string)>{
-        [&log](Glyph_string message) { log.post_message(std::move(message)); }};
-    slot.track(log.destroyed);
-    return slot;
-}
-
-auto post_message(Log& log, Glyph_string const& message) -> sig::Slot<void()>
-{
-    auto slot =
-        sig::Slot<void()>{[&log, message] { log.post_message(message); }};
-    slot.track(log.destroyed);
-    return slot;
-}
-
-}  // namespace slot
 }  // namespace cppurses
+
+namespace cppurses::slot {
+
+auto post_message(Log& log) -> sl::Slot<void(Glyph_string)>
+{
+    return link_lifetimes(
+        [&log](Glyph_string message) { log.post_message(std::move(message)); },
+        log);
+}
+
+auto post_message(Log& log, Glyph_string const& message) -> sl::Slot<void()>
+{
+    return link_lifetimes([&log, message] { log.post_message(message); }, log);
+}
+
+}  // namespace cppurses::slot

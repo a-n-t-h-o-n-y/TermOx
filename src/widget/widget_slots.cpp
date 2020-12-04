@@ -1,6 +1,6 @@
 #include <cppurses/widget/widget_slots.hpp>
 
-#include <signals/slot.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/system/event.hpp>
@@ -8,138 +8,128 @@
 #include <cppurses/system/mouse.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/cursor.hpp>
+#include <cppurses/widget/detail/link_lifetimes.hpp>
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 
-namespace cppurses {
-namespace slot {
+namespace cppurses::slot {
 
-auto enable(Widget& w) -> sig::Slot<void()>
+auto enable(Widget& w) -> sl::Slot<void()>
 {
-    auto slot = sig::Slot<void()>{[&w] { w.enable(); }};
-    slot.track(w.destroyed);
-    return slot;
+    return link_lifetimes([&w] { w.enable(); }, w);
 }
 
-auto disable(Widget& w) -> sig::Slot<void()>
+auto disable(Widget& w) -> sl::Slot<void()>
 {
-    auto slot = sig::Slot<void()>{[&w] { w.disable(); }};
-    slot.track(w.destroyed);
-    return slot;
+    return link_lifetimes([&w] { w.disable(); }, w);
 }
 
-auto update(Widget& w) -> sig::Slot<void()>
+auto update(Widget& w) -> sl::Slot<void()>
 {
-    auto slot = sig::Slot<void()>{[&w] { w.update(); }};
-    slot.track(w.destroyed);
-    return slot;
+    return link_lifetimes([&w] { w.update(); }, w);
 }
 
-auto click(Widget& w) -> sig::Slot<void(Point, Mouse::Button)>
+auto click(Widget& w) -> sl::Slot<void(Point, Mouse::Button)>
 {
-    auto slot = sig::Slot<void(Point, Mouse::Button)>{
+    return link_lifetimes(
         [&w](Point const& p, Mouse::Button b) {
             System::send_event(Mouse_press_event{
                 w, Mouse{{w.inner_x() + p.x, w.inner_y() + p.y}, p, b, 0, {}}});
-        }};
-    slot.track(w.destroyed);
-    return slot;
+        },
+        w);
 }
 
-auto click(Widget& w, Point p) -> sig::Slot<void(Mouse::Button)>
+auto click(Widget& w, Point p) -> sl::Slot<void(Mouse::Button)>
 {
-    auto slot = sig::Slot<void(Mouse::Button)>{[&w, p](Mouse::Button b) {
-        System::send_event(Mouse_press_event{
-            w, Mouse{{w.inner_x() + p.x, w.inner_y() + p.y}, p, b, 0, {}}});
-    }};
-    slot.track(w.destroyed);
-    return slot;
+    return link_lifetimes(
+        [&w, p](Mouse::Button b) {
+            System::send_event(Mouse_press_event{
+                w, Mouse{{w.inner_x() + p.x, w.inner_y() + p.y}, p, b, 0, {}}});
+        },
+        w);
 }
 
-auto click(Widget& w, Mouse::Button b) -> sig::Slot<void(Point)>
+auto click(Widget& w, Mouse::Button b) -> sl::Slot<void(Point)>
 {
-    auto slot = sig::Slot<void(Point)>{[&w, b](Point p) {
-        System::send_event(Mouse_press_event{
-            w, Mouse{{w.inner_x() + p.x, w.inner_y() + p.y}, p, b, 0, {}}});
-    }};
-    slot.track(w.destroyed);
-    return slot;
+    return link_lifetimes(
+        [&w, b](Point p) {
+            System::send_event(Mouse_press_event{
+                w, Mouse{{w.inner_x() + p.x, w.inner_y() + p.y}, p, b, 0, {}}});
+        },
+        w);
 }
 
-auto click(Widget& w, Point p, Mouse::Button b) -> sig::Slot<void()>
+auto click(Widget& w, Point p, Mouse::Button b) -> sl::Slot<void()>
 {
-    auto slot = sig::Slot<void()>{[&w, p, b] {
-        System::send_event(Mouse_press_event{
-            w, Mouse{{w.inner_x() + p.x, w.inner_y() + p.y}, p, b, 0, {}}});
-    }};
-    slot.track(w.destroyed);
-    return slot;
+    return link_lifetimes(
+        [&w, p, b] {
+            System::send_event(Mouse_press_event{
+                w, Mouse{{w.inner_x() + p.x, w.inner_y() + p.y}, p, b, 0, {}}});
+        },
+        w);
 }
 
-auto keypress(Widget& w) -> sig::Slot<void(Key)>
+auto keypress(Widget& w) -> sl::Slot<void(Key)>
 {
-    auto slot = sig::Slot<void(Key)>{[&w](Key k) {
-        System::send_event(Key_press_event{w, k});
-    }};
-    slot.track(w.destroyed);
-    return slot;
+    return link_lifetimes(
+        [&w](Key k) {
+            System::send_event(Key_press_event{w, k});
+        },
+        w);
 }
 
-auto keypress(Widget& w, Key k) -> sig::Slot<void()>
+auto keypress(Widget& w, Key k) -> sl::Slot<void()>
 {
-    auto slot = sig::Slot<void()>{[&w, k] {
-        System::send_event(Key_press_event{w, k});
-    }};
-    slot.track(w.destroyed);
-    return slot;
+    return link_lifetimes(
+        [&w, k] {
+            System::send_event(Key_press_event{w, k});
+        },
+        w);
 }
 
-auto set_background(Widget& w) -> sig::Slot<void(Color)>
+auto set_background(Widget& w) -> sl::Slot<void(Color)>
 {
-    auto slot = sig::Slot<void(Color)>{[&w](Color c) {
-        w.brush.set_background(c);
-        w.update();
-    }};
-    slot.track(w.destroyed);
-    return slot;
+    return link_lifetimes(
+        [&w](Color c) {
+            w.brush.set_background(c);
+            w.update();
+        },
+        w);
 }
 
-auto set_background(Widget& w, Color c) -> sig::Slot<void()>
+auto set_background(Widget& w, Color c) -> sl::Slot<void()>
 {
-    auto slot = sig::Slot<void()>{[&w, c] {
-        w.brush.set_background(c);
-        w.update();
-    }};
-    slot.track(w.destroyed);
-    return slot;
+    return link_lifetimes(
+        [&w, c] {
+            w.brush.set_background(c);
+            w.update();
+        },
+        w);
 }
 
-auto set_foreground(Widget& w) -> sig::Slot<void(Color)>
+auto set_foreground(Widget& w) -> sl::Slot<void(Color)>
 {
-    auto slot = sig::Slot<void(Color)>{[&w](Color c) {
-        w.brush.set_foreground(c);
-        w.update();
-    }};
-    slot.track(w.destroyed);
-    return slot;
+    return link_lifetimes(
+        [&w](Color c) {
+            w.brush.set_foreground(c);
+            w.update();
+        },
+        w);
 }
 
-auto set_foreground(Widget& w, Color c) -> sig::Slot<void()>
+auto set_foreground(Widget& w, Color c) -> sl::Slot<void()>
 {
-    auto slot = sig::Slot<void()>{[&w, c] {
-        w.brush.set_foreground(c);
-        w.update();
-    }};
-    slot.track(w.destroyed);
-    return slot;
+    return link_lifetimes(
+        [&w, c] {
+            w.brush.set_foreground(c);
+            w.update();
+        },
+        w);
 }
 
-auto toggle_cursor(Widget& w) -> sig::Slot<void()>
+auto toggle_cursor(Widget& w) -> sl::Slot<void()>
 {
-    auto slot = sig::Slot<void()>{[&w] { w.cursor.toggle(); }};
-    slot.track(w.destroyed);
-    return slot;
+    return link_lifetimes([&w] { w.cursor.toggle(); }, w);
 }
 
-}  // namespace slot
-}  // namespace cppurses
+}  // namespace cppurses::slot

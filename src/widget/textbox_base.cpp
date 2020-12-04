@@ -2,8 +2,6 @@
 
 #include <cstddef>
 
-#include <signals/signal.hpp>
-
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/widgets/text_display.hpp>
 

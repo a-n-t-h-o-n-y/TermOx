@@ -3,7 +3,7 @@
 #include <chrono>
 #include <cmath>
 
-#include <signals/signal.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/trait.hpp>
@@ -27,8 +27,8 @@ namespace demos {
 /// Checkbox to enable/disable a Trait. Has a Signal from it.
 class Trait_checkbox : public cppurses::Labeled_checkbox {
    public:
-    sig::Signal<void(cppurses::Trait)> trait_enabled;
-    sig::Signal<void(cppurses::Trait)> trait_disabled;
+    sl::Signal<void(cppurses::Trait)> trait_enabled;
+    sl::Signal<void(cppurses::Trait)> trait_disabled;
 
    public:
     Trait_checkbox(cppurses::Trait t) : Labeled_checkbox{to_string(t)}, t_{t}
@@ -45,8 +45,8 @@ class Trait_checkbox : public cppurses::Labeled_checkbox {
 /// Holds a Trait_checkbox for each Trait, emits Signals.
 class Trait_boxes : public cppurses::layout::Vertical<Trait_checkbox> {
    public:
-    sig::Signal<void(cppurses::Trait)> trait_enabled;
-    sig::Signal<void(cppurses::Trait)> trait_disabled;
+    sl::Signal<void(cppurses::Trait)> trait_enabled;
+    sl::Signal<void(cppurses::Trait)> trait_disabled;
 
    public:
     Trait_boxes()
@@ -64,7 +64,7 @@ class Labeled_color_select
     : public cppurses::Label_top<cppurses::layout::Horizontal<>,
                                  cppurses::Color_select> {
    public:
-    sig::Signal<void(cppurses::Color)>& color_selected = wrapped.color_selected;
+    sl::Signal<void(cppurses::Color)>& color_selected = wrapped.color_selected;
 
    public:
     Labeled_color_select(cppurses::Glyph_string label)
@@ -156,8 +156,8 @@ class Filename_edit : public cppurses::Textbox {
 
 class Save_area : public cppurses::layout::Horizontal<> {
    public:
-    sig::Signal<void(std::string)> save_request;
-    sig::Signal<void(std::string)> load_request;
+    sl::Signal<void(std::string)> save_request;
+    sl::Signal<void(std::string)> load_request;
 
    public:
     Save_area()

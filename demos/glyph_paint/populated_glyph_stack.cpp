@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include <signals_light/signal.hpp>
+
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
 #include <cppurses/painter/glyph_string.hpp>
@@ -147,7 +149,7 @@ Populated_glyph_stack::Populated_glyph_stack()
         this->make_page<Glyph_select>("Geometric", geometric).glyph_selected);
 }
 
-void Populated_glyph_stack::make_connections(sig::Slot<void(Glyph)> slot)
+void Populated_glyph_stack::make_connections(sl::Slot<void(Glyph)> slot)
 {
     for (auto& signal_ref : signal_refs_)
         signal_ref.get().connect(slot);

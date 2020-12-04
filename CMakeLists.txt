@@ -47,7 +47,6 @@ endif()
 add_subdirectory(external/ncurses-snapshots)
 
 # ADD SIGNALS LIBRARY
-add_subdirectory(external/Signals)
 add_subdirectory(external/signals-light)
 
 # ADD CPPURSES LIBRARY

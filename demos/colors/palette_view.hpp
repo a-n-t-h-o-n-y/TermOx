@@ -2,7 +2,7 @@
 #define CPPURSES_DEMOS_COLORS_COLORS_DISPLAY_HPP
 #include <utility>
 
-#include <signals/signal.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/painter/palette/amstrad_cpc.hpp>
 #include <cppurses/painter/palette/apple_ii.hpp>
@@ -41,7 +41,7 @@ namespace colors {
 
 class Palette_picker : public cppurses::Labeled_cycle_box {
    public:
-    sig::Signal<void(cppurses::Color_palette)> palette_picked;
+    sl::Signal<void(cppurses::Color_palette)> palette_picked;
 
    public:
     Palette_picker() : Labeled_cycle_box{"Palette"}

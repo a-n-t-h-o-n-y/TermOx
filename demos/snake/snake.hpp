@@ -1,35 +1,34 @@
 #ifndef CPPURSES_DEMOS_SNAKE_SNAKE_HPP
 #define CPPURSES_DEMOS_SNAKE_SNAKE_HPP
 #include <algorithm>
+#include <chrono>
 #include <random>
 #include <set>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include <signals/signal.hpp>
+#include <signals_light/signal.hpp>
 
-#include <cppurses/widget/area.hpp>
-#include <cppurses/widget/point.hpp>
-
-#include <chrono>
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/dynamic_colors.hpp>
 #include <cppurses/painter/palette/stormy6.hpp>
 #include <cppurses/painter/trait.hpp>
+#include <cppurses/system/event.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/align.hpp>
+#include <cppurses/widget/area.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/pipe.hpp>
+#include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widgets/confirm_button.hpp>
 #include <cppurses/widget/widgets/cycle_box.hpp>
 #include <cppurses/widget/widgets/label.hpp>
+#include <cppurses/widget/widgets/text_display.hpp>
 #include <cppurses/widget/widgets/toggle_button.hpp>
-#include "cppurses/system/event.hpp"
-#include "cppurses/widget/widgets/text_display.hpp"
 
 namespace snake {
 
@@ -229,8 +228,8 @@ class Engine {
     Snake snake;
 
    public:
-    sig::Signal<void()> game_over;
-    sig::Signal<void(unsigned)> score;
+    sl::Signal<void()> game_over;
+    sl::Signal<void(unsigned)> score;
 
    public:
     /// Set up the state for a new game.
@@ -468,10 +467,10 @@ class Game_space : public cppurses::Widget {
     bool too_small_ = false;
 
    public:
-    sig::Signal<void()>& game_over     = engine_.game_over;
-    sig::Signal<void(unsigned)>& score = engine_.score;
-    sig::Signal<void()> started;
-    sig::Signal<void()> stopped;
+    sl::Signal<void()>& game_over     = engine_.game_over;
+    sl::Signal<void(unsigned)>& score = engine_.score;
+    sl::Signal<void()> started;
+    sl::Signal<void()> stopped;
 
    private:
     auto is_too_small() -> bool
@@ -624,9 +623,9 @@ class Button_bar : public cppurses::layout::Horizontal<> {
     Instructions& instructions_ = this->make_child<Instructions>();
 
    public:
-    sig::Signal<void()>& start = start_pause_btns_.top_pressed;
-    sig::Signal<void()>& pause = start_pause_btns_.bottom_pressed;
-    sig::Signal<void(char)> size_change;
+    sl::Signal<void()>& start = start_pause_btns_.top_pressed;
+    sl::Signal<void()>& pause = start_pause_btns_.bottom_pressed;
+    sl::Signal<void(char)> size_change;
 };
 
 class Score : public cppurses::layout::Horizontal<> {

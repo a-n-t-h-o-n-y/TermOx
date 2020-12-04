@@ -5,7 +5,7 @@
 #include <memory>
 #include <utility>
 
-#include <signals/signal.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph_string.hpp>
@@ -188,9 +188,9 @@ class Scrollbar : public Layout_t {
         this->template make_child<Button>(Glyph_string{bottom_symbol_});
 
    public:
-    sig::Signal<void(std::size_t)> new_position;
-    sig::Signal<void()> decremented;
-    sig::Signal<void()> incremented;
+    sl::Signal<void(std::size_t)> new_position;
+    sl::Signal<void()> decremented;
+    sl::Signal<void()> incremented;
 
    public:
     Scrollbar(Parameters p = {}) : parameters_{std::move(p)}

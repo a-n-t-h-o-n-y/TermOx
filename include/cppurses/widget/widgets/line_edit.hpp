@@ -5,7 +5,7 @@
 #include <utility>
 #include <vector>
 
-#include <signals/signals.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
@@ -33,7 +33,7 @@ class Line_edit : public Textbox {
 
    public:
     /// Emitted on Enter Key press, sends along the current contents.
-    sig::Signal<void(std::string const&)> edit_finished;
+    sl::Signal<void(std::string const&)> edit_finished;
 
    public:
     /// Construct a Line_edit object with \p initial_text in ghost color.

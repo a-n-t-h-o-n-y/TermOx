@@ -23,7 +23,7 @@ auto Event_loop::run() -> int
 void Event_loop::connect_to_system_exit()
 {
     auto exit_loop =
-        sig::Slot<void(int)>{[this](int code) { this->exit(code); }};
+        sl::Slot<void(int)>{[this](int code) { this->exit(code); }};
     exit_loop.track(lifetime_);
     System::exit_signal.connect(exit_loop);
 }

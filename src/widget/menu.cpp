@@ -6,18 +6,19 @@
 #include <string>
 #include <utility>
 
-#include <signals/signals.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/painter/trait.hpp>
 #include <cppurses/system/key.hpp>
 #include <cppurses/system/mouse.hpp>
+#include <cppurses/widget/detail/link_lifetimes.hpp>
 #include <cppurses/widget/focus_policy.hpp>
+#include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widgets/button.hpp>
 #include <cppurses/widget/widgets/label.hpp>
-#include "cppurses/widget/layouts/horizontal.hpp"
 
 namespace cppurses {
 
@@ -31,7 +32,7 @@ Menu::Menu(Glyph_string title_text)
 }
 
 auto Menu::insert_item(Glyph_string label, std::size_t index)
-    -> sig::Signal<void()>&
+    -> sl::Signal<void()>&
 {
     auto button_ptr    = std::make_unique<Button>(std::move(label));
     Button& new_button = *button_ptr;
@@ -127,51 +128,38 @@ auto Menu::mouse_wheel_event_filter(Widget& /* receiver */, Mouse const& m)
     }
 }
 
-namespace slot {
-
-auto select_up(Menu& m) -> sig::Slot<void(std::size_t)>
-{
-    auto slot = sig::Slot<void(std::size_t)>{[&m](auto n) { m.select_up(n); }};
-    slot.track(m.destroyed);
-    return slot;
-}
-
-auto select_up(Menu& m, std::size_t n) -> sig::Slot<void()>
-{
-    auto slot = sig::Slot<void()>{[&m, n] { m.select_up(n); }};
-    slot.track(m.destroyed);
-    return slot;
-}
-
-auto select_down(Menu& m) -> sig::Slot<void(std::size_t)>
-{
-    auto slot =
-        sig::Slot<void(std::size_t)>{[&m](auto n) { m.select_down(n); }};
-    slot.track(m.destroyed);
-    return slot;
-}
-
-auto select_down(Menu& m, std::size_t n) -> sig::Slot<void()>
-{
-    auto slot = sig::Slot<void()>{[&m, n] { m.select_down(n); }};
-    slot.track(m.destroyed);
-    return slot;
-}
-
-auto select_item(Menu& m) -> sig::Slot<void(std::size_t)>
-{
-    auto slot = sig::Slot<void(std::size_t)>{
-        [&m](auto index) { m.select_item(index); }};
-    slot.track(m.destroyed);
-    return slot;
-}
-
-auto select_item(Menu& m, std::size_t index) -> sig::Slot<void()>
-{
-    auto slot = sig::Slot<void()>{[&m, index] { m.select_item(index); }};
-    slot.track(m.destroyed);
-    return slot;
-}
-
-}  // namespace slot
 }  // namespace cppurses
+
+namespace cppurses::slot {
+
+auto select_up(Menu& m) -> sl::Slot<void(std::size_t)>
+{
+    return link_lifetimes([&m](std::size_t n) { m.select_up(n); }, m);
+}
+
+auto select_up(Menu& m, std::size_t n) -> sl::Slot<void()>
+{
+    return link_lifetimes([&m, n] { m.select_up(n); }, m);
+}
+
+auto select_down(Menu& m) -> sl::Slot<void(std::size_t)>
+{
+    return link_lifetimes([&m](std::size_t n) { m.select_down(n); }, m);
+}
+
+auto select_down(Menu& m, std::size_t n) -> sl::Slot<void()>
+{
+    return link_lifetimes([&m, n] { m.select_down(n); }, m);
+}
+
+auto select_item(Menu& m) -> sl::Slot<void(std::size_t)>
+{
+    return link_lifetimes([&m](std::size_t index) { m.select_item(index); }, m);
+}
+
+auto select_item(Menu& m, std::size_t index) -> sl::Slot<void()>
+{
+    return link_lifetimes([&m, index] { m.select_item(index); }, m);
+}
+
+}  // namespace cppurses::slot

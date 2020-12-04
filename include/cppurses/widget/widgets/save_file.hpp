@@ -2,7 +2,7 @@
 #define CPPURSES_WIDGET_WIDGETS_SAVE_FILE_HPP
 #include <fstream>
 
-#include <signals/signal.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
@@ -19,7 +19,7 @@ class Save_file : public layout::Horizontal<> {
     Widget& separator        = this->make_child() | pipe::fixed_width(1);
     Line_edit& filename_edit = this->make_child<Line_edit>("Filename");
 
-    sig::Signal<void(std::basic_ofstream<Char_t>&)> save_requested;
+    sl::Signal<void(std::basic_ofstream<Char_t>&)> save_requested;
 
    public:
     Save_file()

@@ -4,7 +4,7 @@
 #include <chrono>
 #include <string>
 
-#include <signals/signal.hpp>
+#include <signals_light/signal.hpp>
 
 #include <cppurses/painter/color.hpp>
 #include <cppurses/painter/glyph.hpp>
@@ -54,7 +54,7 @@ struct Clear_step_box : cppurses::layout::Vertical<> {
 
 class Rule_edit : public cppurses::layout::Vertical<> {
    public:
-    sig::Signal<void(std::string const&)> rule_change;
+    sl::Signal<void(std::string const&)> rule_change;
 
    public:
     Rule_edit()
@@ -95,8 +95,8 @@ class Rule_edit : public cppurses::layout::Vertical<> {
 
 struct Start_pause_btns : cppurses::Toggle_button {
    public:
-    sig::Signal<void()>& start_requested = top.pressed;
-    sig::Signal<void()>& pause_requested = bottom.pressed;
+    sl::Signal<void()>& start_requested = top.pressed;
+    sl::Signal<void()>& pause_requested = bottom.pressed;
 
    public:
     Start_pause_btns() : Toggle_button{L"Start", L"Pause"}
@@ -118,7 +118,7 @@ struct Interval_box : cppurses::layout::Horizontal<> {
 
     cppurses::HLabel& units = this->make_child<cppurses::HLabel>({L"ms"});
 
-    sig::Signal<void(unsigned)>& value_set = value_edit.value_set;
+    sl::Signal<void(unsigned)>& value_set = value_edit.value_set;
 
    public:
     Interval_box()
@@ -163,13 +163,13 @@ struct Controls_box : cppurses::layout::Vertical<> {
     Widget& break_3      = this->append_child(make_break());
 
    public:
-    sig::Signal<void(std::string const&)>& rule_change = rule_edit.rule_change;
-    sig::Signal<void(std::chrono::milliseconds)> interval_set;
-    sig::Signal<void()>& grid_toggled   = grid_hi_res.grid_box.toggled;
-    sig::Signal<void()>& hi_res_toggled = grid_hi_res.hi_res_box.toggled;
-    sig::Signal<void()>& clear_request  = clear_step_btns.clear_btn.pressed;
-    sig::Signal<void()>& step_request   = clear_step_btns.step_btn.pressed;
-    sig::Signal<void()>& rainbow_toggle = rainbow_btn.toggled;
+    sl::Signal<void(std::string const&)>& rule_change = rule_edit.rule_change;
+    sl::Signal<void(std::chrono::milliseconds)> interval_set;
+    sl::Signal<void()>& grid_toggled   = grid_hi_res.grid_box.toggled;
+    sl::Signal<void()>& hi_res_toggled = grid_hi_res.hi_res_box.toggled;
+    sl::Signal<void()>& clear_request  = clear_step_btns.clear_btn.pressed;
+    sl::Signal<void()>& step_request   = clear_step_btns.step_btn.pressed;
+    sl::Signal<void()>& rainbow_toggle = rainbow_btn.toggled;
 
    public:
     Controls_box()

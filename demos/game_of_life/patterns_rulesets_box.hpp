@@ -3,6 +3,8 @@
 #include <string>
 #include <utility>
 
+#include <signals_light/signal.hpp>
+
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/widget/layouts/stack.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
@@ -44,7 +46,7 @@ class Selection_page : public cppurses::layout::Vertical<> {
     }
 
    public:
-    sig::Signal<void(std::wstring const& name)>& selection_made =
+    sl::Signal<void(std::wstring const& name)>& selection_made =
         list.button_pressed;
 
    public:
