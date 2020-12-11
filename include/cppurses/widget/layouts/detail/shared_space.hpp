@@ -88,19 +88,21 @@ class Shared_space {
             }
             surplus -= given_away;
         }
-        if (surplus != 0 && children.size() != 0)
-            this->disperse_leftovers(children, surplus);
+        this->disperse_leftovers(children, surplus);
     }
 
     /// Stretch ratio can't split small surplus values into values > 1.0
     template <typename Children_span>
     void disperse_leftovers(Children_span& children, int surplus)
     {
-        for (auto iter = children.begin_max();
-             iter != children.end() && surplus != 0; ++iter, --surplus) {
-            if (iter.get_policy().is_passive())
-                continue;
-            iter->length += 1;
+        while (children.size() != 0uL && surplus != 0) {
+            for (auto iter = children.begin_max();
+                 iter != children.end() && surplus != 0; ++iter) {
+                if (iter.get_policy().is_passive())
+                    continue;
+                iter->length += 1;
+                --surplus;
+            }
         }
     }
 
@@ -124,8 +126,7 @@ class Shared_space {
             }
             deficit -= taken_back;
         }
-        if (deficit != 0 && children.size() != 0)
-            this->reclaim_leftovers(children, deficit);
+        this->reclaim_leftovers(children, deficit);
     }
 
     /// Stretch ratio can't split small deficit values into values > 1.0

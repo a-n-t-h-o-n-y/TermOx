@@ -117,6 +117,8 @@ class Brush {
     Byte_t traits_ = 0;
     std::optional<Color> background_color_;
     std::optional<Color> foreground_color_;
+
+   private:
     friend constexpr void imprint(Brush const&, Brush&);
 };
 
