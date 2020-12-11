@@ -60,10 +60,10 @@ struct Foreground_color {
 };
 
 /// Converts a Color into a Background_color to be used by Brush.
-constexpr auto background(Color c) -> Background_color { return {c.value}; }
+constexpr auto bg(Color c) -> Background_color { return {c.value}; }
 
 /// Converts a Color into a Background_color to be used by Brush.
-constexpr auto foreground(Color c) -> Foreground_color { return {c.value}; }
+constexpr auto fg(Color c) -> Foreground_color { return {c.value}; }
 
 /* --------------------------- ANSI/XTERM Color ------------------------------*/
 

@@ -1,4 +1,4 @@
-# Creating New Widgets
+#Creating New Widgets
 
 A new Widget can be defined by extending the `Widget` class. The main tool for
 defining a Widget's behavior is overriding the event handler virtual functions
@@ -15,8 +15,8 @@ class Canvas : public cppurses::Widget {
     {
         using cppurses::Color;
         using namespace cppurses::pipe;
-        *this | bordered() | bold_walls()
-              | bg(Color::Light_blue) | fg(Color::Blue);
+        *this | bordered() | bold_walls() | bg(Color::Light_blue) |
+            fg(Color::Blue);
     }
 
    protected:
@@ -24,7 +24,7 @@ class Canvas : public cppurses::Widget {
     {
         if (m.button == cppurses::Mouse::Button::Left)
             points_.push_back(m.local);
-        this->update();   // post a paint event to *this
+        this->update();  // post a paint event to *this
         return Widget::mouse_press_event(m);
     }
 
@@ -41,37 +41,39 @@ class Canvas : public cppurses::Widget {
 };
 ```
 
-This Widget will paint an `X` to the screen at every point the mouse's left
-button has been clicked. The paint event always starts with a blank slate, so
-a history is held by `points_` and each element is painted to the screen on each
-call to `paint_event`.
+    This Widget will paint an `X` to the screen at every point the
+        mouse's left button has been clicked.The paint event always starts with
+            a blank slate,
+    so a history is held by `points_` and each element is painted to the screen
+        on each call to `paint_event`.
 
-## Extending Existing Widgets
+    ##Extending Existing Widgets
 
-The same tools can be used to extend existing Widgets; by inheriting from the
-Widget and overriding event handlers, or changing traits via the constructor.
+        The same tools can be used to extend existing Widgets;
+by inheriting from the Widget and overriding event handlers,
+    or changing traits via the constructor
+            .
 
-The code below will create a new Textbox type that changes its background color
-when it is in focus.
+        The code below will create a new Textbox type that changes its
+            background color when it is in focus.
 
-```cpp
-class  Focus_indicator_textbox : public cppurses::Textbox {
+```cpp class Focus_indicator_textbox : public cppurses::Textbox {
    public:
     Focus_indicator_textbox(Glyph_string text) : Textbox{std::move(text)}
     {
-        *this | cppurses::pipe::bg(unfocus_color_);
+        *this | cppurses::bg(unfocus_color_);
     }
 
    protected:
     auto focus_in_event() -> bool override
     {
-        *this | cppurses::pipe::bg(focus_color_);
+        *this | cppurses::bg(focus_color_);
         return Widget::focus_in_event();
     }
 
     auto focus_out_event() -> bool override
     {
-        *this | cppurses::pipe::bg(unfocus_color_);
+        *this | cppurses::bg(unfocus_color_);
         return Widget::focus_out_event();
     }
 
@@ -81,11 +83,11 @@ class  Focus_indicator_textbox : public cppurses::Textbox {
 };
 ```
 
-## Next
+    ##Next
 
-- [`main()` Function](main-function.md)
-- [Quick Prototyping](quick-prototyping.md)
+    - [`main()` Function](main - function.md) -
+    [Quick Prototyping](quick - prototyping.md)
 
-## Previous
+        ##Previous
 
-- [Building with Existing Widgets](building-with-existing-widgets.md)
+    - [Building with Existing Widgets](building - with - existing - widgets.md)

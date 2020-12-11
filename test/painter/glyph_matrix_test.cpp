@@ -7,7 +7,7 @@
 
 #include <stdexcept>
 
-using cppurses::background;
+using cppurses::bg;
 using cppurses::Color;
 using cppurses::foreground;
 using cppurses::Glyph;
@@ -47,7 +47,7 @@ TEST(GlyphMatrixTest, Default)
     ASSERT_EQ(5, cgm.height());
 
     Glyph_matrix gm2(5, 3);
-    gm2.at(4, 2) = Glyph{"Ѯ", background(Color::Orange), Trait::Bold};
+    gm2.at(4, 2) = Glyph{"Ѯ", bg(Color::Orange), Trait::Bold};
     EXPECT_EQ("Ѯ", gm2.at(4, 2).str());
     EXPECT_EQ(" ", gm2.at(0, 0).str());
     EXPECT_THROW(gm2.at(5, 3), std::out_of_range);

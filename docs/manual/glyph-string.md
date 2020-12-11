@@ -6,16 +6,16 @@ A `Glyph_string` is a vector-like container of `Glyphs`. Most methods of
 ## User Defined Literal
 
 The UDL `_gs` can be used with `char` string literals and `wchar_t` string
-literals to create Glyph_strings.
+literals to create `Glyph_strings`.
 
 ## Pipe Operator
 
 Traits and Colors can be used with the pipe operator to alter the Brush of each
-Glyph in the Glyph_string.
+Glyph in the `Glyph_string`.
 
 ```cpp
-auto const foo = L"hello!" | Trait::Bold | background(Color::Light_green);
-foo | foreground(Color::Violet);
+auto const foo = L"hello!" | Trait::Bold | bg(Color::Light_green);
+foo | fg(Color::Violet);
 ```
 
 ## See Also

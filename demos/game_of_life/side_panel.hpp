@@ -55,7 +55,7 @@ struct Side_panel : cppurses::layout::Vertical<> {
     }
 
    private:
-    inline static auto const line = L'─' | foreground(color::Light_green);
+    inline static auto const line = L'─' | fg(color::Light_green);
 };
 }  // namespace gol
 #endif  // CPPURSES_DEMOS_GAME_OF_LIFE_SIDE_PANEL_HPP

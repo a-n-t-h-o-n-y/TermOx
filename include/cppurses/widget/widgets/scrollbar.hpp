@@ -62,16 +62,16 @@ class Scrollbar : public Layout_t {
 
         void set_bar_fg(Color c)
         {
-            bar_ | foreground(c);
+            bar_ | fg(c);
             this->update();
         }
 
         void set_bar_bg(Color c)
         {
             if constexpr (is_vertical)
-                *this | pipe::bg(c);
+                *this | bg(c);
             else
-                *this | pipe::wallpaper(L'▬' | foreground(c));
+                *this | pipe::wallpaper(L'▬' | fg(c));
             this->update();
         }
 

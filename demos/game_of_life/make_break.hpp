@@ -13,7 +13,7 @@ inline auto make_break() -> std::unique_ptr<cppurses::Widget>
 {
     using namespace cppurses::pipe;
     return cppurses::widget() | fixed_height(1uL) |
-           wallpaper(L'─' | foreground(color::Teal));
+           wallpaper(L'─' | fg(color::Teal));
 }
 
 }  // namespace gol

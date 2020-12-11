@@ -58,76 +58,6 @@ constexpr bool is_widget_or_wptr =
 
 }  // namespace cppurses::pipe::detail
 
-namespace cppurses {
-
-/// Return *x if x is a unique_ptr to a Widget type, otherwise x.
-template <typename T>
-constexpr auto get(T& x) -> auto&
-{
-    if constexpr (pipe::detail::is_widget_ptr_v<T>)
-        return *x;
-    else
-        return x;
-}
-
-/// Pipe operator for use with Widget.
-template <typename Widget_t,
-          typename F,
-          typename std::enable_if_t<pipe::detail::is_widget_or_wptr<Widget_t>,
-                                    int> = 0>
-auto operator|(Widget_t&& w, F&& op) -> std::invoke_result_t<F, Widget_t&&>
-{
-    return std::forward<F>(op)(std::forward<Widget_t>(w));
-}
-
-/// Pipe operator for use with Widget::get_children.
-template <typename Iter_1, typename Iter_2, typename F>
-auto operator|(Range<Iter_1, Iter_2> children, F&& op) -> Range<Iter_1, Iter_2>
-{
-    for (auto& child : children)
-        std::forward<F>(op)(child);
-    return children;
-}
-
-/// Overload to create a filtered range.
-template <typename Iter_1, typename Iter_2, typename F>
-auto operator|(Range<Iter_1, Iter_2> children,
-               pipe::detail::Filter_predicate<F>&& p)
-{
-    return Range{Filter_iterator{children.begin(), children.end(),
-                                 std::forward<F>(p.predicate)},
-                 children.end()};
-}
-
-// clang-format off
-// clang format can't handle this one at the moment.
-
-/// Overload to create a filtered range with upcast.
-template <typename Iter_1, typename Iter_2, typename Widget_t>
-auto operator|(Range<Iter_1, Iter_2> children,
-               pipe::detail::Dynamic_filter_predicate<Widget_t>)
-{
-    return Range{
-            Transform_iterator{
-                Filter_iterator{ children.begin(), children.end(),
-                [](auto& w) { return dynamic_cast<Widget_t*>(&w) != nullptr; }},
-                [](auto& w) -> auto& {return static_cast<Widget_t&>(w); }
-                }, children.end()};
-}
-// clang-format on
-
-/// Pipe operator for use with Widget::get_descendants.
-template <typename F>
-auto operator|(std::vector<Widget*> const& descendants, F&& op)
-    -> std::vector<Widget*> const&
-{
-    for (auto* d : descendants)
-        std::forward<F>(op)(*d);
-    return descendants;
-}
-
-}  // namespace cppurses
-
 namespace cppurses::pipe {
 
 // Widget Accessors ------------------------------------------------------------
@@ -259,24 +189,35 @@ inline auto wallpaper_without_brush()
     };
 }
 
+}  // namespace cppurses::pipe
+
 // Brush Mofifiers -------------------------------------------------------------
-inline auto bg(cppurses::Color c)
+namespace cppurses {
+
+/// Change the Background color of the given Widget.
+template <typename Widget_t,
+          typename std::enable_if_t<pipe::detail::is_widget_or_wptr<Widget_t>,
+                                    int> = 0>
+auto operator|(Widget_t&& w, Background_color bg) -> decltype(auto)
 {
-    return [=](auto&& w) -> decltype(auto) {
-        get(w).brush.set_background(c);
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
+    get(w).brush.add_traits(bg);
+    get(w).update();
+    return std::forward<Widget_t>(w);
 }
 
-inline auto fg(cppurses::Color c)
+/// Change the Foreground color of the given Widget.
+template <typename Widget_t,
+          typename std::enable_if_t<pipe::detail::is_widget_or_wptr<Widget_t>,
+                                    int> = 0>
+auto operator|(Widget_t&& w, Foreground_color fg) -> decltype(auto)
 {
-    return [=](auto&& w) -> decltype(auto) {
-        get(w).brush.set_foreground(c);
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
+    get(w).brush.add_traits(fg);
+    get(w).update();
+    return std::forward<Widget_t>(w);
 }
+
+}  // namespace cppurses
+namespace cppurses::pipe {
 
 inline auto remove_background()
 {
@@ -296,14 +237,22 @@ inline auto remove_foreground()
     };
 }
 
-inline auto add(Trait t)
+}  // namespace cppurses::pipe
+namespace cppurses {
+
+/// Add \p t to the Brush of \p w.
+template <typename Widget_t,
+          typename std::enable_if_t<pipe::detail::is_widget_or_wptr<Widget_t>,
+                                    int> = 0>
+auto operator|(Widget_t&& w, Trait t) -> decltype(auto)
 {
-    return [=](auto&& w) -> decltype(auto) {
-        get(w).brush.add_traits(t);
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
+    get(w).brush.add_traits(t);
+    get(w).update();
+    return std::forward<Widget_t>(w);
 }
+
+}  // namespace cppurses
+namespace cppurses::pipe {
 
 inline auto discard(Trait t)
 {
@@ -1860,4 +1809,74 @@ inline auto dynamic_size(bool enable)
 }
 
 }  // namespace cppurses::pipe
+
+namespace cppurses {
+
+/// Return *x if x is a unique_ptr to a Widget type, otherwise x.
+template <typename T>
+constexpr auto get(T& x) -> auto&
+{
+    if constexpr (pipe::detail::is_widget_ptr_v<T>)
+        return *x;
+    else
+        return x;
+}
+
+/// Pipe operator for use with Widget.
+template <typename Widget_t,
+          typename F,
+          typename std::enable_if_t<pipe::detail::is_widget_or_wptr<Widget_t>,
+                                    int> = 0>
+auto operator|(Widget_t&& w, F&& op) -> std::invoke_result_t<F, Widget_t&&>
+{
+    return std::forward<F>(op)(std::forward<Widget_t>(w));
+}
+
+/// Pipe operator for use with Widget::get_children.
+template <typename Iter_1, typename Iter_2, typename F>
+auto operator|(Range<Iter_1, Iter_2> children, F&& op) -> Range<Iter_1, Iter_2>
+{
+    for (auto& child : children)
+        child | op;
+    return children;
+}
+
+/// Overload to create a filtered range.
+template <typename Iter_1, typename Iter_2, typename F>
+auto operator|(Range<Iter_1, Iter_2> children,
+               pipe::detail::Filter_predicate<F>&& p)
+{
+    return Range{Filter_iterator{children.begin(), children.end(),
+                                 std::forward<F>(p.predicate)},
+                 children.end()};
+}
+
+// clang-format off
+// clang format can't handle this one at the moment.
+
+/// Overload to create a filtered range with upcast.
+template <typename Iter_1, typename Iter_2, typename Widget_t>
+auto operator|(Range<Iter_1, Iter_2> children,
+               pipe::detail::Dynamic_filter_predicate<Widget_t>)
+{
+    return Range{
+            Transform_iterator{
+                Filter_iterator{ children.begin(), children.end(),
+                [](auto& w) { return dynamic_cast<Widget_t*>(&w) != nullptr; }},
+                [](auto& w) -> auto& {return static_cast<Widget_t&>(w); }
+                }, children.end()};
+}
+// clang-format on
+
+/// Pipe operator for use with Widget::get_descendants.
+template <typename F>
+auto operator|(std::vector<Widget*> const& descendants, F&& op)
+    -> std::vector<Widget*> const&
+{
+    for (auto* d : descendants)
+        *d | op;
+    return descendants;
+}
+
+}  // namespace cppurses
 #endif  // CPPURSES_WIDGET_PIPE_HPP

@@ -31,10 +31,10 @@ int main()
     using namespace cppurses;
     auto app_ptr =
         layout::vertical(
-            textbox("Hello, World!" | foreground(Color::Red) | Trait::Bold) | pipe::name("tb"),
+            textbox("Hello, World!" | fg(Color::Red) | Trait::Bold) | pipe::name("tb"),
             layout::horizontal<Button>(
-                button("Button 1") | pipe::bg(Color::Blue) | pipe::name("b1"),
-                button("Button 2") | pipe::bg(Color::Violet) | pipe::name("b2")
+                button("Button 1") | bg(Color::Blue) | pipe::name("b1"),
+                button("Button 2") | bg(Color::Violet) | pipe::name("b2")
             ) | pipe::fixed_height(1)
         );
     auto& tb = app_ptr->find_child_by_name("tb");

@@ -28,7 +28,7 @@ using namespace cppurses;
 class App : public Widget {
     auto paint_event() -> bool override
     {
-        auto text = L"╔═Hello═World═╝" | foreground(Color::Green) | Trait::Bold;
+        auto text = L"╔═Hello═World═╝" | fg(Color::Green) | Trait::Bold;
         auto p    = Painter{*this};
         p.put(text, {10, 5});
         return Widget::paint_event();
@@ -66,17 +66,17 @@ Inherit from `cppurses::Widget`, creating a new Widget type.
  auto paint_event() -> bool override
 ```
 
-Override the paint_event handler. This method is called every time the Widget
+Override the `paint_event` handler. This method is called every time the Widget
 needs to be re-painted, it is one of many event handlers that Widget has. The
 library internals take care of calling this method when needed.
 
 ---
 
 ```cpp
-auto text = L"╔═Hello═World═╝" | foreground(Color::Green) | Trait::Bold;
+auto text = L"╔═Hello═World═╝" | fg(Color::Green) | Trait::Bold;
 ```
 
-Create a [Glyph_string](glyph-string.md) with a foreground [Color](colors.md)
+Create a [`Glyph_string`](glyph-string.md) with a foreground [Color](colors.md)
 and bold [Trait](traits.md). Traits and Colors are applied with the pipe
 operator, a wide string literal is used for the text.
 

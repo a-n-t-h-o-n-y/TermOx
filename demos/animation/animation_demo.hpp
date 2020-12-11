@@ -65,7 +65,7 @@ class Animated_box : public cppurses::Widget {
    private:
     cppurses::FPS const fps_;
 
-    cppurses::Glyph glyph_ = L'X' | foreground(cppurses::Color::Yellow);
+    cppurses::Glyph glyph_ = L'X' | fg(cppurses::Color::Yellow);
     cppurses::Point xy_    = cppurses::Point{0uL, 0uL};
     int x_direction_       = 1;
     int y_direction_       = 1;

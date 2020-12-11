@@ -46,7 +46,7 @@ class Demo_menu : public cppurses::Menu_stack {
             (
                 checkbox(),
                 checkbox(),
-                textbox("WOW!") | bg(Color::Green),
+                textbox("WOW!") | bg(Color::Green) | Trait::Bold,
                 layout::horizontal
                 (
                     textbox("Left") | bg(Color::Light_blue),

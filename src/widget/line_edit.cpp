@@ -36,7 +36,7 @@ void Line_edit::set_ghost_color(Color c)
 {
     if (not on_initial_)
         return;
-    this->set_contents(this->contents() | foreground(c));
+    this->set_contents(this->contents() | fg(c));
     this->update();
 }
 

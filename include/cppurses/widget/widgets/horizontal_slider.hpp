@@ -26,7 +26,7 @@ class Horizontal_slider : public Widget {
     {
         using namespace pipe;
         *this | fixed_height(1) | strong_focus() |
-            wallpaper(L' ' | background(Color::Light_gray));
+            wallpaper(L' ' | bg(Color::Light_gray));
     }
 
     void set_percent(float percent);

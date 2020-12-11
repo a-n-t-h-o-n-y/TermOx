@@ -38,7 +38,7 @@ class Cycle_stack : public layout::Vertical<> {
 
             left_btn | fixed_width(1) | on_press(slot::previous(cycle_box));
             right_btn | fixed_width(1) | on_press(slot::next(cycle_box));
-            cycle_box | add(Trait::Bold);
+            cycle_box | Trait::Bold;
         }
     };
 

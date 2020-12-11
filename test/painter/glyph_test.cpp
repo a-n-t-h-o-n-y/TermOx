@@ -29,8 +29,8 @@ TEST(GlyphTest, StringConstructor)
 TEST(GlyphTest, StringAndTraitsConstructor)
 {
     EXPECT_NO_THROW(Glyph("#", Trait::Bold));
-    EXPECT_NO_THROW(Glyph("1", background(Color::Blue), Trait::Underline,
-                          Trait::Bold, Trait::Underline));
+    EXPECT_NO_THROW(Glyph("1", bg(Color::Blue), Trait::Underline, Trait::Bold,
+                          Trait::Underline));
     EXPECT_NO_THROW(Glyph("ޒ", Trait::Standout));
 }
 
@@ -48,8 +48,8 @@ TEST(GlyphTest, Symbol)
 TEST(GlyphTest, SetSymbol)
 {
     Glyph g1 = "ੴ";
-    Glyph g2 = {"ആ", Trait::Italic, background(Color::Green)};
-    Glyph g3{"g", foreground(Color::Red), Trait::Dim};
+    Glyph g2 = {"ആ", Trait::Italic, bg(Color::Green)};
+    Glyph g3{"g", fg(Color::Red), Trait::Dim};
 
     EXPECT_EQ("ੴ", g1.str());
     EXPECT_EQ("ആ", g2.str());
@@ -67,15 +67,15 @@ TEST(GlyphTest, SetSymbol)
 TEST(GlyphTest, SetBrush)
 {
     Glyph g1{"ៀ"};
-    Glyph g2("ᯣ", Trait::Italic, background(Color::White));
+    Glyph g2("ᯣ", Trait::Italic, bg(Color::White));
 
     EXPECT_EQ(Brush{}, g1.brush());
-    EXPECT_EQ((Brush{Trait::Italic, background(Color::White)}), g2.brush());
+    EXPECT_EQ((Brush{Trait::Italic, bg(Color::White)}), g2.brush());
 
     g2.brush().set_foreground(Color::Yellow);
     g2.brush().add_traits(Trait::Standout);
 
-    EXPECT_EQ((Brush{Trait::Standout, Trait::Italic, background(Color::White),
-                     foreground(Color::Yellow)}),
+    EXPECT_EQ((Brush{Trait::Standout, Trait::Italic, bg(Color::White),
+                     fg(Color::Yellow)}),
               g2.brush());
 }

@@ -11,11 +11,11 @@ int main() { return cppurses::System{}.run<demos::Demos>(); }
 //     using namespace cppurses;
 //     auto app_ptr =
 //         layout::vertical(
-//             textbox(std::to_string(sizeof(Widget)) | foreground(Color::Red) | Trait::Bold) |
-//             pipe::name("tb"), layout::horizontal<Button>(
-//                 button("Button 1") | pipe::bg(Color::Blue) |
+//             textbox(std::to_string(sizeof(Widget)) | fg(Color::Red) |
+//             Trait::Bold) | pipe::name("tb"), layout::horizontal<Button>(
+//                 button("Button 1") | bg(Color::Blue) |
 //                 pipe::name("b1"), button("Button 2") |
-//                 pipe::bg(Color::Violet) | pipe::name("b2")
+//                 bg(Color::Violet) | pipe::name("b2")
 //             ) | pipe::fixed_height(1)
 //         );
 //     // auto& tb = app_ptr->find_child_by_name("tb");

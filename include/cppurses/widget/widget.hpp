@@ -98,7 +98,7 @@ class Widget {
     Size_policy height_policy;
 
     /// A Brush that is applied to every Glyph painted by this Widget.
-    Brush brush{background(Color::Background), foreground(Color::Foreground)};
+    Brush brush{bg(Color::Background), fg(Color::Foreground)};
 
     /// Slots can track this object's lifetime to disable Slot invocations.
     sl::Lifetime lifetime;

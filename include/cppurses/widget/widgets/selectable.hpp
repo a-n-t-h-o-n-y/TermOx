@@ -44,8 +44,8 @@ class Selectable<Widget_t, void, void> : public Widget_t {
     /// Change visual to mark as selected.
     void select()
     {
-        *this | pipe::add(Trait::Standout);
-        *this | pipe::descendants() | pipe::add(Trait::Standout);
+        *this | Trait::Standout;
+        *this | pipe::descendants() | Trait::Standout;
     }
 
     /// Change visual to mark as unselected.

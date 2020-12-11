@@ -158,10 +158,10 @@ class Vertical_slider : public Widget {
     bool inverted_ = false;
 
     // candidate for struct
-    Glyph_string upper_     = {" ", background(Color::Black)};
+    Glyph_string upper_     = {" ", bg(Color::Black)};
     bool upper_repeats_     = true;
     Glyph_string indicator_ = "░▒▓█";
-    Glyph_string lower_     = {" ", background(Color::White)};
+    Glyph_string lower_     = {" ", bg(Color::White)};
     bool lower_repeats_     = true;
 
    private:

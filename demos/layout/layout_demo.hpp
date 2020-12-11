@@ -25,14 +25,14 @@ class Meta_widget : public cppurses::Widget {
     void select()
     {
         using namespace cppurses;
-        *this | pipe::bg(Color::White) | pipe::fg(Color::Black);
+        *this | bg(Color::White) | fg(Color::Black);
         this->update();
     }
 
     void unselect()
     {
         using namespace cppurses;
-        *this | pipe::bg(Color::Black) | pipe::fg(Color::White);
+        *this | bg(Color::Black) | fg(Color::White);
         this->update();
     }
 

@@ -23,8 +23,8 @@ class Thin_btn : public cppurses::Button {
     Thin_btn(cppurses::Glyph_string name) : Button{std::move(name)}
     {
         using namespace cppurses::pipe;
-        *this | fixed_height(1uL) | cppurses::pipe::bg(color::Light_green) |
-            cppurses::pipe::fg(color::Teal);
+        *this | fixed_height(1uL) | cppurses::bg(color::Light_green) |
+            cppurses::fg(color::Teal);
     }
 };
 

@@ -112,7 +112,7 @@ class GoL_widget : public cppurses::Widget {
     {
         grid_ = !grid_;
         if (grid_)
-            this->set_wallpaper(L'┼' | foreground(color::Teal));
+            this->set_wallpaper(L'┼' | fg(color::Teal));
         else
             this->set_wallpaper(dead_cell);
         this->update();
@@ -298,7 +298,7 @@ class GoL_widget : public cppurses::Widget {
             for (auto y = 0uL; y < height; ++y) {
                 auto const coords = transform_to_engine({x, y});
                 if (engine_.alive_at(coords))
-                    p.put(L'█' | foreground(cell_color_), {x, y});
+                    p.put(L'█' | fg(cell_color_), {x, y});
             }
         }
     }
@@ -312,7 +312,7 @@ class GoL_widget : public cppurses::Widget {
             for (auto y = 0uL; y < height; ++y) {
                 auto const braille = braille_at(cppurses::Point{x, y});
                 if (braille != L'\0')
-                    p.put(braille | foreground(cell_color_), {x, y});
+                    p.put(braille | fg(cell_color_), {x, y});
             }
         }
     }

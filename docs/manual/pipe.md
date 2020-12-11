@@ -34,7 +34,7 @@ filter(F&& predicate);
 ```cpp
 using namespace cppurses::pipe;
 my_widget | children() | filter([](const& w) { return w.brush.has_trait(Trait::Bold); })
-          | wallpaper(L'#' | foreground(Color::Violet));
+          | wallpaper(L'#' | fg(Color::Violet));
 ```
 
 Filtering can also happen based on the Widget's type. This filter will only

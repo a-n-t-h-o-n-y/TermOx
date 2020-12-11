@@ -43,16 +43,16 @@ struct Composites_old : App {
         // *this | children() | fixed_height(4);
         *this | descendants() | bg(Color::Blue);
 
-        save | remove_background();  // TODO maybe clear_bg?
+        save | remove_background();
         txbx | remove_foreground();
 
         // save | add_trait(Trait::Bold, Trait::Underline);
         // save.brush.add_traits(Trait::Bold, Trait::Underline);
-        save | add(Trait::Bold) | add(Trait::Underline);
-        load | add(Trait::Bold) | add(Trait::Underline);
+        save | Trait::Bold | Trait::Underline;
+        load | Trait::Bold | Trait::Underline;
 
-        // save | add(Trait::Bold) | add(Trait::Underline);
-        // save | add(Trait::Bold | Trait::Underline);
+        // save | Trait::Bold | Trait::Underline;
+        // save | Trait::Bold | Trait::Underline;
 
         // save | remove_traits(Trait::Underline);
         save | discard(Trait::Underline);
@@ -74,7 +74,7 @@ struct Composites_old : App {
 
         using namespace std::literals;
         save | animate(34ms) | wallpaper(L'X') | wallpaper(std::nullopt);
-        load | wallpaper({L'-', foreground(Color::Red)});
+        load | wallpaper({L'-', fg(Color::Red)});
         load | wallpaper_without_brush() | wallpaper_with_brush();
 
         load | show_cursor() | put_cursor({2, 5});

@@ -87,16 +87,13 @@ auto generate_color_blocks() -> Glyph_string
 
     auto str = Glyph_string{};
     for (wchar_t rect : rectangles) {
-        for (auto i = std::size_t{0}; i < colors.size(); ++i) {
-            for (auto j = std::size_t{i + 1}; j < colors.size(); ++j) {
-                str.append(
-                    Glyph{rect, background(colors[i]), foreground(colors[j])});
-            }
+        for (auto i = 0uL; i < colors.size(); ++i) {
+            for (auto j = i + 1uL; j < colors.size(); ++j)
+                str.append(Glyph{rect, bg(colors[i]), fg(colors[j])});
         }
     }
-    for (Color c : colors) {
-        str.append(L'█'_g | foreground(c));
-    }
+    for (Color c : colors)
+        str.append(L'█'_g | fg(c));
     return str;
 }
 

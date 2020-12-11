@@ -21,9 +21,9 @@ class GoL_demo : public cppurses::layout::Horizontal<> {
 
    public:
     Side_panel_accordion& side_panel_accordion =
-        this->make_child<Side_panel_accordion>(
-            {L"Settings", cppurses::Align::Center,
-             L'│' | foreground(color::Light_green)});
+        this->make_child<Side_panel_accordion>({L"Settings",
+                                                cppurses::Align::Center,
+                                                L'│' | fg(color::Light_green)});
     Side_panel& side_panel  = side_panel_accordion.wrapped();
     GoL_widget& gol_display = this->make_child<GoL_widget>();
 

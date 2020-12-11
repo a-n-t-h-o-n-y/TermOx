@@ -14,12 +14,11 @@ Traits.
 #### `Brush(Traits...)`
 
 The constructor will take any number of Traits and background and foreground
-colors. Calling the `background(Color)` and `foreground(Color)` methods will
-return a color type that is marked as either a background or foreground color,
-respectively.
+colors. Calling the `bg(Color)` and `fg(Color)` methods will return a color type
+that is marked as either a background or foreground color, respectively.
 
 ```cpp
-auto b = Brush{Trait::Bold, background(Color::Dark_gray), foreground(Color::Yellow)};
+auto b = Brush{Trait::Bold, bg(Color::Dark_gray), fg(Color::Yellow)};
 ```
 
 #### `void add_traits(Traits...)`
@@ -52,11 +51,11 @@ Removes all Traits, not Colors.
 
 ## Pipe Methods
 
-- `bg(Color)`
-- `fg(Color)`
+- `operator|(..., Background_color)`
+- `operator|(..., Foreground_color)`
 - `remove_background()`
 - `remove_foreground()`
-- `add(Trait)`
+- `operator|(..., Trait)`
 - `discard(Trait)`
 - `clear_traits()`
 

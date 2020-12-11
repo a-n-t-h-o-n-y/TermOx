@@ -45,8 +45,8 @@ fancy_x | Trait::Italic;
 ### Colors
 
 ```cpp
-auto const red_x     = L'X' | foreground(Color::Red);
-auto const bg_blue_x = L'X' | background(Color::Blue);
+auto const red_x     = L'X' | fg(Color::Red);
+auto const bg_blue_x = L'X' | bg(Color::Blue);
 ```
 
 ## See Also

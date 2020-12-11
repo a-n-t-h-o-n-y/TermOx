@@ -129,7 +129,7 @@ void Paint_area::disable_erase()
 
 void Paint_area::enable_grid()
 {
-    this->set_wallpaper(L'┼'_g | foreground(Color::Dark_gray));
+    this->set_wallpaper(L'┼'_g | fg(Color::Dark_gray));
     this->update();
 }
 

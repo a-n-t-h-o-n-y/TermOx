@@ -14,8 +14,8 @@ TEST(BrushTest, Constructor)
 {
     Brush b1;
     Brush b2(Trait::Bold);
-    Brush b3(background(Color::Black), foreground(Color::White), Trait::Italic);
-    Brush b4{Trait::Underline, Trait::Italic, background(Color::Red)};
+    Brush b3(ng(Color::Black), fg(Color::White), Trait::Italic);
+    Brush b4{Trait::Underline, Trait::Italic, bg(Color::Red)};
 
     EXPECT_FALSE(bool(b1.background_color()));
     EXPECT_FALSE(bool(b1.foreground_color()));
@@ -39,7 +39,7 @@ TEST(BrushTest, Constructor)
 
 TEST(BrushTest, RemoveTrait)
 {
-    Brush b(Trait::Bold, foreground(Color::Green), Trait::Italic, Trait::Bold,
+    Brush b(Trait::Bold, fg(Color::Green), Trait::Italic, Trait::Bold,
             Trait::Underline);
     EXPECT_EQ(3, b.traits().size());
     b.remove_traits(Trait::Italic);

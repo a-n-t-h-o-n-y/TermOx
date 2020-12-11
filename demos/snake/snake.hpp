@@ -502,47 +502,42 @@ class Game_space : public cppurses::Widget {
         auto painter = cppurses::Painter{*this};
         for (auto const& p : engine_.apples) {
             // TODO store as static constexpr(?) glyph
-            painter.put(L'@' | cppurses::Trait::Bold | foreground(color::Apple),
-                        p);
+            painter.put(L'@' | cppurses::Trait::Bold | fg(color::Apple), p);
         }
 
         // Body
         for (auto const& p : engine_.snake)
-            painter.put(L'█' | foreground(color::Snake), p);
+            painter.put(L'█' | fg(color::Snake), p);
         // TODO Store snake_body as glyph
 
         // Tail
         if (engine_.snake.size() > 3) {
             // TODO store as static glyphs
-            painter.put(L'░' | foreground(color::Snake), engine_.snake[0]);
-            painter.put(L'▒' | foreground(color::Snake), engine_.snake[1]);
-            painter.put(L'▓' | foreground(color::Snake), engine_.snake[2]);
+            painter.put(L'░' | fg(color::Snake), engine_.snake[0]);
+            painter.put(L'▒' | fg(color::Snake), engine_.snake[1]);
+            painter.put(L'▓' | fg(color::Snake), engine_.snake[2]);
         }
         else if (engine_.snake.size() == 3) {
-            painter.put(L'▒' | foreground(color::Snake), engine_.snake[0]);
-            painter.put(L'▓' | foreground(color::Snake), engine_.snake[1]);
+            painter.put(L'▒' | fg(color::Snake), engine_.snake[0]);
+            painter.put(L'▓' | fg(color::Snake), engine_.snake[1]);
         }
         else if (engine_.snake.size() == 2) {
-            painter.put(L'▓' | foreground(color::Snake), engine_.snake[0]);
+            painter.put(L'▓' | fg(color::Snake), engine_.snake[0]);
         }
 
         // Head
         switch (engine_.snake.get_direction()) {
             case Snake::Direction::Up:
-                painter.put(L'🭯' | foreground(color::Snake),
-                            engine_.snake.head());
+                painter.put(L'🭯' | fg(color::Snake), engine_.snake.head());
                 break;
             case Snake::Direction::Down:
-                painter.put(L'🭭' | foreground(color::Snake),
-                            engine_.snake.head());
+                painter.put(L'🭭' | fg(color::Snake), engine_.snake.head());
                 break;
             case Snake::Direction::Left:
-                painter.put(L'🭮' | foreground(color::Snake),
-                            engine_.snake.head());
+                painter.put(L'🭮' | fg(color::Snake), engine_.snake.head());
                 break;
             case Snake::Direction::Right:
-                painter.put(L'🭬' | foreground(color::Snake),
-                            engine_.snake.head());
+                painter.put(L'🭬' | fg(color::Snake), engine_.snake.head());
                 break;
         }
     }
@@ -569,9 +564,8 @@ class Instructions : public cppurses::Text_display {
     static auto get_text() -> cppurses::Glyph_string
     {
         using namespace cppurses;
-        auto const standout =
-            Brush{foreground(color::Instruction_text), Trait::Bold};
-        auto result = Glyph_string{L"Start/Stop "};
+        auto const standout = Brush{fg(color::Instruction_text), Trait::Bold};
+        auto result         = Glyph_string{L"Start/Stop "};
         result.append(L"Space Bar" | standout);
         result.append(L" - Movement ");
         result.append(L"Arrow Keys" | standout);

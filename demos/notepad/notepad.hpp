@@ -77,7 +77,7 @@ class Labeled_color_select
             [this](auto const& pal) { this->set_heights(pal); });
 
         this->set_heights(System::terminal.current_palette());
-        this->label | add(Trait::Bold) | align_center();
+        this->label | Trait::Bold | align_center();
     }
 
    private:
@@ -191,13 +191,13 @@ class File_status_bar
     void fail(cppurses::Glyph_string message)
     {
         using namespace cppurses;
-        this->set_text(std::move(message | foreground(Color::Red)));
+        this->set_text(std::move(message | fg(Color::Red)));
     }
 
     void success(cppurses::Glyph_string message)
     {
         using namespace cppurses;
-        this->set_text(std::move(message | foreground(Color::Light_green)));
+        this->set_text(std::move(message | fg(Color::Light_green)));
     }
 };
 
