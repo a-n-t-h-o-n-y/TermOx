@@ -16,6 +16,7 @@
 #include <cppurses/widget/point.hpp>
 #include <cppurses/widget/widget.hpp>
 #include <cppurses/widget/widgets/button.hpp>
+#include <cppurses/widget/widgets/textbox.hpp>
 
 namespace cppurses {
 
@@ -349,6 +350,21 @@ void link(Scrollbar<Layout_t>& scrollbar,
         layout.mouse_wheel_scrolled.connect(
             [&](auto const& mouse) { scrollbar.handle_wheel(mouse.button); });
     }
+}
+
+template <typename Layout_t>
+void link(Scrollbar<Layout_t>& scrollbar, Textbox& textbox)
+{
+    scrollbar.set_size(textbox.line_count());
+
+    textbox.line_count_changed.connect(
+        [&](std::size_t lines) { scrollbar.set_size(lines); });
+
+    scrollbar.new_position.connect(
+        [&](std::size_t p) { textbox.set_top_line(p); });
+
+    textbox.scrolled_to.connect(
+        [&](std::size_t n) { scrollbar.set_position(n); });
 }
 
 }  // namespace cppurses

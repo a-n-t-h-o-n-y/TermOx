@@ -87,6 +87,7 @@ void Text_display::scroll_up(std::size_t n)
         top_line_ -= n;
     this->update();
     scrolled_up(n);
+    scrolled_to(top_line_);
 }
 
 void Text_display::scroll_down(std::size_t n)
@@ -97,6 +98,7 @@ void Text_display::scroll_down(std::size_t n)
         top_line_ += n;
     this->update();
     scrolled_down(n);
+    scrolled_to(top_line_);
 }
 
 auto Text_display::index_at(Point position) const -> std::size_t
@@ -138,7 +140,7 @@ auto Text_display::display_position(std::size_t index) const -> Point
 
 auto Text_display::paint_event() -> bool
 {
-    Painter p{*this};
+    auto p      = Painter{*this};
     auto line_n = 0uL;
     auto paint  = [&p, &line_n, this](Line_info const& line) {
         auto const sub_begin = std::begin(this->contents_) + line.start_index;
@@ -209,6 +211,7 @@ void Text_display::update_display(std::size_t from_line)
     // Reset top_line_ if out of bounds of new display.
     if (this->top_line() >= display_state_.size())
         top_line_ = this->last_line();
+    line_count_changed(display_state_.size());
 }
 
 auto Text_display::line_at(std::size_t index) const -> std::size_t

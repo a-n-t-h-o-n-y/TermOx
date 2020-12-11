@@ -29,8 +29,14 @@ class Text_display : public Widget {
     /// Emitted when text is scrolled down. Sends number of lines scrolled by.
     sl::Signal<void(std::size_t n)> scrolled_down;
 
+    /// Emitted when text is scrolled, sends the top line.
+    sl::Signal<void(std::size_t n)> scrolled_to;
+
     /// Emitted when contents are modified. Sends a reference to the contents.
     sl::Signal<void(Glyph_string const&)> contents_modified;
+
+    /// Emitted when total line count changes.
+    sl::Signal<void(std::size_t)> line_count_changed;
 
    public:
     /// Construct a Text_display with initial Glyph_string \p contents.
@@ -129,6 +135,17 @@ class Text_display : public Widget {
         return difference;
     }
 
+    /// Return the total number of lines in display_state_.
+    auto line_count() const -> std::size_t { return display_state_.size(); }
+
+    /// Set the top line, by row index.
+    void set_top_line(std::size_t n)
+    {
+        if (n < display_state_.size())
+            top_line_ = n;
+        this->update();
+    }
+
     /// Return the index into the contents from a physical Point on the Widget.
     /** If \p position is past any text on the corresponding line, then return
      *  index of the last Glyph on that line. If Point is past displayed lines,
@@ -180,9 +197,6 @@ class Text_display : public Widget {
 
     /// Return the index into display_state_ of the last line.
     auto last_line() const -> std::size_t { return display_state_.size() - 1; }
-
-    /// Return the total number of lines in display_state_.
-    auto line_count() const -> std::size_t { return display_state_.size(); }
 
     /// Return the index of the first Glyph at line number \p line.
     auto first_index_at(std::size_t line) const -> std::size_t
