@@ -80,7 +80,7 @@ class Demos : public cppurses::layout::Vertical<> {
     // TODO add a back button to left side of titlebar that appears in demos
     using Titlebar = cppurses::Titlebar;
 
-    Titlebar& title_ = this->make_child<Titlebar>("~ GlyphBox ~");
+    Titlebar& title_ = this->make_child<Titlebar>("~ TermOx ~");
     Demo_menu& menu  = this->make_child<Demo_menu>();
 
    public:
