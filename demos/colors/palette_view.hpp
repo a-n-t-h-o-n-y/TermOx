@@ -41,7 +41,7 @@ namespace colors {
 
 class Palette_picker : public cppurses::Labeled_cycle_box {
    public:
-    sl::Signal<void(cppurses::Color_palette)> palette_picked;
+    sl::Signal<void(cppurses::Palette)> palette_picked;
 
    public:
     Palette_picker() : Labeled_cycle_box{"Palette"}
@@ -76,7 +76,7 @@ class Palette_picker : public cppurses::Labeled_cycle_box {
    private:
     /// Adds an entry to the cycle box for the given palette with \p title.
     void append_option(cppurses::Glyph_string title,
-                       cppurses::Color_palette const& pal)
+                       cppurses::Palette const& pal)
     {
         this->cycle_box.add_option(std::move(title)).connect([this, pal]() {
             palette_picked(pal);

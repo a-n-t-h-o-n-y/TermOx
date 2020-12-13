@@ -15,7 +15,7 @@ inline auto constexpr White       = cppurses::Color::Foreground;
 
 }  // namespace color
 
-inline auto const gol_palette = cppurses::Color_palette{
+inline auto const gol_palette = cppurses::Palette{
     /* clang-format off */
         {color::Black,       cppurses::ANSI{16}, 0x0c2e44},
         {color::Light_green, cppurses::ANSI{17}, 0x5ac54f},

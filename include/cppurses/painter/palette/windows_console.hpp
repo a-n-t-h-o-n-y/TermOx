@@ -23,7 +23,7 @@ constexpr auto White       = Color::Foreground;
 
 /// New Windows Console 16 Color Palette
 /** https://lospec.com/palette-list/campbell-new-windows-console */
-inline auto const palette = Color_palette{
+inline auto const palette = Palette{
     /* clang-format off */
     {Black,       ANSI{16}, 0x0c0c0c},
     {Red,         ANSI{17}, 0xc50f1f},

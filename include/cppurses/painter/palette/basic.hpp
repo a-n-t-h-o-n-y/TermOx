@@ -22,7 +22,7 @@ constexpr auto Aqua    = Color{14};
 constexpr auto White   = Color::Foreground;
 
 /// The Built-in Default Terminal 16 Color Palette
-inline auto const palette = Color_palette{
+inline auto const palette = Palette{
     /* clang-format off */
     {Black,   ANSI{0}},
     {Maroon,  ANSI{1}},

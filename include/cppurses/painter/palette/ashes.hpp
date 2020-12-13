@@ -16,7 +16,7 @@ constexpr auto Gray        = Color{8};
 constexpr auto White       = Color::Foreground;
 
 /// Ashes scheme by Jannik Siebert (https://github.com/janniks)
-inline auto const palette = Color_palette{
+inline auto const palette = Palette{
     /* clang-format off */
     {Black,       ANSI{16}, 0x1c2023},
     {Red,         ANSI{17}, 0xc795ae},

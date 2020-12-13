@@ -96,7 +96,7 @@ class Animated_box : public cppurses::Widget {
 };
 
 /// Contains a few Animated_boxes at various animation rates.
-auto build_demo() -> std::unique_ptr<cppurses::Widget>
+inline auto build_demo() -> std::unique_ptr<cppurses::Widget>
 {
     using namespace cppurses;
     return layout::horizontal<Animated_box>(

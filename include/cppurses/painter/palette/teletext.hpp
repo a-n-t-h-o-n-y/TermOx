@@ -14,7 +14,7 @@ constexpr auto Yellow  = Color{3};
 constexpr auto White   = Color::Foreground;
 
 /// World System Teletext Level 1 Color Palette
-inline auto const palette = Color_palette{
+inline auto const palette = Palette{
     /* clang-format off */
     {Black,   ANSI{16}, 0x000000},
     {Blue,    ANSI{17}, 0x0000ff},

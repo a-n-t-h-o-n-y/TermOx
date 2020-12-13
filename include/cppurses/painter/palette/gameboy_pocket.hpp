@@ -10,7 +10,7 @@ constexpr auto Light_gray = Color{7};
 constexpr auto White      = Color::Foreground;
 
 /// Gameboy Pocket Grayscale Color Palette
-inline auto const palette = Color_palette{
+inline auto const palette = Palette{
     /* clang-format off */
     {Black,      ANSI{16}, 0x000000},
     {Dark_gray,  ANSI{17}, 0x545454},

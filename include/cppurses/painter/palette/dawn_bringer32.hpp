@@ -39,7 +39,7 @@ constexpr auto Pesto          = Color{31};
 
 /// Dawn Bringer 16 Color Palette
 /** https://lospec.com/palette-list/dawnbringer-32 */
-inline auto const palette = Color_palette{
+inline auto const palette = Palette{
     /* clang-format off */
     {Black,          ANSI{16}, 0x000000},
     {Steel_gray,     ANSI{17}, 0x222034},

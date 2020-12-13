@@ -22,7 +22,7 @@ constexpr auto White       = Color::Foreground;
 
 /// MSX Home Computer 15 Color Palette
 /** https://lospec.com/palette-list/msx */
-inline auto const palette = Color_palette{
+inline auto const palette = Palette{
     /* clang-format off */
     {Black,       ANSI{16}, 0x000000},
     {Dark_red,    ANSI{17}, 0xb75e51},

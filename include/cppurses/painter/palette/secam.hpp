@@ -15,7 +15,7 @@ constexpr auto White  = Color::Foreground;
 
 /// SECAM Color Television 8 Color Palette
 /** https://lospec.com/palette-list/secam */
-inline auto const palette = Color_palette{
+inline auto const palette = Palette{
     /* clang-format off */
     {Black,  ANSI{16}, 0x000000},
     {Red,    ANSI{17}, 0xf03c79},

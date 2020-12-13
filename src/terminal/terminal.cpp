@@ -127,7 +127,7 @@ void Terminal::set_background(Glyph const& tile)
         this->repaint_all();
 }
 
-void Terminal::set_palette(Color_palette colors)
+void Terminal::set_palette(Palette colors)
 {
     if (!is_initialized_ || !this->has_color())
         return;

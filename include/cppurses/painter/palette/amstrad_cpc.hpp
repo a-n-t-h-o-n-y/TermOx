@@ -34,7 +34,7 @@ constexpr auto Eggplant     = Color{26};
 
 /// Amstrad CPC 27 Color Palette
 /** https://lospec.com/palette-list/amstrad-cpc */
-inline auto const palette = Color_palette{
+inline auto const palette = Palette{
     /* clang-format off */
     {Black,        ANSI{16}, 0x040404},
     {Maroon,       ANSI{17}, 0x800000},

@@ -16,7 +16,7 @@ constexpr auto Gray   = Color{8};
 constexpr auto White  = Color::Foreground;
 
 /// Atelier Savanna scheme by Bram de Haan (http://atelierbramdehaan.nl)
-inline auto const palette = Color_palette{
+inline auto const palette = Palette{
     /* clang-format off */
     {Black,  ANSI{16}, 0x171c19},
     {Rust,   ANSI{17}, 0xb16139},

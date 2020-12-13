@@ -14,4 +14,4 @@ This will rotate through the Hue of the HSL color wheel, with the given
 rotate through the entire wheel, but rather the period of time between
 increments(by one) of the Hue.
 
-This creates a `Dynamic_color` that can be used in a `Color_palette`.
+This creates a `Dynamic_color` that can be used in a `Palette`.

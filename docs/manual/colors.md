@@ -39,7 +39,7 @@ struct:
 - True Color
 - Dynamic Color
 
-All three can be mixed together in a `Color_palette`, which is a type alias for
+All three can be mixed together in a `Palette`, which is a type alias for
 `std::vector<Color_definition>`.
 
 ### ANSI/XTERM Values
@@ -97,7 +97,7 @@ auto const fd  = Color_definition{Color{46}, ANSI{101},
 
 ### Example Color Palette
 
-Creating a `Color_palette` with each of the three `Color_definition` types and
+Creating a `Palette` with each of the three `Color_definition` types and
 custom Color names:
 
 ```cpp
@@ -107,7 +107,7 @@ constexpr auto Yellow  = Color{0};
 constexpr auto Blue    = Color{1};
 constexpr auto Rainbow = Color{2};
 
-inline auto const palette = Color_palette {
+inline auto const palette = Palette {
     {Yellow,  ANSI{228}                     },
     {Blue,    ANSI{16}, True_color{0x20283d}},
     {Rainbow, ANSI{17}, dynamic::rainbow()  }

@@ -23,7 +23,7 @@ constexpr auto White       = Color::Foreground;
 
 /// Dawn Bringer 16 Color Palette
 /** https://lospec.com/palette-list/dawnbringer-16 */
-inline auto const palette = Color_palette{
+inline auto const palette = Palette{
     /* clang-format off */
     {Black,       ANSI{16}, 0x140c1c},
     {Dark_red,    ANSI{17}, 0x442434},

@@ -11,7 +11,7 @@ constexpr auto White = Color::Foreground;
 
 /// EN 4 Color Palette
 /** https://lospec.com/palette-list/en4 */
-inline auto const palette = Color_palette{
+inline auto const palette = Palette{
     /* clang-format off */
     {Blue,  ANSI{16}, 0x20283d},
     {Peach, ANSI{17}, 0xe5b083},

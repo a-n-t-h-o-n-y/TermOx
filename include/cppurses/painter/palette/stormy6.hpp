@@ -13,7 +13,7 @@ constexpr auto White  = Color::Foreground;
 
 /// Stormy 6 Color Palette
 /** https://lospec.com/palette-list/stormy-6 */
-inline auto const palette = Color_palette{
+inline auto const palette = Palette{
     /* clang-format off */
     {Black,  ANSI{16}, 0x242828},
     {Green,  ANSI{17}, 0x7f9860},

@@ -82,7 +82,7 @@ class Labeled_color_select
 
    private:
     /// Sets Widget heights based on number of colors in palette.
-    void set_heights(cppurses::Color_palette const& pal)
+    void set_heights(cppurses::Palette const& pal)
     {
         using namespace cppurses::pipe;
         auto const height = std::ceil(pal.size() / 8.) + 1;

@@ -13,7 +13,7 @@ namespace cppurses {
 
 class Terminal {
    public:
-    sl::Signal<void(Color_palette const&)> palette_changed;
+    sl::Signal<void(Palette const&)> palette_changed;
 
    public:
     /// Initializes the terminal screen into curses mode.
@@ -48,7 +48,7 @@ class Terminal {
     auto background() const -> Glyph const& { return background_; }
 
     /// Change Color definitions.
-    void set_palette(Color_palette colors);
+    void set_palette(Palette colors);
 
     /// Append a Color_definition::Value_t to the current color palette.
     /** Returns the Color that \p def was paired with. Picks the Color by
@@ -56,7 +56,7 @@ class Terminal {
     auto palette_append(Color_definition::Value_t value) -> Color;
 
     /// Return a copy of the currently set ANSI color palette.
-    auto current_palette() const -> Color_palette const& { return palette_; }
+    auto current_palette() const -> Palette const& { return palette_; }
 
     /// Set a single ANSI Color value.
     void set_color_definition(Color c, ANSI a, std::monostate);
@@ -117,7 +117,7 @@ class Terminal {
     }
 
    private:
-    Color_palette palette_;
+    Palette palette_;
     std::chrono::milliseconds refresh_rate_{33};
     Dynamic_color_engine dynamic_color_engine_;
     Glyph background_    = L' ';

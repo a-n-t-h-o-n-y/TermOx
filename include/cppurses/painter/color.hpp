@@ -231,7 +231,7 @@ struct Dynamic_color {
 
 /* ----------------------------- Color Palette -------------------------------*/
 
-/// Used to define a single color for a Color_palette.
+/// Used to define a single color for a Palette.
 class Color_definition {
    public:
     using Value_t = std::variant<std::monostate, True_color, Dynamic_color>;
@@ -253,13 +253,13 @@ class Color_definition {
 
 /// Max size of 181 colors in a palette
 /** 181 colors will need 32,761 pairs, max_pairs in ncurses is 32,767. */
-using Color_palette = std::vector<Color_definition>;
+using Palette = std::vector<Color_definition>;
 
-/// Create a Color_palette by pairing Color_definition::Value_t with Colors.
+/// Create a Palette by pairing Color_definition::Value_t with Colors.
 /** Colors are paired in order Color_definition::Value_t's are added,
  *  starting with Color{0}. */
 template <typename... ColorValues>
-static auto make_palette(ColorValues... values) -> Color_palette
+static auto make_palette(ColorValues... values) -> Palette
 {
     auto c = Color::Value_t{0};
     auto a = ANSI::Value_t{16};

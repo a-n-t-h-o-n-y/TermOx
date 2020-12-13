@@ -10,7 +10,7 @@ constexpr auto Green_3 = Color{3};
 constexpr auto Green_4 = Color::Foreground;
 
 /// Original Gameboy Greenscale 4 Color Palette
-inline auto const palette = Color_palette{
+inline auto const palette = Palette{
     /* clang-format off */
     {Green_1, ANSI{16}, 0x0f380f},
     {Green_2, ANSI{17}, 0x306230},

@@ -62,7 +62,7 @@ constexpr auto Boulder_2         = Color{54};
 
 /// Nintendo Entertainment System Color Palette
 /** https://lospec.com/palette-list/nintendo-entertainment-system */
-inline auto const palette = Color_palette{
+inline auto const palette = Palette{
     /* clang-format off */
     {Black,             ANSI{16}, 0x000000},
     {Alabaster,         ANSI{17}, 0xf8f8f8},

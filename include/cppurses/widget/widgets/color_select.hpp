@@ -56,7 +56,7 @@ class Color_select : public layout::Vertical<Color_line> {
     }
 
    private:
-    void set_palette(Color_palette const& pal)
+    void set_palette(Palette const& pal)
     {
         this->delete_all_children();
         auto const size           = pal.size();

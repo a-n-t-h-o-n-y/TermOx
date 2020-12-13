@@ -22,7 +22,7 @@ constexpr auto White        = Color::Foreground;
 
 /// Apple II 15 Color Palette
 /** https://lospec.com/palette-list/apple-ii */
-inline auto const palette = Color_palette{
+inline auto const palette = Palette{
     /* clang-format off */
     {Black,        ANSI{16}, 0x000000},
     {Dark_pink,    ANSI{17}, 0x843d52},

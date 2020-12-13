@@ -14,7 +14,7 @@ constexpr auto Teal   = Color{6};
 constexpr auto Silver = Color::Foreground;
 
 /// The Built-in Default Terminal 8 Color Palette
-inline auto const palette = Color_palette{
+inline auto const palette = Palette{
     /* clang-format off */
     {Black,   ANSI{0}},
     {Maroon,  ANSI{1}},

@@ -23,7 +23,7 @@ constexpr auto White       = Color::Foreground;
 
 /// Commodore 64 16 Color Palette
 /** https://lospec.com/palette-list/commodore-64 */
-inline auto const palette = Color_palette{
+inline auto const palette = Palette{
     /* clang-format off */
     {Black,       ANSI{16}, 0x000000},
     {Dark_red,    ANSI{17}, 0x813338},

@@ -86,7 +86,7 @@ auto const latin_1 = Glyph_string{
     L"Å Æ Ç È É Ê Ë Ì Í Î Ï Ð Ñ Ò Ó Ô Õ Ö × Ø Ù Ú Û Ü Ý Þ ß à á â ã ä å æ ç è "
     L"é ê ë ì í î ï ð ñ ò ó ô õ ö ÷ ø ù ú û ü ý þ ÿ"};
 
-auto color_blocks(Color_palette const& p) -> Glyph_string
+auto color_blocks(Palette const& p) -> Glyph_string
 {
     auto constexpr blocks = std::array{L'░', L'▒', L'▓', L'█'};
 
@@ -101,7 +101,7 @@ auto color_blocks(Color_palette const& p) -> Glyph_string
     return result;
 }
 
-auto color_shapes(Color_palette const& p) -> Glyph_string
+auto color_shapes(Palette const& p) -> Glyph_string
 {
     auto constexpr shapes = std::array{
         L'🮌', L'🮍', L'🮎', L'🮏', L'🮜', L'🮝',
@@ -140,13 +140,13 @@ auto populated_glyph_selector() -> std::unique_ptr<Glyph_selector>
     result->add_sheet(L"Latin-1", latin_1);
 
     auto const build_blocks = cppurses::slot::link_lifetimes(
-        [&blocks](cppurses::Color_palette const& p) {
+        [&blocks](cppurses::Palette const& p) {
             blocks.set_contents(color_blocks(p));
         },
         blocks);
 
     auto const build_shapes = cppurses::slot::link_lifetimes(
-        [&shapes](cppurses::Color_palette const& p) {
+        [&shapes](cppurses::Palette const& p) {
             shapes.set_contents(color_shapes(p));
         },
         shapes);
