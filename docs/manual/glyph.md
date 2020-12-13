@@ -18,12 +18,6 @@ template <typename... Traits>
 constexpr Glyph(wchar_t sym, Traits&&... traits);
 ```
 
-With the user defined literal `_g`:
-
-```cpp
-auto const circle = L'O'_g;
-```
-
 With `wchar_t` in combination with the pipe operator:
 
 ```cpp

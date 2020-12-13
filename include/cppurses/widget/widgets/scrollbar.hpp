@@ -78,29 +78,26 @@ class Scrollbar : public Layout_t {
         /// Finds the scroll position from a physical point on the bar.
         auto find_position_from_point(Point p) -> std::size_t
         {
-            if (parameters_.size == 0uL)
-                return 0uL;
-            auto const point              = is_vertical ? p.y : p.x;
-            double const length_available = this->max_length() - slider_length_;
-            if (length_available == 0uL)
-                return 0uL;
-            auto const result =
-                std::ceil(double(point * parameters_.size) / length_available);
-            if (result >= parameters_.size && parameters_.size != 0uL)
-                return parameters_.size - 1;
-            else
-                return result;
+            auto const length = (int)this->max_length() - (int)slider_length_;
+            if (length < 1 || parameters_.size == 0)
+                return 0;
+            double const at = is_vertical ? p.y : p.x;
+            double ratio    = at / length;
+            if (ratio > 1.)
+                ratio = 1.;
+            return ratio * (parameters_.size - 1);
         }
 
        protected:
         auto paint_event() -> bool override
         {
             if (parameters_.size == 0uL ||
-                parameters_.position == invalid_position) {
+                parameters_.position == invalid_position ||
+                slider_length_ == 0uL) {
                 return Widget::paint_event();
             }
             auto const begin  = point(slider_position_);
-            auto const length = point(slider_length_);
+            auto const length = point(slider_length_ - 1);  // bc line inclusive
             Painter{*this}.line(bar_, begin, begin + length);
             return Widget::paint_event();
         }
@@ -140,25 +137,24 @@ class Scrollbar : public Layout_t {
         }
 
         static auto constexpr slider_position(std::size_t max_length,
-                                              double scrollable_size,
+                                              double line_count,
                                               double position,
                                               std::size_t slider_length)
             -> std::size_t
         {
-            if (scrollable_size == 0.)
+            if (line_count == 0. || line_count == 1.)
                 return 0uL;
-            double const ratio = position / scrollable_size;
-            return ratio * (max_length - slider_length);
+            double const ratio = position / (line_count - 1);
+            auto const length  = max_length - slider_length;
+            return std::round(ratio * length);
         }
 
         static auto constexpr slider_length(double max_length,
-                                            double scrollable_size)
-            -> std::size_t
+                                            double line_count) -> std::size_t
         {
-            if (max_length == 0. || scrollable_size == 0.)
-                return max_length;
-            double const ratio = 1. / ((scrollable_size / max_length) * 2.);
-            return ratio * max_length;
+            if (max_length == 0. || line_count == 0.)
+                return 0;
+            return std::ceil((1. / line_count) * max_length);
         }
 
         auto max_length() const -> std::size_t

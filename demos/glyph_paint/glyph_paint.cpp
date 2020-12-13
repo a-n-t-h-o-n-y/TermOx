@@ -4,11 +4,11 @@
 
 using namespace cppurses;
 
-namespace demos::glyph_paint {
+namespace paint {
 
 Glyph_paint::Glyph_paint()
 {
-    side_pane.glyph_select.make_connections(slot::set_symbol(paint_area));
+    side_pane.glyph_selector.selected.connect(slot::set_symbol(paint_area));
 
     side_pane.color_pages.foreground.color_selected.connect(
         slot::set_foreground_color(paint_area));
@@ -70,4 +70,4 @@ Glyph_paint::Glyph_paint()
         slot::read(paint_area));
 }
 
-}  // namespace demos::glyph_paint
+}  // namespace paint

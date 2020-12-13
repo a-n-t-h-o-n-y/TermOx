@@ -9,8 +9,8 @@ namespace palette {
 bool Shade_display::paint_event()
 {
     using namespace cppurses;
-    auto light_shade   = L'░'_g | bg(base_);
-    auto mid_shade     = L'▒'_g | bg(base_);
+    auto light_shade   = L'░' | bg(base_);
+    auto mid_shade     = L'▒' | bg(base_);
     auto const color_n = cppurses::System::terminal.get_palette_color_count();
 
     int const height = static_cast<int>(this->height());

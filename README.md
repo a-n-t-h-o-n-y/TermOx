@@ -4,10 +4,10 @@
 
 # TermOx 🐂
 
-**TermOx** is a Terminal User Interface Framework for C++17. Built on top
-of [nCurses](https://www.gnu.org/software/ncurses/), it defines a set of
-Widgets, Layouts, and Events that make it quick to craft unique user interfaces
-in the terminal.
+**TermOx** is a Terminal User Interface Framework for C++17. Built on top of
+[nCurses](https://invisible-island.net/ncurses/announce.html), it defines a set
+of Widgets, Layouts, and Events that make it quick to craft unique user
+interfaces in the terminal.
 
 <!-- TODO - single gif of multiple demos -->
 <p align="center">
@@ -22,6 +22,8 @@ Layouts.
 This project was previously named CPPurses.
 
 ## Usage
+
+<!-- TODO this is only one usage, and it isn't the common one, its misleading. -->
 
 ```cpp
 #include <termox/termox.hpp>

@@ -3,11 +3,6 @@
 A `Glyph_string` is a vector-like container of `Glyphs`. Most methods of
 `std::vector` are avaliable for `Glyph_string`.
 
-## User Defined Literal
-
-The UDL `_gs` can be used with `char` string literals and `wchar_t` string
-literals to create `Glyph_strings`.
-
 ## Pipe Operator
 
 Traits and Colors can be used with the pipe operator to alter the Brush of each

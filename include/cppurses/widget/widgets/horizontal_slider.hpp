@@ -15,6 +15,7 @@
 
 namespace cppurses {
 
+// TODO this can probably be removed, scroll bar replaces it.
 class Horizontal_slider : public Widget {
    public:
     sl::Signal<void(float)> percent_changed;

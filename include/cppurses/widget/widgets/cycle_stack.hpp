@@ -25,9 +25,9 @@ class Cycle_stack : public layout::Vertical<> {
     /// User interface to cycle through the pages of the Stack.
     class Top_row : public layout::Horizontal<> {
        public:
-        Button& left_btn     = this->make_child<Button>("<");
+        Button& left_btn     = this->make_child<Button>(L"<");
         Cycle_box& cycle_box = this->make_child<Cycle_box>();
-        Button& right_btn    = this->make_child<Button>(">");
+        Button& right_btn    = this->make_child<Button>(L">");
 
        public:
         Top_row()

@@ -64,7 +64,7 @@ class Demo_menu : public cppurses::Menu_stack {
 
         this->make_page<graph::Graph_demo>("Graph");
         this->make_page<gol::GoL_demo>("Game of Life");
-        this->make_page<glyph_paint::Glyph_paint>("Glyph Paint");
+        this->make_page<paint::Glyph_paint>("Glyph Paint");
 
         this->make_page<colors::Palette_demo>("Color Palettes");
         this->make_page<palette::Palette_demo>("Color Palette");

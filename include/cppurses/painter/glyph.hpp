@@ -29,8 +29,6 @@ struct Glyph {
     {}
 };
 
-constexpr auto operator""_g(wchar_t c) -> Glyph { return {c}; }
-
 // Trait -------------------------------------------------------------------
 constexpr auto operator|(Glyph& g, Trait t) -> Glyph&
 {

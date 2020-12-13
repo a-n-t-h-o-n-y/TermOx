@@ -6,6 +6,8 @@
 #include <string>
 #include <utility>
 
+#include <iostream>  //temp
+
 #include <cppurses/painter/glyph_string.hpp>
 #include <cppurses/painter/painter.hpp>
 #include <cppurses/painter/trait.hpp>

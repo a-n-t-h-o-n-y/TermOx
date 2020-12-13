@@ -5,16 +5,16 @@
 
 #include <cppurses/widget/layouts/horizontal.hpp>
 
-namespace demos::glyph_paint {
+namespace paint {
 
 class Glyph_paint : public cppurses::layout::Horizontal<> {
    public:
     Glyph_paint();
 
    private:
-    Paint_area& paint_area = this->make_child<Paint_area>();
-    Side_pane& side_pane   = this->make_child<Side_pane>();
+    Paint_area& paint_area = make_child<Paint_area>();
+    Side_pane& side_pane   = make_child<Side_pane>();
 };
 
-}  // namespace demos::glyph_paint
+}  // namespace paint
 #endif  // DEMOS_GLYPH_PAINT_GLYPH_PAINT_HPP

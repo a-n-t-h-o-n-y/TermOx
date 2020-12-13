@@ -249,16 +249,6 @@ class Glyph_string : private std::vector<Glyph> {
     using std::vector<Glyph>::swap;
 };
 
-inline auto operator""_gs(char const* x, std::size_t) -> Glyph_string
-{
-    return {x};
-}
-
-inline auto operator""_gs(wchar_t const* x, std::size_t) -> Glyph_string
-{
-    return {x};
-}
-
 // Trait -----------------------------------------------------------------------
 inline auto operator|(Glyph_string& gs, Trait t) -> Glyph_string&
 {

@@ -33,9 +33,7 @@ target_sources(demos PRIVATE
     glyph_paint/glyph_paint.cpp
     glyph_paint/paint_area.cpp
     glyph_paint/options_box.cpp
-    glyph_paint/populated_glyph_stack.cpp
-    glyph_paint/glyph_select_stack.cpp
-    glyph_paint/glyph_select.cpp
+    glyph_paint/glyph_selector.cpp
 )
 
 # PALETTE
