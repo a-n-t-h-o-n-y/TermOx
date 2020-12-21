@@ -19,6 +19,7 @@
 #include <cppurses/system/system.hpp>
 #include <cppurses/widget/align.hpp>
 #include <cppurses/widget/area.hpp>
+#include <cppurses/widget/layouts/float.hpp>
 #include <cppurses/widget/layouts/horizontal.hpp>
 #include <cppurses/widget/layouts/vertical.hpp>
 #include <cppurses/widget/pipe.hpp>
@@ -651,28 +652,11 @@ class Bottom_bar : public cppurses::layout::Horizontal<> {
     Score& score        = this->make_child<Score>();
 };
 
-template <typename Widget_t, typename Layout_t>
-class Buffer : public Layout_t {
-   public:
-    cppurses::Widget& buffer_1;
-    Widget_t& widget;
-    cppurses::Widget& buffer_2;
-
-   public:
-    template <typename... Args>
-    Buffer(Args&&... args)
-        : buffer_1{this->make_child()},
-          widget{
-              this->template make_child<Widget_t>(std::forward<Args>(args)...)},
-          buffer_2{this->make_child()}
-    {}
-};
-
-using VBuffered_gs = Buffer<Game_space, cppurses::layout::Vertical<>>;
-using Buffered_game_space =
-    Buffer<VBuffered_gs, cppurses::layout::Horizontal<>>;
-
 class Snake_game : public cppurses::layout::Vertical<> {
+   private:
+    using VFloat = cppurses::Float<Game_space, cppurses::layout::Vertical>;
+    using Floating_game = cppurses::Float<VFloat, cppurses::layout::Horizontal>;
+
    public:
     Snake_game()
     {
@@ -683,7 +667,12 @@ class Snake_game : public cppurses::layout::Vertical<> {
         bottom_.buttons.start.connect([this] { game_space_.start(); });
         bottom_.buttons.pause.connect([this] { game_space_.stop(); });
 
-        bottom_.buttons.size_change.connect([this](char c) {
+        auto constexpr s_size = cppurses::Area{60, 17};
+        auto constexpr m_size = cppurses::Area{100, 27};
+        auto constexpr l_size = cppurses::Area{160, 37};
+        auto constexpr x_size = cppurses::Area{230, 47};
+
+        bottom_.buttons.size_change.connect([=](char c) {
             switch (c) {
                 case 's': game_space_.resize(s_size); break;
                 case 'm': game_space_.resize(m_size); break;
@@ -694,11 +683,10 @@ class Snake_game : public cppurses::layout::Vertical<> {
 
         using namespace cppurses;
         using namespace cppurses::pipe;
-        buffered_game_space_.buffer_1 | bg(color::Border);
-        buffered_game_space_.buffer_2 | bg(color::Border);
-        vbuffered_.buffer_1 | bg(color::Border);
-        vbuffered_.buffer_2 | bg(color::Border);
-        vbuffered_ | passive_width();
+        floating_game.buffer_1 | bg(color::Border);
+        floating_game.buffer_2 | bg(color::Border);
+        vfloat.buffer_1 | bg(color::Border);
+        vfloat.buffer_2 | bg(color::Border);
 
         game_space_.resize(s_size);
         game_space_.score.connect(
@@ -718,18 +706,10 @@ class Snake_game : public cppurses::layout::Vertical<> {
     }
 
    private:
-    Buffered_game_space& buffered_game_space_ =
-        this->make_child<Buffered_game_space>();
-    VBuffered_gs& vbuffered_ = buffered_game_space_.widget;
-    Game_space& game_space_  = vbuffered_.widget;
-    Bottom_bar& bottom_      = this->make_child<Bottom_bar>();
-
-   private:
-    // TODO make these local to the function that uses them if possible
-    static auto constexpr s_size = cppurses::Area{60, 17};
-    static auto constexpr m_size = cppurses::Area{100, 27};
-    static auto constexpr l_size = cppurses::Area{160, 37};
-    static auto constexpr x_size = cppurses::Area{230, 47};
+    Floating_game& floating_game = make_child<Floating_game>();
+    VFloat& vfloat               = floating_game.widget;
+    Game_space& game_space_      = vfloat.widget;
+    Bottom_bar& bottom_          = make_child<Bottom_bar>();
 };
 
 }  // namespace snake

@@ -58,7 +58,7 @@ void Terminal::initialize()
         return;
     std::setlocale(LC_ALL, "en_US.UTF-8");
 
-    if (::newterm(std::getenv("TERM"), stdout, stdin) == nullptr and
+    if (::newterm(std::getenv("TERM"), stdout, stdin) == nullptr &&
         ::newterm("xterm-256color", stdout, stdin) == nullptr) {
         throw std::runtime_error{"Unable to initialize screen."};
     }

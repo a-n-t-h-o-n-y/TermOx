@@ -11,7 +11,6 @@
 #include <cppurses/widget/widgets/titlebar.hpp>
 
 #include "animation/animation_demo.hpp"
-#include "chess/src/chess_ui.hpp"
 #include "colors/palette_view.hpp"
 #include "composites/composites.hpp"
 #include "focus/focus_demo.hpp"
@@ -27,7 +26,7 @@ namespace demos {
 
 class Demo_menu : public cppurses::Menu_stack {
    public:
-    Demo_menu() : Menu_stack{"Demos"}
+    Demo_menu() : Menu_stack{L"Demos"}
     {
         using namespace cppurses;
         using namespace cppurses::pipe;
@@ -37,41 +36,40 @@ class Demo_menu : public cppurses::Menu_stack {
             this->Menu_stack::goto_menu();
         });
 
-        this->make_page<comp::Idea>("Idea");
-        this->make_page<snake::Snake_game>("Snake Game");
+        this->make_page<comp::Idea>(L"Idea");
+        this->make_page<snake::Snake_game>(L"Snake Game");
 
         // clang-format off
-        this->append_page("Composites",
+        this->append_page(L"Composites",
             layout::vertical
             (
                 checkbox(),
                 checkbox(),
-                textbox("WOW!") | bg(Color::Green) | Trait::Bold,
+                textbox(L"WOW!") | bg(Color::Green) | Trait::Bold,
                 layout::horizontal
                 (
-                    textbox("Left") | bg(Color::Light_blue),
-                    textbox("Right") | bg(Color::Violet)
+                    textbox(L"Left") | bg(Color::Light_blue),
+                    textbox(L"Right") | bg(Color::Violet)
                 ),
                 checkbox(),
-                labeled_checkbox("A Box")
+                labeled_checkbox(L"A Box")
             )
         );
         // clang-format on
 
-        this->make_page<Notepad>("Notepad");
-        this->append_page("Focus", focus::build_demo());
-        this->append_page("Animated Widget", animation::build_demo());
+        this->make_page<Notepad>(L"Notepad");
+        this->append_page(L"Focus", focus::build_demo());
+        this->append_page(L"Animated Widget", animation::build_demo());
 
-        this->make_page<graph::Graph_demo>("Graph");
-        this->make_page<gol::GoL_demo>("Game of Life");
-        this->make_page<paint::Glyph_paint>("Glyph Paint");
+        this->make_page<graph::Graph_demo>(L"Graph");
+        this->make_page<gol::GoL_demo>(L"Game of Life");
+        this->make_page<paint::Glyph_paint>(L"Glyph Paint");
 
-        this->make_page<colors::Palette_demo>("Color Palettes");
-        this->make_page<palette::Palette_demo>("Color Palette");
-        this->make_page<Chess_UI>("Chess");
+        this->make_page<colors::Palette_demo>(L"Color Palettes");
+        this->make_page<palette::Palette_demo>(L"Color Palette");
 
-        this->make_page<layout_demo::Layout_demo>("Layouts");
-        this->make_page<comp::Two_lists>("Check Lists");
+        this->make_page<layout_demo::Layout_demo>(L"Layouts");
+        this->make_page<comp::Two_lists>(L"Check Lists");
     }
 };
 

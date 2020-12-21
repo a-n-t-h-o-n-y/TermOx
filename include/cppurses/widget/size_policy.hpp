@@ -152,19 +152,24 @@ class Size_policy {
     }
 
    public:
-    // None of these copies/replaces the policy_updated Signal.
-    // Signal is attached to the Widget, not the Size_policy.
     Size_policy() = default;
-    Size_policy(Size_policy const& x) : data_{x.data_} {}
-    Size_policy(Size_policy&& x) : data_{std::move(x.data_)} {}
+
+    Size_policy(Size_policy const& x) = delete;
+    Size_policy(Size_policy&& x)      = delete;
+
+    /// Specifically does not copy the Signal, so Widget is still notified.
     auto operator=(Size_policy const& x) -> Size_policy&
     {
         this->data_ = x.data_;
+        this->policy_updated();
         return *this;
     }
+
+    /// Specifically does not copy the Signal, so Widget is still notified.
     auto operator=(Size_policy&& x) -> Size_policy&
     {
         this->data_ = std::move(x.data_);
+        this->policy_updated();
         return *this;
     }
 

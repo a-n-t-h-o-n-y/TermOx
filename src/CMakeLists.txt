@@ -36,6 +36,16 @@ target_compile_options(cppurses
 )
 endif()
 
+# Enable Someday if needed
+# if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16")
+#     target_precompile_headers(
+#         cppurses
+#         PRIVATE
+#             ../include/cppurses/widget/widget.hpp
+#             ../external/signals-light/include/signals_light/signal.hpp
+#     )
+# endif()
+
 # GATHER SOURCES
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # SYSTEM
