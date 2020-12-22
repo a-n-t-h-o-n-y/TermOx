@@ -11,7 +11,7 @@ interfaces in the terminal.
 
 <!-- TODO - single gif of multiple demos -->
 <p align="center">
-  <img src="docs/images/regexplore.gif">
+  <img src="docs/images/termox-demos.gif">
 </p>
 
 The [Widget Library](docs/manual/widget.md#widget-library) contains many common
