@@ -15,6 +15,6 @@ foo | fg(Color::Violet);
 
 ## See Also
 
-- [Reference](https://a-n-t-h-o-n-y.github.io/CPPurses/classcppurses_1_1Glyph__string.html)
+- [Reference](https://a-n-t-h-o-n-y.github.io/TermOx/classox_1_1Glyph__string.html)
 - [Glyph](glyph.md)
 - [Brush](brush.md)

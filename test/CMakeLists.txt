@@ -9,7 +9,7 @@ set_property(TARGET gtest PROPERTY
 
 # GATHER SOURCES
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-add_executable(cppurses_test EXCLUDE_FROM_ALL
+add_executable(termox_tests EXCLUDE_FROM_ALL
     system/event_queue.test.cpp
     # system/system_test.cpp
     # system/object_test.cpp
@@ -28,12 +28,12 @@ add_executable(cppurses_test EXCLUDE_FROM_ALL
 
 # CREATE TESTS
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-target_link_libraries(cppurses_test PRIVATE cppurses gtest)
+target_link_libraries(termox_tests PRIVATE TermOx gtest)
 
 if(${CMAKE_VERSION} VERSION_LESS "3.8")
     set(CMAKE_CXX_STANDARD 14)
 else()
-    target_compile_features(cppurses_test PRIVATE cxx_std_14)
+    target_compile_features(termox_tests PRIVATE cxx_std_14)
 endif()
 
-add_test(cppurses_test cppurses_test)
+add_test(termox_tests termox_tests)

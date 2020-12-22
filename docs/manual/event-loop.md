@@ -32,6 +32,6 @@ the only thread that processes the Event Queue.
 
 ## See Also
 
-- [Reference](https://a-n-t-h-o-n-y.github.io/CPPurses/classcppurses_1_1Event__loop.html)
+- [Reference](https://a-n-t-h-o-n-y.github.io/TermOx/classox_1_1Event__loop.html)
 - [System](system.md)
 - [Events](events.md)

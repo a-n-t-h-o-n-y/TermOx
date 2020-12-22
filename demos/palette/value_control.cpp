@@ -3,13 +3,12 @@
 #include <cctype>
 #include <string>
 
-#include <cppurses/painter/color.hpp>
-#include "cppurses/widget/layouts/horizontal.hpp"
+#include <termox/painter/color.hpp>
+#include <termox/widget/layouts/horizontal.hpp>
 
-using namespace cppurses;
+using namespace ox;
 
-namespace palette {
-namespace detail {
+namespace palette::detail {
 
 Buffered_edit_box::Buffered_edit_box()
 {
@@ -20,7 +19,9 @@ Buffered_edit_box::Buffered_edit_box()
         child.brush.set_background(Color::Blue);
     }
 }
-}  // namespace detail
+}  // namespace palette::detail
+
+namespace palette {
 
 // Set up value_edit_ and slider_ to be consistent with each other.
 Value_control::Value_control(const Glyph_string& label)

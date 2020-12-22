@@ -3,12 +3,12 @@
 ## Modifying an Existing Widget
 
 ```cpp
-class Thin_button : public cppurses::Button {
+class Thin_button : public ox::Button {
    public:
-    Thin_button(cppurses::Glyph_string title) : Button{std::move(title)}
+    Thin_button(ox::Glyph_string title) : Button{std::move(title)}
     {
-        using namespace cppurses::pipe;
-        *this | fixed_height(1) | wallpaper(L'~') | bg(cppurses::Color::Red);
+        using namespace ox::pipe;
+        *this | fixed_height(1) | wallpaper(L'~') | bg(ox::Color::Red);
     }
 };
 ```
@@ -31,7 +31,7 @@ function calls.
 ## Combining Widgets with Layouts
 
 ```cpp
-using namespace cppurses;
+using namespace ox;
 
 struct Settings_pane : layout::Vertical<> {
     Label& title          = this->make_child<Label>(L"Settings");

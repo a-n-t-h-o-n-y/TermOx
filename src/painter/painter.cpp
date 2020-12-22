@@ -1,29 +1,31 @@
-#include <cppurses/painter/painter.hpp>
+#include <termox/painter/painter.hpp>
 
 #include <cstddef>
 #include <string>
 #include <unordered_map>
 
-#include <cppurses/painter/detail/is_paintable.hpp>
-#include <cppurses/painter/detail/screen_descriptor.hpp>
-#include <cppurses/painter/detail/staged_changes.hpp>
-#include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/system/event_loop.hpp>
-#include <cppurses/system/system.hpp>
-#include <cppurses/widget/border.hpp>
-#include <cppurses/widget/detail/border_offset.hpp>
-#include <cppurses/widget/point.hpp>
-#include <cppurses/widget/widget.hpp>
+#include <termox/painter/detail/is_paintable.hpp>
+#include <termox/painter/detail/screen_descriptor.hpp>
+#include <termox/painter/detail/staged_changes.hpp>
+#include <termox/painter/glyph_string.hpp>
+#include <termox/system/event_loop.hpp>
+#include <termox/system/system.hpp>
+#include <termox/widget/border.hpp>
+#include <termox/widget/detail/border_offset.hpp>
+#include <termox/widget/point.hpp>
+#include <termox/widget/widget.hpp>
 
 namespace {
-auto border_is_paintable(cppurses::Widget const& widg) -> bool
+
+auto border_is_paintable(ox::Widget const& widg) -> bool
 {
     return widg.border.enabled() and widg.is_enabled() and
            widg.outer_width() != 0 and widg.outer_height() != 0;
 }
+
 }  // namespace
 
-namespace cppurses {
+namespace ox {
 
 Painter::Painter(Widget& widg)
     : widget_{widg},
@@ -234,4 +236,4 @@ void Painter::line_global(Glyph const& tile,
     }
 }
 
-}  // namespace cppurses
+}  // namespace ox

@@ -1,10 +1,10 @@
-#include <cppurses/painter/glyph_matrix.hpp>
+#include <termox/painter/glyph_matrix.hpp>
 
 #include <cstddef>
 
-#include <cppurses/painter/glyph.hpp>
+#include <termox/painter/glyph.hpp>
 
-namespace cppurses {
+namespace ox {
 
 void Glyph_matrix::resize(std::size_t width, std::size_t height)
 {
@@ -16,4 +16,4 @@ void Glyph_matrix::resize(std::size_t width, std::size_t height)
     }
 }
 
-}  // namespace cppurses
+}  // namespace ox

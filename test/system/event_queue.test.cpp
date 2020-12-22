@@ -3,12 +3,12 @@
 
 #include <gtest/gtest.h>
 
-#include <cppurses/system/detail/event_queue.hpp>
-#include <cppurses/system/event.hpp>
-#include <cppurses/widget/widgets/button.hpp>
+#include <termox/system/detail/event_queue.hpp>
+#include <termox/system/event.hpp>
+#include <termox/widget/widgets/button.hpp>
 
 namespace {
-using namespace cppurses;
+using namespace ox;
 
 auto get_widg() -> Button&
 {
@@ -45,7 +45,7 @@ auto make_rand_event() -> std::unique_ptr<Event>
 
 }  // namespace
 
-using namespace cppurses::detail;
+using namespace ox::detail;
 using General_view = Event_queue::View<Event::None>;
 using Paint_view   = Event_queue::View<Event::Paint>;
 using Delete_view  = Event_queue::View<Event::Delete>;

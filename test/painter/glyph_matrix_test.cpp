@@ -7,12 +7,12 @@
 
 #include <stdexcept>
 
-using cppurses::bg;
-using cppurses::Color;
-using cppurses::foreground;
-using cppurses::Glyph;
-using cppurses::Glyph_matrix;
-using cppurses::Trait;
+using ox::bg;
+using ox::Color;
+using ox::foreground;
+using ox::Glyph;
+using ox::Glyph_matrix;
+using ox::Trait;
 
 TEST(GlyphMatrixTest, Default)
 {

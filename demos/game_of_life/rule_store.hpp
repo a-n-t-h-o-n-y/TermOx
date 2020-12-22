@@ -1,5 +1,5 @@
-#ifndef CPPURSES_DEMOS_GAME_OF_LIFE_RULE_STORE_HPP
-#define CPPURSES_DEMOS_GAME_OF_LIFE_RULE_STORE_HPP
+#ifndef TERMOX_DEMOS_GAME_OF_LIFE_RULE_STORE_HPP
+#define TERMOX_DEMOS_GAME_OF_LIFE_RULE_STORE_HPP
 #include <map>
 #include <string_view>
 
@@ -22,4 +22,4 @@ class Rule_store {
 };
 
 }  // namespace gol
-#endif  // CPPURSES_DEMOS_GAME_OF_LIFE_RULE_STORE_HPP
+#endif  // TERMOX_DEMOS_GAME_OF_LIFE_RULE_STORE_HPP

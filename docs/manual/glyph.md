@@ -45,5 +45,5 @@ auto const bg_blue_x = L'X' | bg(Color::Blue);
 
 ## See Also
 
-- [Reference](https://a-n-t-h-o-n-y.github.io/CPPurses/structcppurses_1_1Glyph.html)
+- [Reference](https://a-n-t-h-o-n-y.github.io/TermOx/structox_1_1Glyph.html)
 - [Brush](brush.md)

@@ -1,4 +1,4 @@
-#include <cppurses/widget/widget.hpp>
+#include <termox/widget/widget.hpp>
 
 #include <cstdint>
 #include <mutex>
@@ -7,11 +7,11 @@
 
 #include <signals_light/signal.hpp>
 
-#include <cppurses/painter/brush.hpp>
-#include <cppurses/painter/glyph.hpp>
-#include <cppurses/system/event.hpp>
-#include <cppurses/system/system.hpp>
-#include <cppurses/terminal/terminal.hpp>
+#include <termox/painter/brush.hpp>
+#include <termox/painter/glyph.hpp>
+#include <termox/system/event.hpp>
+#include <termox/system/system.hpp>
+#include <termox/terminal/terminal.hpp>
 
 namespace {
 
@@ -23,9 +23,9 @@ auto get_unique_id() -> std::uint16_t
     return ++current;
 }
 
-void post_child_polished(cppurses::Widget& w)
+void post_child_polished(ox::Widget& w)
 {
-    using namespace cppurses;
+    using namespace ox;
     auto* parent = w.parent();
     if (parent != nullptr)
         System::post_event(Child_polished_event{*parent, w});
@@ -33,7 +33,7 @@ void post_child_polished(cppurses::Widget& w)
 
 }  // namespace
 
-namespace cppurses {
+namespace ox {
 
 Widget::Widget(std::string name)
     : name_{std::move(name)}, unique_id_{get_unique_id()}
@@ -90,4 +90,4 @@ void Widget::enable_and_post_events(bool enable, bool post_child_polished_event)
     this->update();
 }
 
-}  // namespace cppurses
+}  // namespace ox

@@ -46,4 +46,4 @@ bool paint_event() override
 
 ## See Also
 
-- [Reference](https://a-n-t-h-o-n-y.github.io/CPPurses/classcppurses_1_1Painter.html)
+- [Reference](https://a-n-t-h-o-n-y.github.io/TermOx/classox_1_1Painter.html)

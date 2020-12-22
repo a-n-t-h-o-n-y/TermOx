@@ -1,29 +1,28 @@
-#ifndef CPPURSES_DEMOS_COMPOSITES_COMPOSITES_HPP
-#define CPPURSES_DEMOS_COMPOSITES_COMPOSITES_HPP
+#ifndef TERMOX_DEMOS_COMPOSITES_COMPOSITES_HPP
+#define TERMOX_DEMOS_COMPOSITES_COMPOSITES_HPP
 #include <string>
 #include <utility>
 
-#include <cppurses/system/key.hpp>
-#include <cppurses/widget/array.hpp>
-#include <cppurses/widget/layouts/horizontal.hpp>
-#include <cppurses/widget/layouts/selecting.hpp>
-#include <cppurses/widget/layouts/vertical.hpp>
-#include <cppurses/widget/pair.hpp>
-#include <cppurses/widget/pipe.hpp>
-#include <cppurses/widget/tuple.hpp>
-#include <cppurses/widget/widget.hpp>
-#include <cppurses/widget/widgets/button.hpp>
-#include <cppurses/widget/widgets/checkbox.hpp>
-#include <cppurses/widget/widgets/selectable.hpp>
-#include <cppurses/widget/widgets/textbox.hpp>
-#include "cppurses/widget/widgets/cycle_box.hpp"
+#include <termox/system/key.hpp>
+#include <termox/widget/array.hpp>
+#include <termox/widget/layouts/horizontal.hpp>
+#include <termox/widget/layouts/selecting.hpp>
+#include <termox/widget/layouts/vertical.hpp>
+#include <termox/widget/pair.hpp>
+#include <termox/widget/pipe.hpp>
+#include <termox/widget/tuple.hpp>
+#include <termox/widget/widget.hpp>
+#include <termox/widget/widgets/button.hpp>
+#include <termox/widget/widgets/checkbox.hpp>
+#include <termox/widget/widgets/cycle_box.hpp>
+#include <termox/widget/widgets/selectable.hpp>
+#include <termox/widget/widgets/textbox.hpp>
 
 namespace comp {
 
-using Btns = cppurses::Array<cppurses::layout::Horizontal<cppurses::Button>, 2>;
+using Btns = ox::Array<ox::layout::Horizontal<ox::Button>, 2>;
 
-using App =
-    cppurses::Tuple<cppurses::layout::Vertical<>, cppurses::Textbox, Btns>;
+using App = ox::Tuple<ox::layout::Vertical<>, ox::Textbox, Btns>;
 
 struct Composites_old : App {
     Composites_old()
@@ -33,8 +32,8 @@ struct Composites_old : App {
         auto& load = btns.get<1>();
         auto& txbx = this->get<0>();
 
-        using namespace cppurses;
-        using namespace cppurses::pipe;
+        using namespace ox;
+        using namespace ox::pipe;
         btns | fixed_height(1);
         // save | label("Save") | bg(Color::Light_blue);
         // load | label("Load") | bg(Color::Light_green);
@@ -126,7 +125,7 @@ struct Composites_old : App {
     }
 };
 
-using namespace cppurses;
+using namespace ox;
 
 using Check      = Selectable<Labeled_checkbox>;
 using Check_list = Array<layout::Selecting<layout::Vertical<Check>>, 15>;
@@ -134,8 +133,8 @@ using Check_list = Array<layout::Selecting<layout::Vertical<Check>>, 15>;
 struct My_check_list : Check_list {
     My_check_list()
     {
-        using namespace cppurses;
-        using namespace pipe;
+        using namespace ox;
+        using namespace ox::pipe;
 
         this->set_increment_selection_keys({Key::Arrow_down, Key::j});
         this->set_decrement_selection_keys({Key::Arrow_up, Key::k});
@@ -155,7 +154,7 @@ struct Two_lists : Pair<layout::Vertical<My_check_list>> {
     Two_lists()
     {
         *this | pipe::strong_focus() | pipe::on_focus_in([this] {
-            cppurses::System::set_focus(this->get_children().front());
+            ox::System::set_focus(this->get_children().front());
         });
         this->find_child_if(
             [](My_check_list const& l) { return l.name().empty(); });
@@ -169,19 +168,18 @@ struct Two_lists : Pair<layout::Vertical<My_check_list>> {
     }
 };
 
-using Settings_box =
-    cppurses::Tuple<cppurses::layout::Vertical<>,
-                    cppurses::Button,
-                    cppurses::Label<cppurses::layout::Horizontal<>>,
-                    cppurses::Checkbox,
-                    cppurses::Cycle_box>;
+using Settings_box = ox::Tuple<ox::layout::Vertical<>,
+                               ox::Button,
+                               ox::Label<ox::layout::Horizontal<>>,
+                               ox::Checkbox,
+                               ox::Cycle_box>;
 
 class Idea : public Settings_box {
    public:
     Idea()
     {
-        using namespace cppurses::pipe;
-        using namespace cppurses;
+        using namespace ox;
+        using namespace ox::pipe;
 
         this->get<0>().set_label(L"I'm a BUTTON");
         this->get<0>() | on_press([this] { this->get<2>().toggle(); });
@@ -208,4 +206,4 @@ class Idea : public Settings_box {
 };
 
 }  // namespace comp
-#endif  // CPPURSES_DEMOS_COMPOSITES_COMPOSITES_HPP
+#endif  // TERMOX_DEMOS_COMPOSITES_COMPOSITES_HPP

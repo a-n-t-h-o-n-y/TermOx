@@ -6,12 +6,12 @@
 #include <string>
 #include <utility>
 
-#include <cppurses/painter/color.hpp>
-#include <cppurses/painter/trait.hpp>
-#include <cppurses/system/system.hpp>
-#include <cppurses/widget/border.hpp>
-#include <cppurses/widget/widget_slots.hpp>
-#include "cppurses/widget/pipe.hpp"
+#include <termox/painter/color.hpp>
+#include <termox/painter/trait.hpp>
+#include <termox/system/system.hpp>
+#include <termox/widget/border.hpp>
+#include <termox/widget/pipe.hpp>
+#include <termox/widget/widget_slots.hpp>
 
 namespace {
 
@@ -39,7 +39,7 @@ auto read_file(std::string const& filename) -> std::string
 
 }  // namespace
 
-using namespace cppurses;
+using namespace ox;
 
 namespace demos {
 

@@ -1,52 +1,52 @@
-#ifndef CPPURSES_DEMOS_COLORS_COLORS_DISPLAY_HPP
-#define CPPURSES_DEMOS_COLORS_COLORS_DISPLAY_HPP
+#ifndef TERMOX_DEMOS_COLORS_COLORS_DISPLAY_HPP
+#define TERMOX_DEMOS_COLORS_COLORS_DISPLAY_HPP
 #include <utility>
 
 #include <signals_light/signal.hpp>
 
-#include <cppurses/painter/palette/amstrad_cpc.hpp>
-#include <cppurses/painter/palette/apple_ii.hpp>
-#include <cppurses/painter/palette/ashes.hpp>
-#include <cppurses/painter/palette/basic.hpp>
-#include <cppurses/painter/palette/basic8.hpp>
-#include <cppurses/painter/palette/cga.hpp>
-#include <cppurses/painter/palette/commodore_64.hpp>
-#include <cppurses/painter/palette/commodore_vic20.hpp>
-#include <cppurses/painter/palette/dawn_bringer16.hpp>
-#include <cppurses/painter/palette/dawn_bringer32.hpp>
-#include <cppurses/painter/palette/en4.hpp>
-#include <cppurses/painter/palette/gameboy.hpp>
-#include <cppurses/painter/palette/gameboy_pocket.hpp>
-#include <cppurses/painter/palette/macintosh_ii.hpp>
-#include <cppurses/painter/palette/msx.hpp>
-#include <cppurses/painter/palette/nes.hpp>
-#include <cppurses/painter/palette/savanna.hpp>
-#include <cppurses/painter/palette/secam.hpp>
-#include <cppurses/painter/palette/stormy6.hpp>
-#include <cppurses/painter/palette/teletext.hpp>
-#include <cppurses/painter/palette/thomson_m05.hpp>
-#include <cppurses/painter/palette/windows.hpp>
-#include <cppurses/painter/palette/windows_console.hpp>
-#include <cppurses/painter/palette/zx_spectrum.hpp>
-#include <cppurses/system/system.hpp>
-#include <cppurses/terminal/terminal.hpp>
-#include <cppurses/widget/layouts/vertical.hpp>
-#include <cppurses/widget/pipe.hpp>
-#include <cppurses/widget/widgets/color_select.hpp>
-#include <cppurses/widget/widgets/cycle_box.hpp>
-#include "cppurses/painter/color.hpp"
-#include "cppurses/painter/glyph_string.hpp"
+#include <termox/painter/color.hpp>
+#include <termox/painter/glyph_string.hpp>
+#include <termox/painter/palette/amstrad_cpc.hpp>
+#include <termox/painter/palette/apple_ii.hpp>
+#include <termox/painter/palette/ashes.hpp>
+#include <termox/painter/palette/basic.hpp>
+#include <termox/painter/palette/basic8.hpp>
+#include <termox/painter/palette/cga.hpp>
+#include <termox/painter/palette/commodore_64.hpp>
+#include <termox/painter/palette/commodore_vic20.hpp>
+#include <termox/painter/palette/dawn_bringer16.hpp>
+#include <termox/painter/palette/dawn_bringer32.hpp>
+#include <termox/painter/palette/en4.hpp>
+#include <termox/painter/palette/gameboy.hpp>
+#include <termox/painter/palette/gameboy_pocket.hpp>
+#include <termox/painter/palette/macintosh_ii.hpp>
+#include <termox/painter/palette/msx.hpp>
+#include <termox/painter/palette/nes.hpp>
+#include <termox/painter/palette/savanna.hpp>
+#include <termox/painter/palette/secam.hpp>
+#include <termox/painter/palette/stormy6.hpp>
+#include <termox/painter/palette/teletext.hpp>
+#include <termox/painter/palette/thomson_m05.hpp>
+#include <termox/painter/palette/windows.hpp>
+#include <termox/painter/palette/windows_console.hpp>
+#include <termox/painter/palette/zx_spectrum.hpp>
+#include <termox/system/system.hpp>
+#include <termox/terminal/terminal.hpp>
+#include <termox/widget/layouts/vertical.hpp>
+#include <termox/widget/pipe.hpp>
+#include <termox/widget/widgets/color_select.hpp>
+#include <termox/widget/widgets/cycle_box.hpp>
 
 namespace colors {
 
-class Palette_picker : public cppurses::Labeled_cycle_box {
+class Palette_picker : public ox::Labeled_cycle_box {
    public:
-    sl::Signal<void(cppurses::Palette)> palette_picked;
+    sl::Signal<void(ox::Palette)> palette_picked;
 
    public:
     Palette_picker() : Labeled_cycle_box{"Palette"}
     {
-        using namespace cppurses;
+        using namespace ox;
         this->append_option(L"Dawn Bringer 16", dawn_bringer16::palette);
         this->append_option(L"Dawn Bringer 32", dawn_bringer32::palette);
         this->append_option(L"Basic 16", basic::palette);
@@ -75,8 +75,7 @@ class Palette_picker : public cppurses::Labeled_cycle_box {
 
    private:
     /// Adds an entry to the cycle box for the given palette with \p title.
-    void append_option(cppurses::Glyph_string title,
-                       cppurses::Palette const& pal)
+    void append_option(ox::Glyph_string title, ox::Palette const& pal)
     {
         this->cycle_box.add_option(std::move(title)).connect([this, pal]() {
             palette_picked(pal);
@@ -84,22 +83,20 @@ class Palette_picker : public cppurses::Labeled_cycle_box {
     }
 };
 
-class Palette_demo : public cppurses::layout::Vertical<> {
+class Palette_demo : public ox::layout::Vertical<> {
    public:
-    cppurses::Color_select& palette_view =
-        this->make_child<cppurses::Color_select>(true);
+    ox::Color_select& palette_view = this->make_child<ox::Color_select>(true);
     Palette_picker& palette_picker = this->make_child<Palette_picker>();
 
    public:
     Palette_demo()
     {
-        using namespace cppurses::pipe;
+        using namespace ox::pipe;
         *this | strong_focus();
-        palette_picker.palette_picked.connect([](auto const& pal) {
-            cppurses::System::terminal.set_palette(pal);
-        });
+        palette_picker.palette_picked.connect(
+            [](auto const& pal) { ox::System::terminal.set_palette(pal); });
     }
 };
 
 }  // namespace colors
-#endif  // CPPURSES_DEMOS_COLORS_COLORS_DISPLAY_HPP
+#endif  // TERMOX_DEMOS_COLORS_COLORS_DISPLAY_HPP

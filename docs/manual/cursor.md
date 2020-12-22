@@ -53,4 +53,4 @@ Set the local position of the cursor.
 
 ## See Also
 
-- [Reference](https://a-n-t-h-o-n-y.github.io/CPPurses/classcppurses_1_1Cursor.html)
+- [Reference](https://a-n-t-h-o-n-y.github.io/TermOx/classox_1_1Cursor.html)

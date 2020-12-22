@@ -7,32 +7,32 @@
 
 #include <signals_light/signal.hpp>
 
-#include <cppurses/painter/color.hpp>
-#include <cppurses/painter/glyph.hpp>
-#include <cppurses/painter/painter.hpp>
-#include <cppurses/painter/trait.hpp>
-#include <cppurses/system/key.hpp>
-#include <cppurses/system/mouse.hpp>
-#include <cppurses/widget/pipe.hpp>
-#include <cppurses/widget/widget.hpp>
+#include <termox/painter/color.hpp>
+#include <termox/painter/glyph.hpp>
+#include <termox/painter/painter.hpp>
+#include <termox/painter/trait.hpp>
+#include <termox/system/key.hpp>
+#include <termox/system/mouse.hpp>
+#include <termox/widget/pipe.hpp>
+#include <termox/widget/widget.hpp>
 
 namespace paint {
 
-class Paint_area : public cppurses::Widget {
+class Paint_area : public ox::Widget {
    public:
-    sl::Signal<void(cppurses::Glyph)> glyph_changed;
+    sl::Signal<void(ox::Glyph)> glyph_changed;
     sl::Signal<void()> erase_enabled;
     sl::Signal<void()> erase_disabled;
 
    public:
     Paint_area()
     {
-        using namespace cppurses::pipe;
+        using namespace ox::pipe;
         *this | strong_focus() | east_border();
     }
 
    public:
-    void set_glyph(cppurses::Glyph g)
+    void set_glyph(ox::Glyph g)
     {
         current_glyph_ = g;
         glyph_changed(std::move(g));
@@ -42,7 +42,7 @@ class Paint_area : public cppurses::Widget {
         }
     }
 
-    void set_symbol(cppurses::Glyph const& symbol)
+    void set_symbol(ox::Glyph const& symbol)
     {
         if (erase_enabled_) {
             this->disable_erase();
@@ -56,28 +56,28 @@ class Paint_area : public cppurses::Widget {
         glyph_changed(current_glyph_);
     }
 
-    void set_foreground_color(cppurses::Color c)
+    void set_foreground_color(ox::Color c)
     {
         current_glyph_ | fg(c);
         if (!erase_enabled_)
             glyph_changed(current_glyph_);
     }
 
-    void set_background_color(cppurses::Color c)
+    void set_background_color(ox::Color c)
     {
         current_glyph_ | bg(c);
         if (!erase_enabled_)
             glyph_changed(current_glyph_);
     }
 
-    void set_trait(cppurses::Trait t)
+    void set_trait(ox::Trait t)
     {
         current_glyph_ | t;
         if (!erase_enabled_)
             glyph_changed(current_glyph_);
     }
 
-    void remove_traits(cppurses::Trait t)
+    void remove_traits(ox::Trait t)
     {
         current_glyph_.brush.remove_traits(t);
         if (!erase_enabled_)
@@ -90,7 +90,7 @@ class Paint_area : public cppurses::Widget {
         this->update();
     }
 
-    auto glyph() const -> cppurses::Glyph { return current_glyph_; }
+    auto glyph() const -> ox::Glyph { return current_glyph_; }
 
     void toggle_clone() { clone_enabled_ = !clone_enabled_; }
 
@@ -108,7 +108,7 @@ class Paint_area : public cppurses::Widget {
 
     void enable_grid()
     {
-        this->set_wallpaper(L'┼' | fg(cppurses::Color::Dark_gray));
+        this->set_wallpaper(L'┼' | fg(ox::Color::Dark_gray));
         this->update();
     }
 
@@ -125,7 +125,7 @@ class Paint_area : public cppurses::Widget {
    protected:
     auto paint_event() -> bool override
     {
-        auto p       = cppurses::Painter{*this};
+        auto p       = ox::Painter{*this};
         auto const w = this->width();
         auto const h = this->height();
         for (auto const& [at, glyph] : glyphs_painted_) {
@@ -135,10 +135,10 @@ class Paint_area : public cppurses::Widget {
         return Widget::paint_event();
     }
 
-    auto mouse_press_event(cppurses::Mouse const& m) -> bool override
+    auto mouse_press_event(ox::Mouse const& m) -> bool override
     {
         switch (m.button) {
-            using Button = cppurses::Mouse::Button;
+            using Button = ox::Mouse::Button;
             case Button::Right: this->remove_glyph(m.local); break;
             case Button::Middle:
                 if (glyphs_painted_.count(m.local) == 1)
@@ -149,19 +149,19 @@ class Paint_area : public cppurses::Widget {
         return Widget::mouse_press_event(m);
     }
 
-    auto key_press_event(cppurses::Key k) -> bool override;
+    auto key_press_event(ox::Key k) -> bool override;
 
    private:
-    std::unordered_map<cppurses::Point, cppurses::Glyph> glyphs_painted_;
-    cppurses::Glyph current_glyph_ = L'x';
-    cppurses::Glyph before_erase_  = L'x';
-    bool clone_enabled_            = false;
-    bool erase_enabled_            = false;
+    std::unordered_map<ox::Point, ox::Glyph> glyphs_painted_;
+    ox::Glyph current_glyph_ = L'x';
+    ox::Glyph before_erase_  = L'x';
+    bool clone_enabled_      = false;
+    bool erase_enabled_      = false;
 
    public:
     void place_glyph(std::size_t x, std::size_t y);
 
-    void remove_glyph(cppurses::Point coords)
+    void remove_glyph(ox::Point coords)
     {
         glyphs_painted_.erase(coords);
         this->update();
@@ -172,15 +172,15 @@ class Paint_area : public cppurses::Widget {
 
 namespace paint::slot {
 
-auto set_symbol(Paint_area& pa) -> sl::Slot<void(cppurses::Glyph)>;
+auto set_symbol(Paint_area& pa) -> sl::Slot<void(ox::Glyph)>;
 
-auto set_foreground_color(Paint_area& pa) -> sl::Slot<void(cppurses::Color)>;
+auto set_foreground_color(Paint_area& pa) -> sl::Slot<void(ox::Color)>;
 
-auto set_background_color(Paint_area& pa) -> sl::Slot<void(cppurses::Color)>;
+auto set_background_color(Paint_area& pa) -> sl::Slot<void(ox::Color)>;
 
-auto set_trait(Paint_area& pa, cppurses::Trait t) -> sl::Slot<void()>;
+auto set_trait(Paint_area& pa, ox::Trait t) -> sl::Slot<void()>;
 
-auto remove_traits(Paint_area& pa, cppurses::Trait t) -> sl::Slot<void()>;
+auto remove_traits(Paint_area& pa, ox::Trait t) -> sl::Slot<void()>;
 
 auto toggle_clone(Paint_area& pa) -> sl::Slot<void()>;
 

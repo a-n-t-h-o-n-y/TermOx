@@ -1,12 +1,12 @@
-#include <cppurses/widget/detail/graph_tree.hpp>
+#include <termox/widget/detail/graph_tree.hpp>
 
 #include <fstream>
 #include <string>
 
-#include <cppurses/widget/widget.hpp>
+#include <termox/widget/widget.hpp>
 
 namespace {
-using namespace cppurses;
+using namespace ox;
 
 void begin_graph(std::ofstream& file, std::string const& graph_name)
 {
@@ -52,8 +52,7 @@ void make_connections_to_children(std::ofstream& file, Widget const& parent)
 
 }  // namespace
 
-namespace cppurses {
-namespace detail {
+namespace ox::detail {
 
 void graph_tree(Widget const& w, std::string const& filename)
 {
@@ -63,5 +62,4 @@ void graph_tree(Widget const& w, std::string const& filename)
     end_graph(file);
 }
 
-}  // namespace detail
-}  // namespace cppurses
+}  // namespace ox::detail

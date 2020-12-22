@@ -1,14 +1,14 @@
-#include <cppurses/system/system.hpp>
+#include <termox/system/system.hpp>
 
 #include "demo_menu.hpp"
 
-int main() { return cppurses::System{}.run<demos::Demos>(); }
+int main() { return ox::System{}.run<demos::Demos>(); }
 
-// #include <cppurses/cppurses.hpp>
+// #include <termox/termox.hpp>
 
 // int main()
 // {
-//     using namespace cppurses;
+//     using namespace ox;
 //     auto app_ptr =
 //         layout::vertical(
 //             textbox(std::to_string(sizeof(Widget)) | fg(Color::Red) |

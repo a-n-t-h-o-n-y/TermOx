@@ -4,12 +4,13 @@
 
 #include <gtest/gtest.h>
 
-using cppurses::Color;
-using cppurses::DawnBringer_palette;
-using cppurses::Standard_palette;
-using cppurses::System;
+using ox::Color;
+using ox::DawnBringer_palette;
+using ox::Standard_palette;
+using ox::System;
 
-TEST(PaletteTest, Everything) {
+TEST(PaletteTest, Everything)
+{
     System system;
     EXPECT_EQ(255, Standard_palette().red_value(Color::Red));
     EXPECT_EQ(0, Standard_palette().green_value(Color::Red));

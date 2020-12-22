@@ -1,6 +1,6 @@
-[![Build Status](https://github.com/a-n-t-h-o-n-y/CPPurses/workflows/build/badge.svg)](https://github.com/a-n-t-h-o-n-y/CPPurses/actions?query=workflow%3Abuild)
+[![Build Status](https://github.com/a-n-t-h-o-n-y/TermOx/workflows/build/badge.svg)](https://github.com/a-n-t-h-o-n-y/TermOx/actions?query=workflow%3Abuild)
 [![Read the Manual](https://img.shields.io/badge/-Manual-yellow.svg)](docs/manual/index.md)
-[![Read the Reference](https://img.shields.io/badge/-API%20Reference-blue.svg)](https://a-n-t-h-o-n-y.github.io/CPPurses/hierarchy.html)
+[![Read the Reference](https://img.shields.io/badge/-API%20Reference-blue.svg)](https://a-n-t-h-o-n-y.github.io/TermOx/hierarchy.html)
 
 # TermOx 🐂
 
@@ -19,7 +19,7 @@ Widget and Layout types that can be pieced together to create a composite
 interface. It's easy to expand on top of these types to create new Widgets and
 Layouts.
 
-This project was previously named CPPurses.
+This project was previously named **CPPurses**.
 
 ## Usage
 

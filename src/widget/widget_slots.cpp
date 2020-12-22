@@ -1,18 +1,18 @@
-#include <cppurses/widget/widget_slots.hpp>
+#include <termox/widget/widget_slots.hpp>
 
 #include <signals_light/signal.hpp>
 
-#include <cppurses/painter/color.hpp>
-#include <cppurses/system/event.hpp>
-#include <cppurses/system/key.hpp>
-#include <cppurses/system/mouse.hpp>
-#include <cppurses/system/system.hpp>
-#include <cppurses/widget/cursor.hpp>
-#include <cppurses/widget/detail/link_lifetimes.hpp>
-#include <cppurses/widget/point.hpp>
-#include <cppurses/widget/widget.hpp>
+#include <termox/painter/color.hpp>
+#include <termox/system/event.hpp>
+#include <termox/system/key.hpp>
+#include <termox/system/mouse.hpp>
+#include <termox/system/system.hpp>
+#include <termox/widget/cursor.hpp>
+#include <termox/widget/detail/link_lifetimes.hpp>
+#include <termox/widget/point.hpp>
+#include <termox/widget/widget.hpp>
 
-namespace cppurses::slot {
+namespace ox::slot {
 
 auto enable(Widget& w) -> sl::Slot<void()>
 {
@@ -132,4 +132,4 @@ auto toggle_cursor(Widget& w) -> sl::Slot<void()>
     return link_lifetimes([&w] { w.cursor.toggle(); }, w);
 }
 
-}  // namespace cppurses::slot
+}  // namespace ox::slot

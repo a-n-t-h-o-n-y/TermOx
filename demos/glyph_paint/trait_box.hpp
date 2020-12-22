@@ -1,31 +1,30 @@
 #ifndef DEMOS_GLYPH_PAINT_TRAIT_BOX_HPP
 #define DEMOS_GLYPH_PAINT_TRAIT_BOX_HPP
-#include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/painter/trait.hpp>
-#include <cppurses/widget/layouts/horizontal.hpp>
-#include <cppurses/widget/layouts/vertical.hpp>
-#include <cppurses/widget/widgets/checkbox.hpp>
-#include <cppurses/widget/widgets/label.hpp>
+#include <termox/painter/glyph_string.hpp>
+#include <termox/painter/trait.hpp>
+#include <termox/widget/layouts/horizontal.hpp>
+#include <termox/widget/layouts/vertical.hpp>
+#include <termox/widget/widgets/checkbox.hpp>
+#include <termox/widget/widgets/label.hpp>
 
 namespace paint {
 
-class Trait_box : public cppurses::layout::Vertical<> {
+class Trait_box : public ox::layout::Vertical<> {
    private:
-    using Checkbox = cppurses::Labeled_checkbox;
+    using Checkbox = ox::Labeled_checkbox;
 
-    struct Top_row : cppurses::layout::Horizontal<Checkbox> {
-        Checkbox& bold_box = make_child(L"Bold" | cppurses::Trait::Bold);
-        Checkbox& dim_box  = make_child(L"Dim" | cppurses::Trait::Dim);
+    struct Top_row : ox::layout::Horizontal<Checkbox> {
+        Checkbox& bold_box = make_child(L"Bold" | ox::Trait::Bold);
+        Checkbox& dim_box  = make_child(L"Dim" | ox::Trait::Dim);
     };
 
    public:
     Top_row& top_row = make_child<Top_row>();
     Checkbox& inverse_box =
-        make_child<Checkbox>(L"Inverse" | cppurses::Trait::Inverse);
-    Checkbox& italic_box =
-        make_child<Checkbox>(L"Italic" | cppurses::Trait::Italic);
+        make_child<Checkbox>(L"Inverse" | ox::Trait::Inverse);
+    Checkbox& italic_box = make_child<Checkbox>(L"Italic" | ox::Trait::Italic);
     Checkbox& underline_box =
-        make_child<Checkbox>(L"Underline" | cppurses::Trait::Underline);
+        make_child<Checkbox>(L"Underline" | ox::Trait::Underline);
 
    public:
     Trait_box() { this->height_policy.fixed(4); }

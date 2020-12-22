@@ -1,12 +1,12 @@
 #include "color_control.hpp"
 
-#include <cppurses/system/system.hpp>
-#include <cppurses/widget/border.hpp>
+#include <termox/system/system.hpp>
+#include <termox/widget/border.hpp>
 
 #include "palette_helpers.hpp"
 
 namespace {
-using namespace cppurses;
+using namespace ox;
 
 /// Enable only the east wall of given a border, \p b. Also enables the border.
 void enable_east_wall(Border& b)
@@ -28,9 +28,9 @@ Color_control::Color_control()
     slider_green_.width_policy.hint(6);
 }
 
-void Color_control::set_sliders(cppurses::Color /* color */)
+void Color_control::set_sliders(ox::Color /* color */)
 {
-    // auto palette           = cppurses::System::terminal.current_palette();
+    // auto palette           = ox::System::terminal.current_palette();
     // const auto& definition = detail::extract_definition(palette, color);
     // this->set_red_slider(definition.values.red);
     // this->set_green_slider(definition.values.green);

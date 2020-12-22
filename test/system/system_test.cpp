@@ -10,12 +10,12 @@
 #include <memory>
 #include <utility>
 
-using cppurses::Event;
-using cppurses::Object;
-using cppurses::System;
-using cppurses::detail::Posted_event;
-using cppurses::detail::Posted_event_queue;
-using cppurses::detail::Thread_data;
+using ox::Event;
+using ox::Object;
+using ox::System;
+using ox::detail::Posted_event;
+using ox::detail::Posted_event_queue;
+using ox::detail::Thread_data;
 
 TEST(SystemTest, DefaultConstructor) { System system; }
 

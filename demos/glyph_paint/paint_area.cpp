@@ -14,19 +14,19 @@
 
 #include <signals_light/signal.hpp>
 
-#include <cppurses/painter/brush.hpp>
-#include <cppurses/painter/color.hpp>
-#include <cppurses/painter/glyph.hpp>
-#include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/painter/trait.hpp>
-#include <cppurses/system/key.hpp>
-#include <cppurses/widget/border.hpp>
-#include <cppurses/widget/detail/link_lifetimes.hpp>
-#include <cppurses/widget/focus_policy.hpp>
-#include <cppurses/widget/point.hpp>
-#include <cppurses/widget/widget.hpp>
+#include <termox/painter/brush.hpp>
+#include <termox/painter/color.hpp>
+#include <termox/painter/glyph.hpp>
+#include <termox/painter/glyph_string.hpp>
+#include <termox/painter/trait.hpp>
+#include <termox/system/key.hpp>
+#include <termox/widget/border.hpp>
+#include <termox/widget/detail/link_lifetimes.hpp>
+#include <termox/widget/focus_policy.hpp>
+#include <termox/widget/point.hpp>
+#include <termox/widget/widget.hpp>
 
-using namespace cppurses;
+using namespace ox;
 
 namespace {
 
@@ -56,7 +56,7 @@ void Paint_area::write(std::ostream& os)
     for (auto const& [point, glyph] : glyphs_painted_) {
         insert_newline(previous_nl, point, os);
         insert_space(previous_s, point, os);
-        os << cppurses::utility::wchar_to_bytes(glyph.symbol);
+        os << ox::utility::wchar_to_bytes(glyph.symbol);
         previous_nl = point;
         previous_s  = point;
     }
@@ -137,7 +137,7 @@ void Paint_area::place_glyph(std::size_t x, std::size_t y)
 
 namespace paint::slot {
 
-using cppurses::slot::link_lifetimes;
+using ox::slot::link_lifetimes;
 
 auto set_symbol(Paint_area& pa) -> sl::Slot<void(Glyph)>
 {

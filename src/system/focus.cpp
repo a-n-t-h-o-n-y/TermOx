@@ -1,4 +1,4 @@
-#include <cppurses/system/detail/focus.hpp>
+#include <termox/system/detail/focus.hpp>
 
 #include <algorithm>
 #include <cstddef>
@@ -7,14 +7,14 @@
 #include <utility>
 #include <vector>
 
-#include <cppurses/system/event.hpp>
-#include <cppurses/system/system.hpp>
-#include <cppurses/widget/focus_policy.hpp>
-#include <cppurses/widget/widget.hpp>
+#include <termox/system/event.hpp>
+#include <termox/system/system.hpp>
+#include <termox/widget/focus_policy.hpp>
+#include <termox/widget/widget.hpp>
 
 namespace {
-using namespace cppurses;
-using namespace cppurses::detail;
+using namespace ox;
+using namespace ox::detail;
 
 auto is_tab_focus_policy(Focus_policy policy) -> bool
 {
@@ -31,7 +31,7 @@ auto const is_tab_focusable = [](auto const* widg) {
 };
 
 // Return a widg tree from System::head() if focus_widget is nullptr.
-auto gen_focus_front_widg_tree() -> std::vector<cppurses::Widget*>
+auto gen_focus_front_widg_tree() -> std::vector<ox::Widget*>
 {
     auto widg_tree = System::head()->get_descendants();
     widg_tree.insert(std::begin(widg_tree), System::head());
@@ -46,7 +46,7 @@ auto gen_focus_front_widg_tree() -> std::vector<cppurses::Widget*>
     return widg_tree;
 }
 
-auto next_tab_focus() -> cppurses::Widget*
+auto next_tab_focus() -> ox::Widget*
 {
     if (System::head() == nullptr)
         return nullptr;
@@ -57,7 +57,7 @@ auto next_tab_focus() -> cppurses::Widget*
     return (next_focus != end) ? *next_focus : Focus::focus_widget();
 }
 
-auto previous_tab_focus() -> cppurses::Widget*
+auto previous_tab_focus() -> ox::Widget*
 {
     if (System::head() == nullptr)
         return nullptr;
@@ -70,13 +70,13 @@ auto previous_tab_focus() -> cppurses::Widget*
 
 }  // namespace
 
-namespace cppurses::detail {
+namespace ox::detail {
 
-cppurses::Widget* Focus::focus_widget_ = nullptr;
-bool Focus::tab_enabled_               = true;
-bool Focus::tab_suppressed_            = false;
+ox::Widget* Focus::focus_widget_ = nullptr;
+bool Focus::tab_enabled_         = true;
+bool Focus::tab_suppressed_      = false;
 
-void Focus::mouse_press(cppurses::Widget& clicked)
+void Focus::mouse_press(ox::Widget& clicked)
 {
     if (&clicked == focus_widget_)
         return;
@@ -112,7 +112,7 @@ auto Focus::shift_tab_press() -> bool
     return false;
 }
 
-void Focus::set(cppurses::Widget& new_focus)
+void Focus::set(ox::Widget& new_focus)
 {
     if (&new_focus == focus_widget_)
         return;
@@ -133,4 +133,4 @@ void Focus::clear()
     focus_widget_ = nullptr;
 }
 
-}  // namespace cppurses::detail
+}  // namespace ox::detail

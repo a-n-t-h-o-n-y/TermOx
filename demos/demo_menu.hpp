@@ -1,14 +1,14 @@
 #ifndef DEMOS_DEMO_MENU_HPP
 #define DEMOS_DEMO_MENU_HPP
-#include <cppurses/painter/detail/screen_descriptor.hpp>
-#include <cppurses/painter/palette/dawn_bringer16.hpp>
-#include <cppurses/system/key.hpp>
-#include <cppurses/system/shortcuts.hpp>
-#include <cppurses/system/system.hpp>
-#include <cppurses/widget/focus_policy.hpp>
-#include <cppurses/widget/layouts/vertical.hpp>
-#include <cppurses/widget/widgets/menu_stack.hpp>
-#include <cppurses/widget/widgets/titlebar.hpp>
+#include <termox/painter/detail/screen_descriptor.hpp>
+#include <termox/painter/palette/dawn_bringer16.hpp>
+#include <termox/system/key.hpp>
+#include <termox/system/shortcuts.hpp>
+#include <termox/system/system.hpp>
+#include <termox/widget/focus_policy.hpp>
+#include <termox/widget/layouts/vertical.hpp>
+#include <termox/widget/widgets/menu_stack.hpp>
+#include <termox/widget/widgets/titlebar.hpp>
 
 #include "animation/animation_demo.hpp"
 #include "colors/palette_view.hpp"
@@ -24,15 +24,15 @@
 
 namespace demos {
 
-class Demo_menu : public cppurses::Menu_stack {
+class Demo_menu : public ox::Menu_stack {
    public:
     Demo_menu() : Menu_stack{L"Demos"}
     {
-        using namespace cppurses;
-        using namespace cppurses::pipe;
+        using namespace ox;
+        using namespace ox::pipe;
 
         Shortcuts::add_shortcut(Key::Escape).connect([this] {
-            System::terminal.set_palette(cppurses::dawn_bringer16::palette);
+            System::terminal.set_palette(ox::dawn_bringer16::palette);
             this->Menu_stack::goto_menu();
         });
 
@@ -73,21 +73,21 @@ class Demo_menu : public cppurses::Menu_stack {
     }
 };
 
-class Demos : public cppurses::layout::Vertical<> {
+class Demos : public ox::layout::Vertical<> {
    public:
     // TODO add a back button to left side of titlebar that appears in demos
-    using Titlebar = cppurses::Titlebar;
+    using Titlebar = ox::Titlebar;
 
     Titlebar& title_ = this->make_child<Titlebar>("~ TermOx ~");
     Demo_menu& menu  = this->make_child<Demo_menu>();
 
    public:
-    Demos() { this->focus_policy = cppurses::Focus_policy::Direct; }
+    Demos() { this->focus_policy = ox::Focus_policy::Direct; }
 
    protected:
     auto focus_in_event() -> bool override
     {
-        cppurses::System::set_focus(menu);
+        ox::System::set_focus(menu);
         return true;
     }
 };

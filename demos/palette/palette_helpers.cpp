@@ -4,13 +4,13 @@
 #include <cstdint>
 #include <iterator>
 
-#include <cppurses/painter/color.hpp>
-// #include <cppurses/painter/palette.hpp>
-// #include <cppurses/painter/rgb.hpp>
-#include <cppurses/system/system.hpp>
-#include <cppurses/terminal/terminal.hpp>
+#include <termox/painter/color.hpp>
+// #include <termox/painter/palette.hpp>
+// #include <termox/painter/rgb.hpp>
+#include <termox/system/system.hpp>
+#include <termox/terminal/terminal.hpp>
 
-using namespace cppurses;
+using namespace ox;
 
 namespace palette {
 namespace detail {
@@ -34,10 +34,10 @@ using namespace palette::detail;
 /// Set a color definition for the terminal.
 // void set_definition(Color color, RGB values)
 // {
-//     auto palette      = cppurses::System::terminal.current_palette();
+//     auto palette      = ox::System::terminal.current_palette();
 //     auto& definition  = extract_definition(palette, color);
 //     definition.values = values;
-//     cppurses::System::terminal.set_color_palette(palette);
+//     ox::System::terminal.set_color_palette(palette);
 // }
 }  // namespace
 

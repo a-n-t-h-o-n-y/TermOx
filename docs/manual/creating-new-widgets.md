@@ -9,20 +9,20 @@ The constructor is commonly used to set [`Color`](colors.md)s and
 and the [`Focus_policy`](focus-policy.md), among others.
 
 ```cpp
-class Canvas : public cppurses::Widget {
+class Canvas : public ox::Widget {
    public:
     Canvas()
     {
-        using cppurses::Color;
-        using namespace cppurses::pipe;
+        using ox::Color;
+        using namespace ox::pipe;
         *this | bordered() | bold_walls() | bg(Color::Light_blue) |
             fg(Color::Blue);
     }
 
    protected:
-    auto mouse_press_event(cppurses::Mouse const& m) -> bool override
+    auto mouse_press_event(ox::Mouse const& m) -> bool override
     {
-        if (m.button == cppurses::Mouse::Button::Left)
+        if (m.button == ox::Mouse::Button::Left)
             points_.push_back(m.local);
         this->update();  // post a paint event to *this
         return Widget::mouse_press_event(m);
@@ -30,14 +30,14 @@ class Canvas : public cppurses::Widget {
 
     auto paint_event() -> bool override
     {
-        auto p = cppurses::painter{*this};
+        auto p = ox::painter{*this};
         for (auto point : points_)
             p.put(L'X', point);
         return Widget::paint_event();
     }
 
    private:
-    std::vector<cppurses::Point> points_;
+    std::vector<ox::Point> points_;
 };
 ```
 
@@ -57,29 +57,29 @@ by inheriting from the Widget and overriding event handlers,
         The code below will create a new Textbox type that changes its
             background color when it is in focus.
 
-```cpp class Focus_indicator_textbox : public cppurses::Textbox {
+```cpp class Focus_indicator_textbox : public ox::Textbox {
    public:
     Focus_indicator_textbox(Glyph_string text) : Textbox{std::move(text)}
     {
-        *this | cppurses::bg(unfocus_color_);
+        *this | ox::bg(unfocus_color_);
     }
 
    protected:
     auto focus_in_event() -> bool override
     {
-        *this | cppurses::bg(focus_color_);
+        *this | ox::bg(focus_color_);
         return Widget::focus_in_event();
     }
 
     auto focus_out_event() -> bool override
     {
-        *this | cppurses::bg(unfocus_color_);
+        *this | ox::bg(unfocus_color_);
         return Widget::focus_out_event();
     }
 
    private:
-    constexpr static auto focus_color_   = cppurses::Color::Red;
-    constexpr static auto unfocus_color_ = cppurses::Color::Blue;
+    constexpr static auto focus_color_   = ox::Color::Red;
+    constexpr static auto unfocus_color_ = ox::Color::Blue;
 };
 ```
 

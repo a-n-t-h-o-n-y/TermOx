@@ -1,10 +1,10 @@
-#include <cppurses/system/detail/timer_event_loop.hpp>
+#include <termox/system/detail/timer_event_loop.hpp>
 
-#include <cppurses/system/event.hpp>
-#include <cppurses/system/system.hpp>
-#include <cppurses/widget/widget.hpp>
+#include <termox/system/event.hpp>
+#include <termox/system/system.hpp>
+#include <termox/widget/widget.hpp>
 
-namespace cppurses::detail {
+namespace ox::detail {
 
 void Timer_event_loop::register_widget(Widget& w)
 {
@@ -25,4 +25,4 @@ void Timer_event_loop::loop_function()
     }
 }
 
-}  // namespace cppurses::detail
+}  // namespace ox::detail

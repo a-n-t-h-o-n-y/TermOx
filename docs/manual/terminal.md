@@ -12,4 +12,4 @@ access via `System::terminal`.
 
 ## See Also
 
-- [Reference](https://a-n-t-h-o-n-y.github.io/CPPurses/classcppurses_1_1Terminal.html)
+- [Reference](https://a-n-t-h-o-n-y.github.io/TermOx/classox_1_1Terminal.html)

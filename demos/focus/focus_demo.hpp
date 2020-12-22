@@ -1,27 +1,26 @@
-#ifndef CPPURSES_DEMOS_FOCUS_FOCUS_DEMO_HPP
-#define CPPURSES_DEMOS_FOCUS_FOCUS_DEMO_HPP
+#ifndef TERMOX_DEMOS_FOCUS_FOCUS_DEMO_HPP
+#define TERMOX_DEMOS_FOCUS_FOCUS_DEMO_HPP
 #include <memory>
 
-#include <cppurses/painter/color.hpp>
-#include <cppurses/system/system.hpp>
-#include <cppurses/widget/focus_policy.hpp>
-#include <cppurses/widget/layouts/horizontal.hpp>
-#include <cppurses/widget/layouts/vertical.hpp>
-#include <cppurses/widget/pipe.hpp>
-#include <cppurses/widget/widget.hpp>
-#include <cppurses/widget/widgets/label.hpp>
+#include <termox/painter/color.hpp>
+#include <termox/system/system.hpp>
+#include <termox/widget/focus_policy.hpp>
+#include <termox/widget/layouts/horizontal.hpp>
+#include <termox/widget/layouts/vertical.hpp>
+#include <termox/widget/pipe.hpp>
+#include <termox/widget/widget.hpp>
+#include <termox/widget/widgets/label.hpp>
 
 namespace demos::focus {
 
-auto focus_box(cppurses::Focus_policy policy)
-    -> std::unique_ptr<cppurses::Widget>
+auto focus_box(ox::Focus_policy policy) -> std::unique_ptr<ox::Widget>
 {
-    using namespace cppurses::pipe;
+    using namespace ox::pipe;
 
     /// Focus_policy to string
-    auto to_string = [](cppurses::Focus_policy p) -> wchar_t const* {
+    auto to_string = [](ox::Focus_policy p) -> wchar_t const* {
         switch (p) {
-            using namespace cppurses;
+            using namespace ox;
             case Focus_policy::None: return L"None";
             case Focus_policy::Tab: return L"Tab";
             case Focus_policy::Click: return L"Click";
@@ -32,48 +31,48 @@ auto focus_box(cppurses::Focus_policy policy)
     };
 
     /// Remove tab focus from \p p.
-    auto const narrow = [](cppurses::Focus_policy p) {
+    auto const narrow = [](ox::Focus_policy p) {
         switch (p) {
-            using namespace cppurses;
+            using namespace ox;
             case Focus_policy::None:
             case Focus_policy::Tab: return Focus_policy::None;
             case Focus_policy::Click:
             case Focus_policy::Strong: return Focus_policy::Click;
             case Focus_policy::Direct: return Focus_policy::Direct;
         }
-        return cppurses::Focus_policy::None;
+        return ox::Focus_policy::None;
     };
 
     // clang-format off
     auto box_ptr =
-        cppurses::layout::vertical
+        ox::layout::vertical
         (
-            cppurses::label<cppurses::layout::Horizontal<>>({to_string(policy)})
+            ox::label<ox::layout::Horizontal<>>({to_string(policy)})
                 | name("l")
                 | align_center()
                 | fixed_height(1)
-                | cppurses::pipe::focus(narrow(policy)),
-            cppurses::widget()
+                | ox::pipe::focus(narrow(policy)),
+            ox::widget()
                 | name("w")
-                | cppurses::pipe::focus(policy)
+                | ox::pipe::focus(policy)
         ) | bordered();
 
     box_ptr | children() | find("l")
-            | on_focus_in([w = box_ptr->find_child_by_name("w")]{ cppurses::System::set_focus(*w); });
+            | on_focus_in([w = box_ptr->find_child_by_name("w")]{ ox::System::set_focus(*w); });
 
     box_ptr | children() | find("w")
-            | on_focus_in( [&w = *box_ptr]{ w | walls(fg(cppurses::Color::Red)); })
-            | on_focus_out([&w = *box_ptr]{ w | walls(fg(cppurses::Color::White)); });
+            | on_focus_in( [&w = *box_ptr]{ w | walls(fg(ox::Color::Red)); })
+            | on_focus_out([&w = *box_ptr]{ w | walls(fg(ox::Color::White)); });
     // clang-format on
 
     return box_ptr;
 }
 
 /// Build a focus app demo and return the owning pointer to it.
-auto build_demo() -> std::unique_ptr<cppurses::Widget>
+auto build_demo() -> std::unique_ptr<ox::Widget>
 {
-    using namespace cppurses;
-    using namespace cppurses::pipe;
+    using namespace ox;
+    using namespace ox::pipe;
 
     // clang-format off
     return
@@ -106,4 +105,4 @@ auto build_demo() -> std::unique_ptr<cppurses::Widget>
 }
 
 }  // namespace demos::focus
-#endif  // CPPURSES_DEMOS_FOCUS_FOCUS_DEMO_HPP
+#endif  // TERMOX_DEMOS_FOCUS_FOCUS_DEMO_HPP

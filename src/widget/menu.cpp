@@ -1,4 +1,4 @@
-#include <cppurses/widget/widgets/menu.hpp>
+#include <termox/widget/widgets/menu.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -8,19 +8,19 @@
 
 #include <signals_light/signal.hpp>
 
-#include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/painter/painter.hpp>
-#include <cppurses/painter/trait.hpp>
-#include <cppurses/system/key.hpp>
-#include <cppurses/system/mouse.hpp>
-#include <cppurses/widget/detail/link_lifetimes.hpp>
-#include <cppurses/widget/focus_policy.hpp>
-#include <cppurses/widget/layouts/horizontal.hpp>
-#include <cppurses/widget/widget.hpp>
-#include <cppurses/widget/widgets/button.hpp>
-#include <cppurses/widget/widgets/label.hpp>
+#include <termox/painter/glyph_string.hpp>
+#include <termox/painter/painter.hpp>
+#include <termox/painter/trait.hpp>
+#include <termox/system/key.hpp>
+#include <termox/system/mouse.hpp>
+#include <termox/widget/detail/link_lifetimes.hpp>
+#include <termox/widget/focus_policy.hpp>
+#include <termox/widget/layouts/horizontal.hpp>
+#include <termox/widget/widget.hpp>
+#include <termox/widget/widgets/button.hpp>
+#include <termox/widget/widgets/label.hpp>
 
-namespace cppurses {
+namespace ox {
 
 Menu::Menu(Glyph_string title_text)
     : title{this->make_child<HLabel>({std::move(title_text)})}
@@ -128,9 +128,9 @@ auto Menu::mouse_wheel_event_filter(Widget& /* receiver */, Mouse const& m)
     }
 }
 
-}  // namespace cppurses
+}  // namespace ox
 
-namespace cppurses::slot {
+namespace ox::slot {
 
 auto select_up(Menu& m) -> sl::Slot<void(std::size_t)>
 {
@@ -162,4 +162,4 @@ auto select_item(Menu& m, std::size_t index) -> sl::Slot<void()>
     return link_lifetimes([&m, index] { m.select_item(index); }, m);
 }
 
-}  // namespace cppurses::slot
+}  // namespace ox::slot

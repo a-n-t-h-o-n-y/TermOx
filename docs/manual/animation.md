@@ -1,8 +1,8 @@
 # Animation
 
-The Animation system in CPPurses allows Timer Events to be sent to any Widget at
-a chosen interval. The Animation Engine contains its own Event Loop, running in
-a separate thread.
+The Animation system in TermOx allows Timer Events to be sent to any Widget at a
+chosen interval. The Animation Engine contains its own Event Loop, running in a
+separate thread.
 
 ## Methods
 

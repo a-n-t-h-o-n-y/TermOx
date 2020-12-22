@@ -16,7 +16,7 @@ access will only be provided via the parameterized type.
 
 ## Linear Layouts
 
-CPPurses provides two Linear Layouts: `Horizontal` and `Vertical`.
+TermOx provides two Linear Layouts: `Horizontal` and `Vertical`.
 
 These layouts try to fit as many child Widgets on screen as their Size Policies
 allow. Widgets are ordered physically in the same order they are added to the
@@ -36,7 +36,7 @@ page and display it.
 
 ## Layout Modifiers
 
-CPPurses provides a few 'Layout Modifiers' that build on top of the above Layout
+TermOx provides a few 'Layout Modifiers' that build on top of the above Layout
 types to provide a specific behavior.
 
 ### Array

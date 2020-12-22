@@ -124,21 +124,21 @@ auto border(std::unique_ptr<W>) -> std::unique_ptr<Bordered<W>>;
 ## Client Code Examples
 
 ```cpp
-class Bordered_textbox : public cppurses::Border<cppurses::Textbox> {
+class Bordered_textbox : public ox::Border<ox::Textbox> {
    public:
-    Bordered_textbox() { *this | cppurses::pipe::bold_walls(); }
+    Bordered_textbox() { *this | ox::pipe::bold_walls(); }
 };
 
-class Bordered_settings : public cppurses::Border<Settings_pane> {
+class Bordered_settings : public ox::Border<Settings_pane> {
    public:
     Bordered_settings()
     {
-        using namespace cppurses::pipe;
+        using namespace ox::pipe;
         *this | west_border() | bold_walls();
     }
 };
 
-class Notepad : public cppurses::layout::Horizontal<> {
+class Notepad : public ox::layout::Horizontal<> {
    public:
     Notepad()
     {
@@ -146,7 +146,7 @@ class Notepad : public cppurses::layout::Horizontal<> {
     }
 
    private:
-    cppurses::Textbox& textbox_ = this->make_child<Bordered_textbox>("init").child();
+    ox::Textbox& textbox_ = this->make_child<Bordered_textbox>("init").child();
     Settings_pane& settings_    = this->make_child<Bordered_settings>().child();
 };
 
@@ -294,5 +294,5 @@ each Widget can have a particular amount of space between itself and other.
   So its not much of a library, it is just a container of variants with some
   special interface to insert and a process method that just calls std::visit
   with some generic lambda to call process() on each Message type. Still useful
-  though, providing a break, a wall between the message queue and cppurses is
+  though, providing a break, a wall between the message queue and termox is
   benefical in a psychological way, it simplifies things.

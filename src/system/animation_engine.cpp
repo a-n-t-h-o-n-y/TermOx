@@ -1,12 +1,12 @@
-#include <cppurses/system/animation_engine.hpp>
+#include <termox/system/animation_engine.hpp>
 
 #include <algorithm>
 #include <iterator>
 #include <memory>
 
-#include <cppurses/system/detail/timer_event_loop.hpp>
+#include <termox/system/detail/timer_event_loop.hpp>
 
-namespace cppurses {
+namespace ox {
 
 void Animation_engine::register_widget(Widget& w, Period_t interval)
 {
@@ -57,4 +57,4 @@ void Animation_engine::startup()
         loop->run_async();
 }
 
-}  // namespace cppurses
+}  // namespace ox

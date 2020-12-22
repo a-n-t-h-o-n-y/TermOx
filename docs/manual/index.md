@@ -1,4 +1,4 @@
-# CPPurses Manual Index
+# TermOx Manual Index
 
 ## Introduction
 

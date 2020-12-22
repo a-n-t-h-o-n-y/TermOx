@@ -1,10 +1,10 @@
-#include <cppurses/widget/widgets/cycle_box.hpp>
+#include <termox/widget/widgets/cycle_box.hpp>
 
 #include <cstddef>
 
-#include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/system/mouse.hpp>
-#include <cppurses/widget/widgets/text_display.hpp>
+#include <termox/painter/glyph_string.hpp>
+#include <termox/system/mouse.hpp>
+#include <termox/widget/widgets/text_display.hpp>
 
 namespace {
 
@@ -24,7 +24,7 @@ auto wrapped_decrement(std::size_t i, std::size_t edge) -> std::size_t
 
 }  // namespace
 
-namespace cppurses {
+namespace ox {
 
 void Cycle_box::next()
 {
@@ -42,4 +42,4 @@ void Cycle_box::previous()
     this->emit_signals();
 }
 
-}  // namespace cppurses
+}  // namespace ox

@@ -5,7 +5,7 @@ modifying Widgets. The pipe operator `|` is used to chain together calls to
 these methods.
 
 ```cpp
-using namespace cppurses::pipe;
+using namespace ox::pipe;
 my_widget | click_focus() | fixed_height(1) | bg(Color::Blue) | fg(Color::Red)
           | bind_key(Key::H, [](auto& w){ log(w.name()); });
 ```
@@ -32,7 +32,7 @@ filter(F&& predicate);
 ```
 
 ```cpp
-using namespace cppurses::pipe;
+using namespace ox::pipe;
 my_widget | children() | filter([](const& w) { return w.brush.has_trait(Trait::Bold); })
           | wallpaper(L'#' | fg(Color::Violet));
 ```
@@ -48,7 +48,7 @@ filter();
 ```
 
 ```cpp
-using namespace cppurses::pipe;
+using namespace ox::pipe;
 my_widget | descendants() | filter<Button>() | on_press([&]{ my_widget | bg(Color::Red); });
 ```
 
@@ -64,7 +64,7 @@ for_each(F&& f)
 ```
 
 ```cpp
-using namespace cppurses::pipe;
+using namespace ox::pipe;
 my_widget | children() | for_each([](auto& w){ log(w.name()); });
 ```
 

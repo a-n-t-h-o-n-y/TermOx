@@ -1,12 +1,12 @@
-#include <cppurses/painter/detail/screen_mask.hpp>
+#include <termox/painter/detail/screen_mask.hpp>
 
-#include <cppurses/widget/area.hpp>
-#include <cppurses/widget/point.hpp>
-#include <cppurses/widget/widget.hpp>
+#include <termox/widget/area.hpp>
+#include <termox/widget/point.hpp>
+#include <termox/widget/widget.hpp>
 
 namespace {
-using namespace cppurses;
-using namespace cppurses::detail;
+using namespace ox;
+using namespace ox::detail;
 
 auto make_offset(Widget const& w, Screen_mask::Constructor_tag tag) -> Point
 {
@@ -22,7 +22,7 @@ auto make_area(Widget const& w, Screen_mask::Constructor_tag tag) -> Area
 
 }  // namespace
 
-namespace cppurses::detail {
+namespace ox::detail {
 
 /// Can't put in header, Widget depends on Screen_mask
 Screen_mask::Screen_mask(Widget const& w, Constructor_tag tag)
@@ -31,4 +31,4 @@ Screen_mask::Screen_mask(Widget const& w, Constructor_tag tag)
       bits_(area_.width * area_.height)
 {}
 
-}  // namespace cppurses::detail
+}  // namespace ox::detail

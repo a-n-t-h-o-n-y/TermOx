@@ -1,5 +1,5 @@
-#ifndef CPPURSES_DEMOS_GAME_OF_LIFE_PATTERNS_HPP
-#define CPPURSES_DEMOS_GAME_OF_LIFE_PATTERNS_HPP
+#ifndef TERMOX_DEMOS_GAME_OF_LIFE_PATTERNS_HPP
+#define TERMOX_DEMOS_GAME_OF_LIFE_PATTERNS_HPP
 #include "get_rle.hpp"
 #include "pattern.hpp"
 
@@ -47,4 +47,4 @@ extern Pattern const xq8_y1842ve4z8sqp821zw1;
 extern Pattern const xp4_63p4ky2k4p36zy1ci11iczog68aw11wa86goz011y611;
 
 }  // namespace gol::pattern
-#endif  // CPPURSES_DEMOS_GAME_OF_LIFE_PATTERNS_HPP
+#endif  // TERMOX_DEMOS_GAME_OF_LIFE_PATTERNS_HPP

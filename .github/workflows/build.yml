@@ -24,3 +24,5 @@ jobs:
           mkdir build && cd build
           export CXX=clang++ && export CC=clang
           cmake .. && make -j2 demos
+
+# TODO add tests and run them on each platform, maybe with sanitizers?

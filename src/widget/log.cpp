@@ -1,14 +1,14 @@
-#include <cppurses/widget/widgets/log.hpp>
+#include <termox/widget/widgets/log.hpp>
 
 #include <utility>
 
 #include <signals_light/signal.hpp>
 
-#include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/system/key.hpp>
-#include <cppurses/widget/detail/link_lifetimes.hpp>
+#include <termox/painter/glyph_string.hpp>
+#include <termox/system/key.hpp>
+#include <termox/widget/detail/link_lifetimes.hpp>
 
-namespace cppurses {
+namespace ox {
 
 void Log::post_message(Glyph_string message)
 {
@@ -35,9 +35,9 @@ auto Log::key_press_event(Key k) -> bool
     }
 }
 
-}  // namespace cppurses
+}  // namespace ox
 
-namespace cppurses::slot {
+namespace ox::slot {
 
 auto post_message(Log& log) -> sl::Slot<void(Glyph_string)>
 {
@@ -51,4 +51,4 @@ auto post_message(Log& log, Glyph_string const& message) -> sl::Slot<void()>
     return link_lifetimes([&log, message] { log.post_message(message); }, log);
 }
 
-}  // namespace cppurses::slot
+}  // namespace ox::slot

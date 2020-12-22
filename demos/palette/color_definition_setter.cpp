@@ -1,10 +1,10 @@
 #include "color_definition_setter.hpp"
 
-#include <cppurses/painter/color.hpp>
+#include <termox/painter/color.hpp>
 
 #include "palette_helpers.hpp"
 
-using namespace cppurses;
+using namespace ox;
 
 namespace palette {
 

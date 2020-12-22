@@ -3,14 +3,14 @@
 #include <array>
 #include <memory>
 
-#include <cppurses/painter/color.hpp>
-#include <cppurses/painter/glyph.hpp>
-#include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/terminal/terminal.hpp>
-#include <cppurses/widget/detail/link_lifetimes.hpp>
+#include <termox/painter/color.hpp>
+#include <termox/painter/glyph.hpp>
+#include <termox/painter/glyph_string.hpp>
+#include <termox/terminal/terminal.hpp>
+#include <termox/widget/detail/link_lifetimes.hpp>
 
 namespace {
-using namespace cppurses;
+using namespace ox;
 
 auto const box_drawing = Glyph_string{
     L"─ ━ │ ┃ ┄ ┅ ┆ ┇ ┈ ┉ ┊ ┋ ┌ ┍ ┎ ┏ ┐ ┑ ┒ ┓ └ ┕ ┖ ┗ ┘ ┙ ┚ ┛ ├ ┝ ┞ ┟ ┠ ┡ ┢ ┣ "
@@ -139,20 +139,20 @@ auto populated_glyph_selector() -> std::unique_ptr<Glyph_selector>
     auto& shapes = result->add_sheet(L"Color Shapes", L"");
     result->add_sheet(L"Latin-1", latin_1);
 
-    auto const build_blocks = cppurses::slot::link_lifetimes(
-        [&blocks](cppurses::Palette const& p) {
+    auto const build_blocks = ox::slot::link_lifetimes(
+        [&blocks](ox::Palette const& p) {
             blocks.set_contents(color_blocks(p));
         },
         blocks);
 
-    auto const build_shapes = cppurses::slot::link_lifetimes(
-        [&shapes](cppurses::Palette const& p) {
+    auto const build_shapes = ox::slot::link_lifetimes(
+        [&shapes](ox::Palette const& p) {
             shapes.set_contents(color_shapes(p));
         },
         shapes);
 
-    cppurses::System::terminal.palette_changed.connect(build_blocks);
-    cppurses::System::terminal.palette_changed.connect(build_shapes);
+    ox::System::terminal.palette_changed.connect(build_blocks);
+    ox::System::terminal.palette_changed.connect(build_shapes);
 
     return result;
 }

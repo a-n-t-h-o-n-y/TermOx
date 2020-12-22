@@ -1,4 +1,4 @@
-#include <widget/widget.hpp>
+#include <termox/widget/widget.hpp>
 
 #include <gtest/gtest.h>
 

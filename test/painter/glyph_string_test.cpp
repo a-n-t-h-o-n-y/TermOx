@@ -6,157 +6,141 @@
 
 TEST(GlyphStringTest, GlyphConstructor)
 {
-    cppurses::Glyph g1{"⎔", cppurses::Trait::Bold};
-    cppurses::Glyph_string gs1(g1);
+    ox::Glyph g1{"⎔", ox::Trait::Bold};
+    ox::Glyph_string gs1(g1);
 
-    cppurses::Glyph g2{"₹", cppurses::Trait::Bold};
-    cppurses::Glyph_string gs2(g2, cppurses::Trait::Standout,
-                               cppurses::bg(cppurses::Color::Black));
+    ox::Glyph g2{"₹", ox::Trait::Bold};
+    ox::Glyph_string gs2(g2, ox::Trait::Standout, ox::bg(ox::Color::Black));
 
     EXPECT_EQ(gs1[0], g1);
 
-    EXPECT_EQ(gs2[0], (cppurses::Glyph("₹", cppurses::Trait::Bold,
-                                       cppurses::bg(cppurses::Color::Black),
-                                       cppurses::Trait::Standout)));
+    EXPECT_EQ(gs2[0], (ox::Glyph("₹", ox::Trait::Bold, ox::bg(ox::Color::Black),
+                                 ox::Trait::Standout)));
 }
 
 TEST(GlyphStringTest, GlyphInitializerListConstructor)
 {
-    cppurses::Glyph g0{"⎄"};
-    cppurses::Glyph g1{"⎅", cppurses::Trait::Bold,
-                       cppurses::fg(cppurses::Color::Yellow)};
-    cppurses::Glyph g2{"A", cppurses::bg(cppurses::Color::Blue)};
-    cppurses::Glyph g3{"⎆", cppurses::Trait::Standout, cppurses::Trait::Italic};
-    cppurses::Glyph g4{"⎈", cppurses::Trait::Bold, cppurses::Trait::Bold};
+    ox::Glyph g0{"⎄"};
+    ox::Glyph g1{"⎅", ox::Trait::Bold, ox::fg(ox::Color::Yellow)};
+    ox::Glyph g2{"A", ox::bg(ox::Color::Blue)};
+    ox::Glyph g3{"⎆", ox::Trait::Standout, ox::Trait::Italic};
+    ox::Glyph g4{"⎈", ox::Trait::Bold, ox::Trait::Bold};
 
-    cppurses::Glyph_string gs(
-        {g0, g1, g2, g3, g4, {"k", cppurses::Trait::Italic}},
-        cppurses::bg(cppurses::Color::Red));
+    ox::Glyph_string gs({g0, g1, g2, g3, g4, {"k", ox::Trait::Italic}},
+                        ox::bg(ox::Color::Red));
 
-    EXPECT_EQ(gs[0],
-              (cppurses::Glyph{"⎄", cppurses::bg(cppurses::Color::Red)}));
+    EXPECT_EQ(gs[0], (ox::Glyph{"⎄", ox::bg(ox::Color::Red)}));
 
-    EXPECT_EQ(gs[1], (cppurses::Glyph{"⎅", cppurses::bg(cppurses::Color::Red),
-                                      cppurses::Trait::Bold,
-                                      cppurses::fg(cppurses::Color::Yellow)}));
+    EXPECT_EQ(gs[1], (ox::Glyph{"⎅", ox::bg(ox::Color::Red), ox::Trait::Bold,
+                                ox::fg(ox::Color::Yellow)}));
 
-    EXPECT_EQ(gs[2],
-              (cppurses::Glyph{"A", cppurses::bg(cppurses::Color::Red)}));
+    EXPECT_EQ(gs[2], (ox::Glyph{"A", ox::bg(ox::Color::Red)}));
 
-    EXPECT_EQ(gs[3], (cppurses::Glyph{"⎆", cppurses::bg(cppurses::Color::Red),
-                                      cppurses::Trait::Standout,
-                                      cppurses::Trait::Italic}));
+    EXPECT_EQ(gs[3], (ox::Glyph{"⎆", ox::bg(ox::Color::Red),
+                                ox::Trait::Standout, ox::Trait::Italic}));
 
-    EXPECT_EQ(gs[4], (cppurses::Glyph{"⎈", cppurses::bg(cppurses::Color::Red),
-                                      cppurses::Trait::Bold}));
+    EXPECT_EQ(gs[4], (ox::Glyph{"⎈", ox::bg(ox::Color::Red), ox::Trait::Bold}));
 
-    EXPECT_EQ(gs[5], (cppurses::Glyph{"k", cppurses::bg(cppurses::Color::Red),
-                                      cppurses::Trait::Italic}));
+    EXPECT_EQ(gs[5],
+              (ox::Glyph{"k", ox::bg(ox::Color::Red), ox::Trait::Italic}));
 }
 
 TEST(GlyphStringTest, CharConstructor)
 {
-    cppurses::Glyph_string gs1{'g', cppurses::Trait::Bold,
-                               cppurses::bg(cppurses::Color::Blue)};
+    ox::Glyph_string gs1{'g', ox::Trait::Bold, ox::bg(ox::Color::Blue)};
 
-    cppurses::Glyph_string gs2 = 'h';
+    ox::Glyph_string gs2 = 'h';
 
     char c = '4';
-    cppurses::Glyph_string gs3(c, cppurses::Trait::Dim);
+    ox::Glyph_string gs3(c, ox::Trait::Dim);
 
-    EXPECT_EQ(gs1[0], (cppurses::Glyph{"g", cppurses::bg(cppurses::Color::Blue),
-                                       cppurses::Trait::Bold}));
+    EXPECT_EQ(gs1[0],
+              (ox::Glyph{"g", ox::bg(ox::Color::Blue), ox::Trait::Bold}));
 
-    EXPECT_EQ(gs2[0], (cppurses::Glyph{"h"}));
+    EXPECT_EQ(gs2[0], (ox::Glyph{"h"}));
 
-    EXPECT_EQ(gs3[0], (cppurses::Glyph{"4", cppurses::Trait::Dim}));
+    EXPECT_EQ(gs3[0], (ox::Glyph{"4", ox::Trait::Dim}));
 }
 
 TEST(GlyphStringTest, ConstCharPointerConstructor)
 {
-    cppurses::Glyph_string gs1{"hello!", cppurses::Trait::Bold};
-    cppurses::Glyph_string gs2("⎉ab_⍇⍈ ⍼");
-    cppurses::Glyph_string gs3 = "* ⎲⎳";
-    cppurses::Glyph_string gs4{""};
-    cppurses::Glyph_string gs5{"⎋∇ Ⅷ₷", cppurses::fg(cppurses::Color::Green),
-                               cppurses::Trait::Dim};
-    const char str[6]          = {'a', 'b', 'C', 'd', 'E', '\0'};
-    cppurses::Glyph_string gs6 = {str, cppurses::Trait::Italic};
+    ox::Glyph_string gs1{"hello!", ox::Trait::Bold};
+    ox::Glyph_string gs2("⎉ab_⍇⍈ ⍼");
+    ox::Glyph_string gs3 = "* ⎲⎳";
+    ox::Glyph_string gs4{""};
+    ox::Glyph_string gs5{"⎋∇ Ⅷ₷", ox::fg(ox::Color::Green), ox::Trait::Dim};
+    const char str[6]    = {'a', 'b', 'C', 'd', 'E', '\0'};
+    ox::Glyph_string gs6 = {str, ox::Trait::Italic};
 
-    EXPECT_EQ(gs1[1], (cppurses::Glyph("e", cppurses::Trait::Bold)));
+    EXPECT_EQ(gs1[1], (ox::Glyph("e", ox::Trait::Bold)));
 
-    EXPECT_EQ(gs2[3], (cppurses::Glyph("_")));
-    EXPECT_EQ(gs2[5], (cppurses::Glyph("⍈")));
-    EXPECT_EQ(gs2[6], (cppurses::Glyph(" ")));
+    EXPECT_EQ(gs2[3], (ox::Glyph("_")));
+    EXPECT_EQ(gs2[5], (ox::Glyph("⍈")));
+    EXPECT_EQ(gs2[6], (ox::Glyph(" ")));
     EXPECT_EQ(8, gs2.size());
 
-    EXPECT_EQ(gs3[3], (cppurses::Glyph("⎳")));
+    EXPECT_EQ(gs3[3], (ox::Glyph("⎳")));
 
     EXPECT_EQ(0, gs4.size());
 
     ASSERT_EQ(5, gs5.size());
-    EXPECT_EQ(gs5[3], (cppurses::Glyph{"Ⅷ", cppurses::Trait::Dim,
-                                       cppurses::fg(cppurses::Color::Green)}));
+    EXPECT_EQ(gs5[3],
+              (ox::Glyph{"Ⅷ", ox::Trait::Dim, ox::fg(ox::Color::Green)}));
 
     ASSERT_EQ(5, gs6.size());
-    EXPECT_EQ(gs6[2], (cppurses::Glyph{"C", cppurses::Trait::Italic}));
-    EXPECT_EQ(gs6[4], (cppurses::Glyph{"E", cppurses::Trait::Italic}));
+    EXPECT_EQ(gs6[2], (ox::Glyph{"C", ox::Trait::Italic}));
+    EXPECT_EQ(gs6[4], (ox::Glyph{"E", ox::Trait::Italic}));
 }
 
 TEST(GlyphStringTest, StdStringConstructor)
 {
-    cppurses::Glyph_string gs1{std::string("hello!"), cppurses::Trait::Bold};
-    cppurses::Glyph_string gs2(std::string{"⎉ab_⍇⍈ ⍼"});
-    cppurses::Glyph_string gs3 = std::string("* ⎲⎳");
-    cppurses::Glyph_string gs4{std::string("")};
-    cppurses::Glyph_string gs5{std::string{"⎋∇ Ⅷ₷"},
-                               cppurses::fg(cppurses::Color::Green),
-                               cppurses::Trait::Dim};
-    std::string str            = "abCdE";
-    cppurses::Glyph_string gs6 = {str, cppurses::Trait::Italic};
+    ox::Glyph_string gs1{std::string("hello!"), ox::Trait::Bold};
+    ox::Glyph_string gs2(std::string{"⎉ab_⍇⍈ ⍼"});
+    ox::Glyph_string gs3 = std::string("* ⎲⎳");
+    ox::Glyph_string gs4{std::string("")};
+    ox::Glyph_string gs5{std::string{"⎋∇ Ⅷ₷"}, ox::fg(ox::Color::Green),
+                         ox::Trait::Dim};
+    std::string str      = "abCdE";
+    ox::Glyph_string gs6 = {str, ox::Trait::Italic};
 
-    EXPECT_EQ(gs1[1], (cppurses::Glyph("e", cppurses::Trait::Bold)));
+    EXPECT_EQ(gs1[1], (ox::Glyph("e", ox::Trait::Bold)));
 
-    EXPECT_EQ(gs2[3], (cppurses::Glyph("_")));
-    EXPECT_EQ(gs2[5], (cppurses::Glyph("⍈")));
-    EXPECT_EQ(gs2[6], (cppurses::Glyph(" ")));
+    EXPECT_EQ(gs2[3], (ox::Glyph("_")));
+    EXPECT_EQ(gs2[5], (ox::Glyph("⍈")));
+    EXPECT_EQ(gs2[6], (ox::Glyph(" ")));
     EXPECT_EQ(8, gs2.size());
 
-    EXPECT_EQ(gs3[3], (cppurses::Glyph("⎳")));
+    EXPECT_EQ(gs3[3], (ox::Glyph("⎳")));
 
     EXPECT_EQ(0, gs4.size());
 
     ASSERT_EQ(5, gs5.size());
-    EXPECT_EQ(gs5[3], (cppurses::Glyph{"Ⅷ", cppurses::Trait::Dim,
-                                       cppurses::fg(cppurses::Color::Green)}));
+    EXPECT_EQ(gs5[3],
+              (ox::Glyph{"Ⅷ", ox::Trait::Dim, ox::fg(ox::Color::Green)}));
 
     ASSERT_EQ(5, gs6.size());
-    EXPECT_EQ(gs6[2], (cppurses::Glyph{"C", cppurses::Trait::Italic}));
-    EXPECT_EQ(gs6[4], (cppurses::Glyph{"E", cppurses::Trait::Italic}));
+    EXPECT_EQ(gs6[2], (ox::Glyph{"C", ox::Trait::Italic}));
+    EXPECT_EQ(gs6[4], (ox::Glyph{"E", ox::Trait::Italic}));
 }
 
 TEST(GlyphStringTest, EqualityOperator)
 {
-    cppurses::Glyph_string gs1{"⁗ 7₱", cppurses::Trait::Bold,
-                               cppurses::bg(cppurses::Color::Red),
-                               cppurses::Trait::Italic};
-    cppurses::Glyph_string gs2{"⁗ 7₱", cppurses::Trait::Italic,
-                               cppurses::Trait::Bold,
-                               cppurses::bg(cppurses::Color::Red)};
+    ox::Glyph_string gs1{"⁗ 7₱", ox::Trait::Bold, ox::bg(ox::Color::Red),
+                         ox::Trait::Italic};
+    ox::Glyph_string gs2{"⁗ 7₱", ox::Trait::Italic, ox::Trait::Bold,
+                         ox::bg(ox::Color::Red)};
 
     EXPECT_TRUE(gs1 == gs2);
 }
 
 TEST(GlyphStringTest, Str)
 {
-    cppurses::Glyph_string gs1{"⁗ 7₱", cppurses::Trait::Bold,
-                               cppurses::bg(cppurses::Color::Red),
-                               cppurses::Trait::Italic};
+    ox::Glyph_string gs1{"⁗ 7₱", ox::Trait::Bold, ox::bg(ox::Color::Red),
+                         ox::Trait::Italic};
 
-    cppurses::Glyph_string gs2(std::string{"⎉ab_⍇⍈ ⍼"});
+    ox::Glyph_string gs2(std::string{"⎉ab_⍇⍈ ⍼"});
 
-    cppurses::Glyph_string gs3{"", cppurses::Trait::Bold,
-                               cppurses::bg(cppurses::Color::Yellow)};
+    ox::Glyph_string gs3{"", ox::Trait::Bold, ox::bg(ox::Color::Yellow)};
 
     EXPECT_EQ(gs1.str(), "⁗ 7₱");
     EXPECT_EQ(gs2.str(), "⎉ab_⍇⍈ ⍼");
@@ -167,16 +151,15 @@ TEST(GlyphStringTest, Str)
 
 TEST(GlyphStringTest, OperatorPlus)
 {
-    cppurses::Glyph_string gs1{"⁗ 7₱", cppurses::Trait::Bold,
-                               cppurses::bg(cppurses::Color::Red),
-                               cppurses::Trait::Italic};
+    ox::Glyph_string gs1{"⁗ 7₱", ox::Trait::Bold, ox::bg(ox::Color::Red),
+                         ox::Trait::Italic};
 
-    cppurses::Glyph_string gs2("⎉ab_⍇⍈ ⍼", cppurses::Trait::Italic);
+    ox::Glyph_string gs2("⎉ab_⍇⍈ ⍼", ox::Trait::Italic);
 
-    cppurses::Glyph_string gs = gs1 + gs2;
+    ox::Glyph_string gs = gs1 + gs2;
 
-    EXPECT_EQ(gs, (cppurses::Glyph_string{{gs1[0], gs1[1], gs1[2], gs1[3],
-                                           gs2[0], gs2[1], gs2[2], gs2[3],
-                                           gs2[4], gs2[5], gs2[6], gs2[7]}}));
-    EXPECT_EQ(gs[6], (cppurses::Glyph("b", cppurses::Trait::Italic)));
+    EXPECT_EQ(gs, (ox::Glyph_string{{gs1[0], gs1[1], gs1[2], gs1[3], gs2[0],
+                                     gs2[1], gs2[2], gs2[3], gs2[4], gs2[5],
+                                     gs2[6], gs2[7]}}));
+    EXPECT_EQ(gs[6], (ox::Glyph("b", ox::Trait::Italic)));
 }

@@ -1,15 +1,15 @@
-#include <cppurses/widget/widgets/horizontal_slider.hpp>
+#include <termox/widget/widgets/horizontal_slider.hpp>
 
 #include <cmath>
 #include <cstddef>
 
 #include <signals_light/signal.hpp>
 
-#include <cppurses/system/key.hpp>
-#include <cppurses/system/mouse.hpp>
-#include <cppurses/widget/detail/link_lifetimes.hpp>
+#include <termox/system/key.hpp>
+#include <termox/system/mouse.hpp>
+#include <termox/widget/detail/link_lifetimes.hpp>
 
-namespace cppurses {
+namespace ox {
 
 void Horizontal_slider::set_percent(float percent)
 {
@@ -72,9 +72,9 @@ auto Horizontal_slider::percent_to_position(float percent) -> std::size_t
     return width == 0 ? 0 : std::round(percent * static_cast<float>(width - 1));
 }
 
-}  // namespace cppurses
+}  // namespace ox
 
-namespace cppurses::slot {
+namespace ox::slot {
 
 auto set_percent(Horizontal_slider& s) -> sl::Slot<void(float)>
 {
@@ -86,4 +86,4 @@ auto set_percent(Horizontal_slider& s, float percent) -> sl::Slot<void()>
     return link_lifetimes([&s, percent] { s.set_percent(percent); }, s);
 }
 
-}  // namespace cppurses::slot
+}  // namespace ox::slot

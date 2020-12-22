@@ -112,4 +112,4 @@ These do not enable the border to display automatically.
 
 ## See Also
 
-- [Reference](https://a-n-t-h-o-n-y.github.io/CPPurses/classcppurses_1_1Border.html)
+- [Reference](https://a-n-t-h-o-n-y.github.io/TermOx/classox_1_1Border.html)

@@ -1,9 +1,9 @@
-#include <cppurses/widget/widgets/textbox.hpp>
+#include <termox/widget/widgets/textbox.hpp>
 
-#include <cppurses/system/key.hpp>
-#include <cppurses/system/mouse.hpp>
+#include <termox/system/key.hpp>
+#include <termox/system/mouse.hpp>
 
-namespace cppurses {
+namespace ox {
 
 auto Textbox::key_press_event(Key k) -> bool
 {
@@ -76,4 +76,4 @@ auto Textbox::mouse_wheel_event(Mouse const& m) -> bool
     return Textbox_base::mouse_wheel_event(m);
 }
 
-}  // namespace cppurses
+}  // namespace ox

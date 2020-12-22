@@ -61,7 +61,7 @@ Removes all Traits, not Colors.
 
 ## See Also
 
-- [Reference](https://a-n-t-h-o-n-y.github.io/CPPurses/classcppurses_1_1Brush.html)
+- [Reference](https://a-n-t-h-o-n-y.github.io/TermOx/classox_1_1Brush.html)
 - [Traits](traits.md)
 - [Colors](colors.md)
 - [Wallpaper](wallpaper.md)

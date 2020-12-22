@@ -3,11 +3,11 @@
 #include "paint_area.hpp"
 #include "side_pane.hpp"
 
-#include <cppurses/widget/layouts/horizontal.hpp>
+#include <termox/widget/layouts/horizontal.hpp>
 
 namespace paint {
 
-class Glyph_paint : public cppurses::layout::Horizontal<> {
+class Glyph_paint : public ox::layout::Horizontal<> {
    public:
     Glyph_paint();
 

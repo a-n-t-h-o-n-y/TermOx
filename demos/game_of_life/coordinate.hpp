@@ -1,5 +1,5 @@
-#ifndef CPPURSES_DEMOS_GAME_OF_LIFE_COORDINATE_HPP
-#define CPPURSES_DEMOS_GAME_OF_LIFE_COORDINATE_HPP
+#ifndef TERMOX_DEMOS_GAME_OF_LIFE_COORDINATE_HPP
+#define TERMOX_DEMOS_GAME_OF_LIFE_COORDINATE_HPP
 #include <cstdint>
 #include <functional>
 #include <limits>
@@ -43,7 +43,7 @@ inline auto operator==(Coordinate lhs, Coordinate rhs) -> bool
 
 }  // namespace gol
 
-/// Custom specialization of std::hash for cppurses::point.
+/// Custom specialization of std::hash for ox::point.
 namespace std {
 template <>
 struct hash<gol::Coordinate> {
@@ -57,4 +57,4 @@ struct hash<gol::Coordinate> {
     }
 };
 }  // namespace std
-#endif  // CPPURSES_DEMOS_GAME_OF_LIFE_COORDINATE_HPP
+#endif  // TERMOX_DEMOS_GAME_OF_LIFE_COORDINATE_HPP

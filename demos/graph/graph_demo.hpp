@@ -1,5 +1,5 @@
-#ifndef CPPURSES_DEMOS_GRAPH_GRAPH_DEMO_HPP
-#define CPPURSES_DEMOS_GRAPH_GRAPH_DEMO_HPP
+#ifndef TERMOX_DEMOS_GRAPH_GRAPH_DEMO_HPP
+#define TERMOX_DEMOS_GRAPH_GRAPH_DEMO_HPP
 #include <chrono>
 #include <cmath>
 #include <memory>
@@ -7,11 +7,11 @@
 
 #include <signals_light/signal.hpp>
 
-#include <cppurses/widget/layouts/horizontal.hpp>
-#include <cppurses/widget/layouts/vertical.hpp>
-#include <cppurses/widget/widgets/cycle_box.hpp>
-#include <cppurses/widget/widgets/graph.hpp>
-#include <cppurses/widget/widgets/number_edit.hpp>
+#include <termox/widget/layouts/horizontal.hpp>
+#include <termox/widget/layouts/vertical.hpp>
+#include <termox/widget/widgets/cycle_box.hpp>
+#include <termox/widget/widgets/graph.hpp>
+#include <termox/widget/widgets/number_edit.hpp>
 
 namespace graph {
 
@@ -23,7 +23,7 @@ class Graph_generator {
 
    public:
     /// Return points to display in Graph.
-    virtual auto generate() -> std::vector<cppurses::Graph<>::Coordinates> = 0;
+    virtual auto generate() -> std::vector<ox::Graph<>::Coordinates> = 0;
 
     /// Increment internal state.
     virtual void step_forward() = 0;
@@ -32,14 +32,14 @@ class Graph_generator {
     virtual void step_backward() = 0;
 
     /// Retrieve the default boundary dimensions this should be displayed with.
-    virtual auto default_boundary() const -> cppurses::Graph<>::Boundary = 0;
+    virtual auto default_boundary() const -> ox::Graph<>::Boundary = 0;
 };
 
 class Sine final : public Graph_generator {
    public:
-    auto generate() -> std::vector<cppurses::Graph<>::Coordinates> override
+    auto generate() -> std::vector<ox::Graph<>::Coordinates> override
     {
-        auto result = std::vector<cppurses::Graph<>::Coordinates>{};
+        auto result = std::vector<ox::Graph<>::Coordinates>{};
         for (auto i = -3.14; i <= 3.14; i += 0.001)
             result.push_back({i, std::sin(i * t_)});
         return result;
@@ -49,7 +49,7 @@ class Sine final : public Graph_generator {
 
     void step_backward() override { t_ -= 0.01; }
 
-    auto default_boundary() const -> cppurses::Graph<>::Boundary override
+    auto default_boundary() const -> ox::Graph<>::Boundary override
     {
         return {-3.14, 3.14, -1, 1};
     }
@@ -60,9 +60,9 @@ class Sine final : public Graph_generator {
 
 class Sine_three final : public Graph_generator {
    public:
-    auto generate() -> std::vector<cppurses::Graph<>::Coordinates> override
+    auto generate() -> std::vector<ox::Graph<>::Coordinates> override
     {
-        auto result = std::vector<cppurses::Graph<>::Coordinates>{};
+        auto result = std::vector<ox::Graph<>::Coordinates>{};
         for (auto i = -3.14; i <= 3.14; i += 0.001) {
             result.push_back({i, std::sin(i * 40) + std::sin(i * t_ * 0.5) +
                                      std::sin(i * t_)});
@@ -74,7 +74,7 @@ class Sine_three final : public Graph_generator {
 
     void step_backward() override { t_ -= 0.01; }
 
-    auto default_boundary() const -> cppurses::Graph<>::Boundary override
+    auto default_boundary() const -> ox::Graph<>::Boundary override
     {
         return {-3.14, 3.14, -2, 2};
     }
@@ -85,11 +85,11 @@ class Sine_three final : public Graph_generator {
 
 class Sine_phase final : public Graph_generator {
    public:
-    auto generate() -> std::vector<cppurses::Graph<>::Coordinates> override
+    auto generate() -> std::vector<ox::Graph<>::Coordinates> override
     {
-        auto static_sine = std::vector<cppurses::Graph<>::Coordinates>{};
-        auto moving_sine = std::vector<cppurses::Graph<>::Coordinates>{};
-        auto combination = std::vector<cppurses::Graph<>::Coordinates>{};
+        auto static_sine = std::vector<ox::Graph<>::Coordinates>{};
+        auto moving_sine = std::vector<ox::Graph<>::Coordinates>{};
+        auto combination = std::vector<ox::Graph<>::Coordinates>{};
         for (auto i = 2 * -3.14; i <= 2 * 3.14; i += 0.001) {
             static_sine.push_back({i, std::sin(i - (a_ * 0.25))});
             moving_sine.push_back({i, std::sin(i + a_)});
@@ -107,7 +107,7 @@ class Sine_phase final : public Graph_generator {
 
     void step_backward() override { a_ -= 0.01; }
 
-    auto default_boundary() const -> cppurses::Graph<>::Boundary override
+    auto default_boundary() const -> ox::Graph<>::Boundary override
     {
         return {2 * -3.14, 2 * 3.14, -2, 2};
     }
@@ -118,7 +118,7 @@ class Sine_phase final : public Graph_generator {
 
 class Circle final : public Graph_generator {
    public:
-    auto generate() -> std::vector<cppurses::Graph<>::Coordinates> override
+    auto generate() -> std::vector<ox::Graph<>::Coordinates> override
     {
         return implicit_points(
             [](double x, double y) {
@@ -145,7 +145,7 @@ class Circle final : public Graph_generator {
         // radius_ -= 0.01;
     }
 
-    auto default_boundary() const -> cppurses::Graph<>::Boundary override
+    auto default_boundary() const -> ox::Graph<>::Boundary override
     {
         // return {-1.1, 1.1, -1.1, 1.1};
         return {-10.1, 10.1, -10.1, 10.1};
@@ -160,11 +160,11 @@ class Circle final : public Graph_generator {
     /// If f(x, y) is nearly zero, then it is a point.
     template <typename Function_t>
     static auto implicit_points(Function_t f,
-                                cppurses::Graph<>::Boundary b,
+                                ox::Graph<>::Boundary b,
                                 double interval)
-        -> std::vector<cppurses::Graph<>::Coordinates>
+        -> std::vector<ox::Graph<>::Coordinates>
     {
-        auto result = std::vector<cppurses::Graph<>::Coordinates>{};
+        auto result = std::vector<ox::Graph<>::Coordinates>{};
         for (auto x = b.west; x < b.east; x += interval) {
             for (auto y = b.north; y < b.south; y += interval) {
                 if (nearly_zero(f(x, y), interval))
@@ -180,7 +180,7 @@ class Circle final : public Graph_generator {
     }
 };
 
-class Graph_core : public cppurses::Graph<double> {
+class Graph_core : public ox::Graph<double> {
    public:
     sl::Signal<void(Graph::Boundary)> boundary_changed;
 
@@ -190,7 +190,7 @@ class Graph_core : public cppurses::Graph<double> {
     {
         this->set_generator<Generator_t>(std::forward<Args>(args)...);
         // this->enable_animation(std::chrono::milliseconds{16});
-        this->brush.set_foreground(cppurses::Color::Light_green);
+        this->brush.set_foreground(ox::Color::Light_green);
     }
 
     template <typename Generator_t, typename... Args>
@@ -222,19 +222,17 @@ class Graph_core : public cppurses::Graph<double> {
     }
 };
 
-class Graph_demo : public cppurses::layout::Horizontal<> {
+class Graph_demo : public ox::layout::Horizontal<> {
    private:
-    struct Settings : cppurses::layout::Vertical<> {
+    struct Settings : ox::layout::Vertical<> {
        public:
         sl::Signal<void(std::string)> graph_changed;
         sl::Signal<void(int)> step_interval_changed;
 
-        cppurses::Labeled_cycle_box& graph_box{
-            this->make_child<cppurses::Labeled_cycle_box>("Graph")};
-        cppurses::Labeled_number_edit<int>& step_interval_box{
-            this->make_child<cppurses::Labeled_number_edit<int>>(
-                "StepInterval(ms)",
-                16)};
+        ox::Labeled_cycle_box& graph_box =
+            make_child<ox::Labeled_cycle_box>("Graph");
+        ox::Labeled_number_edit<int>& step_interval_box =
+            make_child<ox::Labeled_number_edit<int>>("StepInterval(ms)", 16);
 
        public:
         Settings()
@@ -284,4 +282,4 @@ class Graph_demo : public cppurses::layout::Horizontal<> {
 };
 
 }  // namespace graph
-#endif  // CPPURSES_DEMOS_GRAPH_GRAPH_DEMO_HPP
+#endif  // TERMOX_DEMOS_GRAPH_GRAPH_DEMO_HPP

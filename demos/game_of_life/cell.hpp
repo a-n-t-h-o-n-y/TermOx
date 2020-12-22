@@ -1,5 +1,5 @@
-#ifndef CPPURSES_DEMOS_GAME_OF_LIFE_CELL_HPP
-#define CPPURSES_DEMOS_GAME_OF_LIFE_CELL_HPP
+#ifndef TERMOX_DEMOS_GAME_OF_LIFE_CELL_HPP
+#define TERMOX_DEMOS_GAME_OF_LIFE_CELL_HPP
 #include <cstdint>
 
 namespace gol {
@@ -10,4 +10,4 @@ struct Cell {
 };
 
 }  // namespace gol
-#endif  // CPPURSES_DEMOS_GAME_OF_LIFE_CELL_HPP
+#endif  // TERMOX_DEMOS_GAME_OF_LIFE_CELL_HPP

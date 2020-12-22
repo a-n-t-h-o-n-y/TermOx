@@ -1,7 +1,7 @@
-#ifndef CPPURSES_DEMOS_GAME_OF_LIFE_GOL_DEMO_HPP
-#define CPPURSES_DEMOS_GAME_OF_LIFE_GOL_DEMO_HPP
-#include <cppurses/widget/layouts/horizontal.hpp>
-#include <cppurses/widget/widgets/accordion.hpp>
+#ifndef TERMOX_DEMOS_GAME_OF_LIFE_GOL_DEMO_HPP
+#define TERMOX_DEMOS_GAME_OF_LIFE_GOL_DEMO_HPP
+#include <termox/widget/layouts/horizontal.hpp>
+#include <termox/widget/widgets/accordion.hpp>
 
 #include "colors.hpp"
 #include "gol_widget.hpp"
@@ -11,27 +11,26 @@
 
 namespace gol {
 
-class GoL_demo : public cppurses::layout::Horizontal<> {
+class GoL_demo : public ox::layout::Horizontal<> {
    public:
     GoL_demo();
 
    public:
     using Side_panel_accordion =
-        cppurses::HAccordion<Side_panel, cppurses::Bar_position::Last>;
+        ox::HAccordion<Side_panel, ox::Bar_position::Last>;
 
    public:
     Side_panel_accordion& side_panel_accordion =
-        this->make_child<Side_panel_accordion>({L"Settings",
-                                                cppurses::Align::Center,
-                                                L'│' | fg(color::Light_green)});
+        this->make_child<Side_panel_accordion>(
+            {L"Settings", ox::Align::Center, L'│' | fg(color::Light_green)});
     Side_panel& side_panel  = side_panel_accordion.wrapped();
     GoL_widget& gol_display = this->make_child<GoL_widget>();
 
    protected:
     auto focus_in_event() -> bool override
     {
-        cppurses::System::terminal.set_palette(gol_palette);
-        return cppurses::layout::Horizontal<>::focus_in_event();
+        ox::System::terminal.set_palette(gol_palette);
+        return ox::layout::Horizontal<>::focus_in_event();
     }
 
    private:
@@ -53,4 +52,4 @@ class GoL_demo : public cppurses::layout::Horizontal<> {
 };
 
 }  // namespace gol
-#endif  // CPPURSES_DEMOS_GAME_OF_LIFE_GOL_DEMO_HPP
+#endif  // TERMOX_DEMOS_GAME_OF_LIFE_GOL_DEMO_HPP

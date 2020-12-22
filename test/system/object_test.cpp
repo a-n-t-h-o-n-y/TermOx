@@ -9,12 +9,12 @@
 #include <string>
 #include <utility>
 
-using cppurses::Child_event;
-using cppurses::Event;
-using cppurses::Event_loop;
-using cppurses::Object;
-using cppurses::System;
-using cppurses::Widget;
+using ox::Child_event;
+using ox::Event;
+using ox::Event_loop;
+using ox::Object;
+using ox::System;
+using ox::Widget;
 
 TEST(ObjectTest, DefaultConstructor)
 {

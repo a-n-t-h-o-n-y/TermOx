@@ -1,4 +1,4 @@
-#include <cppurses/terminal/output.hpp>
+#include <termox/terminal/output.hpp>
 
 // #define SLOW_PAINT 7
 
@@ -15,14 +15,14 @@
 #include <ncursesw/ncurses.h>
 #undef border
 
-#include <cppurses/painter/brush.hpp>
-#include <cppurses/painter/color.hpp>
-#include <cppurses/painter/glyph.hpp>
-#include <cppurses/painter/trait.hpp>
-#include <cppurses/system/system.hpp>
+#include <termox/painter/brush.hpp>
+#include <termox/painter/color.hpp>
+#include <termox/painter/glyph.hpp>
+#include <termox/painter/trait.hpp>
+#include <termox/system/system.hpp>
 
 namespace {
-using namespace cppurses;
+using namespace ox;
 
 auto color_index(Color fg, Color bg) -> short
 {
@@ -94,7 +94,7 @@ void put_wchar(Glyph const& glyph)
 }
 }  // namespace
 
-namespace cppurses::output {
+namespace ox::output {
 
 void move_cursor(std::size_t x, std::size_t y)
 {
@@ -115,4 +115,4 @@ void put(Glyph const& g)
 #endif
 }
 
-}  // namespace cppurses::output
+}  // namespace ox::output

@@ -1,12 +1,12 @@
-#include <cppurses/system/detail/find_widget_at.hpp>
+#include <termox/system/detail/find_widget_at.hpp>
 
-#include <cppurses/system/system.hpp>
-#include <cppurses/widget/point.hpp>
-#include <cppurses/widget/widget.hpp>
+#include <termox/system/system.hpp>
+#include <termox/widget/point.hpp>
+#include <termox/widget/widget.hpp>
 
 namespace {
 
-auto contains(cppurses::Widget const& w, cppurses::Point global) -> bool
+auto contains(ox::Widget const& w, ox::Point global) -> bool
 {
     bool const within_west  = global.x >= w.inner_x();
     bool const within_east  = global.x < (w.inner_x() + w.width());
@@ -16,12 +16,12 @@ auto contains(cppurses::Widget const& w, cppurses::Point global) -> bool
 }
 
 /// Returns a descendant of w that owns \p p, or nullptr if none found.
-auto find_owner_of(cppurses::Widget& w, cppurses::Point p) -> cppurses::Widget*
+auto find_owner_of(ox::Widget& w, ox::Point p) -> ox::Widget*
 {
     if (!w.is_enabled() || !contains(w, p))
         return nullptr;
     for (auto& child : w.get_children()) {
-        if (cppurses::Widget* owner = find_owner_of(child, p); owner != nullptr)
+        if (ox::Widget* owner = find_owner_of(child, p); owner != nullptr)
             return owner;
     }
     return &w;
@@ -29,7 +29,7 @@ auto find_owner_of(cppurses::Widget& w, cppurses::Point p) -> cppurses::Widget*
 
 }  // namespace
 
-namespace cppurses::detail {
+namespace ox::detail {
 
 auto find_widget_at(Point p) -> Widget*
 {
@@ -39,4 +39,4 @@ auto find_widget_at(Point p) -> Widget*
         return find_owner_of(*head, p);
 }
 
-}  // namespace cppurses::detail
+}  // namespace ox::detail

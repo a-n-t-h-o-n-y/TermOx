@@ -4,11 +4,12 @@
 
 #include <gtest/gtest.h>
 
-using cppurses::System;
-using cppurses::Event_loop;
-using cppurses::detail::Thread_data;
+using ox::Event_loop;
+using ox::System;
+using ox::detail::Thread_data;
 
-TEST(ThreadDataTest, Default) {
+TEST(ThreadDataTest, Default)
+{
     System system;
     auto& data = Thread_data::current();
     EXPECT_TRUE(data.can_wait);

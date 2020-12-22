@@ -1,5 +1,5 @@
-#ifndef CPPURSES_DEMOS_GAME_OF_LIFE_GET_PLAINTEXT_HPP
-#define CPPURSES_DEMOS_GAME_OF_LIFE_GET_PLAINTEXT_HPP
+#ifndef TERMOX_DEMOS_GAME_OF_LIFE_GET_PLAINTEXT_HPP
+#define TERMOX_DEMOS_GAME_OF_LIFE_GET_PLAINTEXT_HPP
 #include <string>
 
 #include "coordinate.hpp"
@@ -11,4 +11,4 @@ namespace gol {
 auto get_plaintext(std::string const& filename) -> Pattern;
 
 }  // namespace gol
-#endif  // CPPURSES_DEMOS_GAME_OF_LIFE_GET_PLAINTEXT_HPP
+#endif  // TERMOX_DEMOS_GAME_OF_LIFE_GET_PLAINTEXT_HPP

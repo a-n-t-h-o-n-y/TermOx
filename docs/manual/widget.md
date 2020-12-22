@@ -1,10 +1,10 @@
 # Widget
 
-Widgets are the main building block in CPPurses. Each Widget attempts to have a
+Widgets are the main building block in TermOx. Each Widget attempts to have a
 single, well defined purpose. This can be to display the time, to take text
 input and display what was typed, to be a pushable button, etc...
 
-Widgets are the core of CPPurses, each application is built up of a hierarchy of
+Widgets are the core of TermOx, each application is built up of a hierarchy of
 Widgets. [Layout](layouts.md) Widgets act as containers, grouping multiple
 Widgets together into logical units. These Widgets and Layouts form a tree
 structure that holds the entire application's UI state.
@@ -32,7 +32,7 @@ this is accessed via the `Widget::unique_id()` method.
 
 ## Widget Library
 
-CPPurses tries to provide a set of common Widgets, these can be built upon by
+TermOx tries to provide a set of common Widgets, these can be built upon by
 inheriting from them and expanding their functionality.
 
 [Note: These manual pages are not complete]
@@ -73,4 +73,4 @@ inheriting from them and expanding their functionality.
 
 ## See Also
 
-- [Reference](https://a-n-t-h-o-n-y.github.io/CPPurses/classcppurses_1_1Widget.html)
+- [Reference](https://a-n-t-h-o-n-y.github.io/TermOx/classox_1_1Widget.html)

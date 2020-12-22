@@ -4,8 +4,8 @@ All library dependencies are included as git submodules, this includes
 [ncurses](https://invisible-island.net/ncurses/) and a
 [Signals](https://github.com/a-n-t-h-o-n-y/Signals) library. I recommend using
 the library as a git submodule within your own project, importing it with CMake,
-then linking the `cppurses` target to your application. This allows you to lock
-the version of CPPurses for each project you use it with. The API is still
+then linking the `TermOx` target to your application. This allows you to lock
+the version of TermOx for each project you use it with. The API is still
 unstable and installing it on your system may make it less easy to manage across
 multiple projects.
 
@@ -14,7 +14,7 @@ multiple projects.
 ```bash
 cd project-dir/
 mkdir external/
-git submodule add https://github.com/a-n-t-h-o-n-y/CPPurses.git external/CPPurses
+git submodule add https://github.com/a-n-t-h-o-n-y/TermOx.git external/TermOx
 git submodule update --init --recursive
 ```
 
@@ -23,10 +23,10 @@ git submodule update --init --recursive
 ```CMake
 # CMakeLists.txt
 ...
-add_subdirectory(external/CPPurses)
+add_subdirectory(external/TermOx)
 
 add_executable(hello-world src/main.cpp)
-target_link_libraries(hello-world PRIVATE cppurses)
+target_link_libraries(hello-world PRIVATE TermOx)
 ...
 ```
 
@@ -34,11 +34,11 @@ target_link_libraries(hello-world PRIVATE cppurses)
 
 ```cpp
 // main.cpp
-#include <cppurses/cppurses.hpp>
+#include <termox/termox.hpp>
 
 int main()
 {
-    return cppurses::System{}.run<cppurses::Textbox>("Hello, World!");
+    return ox::System{}.run<ox::Textbox>("Hello, World!");
 }
 ```
 
@@ -46,7 +46,7 @@ int main()
 
 ### Library Objects
 
-- `build/external/CPPurses/src/libcppurses.a`
+- `build/external/TermOx/src/libTermOx.a`
 - `external/ncurses-snapshots/output/lib/libncursesw.a`
 - Also depends on your systems threading library
 - May require you to link to
@@ -54,8 +54,8 @@ int main()
 
 ### Include Paths
 
-- `external/CPPurses/include/`
-- `external/CPPurses/external/Signals/include/`
+- `external/TermOx/include/`
+- `external/TermOx/external/Signals/include/`
 - `external/ncurses-snapshots/output/include/`
 
 ## Next

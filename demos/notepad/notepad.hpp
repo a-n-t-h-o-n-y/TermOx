@@ -5,73 +5,71 @@
 
 #include <signals_light/signal.hpp>
 
-#include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/painter/trait.hpp>
-#include <cppurses/system/system.hpp>
-#include <cppurses/widget/align.hpp>
-#include <cppurses/widget/focus_policy.hpp>
-#include <cppurses/widget/layouts/horizontal.hpp>
-#include <cppurses/widget/layouts/vertical.hpp>
-#include <cppurses/widget/pipe.hpp>
-#include <cppurses/widget/widget_slots.hpp>
-#include <cppurses/widget/widgets/accordion.hpp>
-#include <cppurses/widget/widgets/banner.hpp>
-#include <cppurses/widget/widgets/button.hpp>
-#include <cppurses/widget/widgets/checkbox.hpp>
-#include <cppurses/widget/widgets/color_select.hpp>
-#include <cppurses/widget/widgets/label.hpp>
-#include <cppurses/widget/widgets/textbox.hpp>
+#include <termox/painter/glyph_string.hpp>
+#include <termox/painter/trait.hpp>
+#include <termox/system/system.hpp>
+#include <termox/widget/align.hpp>
+#include <termox/widget/focus_policy.hpp>
+#include <termox/widget/layouts/horizontal.hpp>
+#include <termox/widget/layouts/vertical.hpp>
+#include <termox/widget/pipe.hpp>
+#include <termox/widget/widget_slots.hpp>
+#include <termox/widget/widgets/accordion.hpp>
+#include <termox/widget/widgets/banner.hpp>
+#include <termox/widget/widgets/button.hpp>
+#include <termox/widget/widgets/checkbox.hpp>
+#include <termox/widget/widgets/color_select.hpp>
+#include <termox/widget/widgets/label.hpp>
+#include <termox/widget/widgets/textbox.hpp>
 
 namespace demos {
 
 /// Checkbox to enable/disable a Trait. Has a Signal from it.
-class Trait_checkbox : public cppurses::Labeled_checkbox {
+class Trait_checkbox : public ox::Labeled_checkbox {
    public:
-    sl::Signal<void(cppurses::Trait)> trait_enabled;
-    sl::Signal<void(cppurses::Trait)> trait_disabled;
+    sl::Signal<void(ox::Trait)> trait_enabled;
+    sl::Signal<void(ox::Trait)> trait_disabled;
 
    public:
-    Trait_checkbox(cppurses::Trait t) : Labeled_checkbox{to_string(t)}, t_{t}
+    Trait_checkbox(ox::Trait t) : Labeled_checkbox{to_string(t)}, t_{t}
     {
-        this->padding | cppurses::pipe::fixed_width(2);
+        this->padding | ox::pipe::fixed_width(2);
         this->checked.connect([this] { this->trait_enabled(t_); });
         this->unchecked.connect([this] { this->trait_disabled(t_); });
     }
 
    private:
-    cppurses::Trait const t_;
+    ox::Trait const t_;
 };
 
 /// Holds a Trait_checkbox for each Trait, emits Signals.
-class Trait_boxes : public cppurses::layout::Vertical<Trait_checkbox> {
+class Trait_boxes : public ox::layout::Vertical<Trait_checkbox> {
    public:
-    sl::Signal<void(cppurses::Trait)> trait_enabled;
-    sl::Signal<void(cppurses::Trait)> trait_disabled;
+    sl::Signal<void(ox::Trait)> trait_enabled;
+    sl::Signal<void(ox::Trait)> trait_disabled;
 
    public:
     Trait_boxes()
     {
-        for (auto i = 0; i < cppurses::Trait_count; ++i) {
-            auto& w = this->make_child(static_cast<cppurses::Trait>(i));
+        for (auto i = 0; i < ox::Trait_count; ++i) {
+            auto& w = this->make_child(static_cast<ox::Trait>(i));
             w.trait_enabled.connect([this](auto t) { this->trait_enabled(t); });
             w.trait_disabled.connect(
-                [this](cppurses::Trait t) { this->trait_disabled(t); });
+                [this](ox::Trait t) { this->trait_disabled(t); });
         }
     }
 };
 
 class Labeled_color_select
-    : public cppurses::Label_top<cppurses::layout::Horizontal<>,
-                                 cppurses::Color_select> {
+    : public ox::Label_top<ox::layout::Horizontal<>, ox::Color_select> {
    public:
-    sl::Signal<void(cppurses::Color)>& color_selected = wrapped.color_selected;
+    sl::Signal<void(ox::Color)>& color_selected = wrapped.color_selected;
 
    public:
-    Labeled_color_select(cppurses::Glyph_string label)
-        : Label_top{{std::move(label)}}
+    Labeled_color_select(ox::Glyph_string label) : Label_top{{std::move(label)}}
     {
-        using namespace cppurses;
-        using namespace cppurses::pipe;
+        using namespace ox;
+        using namespace ox::pipe;
 
         System::terminal.palette_changed.connect(
             [this](auto const& pal) { this->set_heights(pal); });
@@ -82,16 +80,16 @@ class Labeled_color_select
 
    private:
     /// Sets Widget heights based on number of colors in palette.
-    void set_heights(cppurses::Palette const& pal)
+    void set_heights(ox::Palette const& pal)
     {
-        using namespace cppurses::pipe;
+        using namespace ox::pipe;
         auto const height = std::ceil(pal.size() / 8.) + 1;
         *this | fixed_height(height);
         this->wrapped | fixed_height(height);
     }
 };
 
-class Side_pane : public cppurses::layout::Vertical<> {
+class Side_pane : public ox::layout::Vertical<> {
    public:
     Labeled_color_select& fg_select =
         this->make_child<Labeled_color_select>("Foreground⤵");
@@ -102,31 +100,30 @@ class Side_pane : public cppurses::layout::Vertical<> {
     Trait_boxes& trait_boxes = this->make_child<Trait_boxes>();
 
    public:
-    Side_pane() { *this | cppurses::pipe::fixed_width(16); }
+    Side_pane() { *this | ox::pipe::fixed_width(16); }
 };
 
-using Side_pane_accordion =
-    cppurses::HAccordion<Side_pane, cppurses::Bar_position::Last>;
+using Side_pane_accordion = ox::HAccordion<Side_pane, ox::Bar_position::Last>;
 
-class Text_and_side_pane : public cppurses::layout::Horizontal<> {
+class Text_and_side_pane : public ox::layout::Horizontal<> {
    public:
-    cppurses::Textbox& textbox = this->make_child<cppurses::Textbox>();
-    Side_pane& side_pane       = this->make_child<Side_pane_accordion>(
-                                   {L"Settings", cppurses::Align::Center})
-                               .wrapped();
+    ox::Textbox& textbox = this->make_child<ox::Textbox>();
+    Side_pane& side_pane =
+        this->make_child<Side_pane_accordion>({L"Settings", ox::Align::Center})
+            .wrapped();
 
    public:
     Text_and_side_pane()
     {
-        using namespace cppurses;
-        using namespace cppurses::pipe;
+        using namespace ox;
+        using namespace ox::pipe;
 
         textbox | bordered() | rounded_corners() | bg(Color::Dark_gray);
 
         side_pane.fg_select.color_selected.connect(
-            cppurses::slot::set_foreground(textbox));
+            ox::slot::set_foreground(textbox));
         side_pane.bg_select.color_selected.connect(
-            cppurses::slot::set_background(textbox));
+            ox::slot::set_background(textbox));
 
         side_pane.trait_boxes.trait_enabled.connect(
             [this](Trait t) { textbox.insert_brush.add_traits(t); });
@@ -135,26 +132,26 @@ class Text_and_side_pane : public cppurses::layout::Horizontal<> {
     }
 };
 
-class Filename_edit : public cppurses::Textbox {
+class Filename_edit : public ox::Textbox {
    public:
     Filename_edit()
     {
-        using namespace cppurses;
-        using namespace cppurses::pipe;
+        using namespace ox;
+        using namespace ox::pipe;
         *this | bg(Color::White) | fg(Color::Black);
         this->disable_scrollwheel();
     }
 
    protected:
-    auto key_press_event(cppurses::Key k) -> bool override
+    auto key_press_event(ox::Key k) -> bool override
     {
-        if (k == cppurses::Key::Enter)
+        if (k == ox::Key::Enter)
             return true;
         return Textbox::key_press_event(k);
     }
 };
 
-class Save_area : public cppurses::layout::Horizontal<> {
+class Save_area : public ox::layout::Horizontal<> {
    public:
     sl::Signal<void(std::string)> save_request;
     sl::Signal<void(std::string)> load_request;
@@ -162,8 +159,8 @@ class Save_area : public cppurses::layout::Horizontal<> {
    public:
     Save_area()
     {
-        using namespace cppurses;
-        using namespace cppurses::pipe;
+        using namespace ox;
+        using namespace ox::pipe;
 
         *this | fixed_height(1);
 
@@ -177,31 +174,30 @@ class Save_area : public cppurses::layout::Horizontal<> {
     }
 
    private:
-    cppurses::Button& load_btn   = this->make_child<cppurses::Button>("Load");
+    ox::Button& load_btn         = this->make_child<ox::Button>("Load");
     Filename_edit& filename_edit = this->make_child<Filename_edit>();
-    cppurses::Button& save_btn   = this->make_child<cppurses::Button>("Save");
+    ox::Button& save_btn         = this->make_child<ox::Button>("Save");
 };
 
-class File_status_bar
-    : public cppurses::Banner<cppurses::animator::Unscramble> {
+class File_status_bar : public ox::Banner<ox::animator::Unscramble> {
    public:
     File_status_bar() : Banner{std::chrono::milliseconds{50}} {}
 
    public:
-    void fail(cppurses::Glyph_string message)
+    void fail(ox::Glyph_string message)
     {
-        using namespace cppurses;
+        using namespace ox;
         this->set_text(std::move(message | fg(Color::Red)));
     }
 
-    void success(cppurses::Glyph_string message)
+    void success(ox::Glyph_string message)
     {
-        using namespace cppurses;
+        using namespace ox;
         this->set_text(std::move(message | fg(Color::Light_green)));
     }
 };
 
-class Notepad : public cppurses::layout::Vertical<> {
+class Notepad : public ox::layout::Vertical<> {
    public:
     Text_and_side_pane& txt_trait = this->make_child<Text_and_side_pane>();
     File_status_bar& status_bar   = this->make_child<File_status_bar>();
@@ -211,18 +207,19 @@ class Notepad : public cppurses::layout::Vertical<> {
     Notepad()
     {
         this->initialize();
-        this->focus_policy = cppurses::Focus_policy::Strong;
+        this->focus_policy = ox::Focus_policy::Strong;
     }
 
    protected:
     auto focus_in_event() -> bool override
     {
-        cppurses::System::set_focus(txt_trait.textbox);
+        ox::System::set_focus(txt_trait.textbox);
         return true;
     }
 
    private:
     void initialize();
 };
+
 }  // namespace demos
 #endif  // DEMOS_NOTEPAD_NOTEPAD_HPP

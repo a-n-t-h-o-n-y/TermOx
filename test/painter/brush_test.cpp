@@ -4,11 +4,11 @@
 
 #include <gtest/gtest.h>
 
-using cppurses::background;
-using cppurses::Brush;
-using cppurses::Color;
-using cppurses::foreground;
-using cppurses::Trait;
+using ox::background;
+using ox::Brush;
+using ox::Color;
+using ox::foreground;
+using ox::Trait;
 
 TEST(BrushTest, Constructor)
 {

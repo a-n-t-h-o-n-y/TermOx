@@ -1,5 +1,5 @@
-#ifndef CPPURSES_DEMOS_GAME_OF_LIFE_PATTERN_HPP
-#define CPPURSES_DEMOS_GAME_OF_LIFE_PATTERN_HPP
+#ifndef TERMOX_DEMOS_GAME_OF_LIFE_PATTERN_HPP
+#define TERMOX_DEMOS_GAME_OF_LIFE_PATTERN_HPP
 #include <vector>
 
 #include "coordinate.hpp"
@@ -15,4 +15,4 @@ struct Pattern {
 };
 
 }  // namespace gol
-#endif  // CPPURSES_DEMOS_GAME_OF_LIFE_PATTERN_HPP
+#endif  // TERMOX_DEMOS_GAME_OF_LIFE_PATTERN_HPP

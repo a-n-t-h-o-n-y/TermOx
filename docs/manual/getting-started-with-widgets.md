@@ -4,8 +4,8 @@ We'll begin with the simplest use of this library, a lone Widget that paints
 some text to the screen:
 
 ```cpp
-#include <cppurses/cppurses.hpp>
-using namespace cppurses;
+#include <termox/termox.hpp>
+using namespace ox;
 
 class App : public Widget {
     auto paint_event() -> bool override
@@ -22,8 +22,8 @@ This program will paint the text `Hello, World!` to the screen at coordinates
 `{10, 5}`. We can expand on this to add color and traits to the text:
 
 ```cpp
-#include <cppurses/cppurses.hpp>
-using namespace cppurses;
+#include <termox/termox.hpp>
+using namespace ox;
 
 class App : public Widget {
     auto paint_event() -> bool override
@@ -45,12 +45,12 @@ top left of the terminal screen.
 ## Breakdown
 
 ```cpp
-#include <cppurses/cppurses.hpp>
-using namespace cppurses;
+#include <termox/termox.hpp>
+using namespace ox;
 ```
 
-Make all `cppurses` namespace names accessible. The `cppurses` names used in
-this example are: `Widget`, `Painter`, `System`, `Color`, and `Trait`.
+Make all `ox` namespace names accessible. The `ox` names used in this example
+are: `Widget`, `Painter`, `System`, `Color`, and `Trait`.
 
 ---
 
@@ -58,7 +58,7 @@ this example are: `Widget`, `Painter`, `System`, `Color`, and `Trait`.
 class App : public Widget {
 ```
 
-Inherit from `cppurses::Widget`, creating a new Widget type.
+Inherit from `ox::Widget`, creating a new Widget type.
 
 ---
 
@@ -100,7 +100,7 @@ return Widget::paint_event();
 ```
 
 Call down to the base class' implementation, this is common practice for all
-event handlers in CPPurses.
+event handlers in TermOx.
 
 ---
 

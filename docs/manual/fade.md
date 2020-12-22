@@ -1,7 +1,7 @@
 # Fade Dynamic Color
 
 The fade dynamic color is provided via the `fade(...)` free function in the
-`cppurses/painter/dynamic_colors.hpp` header. The resulting `Dynamic_color` will
+`termox/painter/dynamic_colors.hpp` header. The resulting `Dynamic_color` will
 fade between two given color values.
 
 ```cpp

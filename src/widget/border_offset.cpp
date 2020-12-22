@@ -1,11 +1,11 @@
-#include <cppurses/widget/detail/border_offset.hpp>
+#include <termox/widget/detail/border_offset.hpp>
 
 #include <cstddef>
 
-#include <cppurses/widget/border.hpp>
-#include <cppurses/widget/widget.hpp>
+#include <termox/widget/border.hpp>
+#include <termox/widget/widget.hpp>
 
-namespace cppurses::detail {
+namespace ox::detail {
 
 auto Border_offset::west_disqualified(Widget const& w) -> bool
 {
@@ -85,4 +85,4 @@ auto Border_offset::south_enabled(Widget const& w) -> bool
             b.south_west.enabled());
 }
 
-}  // namespace cppurses::detail
+}  // namespace ox::detail

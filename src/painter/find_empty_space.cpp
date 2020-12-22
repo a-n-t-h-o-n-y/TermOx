@@ -1,15 +1,15 @@
-#include <cppurses/painter/detail/find_empty_space.hpp>
+#include <termox/painter/detail/find_empty_space.hpp>
 
 #include <algorithm>
 #include <cstddef>
 #include <iterator>
 #include <numeric>
 
-#include <cppurses/painter/detail/screen_mask.hpp>
-#include <cppurses/widget/widget.hpp>
+#include <termox/painter/detail/screen_mask.hpp>
+#include <termox/widget/widget.hpp>
 
 namespace {
-using namespace cppurses;
+using namespace ox;
 
 /// Return the sum total height of all widgets from [first, last).
 template <typename Iter>
@@ -97,7 +97,7 @@ void mark_covered_tiles(Widget const& w, detail::Screen_mask& mask)
 
 }  // namespace
 
-namespace cppurses::detail {
+namespace ox::detail {
 
 //  Should not consider border space, since that will never be empty.
 auto find_empty_space(Widget const& w) -> Screen_mask
@@ -110,4 +110,4 @@ auto find_empty_space(Widget const& w) -> Screen_mask
     return mask;
 }
 
-}  // namespace cppurses::detail
+}  // namespace ox::detail

@@ -4,13 +4,13 @@
 #include <fstream>
 #include <string>
 
-// #include <cppurses/painter/rgb.hpp>
-#include <cppurses/system/system.hpp>
-#include <cppurses/terminal/terminal.hpp>
-#include <cppurses/widget/border.hpp>
+// #include <termox/painter/rgb.hpp>
+#include <termox/system/system.hpp>
+#include <termox/terminal/terminal.hpp>
+#include <termox/widget/border.hpp>
 
 namespace {
-// auto rgb_to_str(cppurses::RGB const& rgb) -> std::string
+// auto rgb_to_str(ox::RGB const& rgb) -> std::string
 // {
 //     auto result = std::string{"{"};
 //     result += std::to_string(rgb.red);
@@ -26,15 +26,15 @@ namespace {
 void export_current_palette(std::string const& /* name */)
 {
     // auto file = std::ofstream{name + ".hpp"};
-    // auto pal  = cppurses::System::terminal.current_palette();
+    // auto pal  = ox::System::terminal.current_palette();
 
-    // file << R"(#include <cppurses/painter/color.hpp>)" << '\n'
-    //      << R"(#include <cppurses/painter/palette.hpp>)"
+    // file << R"(#include <termox/painter/color.hpp>)" << '\n'
+    //      << R"(#include <termox/painter/palette.hpp>)"
     //      << "\n\n"
-    //      << "cppurses::Palette " << name << "() {" << '\n';
+    //      << "ox::Palette " << name << "() {" << '\n';
 
-    // auto const prefix = std::string{"             {cppurses::Color::"};
-    // file << "    return {{{cppurses::Color::Black, "
+    // auto const prefix = std::string{"             {ox::Color::"};
+    // file << "    return {{{ox::Color::Black, "
     //      << rgb_to_str(pal[0].values) << "},\n"
     //      << prefix << "Dark_red, " << rgb_to_str(pal[1].values) << "},\n"
     //      << prefix << "Dark_blue, " << rgb_to_str(pal[2].values) << "},\n"
@@ -60,7 +60,7 @@ namespace palette {
 
 Export_panel::Export_panel()
 {
-    using namespace cppurses;
+    using namespace ox;
     this->height_policy.maximum(3);
     this->border.enable();
     this->border.segments.disable_all();

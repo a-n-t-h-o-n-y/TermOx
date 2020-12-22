@@ -1,28 +1,28 @@
-#ifndef CPPURSES_DEMOS_GAME_OF_LIFE_SETTINGS_BOX_HPP
-#define CPPURSES_DEMOS_GAME_OF_LIFE_SETTINGS_BOX_HPP
+#ifndef TERMOX_DEMOS_GAME_OF_LIFE_SETTINGS_BOX_HPP
+#define TERMOX_DEMOS_GAME_OF_LIFE_SETTINGS_BOX_HPP
 #include <cctype>
 #include <chrono>
 #include <string>
 
 #include <signals_light/signal.hpp>
 
-#include <cppurses/painter/color.hpp>
-#include <cppurses/painter/glyph.hpp>
-#include <cppurses/painter/glyph_string.hpp>
-#include <cppurses/painter/trait.hpp>
-#include <cppurses/widget/align.hpp>
-#include <cppurses/widget/layouts/horizontal.hpp>
-#include <cppurses/widget/layouts/vertical.hpp>
-#include <cppurses/widget/pipe.hpp>
-#include <cppurses/widget/widget.hpp>
-#include <cppurses/widget/widgets/button.hpp>
-#include <cppurses/widget/widgets/checkbox.hpp>
-#include <cppurses/widget/widgets/confirm_button.hpp>
-#include <cppurses/widget/widgets/label.hpp>
-#include <cppurses/widget/widgets/line_edit.hpp>
-#include <cppurses/widget/widgets/number_edit.hpp>
-#include <cppurses/widget/widgets/text_display.hpp>
-#include <cppurses/widget/widgets/toggle_button.hpp>
+#include <termox/painter/color.hpp>
+#include <termox/painter/glyph.hpp>
+#include <termox/painter/glyph_string.hpp>
+#include <termox/painter/trait.hpp>
+#include <termox/widget/align.hpp>
+#include <termox/widget/layouts/horizontal.hpp>
+#include <termox/widget/layouts/vertical.hpp>
+#include <termox/widget/pipe.hpp>
+#include <termox/widget/widget.hpp>
+#include <termox/widget/widgets/button.hpp>
+#include <termox/widget/widgets/checkbox.hpp>
+#include <termox/widget/widgets/confirm_button.hpp>
+#include <termox/widget/widgets/label.hpp>
+#include <termox/widget/widgets/line_edit.hpp>
+#include <termox/widget/widgets/number_edit.hpp>
+#include <termox/widget/widgets/text_display.hpp>
+#include <termox/widget/widgets/toggle_button.hpp>
 
 #include "colors.hpp"
 #include "make_break.hpp"
@@ -30,18 +30,18 @@
 
 namespace gol {
 
-struct Clear_step_box : cppurses::layout::Vertical<> {
+struct Clear_step_box : ox::layout::Vertical<> {
    public:
-    cppurses::Button& step_btn = this->make_child<cppurses::Button>("Step>");
+    ox::Button& step_btn = this->make_child<ox::Button>("Step>");
 
-    cppurses::Confirm_button& clear_btn =
-        this->make_child<cppurses::Confirm_button>("Clear");
+    ox::Confirm_button& clear_btn =
+        this->make_child<ox::Confirm_button>("Clear");
 
    public:
     Clear_step_box()
     {
-        using namespace cppurses;
-        using namespace cppurses::pipe;
+        using namespace ox;
+        using namespace ox::pipe;
 
         *this | fixed_height(2uL);
         clear_btn.main_btn | bg(color::Light_green) | fg(color::Teal);
@@ -52,15 +52,15 @@ struct Clear_step_box : cppurses::layout::Vertical<> {
     }
 };
 
-class Rule_edit : public cppurses::layout::Vertical<> {
+class Rule_edit : public ox::layout::Vertical<> {
    public:
     sl::Signal<void(std::string const&)> rule_change;
 
    public:
     Rule_edit()
     {
-        using namespace cppurses;
-        using namespace cppurses::pipe;
+        using namespace ox;
+        using namespace ox::pipe;
 
         *this | fixed_height(2uL);
         edit_box_ | bg(color::White) | fg(color::Black) | ghost(color::Teal);
@@ -85,15 +85,14 @@ class Rule_edit : public cppurses::layout::Vertical<> {
     }
 
    private:
-    cppurses::HLabel& label = this->make_child<cppurses::HLabel>(
-        {L"RuleString[B/S]" | cppurses::Trait::Underline |
-             cppurses::Trait::Bold,
-         cppurses::Align::Center});
+    ox::HLabel& label = this->make_child<ox::HLabel>(
+        {L"RuleString[B/S]" | ox::Trait::Underline | ox::Trait::Bold,
+         ox::Align::Center});
 
-    cppurses::Line_edit& edit_box_ = this->make_child<cppurses::Line_edit>();
+    ox::Line_edit& edit_box_ = this->make_child<ox::Line_edit>();
 };
 
-struct Start_pause_btns : cppurses::Toggle_button {
+struct Start_pause_btns : ox::Toggle_button {
    public:
     sl::Signal<void()>& start_requested = top.pressed;
     sl::Signal<void()>& pause_requested = bottom.pressed;
@@ -101,8 +100,8 @@ struct Start_pause_btns : cppurses::Toggle_button {
    public:
     Start_pause_btns() : Toggle_button{L"Start", L"Pause"}
     {
-        using namespace cppurses;
-        using namespace cppurses::pipe;
+        using namespace ox;
+        using namespace ox::pipe;
 
         *this | fixed_height(1uL);
         top | bg(color::Light_green) | fg(color::Teal);
@@ -110,28 +109,27 @@ struct Start_pause_btns : cppurses::Toggle_button {
     }
 };
 
-struct Interval_box : cppurses::layout::Horizontal<> {
+struct Interval_box : ox::layout::Horizontal<> {
    public:
-    cppurses::Labeled_number_edit<unsigned>& value_edit =
-        this->make_child<cppurses::Labeled_number_edit<unsigned>>("Interval ",
-                                                                  40);
+    ox::Labeled_number_edit<unsigned>& value_edit =
+        this->make_child<ox::Labeled_number_edit<unsigned>>("Interval ", 40);
 
-    cppurses::HLabel& units = this->make_child<cppurses::HLabel>({L"ms"});
+    ox::HLabel& units = this->make_child<ox::HLabel>({L"ms"});
 
     sl::Signal<void(unsigned)>& value_set = value_edit.value_set;
 
    public:
     Interval_box()
     {
-        using namespace cppurses;
-        using namespace cppurses::pipe;
+        using namespace ox;
+        using namespace ox::pipe;
 
         *this | fixed_height(1uL);
         units | bg(color::White) | fg(color::Teal) | fixed_width(2uL);
     }
 };
 
-struct Grid_hi_res : cppurses::layout::Horizontal<cppurses::Labeled_checkbox> {
+struct Grid_hi_res : ox::layout::Horizontal<ox::Labeled_checkbox> {
    public:
     Child_t& grid_box   = this->make_child("Grid");
     Child_t& hi_res_box = this->make_child("Hi-Res");
@@ -139,14 +137,14 @@ struct Grid_hi_res : cppurses::layout::Horizontal<cppurses::Labeled_checkbox> {
    public:
     Grid_hi_res()
     {
-        using namespace cppurses::pipe;
+        using namespace ox::pipe;
         *this | fixed_height(1uL) | children() |
             for_each([](auto& c) { c.padding | fixed_width(1uL); });
         hi_res_box.checkbox.toggle();
     }
 };
 
-struct Controls_box : cppurses::layout::Vertical<> {
+struct Controls_box : ox::layout::Vertical<> {
    public:
     // Widget& break_                    = this->append_child(make_break());
     Interval_box& interval_edit        = this->make_child<Interval_box>();
@@ -155,9 +153,9 @@ struct Controls_box : cppurses::layout::Vertical<> {
     Clear_step_box& clear_step_btns    = this->make_child<Clear_step_box>();
     Widget& break_1                    = this->append_child(make_break());
     Grid_hi_res& grid_hi_res           = this->make_child<Grid_hi_res>();
-    cppurses::Labeled_checkbox& rainbow_btn =
-        this->make_child<cppurses::Labeled_checkbox>("Rainbow Mode") |
-        cppurses::pipe::fixed_height(1uL);
+    ox::Labeled_checkbox& rainbow_btn =
+        this->make_child<ox::Labeled_checkbox>("Rainbow Mode") |
+        ox::pipe::fixed_height(1uL);
     Widget& break_2      = this->append_child(make_break());
     Rule_edit& rule_edit = this->make_child<Rule_edit>();
     Widget& break_3      = this->append_child(make_break());
@@ -174,7 +172,7 @@ struct Controls_box : cppurses::layout::Vertical<> {
    public:
     Controls_box()
     {
-        using namespace cppurses::pipe;
+        using namespace ox::pipe;
         *this | fixed_height(12uL);
 
         interval_edit.value_set.connect([this](int value) {
@@ -185,4 +183,4 @@ struct Controls_box : cppurses::layout::Vertical<> {
 };
 
 }  // namespace gol
-#endif  // CPPURSES_DEMOS_GAME_OF_LIFE_SETTINGS_BOX_HPP
+#endif  // TERMOX_DEMOS_GAME_OF_LIFE_SETTINGS_BOX_HPP
