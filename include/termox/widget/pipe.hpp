@@ -14,6 +14,7 @@
 #include <termox/system/animation_engine.hpp>
 #include <termox/widget/align.hpp>
 #include <termox/widget/focus_policy.hpp>
+#include <termox/widget/growth.hpp>
 #include <termox/widget/point.hpp>
 #include <termox/widget/widget.hpp>
 
@@ -1799,10 +1800,18 @@ inline auto ghost(Color c)
 }
 
 // Label
-inline auto dynamic_size(bool enable)
+inline auto dynamic_growth()
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).set_dynamic_size(enable);
+        get(w).set_growth_strategy(Growth::Dynamic);
+        return std::forward<decltype(w)>(w);
+    };
+}
+
+inline auto no_growth()
+{
+    return [=](auto&& w) -> decltype(auto) {
+        get(w).set_growth_strategy(Growth::Static);
         return std::forward<decltype(w)>(w);
     };
 }

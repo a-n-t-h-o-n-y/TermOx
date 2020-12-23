@@ -20,15 +20,15 @@
 namespace ox {
 
 /// Layout_t is the Layout to use for the Bar, not Accordion.
-template <typename Layout_t>
-class Bar : public Layout_t {
+template <template <typename> typename Layout_t>
+class Bar : public Layout_t<Widget> {
    private:
     class Indicator : public Widget {
        public:
         Indicator()
         {
             using namespace pipe;
-            if constexpr (layout::is_vertical_v<Layout_t>)
+            if constexpr (layout::is_vertical_v<Layout_t<Widget>>)
                 *this | fixed_height(1uL);
             else
                 *this | fixed_width(3uL);
@@ -58,7 +58,7 @@ class Bar : public Layout_t {
         Glyph_string x_ = L"[+]";
     };
 
-    class Title : public layout::Opposite_t<Layout_t> {
+    class Title : public layout::Opposite_t<Layout_t<Widget>> {
        public:
         struct Parameters {
             Glyph_string title;
@@ -92,13 +92,13 @@ class Bar : public Layout_t {
         Label<Layout_t>& centered_text_;
 
         static auto constexpr is_vertical =
-            layout::is_vertical_v<layout::Opposite_t<Layout_t>>;
+            layout::is_vertical_v<layout::Opposite_t<Layout_t<Widget>>>;
 
         static auto constexpr extra_left = is_vertical ? 3uL : 1uL;
     };
 
    private:
-    static auto constexpr is_vertical = layout::is_vertical_v<Layout_t>;
+    static auto constexpr is_vertical = layout::is_vertical_v<Layout_t<Widget>>;
 
    public:
     using Parameters = typename Title::Parameters;
@@ -134,20 +134,22 @@ class Bar : public Layout_t {
 
 enum class Bar_position { First, Last };
 
-template <typename Layout_t,
+template <template <typename> typename Layout_t,
           typename Widget_t,
           Bar_position position = Bar_position::First>
-class Accordion : public Layout_t {
-    static_assert(layout::is_vertical_v<Layout_t> ||
-                  layout::is_horizontal_v<Layout_t>);
+class Accordion : public Layout_t<Widget> {
+    static_assert(layout::is_vertical_v<Layout_t<Widget>> ||
+                  layout::is_horizontal_v<Layout_t<Widget>>);
 
    private:
-    using Bar_t = Bar<layout::Opposite_t<Layout_t>>;
+    using Bar_t =
+        Bar<layout::Opposite_template<Layout_t<Widget>>::template type>;
 
    public:
     using Parameters = typename Bar_t::Parameters;
 
    public:
+    /// Create an Accordion with \pargs... going to Widget_t constructor.
     template <typename... Args>
     Accordion(Parameters p, Args&&... args)
         : bar_{this->template make_child<Bar_t>(std::move(p))},
@@ -207,7 +209,7 @@ class Accordion : public Layout_t {
     static auto constexpr wrapped_index_ =
         position == Bar_position::First ? 1uL : 0uL;
 
-    static auto constexpr is_vertical = layout::is_vertical_v<Layout_t>;
+    static auto constexpr is_vertical = layout::is_vertical_v<Layout_t<Widget>>;
 
    private:
     void reinsert_wrapped()
@@ -226,12 +228,12 @@ class Accordion : public Layout_t {
 };
 
 template <typename Widget_t, Bar_position position = Bar_position::First>
-using HAccordion = Accordion<layout::Horizontal<>, Widget_t, position>;
+using HAccordion = Accordion<layout::Horizontal, Widget_t, position>;
 
 template <typename Widget_t, Bar_position position = Bar_position::First>
-using VAccordion = Accordion<layout::Vertical<>, Widget_t, position>;
+using VAccordion = Accordion<layout::Vertical, Widget_t, position>;
 
-template <typename Layout_t,
+template <template <typename> typename Layout_t,
           typename Widget_t,
           Bar_position position = Bar_position::First,
           typename... Args>

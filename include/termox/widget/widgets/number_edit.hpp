@@ -115,9 +115,9 @@ auto number_edit(Args&&... args) -> std::unique_ptr<Number_edit<Number_t>>
 /// Number_edit with preceding Label arranged horizontally.
 template <typename Number_t = int>
 class Labeled_number_edit
-    : public Label_left<layout::Horizontal<>, Number_edit<Number_t>> {
+    : public Label_left<layout::Horizontal, Number_edit<Number_t>> {
    private:
-    using Base = Label_left<layout::Horizontal<>, Number_edit<Number_t>>;
+    using Base = Label_left<layout::Horizontal, Number_edit<Number_t>>;
 
    public:
     HLabel& label                      = Base::label;
@@ -134,7 +134,7 @@ class Labeled_number_edit
     {
         using namespace pipe;
         *this | fixed_height(1);
-        label | dynamic_size(true);
+        label | dynamic_growth();
         number_edit | bg(Color::White) | fg(Color::Black) | ghost(Color::Gray);
     }
 

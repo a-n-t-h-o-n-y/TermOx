@@ -112,7 +112,7 @@ auto checkbox(Args&&... args) -> std::unique_ptr<Checkbox>
     return std::make_unique<Checkbox>(std::forward<Args>(args)...);
 }
 
-class Labeled_checkbox : public Label_right<layout::Horizontal<>, Checkbox> {
+class Labeled_checkbox : public Label_right<layout::Horizontal, Checkbox> {
    public:
     Checkbox& checkbox = Label_right::wrapped;
 
@@ -121,8 +121,7 @@ class Labeled_checkbox : public Label_right<layout::Horizontal<>, Checkbox> {
     sl::Signal<void()>& toggled   = checkbox.toggled;
 
    public:
-    Labeled_checkbox(Glyph_string label_ = "")
-        : Label_right{{std::move(label_)}}
+    Labeled_checkbox(Glyph_string label_ = "") : Label_right{std::move(label_)}
     {
         using namespace pipe;
         Label_right::label | on_mouse_press([&](auto) { checkbox.toggle(); });

@@ -61,7 +61,7 @@ class Trait_boxes : public ox::layout::Vertical<Trait_checkbox> {
 };
 
 class Labeled_color_select
-    : public ox::Label_top<ox::layout::Horizontal<>, ox::Color_select> {
+    : public ox::Label_top<ox::layout::Horizontal, ox::Color_select> {
    public:
     sl::Signal<void(ox::Color)>& color_selected = wrapped.color_selected;
 

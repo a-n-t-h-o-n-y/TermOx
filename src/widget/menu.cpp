@@ -23,7 +23,7 @@
 namespace ox {
 
 Menu::Menu(Glyph_string title_text)
-    : title{this->make_child<HLabel>({std::move(title_text)})}
+    : title{this->make_child<HLabel>(std::move(title_text))}
 {
     this->focus_policy = Focus_policy::Strong;
     title.set_alignment(Align::Center);

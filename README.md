@@ -67,7 +67,7 @@ Reference documentation can be found
 
 - Animation
 
-- Inherit from existing Widgets and Layouts to create new UI elements.
+- Inherit from existing Widgets and Layouts to create new UI elements
 
 - Library of commonly used Widgets and Layouts
 

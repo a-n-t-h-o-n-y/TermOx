@@ -13,7 +13,7 @@
 
 namespace demos::focus {
 
-auto focus_box(ox::Focus_policy policy) -> std::unique_ptr<ox::Widget>
+inline auto focus_box(ox::Focus_policy policy) -> std::unique_ptr<ox::Widget>
 {
     using namespace ox::pipe;
 
@@ -47,7 +47,7 @@ auto focus_box(ox::Focus_policy policy) -> std::unique_ptr<ox::Widget>
     auto box_ptr =
         ox::layout::vertical
         (
-            ox::label<ox::layout::Horizontal<>>({to_string(policy)})
+            ox::hlabel(to_string(policy))
                 | name("l")
                 | align_center()
                 | fixed_height(1)
@@ -58,7 +58,8 @@ auto focus_box(ox::Focus_policy policy) -> std::unique_ptr<ox::Widget>
         ) | bordered();
 
     box_ptr | children() | find("l")
-            | on_focus_in([w = box_ptr->find_child_by_name("w")]{ ox::System::set_focus(*w); });
+            | on_focus_in([w = box_ptr->find_child_by_name("w")]
+                    { ox::System::set_focus(*w); });
 
     box_ptr | children() | find("w")
             | on_focus_in( [&w = *box_ptr]{ w | walls(fg(ox::Color::Red)); })
@@ -69,7 +70,7 @@ auto focus_box(ox::Focus_policy policy) -> std::unique_ptr<ox::Widget>
 }
 
 /// Build a focus app demo and return the owning pointer to it.
-auto build_demo() -> std::unique_ptr<ox::Widget>
+inline auto build_demo() -> std::unique_ptr<ox::Widget>
 {
     using namespace ox;
     using namespace ox::pipe;
