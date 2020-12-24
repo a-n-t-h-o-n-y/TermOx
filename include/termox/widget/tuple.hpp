@@ -5,6 +5,9 @@
 
 namespace ox {
 
+// TODO constructor that takes each types ::Parameters struct, but it has to
+// sfinae so it doesn't break classes that don't have Parameters.
+
 /// Heterogeneous collection of Widgets within a Layout_t.
 /** Widget_t's must be default constructible. Widgets are constructed in the
  *  order that types are passed in. */

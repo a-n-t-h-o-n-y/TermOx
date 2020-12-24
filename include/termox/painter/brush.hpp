@@ -1,6 +1,5 @@
 #ifndef TERMOX_PAINTER_BRUSH_HPP
 #define TERMOX_PAINTER_BRUSH_HPP
-#include <optional>
 #include <tuple>
 #include <utility>
 
@@ -10,7 +9,19 @@
 namespace ox {
 
 /// Holds the look of any paintable object with Traits and Colors.
+/** sizeof(Brush) == 3 Bytes && alignof(Brush) == 1 Byte. */
 class Brush {
+   public:
+    Color background = Color::Background;
+    Color foreground = Color::Foreground;
+
+   private:
+    // TODO wrap this in an Traits type, container of traits. then make it
+    // public. Brush constructor and class just uses these objects for
+    // convinience.
+    using Byte_t   = unsigned char;
+    Byte_t traits_ = 0;
+
    public:
     /// Construct a Brush with given Traits and Colors.
     template <typename... Traits>
@@ -19,6 +30,7 @@ class Brush {
         this->add_traits(std::forward<Traits>(traits)...);
     }
 
+   public:
     /// Add a variable number of Traits or Colors to the brush.
     /** Use the (back/fore)ground_color(Color c) functions to add colors to the
      *  list. */
@@ -40,24 +52,6 @@ class Brush {
     }
     constexpr void remove_traits() {}
 
-    /// Set the background color of this brush.
-    constexpr void set_background(Color color)
-    {
-        background_color_ = std::optional{color};  // Makes it constexpr in GCC
-    }
-
-    /// Set the foreground color of this brush.
-    constexpr void set_foreground(Color color)
-    {
-        foreground_color_ = std::optional{color};  // Makes it constexpr in GCC
-    }
-
-    /// Set the background to not have a color, the default state.
-    void remove_background() { background_color_ = std::nullopt; }
-
-    /// Set the foreground to not have a color, the default state.
-    void remove_foreground() { foreground_color_ = std::nullopt; }
-
     /// Remove all of the set Traits from the brush, not including colors.
     constexpr void clear_traits() { traits_ = 0; }
 
@@ -68,36 +62,24 @@ class Brush {
         return (traits_ & mask) != 0;
     }
 
-    /// Return the current background as a std::optional object.
-    constexpr auto background_color() const -> std::optional<Color> const&
-    {
-        return background_color_;
-    }
-
-    /// Return the current foreground as an std::optional object.
-    constexpr auto foreground_color() const -> std::optional<Color> const&
-    {
-        return foreground_color_;
-    }
-
     /// Compares if the held traits and (back/fore)ground colors are equal.
-    constexpr auto operator==(Brush const& x) const -> bool
+    constexpr auto operator==(Brush x) const -> bool
     {
-        return std::tie(traits_, background_color_, foreground_color_) ==
-               std::tie(x.traits_, x.background_color_, x.foreground_color_);
+        return std::tie(traits_, background, foreground) ==
+               std::tie(x.traits_, x.background, x.foreground);
     }
 
    private:
     /// Used by add_traits() to set a deail::Background_color.
     constexpr void set_trait(Background_color bg)
     {
-        this->set_background(Color{bg.value});
+        background = Color{bg.value};
     }
 
     /// Used by add_traits() to set a deail::Foreground_color.
     constexpr void set_trait(Foreground_color fg)
     {
-        this->set_foreground(Color{fg.value});
+        foreground = Color{fg.value};
     }
 
     /// Used by add_traits() to set an Trait.
@@ -113,24 +95,19 @@ class Brush {
     }
 
    private:
-    using Byte_t   = unsigned char;
-    Byte_t traits_ = 0;
-    std::optional<Color> background_color_;
-    std::optional<Color> foreground_color_;
-
-   private:
-    friend constexpr void imprint(Brush const&, Brush&);
+    // TODO remove as friend once Traits are public and their own type.
+    friend constexpr auto merge(Brush, Brush) -> Brush;
 };
 
-/// Add Traits and Colors from \p from to \p to.
-/** Does not overwrite existing colors in \p to. */
-constexpr inline void imprint(Brush const& from, Brush& to)
+/// Combines the two Brushes, using the primary Brush's Colors, if any, first.
+constexpr inline auto merge(Brush primary, Brush secondary) -> Brush
 {
-    if (!to.background_color_ and from.background_color_)
-        to.background_color_ = *from.background_color_;
-    if (!to.foreground_color_ and from.foreground_color_)
-        to.foreground_color_ = *from.foreground_color_;
-    to.traits_ |= from.traits_;
+    if (primary.background == Color::Background)
+        primary.background = secondary.background;
+    if (primary.foreground == Color::Foreground)
+        primary.foreground = secondary.foreground;
+    primary.traits_ |= secondary.traits_;
+    return primary;
 }
 
 }  // namespace ox

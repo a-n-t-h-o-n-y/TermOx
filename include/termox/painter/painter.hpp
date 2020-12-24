@@ -23,10 +23,10 @@ class Painter {
     Painter(Painter&&)      = delete;
 
     /// Put single Glyph to local coordinates, no-op if out of Widget's bounds.
-    void put(Glyph const& tile, std::size_t x, std::size_t y);
+    void put(Glyph tile, std::size_t x, std::size_t y);
 
     /// Put single Glyph to local coordinates, no-op if out of Widget's bounds.
-    void put(Glyph const& tile, Point const& position)
+    void put(Glyph tile, Point const& position)
     {
         this->put(tile, position.x, position.y);
     }
@@ -48,7 +48,7 @@ class Painter {
 
     /// Fill the Widget with \p tile Glyphs, from the top left point (x, y).
     /** \p x and \p y are in Widget local coordinates. */
-    void fill(Glyph const& tile,
+    void fill(Glyph tile,
               std::size_t x,
               std::size_t y,
               std::size_t width,
@@ -56,11 +56,11 @@ class Painter {
 
     /// Fill the Widget with \p tile Glyphs starting at the top left \p point.
     /** \p point is in Widget local coordinates. */
-    void fill(Glyph const& tile, Point const& point, Area const& area);
+    void fill(Glyph tile, Point const& point, Area const& area);
 
     /// Draw a straight line from [x1, y1] to [x2, y2] in local coordinates.
     /** Diagonal lines are not implemented yet. */
-    void line(Glyph const& tile,
+    void line(Glyph tile,
               std::size_t x1,
               std::size_t y1,
               std::size_t x2,
@@ -68,7 +68,7 @@ class Painter {
 
     /// Draw a straight line from \p a to \p b, inclusive, in local coordinates.
     /** Diagonal lines are not implemented yet. */
-    void line(Glyph const& tile, Point const& a, Point const& b)
+    void line(Glyph tile, Point const& a, Point const& b)
     {
         this->line(tile, a.x, a.y, b.x, b.y);
     }
@@ -77,7 +77,7 @@ class Painter {
     /// Put a single Glyph to the staged_changes_ container.
     /** No bounds checking, used internally for all painting. Main entry point
      *  for modifying the staged_changes_ object. */
-    void put_global(Glyph const& tile, std::size_t x, std::size_t y)
+    void put_global(Glyph tile, std::size_t x, std::size_t y)
     {
         staged_changes_[{x, y}] = tile;
     }
@@ -85,14 +85,14 @@ class Painter {
     /// Put a single Glyph to the staged_changes_ container.
     /** No bounds checking, used internally for all painting. Main entry point
      *  for modifying the staged_changes_ object. */
-    void put_global(Glyph const& tile, Point const& position)
+    void put_global(Glyph tile, Point const& position)
     {
         this->put_global(tile, position.x, position.y);
     }
 
     /// Paint a line from [x1, y1] to [x2, y2] using global coordinates.
     /** No bounds checking, used internally for Border object painting. */
-    void line_global(Glyph const& tile,
+    void line_global(Glyph tile,
                      std::size_t x1,
                      std::size_t y1,
                      std::size_t x2,
@@ -100,7 +100,7 @@ class Painter {
 
     /// Paint a line from \p a to \p b inclusive using global coordinates.
     /** No bounds checking, used internally for Border object painting. */
-    void line_global(Glyph const& tile, Point const& a, Point const& b)
+    void line_global(Glyph tile, Point const& a, Point const& b)
     {
         line_global(tile, a.x, a.y, b.x, b.y);
     }

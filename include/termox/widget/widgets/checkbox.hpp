@@ -1,5 +1,6 @@
 #ifndef TERMOX_WIDGET_WIDGETS_CHECKBOX_HPP
 #define TERMOX_WIDGET_WIDGETS_CHECKBOX_HPP
+#include <memory>
 #include <utility>
 
 #include <signals_light/signal.hpp>
@@ -11,14 +12,35 @@
 #include <termox/widget/detail/link_lifetimes.hpp>
 #include <termox/widget/layouts/horizontal.hpp>
 #include <termox/widget/pipe.hpp>
-#include <termox/widget/widget.hpp>
 #include <termox/widget/widgets/label.hpp>
+#include <termox/widget/widgets/tile.hpp>
 
 namespace ox {
 
+// ☒
+// [x]
+
+// ☐
+// [ ]
+
+// TODO let the checkbox be a Glyph_string, don't use tile then..
+// you'll need to have paint event again then.
+
+// TODO add 'locked' state, where it is greyed out in some way and it can't be
+// toggled?
+
 /// Checkbox Widget that is either checked or not checked.
 /** Uses mouse left button click to toggle between states. */
-class Checkbox : public Widget {
+class Checkbox : public Tile {
+   public:
+    enum class State : bool { Unchecked, Checked };
+
+    struct Parameters {
+        State initial_state = State::Unchecked;
+        Glyph checked       = L'☒';
+        Glyph unchecked     = L'☐';
+    };
+
    public:
     /// Emitted when box becomes checked.
     sl::Signal<void()> checked;
@@ -30,77 +52,85 @@ class Checkbox : public Widget {
     sl::Signal<void()> toggled;
 
    public:
-    explicit Checkbox(bool is_checked = false,
-                      Glyph checked   = L'☒',
-                      Glyph unchecked = L'☐')
-        : is_checked_{is_checked}, checked_{checked}, unchecked_{unchecked}
-    {
-        using namespace pipe;
-        *this | fixed_height(1) | fixed_width(1);
-    }
+    /// Construct a new Checkbox
+    explicit Checkbox(State initial_state = State::Unchecked,
+                      Glyph checked       = L'☒',
+                      Glyph unchecked     = L'☐')
+        : Tile{initial_state == State::Unchecked ? unchecked : checked},
+          state_{initial_state},
+          checked_{checked},
+          unchecked_{unchecked}
+    {}
 
-    /// Change state to be unchecked if currently checked, checked otherwise.
-    void toggle()
-    {
-        is_checked_ = !is_checked_;
-        toggled();
-        is_checked_ ? checked() : unchecked();
-        this->update();
-    }
+    /// Construct a new Checkbox
+    explicit Checkbox(Parameters p)
+        : Checkbox{p.initial_state, p.checked, p.unchecked} {};
 
+   public:
     /// Set the state to be checked.
     void check()
     {
-        if (not is_checked_)
-            this->toggle();
+        if (state_ == State::Unchecked) {
+            state_ = State::Checked;
+            this->Tile::set(checked_);
+            checked.emit();
+            this->update();
+        }
     }
 
     /// Set the state to be unchecked.
     void uncheck()
     {
-        if (is_checked_)
-            this->toggle();
+        if (state_ == State::Checked) {
+            state_ = State::Unchecked;
+            this->Tile::set(unchecked_);
+            unchecked.emit();
+            this->update();
+        }
     }
 
-    /// Return whether Checkbox is currently checked.
-    auto is_checked() const -> bool { return is_checked_; }
+    /// Change state to be unchecked if currently checked, checked otherwise.
+    void toggle()
+    {
+        switch (state_) {
+            case State::Checked: this->uncheck(); break;
+            case State::Unchecked: this->check(); break;
+        }
+    }
 
-    /// Set the Glyph used for a checked box.
-    void set_checked_glyph(Glyph const& symbol)
+    /// Return the current state of the Checkbox as Checkbox::State enum value.
+    auto get_state() const -> State { return state_; }
+
+    /// Set the Glyph used for the Checked State.
+    void set_checked_glyph(Glyph symbol)
     {
         checked_ = symbol;
         this->update();
     }
 
-    /// Set the Glyph used for an unchecked box.
-    void set_unchecked_glyph(Glyph const& symbol)
+    /// Return the Glyph used for the Checked State.
+    auto get_checked_glyph() const -> Glyph { return checked_; }
+
+    /// Set the Glyph used for the Unchecked State.
+    void set_unchecked_glyph(Glyph symbol)
     {
         unchecked_ = symbol;
         this->update();
     }
 
-    /// Return the Glyph representing the checked state.
-    auto get_checked_glyph() const -> Glyph const& { return checked_; }
-
-    /// Return the Glyph representing the unchecked state.
-    auto get_unchecked_glyph() const -> Glyph const& { return unchecked_; }
+    /// Return the Glyph used for the Unchecked State.
+    auto get_unchecked_glyph() const -> Glyph { return unchecked_; }
 
    protected:
-    auto paint_event() -> bool override
-    {
-        Painter{*this}.put(this->is_checked() ? checked_ : unchecked_, 0, 0);
-        return Widget::paint_event();
-    }
-
     auto mouse_press_event(Mouse const& m) -> bool override
     {
         if (m.button == Mouse::Button::Left)
             this->toggle();
-        return Widget::mouse_press_event(m);
+        return Tile::mouse_press_event(m);
     }
 
    private:
-    bool is_checked_ = false;
+    State state_;
     Glyph checked_;
     Glyph unchecked_;
 };
@@ -112,20 +142,27 @@ auto checkbox(Args&&... args) -> std::unique_ptr<Checkbox>
     return std::make_unique<Checkbox>(std::forward<Args>(args)...);
 }
 
+// TODO possibly provide checkbox on either side and vertical too, via template
+// parameters that you can type alias and give names to. very similar to ..
+// actually you might be able to use the Label_wrapper type directly or
+// something to create the types directly, but you want to wrap that too, so
+// that you have a checkbox name to access, that just redirects to wrapped.
 class Labeled_checkbox : public Label_right<layout::Horizontal, Checkbox> {
-   public:
-    Checkbox& checkbox = Label_right::wrapped;
-
-    sl::Signal<void()>& checked   = checkbox.checked;
-    sl::Signal<void()>& unchecked = checkbox.unchecked;
-    sl::Signal<void()>& toggled   = checkbox.toggled;
+   private:
+    using Label_t = Label_right<layout::Horizontal, Checkbox>;
 
    public:
-    Labeled_checkbox(Glyph_string label_ = "") : Label_right{std::move(label_)}
+    Checkbox& checkbox = Label_t::wrapped;
+    HLabel& label      = Label_t::label;
+
+   public:
+    Labeled_checkbox(Glyph_string label_ = L"") : Label_t{std::move(label_)}
     {
         using namespace pipe;
-        Label_right::label | on_mouse_press([&](auto) { checkbox.toggle(); });
-        Label_right::padding | on_mouse_press([&](auto) { checkbox.toggle(); });
+        Label_t::label | on_mouse_press([&](auto) { checkbox.toggle(); });
+        Label_t::padding | on_mouse_press([&](auto) { checkbox.toggle(); });
+        *this | fixed_height(1);  // TODO this should be taken care of if you
+                                  // use the Label wrapper type
     }
 };
 

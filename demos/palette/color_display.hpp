@@ -19,7 +19,7 @@ struct Color_patch : ox::Widget {
 
     void set_color(ox::Color value)
     {
-        this->brush.set_background(value);
+        this->brush.background = value;
         this->update();
     }
 };

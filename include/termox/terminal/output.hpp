@@ -14,7 +14,7 @@ void move_cursor(std::size_t x, std::size_t y);
 void refresh();
 
 /// Places Glyph \p g on the screen at the current cursor position.
-void put(Glyph const& g);
+void put(Glyph g);
 
 /// Places Glyph \p g at coordinates \p x , \p y.
 /** First moves the cursor's position to (x,y), then puts the Glyph to the

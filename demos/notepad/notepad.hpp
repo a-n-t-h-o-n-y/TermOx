@@ -34,8 +34,8 @@ class Trait_checkbox : public ox::Labeled_checkbox {
     Trait_checkbox(ox::Trait t) : Labeled_checkbox{to_string(t)}, t_{t}
     {
         this->padding | ox::pipe::fixed_width(2);
-        this->checked.connect([this] { this->trait_enabled(t_); });
-        this->unchecked.connect([this] { this->trait_disabled(t_); });
+        this->checkbox.checked.connect([this] { this->trait_enabled(t_); });
+        this->checkbox.unchecked.connect([this] { this->trait_disabled(t_); });
     }
 
    private:
@@ -62,11 +62,14 @@ class Trait_boxes : public ox::layout::Vertical<Trait_checkbox> {
 
 class Labeled_color_select
     : public ox::Label_top<ox::layout::Horizontal, ox::Color_select> {
+   private:
+    using Label_t = ox::Label_top<ox::layout::Horizontal, ox::Color_select>;
+
    public:
     sl::Signal<void(ox::Color)>& color_selected = wrapped.color_selected;
 
    public:
-    Labeled_color_select(ox::Glyph_string label) : Label_top{{std::move(label)}}
+    Labeled_color_select(ox::Glyph_string label) : Label_t{std::move(label)}
     {
         using namespace ox;
         using namespace ox::pipe;

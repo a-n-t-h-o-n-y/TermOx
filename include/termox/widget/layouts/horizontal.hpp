@@ -84,14 +84,13 @@ auto horizontal(Args&&... args) -> std::unique_ptr<Horizontal<Widget_t>>
     return std::make_unique<Horizontal<Widget_t>>(std::forward<Args>(args)...);
 }
 
-template <typename T>
-struct Is_horizontal : std::false_type {};
-
-template <typename Child_t>
-struct Is_horizontal<layout::Horizontal<Child_t>> : std::true_type {};
-
+/// True if the given type is a layout::Horizontal.
 template <typename Layout_t>
-constexpr bool is_horizontal_v = Is_horizontal<Layout_t>::value;
+inline constexpr bool is_horizontal_v = false;
+
+/// True if the given type is a layout::Horizontal.
+template <typename Child_t>
+inline constexpr bool is_horizontal_v<layout::Horizontal<Child_t>> = true;
 
 }  // namespace ox::layout
 #endif  // TERMOX_WIDGET_LAYOUTS_HORIZONTAL_HPP

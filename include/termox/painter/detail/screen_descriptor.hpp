@@ -42,7 +42,7 @@ class Screen_descriptor {
     // This is only called after a clear() so don't bother resetting.
     void move(Point p) { top_left_ = p; }
 
-    auto at(Point p) const -> Glyph const& { return map_.at(p); }
+    auto at(Point p) const -> Glyph { return map_.at(p); }
 
     auto operator[](Point&& p) -> Glyph& { return map_[std::move(p)]; }
 

@@ -72,7 +72,7 @@ TEST(GlyphTest, SetBrush)
     EXPECT_EQ(Brush{}, g1.brush());
     EXPECT_EQ((Brush{Trait::Italic, bg(Color::White)}), g2.brush());
 
-    g2.brush().set_foreground(Color::Yellow);
+    g2.brush().foreground = Color::Yellow;
     g2.brush().add_traits(Trait::Standout);
 
     EXPECT_EQ((Brush{Trait::Standout, Trait::Italic, bg(Color::White),

@@ -26,10 +26,10 @@ class Save_file : public layout::Horizontal<> {
     {
         this->height_policy.fixed(1);
         save_btn.width_policy.fixed(4);
-        save_btn.brush.set_background(Color::Blue);
+        save_btn.brush.background = Color::Blue;
         separator.set_wallpaper(L'>');
-        filename_edit.brush.set_background(Color::White);
-        filename_edit.brush.set_foreground(Color::Black);
+        filename_edit.brush.background = Color::White;
+        filename_edit.brush.foreground = Color::Black;
         filename_edit.set_ghost_color(Color::Dark_gray);
         save_btn.pressed.connect([this] { this->notify(); });
     }

@@ -35,7 +35,7 @@ auto has_children(Widget const& widg) -> bool
 }
 
 /// Covers space unowned by any child widget with wallpaper.
-void paint_unowned_tiles(Widget const& layout, Glyph const& wallpaper)
+void paint_unowned_tiles(Widget const& layout, Glyph wallpaper)
 {
     auto const empty_space = detail::find_empty_space(layout);
     auto const y_begin     = empty_space.offset().y;
@@ -64,8 +64,8 @@ void paint_to_terminal(Widget& widg,
     for (auto y = y_begin; y < y_end; ++y) {
         for (auto x = x_begin; x < x_end; ++x) {
             if (contains({x, y}, staged_tiles)) {
-                auto tile = staged_tiles.at({x, y});
-                imprint(widg.brush, tile.brush);
+                auto tile  = staged_tiles.at({x, y});
+                tile.brush = merge(tile.brush, widg.brush);
                 output::put(x, y, tile);
             }
             else if (not is_layout)

@@ -62,7 +62,7 @@ class Glyph_string : private std::vector<Glyph> {
     }
 
     /// Construct with \p count \p glyph's, adding given Traits to each.
-    explicit Glyph_string(Glyph const& glyph, std::size_t count = 1)
+    explicit Glyph_string(Glyph glyph, std::size_t count = 1)
     {
         for (; count != 0; --count)
             this->append(glyph);
@@ -96,20 +96,19 @@ class Glyph_string : private std::vector<Glyph> {
 
    public:
     /// Compound concatenation assignment operator to append a Glyph.
-    auto operator+=(Glyph const& glyph) -> Glyph_string&
+    auto operator+=(Glyph glyph) -> Glyph_string&
     {
         return this->append(glyph);
     }
 
     /// Concatenation operator to append a Glyph_string.
-    auto operator+(Glyph const& g) const -> Glyph_string
+    auto operator+(Glyph g) const -> Glyph_string
     {
         return Glyph_string{*this}.append(g);
     }
 
     /// Concatenation operator to append a Glyph_string.
-    friend auto operator+(Glyph const& lhs, Glyph_string const& rhs)
-        -> Glyph_string
+    friend auto operator+(Glyph lhs, Glyph_string const& rhs) -> Glyph_string
     {
         return Glyph_string{lhs}.append(rhs);
     }
@@ -136,7 +135,7 @@ class Glyph_string : private std::vector<Glyph> {
 
     /// Append single Glyph to the end of the Glyph_string w/given Traits.
     template <typename... Traits>
-    auto append(Glyph const& symbol, Traits... traits) -> Glyph_string&
+    auto append(Glyph symbol, Traits... traits) -> Glyph_string&
     {
         this->push_back(symbol);
         this->back().brush.add_traits(traits...);
@@ -184,8 +183,8 @@ class Glyph_string : private std::vector<Glyph> {
     template <typename... Traits>
     auto append(Glyph_string const& gs, Traits... traits) -> Glyph_string&
     {
-        for (Glyph const& glyph : gs)
-            this->append(glyph, traits...);
+        for (Glyph g : gs)
+            this->append(g, traits...);
         return *this;
     }
 

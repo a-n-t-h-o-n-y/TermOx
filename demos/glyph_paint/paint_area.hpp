@@ -42,17 +42,17 @@ class Paint_area : public ox::Widget {
         }
     }
 
-    void set_symbol(ox::Glyph const& symbol)
+    void set_symbol(ox::Glyph s)
     {
         if (erase_enabled_) {
             this->disable_erase();
             erase_disabled();
         }
-        current_glyph_.symbol = symbol.symbol;
-        if (auto const symbol_bg = symbol.brush.background_color(); symbol_bg)
-            current_glyph_ | bg(*symbol_bg);
-        if (auto const symbol_fg = symbol.brush.foreground_color(); symbol_fg)
-            current_glyph_ | fg(*symbol_fg);
+        current_glyph_.symbol = s.symbol;
+        if (s.brush.background != ox::Color::Background)
+            current_glyph_ | bg(s.brush.background);
+        if (s.brush.foreground != ox::Color::Foreground)
+            current_glyph_ | fg(s.brush.foreground);
         glyph_changed(current_glyph_);
     }
 

@@ -154,8 +154,7 @@ struct Controls_box : ox::layout::Vertical<> {
     Widget& break_1                    = this->append_child(make_break());
     Grid_hi_res& grid_hi_res           = this->make_child<Grid_hi_res>();
     ox::Labeled_checkbox& rainbow_btn =
-        this->make_child<ox::Labeled_checkbox>("Rainbow Mode") |
-        ox::pipe::fixed_height(1uL);
+        this->make_child<ox::Labeled_checkbox>(L"Rainbow Mode");
     Widget& break_2      = this->append_child(make_break());
     Rule_edit& rule_edit = this->make_child<Rule_edit>();
     Widget& break_3      = this->append_child(make_break());
@@ -163,11 +162,12 @@ struct Controls_box : ox::layout::Vertical<> {
    public:
     sl::Signal<void(std::string const&)>& rule_change = rule_edit.rule_change;
     sl::Signal<void(std::chrono::milliseconds)> interval_set;
-    sl::Signal<void()>& grid_toggled   = grid_hi_res.grid_box.toggled;
-    sl::Signal<void()>& hi_res_toggled = grid_hi_res.hi_res_box.toggled;
+    sl::Signal<void()>& grid_toggled = grid_hi_res.grid_box.checkbox.toggled;
+    sl::Signal<void()>& hi_res_toggled =
+        grid_hi_res.hi_res_box.checkbox.toggled;
     sl::Signal<void()>& clear_request  = clear_step_btns.clear_btn.pressed;
     sl::Signal<void()>& step_request   = clear_step_btns.step_btn.pressed;
-    sl::Signal<void()>& rainbow_toggle = rainbow_btn.toggled;
+    sl::Signal<void()>& rainbow_toggle = rainbow_btn.checkbox.toggled;
 
    public:
     Controls_box()

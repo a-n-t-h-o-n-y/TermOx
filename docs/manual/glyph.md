@@ -10,7 +10,7 @@ There are a few ways to create a Glyph.
 With the constructors:
 
 ```cpp
-constexpr Glyph(wchar_t sym, Brush const& b);
+constexpr Glyph(wchar_t sym, Brush b);
 ```
 
 ```cpp

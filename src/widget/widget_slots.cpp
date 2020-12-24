@@ -91,7 +91,7 @@ auto set_background(Widget& w) -> sl::Slot<void(Color)>
 {
     return link_lifetimes(
         [&w](Color c) {
-            w.brush.set_background(c);
+            w.brush.background = c;
             w.update();
         },
         w);
@@ -101,7 +101,7 @@ auto set_background(Widget& w, Color c) -> sl::Slot<void()>
 {
     return link_lifetimes(
         [&w, c] {
-            w.brush.set_background(c);
+            w.brush.background = c;
             w.update();
         },
         w);
@@ -111,7 +111,7 @@ auto set_foreground(Widget& w) -> sl::Slot<void(Color)>
 {
     return link_lifetimes(
         [&w](Color c) {
-            w.brush.set_foreground(c);
+            w.brush.foreground = c;
             w.update();
         },
         w);
@@ -121,7 +121,7 @@ auto set_foreground(Widget& w, Color c) -> sl::Slot<void()>
 {
     return link_lifetimes(
         [&w, c] {
-            w.brush.set_foreground(c);
+            w.brush.foreground = c;
             w.update();
         },
         w);

@@ -29,17 +29,6 @@ auto color_index(Color fg, Color bg) -> short
     return System::terminal.color_index(fg, bg);
 }
 
-auto color_index(Brush const& brush) -> short
-{
-    auto background = Color{Color::Black};
-    if (brush.background_color())
-        background = *(brush.background_color());
-    auto foreground = Color{Color::Black};
-    if (brush.foreground_color())
-        foreground = *(brush.foreground_color());
-    return color_index(foreground, background);
-}
-
 auto trait_to_attr_t(Trait t) -> attr_t
 {
     auto result = A_NORMAL;
@@ -56,7 +45,7 @@ auto trait_to_attr_t(Trait t) -> attr_t
     return result;
 }
 
-auto find_attr_t(Brush const& brush) -> attr_t
+auto find_attr_t(Brush brush) -> attr_t
 {
     auto result = A_NORMAL;
     for (auto i = 0; i < Trait_count; ++i) {
@@ -82,9 +71,10 @@ void paint_indicator(char symbol)
 #endif
 
 /// Add \p glyph's symbol, with traits, to the screen at cursor position.
-void put_wchar(Glyph const& glyph)
+void put_wchar(Glyph glyph)
 {
-    auto const color_pair   = color_index(glyph.brush);
+    auto const brush        = glyph.brush;
+    auto const color_pair   = color_index(brush.foreground, brush.background);
     auto const traits       = find_attr_t(glyph.brush);
     wchar_t const symbol[2] = {glyph.symbol, L'\0'};
     auto symbol_and_traits  = cchar_t{};
@@ -103,7 +93,7 @@ void move_cursor(std::size_t x, std::size_t y)
 
 void refresh() { ::wrefresh(::stdscr); }
 
-void put(Glyph const& g)
+void put(Glyph g)
 {
 #ifdef SLOW_PAINT
     paint_indicator('X');

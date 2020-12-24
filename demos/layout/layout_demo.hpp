@@ -100,38 +100,38 @@ struct Size_policy_settings : ox::layout::Vertical<> {
         // this->height_policy.fixed(6);
 
         title.height_policy.fixed(1);
-        title.brush.set_background(ox::Color::Dark_gray);
+        title.brush.background = ox::Color::Dark_gray;
 
         // types_box.type_updated.connect([this](auto type) {
         //     size_policy_.type(type);
         //     this->notify();
         // });
-        // types_box.label.brush.set_background(ox::Color::Dark_gray);
-        // types_box.cycle_box.brush.set_background(ox::Color::Dark_gray);
+        // types_box.label.brush.background     = ox::Color::Dark_gray;
+        // types_box.cycle_box.brush.background = ox::Color::Dark_gray;
 
         stretch.value_set.connect([this](double value) {
             size_policy_.stretch(value);
             this->notify();
         });
-        stretch.label.brush.set_background(ox::Color::Dark_gray);
+        stretch.label.brush.background = ox::Color::Dark_gray;
 
         hint.value_set.connect([this](std::size_t value) {
             size_policy_.hint(value);
             this->notify();
         });
-        hint.label.brush.set_background(ox::Color::Dark_gray);
+        hint.label.brush.background = ox::Color::Dark_gray;
 
         min.value_set.connect([this](std::size_t value) {
             size_policy_.min(value);
             this->notify();
         });
-        min.label.brush.set_background(ox::Color::Dark_gray);
+        min.label.brush.background = ox::Color::Dark_gray;
 
         max.value_set.connect([this](std::size_t value) {
             size_policy_.max(value);
             this->notify();
         });
-        max.label.brush.set_background(ox::Color::Dark_gray);
+        max.label.brush.background = ox::Color::Dark_gray;
     }
 
     ox::Text_display& title{
@@ -199,7 +199,7 @@ struct Settings : ox::layout::Vertical<> {
 
         title.height_policy.fixed(1);
         title.set_alignment(ox::Align::Center);
-        title.brush.set_background(ox::Color::Dark_gray);
+        title.brush.background = ox::Color::Dark_gray;
 
         width_policy_settings.policy_updated.connect(
             [this](ox::Size_policy const& p) {
@@ -208,13 +208,13 @@ struct Settings : ox::layout::Vertical<> {
 
         add_btn.pressed.connect([this] { this->add_widget(); });
         add_btn.height_policy.fixed(3);
-        add_btn.brush.set_background(ox::Color::Light_blue);
-        add_btn.brush.set_foreground(ox::Color::Black);
+        add_btn.brush.background = ox::Color::Light_blue;
+        add_btn.brush.foreground = ox::Color::Black;
 
         remove_btn.pressed.connect([this] { this->remove_selected(); });
         remove_btn.height_policy.fixed(3);
-        remove_btn.brush.set_background(ox::Color::Violet);
-        remove_btn.brush.set_foreground(ox::Color::Black);
+        remove_btn.brush.background = ox::Color::Violet;
+        remove_btn.brush.foreground = ox::Color::Black;
     }
 
     /// update size_policy internals to selected widget's internals

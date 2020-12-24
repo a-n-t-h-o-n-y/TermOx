@@ -93,8 +93,6 @@ my_widget | children() | for_each([](auto& w){ log(w.name()); });
 
 - `bg(Color)`
 - `fg(Color)`
-- `remove_background()`
-- `remove_foreground()`
 - `add(Trait)`
 - `discard(Trait)`
 - `clear_traits()`

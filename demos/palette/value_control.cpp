@@ -15,9 +15,8 @@ Buffered_edit_box::Buffered_edit_box()
     this->height_policy.fixed(1);
     this->box.set_validator([](char c) { return std::isdigit(c); });
     this->box.set_ghost_color(Color::White);
-    for (auto& child : this->get_children()) {
-        child.brush.set_background(Color::Blue);
-    }
+    for (auto& child : this->get_children())
+        child.brush.background = Color::Blue;
 }
 }  // namespace palette::detail
 

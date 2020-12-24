@@ -34,7 +34,7 @@ Painter::Painter(Widget& widg)
       staged_changes_{detail::Staged_changes::get()[&widg]}
 {}
 
-void Painter::put(Glyph const& tile, std::size_t x, std::size_t y)
+void Painter::put(Glyph tile, std::size_t x, std::size_t y)
 {
     if (x >= inner_area_.width or y >= inner_area_.height)
         return;
@@ -47,9 +47,8 @@ void Painter::put(Glyph_string const& text, std::size_t x, std::size_t y)
 {
     if (not is_paintable_)
         return;
-    for (Glyph const& g : text) {
+    for (Glyph g : text)
         this->put(g, x++, y);
-    }
 }
 
 void Painter::border()
@@ -177,7 +176,7 @@ void Painter::border()
         this->put_global(wallpaper, south_east);
 }
 
-void Painter::fill(Glyph const& tile,
+void Painter::fill(Glyph tile,
                    std::size_t x,
                    std::size_t y,
                    std::size_t width,
@@ -186,18 +185,17 @@ void Painter::fill(Glyph const& tile,
     if (width == 0)
         return;
     auto const y_limit = y + height;
-    for (; y < y_limit; ++y) {
+    for (; y < y_limit; ++y)
         this->line(tile, x, y, width - 1, y);
-    }
 }
 
-void Painter::fill(Glyph const& tile, Point const& point, Area const& area)
+void Painter::fill(Glyph tile, Point const& point, Area const& area)
 {
     this->fill(tile, point.x, point.y, area.width, area.height);
 }
 
 // Does not call down to line_global because this needs bounds checking.
-void Painter::line(Glyph const& tile,
+void Painter::line(Glyph tile,
                    std::size_t x1,
                    std::size_t y1,
                    std::size_t x2,
@@ -205,19 +203,17 @@ void Painter::line(Glyph const& tile,
 {
     // Horizontal
     if (y1 == y2) {
-        for (; x1 <= x2; ++x1) {
+        for (; x1 <= x2; ++x1)
             this->put(tile, x1, y1);
-        }
     }  // Vertical
     else if (x1 == x2) {
-        for (; y1 <= y2; ++y1) {
+        for (; y1 <= y2; ++y1)
             this->put(tile, x1, y1);
-        }
     }
 }
 
 // GLOBAL COORDINATES - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-void Painter::line_global(Glyph const& tile,
+void Painter::line_global(Glyph tile,
                           std::size_t x1,
                           std::size_t y1,
                           std::size_t x2,
@@ -225,14 +221,12 @@ void Painter::line_global(Glyph const& tile,
 {
     // Horizontal
     if (y1 == y2) {
-        for (; x1 <= x2; ++x1) {
+        for (; x1 <= x2; ++x1)
             this->put_global(tile, x1, y1);
-        }
     }  // Vertical
     else if (x1 == x2) {
-        for (; y1 <= y2; ++y1) {
+        for (; y1 <= y2; ++y1)
             this->put_global(tile, x1, y1);
-        }
     }
 }
 

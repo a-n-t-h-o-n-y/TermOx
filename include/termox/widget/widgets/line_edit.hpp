@@ -65,7 +65,7 @@ class Line_edit : public Textbox {
     }
 
     /// Set Glyph used to obscure the display.
-    void set_veil(Glyph const& veil)
+    void set_veil(Glyph veil)
     {
         veil_ = veil;
         this->update();

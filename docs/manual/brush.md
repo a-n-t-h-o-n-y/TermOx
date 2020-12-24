@@ -29,22 +29,6 @@ Add any number of Traits or Colors to an existing Brush.
 
 Remove any number of Traits, not Colors.
 
-#### `void set_background(Color)`
-
-Set the background Color.
-
-#### `void set_foreground(Color)`
-
-Set the foreground Color.
-
-#### `void remove_background()`
-
-Remove the background Color.
-
-#### `void remove_foreground()`
-
-Remove the foreground Color.
-
 #### `void clear_traits()`
 
 Removes all Traits, not Colors.
@@ -53,8 +37,6 @@ Removes all Traits, not Colors.
 
 - `operator|(..., Background_color)`
 - `operator|(..., Foreground_color)`
-- `remove_background()`
-- `remove_foreground()`
 - `operator|(..., Trait)`
 - `discard(Trait)`
 - `clear_traits()`

@@ -157,7 +157,7 @@ inline auto disanimate()
 }
 
 // Wallpaper Modifiers ---------------------------------------------------------
-inline auto wallpaper(Glyph const& g)
+inline auto wallpaper(Glyph g)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).set_wallpaper(g);
@@ -215,30 +215,6 @@ auto operator|(Widget_t&& w, Foreground_color fg) -> decltype(auto)
     get(w).update();
     return std::forward<Widget_t>(w);
 }
-
-}  // namespace ox
-namespace ox::pipe {
-
-inline auto remove_background()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).brush.remove_background();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto remove_foreground()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).brush.remove_foreground();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-}  // namespace ox::pipe
-namespace ox {
 
 /// Add \p t to the Brush of \p w.
 template <typename Widget_t,

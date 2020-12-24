@@ -7,7 +7,11 @@
 
 namespace ox {
 
+/// A unit width/height Widget that can display a single Glyph.
 class Tile : public Widget {
+   public:
+    using Parameters = Glyph;
+
    public:
     Tile(Glyph g = L' ') : display_{g}
     {
@@ -15,6 +19,7 @@ class Tile : public Widget {
         *this | fixed_width(1) | fixed_height(1);
     }
 
+   public:
     void set(Glyph g)
     {
         display_ = g;
@@ -26,7 +31,7 @@ class Tile : public Widget {
    protected:
     auto paint_event() -> bool override
     {
-        Painter{*this}.put(display_, 0, 0);
+        Painter{*this}.put(display_, {0, 0});
         return Widget::paint_event();
     }
 

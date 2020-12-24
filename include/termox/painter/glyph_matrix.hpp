@@ -42,7 +42,7 @@ class Glyph_matrix {
 
     /// Glyph access operator. (0, 0) is top left. x grows south and y east.
     /** Provides no bounds checking. */
-    auto operator()(std::size_t x, std::size_t y) const -> Glyph const&
+    auto operator()(std::size_t x, std::size_t y) const -> Glyph
     {
         return matrix_[y][x];
     }
@@ -56,7 +56,7 @@ class Glyph_matrix {
 
     /// Glyph access operator. (0, 0) is top left. x grows south and y east.
     /** Has bounds checking and throws std::out_of_range if not within range. */
-    auto at(std::size_t x, std::size_t y) const -> Glyph const&
+    auto at(std::size_t x, std::size_t y) const -> Glyph
     {
         return matrix_.at(y).at(x);
     }

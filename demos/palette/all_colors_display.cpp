@@ -32,7 +32,7 @@ bool Shade_display::paint_event()
             if (fg == base_)
                 --x;
             else {
-                shade.brush.set_foreground(fg);
+                shade.brush.foreground = fg;
                 p.put(shade, x, y);
             }
         }

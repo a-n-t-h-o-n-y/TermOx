@@ -11,7 +11,7 @@ class Border {
     class Segment : public Glyph {
        public:
         /// Construct a Border Segment with \g for appearance.
-        Segment(Glyph const& g) : Glyph{g} {}
+        Segment(Glyph g) : Glyph{g} {}
 
         /// Enable the Segment to be displayable.
         void enable() { enabled_ = true; }

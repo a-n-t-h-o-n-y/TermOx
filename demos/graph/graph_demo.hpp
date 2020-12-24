@@ -190,7 +190,7 @@ class Graph_core : public ox::Graph<double> {
     {
         this->set_generator<Generator_t>(std::forward<Args>(args)...);
         // this->enable_animation(std::chrono::milliseconds{16});
-        this->brush.set_foreground(ox::Color::Light_green);
+        this->brush.foreground = ox::Color::Light_green;
     }
 
     template <typename Generator_t, typename... Args>

@@ -120,7 +120,7 @@ void Terminal::set_refresh_rate(std::chrono::milliseconds duration)
         ::timeout(refresh_rate_.count());
 }
 
-void Terminal::set_background(Glyph const& tile)
+void Terminal::set_background(Glyph tile)
 {
     background_ = tile;
     if (is_initialized_)

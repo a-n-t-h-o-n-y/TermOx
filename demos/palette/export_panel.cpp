@@ -66,13 +66,13 @@ Export_panel::Export_panel()
     this->border.segments.disable_all();
     this->border.segments.north.enable();
 
-    name_edit_.brush.set_background(Color::Dark_gray);
+    name_edit_.brush.background = Color::Dark_gray;
     name_edit_.set_ghost_color(Color::Light_gray);
     name_edit_.set_validator(
         [](char c) { return !std::iscntrl(c) or !std::isspace(c); });
 
-    export_btn_.brush.set_background(Color::White);
-    export_btn_.brush.set_foreground(Color::Black);
+    export_btn_.brush.background = Color::White;
+    export_btn_.brush.foreground = Color::Black;
     export_btn_.pressed.connect(
         [this]() { export_current_palette(name_edit_.contents().str()); });
 }

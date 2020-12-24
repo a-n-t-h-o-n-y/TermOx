@@ -141,7 +141,6 @@ class Label : public Widget {
     inline static auto constexpr is_vertical =
         layout::is_vertical_v<Layout_t<Widget>>;
 
-    // Publicly Known Parameters
     Glyph_string text_;
     Align alignment_;
     std::size_t extra_left_;
@@ -221,70 +220,121 @@ class Label : public Widget {
     }
 };
 
+// -----------------------------------------------------------------------------
+
 /// Horizontal Label Widget
 using HLabel = Label<layout::Horizontal>;
 
 /// Vertical Label Widget
 using VLabel = Label<layout::Vertical>;
 
-/// Helper function to create an instance.
+/// Helper function to create a Label instance.
 template <template <typename> typename Layout_t, typename... Args>
 auto label(Args&&... args) -> std::unique_ptr<Label<Layout_t>>
 {
     return std::make_unique<Label<Layout_t>>(std::forward(args)...);
 }
 
-/// Helper function to create an instance.
+/// Helper function to create an HLabel instance.
 template <typename... Args>
-auto hlabel(Args&&... args) -> std::unique_ptr<Label<layout::Horizontal>>
+auto hlabel(Args&&... args) -> std::unique_ptr<HLabel>
 {
-    return std::make_unique<Label<layout::Horizontal>>(
-        std::forward<Args>(args)...);
+    return std::make_unique<HLabel>(std::forward<Args>(args)...);
 }
 
-/// Helper function to create an instance.
+/// Helper function to create a VLabel instance.
 template <typename... Args>
-auto vlabel(Args&&... args) -> std::unique_ptr<Label<layout::Vertical>>
+auto vlabel(Args&&... args) -> std::unique_ptr<VLabel>
 {
-    return std::make_unique<Label<layout::Vertical>>(
-        std::forward<Args>(args)...);
+    return std::make_unique<VLabel>(std::forward<Args>(args)...);
 }
 
-/// Wraps a Widget_t object with a label on the left.
-/** Layout_t is applied to the Label object. */
-template <template <typename> typename Layout_t, typename Widget_t>
-class Label_left : public layout::Horizontal<> {
+// -----------------------------------------------------------------------------
+
+/// Wraps a Widget_t object with a label.
+/** Layout_t is applied to the Label object, Wrapper_layout is the layout of
+ *  *this, if label_last is true, the Label is after the wrapped Widget_t. */
+template <template <typename> typename Layout_t,
+          typename Widget_t,
+          typename Wrapper_layout,
+          bool label_last>
+class Label_wrapper : public Wrapper_layout {
+   private:
+    using Label_t = Label<Layout_t>;
+
    public:
-    Label<Layout_t>& label;
-    Widget& padding = make_child() | pipe::fixed_width(1);
+    using Parameters = typename Label_t::Parameters;
+
+   public:
+    Label_t& label;
+    Widget& padding = this->template make_child() | padding_policy();
     Widget_t& wrapped;
 
    public:
     /// Construct a new Label and wrapped Widget_t.
     /** Only takes Label constructor args, if you need to pass in args to the
      *  wrapped Widget_t, then use the Label::Parameters overload. */
-    explicit Label_left(Glyph_string text       = L"",
-                        Align alignment         = Align::Left,
-                        std::size_t extra_left  = 0uL,
-                        std::size_t extra_right = 0uL,
-                        Growth growth_strategy  = Growth::Static)
-        : Label_left{typename Label<Layout_t>::Parameters{
-              std::move(text), alignment, extra_left, extra_right,
-              growth_strategy}}
+    explicit Label_wrapper(Glyph_string text       = L"",
+                           Align alignment         = Align::Left,
+                           std::size_t extra_left  = 0uL,
+                           std::size_t extra_right = 0uL,
+                           Growth growth_strategy  = Growth::Static)
+        : Label_wrapper{Parameters{std::move(text), alignment, extra_left,
+                                   extra_right, growth_strategy}}
     {}
 
     /// Constructs Label with given parameters, and Widget_t with args...
     template <typename... Args>
-    explicit Label_left(typename Label<Layout_t>::Parameters p, Args&&... args)
-        : label{make_child<Label<Layout_t>>(std::move(p))},
-          wrapped{make_child<Widget_t>(std::forward<Args>(args)...)}
+    explicit Label_wrapper(Parameters p, Args&&... args)
+        : label{this->template make_child<Label_t>(std::move(p))},
+          wrapped{
+              this->template make_child<Widget_t>(std::forward<Args>(args)...)}
     {
-        this->height_policy = wrapped.height_policy;
+        if constexpr (layout::is_vertical_v<Wrapper_layout>)
+            this->width_policy = wrapped.width_policy;
+        else
+            this->height_policy = wrapped.height_policy;
+
         *this | pipe::on_focus_in([this] { System::set_focus(wrapped); });
+
+        if constexpr (label_last)
+            this->swap_children(0, 2);
+    }
+
+   private:
+    auto padding_policy()
+    {
+        if constexpr (layout::is_vertical_v<Wrapper_layout>)
+            return pipe::fixed_height(0);
+        else
+            return pipe::fixed_width(1);
     }
 };
 
-/// Helper function to create an instance.
+// -----------------------------------------------------------------------------
+
+/// Wraps a Widget_t object with a label on the left.
+template <template <typename> typename Layout_t, typename Widget_t>
+using Label_left =
+    Label_wrapper<Layout_t, Widget_t, layout::Horizontal<>, false>;
+
+/// Wraps a Widget_t object with a label on the right.
+template <template <typename> typename Layout_t, typename Widget_t>
+using Label_right =
+    Label_wrapper<Layout_t, Widget_t, layout::Horizontal<>, true>;
+
+/// Wraps a Widget_t object with a label on the top.
+template <template <typename> typename Layout_t, typename Widget_t>
+using Label_top = Label_wrapper<Layout_t, Widget_t, layout::Vertical<>, false>;
+
+/// Wraps a Widget_t object with a label on the bottom.
+template <template <typename> typename Layout_t, typename Widget_t>
+using Label_bottom =
+    Label_wrapper<Layout_t, Widget_t, layout::Vertical<>, true>;
+
+// -----------------------------------------------------------------------------
+
+// Helper function to create a Label_left instance.
 template <template <typename> typename Layout_t,
           typename Widget_t,
           typename... Args>
@@ -295,7 +345,7 @@ auto label_left(typename Label<Layout_t>::Parameters p, Args&&... args)
         std::move(p), std::forward<Args>(args)...);
 }
 
-/// Helper function to create an instance.
+/// Helper function to create a Label_left instance.
 /** Only takes Label constructor args, if you need to pass in args to the
  *  wrapped Widget_t, then use the Label::Parameters overload. */
 template <template <typename> typename Layout_t, typename Widget_t>
@@ -310,41 +360,7 @@ auto label_left(Glyph_string text       = L"",
         std::move(text), alignment, extra_left, extra_right, growth_strategy});
 }
 
-/// Wraps a Widget_t object with a label on the right.
-/** Layout_t is applied to the Label object. */
-template <template <typename> typename Layout_t, typename Widget_t>
-class Label_right : public layout::Horizontal<> {
-   public:
-    Widget_t& wrapped;
-    Widget& padding = make_child() | pipe::fixed_width(1);
-    Label<Layout_t>& label;
-
-   public:
-    /// Construct a new Label and wrapped Widget_t.
-    /** Only takes Label constructor args, if you need to pass in args to the
-     *  wrapped Widget_t, then use the Label::Parameters overload. */
-    explicit Label_right(Glyph_string text       = L"",
-                         Align alignment         = Align::Left,
-                         std::size_t extra_left  = 0uL,
-                         std::size_t extra_right = 0uL,
-                         Growth growth_strategy  = Growth::Static)
-        : Label_right{typename Label<Layout_t>::Parameters{
-              std::move(text), alignment, extra_left, extra_right,
-              growth_strategy}}
-    {}
-
-    /// Constructs Label with \p label_, and Widget_t with args...
-    template <typename... Args>
-    explicit Label_right(typename Label<Layout_t>::Parameters p, Args&&... args)
-        : wrapped{make_child<Widget_t>(std::forward<Args>(args)...)},
-          label{make_child<Label<Layout_t>>(std::move(p))}
-    {
-        this->height_policy = wrapped.height_policy;
-        *this | pipe::on_focus_in([this] { System::set_focus(wrapped); });
-    }
-};
-
-/// Helper function to create an instance.
+/// Helper function to create a Label_right instance.
 template <template <typename> typename Layout_t,
           typename Widget_t,
           typename... Args>
@@ -355,7 +371,7 @@ auto label_right(typename Label<Layout_t>::Parameters p, Args&&... args)
         std::move(p), std::forward<Args>(args)...);
 }
 
-/// Helper function to create an instance.
+/// Helper function to create a Label_right instance.
 /** Only takes Label constructor args, if you need to pass in args to the
  *  wrapped Widget_t, then use the Label::Parameters overload. */
 template <template <typename> typename Layout_t, typename Widget_t>
@@ -370,40 +386,7 @@ auto label_right(Glyph_string text       = L"",
         std::move(text), alignment, extra_left, extra_right, growth_strategy});
 }
 
-/// Wraps a Widget_t object with a label on the top.
-/** Layout_t is applied to the Label object. */
-template <template <typename> typename Layout_t, typename Widget_t>
-class Label_top : public layout::Vertical<> {
-   public:
-    Label<Layout_t>& label;
-    Widget& padding = make_child() | pipe::fixed_height(0);
-    Widget_t& wrapped;
-
-   public:
-    /// Construct a new Label and wrapped Widget_t.
-    /** Only takes Label constructor args, if you need to pass in args to the
-     *  wrapped Widget_t, then use the Label::Parameters overload. */
-    explicit Label_top(Glyph_string text        = L"",
-                       Align alignment          = Align::Left,
-                       std::size_t extra_top    = 0uL,
-                       std::size_t extra_bottom = 0uL,
-                       Growth growth_strategy   = Growth::Static)
-        : Label_top{typename Label<Layout_t>::Parameters{
-              std::move(text), alignment, extra_top, extra_bottom,
-              growth_strategy}}
-    {}
-
-    /// Constructs Label with \p label_, and Widget_t with args...
-    template <typename... Args>
-    explicit Label_top(typename Label<Layout_t>::Parameters p, Args&&... args)
-        : label{make_child<Label<Layout_t>>(std::move(p))},
-          wrapped{make_child<Widget_t>(std::forward<Args>(args)...)}
-    {
-        *this | pipe::on_focus_in([this] { System::set_focus(wrapped); });
-    }
-};
-
-/// Helper function to create an instance.
+/// Helper function to create a Label_top instance.
 template <template <typename> typename Layout_t,
           typename Widget_t,
           typename... Args>
@@ -414,7 +397,7 @@ auto label_top(typename Label<Layout_t>::Parameters p, Args&&... args)
         std::move(p), std::forward<Args>(args)...);
 }
 
-/// Helper function to create an instance.
+/// Helper function to create a Label_top instance.
 /** Only takes Label constructor args, if you need to pass in args to the
  *  wrapped Widget_t, then use the Label::Parameters overload. */
 template <template <typename> typename Layout_t, typename Widget_t>
@@ -429,41 +412,7 @@ auto label_top(Glyph_string text        = L"",
         std::move(text), alignment, extra_top, extra_bottom, growth_strategy});
 }
 
-/// Wraps a Widget_t object with a label on the bottom.
-/** Layout_t is applied to the Label object. */
-template <template <typename> typename Layout_t, typename Widget_t>
-class Label_bottom : public layout::Vertical<> {
-   public:
-    Widget_t& wrapped;
-    Widget& padding = make_child() | pipe::fixed_height(0);
-    Label<Layout_t>& label;
-
-   public:
-    /// Construct a new Label and wrapped Widget_t.
-    /** Only takes Label constructor args, if you need to pass in args to the
-     *  wrapped Widget_t, then use the Label::Parameters overload. */
-    explicit Label_bottom(Glyph_string text        = L"",
-                          Align alignment          = Align::Left,
-                          std::size_t extra_top    = 0uL,
-                          std::size_t extra_bottom = 0uL,
-                          Growth growth_strategy   = Growth::Static)
-        : Label_bottom{typename Label<Layout_t>::Parameters{
-              std::move(text), alignment, extra_top, extra_bottom,
-              growth_strategy}}
-    {}
-
-    /// Constructs Label with \p label_, and Widget_t with args...
-    template <typename... Args>
-    explicit Label_bottom(typename Label<Layout_t>::Parameters p,
-                          Args&&... args)
-        : wrapped{make_child<Widget_t>(std::forward<Args>(args)...)},
-          label{make_child<Label>(std::move(p))}
-    {
-        *this | pipe::on_focus_in([this] { System::set_focus(wrapped); });
-    }
-};
-
-/// Helper function to create an instance.
+/// Helper function to create a Label_bottom instance.
 template <template <typename> typename Layout_t,
           typename Widget_t,
           typename... Args>
@@ -474,7 +423,7 @@ auto label_bottom(typename Label<Layout_t>::Parameters p, Args&&... args)
         std::move(p), std::forward<Args>(args)...);
 }
 
-/// Helper function to create an instance.
+/// Helper function to create a Label_bottom instance.
 /** Only takes Label constructor args, if you need to pass in args to the
  *  wrapped Widget_t, then use the Label::Parameters overload. */
 template <template <typename> typename Layout_t, typename Widget_t>

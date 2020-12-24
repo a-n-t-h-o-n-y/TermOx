@@ -42,8 +42,8 @@ struct Composites_old : App {
         // *this | children() | fixed_height(4);
         *this | descendants() | bg(Color::Blue);
 
-        save | remove_background();
-        txbx | remove_foreground();
+        save | bg(Color::Background);
+        txbx | fg(Color::Foreground);
 
         // save | add_trait(Trait::Bold, Trait::Underline);
         // save.brush.add_traits(Trait::Bold, Trait::Underline);
@@ -172,7 +172,8 @@ using Settings_box = ox::Tuple<ox::layout::Vertical<>,
                                ox::Button,
                                ox::HLabel,
                                ox::Checkbox,
-                               ox::Cycle_box>;
+                               ox::Cycle_box,
+                               ox::Push_button>;
 
 class Idea : public Settings_box {
    public:
@@ -202,6 +203,11 @@ class Idea : public Settings_box {
         this->get<3>().add_option(L"Option GREEN").connect([this] {
             this->get<0>() | bg(Color::Green);
         });
+
+        auto const s = std::to_string(sizeof(Glyph));
+        this->get<4>().set_label(s);
+        this->get<4>().set_pressed_color(Color::Violet);
+        this->get<4>().set_released_color(Color::Blue);
     }
 };
 

@@ -51,12 +51,15 @@ struct Center_offset : ox::layout::Vertical<> {
     Center_offset()
     {
         using namespace ox;
+
         title_.set_alignment(Align::Center);
-        x_coords.number_edit.brush.set_background(color::Black);
-        x_coords.number_edit.brush.set_foreground(color::White);
+
+        x_coords.number_edit.brush.background = color::Black;
+        x_coords.number_edit.brush.foreground = color::White;
         x_coords.number_edit.set_ghost_color(color::White);
-        y_coords.number_edit.brush.set_background(color::Black);
-        y_coords.number_edit.brush.set_foreground(color::White);
+
+        y_coords.number_edit.brush.background = color::Black;
+        y_coords.number_edit.brush.foreground = color::White;
         y_coords.number_edit.set_ghost_color(color::White);
     }
 };

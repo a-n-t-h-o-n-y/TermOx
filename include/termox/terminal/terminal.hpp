@@ -42,10 +42,10 @@ class Terminal {
 
     /// Set the default background/wallpaper tiles to be used.
     /** This is used if a Widget has no assigned wallpaper. */
-    void set_background(Glyph const& tile);
+    void set_background(Glyph tile);
 
     /// Return the default background/wallpaper currently in use.
-    auto background() const -> Glyph const& { return background_; }
+    auto background() const -> Glyph { return background_; }
 
     /// Change Color definitions.
     void set_palette(Palette colors);
