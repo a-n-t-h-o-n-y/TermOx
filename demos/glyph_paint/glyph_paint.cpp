@@ -15,29 +15,29 @@ Glyph_paint::Glyph_paint()
     side_pane.color_pages.background.color_selected.connect(
         slot::set_background_color(paint_area));
 
-    side_pane.trait_box.top_row.bold_box.wrapped.checked.connect(
+    side_pane.trait_box.top_row.bold_box.checkbox.checked.connect(
         slot::set_trait(paint_area, Trait::Bold));
-    side_pane.trait_box.top_row.bold_box.wrapped.unchecked.connect(
+    side_pane.trait_box.top_row.bold_box.checkbox.unchecked.connect(
         slot::remove_traits(paint_area, Trait::Bold));
 
-    side_pane.trait_box.top_row.dim_box.wrapped.checked.connect(
+    side_pane.trait_box.top_row.dim_box.checkbox.checked.connect(
         slot::set_trait(paint_area, Trait::Dim));
-    side_pane.trait_box.top_row.dim_box.wrapped.unchecked.connect(
+    side_pane.trait_box.top_row.dim_box.checkbox.unchecked.connect(
         slot::remove_traits(paint_area, Trait::Dim));
 
-    side_pane.trait_box.inverse_box.wrapped.checked.connect(
+    side_pane.trait_box.inverse_box.checkbox.checked.connect(
         slot::set_trait(paint_area, Trait::Inverse));
-    side_pane.trait_box.inverse_box.wrapped.unchecked.connect(
+    side_pane.trait_box.inverse_box.checkbox.unchecked.connect(
         slot::remove_traits(paint_area, Trait::Inverse));
 
-    side_pane.trait_box.italic_box.wrapped.checked.connect(
+    side_pane.trait_box.italic_box.checkbox.checked.connect(
         slot::set_trait(paint_area, Trait::Italic));
-    side_pane.trait_box.italic_box.wrapped.unchecked.connect(
+    side_pane.trait_box.italic_box.checkbox.unchecked.connect(
         slot::remove_traits(paint_area, Trait::Italic));
 
-    side_pane.trait_box.underline_box.wrapped.checked.connect(
+    side_pane.trait_box.underline_box.checkbox.checked.connect(
         slot::set_trait(paint_area, Trait::Underline));
-    side_pane.trait_box.underline_box.wrapped.unchecked.connect(
+    side_pane.trait_box.underline_box.checkbox.unchecked.connect(
         slot::remove_traits(paint_area, Trait::Underline));
 
     paint_area.glyph_changed.connect(

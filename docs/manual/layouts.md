@@ -101,9 +101,9 @@ A `Selectable` template class is provided to wrap any Widget type with a
 to adding the `Trait::Standout` upon selection.
 
 ```cpp
-using Check      = Selectable<Labeled_checkbox>;
+using Check      = Selectable<HCheckbox_label>;
 using Check_list = Array<layout::Selecting<layout::Vertical<Check>>, 15>;
 ```
 
-This creates a type that will have 15 `Labeled_checkbox`es, arranged vertically,
-and each `Labeled_checkbox` will get the `Trait::Standout` when it is selected.
+This creates a type that will have 15 `HCheckbox_label`es, arranged vertically,
+and each `HCheckbox_label` will get the `Trait::Standout` when it is selected.

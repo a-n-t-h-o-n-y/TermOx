@@ -52,7 +52,7 @@ class Demo_menu : public ox::Menu_stack {
                     textbox(L"Right") | bg(Color::Violet)
                 ),
                 checkbox(),
-                labeled_checkbox(L"A Box")
+                hcheckbox_label({L"A Box"})
             )
         );
         // clang-format on

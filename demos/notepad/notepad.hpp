@@ -25,13 +25,13 @@
 namespace demos {
 
 /// Checkbox to enable/disable a Trait. Has a Signal from it.
-class Trait_checkbox : public ox::Labeled_checkbox {
+class Trait_checkbox : public ox::HCheckbox_label {
    public:
     sl::Signal<void(ox::Trait)> trait_enabled;
     sl::Signal<void(ox::Trait)> trait_disabled;
 
    public:
-    Trait_checkbox(ox::Trait t) : Labeled_checkbox{to_string(t)}, t_{t}
+    Trait_checkbox(ox::Trait t) : ox::HCheckbox_label{{to_string(t)}}, t_{t}
     {
         this->padding | ox::pipe::fixed_width(2);
         this->checkbox.checked.connect([this] { this->trait_enabled(t_); });

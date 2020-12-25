@@ -129,10 +129,10 @@ struct Interval_box : ox::layout::Horizontal<> {
     }
 };
 
-struct Grid_hi_res : ox::layout::Horizontal<ox::Labeled_checkbox> {
+struct Grid_hi_res : ox::layout::Horizontal<ox::HCheckbox_label> {
    public:
-    Child_t& grid_box   = this->make_child("Grid");
-    Child_t& hi_res_box = this->make_child("Hi-Res");
+    Child_t& grid_box   = this->make_child({L"Grid"});
+    Child_t& hi_res_box = this->make_child({L"Hi-Res"});
 
    public:
     Grid_hi_res()
@@ -153,8 +153,8 @@ struct Controls_box : ox::layout::Vertical<> {
     Clear_step_box& clear_step_btns    = this->make_child<Clear_step_box>();
     Widget& break_1                    = this->append_child(make_break());
     Grid_hi_res& grid_hi_res           = this->make_child<Grid_hi_res>();
-    ox::Labeled_checkbox& rainbow_btn =
-        this->make_child<ox::Labeled_checkbox>(L"Rainbow Mode");
+    ox::HCheckbox_label& rainbow_btn =
+        this->make_child<ox::HCheckbox_label>({L"Rainbow Mode"});
     Widget& break_2      = this->append_child(make_break());
     Rule_edit& rule_edit = this->make_child<Rule_edit>();
     Widget& break_3      = this->append_child(make_break());

@@ -52,6 +52,9 @@ class Label : public Widget {
             *this | pipe::fixed_width(1uL);
         else
             *this | pipe::fixed_height(1uL);
+
+        if (growth_strategy_ == Growth::Dynamic)
+            *this | pipe::fixed_width(text_.size());
     }
 
     /// Construct directly with Parameters object.
@@ -251,14 +254,17 @@ auto vlabel(Args&&... args) -> std::unique_ptr<VLabel>
 
 // -----------------------------------------------------------------------------
 
+namespace detail {
+
 /// Wraps a Widget_t object with a label.
 /** Layout_t is applied to the Label object, Wrapper_layout is the layout of
  *  *this, if label_last is true, the Label is after the wrapped Widget_t. */
 template <template <typename> typename Layout_t,
           typename Widget_t,
+          template <typename>
           typename Wrapper_layout,
           bool label_last>
-class Label_wrapper : public Wrapper_layout {
+class Label_wrapper : public Wrapper_layout<Widget> {
    private:
     using Label_t = Label<Layout_t>;
 
@@ -290,7 +296,7 @@ class Label_wrapper : public Wrapper_layout {
           wrapped{
               this->template make_child<Widget_t>(std::forward<Args>(args)...)}
     {
-        if constexpr (layout::is_vertical_v<Wrapper_layout>)
+        if constexpr (layout::is_vertical_v<Wrapper_layout<Widget>>)
             this->width_policy = wrapped.width_policy;
         else
             this->height_policy = wrapped.height_policy;
@@ -304,33 +310,36 @@ class Label_wrapper : public Wrapper_layout {
    private:
     auto padding_policy()
     {
-        if constexpr (layout::is_vertical_v<Wrapper_layout>)
+        if constexpr (layout::is_vertical_v<Wrapper_layout<Widget>>)
             return pipe::fixed_height(0);
         else
             return pipe::fixed_width(1);
     }
 };
 
+}  // namespace detail
+
 // -----------------------------------------------------------------------------
 
-/// Wraps a Widget_t object with a label on the left.
+/// Wraps a Widget_t object with a Label on the left.
 template <template <typename> typename Layout_t, typename Widget_t>
 using Label_left =
-    Label_wrapper<Layout_t, Widget_t, layout::Horizontal<>, false>;
+    detail::Label_wrapper<Layout_t, Widget_t, layout::Horizontal, false>;
 
-/// Wraps a Widget_t object with a label on the right.
+/// Wraps a Widget_t object with a Label on the right.
 template <template <typename> typename Layout_t, typename Widget_t>
 using Label_right =
-    Label_wrapper<Layout_t, Widget_t, layout::Horizontal<>, true>;
+    detail::Label_wrapper<Layout_t, Widget_t, layout::Horizontal, true>;
 
-/// Wraps a Widget_t object with a label on the top.
+/// Wraps a Widget_t object with a Label on the top.
 template <template <typename> typename Layout_t, typename Widget_t>
-using Label_top = Label_wrapper<Layout_t, Widget_t, layout::Vertical<>, false>;
+using Label_top =
+    detail::Label_wrapper<Layout_t, Widget_t, layout::Vertical, false>;
 
-/// Wraps a Widget_t object with a label on the bottom.
+/// Wraps a Widget_t object with a Label on the bottom.
 template <template <typename> typename Layout_t, typename Widget_t>
 using Label_bottom =
-    Label_wrapper<Layout_t, Widget_t, layout::Vertical<>, true>;
+    detail::Label_wrapper<Layout_t, Widget_t, layout::Vertical, true>;
 
 // -----------------------------------------------------------------------------
 

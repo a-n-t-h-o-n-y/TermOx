@@ -19,7 +19,7 @@ class Color {
 
    public:
     enum Name : Value_t {
-        Background  = 0,
+        Background  = 0,  // Default Background; should you change the name?
         Black       = 0,
         Dark_red    = 1,
         Green       = 2,
@@ -36,7 +36,7 @@ class Color {
         Orange      = 13,
         Gray        = 14,
         White       = 15,
-        Foreground  = 15,
+        Foreground  = 15,  // Default Foreground
     };
 
    public:

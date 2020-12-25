@@ -35,8 +35,8 @@ using namespace ox;
 
 struct Settings_pane : layout::Vertical<> {
     Label& title          = this->make_child<Label>(L"Settings");
-    Labeled_checkbox& foo = this->make_child<Labeled_checkbox>(L"Foo");
-    Labeled_checkbox& bar = this->make_child<Labeled_checkbox>(L"Bar");
+    HCheckbox_label& foo = this->make_child<HCheckbox_label>({L"Foo"});
+    HCheckbox_label& bar = this->make_child<HCheckbox_label>({L"Bar"});
     Thin_button& baz      = this->make_child<Thin_button>(L"Baz");
     Confirm_button& reset = this->make_child<Confirm_button>(L"Reset");
 

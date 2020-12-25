@@ -17,28 +17,21 @@
 
 namespace ox {
 
-// ☒
-// [x]
-
-// ☐
-// [ ]
-
-// TODO let the checkbox be a Glyph_string, don't use tile then..
-// you'll need to have paint event again then.
-
-// TODO add 'locked' state, where it is greyed out in some way and it can't be
-// toggled?
-
 /// Checkbox Widget that is either checked or not checked.
 /** Uses mouse left button click to toggle between states. */
-class Checkbox : public Tile {
+class Checkbox : public HLabel {
    public:
     enum class State : bool { Unchecked, Checked };
 
+    struct Display {
+        Glyph_string checked;
+        Glyph_string unchecked;
+    };
+
     struct Parameters {
         State initial_state = State::Unchecked;
-        Glyph checked       = L'☒';
-        Glyph unchecked     = L'☐';
+        Display display     = {L"☒", L"☐"};
+        bool locked         = false;
     };
 
    public:
@@ -54,25 +47,37 @@ class Checkbox : public Tile {
    public:
     /// Construct a new Checkbox
     explicit Checkbox(State initial_state = State::Unchecked,
-                      Glyph checked       = L'☒',
-                      Glyph unchecked     = L'☐')
-        : Tile{initial_state == State::Unchecked ? unchecked : checked},
+                      Display display     = {L"☒", L"☐"},
+                      bool locked         = false)
+        : HLabel{initial_state == State::Unchecked ? display.unchecked
+                                                   : display.checked,
+                 Align::Left, 0, 0, Growth::Dynamic},
           state_{initial_state},
-          checked_{checked},
-          unchecked_{unchecked}
-    {}
+          display_{display},
+          locked_{locked}
+    {
+        if (locked_) {
+            display_.checked | Trait::Dim;
+            display_.unchecked | Trait::Dim;
+            this->HLabel::set_text(state_ == State::Unchecked
+                                       ? display_.unchecked
+                                       : display_.checked);
+        }
+    }
 
     /// Construct a new Checkbox
     explicit Checkbox(Parameters p)
-        : Checkbox{p.initial_state, p.checked, p.unchecked} {};
+        : Checkbox{p.initial_state, p.display, p.locked} {};
 
    public:
     /// Set the state to be checked.
     void check()
     {
+        if (locked_)
+            return;
         if (state_ == State::Unchecked) {
             state_ = State::Checked;
-            this->Tile::set(checked_);
+            this->HLabel::set_text(display_.checked);
             checked.emit();
             this->update();
         }
@@ -81,9 +86,11 @@ class Checkbox : public Tile {
     /// Set the state to be unchecked.
     void uncheck()
     {
+        if (locked_)
+            return;
         if (state_ == State::Checked) {
             state_ = State::Unchecked;
-            this->Tile::set(unchecked_);
+            this->HLabel::set_text(display_.unchecked);
             unchecked.emit();
             this->update();
         }
@@ -101,38 +108,59 @@ class Checkbox : public Tile {
     /// Return the current state of the Checkbox as Checkbox::State enum value.
     auto get_state() const -> State { return state_; }
 
-    /// Set the Glyph used for the Checked State.
-    void set_checked_glyph(Glyph symbol)
+    /// Lock the Checkbox, it can not be toggled when locked.
+    void lock()
     {
-        checked_ = symbol;
+        locked_ = true;
+        display_.checked | Trait::Dim;
+        display_.unchecked | Trait::Dim;
+    }
+
+    /// Unlock the Checkbox, allowing it to be toggled.
+    void unlock()
+    {
+        locked_ = false;
+        display_.checked.remove_traits(Trait::Dim);
+        display_.unchecked.remove_traits(Trait::Dim);
+    }
+
+    /// Return true if the Checkbox is locked.
+    auto is_locked() const -> bool { return locked_; }
+
+    /// Set the look of each Checkbox State.
+    void set_display(Display d)
+    {
+        display_ = std::move(d);
+        if (locked_) {
+            display_.checked | Trait::Dim;
+            display_.unchecked | Trait::Dim;
+        }
         this->update();
     }
 
-    /// Return the Glyph used for the Checked State.
-    auto get_checked_glyph() const -> Glyph { return checked_; }
-
-    /// Set the Glyph used for the Unchecked State.
-    void set_unchecked_glyph(Glyph symbol)
+    /// Return the look of each Checkbox State.
+    auto get_display() -> Display
     {
-        unchecked_ = symbol;
-        this->update();
+        auto result = display_;
+        if (locked_) {
+            result.checked.remove_traits(Trait::Dim);
+            result.unchecked.remove_traits(Trait::Dim);
+        }
+        return result;
     }
-
-    /// Return the Glyph used for the Unchecked State.
-    auto get_unchecked_glyph() const -> Glyph { return unchecked_; }
 
    protected:
     auto mouse_press_event(Mouse const& m) -> bool override
     {
         if (m.button == Mouse::Button::Left)
             this->toggle();
-        return Tile::mouse_press_event(m);
+        return HLabel::mouse_press_event(m);
     }
 
    private:
     State state_;
-    Glyph checked_;
-    Glyph unchecked_;
+    Display display_;
+    bool locked_;
 };
 
 /// Helper function to create an instance.
@@ -142,35 +170,89 @@ auto checkbox(Args&&... args) -> std::unique_ptr<Checkbox>
     return std::make_unique<Checkbox>(std::forward<Args>(args)...);
 }
 
-// TODO possibly provide checkbox on either side and vertical too, via template
-// parameters that you can type alias and give names to. very similar to ..
-// actually you might be able to use the Label_wrapper type directly or
-// something to create the types directly, but you want to wrap that too, so
-// that you have a checkbox name to access, that just redirects to wrapped.
-class Labeled_checkbox : public Label_right<layout::Horizontal, Checkbox> {
+namespace detail {
+
+/// Label, buffer and Checkbox tuple implementation.
+template <template <typename> typename Layout_t, bool label_last>
+class Label_checkbox_impl
+    : public Label_wrapper<Layout_t, Checkbox, Layout_t, label_last> {
    private:
-    using Label_t = Label_right<layout::Horizontal, Checkbox>;
+    using Base_t = Label_wrapper<Layout_t, Checkbox, Layout_t, label_last>;
 
    public:
-    Checkbox& checkbox = Label_t::wrapped;
-    HLabel& label      = Label_t::label;
+    using Label_t = Label<Layout_t>;
 
    public:
-    Labeled_checkbox(Glyph_string label_ = L"") : Label_t{std::move(label_)}
+    Checkbox& checkbox = Base_t::wrapped;
+    Label_t& label     = Base_t::label;
+
+   public:
+    explicit Label_checkbox_impl(
+        typename Label_t::Parameters label_parameters = {},
+        Checkbox::Parameters checkbox_parameters      = {})
+        : Base_t{std::move(label_parameters), std::move(checkbox_parameters)}
     {
         using namespace pipe;
-        Label_t::label | on_mouse_press([&](auto) { checkbox.toggle(); });
-        Label_t::padding | on_mouse_press([&](auto) { checkbox.toggle(); });
-        *this | fixed_height(1);  // TODO this should be taken care of if you
-                                  // use the Label wrapper type
+        Base_t::label | on_mouse_press([&](auto) { checkbox.toggle(); });
+        Base_t::padding | on_mouse_press([&](auto) { checkbox.toggle(); });
     }
+
+   private:
+    using Base_t::wrapped;
 };
 
-/// Helper function to create an instance.
-template <typename... Args>
-auto labeled_checkbox(Args&&... args) -> std::unique_ptr<Labeled_checkbox>
+}  // namespace detail
+
+/// Horizontal Label and then Checkbox
+using HLabel_checkbox = detail::Label_checkbox_impl<layout::Horizontal, false>;
+
+/// Horizontal Checkbox and then Label
+using HCheckbox_label = detail::Label_checkbox_impl<layout::Horizontal, true>;
+
+/// Vertical Label and then Checkbox
+using VLabel_checkbox = detail::Label_checkbox_impl<layout::Vertical, false>;
+
+/// Vertical Checkbox and then Label
+using VCheckbox_label = detail::Label_checkbox_impl<layout::Vertical, true>;
+
+/// Helper function to create an HLabel_checkbox instance.
+inline auto hlabel_checkbox(
+    typename HLabel_checkbox::Label_t::Parameters label_parameters = {},
+    Checkbox::Parameters checkbox_parameters                       = {})
+    -> std::unique_ptr<HLabel_checkbox>
 {
-    return std::make_unique<Labeled_checkbox>(std::forward<Args>(args)...);
+    return std::make_unique<HLabel_checkbox>(std::move(label_parameters),
+                                             std::move(checkbox_parameters));
+}
+
+/// Helper function to create an HCheckbox_label instance.
+inline auto hcheckbox_label(
+    typename HCheckbox_label::Label_t::Parameters label_parameters = {},
+    Checkbox::Parameters checkbox_parameters                       = {})
+    -> std::unique_ptr<HCheckbox_label>
+{
+    return std::make_unique<HCheckbox_label>(std::move(label_parameters),
+                                             std::move(checkbox_parameters));
+}
+
+/// Helper function to create an VLabel_checkbox instance.
+inline auto vlabel_checkbox(
+    typename VLabel_checkbox::Label_t::Parameters label_parameters = {},
+    Checkbox::Parameters checkbox_parameters                       = {})
+    -> std::unique_ptr<VLabel_checkbox>
+{
+    return std::make_unique<VLabel_checkbox>(std::move(label_parameters),
+                                             std::move(checkbox_parameters));
+}
+
+/// Helper function to create an VCheckbox_label instance.
+inline auto vcheckbox_label(
+    typename VCheckbox_label::Label_t::Parameters label_parameters = {},
+    Checkbox::Parameters checkbox_parameters                       = {})
+    -> std::unique_ptr<VCheckbox_label>
+{
+    return std::make_unique<VCheckbox_label>(std::move(label_parameters),
+                                             std::move(checkbox_parameters));
 }
 
 }  // namespace ox

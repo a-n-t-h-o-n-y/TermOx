@@ -16,13 +16,13 @@ namespace paint {
 
 class Options_A : public ox::layout::Vertical<> {
    private:
-    using Checkbox = ox::Labeled_checkbox;
+    using Checkbox = ox::HCheckbox_label;
 
    public:
     ox::Button& clone_btn = make_child<ox::Button>(L"Clone Tool");
-    Checkbox& eraser_box  = make_child<Checkbox>(L"Eraser");
-    Checkbox& cursor_box  = make_child<Checkbox>(L"Show Cursor");
-    Checkbox& grid_box    = make_child<Checkbox>(L"Show Grid");
+    Checkbox& eraser_box  = make_child<Checkbox>({L"Eraser"});
+    Checkbox& cursor_box  = make_child<Checkbox>({L"Show Cursor"});
+    Checkbox& grid_box    = make_child<Checkbox>({L"Show Grid"});
     ox::Confirm_button& clear_btn =
         make_child<ox::Confirm_button>(L"Clear Painting");
     ox::Button& more_btn = make_child<ox::Button>(L"More Options");

@@ -127,7 +127,7 @@ struct Composites_old : App {
 
 using namespace ox;
 
-using Check      = Selectable<Labeled_checkbox>;
+using Check      = Selectable<HCheckbox_label>;
 using Check_list = Array<layout::Selecting<layout::Vertical<Check>>, 15>;
 
 struct My_check_list : Check_list {
