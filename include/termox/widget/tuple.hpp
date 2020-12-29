@@ -8,6 +8,8 @@ namespace ox {
 // TODO constructor that takes each types ::Parameters struct, but it has to
 // sfinae so it doesn't break classes that don't have Parameters.
 
+// so Widget_t::Parameters p = {},...
+
 /// Heterogeneous collection of Widgets within a Layout_t.
 /** Widget_t's must be default constructible. Widgets are constructed in the
  *  order that types are passed in. */
@@ -15,6 +17,14 @@ template <typename Layout_t, typename... Widget_t>
 class Tuple : public Layout_t {
    public:
     using Base = Layout_t;
+
+   public:
+    Tuple() = default;
+
+    explicit Tuple(typename Widget_t::Parameters... p)
+        : refs_{std::forward_as_tuple(
+              this->template make_child<Widget_t>(std::move(p))...)}
+    {}
 
    public:
     /// Get child by index.

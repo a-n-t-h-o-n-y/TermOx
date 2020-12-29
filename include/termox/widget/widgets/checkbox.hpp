@@ -11,15 +11,19 @@
 #include <termox/system/mouse.hpp>
 #include <termox/widget/detail/link_lifetimes.hpp>
 #include <termox/widget/layouts/horizontal.hpp>
+#include <termox/widget/layouts/vertical.hpp>
 #include <termox/widget/pipe.hpp>
 #include <termox/widget/widgets/label.hpp>
-#include <termox/widget/widgets/tile.hpp>
 
 namespace ox {
 
 /// Checkbox Widget that is either checked or not checked.
 /** Uses mouse left button click to toggle between states. */
-class Checkbox : public HLabel {
+template <template <typename> typename Layout_t>
+class Checkbox : public Label<Layout_t> {
+   private:
+    using Base_t = Label<Layout_t>;
+
    public:
     enum class State : bool { Unchecked, Checked };
 
@@ -29,9 +33,9 @@ class Checkbox : public HLabel {
     };
 
     struct Parameters {
-        State initial_state = State::Unchecked;
-        Display display     = {L"☒", L"☐"};
-        bool locked         = false;
+        State initial_state;
+        Display display;
+        bool locked;
     };
 
    public:
@@ -46,10 +50,8 @@ class Checkbox : public HLabel {
 
    public:
     /// Construct a new Checkbox
-    explicit Checkbox(State initial_state = State::Unchecked,
-                      Display display     = {L"☒", L"☐"},
-                      bool locked         = false)
-        : HLabel{initial_state == State::Unchecked ? display.unchecked
+    explicit Checkbox(State initial_state, Display display, bool locked)
+        : Base_t{initial_state == State::Unchecked ? display.unchecked
                                                    : display.checked,
                  Align::Left, 0, 0, Growth::Dynamic},
           state_{initial_state},
@@ -59,7 +61,7 @@ class Checkbox : public HLabel {
         if (locked_) {
             display_.checked | Trait::Dim;
             display_.unchecked | Trait::Dim;
-            this->HLabel::set_text(state_ == State::Unchecked
+            this->Base_t::set_text(state_ == State::Unchecked
                                        ? display_.unchecked
                                        : display_.checked);
         }
@@ -77,7 +79,7 @@ class Checkbox : public HLabel {
             return;
         if (state_ == State::Unchecked) {
             state_ = State::Checked;
-            this->HLabel::set_text(display_.checked);
+            this->Base_t::set_text(display_.checked);
             checked.emit();
             this->update();
         }
@@ -90,7 +92,7 @@ class Checkbox : public HLabel {
             return;
         if (state_ == State::Checked) {
             state_ = State::Unchecked;
-            this->HLabel::set_text(display_.unchecked);
+            this->Base_t::set_text(display_.unchecked);
             unchecked.emit();
             this->update();
         }
@@ -154,7 +156,7 @@ class Checkbox : public HLabel {
     {
         if (m.button == Mouse::Button::Left)
             this->toggle();
-        return HLabel::mouse_press_event(m);
+        return Base_t::mouse_press_event(m);
     }
 
    private:
@@ -163,33 +165,47 @@ class Checkbox : public HLabel {
     bool locked_;
 };
 
-/// Helper function to create an instance.
+using HCheckbox = Checkbox<layout::Horizontal>;
+using VCheckbox = Checkbox<layout::Vertical>;
+
+/// Helper function to create an HCheckbox instance.
 template <typename... Args>
-auto checkbox(Args&&... args) -> std::unique_ptr<Checkbox>
+auto hcheckbox(Args&&... args) -> std::unique_ptr<HCheckbox>
 {
-    return std::make_unique<Checkbox>(std::forward<Args>(args)...);
+    return std::make_unique<HCheckbox>(std::forward<Args>(args)...);
 }
 
-namespace detail {
+/// Helper function to create a VCheckbox instance.
+template <typename... Args>
+auto vcheckbox(Args&&... args) -> std::unique_ptr<VCheckbox>
+{
+    return std::make_unique<VCheckbox>(std::forward<Args>(args)...);
+}
+
+}  // namespace ox
+namespace ox::detail {
 
 /// Label, buffer and Checkbox tuple implementation.
-template <template <typename> typename Layout_t, bool label_last>
+template <template <typename> typename Layout_t,
+          typename Checkbox_type,
+          bool label_last>
 class Label_checkbox_impl
-    : public Label_wrapper<Layout_t, Checkbox, Layout_t, label_last> {
+    : public Label_wrapper<Layout_t, Checkbox_type, Layout_t, label_last> {
    private:
-    using Base_t = Label_wrapper<Layout_t, Checkbox, Layout_t, label_last>;
+    using Base_t = Label_wrapper<Layout_t, Checkbox_type, Layout_t, label_last>;
 
    public:
-    using Label_t = Label<Layout_t>;
+    using Checkbox_t = Checkbox_type;
+    using Label_t    = Label<Layout_t>;
 
    public:
-    Checkbox& checkbox = Base_t::wrapped;
-    Label_t& label     = Base_t::label;
+    Checkbox_t& checkbox = Base_t::wrapped;
+    Label_t& label       = Base_t::label;
 
    public:
     explicit Label_checkbox_impl(
-        typename Label_t::Parameters label_parameters = {},
-        Checkbox::Parameters checkbox_parameters      = {})
+        typename Label_t::Parameters label_parameters       = {},
+        typename Checkbox_t::Parameters checkbox_parameters = {})
         : Base_t{std::move(label_parameters), std::move(checkbox_parameters)}
     {
         using namespace pipe;
@@ -201,75 +217,526 @@ class Label_checkbox_impl
     using Base_t::wrapped;
 };
 
-}  // namespace detail
+}  // namespace ox::detail
 
-/// Horizontal Label and then Checkbox
-using HLabel_checkbox = detail::Label_checkbox_impl<layout::Horizontal, false>;
+namespace ox {
 
-/// Horizontal Checkbox and then Label
-using HCheckbox_label = detail::Label_checkbox_impl<layout::Horizontal, true>;
+/// template function to build a specified Labeled_checkbox type.
+/** T is some sort of Labeled_checkbox type. */
+template <typename T>
+inline auto constexpr labeled_checkbox =
+    [](typename T::Label_t::Parameters label_parameters       = {},
+       typename T::Checkbox_t::Parameters checkbox_parameters = {})
+    -> std::unique_ptr<T> {
+    return std::make_unique<T>(std::move(label_parameters),
+                               std::move(checkbox_parameters));
+};
 
-/// Vertical Label and then Checkbox
-using VLabel_checkbox = detail::Label_checkbox_impl<layout::Vertical, false>;
+// ☒
+class Checkbox1 : public HCheckbox {
+   public:
+    struct Parameters {
+        State initial_state = State::Unchecked;
+        bool locked         = false;
+    };
 
-/// Vertical Checkbox and then Label
-using VCheckbox_label = detail::Label_checkbox_impl<layout::Vertical, true>;
+   public:
+    Checkbox1(State initial_state = State::Unchecked, bool locked = false)
+        : HCheckbox{initial_state, {L"☒", L"☐"}, locked}
+    {}
 
-/// Helper function to create an HLabel_checkbox instance.
-inline auto hlabel_checkbox(
-    typename HLabel_checkbox::Label_t::Parameters label_parameters = {},
-    Checkbox::Parameters checkbox_parameters                       = {})
-    -> std::unique_ptr<HLabel_checkbox>
-{
-    return std::make_unique<HLabel_checkbox>(std::move(label_parameters),
-                                             std::move(checkbox_parameters));
-}
+    Checkbox1(Parameters p) : Checkbox1{p.initial_state, p.locked} {}
+};
 
-/// Helper function to create an HCheckbox_label instance.
-inline auto hcheckbox_label(
-    typename HCheckbox_label::Label_t::Parameters label_parameters = {},
-    Checkbox::Parameters checkbox_parameters                       = {})
-    -> std::unique_ptr<HCheckbox_label>
-{
-    return std::make_unique<HCheckbox_label>(std::move(label_parameters),
-                                             std::move(checkbox_parameters));
-}
+using HCheckbox1_label =
+    detail::Label_checkbox_impl<layout::Horizontal, Checkbox1, true>;
+using HCheckbox_label = HCheckbox1_label;
 
-/// Helper function to create an VLabel_checkbox instance.
-inline auto vlabel_checkbox(
-    typename VLabel_checkbox::Label_t::Parameters label_parameters = {},
-    Checkbox::Parameters checkbox_parameters                       = {})
-    -> std::unique_ptr<VLabel_checkbox>
-{
-    return std::make_unique<VLabel_checkbox>(std::move(label_parameters),
-                                             std::move(checkbox_parameters));
-}
+using HLabel_checkbox1 =
+    detail::Label_checkbox_impl<layout::Horizontal, Checkbox1, false>;
+using HLabel_checkbox = HLabel_checkbox1;
 
-/// Helper function to create an VCheckbox_label instance.
-inline auto vcheckbox_label(
-    typename VCheckbox_label::Label_t::Parameters label_parameters = {},
-    Checkbox::Parameters checkbox_parameters                       = {})
-    -> std::unique_ptr<VCheckbox_label>
-{
-    return std::make_unique<VCheckbox_label>(std::move(label_parameters),
-                                             std::move(checkbox_parameters));
-}
+using VCheckbox1_label =
+    detail::Label_checkbox_impl<layout::Vertical, Checkbox1, true>;
+using VCheckbox_label = VCheckbox1_label;
+
+using VLabel_checkbox1 =
+    detail::Label_checkbox_impl<layout::Vertical, Checkbox1, false>;
+using VLabel_checkbox = VLabel_checkbox1;
+
+inline auto constexpr hcheckbox1_label = labeled_checkbox<HCheckbox_label>;
+inline auto constexpr hcheckbox_label  = hcheckbox1_label;
+inline auto constexpr hlabel_checkbox1 = labeled_checkbox<HLabel_checkbox>;
+inline auto constexpr hlabel_checkbox  = hlabel_checkbox1;
+inline auto constexpr vcheckbox1_label = labeled_checkbox<VCheckbox_label>;
+inline auto constexpr vcheckbox_label  = vcheckbox1_label;
+inline auto constexpr vlabel_checkbox1 = labeled_checkbox<VLabel_checkbox>;
+inline auto constexpr vlabel_checkbox  = vlabel_checkbox1;
+
+// [x]
+class Checkbox2 : public HCheckbox {
+   public:
+    struct Parameters {
+        State initial_state = State::Unchecked;
+        bool locked         = false;
+    };
+
+   public:
+    Checkbox2(State initial_state = State::Unchecked, bool locked = false)
+        : HCheckbox{initial_state, {L"[x]", L"[ ]"}, locked}
+    {}
+
+    Checkbox2(Parameters p) : Checkbox2{p.initial_state, p.locked} {}
+};
+
+using HCheckbox2_label =
+    detail::Label_checkbox_impl<layout::Horizontal, Checkbox2, true>;
+using HLabel_checkbox2 =
+    detail::Label_checkbox_impl<layout::Horizontal, Checkbox2, false>;
+using VCheckbox2_label =
+    detail::Label_checkbox_impl<layout::Vertical, Checkbox2, true>;
+using VLabel_checkbox2 =
+    detail::Label_checkbox_impl<layout::Vertical, Checkbox2, false>;
+
+inline auto constexpr hcheckbox2_label = labeled_checkbox<HCheckbox2_label>;
+inline auto constexpr hlabel_checkbox2 = labeled_checkbox<HLabel_checkbox2>;
+inline auto constexpr vcheckbox2_label = labeled_checkbox<VCheckbox2_label>;
+inline auto constexpr vlabel_checkbox2 = labeled_checkbox<VLabel_checkbox2>;
+
+// ┌
+// x
+// └
+class Checkbox3 : public VCheckbox {
+   public:
+    struct Parameters {
+        State initial_state = State::Unchecked;
+        bool locked         = false;
+    };
+
+   public:
+    Checkbox3(State initial_state = State::Unchecked, bool locked = false)
+        : VCheckbox{initial_state, {L"┌x└", L"┌ └"}, locked}
+    {}
+
+    Checkbox3(Parameters p) : Checkbox3{p.initial_state, p.locked} {}
+};
+
+using HCheckbox3_label =
+    detail::Label_checkbox_impl<layout::Horizontal, Checkbox3, true>;
+
+inline auto constexpr hcheckbox3_label = labeled_checkbox<HCheckbox3_label>;
+
+// ┐
+// x
+// ┘
+class Checkbox4 : public VCheckbox {
+   public:
+    struct Parameters {
+        State initial_state = State::Unchecked;
+        bool locked         = false;
+    };
+
+   public:
+    Checkbox4(State initial_state = State::Unchecked, bool locked = false)
+        : VCheckbox{initial_state, {L"┐x┘", L"┐ ┘"}, locked}
+    {}
+
+    Checkbox4(Parameters p) : Checkbox4{p.initial_state, p.locked} {}
+};
+
+using HLabel_checkbox4 =
+    detail::Label_checkbox_impl<layout::Horizontal, Checkbox4, false>;
+
+inline auto constexpr hlabel_checkbox4 = labeled_checkbox<HLabel_checkbox4>;
+
+// ┌x┐
+class Checkbox5 : public HCheckbox {
+   public:
+    struct Parameters {
+        State initial_state = State::Unchecked;
+        bool locked         = false;
+    };
+
+   public:
+    Checkbox5(State initial_state = State::Unchecked, bool locked = false)
+        : HCheckbox{initial_state, {L"┌x┐", L"┌ ┐"}, locked}
+    {}
+
+    Checkbox5(Parameters p) : Checkbox5{p.initial_state, p.locked} {}
+};
+
+using VCheckbox5_label =
+    detail::Label_checkbox_impl<layout::Vertical, Checkbox5, true>;
+
+inline auto constexpr vcheckbox5_label = labeled_checkbox<VCheckbox5_label>;
+
+// └x┘
+class Checkbox6 : public HCheckbox {
+   public:
+    struct Parameters {
+        State initial_state = State::Unchecked;
+        bool locked         = false;
+    };
+
+   public:
+    Checkbox6(State initial_state = State::Unchecked, bool locked = false)
+        : HCheckbox{initial_state, {L"└x┘", L"└ ┘"}, locked}
+    {}
+
+    Checkbox6(Parameters p) : Checkbox6{p.initial_state, p.locked} {}
+};
+
+using VLabel_checkbox6 =
+    detail::Label_checkbox_impl<layout::Vertical, Checkbox6, false>;
+
+inline auto constexpr vlabel_checkbox6 = labeled_checkbox<VLabel_checkbox6>;
+
+// ╭
+// x
+// ╰
+class Checkbox7 : public VCheckbox {
+   public:
+    struct Parameters {
+        State initial_state = State::Unchecked;
+        bool locked         = false;
+    };
+
+   public:
+    Checkbox7(State initial_state = State::Unchecked, bool locked = false)
+        : VCheckbox{initial_state, {L"╭x╰", L"╭ ╰"}, locked}
+    {}
+
+    Checkbox7(Parameters p) : Checkbox7{p.initial_state, p.locked} {}
+};
+
+using HCheckbox7_label =
+    detail::Label_checkbox_impl<layout::Horizontal, Checkbox7, true>;
+
+inline auto constexpr hcheckbox7_label = labeled_checkbox<HCheckbox7_label>;
+
+// ╮
+// x
+// ╯
+class Checkbox8 : public VCheckbox {
+   public:
+    struct Parameters {
+        State initial_state = State::Unchecked;
+        bool locked         = false;
+    };
+
+   public:
+    Checkbox8(State initial_state = State::Unchecked, bool locked = false)
+        : VCheckbox{initial_state, {L"╮x╯", L"╮ ╯"}, locked}
+    {}
+
+    Checkbox8(Parameters p) : Checkbox8{p.initial_state, p.locked} {}
+};
+
+using HLabel_checkbox8 =
+    detail::Label_checkbox_impl<layout::Horizontal, Checkbox8, false>;
+
+inline auto constexpr hlabel_checkbox8 = labeled_checkbox<HLabel_checkbox8>;
+
+// ╭x╮
+class Checkbox9 : public HCheckbox {
+   public:
+    struct Parameters {
+        State initial_state = State::Unchecked;
+        bool locked         = false;
+    };
+
+   public:
+    Checkbox9(State initial_state = State::Unchecked, bool locked = false)
+        : HCheckbox{initial_state, {L"╭x╮", L"╭ ╮"}, locked}
+    {}
+
+    Checkbox9(Parameters p) : Checkbox9{p.initial_state, p.locked} {}
+};
+
+using VCheckbox9_label =
+    detail::Label_checkbox_impl<layout::Vertical, Checkbox9, true>;
+
+inline auto constexpr vcheckbox9_label = labeled_checkbox<VCheckbox9_label>;
+
+// ╰x╯
+class Checkbox10 : public HCheckbox {
+   public:
+    struct Parameters {
+        State initial_state = State::Unchecked;
+        bool locked         = false;
+    };
+
+   public:
+    Checkbox10(State initial_state = State::Unchecked, bool locked = false)
+        : HCheckbox{initial_state, {L"╰x╯", L"╰ ╯"}, locked}
+    {}
+
+    Checkbox10(Parameters p) : Checkbox10{p.initial_state, p.locked} {}
+};
+
+using VLabel_checkbox10 =
+    detail::Label_checkbox_impl<layout::Vertical, Checkbox10, false>;
+
+inline auto constexpr vlabel_checkbox10 = labeled_checkbox<VLabel_checkbox10>;
+
+// -----------------------------------------------------------------------------
+
+// ┘
+// ╴
+// ┐
+class Checkbox11 : public VCheckbox {
+   public:
+    struct Parameters {
+        State initial_state = State::Unchecked;
+        bool locked         = false;
+    };
+
+   public:
+    Checkbox11(State initial_state = State::Unchecked, bool locked = false)
+        : VCheckbox{initial_state, {L"┘╴┐", L"┘ ┐"}, locked}
+    {}
+
+    Checkbox11(Parameters p) : Checkbox11{p.initial_state, p.locked} {}
+};
+
+using HCheckbox11_label =
+    detail::Label_checkbox_impl<layout::Horizontal, Checkbox11, true>;
+
+inline auto constexpr hcheckbox11_label = labeled_checkbox<HCheckbox11_label>;
+
+// └
+// ╶
+// ┌
+class Checkbox12 : public VCheckbox {
+   public:
+    struct Parameters {
+        State initial_state = State::Unchecked;
+        bool locked         = false;
+    };
+
+   public:
+    Checkbox12(State initial_state = State::Unchecked, bool locked = false)
+        : VCheckbox{initial_state, {L"└╶┌", L"└ ┌"}, locked}
+    {}
+
+    Checkbox12(Parameters p) : Checkbox12{p.initial_state, p.locked} {}
+};
+
+using HLabel_checkbox12 =
+    detail::Label_checkbox_impl<layout::Horizontal, Checkbox12, false>;
+
+inline auto constexpr hlabel_checkbox12 = labeled_checkbox<HLabel_checkbox12>;
+
+// ┘╵└
+class Checkbox13 : public HCheckbox {
+   public:
+    struct Parameters {
+        State initial_state = State::Unchecked;
+        bool locked         = false;
+    };
+
+   public:
+    Checkbox13(State initial_state = State::Unchecked, bool locked = false)
+        : HCheckbox{initial_state, {L"┘╵└", L"┘ └"}, locked}
+    {}
+
+    Checkbox13(Parameters p) : Checkbox13{p.initial_state, p.locked} {}
+};
+
+using VCheckbox13_label =
+    detail::Label_checkbox_impl<layout::Vertical, Checkbox13, true>;
+
+inline auto constexpr vcheckbox13_label = labeled_checkbox<VCheckbox13_label>;
+
+// ┐╷┌
+class Checkbox14 : public HCheckbox {
+   public:
+    struct Parameters {
+        State initial_state = State::Unchecked;
+        bool locked         = false;
+    };
+
+   public:
+    Checkbox14(State initial_state = State::Unchecked, bool locked = false)
+        : HCheckbox{initial_state, {L"┐╷┌", L"┐ ┌"}, locked}
+    {}
+
+    Checkbox14(Parameters p) : Checkbox14{p.initial_state, p.locked} {}
+};
+
+using VLabel_checkbox14 =
+    detail::Label_checkbox_impl<layout::Vertical, Checkbox14, false>;
+
+inline auto constexpr vlabel_checkbox14 = labeled_checkbox<VLabel_checkbox14>;
+
+// ╯
+// ╴
+// ╮
+class Checkbox15 : public VCheckbox {
+   public:
+    struct Parameters {
+        State initial_state = State::Unchecked;
+        bool locked         = false;
+    };
+
+   public:
+    Checkbox15(State initial_state = State::Unchecked, bool locked = false)
+        : VCheckbox{initial_state, {L"╯╴╮", L"╯ ╮"}, locked}
+    {}
+
+    Checkbox15(Parameters p) : Checkbox15{p.initial_state, p.locked} {}
+};
+
+using HCheckbox15_label =
+    detail::Label_checkbox_impl<layout::Horizontal, Checkbox15, true>;
+
+inline auto constexpr hcheckbox15_label = labeled_checkbox<HCheckbox15_label>;
+
+// ╰
+// ╶
+// ╭
+class Checkbox16 : public VCheckbox {
+   public:
+    struct Parameters {
+        State initial_state = State::Unchecked;
+        bool locked         = false;
+    };
+
+   public:
+    Checkbox16(State initial_state = State::Unchecked, bool locked = false)
+        : VCheckbox{initial_state, {L"╰╶╭", L"╰ ╭"}, locked}
+    {}
+
+    Checkbox16(Parameters p) : Checkbox16{p.initial_state, p.locked} {}
+};
+
+using HLabel_checkbox16 =
+    detail::Label_checkbox_impl<layout::Horizontal, Checkbox16, false>;
+
+inline auto constexpr hlabel_checkbox16 = labeled_checkbox<HLabel_checkbox16>;
+
+// ╯╵╰
+class Checkbox17 : public HCheckbox {
+   public:
+    struct Parameters {
+        State initial_state = State::Unchecked;
+        bool locked         = false;
+    };
+
+   public:
+    Checkbox17(State initial_state = State::Unchecked, bool locked = false)
+        : HCheckbox{initial_state, {L"╯╵╰", L"╯ ╰"}, locked}
+    {}
+
+    Checkbox17(Parameters p) : Checkbox17{p.initial_state, p.locked} {}
+};
+
+using VCheckbox17_label =
+    detail::Label_checkbox_impl<layout::Vertical, Checkbox17, true>;
+
+inline auto constexpr vcheckbox17_label = labeled_checkbox<VCheckbox17_label>;
+
+// ╮╷╭
+class Checkbox18 : public HCheckbox {
+   public:
+    struct Parameters {
+        State initial_state = State::Unchecked;
+        bool locked         = false;
+    };
+
+   public:
+    Checkbox18(State initial_state = State::Unchecked, bool locked = false)
+        : HCheckbox{initial_state, {L"╮╷╭", L"╮ ╭"}, locked}
+    {}
+
+    Checkbox18(Parameters p) : Checkbox18{p.initial_state, p.locked} {}
+};
+
+using VLabel_checkbox18 =
+    detail::Label_checkbox_impl<layout::Vertical, Checkbox18, false>;
+
+inline auto constexpr vlabel_checkbox18 = labeled_checkbox<VLabel_checkbox18>;
+
+// -----------------------------------------------------------------------------
+
+// ├x┤
+class Checkbox19 : public HCheckbox {
+   public:
+    struct Parameters {
+        State initial_state = State::Unchecked;
+        bool locked         = false;
+    };
+
+   public:
+    Checkbox19(State initial_state = State::Unchecked, bool locked = false)
+        : HCheckbox{initial_state, {L"├x┤", L"├ ┤"}, locked}
+    {}
+
+    Checkbox19(Parameters p) : Checkbox19{p.initial_state, p.locked} {}
+};
+
+using HCheckbox19_label =
+    detail::Label_checkbox_impl<layout::Horizontal, Checkbox19, true>;
+using HLabel_checkbox19 =
+    detail::Label_checkbox_impl<layout::Horizontal, Checkbox19, false>;
+using VCheckbox19_label =
+    detail::Label_checkbox_impl<layout::Vertical, Checkbox19, true>;
+using VLabel_checkbox19 =
+    detail::Label_checkbox_impl<layout::Vertical, Checkbox19, false>;
+
+inline auto constexpr hcheckbox19_label = labeled_checkbox<HCheckbox19_label>;
+inline auto constexpr hlabel_checkbox19 = labeled_checkbox<HLabel_checkbox19>;
+inline auto constexpr vcheckbox19_label = labeled_checkbox<VCheckbox19_label>;
+inline auto constexpr vlabel_checkbox19 = labeled_checkbox<VLabel_checkbox19>;
+
+// ┤x├
+class Checkbox20 : public HCheckbox {
+   public:
+    struct Parameters {
+        State initial_state = State::Unchecked;
+        bool locked         = false;
+    };
+
+   public:
+    Checkbox20(State initial_state = State::Unchecked, bool locked = false)
+        : HCheckbox{initial_state, {L"┤x├", L"┤ ├"}, locked}
+    {}
+
+    Checkbox20(Parameters p) : Checkbox20{p.initial_state, p.locked} {}
+};
+
+using HCheckbox20_label =
+    detail::Label_checkbox_impl<layout::Horizontal, Checkbox20, true>;
+using HLabel_checkbox20 =
+    detail::Label_checkbox_impl<layout::Horizontal, Checkbox20, false>;
+using VCheckbox20_label =
+    detail::Label_checkbox_impl<layout::Vertical, Checkbox20, true>;
+using VLabel_checkbox20 =
+    detail::Label_checkbox_impl<layout::Vertical, Checkbox20, false>;
+
+inline auto constexpr hcheckbox20_label = labeled_checkbox<HCheckbox20_label>;
+inline auto constexpr hlabel_checkbox20 = labeled_checkbox<HLabel_checkbox20>;
+inline auto constexpr vcheckbox20_label = labeled_checkbox<VCheckbox20_label>;
+inline auto constexpr vlabel_checkbox20 = labeled_checkbox<VLabel_checkbox20>;
 
 }  // namespace ox
 
 namespace ox::slot {
 
-inline auto toggle(Checkbox& cb) -> sl::Slot<void()>
+template <template <typename> typename Layout_t>
+auto toggle(Checkbox<Layout_t>& cb) -> sl::Slot<void()>
 {
     return link_lifetimes([&cb] { cb.toggle(); }, cb);
 }
 
-inline auto check(Checkbox& cb) -> sl::Slot<void()>
+template <template <typename> typename Layout_t>
+auto check(Checkbox<Layout_t>& cb) -> sl::Slot<void()>
 {
     return link_lifetimes([&cb] { cb.check(); }, cb);
 }
 
-inline auto uncheck(Checkbox& cb) -> sl::Slot<void()>
+template <template <typename> typename Layout_t>
+auto uncheck(Checkbox<Layout_t>& cb) -> sl::Slot<void()>
 {
     return link_lifetimes([&cb] { cb.uncheck(); }, cb);
 }

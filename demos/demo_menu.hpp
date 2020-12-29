@@ -43,15 +43,14 @@ class Demo_menu : public ox::Menu_stack {
         this->append_page(L"Composites",
             layout::vertical
             (
-                checkbox(),
-                checkbox(),
+                ox::make<Checkbox1>(),
                 textbox(L"WOW!") | bg(Color::Green) | Trait::Bold,
                 layout::horizontal
                 (
                     textbox(L"Left") | bg(Color::Light_blue),
                     textbox(L"Right") | bg(Color::Violet)
                 ),
-                checkbox(),
+                make<Checkbox2>(),
                 hcheckbox_label({L"A Box"})
             )
         );

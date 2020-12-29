@@ -8,8 +8,10 @@
 #include <termox/widget/align.hpp>
 #include <termox/widget/growth.hpp>
 #include <termox/widget/layouts/horizontal.hpp>
+#include <termox/widget/layouts/opposite.hpp>
 #include <termox/widget/layouts/vertical.hpp>
 #include <termox/widget/pipe.hpp>
+#include <termox/widget/tuple.hpp>
 
 namespace ox {
 
@@ -53,8 +55,12 @@ class Label : public Widget {
         else
             *this | pipe::fixed_height(1uL);
 
-        if (growth_strategy_ == Growth::Dynamic)
-            *this | pipe::fixed_width(text_.size());
+        if (growth_strategy_ == Growth::Dynamic) {
+            if constexpr (is_vertical)
+                *this | pipe::fixed_height(text_.size());
+            else
+                *this | pipe::fixed_width(text_.size());
+        }
     }
 
     /// Construct directly with Parameters object.
@@ -70,8 +76,12 @@ class Label : public Widget {
     /// Set text contents of Label and update display.
     void set_text(Glyph_string text)
     {
-        if (growth_strategy_ == Growth::Dynamic)
-            *this | pipe::fixed_width(text.size());
+        if (growth_strategy_ == Growth::Dynamic) {
+            if constexpr (is_vertical)
+                *this | pipe::fixed_height(text_.size());
+            else
+                *this | pipe::fixed_width(text_.size());
+        }
         text_ = std::move(text);
         this->update_offset();
     }
@@ -257,16 +267,20 @@ auto vlabel(Args&&... args) -> std::unique_ptr<VLabel>
 namespace detail {
 
 /// Wraps a Widget_t object with a label.
-/** Layout_t is applied to the Label object, Wrapper_layout is the layout of
- *  *this, if label_last is true, the Label is after the wrapped Widget_t. */
-template <template <typename> typename Layout_t,
+/** Wrapper_layout is the layout of *this, if label_last is true, the Label is
+ *  after the wrapped Widget_t. */
+template <template <typename> typename Label_layout,
           typename Widget_t,
           template <typename>
           typename Wrapper_layout,
           bool label_last>
 class Label_wrapper : public Wrapper_layout<Widget> {
    private:
-    using Label_t = Label<Layout_t>;
+    using Label_t      = Label<Label_layout>;
+    using Padded_label = Tuple<layout::Opposite_t<Label_layout<Widget>>,
+                               Widget,
+                               Label_t,
+                               Widget>;
 
    public:
     using Parameters = typename Label_t::Parameters;
@@ -292,7 +306,10 @@ class Label_wrapper : public Wrapper_layout<Widget> {
     /// Constructs Label with given parameters, and Widget_t with args...
     template <typename... Args>
     explicit Label_wrapper(Parameters p, Args&&... args)
-        : label{this->template make_child<Label_t>(std::move(p))},
+        : label{this->template make_child<Padded_label>(Widget::Parameters{},
+                                                        std::move(p),
+                                                        Widget::Parameters{})
+                    .template get<1>()},
           wrapped{
               this->template make_child<Widget_t>(std::forward<Args>(args)...)}
     {
@@ -305,6 +322,8 @@ class Label_wrapper : public Wrapper_layout<Widget> {
 
         if constexpr (label_last)
             this->swap_children(0, 2);
+        else
+            label.set_alignment(Align::Right);  // Same as Align::Bottom
     }
 
    private:

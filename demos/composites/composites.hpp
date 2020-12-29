@@ -171,7 +171,7 @@ struct Two_lists : Pair<layout::Vertical<My_check_list>> {
 using Settings_box = ox::Tuple<ox::layout::Vertical<>,
                                ox::Button,
                                ox::HLabel,
-                               ox::Checkbox,
+                               ox::Checkbox1,
                                ox::Cycle_box,
                                ox::Push_button>;
 

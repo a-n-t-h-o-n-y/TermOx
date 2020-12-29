@@ -34,6 +34,13 @@
 namespace ox {
 
 class Widget {
+   public:
+    // TODO
+    struct Parameters {
+        std::string name;
+        std::optional<Glyph> wallpaper;
+    };
+
    private:
     template <typename Signature>
     using Signal = sl::Signal<Signature>;
@@ -106,6 +113,8 @@ class Widget {
    public:
     /// Initialize with \p name.
     explicit Widget(std::string name = "");
+
+    explicit Widget(Parameters p) : Widget{std::move(p.name)} {}
 
     Widget(Widget const&) = delete;
     Widget(Widget&&)      = delete;
@@ -677,5 +686,13 @@ auto widget(Args&&... args) -> std::unique_ptr<Widget>
     return std::make_unique<Widget>(std::forward<Args>(args)...);
 }
 
+/// Wrapper for std::make_unique
+template <typename Widget_t, typename... Args>
+auto make(Args&&... args) -> std::unique_ptr<Widget_t>
+{
+    static_assert(std::is_base_of_v<Widget, Widget_t>,
+                  "Must make a Widget derived type.");
+    return std::make_unique<Widget_t>(std::forward<Args>(args)...);
+}
 }  // namespace ox
 #endif  // TERMOX_WIDGET_WIDGET_HPP

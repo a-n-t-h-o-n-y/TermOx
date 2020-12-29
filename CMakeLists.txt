@@ -61,4 +61,4 @@ add_subdirectory(src)
 add_subdirectory(demos)
 
 # Add Tests
-# add_subdirectory(test)
+add_subdirectory(tests)
