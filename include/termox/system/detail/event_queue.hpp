@@ -116,8 +116,11 @@ class Event_queue {
     /// Adds the given event with priority for the concrete event type.
     void append(Event e)
     {
-        std::visit([this](auto&& e) { this->add_to_a_queue(std::move(e)); },
-                   std::move(e));
+        std::visit(
+            [this](auto&& e) {
+                this->add_to_a_queue(std::forward<decltype(e)>(e));
+            },
+            std::move(e));
     }
 
     void send_all()

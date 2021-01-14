@@ -17,6 +17,7 @@ void Timer_event_loop::register_widget(Widget& w)
 
 void Timer_event_loop::loop_function()
 {
+    // The first call to this returns immediately.
     Interval_event_loop::loop_function();
     {
         auto const guard = Guard_t{mtx_registered_widgets_};

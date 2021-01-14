@@ -60,10 +60,9 @@ class Trait_boxes : public ox::layout::Vertical<Trait_checkbox> {
     }
 };
 
-class Labeled_color_select
-    : public ox::Label_top<ox::layout::Horizontal, ox::Color_select> {
+class Labeled_color_select : public ox::HLabel_top<ox::Color_select> {
    private:
-    using Label_t = ox::Label_top<ox::layout::Horizontal, ox::Color_select>;
+    using Label_t = ox::HLabel_top<ox::Color_select>;
 
    public:
     sl::Signal<void(ox::Color)>& color_selected = wrapped.color_selected;
@@ -86,8 +85,8 @@ class Labeled_color_select
     void set_heights(ox::Palette const& pal)
     {
         using namespace ox::pipe;
-        auto const height = std::ceil(pal.size() / 8.) + 1;
-        *this | fixed_height(height);
+        auto const height = std::ceil(pal.size() / 8.);
+        *this | fixed_height(height + 1);
         this->wrapped | fixed_height(height);
     }
 };

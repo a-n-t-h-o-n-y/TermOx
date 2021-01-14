@@ -78,9 +78,9 @@ class Label : public Widget {
     {
         if (growth_strategy_ == Growth::Dynamic) {
             if constexpr (is_vertical)
-                *this | pipe::fixed_height(text_.size());
+                *this | pipe::fixed_height(text.size());
             else
-                *this | pipe::fixed_width(text_.size());
+                *this | pipe::fixed_width(text.size());
         }
         text_ = std::move(text);
         this->update_offset();
@@ -283,7 +283,14 @@ class Label_wrapper : public Wrapper_layout<Widget> {
                                Widget>;
 
    public:
-    using Parameters = typename Label_t::Parameters;
+    // Instead of inheriting Label_t::Parmeters, because default alignment.
+    struct Parameters {
+        Glyph_string text;
+        Align alignment         = label_last ? Align::Left : Align::Right;
+        std::size_t extra_left  = 0uL;
+        std::size_t extra_right = 0uL;
+        Growth growth_strategy  = Growth::Static;
+    };
 
    public:
     Label_t& label;
@@ -306,9 +313,12 @@ class Label_wrapper : public Wrapper_layout<Widget> {
     /// Constructs Label with given parameters, and Widget_t with args...
     template <typename... Args>
     explicit Label_wrapper(Parameters p, Args&&... args)
-        : label{this->template make_child<Padded_label>(Widget::Parameters{},
-                                                        std::move(p),
-                                                        Widget::Parameters{})
+        : label{this->template make_child<Padded_label>(
+                        Widget::Parameters{},
+                        typename Label_t::Parameters{
+                            std::move(p.text), p.alignment, p.extra_left,
+                            p.extra_right, p.growth_strategy},
+                        Widget::Parameters{})
                     .template get<1>()},
           wrapped{
               this->template make_child<Widget_t>(std::forward<Args>(args)...)}
@@ -322,8 +332,6 @@ class Label_wrapper : public Wrapper_layout<Widget> {
 
         if constexpr (label_last)
             this->swap_children(0, 2);
-        else
-            label.set_alignment(Align::Right);  // Same as Align::Bottom
     }
 
    private:
@@ -341,24 +349,56 @@ class Label_wrapper : public Wrapper_layout<Widget> {
 // -----------------------------------------------------------------------------
 
 /// Wraps a Widget_t object with a Label on the left.
-template <template <typename> typename Layout_t, typename Widget_t>
+template <template <typename> typename Label_layout_t, typename Widget_t>
 using Label_left =
-    detail::Label_wrapper<Layout_t, Widget_t, layout::Horizontal, false>;
+    detail::Label_wrapper<Label_layout_t, Widget_t, layout::Horizontal, false>;
+
+/// Wraps a Widget_t object with an HLabel on the left.
+template <typename Widget_t>
+using HLabel_left = Label_left<layout::Horizontal, Widget_t>;
+
+/// Wraps a Widget_t object with a VLabel on the left.
+template <typename Widget_t>
+using VLabel_left = Label_left<layout::Vertical, Widget_t>;
 
 /// Wraps a Widget_t object with a Label on the right.
-template <template <typename> typename Layout_t, typename Widget_t>
+template <template <typename> typename Label_layout_t, typename Widget_t>
 using Label_right =
-    detail::Label_wrapper<Layout_t, Widget_t, layout::Horizontal, true>;
+    detail::Label_wrapper<Label_layout_t, Widget_t, layout::Horizontal, true>;
+
+/// Wraps a Widget_t object with an HLabel on the right.
+template <typename Widget_t>
+using HLabel_right = Label_right<layout::Horizontal, Widget_t>;
+
+/// Wraps a Widget_t object with a VLabel on the right.
+template <typename Widget_t>
+using VLabel_right = Label_right<layout::Vertical, Widget_t>;
 
 /// Wraps a Widget_t object with a Label on the top.
-template <template <typename> typename Layout_t, typename Widget_t>
+template <template <typename> typename Label_layout_t, typename Widget_t>
 using Label_top =
-    detail::Label_wrapper<Layout_t, Widget_t, layout::Vertical, false>;
+    detail::Label_wrapper<Label_layout_t, Widget_t, layout::Vertical, false>;
+
+/// Wraps a Widget_t object with a VLabel on the top.
+template <typename Widget_t>
+using VLabel_top = Label_top<layout::Vertical, Widget_t>;
+
+/// Wraps a Widget_t object with an HLabel on the top.
+template <typename Widget_t>
+using HLabel_top = Label_top<layout::Horizontal, Widget_t>;
 
 /// Wraps a Widget_t object with a Label on the bottom.
-template <template <typename> typename Layout_t, typename Widget_t>
+template <template <typename> typename Label_layout_t, typename Widget_t>
 using Label_bottom =
-    detail::Label_wrapper<Layout_t, Widget_t, layout::Vertical, true>;
+    detail::Label_wrapper<Label_layout_t, Widget_t, layout::Vertical, true>;
+
+/// Wraps a Widget_t object with a VLabel on the bottom.
+template <typename Widget_t>
+using VLabel_bottom = Label_bottom<layout::Vertical, Widget_t>;
+
+/// Wraps a Widget_t object with an HLabel on the bottom.
+template <typename Widget_t>
+using HLabel_bottom = Label_bottom<layout::Horizontal, Widget_t>;
 
 // -----------------------------------------------------------------------------
 

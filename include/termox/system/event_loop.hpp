@@ -55,6 +55,9 @@ class Event_loop {
     /** This function will be called on once every loop iteration. */
     virtual void loop_function() = 0;
 
+    /// Return true if the exit flag has been set.
+    auto exit_flag() const -> bool { return exit_; }
+
    private:
     /// Connect to the System::exit_signal so loop can exit with System.
     auto connect_to_system_exit() -> void;
@@ -62,9 +65,9 @@ class Event_loop {
    private:
     std::future<int> fut_;
     sl::Lifetime lifetime_;
-    int return_code_ = 0;
-    bool running_    = false;
-    std::atomic<bool> exit_{false};
+    int return_code_        = 0;
+    bool running_           = false;
+    std::atomic<bool> exit_ = false;
 
    protected:
     bool is_main_thread_ = false;

@@ -28,10 +28,7 @@
 
 namespace ox {
 
-auto System::focus_widget() -> Widget*
-{
-    return detail::Focus::focus_widget();
-}
+auto System::focus_widget() -> Widget* { return detail::Focus::focus_widget(); }
 
 void System::set_focus(Widget& w) { detail::Focus::set(w); }
 

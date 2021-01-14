@@ -1692,6 +1692,33 @@ inline auto on_press(Handler&& op)
     };
 }
 
+template <typename Handler>
+inline auto on_check(Handler&& op)
+{
+    return [&](auto&& w) -> decltype(auto) {
+        get(w).checked.connect(std::forward<Handler>(op));
+        return std::forward<decltype(w)>(w);
+    };
+}
+
+template <typename Handler>
+inline auto on_uncheck(Handler&& op)
+{
+    return [&](auto&& w) -> decltype(auto) {
+        get(w).unchecked.connect(std::forward<Handler>(op));
+        return std::forward<decltype(w)>(w);
+    };
+}
+
+template <typename Handler>
+inline auto on_toggle(Handler&& op)
+{
+    return [&](auto&& w) -> decltype(auto) {
+        get(w).toggled.connect(std::forward<Handler>(op));
+        return std::forward<decltype(w)>(w);
+    };
+}
+
 // Derived Widget Modifiers ----------------------------------------------------
 inline auto active_page(std::size_t p)
 {

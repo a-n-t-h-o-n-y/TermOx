@@ -45,7 +45,7 @@ void Painter::put(Glyph tile, std::size_t x, std::size_t y)
 
 void Painter::put(Glyph_string const& text, std::size_t x, std::size_t y)
 {
-    if (not is_paintable_)
+    if (!is_paintable_)
         return;
     for (Glyph g : text)
         this->put(g, x++, y);
@@ -54,7 +54,7 @@ void Painter::put(Glyph_string const& text, std::size_t x, std::size_t y)
 void Painter::border()
 {
     using Offset = detail::Border_offset;
-    if (not border_is_paintable(widget_))
+    if (!border_is_paintable(widget_))
         return;
     // Disqualified borders
     auto const west_dq  = Offset::west_disqualified(widget_);

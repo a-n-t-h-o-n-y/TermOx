@@ -43,7 +43,19 @@ class Interval_event_loop : public Event_loop {
 
    protected:
     /// Tells the event engine to not processes the event queue.
-    void loop_function() override { this->wait_on_interval(); }
+    /** The first call to this method returns immediately. */
+    void loop_function() override
+    {
+        auto leftovers = this->get_actual_interval();
+        while (leftovers > exit_check_interval_) {
+            if (this->Event_loop::exit_flag())
+                return;
+            std::this_thread::sleep_for(exit_check_interval_);
+            leftovers -= exit_check_interval_;
+        }
+        std::this_thread::sleep_for(leftovers);
+        last_time_ = Clock_t::now();  // Don't have to update if you are exiting
+    }
 
    private:
     using Clock_t = std::chrono::high_resolution_clock;
@@ -51,15 +63,17 @@ class Interval_event_loop : public Event_loop {
     Period_t const interval_;
     std::chrono::time_point<Clock_t> last_time_;
 
+    static auto constexpr exit_check_interval_ = Period_t{30};
+
    private:
-    void wait_on_interval()
+    /// Return the interval, minus the time since the last loop finished.
+    /** Returns zero if the time elapsed since the last loop is larger than the
+     *  set interval. Starting, then stopping, then starting again, will do the
+     *  right thing. Returns zero on the first call. */
+    auto get_actual_interval() const -> Clock_t::duration
     {
-        auto const time_to_sleep = [this] {
-            auto const elapsed = Clock_t::now() - last_time_;
-            return std::max(Clock_t::duration::zero(), interval_ - elapsed);
-        }();
-        std::this_thread::sleep_for(time_to_sleep);
-        last_time_ = Clock_t::now();
+        auto const elapsed = Clock_t::now() - last_time_;
+        return std::max(Clock_t::duration::zero(), interval_ - elapsed);
     }
 };
 
