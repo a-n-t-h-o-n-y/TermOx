@@ -13,6 +13,7 @@ target_link_libraries(TermOx
     PUBLIC
         signals-light
     PRIVATE
+        escape
         nc
         ${CMAKE_THREAD_LIBS_INIT}
 )
