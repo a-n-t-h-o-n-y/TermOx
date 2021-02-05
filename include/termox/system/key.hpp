@@ -1,6 +1,6 @@
 #ifndef TERMOX_SYSTEM_KEY_HPP
 #define TERMOX_SYSTEM_KEY_HPP
-#include <cstdint>
+#include <cstddef>
 #include <functional>
 #include <type_traits>
 
