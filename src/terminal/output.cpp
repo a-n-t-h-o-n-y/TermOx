@@ -1,6 +1,6 @@
 #include <termox/terminal/output.hpp>
 
-// #define SLOW_PAINT 7
+#define SLOW_PAINT 7
 
 #ifdef SLOW_PAINT
 #    include <chrono>
@@ -8,6 +8,7 @@
 #endif
 
 #include <cstddef>
+#include <type_traits>  //temp
 
 #ifndef _XOPEN_SOURCE_EXTENDED
 #    define _XOPEN_SOURCE_EXTENDED
@@ -41,29 +42,37 @@ auto trait_to_attr_t(Trait t) -> attr_t
         case Trait::Invisible: result = A_INVIS; break;
         case Trait::Blink: result = A_BLINK; break;
         case Trait::Italic: result = A_ITALIC; break;
+        case Trait::None:
+        case Trait::Crossed_out:
+        case Trait::Double_underline: break;
     }
     return result;
 }
 
+// TODO don't need this with esc, uses Trait_count though..
 auto find_attr_t(Brush brush) -> attr_t
 {
     auto result = A_NORMAL;
-    for (auto i = 0; i < Trait_count; ++i) {
+    auto count  = 0;
+    for (auto i = static_cast<std::underlying_type_t<ox::Trait>>(
+             ox::Trait::Standout);
+         count < 8; (++count, i <<= 1)) {
         auto const a = static_cast<Trait>(i);
-        if (brush.has_trait(a))
+        if (brush.traits.contains(a))
             result |= trait_to_attr_t(a);
     }
     return result;
 }
 
 #ifdef SLOW_PAINT
-void paint_indicator(char symbol)
+void paint_indicator(char32_t symbol)
 {
-    auto const color_pair     = color_index(Color::White, Color::Black);
-    auto const traits         = A_NORMAL;
-    wchar_t const temp_sym[2] = {symbol, L'\0'};
-    auto temp_display         = cchar_t{' '};
-    ::setcchar(&temp_display, temp_sym, traits, color_pair, nullptr);
+    auto const color_pair      = color_index(Color::White, Color::Black);
+    auto const traits          = A_NORMAL;
+    char32_t const temp_sym[2] = {symbol, U'\0'};
+    auto temp_display          = cchar_t{' '};
+    ::setcchar(&temp_display, (wchar_t const*)temp_sym, traits, color_pair,
+               nullptr);
     ::wadd_wchnstr(::stdscr, &temp_display, 1);
     refresh();
     std::this_thread::sleep_for(std::chrono::milliseconds(SLOW_PAINT));
@@ -73,13 +82,14 @@ void paint_indicator(char symbol)
 /// Add \p glyph's symbol, with traits, to the screen at cursor position.
 void put_wchar(Glyph glyph)
 {
-    auto const brush        = glyph.brush;
-    auto const color_pair   = color_index(brush.foreground, brush.background);
-    auto const traits       = find_attr_t(glyph.brush);
-    wchar_t const symbol[2] = {glyph.symbol, L'\0'};
-    auto symbol_and_traits  = cchar_t{};
+    auto const brush         = glyph.brush;
+    auto const color_pair    = color_index(brush.foreground, brush.background);
+    auto const traits        = find_attr_t(glyph.brush);
+    char32_t const symbol[2] = {glyph.symbol, U'\0'};
+    auto symbol_and_traits   = cchar_t{};
 
-    ::setcchar(&symbol_and_traits, symbol, traits, color_pair, nullptr);
+    ::setcchar(&symbol_and_traits, (wchar_t const*)symbol, traits, color_pair,
+               nullptr);
     ::wadd_wchnstr(::stdscr, &symbol_and_traits, 1);
 }
 }  // namespace
@@ -96,7 +106,7 @@ void refresh() { ::wrefresh(::stdscr); }
 void put(Glyph g)
 {
 #ifdef SLOW_PAINT
-    paint_indicator('X');
+    paint_indicator(U'X');
 #endif
     put_wchar(g);
 #ifdef SLOW_PAINT

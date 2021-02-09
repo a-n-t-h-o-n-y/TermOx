@@ -25,22 +25,22 @@ constexpr auto White       = Color::Foreground;
 /** https://lospec.com/palette-list/zx-spectrum */
 inline auto const palette = Palette{
     /* clang-format off */
-    {Black,       ANSI{16}, 0x000000},
-    {Dark_red,    ANSI{17}, 0xd62816},
-    {Dark_green,  ANSI{18}, 0x00c525},
-    {Olive,       ANSI{19}, 0xccc82a},
-    {Dark_blue,   ANSI{20}, 0x0022c7},
-    {Dark_violet, ANSI{21}, 0xd433c7},
-    {Dark_cyan,   ANSI{22}, 0x00c7c9},
-    {Silver,      ANSI{23}, 0xcacaca},
-    {Black_2,     ANSI{31}, 0x000000},
-    {Red,         ANSI{24}, 0xff331c},
-    {Green,       ANSI{25}, 0x00f92f},
-    {Yellow,      ANSI{26}, 0xfffc36},
-    {Blue,        ANSI{27}, 0x002bfb},
-    {Violet,      ANSI{28}, 0xff40fc},
-    {Cyan,        ANSI{29}, 0x00fbfe},
-    {White,       ANSI{30}, 0xffffff},
+    {Black,       RGB{0x000000}},
+    {Dark_red,    RGB{0xd62816}},
+    {Dark_green,  RGB{0x00c525}},
+    {Olive,       RGB{0xccc82a}},
+    {Dark_blue,   RGB{0x0022c7}},
+    {Dark_violet, RGB{0xd433c7}},
+    {Dark_cyan,   RGB{0x00c7c9}},
+    {Silver,      RGB{0xcacaca}},
+    {Black_2,     RGB{0x000000}},
+    {Red,         RGB{0xff331c}},
+    {Green,       RGB{0x00f92f}},
+    {Yellow,      RGB{0xfffc36}},
+    {Blue,        RGB{0x002bfb}},
+    {Violet,      RGB{0xff40fc}},
+    {Cyan,        RGB{0x00fbfe}},
+    {White,       RGB{0xffffff}},
     /* clang-format on */
 };
 

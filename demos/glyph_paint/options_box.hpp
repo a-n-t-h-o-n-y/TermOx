@@ -19,13 +19,13 @@ class Options_A : public ox::layout::Vertical<> {
     using Checkbox = ox::HCheckbox_label;
 
    public:
-    ox::Button& clone_btn = make_child<ox::Button>(L"Clone Tool");
-    Checkbox& eraser_box  = make_child<Checkbox>({L"Eraser"});
-    Checkbox& cursor_box  = make_child<Checkbox>({L"Show Cursor"});
-    Checkbox& grid_box    = make_child<Checkbox>({L"Show Grid"});
+    ox::Button& clone_btn = make_child<ox::Button>(U"Clone Tool");
+    Checkbox& eraser_box  = make_child<Checkbox>({U"Eraser"});
+    Checkbox& cursor_box  = make_child<Checkbox>({U"Show Cursor"});
+    Checkbox& grid_box    = make_child<Checkbox>({U"Show Grid"});
     ox::Confirm_button& clear_btn =
-        make_child<ox::Confirm_button>(L"Clear Painting");
-    ox::Button& more_btn = make_child<ox::Button>(L"More Options");
+        make_child<ox::Confirm_button>(U"Clear Painting");
+    ox::Button& more_btn = make_child<ox::Button>(U"More Options");
 
    public:
     Options_A()
@@ -40,7 +40,7 @@ class Options_A : public ox::layout::Vertical<> {
 
 class Options_B : public ox::layout::Vertical<> {
    public:
-    ox::HLabel& palette_label  = make_child<ox::HLabel>({L"Color  Palette"});
+    ox::HLabel& palette_label  = make_child<ox::HLabel>({U"Color  Palette"});
     ox::Cycle_box& palette_box = make_child<ox::Cycle_box>();
     Widget& space1             = make_child() | ox::pipe::fixed_height(1);
     ox::Save_file<>& save_file = make_child<ox::Save_file<>>();

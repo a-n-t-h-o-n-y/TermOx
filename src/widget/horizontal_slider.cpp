@@ -26,7 +26,7 @@ void Horizontal_slider::set_percent(float percent)
 auto Horizontal_slider::mouse_press_event(Mouse const& m) -> bool
 {
     if (m.button == Mouse::Button::Left)
-        this->set_percent(position_to_percent(m.local.x));
+        this->set_percent(position_to_percent(m.at.x));
     return Widget::mouse_press_event(m);
 }
 

@@ -79,7 +79,7 @@ class Paint_area : public ox::Widget {
 
     void remove_traits(ox::Trait t)
     {
-        current_glyph_.brush.remove_traits(t);
+        current_glyph_.brush.traits.remove(t);
         if (!erase_enabled_)
             glyph_changed(current_glyph_);
     }
@@ -97,7 +97,7 @@ class Paint_area : public ox::Widget {
     void enable_erase()
     {
         erase_enabled_ = true;
-        glyph_changed(L' ');
+        glyph_changed(U' ');
     }
 
     void disable_erase()
@@ -108,7 +108,7 @@ class Paint_area : public ox::Widget {
 
     void enable_grid()
     {
-        this->set_wallpaper(L'┼' | fg(ox::Color::Dark_gray));
+        this->set_wallpaper(U'┼' | fg(ox::Color::Dark_gray));
         this->update();
     }
 
@@ -139,12 +139,12 @@ class Paint_area : public ox::Widget {
     {
         switch (m.button) {
             using Button = ox::Mouse::Button;
-            case Button::Right: this->remove_glyph(m.local); break;
+            case Button::Right: this->remove_glyph(m.at); break;
             case Button::Middle:
-                if (glyphs_painted_.count(m.local) == 1)
-                    this->set_glyph(glyphs_painted_[m.local]);
+                if (glyphs_painted_.count(m.at) == 1)
+                    this->set_glyph(glyphs_painted_[m.at]);
                 break;
-            default: this->place_glyph(m.local.x, m.local.y); break;
+            default: this->place_glyph(m.at.x, m.at.y); break;
         }
         return Widget::mouse_press_event(m);
     }
@@ -153,8 +153,8 @@ class Paint_area : public ox::Widget {
 
    private:
     std::unordered_map<ox::Point, ox::Glyph> glyphs_painted_;
-    ox::Glyph current_glyph_ = L'x';
-    ox::Glyph before_erase_  = L'x';
+    ox::Glyph current_glyph_ = U'x';
+    ox::Glyph before_erase_  = U'x';
     bool clone_enabled_      = false;
     bool erase_enabled_      = false;
 

@@ -54,7 +54,7 @@ auto Vertical_slider::paint_event() -> bool
 auto Vertical_slider::mouse_press_event(const Mouse& m) -> bool
 {
     if (m.button == Mouse::Button::Left) {
-        logic_.set_ratio(this->ratio_at(m.local.y));
+        logic_.set_ratio(this->ratio_at(m.at.y));
         this->update();
     }
     return Widget::mouse_press_event(m);

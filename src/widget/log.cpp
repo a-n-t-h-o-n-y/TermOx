@@ -13,7 +13,7 @@ namespace ox {
 void Log::post_message(Glyph_string message)
 {
     if (!this->contents().empty())
-        this->append(L"\n");
+        this->append(U"\n");
     this->append(std::move(message));
     this->update_display();
     auto const tl = this->top_line();

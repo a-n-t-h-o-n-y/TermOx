@@ -9,7 +9,7 @@ namespace gol {
 
 class Rule_store {
    public:
-    using Name = std::wstring_view;
+    using Name = std::u32string_view;
 
    private:
     std::map<Name, Rule> rules_;

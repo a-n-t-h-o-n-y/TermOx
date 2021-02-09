@@ -51,8 +51,12 @@ class Trait_boxes : public ox::layout::Vertical<Trait_checkbox> {
    public:
     Trait_boxes()
     {
-        for (auto i = 0; i < ox::Trait_count; ++i) {
-            auto& w = this->make_child(static_cast<ox::Trait>(i));
+        // TODO update to new esc:: Traits(crossout, etc..)
+        using ox::Trait;
+        for (auto trait :
+             {Trait::Bold, Trait::Italic, Trait::Underline, Trait::Standout,
+              Trait::Dim, Trait::Inverse, Trait::Invisible, Trait::Blink}) {
+            auto& w = this->make_child(static_cast<ox::Trait>(trait));
             w.trait_enabled.connect([this](auto t) { this->trait_enabled(t); });
             w.trait_disabled.connect(
                 [this](ox::Trait t) { this->trait_disabled(t); });
@@ -111,7 +115,7 @@ class Text_and_side_pane : public ox::layout::Horizontal<> {
    public:
     ox::Textbox& textbox = this->make_child<ox::Textbox>();
     Side_pane& side_pane =
-        this->make_child<Side_pane_accordion>({L"Settings", ox::Align::Center})
+        this->make_child<Side_pane_accordion>({U"Settings", ox::Align::Center})
             .wrapped();
 
    public:
@@ -128,9 +132,9 @@ class Text_and_side_pane : public ox::layout::Horizontal<> {
             ox::slot::set_background(textbox));
 
         side_pane.trait_boxes.trait_enabled.connect(
-            [this](Trait t) { textbox.insert_brush.add_traits(t); });
+            [this](Trait t) { textbox.insert_brush.traits.insert(t); });
         side_pane.trait_boxes.trait_disabled.connect(
-            [this](Trait t) { textbox.insert_brush.remove_traits(t); });
+            [this](Trait t) { textbox.insert_brush.traits.remove(t); });
     }
 };
 

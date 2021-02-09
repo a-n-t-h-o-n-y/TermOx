@@ -122,8 +122,8 @@ class Checkbox : public Label<Layout_t> {
     void unlock()
     {
         locked_ = false;
-        display_.checked.remove_traits(Trait::Dim);
-        display_.unchecked.remove_traits(Trait::Dim);
+        display_.checked.traits.remove(Trait::Dim);
+        display_.unchecked.traits.remove(Trait::Dim);
         this->update_display();
     }
 
@@ -146,8 +146,8 @@ class Checkbox : public Label<Layout_t> {
     {
         auto result = display_;
         if (locked_) {
-            result.checked.remove_traits(Trait::Dim);
-            result.unchecked.remove_traits(Trait::Dim);
+            result.checked.traits.remove(Trait::Dim);
+            result.unchecked.traits.remove(Trait::Dim);
         }
         return result;
     }
@@ -266,7 +266,7 @@ class Checkbox1 : public HCheckbox {
 
    public:
     Checkbox1(State initial_state = State::Unchecked, bool locked = false)
-        : HCheckbox{initial_state, {L"☒", L"☐"}, locked}
+        : HCheckbox{initial_state, {U"☒", U"☐"}, locked}
     {}
 
     Checkbox1(Parameters p) : Checkbox1{p.initial_state, p.locked} {}
@@ -309,7 +309,7 @@ class Checkbox2 : public HCheckbox {
 
    public:
     Checkbox2(State initial_state = State::Unchecked, bool locked = false)
-        : HCheckbox{initial_state, {L"[x]", L"[ ]"}, locked}
+        : HCheckbox{initial_state, {U"[x]", U"[ ]"}, locked}
     {}
 
     Checkbox2(Parameters p) : Checkbox2{p.initial_state, p.locked} {}
@@ -343,7 +343,7 @@ class Checkbox3 : public VCheckbox {
 
    public:
     Checkbox3(State initial_state = State::Unchecked, bool locked = false)
-        : VCheckbox{initial_state, {L"┌x└", L"┌ └"}, locked}
+        : VCheckbox{initial_state, {U"┌x└", U"┌ └"}, locked}
     {}
 
     Checkbox3(Parameters p) : Checkbox3{p.initial_state, p.locked} {}
@@ -368,7 +368,7 @@ class Checkbox4 : public VCheckbox {
 
    public:
     Checkbox4(State initial_state = State::Unchecked, bool locked = false)
-        : VCheckbox{initial_state, {L"┐x┘", L"┐ ┘"}, locked}
+        : VCheckbox{initial_state, {U"┐x┘", U"┐ ┘"}, locked}
     {}
 
     Checkbox4(Parameters p) : Checkbox4{p.initial_state, p.locked} {}
@@ -391,7 +391,7 @@ class Checkbox5 : public HCheckbox {
 
    public:
     Checkbox5(State initial_state = State::Unchecked, bool locked = false)
-        : HCheckbox{initial_state, {L"┌x┐", L"┌ ┐"}, locked}
+        : HCheckbox{initial_state, {U"┌x┐", U"┌ ┐"}, locked}
     {}
 
     Checkbox5(Parameters p) : Checkbox5{p.initial_state, p.locked} {}
@@ -414,7 +414,7 @@ class Checkbox6 : public HCheckbox {
 
    public:
     Checkbox6(State initial_state = State::Unchecked, bool locked = false)
-        : HCheckbox{initial_state, {L"└x┘", L"└ ┘"}, locked}
+        : HCheckbox{initial_state, {U"└x┘", U"└ ┘"}, locked}
     {}
 
     Checkbox6(Parameters p) : Checkbox6{p.initial_state, p.locked} {}
@@ -439,7 +439,7 @@ class Checkbox7 : public VCheckbox {
 
    public:
     Checkbox7(State initial_state = State::Unchecked, bool locked = false)
-        : VCheckbox{initial_state, {L"╭x╰", L"╭ ╰"}, locked}
+        : VCheckbox{initial_state, {U"╭x╰", U"╭ ╰"}, locked}
     {}
 
     Checkbox7(Parameters p) : Checkbox7{p.initial_state, p.locked} {}
@@ -464,7 +464,7 @@ class Checkbox8 : public VCheckbox {
 
    public:
     Checkbox8(State initial_state = State::Unchecked, bool locked = false)
-        : VCheckbox{initial_state, {L"╮x╯", L"╮ ╯"}, locked}
+        : VCheckbox{initial_state, {U"╮x╯", U"╮ ╯"}, locked}
     {}
 
     Checkbox8(Parameters p) : Checkbox8{p.initial_state, p.locked} {}
@@ -487,7 +487,7 @@ class Checkbox9 : public HCheckbox {
 
    public:
     Checkbox9(State initial_state = State::Unchecked, bool locked = false)
-        : HCheckbox{initial_state, {L"╭x╮", L"╭ ╮"}, locked}
+        : HCheckbox{initial_state, {U"╭x╮", U"╭ ╮"}, locked}
     {}
 
     Checkbox9(Parameters p) : Checkbox9{p.initial_state, p.locked} {}
@@ -510,7 +510,7 @@ class Checkbox10 : public HCheckbox {
 
    public:
     Checkbox10(State initial_state = State::Unchecked, bool locked = false)
-        : HCheckbox{initial_state, {L"╰x╯", L"╰ ╯"}, locked}
+        : HCheckbox{initial_state, {U"╰x╯", U"╰ ╯"}, locked}
     {}
 
     Checkbox10(Parameters p) : Checkbox10{p.initial_state, p.locked} {}
@@ -537,7 +537,7 @@ class Checkbox11 : public VCheckbox {
 
    public:
     Checkbox11(State initial_state = State::Unchecked, bool locked = false)
-        : VCheckbox{initial_state, {L"┘╴┐", L"┘ ┐"}, locked}
+        : VCheckbox{initial_state, {U"┘╴┐", U"┘ ┐"}, locked}
     {}
 
     Checkbox11(Parameters p) : Checkbox11{p.initial_state, p.locked} {}
@@ -562,7 +562,7 @@ class Checkbox12 : public VCheckbox {
 
    public:
     Checkbox12(State initial_state = State::Unchecked, bool locked = false)
-        : VCheckbox{initial_state, {L"└╶┌", L"└ ┌"}, locked}
+        : VCheckbox{initial_state, {U"└╶┌", U"└ ┌"}, locked}
     {}
 
     Checkbox12(Parameters p) : Checkbox12{p.initial_state, p.locked} {}
@@ -585,7 +585,7 @@ class Checkbox13 : public HCheckbox {
 
    public:
     Checkbox13(State initial_state = State::Unchecked, bool locked = false)
-        : HCheckbox{initial_state, {L"┘╵└", L"┘ └"}, locked}
+        : HCheckbox{initial_state, {U"┘╵└", U"┘ └"}, locked}
     {}
 
     Checkbox13(Parameters p) : Checkbox13{p.initial_state, p.locked} {}
@@ -608,7 +608,7 @@ class Checkbox14 : public HCheckbox {
 
    public:
     Checkbox14(State initial_state = State::Unchecked, bool locked = false)
-        : HCheckbox{initial_state, {L"┐╷┌", L"┐ ┌"}, locked}
+        : HCheckbox{initial_state, {U"┐╷┌", U"┐ ┌"}, locked}
     {}
 
     Checkbox14(Parameters p) : Checkbox14{p.initial_state, p.locked} {}
@@ -633,7 +633,7 @@ class Checkbox15 : public VCheckbox {
 
    public:
     Checkbox15(State initial_state = State::Unchecked, bool locked = false)
-        : VCheckbox{initial_state, {L"╯╴╮", L"╯ ╮"}, locked}
+        : VCheckbox{initial_state, {U"╯╴╮", U"╯ ╮"}, locked}
     {}
 
     Checkbox15(Parameters p) : Checkbox15{p.initial_state, p.locked} {}
@@ -658,7 +658,7 @@ class Checkbox16 : public VCheckbox {
 
    public:
     Checkbox16(State initial_state = State::Unchecked, bool locked = false)
-        : VCheckbox{initial_state, {L"╰╶╭", L"╰ ╭"}, locked}
+        : VCheckbox{initial_state, {U"╰╶╭", U"╰ ╭"}, locked}
     {}
 
     Checkbox16(Parameters p) : Checkbox16{p.initial_state, p.locked} {}
@@ -681,7 +681,7 @@ class Checkbox17 : public HCheckbox {
 
    public:
     Checkbox17(State initial_state = State::Unchecked, bool locked = false)
-        : HCheckbox{initial_state, {L"╯╵╰", L"╯ ╰"}, locked}
+        : HCheckbox{initial_state, {U"╯╵╰", U"╯ ╰"}, locked}
     {}
 
     Checkbox17(Parameters p) : Checkbox17{p.initial_state, p.locked} {}
@@ -704,7 +704,7 @@ class Checkbox18 : public HCheckbox {
 
    public:
     Checkbox18(State initial_state = State::Unchecked, bool locked = false)
-        : HCheckbox{initial_state, {L"╮╷╭", L"╮ ╭"}, locked}
+        : HCheckbox{initial_state, {U"╮╷╭", U"╮ ╭"}, locked}
     {}
 
     Checkbox18(Parameters p) : Checkbox18{p.initial_state, p.locked} {}
@@ -729,7 +729,7 @@ class Checkbox19 : public HCheckbox {
 
    public:
     Checkbox19(State initial_state = State::Unchecked, bool locked = false)
-        : HCheckbox{initial_state, {L"├x┤", L"├ ┤"}, locked}
+        : HCheckbox{initial_state, {U"├x┤", U"├ ┤"}, locked}
     {}
 
     Checkbox19(Parameters p) : Checkbox19{p.initial_state, p.locked} {}
@@ -761,7 +761,7 @@ class Checkbox20 : public HCheckbox {
 
    public:
     Checkbox20(State initial_state = State::Unchecked, bool locked = false)
-        : HCheckbox{initial_state, {L"┤x├", L"┤ ├"}, locked}
+        : HCheckbox{initial_state, {U"┤x├", U"┤ ├"}, locked}
     {}
 
     Checkbox20(Parameters p) : Checkbox20{p.initial_state, p.locked} {}

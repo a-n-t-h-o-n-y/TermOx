@@ -25,22 +25,22 @@ constexpr auto White    = Color::Foreground;
 /** https://lospec.com/palette-list/microsoft-windows */
 inline auto const palette = Palette{
     /* clang-format off */
-    {Black,    ANSI{16}, 0x000000},
-    {Maroon,   ANSI{17}, 0x7e0000},
-    {Green,    ANSI{18}, 0x047e00},
-    {Olive,    ANSI{19}, 0x7e7e00},
-    {Navy,     ANSI{20}, 0x00007e},
-    {Violet,   ANSI{21}, 0xfe00ff},
-    {Cyan,     ANSI{22}, 0x06ffff},
-    {Silver,   ANSI{23}, 0xbebebe},
-    {Gray,     ANSI{24}, 0x7e7e7e},
-    {Red,      ANSI{25}, 0xfe0000},
-    {Lime,     ANSI{26}, 0x06ff04},
-    {Yellow,   ANSI{27}, 0xffff04},
-    {Blue,     ANSI{28}, 0x0000ff},
-    {Eggplant, ANSI{29}, 0x7e007e},
-    {Teal,     ANSI{30}, 0x047e7e},
-    {White,    ANSI{31}, 0xffffff},
+    {Black,    RGB{0x000000}},
+    {Maroon,   RGB{0x7e0000}},
+    {Green,    RGB{0x047e00}},
+    {Olive,    RGB{0x7e7e00}},
+    {Navy,     RGB{0x00007e}},
+    {Violet,   RGB{0xfe00ff}},
+    {Cyan,     RGB{0x06ffff}},
+    {Silver,   RGB{0xbebebe}},
+    {Gray,     RGB{0x7e7e7e}},
+    {Red,      RGB{0xfe0000}},
+    {Lime,     RGB{0x06ff04}},
+    {Yellow,   RGB{0xffff04}},
+    {Blue,     RGB{0x0000ff}},
+    {Eggplant, RGB{0x7e007e}},
+    {Teal,     RGB{0x047e7e}},
+    {White,    RGB{0xffffff}},
     /* clang-format on */
 };
 

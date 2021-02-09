@@ -9,12 +9,9 @@
 #include <termox/common/transform_view.hpp>
 #include <termox/system/event.hpp>
 #include <termox/system/system.hpp>
+#include <termox/widget/area.hpp>
+#include <termox/widget/point.hpp>
 #include <termox/widget/widget.hpp>
-
-namespace ox {
-struct Area;
-struct Point;
-}  // namespace ox
 
 namespace ox::layout {
 

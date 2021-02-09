@@ -25,22 +25,22 @@ constexpr auto White       = Color::Foreground;
 /** https://lospec.com/palette-list/commodore-64 */
 inline auto const palette = Palette{
     /* clang-format off */
-    {Black,       ANSI{16}, 0x000000},
-    {Dark_red,    ANSI{17}, 0x813338},
-    {Green,       ANSI{18}, 0x56ac4d},
-    {Brown,       ANSI{19}, 0x553800},
-    {Blue,        ANSI{20}, 0x2e2c9b},
-    {Violet,      ANSI{21}, 0x8e3c97},
-    {Cyan,        ANSI{22}, 0x75cec8},
-    {Light_gray,  ANSI{23}, 0x7b7b7b},
-    {Gray,        ANSI{24}, 0x4a4a4a},
-    {Red,         ANSI{25}, 0xc46c71},
-    {Light_green, ANSI{26}, 0xa9ff9f},
-    {Yellow,      ANSI{27}, 0xedf171},
-    {Light_blue,  ANSI{28}, 0x706deb},
-    {Orange,      ANSI{29}, 0x8e5029},
-    {Silver,      ANSI{30}, 0xb2b2b2},
-    {White,       ANSI{31}, 0xffffff},
+    {Black,       RGB{0x000000}},
+    {Dark_red,    RGB{0x813338}},
+    {Green,       RGB{0x56ac4d}},
+    {Brown,       RGB{0x553800}},
+    {Blue,        RGB{0x2e2c9b}},
+    {Violet,      RGB{0x8e3c97}},
+    {Cyan,        RGB{0x75cec8}},
+    {Light_gray,  RGB{0x7b7b7b}},
+    {Gray,        RGB{0x4a4a4a}},
+    {Red,         RGB{0xc46c71}},
+    {Light_green, RGB{0xa9ff9f}},
+    {Yellow,      RGB{0xedf171}},
+    {Light_blue,  RGB{0x706deb}},
+    {Orange,      RGB{0x8e5029}},
+    {Silver,      RGB{0xb2b2b2}},
+    {White,       RGB{0xffffff}},
     /* clang-format on */
 };
 

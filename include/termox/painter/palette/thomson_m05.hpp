@@ -25,22 +25,22 @@ constexpr auto White      = Color::Foreground;
 /** https://lospec.com/palette-list/thomson-m05 */
 inline auto const palette = Palette{
     /* clang-format off */
-    {Black,      ANSI{16}, 0x000000},
-    {Light_red,  ANSI{17}, 0xdd7777},
-    {Mint,       ANSI{18}, 0x77dd77},
-    {Brown,      ANSI{19}, 0xdddd77},
-    {Light_blue, ANSI{20}, 0x7777dd},
-    {Violet,     ANSI{21}, 0xdd77ee},
-    {Light_cyan, ANSI{22}, 0xbbffff},
-    {Silver,     ANSI{23}, 0xbbbbbb},
-    {Orange,     ANSI{24}, 0xeebb00},
-    {Red,        ANSI{25}, 0xff0000},
-    {Lime,       ANSI{26}, 0x00ff00},
-    {Yellow,     ANSI{27}, 0xffff00},
-    {Blue,       ANSI{28}, 0x0000ff},
-    {Magenta,    ANSI{29}, 0xff00ff},
-    {Cyan,       ANSI{30}, 0x00ffff},
-    {White,      ANSI{31}, 0xffffff},
+    {Black,      RGB{0x000000}},
+    {Light_red,  RGB{0xdd7777}},
+    {Mint,       RGB{0x77dd77}},
+    {Brown,      RGB{0xdddd77}},
+    {Light_blue, RGB{0x7777dd}},
+    {Violet,     RGB{0xdd77ee}},
+    {Light_cyan, RGB{0xbbffff}},
+    {Silver,     RGB{0xbbbbbb}},
+    {Orange,     RGB{0xeebb00}},
+    {Red,        RGB{0xff0000}},
+    {Lime,       RGB{0x00ff00}},
+    {Yellow,     RGB{0xffff00}},
+    {Blue,       RGB{0x0000ff}},
+    {Magenta,    RGB{0xff00ff}},
+    {Cyan,       RGB{0x00ffff}},
+    {White,      RGB{0xffffff}},
     /* clang-format on */
 };
 

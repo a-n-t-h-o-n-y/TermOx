@@ -5,10 +5,10 @@
 #include <termox/painter/detail/screen_descriptor.hpp>
 #include <termox/painter/detail/staged_changes.hpp>
 #include <termox/widget/area.hpp>
+#include <termox/widget/point.hpp>
 
 namespace ox {
 class Glyph_string;
-struct Point;
 struct Glyph;
 class Widget;
 
@@ -31,6 +31,7 @@ class Painter {
         this->put(tile, position.x, position.y);
     }
 
+    // TODO remove this overload?
     /// Put Glyph_string to local coordinates, no-op if out of Widget's bounds
     void put(Glyph_string const& text, std::size_t x, std::size_t y);
 

@@ -9,7 +9,7 @@ Traits and Colors can be used with the pipe operator to alter the Brush of each
 Glyph in the `Glyph_string`.
 
 ```cpp
-auto const foo = L"hello!" | Trait::Bold | bg(Color::Light_green);
+auto const foo = U"hello!" | Trait::Bold | bg(Color::Light_green);
 foo | fg(Color::Violet);
 ```
 

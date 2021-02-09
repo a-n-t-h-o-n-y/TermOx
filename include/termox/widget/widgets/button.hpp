@@ -25,7 +25,7 @@ class Button : public Widget {
 
    public:
     /// Construct a Button with centered \p label.
-    explicit Button(Glyph_string label = L"") : label_{std::move(label)} {}
+    explicit Button(Glyph_string label = U"") : label_{std::move(label)} {}
 
    public:
     /// Set the label and repaint.
@@ -84,7 +84,7 @@ class Push_button : public Button {
 
    public:
     /// Construct a new Push_button
-    explicit Push_button(Glyph_string label = L"",
+    explicit Push_button(Glyph_string label = U"",
                          Color pressed      = Color::Foreground,
                          Color released     = Color::Background)
         : Button{std::move(label)},

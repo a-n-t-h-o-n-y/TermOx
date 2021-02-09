@@ -12,8 +12,8 @@ find_package(Threads REQUIRED)
 target_link_libraries(TermOx
     PUBLIC
         signals-light
-    PRIVATE
         escape
+    PRIVATE
         nc
         ${CMAKE_THREAD_LIBS_INIT}
 )

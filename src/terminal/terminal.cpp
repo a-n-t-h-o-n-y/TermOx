@@ -135,9 +135,7 @@ void Terminal::set_palette(Palette colors)
     palette_ = std::move(colors);
     for (auto const& def : palette_) {
         std::visit(
-            [&](auto const& d) {
-                this->set_color_definition(def.color, def.ansi, d);
-            },
+            [&](auto const& c) { this->set_color_definition(def.color, c); },
             def.value);
     }
     this->repaint_all();
@@ -148,11 +146,10 @@ auto Terminal::palette_append(Color_definition::Value_t value) -> Color
 {
     auto pal = this->current_palette();
     if (pal.empty())
-        pal.push_back({Color{0}, ANSI{16}, value});
+        pal.push_back({Color{0}, value});
     else {
         pal.push_back(
             {Color{static_cast<Color::Value_t>(pal.back().color.value + 1)},
-             ANSI{static_cast<ANSI::Value_t>(pal.back().ansi.value + 1)},
              value});
     }
     this->set_palette(pal);
@@ -167,21 +164,24 @@ void Terminal::initialize_pairs(Color c, ANSI a)
     }
 }
 
-void Terminal::set_color_definition(Color c, ANSI a, std::monostate)
+void Terminal::set_color_definition(Color c, Color_index value)
 {
-    this->initialize_pairs(c, a);
+    // TODO
+    // this->initialize_pairs(c, a);
 }
 
-void Terminal::set_color_definition(Color c, ANSI a, True_color value)
+void Terminal::set_color_definition(Color c, True_color value)
 {
-    this->initialize_pairs(c, a);
-    this->term_set_color(a, value);
+    // TODO
+    // this->initialize_pairs(c, a);
+    // this->term_set_color(a, value);
 }
 
-void Terminal::set_color_definition(Color c, ANSI a, Dynamic_color value)
+void Terminal::set_color_definition(Color c, Dynamic_color value)
 {
-    this->initialize_pairs(c, a);
-    dynamic_color_engine_.register_color(a, value);
+    // TODO
+    // this->initialize_pairs(c, a);
+    // dynamic_color_engine_.register_color(a, value);
 }
 
 auto Terminal::get_ansi(Color c) -> short

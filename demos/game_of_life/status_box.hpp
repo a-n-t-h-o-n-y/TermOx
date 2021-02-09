@@ -31,21 +31,21 @@ class Generation_count : public ox::layout::Horizontal<> {
     }
 
    private:
-    ox::HLabel& title_ = this->make_child<ox::HLabel>({L"Generation"});
+    ox::HLabel& title_ = this->make_child<ox::HLabel>({U"Generation"});
 
-    ox::Text_display& count_ = this->make_child<ox::Text_display>(L"0");
+    ox::Text_display& count_ = this->make_child<ox::Text_display>(U"0");
 };
 
 struct Center_offset : ox::layout::Vertical<> {
    public:
     ox::HLabel& title_ =
-        this->make_child<ox::HLabel>({L"Center Offset" | ox::Trait::Underline});
+        this->make_child<ox::HLabel>({U"Center Offset" | ox::Trait::Underline});
 
     ox::Labeled_number_edit<>& x_coords =
-        this->make_child<ox::Labeled_number_edit<>>(L"x: ", 0);
+        this->make_child<ox::Labeled_number_edit<>>(U"x: ", 0);
 
     ox::Labeled_number_edit<>& y_coords =
-        this->make_child<ox::Labeled_number_edit<>>(L"y: ", 0);
+        this->make_child<ox::Labeled_number_edit<>>(U"y: ", 0);
 
    public:
     Center_offset()

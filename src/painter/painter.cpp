@@ -33,10 +33,11 @@ Painter::Painter(Widget& widg)
       is_paintable_{detail::is_paintable(widget_)},
       staged_changes_{detail::Staged_changes::get()[&widg]}
 {}
+// TODO write out the widget space with wallpaper on the canvas.
 
 void Painter::put(Glyph tile, std::size_t x, std::size_t y)
 {
-    if (x >= inner_area_.width or y >= inner_area_.height)
+    if (x >= inner_area_.width || y >= inner_area_.height)
         return;
     auto const x_global = widget_.inner_x() + x;
     auto const y_global = widget_.inner_y() + y;

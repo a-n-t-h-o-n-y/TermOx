@@ -19,6 +19,7 @@ class Dynamic_color_event_loop : public detail::Interval_event_loop {
     using Interval_event_loop::Interval_event_loop;
 
    public:
+    // TODO instead, register a Color, not an ANSI
     /// Register a new ansi color to be dynamic, will replace if already exists.
     void register_color(ANSI ansi, Dynamic_color dynamic)
     {

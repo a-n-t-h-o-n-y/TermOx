@@ -23,7 +23,7 @@ class Canvas : public ox::Widget {
     auto mouse_press_event(ox::Mouse const& m) -> bool override
     {
         if (m.button == ox::Mouse::Button::Left)
-            points_.push_back(m.local);
+            points_.push_back(m.at);
         this->update();  // post a paint event to *this
         return Widget::mouse_press_event(m);
     }
@@ -32,7 +32,7 @@ class Canvas : public ox::Widget {
     {
         auto p = ox::painter{*this};
         for (auto point : points_)
-            p.put(L'X', point);
+            p.put(U'X', point);
         return Widget::paint_event();
     }
 

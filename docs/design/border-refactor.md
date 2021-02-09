@@ -242,7 +242,7 @@ each Widget can have a particular amount of space between itself and other.
   ```cpp
   auto paint_event(Canvas c) const -> Canvas
   {
-    c.put(L'X' | bg(Color::Blue), {5, 2});
+    c.put(U'X' | bg(Color::Blue), {5, 2});
     return Widget::paint_event(std::move(c));
   }
   ```

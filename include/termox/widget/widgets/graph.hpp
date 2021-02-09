@@ -129,8 +129,8 @@ class Graph : public Widget {
    private:
     static auto to_symbol(Bitmap b) -> Glyph
     {
-        auto constexpr initial_braille = L'⠀';
-        return wchar_t{initial_braille + b.get()};
+        auto constexpr initial_braille = U'⠀';
+        return char32_t{initial_braille + b.get()};
     }
 
     static auto distance(Number_t smaller, Number_t larger) -> Number_t

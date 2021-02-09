@@ -26,7 +26,7 @@ class Titlebar : public layout::Horizontal<> {
     explicit Titlebar(Glyph_string title_ = "")
         : title{this->make_child<HLabel>(
               {std::move(title_), Align::Center, extra_left, extra_right})},
-          exit_button{this->make_child<Button>(L"│✕ ")}
+          exit_button{this->make_child<Button>(U"│✕ ")}
     {
         using namespace ox::pipe;
         *this | fixed_height(1uL);

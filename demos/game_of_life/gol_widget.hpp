@@ -112,7 +112,7 @@ class GoL_widget : public ox::Widget {
     {
         grid_ = !grid_;
         if (grid_)
-            this->set_wallpaper(L'┼' | fg(color::Teal));
+            this->set_wallpaper(U'┼' | fg(color::Teal));
         else
             this->set_wallpaper(dead_cell);
         this->update();
@@ -176,7 +176,7 @@ class GoL_widget : public ox::Widget {
 
     auto mouse_press_event(ox::Mouse const& m) -> bool override
     {
-        auto const c = transform_to_engine(m.local);
+        auto const c = transform_to_engine(m.at);
         if (m.button == ox::Mouse::Button::Right) {
             if (hi_res_)
                 this->decrement_at(c);
@@ -196,7 +196,7 @@ class GoL_widget : public ox::Widget {
 
     auto mouse_wheel_event(ox::Mouse const& m) -> bool override
     {
-        auto const c = transform_to_engine(m.local);
+        auto const c = transform_to_engine(m.at);
         if (m.button == ox::Mouse::Button::ScrollUp) {
             if (m.modifiers.ctrl)
                 this->set_offset({offset_.x, offset_.y - 1});
@@ -263,7 +263,7 @@ class GoL_widget : public ox::Widget {
     int half_width_  = 0;
     int half_height_ = 0;
 
-    static auto constexpr dead_cell = ox::Glyph{L' '};
+    static auto constexpr dead_cell = ox::Glyph{U' '};
 
    private:
     /// Update the period if currently running.
@@ -297,7 +297,7 @@ class GoL_widget : public ox::Widget {
             for (auto y = 0uL; y < height; ++y) {
                 auto const coords = transform_to_engine({x, y});
                 if (engine_.alive_at(coords))
-                    p.put(L'█' | fg(cell_color_), {x, y});
+                    p.put(U'█' | fg(cell_color_), {x, y});
             }
         }
     }
@@ -310,37 +310,37 @@ class GoL_widget : public ox::Widget {
         for (auto x = 0uL; x < width; ++x) {
             for (auto y = 0uL; y < height; ++y) {
                 auto const braille = braille_at(ox::Point{x, y});
-                if (braille != L'\0')
+                if (braille != U'\0')
                     p.put(braille | fg(cell_color_), {x, y});
             }
         }
     }
 
-    auto braille_at(ox::Point p) const -> wchar_t
+    auto braille_at(ox::Point p) const -> char32_t
     {
         return braille_at(transform_to_engine(p));
     }
 
     /// Find the braille representation of the Coordinates at \p p.
-    auto braille_at(Coordinate c) const -> wchar_t
+    auto braille_at(Coordinate c) const -> char32_t
     {
-        auto result = L'\0';
+        auto result = U'\0';
         if (engine_.alive_at(c))
-            result |= L'⠁';
+            result |= U'⠁';
         if (engine_.alive_at({c.x, c.y + 1}))
-            result |= L'⠂';
+            result |= U'⠂';
         if (engine_.alive_at({c.x, c.y + 2}))
-            result |= L'⠄';
+            result |= U'⠄';
         if (engine_.alive_at({c.x, c.y + 3}))
-            result |= L'⡀';
+            result |= U'⡀';
         if (engine_.alive_at({c.x + 1, c.y}))
-            result |= L'⠈';
+            result |= U'⠈';
         if (engine_.alive_at({c.x + 1, c.y + 1}))
-            result |= L'⠐';
+            result |= U'⠐';
         if (engine_.alive_at({c.x + 1, c.y + 2}))
-            result |= L'⠠';
+            result |= U'⠠';
         if (engine_.alive_at({c.x + 1, c.y + 3}))
-            result |= L'⢀';
+            result |= U'⢀';
         return result;
     }
 
@@ -348,8 +348,8 @@ class GoL_widget : public ox::Widget {
     {
         auto b = this->braille_at(c);
         // wrapping increment
-        if (b == L'⣿')
-            b = L'⠀';
+        if (b == U'⣿')
+            b = U'⠀';
         else
             ++b;
         change_state(c, b);
@@ -359,56 +359,56 @@ class GoL_widget : public ox::Widget {
     {
         auto b = this->braille_at(c);
         // wrapping decrement
-        if (b == L'⠀')
-            b = L'⣿';
+        if (b == U'⠀')
+            b = U'⣿';
         else
             --b;
         change_state(c, b);
     }
 
-    auto has_bit_set(wchar_t subject, wchar_t bit) -> bool
+    auto has_bit_set(char32_t subject, char32_t bit) -> bool
     {
-        return (subject - L'⠀') & (bit - L'⠀');
+        return (subject - U'⠀') & (bit - U'⠀');
     }
 
-    void change_state(Coordinate c, wchar_t bits)
+    void change_state(Coordinate c, char32_t bits)
     {
-        if (has_bit_set(bits, L'⠁'))
+        if (has_bit_set(bits, U'⠁'))
             engine_.create_life(c);
         else
             engine_.kill(c);
 
-        if (has_bit_set(bits, L'⠂'))
+        if (has_bit_set(bits, U'⠂'))
             engine_.create_life({c.x, c.y + 1});
         else
             engine_.kill({c.x, c.y + 1});
 
-        if (has_bit_set(bits, L'⠄'))
+        if (has_bit_set(bits, U'⠄'))
             engine_.create_life({c.x, c.y + 2});
         else
             engine_.kill({c.x, c.y + 2});
 
-        if (has_bit_set(bits, L'⡀'))
+        if (has_bit_set(bits, U'⡀'))
             engine_.create_life({c.x, c.y + 3});
         else
             engine_.kill({c.x, c.y + 3});
 
-        if (has_bit_set(bits, L'⠈'))
+        if (has_bit_set(bits, U'⠈'))
             engine_.create_life({c.x + 1, c.y});
         else
             engine_.kill({c.x + 1, c.y});
 
-        if (has_bit_set(bits, L'⠐'))
+        if (has_bit_set(bits, U'⠐'))
             engine_.create_life({c.x + 1, c.y + 1});
         else
             engine_.kill({c.x + 1, c.y + 1});
 
-        if (has_bit_set(bits, L'⠠'))
+        if (has_bit_set(bits, U'⠠'))
             engine_.create_life({c.x + 1, c.y + 2});
         else
             engine_.kill({c.x + 1, c.y + 2});
 
-        if (has_bit_set(bits, L'⢀'))
+        if (has_bit_set(bits, U'⢀'))
             engine_.create_life({c.x + 1, c.y + 3});
         else
             engine_.kill({c.x + 1, c.y + 3});

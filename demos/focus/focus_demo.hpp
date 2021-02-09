@@ -18,16 +18,16 @@ inline auto focus_box(ox::Focus_policy policy) -> std::unique_ptr<ox::Widget>
     using namespace ox::pipe;
 
     /// Focus_policy to string
-    auto to_string = [](ox::Focus_policy p) -> wchar_t const* {
+    auto to_string = [](ox::Focus_policy p) -> char32_t const* {
         switch (p) {
             using namespace ox;
-            case Focus_policy::None: return L"None";
-            case Focus_policy::Tab: return L"Tab";
-            case Focus_policy::Click: return L"Click";
-            case Focus_policy::Strong: return L"Strong";
-            case Focus_policy::Direct: return L"Direct";
+            case Focus_policy::None: return U"None";
+            case Focus_policy::Tab: return U"Tab";
+            case Focus_policy::Click: return U"Click";
+            case Focus_policy::Strong: return U"Strong";
+            case Focus_policy::Direct: return U"Direct";
         }
-        return L"";
+        return U"";
     };
 
     /// Remove tab focus from \p p.

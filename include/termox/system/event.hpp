@@ -20,7 +20,7 @@ struct Paint_event {
 
 struct Key_press_event {
     Widget_ref receiver;
-    ox::Key key;
+    Key key;
 };
 
 struct Mouse_press_event {

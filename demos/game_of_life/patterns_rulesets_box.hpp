@@ -46,19 +46,19 @@ class Selection_page : public ox::layout::Vertical<> {
     }
 
    public:
-    sl::Signal<void(std::wstring const& name)>& selection_made =
+    sl::Signal<void(std::u32string const& name)>& selection_made =
         list.button_pressed;
 
    public:
-    void add_option(std::wstring const& name) { list.add_button(name); }
+    void add_option(std::u32string const& name) { list.add_button(name); }
 };
 
 /// Stack of patterns and rules pages.
 class Patterns_rulesets_box : public ox::layout::Stack<Selection_page> {
    public:
     // The String is for the GoTo Button
-    Selection_page& patterns = this->make_page(L"Rulesets");
-    Selection_page& rulesets = this->make_page(L"Patterns");
+    Selection_page& patterns = this->make_page(U"Rulesets");
+    Selection_page& rulesets = this->make_page(U"Patterns");
 
    public:
     Patterns_rulesets_box()

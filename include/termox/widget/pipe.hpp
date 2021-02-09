@@ -200,7 +200,7 @@ template <typename Widget_t,
                                     int> = 0>
 auto operator|(Widget_t&& w, Background_color bg) -> decltype(auto)
 {
-    get(w).brush.add_traits(bg);
+    get(w).brush.background = Color{bg.value};
     get(w).update();
     return std::forward<Widget_t>(w);
 }
@@ -211,7 +211,7 @@ template <typename Widget_t,
                                     int> = 0>
 auto operator|(Widget_t&& w, Foreground_color fg) -> decltype(auto)
 {
-    get(w).brush.add_traits(fg);
+    get(w).brush.foreground = Color{fg.value};
     get(w).update();
     return std::forward<Widget_t>(w);
 }
@@ -222,7 +222,7 @@ template <typename Widget_t,
                                     int> = 0>
 auto operator|(Widget_t&& w, Trait t) -> decltype(auto)
 {
-    get(w).brush.add_traits(t);
+    get(w).brush.traits.insert(t);
     get(w).update();
     return std::forward<Widget_t>(w);
 }
@@ -233,7 +233,7 @@ namespace ox::pipe {
 inline auto discard(Trait t)
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).brush.remove_traits(t);
+        get(w).brush.traits.remove(t);
         get(w).update();
         return std::forward<decltype(w)>(w);
     };
@@ -242,7 +242,7 @@ inline auto discard(Trait t)
 inline auto clear_traits()
 {
     return [](auto&& w) -> decltype(auto) {
-        get(w).brush.clear_traits();
+        get(w).brush.traits = Trait::None;
         get(w).update();
         return std::forward<decltype(w)>(w);
     };
@@ -791,20 +791,59 @@ using Can_make_glyph_from_t =
                      int>;
 }
 
-/// Sets traits given to each wall of the border.
-template <typename... Traits>
-auto walls(Traits... a)
+/// Set traits given to each wall of the border.
+inline auto walls(Traits traits)
 {
     return [=](auto&& w) -> decltype(auto) {
         auto& x = get(w);
-        x.border.segments.north.brush.add_traits(a...);
-        x.border.segments.south.brush.add_traits(a...);
-        x.border.segments.east.brush.add_traits(a...);
-        x.border.segments.west.brush.add_traits(a...);
-        x.border.segments.north_east.brush.add_traits(a...);
-        x.border.segments.north_west.brush.add_traits(a...);
-        x.border.segments.south_east.brush.add_traits(a...);
-        x.border.segments.south_west.brush.add_traits(a...);
+        x.border.segments.north.brush.traits.insert(traits);
+        x.border.segments.south.brush.traits.insert(traits);
+        x.border.segments.east.brush.traits.insert(traits);
+        x.border.segments.west.brush.traits.insert(traits);
+        x.border.segments.north_east.brush.traits.insert(traits);
+        x.border.segments.north_west.brush.traits.insert(traits);
+        x.border.segments.south_east.brush.traits.insert(traits);
+        x.border.segments.south_west.brush.traits.insert(traits);
+        x.update();
+        return std::forward<decltype(w)>(w);
+    };
+}
+
+/// Set the foreground color given to each wall of the border.
+inline auto walls(Foreground_color c)
+{
+    return [=](auto&& w) -> decltype(auto) {
+        auto& x          = get(w);
+        auto const color = Color{c.value};
+
+        x.border.segments.north.brush.foreground      = color;
+        x.border.segments.south.brush.foreground      = color;
+        x.border.segments.east.brush.foreground       = color;
+        x.border.segments.west.brush.foreground       = color;
+        x.border.segments.north_east.brush.foreground = color;
+        x.border.segments.north_west.brush.foreground = color;
+        x.border.segments.south_east.brush.foreground = color;
+        x.border.segments.south_west.brush.foreground = color;
+        x.update();
+        return std::forward<decltype(w)>(w);
+    };
+}
+
+/// Set the background color given to each wall of the border.
+inline auto walls(Background_color c)
+{
+    return [=](auto&& w) -> decltype(auto) {
+        auto& x          = get(w);
+        auto const color = Color{c.value};
+
+        x.border.segments.north.brush.background      = color;
+        x.border.segments.south.brush.background      = color;
+        x.border.segments.east.brush.background       = color;
+        x.border.segments.west.brush.background       = color;
+        x.border.segments.north_east.brush.background = color;
+        x.border.segments.north_west.brush.background = color;
+        x.border.segments.south_east.brush.background = color;
+        x.border.segments.south_west.brush.background = color;
         x.update();
         return std::forward<decltype(w)>(w);
     };
@@ -1136,10 +1175,10 @@ inline auto squared_corners()
 {
     return [=](auto&& w) -> decltype(auto) {
         auto& x                      = get(w);
-        x.border.segments.north_east = L'┐';
-        x.border.segments.north_west = L'┌';
-        x.border.segments.south_east = L'┘';
-        x.border.segments.south_west = L'└';
+        x.border.segments.north_east = U'┐';
+        x.border.segments.north_west = U'┌';
+        x.border.segments.south_east = U'┘';
+        x.border.segments.south_west = U'└';
         x.update();
         return std::forward<decltype(w)>(w);
     };
@@ -1149,10 +1188,10 @@ inline auto rounded_corners()
 {
     return [=](auto&& w) -> decltype(auto) {
         auto& x                      = get(w);
-        x.border.segments.north_east = L'╮';
-        x.border.segments.north_west = L'╭';
-        x.border.segments.south_east = L'╯';
-        x.border.segments.south_west = L'╰';
+        x.border.segments.north_east = U'╮';
+        x.border.segments.north_west = U'╭';
+        x.border.segments.south_east = U'╯';
+        x.border.segments.south_west = U'╰';
         x.update();
         return std::forward<decltype(w)>(w);
     };
@@ -1162,10 +1201,10 @@ inline auto plus_corners()
 {
     return [=](auto&& w) -> decltype(auto) {
         auto& x                      = get(w);
-        x.border.segments.north_east = L'+';
-        x.border.segments.north_west = L'+';
-        x.border.segments.south_east = L'+';
-        x.border.segments.south_west = L'+';
+        x.border.segments.north_east = U'+';
+        x.border.segments.north_west = U'+';
+        x.border.segments.south_east = U'+';
+        x.border.segments.south_west = U'+';
         x.update();
         return std::forward<decltype(w)>(w);
     };
@@ -1175,14 +1214,14 @@ inline auto asterisk_walls()
 {
     return [=](auto&& w) -> decltype(auto) {
         auto& x                      = get(w);
-        x.border.segments.north      = L'*';
-        x.border.segments.south      = L'*';
-        x.border.segments.east       = L'*';
-        x.border.segments.west       = L'*';
-        x.border.segments.north_east = L'*';
-        x.border.segments.north_west = L'*';
-        x.border.segments.south_east = L'*';
-        x.border.segments.south_west = L'*';
+        x.border.segments.north      = U'*';
+        x.border.segments.south      = U'*';
+        x.border.segments.east       = U'*';
+        x.border.segments.west       = U'*';
+        x.border.segments.north_east = U'*';
+        x.border.segments.north_west = U'*';
+        x.border.segments.south_east = U'*';
+        x.border.segments.south_west = U'*';
         x.update();
         return std::forward<decltype(w)>(w);
     };
@@ -1192,14 +1231,14 @@ inline auto doubled_walls()
 {
     return [=](auto&& w) -> decltype(auto) {
         auto& x                      = get(w);
-        x.border.segments.north      = L'═';
-        x.border.segments.south      = L'═';
-        x.border.segments.east       = L'║';
-        x.border.segments.west       = L'║';
-        x.border.segments.north_east = L'╗';
-        x.border.segments.north_west = L'╔';
-        x.border.segments.south_east = L'╝';
-        x.border.segments.south_west = L'╚';
+        x.border.segments.north      = U'═';
+        x.border.segments.south      = U'═';
+        x.border.segments.east       = U'║';
+        x.border.segments.west       = U'║';
+        x.border.segments.north_east = U'╗';
+        x.border.segments.north_west = U'╔';
+        x.border.segments.south_east = U'╝';
+        x.border.segments.south_west = U'╚';
         x.update();
         return std::forward<decltype(w)>(w);
     };
@@ -1209,14 +1248,14 @@ inline auto bold_walls()
 {
     return [=](auto&& w) -> decltype(auto) {
         auto& x                      = get(w);
-        x.border.segments.north      = L'━';
-        x.border.segments.south      = L'━';
-        x.border.segments.east       = L'┃';
-        x.border.segments.west       = L'┃';
-        x.border.segments.north_east = L'┓';
-        x.border.segments.north_west = L'┏';
-        x.border.segments.south_east = L'┛';
-        x.border.segments.south_west = L'┗';
+        x.border.segments.north      = U'━';
+        x.border.segments.south      = U'━';
+        x.border.segments.east       = U'┃';
+        x.border.segments.west       = U'┃';
+        x.border.segments.north_east = U'┓';
+        x.border.segments.north_west = U'┏';
+        x.border.segments.south_east = U'┛';
+        x.border.segments.south_west = U'┗';
         x.update();
         return std::forward<decltype(w)>(w);
     };
@@ -1226,10 +1265,10 @@ inline auto dashed_walls_1()
 {
     return [=](auto&& w) -> decltype(auto) {
         auto& x                 = get(w);
-        x.border.segments.north = L'╶';
-        x.border.segments.south = L'╶';
-        x.border.segments.east  = L'╷';
-        x.border.segments.west  = L'╷';
+        x.border.segments.north = U'╶';
+        x.border.segments.south = U'╶';
+        x.border.segments.east  = U'╷';
+        x.border.segments.west  = U'╷';
         x.update();
         return std::forward<decltype(w)>(w);
     };
@@ -1239,10 +1278,10 @@ inline auto bold_dashed_walls_1()
 {
     return [=](auto&& w) -> decltype(auto) {
         auto& x                 = get(w);
-        x.border.segments.north = L'╺';
-        x.border.segments.south = L'╺';
-        x.border.segments.east  = L'╻';
-        x.border.segments.west  = L'╻';
+        x.border.segments.north = U'╺';
+        x.border.segments.south = U'╺';
+        x.border.segments.east  = U'╻';
+        x.border.segments.west  = U'╻';
         x.update();
         return std::forward<decltype(w)>(w);
     };
@@ -1252,10 +1291,10 @@ inline auto dashed_walls_2()
 {
     return [=](auto&& w) -> decltype(auto) {
         auto& x                 = get(w);
-        x.border.segments.north = L'╌';
-        x.border.segments.south = L'╌';
-        x.border.segments.east  = L'╎';
-        x.border.segments.west  = L'╎';
+        x.border.segments.north = U'╌';
+        x.border.segments.south = U'╌';
+        x.border.segments.east  = U'╎';
+        x.border.segments.west  = U'╎';
         x.update();
         return std::forward<decltype(w)>(w);
     };
@@ -1265,10 +1304,10 @@ inline auto bold_dashed_walls_2()
 {
     return [=](auto&& w) -> decltype(auto) {
         auto& x                 = get(w);
-        x.border.segments.north = L'╍';
-        x.border.segments.south = L'╍';
-        x.border.segments.east  = L'╏';
-        x.border.segments.west  = L'╏';
+        x.border.segments.north = U'╍';
+        x.border.segments.south = U'╍';
+        x.border.segments.east  = U'╏';
+        x.border.segments.west  = U'╏';
         x.update();
         return std::forward<decltype(w)>(w);
     };
@@ -1278,10 +1317,10 @@ inline auto dashed_walls_3()
 {
     return [=](auto&& w) -> decltype(auto) {
         auto& x                 = get(w);
-        x.border.segments.north = L'┄';
-        x.border.segments.south = L'┄';
-        x.border.segments.east  = L'┆';
-        x.border.segments.west  = L'┆';
+        x.border.segments.north = U'┄';
+        x.border.segments.south = U'┄';
+        x.border.segments.east  = U'┆';
+        x.border.segments.west  = U'┆';
         x.update();
         return std::forward<decltype(w)>(w);
     };
@@ -1291,10 +1330,10 @@ inline auto bold_dashed_walls_3()
 {
     return [=](auto&& w) -> decltype(auto) {
         auto& x                 = get(w);
-        x.border.segments.north = L'┅';
-        x.border.segments.south = L'┅';
-        x.border.segments.east  = L'┇';
-        x.border.segments.west  = L'┇';
+        x.border.segments.north = U'┅';
+        x.border.segments.south = U'┅';
+        x.border.segments.east  = U'┇';
+        x.border.segments.west  = U'┇';
         x.update();
         return std::forward<decltype(w)>(w);
     };
@@ -1304,10 +1343,10 @@ inline auto dashed_walls_4()
 {
     return [=](auto&& w) -> decltype(auto) {
         auto& x                 = get(w);
-        x.border.segments.north = L'┈';
-        x.border.segments.south = L'┈';
-        x.border.segments.east  = L'┊';
-        x.border.segments.west  = L'┊';
+        x.border.segments.north = U'┈';
+        x.border.segments.south = U'┈';
+        x.border.segments.east  = U'┊';
+        x.border.segments.west  = U'┊';
         x.update();
         return std::forward<decltype(w)>(w);
     };
@@ -1317,10 +1356,10 @@ inline auto bold_dashed_walls_4()
 {
     return [=](auto&& w) -> decltype(auto) {
         auto& x                 = get(w);
-        x.border.segments.north = L'┉';
-        x.border.segments.south = L'┉';
-        x.border.segments.east  = L'┋';
-        x.border.segments.west  = L'┋';
+        x.border.segments.north = U'┉';
+        x.border.segments.south = U'┉';
+        x.border.segments.east  = U'┋';
+        x.border.segments.west  = U'┋';
         x.update();
         return std::forward<decltype(w)>(w);
     };
@@ -1330,14 +1369,14 @@ inline auto block_walls_1()
 {
     return [=](auto&& w) -> decltype(auto) {
         auto& x                      = get(w);
-        x.border.segments.north      = L'█';
-        x.border.segments.south      = L'█';
-        x.border.segments.east       = L'█';
-        x.border.segments.west       = L'█';
-        x.border.segments.north_east = L'█';
-        x.border.segments.north_west = L'█';
-        x.border.segments.south_east = L'█';
-        x.border.segments.south_west = L'█';
+        x.border.segments.north      = U'█';
+        x.border.segments.south      = U'█';
+        x.border.segments.east       = U'█';
+        x.border.segments.west       = U'█';
+        x.border.segments.north_east = U'█';
+        x.border.segments.north_west = U'█';
+        x.border.segments.south_east = U'█';
+        x.border.segments.south_west = U'█';
         x.update();
         return std::forward<decltype(w)>(w);
     };
@@ -1347,14 +1386,14 @@ inline auto block_walls_2()
 {
     return [=](auto&& w) -> decltype(auto) {
         auto& x                      = get(w);
-        x.border.segments.north      = L'▓';
-        x.border.segments.south      = L'▓';
-        x.border.segments.east       = L'▓';
-        x.border.segments.west       = L'▓';
-        x.border.segments.north_east = L'▓';
-        x.border.segments.north_west = L'▓';
-        x.border.segments.south_east = L'▓';
-        x.border.segments.south_west = L'▓';
+        x.border.segments.north      = U'▓';
+        x.border.segments.south      = U'▓';
+        x.border.segments.east       = U'▓';
+        x.border.segments.west       = U'▓';
+        x.border.segments.north_east = U'▓';
+        x.border.segments.north_west = U'▓';
+        x.border.segments.south_east = U'▓';
+        x.border.segments.south_west = U'▓';
         x.update();
         return std::forward<decltype(w)>(w);
     };
@@ -1364,14 +1403,14 @@ inline auto block_walls_3()
 {
     return [=](auto&& w) -> decltype(auto) {
         auto& x                      = get(w);
-        x.border.segments.north      = L'▒';
-        x.border.segments.south      = L'▒';
-        x.border.segments.east       = L'▒';
-        x.border.segments.west       = L'▒';
-        x.border.segments.north_east = L'▒';
-        x.border.segments.north_west = L'▒';
-        x.border.segments.south_east = L'▒';
-        x.border.segments.south_west = L'▒';
+        x.border.segments.north      = U'▒';
+        x.border.segments.south      = U'▒';
+        x.border.segments.east       = U'▒';
+        x.border.segments.west       = U'▒';
+        x.border.segments.north_east = U'▒';
+        x.border.segments.north_west = U'▒';
+        x.border.segments.south_east = U'▒';
+        x.border.segments.south_west = U'▒';
         x.update();
         return std::forward<decltype(w)>(w);
     };
@@ -1381,14 +1420,14 @@ inline auto block_walls_4()
 {
     return [=](auto&& w) -> decltype(auto) {
         auto& x                      = get(w);
-        x.border.segments.north      = L'░';
-        x.border.segments.south      = L'░';
-        x.border.segments.east       = L'░';
-        x.border.segments.west       = L'░';
-        x.border.segments.north_east = L'░';
-        x.border.segments.north_west = L'░';
-        x.border.segments.south_east = L'░';
-        x.border.segments.south_west = L'░';
+        x.border.segments.north      = U'░';
+        x.border.segments.south      = U'░';
+        x.border.segments.east       = U'░';
+        x.border.segments.west       = U'░';
+        x.border.segments.north_east = U'░';
+        x.border.segments.north_west = U'░';
+        x.border.segments.south_east = U'░';
+        x.border.segments.south_west = U'░';
         x.update();
         return std::forward<decltype(w)>(w);
     };
@@ -1398,14 +1437,14 @@ inline auto half_block_walls()
 {
     return [=](auto&& w) -> decltype(auto) {
         auto& x                      = get(w);
-        x.border.segments.north      = Glyph{L'▄', Trait::Inverse};
-        x.border.segments.south      = L'▄';
-        x.border.segments.east       = Glyph{L'▌', Trait::Inverse};
-        x.border.segments.west       = L'▌';
-        x.border.segments.north_east = L'▜';
-        x.border.segments.north_west = L'▛';
-        x.border.segments.south_east = L'▟';
-        x.border.segments.south_west = L'▙';
+        x.border.segments.north      = Glyph{U'▄', Trait::Inverse};
+        x.border.segments.south      = U'▄';
+        x.border.segments.east       = Glyph{U'▌', Trait::Inverse};
+        x.border.segments.west       = U'▌';
+        x.border.segments.north_east = U'▜';
+        x.border.segments.north_west = U'▛';
+        x.border.segments.south_east = U'▟';
+        x.border.segments.south_west = U'▙';
         x.update();
         return std::forward<decltype(w)>(w);
     };
@@ -1415,14 +1454,14 @@ inline auto half_block_inner_walls_1()
 {
     return [=](auto&& w) -> decltype(auto) {
         auto& x                      = get(w);
-        x.border.segments.north      = L'▄';
-        x.border.segments.south      = Glyph{L'▄', Trait::Inverse};
-        x.border.segments.east       = L'▌';
-        x.border.segments.west       = Glyph{L'▌', Trait::Inverse};
-        x.border.segments.north_east = L'▖';
-        x.border.segments.north_west = L'▗';
-        x.border.segments.south_east = L'▘';
-        x.border.segments.south_west = L'▝';
+        x.border.segments.north      = U'▄';
+        x.border.segments.south      = Glyph{U'▄', Trait::Inverse};
+        x.border.segments.east       = U'▌';
+        x.border.segments.west       = Glyph{U'▌', Trait::Inverse};
+        x.border.segments.north_east = U'▖';
+        x.border.segments.north_west = U'▗';
+        x.border.segments.south_east = U'▘';
+        x.border.segments.south_west = U'▝';
         x.update();
         return std::forward<decltype(w)>(w);
     };
@@ -1432,14 +1471,14 @@ inline auto half_block_inner_walls_2()
 {
     return [=](auto&& w) -> decltype(auto) {
         auto& x                      = get(w);
-        x.border.segments.north      = L'▄';
-        x.border.segments.south      = Glyph{L'▄', Trait::Inverse};
-        x.border.segments.east       = L'▌';
-        x.border.segments.west       = Glyph{L'▌', Trait::Inverse};
-        x.border.segments.north_east = L'▞';
-        x.border.segments.north_west = L'▚';
-        x.border.segments.south_east = L'▚';
-        x.border.segments.south_west = L'▞';
+        x.border.segments.north      = U'▄';
+        x.border.segments.south      = Glyph{U'▄', Trait::Inverse};
+        x.border.segments.east       = U'▌';
+        x.border.segments.west       = Glyph{U'▌', Trait::Inverse};
+        x.border.segments.north_east = U'▞';
+        x.border.segments.north_west = U'▚';
+        x.border.segments.south_east = U'▚';
+        x.border.segments.south_west = U'▞';
         x.update();
         return std::forward<decltype(w)>(w);
     };
@@ -1449,10 +1488,10 @@ inline auto block_corners()
 {
     return [=](auto&& w) -> decltype(auto) {
         auto& x                      = get(w);
-        x.border.segments.north_east = L'▝';
-        x.border.segments.north_west = L'▘';
-        x.border.segments.south_east = L'▗';
-        x.border.segments.south_west = L'▖';
+        x.border.segments.north_east = U'▝';
+        x.border.segments.north_west = U'▘';
+        x.border.segments.south_east = U'▗';
+        x.border.segments.south_west = U'▖';
         x.update();
         return std::forward<decltype(w)>(w);
     };
@@ -1462,10 +1501,10 @@ inline auto floating_block_corners()
 {
     return [=](auto&& w) -> decltype(auto) {
         auto& x                      = get(w);
-        x.border.segments.north_east = L'▖';
-        x.border.segments.north_west = L'▗';
-        x.border.segments.south_east = L'▘';
-        x.border.segments.south_west = L'▝';
+        x.border.segments.north_east = U'▖';
+        x.border.segments.north_west = U'▗';
+        x.border.segments.south_east = U'▘';
+        x.border.segments.south_west = U'▝';
         x.update();
         return std::forward<decltype(w)>(w);
     };
@@ -1617,11 +1656,11 @@ inline auto on_key_press(Handler&& op)
 }
 
 template <typename Handler>
-inline auto bind_key(Key key, Handler&& op)
+inline auto bind_key(Key k, Handler&& op)
 {
-    return [op = std::forward<Handler>(op), key](auto&& w) -> decltype(auto) {
-        get(w).key_pressed.connect([&w, &op, key](auto pressed) {
-            if (pressed == key)
+    return [op = std::forward<Handler>(op), k](auto&& w) -> decltype(auto) {
+        get(w).key_pressed.connect([&w, &op, k](auto pressed) {
+            if (pressed == k)
                 op(w);
         });
         return std::forward<decltype(w)>(w);

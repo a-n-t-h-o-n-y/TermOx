@@ -86,7 +86,7 @@ class Rule_edit : public ox::layout::Vertical<> {
 
    private:
     ox::HLabel& label = this->make_child<ox::HLabel>(
-        {L"RuleString[B/S]" | ox::Trait::Underline | ox::Trait::Bold,
+        {U"RuleString[B/S]" | ox::Trait::Underline | ox::Trait::Bold,
          ox::Align::Center});
 
     ox::Line_edit& edit_box_ = this->make_child<ox::Line_edit>();
@@ -98,7 +98,7 @@ struct Start_pause_btns : ox::Toggle_button {
     sl::Signal<void()>& pause_requested = bottom.pressed;
 
    public:
-    Start_pause_btns() : Toggle_button{L"Start", L"Pause"}
+    Start_pause_btns() : Toggle_button{U"Start", U"Pause"}
     {
         using namespace ox;
         using namespace ox::pipe;
@@ -114,7 +114,7 @@ struct Interval_box : ox::layout::Horizontal<> {
     ox::Labeled_number_edit<unsigned>& value_edit =
         this->make_child<ox::Labeled_number_edit<unsigned>>("Interval ", 40);
 
-    ox::HLabel& units = this->make_child<ox::HLabel>({L"ms"});
+    ox::HLabel& units = this->make_child<ox::HLabel>({U"ms"});
 
     sl::Signal<void(unsigned)>& value_set = value_edit.value_set;
 
@@ -131,8 +131,8 @@ struct Interval_box : ox::layout::Horizontal<> {
 
 struct Grid_hi_res : ox::layout::Horizontal<ox::HCheckbox_label> {
    public:
-    Child_t& grid_box   = this->make_child({L"Grid"});
-    Child_t& hi_res_box = this->make_child({L"Hi-Res"});
+    Child_t& grid_box   = this->make_child({U"Grid"});
+    Child_t& hi_res_box = this->make_child({U"Hi-Res"});
 
    public:
     Grid_hi_res()
@@ -154,7 +154,7 @@ struct Controls_box : ox::layout::Vertical<> {
     Widget& break_1                    = this->append_child(make_break());
     Grid_hi_res& grid_hi_res           = this->make_child<Grid_hi_res>();
     ox::HCheckbox_label& rainbow_btn =
-        this->make_child<ox::HCheckbox_label>({L"Rainbow Mode"});
+        this->make_child<ox::HCheckbox_label>({U"Rainbow Mode"});
     Widget& break_2      = this->append_child(make_break());
     Rule_edit& rule_edit = this->make_child<Rule_edit>();
     Widget& break_3      = this->append_child(make_break());

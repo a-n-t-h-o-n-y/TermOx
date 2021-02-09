@@ -47,30 +47,30 @@ class Palette_picker : public ox::Labeled_cycle_box {
     Palette_picker() : Labeled_cycle_box{"Palette"}
     {
         using namespace ox;
-        this->append_option(L"Dawn Bringer 16", dawn_bringer16::palette);
-        this->append_option(L"Dawn Bringer 32", dawn_bringer32::palette);
-        this->append_option(L"Basic 16", basic::palette);
-        this->append_option(L"Basic 8", basic8::palette);
-        this->append_option(L"EN 4", en4::palette);
-        this->append_option(L"Stormy 6", stormy6::palette);
-        this->append_option(L"Teletext", teletext::palette);
-        this->append_option(L"Gameboy", gameboy::palette);
-        this->append_option(L"Gameboy Pocket", gameboy_pocket::palette);
-        this->append_option(L"NES", nes::palette);
-        this->append_option(L"CGA", cga::palette);
-        this->append_option(L"Amstrad CPC", amstrad_cpc::palette);
-        this->append_option(L"Early MSFT Windows", windows::palette);
-        this->append_option(L"Apple II", apple_ii::palette);
-        this->append_option(L"Macintosh II", macintosh_ii::palette);
-        this->append_option(L"MSX", msx::palette);
-        this->append_option(L"ZX Spectrum", zx_spectrum::palette);
-        this->append_option(L"Thomson M05", thomson_m05::palette);
-        this->append_option(L"SECAM", secam::palette);
-        this->append_option(L"Commodore VIC-20", commodore_vic20::palette);
-        this->append_option(L"Commodore 64", commodore_64::palette);
-        this->append_option(L"Windows Console", windows_console::palette);
-        this->append_option(L"Atelier Savanna", savanna::palette);
-        this->append_option(L"Ashes", ashes::palette);
+        this->append_option(U"Dawn Bringer 16", dawn_bringer16::palette);
+        this->append_option(U"Dawn Bringer 32", dawn_bringer32::palette);
+        this->append_option(U"Basic 16", basic::palette);
+        this->append_option(U"Basic 8", basic8::palette);
+        this->append_option(U"EN 4", en4::palette);
+        this->append_option(U"Stormy 6", stormy6::palette);
+        this->append_option(U"Teletext", teletext::palette);
+        this->append_option(U"Gameboy", gameboy::palette);
+        this->append_option(U"Gameboy Pocket", gameboy_pocket::palette);
+        this->append_option(U"NES", nes::palette);
+        this->append_option(U"CGA", cga::palette);
+        this->append_option(U"Amstrad CPC", amstrad_cpc::palette);
+        this->append_option(U"Early MSFT Windows", windows::palette);
+        this->append_option(U"Apple II", apple_ii::palette);
+        this->append_option(U"Macintosh II", macintosh_ii::palette);
+        this->append_option(U"MSX", msx::palette);
+        this->append_option(U"ZX Spectrum", zx_spectrum::palette);
+        this->append_option(U"Thomson M05", thomson_m05::palette);
+        this->append_option(U"SECAM", secam::palette);
+        this->append_option(U"Commodore VIC-20", commodore_vic20::palette);
+        this->append_option(U"Commodore 64", commodore_64::palette);
+        this->append_option(U"Windows Console", windows_console::palette);
+        this->append_option(U"Atelier Savanna", savanna::palette);
+        this->append_option(U"Ashes", ashes::palette);
     }
 
    private:

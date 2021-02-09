@@ -37,9 +37,9 @@ not implemented yet.
 bool paint_event() override
 {
     auto p = Painter{*this};
-    p.put(L'X' | Trait::Bold, {3, 5});
-    p.line(L'-', {0, 0}, {0, this->height() - 1});
-    p.fill(L'#', Point{7, 2}, Area{5, 5});
+    p.put(U'X' | Trait::Bold, {3, 5});
+    p.line(U'-', {0, 0}, {0, this->height() - 1});
+    p.fill(U'#', Point{7, 2}, Area{5, 5});
     return Widget::paint_event();
 }
 ```

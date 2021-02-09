@@ -39,7 +39,7 @@ class Label : public Widget {
      *  \param extra_right     Align::Center takes this into account
      *  \param growth_strategy If the Label is resized to fit the text or not.
      */
-    explicit Label(Glyph_string text       = L"",
+    explicit Label(Glyph_string text       = U"",
                    Align alignment         = Align::Left,
                    std::size_t extra_left  = 0uL,
                    std::size_t extra_right = 0uL,
@@ -301,7 +301,7 @@ class Label_wrapper : public Wrapper_layout<Widget> {
     /// Construct a new Label and wrapped Widget_t.
     /** Only takes Label constructor args, if you need to pass in args to the
      *  wrapped Widget_t, then use the Label::Parameters overload. */
-    explicit Label_wrapper(Glyph_string text       = L"",
+    explicit Label_wrapper(Glyph_string text       = U"",
                            Align alignment         = Align::Left,
                            std::size_t extra_left  = 0uL,
                            std::size_t extra_right = 0uL,
@@ -417,7 +417,7 @@ auto label_left(typename Label<Layout_t>::Parameters p, Args&&... args)
 /** Only takes Label constructor args, if you need to pass in args to the
  *  wrapped Widget_t, then use the Label::Parameters overload. */
 template <template <typename> typename Layout_t, typename Widget_t>
-auto label_left(Glyph_string text       = L"",
+auto label_left(Glyph_string text       = U"",
                 Align alignment         = Align::Left,
                 std::size_t extra_left  = 0uL,
                 std::size_t extra_right = 0uL,
@@ -443,7 +443,7 @@ auto label_right(typename Label<Layout_t>::Parameters p, Args&&... args)
 /** Only takes Label constructor args, if you need to pass in args to the
  *  wrapped Widget_t, then use the Label::Parameters overload. */
 template <template <typename> typename Layout_t, typename Widget_t>
-auto label_right(Glyph_string text       = L"",
+auto label_right(Glyph_string text       = U"",
                  Align alignment         = Align::Left,
                  std::size_t extra_left  = 0uL,
                  std::size_t extra_right = 0uL,
@@ -469,7 +469,7 @@ auto label_top(typename Label<Layout_t>::Parameters p, Args&&... args)
 /** Only takes Label constructor args, if you need to pass in args to the
  *  wrapped Widget_t, then use the Label::Parameters overload. */
 template <template <typename> typename Layout_t, typename Widget_t>
-auto label_top(Glyph_string text        = L"",
+auto label_top(Glyph_string text        = U"",
                Align alignment          = Align::Left,
                std::size_t extra_top    = 0uL,
                std::size_t extra_bottom = 0uL,
@@ -495,7 +495,7 @@ auto label_bottom(typename Label<Layout_t>::Parameters p, Args&&... args)
 /** Only takes Label constructor args, if you need to pass in args to the
  *  wrapped Widget_t, then use the Label::Parameters overload. */
 template <template <typename> typename Layout_t, typename Widget_t>
-auto label_bottom(Glyph_string text        = L"",
+auto label_bottom(Glyph_string text        = U"",
                   Align alignment          = Align::Left,
                   std::size_t extra_top    = 0uL,
                   std::size_t extra_bottom = 0uL,

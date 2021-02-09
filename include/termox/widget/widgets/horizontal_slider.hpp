@@ -27,7 +27,7 @@ class Horizontal_slider : public Widget {
     {
         using namespace pipe;
         *this | fixed_height(1) | strong_focus() |
-            wallpaper(L' ' | bg(Color::Light_gray));
+            wallpaper(U' ' | bg(Color::Light_gray));
     }
 
     void set_percent(float percent);
@@ -49,7 +49,7 @@ class Horizontal_slider : public Widget {
     auto key_press_event(Key k) -> bool override;
 
    private:
-    Glyph indicator_        = L'░';
+    Glyph indicator_        = U'░';
     float percent_progress_ = 0.0;
 
    private:

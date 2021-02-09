@@ -34,7 +34,7 @@ filter(F&& predicate);
 ```cpp
 using namespace ox::pipe;
 my_widget | children() | filter([](const& w) { return w.brush.has_trait(Trait::Bold); })
-          | wallpaper(L'#' | fg(Color::Violet));
+          | wallpaper(U'#' | fg(Color::Violet));
 ```
 
 Filtering can also happen based on the Widget's type. This filter will only

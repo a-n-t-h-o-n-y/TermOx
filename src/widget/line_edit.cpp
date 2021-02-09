@@ -18,16 +18,16 @@ namespace ox {
 void Line_edit::underline(bool enabled)
 {
     if (enabled) {
-        this->set_wallpaper(L' ' | Trait::Underline);
+        this->set_wallpaper(U' ' | Trait::Underline);
         this->set_contents(this->contents() | Trait::Underline);
-        this->insert_brush.add_traits(Trait::Underline);
+        this->insert_brush.traits.insert(Trait::Underline);
     }
     else {
-        this->set_wallpaper(L' ');
+        this->set_wallpaper(U' ');
         auto non_underlined = this->contents();
         non_underlined.remove_traits(Trait::Underline);
         this->set_contents(std::move(non_underlined));
-        this->insert_brush.remove_traits(Trait::Underline);
+        this->insert_brush.traits.remove(Trait::Underline);
     }
     this->update();
 }
@@ -57,12 +57,12 @@ auto Line_edit::key_press_event(Key k) -> bool
     auto const is_printable = [](char c) {
         return std::isprint(c) or std::isspace(c);
     };
-    auto const symbol = to_wchar(k);
+    auto const symbol = key_to_char32(k);
     if (!is_printable(symbol))
         return Textbox::key_press_event(k);
     if (!validator_(symbol))
         return true;
-    if (symbol != L'\0' && on_initial_) {  // First alpha-num input
+    if (symbol != U'\0' && on_initial_) {  // First alpha-num input
         this->clear();
         on_initial_ = false;
     }

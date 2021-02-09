@@ -25,22 +25,22 @@ constexpr auto White       = Color::Foreground;
 /** https://lospec.com/palette-list/color-graphics-adapter */
 inline auto const palette = Palette{
     /* clang-format off */
-    {Black,       ANSI{16}, 0x000000},
-    {Red,         ANSI{17}, 0xaa0000},
-    {Green,       ANSI{18}, 0x00aa00},
-    {Brown,       ANSI{19}, 0xaa5500},
-    {Blue,        ANSI{20}, 0x0000aa},
-    {Magenta,     ANSI{21}, 0xaa00aa},
-    {Cyan,        ANSI{22}, 0x55ffff},
-    {Light_gray,  ANSI{23}, 0xaaaaaa},
-    {Gray,        ANSI{24}, 0x555555},
-    {Light_red,   ANSI{25}, 0xff5555},
-    {Light_green, ANSI{26}, 0x55ff55},
-    {Yellow,      ANSI{27}, 0xffff55},
-    {Teal,        ANSI{28}, 0x00aaaa},
-    {Pink,        ANSI{29}, 0xff55ff},
-    {Light_blue,  ANSI{30}, 0x5555ff},
-    {White,       ANSI{31}, 0xffffff},
+    {Black,       RGB{0x000000}},
+    {Red,         RGB{0xaa0000}},
+    {Green,       RGB{0x00aa00}},
+    {Brown,       RGB{0xaa5500}},
+    {Blue,        RGB{0x0000aa}},
+    {Magenta,     RGB{0xaa00aa}},
+    {Cyan,        RGB{0x55ffff}},
+    {Light_gray,  RGB{0xaaaaaa}},
+    {Gray,        RGB{0x555555}},
+    {Light_red,   RGB{0xff5555}},
+    {Light_green, RGB{0x55ff55}},
+    {Yellow,      RGB{0xffff55}},
+    {Teal,        RGB{0x00aaaa}},
+    {Pink,        RGB{0xff55ff}},
+    {Light_blue,  RGB{0x5555ff}},
+    {White,       RGB{0xffffff}},
     /* clang-format on */
 };
 

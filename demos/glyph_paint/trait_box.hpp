@@ -14,18 +14,18 @@ class Trait_box : public ox::layout::Vertical<> {
     using Checkbox = ox::HCheckbox_label;
 
     struct Top_row : ox::layout::Horizontal<Checkbox> {
-        Checkbox& bold_box = make_child({L"Bold" | ox::Trait::Bold});
-        Checkbox& dim_box  = make_child({L"Dim" | ox::Trait::Dim});
+        Checkbox& bold_box = make_child({U"Bold" | ox::Trait::Bold});
+        Checkbox& dim_box  = make_child({U"Dim" | ox::Trait::Dim});
     };
 
    public:
     Top_row& top_row = make_child<Top_row>();
     Checkbox& inverse_box =
-        make_child<Checkbox>({L"Inverse" | ox::Trait::Inverse});
+        make_child<Checkbox>({U"Inverse" | ox::Trait::Inverse});
     Checkbox& italic_box =
-        make_child<Checkbox>({L"Italic" | ox::Trait::Italic});
+        make_child<Checkbox>({U"Italic" | ox::Trait::Italic});
     Checkbox& underline_box =
-        make_child<Checkbox>({L"Underline" | ox::Trait::Underline});
+        make_child<Checkbox>({U"Underline" | ox::Trait::Underline});
 
    public:
     Trait_box() { this->height_policy.fixed(4); }

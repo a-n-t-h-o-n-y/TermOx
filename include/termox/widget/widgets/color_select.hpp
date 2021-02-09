@@ -19,7 +19,7 @@ namespace ox {
 class Color_tile : public Button {
    public:
     Color_tile(Color c, bool display_number)
-        : color_{std::to_wstring(c.value) | fg(Color::Foreground)},
+        : color_{std::to_string(c.value) | fg(Color::Foreground)},
           number_{display_number}
     {
         using namespace ox::pipe;

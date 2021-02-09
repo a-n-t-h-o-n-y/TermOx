@@ -37,13 +37,13 @@ class Bar : public Layout_t<Widget> {
        public:
         void plus()
         {
-            x_ = L"[+]";
+            x_ = U"[+]";
             this->update();
         }
 
         void minus()
         {
-            x_ = L"[-]";
+            x_ = U"[-]";
             this->update();
         }
 
@@ -55,7 +55,7 @@ class Bar : public Layout_t<Widget> {
         }
 
        private:
-        Glyph_string x_ = L"[+]";
+        Glyph_string x_ = U"[+]";
     };
 
     class Title : public layout::Opposite_t<Layout_t<Widget>> {
@@ -63,7 +63,7 @@ class Bar : public Layout_t<Widget> {
         struct Parameters {
             Glyph_string title;
             Align alignment = is_vertical ? Align::Left : Align::Top;
-            Glyph wallpaper = is_vertical ? L'─' : L'│';
+            Glyph wallpaper = is_vertical ? U'─' : U'│';
         };
 
        public:
@@ -72,7 +72,10 @@ class Bar : public Layout_t<Widget> {
        public:
         Title(Parameters p)
             : centered_text_{this->template make_child<Label<Layout_t>>(
-                  {(L' ' + std::move(p.title) + L' ') | Trait::Bold,
+                  {(Glyph_string{U' '}
+                        .append(std::move(p.title))
+                        .append(U' ')) |
+                       Trait::Bold,
                    p.alignment, extra_left})}
         {
             using namespace ox::pipe;

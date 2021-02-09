@@ -27,8 +27,8 @@ Menu::Menu(Glyph_string title_text)
 {
     this->focus_policy = Focus_policy::Strong;
     title.set_alignment(Align::Center);
-    title.brush.add_traits(Trait::Bold);
-    line_break.set_wallpaper(L'─');
+    title.brush.traits.insert(Trait::Bold);
+    line_break.set_wallpaper(U'─');
 }
 
 auto Menu::insert_item(Glyph_string label, std::size_t index)
@@ -65,22 +65,22 @@ void Menu::select_item(std::size_t index)
     if (items_.empty())
         return;
     auto& previous_btn = items_[selected_index_].button.get();
-    previous_btn.brush.remove_traits(selected_trait_);
+    previous_btn.brush.traits.remove(selected_trait_);
     previous_btn.update();
 
     selected_index_ = index >= items_.size() ? items_.size() - 1 : index;
 
     auto& current_btn = items_[selected_index_].button.get();
-    current_btn.brush.add_traits(selected_trait_);
+    current_btn.brush.traits.insert(selected_trait_);
     current_btn.update();
 }
 
 void Menu::set_selected_trait(Trait const& trait)
 {
     auto& selected_btn = items_[selected_index_].button.get();
-    selected_btn.brush.remove_traits(selected_trait_);
+    selected_btn.brush.traits.remove(selected_trait_);
     selected_trait_ = trait;
-    selected_btn.brush.add_traits(selected_trait_);
+    selected_btn.brush.traits.insert(selected_trait_);
     selected_btn.update();
 }
 

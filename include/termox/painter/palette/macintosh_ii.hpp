@@ -25,22 +25,22 @@ constexpr auto White       = Color::Foreground;
 /** https://lospec.com/palette-list/macintosh-ii */
 inline auto const palette = Palette{
     /* clang-format off */
-    {Black,       ANSI{16}, 0x000000},
-    {Red,         ANSI{17}, 0xdc0000},
-    {Green,       ANSI{18}, 0x006500},
-    {Brown,       ANSI{19}, 0x653600},
-    {Indigo,      ANSI{20}, 0x360097},
-    {Magenta,     ANSI{21}, 0xff0097},
-    {Light_blue,  ANSI{22}, 0x0097ff},
-    {Silver,      ANSI{23}, 0xb9b9b9},
-    {Dark_gray,   ANSI{24}, 0x454545},
-    {Light_brown, ANSI{25}, 0x976536},
-    {Light_green, ANSI{26}, 0x00a800},
-    {Yellow,      ANSI{27}, 0xffff00},
-    {Blue,        ANSI{28}, 0x0000ca},
-    {Orange,      ANSI{29}, 0xff6500},
-    {Gray,        ANSI{30}, 0x868686},
-    {White,       ANSI{31}, 0xffffff},
+    {Black,       RGB{0x000000}},
+    {Red,         RGB{0xdc0000}},
+    {Green,       RGB{0x006500}},
+    {Brown,       RGB{0x653600}},
+    {Indigo,      RGB{0x360097}},
+    {Magenta,     RGB{0xff0097}},
+    {Light_blue,  RGB{0x0097ff}},
+    {Silver,      RGB{0xb9b9b9}},
+    {Dark_gray,   RGB{0x454545}},
+    {Light_brown, RGB{0x976536}},
+    {Light_green, RGB{0x00a800}},
+    {Yellow,      RGB{0xffff00}},
+    {Blue,        RGB{0x0000ca}},
+    {Orange,      RGB{0xff6500}},
+    {Gray,        RGB{0x868686}},
+    {White,       RGB{0xffffff}},
     /* clang-format on */
 };
 

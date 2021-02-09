@@ -20,7 +20,7 @@ class Confirm_button : public layout::Stack<> {
     class Confirm_page : public layout::Horizontal<Button> {
        public:
         Child_t& confirm_btn;
-        Child_t& exit_btn = this->make_child(L"X");
+        Child_t& exit_btn = this->make_child(U"X");
 
        public:
         explicit Confirm_page(Glyph_string confirm_text)

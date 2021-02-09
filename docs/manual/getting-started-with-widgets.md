@@ -28,7 +28,7 @@ using namespace ox;
 class App : public Widget {
     auto paint_event() -> bool override
     {
-        auto text = L"╔═Hello═World═╝" | fg(Color::Green) | Trait::Bold;
+        auto text = U"╔═Hello═World═╝" | fg(Color::Green) | Trait::Bold;
         auto p    = Painter{*this};
         p.put(text, {10, 5});
         return Widget::paint_event();
@@ -73,7 +73,7 @@ library internals take care of calling this method when needed.
 ---
 
 ```cpp
-auto text = L"╔═Hello═World═╝" | fg(Color::Green) | Trait::Bold;
+auto text = U"╔═Hello═World═╝" | fg(Color::Green) | Trait::Bold;
 ```
 
 Create a [`Glyph_string`](glyph-string.md) with a foreground [Color](colors.md)

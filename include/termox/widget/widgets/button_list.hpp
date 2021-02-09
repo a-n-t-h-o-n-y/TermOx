@@ -29,10 +29,10 @@ class Button_list : public layout::Opposite_t<Layout_t<Widget>> {
         static auto constexpr is_vertical = layout::is_vertical_v<Base_t>;
 
        public:
-        sl::Signal<void(std::wstring const& name)> button_pressed;
+        sl::Signal<void(std::u32string const& name)> button_pressed;
 
        public:
-        auto add_button(std::wstring const& name) -> Button&
+        auto add_button(std::u32string const& name) -> Button&
         {
             using namespace ox::pipe;
             auto& btn = this->template make_child<Button>(name) |
@@ -52,7 +52,7 @@ class Button_list : public layout::Opposite_t<Layout_t<Widget>> {
     Button_list_impl& btn_list = this->template make_child<Button_list_impl>();
 
    public:
-    sl::Signal<void(std::wstring const& name)>& button_pressed =
+    sl::Signal<void(std::u32string const& name)>& button_pressed =
         btn_list.button_pressed;
 
    public:
@@ -61,7 +61,7 @@ class Button_list : public layout::Opposite_t<Layout_t<Widget>> {
    public:
     /// Returns reference to the Button added.
     /** The Brush and the 'pressed' signal are accessible to customize. */
-    auto add_button(std::wstring const& name) -> Button&
+    auto add_button(std::u32string const& name) -> Button&
     {
         return btn_list.add_button(name);
     }

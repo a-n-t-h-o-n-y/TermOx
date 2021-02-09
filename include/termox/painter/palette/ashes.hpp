@@ -18,16 +18,16 @@ constexpr auto White       = Color::Foreground;
 /// Ashes scheme by Jannik Siebert (https://github.com/janniks)
 inline auto const palette = Palette{
     /* clang-format off */
-    {Black,       ANSI{16}, 0x1c2023},
-    {Red,         ANSI{17}, 0xc795ae},
-    {Green,       ANSI{18}, 0x95c7ae},
-    {Brown,       ANSI{19}, 0xc7ae95},
-    {Blue,        ANSI{20}, 0x95aec7},
-    {Violet,      ANSI{21}, 0xae95c7},
-    {Light_green, ANSI{22}, 0xaec795},
-    {Silver,      ANSI{23}, 0xc7ccd1},
-    {Gray,        ANSI{24}, 0x747c84},
-    {White,       ANSI{25}, 0xf3f4f5},
+    {Black,       RGB{0x1c2023}},
+    {Red,         RGB{0xc795ae}},
+    {Green,       RGB{0x95c7ae}},
+    {Brown,       RGB{0xc7ae95}},
+    {Blue,        RGB{0x95aec7}},
+    {Violet,      RGB{0xae95c7}},
+    {Light_green, RGB{0xaec795}},
+    {Silver,      RGB{0xc7ccd1}},
+    {Gray,        RGB{0x747c84}},
+    {White,       RGB{0xf3f4f5}},
     /* clang-format on */
 };
 

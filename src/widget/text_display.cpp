@@ -6,7 +6,7 @@
 #include <string>
 #include <utility>
 
-#include <iostream>  //temp
+#include <type_traits>  //temp
 
 #include <termox/painter/glyph_string.hpp>
 #include <termox/painter/painter.hpp>
@@ -23,13 +23,8 @@ void Text_display::insert(Glyph_string text, std::size_t index)
         this->append(std::move(text));
         return;
     }
-    for (auto& glyph : text) {
-        for (auto i = 0; i < Trait_count; ++i) {
-            auto const a = static_cast<Trait>(i);
-            if (this->insert_brush.has_trait(a))
-                glyph.brush.add_traits(a);
-        }
-    }
+    for (auto& glyph : text)
+        glyph.brush.traits |= this->insert_brush.traits;
     contents_.insert(std::begin(contents_) + index, std::begin(text),
                      std::end(text));
     this->update();
@@ -38,13 +33,8 @@ void Text_display::insert(Glyph_string text, std::size_t index)
 
 void Text_display::append(Glyph_string text)
 {
-    for (auto& glyph : text) {
-        for (auto i = 0; i < Trait_count; ++i) {
-            auto const a = static_cast<Trait>(i);
-            if (this->insert_brush.has_trait(a))
-                glyph.brush.add_traits(a);
-        }
-    }
+    for (auto& glyph : text)
+        glyph.brush.traits |= this->insert_brush.traits;
     contents_.append(text);
     this->update();
     contents_modified(contents_);
@@ -169,10 +159,10 @@ auto Text_display::paint_event() -> bool
 }
 
 // TODO: Implement tab character. and newline?
-// if (glyph.symbol == L'\n') {
+// if (glyph.symbol == U'\n') {
 //     move_cursor(*widget_, 0, widget_->cursor_y() + 1);
 //     return;
-// } else if (glyph.symbol == L'\t') {
+// } else if (glyph.symbol == U'\t') {
 //     // TODO move cursor to next x coord divisible by tablength
 //     // textbox should account for it.
 //     return;
@@ -191,9 +181,9 @@ void Text_display::update_display(std::size_t from_line)
     auto last_space  = 0uL;
     for (auto i = begin; i < contents_.size(); ++i) {
         ++length;
-        if (this->word_wrap_enabled() and contents_.at(i).symbol == L' ')
+        if (this->word_wrap_enabled() and contents_.at(i).symbol == U' ')
             last_space = length;
-        if (contents_.at(i).symbol == L'\n') {
+        if (contents_.at(i).symbol == U'\n') {
             display_state_.push_back(Line_info{start_index, length - 1});
             start_index += length;
             length = 0;

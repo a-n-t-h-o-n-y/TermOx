@@ -26,7 +26,7 @@ namespace demos {
 
 class Demo_menu : public ox::Menu_stack {
    public:
-    Demo_menu() : Menu_stack{L"Demos"}
+    Demo_menu() : Menu_stack{U"Demos"}
     {
         using namespace ox;
         using namespace ox::pipe;
@@ -36,37 +36,37 @@ class Demo_menu : public ox::Menu_stack {
             this->Menu_stack::goto_menu();
         });
 
-        // this->make_page<comp::Idea>(L"Idea");
+        // this->make_page<comp::Idea>(U"Idea");
 
         // clang-format off
-        // this->append_page(L"Composites",
+        // this->append_page(U"Composites",
         //     layout::vertical
         //     (
         //         ox::make<Checkbox1>(),
-        //         textbox(L"WOW!") | bg(Color::Green) | Trait::Bold,
+        //         textbox(U"WOW!") | bg(Color::Green) | Trait::Bold,
         //         layout::horizontal
         //         (
-        //             textbox(L"Left") | bg(Color::Light_blue),
-        //             textbox(L"Right") | bg(Color::Violet)
+        //             textbox(U"Left") | bg(Color::Light_blue),
+        //             textbox(U"Right") | bg(Color::Violet)
         //         ),
         //         make<Checkbox2>(),
-        //         hcheckbox_label({L"A Box"})
+        //         hcheckbox_label({U"A Box"})
         //     )
         // );
         // clang-format on
 
-        this->make_page<snake::Snake_game>(L"Snake Game");
-        this->make_page<gol::GoL_demo>(L"Game of Life");
-        this->make_page<Notepad>(L"Notepad");
-        this->make_page<paint::Glyph_paint>(L"Glyph Paint");
-        this->append_page(L"Animated Widget", animation::build_demo());
-        this->append_page(L"Focus", focus::build_demo());
-        this->make_page<colors::Palette_demo>(L"Color Palettes");
-        this->make_page<graph::Graph_demo>(L"Graph");
-        this->make_page<comp::Two_lists>(L"Check Lists");
+        this->make_page<snake::Snake_game>(U"Snake Game");
+        this->make_page<gol::GoL_demo>(U"Game of Life");
+        this->make_page<Notepad>(U"Notepad");
+        this->make_page<paint::Glyph_paint>(U"Glyph Paint");
+        this->append_page(U"Animated Widget", animation::build_demo());
+        this->append_page(U"Focus", focus::build_demo());
+        this->make_page<colors::Palette_demo>(U"Color Palettes");
+        this->make_page<graph::Graph_demo>(U"Graph");
+        this->make_page<comp::Two_lists>(U"Check Lists");
 
-        // this->make_page<palette::Palette_demo>(L"Color Palette");
-        // this->make_page<layout_demo::Layout_demo>(L"Layouts");
+        // this->make_page<palette::Palette_demo>(U"Color Palette");
+        // this->make_page<layout_demo::Layout_demo>(U"Layouts");
     }
 };
 

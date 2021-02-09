@@ -25,22 +25,22 @@ constexpr auto White        = Color::Foreground;
 /** https://lospec.com/palette-list/commodore-vic-20 */
 inline auto const palette = Palette{
     /* clang-format off */
-    {Black,        ANSI{16}, 0x000000},
-    {Dark_red,     ANSI{17}, 0x772d26},
-    {Green,        ANSI{18}, 0x559e4a},
-    {Olive,        ANSI{19}, 0xbdcc71},
-    {Blue,         ANSI{20}, 0x42348b},
-    {Violet,       ANSI{21}, 0xa85fb4},
-    {Brown,        ANSI{22}, 0xa8734a},
-    {Cyan,         ANSI{23}, 0x85d4dc},
-    {Red,          ANSI{24}, 0xb66862},
-    {Light_green,  ANSI{25}, 0x92df87},
-    {Yellow,       ANSI{26}, 0xffffb0},
-    {Light_blue,   ANSI{27}, 0x7e70ca},
-    {Light_violet, ANSI{28}, 0xe99df5},
-    {Sand,         ANSI{29}, 0xe9b287},
-    {Light_cyan,   ANSI{30}, 0xc5ffff},
-    {White,        ANSI{31}, 0xffffff},
+    {Black,        RGB{0x000000}},
+    {Dark_red,     RGB{0x772d26}},
+    {Green,        RGB{0x559e4a}},
+    {Olive,        RGB{0xbdcc71}},
+    {Blue,         RGB{0x42348b}},
+    {Violet,       RGB{0xa85fb4}},
+    {Brown,        RGB{0xa8734a}},
+    {Cyan,         RGB{0x85d4dc}},
+    {Red,          RGB{0xb66862}},
+    {Light_green,  RGB{0x92df87}},
+    {Yellow,       RGB{0xffffb0}},
+    {Light_blue,   RGB{0x7e70ca}},
+    {Light_violet, RGB{0xe99df5}},
+    {Sand,         RGB{0xe9b287}},
+    {Light_cyan,   RGB{0xc5ffff}},
+    {White,        RGB{0xffffff}},
     /* clang-format on */
 };
 

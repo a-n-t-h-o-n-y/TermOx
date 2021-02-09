@@ -39,36 +39,36 @@ Options_B::Options_B()
     using namespace ox;
     using namespace ox::pipe;
 
-    space1 | wallpaper(L'─');
+    space1 | wallpaper(U'─');
     palette_label | align_center();
     back_btn | bg(Color::Light_gray) | fg(Color::Black);
     palette_box | bg(Color::White) | fg(Color::Black);
 
     auto const palettes = std::array{
-        std::pair{L"Dawn Bringer 16", dawn_bringer16::palette},
-        std::pair{L"Dawn Bringer 32", dawn_bringer32::palette},
-        std::pair{L"Basic 16", basic::palette},
-        std::pair{L"Basic 8", basic8::palette},
-        std::pair{L"EN 4", en4::palette},
-        std::pair{L"Stormy 6", stormy6::palette},
-        std::pair{L"Savanna VIM", savanna::palette},
-        std::pair{L"Ashes VIM", ashes::palette},
-        std::pair{L"Amstrad CPC", amstrad_cpc::palette},
-        std::pair{L"Apple II", apple_ii::palette},
-        std::pair{L"Macintosh II", macintosh_ii::palette},
-        std::pair{L"CGA", cga::palette},
-        std::pair{L"MSX", msx::palette},
-        std::pair{L"SECAM", secam::palette},
-        std::pair{L"Commodore 64", commodore_64::palette},
-        std::pair{L"Commodore VIC-20", commodore_vic20::palette},
-        std::pair{L"Gameboy", gameboy::palette},
-        std::pair{L"Gameboy Pocket", gameboy_pocket::palette},
-        std::pair{L"NES", nes::palette},
-        std::pair{L"Teletext", teletext::palette},
-        std::pair{L"Thomson M05", thomson_m05::palette},
-        std::pair{L"Early Windows", windows::palette},
-        std::pair{L"Windows Console", windows_console::palette},
-        std::pair{L"ZX Spectrum", zx_spectrum::palette},
+        std::pair{U"Dawn Bringer 16", dawn_bringer16::palette},
+        std::pair{U"Dawn Bringer 32", dawn_bringer32::palette},
+        std::pair{U"Basic 16", basic::palette},
+        std::pair{U"Basic 8", basic8::palette},
+        std::pair{U"EN 4", en4::palette},
+        std::pair{U"Stormy 6", stormy6::palette},
+        std::pair{U"Savanna VIM", savanna::palette},
+        std::pair{U"Ashes VIM", ashes::palette},
+        std::pair{U"Amstrad CPC", amstrad_cpc::palette},
+        std::pair{U"Apple II", apple_ii::palette},
+        std::pair{U"Macintosh II", macintosh_ii::palette},
+        std::pair{U"CGA", cga::palette},
+        std::pair{U"MSX", msx::palette},
+        std::pair{U"SECAM", secam::palette},
+        std::pair{U"Commodore 64", commodore_64::palette},
+        std::pair{U"Commodore VIC-20", commodore_vic20::palette},
+        std::pair{U"Gameboy", gameboy::palette},
+        std::pair{U"Gameboy Pocket", gameboy_pocket::palette},
+        std::pair{U"NES", nes::palette},
+        std::pair{U"Teletext", teletext::palette},
+        std::pair{U"Thomson M05", thomson_m05::palette},
+        std::pair{U"Early Windows", windows::palette},
+        std::pair{U"Windows Console", windows_console::palette},
+        std::pair{U"ZX Spectrum", zx_spectrum::palette},
     };
 
     for (auto const& [name, palette] : palettes) {

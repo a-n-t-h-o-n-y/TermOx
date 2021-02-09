@@ -46,14 +46,14 @@ struct Composites_old : App {
         txbx | fg(Color::Foreground);
 
         // save | add_trait(Trait::Bold, Trait::Underline);
-        // save.brush.add_traits(Trait::Bold, Trait::Underline);
+        // save.brush.traits.insert(Trait::Bold, Trait::Underline);
         save | Trait::Bold | Trait::Underline;
         load | Trait::Bold | Trait::Underline;
 
         // save | Trait::Bold | Trait::Underline;
         // save | Trait::Bold | Trait::Underline;
 
-        // save | remove_traits(Trait::Underline);
+        // save | discard(Trait::Underline);
         save | discard(Trait::Underline);
         save | clear_traits();
         save | on_enable([&txbx]() { txbx.set_contents("Save Enabled"); });
@@ -72,8 +72,8 @@ struct Composites_old : App {
         txbx | on_key_press([&](auto) { txbx | bg(Color::Light_blue); });
 
         using namespace std::literals;
-        save | animate(34ms) | wallpaper(L'X') | wallpaper(std::nullopt);
-        load | wallpaper({L'-', fg(Color::Red)});
+        save | animate(34ms) | wallpaper(U'X') | wallpaper(std::nullopt);
+        load | wallpaper({U'-', fg(Color::Red)});
         load | wallpaper_without_brush() | wallpaper_with_brush();
 
         load | show_cursor() | put_cursor({2, 5});
@@ -111,16 +111,16 @@ struct Composites_old : App {
         // save | can_ignore_height_min();
         // save | cannot_ignore_height_min();
 
-        // txbx | bordered() | block_walls_4() | west_wall(L'▓')
-        //      | north_wall(L'▓') | north_west_corner(L'▓');
+        // txbx | bordered() | block_walls_4() | west_wall(U'▓')
+        //      | north_wall(U'▓') | north_west_corner(U'▓');
 
-        // txbx | bordered() | block_walls_3() | north_west_walls(L'▓');
+        // txbx | bordered() | block_walls_3() | north_west_walls(U'▓');
         txbx | bordered() | asterisk_walls() | plus_corners();
         load | on_mouse_press([&](auto const& m) {
             if (m.modifiers.ctrl)
                 txbx | bg(Color::Orange);
         });
-        // constexpr auto g = L'G' | Trait::Bold;
+        // constexpr auto g = U'G' | Trait::Bold;
         auto gs = "hello" | Trait::Inverse;
     }
 };
@@ -182,25 +182,25 @@ class Idea : public Settings_box {
         using namespace ox;
         using namespace ox::pipe;
 
-        this->get<0>().set_label(L"I'm a BUTTON");
+        this->get<0>().set_label(U"I'm a BUTTON");
         this->get<0>() | on_press([this] { this->get<2>().toggle(); });
 
-        this->get<1>().set_text(L"I'm a LABEL");
+        this->get<1>().set_text(U"I'm a LABEU");
         this->get<2>().check();
 
         this->get<3>() | bg(Color::Dark_gray);
 
-        // this->get<3>() | add_option(L"Option BLACK", [this] {
+        // this->get<3>() | add_option(U"Option BLACK", [this] {
         //     this->get<0>() | bg(Color::Black);
         // });
 
-        this->get<3>().add_option(L"Option BLACK").connect([this] {
+        this->get<3>().add_option(U"Option BLACK").connect([this] {
             this->get<0>() | bg(Color::Black);
         });
-        this->get<3>().add_option(L"Option RED").connect([this] {
+        this->get<3>().add_option(U"Option RED").connect([this] {
             this->get<0>() | bg(Color::Red);
         });
-        this->get<3>().add_option(L"Option GREEN").connect([this] {
+        this->get<3>().add_option(U"Option GREEN").connect([this] {
             this->get<0>() | bg(Color::Green);
         });
 

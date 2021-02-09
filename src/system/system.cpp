@@ -60,13 +60,10 @@ auto System::run() -> int
 {
     if (head_ == nullptr)
         return -1;
-    terminal.initialize();
     head_->enable();
     System::post_event(Resize_event{*System::head(), terminal.area()});
     detail::Focus::set(*head_);
-    auto const exit_code = user_input_loop_.run();
-    terminal.uninitialize();
-    return exit_code;
+    return user_input_loop_.run();
 }
 
 void System::send_event(Event e)

@@ -13,7 +13,7 @@ class Tile : public Widget {
     using Parameters = Glyph;
 
    public:
-    Tile(Glyph g = L' ') : display_{g}
+    Tile(Glyph g = U' ') : display_{g}
     {
         using namespace pipe;
         *this | fixed_width(1) | fixed_height(1);

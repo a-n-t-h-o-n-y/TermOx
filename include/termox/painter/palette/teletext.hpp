@@ -16,14 +16,14 @@ constexpr auto White   = Color::Foreground;
 /// World System Teletext Level 1 Color Palette
 inline auto const palette = Palette{
     /* clang-format off */
-    {Black,   ANSI{16}, 0x000000},
-    {Blue,    ANSI{17}, 0x0000ff},
-    {Red,     ANSI{18}, 0xff0000},
-    {Magenta, ANSI{19}, 0xff00ff},
-    {Lime,    ANSI{20}, 0x00ff00},
-    {Cyan,    ANSI{21}, 0x00ffff},
-    {Yellow,  ANSI{22}, 0xffff00},
-    {White,   ANSI{23}, 0xffffff},
+    {Black,   RGB{0x000000}},
+    {Blue,    RGB{0x0000ff}},
+    {Red,     RGB{0xff0000}},
+    {Magenta, RGB{0xff00ff}},
+    {Lime,    RGB{0x00ff00}},
+    {Cyan,    RGB{0x00ffff}},
+    {Yellow,  RGB{0xffff00}},
+    {White,   RGB{0xffffff}},
     /* clang-format on */
 };
 

@@ -32,7 +32,7 @@ class Cycle_box : public HLabel {
     sl::Signal<void(std::string)> option_changed;
 
    public:
-    Cycle_box() : HLabel{L""}
+    Cycle_box() : HLabel{U""}
     {
         *this | pipe::align_center() | pipe::strong_focus();
     }
@@ -42,7 +42,7 @@ class Cycle_box : public HLabel {
      *  enabled. \p label's string representation is the identifying param. */
     auto add_option(Glyph_string label) -> sl::Signal<void()>&
     {
-        options_.emplace_back(std::move(label));
+        options_.push_back({std::move(label)});
         if (this->size() == 1)
             this->set_current_option(0);
         return options_.back().enabled;
@@ -124,9 +124,8 @@ class Cycle_box : public HLabel {
    private:
     /// Holds an Option's Signal and name.
     struct Option {
-        explicit Option(Glyph_string name_) : name{std::move(name_)} {}
         Glyph_string name;
-        sl::Signal<void()> enabled;
+        sl::Signal<void()> enabled = {};
     };
     std::vector<Option> options_;
     std::size_t index_ = 0uL;
@@ -136,7 +135,7 @@ class Cycle_box : public HLabel {
     auto current_option_label() const -> Glyph_string
     {
         if (options_.empty())
-            return "";
+            return U"";
         return options_[index_].name;
     }
 
@@ -167,9 +166,9 @@ inline auto cycle_box() -> std::unique_ptr<Cycle_box>
 /// A label on the left and a Cycle_box on the right.
 class Labeled_cycle_box : public layout::Horizontal<> {
    public:
-    HLabel& label = make_child<HLabel>(L"");
+    HLabel& label = make_child<HLabel>(U"");
 
-    Tile& div            = make_child<Tile>(L'├');
+    Tile& div            = make_child<Tile>(U'├');
     Cycle_box& cycle_box = make_child<Cycle_box>();
 
    public:

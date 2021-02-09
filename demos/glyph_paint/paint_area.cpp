@@ -14,6 +14,7 @@
 
 #include <signals_light/signal.hpp>
 
+#include <termox/common/u32_to_mb.hpp>
 #include <termox/painter/brush.hpp>
 #include <termox/painter/color.hpp>
 #include <termox/painter/glyph.hpp>
@@ -56,7 +57,7 @@ void Paint_area::write(std::ostream& os)
     for (auto const& [point, glyph] : glyphs_painted_) {
         insert_newline(previous_nl, point, os);
         insert_space(previous_s, point, os);
-        os << ox::utility::wchar_to_bytes(glyph.symbol);
+        os << ox::u32_to_mb(glyph.symbol);
         previous_nl = point;
         previous_s  = point;
     }
@@ -73,7 +74,7 @@ void Paint_area::read(std::istream& is)
         if (!std::iswspace(glyph.symbol))
             glyphs_painted_[at] = glyph;
         ++at.x;
-        if (glyph.symbol == L'\n') {
+        if (glyph.symbol == U'\n') {
             ++at.y;
             at.x = 0uL;
         }
@@ -82,7 +83,7 @@ void Paint_area::read(std::istream& is)
 
 auto Paint_area::key_press_event(Key k) -> bool
 {
-    auto const symbol = to_wchar(k);
+    auto const symbol = key_to_char32(k);
     if (!std::iscntrl(symbol))
         this->set_symbol(symbol);
     auto const w = this->width();
@@ -143,7 +144,7 @@ auto set_symbol(Paint_area& pa) -> sl::Slot<void(Glyph)>
 {
     return link_lifetimes(
         [&pa](Glyph symbol) {
-            if (symbol.symbol != L' ')
+            if (symbol.symbol != U' ')
                 pa.set_symbol(std::move(symbol));
         },
         pa);

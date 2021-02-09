@@ -58,6 +58,10 @@ add_subdirectory(external/Escape)
 # Add Signals-Light
 add_subdirectory(external/signals-light)
 
+if (NOT TARGET Catch2)
+    add_subdirectory(external/Catch2)
+endif()
+
 # Add TermOx
 add_subdirectory(src)
 

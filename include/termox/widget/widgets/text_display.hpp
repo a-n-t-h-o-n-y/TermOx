@@ -9,10 +9,10 @@
 #include <termox/painter/brush.hpp>
 #include <termox/painter/glyph_string.hpp>
 #include <termox/widget/align.hpp>
+#include <termox/widget/point.hpp>
 #include <termox/widget/widget.hpp>
 
 namespace ox {
-struct Point;
 
 /// Non-interactive box to display a given Glyph_string.
 /** Provides operations to change the text, wrap words on spaces, change the

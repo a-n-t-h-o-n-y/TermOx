@@ -24,21 +24,21 @@ constexpr auto White       = Color::Foreground;
 /** https://lospec.com/palette-list/msx */
 inline auto const palette = Palette{
     /* clang-format off */
-    {Black,       ANSI{16}, 0x000000},
-    {Dark_red,    ANSI{17}, 0xb75e51},
-    {Dark_green,  ANSI{18}, 0x3ca042},
-    {Olive,       ANSI{19}, 0xcac15e},
-    {Blue,        ANSI{20}, 0x5955df},
-    {Violet,      ANSI{21}, 0xb565b3},
-    {Cyan,        ANSI{22}, 0x64daee},
-    {Silver,      ANSI{23}, 0xcacaca},
-    {Indigo,      ANSI{24}, 0x7e75f0},
-    {Red,         ANSI{25}, 0xd96459},
-    {Light_green, ANSI{26}, 0x73ce7c},
-    {Brown,       ANSI{27}, 0xddce85},
-    {Light_red,   ANSI{28}, 0xfe877c},
-    {Green,       ANSI{29}, 0x40b64a},
-    {White,       ANSI{30}, 0xffffff},
+    {Black,       RGB{0x000000}},
+    {Dark_red,    RGB{0xb75e51}},
+    {Dark_green,  RGB{0x3ca042}},
+    {Olive,       RGB{0xcac15e}},
+    {Blue,        RGB{0x5955df}},
+    {Violet,      RGB{0xb565b3}},
+    {Cyan,        RGB{0x64daee}},
+    {Silver,      RGB{0xcacaca}},
+    {Indigo,      RGB{0x7e75f0}},
+    {Red,         RGB{0xd96459}},
+    {Light_green, RGB{0x73ce7c}},
+    {Brown,       RGB{0xddce85}},
+    {Light_red,   RGB{0xfe877c}},
+    {Green,       RGB{0x40b64a}},
+    {White,       RGB{0xffffff}},
     /* clang-format on */
 };
 

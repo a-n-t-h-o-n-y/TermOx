@@ -5,10 +5,10 @@
 #include <termox/painter/color.hpp>
 #include <termox/system/key.hpp>
 #include <termox/system/mouse.hpp>
+#include <termox/widget/point.hpp>
 
 namespace ox {
 class Widget;
-struct Point;
 }  // namespace ox
 
 namespace ox::slot {

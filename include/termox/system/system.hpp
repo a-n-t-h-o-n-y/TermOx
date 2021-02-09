@@ -37,13 +37,17 @@ class System {
     inline static Terminal terminal;
 
    public:
-    System()              = default;
+    System() { terminal.initialize(); }
     System(System const&) = delete;
     System& operator=(System const&) = delete;
     System(System&&)                 = default;
     System& operator=(System&&) = default;
 
-    ~System() { System::exit(0); }
+    ~System()
+    {
+        System::exit(0);
+        terminal.uninitialize();
+    }
 
     /// Return a pointer to the currently focused Widget.
     static auto focus_widget() -> Widget*;

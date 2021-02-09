@@ -6,6 +6,8 @@
 #include <cstdint>
 #include <random>
 
+#include <esc/true_color.hpp>
+
 #include <termox/painter/color.hpp>
 #include <termox/system/system.hpp>
 
@@ -251,9 +253,9 @@ auto fade(True_color a,
           Dynamic_color::Period_t interval = std::chrono::milliseconds{40})
     -> Dynamic_color
 {
-    return fade<Shape>(True_color::rgb_to_hsl({a.red(), a.green(), a.blue()}),
-                       True_color::rgb_to_hsl({b.red(), b.green(), b.blue()}),
-                       resolution, interval);
+    return fade<Shape>(esc::rgb_to_hsl({a.red, a.green, a.blue}),
+                       esc::rgb_to_hsl({b.red, b.green, b.blue}), resolution,
+                       interval);
 }
 
 }  // namespace ox::dynamic

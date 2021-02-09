@@ -29,7 +29,7 @@ class Wall : public ox::layout::Vertical<> {
 
     class Count : public ox::HLabel {
        public:
-        Count() : ox::HLabel{L"Count: 0"} {}
+        Count() : ox::HLabel{U"Count: 0"} {}
 
        public:
         void increment()
@@ -74,24 +74,24 @@ struct Horizontals : public ox::layout::Vertical<> {
     Horizontals()
     {
         using namespace ox;
-        this->make_child<HCheckbox1_label>({L"Label!"});
-        this->make_child<HCheckbox_label>({L"Label!"});
-        this->make_child<HLabel_checkbox1>({L"Label!"});
-        this->make_child<HLabel_checkbox>({L"Label!"});
-        this->make_child<HCheckbox2_label>({L"Label!"});
-        this->make_child<HLabel_checkbox2>({L"Label!"});
-        this->make_child<HCheckbox3_label>({L"Label!"});
-        this->make_child<HLabel_checkbox4>({L"Label!"});
-        this->make_child<HCheckbox7_label>({L"Label!"});
-        this->make_child<HLabel_checkbox8>({L"Label!"});
-        this->make_child<HCheckbox11_label>({L"Label!"});
-        this->make_child<HLabel_checkbox12>({L"Label!"});
-        this->make_child<HCheckbox15_label>({L"Label!"});
-        this->make_child<HLabel_checkbox16>({L"Label!"});
-        this->make_child<HCheckbox19_label>({L"Label!"});
-        this->make_child<HLabel_checkbox19>({L"Label!"});
-        this->make_child<HCheckbox20_label>({L"Label!"});
-        this->make_child<HLabel_checkbox20>({L"Label!"});
+        this->make_child<HCheckbox1_label>({U"Label!"});
+        this->make_child<HCheckbox_label>({U"Label!"});
+        this->make_child<HLabel_checkbox1>({U"Label!"});
+        this->make_child<HLabel_checkbox>({U"Label!"});
+        this->make_child<HCheckbox2_label>({U"Label!"});
+        this->make_child<HLabel_checkbox2>({U"Label!"});
+        this->make_child<HCheckbox3_label>({U"Label!"});
+        this->make_child<HLabel_checkbox4>({U"Label!"});
+        this->make_child<HCheckbox7_label>({U"Label!"});
+        this->make_child<HLabel_checkbox8>({U"Label!"});
+        this->make_child<HCheckbox11_label>({U"Label!"});
+        this->make_child<HLabel_checkbox12>({U"Label!"});
+        this->make_child<HCheckbox15_label>({U"Label!"});
+        this->make_child<HLabel_checkbox16>({U"Label!"});
+        this->make_child<HCheckbox19_label>({U"Label!"});
+        this->make_child<HLabel_checkbox19>({U"Label!"});
+        this->make_child<HCheckbox20_label>({U"Label!"});
+        this->make_child<HLabel_checkbox20>({U"Label!"});
     }
 };
 
@@ -101,24 +101,24 @@ struct Verticals : public ox::layout::Horizontal<> {
     Verticals()
     {
         using namespace ox;
-        this->make_child<VCheckbox1_label>({L"Label!"});
-        this->make_child<VCheckbox_label>({L"Label!"});
-        this->make_child<VLabel_checkbox1>({L"Label!"});
-        this->make_child<VLabel_checkbox>({L"Label!"});
-        this->make_child<VCheckbox2_label>({L"Label!"});
-        this->make_child<VLabel_checkbox2>({L"Label!"});
-        this->make_child<VCheckbox5_label>({L"Label!"});
-        this->make_child<VLabel_checkbox6>({L"Label!"});
-        this->make_child<VCheckbox9_label>({L"Label!"});
-        this->make_child<VLabel_checkbox10>({L"Label!"});
-        this->make_child<VCheckbox13_label>({L"Label!"});
-        this->make_child<VLabel_checkbox14>({L"Label!"});
-        this->make_child<VCheckbox17_label>({L"Label!"});
-        this->make_child<VLabel_checkbox18>({L"Label!"});
-        this->make_child<VCheckbox19_label>({L"Label!"});
-        this->make_child<VLabel_checkbox19>({L"Label!"});
-        this->make_child<VCheckbox20_label>({L"Label!"});
-        this->make_child<VLabel_checkbox20>({L"Label!"});
+        this->make_child<VCheckbox1_label>({U"Label!"});
+        this->make_child<VCheckbox_label>({U"Label!"});
+        this->make_child<VLabel_checkbox1>({U"Label!"});
+        this->make_child<VLabel_checkbox>({U"Label!"});
+        this->make_child<VCheckbox2_label>({U"Label!"});
+        this->make_child<VLabel_checkbox2>({U"Label!"});
+        this->make_child<VCheckbox5_label>({U"Label!"});
+        this->make_child<VLabel_checkbox6>({U"Label!"});
+        this->make_child<VCheckbox9_label>({U"Label!"});
+        this->make_child<VLabel_checkbox10>({U"Label!"});
+        this->make_child<VCheckbox13_label>({U"Label!"});
+        this->make_child<VLabel_checkbox14>({U"Label!"});
+        this->make_child<VCheckbox17_label>({U"Label!"});
+        this->make_child<VLabel_checkbox18>({U"Label!"});
+        this->make_child<VCheckbox19_label>({U"Label!"});
+        this->make_child<VLabel_checkbox19>({U"Label!"});
+        this->make_child<VCheckbox20_label>({U"Label!"});
+        this->make_child<VLabel_checkbox20>({U"Label!"});
     }
 };
 
@@ -175,38 +175,38 @@ class Runtime : public ox::layout::Horizontal<> {
             {
                 using namespace ox::pipe;
                 *this | fixed_height(1) |
-                    wallpaper(L'─' | fg(ox::Color::Light_gray));
+                    wallpaper(U'─' | fg(ox::Color::Light_gray));
             }
         };
 
        public:
-        ox::Button& check_btn   = this->make_child<ox::Button>(L"Check");
-        ox::Button& uncheck_btn = this->make_child<ox::Button>(L"Uncheck");
-        ox::Button& toggle_btn  = this->make_child<ox::Button>(L"Toggle");
+        ox::Button& check_btn   = this->make_child<ox::Button>(U"Check");
+        ox::Button& uncheck_btn = this->make_child<ox::Button>(U"Uncheck");
+        ox::Button& toggle_btn  = this->make_child<ox::Button>(U"Toggle");
 
         Divider& div1     = this->make_child<Divider>();
-        Checkbox& lock_cb = this->make_child<Checkbox>({L"Lock"});
+        Checkbox& lock_cb = this->make_child<Checkbox>({U"Lock"});
         Divider& div2     = this->make_child<Divider>();
 
         Edit& unchecked_display = this->make_child<Edit>(
-            Edit::Parameters{L"Unchecked Display", ox::Align::Left},
-            L"☐");
+            Edit::Parameters{U"Unchecked Display", ox::Align::Left},
+            U"☐");
         Edit& checked_display = this->make_child<Edit>(
-            Edit::Parameters{L"Checked   Display", ox::Align::Left},
-            L"☒");
+            Edit::Parameters{U"Checked   Display", ox::Align::Left},
+            U"☒");
 
         Divider& div3 = this->make_child<Divider>();
 
         Light_box& checked_lb = this->make_child<Light_box>(
-            Light_box::Parameters{L"`checked`   Signal"},
+            Light_box::Parameters{U"`checked`   Signal"},
             ox::Notify_light::Display{ox::Color::Yellow, ox::Color::Dark_gray},
             ox::Notify_light::Duration_t{350});
         Light_box& unchecked_lb = this->make_child<Light_box>(
-            Light_box::Parameters{L"`unchecked` Signal"},
+            Light_box::Parameters{U"`unchecked` Signal"},
             ox::Notify_light::Display{ox::Color::Yellow, ox::Color::Dark_gray},
             ox::Notify_light::Duration_t{350});
         Light_box& toggled_lb = this->make_child<Light_box>(
-            Light_box::Parameters{L"`toggled`   Signal"},
+            Light_box::Parameters{U"`toggled`   Signal"},
             ox::Notify_light::Display{ox::Color::Yellow, ox::Color::Dark_gray},
             ox::Notify_light::Duration_t{350});
     };
@@ -215,7 +215,7 @@ class Runtime : public ox::layout::Horizontal<> {
     Runtime()
     {
         using namespace ox::pipe;
-        divider | fixed_width(1) | wallpaper(L'│' | fg(ox::Color::Light_gray));
+        divider | fixed_width(1) | wallpaper(U'│' | fg(ox::Color::Light_gray));
     }
 
    private:
@@ -232,11 +232,11 @@ class Test : public ox::Cycle_stack<> {
    public:
     Test()
     {
-        this->make_page<Wall>(L"Wall");
-        this->make_page<Horizontals>(L"Labeled Horizontals");
-        this->make_page<Verticals>(L"Labeled Verticals");
+        this->make_page<Wall>(U"Wall");
+        this->make_page<Horizontals>(U"Labeled Horizontals");
+        this->make_page<Verticals>(U"Labeled Verticals");
         // clang-format off
-        this->append_page(L"Checkbox() Helpers",
+        this->append_page(U"Checkbox() Helpers",
             ox::layout::vertical(
                 ox::layout::horizontal(
                     ox::checkbox1(), ox::checkbox2(), ox::checkbox3(),
@@ -302,7 +302,7 @@ class Test : public ox::Cycle_stack<> {
                 )
             )
         );
-        this->append_page(L"Labeled Horizontal Helpers - No Parameters",
+        this->append_page(U"Labeled Horizontal Helpers - No Parameters",
             ox::layout::vertical(
                 ox::hcheckbox1_label(),
                 ox::hcheckbox_label(),
@@ -324,70 +324,70 @@ class Test : public ox::Cycle_stack<> {
                 ox::hlabel_checkbox20()
             )
         );
-        this->append_page(L"Labeled Horizontal Helpers - Label Parameters",
+        this->append_page(U"Labeled Horizontal Helpers - Label Parameters",
             ox::layout::vertical(
-                ox::hcheckbox1_label({L"Label!", ox::Align::Right}),
-                ox::hcheckbox_label({L"Label!", ox::Align::Left}),
-                ox::hlabel_checkbox1({L"Label!", ox::Align::Center}),
-                ox::hlabel_checkbox({L"Label!", ox::Align::Right}),
-                ox::hcheckbox2_label({L"Label!", ox::Align::Left}),
-                ox::hlabel_checkbox2({L"Label!", ox::Align::Center}),
-                ox::hcheckbox3_label({L"Label!", ox::Align::Right}),
-                ox::hlabel_checkbox4({L"Label!", ox::Align::Left}),
-                ox::hcheckbox7_label({L"Label!", ox::Align::Center}),
-                ox::hlabel_checkbox8({L"Label!", ox::Align::Right}),
-                ox::hcheckbox11_label({L"Label!", ox::Align::Left}),
-                ox::hlabel_checkbox12({L"Label!", ox::Align::Center}),
-                ox::hcheckbox15_label({L"Label!", ox::Align::Right}),
-                ox::hlabel_checkbox16({L"Label!", ox::Align::Left}),
-                ox::hcheckbox19_label({L"Label!", ox::Align::Center}),
-                ox::hlabel_checkbox19({L"Label!", ox::Align::Right}),
-                ox::hcheckbox20_label({L"Label!", ox::Align::Left}),
-                ox::hlabel_checkbox20({L"Label!", ox::Align::Center})
+                ox::hcheckbox1_label({U"Label!", ox::Align::Right}),
+                ox::hcheckbox_label({U"Label!", ox::Align::Left}),
+                ox::hlabel_checkbox1({U"Label!", ox::Align::Center}),
+                ox::hlabel_checkbox({U"Label!", ox::Align::Right}),
+                ox::hcheckbox2_label({U"Label!", ox::Align::Left}),
+                ox::hlabel_checkbox2({U"Label!", ox::Align::Center}),
+                ox::hcheckbox3_label({U"Label!", ox::Align::Right}),
+                ox::hlabel_checkbox4({U"Label!", ox::Align::Left}),
+                ox::hcheckbox7_label({U"Label!", ox::Align::Center}),
+                ox::hlabel_checkbox8({U"Label!", ox::Align::Right}),
+                ox::hcheckbox11_label({U"Label!", ox::Align::Left}),
+                ox::hlabel_checkbox12({U"Label!", ox::Align::Center}),
+                ox::hcheckbox15_label({U"Label!", ox::Align::Right}),
+                ox::hlabel_checkbox16({U"Label!", ox::Align::Left}),
+                ox::hcheckbox19_label({U"Label!", ox::Align::Center}),
+                ox::hlabel_checkbox19({U"Label!", ox::Align::Right}),
+                ox::hcheckbox20_label({U"Label!", ox::Align::Left}),
+                ox::hlabel_checkbox20({U"Label!", ox::Align::Center})
             )
         );
         this->append_page(
-            L"Labeled Horizontal Helpers - Label and Checkbox Parameters",
+            U"Labeled Horizontal Helpers - Label and Checkbox Parameters",
             ox::layout::vertical(
-                ox::hcheckbox1_label({L"Label!", ox::Align::Right},
+                ox::hcheckbox1_label({U"Label!", ox::Align::Right},
                                      {ox::Checkbox1::State::Checked, false}),
-                ox::hcheckbox_label({L"Label!", ox::Align::Left},
+                ox::hcheckbox_label({U"Label!", ox::Align::Left},
                                     {ox::Checkbox1::State::Unchecked, true}),
-                ox::hlabel_checkbox1({L"Label!", ox::Align::Center},
+                ox::hlabel_checkbox1({U"Label!", ox::Align::Center},
                                      {ox::Checkbox1::State::Checked, false}),
-                ox::hlabel_checkbox({L"Label!", ox::Align::Right},
+                ox::hlabel_checkbox({U"Label!", ox::Align::Right},
                                     {ox::Checkbox1::State::Unchecked, false}),
-                ox::hcheckbox2_label({L"Label!", ox::Align::Left},
+                ox::hcheckbox2_label({U"Label!", ox::Align::Left},
                                      {ox::Checkbox2::State::Checked, true}),
-                ox::hlabel_checkbox2({L"Label!", ox::Align::Center},
+                ox::hlabel_checkbox2({U"Label!", ox::Align::Center},
                                      {ox::Checkbox2::State::Unchecked, false}),
-                ox::hcheckbox3_label({L"Label!", ox::Align::Right},
+                ox::hcheckbox3_label({U"Label!", ox::Align::Right},
                                      {ox::Checkbox3::State::Checked, false}),
-                ox::hlabel_checkbox4({L"Label!", ox::Align::Left},
+                ox::hlabel_checkbox4({U"Label!", ox::Align::Left},
                                      {ox::Checkbox4::State::Unchecked, false}),
-                ox::hcheckbox7_label({L"Label!", ox::Align::Center},
+                ox::hcheckbox7_label({U"Label!", ox::Align::Center},
                                      {ox::Checkbox7::State::Checked, true}),
-                ox::hlabel_checkbox8({L"Label!", ox::Align::Right},
+                ox::hlabel_checkbox8({U"Label!", ox::Align::Right},
                                      {ox::Checkbox8::State::Unchecked, false}),
-                ox::hcheckbox11_label({L"Label!", ox::Align::Left},
+                ox::hcheckbox11_label({U"Label!", ox::Align::Left},
                                       {ox::Checkbox11::State::Checked, false}),
-                ox::hlabel_checkbox12({L"Label!", ox::Align::Center},
+                ox::hlabel_checkbox12({U"Label!", ox::Align::Center},
                                       {ox::Checkbox12::State::Unchecked, true}),
-                ox::hcheckbox15_label({L"Label!", ox::Align::Right},
+                ox::hcheckbox15_label({U"Label!", ox::Align::Right},
                                       {ox::Checkbox15::State::Checked, false}),
-                ox::hlabel_checkbox16({L"Label!", ox::Align::Left},
+                ox::hlabel_checkbox16({U"Label!", ox::Align::Left},
                                       {ox::Checkbox16::State::Unchecked, true}),
-                ox::hcheckbox19_label({L"Label!", ox::Align::Center},
+                ox::hcheckbox19_label({U"Label!", ox::Align::Center},
                                       {ox::Checkbox19::State::Checked, false}),
-                ox::hlabel_checkbox19({L"Label!", ox::Align::Right},
+                ox::hlabel_checkbox19({U"Label!", ox::Align::Right},
                                       {ox::Checkbox19::State::Unchecked, true}),
-                ox::hcheckbox20_label({L"Label!", ox::Align::Left},
+                ox::hcheckbox20_label({U"Label!", ox::Align::Left},
                                       {ox::Checkbox20::State::Checked, false}),
-                ox::hlabel_checkbox20({L"Label!", ox::Align::Center},
+                ox::hlabel_checkbox20({U"Label!", ox::Align::Center},
                                       {ox::Checkbox20::State::Checked, true})
             )
         );
-        this->append_page(L"Labeled Vertical Helpers - No Parameters",
+        this->append_page(U"Labeled Vertical Helpers - No Parameters",
             ox::layout::horizontal(
                 ox::vcheckbox1_label(),
                 ox::vcheckbox_label(),
@@ -409,71 +409,71 @@ class Test : public ox::Cycle_stack<> {
                 ox::vlabel_checkbox20()
             )
         );
-        this->append_page(L"Labeled Vertical Helpers - Label Parameters",
+        this->append_page(U"Labeled Vertical Helpers - Label Parameters",
             ox::layout::horizontal(
-                ox::vcheckbox1_label  ({L"Label!", ox::Align::Right}),
-                ox::vcheckbox_label   ({L"Label!", ox::Align::Left}),
-                ox::vlabel_checkbox1  ({L"Label!", ox::Align::Center}),
-                ox::vlabel_checkbox   ({L"Label!", ox::Align::Right}),
-                ox::vcheckbox2_label  ({L"Label!", ox::Align::Left}),
-                ox::vlabel_checkbox2  ({L"Label!", ox::Align::Center}),
-                ox::vcheckbox5_label  ({L"Label!", ox::Align::Right}),
-                ox::vlabel_checkbox6  ({L"Label!", ox::Align::Left}),
-                ox::vcheckbox9_label  ({L"Label!", ox::Align::Center}),
-                ox::vlabel_checkbox10 ({L"Label!", ox::Align::Right}),
-                ox::vcheckbox13_label ({L"Label!", ox::Align::Left}),
-                ox::vlabel_checkbox14 ({L"Label!", ox::Align::Center}),
-                ox::vcheckbox17_label ({L"Label!", ox::Align::Right}),
-                ox::vlabel_checkbox18 ({L"Label!", ox::Align::Left}),
-                ox::vcheckbox19_label ({L"Label!", ox::Align::Center}),
-                ox::vlabel_checkbox19 ({L"Label!", ox::Align::Right}),
-                ox::vcheckbox20_label ({L"Label!", ox::Align::Left}),
-                ox::vlabel_checkbox20 ({L"Label!", ox::Align::Center})
+                ox::vcheckbox1_label  ({U"Label!", ox::Align::Right}),
+                ox::vcheckbox_label   ({U"Label!", ox::Align::Left}),
+                ox::vlabel_checkbox1  ({U"Label!", ox::Align::Center}),
+                ox::vlabel_checkbox   ({U"Label!", ox::Align::Right}),
+                ox::vcheckbox2_label  ({U"Label!", ox::Align::Left}),
+                ox::vlabel_checkbox2  ({U"Label!", ox::Align::Center}),
+                ox::vcheckbox5_label  ({U"Label!", ox::Align::Right}),
+                ox::vlabel_checkbox6  ({U"Label!", ox::Align::Left}),
+                ox::vcheckbox9_label  ({U"Label!", ox::Align::Center}),
+                ox::vlabel_checkbox10 ({U"Label!", ox::Align::Right}),
+                ox::vcheckbox13_label ({U"Label!", ox::Align::Left}),
+                ox::vlabel_checkbox14 ({U"Label!", ox::Align::Center}),
+                ox::vcheckbox17_label ({U"Label!", ox::Align::Right}),
+                ox::vlabel_checkbox18 ({U"Label!", ox::Align::Left}),
+                ox::vcheckbox19_label ({U"Label!", ox::Align::Center}),
+                ox::vlabel_checkbox19 ({U"Label!", ox::Align::Right}),
+                ox::vcheckbox20_label ({U"Label!", ox::Align::Left}),
+                ox::vlabel_checkbox20 ({U"Label!", ox::Align::Center})
             )
         );
         this->append_page(
-            L"Labeled Vertical Helpers - Label and Checkbox Parameters",
+            U"Labeled Vertical Helpers - Label and Checkbox Parameters",
             ox::layout::horizontal(
-                ox::vcheckbox1_label({L"Label!", ox::Align::Right},
+                ox::vcheckbox1_label({U"Label!", ox::Align::Right},
                                      {ox::Checkbox1::State::Checked, false}),
-                ox::vcheckbox_label({L"Label!", ox::Align::Left},
+                ox::vcheckbox_label({U"Label!", ox::Align::Left},
                                     {ox::Checkbox1::State::Unchecked, true}),
-                ox::vlabel_checkbox1({L"Label!", ox::Align::Center},
+                ox::vlabel_checkbox1({U"Label!", ox::Align::Center},
                                      {ox::Checkbox1::State::Checked, false}),
-                ox::vlabel_checkbox({L"Label!", ox::Align::Right},
+                ox::vlabel_checkbox({U"Label!", ox::Align::Right},
                                     {ox::Checkbox1::State::Unchecked, false}),
-                ox::vcheckbox2_label({L"Label!", ox::Align::Left},
+                ox::vcheckbox2_label({U"Label!", ox::Align::Left},
                                      {ox::Checkbox2::State::Checked, true}),
-                ox::vlabel_checkbox2({L"Label!", ox::Align::Center},
+                ox::vlabel_checkbox2({U"Label!", ox::Align::Center},
                                      {ox::Checkbox2::State::Unchecked, false}),
-                ox::vcheckbox5_label({L"Label!", ox::Align::Right},
+                ox::vcheckbox5_label({U"Label!", ox::Align::Right},
                                      {ox::Checkbox5::State::Checked, false}),
-                ox::vlabel_checkbox6({L"Label!", ox::Align::Left},
+                ox::vlabel_checkbox6({U"Label!", ox::Align::Left},
                                      {ox::Checkbox6::State::Unchecked, false}),
-                ox::vcheckbox9_label({L"Label!", ox::Align::Center},
+                ox::vcheckbox9_label({U"Label!", ox::Align::Center},
                                      {ox::Checkbox9::State::Checked, true}),
-                ox::vlabel_checkbox10({L"Label!", ox::Align::Right},
+                ox::vlabel_checkbox10({U"Label!", ox::Align::Right},
                                      {ox::Checkbox10::State::Unchecked, false}),
-                ox::vcheckbox13_label({L"Label!", ox::Align::Left},
+                ox::vcheckbox13_label({U"Label!", ox::Align::Left},
                                       {ox::Checkbox13::State::Checked, false}),
-                ox::vlabel_checkbox14({L"Label!", ox::Align::Center},
+                ox::vlabel_checkbox14({U"Label!", ox::Align::Center},
                                       {ox::Checkbox14::State::Unchecked, true}),
-                ox::vcheckbox17_label({L"Label!", ox::Align::Right},
+                ox::vcheckbox17_label({U"Label!", ox::Align::Right},
                                       {ox::Checkbox17::State::Checked, false}),
-                ox::vlabel_checkbox18({L"Label!", ox::Align::Left},
+                ox::vlabel_checkbox18({U"Label!", ox::Align::Left},
                                       {ox::Checkbox18::State::Unchecked, true}),
-                ox::vcheckbox19_label({L"Label!", ox::Align::Center},
+                ox::vcheckbox19_label({U"Label!", ox::Align::Center},
                                       {ox::Checkbox19::State::Checked, false}),
-                ox::vlabel_checkbox19({L"Label!", ox::Align::Right},
+                ox::vlabel_checkbox19({U"Label!", ox::Align::Right},
                                       {ox::Checkbox19::State::Unchecked, true}),
-                ox::vcheckbox20_label({L"Label!", ox::Align::Left},
+                ox::vcheckbox20_label({U"Label!", ox::Align::Left},
                                       {ox::Checkbox20::State::Checked, false}),
-                ox::vlabel_checkbox20({L"Label!", ox::Align::Center},
+                ox::vlabel_checkbox20({U"Label!", ox::Align::Center},
                                       {ox::Checkbox20::State::Checked, true})
             )
         );
         // clang-format on
-        this->make_page<Runtime>(L"Runtime");
+        this->make_page<Runtime>(U"Runtime");
     }
 };
 

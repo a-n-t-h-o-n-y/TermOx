@@ -12,10 +12,10 @@ class Export_panel : public ox::layout::Vertical<> {
     Export_panel();
 
    private:
-    ox::Line_edit& name_edit_ = make_child<ox::Line_edit>(L"Enter name...");
+    ox::Line_edit& name_edit_ = make_child<ox::Line_edit>(U"Enter name...");
 
     ox::Confirm_button& export_btn_ =
-        make_child<ox::Confirm_button>(L"Export Palette");
+        make_child<ox::Confirm_button>(U"Export Palette");
 };
 
 }  // namespace palette

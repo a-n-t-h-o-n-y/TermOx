@@ -35,7 +35,7 @@ class Glyph_sheet : public ox::Textbox {
     {
         auto const& contents = this->contents();
         if (m.button == ox::Mouse::Button::Left && !contents.empty())
-            selected(contents[this->index_at(m.local)]);
+            selected(contents[this->index_at(m.at)]);
         return Textbox::mouse_press_event(m);
     }
 };

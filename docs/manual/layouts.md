@@ -81,10 +81,10 @@ ordering is used to physically order the Widgets within the given Layout type.
 ```cpp
 auto get_label                = [](Button const& b){ return b.get_label(); };
 auto alphanum_ordered_buttons = layout::Set<layout::Vertical<Button>, decltype(get_label)>{};
-alphnum_ordered_buttons.insert(button(L"b"));
-alphnum_ordered_buttons.insert(button(L"a"));
-alphnum_ordered_buttons.insert(button(L"z"));
-alphnum_ordered_buttons.insert(button(L"y"));
+alphnum_ordered_buttons.insert(button(U"b"));
+alphnum_ordered_buttons.insert(button(U"a"));
+alphnum_ordered_buttons.insert(button(U"z"));
+alphnum_ordered_buttons.insert(button(U"y"));
 ```
 
 ### Selecting

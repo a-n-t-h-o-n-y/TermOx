@@ -1,6 +1,9 @@
 #ifndef TERMOX_HPP
 #define TERMOX_HPP
 
+#include <termox/common/mb_to_u32.hpp>
+#include <termox/common/u32_to_mb.hpp>
+
 #include <termox/painter/brush.hpp>
 #include <termox/painter/color.hpp>
 #include <termox/painter/glyph.hpp>
@@ -8,7 +11,6 @@
 #include <termox/painter/glyph_string.hpp>
 #include <termox/painter/painter.hpp>
 #include <termox/painter/trait.hpp>
-#include <termox/painter/utility/wchar_to_bytes.hpp>
 
 #include <termox/system/key.hpp>
 #include <termox/system/mouse.hpp>

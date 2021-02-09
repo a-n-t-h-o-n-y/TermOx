@@ -22,9 +22,9 @@ class Side_pane : public ox::layout::Vertical<> {
         Color_pages() { height_policy.fixed(3); }
 
         ox::Color_select& foreground =
-            make_page(L"Foreground" | ox::Trait::Bold);
+            make_page(U"Foreground" | ox::Trait::Bold);
         ox::Color_select& background =
-            make_page(L"Background" | ox::Trait::Bold);
+            make_page(U"Background" | ox::Trait::Bold);
     };
 
    public:
@@ -33,8 +33,8 @@ class Side_pane : public ox::layout::Vertical<> {
         using namespace ox::pipe;
 
         *this | fixed_width(16);
-        space1 | wallpaper(L'─');
-        space2 | wallpaper(L'─');
+        space1 | wallpaper(U'─');
+        space2 | wallpaper(U'─');
         glyph_selector | preferred_height(6);
         show_glyph | fixed_height(1) | align_center();
     }

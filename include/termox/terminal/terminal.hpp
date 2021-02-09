@@ -55,22 +55,19 @@ class Terminal {
      *  incrementing the last color in the current palette. */
     auto palette_append(Color_definition::Value_t value) -> Color;
 
-    /// Return a copy of the currently set ANSI color palette.
+    /// Return a copy of the currently set color palette.
     auto current_palette() const -> Palette const& { return palette_; }
 
-    /// Set a single ANSI Color value.
-    void set_color_definition(Color c, ANSI a, std::monostate);
+    /// Set a single Color_index Color value.
+    void set_color_definition(Color c, Color_index value);
 
     /// Set a single True_color value.
-    void set_color_definition(Color c, ANSI a, True_color value);
+    void set_color_definition(Color c, True_color value);
 
     /// Set a single Dynamic_color value.
-    void set_color_definition(Color c, ANSI a, Dynamic_color value);
+    void set_color_definition(Color c, Dynamic_color value);
 
     auto get_ansi(Color c) -> short;
-
-    /// Retrieve the RGB values of a given ANSI color.
-    auto color_content(ANSI c) -> RGB;
 
     /// Lock a Color and ANSI value together, with all possible combinations.
     /** Relies on the palette_ objects being accurate. */
@@ -120,7 +117,7 @@ class Terminal {
     Palette palette_;
     std::chrono::milliseconds refresh_rate_{33};
     Dynamic_color_engine dynamic_color_engine_;
-    Glyph background_    = L' ';
+    Glyph background_    = U' ';
     bool is_initialized_ = false;
     bool show_cursor_    = false;
     bool raw_mode_       = false;

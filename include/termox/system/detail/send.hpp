@@ -11,8 +11,13 @@ namespace ox::detail {
 
 inline void send(ox::Paint_event e)
 {
-    if (is_paintable(e.receiver))
+    if (is_paintable(e.receiver)) {
+        // TODO
+        // Create
+        // auto p = Painter{e.receiver};
+        // e.receiver.get().paint_event(p);
         e.receiver.get().paint_event();
+    }
 }
 
 inline void send(ox::Key_press_event e)

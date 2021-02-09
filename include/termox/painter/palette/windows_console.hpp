@@ -25,22 +25,22 @@ constexpr auto White       = Color::Foreground;
 /** https://lospec.com/palette-list/campbell-new-windows-console */
 inline auto const palette = Palette{
     /* clang-format off */
-    {Black,       ANSI{16}, 0x0c0c0c},
-    {Red,         ANSI{17}, 0xc50f1f},
-    {Green,       ANSI{18}, 0x13a10e},
-    {Olive,       ANSI{19}, 0xc19c00},
-    {Blue,        ANSI{20}, 0x0037da},
-    {Violet,      ANSI{21}, 0x881798},
-    {Azure,       ANSI{22}, 0x3a96dd},
-    {Silver,      ANSI{23}, 0xcccccc},
-    {Gray,        ANSI{24}, 0x767676},
-    {Light_red,   ANSI{25}, 0xe74856},
-    {Light_green, ANSI{26}, 0x16c60c},
-    {Yellow,      ANSI{27}, 0xf9f1a5},
-    {Light_blue,  ANSI{28}, 0x3b78ff},
-    {Magenta,     ANSI{29}, 0xb4009e},
-    {Cyan,        ANSI{30}, 0x61d6d6},
-    {White,       ANSI{31}, 0xf2f2f2},
+    {Black,       RGB{0x0c0c0c}},
+    {Red,         RGB{0xc50f1f}},
+    {Green,       RGB{0x13a10e}},
+    {Olive,       RGB{0xc19c00}},
+    {Blue,        RGB{0x0037da}},
+    {Violet,      RGB{0x881798}},
+    {Azure,       RGB{0x3a96dd}},
+    {Silver,      RGB{0xcccccc}},
+    {Gray,        RGB{0x767676}},
+    {Light_red,   RGB{0xe74856}},
+    {Light_green, RGB{0x16c60c}},
+    {Yellow,      RGB{0xf9f1a5}},
+    {Light_blue,  RGB{0x3b78ff}},
+    {Magenta,     RGB{0xb4009e}},
+    {Cyan,        RGB{0x61d6d6}},
+    {White,       RGB{0xf2f2f2}},
     /* clang-format on */
 };
 

@@ -594,7 +594,7 @@ class Widget {
     }
 
     /// Handles Key_press_event objects filtered from other Widgets.
-    virtual auto key_press_event_filter(Widget& receiver, Key const& k) -> bool
+    virtual auto key_press_event_filter(Widget& receiver, Key k) -> bool
     {
         key_pressed_filter(receiver, k);
         return false;

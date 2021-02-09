@@ -50,7 +50,7 @@ class Notify_light : public Widget {
     void emit()
     {
         this->Widget::disable_animation();
-        on_block_.symbol = L' ';
+        on_block_.symbol = U' ';
         this->Widget::enable_animation(parameters_.duration / block_count);
     }
 
@@ -82,10 +82,10 @@ class Notify_light : public Widget {
     auto timer_event() -> bool override
     {
         auto constexpr first  = initial_block;
-        auto constexpr second = L'▓';
-        auto constexpr third  = L'▒';
-        auto constexpr fourth = L'░';
-        auto constexpr empty  = L' ';
+        auto constexpr second = U'▓';
+        auto constexpr third  = U'▒';
+        auto constexpr fourth = U'░';
+        auto constexpr empty  = U' ';
 
         switch (on_block_.symbol) {
             case empty: on_block_.symbol = first; break;
@@ -114,7 +114,7 @@ class Notify_light : public Widget {
     Glyph on_block_;
     Glyph off_block_;
 
-    static auto constexpr initial_block    = L'█';
+    static auto constexpr initial_block    = U'█';
     static auto constexpr block_count      = 4;
     static auto constexpr default_duration = Duration_t{450};
 };

@@ -317,9 +317,9 @@ inline auto constexpr Instruction_text = ox::stormy6::Orange;
 
 inline auto const snake_palette = [] {
     auto pal = ox::stormy6::palette;
-    pal.push_back({color::Fade, ox::ANSI{22},
-                   ox::dynamic::fade<ox::dynamic::Sine>(0x7f9860, 0xa95a3f)});
-    pal.push_back({color::Rainbow, ox::ANSI{23}, ox::dynamic::rainbow()});
+    pal.push_back({color::Fade, ox::dynamic::fade<ox::dynamic::Sine>(
+                                    ox::RGB{0x7f9860}, ox::RGB{0xa95a3f})});
+    pal.push_back({color::Rainbow, ox::dynamic::rainbow()});
     return pal;
 }();
 
@@ -490,9 +490,9 @@ class Game_space : public ox::Widget {
             return widg_height < game_height ? game_height - widg_height : 0;
         }();
         auto painter = ox::Painter{*this};
-        painter.put(L"Screen is too small!", {0, 0});
-        painter.put(L"Needs " + std::to_wstring(w) + L" more width.", {0, 1});
-        painter.put(L"Needs " + std::to_wstring(h) + L" more height.", {0, 2});
+        painter.put(U"Screen is too small!", {0, 0});
+        painter.put("Needs " + std::to_string(w) + " more width.", {0, 1});
+        painter.put("Needs " + std::to_string(h) + " more height.", {0, 2});
     }
 
     void paint_game()
@@ -500,42 +500,42 @@ class Game_space : public ox::Widget {
         auto painter = ox::Painter{*this};
         for (auto const& p : engine_.apples) {
             // TODO store as static constexpr(?) glyph
-            painter.put(L'@' | ox::Trait::Bold | fg(color::Apple), p);
+            painter.put(U'@' | ox::Trait::Bold | fg(color::Apple), p);
         }
 
         // Body
         for (auto const& p : engine_.snake)
-            painter.put(L'█' | fg(color::Snake), p);
+            painter.put(U'█' | fg(color::Snake), p);
         // TODO Store snake_body as glyph
 
         // Tail
         if (engine_.snake.size() > 3) {
             // TODO store as static glyphs
-            painter.put(L'░' | fg(color::Snake), engine_.snake[0]);
-            painter.put(L'▒' | fg(color::Snake), engine_.snake[1]);
-            painter.put(L'▓' | fg(color::Snake), engine_.snake[2]);
+            painter.put(U'░' | fg(color::Snake), engine_.snake[0]);
+            painter.put(U'▒' | fg(color::Snake), engine_.snake[1]);
+            painter.put(U'▓' | fg(color::Snake), engine_.snake[2]);
         }
         else if (engine_.snake.size() == 3) {
-            painter.put(L'▒' | fg(color::Snake), engine_.snake[0]);
-            painter.put(L'▓' | fg(color::Snake), engine_.snake[1]);
+            painter.put(U'▒' | fg(color::Snake), engine_.snake[0]);
+            painter.put(U'▓' | fg(color::Snake), engine_.snake[1]);
         }
         else if (engine_.snake.size() == 2) {
-            painter.put(L'▓' | fg(color::Snake), engine_.snake[0]);
+            painter.put(U'▓' | fg(color::Snake), engine_.snake[0]);
         }
 
         // Head
         switch (engine_.snake.get_direction()) {
             case Snake::Direction::Up:
-                painter.put(L'🭯' | fg(color::Snake), engine_.snake.head());
+                painter.put(U'🭯' | fg(color::Snake), engine_.snake.head());
                 break;
             case Snake::Direction::Down:
-                painter.put(L'🭭' | fg(color::Snake), engine_.snake.head());
+                painter.put(U'🭭' | fg(color::Snake), engine_.snake.head());
                 break;
             case Snake::Direction::Left:
-                painter.put(L'🭮' | fg(color::Snake), engine_.snake.head());
+                painter.put(U'🭮' | fg(color::Snake), engine_.snake.head());
                 break;
             case Snake::Direction::Right:
-                painter.put(L'🭬' | fg(color::Snake), engine_.snake.head());
+                painter.put(U'🭬' | fg(color::Snake), engine_.snake.head());
                 break;
         }
     }
@@ -563,12 +563,12 @@ class Instructions : public ox::Text_display {
     {
         using namespace ox;
         auto const standout = Brush{fg(color::Instruction_text), Trait::Bold};
-        auto result         = Glyph_string{L"Start/Stop "};
-        result.append(L"Space Bar" | standout);
-        result.append(L" - Movement ");
-        result.append(L"Arrow Keys" | standout);
-        result.append(L" or ");
-        result.append(L"'hjkl'" | standout);
+        auto result         = Glyph_string{U"Start/Stop "};
+        result.append(U"Space Bar" | standout);
+        result.append(U" - Movement ");
+        result.append(U"Arrow Keys" | standout);
+        result.append(U" or ");
+        result.append(U"'hjkl'" | standout);
         return result;
     }
 };
@@ -585,13 +585,13 @@ class Button_bar : public ox::layout::Horizontal<> {
         sizes_.cycle_box | bg(color::Size_bg) | fg(color::Size_fg);
 
         sizes_.cycle_box | no_focus();
-        sizes_.cycle_box.add_option(L"Small").connect(
+        sizes_.cycle_box.add_option(U"Small").connect(
             [this] { size_change('s'); });
-        sizes_.cycle_box.add_option(L"Medium").connect(
+        sizes_.cycle_box.add_option(U"Medium").connect(
             [this] { size_change('m'); });
-        sizes_.cycle_box.add_option(L"Large").connect(
+        sizes_.cycle_box.add_option(U"Large").connect(
             [this] { size_change('l'); });
-        sizes_.cycle_box.add_option(L"X-Large").connect([this] {
+        sizes_.cycle_box.add_option(U"X-Large").connect([this] {
             size_change('x');
         });
 
@@ -607,10 +607,10 @@ class Button_bar : public ox::layout::Horizontal<> {
 
    private:
     ox::Toggle_button& start_pause_btns_ =
-        this->make_child<ox::Toggle_button>(L"Start" | ox::Trait::Bold,
-                                            L"Pause" | ox::Trait::Bold);
+        this->make_child<ox::Toggle_button>(U"Start" | ox::Trait::Bold,
+                                            U"Pause" | ox::Trait::Bold);
     ox::Labeled_cycle_box& sizes_ =
-        this->make_child<ox::Labeled_cycle_box>(L" Size");
+        this->make_child<ox::Labeled_cycle_box>(U" Size");
     Instructions& instructions_ = this->make_child<Instructions>();
 
    public:
@@ -632,8 +632,8 @@ class Score : public ox::layout::Horizontal<> {
     void set(unsigned score) { score_.set_text(std::to_string(score)); }
 
    private:
-    ox::HLabel& label_ = this->make_child<ox::HLabel>({L"Score: "});
-    ox::HLabel& score_ = this->make_child<ox::HLabel>({L"0", ox::Align::Right});
+    ox::HLabel& label_ = this->make_child<ox::HLabel>({U"Score: "});
+    ox::HLabel& score_ = this->make_child<ox::HLabel>({U"0", ox::Align::Right});
 
     // you could have a number_display widget, that is templated on the
     // number type, and has display options specific to numbers, then number

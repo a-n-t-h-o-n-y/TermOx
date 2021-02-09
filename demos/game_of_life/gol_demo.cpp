@@ -65,119 +65,119 @@ GoL_demo::GoL_demo()
     });
 
     auto& patterns = side_panel.patterns_rulesets.patterns;
-    patterns.selection_made.connect([this](std::wstring const& name) {
+    patterns.selection_made.connect([this](std::u32string const& name) {
         gol_display.import_pattern(pattern_store_.get(name));
     });
 
-    this->add_pattern_example(L"Tetrominos", pattern::tetrominos);
-    this->add_pattern_example(L"R-pentomino", pattern::r_pentomino);
-    this->add_pattern_example(L"B-heptomino", pattern::b_heptomino);
-    this->add_pattern_example(L"C-heptomino", pattern::c_heptomino);
-    this->add_pattern_example(L"E-heptomino", pattern::e_heptomino);
-    this->add_pattern_example(L"F-heptomino", pattern::f_heptomino);
-    this->add_pattern_example(L"Pi-heptomino", pattern::pi_heptomino);
-    this->add_pattern_example(L"Century", pattern::century);
-    this->add_pattern_example(L"StairStep Hexomino",
+    this->add_pattern_example(U"Tetrominos", pattern::tetrominos);
+    this->add_pattern_example(U"R-pentomino", pattern::r_pentomino);
+    this->add_pattern_example(U"B-heptomino", pattern::b_heptomino);
+    this->add_pattern_example(U"C-heptomino", pattern::c_heptomino);
+    this->add_pattern_example(U"E-heptomino", pattern::e_heptomino);
+    this->add_pattern_example(U"F-heptomino", pattern::f_heptomino);
+    this->add_pattern_example(U"Pi-heptomino", pattern::pi_heptomino);
+    this->add_pattern_example(U"Century", pattern::century);
+    this->add_pattern_example(U"StairStep Hexomino",
                               pattern::stairstep_hexomino);
-    this->add_pattern_example(L"Z-hexomino", pattern::z_hexomino);
-    this->add_pattern_example(L"Kok's Galaxy", pattern::koks_galaxy);
-    this->add_pattern_example(L"Achim's p144", pattern::achims_p144);
-    this->add_pattern_example(L"Achim's p11", pattern::achims_p11);
-    this->add_pattern_example(L"Achim's Other p16", pattern::achims_other_p16);
-    this->add_pattern_example(L"Gabriels p138", pattern::gabriels_p138);
-    this->add_pattern_example(L"Smiley", pattern::smiley);
-    this->add_pattern_example(L"Twin Bees Shuttle", pattern::twin_bees_shuttle);
-    this->add_pattern_example(L"Loafer", pattern::loafer);
-    this->add_pattern_example(L"Queen Bee Shuttle", pattern::queen_bee_shuttle);
-    this->add_pattern_example(L"Breeder1", pattern::breeder1);
-    this->add_pattern_example(L"Halfmax", pattern::halfmax);
-    this->add_pattern_example(L"Sir Robin", pattern::sir_robin);
-    this->add_pattern_example(L"David Hilbert", pattern::david_hilbert);
-    this->add_pattern_example(L"Spider", pattern::spider);
-    this->add_pattern_example(L"Scholar", pattern::scholar);
-    this->add_pattern_example(L"Snark Variant", pattern::snark_variant);
-    this->add_pattern_example(L"Two Engine Cordership Seed",
+    this->add_pattern_example(U"Z-hexomino", pattern::z_hexomino);
+    this->add_pattern_example(U"Kok's Galaxy", pattern::koks_galaxy);
+    this->add_pattern_example(U"Achim's p144", pattern::achims_p144);
+    this->add_pattern_example(U"Achim's p11", pattern::achims_p11);
+    this->add_pattern_example(U"Achim's Other p16", pattern::achims_other_p16);
+    this->add_pattern_example(U"Gabriels p138", pattern::gabriels_p138);
+    this->add_pattern_example(U"Smiley", pattern::smiley);
+    this->add_pattern_example(U"Twin Bees Shuttle", pattern::twin_bees_shuttle);
+    this->add_pattern_example(U"Loafer", pattern::loafer);
+    this->add_pattern_example(U"Queen Bee Shuttle", pattern::queen_bee_shuttle);
+    this->add_pattern_example(U"Breeder1", pattern::breeder1);
+    this->add_pattern_example(U"Halfmax", pattern::halfmax);
+    this->add_pattern_example(U"Sir Robin", pattern::sir_robin);
+    this->add_pattern_example(U"David Hilbert", pattern::david_hilbert);
+    this->add_pattern_example(U"Spider", pattern::spider);
+    this->add_pattern_example(U"Scholar", pattern::scholar);
+    this->add_pattern_example(U"Snark Variant", pattern::snark_variant);
+    this->add_pattern_example(U"Two Engine Cordership Seed",
                               pattern::two_engine_cordership_seed);
-    this->add_pattern_example(L"Gosper Glyder Gun", pattern::gosper_glyder_gun);
-    this->add_pattern_example(L"Bi-Gun", pattern::bi_gun);
-    this->add_pattern_example(L"CopperHead", pattern::copperhead);
-    this->add_pattern_example(L"Three Engine Cordership Rake",
+    this->add_pattern_example(U"Gosper Glyder Gun", pattern::gosper_glyder_gun);
+    this->add_pattern_example(U"Bi-Gun", pattern::bi_gun);
+    this->add_pattern_example(U"CopperHead", pattern::copperhead);
+    this->add_pattern_example(U"Three Engine Cordership Rake",
                               pattern::three_engine_cordership_rake);
-    this->add_pattern_example(L"Merzenich's p31", pattern::merzenichs_p31);
-    this->add_pattern_example(L"Lobster", pattern::lobster);
-    this->add_pattern_example(L"37P4H1V0", pattern::three7P4H1V0);
-    this->add_pattern_example(L"Swan Tagalong", pattern::swan_tagalong);
-    this->add_pattern_example(L"P50 Traffic Jam", pattern::p50_traffic_jam);
-    this->add_pattern_example(L"Quad Fuse", pattern::quad_fuse);
+    this->add_pattern_example(U"Merzenich's p31", pattern::merzenichs_p31);
+    this->add_pattern_example(U"Lobster", pattern::lobster);
+    this->add_pattern_example(U"37P4H1V0", pattern::three7P4H1V0);
+    this->add_pattern_example(U"Swan Tagalong", pattern::swan_tagalong);
+    this->add_pattern_example(U"P50 Traffic Jam", pattern::p50_traffic_jam);
+    this->add_pattern_example(U"Quad Fuse", pattern::quad_fuse);
     this->add_pattern_example(
-        L"xp4_y19hggggh9z3w1u042w240u1w3z6w43g9a88a9g34w6zy144y044",
+        U"xp4_y19hggggh9z3w1u042w240u1w3z6w43g9a88a9g34w6zy144y044",
         pattern::xp4_y19hggggh9z3w1u042w240u1w3z6w43g9a88a9g34w6zy144y044);
-    this->add_pattern_example(L"xq8_y1842ve4z8sqp821zw1",
+    this->add_pattern_example(U"xq8_y1842ve4z8sqp821zw1",
                               pattern::xq8_y1842ve4z8sqp821zw1);
     this->add_pattern_example(
-        L"xp4_63p4ky2k4p36zy1ci11iczog68aw11wa86goz011y611",
+        U"xp4_63p4ky2k4p36zy1ci11iczog68aw11wa86goz011y611",
         pattern::xp4_63p4ky2k4p36zy1ci11iczog68aw11wa86goz011y611);
 
     auto& rules = side_panel.patterns_rulesets.rulesets;
-    rules.selection_made.connect([this](std::wstring const& name) {
+    rules.selection_made.connect([this](std::u32string const& name) {
         gol_display.set_rules(rule_store_.get(name));
     });
 
-    this->add_rule_example(L"Replicator", "B1357/S1357");
-    this->add_rule_example(L"Fredkin", "B1357/S02468");
-    this->add_rule_example(L"Seeds", "B2/S");
-    this->add_rule_example(L"Live Free or Die", "B2/S0");
-    this->add_rule_example(L"Life Without Death", "B3/S012345678");
-    this->add_rule_example(L"Flock", "B3/S12");
-    this->add_rule_example(L"Mazectric", "B3/S1234");
-    this->add_rule_example(L"Maze", "B3/S12345");
-    this->add_rule_example(L"Conway's Game of Life", "B3/S23");
-    this->add_rule_example(L"EightLife", "B3/S238");
-    this->add_rule_example(L"Coral", "B3/S45678");
-    this->add_rule_example(L"2x2", "B36/S125");
-    this->add_rule_example(L"HighLife", "B36/S23");
-    this->add_rule_example(L"Move", "B368/S245");
-    this->add_rule_example(L"Day & Night", "B3678/S34678");
-    this->add_rule_example(L"DryLife", "B37/S23");
-    this->add_rule_example(L"Pedestrian Life", "B38/S23");
-    this->add_rule_example(L"AntiLife", "B0123478/S01234678");
-    this->add_rule_example(L"InverseLife", "B012345678/S34678");
-    this->add_rule_example(L"H-Trees", "B1/S012345678");
-    this->add_rule_example(L"Gnarl", "B1/S1");
-    this->add_rule_example(L"Serviettes", "B234/S");
-    this->add_rule_example(L"Iceballs", "B25678/S5678");
-    this->add_rule_example(L"DotLife", "B3/S023");
-    this->add_rule_example(L"SnowLife", "B3/S1237");
-    this->add_rule_example(L"Corrosion of Conformity", "B3/S124");
-    this->add_rule_example(L"LowLife", "B3/S13");
-    this->add_rule_example(L"B3/S2", "B3/S2");
-    this->add_rule_example(L"3-4 Life", "B34/S34");
-    this->add_rule_example(L"Bacteria", "B34/S456");
-    this->add_rule_example(L"Blinkers", "B345/S2");
-    this->add_rule_example(L"Assimilation", "B345/S4567");
-    this->add_rule_example(L"Long Life", "B345/S5");
-    this->add_rule_example(L"Gems", "B3457/S4568");
-    this->add_rule_example(L"Gems Minor", "B34578/S456");
-    this->add_rule_example(L"Land Rush", "B35/S234578");
-    this->add_rule_example(L"Bugs", "B3567/S15678");
-    this->add_rule_example(L"Holstein", "B35678/S4678");
-    this->add_rule_example(L"Diamoeba", "B35678/S5678");
-    this->add_rule_example(L"Amoeba", "B357/S1358");
-    this->add_rule_example(L"Pseudo Life", "B357/S238");
-    this->add_rule_example(L"Blinker Life", "B36/S235");
-    this->add_rule_example(L"Slow Blob", "B367/S125678");
-    this->add_rule_example(L"Stains", "B3678/S235678");
-    this->add_rule_example(L"LowDeath", "B368/S238");
-    this->add_rule_example(L"Mazectric w/Mice", "B37/S1234");
-    this->add_rule_example(L"Maze W/Mice", "B37/S12345");
-    this->add_rule_example(L"Plow World", "B378/S012345678");
-    this->add_rule_example(L"Coagulations", "B378/S235678");
-    this->add_rule_example(L"HoneyLife", "B38/S238");
-    this->add_rule_example(L"Electrified Maze", "B45/S12345");
-    this->add_rule_example(L"Walled Cities", "B45678/S2345");
-    this->add_rule_example(L"Vote 4/5", "B4678/S35678");
-    this->add_rule_example(L"Vote", "B5678/S45678");
-    this->add_rule_example(L"Star Trek", "B3/S0248");
+    this->add_rule_example(U"Replicator", "B1357/S1357");
+    this->add_rule_example(U"Fredkin", "B1357/S02468");
+    this->add_rule_example(U"Seeds", "B2/S");
+    this->add_rule_example(U"Live Free or Die", "B2/S0");
+    this->add_rule_example(U"Life Without Death", "B3/S012345678");
+    this->add_rule_example(U"Flock", "B3/S12");
+    this->add_rule_example(U"Mazectric", "B3/S1234");
+    this->add_rule_example(U"Maze", "B3/S12345");
+    this->add_rule_example(U"Conway's Game of Life", "B3/S23");
+    this->add_rule_example(U"EightLife", "B3/S238");
+    this->add_rule_example(U"Coral", "B3/S45678");
+    this->add_rule_example(U"2x2", "B36/S125");
+    this->add_rule_example(U"HighLife", "B36/S23");
+    this->add_rule_example(U"Move", "B368/S245");
+    this->add_rule_example(U"Day & Night", "B3678/S34678");
+    this->add_rule_example(U"DryLife", "B37/S23");
+    this->add_rule_example(U"Pedestrian Life", "B38/S23");
+    this->add_rule_example(U"AntiLife", "B0123478/S01234678");
+    this->add_rule_example(U"InverseLife", "B012345678/S34678");
+    this->add_rule_example(U"H-Trees", "B1/S012345678");
+    this->add_rule_example(U"Gnarl", "B1/S1");
+    this->add_rule_example(U"Serviettes", "B234/S");
+    this->add_rule_example(U"Iceballs", "B25678/S5678");
+    this->add_rule_example(U"DotLife", "B3/S023");
+    this->add_rule_example(U"SnowLife", "B3/S1237");
+    this->add_rule_example(U"Corrosion of Conformity", "B3/S124");
+    this->add_rule_example(U"LowLife", "B3/S13");
+    this->add_rule_example(U"B3/S2", "B3/S2");
+    this->add_rule_example(U"3-4 Life", "B34/S34");
+    this->add_rule_example(U"Bacteria", "B34/S456");
+    this->add_rule_example(U"Blinkers", "B345/S2");
+    this->add_rule_example(U"Assimilation", "B345/S4567");
+    this->add_rule_example(U"Long Life", "B345/S5");
+    this->add_rule_example(U"Gems", "B3457/S4568");
+    this->add_rule_example(U"Gems Minor", "B34578/S456");
+    this->add_rule_example(U"Land Rush", "B35/S234578");
+    this->add_rule_example(U"Bugs", "B3567/S15678");
+    this->add_rule_example(U"Holstein", "B35678/S4678");
+    this->add_rule_example(U"Diamoeba", "B35678/S5678");
+    this->add_rule_example(U"Amoeba", "B357/S1358");
+    this->add_rule_example(U"Pseudo Life", "B357/S238");
+    this->add_rule_example(U"Blinker Life", "B36/S235");
+    this->add_rule_example(U"Slow Blob", "B367/S125678");
+    this->add_rule_example(U"Stains", "B3678/S235678");
+    this->add_rule_example(U"LowDeath", "B368/S238");
+    this->add_rule_example(U"Mazectric w/Mice", "B37/S1234");
+    this->add_rule_example(U"Maze W/Mice", "B37/S12345");
+    this->add_rule_example(U"Plow World", "B378/S012345678");
+    this->add_rule_example(U"Coagulations", "B378/S235678");
+    this->add_rule_example(U"HoneyLife", "B38/S238");
+    this->add_rule_example(U"Electrified Maze", "B45/S12345");
+    this->add_rule_example(U"Walled Cities", "B45678/S2345");
+    this->add_rule_example(U"Vote 4/5", "B4678/S35678");
+    this->add_rule_example(U"Vote", "B5678/S45678");
+    this->add_rule_example(U"Star Trek", "B3/S0248");
 }
 
 }  // namespace gol

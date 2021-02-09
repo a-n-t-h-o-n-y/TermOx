@@ -31,14 +31,14 @@ class Border {
 
     /// Holds all 8 Segments that a Border is made up of.
     struct Segments {
-        Segment north      = Glyph{L'─'};
-        Segment south      = Glyph{L'─'};
-        Segment east       = Glyph{L'│'};
-        Segment west       = Glyph{L'│'};
-        Segment north_west = Glyph{L'┌'};
-        Segment north_east = Glyph{L'┐'};
-        Segment south_west = Glyph{L'└'};
-        Segment south_east = Glyph{L'┘'};
+        Segment north      = Glyph{U'─'};
+        Segment south      = Glyph{U'─'};
+        Segment east       = Glyph{U'│'};
+        Segment west       = Glyph{U'│'};
+        Segment north_west = Glyph{U'┌'};
+        Segment north_east = Glyph{U'┐'};
+        Segment south_west = Glyph{U'└'};
+        Segment south_east = Glyph{U'┘'};
 
         /// Disable all Segments.
         void disable_all();

@@ -13,10 +13,10 @@
 #include <termox/system/key.hpp>
 #include <termox/system/mouse.hpp>
 #include <termox/widget/pipe.hpp>
+#include <termox/widget/point.hpp>
 #include <termox/widget/widgets/textbox.hpp>
 
 namespace ox {
-struct Point;
 
 // TODO input_mask option, which shows outline of acceptable text in ghost color
 // ex) phone #| (___)___-____
@@ -102,7 +102,7 @@ class Line_edit : public Textbox {
     bool clear_on_enter_   = false;
     bool on_initial_       = true;
     bool is_veiled_        = false;
-    Glyph veil_            = L'*';
+    Glyph veil_            = U'*';
     Validator_t validator_ = [](char) { return true; };
 };
 

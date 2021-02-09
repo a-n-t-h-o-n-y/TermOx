@@ -33,8 +33,7 @@ auto click(Widget& w) -> sl::Slot<void(Point, Mouse::Button)>
 {
     return link_lifetimes(
         [&w](Point const& p, Mouse::Button b) {
-            System::send_event(Mouse_press_event{
-                w, Mouse{{w.inner_x() + p.x, w.inner_y() + p.y}, p, b, 0, {}}});
+            System::send_event(Mouse_press_event{w, Mouse{p, b, {}}});
         },
         w);
 }
@@ -43,8 +42,7 @@ auto click(Widget& w, Point p) -> sl::Slot<void(Mouse::Button)>
 {
     return link_lifetimes(
         [&w, p](Mouse::Button b) {
-            System::send_event(Mouse_press_event{
-                w, Mouse{{w.inner_x() + p.x, w.inner_y() + p.y}, p, b, 0, {}}});
+            System::send_event(Mouse_press_event{w, Mouse{p, b, {}}});
         },
         w);
 }
@@ -53,8 +51,7 @@ auto click(Widget& w, Mouse::Button b) -> sl::Slot<void(Point)>
 {
     return link_lifetimes(
         [&w, b](Point p) {
-            System::send_event(Mouse_press_event{
-                w, Mouse{{w.inner_x() + p.x, w.inner_y() + p.y}, p, b, 0, {}}});
+            System::send_event(Mouse_press_event{w, Mouse{p, b, {}}});
         },
         w);
 }
@@ -63,8 +60,7 @@ auto click(Widget& w, Point p, Mouse::Button b) -> sl::Slot<void()>
 {
     return link_lifetimes(
         [&w, p, b] {
-            System::send_event(Mouse_press_event{
-                w, Mouse{{w.inner_x() + p.x, w.inner_y() + p.y}, p, b, 0, {}}});
+            System::send_event(Mouse_press_event{w, Mouse{p, b, {}}});
         },
         w);
 }

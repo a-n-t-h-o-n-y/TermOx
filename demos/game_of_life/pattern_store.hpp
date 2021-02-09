@@ -12,7 +12,7 @@ namespace gol {
 
 class Pattern_store {
    public:
-    using Name = std::wstring_view;
+    using Name = std::u32string_view;
 
    private:
     std::map<Name, Pattern> patterns_;

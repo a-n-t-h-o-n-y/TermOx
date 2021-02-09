@@ -71,7 +71,7 @@ class Scrollbar : public Layout_t {
             if constexpr (is_vertical)
                 *this | bg(c);
             else
-                *this | pipe::wallpaper(L'▬' | fg(c));
+                *this | pipe::wallpaper(U'▬' | fg(c));
             this->update();
         }
 
@@ -113,7 +113,7 @@ class Scrollbar : public Layout_t {
 
        private:
         Parameters parameters_;
-        Glyph bar_ = is_vertical ? L'█' : L'▬';
+        Glyph bar_ = is_vertical ? U'█' : U'▬';
 
         std::size_t slider_position_;
         std::size_t slider_length_;
@@ -288,7 +288,7 @@ class Scrollbar : public Layout_t {
         if (&w != &middle)
             return false;
         if (m.button == Mouse::Button::Left)
-            this->set_position(middle.find_position_from_point(m.local));
+            this->set_position(middle.find_position_from_point(m.at));
         return true;
     }
 
@@ -297,8 +297,8 @@ class Scrollbar : public Layout_t {
 
    private:
     static auto constexpr is_vertical    = layout::is_vertical_v<Layout_t>;
-    static auto constexpr top_symbol_    = is_vertical ? L'▴' : L'◂';
-    static auto constexpr bottom_symbol_ = is_vertical ? L'▾' : L'▸';
+    static auto constexpr top_symbol_    = is_vertical ? U'▴' : U'◂';
+    static auto constexpr bottom_symbol_ = is_vertical ? U'▾' : U'▸';
 };
 
 using HScrollbar = Scrollbar<layout::Horizontal<>>;

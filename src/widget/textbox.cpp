@@ -30,7 +30,7 @@ auto Textbox::key_press_event(Key k) -> bool
 
         case Key::Enter: {
             auto const cursor_index = this->cursor_index();
-            this->Text_display::insert(L"\n", cursor_index);
+            this->Text_display::insert(U"\n", cursor_index);
             if (this->cursor.y() + 1 == this->height())
                 this->scroll_down(1);
             this->set_cursor(cursor_index + 1);
@@ -41,8 +41,8 @@ auto Textbox::key_press_event(Key k) -> bool
             break;
 
         default:  // Insert text
-            auto const text = to_wchar(k);
-            if (text != L'\0') {
+            auto const text = key_to_char32(k);
+            if (text != U'\0') {
                 // TODO Cursor Movement for Alignments other than left
                 auto const cursor_index = this->cursor_index();
                 this->Text_display::insert(Glyph_string{text}, cursor_index);
@@ -56,7 +56,7 @@ auto Textbox::key_press_event(Key k) -> bool
 auto Textbox::mouse_press_event(Mouse const& m) -> bool
 {
     if (m.button == Mouse::Button::Left)
-        this->set_cursor(m.local);
+        this->set_cursor(m.at);
     return Textbox_base::mouse_press_event(m);
 }
 

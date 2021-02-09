@@ -49,7 +49,7 @@ class Animated_box : public ox::Widget {
 
     auto mouse_press_event(const ox::Mouse& m) -> bool override
     {
-        xy_ = m.local;
+        xy_ = m.at;
         this->update();
         return Widget::mouse_press_event(m);
     }
@@ -64,7 +64,7 @@ class Animated_box : public ox::Widget {
    private:
     ox::FPS const fps_;
 
-    ox::Glyph glyph_ = L'X' | fg(ox::Color::Yellow);
+    ox::Glyph glyph_ = U'X' | fg(ox::Color::Yellow);
     ox::Point xy_    = ox::Point{0uL, 0uL};
     int x_direction_ = 1;
     int y_direction_ = 1;
