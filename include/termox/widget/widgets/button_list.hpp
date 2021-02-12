@@ -38,9 +38,9 @@ class Button_list : public layout::Opposite_t<Layout_t<Widget>> {
             auto& btn = this->template make_child<Button>(name) |
                         on_press([this, name] { button_pressed(name); });
             if constexpr (is_vertical)
-                btn | fixed_height(1uL);
+                btn | fixed_height(1);
             else
-                btn | fixed_width(1uL);
+                btn | fixed_width(1);
             return btn;
         }
     };

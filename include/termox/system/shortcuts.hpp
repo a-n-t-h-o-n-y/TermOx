@@ -17,7 +17,7 @@ class Shortcuts {
      *  is encountered. */
     static auto add_shortcut(Key k) -> sl::Signal<void()>&
     {
-        if (shortcuts_.count(k) == 0uL)
+        if (shortcuts_.count(k) == 0)
             shortcuts_[k] = sl::Signal<void()>{};
         return shortcuts_.at(k);
     }
@@ -33,7 +33,7 @@ class Shortcuts {
     /** Returns true if the key was used as a shortcut. */
     static auto send_key(Key k) -> bool
     {
-        if (enabled_ && shortcuts_.count(k) == 1uL) {
+        if (enabled_ && shortcuts_.count(k) == 1) {
             shortcuts_[k]();
             return true;
         }

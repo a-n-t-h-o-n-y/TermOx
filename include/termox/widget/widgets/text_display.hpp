@@ -1,6 +1,5 @@
 #ifndef TERMOX_WIDGET_WIDGETS_TEXT_DISPLAY_HPP
 #define TERMOX_WIDGET_WIDGETS_TEXT_DISPLAY_HPP
-#include <cstddef>
 #include <utility>
 #include <vector>
 
@@ -24,19 +23,19 @@ class Text_display : public Widget {
     Brush insert_brush = this->brush;
 
     /// Emitted when text is scrolled up. Sends number of lines scrolled by.
-    sl::Signal<void(std::size_t n)> scrolled_up;
+    sl::Signal<void(int n)> scrolled_up;
 
     /// Emitted when text is scrolled down. Sends number of lines scrolled by.
-    sl::Signal<void(std::size_t n)> scrolled_down;
+    sl::Signal<void(int n)> scrolled_down;
 
     /// Emitted when text is scrolled, sends the top line.
-    sl::Signal<void(std::size_t n)> scrolled_to;
+    sl::Signal<void(int n)> scrolled_to;
 
     /// Emitted when contents are modified. Sends a reference to the contents.
     sl::Signal<void(Glyph_string const&)> contents_modified;
 
     /// Emitted when total line count changes.
-    sl::Signal<void(std::size_t)> line_count_changed;
+    sl::Signal<void(int)> line_count_changed;
 
    public:
     /// Construct a Text_display with initial Glyph_string \p contents.
@@ -61,14 +60,14 @@ class Text_display : public Widget {
     /** Applys insert_brush to each Glyph added. Index can be one past the
      *  current length of the contents, to append. No-op if index is larger than
      *  one past the current length of contents. */
-    void insert(Glyph_string text, std::size_t index);
+    void insert(Glyph_string text, int index);
 
     /// Inserts \p text to the end of the current contents.
     /** Applys insert_brush to each Glyph inserted. */
     void append(Glyph_string text);
 
     /// Remove Glyphs from contents starting at \p index, for \p length Glyphs.
-    void erase(std::size_t index, std::size_t length = Glyph_string::npos);
+    void erase(int index, int length = Glyph_string::npos);
 
     /// Remove the last Glyph from the current contents. No-op if this->empty();
     void pop_back();
@@ -91,11 +90,11 @@ class Text_display : public Widget {
 
     /// Scroll the display up by \p n lines.
     /** Tops out at the first line displayed at the top of the display. */
-    virtual void scroll_up(std::size_t n = 1);
+    virtual void scroll_up(int n = 1);
 
     /// Scroll the display down by \p n lines.
     /** Bottoms out at the last line displaying at the top of the display. */
-    virtual void scroll_down(std::size_t n = 1);
+    virtual void scroll_down(int n = 1);
 
     /// Enable word wrapping on spaces if \p enable is true, else disable it.
     void enable_word_wrap(bool enable = true)
@@ -120,28 +119,28 @@ class Text_display : public Widget {
 
     /// Return the length of the line at row \p y.
     /** Index 0 is the top of the Widget. */
-    auto row_length(std::size_t y) const -> std::size_t
+    auto row_length(int y) const -> int
     {
         const auto line = this->top_line() + y;
         return this->line_length(line);
     }
 
     /// Return the number of lines currently displayed.
-    auto display_height() const -> std::size_t
+    auto display_height() const -> int
     {
-        auto difference = 1 + this->last_line() - this->top_line();
+        int difference = 1 + this->last_line() - this->top_line();
         if (difference > this->height())
             difference = this->height();
         return difference;
     }
 
     /// Return the total number of lines in display_state_.
-    auto line_count() const -> std::size_t { return display_state_.size(); }
+    auto line_count() const -> int { return display_state_.size(); }
 
     /// Set the top line, by row index.
-    void set_top_line(std::size_t n)
+    void set_top_line(int n)
     {
-        if (n < display_state_.size())
+        if (n < (int)display_state_.size())
             top_line_ = n;
         this->update();
     }
@@ -150,12 +149,12 @@ class Text_display : public Widget {
     /** If \p position is past any text on the corresponding line, then return
      *  index of the last Glyph on that line. If Point is past displayed lines,
      *  return the index of the last Glyph in contents. */
-    auto index_at(Point position) const -> std::size_t;
+    auto index_at(Point position) const -> int;
 
     /// Return the position of the Glyph at \p index.
     /** If \p index is not currently displayed on screen, return the closest
      *  Glyph position to \p index that is displayed on screen. */
-    auto display_position(std::size_t index) const -> Point;
+    auto display_position(int index) const -> Point;
 
     /// Return the entire contents of the Text_display.
     /** Provided as a non-const reference so contents can be modified without
@@ -172,6 +171,7 @@ class Text_display : public Widget {
     /// Add call to Text_display::update_display() before posting Paint_event.
     void update() override
     {
+        // TODO
         // This call to update_display is required here, and not in paint_event.
         // Could probably be refactored so this can be in paint_event, more
         // efficient...
@@ -181,51 +181,51 @@ class Text_display : public Widget {
 
    protected:
     /// Paint the portion of contents that is currently visible on screen.
-    auto paint_event() -> bool override;
+    auto paint_event(Painter& p) -> bool override;
 
     /// Return the line number that contains \p index.
-    auto line_at(std::size_t index) const -> std::size_t;
+    auto line_at(int index) const -> int;
 
     /// Return the line number that is being displayed at the top of the Widget.
-    auto top_line() const -> std::size_t { return top_line_; }
+    auto top_line() const -> int { return top_line_; }
 
     /// Return line number that is being displayed at the bottom of the Widget.
-    auto bottom_line() const -> std::size_t
+    auto bottom_line() const -> int
     {
         return this->top_line() + this->display_height() - 1;
     }
 
     /// Return the index into display_state_ of the last line.
-    auto last_line() const -> std::size_t { return display_state_.size() - 1; }
+    auto last_line() const -> int { return display_state_.size() - 1; }
 
     /// Return the index of the first Glyph at line number \p line.
-    auto first_index_at(std::size_t line) const -> std::size_t
+    auto first_index_at(int line) const -> int
     {
-        if (line >= display_state_.size())
+        if (line >= (int)display_state_.size())
             line = display_state_.size() - 1;
         return display_state_.at(line).start_index;
     }
 
     /// Return the index of the last Glyph at line number \p line.
-    auto last_index_at(std::size_t line) const -> std::size_t
+    auto last_index_at(int line) const -> int
     {
         const auto next_line = line + 1;
-        if (next_line >= display_state_.size())
+        if (next_line >= (int)display_state_.size())
             return this->end_index();
         return display_state_.at(next_line).start_index;
     }
 
     /// Return the number of Glyphs contained at line index \p line
-    auto line_length(std::size_t line) const -> std::size_t
+    auto line_length(int line) const -> int
     {
-        if (line >= display_state_.size())
+        if (line >= (int)display_state_.size())
             line = display_state_.size() - 1;
         return display_state_.at(line).length;
     }
 
     /// Return the index of the last Glyph in contents.
     /** Can give an incorrect result if contents is empty. */
-    auto end_index() const -> std::size_t
+    auto end_index() const -> int
     {
         return this->contents().empty() ? 0 : this->contents().size() - 1;
     }
@@ -233,17 +233,17 @@ class Text_display : public Widget {
     /// Recalculate the text layout via display_state_.
     /** This updates display_state_, depends on the Widget's dimensions, if word
      *  wrap is enabled, and the contents.*/
-    void update_display(std::size_t from_line = 0);
+    void update_display(int from_line = 0);
 
    private:
     /// Provides a start index into contents and total length for a text line.
     struct Line_info {
-        std::size_t start_index;
-        std::size_t length;
+        int start_index;
+        int length;
     };
 
     /// Index into display_state_.
-    std::size_t top_line_   = 0;
+    int top_line_           = 0;
     bool word_wrap_enabled_ = true;
     Align alignment_        = Align::Left;
     Glyph_string contents_;

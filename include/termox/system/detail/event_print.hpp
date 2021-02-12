@@ -16,8 +16,10 @@ inline void event_print(std::ostream& os, ox::Paint_event const& e)
 inline void event_print(std::ostream& os, ox::Key_press_event const& e)
 {
     os << "Key_press_event\n";
-    os << "--->receiver id:   " << e.receiver.get().unique_id() << '\n';
-    os << "--->receiver name: " << e.receiver.get().name() << '\n';
+    if (e.receiver) {
+        os << "--->receiver id:   " << e.receiver->get().unique_id() << '\n';
+        os << "--->receiver name: " << e.receiver->get().name() << '\n';
+    }
 }
 
 inline void event_print(std::ostream& os, ox::Mouse_press_event const& e)

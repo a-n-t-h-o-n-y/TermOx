@@ -13,27 +13,27 @@ using namespace ox;
 
 /// Return the sum total height of all widgets from [first, last).
 template <typename Iter>
-auto heights(Iter first, Iter last) -> std::size_t
+auto heights(Iter first, Iter last) -> int
 {
     auto const sum_heights = [](auto sum, auto const& widget) {
         return widget.is_enabled() ? sum += widget.outer_height() : sum;
     };
-    return std::accumulate(first, last, 0uL, sum_heights);
+    return std::accumulate(first, last, 0, sum_heights);
 }
 
 /// Return the sum total width of all widgets from [first, last).
 template <typename Iter>
-auto widths(Iter first, Iter last) -> std::size_t
+auto widths(Iter first, Iter last) -> int
 {
     auto const sum_widths = [](auto sum, auto const& widget) {
         return widget.is_enabled() ? sum += widget.outer_width() : sum;
     };
-    return std::accumulate(first, last, 0uL, sum_widths);
+    return std::accumulate(first, last, 0, sum_widths);
 }
 
 /// Check if each Widget from [first, last) has width equal to \p width.
 template <typename Iter>
-auto all_widths_equal_to(Iter first, Iter last, std::size_t width)
+auto all_widths_equal_to(Iter first, Iter last, int width)
 {
     auto const widths_equal = [width](Widget const& w) {
         return w.is_enabled() ? w.outer_width() == width : true;
@@ -43,7 +43,7 @@ auto all_widths_equal_to(Iter first, Iter last, std::size_t width)
 
 /// Check if each Widget from [first,last) has height equal to \p height.
 template <typename Iter>
-auto all_heights_equal_to(Iter first, Iter last, std::size_t height)
+auto all_heights_equal_to(Iter first, Iter last, int height)
 {
     auto const heights_equal = [height](Widget const& w) {
         return w.is_enabled() ? w.outer_height() == height : true;

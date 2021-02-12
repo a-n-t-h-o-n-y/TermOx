@@ -21,8 +21,8 @@ class Generation_count : public ox::layout::Horizontal<> {
     {
         this->height_policy.fixed(1);
         this->cursor.disable();
-        title_ | ox::pipe::fixed_width(11uL);
-        count_ | ox::pipe::fixed_width(5uL);
+        title_ | ox::pipe::fixed_width(11);
+        count_ | ox::pipe::fixed_width(5);
     }
 
     void update_count(std::uint32_t count)
@@ -71,7 +71,7 @@ struct Status_box : ox::layout::Vertical<> {
     Center_offset& center_offset = this->make_child<Center_offset>();
 
    public:
-    Status_box() { this->height_policy.fixed(5uL); }
+    Status_box() { this->height_policy.fixed(5); }
 };
 }  // namespace gol
 #endif  // TERMOX_DEMOS_GAME_OF_LIFE_STATUS_BOX_HPP

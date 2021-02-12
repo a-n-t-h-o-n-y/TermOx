@@ -1,6 +1,5 @@
 #ifndef TERMOX_WIDGET_WIDGETS_LABEL_HPP
 #define TERMOX_WIDGET_WIDGETS_LABEL_HPP
-#include <cstddef>
 #include <memory>
 #include <utility>
 
@@ -25,10 +24,10 @@ class Label : public Widget {
    public:
     struct Parameters {
         Glyph_string text;
-        Align alignment         = Align::Left;
-        std::size_t extra_left  = 0uL;
-        std::size_t extra_right = 0uL;
-        Growth growth_strategy  = Growth::Static;
+        Align alignment        = Align::Left;
+        int extra_left         = 0;
+        int extra_right        = 0;
+        Growth growth_strategy = Growth::Static;
     };
 
    public:
@@ -39,11 +38,11 @@ class Label : public Widget {
      *  \param extra_right     Align::Center takes this into account
      *  \param growth_strategy If the Label is resized to fit the text or not.
      */
-    explicit Label(Glyph_string text       = U"",
-                   Align alignment         = Align::Left,
-                   std::size_t extra_left  = 0uL,
-                   std::size_t extra_right = 0uL,
-                   Growth growth_strategy  = Growth::Static)
+    explicit Label(Glyph_string text      = U"",
+                   Align alignment        = Align::Left,
+                   int extra_left         = 0,
+                   int extra_right        = 0,
+                   Growth growth_strategy = Growth::Static)
         : text_{std::move(text)},
           alignment_{alignment},
           extra_left_{extra_left},
@@ -51,9 +50,9 @@ class Label : public Widget {
           growth_strategy_{growth_strategy}
     {
         if constexpr (is_vertical)
-            *this | pipe::fixed_width(1uL);
+            *this | pipe::fixed_width(1);
         else
-            *this | pipe::fixed_height(1uL);
+            *this | pipe::fixed_height(1);
 
         if (growth_strategy_ == Growth::Dynamic) {
             if constexpr (is_vertical)
@@ -100,24 +99,24 @@ class Label : public Widget {
     auto get_alignment() const -> Align { return alignment_; }
 
     /// Inform Label about space to left of Label for centered text offset.
-    void set_extra_left(std::size_t x)
+    void set_extra_left(int x)
     {
         extra_left_ = x;
         this->update_offset();
     }
 
     /// Return the amount given to set_extra_left().
-    auto get_extra_left() const -> std::size_t { return extra_left_; }
+    auto get_extra_left() const -> int { return extra_left_; }
 
     /// Inform Label about space to right of Label for centered text offset.
-    void set_extra_right(std::size_t x)
+    void set_extra_right(int x)
     {
         extra_right_ = x;
         this->update_offset();
     }
 
     /// Return the amount given to set_extra_right().
-    auto get_extra_right() const -> std::size_t { return extra_right_; }
+    auto get_extra_right() const -> int { return extra_right_; }
 
     /// Enable/Disable Dynamic size, where the Label's size is the text length.
     void set_growth_strategy(Growth type)
@@ -135,13 +134,13 @@ class Label : public Widget {
     auto get_growth_strategy() const -> Growth { return growth_strategy_; }
 
    protected:
-    auto paint_event() -> bool override
+    auto paint_event(Painter& p) -> bool override
     {
         if constexpr (is_vertical)
-            this->paint_vertical();
+            this->paint_vertical(p);
         else
-            this->paint_horizontal();
-        return Widget::paint_event();
+            this->paint_horizontal(p);
+        return Widget::paint_event(p);
     }
 
     auto resize_event(Area new_size, Area old_size) -> bool override
@@ -156,11 +155,11 @@ class Label : public Widget {
 
     Glyph_string text_;
     Align alignment_;
-    std::size_t extra_left_;
-    std::size_t extra_right_;
+    int extra_left_;
+    int extra_right_;
     Growth growth_strategy_;
 
-    std::size_t offset_ = 0uL;
+    int offset_ = 0;
 
    private:
     /// Update the internal offset_ value to account for new settings/state
@@ -178,20 +177,19 @@ class Label : public Widget {
         this->update();
     }
 
-    void paint_vertical()
+    void paint_vertical(Painter& p)
     {
-        auto p = Painter{*this};
-        for (auto i = 0uL; i < text_.size() && i < this->height(); ++i)
-            p.put(text_[i], {0uL, offset_ + i});
+        for (auto i = 0; i < text_.size() && i < this->height(); ++i)
+            p.put(text_[i], {0, offset_ + i});
     }
 
-    void paint_horizontal() { Painter{*this}.put(text_, {offset_, 0uL}); }
+    void paint_horizontal(Painter& p) { p.put(text_, {offset_, 0}); }
 
     /// Find the text's first Glyph placement along the length of the Widget.
-    auto find_offset(std::size_t text_length,
-                     std::size_t box_length,
-                     std::size_t extra_left,
-                     std::size_t extra_right) -> std::size_t
+    auto find_offset(int text_length,
+                     int box_length,
+                     int extra_left,
+                     int extra_right) -> int
     {
         switch (alignment_) {
             case Align::Left:
@@ -207,26 +205,23 @@ class Label : public Widget {
             case Align::Bottom:
                 return right_bottom_offset(text_length, box_length);
         }
-        return 0uL;
+        return 0;
     }
 
-    static auto left_top_offset() -> std::size_t { return 0uL; }
+    static auto left_top_offset() -> int { return 0; }
 
-    static auto center_offset(std::size_t text_length, std::size_t box_length)
-        -> std::size_t
+    static auto center_offset(int text_length, int box_length) -> int
     {
-        return text_length > box_length ? 0uL : (box_length - text_length) / 2;
+        return text_length > box_length ? 0 : (box_length - text_length) / 2;
     }
 
-    static auto right_bottom_offset(std::size_t text_length,
-                                    std::size_t box_length) -> std::size_t
+    static auto right_bottom_offset(int text_length, int box_length) -> int
     {
-        return text_length > box_length ? 0uL : box_length - text_length;
+        return text_length > box_length ? 0 : box_length - text_length;
     }
 
     /// Offsets a given \p position by the extra length parameters
-    static auto apply_origin_offset(std::size_t position, std::size_t left)
-        -> std::size_t
+    static auto apply_origin_offset(int position, int left) -> int
     {
         position -= position < left ? position : left;
         return position;
@@ -286,10 +281,10 @@ class Label_wrapper : public Wrapper_layout<Widget> {
     // Instead of inheriting Label_t::Parmeters, because default alignment.
     struct Parameters {
         Glyph_string text;
-        Align alignment         = label_last ? Align::Left : Align::Right;
-        std::size_t extra_left  = 0uL;
-        std::size_t extra_right = 0uL;
-        Growth growth_strategy  = Growth::Static;
+        Align alignment        = label_last ? Align::Left : Align::Right;
+        int extra_left         = 0;
+        int extra_right        = 0;
+        Growth growth_strategy = Growth::Static;
     };
 
    public:
@@ -301,11 +296,11 @@ class Label_wrapper : public Wrapper_layout<Widget> {
     /// Construct a new Label and wrapped Widget_t.
     /** Only takes Label constructor args, if you need to pass in args to the
      *  wrapped Widget_t, then use the Label::Parameters overload. */
-    explicit Label_wrapper(Glyph_string text       = U"",
-                           Align alignment         = Align::Left,
-                           std::size_t extra_left  = 0uL,
-                           std::size_t extra_right = 0uL,
-                           Growth growth_strategy  = Growth::Static)
+    explicit Label_wrapper(Glyph_string text      = U"",
+                           Align alignment        = Align::Left,
+                           int extra_left         = 0,
+                           int extra_right        = 0,
+                           Growth growth_strategy = Growth::Static)
         : Label_wrapper{Parameters{std::move(text), alignment, extra_left,
                                    extra_right, growth_strategy}}
     {}
@@ -417,11 +412,11 @@ auto label_left(typename Label<Layout_t>::Parameters p, Args&&... args)
 /** Only takes Label constructor args, if you need to pass in args to the
  *  wrapped Widget_t, then use the Label::Parameters overload. */
 template <template <typename> typename Layout_t, typename Widget_t>
-auto label_left(Glyph_string text       = U"",
-                Align alignment         = Align::Left,
-                std::size_t extra_left  = 0uL,
-                std::size_t extra_right = 0uL,
-                Growth growth_strategy  = Growth::Static)
+auto label_left(Glyph_string text      = U"",
+                Align alignment        = Align::Left,
+                int extra_left         = 0,
+                int extra_right        = 0,
+                Growth growth_strategy = Growth::Static)
     -> std::unique_ptr<Label_left<Layout_t, Widget_t>>
 {
     return label_left(typename Label<Layout_t>::Parameters{
@@ -443,11 +438,11 @@ auto label_right(typename Label<Layout_t>::Parameters p, Args&&... args)
 /** Only takes Label constructor args, if you need to pass in args to the
  *  wrapped Widget_t, then use the Label::Parameters overload. */
 template <template <typename> typename Layout_t, typename Widget_t>
-auto label_right(Glyph_string text       = U"",
-                 Align alignment         = Align::Left,
-                 std::size_t extra_left  = 0uL,
-                 std::size_t extra_right = 0uL,
-                 Growth growth_strategy  = Growth::Static)
+auto label_right(Glyph_string text      = U"",
+                 Align alignment        = Align::Left,
+                 int extra_left         = 0,
+                 int extra_right        = 0,
+                 Growth growth_strategy = Growth::Static)
     -> std::unique_ptr<Label_left<Layout_t, Widget_t>>
 {
     return label_right(typename Label<Layout_t>::Parameters{
@@ -469,11 +464,11 @@ auto label_top(typename Label<Layout_t>::Parameters p, Args&&... args)
 /** Only takes Label constructor args, if you need to pass in args to the
  *  wrapped Widget_t, then use the Label::Parameters overload. */
 template <template <typename> typename Layout_t, typename Widget_t>
-auto label_top(Glyph_string text        = U"",
-               Align alignment          = Align::Left,
-               std::size_t extra_top    = 0uL,
-               std::size_t extra_bottom = 0uL,
-               Growth growth_strategy   = Growth::Static)
+auto label_top(Glyph_string text      = U"",
+               Align alignment        = Align::Left,
+               int extra_top          = 0,
+               int extra_bottom       = 0,
+               Growth growth_strategy = Growth::Static)
     -> std::unique_ptr<Label_left<Layout_t, Widget_t>>
 {
     return label_top(typename Label<Layout_t>::Parameters{
@@ -495,11 +490,11 @@ auto label_bottom(typename Label<Layout_t>::Parameters p, Args&&... args)
 /** Only takes Label constructor args, if you need to pass in args to the
  *  wrapped Widget_t, then use the Label::Parameters overload. */
 template <template <typename> typename Layout_t, typename Widget_t>
-auto label_bottom(Glyph_string text        = U"",
-                  Align alignment          = Align::Left,
-                  std::size_t extra_top    = 0uL,
-                  std::size_t extra_bottom = 0uL,
-                  Growth growth_strategy   = Growth::Static)
+auto label_bottom(Glyph_string text      = U"",
+                  Align alignment        = Align::Left,
+                  int extra_top          = 0,
+                  int extra_bottom       = 0,
+                  Growth growth_strategy = Growth::Static)
     -> std::unique_ptr<Label_left<Layout_t, Widget_t>>
 {
     return label_bottom(typename Label<Layout_t>::Parameters{

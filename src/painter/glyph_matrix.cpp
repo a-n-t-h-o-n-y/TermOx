@@ -1,17 +1,16 @@
 #include <termox/painter/glyph_matrix.hpp>
 
-#include <cstddef>
-
 #include <termox/painter/glyph.hpp>
+#include <termox/widget/area.hpp>
 
 namespace ox {
 
-void Glyph_matrix::resize(std::size_t width, std::size_t height)
+void Glyph_matrix::resize(Area area)
 {
-    matrix_.resize(height);
+    matrix_.resize(area.height);
     matrix_.shrink_to_fit();
     for (auto& row : matrix_) {
-        row.resize(width, U' ');
+        row.resize(area.width, U' ');
         row.shrink_to_fit();
     }
 }

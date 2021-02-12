@@ -8,10 +8,10 @@ some text to the screen:
 using namespace ox;
 
 class App : public Widget {
-    auto paint_event() -> bool override
+    auto paint_event(Painter& p) -> bool override
     {
-        Painter{*this}.put("Hello, World!", {10, 5});
-        return Widget::paint_event();
+        p.put("Hello, World!", {10, 5});
+        return Widget::paint_event(p);
     }
 };
 
@@ -26,12 +26,11 @@ This program will paint the text `Hello, World!` to the screen at coordinates
 using namespace ox;
 
 class App : public Widget {
-    auto paint_event() -> bool override
+    auto paint_event(Painter& p) -> bool override
     {
         auto text = U"╔═Hello═World═╝" | fg(Color::Green) | Trait::Bold;
-        auto p    = Painter{*this};
         p.put(text, {10, 5});
-        return Widget::paint_event();
+        return Widget::paint_event(p);
     }
 };
 
@@ -63,7 +62,7 @@ Inherit from `ox::Widget`, creating a new Widget type.
 ---
 
 ```cpp
- auto paint_event() -> bool override
+ auto paint_event(Painter& p) -> bool override
 ```
 
 Override the `paint_event` handler. This method is called every time the Widget
@@ -96,7 +95,7 @@ Each `paint_event` call begins with a blank display.
 ---
 
 ```cpp
-return Widget::paint_event();
+return Widget::paint_event(p);
 ```
 
 Call down to the base class' implementation, this is common practice for all

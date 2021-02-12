@@ -1,30 +1,25 @@
 #include <termox/terminal/terminal.hpp>
 
-#include <algorithm>
-#include <chrono>
-#include <clocale>
+#include <cassert>
 #include <csignal>
-#include <cstddef>
-#include <cstdint>
-#include <cstdio>
 #include <cstdlib>
 #include <iterator>
-#include <mutex>
-#include <stdexcept>
+#include <map>
+#include <optional>
+#include <string>
+#include <utility>
+#include <variant>
 
-#ifndef _XOPEN_SOURCE_EXTENDED
-#    define _XOPEN_SOURCE_EXTENDED
-#endif
-#include <ncursesw/ncurses.h>
-#undef border
+#include <esc/esc.hpp>
 
+#include <termox/common/u32_to_mb.hpp>
 #include <termox/painter/color.hpp>
-#include <termox/painter/palette/basic.hpp>
-#include <termox/painter/palette/basic8.hpp>
 #include <termox/painter/palette/dawn_bringer16.hpp>
+#include <termox/system/detail/find_widget_at.hpp>
+#include <termox/system/event.hpp>
+#include <termox/system/shortcuts.hpp>
 #include <termox/system/system.hpp>
-#include <termox/terminal/input.hpp>
-#include <termox/terminal/terminal_error.hpp>
+#include <termox/terminal/detail/canvas.hpp>
 #include <termox/widget/widget.hpp>
 
 extern "C" void handle_sigint(int /* sig*/)
@@ -38,107 +33,219 @@ extern "C" void handle_sigint(int /* sig*/)
 }
 
 namespace {
-using namespace ox;
 
-auto scale(RGB::Value_t value) -> short
+using Color_store = std::map<ox::Color, std::string>;
+
+auto fg_store = Color_store{};
+
+auto bg_store = Color_store{};
+
+/// Return the terminal escape sequence for the given Color \p c as foreground.
+/** Returns the terminal default foreground color sequence if \p c is not in the
+ *  currently set palette. */
+[[nodiscard]] auto get_fg_sequence(ox::Color c) -> std::string
 {
-    auto constexpr value_max   = RGB::Value_t{255};
-    auto constexpr ncurses_max = short{1000};
-    return static_cast<short>((static_cast<double>(value) / value_max) *
-                              ncurses_max);
+    if (auto const iter = fg_store.find(c); iter != std::cend(fg_store))
+        return iter->second;
+    else
+        return esc::escape(foreground(esc::Default_color{}));
+}
+
+/// Return the terminal escape sequence for the given Color \p c as background.
+/** Returns the terminal default background color sequence if \p c is not in the
+ *  currently set palette. */
+[[nodiscard]] auto get_bg_sequence(ox::Color c) -> std::string
+{
+    if (auto const iter = bg_store.find(c); iter != std::cend(bg_store))
+        return iter->second;
+    else
+        return esc::escape(background(esc::Default_color{}));
+}
+
+/// Convert a Canvas::Diff into a terminal escape sequence.
+[[nodiscard]] auto to_escape_sequence(ox::detail::Canvas::Diff const& diff)
+    -> std::string
+{
+    auto sequence = std::string{};
+    for (auto [point, glyph] : diff) {
+        using esc::escape;
+        sequence.append(escape(esc::Cursor_position{point}));
+        // TODO check if current traits are the same as glyph.traits, etc.. for
+        // colors too, then you don't have to generate and append escape
+        // sequences for those that are already set.
+        sequence.append(escape(glyph.brush.traits));
+        sequence.append(get_fg_sequence(glyph.brush.foreground));
+        sequence.append(get_bg_sequence(glyph.brush.background));
+        sequence.append(ox::u32_to_mb(glyph.symbol));
+    }
+    return sequence;
+}
+
+/// Used as the return type for color_sequences() functions.
+struct Color_sequences {
+    std::string fg, bg;
+};
+
+/// Return the terminal escape sequence to set the fg/bg to Color_index \p x.
+[[nodiscard]] auto color_sequences(ox::Color_index x) -> Color_sequences
+{
+    return {esc::escape(foreground(x)), esc::escape(background(x))};
+}
+
+/// Return the terminal escape sequence to set the fg/bg to True_color \p x.
+[[nodiscard]] auto color_sequences(ox::True_color x) -> Color_sequences
+{
+    return {esc::escape(foreground(x)), esc::escape(background(x))};
+}
+
+/// Return the terminal escape sequence to set the fg/bg to \p x.
+/** This calls on x.get_value() to get the initial color value to set. */
+[[nodiscard]] auto color_sequences(ox::Dynamic_color x) -> Color_sequences
+{
+    return color_sequences(x.get_value());
+}
+
+/// Call update on every Widget in the Widget Tree.
+void repaint_all_widgets()
+{
+    auto* const head = ox::System::head();
+    if (head == nullptr)
+        return;
+    for (auto* const d : head->get_descendants())
+        d->update();
+}
+
+/// Turn an esc:: mouse event into a pair of Receiver and local Mouse object.
+template <typename T>
+[[nodiscard]] auto mouse_event_info(T& event)
+    -> std::pair<ox::Widget&, ox::Mouse&>
+{
+    auto& receiver = [&]() -> ox::Widget& {
+        auto* widg = ox::detail::find_widget_at(event.state.at);
+        assert(widg != nullptr);
+        return *widg;
+    }();
+    // Change to local Point.
+    event.state.at = ox::Point{event.state.at.x - receiver.inner_x(),
+                               event.state.at.y - receiver.inner_y()};
+    return {receiver, event.state};
+}
+
+/// Tranform Mouse_press events to ox::Events.
+[[nodiscard]] auto transform(::esc::Mouse_press x) -> ox::Event
+{
+    auto [receiver, mouse] = mouse_event_info(x);
+    return ox::Mouse_press_event{receiver, mouse};
+}
+
+/// Tranform Mouse_release events to ox::Events.
+[[nodiscard]] auto transform(::esc::Mouse_release x) -> ox::Event
+{
+    auto [receiver, mouse] = mouse_event_info(x);
+    return ox::Mouse_release_event{receiver, mouse};
+}
+
+/// Tranform Scroll_wheel events to ox::Events.
+[[nodiscard]] auto transform(::esc::Scroll_wheel x) -> ox::Event
+{
+    auto [receiver, mouse] = mouse_event_info(x);
+    return ox::Mouse_wheel_event{receiver, mouse};
+}
+
+/// Tranform Mouse_move events to ox::Events.
+[[nodiscard]] auto transform(::esc::Mouse_move x) -> ox::Event
+{
+    auto [receiver, mouse] = mouse_event_info(x);
+    return ox::Mouse_move_event{receiver, mouse};
+}
+
+/// Tranform Key_press events to ox::Events.
+[[nodiscard]] auto transform(::esc::Key_press x) -> ox::Event
+{
+    auto receiver = []() -> decltype(ox::Key_press_event::receiver) {
+        if (ox::Widget* const fw = ox::System::focus_widget(); fw == nullptr)
+            return std::nullopt;
+        else
+            return *fw;
+    }();
+    return ox::Key_press_event{receiver, x.key};
+}
+
+/// Tranform Window_resize events to ox::Events.
+[[nodiscard]] auto transform(::esc::Window_resize x) -> ox::Event
+{
+    ox::Widget& head = []() -> ox::Widget& {
+        ox::Widget* head = ox::System::head();
+        assert(head != nullptr);
+        return *head;
+    }();
+    ox::System::terminal.screen_buffers.resize(x.new_dimensions);
+    return ox::Resize_event{head, x.new_dimensions};
 }
 
 }  // namespace
 
 namespace ox {
 
-void Terminal::initialize()
+void Terminal::initialize(Mouse_mode mouse_mode, Signals signals)
 {
     if (is_initialized_)
         return;
-    std::setlocale(LC_ALL, "en_US.UTF-8");
-
-    if (::newterm(std::getenv("TERM"), stdout, stdin) == nullptr &&
-        ::newterm("xterm-256color", stdout, stdin) == nullptr) {
-        throw std::runtime_error{"Unable to initialize screen."};
-    }
-    std::signal(SIGINT, &handle_sigint);
-
+    ::esc::initialize_interactive_terminal(mouse_mode, signals);
     is_initialized_ = true;
-    ::noecho();
-    ::keypad(::stdscr, true);
-    ::set_escdelay(1);
-    ::mousemask(ALL_MOUSE_EVENTS, nullptr);
-    ::mouseinterval(0);
-    this->set_refresh_rate(refresh_rate_);
-    if (this->has_color()) {
-        ::start_color();
-        try {
-            this->set_palette(dawn_bringer16::palette);
-        }
-        catch (Terminal_error const&) {
-            if (this->has_extended_colors())
-                this->set_palette(basic::palette);
-            else
-                this->set_palette(basic8::palette);
-        }
-    }
-    this->ncurses_set_raw_mode();
-    this->ncurses_set_cursor();
+    this->set_palette(dawn_bringer16::palette);
+    std::signal(SIGINT, &handle_sigint);
+    screen_buffers.resize(Terminal::area());
 }
 
 void Terminal::uninitialize()
 {
     if (!is_initialized_)
         return;
-    ::wrefresh(::stdscr);
+    ::esc::uninitialize_terminal();
     is_initialized_ = false;
-    ::endwin();
 }
 
-// getmaxx/getmaxy are non-standard.
-auto Terminal::width() const -> std::size_t
+void Terminal::refresh()
 {
-    auto x = 0;
-    if (auto y = 0; is_initialized_)
-        getmaxyx(::stdscr, y, x);
-    return x;
+    esc::write(to_escape_sequence(screen_buffers.merge_and_diff()));
+    esc::flush();
 }
 
-auto Terminal::height() const -> std::size_t
+void Terminal::set_default_wallpaper(Glyph tile)
 {
-    auto y = 0;
-    if (auto x = 0; is_initialized_)
-        getmaxyx(::stdscr, y, x);
-    return y;
-}
-
-void Terminal::set_refresh_rate(std::chrono::milliseconds duration)
-{
-    refresh_rate_ = duration;
+    wallpaper_ = tile;
     if (is_initialized_)
-        ::timeout(refresh_rate_.count());
+        repaint_all_widgets();
 }
 
-void Terminal::set_background(Glyph tile)
+void Terminal::update_color_stores(Color c, True_color tc)
 {
-    background_ = tile;
-    if (is_initialized_)
-        this->repaint_all();
+    fg_store[c] = esc::escape(foreground(tc));
+    bg_store[c] = esc::escape(background(tc));
+}
+
+void Terminal::repaint_color(Color c)
+{
+    esc::write(to_escape_sequence(screen_buffers.generate_color_diff(c)));
+    esc::flush();
 }
 
 void Terminal::set_palette(Palette colors)
 {
-    if (!is_initialized_ || !this->has_color())
-        return;
     dynamic_color_engine_.clear();
     palette_ = std::move(colors);
-    for (auto const& def : palette_) {
-        std::visit(
-            [&](auto const& c) { this->set_color_definition(def.color, c); },
-            def.value);
+    for (auto const& [color, color_type] : palette_) {
+        auto [fg, bg] = std::visit(
+            [&](auto const& x) { return color_sequences(x); }, color_type);
+        fg_store[color] = fg;
+        bg_store[color] = bg;
+        if (std::holds_alternative<Dynamic_color>(color_type)) {
+            dynamic_color_engine_.register_color(
+                color, std::get<Dynamic_color>(color_type));
+        }
     }
-    this->repaint_all();
+    repaint_all_widgets();
     palette_changed(palette_);
 }
 
@@ -156,146 +263,20 @@ auto Terminal::palette_append(Color_definition::Value_t value) -> Color
     return pal.back().color;
 }
 
-void Terminal::initialize_pairs(Color c, ANSI a)
+auto Terminal::get() -> Event
 {
-    for (auto const& def : palette_) {
-        ::init_pair(this->color_index(c, def.color), a.value, def.ansi.value);
-        ::init_pair(this->color_index(def.color, c), def.ansi.value, a.value);
-    }
-}
+    return std::visit([](auto const& event) { return transform(event); },
+                      ::esc::read());
 
-void Terminal::set_color_definition(Color c, Color_index value)
-{
-    // TODO
-    // this->initialize_pairs(c, a);
-}
+    // visit each type and return the cooresponding ox:: event type.
 
-void Terminal::set_color_definition(Color c, True_color value)
-{
-    // TODO
-    // this->initialize_pairs(c, a);
-    // this->term_set_color(a, value);
-}
-
-void Terminal::set_color_definition(Color c, Dynamic_color value)
-{
-    // TODO
-    // this->initialize_pairs(c, a);
-    // dynamic_color_engine_.register_color(a, value);
-}
-
-auto Terminal::get_ansi(Color c) -> short
-{
-    auto const iter =
-        std::find_if(std::begin(palette_), std::end(palette_),
-                     [c](auto const& def) { return def.color == c; });
-    if (iter != std::end(palette_))
-        return iter->ansi.value;
-    throw std::runtime_error("get_ansi: Color not found in palette.");
-}
-
-auto Terminal::color_content(ANSI ansi) -> RGB
-{
-    short r, g, b;
-    ::color_content(ansi.value, &r, &g, &b);
-    auto const scale_to_256 = [](short x) -> std::uint8_t {
-        return x / 1000. * 256;
-    };
-    return {
-        scale_to_256(r),
-        scale_to_256(b),
-        scale_to_256(b),
-    };
-}
-
-void Terminal::show_cursor(bool show)
-{
-    show_cursor_ = show;
-    if (is_initialized_)
-        this->ncurses_set_cursor();
-}
-
-void Terminal::raw_mode(bool enable)
-{
-    raw_mode_ = enable;
-    if (is_initialized_)
-        this->ncurses_set_raw_mode();
-}
-
-auto Terminal::has_color() const -> bool
-{
-    if (is_initialized_)
-        return ::has_colors() == TRUE;
-    return false;
-}
-
-auto Terminal::has_extended_colors() const -> bool
-{
-    if (is_initialized_)
-        return COLORS >= 16;
-    return false;
-}
-
-auto Terminal::color_count() const -> short
-{
-    if (is_initialized_)
-        return COLORS;
-    return 0;
-}
-
-auto Terminal::can_change_colors() const -> bool
-{
-    if (is_initialized_)
-        return ::can_change_color() == TRUE;
-    return false;
-}
-
-auto Terminal::color_pair_count() const -> int
-{
-    if (is_initialized_)
-        return COLOR_PAIRS;
-    return 0;
-}
-
-auto Terminal::color_index(Color fg, Color bg) const -> short
-{
-    auto constexpr color_count = 181uL;
-    return 1 + (fg.value * color_count) + bg.value;
-}
-
-void Terminal::term_set_color(ANSI a, True_color value)
-{
-    if (!this->can_change_colors())
-        throw Terminal_error{"Terminal cannot re-define color values."};
-
-    ::init_color(a.value, scale(value.red()), scale(value.green()),
-                 scale(value.blue()));
-}
-
-void Terminal::ncurses_set_raw_mode() const
-{
-    if (raw_mode_) {
-        ::nocbreak();
-        ::raw();
-    }
-    else {
-        ::noraw();
-        ::cbreak();
-    }
-}
-
-void Terminal::ncurses_set_cursor() const
-{
-    show_cursor_ ? ::curs_set(1) : ::curs_set(0);
-}
-
-void Terminal::repaint_all()
-{
-    auto* const head = System::head();
-    if (head == nullptr)
-        return;
-    for (auto* const d : head->get_descendants())
-        d->update();
+    // auto const input = ::getch();
+    // switch (input) {
+    //     case ERR: return std::nullopt;  // Timeout and no event.
+    //     case KEY_MOUSE: return make_mouse_event();
+    //     case KEY_RESIZE: return make_resize_event();
+    //     default: return make_keyboard_event(input);
+    // }
 }
 
 }  // namespace ox

@@ -10,8 +10,7 @@
 #include <termox/system/mouse.hpp>
 #include <termox/widget/focus_policy.hpp>
 #include <termox/widget/widget.hpp>
-
-#include "detail/slider_logic.hpp"
+#include <termox/widget/widgets/detail/slider_logic.hpp>
 
 namespace ox {
 
@@ -137,7 +136,7 @@ class Vertical_slider : public Widget {
     auto lower() const -> Glyph_string const& { return lower_; }
 
    protected:
-    auto paint_event() -> bool override;
+    auto paint_event(Painter& p) -> bool override;
 
     auto mouse_press_event(Mouse const& m) -> bool override;
 
@@ -168,13 +167,13 @@ class Vertical_slider : public Widget {
     /// Calculate the ratio of the given y position to the height of *this.
     /** Inverted so that height() - 1 is a ratio of 0.0 and position 0 is a
      *  ratio of 1.0. */
-    auto ratio_at(std::size_t position) const -> Ratio_t;
+    auto ratio_at(int position) const -> Ratio_t;
 
     /// Return the indicator's position without respect to its invertedness.
     auto indicator_absolute_position() const -> Ratio_t;
 
     /// Get the indicator's y position on the screen from the current ratio.
-    auto indicator_position() const -> std::size_t;
+    auto indicator_position() const -> int;
 
     /// Find the index into the middle_ container that cooresponds to the ratio.
     auto indicator_index() const -> std::size_t;

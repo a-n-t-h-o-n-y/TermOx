@@ -43,7 +43,7 @@ struct Clear_step_box : ox::layout::Vertical<> {
         using namespace ox;
         using namespace ox::pipe;
 
-        *this | fixed_height(2uL);
+        *this | fixed_height(2);
         clear_btn.main_btn | bg(color::Light_green) | fg(color::Teal);
         clear_btn.confirm_page.confirm_btn | bg(color::Light_green) |
             fg(color::Teal);
@@ -62,7 +62,7 @@ class Rule_edit : public ox::layout::Vertical<> {
         using namespace ox;
         using namespace ox::pipe;
 
-        *this | fixed_height(2uL);
+        *this | fixed_height(2);
         edit_box_ | bg(color::White) | fg(color::Black) | ghost(color::Teal);
 
         edit_box_.set_validator([](char c) {
@@ -103,7 +103,7 @@ struct Start_pause_btns : ox::Toggle_button {
         using namespace ox;
         using namespace ox::pipe;
 
-        *this | fixed_height(1uL);
+        *this | fixed_height(1);
         top | bg(color::Light_green) | fg(color::Teal);
         bottom | bg(color::Green) | fg(color::White);
     }
@@ -124,8 +124,8 @@ struct Interval_box : ox::layout::Horizontal<> {
         using namespace ox;
         using namespace ox::pipe;
 
-        *this | fixed_height(1uL);
-        units | bg(color::White) | fg(color::Teal) | fixed_width(2uL);
+        *this | fixed_height(1);
+        units | bg(color::White) | fg(color::Teal) | fixed_width(2);
     }
 };
 
@@ -138,8 +138,8 @@ struct Grid_hi_res : ox::layout::Horizontal<ox::HCheckbox_label> {
     Grid_hi_res()
     {
         using namespace ox::pipe;
-        *this | fixed_height(1uL) | children() |
-            for_each([](auto& c) { c.padding | fixed_width(1uL); });
+        *this | fixed_height(1) | children() |
+            for_each([](auto& c) { c.padding | fixed_width(1); });
         hi_res_box.checkbox.toggle();
     }
 };
@@ -173,7 +173,7 @@ struct Controls_box : ox::layout::Vertical<> {
     Controls_box()
     {
         using namespace ox::pipe;
-        *this | fixed_height(12uL);
+        *this | fixed_height(12);
 
         interval_edit.value_set.connect([this](int value) {
             interval_set(std::chrono::milliseconds{value});

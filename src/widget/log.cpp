@@ -19,7 +19,7 @@ void Log::post_message(Glyph_string message)
     auto const tl = this->top_line();
     auto const h  = this->height();
     auto const lc = this->line_count();
-    if (tl + h < lc)
+    if (tl + h < (int)lc)
         this->scroll_down(lc - tl - h);
     this->set_cursor(this->contents().size());
 }

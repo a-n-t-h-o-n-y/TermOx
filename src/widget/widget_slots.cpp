@@ -32,7 +32,7 @@ auto update(Widget& w) -> sl::Slot<void()>
 auto click(Widget& w) -> sl::Slot<void(Point, Mouse::Button)>
 {
     return link_lifetimes(
-        [&w](Point const& p, Mouse::Button b) {
+        [&w](Point p, Mouse::Button b) {
             System::send_event(Mouse_press_event{w, Mouse{p, b, {}}});
         },
         w);

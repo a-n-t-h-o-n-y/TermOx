@@ -54,6 +54,8 @@ constexpr auto operator==(Color x, Color y) -> bool
 
 constexpr auto operator!=(Color x, Color y) -> bool { return !(x == y); }
 
+constexpr auto operator<(Color x, Color y) -> bool { return x.value < y.value; }
+
 struct Background_color {
     Color::Value_t value;
 };
@@ -73,16 +75,6 @@ constexpr auto fg(Color c) -> Foreground_color { return {c.value}; }
 /// Color Index for XTerm like palette [0 - 255].
 using Color_index = ::esc::Color_index;
 
-// TODO convert ANSI to Color_index, unless its True_color.
-/// ANSI color numbers [0 - 255].
-// struct ANSI {
-//     using Value_t = std::uint8_t;
-//     Value_t value;
-// };
-
-// inline auto operator==(ANSI a, ANSI b) -> bool { return a.value == b.value; }
-// inline auto operator!=(ANSI a, ANSI b) -> bool { return a.value != b.value; }
-
 /* ------------------------------- True Color --------------------------------*/
 
 /// Holds Red, Green, and Blue values; valid range of [0-255] for each color.
@@ -94,147 +86,6 @@ using HSL = ::esc::HSL;
 /// Holds data for a terminal 'true color'.
 /** True colors can be used to set an exact color to the terminal screen. */
 using True_color = ::esc::True_color;
-
-// struct RGB {
-//     using Value_t = std::uint8_t;
-//     Value_t red;
-//     Value_t green;
-//     Value_t blue;
-// };
-
-/// Holds Hue, Saturation, Lightness values of a color.
-// struct HSL {
-//     std::uint16_t hue;        // [0, 359] degrees
-//     std::uint8_t saturation;  // [0, 100] %
-//     std::uint8_t lightness;   // [0, 100] %
-// };
-
-/// Holds a True Color definition in terms of RGB values.
-// class True_color {
-//    public:
-//     using Value_t = std::uint32_t;
-
-//    public:
-//     constexpr True_color(Value_t hex) : value_{hex} {}
-
-//     constexpr True_color(RGB x) : value_{merge(x)} {}
-
-//     constexpr True_color(HSL x) : value_{merge(hsl_to_rgb(x))} {}
-
-//    public:
-//     /// Returns the red component value [0, 255]
-//     constexpr auto red() const -> std::uint8_t { return (value_ >> 16) &
-//     0xFF; }
-
-//     /// Returns the green component value [0, 255]
-//     constexpr auto green() const -> std::uint8_t
-//     {
-//         return (value_ >> 8) & 0xFF;
-//     }
-
-//     /// Returns the blue component value [0, 255]
-//     constexpr auto blue() const -> std::uint8_t { return value_ & 0xFF; }
-
-//    private:
-//     Value_t value_;
-
-//    private:
-//     /// Merge RGB values into single 24 bit value
-//     static constexpr auto merge(RGB x) -> Value_t
-//     {
-//         return (x.red << 16) + (x.green << 8) + x.blue;
-//     }
-
-//     template <typename T>
-//     static constexpr auto abs(T x) -> T
-//     {
-//         return (x == T(0) ? T(0) : x < T(0) ? -x : x);
-//     }
-
-//     template <typename T>
-//     static constexpr auto fmod(const T x, const T y) -> T
-//     {
-//         return (x - T(static_cast<long long>(x / y)) * y);
-//     }
-
-//     static constexpr auto hsl_to_rgb(HSL v) -> RGB
-//     {
-//         double const lightness  = v.lightness / 100.;
-//         double const saturation = v.saturation / 100.;
-
-//         auto const c         = (1 - abs((2 * lightness) - 1.)) * saturation;
-//         double const h_prime = v.hue / 60.;
-//         double const x       = c * (1. - abs(fmod(h_prime, 2.) - 1.));
-//         double const m       = lightness - (c / 2.);
-
-//         auto const c_ = static_cast<RGB::Value_t>((c + m) * 255);
-//         auto const x_ = static_cast<RGB::Value_t>((x + m) * 255);
-//         auto const m_ = static_cast<RGB::Value_t>(m * 255);
-
-//         if (v.hue < 60.)
-//             return {c_, x_, m_};
-//         if (v.hue < 120.)
-//             return {x_, c_, m_};
-//         if (v.hue < 180.)
-//             return {m_, c_, x_};
-//         if (v.hue < 240.)
-//             return {m_, x_, c_};
-//         if (v.hue < 300.)
-//             return {x_, m_, c_};
-//         if (v.hue < 360.)
-//             return {c_, m_, x_};
-//         else
-//             return {0, 0, 0};
-//     }
-
-//    public:
-//     static [> constexpr <] auto rgb_to_hsl(RGB x) -> HSL
-//     {
-//         double const r_prime = x.red / 255.;
-//         double const g_prime = x.green / 255.;
-//         double const b_prime = x.blue / 255.;
-
-//         double const c_max = std::max({r_prime, g_prime, b_prime});
-//         double const c_min = std::min({r_prime, g_prime, b_prime});
-//         double const delta = c_max - c_min;
-
-//         double const lightness  = (c_max + c_min) / 2.;
-//         double const saturation = [&] {
-//             if (delta == 0.)
-//                 return 0.;
-//             double const den = 1. - abs(2. * lightness - 1.);
-//             return delta / den;
-//         }();
-//         std::uint16_t const hue = [&] {
-//             if (delta == 0.)
-//                 return 0.;
-//             if (c_max == r_prime)
-//                 return 60. * fmod((g_prime - b_prime) / delta, 6.);
-//             if (c_max == g_prime)
-//                 return 60. * (((b_prime - r_prime) / delta) + 2.);
-//             if (c_max == b_prime)
-//                 return 60. * (((r_prime - g_prime) / delta) + 4.);
-//             return .0;
-//         }();
-//         return {static_cast<std::uint16_t>(hue),
-//                 static_cast<std::uint8_t>(saturation * 100),
-//                 static_cast<std::uint8_t>(lightness * 100)};
-//     }
-// };
-
-/// Returns a True_color from RGB values. Convinience for defining palettes.
-// inline constexpr auto rgb(RGB::Value_t r, RGB::Value_t g, RGB::Value_t b)
-//     -> True_color
-// {
-//     return {RGB{r, g, b}};
-// }
-
-// /// Returns a True_color from HSL values. Convinience for defining palettes.
-// inline constexpr auto hsl(std::uint16_t h, std::uint8_t s, std::uint8_t l)
-//     -> True_color
-// {
-//     return {HSL{h, s, l}};
-// }
 
 /* ----------------------------- Dynamic Color -------------------------------*/
 
@@ -258,6 +109,7 @@ class Color_definition {
     Value_t value;
 
    public:
+    // TODO can you get rid of this and use aggregate init? with variant?
     Color_definition(Color c, Value_t v) : color{c}, value{v} {}
 };
 

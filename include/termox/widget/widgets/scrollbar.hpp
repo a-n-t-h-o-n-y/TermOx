@@ -39,7 +39,7 @@ class Scrollbar : public Layout_t {
         };
 
        public:
-        Middle(Parameters p = {0uL, 0uL}) : parameters_{p}
+        Middle(Parameters p = {0, 0}) : parameters_{p}
         {
             this->set_bar_fg(Color::Foreground);
             this->set_bar_bg(Color::Dark_gray);
@@ -89,17 +89,17 @@ class Scrollbar : public Layout_t {
         }
 
        protected:
-        auto paint_event() -> bool override
+        auto paint_event(Painter& p) -> bool override
         {
-            if (parameters_.size == 0uL ||
+            if (parameters_.size == 0 ||
                 parameters_.position == invalid_position ||
-                slider_length_ == 0uL) {
-                return Widget::paint_event();
+                slider_length_ == 0) {
+                return Widget::paint_event(p);
             }
             auto const begin  = point(slider_position_);
             auto const length = point(slider_length_ - 1);  // bc line inclusive
-            Painter{*this}.line(bar_, begin, begin + length);
-            return Widget::paint_event();
+            p.line(bar_, begin, begin + length);
+            return Widget::paint_event(p);
         }
 
         auto resize_event(Area new_size, Area old_size) -> bool override
@@ -115,7 +115,7 @@ class Scrollbar : public Layout_t {
         Parameters parameters_;
         Glyph bar_ = is_vertical ? U'█' : U'▬';
 
-        std::size_t slider_position_;
+        int slider_position_;
         std::size_t slider_length_;
 
        private:
@@ -128,22 +128,21 @@ class Scrollbar : public Layout_t {
                 length, parameters_.size, parameters_.position, slider_length_);
         }
 
-        static auto constexpr point(std::size_t position) -> Point
+        static auto constexpr point(int position) -> Point
         {
             if constexpr (is_vertical)
-                return {0uL, position};
+                return {0, position};
             else
-                return {position, 0uL};
+                return {position, 0};
         }
 
-        static auto constexpr slider_position(std::size_t max_length,
+        static auto constexpr slider_position(int max_length,
                                               double line_count,
                                               double position,
-                                              std::size_t slider_length)
-            -> std::size_t
+                                              std::size_t slider_length) -> int
         {
             if (line_count == 0. || line_count == 1.)
-                return 0uL;
+                return 0;
             double const ratio = position / (line_count - 1);
             auto const length  = max_length - slider_length;
             return std::round(ratio * length);
@@ -168,7 +167,7 @@ class Scrollbar : public Layout_t {
 
    public:
     struct Parameters {
-        std::size_t size     = 0uL;
+        std::size_t size     = 0;
         std::size_t position = invalid_position;
     };
 
@@ -179,7 +178,7 @@ class Scrollbar : public Layout_t {
     Button& decrement_btn =
         this->template make_child<Button>(Glyph_string{top_symbol_});
 
-    Middle& middle = this->template make_child<Middle>({0uL, invalid_position});
+    Middle& middle = this->template make_child<Middle>({0, invalid_position});
 
     Button& increment_btn =
         this->template make_child<Button>(Glyph_string{bottom_symbol_});
@@ -194,16 +193,16 @@ class Scrollbar : public Layout_t {
     {
         using namespace pipe;
         if constexpr (is_vertical) {
-            *this | fixed_width(1uL);
-            decrement_btn | fixed_height(1uL);
-            middle | expanding_height(0uL);
-            increment_btn | fixed_height(1uL);
+            *this | fixed_width(1);
+            decrement_btn | fixed_height(1);
+            middle | expanding_height(0);
+            increment_btn | fixed_height(1);
         }
         else {
-            *this | fixed_height(1uL);
-            decrement_btn | fixed_width(1uL);
-            middle | expanding_width(0uL);
-            increment_btn | fixed_width(1uL);
+            *this | fixed_height(1);
+            decrement_btn | fixed_width(1);
+            middle | expanding_width(0);
+            increment_btn | fixed_width(1);
         }
 
         decrement_btn.pressed.connect([this] { this->decrement_position(); });
@@ -220,30 +219,29 @@ class Scrollbar : public Layout_t {
     void set_size(std::size_t s)
     {
         parameters_.size = s;
-        if (parameters_.position == invalid_position && parameters_.size != 0uL)
-            this->set_position(0uL);
+        if (parameters_.position == invalid_position && parameters_.size != 0)
+            this->set_position(0);
         else if (parameters_.position >= parameters_.size)
-            this->set_position(parameters_.size - 1uL);
+            this->set_position(parameters_.size - 1);
         middle.set_size(s);
     }
 
-    void increment_size() { this->set_size(this->get_size() + 1uL); }
+    void increment_size() { this->set_size(this->get_size() + 1); }
 
     void decrement_size()
     {
-        if (this->get_size() == 0uL)
+        if (this->get_size() == 0)
             return;
-        this->set_size(this->get_size() - 1uL);
+        this->set_size(this->get_size() - 1);
     }
 
     auto get_position() const -> std::size_t { return parameters_.position; }
 
     void set_position(std::size_t p)
     {
-        if (parameters_.size == 0uL)
+        if (parameters_.size == 0)
             return;
-        parameters_.position =
-            p < parameters_.size ? p : parameters_.size - 1uL;
+        parameters_.position = p < parameters_.size ? p : parameters_.size - 1;
         new_position(parameters_.position);
         middle.set_position(p);
     }
@@ -252,17 +250,17 @@ class Scrollbar : public Layout_t {
     {
         if (parameters_.position == invalid_position)
             return;
-        if (parameters_.position == 0uL)
+        if (parameters_.position == 0)
             return;
-        this->set_position(parameters_.position - 1uL);
+        this->set_position(parameters_.position - 1);
         decremented();
     }
 
     void increment_position()
     {
-        if (parameters_.position + 1uL == parameters_.size)
+        if (parameters_.position + 1 == parameters_.size)
             return;
-        this->set_position(parameters_.position + 1uL);
+        this->set_position(parameters_.position + 1);
         incremented();
     }
 
@@ -360,7 +358,7 @@ void link(Scrollbar<Layout_t>& scrollbar, Textbox& textbox)
         [&](std::size_t p) { textbox.set_top_line(p); });
 
     textbox.scrolled_to.connect(
-        [&](std::size_t n) { scrollbar.set_position(n); });
+        [&](int n) { scrollbar.set_position(n); });
 }
 
 }  // namespace ox

@@ -2,7 +2,6 @@
 #define TERMOX_WIDGET_WIDGETS_BANNER_HPP
 #include <chrono>
 #include <cstddef>
-#include <cstdint>
 #include <numeric>
 #include <optional>
 #include <random>
@@ -24,7 +23,7 @@ namespace ox {
 
 struct Index_and_position {
     std::size_t index;
-    std::size_t position;
+    int position;
 };
 
 inline auto operator++(Index_and_position& x) -> Index_and_position&
@@ -77,16 +76,15 @@ class Banner : public Widget {
     auto get_text() const -> Glyph_string const& { return text_; }
 
    protected:
-    auto paint_event() -> bool override
+    auto paint_event(Painter& p) -> bool override
     {
         if (range_) {
-            auto p = Painter{*this};
             for (auto const& x : *range_)
-                p.put(text_[x.index], {x.position, 0uL});
+                p.put(text_[x.index], {x.position, 0});
         }
         else
-            Painter{*this}.put(text_, {0uL, 0uL});
-        return Widget::paint_event();
+            p.put(text_, {0, 0});
+        return Widget::paint_event(p);
     }
 
     auto timer_event() -> bool override
@@ -111,7 +109,7 @@ class Banner : public Widget {
    private:
     void start()
     {
-        if (text_.size() == 0uL)
+        if (text_.size() == 0)
             return;
         this->enable_animation(period_);
     }
@@ -130,7 +128,9 @@ auto banner(Args&&... args) -> std::unique_ptr<Banner<Animator>>
     return std::make_unique<Banner<Animator>>(std::forward<Args>(args)...);
 }
 
-namespace animator {
+}  // namespace ox
+
+namespace ox::animator {
 
 class Animator_base {
    public:
@@ -161,7 +161,7 @@ class Animator_base {
     void initialize_data()
     {
         this->data().resize(this->text_length());
-        std::iota(this->begin(), this->end(), Index_and_position{0uL, 0uL});
+        std::iota(this->begin(), this->end(), Index_and_position{0, 0});
     }
 
     auto max_length() const -> std::size_t { return max_length_; }
@@ -206,9 +206,9 @@ class Scan : public Animator_base {
     {
         auto const t_length = this->text_length();
         auto const hold_max = t_length * 3;
-        if (begin_ == 0uL && end_ != t_length && hold_ == 0uL)
+        if (begin_ == 0 && end_ != t_length && hold_ == 0)
             ++end_;
-        else if (begin_ == 0uL && end_ == t_length && hold_ != hold_max)
+        else if (begin_ == 0 && end_ == t_length && hold_ != hold_max)
             ++hold_;
         else if (begin_ != t_length && end_ == t_length && hold_ == hold_max)
             ++begin_;
@@ -221,12 +221,12 @@ class Scan : public Animator_base {
     void set_text_length(std::size_t x)
     {
         Animator_base::set_text_length(x);
-        if (this->text_length() == 0uL)
+        if (this->text_length() == 0)
             return;
         this->Animator_base::initialize_data();
-        begin_ = 0uL;
-        end_   = 0uL;
-        hold_  = 0uL;
+        begin_ = 0;
+        end_   = 0;
+        hold_  = 0;
         start();
     }
 
@@ -251,10 +251,10 @@ class Persistent_scan : public Animator_base {
     void set_text_length(std::size_t x)
     {
         Animator_base::set_text_length(x);
-        if (this->text_length() == 0uL)
+        if (this->text_length() == 0)
             return;
         this->Animator_base::initialize_data();
-        end_ = 0uL;
+        end_ = 0;
         start();
     }
 
@@ -276,11 +276,11 @@ class Random : public Animator_base {
     void set_text_length(std::size_t x)
     {
         Animator_base::set_text_length(x);
-        if (this->text_length() == 0uL)
+        if (this->text_length() == 0)
             return;
         this->Animator_base::initialize_data();
         shuffle(this->data());
-        end_ = 0uL;
+        end_ = 0;
         start();
     }
 
@@ -304,8 +304,8 @@ class Scroll_base : public Animator_base {
             ++hold_;
         else if (begin_ == this->text_length()) {
             this->Animator_base::initialize_data();
-            begin_ = 0uL;
-            hold_  = 0uL;
+            begin_ = 0;
+            hold_  = 0;
         }
         else {
             ++begin_;
@@ -320,8 +320,8 @@ class Scroll_base : public Animator_base {
         Animator_base::set_text_length(x);
         this->reset_hold_length();
         this->Animator_base::initialize_data();
-        begin_ = 0uL;
-        hold_  = 0uL;
+        begin_ = 0;
+        hold_  = 0;
     }
 
     void set_max_length(std::size_t x)
@@ -331,8 +331,8 @@ class Scroll_base : public Animator_base {
     }
 
    protected:
-    std::size_t begin_ = 0uL;
-    std::size_t hold_  = 0uL;
+    std::size_t begin_ = 0;
+    std::size_t hold_  = 0;
 
    private:
     void reset_hold_length()
@@ -352,7 +352,7 @@ class Scroll : public Scroll_base {
     void set_text_length(std::size_t x)
     {
         Scroll_base::set_text_length(x);
-        if (this->text_length() != 0uL)
+        if (this->text_length() != 0)
             start();
     }
 };
@@ -382,7 +382,7 @@ class Conditional_scroll : public Scroll_base {
     {
         return !this->is_started() &&
                this->text_length() > this->max_length() &&
-               this->text_length() != 0uL;
+               this->text_length() != 0;
     }
 
     auto stop_condition() const -> bool
@@ -393,8 +393,8 @@ class Conditional_scroll : public Scroll_base {
     void stop_and_reset()
     {
         this->Scroll_base::initialize_data();
-        hold_  = 0uL;
-        begin_ = 0uL;
+        hold_  = 0;
+        begin_ = 0;
         stop();
     }
 };
@@ -403,13 +403,13 @@ class Unscramble : public Animator_base {
    public:
     auto operator()() -> IP_range
     {
-        if (sorted_to_ == this->text_length()) {
+        if (static_cast<std::size_t>(sorted_to_) == this->text_length()) {
             stop();
             return {this->begin(), this->end()};
         }
         else {
             // TODO concise rewrite
-            for (auto i = sorted_to_; i < this->data().size(); ++i) {
+            for (std::size_t i = sorted_to_; i < this->data().size(); ++i) {
                 auto& x = this->data()[i];
                 if (x.position == sorted_to_) {
                     std::swap(x.position, this->data()[sorted_to_].position);
@@ -424,29 +424,29 @@ class Unscramble : public Animator_base {
     void set_text_length(std::size_t x)
     {
         Animator_base::set_text_length(x);
-        if (this->text_length() == 0uL)
+        if (this->text_length() == 0)
             return;
         this->initialize_data();
-        sorted_to_ = 0uL;
+        sorted_to_ = 0;
         start();
     }
 
    private:
-    std::size_t sorted_to_;
+    int sorted_to_;
 
    private:
     void initialize_data()
     {
         auto indices   = std::vector<std::size_t>(this->text_length());
-        auto positions = std::vector<std::size_t>(this->text_length());
+        auto positions = std::vector<int>(this->text_length());
         std::iota(std::begin(indices), std::end(indices), 0uL);
-        std::iota(std::begin(positions), std::end(positions), 0uL);
+        std::iota(std::begin(positions), std::end(positions), 0);
         shuffle(positions);
         this->data() = zip<Index_and_position>(indices, positions);
     }
 
-    template <typename Pair_t, typename Container>
-    static auto zip(Container const& x, Container const& y)
+    template <typename Pair_t, typename Container1, typename Container2>
+    static auto zip(Container1 const& x, Container2 const& y)
         -> std::vector<Pair_t>
     {
         auto zipped = std::vector<Pair_t>{};
@@ -463,6 +463,5 @@ class Unscramble : public Animator_base {
     }
 };
 
-}  // namespace animator
-}  // namespace ox
+}  // namespace ox::animator
 #endif  // TERMOX_WIDGET_WIDGETS_BANNER_HPP

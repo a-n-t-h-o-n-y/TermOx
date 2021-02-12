@@ -6,12 +6,12 @@
 
 namespace palette {
 
-bool Shade_display::paint_event()
+auto Shade_display::paint_event(ox::Painter& p) -> bool
 {
     using namespace ox;
     auto light_shade   = U'░' | bg(base_);
     auto mid_shade     = U'▒' | bg(base_);
-    auto const color_n = ox::System::terminal.get_palette_color_count();
+    auto const color_n = (int)ox::System::terminal.current_palette().size();
 
     int const height = static_cast<int>(this->height());
     int const width  = static_cast<int>(this->width());
@@ -22,7 +22,6 @@ bool Shade_display::paint_event()
     };
     auto increment = [this](int& y) { inverted_ ? ++y : --y; };
 
-    auto p      = Painter{*this};
     auto& shade = light_shade;
     for (auto y = y_begin, i = 0; y_end(y); increment(y)) {
         for (auto x = 0; x < width && i < (2 * color_n); ++x, ++i) {
@@ -33,11 +32,11 @@ bool Shade_display::paint_event()
                 --x;
             else {
                 shade.brush.foreground = fg;
-                p.put(shade, x, y);
+                p.put(shade, {x, y});
             }
         }
     }
-    return Widget::paint_event();
+    return Widget::paint_event(p);
 }
 
 Bottom_shades::Bottom_shades()

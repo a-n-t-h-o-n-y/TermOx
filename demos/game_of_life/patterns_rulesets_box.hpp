@@ -23,7 +23,7 @@ class Thin_btn : public ox::Button {
     Thin_btn(ox::Glyph_string name) : Button{std::move(name)}
     {
         using namespace ox::pipe;
-        *this | fixed_height(1uL) | ox::bg(color::Light_green) |
+        *this | fixed_height(1) | ox::bg(color::Light_green) |
             ox::fg(color::Teal);
     }
 };

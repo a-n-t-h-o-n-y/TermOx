@@ -15,7 +15,7 @@ namespace ox::layout::detail {
 
 struct Dimension {
     Widget* widget;  // This is nullptr when limit is reached
-    std::size_t length;
+    int length;
 };
 
 /// Container view to iterate over a Widget's children, yielding layout info.
@@ -113,7 +113,7 @@ class Layout_span {
     template <typename Iter>
     Layout_span(Iter first,
                 Iter last,
-                std::size_t primary_length,
+                int primary_length,
                 Get_policy_t&& get_policy,
                 Policy_direction d)
         : dimensions_{Layout_span::build_dimensions(first,
@@ -149,12 +149,11 @@ class Layout_span {
         return total_inverse_stretch_;
     }
 
-    auto entire_length() const -> std::size_t
+    auto entire_length() const -> int
     {
-        return std::accumulate(dimensions_.begin(), dimensions_.end(), 0uL,
-                               [](std::size_t total, Dimension const& d) {
-                                   return total + d.length;
-                               });
+        return std::accumulate(
+            dimensions_.begin(), dimensions_.end(), 0uL,
+            [](int total, Dimension const& d) { return total + d.length; });
     }
 
     auto size() const -> std::size_t
@@ -163,9 +162,9 @@ class Layout_span {
                              [](auto const& d) { return d.widget != nullptr; });
     }
 
-    auto get_results() const -> std::vector<std::size_t>
+    auto get_results() const -> std::vector<int>
     {
-        auto result = std::vector<std::size_t>{};
+        auto result = std::vector<int>{};
         result.reserve(dimensions_.size());
         std::transform(dimensions_.begin(), dimensions_.end(),
                        std::back_inserter(result),
@@ -204,10 +203,10 @@ class Layout_span {
         if (can_ignore_min)
             first->length = leftover;
         else
-            first->length = 0uL;
+            first->length = 0;
         ++first;
         while (first != last) {
-            first->length = 0uL;
+            first->length = 0;
             ++first;
         }
     }
@@ -325,7 +324,7 @@ class Layout_span {
     /// Sum policy.min() of each child, if child is passive this is recursive.
     static auto sum_child_mins(Widget const& w,
                                Get_policy_t get_policy,
-                               Policy_direction d) -> std::size_t
+                               Policy_direction d) -> int
     {
         // TODO Calling get_policy on child objects will break when child is not
         // the same layout type as the parent.

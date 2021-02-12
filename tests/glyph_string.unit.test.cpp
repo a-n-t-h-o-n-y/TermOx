@@ -1,13 +1,13 @@
-#include <catch2/catch.hpp>
-
 #include <clocale>
+
+#include <catch2/catch.hpp>
 
 #include <termox/painter/brush.hpp>
 #include <termox/painter/color.hpp>
 #include <termox/painter/glyph_string.hpp>
 #include <termox/painter/trait.hpp>
 
-void init() { std::setlocale(LC_ALL, "en_US.UTF-8"); }
+static void init() { std::setlocale(LC_ALL, "en_US.UTF-8"); }
 
 TEST_CASE("Empty Glyph_string function calls", "[Glyph_string]")
 {

@@ -118,7 +118,7 @@ class Linear_layout : public Layout<Child> {
     void delete_all_children()
     {
         this->Base_t::delete_all_children();
-        this->set_child_offset(0uL);
+        this->set_child_offset(0);
     }
 
    public:
@@ -129,23 +129,23 @@ class Linear_layout : public Layout<Child> {
         shared_space_.set_offset(index);
         unique_space_.set_offset(index);
         System::post_event(Child_polished_event{*this, *this});
-        this->force_repaint_empty_space();
+        // this->force_repaint_empty_space();
     }
 
     void decrement_offset()
     {
         auto const offset = this->get_child_offset();
-        if (offset == 0uL)
+        if (offset == 0)
             return;
-        this->set_child_offset(offset - 1uL);
+        this->set_child_offset(offset - 1);
     }
 
     void increment_offset()
     {
         auto const offset = this->get_child_offset();
-        if (offset + 1uL >= this->child_count())
+        if (offset + 1 >= this->child_count())
             return;
-        this->set_child_offset(offset + 1uL);
+        this->set_child_offset(offset + 1);
     }
 
    protected:
@@ -190,15 +190,15 @@ class Linear_layout : public Layout<Child> {
     }
 
    private:
-    using Length_list   = std::vector<std::size_t>;
-    using Position_list = std::vector<std::size_t>;
+    using Length_list   = std::vector<int>;
+    using Position_list = std::vector<int>;
 
     Shared_space<Parameters> shared_space_;
     Unique_space<Parameters> unique_space_;
 
    private:
     // Hack until the paint system is updated and treats layouts accordingly.
-    void force_repaint_empty_space() { Painter{*this}; }
+    // void force_repaint_empty_space() { Painter{*this}; }
 
     void send_enable_disable_events(Length_list const& primary,
                                     Length_list const& secondary)
@@ -270,8 +270,8 @@ class Linear_layout : public Layout<Child> {
     void reset_offset_if_out_of_bounds()
     {
         auto const count = this->child_count();
-        if (count == 0uL)
-            this->set_child_offset(0uL);
+        if (count == 0)
+            this->set_child_offset(0);
         else if (this->get_child_offset() >= count)
             this->set_child_offset(count - 1);
     }

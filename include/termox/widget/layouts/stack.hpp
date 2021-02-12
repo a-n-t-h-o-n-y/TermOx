@@ -155,7 +155,7 @@ class Stack : public Layout<Child_t> {
             return Stack::invalid_index;
         auto begin     = std::cbegin(this->get_children());
         auto const end = std::cend(this->get_children());
-        auto distance  = 0uL;
+        auto distance  = 0;
         for (; begin != end; ++begin) {
             if (&(*begin) != active_page_)
                 ++distance;

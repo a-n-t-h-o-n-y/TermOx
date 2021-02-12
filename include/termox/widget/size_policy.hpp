@@ -1,6 +1,5 @@
 #ifndef TERMOX_WIDGET_SIZE_POLICY_HPP
 #define TERMOX_WIDGET_SIZE_POLICY_HPP
-#include <cstddef>
 #include <limits>
 #include <utility>
 
@@ -16,17 +15,17 @@ class Size_policy {
 
    public:
     /// Set the size hint, used as the initial value in calculations.
-    void hint(std::size_t value)
+    void hint(int value)
     {
         data_.hint = value;
         this->policy_updated();
     }
 
     /// Return the size hint currently being used.
-    auto hint() const -> std::size_t { return data_.hint; }
+    auto hint() const -> int { return data_.hint; }
 
     /// Set the minimum length that the owning Widget should be.
-    void min(std::size_t value)
+    void min(int value)
     {
         data_.min = value;
         if (data_.max < data_.min)
@@ -35,10 +34,10 @@ class Size_policy {
     }
 
     /// Return the minimum length currently set.
-    auto min() const -> std::size_t { return data_.min; }
+    auto min() const -> int { return data_.min; }
 
     /// Set the maximum length/height that the owning Widget can be.
-    void max(std::size_t value)
+    void max(int value)
     {
         data_.max = value;
         if (data_.min > data_.max)
@@ -47,7 +46,7 @@ class Size_policy {
     }
 
     /// Return the maximum length currently set.
-    auto max() const -> std::size_t { return data_.max; }
+    auto max() const -> int { return data_.max; }
 
     /// Set the stretch value, used to divide up space between sibling Widgets.
     /** A ratio of stretch over siblings' stretch sum is used to give space. */
@@ -81,7 +80,7 @@ class Size_policy {
 
     /* _Helper Methods_ */
     /// Fixed: \p hint is the only acceptable size.
-    void fixed(std::size_t hint)
+    void fixed(int hint)
     {
         data_.hint    = hint;
         data_.min     = hint;
@@ -92,7 +91,7 @@ class Size_policy {
     }
 
     /// Minimum: \p hint is the minimum acceptable size, may be larger.
-    void minimum(std::size_t hint)
+    void minimum(int hint)
     {
         data_.hint    = hint;
         data_.passive = false;
@@ -100,7 +99,7 @@ class Size_policy {
     }
 
     /// Maximum: \p hint is the maximum acceptable size, may be smaller.
-    void maximum(std::size_t hint)
+    void maximum(int hint)
     {
         data_.hint    = hint;
         data_.passive = false;
@@ -108,7 +107,7 @@ class Size_policy {
     }
 
     /// Preferred: \p hint is preferred, though it can be any size.
-    void preferred(std::size_t hint)
+    void preferred(int hint)
     {
         data_.hint = hint;
         if (hint < data_.min)
@@ -120,7 +119,7 @@ class Size_policy {
     }
 
     /// Expanding: \p hint is preferred, but it will expand to use extra space.
-    void expanding(std::size_t hint)
+    void expanding(int hint)
     {
         data_.stretch = 100'000.;
         data_.hint    = hint;
@@ -133,7 +132,7 @@ class Size_policy {
     }
 
     /// Minimum Expanding: \p hint is minimum, it will expand into unused space.
-    void minimum_expanding(std::size_t hint)
+    void minimum_expanding(int hint)
     {
         data_.stretch = 100'000.;
         data_.hint    = hint;
@@ -175,9 +174,9 @@ class Size_policy {
 
    private:
     struct Data {
-        std::size_t hint    = 0;
-        std::size_t min     = 0;
-        std::size_t max     = max_max_;
+        int hint            = 0;
+        int min             = 0;
+        int max             = max_max_;
         double stretch      = 1.;
         bool can_ignore_min = true;
         bool passive        = false;

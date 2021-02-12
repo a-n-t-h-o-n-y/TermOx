@@ -4,6 +4,7 @@
 
 #include <termox/painter/glyph_matrix.hpp>
 #include <termox/painter/painter.hpp>
+#include <termox/widget/area.hpp>
 #include <termox/widget/widget.hpp>
 
 namespace ox {
@@ -14,28 +15,24 @@ class Matrix_display : public Widget {
     Glyph_matrix matrix;
 
    public:
-    explicit Matrix_display(Glyph_matrix matrix_ = Glyph_matrix{})
-        : matrix{std::move(matrix_)}
-    {}
+    explicit Matrix_display(Area area) : matrix{area} {}
 
-    Matrix_display(std::size_t width, std::size_t height)
-        : matrix{width, height}
+    explicit Matrix_display(Glyph_matrix matrix_) : matrix{std::move(matrix_)}
     {}
 
    protected:
-    auto paint_event() -> bool override
+    auto paint_event(Painter& p) -> bool override
     {
         auto const width =
             matrix.width() > this->width() ? this->width() : matrix.width();
         auto const height =
             matrix.height() > this->height() ? this->height() : matrix.height();
 
-        auto p = Painter{*this};
-        for (auto y = 0uL; y < height; ++y) {
-            for (auto x = 0uL; x < width; ++x)
-                p.put(matrix(x, y), x, y);
+        for (auto y = 0; y < height; ++y) {
+            for (auto x = 0; x < width; ++x)
+                p.put(matrix({x, y}), {x, y});
         }
-        return Widget::paint_event();
+        return Widget::paint_event(p);
     }
 };
 

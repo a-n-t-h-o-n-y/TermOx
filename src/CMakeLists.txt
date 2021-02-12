@@ -67,10 +67,10 @@ target_sources(TermOx
 target_sources(TermOx
     PRIVATE
         painter/painter.cpp
-        painter/screen.cpp
+        # painter/screen.cpp
         painter/glyph_matrix.cpp
-        painter/screen_mask.cpp
-        painter/find_empty_space.cpp
+        # painter/screen_mask.cpp
+        # painter/find_empty_space.cpp
 )
 
 # Widget
@@ -96,7 +96,7 @@ target_sources(TermOx
 target_sources(TermOx
     PRIVATE
         terminal/terminal.cpp
-        terminal/output.cpp
-        terminal/input.cpp
+        # terminal/output.cpp
+        # terminal/input.cpp
         terminal/dynamic_color_engine.cpp
 )

@@ -1,5 +1,6 @@
 #include <termox/painter/detail/screen.hpp>
 
+#include <cassert>
 #include <iterator>
 #include <mutex>
 
@@ -14,7 +15,6 @@
 #include <termox/painter/trait.hpp>
 #include <termox/system/detail/focus.hpp>
 #include <termox/system/system.hpp>
-#include <termox/terminal/output.hpp>
 #include <termox/terminal/terminal.hpp>
 #include <termox/widget/area.hpp>
 #include <termox/widget/point.hpp>
@@ -44,8 +44,8 @@ void paint_unowned_tiles(Widget const& layout, Glyph wallpaper)
     auto const x_end       = x_begin + empty_space.area().width;
     for (auto y = y_begin; y < y_end; ++y) {
         for (auto x = x_begin; x < x_end; ++x) {
-            if (empty_space.at(x, y))
-                output::put(x, y, wallpaper);
+            // if (empty_space.at(x, y))
+            //     output::put(x, y, wallpaper);
         }
     }
 }
@@ -68,7 +68,7 @@ void paint_to_terminal(Widget& widg,
                 tile.brush = merge(tile.brush, widg.brush);
                 output::put(x, y, tile);
             }
-            else if (not is_layout)
+            else if (!is_layout)
                 output::put(x, y, wallpaper);
         }
     }
@@ -79,10 +79,10 @@ void set_cursor(Point offset, Cursor const& cursor)
     System::terminal.show_cursor();
     auto const x_global = offset.x + cursor.x();
     auto const y_global = offset.y + cursor.y();
-    output::move_cursor(x_global, y_global);
+    output::move_cursor({x_global, y_global});
 }
 
-auto cursor_is_within_area(Cursor const& cursor, Area const& a) -> bool
+auto cursor_is_within_area(Cursor const& cursor, Area a) -> bool
 {
     return cursor.x() < a.width && cursor.y() < a.height;
 }
@@ -91,8 +91,8 @@ auto has_valid_cursor(Widget const* w) -> bool
 {
     if (w == nullptr)
         return false;
-    return w->cursor.enabled() && detail::is_paintable(*w) &&
-           cursor_is_within_area(w->cursor, w->area());
+    assert(cursor_is_within_area(w->cursor, w->area()));
+    return w->cursor.is_enabled() && detail::is_paintable(*w);
 }
 
 void remove_cursor() { System::terminal.show_cursor(false); }

@@ -59,7 +59,7 @@ struct Composites_old : App {
         save | on_enable([&txbx]() { txbx.set_contents("Save Enabled"); });
         save | on_child_added([](Widget& w) { w.border.enable(); });
 
-        load | on_move([&txbx](auto const& n, auto const&) {
+        load | on_move([&txbx](Point n, Point) {
             txbx.set_contents(std::to_string(n.x) + " " + std::to_string(n.y));
         });
         load | on_resize([&txbx](auto const& n, auto const&) {

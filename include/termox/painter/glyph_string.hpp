@@ -26,7 +26,7 @@ namespace ox {
 class Glyph_string : private std::vector<Glyph> {
    public:
     /// Used to indicate 'Until the end of the string'.
-    static constexpr auto npos = static_cast<std::size_t>(-1);
+    static constexpr auto npos = -1;
 
    public:
     /// Default constructs an empty Glyph_string.
@@ -43,7 +43,7 @@ class Glyph_string : private std::vector<Glyph> {
     auto operator=(Glyph_string&&) -> Glyph_string& = default;
 
     /// Construct with \p count \p glyph's, adding given Traits to each.
-    explicit Glyph_string(Glyph glyph, std::size_t count = 1)
+    explicit Glyph_string(Glyph glyph, int count = 1)
     {
         for (; count != 0; --count)
             this->append(glyph);
@@ -109,11 +109,11 @@ class Glyph_string : private std::vector<Glyph> {
    public:
     /// Return the number of Glyphs in *this Glyph_string.
     /** Same as size() member function. */
-    auto length() const -> size_type { return this->size(); }
+    auto length() const -> int { return this->size(); }
 
     /// Return the number of Glyphs in *this Glyph_string.
     /** Same as length() member function. */
-    auto size() const -> size_type { return this->vector::size(); }
+    auto size() const -> int { return this->vector::size(); }
 
    public:
     /// Convert to a std::u32string, each Glyph being a char32_t.
@@ -176,9 +176,9 @@ class Glyph_string : private std::vector<Glyph> {
     }
 
    public:
+    using size_type = int;
     using std::vector<Glyph>::value_type;
     using std::vector<Glyph>::allocator_type;
-    using std::vector<Glyph>::size_type;
     using std::vector<Glyph>::difference_type;
     using std::vector<Glyph>::reference;
     using std::vector<Glyph>::const_reference;

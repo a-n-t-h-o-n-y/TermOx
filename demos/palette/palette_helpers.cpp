@@ -1,12 +1,9 @@
 #include "palette_helpers.hpp"
 
 #include <algorithm>
-#include <cstdint>
 #include <iterator>
 
 #include <termox/painter/color.hpp>
-// #include <termox/painter/palette.hpp>
-// #include <termox/painter/rgb.hpp>
 #include <termox/system/system.hpp>
 #include <termox/terminal/terminal.hpp>
 

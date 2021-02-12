@@ -29,10 +29,10 @@ class Tile : public Widget {
     auto get() -> Glyph { return display_; }
 
    protected:
-    auto paint_event() -> bool override
+    auto paint_event(Painter& p) -> bool override
     {
-        Painter{*this}.put(display_, {0, 0});
-        return Widget::paint_event();
+        p.put(display_, {0, 0});
+        return Widget::paint_event(p);
     }
 
    private:

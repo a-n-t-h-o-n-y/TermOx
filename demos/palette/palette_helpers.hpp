@@ -1,9 +1,6 @@
 #ifndef TERMOX_DEMOS_PALETTE_PALETTE_HELPERS_HPP
 #define TERMOX_DEMOS_PALETTE_PALETTE_HELPERS_HPP
-#include <cstdint>
-
 #include <termox/painter/color.hpp>
-// #include <termox/painter/palette.hpp>
 
 namespace palette {
 namespace detail {

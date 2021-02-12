@@ -14,7 +14,6 @@
 #include <termox/system/event.hpp>
 #include <termox/system/key.hpp>
 #include <termox/system/mouse.hpp>
-#include <termox/system/shortcuts.hpp>
 #include <termox/system/system.hpp>
 #include <termox/widget/area.hpp>
 #include <termox/widget/point.hpp>
@@ -139,24 +138,26 @@ auto make_mouse_event() -> std::optional<Event>
     return make_event(*receiver, mouse, mouse_event);
 }
 
-auto make_resize_event() -> std::optional<Event>
-{
-    if (Widget* const receiver = System::head(); receiver != nullptr)
-        return Resize_event{*receiver, System::terminal.area()};
-    else
-        return std::nullopt;
-}
+// auto make_resize_event() -> std::optional<Event>
+// {
+//     // TODO update screen_buffers.resize(System::terminal.area());
+//     // Once this is within a single Terminal TU.
+//     if (Widget* const receiver = System::head(); receiver != nullptr)
+//         return Resize_event{*receiver, System::terminal.area()};
+//     else
+//         return std::nullopt;
+// }
 
-auto make_keyboard_event(int input) -> std::optional<Event>
-{
-    auto const key = static_cast<Key>(input);
-    // TODO shortcut handling is stuffed in here, should be elsewhere.
-    if (Shortcuts::send_key(key))
-        return std::nullopt;
-    else if (auto* const r = detail::Focus::focus_widget(); r != nullptr)
-        return Key_press_event{*r, key};
-    return std::nullopt;
-}
+// auto make_keyboard_event(int input) -> std::optional<Event>
+// {
+//     auto const key = static_cast<Key>(input);
+//     // TODO shortcut handling is stuffed in here, should be elsewhere.
+//     if (Shortcuts::send_key(key))
+//         return std::nullopt;
+//     else if (auto* const r = detail::Focus::focus_widget(); r != nullptr)
+//         return Key_press_event{*r, key};
+//     return std::nullopt;
+// }
 
 }  // namespace
 

@@ -40,24 +40,18 @@ class Screen_mask {
     /// Clear the contents to an empty state.
     void clear() { bits_.clear(); }
 
-    /// Return the bit set at point \p p
-    auto at(std::size_t x, std::size_t y) -> Reference
-    {
-        return bits_[index_at(x, y)];
-    }
+    /// Return the bit set at Point \p p
+    auto at(Point p) -> Reference { return bits_[index_at(p)]; }
 
     /// Return the bit set at point \p p
-    auto at(std::size_t x, std::size_t y) const -> Const_reference
-    {
-        return bits_[index_at(x, y)];
-    }
+    auto at(Point p) const -> Const_reference { return bits_[index_at(p)]; }
 
    private:
-    auto index_at(std::size_t x, std::size_t y) const -> std::size_t
+    auto index_at(Point p) const -> std::size_t
     {
-        x -= offset_.x;
-        y -= offset_.y;
-        return (y * area_.width) + x;
+        p.x -= offset_.x;
+        p.y -= offset_.y;
+        return p.x + (p.y * area_.width);
     }
 
    private:

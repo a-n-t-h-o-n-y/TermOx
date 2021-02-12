@@ -19,21 +19,20 @@ class Dynamic_color_event_loop : public detail::Interval_event_loop {
     using Interval_event_loop::Interval_event_loop;
 
    public:
-    // TODO instead, register a Color, not an ANSI
-    /// Register a new ansi color to be dynamic, will replace if already exists.
-    void register_color(ANSI ansi, Dynamic_color dynamic)
+    /// Register a new Color to be dynamic, will replace if already exists.
+    void register_color(Color color, Dynamic_color const& dynamic)
     {
         auto const guard = Guard_t{colors_mtx_};
-        if (this->has_color(ansi))
-            this->get_def_at(ansi).dynamic = dynamic;
+        if (this->has_color(color))
+            this->get_def_at(color).dynamic = dynamic;
         else
-            colors_.emplace_back(Def{ansi, dynamic});
+            colors_.emplace_back(Def{color, dynamic});
     }
 
-    auto unregister_color(ANSI ansi) -> bool
+    auto unregister_color(Color color) -> bool
     {
         auto const guard = Guard_t{colors_mtx_};
-        if (auto iter = this->get_iter_for(ansi); iter != std::end(colors_)) {
+        if (auto iter = this->get_iter_for(color); iter != std::end(colors_)) {
             colors_.erase(iter);
             return true;
         }
@@ -58,7 +57,7 @@ class Dynamic_color_event_loop : public detail::Interval_event_loop {
 
    public:
     struct Def {
-        ANSI ansi;
+        Color color;
         Dynamic_color dynamic;
     };
 
@@ -67,28 +66,34 @@ class Dynamic_color_event_loop : public detail::Interval_event_loop {
     mutable Mutex_t colors_mtx_;
 
    private:
-    /// Return the iterator for \p ansi from colors_, end(colors_) if not found.
-    auto get_iter_for(ANSI ansi) -> std::vector<Def>::iterator
+    /// Return iterator for \p color from colors_; end(colors_) if not found.
+    auto get_iter_for(Color color) const -> std::vector<Def>::const_iterator
     {
         // No mtx because only used internally from places with locked mtx
         return std::find_if(
             std::begin(colors_), std::end(colors_),
-            [ansi](auto const& def) { return def.ansi == ansi; });
+            [color](auto const& def) { return def.color == color; });
     }
 
-    /// Check if colors_ contains a Def for \p ansi.
-    auto has_color(ANSI ansi) -> bool
+    /// Check if colors_ contains a Def for \p color.
+    auto has_color(Color color) const -> bool
     {
-        return this->get_iter_for(ansi) != std::end(colors_);
+        return this->get_iter_for(color) != std::end(colors_);
     }
 
-    /// Return the Def object for \p ansi. Assumes it exists, otherwise UB.
-    auto get_def_at(ANSI ansi) -> Def& { return *this->get_iter_for(ansi); }
+    /// Return the Def object for \p color. Assumes it exists, otherwise UB.
+    auto get_def_at(Color color) -> Def&
+    {
+        return const_cast<Def&>(
+            *static_cast<Dynamic_color_event_loop const&>(*this).get_iter_for(
+                color));
+    }
 };
 
 }  // namespace ox::detail
 
 namespace ox {
+
 class Dynamic_color_engine {
    public:
     using Period_t = detail::Dynamic_color_event_loop::Period_t;
@@ -103,8 +108,8 @@ class Dynamic_color_engine {
     }
 
    public:
-    /// Add a dynamic color at \p interval.
-    void register_color(ANSI ansi, Dynamic_color const& dynamic)
+    /// Add a dynamic color linked to \p color.
+    void register_color(Color color, Dynamic_color const& dynamic)
     {
         if (!this->has_loop_with(dynamic.interval)) {
             loops_.emplace_back(
@@ -112,17 +117,18 @@ class Dynamic_color_engine {
                     dynamic.interval));
             loops_.back()->run_async();
         }
-        this->get_loop_with(dynamic.interval).register_color(ansi, dynamic);
+        this->get_loop_with(dynamic.interval).register_color(color, dynamic);
     }
 
-    /// Removes a dynamic color from the system.
-    void unregister_color(ANSI ansi)
+    /// Removes the Dynamic_color linked to \p color.
+    void unregister_color(Color color)
     {
         // Unregister the color from the event loop it is contained in, and
-        // return that event loop.
-        auto const iter = std::find_if(
-            std::begin(loops_), std::end(loops_),
-            [ansi](auto const& loop) { return loop->unregister_color(ansi); });
+        // return that event loop. unregister_color returns bool if removed.
+        auto const iter = std::find_if(std::begin(loops_), std::end(loops_),
+                                       [color](auto const& loop) {
+                                           return loop->unregister_color(color);
+                                       });
 
         // If an event loop was found, and it is now empty, destroy that loop.
         if (iter != std::end(loops_)) {

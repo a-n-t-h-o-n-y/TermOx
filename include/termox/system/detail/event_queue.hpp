@@ -13,32 +13,79 @@
 #include <termox/widget/widget.hpp>
 
 namespace ox {
+
 inline auto operator<(Paint_event const& x, Paint_event const& y) -> bool
 {
     return std::addressof(x.receiver.get()) < std::addressof(y.receiver.get());
 }
+
 }  // namespace ox
 
 namespace ox::detail {
 
 class Paint_queue : public Lockable<std::mutex> {
+   private:
+    /// Holds a priority and a Paint_event.
+    /** Priority is backwards, low values are higher priority. */
+    struct Priority_paint_event {
+        int priority;
+        Paint_event event;
+    };
+
+    using Paint_event_container = std::vector<Priority_paint_event>;
+
    public:
     void append(Paint_event e)
     {
         auto const lock = this->Lockable::lock();
+        // queue_.push_back({running_count_, e});
+        // ++running_count_;
         paints_.insert(std::move(e));
     }
 
     void send_all()
     {
         auto const lock = this->Lockable::lock();
+        // make_unique_and_ordered(queue_);
+        // for (auto& [_, e] : queue_)
+        //     System::post_event(e);
         for (auto& p : paints_)
             System::send_event(std::move(p));
-        paints_.clear();
+        // paints_.clear();
+        // queue_.clear();
+        // running_count_ = 0;
     }
 
    private:
     std::set<Paint_event> paints_;
+    // pull this out into a separate type so you can easily test.
+    // Paint_event_container queue_;
+    // int running_count_ = 0;
+
+   private:
+    /// modifies \p container to only have unique elements, ordered by count.
+    // static void make_unique_and_ordered(Paint_event_container& container)
+    // {
+    //     // TODO
+    //     // std::stable_sort(container) by address_of(receiver.get())
+    //     // std::equal(reverse(container)) with equality by ^^ address of
+    //     // erase the back half by using normal std::begin() and equal
+    //     //  result.base(). This should erase the throw out section, but double
+    //     //  check what reverse_iterator::base() exactly returns.
+    //     // std::sort(container) by priority now
+    //     // done
+    // }
+
+// on send_all() you sort the queue by address(Paint_event::receiver.get());
+// Then you call unique() on the collection, but this doesn't work because it
+// doesn't guarantee that you will save the one with the largest pair.
+// It does work: "Eliminates all except the first element from every consecutive
+// group of equivalent elements from the range" that is std::equal, so if you
+// are appending in order received, and you stable_sort() and you do equal over
+// reverse iterators, then it should all work. and erasing from unique end iter.
+// Then forward iteration leaves you with a unique list of paint events and you
+// can then sort them(unstable) by their count value(pair::first). and then
+// forward iterate over them and send them all.
 };
 
 class Delete_queue : public Lockable<std::mutex> {
@@ -101,7 +148,7 @@ class Basic_queue : public Lockable<std::mutex> {
     auto increment_index(std::size_t current) -> std::size_t
     {
         auto const lock = this->Lockable::lock();
-        return current + 1uL < basics_.size() ? current + 1uL : -1uL;
+        return current + 1 < basics_.size() ? current + 1 : -1uL;
     }
 
     auto get_begin_index() -> std::size_t

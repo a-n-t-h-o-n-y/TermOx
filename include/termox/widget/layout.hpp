@@ -178,8 +178,8 @@ class Layout : public Widget {
     /// Removes all children and sends Delete_events to each.
     void delete_all_children()
     {
-        while (this->child_count() != 0uL)
-            this->remove_and_delete_child_at(0uL);
+        while (this->child_count() != 0)
+            this->remove_and_delete_child_at(0);
     }
 
     /// Swap two child widgets, no index range check.

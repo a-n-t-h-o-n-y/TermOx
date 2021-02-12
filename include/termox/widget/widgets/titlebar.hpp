@@ -29,14 +29,14 @@ class Titlebar : public layout::Horizontal<> {
           exit_button{this->make_child<Button>(U"│✕ ")}
     {
         using namespace ox::pipe;
-        *this | fixed_height(1uL);
+        *this | fixed_height(1);
         *this | children() | bg(Color::White) | fg(Color::Black);
         exit_button | fixed_width(exit_width) | on_press(System::quit);
     }
 
    private:
-    inline static auto constexpr exit_width  = 3uL;
-    inline static auto constexpr extra_left  = 0uL;
+    inline static auto constexpr exit_width  = 3;
+    inline static auto constexpr extra_left  = 0;
     inline static auto constexpr extra_right = exit_width;
 };
 

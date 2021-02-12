@@ -53,6 +53,13 @@ class Brush {
     constexpr void set_item(Traits t) { traits |= t; }
 };
 
+/// Compares if the held traits and (back/fore)ground colors are equal.
+constexpr auto operator==(Brush a, Brush b) -> bool
+{
+    return std::tie(a.traits, a.background, a.foreground) ==
+           std::tie(b.traits, b.background, b.foreground);
+}
+
 /// Combines the two Brushes, using the primary Brush's Colors, if any, first.
 constexpr auto merge(Brush primary, Brush secondary) -> Brush
 {
@@ -62,13 +69,6 @@ constexpr auto merge(Brush primary, Brush secondary) -> Brush
         primary.foreground = secondary.foreground;
     primary.traits |= secondary.traits;
     return primary;
-}
-
-/// Compares if the held traits and (back/fore)ground colors are equal.
-constexpr auto operator==(Brush a, Brush b) -> bool
-{
-    return std::tie(a.traits, a.background, a.foreground) ==
-           std::tie(b.traits, b.background, b.foreground);
 }
 
 }  // namespace ox

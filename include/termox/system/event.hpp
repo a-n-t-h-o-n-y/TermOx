@@ -3,6 +3,7 @@
 #include <functional>
 #include <memory>
 #include <variant>
+#include <optional>
 
 #include <termox/system/key.hpp>
 #include <termox/system/mouse.hpp>
@@ -19,7 +20,7 @@ struct Paint_event {
 };
 
 struct Key_press_event {
-    Widget_ref receiver;
+    std::optional<Widget_ref> receiver;
     Key key;
 };
 
@@ -33,6 +34,7 @@ struct Mouse_release_event {
     Mouse data;
 };
 
+// TODO remove
 struct Mouse_double_click_event {
     Widget_ref receiver;
     Mouse data;

@@ -6,9 +6,16 @@ namespace ox::detail {
 
 /// Defaults to sending if the reciever of the event is enabled.
 template <typename T>
-auto is_sendable(T const& event) -> bool
+[[nodiscard]] auto is_sendable(T const& event) -> bool
 {
     return event.receiver.get().is_enabled();
+}
+
+template <>
+[[nodiscard]] inline auto is_sendable<ox::Key_press_event>(
+    Key_press_event const& event) -> bool
+{
+    return event.receiver->get().is_enabled();
 }
 
 // Always Sendable

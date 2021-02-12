@@ -20,8 +20,6 @@
 #include <termox/system/shortcuts.hpp>
 #include <termox/system/system.hpp>
 
-#include <termox/terminal/input.hpp>
-#include <termox/terminal/output.hpp>
 #include <termox/terminal/terminal.hpp>
 
 #include <termox/widget/layouts/horizontal.hpp>

@@ -35,11 +35,11 @@ class Horizontal_slider : public Widget {
     auto percent() const -> float { return percent_progress_; }
 
    protected:
-    auto paint_event() -> bool override
+    auto paint_event(Painter& p) -> bool override
     {
         auto const x = percent_to_position(percent_progress_);
-        Painter{*this}.put(indicator_, x, 0);
-        return Widget::paint_event();
+        p.put(indicator_, {x, 0});
+        return Widget::paint_event(p);
     }
 
     auto mouse_press_event(Mouse const& m) -> bool override;
@@ -53,8 +53,9 @@ class Horizontal_slider : public Widget {
     float percent_progress_ = 0.0;
 
    private:
-    auto position_to_percent(std::size_t position) -> float;
-    auto percent_to_position(float percent) -> std::size_t;
+    auto position_to_percent(int position) -> float;
+
+    auto percent_to_position(float percent) -> int;
 };
 
 /// Helper function to create an instance.

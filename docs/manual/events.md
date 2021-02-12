@@ -88,15 +88,15 @@ Signal<void()> destroyed;
 /** Both Points are given as global coordinates from the top left of the
  *  terminal window to the top left of the Widget. */
 bool move_event(Point new_position, Point old_position);
-Signal<void(Point const&, Point const&)> moved;
+Signal<void(Point, Point)> moved;
 
 /// Widget was just given a new height and/or width.
 bool resize_event(Area new_size, Area old_size);
-Signal<void(Area const&, Area const&)> resized;
+Signal<void(Area, Area)> resized;
 
 /// Widget needs to be re-drawn.
 /** The implementation should call on Painter to paint to the screen. */
-bool paint_event();
+bool paint_event(Painter& p);
 Signal<void()> painted;
 ```
 

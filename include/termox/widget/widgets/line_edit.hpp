@@ -91,11 +91,11 @@ class Line_edit : public Textbox {
         return Textbox::focus_in_event();
     }
 
-    auto paint_event() -> bool override
+    auto paint_event(Painter& p) -> bool override
     {
         if (is_veiled_)
             this->set_contents(Glyph_string{veil_, this->contents().size()});
-        return Textbox::paint_event();
+        return Textbox::paint_event(p);
     }
 
    private:

@@ -1,7 +1,5 @@
 #ifndef TERMOX_WIDGET_DETAIL_BORDER_OFFSETS_HPP
 #define TERMOX_WIDGET_DETAIL_BORDER_OFFSETS_HPP
-#include <cstddef>
-
 namespace ox {
 class Widget;
 class Painter;
@@ -17,16 +15,16 @@ namespace ox::detail {
 class Border_offset {
    public:
     /// Calculate west border offset, either 1 or 0.
-    static auto west(Widget const& w) -> std::size_t;
+    static auto west(Widget const& w) -> int;
 
     /// Calculate east border offset, either 1 or 0.
-    static auto east(Widget const& w) -> std::size_t;
+    static auto east(Widget const& w) -> int;
 
     /// Calculate north border offset, either 1 or 0.
-    static auto north(Widget const& w) -> std::size_t;
+    static auto north(Widget const& w) -> int;
 
     /// Calculate south border offset, either 1 or 0.
-    static auto south(Widget const& w) -> std::size_t;
+    static auto south(Widget const& w) -> int;
 
     /// Calculate whether or not \p w is too small to display the west border.
     static auto west_disqualified(Widget const& w) -> bool;

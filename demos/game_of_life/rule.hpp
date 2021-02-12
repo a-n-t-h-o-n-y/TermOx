@@ -36,13 +36,13 @@ constexpr auto parse_bs_rulestring(std::string_view rs) -> Rule
     auto const delimit_pos = rs.find('/');
     if (delimit_pos == std::string_view::npos)
         throw std::invalid_argument{parse_error_str()};
-    if (delimit_pos + 1uL >= rs.size())
+    if (delimit_pos + 1 >= rs.size())
         throw std::invalid_argument{parse_error_str()};
-    if (rs[delimit_pos + 1uL] != 'S' && rs[delimit_pos + 1uL] != 's')
+    if (rs[delimit_pos + 1] != 'S' && rs[delimit_pos + 1] != 's')
         throw std::invalid_argument{parse_error_str()};
 
-    auto const b = make_neighbors(rs.substr(1uL, delimit_pos - 1uL));
-    auto const s = make_neighbors(rs.substr(delimit_pos + 2uL));
+    auto const b = make_neighbors(rs.substr(1, delimit_pos - 1));
+    auto const s = make_neighbors(rs.substr(delimit_pos + 2));
     return {b, s};
 }
 
@@ -52,8 +52,8 @@ constexpr auto parse_sb_rulestring(std::string_view rs) -> Rule
     if (delimit_pos == std::string_view::npos)
         throw std::invalid_argument{parse_error_str()};
 
-    auto const s = make_neighbors(rs.substr(0uL, delimit_pos));
-    auto const b = make_neighbors(rs.substr(delimit_pos + 1uL));
+    auto const s = make_neighbors(rs.substr(0, delimit_pos));
+    auto const b = make_neighbors(rs.substr(delimit_pos + 1));
     return {s, b};
 }
 

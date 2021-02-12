@@ -7,7 +7,7 @@
 
 namespace ox::detail {
 
-void Textbox_base::cursor_up(std::size_t n)
+void Textbox_base::cursor_up(int n)
 {
     auto y = this->cursor.y() - n;
     if (this->cursor.y() < n) {
@@ -18,7 +18,7 @@ void Textbox_base::cursor_up(std::size_t n)
     cursor_moved_up(n);
 }
 
-void Textbox_base::cursor_down(std::size_t n)
+void Textbox_base::cursor_down(int n)
 {
     if (this->cursor.y() + this->top_line() == this->last_line())
         return;

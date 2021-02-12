@@ -11,7 +11,7 @@ namespace ox {
 struct Glyph {
    public:
     /// The Glyph's symbol is the wide character that will be displayed.
-    char32_t symbol = U' ';
+    char32_t symbol = U'\0';
 
     /// The Brush that will determine the Traits and Colors of the symbol.
     Brush brush{};
@@ -54,9 +54,11 @@ constexpr auto operator|(char32_t g, Traits t) -> ox::Glyph
 }
 
 // TODO enable once constructor
-// constexpr auto operator|(char g, Trait t) -> ox::Glyph { return ox::Glyph{g} | t; }
+// constexpr auto operator|(char g, Trait t) -> ox::Glyph { return ox::Glyph{g}
+// | t; }
 
-// constexpr auto operator|(char g, Traits t) -> ox::Glyph { return ox::Glyph{g} | t; }
+// constexpr auto operator|(char g, Traits t) -> ox::Glyph { return ox::Glyph{g}
+// | t; }
 
 }  // namespace esc
 

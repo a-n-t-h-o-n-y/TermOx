@@ -81,13 +81,12 @@ class Graph : public Widget {
     // even if number_t is unsigned... or create four overloads, that is better)
     // // this scroll will add the value distance to east and west
    protected:
-    auto paint_event() -> bool override
+    auto paint_event(Painter& p) -> bool override
     {
         // Only relies on map_, call regenerate_map() if you need a new size
-        auto p = Painter{*this};
         for (auto const& [point, bitmap] : map_)
             p.put(to_symbol(bitmap), point);
-        return Widget::paint_event();
+        return Widget::paint_event(p);
     }
 
     auto resize_event(Area new_size, Area old_size) -> bool override

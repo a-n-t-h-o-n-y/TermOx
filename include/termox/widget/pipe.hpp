@@ -294,7 +294,7 @@ inline auto direct_focus() { return focus(Focus_policy::Direct); }
 
 // Width Policy Modifiers -----------------------------------------------------
 
-inline auto fixed_width(std::size_t hint)
+inline auto fixed_width(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).width_policy.fixed(hint);
@@ -302,7 +302,7 @@ inline auto fixed_width(std::size_t hint)
     };
 }
 
-inline auto minimum_width(std::size_t hint)
+inline auto minimum_width(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).width_policy.minimum(hint);
@@ -310,7 +310,7 @@ inline auto minimum_width(std::size_t hint)
     };
 }
 
-inline auto maximum_width(std::size_t hint)
+inline auto maximum_width(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).width_policy.maximum(hint);
@@ -318,7 +318,7 @@ inline auto maximum_width(std::size_t hint)
     };
 }
 
-inline auto preferred_width(std::size_t hint)
+inline auto preferred_width(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).width_policy.preferred(hint);
@@ -326,7 +326,7 @@ inline auto preferred_width(std::size_t hint)
     };
 }
 
-inline auto expanding_width(std::size_t hint)
+inline auto expanding_width(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).width_policy.expanding(hint);
@@ -334,7 +334,7 @@ inline auto expanding_width(std::size_t hint)
     };
 }
 
-inline auto minimum_expanding_width(std::size_t hint)
+inline auto minimum_expanding_width(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).width_policy.minimum_expanding(hint);
@@ -350,7 +350,7 @@ inline auto ignored_width()
     };
 }
 
-inline auto width_hint(std::size_t hint)
+inline auto width_hint(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).width_policy.hint(hint);
@@ -358,7 +358,7 @@ inline auto width_hint(std::size_t hint)
     };
 }
 
-inline auto width_min(std::size_t min)
+inline auto width_min(int min)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).width_policy.min(min);
@@ -366,7 +366,7 @@ inline auto width_min(std::size_t min)
     };
 }
 
-inline auto width_max(std::size_t max)
+inline auto width_max(int max)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).width_policy.max(max);
@@ -408,7 +408,7 @@ inline auto passive_width(bool x = true)
 
 // Height Policy Modifiers -----------------------------------------------------
 
-inline auto fixed_height(std::size_t hint)
+inline auto fixed_height(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).height_policy.fixed(hint);
@@ -416,7 +416,7 @@ inline auto fixed_height(std::size_t hint)
     };
 }
 
-inline auto minimum_height(std::size_t hint)
+inline auto minimum_height(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).height_policy.minimum(hint);
@@ -424,7 +424,7 @@ inline auto minimum_height(std::size_t hint)
     };
 }
 
-inline auto maximum_height(std::size_t hint)
+inline auto maximum_height(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).height_policy.maximum(hint);
@@ -432,7 +432,7 @@ inline auto maximum_height(std::size_t hint)
     };
 }
 
-inline auto preferred_height(std::size_t hint)
+inline auto preferred_height(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).height_policy.preferred(hint);
@@ -440,7 +440,7 @@ inline auto preferred_height(std::size_t hint)
     };
 }
 
-inline auto expanding_height(std::size_t hint)
+inline auto expanding_height(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).height_policy.expanding(hint);
@@ -448,7 +448,7 @@ inline auto expanding_height(std::size_t hint)
     };
 }
 
-inline auto minimum_expanding_height(std::size_t hint)
+inline auto minimum_expanding_height(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).height_policy.minimum_expanding(hint);
@@ -464,7 +464,7 @@ inline auto ignored_height()
     };
 }
 
-inline auto height_hint(std::size_t hint)
+inline auto height_hint(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).height_policy.hint(hint);
@@ -472,7 +472,7 @@ inline auto height_hint(std::size_t hint)
     };
 }
 
-inline auto height_min(std::size_t min)
+inline auto height_min(int min)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).height_policy.min(min);
@@ -480,7 +480,7 @@ inline auto height_min(std::size_t min)
     };
 }
 
-inline auto height_max(std::size_t max)
+inline auto height_max(int max)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).height_policy.max(max);

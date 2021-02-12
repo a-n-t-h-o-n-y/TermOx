@@ -37,19 +37,18 @@ class Meta_widget : public ox::Widget {
     }
 
    protected:
-    auto paint_event() -> bool override
+    auto paint_event(ox::Painter& p) -> bool override
     {
         auto const w = std::to_string(this->width());
         auto const h = std::to_string(this->height());
         auto const x = std::to_string(this->parent()->x());
         auto const y = std::to_string(this->parent()->y());
 
-        auto p = ox::Painter{*this};
         p.put("X " + x, 0, 0);
         p.put("Y " + y, 0, 1);
         p.put("W " + w, 0, 2);
         p.put("H " + h, 0, 3);
-        return Widget::paint_event();
+        return Widget::paint_event(p);
     }
 };
 

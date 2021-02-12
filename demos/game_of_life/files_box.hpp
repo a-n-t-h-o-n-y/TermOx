@@ -58,7 +58,7 @@ struct Files_box : ox::layout::Vertical<> {
         export_btn.file_request;
 
    public:
-    Files_box() { *this | ox::pipe::fixed_height(5uL); }
+    Files_box() { *this | ox::pipe::fixed_height(5); }
 };
 
 }  // namespace gol

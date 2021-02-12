@@ -9,6 +9,7 @@
 #include <termox/system/detail/user_input_event_loop.hpp>
 #include <termox/system/event_fwd.hpp>
 #include <termox/terminal/terminal.hpp>
+#include <termox/widget/cursor.hpp>
 
 namespace ox {
 class Animation_engine;
@@ -50,7 +51,7 @@ class System {
     }
 
     /// Return a pointer to the currently focused Widget.
-    static auto focus_widget() -> Widget*;
+    [[nodiscard]] static auto focus_widget() -> Widget*;
 
     /// Give program focus to \p w.
     /** Sends Focus_out_event to Widget in focus, and Focus_in_event to \p w. */
@@ -137,7 +138,18 @@ class System {
     }
 
     /// Return whether System has gotten an exit request, set by System::exit()
-    static auto exit_requested() -> bool { return exit_requested_; }
+    static auto is_exit_requested() -> bool { return exit_requested_; }
+
+    /// Set the terminal cursor via \p cursor parameters and \p offset applied.
+    static void set_cursor(Cursor cursor, Point offset)
+    {
+        if (!cursor.is_enabled())
+            System::terminal.show_cursor(false);
+        else {
+            System::terminal.show_cursor();
+            Terminal::move_cursor({offset.x + cursor.x(), offset.y + cursor.y()});
+        }
+    }
 
    private:
     inline static Widget* head_        = nullptr;

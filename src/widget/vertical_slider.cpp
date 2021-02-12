@@ -10,9 +10,8 @@
 
 namespace ox {
 
-auto Vertical_slider::paint_event() -> bool
+auto Vertical_slider::paint_event(Painter& p) -> bool
 {
-    Painter p{*this};
     auto const indicator_y = indicator_position();
     auto const width       = this->width();
 
@@ -22,18 +21,16 @@ auto Vertical_slider::paint_event() -> bool
     auto const upper_limit = indicator_y - 1;
     for (auto y = indicator_y - 1; y < indicator_y; --y) {
         auto const upper_index = (upper_limit - y) % upper_gs.size();
-        for (auto x = 0uL; x < width; ++x) {
-            p.put(upper_gs[upper_index], x, y);
-        }
-        if (not up_repeats and (indicator_y - y) == upper_gs.size())
+        for (auto x = 0; x < width; ++x)
+            p.put(upper_gs[upper_index], {x, y});
+        if (!up_repeats && (indicator_y - y) == upper_gs.size())
             break;
     }
 
     // Middle
     auto const index = this->indicator_index();
-    for (auto x = 0uL; x < width; ++x) {
-        p.put(indicator_[index], x, indicator_y);
-    }
+    for (auto x = 0; x < width; ++x)
+        p.put(indicator_[index], {x, indicator_y});
 
     // Lower
     auto const& lower_gs    = inverted_ ? upper_ : lower_;
@@ -42,13 +39,12 @@ auto Vertical_slider::paint_event() -> bool
     auto const lower_offset = indicator_y + 1;
     for (auto y = indicator_y + 1; y < height; ++y) {
         auto const lower_index = (y - lower_offset) % lower_gs.size();
-        for (auto x = 0uL; x < width; ++x) {
-            p.put(lower_gs[lower_index], x, y);
-        }
-        if (not low_repeats and (y - indicator_y) == lower_gs.size())
+        for (auto x = 0; x < width; ++x)
+            p.put(lower_gs[lower_index], {x, y});
+        if (!low_repeats && (y - indicator_y) == (int)lower_gs.size())
             break;
     }
-    return Widget::paint_event();
+    return Widget::paint_event(p);
 }
 
 auto Vertical_slider::mouse_press_event(const Mouse& m) -> bool
@@ -70,7 +66,7 @@ auto Vertical_slider::mouse_wheel_event(Mouse const& m) -> bool
     return Widget::mouse_wheel_event(m);
 }
 
-auto Vertical_slider::ratio_at(std::size_t position) const -> Ratio_t
+auto Vertical_slider::ratio_at(int position) const -> Ratio_t
 {
     if (this->height() == 1)
         return 1.0;
@@ -85,7 +81,7 @@ auto Vertical_slider::indicator_absolute_position() const -> Ratio_t
     return detail::ceil_if_nearly_whole(logic_.ratio() * screen_max);
 }
 
-auto Vertical_slider::indicator_position() const -> std::size_t
+auto Vertical_slider::indicator_position() const -> int
 {
     auto const screen_max = this->height() - 1;
     auto const abs_pos    = std::floor(this->indicator_absolute_position());

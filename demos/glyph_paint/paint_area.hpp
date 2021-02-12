@@ -1,7 +1,6 @@
 #ifndef DEMOS_GLYPH_PAINT_PAINT_AREA_HPP
 #define DEMOS_GLYPH_PAINT_PAINT_AREA_HPP
 #include <cstddef>
-#include <cstdint>
 #include <iostream>
 #include <unordered_map>
 
@@ -123,16 +122,15 @@ class Paint_area : public ox::Widget {
     void read(std::istream& is);
 
    protected:
-    auto paint_event() -> bool override
+    auto paint_event(ox::Painter& p) -> bool override
     {
-        auto p       = ox::Painter{*this};
         auto const w = this->width();
         auto const h = this->height();
         for (auto const& [at, glyph] : glyphs_painted_) {
             if (at.x < w && at.y < h)
                 p.put(glyph, at);
         }
-        return Widget::paint_event();
+        return Widget::paint_event(p);
     }
 
     auto mouse_press_event(ox::Mouse const& m) -> bool override
@@ -144,7 +142,7 @@ class Paint_area : public ox::Widget {
                 if (glyphs_painted_.count(m.at) == 1)
                     this->set_glyph(glyphs_painted_[m.at]);
                 break;
-            default: this->place_glyph(m.at.x, m.at.y); break;
+            default: this->place_glyph(m.at); break;
         }
         return Widget::mouse_press_event(m);
     }
@@ -159,7 +157,7 @@ class Paint_area : public ox::Widget {
     bool erase_enabled_      = false;
 
    public:
-    void place_glyph(std::size_t x, std::size_t y);
+    void place_glyph(ox::Point p);
 
     void remove_glyph(ox::Point coords)
     {

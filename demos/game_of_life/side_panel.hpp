@@ -45,9 +45,9 @@ struct Side_panel : ox::layout::Vertical<> {
         using namespace ox;
         using namespace ox::pipe;
 
-        *this | fixed_width(16uL);
+        *this | fixed_width(16);
 
-        empty_space | expanding_height(0uL);
+        empty_space | expanding_height(0);
         settings_accordion.expand();
     }
 

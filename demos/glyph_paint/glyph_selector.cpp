@@ -92,7 +92,7 @@ auto color_blocks(Palette const& p) -> Glyph_string
 
     auto result = Glyph_string{};
     for (auto i = 0uL; i < p.size(); ++i) {
-        for (auto j = i + 1uL; j < p.size(); ++j) {
+        for (auto j = i + 1; j < p.size(); ++j) {
             result.append(U'█' | fg(p[i].color));
             for (char32_t const block : blocks)
                 result.append(block | bg(p[i].color) | fg(p[j].color));
@@ -110,7 +110,7 @@ auto color_shapes(Palette const& p) -> Glyph_string
 
     auto result = Glyph_string{};
     for (auto i = 0uL; i < p.size(); ++i) {
-        for (auto j = i + 1uL; j < p.size(); ++j) {
+        for (auto j = i + 1; j < p.size(); ++j) {
             for (char32_t const shape : shapes) {
                 result.append(shape | bg(p[i].color) | fg(p[j].color));
                 result.append(U' ');

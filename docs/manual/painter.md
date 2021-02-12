@@ -34,13 +34,12 @@ not implemented yet.
 ## Example
 
 ```cpp
-bool paint_event() override
+bool paint_event(Painter& p) override
 {
-    auto p = Painter{*this};
     p.put(U'X' | Trait::Bold, {3, 5});
     p.line(U'-', {0, 0}, {0, this->height() - 1});
     p.fill(U'#', Point{7, 2}, Area{5, 5});
-    return Widget::paint_event();
+    return Widget::paint_event(p);
 }
 ```
 

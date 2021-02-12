@@ -27,11 +27,11 @@ class Color_tile : public Button {
     }
 
    protected:
-    auto paint_event() -> bool override
+    auto paint_event(Painter& p) -> bool override
     {
         if (number_)
-            Painter{*this}.put(color_, {0uL, 0uL});
-        return Button::paint_event();
+            p.put(color_, {0, 0});
+        return Button::paint_event(p);
     }
 
    private:

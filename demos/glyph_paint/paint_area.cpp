@@ -3,7 +3,6 @@
 #include <cctype>
 #include <codecvt>
 #include <cstddef>
-#include <cstdint>
 #include <cwctype>
 #include <iostream>
 #include <iterator>
@@ -53,7 +52,7 @@ namespace paint {
 void Paint_area::write(std::ostream& os)
 {
     auto previous_nl = Point{0, 0};
-    auto previous_s  = Point{0, static_cast<std::size_t>(-1)};
+    auto previous_s  = Point{0, -1};
     for (auto const& [point, glyph] : glyphs_painted_) {
         insert_newline(previous_nl, point, os);
         insert_space(previous_s, point, os);
@@ -76,7 +75,7 @@ void Paint_area::read(std::istream& is)
         ++at.x;
         if (glyph.symbol == U'\n') {
             ++at.y;
-            at.x = 0uL;
+            at.x = 0;
         }
     }
 }
@@ -90,8 +89,8 @@ auto Paint_area::key_press_event(Key k) -> bool
     auto const h = this->height();
     if (!this->cursor.enabled() || w == 0 || h == 0)
         return Widget::key_press_event(k);
-    auto new_x = this->cursor.x() + 1uL;
-    auto new_y = this->cursor.y() + 1uL;
+    auto new_x = this->cursor.x() + 1;
+    auto new_y = this->cursor.y() + 1;
     switch (k) {
         case Key::Arrow_right:
             if (new_x == w)
@@ -105,12 +104,10 @@ auto Paint_area::key_press_event(Key k) -> bool
             this->cursor.set_y(new_y);
             break;
         case Key::Arrow_up: this->cursor.set_y(this->cursor.y() - 1); break;
-        case Key::Enter:
-            this->place_glyph(this->cursor.x(), this->cursor.y());
-            break;
+        case Key::Enter: this->place_glyph(this->cursor.position()); break;
         default:
             if (!std::iscntrl(symbol)) {
-                this->place_glyph(this->cursor.x(), this->cursor.y());
+                this->place_glyph(this->cursor.position());
                 this->update();
             }
             break;
@@ -118,18 +115,18 @@ auto Paint_area::key_press_event(Key k) -> bool
     return Widget::key_press_event(k);
 }
 
-void Paint_area::place_glyph(std::size_t x, std::size_t y)
+void Paint_area::place_glyph(ox::Point p)
 {
     if (clone_enabled_) {
-        if (glyphs_painted_.count({x, y}) == 1) {
-            this->set_glyph(glyphs_painted_[{x, y}]);
+        if (glyphs_painted_.count(p) == 1) {
+            this->set_glyph(glyphs_painted_[p]);
             this->toggle_clone();
         }
     }
     else if (erase_enabled_)
-        this->remove_glyph({x, y});
+        this->remove_glyph(p);
     else {
-        glyphs_painted_[{x, y}] = current_glyph_;
+        glyphs_painted_[p] = current_glyph_;
         this->update();
     }
 }

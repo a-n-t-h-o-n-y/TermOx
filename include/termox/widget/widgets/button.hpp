@@ -53,13 +53,13 @@ class Button : public Widget {
         return Widget::mouse_release_event(m);
     }
 
-    auto paint_event() -> bool override
+    auto paint_event(Painter& p) -> bool override
     {
         auto const width = this->width();
         auto const x = label_.size() > width ? 0 : (width - label_.size()) / 2;
         auto const y = this->height() / 2;
-        Painter{*this}.put(label_, x, y);
-        return Widget::paint_event();
+        p.put(label_, {x, y});
+        return Widget::paint_event(p);
     }
 
    private:

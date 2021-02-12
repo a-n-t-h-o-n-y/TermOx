@@ -41,7 +41,7 @@ class Textbox_base : public Text_display {
     }
 
     /// Add cursor movement to Text_display::scroll_up.
-    void scroll_up(std::size_t n = 1) override
+    void scroll_up(int n = 1) override
     {
         if (this->top_line() == 0)
             return;
@@ -53,7 +53,7 @@ class Textbox_base : public Text_display {
     }
 
     /// Add cursor movement to Text_display::scroll_down.
-    void scroll_down(std::size_t n = 1) override
+    void scroll_down(int n = 1) override
     {
         Text_display::scroll_down(n);
         auto y = this->cursor.y();
@@ -67,30 +67,28 @@ class Textbox_base : public Text_display {
     /// Move the cursor up \p n lines, scroll if at the top line.
     /** Cursor is moved to the right-most Glyph if the moved to line does not
      *  extend as far as the current cursor column position. */
-    void cursor_up(std::size_t n = 1);
+    void cursor_up(int n = 1);
 
     /// Move the cursor down \p n lines, scroll if at the bottom line.
     /** Cursor is moved to the right-most Glyph if the moved to line does not
      *  extend as far as the current cursor column position. */
-    void cursor_down(std::size_t n = 1);
+    void cursor_down(int n = 1);
 
     /// Move the cursor \p n indices towards the beginning of contents.
     /** Scroll up if moving past the top-left position. */
-    void cursor_left(std::size_t n = 1)
+    void cursor_left(int n = 1)
     {
-        for (auto i = 0uL; i < n; ++i) {
+        for (auto i = 0; i < n; ++i)
             this->increment_cursor_left();
-        }
         cursor_moved_left(n);
     }
 
     /// Move the cursor \p n indices towards the end of contents.
     /** Scroll down if moving past the bottom-right position. */
-    void cursor_right(std::size_t n = 1)
+    void cursor_right(int n = 1)
     {
-        for (auto i = 0uL; i < n; ++i) {
+        for (auto i = 0; i < n; ++i)
             this->increment_cursor_right();
-        }
         cursor_moved_right(n);
     }
 
@@ -103,7 +101,7 @@ class Textbox_base : public Text_display {
     }
 
     /// Return the index into contents that the cursor is located at.
-    auto cursor_index() const -> std::size_t
+    auto cursor_index() const -> int
     {
         return this->index_at(this->cursor.position());
     }
@@ -120,7 +118,7 @@ class Textbox_base : public Text_display {
         auto const true_last_index =
             this->first_index_at(this->bottom_line() + 1) - 1;
         auto const cursor_index = this->cursor_index();
-        if (cursor_index == true_last_index and
+        if (cursor_index == true_last_index &&
             this->cursor.y() == this->height() - 1) {
             this->scroll_down(1);
         }

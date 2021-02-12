@@ -8,8 +8,6 @@
 
 namespace ox::detail {
 
-// using Screen_descriptor = std::unordered_map<Point, Glyph>;
-
 /// Holds the screen state by Points on the screen and corresponding Glyphs.
 /** Points are in global coordinates. */
 class Screen_descriptor {
@@ -44,9 +42,7 @@ class Screen_descriptor {
 
     auto at(Point p) const -> Glyph { return map_.at(p); }
 
-    auto operator[](Point&& p) -> Glyph& { return map_[std::move(p)]; }
-
-    auto operator[](Point const& p) -> Glyph& { return map_[p]; }
+    auto operator[](Point p) -> Glyph& { return map_[p]; }
 
     auto count(Point p) const -> std::size_t { return map_.count(p); }
 
@@ -63,8 +59,8 @@ class Screen_descriptor {
 
    private:
     Map_t map_;
-    Area area_      = {0uL, 0uL};
-    Point top_left_ = {0uL, 0uL};
+    Area area_      = {0, 0};
+    Point top_left_ = {0, 0};
 };
 
 }  // namespace ox::detail

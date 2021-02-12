@@ -56,7 +56,7 @@ auto Horizontal_slider::key_press_event(Key k) -> bool
     return Widget::key_press_event(k);
 }
 
-auto Horizontal_slider::position_to_percent(std::size_t position) -> float
+auto Horizontal_slider::position_to_percent(int position) -> float
 {
     auto const width = this->width();
     if (width < 2)
@@ -66,7 +66,7 @@ auto Horizontal_slider::position_to_percent(std::size_t position) -> float
     return static_cast<float>(position) / static_cast<float>(width - 1);
 }
 
-auto Horizontal_slider::percent_to_position(float percent) -> std::size_t
+auto Horizontal_slider::percent_to_position(float percent) -> int
 {
     auto const width = this->width();
     return width == 0 ? 0 : std::round(percent * static_cast<float>(width - 1));

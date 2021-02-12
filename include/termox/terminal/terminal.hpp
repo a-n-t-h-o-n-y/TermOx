@@ -1,51 +1,90 @@
 #ifndef TERMOX_TERMINAL_TERMINAL_HPP
 #define TERMOX_TERMINAL_TERMINAL_HPP
-#include <chrono>
-#include <cstddef>
+#include <cstdint>
+#include <optional>
 
 #include <signals_light/signal.hpp>
 
 #include <termox/painter/color.hpp>
 #include <termox/painter/glyph.hpp>
+#include <termox/system/event_fwd.hpp>
+#include <termox/terminal/detail/screen_buffers.hpp>
 #include <termox/terminal/dynamic_color_engine.hpp>
+#include <termox/widget/area.hpp>
+
+#include <esc/esc.hpp>
 
 namespace ox {
+
+using Mouse_mode = ::esc::Mouse_mode;
+using Signals    = ::esc::Signals;
 
 class Terminal {
    public:
     sl::Signal<void(Palette const&)> palette_changed;
 
+    detail::Screen_buffers screen_buffers{Area{0, 0}};
+
    public:
     /// Initializes the terminal screen into curses mode.
-    /** Must be called before any input/output can occur. Also initializes
-     *  various properties that are modifiable from this Terminal class. No-op
-     *  if already initialized. */
-    void initialize();
+    /** Must be called before any input/output can occur. No-op if initialized.
+     *  Mouse_mode  - - Off:   Generates no Mouse Events.
+     *                  Basic: Generate Mouse Press and Release Events for all
+     *                         buttons and the scroll wheel.
+     *                  Drag:  Basic, plus Mouse Move Events while a button is
+     *                         pressed.
+     *                  Move:  Basic, plus Mouse Move Events are generated with
+     *                         or without a button pressed.
+     *
+     *  Signals - - - On:  Signals can be generated from ctrl-[key] presses, for
+     *                     instance ctrl-c will send SIGINT instead of byte 3.
+     *                Off: Signals will not be generated on ctrl-[key] presses,
+     *                     sending the byte value of the ctrl character instead.
+     */
+    void initialize(Mouse_mode mouse_mode = Mouse_mode::Basic,
+                    Signals signals       = Signals::On);
 
     /// Reset the terminal to its state before initialize() was called.
     /** No-op if already uninitialized. */
     void uninitialize();
 
     /// Return the Area of the terminal screen.
-    auto area() const -> Area { return {this->width(), this->height()}; }
+    [[nodiscard]] static auto area() -> Area
+    {
+        return {Terminal::width(), Terminal::height()};
+    }
 
     /// Return the width of the terminal screen.
-    auto width() const -> std::size_t;
+    [[nodiscard]] static auto width() -> int
+    {
+        return static_cast<int>(esc::terminal_width());
+    }
 
     /// Return the height of the terminal screen.
-    auto height() const -> std::size_t;
+    [[nodiscard]] static auto height() -> int
+    {
+        return static_cast<int>(esc::terminal_height());
+    }
 
-    /// Set the rate at which the screen will update.
-    /** User input will immediately flush, but other event loops are only
-     *  processed every refresh rate. Default is 33ms. */
-    void set_refresh_rate(std::chrono::milliseconds duration);
+    /// Update the screen to reflect change made by Painter since last call.
+    /** This leaves the cursor in an unknown location, the cursor must be set
+     *  separately for the currently in-focus Widget. */
+    void refresh();
 
-    /// Set the default background/wallpaper tiles to be used.
+    /// Set the default wallpaper tiles to be used.
     /** This is used if a Widget has no assigned wallpaper. */
-    void set_background(Glyph tile);
+    void set_default_wallpaper(Glyph tile);
 
-    /// Return the default background/wallpaper currently in use.
-    auto background() const -> Glyph { return background_; }
+    /// Return the default wallpaper currently in use.
+    [[nodiscard]] auto default_wallpaper() const -> Glyph { return wallpaper_; }
+
+    /// Update a Color Palette value.
+    /** Used by Dynamic_color_engine. */
+    void update_color_stores(Color c, True_color tc);
+
+    /// Repaints all Glyphs with \p c in their Brush to the screen.
+    /** Used by Dynamic_color_engine. */
+    void repaint_color(Color c);
 
     /// Change Color definitions.
     void set_palette(Palette colors);
@@ -56,81 +95,49 @@ class Terminal {
     auto palette_append(Color_definition::Value_t value) -> Color;
 
     /// Return a copy of the currently set color palette.
-    auto current_palette() const -> Palette const& { return palette_; }
-
-    /// Set a single Color_index Color value.
-    void set_color_definition(Color c, Color_index value);
-
-    /// Set a single True_color value.
-    void set_color_definition(Color c, True_color value);
-
-    /// Set a single Dynamic_color value.
-    void set_color_definition(Color c, Dynamic_color value);
-
-    auto get_ansi(Color c) -> short;
-
-    /// Lock a Color and ANSI value together, with all possible combinations.
-    /** Relies on the palette_ objects being accurate. */
-    void initialize_pairs(Color c, ANSI a);
-
-    /// Set the RGB value of an ANSI color.
-    void term_set_color(ANSI a, True_color value);
+    [[nodiscard]] auto current_palette() const -> Palette const&
+    {
+        return palette_;
+    }
 
     /// Set whether or not the cursor is visible on screen.
-    void show_cursor(bool show = true);
-
-    /// Enable or disable raw mode.
-    /** In raw mode, the interrupt, quit, suspend, and flow control characters
-     *  are all passed through uninterpreted, instead of generating a signal.
-     *  This mode is off by default. */
-    void raw_mode(bool enable = true);
-
-    /// Return whether this terminal can display colors.
-    /** Return false if the Terminal hasn't been initialized yet. */
-    auto has_color() const -> bool;
-
-    /// Return whether this terminal can display up to 16 colors.
-    auto has_extended_colors() const -> bool;
-
-    /// Return the number of colors this terminal supports.
-    auto color_count() const -> short;
-
-    /// Return whether this terminal can change color definitions.
-    /** This is required for the color Palette to be changed. Return false if
-     *  the Terminal hasn't been initialized yet. */
-    auto can_change_colors() const -> bool;
-
-    /// Return the number of color pairs in this terminal.
-    /** Always returns 0 ...*/
-    auto color_pair_count() const -> int;
-
-    /// Map pairs of colors to a unique index between [0, 255]
-    auto color_index(Color fg, Color bg) const -> short;
-
-    /// Returns the number of colors in the currently set ANSI_palette.
-    auto get_palette_color_count() const -> Color::Value_t
+    static void show_cursor(bool show = true)
     {
-        return static_cast<Color::Value_t>(palette_.size());
+        ::esc::set(show ? ::esc::Cursor::Show : ::esc::Cursor::Hide);
+        ::esc::flush();
     }
+
+    /// Moves the cursor to Point \p point on screen.
+    /** {0, 0} is top left of the terminal screen. */
+    static void move_cursor(Point point)
+    {
+        ::esc::write(::esc::escape(::esc::Cursor_position{point}));
+        ::esc::flush();
+    }
+
+    /// Return the number of colors in the terminal's built in palette.
+    /** This cooresponds to the number of Color_index values. */
+    [[nodiscard]] static auto color_count() -> std::uint16_t
+    {
+        return ::esc::color_palette_size();
+    }
+
+    /// Return true if this terminal supports true color.
+    [[nodiscard]] static auto has_true_color() -> bool
+    {
+        return ::esc::has_true_color();
+    }
+
+    /// Wait for user input, and return with a corresponding Event.
+    /** Blocking call, input can be received from the keyboard, mouse, or the
+     *  terminal being resized. Will return nullopt if there is an error. */
+    [[nodiscard]] static auto get() -> Event;
 
    private:
     Palette palette_;
-    std::chrono::milliseconds refresh_rate_{33};
     Dynamic_color_engine dynamic_color_engine_;
-    Glyph background_    = U' ';
+    Glyph wallpaper_     = U' ';
     bool is_initialized_ = false;
-    bool show_cursor_    = false;
-    bool raw_mode_       = false;
-
-   private:
-    /// Actually set raw/noraw mode via ncurses using the state of raw_mode_.
-    void ncurses_set_raw_mode() const;
-
-    /// Actually set show_cursor via ncurses using the state of show_cursor_.
-    void ncurses_set_cursor() const;
-
-    /// Repaint All Widgets
-    void repaint_all();
 };
 
 }  // namespace ox

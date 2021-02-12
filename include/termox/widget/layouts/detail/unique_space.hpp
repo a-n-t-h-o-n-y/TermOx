@@ -12,8 +12,8 @@ namespace ox::layout::detail {
 template <typename Parameters>
 class Unique_space {
    private:
-    using Length_list   = std::vector<std::size_t>;
-    using Position_list = std::vector<std::size_t>;
+    using Length_list   = std::vector<int>;
+    using Position_list = std::vector<int>;
 
    public:
     auto calculate_lengths(Widget& parent) -> Length_list
@@ -29,7 +29,7 @@ class Unique_space {
                 typename Parameters::Secondary::get_policy{}(*begin);
             if (limit > policy.max())
                 result.push_back(policy.max());
-            else if (limit < policy.min() and !policy.can_ignore_min())
+            else if (limit < policy.min() && !policy.can_ignore_min())
                 result.push_back(0);
             else
                 result.push_back(limit);
@@ -39,7 +39,7 @@ class Unique_space {
 
     auto calculate_positions(Length_list const& lengths) -> Position_list
     {
-        return Position_list(lengths.size(), 0uL);
+        return Position_list(lengths.size(), 0);
     }
 
     /// Return the child Widget offset, the first widget included in the layout.
@@ -49,7 +49,7 @@ class Unique_space {
     auto set_offset(std::size_t index) { offset_ = index; }
 
    private:
-    std::size_t offset_ = 0uL;
+    std::size_t offset_ = 0;
 };
 
 }  // namespace ox::layout::detail

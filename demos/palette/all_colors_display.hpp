@@ -16,7 +16,7 @@ class Shade_display : public ox::Widget {
     void invert() { inverted_ = true; }
 
    protected:
-    bool paint_event() override;
+    auto paint_event(ox::Painter& p) -> bool override;
 
    private:
     ox::Color base_;

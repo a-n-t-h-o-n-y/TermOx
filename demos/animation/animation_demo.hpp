@@ -29,10 +29,10 @@ class Animated_box : public ox::Widget {
         return Widget::timer_event();
     }
 
-    auto paint_event() -> bool override
+    auto paint_event(ox::Painter& p) -> bool override
     {
-        ox::Painter{*this}.put(glyph_, xy_);
-        return Widget::paint_event();
+        p.put(glyph_, xy_);
+        return Widget::paint_event(p);
     }
 
     auto enable_event() -> bool override
@@ -65,20 +65,18 @@ class Animated_box : public ox::Widget {
     ox::FPS const fps_;
 
     ox::Glyph glyph_ = U'X' | fg(ox::Color::Yellow);
-    ox::Point xy_    = ox::Point{0uL, 0uL};
+    ox::Point xy_    = ox::Point{0, 0};
     int x_direction_ = 1;
     int y_direction_ = 1;
 
    private:
     /// Increments by \p direction, if 0 or \p max, flips the direction.
     /** \p limit is one past the last viable value. */
-    static void flip_increment(std::size_t& value,
-                               int& direction,
-                               std::size_t limit)
+    static void flip_increment(int& value, int& direction, int limit)
     {
-        if (limit == 1uL)
+        if (limit == 1)
             return;
-        if ((direction == -1 && value == 0uL) ||
+        if ((direction == -1 && value == 0) ||
             (direction == +1 && value + 1 == limit)) {
             direction *= -1;
         }
@@ -87,10 +85,10 @@ class Animated_box : public ox::Widget {
 
     /// Adjust a coord if the borders have moved so that it is out of bounds.
     /** \p limit is one past the last viable value. */
-    static void reset(std::size_t& value, std::size_t limit)
+    static void reset(int& value, int limit)
     {
         if (value >= limit)
-            value = (limit == 0uL ? 0uL : limit - 1uL);
+            value = (limit == 0 ? 0 : limit - 1);
     }
 };
 

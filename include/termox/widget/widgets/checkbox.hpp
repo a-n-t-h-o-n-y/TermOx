@@ -122,8 +122,8 @@ class Checkbox : public Label<Layout_t> {
     void unlock()
     {
         locked_ = false;
-        display_.checked.traits.remove(Trait::Dim);
-        display_.unchecked.traits.remove(Trait::Dim);
+        display_.checked.remove_traits(Trait::Dim);
+        display_.unchecked.remove_traits(Trait::Dim);
         this->update_display();
     }
 
@@ -146,8 +146,8 @@ class Checkbox : public Label<Layout_t> {
     {
         auto result = display_;
         if (locked_) {
-            result.checked.traits.remove(Trait::Dim);
-            result.unchecked.traits.remove(Trait::Dim);
+            result.checked.remove_traits(Trait::Dim);
+            result.unchecked.remove_traits(Trait::Dim);
         }
         return result;
     }

@@ -12,7 +12,7 @@ namespace gol {
 inline auto make_break() -> std::unique_ptr<ox::Widget>
 {
     using namespace ox::pipe;
-    return ox::widget() | fixed_height(1uL) | wallpaper(U'─' | fg(color::Teal));
+    return ox::widget() | fixed_height(1) | wallpaper(U'─' | fg(color::Teal));
 }
 
 }  // namespace gol

@@ -165,13 +165,13 @@ class GoL_widget : public ox::Widget {
     }
 
    protected:
-    auto paint_event() -> bool override
+    auto paint_event(ox::Painter& p) -> bool override
     {
         if (hi_res_)
-            this->paint_hi_res();
+            this->paint_hi_res(p);
         else
-            this->paint_low_res();
-        return Widget::paint_event();
+            this->paint_low_res(p);
+        return Widget::paint_event(p);
     }
 
     auto mouse_press_event(ox::Mouse const& m) -> bool override
@@ -288,13 +288,12 @@ class GoL_widget : public ox::Widget {
         return {x, y};
     }
 
-    void paint_low_res()
+    void paint_low_res(ox::Painter& p)
     {
         auto const width  = this->width();
         auto const height = this->height();
-        auto p            = ox::Painter{*this};
-        for (auto x = 0uL; x < width; ++x) {
-            for (auto y = 0uL; y < height; ++y) {
+        for (auto x = 0; x < width; ++x) {
+            for (auto y = 0; y < height; ++y) {
                 auto const coords = transform_to_engine({x, y});
                 if (engine_.alive_at(coords))
                     p.put(U'█' | fg(cell_color_), {x, y});
@@ -302,13 +301,12 @@ class GoL_widget : public ox::Widget {
         }
     }
 
-    void paint_hi_res()
+    void paint_hi_res(ox::Painter& p)
     {
         auto const width  = this->width();
         auto const height = this->height();
-        auto p            = ox::Painter{*this};
-        for (auto x = 0uL; x < width; ++x) {
-            for (auto y = 0uL; y < height; ++y) {
+        for (auto x = 0; x < width; ++x) {
+            for (auto y = 0; y < height; ++y) {
                 auto const braille = braille_at(ox::Point{x, y});
                 if (braille != U'\0')
                     p.put(braille | fg(cell_color_), {x, y});

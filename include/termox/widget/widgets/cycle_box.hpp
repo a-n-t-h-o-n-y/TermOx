@@ -128,7 +128,7 @@ class Cycle_box : public HLabel {
         sl::Signal<void()> enabled = {};
     };
     std::vector<Option> options_;
-    std::size_t index_ = 0uL;
+    std::size_t index_ = 0;
 
    private:
     /// Return the current option's text.

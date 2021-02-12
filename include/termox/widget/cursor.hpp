@@ -1,7 +1,5 @@
 #ifndef TERMOX_WIDGET_CURSOR_DATA_HPP
 #define TERMOX_WIDGET_CURSOR_DATA_HPP
-#include <cstddef>
-
 #include <signals_light/signal.hpp>
 
 #include <termox/widget/point.hpp>
@@ -17,16 +15,16 @@ class Cursor {
 
    public:
     /// Query if the cursor is enabled.
-    auto enabled() const -> bool { return enabled_; }
+    [[nodiscard]] auto is_enabled() const -> bool { return enabled_; }
 
     /// Get the local x coordinate of the cursor.
-    auto x() const -> std::size_t { return position_.x; }
+    [[nodiscard]] auto x() const -> int { return position_.x; }
 
     /// Get the local y coordinate of the cursor.
-    auto y() const -> std::size_t { return position_.y; }
+    [[nodiscard]] auto y() const -> int { return position_.y; }
 
     /// Get the local position of the cursor.
-    auto position() const -> Point { return position_; }
+    [[nodiscard]] auto position() const -> Point { return position_; }
 
     /// Enable the cursor(show on screen).
     void enable(bool enable = true) { enabled_ = enable; }
@@ -35,17 +33,17 @@ class Cursor {
     void disable(bool disable = true) { this->enable(!disable); }
 
     /// Enable the cursor if disabled, or disable it if enabled.
-    void toggle() { this->enable(!this->enabled()); }
+    void toggle() { this->enable(!this->is_enabled()); }
 
     /// Set the local x coordinate of the cursor.
-    void set_x(std::size_t x)
+    void set_x(int x)
     {
         position_.x = x;
         this->moved(position_);
     }
 
     /// Set the local y coordinate of the cursor.
-    void set_y(std::size_t y)
+    void set_y(int y)
     {
         position_.y = y;
         this->moved(position_);

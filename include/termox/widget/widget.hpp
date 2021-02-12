@@ -54,8 +54,8 @@ class Widget {
     Signal<void(Widget&)> child_added;
     Signal<void(Widget&)> child_removed;
     Signal<void(Widget&)> child_polished;
-    Signal<void(Point const&, Point const&)> moved;
-    Signal<void(Area const&, Area const&)> resized;
+    Signal<void(Point, Point)> moved;
+    Signal<void(Area, Area)> resized;
     Signal<void(Mouse const&)> mouse_pressed;
     Signal<void(Mouse const&)> mouse_released;
     Signal<void(Mouse const&)> mouse_double_clicked;
@@ -74,8 +74,8 @@ class Widget {
     Signal<void(Widget&, Widget&)> child_added_filter;
     Signal<void(Widget&, Widget&)> child_removed_filter;
     Signal<void(Widget&, Widget&)> child_polished_filter;
-    Signal<void(Widget&, Point const&, Point const&)> moved_filter;
-    Signal<void(Widget&, Area const&, Area const&)> resized_filter;
+    Signal<void(Widget&, Point, Point)> moved_filter;
+    Signal<void(Widget&, Area, Area)> resized_filter;
     Signal<void(Widget&, Mouse const&)> mouse_pressed_filter;
     Signal<void(Widget&, Mouse const&)> mouse_released_filter;
     Signal<void(Widget&, Mouse const&)> mouse_double_clicked_filter;
@@ -187,17 +187,17 @@ class Widget {
 
     /// x coordinate for the top left point of this Widget.
     /** Given with relation to the top left of the terminal screen. */
-    auto x() const -> std::size_t { return top_left_position_.x; }
+    auto x() const -> int { return top_left_position_.x; }
 
     /// y coordinate for the top left point of this Widget.
     /** Given with relation to the top left of the terminal screen. */
-    auto y() const -> std::size_t { return top_left_position_.y; }
+    auto y() const -> int { return top_left_position_.y; }
 
     /// x coordinate for the top left point of this Widget, beyond the Border.
     /** Given with relation to the top left of the terminal screen. This is the
      *  coordinate that marks the beginning of the space that is available for
      *  use by the Widget. */
-    auto inner_x() const -> std::size_t
+    auto inner_x() const -> int
     {
         return top_left_position_.x + detail::Border_offset::west(*this);
     }
@@ -206,7 +206,7 @@ class Widget {
     /** Given with relation to the top left of the terminal screen. This is the
      *  coordinate that marks the beginning of the space that is available for
      *  use by the Widget. */
-    auto inner_y() const -> std::size_t
+    auto inner_y() const -> int
     {
         return top_left_position_.y + detail::Border_offset::north(*this);
     }
@@ -215,14 +215,14 @@ class Widget {
     auto area() const -> Area { return {this->width(), this->height()}; }
 
     /// Return the inner width dimension, this does not include Border space.
-    auto width() const -> std::size_t
+    auto width() const -> int
     {
         return this->outer_width() - detail::Border_offset::east(*this) -
                detail::Border_offset::west(*this);
     }
 
     /// Return the inner height dimension, this does not include Border space.
-    auto height() const -> std::size_t
+    auto height() const -> int
     {
         return this->outer_height() - detail::Border_offset::north(*this) -
                detail::Border_offset::south(*this);
@@ -232,10 +232,10 @@ class Widget {
     auto outer_area() const -> Area { return outer_area_; }
 
     /// Return the width dimension, this includes Border space.
-    auto outer_width() const -> std::size_t { return outer_area_.width; }
+    auto outer_width() const -> int { return outer_area_.width; }
 
     /// Return the height dimension, this includes Border space.
-    auto outer_height() const -> std::size_t { return outer_area_.height; }
+    auto outer_height() const -> int { return outer_area_.height; }
 
     // TODO remove virtual
     /// Post a paint event to this Widget.
@@ -481,9 +481,9 @@ class Widget {
     }
 
     /// Handles Paint_event objects.
-    virtual auto paint_event() -> bool
+    virtual auto paint_event(Painter& painter) -> bool
     {
-        Painter{*this}.border();
+        painter.border();
         painted();
         return true;
     }
@@ -651,7 +651,7 @@ class Widget {
    protected:
     using Children_t = std::vector<std::unique_ptr<Widget>>;
     Children_t children_;
-    std::size_t child_offset_ = 0uL;
+    std::size_t child_offset_ = 0;
 
    private:
     std::string name_;
@@ -662,7 +662,7 @@ class Widget {
 
     // Top left point of *this, relative to the top left of the screen.
     // This Point is the same with or without a border enabled.
-    Point top_left_position_{0uL, 0uL};
+    Point top_left_position_{0, 0};
 
     // The entire area of the widget, including any border space.
     Area outer_area_{width_policy.hint(), height_policy.hint()};

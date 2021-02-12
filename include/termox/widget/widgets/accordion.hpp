@@ -29,9 +29,9 @@ class Bar : public Layout_t<Widget> {
         {
             using namespace pipe;
             if constexpr (layout::is_vertical_v<Layout_t<Widget>>)
-                *this | fixed_height(1uL);
+                *this | fixed_height(1);
             else
-                *this | fixed_width(3uL);
+                *this | fixed_width(3);
         }
 
        public:
@@ -48,10 +48,10 @@ class Bar : public Layout_t<Widget> {
         }
 
        protected:
-        auto paint_event() -> bool override
+        auto paint_event(Painter& p) -> bool override
         {
-            Painter{*this}.put(x_, {0uL, 0uL});
-            return Widget::paint_event();
+            p.put(x_, {0, 0});
+            return Widget::paint_event(p);
         }
 
        private:
@@ -80,11 +80,11 @@ class Bar : public Layout_t<Widget> {
         {
             using namespace ox::pipe;
             if constexpr (is_vertical)
-                centered_text_ | fixed_height(1uL);
+                centered_text_ | fixed_height(1);
             else {
-                this->insert_child(widget(), 0uL);
-                this->insert_child(widget(), 2uL);
-                *this | children() | fixed_width(1uL);
+                this->insert_child(widget(), 0);
+                this->insert_child(widget(), 2);
+                *this | children() | fixed_width(1);
             }
             *this | children() |
                 on_mouse_press([this](auto const&) { this->clicked(); });
@@ -97,7 +97,7 @@ class Bar : public Layout_t<Widget> {
         static auto constexpr is_vertical =
             layout::is_vertical_v<layout::Opposite_t<Layout_t<Widget>>>;
 
-        static auto constexpr extra_left = is_vertical ? 3uL : 1uL;
+        static auto constexpr extra_left = is_vertical ? 3 : 1;
     };
 
    private:
@@ -114,9 +114,9 @@ class Bar : public Layout_t<Widget> {
     {
         using namespace pipe;
         if constexpr (is_vertical)
-            *this | fixed_width(3uL);
+            *this | fixed_width(3);
         else
-            *this | fixed_height(1uL);
+            *this | fixed_height(1);
 
         this->collapse();
 
@@ -159,8 +159,8 @@ class Accordion : public Layout_t<Widget> {
           wrapped_{
               this->template make_child<Widget_t>(std::forward<Args>(args)...)}
     {
-        if constexpr (wrapped_index_ == 0uL)
-            this->swap_children(0uL, 1uL);
+        if constexpr (wrapped_index_ == 0)
+            this->swap_children(0, 1);
 
         if constexpr (is_vertical)
             *this | pipe::passive_height();
@@ -210,7 +210,7 @@ class Accordion : public Layout_t<Widget> {
     std::unique_ptr<Widget> w_storage_ = nullptr;
 
     static auto constexpr wrapped_index_ =
-        position == Bar_position::First ? 1uL : 0uL;
+        position == Bar_position::First ? 1 : 0;
 
     static auto constexpr is_vertical = layout::is_vertical_v<Layout_t<Widget>>;
 

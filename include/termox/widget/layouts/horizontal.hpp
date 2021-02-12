@@ -7,14 +7,14 @@
 namespace ox::layout::h_detail {
 
 struct Get_area {
-    auto operator()(std::size_t primary, std::size_t secondary) const -> Area
+    auto operator()(int primary, int secondary) const -> Area
     {
         return {primary, secondary};
     }
 };
 
 struct Get_point {
-    auto operator()(std::size_t primary, std::size_t secondary) const -> Point
+    auto operator()(int primary, int secondary) const -> Point
     {
         return {primary, secondary};
     }
@@ -28,14 +28,11 @@ struct Primary_policy {
 };
 
 struct Primary_length {
-    auto operator()(Widget const& w) const -> std::size_t { return w.width(); }
+    auto operator()(Widget const& w) const -> int { return w.width(); }
 };
 
 struct Primary_offset {
-    auto operator()(Widget const& w) const -> std::size_t
-    {
-        return w.inner_x();
-    }
+    auto operator()(Widget const& w) const -> int { return w.inner_x(); }
 };
 
 struct Secondary_policy {
@@ -46,14 +43,11 @@ struct Secondary_policy {
 };
 
 struct Secondary_length {
-    auto operator()(Widget const& w) const -> std::size_t { return w.height(); }
+    auto operator()(Widget const& w) const -> int { return w.height(); }
 };
 
 struct Secondary_offset {
-    auto operator()(Widget const& w) const -> std::size_t
-    {
-        return w.inner_y();
-    }
+    auto operator()(Widget const& w) const -> int { return w.inner_y(); }
 };
 
 using Primary = detail::Dimension_parameters<Primary_policy,

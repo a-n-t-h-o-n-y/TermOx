@@ -130,7 +130,7 @@ class Selecting : public Layout_t {
         this->reset_selected_if_necessary();
         if (this->has_selected_child())
             this->selected_child().select();
-        else if (this->child_count() > 0uL)
+        else if (this->child_count() > 0)
             this->select_first_child();
         return Layout_t::focus_in_event();
     }
@@ -161,7 +161,7 @@ class Selecting : public Layout_t {
     auto child_removed_event(Widget& child) -> bool override
     {
         if (&child == selected_) {
-            if (this->child_count() > 0uL)
+            if (this->child_count() > 0)
                 this->set_selected_by_index(this->get_child_offset());
             else
                 selected_ = nullptr;

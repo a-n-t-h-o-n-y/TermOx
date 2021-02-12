@@ -1,8 +1,6 @@
 #ifndef TERMOX_TERMINAL_INPUT_HPP
 #define TERMOX_TERMINAL_INPUT_HPP
-#include <optional>
 
-#include <termox/system/event.hpp>
 
 namespace ox::input {
 

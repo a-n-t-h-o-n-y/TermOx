@@ -14,8 +14,8 @@ namespace ox::layout::detail {
 template <typename Parameters>
 class Shared_space {
    private:
-    using Length_list   = std::vector<std::size_t>;
-    using Position_list = std::vector<std::size_t>;
+    using Length_list   = std::vector<int>;
+    using Position_list = std::vector<int>;
 
    public:
     auto calculate_lengths(Widget& parent) -> Length_list
@@ -48,7 +48,7 @@ class Shared_space {
     {
         auto result = Position_list{};
         result.reserve(lengths.size());
-        auto running_total = 0uL;
+        auto running_total = 0;
         for (auto length : lengths) {
             result.push_back(running_total);
             running_total += length;
@@ -63,7 +63,7 @@ class Shared_space {
     auto set_offset(std::size_t index) { offset_ = index; }
 
    private:
-    std::size_t offset_ = 0uL;
+    std::size_t offset_ = 0;
 
    private:
     template <typename Children_span>
@@ -80,7 +80,7 @@ class Shared_space {
                 auto const max_length = policy.max();
                 auto const stretch_ratio =
                     policy.stretch() / children.total_stretch();
-                auto to_add = static_cast<std::size_t>(stretch_ratio * surplus);
+                auto to_add = int(stretch_ratio * surplus);
                 if ((iter->length + to_add) > max_length)
                     to_add = max_length - iter->length;
                 iter->length += to_add;
@@ -95,7 +95,7 @@ class Shared_space {
     template <typename Children_span>
     void disperse_leftovers(Children_span& children, int surplus)
     {
-        while (children.size() != 0uL && surplus != 0) {
+        while (children.size() != 0 && surplus != 0) {
             for (auto iter = children.begin_max();
                  iter != children.end() && surplus != 0; ++iter) {
                 if (iter.get_policy().is_passive())
@@ -133,7 +133,7 @@ class Shared_space {
     template <typename Children_span>
     void reclaim_leftovers(Children_span& children, int deficit)
     {
-        while (children.size() != 0uL && deficit != 0) {
+        while (children.size() != 0 && deficit != 0) {
             for (auto iter = children.begin_min();
                  iter != children.end() && deficit != 0; ++iter, --deficit) {
                 iter->length -= 1;
@@ -145,10 +145,9 @@ class Shared_space {
     static auto find_length_difference(Widget const& parent,
                                        Children_span const& span) -> int
     {
-        auto const parent_length = static_cast<int>(
-            typename Parameters::Primary::get_length{}(parent));
-        auto const children_entire_length =
-            static_cast<int>(span.entire_length());
+        auto const parent_length =
+            typename Parameters::Primary::get_length{}(parent);
+        auto const children_entire_length = span.entire_length();
         return parent_length - children_entire_length;
     }
 };

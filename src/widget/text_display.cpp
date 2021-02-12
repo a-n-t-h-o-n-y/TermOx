@@ -1,12 +1,9 @@
 #include <termox/widget/widgets/text_display.hpp>
 
 #include <algorithm>
-#include <cstddef>
 #include <iterator>
 #include <string>
 #include <utility>
-
-#include <type_traits>  //temp
 
 #include <termox/painter/glyph_string.hpp>
 #include <termox/painter/painter.hpp>
@@ -15,7 +12,7 @@
 
 namespace ox {
 
-void Text_display::insert(Glyph_string text, std::size_t index)
+void Text_display::insert(Glyph_string text, int index)
 {
     if (index > contents_.size())
         return;
@@ -40,9 +37,9 @@ void Text_display::append(Glyph_string text)
     contents_modified(contents_);
 }
 
-void Text_display::erase(std::size_t index, std::size_t length)
+void Text_display::erase(int index, int length)
 {
-    if (contents_.empty() or index >= contents_.size())
+    if (contents_.empty() || index >= contents_.size())
         return;
     auto const begin = std::begin(contents_);
     auto end         = begin + length + index;
@@ -71,7 +68,7 @@ void Text_display::clear()
     contents_modified(contents_);
 }
 
-void Text_display::scroll_up(std::size_t n)
+void Text_display::scroll_up(int n)
 {
     if (n > this->top_line())
         top_line_ = 0;
@@ -82,7 +79,7 @@ void Text_display::scroll_up(std::size_t n)
     scrolled_to(top_line_);
 }
 
-void Text_display::scroll_down(std::size_t n)
+void Text_display::scroll_down(int n)
 {
     if (this->top_line() + n > this->last_line())
         top_line_ = this->last_line();
@@ -93,10 +90,10 @@ void Text_display::scroll_down(std::size_t n)
     scrolled_to(top_line_);
 }
 
-auto Text_display::index_at(Point position) const -> std::size_t
+auto Text_display::index_at(Point position) const -> int
 {
     auto line = this->top_line() + position.y;
-    if (line >= display_state_.size())
+    if (line >= (int)display_state_.size())
         return this->contents().size();
     auto const info = display_state_.at(line);
     if (position.x >= info.length) {
@@ -112,7 +109,7 @@ auto Text_display::index_at(Point position) const -> std::size_t
     return info.start_index + position.x;
 }
 
-auto Text_display::display_position(std::size_t index) const -> Point
+auto Text_display::display_position(int index) const -> Point
 {
     auto position = Point{};
     auto line     = this->line_at(index);
@@ -130,14 +127,13 @@ auto Text_display::display_position(std::size_t index) const -> Point
     return position;
 }
 
-auto Text_display::paint_event() -> bool
+auto Text_display::paint_event(Painter& p) -> bool
 {
-    auto p      = Painter{*this};
-    auto line_n = 0uL;
+    auto line_n = 0;
     auto paint  = [&p, &line_n, this](Line_info const& line) {
         auto const sub_begin = std::begin(this->contents_) + line.start_index;
         auto const sub_end   = sub_begin + line.length;
-        auto start           = 0uL;
+        auto start           = 0;
         switch (alignment_) {
             case Align::Top:
             case Align::Left: start = 0; break;
@@ -147,15 +143,15 @@ auto Text_display::paint_event() -> bool
             case Align::Bottom:
             case Align::Right: start = this->width() - line.length; break;
         }
-        p.put(Glyph_string(sub_begin, sub_end), start, line_n++);
+        p.put(Glyph_string(sub_begin, sub_end), {start, line_n++});
     };
     auto const begin = std::begin(display_state_) + this->top_line();
     auto end         = std::end(display_state_);
-    if (display_state_.size() > this->top_line() + this->height())
+    if ((int)display_state_.size() > this->top_line() + this->height())
         end = begin + this->height();  // maybe make this the initial value?
-    if (this->top_line() < display_state_.size())
+    if (this->top_line() < (int)display_state_.size())
         std::for_each(begin, end, paint);
-    return Widget::paint_event();
+    return Widget::paint_event(p);
 }
 
 // TODO: Implement tab character. and newline?
@@ -168,7 +164,7 @@ auto Text_display::paint_event() -> bool
 //     return;
 // }
 
-void Text_display::update_display(std::size_t from_line)
+void Text_display::update_display(int from_line)
 {
     auto const begin = display_state_.at(from_line).start_index;
     display_state_.clear();
@@ -176,9 +172,9 @@ void Text_display::update_display(std::size_t from_line)
         display_state_.push_back(Line_info{0, 0});
         return;
     }
-    auto start_index = 0uL;
-    auto length      = 0uL;
-    auto last_space  = 0uL;
+    auto start_index = 0;
+    auto length      = 0;
+    auto last_space  = 0;
     for (auto i = begin; i < contents_.size(); ++i) {
         ++length;
         if (this->word_wrap_enabled() and contents_.at(i).symbol == U' ')
@@ -201,12 +197,12 @@ void Text_display::update_display(std::size_t from_line)
     }
     display_state_.push_back(Line_info{start_index, length});
     // Reset top_line_ if out of bounds of new display.
-    if (this->top_line() >= display_state_.size())
+    if (this->top_line() >= (int)display_state_.size())
         top_line_ = this->last_line();
     line_count_changed(display_state_.size());
 }
 
-auto Text_display::line_at(std::size_t index) const -> std::size_t
+auto Text_display::line_at(int index) const -> int
 {
     auto line = 0uL;
     for (auto const& info : display_state_) {

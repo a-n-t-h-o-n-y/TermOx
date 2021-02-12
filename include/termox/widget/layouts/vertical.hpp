@@ -4,19 +4,19 @@
 #include <memory>
 #include <utility>
 
-#include "detail/linear_layout.hpp"
+#include <termox/widget/layouts/detail/linear_layout.hpp>
 
 namespace ox::layout::v_detail {
 
 struct Get_area {
-    auto operator()(std::size_t primary, std::size_t secondary) const -> Area
+    auto operator()(int primary, int secondary) const -> Area
     {
         return {secondary, primary};
     }
 };
 
 struct Get_point {
-    auto operator()(std::size_t primary, std::size_t secondary) const -> Point
+    auto operator()(int primary, int secondary) const -> Point
     {
         return {secondary, primary};
     }
@@ -30,14 +30,11 @@ struct Primary_policy {
 };
 
 struct Primary_length {
-    auto operator()(Widget const& w) const -> std::size_t { return w.height(); }
+    auto operator()(Widget const& w) const -> int { return w.height(); }
 };
 
 struct Primary_offset {
-    auto operator()(Widget const& w) const -> std::size_t
-    {
-        return w.inner_y();
-    }
+    auto operator()(Widget const& w) const -> int { return w.inner_y(); }
 };
 
 struct Secondary_policy {
@@ -48,14 +45,11 @@ struct Secondary_policy {
 };
 
 struct Secondary_length {
-    auto operator()(Widget const& w) const -> std::size_t { return w.width(); }
+    auto operator()(Widget const& w) const -> int { return w.width(); }
 };
 
 struct Secondary_offset {
-    auto operator()(Widget const& w) const -> std::size_t
-    {
-        return w.inner_x();
-    }
+    auto operator()(Widget const& w) const -> int { return w.inner_x(); }
 };
 
 using Primary = detail::Dimension_parameters<Primary_policy,
