@@ -143,11 +143,12 @@ class System {
     /// Set the terminal cursor via \p cursor parameters and \p offset applied.
     static void set_cursor(Cursor cursor, Point offset)
     {
+        auto& term = System::terminal;
         if (!cursor.is_enabled())
-            System::terminal.show_cursor(false);
+            term.show_cursor(false);
         else {
-            System::terminal.show_cursor();
-            Terminal::move_cursor({offset.x + cursor.x(), offset.y + cursor.y()});
+            term.show_cursor();
+            term.move_cursor({offset.x + cursor.x(), offset.y + cursor.y()});
         }
     }
 

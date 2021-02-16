@@ -1,3 +1,4 @@
+#include <memory>
 #include <string>
 
 #include <termox/system/system.hpp>
@@ -15,83 +16,94 @@
 #include <termox/widget/widgets/line_edit.hpp>
 #include <termox/widget/widgets/notify_light.hpp>
 
-// Wall of Checkboxes - Update a count of checked boxes.
-class Wall : public ox::layout::Vertical<> {
+class Count : public ox::HLabel {
+   public:
+    Count() : ox::HLabel{U"Count: 0"} { *this | ox::pipe::fixed_height(1); }
+
+   public:
+    void increment()
+    {
+        ++count_;
+        this->ox::HLabel::set_text("Count: " + std::to_string(count_));
+    }
+
+    void decrement()
+    {
+        --count_;
+        this->ox::HLabel::set_text("Count: " + std::to_string(count_));
+    }
+
    private:
-    static auto constexpr vcount = 20;
-    static auto constexpr hcount = 40;
+    int count_ = 0;
+};
 
+auto constexpr vcount = 20;
+auto constexpr hcount = 40;
+
+// Wall of Checkboxes - Update a count of checked boxes.
+class Wall : public ox::Array<
+                 ox::layout::Horizontal<
+                     ox::Array<ox::layout::Vertical<ox::Checkbox1>, vcount>>,
+                 hcount> {
    public:
-    using Checkboxes =
-        ox::Array<ox::layout::Horizontal<
-                      ox::Array<ox::layout::Vertical<ox::Checkbox1>, vcount>>,
-                  hcount>;
-
-    class Count : public ox::HLabel {
-       public:
-        Count() : ox::HLabel{U"Count: 0"} {}
-
-       public:
-        void increment()
-        {
-            ++count_;
-            this->ox::HLabel::set_text("Count: " + std::to_string(count_));
-        }
-
-        void decrement()
-        {
-            --count_;
-            this->ox::HLabel::set_text("Count: " + std::to_string(count_));
-        }
-
-       private:
-        int count_ = 0;
-    };
-
-   public:
-    Checkboxes& boxes_ = make_child<Checkboxes>();
-    Count& count       = make_child<Count>();
+    sl::Signal<void()> checked;
+    sl::Signal<void()> unchecked;
 
    public:
     Wall()
     {
         using namespace ox::pipe;
-        count | fixed_height(1);
+        *this | fixed_height(vcount) | fixed_width(hcount) | children() |
+            fixed_width(1);
 
-        boxes_ | children() | fixed_width(1);
-        for (auto& row : boxes_.get_children()) {
+        for (auto& row : this->get_children()) {
             for (auto& child : row.get_children()) {
-                child.checked.connect([this] { count.increment(); });
-                child.unchecked.connect([this] { count.decrement(); });
+                child.checked.connect([this] { checked(); });
+                child.unchecked.connect([this] { unchecked(); });
             }
         }
     }
 };
 
+using Float_wall = ox::Float_2d<Wall>;
+
+class Wall_widget : public ox::layout::Vertical<> {
+   private:
+    Wall& wall_   = this->make_child<Float_wall>().widget.widget;
+    Count& count_ = this->make_child<Count>();
+
+   public:
+    Wall_widget()
+    {
+        wall_.checked.connect([this] { count_.increment(); });
+        wall_.unchecked.connect([this] { count_.decrement(); });
+    }
+};
+
 /// horizontal labeled checkboxes in all initial configurations
-// use both h and v checkboxes
 struct Horizontals : public ox::layout::Vertical<> {
     Horizontals()
     {
         using namespace ox;
-        this->make_child<HCheckbox1_label>({U"Label!"});
-        this->make_child<HCheckbox_label>({U"Label!"});
-        this->make_child<HLabel_checkbox1>({U"Label!"});
-        this->make_child<HLabel_checkbox>({U"Label!"});
-        this->make_child<HCheckbox2_label>({U"Label!"});
-        this->make_child<HLabel_checkbox2>({U"Label!"});
-        this->make_child<HCheckbox3_label>({U"Label!"});
-        this->make_child<HLabel_checkbox4>({U"Label!"});
-        this->make_child<HCheckbox7_label>({U"Label!"});
-        this->make_child<HLabel_checkbox8>({U"Label!"});
-        this->make_child<HCheckbox11_label>({U"Label!"});
-        this->make_child<HLabel_checkbox12>({U"Label!"});
-        this->make_child<HCheckbox15_label>({U"Label!"});
-        this->make_child<HLabel_checkbox16>({U"Label!"});
-        this->make_child<HCheckbox19_label>({U"Label!"});
-        this->make_child<HLabel_checkbox19>({U"Label!"});
-        this->make_child<HCheckbox20_label>({U"Label!"});
-        this->make_child<HLabel_checkbox20>({U"Label!"});
+        make_child<HCheckbox1_label>({U"Label!"});
+        make_child<HCheckbox_label>({U"Label!"});
+        make_child<HLabel_checkbox1>({U"Label!"});
+        make_child<HLabel_checkbox>({U"Label!"});
+        make_child<HCheckbox2_label>({U"Label!"});
+        make_child<HLabel_checkbox2>({U"Label!"});
+        make_child<HCheckbox3_label>({U"Label!"});
+        make_child<HLabel_checkbox4>({U"Label!"});
+        make_child<HCheckbox7_label>({U"Label!"});
+        make_child<HLabel_checkbox8>({U"Label!"});
+        make_child<HCheckbox11_label>({U"Label!"});
+        make_child<HLabel_checkbox12>({U"Label!"});
+        make_child<HCheckbox15_label>({U"Label!"});
+        make_child<HLabel_checkbox16>({U"Label!"});
+        make_child<HCheckbox19_label>({U"Label!"});
+        make_child<HLabel_checkbox19>({U"Label!"});
+        make_child<HCheckbox20_label>({U"Label!"});
+        make_child<HLabel_checkbox20>({U"Label!"});
+        make_child();
     }
 };
 
@@ -119,6 +131,7 @@ struct Verticals : public ox::layout::Horizontal<> {
         this->make_child<VLabel_checkbox19>({U"Label!"});
         this->make_child<VCheckbox20_label>({U"Label!"});
         this->make_child<VLabel_checkbox20>({U"Label!"});
+        make_child();
     }
 };
 
@@ -209,6 +222,8 @@ class Runtime : public ox::layout::Horizontal<> {
             Light_box::Parameters{U"`toggled`   Signal"},
             ox::Notify_light::Display{ox::Color::Yellow, ox::Color::Dark_gray},
             ox::Notify_light::Duration_t{350});
+
+        ox::Widget& buffer = make_child();
     };
 
    public:
@@ -228,100 +243,136 @@ class Runtime : public ox::layout::Horizontal<> {
         this->make_child<Checkbox_options>(checkbox.widget.widget);
 };
 
+/// Adds a buffer widget as the second Widget in a Layout_t object.
+template <typename Widget_t, template <typename> typename Layout_t>
+class Buf : public Layout_t<ox::Widget> {
+   public:
+    Buf() { *this | ox::pipe::passive_width(); }
+
+    Buf(std::unique_ptr<Widget_t> w_ptr)
+        : Layout_t<ox::Widget>{std::move(w_ptr)}
+    {
+        *this | ox::pipe::passive_width();
+    }
+
+   public:
+    ox::Widget& buffer = this->template make_child();
+};
+
+template <typename Widget_t>
+using VBuf = Buf<Widget_t, ox::layout::Vertical>;
+
+template <typename Widget_t>
+auto vbuf(std::unique_ptr<Widget_t> w_ptr) -> std::unique_ptr<VBuf<Widget_t>>
+{
+    return std::make_unique<VBuf<Widget_t>>(std::move(w_ptr));
+}
+
+template <typename Widget_t>
+using HBuf = Buf<Widget_t, ox::layout::Horizontal>;
+
+template <typename Widget_t>
+auto hbuf(std::unique_ptr<Widget_t> w_ptr) -> std::unique_ptr<HBuf<Widget_t>>
+{
+    return std::make_unique<HBuf<Widget_t>>(std::move(w_ptr));
+}
+
 class Test : public ox::Cycle_stack<> {
    public:
     Test()
     {
-        this->make_page<Wall>(U"Wall");
+        this->make_page<Wall_widget>(U"Wall");
         this->make_page<Horizontals>(U"Labeled Horizontals");
         this->make_page<Verticals>(U"Labeled Verticals");
         // clang-format off
         this->append_page(U"Checkbox() Helpers",
             ox::layout::vertical(
                 ox::layout::horizontal(
-                    ox::checkbox1(), ox::checkbox2(), ox::checkbox3(),
-                    ox::checkbox4(), ox::checkbox5(), ox::checkbox6(),
-                    ox::checkbox7(), ox::checkbox8(), ox::checkbox9(),
-                    ox::checkbox10(), ox::checkbox11(), ox::checkbox12(),
-                    ox::checkbox13(), ox::checkbox14(), ox::checkbox15(),
-                    ox::checkbox16(), ox::checkbox17(), ox::checkbox18(),
-                    ox::checkbox19(), ox::checkbox20()
+                    vbuf(ox::checkbox1()),  vbuf(ox::checkbox2()),
+                    vbuf(ox::checkbox3()),  vbuf(ox::checkbox4()),
+                    vbuf(ox::checkbox5()),  vbuf(ox::checkbox6()),
+                    vbuf(ox::checkbox7()),  vbuf(ox::checkbox8()), 
+                    vbuf(ox::checkbox9()),  vbuf(ox::checkbox10()),
+                    vbuf(ox::checkbox11()), vbuf(ox::checkbox12()),
+                    vbuf(ox::checkbox13()), vbuf(ox::checkbox14()),
+                    vbuf(ox::checkbox15()), vbuf(ox::checkbox16()),
+                    vbuf(ox::checkbox17()), vbuf(ox::checkbox18()),
+                    vbuf(ox::checkbox19()), vbuf(ox::checkbox20()),
+                    ox::widget("buffer")
                 ),
                 ox::layout::horizontal(
-                    ox::checkbox1({}), ox::checkbox2({}), ox::checkbox3({}),
-                    ox::checkbox4({}), ox::checkbox5({}), ox::checkbox6({}),
-                    ox::checkbox7({}), ox::checkbox8({}), ox::checkbox9({}),
-                    ox::checkbox10({}), ox::checkbox11({}), ox::checkbox12({}),
-                    ox::checkbox13({}), ox::checkbox14({}), ox::checkbox15({}),
-                    ox::checkbox16({}), ox::checkbox17({}), ox::checkbox18(),
-                    ox::checkbox19({}), ox::checkbox20({})
+                    vbuf(ox::checkbox1({})),  vbuf(ox::checkbox2({})),
+                    vbuf(ox::checkbox3({})),  vbuf(ox::checkbox4({})),
+                    vbuf(ox::checkbox5({})),  vbuf(ox::checkbox6({})),
+                    vbuf(ox::checkbox7({})),  vbuf(ox::checkbox8({})),
+                    vbuf(ox::checkbox9({})),  vbuf(ox::checkbox10({})),
+                    vbuf(ox::checkbox11({})), vbuf(ox::checkbox12({})),
+                    vbuf(ox::checkbox13({})), vbuf(ox::checkbox14({})),
+                    vbuf(ox::checkbox15({})), vbuf(ox::checkbox16({})),
+                    vbuf(ox::checkbox17({})), vbuf(ox::checkbox18({})),
+                    vbuf(ox::checkbox19({})), vbuf(ox::checkbox20({})),
+                    ox::widget("buffer")
                 ),
                 ox::layout::horizontal(
-                    ox::checkbox1({ox::Checkbox1::State::Checked, false}),
-                    ox::checkbox2({ox::Checkbox2::State::Checked, false}),
-                    ox::checkbox3({ox::Checkbox3::State::Checked, false}),
-                    ox::checkbox4({ox::Checkbox4::State::Checked, false}),
-                    ox::checkbox5({ox::Checkbox5::State::Checked, false}),
-                    ox::checkbox6({ox::Checkbox6::State::Checked, false}),
-                    ox::checkbox7({ox::Checkbox7::State::Checked, false}),
-                    ox::checkbox8({ox::Checkbox8::State::Checked, false}),
-                    ox::checkbox9({ox::Checkbox9::State::Checked, false}),
-                    ox::checkbox10({ox::Checkbox10::State::Checked, false}),
-                    ox::checkbox11({ox::Checkbox11::State::Checked, false}),
-                    ox::checkbox12({ox::Checkbox12::State::Checked, false}),
-                    ox::checkbox13({ox::Checkbox13::State::Checked, false}),
-                    ox::checkbox14({ox::Checkbox14::State::Checked, false}),
-                    ox::checkbox15({ox::Checkbox15::State::Checked, false}),
-                    ox::checkbox16({ox::Checkbox16::State::Checked, false}),
-                    ox::checkbox17({ox::Checkbox17::State::Checked, false}),
-                    ox::checkbox18({ox::Checkbox18::State::Checked, false}),
-                    ox::checkbox19({ox::Checkbox19::State::Checked, false}),
-                    ox::checkbox20({ox::Checkbox20::State::Checked, false})
+                    vbuf(ox::checkbox1({ox::Checkbox1::State::Checked, false})),
+                    vbuf(ox::checkbox2({ox::Checkbox2::State::Checked, false})),
+                    vbuf(ox::checkbox3({ox::Checkbox3::State::Checked, false})),
+                    vbuf(ox::checkbox4({ox::Checkbox4::State::Checked, false})),
+                    vbuf(ox::checkbox5({ox::Checkbox5::State::Checked, false})),
+                    vbuf(ox::checkbox6({ox::Checkbox6::State::Checked, false})),
+                    vbuf(ox::checkbox7({ox::Checkbox7::State::Checked, false})),
+                    vbuf(ox::checkbox8({ox::Checkbox8::State::Checked, false})),
+                    vbuf(ox::checkbox9({ox::Checkbox9::State::Checked, false})),
+                    vbuf(ox::checkbox10({ox::Checkbox10::State::Checked, false})),
+                    vbuf(ox::checkbox11({ox::Checkbox11::State::Checked, false})),
+                    vbuf(ox::checkbox12({ox::Checkbox12::State::Checked, false})),
+                    vbuf(ox::checkbox13({ox::Checkbox13::State::Checked, false})),
+                    vbuf(ox::checkbox14({ox::Checkbox14::State::Checked, false})),
+                    vbuf(ox::checkbox15({ox::Checkbox15::State::Checked, false})),
+                    vbuf(ox::checkbox16({ox::Checkbox16::State::Checked, false})),
+                    vbuf(ox::checkbox17({ox::Checkbox17::State::Checked, false})),
+                    vbuf(ox::checkbox18({ox::Checkbox18::State::Checked, false})),
+                    vbuf(ox::checkbox19({ox::Checkbox19::State::Checked, false})),
+                    vbuf(ox::checkbox20({ox::Checkbox20::State::Checked, false})),
+                    ox::widget("buffer")
                 ),
                 ox::layout::horizontal(
-                    ox::checkbox1(ox::Checkbox1::State::Unchecked, true),
-                    ox::checkbox2(ox::Checkbox2::State::Unchecked, true),
-                    ox::checkbox3(ox::Checkbox3::State::Unchecked, true),
-                    ox::checkbox4(ox::Checkbox4::State::Unchecked, true),
-                    ox::checkbox5(ox::Checkbox5::State::Unchecked, true),
-                    ox::checkbox6(ox::Checkbox6::State::Unchecked, true),
-                    ox::checkbox7(ox::Checkbox7::State::Unchecked, true),
-                    ox::checkbox8(ox::Checkbox8::State::Unchecked, true),
-                    ox::checkbox9(ox::Checkbox9::State::Unchecked, true),
-                    ox::checkbox10(ox::Checkbox10::State::Unchecked, true),
-                    ox::checkbox11(ox::Checkbox11::State::Unchecked, true),
-                    ox::checkbox12(ox::Checkbox12::State::Unchecked, true),
-                    ox::checkbox13(ox::Checkbox13::State::Unchecked, true),
-                    ox::checkbox14(ox::Checkbox14::State::Unchecked, true),
-                    ox::checkbox15(ox::Checkbox15::State::Unchecked, true),
-                    ox::checkbox16(ox::Checkbox16::State::Unchecked, true),
-                    ox::checkbox17(ox::Checkbox17::State::Unchecked, true),
-                    ox::checkbox18(ox::Checkbox18::State::Unchecked, true),
-                    ox::checkbox19(ox::Checkbox19::State::Unchecked, true),
-                    ox::checkbox20(ox::Checkbox20::State::Unchecked, true)
+                    vbuf(ox::checkbox1(ox::Checkbox1::State::Unchecked, true)),
+                    vbuf(ox::checkbox2(ox::Checkbox2::State::Unchecked, true)),
+                    vbuf(ox::checkbox3(ox::Checkbox3::State::Unchecked, true)),
+                    vbuf(ox::checkbox4(ox::Checkbox4::State::Unchecked, true)),
+                    vbuf(ox::checkbox5(ox::Checkbox5::State::Unchecked, true)),
+                    vbuf(ox::checkbox6(ox::Checkbox6::State::Unchecked, true)),
+                    vbuf(ox::checkbox7(ox::Checkbox7::State::Unchecked, true)),
+                    vbuf(ox::checkbox8(ox::Checkbox8::State::Unchecked, true)),
+                    vbuf(ox::checkbox9(ox::Checkbox9::State::Unchecked, true)),
+                    vbuf(ox::checkbox10(ox::Checkbox10::State::Unchecked, true)),
+                    vbuf(ox::checkbox11(ox::Checkbox11::State::Unchecked, true)),
+                    vbuf(ox::checkbox12(ox::Checkbox12::State::Unchecked, true)),
+                    vbuf(ox::checkbox13(ox::Checkbox13::State::Unchecked, true)),
+                    vbuf(ox::checkbox14(ox::Checkbox14::State::Unchecked, true)),
+                    vbuf(ox::checkbox15(ox::Checkbox15::State::Unchecked, true)),
+                    vbuf(ox::checkbox16(ox::Checkbox16::State::Unchecked, true)),
+                    vbuf(ox::checkbox17(ox::Checkbox17::State::Unchecked, true)),
+                    vbuf(ox::checkbox18(ox::Checkbox18::State::Unchecked, true)),
+                    vbuf(ox::checkbox19(ox::Checkbox19::State::Unchecked, true)),
+                    vbuf(ox::checkbox20(ox::Checkbox20::State::Unchecked, true)),
+                    ox::widget("buffer")
                 )
             )
         );
         this->append_page(U"Labeled Horizontal Helpers - No Parameters",
             ox::layout::vertical(
-                ox::hcheckbox1_label(),
-                ox::hcheckbox_label(),
-                ox::hlabel_checkbox1(),
-                ox::hlabel_checkbox(),
-                ox::hcheckbox2_label(),
-                ox::hlabel_checkbox2(),
-                ox::hcheckbox3_label(),
-                ox::hlabel_checkbox4(),
-                ox::hcheckbox7_label(),
-                ox::hlabel_checkbox8(),
-                ox::hcheckbox11_label(),
-                ox::hlabel_checkbox12(),
-                ox::hcheckbox15_label(),
-                ox::hlabel_checkbox16(),
-                ox::hcheckbox19_label(),
-                ox::hlabel_checkbox19(),
-                ox::hcheckbox20_label(),
-                ox::hlabel_checkbox20()
+                ox::hcheckbox1_label(), ox::hcheckbox_label(),
+                ox::hlabel_checkbox1(), ox::hlabel_checkbox(),
+                ox::hcheckbox2_label(), ox::hlabel_checkbox2(),
+                ox::hcheckbox3_label(), ox::hlabel_checkbox4(),
+                ox::hcheckbox7_label(), ox::hlabel_checkbox8(),
+                ox::hcheckbox11_label(), ox::hlabel_checkbox12(),
+                ox::hcheckbox15_label(), ox::hlabel_checkbox16(),
+                ox::hcheckbox19_label(), ox::hlabel_checkbox19(),
+                ox::hcheckbox20_label(), ox::hlabel_checkbox20(),
+                ox::widget("buffer")
             )
         );
         this->append_page(U"Labeled Horizontal Helpers - Label Parameters",
@@ -343,7 +394,8 @@ class Test : public ox::Cycle_stack<> {
                 ox::hcheckbox19_label({U"Label!", ox::Align::Center}),
                 ox::hlabel_checkbox19({U"Label!", ox::Align::Right}),
                 ox::hcheckbox20_label({U"Label!", ox::Align::Left}),
-                ox::hlabel_checkbox20({U"Label!", ox::Align::Center})
+                ox::hlabel_checkbox20({U"Label!", ox::Align::Center}),
+                ox::widget("buffer")
             )
         );
         this->append_page(
@@ -384,29 +436,22 @@ class Test : public ox::Cycle_stack<> {
                 ox::hcheckbox20_label({U"Label!", ox::Align::Left},
                                       {ox::Checkbox20::State::Checked, false}),
                 ox::hlabel_checkbox20({U"Label!", ox::Align::Center},
-                                      {ox::Checkbox20::State::Checked, true})
+                                      {ox::Checkbox20::State::Checked, true}),
+                ox::widget("buffer")
             )
         );
         this->append_page(U"Labeled Vertical Helpers - No Parameters",
             ox::layout::horizontal(
-                ox::vcheckbox1_label(),
-                ox::vcheckbox_label(),
-                ox::vlabel_checkbox1(),
-                ox::vlabel_checkbox(),
-                ox::vcheckbox2_label(),
-                ox::vlabel_checkbox2(),
-                ox::vcheckbox5_label(),
-                ox::vlabel_checkbox6(),
-                ox::vcheckbox9_label(),
-                ox::vlabel_checkbox10(),
-                ox::vcheckbox13_label(),
-                ox::vlabel_checkbox14(),
-                ox::vcheckbox17_label(),
-                ox::vlabel_checkbox18(),
-                ox::vcheckbox19_label(),
-                ox::vlabel_checkbox19(),
-                ox::vcheckbox20_label(),
-                ox::vlabel_checkbox20()
+                ox::vcheckbox1_label(), ox::vcheckbox_label(),
+                ox::vlabel_checkbox1(), ox::vlabel_checkbox(),
+                ox::vcheckbox2_label(), ox::vlabel_checkbox2(),
+                ox::vcheckbox5_label(), ox::vlabel_checkbox6(),
+                ox::vcheckbox9_label(), ox::vlabel_checkbox10(),
+                ox::vcheckbox13_label(), ox::vlabel_checkbox14(),
+                ox::vcheckbox17_label(), ox::vlabel_checkbox18(),
+                ox::vcheckbox19_label(), ox::vlabel_checkbox19(),
+                ox::vcheckbox20_label(), ox::vlabel_checkbox20(),
+                ox::widget()
             )
         );
         this->append_page(U"Labeled Vertical Helpers - Label Parameters",
@@ -428,7 +473,8 @@ class Test : public ox::Cycle_stack<> {
                 ox::vcheckbox19_label ({U"Label!", ox::Align::Center}),
                 ox::vlabel_checkbox19 ({U"Label!", ox::Align::Right}),
                 ox::vcheckbox20_label ({U"Label!", ox::Align::Left}),
-                ox::vlabel_checkbox20 ({U"Label!", ox::Align::Center})
+                ox::vlabel_checkbox20 ({U"Label!", ox::Align::Center}),
+                ox::widget("buffer")
             )
         );
         this->append_page(
@@ -469,7 +515,8 @@ class Test : public ox::Cycle_stack<> {
                 ox::vcheckbox20_label({U"Label!", ox::Align::Left},
                                       {ox::Checkbox20::State::Checked, false}),
                 ox::vlabel_checkbox20({U"Label!", ox::Align::Center},
-                                      {ox::Checkbox20::State::Checked, true})
+                                      {ox::Checkbox20::State::Checked, true}),
+                ox::widget("buffer")
             )
         );
         // clang-format on

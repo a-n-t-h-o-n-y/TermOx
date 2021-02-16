@@ -76,10 +76,14 @@ class Label : public Widget {
     void set_text(Glyph_string text)
     {
         if (growth_strategy_ == Growth::Dynamic) {
-            if constexpr (is_vertical)
-                *this | pipe::fixed_height(text.size());
-            else
-                *this | pipe::fixed_width(text.size());
+            if constexpr (is_vertical) {
+                if (text.size() != this->outer_height())
+                    *this | pipe::fixed_height(text.size());
+            }
+            else {
+                if (text.size() != this->outer_width())
+                    *this | pipe::fixed_width(text.size());
+            }
         }
         text_ = std::move(text);
         this->update_offset();

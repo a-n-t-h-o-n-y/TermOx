@@ -13,7 +13,7 @@
 
 namespace {
 
-auto border_is_paintable(ox::Widget const& widg) -> bool
+[[nodiscard]] auto border_is_paintable(ox::Widget const& widg) -> bool
 {
     return widg.border.enabled() && widg.is_enabled() &&
            widg.outer_width() != 0 && widg.outer_height() != 0;
@@ -26,7 +26,6 @@ namespace ox {
 Painter::Painter(Widget& widg, detail::Canvas& canvas)
     : widget_{widg},
       inner_area_{widget_.width(), widget_.height()},
-      is_paintable_{detail::is_paintable(widget_)},
       canvas_{canvas},
       brush_{widg.brush}
 {
@@ -36,7 +35,9 @@ Painter::Painter(Widget& widg, detail::Canvas& canvas)
 
 void Painter::put(Glyph tile, Point p)
 {
-    assert(p.x < inner_area_.width && p.y < inner_area_.height);
+    // User code can overrun Widget bounds.
+    if (p.x >= inner_area_.width || p.y >= inner_area_.height)
+        return;
     auto const x_global = widget_.inner_x() + p.x;
     auto const y_global = widget_.inner_y() + p.y;
     this->put_global(tile, {x_global, y_global});
@@ -44,8 +45,6 @@ void Painter::put(Glyph tile, Point p)
 
 void Painter::put(Glyph_string const& text, Point p)
 {
-    if (!is_paintable_)
-        return;
     for (Glyph g : text)
         this->put(g, {p.x++, p.y});
 }

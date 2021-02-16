@@ -25,9 +25,17 @@ class Screen_buffers {
         next.resize(a);
     }
 
+    /// Return the current size of the screen buffers.
+    [[nodiscard]] auto area() const -> Area { return current.area(); }
+
+    /// Merges the next Canvas into the current Canvas.
+    /** This will copy every Glyph from next that differs with current into
+     *  current Canvas. */
+    auto merge() { ::ox::detail::merge(next, current); }
+
     /// Merges the next Canvas into the current Canvas and returns the changes.
-    /** This will copy every Glyph from next that differs with current, and will
-     *  write that change to the returned Canvas::Diff object. */
+    /** This will copy every Glyph from next that differs with current into
+     *  current, and writes that change to the returned Canvas::Diff object. */
     [[nodiscard]] auto merge_and_diff() -> Canvas::Diff const&
     {
         ::ox::detail::merge_and_diff(next, current, diff_);
@@ -41,6 +49,13 @@ class Screen_buffers {
     [[nodiscard]] auto generate_color_diff(Color c) -> Canvas::Diff const&
     {
         ::ox::detail::generate_color_diff(c, current, diff_);
+        return diff_;
+    }
+
+    /// Returns the entire current screen as a Diff. Used on Window Resize.
+    [[nodiscard]] auto current_screen_as_diff() -> Canvas::Diff const&
+    {
+        ::ox::detail::generate_full_diff(current, diff_);
         return diff_;
     }
 

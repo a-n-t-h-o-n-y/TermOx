@@ -50,7 +50,7 @@ endif()
 
 # TODO Remove ncurses
 # Add nCurses
-add_subdirectory(external/ncurses-snapshots)
+# add_subdirectory(external/ncurses-snapshots)
 
 # Add Escape Library
 add_subdirectory(external/Escape)

@@ -117,7 +117,7 @@ inline void send(ox::Resize_event e)
 
 inline void send(ox::Timer_event e)
 {
-    if (detail::is_paintable(e.receiver))
+    if (e.receiver.get().is_enabled())
         e.receiver.get().timer_event();
 }
 

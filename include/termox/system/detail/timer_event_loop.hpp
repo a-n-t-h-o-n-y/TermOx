@@ -12,6 +12,7 @@ class Widget;
 }  // namespace ox
 
 namespace ox::detail {
+// TODO Remove?
 
 /// Event loop for sending Timer_events at a given interval.
 class Timer_event_loop : public Interval_event_loop {
@@ -20,12 +21,12 @@ class Timer_event_loop : public Interval_event_loop {
     using Guard_t = std::scoped_lock<Mutex_t>;
 
    public:
-    ~Timer_event_loop()
-    {
-        // Have to end the thread here, since it uses the std::set<...>
-        this->exit(0);
-        this->wait();
-    }
+    // ~Timer_event_loop()
+    // {
+    //     // Have to end the thread here, since it uses the std::set<...>
+    //     this->exit(0);
+    //     this->wait();
+    // }
 
    public:
     using Interval_event_loop::Interval_event_loop;

@@ -24,21 +24,25 @@ namespace ox::detail {
  *  calculations in between the calls to wait. */
 class Interval_event_loop : public Event_loop {
    public:
-    using Period_t = std::chrono::milliseconds;
+    using Clock_t    = std::chrono::steady_clock;
+    using Time_point = Clock_t::time_point;
+    using Interval_t = std::chrono::milliseconds;
 
    public:
-    explicit Interval_event_loop(Period_t interval) : interval_{interval} {}
+    explicit Interval_event_loop(Interval_t interval) : interval_{interval} {}
 
     explicit Interval_event_loop(FPS fps) : interval_{fps_to_period(fps)} {}
 
-    auto get_interval() const -> Period_t { return interval_; }
+    void set_interval(Interval_t interval) { interval_ = interval; }
+
+    auto get_interval() const -> Interval_t { return interval_; }
 
    public:
     /// Converts frames per second to an interval of time.
-    static auto fps_to_period(FPS fps) -> Period_t
+    static auto fps_to_period(FPS fps) -> Interval_t
     {
-        return Period_t{static_cast<Period_t::rep>((1. / fps.value) *
-                                                   Period_t::period::den)};
+        return Interval_t{static_cast<Interval_t::rep>(
+            (1. / fps.value) * Interval_t::period::den)};
     }
 
    protected:
@@ -58,12 +62,10 @@ class Interval_event_loop : public Event_loop {
     }
 
    private:
-    using Clock_t = std::chrono::high_resolution_clock;
+    Interval_t interval_;
+    Time_point last_time_;
 
-    Period_t const interval_;
-    std::chrono::time_point<Clock_t> last_time_;
-
-    static auto constexpr exit_check_interval_ = Period_t{30};
+    static auto constexpr exit_check_interval_ = Interval_t{30};
 
    private:
     /// Return the interval, minus the time since the last loop finished.

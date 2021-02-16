@@ -11,8 +11,8 @@ auto Event_loop::run() -> int
         return -1;
     running_ = true;
     while (!exit_) {
-        if (is_main_thread_)
-            System::event_engine().process();
+        // if (is_main_thread_)
+        System::event_engine().process();
         this->loop_function();
     }
     running_ = false;

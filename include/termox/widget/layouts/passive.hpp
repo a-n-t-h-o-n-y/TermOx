@@ -6,10 +6,12 @@ namespace ox::layout {
 
 /// Make any Linear_layout type passive.
 /** A Passive Layout will always have the size policy that is the sum of its
- * children's size hints.*/
+ *  children's size hints. */
 template <typename Layout_t>
 class Passive : public Layout_t {
    public:
+       // TODO child_events should update its fixed width or height.
+       // seems simple enough.
 };
 
 }  // namespace ox::layout

@@ -78,7 +78,7 @@ my_widget | children() | for_each([](auto& w){ log(w.name()); });
 
 ### Animation
 
-- `animate(Animation_engine::Period_t period)`
+- `animate(Animation_engine::Interval_t interval)`
 - `animate(FPS fps)`
 - `disanimate()`
 

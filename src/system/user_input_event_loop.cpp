@@ -8,7 +8,7 @@ namespace ox::detail {
 
 void User_input_event_loop::loop_function()
 {
-    System::post_event(Terminal::get());
+    ox::System::post_event(ox::System::terminal.get());
 }
 
 }  // namespace ox::detail

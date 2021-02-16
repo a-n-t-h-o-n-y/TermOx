@@ -13,12 +13,12 @@ namespace ox {
 /// Single cell animated spinner.
 class Spinner : public Widget {
    public:
-    using Period_t = Animation_engine::Period_t;
+    using Interval_t = Animation_engine::Interval_t;
 
    public:
     /// Each glyph in frames is a frame, offset is starting index into frames.
     explicit Spinner(Glyph_string frames,
-                     Period_t period    = Period_t{100},
+                     Interval_t period  = Interval_t{100},
                      int width          = 1,
                      std::size_t offset = 0)
         : frames_{std::move(frames)},
@@ -32,7 +32,7 @@ class Spinner : public Widget {
 
     void set_frames(Glyph_string frames) { frames_ = std::move(frames); }
 
-    void set_period(Period_t period)
+    void set_period(Interval_t period)
     {
         if (started_) {
             this->stop();
@@ -80,7 +80,7 @@ class Spinner : public Widget {
    private:
     bool started_ = false;
     Glyph_string frames_;
-    Period_t period_;
+    Interval_t period_;
     int width_;
     std::size_t index_;
 };
@@ -94,7 +94,7 @@ auto spinner(Args&&... args) -> std::unique_ptr<Spinner>
 
 /// Specific Spinners
 struct Spinner_cycle : Spinner {
-    Spinner_cycle(Period_t period    = Period_t{100},
+    Spinner_cycle(Interval_t period  = Interval_t{100},
                   int width          = 1,
                   std::size_t offset = 0)
         : Spinner{"⠁⠈⠐⠠⢀⡀⠄⠂", period, width, offset}
@@ -109,7 +109,7 @@ auto spinner_cycle(Args&&... args) -> std::unique_ptr<Spinner_cycle>
 }
 
 struct Spinner_cycle_ccw : Spinner {
-    Spinner_cycle_ccw(Period_t period    = Period_t{100},
+    Spinner_cycle_ccw(Interval_t period  = Interval_t{100},
                       int width          = 1,
                       std::size_t offset = 0)
         : Spinner{"⠁⠂⠄⡀⢀⠠⠐⠈", period, width, offset}
@@ -124,7 +124,7 @@ auto spinner_cycle_ccw(Args&&... args) -> std::unique_ptr<Spinner_cycle_ccw>
 }
 
 struct Spinner_fall : Spinner {
-    Spinner_fall(Period_t period    = Period_t{100},
+    Spinner_fall(Interval_t period  = Interval_t{100},
                  int width          = 1,
                  std::size_t offset = 0)
         : Spinner{"⠁⠂⠄⡀⡈⡐⡠⣀⣁⣂⣄⣌⣔⣤⣥⣦⣮⣶⣷⣿", period, width, offset}
@@ -139,7 +139,7 @@ auto spinner_fall(Args&&... args) -> std::unique_ptr<Spinner_fall>
 }
 
 struct Spinner_fall_two : Spinner {
-    Spinner_fall_two(Period_t period    = Period_t{100},
+    Spinner_fall_two(Interval_t period  = Interval_t{100},
                      int width          = 1,
                      std::size_t offset = 0)
         : Spinner{" ⠁⠉⠋⠛⠟⠿⡿⣿⣿⣿⣿⣷⣶⣦⣤⣄⣀⡀ ", period, width, offset}
@@ -154,7 +154,7 @@ auto spinner_fall_two(Args&&... args) -> std::unique_ptr<Spinner_fall_two>
 }
 
 struct Spinner_fall_three : Spinner {
-    Spinner_fall_three(Period_t period    = Period_t{100},
+    Spinner_fall_three(Interval_t period  = Interval_t{100},
                        int width          = 1,
                        std::size_t offset = 0)
         : Spinner{"   ⠁⠂⠄⡀⡈⡐⡠⣀⣁⣂⣄⣌⣔⣤⣥⣦⣮⣶⣷⣿⣿⣿⣿⣿⣿⡿⠿⢟⠟⡛⠛⠫⢋⠋⠍⡉⠉⠑⠡⢁⠁⠂⠄⡀   ", period,
@@ -170,7 +170,7 @@ auto spinner_fall_three(Args&&... args) -> std::unique_ptr<Spinner_fall_three>
 }
 
 struct Spinner_rise : Spinner {
-    Spinner_rise(Period_t period    = Period_t{100},
+    Spinner_rise(Interval_t period  = Interval_t{100},
                  int width          = 1,
                  std::size_t offset = 0)
         : Spinner{"⡀⠄⠂⠁⢁⠡⠑⠉⡉⠍⠋⢋⠫⠛⡛⠟⢟⠿⡿⣿", period, width, offset}
@@ -185,7 +185,7 @@ auto spinner_rise(Args&&... args) -> std::unique_ptr<Spinner_rise>
 }
 
 struct Spinner_rise_two : Spinner {
-    Spinner_rise_two(Period_t period    = Period_t{100},
+    Spinner_rise_two(Interval_t period  = Interval_t{100},
                      int width          = 1,
                      std::size_t offset = 0)
         : Spinner{"    ⡀⣀⣄⣤⣦⣶⣷⣿⣿⣿⣿⡿⠿⠟⠛⠋⠉⠁    ", period, width, offset}
@@ -200,7 +200,7 @@ auto spinner_rise_two(Args&&... args) -> std::unique_ptr<Spinner_rise_two>
 }
 
 struct Spinner_rise_three : Spinner {
-    Spinner_rise_three(Period_t period    = Period_t{100},
+    Spinner_rise_three(Interval_t period  = Interval_t{100},
                        int width          = 1,
                        std::size_t offset = 0)
         : Spinner{"   ⡀⠄⠂⠁⢁⠡⠑⠉⡉⠍⠋⢋⠫⠛⡛⠟⢟⠿⡿⣿⣿⣿⣿⣿⣿⣷⣶⣮⣦⣥⣤⣔⣌⣄⣂⣁⣀⡠⡐⡈⡀⠄⠂⠁   ", period,
@@ -216,7 +216,7 @@ auto spinner_rise_three(Args&&... args) -> std::unique_ptr<Spinner_rise_three>
 }
 
 struct Spinner_fill : Spinner {
-    Spinner_fill(Period_t period    = Period_t{100},
+    Spinner_fill(Interval_t period  = Interval_t{100},
                  int width          = 1,
                  std::size_t offset = 0)
         : Spinner{"⡀⣀⣄⣤⣦⣶⣷⣿", period, width, offset}
@@ -231,7 +231,7 @@ auto spinner_fill(Args&&... args) -> std::unique_ptr<Spinner_fill>
 }
 
 struct Spinner_top_fill : Spinner {
-    Spinner_top_fill(Period_t period    = Period_t{100},
+    Spinner_top_fill(Interval_t period  = Interval_t{100},
                      int width          = 1,
                      std::size_t offset = 0)
         : Spinner{"⠁⠉⠋⠛⠟⠿⡿⣿", period, width, offset}
@@ -246,7 +246,7 @@ auto spinner_top_fill(Args&&... args) -> std::unique_ptr<Spinner_top_fill>
 }
 
 struct Spinner_tail : Spinner {
-    Spinner_tail(Period_t period    = Period_t{100},
+    Spinner_tail(Interval_t period  = Interval_t{100},
                  int width          = 1,
                  std::size_t offset = 0)
         : Spinner{"⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏", period, width, offset}
@@ -261,7 +261,7 @@ auto spinner_tail(Args&&... args) -> std::unique_ptr<Spinner_tail>
 }
 
 struct Spinner_switch : Spinner {
-    Spinner_switch(Period_t period    = Period_t{100},
+    Spinner_switch(Interval_t period  = Interval_t{100},
                    int width          = 1,
                    std::size_t offset = 0)
         : Spinner{"⢹⢺⢼⣸⣇⡧⡗⡏", period, width, offset}
@@ -276,7 +276,7 @@ auto spinner_switch(Args&&... args) -> std::unique_ptr<Spinner_switch>
 }
 
 struct Spinner_chase : Spinner {
-    Spinner_chase(Period_t period    = Period_t{100},
+    Spinner_chase(Interval_t period  = Interval_t{100},
                   int width          = 1,
                   std::size_t offset = 0)
         : Spinner{"⢄⢂⢁⡁⡈⡐⡠", period, width, offset}
@@ -291,7 +291,7 @@ auto spinner_chase(Args&&... args) -> std::unique_ptr<Spinner_chase>
 }
 
 struct Spinner_line : Spinner {
-    Spinner_line(Period_t period    = Period_t{100},
+    Spinner_line(Interval_t period  = Interval_t{100},
                  int width          = 1,
                  std::size_t offset = 0)
         : Spinner{"-\\|/", period, width, offset}
@@ -306,7 +306,7 @@ auto spinner_line(Args&&... args) -> std::unique_ptr<Spinner_line>
 }
 
 struct Spinner_block_cycle : Spinner {
-    Spinner_block_cycle(Period_t period    = Period_t{100},
+    Spinner_block_cycle(Interval_t period  = Interval_t{100},
                         int width          = 1,
                         std::size_t offset = 0)
         : Spinner{"▖▘▝▗", period, width, offset}
@@ -321,7 +321,7 @@ auto spinner_block_cycle(Args&&... args) -> std::unique_ptr<Spinner_block_cycle>
 }
 
 struct Spinner_fade : Spinner {
-    Spinner_fade(Period_t period    = Period_t{100},
+    Spinner_fade(Interval_t period  = Interval_t{100},
                  int width          = 1,
                  std::size_t offset = 0)
         : Spinner{"         ░░▒▓▓██████████████████▓▓▒░░         ", period,
@@ -338,7 +338,7 @@ auto spinner_fade(Args&&... args) -> std::unique_ptr<Spinner_fade>
 
 /// Best used with multiple spinners horizontally, each offset one from neighbor
 struct Spinner_fade_trail : Spinner {
-    Spinner_fade_trail(Period_t period    = Period_t{100},
+    Spinner_fade_trail(Interval_t period  = Interval_t{100},
                        int width          = 1,
                        std::size_t offset = 0)
         : Spinner{"⢀⢀⠠⠠⢀⢀⠠⠠⢀░░▒▓▓██████████████████▓▓▒░░⢀⢀⠠⠠⢀⢀⠠⠠⢀", period,
@@ -354,7 +354,7 @@ auto spinner_fade_trail(Args&&... args) -> std::unique_ptr<Spinner_fade_trail>
 }
 
 struct Spinner_quarter_circles : Spinner {
-    Spinner_quarter_circles(Period_t period    = Period_t{100},
+    Spinner_quarter_circles(Interval_t period  = Interval_t{100},
                             int width          = 1,
                             std::size_t offset = 0)
         : Spinner{"◜◝◞◟", period, width, offset}
@@ -371,7 +371,7 @@ auto spinner_quarter_circles(Args&&... args)
 }
 
 struct Spinner_triangles : Spinner {
-    Spinner_triangles(Period_t period    = Period_t{100},
+    Spinner_triangles(Interval_t period  = Interval_t{100},
                       int width          = 1,
                       std::size_t offset = 0)
         : Spinner{"◤◥◢◣", period, width, offset}
@@ -386,7 +386,7 @@ auto spinner_triangles(Args&&... args) -> std::unique_ptr<Spinner_triangles>
 }
 
 struct Spinner_empty_triangles : Spinner {
-    Spinner_empty_triangles(Period_t period    = Period_t{100},
+    Spinner_empty_triangles(Interval_t period  = Interval_t{100},
                             int width          = 1,
                             std::size_t offset = 0)
         : Spinner{"◸◹◿◺", period, width, offset}
@@ -403,7 +403,7 @@ auto spinner_empty_triangles(Args&&... args)
 }
 
 struct Spinner_clock : Spinner {
-    Spinner_clock(Period_t period    = Period_t{100},
+    Spinner_clock(Interval_t period  = Interval_t{100},
                   int width          = 1,
                   std::size_t offset = 0)
         : Spinner{"◴◷◶◵", period, width, offset}
@@ -418,7 +418,7 @@ auto spinner_clock(Args&&... args) -> std::unique_ptr<Spinner_clock>
 }
 
 struct Spinner_box : Spinner {
-    Spinner_box(Period_t period    = Period_t{100},
+    Spinner_box(Interval_t period  = Interval_t{100},
                 int width          = 1,
                 std::size_t offset = 0)
         : Spinner{"▤▧▥▨", period, width, offset}
@@ -433,7 +433,7 @@ auto spinner_box(Args&&... args) -> std::unique_ptr<Spinner_box>
 }
 
 struct Spinner_cross : Spinner {
-    Spinner_cross(Period_t period    = Period_t{100},
+    Spinner_cross(Interval_t period  = Interval_t{100},
                   int width          = 1,
                   std::size_t offset = 0)
         : Spinner{"┽╀┾╁", period, width, offset}
@@ -449,7 +449,7 @@ auto spinner_cross(Args&&... args) -> std::unique_ptr<Spinner_cross>
 
 struct Spinner_vertical_pass : Spinner {
    public:
-    Spinner_vertical_pass(Period_t period    = Period_t{100},
+    Spinner_vertical_pass(Interval_t period  = Interval_t{100},
                           int width          = 1,
                           std::size_t offset = 0)
         : Spinner{first() + second() + " ", period, width, offset}
@@ -475,7 +475,7 @@ auto spinner_vertical_pass(Args&&... args)
 
 struct Spinner_horizontal_pass : Spinner {
    public:
-    Spinner_horizontal_pass(Period_t period    = Period_t{100},
+    Spinner_horizontal_pass(Interval_t period  = Interval_t{100},
                             int width          = 1,
                             std::size_t offset = 0)
         : Spinner{first().append(second()).append(" "), period, width, offset}
@@ -501,7 +501,7 @@ auto spinner_horizontal_pass(Args&&... args)
 }
 
 struct Spinner_bump : Spinner {
-    Spinner_bump(Period_t period    = Period_t{100},
+    Spinner_bump(Interval_t period  = Interval_t{100},
                  int width          = 1,
                  std::size_t offset = 0)
         : Spinner{" ▁▂▃▄▅▆▇█▇▆▅▄▃▂▁", period, width, offset}

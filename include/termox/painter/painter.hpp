@@ -73,7 +73,6 @@ class Painter {
    private:
     Widget const& widget_;
     Area const inner_area_;
-    bool const is_paintable_;
     detail::Canvas& canvas_;
     Brush brush_;
 };

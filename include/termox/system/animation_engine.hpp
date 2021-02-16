@@ -1,70 +1,84 @@
 #ifndef TERMOX_SYSTEM_ANIMATION_ENGINE_HPP
 #define TERMOX_SYSTEM_ANIMATION_ENGINE_HPP
-#include <memory>
-#include <vector>
+#include <algorithm>
+#include <chrono>
+#include <future>
+#include <iterator>
+#include <map>
+#include <mutex>
 
-#include <termox/system/detail/timer_event_loop.hpp>
+#include <termox/common/lockable.hpp>
+#include <termox/system/detail/interval_event_loop.hpp>
 
 namespace ox {
 class Widget;
 
-/// Manages all Timer_event_loops, grouping by period.
-class Animation_engine {
-   public:
-    using Period_t = detail::Timer_event_loop::Period_t;
+/// Registers Widgets with intervals to send timer events.
+class Animation_engine : public detail::Interval_event_loop,
+                         private Lockable<std::recursive_mutex> {
+    class Animation_event_loop : detail::Interval_event_loop {};
+
+   private:
+    using Clock_t    = std::chrono::steady_clock;
+    using Time_point = Clock_t::time_point;
+
+    struct Registered_data {
+        std::chrono::milliseconds interval;
+        Time_point last_event_time;
+    };
 
    public:
+    using Interval_t = std::chrono::milliseconds;
+
+   public:
+    Animation_engine() : Interval_event_loop{Interval_t{60}} {}
+
     ~Animation_engine()
     {
-        for (auto& loop : loops_) {
-            loop->exit(0);
-            loop->wait();
-        }
+        this->Interval_event_loop::exit(0);
+        this->Interval_event_loop::wait();
     }
 
    public:
-    /// Begins posting Timer_events to the given Widget every period.
-    void register_widget(Widget& w, Period_t interval);
+    /// Register to start sending Timer_events to \p w every \p interval.
+    void register_widget(Widget& w, Interval_t interval);
 
-    /// Begins posting Timer_events to the given Widget at \p fps.
+    /// Register to start sending Timer_events to \p w at \p fps.
     void register_widget(Widget& w, FPS fps);
 
-    /// Stop posting Timer_events to a given Widget.
+    /// Stop the given Widget from being sent Timer_events.
     void unregister_widget(Widget& w);
 
-    // Start sending Timer_events to all registered widgets.
-    /** Only needed if shutdown() has been called. */
-    void startup();
-
-    /// Send stop signals to all event loops and wait for them to exit.
-    void shutdown();
+   private:
+    std::map<Widget*, Registered_data> subjects_;
 
    private:
-    // Using a std::unique_ptr because Event_loops can't be copied.
-    using Loop_t = std::unique_ptr<detail::Timer_event_loop>;
-    std::vector<Loop_t> loops_;
+    void loop_function();
 
-   private:
-    /// Find and return iterator pointing to Event Loop with \p interval.
-    /** Returns std::end(loops_) if no loop found with \p interval. */
-    auto get_loop_iter_with(Period_t interval) const
+    /// Post any timer events that are ready to be posted.
+    void post_timer_events();
+
+    /// Only update if \p interval half is less than the current set interval.
+    void maybe_update_interval(Interval_t interval)
     {
-        return std::find_if(std::begin(loops_), std::end(loops_),
-                            [interval](auto const& loop) {
-                                return loop->get_interval() == interval;
-                            });
+        // mutex is already locked
+        auto const current_interval = this->Interval_event_loop::get_interval();
+        if (auto const half = interval / 2; half < current_interval)
+            this->set_interval(half);
     }
 
-    /// Return true if there is already an Event_loop for \p interval.
-    auto has_loop_with(Period_t interval) const -> bool
+    /// Finds the smallest registered interval, uses it for class interval.
+    void reset_interval()
     {
-        return this->get_loop_iter_with(interval) != std::end(loops_);
-    }
-
-    /// Assumes that the Event Loop does exist, otherwise undefined behavior.
-    auto get_loop_with(Period_t interval) -> detail::Timer_event_loop&
-    {
-        return **this->get_loop_iter_with(interval);
+        // mutex is already locked
+        auto const iter =
+            std::min_element(std::cbegin(subjects_), std::cend(subjects_),
+                             [](auto const& a, auto const& b) {
+                                 return a.second.interval < b.second.interval;
+                             });
+        if (iter == std::cend(subjects_))
+            return;
+        this->Interval_event_loop::set_interval(iter->second.interval / 2);
     }
 };
 

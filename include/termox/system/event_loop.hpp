@@ -21,9 +21,9 @@ class Event_loop {
    public:
     Event_loop() { this->connect_to_system_exit(); }
 
-    /// Make sure the loop has exited and returned from async functions.
     virtual ~Event_loop() = default;
 
+   public:
     /// Start the event loop.
     auto run() -> int;
 

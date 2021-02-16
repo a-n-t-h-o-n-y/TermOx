@@ -49,22 +49,7 @@ class Terminal {
     void uninitialize();
 
     /// Return the Area of the terminal screen.
-    [[nodiscard]] static auto area() -> Area
-    {
-        return {Terminal::width(), Terminal::height()};
-    }
-
-    /// Return the width of the terminal screen.
-    [[nodiscard]] static auto width() -> int
-    {
-        return static_cast<int>(esc::terminal_width());
-    }
-
-    /// Return the height of the terminal screen.
-    [[nodiscard]] static auto height() -> int
-    {
-        return static_cast<int>(esc::terminal_height());
-    }
+    [[nodiscard]] auto area() -> Area { return ::esc::terminal_area(); }
 
     /// Update the screen to reflect change made by Painter since last call.
     /** This leaves the cursor in an unknown location, the cursor must be set
@@ -101,7 +86,7 @@ class Terminal {
     }
 
     /// Set whether or not the cursor is visible on screen.
-    static void show_cursor(bool show = true)
+    void show_cursor(bool show = true)
     {
         ::esc::set(show ? ::esc::Cursor::Show : ::esc::Cursor::Hide);
         ::esc::flush();
@@ -109,7 +94,7 @@ class Terminal {
 
     /// Moves the cursor to Point \p point on screen.
     /** {0, 0} is top left of the terminal screen. */
-    static void move_cursor(Point point)
+    void move_cursor(Point point)
     {
         ::esc::write(::esc::escape(::esc::Cursor_position{point}));
         ::esc::flush();
@@ -117,13 +102,13 @@ class Terminal {
 
     /// Return the number of colors in the terminal's built in palette.
     /** This cooresponds to the number of Color_index values. */
-    [[nodiscard]] static auto color_count() -> std::uint16_t
+    [[nodiscard]] auto color_count() -> std::uint16_t
     {
         return ::esc::color_palette_size();
     }
 
     /// Return true if this terminal supports true color.
-    [[nodiscard]] static auto has_true_color() -> bool
+    [[nodiscard]] auto has_true_color() -> bool
     {
         return ::esc::has_true_color();
     }
@@ -131,13 +116,18 @@ class Terminal {
     /// Wait for user input, and return with a corresponding Event.
     /** Blocking call, input can be received from the keyboard, mouse, or the
      *  terminal being resized. Will return nullopt if there is an error. */
-    [[nodiscard]] static auto get() -> Event;
+    [[nodiscard]] auto get() -> Event;
+
+    /// Sets a flag so that the next call to refresh() will repaint every cell.
+    /** The repaint forces the diff to contain every cell on the terminal. */
+    void flag_full_repaint() { full_repaint_ = true; }
 
    private:
     Palette palette_;
     Dynamic_color_engine dynamic_color_engine_;
     Glyph wallpaper_     = U' ';
     bool is_initialized_ = false;
+    bool full_repaint_   = false;
 };
 
 }  // namespace ox

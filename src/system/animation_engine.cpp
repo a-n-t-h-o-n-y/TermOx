@@ -1,60 +1,50 @@
+#include <chrono>
 #include <termox/system/animation_engine.hpp>
 
-#include <algorithm>
-#include <iterator>
-#include <memory>
+#include <cassert>
+#include <thread>
+#include <utility>
 
-#include <termox/system/detail/timer_event_loop.hpp>
+#include <termox/system/event.hpp>
+#include <termox/system/system.hpp>
 
 namespace ox {
 
-void Animation_engine::register_widget(Widget& w, Period_t interval)
+void Animation_engine::register_widget(Widget& w, Interval_t interval)
 {
-    if (!this->has_loop_with(interval)) {
-        loops_.emplace_back(
-            std::make_unique<detail::Timer_event_loop>(interval));
-        loops_.back()->run_async();
-    }
-    this->get_loop_with(interval).register_widget(w);
+    auto const lock = this->Lockable::lock();
+    this->maybe_update_interval(interval);
+    subjects_.insert(std::pair{&w, Registered_data{interval, Clock_t::now()}});
 }
 
 void Animation_engine::register_widget(Widget& w, FPS fps)
 {
-    this->register_widget(w, detail::Interval_event_loop::fps_to_period(fps));
+    this->register_widget(w, Interval_event_loop::fps_to_period(fps));
 }
 
 void Animation_engine::unregister_widget(Widget& w)
 {
-    // Unregister the Widget from the event loop it is contained in, and return
-    // that event loop.
-    auto const iter = std::find_if(
-        std::begin(loops_), std::end(loops_),
-        [&w](auto const& loop) { return loop->unregister_widget(w); });
+    auto const lock = this->Lockable::lock();
+    subjects_.erase(&w);
+    this->reset_interval();
+}
 
-    // If an event loop was found, and it is now empty, shutdown that event loop
-    if (iter != std::end(loops_)) {
-        if (auto& loop = *iter; loop->is_empty()) {
-            loop->exit(0);
-            loop->wait();
-            loops_.erase(iter);
+void Animation_engine::loop_function()
+{
+    Interval_event_loop::loop_function();
+    this->post_timer_events();
+}
+
+void Animation_engine::post_timer_events()
+{
+    auto const lock = this->Lockable::lock();
+    auto const now  = Clock_t::now();
+    for (auto& [widget, data] : subjects_) {
+        if (now - data.last_event_time >= data.interval) {
+            data.last_event_time = now;
+            System::post_event(Timer_event{*widget});
         }
     }
-}
-
-void Animation_engine::shutdown()
-{
-    /* Timer_event_loops will wait on the future at destruction.
-     * Because shutdown is called from Event_loop and will wait forever. */
-    for (auto& loop : loops_) {
-        loop->exit(0);
-        loop->wait();
-    }
-}
-
-void Animation_engine::startup()
-{
-    for (auto& loop : loops_)
-        loop->run_async();
 }
 
 }  // namespace ox

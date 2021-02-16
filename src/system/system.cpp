@@ -40,13 +40,15 @@ void System::disable_tab_focus() { detail::Focus::disable_tab_focus(); }
 
 void System::post_event(Event e)
 {
-    System::event_engine().queue().append(std::move(e));
+    System::event_engine().append(std::move(e));
 }
 
 void System::exit(int exit_code)
 {
     System::exit_requested_ = true;
     System::exit_signal(exit_code);
+    animation_engine_.exit(0);
+    animation_engine_.wait();
 }
 
 void System::set_head(Widget* new_head)
@@ -63,6 +65,7 @@ auto System::run() -> int
     head_->enable();
     System::post_event(Resize_event{*System::head(), terminal.area()});
     detail::Focus::set(*head_);
+    animation_engine_.run_async();
     return user_input_loop_.run();
 }
 

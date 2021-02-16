@@ -39,7 +39,6 @@ class Shared_space {
             this->disperse(children, difference);
         else if (difference < 0)
             this->reclaim(children, -1 * difference);
-
         return children.get_results();
     }
 

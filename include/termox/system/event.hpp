@@ -2,8 +2,8 @@
 #define TERMOX_SYSTEM_EVENT_HPP
 #include <functional>
 #include <memory>
-#include <variant>
 #include <optional>
+#include <variant>
 
 #include <termox/system/key.hpp>
 #include <termox/system/mouse.hpp>

@@ -368,6 +368,9 @@ class Layout : public Widget {
         System::post_event(Child_removed_event{*this, w});
         w.set_parent(nullptr);
     }
+
+    /// Layouts should never paint to the screen.
+    [[nodiscard]] auto type_can_paint() const -> bool override { return false; }
 };
 
 }  // namespace ox::layout

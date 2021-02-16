@@ -55,7 +55,7 @@ template <typename Animator>
 class Banner : public Widget {
    public:
     template <typename... Args>
-    Banner(Animation_engine::Period_t interval, Args&&... args)
+    Banner(Animation_engine::Interval_t interval, Args&&... args)
         : period_{interval}, animator_{std::forward<Args>(args)...}
     {
         *this | pipe::fixed_height(1);
@@ -101,7 +101,7 @@ class Banner : public Widget {
     }
 
    private:
-    Animation_engine::Period_t const period_;
+    Animation_engine::Interval_t const period_;
     Animator animator_;
     Glyph_string text_;
     std::optional<IP_range> range_;

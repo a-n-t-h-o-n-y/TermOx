@@ -179,7 +179,10 @@ template <typename T>
         assert(head != nullptr);
         return *head;
     }();
-    ox::System::terminal.screen_buffers.resize(x.new_dimensions);
+    auto& buffers = ox::System::terminal.screen_buffers;
+    if (x.new_dimensions.height < buffers.area().height)
+        ox::System::terminal.flag_full_repaint();
+    buffers.resize(x.new_dimensions);
     return ox::Resize_event{head, x.new_dimensions};
 }
 
@@ -192,10 +195,10 @@ void Terminal::initialize(Mouse_mode mouse_mode, Signals signals)
     if (is_initialized_)
         return;
     ::esc::initialize_interactive_terminal(mouse_mode, signals);
-    is_initialized_ = true;
-    this->set_palette(dawn_bringer16::palette);
     std::signal(SIGINT, &handle_sigint);
+    this->set_palette(dawn_bringer16::palette);
     screen_buffers.resize(Terminal::area());
+    is_initialized_ = true;
 }
 
 void Terminal::uninitialize()
@@ -208,8 +211,15 @@ void Terminal::uninitialize()
 
 void Terminal::refresh()
 {
-    esc::write(to_escape_sequence(screen_buffers.merge_and_diff()));
+    if (full_repaint_) {
+        screen_buffers.merge();
+        esc::write(to_escape_sequence(screen_buffers.current_screen_as_diff()));
+        full_repaint_ = false;
+    }
+    else
+        esc::write(to_escape_sequence(screen_buffers.merge_and_diff()));
     esc::flush();
+    screen_buffers.next.reset();
 }
 
 void Terminal::set_default_wallpaper(Glyph tile)
@@ -267,16 +277,6 @@ auto Terminal::get() -> Event
 {
     return std::visit([](auto const& event) { return transform(event); },
                       ::esc::read());
-
-    // visit each type and return the cooresponding ox:: event type.
-
-    // auto const input = ::getch();
-    // switch (input) {
-    //     case ERR: return std::nullopt;  // Timeout and no event.
-    //     case KEY_MOUSE: return make_mouse_event();
-    //     case KEY_RESIZE: return make_resize_event();
-    //     default: return make_keyboard_event(input);
-    // }
 }
 
 }  // namespace ox

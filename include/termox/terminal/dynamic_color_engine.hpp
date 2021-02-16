@@ -96,7 +96,7 @@ namespace ox {
 
 class Dynamic_color_engine {
    public:
-    using Period_t = detail::Dynamic_color_event_loop::Period_t;
+    using Interval_t = detail::Dynamic_color_event_loop::Interval_t;
 
    public:
     ~Dynamic_color_engine()
@@ -170,7 +170,7 @@ class Dynamic_color_engine {
    private:
     /// Find and return iterator pointing to Event Loop with \p interval.
     /** Returns std::end(loops_) if no loop found with \p interval. */
-    auto get_loop_iter_with(Period_t interval) const
+    auto get_loop_iter_with(Interval_t interval) const
     {
         return std::find_if(std::begin(loops_), std::end(loops_),
                             [interval](auto const& loop) {
@@ -179,13 +179,13 @@ class Dynamic_color_engine {
     }
 
     /// Return true if there is already an Event_loop for \p interval.
-    auto has_loop_with(Period_t interval) const -> bool
+    auto has_loop_with(Interval_t interval) const -> bool
     {
         return this->get_loop_iter_with(interval) != std::end(loops_);
     }
 
     /// Assumes that the Event Loop does exist, otherwise undefined behavior.
-    auto get_loop_with(Period_t interval) -> detail::Dynamic_color_event_loop&
+    auto get_loop_with(Interval_t interval) -> detail::Dynamic_color_event_loop&
     {
         return **this->get_loop_iter_with(interval);
     }

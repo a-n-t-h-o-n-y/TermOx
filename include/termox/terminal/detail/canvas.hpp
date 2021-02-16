@@ -1,6 +1,8 @@
 #ifndef TERMOX_TERMINAL_DETAIL_CANVAS_HPP
 #define TERMOX_TERMINAL_DETAIL_CANVAS_HPP
+#include <algorithm>
 #include <cassert>
+#include <iostream>
 #include <iterator>
 #include <utility>
 #include <vector>
@@ -89,6 +91,9 @@ class Canvas {
         return std::cend(buffer_);
     }
 
+    /// Sets all Glyphs to default construction.
+    void reset() { std::fill(std::begin(buffer_), std::end(buffer_), Glyph{}); }
+
    private:
     Buffer_t buffer_;
     ox::Area area_;
@@ -100,6 +105,19 @@ class Canvas {
         return (p.x < a.width) && (p.y < a.height);
     }
 };
+
+/// Merge \p next into \p current.
+/** A Glyph with null(zero) symbol is considered an untouched cell. */
+inline void merge(Canvas const& next, Canvas& current)
+{
+    assert(next.area() == current.area());
+    auto next_iter    = std::cbegin(next);
+    auto current_iter = std::begin(current);
+    for (; next_iter != std::cend(next); ++next_iter, ++current_iter) {
+        if (next_iter->symbol != U'\0' && *next_iter != *current_iter)
+            *current_iter = *next_iter;
+    }
+}
 
 /// Merge \p next into \p current, producing a diff of the changes.
 /** The diff is stored into \p diff_out, which is cleared at the start.
@@ -138,6 +156,30 @@ inline void generate_color_diff(Color color,
             diff_out.push_back({point, g});
         point = next(point, canvas.area());
     }
+}
+
+/// Writes the entire contents of \p canvas into \p diff_out.
+/** Clears diff_out before writing. */
+inline void generate_full_diff(Canvas const& canvas, Canvas::Diff& diff_out)
+{
+    diff_out.clear();
+    auto point = ox::Point{0, 0};
+    for (Glyph g : canvas) {
+        diff_out.push_back({point, g});
+        point = next(point, canvas.area());
+    }
+}
+
+/// Debug function, print representation of the given Canvas::Diff.
+inline auto print(Canvas::Diff const& diff, std::ostream& os) -> std::ostream&
+{
+    // using Diff = std::vector<std::pair<ox::Point, ox::Glyph>>;
+    for (auto const& [point, glyph] : diff) {
+        os << "Point: {" << point.x << ", " << point.y << "}\n";
+        os << "Glyph: symbol: " << glyph.symbol << '\n';
+        os << "----------------------\n";
+    }
+    return os;
 }
 
 }  // namespace ox::detail

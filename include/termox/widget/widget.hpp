@@ -241,6 +241,11 @@ class Widget {
     /// Post a paint event to this Widget.
     virtual void update();
 
+    /// Return whether or not this Widget type should be painting at all.
+    /** Used by is_paintable to decide whether or not to send a Paint_event.
+     *  This is a type parameter, Layout is the only thing that can't paint. */
+    [[nodiscard]] virtual auto type_can_paint() const -> bool { return true; }
+
     /// Install another Widget as an Event filter.
     /** The installed Widget will get the first go at processing the event with
      *  its filter event handler function. Widgets are installed in the order
@@ -265,11 +270,11 @@ class Widget {
      *  handled on a separate thread from the main user input thread, and has
      *  its own staged_changes object that it paints to to avoid shared data
      *  issues. */
-    void enable_animation(Animation_engine::Period_t period)
+    void enable_animation(Animation_engine::Interval_t interval)
     {
         if (is_animated_)
             return;
-        System::animation_engine().register_widget(*this, period);
+        System::animation_engine().register_widget(*this, interval);
         is_animated_ = true;
     }
 
