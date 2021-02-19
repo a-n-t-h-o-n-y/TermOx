@@ -210,13 +210,6 @@ void Terminal::refresh()
     screen_buffers.next.reset();
 }
 
-void Terminal::set_default_wallpaper(Glyph tile)
-{
-    wallpaper_ = tile;
-    if (is_initialized_)
-        repaint_all_widgets();
-}
-
 void Terminal::update_color_stores(Color c, True_color tc)
 {
     fg_store[c] = esc::escape(foreground(tc));

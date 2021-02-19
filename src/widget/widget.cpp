@@ -55,9 +55,8 @@ void Widget::update() { System::post_event(Paint_event{*this}); }
 
 auto Widget::generate_wallpaper() const -> Glyph
 {
-    auto bg_glyph =
-        wallpaper_ ? *(wallpaper_) : System::terminal.default_wallpaper();
-    if (this->does_paint_wallpaper_with_brush())
+    auto bg_glyph = wallpaper_;
+    if (this->paints_wallpaper_with_brush())
         bg_glyph.brush = merge(bg_glyph.brush, this->brush);
     return bg_glyph;
 }

@@ -113,7 +113,7 @@ class Paint_area : public ox::Widget {
 
     void disable_grid()
     {
-        this->set_wallpaper(std::nullopt);
+        this->set_wallpaper(U' ');
         this->update();
     }
 

@@ -165,14 +165,6 @@ inline auto wallpaper(Glyph g)
     };
 }
 
-inline auto wallpaper(std::nullopt_t)
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).set_wallpaper(std::nullopt);
-        return std::forward<decltype(w)>(w);
-    };
-}
-
 inline auto wallpaper_with_brush()
 {
     return [](auto&& w) -> decltype(auto) {

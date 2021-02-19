@@ -4,7 +4,6 @@
 #include <cstdint>
 #include <iterator>
 #include <memory>
-#include <optional>
 #include <set>
 #include <string>
 #include <utility>
@@ -38,7 +37,7 @@ class Widget {
     // TODO
     struct Parameters {
         std::string name;
-        std::optional<Glyph> wallpaper;
+        Glyph wallpaper;
     };
 
    private:
@@ -138,14 +137,14 @@ class Widget {
     auto unique_id() const -> std::uint16_t { return unique_id_; }
 
     /// Used to fill in empty space that is not filled in by paint_event().
-    void set_wallpaper(std::optional<Glyph> g)
+    void set_wallpaper(Glyph g)
     {
         wallpaper_ = g;
         this->update();
     }
 
     /// Return the currently in use wallpaper or std::nullopt if none.
-    auto get_wallpaper() const -> std::optional<Glyph> { return wallpaper_; }
+    auto get_wallpaper() const -> Glyph { return wallpaper_; }
 
     /// Post an Enable_event to this widget, and all descendants.
     /** Will only post a Child_polished_event to the parent if requested. Useful
@@ -333,7 +332,7 @@ class Widget {
     }
 
     /// If true, the brush will apply to the wallpaper Glyph.
-    auto does_paint_wallpaper_with_brush() const -> bool
+    [[nodiscard]] auto paints_wallpaper_with_brush() const -> bool
     {
         return brush_paints_wallpaper_;
     }
@@ -660,8 +659,8 @@ class Widget {
 
    private:
     std::string name_;
-    Widget* parent_ = nullptr;
-    std::optional<Glyph> wallpaper_;
+    Widget* parent_  = nullptr;
+    Glyph wallpaper_ = U' ';
     detail::Screen_descriptor screen_state_;
     std::set<Widget*> event_filters_;
 

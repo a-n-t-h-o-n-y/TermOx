@@ -56,13 +56,6 @@ class Terminal {
      *  separately for the currently in-focus Widget. */
     void refresh();
 
-    /// Set the default wallpaper tiles to be used.
-    /** This is used if a Widget has no assigned wallpaper. */
-    void set_default_wallpaper(Glyph tile);
-
-    /// Return the default wallpaper currently in use.
-    [[nodiscard]] auto default_wallpaper() const -> Glyph { return wallpaper_; }
-
     /// Update a Color Palette value.
     /** Used by Dynamic_color_engine. */
     void update_color_stores(Color c, True_color tc);
@@ -125,7 +118,6 @@ class Terminal {
    private:
     Palette palette_;
     Dynamic_color_engine dynamic_color_engine_;
-    Glyph wallpaper_     = U' ';
     bool is_initialized_ = false;
     bool full_repaint_   = false;
 };
