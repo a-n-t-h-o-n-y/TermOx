@@ -18,6 +18,7 @@
 #include <termox/system/detail/focus.hpp>
 #include <termox/system/detail/is_sendable.hpp>
 #include <termox/system/detail/send.hpp>
+#include <termox/system/detail/send_shortcut.hpp>
 #include <termox/system/detail/user_input_event_loop.hpp>
 #include <termox/system/event.hpp>
 #include <termox/system/event_loop.hpp>
@@ -65,34 +66,40 @@ auto System::run() -> int
     head_->enable();
     System::post_event(Resize_event{*System::head(), terminal.area()});
     detail::Focus::set(*head_);
-    animation_engine_.run_async();
     return user_input_loop_.run();
 }
 
-void System::send_event(Event e)
+auto System::send_event(Event e) -> bool
 {
+    auto handled =
+        std::visit([](auto const& e) { return detail::send_shortcut(e); }, e);
     if (!std::visit([](auto const& e) { return detail::is_sendable(e); }, e))
-        return;
-    auto const handled =
-        std::visit([](auto const& e) { return detail::filter_send(e); }, e);
+        return false;
+    if (!handled) {
+        handled =
+            std::visit([](auto const& e) { return detail::filter_send(e); }, e);
+    }
     if (!handled)
         std::visit([](auto e) { detail::send(std::move(e)); }, std::move(e));
+    return true;
 }
 
-void System::send_event(Paint_event e)
+auto System::send_event(Paint_event e) -> bool
 {
     if (!detail::is_sendable(e))
-        return;
+        return false;
     auto const handled = detail::filter_send(e);
     if (!handled)
         detail::send(std::move(e));
+    return true;
 }
 
-void System::send_event(Delete_event e)
+auto System::send_event(Delete_event e) -> bool
 {
     auto const handled = detail::filter_send(e);
     if (!handled)
         detail::send(std::move(e));
+    return true;
 }
 
 sl::Slot<void()> System::quit = [] { System::exit(); };

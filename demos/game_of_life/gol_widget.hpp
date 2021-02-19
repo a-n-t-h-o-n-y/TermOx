@@ -252,6 +252,12 @@ class GoL_widget : public ox::Widget {
         return Widget::resize_event(new_size, old_size);
     }
 
+    auto disable_event() -> bool override
+    {
+        this->pause();
+        return Widget::disable_event();
+    }
+
    private:
     Game_of_life_engine engine_;
     bool hi_res_ = true;

@@ -23,8 +23,8 @@ class Event_engine : public Lockable<std::recursive_mutex> {
     void process()
     {
         auto const lock = this->Lockable::lock();
-        queue_.send_all();
-        flush_screen();
+        if (queue_.send_all())  // if any events sent
+            flush_screen();
     }
 
     /// Adds the given event to the Event_queue
@@ -38,15 +38,14 @@ class Event_engine : public Lockable<std::recursive_mutex> {
     /// Flushes all of the staged changes to the screen and sets the cursor.
     static void flush_screen()
     {
+        System::terminal.show_cursor(false);
         System::terminal.refresh();
         // Cursor
         Widget const* const fw = System::focus_widget();
         if (fw != nullptr && is_paintable(*fw)) {
             assert(is_within(fw->cursor.position(), fw->area()));
-            System::set_cursor(fw->cursor, fw->top_left());
+            System::set_cursor(fw->cursor, fw->inner_top_left());
         }
-        else
-            System::terminal.show_cursor(false);
     }
 
     /// Return true if \p point is within \p area.

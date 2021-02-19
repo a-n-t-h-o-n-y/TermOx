@@ -1,11 +1,14 @@
 #ifndef TERMOX_SYSTEM_DETAIL_SEND_HPP
 #define TERMOX_SYSTEM_DETAIL_SEND_HPP
+#include <esc/event.hpp>
+
 #include <termox/painter/detail/is_paintable.hpp>
 #include <termox/painter/painter.hpp>
 #include <termox/system/detail/focus.hpp>
 #include <termox/system/event.hpp>
 #include <termox/system/key.hpp>
 #include <termox/system/system.hpp>
+#include <termox/terminal/terminal.hpp>
 #include <termox/widget/area.hpp>
 #include <termox/widget/widget.hpp>
 
@@ -15,6 +18,8 @@ inline void send(ox::Paint_event e)
 {
     if (is_paintable(e.receiver)) {
         auto p = Painter{e.receiver, System::terminal.screen_buffers.next};
+        if (!e.receiver.get().is_layout_type())
+            p.wallpaper_fill();
         e.receiver.get().paint_event(p);
     }
 }
@@ -111,7 +116,6 @@ inline void send(ox::Resize_event e)
     if (old_area == new_area)
         return;
     e.receiver.get().set_outer_area(new_area);
-    // e.receiver.get().screen_state().resize(new_area);
     e.receiver.get().resize_event(new_area, old_area);
 }
 
@@ -119,6 +123,29 @@ inline void send(ox::Timer_event e)
 {
     if (e.receiver.get().is_enabled())
         e.receiver.get().timer_event();
+}
+
+inline void send(ox::Dynamic_color_event const& e)
+{
+    for (auto [color, true_color] : e.color_data) {
+        ox::System::terminal.update_color_stores(color, true_color);
+        ox::System::terminal.repaint_color(color);
+    }
+}
+
+/// Modify Screen_buffers object and post event to head Widget.
+inline void send(::esc::Window_resize x)
+{
+    ox::Widget& head = []() -> ox::Widget& {
+        ox::Widget* head = ox::System::head();
+        assert(head != nullptr);
+        return *head;
+    }();
+    auto& buffers = ox::System::terminal.screen_buffers;
+    if (x.new_dimensions.height < buffers.area().height)
+        ox::System::terminal.flag_full_repaint();
+    buffers.resize(x.new_dimensions);
+    System::post_event(ox::Resize_event{head, x.new_dimensions});
 }
 
 inline void send(ox::Custom_event e) { e.send(); }

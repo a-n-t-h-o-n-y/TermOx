@@ -13,158 +13,146 @@
 #include <termox/system/mouse.hpp>
 #include <termox/widget/layouts/horizontal.hpp>
 #include <termox/widget/layouts/vertical.hpp>
+#include <termox/widget/pair.hpp>
 #include <termox/widget/pipe.hpp>
 #include <termox/widget/widget.hpp>
 #include <termox/widget/widgets/label.hpp>
 
+// New
+#include <cstddef>
+#include <utility>
+
+#include <signals_light/signal.hpp>
+
+#include <termox/painter/glyph_string.hpp>
+#include <termox/system/key.hpp>
+#include <termox/system/mouse.hpp>
+#include <termox/widget/layouts/horizontal.hpp>
+#include <termox/widget/layouts/selecting.hpp>
+#include <termox/widget/layouts/vertical.hpp>
+#include <termox/widget/pipe.hpp>
+#include <termox/widget/widgets/label.hpp>
+#include <termox/widget/widgets/selectable.hpp>
+
 namespace ox {
-class Button;
 
-// inherit from Label_top
-// Label_top(Glyph_string label_, Args&&... args)
-// Just add a Labeled_menu widget type under menu, replace all Menu uses with
-// Labeled_menu
-// move line break operations into the labeled one.
-
-/// Displays a list of items, sending an associated Signal on user input.
-/** Signal sent to selected on Key::Enter press or */
-class Menu : public layout::Vertical<> {
+class Menu_item : public Selectable<HLabel> {
    public:
-    /// Menu Title Widget
-    HLabel& title;
-
-    /// Line Break Widget under Title
-    Widget& line_break = this->make_child() | pipe::fixed_height(1);
+    sl::Signal<void()> selected;
 
    public:
-    /// Construct an empty Menu with \p title_text.
-    explicit Menu(Glyph_string title_text);
+    Menu_item(Glyph_string label)
+    {
+        // TODO Selectable should take Widget_t::Parameters if that type exists,
+        // in the constructor.
+        *this | pipe::fixed_height(1);
+        if (!label.empty())
+            *this | fg(label.front().brush.foreground);
+        this->HLabel::set_text(std::move(label));
+        this->HLabel::set_alignment(Align::Center);
+    }
+};
 
+class Menu_list : public layout::Selecting<layout::Vertical<Menu_item>> {
+    using Base_t = layout::Selecting<layout::Vertical<Menu_item>>;
+
+   public:
+    Menu_list()
+    {
+        *this | pipe::passive_height();
+
+        this->set_increment_selection_keys({Key::Arrow_down, Key::j});
+        this->set_decrement_selection_keys({Key::Arrow_up, Key::k});
+    }
+
+   public:
     /// Append item to the end of list, displayed with \p label.
     /** Returns a Signal ref which will be called when this item is selected. */
     auto append_item(Glyph_string label) -> sl::Signal<void()>&
     {
-        return this->insert_item(std::move(label), this->size());
+        return this->insert_item(std::move(label), this->child_count());
     }
 
-    /// Insert item at \p index into the Menu, displayed with \p label.
+    /// Insert item at \p index into the Menu_list, displayed with \p label.
     /** Returns a Signal ref which will be called when this item is selected. */
     auto insert_item(Glyph_string label, std::size_t index)
-        -> sl::Signal<void()>&;
-
-    /// Remove item a \p index in the Menu, no-op if \p index is invalid.
-    void remove_item(std::size_t index);
-
-    /// Set \p index as the currently selected item, does not send Signal.
-    void select_item(std::size_t index);
-
-    /// Decrement the currently selected index by \p n.
-    /** Clamps to index 0 if n is too large. */
-    void select_up(std::size_t n = 1)
+        -> sl::Signal<void()>&
     {
-        auto const new_index = selected_index_ > n ? selected_index_ - n : 0;
-        this->select_item(new_index);
+        return this
+            ->insert_child(std::make_unique<Menu_item>(std::move(label)), index)
+            .selected;
     }
 
-    /// Increment the currently selected index by \p n, no-op if
-    /** Clamps to index this->size() - 1 if n is too large. */
-    void select_down(std::size_t n = 1)
+    /// Remove item a \p index in the Menu_list, no-op if \p index is invalid.
+    void remove_item(std::size_t index)
     {
-        this->select_item(selected_index_ + n);
+        this->remove_and_delete_child_at(index);
     }
-
-    /// Return the number of items in the Menu.
-    auto size() const -> std::size_t { return items_.size(); }
-
-    /// Set the Trait applied to the selected item.
-    void set_selected_trait(Trait const& t);
-
-    /// Hide the Menu's title.
-    void hide_title()
-    {
-        title_enabled_ = false;
-        this->enable(this->is_enabled());
-    }
-
-    /// Show the Menu's title.
-    void show_title()
-    {
-        title_enabled_ = true;
-        this->enable(this->is_enabled());
-    }
-
-    /// Hide the line break just under the title.
-    void hide_line_break()
-    {
-        line_break_enabled_ = false;
-        this->enable(this->is_enabled());
-    }
-
-    /// Show the line break just under the title.
-    void show_line_break()
-    {
-        line_break_enabled_ = true;
-        this->enable(this->is_enabled());
-    }
-
-    /// Only enables title and line_break if they are enabled.
-    void enable(bool enable                    = true,
-                bool post_child_polished_event = true) override;
 
    protected:
-    /// Arrow keys up/down will select up/down, Enter key will send Signal.
-    auto key_press_event(Key k) -> bool override;
-
-    /// Selects up/down on scroll wheel.
-    auto mouse_wheel_event(Mouse const& m) -> bool override;
-
-    /// Selects up/down on scroll wheel.
-    auto mouse_wheel_event_filter(Widget& /* receiver */, Mouse const& m)
-        -> bool override;
-
-   private:
-    /// Holds reference to Button used to display item, and its Signal.
-    struct Menu_item {
-        explicit Menu_item(Button& ref) : button{ref} {};
-        std::reference_wrapper<Button> button;
-        sl::Signal<void()> selected;
-    };
-
-    std::vector<Menu_item> items_;
-    std::size_t selected_index_ = 0;
-    Trait selected_trait_       = Trait::Inverse;
-    bool title_enabled_         = true;
-    bool line_break_enabled_    = true;
-
-   private:
-    /// Sends the Signal associated with the currently selected item.
-    /** No-op if this-size() == 0. */
-    void send_selected_signal()
+    auto key_press_event(Key k) -> bool override
     {
-        if (not items_.empty())
-            items_[selected_index_].selected();
+        auto const result = Base_t::key_press_event(k);
+        if (this->child_count() == 0)
+            return result;
+
+        switch (k) {
+            case Key::Enter: this->selected_child().selected.emit(); break;
+            default: break;
+        }
+        return result;
+    }
+
+    // Selecting base class installs event filter on children.
+    auto mouse_press_event_filter(Widget& w, Mouse const& m) -> bool override
+    {
+        auto const result = Base_t::mouse_press_event_filter(w, m);
+        if (this->child_count() == 0)
+            return result;
+
+        switch (m.button) {
+            case Mouse::Button::Left:
+                this->selected_child().selected.emit();
+                break;
+            default: break;
+        }
+        return result;
     }
 };
 
-/// Helper function to create an instance.
-template <typename... Args>
-auto menu(Args&&... args) -> std::unique_ptr<Menu>
-{
-    return std::make_unique<Menu>(std::forward<Args>(args)...);
-}
+class Menu : public Pair<layout::Vertical<>, Menu_list, Widget> {
+   public:
+    Menu() { *this | pipe::direct_focus(); }
+
+   public:
+    /// Append item to the end of list, displayed with \p label.
+    /** Returns a Signal ref which will be called when this item is selected. */
+    auto append_item(Glyph_string label) -> sl::Signal<void()>&
+    {
+        return menu_.append_item(std::move(label));
+    }
+
+    /// Insert item at \p index into the Menu_list, displayed with \p label.
+    /** Returns a Signal ref which will be called when this item is selected. */
+    auto insert_item(Glyph_string label, std::size_t index)
+        -> sl::Signal<void()>&
+    {
+        return menu_.insert_item(std::move(label), index);
+    }
+
+    /// Remove item a \p index in the Menu_list, no-op if \p index is invalid.
+    void remove_item(std::size_t index) { menu_.remove_item(index); }
+
+   protected:
+    auto focus_in_event() -> bool override
+    {
+        ox::System::set_focus(menu_);
+        return true;
+    }
+
+   private:
+    Menu_list& menu_ = this->first;
+};
 
 }  // namespace ox
-
-namespace ox::slot {
-
-auto select_up(Menu& m) -> sl::Slot<void(std::size_t)>;
-auto select_up(Menu& m, std::size_t n) -> sl::Slot<void()>;
-
-auto select_down(Menu& m) -> sl::Slot<void(std::size_t)>;
-auto select_down(Menu& m, std::size_t n) -> sl::Slot<void()>;
-
-auto select_item(Menu& m) -> sl::Slot<void(std::size_t)>;
-auto select_item(Menu& m, std::size_t index) -> sl::Slot<void()>;
-
-}  // namespace ox::slot
 #endif  // TERMOX_WIDGET_WIDGETS_MENU_HPP

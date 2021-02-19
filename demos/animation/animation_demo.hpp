@@ -11,7 +11,7 @@
 
 namespace demos::animation {
 
-/// Box containing an 'x' character that bounces off the Widget's walls.
+/// Box containing a circle character that bounces off the Widget's walls.
 class Animated_box : public ox::Widget {
    public:
     /// Initialize with the frames-per-second the animation will happen in.
@@ -64,7 +64,7 @@ class Animated_box : public ox::Widget {
    private:
     ox::FPS const fps_;
 
-    ox::Glyph glyph_ = U'X' | fg(ox::Color::Yellow);
+    ox::Glyph glyph_ = U'○' | fg(ox::Color::Yellow);
     ox::Point xy_    = ox::Point{0, 0};
     int x_direction_ = 1;
     int y_direction_ = 1;
@@ -96,12 +96,16 @@ class Animated_box : public ox::Widget {
 inline auto build_demo() -> std::unique_ptr<ox::Widget>
 {
     using namespace ox;
-    return layout::horizontal<Animated_box>(
+    auto app = layout::horizontal<Animated_box>(
         std::make_unique<Animated_box>(FPS{5}),
         std::make_unique<Animated_box>(FPS{10}) | pipe::bordered(),
         std::make_unique<Animated_box>(FPS{20}),
         std::make_unique<Animated_box>(FPS{30}) | pipe::bordered(),
         std::make_unique<Animated_box>(FPS{60}));
+    app | pipe::direct_focus() | pipe::on_focus_in([x = app.get()] {
+        ox::System::set_focus(x->get_children().front());
+    });
+    return app;
 }
 
 }  // namespace demos::animation

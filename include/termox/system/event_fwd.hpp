@@ -2,6 +2,10 @@
 #define TERMOX_SYSTEM_EVENT_FWD_HPP
 #include <variant>
 
+namespace esc {
+struct Window_resize;
+}  // namespace esc
+
 namespace ox {
 
 struct Paint_event;
@@ -22,6 +26,7 @@ struct Focus_out_event;
 struct Move_event;
 struct Resize_event;
 struct Timer_event;
+struct Dynamic_color_event;
 struct Custom_event;
 
 using Event = std::variant<Paint_event,
@@ -42,6 +47,8 @@ using Event = std::variant<Paint_event,
                            Move_event,
                            Resize_event,
                            Timer_event,
+                           Dynamic_color_event,
+                           ::esc::Window_resize,
                            Custom_event>;
 
 }  // namespace ox

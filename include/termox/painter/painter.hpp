@@ -48,6 +48,9 @@ class Painter {
     /// Draw a vertical line from \p a to \p b, inclusive, in local coords.
     void vline(Glyph tile, Point a, Point b);
 
+    /// Fill the entire widget screen with wallpaper.
+    void wallpaper_fill();
+
    private:
     /// Put a single Glyph to the canvas_ container.
     /** No bounds checking, used internally for all painting. Main entry point

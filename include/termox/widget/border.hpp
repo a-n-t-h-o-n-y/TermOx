@@ -74,7 +74,7 @@ class Border {
     void disable() { enabled_ = false; }
 
     /// Return whether the border is enabled.
-    auto enabled() const -> bool { return enabled_; }
+    [[nodiscard]] auto enabled() const -> bool { return enabled_; }
 
    private:
     bool enabled_ = false;

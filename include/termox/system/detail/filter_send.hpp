@@ -6,6 +6,7 @@
 #include <termox/system/event.hpp>
 #include <termox/system/shortcuts.hpp>
 #include <termox/widget/widget.hpp>
+#include "esc/event.hpp"
 
 namespace ox::detail {
 
@@ -35,8 +36,6 @@ inline auto filter_send(ox::Key_press_event const& e) -> bool
         case Key::Back_tab: detail::Focus::shift_tab_press(); break;
         default: break;
     }
-    if (ox::Shortcuts::send_key(e.key))
-        return true;
     if (!e.receiver)
         return true;
     return apply_until_accepted(
@@ -203,6 +202,13 @@ inline auto filter_send(ox::Timer_event const& e) -> bool
         },
         e.receiver.get().get_event_filters());
 }
+
+inline auto filter_send(ox::Dynamic_color_event const&) -> bool
+{
+    return false;
+}
+
+inline auto filter_send(::esc::Window_resize) -> bool { return false; }
 
 inline auto filter_send(ox::Custom_event const& e) -> bool
 {

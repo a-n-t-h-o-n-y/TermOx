@@ -37,22 +37,22 @@ auto selectable(Select_method s, Unselect_method u)
                                                               std::move(u));
 }
 
-/// Default overload that set's Widget_t's brush to Trait::Standout.
+/// Default overload that set's Widget_t's brush to Trait::Inverse.
 template <typename Widget_t>
 class Selectable<Widget_t, void, void> : public Widget_t {
    public:
     /// Change visual to mark as selected.
     void select()
     {
-        *this | Trait::Standout;
-        *this | pipe::descendants() | Trait::Standout;
+        *this | Trait::Inverse;
+        *this | pipe::descendants() | Trait::Inverse;
     }
 
     /// Change visual to mark as unselected.
     void unselect()
     {
-        *this | pipe::discard(Trait::Standout);
-        *this | pipe::descendants() | pipe::discard(Trait::Standout);
+        *this | pipe::discard(Trait::Inverse);
+        *this | pipe::descendants() | pipe::discard(Trait::Inverse);
     }
 };
 

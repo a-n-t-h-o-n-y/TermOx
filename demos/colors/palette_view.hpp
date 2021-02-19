@@ -47,6 +47,8 @@ class Palette_picker : public ox::Labeled_cycle_box {
     Palette_picker() : Labeled_cycle_box{"Palette"}
     {
         using namespace ox;
+        *this | pipe::direct_focus();
+
         this->append_option(U"Dawn Bringer 16", dawn_bringer16::palette);
         this->append_option(U"Dawn Bringer 32", dawn_bringer32::palette);
         this->append_option(U"Basic 16", basic::palette);
@@ -95,6 +97,14 @@ class Palette_demo : public ox::layout::Vertical<> {
         *this | strong_focus();
         palette_picker.palette_picked.connect(
             [](auto const& pal) { ox::System::terminal.set_palette(pal); });
+    }
+
+   protected:
+    auto focus_in_event() -> bool override
+    {
+        ox::System::terminal.set_palette(ox::dawn_bringer16::palette);
+        ox::System::set_focus(palette_picker);
+        return true;
     }
 };
 

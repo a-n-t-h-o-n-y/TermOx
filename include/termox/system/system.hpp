@@ -6,13 +6,13 @@
 
 #include <signals_light/signal.hpp>
 
+#include <termox/system/animation_engine.hpp>
 #include <termox/system/detail/user_input_event_loop.hpp>
 #include <termox/system/event_fwd.hpp>
 #include <termox/terminal/terminal.hpp>
 #include <termox/widget/cursor.hpp>
 
 namespace ox {
-class Animation_engine;
 class Widget;
 }  // namespace ox
 
@@ -103,13 +103,16 @@ class System {
     static auto run() -> int;
 
     /// Immediately send the event filters and then to the intended receiver.
-    static void send_event(Event e);
+    /** Return true if the event was actually sent. */
+    static auto send_event(Event e) -> bool;
 
     // Minor optimization.
-    static void send_event(Paint_event e);
+    /** Return true if the event was actually sent. */
+    static auto send_event(Paint_event e) -> bool;
 
     // Minor optimization.
-    static void send_event(Delete_event e);
+    /** Return true if the event was actually sent. */
+    static auto send_event(Delete_event e) -> bool;
 
     /// Append the event to the Event_queue for the thread it was called on.
     /** The Event_queue is processed once per iteration of the Event_loop. When
@@ -130,11 +133,31 @@ class System {
         return event_engine_;
     }
 
-    /// Return a reference to the Animation_engine in System.
-    /** This manages animation on each of the Widgets that enables it. */
-    static auto animation_engine() -> Animation_engine&
+    /// Enable animation for the given Widget \p w at \p interval.
+    /** Starts the animation_engine if not started yet. */
+    static void enable_animation(Widget& w,
+                                 Animation_engine::Interval_t interval)
     {
-        return animation_engine_;
+        if (!animation_engine_.is_running())
+            animation_engine_.run_async();
+        animation_engine_.register_widget(w, interval);
+    }
+
+    /// Enable animation for the given Widget \p w at \p fps.
+    /** Starts the animation_engine if not started yet. */
+    static void enable_animation(Widget& w, FPS fps)
+    {
+        if (!animation_engine_.is_running())
+            animation_engine_.run_async();
+        animation_engine_.register_widget(w, fps);
+    }
+
+   public:
+    /// Disable animation for the given Widget \p w.
+    /** Does not stop the animation_engine, even if its empty. */
+    static void disable_animation(Widget& w)
+    {
+        animation_engine_.unregister_widget(w);
     }
 
     /// Return whether System has gotten an exit request, set by System::exit()
@@ -147,8 +170,8 @@ class System {
         if (!cursor.is_enabled())
             term.show_cursor(false);
         else {
-            term.show_cursor();
             term.move_cursor({offset.x + cursor.x(), offset.y + cursor.y()});
+            term.show_cursor();
         }
     }
 

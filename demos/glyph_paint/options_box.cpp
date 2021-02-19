@@ -45,8 +45,8 @@ Options_B::Options_B()
     palette_box | bg(Color::White) | fg(Color::Black);
 
     auto const palettes = std::array{
-        std::pair{U"Dawn Bringer 16", dawn_bringer16::palette},
         std::pair{U"Dawn Bringer 32", dawn_bringer32::palette},
+        std::pair{U"Dawn Bringer 16", dawn_bringer16::palette},
         std::pair{U"Basic 16", basic::palette},
         std::pair{U"Basic 8", basic8::palette},
         std::pair{U"EN 4", en4::palette},

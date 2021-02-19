@@ -85,7 +85,6 @@ target_sources(TermOx
         widget/horizontal_slider.cpp
         widget/textbox_base.cpp
         widget/text_display.cpp
-        widget/menu.cpp
         widget/border_offset.cpp
         widget/graph_tree.cpp
         widget/vertical_slider.cpp

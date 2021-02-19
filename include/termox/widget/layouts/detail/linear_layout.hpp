@@ -167,8 +167,11 @@ class Linear_layout : public Layout<Child> {
         this->send_move_events(primary_pos, secondary_pos);
     }
 
+    // TODO remove once passive is its own layout modifier type.
     auto child_polished_event(Widget& child) -> bool override
     {
+        if (!this->is_enabled())
+            return Widget::child_polished_event(child);
         if (this->width_policy.is_passive()) {
             Widget* parent = this->parent();
             // Find first parent that is not passive.

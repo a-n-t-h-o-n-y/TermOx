@@ -132,7 +132,7 @@ class Labeled_number_edit : public HLabel_left<Number_edit<Number_t>> {
         : Base({std::move(title)}, initial)
     {
         using namespace pipe;
-        *this | fixed_height(1);
+        *this | fixed_height(1) | direct_focus();
         label | dynamic_growth();
         number_edit | bg(Color::White) | fg(Color::Black) | ghost(Color::Gray);
     }
@@ -140,6 +140,13 @@ class Labeled_number_edit : public HLabel_left<Number_edit<Number_t>> {
     /// Manually set the value of the Number_edit.
     /** Does not emit a value_set Signal. */
     void set_value(Number_t value) { number_edit.set_value(value); }
+
+   protected:
+    auto focus_in_event() -> bool override
+    {
+        System::set_focus(number_edit);
+        return true;
+    }
 };
 
 /// Helper function to create an instance.

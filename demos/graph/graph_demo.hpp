@@ -9,6 +9,7 @@
 
 #include <termox/widget/layouts/horizontal.hpp>
 #include <termox/widget/layouts/vertical.hpp>
+#include <termox/widget/pipe.hpp>
 #include <termox/widget/widgets/cycle_box.hpp>
 #include <termox/widget/widgets/graph.hpp>
 #include <termox/widget/widgets/number_edit.hpp>
@@ -58,6 +59,7 @@ class Sine final : public Graph_generator {
     double t_{0.};
 };
 
+// TODO this generates negative points!
 class Sine_three final : public Graph_generator {
    public:
     auto generate() -> std::vector<ox::Graph<>::Coordinates> override
@@ -211,6 +213,12 @@ class Graph_core : public ox::Graph<double> {
         return Graph::timer_event();
     }
 
+    auto disable_event() -> bool override
+    {
+        this->disable_animation();
+        return Graph::disable_event();
+    }
+
    private:
     std::unique_ptr<Graph_generator> generator_{nullptr};
 
@@ -230,17 +238,18 @@ class Graph_demo : public ox::layout::Horizontal<> {
         sl::Signal<void(int)> step_interval_changed;
 
         ox::Labeled_cycle_box& graph_box =
-            make_child<ox::Labeled_cycle_box>("Graph");
+            make_child<ox::Labeled_cycle_box>(U"Graph");
         ox::Labeled_number_edit<int>& step_interval_box =
-            make_child<ox::Labeled_number_edit<int>>("StepInterval(ms)", 16);
+            make_child<ox::Labeled_number_edit<int>>(U"StepInterval(ms)", 16);
+
+       private:
+        ox::Widget& buffer_ = this->make_child();
 
        public:
         Settings()
         {
-            this->width_policy.fixed(25);
-            this->border.enable();
-            this->border.segments.disable_all();
-            this->border.segments.west.enable();
+            using namespace ox::pipe;
+            *this | fixed_width(25) | west_border();
 
             graph_box.cycle_box.add_option("Sine").connect(
                 [this] { graph_changed("sine"); });
@@ -264,6 +273,7 @@ class Graph_demo : public ox::layout::Horizontal<> {
    public:
     Graph_demo()
     {
+        using namespace ox::pipe;
         settings_.graph_changed.connect([this](std::string gen) {
             if (gen == "sine")
                 core_.set_generator<Sine>();

@@ -1,6 +1,7 @@
 #ifndef TERMOX_SYSTEM_EVENT_LOOP_HPP
 #define TERMOX_SYSTEM_EVENT_LOOP_HPP
 #include <atomic>
+#include <cassert>
 #include <future>
 #include <stdexcept>
 #include <thread>
@@ -30,6 +31,8 @@ class Event_loop {
     /// Start the event loop in a separate thread.
     void run_async()
     {
+        if (fut_.valid())
+            return;
         fut_ = std::async(std::launch::async, [this] { return this->run(); });
     }
 
@@ -49,6 +52,12 @@ class Event_loop {
     /** Event_loop::exit(int) must be called to return from wait().
      *  @return the return code passed to the call to exit(). */
     auto wait() -> int { return fut_.valid() ? fut_.get() : -1; }
+
+    /// Return true if the event loop is currently running.
+    [[nodiscard]] auto is_running() const -> bool { return running_; }
+
+    /// Return true if the animation engine has been told to exit.
+    [[nodiscard]] auto is_exiting() const -> bool { return this->exit_flag(); }
 
    protected:
     /// Override this in derived classes to define Event_loop behavior.
@@ -70,8 +79,6 @@ class Event_loop {
     std::atomic<bool> exit_ = false;
 
    protected:
-    bool is_main_thread_ = false;
-
     friend class System;
 };
 

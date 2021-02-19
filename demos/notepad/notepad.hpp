@@ -6,6 +6,7 @@
 #include <signals_light/signal.hpp>
 
 #include <termox/painter/glyph_string.hpp>
+#include <termox/painter/palette/dawn_bringer16.hpp>
 #include <termox/painter/trait.hpp>
 #include <termox/system/system.hpp>
 #include <termox/widget/align.hpp>
@@ -105,8 +106,14 @@ class Side_pane : public ox::layout::Vertical<> {
 
     Trait_boxes& trait_boxes = this->make_child<Trait_boxes>();
 
+    Widget& buffer = this->make_child();
+
    public:
-    Side_pane() { *this | ox::pipe::fixed_width(16); }
+    Side_pane()
+    {
+        *this | ox::pipe::fixed_width(16);
+        trait_boxes | ox::pipe::passive_height();
+    }
 };
 
 using Side_pane_accordion = ox::HAccordion<Side_pane, ox::Bar_position::Last>;
@@ -219,6 +226,7 @@ class Notepad : public ox::layout::Vertical<> {
    protected:
     auto focus_in_event() -> bool override
     {
+        ox::System::terminal.set_palette(ox::dawn_bringer16::palette);
         ox::System::set_focus(txt_trait.textbox);
         return true;
     }

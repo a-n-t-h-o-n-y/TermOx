@@ -53,8 +53,7 @@ class Wall : public ox::Array<
     Wall()
     {
         using namespace ox::pipe;
-        *this | fixed_height(vcount) | fixed_width(hcount) | children() |
-            fixed_width(1);
+        *this | fixed_height(vcount) | fixed_width(hcount);
 
         for (auto& row : this->get_children()) {
             for (auto& child : row.get_children()) {

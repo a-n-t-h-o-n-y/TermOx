@@ -18,13 +18,21 @@ namespace paint {
 
 class Side_pane : public ox::layout::Vertical<> {
    private:
-    struct Color_pages : ox::Cycle_stack<ox::Color_select> {
-        Color_pages() { height_policy.fixed(3); }
-
+    class Color_pages : public ox::Cycle_stack<ox::Color_select> {
+       public:
         ox::Color_select& foreground =
             make_page(U"Foreground" | ox::Trait::Bold);
         ox::Color_select& background =
             make_page(U"Background" | ox::Trait::Bold);
+
+       public:
+        Color_pages()
+        {
+            ox::System::terminal.palette_changed.connect([this](
+                                                             auto const& pal) {
+                *this | ox::pipe::fixed_height(std::ceil(pal.size() / 8.) + 1);
+            });
+        }
     };
 
    public:

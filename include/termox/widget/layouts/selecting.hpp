@@ -117,6 +117,32 @@ class Selecting : public Layout_t {
         return Layout_t::key_press_event(k);
     }
 
+    auto mouse_wheel_event_filter(Widget&, Mouse const& m) -> bool override
+    {
+        switch (m.button) {
+            case Mouse::Button::ScrollUp:
+                this->decrement_selected_and_scroll_if_necessary();
+                break;
+            case Mouse::Button::ScrollDown:
+                this->increment_selected_and_scroll_if_necessary();
+                break;
+            default: break;
+        }
+        return true;
+    }
+
+    auto mouse_press_event_filter(Widget& w, Mouse const& m) -> bool override
+    {
+        switch (m.button) {
+            case Mouse::Button::Left:
+                this->set_selected_by_pointer(
+                    static_cast<typename Layout_t::Child_t*>(&w));
+                break;
+            default: break;
+        }
+        return true;
+    }
+
     /// Reset the selected child if needed.
     auto resize_event(ox::Area new_size, ox::Area old_size) -> bool override
     {
@@ -156,6 +182,14 @@ class Selecting : public Layout_t {
         if (this->has_selected_child())
             this->selected_child().unselect();
         return Layout_t::disable_event();
+    }
+
+    auto child_added_event(Widget& child) -> bool override
+    {
+        if (this->child_count() == 1)
+            this->select_first_child();
+        child.install_event_filter(*this);
+        return Layout_t::child_added_event(child);
     }
 
     auto child_removed_event(Widget& child) -> bool override

@@ -3,7 +3,11 @@
 #include <functional>
 #include <memory>
 #include <optional>
+#include <utility>
 #include <variant>
+#include <vector>
+
+#include <esc/event.hpp>
 
 #include <termox/system/key.hpp>
 #include <termox/system/mouse.hpp>
@@ -20,7 +24,7 @@ struct Paint_event {
 };
 
 struct Key_press_event {
-    std::optional<Widget_ref> receiver;
+    std::optional<Widget_ref> receiver;  // nullopt if no current focus Widget.
     Key key;
 };
 
@@ -99,6 +103,11 @@ struct Timer_event {
     Widget_ref receiver;
 };
 
+struct Dynamic_color_event {
+    using Processed_colors = std::vector<std::pair<ox::Color, ox::True_color>>;
+    Processed_colors color_data;
+};
+
 /** \p send will be called to send the event, typically would call on a member
  *  function of some receiving Widget type. \p filter_send should call whatever
  *  filter method on each installed filter, and return true if one of the
@@ -126,6 +135,8 @@ using Event = std::variant<Paint_event,
                            Move_event,
                            Resize_event,
                            Timer_event,
+                           Dynamic_color_event,
+                           ::esc::Window_resize,
                            Custom_event>;
 
 }  // namespace ox

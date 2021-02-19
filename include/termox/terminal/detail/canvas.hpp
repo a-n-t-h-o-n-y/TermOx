@@ -4,6 +4,7 @@
 #include <cassert>
 #include <iostream>
 #include <iterator>
+#include <memory>
 #include <utility>
 #include <vector>
 
@@ -59,14 +60,18 @@ class Canvas {
     /** Will throw out any Glyphs from the current Canvas that no longer fit. */
     void resize(ox::Area a)
     {
-        auto new_canvas = Canvas{a};
-        auto current    = ox::Point{0, 0};
+        if (resize_buffer_ == nullptr)
+            resize_buffer_ = std::make_unique<Canvas>(a);
+        resize_buffer_->reset();
+        resize_buffer_->area_ = a;
+        resize_buffer_->buffer_.resize(a.width * a.height);
+        auto current = ox::Point{0, 0};
         for (Glyph g : buffer_) {
             if (is_within(current, a))
-                new_canvas.at(current) = g;
+                resize_buffer_->at(current) = g;
             current = next(current, area_);
         }
-        this->operator=(std::move(new_canvas));
+        std::swap(*this, *resize_buffer_);
     }
 
    public:
@@ -97,6 +102,8 @@ class Canvas {
    private:
     Buffer_t buffer_;
     ox::Area area_;
+
+    std::unique_ptr<Canvas> resize_buffer_ = nullptr;
 
    private:
     /// Return true if Point \p p is within the bounds of \p a.

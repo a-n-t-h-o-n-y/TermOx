@@ -30,14 +30,19 @@ class Paint_queue {
    public:
     void append(Paint_event e) { events_.append(e); }
 
-    void send_all()
+    /// Return true if any events are actually sent.
+    auto send_all() -> bool
     {
         events_.compress();
         /// Processing Paint_events should not post more Paint_events.
+        bool sent = false;
         for (auto& p : events_)
-            System::send_event(std::move(p));
+            sent = System::send_event(std::move(p)) || sent;
         events_.clear();
+        return sent;
     }
+
+    auto size() const -> std::size_t { return events_.size(); }
 
    private:
     Unique_queue<Paint_event> events_;
@@ -47,13 +52,16 @@ class Delete_queue {
    public:
     void append(Delete_event e) { deletes_.push_back(std::move(e)); }
 
-    void send_all()
+    auto send_all() -> bool
     {
         /// Processing Delete_events should not post more Delete_events.
         for (auto& d : deletes_)
             System::send_event(std::move(d));
         deletes_.clear();
+        return true;
     }
+
+    auto size() const -> std::size_t { return deletes_.size(); }
 
    private:
     std::vector<Delete_event> deletes_;
@@ -63,13 +71,17 @@ class Basic_queue {
    public:
     void append(Event e) { basics_.push_back(std::move(e)); }
 
-    void send_all()
+    auto send_all() -> bool
     {
         // Allows for send(e) appending to the queue and invalidating iterators.
+        bool sent = false;
         for (auto index = 0uL; index < basics_.size(); ++index)
-            System::send_event(std::move(basics_[index]));
+            sent = System::send_event(std::move(basics_[index])) || sent;
         basics_.clear();
+        return sent;
     }
+
+    auto size() const -> std::size_t { return basics_.size(); }
 
    private:
     std::vector<Event> basics_;
@@ -87,11 +99,13 @@ class Event_queue {
             std::move(e));
     }
 
-    void send_all()
+    /// Returns true if any events were sent.
+    auto send_all() -> bool
     {
-        basics_.send_all();
-        paints_.send_all();
-        deletes_.send_all();
+        bool sent = basics_.send_all();
+        sent      = paints_.send_all() || sent;
+        sent      = deletes_.send_all() || sent;
+        return sent;
     }
 
    private:

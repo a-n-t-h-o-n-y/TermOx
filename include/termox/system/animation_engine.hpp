@@ -16,22 +16,20 @@ class Widget;
 /// Registers Widgets with intervals to send timer events.
 class Animation_engine : public detail::Interval_event_loop,
                          private Lockable<std::recursive_mutex> {
-    class Animation_event_loop : detail::Interval_event_loop {};
-
-   private:
-    using Clock_t    = std::chrono::steady_clock;
-    using Time_point = Clock_t::time_point;
+   public:
+    using Interval_event_loop::Clock_t;
+    using Interval_event_loop::Interval_t;
+    using Interval_event_loop::Time_point;
 
     struct Registered_data {
-        std::chrono::milliseconds interval;
+        Interval_t interval;
         Time_point last_event_time;
     };
 
-   public:
-    using Interval_t = std::chrono::milliseconds;
+    static auto constexpr default_interval = Interval_t{100};
 
    public:
-    Animation_engine() : Interval_event_loop{Interval_t{60}} {}
+    Animation_engine() : Interval_event_loop{default_interval} {}
 
     ~Animation_engine()
     {
@@ -49,37 +47,18 @@ class Animation_engine : public detail::Interval_event_loop,
     /// Stop the given Widget from being sent Timer_events.
     void unregister_widget(Widget& w);
 
+    /// Return true if there are no registered widgets
+    [[nodiscard]] auto is_empty() const -> bool { return subjects_.empty(); }
+
    private:
     std::map<Widget*, Registered_data> subjects_;
 
    private:
-    void loop_function();
+    void loop_function() override;
 
     /// Post any timer events that are ready to be posted.
+    /** Returns true if any events were posted. */
     void post_timer_events();
-
-    /// Only update if \p interval half is less than the current set interval.
-    void maybe_update_interval(Interval_t interval)
-    {
-        // mutex is already locked
-        auto const current_interval = this->Interval_event_loop::get_interval();
-        if (auto const half = interval / 2; half < current_interval)
-            this->set_interval(half);
-    }
-
-    /// Finds the smallest registered interval, uses it for class interval.
-    void reset_interval()
-    {
-        // mutex is already locked
-        auto const iter =
-            std::min_element(std::cbegin(subjects_), std::cend(subjects_),
-                             [](auto const& a, auto const& b) {
-                                 return a.second.interval < b.second.interval;
-                             });
-        if (iter == std::cend(subjects_))
-            return;
-        this->Interval_event_loop::set_interval(iter->second.interval / 2);
-    }
 };
 
 }  // namespace ox

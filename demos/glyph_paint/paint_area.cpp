@@ -87,23 +87,33 @@ auto Paint_area::key_press_event(Key k) -> bool
         this->set_symbol(symbol);
     auto const w = this->width();
     auto const h = this->height();
-    if (!this->cursor.enabled() || w == 0 || h == 0)
+    if (!this->cursor.is_enabled() || w == 0 || h == 0)
         return Widget::key_press_event(k);
     auto new_x = this->cursor.x() + 1;
     auto new_y = this->cursor.y() + 1;
     switch (k) {
         case Key::Arrow_right:
-            if (new_x == w)
+            if (new_x >= w)
                 new_x = 0;
             this->cursor.set_x(new_x);
             break;
-        case Key::Arrow_left: this->cursor.set_x(this->cursor.x() - 1); break;
+        case Key::Arrow_left:
+            --new_x;
+            if (new_x <= 0)
+                new_x = w;
+            this->cursor.set_x(new_x - 1);
+            break;
         case Key::Arrow_down:
-            if (new_y == h)
+            if (new_y >= h)
                 new_y = 0;
             this->cursor.set_y(new_y);
             break;
-        case Key::Arrow_up: this->cursor.set_y(this->cursor.y() - 1); break;
+        case Key::Arrow_up:
+            --new_y;
+            if (new_y <= 0)
+                new_y = h;
+            this->cursor.set_y(new_y - 1);
+            break;
         case Key::Enter: this->place_glyph(this->cursor.position()); break;
         default:
             if (!std::iscntrl(symbol)) {

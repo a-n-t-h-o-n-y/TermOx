@@ -3,6 +3,7 @@
 #include <memory>
 
 #include <termox/painter/color.hpp>
+#include <termox/painter/palette/amstrad_cpc.hpp>
 #include <termox/system/system.hpp>
 #include <termox/widget/focus_policy.hpp>
 #include <termox/widget/layouts/horizontal.hpp>
@@ -10,6 +11,7 @@
 #include <termox/widget/pipe.hpp>
 #include <termox/widget/widget.hpp>
 #include <termox/widget/widgets/label.hpp>
+#include "termox/painter/palette/amstrad_cpc.hpp"
 
 namespace demos::focus {
 
@@ -57,6 +59,10 @@ inline auto focus_box(ox::Focus_policy policy) -> std::unique_ptr<ox::Widget>
                 | ox::pipe::focus(policy)
         ) | bordered();
 
+    box_ptr | direct_focus() | on_focus_in([x = box_ptr.get()]{
+            ox::System::set_focus(x->get_children()[1]);
+            });
+
     box_ptr | children() | find("l")
             | on_focus_in([w = box_ptr->find_child_by_name("w")]
                     { ox::System::set_focus(*w); });
@@ -82,7 +88,7 @@ inline auto build_demo() -> std::unique_ptr<ox::Widget>
             focus_box(Focus_policy::Tab) | height_stretch(3),
             layout::horizontal(
                 focus_box(Focus_policy::Strong),
-                focus_box(Focus_policy::Tab)
+                focus_box(Focus_policy::Direct)
             )
         ),
         layout::vertical(
@@ -101,7 +107,9 @@ inline auto build_demo() -> std::unique_ptr<ox::Widget>
             ) | height_stretch(2),
             focus_box(Focus_policy::Strong)
         )
-    );
+    ) | direct_focus() | on_focus_in([]{
+            System::terminal.set_palette(ox::amstrad_cpc::palette);
+        });
     // clang-format on
 }
 

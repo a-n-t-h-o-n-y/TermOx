@@ -164,8 +164,8 @@ class Graph : public Widget {
             interval_h_ == 0 ? 0 : distance(boundary_.north, c.y) / interval_h_;
         auto const vertical_offset = visual_height - distance_from_bottom;
 
-        auto& bitmap = map_[{static_cast<std::size_t>(horizontal_offset),
-                             static_cast<std::size_t>(vertical_offset)}];
+        auto& bitmap = map_[{static_cast<int>(horizontal_offset),
+                             static_cast<int>(vertical_offset)}];
 
         auto const h_dec = std::fmod(horizontal_offset, 1.);
         auto const v_dec = std::fmod(vertical_offset, 1.);

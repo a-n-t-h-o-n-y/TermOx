@@ -98,7 +98,10 @@ class Scrollbar : public Layout_t {
             }
             auto const begin  = point(slider_position_);
             auto const length = point(slider_length_ - 1);  // bc line inclusive
-            p.line(bar_, begin, begin + length);
+            if constexpr (is_vertical)
+                p.vline(bar_, begin, begin + length);
+            else
+                p.hline(bar_, begin, begin + length);
             return Widget::paint_event(p);
         }
 
@@ -357,8 +360,7 @@ void link(Scrollbar<Layout_t>& scrollbar, Textbox& textbox)
     scrollbar.new_position.connect(
         [&](std::size_t p) { textbox.set_top_line(p); });
 
-    textbox.scrolled_to.connect(
-        [&](int n) { scrollbar.set_position(n); });
+    textbox.scrolled_to.connect([&](int n) { scrollbar.set_position(n); });
 }
 
 }  // namespace ox

@@ -1,47 +1,55 @@
 #include <termox/terminal/dynamic_color_engine.hpp>
 
-#include <mutex>
 #include <utility>
 #include <vector>
 
+#include <termox/painter/color.hpp>
 #include <termox/painter/detail/screen.hpp>
 #include <termox/system/event.hpp>
 #include <termox/system/system.hpp>
 #include <termox/terminal/terminal.hpp>
 
-namespace ox::detail {
+namespace ox {
 
-namespace {
-
-using Processed_colors = std::vector<std::pair<Color, True_color>>;
-
-// TODO can you create a new Event type instead of having to rely on
-// std::function?
-/// Create a Custom_event to update color definitions.
-auto dynamic_color_event(Processed_colors colors) -> Custom_event
+void Dynamic_color_engine::loop_function()
 {
-    return {[=] {
-        {
-            for (auto [color, true_color] : colors) {
-                System::terminal.update_color_stores(color, true_color);
-                System::terminal.repaint_color(color);
+    // The first call to this returns immediately.
+    Interval_event_loop::loop_function();
+    this->post_dynamic_color_events();
+}
+
+void Dynamic_color_engine::post_dynamic_color_events()
+{
+    if (data_.empty()) {
+        this->set_interval(default_interval);
+        return;
+    }
+    auto processed = Dynamic_color_event::Processed_colors{};
+    {
+        auto const lock    = this->Lockable::lock();
+        auto next_interval = [&, this] {
+            return std::min_element(std::cbegin(data_), std::cend(data_),
+                                    [](auto const& a, auto const& b) {
+                                        return a.dynamic.interval <
+                                               b.dynamic.interval;
+                                    })
+                ->dynamic.interval;
+        }();
+        auto const now = Clock_t::now();
+        for (auto& data : data_) {
+            auto const time_left = std::chrono::duration_cast<Interval_t>(
+                data.dynamic.interval - (now - data.last_event_time));
+            if (time_left <= Interval_t{0}) {
+                data.last_event_time = now;
+                processed.push_back({data.color, data.dynamic.get_value()});
+            }
+            else {
+                next_interval = std::min(next_interval, time_left);
             }
         }
-    }};
-}
-
-}  // namespace
-
-void Dynamic_color_event_loop::loop_function()
-{
-    {
-        auto processed   = Processed_colors{};
-        auto const guard = std::scoped_lock{colors_mtx_};
-        for (auto& [color, dynamic] : colors_)
-            processed.push_back({color, dynamic.get_value()});
-        System::post_event(dynamic_color_event(processed));
+        this->Interval_event_loop::set_interval(next_interval);
     }
-    Interval_event_loop::loop_function();
+    System::post_event(Dynamic_color_event{std::move(processed)});
 }
 
-}  // namespace ox::detail
+}  // namespace ox

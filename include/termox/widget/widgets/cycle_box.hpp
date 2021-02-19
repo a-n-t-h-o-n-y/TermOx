@@ -174,7 +174,8 @@ class Labeled_cycle_box : public layout::Horizontal<> {
    public:
     explicit Labeled_cycle_box(Glyph_string title = "")
     {
-        *this | pipe::fixed_height(1) | pipe::label(std::move(title));
+        *this | pipe::fixed_height(1) | pipe::label(std::move(title)) |
+            pipe::direct_focus();
     }
 
     void set_label(Glyph_string title)
@@ -184,6 +185,13 @@ class Labeled_cycle_box : public layout::Horizontal<> {
     }
 
     void set_divider(Glyph divider) { div.set(divider); }
+
+   protected:
+    auto focus_in_event() -> bool override
+    {
+        System::set_focus(cycle_box);
+        return true;
+    }
 
    private:
     // TODO remove and set label as dynamic

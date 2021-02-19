@@ -301,7 +301,10 @@ class Layout : public Widget {
 
     auto child_polished_event(Widget& child) -> bool override
     {
-        this->update_geometry();
+        // Child_polished_event can be sent even if receivier is disabled, and
+        // update_geometry() is capable of enabling child widgets, so don't call
+        if (this->is_enabled())
+            this->update_geometry();
         return Widget::child_polished_event(child);
     }
 
@@ -369,8 +372,10 @@ class Layout : public Widget {
         w.set_parent(nullptr);
     }
 
-    /// Layouts should never paint to the screen.
-    [[nodiscard]] auto type_can_paint() const -> bool override { return false; }
+    // For painting stuff, border has to be painted, but layouts shouldn't paint
+    // otherwise, delete this once borders are redesigned to be layouts with
+    // widgets.
+    [[nodiscard]] auto is_layout_type() const -> bool override { return true; }
 };
 
 }  // namespace ox::layout

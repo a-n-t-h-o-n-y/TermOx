@@ -241,10 +241,10 @@ class Widget {
     /// Post a paint event to this Widget.
     virtual void update();
 
-    /// Return whether or not this Widget type should be painting at all.
+    /// Remove once border is redesigned.
     /** Used by is_paintable to decide whether or not to send a Paint_event.
      *  This is a type parameter, Layout is the only thing that can't paint. */
-    [[nodiscard]] virtual auto type_can_paint() const -> bool { return true; }
+    [[nodiscard]] virtual auto is_layout_type() const -> bool { return false; }
 
     /// Install another Widget as an Event filter.
     /** The installed Widget will get the first go at processing the event with
@@ -274,7 +274,7 @@ class Widget {
     {
         if (is_animated_)
             return;
-        System::animation_engine().register_widget(*this, interval);
+        System::enable_animation(*this, interval);
         is_animated_ = true;
     }
 
@@ -283,7 +283,7 @@ class Widget {
     {
         if (is_animated_)
             return;
-        System::animation_engine().register_widget(*this, fps);
+        System::enable_animation(*this, fps);
         is_animated_ = true;
     }
 
@@ -294,7 +294,7 @@ class Widget {
     {
         if (!is_animated_)
             return;
-        System::animation_engine().unregister_widget(*this);
+        System::disable_animation(*this);
         is_animated_ = false;
     }
 
@@ -486,9 +486,9 @@ class Widget {
     }
 
     /// Handles Paint_event objects.
-    virtual auto paint_event(Painter& painter) -> bool
+    virtual auto paint_event(Painter& p) -> bool
     {
-        painter.border();
+        p.border();
         painted();
         return true;
     }

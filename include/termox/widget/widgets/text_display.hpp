@@ -192,7 +192,8 @@ class Text_display : public Widget {
     /// Return line number that is being displayed at the bottom of the Widget.
     auto bottom_line() const -> int
     {
-        return this->top_line() + this->display_height() - 1;
+        auto const line = this->top_line() + this->display_height() - 1;
+        return line < 0 ? 0 : line;
     }
 
     /// Return the index into display_state_ of the last line.

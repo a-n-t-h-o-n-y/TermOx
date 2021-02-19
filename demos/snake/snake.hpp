@@ -277,8 +277,10 @@ class Engine {
         -> State
     {
         auto const& head = snake.head();
-        if (head.x >= apples.area().width || head.y >= apples.area().height)
+        if (head.x >= apples.area().width || head.y >= apples.area().height ||
+            head.x < 0 || head.y < 0) {
             return State::Dead;
+        }
         if (std::count(std::cbegin(snake), std::cend(snake), head) > 1)
             return State::Dead;
 
@@ -641,12 +643,12 @@ class Bottom_bar : public ox::layout::Horizontal<> {
 
 class Snake_game : public ox::layout::Vertical<> {
    private:
-    using VFloat        = ox::Float<Game_space, ox::layout::Vertical>;
-    using Floating_game = ox::Float<VFloat, ox::layout::Horizontal>;
+    using Floating_game = ox::Float_2d<Game_space>;
 
    public:
     Snake_game()
     {
+        using namespace ox;
         using namespace ox::pipe;
         *this | direct_focus();
 
@@ -668,12 +670,10 @@ class Snake_game : public ox::layout::Vertical<> {
             }
         });
 
-        using namespace ox;
-        using namespace ox::pipe;
         floating_game.buffer_1 | bg(color::Border);
         floating_game.buffer_2 | bg(color::Border);
-        vfloat.buffer_1 | bg(color::Border);
-        vfloat.buffer_2 | bg(color::Border);
+        floating_game.widget.buffer_1 | bg(color::Border);
+        floating_game.widget.buffer_2 | bg(color::Border);
 
         game_space_.resize(s_size);
         game_space_.score.connect(
@@ -694,8 +694,7 @@ class Snake_game : public ox::layout::Vertical<> {
 
    private:
     Floating_game& floating_game = make_child<Floating_game>();
-    VFloat& vfloat               = floating_game.widget;
-    Game_space& game_space_      = vfloat.widget;
+    Game_space& game_space_      = floating_game.widget.widget;
     Bottom_bar& bottom_          = make_child<Bottom_bar>();
 };
 

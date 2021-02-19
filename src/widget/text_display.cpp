@@ -204,7 +204,7 @@ void Text_display::update_display(int from_line)
 
 auto Text_display::line_at(int index) const -> int
 {
-    auto line = 0uL;
+    auto line = 0;
     for (auto const& info : display_state_) {
         if (info.start_index <= index)
             ++line;

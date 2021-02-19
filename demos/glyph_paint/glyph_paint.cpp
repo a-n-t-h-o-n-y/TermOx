@@ -1,5 +1,6 @@
 #include "glyph_paint.hpp"
 
+#include <termox/widget/pipe.hpp>
 #include <termox/widget/widget_slots.hpp>
 
 using namespace ox;
@@ -8,6 +9,7 @@ namespace paint {
 
 Glyph_paint::Glyph_paint()
 {
+    *this | pipe::direct_focus();
     side_pane.glyph_selector.selected.connect(slot::set_symbol(paint_area));
 
     side_pane.color_pages.foreground.color_selected.connect(

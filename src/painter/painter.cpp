@@ -1,6 +1,6 @@
+#include <ios>
 #include <termox/painter/painter.hpp>
 
-#include <termox/painter/detail/is_paintable.hpp>
 #include <termox/painter/detail/screen_descriptor.hpp>
 #include <termox/painter/glyph_string.hpp>
 #include <termox/system/event_loop.hpp>
@@ -28,16 +28,15 @@ Painter::Painter(Widget& widg, detail::Canvas& canvas)
       inner_area_{widget_.width(), widget_.height()},
       canvas_{canvas},
       brush_{widg.brush}
-{
-    this->fill_global(widget_.generate_wallpaper(), widget_.top_left(),
-                      widget_.outer_area());
-}
+{}
 
 void Painter::put(Glyph tile, Point p)
 {
-    // User code can overrun Widget bounds.
-    if (p.x >= inner_area_.width || p.y >= inner_area_.height)
+    // User code can contain invalid points.
+    if (p.x >= inner_area_.width || p.y >= inner_area_.height || p.x < 0 ||
+        p.y < 0) {
         return;
+    }
     auto const x_global = widget_.inner_x() + p.x;
     auto const y_global = widget_.inner_y() + p.y;
     this->put_global(tile, {x_global, y_global});
@@ -54,6 +53,7 @@ void Painter::border()
     using Offset = detail::Border_offset;
     if (!border_is_paintable(widget_))
         return;
+
     // Disqualified borders
     auto const west_dq  = Offset::west_disqualified(widget_);
     auto const east_dq  = Offset::east_disqualified(widget_);
@@ -212,6 +212,12 @@ void Painter::vline_global(Glyph tile, Point a, Point b)
 {
     for (; a.y <= b.y; ++a.y)
         this->put_global(tile, a);
+}
+
+void Painter::wallpaper_fill()
+{
+    this->fill_global(widget_.generate_wallpaper(), widget_.top_left(),
+                      widget_.outer_area());
 }
 
 void Painter::fill_global(Glyph tile, Point point, Area area)

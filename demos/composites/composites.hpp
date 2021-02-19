@@ -141,10 +141,9 @@ struct My_check_list : Check_list {
         this->set_increment_scroll_keys({Key::J});
         this->set_decrement_scroll_keys({Key::K});
 
-        *this | /* passive_height() |*/ bordered() | children() |
-            for_each([i = 0uL](auto& w) mutable {
-                w.label.set_text("number: " + std::to_string(i++));
-            });
+        *this | bordered() | children() | for_each([i = 0uL](auto& w) mutable {
+            w.label.set_text("number: " + std::to_string(i++));
+        });
         *this | bind_key(Key::Enter,
                          [](auto& w) { w.selected_child().checkbox.toggle(); });
     }

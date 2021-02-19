@@ -44,10 +44,10 @@ class Meta_widget : public ox::Widget {
         auto const x = std::to_string(this->parent()->x());
         auto const y = std::to_string(this->parent()->y());
 
-        p.put("X " + x, 0, 0);
-        p.put("Y " + y, 0, 1);
-        p.put("W " + w, 0, 2);
-        p.put("H " + h, 0, 3);
+        p.put("X " + x, {0, 0});
+        p.put("Y " + y, {0, 1});
+        p.put("W " + w, {0, 2});
+        p.put("H " + h, {0, 3});
         return Widget::paint_event(p);
     }
 };

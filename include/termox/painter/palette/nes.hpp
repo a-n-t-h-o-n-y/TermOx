@@ -5,13 +5,13 @@
 namespace ox::nes {
 
 constexpr auto Black             = Color::Background;
-constexpr auto Alabaster         = Color{1};
-constexpr auto Silver            = Color{2};
-constexpr auto Boulder           = Color{3};
-constexpr auto Anakiwa           = Color{4};
-constexpr auto Dodger_blue       = Color{5};
-constexpr auto Azure             = Color{6};
-constexpr auto Blue              = Color{7};
+constexpr auto Dodger_blue       = Color{1};
+constexpr auto Azure             = Color{2};
+constexpr auto Blue              = Color{3};
+constexpr auto Silver            = Color{4};
+constexpr auto Boulder           = Color{5};
+constexpr auto Anakiwa           = Color{6};
+constexpr auto Alabaster         = Color{7};
 constexpr auto Perfume           = Color{8};
 constexpr auto Cornflower_blue   = Color{9};
 constexpr auto Blue_ribbon       = Color{10};

@@ -19,9 +19,8 @@ class Menu_stack : public layout::Stack<Widget> {
     static auto constexpr menu_index_ = 0uL;
 
    public:
-    /// Construct an empty Menu_stack with \p title passed to Menu constructor.
-    Menu_stack(Glyph_string title = "")
-        : menu_{this->Stack::make_page<Menu>(std::move(title))}
+    /// Construct an empty Menu_stack.
+    Menu_stack() : menu_{this->Stack::make_page<Menu>()}
     {
         this->Stack::set_active_page(menu_index_);
         this->focus_policy = Focus_policy::Direct;
@@ -52,13 +51,6 @@ class Menu_stack : public layout::Stack<Widget> {
             "Menu_stack::append_page: Widget_t must be a Child_t type");
         this->Stack::append_page(std::move(w_ptr));
         this->connect_to_menu(std::move(title), this->Stack::size() - 1);
-    }
-
-    template <typename Widget_t>
-    void append_page(Glyph_string title, Widget_t&& w)
-    {
-        this->append_page(std::move(title), std::make_unique<Widget_t>(
-                                                std::forward<Widget_t>(w)));
     }
 
     /// Insert a Widget at \p index.
@@ -115,13 +107,6 @@ class Menu_stack : public layout::Stack<Widget> {
     void set_active_page(std::size_t index)
     {
         this->Stack::set_active_page(index + 1);
-    }
-
-   protected:
-    auto focus_in_event() -> bool override
-    {
-        System::set_focus(menu_);
-        return true;
     }
 
    private:

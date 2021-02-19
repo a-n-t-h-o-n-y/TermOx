@@ -172,19 +172,7 @@ template <typename T>
 }
 
 /// Tranform Window_resize events to ox::Events.
-[[nodiscard]] auto transform(::esc::Window_resize x) -> ox::Event
-{
-    ox::Widget& head = []() -> ox::Widget& {
-        ox::Widget* head = ox::System::head();
-        assert(head != nullptr);
-        return *head;
-    }();
-    auto& buffers = ox::System::terminal.screen_buffers;
-    if (x.new_dimensions.height < buffers.area().height)
-        ox::System::terminal.flag_full_repaint();
-    buffers.resize(x.new_dimensions);
-    return ox::Resize_event{head, x.new_dimensions};
-}
+[[nodiscard]] auto transform(::esc::Window_resize x) -> ox::Event { return x; }
 
 }  // namespace
 
@@ -251,11 +239,12 @@ void Terminal::set_palette(Palette colors)
         fg_store[color] = fg;
         bg_store[color] = bg;
         if (std::holds_alternative<Dynamic_color>(color_type)) {
+            dynamic_color_engine_.run_async();  // no-op if already running
             dynamic_color_engine_.register_color(
                 color, std::get<Dynamic_color>(color_type));
         }
     }
-    repaint_all_widgets();
+    this->flag_full_repaint();
     palette_changed(palette_);
 }
 
