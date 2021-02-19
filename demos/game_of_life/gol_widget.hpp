@@ -43,10 +43,18 @@ class GoL_widget : public ox::Widget {
     }
 
     /// Start animation, no-op if already running.
-    void start() { this->enable_animation(period_); }
+    void start()
+    {
+        this->enable_animation(period_);
+        running_ = true;
+    }
 
     /// Pause auto generation increment.
-    void pause() { this->disable_animation(); }
+    void pause()
+    {
+        this->disable_animation();
+        running_ = false;
+    }
 
     /// Progress to the next iteration of the game.
     void step()
@@ -252,9 +260,16 @@ class GoL_widget : public ox::Widget {
         return Widget::resize_event(new_size, old_size);
     }
 
+    auto enable_event() -> bool override
+    {
+        if (running_)
+            this->enable_animation(period_);
+        return Widget::enable_event();
+    }
+
     auto disable_event() -> bool override
     {
-        this->pause();
+        this->disable_animation();
         return Widget::disable_event();
     }
 
@@ -265,6 +280,7 @@ class GoL_widget : public ox::Widget {
     Period_t period_{40};
     Coordinate offset_{0, 0};
     ox::Color cell_color_ = color::White;
+    bool running_         = false;
 
     int half_width_  = 0;
     int half_height_ = 0;

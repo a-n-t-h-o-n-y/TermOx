@@ -19,6 +19,9 @@ namespace gol {
 
 /// Holds game state and provides an interface to update to the next pattern.
 class Game_of_life_engine {
+   private:
+    static auto constexpr outer_bound = 5'000;
+
    public:
     sl::Signal<void(std::uint32_t)> generation_count_changed;
 
@@ -33,16 +36,13 @@ class Game_of_life_engine {
             auto const is_alive       = alive_at(c);
             if (is_alive && !contains(neighbor_count, rules_.survival)) {
                 temp_cells.remove(c);
-                // coordinates_.stage_removal(c);
                 this->add_volatiles(c);
             }
             else if (!is_alive && contains(neighbor_count, rules_.birth)) {
                 temp_cells.insert(c);
-                // coordinates_.push_back(c);
                 this->add_volatiles(c);
             }
         }
-        // coordinates_.commit_removals();
         this->increment_generation_count();
         std::swap(cells_, temp_cells);
     }
@@ -71,7 +71,6 @@ class Game_of_life_engine {
     void kill_all()
     {
         cells_.clear();
-        // coordinates_.clear();
         volatiles_.clear();
         this->reset_generation_count();
     }
@@ -87,11 +86,6 @@ class Game_of_life_engine {
             count += alive_at(neighbor) ? 1 : 0;
         return count;
     }
-
-    /// Number of alive cells.
-    // TODO remove this and call site
-    // auto alive_cell_count() const -> std::size_t { return
-    // coordinates_.size(); }
 
     /// Begin iterator to boolean is_alive and Coordinate.
     auto begin() const { return std::cbegin(cells_); }
@@ -125,11 +119,7 @@ class Game_of_life_engine {
     }
 
    private:
-    // Fast Lookup
     Bitset cells_;
-
-    // Duplicate for Fast Iteration
-    // Coordinates coordinates_;
 
     std::unordered_set<Coordinate> volatiles_;
     Rule rules_;
@@ -141,6 +131,10 @@ class Game_of_life_engine {
      *  iteration. */
     void add_volatiles(Coordinate c)
     {
+        if (c.x > outer_bound || c.x < -outer_bound || c.y > outer_bound ||
+            c.y < -outer_bound) {
+            return;
+        }
         volatiles_.insert(c);
         for (Coordinate neighbor : neighbors(c))
             volatiles_.insert(neighbor);
@@ -165,7 +159,6 @@ class Game_of_life_engine {
     {
         this->add_volatiles(c);
         cells_.insert(c);
-        // coordinates_.push_back(c);
     }
 
     /// Remove an alive cell at the given position.
@@ -173,7 +166,6 @@ class Game_of_life_engine {
     {
         this->add_volatiles(c);
         cells_.remove(c);
-        // coordinates_.immediate_remove(c);
     }
 
     /// Make every alive cell a volatile cell, needed for changing the rules.

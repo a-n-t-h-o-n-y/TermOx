@@ -87,7 +87,7 @@ class Bitset {
         values_[this->get_offset(c)] = false;
     }
 
-    auto contains(Coordinate c) const -> bool
+    [[nodiscard]] auto contains(Coordinate c) const -> bool
     {
         if (this->out_of_bounds(c))
             return false;
@@ -99,14 +99,14 @@ class Bitset {
 
     /// Begin iterator to boolean and Coordinate.
     /** This container is usually fairly large. */
-    auto begin() const -> const_iterator
+    [[nodiscard]] auto begin() const -> const_iterator
     {
         return {std::cbegin(values_), lower_bound_, upper_bound_};
     }
 
     /// End iterator to boolean and Coordinate.
     /** This container is usually fairly large. */
-    auto end() const -> const_iterator
+    [[nodiscard]] auto end() const -> const_iterator
     {
         return {std::cend(values_), lower_bound_, upper_bound_};
     }
@@ -152,16 +152,6 @@ class Bitset {
                                   new_half_length)] = true;
             }
         }
-
-        // auto c = Coordinate{lower_bound_, lower_bound_};
-        // for (auto b : values_) {
-        //     if (b)
-        //         new_values[offset(c, new_side_length, new_half_length)] = true;
-        //     if (++c.x > upper_bound_) {
-        //         c.x = lower_bound_;
-        //         ++c.y;
-        //     }
-        // }
 
         values_      = std::move(new_values);
         side_length_ = new_side_length;
