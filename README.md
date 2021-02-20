@@ -79,10 +79,12 @@ git submodules.
 ```
 git clone https://github.com/a-n-t-h-o-n-y/TermOx.git
 mkdir TermOx/build && cd TermOx/build
-git submodule update --init --recursive   # Pull in dependencies
+git submodule update --init               # Pull in dependencies
 cmake .. -DCMAKE_BUILD_TYPE=Release       # Generate Makefiles
 make                                      # Build library
 make demos                                # Build demos(optional)
+make termox.unit.tests                    # Build Unit Tests(optional)
+make termox.ui.tests                      # Build UI Tests(optional)
 ```
 
 ## Using the Library
