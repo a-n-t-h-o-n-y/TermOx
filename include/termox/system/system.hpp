@@ -31,7 +31,27 @@ class System {
     static sl::Slot<void()> quit;
 
    public:
-    System() { Terminal::initialize(); }
+    /// Initializes the terminal screen into curses mode.
+    /** Must be called before any input/output can occur. No-op if initialized.
+     *  Mouse_mode  - - Off:   Generates no Mouse Events.
+     *                  Basic: Generate Mouse Press and Release Events for all
+     *                         buttons and the scroll wheel.
+     *                  Drag:  Basic, plus Mouse Move Events while a button is
+     *                         pressed.
+     *                  Move:  Basic, plus Mouse Move Events are generated with
+     *                         or without a button pressed.
+     *
+     *  Signals - - - On:  Signals can be generated from ctrl-[key] presses, for
+     *                     instance ctrl-c will send SIGINT instead of byte 3.
+     *                Off: Signals will not be generated on ctrl-[key] presses,
+     *                     sending the byte value of the ctrl character instead.
+     */
+    System(Mouse_mode mouse_mode = Mouse_mode::Basic,
+           Signals signals       = Signals::On)
+    {
+        Terminal::initialize(mouse_mode, signals);
+    }
+
     System(System const&) = delete;
     System& operator=(System const&) = delete;
     System(System&&)                 = default;

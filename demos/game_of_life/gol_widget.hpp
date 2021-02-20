@@ -184,22 +184,14 @@ class GoL_widget : public ox::Widget {
 
     auto mouse_press_event(ox::Mouse const& m) -> bool override
     {
-        auto const c = transform_to_engine(m.at);
-        if (m.button == ox::Mouse::Button::Right) {
-            if (hi_res_)
-                this->decrement_at(c);
-            else
-                engine_.kill(c);
-            this->update();
-        }
-        else if (m.button == ox::Mouse::Button::Left) {
-            if (hi_res_)
-                this->increment_at(c);
-            else
-                engine_.create_life(c);
-            this->update();
-        }
+        this->handle_mouse_event(m);
         return Widget::mouse_press_event(m);
+    }
+
+    auto mouse_move_event(ox::Mouse const& m) -> bool override
+    {
+        this->handle_mouse_event(m);
+        return Widget::mouse_move_event(m);
     }
 
     auto mouse_wheel_event(ox::Mouse const& m) -> bool override
@@ -432,6 +424,25 @@ class GoL_widget : public ox::Widget {
             engine_.create_life({c.x + 1, c.y + 3});
         else
             engine_.kill({c.x + 1, c.y + 3});
+    }
+
+    void handle_mouse_event(ox::Mouse const& m)
+    {
+        auto const c = transform_to_engine(m.at);
+        if (m.button == ox::Mouse::Button::Right) {
+            if (hi_res_)
+                this->decrement_at(c);
+            else
+                engine_.kill(c);
+            this->update();
+        }
+        else if (m.button == ox::Mouse::Button::Left) {
+            if (hi_res_)
+                this->increment_at(c);
+            else
+                engine_.create_life(c);
+            this->update();
+        }
     }
 
    public:

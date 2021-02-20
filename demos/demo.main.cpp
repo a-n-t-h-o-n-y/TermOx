@@ -2,4 +2,4 @@
 
 #include "demo_menu.hpp"
 
-int main() { return ox::System{}.run<demos::Demos>(); }
+int main() { return ox::System{ox::Mouse_mode::Drag}.run<demos::Demos>(); }

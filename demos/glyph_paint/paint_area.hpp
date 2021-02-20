@@ -137,14 +137,30 @@ class Paint_area : public ox::Widget {
     {
         switch (m.button) {
             using Button = ox::Mouse::Button;
+            case Button::Left: this->place_glyph(m.at); break;
             case Button::Right: this->remove_glyph(m.at); break;
             case Button::Middle:
                 if (glyphs_painted_.count(m.at) == 1)
                     this->set_glyph(glyphs_painted_[m.at]);
                 break;
-            default: this->place_glyph(m.at); break;
+            default: break;
         }
         return Widget::mouse_press_event(m);
+    }
+
+    auto mouse_move_event(ox::Mouse const& m) -> bool override
+    {
+        switch (m.button) {
+            using Button = ox::Mouse::Button;
+            case Button::Left: this->place_glyph(m.at); break;
+            case Button::Right: this->remove_glyph(m.at); break;
+            case Button::Middle:
+                if (glyphs_painted_.count(m.at) == 1)
+                    this->set_glyph(glyphs_painted_[m.at]);
+                break;
+            default: break;
+        }
+        return Widget::mouse_move_event(m);
     }
 
     auto key_press_event(ox::Key k) -> bool override;
