@@ -1,28 +1,267 @@
 name: build
 
+# TODO Add sanitizers via cmake parameters.
+
 on:
   push:
     branches: [ develop, main ]
 
 jobs:
-  gcc-build:
+  # Ubuntu-20 GCC
+  gcc-build-ubuntu20-gcc10:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2.3.1
         with:
           submodules: recursive
-      - run: |
+      - env:
+          CC: gcc-10
+          CXX: g++-10
+        run: |
           mkdir build && cd build
-          cmake .. && make -j2 demos
-  clang-build:
+          cmake .. && make demos termox.ui.tests termox.unit.tests
+          ./tests/termox.unit.tests
+  gcc-build-ubuntu20-gcc9:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2.3.1
         with:
           submodules: recursive
-      - run: |
+      - env:
+          CC: gcc-9
+          CXX: g++-9
+        run: |
           mkdir build && cd build
-          export CXX=clang++ && export CC=clang
-          cmake .. && make -j2 demos
+          cmake .. && make demos termox.ui.tests termox.unit.tests
+          ./tests/termox.unit.tests
+  gcc-build-ubuntu20-gcc8:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2.3.1
+        with:
+          submodules: recursive
+      - env:
+          CC: gcc-8
+          CXX: g++-8
+        run: |
+          mkdir build && cd build
+          cmake .. && make demos termox.ui.tests termox.unit.tests
+          ./tests/termox.unit.tests
+  gcc-build-ubuntu20-gcc7:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2.3.1
+        with:
+          submodules: recursive
+      - env:
+          CC: gcc-7
+          CXX: g++-7
+        run: |
+          mkdir build && cd build
+          cmake .. && make demos termox.ui.tests termox.unit.tests
+          ./tests/termox.unit.tests
 
-# TODO add tests and run them on each platform, maybe with sanitizers?
+  # Ubuntu-20 Clang
+  clang-build-ubuntu20-clang10:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2.3.1
+        with:
+          submodules: recursive
+      - env:
+          CC: clang-10
+          CXX: clang++-10
+        run: |
+          mkdir build && cd build
+          cmake .. && make demos termox.ui.tests termox.unit.tests
+          ./tests/termox.unit.tests
+  clang-build-ubuntu20-clang9:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2.3.1
+        with:
+          submodules: recursive
+      - env:
+          CC: clang-9
+          CXX: clang++-9
+        run: |
+          mkdir build && cd build
+          cmake .. && make demos termox.ui.tests termox.unit.tests
+          ./tests/termox.unit.tests
+  clang-build-ubuntu20-clang8:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2.3.1
+        with:
+          submodules: recursive
+      - env:
+          CC: clang-8
+          CXX: clang++-8
+        run: |
+          mkdir build && cd build
+          cmake .. && make demos termox.ui.tests termox.unit.tests
+          ./tests/termox.unit.tests
+
+  # Ubuntu-18 GCC
+  gcc-build-ubuntu18-gcc10:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2.3.1
+        with:
+          submodules: recursive
+      - env:
+          CC: gcc-10
+          CXX: g++-10
+        run: |
+          mkdir build && cd build
+          cmake .. && make demos termox.ui.tests termox.unit.tests
+          ./tests/termox.unit.tests
+  gcc-build-ubuntu18-gcc9:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2.3.1
+        with:
+          submodules: recursive
+      - env:
+          CC: gcc-9
+          CXX: g++-9
+        run: |
+          mkdir build && cd build
+          cmake .. && make demos termox.ui.tests termox.unit.tests
+          ./tests/termox.unit.tests
+  gcc-build-ubuntu18-gcc8:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2.3.1
+        with:
+          submodules: recursive
+      - env:
+          CC: gcc-8
+          CXX: g++-8
+        run: |
+          mkdir build && cd build
+          cmake .. && make demos termox.ui.tests termox.unit.tests
+          ./tests/termox.unit.tests
+  gcc-build-ubuntu18-gcc7:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2.3.1
+        with:
+          submodules: recursive
+      - env:
+          CC: gcc-7
+          CXX: g++-7
+        run: |
+          mkdir build && cd build
+          cmake .. && make demos termox.ui.tests termox.unit.tests
+          ./tests/termox.unit.tests
+
+  # Ubuntu-18 Clang
+  clang-build-ubuntu18-clang9:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2.3.1
+        with:
+          submodules: recursive
+      - env:
+          CC: clang-9
+          CXX: clang++-9
+        run: |
+          mkdir build && cd build
+          cmake .. && make demos termox.ui.tests termox.unit.tests
+          ./tests/termox.unit.tests
+  clang-build-ubuntu18-clang8:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2.3.1
+        with:
+          submodules: recursive
+      - env:
+          CC: clang-8
+          CXX: clang++-8
+        run: |
+          mkdir build && cd build
+          cmake .. && make demos termox.ui.tests termox.unit.tests
+          ./tests/termox.unit.tests
+  # clang-build-ubuntu18-clang6: # std::variant bug with io.cpp std::get<>
+  #   runs-on: ubuntu-18.04
+  #   steps:
+  #     - uses: actions/checkout@v2.3.1
+  #       with:
+  #         submodules: recursive
+  #     - env:
+  #         CC: clang-6.0
+  #         CXX: clang++-6.0
+  #       run: |
+  #         mkdir build && cd build
+  #       cmake .. && make demos termox.ui.tests termox.unit.tests
+  #       ./tests/termox.unit.tests
+
+  # MacOS-10.15 Clang
+  clang-build-MacOS10-clang12:
+    runs-on: macos-10.15
+    steps:
+      - uses: actions/checkout@v2.3.1
+        with:
+          submodules: recursive
+      - env:
+          CC: clang
+          CXX: clang++
+        run: |
+          mkdir build && cd build
+          cmake .. && make demos termox.ui.tests termox.unit.tests
+          ./tests/termox.unit.tests
+  clang-build-MacOS10-clang11:
+    runs-on: macos-10.15
+    steps:
+      - uses: actions/checkout@v2.3.1
+        with:
+          submodules: recursive
+      - run: |
+          mkdir build && cd build
+          comp="$(brew --prefix llvm)/bin/clang"
+          export CC="${comp}"
+          export CXX="${comp}++"
+          cmake .. && make demos termox.ui.tests termox.unit.tests
+          ./tests/termox.unit.tests
+
+  # MacOS-10.15 GCC
+  clang-build-MacOS10-gcc10:
+    runs-on: macos-10.15
+    steps:
+      - uses: actions/checkout@v2.3.1
+        with:
+          submodules: recursive
+      - env:
+          CC: gcc-10
+          CXX: g++-10
+        run: |
+          mkdir build && cd build
+          cmake .. && make demos termox.ui.tests termox.unit.tests
+          ./tests/termox.unit.tests
+  clang-build-MacOS10-gcc9:
+    runs-on: macos-10.15
+    steps:
+      - uses: actions/checkout@v2.3.1
+        with:
+          submodules: recursive
+      - env:
+          CC: gcc-9
+          CXX: g++-9
+        run: |
+          mkdir build && cd build
+          cmake .. && make demos termox.ui.tests termox.unit.tests
+          ./tests/termox.unit.tests
+  clang-build-MacOS10-gcc8:
+    runs-on: macos-10.15
+    steps:
+      - uses: actions/checkout@v2.3.1
+        with:
+          submodules: recursive
+      - env:
+          CC: gcc-8
+          CXX: g++-8
+        run: |
+          mkdir build && cd build
+          cmake .. && make demos termox.ui.tests termox.unit.tests
+          ./tests/termox.unit.tests
