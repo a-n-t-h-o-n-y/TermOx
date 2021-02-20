@@ -26,7 +26,8 @@ class Transform_iterator {
     {}
 
     Transform_iterator(Transform_iterator const&) = default;
-    Transform_iterator(Transform_iterator&&)      = default;
+
+    Transform_iterator(Transform_iterator&&) = default;
 
     Transform_iterator& operator=(Transform_iterator const& other)
     {
@@ -42,7 +43,10 @@ class Transform_iterator {
         return *this;
     }
 
-    auto operator++(int) -> Transform_iterator { return {it_++, map_fn_}; }
+    [[nodiscard]] auto operator++(int) -> Transform_iterator
+    {
+        return {it_++, map_fn_};
+    }
 
     auto operator+=(difference_type n) -> Transform_iterator&
     {
@@ -68,7 +72,10 @@ class Transform_iterator {
         return *this;
     }
 
-    auto operator--(int) -> Transform_iterator { return {it_--, map_fn_}; }
+    [[nodiscard]] auto operator--(int) -> Transform_iterator
+    {
+        return {it_--, map_fn_};
+    }
 
     auto operator-=(difference_type n) -> Transform_iterator&
     {
@@ -87,31 +94,31 @@ class Transform_iterator {
         return {it_ - n, map_fn_};
     }
 
-    auto operator*() const -> reference { return map_fn_(*it_); }
+    [[nodiscard]] auto operator*() const -> reference { return map_fn_(*it_); }
 
-    auto operator==(Transform_iterator const& other) const -> bool
+    [[nodiscard]] auto operator==(Transform_iterator const& other) const -> bool
     {
         return it_ == other.it_;
     }
 
-    auto operator!=(Transform_iterator const& other) const -> bool
+    [[nodiscard]] auto operator!=(Transform_iterator const& other) const -> bool
     {
         return it_ != other.it_;
     }
 
     template <typename T>
-    auto operator==(T const& other) const -> bool
+    [[nodiscard]] auto operator==(T const& other) const -> bool
     {
         return it_ == other;
     }
 
     template <typename T>
-    auto operator!=(T const& other) const -> bool
+    [[nodiscard]] auto operator!=(T const& other) const -> bool
     {
         return it_ != other;
     }
 
-    auto underlying() const -> Iter { return it_; }
+    [[nodiscard]] auto underlying() const -> Iter { return it_; }
 
    private:
     Iter it_;

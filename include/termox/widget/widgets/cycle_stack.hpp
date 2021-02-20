@@ -76,7 +76,8 @@ class Cycle_stack : public layout::Vertical<> {
 
 /// Helper function to create an instance.
 template <typename Child = Widget, typename... Args>
-auto cycle_stack(Args&&... args) -> std::unique_ptr<Cycle_stack<Child>>
+[[nodiscard]] auto cycle_stack(Args&&... args)
+    -> std::unique_ptr<Cycle_stack<Child>>
 {
     return std::make_unique<Cycle_stack<Child>>(std::forward<Args>(args)...);
 }

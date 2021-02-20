@@ -16,7 +16,7 @@ class Unique_space {
     using Position_list = std::vector<int>;
 
    public:
-    auto calculate_lengths(Widget& parent) -> Length_list
+    [[nodiscard]] auto calculate_lengths(Widget& parent) -> Length_list
     {
         auto result      = Length_list{};
         auto const limit = typename Parameters::Secondary::get_length{}(parent);
@@ -37,16 +37,17 @@ class Unique_space {
         return result;
     }
 
-    auto calculate_positions(Length_list const& lengths) -> Position_list
+    [[nodiscard]] auto calculate_positions(Length_list const& lengths)
+        -> Position_list
     {
         return Position_list(lengths.size(), 0);
     }
 
     /// Return the child Widget offset, the first widget included in the layout.
-    auto get_offset() const -> std::size_t { return offset_; }
+    [[nodiscard]] auto get_offset() const -> std::size_t { return offset_; }
 
     /// Sets the child Widget offset, does not do bounds checking.
-    auto set_offset(std::size_t index) { offset_ = index; }
+    void set_offset(std::size_t index) { offset_ = index; }
 
    private:
     std::size_t offset_ = 0;

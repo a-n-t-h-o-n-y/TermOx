@@ -14,7 +14,7 @@ auto Border_offset::east_disqualified(Widget const& w) -> bool
 {
     if (w.outer_width() <= 1)
         return true;
-    if (w.outer_width() == 2 && w.border.segments.west.enabled())
+    if (w.outer_width() == 2 && w.border.segments.west.is_enabled())
         return true;
     return false;
 }
@@ -28,7 +28,7 @@ auto Border_offset::south_disqualified(Widget const& w) -> bool
 {
     if (w.outer_height() <= 1)
         return true;
-    if (w.outer_height() == 2 && w.border.segments.north.enabled())
+    if (w.outer_height() == 2 && w.border.segments.north.is_enabled())
         return true;
     return false;
 }
@@ -56,29 +56,33 @@ auto Border_offset::south(Widget const& w) -> int
 auto Border_offset::west_enabled(Widget const& w) -> bool
 {
     auto const& b = w.border.segments;
-    return w.border.enabled() && (b.west.enabled() || b.north_west.enabled() ||
-                                  b.south_west.enabled());
+    return w.border.is_enabled() &&
+           (b.west.is_enabled() || b.north_west.is_enabled() ||
+            b.south_west.is_enabled());
 }
 
 auto Border_offset::east_enabled(Widget const& w) -> bool
 {
     auto const& b = w.border.segments;
-    return w.border.enabled() && (b.east.enabled() || b.north_east.enabled() ||
-                                  b.south_east.enabled());
+    return w.border.is_enabled() &&
+           (b.east.is_enabled() || b.north_east.is_enabled() ||
+            b.south_east.is_enabled());
 }
 
 auto Border_offset::north_enabled(Widget const& w) -> bool
 {
     auto const& b = w.border.segments;
-    return w.border.enabled() && (b.north.enabled() || b.north_east.enabled() ||
-                                  b.north_west.enabled());
+    return w.border.is_enabled() &&
+           (b.north.is_enabled() || b.north_east.is_enabled() ||
+            b.north_west.is_enabled());
 }
 
 auto Border_offset::south_enabled(Widget const& w) -> bool
 {
     auto const& b = w.border.segments;
-    return w.border.enabled() && (b.south.enabled() || b.south_east.enabled() ||
-                                  b.south_west.enabled());
+    return w.border.is_enabled() &&
+           (b.south.is_enabled() || b.south_east.is_enabled() ||
+            b.south_west.is_enabled());
 }
 
 }  // namespace ox::detail

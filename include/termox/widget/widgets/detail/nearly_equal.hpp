@@ -10,7 +10,7 @@ namespace ox::detail {
 
 /// Type punning to reinterpret a value of U as T.
 template <typename Result_t, typename Input_t>
-auto reinterpret(Input_t const& value) -> Result_t
+[[nodiscard]] auto reinterpret(Input_t const& value) -> Result_t
 {
     static_assert(std::is_trivially_copyable<Result_t>::value and
                       std::is_trivially_copyable<Input_t>::value,
@@ -23,7 +23,7 @@ auto reinterpret(Input_t const& value) -> Result_t
 }
 
 /// Return true if there are no floating point values between \p a and \p b.
-inline auto is_nearly_equal(double a, double b) -> bool
+[[nodiscard]] inline auto is_nearly_equal(double a, double b) -> bool
 {
     auto const max_ulps_difference = 1;
     return std::abs(reinterpret<std::int64_t>(a) -
@@ -31,7 +31,7 @@ inline auto is_nearly_equal(double a, double b) -> bool
 }
 
 /// Return true if \p value is nearly equal to the next greatest whole number.
-inline auto is_nearly_whole(double value) -> bool
+[[nodiscard]] inline auto is_nearly_whole(double value) -> bool
 {
     return is_nearly_equal(value, std::ceil(value));
 }
@@ -39,7 +39,7 @@ inline auto is_nearly_whole(double value) -> bool
 /// Round up towards the nearest whole number greater than \p value.
 /** Only rounds up if there are no floating point values between \p value and
  *  the next whole number. */
-inline auto ceil_if_nearly_whole(double value) -> double
+[[nodiscard]] inline auto ceil_if_nearly_whole(double value) -> double
 {
     if (is_nearly_whole(value))
         value = std::ceil(value);

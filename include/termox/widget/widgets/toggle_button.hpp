@@ -34,6 +34,7 @@ class Toggle_button : public layout::Stack<Button> {
         this->give_focus_on_change(false);
     }
 
+   public:
     /// Display the top button, without emitting any Signals.
     void show_top() { this->set_active_page(top_index_); }
 
@@ -56,7 +57,8 @@ class Toggle_button : public layout::Stack<Button> {
 
 /// Helper function to create an instance.
 template <typename... Args>
-auto toggle_button(Args&&... args) -> std::unique_ptr<Toggle_button>
+[[nodiscard]] auto toggle_button(Args&&... args)
+    -> std::unique_ptr<Toggle_button>
 {
     return std::make_unique<Toggle_button>(std::forward<Args>(args)...);
 }

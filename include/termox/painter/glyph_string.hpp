@@ -109,16 +109,16 @@ class Glyph_string : private std::vector<Glyph> {
    public:
     /// Return the number of Glyphs in *this Glyph_string.
     /** Same as size() member function. */
-    auto length() const -> int { return this->size(); }
+    [[nodiscard]] auto length() const -> int { return this->size(); }
 
     /// Return the number of Glyphs in *this Glyph_string.
     /** Same as length() member function. */
-    auto size() const -> int { return this->vector::size(); }
+    [[nodiscard]] auto size() const -> int { return this->vector::size(); }
 
    public:
     /// Convert to a std::u32string, each Glyph being a char32_t.
     /** All Brush attributes are lost. */
-    auto u32str() const -> std::u32string
+    [[nodiscard]] auto u32str() const -> std::u32string
     {
         auto result = std::u32string{};
         result.reserve(this->size());
@@ -130,7 +130,10 @@ class Glyph_string : private std::vector<Glyph> {
     /// Convert to a std::string.
     /** Each Glyph::symbols is converted to a (potentially) multi-byte char
      *  string. All Brush attributes are lost. */
-    auto str() const -> std::string { return u32_to_mb(this->u32str()); }
+    [[nodiscard]] auto str() const -> std::string
+    {
+        return u32_to_mb(this->u32str());
+    }
 
    public:
     /// Add \p traits to every Glyph contained in *this.
@@ -227,7 +230,7 @@ inline auto operator|(Glyph_string& gs, Traits t) -> Glyph_string&
     return gs;
 }
 
-inline auto operator|(Glyph_string&& gs, Traits t) -> Glyph_string
+[[nodiscard]] inline auto operator|(Glyph_string&& gs, Traits t) -> Glyph_string
 {
     return gs | t;
 }
@@ -235,22 +238,25 @@ inline auto operator|(Glyph_string&& gs, Traits t) -> Glyph_string
 }  // namespace ox
 
 namespace esc {  // For ADL; Trait(s) is really in namespace::esc.
-inline auto operator|(char32_t const* gs, Trait t) -> ox::Glyph_string
+[[nodiscard]] inline auto operator|(char32_t const* gs, Trait t)
+    -> ox::Glyph_string
 {
     return ox::Glyph_string{gs} | t;
 }
 
-inline auto operator|(char32_t const* gs, Traits t) -> ox::Glyph_string
+[[nodiscard]] inline auto operator|(char32_t const* gs, Traits t)
+    -> ox::Glyph_string
 {
     return ox::Glyph_string{gs} | t;
 }
 
-inline auto operator|(char const* gs, Trait t) -> ox::Glyph_string
+[[nodiscard]] inline auto operator|(char const* gs, Trait t) -> ox::Glyph_string
 {
     return ox::Glyph_string{gs} | t;
 }
 
-inline auto operator|(char const* gs, Traits t) -> ox::Glyph_string
+[[nodiscard]] inline auto operator|(char const* gs, Traits t)
+    -> ox::Glyph_string
 {
     return ox::Glyph_string{gs} | t;
 }
@@ -265,12 +271,14 @@ inline auto operator|(Glyph_string& gs, Background_color c) -> Glyph_string&
     return gs;
 }
 
-inline auto operator|(Glyph_string&& gs, Background_color c) -> Glyph_string
+[[nodiscard]] inline auto operator|(Glyph_string&& gs, Background_color c)
+    -> Glyph_string
 {
     return gs | c;
 }
 
-inline auto operator|(char32_t const* gs, Background_color c) -> Glyph_string
+[[nodiscard]] inline auto operator|(char32_t const* gs, Background_color c)
+    -> Glyph_string
 {
     return Glyph_string{gs} | c;
 }
@@ -282,12 +290,14 @@ inline auto operator|(Glyph_string& gs, Foreground_color c) -> Glyph_string&
     return gs;
 }
 
-inline auto operator|(Glyph_string&& gs, Foreground_color c) -> Glyph_string
+[[nodiscard]] inline auto operator|(Glyph_string&& gs, Foreground_color c)
+    -> Glyph_string
 {
     return gs | c;
 }
 
-inline auto operator|(char32_t const* gs, Foreground_color c) -> Glyph_string
+[[nodiscard]] inline auto operator|(char32_t const* gs, Foreground_color c)
+    -> Glyph_string
 {
     return Glyph_string{gs} | c;
 }
@@ -302,13 +312,13 @@ inline auto operator|(Glyph_string& gs, Brush b) -> Glyph_string&
 }
 
 /// Assigns the Brush \p b to each Glyph in \p gs.
-inline auto operator|(Glyph_string&& gs, Brush b) -> Glyph_string
+[[nodiscard]] inline auto operator|(Glyph_string&& gs, Brush b) -> Glyph_string
 {
     return gs | b;
 }
 
 /// Assigns the Brush \p b to each Glyph in \p gs.
-inline auto operator|(char32_t const* gs, Brush b) -> Glyph_string
+[[nodiscard]] inline auto operator|(char32_t const* gs, Brush b) -> Glyph_string
 {
     return Glyph_string{gs} | b;
 }
@@ -316,13 +326,15 @@ inline auto operator|(char32_t const* gs, Brush b) -> Glyph_string
 // Comparison ------------------------------------------------------------------
 
 /// Equality comparison on each Glyph in the Glyph_strings.
-inline auto operator==(Glyph_string const& x, Glyph_string const& y) -> bool
+[[nodiscard]] inline auto operator==(Glyph_string const& x,
+                                     Glyph_string const& y) -> bool
 {
     return std::equal(std::begin(x), std::end(x), std::begin(y), std::end(y));
 }
 
 /// Inequality comparison on each Glyph in the Glyph_strings.
-inline auto operator!=(Glyph_string const& x, Glyph_string const& y) -> bool
+[[nodiscard]] inline auto operator!=(Glyph_string const& x,
+                                     Glyph_string const& y) -> bool
 {
     return !(x == y);
 }

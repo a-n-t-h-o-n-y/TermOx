@@ -23,6 +23,7 @@ class Textbox : public detail::Textbox_base {
         this->focus_policy = Focus_policy::Strong;
     }
 
+   public:
     /// Enable the mouse scroll wheel to scroll the display up and down.
     /** Enabled by default at construction. */
     void enable_scrollwheel(bool enable = true) { scroll_wheel_ = enable; }
@@ -32,7 +33,10 @@ class Textbox : public detail::Textbox_base {
     void disable_scrollwheel(bool disable = true) { scroll_wheel_ = !disable; }
 
     /// Return if the mouse scroll wheel is enabled.
-    auto scrollwheel_enabled() const -> bool { return scroll_wheel_; }
+    [[nodiscard]] auto scrollwheel_enabled() const -> bool
+    {
+        return scroll_wheel_;
+    }
 
     /// Set the number of lines a single scroll will move the display by.
     /** Default wheel speed is 1. */
@@ -77,7 +81,7 @@ class Textbox : public detail::Textbox_base {
 
 /// Helper function to create an instance.
 template <typename... Args>
-auto textbox(Args&&... args) -> std::unique_ptr<Textbox>
+[[nodiscard]] auto textbox(Args&&... args) -> std::unique_ptr<Textbox>
 {
     return std::make_unique<Textbox>(std::forward<Args>(args)...);
 }

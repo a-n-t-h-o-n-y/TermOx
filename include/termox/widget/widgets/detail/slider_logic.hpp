@@ -31,6 +31,7 @@ class Slider_logic {
         this->set_value(minimum_);
     }
 
+   public:
     /// Set the minimum value the slider can take on.
     /** Modifies maximum to be min + 1 if max <= min. */
     void set_minimum(Value_t min)
@@ -54,10 +55,10 @@ class Slider_logic {
     }
 
     /// Return the smallest possible value for the slider.
-    auto minimum() const -> Value_t { return minimum_; }
+    [[nodiscard]] auto minimum() const -> Value_t { return minimum_; }
 
     /// Return the largest possible value for the slider.
-    auto maximum() const -> Value_t { return maximum_; }
+    [[nodiscard]] auto maximum() const -> Value_t { return maximum_; }
 
     /// Increment the current value by \p amount.
     void increment(Value_t amount = 1)
@@ -87,7 +88,7 @@ class Slider_logic {
     }
 
     /// Return the position of the current value in the slider as a ratio.
-    auto ratio() const -> double { return ratio_; };
+    [[nodiscard]] auto ratio() const -> double { return ratio_; };
 
     /// Set the current value of the slider and emit signal.
     void set_value(Value_t value)
@@ -102,14 +103,14 @@ class Slider_logic {
     }
 
     /// Return the current value.
-    auto value() const -> Value_t
+    [[nodiscard]] auto value() const -> Value_t
     {
         return minimum_ + std::floor(detail::ceil_if_nearly_whole(
                               ratio_ * this->length()));
     }
 
     /// Return the distance between the maximum and minimum.
-    auto length() const -> Value_t { return maximum_ - minimum_; }
+    [[nodiscard]] auto length() const -> Value_t { return maximum_ - minimum_; }
 
    private:
     Value_t minimum_ = 0;

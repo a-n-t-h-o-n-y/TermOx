@@ -155,14 +155,12 @@ struct Two_lists : Pair<layout::Vertical<My_check_list>> {
         *this | pipe::strong_focus() | pipe::on_focus_in([this] {
             ox::System::set_focus(this->get_children().front());
         });
-        this->find_child_if(
-            [](My_check_list const& l) { return l.name().empty(); });
         this->foo();
     }
 
     void foo() const
     {
-        this->find_child_if(
+        (void)this->find_child_if(
             [](My_check_list const& l) { return l.name().empty(); });
     }
 };

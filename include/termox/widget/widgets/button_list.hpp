@@ -75,7 +75,7 @@ class Button_list : public layout::Opposite_t<Layout_t<Widget>> {
 
 /// Helper function to create an instance.
 template <template <typename> class Layout_t>
-auto button_list() -> std::unique_ptr<Button_list<Layout_t>>
+[[nodiscard]] auto button_list() -> std::unique_ptr<Button_list<Layout_t>>
 {
     return std::make_unique<Button_list<Layout_t>>();
 }

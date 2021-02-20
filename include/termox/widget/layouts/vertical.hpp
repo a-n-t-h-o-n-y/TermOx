@@ -9,47 +9,59 @@
 namespace ox::layout::v_detail {
 
 struct Get_area {
-    auto operator()(int primary, int secondary) const -> Area
+    [[nodiscard]] auto operator()(int primary, int secondary) const -> Area
     {
         return {secondary, primary};
     }
 };
 
 struct Get_point {
-    auto operator()(int primary, int secondary) const -> Point
+    [[nodiscard]] auto operator()(int primary, int secondary) const -> Point
     {
         return {secondary, primary};
     }
 };
 
 struct Primary_policy {
-    auto operator()(Widget const& w) const -> Size_policy const&
+    [[nodiscard]] auto operator()(Widget const& w) const -> Size_policy const&
     {
         return w.height_policy;
     }
 };
 
 struct Primary_length {
-    auto operator()(Widget const& w) const -> int { return w.height(); }
+    [[nodiscard]] auto operator()(Widget const& w) const -> int
+    {
+        return w.height();
+    }
 };
 
 struct Primary_offset {
-    auto operator()(Widget const& w) const -> int { return w.inner_y(); }
+    [[nodiscard]] auto operator()(Widget const& w) const -> int
+    {
+        return w.inner_y();
+    }
 };
 
 struct Secondary_policy {
-    auto operator()(Widget const& w) const -> Size_policy const&
+    [[nodiscard]] auto operator()(Widget const& w) const -> Size_policy const&
     {
         return w.width_policy;
     }
 };
 
 struct Secondary_length {
-    auto operator()(Widget const& w) const -> int { return w.width(); }
+    [[nodiscard]] auto operator()(Widget const& w) const -> int
+    {
+        return w.width();
+    }
 };
 
 struct Secondary_offset {
-    auto operator()(Widget const& w) const -> int { return w.inner_x(); }
+    [[nodiscard]] auto operator()(Widget const& w) const -> int
+    {
+        return w.inner_x();
+    }
 };
 
 using Primary = detail::Dimension_parameters<Primary_policy,
@@ -74,7 +86,8 @@ using Vertical = detail::Linear_layout<Child_t, v_detail::Vertical_parameters>;
 
 /// Helper function to create an instance.
 template <typename Widget_t = Widget, typename... Args>
-auto vertical(Args&&... args) -> std::unique_ptr<Vertical<Widget_t>>
+[[nodiscard]] auto vertical(Args&&... args)
+    -> std::unique_ptr<Vertical<Widget_t>>
 {
     return std::make_unique<Vertical<Widget_t>>(std::forward<Args>(args)...);
 }

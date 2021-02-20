@@ -57,7 +57,7 @@ class Set : public Layout_t {
     /// Find a child widget by its key type(the result of the Projection fn).
     /** Uses the Projection function on each child until a result equal to \p
      *  key is found. Retuns nullptr if no child found. */
-    auto find_child(Key_t const& key) -> Child_t*
+    [[nodiscard]] auto find_child(Key_t const& key) -> Child_t*
     {
         return this->get_children().find(
             [&key](auto const& c) { return Projection{}(c) == key; });
@@ -75,7 +75,8 @@ template <typename Layout_t,
                                    std::add_const_t<std::add_lvalue_reference_t<
                                        typename Layout_t::Child_t>>>>,
           typename... Args>
-auto set(Args&&... args) -> std::unique_ptr<Set<Projection, Comparison>>
+[[nodiscard]] auto set(Args&&... args)
+    -> std::unique_ptr<Set<Projection, Comparison>>
 {
     return std::make_unique<Set<Projection, Comparison>>(
         std::forward<Args>(args)...);

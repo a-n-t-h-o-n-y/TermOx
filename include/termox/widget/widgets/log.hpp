@@ -25,7 +25,7 @@ class Log : public Textbox {
 
 /// Helper function to create an instance.
 template <typename... Args>
-auto log(Args&&... args) -> std::unique_ptr<Log>
+[[nodiscard]] auto log(Args&&... args) -> std::unique_ptr<Log>
 {
     return std::make_unique<Log>(std::forward<Args>(args)...);
 }
@@ -34,8 +34,10 @@ auto log(Args&&... args) -> std::unique_ptr<Log>
 
 namespace ox::slot {
 
-auto post_message(Log& log) -> sl::Slot<void(Glyph_string)>;
-auto post_message(Log& log, Glyph_string const& message) -> sl::Slot<void()>;
+[[nodiscard]] auto post_message(Log& log) -> sl::Slot<void(Glyph_string)>;
+
+[[nodiscard]] auto post_message(Log& log, Glyph_string const& message)
+    -> sl::Slot<void()>;
 
 }  // namespace ox::slot
 #endif  // TERMOX_WIDGET_WIDGETS_LOG_HPP

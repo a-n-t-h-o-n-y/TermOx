@@ -22,7 +22,7 @@ class Rainbow {
     {}
 
    public:
-    auto operator()() -> True_color
+    [[nodiscard]] auto operator()() -> True_color
     {
         return True_color{
             HSL{this->postincrement_hue(), saturation_, lightness_}};
@@ -35,7 +35,7 @@ class Rainbow {
 
    private:
     // Increments hue_, then returns the previous value, wraps at 360.
-    auto postincrement_hue() -> std::uint16_t
+    [[nodiscard]] auto postincrement_hue() -> std::uint16_t
     {
         auto const old = hue_;
         if (++hue_ == 360)
@@ -45,7 +45,7 @@ class Rainbow {
 };
 
 /// Returns a Rainbow Dynamic_color object. Convinience for defining palettes.
-inline auto rainbow(
+[[nodiscard]] inline auto rainbow(
     Dynamic_color::Period_t period = std::chrono::milliseconds{40},
     std::uint8_t saturation        = 75,
     std::uint8_t lightness         = 75) -> Dynamic_color
@@ -64,7 +64,7 @@ class Modulation_base {
 
    protected:
     /// Finds the next ratio between from the current step and resolution.
-    auto get_next_ratio() -> double
+    [[nodiscard]] auto get_next_ratio() -> double
     {
         return this->post_increment_step() / step_total_;
     }
@@ -75,7 +75,7 @@ class Modulation_base {
 
    private:
     /// Apply a wrapping post increment to step_ and return the previous value.
-    auto post_increment_step() -> int
+    [[nodiscard]] auto post_increment_step() -> int
     {
         return step_ == step_total_ ? (step_ = 0, step_total_) : step_++;
     }
@@ -87,7 +87,10 @@ class Invert : public Function {
     using Function::Function;
 
    public:
-    auto operator()() -> double { return -1. * Function::operator()() + 1.; }
+    [[nodiscard]] auto operator()() -> double
+    {
+        return -1. * Function::operator()() + 1.;
+    }
 };
 
 template <typename Function>
@@ -96,7 +99,10 @@ class Concave : public Function {
     using Function::Function;
 
    public:
-    auto operator()() -> double { return std::pow(Function::operator()(), 2.); }
+    [[nodiscard]] auto operator()() -> double
+    {
+        return std::pow(Function::operator()(), 2.);
+    }
 };
 
 template <typename Function>
@@ -105,7 +111,10 @@ class Convex : public Function {
     using Function::Function;
 
    public:
-    auto operator()() -> double { return std::sqrt(Function::operator()()); }
+    [[nodiscard]] auto operator()() -> double
+    {
+        return std::sqrt(Function::operator()());
+    }
 };
 
 class Triangle : private Modulation_base {
@@ -115,7 +124,7 @@ class Triangle : private Modulation_base {
 
    public:
     /// Returns value in range [0.0, 1.0]
-    auto operator()() -> double
+    [[nodiscard]] auto operator()() -> double
     {
         return -1. * std::abs(2 * this->get_next_ratio() - 1.) + 1.;
     }
@@ -128,7 +137,7 @@ class Sine : private Modulation_base {
 
    public:
     /// Returns value in range [0.0, 1.0]
-    auto operator()() -> double
+    [[nodiscard]] auto operator()() -> double
     {
         auto constexpr pi = 3.1416;
         return .5 * (1 + std::sin(2 * pi * (this->get_next_ratio() - .25)));
@@ -142,7 +151,7 @@ class Sawtooth_up : private Modulation_base {
 
    public:
     /// Returns value in range [0.0, 1.0]
-    auto operator()() -> double { return this->get_next_ratio(); }
+    [[nodiscard]] auto operator()() -> double { return this->get_next_ratio(); }
 };
 
 class Sawtooth_down : public Invert<Sawtooth_up> {
@@ -157,7 +166,7 @@ class Square : private Modulation_base {
 
    public:
     /// Returns value in range [0.0, 1.0]
-    auto operator()() -> double
+    [[nodiscard]] auto operator()() -> double
     {
         return this->get_next_ratio() < 0.5 ? 0. : 1.;
     }
@@ -170,7 +179,7 @@ class Random : private Modulation_base {
 
    public:
     /// Returns value in range [0.0, 1.0]
-    auto operator()() -> double { return dist_(gen_); }
+    [[nodiscard]] auto operator()() -> double { return dist_(gen_); }
 
    private:
     std::mt19937 gen_{std::random_device{}()};
@@ -190,7 +199,7 @@ class Fade {
     {}
 
    public:
-    auto operator()() -> True_color { return this->step(); }
+    [[nodiscard]] auto operator()() -> True_color { return this->step(); }
 
    private:
     /// Holds the difference between two HSL values.
@@ -207,14 +216,14 @@ class Fade {
 
    private:
     /// Return HSL_diff composed of the distance between \p a and \p b.
-    static auto find_distance(HSL a, HSL b) -> HSL_diff
+    [[nodiscard]] static auto find_distance(HSL a, HSL b) -> HSL_diff
     {
         return {b.hue - a.hue, b.saturation - a.saturation,
                 b.lightness - a.lightness};
     }
 
     /// Performs a single step and returns the calculated HSL value.
-    auto step() -> HSL
+    [[nodiscard]] auto step() -> HSL
     {
         double const ratio = shape_fn_();
 
@@ -226,7 +235,9 @@ class Fade {
     }
 
     // Use to create an HSL from double values, performs narrowing conversions.
-    static auto shrink(double hue, double saturation, double lightness) -> HSL
+    [[nodiscard]] static auto shrink(double hue,
+                                     double saturation,
+                                     double lightness) -> HSL
     {
         return {static_cast<std::uint16_t>(hue),
                 static_cast<std::uint8_t>(saturation),
@@ -236,22 +247,22 @@ class Fade {
 
 /// Returns a Fade Dynamic_color object. Convinience for defining palettes.
 template <typename Shape>
-auto fade(HSL a,
-          HSL b,
-          unsigned resolution              = 400,
-          Dynamic_color::Period_t interval = std::chrono::milliseconds{40})
-    -> Dynamic_color
+[[nodiscard]] auto fade(HSL a,
+                        HSL b,
+                        unsigned resolution = 400,
+                        Dynamic_color::Period_t interval =
+                            std::chrono::milliseconds{40}) -> Dynamic_color
 {
     return {interval, Fade{a, b, Shape{resolution}}};
 }
 
 /// Returns a Fade Dynamic_color object. Convinience for defining palettes.
 template <typename Shape>
-auto fade(True_color a,
-          True_color b,
-          unsigned resolution              = 400,
-          Dynamic_color::Period_t interval = std::chrono::milliseconds{40})
-    -> Dynamic_color
+[[nodiscard]] auto fade(True_color a,
+                        True_color b,
+                        unsigned resolution = 400,
+                        Dynamic_color::Period_t interval =
+                            std::chrono::milliseconds{40}) -> Dynamic_color
 {
     return fade<Shape>(esc::rgb_to_hsl({a.red, a.green, a.blue}),
                        esc::rgb_to_hsl({b.red, b.green, b.blue}), resolution,

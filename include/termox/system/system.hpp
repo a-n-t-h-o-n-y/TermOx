@@ -43,6 +43,7 @@ class System {
         Terminal::uninitialize();
     }
 
+   public:
     /// Return a pointer to the currently focused Widget.
     [[nodiscard]] static auto focus_widget() -> Widget*;
 
@@ -67,7 +68,7 @@ class System {
     /// Return a pointer to the head Widget.
     /** This Widget is the ancestor of every other widget that will be displayed
      *  on the screen. */
-    static auto head() -> Widget* { return head_; }
+    [[nodiscard]] static auto head() -> Widget* { return head_; }
 
     /// Create a Widget_t object, set it as head widget and call System::run().
     /** \p args... are passed on to the Widget_t constructor. Blocks until
@@ -148,7 +149,10 @@ class System {
     }
 
     /// Return whether System has gotten an exit request, set by System::exit()
-    static auto is_exit_requested() -> bool { return exit_requested_; }
+    [[nodiscard]] static auto is_exit_requested() -> bool
+    {
+        return exit_requested_;
+    }
 
     /// Set the terminal cursor via \p cursor parameters and \p offset applied.
     static void set_cursor(Cursor cursor, Point offset)

@@ -108,7 +108,7 @@ class Line_edit : public Textbox {
 
 /// Helper function to create an instance.
 template <typename... Args>
-auto line_edit(Args&&... args) -> std::unique_ptr<Line_edit>
+[[nodiscard]] auto line_edit(Args&&... args) -> std::unique_ptr<Line_edit>
 {
     return std::make_unique<Line_edit>(std::forward<Args>(args)...);
 }

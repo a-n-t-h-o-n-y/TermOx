@@ -43,7 +43,7 @@ class Timer {
    private:
     /// Return the time to sleep, interval minus time since begin() called.
     /** Returns zero time if that would be negative. */
-    auto get_sleep_time() const -> Clock_t::duration
+    [[nodiscard]] auto get_sleep_time() const -> Clock_t::duration
     {
         auto const elapsed = Clock_t::now() - last_time_;
         return std::max(Clock_t::duration::zero(), interval_ - elapsed);

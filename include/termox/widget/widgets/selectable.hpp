@@ -16,6 +16,7 @@ class Selectable : public Widget_t {
         : select_{std::move(s)}, unselect_{std::move(u)}
     {}
 
+   public:
     /// Change visual to mark as selected.
     void select() { select_(*this); }
 
@@ -29,7 +30,7 @@ class Selectable : public Widget_t {
 
 /// Helper function to create an instance.
 template <typename Widget_t, typename Select_method, typename Unselect_method>
-auto selectable(Select_method s, Unselect_method u)
+[[nodiscard]] auto selectable(Select_method s, Unselect_method u)
     -> std::unique_ptr<Selectable<Widget_t, Select_method, Unselect_method>>
 {
     return std::make_unique<
@@ -58,7 +59,7 @@ class Selectable<Widget_t, void, void> : public Widget_t {
 
 /// Helper function to create an instance.
 template <typename Widget_t>
-auto selectable() -> std::unique_ptr<Selectable<Widget_t>>
+[[nodiscard]] auto selectable() -> std::unique_ptr<Selectable<Widget_t>>
 {
     return std::make_unique<Selectable<Widget_t>>();
 }

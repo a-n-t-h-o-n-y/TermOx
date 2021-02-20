@@ -44,6 +44,7 @@ class Text_display : public Widget {
         : contents_{std::move(contents)}
     {}
 
+   public:
     /// Replace the current contents with \p text.
     /** Reset the display to show the first line at the top of the screen and
      *  the cursor at the first Glyph, or where the first Glyph would be. */
@@ -86,7 +87,7 @@ class Text_display : public Widget {
     }
 
     /// Return the currently used Alignment.
-    auto alignment() const -> Align { return alignment_; }
+    [[nodiscard]] auto alignment() const -> Align { return alignment_; }
 
     /// Scroll the display up by \p n lines.
     /** Tops out at the first line displayed at the top of the display. */
@@ -119,14 +120,14 @@ class Text_display : public Widget {
 
     /// Return the length of the line at row \p y.
     /** Index 0 is the top of the Widget. */
-    auto row_length(int y) const -> int
+    [[nodiscard]] auto row_length(int y) const -> int
     {
         const auto line = this->top_line() + y;
         return this->line_length(line);
     }
 
     /// Return the number of lines currently displayed.
-    auto display_height() const -> int
+    [[nodiscard]] auto display_height() const -> int
     {
         int difference = 1 + this->last_line() - this->top_line();
         if (difference > this->height())
@@ -135,7 +136,10 @@ class Text_display : public Widget {
     }
 
     /// Return the total number of lines in display_state_.
-    auto line_count() const -> int { return display_state_.size(); }
+    [[nodiscard]] auto line_count() const -> int
+    {
+        return display_state_.size();
+    }
 
     /// Set the top line, by row index.
     void set_top_line(int n)
@@ -149,24 +153,30 @@ class Text_display : public Widget {
     /** If \p position is past any text on the corresponding line, then return
      *  index of the last Glyph on that line. If Point is past displayed lines,
      *  return the index of the last Glyph in contents. */
-    auto index_at(Point position) const -> int;
+    [[nodiscard]] auto index_at(Point position) const -> int;
 
     /// Return the position of the Glyph at \p index.
     /** If \p index is not currently displayed on screen, return the closest
      *  Glyph position to \p index that is displayed on screen. */
-    auto display_position(int index) const -> Point;
+    [[nodiscard]] auto display_position(int index) const -> Point;
 
     /// Return the entire contents of the Text_display.
     /** Provided as a non-const reference so contents can be modified without
      *  limitation from the Text_display interface. Be sure to call
      *  Text_display::update() after modifying the contents directly. */
-    auto contents() -> Glyph_string& { return contents_; }
+    [[nodiscard]] auto contents() -> Glyph_string& { return contents_; }
 
     /// Return the entire contents of the Text_display.
-    auto contents() const -> Glyph_string const& { return contents_; }
+    [[nodiscard]] auto contents() const -> Glyph_string const&
+    {
+        return contents_;
+    }
 
     /// Return whether word wrapping is enabled.
-    auto word_wrap_enabled() const -> bool { return word_wrap_enabled_; }
+    [[nodiscard]] auto word_wrap_enabled() const -> bool
+    {
+        return word_wrap_enabled_;
+    }
 
     /// Add call to Text_display::update_display() before posting Paint_event.
     void update() override
@@ -184,23 +194,26 @@ class Text_display : public Widget {
     auto paint_event(Painter& p) -> bool override;
 
     /// Return the line number that contains \p index.
-    auto line_at(int index) const -> int;
+    [[nodiscard]] auto line_at(int index) const -> int;
 
     /// Return the line number that is being displayed at the top of the Widget.
-    auto top_line() const -> int { return top_line_; }
+    [[nodiscard]] auto top_line() const -> int { return top_line_; }
 
     /// Return line number that is being displayed at the bottom of the Widget.
-    auto bottom_line() const -> int
+    [[nodiscard]] auto bottom_line() const -> int
     {
         auto const line = this->top_line() + this->display_height() - 1;
         return line < 0 ? 0 : line;
     }
 
     /// Return the index into display_state_ of the last line.
-    auto last_line() const -> int { return display_state_.size() - 1; }
+    [[nodiscard]] auto last_line() const -> int
+    {
+        return display_state_.size() - 1;
+    }
 
     /// Return the index of the first Glyph at line number \p line.
-    auto first_index_at(int line) const -> int
+    [[nodiscard]] auto first_index_at(int line) const -> int
     {
         if (line >= (int)display_state_.size())
             line = display_state_.size() - 1;
@@ -208,7 +221,7 @@ class Text_display : public Widget {
     }
 
     /// Return the index of the last Glyph at line number \p line.
-    auto last_index_at(int line) const -> int
+    [[nodiscard]] auto last_index_at(int line) const -> int
     {
         const auto next_line = line + 1;
         if (next_line >= (int)display_state_.size())
@@ -217,7 +230,7 @@ class Text_display : public Widget {
     }
 
     /// Return the number of Glyphs contained at line index \p line
-    auto line_length(int line) const -> int
+    [[nodiscard]] auto line_length(int line) const -> int
     {
         if (line >= (int)display_state_.size())
             line = display_state_.size() - 1;
@@ -226,7 +239,7 @@ class Text_display : public Widget {
 
     /// Return the index of the last Glyph in contents.
     /** Can give an incorrect result if contents is empty. */
-    auto end_index() const -> int
+    [[nodiscard]] auto end_index() const -> int
     {
         return this->contents().empty() ? 0 : this->contents().size() - 1;
     }
@@ -253,7 +266,7 @@ class Text_display : public Widget {
 
 /// Helper function to create an instance.
 template <typename... Args>
-auto text_display(Args&&... args) -> std::unique_ptr<Text_display>
+[[nodiscard]] auto text_display(Args&&... args) -> std::unique_ptr<Text_display>
 {
     return std::make_unique<Text_display>(std::forward<Args>(args)...);
 }

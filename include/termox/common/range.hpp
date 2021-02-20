@@ -10,10 +10,10 @@ struct Range {
 
    public:
     /// Return the iterator to the beginning of the Range.
-    auto begin() const { return begin_; }
+    [[nodiscard]] auto begin() const { return begin_; }
 
     /// Return the iterator to the end of the Range.
-    auto end() const { return end_; }
+    [[nodiscard]] auto end() const { return end_; }
 
    private:
     Iter_1 begin_;

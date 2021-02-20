@@ -29,33 +29,33 @@ class Filter_iterator {
         return *this;
     }
 
-    auto operator++(int) -> Filter_iterator
+    [[nodiscard]] auto operator++(int) -> Filter_iterator
     {
         auto copy = *this;
         copy.increment();
         return copy;
     }
 
-    auto operator*() const -> auto& { return *it_; }
+    [[nodiscard]] auto operator*() const -> auto& { return *it_; }
 
-    auto operator==(Filter_iterator const& other) const -> bool
+    [[nodiscard]] auto operator==(Filter_iterator const& other) const -> bool
     {
         return it_ == other.it_;
     }
 
-    auto operator!=(Filter_iterator const& other) const -> bool
+    [[nodiscard]] auto operator!=(Filter_iterator const& other) const -> bool
     {
         return it_ != other.it_;
     }
 
     template <typename T>
-    auto operator==(T const& other) const -> bool
+    [[nodiscard]] auto operator==(T const& other) const -> bool
     {
         return it_ == other;
     }
 
     template <typename T>
-    auto operator!=(T const& other) const -> bool
+    [[nodiscard]] auto operator!=(T const& other) const -> bool
     {
         return it_ != other;
     }

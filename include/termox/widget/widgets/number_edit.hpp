@@ -27,7 +27,7 @@ class Number_edit : public Line_edit {
 
    public:
     /// Construct a Number_edit with \p initial value.
-    Number_edit(Number_t initial = 0)
+    explicit Number_edit(Number_t initial = 0)
         : Line_edit{std::to_string(initial)}, value_{initial}
     {
         // this->set_alignment(Align::Right); // TODO Once alignment works w/ed
@@ -66,7 +66,7 @@ class Number_edit : public Line_edit {
 
    private:
     /// Verifies if \p c is a valid input for Number_t.
-    static auto is_valid_input(char c) -> bool
+    [[nodiscard]] static auto is_valid_input(char c) -> bool
     {
         auto is_separator = false;
         if constexpr (std::is_floating_point<Number_t>::value)
@@ -107,7 +107,8 @@ class Number_edit : public Line_edit {
 
 /// Helper function to create an instance.
 template <typename Number_t = int, typename... Args>
-auto number_edit(Args&&... args) -> std::unique_ptr<Number_edit<Number_t>>
+[[nodiscard]] auto number_edit(Args&&... args)
+    -> std::unique_ptr<Number_edit<Number_t>>
 {
     return std::make_unique<Number_edit<Number_t>>(std::forward<Args>(args)...);
 }
@@ -137,6 +138,7 @@ class Labeled_number_edit : public HLabel_left<Number_edit<Number_t>> {
         number_edit | bg(Color::White) | fg(Color::Black) | ghost(Color::Gray);
     }
 
+   public:
     /// Manually set the value of the Number_edit.
     /** Does not emit a value_set Signal. */
     void set_value(Number_t value) { number_edit.set_value(value); }
@@ -151,7 +153,7 @@ class Labeled_number_edit : public HLabel_left<Number_edit<Number_t>> {
 
 /// Helper function to create an instance.
 template <typename Number_t = int, typename... Args>
-auto labeled_number_edit(Args&&... args)
+[[nodiscard]] auto labeled_number_edit(Args&&... args)
     -> std::unique_ptr<Labeled_number_edit<Number_t>>
 {
     return std::make_unique<Labeled_number_edit<Number_t>>(

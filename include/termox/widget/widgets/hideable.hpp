@@ -35,7 +35,7 @@ class Hideable : public layout::Stack<> {
     void hide() { this->Stack::set_active_page(blank_index_); }
 
     /// Return if w is hidden.
-    auto is_hidden() const -> bool
+    [[nodiscard]] auto is_hidden() const -> bool
     {
         return this->Stack::active_page_index() == blank_index_;
     }
@@ -47,7 +47,8 @@ class Hideable : public layout::Stack<> {
 
 /// Helper function to create an instance.
 template <typename Widget_t, typename... Args>
-auto hideable(Args&&... args) -> std::unique_ptr<Hideable<Widget_t>>
+[[nodiscard]] auto hideable(Args&&... args)
+    -> std::unique_ptr<Hideable<Widget_t>>
 {
     return std::make_unique<Hideable<Widget_t>>(std::forward<Args>(args)...);
 }

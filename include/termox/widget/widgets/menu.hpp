@@ -1,25 +1,6 @@
 #ifndef TERMOX_WIDGET_WIDGETS_MENU_HPP
 #define TERMOX_WIDGET_WIDGETS_MENU_HPP
 #include <cstddef>
-#include <functional>
-#include <utility>
-#include <vector>
-
-#include <signals_light/signal.hpp>
-
-#include <termox/painter/glyph_string.hpp>
-#include <termox/painter/trait.hpp>
-#include <termox/system/key.hpp>
-#include <termox/system/mouse.hpp>
-#include <termox/widget/layouts/horizontal.hpp>
-#include <termox/widget/layouts/vertical.hpp>
-#include <termox/widget/pair.hpp>
-#include <termox/widget/pipe.hpp>
-#include <termox/widget/widget.hpp>
-#include <termox/widget/widgets/label.hpp>
-
-// New
-#include <cstddef>
 #include <utility>
 
 #include <signals_light/signal.hpp>
@@ -30,6 +11,7 @@
 #include <termox/widget/layouts/horizontal.hpp>
 #include <termox/widget/layouts/selecting.hpp>
 #include <termox/widget/layouts/vertical.hpp>
+#include <termox/widget/pair.hpp>
 #include <termox/widget/pipe.hpp>
 #include <termox/widget/widgets/label.hpp>
 #include <termox/widget/widgets/selectable.hpp>
@@ -41,7 +23,7 @@ class Menu_item : public Selectable<HLabel> {
     sl::Signal<void()> selected;
 
    public:
-    Menu_item(Glyph_string label)
+    explicit Menu_item(Glyph_string label)
     {
         // TODO Selectable should take Widget_t::Parameters if that type exists,
         // in the constructor.

@@ -101,7 +101,7 @@ class Textbox_base : public Text_display {
     }
 
     /// Return the index into contents that the cursor is located at.
-    auto cursor_index() const -> int
+    [[nodiscard]] auto cursor_index() const -> int
     {
         return this->index_at(this->cursor.position());
     }

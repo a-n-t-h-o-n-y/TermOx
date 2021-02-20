@@ -26,12 +26,16 @@ class Unique_queue {
     /// Used in Transform_iterator
     class Get_element {
        public:
-        auto operator()(Ordered_element const& e) const -> T const&
+        [[nodiscard]] auto operator()(Ordered_element const& e) const
+            -> T const&
         {
             return e.element;
         }
 
-        auto operator()(Ordered_element& e) const -> T& { return e.element; }
+        [[nodiscard]] auto operator()(Ordered_element& e) const -> T&
+        {
+            return e.element;
+        }
     };
 
     using Internal_container_t = std::vector<Ordered_element>;

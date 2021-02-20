@@ -200,7 +200,7 @@ class Accordion : public Layout_t<Widget> {
     }
 
     /// Return the wrapped widget.
-    auto wrapped() -> Widget_t& { return wrapped_; }
+    [[nodiscard]] auto wrapped() -> Widget_t& { return wrapped_; }
 
    private:
     Bar_t& bar_;
@@ -240,7 +240,7 @@ template <template <typename> typename Layout_t,
           typename Widget_t,
           Bar_position position = Bar_position::First,
           typename... Args>
-auto accordion(Args&&... args)
+[[nodiscard]] auto accordion(Args&&... args)
     -> std::unique_ptr<Accordion<Layout_t, Widget_t, position>>
 {
     return std::make_unique<Accordion<Layout_t, Widget_t, position>>(
@@ -250,7 +250,7 @@ auto accordion(Args&&... args)
 template <typename Widget_t,
           Bar_position position = Bar_position::First,
           typename... Args>
-auto v_accordion(Args&&... args)
+[[nodiscard]] auto v_accordion(Args&&... args)
     -> std::unique_ptr<VAccordion<Widget_t, position>>
 {
     return std::make_unique<VAccordion<Widget_t, position>>(
@@ -260,7 +260,7 @@ auto v_accordion(Args&&... args)
 template <typename Widget_t,
           Bar_position position = Bar_position::First,
           typename... Args>
-auto h_accordion(Args&&... args)
+[[nodiscard]] auto h_accordion(Args&&... args)
     -> std::unique_ptr<HAccordion<Widget_t, position>>
 {
     return std::make_unique<HAccordion<Widget_t, position>>(

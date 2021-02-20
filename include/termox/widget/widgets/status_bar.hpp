@@ -20,6 +20,7 @@ class Status_bar : public HLabel {
         : HLabel{{std::move(initial_message)}}
     {}
 
+   public:
     void update_status(Glyph_string message)
     {
         this->set_text(std::move(message));
@@ -29,7 +30,7 @@ class Status_bar : public HLabel {
 
 /// Helper function to create an instance.
 template <typename... Args>
-auto status_bar(Args&&... args) -> std::unique_ptr<Status_bar>
+[[nodiscard]] auto status_bar(Args&&... args) -> std::unique_ptr<Status_bar>
 {
     return std::make_unique<Status_bar>(std::forward<Args>(args)...);
 }
@@ -38,7 +39,7 @@ auto status_bar(Args&&... args) -> std::unique_ptr<Status_bar>
 
 namespace ox::slot {
 
-inline auto update_status(Status_bar& sb) -> sl::Slot<void(Glyph)>
+[[nodiscard]] inline auto update_status(Status_bar& sb) -> sl::Slot<void(Glyph)>
 {
     return link_lifetimes(
         [&sb](Glyph message) {
@@ -47,7 +48,8 @@ inline auto update_status(Status_bar& sb) -> sl::Slot<void(Glyph)>
         sb);
 }
 
-inline auto update_status(Status_bar& sb, Glyph_string const& message)
+[[nodiscard]] inline auto update_status(Status_bar& sb,
+                                        Glyph_string const& message)
     -> sl::Slot<void()>
 {
     return link_lifetimes([&sb, message] { sb.update_status(message); }, sb);

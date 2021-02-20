@@ -26,6 +26,7 @@ class Menu_stack : public layout::Stack<Widget> {
         this->focus_policy = Focus_policy::Direct;
     }
 
+   public:
     /// Construct and append a page to the Stack.
     /** This will construct a child Widget of type Widget_t, using \p args
      *  passed to Widget_t's constructor, and then automatically disable it.
@@ -76,7 +77,7 @@ class Menu_stack : public layout::Stack<Widget> {
     /** Useful if you need to move a page into another Widget. Use delete_page()
      *  if you want to remove a page and destroy it. No-op if index is not
      *  valid. Sets active page to menu if active page is being removed. */
-    auto remove_page(std::size_t index) -> std::unique_ptr<Widget>
+    [[nodiscard]] auto remove_page(std::size_t index) -> std::unique_ptr<Widget>
     {
         this->remove_from_menu(index + 1);
         return this->Stack::remove_page(index + 1);
@@ -92,13 +93,16 @@ class Menu_stack : public layout::Stack<Widget> {
     }
 
     /// Return the number of pages in this Stack, not including the Menu Widget.
-    auto size() const -> std::size_t { return this->Stack::size() - 1; }
+    [[nodiscard]] auto size() const -> std::size_t
+    {
+        return this->Stack::size() - 1;
+    }
 
     /// Return reference to the Menu Widget at the front of the Stack.
-    auto menu() -> Menu& { return menu_; }
+    [[nodiscard]] auto menu() -> Menu& { return menu_; }
 
     /// Return const reference to the Menu Widget at the front of the Stack.
-    auto menu() const -> Menu const& { return menu_; }
+    [[nodiscard]] auto menu() const -> Menu const& { return menu_; }
 
     /// Set the active page to the menu, useful to control returning to menu.
     void goto_menu() { this->Stack::set_active_page(menu_index_); }
@@ -133,7 +137,7 @@ class Menu_stack : public layout::Stack<Widget> {
 
 /// Helper function to create an instance.
 template <typename... Args>
-auto menu_stack(Args&&... args) -> std::unique_ptr<Menu_stack>
+[[nodiscard]] auto menu_stack(Args&&... args) -> std::unique_ptr<Menu_stack>
 {
     return std::make_unique<Menu_stack>(std::forward<Args>(args)...);
 }

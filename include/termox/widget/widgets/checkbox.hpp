@@ -107,7 +107,7 @@ class Checkbox : public Label<Layout_t> {
     }
 
     /// Return the current state of the Checkbox as Checkbox::State enum value.
-    auto get_state() const -> State { return state_; }
+    [[nodiscard]] auto get_state() const -> State { return state_; }
 
     /// Lock the Checkbox, it can not be toggled when locked.
     void lock()
@@ -128,7 +128,7 @@ class Checkbox : public Label<Layout_t> {
     }
 
     /// Return true if the Checkbox is locked.
-    auto is_locked() const -> bool { return locked_; }
+    [[nodiscard]] auto is_locked() const -> bool { return locked_; }
 
     /// Set the look of each Checkbox State.
     void set_display(Display d)
@@ -142,7 +142,7 @@ class Checkbox : public Label<Layout_t> {
     }
 
     /// Return the look of each Checkbox State.
-    auto get_display() -> Display
+    [[nodiscard]] auto get_display() -> Display
     {
         auto result = display_;
         if (locked_) {
@@ -179,14 +179,14 @@ using VCheckbox = Checkbox<layout::Vertical>;
 
 /// Helper function to create an HCheckbox instance.
 template <typename... Args>
-auto hcheckbox(Args&&... args) -> std::unique_ptr<HCheckbox>
+[[nodiscard]] auto hcheckbox(Args&&... args) -> std::unique_ptr<HCheckbox>
 {
     return std::make_unique<HCheckbox>(std::forward<Args>(args)...);
 }
 
 /// Helper function to create a VCheckbox instance.
 template <typename... Args>
-auto vcheckbox(Args&&... args) -> std::unique_ptr<VCheckbox>
+[[nodiscard]] auto vcheckbox(Args&&... args) -> std::unique_ptr<VCheckbox>
 {
     return std::make_unique<VCheckbox>(std::forward<Args>(args)...);
 }

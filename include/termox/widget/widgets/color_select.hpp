@@ -81,7 +81,7 @@ class Color_select : public layout::Vertical<Color_line> {
 
 /// Helper function to create an instance.
 template <typename... Args>
-auto color_select(Args&&... args) -> std::unique_ptr<Color_select>
+[[nodiscard]] auto color_select(Args&&... args) -> std::unique_ptr<Color_select>
 {
     return std::make_unique<Color_select>(std::forward<Args>(args)...);
 }

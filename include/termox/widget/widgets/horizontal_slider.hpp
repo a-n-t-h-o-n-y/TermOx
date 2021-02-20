@@ -30,9 +30,10 @@ class Horizontal_slider : public Widget {
             wallpaper(U' ' | bg(Color::Light_gray));
     }
 
+   public:
     void set_percent(float percent);
 
-    auto percent() const -> float { return percent_progress_; }
+    [[nodiscard]] auto percent() const -> float { return percent_progress_; }
 
    protected:
     auto paint_event(Painter& p) -> bool override
@@ -53,23 +54,25 @@ class Horizontal_slider : public Widget {
     float percent_progress_ = 0.0;
 
    private:
-    auto position_to_percent(int position) -> float;
+    [[nodiscard]] auto position_to_percent(int position) -> float;
 
-    auto percent_to_position(float percent) -> int;
+    [[nodiscard]] auto percent_to_position(float percent) -> int;
 };
 
 /// Helper function to create an instance.
 template <typename... Args>
-auto horizontal_slider(Args&&... args) -> std::unique_ptr<Horizontal_slider>
+[[nodiscard]] auto horizontal_slider(Args&&... args)
+    -> std::unique_ptr<Horizontal_slider>
 {
     return std::make_unique<Horizontal_slider>(std::forward<Args>(args)...);
 }
 
 namespace slot {
 
-auto set_percent(Horizontal_slider& s) -> sl::Slot<void(float)>;
+[[nodiscard]] auto set_percent(Horizontal_slider& s) -> sl::Slot<void(float)>;
 
-auto set_percent(Horizontal_slider& s, float percent) -> sl::Slot<void(void)>;
+[[nodiscard]] auto set_percent(Horizontal_slider& s, float percent)
+    -> sl::Slot<void(void)>;
 
 }  // namespace slot
 }  // namespace ox

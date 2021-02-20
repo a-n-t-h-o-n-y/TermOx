@@ -72,7 +72,7 @@ class Event_loop {
     [[nodiscard]] auto is_running() const -> bool { return running_; }
 
     /// Return true if the exit flag has been set.
-    auto exit_flag() const -> bool { return exit_; }
+    [[nodiscard]] auto exit_flag() const -> bool { return exit_; }
 
    private:
     /// Connect to the System::exit_signal so loop can exit with System.

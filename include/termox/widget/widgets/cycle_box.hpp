@@ -86,7 +86,7 @@ class Cycle_box : public HLabel {
     }
 
     /// Return the number of options in the Cycle_box.
-    auto size() const -> std::size_t { return options_.size(); }
+    [[nodiscard]] auto size() const -> std::size_t { return options_.size(); }
 
    protected:
     auto mouse_press_event(Mouse const& m) -> bool override
@@ -132,7 +132,7 @@ class Cycle_box : public HLabel {
 
    private:
     /// Return the current option's text.
-    auto current_option_label() const -> Glyph_string
+    [[nodiscard]] auto current_option_label() const -> Glyph_string
     {
         if (options_.empty())
             return U"";
@@ -140,7 +140,8 @@ class Cycle_box : public HLabel {
     }
 
     /// Find iter into options_ that points to label, else end iter.
-    auto find(std::string const& label) -> decltype(options_)::iterator
+    [[nodiscard]] auto find(std::string const& label)
+        -> decltype(options_)::iterator
     {
         auto const begin = std::begin(options_);
         auto const end   = std::end(options_);
@@ -158,7 +159,7 @@ class Cycle_box : public HLabel {
 };
 
 /// Helper function to create an instance.
-inline auto cycle_box() -> std::unique_ptr<Cycle_box>
+[[nodiscard]] inline auto cycle_box() -> std::unique_ptr<Cycle_box>
 {
     return std::make_unique<Cycle_box>();
 }
@@ -178,6 +179,7 @@ class Labeled_cycle_box : public layout::Horizontal<> {
             pipe::direct_focus();
     }
 
+   public:
     void set_label(Glyph_string title)
     {
         label.set_text(std::move(title));
@@ -203,7 +205,8 @@ class Labeled_cycle_box : public layout::Horizontal<> {
 
 /// Helper function to create an instance.
 template <typename... Args>
-auto labeled_cycle_box(Args&&... args) -> std::unique_ptr<Labeled_cycle_box>
+[[nodiscard]] auto labeled_cycle_box(Args&&... args)
+    -> std::unique_ptr<Labeled_cycle_box>
 {
     return std::make_unique<Labeled_cycle_box>(std::forward<Args>(args)...);
 }
@@ -212,36 +215,38 @@ auto labeled_cycle_box(Args&&... args) -> std::unique_ptr<Labeled_cycle_box>
 
 namespace ox::slot {
 
-inline auto add_option(Cycle_box& cb) -> sl::Slot<void(Glyph_string)>
+[[nodiscard]] inline auto add_option(Cycle_box& cb)
+    -> sl::Slot<void(Glyph_string)>
 {
     return link_lifetimes(
         [&cb](Glyph_string label) { cb.add_option(std::move(label)); }, cb);
 }
 
-inline auto add_option(Cycle_box& cb, Glyph_string const& label)
+[[nodiscard]] inline auto add_option(Cycle_box& cb, Glyph_string const& label)
     -> sl::Slot<void()>
 {
     return link_lifetimes([&cb, label] { cb.add_option(label); }, cb);
 }
 
-inline auto remove_option(Cycle_box& cb) -> sl::Slot<void(std::string const&)>
+[[nodiscard]] inline auto remove_option(Cycle_box& cb)
+    -> sl::Slot<void(std::string const&)>
 {
     return link_lifetimes(
         [&cb](std::string const& label) { cb.remove_option(label); }, cb);
 }
 
-inline auto remove_option(Cycle_box& cb, std::string const& label)
+[[nodiscard]] inline auto remove_option(Cycle_box& cb, std::string const& label)
     -> sl::Slot<void()>
 {
     return link_lifetimes([&cb, label] { cb.remove_option(label); }, cb);
 }
 
-inline auto next(Cycle_box& cb) -> sl::Slot<void()>
+[[nodiscard]] inline auto next(Cycle_box& cb) -> sl::Slot<void()>
 {
     return link_lifetimes([&cb]() { cb.next(); }, cb);
 }
 
-inline auto previous(Cycle_box& cb) -> sl::Slot<void()>
+[[nodiscard]] inline auto previous(Cycle_box& cb) -> sl::Slot<void()>
 {
     return link_lifetimes([&cb]() { cb.previous(); }, cb);
 }

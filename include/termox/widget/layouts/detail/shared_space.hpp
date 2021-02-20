@@ -18,7 +18,7 @@ class Shared_space {
     using Position_list = std::vector<int>;
 
    public:
-    auto calculate_lengths(Widget& parent) -> Length_list
+    [[nodiscard]] auto calculate_lengths(Widget& parent) -> Length_list
     {
         // Disperse initial min() space to each child Widget.
         auto children = [&parent, this] {
@@ -43,7 +43,8 @@ class Shared_space {
     }
 
     /// Returns local primary dimension positions, starting at zero.
-    auto calculate_positions(Length_list const& lengths) -> Position_list
+    [[nodiscard]] auto calculate_positions(Length_list const& lengths)
+        -> Position_list
     {
         auto result = Position_list{};
         result.reserve(lengths.size());
@@ -59,7 +60,7 @@ class Shared_space {
     [[nodiscard]] auto get_offset() const -> std::size_t { return offset_; }
 
     /// Sets the child Widget offset, does not do bounds checking.
-    auto set_offset(std::size_t index) { offset_ = index; }
+    void set_offset(std::size_t index) { offset_ = index; }
 
    private:
     std::size_t offset_ = 0;
@@ -141,8 +142,9 @@ class Shared_space {
     }
 
     template <typename Children_span>
-    static auto find_length_difference(Widget const& parent,
-                                       Children_span const& span) -> int
+    [[nodiscard]] static auto find_length_difference(Widget const& parent,
+                                                     Children_span const& span)
+        -> int
     {
         auto const parent_length =
             typename Parameters::Primary::get_length{}(parent);

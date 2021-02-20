@@ -71,10 +71,8 @@ auto bg_store = Color_store{};
     for (auto [point, glyph] : diff) {
         using esc::escape;
         sequence.append(escape(esc::Cursor_position{point}));
-        // TODO check if current traits are the same as glyph.traits, etc.. for
-        // colors too, then you don't have to generate and append escape
-        // sequences for those that are already set.
-        sequence.append(escape(glyph.brush.traits));
+        if (::esc::traits() != glyph.brush.traits)
+            sequence.append(escape(glyph.brush.traits));
         sequence.append(get_fg_sequence(glyph.brush.foreground));
         sequence.append(get_bg_sequence(glyph.brush.background));
         sequence.append(ox::u32_to_mb(glyph.symbol));

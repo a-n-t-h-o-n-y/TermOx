@@ -24,14 +24,14 @@ class Tuple : public Layout_t {
    public:
     /// Get child by index.
     template <std::size_t Index>
-    auto get() -> auto&
+    [[nodiscard]] auto get() -> auto&
     {
         return std::get<Index>(refs_);
     }
 
     /// Get child by index.
     template <std::size_t Index>
-    auto get() const -> auto const&
+    [[nodiscard]] auto get() const -> auto const&
     {
         return std::get<Index>(refs_);
     }

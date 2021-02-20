@@ -33,6 +33,7 @@ class Vertical_slider : public Widget {
         this->focus_policy = Focus_policy::Strong;
     }
 
+   public:
     /// Manually set the value of the slider, clamped to [minimum, maximum].
     void set_value(Value_t value)
     {
@@ -78,13 +79,13 @@ class Vertical_slider : public Widget {
     }
 
     /// Return the current value of the slider.
-    auto value() const -> Value_t { return logic_.value(); }
+    [[nodiscard]] auto value() const -> Value_t { return logic_.value(); }
 
     /// Return the smallest possible value for the slider.
-    auto minimum() const -> Value_t { return logic_.minimum(); }
+    [[nodiscard]] auto minimum() const -> Value_t { return logic_.minimum(); }
 
     /// Return the largest possible value for the slider.
-    auto maximum() const -> Value_t { return logic_.maximum(); }
+    [[nodiscard]] auto maximum() const -> Value_t { return logic_.maximum(); }
 
     /// Flip the Slider so the minimum value is at the top of the display.
     /** Upper and lower Glyph_strings are also flipped. */
@@ -95,7 +96,7 @@ class Vertical_slider : public Widget {
     };
 
     /// Return if slider is inverted.
-    auto is_inverted() const -> bool { return inverted_; }
+    [[nodiscard]] auto is_inverted() const -> bool { return inverted_; }
 
     /// Set the upper glyph represetation.
     /** String is printed starting one above the indicator and is repeated if \p
@@ -127,13 +128,16 @@ class Vertical_slider : public Widget {
     }
 
     /// Return the upper representation of the Slider.
-    auto upper() const -> Glyph_string const& { return upper_; }
+    [[nodiscard]] auto upper() const -> Glyph_string const& { return upper_; }
 
     /// Return the indicator's representation.
-    auto indicator() const -> Glyph_string const& { return indicator_; }
+    [[nodiscard]] auto indicator() const -> Glyph_string const&
+    {
+        return indicator_;
+    }
 
     /// Return the lower representation of the Slider.
-    auto lower() const -> Glyph_string const& { return lower_; }
+    [[nodiscard]] auto lower() const -> Glyph_string const& { return lower_; }
 
    protected:
     auto paint_event(Painter& p) -> bool override;
@@ -167,21 +171,22 @@ class Vertical_slider : public Widget {
     /// Calculate the ratio of the given y position to the height of *this.
     /** Inverted so that height() - 1 is a ratio of 0.0 and position 0 is a
      *  ratio of 1.0. */
-    auto ratio_at(int position) const -> Ratio_t;
+    [[nodiscard]] auto ratio_at(int position) const -> Ratio_t;
 
     /// Return the indicator's position without respect to its invertedness.
-    auto indicator_absolute_position() const -> Ratio_t;
+    [[nodiscard]] auto indicator_absolute_position() const -> Ratio_t;
 
     /// Get the indicator's y position on the screen from the current ratio.
-    auto indicator_position() const -> int;
+    [[nodiscard]] auto indicator_position() const -> int;
 
     /// Find the index into the middle_ container that cooresponds to the ratio.
-    auto indicator_index() const -> std::size_t;
+    [[nodiscard]] auto indicator_index() const -> std::size_t;
 };
 
 /// Helper function to create an instance.
 template <typename... Args>
-auto vertical_slider(Args&&... args) -> std::unique_ptr<Vertical_slider>
+[[nodiscard]] auto vertical_slider(Args&&... args)
+    -> std::unique_ptr<Vertical_slider>
 {
     return std::make_unique<Vertical_slider>(std::forward<Args>(args)...);
 }

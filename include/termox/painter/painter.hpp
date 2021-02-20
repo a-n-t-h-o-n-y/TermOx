@@ -8,9 +8,13 @@ namespace ox {
 class Glyph_string;
 struct Glyph;
 class Widget;
-namespace detail {
+}  // namespace ox
+
+namespace ox::detail {
 class Canvas;
-}
+}  // namespace ox::detail
+
+namespace ox {
 
 /// Contains functions to paint Glyphs to a Widget's screen area.
 /** For use within Widget::paint_event(...), and virtual overrides. */

@@ -33,6 +33,7 @@ class Graph : public Widget {
    public:
     Graph(Boundary const& b = {}) : boundary_{b} {}
 
+   public:
     template <typename Range_t>
     void add(Range_t const& values)
     {
@@ -109,7 +110,7 @@ class Graph : public Widget {
         void set_bottom_left() { bits_ |= std::byte{0b01000000}; }
         void set_bottom_right() { bits_ |= std::byte{0b10000000}; }
 
-        auto get() const -> unsigned char
+        [[nodiscard]] auto get() const -> unsigned char
         {
             return std::to_integer<unsigned char>(bits_);
         }
@@ -126,13 +127,14 @@ class Graph : public Widget {
     Number_t interval_h_ = 0;
 
    private:
-    static auto to_symbol(Bitmap b) -> Glyph
+    [[nodiscard]] static auto to_symbol(Bitmap b) -> Glyph
     {
         auto constexpr initial_braille = U'⠀';
         return char32_t{initial_braille + b.get()};
     }
 
-    static auto distance(Number_t smaller, Number_t larger) -> Number_t
+    [[nodiscard]] static auto distance(Number_t smaller, Number_t larger)
+        -> Number_t
     {
         return larger - smaller;
     }
@@ -202,7 +204,7 @@ class Graph : public Widget {
 
 /// Helper function to create an instance.
 template <typename Number_t = double, typename... Args>
-auto graph(Args&&... args) -> std::unique_ptr<Graph<Number_t>>
+[[nodiscard]] auto graph(Args&&... args) -> std::unique_ptr<Graph<Number_t>>
 {
     return std::make_unique<Graph<Number_t>>(std::forward<Args>(args)...);
 }

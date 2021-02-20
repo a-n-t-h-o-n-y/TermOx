@@ -15,7 +15,7 @@ class Shortcuts {
     /** Key has combined key presses defined for multi-key shortcuts. The
      *  returned Signal reference will be called each time the keyboard shortcut
      *  is encountered. */
-    static auto add_shortcut(Key k) -> sl::Signal<void()>&
+    [[nodiscard]] static auto add_shortcut(Key k) -> sl::Signal<void()>&
     {
         if (shortcuts_.count(k) == 0)
             shortcuts_[k] = sl::Signal<void()>{};

@@ -31,7 +31,7 @@ class Screen_buffers {
     /// Merges the next Canvas into the current Canvas.
     /** This will copy every Glyph from next that differs with current into
      *  current Canvas. */
-    auto merge() { ::ox::detail::merge(next, current); }
+    void merge() { ::ox::detail::merge(next, current); }
 
     /// Merges the next Canvas into the current Canvas and returns the changes.
     /** This will copy every Glyph from next that differs with current into

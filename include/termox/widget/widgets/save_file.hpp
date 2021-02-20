@@ -44,7 +44,7 @@ class Save_file : public layout::Horizontal<> {
 
 /// Helper function to create an instance.
 template <typename Char_t = char>
-inline auto save_file() -> std::unique_ptr<Save_file<Char_t>>
+[[nodiscard]] inline auto save_file() -> std::unique_ptr<Save_file<Char_t>>
 {
     return std::make_unique<Save_file<Char_t>>();
 }

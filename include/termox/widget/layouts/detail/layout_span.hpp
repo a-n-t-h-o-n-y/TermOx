@@ -62,6 +62,7 @@ class Layout_span {
         auto operator=(Iterator&&) -> Iterator& = delete;
         ~Iterator()                             = default;
 
+       public:
         auto operator++() -> Iterator&
         {
             if (iter_->length == get_limit_(get_policy_(*iter_->widget)))
@@ -72,16 +73,19 @@ class Layout_span {
             return *this;
         }
 
-        auto operator*() const -> reference { return *iter_; }
+        [[nodiscard]] auto operator*() const -> reference { return *iter_; }
 
-        auto operator->() const -> pointer { return iter_.operator->(); }
+        [[nodiscard]] auto operator->() const -> pointer
+        {
+            return iter_.operator->();
+        }
 
-        auto operator==(Container_t::iterator other) const -> bool
+        [[nodiscard]] auto operator==(Container_t::iterator other) const -> bool
         {
             return this->iter_ == other;
         }
 
-        auto operator!=(Container_t::iterator other) const -> bool
+        [[nodiscard]] auto operator!=(Container_t::iterator other) const -> bool
         {
             return this->iter_ != other;
         }
@@ -124,9 +128,10 @@ class Layout_span {
           get_policy_{std::forward<Get_policy_t>(get_policy)}
     {}
 
+   public:
     /// Return iterator to the first element, will skip when length == max
     /** Size_policy::max will be used as limit. */
-    auto begin_max()
+    [[nodiscard]] auto begin_max()
     {
         total_stretch_ = this->calculate_total_stretch();
         return this->begin([](Size_policy const& p) { return p.max(); });
@@ -134,35 +139,41 @@ class Layout_span {
 
     /// Return iterator to the first element, will skip when length == min
     /** Size_policy::min will be used as limit. */
-    auto begin_min()
+    [[nodiscard]] auto begin_min()
     {
         total_inverse_stretch_ = this->calculate_total_inverse_stretch();
         return this->begin([](Size_policy const& p) { return p.min(); });
     }
 
-    auto end() -> Container_t::iterator { return dimensions_.end(); }
+    [[nodiscard]] auto end() -> Container_t::iterator
+    {
+        return dimensions_.end();
+    }
 
-    auto total_stretch() const -> double { return total_stretch_; }
+    [[nodiscard]] auto total_stretch() const -> double
+    {
+        return total_stretch_;
+    }
 
-    auto total_inverse_stretch() const -> double
+    [[nodiscard]] auto total_inverse_stretch() const -> double
     {
         return total_inverse_stretch_;
     }
 
-    auto entire_length() const -> int
+    [[nodiscard]] auto entire_length() const -> int
     {
         return std::accumulate(
             dimensions_.begin(), dimensions_.end(), 0uL,
             [](int total, Dimension const& d) { return total + d.length; });
     }
 
-    auto size() const -> std::size_t
+    [[nodiscard]] auto size() const -> std::size_t
     {
         return std::count_if(dimensions_.begin(), dimensions_.end(),
                              [](auto const& d) { return d.widget != nullptr; });
     }
 
-    auto get_results() const -> std::vector<int>
+    [[nodiscard]] auto get_results() const -> std::vector<int>
     {
         auto result = std::vector<int>{};
         result.reserve(dimensions_.size());
@@ -181,7 +192,8 @@ class Layout_span {
    private:
     /// Generate a Dimensions container initialized with child Widget pointers.
     template <typename Iter>
-    static auto generate_zero_init_dimensions(Iter first, Iter last)
+    [[nodiscard]] static auto generate_zero_init_dimensions(Iter first,
+                                                            Iter last)
         -> Container_t
     {
         auto result = Container_t{};
@@ -250,7 +262,7 @@ class Layout_span {
     }
 
     /// Set each Dimension to the cooresponding Widget's hint.
-    static auto set_each_to_hint(Container_t& dimensions,
+    static void set_each_to_hint(Container_t& dimensions,
                                  Get_policy_t get_policy)
     {
         // Can assume all Dimension::widget pointers are valid.
@@ -264,11 +276,12 @@ class Layout_span {
     }
 
     template <typename Iter>
-    static auto build_dimensions(Iter first,
-                                 Iter last,
-                                 std::size_t primary_length,
-                                 Get_policy_t get_policy,
-                                 Policy_direction d) -> Container_t
+    [[nodiscard]] static auto build_dimensions(Iter first,
+                                               Iter last,
+                                               std::size_t primary_length,
+                                               Get_policy_t get_policy,
+                                               Policy_direction d)
+        -> Container_t
     {
         auto dimensions = generate_zero_init_dimensions(first, last);
         if (!set_each_to_min(dimensions, primary_length, get_policy, d))
@@ -279,7 +292,7 @@ class Layout_span {
     /// \p Get_limit_t Is a functor type <std::size_t(Size_policy const&)>
     /** Calculates and stores total stretch when called. */
     template <typename Get_limit_t>
-    auto begin(Get_limit_t get_limit)
+    [[nodiscard]] auto begin(Get_limit_t get_limit)
     {
         auto const begin = dimensions_.begin();
         auto const end   = dimensions_.end();
@@ -289,7 +302,7 @@ class Layout_span {
         return Iterator{begin, end, get_policy_, get_limit};
     }
 
-    auto calculate_total_stretch() const -> double
+    [[nodiscard]] auto calculate_total_stretch() const -> double
     {
         auto sum       = 0.;
         auto const end = dimensions_.end();
@@ -300,7 +313,7 @@ class Layout_span {
         return sum;
     }
 
-    auto calculate_total_inverse_stretch() const -> double
+    [[nodiscard]] auto calculate_total_inverse_stretch() const -> double
     {
         auto sum       = 0.;
         auto const end = dimensions_.end();
@@ -311,7 +324,7 @@ class Layout_span {
         return sum;
     }
 
-    auto find_valid_begin() const
+    [[nodiscard]] auto find_valid_begin() const
     {
         auto const end = dimensions_.end();
         for (auto iter = dimensions_.begin(); iter != end; ++iter) {
@@ -322,9 +335,9 @@ class Layout_span {
     }
 
     /// Sum policy.min() of each child, if child is passive this is recursive.
-    static auto sum_child_mins(Widget const& w,
-                               Get_policy_t get_policy,
-                               Policy_direction d) -> int
+    [[nodiscard]] static auto sum_child_mins(Widget const& w,
+                                             Get_policy_t get_policy,
+                                             Policy_direction d) -> int
     {
         // TODO Calling get_policy on child objects will break when child is not
         // the same layout type as the parent.

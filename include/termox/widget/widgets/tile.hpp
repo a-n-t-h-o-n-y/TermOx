@@ -13,7 +13,7 @@ class Tile : public Widget {
     using Parameters = Glyph;
 
    public:
-    Tile(Glyph g = U' ') : display_{g}
+    explicit Tile(Glyph g = U' ') : display_{g}
     {
         using namespace pipe;
         *this | fixed_width(1) | fixed_height(1);
@@ -26,7 +26,7 @@ class Tile : public Widget {
         this->update();
     }
 
-    auto get() -> Glyph { return display_; }
+    [[nodiscard]] auto get() -> Glyph { return display_; }
 
    protected:
     auto paint_event(Painter& p) -> bool override
@@ -41,7 +41,7 @@ class Tile : public Widget {
 
 /// Helper function to create an instance.
 template <typename... Args>
-auto tile(Args&&... args) -> std::unique_ptr<Tile>
+[[nodiscard]] auto tile(Args&&... args) -> std::unique_ptr<Tile>
 {
     return std::make_unique<Tile>(std::forward<Args>(args)...);
 }

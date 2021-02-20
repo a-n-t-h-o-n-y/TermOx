@@ -70,7 +70,8 @@ class Confirm_button : public layout::Stack<> {
 
 /// Helper function to create an instance.
 template <typename... Args>
-auto confirm_button(Args&&... args) -> std::unique_ptr<Confirm_button>
+[[nodiscard]] auto confirm_button(Args&&... args)
+    -> std::unique_ptr<Confirm_button>
 {
     return std::make_unique<Confirm_button>(std::forward<Args>(args)...);
 }

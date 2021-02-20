@@ -13,7 +13,8 @@ namespace ox::slot {
 template <typename... Widgets,
           typename F,
           typename Signature = detail::Call_signature_t<F>>
-auto link_lifetimes(F&& method, Widgets&... widgets) -> sl::Slot<Signature>
+[[nodiscard]] auto link_lifetimes(F&& method, Widgets&... widgets)
+    -> sl::Slot<Signature>
 {
     static_assert(sizeof...(widgets) > 0, "You must link at least 1 lifetime");
     auto slot = sl::Slot<Signature>{std::forward<F>(method)};

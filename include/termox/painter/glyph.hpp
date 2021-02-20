@@ -14,7 +14,7 @@ struct Glyph {
     char32_t symbol = U'\0';
 
     /// The Brush that will determine the Traits and Colors of the symbol.
-    Brush brush{};
+    Brush brush = Brush{};
 
    public:
     /// Construct an invisible Glyph, defaults to space and no traits/colors.
@@ -27,7 +27,17 @@ struct Glyph {
     template <typename... Items>
     constexpr Glyph(char32_t sym, Items... items) : symbol{sym}, brush{items...}
     {}
-    // TODO make char constructor
+
+    /// Construct a Glyph with the provided char and Brush.
+    constexpr Glyph(char sym, Brush b)
+        : symbol{static_cast<char32_t>(sym)}, brush{b}
+    {}
+
+    /// Construct with the provided char32_t and list of Traits and Colors.
+    template <typename... Items>
+    constexpr Glyph(char sym, Items... items)
+        : symbol{static_cast<char32_t>(sym)}, brush{items...}
+    {}
 };
 
 // Trait -------------------------------------------------------------------
@@ -37,28 +47,34 @@ constexpr auto operator|(Glyph& g, Traits t) -> Glyph&
     return g;
 }
 
-constexpr auto operator|(Glyph&& g, Traits t) -> Glyph { return g | t; }
+[[nodiscard]] constexpr auto operator|(Glyph&& g, Traits t) -> Glyph
+{
+    return g | t;
+}
 
 }  // namespace ox
 
 namespace esc {  // For ADL; Trait(s) is really in namespace::esc.
 
-constexpr auto operator|(char32_t g, Trait t) -> ox::Glyph
+[[nodiscard]] constexpr auto operator|(char32_t g, Trait t) -> ox::Glyph
 {
     return ox::Glyph{g} | t;
 }
 
-constexpr auto operator|(char32_t g, Traits t) -> ox::Glyph
+[[nodiscard]] constexpr auto operator|(char32_t g, Traits t) -> ox::Glyph
 {
     return ox::Glyph{g} | t;
 }
 
-// TODO enable once constructor
-// constexpr auto operator|(char g, Trait t) -> ox::Glyph { return ox::Glyph{g}
-// | t; }
+[[nodiscard]] constexpr auto operator|(char g, Trait t) -> ox::Glyph
+{
+    return ox::Glyph{g} | t;
+}
 
-// constexpr auto operator|(char g, Traits t) -> ox::Glyph { return ox::Glyph{g}
-// | t; }
+[[nodiscard]] constexpr auto operator|(char g, Traits t) -> ox::Glyph
+{
+    return ox::Glyph{g} | t;
+}
 
 }  // namespace esc
 
@@ -71,14 +87,19 @@ constexpr auto operator|(Glyph& g, Background_color c) -> Glyph&
     return g;
 }
 
-constexpr auto operator|(Glyph&& g, Background_color c) -> Glyph
+[[nodiscard]] constexpr auto operator|(Glyph&& g, Background_color c) -> Glyph
 {
     return g | c;
 }
 
-constexpr auto operator|(char32_t g, Background_color c) -> Glyph
+[[nodiscard]] constexpr auto operator|(char32_t g, Background_color c) -> Glyph
 {
     return Glyph{g} | c;
+}
+
+[[nodiscard]] constexpr auto operator|(char g, Background_color c) -> ox::Glyph
+{
+    return ox::Glyph{g} | c;
 }
 
 // Foreground_color ------------------------------------------------------------
@@ -88,24 +109,31 @@ constexpr auto operator|(Glyph& g, Foreground_color c) -> Glyph&
     return g;
 }
 
-constexpr auto operator|(Glyph&& g, Foreground_color c) -> Glyph
+[[nodiscard]] constexpr auto operator|(Glyph&& g, Foreground_color c) -> Glyph
 {
     return g | c;
 }
 
-constexpr auto operator|(char32_t g, Foreground_color c) -> Glyph
+[[nodiscard]] constexpr auto operator|(char32_t g, Foreground_color c) -> Glyph
 {
     return Glyph{g} | c;
 }
 
+[[nodiscard]] constexpr auto operator|(char g, Foreground_color c) -> ox::Glyph
+{
+    return ox::Glyph{g} | c;
+}
+
+// Comparisons  ----------------------------------------------------------------
+
 /// Compares symbol and brush for equality.
-constexpr auto operator==(Glyph lhs, Glyph rhs) -> bool
+[[nodiscard]] constexpr auto operator==(Glyph lhs, Glyph rhs) -> bool
 {
     return (lhs.symbol == rhs.symbol) and (lhs.brush == rhs.brush);
 }
 
 /// Compares symbol and brush for inequality.
-constexpr auto operator!=(Glyph lhs, Glyph rhs) -> bool
+[[nodiscard]] constexpr auto operator!=(Glyph lhs, Glyph rhs) -> bool
 {
     return !(lhs == rhs);
 }

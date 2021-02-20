@@ -64,19 +64,25 @@ class Notify_light : public Widget {
     }
 
     /// Return the on and off Colors currently used.
-    auto get_display() const -> Display { return parameters_.display; }
+    [[nodiscard]] auto get_display() const -> Display
+    {
+        return parameters_.display;
+    }
 
     /// Set the duration from the time emit is called to when the light is off.
     void set_duration(Duration_t d) { parameters_.duration = d; }
 
     /// Return the currently set duration.
-    auto get_duration() const -> Duration_t { return parameters_.duration; }
+    [[nodiscard]] auto get_duration() const -> Duration_t
+    {
+        return parameters_.duration;
+    }
 
     /// Set the light to Fade or not.
     void set_fade(Fade f) { parameters_.fade = f; }
 
     /// Return the currently set Fade type.
-    auto get_fade() const -> Fade { return parameters_.fade; }
+    [[nodiscard]] auto get_fade() const -> Fade { return parameters_.fade; }
 
    protected:
     auto timer_event() -> bool override

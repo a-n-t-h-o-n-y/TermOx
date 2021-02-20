@@ -20,7 +20,7 @@ auto apply_until_accepted(F&& filter_function, std::set<Widget*> const& filters)
                         filter_function) != std::end(filters);
 }
 
-inline auto filter_send(ox::Paint_event const& e) -> bool
+[[nodiscard]] inline auto filter_send(ox::Paint_event const& e) -> bool
 {
     return apply_until_accepted(
         [&e](Widget* filter) {
@@ -29,7 +29,7 @@ inline auto filter_send(ox::Paint_event const& e) -> bool
         e.receiver.get().get_event_filters());
 }
 
-inline auto filter_send(ox::Key_press_event const& e) -> bool
+[[nodiscard]] inline auto filter_send(ox::Key_press_event const& e) -> bool
 {
     switch (e.key) {
         case Key::Tab: detail::Focus::tab_press(); break;
@@ -45,7 +45,7 @@ inline auto filter_send(ox::Key_press_event const& e) -> bool
         e.receiver->get().get_event_filters());
 }
 
-inline auto filter_send(ox::Mouse_press_event const& e) -> bool
+[[nodiscard]] inline auto filter_send(ox::Mouse_press_event const& e) -> bool
 {
     return apply_until_accepted(
         [&e](Widget* filter) {
@@ -54,7 +54,7 @@ inline auto filter_send(ox::Mouse_press_event const& e) -> bool
         e.receiver.get().get_event_filters());
 }
 
-inline auto filter_send(ox::Mouse_release_event const& e) -> bool
+[[nodiscard]] inline auto filter_send(ox::Mouse_release_event const& e) -> bool
 {
     return apply_until_accepted(
         [&e](Widget* filter) {
@@ -63,7 +63,8 @@ inline auto filter_send(ox::Mouse_release_event const& e) -> bool
         e.receiver.get().get_event_filters());
 }
 
-inline auto filter_send(ox::Mouse_double_click_event const& e) -> bool
+[[nodiscard]] inline auto filter_send(ox::Mouse_double_click_event const& e)
+    -> bool
 {
     return apply_until_accepted(
         [&e](Widget* filter) {
@@ -73,7 +74,7 @@ inline auto filter_send(ox::Mouse_double_click_event const& e) -> bool
         e.receiver.get().get_event_filters());
 }
 
-inline auto filter_send(ox::Mouse_wheel_event const& e) -> bool
+[[nodiscard]] inline auto filter_send(ox::Mouse_wheel_event const& e) -> bool
 {
     return apply_until_accepted(
         [&e](Widget* filter) {
@@ -82,7 +83,7 @@ inline auto filter_send(ox::Mouse_wheel_event const& e) -> bool
         e.receiver.get().get_event_filters());
 }
 
-inline auto filter_send(ox::Mouse_move_event const& e) -> bool
+[[nodiscard]] inline auto filter_send(ox::Mouse_move_event const& e) -> bool
 {
     return apply_until_accepted(
         [&e](Widget* filter) {
@@ -91,7 +92,7 @@ inline auto filter_send(ox::Mouse_move_event const& e) -> bool
         e.receiver.get().get_event_filters());
 }
 
-inline auto filter_send(ox::Child_added_event const& e) -> bool
+[[nodiscard]] inline auto filter_send(ox::Child_added_event const& e) -> bool
 {
     return apply_until_accepted(
         [&e](Widget* filter) {
@@ -100,7 +101,7 @@ inline auto filter_send(ox::Child_added_event const& e) -> bool
         e.receiver.get().get_event_filters());
 }
 
-inline auto filter_send(ox::Child_removed_event const& e) -> bool
+[[nodiscard]] inline auto filter_send(ox::Child_removed_event const& e) -> bool
 {
     return apply_until_accepted(
         [&e](Widget* filter) {
@@ -110,7 +111,7 @@ inline auto filter_send(ox::Child_removed_event const& e) -> bool
         e.receiver.get().get_event_filters());
 }
 
-inline auto filter_send(ox::Child_polished_event const& e) -> bool
+[[nodiscard]] inline auto filter_send(ox::Child_polished_event const& e) -> bool
 {
     return apply_until_accepted(
         [&e](Widget* filter) {
@@ -120,7 +121,7 @@ inline auto filter_send(ox::Child_polished_event const& e) -> bool
         e.receiver.get().get_event_filters());
 }
 
-inline auto filter_send(ox::Delete_event const& e) -> bool
+[[nodiscard]] inline auto filter_send(ox::Delete_event const& e) -> bool
 {
     return apply_until_accepted(
         [&e](Widget* filter) {
@@ -129,7 +130,7 @@ inline auto filter_send(ox::Delete_event const& e) -> bool
         e.removed->get_event_filters());
 }
 
-inline auto filter_send(ox::Disable_event const& e) -> bool
+[[nodiscard]] inline auto filter_send(ox::Disable_event const& e) -> bool
 {
     return apply_until_accepted(
         [&e](Widget* filter) {
@@ -138,7 +139,7 @@ inline auto filter_send(ox::Disable_event const& e) -> bool
         e.receiver.get().get_event_filters());
 }
 
-inline auto filter_send(ox::Enable_event const& e) -> bool
+[[nodiscard]] inline auto filter_send(ox::Enable_event const& e) -> bool
 {
     return apply_until_accepted(
         [&e](Widget* filter) {
@@ -147,7 +148,7 @@ inline auto filter_send(ox::Enable_event const& e) -> bool
         e.receiver.get().get_event_filters());
 }
 
-inline auto filter_send(ox::Focus_in_event const& e) -> bool
+[[nodiscard]] inline auto filter_send(ox::Focus_in_event const& e) -> bool
 {
     return apply_until_accepted(
         [&e](Widget* filter) {
@@ -156,7 +157,7 @@ inline auto filter_send(ox::Focus_in_event const& e) -> bool
         e.receiver.get().get_event_filters());
 }
 
-inline auto filter_send(ox::Focus_out_event const& e) -> bool
+[[nodiscard]] inline auto filter_send(ox::Focus_out_event const& e) -> bool
 {
     return apply_until_accepted(
         [&e](Widget* filter) {
@@ -165,7 +166,7 @@ inline auto filter_send(ox::Focus_out_event const& e) -> bool
         e.receiver.get().get_event_filters());
 }
 
-inline auto filter_send(ox::Move_event const& e) -> bool
+[[nodiscard]] inline auto filter_send(ox::Move_event const& e) -> bool
 {
     auto const old_position = e.receiver.get().top_left();
     auto const new_position = e.new_position;
@@ -179,7 +180,7 @@ inline auto filter_send(ox::Move_event const& e) -> bool
         e.receiver.get().get_event_filters());
 }
 
-inline auto filter_send(ox::Resize_event const& e) -> bool
+[[nodiscard]] inline auto filter_send(ox::Resize_event const& e) -> bool
 {
     auto const old_area = e.receiver.get().outer_area();
     auto const new_area = e.new_area;
@@ -194,7 +195,7 @@ inline auto filter_send(ox::Resize_event const& e) -> bool
         e.receiver.get().get_event_filters());
 }
 
-inline auto filter_send(ox::Timer_event const& e) -> bool
+[[nodiscard]] inline auto filter_send(ox::Timer_event const& e) -> bool
 {
     return apply_until_accepted(
         [&e](Widget* filter) {
@@ -203,14 +204,17 @@ inline auto filter_send(ox::Timer_event const& e) -> bool
         e.receiver.get().get_event_filters());
 }
 
-inline auto filter_send(ox::Dynamic_color_event const&) -> bool
+[[nodiscard]] inline auto filter_send(ox::Dynamic_color_event const&) -> bool
 {
     return false;
 }
 
-inline auto filter_send(::esc::Window_resize) -> bool { return false; }
+[[nodiscard]] inline auto filter_send(::esc::Window_resize) -> bool
+{
+    return false;
+}
 
-inline auto filter_send(ox::Custom_event const& e) -> bool
+[[nodiscard]] inline auto filter_send(ox::Custom_event const& e) -> bool
 {
     return e.filter_send();
 }

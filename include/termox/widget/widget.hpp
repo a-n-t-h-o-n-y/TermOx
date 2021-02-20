@@ -131,10 +131,10 @@ class Widget {
     void set_name(std::string name) { name_ = std::move(name); }
 
     /// Return the name of the Widget.
-    auto name() const -> std::string const& { return name_; }
+    [[nodiscard]] auto name() const -> std::string const& { return name_; }
 
     /// Return the ID number unique to this Widget.
-    auto unique_id() const -> std::uint16_t { return unique_id_; }
+    [[nodiscard]] auto unique_id() const -> std::uint16_t { return unique_id_; }
 
     /// Used to fill in empty space that is not filled in by paint_event().
     void set_wallpaper(Glyph g)
@@ -144,7 +144,7 @@ class Widget {
     }
 
     /// Return the currently in use wallpaper or std::nullopt if none.
-    auto get_wallpaper() const -> Glyph { return wallpaper_; }
+    [[nodiscard]] auto get_wallpaper() const -> Glyph { return wallpaper_; }
 
     /// Post an Enable_event to this widget, and all descendants.
     /** Will only post a Child_polished_event to the parent if requested. Useful
@@ -168,35 +168,35 @@ class Widget {
     }
 
     /// Check whether the Widget is enabled.
-    auto is_enabled() const -> bool { return enabled_; }
+    [[nodiscard]] auto is_enabled() const -> bool { return enabled_; }
 
     /// Return the Widget's parent pointer.
     /** The parent is the Widget that owns *this, it  is in charge of
      *  positioning and resizing this Widget. */
-    auto parent() const -> Widget* { return parent_; }
+    [[nodiscard]] auto parent() const -> Widget* { return parent_; }
 
     /// Return the global top left corner of this widget.
-    auto top_left() const -> Point { return top_left_position_; }
+    [[nodiscard]] auto top_left() const -> Point { return top_left_position_; }
 
     /// Return the global top left corner of this widget, not including border.
-    auto inner_top_left() const -> Point
+    [[nodiscard]] auto inner_top_left() const -> Point
     {
         return {this->inner_x(), this->inner_y()};
     }
 
     /// x coordinate for the top left point of this Widget.
     /** Given with relation to the top left of the terminal screen. */
-    auto x() const -> int { return top_left_position_.x; }
+    [[nodiscard]] auto x() const -> int { return top_left_position_.x; }
 
     /// y coordinate for the top left point of this Widget.
     /** Given with relation to the top left of the terminal screen. */
-    auto y() const -> int { return top_left_position_.y; }
+    [[nodiscard]] auto y() const -> int { return top_left_position_.y; }
 
     /// x coordinate for the top left point of this Widget, beyond the Border.
     /** Given with relation to the top left of the terminal screen. This is the
      *  coordinate that marks the beginning of the space that is available for
      *  use by the Widget. */
-    auto inner_x() const -> int
+    [[nodiscard]] auto inner_x() const -> int
     {
         return top_left_position_.x + detail::Border_offset::west(*this);
     }
@@ -205,36 +205,42 @@ class Widget {
     /** Given with relation to the top left of the terminal screen. This is the
      *  coordinate that marks the beginning of the space that is available for
      *  use by the Widget. */
-    auto inner_y() const -> int
+    [[nodiscard]] auto inner_y() const -> int
     {
         return top_left_position_.y + detail::Border_offset::north(*this);
     }
 
     /// Return the area the widget occupies, not including the Border.
-    auto area() const -> Area { return {this->width(), this->height()}; }
+    [[nodiscard]] auto area() const -> Area
+    {
+        return {this->width(), this->height()};
+    }
 
     /// Return the inner width dimension, this does not include Border space.
-    auto width() const -> int
+    [[nodiscard]] auto width() const -> int
     {
         return this->outer_width() - detail::Border_offset::east(*this) -
                detail::Border_offset::west(*this);
     }
 
     /// Return the inner height dimension, this does not include Border space.
-    auto height() const -> int
+    [[nodiscard]] auto height() const -> int
     {
         return this->outer_height() - detail::Border_offset::north(*this) -
                detail::Border_offset::south(*this);
     }
 
     /// Return the area the widget occupies, including Border space.
-    auto outer_area() const -> Area { return outer_area_; }
+    [[nodiscard]] auto outer_area() const -> Area { return outer_area_; }
 
     /// Return the width dimension, this includes Border space.
-    auto outer_width() const -> int { return outer_area_.width; }
+    [[nodiscard]] auto outer_width() const -> int { return outer_area_.width; }
 
     /// Return the height dimension, this includes Border space.
-    auto outer_height() const -> int { return outer_area_.height; }
+    [[nodiscard]] auto outer_height() const -> int
+    {
+        return outer_area_.height;
+    }
 
     // TODO remove virtual
     /// Post a paint event to this Widget.
@@ -258,7 +264,7 @@ class Widget {
     void remove_event_filter(Widget& filter) { event_filters_.erase(&filter); }
 
     /// Return the list of Event filter Widgets.
-    auto get_event_filters() const -> std::set<Widget*> const&
+    [[nodiscard]] auto get_event_filters() const -> std::set<Widget*> const&
     {
         return event_filters_;
     }
@@ -298,10 +304,10 @@ class Widget {
     }
 
     /// Return true if this Widget has animation enabled.
-    auto is_animated() const -> bool { return is_animated_; }
+    [[nodiscard]] auto is_animated() const -> bool { return is_animated_; }
 
     /// Get a range containing Widget& to each child.
-    auto get_children()
+    [[nodiscard]] auto get_children()
     {
         auto constexpr dereference = [](auto& widg_ptr) -> Widget& {
             return *widg_ptr;
@@ -310,7 +316,7 @@ class Widget {
     }
 
     /// Get a const range containing Widget& to each child.
-    auto get_children() const
+    [[nodiscard]] auto get_children() const
     {
         auto constexpr dereference = [](auto const& widg_ptr) -> Widget const& {
             return *widg_ptr;
@@ -319,7 +325,7 @@ class Widget {
     }
 
     /// Return container of all descendants of self_.
-    auto get_descendants() const -> std::vector<Widget*>
+    [[nodiscard]] auto get_descendants() const -> std::vector<Widget*>
     {
         auto descendants = std::vector<Widget*>{};
         for (auto const& w_ptr : children_) {
@@ -347,16 +353,22 @@ class Widget {
     /// Return the wallpaper Glyph.
     /** The Glyph has the brush applied to it, if brush_paints_wallpaper is set
      *  to true. */
-    auto generate_wallpaper() const -> Glyph;
+    [[nodiscard]] auto generate_wallpaper() const -> Glyph;
 
     // TODO These two below are here instead of in Layout_linear because of
     // Layout_span::sum_child_mins, that function knows too much?
 
     /// Return the index of the first child displayed by this Widget.
-    auto get_child_offset() const -> std::size_t { return child_offset_; }
+    [[nodiscard]] auto get_child_offset() const -> std::size_t
+    {
+        return child_offset_;
+    }
 
     /// Return the number of children held by this Widget.
-    auto child_count() const -> std::size_t { return children_.size(); }
+    [[nodiscard]] auto child_count() const -> std::size_t
+    {
+        return children_.size();
+    }
 
     // - - - - - - - - - - - - - Event Handlers - - - - - - - - - - - - - - - -
     /// Handles Enable_event objects.
@@ -675,14 +687,14 @@ class Widget {
 
 /// Helper function to create an instance.
 template <typename... Args>
-auto widget(Args&&... args) -> std::unique_ptr<Widget>
+[[nodiscard]] auto widget(Args&&... args) -> std::unique_ptr<Widget>
 {
     return std::make_unique<Widget>(std::forward<Args>(args)...);
 }
 
 /// Wrapper for std::make_unique
 template <typename Widget_t, typename... Args>
-auto make(Args&&... args) -> std::unique_ptr<Widget_t>
+[[nodiscard]] auto make(Args&&... args) -> std::unique_ptr<Widget_t>
 {
     static_assert(std::is_base_of_v<Widget, Widget_t>,
                   "Must make a Widget derived type.");

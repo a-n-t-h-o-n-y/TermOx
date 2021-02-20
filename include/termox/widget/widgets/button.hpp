@@ -36,7 +36,10 @@ class Button : public Widget {
     }
 
     /// Return the current label.
-    auto get_label() const -> Glyph_string const& { return label_; }
+    [[nodiscard]] auto get_label() const -> Glyph_string const&
+    {
+        return label_;
+    }
 
    protected:
     auto mouse_press_event(Mouse const& m) -> bool override
@@ -68,7 +71,7 @@ class Button : public Widget {
 
 /// Helper function to create a Button instance.
 template <typename... Args>
-auto button(Args&&... args) -> std::unique_ptr<Button>
+[[nodiscard]] auto button(Args&&... args) -> std::unique_ptr<Button>
 {
     return std::make_unique<Button>(std::forward<Args>(args)...);
 }
@@ -106,7 +109,10 @@ class Push_button : public Button {
     void set_pressed_color(Color c) { pressed_color_ = c; }
 
     /// Return the current Color assigned to mouse press events.
-    auto get_pressed_color() const -> Color { return pressed_color_; };
+    [[nodiscard]] auto get_pressed_color() const -> Color
+    {
+        return pressed_color_;
+    };
 
     /// Set the background Color of the Button when released Signal is emitted.
     void set_released_color(Color c)
@@ -116,7 +122,10 @@ class Push_button : public Button {
     }
 
     /// Return the current Color assigned to mouse release events.
-    auto get_released_color() const -> Color { return released_color_; };
+    [[nodiscard]] auto get_released_color() const -> Color
+    {
+        return released_color_;
+    };
 
    private:
     Color pressed_color_;
@@ -125,7 +134,7 @@ class Push_button : public Button {
 
 /// Helper function to create a Push_button instance.
 template <typename... Args>
-auto push_button(Args&&... args) -> std::unique_ptr<Push_button>
+[[nodiscard]] auto push_button(Args&&... args) -> std::unique_ptr<Push_button>
 {
     return std::make_unique<Push_button>(std::forward<Args>(args)...);
 }

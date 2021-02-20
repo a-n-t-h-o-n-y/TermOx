@@ -122,7 +122,7 @@ class Stack : public Layout<Child_t> {
      *  Letting the returned Widget destroy itself will potentially leave
      *  dangling pointers in the event system. Throws std::out_of_range if \p
      *  index is invalid. Sets active page to nullptr if active page removed. */
-    auto remove_page(std::size_t index) -> std::unique_ptr<Widget>
+    [[nodiscard]] auto remove_page(std::size_t index) -> std::unique_ptr<Widget>
     {
         if (index >= this->size())
             throw std::out_of_range{"Stack::remove_page: index is invalid."};
@@ -142,14 +142,20 @@ class Stack : public Layout<Child_t> {
 
     /// Return number of pages in this Stack.
     // TODO change to page_count()
-    auto size() const -> std::size_t { return this->child_count(); }
+    [[nodiscard]] auto size() const -> std::size_t
+    {
+        return this->child_count();
+    }
 
     /// Return a pointer to the current active page, or nullptr if none.
-    auto get_active_page() const -> Child_t* { return active_page_; }
+    [[nodiscard]] auto get_active_page() const -> Child_t*
+    {
+        return active_page_;
+    }
 
     /// Return the index of the current active page.
     /** Returns Stack::invalid_index if active_page_ is nullptr. */
-    auto active_page_index() const -> std::size_t
+    [[nodiscard]] auto active_page_index() const -> std::size_t
     {
         if (active_page_ == nullptr)
             return Stack::invalid_index;
@@ -223,7 +229,7 @@ class Stack : public Layout<Child_t> {
 
 /// Helper function to create an instance.
 template <typename Widget_t = Widget, typename... Args>
-auto stack(Args&&... args) -> std::unique_ptr<Stack<Widget_t>>
+[[nodiscard]] auto stack(Args&&... args) -> std::unique_ptr<Stack<Widget_t>>
 {
     return std::make_unique<Stack<Widget_t>>(std::forward<Args>(args)...);
 }
@@ -234,7 +240,7 @@ auto stack(Args&&... args) -> std::unique_ptr<Stack<Widget_t>>
 namespace ox::slot {
 
 template <typename Child_t>
-auto set_active_page(layout::Stack<Child_t>& stack)
+[[nodiscard]] auto set_active_page(layout::Stack<Child_t>& stack)
     -> sl::Slot<void(std::size_t)>
 {
     return link_lifetimes(
@@ -242,29 +248,30 @@ auto set_active_page(layout::Stack<Child_t>& stack)
 }
 
 template <typename Child_t>
-auto set_active_page(layout::Stack<Child_t>& stack, std::size_t index)
-    -> sl::Slot<void()>
+[[nodiscard]] auto set_active_page(layout::Stack<Child_t>& stack,
+                                   std::size_t index) -> sl::Slot<void()>
 {
     return link_lifetimes([&stack, index] { stack.set_active_page(index); },
                           stack);
 }
 
 template <typename Child_t>
-auto delete_page(layout::Stack<Child_t>& stack) -> sl::Slot<void(std::size_t)>
+[[nodiscard]] auto delete_page(layout::Stack<Child_t>& stack)
+    -> sl::Slot<void(std::size_t)>
 {
     return link_lifetimes([&stack](auto index) { stack.delete_page(index); },
                           stack);
 }
 
 template <typename Child_t>
-auto delete_page(layout::Stack<Child_t>& stack, std::size_t index)
+[[nodiscard]] auto delete_page(layout::Stack<Child_t>& stack, std::size_t index)
     -> sl::Slot<void()>
 {
     return link_lifetimes([&stack, index] { stack.delete_page(index); }, stack);
 }
 
 template <typename Child_t>
-auto insert_page(layout::Stack<Child_t>& stack)
+[[nodiscard]] auto insert_page(layout::Stack<Child_t>& stack)
     -> sl::Slot<void(std::size_t, std::unique_ptr<Widget>)>
 {
     return link_lifetimes(
@@ -275,7 +282,7 @@ auto insert_page(layout::Stack<Child_t>& stack)
 }
 
 template <typename Child_t>
-auto insert_page(layout::Stack<Child_t>& stack, std::size_t index)
+[[nodiscard]] auto insert_page(layout::Stack<Child_t>& stack, std::size_t index)
     -> sl::Slot<void(std::unique_ptr<Widget>)>
 {
     return link_lifetimes(

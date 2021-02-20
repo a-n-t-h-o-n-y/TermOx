@@ -7,47 +7,59 @@
 namespace ox::layout::h_detail {
 
 struct Get_area {
-    auto operator()(int primary, int secondary) const -> Area
+    [[nodiscard]] auto operator()(int primary, int secondary) const -> Area
     {
         return {primary, secondary};
     }
 };
 
 struct Get_point {
-    auto operator()(int primary, int secondary) const -> Point
+    [[nodiscard]] auto operator()(int primary, int secondary) const -> Point
     {
         return {primary, secondary};
     }
 };
 
 struct Primary_policy {
-    auto operator()(Widget const& w) const -> Size_policy const&
+    [[nodiscard]] auto operator()(Widget const& w) const -> Size_policy const&
     {
         return w.width_policy;
     }
 };
 
 struct Primary_length {
-    auto operator()(Widget const& w) const -> int { return w.width(); }
+    [[nodiscard]] auto operator()(Widget const& w) const -> int
+    {
+        return w.width();
+    }
 };
 
 struct Primary_offset {
-    auto operator()(Widget const& w) const -> int { return w.inner_x(); }
+    [[nodiscard]] auto operator()(Widget const& w) const -> int
+    {
+        return w.inner_x();
+    }
 };
 
 struct Secondary_policy {
-    auto operator()(Widget const& w) const -> Size_policy const&
+    [[nodiscard]] auto operator()(Widget const& w) const -> Size_policy const&
     {
         return w.height_policy;
     }
 };
 
 struct Secondary_length {
-    auto operator()(Widget const& w) const -> int { return w.height(); }
+    [[nodiscard]] auto operator()(Widget const& w) const -> int
+    {
+        return w.height();
+    }
 };
 
 struct Secondary_offset {
-    auto operator()(Widget const& w) const -> int { return w.inner_y(); }
+    [[nodiscard]] auto operator()(Widget const& w) const -> int
+    {
+        return w.inner_y();
+    }
 };
 
 using Primary = detail::Dimension_parameters<Primary_policy,
@@ -73,7 +85,8 @@ using Horizontal =
 
 /// Helper function to create an instance.
 template <typename Widget_t = Widget, typename... Args>
-auto horizontal(Args&&... args) -> std::unique_ptr<Horizontal<Widget_t>>
+[[nodiscard]] auto horizontal(Args&&... args)
+    -> std::unique_ptr<Horizontal<Widget_t>>
 {
     return std::make_unique<Horizontal<Widget_t>>(std::forward<Args>(args)...);
 }

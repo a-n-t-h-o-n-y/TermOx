@@ -25,44 +25,59 @@ class Transform_view {
     {}
 
    public:
-    auto size() const -> std::size_t { return container_.size(); }
+    [[nodiscard]] auto size() const -> std::size_t { return container_.size(); }
 
-    auto empty() const -> bool { return container_.empty(); }
+    [[nodiscard]] auto is_empty() const -> bool { return container_.empty(); }
 
-    auto operator[](std::size_t i) const -> Reference_const
+    [[nodiscard]] auto operator[](std::size_t i) const -> Reference_const
     {
         return map_fn_(container_[i]);
     }
 
-    auto operator[](std::size_t i) -> Reference
+    [[nodiscard]] auto operator[](std::size_t i) -> Reference
     {
         return map_fn_(container_[i]);
     }
 
-    auto front() const -> Reference_const
+    [[nodiscard]] auto front() const -> Reference_const
     {
         return map_fn_(container_.front());
     }
 
-    auto front() -> Reference { return map_fn_(container_.front()); }
+    [[nodiscard]] auto front() -> Reference
+    {
+        return map_fn_(container_.front());
+    }
 
-    auto back() const -> Reference_const { return map_fn_(container_.back()); }
+    [[nodiscard]] auto back() const -> Reference_const
+    {
+        return map_fn_(container_.back());
+    }
 
-    auto back() -> Reference { return map_fn_(container_.back()); }
+    [[nodiscard]] auto back() -> Reference
+    {
+        return map_fn_(container_.back());
+    }
 
-    auto begin() const
+    [[nodiscard]] auto begin() const
     {
         return Transform_iterator{std::cbegin(container_), map_fn_};
     }
 
-    auto begin() { return Transform_iterator{std::begin(container_), map_fn_}; }
+    [[nodiscard]] auto begin()
+    {
+        return Transform_iterator{std::begin(container_), map_fn_};
+    }
 
-    auto end() const
+    [[nodiscard]] auto end() const
     {
         return Transform_iterator{std::cend(container_), map_fn_};
     }
 
-    auto end() { return Transform_iterator{std::end(container_), map_fn_}; }
+    [[nodiscard]] auto end()
+    {
+        return Transform_iterator{std::end(container_), map_fn_};
+    }
 
    private:
     Container& container_;

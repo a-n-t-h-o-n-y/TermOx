@@ -56,7 +56,8 @@ class Linear_layout : public Layout<Child> {
     // virtual, but keep this in mind if you every hold Layouts and Widgets
     // separately.
 
-    auto remove_child(Child_t const* child) -> std::unique_ptr<Widget>
+    [[nodiscard]] auto remove_child(Child_t const* child)
+        -> std::unique_ptr<Widget>
     {
         auto result = this->Base_t::remove_child(child);
         this->reset_offset_if_out_of_bounds();
@@ -67,7 +68,8 @@ class Linear_layout : public Layout<Child> {
     /** If no child is found, returns nullptr. */
     template <typename UnaryPredicate,
               typename = enable_if_invocable<UnaryPredicate>>
-    auto remove_child_if(UnaryPredicate&& predicate) -> std::unique_ptr<Widget>
+    [[nodiscard]] auto remove_child_if(UnaryPredicate&& predicate)
+        -> std::unique_ptr<Widget>
     {
         auto result = this->Base_t::remove_child_if(
             std::forward<UnaryPredicate>(predicate));
@@ -77,7 +79,8 @@ class Linear_layout : public Layout<Child> {
 
     /// Removes and returns the child at \p index in the child container.
     /** Returns nullptr if \p index is out of range. */
-    auto remove_child_at(std::size_t index) -> std::unique_ptr<Widget>
+    [[nodiscard]] auto remove_child_at(std::size_t index)
+        -> std::unique_ptr<Widget>
     {
         auto result = this->Base_t::remove_child_at(index);
         this->reset_offset_if_out_of_bounds();
@@ -264,7 +267,8 @@ class Linear_layout : public Layout<Child> {
     /** A length of zero in any dimension means the Widget will be disabled. */
     // TODO This is ambiguous, what is a zero width/height wants to be enabled?
     // Need another data member to tell if something should be enabled or not.
-    static auto is_valid(std::size_t primary, std::size_t secondary) -> bool
+    [[nodiscard]] static auto is_valid(std::size_t primary,
+                                       std::size_t secondary) -> bool
     {
         return primary != 0 && secondary != 0;
     }

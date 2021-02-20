@@ -41,9 +41,9 @@ class IP_range {
     IP_range(Iter_t begin, Iter_t end) : begin_{begin}, end_{end} {}
 
    public:
-    auto begin() const -> Iter_t { return begin_; }
+    [[nodiscard]] auto begin() const -> Iter_t { return begin_; }
 
-    auto end() const -> Iter_t { return end_; }
+    [[nodiscard]] auto end() const -> Iter_t { return end_; }
 
    private:
     Iter_t begin_;
@@ -73,7 +73,7 @@ class Banner : public Widget {
         this->update();
     }
 
-    auto get_text() const -> Glyph_string const& { return text_; }
+    [[nodiscard]] auto get_text() const -> Glyph_string const& { return text_; }
 
    protected:
     auto paint_event(Painter& p) -> bool override
@@ -123,7 +123,7 @@ class Banner : public Widget {
 
 /// Helper function to create an instance.
 template <typename Animator, typename... Args>
-auto banner(Args&&... args) -> std::unique_ptr<Banner<Animator>>
+[[nodiscard]] auto banner(Args&&... args) -> std::unique_ptr<Banner<Animator>>
 {
     return std::make_unique<Banner<Animator>>(std::forward<Args>(args)...);
 }
@@ -150,12 +150,15 @@ class Animator_base {
     }
 
    protected:
-    auto data() const -> std::vector<Index_and_position> const&
+    [[nodiscard]] auto data() const -> std::vector<Index_and_position> const&
     {
         return data_;
     }
 
-    auto data() -> std::vector<Index_and_position>& { return data_; }
+    [[nodiscard]] auto data() -> std::vector<Index_and_position>&
+    {
+        return data_;
+    }
 
     /// Incremented values, length of text.
     void initialize_data()
@@ -164,28 +167,33 @@ class Animator_base {
         std::iota(this->begin(), this->end(), Index_and_position{0, 0});
     }
 
-    auto max_length() const -> std::size_t { return max_length_; }
+    [[nodiscard]] auto max_length() const -> std::size_t { return max_length_; }
 
-    auto text_length() const -> std::size_t { return text_length_; }
+    [[nodiscard]] auto text_length() const -> std::size_t
+    {
+        return text_length_;
+    }
 
-    auto is_started() const -> bool { return started_; }
+    [[nodiscard]] auto is_started() const -> bool { return started_; }
 
-    auto begin() -> std::vector<Index_and_position>::iterator
+    [[nodiscard]] auto begin() -> std::vector<Index_and_position>::iterator
     {
         return std::begin(data_);
     }
 
-    auto begin() const -> std::vector<Index_and_position>::const_iterator
+    [[nodiscard]] auto begin() const
+        -> std::vector<Index_and_position>::const_iterator
     {
         return std::cbegin(data_);
     }
 
-    auto end() -> std::vector<Index_and_position>::iterator
+    [[nodiscard]] auto end() -> std::vector<Index_and_position>::iterator
     {
         return std::end(data_);
     }
 
-    auto end() const -> std::vector<Index_and_position>::const_iterator
+    [[nodiscard]] auto end() const
+        -> std::vector<Index_and_position>::const_iterator
     {
         return std::cend(data_);
     }
@@ -202,7 +210,7 @@ class Animator_base {
 /// Left to right reveal of text, hold, left to right clearning of text.
 class Scan : public Animator_base {
    public:
-    auto operator()() -> IP_range
+    [[nodiscard]] auto operator()() -> IP_range
     {
         auto const t_length = this->text_length();
         auto const hold_max = t_length * 3;
@@ -239,7 +247,7 @@ class Scan : public Animator_base {
 /// Left to right reveal of text, then hold.
 class Persistent_scan : public Animator_base {
    public:
-    auto operator()() -> IP_range
+    [[nodiscard]] auto operator()() -> IP_range
     {
         if (end_ == this->text_length()) {
             stop();
@@ -264,7 +272,7 @@ class Persistent_scan : public Animator_base {
 
 class Random : public Animator_base {
    public:
-    auto operator()() -> IP_range
+    [[nodiscard]] auto operator()() -> IP_range
     {
         if (end_ == this->text_length()) {
             stop();
@@ -298,7 +306,7 @@ class Random : public Animator_base {
 
 class Scroll_base : public Animator_base {
    public:
-    auto operator()() -> IP_range
+    [[nodiscard]] auto operator()() -> IP_range
     {
         if (hold_ < hold_length_)
             ++hold_;
@@ -378,14 +386,14 @@ class Conditional_scroll : public Scroll_base {
     }
 
    private:
-    auto start_condition() const -> bool
+    [[nodiscard]] auto start_condition() const -> bool
     {
         return !this->is_started() &&
                this->text_length() > this->max_length() &&
                this->text_length() != 0;
     }
 
-    auto stop_condition() const -> bool
+    [[nodiscard]] auto stop_condition() const -> bool
     {
         return this->is_started() && this->text_length() <= this->max_length();
     }
@@ -401,7 +409,7 @@ class Conditional_scroll : public Scroll_base {
 
 class Unscramble : public Animator_base {
    public:
-    auto operator()() -> IP_range
+    [[nodiscard]] auto operator()() -> IP_range
     {
         if (static_cast<std::size_t>(sorted_to_) == this->text_length()) {
             stop();
@@ -446,7 +454,7 @@ class Unscramble : public Animator_base {
     }
 
     template <typename Pair_t, typename Container1, typename Container2>
-    static auto zip(Container1 const& x, Container2 const& y)
+    [[nodiscard]] static auto zip(Container1 const& x, Container2 const& y)
         -> std::vector<Pair_t>
     {
         auto zipped = std::vector<Pair_t>{};

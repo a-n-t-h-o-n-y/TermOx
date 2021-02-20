@@ -13,7 +13,7 @@ namespace ox::detail {
  *  Return the deepest child Widget that owns the coordinates. If a parent owns
  *  the coordinates, it is checked if any of the children own it as well before
  *  returning. Used only by input::get at the moment. */
-auto find_widget_at(Point p) -> Widget*;
+[[nodiscard]] auto find_widget_at(Point p) -> Widget*;
 
 }  // namespace ox::detail
 #endif  // TERMOX_SYSTEM_DETAIL_FIND_WIDGET_AT_HPP

@@ -22,7 +22,7 @@ class Size_policy {
     }
 
     /// Return the size hint currently being used.
-    auto hint() const -> int { return data_.hint; }
+    [[nodiscard]] auto hint() const -> int { return data_.hint; }
 
     /// Set the minimum length that the owning Widget should be.
     void min(int value)
@@ -34,7 +34,7 @@ class Size_policy {
     }
 
     /// Return the minimum length currently set.
-    auto min() const -> int { return data_.min; }
+    [[nodiscard]] auto min() const -> int { return data_.min; }
 
     /// Set the maximum length/height that the owning Widget can be.
     void max(int value)
@@ -46,7 +46,7 @@ class Size_policy {
     }
 
     /// Return the maximum length currently set.
-    auto max() const -> int { return data_.max; }
+    [[nodiscard]] auto max() const -> int { return data_.max; }
 
     /// Set the stretch value, used to divide up space between sibling Widgets.
     /** A ratio of stretch over siblings' stretch sum is used to give space. */
@@ -59,13 +59,16 @@ class Size_policy {
     }
 
     /// Return the stretch value currently being used.
-    auto stretch() const -> double { return data_.stretch; }
+    [[nodiscard]] auto stretch() const -> double { return data_.stretch; }
 
     /// Set if min can be ignored for the last displayed widget in a layout.
     void can_ignore_min(bool enable) { data_.can_ignore_min = enable; }
 
     /// Return if min can be ignored for the last displayed widget in a layout.
-    auto can_ignore_min() const -> bool { return data_.can_ignore_min; }
+    [[nodiscard]] auto can_ignore_min() const -> bool
+    {
+        return data_.can_ignore_min;
+    }
 
     /// Passive: Takes the sum of child Widget's hints as its fixed length.
     /** Assumes each child has a fixed() Size_policy. */
@@ -76,7 +79,7 @@ class Size_policy {
     }
 
     /// Return true if Size_policy is passive.
-    auto is_passive() const -> bool { return data_.passive; }
+    [[nodiscard]] auto is_passive() const -> bool { return data_.passive; }
 
     /* _Helper Methods_ */
     /// Fixed: \p hint is the only acceptable size.

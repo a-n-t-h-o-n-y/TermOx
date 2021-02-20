@@ -24,14 +24,14 @@ class Array : public Layout_t {
 
     /// Get child by index.
     template <std::size_t Index>
-    auto get() -> auto&
+    [[nodiscard]] auto get() -> auto&
     {
         return std::get<Index>(refs_).get();
     }
 
     /// Get child by index.
     template <std::size_t Index>
-    auto get() const -> auto const&
+    [[nodiscard]] auto get() const -> auto const&
     {
         return std::get<Index>(refs_).get();
     }
@@ -43,15 +43,15 @@ class Array : public Layout_t {
 
    private:
     template <typename... Args>
-    auto make_child_with_index(std::size_t, Args const&... args) ->
-        typename Layout_t::Child_t&
+    [[nodiscard]] auto make_child_with_index(std::size_t, Args const&... args)
+        -> typename Layout_t::Child_t&
     {
         return this->make_child(args...);
     }
 
     template <std::size_t... I, typename... Args>
-    auto create_n_children(std::index_sequence<I...>, Args const&... args)
-        -> References
+    [[nodiscard]] auto create_n_children(std::index_sequence<I...>,
+                                         Args const&... args) -> References
     {
         return {this->make_child_with_index(I, args...)...};
     }

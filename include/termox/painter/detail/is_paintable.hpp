@@ -5,7 +5,7 @@
 namespace ox::detail {
 
 /// A check for whether a widget is in a state that can be painted.
-inline auto is_paintable(Widget const& w) -> bool
+[[nodiscard]] inline auto is_paintable(Widget const& w) -> bool
 {
     return w.is_enabled() && (w.outer_width() != 0) && (w.outer_height() != 0);
 }

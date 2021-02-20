@@ -71,10 +71,14 @@ class Selecting : public Layout_t {
    public:
     /// Return whether or not a child widget is currently selected.
     /** Useful to call before selected_child(), if you don't want to catch. */
-    auto has_selected_child() const -> bool { return selected_ != nullptr; }
+    [[nodiscard]] auto is_child_selected() const -> bool
+    {
+        return selected_ != nullptr;
+    }
 
     /// Return the currently selected child, UB if no children in Layout.
-    auto selected_child() const -> typename Layout_t::Child_t const&
+    [[nodiscard]] auto selected_child() const ->
+        typename Layout_t::Child_t const&
     {
         if (selected_ != nullptr)
             return *selected_;
@@ -154,7 +158,7 @@ class Selecting : public Layout_t {
     auto focus_in_event() -> bool override
     {
         this->reset_selected_if_necessary();
-        if (this->has_selected_child())
+        if (this->is_child_selected())
             this->selected_child().select();
         else if (this->child_count() > 0)
             this->select_first_child();
@@ -164,7 +168,7 @@ class Selecting : public Layout_t {
     auto focus_out_event() -> bool override
     {
         if constexpr (unselect_on_focus_out) {
-            if (this->has_selected_child())
+            if (this->is_child_selected())
                 this->selected_child().unselect();
         }
         return Layout_t::focus_out_event();
@@ -172,14 +176,14 @@ class Selecting : public Layout_t {
 
     auto enable_event() -> bool override
     {
-        if (this->has_selected_child() && System::focus_widget() == this)
+        if (this->is_child_selected() && System::focus_widget() == this)
             this->selected_child().select();
         return Layout_t::enable_event();
     }
 
     auto disable_event() -> bool override
     {
-        if (this->has_selected_child())
+        if (this->is_child_selected())
             this->selected_child().unselect();
         return Layout_t::disable_event();
     }
@@ -221,7 +225,7 @@ class Selecting : public Layout_t {
 
     void increment_selected_and_scroll_if_necessary()
     {
-        if (!this->has_selected_child())
+        if (!this->is_child_selected())
             return;
         this->increment_selected();
         while (!this->selected_child().is_enabled()) {
@@ -240,7 +244,7 @@ class Selecting : public Layout_t {
 
     void decrement_selected_and_scroll_if_necessary()
     {
-        if (!this->has_selected_child())
+        if (!this->is_child_selected())
             return;
         this->decrement_selected();
         if (!this->selected_child().is_enabled())
@@ -293,7 +297,7 @@ class Selecting : public Layout_t {
     /// unselect() the currently selected child, if any, and select() \p child.
     void set_selected_by_pointer(typename Layout_t::Child_t* child)
     {
-        if (this->has_selected_child())
+        if (this->is_child_selected())
             selected_->unselect();
         selected_ = child;
         selected_->select();
@@ -318,7 +322,7 @@ class Selecting : public Layout_t {
     /// If selected_child is off the screen, select() the last displayed widget.
     void reset_selected_if_necessary()
     {
-        if (this->has_selected_child()) {
+        if (this->is_child_selected()) {
             if (this->selected_child().is_enabled())
                 return;
             else
@@ -327,7 +331,7 @@ class Selecting : public Layout_t {
     }
 
     /// Return true if \p codes contains the value \p key.
-    static auto contains(Key k, Key_codes const& codes) -> bool
+    [[nodiscard]] static auto contains(Key k, Key_codes const& codes) -> bool
     {
         return std::any_of(std::begin(codes), std::end(codes),
                            [=](auto code) { return code == k; });
@@ -338,7 +342,7 @@ class Selecting : public Layout_t {
 template <typename Layout_t,
           bool unselect_on_focus_out = true,
           typename... Args>
-auto selecting(Args&&... args)
+[[nodiscard]] auto selecting(Args&&... args)
     -> std::unique_ptr<Selecting<Layout_t, unselect_on_focus_out>>
 {
     return std::make_unique<Selecting<Layout_t, unselect_on_focus_out>>(

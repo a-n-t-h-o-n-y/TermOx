@@ -44,17 +44,24 @@ class Color {
 
    public:
     constexpr Color(Name n) : value{static_cast<Value_t>(n)} {}
+
     constexpr explicit Color(Value_t v) : value{v} {}
 };
 
-constexpr auto operator==(Color x, Color y) -> bool
+[[nodiscard]] constexpr auto operator==(Color x, Color y) -> bool
 {
     return x.value == y.value;
 }
 
-constexpr auto operator!=(Color x, Color y) -> bool { return !(x == y); }
+[[nodiscard]] constexpr auto operator!=(Color x, Color y) -> bool
+{
+    return !(x == y);
+}
 
-constexpr auto operator<(Color x, Color y) -> bool { return x.value < y.value; }
+[[nodiscard]] constexpr auto operator<(Color x, Color y) -> bool
+{
+    return x.value < y.value;
+}
 
 struct Background_color {
     Color::Value_t value;
@@ -65,10 +72,16 @@ struct Foreground_color {
 };
 
 /// Converts a Color into a Background_color to be used by Brush.
-constexpr auto bg(Color c) -> Background_color { return {c.value}; }
+[[nodiscard]] constexpr auto bg(Color c) -> Background_color
+{
+    return {c.value};
+}
 
 /// Converts a Color into a Background_color to be used by Brush.
-constexpr auto fg(Color c) -> Foreground_color { return {c.value}; }
+[[nodiscard]] constexpr auto fg(Color c) -> Foreground_color
+{
+    return {c.value};
+}
 
 /* --------------------------- Color_index -----------------------------------*/
 

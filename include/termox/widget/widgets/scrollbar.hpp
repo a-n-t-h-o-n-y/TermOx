@@ -76,7 +76,7 @@ class Scrollbar : public Layout_t {
         }
 
         /// Finds the scroll position from a physical point on the bar.
-        auto find_position_from_point(Point p) -> std::size_t
+        [[nodiscard]] auto find_position_from_point(Point p) -> std::size_t
         {
             auto const length = (int)this->max_length() - (int)slider_length_;
             if (length < 1 || parameters_.size == 0)
@@ -131,7 +131,7 @@ class Scrollbar : public Layout_t {
                 length, parameters_.size, parameters_.position, slider_length_);
         }
 
-        static auto constexpr point(int position) -> Point
+        [[nodiscard]] static auto constexpr point(int position) -> Point
         {
             if constexpr (is_vertical)
                 return {0, position};
@@ -139,10 +139,11 @@ class Scrollbar : public Layout_t {
                 return {position, 0};
         }
 
-        static auto constexpr slider_position(int max_length,
-                                              double line_count,
-                                              double position,
-                                              std::size_t slider_length) -> int
+        [[nodiscard]] static auto constexpr slider_position(
+            int max_length,
+            double line_count,
+            double position,
+            std::size_t slider_length) -> int
         {
             if (line_count == 0. || line_count == 1.)
                 return 0;
@@ -151,15 +152,16 @@ class Scrollbar : public Layout_t {
             return std::round(ratio * length);
         }
 
-        static auto constexpr slider_length(double max_length,
-                                            double line_count) -> std::size_t
+        [[nodiscard]] static auto constexpr slider_length(double max_length,
+                                                          double line_count)
+            -> std::size_t
         {
             if (max_length == 0. || line_count == 0.)
                 return 0;
             return std::ceil((1. / line_count) * max_length);
         }
 
-        auto max_length() const -> std::size_t
+        [[nodiscard]] auto max_length() const -> std::size_t
         {
             if constexpr (is_vertical)
                 return this->height();
@@ -192,7 +194,7 @@ class Scrollbar : public Layout_t {
     sl::Signal<void()> incremented;
 
    public:
-    Scrollbar(Parameters p = {}) : parameters_{std::move(p)}
+    explicit Scrollbar(Parameters p = {}) : parameters_{std::move(p)}
     {
         using namespace pipe;
         if constexpr (is_vertical) {
@@ -217,7 +219,10 @@ class Scrollbar : public Layout_t {
     }
 
    public:
-    auto get_size() const -> std::size_t { return parameters_.size; }
+    [[nodiscard]] auto get_size() const -> std::size_t
+    {
+        return parameters_.size;
+    }
 
     void set_size(std::size_t s)
     {
@@ -238,7 +243,10 @@ class Scrollbar : public Layout_t {
         this->set_size(this->get_size() - 1);
     }
 
-    auto get_position() const -> std::size_t { return parameters_.position; }
+    [[nodiscard]] auto get_position() const -> std::size_t
+    {
+        return parameters_.position;
+    }
 
     void set_position(std::size_t p)
     {
@@ -307,20 +315,22 @@ using VScrollbar = Scrollbar<layout::Vertical<>>;
 
 /// Helper function to create an instance.
 template <typename Layout_t>
-inline auto scrollbar(typename Scrollbar<Layout_t>::Parameters p)
+[[nodiscard]] inline auto scrollbar(typename Scrollbar<Layout_t>::Parameters p)
     -> std::unique_ptr<Scrollbar<Layout_t>>
 {
     return std::make_unique<Scrollbar<Layout_t>>(std::move(p));
 }
 
 /// Helper function to create an instance.
-inline auto h_scrollbar(HScrollbar::Parameters p) -> std::unique_ptr<HScrollbar>
+[[nodiscard]] inline auto h_scrollbar(HScrollbar::Parameters p)
+    -> std::unique_ptr<HScrollbar>
 {
     return std::make_unique<HScrollbar>(std::move(p));
 }
 
 /// Helper function to create an instance.
-inline auto v_scrollbar(VScrollbar::Parameters p) -> std::unique_ptr<VScrollbar>
+[[nodiscard]] inline auto v_scrollbar(VScrollbar::Parameters p)
+    -> std::unique_ptr<VScrollbar>
 {
     return std::make_unique<VScrollbar>(std::move(p));
 }

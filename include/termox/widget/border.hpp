@@ -20,7 +20,7 @@ class Border {
         void disable() { enabled_ = false; }
 
         /// Return whether or not the border is enabled.
-        auto enabled() const -> bool { return enabled_; }
+        [[nodiscard]] auto is_enabled() const -> bool { return enabled_; }
 
         /// Can assign to this as if it is a Glyph.
         using Glyph::operator=;
@@ -74,7 +74,7 @@ class Border {
     void disable() { enabled_ = false; }
 
     /// Return whether the border is enabled.
-    [[nodiscard]] auto enabled() const -> bool { return enabled_; }
+    [[nodiscard]] auto is_enabled() const -> bool { return enabled_; }
 
    private:
     bool enabled_ = false;

@@ -14,12 +14,14 @@
 
 namespace ox {
 
-inline auto operator<(Paint_event const& x, Paint_event const& y) -> bool
+[[nodiscard]] inline auto operator<(Paint_event const& x, Paint_event const& y)
+    -> bool
 {
     return std::addressof(x.receiver.get()) < std::addressof(y.receiver.get());
 }
 
-inline auto operator==(Paint_event const& a, Paint_event const& b) -> bool
+[[nodiscard]] inline auto operator==(Paint_event const& a, Paint_event const& b)
+    -> bool
 {
     return std::addressof(a.receiver.get()) == std::addressof(b.receiver.get());
 }
@@ -44,7 +46,7 @@ class Paint_queue {
         return sent;
     }
 
-    auto size() const -> std::size_t { return events_.size(); }
+    [[nodiscard]] auto size() const -> std::size_t { return events_.size(); }
 
    private:
     Unique_queue<Paint_event> events_;
@@ -63,7 +65,7 @@ class Delete_queue {
         return true;
     }
 
-    auto size() const -> std::size_t { return deletes_.size(); }
+    [[nodiscard]] auto size() const -> std::size_t { return deletes_.size(); }
 
    private:
     std::vector<Delete_event> deletes_;
@@ -83,7 +85,7 @@ class Basic_queue {
         return sent;
     }
 
-    auto size() const -> std::size_t { return basics_.size(); }
+    [[nodiscard]] auto size() const -> std::size_t { return basics_.size(); }
 
    private:
     std::vector<Event> basics_;

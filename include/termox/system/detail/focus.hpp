@@ -11,7 +11,10 @@ namespace ox::detail {
 class Focus {
    public:
     /// Return a pointer to the currently focused Widget, can return nullptr.
-    static auto focus_widget() -> ox::Widget* { return focus_widget_; }
+    [[nodiscard]] static auto focus_widget() -> ox::Widget*
+    {
+        return focus_widget_;
+    }
 
     /// Sets the focus to \p clicked if it has a Focus_policy::Mouse/Strong.
     static void mouse_press(ox::Widget& clicked);

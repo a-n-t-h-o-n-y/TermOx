@@ -62,7 +62,7 @@ namespace ox::pipe {
 
 // Widget Accessors ------------------------------------------------------------
 /// Widget -> Range<Children>
-inline auto children()
+[[nodiscard]] inline auto children()
 {
     return [](auto&& w) {
         auto c = get(w).get_children();
@@ -71,7 +71,7 @@ inline auto children()
 }
 
 /// Widget -> std::vector<Widget*>
-inline auto descendants()
+[[nodiscard]] inline auto descendants()
 {
     return [](auto&& w) { return get(w).get_descendants(); };
 }
@@ -88,13 +88,13 @@ auto for_each(F&& f)
 
 /// Container -> Container
 template <typename F>
-auto filter(F&& predicate)
+[[nodiscard]] auto filter(F&& predicate)
 {
     return detail::Filter_predicate{predicate};
 }
 
 /// Filter by name of Widget
-inline auto find(std::string const& name)
+[[nodiscard]] inline auto find(std::string const& name)
 {
     return detail::Filter_predicate{
         [=](auto const& w) { return w.name() == name; }};
@@ -102,7 +102,7 @@ inline auto find(std::string const& name)
 
 /// Dynamic cast, be aware.
 template <typename Widget_t>
-auto filter()
+[[nodiscard]] auto filter()
 {
     return detail::Dynamic_filter_predicate<Widget_t>{};
 }
@@ -1856,7 +1856,7 @@ namespace ox {
 
 /// Return *x if x is a unique_ptr to a Widget type, otherwise x.
 template <typename T>
-constexpr auto get(T& x) -> auto&
+[[nodiscard]] constexpr auto get(T& x) -> auto&
 {
     if constexpr (pipe::detail::is_widget_ptr_v<T>)
         return *x;
