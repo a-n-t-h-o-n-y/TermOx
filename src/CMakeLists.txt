@@ -57,7 +57,6 @@ target_sources(TermOx
         system/focus.cpp
         system/system.cpp
         system/animation_engine.cpp
-        system/timer_event_loop.cpp
         system/user_input_event_loop.cpp
         system/find_widget_at.cpp
 )
@@ -66,10 +65,7 @@ target_sources(TermOx
 target_sources(TermOx
     PRIVATE
         painter/painter.cpp
-        # painter/screen.cpp
         painter/glyph_matrix.cpp
-        # painter/screen_mask.cpp
-        # painter/find_empty_space.cpp
 )
 
 # Widget

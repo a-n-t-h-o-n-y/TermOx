@@ -12,8 +12,6 @@
 #include <signals_light/signal.hpp>
 
 #include <termox/system/animation_engine.hpp>
-#include <termox/system/detail/event_engine.hpp>
-#include <termox/system/detail/event_queue.hpp>
 #include <termox/system/detail/filter_send.hpp>
 #include <termox/system/detail/focus.hpp>
 #include <termox/system/detail/is_sendable.hpp>
@@ -22,6 +20,7 @@
 #include <termox/system/detail/user_input_event_loop.hpp>
 #include <termox/system/event.hpp>
 #include <termox/system/event_loop.hpp>
+#include <termox/system/event_queue.hpp>
 #include <termox/system/system.hpp>
 #include <termox/terminal/terminal.hpp>
 #include <termox/widget/area.hpp>
@@ -39,17 +38,13 @@ void System::enable_tab_focus() { detail::Focus::enable_tab_focus(); }
 
 void System::disable_tab_focus() { detail::Focus::disable_tab_focus(); }
 
-void System::post_event(Event e)
-{
-    System::event_engine().append(std::move(e));
-}
+void System::post_event(Event e) { Event_queue::append(std::move(e)); }
 
 void System::exit(int exit_code)
 {
     System::exit_requested_ = true;
     System::exit_signal(exit_code);
-    animation_engine_.exit(0);
-    animation_engine_.wait();
+    animation_engine_.stop();
 }
 
 void System::set_head(Widget* new_head)
@@ -64,7 +59,7 @@ auto System::run() -> int
     if (head_ == nullptr)
         return -1;
     head_->enable();
-    System::post_event(Resize_event{*System::head(), terminal.area()});
+    System::post_event(Resize_event{*System::head(), Terminal::area()});
     detail::Focus::set(*head_);
     return user_input_loop_.run();
 }
@@ -103,7 +98,6 @@ auto System::send_event(Delete_event e) -> bool
 }
 
 sl::Slot<void()> System::quit = [] { System::exit(); };
-detail::Event_engine System::event_engine_;
 Animation_engine System::animation_engine_;
 
 // GCC requires this here, it can't find the default constructor when it's in

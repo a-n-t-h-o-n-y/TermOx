@@ -19,7 +19,7 @@ class Glyph_paint : public ox::layout::Horizontal<> {
    protected:
     auto focus_in_event() -> bool override
     {
-        ox::System::terminal.set_palette(ox::dawn_bringer32::palette);
+        ox::Terminal::set_palette(ox::dawn_bringer32::palette);
         ox::System::set_focus(paint_area);
         return true;
     }

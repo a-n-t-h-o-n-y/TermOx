@@ -28,8 +28,7 @@ class Side_pane : public ox::layout::Vertical<> {
        public:
         Color_pages()
         {
-            ox::System::terminal.palette_changed.connect([this](
-                                                             auto const& pal) {
+            ox::Terminal::palette_changed.connect([this](auto const& pal) {
                 *this | ox::pipe::fixed_height(std::ceil(pal.size() / 8.) + 1);
             });
         }

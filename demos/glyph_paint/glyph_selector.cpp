@@ -151,8 +151,8 @@ auto populated_glyph_selector() -> std::unique_ptr<Glyph_selector>
         },
         shapes);
 
-    ox::System::terminal.palette_changed.connect(build_blocks);
-    ox::System::terminal.palette_changed.connect(build_shapes);
+    ox::Terminal::palette_changed.connect(build_blocks);
+    ox::Terminal::palette_changed.connect(build_shapes);
 
     return result;
 }

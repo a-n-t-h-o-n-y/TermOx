@@ -1,23 +1,9 @@
 #include <termox/system/event_loop.hpp>
 
-#include <termox/system/detail/event_engine.hpp>
+#include <termox/system/event_queue.hpp>
 #include <termox/system/system.hpp>
 
 namespace ox {
-
-auto Event_loop::run() -> int
-{
-    if (running_)
-        return -1;
-    running_ = true;
-    while (!exit_) {
-        System::event_engine().process();
-        this->loop_function();
-    }
-    running_ = false;
-    exit_    = false;
-    return return_code_;
-}
 
 void Event_loop::connect_to_system_exit()
 {
@@ -26,5 +12,8 @@ void Event_loop::connect_to_system_exit()
     exit_loop.track(lifetime_);
     System::exit_signal.connect(exit_loop);
 }
+
+// Required here because event_queue.hpp can't be in header, but run is template
+void Event_loop::send_all_events_and_flush() { Event_queue::send_all(); }
 
 }  // namespace ox

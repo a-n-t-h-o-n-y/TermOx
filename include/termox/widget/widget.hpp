@@ -349,15 +349,6 @@ class Widget {
      *  to true. */
     auto generate_wallpaper() const -> Glyph;
 
-    /// Return the current Screen_descriptor of this Widget, as it appears.
-    auto screen_state() -> detail::Screen_descriptor& { return screen_state_; }
-
-    /// Return the current Screen_descriptor of this Widget, as it appears.
-    auto screen_state() const -> detail::Screen_descriptor const&
-    {
-        return screen_state_;
-    }
-
     // TODO These two below are here instead of in Layout_linear because of
     // Layout_span::sum_child_mins, that function knows too much?
 
@@ -661,7 +652,6 @@ class Widget {
     std::string name_;
     Widget* parent_  = nullptr;
     Glyph wallpaper_ = U' ';
-    detail::Screen_descriptor screen_state_;
     std::set<Widget*> event_filters_;
 
     // Top left point of *this, relative to the top left of the screen.

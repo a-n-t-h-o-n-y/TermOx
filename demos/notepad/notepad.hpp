@@ -78,10 +78,10 @@ class Labeled_color_select : public ox::HLabel_top<ox::Color_select> {
         using namespace ox;
         using namespace ox::pipe;
 
-        System::terminal.palette_changed.connect(
+        Terminal::palette_changed.connect(
             [this](auto const& pal) { this->set_heights(pal); });
 
-        this->set_heights(System::terminal.current_palette());
+        this->set_heights(Terminal::current_palette());
         this->label | Trait::Bold | align_center();
     }
 
@@ -226,7 +226,7 @@ class Notepad : public ox::layout::Vertical<> {
    protected:
     auto focus_in_event() -> bool override
     {
-        ox::System::terminal.set_palette(ox::dawn_bringer16::palette);
+        ox::Terminal::set_palette(ox::dawn_bringer16::palette);
         ox::System::set_focus(txt_trait.textbox);
         return true;
     }

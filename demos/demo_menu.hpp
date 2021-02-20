@@ -1,6 +1,5 @@
 #ifndef DEMOS_DEMO_MENU_HPP
 #define DEMOS_DEMO_MENU_HPP
-#include <termox/painter/detail/screen_descriptor.hpp>
 #include <termox/painter/palette/apple_ii.hpp>
 #include <termox/system/key.hpp>
 #include <termox/system/shortcuts.hpp>
@@ -35,10 +34,10 @@ class Demo_menu : public ox::Menu_stack {
         using namespace ox;
         using namespace ox::pipe;
 
-        ox::System::terminal.set_palette(Menu_palette::palette);
+        ox::Terminal::set_palette(Menu_palette::palette);
 
         Shortcuts::add_shortcut(Key::Escape).connect([this] {
-            ox::System::terminal.set_palette(Menu_palette::palette);
+            ox::Terminal::set_palette(Menu_palette::palette);
             this->Menu_stack::goto_menu();
         });
 
@@ -101,7 +100,7 @@ class Demos : public ox::layout::Vertical<> {
     {
         this->focus_policy = ox::Focus_policy::Direct;
         back_bar.back_btn.pressed.connect([&] {
-            ox::System::terminal.set_palette(Menu_palette::palette);
+            ox::Terminal::set_palette(Menu_palette::palette);
             menu.goto_menu();
         });
     }

@@ -1,25 +1,21 @@
 #ifndef TERMOX_SYSTEM_ANIMATION_ENGINE_HPP
 #define TERMOX_SYSTEM_ANIMATION_ENGINE_HPP
-#include <algorithm>
-#include <chrono>
-#include <future>
-#include <iterator>
 #include <map>
 #include <mutex>
 
 #include <termox/common/lockable.hpp>
-#include <termox/system/detail/interval_event_loop.hpp>
+#include <termox/common/timer.hpp>
+#include <termox/system/event_loop.hpp>
 
 namespace ox {
 class Widget;
 
 /// Registers Widgets with intervals to send timer events.
-class Animation_engine : public detail::Interval_event_loop,
-                         private Lockable<std::recursive_mutex> {
+class Animation_engine : private Lockable<std::recursive_mutex> {
    public:
-    using Interval_event_loop::Clock_t;
-    using Interval_event_loop::Interval_t;
-    using Interval_event_loop::Time_point;
+    using Clock_t    = Timer::Clock_t;
+    using Interval_t = Timer::Interval_t;
+    using Time_point = Timer::Time_point;
 
     struct Registered_data {
         Interval_t interval;
@@ -29,12 +25,10 @@ class Animation_engine : public detail::Interval_event_loop,
     static auto constexpr default_interval = Interval_t{100};
 
    public:
-    Animation_engine() : Interval_event_loop{default_interval} {}
-
     ~Animation_engine()
     {
-        this->Interval_event_loop::exit(0);
-        this->Interval_event_loop::wait();
+        loop_.exit(0);
+        loop_.wait();
     }
 
    public:
@@ -50,15 +44,33 @@ class Animation_engine : public detail::Interval_event_loop,
     /// Return true if there are no registered widgets
     [[nodiscard]] auto is_empty() const -> bool { return subjects_.empty(); }
 
+    /// Start another thread that waits on intervals and sents timer events.
+    void start()
+    {
+        loop_.run_async([this] { this->loop_function(); });
+    }
+
+    /// Sends exit signal and waits for animation thread to exit.
+    void stop()
+    {
+        loop_.exit(0);
+        loop_.wait();
+    }
+
+    /// Return true if start() has been called, and hasn't been exited.
+    [[nodiscard]] auto is_running() const -> bool { return loop_.is_running(); }
+
    private:
     std::map<Widget*, Registered_data> subjects_;
+    Event_loop loop_;
+    Timer timer_ = Timer{default_interval};
 
    private:
-    void loop_function() override;
-
-    /// Post any timer events that are ready to be posted.
-    /** Returns true if any events were posted. */
+    /// Post any Timer_events that are ready to be posted.
     void post_timer_events();
+
+    /// Waits on intervals then sends Timer_events.
+    void loop_function();
 };
 
 }  // namespace ox

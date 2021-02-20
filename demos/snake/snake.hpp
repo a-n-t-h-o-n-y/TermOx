@@ -687,7 +687,7 @@ class Snake_game : public ox::layout::Vertical<> {
    protected:
     auto focus_in_event() -> bool override
     {
-        ox::System::terminal.set_palette(snake_palette);
+        ox::Terminal::set_palette(snake_palette);
         ox::System::set_focus(game_space_);
         return ox::layout::Vertical<>::focus_in_event();
     }

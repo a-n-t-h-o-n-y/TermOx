@@ -11,7 +11,7 @@ auto Shade_display::paint_event(ox::Painter& p) -> bool
     using namespace ox;
     auto light_shade   = U'░' | bg(base_);
     auto mid_shade     = U'▒' | bg(base_);
-    auto const color_n = (int)ox::System::terminal.current_palette().size();
+    auto const color_n = (int)ox::Terminal::current_palette().size();
 
     int const height = static_cast<int>(this->height());
     int const width  = static_cast<int>(this->width());

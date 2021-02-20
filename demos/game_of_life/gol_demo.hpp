@@ -29,7 +29,7 @@ class GoL_demo : public ox::layout::Horizontal<> {
    protected:
     auto focus_in_event() -> bool override
     {
-        ox::System::terminal.set_palette(gol_palette);
+        ox::Terminal::set_palette(gol_palette);
         return ox::layout::Horizontal<>::focus_in_event();
     }
 

@@ -1,6 +1,7 @@
-#ifndef TERMOX_SYSTEM_DETAIL_EVENT_QUEUE_HPP
-#define TERMOX_SYSTEM_DETAIL_EVENT_QUEUE_HPP
+#ifndef TERMOX_SYSTEM_EVENT_QUEUE_HPP
+#define TERMOX_SYSTEM_EVENT_QUEUE_HPP
 #include <memory>
+#include <mutex>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -8,6 +9,7 @@
 #include <termox/common/unique_queue.hpp>
 #include <termox/system/event.hpp>
 #include <termox/system/system.hpp>
+#include <termox/terminal/terminal.hpp>
 #include <termox/widget/widget.hpp>
 
 namespace ox {
@@ -87,43 +89,53 @@ class Basic_queue {
     std::vector<Event> basics_;
 };
 
+}  // namespace ox::detail
+
+namespace ox {
+
 class Event_queue {
    public:
     /// Adds the given event with priority for the underlying event type.
-    void append(Event e)
+    static void append(Event e)
     {
+        auto const lock = std::lock_guard{mtx_};
         std::visit(
-            [this](auto&& e) {
-                this->add_to_a_queue(std::forward<decltype(e)>(e));
-            },
+            [](auto&& e) { add_to_a_queue(std::forward<decltype(e)>(e)); },
             std::move(e));
     }
 
-    /// Returns true if any events were sent.
-    auto send_all() -> bool
+    /// Send all events, then flush the screen if any events were actually sent.
+    static void send_all()
     {
-        bool sent = basics_.send_all();
-        sent      = paints_.send_all() || sent;
-        sent      = deletes_.send_all() || sent;
-        return sent;
+        auto const lock = std::lock_guard{mtx_};
+        bool sent       = basics_.send_all();
+        sent            = paints_.send_all() || sent;
+        sent            = deletes_.send_all() || sent;
+        if (sent)
+            Terminal::flush_screen();
     }
 
    private:
-    Basic_queue basics_;
-    Paint_queue paints_;
-    Delete_queue deletes_;
+    inline static detail::Basic_queue basics_;
+    inline static detail::Paint_queue paints_;
+    inline static detail::Delete_queue deletes_;
+
+    inline static std::recursive_mutex mtx_;
 
    private:
     template <typename T>
-    void add_to_a_queue(T e)
+    static void add_to_a_queue(T e)
     {
         basics_.append(std::move(e));
     }
 
-    void add_to_a_queue(Paint_event e) { paints_.append(std::move(e)); }
+    static void add_to_a_queue(Paint_event e) { paints_.append(std::move(e)); }
 
-    void add_to_a_queue(Delete_event e) { deletes_.append(std::move(e)); }
+    static void add_to_a_queue(Delete_event e)
+    {
+        deletes_.append(std::move(e));
+    }
 };
 
-}  // namespace ox::detail
-#endif  // TERMOX_SYSTEM_DETAIL_EVENT_QUEUE_HPP
+}  // namespace ox
+#endif  // TERMOX_SYSTEM_EVENT_QUEUE_HPP

@@ -6,9 +6,10 @@
 
 namespace ox::detail {
 
-void User_input_event_loop::loop_function()
+auto User_input_event_loop::run() -> int
 {
-    ox::System::post_event(ox::System::terminal.get());
+    return loop_.run(
+        [] { ox::System::post_event(ox::Terminal::read_input()); });
 }
 
 }  // namespace ox::detail

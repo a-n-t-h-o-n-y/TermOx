@@ -16,10 +16,6 @@ namespace ox {
 class Widget;
 }  // namespace ox
 
-namespace ox::detail {
-class Event_engine;
-}  // namespace ox::detail
-
 namespace ox {
 
 /// Organizes the highest level of the TUI framework.
@@ -34,11 +30,8 @@ class System {
     // Slots
     static sl::Slot<void()> quit;
 
-    /// Provides access to and modification of global terminal properties.
-    inline static Terminal terminal;
-
    public:
-    System() { terminal.initialize(); }
+    System() { Terminal::initialize(); }
     System(System const&) = delete;
     System& operator=(System const&) = delete;
     System(System&&)                 = default;
@@ -47,7 +40,7 @@ class System {
     ~System()
     {
         System::exit(0);
-        terminal.uninitialize();
+        Terminal::uninitialize();
     }
 
     /// Return a pointer to the currently focused Widget.
@@ -127,19 +120,13 @@ class System {
      *  this function returns. */
     static void exit(int exit_code = 0);
 
-    /// Returns a reference to the single Event_engine that owns the queue.
-    static auto event_engine() -> detail::Event_engine&
-    {
-        return event_engine_;
-    }
-
     /// Enable animation for the given Widget \p w at \p interval.
     /** Starts the animation_engine if not started yet. */
     static void enable_animation(Widget& w,
                                  Animation_engine::Interval_t interval)
     {
         if (!animation_engine_.is_running())
-            animation_engine_.run_async();
+            animation_engine_.start();
         animation_engine_.register_widget(w, interval);
     }
 
@@ -148,7 +135,7 @@ class System {
     static void enable_animation(Widget& w, FPS fps)
     {
         if (!animation_engine_.is_running())
-            animation_engine_.run_async();
+            animation_engine_.start();
         animation_engine_.register_widget(w, fps);
     }
 
@@ -166,12 +153,12 @@ class System {
     /// Set the terminal cursor via \p cursor parameters and \p offset applied.
     static void set_cursor(Cursor cursor, Point offset)
     {
-        auto& term = System::terminal;
         if (!cursor.is_enabled())
-            term.show_cursor(false);
+            Terminal::show_cursor(false);
         else {
-            term.move_cursor({offset.x + cursor.x(), offset.y + cursor.y()});
-            term.show_cursor();
+            Terminal::move_cursor(
+                {offset.x + cursor.x(), offset.y + cursor.y()});
+            Terminal::show_cursor();
         }
     }
 
@@ -179,7 +166,6 @@ class System {
     inline static Widget* head_        = nullptr;
     inline static bool exit_requested_ = false;
     static detail::User_input_event_loop user_input_loop_;
-    static detail::Event_engine event_engine_;
     static Animation_engine animation_engine_;
 };
 

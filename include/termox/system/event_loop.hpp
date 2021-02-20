@@ -9,12 +9,9 @@
 
 #include <signals_light/signal.hpp>
 
-#include <termox/painter/detail/screen.hpp>
-#include <termox/painter/detail/staged_changes.hpp>
-
 namespace ox {
 
-/// Waits on loop_function() and then notifies Event_engine if event is posted.
+/// Calls on loop_function(), and then processes the Event_queue.
 /** Specialized by providing a loop_function to be run at each iteration. The
  *  owner of the event loop is responsible for making sure its async thread is
  *  shutdown: exit() then wait(). */
@@ -22,18 +19,36 @@ class Event_loop {
    public:
     Event_loop() { this->connect_to_system_exit(); }
 
-    virtual ~Event_loop() = default;
-
    public:
-    /// Start the event loop.
-    auto run() -> int;
+    /// Start the event loop, calling \p loop_function on each iteration.
+    /** loop_function should have signature: void(). It should probably post an
+     *  Event. */
+    template <typename F>
+    auto run(F loop_function) -> int
+    {
+        if (running_)
+            return -1;
+        running_ = true;
+        while (!exit_) {
+            this->send_all_events_and_flush();
+            loop_function();
+        }
+        running_ = false;
+        exit_    = false;
+        return return_code_;
+    }
 
     /// Start the event loop in a separate thread.
-    void run_async()
+    /** loop_function should have signature: void(). It should probably post an
+     *  Event. */
+    template <typename F>
+    void run_async(F&& loop_function)
     {
         if (fut_.valid())
             return;
-        fut_ = std::async(std::launch::async, [this] { return this->run(); });
+        fut_ = std::async(std::launch::async, [this, loop_function] {
+            return this->run(std::move(loop_function));
+        });
     }
 
     /// Call on the loop to exit at the next exit point.
@@ -56,20 +71,15 @@ class Event_loop {
     /// Return true if the event loop is currently running.
     [[nodiscard]] auto is_running() const -> bool { return running_; }
 
-    /// Return true if the animation engine has been told to exit.
-    [[nodiscard]] auto is_exiting() const -> bool { return this->exit_flag(); }
-
-   protected:
-    /// Override this in derived classes to define Event_loop behavior.
-    /** This function will be called on once every loop iteration. */
-    virtual void loop_function() = 0;
-
     /// Return true if the exit flag has been set.
     auto exit_flag() const -> bool { return exit_; }
 
    private:
     /// Connect to the System::exit_signal so loop can exit with System.
     auto connect_to_system_exit() -> void;
+
+    /// Send all events on the event queue and flush the changes to the screen.
+    void send_all_events_and_flush();
 
    private:
     std::future<int> fut_;

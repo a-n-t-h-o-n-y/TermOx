@@ -21,9 +21,9 @@ using Signals    = ::esc::Signals;
 
 class Terminal {
    public:
-    sl::Signal<void(Palette const&)> palette_changed;
+    inline static sl::Signal<void(Palette const&)> palette_changed;
 
-    detail::Screen_buffers screen_buffers{Area{0, 0}};
+    inline static detail::Screen_buffers screen_buffers{Area{0, 0}};
 
    public:
     /// Initializes the terminal screen into curses mode.
@@ -41,45 +41,45 @@ class Terminal {
      *                Off: Signals will not be generated on ctrl-[key] presses,
      *                     sending the byte value of the ctrl character instead.
      */
-    void initialize(Mouse_mode mouse_mode = Mouse_mode::Basic,
-                    Signals signals       = Signals::On);
+    static void initialize(Mouse_mode mouse_mode = Mouse_mode::Basic,
+                           Signals signals       = Signals::On);
 
     /// Reset the terminal to its state before initialize() was called.
     /** No-op if already uninitialized. */
-    void uninitialize();
+    static void uninitialize();
 
     /// Return the Area of the terminal screen.
-    [[nodiscard]] auto area() -> Area { return ::esc::terminal_area(); }
+    [[nodiscard]] static auto area() -> Area { return ::esc::terminal_area(); }
 
     /// Update the screen to reflect change made by Painter since last call.
     /** This leaves the cursor in an unknown location, the cursor must be set
      *  separately for the currently in-focus Widget. */
-    void refresh();
+    static void refresh();
 
     /// Update a Color Palette value.
     /** Used by Dynamic_color_engine. */
-    void update_color_stores(Color c, True_color tc);
+    static void update_color_stores(Color c, True_color tc);
 
     /// Repaints all Glyphs with \p c in their Brush to the screen.
     /** Used by Dynamic_color_engine. */
-    void repaint_color(Color c);
+    static void repaint_color(Color c);
 
     /// Change Color definitions.
-    void set_palette(Palette colors);
+    static void set_palette(Palette colors);
 
     /// Append a Color_definition::Value_t to the current color palette.
     /** Returns the Color that \p def was paired with. Picks the Color by
      *  incrementing the last color in the current palette. */
-    auto palette_append(Color_definition::Value_t value) -> Color;
+    static auto palette_append(Color_definition::Value_t value) -> Color;
 
     /// Return a copy of the currently set color palette.
-    [[nodiscard]] auto current_palette() const -> Palette const&
+    [[nodiscard]] static auto current_palette() -> Palette const&
     {
         return palette_;
     }
 
     /// Set whether or not the cursor is visible on screen.
-    void show_cursor(bool show = true)
+    static void show_cursor(bool show = true)
     {
         ::esc::set(show ? ::esc::Cursor::Show : ::esc::Cursor::Hide);
         ::esc::flush();
@@ -87,7 +87,7 @@ class Terminal {
 
     /// Moves the cursor to Point \p point on screen.
     /** {0, 0} is top left of the terminal screen. */
-    void move_cursor(Point point)
+    static void move_cursor(Point point)
     {
         ::esc::write(::esc::escape(::esc::Cursor_position{point}));
         ::esc::flush();
@@ -95,13 +95,13 @@ class Terminal {
 
     /// Return the number of colors in the terminal's built in palette.
     /** This cooresponds to the number of Color_index values. */
-    [[nodiscard]] auto color_count() -> std::uint16_t
+    [[nodiscard]] static auto color_count() -> std::uint16_t
     {
         return ::esc::color_palette_size();
     }
 
     /// Return true if this terminal supports true color.
-    [[nodiscard]] auto has_true_color() -> bool
+    [[nodiscard]] static auto has_true_color() -> bool
     {
         return ::esc::has_true_color();
     }
@@ -109,17 +109,26 @@ class Terminal {
     /// Wait for user input, and return with a corresponding Event.
     /** Blocking call, input can be received from the keyboard, mouse, or the
      *  terminal being resized. Will return nullopt if there is an error. */
-    [[nodiscard]] auto get() -> Event;
+    [[nodiscard]] static auto read_input() -> Event;
 
     /// Sets a flag so that the next call to refresh() will repaint every cell.
     /** The repaint forces the diff to contain every cell on the terminal. */
-    void flag_full_repaint() { full_repaint_ = true; }
+    static void flag_full_repaint() { full_repaint_ = true; }
+
+    /// Flushes all of the staged changes to the screen and sets the cursor.
+    static void flush_screen();
 
    private:
-    Palette palette_;
-    Dynamic_color_engine dynamic_color_engine_;
-    bool is_initialized_ = false;
-    bool full_repaint_   = false;
+    inline static Palette palette_;
+    inline static Dynamic_color_engine dynamic_color_engine_;
+    inline static bool is_initialized_ = false;
+    inline static bool full_repaint_   = false;
+
+    /// Return true if \p point is within \p area.
+    [[nodiscard]] static auto is_within(Point point, Area area) -> bool
+    {
+        return point.x < area.width && point.y < area.height;
+    }
 };
 
 }  // namespace ox

@@ -14,6 +14,7 @@
 
 #include <termox/common/u32_to_mb.hpp>
 #include <termox/painter/color.hpp>
+#include <termox/painter/detail/is_paintable.hpp>
 #include <termox/painter/palette/dawn_bringer16.hpp>
 #include <termox/system/detail/find_widget_at.hpp>
 #include <termox/system/event.hpp>
@@ -24,7 +25,7 @@
 
 extern "C" void handle_sigint(int /* sig*/)
 {
-    ox::System::terminal.uninitialize();
+    ox::Terminal::uninitialize();
 #if !defined __APPLE__ && !defined __MINGW32__
     std::quick_exit(0);
 #else
@@ -105,16 +106,6 @@ struct Color_sequences {
     return color_sequences(x.get_value());
 }
 
-/// Call update on every Widget in the Widget Tree.
-void repaint_all_widgets()
-{
-    auto* const head = ox::System::head();
-    if (head == nullptr)
-        return;
-    for (auto* const d : head->get_descendants())
-        d->update();
-}
-
 /// Turn an esc:: mouse event into a pair of Receiver and local Mouse object.
 template <typename T>
 [[nodiscard]] auto mouse_event_info(T& event)
@@ -184,7 +175,7 @@ void Terminal::initialize(Mouse_mode mouse_mode, Signals signals)
         return;
     ::esc::initialize_interactive_terminal(mouse_mode, signals);
     std::signal(SIGINT, &handle_sigint);
-    this->set_palette(dawn_bringer16::palette);
+    Terminal::set_palette(dawn_bringer16::palette);
     screen_buffers.resize(Terminal::area());
     is_initialized_ = true;
 }
@@ -193,6 +184,7 @@ void Terminal::uninitialize()
 {
     if (!is_initialized_)
         return;
+    dynamic_color_engine_.stop();
     ::esc::uninitialize_terminal();
     is_initialized_ = false;
 }
@@ -232,18 +224,18 @@ void Terminal::set_palette(Palette colors)
         fg_store[color] = fg;
         bg_store[color] = bg;
         if (std::holds_alternative<Dynamic_color>(color_type)) {
-            dynamic_color_engine_.run_async();  // no-op if already running
+            dynamic_color_engine_.start();  // no-op if already running
             dynamic_color_engine_.register_color(
                 color, std::get<Dynamic_color>(color_type));
         }
     }
-    this->flag_full_repaint();
+    Terminal::flag_full_repaint();
     palette_changed(palette_);
 }
 
 auto Terminal::palette_append(Color_definition::Value_t value) -> Color
 {
-    auto pal = this->current_palette();
+    auto pal = Terminal::current_palette();
     if (pal.empty())
         pal.push_back({Color{0}, value});
     else {
@@ -251,14 +243,26 @@ auto Terminal::palette_append(Color_definition::Value_t value) -> Color
             {Color{static_cast<Color::Value_t>(pal.back().color.value + 1)},
              value});
     }
-    this->set_palette(pal);
+    Terminal::set_palette(pal);
     return pal.back().color;
 }
 
-auto Terminal::get() -> Event
+auto Terminal::read_input() -> Event
 {
     return std::visit([](auto const& event) { return transform(event); },
                       ::esc::read());
+}
+
+void Terminal::flush_screen()
+{
+    Terminal::show_cursor(false);
+    Terminal::refresh();
+    // Cursor
+    Widget const* const fw = System::focus_widget();
+    if (fw != nullptr && detail::is_paintable(*fw)) {
+        assert(is_within(fw->cursor.position(), fw->area()));
+        System::set_cursor(fw->cursor, fw->inner_top_left());
+    }
 }
 
 }  // namespace ox

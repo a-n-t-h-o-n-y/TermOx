@@ -73,7 +73,7 @@ Options_B::Options_B()
 
     for (auto const& [name, palette] : palettes) {
         palette_box.add_option(name).connect(
-            [p = palette] { System::terminal.set_palette(p); });
+            [p = palette] { Terminal::set_palette(p); });
     }
 }
 

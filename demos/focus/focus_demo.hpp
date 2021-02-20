@@ -108,7 +108,7 @@ inline auto build_demo() -> std::unique_ptr<ox::Widget>
             focus_box(Focus_policy::Strong)
         )
     ) | direct_focus() | on_focus_in([]{
-            System::terminal.set_palette(ox::amstrad_cpc::palette);
+            Terminal::set_palette(ox::amstrad_cpc::palette);
         });
     // clang-format on
 }

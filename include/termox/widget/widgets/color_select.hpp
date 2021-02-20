@@ -51,8 +51,8 @@ class Color_select : public layout::Vertical<Color_line> {
     explicit Color_select(bool display_numbers = false)
         : numbers_{display_numbers}
     {
-        this->set_palette(System::terminal.current_palette());
-        System::terminal.palette_changed.connect(
+        this->set_palette(Terminal::current_palette());
+        Terminal::palette_changed.connect(
             [this](auto const& pal) { this->set_palette(pal); });
     }
 

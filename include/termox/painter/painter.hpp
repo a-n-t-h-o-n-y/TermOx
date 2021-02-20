@@ -1,6 +1,5 @@
 #ifndef TERMOX_PAINTER_PAINTER_HPP
 #define TERMOX_PAINTER_PAINTER_HPP
-#include <termox/painter/detail/screen_descriptor.hpp>
 #include <termox/terminal/detail/canvas.hpp>
 #include <termox/widget/area.hpp>
 #include <termox/widget/point.hpp>

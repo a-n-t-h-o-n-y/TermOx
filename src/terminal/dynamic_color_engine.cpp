@@ -4,7 +4,6 @@
 #include <vector>
 
 #include <termox/painter/color.hpp>
-#include <termox/painter/detail/screen.hpp>
 #include <termox/system/event.hpp>
 #include <termox/system/system.hpp>
 #include <termox/terminal/terminal.hpp>
@@ -14,14 +13,15 @@ namespace ox {
 void Dynamic_color_engine::loop_function()
 {
     // The first call to this returns immediately.
-    Interval_event_loop::loop_function();
-    this->post_dynamic_color_events();
+    timer_.wait();
+    timer_.begin();
+    this->post_dynamic_color_events();  // This resets the Timer interval.
 }
 
 void Dynamic_color_engine::post_dynamic_color_events()
 {
     if (data_.empty()) {
-        this->set_interval(default_interval);
+        timer_.set_interval(default_interval);
         return;
     }
     auto processed = Dynamic_color_event::Processed_colors{};
@@ -47,7 +47,7 @@ void Dynamic_color_engine::post_dynamic_color_events()
                 next_interval = std::min(next_interval, time_left);
             }
         }
-        this->Interval_event_loop::set_interval(next_interval);
+        timer_.set_interval(next_interval);
     }
     System::post_event(Dynamic_color_event{std::move(processed)});
 }

@@ -1,7 +1,6 @@
 #include <ios>
 #include <termox/painter/painter.hpp>
 
-#include <termox/painter/detail/screen_descriptor.hpp>
 #include <termox/painter/glyph_string.hpp>
 #include <termox/system/event_loop.hpp>
 #include <termox/system/system.hpp>

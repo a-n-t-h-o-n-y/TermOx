@@ -17,7 +17,7 @@ namespace ox::detail {
 inline void send(ox::Paint_event e)
 {
     if (is_paintable(e.receiver)) {
-        auto p = Painter{e.receiver, System::terminal.screen_buffers.next};
+        auto p = Painter{e.receiver, Terminal::screen_buffers.next};
         if (!e.receiver.get().is_layout_type())
             p.wallpaper_fill();
         e.receiver.get().paint_event(p);
@@ -81,11 +81,7 @@ inline void send(ox::Delete_event e)
     e.removed.reset();
 }
 
-inline void send(ox::Disable_event e)
-{
-    e.receiver.get().screen_state().clear();
-    e.receiver.get().disable_event();
-}
+inline void send(ox::Disable_event e) { e.receiver.get().disable_event(); }
 
 inline void send(ox::Enable_event e) { e.receiver.get().enable_event(); }
 
@@ -103,8 +99,6 @@ inline void send(ox::Move_event e)
     auto const new_position = e.new_position;
     if (old_position == new_position)
         return;
-    e.receiver.get().screen_state().clear();
-    e.receiver.get().screen_state().move(new_position);
     e.receiver.get().set_top_left(new_position);
     e.receiver.get().move_event(new_position, old_position);
 }
@@ -128,8 +122,8 @@ inline void send(ox::Timer_event e)
 inline void send(ox::Dynamic_color_event const& e)
 {
     for (auto [color, true_color] : e.color_data) {
-        ox::System::terminal.update_color_stores(color, true_color);
-        ox::System::terminal.repaint_color(color);
+        ox::Terminal::update_color_stores(color, true_color);
+        ox::Terminal::repaint_color(color);
     }
 }
 
@@ -141,9 +135,9 @@ inline void send(::esc::Window_resize x)
         assert(head != nullptr);
         return *head;
     }();
-    auto& buffers = ox::System::terminal.screen_buffers;
+    auto& buffers = ox::Terminal::screen_buffers;
     if (x.new_dimensions.height < buffers.area().height)
-        ox::System::terminal.flag_full_repaint();
+        ox::Terminal::flag_full_repaint();
     buffers.resize(x.new_dimensions);
     System::post_event(ox::Resize_event{head, x.new_dimensions});
 }

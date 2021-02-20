@@ -96,13 +96,13 @@ class Palette_demo : public ox::layout::Vertical<> {
         using namespace ox::pipe;
         *this | strong_focus();
         palette_picker.palette_picked.connect(
-            [](auto const& pal) { ox::System::terminal.set_palette(pal); });
+            [](auto const& pal) { ox::Terminal::set_palette(pal); });
     }
 
    protected:
     auto focus_in_event() -> bool override
     {
-        ox::System::terminal.set_palette(ox::dawn_bringer16::palette);
+        ox::Terminal::set_palette(ox::dawn_bringer16::palette);
         ox::System::set_focus(palette_picker);
         return true;
     }

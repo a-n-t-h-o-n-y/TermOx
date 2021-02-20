@@ -31,10 +31,10 @@ using namespace palette::detail;
 /// Set a color definition for the terminal.
 // void set_definition(Color color, RGB values)
 // {
-//     auto palette      = ox::System::terminal.current_palette();
+//     auto palette      = ox::Terminal::current_palette();
 //     auto& definition  = extract_definition(palette, color);
 //     definition.values = values;
-//     ox::System::terminal.set_color_palette(palette);
+//     ox::Terminal::set_color_palette(palette);
 // }
 }  // namespace
 

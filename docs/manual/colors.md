@@ -111,13 +111,13 @@ inline auto const palette = Palette {
 } // namespace three_color
 
 // Later...
-System::terminal.set_palette(three_color::palette);
+Terminal::set_palette(three_color::palette);
 
 // Later...
 auto const glyph = U'X' | bg(three_color::Rainbow);
 ```
 
-Palettes can be set by calling the `System::terminal.set_palette(...)` method.
+Palettes can be set by calling the `Terminal::set_palette(...)` method.
 
 ### Library Color Palettes
 

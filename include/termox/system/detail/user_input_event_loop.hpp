@@ -5,10 +5,13 @@
 namespace ox::detail {
 
 /// Event loop that blocks for user input on each iteration.
-class User_input_event_loop : public Event_loop {
-   protected:
-    /// Wait on esc::read(), and post the result.
-    void loop_function() override;
+class User_input_event_loop {
+   public:
+    /// Starts listening for user input events in the thread called from.
+    auto run() -> int;
+
+   private:
+    Event_loop loop_;
 };
 
 }  // namespace ox::detail

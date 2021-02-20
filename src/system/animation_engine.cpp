@@ -1,12 +1,12 @@
 #include <termox/system/animation_engine.hpp>
 
 #include <algorithm>
-#include <cassert>
 #include <chrono>
-#include <thread>
+#include <iterator>
 #include <utility>
 #include <vector>
 
+#include <termox/common/fps.hpp>
 #include <termox/system/event.hpp>
 #include <termox/system/system.hpp>
 
@@ -26,7 +26,7 @@ void Animation_engine::register_widget(Widget& w, Interval_t interval)
 
 void Animation_engine::register_widget(Widget& w, FPS fps)
 {
-    this->register_widget(w, Interval_event_loop::fps_to_period(fps));
+    this->register_widget(w, fps_to_period<Interval_t>(fps));
 }
 
 void Animation_engine::unregister_widget(Widget& w)
@@ -38,14 +38,15 @@ void Animation_engine::unregister_widget(Widget& w)
 void Animation_engine::loop_function()
 {
     // The first call to this returns immediately.
-    Interval_event_loop::loop_function();
-    this->post_timer_events();
+    timer_.wait();
+    timer_.begin();
+    this->post_timer_events();  // This resets the Timer interval.
 }
 
 void Animation_engine::post_timer_events()
 {
     if (subjects_.empty()) {
-        this->set_interval(default_interval);
+        timer_.set_interval(default_interval);
         return;
     }
 
@@ -73,7 +74,7 @@ void Animation_engine::post_timer_events()
                 next_interval = std::min(next_interval, time_left);
             }
         }
-        this->Interval_event_loop::set_interval(next_interval);
+        timer_.set_interval(next_interval);
     }
     // Send events without a lock on the mutex.
     for (auto const& e : timer_events)
