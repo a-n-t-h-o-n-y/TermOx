@@ -1,6 +1,7 @@
 #ifndef TERMOX_DEMOS_GAME_OF_LIFE_GAME_OF_LIFE_ENGINE_HPP
 #define TERMOX_DEMOS_GAME_OF_LIFE_GAME_OF_LIFE_ENGINE_HPP
 #include <algorithm>
+#include <array>
 #include <cstdint>
 #include <iterator>
 #include <unordered_map>
