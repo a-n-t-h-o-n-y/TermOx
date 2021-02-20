@@ -1,5 +1,6 @@
 #ifndef TERMOX_WIDGET_PAIR_HPP
 #define TERMOX_WIDGET_PAIR_HPP
+#include <memory>
 
 namespace ox {
 
@@ -25,6 +26,15 @@ class Pair<Layout_t, void, void> : public Layout_t {
    public:
     using Base = Layout_t;
 };
+
+// TODO add constructor params.
+template <typename Layout_t,
+          typename Widget_one_t = void,
+          typename Widget_two_t = void>
+auto pair() -> std::unique_ptr<Pair<Layout_t, Widget_one_t, Widget_two_t>>
+{
+    return std::make_unique<Pair<Layout_t, Widget_one_t, Widget_two_t>>();
+}
 
 }  // namespace ox
 #endif  // TERMOX_WIDGET_PAIR_HPP

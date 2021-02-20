@@ -26,26 +26,37 @@
 #include <termox/widget/layouts/stack.hpp>
 #include <termox/widget/layouts/vertical.hpp>
 
+#include <termox/widget/widgets/accordion.hpp>
+#include <termox/widget/widgets/banner.hpp>
 #include <termox/widget/widgets/button.hpp>
+#include <termox/widget/widgets/button_list.hpp>
 #include <termox/widget/widgets/checkbox.hpp>
 #include <termox/widget/widgets/color_select.hpp>
 #include <termox/widget/widgets/confirm_button.hpp>
 #include <termox/widget/widgets/cycle_box.hpp>
 #include <termox/widget/widgets/cycle_stack.hpp>
 #include <termox/widget/widgets/graph.hpp>
+#include <termox/widget/widgets/hideable.hpp>
+#include <termox/widget/widgets/horizontal_slider.hpp>
 #include <termox/widget/widgets/label.hpp>
 #include <termox/widget/widgets/line_edit.hpp>
 #include <termox/widget/widgets/log.hpp>
 #include <termox/widget/widgets/matrix_display.hpp>
 #include <termox/widget/widgets/menu.hpp>
 #include <termox/widget/widgets/menu_stack.hpp>
+#include <termox/widget/widgets/notify_light.hpp>
 #include <termox/widget/widgets/number_edit.hpp>
 #include <termox/widget/widgets/open_file.hpp>
 #include <termox/widget/widgets/save_file.hpp>
+#include <termox/widget/widgets/scrollbar.hpp>
+#include <termox/widget/widgets/selectable.hpp>
+#include <termox/widget/widgets/spinner.hpp>
 #include <termox/widget/widgets/status_bar.hpp>
 #include <termox/widget/widgets/text_display.hpp>
 #include <termox/widget/widgets/textbox.hpp>
+#include <termox/widget/widgets/tile.hpp>
 #include <termox/widget/widgets/titlebar.hpp>
+#include <termox/widget/widgets/toggle_button.hpp>
 #include <termox/widget/widgets/vertical_slider.hpp>
 
 #include <termox/widget/area.hpp>

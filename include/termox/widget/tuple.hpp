@@ -1,5 +1,6 @@
 #ifndef TERMOX_WIDGET_TUPLE_HPP
 #define TERMOX_WIDGET_TUPLE_HPP
+#include <memory>
 #include <tuple>
 #include <utility>
 
@@ -40,6 +41,19 @@ class Tuple : public Layout_t {
     std::tuple<Widget_t&...> refs_ =
         std::forward_as_tuple(this->template make_child<Widget_t>()...);
 };
+
+template <typename Layout_t, typename... Widget_t>
+auto tuple(typename Widget_t::Parameters... p)
+    -> std::unique_ptr<Tuple<Layout_t, Widget_t...>>
+{
+    return std::make_unique<Tuple<Layout_t, Widget_t...>>(std::move(p)...);
+}
+
+template <typename Layout_t, typename... Widget_t>
+auto tuple() -> std::unique_ptr<Tuple<Layout_t, Widget_t...>>
+{
+    return std::make_unique<Tuple<Layout_t, Widget_t...>>();
+}
 
 }  // namespace ox
 #endif  // TERMOX_WIDGET_TUPLE_HPP

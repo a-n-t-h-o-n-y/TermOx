@@ -6,10 +6,15 @@ cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 add_executable(checkbox.ui.test EXCLUDE_FROM_ALL checkbox.ui.test.cpp)
 target_link_libraries(checkbox.ui.test PRIVATE TermOx)
 
+## Spinners
+add_executable(spinners.ui.test EXCLUDE_FROM_ALL spinners.ui.test.cpp)
+target_link_libraries(spinners.ui.test PRIVATE TermOx)
+
 add_custom_target(
     termox.ui.tests
     DEPENDS
         checkbox.ui.test
+        spinners.ui.test
 )
 
 # Unit Tests

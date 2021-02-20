@@ -44,6 +44,14 @@ class Spinner : public Widget {
             period_ = period;
     }
 
+    void set_width(int width)
+    {
+        width_ = width;
+        width_policy.fixed(width_);
+    }
+
+    void set_offset(int offset) { index_ = offset; }
+
     void start()
     {
         if (started_)
