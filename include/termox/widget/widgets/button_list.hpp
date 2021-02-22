@@ -6,6 +6,7 @@
 #include <signals_light/signal.hpp>
 
 #include <termox/widget/layouts/opposite.hpp>
+#include <termox/widget/pair.hpp>
 #include <termox/widget/pipe.hpp>
 #include <termox/widget/widget.hpp>
 #include <termox/widget/widgets/button.hpp>
@@ -32,6 +33,9 @@ class Button_list : public layout::Opposite_t<Layout_t<Widget>> {
         sl::Signal<void(std::u32string const& name)> button_pressed;
 
        public:
+        Button_list_impl() { *this | pipe::passive_height(); }
+
+       public:
         auto add_button(std::u32string const& name) -> Button&
         {
             using namespace ox::pipe;
@@ -49,7 +53,10 @@ class Button_list : public layout::Opposite_t<Layout_t<Widget>> {
     Scrollbar<Layout_t<Widget>>& scrollbar =
         this->template make_child<Scrollbar<Layout_t<Widget>>>();
 
-    Button_list_impl& btn_list = this->template make_child<Button_list_impl>();
+    Button_list_impl& btn_list =
+        this->template make_child<
+                Pair<Layout_t<Widget>, Button_list_impl, Widget>>()
+            .first;
 
    public:
     sl::Signal<void(std::u32string const& name)>& button_pressed =
