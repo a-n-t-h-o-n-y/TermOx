@@ -7,18 +7,16 @@
 #include <thread>
 #include <utility>
 
-#include <signals_light/signal.hpp>
+#include <termox/system/event_queue.hpp>
 
 namespace ox {
 
 /// Calls on loop_function(), and then processes the Event_queue.
 /** Specialized by providing a loop_function to be run at each iteration. The
  *  owner of the event loop is responsible for making sure its async thread is
- *  shutdown: exit() then wait(). */
+ *  shutdown: exit() then wait() before any potentially posted to Widgets are
+ *  destroyed. */
 class Event_loop {
-   public:
-    Event_loop() { this->connect_to_system_exit(); }
-
    public:
     /// Start the event loop, calling \p loop_function on each iteration.
     /** loop_function should have signature: void(). It should probably post an
@@ -29,9 +27,11 @@ class Event_loop {
         if (running_)
             return -1;
         running_ = true;
+        if (!exit_)
+            queue_.send_all();
         while (!exit_) {
-            this->send_all_events_and_flush();
-            loop_function();
+            loop_function(queue_);
+            queue_.send_all();
         }
         running_ = false;
         exit_    = false;
@@ -74,22 +74,21 @@ class Event_loop {
     /// Return true if the exit flag has been set.
     [[nodiscard]] auto exit_flag() const -> bool { return exit_; }
 
-   private:
-    /// Connect to the System::exit_signal so loop can exit with System.
-    auto connect_to_system_exit() -> void;
+    /// Return a reference to the Event_queue of this loop.
+    [[nodiscard]] auto event_queue() -> Event_queue& { return queue_; }
 
-    /// Send all events on the event queue and flush the changes to the screen.
-    void send_all_events_and_flush();
+    /// Return a const reference to the Event_queue of this loop.
+    [[nodiscard]] auto event_queue() const -> Event_queue const&
+    {
+        return queue_;
+    }
 
    private:
     std::future<int> fut_;
-    sl::Lifetime lifetime_;
     int return_code_        = 0;
     bool running_           = false;
     std::atomic<bool> exit_ = false;
-
-   protected:
-    friend class System;
+    Event_queue queue_;
 };
 
 }  // namespace ox

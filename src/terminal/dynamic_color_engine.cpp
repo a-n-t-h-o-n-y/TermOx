@@ -7,24 +7,26 @@
 #include <termox/system/event.hpp>
 #include <termox/system/system.hpp>
 #include <termox/terminal/terminal.hpp>
+#include <termox/widget/widget.hpp>
 
 namespace ox {
 
-void Dynamic_color_engine::loop_function()
+void Dynamic_color_engine::loop_function(Event_queue& queue)
 {
     // The first call to this returns immediately.
     timer_.wait();
     timer_.begin();
-    this->post_dynamic_color_events();  // This resets the Timer interval.
+    // This resets the Timer interval.
+    queue.append(this->get_dynamic_color_event());
 }
 
-void Dynamic_color_engine::post_dynamic_color_events()
+auto Dynamic_color_engine::get_dynamic_color_event() -> Dynamic_color_event
 {
+    auto processed = Dynamic_color_event::Processed_colors{};
     if (data_.empty()) {
         timer_.set_interval(default_interval);
-        return;
+        return Dynamic_color_event{processed};
     }
-    auto processed = Dynamic_color_event::Processed_colors{};
     {
         auto const lock    = this->Lockable::lock();
         auto next_interval = [&, this] {
@@ -49,7 +51,7 @@ void Dynamic_color_engine::post_dynamic_color_events()
         }
         timer_.set_interval(next_interval);
     }
-    System::post_event(Dynamic_color_event{std::move(processed)});
+    return Dynamic_color_event{std::move(processed)};
 }
 
 }  // namespace ox

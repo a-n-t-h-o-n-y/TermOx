@@ -118,6 +118,9 @@ class Terminal {
     /// Flushes all of the staged changes to the screen and sets the cursor.
     static void flush_screen();
 
+    /// Send exit flag and wait for Dynamic_color_engine thread to shutdown.
+    static void stop_dynamic_color_engine() { dynamic_color_engine_.stop(); }
+
    private:
     inline static Palette palette_;
     inline static Dynamic_color_engine dynamic_color_engine_;

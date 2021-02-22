@@ -7,6 +7,7 @@
 #include <termox/common/timer.hpp>
 #include <termox/painter/color.hpp>
 #include <termox/system/event_loop.hpp>
+#include <termox/system/event_queue.hpp>
 
 namespace ox {
 
@@ -24,13 +25,6 @@ class Dynamic_color_engine : private Lockable<std::mutex> {
     };
 
     static auto constexpr default_interval = Interval_t{100};
-
-   public:
-    ~Dynamic_color_engine()
-    {
-        loop_.exit(0);
-        loop_.wait();
-    }
 
    public:
     /// Add a dynamic color linked to \p color.
@@ -66,7 +60,7 @@ class Dynamic_color_engine : private Lockable<std::mutex> {
     /// Start another thread that waits on intervals and sents Events.
     void start()
     {
-        loop_.run_async([this] { this->loop_function(); });
+        loop_.run_async([this](Event_queue& q) { this->loop_function(q); });
     }
 
     /// Sends exit signal and waits for animation thread to exit.
@@ -83,10 +77,10 @@ class Dynamic_color_engine : private Lockable<std::mutex> {
 
    private:
     /// Post any Dynamic_color_events that are ready to be posted.
-    void post_dynamic_color_events();
+    auto get_dynamic_color_event() -> Dynamic_color_event;
 
     /// Waits on intervals then sends Dynamic_color_events.
-    void loop_function();
+    void loop_function(Event_queue& queue);
 };
 
 }  // namespace ox

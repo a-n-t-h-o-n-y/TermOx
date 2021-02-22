@@ -182,7 +182,6 @@ void Terminal::uninitialize()
 {
     if (!is_initialized_)
         return;
-    dynamic_color_engine_.stop();
     ::esc::uninitialize_terminal();
     is_initialized_ = false;
 }

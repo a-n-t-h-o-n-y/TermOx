@@ -1,9 +1,11 @@
 #include <termox/system/system.hpp>
 
 #include <algorithm>
+#include <functional>
 #include <iterator>
+#include <map>
 #include <memory>
-#include <mutex>
+#include <shared_mutex>
 #include <stdexcept>
 #include <thread>
 #include <utility>
@@ -38,14 +40,9 @@ void System::enable_tab_focus() { detail::Focus::enable_tab_focus(); }
 
 void System::disable_tab_focus() { detail::Focus::disable_tab_focus(); }
 
-void System::post_event(Event e) { Event_queue::append(std::move(e)); }
+void System::post_event(Event e) { current_queue_.get().append(std::move(e)); }
 
-void System::exit(int exit_code)
-{
-    System::exit_requested_ = true;
-    System::exit_signal(exit_code);
-    animation_engine_.stop();
-}
+void System::exit() { user_input_loop_.exit(0); }
 
 void System::set_head(Widget* new_head)
 {
@@ -61,7 +58,10 @@ auto System::run() -> int
     head_->enable();
     System::post_event(Resize_event{*System::head(), Terminal::area()});
     detail::Focus::set(*head_);
-    return user_input_loop_.run();
+    auto const result = user_input_loop_.run();
+    animation_engine_.stop();
+    Terminal::stop_dynamic_color_engine();
+    return result;
 }
 
 auto System::send_event(Event e) -> bool
@@ -98,11 +98,10 @@ auto System::send_event(Delete_event e) -> bool
 }
 
 sl::Slot<void()> System::quit = [] { System::exit(); };
-Animation_engine System::animation_engine_;
 
-// GCC requires this here, it can't find the default constructor when it's in
-// system.hpp for whatever reason...
-sl::Signal<void(int)> System::exit_signal;
 detail::User_input_event_loop System::user_input_loop_;
+Animation_engine System::animation_engine_;
+std::reference_wrapper<Event_queue> System::current_queue_ =
+    user_input_loop_.event_queue();
 
 }  // namespace ox

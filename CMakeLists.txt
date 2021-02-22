@@ -48,10 +48,6 @@ if(${CMAKE_VERSION} VERSION_LESS "3.8")
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
 
-# TODO Remove ncurses
-# Add nCurses
-# add_subdirectory(external/ncurses-snapshots)
-
 # Add Escape Library
 add_subdirectory(external/Escape)
 

@@ -6,6 +6,7 @@
 #include <termox/common/lockable.hpp>
 #include <termox/common/timer.hpp>
 #include <termox/system/event_loop.hpp>
+#include <termox/system/event_queue.hpp>
 
 namespace ox {
 class Widget;
@@ -25,13 +26,6 @@ class Animation_engine : private Lockable<std::recursive_mutex> {
     static auto constexpr default_interval = Interval_t{100};
 
    public:
-    ~Animation_engine()
-    {
-        loop_.exit(0);
-        loop_.wait();
-    }
-
-   public:
     /// Register to start sending Timer_events to \p w every \p interval.
     void register_widget(Widget& w, Interval_t interval);
 
@@ -47,7 +41,7 @@ class Animation_engine : private Lockable<std::recursive_mutex> {
     /// Start another thread that waits on intervals and sents timer events.
     void start()
     {
-        loop_.run_async([this] { this->loop_function(); });
+        loop_.run_async([this](Event_queue& q) { this->loop_function(q); });
     }
 
     /// Sends exit signal and waits for animation thread to exit.
@@ -67,10 +61,10 @@ class Animation_engine : private Lockable<std::recursive_mutex> {
 
    private:
     /// Post any Timer_events that are ready to be posted.
-    void post_timer_events();
+    auto get_timer_events() -> std::vector<Timer_event>&;
 
     /// Waits on intervals then sends Timer_events.
-    void loop_function();
+    void loop_function(Event_queue& queue);
 };
 
 }  // namespace ox

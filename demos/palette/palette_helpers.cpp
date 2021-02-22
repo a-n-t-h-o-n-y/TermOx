@@ -6,6 +6,7 @@
 #include <termox/painter/color.hpp>
 #include <termox/system/system.hpp>
 #include <termox/terminal/terminal.hpp>
+#include <termox/widget/widget.hpp>
 
 using namespace ox;
 

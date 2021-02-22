@@ -3,6 +3,7 @@
 #include <esc/event.hpp>
 
 #include <termox/system/event.hpp>
+#include <termox/widget/widget.hpp>
 
 namespace ox::detail {
 

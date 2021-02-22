@@ -1,6 +1,10 @@
 #ifndef TERMOX_SYSTEM_SYSTEM_HPP
 #define TERMOX_SYSTEM_SYSTEM_HPP
+#include <cassert>
+#include <functional>
 #include <mutex>
+#include <shared_mutex>
+#include <thread>
 #include <utility>
 #include <vector>
 
@@ -14,6 +18,7 @@
 
 namespace ox {
 class Widget;
+class Event_queue;
 }  // namespace ox
 
 namespace ox {
@@ -23,11 +28,6 @@ namespace ox {
  *  Manages the head Widget and the main User_input_event_loop. */
 class System {
    public:
-    /// Emitted when System::exit is called. Should call Event_loop::exit.
-    /** Passes along the exit_code System::exit() was called with. */
-    static sl::Signal<void(int)> exit_signal;
-
-    // Slots
     static sl::Slot<void()> quit;
 
    public:
@@ -59,7 +59,7 @@ class System {
 
     ~System()
     {
-        System::exit(0);
+        System::exit();
         Terminal::uninitialize();
     }
 
@@ -134,12 +134,10 @@ class System {
      *  System::send_event() */
     static void post_event(Event e);
 
-    /// Send an exit signal to each of the currently running Event_loops.
-    /** Also call shutdown() on the Animation_engine and set
-     *  System::exit_requested_ to true. Though it sends the exit signal to each
-     *  of the Event_loops, they are not guaranteed to be stopped by the time
-     *  this function returns. */
-    static void exit(int exit_code = 0);
+    /// Sets the exit flag for the user input event loop.
+    /** Only call from the main user input event loop, not animation loop. This
+     *  is because shutdown will be blocked until more user input is entered. */
+    static void exit();
 
     /// Enable animation for the given Widget \p w at \p interval.
     /** Starts the animation_engine if not started yet. */
@@ -160,18 +158,11 @@ class System {
         animation_engine_.register_widget(w, fps);
     }
 
-   public:
     /// Disable animation for the given Widget \p w.
     /** Does not stop the animation_engine, even if its empty. */
     static void disable_animation(Widget& w)
     {
         animation_engine_.unregister_widget(w);
-    }
-
-    /// Return whether System has gotten an exit request, set by System::exit()
-    [[nodiscard]] static auto is_exit_requested() -> bool
-    {
-        return exit_requested_;
     }
 
     /// Set the terminal cursor via \p cursor parameters and \p offset applied.
@@ -186,11 +177,18 @@ class System {
         }
     }
 
+    /// Set the Event_queue that will be used by post_event.
+    /** Set by Event_queue::send_all. */
+    static void set_current_queue(Event_queue& queue)
+    {
+        current_queue_ = queue;
+    }
+
    private:
-    inline static Widget* head_        = nullptr;
-    inline static bool exit_requested_ = false;
+    inline static Widget* head_ = nullptr;
     static detail::User_input_event_loop user_input_loop_;
     static Animation_engine animation_engine_;
+    static std::reference_wrapper<Event_queue> current_queue_;
 };
 
 }  // namespace ox

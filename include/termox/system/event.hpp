@@ -9,13 +9,14 @@
 
 #include <esc/event.hpp>
 
+#include <termox/painter/color.hpp>
 #include <termox/system/key.hpp>
 #include <termox/system/mouse.hpp>
 #include <termox/widget/area.hpp>
 #include <termox/widget/point.hpp>
-#include <termox/widget/widget.hpp>
 
 namespace ox {
+class Widget;
 
 using Widget_ref = std::reference_wrapper<Widget>;
 

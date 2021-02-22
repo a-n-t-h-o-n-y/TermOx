@@ -9,6 +9,7 @@
 #include <termox/common/fps.hpp>
 #include <termox/system/event.hpp>
 #include <termox/system/system.hpp>
+#include <termox/widget/widget.hpp>
 
 namespace {
 
@@ -35,50 +36,46 @@ void Animation_engine::unregister_widget(Widget& w)
     subjects_.erase(&w);
 }
 
-void Animation_engine::loop_function()
+void Animation_engine::loop_function(Event_queue& queue)
 {
-    // The first call to this returns immediately.
+    // The first call to wait() returns immediately.
     timer_.wait();
     timer_.begin();
-    this->post_timer_events();  // This resets the Timer interval.
+    for (Timer_event& e : get_timer_events())  // This resets the Timer interval
+        queue.append(std::move(e));
 }
 
-void Animation_engine::post_timer_events()
+auto Animation_engine::get_timer_events() -> std::vector<Timer_event>&
 {
+    timer_events.clear();
     if (subjects_.empty()) {
         timer_.set_interval(default_interval);
-        return;
+        return timer_events;
     }
+    auto const lock    = this->Lockable::lock();
+    auto next_interval = [&, this] {
+        return std::min_element(std::cbegin(subjects_), std::cend(subjects_),
+                                [](auto const& a, auto const& b) {
+                                    return a.second.interval <
+                                           b.second.interval;
+                                })
+            ->second.interval;
+    }();
 
-    timer_events.clear();
-    {
-        auto const lock    = this->Lockable::lock();
-        auto next_interval = [&, this] {
-            return std::min_element(
-                       std::cbegin(subjects_), std::cend(subjects_),
-                       [](auto const& a, auto const& b) {
-                           return a.second.interval < b.second.interval;
-                       })
-                ->second.interval;
-        }();
-
-        auto const now = Clock_t::now();
-        for (auto& [widget, data] : subjects_) {
-            auto const time_left = std::chrono::duration_cast<Interval_t>(
-                data.interval - (now - data.last_event_time));
-            if (time_left <= Interval_t{0}) {
-                data.last_event_time = now;
-                timer_events.push_back(Timer_event{*widget});
-            }
-            else {
-                next_interval = std::min(next_interval, time_left);
-            }
+    auto const now = Clock_t::now();
+    for (auto& [widget, data] : subjects_) {
+        auto const time_left = std::chrono::duration_cast<Interval_t>(
+            data.interval - (now - data.last_event_time));
+        if (time_left <= Interval_t{0}) {
+            data.last_event_time = now;
+            timer_events.push_back(Timer_event{*widget});
         }
-        timer_.set_interval(next_interval);
+        else {
+            next_interval = std::min(next_interval, time_left);
+        }
     }
-    // Send events without a lock on the mutex.
-    for (auto const& e : timer_events)
-        System::post_event(e);
+    timer_.set_interval(next_interval);
+    return timer_events;
 }
 
 }  // namespace ox
