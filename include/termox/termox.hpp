@@ -65,12 +65,19 @@
 #include <termox/widget/widgets/toggle_button.hpp>
 #include <termox/widget/widgets/vertical_slider.hpp>
 
+#include <termox/widget/align.hpp>
 #include <termox/widget/area.hpp>
+#include <termox/widget/array.hpp>
 #include <termox/widget/border.hpp>
+#include <termox/widget/cursor.hpp>
 #include <termox/widget/focus_policy.hpp>
+#include <termox/widget/growth.hpp>
 #include <termox/widget/layout.hpp>
+#include <termox/widget/pair.hpp>
+#include <termox/widget/pipe.hpp>
 #include <termox/widget/point.hpp>
 #include <termox/widget/size_policy.hpp>
+#include <termox/widget/tuple.hpp>
 #include <termox/widget/widget.hpp>
 #include <termox/widget/widget_slots.hpp>
 

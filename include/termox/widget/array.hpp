@@ -8,9 +8,9 @@
 #include <termox/widget/layouts/horizontal.hpp>
 #include <termox/widget/layouts/vertical.hpp>
 
-// TODO place in layout namespace
 namespace ox {
 
+// TODO move to layout folder.
 /// Homogeneous collection of Widgets within a Layout_t<Widget_t>.
 /** Depends on Layout_t::make_child(args...) to construct the Widget_t. */
 template <typename Layout_t, std::size_t N>

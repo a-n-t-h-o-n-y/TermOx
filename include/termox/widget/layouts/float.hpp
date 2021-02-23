@@ -22,9 +22,9 @@ class Float : public Layout_t<Widget> {
     using Base_t = Layout_t<Widget>;
 
    public:
-    ox::Widget& buffer_1;
+    Widget& buffer_1;
     Widget_t& widget;
-    ox::Widget& buffer_2;
+    Widget& buffer_2;
 
    public:
     template <typename... Args>
@@ -48,7 +48,7 @@ class Float : public Layout_t<Widget> {
    private:
     void update_policy()
     {
-        if constexpr (ox::layout::is_horizontal_v<Base_t>)
+        if constexpr (layout::is_horizontal_v<Base_t>)
             this->height_policy = widget.height_policy;
         else
             this->width_policy = widget.width_policy;
