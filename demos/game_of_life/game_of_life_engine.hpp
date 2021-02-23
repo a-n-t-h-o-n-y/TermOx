@@ -4,8 +4,7 @@
 #include <array>
 #include <cstdint>
 #include <iterator>
-#include <unordered_map>
-#include <unordered_set>
+#include <vector>
 
 #include <signals_light/signal.hpp>
 
@@ -30,22 +29,27 @@ class Game_of_life_engine {
     /// Updates the engine state to the next generation of cells.
     void get_next_generation()
     {
-        auto const volatiles = std::move(volatiles_);
-        auto temp_cells      = cells_;
-        for (auto c : volatiles) {
+        compress(volatiles_);
+        // Moving will cause more allocations later since capacity is zero.
+        temp_volatiles_ = volatiles_;
+        volatiles_.clear();
+        temp_cells_ = cells_;
+        for (auto c : temp_volatiles_) {
             auto const neighbor_count = this->alive_neighbor_count(c);
             auto const is_alive       = alive_at(c);
             if (is_alive && !contains(neighbor_count, rules_.survival)) {
-                temp_cells.remove(c);
+                temp_cells_.remove(c);
                 this->add_volatiles(c);
             }
             else if (!is_alive && contains(neighbor_count, rules_.birth)) {
-                temp_cells.insert(c);
+                temp_cells_.insert(c);
                 this->add_volatiles(c);
             }
         }
         this->increment_generation_count();
-        std::swap(cells_, temp_cells);
+        std::swap(cells_, temp_cells_);
+        temp_cells_.clear();
+        temp_volatiles_.clear();
     }
 
     /// Create a living cell at \p c and reset the generation count.
@@ -121,8 +125,10 @@ class Game_of_life_engine {
 
    private:
     Bitset cells_;
+    Bitset temp_cells_;
 
-    std::unordered_set<Coordinate> volatiles_;
+    std::vector<Coordinate> volatiles_;
+    std::vector<Coordinate> temp_volatiles_;
     Rule rules_;
     std::uint32_t generation_count_ = 0;
 
@@ -136,9 +142,9 @@ class Game_of_life_engine {
             c.y < -outer_bound) {
             return;
         }
-        volatiles_.insert(c);
+        volatiles_.push_back(c);
         for (Coordinate neighbor : neighbors(c))
-            volatiles_.insert(neighbor);
+            volatiles_.push_back(neighbor);
     }
 
     /// Set the generation count to 0 and emit generation_count_changed.
@@ -174,7 +180,7 @@ class Game_of_life_engine {
     {
         for (auto const cell : cells_) {
             if (cell.is_alive)
-                volatiles_.insert(cell.coordinate);
+                volatiles_.push_back(cell.coordinate);
         }
     }
 
@@ -196,6 +202,14 @@ class Game_of_life_engine {
         auto const south_west = Coordinate{c.x - 1, c.y + 1};
         return {north,      south,      east,       west,
                 north_west, north_east, south_east, south_west};
+    }
+
+    /// Removed duplicate elements.
+    static void compress(std::vector<Coordinate>& x)
+    {
+        std::sort(std::begin(x), std::end(x));
+        auto const end = std::unique(std::begin(x), std::end(x));
+        x.erase(end, std::end(x));
     }
 };
 
