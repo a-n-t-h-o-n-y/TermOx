@@ -10,11 +10,16 @@ target_link_libraries(checkbox.ui.test PRIVATE TermOx)
 add_executable(spinners.ui.test EXCLUDE_FROM_ALL spinners.ui.test.cpp)
 target_link_libraries(spinners.ui.test PRIVATE TermOx)
 
+## Passive Layout Wrapper
+add_executable(passive.ui.test EXCLUDE_FROM_ALL passive.ui.test.cpp)
+target_link_libraries(passive.ui.test PRIVATE TermOx)
+
 add_custom_target(
     termox.ui.tests
     DEPENDS
         checkbox.ui.test
         spinners.ui.test
+        passive.ui.test
 )
 
 # Unit Tests

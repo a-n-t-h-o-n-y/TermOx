@@ -4,6 +4,9 @@
 #include <tuple>
 #include <utility>
 
+#include <termox/widget/layouts/horizontal.hpp>
+#include <termox/widget/layouts/vertical.hpp>
+
 namespace ox {
 
 /// Heterogeneous collection of Widgets within a Layout_t.
@@ -54,6 +57,13 @@ auto tuple() -> std::unique_ptr<Tuple<Layout_t, Widget_t...>>
 {
     return std::make_unique<Tuple<Layout_t, Widget_t...>>();
 }
+
+// TODO make function() -> unique_ptr for each
+template <typename... Widget_t>
+using VTuple = Tuple<layout::Vertical<>, Widget_t...>;
+
+template <typename... Widget_t>
+using HTuple = Tuple<layout::Horizontal<>, Widget_t...>;
 
 }  // namespace ox
 #endif  // TERMOX_WIDGET_TUPLE_HPP

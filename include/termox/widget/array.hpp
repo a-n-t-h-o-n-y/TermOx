@@ -5,6 +5,9 @@
 #include <functional>
 #include <utility>
 
+#include <termox/widget/layouts/horizontal.hpp>
+#include <termox/widget/layouts/vertical.hpp>
+
 // TODO place in layout namespace
 namespace ox {
 
@@ -56,6 +59,13 @@ class Array : public Layout_t {
         return {this->make_child_with_index(I, args...)...};
     }
 };
+
+// TODO make function() -> unique_ptr for each
+template <typename Widget_t, std::size_t N>
+using VArray = Array<layout::Vertical<Widget_t>, N>;
+
+template <typename Widget_t, std::size_t N>
+using HArray = Array<layout::Horizontal<Widget_t>, N>;
 
 }  // namespace ox
 #endif  // TERMOX_WIDGET_ARRAY_HPP

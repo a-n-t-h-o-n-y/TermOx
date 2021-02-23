@@ -1,6 +1,9 @@
 #ifndef TERMOX_WIDGET_LAYOUTS_HORIZONTAL_HPP
 #define TERMOX_WIDGET_LAYOUTS_HORIZONTAL_HPP
 #include <cstddef>
+#include <memory>
+#include <type_traits>
+#include <utility>
 
 #include "detail/linear_layout.hpp"
 
@@ -91,13 +94,19 @@ template <typename Widget_t = Widget, typename... Args>
     return std::make_unique<Horizontal<Widget_t>>(std::forward<Args>(args)...);
 }
 
-/// True if the given type is a layout::Horizontal.
-template <typename Layout_t>
-inline constexpr bool is_horizontal_v = false;
-
-/// True if the given type is a layout::Horizontal.
+namespace detail {
 template <typename Child_t>
-inline constexpr bool is_horizontal_v<layout::Horizontal<Child_t>> = true;
+auto is_horizontal_impl(layout::Horizontal<Child_t>&) -> std::true_type;
+
+auto is_horizontal_impl(...) -> std::false_type;
+}  // namespace detail
+
+template <typename T>
+using Is_horizontal = decltype(detail::is_horizontal_impl(std::declval<T&>()));
+
+/// True if the given type is a layout::Horizontal type or derived from.
+template <typename T>
+inline bool constexpr is_horizontal_v = Is_horizontal<T>::value;
 
 }  // namespace ox::layout
 #endif  // TERMOX_WIDGET_LAYOUTS_HORIZONTAL_HPP

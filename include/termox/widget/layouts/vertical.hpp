@@ -2,6 +2,7 @@
 #define TERMOX_WIDGET_LAYOUTS_VERTICAL_HPP
 #include <cstddef>
 #include <memory>
+#include <type_traits>
 #include <utility>
 
 #include <termox/widget/layouts/detail/linear_layout.hpp>
@@ -92,13 +93,19 @@ template <typename Widget_t = Widget, typename... Args>
     return std::make_unique<Vertical<Widget_t>>(std::forward<Args>(args)...);
 }
 
-/// True if the given type is a layout::Vertical.
-template <typename Layout_t>
-inline constexpr bool is_vertical_v = false;
-
-/// True if the given type is a layout::Vertical.
+namespace detail {
 template <typename Child_t>
-inline constexpr bool is_vertical_v<layout::Vertical<Child_t>> = true;
+auto is_vertical_impl(layout::Vertical<Child_t>&) -> std::true_type;
+
+auto is_vertical_impl(...) -> std::false_type;
+}  // namespace detail
+
+template <typename T>
+using Is_vertical = decltype(detail::is_vertical_impl(std::declval<T&>()));
+
+/// True if the given type is a layout::Vertical type or derived from.
+template <typename T>
+inline bool constexpr is_vertical_v = Is_vertical<T>::value;
 
 }  // namespace ox::layout
 #endif  // TERMOX_WIDGET_LAYOUTS_VERTICAL_HPP

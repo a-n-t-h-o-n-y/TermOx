@@ -2,6 +2,9 @@
 #define TERMOX_WIDGET_PAIR_HPP
 #include <memory>
 
+#include <termox/widget/layouts/horizontal.hpp>
+#include <termox/widget/layouts/vertical.hpp>
+
 namespace ox {
 
 /// Heterogeneous pair of Widgets within a Layout_t.
@@ -35,6 +38,13 @@ auto pair() -> std::unique_ptr<Pair<Layout_t, Widget_one_t, Widget_two_t>>
 {
     return std::make_unique<Pair<Layout_t, Widget_one_t, Widget_two_t>>();
 }
+
+// TODO make function() -> unique_ptr for each
+template <typename Widget_one_t, typename Widget_two_t>
+using VPair = Pair<layout::Vertical<>, Widget_one_t, Widget_two_t>;
+
+template <typename Widget_one_t, typename Widget_two_t>
+using HPair = Pair<layout::Horizontal<>, Widget_one_t, Widget_two_t>;
 
 }  // namespace ox
 #endif  // TERMOX_WIDGET_PAIR_HPP
