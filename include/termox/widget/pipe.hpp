@@ -390,14 +390,6 @@ inline auto cannot_ignore_width_min()
     };
 }
 
-inline auto passive_width(bool x = true)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        get(w).width_policy.passive(x);
-        return std::forward<decltype(w)>(w);
-    };
-}
-
 // Height Policy Modifiers -----------------------------------------------------
 
 inline auto fixed_height(int hint)
@@ -500,14 +492,6 @@ inline auto cannot_ignore_height_min()
 {
     return [](auto&& w) -> decltype(auto) {
         get(w).height_policy.can_ignore_min(false);
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto passive_height(bool x = true)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        get(w).height_policy.passive(x);
         return std::forward<decltype(w)>(w);
     };
 }

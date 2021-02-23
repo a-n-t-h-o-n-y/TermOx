@@ -118,13 +118,11 @@ class Layout_span {
     Layout_span(Iter first,
                 Iter last,
                 int primary_length,
-                Get_policy_t&& get_policy,
-                Policy_direction d)
+                Get_policy_t&& get_policy)
         : dimensions_{Layout_span::build_dimensions(first,
                                                     last,
                                                     primary_length,
-                                                    get_policy,
-                                                    d)},
+                                                    get_policy)},
           get_policy_{std::forward<Get_policy_t>(get_policy)}
     {}
 
@@ -236,19 +234,14 @@ class Layout_span {
      *  exceed \p length, then return false. */
     static auto set_each_to_min(Container_t& dimensions,
                                 std::size_t length,
-                                Get_policy_t get_policy,
-                                Policy_direction d) -> bool
+                                Get_policy_t get_policy) -> bool
     {
         // Can assume all Dimension::widget pointers are valid.
         auto min_sum   = 0uL;
         auto const end = std::end(dimensions);
         for (auto iter = std::begin(dimensions); iter != end; ++iter) {
             auto const& policy = get_policy(*(iter->widget));
-            auto const min     = [&] {
-                if (policy.is_passive())
-                    return sum_child_mins(*iter->widget, get_policy, d);
-                return policy.min();
-            }();
+            auto const min     = policy.min();
             min_sum += min;
             if (min_sum > length) {  // Stop Condition
                 auto const leftover = length - (min_sum - min);
@@ -268,10 +261,8 @@ class Layout_span {
         // Can assume all Dimension::widget pointers are valid.
         std::for_each(std::begin(dimensions), std::end(dimensions),
                       [get_policy](auto& dimension) {
-                          auto const& policy = get_policy(*dimension.widget);
-                          if (policy.is_passive())
-                              return;
-                          dimension.length = policy.hint();
+                          dimension.length =
+                              get_policy(*dimension.widget).hint();
                       });
     }
 
@@ -279,12 +270,11 @@ class Layout_span {
     [[nodiscard]] static auto build_dimensions(Iter first,
                                                Iter last,
                                                std::size_t primary_length,
-                                               Get_policy_t get_policy,
-                                               Policy_direction d)
+                                               Get_policy_t get_policy)
         -> Container_t
     {
         auto dimensions = generate_zero_init_dimensions(first, last);
-        if (!set_each_to_min(dimensions, primary_length, get_policy, d))
+        if (!set_each_to_min(dimensions, primary_length, get_policy))
             set_each_to_hint(dimensions, get_policy);
         return dimensions;
     }
@@ -332,38 +322,6 @@ class Layout_span {
                 return iter;
         }
         return end;
-    }
-
-    /// Sum policy.min() of each child, if child is passive this is recursive.
-    [[nodiscard]] static auto sum_child_mins(Widget const& w,
-                                             Get_policy_t get_policy,
-                                             Policy_direction d) -> int
-    {
-        // TODO Calling get_policy on child objects will break when child is not
-        // the same layout type as the parent.
-        auto sum            = 0uL;
-        auto const children = w.get_children();
-        for (auto i = w.get_child_offset(); i < w.child_count(); ++i) {
-            auto const& policy = get_policy(children[i]);
-            if (policy.is_passive())
-                sum += sum_child_mins(children[i], get_policy, d);
-            else
-                sum += policy.min();
-        }
-        if (get_policy(w).is_passive()) {
-            switch (d) {
-                using namespace ox::detail;
-                case Policy_direction::Vertical:
-                    sum += Border_offset::north_enabled(w) ? 1 : 0;
-                    sum += Border_offset::south_enabled(w) ? 1 : 0;
-                    break;
-                case Policy_direction::Horizontal:
-                    sum += Border_offset::east_enabled(w) ? 1 : 0;
-                    sum += Border_offset::west_enabled(w) ? 1 : 0;
-                    break;
-            }
-        }
-        return sum;
     }
 };
 

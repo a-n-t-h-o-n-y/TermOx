@@ -65,15 +65,11 @@ struct Secondary_offset {
     }
 };
 
-using Primary = detail::Dimension_parameters<Primary_policy,
-                                             Primary_length,
-                                             Primary_offset,
-                                             Policy_direction::Vertical>;
+using Primary = detail::
+    Dimension_parameters<Primary_policy, Primary_length, Primary_offset>;
 
-using Secondary = detail::Dimension_parameters<Secondary_policy,
-                                               Secondary_length,
-                                               Secondary_offset,
-                                               Policy_direction::Horizontal>;
+using Secondary = detail::
+    Dimension_parameters<Secondary_policy, Secondary_length, Secondary_offset>;
 
 using Vertical_parameters =
     detail::Linear_layout_parameters<Primary, Secondary, Get_area, Get_point>;

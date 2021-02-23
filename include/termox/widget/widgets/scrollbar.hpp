@@ -152,7 +152,7 @@ class Scrollbar : public Layout_t {
             return std::round(ratio * length);
         }
 
-        [[nodiscard]] static auto constexpr slider_length(double max_length,
+        [[nodiscard]] static constexpr auto slider_length(double max_length,
                                                           double line_count)
             -> std::size_t
         {

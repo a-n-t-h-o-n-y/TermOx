@@ -1,5 +1,5 @@
-#ifndef TERMOX_HPP
-#define TERMOX_HPP
+#ifndef TERMOX_TERMOX_HPP
+#define TERMOX_TERMOX_HPP
 
 #include <termox/common/mb_to_u32.hpp>
 #include <termox/common/u32_to_mb.hpp>
@@ -22,7 +22,13 @@
 
 #include <termox/terminal/terminal.hpp>
 
+#include <termox/widget/layouts/fixed.hpp>
+#include <termox/widget/layouts/float.hpp>
 #include <termox/widget/layouts/horizontal.hpp>
+#include <termox/widget/layouts/opposite.hpp>
+#include <termox/widget/layouts/passive.hpp>
+#include <termox/widget/layouts/selecting.hpp>
+#include <termox/widget/layouts/set.hpp>
 #include <termox/widget/layouts/stack.hpp>
 #include <termox/widget/layouts/vertical.hpp>
 
@@ -68,4 +74,4 @@
 #include <termox/widget/widget.hpp>
 #include <termox/widget/widget_slots.hpp>
 
-#endif  // TERMOX_HPP
+#endif  // TERMOX_TERMOX_HPP

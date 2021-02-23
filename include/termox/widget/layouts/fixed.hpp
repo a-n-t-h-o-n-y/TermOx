@@ -1,17 +1,20 @@
 #ifndef TERMOX_WIDGET_LAYOUT_FIXED_HPP
 #define TERMOX_WIDGET_LAYOUT_FIXED_HPP
-#include <cstddef>
+#include <termox/widget/widget.hpp>
 
-#include <termox/system/system.hpp>
-#include <termox/widget/layout.hpp>
-
-namespace ox::layout {
-
-// TODO this isn't real/implemented yet.
+namespace ox {
 
 /// Fixed offset on left and right sides of Widget_t object.
-template <typename Widget_t>
-class Fixed_horizontal : public Layout<Widget_t> {
+template <template <typename> typename Layout_t, typename Widget_t>
+class Fixed_horizontal : public Layout_t<Widget> {
+   private:
+    using Base_t = Layout_t<Widget>;
+
+   public:
+    ox::Widget& buffer_1;
+    Widget_t& widget;
+    ox::Widget& buffer_2;
+
    public:
     template <typename W = Widget_t, typename... Args>
     Fixed_horizontal(std::size_t left_offset,
@@ -40,32 +43,11 @@ class Fixed_horizontal : public Layout<Widget_t> {
         widget_ = &(this->template make_child<W>(std::forward<Args>(args)...));
     }
 
-   protected:
-    void update_geometry() override
-    {
-        // position
-        // TODO make sure x position doesn't go off the end of widget, if it
-        // does, then disable it? will that happen automatically? probably not.
-        {
-            auto const pos =
-                Point{this->inner_x() + offset_l_, this->inner_y()};
-            System::post_event(Move_event{*widget_, pos});
-        }
-        // size
-        {
-            // TODO make sure the offset additions don't make width go below
-            // zero.
-            auto const area =
-                Area{this->width() - (offset_l_ + offset_r_), this->height()};
-            System::post_event(Resize_event{*widget_, area});
-        }
-    }
-
    private:
     std::size_t offset_l_;
     std::size_t offset_r_;
     Widget_t* widget_;  // class invariant: this must always point to a valid w.
 };
 
-}  // namespace ox::layout
+}  // namespace ox
 #endif  // TERMOX_WIDGET_LAYOUT_FIXED_HPP

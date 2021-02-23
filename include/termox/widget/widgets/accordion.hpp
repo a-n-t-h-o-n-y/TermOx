@@ -12,6 +12,7 @@
 #include <termox/widget/layouts/detail/linear_layout.hpp>
 #include <termox/widget/layouts/horizontal.hpp>
 #include <termox/widget/layouts/opposite.hpp>
+#include <termox/widget/layouts/passive.hpp>
 #include <termox/widget/layouts/vertical.hpp>
 #include <termox/widget/pipe.hpp>
 #include <termox/widget/widgets/label.hpp>
@@ -140,7 +141,8 @@ enum class Bar_position { First, Last };
 template <template <typename> typename Layout_t,
           typename Widget_t,
           Bar_position position = Bar_position::First>
-class Accordion : public Layout_t<Widget> {
+class Accordion : public Passive<Layout_t<Widget>> {
+   private:
     static_assert(layout::is_vertical_v<Layout_t<Widget>> ||
                   layout::is_horizontal_v<Layout_t<Widget>>);
 
@@ -161,11 +163,6 @@ class Accordion : public Layout_t<Widget> {
     {
         if constexpr (wrapped_index_ == 0)
             this->swap_children(0, 1);
-
-        if constexpr (is_vertical)
-            *this | pipe::passive_height();
-        else
-            *this | pipe::passive_width();
 
         bar_.toggle_request.connect([this] { this->toggle_expansion(); });
 

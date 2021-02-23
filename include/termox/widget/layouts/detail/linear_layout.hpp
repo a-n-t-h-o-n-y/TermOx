@@ -1,6 +1,5 @@
 #ifndef TERMOX_WIDGET_LAYOUTS_DETAIL_LINEAR_LAYOUT_HPP
 #define TERMOX_WIDGET_LAYOUTS_DETAIL_LINEAR_LAYOUT_HPP
-#include <termox/painter/painter.hpp>
 #include <termox/system/event.hpp>
 #include <termox/widget/layout.hpp>
 
@@ -9,15 +8,11 @@
 
 namespace ox::layout::detail {
 
-template <typename Get_policy_t,
-          typename Get_length_t,
-          typename Get_offset_t,
-          Policy_direction d>
+template <typename Get_policy_t, typename Get_length_t, typename Get_offset_t>
 struct Dimension_parameters {
     using get_policy = Get_policy_t;  // Size_policy const&(Widget const&)
     using get_length = Get_length_t;  // std::size_t(Widget const&) [w/h]
     using get_offset = Get_offset_t;  // std::size_t(Widget const&) [global x/y]
-    static auto const direction = d;
 };
 
 template <typename Primary_t,
@@ -132,7 +127,6 @@ class Linear_layout : public Layout<Child> {
         shared_space_.set_offset(index);
         unique_space_.set_offset(index);
         System::post_event(Child_polished_event{*this, *this});
-        // this->force_repaint_empty_space();
     }
 
     void decrement_offset()
@@ -170,31 +164,6 @@ class Linear_layout : public Layout<Child> {
         this->send_move_events(primary_pos, secondary_pos);
     }
 
-    // TODO remove once passive is its own layout modifier type.
-    auto child_polished_event(Widget& child) -> bool override
-    {
-        if (!this->is_enabled())
-            return Widget::child_polished_event(child);
-        if (this->width_policy.is_passive()) {
-            Widget* parent = this->parent();
-            // Find first parent that is not passive.
-            while (parent != nullptr && parent->width_policy.is_passive())
-                parent = parent->parent();
-            if (parent != nullptr)
-                System::post_event(Child_polished_event{*parent, *this});
-        }
-        if (this->height_policy.is_passive()) {
-            Widget* parent = this->parent();
-            // Find first parent that is not passive.
-            while (parent != nullptr && parent->height_policy.is_passive())
-                parent = parent->parent();
-            if (parent != nullptr)
-                System::post_event(Child_polished_event{*parent, *this});
-        }
-        this->update_geometry();
-        return Widget::child_polished_event(child);
-    }
-
    private:
     using Length_list   = std::vector<int>;
     using Position_list = std::vector<int>;
@@ -203,9 +172,6 @@ class Linear_layout : public Layout<Child> {
     Unique_space<Parameters> unique_space_;
 
    private:
-    // Hack until the paint system is updated and treats layouts accordingly.
-    // void force_repaint_empty_space() { Painter{*this}; }
-
     void send_enable_disable_events(Length_list const& primary,
                                     Length_list const& secondary)
     {
@@ -265,8 +231,9 @@ class Linear_layout : public Layout<Child> {
 
     /// Determine whether a widget is valid to display from its lengths
     /** A length of zero in any dimension means the Widget will be disabled. */
-    // TODO This is ambiguous, what is a zero width/height wants to be enabled?
+    // TODO This is ambiguous, what if a zero width/height wants to be enabled?
     // Need another data member to tell if something should be enabled or not.
+    // What's the use case? Feb 22, 2021
     [[nodiscard]] static auto is_valid(std::size_t primary,
                                        std::size_t secondary) -> bool
     {

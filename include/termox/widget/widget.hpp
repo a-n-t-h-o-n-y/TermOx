@@ -355,9 +355,6 @@ class Widget {
      *  to true. */
     [[nodiscard]] auto generate_wallpaper() const -> Glyph;
 
-    // TODO These two below are here instead of in Layout_linear because of
-    // Layout_span::sum_child_mins, that function knows too much?
-
     /// Return the index of the first child displayed by this Widget.
     [[nodiscard]] auto get_child_offset() const -> std::size_t
     {

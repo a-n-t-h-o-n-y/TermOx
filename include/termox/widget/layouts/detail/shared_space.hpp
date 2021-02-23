@@ -28,8 +28,7 @@ class Shared_space {
                 typename Parameters::Primary::get_length{}(parent),
                 [](Widget const& w) -> Size_policy const& {
                     return typename Parameters::Primary::get_policy{}(w);
-                },
-                Parameters::Primary::direction};
+                }};
         }();
 
         // Have you gone over or under the avaliable space?
@@ -74,9 +73,7 @@ class Shared_space {
             given_away = 0;
             for (auto iter = children.begin_max(); iter != children.end();
                  ++iter) {
-                auto const& policy = iter.get_policy();
-                if (policy.is_passive())
-                    continue;
+                auto const& policy    = iter.get_policy();
                 auto const max_length = policy.max();
                 auto const stretch_ratio =
                     policy.stretch() / children.total_stretch();
@@ -98,8 +95,6 @@ class Shared_space {
         while (children.size() != 0 && surplus != 0) {
             for (auto iter = children.begin_max();
                  iter != children.end() && surplus != 0; ++iter) {
-                if (iter.get_policy().is_passive())
-                    continue;
                 iter->length += 1;
                 --surplus;
             }

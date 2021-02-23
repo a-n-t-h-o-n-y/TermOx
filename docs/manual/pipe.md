@@ -129,7 +129,6 @@ my_widget | children() | for_each([](auto& w){ log(w.name()); });
 - `width_stretch(double stretch)`
 - `can_ignore_width_min()`
 - `cannot_ignore_width_min()`
-- `passive_width(bool x = true)`
 
 #### Height
 
@@ -146,7 +145,6 @@ my_widget | children() | for_each([](auto& w){ log(w.name()); });
 - `height_stretch(double stretch)`
 - `can_ignore_height_min()`
 - `cannot_ignore_height_min()`
-- `passive_height(bool x = true)`
 
 ### Border
 
