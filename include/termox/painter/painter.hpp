@@ -30,29 +30,29 @@ class Painter {
 
    public:
     /// Put single Glyph to local coordinates.
-    void put(Glyph tile, Point p);
+    auto put(Glyph tile, Point p) -> Painter&;
 
     /// Put Glyph_string to local coordinates.
-    void put(Glyph_string const& text, Point p);
+    auto put(Glyph_string const& text, Point p) -> Painter&;
+
+    /// Fill the Widget with \p tile Glyphs starting at the top left \p point.
+    /** \p point is in Widget local coordinates. */
+    auto fill(Glyph tile, Point point, Area area) -> Painter&;
+
+    /// Draw a horizontal line from \p a to \p b, inclusive, in local coords.
+    auto hline(Glyph tile, Point a, Point b) -> Painter&;
+
+    /// Draw a vertical line from \p a to \p b, inclusive, in local coords.
+    auto vline(Glyph tile, Point a, Point b) -> Painter&;
+
+    /// Fill the entire widget screen with wallpaper.
+    auto wallpaper_fill() -> Painter&;
 
     /// Paint the Border object around the outside of the associated Widget.
     /** Borders own the perimeter defined by Widget::x(), Widget::y() and
      *  Widget::outer_width(), Widget::outer_height(). Border is owned by
      *  widget_ */
     void border();
-
-    /// Fill the Widget with \p tile Glyphs starting at the top left \p point.
-    /** \p point is in Widget local coordinates. */
-    void fill(Glyph tile, Point point, Area area);
-
-    /// Draw a horizontal line from \p a to \p b, inclusive, in local coords.
-    void hline(Glyph tile, Point a, Point b);
-
-    /// Draw a vertical line from \p a to \p b, inclusive, in local coords.
-    void vline(Glyph tile, Point a, Point b);
-
-    /// Fill the entire widget screen with wallpaper.
-    void wallpaper_fill();
 
    private:
     /// Put a single Glyph to the canvas_ container.
