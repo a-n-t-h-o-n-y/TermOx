@@ -8,6 +8,8 @@
 #include <termox/painter/glyph_string.hpp>
 #include <termox/painter/painter.hpp>
 #include <termox/system/mouse.hpp>
+#include <termox/widget/layouts/horizontal.hpp>
+#include <termox/widget/layouts/vertical.hpp>
 #include <termox/widget/pipe.hpp>
 #include <termox/widget/widget.hpp>
 
@@ -138,6 +140,22 @@ template <typename... Args>
 {
     return std::make_unique<Push_button>(std::forward<Args>(args)...);
 }
+
+/// Width or Height 1 Button
+template <template <typename> typename Layout_t>
+class Thin_button : public Button {
+   public:
+    explicit Thin_button(Glyph_string label = U"") : Button{std::move(label)}
+    {
+        if constexpr (layout::is_vertical_v<Layout_t<Widget>>)
+            *this | pipe::fixed_width(1);
+        else
+            *this | pipe::fixed_height(1);
+    }
+};
+
+using HThin_button = Thin_button<layout::Horizontal>;
+using VThin_button = Thin_button<layout::Vertical>;
 
 }  // namespace ox
 #endif  // TERMOX_WIDGET_WIDGETS_BUTTON_HPP

@@ -236,8 +236,7 @@ class Layout : public Widget {
 
     /// Finds the index of the given child pointer in the child container.
     /** Returns std::size_t(-1) if \p w is not a child of *this. */
-    [[nodiscard]] auto find_child_position(Child_t const* w) const
-        -> std::size_t
+    [[nodiscard]] auto find_child_position(Widget const* w) const -> std::size_t
     {
         auto const found = std::find_if(
             std::cbegin(children_), std::cend(children_),
