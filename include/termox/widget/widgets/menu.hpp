@@ -102,9 +102,13 @@ class Menu_list
     }
 };
 
-class Menu : public Pair<layout::Vertical<>, Menu_list, Widget> {
+class Menu : public VPair<Menu_list, Widget> {
    public:
-    Menu() { *this | pipe::direct_focus(); }
+    Menu()
+    {
+        *this | pipe::direct_focus();
+        buffer.install_event_filter(menu_);
+    }
 
    public:
     /// Append item to the end of list, displayed with \p label.
@@ -134,6 +138,7 @@ class Menu : public Pair<layout::Vertical<>, Menu_list, Widget> {
 
    private:
     Menu_list& menu_ = this->first;
+    Widget& buffer   = this->second;
 };
 
 }  // namespace ox

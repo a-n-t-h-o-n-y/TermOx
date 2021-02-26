@@ -71,7 +71,7 @@ class Canvas {
                 resize_buffer_->at(current) = g;
             current = next(current, area_);
         }
-        std::swap(*this, *resize_buffer_);
+        this->swap(*resize_buffer_);
     }
 
    public:
@@ -110,6 +110,17 @@ class Canvas {
     [[nodiscard]] static auto is_within(ox::Point p, ox::Area a) -> bool
     {
         return (p.x < a.width) && (p.y < a.height);
+    }
+
+    /// Does not swap resize_buffer_
+    void swap(Canvas& x)
+    {
+        auto x_buf    = std::move(x.buffer_);
+        auto x_area   = std::move(x.area_);
+        x.buffer_     = std::move(this->buffer_);
+        x.area_       = std::move(this->area_);
+        this->buffer_ = std::move(x_buf);
+        this->area_   = std::move(x_area);
     }
 };
 
