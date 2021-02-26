@@ -480,6 +480,7 @@ class Widget {
     /// Handles Delete_event objects.
     virtual auto delete_event() -> bool
     {
+        this->disable_animation();
         destroyed();
         return true;
     }
