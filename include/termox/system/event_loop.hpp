@@ -19,8 +19,8 @@ namespace ox {
 class Event_loop {
    public:
     /// Start the event loop, calling \p loop_function on each iteration.
-    /** loop_function should have signature: void(). It should probably post an
-     *  Event. */
+    /** loop_function should have signature: void(Event_queue&). It should
+        probably append an Event to the provided queue. */
     template <typename F>
     auto run(F loop_function) -> int
     {
@@ -39,8 +39,8 @@ class Event_loop {
     }
 
     /// Start the event loop in a separate thread.
-    /** loop_function should have signature: void(). It should probably post an
-     *  Event. */
+    /** loop_function should have signature: void(Event_queue&). It should
+        probably append an Event to the provided queue. */
     template <typename F>
     void run_async(F&& loop_function)
     {
@@ -49,6 +49,7 @@ class Event_loop {
         fut_ = std::async(std::launch::async, [this, loop_function] {
             return this->run(std::move(loop_function));
         });
+        assert(fut_.valid());
     }
 
     /// Call on the loop to exit at the next exit point.
@@ -66,7 +67,13 @@ class Event_loop {
     /// Block until the async event loop returns.
     /** Event_loop::exit(int) must be called to return from wait().
      *  @return the return code passed to the call to exit(). */
-    auto wait() -> int { return fut_.valid() ? fut_.get() : -1; }
+    // wait, then if valid, get it
+    auto wait() -> int
+    {
+        if (!fut_.valid())
+            return -1;
+        return fut_.get();
+    }
 
     /// Return true if the event loop is currently running.
     [[nodiscard]] auto is_running() const -> bool { return running_; }
@@ -85,9 +92,9 @@ class Event_loop {
 
    private:
     std::future<int> fut_;
-    int return_code_        = 0;
-    bool running_           = false;
-    std::atomic<bool> exit_ = false;
+    int return_code_           = 0;
+    std::atomic<bool> running_ = false;
+    std::atomic<bool> exit_    = false;
     Event_queue queue_;
 };
 

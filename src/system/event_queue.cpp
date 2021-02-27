@@ -44,6 +44,14 @@ namespace ox {
 
 void Event_queue::send_all()
 {
+    // If widget tree has not been fully created yet, then do not process events
+    // this prevents set_current_queue() from being called, while widget
+    // constructors are still posting to the System::current_queue_, which
+    // should be the user input event loop at construction. Prevents async loops
+    // like the animation engine from assigning to current_queue during Widget
+    // tree construction.
+    if (System::head() == nullptr)
+        return;
     static auto mtx = std::mutex{};
     auto const lock = std::lock_guard{mtx};
     System::set_current_queue(*this);

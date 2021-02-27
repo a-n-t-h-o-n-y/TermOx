@@ -9,7 +9,7 @@ namespace ox::detail {
 auto User_input_event_loop::run() -> int
 {
     return loop_.run(
-        [](Event_queue& queue) { queue.append(ox::Terminal::read_input()); });
+        [](Event_queue& q) { q.append(ox::Terminal::read_input()); });
 }
 
 }  // namespace ox::detail

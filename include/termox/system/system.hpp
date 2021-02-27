@@ -1,5 +1,6 @@
 #ifndef TERMOX_SYSTEM_SYSTEM_HPP
 #define TERMOX_SYSTEM_SYSTEM_HPP
+#include <atomic>
 #include <cassert>
 #include <functional>
 #include <mutex>
@@ -88,7 +89,7 @@ class System {
     /// Return a pointer to the head Widget.
     /** This Widget is the ancestor of every other widget that will be displayed
      *  on the screen. */
-    [[nodiscard]] static auto head() -> Widget* { return head_; }
+    [[nodiscard]] static auto head() -> Widget* { return head_.load(); }
 
     /// Create a Widget_t object, set it as head widget and call System::run().
     /** \p args... are passed on to the Widget_t constructor. Blocks until
@@ -185,7 +186,7 @@ class System {
     }
 
    private:
-    inline static Widget* head_ = nullptr;
+    inline static std::atomic<Widget*> head_ = nullptr;
     static detail::User_input_event_loop user_input_loop_;
     static Animation_engine animation_engine_;
     static std::reference_wrapper<Event_queue> current_queue_;

@@ -45,18 +45,12 @@ class Array : public Layout_t {
     References refs_;
 
    private:
-    template <typename... Args>
-    [[nodiscard]] auto make_child_with_index(std::size_t, Args const&... args)
-        -> typename Layout_t::Child_t&
-    {
-        return this->make_child(args...);
-    }
-
-    template <std::size_t... I, typename... Args>
-    [[nodiscard]] auto create_n_children(std::index_sequence<I...>,
+    template <std::size_t... Is, typename... Args>
+    [[nodiscard]] auto create_n_children(std::index_sequence<Is...>,
                                          Args const&... args) -> References
     {
-        return {this->make_child_with_index(I, args...)...};
+        return {this->insert_child(
+            std::make_unique<typename Layout_t::Child_t>(args...), Is)...};
     }
 };
 

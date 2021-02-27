@@ -135,10 +135,8 @@ inline void send(::esc::Window_resize x)
         assert(head != nullptr);
         return *head;
     }();
-    auto& buffers = ox::Terminal::screen_buffers;
-    if (x.new_dimensions.height < buffers.area().height)
-        ox::Terminal::flag_full_repaint();
-    buffers.resize(x.new_dimensions);
+    ox::Terminal::flag_full_repaint();
+    ox::Terminal::screen_buffers.resize(x.new_dimensions);
     System::post_event(ox::Resize_event{head, x.new_dimensions});
 }
 

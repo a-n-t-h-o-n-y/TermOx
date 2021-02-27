@@ -8,8 +8,6 @@
 #include <utility>
 #include <vector>
 
-#include <iostream>  //temp
-
 #include <termox/system/event.hpp>
 #include <termox/system/system.hpp>
 #include <termox/widget/focus_policy.hpp>

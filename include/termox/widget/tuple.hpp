@@ -21,8 +21,9 @@ class Tuple : public Layout_t {
     Tuple() = default;
 
     explicit Tuple(typename Widget_t::Parameters... p)
-        : refs_{std::forward_as_tuple(
-              this->template make_child<Widget_t>(std::move(p))...)}
+        : refs_{this->indexed_init_children(
+              std::index_sequence_for<Widget_t...>(),
+              std::move(p)...)}
     {}
 
    public:
@@ -41,8 +42,25 @@ class Tuple : public Layout_t {
     }
 
    private:
-    std::tuple<Widget_t&...> refs_ =
-        std::forward_as_tuple(this->template make_child<Widget_t>()...);
+    using Refs_tuple = std::tuple<Widget_t&...>;
+    Refs_tuple refs_ =
+        this->indexed_init_children(std::index_sequence_for<Widget_t...>());
+
+   private:
+    template <std::size_t... Is>
+    auto indexed_init_children(std::index_sequence<Is...>,
+                               typename Widget_t::Parameters... p)
+    {
+        return std::forward_as_tuple(this->insert_child(
+            std::make_unique<Widget_t>(std::move(p)), Is)...);
+    }
+
+    template <std::size_t... Is>
+    auto indexed_init_children(std::index_sequence<Is...>)
+    {
+        return std::forward_as_tuple(
+            this->insert_child(std::make_unique<Widget_t>(), Is)...);
+    }
 };
 
 template <typename Layout_t, typename... Widget_t>

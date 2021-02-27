@@ -46,19 +46,23 @@ void System::exit() { user_input_loop_.exit(0); }
 
 void System::set_head(Widget* new_head)
 {
-    if (head_ != nullptr)
-        head_->disable();
+    if (auto* const head = head_.load(); head != nullptr)
+        head->disable();
+    if (new_head != nullptr) {
+        new_head->enable();
+        System::post_event(Resize_event{*new_head, Terminal::area()});
+        detail::Focus::set(*new_head);
+    }
     head_ = new_head;
 }
 
 auto System::run() -> int
 {
-    if (head_ == nullptr)
+    auto* const head = head_.load();
+    if (head == nullptr)
         return -1;
-    head_->enable();
-    System::post_event(Resize_event{*System::head(), Terminal::area()});
-    detail::Focus::set(*head_);
     auto const result = user_input_loop_.run();
+    // user_input_loop_ is already stopped if you are here.
     animation_engine_.stop();
     Terminal::stop_dynamic_color_engine();
     return result;

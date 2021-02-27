@@ -51,17 +51,24 @@ class Button_list : public layout::Opposite_t<Layout_t<Widget>> {
     Scrollbar<Layout_t<Widget>>& scrollbar =
         this->template make_child<Scrollbar<Layout_t<Widget>>>();
 
-    Button_list_impl& btn_list =
+    Pair<Layout_t<Widget>, Button_list_impl, Widget>& pair_ =
         this->template make_child<
-                Pair<Layout_t<Widget>, Button_list_impl, Widget>>()
-            .first;
+            Pair<Layout_t<Widget>, Button_list_impl, Widget>>();
+
+    Button_list_impl& btn_list = pair_.first;
+
+    Widget& buffer_ = pair_.second;
 
    public:
     sl::Signal<void(std::u32string const& name)>& button_pressed =
         btn_list.button_pressed;
 
    public:
-    Button_list() { link(scrollbar, btn_list); }
+    Button_list()
+    {
+        link(scrollbar, btn_list);
+        buffer_.install_event_filter(scrollbar);
+    }
 
    public:
     /// Returns reference to the Button added.
