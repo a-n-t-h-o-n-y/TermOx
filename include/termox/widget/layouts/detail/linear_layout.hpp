@@ -1,5 +1,7 @@
 #ifndef TERMOX_WIDGET_LAYOUTS_DETAIL_LINEAR_LAYOUT_HPP
 #define TERMOX_WIDGET_LAYOUTS_DETAIL_LINEAR_LAYOUT_HPP
+#include <cassert>
+
 #include <termox/system/event.hpp>
 #include <termox/widget/layout.hpp>
 
@@ -123,6 +125,7 @@ class Linear_layout : public Layout<Child> {
     /// Sets the child Widget offset, does not do bounds checking.
     void set_child_offset(std::size_t index)
     {
+        assert(index <= this->child_count());
         Widget::child_offset_ = index;
         shared_space_.set_offset(index);
         unique_space_.set_offset(index);

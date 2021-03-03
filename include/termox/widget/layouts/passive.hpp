@@ -20,7 +20,12 @@ class Passive : public Layout_t {
     static auto constexpr is_vertical = layout::is_vertical_v<Base_t>;
 
    public:
-    using Base_t::Base_t;
+    template <typename... Args>
+    Passive(Args&&... args) : Base_t{std::forward<Args>(args)...}
+    {
+        this->set_length(
+            sum_hints(this->get_children(), this->get_child_offset()));
+    }
 
    protected:
     auto child_added_event(ox::Widget& child) -> bool override

@@ -20,13 +20,12 @@ auto Paint_queue::send_all() -> bool
     return sent;
 }
 
-auto Delete_queue::send_all() -> bool
+void Delete_queue::send_all()
 {
     /// Processing Delete_events should not post more Delete_events.
     for (auto& d : deletes_)
         System::send_event(std::move(d));
     deletes_.clear();
-    return true;
 }
 
 auto Basic_queue::send_all() -> bool
@@ -57,7 +56,7 @@ void Event_queue::send_all()
     System::set_current_queue(*this);
     bool sent = basics_.send_all();
     sent      = paints_.send_all() || sent;
-    sent      = deletes_.send_all() || sent;
+    deletes_.send_all();
     if (sent)
         Terminal::flush_screen();
 }

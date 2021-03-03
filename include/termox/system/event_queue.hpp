@@ -43,7 +43,7 @@ class Delete_queue {
    public:
     void append(Delete_event e) { deletes_.push_back(std::move(e)); }
 
-    auto send_all() -> bool;
+    void send_all();
 
     [[nodiscard]] auto size() const -> std::size_t { return deletes_.size(); }
 

@@ -131,6 +131,10 @@ class Bar : public Layout_t<Widget> {
 
     void collapse() { indicator_.plus(); }
 
+    auto indicator_widget() -> Indicator& { return indicator_; }
+
+    auto title_widget() -> Title& { return text_; }
+
    private:
     Indicator& indicator_ = this->template make_child<Indicator>();
     Title& text_;
@@ -198,6 +202,9 @@ class Accordion : public Passive<Layout_t<Widget>> {
 
     /// Return the wrapped widget.
     [[nodiscard]] auto wrapped() -> Widget_t& { return wrapped_; }
+
+    /// Return the titled Bar widget.
+    [[nodiscard]] auto bar() -> Bar_t& { return bar_; }
 
    private:
     Bar_t& bar_;

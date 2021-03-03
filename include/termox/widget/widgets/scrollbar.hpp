@@ -253,7 +253,7 @@ class Scrollbar : public Layout_t {
         if (parameters_.size == 0)
             return;
         parameters_.position = p < parameters_.size ? p : parameters_.size - 1;
-        new_position(parameters_.position);
+        new_position.emit(parameters_.position);
         middle.set_position(p);
     }
 
@@ -293,6 +293,15 @@ class Scrollbar : public Layout_t {
     }
 
     auto mouse_press_event_filter(Widget& w, Mouse const& m) -> bool override
+    {
+        if (&w != &middle)
+            return false;
+        if (m.button == Mouse::Button::Left)
+            this->set_position(middle.find_position_from_point(m.at));
+        return true;
+    }
+
+    auto mouse_move_event_filter(Widget& w, Mouse const& m) -> bool override
     {
         if (&w != &middle)
             return false;
@@ -342,8 +351,10 @@ void link(Scrollbar<Layout_t>& scrollbar,
 {
     scrollbar.set_size(layout.child_count());
 
-    scrollbar.new_position.connect(
-        [&](std::size_t p) { layout.set_child_offset(p); });
+    scrollbar.new_position.connect([&](std::size_t p) {
+        if (p < layout.child_count())
+            layout.set_child_offset(p);
+    });
 
     layout.child_added.connect([&](auto&) { scrollbar.increment_size(); });
     layout.child_removed.connect([&](auto&) { scrollbar.decrement_size(); });
