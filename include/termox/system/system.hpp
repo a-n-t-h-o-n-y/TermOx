@@ -138,7 +138,7 @@ class System {
     /// Sets the exit flag for the user input event loop.
     /** Only call from the main user input event loop, not animation loop. This
      *  is because shutdown will be blocked until more user input is entered.
-     *  This calls quick_exit, does not clean up with destructors.
+     *  This calls std::_Exit, does not clean up with destructors.
      *  TODO threading design makes this difficult to do properly. */
     static void exit();
 

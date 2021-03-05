@@ -26,11 +26,7 @@
 extern "C" void handle_sigint(int /* sig*/)
 {
     ox::Terminal::uninitialize();
-#if !defined __APPLE__ && !defined __MINGW32__
-    std::quick_exit(0);
-#else
-    std::exit(0);
-#endif
+    std::_Exit(0);
 }
 
 namespace {
