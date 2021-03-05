@@ -47,7 +47,7 @@ void System::exit()
 {
     user_input_loop_.exit(0);
     Terminal::uninitialize();
-    std::quick_exit(0);
+    std::_Exit(0);
 }
 
 void System::set_head(Widget* new_head)
