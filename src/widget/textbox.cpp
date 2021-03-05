@@ -18,11 +18,22 @@ auto Textbox::key_press_event(Key k) -> bool
         return Textbox_base::key_press_event(k);
     switch (k) {
         case Key::Backspace:
+        case Key::Backspace_1:
         case Key::Backspace_2: {
             auto cursor_index = this->cursor_index();
             if (cursor_index == 0)
                 break;
             this->erase(--cursor_index, 1);
+            if (this->line_at(cursor_index) < this->top_line())
+                this->scroll_up(1);
+            this->set_cursor(cursor_index);
+        } break;
+
+        case Key::Delete: {
+            auto cursor_index = this->cursor_index();
+            if (cursor_index == this->contents().size())
+                break;
+            this->erase(cursor_index, 1);
             if (this->line_at(cursor_index) < this->top_line())
                 this->scroll_up(1);
             this->set_cursor(cursor_index);
