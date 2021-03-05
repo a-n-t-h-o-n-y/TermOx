@@ -1,6 +1,7 @@
 #include <termox/system/system.hpp>
 
 #include <algorithm>
+#include <cstdlib>
 #include <functional>
 #include <iterator>
 #include <map>
@@ -42,7 +43,12 @@ void System::disable_tab_focus() { detail::Focus::disable_tab_focus(); }
 
 void System::post_event(Event e) { current_queue_.get().append(std::move(e)); }
 
-void System::exit() { user_input_loop_.exit(0); }
+void System::exit()
+{
+    user_input_loop_.exit(0);
+    Terminal::uninitialize();
+    std::quick_exit(0);
+}
 
 void System::set_head(Widget* new_head)
 {
