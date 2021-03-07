@@ -9,7 +9,6 @@
 Layouts, and Events that make it quick to craft unique user interfaces in the
 terminal.
 
-<!-- TODO - single gif of multiple demos -->
 <p align="center">
   <img src="docs/images/termox-demos.gif">
 </p>
