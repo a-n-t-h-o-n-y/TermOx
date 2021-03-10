@@ -19,6 +19,19 @@ target_link_libraries(TermOx
 
 target_include_directories(TermOx PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
+include(GNUInstallDirs)
+install(TARGETS TermOx
+        ARCHIVE
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        CONFIGURATIONS Release
+)
+install(
+    DIRECTORY
+        ${PROJECT_SOURCE_DIR}/include/termox
+    DESTINATION
+        ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
 if(NOT ${CMAKE_VERSION} VERSION_LESS "3.8")
     target_compile_features(TermOx PUBLIC cxx_std_17)
 endif()

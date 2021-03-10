@@ -55,7 +55,7 @@ add_subdirectory(external/Escape)
 add_subdirectory(external/signals-light)
 
 if (NOT TARGET Catch2)
-    add_subdirectory(external/Catch2)
+    add_subdirectory(external/Catch2 EXCLUDE_FROM_ALL)
 endif()
 
 # Add TermOx
