@@ -29,8 +29,12 @@ class Focus {
     /** If \p new_focus has Focus_policy::None, calls Focus::clear(). */
     static void set(ox::Widget& new_focus);
 
-    /// Set the focus widget to nullptr.
+    /// Set the focus widget to nullptr and send Focus_out_event to focus_widg.
     static void clear();
+
+    /// Set the focus widget to nullptr and do not send a Focus_out_event.
+    /** Needed to unregister the focus widget if it is being destroyed. */
+    static void clear_without_posting_event();
 
     /// Enable Tab/Back_tab keys to change the focus Widget.
     static void enable_tab_focus() { tab_enabled_ = true; }

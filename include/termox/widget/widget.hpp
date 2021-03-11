@@ -120,11 +120,7 @@ class Widget {
     Widget& operator=(Widget const&) = delete;
     Widget& operator=(Widget&&) = delete;
 
-    virtual ~Widget()
-    {
-        if (detail::Focus::focus_widget() == this)
-            detail::Focus::clear();
-    }
+    virtual ~Widget() {}
 
    public:
     /// Set the identifying name of the Widget.
@@ -482,6 +478,8 @@ class Widget {
     {
         this->disable_animation();
         destroyed();
+        if (detail::Focus::focus_widget() == this)
+            detail::Focus::clear_without_posting_event();
         return true;
     }
 

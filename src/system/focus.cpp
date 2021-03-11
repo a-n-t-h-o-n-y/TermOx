@@ -134,4 +134,6 @@ void Focus::clear()
     focus_widget_ = nullptr;
 }
 
+void Focus::clear_without_posting_event() { focus_widget_ = nullptr; }
+
 }  // namespace ox::detail
