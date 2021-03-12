@@ -10,7 +10,8 @@ namespace ox {
 
 /// Read only Container view that applies transformation to elements at access.
 /** Container is assumed to have a vector like interface. Transformation is
- *  applied at iterator dereference and operator[]. */
+ *  applied at iterator dereference and operator[]. This is a non-owning view,
+ *  relies on passed in container being alive as long as this view is.\*/
 template <typename Container, typename Map_fn>
 class Transform_view {
    public:
