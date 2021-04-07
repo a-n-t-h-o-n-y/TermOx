@@ -120,6 +120,7 @@ class Textbox_base : public Text_display {
         auto const cursor_index = this->cursor_index();
         if (cursor_index == true_last_index &&
             this->cursor.y() == this->height() - 1) {
+            this->cursor.set_position({0, 0});  // hack for Typer
             this->scroll_down(1);
         }
         this->set_cursor(cursor_index + 1);

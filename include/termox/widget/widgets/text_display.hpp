@@ -220,7 +220,7 @@ class Text_display : public Widget {
         return display_state_.at(line).start_index;
     }
 
-    /// Return the index of the last Glyph at line number \p line.
+    /// Returns one past the last index of the last Glyph at line number \p line
     [[nodiscard]] auto last_index_at(int line) const -> int
     {
         const auto next_line = line + 1;
@@ -238,10 +238,9 @@ class Text_display : public Widget {
     }
 
     /// Return the index of the last Glyph in contents.
-    /** Can give an incorrect result if contents is empty. */
     [[nodiscard]] auto end_index() const -> int
     {
-        return this->contents().empty() ? 0 : this->contents().size() - 1;
+        return this->contents().size();
     }
 
     /// Recalculate the text layout via display_state_.

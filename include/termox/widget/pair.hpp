@@ -2,7 +2,9 @@
 #define TERMOX_WIDGET_PAIR_HPP
 #include <memory>
 
+#include <termox/common/common_type.hpp>
 #include <termox/widget/layouts/horizontal.hpp>
+#include <termox/widget/layouts/stack.hpp>
 #include <termox/widget/layouts/vertical.hpp>
 
 namespace ox {
@@ -13,11 +15,25 @@ template <typename Layout_t,
           typename Widget_two_t = void>
 class Pair : public Layout_t {
    public:
-    Widget_one_t& first  = this->template make_child<Widget_one_t>();
-    Widget_two_t& second = this->template make_child<Widget_two_t>();
+    using Base = Layout_t;
 
    public:
-    using Base = Layout_t;
+    Widget_one_t& first;
+    Widget_two_t& second;
+
+   public:
+    // TODO if both types have Parameters defines, then take those, default to
+    // default constructed?
+    Pair()
+        : first{this->template make_child<Widget_one_t>()},
+          second{this->template make_child<Widget_two_t>()}
+    {}
+
+    Pair(std::unique_ptr<Widget_one_t> a, std::unique_ptr<Widget_two_t> b)
+        : Base{std::move(a), std::move(b)},
+          first{static_cast<Widget_one_t&>(this->get_children()[0])},
+          second{static_cast<Widget_two_t&>(this->get_children()[1])}
+    {}
 };
 
 template <typename Layout_t>
@@ -40,11 +56,15 @@ auto pair() -> std::unique_ptr<Pair<Layout_t, Widget_one_t, Widget_two_t>>
 }
 
 // TODO make function() -> unique_ptr for each
-template <typename Widget_one_t, typename Widget_two_t>
-using VPair = Pair<layout::Vertical<>, Widget_one_t, Widget_two_t>;
+template <typename First, typename Second>
+using VPair = Pair<layout::Vertical<Common_type<First, Second>>, First, Second>;
 
-template <typename Widget_one_t, typename Widget_two_t>
-using HPair = Pair<layout::Horizontal<>, Widget_one_t, Widget_two_t>;
+template <typename First, typename Second>
+using HPair =
+    Pair<layout::Horizontal<Common_type<First, Second>>, First, Second>;
+
+template <typename First, typename Second>
+using SPair = Pair<layout::Stack<Common_type<First, Second>>, First, Second>;
 
 }  // namespace ox
 #endif  // TERMOX_WIDGET_PAIR_HPP
