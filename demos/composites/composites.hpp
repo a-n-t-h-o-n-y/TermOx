@@ -149,11 +149,11 @@ struct My_check_list : Check_list {
     }
 };
 
-struct Two_lists : Pair<layout::Vertical<My_check_list>> {
+struct Two_lists : VArray<My_check_list, 2> {
     Two_lists()
     {
         *this | pipe::strong_focus() | pipe::on_focus_in([this] {
-            ox::System::set_focus(this->get_children().front());
+            ox::System::set_focus(this->get<0>());
         });
         this->foo();
     }
