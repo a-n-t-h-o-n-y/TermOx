@@ -4,19 +4,45 @@
 #include <termox/common/mb_to_u32.hpp>
 #include <termox/common/u32_to_mb.hpp>
 
+#include <termox/painter/palette/amstrad_cpc.hpp>
+#include <termox/painter/palette/apple_ii.hpp>
+#include <termox/painter/palette/ashes.hpp>
+#include <termox/painter/palette/basic.hpp>
+#include <termox/painter/palette/basic8.hpp>
+#include <termox/painter/palette/cga.hpp>
+#include <termox/painter/palette/commodore_64.hpp>
+#include <termox/painter/palette/commodore_vic20.hpp>
+#include <termox/painter/palette/dawn_bringer16.hpp>
+#include <termox/painter/palette/dawn_bringer32.hpp>
+#include <termox/painter/palette/en4.hpp>
+#include <termox/painter/palette/gameboy.hpp>
+#include <termox/painter/palette/gameboy_pocket.hpp>
+#include <termox/painter/palette/macintosh_ii.hpp>
+#include <termox/painter/palette/msx.hpp>
+#include <termox/painter/palette/nes.hpp>
+#include <termox/painter/palette/savanna.hpp>
+#include <termox/painter/palette/secam.hpp>
+#include <termox/painter/palette/stormy6.hpp>
+#include <termox/painter/palette/teletext.hpp>
+#include <termox/painter/palette/thomson_m05.hpp>
+#include <termox/painter/palette/windows.hpp>
+#include <termox/painter/palette/windows_console.hpp>
+#include <termox/painter/palette/zx_spectrum.hpp>
+
 #include <termox/painter/brush.hpp>
 #include <termox/painter/color.hpp>
+#include <termox/painter/dynamic_colors.hpp>
 #include <termox/painter/glyph.hpp>
 #include <termox/painter/glyph_matrix.hpp>
 #include <termox/painter/glyph_string.hpp>
 #include <termox/painter/painter.hpp>
 #include <termox/painter/trait.hpp>
 
+#include <termox/system/animation_engine.hpp>
+#include <termox/system/event.hpp>
+#include <termox/system/event_loop.hpp>
 #include <termox/system/key.hpp>
 #include <termox/system/mouse.hpp>
-
-#include <termox/system/animation_engine.hpp>
-#include <termox/system/event_loop.hpp>
 #include <termox/system/shortcuts.hpp>
 #include <termox/system/system.hpp>
 
