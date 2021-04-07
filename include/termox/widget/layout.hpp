@@ -261,6 +261,18 @@ class Layout : public Widget {
         return std::find(std::begin(d), std::end(d), descendant) != std::end(d);
     }
 
+    /// Sort children by the given comparison function.
+    template <typename Fn>
+    void sort(Fn comp)
+    {
+        std::stable_sort(std::begin(children_), std::end(children_),
+                         [&comp](auto const& a, auto const& b) {
+                             return comp(static_cast<Child_t const&>(*a),
+                                         static_cast<Child_t const&>(*b));
+                         });
+        this->update_geometry();
+    }
+
    protected:
     /// Clients override this to post Resize and Move events to children.
     /** This will be called each time the children Widgets possibly need to be

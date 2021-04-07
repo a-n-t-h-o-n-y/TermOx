@@ -17,6 +17,11 @@ target_link_libraries(passive.ui.test PRIVATE TermOx)
 ## Fixed Wrapper
 add_executable(fixed.ui.test EXCLUDE_FROM_ALL fixed.ui.test.cpp)
 target_link_libraries(fixed.ui.test PRIVATE TermOx)
+
+## Layout Sorting
+add_executable(layout_sort.ui.test EXCLUDE_FROM_ALL layout_sort.ui.test.cpp)
+target_link_libraries(layout_sort.ui.test PRIVATE TermOx)
+
 add_custom_target(
     termox.ui.tests
     DEPENDS
@@ -24,6 +29,7 @@ add_custom_target(
         spinners.ui.test
         passive.ui.test
         fixed.ui.test
+        layout_sort.ui.test
 )
 
 # Unit Tests
