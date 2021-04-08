@@ -34,10 +34,16 @@ namespace ox {
 
 class Widget {
    public:
-    // TODO
     struct Parameters {
-        std::string name;
-        Glyph wallpaper;
+        std::string name            = std::string{};
+        Focus_policy focus_policy   = Focus_policy::None;
+        Size_policy width_policy    = Size_policy{};
+        Size_policy height_policy   = Size_policy{};
+        Border border               = Border{};
+        Brush brush                 = Brush{};
+        Glyph wallpaper             = Glyph{U' '};
+        bool brush_paints_wallpaper = true;
+        Cursor cursor               = Cursor{};
     };
 
    private:
@@ -92,7 +98,7 @@ class Widget {
     Border border;
 
     /// Describes how focus is given to this Widget.
-    Focus_policy focus_policy{Focus_policy::None};
+    Focus_policy focus_policy;
 
     /// Provides information on where the cursor is and if it is enabled.
     Cursor cursor;
@@ -104,23 +110,28 @@ class Widget {
     Size_policy height_policy;
 
     /// A Brush that is applied to every Glyph painted by this Widget.
-    Brush brush{bg(Color::Background), fg(Color::Foreground)};
+    Brush brush;
 
     /// Slots can track this object's lifetime to disable Slot invocations.
     sl::Lifetime lifetime;
 
    public:
-    /// Initialize with \p name.
-    explicit Widget(std::string name = "");
+    /// Create an empty Widget.
+    explicit Widget(Parameters p = {{}, {}, {}, {}, {}, Brush{}, {}, {}, {}});
 
-    explicit Widget(Parameters p) : Widget{std::move(p.name)} {}
+    // Excessive braces needed above to get around gcc and clang bug:
+    // https://bugs.llvm.org/show_bug.cgi?id=36684
+    // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=88165
 
+    virtual ~Widget() = default;
+
+    // Widgets are exclusively owned by std::unique_ptrs and sl::Slots often
+    // depend on Widget references to remain valid, copying and moving would
+    // invalidate those references.
     Widget(Widget const&) = delete;
     Widget(Widget&&)      = delete;
     Widget& operator=(Widget const&) = delete;
     Widget& operator=(Widget&&) = delete;
-
-    virtual ~Widget() {}
 
    public:
     /// Set the identifying name of the Widget.
@@ -647,9 +658,9 @@ class Widget {
     void enable_and_post_events(bool enable, bool post_child_polished_event);
 
    private:
-    bool enabled_                = false;
-    bool brush_paints_wallpaper_ = true;
-    bool is_animated_            = false;
+    bool enabled_ = false;
+    bool brush_paints_wallpaper_;
+    bool is_animated_ = false;
 
    protected:
     using Children_t = std::vector<std::unique_ptr<Widget>>;
@@ -658,8 +669,8 @@ class Widget {
 
    private:
     std::string name_;
-    Widget* parent_  = nullptr;
-    Glyph wallpaper_ = U' ';
+    Widget* parent_ = nullptr;
+    Glyph wallpaper_;
     std::set<Widget*> event_filters_;
 
     // Top left point of *this, relative to the top left of the screen.
@@ -682,10 +693,10 @@ class Widget {
 };
 
 /// Helper function to create an instance.
-template <typename... Args>
-[[nodiscard]] auto widget(Args&&... args) -> std::unique_ptr<Widget>
+[[nodiscard]] inline auto widget(Widget::Parameters parameters = {})
+    -> std::unique_ptr<Widget>
 {
-    return std::make_unique<Widget>(std::forward<Args>(args)...);
+    return std::make_unique<Widget>(std::move(parameters));
 }
 
 /// Wrapper for std::make_unique

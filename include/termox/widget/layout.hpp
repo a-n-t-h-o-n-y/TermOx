@@ -97,8 +97,7 @@ class Layout : public Widget {
     }
 
     /// Helper so Parameters type does not have to be specified at call site.
-    template <typename Widget_t = Child_t,
-              typename SFINAE   = typename Widget_t::Parameters>
+    template <typename Widget_t = Child_t>
     auto make_child(typename Widget_t::Parameters p) -> Widget_t&
     {
         return this->append_child(std::make_unique<Widget_t>(std::move(p)));

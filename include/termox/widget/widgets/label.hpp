@@ -318,11 +318,10 @@ class Label_wrapper : public Wrapper_layout<Widget> {
     template <typename... Args>
     explicit Label_wrapper(Parameters p, Args&&... args)
         : label{this->template make_child<Padded_label>(
-                        Widget::Parameters{},
-                        typename Label_t::Parameters{
-                            std::move(p.text), p.alignment, p.extra_left,
-                            p.extra_right, p.growth_strategy},
-                        Widget::Parameters{})
+                        {{},
+                         {std::move(p.text), p.alignment, p.extra_left,
+                          p.extra_right, p.growth_strategy},
+                         {}})
                     .template get<1>()},
           wrapped{
               this->template make_child<Widget_t>(std::forward<Args>(args)...)}

@@ -294,7 +294,7 @@ class Test : public ox::Cycle_stack<> {
                     vbuf(ox::checkbox15()), vbuf(ox::checkbox16()),
                     vbuf(ox::checkbox17()), vbuf(ox::checkbox18()),
                     vbuf(ox::checkbox19()), vbuf(ox::checkbox20()),
-                    ox::widget("buffer")
+                    ox::widget({"buffer"})
                 ),
                 ox::layout::horizontal(
                     vbuf(ox::checkbox1({})),  vbuf(ox::checkbox2({})),
@@ -307,7 +307,7 @@ class Test : public ox::Cycle_stack<> {
                     vbuf(ox::checkbox15({})), vbuf(ox::checkbox16({})),
                     vbuf(ox::checkbox17({})), vbuf(ox::checkbox18({})),
                     vbuf(ox::checkbox19({})), vbuf(ox::checkbox20({})),
-                    ox::widget("buffer")
+                    ox::widget({"buffer"})
                 ),
                 ox::layout::horizontal(
                     vbuf(ox::checkbox1({ox::Checkbox1::State::Checked, false})),
@@ -330,7 +330,7 @@ class Test : public ox::Cycle_stack<> {
                     vbuf(ox::checkbox18({ox::Checkbox18::State::Checked, false})),
                     vbuf(ox::checkbox19({ox::Checkbox19::State::Checked, false})),
                     vbuf(ox::checkbox20({ox::Checkbox20::State::Checked, false})),
-                    ox::widget("buffer")
+                    ox::widget({"buffer"})
                 ),
                 ox::layout::horizontal(
                     vbuf(ox::checkbox1(ox::Checkbox1::State::Unchecked, true)),
@@ -353,7 +353,7 @@ class Test : public ox::Cycle_stack<> {
                     vbuf(ox::checkbox18(ox::Checkbox18::State::Unchecked, true)),
                     vbuf(ox::checkbox19(ox::Checkbox19::State::Unchecked, true)),
                     vbuf(ox::checkbox20(ox::Checkbox20::State::Unchecked, true)),
-                    ox::widget("buffer")
+                    ox::widget({"buffer"})
                 )
             )
         );
@@ -368,7 +368,7 @@ class Test : public ox::Cycle_stack<> {
                 ox::hcheckbox15_label(), ox::hlabel_checkbox16(),
                 ox::hcheckbox19_label(), ox::hlabel_checkbox19(),
                 ox::hcheckbox20_label(), ox::hlabel_checkbox20(),
-                ox::widget("buffer")
+                ox::widget({"buffer"})
             )
         );
         this->append_page(U"Labeled Horizontal Helpers - Label Parameters",
@@ -391,7 +391,7 @@ class Test : public ox::Cycle_stack<> {
                 ox::hlabel_checkbox19({U"Label!", ox::Align::Right}),
                 ox::hcheckbox20_label({U"Label!", ox::Align::Left}),
                 ox::hlabel_checkbox20({U"Label!", ox::Align::Center}),
-                ox::widget("buffer")
+                ox::widget({"buffer"})
             )
         );
         this->append_page(
@@ -433,7 +433,7 @@ class Test : public ox::Cycle_stack<> {
                                       {ox::Checkbox20::State::Checked, false}),
                 ox::hlabel_checkbox20({U"Label!", ox::Align::Center},
                                       {ox::Checkbox20::State::Checked, true}),
-                ox::widget("buffer")
+                ox::widget({"buffer"})
             )
         );
         this->append_page(U"Labeled Vertical Helpers - No Parameters",
@@ -470,7 +470,7 @@ class Test : public ox::Cycle_stack<> {
                 ox::vlabel_checkbox19 ({U"Label!", ox::Align::Right}),
                 ox::vcheckbox20_label ({U"Label!", ox::Align::Left}),
                 ox::vlabel_checkbox20 ({U"Label!", ox::Align::Center}),
-                ox::widget("buffer")
+                ox::widget({"buffer"})
             )
         );
         this->append_page(
@@ -512,7 +512,7 @@ class Test : public ox::Cycle_stack<> {
                                       {ox::Checkbox20::State::Checked, false}),
                 ox::vlabel_checkbox20({U"Label!", ox::Align::Center},
                                       {ox::Checkbox20::State::Checked, true}),
-                ox::widget("buffer")
+                ox::widget({"buffer"})
             )
         );
         // clang-format on

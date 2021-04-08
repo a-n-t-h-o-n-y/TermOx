@@ -35,8 +35,17 @@ void post_child_polished(ox::Widget& w)
 
 namespace ox {
 
-Widget::Widget(std::string name)
-    : name_{std::move(name)}, unique_id_{get_unique_id()}
+Widget::Widget(Parameters p)
+    : border{std::move(p.border)},
+      focus_policy{std::move(p.focus_policy)},
+      cursor{std::move(p.cursor)},
+      width_policy{std::move(p.width_policy)},
+      height_policy{std::move(p.height_policy)},
+      brush{std::move(p.brush)},
+      brush_paints_wallpaper_{std::move(p.brush_paints_wallpaper)},
+      name_{std::move(p.name)},
+      wallpaper_{std::move(p.wallpaper)},
+      unique_id_{get_unique_id()}
 {
     width_policy.policy_updated.connect([this] { post_child_polished(*this); });
     height_policy.policy_updated.connect(

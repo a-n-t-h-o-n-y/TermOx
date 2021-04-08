@@ -15,6 +15,9 @@ namespace ox {
 template <typename Layout_t, typename... Widget_t>
 class Tuple : public Layout_t {
    public:
+    using Parameters = std::tuple<typename Widget_t::Parameters...>;
+
+   public:
     /// Default construct each Widget.
     Tuple()
         : refs_{this->indexed_init_children(
@@ -26,6 +29,13 @@ class Tuple : public Layout_t {
         : refs_{this->indexed_init_children(
               std::index_sequence_for<Widget_t...>(),
               std::move(p)...)}
+    {}
+
+    /// Construct from a Tuple::Parameters object.
+    explicit Tuple(Tuple::Parameters p)
+        : refs_{this->tuple_init_children(
+              std::make_index_sequence<std::tuple_size_v<Tuple::Parameters>>(),
+              std::move(p))}
     {}
 
     /// Move existing Widgets into a Tuple.
@@ -76,6 +86,15 @@ class Tuple : public Layout_t {
     {
         return std::forward_as_tuple(
             this->insert_child(std::move(widget_ptrs), Is)...);
+    }
+
+    template <std::size_t... Is>
+    [[nodiscard]] auto tuple_init_children(std::index_sequence<Is...>,
+                                           Tuple::Parameters parameters)
+    {
+        return std::forward_as_tuple(this->insert_child(
+            std::make_unique<Widget_t>(std::move(std::get<Is>(parameters))),
+            Is)...);
     }
 
    private:

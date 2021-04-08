@@ -151,8 +151,11 @@ class Size_policy {
    public:
     Size_policy() = default;
 
-    Size_policy(Size_policy const& x) = delete;
-    Size_policy(Size_policy&& x)      = delete;
+    /// Does not copy the Signal, so no slots are connected on copy init.
+    Size_policy(Size_policy const& x) : data_{x.data_} {}
+
+    /// Does not move the Signal, so no slots are connected on move init.
+    Size_policy(Size_policy&& x) : data_{std::move(x.data_)} {}
 
     /// Specifically does not copy the Signal, so Widget is still notified.
     auto operator=(Size_policy const& x) -> Size_policy&
