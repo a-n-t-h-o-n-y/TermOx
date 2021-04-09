@@ -69,11 +69,11 @@ class Banner : public Widget {
         this->stop();
         text_ = std::move(text);
         range_.reset();
-        animator_.set_text_length(this->get_text().size());
+        animator_.set_text_length(this->text().size());
         this->update();
     }
 
-    [[nodiscard]] auto get_text() const -> Glyph_string const& { return text_; }
+    [[nodiscard]] auto text() const -> Glyph_string const& { return text_; }
 
    protected:
     auto paint_event(Painter& p) -> bool override

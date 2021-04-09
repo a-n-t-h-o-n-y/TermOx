@@ -545,7 +545,7 @@ class Game_space : public ox::Widget {
 
 class Instructions : public ox::Text_display {
    public:
-    Instructions() : Text_display{get_text()}
+    Instructions() : Text_display{make_text()}
     {
         using namespace ox::pipe;
         *this | bg(color::Instruction_bg) | fg(color::Instruction_fg) |
@@ -553,7 +553,7 @@ class Instructions : public ox::Text_display {
     }
 
    private:
-    static auto get_text() -> ox::Glyph_string
+    static auto make_text() -> ox::Glyph_string
     {
         using namespace ox;
         auto const standout = Brush{fg(color::Instruction_text), Trait::Bold};

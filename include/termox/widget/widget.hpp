@@ -117,11 +117,10 @@ class Widget {
 
    public:
     /// Create an empty Widget.
-    explicit Widget(Parameters p = {{}, {}, {}, {}, {}, Brush{}, {}, {}, {}});
+    Widget() : Widget{{}} {}
 
-    // Excessive braces needed above to get around gcc and clang bug:
-    // https://bugs.llvm.org/show_bug.cgi?id=36684
-    // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=88165
+    /// Create an empty Widget.
+    explicit Widget(Parameters p);
 
     virtual ~Widget() = default;
 

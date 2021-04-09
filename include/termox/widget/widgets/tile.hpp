@@ -10,40 +10,49 @@ namespace ox {
 /// A unit width/height Widget that can display a single Glyph.
 class Tile : public Widget {
    public:
-    using Parameters = Glyph;
+    struct Parameters {
+        Glyph tile = U' ';
+    };
 
    public:
-    explicit Tile(Glyph g = U' ') : display_{g}
+    explicit Tile(Glyph tile = U' ') : tile_{tile}
     {
-        using namespace pipe;
-        *this | fixed_width(1) | fixed_height(1);
+        *this | pipe::fixed_width(1) | pipe::fixed_height(1);
     }
 
+    explicit Tile(Parameters parameters) : Tile{std::move(parameters.tile)} {}
+
    public:
-    void set(Glyph g)
+    void set_tile(Glyph tile)
     {
-        display_ = g;
+        tile_ = tile;
         this->update();
     }
 
-    [[nodiscard]] auto get() -> Glyph { return display_; }
+    [[nodiscard]] auto tile() -> Glyph { return tile_; }
 
    protected:
     auto paint_event(Painter& p) -> bool override
     {
-        p.put(display_, {0, 0});
+        p.put(tile_, {0, 0});
         return Widget::paint_event(p);
     }
 
    private:
-    Glyph display_;
+    Glyph tile_;
 };
 
-/// Helper function to create an instance.
-template <typename... Args>
-[[nodiscard]] auto tile(Args&&... args) -> std::unique_ptr<Tile>
+/// Helper function to create a Tile instance.
+[[nodiscard]] inline auto tile(Glyph tile = U' ') -> std::unique_ptr<Tile>
 {
-    return std::make_unique<Tile>(std::forward<Args>(args)...);
+    return std::make_unique<Tile>(std::move(tile));
+}
+
+/// Helper function to create a Tile instance.
+[[nodiscard]] inline auto tile(Tile::Parameters parameters)
+    -> std::unique_ptr<Tile>
+{
+    return std::make_unique<Tile>(std::move(parameters));
 }
 
 }  // namespace ox

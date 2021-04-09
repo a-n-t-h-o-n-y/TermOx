@@ -178,13 +178,13 @@ class Size_policy {
 template <int Hint, typename Widget_t>
 struct Fixed_height : Widget_t {
     template <typename... Args>
-    Fixed_height(Args&&... args) : Widget_t{std::forward<Args>(args)...}
+    explicit Fixed_height(Args&&... args)
+        : Widget_t{std::forward<Args>(args)...}
     {
         this->height_policy.fixed(Hint);
     }
 
-    template <typename = typename Widget_t::Parameters>
-    Fixed_height(typename Widget_t::Parameters parameters)
+    explicit Fixed_height(typename Widget_t::Parameters parameters)
         : Widget_t{std::move(parameters)}
     {
         this->height_policy.fixed(Hint);
@@ -195,13 +195,12 @@ struct Fixed_height : Widget_t {
 template <int Hint, typename Widget_t>
 struct Fixed_width : Widget_t {
     template <typename... Args>
-    Fixed_width(Args&&... args) : Widget_t{std::forward<Args>(args)...}
+    explicit Fixed_width(Args&&... args) : Widget_t{std::forward<Args>(args)...}
     {
         this->width_policy.fixed(Hint);
     }
 
-    template <typename = typename Widget_t::Parameters>
-    Fixed_width(typename Widget_t::Parameters parameters)
+    explicit Fixed_width(typename Widget_t::Parameters parameters)
         : Widget_t{std::move(parameters)}
     {
         this->width_policy.fixed(Hint);
@@ -212,13 +211,13 @@ struct Fixed_width : Widget_t {
 template <int Hint, typename Widget_t>
 struct Minimum_height : Widget_t {
     template <typename... Args>
-    Minimum_height(Args&&... args) : Widget_t{std::forward<Args>(args)...}
+    explicit Minimum_height(Args&&... args)
+        : Widget_t{std::forward<Args>(args)...}
     {
         this->height_policy.minimum(Hint);
     }
 
-    template <typename = typename Widget_t::Parameters>
-    Minimum_height(typename Widget_t::Parameters parameters)
+    explicit Minimum_height(typename Widget_t::Parameters parameters)
         : Widget_t{std::move(parameters)}
     {
         this->height_policy.minimum(Hint);
@@ -229,13 +228,13 @@ struct Minimum_height : Widget_t {
 template <int Hint, typename Widget_t>
 struct Minimum_width : Widget_t {
     template <typename... Args>
-    Minimum_width(Args&&... args) : Widget_t{std::forward<Args>(args)...}
+    explicit Minimum_width(Args&&... args)
+        : Widget_t{std::forward<Args>(args)...}
     {
         this->width_policy.minimum(Hint);
     }
 
-    template <typename = typename Widget_t::Parameters>
-    Minimum_width(typename Widget_t::Parameters parameters)
+    explicit Minimum_width(typename Widget_t::Parameters parameters)
         : Widget_t{std::move(parameters)}
     {
         this->width_policy.minimum(Hint);
@@ -246,13 +245,13 @@ struct Minimum_width : Widget_t {
 template <int Hint, typename Widget_t>
 struct Maximum_height : Widget_t {
     template <typename... Args>
-    Maximum_height(Args&&... args) : Widget_t{std::forward<Args>(args)...}
+    explicit Maximum_height(Args&&... args)
+        : Widget_t{std::forward<Args>(args)...}
     {
         this->height_policy.maximum(Hint);
     }
 
-    template <typename = typename Widget_t::Parameters>
-    Maximum_height(typename Widget_t::Parameters parameters)
+    explicit Maximum_height(typename Widget_t::Parameters parameters)
         : Widget_t{std::move(parameters)}
     {
         this->height_policy.maximum(Hint);
@@ -263,13 +262,13 @@ struct Maximum_height : Widget_t {
 template <int Hint, typename Widget_t>
 struct Maximum_width : Widget_t {
     template <typename... Args>
-    Maximum_width(Args&&... args) : Widget_t{std::forward<Args>(args)...}
+    explicit Maximum_width(Args&&... args)
+        : Widget_t{std::forward<Args>(args)...}
     {
         this->width_policy.maximum(Hint);
     }
 
-    template <typename = typename Widget_t::Parameters>
-    Maximum_width(typename Widget_t::Parameters parameters)
+    explicit Maximum_width(typename Widget_t::Parameters parameters)
         : Widget_t{std::move(parameters)}
     {
         this->width_policy.maximum(Hint);
@@ -280,13 +279,13 @@ struct Maximum_width : Widget_t {
 template <int Hint, typename Widget_t>
 struct Preferred_height : Widget_t {
     template <typename... Args>
-    Preferred_height(Args&&... args) : Widget_t{std::forward<Args>(args)...}
+    explicit Preferred_height(Args&&... args)
+        : Widget_t{std::forward<Args>(args)...}
     {
         this->height_policy.preferred(Hint);
     }
 
-    template <typename = typename Widget_t::Parameters>
-    Preferred_height(typename Widget_t::Parameters parameters)
+    explicit Preferred_height(typename Widget_t::Parameters parameters)
         : Widget_t{std::move(parameters)}
     {
         this->height_policy.preferred(Hint);
@@ -297,13 +296,13 @@ struct Preferred_height : Widget_t {
 template <int Hint, typename Widget_t>
 struct Preferred_width : Widget_t {
     template <typename... Args>
-    Preferred_width(Args&&... args) : Widget_t{std::forward<Args>(args)...}
+    explicit Preferred_width(Args&&... args)
+        : Widget_t{std::forward<Args>(args)...}
     {
         this->width_policy.preferred(Hint);
     }
 
-    template <typename = typename Widget_t::Parameters>
-    Preferred_width(typename Widget_t::Parameters parameters)
+    explicit Preferred_width(typename Widget_t::Parameters parameters)
         : Widget_t{std::move(parameters)}
     {
         this->width_policy.preferred(Hint);
@@ -314,13 +313,13 @@ struct Preferred_width : Widget_t {
 template <int Hint, typename Widget_t>
 struct Expanding_height : Widget_t {
     template <typename... Args>
-    Expanding_height(Args&&... args) : Widget_t{std::forward<Args>(args)...}
+    explicit Expanding_height(Args&&... args)
+        : Widget_t{std::forward<Args>(args)...}
     {
         this->height_policy.expanding(Hint);
     }
 
-    template <typename = typename Widget_t::Parameters>
-    Expanding_height(typename Widget_t::Parameters parameters)
+    explicit Expanding_height(typename Widget_t::Parameters parameters)
         : Widget_t{std::move(parameters)}
     {
         this->height_policy.expanding(Hint);
@@ -331,13 +330,13 @@ struct Expanding_height : Widget_t {
 template <int Hint, typename Widget_t>
 struct Expanding_width : Widget_t {
     template <typename... Args>
-    Expanding_width(Args&&... args) : Widget_t{std::forward<Args>(args)...}
+    explicit Expanding_width(Args&&... args)
+        : Widget_t{std::forward<Args>(args)...}
     {
         this->width_policy.expanding(Hint);
     }
 
-    template <typename = typename Widget_t::Parameters>
-    Expanding_width(typename Widget_t::Parameters parameters)
+    explicit Expanding_width(typename Widget_t::Parameters parameters)
         : Widget_t{std::move(parameters)}
     {
         this->width_policy.expanding(Hint);
@@ -348,14 +347,13 @@ struct Expanding_width : Widget_t {
 template <int Hint, typename Widget_t>
 struct Minimum_expanding_height : Widget_t {
     template <typename... Args>
-    Minimum_expanding_height(Args&&... args)
+    explicit Minimum_expanding_height(Args&&... args)
         : Widget_t{std::forward<Args>(args)...}
     {
         this->height_policy.minimum_expanding(Hint);
     }
 
-    template <typename = typename Widget_t::Parameters>
-    Minimum_expanding_height(typename Widget_t::Parameters parameters)
+    explicit Minimum_expanding_height(typename Widget_t::Parameters parameters)
         : Widget_t{std::move(parameters)}
     {
         this->height_policy.minimum_expanding(Hint);
@@ -366,14 +364,13 @@ struct Minimum_expanding_height : Widget_t {
 template <int Hint, typename Widget_t>
 struct Minimum_expanding_width : Widget_t {
     template <typename... Args>
-    Minimum_expanding_width(Args&&... args)
+    explicit Minimum_expanding_width(Args&&... args)
         : Widget_t{std::forward<Args>(args)...}
     {
         this->width_policy.minimum_expanding(Hint);
     }
 
-    template <typename = typename Widget_t::Parameters>
-    Minimum_expanding_width(typename Widget_t::Parameters parameters)
+    explicit Minimum_expanding_width(typename Widget_t::Parameters parameters)
         : Widget_t{std::move(parameters)}
     {
         this->width_policy.minimum_expanding(Hint);
@@ -384,13 +381,13 @@ struct Minimum_expanding_width : Widget_t {
 template <typename Widget_t>
 struct Ignored_height : Widget_t {
     template <typename... Args>
-    Ignored_height(Args&&... args) : Widget_t{std::forward<Args>(args)...}
+    explicit Ignored_height(Args&&... args)
+        : Widget_t{std::forward<Args>(args)...}
     {
         this->height_policy.ignored();
     }
 
-    template <typename = typename Widget_t::Parameters>
-    Ignored_height(typename Widget_t::Parameters parameters)
+    explicit Ignored_height(typename Widget_t::Parameters parameters)
         : Widget_t{std::move(parameters)}
     {
         this->height_policy.ignored();
@@ -401,17 +398,18 @@ struct Ignored_height : Widget_t {
 template <typename Widget_t>
 struct Ignored_width : Widget_t {
     template <typename... Args>
-    Ignored_width(Args&&... args) : Widget_t{std::forward<Args>(args)...}
+    explicit Ignored_width(Args&&... args)
+        : Widget_t{std::forward<Args>(args)...}
     {
         this->width_policy.ignored();
     }
 
-    template <typename = typename Widget_t::Parameters>
-    Ignored_width(typename Widget_t::Parameters parameters)
+    explicit Ignored_width(typename Widget_t::Parameters parameters)
         : Widget_t{std::move(parameters)}
     {
         this->width_policy.ignored();
     }
 };
+
 }  // namespace ox
 #endif  // TERMOX_WIDGET_SIZE_POLICY_HPP

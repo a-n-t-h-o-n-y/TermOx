@@ -65,9 +65,9 @@ Glyph_paint::Glyph_paint()
         slot::enable_grid(paint_area));
     side_pane.options_box.options_a.grid_box.checkbox.unchecked.connect(
         slot::disable_grid(paint_area));
-    side_pane.options_box.options_b.save_file.save_requested.connect(
+    side_pane.options_box.options_b.write_file.request.connect(
         slot::write(paint_area));
-    side_pane.options_box.options_b.open_file.open_requested.connect(
+    side_pane.options_box.options_b.read_file.request.connect(
         slot::read(paint_area));
 }
 

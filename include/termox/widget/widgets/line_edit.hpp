@@ -31,18 +31,27 @@ class Line_edit : public Textbox {
    public:
     using Validator_t = std::function<bool(char)>;
 
+    struct Parameters {
+        Glyph_string initial_text = U"";
+    };
+
    public:
     /// Emitted on Enter Key press, sends along the current contents.
     sl::Signal<void(std::string const&)> edit_finished;
 
    public:
     /// Construct a Line_edit object with \p initial_text in ghost color.
-    explicit Line_edit(Glyph_string initial_text = "")
+    explicit Line_edit(Glyph_string initial_text = U"")
         : Textbox{std::move(initial_text)}
     {
         using namespace pipe;
         *this | fixed_height(1) | ghost(Color::Light_gray) | word_wrap(false);
     }
+
+    /// Construct a Line_edit object with \p parameters.
+    explicit Line_edit(Parameters parameters)
+        : Line_edit{std::move(parameters.initial_text)}
+    {}
 
     /// Set the input validator, allowing or disallowing specific char types.
     /** The default validator always returns true, allowing all chars. Invalid

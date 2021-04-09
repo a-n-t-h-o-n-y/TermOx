@@ -186,7 +186,7 @@ class Labeled_cycle_box : public layout::Horizontal<> {
         this->resize_label();
     }
 
-    void set_divider(Glyph divider) { div.set(divider); }
+    void set_divider(Glyph divider) { div.set_tile(divider); }
 
    protected:
     auto focus_in_event() -> bool override
@@ -197,10 +197,7 @@ class Labeled_cycle_box : public layout::Horizontal<> {
 
    private:
     // TODO remove and set label as dynamic
-    void resize_label()
-    {
-        label | pipe::fixed_width(label.get_text().size() + 1);
-    }
+    void resize_label() { label | pipe::fixed_width(label.text().size() + 1); }
 };
 
 /// Helper function to create an instance.

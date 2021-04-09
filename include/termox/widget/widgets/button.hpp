@@ -18,7 +18,9 @@ namespace ox {
 /// Button widget that emits Signal on a left mouse button press.
 class Button : public Widget {
    public:
-    using Parameters = Glyph_string;
+    struct Parameters {
+        Glyph_string text;
+    };
 
    public:
     // Emitted when this Widget receives a left mouse button press event.
@@ -26,22 +28,22 @@ class Button : public Widget {
     sl::Signal<void()> released;
 
    public:
-    /// Construct a Button with centered \p label.
-    explicit Button(Glyph_string label = U"") : label_{std::move(label)} {}
+    /// Construct a Button with centered \p text.
+    explicit Button(Glyph_string text = U"") : text_{std::move(text)} {}
+
+    explicit Button(Parameters parameters) : text_{std::move(parameters.text)}
+    {}
 
    public:
-    /// Set the label and repaint.
-    void set_label(Glyph_string label)
+    /// Set the text and repaint.
+    void set_text(Glyph_string text)
     {
-        label_ = std::move(label);
+        text_ = std::move(text);
         this->update();
     }
 
-    /// Return the current label.
-    [[nodiscard]] auto get_label() const -> Glyph_string const&
-    {
-        return label_;
-    }
+    /// Return the current text.
+    [[nodiscard]] auto text() const -> Glyph_string const& { return text_; }
 
    protected:
     auto mouse_press_event(Mouse const& m) -> bool override
@@ -61,38 +63,45 @@ class Button : public Widget {
     auto paint_event(Painter& p) -> bool override
     {
         auto const width = this->width();
-        auto const x = label_.size() > width ? 0 : (width - label_.size()) / 2;
+        auto const x = text_.size() > width ? 0 : (width - text_.size()) / 2;
         auto const y = this->height() / 2;
-        p.put(label_, {x, y});
+        p.put(text_, {x, y});
         return Widget::paint_event(p);
     }
 
    private:
-    Glyph_string label_;
+    Glyph_string text_;
 };
 
 /// Helper function to create a Button instance.
-template <typename... Args>
-[[nodiscard]] auto button(Args&&... args) -> std::unique_ptr<Button>
+[[nodiscard]] inline auto button(Glyph_string text = U"")
+    -> std::unique_ptr<Button>
 {
-    return std::make_unique<Button>(std::forward<Args>(args)...);
+    return std::make_unique<Button>(std::move(text));
+}
+
+/// Helper function to create a Button instance.
+[[nodiscard]] inline auto button(Button::Parameters p = {})
+    -> std::unique_ptr<Button>
+{
+    return std::make_unique<Button>(std::move(p));
 }
 
 /// Button that changes its background Color on press and release events.
 class Push_button : public Button {
    public:
     struct Parameters {
-        Glyph_string label;
+        Glyph_string text;
         Color pressed  = Color::Foreground;
         Color released = Color::Background;
     };
 
    public:
     /// Construct a new Push_button
-    explicit Push_button(Glyph_string label = U"",
-                         Color pressed      = Color::Foreground,
-                         Color released     = Color::Background)
-        : Button{std::move(label)},
+    explicit Push_button(Glyph_string text = U"",
+                         Color pressed     = Color::Foreground,
+                         Color released    = Color::Background)
+        : Button{std::move(text)},
           pressed_color_{pressed},
           released_color_{released}
     {
@@ -103,7 +112,7 @@ class Push_button : public Button {
 
     /// Construct a new Push_button
     explicit Push_button(Parameters p)
-        : Push_button{std::move(p.label), p.pressed, p.released}
+        : Push_button{std::move(p.text), p.pressed, p.released}
     {}
 
    public:
@@ -135,27 +144,89 @@ class Push_button : public Button {
 };
 
 /// Helper function to create a Push_button instance.
-template <typename... Args>
-[[nodiscard]] auto push_button(Args&&... args) -> std::unique_ptr<Push_button>
+[[nodiscard]] inline auto push_button(Glyph_string text = U"",
+                                      Color pressed     = Color::Foreground,
+                                      Color released    = Color::Background)
+    -> std::unique_ptr<Push_button>
 {
-    return std::make_unique<Push_button>(std::forward<Args>(args)...);
+    return std::make_unique<Push_button>(std::move(text), pressed, released);
+}
+
+/// Helper function to create a Push_button instance.
+[[nodiscard]] inline auto push_button(Push_button::Parameters p = {})
+    -> std::unique_ptr<Push_button>
+{
+    return std::make_unique<Push_button>(std::move(p));
 }
 
 /// Width or Height 1 Button
 template <template <typename> typename Layout_t>
 class Thin_button : public Button {
    public:
-    explicit Thin_button(Glyph_string label = U"") : Button{std::move(label)}
+    using Button::Parameters;
+
+   public:
+    explicit Thin_button(Glyph_string text = U"") : Button{std::move(text)}
     {
         if constexpr (layout::is_vertical_v<Layout_t<Widget>>)
             *this | pipe::fixed_width(1);
         else
             *this | pipe::fixed_height(1);
     }
+
+    explicit Thin_button(Parameters parameters)
+        : Thin_button{std::move(parameters.text)}
+    {}
 };
 
+/// Helper function to create a Thin_button instance.
+template <template <typename> typename Layout_t>
+[[nodiscard]] auto thin_button(Glyph_string text = U"")
+    -> std::unique_ptr<Thin_button<Layout_t>>
+{
+    return std::make_unique<Thin_button<Layout_t>>(std::move(text));
+}
+
+/// Helper function to create a Thin_button instance.
+template <template <typename> typename Layout_t>
+[[nodiscard]] auto thin_button(
+    typename Thin_button<Layout_t>::Parameters p = {})
+    -> std::unique_ptr<Thin_button<Layout_t>>
+{
+    return std::make_unique<Thin_button<Layout_t>>(std::move(p));
+}
+
 using HThin_button = Thin_button<layout::Horizontal>;
+
+/// Helper function to create an HThin_button instance.
+[[nodiscard]] inline auto hthin_button(Glyph_string text = U"")
+    -> std::unique_ptr<HThin_button>
+{
+    return std::make_unique<HThin_button>(std::move(text));
+}
+
+/// Helper function to create an HThin_button instance.
+[[nodiscard]] inline auto hthin_button(typename HThin_button::Parameters p = {})
+    -> std::unique_ptr<HThin_button>
+{
+    return std::make_unique<HThin_button>(std::move(p));
+}
+
 using VThin_button = Thin_button<layout::Vertical>;
+
+/// Helper function to create a VThin_button instance.
+[[nodiscard]] inline auto vthin_button(Glyph_string text = U"")
+    -> std::unique_ptr<VThin_button>
+{
+    return std::make_unique<VThin_button>(std::move(text));
+}
+
+/// Helper function to create a VThin_button instance.
+[[nodiscard]] inline auto vthin_button(typename VThin_button::Parameters p = {})
+    -> std::unique_ptr<VThin_button>
+{
+    return std::make_unique<VThin_button>(std::move(p));
+}
 
 }  // namespace ox
 #endif  // TERMOX_WIDGET_WIDGETS_BUTTON_HPP

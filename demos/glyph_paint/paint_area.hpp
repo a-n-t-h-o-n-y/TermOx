@@ -2,7 +2,7 @@
 #define DEMOS_GLYPH_PAINT_PAINT_AREA_HPP
 #include <cstddef>
 #include <iostream>
-#include <unordered_map>
+#include <map>
 
 #include <signals_light/signal.hpp>
 
@@ -166,7 +166,7 @@ class Paint_area : public ox::Widget {
     auto key_press_event(ox::Key k) -> bool override;
 
    private:
-    std::unordered_map<ox::Point, ox::Glyph> glyphs_painted_;
+    std::map<ox::Point, ox::Glyph> glyphs_painted_;
     ox::Glyph current_glyph_ = U'x';
     ox::Glyph before_erase_  = U'x';
     bool clone_enabled_      = false;

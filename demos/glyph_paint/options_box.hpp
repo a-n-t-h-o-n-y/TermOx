@@ -9,8 +9,8 @@
 #include <termox/widget/widgets/confirm_button.hpp>
 #include <termox/widget/widgets/cycle_box.hpp>
 #include <termox/widget/widgets/label.hpp>
-#include <termox/widget/widgets/open_file.hpp>
-#include <termox/widget/widgets/save_file.hpp>
+#include <termox/widget/widgets/read_file.hpp>
+#include <termox/widget/widgets/write_file.hpp>
 
 namespace paint {
 
@@ -40,12 +40,12 @@ class Options_A : public ox::layout::Vertical<> {
 
 class Options_B : public ox::layout::Vertical<> {
    public:
-    ox::HLabel& palette_label  = make_child<ox::HLabel>({U"Color  Palette"});
-    ox::Cycle_box& palette_box = make_child<ox::Cycle_box>();
-    Widget& space1             = make_child() | ox::pipe::fixed_height(1);
-    ox::Save_file<>& save_file = make_child<ox::Save_file<>>();
-    ox::Open_file<>& open_file = make_child<ox::Open_file<>>();
-    ox::Button& back_btn       = make_child<ox::Button>("Back");
+    ox::HLabel& palette_label    = make_child<ox::HLabel>({U"Color  Palette"});
+    ox::Cycle_box& palette_box   = make_child<ox::Cycle_box>();
+    Widget& space1               = make_child() | ox::pipe::fixed_height(1);
+    ox::Write_file<>& write_file = make_child<ox::Write_file<>>();
+    ox::Read_file<>& read_file   = make_child<ox::Read_file<>>();
+    ox::Button& back_btn         = make_child<ox::Button>("Back");
 
    public:
     Options_B();

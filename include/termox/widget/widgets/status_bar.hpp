@@ -24,7 +24,7 @@ class Status_bar : public HLabel {
     void update_status(Glyph_string message)
     {
         this->set_text(std::move(message));
-        status_updated(this->get_text());
+        status_updated(this->text());
     }
 };
 

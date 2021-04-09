@@ -179,10 +179,10 @@ class Idea : public Settings_box {
         using namespace ox;
         using namespace ox::pipe;
 
-        this->get<0>().set_label(U"I'm a BUTTON");
+        this->get<0>().set_text(U"I'm a BUTTON");
         this->get<0>() | on_press([this] { this->get<2>().toggle(); });
 
-        this->get<1>().set_text(U"I'm a LABEU");
+        this->get<1>().set_text(U"I'm a LABEL");
         this->get<2>().check();
 
         this->get<3>() | bg(Color::Dark_gray);
@@ -202,7 +202,7 @@ class Idea : public Settings_box {
         });
 
         auto const s = std::to_string(sizeof(Glyph));
-        this->get<4>().set_label(s);
+        this->get<4>().set_text(s);
         this->get<4>().set_pressed_color(Color::Violet);
         this->get<4>().set_released_color(Color::Blue);
     }

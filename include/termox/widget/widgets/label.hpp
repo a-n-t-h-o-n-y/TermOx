@@ -23,7 +23,7 @@ class Label : public Widget {
 
    public:
     struct Parameters {
-        Glyph_string text;
+        Glyph_string text      = Glyph_string{U""};
         Align alignment        = Align::Left;
         int extra_left         = 0;
         int extra_right        = 0;
@@ -90,7 +90,7 @@ class Label : public Widget {
     }
 
     /// Return the text given to set_text().
-    [[nodiscard]] auto get_text() const -> Glyph_string const& { return text_; }
+    [[nodiscard]] auto text() const -> Glyph_string const& { return text_; }
 
     /// Set text alignment of Label and update display.
     void set_alignment(Align x)
@@ -100,7 +100,7 @@ class Label : public Widget {
     }
 
     /// Return the Align given to set_alignment().
-    [[nodiscard]] auto get_alignment() const -> Align { return alignment_; }
+    [[nodiscard]] auto alignment() const -> Align { return alignment_; }
 
     /// Inform Label about space to left of Label for centered text offset.
     void set_extra_left(int x)
@@ -110,7 +110,7 @@ class Label : public Widget {
     }
 
     /// Return the amount given to set_extra_left().
-    [[nodiscard]] auto get_extra_left() const -> int { return extra_left_; }
+    [[nodiscard]] auto extra_left() const -> int { return extra_left_; }
 
     /// Inform Label about space to right of Label for centered text offset.
     void set_extra_right(int x)
@@ -120,7 +120,7 @@ class Label : public Widget {
     }
 
     /// Return the amount given to set_extra_right().
-    [[nodiscard]] auto get_extra_right() const -> int { return extra_right_; }
+    [[nodiscard]] auto extra_right() const -> int { return extra_right_; }
 
     /// Enable/Disable Dynamic size, where the Label's size is the text length.
     void set_growth_strategy(Growth type)
@@ -135,7 +135,7 @@ class Label : public Widget {
     }
 
     /// Return the value given to set_growth_strategy().
-    [[nodiscard]] auto get_growth_strategy() const -> Growth
+    [[nodiscard]] auto growth_strategy() const -> Growth
     {
         return growth_strategy_;
     }
@@ -237,38 +237,76 @@ class Label : public Widget {
     }
 };
 
-// -----------------------------------------------------------------------------
+/// Helper function to create a Label instance.
+template <template <typename> typename Layout_t>
+[[nodiscard]] auto label(Glyph_string text      = U"",
+                         Align alignment        = Align::Left,
+                         int extra_left         = 0,
+                         int extra_right        = 0,
+                         Growth growth_strategy = Growth::Static)
+    -> std::unique_ptr<Label<Layout_t>>
+{
+    return std::make_unique<Label<Layout_t>>(
+        std::move(text), alignment, extra_left, extra_right, growth_strategy);
+}
+
+/// Helper function to create a Label instance.
+template <template <typename> typename Layout_t>
+[[nodiscard]] auto label(typename Label<Layout_t>::Parameters parameters)
+    -> std::unique_ptr<Label<Layout_t>>
+{
+    return std::make_unique<Label<Layout_t>>(std::move(parameters));
+}
 
 /// Horizontal Label Widget
 using HLabel = Label<layout::Horizontal>;
 
-/// Vertical Label Widget
-using VLabel = Label<layout::Vertical>;
-
-/// Helper function to create a Label instance.
-template <template <typename> typename Layout_t, typename... Args>
-[[nodiscard]] auto label(Args&&... args) -> std::unique_ptr<Label<Layout_t>>
+/// Helper function to create an HLabel instance.
+[[nodiscard]] inline auto hlabel(Glyph_string text      = U"",
+                                 Align alignment        = Align::Left,
+                                 int extra_left         = 0,
+                                 int extra_right        = 0,
+                                 Growth growth_strategy = Growth::Static)
+    -> std::unique_ptr<HLabel>
 {
-    return std::make_unique<Label<Layout_t>>(std::forward(args)...);
+    return std::make_unique<HLabel>(std::move(text), alignment, extra_left,
+                                    extra_right, growth_strategy);
 }
 
 /// Helper function to create an HLabel instance.
-template <typename... Args>
-[[nodiscard]] auto hlabel(Args&&... args) -> std::unique_ptr<HLabel>
+[[nodiscard]] inline auto hlabel(HLabel::Parameters parameters)
+    -> std::unique_ptr<HLabel>
 {
-    return std::make_unique<HLabel>(std::forward<Args>(args)...);
+    return std::make_unique<HLabel>(std::move(parameters));
+}
+
+/// Vertical Label Widget
+using VLabel = Label<layout::Vertical>;
+
+/// Helper function to create a VLabel instance.
+[[nodiscard]] inline auto vlabel(Glyph_string text      = U"",
+                                 Align alignment        = Align::Left,
+                                 int extra_left         = 0,
+                                 int extra_right        = 0,
+                                 Growth growth_strategy = Growth::Static)
+    -> std::unique_ptr<VLabel>
+{
+    return std::make_unique<VLabel>(std::move(text), alignment, extra_left,
+                                    extra_right, growth_strategy);
 }
 
 /// Helper function to create a VLabel instance.
-template <typename... Args>
-[[nodiscard]] auto vlabel(Args&&... args) -> std::unique_ptr<VLabel>
+[[nodiscard]] inline auto vlabel(VLabel::Parameters parameters)
+    -> std::unique_ptr<VLabel>
 {
-    return std::make_unique<VLabel>(std::forward<Args>(args)...);
+    return std::make_unique<VLabel>(std::move(parameters));
 }
+
+}  // namespace ox
 
 // -----------------------------------------------------------------------------
 
-namespace detail {
+namespace ox::detail {
 
 /// Wraps a Widget_t object with a label.
 /** Wrapper_layout is the layout of *this, if label_last is true, the Label is
@@ -289,7 +327,7 @@ class Label_wrapper : public Wrapper_layout<Widget> {
    public:
     // Instead of inheriting Label_t::Parmeters, because default alignment.
     struct Parameters {
-        Glyph_string text;
+        Glyph_string text      = Glyph_string{U""};
         Align alignment        = label_last ? Align::Left : Align::Right;
         int extra_left         = 0;
         int extra_right        = 0;
@@ -310,8 +348,8 @@ class Label_wrapper : public Wrapper_layout<Widget> {
                            int extra_left         = 0,
                            int extra_right        = 0,
                            Growth growth_strategy = Growth::Static)
-        : Label_wrapper{Parameters{std::move(text), alignment, extra_left,
-                                   extra_right, growth_strategy}}
+        : Label_wrapper{{std::move(text), alignment, extra_left, extra_right,
+                         growth_strategy}}
     {}
 
     /// Constructs Label with given parameters, and Widget_t with args...
@@ -347,7 +385,9 @@ class Label_wrapper : public Wrapper_layout<Widget> {
     }
 };
 
-}  // namespace detail
+}  // namespace ox::detail
+
+namespace ox {
 
 // -----------------------------------------------------------------------------
 
@@ -355,55 +395,6 @@ class Label_wrapper : public Wrapper_layout<Widget> {
 template <template <typename> typename Label_layout_t, typename Widget_t>
 using Label_left =
     detail::Label_wrapper<Label_layout_t, Widget_t, layout::Horizontal, false>;
-
-/// Wraps a Widget_t object with an HLabel on the left.
-template <typename Widget_t>
-using HLabel_left = Label_left<layout::Horizontal, Widget_t>;
-
-/// Wraps a Widget_t object with a VLabel on the left.
-template <typename Widget_t>
-using VLabel_left = Label_left<layout::Vertical, Widget_t>;
-
-/// Wraps a Widget_t object with a Label on the right.
-template <template <typename> typename Label_layout_t, typename Widget_t>
-using Label_right =
-    detail::Label_wrapper<Label_layout_t, Widget_t, layout::Horizontal, true>;
-
-/// Wraps a Widget_t object with an HLabel on the right.
-template <typename Widget_t>
-using HLabel_right = Label_right<layout::Horizontal, Widget_t>;
-
-/// Wraps a Widget_t object with a VLabel on the right.
-template <typename Widget_t>
-using VLabel_right = Label_right<layout::Vertical, Widget_t>;
-
-/// Wraps a Widget_t object with a Label on the top.
-template <template <typename> typename Label_layout_t, typename Widget_t>
-using Label_top =
-    detail::Label_wrapper<Label_layout_t, Widget_t, layout::Vertical, false>;
-
-/// Wraps a Widget_t object with a VLabel on the top.
-template <typename Widget_t>
-using VLabel_top = Label_top<layout::Vertical, Widget_t>;
-
-/// Wraps a Widget_t object with an HLabel on the top.
-template <typename Widget_t>
-using HLabel_top = Label_top<layout::Horizontal, Widget_t>;
-
-/// Wraps a Widget_t object with a Label on the bottom.
-template <template <typename> typename Label_layout_t, typename Widget_t>
-using Label_bottom =
-    detail::Label_wrapper<Label_layout_t, Widget_t, layout::Vertical, true>;
-
-/// Wraps a Widget_t object with a VLabel on the bottom.
-template <typename Widget_t>
-using VLabel_bottom = Label_bottom<layout::Vertical, Widget_t>;
-
-/// Wraps a Widget_t object with an HLabel on the bottom.
-template <typename Widget_t>
-using HLabel_bottom = Label_bottom<layout::Horizontal, Widget_t>;
-
-// -----------------------------------------------------------------------------
 
 // Helper function to create a Label_left instance.
 template <template <typename> typename Layout_t,
@@ -428,9 +419,70 @@ template <template <typename> typename Layout_t, typename Widget_t>
                               Growth growth_strategy = Growth::Static)
     -> std::unique_ptr<Label_left<Layout_t, Widget_t>>
 {
-    return label_left(typename Label<Layout_t>::Parameters{
+    return label_left<Layout_t, Widget_t>(typename Label<Layout_t>::Parameters{
         std::move(text), alignment, extra_left, extra_right, growth_strategy});
 }
+
+/// Wraps a Widget_t object with an HLabel on the left.
+template <typename Widget_t>
+using HLabel_left = Label_left<layout::Horizontal, Widget_t>;
+
+// Helper function to create an HLabel_left instance.
+template <typename Widget_t, typename... Args>
+[[nodiscard]] auto hlabel_left(HLabel::Parameters p, Args&&... args)
+    -> std::unique_ptr<HLabel_left<Widget_t>>
+{
+    return std::make_unique<HLabel_left<Widget_t>>(std::move(p),
+                                                   std::forward<Args>(args)...);
+}
+
+/// Helper function to create an HLabel_left instance.
+/** Only takes Label constructor args, if you need to pass in args to the
+ *  wrapped Widget_t, then use the Label::Parameters overload. */
+template <typename Widget_t>
+[[nodiscard]] auto hlabel_left(Glyph_string text      = U"",
+                               Align alignment        = Align::Left,
+                               int extra_left         = 0,
+                               int extra_right        = 0,
+                               Growth growth_strategy = Growth::Static)
+    -> std::unique_ptr<HLabel_left<Widget_t>>
+{
+    return hlabel_left<Widget_t>(HLabel::Parameters{
+        std::move(text), alignment, extra_left, extra_right, growth_strategy});
+}
+
+/// Wraps a Widget_t object with a VLabel on the left.
+template <typename Widget_t>
+using VLabel_left = Label_left<layout::Vertical, Widget_t>;
+
+// Helper function to create a VLabel_left instance.
+template <typename Widget_t, typename... Args>
+[[nodiscard]] auto vlabel_left(VLabel::Parameters p, Args&&... args)
+    -> std::unique_ptr<VLabel_left<Widget_t>>
+{
+    return std::make_unique<VLabel_left<Widget_t>>(std::move(p),
+                                                   std::forward<Args>(args)...);
+}
+
+/// Helper function to create a VLabel_left instance.
+/** Only takes Label constructor args, if you need to pass in args to the
+ *  wrapped Widget_t, then use the Label::Parameters overload. */
+template <typename Widget_t>
+[[nodiscard]] auto vlabel_left(Glyph_string text      = U"",
+                               Align alignment        = Align::Left,
+                               int extra_left         = 0,
+                               int extra_right        = 0,
+                               Growth growth_strategy = Growth::Static)
+    -> std::unique_ptr<VLabel_left<Widget_t>>
+{
+    return vlabel_left<Widget_t>(VLabel::Parameters{
+        std::move(text), alignment, extra_left, extra_right, growth_strategy});
+}
+
+/// Wraps a Widget_t object with a Label on the right.
+template <template <typename> typename Label_layout_t, typename Widget_t>
+using Label_right =
+    detail::Label_wrapper<Label_layout_t, Widget_t, layout::Horizontal, true>;
 
 /// Helper function to create a Label_right instance.
 template <template <typename> typename Layout_t,
@@ -459,6 +511,67 @@ template <template <typename> typename Layout_t, typename Widget_t>
         std::move(text), alignment, extra_left, extra_right, growth_strategy});
 }
 
+/// Wraps a Widget_t object with an HLabel on the right.
+template <typename Widget_t>
+using HLabel_right = Label_right<layout::Horizontal, Widget_t>;
+
+// Helper function to create a HLabel_right instance.
+template <typename Widget_t, typename... Args>
+[[nodiscard]] auto hlabel_right(HLabel::Parameters p, Args&&... args)
+    -> std::unique_ptr<HLabel_right<Widget_t>>
+{
+    return std::make_unique<HLabel_right<Widget_t>>(
+        std::move(p), std::forward<Args>(args)...);
+}
+
+/// Helper function to create a HLabel_right instance.
+/** Only takes Label constructor args, if you need to pass in args to the
+ *  wrapped Widget_t, then use the Label::Parameters overload. */
+template <typename Widget_t>
+[[nodiscard]] auto hlabel_right(Glyph_string text      = U"",
+                                Align alignment        = Align::Left,
+                                int extra_left         = 0,
+                                int extra_right        = 0,
+                                Growth growth_strategy = Growth::Static)
+    -> std::unique_ptr<HLabel_right<Widget_t>>
+{
+    return hlabel_right<Widget_t>(HLabel::Parameters{
+        std::move(text), alignment, extra_left, extra_right, growth_strategy});
+}
+
+/// Wraps a Widget_t object with a VLabel on the right.
+template <typename Widget_t>
+using VLabel_right = Label_right<layout::Vertical, Widget_t>;
+
+// Helper function to create a VLabel_right instance.
+template <typename Widget_t, typename... Args>
+[[nodiscard]] auto vlabel_right(VLabel::Parameters p, Args&&... args)
+    -> std::unique_ptr<VLabel_right<Widget_t>>
+{
+    return std::make_unique<VLabel_right<Widget_t>>(
+        std::move(p), std::forward<Args>(args)...);
+}
+
+/// Helper function to create a VLabel_right instance.
+/** Only takes Label constructor args, if you need to pass in args to the
+ *  wrapped Widget_t, then use the Label::Parameters overload. */
+template <typename Widget_t>
+[[nodiscard]] auto vlabel_right(Glyph_string text      = U"",
+                                Align alignment        = Align::Left,
+                                int extra_left         = 0,
+                                int extra_right        = 0,
+                                Growth growth_strategy = Growth::Static)
+    -> std::unique_ptr<VLabel_right<Widget_t>>
+{
+    return vlabel_right<Widget_t>(VLabel::Parameters{
+        std::move(text), alignment, extra_left, extra_right, growth_strategy});
+}
+
+/// Wraps a Widget_t object with a Label on the top.
+template <template <typename> typename Label_layout_t, typename Widget_t>
+using Label_top =
+    detail::Label_wrapper<Label_layout_t, Widget_t, layout::Vertical, false>;
+
 /// Helper function to create a Label_top instance.
 template <template <typename> typename Layout_t,
           typename Widget_t,
@@ -486,6 +599,67 @@ template <template <typename> typename Layout_t, typename Widget_t>
         std::move(text), alignment, extra_top, extra_bottom, growth_strategy});
 }
 
+/// Wraps a Widget_t object with a VLabel on the top.
+template <typename Widget_t>
+using VLabel_top = Label_top<layout::Vertical, Widget_t>;
+
+// Helper function to create a VLabel_top instance.
+template <typename Widget_t, typename... Args>
+[[nodiscard]] auto vlabel_top(VLabel::Parameters p, Args&&... args)
+    -> std::unique_ptr<VLabel_top<Widget_t>>
+{
+    return std::make_unique<VLabel_top<Widget_t>>(std::move(p),
+                                                  std::forward<Args>(args)...);
+}
+
+/// Helper function to create a VLabel_top instance.
+/** Only takes Label constructor args, if you need to pass in args to the
+ *  wrapped Widget_t, then use the Label::Parameters overload. */
+template <typename Widget_t>
+[[nodiscard]] auto vlabel_top(Glyph_string text      = U"",
+                              Align alignment        = Align::Left,
+                              int extra_left         = 0,
+                              int extra_right        = 0,
+                              Growth growth_strategy = Growth::Static)
+    -> std::unique_ptr<VLabel_top<Widget_t>>
+{
+    return vlabel_top<Widget_t>(VLabel::Parameters{
+        std::move(text), alignment, extra_left, extra_right, growth_strategy});
+}
+
+/// Wraps a Widget_t object with an HLabel on the top.
+template <typename Widget_t>
+using HLabel_top = Label_top<layout::Horizontal, Widget_t>;
+
+// Helper function to create an HLabel_top instance.
+template <typename Widget_t, typename... Args>
+[[nodiscard]] auto hlabel_top(HLabel::Parameters p, Args&&... args)
+    -> std::unique_ptr<HLabel_top<Widget_t>>
+{
+    return std::make_unique<HLabel_top<Widget_t>>(std::move(p),
+                                                  std::forward<Args>(args)...);
+}
+
+/// Helper function to create an HLabel_top instance.
+/** Only takes Label constructor args, if you need to pass in args to the
+ *  wrapped Widget_t, then use the Label::Parameters overload. */
+template <typename Widget_t>
+[[nodiscard]] auto hlabel_top(Glyph_string text      = U"",
+                              Align alignment        = Align::Left,
+                              int extra_left         = 0,
+                              int extra_right        = 0,
+                              Growth growth_strategy = Growth::Static)
+    -> std::unique_ptr<HLabel_top<Widget_t>>
+{
+    return hlabel_top<Widget_t>(HLabel::Parameters{
+        std::move(text), alignment, extra_left, extra_right, growth_strategy});
+}
+
+/// Wraps a Widget_t object with a Label on the bottom.
+template <template <typename> typename Label_layout_t, typename Widget_t>
+using Label_bottom =
+    detail::Label_wrapper<Label_layout_t, Widget_t, layout::Vertical, true>;
+
 /// Helper function to create a Label_bottom instance.
 template <template <typename> typename Layout_t,
           typename Widget_t,
@@ -511,6 +685,62 @@ template <template <typename> typename Layout_t, typename Widget_t>
 {
     return label_bottom(typename Label<Layout_t>::Parameters{
         std::move(text), alignment, extra_top, extra_bottom, growth_strategy});
+}
+
+/// Wraps a Widget_t object with a VLabel on the bottom.
+template <typename Widget_t>
+using VLabel_bottom = Label_bottom<layout::Vertical, Widget_t>;
+
+// Helper function to create a VLabel_bottom instance.
+template <typename Widget_t, typename... Args>
+[[nodiscard]] auto vlabel_bottom(VLabel::Parameters p, Args&&... args)
+    -> std::unique_ptr<VLabel_bottom<Widget_t>>
+{
+    return std::make_unique<VLabel_bottom<Widget_t>>(
+        std::move(p), std::forward<Args>(args)...);
+}
+
+/// Helper function to create a VLabel_bottom instance.
+/** Only takes Label constructor args, if you need to pass in args to the
+ *  wrapped Widget_t, then use the Label::Parameters overload. */
+template <typename Widget_t>
+[[nodiscard]] auto vlabel_bottom(Glyph_string text      = U"",
+                                 Align alignment        = Align::Left,
+                                 int extra_left         = 0,
+                                 int extra_right        = 0,
+                                 Growth growth_strategy = Growth::Static)
+    -> std::unique_ptr<VLabel_bottom<Widget_t>>
+{
+    return vlabel_bottom<Widget_t>(VLabel::Parameters{
+        std::move(text), alignment, extra_left, extra_right, growth_strategy});
+}
+
+/// Wraps a Widget_t object with an HLabel on the bottom.
+template <typename Widget_t>
+using HLabel_bottom = Label_bottom<layout::Horizontal, Widget_t>;
+
+// Helper function to create an HLabel_bottom instance.
+template <typename Widget_t, typename... Args>
+[[nodiscard]] auto hlabel_bottom(HLabel::Parameters p, Args&&... args)
+    -> std::unique_ptr<HLabel_bottom<Widget_t>>
+{
+    return std::make_unique<HLabel_bottom<Widget_t>>(
+        std::move(p), std::forward<Args>(args)...);
+}
+
+/// Helper function to create an HLabel_bottom instance.
+/** Only takes Label constructor args, if you need to pass in args to the
+ *  wrapped Widget_t, then use the Label::Parameters overload. */
+template <typename Widget_t>
+[[nodiscard]] auto hlabel_bottom(Glyph_string text      = U"",
+                                 Align alignment        = Align::Left,
+                                 int extra_left         = 0,
+                                 int extra_right        = 0,
+                                 Growth growth_strategy = Growth::Static)
+    -> std::unique_ptr<HLabel_bottom<Widget_t>>
+{
+    return hlabel_bottom<Widget_t>(HLabel::Parameters{
+        std::move(text), alignment, extra_left, extra_right, growth_strategy});
 }
 
 }  // namespace ox

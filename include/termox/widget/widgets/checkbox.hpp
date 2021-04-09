@@ -192,6 +192,7 @@ template <typename... Args>
 }
 
 }  // namespace ox
+
 namespace ox::detail {
 
 /// Label, buffer and Checkbox tuple implementation.
@@ -234,7 +235,7 @@ namespace ox {
 /// Template function to build a specified Labeled_checkbox type.
 /** T is some sort of Labeled_checkbox type. */
 template <typename T>
-inline auto constexpr labeled_checkbox =
+inline auto constexpr make_labeled_cb_fn =
     [](typename T::Label_wrapper_t::Parameters label_parameters = {},
        typename T::Checkbox_t::Parameters checkbox_parameters   = {})
     -> std::unique_ptr<T> {
@@ -245,7 +246,7 @@ inline auto constexpr labeled_checkbox =
 /// Template function to build a specified Labeled_checkbox type.
 /** T is some sort of Labeled_checkbox type. */
 template <typename Checkbox_t>
-inline auto constexpr make_checkbox = Overload{
+inline auto constexpr make_checkbox_fn = Overload{
     [](typename Checkbox_t::Parameters parameters = {})
         -> std::unique_ptr<Checkbox_t> {
         return std::make_unique<Checkbox_t>(std::move(parameters));
@@ -272,7 +273,7 @@ class Checkbox1 : public HCheckbox {
     Checkbox1(Parameters p) : Checkbox1{p.initial_state, p.locked} {}
 };
 
-inline auto constexpr checkbox1 = make_checkbox<Checkbox1>;
+inline auto constexpr checkbox1 = make_checkbox_fn<Checkbox1>;
 
 using HCheckbox1_label =
     detail::Label_checkbox_impl<layout::Horizontal, Checkbox1, true>;
@@ -290,13 +291,13 @@ using VLabel_checkbox1 =
     detail::Label_checkbox_impl<layout::Vertical, Checkbox1, false>;
 using VLabel_checkbox = VLabel_checkbox1;
 
-inline auto constexpr hcheckbox1_label = labeled_checkbox<HCheckbox_label>;
+inline auto constexpr hcheckbox1_label = make_labeled_cb_fn<HCheckbox_label>;
 inline auto constexpr hcheckbox_label  = hcheckbox1_label;
-inline auto constexpr hlabel_checkbox1 = labeled_checkbox<HLabel_checkbox>;
+inline auto constexpr hlabel_checkbox1 = make_labeled_cb_fn<HLabel_checkbox>;
 inline auto constexpr hlabel_checkbox  = hlabel_checkbox1;
-inline auto constexpr vcheckbox1_label = labeled_checkbox<VCheckbox_label>;
+inline auto constexpr vcheckbox1_label = make_labeled_cb_fn<VCheckbox_label>;
 inline auto constexpr vcheckbox_label  = vcheckbox1_label;
-inline auto constexpr vlabel_checkbox1 = labeled_checkbox<VLabel_checkbox>;
+inline auto constexpr vlabel_checkbox1 = make_labeled_cb_fn<VLabel_checkbox>;
 inline auto constexpr vlabel_checkbox  = vlabel_checkbox1;
 
 // [x]
@@ -315,7 +316,7 @@ class Checkbox2 : public HCheckbox {
     Checkbox2(Parameters p) : Checkbox2{p.initial_state, p.locked} {}
 };
 
-inline auto constexpr checkbox2 = make_checkbox<Checkbox2>;
+inline auto constexpr checkbox2 = make_checkbox_fn<Checkbox2>;
 
 using HCheckbox2_label =
     detail::Label_checkbox_impl<layout::Horizontal, Checkbox2, true>;
@@ -326,10 +327,10 @@ using VCheckbox2_label =
 using VLabel_checkbox2 =
     detail::Label_checkbox_impl<layout::Vertical, Checkbox2, false>;
 
-inline auto constexpr hcheckbox2_label = labeled_checkbox<HCheckbox2_label>;
-inline auto constexpr hlabel_checkbox2 = labeled_checkbox<HLabel_checkbox2>;
-inline auto constexpr vcheckbox2_label = labeled_checkbox<VCheckbox2_label>;
-inline auto constexpr vlabel_checkbox2 = labeled_checkbox<VLabel_checkbox2>;
+inline auto constexpr hcheckbox2_label = make_labeled_cb_fn<HCheckbox2_label>;
+inline auto constexpr hlabel_checkbox2 = make_labeled_cb_fn<HLabel_checkbox2>;
+inline auto constexpr vcheckbox2_label = make_labeled_cb_fn<VCheckbox2_label>;
+inline auto constexpr vlabel_checkbox2 = make_labeled_cb_fn<VLabel_checkbox2>;
 
 // ┌
 // x
@@ -349,12 +350,12 @@ class Checkbox3 : public VCheckbox {
     Checkbox3(Parameters p) : Checkbox3{p.initial_state, p.locked} {}
 };
 
-inline auto constexpr checkbox3 = make_checkbox<Checkbox3>;
+inline auto constexpr checkbox3 = make_checkbox_fn<Checkbox3>;
 
 using HCheckbox3_label =
     detail::Label_checkbox_impl<layout::Horizontal, Checkbox3, true>;
 
-inline auto constexpr hcheckbox3_label = labeled_checkbox<HCheckbox3_label>;
+inline auto constexpr hcheckbox3_label = make_labeled_cb_fn<HCheckbox3_label>;
 
 // ┐
 // x
@@ -374,12 +375,12 @@ class Checkbox4 : public VCheckbox {
     Checkbox4(Parameters p) : Checkbox4{p.initial_state, p.locked} {}
 };
 
-inline auto constexpr checkbox4 = make_checkbox<Checkbox4>;
+inline auto constexpr checkbox4 = make_checkbox_fn<Checkbox4>;
 
 using HLabel_checkbox4 =
     detail::Label_checkbox_impl<layout::Horizontal, Checkbox4, false>;
 
-inline auto constexpr hlabel_checkbox4 = labeled_checkbox<HLabel_checkbox4>;
+inline auto constexpr hlabel_checkbox4 = make_labeled_cb_fn<HLabel_checkbox4>;
 
 // ┌x┐
 class Checkbox5 : public HCheckbox {
@@ -397,12 +398,12 @@ class Checkbox5 : public HCheckbox {
     Checkbox5(Parameters p) : Checkbox5{p.initial_state, p.locked} {}
 };
 
-inline auto constexpr checkbox5 = make_checkbox<Checkbox5>;
+inline auto constexpr checkbox5 = make_checkbox_fn<Checkbox5>;
 
 using VCheckbox5_label =
     detail::Label_checkbox_impl<layout::Vertical, Checkbox5, true>;
 
-inline auto constexpr vcheckbox5_label = labeled_checkbox<VCheckbox5_label>;
+inline auto constexpr vcheckbox5_label = make_labeled_cb_fn<VCheckbox5_label>;
 
 // └x┘
 class Checkbox6 : public HCheckbox {
@@ -420,12 +421,12 @@ class Checkbox6 : public HCheckbox {
     Checkbox6(Parameters p) : Checkbox6{p.initial_state, p.locked} {}
 };
 
-inline auto constexpr checkbox6 = make_checkbox<Checkbox6>;
+inline auto constexpr checkbox6 = make_checkbox_fn<Checkbox6>;
 
 using VLabel_checkbox6 =
     detail::Label_checkbox_impl<layout::Vertical, Checkbox6, false>;
 
-inline auto constexpr vlabel_checkbox6 = labeled_checkbox<VLabel_checkbox6>;
+inline auto constexpr vlabel_checkbox6 = make_labeled_cb_fn<VLabel_checkbox6>;
 
 // ╭
 // x
@@ -445,12 +446,12 @@ class Checkbox7 : public VCheckbox {
     Checkbox7(Parameters p) : Checkbox7{p.initial_state, p.locked} {}
 };
 
-inline auto constexpr checkbox7 = make_checkbox<Checkbox7>;
+inline auto constexpr checkbox7 = make_checkbox_fn<Checkbox7>;
 
 using HCheckbox7_label =
     detail::Label_checkbox_impl<layout::Horizontal, Checkbox7, true>;
 
-inline auto constexpr hcheckbox7_label = labeled_checkbox<HCheckbox7_label>;
+inline auto constexpr hcheckbox7_label = make_labeled_cb_fn<HCheckbox7_label>;
 
 // ╮
 // x
@@ -470,12 +471,12 @@ class Checkbox8 : public VCheckbox {
     Checkbox8(Parameters p) : Checkbox8{p.initial_state, p.locked} {}
 };
 
-inline auto constexpr checkbox8 = make_checkbox<Checkbox8>;
+inline auto constexpr checkbox8 = make_checkbox_fn<Checkbox8>;
 
 using HLabel_checkbox8 =
     detail::Label_checkbox_impl<layout::Horizontal, Checkbox8, false>;
 
-inline auto constexpr hlabel_checkbox8 = labeled_checkbox<HLabel_checkbox8>;
+inline auto constexpr hlabel_checkbox8 = make_labeled_cb_fn<HLabel_checkbox8>;
 
 // ╭x╮
 class Checkbox9 : public HCheckbox {
@@ -493,12 +494,12 @@ class Checkbox9 : public HCheckbox {
     Checkbox9(Parameters p) : Checkbox9{p.initial_state, p.locked} {}
 };
 
-inline auto constexpr checkbox9 = make_checkbox<Checkbox9>;
+inline auto constexpr checkbox9 = make_checkbox_fn<Checkbox9>;
 
 using VCheckbox9_label =
     detail::Label_checkbox_impl<layout::Vertical, Checkbox9, true>;
 
-inline auto constexpr vcheckbox9_label = labeled_checkbox<VCheckbox9_label>;
+inline auto constexpr vcheckbox9_label = make_labeled_cb_fn<VCheckbox9_label>;
 
 // ╰x╯
 class Checkbox10 : public HCheckbox {
@@ -516,12 +517,12 @@ class Checkbox10 : public HCheckbox {
     Checkbox10(Parameters p) : Checkbox10{p.initial_state, p.locked} {}
 };
 
-inline auto constexpr checkbox10 = make_checkbox<Checkbox10>;
+inline auto constexpr checkbox10 = make_checkbox_fn<Checkbox10>;
 
 using VLabel_checkbox10 =
     detail::Label_checkbox_impl<layout::Vertical, Checkbox10, false>;
 
-inline auto constexpr vlabel_checkbox10 = labeled_checkbox<VLabel_checkbox10>;
+inline auto constexpr vlabel_checkbox10 = make_labeled_cb_fn<VLabel_checkbox10>;
 
 // -----------------------------------------------------------------------------
 
@@ -543,12 +544,12 @@ class Checkbox11 : public VCheckbox {
     Checkbox11(Parameters p) : Checkbox11{p.initial_state, p.locked} {}
 };
 
-inline auto constexpr checkbox11 = make_checkbox<Checkbox11>;
+inline auto constexpr checkbox11 = make_checkbox_fn<Checkbox11>;
 
 using HCheckbox11_label =
     detail::Label_checkbox_impl<layout::Horizontal, Checkbox11, true>;
 
-inline auto constexpr hcheckbox11_label = labeled_checkbox<HCheckbox11_label>;
+inline auto constexpr hcheckbox11_label = make_labeled_cb_fn<HCheckbox11_label>;
 
 // └
 // ╶
@@ -568,12 +569,12 @@ class Checkbox12 : public VCheckbox {
     Checkbox12(Parameters p) : Checkbox12{p.initial_state, p.locked} {}
 };
 
-inline auto constexpr checkbox12 = make_checkbox<Checkbox12>;
+inline auto constexpr checkbox12 = make_checkbox_fn<Checkbox12>;
 
 using HLabel_checkbox12 =
     detail::Label_checkbox_impl<layout::Horizontal, Checkbox12, false>;
 
-inline auto constexpr hlabel_checkbox12 = labeled_checkbox<HLabel_checkbox12>;
+inline auto constexpr hlabel_checkbox12 = make_labeled_cb_fn<HLabel_checkbox12>;
 
 // ┘╵└
 class Checkbox13 : public HCheckbox {
@@ -591,12 +592,12 @@ class Checkbox13 : public HCheckbox {
     Checkbox13(Parameters p) : Checkbox13{p.initial_state, p.locked} {}
 };
 
-inline auto constexpr checkbox13 = make_checkbox<Checkbox13>;
+inline auto constexpr checkbox13 = make_checkbox_fn<Checkbox13>;
 
 using VCheckbox13_label =
     detail::Label_checkbox_impl<layout::Vertical, Checkbox13, true>;
 
-inline auto constexpr vcheckbox13_label = labeled_checkbox<VCheckbox13_label>;
+inline auto constexpr vcheckbox13_label = make_labeled_cb_fn<VCheckbox13_label>;
 
 // ┐╷┌
 class Checkbox14 : public HCheckbox {
@@ -614,12 +615,12 @@ class Checkbox14 : public HCheckbox {
     Checkbox14(Parameters p) : Checkbox14{p.initial_state, p.locked} {}
 };
 
-inline auto constexpr checkbox14 = make_checkbox<Checkbox14>;
+inline auto constexpr checkbox14 = make_checkbox_fn<Checkbox14>;
 
 using VLabel_checkbox14 =
     detail::Label_checkbox_impl<layout::Vertical, Checkbox14, false>;
 
-inline auto constexpr vlabel_checkbox14 = labeled_checkbox<VLabel_checkbox14>;
+inline auto constexpr vlabel_checkbox14 = make_labeled_cb_fn<VLabel_checkbox14>;
 
 // ╯
 // ╴
@@ -639,12 +640,12 @@ class Checkbox15 : public VCheckbox {
     Checkbox15(Parameters p) : Checkbox15{p.initial_state, p.locked} {}
 };
 
-inline auto constexpr checkbox15 = make_checkbox<Checkbox15>;
+inline auto constexpr checkbox15 = make_checkbox_fn<Checkbox15>;
 
 using HCheckbox15_label =
     detail::Label_checkbox_impl<layout::Horizontal, Checkbox15, true>;
 
-inline auto constexpr hcheckbox15_label = labeled_checkbox<HCheckbox15_label>;
+inline auto constexpr hcheckbox15_label = make_labeled_cb_fn<HCheckbox15_label>;
 
 // ╰
 // ╶
@@ -664,12 +665,12 @@ class Checkbox16 : public VCheckbox {
     Checkbox16(Parameters p) : Checkbox16{p.initial_state, p.locked} {}
 };
 
-inline auto constexpr checkbox16 = make_checkbox<Checkbox16>;
+inline auto constexpr checkbox16 = make_checkbox_fn<Checkbox16>;
 
 using HLabel_checkbox16 =
     detail::Label_checkbox_impl<layout::Horizontal, Checkbox16, false>;
 
-inline auto constexpr hlabel_checkbox16 = labeled_checkbox<HLabel_checkbox16>;
+inline auto constexpr hlabel_checkbox16 = make_labeled_cb_fn<HLabel_checkbox16>;
 
 // ╯╵╰
 class Checkbox17 : public HCheckbox {
@@ -687,12 +688,12 @@ class Checkbox17 : public HCheckbox {
     Checkbox17(Parameters p) : Checkbox17{p.initial_state, p.locked} {}
 };
 
-inline auto constexpr checkbox17 = make_checkbox<Checkbox17>;
+inline auto constexpr checkbox17 = make_checkbox_fn<Checkbox17>;
 
 using VCheckbox17_label =
     detail::Label_checkbox_impl<layout::Vertical, Checkbox17, true>;
 
-inline auto constexpr vcheckbox17_label = labeled_checkbox<VCheckbox17_label>;
+inline auto constexpr vcheckbox17_label = make_labeled_cb_fn<VCheckbox17_label>;
 
 // ╮╷╭
 class Checkbox18 : public HCheckbox {
@@ -710,12 +711,12 @@ class Checkbox18 : public HCheckbox {
     Checkbox18(Parameters p) : Checkbox18{p.initial_state, p.locked} {}
 };
 
-inline auto constexpr checkbox18 = make_checkbox<Checkbox18>;
+inline auto constexpr checkbox18 = make_checkbox_fn<Checkbox18>;
 
 using VLabel_checkbox18 =
     detail::Label_checkbox_impl<layout::Vertical, Checkbox18, false>;
 
-inline auto constexpr vlabel_checkbox18 = labeled_checkbox<VLabel_checkbox18>;
+inline auto constexpr vlabel_checkbox18 = make_labeled_cb_fn<VLabel_checkbox18>;
 
 // -----------------------------------------------------------------------------
 
@@ -735,7 +736,7 @@ class Checkbox19 : public HCheckbox {
     Checkbox19(Parameters p) : Checkbox19{p.initial_state, p.locked} {}
 };
 
-inline auto constexpr checkbox19 = make_checkbox<Checkbox19>;
+inline auto constexpr checkbox19 = make_checkbox_fn<Checkbox19>;
 
 using HCheckbox19_label =
     detail::Label_checkbox_impl<layout::Horizontal, Checkbox19, true>;
@@ -746,10 +747,10 @@ using VCheckbox19_label =
 using VLabel_checkbox19 =
     detail::Label_checkbox_impl<layout::Vertical, Checkbox19, false>;
 
-inline auto constexpr hcheckbox19_label = labeled_checkbox<HCheckbox19_label>;
-inline auto constexpr hlabel_checkbox19 = labeled_checkbox<HLabel_checkbox19>;
-inline auto constexpr vcheckbox19_label = labeled_checkbox<VCheckbox19_label>;
-inline auto constexpr vlabel_checkbox19 = labeled_checkbox<VLabel_checkbox19>;
+inline auto constexpr hcheckbox19_label = make_labeled_cb_fn<HCheckbox19_label>;
+inline auto constexpr hlabel_checkbox19 = make_labeled_cb_fn<HLabel_checkbox19>;
+inline auto constexpr vcheckbox19_label = make_labeled_cb_fn<VCheckbox19_label>;
+inline auto constexpr vlabel_checkbox19 = make_labeled_cb_fn<VLabel_checkbox19>;
 
 // ┤x├
 class Checkbox20 : public HCheckbox {
@@ -767,7 +768,7 @@ class Checkbox20 : public HCheckbox {
     Checkbox20(Parameters p) : Checkbox20{p.initial_state, p.locked} {}
 };
 
-inline auto constexpr checkbox20 = make_checkbox<Checkbox20>;
+inline auto constexpr checkbox20 = make_checkbox_fn<Checkbox20>;
 
 using HCheckbox20_label =
     detail::Label_checkbox_impl<layout::Horizontal, Checkbox20, true>;
@@ -778,10 +779,10 @@ using VCheckbox20_label =
 using VLabel_checkbox20 =
     detail::Label_checkbox_impl<layout::Vertical, Checkbox20, false>;
 
-inline auto constexpr hcheckbox20_label = labeled_checkbox<HCheckbox20_label>;
-inline auto constexpr hlabel_checkbox20 = labeled_checkbox<HLabel_checkbox20>;
-inline auto constexpr vcheckbox20_label = labeled_checkbox<VCheckbox20_label>;
-inline auto constexpr vlabel_checkbox20 = labeled_checkbox<VLabel_checkbox20>;
+inline auto constexpr hcheckbox20_label = make_labeled_cb_fn<HCheckbox20_label>;
+inline auto constexpr hlabel_checkbox20 = make_labeled_cb_fn<HLabel_checkbox20>;
+inline auto constexpr vcheckbox20_label = make_labeled_cb_fn<VCheckbox20_label>;
+inline auto constexpr vlabel_checkbox20 = make_labeled_cb_fn<VLabel_checkbox20>;
 
 }  // namespace ox
 
