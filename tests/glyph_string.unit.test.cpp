@@ -6,6 +6,7 @@
 #include <termox/painter/color.hpp>
 #include <termox/painter/glyph_string.hpp>
 #include <termox/painter/trait.hpp>
+#include <termox/widget/pipe.hpp>
 
 static void init() { std::setlocale(LC_ALL, "en_US.UTF-8"); }
 
@@ -151,6 +152,10 @@ TEST_CASE("Traits pipe Glyph_string construction", "[Glyph_string]")
         auto const traits2 = traits | Trait::Inverse;
         for (auto g : gs)
             CHECK(g.brush.traits == traits2);
+
+        gs | ox::pipe::discard(Trait::Standout | Trait::Inverse);
+        for (auto g : gs)
+            CHECK(g.brush.traits == Trait::Underline);
     }
     {
         // String Literal

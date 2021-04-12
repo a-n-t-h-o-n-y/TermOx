@@ -19,9 +19,9 @@
 #include <termox/widget/widgets/checkbox.hpp>
 #include <termox/widget/widgets/confirm_button.hpp>
 #include <termox/widget/widgets/label.hpp>
-#include <termox/widget/widgets/line_edit.hpp>
 #include <termox/widget/widgets/number_edit.hpp>
 #include <termox/widget/widgets/text_display.hpp>
+#include <termox/widget/widgets/textline.hpp>
 #include <termox/widget/widgets/toggle_button.hpp>
 
 #include "colors.hpp"
@@ -70,7 +70,7 @@ class Rule_edit : public ox::layout::Vertical<> {
                    c == 'S' || c == 's';
         });
 
-        edit_box_.edit_finished.connect(
+        edit_box_.enter_pressed.connect(
             [this](std::string rule_text) { rule_change(rule_text); });
 
         this->set_rule(parse_rule_string("B3/S23"));
@@ -89,7 +89,7 @@ class Rule_edit : public ox::layout::Vertical<> {
         {U"RuleString[B/S]" | ox::Trait::Underline | ox::Trait::Bold,
          ox::Align::Center});
 
-    ox::Line_edit& edit_box_ = this->make_child<ox::Line_edit>();
+    ox::Textline& edit_box_ = this->make_child<ox::Textline>();
 };
 
 struct Start_pause_btns : ox::Toggle_button {

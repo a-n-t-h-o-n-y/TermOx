@@ -12,15 +12,15 @@
 #include <termox/widget/layouts/horizontal.hpp>
 #include <termox/widget/pipe.hpp>
 #include <termox/widget/widgets/label.hpp>
-#include <termox/widget/widgets/line_edit.hpp>
+#include <termox/widget/widgets/textline.hpp>
 
 namespace ox {
 
-/// A Line_edit for specified number types.
+/// A Textline for specified number types.
 /** Provides validator specific to Number_t. Uses std::stringstream to convert
  *  from string to Number_t value. */
 template <typename Number_t = int>
-class Number_edit : public Line_edit {
+class Number_edit : public Textline {
    public:
     /// Emitted on Enter Key press, sends along the current value.
     sl::Signal<void(Number_t)> value_set;
@@ -28,12 +28,12 @@ class Number_edit : public Line_edit {
    public:
     /// Construct a Number_edit with \p initial value.
     explicit Number_edit(Number_t initial = 0)
-        : Line_edit{std::to_string(initial)}, value_{initial}
+        : Textline{std::to_string(initial)}, value_{initial}
     {
         // this->set_alignment(Align::Right); // TODO Once alignment works w/ed
         this->set_validator(
             [](char c) { return Number_edit::is_valid_input(c); });
-        this->edit_finished.connect([this](std::string text) {
+        this->enter_pressed.connect([this](std::string text) {
             auto ss     = std::stringstream{text};
             auto result = Number_t{0};
             ss >> result;
@@ -58,7 +58,7 @@ class Number_edit : public Line_edit {
             case Mouse::Button::ScrollDown: this->decrement(); break;
             default: break;
         }
-        return Line_edit::mouse_wheel_event(m);
+        return Textline::mouse_wheel_event(m);
     }
 
    private:

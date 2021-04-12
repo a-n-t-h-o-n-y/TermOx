@@ -7,9 +7,9 @@
 #include <termox/widget/layouts/horizontal.hpp>
 #include <termox/widget/layouts/vertical.hpp>
 #include <termox/widget/widgets/label.hpp>
-#include <termox/widget/widgets/line_edit.hpp>
 #include <termox/widget/widgets/number_edit.hpp>
 #include <termox/widget/widgets/text_display.hpp>
+#include <termox/widget/widgets/textline.hpp>
 
 #include "make_break.hpp"
 

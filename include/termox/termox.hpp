@@ -71,7 +71,6 @@
 #include <termox/widget/widgets/hideable.hpp>
 #include <termox/widget/widgets/horizontal_slider.hpp>
 #include <termox/widget/widgets/label.hpp>
-#include <termox/widget/widgets/line_edit.hpp>
 #include <termox/widget/widgets/log.hpp>
 #include <termox/widget/widgets/matrix_display.hpp>
 #include <termox/widget/widgets/menu.hpp>
@@ -85,6 +84,7 @@
 #include <termox/widget/widgets/status_bar.hpp>
 #include <termox/widget/widgets/text_display.hpp>
 #include <termox/widget/widgets/textbox.hpp>
+#include <termox/widget/widgets/textline.hpp>
 #include <termox/widget/widgets/tile.hpp>
 #include <termox/widget/widgets/titlebar.hpp>
 #include <termox/widget/widgets/toggle_button.hpp>

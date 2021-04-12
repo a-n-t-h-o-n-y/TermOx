@@ -8,7 +8,7 @@
 #include <termox/widget/layouts/vertical.hpp>
 #include <termox/widget/pipe.hpp>
 #include <termox/widget/widgets/confirm_button.hpp>
-#include <termox/widget/widgets/line_edit.hpp>
+#include <termox/widget/widgets/textline.hpp>
 
 #include "colors.hpp"
 #include "make_break.hpp"
@@ -18,7 +18,7 @@ namespace gol {
 /// Provides interface to input filename and to Signal on that filename.
 class File_widget : public ox::layout::Vertical<> {
    public:
-    ox::Line_edit& filename_box_ = this->make_child<ox::Line_edit>("Filename");
+    ox::Textline& filename_box_ = this->make_child<ox::Textline>("Filename");
 
     ox::Confirm_button& confirm_btn_;
 

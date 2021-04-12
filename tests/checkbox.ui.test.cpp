@@ -15,8 +15,8 @@
 #include <termox/widget/widgets/checkbox.hpp>
 #include <termox/widget/widgets/cycle_stack.hpp>
 #include <termox/widget/widgets/label.hpp>
-#include <termox/widget/widgets/line_edit.hpp>
 #include <termox/widget/widgets/notify_light.hpp>
+#include <termox/widget/widgets/textline.hpp>
 
 class Count : public ox::HLabel {
    public:
@@ -180,7 +180,7 @@ class Runtime : public ox::layout::Horizontal<> {
 
        private:
         using Checkbox  = ox::HCheckbox20_label;
-        using Edit      = ox::HLabel_left<ox::Line_edit>;
+        using Edit      = ox::HLabel_left<ox::Textline>;
         using Light_box = ox::HLabel_right<ox::Notify_light>;
 
         // TODO make a Widget with template template layout parameter

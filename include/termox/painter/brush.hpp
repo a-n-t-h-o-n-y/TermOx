@@ -53,6 +53,69 @@ class Brush {
     constexpr void set_item(Traits t) { traits |= t; }
 };
 
+// Pipes -----------------------------------------------------------------------
+
+constexpr auto operator|(Brush& b, Traits ts) -> Brush&
+{
+    b.traits |= ts;
+    return b;
+}
+
+[[nodiscard]] constexpr auto operator|(Brush const& b, Traits ts) -> Brush
+{
+    auto copy = b;
+    copy.traits |= ts;
+    return copy;
+}
+
+[[nodiscard]] constexpr auto operator|(Brush&& b, Traits ts) -> Brush
+{
+    b.traits |= ts;
+    return std::move(b);
+}
+
+constexpr auto operator|(Brush& b, Background_color c) -> Brush&
+{
+    b.background = Color{c.value};
+    return b;
+}
+
+[[nodiscard]] constexpr auto operator|(Brush const& b, Background_color c)
+    -> Brush
+{
+    auto copy       = b;
+    copy.background = Color{c.value};
+    return copy;
+}
+
+[[nodiscard]] constexpr auto operator|(Brush&& b, Background_color c) -> Brush
+{
+    b.background = Color{c.value};
+    return std::move(b);
+}
+
+constexpr auto operator|(Brush& b, Foreground_color c) -> Brush&
+{
+    b.foreground = Color{c.value};
+    return b;
+}
+
+[[nodiscard]] constexpr auto operator|(Brush const& b, Foreground_color c)
+    -> Brush
+{
+    auto copy       = b;
+    copy.foreground = Color{c.value};
+    return copy;
+}
+
+[[nodiscard]] constexpr auto operator|(Brush&& b, Foreground_color c) -> Brush
+{
+    b.foreground = Color{c.value};
+    return std::move(b);
+}
+
+// -----------------------------------------------------------------------------
+
 /// Compares if the held traits and (back/fore)ground colors are equal.
 [[nodiscard]] constexpr auto operator==(Brush a, Brush b) -> bool
 {

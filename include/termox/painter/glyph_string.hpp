@@ -8,10 +8,12 @@
 #include <ostream>
 #include <string>
 #include <string_view>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
 #include <termox/common/mb_to_u32.hpp>
+#include <termox/common/overload.hpp>
 #include <termox/common/u32_to_mb.hpp>
 #include <termox/painter/brush.hpp>
 #include <termox/painter/glyph.hpp>
@@ -143,6 +145,13 @@ class Glyph_string : private std::vector<Glyph> {
             glyph.brush.traits.insert(traits);
     }
 
+    /// Remove all currently set traits on each Glyph.
+    void clear_traits()
+    {
+        for (auto& glyph : *this)
+            glyph.brush.traits = Trait::None;
+    }
+
     /// Add \p bg as the background color to every Glyph contained in *this.
     void add_color(Background_color bg)
     {
@@ -224,15 +233,24 @@ class Glyph_string : private std::vector<Glyph> {
 
 // Trait -----------------------------------------------------------------------
 /// Modifying Operation
-inline auto operator|(Glyph_string& gs, Traits t) -> Glyph_string&
+inline auto operator|(Glyph_string& gs, Traits ts) -> Glyph_string&
 {
-    gs.add_traits(t);
+    gs.add_traits(ts);
     return gs;
 }
 
-[[nodiscard]] inline auto operator|(Glyph_string&& gs, Traits t) -> Glyph_string
+[[nodiscard]] inline auto operator|(Glyph_string const& gs, Traits ts)
+    -> Glyph_string
 {
-    return gs | t;
+    auto copy = gs;
+    copy.add_traits(ts);
+    return copy;
+}
+
+[[nodiscard]] inline auto operator|(Glyph_string&& gs, Traits ts)
+    -> Glyph_string
+{
+    return gs | ts;
 }
 
 }  // namespace ox
@@ -244,10 +262,10 @@ namespace esc {  // For ADL; Trait(s) is really in namespace::esc.
     return ox::Glyph_string{gs} | t;
 }
 
-[[nodiscard]] inline auto operator|(char32_t const* gs, Traits t)
+[[nodiscard]] inline auto operator|(char32_t const* gs, Traits ts)
     -> ox::Glyph_string
 {
-    return ox::Glyph_string{gs} | t;
+    return ox::Glyph_string{gs} | ts;
 }
 
 [[nodiscard]] inline auto operator|(char const* gs, Trait t) -> ox::Glyph_string
@@ -255,10 +273,10 @@ namespace esc {  // For ADL; Trait(s) is really in namespace::esc.
     return ox::Glyph_string{gs} | t;
 }
 
-[[nodiscard]] inline auto operator|(char const* gs, Traits t)
+[[nodiscard]] inline auto operator|(char const* gs, Traits ts)
     -> ox::Glyph_string
 {
-    return ox::Glyph_string{gs} | t;
+    return ox::Glyph_string{gs} | ts;
 }
 }  // namespace esc
 
@@ -269,6 +287,14 @@ inline auto operator|(Glyph_string& gs, Background_color c) -> Glyph_string&
 {
     gs.add_color(c);
     return gs;
+}
+
+[[nodiscard]] inline auto operator|(Glyph_string const& gs, Background_color c)
+    -> Glyph_string
+{
+    auto copy = gs;
+    copy.add_color(c);
+    return copy;
 }
 
 [[nodiscard]] inline auto operator|(Glyph_string&& gs, Background_color c)
@@ -290,6 +316,14 @@ inline auto operator|(Glyph_string& gs, Foreground_color c) -> Glyph_string&
     return gs;
 }
 
+[[nodiscard]] inline auto operator|(Glyph_string const& gs, Foreground_color c)
+    -> Glyph_string
+{
+    auto copy = gs;
+    copy.add_color(c);
+    return copy;
+}
+
 [[nodiscard]] inline auto operator|(Glyph_string&& gs, Foreground_color c)
     -> Glyph_string
 {
@@ -309,6 +343,15 @@ inline auto operator|(Glyph_string& gs, Brush b) -> Glyph_string&
     for (auto& g : gs)
         g.brush = b;
     return gs;
+}
+
+[[nodiscard]] inline auto operator|(Glyph_string const& gs, Brush b)
+    -> Glyph_string
+{
+    auto copy = gs;
+    for (auto& g : copy)
+        g.brush = b;
+    return copy;
 }
 
 /// Assigns the Brush \p b to each Glyph in \p gs.

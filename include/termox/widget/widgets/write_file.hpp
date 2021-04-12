@@ -8,18 +8,18 @@
 #include <termox/widget/pipe.hpp>
 #include <termox/widget/tuple.hpp>
 #include <termox/widget/widgets/button.hpp>
-#include <termox/widget/widgets/line_edit.hpp>
+#include <termox/widget/widgets/textline.hpp>
 #include <termox/widget/widgets/tile.hpp>
 
 namespace ox::detail {
 
-struct Write_file_widgets : HTuple<Button, Tile, Line_edit> {
-    Button& save_btn         = this->get<0>();
-    Tile& buffer             = this->get<1>();
-    Line_edit& filename_edit = this->get<2>();
+struct Write_file_widgets : HTuple<Button, Tile, Textline> {
+    Button& save_btn        = this->get<0>();
+    Tile& buffer            = this->get<1>();
+    Textline& filename_edit = this->get<2>();
 
     Write_file_widgets()
-        : HTuple<Button, Tile, Line_edit>{{U"Save"}, {U'>'}, {U"Filename"}}
+        : HTuple<Button, Tile, Textline>{{U"Save"}, {U'>'}, {U"Filename"}}
     {
         using namespace ox::pipe;
         *this | fixed_height(1);

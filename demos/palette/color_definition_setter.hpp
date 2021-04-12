@@ -7,8 +7,8 @@
 #include <termox/painter/painter.hpp>
 #include <termox/widget/layouts/vertical.hpp>
 #include <termox/widget/widgets/confirm_button.hpp>
-#include <termox/widget/widgets/line_edit.hpp>
 #include <termox/widget/widgets/text_display.hpp>
+#include <termox/widget/widgets/textline.hpp>
 
 #include "color_control.hpp"
 #include "color_display.hpp"

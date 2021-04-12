@@ -222,22 +222,91 @@ auto operator|(Widget_t&& w, Trait t) -> decltype(auto)
 }  // namespace ox
 namespace ox::pipe {
 
-inline auto discard(Trait t)
+/// Discards Traits from Widgets or Glyph_strings
+[[nodiscard]] inline auto discard(Traits ts)
 {
-    return [=](auto&& w) -> decltype(auto) {
-        get(w).brush.traits.remove(t);
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
+    return Overload{[ts](Brush& b) -> Brush& {
+                        b.traits.remove(ts);
+                        return b;
+                    },
+                    [ts](Brush b) -> Brush {
+                        b.traits.remove(ts);
+                        return b;
+                    },
+                    [ts](Glyph& g) -> Glyph& {
+                        g.brush.traits.remove(ts);
+                        return g;
+                    },
+                    [ts](Glyph const& g) -> Glyph {
+                        auto copy = g;
+                        copy.brush.traits.remove(ts);
+                        return copy;
+                    },
+                    [ts](Glyph&& g) -> Glyph {
+                        g.brush.traits.remove(ts);
+                        return std::move(g);
+                    },
+                    [ts](Glyph_string& gs) -> Glyph_string& {
+                        gs.remove_traits(ts);
+                        return gs;
+                    },
+                    [ts](Glyph_string const& gs) -> Glyph_string {
+                        auto copy = gs;
+                        copy.remove_traits(ts);
+                        return copy;
+                    },
+                    [ts](Glyph_string&& gs) -> Glyph_string {
+                        gs.remove_traits(ts);
+                        return std::move(gs);
+                    },
+                    [ts](auto&& w) -> decltype(auto) {
+                        get(w).brush.traits.remove(ts);
+                        get(w).update();
+                        return std::forward<decltype(w)>(w);
+                    }};
 }
 
 inline auto clear_traits()
 {
-    return [](auto&& w) -> decltype(auto) {
-        get(w).brush.traits = Trait::None;
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
+    return Overload{[](Brush& b) -> Brush& {
+                        b.traits = Trait::None;
+                        return b;
+                    },
+                    [](Brush b) -> Brush {
+                        b.traits = Trait::None;
+                        return b;
+                    },
+                    [](Glyph& g) -> Glyph& {
+                        g.brush.traits = Trait::None;
+                        return g;
+                    },
+                    [](Glyph const& g) -> Glyph {
+                        auto copy         = g;
+                        copy.brush.traits = Trait::None;
+                        return copy;
+                    },
+                    [](Glyph&& g) -> Glyph {
+                        g.brush.traits = Trait::None;
+                        return std::move(g);
+                    },
+                    [](Glyph_string& gs) -> Glyph_string& {
+                        gs.clear_traits();
+                        return gs;
+                    },
+                    [](Glyph_string const& gs) -> Glyph_string {
+                        auto copy = gs;
+                        copy.clear_traits();
+                        return copy;
+                    },
+                    [](Glyph_string&& gs) -> Glyph_string {
+                        gs.clear_traits();
+                        return std::move(gs);
+                    },
+                    [](auto&& w) -> decltype(auto) {
+                        get(w).brush.traits = Trait::None;
+                        get(w).update();
+                        return std::forward<decltype(w)>(w);
+                    }};
 }
 
 // Cursor Modifiers ------------------------------------------------------------
@@ -1849,10 +1918,10 @@ template <typename T>
 }
 
 /// Pipe operator for use with Widget.
-template <typename Widget_t,
-          typename F,
-          typename std::enable_if_t<pipe::detail::is_widget_or_wptr<Widget_t>,
-                                    int> = 0>
+template <
+    typename Widget_t,
+    typename F,
+    typename = std::enable_if_t<pipe::detail::is_widget_or_wptr<Widget_t>, int>>
 auto operator|(Widget_t&& w, F&& op) -> std::invoke_result_t<F, Widget_t&&>
 {
     return std::forward<F>(op)(std::forward<Widget_t>(w));
@@ -1877,22 +1946,21 @@ auto operator|(Range<Iter_1, Iter_2> children,
                  children.end()};
 }
 
-// clang-format off
-// clang format can't handle this one at the moment.
-
 /// Overload to create a filtered range with upcast.
 template <typename Iter_1, typename Iter_2, typename Widget_t>
 auto operator|(Range<Iter_1, Iter_2> children,
                pipe::detail::Dynamic_filter_predicate<Widget_t>)
 {
+    // clang format can't handle this one at the moment.
+    // clang-format off
     return Range{
             Transform_iterator{
                 Filter_iterator{ children.begin(), children.end(),
                 [](auto& w) { return dynamic_cast<Widget_t*>(&w) != nullptr; }},
                 [](auto& w) -> auto& {return static_cast<Widget_t&>(w); }
                 }, children.end()};
-}
 // clang-format on
+}
 
 /// Pipe operator for use with Widget::get_descendants.
 template <typename F>
@@ -1902,6 +1970,58 @@ auto operator|(std::vector<Widget*> const& descendants, F&& op)
     for (auto* d : descendants)
         *d | op;
     return descendants;
+}
+
+/// Glyph_string pipe operator, for any function object pipe argument.
+template <typename F>
+auto operator|(Glyph_string& gs, F&& op)
+    -> std::invoke_result_t<F, Glyph_string&>
+{
+    return std::forward<F>(op)(gs);
+}
+
+/// Glyph_string pipe operator, for any function object pipe argument.
+template <typename F>
+auto operator|(Glyph_string const& gs, F&& op)
+    -> std::invoke_result_t<F, Glyph_string const&>
+{
+    return std::forward<F>(op)(gs);
+}
+
+/// Glyph_string pipe operator, for any function object pipe argument.
+template <typename F>
+auto operator|(Glyph_string&& gs, F&& op)
+    -> std::invoke_result_t<F, Glyph_string&&>
+{
+    return std::forward<F>(op)(gs);
+}
+
+/// Glyph pipe operator, for any function object pipe argument.
+template <typename F>
+auto operator|(Glyph& g, F&& op) -> std::invoke_result_t<F, Glyph&>
+{
+    return std::forward<F>(op)(g);
+}
+
+/// Glyph pipe operator, for any function object pipe argument.
+template <typename F>
+auto operator|(Glyph g, F&& op) -> std::invoke_result_t<F, Glyph>
+{
+    return std::forward<F>(op)(g);
+}
+
+/// Brush pipe operator, for any function object pipe argument.
+template <typename F>
+auto operator|(Brush& b, F&& op) -> std::invoke_result_t<F, Brush&>
+{
+    return std::forward<F>(op)(b);
+}
+
+/// Brush pipe operator, for any function object pipe argument.
+template <typename F>
+auto operator|(Brush b, F&& op) -> std::invoke_result_t<F, Brush>
+{
+    return std::forward<F>(op)(std::move(b));
 }
 
 }  // namespace ox

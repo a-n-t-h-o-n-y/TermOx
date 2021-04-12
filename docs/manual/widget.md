@@ -53,7 +53,7 @@ inheriting from them and expanding their functionality.
 - [Read_file](widgets/read-file.md)
 - [Write_file](widgets/write-file.md)
 - [Spinner](widgets/spinner.md)
-- [Line_edit](widgets/line-edit.md)
+- [Textline](widgets/textline.md)
 - [Number_edit](widgets/number-edit.md)
 - [Status_bar](widgets/status-bar.md)
 - [Text_display](widgets/text-display.md)
