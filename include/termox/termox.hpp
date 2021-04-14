@@ -69,8 +69,8 @@
 #include <termox/widget/widgets/cycle_stack.hpp>
 #include <termox/widget/widgets/graph.hpp>
 #include <termox/widget/widgets/hideable.hpp>
-#include <termox/widget/widgets/horizontal_slider.hpp>
 #include <termox/widget/widgets/label.hpp>
+#include <termox/widget/widgets/line.hpp>
 #include <termox/widget/widgets/log.hpp>
 #include <termox/widget/widgets/matrix_display.hpp>
 #include <termox/widget/widgets/menu.hpp>
@@ -80,6 +80,7 @@
 #include <termox/widget/widgets/read_file.hpp>
 #include <termox/widget/widgets/scrollbar.hpp>
 #include <termox/widget/widgets/selectable.hpp>
+#include <termox/widget/widgets/slider.hpp>
 #include <termox/widget/widgets/spinner.hpp>
 #include <termox/widget/widgets/status_bar.hpp>
 #include <termox/widget/widgets/text_display.hpp>
@@ -88,7 +89,6 @@
 #include <termox/widget/widgets/tile.hpp>
 #include <termox/widget/widgets/titlebar.hpp>
 #include <termox/widget/widgets/toggle_button.hpp>
-#include <termox/widget/widgets/vertical_slider.hpp>
 #include <termox/widget/widgets/write_file.hpp>
 
 #include <termox/widget/align.hpp>
