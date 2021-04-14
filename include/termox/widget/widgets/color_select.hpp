@@ -18,43 +18,51 @@ namespace ox {
 
 class Color_tile : public Button {
    public:
-    Color_tile(Color c, bool display_number)
-        : color_{std::to_string(c.value) | fg(Color::Foreground)},
-          number_{display_number}
+    enum class Display { None, Number };
+
+    struct Parameters {
+        Color color;
+        Display display = Display::None;
+    };
+
+   public:
+    explicit Color_tile(Color c, Display display = Display::None)
+        : Button{display == Display::None ? "" : std::to_string(c.value)}
     {
-        using namespace ox::pipe;
-        *this | bg(c) | fg(Color::Foreground);
+        *this | bg(c);
     }
 
-   protected:
-    auto paint_event(Painter& p) -> bool override
-    {
-        if (number_)
-            p.put(color_, {0, 0});
-        return Button::paint_event(p);
-    }
-
-   private:
-    Glyph_string color_;
-    bool number_;
+    explicit Color_tile(Parameters parameters)
+        : Color_tile{parameters.color, parameters.display}
+    {}
 };
 
 using Color_line = layout::Horizontal<Color_tile>;
 
 /// Displays each color of the current palette.
-/** Updates when Terminal::set_pallete() succeeds. */
+/** Updates when Terminal::set_palette() succeeds. */
 class Color_select : public layout::Vertical<Color_line> {
+   public:
+    struct Parameters {
+        Color_tile::Display display = Color_tile::Display::None;
+    };
+
    public:
     sl::Signal<void(Color)> color_selected;
 
    public:
-    explicit Color_select(bool display_numbers = false)
-        : numbers_{display_numbers}
+    explicit Color_select(
+        Color_tile::Display display = Color_tile::Display::None)
+        : display_{display}
     {
         this->set_palette(Terminal::current_palette());
         Terminal::palette_changed.connect(
             [this](auto const& pal) { this->set_palette(pal); });
     }
+
+    explicit Color_select(Parameters parameters)
+        : Color_select{parameters.display}
+    {}
 
    private:
     void set_palette(Palette const& pal)
@@ -67,23 +75,31 @@ class Color_select : public layout::Vertical<Color_line> {
         while (count != size) {
             auto& color_line = this->make_child();
             for (auto i = 0uL; i < row_length && count != size; ++i, ++count) {
-                using namespace ox::pipe;
                 auto const color = pal[count].color;
-                color_line.make_child(color, numbers_) |
-                    on_press([this, color]() { color_selected(color); });
+                color_line.make_child(color, display_) |
+                    pipe::on_press(
+                        [this, color] { color_selected.emit(color); });
             }
         }
     }
 
    private:
-    bool numbers_;
+    Color_tile::Display display_;
 };
 
-/// Helper function to create an instance.
-template <typename... Args>
-[[nodiscard]] auto color_select(Args&&... args) -> std::unique_ptr<Color_select>
+/// Helper function to create a Color_select instance.
+[[nodiscard]] inline auto color_select(
+    Color_tile::Display display = Color_tile::Display::None)
+    -> std::unique_ptr<Color_select>
 {
-    return std::make_unique<Color_select>(std::forward<Args>(args)...);
+    return std::make_unique<Color_select>(display);
+}
+
+/// Helper function to create a Color_select instance.
+[[nodiscard]] inline auto color_select(Color_select::Parameters parameters)
+    -> std::unique_ptr<Color_select>
+{
+    return std::make_unique<Color_select>(std::move(parameters));
 }
 
 }  // namespace ox

@@ -87,7 +87,8 @@ class Palette_picker : public ox::Labeled_cycle_box {
 
 class Palette_demo : public ox::layout::Vertical<> {
    public:
-    ox::Color_select& palette_view = this->make_child<ox::Color_select>(true);
+    ox::Color_select& palette_view =
+        this->make_child<ox::Color_select>(ox::Color_tile::Display::Number);
     Palette_picker& palette_picker = this->make_child<Palette_picker>();
 
    public:
