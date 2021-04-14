@@ -442,6 +442,7 @@ class Widget {
     }
 
     /// Handles Mouse_double_click_event objects.
+    // TODO remove this
     virtual auto mouse_double_click_event(Mouse const& m) -> bool
     {
         mouse_double_clicked(m);
@@ -459,7 +460,7 @@ class Widget {
     virtual auto mouse_move_event(Mouse const& m) -> bool
     {
         mouse_moved(m);
-        return false;
+        return true;
     }
 
     /// Handles Key_press_event objects.

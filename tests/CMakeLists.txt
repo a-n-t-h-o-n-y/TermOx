@@ -22,6 +22,10 @@ target_link_libraries(fixed.ui.test PRIVATE TermOx)
 add_executable(layout_sort.ui.test EXCLUDE_FROM_ALL layout_sort.ui.test.cpp)
 target_link_libraries(layout_sort.ui.test PRIVATE TermOx)
 
+## Slider
+add_executable(slider.ui.test EXCLUDE_FROM_ALL slider.ui.test.cpp)
+target_link_libraries(slider.ui.test PRIVATE TermOx)
+
 add_custom_target(
     termox.ui.tests
     DEPENDS
@@ -30,6 +34,7 @@ add_custom_target(
         passive.ui.test
         fixed.ui.test
         layout_sort.ui.test
+        slider.ui.test
 )
 
 # Unit Tests

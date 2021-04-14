@@ -18,6 +18,12 @@ namespace ox {
  *  alignment of the text and scroll through the text, among others. */
 class Text_display : public Widget {
    public:
+    // TODO
+    struct Parameters {
+        Glyph_string contents = U"";
+    };
+
+   public:
     /// Brush to be applied to all new incoming Glyphs, but not existing Glyphs.
     /** Widget::brush is applied after this Brush. */
     Brush insert_brush = this->brush;
@@ -42,6 +48,10 @@ class Text_display : public Widget {
     /** By default, wraps text, and has left alignment. */
     explicit Text_display(Glyph_string contents = "")
         : contents_{std::move(contents)}
+    {}
+
+    explicit Text_display(Parameters parameters)
+        : Text_display{std::move(parameters.contents)}
     {}
 
    public:

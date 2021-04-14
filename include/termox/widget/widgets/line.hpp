@@ -30,14 +30,14 @@ class Line : public Widget {
     static auto constexpr is_vertical = layout::is_vertical_v<Layout_t<Widget>>;
 };
 
-/// Create an instance of a Line.
+/// Helper function to create a Line instance.
 template <template <typename> typename Layout_t>
 [[nodiscard]] auto line() -> std::unique_ptr<Line<Layout_t>>
 {
     return std::make_unique<Line<Layout_t>>();
 }
 
-/// Create an instance of a Line.
+/// Helper function to create a Line instance.
 template <template <typename> typename Layout_t>
 [[nodiscard]] auto line(typename Line<Layout_t>::Parameters p)
     -> std::unique_ptr<Line<Layout_t>>
@@ -47,13 +47,13 @@ template <template <typename> typename Layout_t>
 
 using VLine = Line<layout::Vertical>;
 
-/// Create an instance of a VLine.
+/// Helper function to create a VLine instance.
 [[nodiscard]] inline auto vline() -> std::unique_ptr<VLine>
 {
     return std::make_unique<VLine>();
 }
 
-/// Create an instance of a VLine.
+/// Helper function to create a VLine instance.
 [[nodiscard]] inline auto vline(typename VLine::Parameters p)
     -> std::unique_ptr<VLine>
 {
@@ -62,13 +62,13 @@ using VLine = Line<layout::Vertical>;
 
 using HLine = Line<layout::Horizontal>;
 
-/// Create an instance of an HLine.
+/// Helper function to create an HLine instance.
 [[nodiscard]] inline auto hline() -> std::unique_ptr<HLine>
 {
     return std::make_unique<HLine>();
 }
 
-/// Create an instance of an HLine.
+/// Helper function to create an HLine instance.
 [[nodiscard]] inline auto hline(typename HLine::Parameters p)
     -> std::unique_ptr<HLine>
 {

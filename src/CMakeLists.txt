@@ -91,19 +91,15 @@ target_sources(TermOx
         widget/border.cpp
         widget/cycle_box.cpp
         widget/textbox.cpp
-        widget/horizontal_slider.cpp
         widget/textbox_base.cpp
         widget/text_display.cpp
         widget/border_offset.cpp
         widget/graph_tree.cpp
-        widget/vertical_slider.cpp
 )
 
 # Terminal
 target_sources(TermOx
     PRIVATE
         terminal/terminal.cpp
-        # terminal/output.cpp
-        # terminal/input.cpp
         terminal/dynamic_color_engine.cpp
 )
