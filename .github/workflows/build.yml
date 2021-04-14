@@ -103,19 +103,6 @@ jobs:
           mkdir build && cd build
           cmake .. && make demos termox.ui.tests termox.unit.tests
           ./tests/termox.unit.tests
-  gcc-build-ubuntu18-gcc7:
-    runs-on: ubuntu-18.04
-    steps:
-      - uses: actions/checkout@v2.3.1
-        with:
-          submodules: recursive
-      - env:
-          CC: gcc-7
-          CXX: g++-7
-        run: |
-          mkdir build && cd build
-          cmake .. && make demos termox.ui.tests termox.unit.tests
-          ./tests/termox.unit.tests
 
   # Ubuntu-18 Clang
   clang-build-ubuntu18-clang9:
