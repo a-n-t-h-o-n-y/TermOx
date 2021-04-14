@@ -1993,7 +1993,7 @@ template <typename F>
 auto operator|(Glyph_string&& gs, F&& op)
     -> std::invoke_result_t<F, Glyph_string&&>
 {
-    return std::forward<F>(op)(gs);
+    return std::forward<F>(op)(std::move(gs));
 }
 
 /// Glyph pipe operator, for any function object pipe argument.
@@ -2005,9 +2005,16 @@ auto operator|(Glyph& g, F&& op) -> std::invoke_result_t<F, Glyph&>
 
 /// Glyph pipe operator, for any function object pipe argument.
 template <typename F>
-auto operator|(Glyph g, F&& op) -> std::invoke_result_t<F, Glyph>
+auto operator|(Glyph const& g, F&& op) -> std::invoke_result_t<F, Glyph const&>
 {
     return std::forward<F>(op)(g);
+}
+
+/// Glyph pipe operator, for any function object pipe argument.
+template <typename F>
+auto operator|(Glyph&& g, F&& op) -> std::invoke_result_t<F, Glyph&&>
+{
+    return std::forward<F>(op)(std::move(g));
 }
 
 /// Brush pipe operator, for any function object pipe argument.
@@ -2019,7 +2026,14 @@ auto operator|(Brush& b, F&& op) -> std::invoke_result_t<F, Brush&>
 
 /// Brush pipe operator, for any function object pipe argument.
 template <typename F>
-auto operator|(Brush b, F&& op) -> std::invoke_result_t<F, Brush>
+auto operator|(Brush const& b, F&& op) -> std::invoke_result_t<F, Brush const&>
+{
+    return std::forward<F>(op)(b);
+}
+
+/// Brush pipe operator, for any function object pipe argument.
+template <typename F>
+auto operator|(Brush&& b, F&& op) -> std::invoke_result_t<F, Brush&&>
 {
     return std::forward<F>(op)(std::move(b));
 }
