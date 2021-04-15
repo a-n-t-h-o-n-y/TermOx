@@ -6,6 +6,7 @@
 #include <termox/painter/glyph_string.hpp>
 #include <termox/painter/painter.hpp>
 #include <termox/system/animation_engine.hpp>
+#include <termox/widget/pipe.hpp>
 #include <termox/widget/widget.hpp>
 
 namespace ox {
@@ -14,6 +15,13 @@ namespace ox {
 class Spinner : public Widget {
    public:
     using Interval_t = Animation_engine::Interval_t;
+
+    struct Parameters {
+        Glyph_string frames;
+        Interval_t period = Interval_t{100};
+        int width         = 1;
+        int offset        = 0;
+    };
 
    public:
     /// Each glyph in frames is a frame, offset is starting index into frames.
@@ -26,12 +34,21 @@ class Spinner : public Widget {
           width_{width},
           index_{offset}
     {
-        height_policy.fixed(1);
-        width_policy.fixed(width_);
+        *this | pipe::fixed_height(1) | pipe::fixed_width(width_);
     }
+
+    explicit Spinner(Parameters parameters)
+        : Spinner{std::move(parameters.frames), parameters.period,
+                  parameters.width, parameters.offset}
+    {}
 
    public:
     void set_frames(Glyph_string frames) { frames_ = std::move(frames); }
+
+    [[nodiscard]] auto frames() const noexcept -> Glyph_string const&
+    {
+        return frames_;
+    }
 
     void set_period(Interval_t period)
     {
@@ -44,14 +61,19 @@ class Spinner : public Widget {
             period_ = period;
     }
 
+    [[nodiscard]] auto period() const noexcept -> Interval_t { return period_; }
+
     void set_width(int width)
     {
         width_ = width;
         width_policy.fixed(width_);
     }
 
+    [[nodiscard]] auto spinner_width() const noexcept -> int { return width_; }
+
     void set_offset(int offset) { index_ = offset; }
 
+   public:
     void start()
     {
         if (started_)
@@ -94,28 +116,55 @@ class Spinner : public Widget {
     int index_;
 };
 
-/// Helper function to create an instance.
-template <typename... Args>
-[[nodiscard]] auto spinner(Args&&... args) -> std::unique_ptr<Spinner>
+/// Helper function to create a Spinner instance.
+[[nodiscard]] inline auto spinner(
+    Glyph_string frames,
+    Spinner::Interval_t period = Spinner::Interval_t{100},
+    int width                  = 1,
+    int offset                 = 0) -> std::unique_ptr<Spinner>
 {
-    return std::make_unique<Spinner>(std::forward<Args>(args)...);
+    return std::make_unique<Spinner>(std::move(frames), period, width, offset);
+}
+
+/// Helper function to create a Spinner instance.
+[[nodiscard]] inline auto spinner(Spinner::Parameters parameters)
+    -> std::unique_ptr<Spinner>
+{
+    return std::make_unique<Spinner>(std::move(parameters));
 }
 
 /// Specific Spinners
+
 struct Spinner_cycle : Spinner {
-    Spinner_cycle(Interval_t period = Interval_t{100},
-                  int width         = 1,
-                  int offset        = 0)
+    struct Parameters {
+        Interval_t period = Interval_t{100};
+        int width         = 1;
+        int offset        = 0;
+    };
+
+    explicit Spinner_cycle(Interval_t period = Interval_t{100},
+                           int width         = 1,
+                           int offset        = 0)
         : Spinner{U"⠁⠈⠐⠠⢀⡀⠄⠂", period, width, offset}
+    {}
+
+    explicit Spinner_cycle(Parameters parameters)
+        : Spinner_cycle{parameters.period, parameters.width, parameters.offset}
     {}
 };
 
-/// Helper function to create an instance.
-template <typename... Args>
-[[nodiscard]] auto spinner_cycle(Args&&... args)
+[[nodiscard]] inline auto spinner_cycle(
+    Spinner::Interval_t period = Spinner::Interval_t{100},
+    int width                  = 1,
+    int offset                 = 0) -> std::unique_ptr<Spinner_cycle>
+{
+    return std::make_unique<Spinner_cycle>(period, width, offset);
+}
+
+[[nodiscard]] inline auto spinner_cycle(Spinner_cycle::Parameters parameters)
     -> std::unique_ptr<Spinner_cycle>
 {
-    return std::make_unique<Spinner_cycle>(std::forward<Args>(args)...);
+    return std::make_unique<Spinner_cycle>(std::move(parameters));
 }
 
 struct Spinner_cycle_ccw : Spinner {

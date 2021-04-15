@@ -71,7 +71,7 @@ class Rule_edit : public ox::layout::Vertical<> {
         });
 
         edit_box_.enter_pressed.connect(
-            [this](std::string rule_text) { rule_change(rule_text); });
+            [this](std::string const& rule_text) { rule_change(rule_text); });
 
         this->set_rule(parse_rule_string("B3/S23"));
     }

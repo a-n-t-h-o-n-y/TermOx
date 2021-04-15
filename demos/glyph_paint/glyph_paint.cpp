@@ -43,12 +43,12 @@ Glyph_paint::Glyph_paint()
         slot::remove_traits(paint_area, Trait::Underline));
 
     paint_area.glyph_changed.connect(
-        ox::slot::update_status(side_pane.show_glyph));
+        [this](Glyph x) { side_pane.show_glyph.set_text(Glyph_string{x}); });
     side_pane.options_box.options_a.clone_btn.pressed.connect(
         slot::toggle_clone(paint_area));
-    side_pane.options_box.options_a.clone_btn.pressed.connect(
-        ox::slot::update_status(side_pane.show_glyph,
-                                Glyph_string{U"Clone", fg(Color::Light_gray)}));
+    side_pane.options_box.options_a.clone_btn.pressed.connect([this] {
+        side_pane.show_glyph.set_text(U"Clone" | fg(Color::Light_gray));
+    });
     side_pane.options_box.options_a.clear_btn.pressed.connect(
         slot::clear(paint_area));
     side_pane.options_box.options_a.cursor_box.checkbox.toggled.connect(

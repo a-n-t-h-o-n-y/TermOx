@@ -11,40 +11,50 @@
 #include <termox/widget/layouts/horizontal.hpp>
 #include <termox/widget/layouts/stack.hpp>
 #include <termox/widget/layouts/vertical.hpp>
+#include <termox/widget/pair.hpp>
 #include <termox/widget/pipe.hpp>
+#include <termox/widget/tuple.hpp>
 #include <termox/widget/widget.hpp>
 #include <termox/widget/widgets/button.hpp>
 #include <termox/widget/widgets/cycle_box.hpp>
 
+namespace ox::detail {
+
+/// User interface to cycle through the pages of the Stack.
+class CS_top_row : public HTuple<Button, Cycle_box, Button> {
+   public:
+    Button& left_btn     = this->get<0>();
+    Cycle_box& cycle_box = this->get<1>();
+    Button& right_btn    = this->get<2>();
+
+   public:
+    CS_top_row() : HTuple<Button, Cycle_box, Button>{{U"<"}, {}, {U">"}}
+    {
+        using namespace pipe;
+        *this | fixed_height(1) | children() | bg(Color::Light_gray) |
+            fg(Color::Black);
+
+        left_btn | fixed_width(1) | on_press(slot::previous(cycle_box));
+        right_btn | fixed_width(1) | on_press(slot::next(cycle_box));
+        cycle_box | Trait::Bold;
+    }
+};
+
+}  // namespace ox::detail
 namespace ox {
 
 /// A layout::Stack with an interface to cycle through each Widget in the stack.
 template <typename Child = Widget>
-class Cycle_stack : public layout::Vertical<> {
-   private:
-    /// User interface to cycle through the pages of the Stack.
-    class Top_row : public layout::Horizontal<> {
-       public:
-        Button& left_btn     = this->make_child<Button>(U"<");
-        Cycle_box& cycle_box = this->make_child<Cycle_box>();
-        Button& right_btn    = this->make_child<Button>(U">");
-
-       public:
-        Top_row()
-        {
-            using namespace pipe;
-            *this | fixed_height(1) | children() | bg(Color::Light_gray) |
-                fg(Color::Black);
-
-            left_btn | fixed_width(1) | on_press(slot::previous(cycle_box));
-            right_btn | fixed_width(1) | on_press(slot::next(cycle_box));
-            cycle_box | Trait::Bold;
-        }
-    };
+class Cycle_stack : public VPair<detail::CS_top_row, layout::Stack<Child>> {
+   public:
+    struct Parameters {};
 
    public:
-    Top_row& top_row            = this->make_child<Top_row>();
-    layout::Stack<Child>& stack = this->make_child<layout::Stack<Child>>();
+    detail::CS_top_row& top_row = this->first;
+    layout::Stack<Child>& stack = this->second;
+
+   public:
+    explicit Cycle_stack(Parameters = {}) {}
 
    public:
     /// Construct a new Widget_t object and add it to the end of the Stack.
@@ -74,12 +84,12 @@ class Cycle_stack : public layout::Vertical<> {
     }
 };
 
-/// Helper function to create an instance.
-template <typename Child = Widget, typename... Args>
-[[nodiscard]] auto cycle_stack(Args&&... args)
+/// Helper function to create a Cycle_stack instance.
+template <typename Child = Widget>
+[[nodiscard]] auto cycle_stack(typename Cycle_stack<Child>::Parameters = {})
     -> std::unique_ptr<Cycle_stack<Child>>
 {
-    return std::make_unique<Cycle_stack<Child>>(std::forward<Args>(args)...);
+    return std::make_unique<Cycle_stack<Child>>();
 }
 
 }  // namespace ox

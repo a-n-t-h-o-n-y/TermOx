@@ -82,7 +82,6 @@
 #include <termox/widget/widgets/selectable.hpp>
 #include <termox/widget/widgets/slider.hpp>
 #include <termox/widget/widgets/spinner.hpp>
-#include <termox/widget/widgets/status_bar.hpp>
 #include <termox/widget/widgets/text_display.hpp>
 #include <termox/widget/widgets/textbox.hpp>
 #include <termox/widget/widgets/textline.hpp>

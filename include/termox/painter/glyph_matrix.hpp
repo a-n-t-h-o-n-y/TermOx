@@ -15,7 +15,7 @@ class Glyph_matrix {
     /// Construct with a set width and height, or defaults to 0 for each.
     /** Glyphs default constructed(space char with no colors or traits). */
     explicit Glyph_matrix(Area area)
-        : matrix_(area.height, std::vector<Glyph>(area.width, Glyph{U' '}))
+        : matrix_(area.height, std::vector<Glyph>(area.width, Glyph{U'\0'}))
     {}
 
    public:

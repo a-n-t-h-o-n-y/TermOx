@@ -26,8 +26,6 @@ class Menu_item : public Selectable<HLabel> {
    public:
     explicit Menu_item(Glyph_string label)
     {
-        // TODO Selectable should take Widget_t::Parameters if that type exists,
-        // in the constructor.
         *this | pipe::fixed_height(1);
         if (!label.empty())
             *this | fg(label.front().brush.foreground);
@@ -89,6 +87,10 @@ class Menu_list
     auto mouse_press_event_filter(Widget& w, Mouse const& m) -> bool override
     {
         auto const result = Base_t::mouse_press_event_filter(w, m);
+
+        if (!this->contains_child(&w))
+            return false;
+
         if (this->child_count() == 0)
             return result;
 
@@ -104,11 +106,16 @@ class Menu_list
 
 class Menu : public VPair<Menu_list, Widget> {
    public:
+    struct Parameters {};
+
+   public:
     Menu()
     {
         *this | pipe::direct_focus();
         buffer.install_event_filter(menu_);
     }
+
+    Menu(Parameters) : Menu{} {}
 
    public:
     /// Append item to the end of list, displayed with \p label.
@@ -140,6 +147,12 @@ class Menu : public VPair<Menu_list, Widget> {
     Menu_list& menu_ = this->first;
     Widget& buffer   = this->second;
 };
+
+/// Helper function to create a Menu instance.
+[[nodiscard]] inline auto menu(Menu::Parameters = {}) -> std::unique_ptr<Menu>
+{
+    return std::make_unique<Menu>();
+}
 
 }  // namespace ox
 #endif  // TERMOX_WIDGET_WIDGETS_MENU_HPP

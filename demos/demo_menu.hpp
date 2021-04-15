@@ -12,6 +12,7 @@
 #include <termox/widget/widgets/titlebar.hpp>
 
 #include "animation/animation_demo.hpp"
+#include "color_sliders.hpp"
 #include "colors/palette_view.hpp"
 #include "composites/composites.hpp"
 #include "focus/focus_demo.hpp"
@@ -41,23 +42,6 @@ class Demo_menu : public ox::Menu_stack {
             this->Menu_stack::goto_menu();
         });
 
-        // this->make_page<comp::Idea>(U"Idea");
-        // clang-format off
-        // this->append_page(U"Composites",
-        //     layout::vertical
-        //     (
-        //         ox::make<Checkbox1>(),
-        //         textbox(U"WOW!") | bg(Color::Green) | Trait::Bold,
-        //         layout::horizontal
-        //         (
-        //             textbox(U"Left") | bg(Color::Light_blue),
-        //             textbox(U"Right") | bg(Color::Violet)
-        //         ),
-        //         make<Checkbox2>(),
-        //         hcheckbox_label({U"A Box"})
-        //     )
-        // );
-        // clang-format on
         auto constexpr brush = ox::Brush{fg(ox::apple_ii::Aqua)};
 
         this->make_page<snake::Snake_game>(U"Snake Game" | brush);
@@ -69,6 +53,9 @@ class Demo_menu : public ox::Menu_stack {
         this->make_page<colors::Palette_demo>(U"Color Palettes" | brush);
         this->make_page<graph::Graph_demo>(U"Graph" | brush);
         this->make_page<comp::Two_lists>(U"Check Lists" | brush);
+        this->make_page<Color_sliders<50>>(
+            U"Color Sliders" | brush,
+            make_palette<50>({0, 100, 45}, {360, 100, 45}));
 
         // this->make_page<palette::Palette_demo>(U"Color Palette");
         // this->make_page<layout_demo::Layout_demo>(U"Layouts");

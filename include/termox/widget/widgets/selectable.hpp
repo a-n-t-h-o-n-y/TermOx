@@ -13,7 +13,15 @@ class Selectable : public Widget_t {
    public:
     /// Provide two methods to modify Widget_t. Signature: void(Widget_t&);
     Selectable(Select_method s, Unselect_method u)
-        : select_{std::move(s)}, unselect_{std::move(u)}
+        : Widget_t{}, select_{std::move(s)}, unselect_{std::move(u)}
+    {}
+
+    Selectable(Select_method s,
+               Unselect_method u,
+               typename Widget_t::Parameters parameters)
+        : Widget_t{std::move(parameters)},
+          select_{std::move(s)},
+          unselect_{std::move(u)}
     {}
 
    public:
@@ -28,7 +36,7 @@ class Selectable : public Widget_t {
     Unselect_method unselect_;
 };
 
-/// Helper function to create an instance.
+/// Helper function to create a selectable instance.
 template <typename Widget_t, typename Select_method, typename Unselect_method>
 [[nodiscard]] auto selectable(Select_method s, Unselect_method u)
     -> std::unique_ptr<Selectable<Widget_t, Select_method, Unselect_method>>
@@ -38,9 +46,29 @@ template <typename Widget_t, typename Select_method, typename Unselect_method>
                                                               std::move(u));
 }
 
+/// Helper function to create a selectable instance.
+template <typename Widget_t, typename Select_method, typename Unselect_method>
+[[nodiscard]] auto selectable(Select_method s,
+                              Unselect_method u,
+                              typename Widget_t::Parameters parameters)
+    -> std::unique_ptr<Selectable<Widget_t, Select_method, Unselect_method>>
+{
+    return std::make_unique<
+        Selectable<Widget_t, Select_method, Unselect_method>>(
+        std::move(s), std::move(u), std::move(parameters));
+}
+
 /// Default overload that set's Widget_t's brush to Trait::Inverse.
 template <typename Widget_t>
 class Selectable<Widget_t, void, void> : public Widget_t {
+   public:
+    using Parameters = typename Widget_t::Parameters;
+
+   public:
+    Selectable() = default;
+
+    Selectable(Parameters parameters) : Widget_t{std::move(parameters)} {}
+
    public:
     /// Change visual to mark as selected.
     void select()
@@ -57,11 +85,20 @@ class Selectable<Widget_t, void, void> : public Widget_t {
     }
 };
 
-/// Helper function to create an instance.
+/// Helper function to create a Selectable instance.
 template <typename Widget_t>
 [[nodiscard]] auto selectable() -> std::unique_ptr<Selectable<Widget_t>>
 {
     return std::make_unique<Selectable<Widget_t>>();
+}
+
+/// Helper function to create a Selectable instance.
+template <typename Widget_t>
+[[nodiscard]] auto selectable(
+    typename Selectable<Widget_t>::Parameters parameters)
+    -> std::unique_ptr<Selectable<Widget_t>>
+{
+    return std::make_unique<Selectable<Widget_t>>(std::move(parameters));
 }
 
 }  // namespace ox

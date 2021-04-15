@@ -54,14 +54,29 @@ class IP_range {
 template <typename Animator>
 class Banner : public Widget {
    public:
-    template <typename... Args>
-    Banner(Animation_engine::Interval_t interval, Args&&... args)
-        : period_{interval}, animator_{std::forward<Args>(args)...}
+    using Interval_t = Animation_engine::Interval_t;
+
+    struct Parameters {
+        Glyph_string text   = U"";
+        Interval_t interval = std::chrono::milliseconds{50};
+        Animator animator   = Animator{};
+    };
+
+   public:
+    explicit Banner(Glyph_string text   = U"",
+                    Interval_t interval = std::chrono::milliseconds{50},
+                    Animator animator   = Animator{})
+        : text_{text}, interval_{interval}, animator_{animator}
     {
         *this | pipe::fixed_height(1);
         animator_.start.connect([this] { this->start(); });
         animator_.stop.connect([this] { this->stop(); });
     }
+
+    explicit Banner(Parameters parameters)
+        : Banner{std::move(parameters.text), std::move(parameters.interval),
+                 std::move(parameters.animator)}
+    {}
 
    public:
     void set_text(Glyph_string text)
@@ -69,11 +84,35 @@ class Banner : public Widget {
         this->stop();
         text_ = std::move(text);
         range_.reset();
-        animator_.set_text_length(this->text().size());
+        animator_.set_text_length(text_.size());
         this->update();
     }
 
-    [[nodiscard]] auto text() const -> Glyph_string const& { return text_; }
+    [[nodiscard]] auto text() const noexcept -> Glyph_string const&
+    {
+        return text_;
+    }
+
+    void set_interval(Interval_t interval)
+    {
+        auto const running = this->Widget::is_animated();
+        this->stop();
+        interval_ = interval;
+        if (running)
+            this->start();
+    }
+
+    [[nodiscard]] auto interval() const noexcept -> Interval_t
+    {
+        return interval_;
+    }
+
+    [[nodiscard]] auto animator() const noexcept -> Animator const&
+    {
+        return animator_;
+    }
+
+    [[nodiscard]] auto animator() noexcept -> Animator& { return animator_; }
 
    protected:
     auto paint_event(Painter& p) -> bool override
@@ -101,9 +140,9 @@ class Banner : public Widget {
     }
 
    private:
-    Animation_engine::Interval_t const period_;
-    Animator animator_;
     Glyph_string text_;
+    Interval_t interval_;
+    Animator animator_;
     std::optional<IP_range> range_;
 
    private:
@@ -111,7 +150,7 @@ class Banner : public Widget {
     {
         if (text_.size() == 0)
             return;
-        this->enable_animation(period_);
+        this->enable_animation(interval_);
     }
 
     void stop()
@@ -121,11 +160,24 @@ class Banner : public Widget {
     }
 };
 
-/// Helper function to create an instance.
-template <typename Animator, typename... Args>
-[[nodiscard]] auto banner(Args&&... args) -> std::unique_ptr<Banner<Animator>>
+/// Helper function to create a Banner instance.
+template <typename Animator>
+[[nodiscard]] auto banner(Glyph_string text = U"",
+                          typename Banner<Animator>::Interval_t interval =
+                              std::chrono::milliseconds{50},
+                          Animator animator = Animator{})
+    -> std::unique_ptr<Banner<Animator>>
 {
-    return std::make_unique<Banner<Animator>>(std::forward<Args>(args)...);
+    return std::make_unique<Banner<Animator>>(std::move(text), interval,
+                                              std::move(animator));
+}
+
+/// Helper function to create a Banner instance.
+template <typename Animator>
+[[nodiscard]] auto banner(typename Banner<Animator>::Parameters parameters)
+    -> std::unique_ptr<Banner<Animator>>
+{
+    return std::make_unique<Banner<Animator>>(std::move(parameters));
 }
 
 }  // namespace ox
@@ -472,4 +524,131 @@ class Unscramble : public Animator_base {
 };
 
 }  // namespace ox::animator
+
+namespace ox {
+
+using Scan_banner = Banner<animator::Scan>;
+
+/// Helper function to create a Scan_banner instance.
+[[nodiscard]] inline auto scan_banner(
+    Glyph_string text                = U"",
+    Scan_banner::Interval_t interval = std::chrono::milliseconds{50},
+    animator::Scan animator = animator::Scan{}) -> std::unique_ptr<Scan_banner>
+{
+    return std::make_unique<Scan_banner>(std::move(text), interval,
+                                         std::move(animator));
+}
+
+/// Helper function to create a Scan_banner instance.
+[[nodiscard]] inline auto scan_banner(Scan_banner::Parameters parameters)
+    -> std::unique_ptr<Scan_banner>
+{
+    return std::make_unique<Scan_banner>(std::move(parameters));
+}
+
+using Persistent_scan_banner = Banner<animator::Persistent_scan>;
+
+/// Helper function to create a Persistent_scan_banner instance.
+[[nodiscard]] inline auto persistent_scan_banner(
+    Glyph_string text                           = U"",
+    Persistent_scan_banner::Interval_t interval = std::chrono::milliseconds{50},
+    animator::Persistent_scan animator          = animator::Persistent_scan{})
+    -> std::unique_ptr<Persistent_scan_banner>
+{
+    return std::make_unique<Persistent_scan_banner>(std::move(text), interval,
+                                                    std::move(animator));
+}
+
+/// Helper function to create a Persistent_scan_banner instance.
+[[nodiscard]] inline auto persistent_scan_banner(
+    Persistent_scan_banner::Parameters parameters)
+    -> std::unique_ptr<Persistent_scan_banner>
+{
+    return std::make_unique<Persistent_scan_banner>(std::move(parameters));
+}
+
+using Random_banner = Banner<animator::Random>;
+
+/// Helper function to create a Random_banner instance.
+[[nodiscard]] inline auto random_banner(
+    Glyph_string text                  = U"",
+    Random_banner::Interval_t interval = std::chrono::milliseconds{50},
+    animator::Random animator          = animator::Random{})
+    -> std::unique_ptr<Random_banner>
+{
+    return std::make_unique<Random_banner>(std::move(text), interval,
+                                           std::move(animator));
+}
+
+/// Helper function to create a Random_banner instance.
+[[nodiscard]] inline auto random_banner(Random_banner::Parameters parameters)
+    -> std::unique_ptr<Random_banner>
+{
+    return std::make_unique<Random_banner>(std::move(parameters));
+}
+
+using Scroll_banner = Banner<animator::Scroll>;
+
+/// Helper function to create a Scroll_banner instance.
+[[nodiscard]] inline auto scroll_banner(
+    Glyph_string text                  = U"",
+    Scroll_banner::Interval_t interval = std::chrono::milliseconds{50},
+    animator::Scroll animator          = animator::Scroll{})
+    -> std::unique_ptr<Scroll_banner>
+{
+    return std::make_unique<Scroll_banner>(std::move(text), interval,
+                                           std::move(animator));
+}
+
+/// Helper function to create a Scroll_banner instance.
+[[nodiscard]] inline auto scroll_banner(Scroll_banner::Parameters parameters)
+    -> std::unique_ptr<Scroll_banner>
+{
+    return std::make_unique<Scroll_banner>(std::move(parameters));
+}
+
+using Conditional_scroll_banner = Banner<animator::Conditional_scroll>;
+
+/// Helper function to create a Conditional_scroll_banner instance.
+[[nodiscard]] inline auto conditional_scroll_banner(
+    Glyph_string text = U"",
+    Conditional_scroll_banner::Interval_t interval =
+        std::chrono::milliseconds{50},
+    animator::Conditional_scroll animator = animator::Conditional_scroll{})
+    -> std::unique_ptr<Conditional_scroll_banner>
+{
+    return std::make_unique<Conditional_scroll_banner>(
+        std::move(text), interval, std::move(animator));
+}
+
+/// Helper function to create a Conditional_scroll_banner instance.
+[[nodiscard]] inline auto conditional_scroll_banner(
+    Conditional_scroll_banner::Parameters parameters)
+    -> std::unique_ptr<Conditional_scroll_banner>
+{
+    return std::make_unique<Conditional_scroll_banner>(std::move(parameters));
+}
+
+using Unscramble_banner = Banner<animator::Unscramble>;
+
+/// Helper function to create a Unscramble_banner instance.
+[[nodiscard]] inline auto unscramble_banner(
+    Glyph_string text                      = U"",
+    Unscramble_banner::Interval_t interval = std::chrono::milliseconds{50},
+    animator::Unscramble animator          = animator::Unscramble{})
+    -> std::unique_ptr<Unscramble_banner>
+{
+    return std::make_unique<Unscramble_banner>(std::move(text), interval,
+                                               std::move(animator));
+}
+
+/// Helper function to create a Unscramble_banner instance.
+[[nodiscard]] inline auto unscramble_banner(
+    Unscramble_banner::Parameters parameters)
+    -> std::unique_ptr<Unscramble_banner>
+{
+    return std::make_unique<Unscramble_banner>(std::move(parameters));
+}
+
+}  // namespace ox
 #endif  // TERMOX_WIDGET_WIDGETS_BANNER_HPP

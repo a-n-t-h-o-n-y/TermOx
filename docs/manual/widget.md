@@ -55,7 +55,6 @@ inheriting from them and expanding their functionality.
 - [`Spinner`](widgets/spinner.md)
 - [`Textline`](widgets/textline.md)
 - [`Number_edit`](widgets/number-edit.md)
-- [`Status_bar`](widgets/status-bar.md)
 - [`Text_display`](widgets/text-display.md)
 - [`Textbox`](widgets/textbox.md)
 - [`Tile`](widgets/tile.md)

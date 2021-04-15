@@ -3,25 +3,31 @@
 #include <utility>
 
 #include <termox/widget/layouts/stack.hpp>
+#include <termox/widget/pair.hpp>
 #include <termox/widget/widget.hpp>
 
 namespace ox {
 
 /// Policy to make any Widget or Layout hideable with a hide() and show() method
 template <typename Widget_t>
-class Hideable : public layout::Stack<> {
-   private:
-    Widget& blank_ = this->Stack::make_page();
+class Hideable : public SPair<Widget, Widget_t> {
+   public:
+    using Parameters = typename Widget_t::Parameter;
 
    public:
-    Widget_t& w;
+    Widget_t& w = this->second;
 
    public:
-    /// Forward constructor arguments for the Widget_t that is being wrapped.
+    Hideable()
+    {
+        this->Stack::set_active_page(widget_index_);
+        this->Stack::give_focus_on_change(false);
+    }
+
+    /// Forward constructor Parameters for the Widget_t that is being wrapped.
     /** Wrapped Widget is in visible state when constructed. Access via w. */
-    template <typename... Args>
-    explicit Hideable(Args&&... args)
-        : w{this->Stack::make_page<Widget_t>(std::forward<Args>(args)...)}
+    explicit Hideable(Parameters parameters)
+        : SPair<Widget, Widget_t>{{}, parameters}
     {
         this->Stack::set_active_page(widget_index_);
         this->Stack::give_focus_on_change(false);
@@ -45,12 +51,19 @@ class Hideable : public layout::Stack<> {
     static constexpr auto widget_index_ = 1uL;
 };
 
-/// Helper function to create an instance.
-template <typename Widget_t, typename... Args>
-[[nodiscard]] auto hideable(Args&&... args)
+/// Helper function to create a Hideable instance.
+template <typename Widget_t>
+[[nodiscard]] auto hideable() -> std::unique_ptr<Hideable<Widget_t>>
+{
+    return std::make_unique<Hideable<Widget_t>>();
+}
+
+/// Helper function to create a Hideable instance.
+template <typename Widget_t>
+[[nodiscard]] auto hideable(typename Hideable<Widget_t>::Parameters parameters)
     -> std::unique_ptr<Hideable<Widget_t>>
 {
-    return std::make_unique<Hideable<Widget_t>>(std::forward<Args>(args)...);
+    return std::make_unique<Hideable<Widget_t>>(std::move(parameters));
 }
 
 }  // namespace ox

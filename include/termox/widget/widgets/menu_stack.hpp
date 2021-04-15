@@ -12,6 +12,13 @@
 
 namespace ox {
 
+// maybe TODO
+// You could simplify the index math if you hold:
+// STuple<Main_menu, layout::Stack<Widget>>
+// Then the widgets are in their own stack, you arn't mixing, and you can also
+// have a template parameter if you only want to hold a specific type of Widget,
+// since this is a layout technically.
+
 /// A Stack layout with a Menu to switch between pages.
 /** Menu Widget is not counted as a Stack index, pages start from index 0. */
 class Menu_stack : public layout::Stack<Widget> {

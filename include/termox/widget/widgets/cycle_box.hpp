@@ -17,10 +17,12 @@
 #include <termox/widget/focus_policy.hpp>
 #include <termox/widget/layouts/horizontal.hpp>
 #include <termox/widget/pipe.hpp>
+#include <termox/widget/tuple.hpp>
 #include <termox/widget/widgets/label.hpp>
 #include <termox/widget/widgets/tile.hpp>
 
 // TODO Indicate in focus with color or trait change.
+
 namespace ox {
 
 /// A rotating set of labels, emitting a Signal when the label is changed.
@@ -28,11 +30,14 @@ namespace ox {
  *  by a scroll down button press, or arrow keys. */
 class Cycle_box : public HLabel {
    public:
+    struct Parameters {};
+
+   public:
     /// Emitted when the option is changed, sends the new option's string rep.
     sl::Signal<void(std::string)> option_changed;
 
    public:
-    Cycle_box() : HLabel{U""}
+    Cycle_box(Parameters = {}) : HLabel{U""}
     {
         *this | pipe::align_center() | pipe::strong_focus();
     }
@@ -159,34 +164,37 @@ class Cycle_box : public HLabel {
 };
 
 /// Helper function to create an instance.
-[[nodiscard]] inline auto cycle_box() -> std::unique_ptr<Cycle_box>
+[[nodiscard]] inline auto cycle_box(Cycle_box::Parameters = {})
+    -> std::unique_ptr<Cycle_box>
 {
     return std::make_unique<Cycle_box>();
 }
 
 /// A label on the left and a Cycle_box on the right.
-class Labeled_cycle_box : public layout::Horizontal<> {
+class Labeled_cycle_box : public HTuple<HLabel, Tile, Cycle_box> {
    public:
-    HLabel& label = make_child<HLabel>(U"");
-
-    Tile& div            = make_child<Tile>(U'├');
-    Cycle_box& cycle_box = make_child<Cycle_box>();
+    struct Parameters {
+        Glyph_string label = U"";
+    };
 
    public:
-    explicit Labeled_cycle_box(Glyph_string title = "")
+    HLabel& label        = this->get<0>();
+    Tile& div            = this->get<1>();
+    Cycle_box& cycle_box = this->get<2>();
+
+   public:
+    explicit Labeled_cycle_box(Glyph_string title = U"")
+        : HTuple<HLabel, Tile, Cycle_box>{{std::move(title).append(U' '),
+                                           Align::Left, 0, 0, Growth::Dynamic},
+                                          {U'├'},
+                                          {}}
     {
-        *this | pipe::fixed_height(1) | pipe::label(std::move(title)) |
-            pipe::direct_focus();
+        *this | pipe::fixed_height(1) | pipe::direct_focus();
     }
 
-   public:
-    void set_label(Glyph_string title)
-    {
-        label.set_text(std::move(title));
-        this->resize_label();
-    }
-
-    void set_divider(Glyph divider) { div.set_tile(divider); }
+    explicit Labeled_cycle_box(Parameters parameters)
+        : Labeled_cycle_box{std::move(parameters.label)}
+    {}
 
    protected:
     auto focus_in_event() -> bool override
@@ -194,18 +202,21 @@ class Labeled_cycle_box : public layout::Horizontal<> {
         System::set_focus(cycle_box);
         return true;
     }
-
-   private:
-    // TODO remove and set label as dynamic
-    void resize_label() { label | pipe::fixed_width(label.text().size() + 1); }
 };
 
-/// Helper function to create an instance.
-template <typename... Args>
-[[nodiscard]] auto labeled_cycle_box(Args&&... args)
+/// Helper function to create a Labeled_cycle_box instance.
+[[nodiscard]] inline auto labeled_cycle_box(Glyph_string label = U"")
     -> std::unique_ptr<Labeled_cycle_box>
 {
-    return std::make_unique<Labeled_cycle_box>(std::forward<Args>(args)...);
+    return std::make_unique<Labeled_cycle_box>(std::move(label));
+}
+
+/// Helper function to create a Labeled_cycle_box instance.
+[[nodiscard]] inline auto labeled_cycle_box(
+    Labeled_cycle_box::Parameters parameters)
+    -> std::unique_ptr<Labeled_cycle_box>
+{
+    return std::make_unique<Labeled_cycle_box>(std::move(parameters));
 }
 
 }  // namespace ox

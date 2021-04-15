@@ -137,6 +137,8 @@ class Selecting : public Layout_t {
 
     auto mouse_press_event_filter(Widget& w, Mouse const& m) -> bool override
     {
+        if (!this->contains_child(&w))
+            return false;
         switch (m.button) {
             case Mouse::Button::Left:
                 this->set_selected_by_pointer(

@@ -32,7 +32,7 @@ auto read_file(std::string const& filename) -> std::string
         throw std::runtime_error{filename + " Could Not Be Opened"};
     auto oss = std::ostringstream{};
     ifs >> oss.rdbuf();
-    if (ifs.fail() and !ifs.eof())
+    if (ifs.fail() && !ifs.eof())
         throw std::runtime_error{"Read From " + filename + " Failed"};
     return oss.str();
 }
@@ -47,7 +47,7 @@ namespace demos {
 void Notepad::initialize()
 {
     // Signals
-    save_area.load_request.connect([this](std::string filename) {
+    save_area.load_request.connect([this](std::string const& filename) {
         try {
             txt_trait.textbox.set_contents(::read_file(filename));
             status_bar.success(filename + " Loaded");
@@ -57,7 +57,7 @@ void Notepad::initialize()
         }
     });
 
-    save_area.save_request.connect([this](std::string filename) {
+    save_area.save_request.connect([this](std::string const& filename) {
         try {
             ::write_file(filename, txt_trait.textbox.contents().str());
             status_bar.success("Saved to " + filename);
@@ -67,4 +67,5 @@ void Notepad::initialize()
         }
     });
 }
+
 }  // namespace demos

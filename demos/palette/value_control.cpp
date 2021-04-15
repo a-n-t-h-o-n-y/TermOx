@@ -31,7 +31,7 @@ Value_control::Value_control(const Glyph_string& label)
     auto& edit_box = this->value_edit_.box;
 
     value_edit_.box.enter_pressed.connect(
-        [&slider, &edit_box](std::string value_str) {
+        [&slider, &edit_box](std::string const& value_str) {
             if (value_str.empty())
                 slider.set_value(0);
             else

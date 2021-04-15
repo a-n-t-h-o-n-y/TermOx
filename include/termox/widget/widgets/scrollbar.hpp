@@ -27,35 +27,43 @@ namespace ox {
  *  scrollbar is at is emitted with the new_position signal. */
 template <typename Layout_t>
 class Scrollbar : public Layout_t {
+   public:
+    struct Parameters {
+        std::size_t size     = 0;
+        std::size_t position = invalid_position;
+    };
+
    private:
     class Middle : public Widget {
+       public:
+        using Parameters = Scrollbar::Parameters;
+
        public:
         static auto constexpr invalid_position = -1uL;
 
        public:
-        struct Parameters {
-            std::size_t size;
-            std::size_t position;
-        };
-
-       public:
-        Middle(Parameters p = {0, 0}) : parameters_{p}
+        Middle(std::size_t size = 0, std::size_t position = 0)
+            : size_{size}, position_{position}
         {
             this->set_bar_fg(Color::Foreground);
             this->set_bar_bg(Color::Dark_gray);
         }
 
+        Middle(Parameters parameters)
+            : Middle{parameters.size, parameters.position}
+        {}
+
        public:
         void set_position(std::size_t p)
         {
-            parameters_.position = p;
+            position_ = p;
             this->update_length_and_position();
             this->update();
         }
 
         void set_size(std::size_t s)
         {
-            parameters_.size = s;
+            size_ = s;
             this->update_length_and_position();
             this->update();
         }
@@ -79,20 +87,19 @@ class Scrollbar : public Layout_t {
         [[nodiscard]] auto find_position_from_point(Point p) -> std::size_t
         {
             auto const length = (int)this->max_length() - (int)slider_length_;
-            if (length < 1 || parameters_.size == 0)
+            if (length < 1 || size_ == 0)
                 return 0;
             double const at = is_vertical ? p.y : p.x;
             double ratio    = at / length;
             if (ratio > 1.)
                 ratio = 1.;
-            return ratio * (parameters_.size - 1);
+            return ratio * (size_ - 1);
         }
 
        protected:
         auto paint_event(Painter& p) -> bool override
         {
-            if (parameters_.size == 0 ||
-                parameters_.position == invalid_position ||
+            if (size_ == 0 || position_ == invalid_position ||
                 slider_length_ == 0) {
                 return Widget::paint_event(p);
             }
@@ -115,7 +122,9 @@ class Scrollbar : public Layout_t {
         static auto constexpr is_vertical = layout::is_vertical_v<Layout_t>;
 
        private:
-        Parameters parameters_;
+        std::size_t size_;
+        std::size_t position_;
+
         Glyph bar_ = is_vertical ? U'█' : U'▬';
 
         int slider_position_;
@@ -126,9 +135,9 @@ class Scrollbar : public Layout_t {
         {
             // Order Matters, position depends on length
             auto const length = this->max_length();
-            slider_length_    = slider_length(length, parameters_.size);
-            slider_position_  = slider_position(
-                length, parameters_.size, parameters_.position, slider_length_);
+            slider_length_    = slider_length(length, size_);
+            slider_position_ =
+                slider_position(length, size_, position_, slider_length_);
         }
 
         [[nodiscard]] static auto constexpr point(int position) -> Point
@@ -171,12 +180,6 @@ class Scrollbar : public Layout_t {
     };
 
    public:
-    struct Parameters {
-        std::size_t size     = 0;
-        std::size_t position = invalid_position;
-    };
-
-   public:
     static auto constexpr invalid_position = -1uL;
 
    public:
@@ -194,7 +197,9 @@ class Scrollbar : public Layout_t {
     sl::Signal<void()> incremented;
 
    public:
-    explicit Scrollbar(Parameters p = {}) : parameters_{std::move(p)}
+    explicit Scrollbar(std::size_t size     = 0,
+                       std::size_t position = invalid_position)
+        : size_{size}, position_{position}
     {
         using namespace pipe;
         if constexpr (is_vertical) {
@@ -218,19 +223,20 @@ class Scrollbar : public Layout_t {
         middle.install_event_filter(*this);
     }
 
+    explicit Scrollbar(Parameters parameters)
+        : Scrollbar{parameters.size, parameters.position}
+    {}
+
    public:
-    [[nodiscard]] auto get_size() const -> std::size_t
-    {
-        return parameters_.size;
-    }
+    [[nodiscard]] auto get_size() const -> std::size_t { return size_; }
 
     void set_size(std::size_t s)
     {
-        parameters_.size = s;
-        if (parameters_.position == invalid_position && parameters_.size != 0)
+        size_ = s;
+        if (position_ == invalid_position && size_ != 0)
             this->set_position(0);
-        else if (parameters_.position >= parameters_.size)
-            this->set_position(parameters_.size - 1);
+        else if (position_ >= size_)
+            this->set_position(size_ - 1);
         middle.set_size(s);
     }
 
@@ -243,35 +249,32 @@ class Scrollbar : public Layout_t {
         this->set_size(this->get_size() - 1);
     }
 
-    [[nodiscard]] auto get_position() const -> std::size_t
-    {
-        return parameters_.position;
-    }
+    [[nodiscard]] auto get_position() const -> std::size_t { return position_; }
 
     void set_position(std::size_t p)
     {
-        if (parameters_.size == 0)
+        if (size_ == 0)
             return;
-        parameters_.position = p < parameters_.size ? p : parameters_.size - 1;
-        new_position.emit(parameters_.position);
+        position_ = p < size_ ? p : size_ - 1;
+        new_position.emit(position_);
         middle.set_position(p);
     }
 
     void decrement_position()
     {
-        if (parameters_.position == invalid_position)
+        if (position_ == invalid_position)
             return;
-        if (parameters_.position == 0)
+        if (position_ == 0)
             return;
-        this->set_position(parameters_.position - 1);
+        this->set_position(position_ - 1);
         decremented();
     }
 
     void increment_position()
     {
-        if (parameters_.position + 1 == parameters_.size)
+        if (position_ + 1 == size_)
             return;
-        this->set_position(parameters_.position + 1);
+        this->set_position(position_ + 1);
         incremented();
     }
 
@@ -311,7 +314,8 @@ class Scrollbar : public Layout_t {
     }
 
    private:
-    Parameters parameters_;
+    std::size_t size_;
+    std::size_t position_;
 
    private:
     static auto constexpr is_vertical    = layout::is_vertical_v<Layout_t>;
@@ -319,31 +323,61 @@ class Scrollbar : public Layout_t {
     static auto constexpr bottom_symbol_ = is_vertical ? U'▾' : U'▸';
 };
 
-using HScrollbar = Scrollbar<layout::Horizontal<>>;
-using VScrollbar = Scrollbar<layout::Vertical<>>;
-
-/// Helper function to create an instance.
+/// Helper function to create a Scrollbar instance.
 template <typename Layout_t>
-[[nodiscard]] inline auto scrollbar(typename Scrollbar<Layout_t>::Parameters p)
+[[nodiscard]] auto scrollbar(
+    std::size_t size     = 0,
+    std::size_t position = Scrollbar<Layout_t>::invalid_position)
+    -> std::unique_ptr<Scrollbar<Layout_t>>
+{
+    return std::make_unique<Scrollbar<Layout_t>>(size, position);
+}
+
+/// Helper function to create a Scrollbar instance.
+template <typename Layout_t>
+[[nodiscard]] auto scrollbar(typename Scrollbar<Layout_t>::Parameters p)
     -> std::unique_ptr<Scrollbar<Layout_t>>
 {
     return std::make_unique<Scrollbar<Layout_t>>(std::move(p));
 }
 
-/// Helper function to create an instance.
-[[nodiscard]] inline auto h_scrollbar(HScrollbar::Parameters p)
+using HScrollbar = Scrollbar<layout::Horizontal<>>;
+
+/// Helper function to create an HScrollbar instance.
+[[nodiscard]] inline auto hscrollbar(
+    std::size_t size     = 0,
+    std::size_t position = HScrollbar::invalid_position)
+    -> std::unique_ptr<HScrollbar>
+{
+    return std::make_unique<HScrollbar>(size, position);
+}
+
+/// Helper function to create an HScrollbar instance.
+[[nodiscard]] inline auto hscrollbar(HScrollbar::Parameters p)
     -> std::unique_ptr<HScrollbar>
 {
     return std::make_unique<HScrollbar>(std::move(p));
 }
 
-/// Helper function to create an instance.
-[[nodiscard]] inline auto v_scrollbar(VScrollbar::Parameters p)
+using VScrollbar = Scrollbar<layout::Vertical<>>;
+
+/// Helper function to create a VScrollbar instance.
+[[nodiscard]] inline auto vscrollbar(
+    std::size_t size     = 0,
+    std::size_t position = VScrollbar::invalid_position)
+    -> std::unique_ptr<VScrollbar>
+{
+    return std::make_unique<VScrollbar>(size, position);
+}
+
+/// Helper function to create a VScrollbar instance.
+[[nodiscard]] inline auto vscrollbar(VScrollbar::Parameters p)
     -> std::unique_ptr<VScrollbar>
 {
     return std::make_unique<VScrollbar>(std::move(p));
 }
 
+/// Link a scrollbar and any Linear_layout type.
 template <typename Layout_t, typename Child, typename Parameters>
 void link(Scrollbar<Layout_t>& scrollbar,
           layout::detail::Linear_layout<Child, Parameters>& layout,
@@ -373,6 +407,7 @@ void link(Scrollbar<Layout_t>& scrollbar,
     }
 }
 
+/// Link a Scrollbar and Textbox together.
 template <typename Layout_t>
 void link(Scrollbar<Layout_t>& scrollbar, Textbox& textbox)
 {

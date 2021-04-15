@@ -87,7 +87,6 @@ target_sources(TermOx
         widget/widget.cpp
         widget/widget_slots.cpp
         widget/textline.cpp
-        widget/log.cpp
         widget/border.cpp
         widget/cycle_box.cpp
         widget/textbox.cpp

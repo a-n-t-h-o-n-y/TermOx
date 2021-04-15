@@ -246,9 +246,13 @@ class Layout : public Widget {
     }
 
     /// Returns true if \p w is a child of *this.
-    [[nodiscard]] auto contains_child(Child_t const* w) const -> bool
+    [[nodiscard]] auto contains_child(Widget const* w) const -> bool
     {
-        return this->find_child(w) != nullptr;
+        auto const begin = std::cbegin(children_);
+        auto const end   = std::cend(children_);
+        return std::find_if(begin, end, [w](auto const& w_ptr) {
+                   return w_ptr.get() == w;
+               }) != end;
     }
 
     /// Returns true if \p descendant is a child or some other child's child etc

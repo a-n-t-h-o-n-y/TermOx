@@ -158,7 +158,7 @@ class Accordion : public Passive<Layout_t<Widget>> {
     using Parameters = typename Bar_t::Parameters;
 
    public:
-    /// Create an Accordion with \pargs... going to Widget_t constructor.
+    /// Create an Accordion with \p args... going to Widget_t constructor.
     template <typename... Args>
     Accordion(Parameters p, Args&&... args)
         : bar_{this->template make_child<Bar_t>(std::move(p))},

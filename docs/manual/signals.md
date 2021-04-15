@@ -57,16 +57,16 @@ struct Foo_bar : layout::Horizontal<Button> {
 };
 
 struct App : layout::Vertical<> {
-    Foo_bar& fb        = this->make_child<Foo_bar>();
-    Status_bar& status = this->make_child<Status_bar>();
+    Foo_bar& fb    = this->make_child<Foo_bar>();
+    HLabel& status = this->make_child<HLabel>();
 
     App()
     {
         fb.foo.connect([]{ do_foo(); });
-        fb.foo.connect([this]{ status.update_status("Foo Happened"); });
+        fb.foo.connect([this]{ status.set_text(U"Foo Happened"); });
 
         fb.bar.connect([]{ do_bar(); });
-        fb.bar.connect([this]{ status.update_status("Bar Happened"); });
+        fb.bar.connect([this]{ status.set_text(U"Bar Happened"); });
     }
 };
 ```

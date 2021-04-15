@@ -7,7 +7,7 @@
 #include <termox/widget/pipe.hpp>
 #include <termox/widget/widgets/color_select.hpp>
 #include <termox/widget/widgets/cycle_stack.hpp>
-#include <termox/widget/widgets/status_bar.hpp>
+#include <termox/widget/widgets/label.hpp>
 #include <termox/widget/widgets/text_display.hpp>
 
 #include "glyph_selector.hpp"
@@ -51,7 +51,7 @@ class Side_pane : public ox::layout::Vertical<> {
     Widget& space1                 = make_child() | ox::pipe::fixed_height(1);
     Color_pages& color_pages       = make_child<Color_pages>();
     Trait_box& trait_box           = make_child<Trait_box>();
-    ox::Status_bar& show_glyph     = make_child<ox::Status_bar>("x");
+    ox::HLabel& show_glyph         = make_child<ox::HLabel>(U"x");
     Widget& space2                 = make_child() | ox::pipe::fixed_height(1);
     Options_stack& options_box     = make_child<Options_stack>();
 };

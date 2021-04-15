@@ -16,11 +16,18 @@
 
 namespace ox {
 
+// TODO Add Alignment as param once user input works with Align in Textline.
+
 /// A Textline for specified number types.
 /** Provides validator specific to Number_t. Uses std::stringstream to convert
  *  from string to Number_t value. */
 template <typename Number_t = int>
 class Number_edit : public Textline {
+   public:
+    struct Parameters {
+        Number_t value = 0;
+    };
+
    public:
     /// Emitted on Enter Key press, sends along the current value.
     sl::Signal<void(Number_t)> value_set;
@@ -30,18 +37,20 @@ class Number_edit : public Textline {
     explicit Number_edit(Number_t initial = 0)
         : Textline{std::to_string(initial)}, value_{initial}
     {
-        // this->set_alignment(Align::Right); // TODO Once alignment works w/ed
-        this->set_validator(
-            [](char c) { return Number_edit::is_valid_input(c); });
-        this->enter_pressed.connect([this](std::string text) {
+        this->set_validator([](char c) { return is_valid_input(c); });
+        this->enter_pressed.connect([this](std::string const& text) {
             auto ss     = std::stringstream{text};
-            auto result = Number_t{0};
+            auto result = Number_t(0);
             ss >> result;
-            value_set(result);
+            value_set.emit(result);
         });
         this->set_value(initial);
     }
 
+    explicit Number_edit(Parameters parameters) : Number_edit{parameters.value}
+    {}
+
+   public:
     /// Manually set the value of the Number_edit.
     /** Does not emit a value_set Signal. */
     void set_value(Number_t value)
@@ -49,6 +58,9 @@ class Number_edit : public Textline {
         value_ = value;
         this->display_value();
     }
+
+    /// Return the currently set value.
+    [[nodiscard]] auto value() const -> Number_t { return value_; }
 
    protected:
     auto mouse_wheel_event(Mouse const& m) -> bool override
@@ -84,7 +96,7 @@ class Number_edit : public Textline {
         this->set_contents(ss.str());
     }
 
-    void emit_signal() { value_set(value_); }
+    void emit_signal() { value_set.emit(value_); }
 
     void increment()
     {
@@ -105,12 +117,21 @@ class Number_edit : public Textline {
     }
 };
 
-/// Helper function to create an instance.
-template <typename Number_t = int, typename... Args>
-[[nodiscard]] auto number_edit(Args&&... args)
+/// Helper function to create a Number_edit instance.
+template <typename Number_t = int>
+[[nodiscard]] auto number_edit(Number_t initial = 0)
     -> std::unique_ptr<Number_edit<Number_t>>
 {
-    return std::make_unique<Number_edit<Number_t>>(std::forward<Args>(args)...);
+    return std::make_unique<Number_edit<Number_t>>(initial);
+}
+
+/// Helper function to create a Number_edit instance.
+template <typename Number_t = int>
+[[nodiscard]] auto number_edit(
+    typename Number_edit<Number_t>::Parameters parameters)
+    -> std::unique_ptr<Number_edit<Number_t>>
+{
+    return std::make_unique<Number_edit<Number_t>>(std::move(parameters));
 }
 
 /// Number_edit with preceding Label arranged horizontally.
@@ -118,6 +139,12 @@ template <typename Number_t = int>
 class Labeled_number_edit : public HLabel_left<Number_edit<Number_t>> {
    private:
     using Base = HLabel_left<Number_edit<Number_t>>;
+
+   public:
+    struct Parameters {
+        Glyph_string title;
+        Number_t initial;
+    };
 
    public:
     HLabel& label                      = Base::label;
@@ -138,10 +165,20 @@ class Labeled_number_edit : public HLabel_left<Number_edit<Number_t>> {
         number_edit | bg(Color::White) | fg(Color::Black) | ghost(Color::Gray);
     }
 
+    explicit Labeled_number_edit(Parameters parameters)
+        : Labeled_number_edit{std::move(parameters.title), parameters.initial}
+    {}
+
    public:
     /// Manually set the value of the Number_edit.
     /** Does not emit a value_set Signal. */
     void set_value(Number_t value) { number_edit.set_value(value); }
+
+    /// Return the current value.
+    [[nodiscard]] auto value() const noexcept -> Number_t
+    {
+        return number_edit.value();
+    }
 
    protected:
     auto focus_in_event() -> bool override
@@ -151,13 +188,13 @@ class Labeled_number_edit : public HLabel_left<Number_edit<Number_t>> {
     }
 };
 
-/// Helper function to create an instance.
-template <typename Number_t = int, typename... Args>
-[[nodiscard]] auto labeled_number_edit(Args&&... args)
+/// Helper function to create a Labeled_number_edit instance.
+template <typename Number_t = int>
+[[nodiscard]] auto labeled_number_edit(Glyph_string title, Number_t initial)
     -> std::unique_ptr<Labeled_number_edit<Number_t>>
 {
-    return std::make_unique<Labeled_number_edit<Number_t>>(
-        std::forward<Args>(args)...);
+    return std::make_unique<Labeled_number_edit<Number_t>>(std::move(title),
+                                                           initial);
 }
 
 }  // namespace ox

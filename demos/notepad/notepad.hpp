@@ -14,7 +14,9 @@
 #include <termox/widget/layouts/horizontal.hpp>
 #include <termox/widget/layouts/passive.hpp>
 #include <termox/widget/layouts/vertical.hpp>
+#include <termox/widget/pair.hpp>
 #include <termox/widget/pipe.hpp>
+#include <termox/widget/tuple.hpp>
 #include <termox/widget/widget_slots.hpp>
 #include <termox/widget/widgets/accordion.hpp>
 #include <termox/widget/widgets/banner.hpp>
@@ -144,7 +146,7 @@ class Text_and_side_pane : public ox::layout::Horizontal<> {
 
 class Filename_edit : public ox::Textbox {
    public:
-    Filename_edit()
+    Filename_edit(Parameters = {})
     {
         using namespace ox;
         using namespace ox::pipe;
@@ -161,37 +163,41 @@ class Filename_edit : public ox::Textbox {
     }
 };
 
-class Save_area : public ox::layout::Horizontal<> {
+class Save_area : public ox::HTuple<ox::Button, Filename_edit, ox::Button> {
+   private:
+    ox::Button& load_btn         = this->get<0>();
+    Filename_edit& filename_edit = this->get<1>();
+    ox::Button& save_btn         = this->get<2>();
+
    public:
-    sl::Signal<void(std::string)> save_request;
-    sl::Signal<void(std::string)> load_request;
+    sl::Signal<void(std::string const&)> save_request;
+    sl::Signal<void(std::string const&)> load_request;
 
    public:
     Save_area()
+        : ox::HTuple<ox::Button, Filename_edit, ox::Button>{{U"Load"},
+                                                            {},
+                                                            {U"Save"}}
     {
-        using namespace ox;
         using namespace ox::pipe;
 
         *this | fixed_height(1);
 
-        load_btn | fixed_width(6) | bg(Color::Blue) | on_press([this] {
-            this->load_request(filename_edit.contents().str());
+        load_btn | fixed_width(6) | bg(ox::Color::Blue) | on_press([this] {
+            this->load_request.emit(filename_edit.contents().str());
         });
 
-        save_btn | fixed_width(6) | bg(Color::Blue) | on_press([this] {
-            this->save_request(filename_edit.contents().str());
+        save_btn | fixed_width(6) | bg(ox::Color::Blue) | on_press([this] {
+            this->save_request.emit(filename_edit.contents().str());
         });
     }
-
-   private:
-    ox::Button& load_btn         = this->make_child<ox::Button>("Load");
-    Filename_edit& filename_edit = this->make_child<Filename_edit>();
-    ox::Button& save_btn         = this->make_child<ox::Button>("Save");
 };
 
-class File_status_bar : public ox::Banner<ox::animator::Unscramble> {
+class File_status_bar : public ox::Unscramble_banner {
    public:
-    File_status_bar() : Banner{std::chrono::milliseconds{50}} {}
+    File_status_bar()
+        : ox::Unscramble_banner{U"", std::chrono::milliseconds{40}}
+    {}
 
    public:
     void fail(ox::Glyph_string message)
@@ -207,11 +213,12 @@ class File_status_bar : public ox::Banner<ox::animator::Unscramble> {
     }
 };
 
-class Notepad : public ox::layout::Vertical<> {
+class Notepad
+    : public ox::VTuple<Text_and_side_pane, File_status_bar, Save_area> {
    public:
-    Text_and_side_pane& txt_trait = this->make_child<Text_and_side_pane>();
-    File_status_bar& status_bar   = this->make_child<File_status_bar>();
-    Save_area& save_area          = this->make_child<Save_area>();
+    Text_and_side_pane& txt_trait = this->get<0>();
+    File_status_bar& status_bar   = this->get<1>();
+    Save_area& save_area          = this->get<2>();
 
    public:
     Notepad()
