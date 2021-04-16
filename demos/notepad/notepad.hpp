@@ -24,6 +24,7 @@
 #include <termox/widget/widgets/checkbox.hpp>
 #include <termox/widget/widgets/color_select.hpp>
 #include <termox/widget/widgets/label.hpp>
+#include <termox/widget/widgets/scrollbar.hpp>
 #include <termox/widget/widgets/textbox.hpp>
 
 namespace demos {
@@ -115,11 +116,26 @@ class Side_pane : public ox::layout::Vertical<> {
     Side_pane() { *this | ox::pipe::fixed_width(16); }
 };
 
+class Text_and_scroll : public ox::HPair<ox::VScrollbar, ox::Textbox> {
+   public:
+    ox::VScrollbar& scrollbar = this->first;
+    ox::Textbox& textbox      = this->second;
+
+   public:
+    Text_and_scroll()
+    {
+        using namespace ox::pipe;
+        textbox | bordered() | rounded_corners() | bg(ox::Color::Dark_gray);
+        link(scrollbar, textbox);
+    }
+};
+
 using Side_pane_accordion = ox::HAccordion<Side_pane, ox::Bar_position::Last>;
 
 class Text_and_side_pane : public ox::layout::Horizontal<> {
    public:
-    ox::Textbox& textbox = this->make_child<ox::Textbox>();
+    // ox::Textbox& textbox = this->make_child<ox::Textbox>();
+    Text_and_scroll& text_and_scroll = this->make_child<Text_and_scroll>();
     Side_pane& side_pane =
         this->make_child<Side_pane_accordion>({U"Settings", ox::Align::Center})
             .wrapped();
@@ -130,17 +146,17 @@ class Text_and_side_pane : public ox::layout::Horizontal<> {
         using namespace ox;
         using namespace ox::pipe;
 
-        textbox | bordered() | rounded_corners() | bg(Color::Dark_gray);
-
         side_pane.fg_select.color_selected.connect(
-            ox::slot::set_foreground(textbox));
+            ox::slot::set_foreground(text_and_scroll.textbox));
         side_pane.bg_select.color_selected.connect(
-            ox::slot::set_background(textbox));
+            ox::slot::set_background(text_and_scroll.textbox));
 
-        side_pane.trait_boxes.trait_enabled.connect(
-            [this](Trait t) { textbox.insert_brush.traits.insert(t); });
-        side_pane.trait_boxes.trait_disabled.connect(
-            [this](Trait t) { textbox.insert_brush.traits.remove(t); });
+        side_pane.trait_boxes.trait_enabled.connect([this](Trait t) {
+            text_and_scroll.textbox.insert_brush.traits.insert(t);
+        });
+        side_pane.trait_boxes.trait_disabled.connect([this](Trait t) {
+            text_and_scroll.textbox.insert_brush.traits.remove(t);
+        });
     }
 };
 
@@ -231,7 +247,7 @@ class Notepad
     auto focus_in_event() -> bool override
     {
         ox::Terminal::set_palette(ox::dawn_bringer16::palette);
-        ox::System::set_focus(txt_trait.textbox);
+        ox::System::set_focus(txt_trait.text_and_scroll.textbox);
         return true;
     }
 

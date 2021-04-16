@@ -7,6 +7,7 @@ namespace ox {
 /// Provides representation of a Widget's visible, surrounding border.
 class Border {
    private:
+    // TODO this could be an optional...
     /// Holds enabled state and appearance for a Border Segment.
     class Segment : public Glyph {
        public:
@@ -31,6 +32,9 @@ class Border {
 
     /// Holds all 8 Segments that a Border is made up of.
     struct Segments {
+        // TODO
+        // using Segment = std::optional<Glyph>;
+
         Segment north      = Glyph{U'─'};
         Segment south      = Glyph{U'─'};
         Segment east       = Glyph{U'│'};
