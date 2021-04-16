@@ -9,27 +9,27 @@
 Layouts, and Events that make it quick to craft unique user interfaces in the
 terminal.
 
+## Colors
+
 <p align="center">
   <img src="docs/images/colors.png">
 </p>
 
-## Colors
-
 Some text about colors...
+
+## Combinations
 
 <p align="center">
   <img src="docs/images/combinations.png">
 </p>
 
-## Combinations
-
 Some text about combinations...
+
+## Animation
 
 <p align="center">
   <img src="docs/images/animation.gif">
 </p>
-
-## Animation
 
 Some text about animation...
 
