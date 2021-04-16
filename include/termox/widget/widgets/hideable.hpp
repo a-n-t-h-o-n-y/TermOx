@@ -20,8 +20,8 @@ class Hideable : public SPair<Widget, Widget_t> {
    public:
     Hideable()
     {
-        this->Stack::set_active_page(widget_index_);
-        this->Stack::give_focus_on_change(false);
+        this->set_active_page(widget_index_);
+        this->give_focus_on_change(false);
     }
 
     /// Forward constructor Parameters for the Widget_t that is being wrapped.
@@ -29,21 +29,21 @@ class Hideable : public SPair<Widget, Widget_t> {
     explicit Hideable(Parameters parameters)
         : SPair<Widget, Widget_t>{{}, parameters}
     {
-        this->Stack::set_active_page(widget_index_);
-        this->Stack::give_focus_on_change(false);
+        this->set_active_page(widget_index_);
+        this->give_focus_on_change(false);
     }
 
    public:
     /// Display the held widget
-    void show() { this->Stack::set_active_page(widget_index_); }
+    void show() { this->set_active_page(widget_index_); }
 
     /// Display nothing on the widget space.
-    void hide() { this->Stack::set_active_page(blank_index_); }
+    void hide() { this->set_active_page(blank_index_); }
 
     /// Return if w is hidden.
     [[nodiscard]] auto is_hidden() const -> bool
     {
-        return this->Stack::active_page_index() == blank_index_;
+        return this->active_page_index() == blank_index_;
     }
 
    private:
