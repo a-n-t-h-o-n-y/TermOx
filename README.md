@@ -17,6 +17,14 @@ terminal.
 
 Some text about colors...
 
+## Widget Library
+
+<p align="center">
+  <img src="docs/images/library.png">
+</p>
+
+Some text about the Widget Library...
+
 ## Combinations
 
 <p align="center">
@@ -25,6 +33,14 @@ Some text about colors...
 
 Some text about combinations...
 
+## Interactivity
+
+<p align="center">
+  <img src="docs/images/interactive.png">
+</p>
+
+Some text about interactivity...
+
 ## Animation
 
 <p align="center">
@@ -32,6 +48,14 @@ Some text about combinations...
 </p>
 
 Some text about animation...
+
+## Custom Widgets
+
+<p align="center">
+  <img src="docs/images/custom.png">
+</p>
+
+Some text about custom Widgets...
 
 # Continued...
 
