@@ -15,7 +15,8 @@ terminal.
   <img src="docs/images/colors.png">
 </p>
 
-Some text about colors...
+Xterm color indices, true color(rgb or hsl), dynamic colors.
+Not all terminals support true color.
 
 ## Widget Library
 
@@ -23,7 +24,10 @@ Some text about colors...
   <img src="docs/images/library.png">
 </p>
 
-Some text about the Widget Library...
+The [Widget Library](docs/manual/widget.md#widget-library) contains many generic
+Widget and Layout types that are common to many applications. Often times they
+are the building blocks that can be pieced together to form a significant
+portion of your UI.
 
 ## Combinations
 
@@ -31,7 +35,10 @@ Some text about the Widget Library...
   <img src="docs/images/combinations.png">
 </p>
 
-Some text about combinations...
+Pair, Tuple, Array. `H` prefix is Horizontal. `V` prefix is Vertical.
+Layouts provide basic structure to glue multiple widgets together. Generic
+utilities such as pair and tuple and array simplify patterns of widget
+combinations.
 
 ## Interactivity
 
@@ -39,7 +46,8 @@ Some text about combinations...
   <img src="docs/images/interactive.png">
 </p>
 
-Some text about interactivity...
+Mouse input including mouse movement events, keyboard and keyboard modifiers.
+Though not all terminals support mouse movement or particular modifier keys.
 
 ## Animation
 
@@ -47,7 +55,8 @@ Some text about interactivity...
   <img src="docs/images/animation.gif">
 </p>
 
-Some text about animation...
+Widgets register to have time events sent to them which allows them to update
+their state and repaint themselves. Also dynamic color definitions.
 
 ## Custom Widgets
 
@@ -55,16 +64,16 @@ Some text about animation...
   <img src="docs/images/custom.png">
 </p>
 
-Some text about custom Widgets...
+Allows you to create any interactive visual interface you can imagine on the
+terminal, even good for interactive games. Simple as inheriting from widget
+class and overriding only the necessary virtual event handlers. One or two
+Custom widgets unique to your app, with the widget library filling in the rest.
+Event handlers for user input, etc.
+Inheritance to customize and expand existing Widget types.
 
-# Continued...
+## Signals
 
-The [Widget Library](docs/manual/widget.md#widget-library) contains many common
-Widget and Layout types that can be pieced together to create a composite
-interface. It's easy to expand on top of these types to create new Widgets and
-Layouts.
-
-This project was previously named **CPPurses**.
+Widget to widget communication
 
 ## Usage
 
@@ -91,46 +100,28 @@ int main()
 }
 ```
 
-<!-- TODO Make this an animated gif -->
-<p align="center">
-  <img src="docs/images/example_1.png">
-</p>
-
 See the [Manual](docs/manual/index.md) for more in depth explanations and
 examples.
 
 Reference documentation can be found
 [here](https://a-n-t-h-o-n-y.github.io/TermOx/hierarchy.html).
 
-## Features
-
-- Event System to handle Mouse, Keyboard and Animation events, among others
-
-- Signals and Slots to communicate between Widgets
-
-- Color Palettes and Dynamic Colors
-
-- Animation
-
-- Inherit from existing Widgets and Layouts to create new UI elements
-
-- Library of commonly used Widgets and Layouts
-
 ## Build Instructions
 
-TermOx depends on a Signals library and nCurses, these are both included as
-git submodules.
+TermOx depends on the [Signals
+Light](https://github.com/a-n-t-h-o-n-y/signals-light) and
+[Escape](https://github.com/a-n-t-h-o-n-y/Escape) libraries, these are both
+included as git submodules.
 
-```
-git clone https://github.com/a-n-t-h-o-n-y/TermOx.git
-mkdir TermOx/build && cd TermOx/build
-git submodule update --init               # Pull in dependencies
-cmake .. -DCMAKE_BUILD_TYPE=Release       # Generate Makefiles
-make                                      # Build library
-make demos                                # Build demos(optional)
-make termox.unit.tests                    # Build Unit Tests(optional)
-make termox.ui.tests                      # Build UI Tests(optional)
-```
+    git clone https://github.com/a-n-t-h-o-n-y/TermOx.git
+    mkdir TermOx/build && cd TermOx/build
+    git submodule update --init --recursive   # Pull in dependencies
+    cmake .. -DCMAKE_BUILD_TYPE=Release       # Generate Makefiles
+    make                                      # Build library
+    make demos                                # Build demos(optional)
+    make termox.unit.tests                    # Build Unit Tests(optional)
+    make termox.ui.tests                      # Build UI Tests(optional)
+    make install                              # Install to system directories
 
 ## Using the Library
 
@@ -149,10 +140,13 @@ add_executable(my_app
                ...
 )
 
-# TermOx is cloned into a directory named external/
+# If TermOx is cloned into a directory named external/
 add_subdirectory(external/TermOx)
 target_link_libraries(foo TermOx)
 ```
 
+This project was previously named **CPPurses**.
+
 ## License
+
 This software is distributed under the [MIT License](LICENSE.txt).
