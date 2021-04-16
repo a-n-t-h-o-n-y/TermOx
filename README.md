@@ -10,8 +10,30 @@ Layouts, and Events that make it quick to craft unique user interfaces in the
 terminal.
 
 <p align="center">
-  <img src="docs/images/termox-demos.gif">
+  <img src="docs/images/colors.png">
 </p>
+
+## Colors
+
+Some text about colors...
+
+<p align="center">
+  <img src="docs/images/combinations.png">
+</p>
+
+## Combinations
+
+Some text about combinations...
+
+<p align="center">
+  <img src="docs/images/animation.gif">
+</p>
+
+## Animation
+
+Some text about animation...
+
+# Continued...
 
 The [Widget Library](docs/manual/widget.md#widget-library) contains many common
 Widget and Layout types that can be pieced together to create a composite
