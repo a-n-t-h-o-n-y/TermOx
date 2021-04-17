@@ -158,6 +158,9 @@ class Accordion : public Passive<Layout_t<Widget>> {
     using Parameters = typename Bar_t::Parameters;
 
    public:
+    // TODO add unique_ptr<Widget_t> overload, since this is a wrapper, and add
+    // free functions for this type of constructor.
+
     /// Create an Accordion with \p args... going to Widget_t constructor.
     template <typename... Args>
     Accordion(Parameters p, Args&&... args)
@@ -234,12 +237,6 @@ class Accordion : public Passive<Layout_t<Widget>> {
     }
 };
 
-template <typename Widget_t, Bar_position position = Bar_position::First>
-using HAccordion = Accordion<layout::Horizontal, Widget_t, position>;
-
-template <typename Widget_t, Bar_position position = Bar_position::First>
-using VAccordion = Accordion<layout::Vertical, Widget_t, position>;
-
 template <template <typename> typename Layout_t,
           typename Widget_t,
           Bar_position position = Bar_position::First,
@@ -251,23 +248,29 @@ template <template <typename> typename Layout_t,
         std::forward<Args>(args)...);
 }
 
-template <typename Widget_t,
-          Bar_position position = Bar_position::First,
-          typename... Args>
-[[nodiscard]] auto v_accordion(Args&&... args)
-    -> std::unique_ptr<VAccordion<Widget_t, position>>
-{
-    return std::make_unique<VAccordion<Widget_t, position>>(
-        std::forward<Args>(args)...);
-}
+template <typename Widget_t, Bar_position position = Bar_position::First>
+using HAccordion = Accordion<layout::Horizontal, Widget_t, position>;
 
 template <typename Widget_t,
           Bar_position position = Bar_position::First,
           typename... Args>
-[[nodiscard]] auto h_accordion(Args&&... args)
+[[nodiscard]] auto haccordion(Args&&... args)
     -> std::unique_ptr<HAccordion<Widget_t, position>>
 {
     return std::make_unique<HAccordion<Widget_t, position>>(
+        std::forward<Args>(args)...);
+}
+
+template <typename Widget_t, Bar_position position = Bar_position::First>
+using VAccordion = Accordion<layout::Vertical, Widget_t, position>;
+
+template <typename Widget_t,
+          Bar_position position = Bar_position::First,
+          typename... Args>
+[[nodiscard]] auto vaccordion(Args&&... args)
+    -> std::unique_ptr<VAccordion<Widget_t, position>>
+{
+    return std::make_unique<VAccordion<Widget_t, position>>(
         std::forward<Args>(args)...);
 }
 

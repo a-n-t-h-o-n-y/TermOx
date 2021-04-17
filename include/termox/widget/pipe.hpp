@@ -229,9 +229,14 @@ namespace ox::pipe {
                         b.traits.remove(ts);
                         return b;
                     },
-                    [ts](Brush b) -> Brush {
+                    [ts](Brush const& b) -> Brush {
+                        auto copy = b;
+                        copy.traits.remove(ts);
+                        return copy;
+                    },
+                    [ts](Brush&& b) -> Brush {
                         b.traits.remove(ts);
-                        return b;
+                        return std::move(b);
                     },
                     [ts](Glyph& g) -> Glyph& {
                         g.brush.traits.remove(ts);

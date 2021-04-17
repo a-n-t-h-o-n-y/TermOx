@@ -5,29 +5,13 @@
 
 #include <signals_light/signal.hpp>
 
-#include <termox/painter/glyph_string.hpp>
-#include <termox/painter/palette/dawn_bringer16.hpp>
-#include <termox/painter/trait.hpp>
-#include <termox/system/system.hpp>
-#include <termox/widget/align.hpp>
-#include <termox/widget/focus_policy.hpp>
-#include <termox/widget/layouts/horizontal.hpp>
-#include <termox/widget/layouts/passive.hpp>
-#include <termox/widget/layouts/vertical.hpp>
-#include <termox/widget/pair.hpp>
-#include <termox/widget/pipe.hpp>
-#include <termox/widget/tuple.hpp>
-#include <termox/widget/widget_slots.hpp>
-#include <termox/widget/widgets/accordion.hpp>
-#include <termox/widget/widgets/banner.hpp>
-#include <termox/widget/widgets/button.hpp>
-#include <termox/widget/widgets/checkbox.hpp>
-#include <termox/widget/widgets/color_select.hpp>
-#include <termox/widget/widgets/label.hpp>
-#include <termox/widget/widgets/scrollbar.hpp>
-#include <termox/widget/widgets/textbox.hpp>
+#include <termox/termox.hpp>
 
 namespace demos {
+
+void write_file(std::string const& filename, std::string const& output);
+
+auto read_file(std::string const& filename) -> std::string;
 
 /// Checkbox to enable/disable a Trait. Has a Signal from it.
 class Trait_checkbox : public ox::HCheckbox_label {
@@ -254,6 +238,117 @@ class Notepad
    private:
     void initialize();
 };
+
+// TODO Accordion side pane is only thing missing.
+
+/// Notepad recreated with pipe operator and unique_ptr constructors.
+auto inline notepad() -> auto
+{
+    using namespace ox;
+    using namespace ox::pipe;
+    // clang-format off
+    auto np =
+    vtuple(
+        hpair(
+            hpair(
+                vscrollbar(),
+                textbox(U"A Textbox...") | bordered() | rounded_corners()
+            ),
+            vtuple(
+                cycle_stack<Color_select>(
+                    std::pair{Glyph_string{U"Background"}, color_select()},
+                    std::pair{Glyph_string{U"Foreground"}, color_select()}
+                ) | fixed_height(3),
+                hlabel(U"- Traits -" | Trait::Bold) | align_center(),
+                hcheckbox_label({U"Bold"},{}),
+                hcheckbox_label({U"Italic"},{}),
+                hcheckbox_label({U"Underline"},{}),
+                hcheckbox_label({U"Standout"},{}),
+                hcheckbox_label({U"Dim"},{}),
+                hcheckbox_label({U"Inverse"},{}),
+                hcheckbox_label({U"Invisible"},{}),
+                hcheckbox_label({U"Blink"},{}),
+                hcheckbox_label({U"Cross-out"},{}),
+                hcheckbox_label({U"Dbl Underline"},{}),
+                widget()
+            ) | fixed_width(16)
+        ),
+        unscramble_banner(),
+        htuple(
+            button(U"Load") | bg(Color::Blue) | fixed_width(6),
+            textline() | bg(Color::White) | fg(Color::Black),
+            button(U"Save") | bg(Color::Blue) | fixed_width(6)
+        ) | fixed_height(1)
+    ) | strong_focus()
+      | on_focus_in([] { Terminal::set_palette(dawn_bringer16::palette); });
+    // clang-format on
+
+    auto& sb = np->get<0>().first.first;
+    auto& tb = np->get<0>().first.second;
+
+    auto& bg = np->get<0>().second.get<0>().stack.get_children()[0];
+    auto& fg = np->get<0>().second.get<0>().stack.get_children()[1];
+
+    // TODO Trait_select to complement color_select part of widget library.
+    auto& bold          = np->get<0>().second.get<2>().checkbox;
+    auto& italic        = np->get<0>().second.get<3>().checkbox;
+    auto& underline     = np->get<0>().second.get<4>().checkbox;
+    auto& standout      = np->get<0>().second.get<5>().checkbox;
+    auto& dim           = np->get<0>().second.get<6>().checkbox;
+    auto& inverse       = np->get<0>().second.get<7>().checkbox;
+    auto& invisible     = np->get<0>().second.get<8>().checkbox;
+    auto& blink         = np->get<0>().second.get<9>().checkbox;
+    auto& cross_out     = np->get<0>().second.get<10>().checkbox;
+    auto& dbl_underline = np->get<0>().second.get<11>().checkbox;
+
+    auto& banner = np->get<1>();
+
+    auto& load     = np->get<2>().get<0>();
+    auto& filename = np->get<2>().get<1>();
+    auto& save     = np->get<2>().get<2>();
+
+    link(sb, tb);
+
+    bg.color_selected.connect([&tb](Color c) { tb | ox::bg(c); });
+    fg.color_selected.connect([&tb](Color c) { tb | ox::fg(c); });
+
+    auto const connect = [&tb](auto& cb, Trait t) {
+        cb.checked.connect([&tb, t] { tb.insert_brush | t; });
+        cb.unchecked.connect([&tb, t] { tb.insert_brush | discard(t); });
+    };
+    connect(bold, Trait::Bold);
+    connect(italic, Trait::Italic);
+    connect(underline, Trait::Underline);
+    connect(standout, Trait::Standout);
+    connect(dim, Trait::Dim);
+    connect(inverse, Trait::Inverse);
+    connect(invisible, Trait::Invisible);
+    connect(blink, Trait::Blink);
+    connect(cross_out, Trait::Crossed_out);
+    connect(dbl_underline, Trait::Double_underline);
+
+    load.pressed.connect([&filename, &tb, &banner] {
+        auto const name = filename.text().str();
+        try {
+            tb.set_contents(read_file(name));
+            banner.set_text((name + " Loaded") | ox::fg(Color::Light_green));
+        }
+        catch (std::runtime_error const& e) {
+            banner.set_text(e.what() | ox::fg(Color::Red));
+        }
+    });
+    save.pressed.connect([&filename, &tb, &banner] {
+        auto const name = filename.text().str();
+        try {
+            write_file(filename.text().str(), tb.contents().str());
+            banner.set_text((name + " Saved") | ox::fg(Color::Light_green));
+        }
+        catch (std::runtime_error const& e) {
+            banner.set_text(e.what() | ox::fg(Color::Red));
+        }
+    });
+    return np;
+}
 
 }  // namespace demos
 #endif  // DEMOS_NOTEPAD_NOTEPAD_HPP

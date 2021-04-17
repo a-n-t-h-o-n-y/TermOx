@@ -81,7 +81,7 @@ class Button : public Widget {
 }
 
 /// Helper function to create a Button instance.
-[[nodiscard]] inline auto button(Button::Parameters p = {})
+[[nodiscard]] inline auto button(Button::Parameters p)
     -> std::unique_ptr<Button>
 {
     return std::make_unique<Button>(std::move(p));
@@ -153,7 +153,7 @@ class Push_button : public Button {
 }
 
 /// Helper function to create a Push_button instance.
-[[nodiscard]] inline auto push_button(Push_button::Parameters p = {})
+[[nodiscard]] inline auto push_button(Push_button::Parameters p)
     -> std::unique_ptr<Push_button>
 {
     return std::make_unique<Push_button>(std::move(p));
@@ -189,8 +189,7 @@ template <template <typename> typename Layout_t>
 
 /// Helper function to create a Thin_button instance.
 template <template <typename> typename Layout_t>
-[[nodiscard]] auto thin_button(
-    typename Thin_button<Layout_t>::Parameters p = {})
+[[nodiscard]] auto thin_button(typename Thin_button<Layout_t>::Parameters p)
     -> std::unique_ptr<Thin_button<Layout_t>>
 {
     return std::make_unique<Thin_button<Layout_t>>(std::move(p));
@@ -206,7 +205,7 @@ using HThin_button = Thin_button<layout::Horizontal>;
 }
 
 /// Helper function to create an HThin_button instance.
-[[nodiscard]] inline auto hthin_button(typename HThin_button::Parameters p = {})
+[[nodiscard]] inline auto hthin_button(typename HThin_button::Parameters p)
     -> std::unique_ptr<HThin_button>
 {
     return std::make_unique<HThin_button>(std::move(p));
@@ -222,7 +221,7 @@ using VThin_button = Thin_button<layout::Vertical>;
 }
 
 /// Helper function to create a VThin_button instance.
-[[nodiscard]] inline auto vthin_button(typename VThin_button::Parameters p = {})
+[[nodiscard]] inline auto vthin_button(typename VThin_button::Parameters p)
     -> std::unique_ptr<VThin_button>
 {
     return std::make_unique<VThin_button>(std::move(p));

@@ -5,6 +5,7 @@
 #include <memory>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 #include <termox/common/transform_view.hpp>
 #include <termox/system/event.hpp>
@@ -23,6 +24,10 @@ class Layout : public Widget {
    public:
     using Child_t = Child;
 
+    struct Parameters {
+        std::vector<std::unique_ptr<Child_t>> children;
+    };
+
     static_assert(std::is_base_of_v<Widget, Child_t>,
                   "Layout: Child type must be a Widget type.");
 
@@ -38,6 +43,12 @@ class Layout : public Widget {
     Layout(std::unique_ptr<Widgets>... children)
     {
         (this->append_child(std::move(children)), ...);
+    }
+
+    Layout(Parameters parameters)
+    {
+        for (auto& child : parameters.children)
+            this->append_child(std::move(child));
     }
 
    public:

@@ -13,7 +13,7 @@
 #include <termox/widget/pipe.hpp>
 #include <termox/widget/widget_slots.hpp>
 
-namespace {
+namespace demos {
 
 void write_file(std::string const& filename, std::string const& output)
 {
@@ -37,11 +37,7 @@ auto read_file(std::string const& filename) -> std::string
     return oss.str();
 }
 
-}  // namespace
-
 using namespace ox;
-
-namespace demos {
 
 // Save Area
 void Notepad::initialize()
@@ -49,8 +45,7 @@ void Notepad::initialize()
     // Signals
     save_area.load_request.connect([this](std::string const& filename) {
         try {
-            txt_trait.text_and_scroll.textbox.set_contents(
-                ::read_file(filename));
+            txt_trait.text_and_scroll.textbox.set_contents(read_file(filename));
             status_bar.success(filename + " Loaded");
         }
         catch (std::runtime_error const& e) {
@@ -60,8 +55,8 @@ void Notepad::initialize()
 
     save_area.save_request.connect([this](std::string const& filename) {
         try {
-            ::write_file(filename,
-                         txt_trait.text_and_scroll.textbox.contents().str());
+            write_file(filename,
+                       txt_trait.text_and_scroll.textbox.contents().str());
             status_bar.success("Saved to " + filename);
         }
         catch (std::runtime_error const& e) {

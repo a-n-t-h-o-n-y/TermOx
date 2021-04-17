@@ -57,6 +57,7 @@ class Demo_menu : public ox::Menu_stack {
             U"Color Sliders" | brush,
             make_palette<50>({0, 100, 45}, {360, 100, 45}));
 
+        // this->append_page(U"Notepad Composite" | brush, notepad());
         // this->make_page<palette::Palette_demo>(U"Color Palette");
         // this->make_page<layout_demo::Layout_demo>(U"Layouts");
     }

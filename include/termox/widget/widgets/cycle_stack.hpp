@@ -3,6 +3,7 @@
 #include <memory>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 #include <termox/painter/brush.hpp>
 #include <termox/painter/color.hpp>
@@ -23,12 +24,16 @@ namespace ox::detail {
 /// User interface to cycle through the pages of the Stack.
 class CS_top_row : public HTuple<Button, Cycle_box, Button> {
    public:
+    struct Parameters {};
+
+   public:
     Button& left_btn     = this->get<0>();
     Cycle_box& cycle_box = this->get<1>();
     Button& right_btn    = this->get<2>();
 
    public:
-    CS_top_row() : HTuple<Button, Cycle_box, Button>{{U"<"}, {}, {U">"}}
+    CS_top_row(Parameters = {})
+        : HTuple<Button, Cycle_box, Button>{{U"<"}, {}, {U">"}}
     {
         using namespace pipe;
         *this | fixed_height(1) | children() | bg(Color::Light_gray) |
@@ -47,14 +52,29 @@ namespace ox {
 template <typename Child = Widget>
 class Cycle_stack : public VPair<detail::CS_top_row, layout::Stack<Child>> {
    public:
-    struct Parameters {};
+    // TODO Parameters needs to take titles for each child as well.
+    using Parameters = typename layout::Stack<Child>::Parameters;
 
    public:
     detail::CS_top_row& top_row = this->first;
     layout::Stack<Child>& stack = this->second;
 
    public:
-    explicit Cycle_stack(Parameters = {}) {}
+    explicit Cycle_stack(Parameters parameters)
+        : VPair<detail::CS_top_row, layout::Stack<Child>>{{},
+                                                          std::move(parameters)}
+    {}
+
+    template <typename... Widget_t>
+    explicit Cycle_stack(
+        std::pair<Glyph_string, std::unique_ptr<Widget_t>>... children)
+    {
+        // Can't move unique_ptrs out of a std::initializer_list... So can't
+        // forward to Layout's constructor.
+        (this->append_page(std::move(children.first),
+                           std::move(children.second)),
+         ...);
+    }
 
    public:
     /// Construct a new Widget_t object and add it to the end of the Stack.
@@ -86,10 +106,20 @@ class Cycle_stack : public VPair<detail::CS_top_row, layout::Stack<Child>> {
 
 /// Helper function to create a Cycle_stack instance.
 template <typename Child = Widget>
-[[nodiscard]] auto cycle_stack(typename Cycle_stack<Child>::Parameters = {})
+[[nodiscard]] auto cycle_stack(
+    typename Cycle_stack<Child>::Parameters parameters)
     -> std::unique_ptr<Cycle_stack<Child>>
 {
-    return std::make_unique<Cycle_stack<Child>>();
+    return std::make_unique<Cycle_stack<Child>>(std::move(parameters));
+}
+
+/// Helper function to create a Cycle_stack instance.
+template <typename Child = Widget, typename... Widget_t>
+[[nodiscard]] auto cycle_stack(
+    std::pair<Glyph_string, std::unique_ptr<Widget_t>>... children)
+    -> std::unique_ptr<Cycle_stack<Child>>
+{
+    return std::make_unique<Cycle_stack<Child>>(std::move(children)...);
 }
 
 }  // namespace ox
