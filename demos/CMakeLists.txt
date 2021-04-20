@@ -54,10 +54,10 @@ target_sources(demos
         game_of_life/get_plaintext.cpp
 )
 
-target_link_libraries(demos
-    PUBLIC
-        TermOx
-)
+target_link_libraries(demos PUBLIC TermOx)
+
+add_executable(readme.demo EXCLUDE_FROM_ALL readme.main.cpp)
+target_link_libraries(readme.demo PUBLIC TermOx)
 
 if(NOT ${CMAKE_VERSION} VERSION_LESS "3.8")
     target_compile_features(demos INTERFACE cxx_std_17)

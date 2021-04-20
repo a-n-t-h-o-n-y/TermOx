@@ -90,7 +90,10 @@ class Label : public Widget {
     }
 
     /// Return the text given to set_text().
-    [[nodiscard]] auto text() const -> Glyph_string const& { return text_; }
+    [[nodiscard]] auto text() const noexcept -> Glyph_string const&
+    {
+        return text_;
+    }
 
     /// Set text alignment of Label and update display.
     void set_alignment(Align x)
@@ -100,7 +103,10 @@ class Label : public Widget {
     }
 
     /// Return the Align given to set_alignment().
-    [[nodiscard]] auto alignment() const -> Align { return alignment_; }
+    [[nodiscard]] auto alignment() const noexcept -> Align
+    {
+        return alignment_;
+    }
 
     /// Inform Label about space to left of Label for centered text offset.
     void set_extra_left(int x)
@@ -110,7 +116,10 @@ class Label : public Widget {
     }
 
     /// Return the amount given to set_extra_left().
-    [[nodiscard]] auto extra_left() const -> int { return extra_left_; }
+    [[nodiscard]] auto extra_left() const noexcept -> int
+    {
+        return extra_left_;
+    }
 
     /// Inform Label about space to right of Label for centered text offset.
     void set_extra_right(int x)
@@ -120,7 +129,10 @@ class Label : public Widget {
     }
 
     /// Return the amount given to set_extra_right().
-    [[nodiscard]] auto extra_right() const -> int { return extra_right_; }
+    [[nodiscard]] auto extra_right() const noexcept -> int
+    {
+        return extra_right_;
+    }
 
     /// Enable/Disable Dynamic size, where the Label's size is the text length.
     void set_growth_strategy(Growth type)
@@ -135,7 +147,7 @@ class Label : public Widget {
     }
 
     /// Return the value given to set_growth_strategy().
-    [[nodiscard]] auto growth_strategy() const -> Growth
+    [[nodiscard]] auto growth_strategy() const noexcept -> Growth
     {
         return growth_strategy_;
     }

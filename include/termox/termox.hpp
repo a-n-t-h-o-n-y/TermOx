@@ -76,6 +76,7 @@
 #include <termox/widget/widgets/menu.hpp>
 #include <termox/widget/widgets/menu_stack.hpp>
 #include <termox/widget/widgets/notify_light.hpp>
+#include <termox/widget/widgets/number_display.hpp>
 #include <termox/widget/widgets/number_edit.hpp>
 #include <termox/widget/widgets/read_file.hpp>
 #include <termox/widget/widgets/scrollbar.hpp>

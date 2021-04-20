@@ -62,7 +62,7 @@ class Confirm_button : public STuple<Button, detail::Confirm_page> {
 
    public:
     /// Construct a Button with \p label and corresponding \p confirm_text.
-    explicit Confirm_button(Glyph_string label,
+    explicit Confirm_button(Glyph_string label        = U"",
                             Glyph_string confirm_text = U"Confirm")
         : STuple<Button, detail::Confirm_page>{{std::move(label)},
                                                {std::move(confirm_text)}}
@@ -94,7 +94,7 @@ class Confirm_button : public STuple<Button, detail::Confirm_page> {
 };
 
 /// Helper function to create a Confirm_button instance.
-[[nodiscard]] inline auto confirm_button(Glyph_string label,
+[[nodiscard]] inline auto confirm_button(Glyph_string label        = U"",
                                          Glyph_string confirm_text = U"Confirm")
     -> std::unique_ptr<Confirm_button>
 {

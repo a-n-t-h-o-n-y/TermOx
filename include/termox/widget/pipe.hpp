@@ -1859,6 +1859,15 @@ inline auto text(Glyph_string x)
     };
 }
 
+template <typename Number_t>
+inline auto value(Number_t x)
+{
+    return [=](auto&& w) -> decltype(auto) {
+        get(w).set_value(x);
+        return std::forward<decltype(w)>(w);
+    };
+}
+
 inline auto align_left()
 {
     return [=](auto&& w) -> decltype(auto) {

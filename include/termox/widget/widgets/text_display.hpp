@@ -67,6 +67,8 @@ class Text_display : public Widget {
         contents_modified(contents_);
     }
 
+    void set_text(Glyph_string text) { this->set_contents(std::move(text)); }
+
     /// Inserts \p text starting at \p index into the current contents.
     /** Applys insert_brush to each Glyph added. Index can be one past the
      *  current length of the contents, to append. No-op if index is larger than
