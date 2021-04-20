@@ -19,7 +19,7 @@ jobs:
           CXX: g++-10
         run: |
           mkdir build && cd build
-          cmake .. && make demos termox.ui.tests termox.unit.tests
+          cmake .. && make demos termox.ui.tests termox.unit.tests readme.demo
           ./tests/termox.unit.tests
   gcc-build-ubuntu20-gcc9:
     runs-on: ubuntu-20.04
@@ -32,7 +32,7 @@ jobs:
           CXX: g++-9
         run: |
           mkdir build && cd build
-          cmake .. && make demos termox.ui.tests termox.unit.tests
+          cmake .. && make demos termox.ui.tests termox.unit.tests readme.demo
           ./tests/termox.unit.tests
 
   # Ubuntu-20 Clang
@@ -47,7 +47,7 @@ jobs:
           CXX: clang++-11
         run: |
           mkdir build && cd build
-          cmake .. && make demos termox.ui.tests termox.unit.tests
+          cmake .. && make demos termox.ui.tests termox.unit.tests readme.demo
           ./tests/termox.unit.tests
   clang-build-ubuntu20-clang10:
     runs-on: ubuntu-20.04
@@ -60,7 +60,7 @@ jobs:
           CXX: clang++-10
         run: |
           mkdir build && cd build
-          cmake .. && make demos termox.ui.tests termox.unit.tests
+          cmake .. && make demos termox.ui.tests termox.unit.tests readme.demo
           ./tests/termox.unit.tests
   clang-build-ubuntu20-clang9:
     runs-on: ubuntu-20.04
@@ -73,7 +73,7 @@ jobs:
           CXX: clang++-9
         run: |
           mkdir build && cd build
-          cmake .. && make demos termox.ui.tests termox.unit.tests
+          cmake .. && make demos termox.ui.tests termox.unit.tests readme.demo
           ./tests/termox.unit.tests
 
   # Ubuntu-18 GCC
@@ -88,7 +88,7 @@ jobs:
           CXX: g++-10
         run: |
           mkdir build && cd build
-          cmake .. && make demos termox.ui.tests termox.unit.tests
+          cmake .. && make demos termox.ui.tests termox.unit.tests readme.demo
           ./tests/termox.unit.tests
   gcc-build-ubuntu18-gcc9:
     runs-on: ubuntu-18.04
@@ -101,7 +101,7 @@ jobs:
           CXX: g++-9
         run: |
           mkdir build && cd build
-          cmake .. && make demos termox.ui.tests termox.unit.tests
+          cmake .. && make demos termox.ui.tests termox.unit.tests readme.demo
           ./tests/termox.unit.tests
 
   # Ubuntu-18 Clang
@@ -116,7 +116,7 @@ jobs:
           CXX: clang++-9
         run: |
           mkdir build && cd build
-          cmake .. && make demos termox.ui.tests termox.unit.tests
+          cmake .. && make demos termox.ui.tests termox.unit.tests readme.demo
           ./tests/termox.unit.tests
 
   # MacOS-10.15 Clang
@@ -131,7 +131,7 @@ jobs:
           CXX: clang++
         run: |
           mkdir build && cd build
-          cmake .. && make demos termox.ui.tests termox.unit.tests
+          cmake .. && make demos termox.ui.tests termox.unit.tests readme.demo
           ./tests/termox.unit.tests
   clang-build-MacOS10-clang11:
     runs-on: macos-10.15
@@ -144,7 +144,7 @@ jobs:
           comp="$(brew --prefix llvm)/bin/clang"
           export CC="${comp}"
           export CXX="${comp}++"
-          cmake .. && make demos termox.ui.tests termox.unit.tests
+          cmake .. && make demos termox.ui.tests termox.unit.tests readme.demo
           ./tests/termox.unit.tests
 
   # MacOS-10.15 GCC
@@ -159,7 +159,7 @@ jobs:
           CXX: g++-10
         run: |
           mkdir build && cd build
-          cmake .. && make demos termox.ui.tests termox.unit.tests
+          cmake .. && make demos termox.ui.tests termox.unit.tests readme.demo
           ./tests/termox.unit.tests
   clang-build-MacOS10-gcc9:
     runs-on: macos-10.15
@@ -172,7 +172,7 @@ jobs:
           CXX: g++-9
         run: |
           mkdir build && cd build
-          cmake .. && make demos termox.ui.tests termox.unit.tests
+          cmake .. && make demos termox.ui.tests termox.unit.tests readme.demo
           ./tests/termox.unit.tests
   clang-build-MacOS10-gcc8:
     runs-on: macos-10.15
@@ -185,5 +185,5 @@ jobs:
           CXX: g++-8
         run: |
           mkdir build && cd build
-          cmake .. && make demos termox.ui.tests termox.unit.tests
+          cmake .. && make demos termox.ui.tests termox.unit.tests readme.demo
           ./tests/termox.unit.tests
