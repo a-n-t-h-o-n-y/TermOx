@@ -20,7 +20,7 @@
 #include <termox/widget/widgets/confirm_button.hpp>
 #include <termox/widget/widgets/label.hpp>
 #include <termox/widget/widgets/number_edit.hpp>
-#include <termox/widget/widgets/text_display.hpp>
+#include <termox/widget/widgets/text_view.hpp>
 #include <termox/widget/widgets/textline.hpp>
 #include <termox/widget/widgets/toggle_button.hpp>
 

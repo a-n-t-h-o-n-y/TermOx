@@ -3,7 +3,7 @@
 #include <termox/termox.hpp>
 #include "termox/widget/size_policy.hpp"
 
-class Numbered_box : public ox::Text_display {
+class Numbered_box : public ox::Text_view {
    public:
     void set_value(int i)
     {

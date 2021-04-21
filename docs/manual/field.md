@@ -12,21 +12,21 @@ those `Glyph`s.
 /// Random Field of pre-defined Glyphs, expands on larger resize event.
 /** Inverts Glyph under mouse on left click and drag, generates new glyph under
  *  mouse on right click and drag. */
-class Field : public ox::Matrix_display {
+class Field : public ox::Matrix_view {
    public:
-    Field() : Matrix_display{ox::Area{0, 0}} {}
+    Field() : Matrix_view{ox::Area{0, 0}} {}
 
    protected:
     auto mouse_press_event(ox::Mouse const& m) -> bool override
     {
         this->handle_mouse(m);
-        return Matrix_display::mouse_press_event(m);
+        return Matrix_view::mouse_press_event(m);
     }
 
     auto mouse_move_event(ox::Mouse const& m) -> bool override
     {
         this->handle_mouse(m);
-        return Matrix_display::mouse_move_event(m);
+        return Matrix_view::mouse_move_event(m);
     }
 
     auto resize_event(ox::Area new_size, ox::Area old) -> bool override
@@ -43,7 +43,7 @@ class Field : public ox::Matrix_display {
                     this->matrix({x, y}) = generate_random_glyph();
             }
         }
-        return Matrix_display::resize_event(new_size, old);
+        return Matrix_view::resize_event(new_size, old);
     }
 
    private:

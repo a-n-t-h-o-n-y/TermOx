@@ -7,12 +7,12 @@
 
 #include <termox/painter/glyph_string.hpp>
 #include <termox/widget/point.hpp>
-#include <termox/widget/widgets/text_display.hpp>
+#include <termox/widget/widgets/text_view.hpp>
 
 namespace ox::detail {
 
-/// Implements cursor movement on top of a Text_display, for use by Textbox.
-class Textbox_base : public Text_display {
+/// Implements cursor movement on top of a Text_view, for use by Textbox.
+class Textbox_base : public Text_view {
    public:
     /// Emitted when the cursor moves left, passes along \n positions moved.
     sl::Signal<void(std::size_t n)> cursor_moved_left;
@@ -40,22 +40,22 @@ class Textbox_base : public Text_display {
         this->cursor.set_position(coords);
     }
 
-    /// Add cursor movement to Text_display::scroll_up.
+    /// Add cursor movement to Text_view::scroll_up.
     void scroll_up(int n = 1) override
     {
         if (this->top_line() == 0)
             return;
-        Text_display::scroll_up(n);
+        Text_view::scroll_up(n);
         auto y = this->cursor.y() + n;
         if (y > this->height() - 1)
             y = this->height() - 1;
         this->set_cursor({this->cursor.x(), y});
     }
 
-    /// Add cursor movement to Text_display::scroll_down.
+    /// Add cursor movement to Text_view::scroll_down.
     void scroll_down(int n = 1) override
     {
-        Text_display::scroll_down(n);
+        Text_view::scroll_down(n);
         auto y = this->cursor.y();
         if (y < n)
             y = 0;
@@ -95,7 +95,7 @@ class Textbox_base : public Text_display {
    protected:
     /// Construct with initial \p contents, enable cursor.
     explicit Textbox_base(Glyph_string contents = "")
-        : Text_display{std::move(contents)}
+        : Text_view{std::move(contents)}
     {
         this->cursor.enable();
     }

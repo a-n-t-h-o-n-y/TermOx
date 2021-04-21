@@ -83,9 +83,9 @@ class Pinbox : public ox::Widget {
 class Side_pane : public ox::VTuple<ox::HLabel,
                                     ox::Color_select,
                                     ox::HLabel,
-                                    ox::Text_display,
+                                    ox::Text_view,
                                     ox::HLine,
-                                    ox::HPair<ox::HLabel, ox::Int_display>,
+                                    ox::HPair<ox::HLabel, ox::Int_view>,
                                     ox::HLine,
                                     ox::Confirm_button,
                                     ox::Widget> {
@@ -93,9 +93,9 @@ class Side_pane : public ox::VTuple<ox::HLabel,
     ox::HLabel& color_label        = this->get<0>();
     ox::Color_select& color_select = this->get<1>();
     ox::HLabel& status_label       = this->get<2>();
-    ox::Text_display& status_box   = this->get<3>();
+    ox::Text_view& status_box      = this->get<3>();
     ox::HLabel& count_label        = this->get<5>().first;
-    ox::Int_display& count_box     = this->get<5>().second;
+    ox::Int_view& count_box        = this->get<5>().second;
     ox::Confirm_button& clear_btn  = this->get<7>();
     ox::Widget& empty_space        = this->get<8>();
 
@@ -171,7 +171,7 @@ auto pinbox_app()
                 ox::hline(),
                 ox::hpair(
                     ox::hlabel("Pin Count" | ox::Trait::Bold) | fixed_width(10),
-                    ox::int_display(0)
+                    ox::int_view(0)
                 ) | fixed_height(1),
                 ox::hline(),
                 ox::confirm_button("Clear"),

@@ -4,7 +4,7 @@
 
 #include <termox/painter/glyph_string.hpp>
 #include <termox/system/mouse.hpp>
-#include <termox/widget/widgets/text_display.hpp>
+#include <termox/widget/widgets/text_view.hpp>
 
 namespace {
 

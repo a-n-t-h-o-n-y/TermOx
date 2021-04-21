@@ -16,7 +16,7 @@ namespace ox {
 /// Non-interactive box to display a given Glyph_string.
 /** Provides operations to change the text, wrap words on spaces, change the
  *  alignment of the text and scroll through the text, among others. */
-class Text_display : public Widget {
+class Text_view : public Widget {
    public:
     // TODO
     struct Parameters {
@@ -44,14 +44,14 @@ class Text_display : public Widget {
     sl::Signal<void(int)> line_count_changed;
 
    public:
-    /// Construct a Text_display with initial Glyph_string \p contents.
+    /// Construct a Text_view with initial Glyph_string \p contents.
     /** By default, wraps text, and has left alignment. */
-    explicit Text_display(Glyph_string contents = "")
+    explicit Text_view(Glyph_string contents = "")
         : contents_{std::move(contents)}
     {}
 
-    explicit Text_display(Parameters parameters)
-        : Text_display{std::move(parameters.contents)}
+    explicit Text_view(Parameters parameters)
+        : Text_view{std::move(parameters.contents)}
     {}
 
    public:
@@ -172,13 +172,13 @@ class Text_display : public Widget {
      *  Glyph position to \p index that is displayed on screen. */
     [[nodiscard]] auto display_position(int index) const -> Point;
 
-    /// Return the entire contents of the Text_display.
+    /// Return the entire contents of the Text_view.
     /** Provided as a non-const reference so contents can be modified without
-     *  limitation from the Text_display interface. Be sure to call
-     *  Text_display::update() after modifying the contents directly. */
+     *  limitation from the Text_view interface. Be sure to call
+     *  Text_view::update() after modifying the contents directly. */
     [[nodiscard]] auto contents() -> Glyph_string& { return contents_; }
 
-    /// Return the entire contents of the Text_display.
+    /// Return the entire contents of the Text_view.
     [[nodiscard]] auto contents() const -> Glyph_string const&
     {
         return contents_;
@@ -190,7 +190,7 @@ class Text_display : public Widget {
         return word_wrap_enabled_;
     }
 
-    /// Add call to Text_display::update_display() before posting Paint_event.
+    /// Add call to Text_view::update_display() before posting Paint_event.
     void update() override
     {
         // TODO
@@ -277,9 +277,9 @@ class Text_display : public Widget {
 
 /// Helper function to create an instance.
 template <typename... Args>
-[[nodiscard]] auto text_display(Args&&... args) -> std::unique_ptr<Text_display>
+[[nodiscard]] auto text_display(Args&&... args) -> std::unique_ptr<Text_view>
 {
-    return std::make_unique<Text_display>(std::forward<Args>(args)...);
+    return std::make_unique<Text_view>(std::forward<Args>(args)...);
 }
 
 }  // namespace ox

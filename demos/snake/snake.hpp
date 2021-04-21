@@ -28,7 +28,7 @@
 #include <termox/widget/widgets/confirm_button.hpp>
 #include <termox/widget/widgets/cycle_box.hpp>
 #include <termox/widget/widgets/label.hpp>
-#include <termox/widget/widgets/text_display.hpp>
+#include <termox/widget/widgets/text_view.hpp>
 #include <termox/widget/widgets/toggle_button.hpp>
 
 namespace snake {
@@ -543,9 +543,9 @@ class Game_space : public ox::Widget {
     }
 };
 
-class Instructions : public ox::Text_display {
+class Instructions : public ox::Text_view {
    public:
-    Instructions() : Text_display{make_text()}
+    Instructions() : Text_view{make_text()}
     {
         using namespace ox::pipe;
         *this | bg(color::Instruction_bg) | fg(color::Instruction_fg) |
@@ -627,11 +627,8 @@ class Score : public ox::layout::Horizontal<> {
 
    private:
     ox::HLabel& label_ = this->make_child<ox::HLabel>({U"Score: "});
+    // TODO replace with Number_view Widget
     ox::HLabel& score_ = this->make_child<ox::HLabel>({U"0", ox::Align::Right});
-
-    // you could have a number_display widget, that is templated on the
-    // number type, and has display options specific to numbers, then number
-    // edit is built on top of this.
 };
 
 // tuple or pair

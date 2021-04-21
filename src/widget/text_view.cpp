@@ -1,4 +1,4 @@
-#include <termox/widget/widgets/text_display.hpp>
+#include <termox/widget/widgets/text_view.hpp>
 
 #include <algorithm>
 #include <iterator>
@@ -12,7 +12,7 @@
 
 namespace ox {
 
-void Text_display::insert(Glyph_string text, int index)
+void Text_view::insert(Glyph_string text, int index)
 {
     if (index > contents_.size())
         return;
@@ -28,7 +28,7 @@ void Text_display::insert(Glyph_string text, int index)
     contents_modified(contents_);
 }
 
-void Text_display::append(Glyph_string text)
+void Text_view::append(Glyph_string text)
 {
     for (auto& glyph : text)
         glyph.brush.traits |= this->insert_brush.traits;
@@ -37,7 +37,7 @@ void Text_display::append(Glyph_string text)
     contents_modified(contents_);
 }
 
-void Text_display::erase(int index, int length)
+void Text_view::erase(int index, int length)
 {
     if (contents_.empty() || index >= contents_.size())
         return;
@@ -50,7 +50,7 @@ void Text_display::erase(int index, int length)
     contents_modified(contents_);
 }
 
-void Text_display::pop_back()
+void Text_view::pop_back()
 {
     if (contents_.empty())
         return;
@@ -59,7 +59,7 @@ void Text_display::pop_back()
     contents_modified(contents_);
 }
 
-void Text_display::clear()
+void Text_view::clear()
 {
     contents_.clear();
     this->cursor.set_x(0);
@@ -68,7 +68,7 @@ void Text_display::clear()
     contents_modified(contents_);
 }
 
-void Text_display::scroll_up(int n)
+void Text_view::scroll_up(int n)
 {
     if (n > this->top_line())
         top_line_ = 0;
@@ -79,7 +79,7 @@ void Text_display::scroll_up(int n)
     scrolled_to(top_line_);
 }
 
-void Text_display::scroll_down(int n)
+void Text_view::scroll_down(int n)
 {
     if (this->top_line() + n > this->last_line())
         top_line_ = this->last_line();
@@ -90,7 +90,7 @@ void Text_display::scroll_down(int n)
     scrolled_to(top_line_);
 }
 
-auto Text_display::index_at(Point position) const -> int
+auto Text_view::index_at(Point position) const -> int
 {
     auto line = this->top_line() + position.y;
     if (line >= (int)display_state_.size())
@@ -109,7 +109,7 @@ auto Text_display::index_at(Point position) const -> int
     return info.start_index + position.x;
 }
 
-auto Text_display::display_position(int index) const -> Point
+auto Text_view::display_position(int index) const -> Point
 {
     auto position = Point{};
     auto line     = this->line_at(index);
@@ -127,7 +127,7 @@ auto Text_display::display_position(int index) const -> Point
     return position;
 }
 
-auto Text_display::paint_event(Painter& p) -> bool
+auto Text_view::paint_event(Painter& p) -> bool
 {
     auto line_n = 0;
     auto paint  = [&p, &line_n, this](Line_info const& line) {
@@ -164,7 +164,7 @@ auto Text_display::paint_event(Painter& p) -> bool
 //     return;
 // }
 
-void Text_display::update_display(int from_line)
+void Text_view::update_display(int from_line)
 {
     auto const begin = display_state_.at(from_line).start_index;
     display_state_.clear();
@@ -202,7 +202,7 @@ void Text_display::update_display(int from_line)
     line_count_changed(display_state_.size());
 }
 
-auto Text_display::line_at(int index) const -> int
+auto Text_view::line_at(int index) const -> int
 {
     auto line = 0;
     for (auto const& info : display_state_) {

@@ -8,15 +8,15 @@
 #include <termox/widget/tuple.hpp>
 #include <termox/widget/widgets/line.hpp>
 #include <termox/widget/widgets/slider.hpp>
-#include <termox/widget/widgets/text_display.hpp>
+#include <termox/widget/widgets/text_view.hpp>
 
 using namespace ox;
 
 namespace {
 
 template <typename Slider_t>
-struct Slider_view : VPair<Slider_t, Text_display> {
-    Slider_view() : VPair<Slider_t, Text_display>{{{-255, 255}, 0}, {U"Init"}}
+struct Slider_view : VPair<Slider_t, Text_view> {
+    Slider_view() : VPair<Slider_t, Text_view>{{{-255, 255}, 0}, {U"Init"}}
     {
         this->first.value_changed.connect(
             [this](int v) { this->second.set_contents(std::to_string(v)); });

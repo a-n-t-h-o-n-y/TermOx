@@ -13,7 +13,7 @@
 #include <termox/widget/widgets/button.hpp>
 #include <termox/widget/widgets/cycle_box.hpp>
 #include <termox/widget/widgets/number_edit.hpp>
-#include <termox/widget/widgets/text_display.hpp>
+#include <termox/widget/widgets/text_view.hpp>
 
 namespace layout_demo {
 
@@ -133,8 +133,7 @@ struct Size_policy_settings : ox::layout::Vertical<> {
         max.label.brush.background = ox::Color::Dark_gray;
     }
 
-    ox::Text_display& title{
-        this->make_child<ox::Text_display>("[-] Width Policy")};
+    ox::Text_view& title{this->make_child<ox::Text_view>("[-] Width Policy")};
 
     // Policy_type_box& types_box{this->make_child<Policy_type_box>()};
 
@@ -184,7 +183,7 @@ struct Size_policy_settings : ox::layout::Vertical<> {
 };
 
 struct Settings : ox::layout::Vertical<> {
-    ox::Text_display& title{this->make_child<ox::Text_display>(
+    ox::Text_view& title{this->make_child<ox::Text_view>(
         ox::Glyph_string{"Settings", ox::Trait::Bold})};
     Size_policy_settings& width_policy_settings{
         this->make_child<Size_policy_settings>()};

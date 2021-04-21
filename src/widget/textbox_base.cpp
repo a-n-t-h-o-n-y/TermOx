@@ -3,7 +3,7 @@
 #include <cstddef>
 
 #include <termox/painter/glyph_string.hpp>
-#include <termox/widget/widgets/text_display.hpp>
+#include <termox/widget/widgets/text_view.hpp>
 
 namespace ox::detail {
 
@@ -34,7 +34,7 @@ void Textbox_base::cursor_down(int n)
 auto Textbox_base::resize_event(Area new_size, Area old_size) -> bool
 {
     auto const cursor_index = this->index_at(this->cursor.position());
-    Text_display::resize_event(new_size, old_size);
+    Text_view::resize_event(new_size, old_size);
 
     // Scroll if old cursor index is now hidden.
     auto const cursor_line = this->line_at(cursor_index);
@@ -43,7 +43,7 @@ auto Textbox_base::resize_event(Area new_size, Area old_size) -> bool
     else if (this->bottom_line() < cursor_line)
         this->scroll_down(cursor_line - this->bottom_line());
     this->set_cursor(cursor_index);
-    return Text_display::resize_event(new_size, old_size);
+    return Text_view::resize_event(new_size, old_size);
 }
 
 }  // namespace ox::detail

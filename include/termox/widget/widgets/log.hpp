@@ -4,7 +4,7 @@
 
 #include <termox/painter/glyph_string.hpp>
 #include <termox/system/key.hpp>
-#include <termox/widget/widgets/text_display.hpp>
+#include <termox/widget/widgets/text_view.hpp>
 #include <termox/widget/widgets/textbox.hpp>
 
 namespace ox {
@@ -46,11 +46,11 @@ class Log : public Textbox {
     }
 
    private:
-    using Text_display::append;
-    using Text_display::erase;
-    using Text_display::insert;
-    using Text_display::pop_back;
-    using Text_display::set_contents;
+    using Text_view::append;
+    using Text_view::erase;
+    using Text_view::insert;
+    using Text_view::pop_back;
+    using Text_view::set_contents;
 };
 
 /// Helper function to create a Log instance.

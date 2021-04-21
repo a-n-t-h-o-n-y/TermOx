@@ -91,7 +91,7 @@ target_sources(TermOx
         widget/cycle_box.cpp
         widget/textbox.cpp
         widget/textbox_base.cpp
-        widget/text_display.cpp
+        widget/text_view.cpp
         widget/border_offset.cpp
         widget/graph_tree.cpp
 )

@@ -8,7 +8,7 @@
 #include <termox/widget/widgets/color_select.hpp>
 #include <termox/widget/widgets/cycle_stack.hpp>
 #include <termox/widget/widgets/label.hpp>
-#include <termox/widget/widgets/text_display.hpp>
+#include <termox/widget/widgets/text_view.hpp>
 
 #include "glyph_selector.hpp"
 #include "options_box.hpp"

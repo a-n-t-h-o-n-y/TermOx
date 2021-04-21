@@ -4,7 +4,7 @@
 #include <termox/widget/layouts/horizontal.hpp>
 #include <termox/widget/layouts/vertical.hpp>
 #include <termox/widget/widget.hpp>
-#include <termox/widget/widgets/text_display.hpp>
+#include <termox/widget/widgets/text_view.hpp>
 
 namespace palette {
 
@@ -25,9 +25,9 @@ struct Color_patch : ox::Widget {
 };
 
 /// Title and name display of a given Color.
-struct Color_name : ox::layout::Vertical<ox::Text_display> {
-    ox::Text_display& title = this->make_child("Color:");
-    ox::Text_display& name  = this->make_child("White");
+struct Color_name : ox::layout::Vertical<ox::Text_view> {
+    ox::Text_view& title = this->make_child("Color:");
+    ox::Text_view& name  = this->make_child("White");
 };
 
 /// Displays a text name and a square visual of a given Color.
