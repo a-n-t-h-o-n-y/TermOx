@@ -12,7 +12,6 @@ struct Paint_event;
 struct Key_press_event;
 struct Mouse_press_event;
 struct Mouse_release_event;
-struct Mouse_double_click_event;
 struct Mouse_wheel_event;
 struct Mouse_move_event;
 struct Child_added_event;
@@ -33,7 +32,6 @@ using Event = std::variant<Paint_event,
                            Key_press_event,
                            Mouse_press_event,
                            Mouse_release_event,
-                           Mouse_double_click_event,
                            Mouse_wheel_event,
                            Mouse_move_event,
                            Child_added_event,

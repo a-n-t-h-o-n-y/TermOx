@@ -39,12 +39,6 @@ struct Mouse_release_event {
     Mouse data;
 };
 
-// TODO remove
-struct Mouse_double_click_event {
-    Widget_ref receiver;
-    Mouse data;
-};
-
 struct Mouse_wheel_event {
     Widget_ref receiver;
     Mouse data;
@@ -122,7 +116,6 @@ using Event = std::variant<Paint_event,
                            Key_press_event,
                            Mouse_press_event,
                            Mouse_release_event,
-                           Mouse_double_click_event,
                            Mouse_wheel_event,
                            Mouse_move_event,
                            Child_added_event,

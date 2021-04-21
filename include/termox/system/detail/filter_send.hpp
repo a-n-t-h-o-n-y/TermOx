@@ -63,17 +63,6 @@ auto apply_until_accepted(F&& filter_function, std::set<Widget*> const& filters)
         e.receiver.get().get_event_filters());
 }
 
-[[nodiscard]] inline auto filter_send(ox::Mouse_double_click_event const& e)
-    -> bool
-{
-    return apply_until_accepted(
-        [&e](Widget* filter) {
-            return filter->mouse_double_click_event_filter(e.receiver.get(),
-                                                           e.data);
-        },
-        e.receiver.get().get_event_filters());
-}
-
 [[nodiscard]] inline auto filter_send(ox::Mouse_wheel_event const& e) -> bool
 {
     return apply_until_accepted(

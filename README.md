@@ -92,8 +92,8 @@ that are able to hold other Widgets, they provide the logic for enabling,
 resizing, and placement of each of their child Widgets.
 
 Patterns of Layout use are encapsulated by the generic `Pair`, `Tuple`, and
-`Array` utility types, making combinations of Widgets as simple as a list of
-Widget types, or number of Widgets of specific type, as in the case of `Array`.
+`Array` utility types; combining Widgets is as simple as listing Widget types,
+or the number of Widgets of specific type, as in the case of `Array`.
 
 ## Custom Widgets
 

@@ -63,7 +63,6 @@ class Widget {
     Signal<void(Area, Area)> resized;
     Signal<void(Mouse const&)> mouse_pressed;
     Signal<void(Mouse const&)> mouse_released;
-    Signal<void(Mouse const&)> mouse_double_clicked;
     Signal<void(Mouse const&)> mouse_wheel_scrolled;
     Signal<void(Mouse const&)> mouse_moved;
     Signal<void(Key)> key_pressed;
@@ -83,7 +82,6 @@ class Widget {
     Signal<void(Widget&, Area, Area)> resized_filter;
     Signal<void(Widget&, Mouse const&)> mouse_pressed_filter;
     Signal<void(Widget&, Mouse const&)> mouse_released_filter;
-    Signal<void(Widget&, Mouse const&)> mouse_double_clicked_filter;
     Signal<void(Widget&, Mouse const&)> mouse_wheel_scrolled_filter;
     Signal<void(Widget&, Mouse const&)> mouse_moved_filter;
     Signal<void(Widget&, Key)> key_pressed_filter;
@@ -441,14 +439,6 @@ class Widget {
         return true;
     }
 
-    /// Handles Mouse_double_click_event objects.
-    // TODO remove this
-    virtual auto mouse_double_click_event(Mouse const& m) -> bool
-    {
-        mouse_double_clicked(m);
-        return true;
-    }
-
     /// Handles Mouse_wheel_event objects.
     virtual auto mouse_wheel_event(Mouse const& m) -> bool
     {
@@ -580,14 +570,6 @@ class Widget {
         -> bool
     {
         mouse_released_filter(receiver, m);
-        return false;
-    }
-
-    /// Handles Mouse_double_click_event objects filtered from other Widgets.
-    virtual auto mouse_double_click_event_filter(Widget& receiver,
-                                                 Mouse const& m) -> bool
-    {
-        mouse_double_clicked_filter(receiver, m);
         return false;
     }
 

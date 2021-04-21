@@ -41,11 +41,6 @@ inline void send(ox::Mouse_release_event e)
     e.receiver.get().mouse_release_event(e.data);
 }
 
-inline void send(ox::Mouse_double_click_event e)
-{
-    e.receiver.get().mouse_double_click_event(e.data);
-}
-
 inline void send(ox::Mouse_wheel_event e)
 {
     e.receiver.get().mouse_wheel_event(e.data);
