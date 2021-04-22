@@ -46,7 +46,8 @@ class Demo_menu : public ox::Menu_stack {
 
         this->make_page<snake::Snake_game>(U"Snake Game" | brush);
         this->make_page<gol::GoL_demo>(U"Game of Life" | brush);
-        this->make_page<Notepad>(U"Notepad" | brush);
+        // this->make_page<Notepad>(U"Notepad" | brush); // seg-faults on Load
+        this->append_page(U"Notepad" | brush, notepad());
         this->make_page<paint::Glyph_paint>(U"Glyph Paint" | brush);
         this->append_page(U"Animated Widget" | brush, make_animation_demo());
         this->append_page(U"Focus" | brush, make_focus_demo());

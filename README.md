@@ -397,9 +397,9 @@ the limitation that it cannot add named data. If you need to hold an `int
 count;` variable that multiple Widgets access, you need a new Widget type that
 holds that variable.
 
-<!-- TODO insert image -->
-
-<!-- TODO link to yt -->
+<p align="center">
+  <img src="docs/images/pinbox.png">
+</p>
 
 See the [Manual](docs/manual/index.md) for more in depth explanations and
 examples.

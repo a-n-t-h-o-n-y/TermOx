@@ -174,41 +174,6 @@ void Painter::border()
         else if (b.east.is_enabled() && !b.south.is_enabled())
             put_global(b.east, south_east);
     }
-
-    // TODO might not need this anymore? with Painter constructor painting over
-    // the outermost area of the widget, then the border being painted as the
-    // last step in Widget::paint_event.
-
-    // Paint wallpaper over empty space that a missing border can cause
-    auto const wallpaper = widget_.generate_wallpaper();
-    // North Wallpaper
-    if (Offset::north(widget_) == 1 && !b.north.is_enabled())
-        this->hline_global(wallpaper, north_left, north_right);
-    // South Wallpaper
-    if (Offset::south(widget_) == 1 && !b.south.is_enabled())
-        this->hline_global(wallpaper, south_left, south_right);
-    // East Wallpaper
-    if (Offset::east(widget_) == 1 && !b.east.is_enabled())
-        this->vline_global(wallpaper, east_top, east_bottom);
-    // West Wallpaper
-    if (Offset::west(widget_) == 1 && !b.west.is_enabled())
-        this->vline_global(wallpaper, west_top, west_bottom);
-    // North-West Wallpaper
-    if (Offset::north(widget_) == 1 && Offset::west(widget_) == 1 &&
-        !b.north_west.is_enabled())
-        this->put_global(wallpaper, north_west);
-    // North-East Wallpaper
-    if (Offset::north(widget_) == 1 && Offset::east(widget_) == 1 &&
-        !b.north_east.is_enabled())
-        this->put_global(wallpaper, north_east);
-    // South-West Wallpaper
-    if (Offset::south(widget_) == 1 && Offset::west(widget_) == 1 &&
-        !b.south_west.is_enabled())
-        this->put_global(wallpaper, south_west);
-    // South-East Wallpaper
-    if (Offset::south(widget_) == 1 && Offset::east(widget_) == 1 &&
-        !b.south_east.is_enabled())
-        this->put_global(wallpaper, south_east);
 }
 
 // GLOBAL COORDINATES - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -249,7 +249,7 @@ class Notepad
 // TODO Accordion side pane is only thing missing.
 
 /// Notepad recreated with pipe operator and unique_ptr constructors.
-auto inline notepad() -> auto
+auto inline notepad()
 {
     using namespace ox;
     using namespace ox::pipe;

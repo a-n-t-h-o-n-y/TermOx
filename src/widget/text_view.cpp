@@ -101,10 +101,10 @@ auto Text_view::index_at(Point position) const -> int
             position.x = 0;
         else if (this->top_line() + position.y != this->last_line())
             return this->first_index_at(this->top_line() + position.y + 1) - 1;
-        else if (this->top_line() + position.y == this->last_line())
+        else  // if (this->top_line() + position.y == this->last_line())
             return this->contents().size();
-        else  // TODO This can't be reached
-            position.x = info.length - 1;
+        // else  // TODO This can't be reached
+        //     position.x = info.length - 1;
     }
     return info.start_index + position.x;
 }

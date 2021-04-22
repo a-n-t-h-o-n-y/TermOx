@@ -36,13 +36,14 @@ class Glyph_string : private std::vector<Glyph> {
 
     Glyph_string(Glyph_string const&) = default;
 
-    // TODO make noexcept if vector is
-    Glyph_string(Glyph_string&&) = default;
+    Glyph_string(Glyph_string&&) noexcept(
+        std::is_nothrow_move_constructible_v<std::vector<Glyph>>) = default;
 
     auto operator=(Glyph_string const&) -> Glyph_string& = default;
 
-    // TODO make noexcept if vector is
-    auto operator=(Glyph_string&&) -> Glyph_string& = default;
+    auto operator=(Glyph_string&&) noexcept(
+        std::is_nothrow_move_constructible_v<std::vector<Glyph>>)
+        -> Glyph_string& = default;
 
     /// Construct with \p count \p glyph's, adding given Traits to each.
     explicit Glyph_string(Glyph glyph, int count = 1)

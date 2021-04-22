@@ -15,6 +15,7 @@
 #include <termox/widget/widgets/checkbox.hpp>
 #include <termox/widget/widgets/cycle_stack.hpp>
 #include <termox/widget/widgets/label.hpp>
+#include <termox/widget/widgets/line.hpp>
 #include <termox/widget/widgets/notify_light.hpp>
 #include <termox/widget/widgets/textline.hpp>
 
@@ -183,14 +184,8 @@ class Runtime : public ox::layout::Horizontal<> {
         using Edit      = ox::HLabel_left<ox::Textline>;
         using Light_box = ox::HLabel_right<ox::Notify_light>;
 
-        // TODO make a Widget with template template layout parameter
-        struct Divider : public Widget {
-            Divider()
-            {
-                using namespace ox::pipe;
-                *this | fixed_height(1) |
-                    wallpaper(U'─' | fg(ox::Color::Light_gray));
-            }
+        struct Divider : public ox::HLine {
+            Divider() { *this | fg(ox::Color::Light_gray); }
         };
 
        public:
@@ -227,19 +222,13 @@ class Runtime : public ox::layout::Horizontal<> {
         ox::Widget& buffer = make_child();
     };
 
-   public:
-    Runtime()
-    {
-        using namespace ox::pipe;
-        divider | fixed_width(1) | wallpaper(U'│' | fg(ox::Color::Light_gray));
-    }
-
    private:
     using Checkbox = ox::Float_2d<ox::Checkbox1>;
 
    private:
     Checkbox& checkbox = this->make_child<Checkbox>();
-    Widget& divider    = this->make_child();
+    ox::VLine& divider =
+        this->make_child<ox::VLine>() | fg(ox::Color::Light_gray);
     Checkbox_options& options =
         this->make_child<Checkbox_options>(checkbox.widget.widget);
 };

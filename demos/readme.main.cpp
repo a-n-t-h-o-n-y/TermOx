@@ -16,7 +16,6 @@ class Pinbox : public ox::Widget {
     // Set the Color to be used for new pins inserted.
     void set_foreground(ox::Color c) { foreground_ = c; }
 
-    // TODO single line function in README
     // Remove all pins from the screen.
     void clear_screen()
     {

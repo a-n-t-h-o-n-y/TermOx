@@ -22,17 +22,6 @@ target_sources(demos
         glyph_paint/glyph_selector.cpp
 )
 
-# Palette
-target_sources(demos
-    PRIVATE
-        palette/value_control.cpp
-        palette/color_definition_setter.cpp
-        palette/color_control.cpp
-        palette/palette_helpers.cpp
-        palette/export_panel.cpp
-        palette/all_colors_display.cpp
-)
-
 # Notepad / Main Menu
 target_sources(demos
     PRIVATE

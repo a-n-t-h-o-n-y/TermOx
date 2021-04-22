@@ -113,17 +113,13 @@ struct Dynamic_color {
 /* ----------------------------- Color Palette -------------------------------*/
 
 /// Used to define a single color for a Palette.
-class Color_definition {
+struct Color_definition {
    public:
     using Value_t = std::variant<Color_index, True_color, Dynamic_color>;
 
    public:
     Color color;
     Value_t value;
-
-   public:
-    // TODO can you get rid of this and use aggregate init? with variant?
-    Color_definition(Color c, Value_t v) : color{c}, value{v} {}
 };
 
 /// A Color Palette pairs Color values and Color_definitions.
