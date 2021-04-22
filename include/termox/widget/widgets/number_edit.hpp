@@ -18,6 +18,8 @@ namespace ox {
 
 // TODO Add Alignment as param once user input works with Align in Textline.
 
+// TODO Add type aliases for Int_edit, Double_edit, Float_edit, etc...
+
 /// A Textline for specified number types.
 /** Provides validator specific to Number_t. Uses std::stringstream to convert
  *  from string to Number_t value. */

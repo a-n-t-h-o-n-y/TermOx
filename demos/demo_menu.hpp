@@ -11,20 +11,20 @@
 #include <termox/widget/widgets/menu_stack.hpp>
 #include <termox/widget/widgets/titlebar.hpp>
 
-#include "animation/animation_demo.hpp"
+#include "animation_demo.hpp"
 #include "color_sliders.hpp"
-#include "colors/palette_view.hpp"
-#include "composites/composites.hpp"
-#include "focus/focus_demo.hpp"
+#include "focus_demo.hpp"
 #include "game_of_life/gol_demo.hpp"
 #include "glyph_paint/glyph_paint.hpp"
 #include "graph/graph_demo.hpp"
-#include "layout/layout_demo.hpp"
+#include "layout_demo.hpp"
 #include "notepad/notepad.hpp"
-#include "palette/palette_demo.hpp"
+#include "palette_creator.hpp"
+#include "palette_view.hpp"
 #include "snake/snake.hpp"
+#include "two_lists.hpp"
 
-namespace demos {
+namespace demo {
 
 namespace Menu_palette = ox::apple_ii;
 
@@ -48,18 +48,17 @@ class Demo_menu : public ox::Menu_stack {
         this->make_page<gol::GoL_demo>(U"Game of Life" | brush);
         this->make_page<Notepad>(U"Notepad" | brush);
         this->make_page<paint::Glyph_paint>(U"Glyph Paint" | brush);
-        this->append_page(U"Animated Widget" | brush, animation::build_demo());
-        this->append_page(U"Focus" | brush, focus::build_demo());
-        this->make_page<colors::Palette_demo>(U"Color Palettes" | brush);
+        this->append_page(U"Animated Widget" | brush, make_animation_demo());
+        this->append_page(U"Focus" | brush, make_focus_demo());
+        this->make_page<colors::Palette_view>(U"Color Palettes" | brush);
+        this->append_page(U"Palette Creator" | brush, make_palette_creator());
         this->make_page<graph::Graph_demo>(U"Graph" | brush);
-        this->make_page<comp::Two_lists>(U"Check Lists" | brush);
+        this->make_page<Two_lists>(U"Check Lists" | brush);
         this->make_page<Color_sliders<50>>(
             U"Color Sliders" | brush,
             make_palette<50>({0, 100, 45}, {360, 100, 45}));
 
-        // this->append_page(U"Notepad Composite" | brush, notepad());
-        // this->make_page<palette::Palette_demo>(U"Color Palette");
-        // this->make_page<layout_demo::Layout_demo>(U"Layouts");
+        // this->make_page<Layout_demo>(U"Layouts");
     }
 };
 
@@ -101,5 +100,5 @@ class Demos : public ox::layout::Vertical<> {
     }
 };
 
-}  // namespace demos
+}  // namespace demo
 #endif  // DEMOS_DEMO_MENU_HPP

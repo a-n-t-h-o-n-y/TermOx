@@ -8,26 +8,31 @@
 #include <termox/widget/layouts/vertical.hpp>
 #include <termox/widget/pipe.hpp>
 #include <termox/widget/widgets/confirm_button.hpp>
+#include <termox/widget/widgets/line.hpp>
 #include <termox/widget/widgets/textline.hpp>
 
 #include "colors.hpp"
-#include "make_break.hpp"
 
 namespace gol {
 
 /// Provides interface to input filename and to Signal on that filename.
 class File_widget : public ox::layout::Vertical<> {
    public:
-    ox::Textline& filename_box_ = this->make_child<ox::Textline>("Filename");
+    struct Parameters {
+        std::u32string btn_text;
+    };
+
+   public:
+    ox::Textline& filename_box_ = this->make_child<ox::Textline>(U"Filename");
 
     ox::Confirm_button& confirm_btn_;
 
-   public:
     sl::Signal<void(std::string const&)> file_request;
 
    public:
-    explicit File_widget(std::string const& btn_text)
-        : confirm_btn_{this->make_child<ox::Confirm_button>(btn_text)}
+    explicit File_widget(Parameters parameters)
+        : confirm_btn_{
+              this->make_child<ox::Confirm_button>(parameters.btn_text)}
     {
         using namespace ox;
         using namespace ox::pipe;
@@ -45,20 +50,27 @@ class File_widget : public ox::layout::Vertical<> {
     }
 };
 
-struct Files_box : ox::layout::Vertical<> {
+struct Files_box : ox::VTuple<File_widget, File_widget, ox::HLine> {
    public:
-    File_widget& import_btn = this->make_child<File_widget>("Import");
-    File_widget& export_btn = this->make_child<File_widget>("Export");
-    Widget& break_          = this->append_child(make_break());
+    File_widget& import_btn = this->get<0>();
+    File_widget& export_btn = this->get<1>();
+    ox::HLine& break_       = this->get<2>() | fg(color::Teal);
 
    public:
     sl::Signal<void(std::string const&)>& import_request =
         import_btn.file_request;
+
     sl::Signal<void(std::string const&)>& export_request =
         export_btn.file_request;
 
    public:
-    Files_box() { *this | ox::pipe::fixed_height(5); }
+    Files_box()
+        : ox::VTuple<File_widget, File_widget, ox::HLine>{{U"Import"},
+                                                          {U"Export"},
+                                                          {}}
+    {
+        *this | ox::pipe::fixed_height(5);
+    }
 };
 
 }  // namespace gol

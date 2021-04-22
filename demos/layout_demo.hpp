@@ -1,21 +1,8 @@
-#ifndef TERMOX_DEMOS_LAYOUT_LAYOUT_DEMO_HPP
-#define TERMOX_DEMOS_LAYOUT_LAYOUT_DEMO_HPP
-#include <signals_light/signal.hpp>
+#ifndef TERMOX_DEMOS_LAYOUT_DEMO_HPP
+#define TERMOX_DEMOS_LAYOUT_DEMO_HPP
+#include <termox/termox.hpp>
 
-#include <termox/painter/color.hpp>
-#include <termox/painter/painter.hpp>
-#include <termox/system/system.hpp>
-#include <termox/widget/layouts/horizontal.hpp>
-#include <termox/widget/layouts/vertical.hpp>
-#include <termox/widget/point.hpp>
-#include <termox/widget/size_policy.hpp>
-#include <termox/widget/widget.hpp>
-#include <termox/widget/widgets/button.hpp>
-#include <termox/widget/widgets/cycle_box.hpp>
-#include <termox/widget/widgets/number_edit.hpp>
-#include <termox/widget/widgets/text_view.hpp>
-
-namespace layout_demo {
+namespace demo {
 
 class Meta_widget : public ox::Widget {
    public:
@@ -280,5 +267,5 @@ struct Layout_demo : ox::layout::Horizontal<> {
     Meta_widget* selected_{nullptr};
 };
 
-}  // namespace layout_demo
-#endif  // TERMOX_DEMOS_LAYOUT_LAYOUT_DEMO_HPP
+}  // namespace demo
+#endif  // TERMOX_DEMOS_LAYOUT_DEMO_HPP

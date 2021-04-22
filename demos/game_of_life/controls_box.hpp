@@ -19,13 +19,13 @@
 #include <termox/widget/widgets/checkbox.hpp>
 #include <termox/widget/widgets/confirm_button.hpp>
 #include <termox/widget/widgets/label.hpp>
+#include <termox/widget/widgets/line.hpp>
 #include <termox/widget/widgets/number_edit.hpp>
 #include <termox/widget/widgets/text_view.hpp>
 #include <termox/widget/widgets/textline.hpp>
 #include <termox/widget/widgets/toggle_button.hpp>
 
 #include "colors.hpp"
-#include "make_break.hpp"
 #include "rule.hpp"
 
 namespace gol {
@@ -59,7 +59,6 @@ class Rule_edit : public ox::layout::Vertical<> {
    public:
     Rule_edit()
     {
-        using namespace ox;
         using namespace ox::pipe;
 
         *this | fixed_height(2);
@@ -144,20 +143,31 @@ struct Grid_hi_res : ox::layout::Horizontal<ox::HCheckbox_label> {
     }
 };
 
-struct Controls_box : ox::layout::Vertical<> {
+struct Rainbow_btn : ox::HCheckbox_label {
+    Rainbow_btn() : ox::HCheckbox_label{{U"Rainbow Mode"}} {}
+};
+
+struct Controls_box : ox::VTuple<Interval_box,
+                                 ox::HLine,
+                                 Start_pause_btns,
+                                 Clear_step_box,
+                                 ox::HLine,
+                                 Grid_hi_res,
+                                 Rainbow_btn,
+                                 ox::HLine,
+                                 Rule_edit,
+                                 ox::HLine> {
    public:
-    // Widget& break_                    = this->append_child(make_break());
-    Interval_box& interval_edit        = this->make_child<Interval_box>();
-    Widget& break_0                    = this->append_child(make_break());
-    Start_pause_btns& start_pause_btns = this->make_child<Start_pause_btns>();
-    Clear_step_box& clear_step_btns    = this->make_child<Clear_step_box>();
-    Widget& break_1                    = this->append_child(make_break());
-    Grid_hi_res& grid_hi_res           = this->make_child<Grid_hi_res>();
-    ox::HCheckbox_label& rainbow_btn =
-        this->make_child<ox::HCheckbox_label>({U"Rainbow Mode"});
-    Widget& break_2      = this->append_child(make_break());
-    Rule_edit& rule_edit = this->make_child<Rule_edit>();
-    Widget& break_3      = this->append_child(make_break());
+    Interval_box& interval_edit        = this->get<0>();
+    ox::HLine& break_0                 = this->get<1>() | fg(color::Teal);
+    Start_pause_btns& start_pause_btns = this->get<2>();
+    Clear_step_box& clear_step_btns    = this->get<3>();
+    ox::HLine& break_1                 = this->get<4>() | fg(color::Teal);
+    Grid_hi_res& grid_hi_res           = this->get<5>();
+    Rainbow_btn& rainbow_btn           = this->get<6>();
+    ox::HLine& break_2                 = this->get<7>() | fg(color::Teal);
+    Rule_edit& rule_edit               = this->get<8>();
+    ox::HLine& break_3                 = this->get<9>() | fg(color::Teal);
 
    public:
     sl::Signal<void(std::string const&)>& rule_change = rule_edit.rule_change;
@@ -172,13 +182,13 @@ struct Controls_box : ox::layout::Vertical<> {
    public:
     Controls_box()
     {
-        using namespace ox::pipe;
-        *this | fixed_height(12);
+        *this | ox::pipe::fixed_height(12);
 
         interval_edit.value_set.connect([this](int value) {
             interval_set(std::chrono::milliseconds{value});
         });
-        interval_edit.value_edit.number_edit | ghost(color::Teal);
+
+        interval_edit.value_edit.number_edit | ox::pipe::ghost(color::Teal);
     }
 };
 

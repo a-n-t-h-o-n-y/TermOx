@@ -3,11 +3,9 @@
 #include <chrono>
 #include <cmath>
 
-#include <signals_light/signal.hpp>
-
 #include <termox/termox.hpp>
 
-namespace demos {
+namespace demo {
 
 void write_file(std::string const& filename, std::string const& output);
 
@@ -38,13 +36,13 @@ class Trait_boxes : public ox::Passive<ox::layout::Vertical<Trait_checkbox>> {
     sl::Signal<void(ox::Trait)> trait_disabled;
 
    public:
-    Trait_boxes()
+    Trait_boxes(Parameters = {})
     {
-        // TODO update to new esc:: Traits(crossout, etc..)
         using ox::Trait;
         for (auto trait :
              {Trait::Bold, Trait::Italic, Trait::Underline, Trait::Standout,
-              Trait::Dim, Trait::Inverse, Trait::Invisible, Trait::Blink}) {
+              Trait::Dim, Trait::Inverse, Trait::Invisible, Trait::Blink,
+              Trait::Crossed_out, Trait::Underline}) {
             auto& w = this->make_child(static_cast<ox::Trait>(trait));
             w.trait_enabled.connect([this](auto t) { this->trait_enabled(t); });
             w.trait_disabled.connect(
@@ -58,19 +56,24 @@ class Labeled_color_select : public ox::HLabel_top<ox::Color_select> {
     using Label_t = ox::HLabel_top<ox::Color_select>;
 
    public:
+    struct Parameters {
+        ox::Glyph_string label;
+    };
+
+   public:
     sl::Signal<void(ox::Color)>& color_selected = wrapped.color_selected;
 
    public:
-    Labeled_color_select(ox::Glyph_string label) : Label_t{std::move(label)}
+    Labeled_color_select(Parameters parameters)
+        : Label_t{std::move(parameters.label)}
     {
-        using namespace ox;
         using namespace ox::pipe;
 
-        Terminal::palette_changed.connect(
+        ox::Terminal::palette_changed.connect(
             [this](auto const& pal) { this->set_heights(pal); });
 
-        this->set_heights(Terminal::current_palette());
-        this->label | Trait::Bold | align_center();
+        this->set_heights(ox::Terminal::current_palette());
+        this->label | ox::Trait::Bold | align_center();
     }
 
    private:
@@ -84,20 +87,25 @@ class Labeled_color_select : public ox::HLabel_top<ox::Color_select> {
     }
 };
 
-class Side_pane : public ox::layout::Vertical<> {
+class Side_pane : public ox::VTuple<Labeled_color_select,
+                                    Labeled_color_select,
+                                    Trait_boxes,
+                                    ox::Widget> {
    public:
-    Labeled_color_select& fg_select =
-        this->make_child<Labeled_color_select>("Foreground⤵");
-
-    Labeled_color_select& bg_select =
-        this->make_child<Labeled_color_select>("Background⤵");
-
-    Trait_boxes& trait_boxes = this->make_child<Trait_boxes>();
-
-    Widget& buffer = this->make_child();
+    Labeled_color_select& fg_select = this->get<0>();
+    Labeled_color_select& bg_select = this->get<1>();
+    Trait_boxes& trait_boxes        = this->get<2>();
+    Widget& buffer                  = this->get<3>();
 
    public:
-    Side_pane() { *this | ox::pipe::fixed_width(16); }
+    Side_pane()
+        : ox::VTuple<Labeled_color_select,
+                     Labeled_color_select,
+                     Trait_boxes,
+                     ox::Widget>{{U"Foreground⤵"}, {U"Background⤵"}, {}, {}}
+    {
+        *this | ox::pipe::fixed_width(16);
+    }
 };
 
 class Text_and_scroll : public ox::HPair<ox::VScrollbar, ox::Textbox> {
@@ -118,7 +126,6 @@ using Side_pane_accordion = ox::HAccordion<Side_pane, ox::Bar_position::Last>;
 
 class Text_and_side_pane : public ox::layout::Horizontal<> {
    public:
-    // ox::Textbox& textbox = this->make_child<ox::Textbox>();
     Text_and_scroll& text_and_scroll = this->make_child<Text_and_scroll>();
     Side_pane& side_pane =
         this->make_child<Side_pane_accordion>({U"Settings", ox::Align::Center})
@@ -350,5 +357,5 @@ auto inline notepad() -> auto
     return np;
 }
 
-}  // namespace demos
+}  // namespace demo
 #endif  // DEMOS_NOTEPAD_NOTEPAD_HPP

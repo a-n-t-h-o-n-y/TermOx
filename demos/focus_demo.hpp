@@ -1,26 +1,17 @@
-#ifndef TERMOX_DEMOS_FOCUS_FOCUS_DEMO_HPP
-#define TERMOX_DEMOS_FOCUS_FOCUS_DEMO_HPP
+#ifndef TERMOX_DEMOS_FOCUS_DEMO_HPP
+#define TERMOX_DEMOS_FOCUS_DEMO_HPP
 #include <memory>
 
-#include <termox/painter/color.hpp>
-#include <termox/painter/palette/amstrad_cpc.hpp>
-#include <termox/system/system.hpp>
-#include <termox/widget/focus_policy.hpp>
-#include <termox/widget/layouts/horizontal.hpp>
-#include <termox/widget/layouts/vertical.hpp>
-#include <termox/widget/pipe.hpp>
-#include <termox/widget/widget.hpp>
-#include <termox/widget/widgets/label.hpp>
-#include "termox/painter/palette/amstrad_cpc.hpp"
+#include <termox/termox.hpp>
 
-namespace demos::focus {
+namespace demo {
 
 inline auto focus_box(ox::Focus_policy policy) -> std::unique_ptr<ox::Widget>
 {
     using namespace ox::pipe;
 
     /// Focus_policy to string
-    auto to_string = [](ox::Focus_policy p) -> char32_t const* {
+    auto const to_string = [](ox::Focus_policy p) -> char32_t const* {
         switch (p) {
             using namespace ox;
             case Focus_policy::None: return U"None";
@@ -47,59 +38,54 @@ inline auto focus_box(ox::Focus_policy policy) -> std::unique_ptr<ox::Widget>
 
     // clang-format off
     auto box_ptr =
-        ox::layout::vertical
-        (
+        ox::vpair(
             ox::hlabel(to_string(policy))
-                | name("l")
-                | align_center()
-                | fixed_height(1)
-                | ox::pipe::focus(narrow(policy)),
-            ox::widget()
-                | name("w")
-                | ox::pipe::focus(policy)
+                | align_center() | ox::pipe::focus(narrow(policy)),
+            ox::widget() | ox::pipe::focus(policy)
         ) | bordered();
 
     box_ptr | direct_focus() | on_focus_in([x = box_ptr.get()]{
             ox::System::set_focus(x->get_children()[1]);
-            });
+        });
 
-    box_ptr | children() | find("l")
-            | on_focus_in([w = box_ptr->find_child_by_name("w")]
-                    { ox::System::set_focus(*w); });
+    auto& label = box_ptr->first;
+    auto& widg  = box_ptr->second;
 
-    box_ptr | children() | find("w")
-            | on_focus_in( [&w = *box_ptr]{ w | walls(fg(ox::Color::Red)); })
-            | on_focus_out([&w = *box_ptr]{ w | walls(fg(ox::Color::White)); });
+    label | on_focus_in([&] { ox::System::set_focus(widg); });
+
+    widg | on_focus_in( [&w = *box_ptr]{ w | walls(fg(ox::Color::Red)); })
+         | on_focus_out([&w = *box_ptr]{ w | walls(fg(ox::Color::White)); });
     // clang-format on
 
     return box_ptr;
 }
 
 /// Build a focus app demo and return the owning pointer to it.
-inline auto build_demo() -> std::unique_ptr<ox::Widget>
+inline auto make_focus_demo() -> std::unique_ptr<ox::Widget>
 {
     using namespace ox;
     using namespace ox::pipe;
 
     // clang-format off
     return
-    layout::horizontal(
-        layout::vertical(
-            focus_box(Focus_policy::Tab) | height_stretch(3),
-            layout::horizontal(
+    htuple(
+        vpair(
+            focus_box(Focus_policy::Tab)
+                | height_stretch(3),
+            hpair(
                 focus_box(Focus_policy::Strong),
                 focus_box(Focus_policy::Direct)
             )
         ),
-        layout::vertical(
+        vpair(
             focus_box(Focus_policy::Strong),
             focus_box(Focus_policy::None)
         ),
-        layout::vertical(
+        vtuple(
             focus_box(Focus_policy::Click),
-            layout::horizontal(
+            htuple(
                 focus_box(Focus_policy::Strong),
-                layout::vertical(
+                vpair(
                     focus_box(Focus_policy::None),
                     focus_box(Focus_policy::Tab)
                 ),
@@ -113,5 +99,5 @@ inline auto build_demo() -> std::unique_ptr<ox::Widget>
     // clang-format on
 }
 
-}  // namespace demos::focus
-#endif  // TERMOX_DEMOS_FOCUS_FOCUS_DEMO_HPP
+}  // namespace demo
+#endif  // TERMOX_DEMOS_FOCUS_DEMO_HPP

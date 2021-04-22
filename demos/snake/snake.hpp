@@ -1,6 +1,7 @@
 #ifndef TERMOX_DEMOS_SNAKE_SNAKE_HPP
 #define TERMOX_DEMOS_SNAKE_SNAKE_HPP
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <random>
 #include <set>
@@ -28,6 +29,7 @@
 #include <termox/widget/widgets/confirm_button.hpp>
 #include <termox/widget/widgets/cycle_box.hpp>
 #include <termox/widget/widgets/label.hpp>
+#include <termox/widget/widgets/number_view.hpp>
 #include <termox/widget/widgets/text_view.hpp>
 #include <termox/widget/widgets/toggle_button.hpp>
 
@@ -460,6 +462,12 @@ class Game_space : public ox::Widget {
     std::chrono::milliseconds period_{initial_period_};
     bool too_small_ = false;
 
+    static auto constexpr apple = U'@' | ox::Trait::Bold | fg(color::Apple);
+    static auto constexpr snake_body = U'█' | fg(color::Snake);
+    static auto constexpr tail       = std::array<ox::Glyph, 3>{
+        U'░' | fg(color::Snake), U'▒' | fg(color::Snake),
+        U'▓' | fg(color::Snake)};
+
    public:
     sl::Signal<void()>& game_over     = engine_.game_over;
     sl::Signal<void(unsigned)>& score = engine_.score;
@@ -467,7 +475,7 @@ class Game_space : public ox::Widget {
     sl::Signal<void()> stopped;
 
    private:
-    auto is_too_small() -> bool
+    [[nodiscard]] auto is_too_small() -> bool
     {
         return this->width() < engine_.apples.area().width ||
                this->height() < engine_.apples.area().height;
@@ -492,30 +500,23 @@ class Game_space : public ox::Widget {
 
     void paint_game(ox::Painter& painter)
     {
-        for (auto const& p : engine_.apples) {
-            // TODO store as static constexpr(?) glyph
-            painter.put(U'@' | ox::Trait::Bold | fg(color::Apple), p);
-        }
+        for (auto const& p : engine_.apples)
+            painter.put(apple, p);
 
-        // Body
         for (auto const& p : engine_.snake)
-            painter.put(U'█' | fg(color::Snake), p);
-        // TODO Store snake_body as glyph
+            painter.put(snake_body, p);
 
-        // Tail
         if (engine_.snake.size() > 3) {
-            // TODO store as static glyphs
-            painter.put(U'░' | fg(color::Snake), engine_.snake[0]);
-            painter.put(U'▒' | fg(color::Snake), engine_.snake[1]);
-            painter.put(U'▓' | fg(color::Snake), engine_.snake[2]);
+            painter.put(tail[0], engine_.snake[0]);
+            painter.put(tail[1], engine_.snake[1]);
+            painter.put(tail[2], engine_.snake[2]);
         }
         else if (engine_.snake.size() == 3) {
-            painter.put(U'▒' | fg(color::Snake), engine_.snake[0]);
-            painter.put(U'▓' | fg(color::Snake), engine_.snake[1]);
+            painter.put(tail[1], engine_.snake[0]);
+            painter.put(tail[2], engine_.snake[1]);
         }
-        else if (engine_.snake.size() == 2) {
-            painter.put(U'▓' | fg(color::Snake), engine_.snake[0]);
-        }
+        else if (engine_.snake.size() == 2)
+            painter.put(tail[2], engine_.snake[0]);
 
         // Head
         switch (engine_.snake.get_direction()) {
@@ -535,7 +536,8 @@ class Game_space : public ox::Widget {
     }
 
     /// Reduce \p duration by \p factor and return the result as ms.
-    auto reduce_by(std::chrono::milliseconds duration, double factor)
+    [[nodiscard]] static auto reduce_by(std::chrono::milliseconds duration,
+                                        double factor)
         -> std::chrono::milliseconds
     {
         return duration - std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -545,7 +547,7 @@ class Game_space : public ox::Widget {
 
 class Instructions : public ox::Text_view {
    public:
-    Instructions() : Text_view{make_text()}
+    Instructions(Parameters = {}) : Text_view{make_text()}
     {
         using namespace ox::pipe;
         *this | bg(color::Instruction_bg) | fg(color::Instruction_fg) |
@@ -553,7 +555,7 @@ class Instructions : public ox::Text_view {
     }
 
    private:
-    static auto make_text() -> ox::Glyph_string
+    [[nodiscard]] static auto make_text() -> ox::Glyph_string
     {
         using namespace ox;
         auto const standout = Brush{fg(color::Instruction_text), Trait::Bold};
@@ -567,9 +569,25 @@ class Instructions : public ox::Text_view {
     }
 };
 
-class Button_bar : public ox::layout::Horizontal<> {
+class Button_bar : public ox::HTuple<ox::Toggle_button,
+                                     ox::Labeled_cycle_box,
+                                     Instructions> {
+   private:
+    ox::Toggle_button& start_pause_btns_ = this->get<0>();
+    ox::Labeled_cycle_box& sizes_        = this->get<1>();
+    Instructions& instructions_          = this->get<2>();
+
+   public:
+    sl::Signal<void()>& start = start_pause_btns_.top_pressed;
+    sl::Signal<void()>& pause = start_pause_btns_.bottom_pressed;
+    sl::Signal<void(char)> size_change;
+
    public:
     Button_bar()
+        : ox::HTuple<ox::Toggle_button, ox::Labeled_cycle_box, Instructions>{
+              {U"Start" | ox::Trait::Bold, U"Pause" | ox::Trait::Bold},
+              {U" Size"},
+              {}}
     {
         using namespace ox::pipe;
         sizes_ | fixed_width(16);
@@ -598,24 +616,13 @@ class Button_bar : public ox::layout::Horizontal<> {
     void show_start_button() { start_pause_btns_.show_top(); }
 
     void show_pause_button() { start_pause_btns_.show_bottom(); }
-
-   private:
-    ox::Toggle_button& start_pause_btns_ =
-        this->make_child<ox::Toggle_button>(U"Start" | ox::Trait::Bold,
-                                            U"Pause" | ox::Trait::Bold);
-    ox::Labeled_cycle_box& sizes_ =
-        this->make_child<ox::Labeled_cycle_box>(U" Size");
-    Instructions& instructions_ = this->make_child<Instructions>();
-
-   public:
-    sl::Signal<void()>& start = start_pause_btns_.top_pressed;
-    sl::Signal<void()>& pause = start_pause_btns_.bottom_pressed;
-    sl::Signal<void(char)> size_change;
 };
 
-class Score : public ox::layout::Horizontal<> {
+class Score : public ox::HPair<ox::HLabel, ox::Int_view> {
    public:
     Score()
+        : ox::HPair<ox::HLabel, ox::Int_view>{{U"Score: "},
+                                              {0, 0, ox::Align::Right}}
     {
         using namespace ox::pipe;
         *this | fixed_width(12) | children() | bg(color::Score_bg) |
@@ -623,19 +630,16 @@ class Score : public ox::layout::Horizontal<> {
     }
 
    public:
-    void set(unsigned score) { score_.set_text(std::to_string(score)); }
+    void set(unsigned score) { score_.set_value(score); }
 
    private:
-    ox::HLabel& label_ = this->make_child<ox::HLabel>({U"Score: "});
-    // TODO replace with Number_view Widget
-    ox::HLabel& score_ = this->make_child<ox::HLabel>({U"0", ox::Align::Right});
+    ox::Int_view& score_ = this->second;
 };
 
-// tuple or pair
-class Bottom_bar : public ox::layout::Horizontal<> {
+class Bottom_bar : public ox::HPair<Button_bar, Score> {
    public:
-    Button_bar& buttons = this->make_child<Button_bar>();
-    Score& score        = this->make_child<Score>();
+    Button_bar& buttons = this->first;
+    Score& score        = this->second;
 };
 
 class Snake_game : public ox::layout::Vertical<> {

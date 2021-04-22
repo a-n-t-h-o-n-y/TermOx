@@ -1,6 +1,8 @@
 #ifndef TERMOX_TERMOX_HPP
 #define TERMOX_TERMOX_HPP
 
+#include <signals_light/signal.hpp>
+
 #include <termox/common/mb_to_u32.hpp>
 #include <termox/common/u32_to_mb.hpp>
 

@@ -1,15 +1,8 @@
-#ifndef TERMOX_DEMOS_ANIMATION_ANIMATED_WIDGET_HPP
-#define TERMOX_DEMOS_ANIMATION_ANIMATED_WIDGET_HPP
-#include <termox/painter/color.hpp>
-#include <termox/painter/glyph.hpp>
-#include <termox/painter/painter.hpp>
-#include <termox/system/mouse.hpp>
-#include <termox/widget/layouts/horizontal.hpp>
-#include <termox/widget/pipe.hpp>
-#include <termox/widget/point.hpp>
-#include <termox/widget/widget.hpp>
+#ifndef TERMOX_DEMOS_ANIMATED_WIDGET_HPP
+#define TERMOX_DEMOS_ANIMATED_WIDGET_HPP
+#include <termox/termox.hpp>
 
-namespace demos::animation {
+namespace demo {
 
 /// Box containing a circle character that bounces off the Widget's walls.
 class Animated_box : public ox::Widget {
@@ -93,7 +86,7 @@ class Animated_box : public ox::Widget {
 };
 
 /// Contains a few Animated_boxes at various animation rates.
-inline auto build_demo() -> std::unique_ptr<ox::Widget>
+inline auto make_animation_demo() -> std::unique_ptr<ox::Widget>
 {
     using namespace ox;
     auto app = layout::horizontal<Animated_box>(
@@ -108,5 +101,5 @@ inline auto build_demo() -> std::unique_ptr<ox::Widget>
     return app;
 }
 
-}  // namespace demos::animation
-#endif  // TERMOX_DEMOS_ANIMATION_ANIMATED_WIDGET_HPP
+}  // namespace demo
+#endif  // TERMOX_DEMOS_ANIMATED_WIDGET_HPP

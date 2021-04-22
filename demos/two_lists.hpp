@@ -1,24 +1,11 @@
-#ifndef TERMOX_DEMOS_COMPOSITES_COMPOSITES_HPP
-#define TERMOX_DEMOS_COMPOSITES_COMPOSITES_HPP
+#ifndef TERMOX_DEMOS_TWO_LISTS_HPP
+#define TERMOX_DEMOS_TWO_LISTS_HPP
 #include <string>
 #include <utility>
 
-#include <termox/system/key.hpp>
-#include <termox/widget/array.hpp>
-#include <termox/widget/layouts/horizontal.hpp>
-#include <termox/widget/layouts/selecting.hpp>
-#include <termox/widget/layouts/vertical.hpp>
-#include <termox/widget/pair.hpp>
-#include <termox/widget/pipe.hpp>
-#include <termox/widget/tuple.hpp>
-#include <termox/widget/widget.hpp>
-#include <termox/widget/widgets/button.hpp>
-#include <termox/widget/widgets/checkbox.hpp>
-#include <termox/widget/widgets/cycle_box.hpp>
-#include <termox/widget/widgets/selectable.hpp>
-#include <termox/widget/widgets/textbox.hpp>
+#include <termox/termox.hpp>
 
-namespace comp {
+namespace demo {
 
 using Btns = ox::Array<ox::layout::Horizontal<ox::Button>, 2>;
 
@@ -208,5 +195,5 @@ class Idea : public Settings_box {
     }
 };
 
-}  // namespace comp
-#endif  // TERMOX_DEMOS_COMPOSITES_COMPOSITES_HPP
+}  // namespace demo
+#endif  // TERMOX_DEMOS_TWO_LISTS_HPP

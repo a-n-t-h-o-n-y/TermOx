@@ -1,41 +1,8 @@
-#ifndef TERMOX_DEMOS_COLORS_COLORS_DISPLAY_HPP
-#define TERMOX_DEMOS_COLORS_COLORS_DISPLAY_HPP
+#ifndef TERMOX_DEMOS_PALETTE_VIEW_HPP
+#define TERMOX_DEMOS_PALETTE_VIEW_HPP
 #include <utility>
 
-#include <signals_light/signal.hpp>
-
-#include <termox/painter/color.hpp>
-#include <termox/painter/glyph_string.hpp>
-#include <termox/painter/palette/amstrad_cpc.hpp>
-#include <termox/painter/palette/apple_ii.hpp>
-#include <termox/painter/palette/ashes.hpp>
-#include <termox/painter/palette/basic.hpp>
-#include <termox/painter/palette/basic8.hpp>
-#include <termox/painter/palette/cga.hpp>
-#include <termox/painter/palette/commodore_64.hpp>
-#include <termox/painter/palette/commodore_vic20.hpp>
-#include <termox/painter/palette/dawn_bringer16.hpp>
-#include <termox/painter/palette/dawn_bringer32.hpp>
-#include <termox/painter/palette/en4.hpp>
-#include <termox/painter/palette/gameboy.hpp>
-#include <termox/painter/palette/gameboy_pocket.hpp>
-#include <termox/painter/palette/macintosh_ii.hpp>
-#include <termox/painter/palette/msx.hpp>
-#include <termox/painter/palette/nes.hpp>
-#include <termox/painter/palette/savanna.hpp>
-#include <termox/painter/palette/secam.hpp>
-#include <termox/painter/palette/stormy6.hpp>
-#include <termox/painter/palette/teletext.hpp>
-#include <termox/painter/palette/thomson_m05.hpp>
-#include <termox/painter/palette/windows.hpp>
-#include <termox/painter/palette/windows_console.hpp>
-#include <termox/painter/palette/zx_spectrum.hpp>
-#include <termox/system/system.hpp>
-#include <termox/terminal/terminal.hpp>
-#include <termox/widget/layouts/vertical.hpp>
-#include <termox/widget/pipe.hpp>
-#include <termox/widget/widgets/color_select.hpp>
-#include <termox/widget/widgets/cycle_box.hpp>
+#include <termox/termox.hpp>
 
 namespace colors {
 
@@ -44,7 +11,7 @@ class Palette_picker : public ox::Labeled_cycle_box {
     sl::Signal<void(ox::Palette)> palette_picked;
 
    public:
-    Palette_picker() : Labeled_cycle_box{"Palette"}
+    Palette_picker(Parameters = {}) : Labeled_cycle_box{"Palette"}
     {
         using namespace ox;
         *this | pipe::direct_focus();
@@ -85,14 +52,16 @@ class Palette_picker : public ox::Labeled_cycle_box {
     }
 };
 
-class Palette_demo : public ox::layout::Vertical<> {
+class Palette_view : public ox::VPair<ox::Color_select, Palette_picker> {
    public:
-    ox::Color_select& palette_view =
-        this->make_child<ox::Color_select>(ox::Color_tile::Display::Number);
-    Palette_picker& palette_picker = this->make_child<Palette_picker>();
+    ox::Color_select& palette_view = this->first;
+    Palette_picker& palette_picker = this->second;
 
    public:
-    Palette_demo()
+    Palette_view()
+        : ox::VPair<ox::Color_select, Palette_picker>{
+              {ox::Color_tile::Display::Number},
+              {}}
     {
         using namespace ox::pipe;
         *this | strong_focus();
@@ -110,4 +79,4 @@ class Palette_demo : public ox::layout::Vertical<> {
 };
 
 }  // namespace colors
-#endif  // TERMOX_DEMOS_COLORS_COLORS_DISPLAY_HPP
+#endif  // TERMOX_DEMOS_PALETTE_VIEW_HPP

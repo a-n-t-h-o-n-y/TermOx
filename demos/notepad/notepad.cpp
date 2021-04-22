@@ -13,7 +13,7 @@
 #include <termox/widget/pipe.hpp>
 #include <termox/widget/widget_slots.hpp>
 
-namespace demos {
+namespace demo {
 
 void write_file(std::string const& filename, std::string const& output)
 {
@@ -65,4 +65,4 @@ void Notepad::initialize()
     });
 }
 
-}  // namespace demos
+}  // namespace demo
