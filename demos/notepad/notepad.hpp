@@ -283,7 +283,7 @@ auto inline notepad()
         unscramble_banner(),
         htuple(
             button(U"Load") | bg(Color::Blue) | fixed_width(6),
-            textline() | bg(Color::White) | fg(Color::Black),
+            line_edit() | bg(Color::White) | fg(Color::Black),
             button(U"Save") | bg(Color::Blue) | fixed_width(6)
         ) | fixed_height(1)
     ) | strong_focus()

@@ -16,8 +16,8 @@
 #include <termox/widget/widgets/cycle_stack.hpp>
 #include <termox/widget/widgets/label.hpp>
 #include <termox/widget/widgets/line.hpp>
+#include <termox/widget/widgets/line_edit.hpp>
 #include <termox/widget/widgets/notify_light.hpp>
-#include <termox/widget/widgets/textline.hpp>
 
 class Count : public ox::HLabel {
    public:
@@ -181,7 +181,7 @@ class Runtime : public ox::layout::Horizontal<> {
 
        private:
         using Checkbox  = ox::HCheckbox20_label;
-        using Edit      = ox::HLabel_left<ox::Textline>;
+        using Edit      = ox::HLabel_left<ox::Line_edit>;
         using Light_box = ox::HLabel_right<ox::Notify_light>;
 
         struct Divider : public ox::HLine {

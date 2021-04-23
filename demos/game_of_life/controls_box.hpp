@@ -20,9 +20,9 @@
 #include <termox/widget/widgets/confirm_button.hpp>
 #include <termox/widget/widgets/label.hpp>
 #include <termox/widget/widgets/line.hpp>
+#include <termox/widget/widgets/line_edit.hpp>
 #include <termox/widget/widgets/number_edit.hpp>
 #include <termox/widget/widgets/text_view.hpp>
-#include <termox/widget/widgets/textline.hpp>
 #include <termox/widget/widgets/toggle_button.hpp>
 
 #include "colors.hpp"
@@ -88,7 +88,7 @@ class Rule_edit : public ox::layout::Vertical<> {
         {U"RuleString[B/S]" | ox::Trait::Underline | ox::Trait::Bold,
          ox::Align::Center});
 
-    ox::Textline& edit_box_ = this->make_child<ox::Textline>();
+    ox::Line_edit& edit_box_ = this->make_child<ox::Line_edit>();
 };
 
 struct Start_pause_btns : ox::Toggle_button {

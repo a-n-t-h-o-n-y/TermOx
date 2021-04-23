@@ -12,19 +12,21 @@
 #include <termox/widget/layouts/horizontal.hpp>
 #include <termox/widget/pipe.hpp>
 #include <termox/widget/widgets/label.hpp>
-#include <termox/widget/widgets/textline.hpp>
+#include <termox/widget/widgets/line_edit.hpp>
 
 namespace ox {
 
-// TODO Add Alignment as param once user input works with Align in Textline.
+// TODO Add Alignment as param once user input works with Align in Line_edit.
 
 // TODO Add type aliases for Int_edit, Double_edit, Float_edit, etc...
 
-/// A Textline for specified number types.
+// TODO add valid range of values as paramter
+
+/// A Line_edit for specified number types.
 /** Provides validator specific to Number_t. Uses std::stringstream to convert
  *  from string to Number_t value. */
 template <typename Number_t = int>
-class Number_edit : public Textline {
+class Number_edit : public Line_edit {
    public:
     struct Parameters {
         Number_t value = 0;
@@ -37,7 +39,7 @@ class Number_edit : public Textline {
    public:
     /// Construct a Number_edit with \p initial value.
     explicit Number_edit(Number_t initial = 0)
-        : Textline{std::to_string(initial)}, value_{initial}
+        : Line_edit{std::to_string(initial)}, value_{initial}
     {
         this->set_validator([](char c) { return is_valid_input(c); });
         this->enter_pressed.connect([this](std::string const& text) {
@@ -72,7 +74,7 @@ class Number_edit : public Textline {
             case Mouse::Button::ScrollDown: this->decrement(); break;
             default: break;
         }
-        return Textline::mouse_wheel_event(m);
+        return Line_edit::mouse_wheel_event(m);
     }
 
    private:
@@ -98,15 +100,13 @@ class Number_edit : public Textline {
         this->set_contents(ss.str());
     }
 
-    void emit_signal() { value_set.emit(value_); }
-
     void increment()
     {
         if (value_ == std::numeric_limits<Number_t>::max())
             return;
         ++value_;
         this->display_value();
-        this->emit_signal();
+        value_set.emit(value_);
     }
 
     void decrement()
@@ -115,7 +115,7 @@ class Number_edit : public Textline {
             return;
         --value_;
         this->display_value();
-        this->emit_signal();
+        value_set.emit(value_);
     }
 };
 
@@ -135,6 +135,10 @@ template <typename Number_t = int>
 {
     return std::make_unique<Number_edit<Number_t>>(std::move(parameters));
 }
+
+using Int_edit    = Number_edit<int>;
+using Double_edit = Number_edit<double>;
+using Float_edit  = Number_edit<float>;
 
 /// Number_edit with preceding Label arranged horizontally.
 template <typename Number_t = int>

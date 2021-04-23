@@ -51,7 +51,7 @@ namespace demo {
     // clang-format off
     auto sliders =
         ox::htuple(
-            slider({0, 360}, U'H'),
+            slider({0, 359}, U'H'),
             slider({0, 100}, U'S'),
             slider({0, 100}, U'L')
         );

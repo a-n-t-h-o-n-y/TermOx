@@ -246,8 +246,6 @@ Widget. Each section produces the exact same user interface.
 This first section creates new Widget types to build up the interface.
 
 ```cpp
-// With Classes
-
 class Side_pane : public ox::VTuple<ox::HLabel,
                                     ox::Color_select,
                                     ox::HLabel,
@@ -329,12 +327,9 @@ This next section produces the same interface as the one above, but uses
 existing Widget objects and modifies them to build up the interface.
 
 ```cpp
-// With Values and Pipes
-
 auto pinbox_app()
 {
     using namespace ox::pipe;
-    // clang-format off
     auto pa =
         ox::hpair(
             std::make_unique<Pinbox>(),
@@ -353,8 +348,8 @@ auto pinbox_app()
                 ox::widget()
             ) | fixed_width(17) | west_border()
         );
-    // clang-format on
 
+    // Access individual Widgets using the `Pair` and `Tuple` interfaces.
     auto& pinbox       = pa->first;
     auto& color_select = pa->second.get<1>();
     auto& status_box   = pa->second.get<3>();
@@ -392,7 +387,7 @@ auto pinbox_app()
 int main() { return ox::System{ox::Mouse_mode::Drag}.run(*pinbox_app()); }
 ```
 
-Although this code is somewhat less verbose than the type style, it does have
+Although this code is somewhat less verbose than the typed style, it does have
 the limitation that it cannot add named data. If you need to hold an `int
 count;` variable that multiple Widgets access, you need a new Widget type that
 holds that variable.

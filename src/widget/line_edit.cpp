@@ -1,4 +1,4 @@
-#include <termox/widget/widgets/textline.hpp>
+#include <termox/widget/widgets/line_edit.hpp>
 
 #include <cctype>
 #include <functional>
@@ -11,7 +11,7 @@
 
 namespace ox {
 
-auto Textline::key_press_event(Key k) -> bool
+auto Line_edit::key_press_event(Key k) -> bool
 {
     auto constexpr can_print = [](unsigned char c) {
         return std::isprint(c) || std::isspace(c);

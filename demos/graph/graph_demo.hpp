@@ -9,9 +9,11 @@
 
 #include <termox/widget/layouts/horizontal.hpp>
 #include <termox/widget/layouts/vertical.hpp>
+#include <termox/widget/pair.hpp>
 #include <termox/widget/pipe.hpp>
 #include <termox/widget/widgets/cycle_box.hpp>
 #include <termox/widget/widgets/graph.hpp>
+#include <termox/widget/widgets/label.hpp>
 #include <termox/widget/widgets/number_edit.hpp>
 
 namespace graph {
@@ -230,6 +232,17 @@ class Graph_core : public ox::Graph<double> {
     }
 };
 
+class Step_interval : public ox::HPair<ox::HLabel, ox::Int_edit> {
+   public:
+    ox::HLabel& label  = this->first | ox::pipe::fixed_width(17);
+    ox::Int_edit& edit = this->second;
+
+   public:
+    Step_interval()
+        : ox::HPair<ox::HLabel, ox::Int_edit>{{U"StepInterval(ms)"}, {16}}
+    {}
+};
+
 class Graph_demo : public ox::layout::Horizontal<> {
    private:
     struct Settings : ox::layout::Vertical<> {
@@ -239,8 +252,7 @@ class Graph_demo : public ox::layout::Horizontal<> {
 
         ox::Labeled_cycle_box& graph_box =
             make_child<ox::Labeled_cycle_box>(U"Graph");
-        ox::Labeled_number_edit<int>& step_interval_box =
-            make_child<ox::Labeled_number_edit<int>>(U"StepInterval(ms)", 16);
+        Step_interval& step_interval_box = this->make_child<Step_interval>();
 
        private:
         ox::Widget& buffer_ = this->make_child();
@@ -261,7 +273,7 @@ class Graph_demo : public ox::layout::Horizontal<> {
             });
             graph_box.cycle_box.add_option("Circle").connect(
                 [this] { graph_changed("circle"); });
-            step_interval_box.number_edit.value_set.connect(
+            step_interval_box.edit.value_set.connect(
                 [this](int interval) { step_interval_changed(interval); });
         }
     };

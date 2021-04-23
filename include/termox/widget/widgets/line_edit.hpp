@@ -1,5 +1,5 @@
-#ifndef TERMOX_WIDGET_WIDGETS_TEXTLINE_HPP
-#define TERMOX_WIDGET_WIDGETS_TEXTLINE_HPP
+#ifndef TERMOX_WIDGET_WIDGETS_LINE_EDIT_HPP
+#define TERMOX_WIDGET_WIDGETS_LINE_EDIT_HPP
 #include <functional>
 #include <memory>
 #include <optional>
@@ -25,7 +25,7 @@ namespace ox {
 
 /// Single line Textbox with input validator and various options.
 /** Initial text is in ghost color and cleared on initial focus. */
-class Textline : public Textbox {
+class Line_edit : public Textbox {
    public:
     using Validator_t = std::function<bool(char)>;
 
@@ -47,13 +47,13 @@ class Textline : public Textbox {
     sl::Signal<void(std::string const&)> enter_pressed;
 
    public:
-    /// Construct a Textline object with \p placeholder_text in ghost color.
-    explicit Textline(Glyph_string placeholder_text        = U"",
-                      std::optional<Validator_t> validator = std::nullopt,
-                      std::optional<Glyph> veil            = std::nullopt,
-                      Action on_enter                      = Action::None,
-                      Color ghost_color                    = Color::Light_gray,
-                      Style style                          = Style::None)
+    /// Construct a Line_edit object with \p placeholder_text in ghost color.
+    explicit Line_edit(Glyph_string placeholder_text        = U"",
+                       std::optional<Validator_t> validator = std::nullopt,
+                       std::optional<Glyph> veil            = std::nullopt,
+                       Action on_enter                      = Action::None,
+                       Color ghost_color                    = Color::Light_gray,
+                       Style style                          = Style::None)
         : Textbox{std::move(placeholder_text)},
           validator_{validator},
           veil_{veil},
@@ -65,14 +65,14 @@ class Textline : public Textbox {
         *this | fixed_height(1) | ghost(ghost_color_) | word_wrap(false);
     }
 
-    /// Construct a Textline object with \p parameters.
-    explicit Textline(Parameters parameters)
-        : Textline{std::move(parameters.placeholder_text),
-                   std::move(parameters.validator),
-                   parameters.veil,
-                   parameters.on_enter,
-                   parameters.ghost_color,
-                   parameters.style}
+    /// Construct a Line_edit object with \p parameters.
+    explicit Line_edit(Parameters parameters)
+        : Line_edit{std::move(parameters.placeholder_text),
+                    std::move(parameters.validator),
+                    parameters.veil,
+                    parameters.on_enter,
+                    parameters.ghost_color,
+                    parameters.style}
     {}
 
    public:
@@ -83,7 +83,7 @@ class Textline : public Textbox {
         this->set_contents(std::move(placeholder_text | fg(ghost_color_)));
     }
 
-    /// Return the current text set in the Textline.
+    /// Return the current text set in the Line_edit.
     [[nodiscard]] auto text() const -> Glyph_string const&
     {
         return this->Textbox::contents();
@@ -140,7 +140,7 @@ class Textline : public Textbox {
     /// Return the current ghost color for the placeholder text.
     [[nodiscard]] auto ghost_color() const -> Color { return ghost_color_; }
 
-    /// Set whether the Textline has an underline for the entire Widget.
+    /// Set whether the Line_edit has an underline for the entire Widget.
     void set_style(Style x)
     {
         using namespace ox::pipe;
@@ -194,26 +194,27 @@ class Textline : public Textbox {
     Style style_;
 };
 
-/// Helper function to create a Textline instance.
-[[nodiscard]] inline auto textline(
-    Glyph_string placeholder_text                  = U"",
-    std::optional<Textline::Validator_t> validator = std::nullopt,
-    std::optional<Glyph> veil                      = std::nullopt,
-    Textline::Action on_enter                      = Textline::Action::None,
-    Color ghost_color                              = Color::Light_gray,
-    Textline::Style style = Textline::Style::None) -> std::unique_ptr<Textline>
+/// Helper function to create a Line_edit instance.
+[[nodiscard]] inline auto line_edit(
+    Glyph_string placeholder_text                   = U"",
+    std::optional<Line_edit::Validator_t> validator = std::nullopt,
+    std::optional<Glyph> veil                       = std::nullopt,
+    Line_edit::Action on_enter                      = Line_edit::Action::None,
+    Color ghost_color                               = Color::Light_gray,
+    Line_edit::Style style                          = Line_edit::Style::None)
+    -> std::unique_ptr<Line_edit>
 {
-    return std::make_unique<Textline>(std::move(placeholder_text),
-                                      std::move(validator), veil, on_enter,
-                                      ghost_color, style);
+    return std::make_unique<Line_edit>(std::move(placeholder_text),
+                                       std::move(validator), veil, on_enter,
+                                       ghost_color, style);
 }
 
-/// Helper function to create a Textline instance.
-[[nodiscard]] inline auto textline(Textline::Parameters parameters)
-    -> std::unique_ptr<Textline>
+/// Helper function to create a Line_edit instance.
+[[nodiscard]] inline auto line_edit(Line_edit::Parameters parameters)
+    -> std::unique_ptr<Line_edit>
 {
-    return std::make_unique<Textline>(std::move(parameters));
+    return std::make_unique<Line_edit>(std::move(parameters));
 }
 
 }  // namespace ox
-#endif  // TERMOX_WIDGET_WIDGETS_TEXTLINE_HPP
+#endif  // TERMOX_WIDGET_WIDGETS_LINE_EDIT_HPP
