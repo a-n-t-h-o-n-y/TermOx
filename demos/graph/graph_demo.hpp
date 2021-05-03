@@ -15,6 +15,7 @@
 #include <termox/widget/widgets/graph.hpp>
 #include <termox/widget/widgets/label.hpp>
 #include <termox/widget/widgets/number_edit.hpp>
+#include "termox/widget/align.hpp"
 
 namespace graph {
 
@@ -234,12 +235,14 @@ class Graph_core : public ox::Graph<double> {
 
 class Step_interval : public ox::HPair<ox::HLabel, ox::Int_edit> {
    public:
-    ox::HLabel& label  = this->first | ox::pipe::fixed_width(17);
-    ox::Int_edit& edit = this->second;
+    ox::HLabel& label = this->first | ox::pipe::fixed_width(17);
+    ox::Int_edit& edit =
+        this->second | bg(ox::Color::White) | fg(ox::Color::Black);
 
    public:
     Step_interval()
-        : ox::HPair<ox::HLabel, ox::Int_edit>{{U"StepInterval(ms)"}, {16}}
+        : ox::HPair<ox::HLabel, ox::Int_edit>{{U"StepInterval(ms)"},
+                                              {16, {1, 5'000}}}
     {}
 };
 
@@ -273,7 +276,7 @@ class Graph_demo : public ox::layout::Horizontal<> {
             });
             graph_box.cycle_box.add_option("Circle").connect(
                 [this] { graph_changed("circle"); });
-            step_interval_box.edit.value_set.connect(
+            step_interval_box.edit.submitted.connect(
                 [this](int interval) { step_interval_changed(interval); });
         }
     };

@@ -37,17 +37,21 @@ class Generation_count : public ox::HPair<ox::HLabel, ox::Int_view> {
     ox::Int_view& count_ = this->second;
 };
 
-struct Coord_view : ox::Labeled_number_edit<> {
+struct Coord_view : ox::HPair<ox::HLabel, ox::Int_edit> {
     struct Parameters {
         ox::Glyph_string label;
     };
 
+    ox::HLabel& label  = this->first;
+    ox::Int_edit& edit = this->second;
+
     Coord_view(Parameters parameters)
-        : ox::Labeled_number_edit<>{parameters.label, 0}
+        : ox::HPair<ox::HLabel, ox::Int_edit>{{parameters.label},
+                                              {0, {-1'000, 1'000}}}
     {
         using namespace ox::pipe;
-        this->number_edit | bg(color::Black) | fg(color::White) |
-            ghost(color::White);
+        label | dynamic_growth();
+        edit | bg(color::Black) | fg(color::White);
     }
 };
 

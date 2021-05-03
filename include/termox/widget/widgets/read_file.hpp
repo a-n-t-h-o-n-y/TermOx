@@ -19,13 +19,16 @@ struct Read_file_widgets : HTuple<Button, Tile, Line_edit> {
     Line_edit& filename_edit = this->get<2>();
 
     Read_file_widgets()
-        : HTuple<Button, Tile, Line_edit>{{U"Open"}, {U'>'}, {U"Filename"}}
+        : HTuple<Button, Tile, Line_edit>{
+              {U"Open"},
+              {U'>'},
+              {U"Filename" | fg(Color::Dark_gray), ox::Align::Left,
+               ox::Line_edit::Action::Clear}}
     {
         using namespace ox::pipe;
         *this | fixed_height(1);
         open_btn | fixed_width(4) | bg(Color::Blue);
-        filename_edit | bg(Color::White) | fg(Color::Black) |
-            ghost(Color::Dark_gray);
+        filename_edit | bg(Color::White) | fg(Color::Black);
     }
 };
 
@@ -55,7 +58,7 @@ class Read_file : public detail::Read_file_widgets {
    private:
     void notify()
     {
-        auto ifs = Stream_t{filename_edit.contents().str()};
+        auto ifs = Stream_t{filename_edit.text().str()};
         request.emit(ifs);
     }
 };

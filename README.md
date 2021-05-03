@@ -15,9 +15,8 @@ in the terminal.
   <img src="docs/images/colors.png">
 </p>
 
-**TermOx Color Palettes** support full true color with RGB and HSL values,
-[XTerm 256 color indices](https://jonasjacek.github.io/colors/), and Dynamic
-Colors.
+TermOx Color Palettes support full true color with RGB and HSL values, [XTerm
+256 color indices](https://jonasjacek.github.io/colors/), and Dynamic Colors.
 
 Color Palettes are used to group Color Definitions together and assign names to
 each color. Palettes can be changed at runtime to give applications a simple way
@@ -37,8 +36,8 @@ XTerm.
   <img src="docs/images/interactive.png">
 </p>
 
-Mouse and Keyboard input is fully supported. Widgets are able to handle Events
-sent to them, update their state and re-paint themselves.
+Mouse and Keyboard input is fully supported. Widgets are able to handle Events,
+update their state and re-paint themselves.
 
 Mouse input supports up to 11 mouse buttons(including scrolling), modifier
 keys(`shift`, `ctrl`, `alt`), mouse click and drag, and always-on mouse
@@ -58,10 +57,9 @@ modifier keys for their own purposes.
   <img src="docs/images/animation.gif">
 </p>
 
-Each Widget can enable Animation for itself. This will send Timer Events to the
-given Widget at a specified time interval. The Widget can handle these Events
-with a virtual function override for Timer Events and update its state and
-re-paint itself.
+Each Widget can enable Animation for itself, sending Timer Events to the Widget
+at a specified time interval. The Widget handles these Events with a virtual
+function override and can update its state.
 
 Individual color definitions can be animated with Dynamic Colors.
 
@@ -103,7 +101,7 @@ or the number of Widgets of specific type, as in the case of `Array`.
 
 Besides the provided Widget Library, anyone can create new Widgets from scratch.
 By inheriting from the `Widget` class, you are provided with virtual function
-Event Handlers. These allow handling of everything from user input, animation,
+event handlers. These allow handling of everything from user input, animation,
 painting to the screen, focus in/out, and others. Existing Widget types can be
 inherited from in order to build on top of existing behavior.
 

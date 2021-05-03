@@ -124,6 +124,24 @@ using Int_view = Number_view<int>;
     return std::make_unique<Int_view>(std::move(parameters));
 }
 
+using Unsigned_view = Number_view<unsigned int>;
+
+/// Helper function to make an Unsigned_view instance.
+[[nodiscard]] inline auto unsigned_view(unsigned int initial = 0,
+                                        int precision        = 2,
+                                        Align alignment      = Align::Left)
+    -> std::unique_ptr<Unsigned_view>
+{
+    return std::make_unique<Unsigned_view>(initial, precision, alignment);
+}
+
+/// Helper function to make an Unsigned_view instance.
+[[nodiscard]] inline auto unsigned_view(Unsigned_view::Parameters parameters)
+    -> std::unique_ptr<Unsigned_view>
+{
+    return std::make_unique<Unsigned_view>(std::move(parameters));
+}
+
 using Double_view = Number_view<double>;
 
 /// Helper function to make a Double_view instance.

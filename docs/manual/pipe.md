@@ -258,5 +258,4 @@ my_widget | children() | for_each([](auto& w){ log(w.name()); });
 - `align_left()`
 - `align_center()`
 - `align_right()`
-- `ghost(Color)`
 - `dynamic_width(bool enable)`

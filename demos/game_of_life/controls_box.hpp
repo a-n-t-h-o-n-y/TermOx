@@ -62,14 +62,14 @@ class Rule_edit : public ox::layout::Vertical<> {
         using namespace ox::pipe;
 
         *this | fixed_height(2);
-        edit_box_ | bg(color::White) | fg(color::Black) | ghost(color::Teal);
+        edit_box_ | bg(color::White) | fg(color::Black);
 
         edit_box_.set_validator([](char c) {
             return std::isdigit(c) || c == '/' || c == 'B' || c == 'b' ||
                    c == 'S' || c == 's';
         });
 
-        edit_box_.enter_pressed.connect(
+        edit_box_.submitted.connect(
             [this](std::string const& rule_text) { rule_change(rule_text); });
 
         this->set_rule(parse_rule_string("B3/S23"));
@@ -79,8 +79,8 @@ class Rule_edit : public ox::layout::Vertical<> {
     void set_rule(Rule r)
     {
         auto const rs = to_rule_string(r);
-        edit_box_.set_contents(rs);
-        edit_box_.set_cursor(rs.size());
+        edit_box_.set_text(rs);
+        edit_box_.set_cursor_to_index(rs.size());
     }
 
    private:
@@ -108,14 +108,24 @@ struct Start_pause_btns : ox::Toggle_button {
     }
 };
 
+struct Value_edit : ox::HPair<ox::HLabel, ox::Unsigned_edit> {
+    ox::HLabel& label       = this->first;
+    ox::Unsigned_edit& edit = this->second;
+
+    Value_edit()
+        : ox::HPair<ox::HLabel, ox::Unsigned_edit>{{U"Interval"},
+                                                   {40, {1, 5'000}}}
+    {
+        label | ox::pipe::fixed_width(9);
+    }
+};
+
 struct Interval_box : ox::layout::Horizontal<> {
    public:
-    ox::Labeled_number_edit<unsigned>& value_edit =
-        this->make_child<ox::Labeled_number_edit<unsigned>>("Interval ", 40);
-
+    Value_edit& value = this->make_child<Value_edit>();
     ox::HLabel& units = this->make_child<ox::HLabel>({U"ms"});
 
-    sl::Signal<void(unsigned)>& value_set = value_edit.value_set;
+    sl::Signal<void(unsigned)>& submitted = value.edit.submitted;
 
    public:
     Interval_box()
@@ -125,6 +135,7 @@ struct Interval_box : ox::layout::Horizontal<> {
 
         *this | fixed_height(1);
         units | bg(color::White) | fg(color::Teal) | fixed_width(2);
+        value.edit | bg(color::White) | fg(color::Teal);
     }
 };
 
@@ -184,11 +195,9 @@ struct Controls_box : ox::VTuple<Interval_box,
     {
         *this | ox::pipe::fixed_height(12);
 
-        interval_edit.value_set.connect([this](int value) {
+        interval_edit.submitted.connect([this](int value) {
             interval_set(std::chrono::milliseconds{value});
         });
-
-        interval_edit.value_edit.number_edit | ox::pipe::ghost(color::Teal);
     }
 };
 

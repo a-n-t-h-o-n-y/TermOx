@@ -49,16 +49,18 @@ GoL_demo::GoL_demo()
         });
 
     gol_display.offset_changed.connect([this](Coordinate c) {
-        side_panel.status.center_offset.x_coords.set_value(c.x);
-        side_panel.status.center_offset.y_coords.set_value(c.y);
+        side_panel.status.center_offset.x_coords.edit.set_value(c.x);
+        side_panel.status.center_offset.y_coords.edit.set_value(c.y);
     });
-    side_panel.status.center_offset.x_coords.value_set.connect([this](int x) {
-        gol_display.set_offset({x, gol_display.offset().y});
-    });
+    side_panel.status.center_offset.x_coords.edit.submitted.connect(
+        [this](int x) {
+            gol_display.set_offset({x, gol_display.offset().y});
+        });
 
-    side_panel.status.center_offset.y_coords.value_set.connect([this](int y) {
-        gol_display.set_offset({gol_display.offset().x, y});
-    });
+    side_panel.status.center_offset.y_coords.edit.submitted.connect(
+        [this](int y) {
+            gol_display.set_offset({gol_display.offset().x, y});
+        });
 
     gol_display.generation_count_changed.connect([this](std::uint32_t count) {
         side_panel.status.gen_count.update_count(count);
@@ -126,6 +128,8 @@ GoL_demo::GoL_demo()
     this->add_rule_example(U"Replicator", "B1357/S1357");
     this->add_rule_example(U"Fredkin", "B1357/S02468");
     this->add_rule_example(U"Seeds", "B2/S");
+    this->add_rule_example(U"Fractal Rug", "B1/S12");
+    this->add_rule_example(U"Slow Explosion", "B12/S123");
     this->add_rule_example(U"Live Free or Die", "B2/S0");
     this->add_rule_example(U"Life Without Death", "B3/S012345678");
     this->add_rule_example(U"Flock", "B3/S12");

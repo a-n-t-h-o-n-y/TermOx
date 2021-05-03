@@ -184,6 +184,10 @@ class Text_view : public Widget {
         return contents_;
     }
 
+    [[nodiscard]] auto text() -> Glyph_string& { return contents_; }
+
+    [[nodiscard]] auto text() const -> Glyph_string const& { return contents_; }
+
     /// Return whether word wrapping is enabled.
     [[nodiscard]] auto word_wrap_enabled() const -> bool
     {

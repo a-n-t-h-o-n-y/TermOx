@@ -1,6 +1,7 @@
 #ifndef TERMOX_DEMOS_LAYOUT_DEMO_HPP
 #define TERMOX_DEMOS_LAYOUT_DEMO_HPP
 #include <termox/termox.hpp>
+#include "termox/widget/widgets/number_edit.hpp"
 
 namespace demo {
 
@@ -53,6 +54,19 @@ class Workspace : public ox::layout::Horizontal<Meta_widget> {
     }
 };
 
+template <typename Number_t>
+struct Value_edit : ox::HPair<ox::HLabel, ox::Number_edit<Number_t>> {
+    ox::HLabel& label               = this->first;
+    ox::Number_edit<Number_t>& edit = this->second;
+
+    Value_edit(std::u32string text, Number_t initial)
+        : ox::HPair<ox::HLabel, ox::Number_edit<Number_t>>{{std::move(text)},
+                                                           {initial}}
+    {
+        label | ox::pipe::fixed_width(8);
+    }
+};
+
 struct Size_policy_settings : ox::layout::Vertical<> {
     // private:
     //  struct Policy_type_box : ox::Labeled_cycle_box {
@@ -95,25 +109,25 @@ struct Size_policy_settings : ox::layout::Vertical<> {
         // types_box.label.brush.background     = ox::Color::Dark_gray;
         // types_box.cycle_box.brush.background = ox::Color::Dark_gray;
 
-        stretch.value_set.connect([this](double value) {
+        stretch.edit.submitted.connect([this](double value) {
             size_policy_.stretch(value);
             this->notify();
         });
         stretch.label.brush.background = ox::Color::Dark_gray;
 
-        hint.value_set.connect([this](std::size_t value) {
+        hint.edit.submitted.connect([this](std::size_t value) {
             size_policy_.hint(value);
             this->notify();
         });
         hint.label.brush.background = ox::Color::Dark_gray;
 
-        min.value_set.connect([this](std::size_t value) {
+        min.edit.submitted.connect([this](std::size_t value) {
             size_policy_.min(value);
             this->notify();
         });
         min.label.brush.background = ox::Color::Dark_gray;
 
-        max.value_set.connect([this](std::size_t value) {
+        max.edit.submitted.connect([this](std::size_t value) {
             size_policy_.max(value);
             this->notify();
         });
@@ -124,27 +138,27 @@ struct Size_policy_settings : ox::layout::Vertical<> {
 
     // Policy_type_box& types_box{this->make_child<Policy_type_box>()};
 
-    ox::Labeled_number_edit<double>& stretch{
-        this->make_child<ox::Labeled_number_edit<double>>("Stretch ", 1.)};
+    Value_edit<double>& stretch =
+        this->make_child<Value_edit<double>>(U"Stretch ", 1.);
 
-    ox::Labeled_number_edit<std::size_t>& hint{
-        this->make_child<ox::Labeled_number_edit<std::size_t>>("Hint    ", 0)};
+    Value_edit<std::size_t>& hint =
+        this->make_child<Value_edit<std::size_t>>(U"Hint", 0);
 
-    ox::Labeled_number_edit<std::size_t>& min{
-        this->make_child<ox::Labeled_number_edit<std::size_t>>("Min     ", 0)};
+    Value_edit<std::size_t>& min =
+        this->make_child<Value_edit<std::size_t>>(U"Min.", 0);
 
-    ox::Labeled_number_edit<std::size_t>& max{
-        this->make_child<ox::Labeled_number_edit<std::size_t>>("Max     ", 0)};
+    Value_edit<std::size_t>& max =
+        this->make_child<Value_edit<std::size_t>>(U"Max.", 0);
 
     /// set the internally held size_policy that is emitted to \p policy.
     void reset(ox::Size_policy const& policy)
     {
         size_policy_ = policy;
         // types_box.cycle_box.set_current_to(to_string(policy.type()));
-        stretch.set_value(policy.stretch());
-        hint.set_value(policy.hint());
-        min.set_value(policy.min());
-        max.set_value(policy.max());
+        stretch.edit.set_value(policy.stretch());
+        hint.edit.set_value(policy.hint());
+        min.edit.set_value(policy.min());
+        max.edit.set_value(policy.max());
     }
 
     sl::Signal<void(ox::Size_policy const&)> policy_updated;

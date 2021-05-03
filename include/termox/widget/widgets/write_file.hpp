@@ -19,13 +19,16 @@ struct Write_file_widgets : HTuple<Button, Tile, Line_edit> {
     Line_edit& filename_edit = this->get<2>();
 
     Write_file_widgets()
-        : HTuple<Button, Tile, Line_edit>{{U"Save"}, {U'>'}, {U"Filename"}}
+        : HTuple<Button, Tile, Line_edit>{
+              {U"Save"},
+              {U'>'},
+              {U"Filename" | fg(Color::Dark_gray), ox::Align::Left,
+               ox::Line_edit::Action::Clear}}
     {
         using namespace ox::pipe;
         *this | fixed_height(1);
         save_btn | fixed_width(4) | bg(Color::Blue);
-        filename_edit | bg(Color::White) | fg(Color::Black) |
-            ghost(Color::Dark_gray);
+        filename_edit | bg(Color::White) | fg(Color::Black);
     }
 };
 
@@ -54,7 +57,7 @@ class Write_file : public detail::Write_file_widgets {
    private:
     void notify()
     {
-        auto ofs = Stream_t{filename_edit.contents().str()};
+        auto ofs = Stream_t{filename_edit.text().str()};
         request.emit(ofs);
     }
 };

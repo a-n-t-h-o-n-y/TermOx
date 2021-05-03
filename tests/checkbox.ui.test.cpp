@@ -165,11 +165,11 @@ class Runtime : public ox::layout::Horizontal<> {
             lock_cb.checkbox | on_check([&cb] { cb.lock(); });
             lock_cb.checkbox | on_uncheck([&cb] { cb.unlock(); });
 
-            unchecked_display.wrapped.contents_modified.connect(
+            unchecked_display.wrapped.text_modified.connect(
                 [&cb](auto const& contents) {
                     cb.set_display({cb.get_display().checked, contents});
                 });
-            checked_display.wrapped.contents_modified.connect(
+            checked_display.wrapped.text_modified.connect(
                 [&cb](auto const& contents) {
                     cb.set_display({contents, cb.get_display().unchecked});
                 });

@@ -39,9 +39,8 @@ class File_widget : public ox::layout::Vertical<> {
 
         *this | fixed_height(2);
 
-        confirm_btn_ | on_press([this]() {
-            file_request(filename_box_.contents().str());
-        });
+        confirm_btn_ |
+            on_press([this]() { file_request(filename_box_.text().str()); });
 
         confirm_btn_.main_btn | bg(color::Teal) | fg(color::White);
         confirm_btn_.confirm_page.confirm_btn | bg(color::Light_green) |

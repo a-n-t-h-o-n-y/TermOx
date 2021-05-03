@@ -1892,14 +1892,6 @@ inline auto align_right()
     };
 }
 
-inline auto ghost(Color c)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        get(w).set_ghost_color(c);
-        return std::forward<decltype(w)>(w);
-    };
-}
-
 // Label
 inline auto dynamic_growth()
 {
