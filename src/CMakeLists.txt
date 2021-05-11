@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.9)
 # TermOx Library
 
 if(${CMAKE_VERSION} VERSION_LESS "3.8")
