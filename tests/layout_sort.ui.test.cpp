@@ -8,7 +8,7 @@ class Numbered_box : public ox::Text_view {
     void set_value(int i)
     {
         value_ = i;
-        this->set_contents(std::to_string(value_));
+        this->set_text(std::to_string(value_));
     }
 
     auto get_value() const -> int { return value_; }

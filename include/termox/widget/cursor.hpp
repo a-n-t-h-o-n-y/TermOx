@@ -5,7 +5,6 @@
 #include <termox/widget/point.hpp>
 
 namespace ox {
-class Widget;
 
 /// Holds and provides access to all data relevant to a Widget's cursor.
 class Cursor {
@@ -15,46 +14,34 @@ class Cursor {
 
    public:
     /// Query if the cursor is enabled.
-    [[nodiscard]] auto is_enabled() const -> bool { return enabled_; }
+    [[nodiscard]] auto is_enabled() const -> bool;
 
     /// Get the local x coordinate of the cursor.
-    [[nodiscard]] auto x() const -> int { return position_.x; }
+    [[nodiscard]] auto x() const -> int;
 
     /// Get the local y coordinate of the cursor.
-    [[nodiscard]] auto y() const -> int { return position_.y; }
+    [[nodiscard]] auto y() const -> int;
 
     /// Get the local position of the cursor.
-    [[nodiscard]] auto position() const -> Point { return position_; }
+    [[nodiscard]] auto position() const -> Point;
 
     /// Enable the cursor(show on screen).
-    void enable(bool enable = true) { enabled_ = enable; }
+    void enable(bool enable = true);
 
     /// Disable the cursor(do not show on screen).
-    void disable(bool disable = true) { this->enable(!disable); }
+    void disable(bool disable = true);
 
     /// Enable the cursor if disabled, or disable it if enabled.
-    void toggle() { this->enable(!this->is_enabled()); }
+    void toggle();
 
     /// Set the local x coordinate of the cursor.
-    void set_x(int x)
-    {
-        position_.x = x;
-        this->moved(position_);
-    }
+    void set_x(int x);
 
     /// Set the local y coordinate of the cursor.
-    void set_y(int y)
-    {
-        position_.y = y;
-        this->moved(position_);
-    }
+    void set_y(int y);
 
     /// Set the local position of the cursor.
-    void set_position(Point p)
-    {
-        this->set_x(p.x);
-        this->set_y(p.y);
-    }
+    void set_position(Point p);
 
    private:
     Point position_ = {0, 0};

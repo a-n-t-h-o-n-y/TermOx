@@ -14,7 +14,7 @@ namespace ox {
 
 // maybe TODO
 // You could simplify the index math if you hold:
-// STuple<Main_menu, layout::Stack<Widget>>
+// STuple<Main_menu, layout::Stack<Child_t>> and make it a template on Child_t
 // Then the widgets are in their own stack, you arn't mixing, and you can also
 // have a template parameter if you only want to hold a specific type of Widget,
 // since this is a layout technically.

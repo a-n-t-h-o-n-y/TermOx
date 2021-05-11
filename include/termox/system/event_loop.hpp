@@ -3,8 +3,6 @@
 #include <atomic>
 #include <cassert>
 #include <future>
-#include <stdexcept>
-#include <thread>
 #include <utility>
 
 #include <termox/system/event_queue.hpp>
@@ -58,37 +56,25 @@ class Event_loop {
      *  Implement a timeout loop_function() if you need to exit quickly. Not
      *  valid to call this method if run() is not currently executing. Only
      *  valid to call once per call to run(). */
-    void exit(int return_code)
-    {
-        return_code_ = return_code;
-        exit_        = true;
-    }
+    void exit(int return_code);
 
     /// Block until the async event loop returns.
     /** Event_loop::exit(int) must be called to return from wait().
      *  @return the return code passed to the call to exit(). */
     // wait, then if valid, get it
-    auto wait() -> int
-    {
-        if (!fut_.valid())
-            return -1;
-        return fut_.get();
-    }
+    auto wait() -> int;
 
     /// Return true if the event loop is currently running.
-    [[nodiscard]] auto is_running() const -> bool { return running_; }
+    [[nodiscard]] auto is_running() const -> bool;
 
     /// Return true if the exit flag has been set.
-    [[nodiscard]] auto exit_flag() const -> bool { return exit_; }
+    [[nodiscard]] auto exit_flag() const -> bool;
 
     /// Return a reference to the Event_queue of this loop.
-    [[nodiscard]] auto event_queue() -> Event_queue& { return queue_; }
+    [[nodiscard]] auto event_queue() -> Event_queue&;
 
     /// Return a const reference to the Event_queue of this loop.
-    [[nodiscard]] auto event_queue() const -> Event_queue const&
-    {
-        return queue_;
-    }
+    [[nodiscard]] auto event_queue() const -> Event_queue const&;
 
    private:
     std::future<int> fut_;

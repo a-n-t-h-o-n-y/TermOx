@@ -28,150 +28,72 @@ class Size_policy {
 
    public:
     /// Set the size hint, used as the initial value in calculations.
-    void hint(int value)
-    {
-        data_.hint = value;
-        this->policy_updated();
-    }
+    void hint(int value);
 
     /// Return the size hint currently being used.
-    [[nodiscard]] auto hint() const -> int { return data_.hint; }
+    [[nodiscard]] auto hint() const -> int;
 
     /// Set the minimum length that the owning Widget should be.
-    void min(int value)
-    {
-        data_.min = value;
-        if (data_.max < data_.min)
-            data_.max = data_.min;
-        this->policy_updated();
-    }
+    void min(int value);
 
     /// Return the minimum length currently set.
-    [[nodiscard]] auto min() const -> int { return data_.min; }
+    [[nodiscard]] auto min() const -> int;
 
     /// Set the maximum length/height that the owning Widget can be.
-    void max(int value)
-    {
-        data_.max = value;
-        if (data_.min > data_.max)
-            data_.min = data_.max;
-        this->policy_updated();
-    }
+    void max(int value);
 
     /// Return the maximum length currently set.
-    [[nodiscard]] auto max() const -> int { return data_.max; }
+    [[nodiscard]] auto max() const -> int;
 
     /// Set the stretch value, used to divide up space between sibling Widgets.
     /** A ratio of stretch over siblings' stretch sum is used to give space. */
-    void stretch(double value)
-    {
-        if (value <= 0.)
-            return;
-        data_.stretch = value;
-        this->policy_updated();
-    }
+    void stretch(double value);
 
     /// Return the stretch value currently being used.
-    [[nodiscard]] auto stretch() const -> double { return data_.stretch; }
+    [[nodiscard]] auto stretch() const -> double;
 
     /// Set if min can be ignored for the last displayed widget in a layout.
-    void can_ignore_min(bool enable) { data_.can_ignore_min = enable; }
+    void can_ignore_min(bool enable);
 
     /// Return if min can be ignored for the last displayed widget in a layout.
-    [[nodiscard]] auto can_ignore_min() const -> bool
-    {
-        return data_.can_ignore_min;
-    }
+    [[nodiscard]] auto can_ignore_min() const -> bool;
 
     /* _Helper Methods_ */
     /// Fixed: \p hint is the only acceptable size.
-    void fixed(int hint)
-    {
-        data_.hint    = hint;
-        data_.min     = hint;
-        data_.max     = hint;
-        data_.stretch = 1.;
-        this->policy_updated();
-    }
+    void fixed(int hint);
 
     /// Minimum: \p hint is the minimum acceptable size, may be larger.
-    void minimum(int hint)
-    {
-        data_.hint = hint;
-        this->min(hint);
-    }
+    void minimum(int hint);
 
     /// Maximum: \p hint is the maximum acceptable size, may be smaller.
-    void maximum(int hint)
-    {
-        data_.hint = hint;
-        this->max(hint);
-    }
+    void maximum(int hint);
 
     /// Preferred: \p hint is preferred, though it can be any size.
-    void preferred(int hint)
-    {
-        data_.hint = hint;
-        if (hint < data_.min)
-            data_.min = hint;
-        if (hint > data_.max)
-            data_.max = hint;
-        this->policy_updated();
-    }
+    void preferred(int hint);
 
     /// Expanding: \p hint is preferred, but it will expand to use extra space.
-    void expanding(int hint)
-    {
-        data_.stretch = 100'000.;
-        data_.hint    = hint;
-        if (hint < data_.min)
-            data_.min = hint;
-        if (hint > data_.max)
-            data_.max = hint;
-        this->policy_updated();
-    }
+    void expanding(int hint);
 
     /// Minimum Expanding: \p hint is minimum, it will expand into unused space.
-    void minimum_expanding(int hint)
-    {
-        data_.stretch = 100'000.;
-        data_.hint    = hint;
-        this->min(hint);
-    }
+    void minimum_expanding(int hint);
 
     /// Ignored: Stretch is the only consideration.
-    void ignored()
-    {
-        data_.hint = 0;
-        data_.min  = 0;
-        data_.max  = maximum_max;
-        this->policy_updated();
-    }
+    void ignored();
 
    public:
     Size_policy() = default;
 
     /// Does not copy the Signal, so no slots are connected on copy init.
-    Size_policy(Size_policy const& x) : data_{x.data_} {}
+    Size_policy(Size_policy const& x);
 
     /// Does not move the Signal, so no slots are connected on move init.
-    Size_policy(Size_policy&& x) : data_{std::move(x.data_)} {}
+    Size_policy(Size_policy&& x);
 
     /// Specifically does not copy the Signal, so Widget is still notified.
-    auto operator=(Size_policy const& x) -> Size_policy&
-    {
-        this->data_ = x.data_;
-        this->policy_updated();
-        return *this;
-    }
+    auto operator=(Size_policy const& x) -> Size_policy&;
 
     /// Specifically does not copy the Signal, so Widget is still notified.
-    auto operator=(Size_policy&& x) -> Size_policy&
-    {
-        this->data_ = std::move(x.data_);
-        this->policy_updated();
-        return *this;
-    }
+    auto operator=(Size_policy&& x) -> Size_policy&;
 };
 
 /// Wrapper type to set the height Size_policy at construction.

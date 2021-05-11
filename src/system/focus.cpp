@@ -1,11 +1,7 @@
-#include <ios>
 #include <termox/system/detail/focus.hpp>
 
 #include <algorithm>
-#include <cstddef>
 #include <iterator>
-#include <memory>
-#include <utility>
 #include <vector>
 
 #include <termox/system/event.hpp>
@@ -77,6 +73,8 @@ ox::Widget* Focus::focus_widget_ = nullptr;
 bool Focus::tab_enabled_         = true;
 bool Focus::tab_suppressed_      = false;
 
+auto Focus::focus_widget() -> ox::Widget* { return focus_widget_; }
+
 void Focus::mouse_press(ox::Widget& clicked)
 {
     if (&clicked == focus_widget_)
@@ -135,5 +133,15 @@ void Focus::clear()
 }
 
 void Focus::clear_without_posting_event() { focus_widget_ = nullptr; }
+
+void Focus::enable_tab_focus() { tab_enabled_ = true; }
+
+void Focus::disable_tab_focus() { tab_enabled_ = false; }
+
+void Focus::suppress_tab() { tab_suppressed_ = true; }
+
+void Focus::unsuppress_tab() { tab_suppressed_ = false; }
+
+void Focus::direct_set_focus(ox::Widget& w) { focus_widget_ = &w; }
 
 }  // namespace ox::detail

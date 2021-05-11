@@ -1,10 +1,9 @@
 #ifndef TERMOX_WIDGET_WIDGETS_MATRIX_VIEW_HPP
 #define TERMOX_WIDGET_WIDGETS_MATRIX_VIEW_HPP
-#include <cstddef>
+#include <memory>
 
 #include <termox/painter/glyph_matrix.hpp>
 #include <termox/painter/painter.hpp>
-#include <termox/widget/area.hpp>
 #include <termox/widget/widget.hpp>
 
 namespace ox {
@@ -20,41 +19,21 @@ class Matrix_view : public Widget {
     Glyph_matrix matrix;
 
    public:
-    explicit Matrix_view(Glyph_matrix matrix_) : matrix{std::move(matrix_)} {}
+    explicit Matrix_view(Glyph_matrix matrix_);
 
-    explicit Matrix_view(Parameters parameters)
-        : Matrix_view{std::move(parameters.matrix)}
-    {}
+    explicit Matrix_view(Parameters p);
 
    protected:
-    auto paint_event(Painter& p) -> bool override
-    {
-        auto const w =
-            matrix.width() > this->width() ? this->width() : matrix.width();
-        auto const h =
-            matrix.height() > this->height() ? this->height() : matrix.height();
-
-        for (auto y = 0; y < h; ++y) {
-            for (auto x = 0; x < w; ++x)
-                p.put(matrix({x, y}), {x, y});
-        }
-        return Widget::paint_event(p);
-    }
+    auto paint_event(Painter& p) -> bool override;
 };
 
 /// Helper function to create a Matrix_view instance.
-[[nodiscard]] inline auto matrix_view(Glyph_matrix matrix)
-    -> std::unique_ptr<Matrix_view>
-{
-    return std::make_unique<Matrix_view>(std::move(matrix));
-}
+[[nodiscard]] auto matrix_view(Glyph_matrix matrix)
+    -> std::unique_ptr<Matrix_view>;
 
 /// Helper function to create a Matrix_view instance.
-[[nodiscard]] inline auto matrix_view(Matrix_view::Parameters parameters)
-    -> std::unique_ptr<Matrix_view>
-{
-    return std::make_unique<Matrix_view>(std::move(parameters));
-}
+[[nodiscard]] auto matrix_view(Matrix_view::Parameters p)
+    -> std::unique_ptr<Matrix_view>;
 
 }  // namespace ox
 #endif  // TERMOX_WIDGET_WIDGETS_MATRIX_VIEW_HPP

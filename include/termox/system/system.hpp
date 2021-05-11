@@ -1,20 +1,16 @@
 #ifndef TERMOX_SYSTEM_SYSTEM_HPP
 #define TERMOX_SYSTEM_SYSTEM_HPP
 #include <atomic>
-#include <cassert>
 #include <functional>
-#include <mutex>
-#include <shared_mutex>
-#include <thread>
 #include <utility>
-#include <vector>
 
 #include <signals_light/signal.hpp>
 
 #include <termox/system/animation_engine.hpp>
 #include <termox/system/detail/user_input_event_loop.hpp>
 #include <termox/system/event_fwd.hpp>
-#include <termox/terminal/terminal.hpp>
+#include <termox/terminal/mouse_mode.hpp>
+#include <termox/terminal/signals.hpp>
 #include <termox/widget/cursor.hpp>
 
 namespace ox {
@@ -48,21 +44,14 @@ class System {
      *                     sending the byte value of the ctrl character instead.
      */
     System(Mouse_mode mouse_mode = Mouse_mode::Basic,
-           Signals signals       = Signals::On)
-    {
-        Terminal::initialize(mouse_mode, signals);
-    }
+           Signals signals       = Signals::On);
 
     System(System const&) = delete;
     System& operator=(System const&) = delete;
     System(System&&)                 = default;
     System& operator=(System&&) = default;
 
-    ~System()
-    {
-        System::exit();
-        Terminal::uninitialize();
-    }
+    ~System();
 
    public:
     /// Return a pointer to the currently focused Widget.
@@ -89,7 +78,7 @@ class System {
     /// Return a pointer to the head Widget.
     /** This Widget is the ancestor of every other widget that will be displayed
      *  on the screen. */
-    [[nodiscard]] static auto head() -> Widget* { return head_.load(); }
+    [[nodiscard]] static auto head() -> Widget*;
 
     /// Create a Widget_t object, set it as head widget and call System::run().
     /** \p args... are passed on to the Widget_t constructor. Blocks until
@@ -105,11 +94,7 @@ class System {
 
     /// Set \p head as head widget and call System::run().
     /** Will throw a std::runtime_error if screen cannot be initialized. */
-    auto run(Widget& head) -> int
-    {
-        System::set_head(&head);
-        return this->run();
-    }
+    auto run(Widget& head) -> int;
 
     /// Launch the main Event_loop and start processing Events.
     /** Blocks until System::exit() is called, returns the exit code. Will throw
@@ -145,47 +130,22 @@ class System {
     /// Enable animation for the given Widget \p w at \p interval.
     /** Starts the animation_engine if not started yet. */
     static void enable_animation(Widget& w,
-                                 Animation_engine::Interval_t interval)
-    {
-        if (!animation_engine_.is_running())
-            animation_engine_.start();
-        animation_engine_.register_widget(w, interval);
-    }
+                                 Animation_engine::Interval_t interval);
 
     /// Enable animation for the given Widget \p w at \p fps.
     /** Starts the animation_engine if not started yet. */
-    static void enable_animation(Widget& w, FPS fps)
-    {
-        if (!animation_engine_.is_running())
-            animation_engine_.start();
-        animation_engine_.register_widget(w, fps);
-    }
+    static void enable_animation(Widget& w, FPS fps);
 
     /// Disable animation for the given Widget \p w.
     /** Does not stop the animation_engine, even if its empty. */
-    static void disable_animation(Widget& w)
-    {
-        animation_engine_.unregister_widget(w);
-    }
+    static void disable_animation(Widget& w);
 
     /// Set the terminal cursor via \p cursor parameters and \p offset applied.
-    static void set_cursor(Cursor cursor, Point offset)
-    {
-        if (!cursor.is_enabled())
-            Terminal::show_cursor(false);
-        else {
-            Terminal::move_cursor(
-                {offset.x + cursor.x(), offset.y + cursor.y()});
-            Terminal::show_cursor();
-        }
-    }
+    static void set_cursor(Cursor cursor, Point offset);
 
     /// Set the Event_queue that will be used by post_event.
     /** Set by Event_queue::send_all. */
-    static void set_current_queue(Event_queue& queue)
-    {
-        current_queue_ = queue;
-    }
+    static void set_current_queue(Event_queue& queue);
 
    private:
     inline static std::atomic<Widget*> head_ = nullptr;

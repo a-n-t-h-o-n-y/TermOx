@@ -158,7 +158,7 @@ class Filename_edit : public ox::Textbox {
         using namespace ox;
         using namespace ox::pipe;
         *this | bg(Color::White) | fg(Color::Black);
-        this->disable_scrollwheel();
+        this->set_scroll_speed(0);
     }
 
    protected:
@@ -191,11 +191,11 @@ class Save_area : public ox::HTuple<ox::Button, Filename_edit, ox::Button> {
         *this | fixed_height(1);
 
         load_btn | fixed_width(6) | bg(ox::Color::Blue) | on_press([this] {
-            this->load_request.emit(filename_edit.contents().str());
+            this->load_request.emit(filename_edit.text().str());
         });
 
         save_btn | fixed_width(6) | bg(ox::Color::Blue) | on_press([this] {
-            this->save_request.emit(filename_edit.contents().str());
+            this->save_request.emit(filename_edit.text().str());
         });
     }
 };
@@ -337,7 +337,7 @@ auto inline notepad()
     load.pressed.connect([&filename, &tb, &banner] {
         auto const name = filename.text().str();
         try {
-            tb.set_contents(read_file(name));
+            tb.set_text(read_file(name));
             banner.set_text((name + " Loaded") | ox::fg(Color::Light_green));
         }
         catch (std::runtime_error const& e) {
@@ -347,7 +347,7 @@ auto inline notepad()
     save.pressed.connect([&filename, &tb, &banner] {
         auto const name = filename.text().str();
         try {
-            write_file(filename.text().str(), tb.contents().str());
+            write_file(filename.text().str(), tb.text().str());
             banner.set_text((name + " Saved") | ox::fg(Color::Light_green));
         }
         catch (std::runtime_error const& e) {

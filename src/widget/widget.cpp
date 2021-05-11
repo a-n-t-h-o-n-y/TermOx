@@ -1,5 +1,7 @@
+#include <chrono>
 #include <termox/widget/widget.hpp>
 
+#include <chrono>
 #include <cstdint>
 #include <mutex>
 #include <string>
@@ -9,9 +11,11 @@
 
 #include <termox/painter/brush.hpp>
 #include <termox/painter/glyph.hpp>
+#include <termox/system/detail/focus.hpp>
 #include <termox/system/event.hpp>
 #include <termox/system/system.hpp>
 #include <termox/terminal/terminal.hpp>
+#include <termox/widget/detail/border_offset.hpp>
 
 namespace {
 
@@ -35,22 +39,52 @@ void post_child_polished(ox::Widget& w)
 
 namespace ox {
 
-Widget::Widget(Parameters p)
-    : border{std::move(p.border)},
-      focus_policy{std::move(p.focus_policy)},
-      cursor{std::move(p.cursor)},
-      width_policy{std::move(p.width_policy)},
-      height_policy{std::move(p.height_policy)},
-      brush{std::move(p.brush)},
-      brush_paints_wallpaper_{std::move(p.brush_paints_wallpaper)},
-      name_{std::move(p.name)},
-      wallpaper_{std::move(p.wallpaper)},
+Widget::Widget(std::string name,
+               Focus_policy focus_policy,
+               Size_policy width_policy,
+               Size_policy height_policy,
+               Border border,
+               Brush brush,
+               Glyph wallpaper,
+               bool brush_paints_wallpaper,
+               Cursor cursor)
+    : border{std::move(border)},
+      focus_policy{std::move(focus_policy)},
+      cursor{std::move(cursor)},
+      width_policy{std::move(width_policy)},
+      height_policy{std::move(height_policy)},
+      brush{std::move(brush)},
+      brush_paints_wallpaper_{std::move(brush_paints_wallpaper)},
+      name_{std::move(name)},
+      wallpaper_{std::move(wallpaper)},
       unique_id_{get_unique_id()}
 {
     width_policy.policy_updated.connect([this] { post_child_polished(*this); });
     height_policy.policy_updated.connect(
         [this] { post_child_polished(*this); });
 }
+
+Widget::Widget(Parameters p)
+    : Widget{std::move(p.name),         std::move(p.focus_policy),
+             std::move(p.width_policy), std::move(p.height_policy),
+             std::move(p.border),       std::move(p.brush),
+             std::move(p.wallpaper),    std::move(p.brush_paints_wallpaper),
+             std::move(p.cursor)}
+{}
+
+void Widget::set_name(std::string name) { name_ = std::move(name); }
+
+auto Widget::name() const -> std::string const& { return name_; }
+
+auto Widget::unique_id() const -> std::uint16_t { return unique_id_; }
+
+void Widget::set_wallpaper(Glyph g)
+{
+    wallpaper_ = g;
+    this->update();
+}
+
+auto Widget::get_wallpaper() const -> Glyph { return wallpaper_; }
 
 void Widget::enable(bool enable, bool post_child_polished_event)
 {
@@ -59,16 +93,59 @@ void Widget::enable(bool enable, bool post_child_polished_event)
         w.enable(enable, post_child_polished_event);
 }
 
-// Don't want to include system/event.hpp in widget.hpp
+void Widget::disable(bool disable, bool post_child_polished_event)
+{
+    this->enable(!disable, post_child_polished_event);
+}
+
+auto Widget::is_enabled() const -> bool { return enabled_; }
+
+auto Widget::parent() const -> Widget* { return parent_; }
+
+auto Widget::top_left() const -> Point { return top_left_position_; }
+
+auto Widget::inner_top_left() const -> Point
+{
+    return {this->inner_x(), this->inner_y()};
+}
+
+auto Widget::x() const -> int { return top_left_position_.x; }
+
+auto Widget::y() const -> int { return top_left_position_.y; }
+
+auto Widget::inner_x() const -> int
+{
+    return top_left_position_.x + detail::Border_offset::west(*this);
+}
+
+auto Widget::inner_y() const -> int
+{
+    return top_left_position_.y + detail::Border_offset::north(*this);
+}
+
+auto Widget::area() const -> Area { return {this->width(), this->height()}; }
+
+auto Widget::width() const -> int
+{
+    return this->outer_width() - detail::Border_offset::east(*this) -
+           detail::Border_offset::west(*this);
+}
+
+auto Widget::height() const -> int
+{
+    return this->outer_height() - detail::Border_offset::north(*this) -
+           detail::Border_offset::south(*this);
+}
+
+auto Widget::outer_area() const -> Area { return outer_area_; }
+
+auto Widget::outer_width() const -> int { return outer_area_.width; }
+
+auto Widget::outer_height() const -> int { return outer_area_.height; }
+
 void Widget::update() { System::post_event(Paint_event{*this}); }
 
-auto Widget::generate_wallpaper() const -> Glyph
-{
-    auto bg_glyph = wallpaper_;
-    if (this->paints_wallpaper_with_brush())
-        bg_glyph.brush = merge(bg_glyph.brush, this->brush);
-    return bg_glyph;
-}
+auto Widget::is_layout_type() const -> bool { return false; }
 
 void Widget::install_event_filter(Widget& filter)
 {
@@ -85,6 +162,294 @@ void Widget::install_event_filter(Widget& filter)
     }
 }
 
+void Widget::remove_event_filter(Widget& filter)
+{
+    event_filters_.erase(&filter);
+}
+
+auto Widget::get_event_filters() const -> std::set<Widget*> const&
+{
+    return event_filters_;
+}
+
+void Widget::enable_animation(std::chrono::milliseconds interval)
+{
+    if (is_animated_)
+        return;
+    System::enable_animation(*this, interval);
+    is_animated_ = true;
+}
+
+void Widget::enable_animation(FPS fps)
+{
+    if (is_animated_)
+        return;
+    System::enable_animation(*this, fps);
+    is_animated_ = true;
+}
+
+void Widget::disable_animation()
+{
+    if (!is_animated_)
+        return;
+    System::disable_animation(*this);
+    is_animated_ = false;
+}
+
+auto Widget::is_animated() const -> bool { return is_animated_; }
+
+auto Widget::get_descendants() const -> std::vector<Widget*>
+{
+    auto descendants = std::vector<Widget*>{};
+    for (auto const& w_ptr : children_) {
+        descendants.push_back(w_ptr.get());
+        auto branch = w_ptr->get_descendants();
+        descendants.insert(std::end(descendants), std::begin(branch),
+                           std::end(branch));
+    }
+    return descendants;
+}
+
+void Widget::paint_wallpaper_with_brush(bool paints)
+{
+    brush_paints_wallpaper_ = paints;
+    this->update();
+}
+
+auto Widget::paints_wallpaper_with_brush() const -> bool
+{
+    return brush_paints_wallpaper_;
+}
+
+auto Widget::generate_wallpaper() const -> Glyph
+{
+    auto bg_glyph = wallpaper_;
+    if (this->paints_wallpaper_with_brush())
+        bg_glyph.brush = merge(bg_glyph.brush, this->brush);
+    return bg_glyph;
+}
+
+auto Widget::get_child_offset() const -> std::size_t { return child_offset_; }
+
+auto Widget::child_count() const -> std::size_t { return children_.size(); }
+
+auto Widget::enable_event() -> bool
+{
+    this->update();
+    enabled();
+    return true;
+}
+
+auto Widget::disable_event() -> bool
+{
+    disabled();
+    return true;
+}
+
+auto Widget::child_added_event(Widget& child) -> bool
+{
+    child_added(child);
+    return true;
+}
+
+auto Widget::child_removed_event(Widget& child) -> bool
+{
+    child_removed(child);
+    return true;
+}
+
+auto Widget::child_polished_event(Widget& child) -> bool
+{
+    this->update();
+    child_polished(child);
+    return true;
+}
+
+auto Widget::move_event(Point new_position, Point old_position) -> bool
+{
+    this->update();
+    moved(new_position, old_position);
+    return true;
+}
+
+auto Widget::resize_event(Area new_size, Area old_size) -> bool
+{
+    this->update();
+    resized(new_size, old_size);
+    return true;
+}
+
+auto Widget::mouse_press_event(Mouse const& m) -> bool
+{
+    mouse_pressed(m);
+    return true;
+}
+
+auto Widget::mouse_release_event(Mouse const& m) -> bool
+{
+    mouse_released(m);
+    return true;
+}
+
+auto Widget::mouse_wheel_event(Mouse const& m) -> bool
+{
+    mouse_wheel_scrolled(m);
+    return true;
+}
+
+auto Widget::mouse_move_event(Mouse const& m) -> bool
+{
+    mouse_moved(m);
+    return true;
+}
+
+auto Widget::key_press_event(Key k) -> bool
+{
+    key_pressed(k);
+    return true;
+}
+
+auto Widget::focus_in_event() -> bool
+{
+    focused_in();
+    return true;
+}
+
+auto Widget::focus_out_event() -> bool
+{
+    focused_out();
+    return true;
+}
+
+auto Widget::delete_event() -> bool
+{
+    this->disable_animation();
+    destroyed();
+    if (detail::Focus::focus_widget() == this)
+        detail::Focus::clear_without_posting_event();
+    return true;
+}
+
+auto Widget::paint_event(Painter& p) -> bool
+{
+    p.border();
+    painted();
+    return true;
+}
+
+auto Widget::timer_event() -> bool
+{
+    timer();
+    return true;
+}
+
+auto Widget::enable_event_filter(Widget& receiver) -> bool
+{
+    enabled_filter(receiver);
+    return false;
+}
+
+auto Widget::disable_event_filter(Widget& receiver) -> bool
+{
+    disabled_filter(receiver);
+    return false;
+}
+
+auto Widget::child_added_event_filter(Widget& receiver, Widget& child) -> bool
+{
+    child_added_filter(receiver, child);
+    return false;
+}
+
+auto Widget::child_removed_event_filter(Widget& receiver, Widget& child) -> bool
+{
+    child_removed_filter(receiver, child);
+    return false;
+}
+
+auto Widget::child_polished_event_filter(Widget& receiver, Widget& child)
+    -> bool
+{
+    child_polished_filter(receiver, child);
+    return false;
+}
+
+auto Widget::move_event_filter(Widget& receiver,
+                               Point new_position,
+                               Point old_position) -> bool
+{
+    moved_filter(receiver, new_position, old_position);
+    return false;
+}
+
+auto Widget::resize_event_filter(Widget& receiver, Area new_size, Area old_size)
+    -> bool
+{
+    resized_filter(receiver, new_size, old_size);
+    return false;
+}
+
+auto Widget::mouse_press_event_filter(Widget& receiver, Mouse const& m) -> bool
+{
+    mouse_pressed_filter(receiver, m);
+    return false;
+}
+
+auto Widget::mouse_release_event_filter(Widget& receiver, Mouse const& m)
+    -> bool
+{
+    mouse_released_filter(receiver, m);
+    return false;
+}
+
+auto Widget::mouse_wheel_event_filter(Widget& receiver, Mouse const& m) -> bool
+{
+    mouse_wheel_scrolled_filter(receiver, m);
+    return false;
+}
+
+auto Widget::mouse_move_event_filter(Widget& receiver, Mouse const& m) -> bool
+{
+    mouse_moved_filter(receiver, m);
+    return false;
+}
+
+auto Widget::key_press_event_filter(Widget& receiver, Key k) -> bool
+{
+    key_pressed_filter(receiver, k);
+    return false;
+}
+
+auto Widget::focus_in_event_filter(Widget& receiver) -> bool
+{
+    focused_in_filter(receiver);
+    return false;
+}
+
+auto Widget::focus_out_event_filter(Widget& receiver) -> bool
+{
+    focused_out_filter(receiver);
+    return false;
+}
+
+auto Widget::delete_event_filter(Widget& receiver) -> bool
+{
+    destroyed_filter(receiver);
+    return false;
+}
+
+auto Widget::paint_event_filter(Widget& receiver) -> bool
+{
+    painted_filter(receiver);
+    return false;
+}
+
+auto Widget::timer_event_filter(Widget& receiver) -> bool
+{
+    timer_filter(receiver);
+    return false;
+}
+
 void Widget::enable_and_post_events(bool enable, bool post_child_polished_event)
 {
     if (enabled_ == enable)
@@ -97,6 +462,34 @@ void Widget::enable_and_post_events(bool enable, bool post_child_polished_event)
     if (post_child_polished_event and this->parent() != nullptr)
         System::post_event(Child_polished_event{*this->parent(), *this});
     this->update();
+}
+
+void Widget::set_top_left(Point p) { top_left_position_ = p; }
+
+void Widget::set_outer_area(Area a) { outer_area_ = a; }
+
+void Widget::set_parent(Widget* parent) { parent_ = parent; }
+
+auto widget(std::string name,
+            Focus_policy focus_policy,
+            Size_policy width_policy,
+            Size_policy height_policy,
+            Border border,
+            Brush brush,
+            Glyph wallpaper,
+            bool brush_paints_wallpaper,
+            Cursor cursor) -> std::unique_ptr<Widget>
+{
+    return std::make_unique<Widget>(
+        std::move(name), std::move(focus_policy), std::move(width_policy),
+        std::move(height_policy), std::move(border), std::move(brush),
+        std::move(wallpaper), std::move(brush_paints_wallpaper),
+        std::move(cursor));
+}
+
+auto widget(Widget::Parameters p) -> std::unique_ptr<Widget>
+{
+    return std::make_unique<Widget>(std::move(p));
 }
 
 }  // namespace ox

@@ -36,23 +36,16 @@ class Animation_engine : private Lockable<std::recursive_mutex> {
     void unregister_widget(Widget& w);
 
     /// Return true if there are no registered widgets
-    [[nodiscard]] auto is_empty() const -> bool { return subjects_.empty(); }
+    [[nodiscard]] auto is_empty() const -> bool;
 
     /// Start another thread that waits on intervals and sents timer events.
-    void start()
-    {
-        loop_.run_async([this](Event_queue& q) { this->loop_function(q); });
-    }
+    void start();
 
     /// Sends exit signal and waits for animation thread to exit.
-    void stop()
-    {
-        loop_.exit(0);
-        loop_.wait();
-    }
+    void stop();
 
     /// Return true if start() has been called, and hasn't been exited.
-    [[nodiscard]] auto is_running() const -> bool { return loop_.is_running(); }
+    [[nodiscard]] auto is_running() const -> bool;
 
    private:
     std::map<Widget*, Registered_data> subjects_;

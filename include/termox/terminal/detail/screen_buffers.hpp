@@ -15,49 +15,33 @@ class Screen_buffers {
 
    public:
     /// Construct with both Canvas objects having Area \p a.
-    Screen_buffers(ox::Area a) : current{a}, next{a} {}
+    Screen_buffers(ox::Area a);
 
    public:
     /// Resizes both current and next Canvas objects to \p a.
-    void resize(ox::Area a)
-    {
-        current.resize(a);
-        next.resize(a);
-    }
+    void resize(ox::Area a);
 
     /// Return the current size of the screen buffers.
-    [[nodiscard]] auto area() const -> Area { return current.area(); }
+    [[nodiscard]] auto area() const -> Area;
 
     /// Merges the next Canvas into the current Canvas.
     /** This will copy every Glyph from next that differs with current into
      *  current Canvas. */
-    void merge() { ::ox::detail::merge(next, current); }
+    void merge();
 
     /// Merges the next Canvas into the current Canvas and returns the changes.
     /** This will copy every Glyph from next that differs with current into
      *  current, and writes that change to the returned Canvas::Diff object. */
-    [[nodiscard]] auto merge_and_diff() -> Canvas::Diff const&
-    {
-        ::ox::detail::merge_and_diff(next, current, diff_);
-        return diff_;
-    }
+    [[nodiscard]] auto merge_and_diff() -> Canvas::Diff const&;
 
     /// Generates a Canvas::Diff, with every Glyph from current that has \p c.
     /** This isn't a true difference, it is meant to be used to generate a list
      *  of Glyphs that need to be re-written to the screen. Used by
      *  Dynamic_color_engine. */
-    [[nodiscard]] auto generate_color_diff(Color c) -> Canvas::Diff const&
-    {
-        ::ox::detail::generate_color_diff(c, current, diff_);
-        return diff_;
-    }
+    [[nodiscard]] auto generate_color_diff(Color c) -> Canvas::Diff const&;
 
     /// Returns the entire current screen as a Diff. Used on Window Resize.
-    [[nodiscard]] auto current_screen_as_diff() -> Canvas::Diff const&
-    {
-        ::ox::detail::generate_full_diff(current, diff_);
-        return diff_;
-    }
+    [[nodiscard]] auto current_screen_as_diff() -> Canvas::Diff const&;
 
    private:
     Canvas::Diff diff_;

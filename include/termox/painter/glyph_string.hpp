@@ -1,21 +1,12 @@
 #ifndef TERMOX_PAINTER_GLYPH_STRING_HPP
 #define TERMOX_PAINTER_GLYPH_STRING_HPP
-#include <algorithm>
-#include <codecvt>
-#include <cstddef>
-#include <locale>
-#include <memory>
-#include <ostream>
 #include <string>
 #include <string_view>
-#include <type_traits>
-#include <utility>
 #include <vector>
 
 #include <termox/common/mb_to_u32.hpp>
-#include <termox/common/overload.hpp>
-#include <termox/common/u32_to_mb.hpp>
 #include <termox/painter/brush.hpp>
+#include <termox/painter/color.hpp>
 #include <termox/painter/glyph.hpp>
 #include <termox/painter/trait.hpp>
 
@@ -34,23 +25,8 @@ class Glyph_string : private std::vector<Glyph> {
     /// Default constructs an empty Glyph_string.
     Glyph_string() = default;
 
-    Glyph_string(Glyph_string const&) = default;
-
-    Glyph_string(Glyph_string&&) noexcept(
-        std::is_nothrow_move_constructible_v<std::vector<Glyph>>) = default;
-
-    auto operator=(Glyph_string const&) -> Glyph_string& = default;
-
-    auto operator=(Glyph_string&&) noexcept(
-        std::is_nothrow_move_constructible_v<std::vector<Glyph>>)
-        -> Glyph_string& = default;
-
     /// Construct with \p count \p glyph's, adding given Traits to each.
-    explicit Glyph_string(Glyph glyph, int count = 1)
-    {
-        for (; count != 0; --count)
-            this->append(glyph);
-    }
+    explicit Glyph_string(Glyph glyph, int count = 1);
 
     /// Construct with a Glyph for each char32_t in \p symbols and Brush \p b.
     /** Attributes can be background/foreground Colors and Traits. */
@@ -60,10 +36,12 @@ class Glyph_string : private std::vector<Glyph> {
         for (char32_t c : symbols)
             this->append(Glyph{c, Brush{attrs...}});
     }
+
     template <typename... Attributes>
     Glyph_string(char32_t const* symbols, Attributes... attrs)
         : Glyph_string{std::u32string_view{symbols}, attrs...}
     {}
+
     template <typename... Attributes>
     Glyph_string(std::u32string const& symbols, Attributes... attrs)
         : Glyph_string{std::u32string_view{symbols}, attrs...}
@@ -77,10 +55,12 @@ class Glyph_string : private std::vector<Glyph> {
     Glyph_string(std::string_view symbols, Attributes... attrs)
         : Glyph_string{mb_to_u32(symbols), attrs...}
     {}
+
     template <typename... Attributes>
     Glyph_string(char const* symbols, Attributes... attrs)
         : Glyph_string{std::string_view{symbols}, attrs...}
     {}
+
     template <typename... Attributes>
     Glyph_string(std::string const& symbols, Attributes... attrs)
         : Glyph_string{std::string_view{symbols}, attrs...}
@@ -95,98 +75,51 @@ class Glyph_string : private std::vector<Glyph> {
 
    public:
     /// Append a single Glyph to the end of *this.
-    auto append(Glyph g) -> Glyph_string&
-    {
-        this->push_back(g);
-        return *this;
-    }
+    auto append(Glyph g) -> Glyph_string&;
 
     /// Append another Glyph_string to the end of *this.
-    auto append(Glyph_string const& gs) -> Glyph_string&
-    {
-        for (Glyph g : gs)
-            this->append(g);
-        return *this;
-    }
+    auto append(Glyph_string const& gs) -> Glyph_string&;
 
    public:
     /// Return the number of Glyphs in *this Glyph_string.
     /** Same as size() member function. */
-    [[nodiscard]] auto length() const -> int { return this->size(); }
+    [[nodiscard]] auto length() const -> int;
 
     /// Return the number of Glyphs in *this Glyph_string.
     /** Same as length() member function. */
-    [[nodiscard]] auto size() const -> int { return this->vector::size(); }
+    [[nodiscard]] auto size() const -> int;
 
    public:
     /// Convert to a std::u32string, each Glyph being a char32_t.
     /** All Brush attributes are lost. */
-    [[nodiscard]] auto u32str() const -> std::u32string
-    {
-        auto result = std::u32string{};
-        result.reserve(this->size());
-        for (Glyph g : *this)
-            result.push_back(g.symbol);
-        return result;
-    }
+    [[nodiscard]] auto u32str() const -> std::u32string;
 
     /// Convert to a std::string.
     /** Each Glyph::symbols is converted to a (potentially) multi-byte char
      *  string. All Brush attributes are lost. */
-    [[nodiscard]] auto str() const -> std::string
-    {
-        return u32_to_mb(this->u32str());
-    }
+    [[nodiscard]] auto str() const -> std::string;
 
    public:
     /// Add \p traits to every Glyph contained in *this.
-    void add_traits(Traits traits)
-    {
-        for (auto& glyph : *this)
-            glyph.brush.traits.insert(traits);
-    }
+    void add_traits(Traits traits);
 
     /// Remove all currently set traits on each Glyph.
-    void clear_traits()
-    {
-        for (auto& glyph : *this)
-            glyph.brush.traits = Trait::None;
-    }
+    void clear_traits();
 
     /// Add \p bg as the background color to every Glyph contained in *this.
-    void add_color(Background_color bg)
-    {
-        for (auto& glyph : *this)
-            glyph.brush.background = Color{bg.value};
-    }
+    void add_color(Background_color bg);
 
     /// Add \p fg as the foreground color to every Glyph contained in *this.
-    void add_color(Foreground_color fg)
-    {
-        for (auto& glyph : *this)
-            glyph.brush.foreground = Color{fg.value};
-    }
+    void add_color(Foreground_color fg);
 
     /// Remove a series of Traits from every Glyph within the Glyph_string.
-    void remove_traits(Traits traits)
-    {
-        for (Glyph& glyph : *this)
-            glyph.brush.traits.remove(traits);
-    }
+    void remove_traits(Traits traits);
 
     /// Set the background color as the default for every Glyph in *this.
-    void remove_background()
-    {
-        for (auto& glyph : *this)
-            glyph.brush.background = Color::Background;
-    }
+    void remove_background();
 
     /// Set the foreground color as the default for every Glyph in *this.
-    void remove_foreground()
-    {
-        for (auto& glyph : *this)
-            glyph.brush.foreground = Color::Foreground;
-    }
+    void remove_foreground();
 
    public:
     using size_type = int;
@@ -234,154 +167,73 @@ class Glyph_string : private std::vector<Glyph> {
 
 // Trait -----------------------------------------------------------------------
 /// Modifying Operation
-inline auto operator|(Glyph_string& gs, Traits ts) -> Glyph_string&
-{
-    gs.add_traits(ts);
-    return gs;
-}
+auto operator|(Glyph_string& gs, Traits ts) -> Glyph_string&;
 
-[[nodiscard]] inline auto operator|(Glyph_string const& gs, Traits ts)
-    -> Glyph_string
-{
-    auto copy = gs;
-    copy.add_traits(ts);
-    return copy;
-}
+[[nodiscard]] auto operator|(Glyph_string const& gs, Traits ts) -> Glyph_string;
 
-[[nodiscard]] inline auto operator|(Glyph_string&& gs, Traits ts)
-    -> Glyph_string
-{
-    return gs | ts;
-}
+[[nodiscard]] auto operator|(Glyph_string&& gs, Traits ts) -> Glyph_string;
 
 }  // namespace ox
 
 namespace esc {  // For ADL; Trait(s) is really in namespace::esc.
-[[nodiscard]] inline auto operator|(char32_t const* gs, Trait t)
-    -> ox::Glyph_string
-{
-    return ox::Glyph_string{gs} | t;
-}
 
-[[nodiscard]] inline auto operator|(char32_t const* gs, Traits ts)
-    -> ox::Glyph_string
-{
-    return ox::Glyph_string{gs} | ts;
-}
+[[nodiscard]] auto operator|(char32_t const* gs, Trait t) -> ox::Glyph_string;
 
-[[nodiscard]] inline auto operator|(char const* gs, Trait t) -> ox::Glyph_string
-{
-    return ox::Glyph_string{gs} | t;
-}
+[[nodiscard]] auto operator|(char32_t const* gs, Traits ts) -> ox::Glyph_string;
 
-[[nodiscard]] inline auto operator|(char const* gs, Traits ts)
-    -> ox::Glyph_string
-{
-    return ox::Glyph_string{gs} | ts;
-}
+[[nodiscard]] auto operator|(char const* gs, Trait t) -> ox::Glyph_string;
+
+[[nodiscard]] auto operator|(char const* gs, Traits ts) -> ox::Glyph_string;
+
 }  // namespace esc
 
 namespace ox {
 
 // Background_color ------------------------------------------------------------
-inline auto operator|(Glyph_string& gs, Background_color c) -> Glyph_string&
-{
-    gs.add_color(c);
-    return gs;
-}
+auto operator|(Glyph_string& gs, Background_color c) -> Glyph_string&;
 
-[[nodiscard]] inline auto operator|(Glyph_string const& gs, Background_color c)
-    -> Glyph_string
-{
-    auto copy = gs;
-    copy.add_color(c);
-    return copy;
-}
+[[nodiscard]] auto operator|(Glyph_string const& gs, Background_color c)
+    -> Glyph_string;
 
-[[nodiscard]] inline auto operator|(Glyph_string&& gs, Background_color c)
-    -> Glyph_string
-{
-    return gs | c;
-}
+[[nodiscard]] auto operator|(Glyph_string&& gs, Background_color c)
+    -> Glyph_string;
 
-[[nodiscard]] inline auto operator|(char32_t const* gs, Background_color c)
-    -> Glyph_string
-{
-    return Glyph_string{gs} | c;
-}
+[[nodiscard]] auto operator|(char32_t const* gs, Background_color c)
+    -> Glyph_string;
 
 // Foreground_color ------------------------------------------------------------
-inline auto operator|(Glyph_string& gs, Foreground_color c) -> Glyph_string&
-{
-    gs.add_color(c);
-    return gs;
-}
+auto operator|(Glyph_string& gs, Foreground_color c) -> Glyph_string&;
 
-[[nodiscard]] inline auto operator|(Glyph_string const& gs, Foreground_color c)
-    -> Glyph_string
-{
-    auto copy = gs;
-    copy.add_color(c);
-    return copy;
-}
+[[nodiscard]] auto operator|(Glyph_string const& gs, Foreground_color c)
+    -> Glyph_string;
 
-[[nodiscard]] inline auto operator|(Glyph_string&& gs, Foreground_color c)
-    -> Glyph_string
-{
-    return gs | c;
-}
+[[nodiscard]] auto operator|(Glyph_string&& gs, Foreground_color c)
+    -> Glyph_string;
 
-[[nodiscard]] inline auto operator|(char32_t const* gs, Foreground_color c)
-    -> Glyph_string
-{
-    return Glyph_string{gs} | c;
-}
+[[nodiscard]] auto operator|(char32_t const* gs, Foreground_color c)
+    -> Glyph_string;
 
 // Brush -----------------------------------------------------------------------
 /// Assigns the Brush \p b to each Glyph in \p gs.
-inline auto operator|(Glyph_string& gs, Brush b) -> Glyph_string&
-{
-    for (auto& g : gs)
-        g.brush = b;
-    return gs;
-}
+auto operator|(Glyph_string& gs, Brush b) -> Glyph_string&;
 
-[[nodiscard]] inline auto operator|(Glyph_string const& gs, Brush b)
-    -> Glyph_string
-{
-    auto copy = gs;
-    for (auto& g : copy)
-        g.brush = b;
-    return copy;
-}
+[[nodiscard]] auto operator|(Glyph_string const& gs, Brush b) -> Glyph_string;
 
 /// Assigns the Brush \p b to each Glyph in \p gs.
-[[nodiscard]] inline auto operator|(Glyph_string&& gs, Brush b) -> Glyph_string
-{
-    return gs | b;
-}
+[[nodiscard]] auto operator|(Glyph_string&& gs, Brush b) -> Glyph_string;
 
 /// Assigns the Brush \p b to each Glyph in \p gs.
-[[nodiscard]] inline auto operator|(char32_t const* gs, Brush b) -> Glyph_string
-{
-    return Glyph_string{gs} | b;
-}
+[[nodiscard]] auto operator|(char32_t const* gs, Brush b) -> Glyph_string;
 
 // Comparison ------------------------------------------------------------------
 
 /// Equality comparison on each Glyph in the Glyph_strings.
-[[nodiscard]] inline auto operator==(Glyph_string const& x,
-                                     Glyph_string const& y) -> bool
-{
-    return std::equal(std::begin(x), std::end(x), std::begin(y), std::end(y));
-}
+[[nodiscard]] auto operator==(Glyph_string const& x, Glyph_string const& y)
+    -> bool;
 
 /// Inequality comparison on each Glyph in the Glyph_strings.
-[[nodiscard]] inline auto operator!=(Glyph_string const& x,
-                                     Glyph_string const& y) -> bool
-{
-    return !(x == y);
-}
+[[nodiscard]] auto operator!=(Glyph_string const& x, Glyph_string const& y)
+    -> bool;
 
 }  // namespace ox
 #endif  // TERMOX_PAINTER_GLYPH_STRING_HPP

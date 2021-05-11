@@ -1,7 +1,6 @@
 #ifndef TERMOX_TERMINAL_TERMINAL_HPP
 #define TERMOX_TERMINAL_TERMINAL_HPP
 #include <cstdint>
-#include <optional>
 
 #include <signals_light/signal.hpp>
 
@@ -10,14 +9,11 @@
 #include <termox/system/event_fwd.hpp>
 #include <termox/terminal/detail/screen_buffers.hpp>
 #include <termox/terminal/dynamic_color_engine.hpp>
+#include <termox/terminal/mouse_mode.hpp>
+#include <termox/terminal/signals.hpp>
 #include <termox/widget/area.hpp>
 
-#include <esc/esc.hpp>
-
 namespace ox {
-
-using Mouse_mode = ::esc::Mouse_mode;
-using Signals    = ::esc::Signals;
 
 class Terminal {
    public:
@@ -49,7 +45,7 @@ class Terminal {
     static void uninitialize();
 
     /// Return the Area of the terminal screen.
-    [[nodiscard]] static auto area() -> Area { return ::esc::terminal_area(); }
+    [[nodiscard]] static auto area() -> Area;
 
     /// Update the screen to reflect change made by Painter since last call.
     /** This leaves the cursor in an unknown location, the cursor must be set
@@ -73,38 +69,21 @@ class Terminal {
     static auto palette_append(Color_definition::Value_t value) -> Color;
 
     /// Return a copy of the currently set color palette.
-    [[nodiscard]] static auto current_palette() -> Palette const&
-    {
-        return palette_;
-    }
+    [[nodiscard]] static auto current_palette() -> Palette const&;
 
     /// Set whether or not the cursor is visible on screen.
-    static void show_cursor(bool show = true)
-    {
-        ::esc::set(show ? ::esc::Cursor::Show : ::esc::Cursor::Hide);
-        ::esc::flush();
-    }
+    static void show_cursor(bool show = true);
 
     /// Moves the cursor to Point \p point on screen.
     /** {0, 0} is top left of the terminal screen. */
-    static void move_cursor(Point point)
-    {
-        ::esc::write(::esc::escape(::esc::Cursor_position{point}));
-        ::esc::flush();
-    }
+    static void move_cursor(Point point);
 
     /// Return the number of colors in the terminal's built in palette.
     /** This cooresponds to the number of Color_index values. */
-    [[nodiscard]] static auto color_count() -> std::uint16_t
-    {
-        return ::esc::color_palette_size();
-    }
+    [[nodiscard]] static auto color_count() -> std::uint16_t;
 
     /// Return true if this terminal supports true color.
-    [[nodiscard]] static auto has_true_color() -> bool
-    {
-        return ::esc::has_true_color();
-    }
+    [[nodiscard]] static auto has_true_color() -> bool;
 
     /// Wait for user input, and return with a corresponding Event.
     /** Blocking call, input can be received from the keyboard, mouse, or the
@@ -113,25 +92,19 @@ class Terminal {
 
     /// Sets a flag so that the next call to refresh() will repaint every cell.
     /** The repaint forces the diff to contain every cell on the terminal. */
-    static void flag_full_repaint() { full_repaint_ = true; }
+    static void flag_full_repaint();
 
     /// Flushes all of the staged changes to the screen and sets the cursor.
     static void flush_screen();
 
     /// Send exit flag and wait for Dynamic_color_engine thread to shutdown.
-    static void stop_dynamic_color_engine() { dynamic_color_engine_.stop(); }
+    static void stop_dynamic_color_engine();
 
    private:
     inline static Palette palette_;
     inline static Dynamic_color_engine dynamic_color_engine_;
     inline static bool is_initialized_ = false;
     inline static bool full_repaint_   = false;
-
-    /// Return true if \p point is within \p area.
-    [[nodiscard]] static auto is_within(Point point, Area area) -> bool
-    {
-        return point.x < area.width && point.y < area.height;
-    }
 };
 
 }  // namespace ox

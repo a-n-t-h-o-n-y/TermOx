@@ -1,8 +1,11 @@
 #ifndef DEMOS_GLYPH_PAINT_SIDE_PANE_HPP
 #define DEMOS_GLYPH_PAINT_SIDE_PANE_HPP
+#include <cmath>
+
 #include <termox/painter/color.hpp>
 #include <termox/painter/glyph.hpp>
 #include <termox/painter/trait.hpp>
+#include <termox/terminal/terminal.hpp>
 #include <termox/widget/layouts/vertical.hpp>
 #include <termox/widget/pipe.hpp>
 #include <termox/widget/widgets/color_select.hpp>

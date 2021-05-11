@@ -12,11 +12,11 @@ class User_input_event_loop {
     auto run() -> int;
 
     /// Sets exit flag.
-    auto exit(int exit_code) { loop_.exit(exit_code); }
+    void exit(int exit_code);
 
     /// Return reference to the internal Event_queue.
     /** Used by System to initialize the current queue. */
-    auto event_queue() -> Event_queue& { return loop_.event_queue(); }
+    auto event_queue() -> Event_queue&;
 
    private:
     Event_loop loop_;

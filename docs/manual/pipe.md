@@ -254,7 +254,7 @@ my_widget | children() | for_each([](auto& w){ log(w.name()); });
 - `label(Glyph_string)`
 - `divider(Glyph)`
 - `word_wrap(bool enable)`
-- `contents(Glyph_string)`
+- `text(Glyph_string)`
 - `align_left()`
 - `align_center()`
 - `align_right()`

@@ -178,6 +178,12 @@ void Painter::border()
 
 // GLOBAL COORDINATES - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+void Painter::put_global(Glyph tile, Point p)
+{
+    tile.brush    = merge(tile.brush, brush_);
+    canvas_.at(p) = tile;
+}
+
 void Painter::hline_global(Glyph tile, Point a, Point b)
 {
     for (; a.x <= b.x; ++a.x)

@@ -1,6 +1,6 @@
 #ifndef TERMOX_PAINTER_PAINTER_HPP
 #define TERMOX_PAINTER_PAINTER_HPP
-#include <termox/terminal/detail/canvas.hpp>
+#include <termox/painter/brush.hpp>
 #include <termox/widget/area.hpp>
 #include <termox/widget/point.hpp>
 
@@ -58,11 +58,7 @@ class Painter {
     /// Put a single Glyph to the canvas_ container.
     /** No bounds checking, used internally for all painting. Main entry point
      *  for modifying the canvas_ object. */
-    void put_global(Glyph tile, Point p)
-    {
-        tile.brush    = merge(tile.brush, brush_);
-        canvas_.at(p) = tile;
-    }
+    void put_global(Glyph tile, Point p);
 
     /// Paint a line from \p a to \p b inclusive using global coordinates.
     /** No bounds checking, used internally for Border object painting. */

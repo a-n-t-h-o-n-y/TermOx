@@ -551,7 +551,7 @@ class Instructions : public ox::Text_view {
     {
         using namespace ox::pipe;
         *this | bg(color::Instruction_bg) | fg(color::Instruction_fg) |
-            word_wrap(false) | align_center();
+            any_wrap() | align_center();
     }
 
    private:

@@ -1,7 +1,6 @@
 #ifndef TERMOX_WIDGET_WIDGETS_DETAIL_TEXTBOX_BASE_HPP
 #define TERMOX_WIDGET_WIDGETS_DETAIL_TEXTBOX_BASE_HPP
 #include <cstddef>
-#include <utility>
 
 #include <signals_light/signal.hpp>
 
@@ -13,6 +12,18 @@ namespace ox::detail {
 
 /// Implements cursor movement on top of a Text_view, for use by Textbox.
 class Textbox_base : public Text_view {
+   private:
+    using Text_view::Parameters;
+
+   protected:
+    /// Construct with initial \p text, enable cursor.
+    explicit Textbox_base(Glyph_string text  = U"",
+                          Align alignment    = Align::Left,
+                          Wrap wrap          = Wrap::Word,
+                          Brush insert_brush = Brush{});
+
+    explicit Textbox_base(Parameters p);
+
    public:
     /// Emitted when the cursor moves left, passes along \n positions moved.
     sl::Signal<void(std::size_t n)> cursor_moved_left;
@@ -28,41 +39,16 @@ class Textbox_base : public Text_view {
 
    public:
     /// Set the cursor to \p position, or the nearest Glyph if no glyph there.
-    void set_cursor(Point position)
-    {
-        this->set_cursor(this->index_at(position));
-    }
+    void set_cursor(Point position);
 
     /// Set the cursor to the Glyph at \p index into contents.
-    void set_cursor(std::size_t index)
-    {
-        auto const coords = this->display_position(index);
-        this->cursor.set_position(coords);
-    }
+    void set_cursor(std::size_t index);
 
     /// Add cursor movement to Text_view::scroll_up.
-    void scroll_up(int n = 1) override
-    {
-        if (this->top_line() == 0)
-            return;
-        Text_view::scroll_up(n);
-        auto y = this->cursor.y() + n;
-        if (y > this->height() - 1)
-            y = this->height() - 1;
-        this->set_cursor({this->cursor.x(), y});
-    }
+    void scroll_up(int n = 1) override;
 
     /// Add cursor movement to Text_view::scroll_down.
-    void scroll_down(int n = 1) override
-    {
-        Text_view::scroll_down(n);
-        auto y = this->cursor.y();
-        if (y < n)
-            y = 0;
-        else
-            y -= n;
-        this->set_cursor({this->cursor.x(), y});
-    }
+    void scroll_down(int n = 1) override;
 
     /// Move the cursor up \p n lines, scroll if at the top line.
     /** Cursor is moved to the right-most Glyph if the moved to line does not
@@ -76,67 +62,25 @@ class Textbox_base : public Text_view {
 
     /// Move the cursor \p n indices towards the beginning of contents.
     /** Scroll up if moving past the top-left position. */
-    void cursor_left(int n = 1)
-    {
-        for (auto i = 0; i < n; ++i)
-            this->increment_cursor_left();
-        cursor_moved_left(n);
-    }
+    void cursor_left(int n = 1);
 
     /// Move the cursor \p n indices towards the end of contents.
     /** Scroll down if moving past the bottom-right position. */
-    void cursor_right(int n = 1)
-    {
-        for (auto i = 0; i < n; ++i)
-            this->increment_cursor_right();
-        cursor_moved_right(n);
-    }
+    void cursor_right(int n = 1);
 
    protected:
-    /// Construct with initial \p contents, enable cursor.
-    explicit Textbox_base(Glyph_string contents = "")
-        : Text_view{std::move(contents)}
-    {
-        this->cursor.enable();
-    }
-
     /// Return the index into contents that the cursor is located at.
-    [[nodiscard]] auto cursor_index() const -> int
-    {
-        return this->index_at(this->cursor.position());
-    }
+    [[nodiscard]] auto cursor_index() const -> int;
 
     /// Scroll to make the cursor visible if no longer on screen after resize.
     auto resize_event(Area new_size, Area old_size) -> bool override;
 
    private:
     /// Move the cursor one position to the right.
-    void increment_cursor_right()
-    {
-        if (this->cursor_index() == this->contents().size())
-            return;
-        auto const true_last_index =
-            this->first_index_at(this->bottom_line() + 1) - 1;
-        auto const cursor_index = this->cursor_index();
-        if (cursor_index == true_last_index &&
-            this->cursor.y() == this->height() - 1) {
-            this->cursor.set_position({0, 0});  // hack for Typer
-            this->scroll_down(1);
-        }
-        this->set_cursor(cursor_index + 1);
-    }
+    void increment_cursor_right();
 
     /// Move the cursor one position to the left.
-    void increment_cursor_left()
-    {
-        auto next_index = this->cursor_index();
-        if (this->cursor.position() == Point{0, 0})
-            this->scroll_up(1);
-        if (next_index == 0)
-            return;
-        --next_index;
-        this->set_cursor(next_index);
-    }
+    void increment_cursor_left();
 };
 
 }  // namespace ox::detail

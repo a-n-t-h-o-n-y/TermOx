@@ -3,17 +3,10 @@
 #include <memory>
 #include <type_traits>
 #include <utility>
-#include <vector>
 
-#include <termox/painter/brush.hpp>
-#include <termox/painter/color.hpp>
 #include <termox/painter/glyph_string.hpp>
-#include <termox/painter/trait.hpp>
-#include <termox/widget/layouts/horizontal.hpp>
 #include <termox/widget/layouts/stack.hpp>
-#include <termox/widget/layouts/vertical.hpp>
 #include <termox/widget/pair.hpp>
-#include <termox/widget/pipe.hpp>
 #include <termox/widget/tuple.hpp>
 #include <termox/widget/widget.hpp>
 #include <termox/widget/widgets/button.hpp>
@@ -32,17 +25,7 @@ class CS_top_row : public HTuple<Button, Cycle_box, Button> {
     Button& right_btn    = this->get<2>();
 
    public:
-    CS_top_row(Parameters = {})
-        : HTuple<Button, Cycle_box, Button>{{U"<"}, {}, {U">"}}
-    {
-        using namespace pipe;
-        *this | fixed_height(1) | children() | bg(Color::Light_gray) |
-            fg(Color::Black);
-
-        left_btn | fixed_width(1) | on_press(slot::previous(cycle_box));
-        right_btn | fixed_width(1) | on_press(slot::next(cycle_box));
-        cycle_box | Trait::Bold;
-    }
+    CS_top_row(Parameters = {});
 };
 
 }  // namespace ox::detail

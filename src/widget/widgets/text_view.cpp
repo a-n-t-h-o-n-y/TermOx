@@ -2,15 +2,63 @@
 
 #include <algorithm>
 #include <iterator>
+#include <memory>
 #include <string>
 #include <utility>
 
+#include <termox/painter/brush.hpp>
 #include <termox/painter/glyph_string.hpp>
 #include <termox/painter/painter.hpp>
-#include <termox/painter/trait.hpp>
+#include <termox/widget/align.hpp>
 #include <termox/widget/point.hpp>
+#include <termox/widget/widget.hpp>
+#include <termox/widget/wrap.hpp>
 
 namespace ox {
+
+Text_view::Text_view(Glyph_string text,
+                     Align alignment,
+                     Wrap wrap,
+                     Brush insert_brush_)
+    : insert_brush{std::move(insert_brush_)},
+      contents_{std::move(text)},
+      alignment_{alignment},
+      wrap_{wrap}
+{}
+
+Text_view::Text_view(Parameters p)
+    : Text_view{std::move(p.text), p.alignment, p.wrap,
+                std::move(p.insert_brush)}
+{}
+
+void Text_view::set_text(Glyph_string text)
+{
+    contents_ = std::move(text);
+    this->update();
+    top_line_ = 0;
+    this->cursor.set_position({0, 0});
+    contents_modified(contents_);
+}
+
+auto Text_view::text() -> Glyph_string& { return contents_; }
+
+auto Text_view::text() const -> Glyph_string const& { return contents_; }
+
+void Text_view::set_alignment(Align type)
+{
+    alignment_ = type;
+    this->update();
+}
+
+auto Text_view::alignment() const -> Align { return alignment_; }
+
+void Text_view::set_wrap(Wrap w)
+{
+    wrap_ = w;
+    this->update();
+}
+
+auto Text_view::wrap() const -> Wrap { return wrap_; }
 
 void Text_view::insert(Glyph_string text, int index)
 {
@@ -70,6 +118,8 @@ void Text_view::clear()
 
 void Text_view::scroll_up(int n)
 {
+    if (n == 0)
+        return;
     if (n > this->top_line())
         top_line_ = 0;
     else
@@ -81,6 +131,8 @@ void Text_view::scroll_up(int n)
 
 void Text_view::scroll_down(int n)
 {
+    if (n == 0)
+        return;
     if (this->top_line() + n > this->last_line())
         top_line_ = this->last_line();
     else
@@ -90,21 +142,42 @@ void Text_view::scroll_down(int n)
     scrolled_to(top_line_);
 }
 
+auto Text_view::row_length(int y) const -> int
+{
+    const auto line = this->top_line() + y;
+    return this->line_length(line);
+}
+
+auto Text_view::display_height() const -> int
+{
+    int difference = 1 + this->last_line() - this->top_line();
+    if (difference > this->height())
+        difference = this->height();
+    return difference;
+}
+
+auto Text_view::line_count() const -> int { return display_state_.size(); }
+
+void Text_view::set_top_line(int n)
+{
+    if (n < (int)display_state_.size())
+        top_line_ = n;
+    this->update();
+}
+
 auto Text_view::index_at(Point position) const -> int
 {
     auto line = this->top_line() + position.y;
     if (line >= (int)display_state_.size())
-        return this->contents().size();
+        return this->text().size();
     auto const info = display_state_.at(line);
     if (position.x >= info.length) {
         if (info.length == 0)
             position.x = 0;
         else if (this->top_line() + position.y != this->last_line())
             return this->first_index_at(this->top_line() + position.y + 1) - 1;
-        else  // if (this->top_line() + position.y == this->last_line())
-            return this->contents().size();
-        // else  // TODO This can't be reached
-        //     position.x = info.length - 1;
+        else
+            return this->text().size();
     }
     return info.start_index + position.x;
 }
@@ -120,11 +193,21 @@ auto Text_view::display_position(int index) const -> Point
         line  = last_shown_line;
         index = this->last_index_at(line);
     }
-    else if (index > this->contents().size())
-        index = this->contents().size();
+    else if (index > this->text().size())
+        index = this->text().size();
     position.y = line - this->top_line();
     position.x = index - this->first_index_at(line);
     return position;
+}
+
+void Text_view::update()
+{
+    // TODO
+    // This call to update_display is required here, and not in paint_event.
+    // Could probably be refactored so this can be in paint_event, more
+    // efficient...
+    this->update_display();
+    Widget::update();
 }
 
 auto Text_view::paint_event(Painter& p) -> bool
@@ -164,6 +247,52 @@ auto Text_view::paint_event(Painter& p) -> bool
 //     return;
 // }
 
+auto Text_view::line_at(int index) const -> int
+{
+    auto line = 0;
+    for (auto const& info : display_state_) {
+        if (info.start_index <= index)
+            ++line;
+        else
+            return line - 1;
+    }
+    return this->last_line();
+}
+
+auto Text_view::top_line() const -> int { return top_line_; }
+
+auto Text_view::bottom_line() const -> int
+{
+    auto const line = this->top_line() + this->display_height() - 1;
+    return line < 0 ? 0 : line;
+}
+
+auto Text_view::last_line() const -> int { return display_state_.size() - 1; }
+
+auto Text_view::first_index_at(int line) const -> int
+{
+    if (line >= (int)display_state_.size())
+        line = display_state_.size() - 1;
+    return display_state_.at(line).start_index;
+}
+
+auto Text_view::last_index_at(int line) const -> int
+{
+    const auto next_line = line + 1;
+    if (next_line >= (int)display_state_.size())
+        return this->end_index();
+    return display_state_.at(next_line).start_index;
+}
+
+auto Text_view::line_length(int line) const -> int
+{
+    if (line >= (int)display_state_.size())
+        line = display_state_.size() - 1;
+    return display_state_.at(line).length;
+}
+
+auto Text_view::end_index() const -> int { return this->text().size(); }
+
 void Text_view::update_display(int from_line)
 {
     auto const begin = display_state_.at(from_line).start_index;
@@ -177,7 +306,7 @@ void Text_view::update_display(int from_line)
     auto last_space  = 0;
     for (auto i = begin; i < contents_.size(); ++i) {
         ++length;
-        if (this->word_wrap_enabled() and contents_.at(i).symbol == U' ')
+        if ((this->wrap() == Wrap::Word) && (contents_.at(i).symbol == U' '))
             last_space = length;
         if (contents_.at(i).symbol == U'\n') {
             display_state_.push_back(Line_info{start_index, length - 1});
@@ -185,7 +314,7 @@ void Text_view::update_display(int from_line)
             length = 0;
         }
         else if (length == this->width()) {
-            if (this->word_wrap_enabled() and last_space > 0) {
+            if ((this->wrap() == Wrap::Word) && last_space > 0) {
                 i -= length - last_space;
                 length     = last_space;
                 last_space = 0;
@@ -202,16 +331,15 @@ void Text_view::update_display(int from_line)
     line_count_changed(display_state_.size());
 }
 
-auto Text_view::line_at(int index) const -> int
+auto text_display(Glyph_string text, Align alignment, Wrap wrap)
+    -> std::unique_ptr<Text_view>
 {
-    auto line = 0;
-    for (auto const& info : display_state_) {
-        if (info.start_index <= index)
-            ++line;
-        else
-            return line - 1;
-    }
-    return this->last_line();
+    return std::make_unique<Text_view>(std::move(text), alignment, wrap);
+}
+
+auto text_display(Text_view::Parameters p) -> std::unique_ptr<Text_view>
+{
+    return std::make_unique<Text_view>(std::move(p));
 }
 
 }  // namespace ox

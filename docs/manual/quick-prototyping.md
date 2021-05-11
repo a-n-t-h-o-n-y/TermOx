@@ -74,10 +74,10 @@ background color.
     btns.find_child_by_name("read-btn") | on_read([&](auto& fs) {
         auto buffer = std::stringstream{};
         buffer << fs.rdbuf();
-        textbox.set_contents(buffer.str());
+        textbox.set_text(buffer.str());
         });
     btns.find_child_by_name("write-btn") | on_write([&](auto& fs) {
-        fs << textbox.contents();
+        fs << textbox.text();
         });
     return std::move(w);
 }

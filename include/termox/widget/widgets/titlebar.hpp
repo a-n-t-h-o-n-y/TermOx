@@ -1,13 +1,9 @@
 #ifndef TERMOX_WIDGET_WIDGETS_TITLEBAR_HPP
 #define TERMOX_WIDGET_WIDGETS_TITLEBAR_HPP
-#include <utility>
+#include <memory>
 
-#include <termox/painter/color.hpp>
 #include <termox/painter/glyph_string.hpp>
-#include <termox/system/system.hpp>
 #include <termox/widget/pair.hpp>
-#include <termox/widget/pipe.hpp>
-#include <termox/widget/size_policy.hpp>
 #include <termox/widget/widgets/button.hpp>
 #include <termox/widget/widgets/label.hpp>
 
@@ -29,22 +25,10 @@ class Titlebar : public HPair<HLabel, Button> {
 
    public:
     /// Construct a Titlebar with centered \p title.
-    explicit Titlebar(Glyph_string title_text = U"")
-        : HPair<HLabel, Button>{
-              {std::move(title_text), Align::Center, extra_left, extra_right},
-              {U"│✕ "}}
+    explicit Titlebar(Glyph_string title_text = U"");
 
-    {
-        using namespace ox::pipe;
-        *this | fixed_height(1);
-        *this | children() | bg(Color::White) | fg(Color::Black);
-        exit_button | fixed_width(exit_width) | on_press(System::quit);
-    }
-
-    /// Construct a Titlebar from \p parameters
-    explicit Titlebar(Parameters parameters)
-        : Titlebar{std::move(parameters.title_text)}
-    {}
+    /// Construct a Titlebar from \p p.
+    explicit Titlebar(Parameters p);
 
    private:
     inline static auto constexpr exit_width  = 3;
@@ -53,18 +37,12 @@ class Titlebar : public HPair<HLabel, Button> {
 };
 
 /// Helper function to create a Titlebar instance.
-[[nodiscard]] inline auto titlebar(Glyph_string title_text = U"")
-    -> std::unique_ptr<Titlebar>
-{
-    return std::make_unique<Titlebar>(std::move(title_text));
-}
+[[nodiscard]] auto titlebar(Glyph_string title_text = U"")
+    -> std::unique_ptr<Titlebar>;
 
 /// Helper function to create a Titlebar instance.
-[[nodiscard]] inline auto titlebar(Titlebar::Parameters parameters)
-    -> std::unique_ptr<Titlebar>
-{
-    return std::make_unique<Titlebar>(std::move(parameters));
-}
+[[nodiscard]] auto titlebar(Titlebar::Parameters p)
+    -> std::unique_ptr<Titlebar>;
 
 }  // namespace ox
 #endif  // TERMOX_WIDGET_WIDGETS_TITLEBAR_HPP

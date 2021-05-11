@@ -1,9 +1,41 @@
 #include <termox/widget/widgets/textbox.hpp>
 
+#include <memory>
+#include <utility>
+
+#include <termox/painter/glyph_string.hpp>
 #include <termox/system/key.hpp>
 #include <termox/system/mouse.hpp>
-
+#include <termox/widget/widgets/detail/textbox_base.hpp>
 namespace ox {
+
+Textbox::Textbox(Glyph_string text,
+                 Align alignment,
+                 Wrap wrap,
+                 Brush insert_brush,
+                 int scroll_speed,
+                 bool text_input)
+    : Textbox_base{std::move(text), alignment, wrap, insert_brush},
+      scroll_speed_{scroll_speed},
+      takes_input_{text_input}
+{
+    this->focus_policy = Focus_policy::Strong;
+}
+
+Textbox::Textbox(Parameters p)
+    : Textbox{std::move(p.text),         p.alignment,    p.wrap,
+              std::move(p.insert_brush), p.scroll_speed, p.text_input}
+{}
+
+void Textbox::set_scroll_speed(int x) noexcept { scroll_speed_ = x; }
+
+auto Textbox::scroll_speed() const noexcept -> int { return scroll_speed_; }
+
+void Textbox::enable_text_input() noexcept { takes_input_ = true; }
+
+void Textbox::disable_text_input() noexcept { takes_input_ = false; }
+
+auto Textbox::has_text_input() const noexcept -> bool { return takes_input_; }
 
 auto Textbox::key_press_event(Key k) -> bool
 {
@@ -31,7 +63,7 @@ auto Textbox::key_press_event(Key k) -> bool
 
         case Key::Delete: {
             auto cursor_index = this->cursor_index();
-            if (cursor_index == this->contents().size())
+            if (cursor_index == this->text().size())
                 break;
             this->erase(cursor_index, 1);
             if (this->line_at(cursor_index) < this->top_line())
@@ -74,17 +106,28 @@ auto Textbox::mouse_press_event(Mouse const& m) -> bool
 auto Textbox::mouse_wheel_event(Mouse const& m) -> bool
 {
     switch (m.button) {
-        case Mouse::Button::ScrollUp:
-            if (scroll_wheel_)
-                this->scroll_up(scroll_speed_up_);
-            break;
-        case Mouse::Button::ScrollDown:
-            if (scroll_wheel_)
-                this->scroll_down(scroll_speed_down_);
-            break;
+        case Mouse::Button::ScrollUp: this->scroll_up(scroll_speed_); break;
+        case Mouse::Button::ScrollDown: this->scroll_down(scroll_speed_); break;
         default: break;
     }
     return Textbox_base::mouse_wheel_event(m);
+}
+
+auto textbox(Glyph_string text,
+             Align alignment,
+             Wrap wrap,
+             Brush insert_brush,
+             int scroll_speed,
+             bool text_input) -> std::unique_ptr<Textbox>
+{
+    return std::make_unique<Textbox>(std::move(text), alignment, wrap,
+                                     std::move(insert_brush), scroll_speed,
+                                     text_input);
+}
+
+auto textbox(Textbox::Parameters p) -> std::unique_ptr<Textbox>
+{
+    return std::make_unique<Textbox>(std::move(p));
 }
 
 }  // namespace ox

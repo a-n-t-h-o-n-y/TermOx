@@ -6,9 +6,7 @@
 #include <signals_light/signal.hpp>
 
 #include <termox/common/overload.hpp>
-#include <termox/painter/glyph.hpp>
 #include <termox/painter/glyph_string.hpp>
-#include <termox/painter/painter.hpp>
 #include <termox/system/mouse.hpp>
 #include <termox/widget/detail/link_lifetimes.hpp>
 #include <termox/widget/layouts/horizontal.hpp>
@@ -51,114 +49,41 @@ class Checkbox : public Label<Layout_t> {
 
    public:
     /// Construct a new Checkbox
-    explicit Checkbox(State initial_state, Display display, bool locked)
-        : Base_t{initial_state == State::Unchecked ? display.unchecked
-                                                   : display.checked,
-                 Align::Left, 0, 0, Growth::Dynamic},
-          state_{initial_state},
-          display_{display},
-          locked_{locked}
-    {
-        if (locked_) {
-            display_.checked | Trait::Dim;
-            display_.unchecked | Trait::Dim;
-            this->update_display();
-        }
-    }
+    explicit Checkbox(State initial_state, Display display, bool locked);
 
     /// Construct a new Checkbox
-    explicit Checkbox(Parameters p)
-        : Checkbox{p.initial_state, p.display, p.locked} {};
+    explicit Checkbox(Parameters p);
 
    public:
     /// Set the state to be checked.
-    void check()
-    {
-        if (locked_)
-            return;
-        if (state_ == State::Unchecked) {
-            state_ = State::Checked;
-            this->Base_t::set_text(display_.checked);
-            checked.emit();
-            toggled.emit();
-        }
-    }
+    void check();
 
     /// Set the state to be unchecked.
-    void uncheck()
-    {
-        if (locked_)
-            return;
-        if (state_ == State::Checked) {
-            state_ = State::Unchecked;
-            this->Base_t::set_text(display_.unchecked);
-            unchecked.emit();
-            toggled.emit();
-        }
-    }
+    void uncheck();
 
     /// Change state to be unchecked if currently checked, checked otherwise.
-    void toggle()
-    {
-        switch (state_) {
-            case State::Checked: this->uncheck(); break;
-            case State::Unchecked: this->check(); break;
-        }
-    }
+    void toggle();
 
     /// Return the current state of the Checkbox as Checkbox::State enum value.
-    [[nodiscard]] auto get_state() const -> State { return state_; }
+    [[nodiscard]] auto get_state() const -> State;
 
     /// Lock the Checkbox, it can not be toggled when locked.
-    void lock()
-    {
-        locked_ = true;
-        display_.checked | Trait::Dim;
-        display_.unchecked | Trait::Dim;
-        this->update_display();
-    }
+    void lock();
 
     /// Unlock the Checkbox, allowing it to be toggled.
-    void unlock()
-    {
-        locked_ = false;
-        display_.checked.remove_traits(Trait::Dim);
-        display_.unchecked.remove_traits(Trait::Dim);
-        this->update_display();
-    }
+    void unlock();
 
     /// Return true if the Checkbox is locked.
-    [[nodiscard]] auto is_locked() const -> bool { return locked_; }
+    [[nodiscard]] auto is_locked() const -> bool;
 
     /// Set the look of each Checkbox State.
-    void set_display(Display d)
-    {
-        display_ = std::move(d);
-        if (locked_) {
-            display_.checked | Trait::Dim;
-            display_.unchecked | Trait::Dim;
-        }
-        this->update_display();
-    }
+    void set_display(Display d);
 
     /// Return the look of each Checkbox State.
-    [[nodiscard]] auto get_display() -> Display
-    {
-        auto result = display_;
-        if (locked_) {
-            result.checked.remove_traits(Trait::Dim);
-            result.unchecked.remove_traits(Trait::Dim);
-        }
-        return result;
-    }
+    [[nodiscard]] auto get_display() -> Display;
 
    protected:
-    auto mouse_press_event(Mouse const& m) -> bool override
-    {
-        if (m.button == Mouse::Button::Left)
-            this->toggle();
-        return Base_t::mouse_press_event(m);
-    }
+    auto mouse_press_event(Mouse const& m) -> bool override;
 
    private:
     State state_;
@@ -167,29 +92,29 @@ class Checkbox : public Label<Layout_t> {
 
    private:
     /// Push changes to display_ to the Label base class to update the display.
-    void update_display()
-    {
-        this->Base_t::set_text(state_ == State::Unchecked ? display_.unchecked
-                                                          : display_.checked);
-    }
+    void update_display();
 };
 
 using HCheckbox = Checkbox<layout::Horizontal>;
 using VCheckbox = Checkbox<layout::Vertical>;
 
 /// Helper function to create an HCheckbox instance.
-template <typename... Args>
-[[nodiscard]] auto hcheckbox(Args&&... args) -> std::unique_ptr<HCheckbox>
-{
-    return std::make_unique<HCheckbox>(std::forward<Args>(args)...);
-}
+[[nodiscard]] auto hcheckbox(HCheckbox::State initial_state,
+                             HCheckbox::Display display,
+                             bool locked) -> std::unique_ptr<HCheckbox>;
+
+/// Helper function to create an HCheckbox instance.
+[[nodiscard]] auto hcheckbox(HCheckbox::Parameters p)
+    -> std::unique_ptr<HCheckbox>;
 
 /// Helper function to create a VCheckbox instance.
-template <typename... Args>
-[[nodiscard]] auto vcheckbox(Args&&... args) -> std::unique_ptr<VCheckbox>
-{
-    return std::make_unique<VCheckbox>(std::forward<Args>(args)...);
-}
+[[nodiscard]] auto vcheckbox(VCheckbox::State initial_state,
+                             VCheckbox::Display display,
+                             bool locked) -> std::unique_ptr<VCheckbox>;
+
+/// Helper function to create a VCheckbox instance.
+[[nodiscard]] auto vcheckbox(VCheckbox::Parameters p)
+    -> std::unique_ptr<VCheckbox>;
 
 }  // namespace ox
 
@@ -789,22 +714,13 @@ inline auto constexpr vlabel_checkbox20 = make_labeled_cb_fn<VLabel_checkbox20>;
 namespace ox::slot {
 
 template <template <typename> typename Layout_t>
-auto toggle(Checkbox<Layout_t>& cb) -> sl::Slot<void()>
-{
-    return link_lifetimes([&cb] { cb.toggle(); }, cb);
-}
+auto toggle(Checkbox<Layout_t>& cb) -> sl::Slot<void()>;
 
 template <template <typename> typename Layout_t>
-auto check(Checkbox<Layout_t>& cb) -> sl::Slot<void()>
-{
-    return link_lifetimes([&cb] { cb.check(); }, cb);
-}
+auto check(Checkbox<Layout_t>& cb) -> sl::Slot<void()>;
 
 template <template <typename> typename Layout_t>
-auto uncheck(Checkbox<Layout_t>& cb) -> sl::Slot<void()>
-{
-    return link_lifetimes([&cb] { cb.uncheck(); }, cb);
-}
+auto uncheck(Checkbox<Layout_t>& cb) -> sl::Slot<void()>;
 
 }  // namespace ox::slot
 #endif  // TERMOX_WIDGET_WIDGETS_CHECKBOX_HPP

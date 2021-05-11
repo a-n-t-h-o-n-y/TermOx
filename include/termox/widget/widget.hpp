@@ -1,31 +1,28 @@
 #ifndef TERMOX_WIDGET_WIDGET_HPP
 #define TERMOX_WIDGET_WIDGET_HPP
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
-#include <iterator>
 #include <memory>
 #include <set>
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
 #include <signals_light/signal.hpp>
 
+#include <termox/common/fps.hpp>
 #include <termox/common/transform_view.hpp>
 #include <termox/painter/brush.hpp>
 #include <termox/painter/color.hpp>
 #include <termox/painter/glyph.hpp>
 #include <termox/painter/painter.hpp>
-#include <termox/painter/trait.hpp>
-#include <termox/system/animation_engine.hpp>
-#include <termox/system/detail/focus.hpp>
 #include <termox/system/key.hpp>
 #include <termox/system/mouse.hpp>
-#include <termox/system/system.hpp>
 #include <termox/widget/area.hpp>
 #include <termox/widget/border.hpp>
 #include <termox/widget/cursor.hpp>
-#include <termox/widget/detail/border_offset.hpp>
 #include <termox/widget/focus_policy.hpp>
 #include <termox/widget/point.hpp>
 #include <termox/widget/size_policy.hpp>
@@ -115,7 +112,15 @@ class Widget {
 
    public:
     /// Create an empty Widget.
-    Widget() : Widget{{}} {}
+    explicit Widget(std::string name            = "",
+                    Focus_policy focus_policy   = Focus_policy::None,
+                    Size_policy width_policy    = Size_policy{},
+                    Size_policy height_policy   = Size_policy{},
+                    Border border               = Border{},
+                    Brush brush                 = Brush{},
+                    Glyph wallpaper             = U' ',
+                    bool brush_paints_wallpaper = true,
+                    Cursor cursor               = Cursor{});
 
     /// Create an empty Widget.
     explicit Widget(Parameters p);
@@ -132,23 +137,19 @@ class Widget {
 
    public:
     /// Set the identifying name of the Widget.
-    void set_name(std::string name) { name_ = std::move(name); }
+    void set_name(std::string name);
 
     /// Return the name of the Widget.
-    [[nodiscard]] auto name() const -> std::string const& { return name_; }
+    [[nodiscard]] auto name() const -> std::string const&;
 
     /// Return the ID number unique to this Widget.
-    [[nodiscard]] auto unique_id() const -> std::uint16_t { return unique_id_; }
+    [[nodiscard]] auto unique_id() const -> std::uint16_t;
 
     /// Used to fill in empty space that is not filled in by paint_event().
-    void set_wallpaper(Glyph g)
-    {
-        wallpaper_ = g;
-        this->update();
-    }
+    void set_wallpaper(Glyph g);
 
     /// Return the currently in use wallpaper or std::nullopt if none.
-    [[nodiscard]] auto get_wallpaper() const -> Glyph { return wallpaper_; }
+    [[nodiscard]] auto get_wallpaper() const -> Glyph;
 
     /// Post an Enable_event to this widget, and all descendants.
     /** Will only post a Child_polished_event to the parent if requested. Useful
@@ -166,85 +167,62 @@ class Widget {
     /** Will only post a Child_polished_event to the parent if requested. Useful
      *  for disabling a child Widget from a parent's Child_polished_event
      *  handler. */
-    void disable(bool disable = true, bool post_child_polished_event = true)
-    {
-        this->enable(!disable, post_child_polished_event);
-    }
+    void disable(bool disable = true, bool post_child_polished_event = true);
 
     /// Check whether the Widget is enabled.
-    [[nodiscard]] auto is_enabled() const -> bool { return enabled_; }
+    [[nodiscard]] auto is_enabled() const -> bool;
 
     /// Return the Widget's parent pointer.
     /** The parent is the Widget that owns *this, it  is in charge of
      *  positioning and resizing this Widget. */
-    [[nodiscard]] auto parent() const -> Widget* { return parent_; }
+    [[nodiscard]] auto parent() const -> Widget*;
 
     /// Return the global top left corner of this widget.
-    [[nodiscard]] auto top_left() const -> Point { return top_left_position_; }
+    [[nodiscard]] auto top_left() const -> Point;
 
     /// Return the global top left corner of this widget, not including border.
-    [[nodiscard]] auto inner_top_left() const -> Point
-    {
-        return {this->inner_x(), this->inner_y()};
-    }
+    [[nodiscard]] auto inner_top_left() const -> Point;
 
     /// x coordinate for the top left point of this Widget.
     /** Given with relation to the top left of the terminal screen. */
-    [[nodiscard]] auto x() const -> int { return top_left_position_.x; }
+    [[nodiscard]] auto x() const -> int;
 
     /// y coordinate for the top left point of this Widget.
     /** Given with relation to the top left of the terminal screen. */
-    [[nodiscard]] auto y() const -> int { return top_left_position_.y; }
+    [[nodiscard]] auto y() const -> int;
 
+    // TODO only provide points, not coords via member functions.
     /// x coordinate for the top left point of this Widget, beyond the Border.
     /** Given with relation to the top left of the terminal screen. This is the
      *  coordinate that marks the beginning of the space that is available for
      *  use by the Widget. */
-    [[nodiscard]] auto inner_x() const -> int
-    {
-        return top_left_position_.x + detail::Border_offset::west(*this);
-    }
+    [[nodiscard]] auto inner_x() const -> int;
 
     /// y coordinate for the top left point of this Widget, beyond the Border.
     /** Given with relation to the top left of the terminal screen. This is the
      *  coordinate that marks the beginning of the space that is available for
      *  use by the Widget. */
-    [[nodiscard]] auto inner_y() const -> int
-    {
-        return top_left_position_.y + detail::Border_offset::north(*this);
-    }
+    [[nodiscard]] auto inner_y() const -> int;
 
+    // TODO only provide area, not width/height
     /// Return the area the widget occupies, not including the Border.
-    [[nodiscard]] auto area() const -> Area
-    {
-        return {this->width(), this->height()};
-    }
+    [[nodiscard]] auto area() const -> Area;
 
     /// Return the inner width dimension, this does not include Border space.
-    [[nodiscard]] auto width() const -> int
-    {
-        return this->outer_width() - detail::Border_offset::east(*this) -
-               detail::Border_offset::west(*this);
-    }
+    [[nodiscard]] auto width() const -> int;
 
     /// Return the inner height dimension, this does not include Border space.
-    [[nodiscard]] auto height() const -> int
-    {
-        return this->outer_height() - detail::Border_offset::north(*this) -
-               detail::Border_offset::south(*this);
-    }
+    [[nodiscard]] auto height() const -> int;
 
     /// Return the area the widget occupies, including Border space.
-    [[nodiscard]] auto outer_area() const -> Area { return outer_area_; }
+    [[nodiscard]] auto outer_area() const -> Area;
 
+    // TODO only provide the structs for all these, not the struct members.
     /// Return the width dimension, this includes Border space.
-    [[nodiscard]] auto outer_width() const -> int { return outer_area_.width; }
+    [[nodiscard]] auto outer_width() const -> int;
 
     /// Return the height dimension, this includes Border space.
-    [[nodiscard]] auto outer_height() const -> int
-    {
-        return outer_area_.height;
-    }
+    [[nodiscard]] auto outer_height() const -> int;
 
     // TODO remove virtual
     /// Post a paint event to this Widget.
@@ -253,7 +231,7 @@ class Widget {
     /// Remove once border is redesigned.
     /** Used by is_paintable to decide whether or not to send a Paint_event.
      *  This is a type parameter, Layout is the only thing that can't paint. */
-    [[nodiscard]] virtual auto is_layout_type() const -> bool { return false; }
+    [[nodiscard]] virtual auto is_layout_type() const -> bool;
 
     /// Install another Widget as an Event filter.
     /** The installed Widget will get the first go at processing the event with
@@ -265,13 +243,10 @@ class Widget {
 
     /// Remove a Widget from the Event filter list.
     /** No-op if \p filter is not already installed. */
-    void remove_event_filter(Widget& filter) { event_filters_.erase(&filter); }
+    void remove_event_filter(Widget& filter);
 
     /// Return the list of Event filter Widgets.
-    [[nodiscard]] auto get_event_filters() const -> std::set<Widget*> const&
-    {
-        return event_filters_;
-    }
+    [[nodiscard]] auto get_event_filters() const -> std::set<Widget*> const&;
 
     /// Enable animation on this Widget.
     /** Animated widgets receiver a Timer_event every \p period. This Timer
@@ -279,36 +254,18 @@ class Widget {
      *  handled on a separate thread from the main user input thread, and has
      *  its own staged_changes object that it paints to to avoid shared data
      *  issues. */
-    void enable_animation(Animation_engine::Interval_t interval)
-    {
-        if (is_animated_)
-            return;
-        System::enable_animation(*this, interval);
-        is_animated_ = true;
-    }
+    void enable_animation(std::chrono::milliseconds interval);
 
     /// Enable animation with a frames-per-second value.
-    void enable_animation(FPS fps)
-    {
-        if (is_animated_)
-            return;
-        System::enable_animation(*this, fps);
-        is_animated_ = true;
-    }
+    void enable_animation(FPS fps);
 
     /// Turn off animation, no more Timer_events will be sent to this Widget.
     /** This Widget will be unregistered from the Animation_engine held by
      *  System. */
-    void disable_animation()
-    {
-        if (!is_animated_)
-            return;
-        System::disable_animation(*this);
-        is_animated_ = false;
-    }
+    void disable_animation();
 
     /// Return true if this Widget has animation enabled.
-    [[nodiscard]] auto is_animated() const -> bool { return is_animated_; }
+    [[nodiscard]] auto is_animated() const -> bool;
 
     /// Get a range containing Widget& to each child.
     [[nodiscard]] auto get_children()
@@ -329,30 +286,13 @@ class Widget {
     }
 
     /// Return container of all descendants of self_.
-    [[nodiscard]] auto get_descendants() const -> std::vector<Widget*>
-    {
-        auto descendants = std::vector<Widget*>{};
-        for (auto const& w_ptr : children_) {
-            descendants.push_back(w_ptr.get());
-            auto branch = w_ptr->get_descendants();
-            descendants.insert(std::end(descendants), std::begin(branch),
-                               std::end(branch));
-        }
-        return descendants;
-    }
-
-    /// If true, the brush will apply to the wallpaper Glyph.
-    [[nodiscard]] auto paints_wallpaper_with_brush() const -> bool
-    {
-        return brush_paints_wallpaper_;
-    }
+    [[nodiscard]] auto get_descendants() const -> std::vector<Widget*>;
 
     /// Set if the brush is applied to the wallpaper Glyph.
-    void paint_wallpaper_with_brush(bool paints = true)
-    {
-        brush_paints_wallpaper_ = paints;
-        this->update();
-    }
+    void paint_wallpaper_with_brush(bool paints = true);
+
+    /// If true, the brush will apply to the wallpaper Glyph.
+    [[nodiscard]] auto paints_wallpaper_with_brush() const -> bool;
 
     /// Return the wallpaper Glyph.
     /** The Glyph has the brush applied to it, if brush_paints_wallpaper is set
@@ -360,276 +300,125 @@ class Widget {
     [[nodiscard]] auto generate_wallpaper() const -> Glyph;
 
     /// Return the index of the first child displayed by this Widget.
-    [[nodiscard]] auto get_child_offset() const -> std::size_t
-    {
-        return child_offset_;
-    }
+    [[nodiscard]] auto get_child_offset() const -> std::size_t;
 
     /// Return the number of children held by this Widget.
-    [[nodiscard]] auto child_count() const -> std::size_t
-    {
-        return children_.size();
-    }
+    [[nodiscard]] auto child_count() const -> std::size_t;
 
     // - - - - - - - - - - - - - Event Handlers - - - - - - - - - - - - - - - -
     /// Handles Enable_event objects.
-    virtual auto enable_event() -> bool
-    {
-        this->update();
-        enabled();
-        return true;
-    }
+    virtual auto enable_event() -> bool;
 
     /// Handles Disable_event objects.
-    virtual auto disable_event() -> bool
-    {
-        disabled();
-        return true;
-    }
+    virtual auto disable_event() -> bool;
 
     /// Handles Child_added_event objects.
-    virtual auto child_added_event(Widget& child) -> bool
-    {
-        child_added(child);
-        return true;
-    }
+    virtual auto child_added_event(Widget& child) -> bool;
 
     /// Handles Child_removed_event objects.
-    virtual auto child_removed_event(Widget& child) -> bool
-    {
-        child_removed(child);
-        return true;
-    }
+    virtual auto child_removed_event(Widget& child) -> bool;
 
     /// Handles Child_polished_event objects.
-    virtual auto child_polished_event(Widget& child) -> bool
-    {
-        this->update();
-        child_polished(child);
-        return true;
-    }
+    virtual auto child_polished_event(Widget& child) -> bool;
 
     /// Handles Move_event objects.
-    virtual auto move_event(Point new_position, Point old_position) -> bool
-    {
-        this->update();
-        moved(new_position, old_position);
-        return true;
-    }
+    virtual auto move_event(Point new_position, Point old_position) -> bool;
 
     /// Handles Resize_event objects.
-    virtual auto resize_event(Area new_size, Area old_size) -> bool
-    {
-        this->update();
-        resized(new_size, old_size);
-        return true;
-    }
+    virtual auto resize_event(Area new_size, Area old_size) -> bool;
 
     /// Handles Mouse_press_event objects.
-    virtual auto mouse_press_event(Mouse const& m) -> bool
-    {
-        mouse_pressed(m);
-        return true;
-    }
+    virtual auto mouse_press_event(Mouse const& m) -> bool;
 
     /// Handles Mouse_release_event objects.
-    virtual auto mouse_release_event(Mouse const& m) -> bool
-    {
-        mouse_released(m);
-        return true;
-    }
+    virtual auto mouse_release_event(Mouse const& m) -> bool;
 
     /// Handles Mouse_wheel_event objects.
-    virtual auto mouse_wheel_event(Mouse const& m) -> bool
-    {
-        mouse_wheel_scrolled(m);
-        return true;
-    }
+    virtual auto mouse_wheel_event(Mouse const& m) -> bool;
 
     /// Handles Mouse_move_event objects.
-    virtual auto mouse_move_event(Mouse const& m) -> bool
-    {
-        mouse_moved(m);
-        return true;
-    }
+    virtual auto mouse_move_event(Mouse const& m) -> bool;
 
     /// Handles Key_press_event objects.
-    virtual auto key_press_event(Key k) -> bool
-    {
-        key_pressed(k);
-        return true;
-    }
+    virtual auto key_press_event(Key k) -> bool;
 
     /// Handles Focus_in_event objects.
-    virtual auto focus_in_event() -> bool
-    {
-        focused_in();
-        return true;
-    }
+    virtual auto focus_in_event() -> bool;
 
     /// Handles Focus_out_event objects.
-    virtual auto focus_out_event() -> bool
-    {
-        focused_out();
-        return true;
-    }
+    virtual auto focus_out_event() -> bool;
 
     /// Handles Delete_event objects.
-    virtual auto delete_event() -> bool
-    {
-        this->disable_animation();
-        destroyed();
-        if (detail::Focus::focus_widget() == this)
-            detail::Focus::clear_without_posting_event();
-        return true;
-    }
+    virtual auto delete_event() -> bool;
 
     /// Handles Paint_event objects.
-    virtual auto paint_event(Painter& p) -> bool
-    {
-        p.border();
-        painted();
-        return true;
-    }
+    virtual auto paint_event(Painter& p) -> bool;
 
     /// Handles Timer_event objects.
-    virtual auto timer_event() -> bool
-    {
-        timer();
-        return true;
-    }
+    virtual auto timer_event() -> bool;
 
     // - - - - - - - - - - - Event Filter Handlers - - - - - - - - - - - - - - -
     /// Handles Enable_event objects filtered from other Widgets.
-    virtual auto enable_event_filter(Widget& receiver) -> bool
-    {
-        enabled_filter(receiver);
-
-        return false;
-    }
+    virtual auto enable_event_filter(Widget& receiver) -> bool;
 
     /// Handles Disable_event objects filtered from other Widgets.
-    virtual auto disable_event_filter(Widget& receiver) -> bool
-    {
-        disabled_filter(receiver);
-        return false;
-    }
+    virtual auto disable_event_filter(Widget& receiver) -> bool;
 
     /// Handles Child_added_event objects filtered from other Widgets.
     virtual auto child_added_event_filter(Widget& receiver, Widget& child)
-        -> bool
-    {
-        child_added_filter(receiver, child);
-        return false;
-    }
+        -> bool;
 
     /// Handles Child_removed_event objects filtered from other Widgets.
     virtual auto child_removed_event_filter(Widget& receiver, Widget& child)
-        -> bool
-    {
-        child_removed_filter(receiver, child);
-        return false;
-    }
+        -> bool;
 
     /// Handles Child_polished_event objects filtered from other Widgets.
     virtual auto child_polished_event_filter(Widget& receiver, Widget& child)
-        -> bool
-    {
-        child_polished_filter(receiver, child);
-        return false;
-    }
+        -> bool;
 
     /// Handles Move_event objects filtered from other Widgets.
     virtual auto move_event_filter(Widget& receiver,
                                    Point new_position,
-                                   Point old_position) -> bool
-    {
-        moved_filter(receiver, new_position, old_position);
-        return false;
-    }
+                                   Point old_position) -> bool;
 
     /// Handles Resize_event objects filtered from other Widgets.
     virtual auto resize_event_filter(Widget& receiver,
                                      Area new_size,
-                                     Area old_size) -> bool
-    {
-        resized_filter(receiver, new_size, old_size);
-        return false;
-    }
+                                     Area old_size) -> bool;
 
     /// Handles Mouse_press_event objects filtered from other Widgets.
     virtual auto mouse_press_event_filter(Widget& receiver, Mouse const& m)
-        -> bool
-    {
-        mouse_pressed_filter(receiver, m);
-        return false;
-    }
+        -> bool;
 
     /// Handles Mouse_release_event objects filtered from other Widgets.
     virtual auto mouse_release_event_filter(Widget& receiver, Mouse const& m)
-        -> bool
-    {
-        mouse_released_filter(receiver, m);
-        return false;
-    }
+        -> bool;
 
     /// Handles Mouse_wheel_event objects filtered from other Widgets.
     virtual auto mouse_wheel_event_filter(Widget& receiver, Mouse const& m)
-        -> bool
-    {
-        mouse_wheel_scrolled_filter(receiver, m);
-        return false;
-    }
+        -> bool;
 
     /// Handles Mouse_move_event objects filtered from other Widgets.
     virtual auto mouse_move_event_filter(Widget& receiver, Mouse const& m)
-        -> bool
-    {
-        mouse_moved_filter(receiver, m);
-        return false;
-    }
+        -> bool;
 
     /// Handles Key_press_event objects filtered from other Widgets.
-    virtual auto key_press_event_filter(Widget& receiver, Key k) -> bool
-    {
-        key_pressed_filter(receiver, k);
-        return false;
-    }
+    virtual auto key_press_event_filter(Widget& receiver, Key k) -> bool;
 
     /// Handles Focus_in_event objects filtered from other Widgets.
-    virtual auto focus_in_event_filter(Widget& receiver) -> bool
-    {
-        focused_in_filter(receiver);
-        return false;
-    }
+    virtual auto focus_in_event_filter(Widget& receiver) -> bool;
 
     /// Handles Focus_out_event objects filtered from other Widgets.
-    virtual auto focus_out_event_filter(Widget& receiver) -> bool
-    {
-        focused_out_filter(receiver);
-        return false;
-    }
+    virtual auto focus_out_event_filter(Widget& receiver) -> bool;
 
     /// Handles Delete_event objects filtered from other Widgets.
-    virtual auto delete_event_filter(Widget& receiver) -> bool
-    {
-        destroyed_filter(receiver);
-        return false;
-    }
+    virtual auto delete_event_filter(Widget& receiver) -> bool;
 
     /// Handles Paint_event objects filtered from other Widgets.
-    virtual auto paint_event_filter(Widget& receiver) -> bool
-    {
-        painted_filter(receiver);
-        return false;
-    }
+    virtual auto paint_event_filter(Widget& receiver) -> bool;
 
     /// Handles Timer_event objects filtered from other Widgets.
-    virtual auto timer_event_filter(Widget& receiver) -> bool
-    {
-        timer_filter(receiver);
-        return false;
-    }
+    virtual auto timer_event_filter(Widget& receiver) -> bool;
 
    protected:
     /// Enable this Widget and possibly notify the parent of the change.
@@ -666,20 +455,28 @@ class Widget {
 
    public:
     /// Should only be used by Move_event send() function.
-    void set_top_left(Point p) { top_left_position_ = p; }
+    void set_top_left(Point p);
 
     /// Should only be used by Resize_event send() function.
-    void set_outer_area(Area a) { outer_area_ = a; }
+    void set_outer_area(Area a);
 
-    void set_parent(Widget* parent) { parent_ = parent; }
+    void set_parent(Widget* parent);
 };
 
-/// Helper function to create an instance.
-[[nodiscard]] inline auto widget(Widget::Parameters parameters = {})
-    -> std::unique_ptr<Widget>
-{
-    return std::make_unique<Widget>(std::move(parameters));
-}
+/// Helper function to create a Widget instance.
+[[nodiscard]] auto widget(std::string name            = "",
+                          Focus_policy focus_policy   = Focus_policy::None,
+                          Size_policy width_policy    = Size_policy{},
+                          Size_policy height_policy   = Size_policy{},
+                          Border border               = Border{},
+                          Brush brush                 = Brush{},
+                          Glyph wallpaper             = U' ',
+                          bool brush_paints_wallpaper = true,
+                          Cursor cursor = Cursor{}) -> std::unique_ptr<Widget>;
+
+/// Helper function to create a Widget instance.
+[[nodiscard]] auto widget(Widget::Parameters parameters)
+    -> std::unique_ptr<Widget>;
 
 /// Wrapper for std::make_unique
 template <typename Widget_t, typename... Args>
@@ -689,5 +486,6 @@ template <typename Widget_t, typename... Args>
                   "Must make a Widget derived type.");
     return std::make_unique<Widget_t>(std::forward<Args>(args)...);
 }
+
 }  // namespace ox
 #endif  // TERMOX_WIDGET_WIDGET_HPP

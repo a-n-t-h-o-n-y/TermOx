@@ -1,20 +1,19 @@
 #ifndef TERMOX_WIDGET_WIDGET_SPINNER_HPP
 #define TERMOX_WIDGET_WIDGET_SPINNER_HPP
-#include <cstddef>
+#include <chrono>
+#include <memory>
 #include <utility>
 
 #include <termox/painter/glyph_string.hpp>
-#include <termox/painter/painter.hpp>
-#include <termox/system/animation_engine.hpp>
-#include <termox/widget/pipe.hpp>
 #include <termox/widget/widget.hpp>
 
 namespace ox {
+class Painter;
 
 /// Single cell animated spinner.
 class Spinner : public Widget {
    public:
-    using Interval_t = Animation_engine::Interval_t;
+    using Interval_t = std::chrono::milliseconds;
 
     struct Parameters {
         Glyph_string frames;
@@ -28,85 +27,34 @@ class Spinner : public Widget {
     explicit Spinner(Glyph_string frames,
                      Interval_t period = Interval_t{100},
                      int width         = 1,
-                     int offset        = 0)
-        : frames_{std::move(frames)},
-          period_{period},
-          width_{width},
-          index_{offset}
-    {
-        *this | pipe::fixed_height(1) | pipe::fixed_width(width_);
-    }
+                     int offset        = 0);
 
-    explicit Spinner(Parameters parameters)
-        : Spinner{std::move(parameters.frames), parameters.period,
-                  parameters.width, parameters.offset}
-    {}
+    explicit Spinner(Parameters p);
 
    public:
-    void set_frames(Glyph_string frames) { frames_ = std::move(frames); }
+    void set_frames(Glyph_string frames);
 
-    [[nodiscard]] auto frames() const noexcept -> Glyph_string const&
-    {
-        return frames_;
-    }
+    [[nodiscard]] auto frames() const noexcept -> Glyph_string const&;
 
-    void set_period(Interval_t period)
-    {
-        if (started_) {
-            this->stop();
-            period_ = period;
-            this->start();
-        }
-        else
-            period_ = period;
-    }
+    void set_period(Interval_t period);
 
-    [[nodiscard]] auto period() const noexcept -> Interval_t { return period_; }
+    [[nodiscard]] auto period() const noexcept -> Interval_t;
 
-    void set_width(int width)
-    {
-        width_ = width;
-        width_policy.fixed(width_);
-    }
+    void set_width(int width);
 
-    [[nodiscard]] auto spinner_width() const noexcept -> int { return width_; }
+    [[nodiscard]] auto spinner_width() const noexcept -> int;
 
-    void set_offset(int offset) { index_ = offset; }
+    void set_offset(int offset);
 
    public:
-    void start()
-    {
-        if (started_)
-            return;
-        this->enable_animation(period_);
-        started_ = true;
-    }
+    void start();
 
-    void stop()
-    {
-        this->disable_animation();
-        started_ = false;
-        this->update();
-    }
+    void stop();
 
    protected:
-    auto paint_event(Painter& p) -> bool override
-    {
-        if (started_) {
-            for (auto x = 0; x < width_; ++x)
-                p.put(frames_[index_], {x, 0});
-        }
-        return Widget::paint_event(p);
-    }
+    auto paint_event(Painter& p) -> bool override;
 
-    auto timer_event() -> bool override
-    {
-        ++index_;
-        if (index_ >= frames_.size())
-            index_ = 0;
-        this->update();
-        return Widget::timer_event();
-    }
+    auto timer_event() -> bool override;
 
    private:
     bool started_ = false;
@@ -117,21 +65,14 @@ class Spinner : public Widget {
 };
 
 /// Helper function to create a Spinner instance.
-[[nodiscard]] inline auto spinner(
+[[nodiscard]] auto spinner(
     Glyph_string frames,
     Spinner::Interval_t period = Spinner::Interval_t{100},
     int width                  = 1,
-    int offset                 = 0) -> std::unique_ptr<Spinner>
-{
-    return std::make_unique<Spinner>(std::move(frames), period, width, offset);
-}
+    int offset                 = 0) -> std::unique_ptr<Spinner>;
 
 /// Helper function to create a Spinner instance.
-[[nodiscard]] inline auto spinner(Spinner::Parameters parameters)
-    -> std::unique_ptr<Spinner>
-{
-    return std::make_unique<Spinner>(std::move(parameters));
-}
+[[nodiscard]] auto spinner(Spinner::Parameters p) -> std::unique_ptr<Spinner>;
 
 /// Specific Spinners
 
@@ -144,35 +85,23 @@ struct Spinner_cycle : Spinner {
 
     explicit Spinner_cycle(Interval_t period = Interval_t{100},
                            int width         = 1,
-                           int offset        = 0)
-        : Spinner{U"⠁⠈⠐⠠⢀⡀⠄⠂", period, width, offset}
-    {}
+                           int offset        = 0);
 
-    explicit Spinner_cycle(Parameters parameters)
-        : Spinner_cycle{parameters.period, parameters.width, parameters.offset}
-    {}
+    explicit Spinner_cycle(Parameters p);
 };
 
-[[nodiscard]] inline auto spinner_cycle(
+[[nodiscard]] auto spinner_cycle(
     Spinner::Interval_t period = Spinner::Interval_t{100},
     int width                  = 1,
-    int offset                 = 0) -> std::unique_ptr<Spinner_cycle>
-{
-    return std::make_unique<Spinner_cycle>(period, width, offset);
-}
+    int offset                 = 0) -> std::unique_ptr<Spinner_cycle>;
 
-[[nodiscard]] inline auto spinner_cycle(Spinner_cycle::Parameters parameters)
-    -> std::unique_ptr<Spinner_cycle>
-{
-    return std::make_unique<Spinner_cycle>(std::move(parameters));
-}
+[[nodiscard]] auto spinner_cycle(Spinner_cycle::Parameters p)
+    -> std::unique_ptr<Spinner_cycle>;
 
 struct Spinner_cycle_ccw : Spinner {
     Spinner_cycle_ccw(Interval_t period = Interval_t{100},
                       int width         = 1,
-                      int offset        = 0)
-        : Spinner{U"⠁⠂⠄⡀⢀⠠⠐⠈", period, width, offset}
-    {}
+                      int offset        = 0);
 };
 
 /// Helper function to create an instance.
@@ -186,9 +115,7 @@ template <typename... Args>
 struct Spinner_fall : Spinner {
     Spinner_fall(Interval_t period = Interval_t{100},
                  int width         = 1,
-                 int offset        = 0)
-        : Spinner{U"⠁⠂⠄⡀⡈⡐⡠⣀⣁⣂⣄⣌⣔⣤⣥⣦⣮⣶⣷⣿", period, width, offset}
-    {}
+                 int offset        = 0);
 };
 
 /// Helper function to create an instance.
@@ -201,9 +128,7 @@ template <typename... Args>
 struct Spinner_fall_two : Spinner {
     Spinner_fall_two(Interval_t period = Interval_t{100},
                      int width         = 1,
-                     int offset        = 0)
-        : Spinner{U" ⠁⠉⠋⠛⠟⠿⡿⣿⣿⣿⣿⣷⣶⣦⣤⣄⣀⡀ ", period, width, offset}
-    {}
+                     int offset        = 0);
 };
 
 /// Helper function to create an instance.
@@ -217,10 +142,7 @@ template <typename... Args>
 struct Spinner_fall_three : Spinner {
     Spinner_fall_three(Interval_t period = Interval_t{100},
                        int width         = 1,
-                       int offset        = 0)
-        : Spinner{U"   ⠁⠂⠄⡀⡈⡐⡠⣀⣁⣂⣄⣌⣔⣤⣥⣦⣮⣶⣷⣿⣿⣿⣿⣿⣿⡿⠿⢟⠟⡛⠛⠫⢋⠋⠍⡉⠉⠑⠡⢁⠁⠂⠄⡀   ", period,
-                  width, offset}
-    {}
+                       int offset        = 0);
 };
 
 /// Helper function to create an instance.
@@ -234,9 +156,7 @@ template <typename... Args>
 struct Spinner_rise : Spinner {
     Spinner_rise(Interval_t period = Interval_t{100},
                  int width         = 1,
-                 int offset        = 0)
-        : Spinner{U"⡀⠄⠂⠁⢁⠡⠑⠉⡉⠍⠋⢋⠫⠛⡛⠟⢟⠿⡿⣿", period, width, offset}
-    {}
+                 int offset        = 0);
 };
 
 /// Helper function to create an instance.
@@ -249,9 +169,7 @@ template <typename... Args>
 struct Spinner_rise_two : Spinner {
     Spinner_rise_two(Interval_t period = Interval_t{100},
                      int width         = 1,
-                     int offset        = 0)
-        : Spinner{U"    ⡀⣀⣄⣤⣦⣶⣷⣿⣿⣿⣿⡿⠿⠟⠛⠋⠉⠁    ", period, width, offset}
-    {}
+                     int offset        = 0);
 };
 
 /// Helper function to create an instance.
@@ -265,10 +183,7 @@ template <typename... Args>
 struct Spinner_rise_three : Spinner {
     Spinner_rise_three(Interval_t period = Interval_t{100},
                        int width         = 1,
-                       int offset        = 0)
-        : Spinner{U"   ⡀⠄⠂⠁⢁⠡⠑⠉⡉⠍⠋⢋⠫⠛⡛⠟⢟⠿⡿⣿⣿⣿⣿⣿⣿⣷⣶⣮⣦⣥⣤⣔⣌⣄⣂⣁⣀⡠⡐⡈⡀⠄⠂⠁   ", period,
-                  width, offset}
-    {}
+                       int offset        = 0);
 };
 
 /// Helper function to create an instance.
@@ -282,9 +197,7 @@ template <typename... Args>
 struct Spinner_fill : Spinner {
     Spinner_fill(Interval_t period = Interval_t{100},
                  int width         = 1,
-                 int offset        = 0)
-        : Spinner{U"⡀⣀⣄⣤⣦⣶⣷⣿", period, width, offset}
-    {}
+                 int offset        = 0);
 };
 
 /// Helper function to create an instance.
@@ -297,9 +210,7 @@ template <typename... Args>
 struct Spinner_top_fill : Spinner {
     Spinner_top_fill(Interval_t period = Interval_t{100},
                      int width         = 1,
-                     int offset        = 0)
-        : Spinner{U"⠁⠉⠋⠛⠟⠿⡿⣿", period, width, offset}
-    {}
+                     int offset        = 0);
 };
 
 /// Helper function to create an instance.
@@ -313,9 +224,7 @@ template <typename... Args>
 struct Spinner_tail : Spinner {
     Spinner_tail(Interval_t period = Interval_t{100},
                  int width         = 1,
-                 int offset        = 0)
-        : Spinner{U"⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏", period, width, offset}
-    {}
+                 int offset        = 0);
 };
 
 /// Helper function to create an instance.
@@ -328,9 +237,7 @@ template <typename... Args>
 struct Spinner_switch : Spinner {
     Spinner_switch(Interval_t period = Interval_t{100},
                    int width         = 1,
-                   int offset        = 0)
-        : Spinner{U"⢹⢺⢼⣸⣇⡧⡗⡏", period, width, offset}
-    {}
+                   int offset        = 0);
 };
 
 /// Helper function to create an instance.
@@ -343,9 +250,7 @@ auto spinner_switch(Args&&... args) -> std::unique_ptr<Spinner_switch>
 struct Spinner_chase : Spinner {
     Spinner_chase(Interval_t period = Interval_t{100},
                   int width         = 1,
-                  int offset        = 0)
-        : Spinner{U"⢄⢂⢁⡁⡈⡐⡠", period, width, offset}
-    {}
+                  int offset        = 0);
 };
 
 /// Helper function to create an instance.
@@ -359,9 +264,7 @@ template <typename... Args>
 struct Spinner_line : Spinner {
     Spinner_line(Interval_t period = Interval_t{100},
                  int width         = 1,
-                 int offset        = 0)
-        : Spinner{U"-\\|/", period, width, offset}
-    {}
+                 int offset        = 0);
 };
 
 /// Helper function to create an instance.
@@ -374,9 +277,7 @@ template <typename... Args>
 struct Spinner_block_cycle : Spinner {
     Spinner_block_cycle(Interval_t period = Interval_t{100},
                         int width         = 1,
-                        int offset        = 0)
-        : Spinner{U"▖▘▝▗", period, width, offset}
-    {}
+                        int offset        = 0);
 };
 
 /// Helper function to create an instance.
@@ -390,10 +291,7 @@ template <typename... Args>
 struct Spinner_fade : Spinner {
     Spinner_fade(Interval_t period = Interval_t{100},
                  int width         = 1,
-                 int offset        = 0)
-        : Spinner{U"         ░░▒▓▓██████████████████▓▓▒░░         ", period,
-                  width, offset}
-    {}
+                 int offset        = 0);
 };
 
 /// Helper function to create an instance.
@@ -407,10 +305,7 @@ template <typename... Args>
 struct Spinner_fade_trail : Spinner {
     Spinner_fade_trail(Interval_t period = Interval_t{100},
                        int width         = 1,
-                       int offset        = 0)
-        : Spinner{U"⢀⢀⠠⠠⢀⢀⠠⠠⢀░░▒▓▓██████████████████▓▓▒░░⢀⢀⠠⠠⢀⢀⠠⠠⢀", period,
-                  width, offset}
-    {}
+                       int offset        = 0);
 };
 
 /// Helper function to create an instance.
@@ -424,9 +319,7 @@ template <typename... Args>
 struct Spinner_quarter_circles : Spinner {
     Spinner_quarter_circles(Interval_t period = Interval_t{100},
                             int width         = 1,
-                            int offset        = 0)
-        : Spinner{U"◜◝◞◟", period, width, offset}
-    {}
+                            int offset        = 0);
 };
 
 /// Helper function to create an instance.
@@ -441,9 +334,7 @@ template <typename... Args>
 struct Spinner_triangles : Spinner {
     Spinner_triangles(Interval_t period = Interval_t{100},
                       int width         = 1,
-                      int offset        = 0)
-        : Spinner{U"◤◥◢◣", period, width, offset}
-    {}
+                      int offset        = 0);
 };
 
 /// Helper function to create an instance.
@@ -457,9 +348,7 @@ template <typename... Args>
 struct Spinner_empty_triangles : Spinner {
     Spinner_empty_triangles(Interval_t period = Interval_t{100},
                             int width         = 1,
-                            int offset        = 0)
-        : Spinner{U"◸◹◿◺", period, width, offset}
-    {}
+                            int offset        = 0);
 };
 
 /// Helper function to create an instance.
@@ -474,9 +363,7 @@ template <typename... Args>
 struct Spinner_clock : Spinner {
     Spinner_clock(Interval_t period = Interval_t{100},
                   int width         = 1,
-                  int offset        = 0)
-        : Spinner{U"◴◷◶◵", period, width, offset}
-    {}
+                  int offset        = 0);
 };
 
 /// Helper function to create an instance.
@@ -490,9 +377,7 @@ template <typename... Args>
 struct Spinner_box : Spinner {
     Spinner_box(Interval_t period = Interval_t{100},
                 int width         = 1,
-                int offset        = 0)
-        : Spinner{U"▤▧▥▨", period, width, offset}
-    {}
+                int offset        = 0);
 };
 
 /// Helper function to create an instance.
@@ -505,9 +390,7 @@ template <typename... Args>
 struct Spinner_cross : Spinner {
     Spinner_cross(Interval_t period = Interval_t{100},
                   int width         = 1,
-                  int offset        = 0)
-        : Spinner{U"┽╀┾╁", period, width, offset}
-    {}
+                  int offset        = 0);
 };
 
 /// Helper function to create an instance.
@@ -522,19 +405,12 @@ struct Spinner_vertical_pass : Spinner {
    public:
     Spinner_vertical_pass(Interval_t period = Interval_t{100},
                           int width         = 1,
-                          int offset        = 0)
-        : Spinner{first().append(second()).append(U" "), period, width, offset}
-    {}
+                          int offset        = 0);
 
    private:
-    [[nodiscard]] auto first() -> Glyph_string { return U"▁▂▃▄▅▆▇█"; }
+    [[nodiscard]] auto first() -> Glyph_string;
 
-    [[nodiscard]] auto second() -> Glyph_string
-    {
-        auto result = first();
-        result.add_traits(Trait::Inverse);
-        return result;
-    }
+    [[nodiscard]] auto second() -> Glyph_string;
 };
 
 /// Helper function to create an instance.
@@ -549,19 +425,12 @@ struct Spinner_horizontal_pass : Spinner {
    public:
     Spinner_horizontal_pass(Interval_t period = Interval_t{100},
                             int width         = 1,
-                            int offset        = 0)
-        : Spinner{first().append(second()).append(U" "), period, width, offset}
-    {}
+                            int offset        = 0);
 
    private:
-    [[nodiscard]] auto first() -> Glyph_string { return U"▏▎▍▌▋▊▉█"; }
+    [[nodiscard]] auto first() -> Glyph_string;
 
-    [[nodiscard]] auto second() -> Glyph_string
-    {
-        auto result = first();
-        result.add_traits(Trait::Inverse);
-        return result;
-    }
+    [[nodiscard]] auto second() -> Glyph_string;
 };
 
 /// Helper function to create an instance.
@@ -576,9 +445,7 @@ template <typename... Args>
 struct Spinner_bump : Spinner {
     Spinner_bump(Interval_t period = Interval_t{100},
                  int width         = 1,
-                 int offset        = 0)
-        : Spinner{U" ▁▂▃▄▅▆▇█▇▆▅▄▃▂▁", period, width, offset}
-    {}
+                 int offset        = 0);
 };
 
 /// Helper function to create an instance.

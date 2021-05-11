@@ -41,20 +41,20 @@ struct Glyph {
 };
 
 // Trait -------------------------------------------------------------------
-constexpr auto operator|(Glyph& g, Traits ts) -> Glyph&
+auto constexpr operator|(Glyph& g, Traits ts) -> Glyph&
 {
     g.brush.traits |= ts;
     return g;
 }
 
-[[nodiscard]] constexpr auto operator|(Glyph const& g, Traits ts) -> Glyph
+[[nodiscard]] auto constexpr operator|(Glyph const& g, Traits ts) -> Glyph
 {
     auto copy = g;
     copy.brush.traits |= ts;
     return copy;
 }
 
-[[nodiscard]] constexpr auto operator|(Glyph&& g, Traits ts) -> Glyph
+[[nodiscard]] auto constexpr operator|(Glyph&& g, Traits ts) -> Glyph
 {
     g.brush.traits |= ts;
     return std::move(g);
@@ -64,22 +64,22 @@ constexpr auto operator|(Glyph& g, Traits ts) -> Glyph&
 
 namespace esc {  // For ADL; Trait(s) is really in namespace::esc.
 
-[[nodiscard]] constexpr auto operator|(char32_t g, Trait t) -> ox::Glyph
+[[nodiscard]] auto constexpr operator|(char32_t g, Trait t) -> ox::Glyph
 {
     return ox::Glyph{g} | t;
 }
 
-[[nodiscard]] constexpr auto operator|(char32_t g, Traits ts) -> ox::Glyph
+[[nodiscard]] auto constexpr operator|(char32_t g, Traits ts) -> ox::Glyph
 {
     return ox::Glyph{g} | ts;
 }
 
-[[nodiscard]] constexpr auto operator|(char g, Trait t) -> ox::Glyph
+[[nodiscard]] auto constexpr operator|(char g, Trait t) -> ox::Glyph
 {
     return ox::Glyph{g} | t;
 }
 
-[[nodiscard]] constexpr auto operator|(char g, Traits ts) -> ox::Glyph
+[[nodiscard]] auto constexpr operator|(char g, Traits ts) -> ox::Glyph
 {
     return ox::Glyph{g} | ts;
 }
@@ -89,43 +89,43 @@ namespace esc {  // For ADL; Trait(s) is really in namespace::esc.
 namespace ox {
 
 // Background_color ------------------------------------------------------------
-constexpr auto operator|(Glyph& g, Background_color c) -> Glyph&
+auto constexpr operator|(Glyph& g, Background_color c) -> Glyph&
 {
     g.brush.background = Color{c.value};
     return g;
 }
 
-[[nodiscard]] constexpr auto operator|(Glyph const& g, Background_color c)
+[[nodiscard]] auto constexpr operator|(Glyph const& g, Background_color c)
     -> Glyph
 {
     auto copy = g;
     return copy | c;
 }
 
-[[nodiscard]] constexpr auto operator|(Glyph&& g, Background_color c) -> Glyph
+[[nodiscard]] auto constexpr operator|(Glyph&& g, Background_color c) -> Glyph
 {
     g.brush.background = Color{c.value};
     return std::move(g);
 }
 
-[[nodiscard]] constexpr auto operator|(char32_t g, Background_color c) -> Glyph
+[[nodiscard]] auto constexpr operator|(char32_t g, Background_color c) -> Glyph
 {
     return Glyph{g} | c;
 }
 
-[[nodiscard]] constexpr auto operator|(char g, Background_color c) -> ox::Glyph
+[[nodiscard]] auto constexpr operator|(char g, Background_color c) -> ox::Glyph
 {
     return ox::Glyph{g} | c;
 }
 
 // Foreground_color ------------------------------------------------------------
-constexpr auto operator|(Glyph& g, Foreground_color c) -> Glyph&
+auto constexpr operator|(Glyph& g, Foreground_color c) -> Glyph&
 {
     g.brush.foreground = Color{c.value};
     return g;
 }
 
-[[nodiscard]] constexpr auto operator|(Glyph const& g, Foreground_color c)
+[[nodiscard]] auto constexpr operator|(Glyph const& g, Foreground_color c)
     -> Glyph
 {
     auto copy             = g;
@@ -133,18 +133,18 @@ constexpr auto operator|(Glyph& g, Foreground_color c) -> Glyph&
     return copy;
 }
 
-[[nodiscard]] constexpr auto operator|(Glyph&& g, Foreground_color c) -> Glyph
+[[nodiscard]] auto constexpr operator|(Glyph&& g, Foreground_color c) -> Glyph
 {
     g.brush.foreground = Color{c.value};
     return std::move(g);
 }
 
-[[nodiscard]] constexpr auto operator|(char32_t g, Foreground_color c) -> Glyph
+[[nodiscard]] auto constexpr operator|(char32_t g, Foreground_color c) -> Glyph
 {
     return Glyph{g} | c;
 }
 
-[[nodiscard]] constexpr auto operator|(char g, Foreground_color c) -> ox::Glyph
+[[nodiscard]] auto constexpr operator|(char g, Foreground_color c) -> ox::Glyph
 {
     return ox::Glyph{g} | c;
 }
@@ -152,13 +152,13 @@ constexpr auto operator|(Glyph& g, Foreground_color c) -> Glyph&
 // Comparisons  ----------------------------------------------------------------
 
 /// Compares symbol and brush for equality.
-[[nodiscard]] constexpr auto operator==(Glyph lhs, Glyph rhs) -> bool
+[[nodiscard]] auto constexpr operator==(Glyph lhs, Glyph rhs) -> bool
 {
     return (lhs.symbol == rhs.symbol) && (lhs.brush == rhs.brush);
 }
 
 /// Compares symbol and brush for inequality.
-[[nodiscard]] constexpr auto operator!=(Glyph lhs, Glyph rhs) -> bool
+[[nodiscard]] auto constexpr operator!=(Glyph lhs, Glyph rhs) -> bool
 {
     return !(lhs == rhs);
 }

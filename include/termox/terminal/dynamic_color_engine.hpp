@@ -1,6 +1,6 @@
 #ifndef TERMOX_TERMINAL_DYNAMIC_COLOR_ENGINE_HPP
 #define TERMOX_TERMINAL_DYNAMIC_COLOR_ENGINE_HPP
-#include <algorithm>
+#include <mutex>
 #include <vector>
 
 #include <termox/common/lockable.hpp>
@@ -29,46 +29,23 @@ class Dynamic_color_engine : private Lockable<std::mutex> {
    public:
     /// Add a dynamic color linked to \p color.
     /** Does not check for duplicates. */
-    void register_color(Color color, Dynamic_color const& dynamic)
-    {
-        auto const lock = this->Lockable::lock();
-        data_.push_back({color, dynamic, Clock_t::now()});
-    }
+    void register_color(Color color, Dynamic_color const& dynamic);
 
     /// Removes the Dynamic_color linked to \p color.
     /** Function does nothing if Color is not found. */
-    void unregister_color(Color color)
-    {
-        auto const lock = this->Lockable::lock();
-        auto const iter = std::find_if(
-            std::cbegin(data_), std::cend(data_),
-            [color](auto const& data) { return data.color == color; });
-        if (iter != std::cend(data_))
-            data_.erase(iter);
-    }
+    void unregister_color(Color color);
 
     /// Remove all registered colors.
-    void clear()
-    {
-        auto const lock = this->Lockable::lock();
-        data_.clear();
-    }
+    void clear();
 
     /// Return true if there are no registered widgets
     [[nodiscard]] auto is_empty() const -> bool;
 
     /// Start another thread that waits on intervals and sents Events.
-    void start()
-    {
-        loop_.run_async([this](Event_queue& q) { this->loop_function(q); });
-    }
+    void start();
 
     /// Sends exit signal and waits for animation thread to exit.
-    void stop()
-    {
-        loop_.exit(0);
-        loop_.wait();
-    }
+    void stop();
 
    private:
     std::vector<Registered_data> data_;

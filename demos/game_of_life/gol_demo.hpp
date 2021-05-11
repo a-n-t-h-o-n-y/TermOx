@@ -1,5 +1,6 @@
 #ifndef TERMOX_DEMOS_GAME_OF_LIFE_GOL_DEMO_HPP
 #define TERMOX_DEMOS_GAME_OF_LIFE_GOL_DEMO_HPP
+#include <termox/terminal/terminal.hpp>
 #include <termox/widget/layouts/horizontal.hpp>
 #include <termox/widget/widgets/accordion.hpp>
 

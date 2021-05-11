@@ -1,15 +1,11 @@
 #ifndef TERMOX_PAINTER_DYNAMIC_COLORS_HPP
 #define TERMOX_PAINTER_DYNAMIC_COLORS_HPP
-#include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <cstdint>
 #include <random>
 
-#include <esc/true_color.hpp>
-
 #include <termox/painter/color.hpp>
-#include <termox/system/system.hpp>
 
 namespace ox::dynamic {
 
@@ -17,57 +13,34 @@ namespace ox::dynamic {
 class Rainbow {
    public:
     /// Creates a Rainbow Dynamic Color w/fixed saturation and lightness values.
-    Rainbow(std::uint8_t saturation, std::uint8_t lightness)
-        : saturation_{saturation}, lightness_{lightness}
-    {}
+    Rainbow(std::uint8_t saturation, std::uint8_t lightness);
 
    public:
-    [[nodiscard]] auto operator()() -> True_color
-    {
-        return True_color{
-            HSL{this->postincrement_hue(), saturation_, lightness_}};
-    }
+    /// Increment and return the next True_color.
+    [[nodiscard]] auto operator()() -> True_color;
 
    private:
     std::uint16_t hue_ = 0;
     std::uint8_t const saturation_;
     std::uint8_t const lightness_;
-
-   private:
-    // Increments hue_, then returns the previous value, wraps at 360.
-    [[nodiscard]] auto postincrement_hue() -> std::uint16_t
-    {
-        auto const old = hue_;
-        if (++hue_ == 360)
-            hue_ = 0;
-        return old;
-    }
 };
 
 /// Returns a Rainbow Dynamic_color object. Convinience for defining palettes.
-[[nodiscard]] inline auto rainbow(
+[[nodiscard]] auto rainbow(
     Dynamic_color::Period_t period = std::chrono::milliseconds{40},
     std::uint8_t saturation        = 75,
-    std::uint8_t lightness         = 75) -> Dynamic_color
-{
-    return {period, Rainbow{saturation, lightness}};
-}
+    std::uint8_t lightness         = 75) -> Dynamic_color;
 
 /* ---------------------------------------------------------------------------*/
 
 class Modulation_base {
    protected:
     /// Resolution is the number of steps to complete a full cycle.
-    Modulation_base(unsigned resolution)
-        : step_total_{static_cast<double>(resolution)}
-    {}
+    Modulation_base(unsigned resolution);
 
    protected:
     /// Finds the next ratio between from the current step and resolution.
-    [[nodiscard]] auto get_next_ratio() -> double
-    {
-        return this->post_increment_step() / step_total_;
-    }
+    [[nodiscard]] auto get_next_ratio() -> double;
 
    private:
     double const step_total_;
@@ -75,10 +48,7 @@ class Modulation_base {
 
    private:
     /// Apply a wrapping post increment to step_ and return the previous value.
-    [[nodiscard]] auto post_increment_step() -> int
-    {
-        return step_ == step_total_ ? (step_ = 0, step_total_) : step_++;
-    }
+    [[nodiscard]] auto post_increment_step() -> int;
 };
 
 template <typename Function>
@@ -120,38 +90,31 @@ class Convex : public Function {
 class Triangle : private Modulation_base {
    public:
     /// Resolution is the number of steps to complete a full cycle.
-    Triangle(unsigned resolution) : Modulation_base{resolution} {}
+    Triangle(unsigned resolution);
 
    public:
     /// Returns value in range [0.0, 1.0]
-    [[nodiscard]] auto operator()() -> double
-    {
-        return -1. * std::abs(2 * this->get_next_ratio() - 1.) + 1.;
-    }
+    [[nodiscard]] auto operator()() -> double;
 };
 
 class Sine : private Modulation_base {
    public:
     /// Resolution is the number of steps to complete a full cycle.
-    Sine(unsigned resolution) : Modulation_base{resolution} {}
+    Sine(unsigned resolution);
 
    public:
     /// Returns value in range [0.0, 1.0]
-    [[nodiscard]] auto operator()() -> double
-    {
-        auto constexpr pi = 3.1416;
-        return .5 * (1 + std::sin(2 * pi * (this->get_next_ratio() - .25)));
-    }
+    [[nodiscard]] auto operator()() -> double;
 };
 
 class Sawtooth_up : private Modulation_base {
    public:
     /// Resolution is the number of steps to complete a full cycle.
-    Sawtooth_up(unsigned resolution) : Modulation_base{resolution} {}
+    Sawtooth_up(unsigned resolution);
 
    public:
     /// Returns value in range [0.0, 1.0]
-    [[nodiscard]] auto operator()() -> double { return this->get_next_ratio(); }
+    [[nodiscard]] auto operator()() -> double;
 };
 
 class Sawtooth_down : public Invert<Sawtooth_up> {
@@ -162,24 +125,21 @@ class Sawtooth_down : public Invert<Sawtooth_up> {
 class Square : private Modulation_base {
    public:
     /// Resolution is the number of steps to complete a full cycle.
-    Square(unsigned resolution) : Modulation_base{resolution} {}
+    Square(unsigned resolution);
 
    public:
     /// Returns value in range [0.0, 1.0]
-    [[nodiscard]] auto operator()() -> double
-    {
-        return this->get_next_ratio() < 0.5 ? 0. : 1.;
-    }
+    [[nodiscard]] auto operator()() -> double;
 };
 
 class Random : private Modulation_base {
    public:
     /// Resolution is the number of steps to complete a full cycle.
-    Random(unsigned resolution) : Modulation_base{resolution} {}
+    Random(unsigned resolution);
 
    public:
     /// Returns value in range [0.0, 1.0]
-    [[nodiscard]] auto operator()() -> double { return dist_(gen_); }
+    [[nodiscard]] auto operator()() -> double;
 
    private:
     std::mt19937 gen_{std::random_device{}()};

@@ -1,16 +1,9 @@
 #include <termox/system/system.hpp>
 
-#include <algorithm>
 #include <cstdlib>
 #include <functional>
-#include <iterator>
-#include <map>
-#include <memory>
-#include <shared_mutex>
-#include <stdexcept>
-#include <thread>
 #include <utility>
-#include <vector>
+#include <variant>
 
 #include <signals_light/signal.hpp>
 
@@ -31,6 +24,17 @@
 
 namespace ox {
 
+System::System(Mouse_mode mouse_mode, Signals signals)
+{
+    Terminal::initialize(mouse_mode, signals);
+}
+
+System::~System()
+{
+    System::exit();
+    Terminal::uninitialize();
+}
+
 auto System::focus_widget() -> Widget* { return detail::Focus::focus_widget(); }
 
 void System::set_focus(Widget& w) { detail::Focus::set(w); }
@@ -40,15 +44,6 @@ void System::clear_focus() { detail::Focus::clear(); }
 void System::enable_tab_focus() { detail::Focus::enable_tab_focus(); }
 
 void System::disable_tab_focus() { detail::Focus::disable_tab_focus(); }
-
-void System::post_event(Event e) { current_queue_.get().append(std::move(e)); }
-
-void System::exit()
-{
-    user_input_loop_.exit(0);
-    Terminal::uninitialize();
-    std::_Exit(0);
-}
 
 void System::set_head(Widget* new_head)
 {
@@ -60,6 +55,14 @@ void System::set_head(Widget* new_head)
         detail::Focus::set(*new_head);
     }
     head_ = new_head;
+}
+
+auto System::head() -> Widget* { return head_.load(); }
+
+auto System::run(Widget& head) -> int
+{
+    System::set_head(&head);
+    return this->run();
 }
 
 auto System::run() -> int
@@ -106,6 +109,46 @@ auto System::send_event(Delete_event e) -> bool
         detail::send(std::move(e));
     return true;
 }
+
+void System::post_event(Event e) { current_queue_.get().append(std::move(e)); }
+
+void System::exit()
+{
+    user_input_loop_.exit(0);
+    Terminal::uninitialize();
+    std::_Exit(0);
+}
+
+void System::enable_animation(Widget& w, Animation_engine::Interval_t interval)
+{
+    if (!animation_engine_.is_running())
+        animation_engine_.start();
+    animation_engine_.register_widget(w, interval);
+}
+
+void System::enable_animation(Widget& w, FPS fps)
+{
+    if (!animation_engine_.is_running())
+        animation_engine_.start();
+    animation_engine_.register_widget(w, fps);
+}
+
+void System::disable_animation(Widget& w)
+{
+    animation_engine_.unregister_widget(w);
+}
+
+void System::set_cursor(Cursor cursor, Point offset)
+{
+    if (!cursor.is_enabled())
+        Terminal::show_cursor(false);
+    else {
+        Terminal::move_cursor({offset.x + cursor.x(), offset.y + cursor.y()});
+        Terminal::show_cursor();
+    }
+}
+
+void System::set_current_queue(Event_queue& queue) { current_queue_ = queue; }
 
 sl::Slot<void()> System::quit = [] { System::exit(); };
 

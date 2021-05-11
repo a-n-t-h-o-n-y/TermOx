@@ -140,15 +140,11 @@ auto populated_glyph_selector() -> std::unique_ptr<Glyph_selector>
     result->add_sheet(U"Latin-1", latin_1);
 
     auto const build_blocks = ox::slot::link_lifetimes(
-        [&blocks](ox::Palette const& p) {
-            blocks.set_contents(color_blocks(p));
-        },
+        [&blocks](ox::Palette const& p) { blocks.set_text(color_blocks(p)); },
         blocks);
 
     auto const build_shapes = ox::slot::link_lifetimes(
-        [&shapes](ox::Palette const& p) {
-            shapes.set_contents(color_shapes(p));
-        },
+        [&shapes](ox::Palette const& p) { shapes.set_text(color_shapes(p)); },
         shapes);
 
     ox::Terminal::palette_changed.connect(build_blocks);

@@ -1,6 +1,5 @@
 #ifndef TERMOX_PAINTER_GLYPH_MATRIX_HPP
 #define TERMOX_PAINTER_GLYPH_MATRIX_HPP
-#include <cstddef>
 #include <vector>
 
 #include <termox/painter/glyph.hpp>
@@ -14,9 +13,7 @@ class Glyph_matrix {
    public:
     /// Construct with a set width and height, or defaults to 0 for each.
     /** Glyphs default constructed(space char with no colors or traits). */
-    explicit Glyph_matrix(Area area)
-        : matrix_(area.height, std::vector<Glyph>(area.width, Glyph{U'\0'}))
-    {}
+    explicit Glyph_matrix(Area area);
 
    public:
     /// Resize the width and height of the matrix.
@@ -25,41 +22,29 @@ class Glyph_matrix {
     void resize(Area area);
 
     /// Remove all Glyphs from the matrix and set width/height to 0.
-    void clear() { matrix_.clear(); }
+    void clear();
 
     /// Return the width of the matrix.
-    [[nodiscard]] auto width() const -> int
-    {
-        return matrix_.empty() ? 0 : matrix_.at(0).size();
-    }
+    [[nodiscard]] auto width() const -> int;
 
     /// Return the height of the matrix.
-    [[nodiscard]] auto height() const -> int { return matrix_.size(); }
+    [[nodiscard]] auto height() const -> int;
 
     /// Glyph access operator. {0, 0} is top left. x grows south and y east.
     /** Provides no bounds checking. */
-    [[nodiscard]] auto operator()(Point p) -> Glyph&
-    {
-        return matrix_[p.y][p.x];
-    }
+    [[nodiscard]] auto operator()(Point p) -> Glyph&;
 
     /// Glyph access operator. {0, 0} is top left. x grows south and y east.
     /** Provides no bounds checking. */
-    [[nodiscard]] auto operator()(Point p) const -> Glyph
-    {
-        return matrix_[p.y][p.x];
-    }
+    [[nodiscard]] auto operator()(Point p) const -> Glyph;
 
     /// Glyph access operator. {0, 0} is top left. x grows south and y east.
     /** Has bounds checking and throws std::out_of_range if not within range. */
-    [[nodiscard]] auto at(Point p) -> Glyph& { return matrix_.at(p.y).at(p.x); }
+    [[nodiscard]] auto at(Point p) -> Glyph&;
 
     /// Glyph access operator. {0, 0} is top left. x grows south and y east.
     /** Has bounds checking and throws std::out_of_range if not within range. */
-    [[nodiscard]] auto at(Point p) const -> Glyph
-    {
-        return matrix_.at(p.y).at(p.x);
-    }
+    [[nodiscard]] auto at(Point p) const -> Glyph;
 
    private:
     std::vector<std::vector<Glyph>> matrix_;

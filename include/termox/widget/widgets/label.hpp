@@ -4,7 +4,9 @@
 #include <utility>
 
 #include <termox/painter/glyph_string.hpp>
+#include <termox/painter/painter.hpp>
 #include <termox/widget/align.hpp>
+#include <termox/widget/area.hpp>
 #include <termox/widget/growth.hpp>
 #include <termox/widget/layouts/horizontal.hpp>
 #include <termox/widget/layouts/opposite.hpp>
@@ -42,131 +44,46 @@ class Label : public Widget {
                    Align alignment        = Align::Left,
                    int extra_left         = 0,
                    int extra_right        = 0,
-                   Growth growth_strategy = Growth::Static)
-        : text_{std::move(text)},
-          alignment_{alignment},
-          extra_left_{extra_left},
-          extra_right_{extra_right},
-          growth_strategy_{growth_strategy}
-    {
-        if constexpr (is_vertical)
-            *this | pipe::fixed_width(1);
-        else
-            *this | pipe::fixed_height(1);
-
-        if (growth_strategy_ == Growth::Dynamic) {
-            if constexpr (is_vertical)
-                *this | pipe::fixed_height(text_.size());
-            else
-                *this | pipe::fixed_width(text_.size());
-        }
-    }
+                   Growth growth_strategy = Growth::Static);
 
     /// Construct directly with Parameters object.
-    explicit Label(Parameters p)
-        : Label(std::move(p.text),
-                p.alignment,
-                p.extra_left,
-                p.extra_right,
-                p.growth_strategy)
-    {}
+    explicit Label(Parameters p);
 
    public:
     /// Set text contents of Label and update display.
-    void set_text(Glyph_string text)
-    {
-        if (growth_strategy_ == Growth::Dynamic) {
-            if constexpr (is_vertical) {
-                if (text.size() != this->outer_height())
-                    *this | pipe::fixed_height(text.size());
-            }
-            else {
-                if (text.size() != this->outer_width())
-                    *this | pipe::fixed_width(text.size());
-            }
-        }
-        text_ = std::move(text);
-        this->update_offset();
-    }
+    void set_text(Glyph_string text);
 
     /// Return the text given to set_text().
-    [[nodiscard]] auto text() const noexcept -> Glyph_string const&
-    {
-        return text_;
-    }
+    [[nodiscard]] auto text() const noexcept -> Glyph_string const&;
 
     /// Set text alignment of Label and update display.
-    void set_alignment(Align x)
-    {
-        alignment_ = x;
-        this->update_offset();
-    }
+    void set_alignment(Align x);
 
     /// Return the Align given to set_alignment().
-    [[nodiscard]] auto alignment() const noexcept -> Align
-    {
-        return alignment_;
-    }
+    [[nodiscard]] auto alignment() const noexcept -> Align;
 
     /// Inform Label about space to left of Label for centered text offset.
-    void set_extra_left(int x)
-    {
-        extra_left_ = x;
-        this->update_offset();
-    }
+    void set_extra_left(int x);
 
     /// Return the amount given to set_extra_left().
-    [[nodiscard]] auto extra_left() const noexcept -> int
-    {
-        return extra_left_;
-    }
+    [[nodiscard]] auto extra_left() const noexcept -> int;
 
     /// Inform Label about space to right of Label for centered text offset.
-    void set_extra_right(int x)
-    {
-        extra_right_ = x;
-        this->update_offset();
-    }
+    void set_extra_right(int x);
 
     /// Return the amount given to set_extra_right().
-    [[nodiscard]] auto extra_right() const noexcept -> int
-    {
-        return extra_right_;
-    }
+    [[nodiscard]] auto extra_right() const noexcept -> int;
 
     /// Enable/Disable Dynamic size, where the Label's size is the text length.
-    void set_growth_strategy(Growth type)
-    {
-        growth_strategy_ = type;
-        if (growth_strategy_ == Growth::Dynamic) {
-            if constexpr (is_vertical)
-                *this | pipe::fixed_height(text_.size());
-            else
-                *this | pipe::fixed_width(text_.size());
-        }
-    }
+    void set_growth_strategy(Growth type);
 
     /// Return the value given to set_growth_strategy().
-    [[nodiscard]] auto growth_strategy() const noexcept -> Growth
-    {
-        return growth_strategy_;
-    }
+    [[nodiscard]] auto growth_strategy() const noexcept -> Growth;
 
    protected:
-    auto paint_event(Painter& p) -> bool override
-    {
-        if constexpr (is_vertical)
-            this->paint_vertical(p);
-        else
-            this->paint_horizontal(p);
-        return Widget::paint_event(p);
-    }
+    auto paint_event(Painter& p) -> bool override;
 
-    auto resize_event(Area new_size, Area old_size) -> bool override
-    {
-        this->update_offset();
-        return Widget::resize_event(new_size, old_size);
-    }
+    auto resize_event(Area new_size, Area old_size) -> bool override;
 
    private:
     inline static auto constexpr is_vertical =
@@ -182,71 +99,17 @@ class Label : public Widget {
 
    private:
     /// Update the internal offset_ value to account for new settings/state
-    void update_offset()
-    {
-        auto const box_length = [this] {
-            if constexpr (is_vertical)
-                return this->height();
-            else
-                return this->width();
-        }();
+    void update_offset();
 
-        offset_ = this->find_offset(text_.size(), box_length, extra_left_,
-                                    extra_right_);
-        this->update();
-    }
+    void paint_vertical(Painter& p);
 
-    void paint_vertical(Painter& p)
-    {
-        for (auto i = 0; i < text_.size() && i < this->height(); ++i)
-            p.put(text_[i], {0, offset_ + i});
-    }
-
-    void paint_horizontal(Painter& p) { p.put(text_, {offset_, 0}); }
+    void paint_horizontal(Painter& p);
 
     /// Find the text's first Glyph placement along the length of the Widget.
     [[nodiscard]] auto find_offset(int text_length,
                                    int box_length,
                                    int extra_left,
-                                   int extra_right) -> int
-    {
-        switch (alignment_) {
-            case Align::Left:
-            case Align::Top: return left_top_offset();
-
-            case Align::Center:
-                return apply_origin_offset(
-                    center_offset(text_length,
-                                  box_length + extra_left + extra_right),
-                    extra_left);
-
-            case Align::Right:
-            case Align::Bottom:
-                return right_bottom_offset(text_length, box_length);
-        }
-        return 0;
-    }
-
-    [[nodiscard]] static auto left_top_offset() -> int { return 0; }
-
-    [[nodiscard]] static auto center_offset(int text_length, int box_length)
-        -> int
-    {
-        return text_length > box_length ? 0 : (box_length - text_length) / 2;
-    }
-
-    [[nodiscard]] static auto right_bottom_offset(int text_length,
-                                                  int box_length) -> int
-    {
-        return text_length > box_length ? 0 : box_length - text_length;
-    }
-
-    /// Offsets a given \p position by the extra length parameters
-    [[nodiscard]] static auto apply_origin_offset(int position, int left) -> int
-    {
-        position -= position < left ? position : left;
-        return position;
-    }
+                                   int extra_right) -> int;
 };
 
 /// Helper function to create a Label instance.
@@ -256,63 +119,40 @@ template <template <typename> typename Layout_t>
                          int extra_left         = 0,
                          int extra_right        = 0,
                          Growth growth_strategy = Growth::Static)
-    -> std::unique_ptr<Label<Layout_t>>
-{
-    return std::make_unique<Label<Layout_t>>(
-        std::move(text), alignment, extra_left, extra_right, growth_strategy);
-}
+    -> std::unique_ptr<Label<Layout_t>>;
 
 /// Helper function to create a Label instance.
 template <template <typename> typename Layout_t>
-[[nodiscard]] auto label(typename Label<Layout_t>::Parameters parameters)
-    -> std::unique_ptr<Label<Layout_t>>
-{
-    return std::make_unique<Label<Layout_t>>(std::move(parameters));
-}
+[[nodiscard]] auto label(typename Label<Layout_t>::Parameters p)
+    -> std::unique_ptr<Label<Layout_t>>;
 
 /// Horizontal Label Widget
 using HLabel = Label<layout::Horizontal>;
 
 /// Helper function to create an HLabel instance.
-[[nodiscard]] inline auto hlabel(Glyph_string text      = U"",
-                                 Align alignment        = Align::Left,
-                                 int extra_left         = 0,
-                                 int extra_right        = 0,
-                                 Growth growth_strategy = Growth::Static)
-    -> std::unique_ptr<HLabel>
-{
-    return std::make_unique<HLabel>(std::move(text), alignment, extra_left,
-                                    extra_right, growth_strategy);
-}
+[[nodiscard]] auto hlabel(Glyph_string text      = U"",
+                          Align alignment        = Align::Left,
+                          int extra_left         = 0,
+                          int extra_right        = 0,
+                          Growth growth_strategy = Growth::Static)
+    -> std::unique_ptr<HLabel>;
 
 /// Helper function to create an HLabel instance.
-[[nodiscard]] inline auto hlabel(HLabel::Parameters parameters)
-    -> std::unique_ptr<HLabel>
-{
-    return std::make_unique<HLabel>(std::move(parameters));
-}
+[[nodiscard]] auto hlabel(HLabel::Parameters p) -> std::unique_ptr<HLabel>;
 
 /// Vertical Label Widget
 using VLabel = Label<layout::Vertical>;
 
 /// Helper function to create a VLabel instance.
-[[nodiscard]] inline auto vlabel(Glyph_string text      = U"",
-                                 Align alignment        = Align::Left,
-                                 int extra_left         = 0,
-                                 int extra_right        = 0,
-                                 Growth growth_strategy = Growth::Static)
-    -> std::unique_ptr<VLabel>
-{
-    return std::make_unique<VLabel>(std::move(text), alignment, extra_left,
-                                    extra_right, growth_strategy);
-}
+[[nodiscard]] auto vlabel(Glyph_string text      = U"",
+                          Align alignment        = Align::Left,
+                          int extra_left         = 0,
+                          int extra_right        = 0,
+                          Growth growth_strategy = Growth::Static)
+    -> std::unique_ptr<VLabel>;
 
 /// Helper function to create a VLabel instance.
-[[nodiscard]] inline auto vlabel(VLabel::Parameters parameters)
-    -> std::unique_ptr<VLabel>
-{
-    return std::make_unique<VLabel>(std::move(parameters));
-}
+[[nodiscard]] auto vlabel(VLabel::Parameters p) -> std::unique_ptr<VLabel>;
 
 }  // namespace ox
 

@@ -1,5 +1,6 @@
 #ifndef TERMOX_WIDGET_PIPE_HPP
 #define TERMOX_WIDGET_PIPE_HPP
+#include <chrono>
 #include <cstddef>
 #include <memory>
 #include <string>
@@ -8,15 +9,16 @@
 #include <vector>
 
 #include <termox/common/filter_iterator.hpp>
+#include <termox/common/overload.hpp>
 #include <termox/common/range.hpp>
 #include <termox/common/transform_iterator.hpp>
 #include <termox/painter/glyph_string.hpp>
-#include <termox/system/animation_engine.hpp>
 #include <termox/widget/align.hpp>
 #include <termox/widget/focus_policy.hpp>
 #include <termox/widget/growth.hpp>
 #include <termox/widget/point.hpp>
 #include <termox/widget/widget.hpp>
+#include <termox/widget/wrap.hpp>
 
 namespace ox::pipe::detail {
 
@@ -132,7 +134,7 @@ inline auto remove_filter(Widget& filter)
     };
 }
 
-inline auto animate(Animation_engine::Interval_t interval)
+inline auto animate(std::chrono::milliseconds interval)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).enable_animation(interval);
@@ -1834,19 +1836,18 @@ inline auto divider(Glyph x)
     };
 }
 
-inline auto word_wrap(bool enable)
+inline auto any_wrap()
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).enable_word_wrap(enable);
+        get(w).set_wrap(Wrap::Any);
         return std::forward<decltype(w)>(w);
     };
 }
 
-// TODO remove and replace with text()
-inline auto contents(Glyph_string x)
+inline auto word_wrap()
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).set_contents(x);
+        get(w).set_wrap(Wrap::Word);
         return std::forward<decltype(w)>(w);
     };
 }

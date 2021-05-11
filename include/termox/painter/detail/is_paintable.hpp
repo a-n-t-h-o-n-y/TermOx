@@ -1,14 +1,14 @@
 #ifndef TERMOX_PAINTER_DETAIL_IS_PAINTABLE_HPP
 #define TERMOX_PAINTER_DETAIL_IS_PAINTABLE_HPP
-#include <termox/widget/widget.hpp>
+
+namespace ox {
+class Widget;
+}  // namespace ox
 
 namespace ox::detail {
 
 /// A check for whether a widget is in a state that can be painted.
-[[nodiscard]] inline auto is_paintable(Widget const& w) -> bool
-{
-    return w.is_enabled() && (w.outer_width() != 0) && (w.outer_height() != 0);
-}
+[[nodiscard]] auto is_paintable(Widget const& w) -> bool;
 
 }  // namespace ox::detail
 #endif  // TERMOX_PAINTER_DETAIL_IS_PAINTABLE_HPP

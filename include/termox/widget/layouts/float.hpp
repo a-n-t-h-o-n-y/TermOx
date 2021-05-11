@@ -9,8 +9,6 @@
 
 namespace ox {
 
-// TODO Think about adding stretch for either side
-
 // TODO limit child add/remove functions, invariant should be only every having
 // the widgets you have at construction.
 

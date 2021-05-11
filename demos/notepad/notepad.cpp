@@ -45,7 +45,7 @@ void Notepad::initialize()
     // Signals
     save_area.load_request.connect([this](std::string const& filename) {
         try {
-            txt_trait.text_and_scroll.textbox.set_contents(read_file(filename));
+            txt_trait.text_and_scroll.textbox.set_text(read_file(filename));
             status_bar.success(filename + " Loaded");
         }
         catch (std::runtime_error const& e) {
@@ -56,7 +56,7 @@ void Notepad::initialize()
     save_area.save_request.connect([this](std::string const& filename) {
         try {
             write_file(filename,
-                       txt_trait.text_and_scroll.textbox.contents().str());
+                       txt_trait.text_and_scroll.textbox.text().str());
             status_bar.success("Saved to " + filename);
         }
         catch (std::runtime_error const& e) {

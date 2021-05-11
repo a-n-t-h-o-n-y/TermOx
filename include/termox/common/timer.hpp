@@ -1,7 +1,6 @@
 #ifndef TERMOX_COMMON_TIMER_HPP
 #define TERMOX_COMMON_TIMER_HPP
 #include <chrono>
-#include <thread>
 
 #include <termox/common/fps.hpp>
 
@@ -16,25 +15,25 @@ class Timer {
 
    public:
     /// Construct a Timer with the given interval.
-    explicit Timer(Interval_t interval) : interval_{interval} {}
+    explicit Timer(Interval_t interval);
 
     /// Construct a Timer with the given FPS interval.
-    explicit Timer(FPS fps) : interval_{fps_to_period<Interval_t>(fps)} {}
+    explicit Timer(FPS fps);
 
    public:
     /// Start the timer, returns immediately.
-    void begin() { last_time_ = Clock_t::now(); }
+    void begin();
 
     /// Sleep until the time interval is over, from last begin() call.
     /** Returns immediately if interval has already elapsed. Calling this
      *  without calling begin() first will return immediately. */
-    void wait() { std::this_thread::sleep_for(this->get_sleep_time()); }
+    void wait();
 
     /// Set the amount of time to wait for from begin().
-    void set_interval(Interval_t interval) { interval_ = interval; }
+    void set_interval(Interval_t interval);
 
     /// Return the currently set interval.
-    [[nodiscard]] auto get_interval() const -> Interval_t { return interval_; }
+    [[nodiscard]] auto get_interval() const -> Interval_t;
 
    private:
     Interval_t interval_;
@@ -43,11 +42,7 @@ class Timer {
    private:
     /// Return the time to sleep, interval minus time since begin() called.
     /** Returns zero time if that would be negative. */
-    [[nodiscard]] auto get_sleep_time() const -> Clock_t::duration
-    {
-        auto const elapsed = Clock_t::now() - last_time_;
-        return std::max(Clock_t::duration::zero(), interval_ - elapsed);
-    }
+    [[nodiscard]] auto get_sleep_time() const -> Clock_t::duration;
 };
 
 }  // namespace ox

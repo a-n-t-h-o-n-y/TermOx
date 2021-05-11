@@ -4,7 +4,6 @@
 
 #include <signals_light/signal.hpp>
 
-#include <termox/painter/color.hpp>
 #include <termox/widget/pipe.hpp>
 #include <termox/widget/tuple.hpp>
 #include <termox/widget/widgets/button.hpp>
@@ -18,18 +17,7 @@ struct Write_file_widgets : HTuple<Button, Tile, Line_edit> {
     Tile& buffer             = this->get<1>();
     Line_edit& filename_edit = this->get<2>();
 
-    Write_file_widgets()
-        : HTuple<Button, Tile, Line_edit>{
-              {U"Save"},
-              {U'>'},
-              {U"Filename" | fg(Color::Dark_gray), ox::Align::Left,
-               ox::Line_edit::Action::Clear}}
-    {
-        using namespace ox::pipe;
-        *this | fixed_height(1);
-        save_btn | fixed_width(4) | bg(Color::Blue);
-        filename_edit | bg(Color::White) | fg(Color::Black);
-    }
+    Write_file_widgets();
 };
 
 }  // namespace ox::detail
@@ -62,9 +50,9 @@ class Write_file : public detail::Write_file_widgets {
     }
 };
 
-/// Helper function to create an instance.
+/// Helper function to create a Write_file instance.
 template <typename Char_t = char>
-[[nodiscard]] inline auto write_file() -> std::unique_ptr<Write_file<Char_t>>
+[[nodiscard]] auto write_file() -> std::unique_ptr<Write_file<Char_t>>
 {
     return std::make_unique<Write_file<Char_t>>();
 }

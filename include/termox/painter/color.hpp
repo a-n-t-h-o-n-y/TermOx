@@ -1,10 +1,8 @@
 #ifndef TERMOX_PAINTER_COLOR_HPP
 #define TERMOX_PAINTER_COLOR_HPP
-#include <algorithm>
 #include <chrono>
 #include <cstdint>
 #include <functional>
-#include <stdexcept>
 #include <string>
 #include <variant>
 #include <vector>
@@ -45,20 +43,20 @@ class Color {
    public:
     constexpr Color(Name n) : value{static_cast<Value_t>(n)} {}
 
-    constexpr explicit Color(Value_t v) : value{v} {}
+    explicit constexpr Color(Value_t v) : value{v} {}
 };
 
-[[nodiscard]] constexpr auto operator==(Color x, Color y) -> bool
+[[nodiscard]] auto constexpr operator==(Color x, Color y) -> bool
 {
     return x.value == y.value;
 }
 
-[[nodiscard]] constexpr auto operator!=(Color x, Color y) -> bool
+[[nodiscard]] auto constexpr operator!=(Color x, Color y) -> bool
 {
     return !(x == y);
 }
 
-[[nodiscard]] constexpr auto operator<(Color x, Color y) -> bool
+[[nodiscard]] auto constexpr operator<(Color x, Color y) -> bool
 {
     return x.value < y.value;
 }
@@ -72,13 +70,13 @@ struct Foreground_color {
 };
 
 /// Converts a Color into a Background_color to be used by Brush.
-[[nodiscard]] constexpr auto bg(Color c) -> Background_color
+[[nodiscard]] auto constexpr bg(Color c) -> Background_color
 {
     return {c.value};
 }
 
 /// Converts a Color into a Background_color to be used by Brush.
-[[nodiscard]] constexpr auto fg(Color c) -> Foreground_color
+[[nodiscard]] auto constexpr fg(Color c) -> Foreground_color
 {
     return {c.value};
 }
@@ -140,28 +138,7 @@ template <typename... ColorValues>
 /* ---------------------------------------------------------------------------*/
 
 /// Get the default name of the color as a string.
-[[nodiscard]] inline auto color_to_string(Color c) -> std::string
-{
-    switch (c.value) {
-        case 0: return "Black";
-        case 1: return "Dark Red";
-        case 2: return "Green";
-        case 3: return "Brown";
-        case 4: return "Dark Blue";
-        case 5: return "Violet";
-        case 6: return "Light Blue";
-        case 7: return "Light Gray";
-        case 8: return "Dark Gray";
-        case 9: return "Red";
-        case 10: return "Light Green";
-        case 11: return "Yellow";
-        case 12: return "Blue";
-        case 13: return "Orange";
-        case 14: return "Gray";
-        case 15: return "White";
-        default: return "";
-    }
-}
+[[nodiscard]] auto color_to_string(Color c) -> std::string;
 
 }  // namespace ox
 #endif  // TERMOX_PAINTER_COLOR_HPP

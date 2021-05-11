@@ -1,13 +1,33 @@
 #include <termox/system/event_queue.hpp>
 
+#include <cstddef>
+#include <memory>
 #include <mutex>
 #include <utility>
+#include <variant>
 
+#include <termox/system/event.hpp>
 #include <termox/system/system.hpp>
 #include <termox/terminal/terminal.hpp>
 #include <termox/widget/widget.hpp>
 
+namespace ox {
+
+auto operator<(Paint_event const& x, Paint_event const& y) -> bool
+{
+    return std::addressof(x.receiver.get()) < std::addressof(y.receiver.get());
+}
+
+auto operator==(Paint_event const& a, Paint_event const& b) -> bool
+{
+    return std::addressof(a.receiver.get()) == std::addressof(b.receiver.get());
+}
+
+}  // namespace ox
+
 namespace ox::detail {
+
+void Paint_queue::append(Paint_event e) { events_.append(e); }
 
 auto Paint_queue::send_all() -> bool
 {
@@ -20,6 +40,10 @@ auto Paint_queue::send_all() -> bool
     return sent;
 }
 
+auto Paint_queue::size() const -> std::size_t { return events_.size(); }
+
+void Delete_queue::append(Delete_event e) { deletes_.push_back(std::move(e)); }
+
 void Delete_queue::send_all()
 {
     /// Processing Delete_events should not post more Delete_events.
@@ -27,6 +51,10 @@ void Delete_queue::send_all()
         System::send_event(std::move(d));
     deletes_.clear();
 }
+
+auto Delete_queue::size() const -> std::size_t { return deletes_.size(); }
+
+void Basic_queue::append(Event e) { basics_.push_back(std::move(e)); }
 
 auto Basic_queue::send_all() -> bool
 {
@@ -37,9 +65,21 @@ auto Basic_queue::send_all() -> bool
     basics_.clear();
     return sent;
 }
+
+auto Basic_queue::size() const -> std::size_t { return basics_.size(); }
+
 }  // namespace ox::detail
 
 namespace ox {
+
+void Event_queue::append(Event e)
+{
+    std::visit(
+        [this](auto&& e) {
+            this->add_to_a_queue(std::forward<decltype(e)>(e));
+        },
+        std::move(e));
+}
 
 void Event_queue::send_all()
 {
@@ -59,6 +99,16 @@ void Event_queue::send_all()
     deletes_.send_all();
     if (sent)
         Terminal::flush_screen();
+}
+
+void Event_queue::add_to_a_queue(Paint_event e)
+{
+    paints_.append(std::move(e));
+}
+
+void Event_queue::add_to_a_queue(Delete_event e)
+{
+    deletes_.append(std::move(e));
 }
 
 }  // namespace ox

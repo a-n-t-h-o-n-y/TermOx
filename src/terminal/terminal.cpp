@@ -18,7 +18,6 @@
 #include <termox/painter/palette/dawn_bringer16.hpp>
 #include <termox/system/detail/find_widget_at.hpp>
 #include <termox/system/event.hpp>
-#include <termox/system/shortcuts.hpp>
 #include <termox/system/system.hpp>
 #include <termox/terminal/detail/canvas.hpp>
 #include <termox/widget/widget.hpp>
@@ -159,6 +158,13 @@ template <typename T>
 /// Tranform Window_resize events to ox::Events.
 [[nodiscard]] auto transform(::esc::Window_resize x) -> ox::Event { return x; }
 
+/// Return true if \p point is within \p area.
+[[nodiscard, maybe_unused]] auto is_within(ox::Point point, ox::Area area)
+    -> bool
+{
+    return point.x < area.width && point.y < area.height;
+}
+
 }  // namespace
 
 namespace ox {
@@ -181,6 +187,8 @@ void Terminal::uninitialize()
     ::esc::uninitialize_terminal();
     is_initialized_ = false;
 }
+
+auto Terminal::area() -> Area { return ::esc::terminal_area(); }
 
 void Terminal::refresh()
 {
@@ -240,11 +248,34 @@ auto Terminal::palette_append(Color_definition::Value_t value) -> Color
     return pal.back().color;
 }
 
+auto Terminal::current_palette() -> Palette const& { return palette_; }
+
+void Terminal::show_cursor(bool show)
+{
+    ::esc::set(show ? ::esc::Cursor::Show : ::esc::Cursor::Hide);
+    ::esc::flush();
+}
+
+void Terminal::move_cursor(Point point)
+{
+    ::esc::write(::esc::escape(::esc::Cursor_position{point}));
+    ::esc::flush();
+}
+
+auto Terminal::color_count() -> std::uint16_t
+{
+    return ::esc::color_palette_size();
+}
+
+auto Terminal::has_true_color() -> bool { return ::esc::has_true_color(); }
+
 auto Terminal::read_input() -> Event
 {
     return std::visit([](auto const& event) { return transform(event); },
                       ::esc::read());
 }
+
+void Terminal::flag_full_repaint() { full_repaint_ = true; }
 
 void Terminal::flush_screen()
 {
@@ -257,5 +288,7 @@ void Terminal::flush_screen()
         System::set_cursor(fw->cursor, fw->inner_top_left());
     }
 }
+
+void Terminal::stop_dynamic_color_engine() { dynamic_color_engine_.stop(); }
 
 }  // namespace ox

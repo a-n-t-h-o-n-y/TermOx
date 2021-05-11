@@ -14,6 +14,7 @@
 #include <termox/widget/widgets/cycle_stack.hpp>
 #include <termox/widget/widgets/scrollbar.hpp>
 #include <termox/widget/widgets/textbox.hpp>
+#include <termox/widget/wrap.hpp>
 
 namespace paint {
 
@@ -25,15 +26,15 @@ class Glyph_sheet : public ox::Textbox {
    public:
     Glyph_sheet(ox::Glyph_string symbols) : Textbox{std::move(symbols)}
     {
-        this->disable_input();
-        this->disable_word_wrap();
+        this->disable_text_input();
+        this->set_wrap(Wrap::Any);
         this->cursor.disable();
     }
 
    protected:
     auto mouse_press_event(ox::Mouse const& m) -> bool override
     {
-        auto const& contents = this->contents();
+        auto const& contents = this->text();
         if (m.button == ox::Mouse::Button::Left && !contents.empty())
             selected(contents[this->index_at(m.at)]);
         return Textbox::mouse_press_event(m);
