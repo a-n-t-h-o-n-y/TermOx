@@ -56,21 +56,6 @@ class Line_edit : public Textbox {
     /** This is disabled by default. */
     void clear_on_enter(bool enable = true) { clear_on_enter_ = enable; }
 
-    /// Set whether the Line_edit has veilded output, doesn't alter the content.
-    /** Disabled by default, uses '*' to veil by default. */
-    void veil_text(bool enable = true)
-    {
-        is_veiled_ = enable;
-        this->update();
-    }
-
-    /// Set Glyph used to obscure the display.
-    void set_veil(Glyph veil)
-    {
-        veil_ = veil;
-        this->update();
-    }
-
     /// Set whether the Line_edit has an underline.
     /** Disabled by default. The entire length of the box is underlined if
      *  enabled. */
@@ -78,6 +63,9 @@ class Line_edit : public Textbox {
 
     /// Set color of the initial text, before focus has been given to this.
     void set_ghost_color(Color c);
+
+    using Text_display::veil_text;
+    using Text_display::set_veil;
 
    protected:
     auto key_press_event(Key k) -> bool override;
@@ -91,18 +79,9 @@ class Line_edit : public Textbox {
         return Textbox::focus_in_event();
     }
 
-    auto paint_event() -> bool override
-    {
-        if (is_veiled_)
-            this->set_contents(Glyph_string{veil_, this->contents().size()});
-        return Textbox::paint_event();
-    }
-
    private:
     bool clear_on_enter_   = false;
     bool on_initial_       = true;
-    bool is_veiled_        = false;
-    Glyph veil_            = L'*';
     Validator_t validator_ = [](char) { return true; };
 };
 
