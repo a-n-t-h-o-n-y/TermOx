@@ -8,7 +8,20 @@ on:
 
 jobs:
   # Ubuntu-20 GCC
-  gcc-build-ubuntu20-gcc10:
+  build-ubuntu20-gcc11:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2.3.1
+        with:
+          submodules: recursive
+      - env:
+          CC: gcc-11
+          CXX: g++-11
+        run: |
+          mkdir build && cd build
+          cmake .. && make demos termox.ui.tests termox.unit.tests readme.demo
+          ./tests/termox.unit.tests
+  build-ubuntu20-gcc10:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2.3.1
@@ -21,7 +34,7 @@ jobs:
           mkdir build && cd build
           cmake .. && make demos termox.ui.tests termox.unit.tests readme.demo
           ./tests/termox.unit.tests
-  gcc-build-ubuntu20-gcc9:
+  build-ubuntu20-gcc9:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2.3.1
@@ -36,7 +49,20 @@ jobs:
           ./tests/termox.unit.tests
 
   # Ubuntu-20 Clang
-  clang-build-ubuntu20-clang11:
+  build-ubuntu20-clang12:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2.3.1
+        with:
+          submodules: recursive
+      - env:
+          CC: clang-12
+          CXX: clang++-12
+        run: |
+          mkdir build && cd build
+          cmake .. && make demos termox.ui.tests termox.unit.tests readme.demo
+          ./tests/termox.unit.tests
+  build-ubuntu20-clang11:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2.3.1
@@ -49,7 +75,7 @@ jobs:
           mkdir build && cd build
           cmake .. && make demos termox.ui.tests termox.unit.tests readme.demo
           ./tests/termox.unit.tests
-  clang-build-ubuntu20-clang10:
+  build-ubuntu20-clang10:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2.3.1
@@ -62,22 +88,9 @@ jobs:
           mkdir build && cd build
           cmake .. && make demos termox.ui.tests termox.unit.tests readme.demo
           ./tests/termox.unit.tests
-  clang-build-ubuntu20-clang9:
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v2.3.1
-        with:
-          submodules: recursive
-      - env:
-          CC: clang-9
-          CXX: clang++-9
-        run: |
-          mkdir build && cd build
-          cmake .. && make demos termox.ui.tests termox.unit.tests readme.demo
-          ./tests/termox.unit.tests
 
   # Ubuntu-18 GCC
-  gcc-build-ubuntu18-gcc10:
+  build-ubuntu18-gcc10:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2.3.1
@@ -90,7 +103,7 @@ jobs:
           mkdir build && cd build
           cmake .. && make demos termox.ui.tests termox.unit.tests readme.demo
           ./tests/termox.unit.tests
-  gcc-build-ubuntu18-gcc9:
+  build-ubuntu18-gcc9:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2.3.1
@@ -105,7 +118,7 @@ jobs:
           ./tests/termox.unit.tests
 
   # Ubuntu-18 Clang
-  clang-build-ubuntu18-clang9:
+  build-ubuntu18-clang9:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2.3.1
@@ -120,7 +133,7 @@ jobs:
           ./tests/termox.unit.tests
 
   # MacOS-10.15 Clang
-  clang-build-MacOS10-clang12:
+  build-MacOS10-clang12:
     runs-on: macos-10.15
     steps:
       - uses: actions/checkout@v2.3.1
@@ -133,22 +146,22 @@ jobs:
           mkdir build && cd build
           cmake .. && make demos termox.ui.tests termox.unit.tests readme.demo
           ./tests/termox.unit.tests
-  clang-build-MacOS10-clang11:
+
+  # MacOS-10.15 GCC
+  build-MacOS10-gcc11:
     runs-on: macos-10.15
     steps:
       - uses: actions/checkout@v2.3.1
         with:
           submodules: recursive
-      - run: |
+      - env:
+          CC: gcc-11
+          CXX: g++-11
+        run: |
           mkdir build && cd build
-          comp="$(brew --prefix llvm)/bin/clang"
-          export CC="${comp}"
-          export CXX="${comp}++"
           cmake .. && make demos termox.ui.tests termox.unit.tests readme.demo
           ./tests/termox.unit.tests
-
-  # MacOS-10.15 GCC
-  clang-build-MacOS10-gcc10:
+  build-MacOS10-gcc10:
     runs-on: macos-10.15
     steps:
       - uses: actions/checkout@v2.3.1
@@ -161,7 +174,7 @@ jobs:
           mkdir build && cd build
           cmake .. && make demos termox.ui.tests termox.unit.tests readme.demo
           ./tests/termox.unit.tests
-  clang-build-MacOS10-gcc9:
+  build-MacOS10-gcc9:
     runs-on: macos-10.15
     steps:
       - uses: actions/checkout@v2.3.1
@@ -174,7 +187,7 @@ jobs:
           mkdir build && cd build
           cmake .. && make demos termox.ui.tests termox.unit.tests readme.demo
           ./tests/termox.unit.tests
-  clang-build-MacOS10-gcc8:
+  build-MacOS10-gcc8:
     runs-on: macos-10.15
     steps:
       - uses: actions/checkout@v2.3.1
