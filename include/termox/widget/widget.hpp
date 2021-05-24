@@ -113,11 +113,11 @@ class Widget {
    public:
     /// Create an empty Widget.
     explicit Widget(std::string name            = "",
-                    Focus_policy focus_policy   = Focus_policy::None,
-                    Size_policy width_policy    = Size_policy{},
-                    Size_policy height_policy   = Size_policy{},
-                    Border border               = Border{},
-                    Brush brush                 = Brush{},
+                    Focus_policy focus_policy_  = Focus_policy::None,
+                    Size_policy width_policy_   = Size_policy{},
+                    Size_policy height_policy_  = Size_policy{},
+                    Border border_              = Border{},
+                    Brush brush_                = Brush{},
                     Glyph wallpaper             = U' ',
                     bool brush_paints_wallpaper = true,
                     Cursor cursor               = Cursor{});
@@ -446,10 +446,10 @@ class Widget {
 
     // Top left point of *this, relative to the top left of the screen.
     // This Point is the same with or without a border enabled.
-    Point top_left_position_{0, 0};
+    Point top_left_position_ = {0, 0};
 
     // The entire area of the widget, including any border space.
-    Area outer_area_{width_policy.hint(), height_policy.hint()};
+    Area outer_area_ = {0, 0};
 
     std::uint16_t const unique_id_;
 

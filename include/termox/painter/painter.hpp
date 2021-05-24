@@ -35,6 +35,12 @@ class Painter {
     /// Put Glyph_string to local coordinates.
     auto put(Glyph_string const& text, Point p) -> Painter&;
 
+    /// Return a copy of the Glyph at \p p, is U'\0' if Glyph is not set yet.
+    [[nodiscard]] auto at(Point p) const -> Glyph;
+
+    /// Return a reference of the Glyph at \p p, is U'\0' if Glyph not set yet.
+    [[nodiscard]] auto at(Point p) -> Glyph&;
+
     /// Fill the Widget with \p tile Glyphs starting at the top left \p point.
     /** \p point is in Widget local coordinates. */
     auto fill(Glyph tile, Point point, Area area) -> Painter&;
@@ -63,14 +69,16 @@ class Painter {
     /// Paint a line from \p a to \p b inclusive using global coordinates.
     /** No bounds checking, used internally for Border object painting. */
     void hline_global(Glyph tile, Point a, Point b);
+    void hline_global_no_brush(Glyph tile, Point a, Point b);
 
     /// Paint a line from \p a to \p b inclusive using global coordinates.
     /** No bounds checking, used internally for Border object painting. */
     void vline_global(Glyph tile, Point a, Point b);
 
     /// Fill the Widget with \p tile Glyphs starting at the top left \p point.
-    /** No bounds checking, used internally in Painter constructor. */
+    /** No bounds checking. */
     void fill_global(Glyph tile, Point point, Area area);
+    void fill_global_no_brush(Glyph tile, Point point, Area area);
 
    private:
     Widget const& widget_;

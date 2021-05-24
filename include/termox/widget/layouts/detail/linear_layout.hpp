@@ -190,10 +190,8 @@ class Linear_layout : public Layout<Child> {
                 if (!child.is_enabled())
                     child.enable(true, false);
             }
-            else {
-                if (child.is_enabled())
-                    child.disable(true, false);
-            }
+            else if (child.is_enabled())
+                child.disable(true, false);
         }
     }
 

@@ -38,7 +38,7 @@ Canvas::Canvas(ox::Area a) : buffer_(a.width * a.height, ox::Glyph{}), area_{a}
 
 auto Canvas::area() const -> ox::Area { return area_; }
 
-auto Canvas::at(ox::Point p) const -> ox::Glyph const&
+auto Canvas::at(ox::Point p) const -> ox::Glyph
 {
     auto const index = p.x + (p.y * area_.width);
     assert(index < (int)buffer_.size());
@@ -47,7 +47,9 @@ auto Canvas::at(ox::Point p) const -> ox::Glyph const&
 
 auto Canvas::at(ox::Point p) -> ox::Glyph&
 {
-    return const_cast<ox::Glyph&>(static_cast<Canvas const&>(*this).at(p));
+    auto const index = p.x + (p.y * area_.width);
+    assert(index < (int)buffer_.size());
+    return buffer_[index];
 }
 
 void Canvas::resize(ox::Area a)

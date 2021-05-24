@@ -27,6 +27,8 @@ target_sources(demos
     PRIVATE
         demo.main.cpp
         notepad/notepad.cpp
+        snake/snake.cpp
+        graph/graph_demo.cpp
 )
 
 # Conway's Game of Life
@@ -41,6 +43,8 @@ target_sources(demos
         game_of_life/get_life_1_05.cpp
         game_of_life/get_life_1_06.cpp
         game_of_life/get_plaintext.cpp
+        game_of_life/bitmap.cpp
+        game_of_life/bitset.cpp
 )
 
 target_link_libraries(demos PUBLIC TermOx)

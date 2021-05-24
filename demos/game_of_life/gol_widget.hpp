@@ -2,6 +2,7 @@
 #define TERMOX_DEMOS_GAME_OF_LIFE_GOL_WIDGET_HPP
 #include <chrono>
 #include <cstdint>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 
@@ -87,9 +88,13 @@ class GoL_widget : public ox::Widget {
      */
     void set_rules(std::string_view rule_string)
     {
-        auto const r = parse_rule_string(rule_string);
-        engine_.set_rules(r);
-        rule_changed(r);
+        try {
+            auto const r = parse_rule_string(rule_string);
+            engine_.set_rules(r);
+            rule_changed(r);
+        }
+        catch (std::invalid_argument const&) {
+        }
     }
 
     /// Directly set the Game of Life rules.

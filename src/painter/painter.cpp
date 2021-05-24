@@ -49,6 +49,18 @@ auto Painter::put(Glyph_string const& text, Point p) -> Painter&
     return *this;
 }
 
+auto Painter::at(Point p) const -> Glyph
+{
+    auto const global = p + widget_.top_left();
+    return canvas_.at(global);
+}
+
+auto Painter::at(Point p) -> Glyph&
+{
+    auto const global = p + widget_.top_left();
+    return canvas_.at(global);
+}
+
 auto Painter::fill(Glyph tile, Point point, Area area) -> Painter&
 {
     if (area.width == 0)
@@ -76,8 +88,8 @@ auto Painter::vline(Glyph tile, Point a, Point b) -> Painter&
 
 auto Painter::wallpaper_fill() -> Painter&
 {
-    this->fill_global(widget_.generate_wallpaper(), widget_.top_left(),
-                      widget_.outer_area());
+    this->fill_global_no_brush(widget_.generate_wallpaper(), widget_.top_left(),
+                               widget_.outer_area());
     return *this;
 }
 
@@ -190,6 +202,12 @@ void Painter::hline_global(Glyph tile, Point a, Point b)
         this->put_global(tile, a);
 }
 
+void Painter::hline_global_no_brush(Glyph tile, Point a, Point b)
+{
+    for (; a.x <= b.x; ++a.x)
+        canvas_.at(a) = tile;
+}
+
 void Painter::vline_global(Glyph tile, Point a, Point b)
 {
     for (; a.y <= b.y; ++a.y)
@@ -204,6 +222,16 @@ void Painter::fill_global(Glyph tile, Point point, Area area)
     auto const x_limit = point.x + area.width - 1;  // Used in inclusive context
     for (; point.y < y_limit; ++point.y)
         this->hline_global(tile, point, {x_limit, point.y});
+}
+
+void Painter::fill_global_no_brush(Glyph tile, Point point, Area area)
+{
+    if (area.width == 0)
+        return;
+    auto const y_limit = point.y + area.height;
+    auto const x_limit = point.x + area.width - 1;  // Used in inclusive context
+    for (; point.y < y_limit; ++point.y)
+        this->hline_global_no_brush(tile, point, {x_limit, point.y});
 }
 
 }  // namespace ox

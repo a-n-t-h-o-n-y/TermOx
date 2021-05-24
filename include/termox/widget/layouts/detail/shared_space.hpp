@@ -32,7 +32,7 @@ class Shared_space {
         }();
 
         // Have you gone over or under the avaliable space?
-        auto const difference = this->find_length_difference(parent, children);
+        auto const difference = find_length_difference(parent, children);
 
         if (difference > 0)
             this->disperse(children, difference);

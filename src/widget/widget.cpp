@@ -40,28 +40,29 @@ void post_child_polished(ox::Widget& w)
 namespace ox {
 
 Widget::Widget(std::string name,
-               Focus_policy focus_policy,
-               Size_policy width_policy,
-               Size_policy height_policy,
-               Border border,
-               Brush brush,
+               Focus_policy focus_policy_,
+               Size_policy width_policy_,
+               Size_policy height_policy_,
+               Border border_,
+               Brush brush_,
                Glyph wallpaper,
                bool brush_paints_wallpaper,
                Cursor cursor)
-    : border{std::move(border)},
-      focus_policy{std::move(focus_policy)},
+    : border{std::move(border_)},
+      focus_policy{std::move(focus_policy_)},
       cursor{std::move(cursor)},
-      width_policy{std::move(width_policy)},
-      height_policy{std::move(height_policy)},
-      brush{std::move(brush)},
+      width_policy{std::move(width_policy_)},
+      height_policy{std::move(height_policy_)},
+      brush{std::move(brush_)},
       brush_paints_wallpaper_{std::move(brush_paints_wallpaper)},
       name_{std::move(name)},
       wallpaper_{std::move(wallpaper)},
       unique_id_{get_unique_id()}
 {
-    width_policy.policy_updated.connect([this] { post_child_polished(*this); });
+    width_policy.policy_updated.connect(
+        [this] { ::post_child_polished(*this); });
     height_policy.policy_updated.connect(
-        [this] { post_child_polished(*this); });
+        [this] { ::post_child_polished(*this); });
 }
 
 Widget::Widget(Parameters p)

@@ -32,7 +32,7 @@ class Canvas {
     [[nodiscard]] auto area() const -> ox::Area;
 
     /// Return the Glyph at Point \p p.
-    [[nodiscard]] auto at(ox::Point p) const -> ox::Glyph const&;
+    [[nodiscard]] auto at(ox::Point p) const -> ox::Glyph;
 
     /// Return the Glyph at Point \p p.
     [[nodiscard]] auto at(ox::Point p) -> ox::Glyph&;

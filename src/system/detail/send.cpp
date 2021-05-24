@@ -22,6 +22,7 @@ namespace ox::detail {
 void send(ox::Paint_event e)
 {
     if (is_paintable(e.receiver)) {
+        // screen_buffers.next is covered in wallpaper below, not cleared.
         auto p = Painter{e.receiver, ox::Terminal::screen_buffers.next};
         if (!e.receiver.get().is_layout_type())
             p.wallpaper_fill();

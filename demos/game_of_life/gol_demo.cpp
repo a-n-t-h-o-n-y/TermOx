@@ -133,6 +133,7 @@ GoL_demo::GoL_demo()
     this->add_rule_example(U"Live Free or Die", "B2/S0");
     this->add_rule_example(U"Life Without Death", "B3/S012345678");
     this->add_rule_example(U"Flock", "B3/S12");
+    this->add_rule_example(U"Switch", "B48/S1234");
     this->add_rule_example(U"Mazectric", "B3/S1234");
     this->add_rule_example(U"Maze", "B3/S12345");
     this->add_rule_example(U"Conway's Game of Life", "B3/S23");

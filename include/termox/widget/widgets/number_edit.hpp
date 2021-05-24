@@ -149,7 +149,7 @@ class Number_edit : public detail::Textline_base {
     Range range_;
     Number_t increment_;
 
-    static auto constexpr Min_num = std::numeric_limits<Number_t>::min();
+    static auto constexpr Min_num = std::numeric_limits<Number_t>::lowest();
     static auto constexpr Max_num = std::numeric_limits<Number_t>::max();
 
    private:

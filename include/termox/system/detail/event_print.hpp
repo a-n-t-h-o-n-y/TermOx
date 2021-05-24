@@ -3,6 +3,7 @@
 #include <iosfwd>
 
 #include <termox/system/event_fwd.hpp>
+#include "termox/system/event.hpp"
 
 namespace ox::detail {
 
@@ -41,6 +42,10 @@ void event_print(std::ostream& os, ox::Resize_event const& e);
 void event_print(std::ostream& os, ox::Timer_event const& e);
 
 void event_print(std::ostream& os, ox::Custom_event const&);
+
+void event_print(std::ostream& os, ox::Dynamic_color_event const&);
+
+void event_print(std::ostream& os, ::esc::Window_resize const&);
 
 }  // namespace ox::detail
 #endif  // TERMOX_SYSTEM_DETAIL_EVENT_PRINT_HPP

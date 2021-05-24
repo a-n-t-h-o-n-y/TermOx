@@ -1,5 +1,6 @@
 #include <termox/widget/size_policy.hpp>
 
+#include <algorithm>
 #include <utility>
 
 namespace ox {
@@ -15,8 +16,7 @@ auto Size_policy::hint() const -> int { return data_.hint; }
 void Size_policy::min(int value)
 {
     data_.min = value;
-    if (data_.max < data_.min)
-        data_.max = data_.min;
+    data_.max = std::max(data_.max, data_.min);
     policy_updated.emit();
 }
 
@@ -25,8 +25,7 @@ auto Size_policy::min() const -> int { return data_.min; }
 void Size_policy::max(int value)
 {
     data_.max = value;
-    if (data_.min > data_.max)
-        data_.min = data_.max;
+    data_.min = std::min(data_.min, data_.max);
     policy_updated.emit();
 }
 
@@ -73,10 +72,8 @@ void Size_policy::maximum(int hint)
 void Size_policy::preferred(int hint)
 {
     data_.hint = hint;
-    if (hint < data_.min)
-        data_.min = hint;
-    if (hint > data_.max)
-        data_.max = hint;
+    data_.min  = std::min(hint, data_.min);
+    data_.max  = std::max(hint, data_.max);
     policy_updated.emit();
 }
 
@@ -84,10 +81,8 @@ void Size_policy::expanding(int hint)
 {
     data_.stretch = 100'000.;
     data_.hint    = hint;
-    if (hint < data_.min)
-        data_.min = hint;
-    if (hint > data_.max)
-        data_.max = hint;
+    data_.min     = std::min(data_.min, hint);
+    data_.max     = std::max(data_.max, hint);
     policy_updated.emit();
 }
 

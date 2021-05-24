@@ -1,32 +1,27 @@
 #ifndef TERMOX_DEMOS_SNAKE_SNAKE_HPP
 #define TERMOX_DEMOS_SNAKE_SNAKE_HPP
-#include <algorithm>
 #include <array>
 #include <chrono>
-#include <random>
+#include <cstddef>
 #include <set>
-#include <string>
-#include <utility>
 #include <vector>
 
 #include <signals_light/signal.hpp>
 
 #include <termox/painter/color.hpp>
 #include <termox/painter/dynamic_colors.hpp>
+#include <termox/painter/glyph.hpp>
+#include <termox/painter/painter.hpp>
 #include <termox/painter/palette/stormy6.hpp>
 #include <termox/painter/trait.hpp>
-#include <termox/system/event.hpp>
 #include <termox/system/key.hpp>
-#include <termox/system/system.hpp>
-#include <termox/widget/align.hpp>
 #include <termox/widget/area.hpp>
 #include <termox/widget/layouts/float.hpp>
-#include <termox/widget/layouts/horizontal.hpp>
 #include <termox/widget/layouts/vertical.hpp>
-#include <termox/widget/pipe.hpp>
+#include <termox/widget/pair.hpp>
 #include <termox/widget/point.hpp>
+#include <termox/widget/tuple.hpp>
 #include <termox/widget/widget.hpp>
-#include <termox/widget/widgets/confirm_button.hpp>
 #include <termox/widget/widgets/cycle_box.hpp>
 #include <termox/widget/widgets/label.hpp>
 #include <termox/widget/widgets/number_view.hpp>
@@ -35,91 +30,46 @@
 
 namespace snake {
 
+class Snake;
+
 /// A field of apples, stored as Points to their location within a given Area.
 class Apple_field {
    public:
     /// Initialize the field with some % of cells as apples.
-    template <typename Range>
-    void initialize(ox::Area a, Range const& mask)
-    {
-        this->clear();
-        this->resize(a);
-        auto constexpr coverage = .004;
-        auto const total        = a.width * a.height * coverage;
-        for (auto i = 0; i < total; ++i)
-            this->create_apple(mask);
-    }
+    void initialize(ox::Area a, Snake const& mask);
 
     /// Add a new apple at a random point within the area.
     /** Will not add the apple over an existing apple, or over any point within
      *  the given \p mask. */
-    template <typename Range>
-    void create_apple(Range const& mask)
-    {
-        if (area_.width == 0 || area_.height == 0)
-            return;
-        if (points_.size() == ((area_.width * area_.height) - mask.size()))
-            return;
-        auto p = ox::Point{0, 0};
-        do {
-            p.x = random_index(area_.width - 1);
-            p.y = random_index(area_.height - 1);
-        } while (points_.count(p) > 0 && !contain(mask, p));
-        points_.insert(p);
-    }
+    void create_apple(Snake const& mask);
 
     /// Remove apple at point \p if one exists
-    void remove(ox::Point p) { points_.erase(p); }
+    void remove(ox::Point p);
 
     /// Return true if there is an apple at \p p.
-    auto contains(ox::Point p) const -> bool { return points_.count(p) > 0; }
+    auto contains(ox::Point p) const -> bool;
 
     /// Return iterator to the first apple Point in the field.
-    auto begin() const { return std::cbegin(points_); }
+    auto begin() const -> std::set<ox::Point>::const_iterator;
 
     /// Return iterator to one past-the-last apple Point in the field.
-    auto end() const { return std::cend(points_); }
+    auto end() const -> std::set<ox::Point>::const_iterator;
 
     /// Return the number of apples in the field.
-    auto size() const -> std::size_t { return points_.size(); }
+    auto size() const -> std::size_t;
 
     /// Return the field's bounding Area.
-    auto area() const -> ox::Area { return area_; }
+    auto area() const -> ox::Area;
 
     /// Resize the apple field, remove apples outside of the new boundary.
-    void resize(ox::Area a)
-    {
-        area_ = a;
-        for (auto point = std::begin(points_); point != std::end(points_);) {
-            if (point->x >= area_.width || point->y >= area_.height)
-                point = points_.erase(point);
-            else
-                std::advance(point, 1);
-        }
-    }
+    void resize(ox::Area a);
 
     /// Removes all apples, does not resize.
-    void clear() { points_.clear(); }
+    void clear();
 
    private:
     std::set<ox::Point> points_;
     ox::Area area_;
-
-   private:
-    /// Return random value between [0, max]
-    static auto random_index(std::size_t max) -> std::size_t
-    {
-        static auto gen = std::mt19937{std::random_device{}()};
-        auto dist       = std::uniform_int_distribution<std::size_t>{0, max};
-        return dist(gen);
-    }
-
-    /// Return true if \p p is found within \p r.
-    template <typename Range>
-    static auto contain(Range const& r, ox::Point p) -> bool
-    {
-        return std::find(std::cbegin(r), std::cend(r), p) != std::cend(r);
-    }
 };
 
 class Snake {
@@ -128,60 +78,39 @@ class Snake {
 
    public:
     /// Clear existing snake, create a new snake at \p p with Direction::Right.
-    void initialize(ox::Point p)
-    {
-        points_.clear();
-        points_.push_back(p);
-        direction_      = Direction::Right;
-        next_direction_ = Direction::Right;
-    }
+    void initialize(ox::Point p);
 
     /// Allow direction changes.
-    void enable_input() { has_input_ = true; }
+    void enable_input();
 
     /// Disallow direction changes.
-    void disable_input() { has_input_ = false; }
+    void disable_input();
 
     /// Checks the direction isn't 180 degrees from the current before setting.
-    void set_direction(Direction d)
-    {
-        if (has_input_ && !is_180_degrees(d, direction_))
-            next_direction_ = d;
-    }
+    void set_direction(Direction d);
 
-    auto get_direction() const -> Direction { return direction_; }
+    auto get_direction() const -> Direction;
 
     /// Adds a Point to the Snake's head in the current direction.
-    void increment_head()
-    {
-        direction_       = next_direction_;
-        auto const units = to_units(direction_);
-        points_.push_back(
-            {points_.back().x + units.first, points_.back().y + units.second});
-    }
+    void increment_head();
 
     /// Remove the tail Point from the Snake.
-    void decrement_tail()
-    {
-        if (points_.empty())
-            return;
-        points_.erase(std::begin(points_));
-    }
+    void decrement_tail();
 
     /// Return the Point where the Snake's head is located.
-    auto head() const -> ox::Point { return points_.back(); }
+    auto head() const -> ox::Point;
 
     /// Returns iterator to the tail of the snake.
-    auto begin() const { return std::cbegin(points_); }
+    auto begin() const -> std::vector<ox::Point>::const_iterator;
 
     /// Returns iterator to one past the head of the snake.
-    auto end() const { return std::cend(points_); }
+    auto end() const -> std::vector<ox::Point>::const_iterator;
 
     /// Return the size of the snake, in cells.
-    auto size() const { return points_.size(); }
+    auto size() const -> std::size_t;
 
     /// Return the point at snake segment \p i, where 0 is the tail.
-    auto operator[](std::size_t i) const -> ox::Point { return points_[i]; }
+    auto operator[](std::size_t i) const -> ox::Point;
 
    private:
     // First point is the tail, last point is the head.
@@ -189,35 +118,10 @@ class Snake {
     Direction next_direction_ = Direction::Right;
     Direction direction_      = Direction::Right;
     bool has_input_           = false;
-
-   private:
-    /// Return true if the given Directions are at 180 degrees from each other.
-    static auto is_180_degrees(Direction a, Direction b) -> bool
-    {
-        switch (a) {
-            case Direction::Left: return b == Direction::Right;
-            case Direction::Right: return b == Direction::Left;
-            case Direction::Up: return b == Direction::Down;
-            case Direction::Down: return b == Direction::Up;
-        }
-        return false;
-    }
-
-    /// Returns a pair of 0, -1, or +1, cooresponding to the direction \p d.
-    static auto to_units(Direction d) -> std::pair<short, short>
-    {
-        switch (d) {
-            case Direction::Left: return {-1, 0};
-            case Direction::Right: return {1, 0};
-            case Direction::Up: return {0, -1};
-            case Direction::Down: return {0, 1};
-        }
-        return {0, 0};
-    }
 };
 
 class Engine {
-   private:
+   public:
     enum class State { Dead, Apple, No_apple };
 
    public:
@@ -230,41 +134,16 @@ class Engine {
 
    public:
     /// Set up the state for a new game.
-    void reset(ox::Area a)
-    {
-        score_ = 0;
-        score(score_);
-        step_ = 0;
-        snake.initialize({a.width / 2, a.height / 2});
-        apples.initialize(a, snake);
-    }
+    void reset(ox::Area a);
 
     /// Increment the game state by one step.
-    void increment()
-    {
-        ++step_;
-        snake.increment_head();
-        switch (get_state(snake, apples)) {
-            case State::Dead: game_over(); return;
-            case State::Apple:
-                ++score_;
-                score(score_);
-                apples.remove(snake.head());
-                break;
-            case State::No_apple: snake.decrement_tail(); break;
-        }
-        if (step_ % add_apple_at_ == 0)
-            apples.create_apple(snake);
-    }
+    void increment();
 
     /// Return true is the game is over.
-    auto is_game_over() const -> bool
-    {
-        return get_state(snake, apples) == State::Dead;
-    }
+    auto is_game_over() const -> bool;
 
     /// Return the current score.
-    auto get_score() const -> unsigned { return score_; }
+    auto get_score() const -> unsigned;
 
    private:
     unsigned score_ = 0;
@@ -272,25 +151,6 @@ class Engine {
 
    private:
     static auto constexpr add_apple_at_ = 20;
-
-   private:
-    /// Return the current state of the game.
-    static auto get_state(Snake const& snake, Apple_field const& apples)
-        -> State
-    {
-        auto const& head = snake.head();
-        if (head.x >= apples.area().width || head.y >= apples.area().height ||
-            head.x < 0 || head.y < 0) {
-            return State::Dead;
-        }
-        if (std::count(std::cbegin(snake), std::cend(snake), head) > 1)
-            return State::Dead;
-
-        if (apples.contains(head))
-            return State::Apple;
-
-        return State::No_apple;
-    }
 };
 
 namespace color {
@@ -324,136 +184,39 @@ inline auto const snake_palette = [] {
 /// Main Game Widget
 class Game_space : public ox::Widget {
    public:
-    Game_space()
-    {
-        using namespace ox::pipe;
-        *this | strong_focus();
-        game_over.connect([this] { this->stop(); });
-        score.connect([this](unsigned score) {
-            auto constexpr limit    = std::chrono::milliseconds{40};
-            auto constexpr interval = 7;
-            if ((score % interval == 0) && period_ > limit)
-                this->set_speed(reduce_by(period_, .05));
-        });
-    }
+    Game_space();
 
    public:
     /// Start the game from the current state.
-    /** If the game is over, will reset the game state and start a new game. */
-    void start()
-    {
-        if (too_small_) {
-            this->stop();  // Emit signals to reset toggle button display.
-            return;
-        }
-        if (engine_.is_game_over())
-            this->reset();
-        using namespace ox::pipe;
-        engine_.snake.enable_input();
-        *this | animate(period_);
-        started();
-    }
+    /** If the game is over, will reset the game state and start a new game.
+     */
+    void start();
 
     /// Stop/pause the game.
-    void stop()
-    {
-        using namespace ox::pipe;
-        engine_.snake.disable_input();
-        *this | disanimate();
-        stopped();
-    }
+    void stop();
 
     /// Start the game if it is stopped, stop the game it started.
-    void toggle()
-    {
-        if (this->is_animated())
-            this->stop();
-        else
-            this->start();
-    }
+    void toggle();
 
     /// Resize the playing surface, also resets the game state.
-    void resize(ox::Area a)
-    {
-        using namespace ox::pipe;
-        *this | fixed_width(a.width) | fixed_height(a.height);
-        this->stop();
-        engine_.reset(a);
-        this->set_speed(initial_period_);
-        too_small_ = this->is_too_small();
-        this->update();
-    }
+    void resize(ox::Area a);
 
-    void reset()
-    {
-        this->stop();
-        engine_.reset(engine_.apples.area());
-        this->update();
-        this->set_speed(initial_period_);
-    }
+    void reset();
 
     /// Set the amount of time between game steps.
-    void set_speed(std::chrono::milliseconds period)
-    {
-        using namespace ox::pipe;
-        if (this->is_animated())
-            *this | disanimate() | animate(period);
-        period_ = period;
-    }
+    void set_speed(std::chrono::milliseconds period);
 
    protected:
-    auto paint_event(ox::Painter& p) -> bool override
-    {
-        if (too_small_)
-            this->paint_size_message(p);
-        else
-            this->paint_game(p);
-        return Widget::paint_event(p);
-    }
+    auto paint_event(ox::Painter& p) -> bool override;
 
     /// Change the direction of the snake.
-    auto key_press_event(ox::Key k) -> bool override
-    {
-        switch (k) {
-            using namespace ox;
-            case Key::Space: this->toggle(); break;
-            case Key::Arrow_left:
-            case Key::h:
-                engine_.snake.set_direction(Snake::Direction::Left);
-                break;
-            case Key::Arrow_right:
-            case Key::l:
-                engine_.snake.set_direction(Snake::Direction::Right);
-                break;
-            case Key::Arrow_up:
-            case Key::k:
-                engine_.snake.set_direction(Snake::Direction::Up);
-                break;
-            case Key::Arrow_down:
-            case Key::j:
-                engine_.snake.set_direction(Snake::Direction::Down);
-                break;
-            default: break;
-        }
-        return Widget::key_press_event(k);
-    }
+    auto key_press_event(ox::Key k) -> bool override;
 
     /// Increment the game state.
-    auto timer_event() -> bool override
-    {
-        engine_.increment();
-        this->update();
-        return Widget::timer_event();
-    }
+    auto timer_event() -> bool override;
 
     /// Checks if the screen is too small to display the game state.
-    auto resize_event(ox::Area new_size, ox::Area old_size) -> bool override
-    {
-        too_small_ = this->is_too_small();
-        if (too_small_)
-            this->stop();
-        return Widget::resize_event(new_size, old_size);
-    }
+    auto resize_event(ox::Area new_size, ox::Area old_size) -> bool override;
 
    private:
     inline static auto const initial_period_ = std::chrono::milliseconds{210};
@@ -475,98 +238,16 @@ class Game_space : public ox::Widget {
     sl::Signal<void()> stopped;
 
    private:
-    [[nodiscard]] auto is_too_small() -> bool
-    {
-        return this->width() < engine_.apples.area().width ||
-               this->height() < engine_.apples.area().height;
-    }
+    [[nodiscard]] auto is_too_small() -> bool;
 
-    void paint_size_message(ox::Painter& painter)
-    {
-        auto const w = [this] {
-            auto const& widg_width = this->width();
-            auto const& game_width = engine_.apples.area().width;
-            return widg_width < game_width ? game_width - widg_width : 0;
-        }();
-        auto const h = [this] {
-            auto const& widg_height = this->height();
-            auto const& game_height = engine_.apples.area().height;
-            return widg_height < game_height ? game_height - widg_height : 0;
-        }();
-        painter.put(U"Screen is too small!", {0, 0});
-        painter.put("Needs " + std::to_string(w) + " more width.", {0, 1});
-        painter.put("Needs " + std::to_string(h) + " more height.", {0, 2});
-    }
+    void paint_size_message(ox::Painter& painter);
 
-    void paint_game(ox::Painter& painter)
-    {
-        for (auto const& p : engine_.apples)
-            painter.put(apple, p);
-
-        for (auto const& p : engine_.snake)
-            painter.put(snake_body, p);
-
-        if (engine_.snake.size() > 3) {
-            painter.put(tail[0], engine_.snake[0]);
-            painter.put(tail[1], engine_.snake[1]);
-            painter.put(tail[2], engine_.snake[2]);
-        }
-        else if (engine_.snake.size() == 3) {
-            painter.put(tail[1], engine_.snake[0]);
-            painter.put(tail[2], engine_.snake[1]);
-        }
-        else if (engine_.snake.size() == 2)
-            painter.put(tail[2], engine_.snake[0]);
-
-        // Head
-        switch (engine_.snake.get_direction()) {
-            case Snake::Direction::Up:
-                painter.put(U'🭯' | fg(color::Snake), engine_.snake.head());
-                break;
-            case Snake::Direction::Down:
-                painter.put(U'🭭' | fg(color::Snake), engine_.snake.head());
-                break;
-            case Snake::Direction::Left:
-                painter.put(U'🭮' | fg(color::Snake), engine_.snake.head());
-                break;
-            case Snake::Direction::Right:
-                painter.put(U'🭬' | fg(color::Snake), engine_.snake.head());
-                break;
-        }
-    }
-
-    /// Reduce \p duration by \p factor and return the result as ms.
-    [[nodiscard]] static auto reduce_by(std::chrono::milliseconds duration,
-                                        double factor)
-        -> std::chrono::milliseconds
-    {
-        return duration - std::chrono::duration_cast<std::chrono::milliseconds>(
-                              duration * factor);
-    }
+    void paint_game(ox::Painter& painter);
 };
 
 class Instructions : public ox::Text_view {
    public:
-    Instructions(Parameters = {}) : Text_view{make_text()}
-    {
-        using namespace ox::pipe;
-        *this | bg(color::Instruction_bg) | fg(color::Instruction_fg) |
-            any_wrap() | align_center();
-    }
-
-   private:
-    [[nodiscard]] static auto make_text() -> ox::Glyph_string
-    {
-        using namespace ox;
-        auto const standout = Brush{fg(color::Instruction_text), Trait::Bold};
-        auto result         = Glyph_string{U"Start/Stop "};
-        result.append(U"Space Bar" | standout);
-        result.append(U" - Movement ");
-        result.append(U"Arrow Keys" | standout);
-        result.append(U" or ");
-        result.append(U"'hjkl'" | standout);
-        return result;
-    }
+    explicit Instructions(Parameters = {});
 };
 
 class Button_bar : public ox::HTuple<ox::Toggle_button,
@@ -583,54 +264,19 @@ class Button_bar : public ox::HTuple<ox::Toggle_button,
     sl::Signal<void(char)> size_change;
 
    public:
-    Button_bar()
-        : ox::HTuple<ox::Toggle_button, ox::Labeled_cycle_box, Instructions>{
-              {U"Start" | ox::Trait::Bold, U"Pause" | ox::Trait::Bold},
-              {U" Size"},
-              {}}
-    {
-        using namespace ox::pipe;
-        sizes_ | fixed_width(16);
-
-        sizes_.label | bg(color::Size_bg) | fg(color::Size_fg);
-        sizes_.div | bg(color::Size_bg) | fg(color::Size_fg);
-        sizes_.cycle_box | bg(color::Size_bg) | fg(color::Size_fg);
-
-        sizes_.cycle_box | no_focus();
-        sizes_.cycle_box.add_option(U"Small").connect(
-            [this] { size_change('s'); });
-        sizes_.cycle_box.add_option(U"Medium").connect(
-            [this] { size_change('m'); });
-        sizes_.cycle_box.add_option(U"Large").connect(
-            [this] { size_change('l'); });
-        sizes_.cycle_box.add_option(U"X-Large").connect([this] {
-            size_change('x');
-        });
-
-        start_pause_btns_ | fixed_width(15);
-        start_pause_btns_.top | bg(color::Start_bg);
-        start_pause_btns_.bottom | bg(color::Pause_bg);
-    }
+    Button_bar();
 
    public:
-    void show_start_button() { start_pause_btns_.show_top(); }
-
-    void show_pause_button() { start_pause_btns_.show_bottom(); }
+    void show_start_button();
+    void show_pause_button();
 };
 
 class Score : public ox::HPair<ox::HLabel, ox::Int_view> {
    public:
-    Score()
-        : ox::HPair<ox::HLabel, ox::Int_view>{{U"Score: "},
-                                              {0, 0, ox::Align::Right}}
-    {
-        using namespace ox::pipe;
-        *this | fixed_width(12) | children() | bg(color::Score_bg) |
-            fg(color::Score_fg);
-    }
+    Score();
 
    public:
-    void set(unsigned score) { score_.set_value(score); }
+    void set(unsigned score);
 
    private:
     ox::Int_view& score_ = this->second;
@@ -647,51 +293,10 @@ class Snake_game : public ox::layout::Vertical<> {
     using Floating_game = ox::Float_2d<Game_space>;
 
    public:
-    Snake_game()
-    {
-        using namespace ox;
-        using namespace ox::pipe;
-        *this | direct_focus();
-
-        bottom_ | fixed_height(1);
-        bottom_.buttons.start.connect([this] { game_space_.start(); });
-        bottom_.buttons.pause.connect([this] { game_space_.stop(); });
-
-        auto constexpr s_size = ox::Area{60, 17};
-        auto constexpr m_size = ox::Area{100, 27};
-        auto constexpr l_size = ox::Area{160, 37};
-        auto constexpr x_size = ox::Area{230, 47};
-
-        bottom_.buttons.size_change.connect([=](char c) {
-            switch (c) {
-                case 's': game_space_.resize(s_size); break;
-                case 'm': game_space_.resize(m_size); break;
-                case 'l': game_space_.resize(l_size); break;
-                case 'x': game_space_.resize(x_size); break;
-            }
-        });
-
-        floating_game.buffer_1 | bg(color::Border);
-        floating_game.buffer_2 | bg(color::Border);
-        floating_game.widget.buffer_1 | bg(color::Border);
-        floating_game.widget.buffer_2 | bg(color::Border);
-
-        game_space_.resize(s_size);
-        game_space_.score.connect(
-            [this](unsigned score) { bottom_.score.set(score); });
-        game_space_.started.connect(
-            [this] { bottom_.buttons.show_pause_button(); });
-        game_space_.stopped.connect(
-            [this] { bottom_.buttons.show_start_button(); });
-    }
+    Snake_game();
 
    protected:
-    auto focus_in_event() -> bool override
-    {
-        ox::Terminal::set_palette(snake_palette);
-        ox::System::set_focus(game_space_);
-        return ox::layout::Vertical<>::focus_in_event();
-    }
+    auto focus_in_event() -> bool override;
 
    private:
     Floating_game& floating_game = make_child<Floating_game>();

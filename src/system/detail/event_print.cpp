@@ -132,4 +132,14 @@ void event_print(std::ostream& os, ox::Custom_event const&)
     os << "Custom_event\n";
 }
 
+void event_print(std::ostream& os, ox::Dynamic_color_event const&)
+{
+    os << "Dynamic_color_event\n";
+}
+
+void event_print(std::ostream& os, ::esc::Window_resize const&)
+{
+    os << "esc::Window_resize\n";
+}
+
 }  // namespace ox::detail
