@@ -81,8 +81,6 @@ Menu::Menu()
     buffer.install_event_filter(menu_);
 }
 
-Menu::Menu(Parameters) : Menu{} {}
-
 auto Menu::append_item(Glyph_string label) -> sl::Signal<void()>&
 {
     return menu_.append_item(std::move(label));
@@ -102,9 +100,6 @@ auto Menu::focus_in_event() -> bool
     return true;
 }
 
-auto menu(Menu::Parameters) -> std::unique_ptr<Menu>
-{
-    return std::make_unique<Menu>();
-}
+auto menu() -> std::unique_ptr<Menu> { return std::make_unique<Menu>(); }
 
 }  // namespace ox

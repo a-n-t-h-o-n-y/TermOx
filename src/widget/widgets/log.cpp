@@ -10,8 +10,6 @@
 
 namespace ox {
 
-Log::Log(Parameters) {}
-
 void Log::post_message(Glyph_string message)
 {
     if (!this->text().empty())
@@ -37,9 +35,6 @@ auto Log::key_press_event(Key k) -> bool
     }
 }
 
-auto log(Log::Parameters parameters) -> std::unique_ptr<Log>
-{
-    return std::make_unique<Log>(std::move(parameters));
-}
+auto log() -> std::unique_ptr<Log> { return std::make_unique<Log>(); }
 
 }  // namespace ox

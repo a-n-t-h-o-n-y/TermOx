@@ -29,8 +29,6 @@ class Write_file : public detail::Write_file_widgets {
    public:
     using Stream_t = std::basic_ofstream<Char_t>;
 
-    struct Parameters {};
-
    public:
     sl::Signal<void(Stream_t&)> request;
 
@@ -39,8 +37,6 @@ class Write_file : public detail::Write_file_widgets {
     {
         save_btn | pipe::on_press([this] { this->notify(); });
     }
-
-    Write_file(Parameters) : Write_file{} {}
 
    private:
     void notify()

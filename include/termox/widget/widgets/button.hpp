@@ -18,7 +18,7 @@ class Painter;
 class Button : public Widget {
    public:
     struct Parameters {
-        Glyph_string text;
+        Glyph_string text = U"";
     };
 
    public:

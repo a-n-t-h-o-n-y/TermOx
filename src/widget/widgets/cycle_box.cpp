@@ -36,7 +36,7 @@ auto wrapped_decrement(std::size_t i, std::size_t edge) -> std::size_t
 
 namespace ox {
 
-Cycle_box::Cycle_box(Parameters) : HLabel{U""}
+Cycle_box::Cycle_box() : HLabel{U""}
 {
     *this | pipe::align_center() | pipe::strong_focus();
 }

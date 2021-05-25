@@ -1,9 +1,9 @@
 #ifndef TERMOX_WIDGET_WIDGETS_CYCLE_BOX_HPP
 #define TERMOX_WIDGET_WIDGETS_CYCLE_BOX_HPP
-#include <string>
 #include <cstddef>
-#include <vector>
 #include <memory>
+#include <string>
+#include <vector>
 
 #include <signals_light/signal.hpp>
 
@@ -24,14 +24,11 @@ namespace ox {
  *  by a scroll down button press, or arrow keys. */
 class Cycle_box : public HLabel {
    public:
-    struct Parameters {};
-
-   public:
     /// Emitted when the option is changed, sends the new option's string rep.
     sl::Signal<void(std::string)> option_changed;
 
    public:
-    Cycle_box(Parameters = {});
+    Cycle_box();
 
     /// Add an option/label to the Cycle_box.
     /** The returned Signal reference will be emitted every time this option is

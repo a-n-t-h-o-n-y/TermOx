@@ -5,6 +5,7 @@
 #include <termox/widget/layouts/horizontal.hpp>
 #include <termox/widget/layouts/stack.hpp>
 #include <termox/widget/layouts/vertical.hpp>
+#include <type_traits>
 
 namespace ox {
 
@@ -24,8 +25,8 @@ struct Pair : Layout_t {
 
     /// Widgets are constructed with passed in First/Second::Parameters objects.
     Pair(typename First::Parameters a, typename Second::Parameters b)
-        : first{this->template make_child<First>(std::move(a))},
-          second{this->template make_child<Second>(std::move(b))}
+        : first{this->make_child_maybe_with_parameters<First>(std::move(a))},
+          second{this->make_child_maybe_with_parameters<Second>(std::move(b))}
     {}
 
     /// Existing Widgets are moved into the Pair.
@@ -70,6 +71,19 @@ struct Pair : Layout_t {
     using Layout_t::remove_child_at;
     using Layout_t::remove_child_if;
     using Layout_t::swap_children;
+
+   private:
+    template <typename Widget_t>
+    [[nodiscard]] auto make_child_maybe_with_parameters(
+        typename Widget_t::Parameters p) -> Widget_t&
+    {
+        if constexpr (std::is_constructible_v<Widget_t,
+                                              typename Widget_t::Parameters>) {
+            return this->template make_child<Widget_t>(std::move(p));
+        }
+        else
+            return this->template make_child<Widget_t>();
+    }
 };
 
 /// Build a default constructed Pair unique_ptr.

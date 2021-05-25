@@ -31,8 +31,6 @@ class Read_file : public detail::Read_file_widgets {
    public:
     using Stream_t = std::basic_ifstream<Char_t>;
 
-    struct Parameters {};
-
    public:
     sl::Signal<void(Stream_t&)> request;
 
@@ -41,8 +39,6 @@ class Read_file : public detail::Read_file_widgets {
     {
         open_btn | pipe::on_press([this] { this->notify(); });
     }
-
-    Read_file(Parameters) : Read_file{} {}
 
    private:
     void notify()

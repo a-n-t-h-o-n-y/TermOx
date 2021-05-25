@@ -18,10 +18,6 @@ Line<Layout_t>::Line()
         *this | pipe::fixed_height(1) | pipe::wallpaper(U'─');
 }
 
-template <template <typename> typename Layout_t>
-Line<Layout_t>::Line(Parameters) : Line{}
-{}
-
 template class Line<layout::Horizontal>;
 template class Line<layout::Vertical>;
 
@@ -34,28 +30,8 @@ auto line() -> std::unique_ptr<Line<Layout_t>>
 template auto line() -> std::unique_ptr<HLine>;
 template auto line() -> std::unique_ptr<VLine>;
 
-template <template <typename> typename Layout_t>
-auto line(typename Line<Layout_t>::Parameters p)
-    -> std::unique_ptr<Line<Layout_t>>
-{
-    return std::make_unique<Line<Layout_t>>(std::move(p));
-}
-
-template auto line(HLine::Parameters p) -> std::unique_ptr<HLine>;
-template auto line(VLine::Parameters p) -> std::unique_ptr<VLine>;
-
 auto vline() -> std::unique_ptr<VLine> { return std::make_unique<VLine>(); }
 
-auto vline(VLine::Parameters p) -> std::unique_ptr<VLine>
-{
-    return std::make_unique<VLine>(std::move(p));
-}
-
 auto hline() -> std::unique_ptr<HLine> { return std::make_unique<HLine>(); }
-
-auto hline(HLine::Parameters p) -> std::unique_ptr<HLine>
-{
-    return std::make_unique<HLine>(std::move(p));
-}
 
 }  // namespace ox

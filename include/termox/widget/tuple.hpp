@@ -2,6 +2,7 @@
 #define TERMOX_WIDGET_TUPLE_HPP
 #include <memory>
 #include <tuple>
+#include <type_traits>
 #include <utility>
 
 #include <termox/widget/layouts/horizontal.hpp>
@@ -75,8 +76,17 @@ class Tuple : public Layout_t {
     [[nodiscard]] auto indexed_init_children(std::index_sequence<Is...>,
                                              typename Widget_t::Parameters... p)
     {
+        // Default construct Widget_t if it doesn't have Parameters constructor.
+        // All widgets have Parameters struct inherited from Widget.
         return std::forward_as_tuple(this->insert_child(
-            std::make_unique<Widget_t>(std::move(p)), Is)...);
+            [&] {
+                if constexpr (std::is_constructible_v<
+                                  Widget_t, typename Widget_t::Parameters>)
+                    return std::make_unique<Widget_t>(std::move(p));
+                else
+                    return std::make_unique<Widget_t>();
+            }(),
+            Is)...);
     }
 
     template <std::size_t... Is>

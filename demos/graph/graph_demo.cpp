@@ -505,7 +505,7 @@ void Graph_core::reset_scale_and_offset()
     offset_ = {0, 0, 0, 0};
 }
 
-Step_interval::Step_interval(Parameters)
+Step_interval::Step_interval()
     : ox::HPair<ox::HLabel, ox::Int_edit>{{U"StepInterval(ms)"},
                                           {16, {1, 5'000}}}
 {

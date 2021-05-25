@@ -9,8 +9,7 @@
 
 namespace ox::detail {
 
-CS_top_row::CS_top_row(Parameters)
-    : HTuple<Button, Cycle_box, Button>{{U"<"}, {}, {U">"}}
+CS_top_row::CS_top_row() : HTuple<Button, Cycle_box, Button>{{U"<"}, {}, {U">"}}
 {
     using namespace pipe;
     *this | fixed_height(1) | children() | bg(Color::Light_gray) |

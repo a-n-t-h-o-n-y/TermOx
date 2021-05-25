@@ -66,3 +66,12 @@ add_subdirectory(demos)
 
 # Add Tests
 add_subdirectory(tests)
+
+add_custom_target(
+    termox.all
+    DEPENDS
+        demos
+        readme.demo
+        termox.ui.tests
+        termox.unit.tests
+)

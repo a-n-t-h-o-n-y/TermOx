@@ -3,6 +3,7 @@
 #include <array>
 #include <cstddef>
 #include <functional>
+#include <type_traits>
 #include <utility>
 
 #include <termox/widget/layouts/horizontal.hpp>
@@ -23,6 +24,12 @@ class Array : public Layout_t {
                                   std::forward<Args>(args)...)}
     {}
 
+    // sfinae enable this only if Widget_t has a constructor taking a Parameters
+    template <
+        typename Child_t = typename Layout_t::Child_t,
+        typename         = std::enable_if_t<
+            std::is_constructible_v<Child_t, typename Child_t::Parameters>,
+            void>>
     explicit Array(
         std::array<typename Layout_t::Child_t::Parameters, N> parameters)
         : refs_{create_n_children(std::make_index_sequence<N>(),

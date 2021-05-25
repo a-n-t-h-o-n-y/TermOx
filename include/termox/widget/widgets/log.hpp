@@ -13,12 +13,6 @@ namespace ox {
 /** Received messages are posted at the bottom of the Log. */
 class Log : public Textbox {
    public:
-    struct Parameters {};
-
-   public:
-    explicit Log(Parameters = {});
-
-   public:
     void post_message(Glyph_string message);
 
    protected:
@@ -33,8 +27,7 @@ class Log : public Textbox {
 };
 
 /// Helper function to create a Log instance.
-[[nodiscard]] inline auto log(Log::Parameters parameters = {})
-    -> std::unique_ptr<Log>;
+[[nodiscard]] auto log() -> std::unique_ptr<Log>;
 
 }  // namespace ox
 #endif  // TERMOX_WIDGET_WIDGETS_LOG_HPP

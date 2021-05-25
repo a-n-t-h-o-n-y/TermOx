@@ -17,15 +17,12 @@ namespace ox::detail {
 /// User interface to cycle through the pages of the Stack.
 class CS_top_row : public HTuple<Button, Cycle_box, Button> {
    public:
-    struct Parameters {};
-
-   public:
     Button& left_btn     = this->get<0>();
     Cycle_box& cycle_box = this->get<1>();
     Button& right_btn    = this->get<2>();
 
    public:
-    CS_top_row(Parameters = {});
+    CS_top_row();
 };
 
 }  // namespace ox::detail

@@ -54,12 +54,7 @@ class Menu_list
 
 class Menu : public VPair<Menu_list, Widget> {
    public:
-    struct Parameters {};
-
-   public:
     Menu();
-
-    explicit Menu(Parameters);
 
    public:
     /// Append item to the end of list, displayed with \p label.
@@ -83,7 +78,7 @@ class Menu : public VPair<Menu_list, Widget> {
 };
 
 /// Helper function to create a Menu instance.
-[[nodiscard]] auto menu(Menu::Parameters = {}) -> std::unique_ptr<Menu>;
+[[nodiscard]] auto menu() -> std::unique_ptr<Menu>;
 
 }  // namespace ox
 #endif  // TERMOX_WIDGET_WIDGETS_MENU_HPP
