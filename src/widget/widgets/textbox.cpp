@@ -74,7 +74,7 @@ auto Textbox::key_press_event(Key k) -> bool
         case Key::Enter: {
             auto const cursor_index = this->cursor_index();
             this->Text_view::insert(U"\n", cursor_index);
-            if (this->cursor.y() + 1 == this->height())
+            if (this->cursor.position().y + 1 == this->height())
                 this->scroll_down(1);
             this->set_cursor(cursor_index + 1);
         } break;

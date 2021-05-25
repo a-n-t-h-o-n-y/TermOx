@@ -110,8 +110,8 @@ void Text_view::pop_back()
 void Text_view::clear()
 {
     contents_.clear();
-    this->cursor.set_x(0);
-    this->cursor.set_y(0);
+    this->cursor.set_position({0, this->cursor.position().y});
+    this->cursor.set_position({this->cursor.position().x, 0});
     this->update();
     contents_modified(contents_);
 }

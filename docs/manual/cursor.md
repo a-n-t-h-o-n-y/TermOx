@@ -9,21 +9,13 @@ basic info about the cursor for the given Widget.
 
 This signal is called every time the cursor is moved.
 
-#### `bool enabled() const;`
-
-Returns `true` if the cursor is able to display on screen for this Widget.
-
-#### `std::size_t x() const;`
-
-Returns the local `x` coordinate of the cursor.
-
-#### `std::size_t y() const;`
-
-Returns the local `y` coordinate of the cursor.
-
 #### `Point position() const;`
 
 Returns the `Point` where the cursor currently is.
+
+#### `bool is_enabled() const;`
+
+Returns `true` if the cursor is able to display on screen for this Widget.
 
 #### `void enable(bool enable = true);`
 
@@ -38,14 +30,6 @@ focus.
 #### `void toggle();`
 
 Enable the cursor if disabled, or disable it if enabled.
-
-#### `void set_x(std::size_t x);`
-
-Set the local x coordinate of the cursor.
-
-#### `void set_y(std::size_t y);`
-
-Set the local y coordinate of the cursor.
 
 #### `void set_position(Point p);`
 

@@ -56,8 +56,8 @@ class Painter {
 
     /// Paint the Border object around the outside of the associated Widget.
     /** Borders own the perimeter defined by Widget::x(), Widget::y() and
-     *  Widget::outer_width(), Widget::outer_height(). Border is owned by
-     *  widget_ */
+     *  Widget::outer_area().width, Widget::outer_area().height. Border is owned
+     *  by widget_ */
     void border();
 
    private:

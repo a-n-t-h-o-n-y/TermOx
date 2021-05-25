@@ -143,7 +143,8 @@ void System::set_cursor(Cursor cursor, Point offset)
     if (!cursor.is_enabled())
         Terminal::show_cursor(false);
     else {
-        Terminal::move_cursor({offset.x + cursor.x(), offset.y + cursor.y()});
+        Terminal::move_cursor(
+            {offset.x + cursor.position().x, offset.y + cursor.position().y});
         Terminal::show_cursor();
     }
 }

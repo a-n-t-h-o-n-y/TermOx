@@ -29,8 +29,8 @@ class Meta_widget : public ox::Widget {
     {
         auto const w = std::to_string(this->width());
         auto const h = std::to_string(this->height());
-        auto const x = std::to_string(this->parent()->x());
-        auto const y = std::to_string(this->parent()->y());
+        auto const x = std::to_string(this->parent()->top_left().x);
+        auto const y = std::to_string(this->parent()->top_left().y);
 
         p.put("X " + x, {0, 0});
         p.put("Y " + y, {0, 1});

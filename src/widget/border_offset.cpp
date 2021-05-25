@@ -7,28 +7,28 @@ namespace ox::detail {
 
 auto Border_offset::west_disqualified(Widget const& w) -> bool
 {
-    return w.outer_width() <= 1;
+    return w.outer_area().width <= 1;
 }
 
 auto Border_offset::east_disqualified(Widget const& w) -> bool
 {
-    if (w.outer_width() <= 1)
+    if (w.outer_area().width <= 1)
         return true;
-    if (w.outer_width() == 2 && w.border.segments.west.is_enabled())
+    if (w.outer_area().width == 2 && w.border.segments.west.is_enabled())
         return true;
     return false;
 }
 
 auto Border_offset::north_disqualified(Widget const& w) -> bool
 {
-    return w.outer_height() <= 1;
+    return w.outer_area().height <= 1;
 }
 
 auto Border_offset::south_disqualified(Widget const& w) -> bool
 {
-    if (w.outer_height() <= 1)
+    if (w.outer_area().height <= 1)
         return true;
-    if (w.outer_height() == 2 && w.border.segments.north.is_enabled())
+    if (w.outer_area().height == 2 && w.border.segments.north.is_enabled())
         return true;
     return false;
 }

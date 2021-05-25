@@ -183,15 +183,6 @@ class Widget {
     /// Return the global top left corner of this widget, not including border.
     [[nodiscard]] auto inner_top_left() const -> Point;
 
-    /// x coordinate for the top left point of this Widget.
-    /** Given with relation to the top left of the terminal screen. */
-    [[nodiscard]] auto x() const -> int;
-
-    /// y coordinate for the top left point of this Widget.
-    /** Given with relation to the top left of the terminal screen. */
-    [[nodiscard]] auto y() const -> int;
-
-    // TODO only provide points, not coords via member functions.
     /// x coordinate for the top left point of this Widget, beyond the Border.
     /** Given with relation to the top left of the terminal screen. This is the
      *  coordinate that marks the beginning of the space that is available for
@@ -204,7 +195,6 @@ class Widget {
      *  use by the Widget. */
     [[nodiscard]] auto inner_y() const -> int;
 
-    // TODO only provide area, not width/height
     /// Return the area the widget occupies, not including the Border.
     [[nodiscard]] auto area() const -> Area;
 
@@ -216,13 +206,6 @@ class Widget {
 
     /// Return the area the widget occupies, including Border space.
     [[nodiscard]] auto outer_area() const -> Area;
-
-    // TODO only provide the structs for all these, not the struct members.
-    /// Return the width dimension, this includes Border space.
-    [[nodiscard]] auto outer_width() const -> int;
-
-    /// Return the height dimension, this includes Border space.
-    [[nodiscard]] auto outer_height() const -> int;
 
     // TODO remove virtual
     /// Post a paint event to this Widget.

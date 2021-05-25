@@ -82,11 +82,11 @@ void Label<Layout_t>::set_text(Glyph_string text)
 {
     if (growth_strategy_ == Growth::Dynamic) {
         if constexpr (is_vertical) {
-            if (text.size() != this->outer_height())
+            if (text.size() != this->outer_area().height)
                 *this | pipe::fixed_height(text.size());
         }
         else {
-            if (text.size() != this->outer_width())
+            if (text.size() != this->outer_area().width)
                 *this | pipe::fixed_width(text.size());
         }
     }

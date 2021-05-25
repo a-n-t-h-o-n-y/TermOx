@@ -15,7 +15,7 @@ namespace {
 [[nodiscard]] auto border_is_paintable(ox::Widget const& widg) -> bool
 {
     return widg.border.is_enabled() && widg.is_enabled() &&
-           widg.outer_width() != 0 && widg.outer_height() != 0;
+           widg.outer_area().width != 0 && widg.outer_area().height != 0;
 }
 
 }  // namespace
@@ -106,23 +106,23 @@ void Painter::border()
     auto const south_dq = Offset::south_disqualified(widget_);
 
     // North Wall
-    auto const north_left = Point{widget_.inner_x(), widget_.y()};
+    auto const north_left = Point{widget_.inner_x(), widget_.top_left().y};
     auto const north_right =
         Point{north_left.x + inner_area_.width - 1, north_left.y};
 
     // South Wall
-    auto const south_left =
-        Point{north_left.x, widget_.y() + widget_.outer_height() - 1};
+    auto const south_left = Point{
+        north_left.x, widget_.top_left().y + widget_.outer_area().height - 1};
     auto const south_right = Point{north_right.x, south_left.y};
 
     // West Wall
-    auto const west_top = Point{widget_.x(), widget_.inner_y()};
+    auto const west_top = Point{widget_.top_left().x, widget_.inner_y()};
     auto const west_bottom =
         Point{west_top.x, west_top.y + inner_area_.height - 1};
 
     // East Wall
     auto const east_top =
-        Point{west_top.x + widget_.outer_width() - 1, west_top.y};
+        Point{west_top.x + widget_.outer_area().width - 1, west_top.y};
     auto const east_bottom = Point{east_top.x, west_bottom.y};
 
     // Corners

@@ -13,17 +13,11 @@ class Cursor {
     sl::Signal<void(Point)> moved;
 
    public:
-    /// Query if the cursor is enabled.
-    [[nodiscard]] auto is_enabled() const -> bool;
-
-    /// Get the local x coordinate of the cursor.
-    [[nodiscard]] auto x() const -> int;
-
-    /// Get the local y coordinate of the cursor.
-    [[nodiscard]] auto y() const -> int;
-
     /// Get the local position of the cursor.
     [[nodiscard]] auto position() const -> Point;
+
+    /// Query if the cursor is enabled.
+    [[nodiscard]] auto is_enabled() const -> bool;
 
     /// Enable the cursor(show on screen).
     void enable(bool enable = true);
@@ -33,12 +27,6 @@ class Cursor {
 
     /// Enable the cursor if disabled, or disable it if enabled.
     void toggle();
-
-    /// Set the local x coordinate of the cursor.
-    void set_x(int x);
-
-    /// Set the local y coordinate of the cursor.
-    void set_y(int y);
 
     /// Set the local position of the cursor.
     void set_position(Point p);
