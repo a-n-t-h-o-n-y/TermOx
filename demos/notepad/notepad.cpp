@@ -168,15 +168,11 @@ void File_status_bar::success(ox::Glyph_string message)
 
 Notepad::Notepad()
 {
+    using namespace ox::pipe;
     this->initialize();
-    this->focus_policy = ox::Focus_policy::Strong;
-}
-
-auto Notepad::focus_in_event() -> bool
-{
-    ox::Terminal::set_palette(ox::dawn_bringer16::palette);
-    ox::System::set_focus(txt_trait.text_and_scroll.textbox);
-    return true;
+    *this | strong_focus() | forward_focus(txt_trait.text_and_scroll.textbox) |
+        on_focus_in(
+            [] { ox::Terminal::set_palette(ox::dawn_bringer16::palette); });
 }
 
 // Save Area

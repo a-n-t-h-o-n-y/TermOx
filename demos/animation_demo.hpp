@@ -89,15 +89,14 @@ class Animated_box : public ox::Widget {
 inline auto make_animation_demo() -> std::unique_ptr<ox::Widget>
 {
     using namespace ox;
+    using namespace ox::pipe;
     auto app = layout::horizontal<Animated_box>(
         std::make_unique<Animated_box>(FPS{5}),
         std::make_unique<Animated_box>(FPS{10}) | pipe::bordered(),
         std::make_unique<Animated_box>(FPS{20}),
         std::make_unique<Animated_box>(FPS{30}) | pipe::bordered(),
         std::make_unique<Animated_box>(FPS{60}));
-    app | pipe::direct_focus() | pipe::on_focus_in([x = app.get()] {
-        ox::System::set_focus(x->get_children().front());
-    });
+    app | direct_focus() | forward_focus(app->get_children().front());
     return app;
 }
 

@@ -69,9 +69,6 @@ class Menu : public VPair<Menu_list, Widget> {
     /// Remove item a \p index in the Menu_list, no-op if \p index is invalid.
     void remove_item(std::size_t index);
 
-   protected:
-    auto focus_in_event() -> bool override;
-
    private:
     Menu_list& menu_ = this->first;
     Widget& buffer   = this->second;

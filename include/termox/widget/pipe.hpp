@@ -13,6 +13,7 @@
 #include <termox/common/range.hpp>
 #include <termox/common/transform_iterator.hpp>
 #include <termox/painter/glyph_string.hpp>
+#include <termox/system/system.hpp>
 #include <termox/widget/align.hpp>
 #include <termox/widget/focus_policy.hpp>
 #include <termox/widget/growth.hpp>
@@ -359,6 +360,15 @@ inline auto click_focus() { return focus(Focus_policy::Click); }
 inline auto strong_focus() { return focus(Focus_policy::Strong); }
 
 inline auto direct_focus() { return focus(Focus_policy::Direct); }
+
+/// Give focus to \p receiver when the piped Widget gets focus_in_event.
+inline auto forward_focus(Widget& receiver)
+{
+    return [&](auto&& w) -> decltype(auto) {
+        get(w).focused_in.connect([&] { ::ox::System::set_focus(receiver); });
+        return std::forward<decltype(w)>(w);
+    };
+}
 
 // Width Policy Modifiers -----------------------------------------------------
 

@@ -77,7 +77,7 @@ auto Menu_list::mouse_press_event_filter(Widget& w, Mouse const& m) -> bool
 
 Menu::Menu()
 {
-    *this | pipe::direct_focus();
+    *this | pipe::direct_focus() | pipe::forward_focus(menu_);
     buffer.install_event_filter(menu_);
 }
 
@@ -93,12 +93,6 @@ auto Menu::insert_item(Glyph_string label, std::size_t index)
 }
 
 void Menu::remove_item(std::size_t index) { menu_.remove_item(index); }
-
-auto Menu::focus_in_event() -> bool
-{
-    ox::System::set_focus(menu_);
-    return true;
-}
 
 auto menu() -> std::unique_ptr<Menu> { return std::make_unique<Menu>(); }
 

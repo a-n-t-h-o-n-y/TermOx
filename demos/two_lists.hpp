@@ -4,6 +4,7 @@
 #include <utility>
 
 #include <termox/termox.hpp>
+#include "termox/widget/pipe.hpp"
 
 namespace demo {
 
@@ -117,31 +118,33 @@ using namespace ox;
 using Check      = Selectable<HCheckbox_label>;
 using Check_list = Array<layout::Selecting<layout::Vertical<Check>>, 15>;
 
-struct My_check_list : Check_list {
+struct My_check_list : ox::VPair<ox::Passive<Check_list>, ox::Widget> {
+    Check_list& list = this->first;
+
     My_check_list()
     {
         using namespace ox;
         using namespace ox::pipe;
 
-        this->set_increment_selection_keys({Key::Arrow_down, Key::j});
-        this->set_decrement_selection_keys({Key::Arrow_up, Key::k});
-        this->set_increment_scroll_keys({Key::J});
-        this->set_decrement_scroll_keys({Key::K});
+        *this | bordered() | direct_focus() | forward_focus(list);
 
-        *this | bordered() | children() | for_each([i = 0uL](auto& w) mutable {
+        list.set_increment_selection_keys({Key::Arrow_down, Key::j});
+        list.set_decrement_selection_keys({Key::Arrow_up, Key::k});
+        list.set_increment_scroll_keys({Key::J});
+        list.set_decrement_scroll_keys({Key::K});
+
+        list | children() | for_each([i = 0uL](auto& w) mutable {
             w.label.set_text("number: " + std::to_string(i++));
         });
-        *this | bind_key(Key::Enter,
-                         [](auto& w) { w.selected_child().checkbox.toggle(); });
+        list | bind_key(Key::Enter,
+                        [](auto& w) { w.selected_child().checkbox.toggle(); });
     }
 };
 
 struct Two_lists : VArray<My_check_list, 2> {
     Two_lists()
     {
-        *this | pipe::strong_focus() | pipe::on_focus_in([this] {
-            ox::System::set_focus(this->get<0>());
-        });
+        *this | pipe::strong_focus() | pipe::forward_focus(this->get<0>());
         this->foo();
     }
 

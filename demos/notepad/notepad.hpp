@@ -146,9 +146,6 @@ class Notepad
    public:
     Notepad();
 
-   protected:
-    auto focus_in_event() -> bool override;
-
    private:
     void initialize();
 };

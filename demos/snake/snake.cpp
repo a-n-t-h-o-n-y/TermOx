@@ -468,7 +468,8 @@ Snake_game::Snake_game()
 {
     using namespace ox;
     using namespace ox::pipe;
-    *this | direct_focus();
+    *this | direct_focus() | forward_focus(game_space_) |
+        on_focus_in([] { ox::Terminal::set_palette(snake_palette); });
 
     bottom_ | fixed_height(1);
     bottom_.buttons.start.connect([this] { game_space_.start(); });
@@ -500,13 +501,6 @@ Snake_game::Snake_game()
         [this] { bottom_.buttons.show_pause_button(); });
     game_space_.stopped.connect(
         [this] { bottom_.buttons.show_start_button(); });
-}
-
-auto Snake_game::focus_in_event() -> bool
-{
-    ox::Terminal::set_palette(snake_palette);
-    ox::System::set_focus(game_space_);
-    return ox::layout::Vertical<>::focus_in_event();
 }
 
 }  // namespace snake

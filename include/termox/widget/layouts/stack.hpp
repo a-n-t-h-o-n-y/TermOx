@@ -207,8 +207,6 @@ class Stack : public Layout<Child_t> {
         return this->Layout<Child_t>::focus_in_event();
     }
 
-    void update_geometry() override {}
-
    private:
     Child_t* active_page_ = nullptr;
     bool sets_focus_      = true;

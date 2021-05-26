@@ -121,6 +121,19 @@ class Linear_layout : public Layout<Child> {
         this->set_child_offset(0);
     }
 
+    /// Sort children by the given comparison function.
+    template <typename Fn>
+    void sort(Fn compare)
+    {
+        std::stable_sort(std::begin(Base_t::children_),
+                         std::end(Base_t::children_),
+                         [&compare](auto const& a, auto const& b) {
+                             return compare(static_cast<Child_t const&>(*a),
+                                            static_cast<Child_t const&>(*b));
+                         });
+        this->resize_and_move_children();
+    }
+
    public:
     /// Sets the child Widget offset, does not do bounds checking.
     void set_child_offset(std::size_t index)
@@ -129,6 +142,8 @@ class Linear_layout : public Layout<Child> {
         Widget::child_offset_ = index;
         shared_space_.set_offset(index);
         unique_space_.set_offset(index);
+        // This works, not sure exactly why, calling resize_and_move_children
+        // directly does not work.
         System::post_event(Child_polished_event{*this, *this});
     }
 
@@ -152,7 +167,61 @@ class Linear_layout : public Layout<Child> {
     using Parameters_t = Parameters;
 
    protected:
-    void update_geometry() override
+    auto enable_event() -> bool override
+    {
+        this->resize_and_move_children();
+        return Layout<Child>::enable_event();
+    }
+
+    auto move_event(Point new_position, Point old_position) -> bool override
+    {
+        this->resize_and_move_children();
+        return Layout<Child>::move_event(new_position, old_position);
+    }
+
+    auto resize_event(Area new_size, Area old_size) -> bool override
+    {
+        this->resize_and_move_children();
+        return Layout<Child>::resize_event(new_size, old_size);
+    }
+
+    auto child_added_event(Widget& child) -> bool override
+    {
+        // Only update if *this is enabled. Child_added_event can be sent if
+        // *this is disabled, and updating will call enable on children.
+        if (this->is_enabled())
+            this->resize_and_move_children();
+        return Layout<Child>::child_added_event(child);
+    }
+
+    auto child_removed_event(Widget& child) -> bool override
+    {
+        // Only update if *this is enabled. Child_removed_event can be sent if
+        // *this is disabled, and updating will call enable on children.
+        if (this->is_enabled())
+            this->resize_and_move_children();
+        return Layout<Child>::child_removed_event(child);
+    }
+
+    auto child_polished_event(Widget& child) -> bool override
+    {
+        // Only update if *this is enabled. Child_polished_event can be sent if
+        // *this is disabled, and updating will call enable on children.
+        if (this->is_enabled())
+            this->resize_and_move_children();
+        return Layout<Child>::child_polished_event(child);
+    }
+
+   private:
+    using Length_list   = std::vector<int>;
+    using Position_list = std::vector<int>;
+
+    Shared_space<Parameters> shared_space_;
+    Unique_space<Parameters> unique_space_;
+
+   private:
+    // TODO rename
+    void resize_and_move_children()
     {
         auto const primary_lengths = shared_space_.calculate_lengths(*this);
         auto const primary_pos =
@@ -166,13 +235,6 @@ class Linear_layout : public Layout<Child> {
         this->send_resize_events(primary_lengths, secondary_lengths);
         this->send_move_events(primary_pos, secondary_pos);
     }
-
-   private:
-    using Length_list   = std::vector<int>;
-    using Position_list = std::vector<int>;
-
-    Shared_space<Parameters> shared_space_;
-    Unique_space<Parameters> unique_space_;
 
    private:
     void send_enable_disable_events(Length_list const& primary,

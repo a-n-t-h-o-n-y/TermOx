@@ -108,9 +108,6 @@ class Labeled_cycle_box : public HTuple<HLabel, Tile, Cycle_box> {
     explicit Labeled_cycle_box(Glyph_string title = U"");
 
     explicit Labeled_cycle_box(Parameters p);
-
-   protected:
-    auto focus_in_event() -> bool override;
 };
 
 /// Helper function to create a Labeled_cycle_box instance.

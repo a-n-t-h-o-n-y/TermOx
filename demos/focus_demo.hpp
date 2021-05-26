@@ -44,14 +44,12 @@ inline auto focus_box(ox::Focus_policy policy) -> std::unique_ptr<ox::Widget>
             ox::widget() | ox::pipe::focus(policy)
         ) | bordered();
 
-    box_ptr | direct_focus() | on_focus_in([x = box_ptr.get()]{
-            ox::System::set_focus(x->get_children()[1]);
-        });
+    box_ptr | direct_focus() | forward_focus(box_ptr->get_children()[1]);
 
     auto& label = box_ptr->first;
     auto& widg  = box_ptr->second;
 
-    label | on_focus_in([&] { ox::System::set_focus(widg); });
+    label | forward_focus(widg);
 
     widg | on_focus_in( [&w = *box_ptr]{ w | walls(fg(ox::Color::Red)); })
          | on_focus_out([&w = *box_ptr]{ w | walls(fg(ox::Color::White)); });

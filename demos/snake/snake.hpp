@@ -295,9 +295,6 @@ class Snake_game : public ox::layout::Vertical<> {
    public:
     Snake_game();
 
-   protected:
-    auto focus_in_event() -> bool override;
-
    private:
     Floating_game& floating_game = make_child<Floating_game>();
     Game_space& game_space_      = floating_game.widget.widget;

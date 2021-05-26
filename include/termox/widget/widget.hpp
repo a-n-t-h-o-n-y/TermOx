@@ -211,7 +211,7 @@ class Widget {
     /// Post a paint event to this Widget.
     virtual void update();
 
-    /// Remove once border is redesigned.
+    // TODO Remove once border is redesigned.
     /** Used by is_paintable to decide whether or not to send a Paint_event.
      *  This is a type parameter, Layout is the only thing that can't paint. */
     [[nodiscard]] virtual auto is_layout_type() const -> bool;

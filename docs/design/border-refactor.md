@@ -67,7 +67,7 @@ class Fixed : public layout::Layout<Widget_t> {
 
     protected:
     /// Send move and resize events when needed.
-    void update_geometry() override;
+    void update_geometry() override;  // TODO replace with _event handlers.
 
    private:
     struct Offsets {

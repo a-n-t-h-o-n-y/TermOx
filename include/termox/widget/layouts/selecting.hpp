@@ -230,10 +230,8 @@ class Selecting : public Layout_t {
         if (!this->is_child_selected())
             return;
         this->increment_selected();
-        while (!this->selected_child().is_enabled()) {
+        if (!this->selected_child().is_enabled())
             this->increment_offset();
-            this->update_geometry();
-        }
     }
 
     void decrement_selected()
@@ -253,29 +251,10 @@ class Selecting : public Layout_t {
             this->decrement_offset();
     }
 
-    /// Scroll down or right.
-    void increment_offset()
-    {
-        auto const child_n = this->child_count();
-        if (child_n == 0)
-            return;
-        if (auto const offset = this->get_child_offset(); offset + 1 != child_n)
-            this->set_child_offset(offset + 1);
-    }
-
     void increment_offset_and_increment_selected()
     {
         this->increment_offset();
         this->increment_selected();
-    }
-
-    /// Scroll up or left.
-    void decrement_offset()
-    {
-        if (this->child_count() == 0)
-            return;
-        if (auto const offset = this->get_child_offset(); offset != 0)
-            this->set_child_offset(offset - 1);
     }
 
     void decrement_offset_and_decrement_selected()

@@ -1,5 +1,6 @@
 #include "glyph_paint.hpp"
 
+#include <termox/painter/palette/dawn_bringer32.hpp>
 #include <termox/widget/pipe.hpp>
 #include <termox/widget/widget_slots.hpp>
 
@@ -9,7 +10,11 @@ namespace paint {
 
 Glyph_paint::Glyph_paint()
 {
-    *this | pipe::direct_focus();
+    using namespace ox::pipe;
+    *this | direct_focus() | forward_focus(paint_area) | on_focus_in([] {
+        ox::Terminal::set_palette(ox::dawn_bringer32::palette);
+    });
+
     side_pane.glyph_selector.selected.connect(slot::set_symbol(paint_area));
 
     side_pane.color_pages.foreground.color_selected.connect(

@@ -64,17 +64,11 @@ class Palette_view : public ox::VPair<ox::Color_select, Palette_picker> {
               {}}
     {
         using namespace ox::pipe;
-        *this | strong_focus();
+        *this | strong_focus() | forward_focus(palette_picker) |
+            on_focus_in(
+                [] { ox::Terminal::set_palette(ox::dawn_bringer16::palette); });
         palette_picker.palette_picked.connect(
             [](auto const& pal) { ox::Terminal::set_palette(pal); });
-    }
-
-   protected:
-    auto focus_in_event() -> bool override
-    {
-        ox::Terminal::set_palette(ox::dawn_bringer16::palette);
-        ox::System::set_focus(palette_picker);
-        return true;
     }
 };
 

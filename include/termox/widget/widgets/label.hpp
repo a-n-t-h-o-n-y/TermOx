@@ -221,7 +221,7 @@ class Label_wrapper : public Wrapper_layout<Widget> {
         else
             this->height_policy = wrapped.height_policy;
 
-        *this | pipe::on_focus_in([this] { System::set_focus(wrapped); });
+        *this | pipe::forward_focus(wrapped);
 
         if constexpr (label_last)
             this->swap_children(0, 2);

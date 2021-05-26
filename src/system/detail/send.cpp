@@ -93,22 +93,20 @@ void send(ox::Focus_out_event e) { e.receiver.get().focus_out_event(); }
 
 void send(ox::Move_event e)
 {
-    auto const old_position = e.receiver.get().top_left();
-    auto const new_position = e.new_position;
-    if (old_position == new_position)
+    auto const previous = e.receiver.get().top_left();
+    if (previous == e.new_position)
         return;
-    e.receiver.get().set_top_left(new_position);
-    e.receiver.get().move_event(new_position, old_position);
+    e.receiver.get().set_top_left(e.new_position);
+    e.receiver.get().move_event(e.new_position, previous);
 }
 
 void send(ox::Resize_event e)
 {
-    auto const old_area = e.receiver.get().outer_area();
-    auto const new_area = e.new_area;
-    if (old_area == new_area)
+    auto const previous = e.receiver.get().outer_area();
+    if (previous == e.new_area)
         return;
-    e.receiver.get().set_outer_area(new_area);
-    e.receiver.get().resize_event(new_area, old_area);
+    e.receiver.get().set_outer_area(e.new_area);
+    e.receiver.get().resize_event(e.new_area, previous);
 }
 
 void send(ox::Timer_event e)

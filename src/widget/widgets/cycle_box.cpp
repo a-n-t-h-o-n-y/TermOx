@@ -154,18 +154,13 @@ Labeled_cycle_box::Labeled_cycle_box(Glyph_string title)
           {U'├'},
           {}}
 {
-    *this | pipe::fixed_height(1) | pipe::direct_focus();
+    using namespace ox::pipe;
+    *this | fixed_height(1) | direct_focus() | forward_focus(cycle_box);
 }
 
 Labeled_cycle_box::Labeled_cycle_box(Parameters p)
     : Labeled_cycle_box{std::move(p.label)}
 {}
-
-auto Labeled_cycle_box::focus_in_event() -> bool
-{
-    System::set_focus(cycle_box);
-    return true;
-}
 
 auto labeled_cycle_box(Glyph_string label) -> std::unique_ptr<Labeled_cycle_box>
 {
