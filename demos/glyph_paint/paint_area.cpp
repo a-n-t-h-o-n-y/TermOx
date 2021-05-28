@@ -20,7 +20,6 @@
 #include <termox/painter/glyph_string.hpp>
 #include <termox/painter/trait.hpp>
 #include <termox/system/key.hpp>
-#include <termox/widget/border.hpp>
 #include <termox/widget/detail/link_lifetimes.hpp>
 #include <termox/widget/focus_policy.hpp>
 #include <termox/widget/point.hpp>

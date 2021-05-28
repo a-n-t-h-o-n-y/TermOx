@@ -15,7 +15,6 @@
 #include <termox/system/event.hpp>
 #include <termox/system/system.hpp>
 #include <termox/terminal/terminal.hpp>
-#include <termox/widget/detail/border_offset.hpp>
 
 namespace {
 
@@ -43,13 +42,11 @@ Widget::Widget(std::string name,
                Focus_policy focus_policy_,
                Size_policy width_policy_,
                Size_policy height_policy_,
-               Border border_,
                Brush brush_,
                Glyph wallpaper,
                bool brush_paints_wallpaper,
                Cursor cursor)
-    : border{std::move(border_)},
-      focus_policy{std::move(focus_policy_)},
+    : focus_policy{std::move(focus_policy_)},
       cursor{std::move(cursor)},
       width_policy{std::move(width_policy_)},
       height_policy{std::move(height_policy_)},
@@ -66,10 +63,13 @@ Widget::Widget(std::string name,
 }
 
 Widget::Widget(Parameters p)
-    : Widget{std::move(p.name),         std::move(p.focus_policy),
-             std::move(p.width_policy), std::move(p.height_policy),
-             std::move(p.border),       std::move(p.brush),
-             std::move(p.wallpaper),    std::move(p.brush_paints_wallpaper),
+    : Widget{std::move(p.name),
+             std::move(p.focus_policy),
+             std::move(p.width_policy),
+             std::move(p.height_policy),
+             std::move(p.brush),
+             std::move(p.wallpaper),
+             std::move(p.brush_paints_wallpaper),
              std::move(p.cursor)}
 {}
 
@@ -113,31 +113,17 @@ auto Widget::inner_top_left() const -> Point
     return {this->inner_x(), this->inner_y()};
 }
 
-auto Widget::inner_x() const -> int
-{
-    return top_left_position_.x + detail::Border_offset::west(*this);
-}
+auto Widget::inner_x() const -> int { return top_left_position_.x; }
 
-auto Widget::inner_y() const -> int
-{
-    return top_left_position_.y + detail::Border_offset::north(*this);
-}
+auto Widget::inner_y() const -> int { return top_left_position_.y; }
 
 auto Widget::area() const -> Area { return {this->width(), this->height()}; }
 
 // TODO eventually you can remove these and just keep area(), once border is
 // changed to be its own thing.
-auto Widget::width() const -> int
-{
-    return this->outer_area().width - detail::Border_offset::east(*this) -
-           detail::Border_offset::west(*this);
-}
+auto Widget::width() const -> int { return this->outer_area().width; }
 
-auto Widget::height() const -> int
-{
-    return this->outer_area().height - detail::Border_offset::north(*this) -
-           detail::Border_offset::south(*this);
-}
+auto Widget::height() const -> int { return this->outer_area().height; }
 
 auto Widget::outer_area() const -> Area { return outer_area_; }
 
@@ -328,9 +314,8 @@ auto Widget::delete_event() -> bool
     return true;
 }
 
-auto Widget::paint_event(Painter& p) -> bool
+auto Widget::paint_event(Painter&) -> bool
 {
-    p.border();
     painted();
     return true;
 }
@@ -472,7 +457,6 @@ auto widget(std::string name,
             Focus_policy focus_policy,
             Size_policy width_policy,
             Size_policy height_policy,
-            Border border,
             Brush brush,
             Glyph wallpaper,
             bool brush_paints_wallpaper,
@@ -480,9 +464,8 @@ auto widget(std::string name,
 {
     return std::make_unique<Widget>(
         std::move(name), std::move(focus_policy), std::move(width_policy),
-        std::move(height_policy), std::move(border), std::move(brush),
-        std::move(wallpaper), std::move(brush_paints_wallpaper),
-        std::move(cursor));
+        std::move(height_policy), std::move(brush), std::move(wallpaper),
+        std::move(brush_paints_wallpaper), std::move(cursor));
 }
 
 auto widget(Widget::Parameters p) -> std::unique_ptr<Widget>

@@ -93,11 +93,11 @@ Side_pane::Side_pane()
 }
 
 Text_and_scroll::Text_and_scroll()
-    : Base_t{{}, {take_west(ox::border::rounded()), {U"Type Here..."}}}
+    : Base_t{{}, {ox::border::rounded(), {U"Type Here..."}}}
 {
     using namespace ox::pipe;
     textbox | bg(ox::Color::Dark_gray);
-    border.set(border.segments() | bg(ox::Color::Dark_gray));
+    border | bg(ox::Color::Dark_gray);
     link(scrollbar, textbox);
 }
 

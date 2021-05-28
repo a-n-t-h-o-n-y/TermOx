@@ -21,7 +21,6 @@
 #include <termox/system/key.hpp>
 #include <termox/system/mouse.hpp>
 #include <termox/widget/area.hpp>
-#include <termox/widget/border.hpp>
 #include <termox/widget/cursor.hpp>
 #include <termox/widget/focus_policy.hpp>
 #include <termox/widget/point.hpp>
@@ -36,7 +35,6 @@ class Widget {
         Focus_policy focus_policy   = Focus_policy::None;
         Size_policy width_policy    = Size_policy{};
         Size_policy height_policy   = Size_policy{};
-        Border border               = Border{};
         Brush brush                 = Brush{};
         Glyph wallpaper             = Glyph{U' '};
         bool brush_paints_wallpaper = true;
@@ -89,9 +87,6 @@ class Widget {
     Signal<void(Widget&)> timer_filter;
 
    public:
-    /// Describes the visual border of this Widget.
-    Border border;
-
     /// Describes how focus is given to this Widget.
     Focus_policy focus_policy;
 
@@ -116,7 +111,6 @@ class Widget {
                     Focus_policy focus_policy_  = Focus_policy::None,
                     Size_policy width_policy_   = Size_policy{},
                     Size_policy height_policy_  = Size_policy{},
-                    Border border_              = Border{},
                     Brush brush_                = Brush{},
                     Glyph wallpaper             = U' ',
                     bool brush_paints_wallpaper = true,
@@ -195,7 +189,7 @@ class Widget {
      *  use by the Widget. */
     [[nodiscard]] auto inner_y() const -> int;
 
-    /// Return the area the widget occupies, not including the Border.
+    /// Return the area the widget occupies.
     [[nodiscard]] auto area() const -> Area;
 
     /// Return the inner width dimension, this does not include Border space.
@@ -428,10 +422,9 @@ class Widget {
     std::set<Widget*> event_filters_;
 
     // Top left point of *this, relative to the top left of the screen.
-    // This Point is the same with or without a border enabled.
     Point top_left_position_ = {0, 0};
 
-    // The entire area of the widget, including any border space.
+    // The entire area of the widget.
     Area outer_area_ = {0, 0};
 
     std::uint16_t const unique_id_;
@@ -451,7 +444,6 @@ class Widget {
                           Focus_policy focus_policy   = Focus_policy::None,
                           Size_policy width_policy    = Size_policy{},
                           Size_policy height_policy   = Size_policy{},
-                          Border border               = Border{},
                           Brush brush                 = Brush{},
                           Glyph wallpaper             = U' ',
                           bool brush_paints_wallpaper = true,

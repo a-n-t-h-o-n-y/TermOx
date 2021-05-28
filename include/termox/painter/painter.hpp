@@ -54,12 +54,6 @@ class Painter {
     /// Fill the entire widget screen with wallpaper.
     auto wallpaper_fill() -> Painter&;
 
-    /// Paint the Border object around the outside of the associated Widget.
-    /** Borders own the perimeter defined by Widget::x(), Widget::y() and
-     *  Widget::outer_area().width, Widget::outer_area().height. Border is owned
-     *  by widget_ */
-    void border();
-
    private:
     /// Put a single Glyph to the canvas_ container.
     /** No bounds checking, used internally for all painting. Main entry point

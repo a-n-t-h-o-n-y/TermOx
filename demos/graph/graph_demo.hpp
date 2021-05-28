@@ -377,9 +377,9 @@ struct Settings : ox::VTuple<ox::Labeled_cycle_box,
 
 class Graph_demo : public ox::HPair<Graph_core, ox::Bordered<Settings>> {
    public:
-    Graph_core& core = this->first;
-    Settings& settings =
-        this->second | ox::pipe::take_west() | ox::pipe::wrapped();
+    Graph_core& core   = this->first;
+    Settings& settings = this->second | ox::pipe::take_west() |
+                         ox::pipe::fixed_width(25) | ox::pipe::wrapped();
 
    public:
     Graph_demo();

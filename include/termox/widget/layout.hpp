@@ -342,6 +342,7 @@ class Layout : public Widget {
         w.set_parent(nullptr);
     }
 
+    // TODO delete this!
     // For painting stuff, border has to be painted, but layouts shouldn't paint
     // otherwise, delete this once borders are redesigned to be layouts with
     // widgets.

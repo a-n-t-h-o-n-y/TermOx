@@ -6,12 +6,11 @@
 #include <utility>
 
 #include <termox/widget/bordered.hpp>
-#include <termox/widget/detail/border_offset.hpp>
 #include <termox/widget/layouts/horizontal.hpp>
 #include <termox/widget/layouts/vertical.hpp>
 #include <termox/widget/pipe.hpp>
+#include <termox/widget/size_policy.hpp>
 #include <termox/widget/widget.hpp>
-#include "termox/widget/size_policy.hpp"
 
 namespace ox::detail {
 
@@ -108,15 +107,6 @@ class Passive<Layout_t,
 
     void set_length(int length)
     {
-        // TODO this can be removed once Borders are their own thing.
-        if constexpr (is_vertical) {
-            length += detail::Border_offset::north_enabled(*this) ? 1 : 0;
-            length += detail::Border_offset::south_enabled(*this) ? 1 : 0;
-        }
-        else {
-            length += detail::Border_offset::east_enabled(*this) ? 1 : 0;
-            length += detail::Border_offset::west_enabled(*this) ? 1 : 0;
-        }
         if constexpr (is_vertical)
             *this | pipe::fixed_height(length);
         else

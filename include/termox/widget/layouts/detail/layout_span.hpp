@@ -7,7 +7,6 @@
 #include <utility>
 #include <vector>
 
-#include <termox/widget/detail/border_offset.hpp>
 #include <termox/widget/size_policy.hpp>
 #include <termox/widget/widget.hpp>
 

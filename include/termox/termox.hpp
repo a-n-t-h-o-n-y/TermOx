@@ -96,7 +96,6 @@
 #include <termox/widget/align.hpp>
 #include <termox/widget/area.hpp>
 #include <termox/widget/array.hpp>
-#include <termox/widget/border.hpp>
 #include <termox/widget/bordered.hpp>
 #include <termox/widget/cursor.hpp>
 #include <termox/widget/focus_policy.hpp>

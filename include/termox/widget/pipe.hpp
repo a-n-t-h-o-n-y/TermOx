@@ -205,7 +205,7 @@ auto operator|(std::unique_ptr<Bordered<Widget_t>> b_ptr,
     -> std::unique_ptr<Bordered<Widget_t>>
 {
     b_ptr->set(s);
-    return std::move(b_ptr);
+    return b_ptr;
 }
 
 template <
@@ -225,7 +225,7 @@ auto operator|(std::unique_ptr<Bordered<Widget_t>> b_ptr, Background_color bg)
     -> std::unique_ptr<Bordered<Widget_t>>
 {
     b_ptr->set(b_ptr->segments() | bg);
-    return std::move(b_ptr);
+    return b_ptr;
 }
 
 template <
