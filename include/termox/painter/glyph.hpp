@@ -41,7 +41,14 @@ struct Glyph {
 };
 
 // Trait -------------------------------------------------------------------
+// TODO remove
 auto constexpr operator|(Glyph& g, Traits ts) -> Glyph&
+{
+    g.brush.traits |= ts;
+    return g;
+}
+
+auto constexpr operator|=(Glyph& g, Traits ts) -> Glyph&
 {
     g.brush.traits |= ts;
     return g;
@@ -89,12 +96,20 @@ namespace esc {  // For ADL; Trait(s) is really in namespace::esc.
 namespace ox {
 
 // Background_color ------------------------------------------------------------
+// TODO remove
 auto constexpr operator|(Glyph& g, Background_color c) -> Glyph&
 {
     g.brush.background = Color{c.value};
     return g;
 }
 
+auto constexpr operator|=(Glyph& g, Background_color c) -> Glyph&
+{
+    g.brush.background = Color{c.value};
+    return g;
+}
+
+// TODO don't take const&, just take by value, Glyph == 8 bytes
 [[nodiscard]] auto constexpr operator|(Glyph const& g, Background_color c)
     -> Glyph
 {
@@ -102,6 +117,8 @@ auto constexpr operator|(Glyph& g, Background_color c) -> Glyph&
     return copy | c;
 }
 
+// TODO
+// Probably don't need this overload since Glyph does not allocate.
 [[nodiscard]] auto constexpr operator|(Glyph&& g, Background_color c) -> Glyph
 {
     g.brush.background = Color{c.value};
@@ -119,7 +136,14 @@ auto constexpr operator|(Glyph& g, Background_color c) -> Glyph&
 }
 
 // Foreground_color ------------------------------------------------------------
+// TODO remove
 auto constexpr operator|(Glyph& g, Foreground_color c) -> Glyph&
+{
+    g.brush.foreground = Color{c.value};
+    return g;
+}
+
+auto constexpr operator|=(Glyph& g, Foreground_color c) -> Glyph&
 {
     g.brush.foreground = Color{c.value};
     return g;

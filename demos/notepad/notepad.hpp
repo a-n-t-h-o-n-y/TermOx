@@ -9,6 +9,7 @@
 #include <termox/painter/glyph_string.hpp>
 #include <termox/painter/trait.hpp>
 #include <termox/system/key.hpp>
+#include <termox/widget/bordered.hpp>
 #include <termox/widget/layouts/horizontal.hpp>
 #include <termox/widget/layouts/passive.hpp>
 #include <termox/widget/layouts/vertical.hpp>
@@ -83,10 +84,14 @@ class Side_pane : public ox::VTuple<Labeled_color_select,
     Side_pane();
 };
 
-class Text_and_scroll : public ox::HPair<ox::VScrollbar, ox::Textbox> {
+class Text_and_scroll
+    : public ox::HPair<ox::VScrollbar, ox::Bordered<ox::Textbox>> {
+    using Base_t = ox::HPair<ox::VScrollbar, ox::Bordered<ox::Textbox>>;
+
    public:
-    ox::VScrollbar& scrollbar = this->first;
-    ox::Textbox& textbox      = this->second;
+    ox::VScrollbar& scrollbar         = this->first;
+    ox::Bordered<ox::Textbox>& border = this->second;
+    ox::Textbox& textbox              = border.wrapped;
 
    public:
     Text_and_scroll();

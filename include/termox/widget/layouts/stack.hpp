@@ -178,7 +178,7 @@ class Stack : public Layout<Child_t> {
         this->Widget::enable_and_post_events(enable, post_child_polished_event);
         for (auto& child : this->get_children()) {
             if (&child == active_page_)
-                child.enable(enable, post_child_polished_event);
+                child.enable(enable, false);
             else
                 child.disable();
         }

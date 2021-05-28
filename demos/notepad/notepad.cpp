@@ -93,9 +93,11 @@ Side_pane::Side_pane()
 }
 
 Text_and_scroll::Text_and_scroll()
+    : Base_t{{}, {take_west(ox::border::rounded()), {U"Type Here..."}}}
 {
     using namespace ox::pipe;
-    textbox | bordered() | rounded_corners() | bg(ox::Color::Dark_gray);
+    textbox | bg(ox::Color::Dark_gray);
+    border.set(border.segments() | bg(ox::Color::Dark_gray));
     link(scrollbar, textbox);
 }
 
@@ -104,10 +106,12 @@ Text_and_side_pane::Text_and_side_pane()
     using namespace ox;
     using namespace ox::pipe;
 
-    side_pane.fg_select.color_selected.connect(
-        ox::slot::set_foreground(text_and_scroll.textbox));
-    side_pane.bg_select.color_selected.connect(
-        ox::slot::set_background(text_and_scroll.textbox));
+    side_pane.fg_select.color_selected.connect([this](ox::Color c) {
+        text_and_scroll.border | fg(c) | wrapped() | fg(c);
+    });
+    side_pane.bg_select.color_selected.connect([this](ox::Color c) {
+        text_and_scroll.border | bg(c) | wrapped() | bg(c);
+    });
 
     side_pane.trait_boxes.trait_enabled.connect([this](Trait t) {
         text_and_scroll.textbox.insert_brush.traits.insert(t);
@@ -212,7 +216,8 @@ auto notepad() -> std::unique_ptr<Widget>
         hpair(
             hpair(
                 vscrollbar(),
-                textbox(U"A Textbox...") | bordered() | rounded_corners()
+                bordered(textbox(U"Type Here..."))
+                    | ox::border::rounded() | bg(ox::Color::Dark_gray)
             ),
             vtuple(
                 cycle_stack<Color_select>(
@@ -243,8 +248,9 @@ auto notepad() -> std::unique_ptr<Widget>
       | on_focus_in([] { Terminal::set_palette(dawn_bringer16::palette); });
     // clang-format on
 
-    auto& sb = np->get<0>().first.first;
-    auto& tb = np->get<0>().first.second;
+    auto& sb  = np->get<0>().first.first;
+    auto& tbb = np->get<0>().first.second;
+    auto& tb  = tbb | wrapped() | bg(ox::Color::Dark_gray);
 
     auto& bg = np->get<0>().second.get<0>().stack.get_children()[0];
     auto& fg = np->get<0>().second.get<0>().stack.get_children()[1];
@@ -269,8 +275,10 @@ auto notepad() -> std::unique_ptr<Widget>
 
     link(sb, tb);
 
-    bg.color_selected.connect([&tb](Color c) { tb | ox::bg(c); });
-    fg.color_selected.connect([&tb](Color c) { tb | ox::fg(c); });
+    bg.color_selected.connect(
+        [&](Color c) { tbb | ox::bg(c) | wrapped() | ox::bg(c); });
+    fg.color_selected.connect(
+        [&](Color c) { tbb | ox::fg(c) | wrapped() | ox::fg(c); });
 
     auto const connect = [&tb](auto& cb, Trait t) {
         cb.checked.connect([&tb, t] { tb.insert_brush | t; });

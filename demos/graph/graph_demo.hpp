@@ -43,7 +43,7 @@ class Graph_generator {
 
 class Sine final : public Graph_generator {
    public:
-    auto generate(ox::Boundary<double>)
+    auto generate(ox::Boundary<double> b)
         -> std::vector<ox::Graph<>::Coordinate>& override;
 
     void step_forward() override;
@@ -57,7 +57,7 @@ class Sine final : public Graph_generator {
 
 class Sine_three final : public Graph_generator {
    public:
-    auto generate(ox::Boundary<double>)
+    auto generate(ox::Boundary<double> b)
         -> std::vector<ox::Graph<>::Coordinate>& override;
 
     void step_forward() override;
@@ -69,9 +69,24 @@ class Sine_three final : public Graph_generator {
     std::vector<ox::Graph<>::Coordinate> coords_;
 };
 
+class Tan final : public Graph_generator {
+   public:
+    auto generate(ox::Boundary<double> b)
+        -> std::vector<ox::Graph<>::Coordinate>& override;
+
+    void step_forward() override;
+
+    auto default_boundary() const -> ox::Boundary<double> override;
+
+   private:
+    double t_         = 0.;
+    double direction_ = 1.;
+    std::vector<ox::Graph<>::Coordinate> coords_;
+};
+
 class Sine_phase final : public Graph_generator {
    public:
-    auto generate(ox::Boundary<double>)
+    auto generate(ox::Boundary<double> b)
         -> std::vector<ox::Graph<>::Coordinate>& override;
 
     void step_forward() override;
@@ -87,7 +102,7 @@ class Sine_phase final : public Graph_generator {
 
 class Circle final : public Graph_generator {
    public:
-    auto generate(ox::Boundary<double>)
+    auto generate(ox::Boundary<double> b)
         -> std::vector<ox::Graph<>::Coordinate>& override;
 
     void step_forward() override;
@@ -101,7 +116,7 @@ class Circle final : public Graph_generator {
 };
 
 class Biology final : public Graph_generator {
-    auto generate(ox::Boundary<double>)
+    auto generate(ox::Boundary<double> b)
         -> std::vector<ox::Graph<>::Coordinate>& override;
 
     void step_forward() override;
@@ -115,7 +130,7 @@ class Biology final : public Graph_generator {
 };
 
 class Dizzy final : public Graph_generator {
-    auto generate(ox::Boundary<double>)
+    auto generate(ox::Boundary<double> b)
         -> std::vector<ox::Graph<>::Coordinate>& override;
 
     void step_forward() override;
@@ -129,7 +144,7 @@ class Dizzy final : public Graph_generator {
 };
 
 class Board final : public Graph_generator {
-    auto generate(ox::Boundary<double>)
+    auto generate(ox::Boundary<double> b)
         -> std::vector<ox::Graph<>::Coordinate>& override;
 
     void step_forward() override;
@@ -143,7 +158,7 @@ class Board final : public Graph_generator {
 };
 
 class Alien final : public Graph_generator {
-    auto generate(ox::Boundary<double>)
+    auto generate(ox::Boundary<double> b)
         -> std::vector<ox::Graph<>::Coordinate>& override;
 
     void step_forward() override;
@@ -157,7 +172,7 @@ class Alien final : public Graph_generator {
 };
 
 class Mirror final : public Graph_generator {
-    auto generate(ox::Boundary<double>)
+    auto generate(ox::Boundary<double> b)
         -> std::vector<ox::Graph<>::Coordinate>& override;
 
     void step_forward() override;
@@ -171,7 +186,7 @@ class Mirror final : public Graph_generator {
 };
 
 class Tunnel final : public Graph_generator {
-    auto generate(ox::Boundary<double>)
+    auto generate(ox::Boundary<double> b)
         -> std::vector<ox::Graph<>::Coordinate>& override;
 
     void step_forward() override;
@@ -185,7 +200,7 @@ class Tunnel final : public Graph_generator {
 };
 
 class Star final : public Graph_generator {
-    auto generate(ox::Boundary<double>)
+    auto generate(ox::Boundary<double> b)
         -> std::vector<ox::Graph<>::Coordinate>& override;
 
     void step_forward() override;
@@ -199,7 +214,7 @@ class Star final : public Graph_generator {
 };
 
 class Moons final : public Graph_generator {
-    auto generate(ox::Boundary<double>)
+    auto generate(ox::Boundary<double> b)
         -> std::vector<ox::Graph<>::Coordinate>& override;
 
     void step_forward() override;
@@ -360,10 +375,11 @@ struct Settings : ox::VTuple<ox::Labeled_cycle_box,
     void reset_scale_box();
 };
 
-class Graph_demo : public ox::HPair<Graph_core, Settings> {
+class Graph_demo : public ox::HPair<Graph_core, ox::Bordered<Settings>> {
    public:
-    Graph_core& core   = this->first;
-    Settings& settings = this->second;
+    Graph_core& core = this->first;
+    Settings& settings =
+        this->second | ox::pipe::take_west() | ox::pipe::wrapped();
 
    public:
     Graph_demo();

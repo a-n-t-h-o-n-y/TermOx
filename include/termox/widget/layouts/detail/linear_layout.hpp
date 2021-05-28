@@ -220,7 +220,6 @@ class Linear_layout : public Layout<Child> {
     Unique_space<Parameters> unique_space_;
 
    private:
-    // TODO rename
     void resize_and_move_children()
     {
         auto const primary_lengths = shared_space_.calculate_lengths(*this);

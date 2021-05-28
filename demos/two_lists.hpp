@@ -8,125 +8,21 @@
 
 namespace demo {
 
-using Btns = ox::Array<ox::layout::Horizontal<ox::Button>, 2>;
-
-using App = ox::Tuple<ox::layout::Vertical<>, ox::Textbox, Btns>;
-
-struct Composites_old : App {
-    Composites_old()
-    {
-        auto& btns = this->get<1>();
-        auto& save = btns.get<0>();
-        auto& load = btns.get<1>();
-        auto& txbx = this->get<0>();
-
-        using namespace ox;
-        using namespace ox::pipe;
-        btns | fixed_height(1);
-        // save | label("Save") | bg(Color::Light_blue);
-        // load | label("Load") | bg(Color::Light_green);
-        txbx | bg(Color::White) | fg(Color::Black);
-
-        // *this | children() | fixed_height(4);
-        *this | descendants() | bg(Color::Blue);
-
-        save | bg(Color::Background);
-        txbx | fg(Color::Foreground);
-
-        // save | add_trait(Trait::Bold, Trait::Underline);
-        // save.brush.traits.insert(Trait::Bold, Trait::Underline);
-        save | Trait::Bold | Trait::Underline;
-        load | Trait::Bold | Trait::Underline;
-
-        // save | Trait::Bold | Trait::Underline;
-        // save | Trait::Bold | Trait::Underline;
-
-        // save | discard(Trait::Underline);
-        save | discard(Trait::Underline);
-        save | clear_traits();
-        save | on_enable([&txbx]() { txbx.set_text(U"Save Enabled"); });
-        save | on_child_added([](Widget& w) { w.border.enable(); });
-
-        load | on_move([&txbx](Point n, Point) {
-            txbx.set_text(std::to_string(n.x) + " " + std::to_string(n.y));
-        });
-        load | on_resize([&txbx](auto const& n, auto const&) {
-            txbx.set_text(std::to_string(n.width) + " " +
-                          std::to_string(n.height));
-        });
-
-        load | on_mouse_press([&](auto) { load | bg(Color::Light_gray); });
-        load | on_mouse_release([&](auto) { load | bg(Color::Dark_gray); });
-        txbx | on_key_press([&](auto) { txbx | bg(Color::Light_blue); });
-
-        using namespace std::literals;
-        save | animate(34ms) | wallpaper(U'X') | wallpaper(U' ');
-        load | wallpaper({U'-', fg(Color::Red)});
-        load | wallpaper_without_brush() | wallpaper_with_brush();
-
-        load | show_cursor() | put_cursor({2, 5});
-        save | hide_cursor();
-        // txbx | no_focus();
-        load | strong_focus() | bg(Color::Green);
-
-        // save | fixed_width(5);
-        // save | minimum_width(2);
-        // save | maximum_width(7);
-        // save | preferred_width(7);
-        // save | expanding_width(7);
-        // save | minimum_expanding_width(7);
-        // save | ignored_width();
-
-        // save | width_hint(2);
-        // save | width_min(2);
-        // save | width_max(2);
-        // save | width_stretch(2.3);
-        // save | can_ignore_width_min();
-        // save | cannot_ignore_width_min();
-
-        // save | fixed_height(5);
-        // save | minimum_height(2);
-        // save | maximum_height(7);
-        // save | preferred_height(7);
-        // save | expanding_height(7);
-        // save | minimum_expanding_height(7);
-        // save | ignored_height();
-
-        // save | height_hint(2);
-        // save | height_min(2);
-        // save | height_max(2);
-        // save | height_stretch(2.3);
-        // save | can_ignore_height_min();
-        // save | cannot_ignore_height_min();
-
-        // txbx | bordered() | block_walls_4() | west_wall(U'▓')
-        //      | north_wall(U'▓') | north_west_corner(U'▓');
-
-        // txbx | bordered() | block_walls_3() | north_west_walls(U'▓');
-        txbx | bordered() | asterisk_walls() | plus_corners();
-        load | on_mouse_press([&](auto const& m) {
-            if (m.modifiers.ctrl)
-                txbx | bg(Color::Orange);
-        });
-        // constexpr auto g = U'G' | Trait::Bold;
-        auto gs = "hello" | Trait::Inverse;
-    }
-};
-
 using namespace ox;
 
 using Check      = Selectable<HCheckbox_label>;
 using Check_list = Array<layout::Selecting<layout::Vertical<Check>>, 15>;
 
-struct My_check_list : ox::VPair<ox::Passive<Check_list>, ox::Widget> {
-    Check_list& list = this->first;
+struct My_check_list
+    : Bordered<ox::VPair<ox::Passive<Check_list>, ox::Widget>> {
+    Check_list& list = this->wrapped.first;
 
     My_check_list()
     {
         using namespace ox;
         using namespace ox::pipe;
 
-        *this | bordered() | direct_focus() | forward_focus(list);
+        *this | direct_focus() | forward_focus(list);
 
         list.set_increment_selection_keys({Key::Arrow_down, Key::j});
         list.set_decrement_selection_keys({Key::Arrow_up, Key::k});
@@ -176,10 +72,6 @@ class Idea : public Settings_box {
         this->get<2>().check();
 
         this->get<3>() | bg(Color::Dark_gray);
-
-        // this->get<3>() | add_option(U"Option BLACK", [this] {
-        //     this->get<0>() | bg(Color::Black);
-        // });
 
         this->get<3>().add_option(U"Option BLACK").connect([this] {
             this->get<0>() | bg(Color::Black);

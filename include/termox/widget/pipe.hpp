@@ -15,51 +15,13 @@
 #include <termox/painter/glyph_string.hpp>
 #include <termox/system/system.hpp>
 #include <termox/widget/align.hpp>
+#include <termox/widget/bordered.hpp>
+#include <termox/widget/detail/pipe_utility.hpp>
 #include <termox/widget/focus_policy.hpp>
 #include <termox/widget/growth.hpp>
 #include <termox/widget/point.hpp>
 #include <termox/widget/widget.hpp>
 #include <termox/widget/wrap.hpp>
-
-namespace ox::pipe::detail {
-
-/// Used to call operator| overload to create a new Range from filter predicate
-template <typename Predicate>
-class Filter_predicate {
-   public:
-    explicit Filter_predicate(Predicate p) : predicate{p} {}
-
-   public:
-    Predicate predicate;
-};
-
-/// Used to call operator| overload to create a new Range from filter predicate
-template <typename W>
-class Dynamic_filter_predicate {
-   public:
-    using Widget_t = W;
-};
-
-template <typename T>
-struct is_widget_ptr : std::false_type {};
-
-template <typename X>
-struct is_widget_ptr<std::unique_ptr<X>> : std::is_base_of<ox::Widget, X> {};
-
-/// True if T is a std::unique_ptr<> to a ox::\idget type.
-template <typename T>
-constexpr bool is_widget_ptr_v = is_widget_ptr<T>::value;
-
-/// True if T is a Widget type.
-template <typename T>
-constexpr bool is_widget_v = std::is_base_of_v<Widget, std::decay_t<T>>;
-
-/// True if T is a Widget type or a Widget pointer.
-template <typename T>
-constexpr bool is_widget_or_wptr =
-    is_widget_v<T> || is_widget_ptr_v<std::decay_t<T>>;
-
-}  // namespace ox::pipe::detail
 
 namespace ox::pipe {
 
@@ -93,13 +55,13 @@ auto for_each(F&& f)
 template <typename F>
 [[nodiscard]] auto filter(F&& predicate)
 {
-    return detail::Filter_predicate{predicate};
+    return pipe::detail::Filter_predicate{predicate};
 }
 
 /// Filter by name of Widget
 [[nodiscard]] inline auto find(std::string const& name)
 {
-    return detail::Filter_predicate{
+    return pipe::detail::Filter_predicate{
         [=](auto const& w) { return w.name() == name; }};
 }
 
@@ -107,7 +69,7 @@ template <typename F>
 template <typename Widget_t>
 [[nodiscard]] auto filter()
 {
-    return detail::Dynamic_filter_predicate<Widget_t>{};
+    return pipe::detail::Dynamic_filter_predicate<Widget_t>{};
 }
 
 // Widget Modifiers ------------------------------------------------------------
@@ -186,8 +148,9 @@ inline auto wallpaper_without_brush()
 
 }  // namespace ox::pipe
 
-// Brush Mofifiers -------------------------------------------------------------
 namespace ox {
+
+// Brush Mofifiers -------------------------------------------------------------
 
 /// Change the Background color of the given Widget.
 template <typename Widget_t,
@@ -222,8 +185,136 @@ auto operator|(Widget_t&& w, Trait t) -> decltype(auto)
     return std::forward<Widget_t>(w);
 }
 
+// Border Mofifiers ------------------------------------------------------------
+
+template <
+    typename Widget_t,
+    typename std::enable_if_t<pipe::detail::is_widget_v<Widget_t>, int> = 0>
+auto operator|(Bordered<Widget_t>& b, ox::border::Segments const& s)
+    -> Bordered<Widget_t>&
+{
+    b.set(s);
+    return b;
+}
+
+template <
+    typename Widget_t,
+    typename std::enable_if_t<pipe::detail::is_widget_v<Widget_t>, int> = 0>
+auto operator|(std::unique_ptr<Bordered<Widget_t>> b_ptr,
+               ox::border::Segments const& s)
+    -> std::unique_ptr<Bordered<Widget_t>>
+{
+    b_ptr->set(s);
+    return std::move(b_ptr);
+}
+
+template <
+    typename Widget_t,
+    typename std::enable_if_t<pipe::detail::is_widget_v<Widget_t>, int> = 0>
+auto operator|(Bordered<Widget_t>& b, Background_color bg)
+    -> Bordered<Widget_t>&
+{
+    b.set(b.segments() | bg);
+    return b;
+}
+
+template <
+    typename Widget_t,
+    typename std::enable_if_t<pipe::detail::is_widget_v<Widget_t>, int> = 0>
+auto operator|(std::unique_ptr<Bordered<Widget_t>> b_ptr, Background_color bg)
+    -> std::unique_ptr<Bordered<Widget_t>>
+{
+    b_ptr->set(b_ptr->segments() | bg);
+    return std::move(b_ptr);
+}
+
+template <
+    typename Widget_t,
+    typename std::enable_if_t<pipe::detail::is_widget_v<Widget_t>, int> = 0>
+auto operator|(Bordered<Widget_t>& b, Foreground_color fg)
+    -> Bordered<Widget_t>&
+{
+    b.set(b.segments() | fg);
+    return b;
+}
+
+template <
+    typename Widget_t,
+    typename std::enable_if_t<pipe::detail::is_widget_v<Widget_t>, int> = 0>
+auto operator|(std::unique_ptr<Bordered<Widget_t>> b_ptr, Foreground_color fg)
+    -> std::unique_ptr<Bordered<Widget_t>>
+{
+    b_ptr->set(b_ptr->segments() | fg);
+    return std::move(b_ptr);
+}
+
 }  // namespace ox
+
 namespace ox::pipe {
+
+inline auto drop_north()
+{
+    return [](auto&& w) -> decltype(auto) {
+        get(w).set(drop_north(get(w).segments()));
+        return std::forward<decltype(w)>(w);
+    };
+}
+
+inline auto drop_south()
+{
+    return [](auto&& w) -> decltype(auto) {
+        get(w).set(drop_south(get(w).segments()));
+        return std::forward<decltype(w)>(w);
+    };
+}
+
+inline auto drop_east()
+{
+    return [](auto&& w) -> decltype(auto) {
+        get(w).set(drop_east(get(w).segments()));
+        return std::forward<decltype(w)>(w);
+    };
+}
+
+inline auto drop_west()
+{
+    return [](auto&& w) -> decltype(auto) {
+        get(w).set(drop_west(get(w).segments()));
+        return std::forward<decltype(w)>(w);
+    };
+}
+
+inline auto take_north()
+{
+    return [](auto&& w) -> decltype(auto) {
+        get(w).set(take_north(get(w).segments()));
+        return std::forward<decltype(w)>(w);
+    };
+}
+
+inline auto take_south()
+{
+    return [](auto&& w) -> decltype(auto) {
+        get(w).set(take_south(get(w).segments()));
+        return std::forward<decltype(w)>(w);
+    };
+}
+
+inline auto take_east()
+{
+    return [](auto&& w) -> decltype(auto) {
+        get(w).set(take_east(get(w).segments()));
+        return std::forward<decltype(w)>(w);
+    };
+}
+
+inline auto take_west()
+{
+    return [](auto&& w) -> decltype(auto) {
+        get(w).set(take_west(get(w).segments()));
+        return std::forward<decltype(w)>(w);
+    };
+}
 
 /// Discards Traits from Widgets or Glyph_strings
 [[nodiscard]] inline auto discard(Traits ts)
@@ -582,996 +673,6 @@ inline auto cannot_ignore_height_min()
     };
 }
 
-// Border Modifiers ------------------------------------------------------------
-// Pre-Fab Border Shapes - most common of 256 total combinations
-inline auto bordered()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).border.enable();
-        auto& segments = get(w).border.segments;
-        segments.north.enable();
-        segments.south.enable();
-        segments.east.enable();
-        segments.west.enable();
-        segments.north_east.enable();
-        segments.north_west.enable();
-        segments.south_east.enable();
-        segments.south_west.enable();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto not_bordered()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).border.disable();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto north_border()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).border.enable();
-        auto& segments = get(w).border.segments;
-        segments.north.enable();
-        segments.south.disable();
-        segments.east.disable();
-        segments.west.disable();
-        segments.north_east.disable();
-        segments.north_west.disable();
-        segments.south_east.disable();
-        segments.south_west.disable();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto south_border()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).border.enable();
-        auto& segments = get(w).border.segments;
-        segments.north.disable();
-        segments.south.enable();
-        segments.east.disable();
-        segments.west.disable();
-        segments.north_east.disable();
-        segments.north_west.disable();
-        segments.south_east.disable();
-        segments.south_west.disable();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto east_border()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).border.enable();
-        auto& segments = get(w).border.segments;
-        segments.north.disable();
-        segments.south.disable();
-        segments.east.enable();
-        segments.west.disable();
-        segments.north_east.disable();
-        segments.north_west.disable();
-        segments.south_east.disable();
-        segments.south_west.disable();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto west_border()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).border.enable();
-        auto& segments = get(w).border.segments;
-        segments.north.disable();
-        segments.south.disable();
-        segments.east.disable();
-        segments.west.enable();
-        segments.north_east.disable();
-        segments.north_west.disable();
-        segments.south_east.disable();
-        segments.south_west.disable();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto north_east_border()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).border.enable();
-        auto& segments = get(w).border.segments;
-        segments.north.enable();
-        segments.south.disable();
-        segments.east.enable();
-        segments.west.disable();
-        segments.north_east.enable();
-        segments.north_west.disable();
-        segments.south_east.disable();
-        segments.south_west.disable();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto north_west_border()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).border.enable();
-        auto& segments = get(w).border.segments;
-        segments.north.enable();
-        segments.south.disable();
-        segments.east.disable();
-        segments.west.enable();
-        segments.north_east.disable();
-        segments.north_west.enable();
-        segments.south_east.disable();
-        segments.south_west.disable();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto south_east_border()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).border.enable();
-        auto& segments = get(w).border.segments;
-        segments.north.disable();
-        segments.south.enable();
-        segments.east.enable();
-        segments.west.disable();
-        segments.north_east.disable();
-        segments.north_west.disable();
-        segments.south_east.enable();
-        segments.south_west.disable();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto south_west_border()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).border.enable();
-        auto& segments = get(w).border.segments;
-        segments.north.disable();
-        segments.south.enable();
-        segments.east.disable();
-        segments.west.enable();
-        segments.north_east.disable();
-        segments.north_west.disable();
-        segments.south_east.disable();
-        segments.south_west.enable();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto north_south_border()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).border.enable();
-        auto& segments = get(w).border.segments;
-        segments.north.enable();
-        segments.south.enable();
-        segments.east.disable();
-        segments.west.disable();
-        segments.north_east.disable();
-        segments.north_west.disable();
-        segments.south_east.disable();
-        segments.south_west.disable();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto east_west_border()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).border.enable();
-        auto& segments = get(w).border.segments;
-        segments.north.disable();
-        segments.south.disable();
-        segments.east.enable();
-        segments.west.enable();
-        segments.north_east.disable();
-        segments.north_west.disable();
-        segments.south_east.disable();
-        segments.south_west.disable();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto corners_border()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).border.enable();
-        auto& segments = get(w).border.segments;
-        segments.north.disable();
-        segments.south.disable();
-        segments.east.disable();
-        segments.west.disable();
-        segments.north_east.enable();
-        segments.north_west.enable();
-        segments.south_east.enable();
-        segments.south_west.enable();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto no_corners_border()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).border.enable();
-        auto& segments = get(w).border.segments;
-        segments.north.enable();
-        segments.south.enable();
-        segments.east.enable();
-        segments.west.enable();
-        segments.north_east.disable();
-        segments.north_west.disable();
-        segments.south_east.disable();
-        segments.south_west.disable();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto no_walls_border()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).border.enable();
-        auto& segments = get(w).border.segments;
-        segments.north.disable();
-        segments.south.disable();
-        segments.east.disable();
-        segments.west.disable();
-        segments.north_east.enable();
-        segments.north_west.enable();
-        segments.south_east.enable();
-        segments.south_west.enable();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-namespace detail {
-template <typename G>
-using Can_make_glyph_from_t =
-    std::enable_if_t<std::is_constructible_v<Glyph, G> ||
-                         std::is_convertible_v<G, Glyph>,
-                     int>;
-}
-
-/// Set traits given to each wall of the border.
-inline auto walls(Traits traits)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x = get(w);
-        x.border.segments.north.brush.traits.insert(traits);
-        x.border.segments.south.brush.traits.insert(traits);
-        x.border.segments.east.brush.traits.insert(traits);
-        x.border.segments.west.brush.traits.insert(traits);
-        x.border.segments.north_east.brush.traits.insert(traits);
-        x.border.segments.north_west.brush.traits.insert(traits);
-        x.border.segments.south_east.brush.traits.insert(traits);
-        x.border.segments.south_west.brush.traits.insert(traits);
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-/// Set the foreground color given to each wall of the border.
-inline auto walls(Foreground_color c)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x          = get(w);
-        auto const color = Color{c.value};
-
-        x.border.segments.north.brush.foreground      = color;
-        x.border.segments.south.brush.foreground      = color;
-        x.border.segments.east.brush.foreground       = color;
-        x.border.segments.west.brush.foreground       = color;
-        x.border.segments.north_east.brush.foreground = color;
-        x.border.segments.north_west.brush.foreground = color;
-        x.border.segments.south_east.brush.foreground = color;
-        x.border.segments.south_west.brush.foreground = color;
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-/// Set the background color given to each wall of the border.
-inline auto walls(Background_color c)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x          = get(w);
-        auto const color = Color{c.value};
-
-        x.border.segments.north.brush.background      = color;
-        x.border.segments.south.brush.background      = color;
-        x.border.segments.east.brush.background       = color;
-        x.border.segments.west.brush.background       = color;
-        x.border.segments.north_east.brush.background = color;
-        x.border.segments.north_west.brush.background = color;
-        x.border.segments.south_east.brush.background = color;
-        x.border.segments.south_west.brush.background = color;
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-// Wall/Corner Glyphs - Does not change border's enabled state.
-template <typename G, typename detail::Can_make_glyph_from_t<G> = 0>
-auto north_wall(G g)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        get(w).border.segments.north = g;
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename... Traits>
-auto north_wall(Traits... a)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        get(w).border.segments.north.brush.add_traits(a...);
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename G, typename detail::Can_make_glyph_from_t<G> = 0>
-auto south_wall(G g)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        get(w).border.segments.south = g;
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename... Traits>
-auto south_wall(Traits... a)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        get(w).border.segments.south.brush.add_traits(a...);
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename G, typename detail::Can_make_glyph_from_t<G> = 0>
-auto east_wall(G g)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        get(w).border.segments.east = g;
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename... Traits>
-auto east_wall(Traits... a)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        get(w).border.segments.east.brush.add_traits(a...);
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename G, typename detail::Can_make_glyph_from_t<G> = 0>
-auto west_wall(G g)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        get(w).border.segments.west = g;
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename... Traits>
-auto west_wall(Traits... a)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        get(w).border.segments.west.brush.add_traits(a...);
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename G, typename detail::Can_make_glyph_from_t<G> = 0>
-auto north_south_walls(G g)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                 = get(w);
-        x.border.segments.north = g;
-        x.border.segments.south = g;
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename... Traits>
-auto north_south_walls(Traits... a)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x = get(w);
-        x.border.segments.north.brush.add_traits(a...);
-        x.border.segments.south.brush.add_traits(a...);
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename G, typename detail::Can_make_glyph_from_t<G> = 0>
-auto east_west_walls(G g)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                = get(w);
-        x.border.segments.east = g;
-        x.border.segments.west = g;
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename... Traits>
-auto east_west_walls(Traits... a)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x = get(w);
-        x.border.segments.east.brush.add_traits(a...);
-        x.border.segments.west.brush.add_traits(a...);
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename G, typename detail::Can_make_glyph_from_t<G> = 0>
-auto north_east_corner(G g)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north_east = g;
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename... Traits>
-auto north_east_corner(Traits... a)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x = get(w);
-        x.border.segments.north_east.brush.add_traits(a...);
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename G, typename detail::Can_make_glyph_from_t<G> = 0>
-auto north_east_walls(G g)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north      = g;
-        x.border.segments.north_east = g;
-        x.border.segments.east       = g;
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename... Traits>
-auto north_east_walls(Traits... a)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x = get(w);
-        x.border.segments.north.brush.add_traits(a...);
-        x.border.segments.north_east.brush.add_traits(a...);
-        x.border.segments.east.brush.add_traits(a...);
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename G, typename detail::Can_make_glyph_from_t<G> = 0>
-auto north_west_corner(G g)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north_west = g;
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename... Traits>
-auto north_west_corner(Traits... a)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x = get(w);
-        x.border.segments.north_west.brush.add_traits(a...);
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename G, typename detail::Can_make_glyph_from_t<G> = 0>
-auto north_west_walls(G g)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north      = g;
-        x.border.segments.north_west = g;
-        x.border.segments.west       = g;
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename... Traits>
-auto north_west_walls(Traits... a)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x = get(w);
-        x.border.segments.north.brush.add_traits(a...);
-        x.border.segments.north_west.brush.add_traits(a...);
-        x.border.segments.west.brush.add_traits(a...);
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename G, typename detail::Can_make_glyph_from_t<G> = 0>
-auto south_east_corner(G g)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.south_east = g;
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename... Traits>
-auto south_east_corner(Traits... a)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x = get(w);
-        x.border.segments.south_east.brush.add_traits(a...);
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename G, typename detail::Can_make_glyph_from_t<G> = 0>
-auto south_east_walls(G g)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.south      = g;
-        x.border.segments.south_east = g;
-        x.border.segments.east       = g;
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename... Traits>
-auto south_east_walls(Traits... a)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x = get(w);
-        x.border.segments.south.brush.add_traits(a...);
-        x.border.segments.south_east.brush.add_traits(a...);
-        x.border.segments.east.brush.add_traits(a...);
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename G, typename detail::Can_make_glyph_from_t<G> = 0>
-auto south_west_corner(G g)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.south_west = g;
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename... Traits>
-auto south_west_corner(Traits... a)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x = get(w);
-        x.border.segments.south_west.brush.add_traits(a...);
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename G, typename detail::Can_make_glyph_from_t<G> = 0>
-auto south_west_walls(G g)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.south      = g;
-        x.border.segments.south_west = g;
-        x.border.segments.west       = g;
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename... Traits>
-auto south_west_walls(Traits... a)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x = get(w);
-        x.border.segments.south.brush.add_traits(a...);
-        x.border.segments.south_west.brush.add_traits(a...);
-        x.border.segments.west.brush.add_traits(a...);
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-// Pre-Fab Border Glyphs - Does not change border's enabled state.
-inline auto squared_corners()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north_east = U'┐';
-        x.border.segments.north_west = U'┌';
-        x.border.segments.south_east = U'┘';
-        x.border.segments.south_west = U'└';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto rounded_corners()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north_east = U'╮';
-        x.border.segments.north_west = U'╭';
-        x.border.segments.south_east = U'╯';
-        x.border.segments.south_west = U'╰';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto plus_corners()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north_east = U'+';
-        x.border.segments.north_west = U'+';
-        x.border.segments.south_east = U'+';
-        x.border.segments.south_west = U'+';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto asterisk_walls()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north      = U'*';
-        x.border.segments.south      = U'*';
-        x.border.segments.east       = U'*';
-        x.border.segments.west       = U'*';
-        x.border.segments.north_east = U'*';
-        x.border.segments.north_west = U'*';
-        x.border.segments.south_east = U'*';
-        x.border.segments.south_west = U'*';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto doubled_walls()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north      = U'═';
-        x.border.segments.south      = U'═';
-        x.border.segments.east       = U'║';
-        x.border.segments.west       = U'║';
-        x.border.segments.north_east = U'╗';
-        x.border.segments.north_west = U'╔';
-        x.border.segments.south_east = U'╝';
-        x.border.segments.south_west = U'╚';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto bold_walls()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north      = U'━';
-        x.border.segments.south      = U'━';
-        x.border.segments.east       = U'┃';
-        x.border.segments.west       = U'┃';
-        x.border.segments.north_east = U'┓';
-        x.border.segments.north_west = U'┏';
-        x.border.segments.south_east = U'┛';
-        x.border.segments.south_west = U'┗';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto dashed_walls_1()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                 = get(w);
-        x.border.segments.north = U'╶';
-        x.border.segments.south = U'╶';
-        x.border.segments.east  = U'╷';
-        x.border.segments.west  = U'╷';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto bold_dashed_walls_1()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                 = get(w);
-        x.border.segments.north = U'╺';
-        x.border.segments.south = U'╺';
-        x.border.segments.east  = U'╻';
-        x.border.segments.west  = U'╻';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto dashed_walls_2()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                 = get(w);
-        x.border.segments.north = U'╌';
-        x.border.segments.south = U'╌';
-        x.border.segments.east  = U'╎';
-        x.border.segments.west  = U'╎';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto bold_dashed_walls_2()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                 = get(w);
-        x.border.segments.north = U'╍';
-        x.border.segments.south = U'╍';
-        x.border.segments.east  = U'╏';
-        x.border.segments.west  = U'╏';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto dashed_walls_3()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                 = get(w);
-        x.border.segments.north = U'┄';
-        x.border.segments.south = U'┄';
-        x.border.segments.east  = U'┆';
-        x.border.segments.west  = U'┆';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto bold_dashed_walls_3()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                 = get(w);
-        x.border.segments.north = U'┅';
-        x.border.segments.south = U'┅';
-        x.border.segments.east  = U'┇';
-        x.border.segments.west  = U'┇';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto dashed_walls_4()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                 = get(w);
-        x.border.segments.north = U'┈';
-        x.border.segments.south = U'┈';
-        x.border.segments.east  = U'┊';
-        x.border.segments.west  = U'┊';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto bold_dashed_walls_4()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                 = get(w);
-        x.border.segments.north = U'┉';
-        x.border.segments.south = U'┉';
-        x.border.segments.east  = U'┋';
-        x.border.segments.west  = U'┋';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto block_walls_1()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north      = U'█';
-        x.border.segments.south      = U'█';
-        x.border.segments.east       = U'█';
-        x.border.segments.west       = U'█';
-        x.border.segments.north_east = U'█';
-        x.border.segments.north_west = U'█';
-        x.border.segments.south_east = U'█';
-        x.border.segments.south_west = U'█';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto block_walls_2()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north      = U'▓';
-        x.border.segments.south      = U'▓';
-        x.border.segments.east       = U'▓';
-        x.border.segments.west       = U'▓';
-        x.border.segments.north_east = U'▓';
-        x.border.segments.north_west = U'▓';
-        x.border.segments.south_east = U'▓';
-        x.border.segments.south_west = U'▓';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto block_walls_3()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north      = U'▒';
-        x.border.segments.south      = U'▒';
-        x.border.segments.east       = U'▒';
-        x.border.segments.west       = U'▒';
-        x.border.segments.north_east = U'▒';
-        x.border.segments.north_west = U'▒';
-        x.border.segments.south_east = U'▒';
-        x.border.segments.south_west = U'▒';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto block_walls_4()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north      = U'░';
-        x.border.segments.south      = U'░';
-        x.border.segments.east       = U'░';
-        x.border.segments.west       = U'░';
-        x.border.segments.north_east = U'░';
-        x.border.segments.north_west = U'░';
-        x.border.segments.south_east = U'░';
-        x.border.segments.south_west = U'░';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto half_block_walls()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north      = Glyph{U'▄', Trait::Inverse};
-        x.border.segments.south      = U'▄';
-        x.border.segments.east       = Glyph{U'▌', Trait::Inverse};
-        x.border.segments.west       = U'▌';
-        x.border.segments.north_east = U'▜';
-        x.border.segments.north_west = U'▛';
-        x.border.segments.south_east = U'▟';
-        x.border.segments.south_west = U'▙';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto half_block_inner_walls_1()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north      = U'▄';
-        x.border.segments.south      = Glyph{U'▄', Trait::Inverse};
-        x.border.segments.east       = U'▌';
-        x.border.segments.west       = Glyph{U'▌', Trait::Inverse};
-        x.border.segments.north_east = U'▖';
-        x.border.segments.north_west = U'▗';
-        x.border.segments.south_east = U'▘';
-        x.border.segments.south_west = U'▝';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto half_block_inner_walls_2()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north      = U'▄';
-        x.border.segments.south      = Glyph{U'▄', Trait::Inverse};
-        x.border.segments.east       = U'▌';
-        x.border.segments.west       = Glyph{U'▌', Trait::Inverse};
-        x.border.segments.north_east = U'▞';
-        x.border.segments.north_west = U'▚';
-        x.border.segments.south_east = U'▚';
-        x.border.segments.south_west = U'▞';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto block_corners()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north_east = U'▝';
-        x.border.segments.north_west = U'▘';
-        x.border.segments.south_east = U'▗';
-        x.border.segments.south_west = U'▖';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto floating_block_corners()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north_east = U'▖';
-        x.border.segments.north_west = U'▗';
-        x.border.segments.south_east = U'▘';
-        x.border.segments.south_west = U'▝';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
 // Widget::Signals -------------------------------------------------------------
 template <typename Handler>
 inline auto on_enable(Handler&& op)
@@ -1837,6 +938,11 @@ inline auto label(Glyph_string const& x)
     };
 }
 
+inline auto wrapped()
+{
+    return [](auto&& w) -> auto& { return get(w).wrapped; };
+}
+
 // Labeled_cycle_box
 inline auto divider(Glyph x)
 {
@@ -1923,16 +1029,6 @@ inline auto no_growth()
 }  // namespace ox::pipe
 
 namespace ox {
-
-/// Return *x if x is a unique_ptr to a Widget type, otherwise x.
-template <typename T>
-[[nodiscard]] constexpr auto get(T& x) -> auto&
-{
-    if constexpr (pipe::detail::is_widget_ptr_v<T>)
-        return *x;
-    else
-        return x;
-}
 
 /// Pipe operator for use with Widget.
 template <

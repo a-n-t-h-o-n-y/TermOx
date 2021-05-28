@@ -3,17 +3,19 @@
 #include "paint_area.hpp"
 #include "side_pane.hpp"
 
-#include <termox/widget/layouts/horizontal.hpp>
+#include <termox/widget/pair.hpp>
+#include <termox/widget/pipe.hpp>
 
 namespace paint {
 
-class Glyph_paint : public ox::layout::Horizontal<> {
+class Glyph_paint : public ox::HPair<ox::Bordered<Paint_area>, Side_pane> {
    public:
     Glyph_paint();
 
    private:
-    Paint_area& paint_area = make_child<Paint_area>();
-    Side_pane& side_pane   = make_child<Side_pane>();
+    Paint_area& paint_area =
+        this->first | ox::pipe::take_east() | ox::pipe::wrapped();
+    Side_pane& side_pane = this->second;
 };
 
 }  // namespace paint

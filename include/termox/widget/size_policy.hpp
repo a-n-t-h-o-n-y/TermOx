@@ -94,6 +94,9 @@ class Size_policy {
 
     /// Specifically does not copy the Signal, so Widget is still notified.
     auto operator=(Size_policy&& x) -> Size_policy&;
+
+    friend auto operator==(Size_policy const& a, Size_policy const& b) -> bool;
+    friend auto operator!=(Size_policy const& a, Size_policy const& b) -> bool;
 };
 
 /// Wrapper type to set the height Size_policy at construction.

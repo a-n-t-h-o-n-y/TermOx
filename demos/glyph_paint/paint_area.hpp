@@ -24,11 +24,7 @@ class Paint_area : public ox::Widget {
     sl::Signal<void()> erase_disabled;
 
    public:
-    Paint_area()
-    {
-        using namespace ox::pipe;
-        *this | strong_focus() | east_border();
-    }
+    Paint_area() { *this | ox::pipe::strong_focus(); }
 
    public:
     void set_glyph(ox::Glyph g)

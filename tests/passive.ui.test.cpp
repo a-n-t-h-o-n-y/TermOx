@@ -42,10 +42,11 @@ class Line : public ox::Widget {
    public:
     Line()
     {
+        using namespace ox::pipe;
         if constexpr (is_vertical)
-            *this | ox::pipe::fixed_width(1) | ox::pipe::wallpaper(U'│');
+            *this | fixed_width(1) | wallpaper(U'│');
         else
-            *this | ox::pipe::fixed_height(1) | ox::pipe::wallpaper(U'─');
+            *this | fixed_height(1) | wallpaper(U'─');
     }
 };
 
@@ -55,10 +56,7 @@ using Labels = ox::Passive<ox::Array<
     5>>;
 
 template <template <typename> typename Layout_t>
-class Bordered_labels : public Labels<Layout_t> {
-   public:
-    Bordered_labels() { *this | ox::pipe::bordered(); }
-};
+using Bordered_labels = ox::Passive<ox::Bordered<Labels<Layout_t>>>;
 
 template <template <typename> typename Layout_t>
 using Passives =
@@ -78,11 +76,10 @@ using Passives_with_borders =
                           Line<ox::layout::Opposite_t<Layout_t<ox::Widget>>>,
                           Bordered_labels<Layout_t>>>;
 
+// A Passive Border takes the Wrapped size policy plus border space.
 template <template <typename> typename Layout_t>
-class Bordered_passives : public Passives_with_borders<Layout_t> {
-   public:
-    Bordered_passives() { *this | ox::pipe::bordered(); }
-};
+using Bordered_passives =
+    ox::Passive<ox::Bordered<Passives_with_borders<Layout_t>>>;
 
 template <template <typename> typename Layout_t>
 using Nested = ox::Tuple<Layout_t<ox::Widget>,

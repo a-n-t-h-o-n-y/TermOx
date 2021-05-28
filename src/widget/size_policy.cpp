@@ -119,4 +119,17 @@ auto Size_policy::operator=(Size_policy&& x) -> Size_policy&
     return *this;
 }
 
+auto operator==(Size_policy const& a, Size_policy const& b) -> bool
+{
+    return std::tie(a.data_.hint, a.data_.min, a.data_.max, a.data_.stretch,
+                    a.data_.can_ignore_min) ==
+           std::tie(b.data_.hint, b.data_.min, b.data_.max, b.data_.stretch,
+                    b.data_.can_ignore_min);
+}
+
+auto operator!=(Size_policy const& a, Size_policy const& b) -> bool
+{
+    return !(a == b);
+}
+
 }  // namespace ox

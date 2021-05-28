@@ -38,22 +38,28 @@ inline auto focus_box(ox::Focus_policy policy) -> std::unique_ptr<ox::Widget>
 
     // clang-format off
     auto box_ptr =
-        ox::vpair(
-            ox::hlabel(to_string(policy))
-                | align_center() | ox::pipe::focus(narrow(policy)),
-            ox::widget() | ox::pipe::focus(policy)
-        ) | bordered();
+        ox::bordered(
+            ox::vpair(
+                ox::hlabel(to_string(policy))
+                    | align_center() | focus(narrow(policy)),
+                ox::widget() | focus(policy)
+        )) | ox::border::squared();
+    // clang-format on
 
-    box_ptr | direct_focus() | forward_focus(box_ptr->get_children()[1]);
+    auto& border = *box_ptr;
+    auto& box    = border.wrapped;
+    auto& label  = box.first;
+    auto& widg   = box.second;
 
-    auto& label = box_ptr->first;
-    auto& widg  = box_ptr->second;
+    border | direct_focus() | forward_focus(box.get_children()[1]);
 
     label | forward_focus(widg);
 
-    widg | on_focus_in( [&w = *box_ptr]{ w | walls(fg(ox::Color::Red)); })
-         | on_focus_out([&w = *box_ptr]{ w | walls(fg(ox::Color::White)); });
-    // clang-format on
+    widg | on_focus_in([&border] {
+        border.set(border.segments() | (fg(ox::Color::Red)));
+    }) | on_focus_out([&border] {
+        border.set(border.segments() | (fg(ox::Color::White)));
+    });
 
     return box_ptr;
 }
@@ -68,8 +74,7 @@ inline auto make_focus_demo() -> std::unique_ptr<ox::Widget>
     return
     htuple(
         vpair(
-            focus_box(Focus_policy::Tab)
-                | height_stretch(3),
+            focus_box(Focus_policy::Tab) | height_stretch(3),
             hpair(
                 focus_box(Focus_policy::Strong),
                 focus_box(Focus_policy::Direct)

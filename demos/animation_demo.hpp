@@ -1,6 +1,7 @@
 #ifndef TERMOX_DEMOS_ANIMATED_WIDGET_HPP
 #define TERMOX_DEMOS_ANIMATED_WIDGET_HPP
 #include <termox/termox.hpp>
+#include "termox/widget/bordered.hpp"
 
 namespace demo {
 
@@ -90,12 +91,13 @@ inline auto make_animation_demo() -> std::unique_ptr<ox::Widget>
 {
     using namespace ox;
     using namespace ox::pipe;
-    auto app = layout::horizontal<Animated_box>(
-        std::make_unique<Animated_box>(FPS{5}),
-        std::make_unique<Animated_box>(FPS{10}) | pipe::bordered(),
-        std::make_unique<Animated_box>(FPS{20}),
-        std::make_unique<Animated_box>(FPS{30}) | pipe::bordered(),
-        std::make_unique<Animated_box>(FPS{60}));
+    auto app = layout::horizontal<>(std::make_unique<Animated_box>(FPS{5}),
+                                    std::make_unique<Bordered<Animated_box>>(
+                                        ox::border::squared(), FPS{10}),
+                                    std::make_unique<Animated_box>(FPS{20}),
+                                    std::make_unique<Bordered<Animated_box>>(
+                                        ox::border::squared(), FPS{30}),
+                                    std::make_unique<Animated_box>(FPS{60}));
     app | direct_focus() | forward_focus(app->get_children().front());
     return app;
 }

@@ -92,6 +92,33 @@ auto Sine_three::default_boundary() const -> ox::Boundary<double>
 
 // -----------------------------------------------------------------------------
 
+auto Tan::generate(ox::Boundary<double> b)
+    -> std::vector<ox::Graph<>::Coordinate>&
+{
+    auto constexpr coord_count = 10'000;
+    auto const interval        = (b.east - b.west) / coord_count;
+    coords_.clear();
+    for (auto i = b.west; i <= b.east; i += interval) {
+        coords_.push_back(
+            {i, std::tan(i * i) * std::cos(i) * t_ * std::tan(t_)});
+    }
+    return coords_;
+}
+
+void Tan::step_forward()
+{
+    if (t_ < -3.14 || t_ > 3.14)
+        direction_ = -direction_;
+    t_ += (0.01 * direction_);
+}
+
+auto Tan::default_boundary() const -> ox::Boundary<double>
+{
+    return {-3.14, 3.14, 2, -2};
+}
+
+// -----------------------------------------------------------------------------
+
 auto Sine_phase::generate(ox::Boundary<double> b)
     -> std::vector<ox::Graph<>::Coordinate>&
 {
@@ -564,7 +591,7 @@ Settings::Settings()
 {
     using namespace ox;
     using namespace ox::pipe;
-    *this | fixed_width(25) | west_border();
+    *this | fixed_width(25);
 
     start_stop_btn | fixed_height(1);
     start_stop_btn.top | bg(apple_ii::Green);
@@ -576,6 +603,9 @@ Settings::Settings()
     graph_box.cycle_box.add_option("Sine Three").connect([this] {
         graph_changed.emit("sine-three");
     });
+
+    graph_box.cycle_box.add_option("Tan").connect(
+        [this] { graph_changed.emit("tan"); });
 
     graph_box.cycle_box.add_option("Sine Phase").connect([this] {
         graph_changed.emit("sine-phase");
@@ -639,6 +669,8 @@ Graph_demo::Graph_demo()
             this->set_generator<Sine>();
         else if (gen == "sine-three")
             this->set_generator<Sine_three>();
+        else if (gen == "tan")
+            this->set_generator<Tan>();
         else if (gen == "sine-phase")
             this->set_generator<Sine_phase>();
         else if (gen == "circle")
