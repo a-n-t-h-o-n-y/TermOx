@@ -87,6 +87,30 @@ auto constexpr operator|=(Border& b, Traits t) -> Border&
     return detail::pipe_all(b, t);
 }
 
+/// Disable the North Wall.
+[[nodiscard]] auto drop_north(Border b) -> Border;
+
+/// Disable the South Wall.
+[[nodiscard]] auto drop_south(Border b) -> Border;
+
+/// Disable the East Wall.
+[[nodiscard]] auto drop_east(Border b) -> Border;
+
+/// Disable the West Wall.
+[[nodiscard]] auto drop_west(Border b) -> Border;
+
+/// Disable everything except the North Wall.
+[[nodiscard]] auto take_north(Border b) -> Border;
+
+/// Disable everything except the South Wall.
+[[nodiscard]] auto take_south(Border b) -> Border;
+
+/// Disable everything except the East Wall.
+[[nodiscard]] auto take_east(Border b) -> Border;
+
+/// Disable everything except the West Wall.
+[[nodiscard]] auto take_west(Border b) -> Border;
+
 }  // namespace ox
 
 namespace ox::border {
@@ -224,62 +248,6 @@ namespace ox::border {
 {
     return {U'─', U'─', U'│', U'│', U'▗', U'▖', U'▝', U'▘'};
 };
-
-[[nodiscard]] inline auto drop_north(Border b) -> Border
-{
-    b.north = std::nullopt;
-    return b;
-}
-
-[[nodiscard]] inline auto drop_south(Border b) -> Border
-{
-    b.south = std::nullopt;
-    return b;
-}
-
-[[nodiscard]] inline auto drop_east(Border b) -> Border
-{
-    b.east = std::nullopt;
-    return b;
-}
-
-[[nodiscard]] inline auto drop_west(Border b) -> Border
-{
-    b.west = std::nullopt;
-    return b;
-}
-
-[[nodiscard]] inline auto take_north(Border b) -> Border
-{
-    b.south = std::nullopt;
-    b.east  = std::nullopt;
-    b.west  = std::nullopt;
-    return b;
-}
-
-[[nodiscard]] inline auto take_south(Border b) -> Border
-{
-    b.north = std::nullopt;
-    b.east  = std::nullopt;
-    b.west  = std::nullopt;
-    return b;
-}
-
-[[nodiscard]] inline auto take_east(Border b) -> Border
-{
-    b.north = std::nullopt;
-    b.south = std::nullopt;
-    b.west  = std::nullopt;
-    return b;
-}
-
-[[nodiscard]] inline auto take_west(Border b) -> Border
-{
-    b.north = std::nullopt;
-    b.south = std::nullopt;
-    b.east  = std::nullopt;
-    return b;
-}
 
 }  // namespace ox::border
 

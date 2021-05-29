@@ -254,7 +254,7 @@ namespace ox::pipe {
 inline auto drop_north()
 {
     return [](auto&& w) -> decltype(auto) {
-        get(w).set_border(ox::border::drop_north(get(w).Bordered::border()));
+        get(w).set_border(ox::drop_north(get(w).Bordered::border()));
         return std::forward<decltype(w)>(w);
     };
 }
@@ -262,7 +262,7 @@ inline auto drop_north()
 inline auto drop_south()
 {
     return [](auto&& w) -> decltype(auto) {
-        get(w).set_border(ox::border::drop_south(get(w).Bordered::border()));
+        get(w).set_border(ox::drop_south(get(w).Bordered::border()));
         return std::forward<decltype(w)>(w);
     };
 }
@@ -270,7 +270,7 @@ inline auto drop_south()
 inline auto drop_east()
 {
     return [](auto&& w) -> decltype(auto) {
-        get(w).set_border(ox::border::drop_east(get(w).Bordered::border()));
+        get(w).set_border(ox::drop_east(get(w).Bordered::border()));
         return std::forward<decltype(w)>(w);
     };
 }
@@ -278,7 +278,7 @@ inline auto drop_east()
 inline auto drop_west()
 {
     return [](auto&& w) -> decltype(auto) {
-        get(w).set_border(ox::border::drop_west(get(w).Bordered::border()));
+        get(w).set_border(ox::drop_west(get(w).Bordered::border()));
         return std::forward<decltype(w)>(w);
     };
 }
@@ -286,7 +286,7 @@ inline auto drop_west()
 inline auto take_north()
 {
     return [](auto&& w) -> decltype(auto) {
-        get(w).set_border(ox::border::take_north(get(w).Bordered::border()));
+        get(w).set_border(ox::take_north(get(w).Bordered::border()));
         return std::forward<decltype(w)>(w);
     };
 }
@@ -294,7 +294,7 @@ inline auto take_north()
 inline auto take_south()
 {
     return [](auto&& w) -> decltype(auto) {
-        get(w).set_border(ox::border::take_south(get(w).Bordered::border()));
+        get(w).set_border(ox::take_south(get(w).Bordered::border()));
         return std::forward<decltype(w)>(w);
     };
 }
@@ -302,7 +302,7 @@ inline auto take_south()
 inline auto take_east()
 {
     return [](auto&& w) -> decltype(auto) {
-        get(w).set_border(ox::border::take_east(get(w).Bordered::border()));
+        get(w).set_border(ox::take_east(get(w).Bordered::border()));
         return std::forward<decltype(w)>(w);
     };
 }
@@ -310,7 +310,7 @@ inline auto take_east()
 inline auto take_west()
 {
     return [](auto&& w) -> decltype(auto) {
-        get(w).set_border(ox::border::take_west(get(w).Bordered::border()));
+        get(w).set_border(ox::take_west(get(w).Bordered::border()));
         return std::forward<decltype(w)>(w);
     };
 }

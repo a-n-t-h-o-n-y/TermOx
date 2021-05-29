@@ -62,6 +62,7 @@ add_library(TermOx STATIC
     widget/widgets/titlebar.cpp
     widget/widgets/toggle_button.cpp
     widget/widgets/write_file.cpp
+    widget/bordered.cpp
     widget/cursor.cpp
     widget/graph_tree.cpp
     widget/size_policy.cpp
