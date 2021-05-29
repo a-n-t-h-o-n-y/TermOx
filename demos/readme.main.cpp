@@ -176,7 +176,7 @@ auto pinbox_app()
                 ox::hline(),
                 ox::confirm_button("Clear"),
                 ox::widget()
-            ) | fixed_width(17)) | ox::pipe::take_west()
+            ) | fixed_width(17)) | take_west()
         );
     // clang-format on
 

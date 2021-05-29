@@ -280,9 +280,10 @@ class Side_pane : public ox::VTuple<ox::HLabel,
     }
 };
 
-struct Pinbox_app : ox::HPair<Pinbox, Side_pane> {
+struct Pinbox_app : ox::HPair<Pinbox, ox::Bordered<Side_pane>> {
     Pinbox& pinbox       = this->first;
-    Side_pane& side_pane = this->second;
+    Side_pane& side_pane = this->second | ox::pipe::take_west() |
+                           ox::pipe::fixed_width(17) | ox::pipe::wrapped();
 
     Pinbox_app()
     {
@@ -316,6 +317,7 @@ struct Pinbox_app : ox::HPair<Pinbox, Side_pane> {
     }
 };
 
+
 int main() { return ox::System{ox::Mouse_mode::Drag}.run<Pinbox_app>(); }
 ```
 
@@ -331,7 +333,7 @@ auto pinbox_app()
     auto pa =
         ox::hpair(
             std::make_unique<Pinbox>(),
-            ox::vtuple(
+            ox::bordered(ox::vtuple(
                 ox::hlabel("- Color -" | ox::Trait::Bold) | align_center(),
                 ox::color_select() | fixed_height(2),
                 ox::hlabel("Status" | ox::Trait::Bold),
@@ -344,15 +346,14 @@ auto pinbox_app()
                 ox::hline(),
                 ox::confirm_button("Clear"),
                 ox::widget()
-            ) | fixed_width(17) | west_border()
+            ) | fixed_width(17)) | take_west()
         );
 
-    // Access individual Widgets using the `Pair` and `Tuple` interfaces.
     auto& pinbox       = pa->first;
-    auto& color_select = pa->second.get<1>();
-    auto& status_box   = pa->second.get<3>();
-    auto& count_box    = pa->second.get<5>().second;
-    auto& clear_btn    = pa->second.get<7>();
+    auto& color_select = pa->second.wrapped.get<1>();
+    auto& status_box   = pa->second.wrapped.get<3>();
+    auto& count_box    = pa->second.wrapped.get<5>().second;
+    auto& clear_btn    = pa->second.wrapped.get<7>();
 
     clear_btn.main_btn | bg(ox::Color::Dark_blue);
 
