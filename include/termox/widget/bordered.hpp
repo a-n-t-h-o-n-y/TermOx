@@ -368,7 +368,7 @@ class Bordered : public layout::Horizontal<Column> {
 
    public:
     /// Set the currently used Border, updating the display.
-    void set(Border b)
+    void set_border(Border b)
     {
         this->delete_all_border_pieces(border_);
         border_ = b;
