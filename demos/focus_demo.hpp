@@ -55,11 +55,8 @@ inline auto focus_box(ox::Focus_policy policy) -> std::unique_ptr<ox::Widget>
 
     label | forward_focus(widg);
 
-    widg | on_focus_in([&border] {
-        border.set(border.segments() | (fg(ox::Color::Red)));
-    }) | on_focus_out([&border] {
-        border.set(border.segments() | (fg(ox::Color::White)));
-    });
+    widg | on_focus_in([&border] { border | fg(ox::Color::Red); }) |
+        on_focus_out([&border] { border | fg(ox::Color::White); });
 
     return box_ptr;
 }

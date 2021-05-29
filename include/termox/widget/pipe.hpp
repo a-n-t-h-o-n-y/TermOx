@@ -190,62 +190,61 @@ auto operator|(Widget_t&& w, Trait t) -> decltype(auto)
 template <
     typename Widget_t,
     typename std::enable_if_t<pipe::detail::is_widget_v<Widget_t>, int> = 0>
-auto operator|(Bordered<Widget_t>& b, ox::border::Segments const& s)
+auto operator|(Bordered<Widget_t>& w, ox::Border const& b)
     -> Bordered<Widget_t>&
 {
-    b.set(s);
-    return b;
+    w.set(b);
+    return w;
 }
 
 template <
     typename Widget_t,
     typename std::enable_if_t<pipe::detail::is_widget_v<Widget_t>, int> = 0>
-auto operator|(std::unique_ptr<Bordered<Widget_t>> b_ptr,
-               ox::border::Segments const& s)
+auto operator|(std::unique_ptr<Bordered<Widget_t>> w_ptr, ox::Border const& b)
     -> std::unique_ptr<Bordered<Widget_t>>
 {
-    b_ptr->set(s);
-    return b_ptr;
+    w_ptr->set(b);
+    return w_ptr;
 }
 
 template <
     typename Widget_t,
     typename std::enable_if_t<pipe::detail::is_widget_v<Widget_t>, int> = 0>
-auto operator|(Bordered<Widget_t>& b, Background_color bg)
+auto operator|(Bordered<Widget_t>& w, Background_color bg)
     -> Bordered<Widget_t>&
 {
-    b.set(b.segments() | bg);
-    return b;
+    w.set(w.Bordered::border() | bg);
+    return w;
 }
 
 template <
     typename Widget_t,
     typename std::enable_if_t<pipe::detail::is_widget_v<Widget_t>, int> = 0>
-auto operator|(std::unique_ptr<Bordered<Widget_t>> b_ptr, Background_color bg)
+auto operator|(std::unique_ptr<Bordered<Widget_t>> w_ptr, Background_color bg)
     -> std::unique_ptr<Bordered<Widget_t>>
 {
-    b_ptr->set(b_ptr->segments() | bg);
-    return b_ptr;
+    w_ptr->set(w_ptr->Bordered::border() | bg);
+    return w_ptr;
 }
 
 template <
     typename Widget_t,
     typename std::enable_if_t<pipe::detail::is_widget_v<Widget_t>, int> = 0>
-auto operator|(Bordered<Widget_t>& b, Foreground_color fg)
+auto operator|(Bordered<Widget_t>& w, Foreground_color fg)
     -> Bordered<Widget_t>&
 {
-    b.set(b.segments() | fg);
-    return b;
+    w.set(w.Bordered::border() | fg);
+    return w;
 }
 
 template <
     typename Widget_t,
     typename std::enable_if_t<pipe::detail::is_widget_v<Widget_t>, int> = 0>
-auto operator|(std::unique_ptr<Bordered<Widget_t>> b_ptr, Foreground_color fg)
+auto operator|(std::unique_ptr<Bordered<Widget_t>> w_ptr, Foreground_color fg)
     -> std::unique_ptr<Bordered<Widget_t>>
 {
-    b_ptr->set(b_ptr->segments() | fg);
-    return std::move(b_ptr);
+    w_ptr->set(w_ptr->Bordered::border() | fg);
+    return std::move(w_ptr);
 }
 
 }  // namespace ox
@@ -255,7 +254,7 @@ namespace ox::pipe {
 inline auto drop_north()
 {
     return [](auto&& w) -> decltype(auto) {
-        get(w).set(drop_north(get(w).segments()));
+        get(w).set(ox::border::drop_north(get(w).Bordered::border()));
         return std::forward<decltype(w)>(w);
     };
 }
@@ -263,7 +262,7 @@ inline auto drop_north()
 inline auto drop_south()
 {
     return [](auto&& w) -> decltype(auto) {
-        get(w).set(drop_south(get(w).segments()));
+        get(w).set(ox::border::drop_south(get(w).Bordered::border()));
         return std::forward<decltype(w)>(w);
     };
 }
@@ -271,7 +270,7 @@ inline auto drop_south()
 inline auto drop_east()
 {
     return [](auto&& w) -> decltype(auto) {
-        get(w).set(drop_east(get(w).segments()));
+        get(w).set(ox::border::drop_east(get(w).Bordered::border()));
         return std::forward<decltype(w)>(w);
     };
 }
@@ -279,7 +278,7 @@ inline auto drop_east()
 inline auto drop_west()
 {
     return [](auto&& w) -> decltype(auto) {
-        get(w).set(drop_west(get(w).segments()));
+        get(w).set(ox::border::drop_west(get(w).Bordered::border()));
         return std::forward<decltype(w)>(w);
     };
 }
@@ -287,7 +286,7 @@ inline auto drop_west()
 inline auto take_north()
 {
     return [](auto&& w) -> decltype(auto) {
-        get(w).set(take_north(get(w).segments()));
+        get(w).set(ox::border::take_north(get(w).Bordered::border()));
         return std::forward<decltype(w)>(w);
     };
 }
@@ -295,7 +294,7 @@ inline auto take_north()
 inline auto take_south()
 {
     return [](auto&& w) -> decltype(auto) {
-        get(w).set(take_south(get(w).segments()));
+        get(w).set(ox::border::take_south(get(w).Bordered::border()));
         return std::forward<decltype(w)>(w);
     };
 }
@@ -303,7 +302,7 @@ inline auto take_south()
 inline auto take_east()
 {
     return [](auto&& w) -> decltype(auto) {
-        get(w).set(take_east(get(w).segments()));
+        get(w).set(ox::border::take_east(get(w).Bordered::border()));
         return std::forward<decltype(w)>(w);
     };
 }
@@ -311,7 +310,7 @@ inline auto take_east()
 inline auto take_west()
 {
     return [](auto&& w) -> decltype(auto) {
-        get(w).set(take_west(get(w).segments()));
+        get(w).set(ox::border::take_west(get(w).Bordered::border()));
         return std::forward<decltype(w)>(w);
     };
 }

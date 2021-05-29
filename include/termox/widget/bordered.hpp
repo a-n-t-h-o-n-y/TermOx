@@ -14,173 +14,180 @@
 #include <termox/widget/widget.hpp>
 #include <termox/widget/widgets/tile.hpp>
 
-namespace ox::border {
+namespace ox {
 
-struct Segments {
-    using Segment = std::optional<Glyph>;
+/// Defines which border walls are enabled and how they are displayed.
+/** Corners are only enabled if the two adjoining walls are enabled. */
+struct Border {
+    using Wall = std::optional<Glyph>;
 
-    Segment north;
-    Segment south;
-    Segment east;
-    Segment west;
-    Glyph nw_corner;
-    Glyph ne_corner;
-    Glyph sw_corner;
-    Glyph se_corner;
+    Wall north;
+    Wall south;
+    Wall east;
+    Wall west;
+    Glyph nw_corner;  // North West
+    Glyph ne_corner;  // North East
+    Glyph sw_corner;  // South West
+    Glyph se_corner;  // South East
 };
 
-namespace detail {
+}  // namespace ox
 
-/// Combines each segment of \p s with pipe operator and \p x.
+namespace ox::detail {
+
+/// Combines each Wall/Glyph of \p b with pipe operator and \p x.
 template <typename T>
-auto constexpr pipe_all(Segments& s, T x) -> Segments&
+auto constexpr pipe_all(Border& b, T x) -> Border&
 {
-    if (s.north.has_value())
-        *s.north |= x;
-    if (s.south.has_value())
-        *s.south |= x;
-    if (s.east.has_value())
-        *s.east |= x;
-    if (s.west.has_value())
-        *s.west |= x;
-    s.nw_corner |= x;
-    s.ne_corner |= x;
-    s.sw_corner |= x;
-    s.se_corner |= x;
-    return s;
+    if (b.north.has_value())
+        *b.north |= x;
+    if (b.south.has_value())
+        *b.south |= x;
+    if (b.east.has_value())
+        *b.east |= x;
+    if (b.west.has_value())
+        *b.west |= x;
+    b.nw_corner |= x;
+    b.ne_corner |= x;
+    b.sw_corner |= x;
+    b.se_corner |= x;
+    return b;
 }
 
-}  // namespace detail
+}  // namespace ox::detail
+namespace ox {
 
-[[nodiscard]] auto constexpr operator|(Segments s, Background_color bg)
-    -> Segments
+[[nodiscard]] auto constexpr operator|(Border b, Background_color bg) -> Border
 {
-    return detail::pipe_all(s, bg);
+    return detail::pipe_all(b, bg);
 }
 
-auto constexpr operator|=(Segments& s, Background_color bg) -> Segments&
+auto constexpr operator|=(Border& b, Background_color bg) -> Border&
 {
-    return detail::pipe_all(s, bg);
+    return detail::pipe_all(b, bg);
 }
 
-[[nodiscard]] auto constexpr operator|(Segments s, Foreground_color fg)
-    -> Segments
+[[nodiscard]] auto constexpr operator|(Border b, Foreground_color fg) -> Border
 {
-    return detail::pipe_all(s, fg);
+    return detail::pipe_all(b, fg);
 }
 
-auto constexpr operator|=(Segments& s, Foreground_color fg) -> Segments&
+auto constexpr operator|=(Border& b, Foreground_color fg) -> Border&
 {
-    return detail::pipe_all(s, fg);
+    return detail::pipe_all(b, fg);
 }
 
-[[nodiscard]] auto constexpr operator|(Segments s, Traits t) -> Segments
+[[nodiscard]] auto constexpr operator|(Border b, Traits t) -> Border
 {
-    return detail::pipe_all(s, t);
+    return detail::pipe_all(b, t);
 }
 
-auto constexpr operator|=(Segments& s, Traits t) -> Segments&
+auto constexpr operator|=(Border& b, Traits t) -> Border&
 {
-    return detail::pipe_all(s, t);
+    return detail::pipe_all(b, t);
 }
 
-[[nodiscard]] auto constexpr none() -> Segments
+}  // namespace ox
+
+namespace ox::border {
+
+[[nodiscard]] auto constexpr none() -> Border
 {
     return {std::nullopt, std::nullopt, std::nullopt, std::nullopt,
             U' ',         U' ',         U' ',         U' '};
 };
 
-[[nodiscard]] auto constexpr squared() -> Segments
+[[nodiscard]] auto constexpr squared() -> Border
 {
     return {U'─', U'─', U'│', U'│', U'┌', U'┐', U'└', U'┘'};
 };
 
-[[nodiscard]] auto constexpr rounded() -> Segments
+[[nodiscard]] auto constexpr rounded() -> Border
 {
     return {U'─', U'─', U'│', U'│', U'╭', U'╮', U'╰', U'╯'};
 };
 
-[[nodiscard]] auto constexpr plus_corners() -> Segments
+[[nodiscard]] auto constexpr plus_corners() -> Border
 {
     return {U'─', U'─', U'│', U'│', U'+', U'+', U'+', U'+'};
 };
 
-[[nodiscard]] auto constexpr asterisk() -> Segments
+[[nodiscard]] auto constexpr asterisk() -> Border
 {
     return {U'*', U'*', U'*', U'*', U'*', U'*', U'*', U'*'};
 };
 
-[[nodiscard]] auto constexpr doubled() -> Segments
+[[nodiscard]] auto constexpr doubled() -> Border
 {
     return {U'═', U'═', U'║', U'║', U'╔', U'╗', U'╚', U'╝'};
 };
 
-[[nodiscard]] auto constexpr bold() -> Segments
+[[nodiscard]] auto constexpr bold() -> Border
 {
     return {U'━', U'━', U'┃', U'┃', U'┏', U'┓', U'┗', U'┛'};
 };
 
-[[nodiscard]] auto constexpr dashed_1() -> Segments
+[[nodiscard]] auto constexpr dashed_1() -> Border
 {
     return {U'╶', U'╶', U'╷', U'╷', U'┌', U'┐', U'└', U'┘'};
 };
 
-[[nodiscard]] auto constexpr bold_dashed_1() -> Segments
+[[nodiscard]] auto constexpr bold_dashed_1() -> Border
 {
     return {U'╺', U'╺', U'╻', U'╻', U'┏', U'┓', U'┗', U'┛'};
 };
 
-[[nodiscard]] auto constexpr dashed_2() -> Segments
+[[nodiscard]] auto constexpr dashed_2() -> Border
 {
     return {U'╌', U'╌', U'╎', U'╎', U'┌', U'┐', U'└', U'┘'};
 };
 
-[[nodiscard]] auto constexpr bold_dashed_2() -> Segments
+[[nodiscard]] auto constexpr bold_dashed_2() -> Border
 {
     return {U'╍', U'╍', U'╏', U'╏', U'┏', U'┓', U'┗', U'┛'};
 };
 
-[[nodiscard]] auto constexpr dashed_3() -> Segments
+[[nodiscard]] auto constexpr dashed_3() -> Border
 {
     return {U'┄', U'┄', U'┆', U'┆', U'┌', U'┐', U'└', U'┘'};
 };
 
-[[nodiscard]] auto constexpr bold_dashed_3() -> Segments
+[[nodiscard]] auto constexpr bold_dashed_3() -> Border
 {
     return {U'┅', U'┅', U'┇', U'┇', U'┏', U'┓', U'┗', U'┛'};
 };
 
-[[nodiscard]] auto constexpr dashed_4() -> Segments
+[[nodiscard]] auto constexpr dashed_4() -> Border
 {
     return {U'┈', U'┈', U'┊', U'┊', U'┌', U'┐', U'└', U'┘'};
 };
 
-[[nodiscard]] auto constexpr bold_dashed_4() -> Segments
+[[nodiscard]] auto constexpr bold_dashed_4() -> Border
 {
     return {U'┉', U'┉', U'┋', U'┋', U'┏', U'┓', U'┗', U'┛'};
 };
 
-[[nodiscard]] auto constexpr block_1() -> Segments
+[[nodiscard]] auto constexpr block_1() -> Border
 {
     return {U'█', U'█', U'█', U'█', U'█', U'█', U'█', U'█'};
 };
 
-[[nodiscard]] auto constexpr block_2() -> Segments
+[[nodiscard]] auto constexpr block_2() -> Border
 {
     return {U'▓', U'▓', U'▓', U'▓', U'▓', U'▓', U'▓', U'▓'};
 };
 
-[[nodiscard]] auto constexpr block_3() -> Segments
+[[nodiscard]] auto constexpr block_3() -> Border
 {
     return {U'▒', U'▒', U'▒', U'▒', U'▒', U'▒', U'▒', U'▒'};
 };
 
-[[nodiscard]] auto constexpr block_4() -> Segments
+[[nodiscard]] auto constexpr block_4() -> Border
 {
     return {U'░', U'░', U'░', U'░', U'░', U'░', U'░', U'░'};
 };
 
-[[nodiscard]] auto constexpr half_block() -> Segments
+[[nodiscard]] auto constexpr half_block() -> Border
 {
     return {U'▄' | Trait::Inverse,
             U'▄',
@@ -192,7 +199,7 @@ auto constexpr operator|=(Segments& s, Traits t) -> Segments&
             U'▟'};
 };
 
-[[nodiscard]] auto constexpr half_block_inner_1() -> Segments
+[[nodiscard]] auto constexpr half_block_inner_1() -> Border
 {
     return {U'▄', U'▄' | Trait::Inverse,
             U'▌', U'▌' | Trait::Inverse,
@@ -200,7 +207,7 @@ auto constexpr operator|=(Segments& s, Traits t) -> Segments&
             U'▝', U'▘'};
 };
 
-[[nodiscard]] auto constexpr half_block_inner_2() -> Segments
+[[nodiscard]] auto constexpr half_block_inner_2() -> Border
 {
     return {U'▄', U'▄' | Trait::Inverse,
             U'▌', U'▌' | Trait::Inverse,
@@ -208,78 +215,81 @@ auto constexpr operator|=(Segments& s, Traits t) -> Segments&
             U'▞', U'▚'};
 };
 
-[[nodiscard]] auto constexpr block_corners() -> Segments
+[[nodiscard]] auto constexpr block_corners() -> Border
 {
     return {U'─', U'─', U'│', U'│', U'▘', U'▝', U'▖', U'▗'};
 };
 
-[[nodiscard]] auto constexpr floating_block_corners() -> Segments
+[[nodiscard]] auto constexpr floating_block_corners() -> Border
 {
     return {U'─', U'─', U'│', U'│', U'▗', U'▖', U'▝', U'▘'};
 };
 
-[[nodiscard]] inline auto drop_north(Segments s) -> Segments
+[[nodiscard]] inline auto drop_north(Border b) -> Border
 {
-    s.north = std::nullopt;
-    return s;
+    b.north = std::nullopt;
+    return b;
 }
 
-[[nodiscard]] inline auto drop_south(Segments s) -> Segments
+[[nodiscard]] inline auto drop_south(Border b) -> Border
 {
-    s.south = std::nullopt;
-    return s;
+    b.south = std::nullopt;
+    return b;
 }
 
-[[nodiscard]] inline auto drop_east(Segments s) -> Segments
+[[nodiscard]] inline auto drop_east(Border b) -> Border
 {
-    s.east = std::nullopt;
-    return s;
+    b.east = std::nullopt;
+    return b;
 }
 
-[[nodiscard]] inline auto drop_west(Segments s) -> Segments
+[[nodiscard]] inline auto drop_west(Border b) -> Border
 {
-    s.west = std::nullopt;
-    return s;
+    b.west = std::nullopt;
+    return b;
 }
 
-[[nodiscard]] inline auto take_north(Segments s) -> Segments
+[[nodiscard]] inline auto take_north(Border b) -> Border
 {
-    s.south = std::nullopt;
-    s.east  = std::nullopt;
-    s.west  = std::nullopt;
-    return s;
+    b.south = std::nullopt;
+    b.east  = std::nullopt;
+    b.west  = std::nullopt;
+    return b;
 }
 
-[[nodiscard]] inline auto take_south(Segments s) -> Segments
+[[nodiscard]] inline auto take_south(Border b) -> Border
 {
-    s.north = std::nullopt;
-    s.east  = std::nullopt;
-    s.west  = std::nullopt;
-    return s;
+    b.north = std::nullopt;
+    b.east  = std::nullopt;
+    b.west  = std::nullopt;
+    return b;
 }
 
-[[nodiscard]] inline auto take_east(Segments s) -> Segments
+[[nodiscard]] inline auto take_east(Border b) -> Border
 {
-    s.north = std::nullopt;
-    s.south = std::nullopt;
-    s.west  = std::nullopt;
-    return s;
+    b.north = std::nullopt;
+    b.south = std::nullopt;
+    b.west  = std::nullopt;
+    return b;
 }
 
-[[nodiscard]] inline auto take_west(Segments s) -> Segments
+[[nodiscard]] inline auto take_west(Border b) -> Border
 {
-    s.north = std::nullopt;
-    s.south = std::nullopt;
-    s.east  = std::nullopt;
-    return s;
+    b.north = std::nullopt;
+    b.south = std::nullopt;
+    b.east  = std::nullopt;
+    return b;
 }
 
 }  // namespace ox::border
 
 namespace ox {
 
+/// Creates a Bordered widget, which wraps the template type in a Border.
+/** The wrapped widget is accessible from the `wrapped` member. */
 template <typename Widget_t, typename Column = layout::Vertical<>>
 class Bordered : public layout::Horizontal<Column> {
+   private:
     /// Border Corner Widget
     using Corner = Tile;
 
@@ -312,7 +322,7 @@ class Bordered : public layout::Horizontal<Column> {
 
    public:
     struct Parameters {
-        border::Segments segments;
+        Border border;
         typename Widget_t::Parameters wrapped_parameters;
     };
 
@@ -321,27 +331,27 @@ class Bordered : public layout::Horizontal<Column> {
 
    public:
     template <typename... Args>
-    explicit Bordered(border::Segments s, Args&&... wrapped_args)
+    explicit Bordered(Border b, Args&&... wrapped_args)
         : wrapped{this->template make_child<Column>()
                       .template make_child<Widget_t>(
                           std::forward<Args>(wrapped_args)...)},
-          segments_{std::move(s)}
+          border_{std::move(b)}
     {
         this->initialize();
     }
 
     // This overload is required for apple-clang and clang 9 & 10.
-    // Otherwise you'd just have Segments have a default value above.
+    // Otherwise you'd just have Border have a default value above.
     Bordered()
         : wrapped{this->template make_child<Column>()
                       .template make_child<Widget_t>()},
-          segments_{border::rounded()}
+          border_{border::rounded()}
     {
         this->initialize();
     }
 
     explicit Bordered(Parameters p)
-        : Bordered{std::move(p.segments), std::move(p.wrapped_parameters)}
+        : Bordered{std::move(p.border), std::move(p.wrapped_parameters)}
     {}
 
     /// Create a border around an existing Widget.
@@ -349,7 +359,7 @@ class Bordered : public layout::Horizontal<Column> {
     explicit Bordered(std::unique_ptr<Widget_t> w_ptr)
         : wrapped{this->template make_child<Column>().append_child(
               std::move(w_ptr))},
-          segments_{border::rounded()}
+          border_{border::rounded()}
     {
         static_assert(std::is_base_of<Widget, Widget_t>::value,
                       "Bordered: Widget_t must be a Widget type");
@@ -357,78 +367,76 @@ class Bordered : public layout::Horizontal<Column> {
     }
 
    public:
-    /// Set the currently used Segments, updating the display.
-    void set(border::Segments x)
+    /// Set the currently used Border, updating the display.
+    void set(Border b)
     {
-        this->delete_all_border_pieces(segments_);
-
-        segments_ = x;
-
-        this->build_border_pieces(segments_);
+        this->delete_all_border_pieces(border_);
+        border_ = b;
+        this->build_border_pieces(border_);
     }
 
-    /// Return the currenly set Segments.
-    auto segments() const -> border::Segments { return segments_; }
+    /// Return the currenly set Border.
+    auto border() const -> Border { return border_; }
 
    private:
-    border::Segments segments_;
+    Border border_;
 
    private:
     /// Creates new border piece Widgets using \p s as a guide.
-    void build_border_pieces(border::Segments const& s)
+    void build_border_pieces(Border const& b)
     {
         auto const left_column =
-            s.west.has_value() ? std::optional{0} : std::nullopt;
-        auto const mid_column = s.west.has_value() ? 1 : 0;
+            b.west.has_value() ? std::optional{0} : std::nullopt;
+        auto const mid_column = b.west.has_value() ? 1 : 0;
         auto const right_column =
-            s.east.has_value() ? std::optional{mid_column + 1} : std::nullopt;
+            b.east.has_value() ? std::optional{mid_column + 1} : std::nullopt;
 
         // Call order is important.
         if (left_column.has_value()) {
             auto& lc =
                 this->insert_child(std::make_unique<Column>(), *left_column);
             lc.width_policy.fixed(1);
-            if (s.north.has_value())
-                lc.template make_child<Corner>(s.nw_corner);
-            lc.template make_child<VWall>(*s.west);
-            if (s.south.has_value())
-                lc.template make_child<Corner>(s.sw_corner);
+            if (b.north.has_value())
+                lc.template make_child<Corner>(b.nw_corner);
+            lc.template make_child<VWall>(*b.west);
+            if (b.south.has_value())
+                lc.template make_child<Corner>(b.sw_corner);
         }
         if (right_column.has_value()) {
             auto& rc =
                 this->insert_child(std::make_unique<Column>(), *right_column);
             rc.width_policy.fixed(1);
-            if (s.north.has_value())
-                rc.template make_child<Corner>(s.ne_corner);
-            rc.template make_child<VWall>(*s.east);
-            if (s.south.has_value())
-                rc.template make_child<Corner>(s.se_corner);
+            if (b.north.has_value())
+                rc.template make_child<Corner>(b.ne_corner);
+            rc.template make_child<VWall>(*b.east);
+            if (b.south.has_value())
+                rc.template make_child<Corner>(b.se_corner);
         }
-        if (s.north.has_value()) {
+        if (b.north.has_value()) {
             this->get_children()[mid_column].insert_child(
-                std::make_unique<HWall>(*s.north), 0);
+                std::make_unique<HWall>(*b.north), 0);
         }
-        if (s.south.has_value()) {
+        if (b.south.has_value()) {
             this->get_children()[mid_column].template make_child<HWall>(
-                *s.south);
+                *b.south);
         }
     }
 
     /// Using \p s as a guide, will delete all border related Widgets.
-    void delete_all_border_pieces(border::Segments s)
+    void delete_all_border_pieces(Border b)
     {
         auto const left_column =
-            s.west.has_value() ? std::optional{0} : std::nullopt;
-        auto const mid_column = s.west.has_value() ? 1 : 0;
+            b.west.has_value() ? std::optional{0} : std::nullopt;
+        auto const mid_column = b.west.has_value() ? 1 : 0;
         auto const right_column =
-            s.east.has_value() ? std::optional{mid_column + 1} : std::nullopt;
+            b.east.has_value() ? std::optional{mid_column + 1} : std::nullopt;
 
         // Call order is important.
-        if (s.south.has_value()) {
-            auto const back = s.north.has_value() ? 2 : 1;
+        if (b.south.has_value()) {
+            auto const back = b.north.has_value() ? 2 : 1;
             this->get_children()[mid_column].remove_and_delete_child_at(back);
         }
-        if (s.north.has_value())
+        if (b.north.has_value())
             this->get_children()[mid_column].remove_and_delete_child_at(0);
         if (right_column.has_value())
             this->remove_and_delete_child_at(*right_column);
@@ -442,7 +450,7 @@ class Bordered : public layout::Horizontal<Column> {
         this->focus_policy = Focus_policy::Strong;
         this->focused_in.connect([&] { System::set_focus(wrapped); });
 
-        this->build_border_pieces(segments_);
+        this->build_border_pieces(border_);
     }
 };
 
@@ -457,11 +465,11 @@ template <typename Widget_t>
 
 /// Helper function to create an instance of Bordered<Widget_t>.
 template <typename Widget_t, typename... Args>
-[[nodiscard]] auto bordered(border::Segments s = border::rounded(),
+[[nodiscard]] auto bordered(Border b = border::rounded(),
                             Args&&... wrapped_args)
 {
     return std::make_unique<Bordered<Widget_t>>(
-        std::move(s), std::forward<Args>(wrapped_args)...);
+        std::move(b), std::forward<Args>(wrapped_args)...);
 }
 
 template <typename Widget_t>

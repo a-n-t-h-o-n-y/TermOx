@@ -131,14 +131,14 @@ class Passive<
     Passive(Args&&... args) : Base_t{std::forward<Args>(args)...}
     {
         auto const [h, w] =
-            adjust_size_policies(Base_t::wrapped, this->Base_t::segments());
+            adjust_size_policies(Base_t::wrapped, this->Base_t::border());
         this->set_policies(h, w);
     }
 
     Passive(Parameters p) : Base_t{std::move(p)}
     {
         auto const [h, w] =
-            adjust_size_policies(Base_t::wrapped, this->Base_t::segments());
+            adjust_size_policies(Base_t::wrapped, this->Base_t::border());
         this->set_policies(h, w);
     }
 
@@ -146,7 +146,7 @@ class Passive<
     auto child_added_event(ox::Widget& child) -> bool override
     {
         auto const [h, w] =
-            adjust_size_policies(Base_t::wrapped, this->Base_t::segments());
+            adjust_size_policies(Base_t::wrapped, this->Base_t::border());
         this->set_policies(h, w);
         return Base_t::child_added_event(child);
     }
@@ -154,7 +154,7 @@ class Passive<
     auto child_removed_event(ox::Widget& child) -> bool override
     {
         auto const [h, w] =
-            adjust_size_policies(Base_t::wrapped, this->Base_t::segments());
+            adjust_size_policies(Base_t::wrapped, this->Base_t::border());
         this->set_policies(h, w);
         return Base_t::child_removed_event(child);
     }
@@ -162,7 +162,7 @@ class Passive<
     auto child_polished_event(ox::Widget& child) -> bool override
     {
         auto const [h, w] =
-            adjust_size_policies(Base_t::wrapped, this->Base_t::segments());
+            adjust_size_policies(Base_t::wrapped, this->Base_t::border());
         this->set_policies(h, w);
         return Base_t::child_polished_event(child);
     }
@@ -175,8 +175,7 @@ class Passive<
     }
 
     /// Return new size policies, order is [h, w].
-    static auto adjust_size_policies(Wrapped_t const& wrapped,
-                                     border::Segments s)
+    static auto adjust_size_policies(Wrapped_t const& wrapped, Border b)
         -> std::pair<Size_policy, Size_policy>
     {
         auto get_hint = [](Widget const& child) {
@@ -193,15 +192,15 @@ class Passive<
             sum += get_hint(children[i]);
 
         if constexpr (is_vertical) {
-            sum += s.north.has_value();
-            sum += s.south.has_value();
+            sum += b.north.has_value();
+            sum += b.south.has_value();
             auto h = Size_policy{};
             h.fixed(sum);
             return {h, wrapped.width_policy};
         }
         else {
-            sum += s.west.has_value();
-            sum += s.east.has_value();
+            sum += b.west.has_value();
+            sum += b.east.has_value();
             auto w = Size_policy{};
             w.fixed(sum);
             return {wrapped.height_policy, w};
@@ -225,14 +224,14 @@ class Passive<
     Passive(Args&&... args) : Base_t{std::forward<Args>(args)...}
     {
         auto const [h, w] =
-            adjust_size_policies(Base_t::wrapped, this->Base_t::segments());
+            adjust_size_policies(Base_t::wrapped, this->Base_t::border());
         this->set_policies(h, w);
     }
 
     Passive(Parameters p) : Base_t{std::move(p)}
     {
         auto const [h, w] =
-            adjust_size_policies(Base_t::wrapped, this->Base_t::segments());
+            adjust_size_policies(Base_t::wrapped, this->Base_t::border());
         this->set_policies(h, w);
     }
 
@@ -240,7 +239,7 @@ class Passive<
     auto child_added_event(ox::Widget& child) -> bool override
     {
         auto const [h, w] =
-            adjust_size_policies(Base_t::wrapped, this->Base_t::segments());
+            adjust_size_policies(Base_t::wrapped, this->Base_t::border());
         this->set_policies(h, w);
         return Base_t::child_added_event(child);
     }
@@ -248,7 +247,7 @@ class Passive<
     auto child_removed_event(ox::Widget& child) -> bool override
     {
         auto const [h, w] =
-            adjust_size_policies(Base_t::wrapped, this->Base_t::segments());
+            adjust_size_policies(Base_t::wrapped, this->Base_t::border());
         this->set_policies(h, w);
         return Base_t::child_removed_event(child);
     }
@@ -256,7 +255,7 @@ class Passive<
     auto child_polished_event(ox::Widget& child) -> bool override
     {
         auto const [h, w] =
-            adjust_size_policies(Base_t::wrapped, this->Base_t::segments());
+            adjust_size_policies(Base_t::wrapped, this->Base_t::border());
         this->set_policies(h, w);
         return Base_t::child_polished_event(child);
     }
@@ -270,11 +269,11 @@ class Passive<
 
     /// Returns [height, width]
     [[nodiscard]] static auto adjust_size_policies(Widget_t const& wrapped,
-                                                   border::Segments s)
+                                                   Border b)
         -> std::array<ox::Size_policy, 2>
     {
-        auto const border_height = s.north.has_value() + s.south.has_value();
-        auto const border_width  = s.west.has_value() + s.east.has_value();
+        auto const border_height = b.north.has_value() + b.south.has_value();
+        auto const border_width  = b.west.has_value() + b.east.has_value();
 
         auto hp = wrapped.height_policy;
         auto wp = wrapped.width_policy;
