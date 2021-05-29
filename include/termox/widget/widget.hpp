@@ -174,38 +174,12 @@ class Widget {
     /// Return the global top left corner of this widget.
     [[nodiscard]] auto top_left() const -> Point;
 
-    /// Return the global top left corner of this widget, not including border.
-    [[nodiscard]] auto inner_top_left() const -> Point;
-
-    /// x coordinate for the top left point of this Widget, beyond the Border.
-    /** Given with relation to the top left of the terminal screen. This is the
-     *  coordinate that marks the beginning of the space that is available for
-     *  use by the Widget. */
-    [[nodiscard]] auto inner_x() const -> int;
-
-    /// y coordinate for the top left point of this Widget, beyond the Border.
-    /** Given with relation to the top left of the terminal screen. This is the
-     *  coordinate that marks the beginning of the space that is available for
-     *  use by the Widget. */
-    [[nodiscard]] auto inner_y() const -> int;
-
     /// Return the area the widget occupies.
     [[nodiscard]] auto area() const -> Area;
 
-    /// Return the inner width dimension, this does not include Border space.
-    [[nodiscard]] auto width() const -> int;
-
-    /// Return the inner height dimension, this does not include Border space.
-    [[nodiscard]] auto height() const -> int;
-
-    /// Return the area the widget occupies, including Border space.
-    [[nodiscard]] auto outer_area() const -> Area;
-
-    // TODO remove virtual
     /// Post a paint event to this Widget.
     virtual void update();
 
-    // TODO Remove once border is redesigned.
     /** Used by is_paintable to decide whether or not to send a Paint_event.
      *  This is a type parameter, Layout is the only thing that can't paint. */
     [[nodiscard]] virtual auto is_layout_type() const -> bool;
@@ -425,7 +399,7 @@ class Widget {
     Point top_left_position_ = {0, 0};
 
     // The entire area of the widget.
-    Area outer_area_ = {0, 0};
+    Area area_ = {0, 0};
 
     std::uint16_t const unique_id_;
 
@@ -434,8 +408,9 @@ class Widget {
     void set_top_left(Point p);
 
     /// Should only be used by Resize_event send() function.
-    void set_outer_area(Area a);
+    void set_area(Area a);
 
+    /// Should only be used by Layout.
     void set_parent(Widget* parent);
 };
 

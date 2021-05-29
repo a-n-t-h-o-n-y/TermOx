@@ -251,9 +251,8 @@ class GoL_widget : public ox::Widget {
 
     auto resize_event(ox::Area new_size, ox::Area old_size) -> bool override
     {
-        // Can't use new_size, since width takes Border into account.
-        half_width_  = static_cast<int>(this->width() / 2);
-        half_height_ = static_cast<int>(this->height() / 2);
+        half_width_  = (int)(new_size.width / 2);
+        half_height_ = (int)(new_size.height / 2);
         return Widget::resize_event(new_size, old_size);
     }
 
@@ -309,10 +308,9 @@ class GoL_widget : public ox::Widget {
 
     void paint_low_res(ox::Painter& p)
     {
-        auto const width  = this->width();
-        auto const height = this->height();
-        for (auto x = 0; x < width; ++x) {
-            for (auto y = 0; y < height; ++y) {
+        auto const a = this->area();
+        for (auto x = 0; x < a.width; ++x) {
+            for (auto y = 0; y < a.height; ++y) {
                 auto const coords = transform_to_engine({x, y});
                 if (engine_.alive_at(coords))
                     p.put(U'█' | fg(cell_color_), {x, y});
@@ -322,10 +320,9 @@ class GoL_widget : public ox::Widget {
 
     void paint_hi_res(ox::Painter& p)
     {
-        auto const width  = this->width();
-        auto const height = this->height();
-        for (auto x = 0; x < width; ++x) {
-            for (auto y = 0; y < height; ++y) {
+        auto const a = this->area();
+        for (auto x = 0; x < a.width; ++x) {
+            for (auto y = 0; y < a.height; ++y) {
                 auto const braille = braille_at(ox::Point{x, y});
                 if (braille != U'\0')
                     p.put(braille | fg(cell_color_), {x, y});

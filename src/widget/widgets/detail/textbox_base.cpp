@@ -33,7 +33,8 @@ void Textbox_base::scroll_up(int n)
     if (this->top_line() == 0)
         return;
     Text_view::scroll_up(n);
-    auto const y = std::min(this->cursor.position().y + n, this->height() - 1);
+    auto const y =
+        std::min(this->cursor.position().y + n, this->area().height - 1);
     this->set_cursor({this->cursor.position().x, y});
 }
 
@@ -59,10 +60,11 @@ void Textbox_base::cursor_down(int n)
 {
     if (this->cursor.position().y + this->top_line() == this->last_line())
         return;
-    auto y = this->cursor.position().y + n;
-    if (y >= this->height()) {
-        this->scroll_down(y - (this->height() - 1));
-        y = this->height() - 1;
+    auto y       = this->cursor.position().y + n;
+    auto const h = this->area().height;
+    if (y >= h) {
+        this->scroll_down(y - (h - 1));
+        y = h - 1;
     }
     this->set_cursor({this->cursor.position().x, y});
     cursor_moved_down(n);
@@ -110,7 +112,7 @@ void Textbox_base::increment_cursor_right()
         this->first_index_at(this->bottom_line() + 1) - 1;
     auto const cursor_index = this->cursor_index();
     if (cursor_index == true_last_index &&
-        this->cursor.position().y == this->height() - 1) {
+        this->cursor.position().y == this->area().height - 1) {
         this->cursor.set_position({0, 0});  // Hack for Typer TODO remove?
         this->scroll_down(1);
     }

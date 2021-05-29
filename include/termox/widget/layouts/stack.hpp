@@ -221,7 +221,7 @@ class Stack : public Layout<Child_t> {
     void resize_active_page()
     {
         if (active_page_ != nullptr)
-            System::post_event(Resize_event{*active_page_, this->outer_area()});
+            System::post_event(Resize_event{*active_page_, this->area()});
     }
 };
 

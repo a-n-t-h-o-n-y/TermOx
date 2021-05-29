@@ -33,14 +33,14 @@ struct Primary_policy {
 struct Primary_length {
     [[nodiscard]] auto operator()(Widget const& w) const -> int
     {
-        return w.height();
+        return w.area().height;
     }
 };
 
 struct Primary_offset {
     [[nodiscard]] auto operator()(Widget const& w) const -> int
     {
-        return w.inner_y();
+        return w.top_left().y;
     }
 };
 
@@ -54,14 +54,14 @@ struct Secondary_policy {
 struct Secondary_length {
     [[nodiscard]] auto operator()(Widget const& w) const -> int
     {
-        return w.width();
+        return w.area().width;
     }
 };
 
 struct Secondary_offset {
     [[nodiscard]] auto operator()(Widget const& w) const -> int
     {
-        return w.inner_x();
+        return w.top_left().x;
     }
 };
 

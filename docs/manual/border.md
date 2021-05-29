@@ -14,14 +14,6 @@ account for this:
 This returns the area of the Widget without the Border, the space that can be
 painted to. This area starts at `Widget::inner_top_left() -> Point`.
 
-### `Widget::outer_area() -> Area`
-
-This returns the entire area of the Widget, including Border space.
-
-### `Widget::inner_top_left() -> Point`
-
-This returns the top left coordinate of the widget, not including the Border.
-
 ### `Widget::top_left() -> Point`
 
 This returns the top left coordinate of the Widget, including any Border space.

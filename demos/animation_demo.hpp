@@ -17,8 +17,8 @@ class Animated_box : public ox::Widget {
    protected:
     auto timer_event() -> bool override
     {
-        flip_increment(xy_.x, x_direction_, this->width());
-        flip_increment(xy_.y, y_direction_, this->height());
+        flip_increment(xy_.x, x_direction_, this->area().width);
+        flip_increment(xy_.y, y_direction_, this->area().height);
         this->update();
         return Widget::timer_event();
     }
@@ -50,8 +50,8 @@ class Animated_box : public ox::Widget {
 
     auto resize_event(ox::Area new_size, ox::Area old_size) -> bool override
     {
-        reset(xy_.x, this->width());
-        reset(xy_.y, this->height());
+        reset(xy_.x, this->area().width);
+        reset(xy_.y, this->area().height);
         return Widget::resize_event(new_size, old_size);
     }
 

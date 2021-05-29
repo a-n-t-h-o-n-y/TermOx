@@ -17,7 +17,7 @@ void Log::post_message(Glyph_string message)
     this->append(std::move(message));
     this->update_display();
     auto const tl = this->top_line();
-    auto const h  = this->height();
+    auto const h  = this->area().height;
     auto const lc = this->line_count();
     if (tl + h < lc)
         this->scroll_down(lc - tl - h);

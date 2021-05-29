@@ -144,9 +144,9 @@ template <template <typename> typename Layout_t>
 auto Scrollbar<Layout_t>::Middle::max_length() const -> std::size_t
 {
     if constexpr (is_vertical)
-        return this->height();
+        return this->area().height;
     else
-        return this->width();
+        return this->area().width;
 }
 
 template <template <typename> typename Layout_t>

@@ -21,13 +21,10 @@ namespace ox::detail {
 
 void send(ox::Paint_event e)
 {
-    if (is_paintable(e.receiver)) {
-        // screen_buffers.next is covered in wallpaper below, not cleared.
-        auto p = Painter{e.receiver, ox::Terminal::screen_buffers.next};
-        if (!e.receiver.get().is_layout_type())
-            p.wallpaper_fill();
-        e.receiver.get().paint_event(p);
-    }
+    if (!is_paintable(e.receiver))
+        return;
+    auto p = Painter{e.receiver, ox::Terminal::screen_buffers.next};
+    e.receiver.get().paint_event(p);
 }
 
 void send(ox::Key_press_event e)
@@ -102,10 +99,10 @@ void send(ox::Move_event e)
 
 void send(ox::Resize_event e)
 {
-    auto const previous = e.receiver.get().outer_area();
+    auto const previous = e.receiver.get().area();
     if (previous == e.new_area)
         return;
-    e.receiver.get().set_outer_area(e.new_area);
+    e.receiver.get().set_area(e.new_area);
     e.receiver.get().resize_event(e.new_area, previous);
 }
 

@@ -177,7 +177,7 @@ auto filter_send(ox::Move_event const& e) -> bool
 
 auto filter_send(ox::Resize_event const& e) -> bool
 {
-    auto const old_area = e.receiver.get().outer_area();
+    auto const old_area = e.receiver.get().area();
     auto const new_area = e.new_area;
     if (old_area == new_area)
         return true;

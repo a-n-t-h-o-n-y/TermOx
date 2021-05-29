@@ -150,10 +150,8 @@ auto Text_view::row_length(int y) const -> int
 
 auto Text_view::display_height() const -> int
 {
-    int difference = 1 + this->last_line() - this->top_line();
-    if (difference > this->height())
-        difference = this->height();
-    return difference;
+    return std::min(1 + this->last_line() - this->top_line(),
+                    this->area().height);
 }
 
 auto Text_view::line_count() const -> int { return display_state_.size(); }
@@ -221,17 +219,21 @@ auto Text_view::paint_event(Painter& p) -> bool
             case Align::Top:
             case Align::Left: start = 0; break;
             case Align::Center:
-                start = (this->width() - line.length) / 2;
+                start = (this->area().width - line.length) / 2;
                 break;
             case Align::Bottom:
-            case Align::Right: start = this->width() - line.length; break;
+            case Align::Right: start = this->area().width - line.length; break;
         }
         p.put(Glyph_string(sub_begin, sub_end), {start, line_n++});
     };
-    auto const begin = std::begin(display_state_) + this->top_line();
-    auto end         = std::end(display_state_);
-    if ((int)display_state_.size() > this->top_line() + this->height())
-        end = begin + this->height();  // maybe make this the initial value?
+    auto const begin = std::next(std::cbegin(display_state_), this->top_line());
+    auto const end   = [&] {
+        auto const end_index = this->top_line() + this->area().height;
+        if ((int)display_state_.size() > end_index)
+            return std::next(begin, this->area().height);
+        else
+            return std::cend(display_state_);
+    }();
     if (this->top_line() < (int)display_state_.size())
         std::for_each(begin, end, paint);
     return Widget::paint_event(p);
@@ -297,7 +299,7 @@ void Text_view::update_display(int from_line)
 {
     auto const begin = display_state_.at(from_line).start_index;
     display_state_.clear();
-    if (this->width() == 0) {
+    if (this->area().width == 0) {
         display_state_.push_back(Line_info{0, 0});
         return;
     }
@@ -313,7 +315,7 @@ void Text_view::update_display(int from_line)
             start_index += length;
             length = 0;
         }
-        else if (length == this->width()) {
+        else if (length == this->area().width) {
             if ((this->wrap() == Wrap::Word) && last_space > 0) {
                 i -= length - last_space;
                 length     = last_space;

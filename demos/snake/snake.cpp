@@ -357,20 +357,20 @@ auto Game_space::resize_event(ox::Area new_size, ox::Area old_size) -> bool
 
 auto Game_space::is_too_small() -> bool
 {
-    return this->width() < engine_.apples.area().width ||
-           this->height() < engine_.apples.area().height;
+    return this->area().width < engine_.apples.area().width ||
+           this->area().height < engine_.apples.area().height;
 }
 
 void Game_space::paint_size_message(ox::Painter& painter)
 {
     auto const w = [this] {
-        auto const& widg_width = this->width();
-        auto const& game_width = engine_.apples.area().width;
+        auto const widg_width = this->area().width;
+        auto const game_width = engine_.apples.area().width;
         return widg_width < game_width ? game_width - widg_width : 0;
     }();
     auto const h = [this] {
-        auto const& widg_height = this->height();
-        auto const& game_height = engine_.apples.area().height;
+        auto const widg_height = this->area().height;
+        auto const game_height = engine_.apples.area().height;
         return widg_height < game_height ? game_height - widg_height : 0;
     }();
     painter.put(U"Screen is too small!", {0, 0});

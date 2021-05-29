@@ -9,10 +9,10 @@ namespace {
 /// Return true if \p global is within the (non-bordered) area of \p w.
 [[nodiscard]] auto contains(ox::Widget const& w, ox::Point global) -> bool
 {
-    bool const within_west  = global.x >= w.inner_x();
-    bool const within_east  = global.x < (w.inner_x() + w.width());
-    bool const within_north = global.y >= w.inner_y();
-    bool const within_south = global.y < (w.inner_y() + w.height());
+    bool const within_west  = global.x >= w.top_left().x;
+    bool const within_east  = global.x < (w.top_left().x + w.area().width);
+    bool const within_north = global.y >= w.top_left().y;
+    bool const within_south = global.y < (w.top_left().y + w.area().height);
     return within_west && within_east && within_north && within_south;
 }
 

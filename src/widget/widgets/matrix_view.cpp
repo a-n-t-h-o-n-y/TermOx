@@ -15,10 +15,10 @@ Matrix_view::Matrix_view(Parameters p) : Matrix_view{std::move(p.matrix)} {}
 
 auto Matrix_view::paint_event(Painter& p) -> bool
 {
-    auto const w =
-        matrix.width() > this->width() ? this->width() : matrix.width();
-    auto const h =
-        matrix.height() > this->height() ? this->height() : matrix.height();
+    auto const w = (matrix.width() > this->area().width) ? this->area().width
+                                                         : matrix.width();
+    auto const h = (matrix.height() > this->area().height) ? this->area().height
+                                                           : matrix.height();
 
     for (auto y = 0; y < h; ++y) {
         for (auto x = 0; x < w; ++x)

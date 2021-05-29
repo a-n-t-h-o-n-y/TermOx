@@ -41,9 +41,9 @@ auto Button::mouse_release_event(Mouse const& m) -> bool
 
 auto Button::paint_event(Painter& p) -> bool
 {
-    auto const width = this->width();
+    auto const width = this->area().width;
     auto const x     = text_.size() > width ? 0 : (width - text_.size()) / 2;
-    auto const y     = this->height() / 2;
+    auto const y     = this->area().height / 2;
     p.put(text_, {x, y});
     return Widget::paint_event(p);
 }

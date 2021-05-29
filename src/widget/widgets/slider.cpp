@@ -192,18 +192,18 @@ auto Slider<Layout_t, Inverted>::paint_event(Painter& p) -> bool
         (double)(value_ - range_.low + 1) / (double)length(range_);
     auto const w_length = [this] {
         if constexpr (is_vertical)
-            return this->height();
+            return this->area().height;
         else
-            return this->width();
+            return this->area().width;
     }();
 
     // Beginning index to draw the slider bar.
     auto const begin = [&] {
         if constexpr (Inverted) {
             if constexpr (is_vertical)
-                return this->height() - 1;
+                return this->area().height - 1;
             else
-                return this->width() - 1;
+                return this->area().width - 1;
         }
         else
             return 0;
@@ -225,7 +225,7 @@ auto Slider<Layout_t, Inverted>::paint_event(Painter& p) -> bool
         else
             return make_point(begin, 0);
     }();
-    auto const breadth = is_vertical ? this->width() : this->height();
+    auto const breadth = is_vertical ? this->area().width : this->area().height;
     auto const area    = [&] {
         if constexpr (Inverted)
             return make_area(w_length - end, breadth);
@@ -263,8 +263,9 @@ void Slider<Layout_t, Inverted>::decrement(int amount)
 template <template <typename> typename Layout_t, bool Inverted>
 auto Slider<Layout_t, Inverted>::value_from_point(Point p) const -> int
 {
-    auto const w_length = is_vertical ? this->height() : this->width();
-    auto const pos      = [&] {
+    auto const w_length =
+        is_vertical ? this->area().height : this->area().width;
+    auto const pos = [&] {
         auto const x = [&] {
             if constexpr (is_vertical)
                 return p.y;

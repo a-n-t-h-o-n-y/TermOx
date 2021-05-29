@@ -74,9 +74,9 @@ auto Textline_base::paint_event(ox::Painter& p) -> bool
             this->cursor.set_position({core_.cursor_position(), 0});
             break;
         case ox::Align::Right: {
-            p.put(str, {this->width() - str.size(), 0});
+            p.put(str, {this->area().width - str.size(), 0});
             this->cursor.set_position(
-                {this->width() - str.size() + core_.cursor_position(), 0});
+                {this->area().width - str.size() + core_.cursor_position(), 0});
             break;
         }
         default: break;

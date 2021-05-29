@@ -82,11 +82,11 @@ void Label<Layout_t>::set_text(Glyph_string text)
 {
     if (growth_strategy_ == Growth::Dynamic) {
         if constexpr (is_vertical) {
-            if (text.size() != this->outer_area().height)
+            if (text.size() != this->area().height)
                 *this | pipe::fixed_height(text.size());
         }
         else {
-            if (text.size() != this->outer_area().width)
+            if (text.size() != this->area().width)
                 *this | pipe::fixed_width(text.size());
         }
     }
@@ -179,9 +179,9 @@ void Label<Layout_t>::update_offset()
 {
     auto const box_length = [this] {
         if constexpr (is_vertical)
-            return this->height();
+            return this->area().height;
         else
-            return this->width();
+            return this->area().width;
     }();
 
     offset_ =
@@ -192,7 +192,7 @@ void Label<Layout_t>::update_offset()
 template <template <typename> typename Layout_t>
 void Label<Layout_t>::paint_vertical(Painter& p)
 {
-    for (auto i = 0; i < text_.size() && i < this->height(); ++i)
+    for (auto i = 0; i < text_.size() && i < this->area().height; ++i)
         p.put(text_[i], {0, offset_ + i});
 }
 

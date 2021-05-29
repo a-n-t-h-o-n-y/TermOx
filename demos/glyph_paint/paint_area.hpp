@@ -120,10 +120,9 @@ class Paint_area : public ox::Widget {
    protected:
     auto paint_event(ox::Painter& p) -> bool override
     {
-        auto const w = this->width();
-        auto const h = this->height();
+        auto const a = this->area();
         for (auto const& [at, glyph] : glyphs_painted_) {
-            if (at.x < w && at.y < h)
+            if (at.x < a.width && at.y < a.height)
                 p.put(glyph, at);
         }
         return Widget::paint_event(p);

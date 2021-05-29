@@ -27,8 +27,8 @@ class Meta_widget : public ox::Widget {
    protected:
     auto paint_event(ox::Painter& p) -> bool override
     {
-        auto const w = std::to_string(this->width());
-        auto const h = std::to_string(this->height());
+        auto const w = std::to_string(this->area().width);
+        auto const h = std::to_string(this->area().height);
         auto const x = std::to_string(this->parent()->top_left().x);
         auto const y = std::to_string(this->parent()->top_left().y);
 

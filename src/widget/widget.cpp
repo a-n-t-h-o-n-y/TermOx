@@ -103,29 +103,9 @@ auto Widget::is_enabled() const -> bool { return enabled_; }
 
 auto Widget::parent() const -> Widget* { return parent_; }
 
-// TODO this can be removed in the future once Widget does not have to know
-// about its own global coordinates, that is outside the scope of a Widget.
 auto Widget::top_left() const -> Point { return top_left_position_; }
 
-// TODO these can be removed once border is changed.
-auto Widget::inner_top_left() const -> Point
-{
-    return {this->inner_x(), this->inner_y()};
-}
-
-auto Widget::inner_x() const -> int { return top_left_position_.x; }
-
-auto Widget::inner_y() const -> int { return top_left_position_.y; }
-
-auto Widget::area() const -> Area { return {this->width(), this->height()}; }
-
-// TODO eventually you can remove these and just keep area(), once border is
-// changed to be its own thing.
-auto Widget::width() const -> int { return this->outer_area().width; }
-
-auto Widget::height() const -> int { return this->outer_area().height; }
-
-auto Widget::outer_area() const -> Area { return outer_area_; }
+auto Widget::area() const -> Area { return area_; }
 
 void Widget::update() { System::post_event(Paint_event{*this}); }
 
@@ -449,7 +429,7 @@ void Widget::enable_and_post_events(bool enable, bool post_child_polished_event)
 
 void Widget::set_top_left(Point p) { top_left_position_ = p; }
 
-void Widget::set_outer_area(Area a) { outer_area_ = a; }
+void Widget::set_area(Area a) { area_ = a; }
 
 void Widget::set_parent(Widget* parent) { parent_ = parent; }
 

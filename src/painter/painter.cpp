@@ -10,22 +10,19 @@
 namespace ox {
 
 Painter::Painter(Widget& widg, detail::Canvas& canvas)
-    : widget_{widg},
-      inner_area_{widget_.width(), widget_.height()},
-      canvas_{canvas},
-      brush_{widg.brush}
-{}
+    : widget_{widg}, canvas_{canvas}, brush_{widg.brush}
+{
+    this->wallpaper_fill();
+}
 
 auto Painter::put(Glyph tile, Point p) -> Painter&
 {
     // User code can contain invalid points.
-    if (p.x >= inner_area_.width || p.y >= inner_area_.height || p.x < 0 ||
-        p.y < 0) {
+    if (p.x >= widget_.area().width || p.y >= widget_.area().height ||
+        p.x < 0 || p.y < 0) {
         return *this;
     }
-    auto const x_global = widget_.inner_x() + p.x;
-    auto const y_global = widget_.inner_y() + p.y;
-    this->put_global(tile, {x_global, y_global});
+    this->put_global(tile, widget_.top_left() + p);
     return *this;
 }
 
@@ -76,7 +73,7 @@ auto Painter::vline(Glyph tile, Point a, Point b) -> Painter&
 auto Painter::wallpaper_fill() -> Painter&
 {
     this->fill_global_no_brush(widget_.generate_wallpaper(), widget_.top_left(),
-                               widget_.outer_area());
+                               widget_.area());
     return *this;
 }
 

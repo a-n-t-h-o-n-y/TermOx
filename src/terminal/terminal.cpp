@@ -109,9 +109,8 @@ template <typename T>
         assert(widg != nullptr);
         return *widg;
     }();
-    // Change to local Point.
-    event.state.at = ox::Point{event.state.at.x - receiver.inner_x(),
-                               event.state.at.y - receiver.inner_y()};
+    // Calculates local Point.
+    event.state.at = event.state.at - receiver.top_left();
     return {receiver, event.state};
 }
 
@@ -285,7 +284,7 @@ void Terminal::flush_screen()
     Widget const* const fw = System::focus_widget();
     if (fw != nullptr && detail::is_paintable(*fw)) {
         assert(is_within(fw->cursor.position(), fw->area()));
-        System::set_cursor(fw->cursor, fw->inner_top_left());
+        System::set_cursor(fw->cursor, fw->top_left());
     }
 }
 

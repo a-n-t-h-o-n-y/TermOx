@@ -275,6 +275,8 @@ class Layout : public Widget {
         return std::find(std::begin(d), std::end(d), descendant) != std::end(d);
     }
 
+    void update() final override {}
+
    protected:
     struct Dimensions {
         Widget* widget;
@@ -342,11 +344,11 @@ class Layout : public Widget {
         w.set_parent(nullptr);
     }
 
-    // TODO delete this!
-    // For painting stuff, border has to be painted, but layouts shouldn't paint
-    // otherwise, delete this once borders are redesigned to be layouts with
-    // widgets.
-    [[nodiscard]] auto is_layout_type() const -> bool override { return true; }
+    /// Used by send(Paint_event) for wallpaper painting optimization.
+    [[nodiscard]] auto is_layout_type() const -> bool final override
+    {
+        return true;
+    }
 };
 
 }  // namespace ox::layout
