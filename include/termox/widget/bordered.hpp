@@ -321,12 +321,21 @@ class Bordered : public layout::Horizontal<Column> {
 
    public:
     template <typename... Args>
-    explicit Bordered(border::Segments s = border::rounded(),
-                      Args&&... wrapped_args)
+    explicit Bordered(border::Segments s, Args&&... wrapped_args)
         : wrapped{this->template make_child<Column>()
                       .template make_child<Widget_t>(
                           std::forward<Args>(wrapped_args)...)},
           segments_{std::move(s)}
+    {
+        this->initialize();
+    }
+
+    // This overload is required for apple-clang and clang 9 & 10.
+    // Otherwise you'd just have Segments have a default value above.
+    Bordered()
+        : wrapped{this->template make_child<Column>()
+                      .template make_child<Widget_t>()},
+          segments_{border::rounded()}
     {
         this->initialize();
     }
