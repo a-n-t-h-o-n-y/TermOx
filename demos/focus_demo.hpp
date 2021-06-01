@@ -42,8 +42,9 @@ inline auto focus_box(ox::Focus_policy policy) -> std::unique_ptr<ox::Widget>
             ox::vpair(
                 ox::hlabel(to_string(policy))
                     | align_center() | focus(narrow(policy)),
-                ox::widget() | focus(policy)
-        )) | ox::border::squared();
+                ox::widget() | focus(policy))
+            | focus(narrow(policy)))
+        | ox::border::squared();
     // clang-format on
 
     auto& border = *box_ptr;
@@ -51,7 +52,7 @@ inline auto focus_box(ox::Focus_policy policy) -> std::unique_ptr<ox::Widget>
     auto& label  = box.first;
     auto& widg   = box.second;
 
-    border | direct_focus() | forward_focus(box.get_children()[1]);
+    box | forward_focus(box.get_children()[1]);
 
     label | forward_focus(widg);
 

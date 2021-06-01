@@ -60,14 +60,9 @@ class Color_sliders : public ox::HArray<Color_slider, Count> {
         : ox::HArray<Color_slider, Count>{make_slider_constructors(palette)},
           palette_{std::move(palette)}
     {
-        *this | ox::pipe::strong_focus();
-    }
-
-   protected:
-    auto focus_in_event() -> bool override
-    {
-        ox::Terminal::set_palette(palette_);
-        return ox::HArray<Color_slider, Count>::focus_in_event();
+        using namespace ox::pipe;
+        *this | strong_focus() |
+            on_focus_in([this] { ox::Terminal::set_palette(palette_); });
     }
 
    private:

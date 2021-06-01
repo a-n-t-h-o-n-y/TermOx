@@ -14,11 +14,6 @@ class Orange_widget : public ox::Widget {
     Orange_widget() { *this | bg(ox::Color::Orange); }
 };
 
-class Blue_widget : public ox::Widget {
-   public:
-    Blue_widget() { *this | bg(ox::Color::Blue); }
-};
-
 template <typename Layout_t>
 struct Label_label;
 

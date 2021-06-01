@@ -157,6 +157,7 @@ class Selecting : public Layout_t {
         return base_result;
     }
 
+    // This has a focus in event..
     auto focus_in_event() -> bool override
     {
         this->reset_selected_if_necessary();

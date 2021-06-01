@@ -104,6 +104,8 @@ class Side_pane : public ox::VTuple<ox::HLabel,
     {
         using namespace ox::pipe;
 
+        *this | fixed_width(16);
+
         color_label | align_center() | text("- Color -" | ox::Trait::Bold);
         color_select | fixed_height(2);
         status_label | text("Status" | ox::Trait::Bold);
@@ -115,10 +117,10 @@ class Side_pane : public ox::VTuple<ox::HLabel,
     }
 };
 
-struct Pinbox_app : ox::HPair<Pinbox, ox::Bordered<Side_pane>> {
-    Pinbox& pinbox       = this->first;
-    Side_pane& side_pane = this->second | ox::pipe::take_west() |
-                           ox::pipe::fixed_width(17) | ox::pipe::wrapped();
+struct Pinbox_app : ox::HPair<Pinbox, ox::Passive<ox::Bordered<Side_pane>>> {
+    Pinbox& pinbox = this->first;
+    Side_pane& side_pane =
+        this->second | ox::pipe::take_west() | ox::pipe::wrapped();
 
     Pinbox_app()
     {

@@ -41,8 +41,13 @@ class Stack : public Layout<Child_t> {
     {
         if (index > this->Stack::size())
             throw std::out_of_range{"Stack::set_active_page: index is invalid"};
-        active_page_ = &(this->get_children()[index]);
-        this->enable(this->is_enabled(), false);  // sends enable/disable events
+        auto* previous = active_page_;
+        active_page_   = std::addressof(this->get_children()[index]);
+        if (active_page_ == previous)
+            return;
+        if (previous != nullptr)
+            previous->disable();
+        active_page_->enable();
         this->move_active_page();
         this->resize_active_page();
         if (sets_focus_)
@@ -126,7 +131,7 @@ class Stack : public Layout<Child_t> {
     {
         if (index >= this->size())
             throw std::out_of_range{"Stack::remove_page: index is invalid."};
-        auto* page_to_remove = &(this->get_children()[index]);
+        auto* page_to_remove = std::addressof(this->get_children()[index]);
         if (page_to_remove == this->get_active_page())
             active_page_ = nullptr;
         return this->remove_child(page_to_remove);
@@ -163,7 +168,7 @@ class Stack : public Layout<Child_t> {
         auto const end = std::cend(this->get_children());
         auto distance  = 0;
         for (; begin != end; ++begin) {
-            if (&(*begin) != active_page_)
+            if (std::addressof(*begin) != active_page_)
                 ++distance;
             else
                 break;
@@ -171,23 +176,24 @@ class Stack : public Layout<Child_t> {
         return distance;
     }
 
-    /// Post an Enable_event or Disable_event to the active page.
-    void enable(bool enable                    = true,
-                bool post_child_polished_event = true) override
-    {
-        this->Widget::enable_and_post_events(enable, post_child_polished_event);
-        for (auto& child : this->get_children()) {
-            if (&child == active_page_)
-                child.enable(enable, false);
-            else
-                child.disable();
-        }
-    }
-
     /// Used to indicate an error on return values of index type.
     static auto constexpr invalid_index = static_cast<std::size_t>(-1);
 
    protected:
+    auto enable_event() -> bool override
+    {
+        if (active_page_ != nullptr)
+            active_page_->enable();
+        return Layout<Child_t>::enable_event();
+    }
+
+    auto disable_event() -> bool override
+    {
+        if (active_page_ != nullptr)
+            active_page_->disable();
+        return Layout<Child_t>::disable_event();
+    }
+
     auto move_event(Point new_position, Point old_position) -> bool override
     {
         this->move_active_page();

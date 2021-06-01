@@ -86,8 +86,7 @@ class Passive<Layout_t,
     }
 
    private:
-    /// Return the sum of all hints in the inherited from Layout_t
-    /// direction.
+    /// Return the sum of all hints in the inherited from Layout_t direction.
     static auto sum_hints(decltype(std::declval<Layout_t>().get_children())
                               const& children,
                           std::size_t begin_offset) -> int
@@ -114,105 +113,8 @@ class Passive<Layout_t,
     }
 };
 
-template <typename Wrapped_t>
-class Passive<
-    Bordered<Wrapped_t>,
-    std::enable_if_t<detail::is_horizontal_or_vertical_v<Wrapped_t>, void>>
-    : public Bordered<Wrapped_t> {
-   private:
-    using Base_t                      = Bordered<Wrapped_t>;
-    static auto constexpr is_vertical = layout::is_vertical_v<Wrapped_t>;
-
-   public:
-    using Parameters = typename Base_t::Parameters;
-
-   public:
-    template <typename... Args>
-    Passive(Args&&... args) : Base_t{std::forward<Args>(args)...}
-    {
-        auto const [h, w] =
-            adjust_size_policies(Base_t::wrapped, this->Base_t::border());
-        this->set_policies(h, w);
-    }
-
-    Passive(Parameters p) : Base_t{std::move(p)}
-    {
-        auto const [h, w] =
-            adjust_size_policies(Base_t::wrapped, this->Base_t::border());
-        this->set_policies(h, w);
-    }
-
-   protected:
-    auto child_added_event(ox::Widget& child) -> bool override
-    {
-        auto const [h, w] =
-            adjust_size_policies(Base_t::wrapped, this->Base_t::border());
-        this->set_policies(h, w);
-        return Base_t::child_added_event(child);
-    }
-
-    auto child_removed_event(ox::Widget& child) -> bool override
-    {
-        auto const [h, w] =
-            adjust_size_policies(Base_t::wrapped, this->Base_t::border());
-        this->set_policies(h, w);
-        return Base_t::child_removed_event(child);
-    }
-
-    auto child_polished_event(ox::Widget& child) -> bool override
-    {
-        auto const [h, w] =
-            adjust_size_policies(Base_t::wrapped, this->Base_t::border());
-        this->set_policies(h, w);
-        return Base_t::child_polished_event(child);
-    }
-
-   private:
-    void set_policies(Size_policy height, Size_policy width)
-    {
-        this->height_policy = height;
-        this->width_policy  = width;
-    }
-
-    /// Return new size policies, order is [h, w].
-    static auto adjust_size_policies(Wrapped_t const& wrapped, Border b)
-        -> std::pair<Size_policy, Size_policy>
-    {
-        auto get_hint = [](Widget const& child) {
-            if constexpr (is_vertical)
-                return child.height_policy.hint();
-            else
-                return child.width_policy.hint();
-        };
-
-        auto sum                = 0;
-        auto const children     = wrapped.get_children();
-        auto const begin_offset = wrapped.get_child_offset();
-        for (auto i = begin_offset; i < children.size(); ++i)
-            sum += get_hint(children[i]);
-
-        if constexpr (is_vertical) {
-            sum += b.north.has_value();
-            sum += b.south.has_value();
-            auto h = Size_policy{};
-            h.fixed(sum);
-            return {h, wrapped.width_policy};
-        }
-        else {
-            sum += b.west.has_value();
-            sum += b.east.has_value();
-            auto w = Size_policy{};
-            w.fixed(sum);
-            return {wrapped.height_policy, w};
-        }
-    }
-};
-
 template <typename Widget_t>
-class Passive<
-    Bordered<Widget_t>,
-    std::enable_if_t<!detail::is_horizontal_or_vertical_v<Widget_t>, void>>
-    : public Bordered<Widget_t> {
+class Passive<Bordered<Widget_t>> : public Bordered<Widget_t> {
    private:
     using Base_t = Bordered<Widget_t>;
 
@@ -223,42 +125,10 @@ class Passive<
     template <typename... Args>
     Passive(Args&&... args) : Base_t{std::forward<Args>(args)...}
     {
-        auto const [h, w] =
-            adjust_size_policies(Base_t::wrapped, this->Base_t::border());
-        this->set_policies(h, w);
+        this->initialize();
     }
 
-    Passive(Parameters p) : Base_t{std::move(p)}
-    {
-        auto const [h, w] =
-            adjust_size_policies(Base_t::wrapped, this->Base_t::border());
-        this->set_policies(h, w);
-    }
-
-   protected:
-    auto child_added_event(ox::Widget& child) -> bool override
-    {
-        auto const [h, w] =
-            adjust_size_policies(Base_t::wrapped, this->Base_t::border());
-        this->set_policies(h, w);
-        return Base_t::child_added_event(child);
-    }
-
-    auto child_removed_event(ox::Widget& child) -> bool override
-    {
-        auto const [h, w] =
-            adjust_size_policies(Base_t::wrapped, this->Base_t::border());
-        this->set_policies(h, w);
-        return Base_t::child_removed_event(child);
-    }
-
-    auto child_polished_event(ox::Widget& child) -> bool override
-    {
-        auto const [h, w] =
-            adjust_size_policies(Base_t::wrapped, this->Base_t::border());
-        this->set_policies(h, w);
-        return Base_t::child_polished_event(child);
-    }
+    Passive(Parameters p) : Base_t{std::move(p)} { this->initialize(); }
 
    private:
     void set_policies(Size_policy height, Size_policy width)
@@ -278,19 +148,42 @@ class Passive<
         auto hp = wrapped.height_policy;
         auto wp = wrapped.width_policy;
 
-        hp.hint(hp.hint() + border_height);
-        hp.min(hp.min() + border_height);
         // Overflow Check
-        if (hp.max() <= Size_policy::maximum_max - border_height)
+        if (hp.max() <= (Size_policy::maximum_max - border_height))
             hp.max(hp.max() + border_height);
+        hp.min(hp.min() + border_height);
+        hp.hint(hp.hint() + border_height);
 
-        wp.hint(wp.hint() + border_width);
-        wp.min(wp.min() + border_width);
         // Overflow Check
-        if (wp.max() <= Size_policy::maximum_max - border_width)
+        if (wp.max() <= (Size_policy::maximum_max - border_width))
             wp.max(wp.max() + border_width);
+        wp.min(wp.min() + border_width);
+        wp.hint(wp.hint() + border_width);
 
         return {hp, wp};
+    }
+
+    void initialize()
+    {
+        auto const [h, w] =
+            adjust_size_policies(Base_t::wrapped, this->Base_t::border());
+        this->set_policies(h, w);
+
+        Base_t::wrapped.width_policy.policy_updated.connect([this] {
+            auto const [h, w] =
+                adjust_size_policies(Base_t::wrapped, this->Base_t::border());
+            this->set_policies(h, w);
+        });
+        Base_t::wrapped.height_policy.policy_updated.connect([this] {
+            auto const [h, w] =
+                adjust_size_policies(Base_t::wrapped, this->Base_t::border());
+            this->set_policies(h, w);
+        });
+        this->border_set.connect([this] {
+            auto const [h, w] =
+                adjust_size_policies(Base_t::wrapped, this->Base_t::border());
+            this->set_policies(h, w);
+        });
     }
 };
 

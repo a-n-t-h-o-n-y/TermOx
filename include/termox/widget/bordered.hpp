@@ -297,6 +297,9 @@ class Bordered : public layout::Horizontal<Column> {
    public:
     Widget_t& wrapped;
 
+    /// Called on set_border(...) after the Border has been set.
+    sl::Signal<void()> border_set;
+
    public:
     template <typename... Args>
     explicit Bordered(Border b, Args&&... wrapped_args)
@@ -341,6 +344,7 @@ class Bordered : public layout::Horizontal<Column> {
         this->delete_all_border_pieces(border_);
         border_ = b;
         this->build_border_pieces(border_);
+        border_set.emit();
     }
 
     /// Return the currenly set Border.
@@ -359,34 +363,40 @@ class Bordered : public layout::Horizontal<Column> {
         auto const right_column =
             b.east.has_value() ? std::optional{mid_column + 1} : std::nullopt;
 
+        auto const fp   = wrapped.focus_policy;
+        auto const init = [&](auto& w) {
+            w.focus_policy = fp;
+            w.focused_in.connect([&] { System::set_focus(wrapped); });
+        };
+
         // Call order is important.
         if (left_column.has_value()) {
             auto& lc =
                 this->insert_child(std::make_unique<Column>(), *left_column);
             lc.width_policy.fixed(1);
             if (b.north.has_value())
-                lc.template make_child<Corner>(b.nw_corner);
-            lc.template make_child<VWall>(*b.west);
+                init(lc.template make_child<Corner>(b.nw_corner));
+            init(lc.template make_child<VWall>(*b.west));
             if (b.south.has_value())
-                lc.template make_child<Corner>(b.sw_corner);
+                init(lc.template make_child<Corner>(b.sw_corner));
         }
         if (right_column.has_value()) {
             auto& rc =
                 this->insert_child(std::make_unique<Column>(), *right_column);
             rc.width_policy.fixed(1);
             if (b.north.has_value())
-                rc.template make_child<Corner>(b.ne_corner);
-            rc.template make_child<VWall>(*b.east);
+                init(rc.template make_child<Corner>(b.ne_corner));
+            init(rc.template make_child<VWall>(*b.east));
             if (b.south.has_value())
-                rc.template make_child<Corner>(b.se_corner);
+                init(rc.template make_child<Corner>(b.se_corner));
         }
         if (b.north.has_value()) {
-            this->get_children()[mid_column].insert_child(
-                std::make_unique<HWall>(*b.north), 0);
+            init(this->get_children()[mid_column].insert_child(
+                std::make_unique<HWall>(*b.north), 0));
         }
         if (b.south.has_value()) {
-            this->get_children()[mid_column].template make_child<HWall>(
-                *b.south);
+            init(this->get_children()[mid_column].template make_child<HWall>(
+                *b.south));
         }
     }
 
@@ -415,7 +425,7 @@ class Bordered : public layout::Horizontal<Column> {
     void initialize()
     {
         // Can't use pipe:: in this file.
-        this->focus_policy = Focus_policy::Strong;
+        this->focus_policy = wrapped.focus_policy;
         this->focused_in.connect([&] { System::set_focus(wrapped); });
 
         this->build_border_pieces(border_);

@@ -44,10 +44,6 @@ class Focus {
     /// Re-enable a Tab or Back_tab to change focus to the next Widget.
     static void unsuppress_tab();
 
-    /// Directly sets the focus widget without sending any events.
-    /** Only for use by send(Focus_in_event). */
-    static void direct_set_focus(ox::Widget& w);
-
    private:
     static ox::Widget* focus_widget_;
     static bool tab_enabled_;

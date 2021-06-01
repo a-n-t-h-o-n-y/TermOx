@@ -173,6 +173,13 @@ class Linear_layout : public Layout<Child> {
         return Layout<Child>::enable_event();
     }
 
+    auto disable_event() -> bool override
+    {
+        for (Widget& w : this->get_children())
+            w.disable();
+        return Widget::disable_event();
+    }
+
     auto move_event(Point new_position, Point old_position) -> bool override
     {
         this->resize_and_move_children();
@@ -222,6 +229,8 @@ class Linear_layout : public Layout<Child> {
    private:
     void resize_and_move_children()
     {
+        // TODO validate both height and width Size_policies that they make
+        // sense and assert() if they do not.
         auto const primary_lengths = shared_space_.calculate_lengths(*this);
         auto const primary_pos =
             shared_space_.calculate_positions(primary_lengths);
@@ -243,16 +252,16 @@ class Linear_layout : public Layout<Child> {
         auto const offset   = this->get_child_offset();
         for (auto i = 0uL; i < offset; ++i) {
             if (children[i].is_enabled())
-                children[i].disable(true, false);
+                children[i].disable();
         }
         for (auto i = 0uL; i < primary.size(); ++i) {
             auto& child = children[offset + i];
             if (is_valid(primary[i], secondary[i])) {
                 if (!child.is_enabled())
-                    child.enable(true, false);
+                    child.enable();
             }
             else if (child.is_enabled())
-                child.disable(true, false);
+                child.disable();
         }
     }
 

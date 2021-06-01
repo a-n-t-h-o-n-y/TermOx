@@ -1,4 +1,15 @@
-# Border
+# Borders
+
+Widgets can be wrapped in a `Bordered` Widget, this will apply a single line
+border around the entire Widget. The wrapped Widget is accessible via the
+`wrapped` member. The Border can be modified with simple pipe operations, there
+are a number of pre-defined Borders in the `ox::border` namespace. These can be
+use with the pipe operator to set a `Bordered` object. The pipe operator can
+also be used to change the background color, foreground color, and traits of
+each border Glyph. The `take_...` methods allow you to extract a single wall of
+the Border, and the `drop_...` methods allow you to remove a single wall of the
+Border. There is a Passive override for border, so that the Bordered object
+takes the size policy of the wrapped Widget, plus room for the border.
 
 Each Widget has a `Border` object, named `border`, that can be used to outline
 the interior edges of the Widget. Borders can be enabled and disabled, they also

@@ -183,7 +183,7 @@ class Accordion : public Passive<Layout_t<Widget>> {
         expanded_ = true;
         bar_.expand();
         this->reinsert_wrapped();
-        this->enable(this->is_enabled(), false);
+        this->enable(this->is_enabled());
     }
 
     /// Disable the wrapped Widget.
@@ -192,7 +192,7 @@ class Accordion : public Passive<Layout_t<Widget>> {
         expanded_ = false;
         bar_.collapse();
         this->extract_wrapped();
-        this->enable(this->is_enabled(), false);
+        this->enable(this->is_enabled());
     }
 
     void toggle_expansion()

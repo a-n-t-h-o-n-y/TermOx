@@ -96,8 +96,9 @@ namespace demo {
 }
 
 struct Color_control : ox::layout::Horizontal<> {
-    using Slider_stack = std::remove_reference_t<decltype(
-        *std::declval<decltype(std::function{slider_stack})::result_type>())>;
+    using Slider_stack =
+        std::remove_reference_t<decltype(*std::declval<decltype(std::function{
+                                             slider_stack})::result_type>())>;
 
     Slider_stack& ss = this->append_child(slider_stack());
 
@@ -186,19 +187,16 @@ class Palette_creator : public ox::HPair<Color_control, ox::Color_select> {
     // TODO set slider values on color selected
     Palette_creator()
     {
-        *this | ox::pipe::strong_focus();
+        using namespace ox::pipe;
+        *this | direct_focus() | on_focus_in([] {
+            ox::Terminal::set_palette(ox::dawn_bringer32::palette);
+        });
+
         control.new_color.connect(
             [this](ox::True_color c) { this->update_selected(c); });
         select.color_selected.connect([this](ox::Color c) { selected_ = c; });
         ox::Terminal::palette_changed.connect(
             [this](auto const& pal) { palette_ = pal; });
-    }
-
-   protected:
-    auto focus_in_event() -> bool override
-    {
-        ox::Terminal::set_palette(ox::dawn_bringer32::palette);
-        return ox::HPair<Color_control, ox::Color_select>::focus_in_event();
     }
 
    private:

@@ -50,7 +50,7 @@ void System::set_head(Widget* new_head)
     if (auto* const head = head_.load(); head != nullptr)
         head->disable();
     if (new_head != nullptr) {
-        new_head->enable();
+        new_head->enable(true);
         System::post_event(Resize_event{*new_head, Terminal::area()});
         detail::Focus::set(*new_head);
     }

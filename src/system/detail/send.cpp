@@ -80,11 +80,7 @@ void send(ox::Disable_event e) { e.receiver.get().disable_event(); }
 
 void send(ox::Enable_event e) { e.receiver.get().enable_event(); }
 
-void send(ox::Focus_in_event e)
-{
-    Focus::direct_set_focus(e.receiver.get());
-    e.receiver.get().focus_in_event();
-}
+void send(ox::Focus_in_event e) { e.receiver.get().focus_in_event(); }
 
 void send(ox::Focus_out_event e) { e.receiver.get().focus_out_event(); }
 

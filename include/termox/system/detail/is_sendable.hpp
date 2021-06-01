@@ -27,6 +27,8 @@ template <typename T>
 
 [[nodiscard]] auto is_sendable(ox::Disable_event const&) -> bool;
 
+[[nodiscard]] auto is_sendable(ox::Focus_in_event const&) -> bool;
+
 [[nodiscard]] auto is_sendable(ox::Focus_out_event const&) -> bool;
 
 [[nodiscard]] auto is_sendable(ox::Custom_event const&) -> bool;

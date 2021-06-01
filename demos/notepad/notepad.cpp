@@ -217,7 +217,7 @@ auto notepad() -> std::unique_ptr<Widget>
             hpair(
                 vscrollbar(),
                 bordered(textbox(U"Type Here..."))
-                    | ox::border::rounded() | bg(ox::Color::Dark_gray)
+                    | border::rounded() | bg(ox::Color::Dark_gray)
             ),
             vtuple(
                 cycle_stack<Color_select>(
@@ -251,6 +251,8 @@ auto notepad() -> std::unique_ptr<Widget>
     auto& sb  = np->get<0>().first.first;
     auto& tbb = np->get<0>().first.second;
     auto& tb  = tbb | wrapped() | bg(ox::Color::Dark_gray);
+
+    np | forward_focus(tbb);
 
     auto& bg = np->get<0>().second.get<0>().stack.get_children()[0];
     auto& fg = np->get<0>().second.get<0>().stack.get_children()[1];

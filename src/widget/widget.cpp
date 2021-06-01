@@ -87,17 +87,18 @@ void Widget::set_wallpaper(Glyph g)
 
 auto Widget::get_wallpaper() const -> Glyph { return wallpaper_; }
 
-void Widget::enable(bool enable, bool post_child_polished_event)
+void Widget::enable(bool enable)
 {
-    this->enable_and_post_events(enable, post_child_polished_event);
-    for (Widget& w : this->get_children())
-        w.enable(enable, post_child_polished_event);
+    if (enabled_ == enable)
+        return;
+    if (!enable)
+        System::post_event(Disable_event{*this});
+    enabled_ = enable;
+    if (enable)
+        System::post_event(Enable_event{*this});
 }
 
-void Widget::disable(bool disable, bool post_child_polished_event)
-{
-    this->enable(!disable, post_child_polished_event);
-}
+void Widget::disable(bool disable) { this->enable(!disable); }
 
 auto Widget::is_enabled() const -> bool { return enabled_; }
 
@@ -411,20 +412,6 @@ auto Widget::timer_event_filter(Widget& receiver) -> bool
 {
     timer_filter(receiver);
     return false;
-}
-
-void Widget::enable_and_post_events(bool enable, bool post_child_polished_event)
-{
-    if (enabled_ == enable)
-        return;
-    if (!enable)
-        System::post_event(Disable_event{*this});
-    enabled_ = enable;
-    if (enable)
-        System::post_event(Enable_event{*this});
-    if (post_child_polished_event and this->parent() != nullptr)
-        System::post_event(Child_polished_event{*this->parent(), *this});
-    this->update();
 }
 
 void Widget::set_top_left(Point p) { top_left_position_ = p; }

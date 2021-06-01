@@ -22,29 +22,24 @@ FileType get_filetype(const std::string& filename)
 {
     auto result     = FileType::Unknown;
     auto input_file = std::ifstream{filename};
-    if (input_file.fail()) {
+    if (input_file.fail())
         return result;
-    }
-    std::string first_line;
+    auto first_line = std::string{};
     std::getline(input_file, first_line);
     remove_controls(first_line);
-    if (first_line == "#Life 1.05") {
+    if (first_line == "#Life 1.05")
         result = FileType::Life_1_05;
-    }
-    else if (first_line == "#Life 1.06") {
+    else if (first_line == "#Life 1.06")
         result = FileType::Life_1_06;
-    }
-    else if (first_line.size() > 5 and first_line.substr(0, 6) == "!Name:") {
+    else if (first_line.size() > 5 && first_line.substr(0, 6) == "!Name:")
         result = FileType::Plaintext;
-    }
     else {
-        while (!input_file.fail() and !first_line.empty() and
+        while (!input_file.fail() && !first_line.empty() &&
                first_line[0] == '#') {
             std::getline(input_file, first_line);
         }
-        if (first_line.size() > 3 and first_line.substr(0, 3) == "x =") {
+        if (first_line.size() > 3 && first_line.substr(0, 3) == "x =")
             result = FileType::RLE;
-        }
     }
     return result;
 }

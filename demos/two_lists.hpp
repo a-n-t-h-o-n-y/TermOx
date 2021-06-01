@@ -15,14 +15,14 @@ using Check_list = Array<layout::Selecting<layout::Vertical<Check>>, 15>;
 
 struct My_check_list
     : Bordered<ox::VPair<ox::Passive<Check_list>, ox::Widget>> {
+   public:
     Check_list& list = this->wrapped.first;
 
+   public:
     My_check_list()
     {
         using namespace ox;
         using namespace ox::pipe;
-
-        *this | direct_focus() | forward_focus(list);
 
         list.set_increment_selection_keys({Key::Arrow_down, Key::j});
         list.set_decrement_selection_keys({Key::Arrow_up, Key::k});
@@ -38,12 +38,19 @@ struct My_check_list
 };
 
 struct Two_lists : VArray<My_check_list, 2> {
+   public:
     Two_lists()
     {
-        *this | pipe::strong_focus() | pipe::forward_focus(this->get<0>());
+        this->get<0>().set_name("Check list 0");
+        this->get<0>().list.set_name("list 0");
+        this->get<1>().set_name("Check list 1");  // focus is set here, and then
+                                                  // forwarded somewhere?
+        this->get<1>().list.set_name("list 1");
+        *this | pipe::direct_focus() | pipe::forward_focus(this->get<0>().list);
         this->foo();
     }
 
+   public:
     void foo() const
     {
         (void)this->find_child_if(

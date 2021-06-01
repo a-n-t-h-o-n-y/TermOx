@@ -145,23 +145,14 @@ class Widget {
     /// Return the currently in use wallpaper or std::nullopt if none.
     [[nodiscard]] auto get_wallpaper() const -> Glyph;
 
-    /// Post an Enable_event to this widget, and all descendants.
-    /** Will only post a Child_polished_event to the parent if requested. Useful
-     *  for enabling a child Widget from a parent's Child_polished_event
-     *  handler. This function can be overridden to change the implementation of
-     *  what it means to enable a particular Widget type. For instance, if you
-     *  have a Widget that has multiple child Widgets but only wants to display
-     *  one at a time, then the enable() function can be overridden to enable
-     *  itself and then only pass on enable() calls to the children that it
-     *  wants to enable. */
-    virtual void enable(bool enable                    = true,
-                        bool post_child_polished_event = true);
+    /// Enable this Widget and send an Enable or Disable Event to itself.
+    void enable(bool enable = true);
 
     /// Post a Disable_event to this widget, and all descendants.
     /** Will only post a Child_polished_event to the parent if requested. Useful
      *  for disabling a child Widget from a parent's Child_polished_event
      *  handler. */
-    void disable(bool disable = true, bool post_child_polished_event = true);
+    void disable(bool disable = true);
 
     /// Check whether the Widget is enabled.
     [[nodiscard]] auto is_enabled() const -> bool;
@@ -370,14 +361,6 @@ class Widget {
 
     /// Handles Timer_event objects filtered from other Widgets.
     virtual auto timer_event_filter(Widget& receiver) -> bool;
-
-   protected:
-    /// Enable this Widget and possibly notify the parent of the change.
-    /** This function is useful if you want to override enable() function within
-     *  your own derived Widget class. In those cases you could use this
-     *  function to enable that Widget and then call enable() on only the
-     *  children Widgets that you want enabled. */
-    void enable_and_post_events(bool enable, bool post_child_polished_event);
 
    private:
     bool enabled_ = false;

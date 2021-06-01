@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <memory>
 #include <vector>
 
 #include <termox/system/event.hpp>
@@ -113,15 +114,16 @@ auto Focus::shift_tab_press() -> bool
 
 void Focus::set(ox::Widget& new_focus)
 {
-    if (&new_focus == focus_widget_)
+    if (std::addressof(new_focus) == focus_widget_)
         return;
     if (new_focus.focus_policy == Focus_policy::None) {
         Focus::clear();
         return;
     }
     if (focus_widget_ != nullptr)
-        System::send_event(Focus_out_event{*focus_widget_});
-    System::send_event(Focus_in_event{new_focus});
+        System::post_event(Focus_out_event{*focus_widget_});
+    focus_widget_ = std::addressof(new_focus);
+    System::post_event(Focus_in_event{new_focus});
 }
 
 void Focus::clear()
@@ -141,7 +143,5 @@ void Focus::disable_tab_focus() { tab_enabled_ = false; }
 void Focus::suppress_tab() { tab_suppressed_ = true; }
 
 void Focus::unsuppress_tab() { tab_suppressed_ = false; }
-
-void Focus::direct_set_focus(ox::Widget& w) { focus_widget_ = &w; }
 
 }  // namespace ox::detail
