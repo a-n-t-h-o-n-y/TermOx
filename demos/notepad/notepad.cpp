@@ -160,14 +160,12 @@ File_status_bar::File_status_bar()
 
 void File_status_bar::fail(ox::Glyph_string message)
 {
-    using namespace ox;
-    this->set_text(std::move(message | fg(Color::Red)));
+    this->set_text(std::move(message) | ox::fg(Color::Red));
 }
 
 void File_status_bar::success(ox::Glyph_string message)
 {
-    using namespace ox;
-    this->set_text(std::move(message | fg(Color::Light_green)));
+    this->set_text(std::move(message) | fg(ox::Color::Light_green));
 }
 
 Notepad::Notepad()

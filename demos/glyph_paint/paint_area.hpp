@@ -45,29 +45,29 @@ class Paint_area : public ox::Widget {
         }
         current_glyph_.symbol = s.symbol;
         if (s.brush.background != ox::Color::Background)
-            current_glyph_ | bg(s.brush.background);
+            current_glyph_ |= bg(s.brush.background);
         if (s.brush.foreground != ox::Color::Foreground)
-            current_glyph_ | fg(s.brush.foreground);
+            current_glyph_ |= fg(s.brush.foreground);
         glyph_changed(current_glyph_);
     }
 
     void set_foreground_color(ox::Color c)
     {
-        current_glyph_ | fg(c);
+        current_glyph_ |= fg(c);
         if (!erase_enabled_)
             glyph_changed(current_glyph_);
     }
 
     void set_background_color(ox::Color c)
     {
-        current_glyph_ | bg(c);
+        current_glyph_ |= bg(c);
         if (!erase_enabled_)
             glyph_changed(current_glyph_);
     }
 
     void set_trait(ox::Trait t)
     {
-        current_glyph_ | t;
+        current_glyph_ |= t;
         if (!erase_enabled_)
             glyph_changed(current_glyph_);
     }

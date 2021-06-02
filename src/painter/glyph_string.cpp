@@ -91,20 +91,17 @@ void Glyph_string::remove_foreground()
         glyph.brush.foreground = Color::Foreground;
 }
 
-auto operator|(Glyph_string& gs, Traits ts) -> Glyph_string&
+auto operator|=(Glyph_string& gs, Traits ts) -> Glyph_string&
 {
     gs.add_traits(ts);
     return gs;
 }
 
-auto operator|(Glyph_string const& gs, Traits ts) -> Glyph_string
+auto operator|(Glyph_string gs, Traits ts) -> Glyph_string
 {
-    auto copy = gs;
-    copy.add_traits(ts);
-    return copy;
+    gs.add_traits(ts);
+    return gs;
 }
-
-auto operator|(Glyph_string&& gs, Traits ts) -> Glyph_string { return gs | ts; }
 
 }  // namespace ox
 
@@ -133,22 +130,16 @@ auto operator|(char const* gs, Traits ts) -> ox::Glyph_string
 
 namespace ox {
 
-auto operator|(Glyph_string& gs, Background_color c) -> Glyph_string&
+auto operator|=(Glyph_string& gs, Background_color c) -> Glyph_string&
 {
     gs.add_color(c);
     return gs;
 }
 
-auto operator|(Glyph_string const& gs, Background_color c) -> Glyph_string
+auto operator|(Glyph_string gs, Background_color c) -> Glyph_string
 {
-    auto copy = gs;
-    copy.add_color(c);
-    return copy;
-}
-
-auto operator|(Glyph_string&& gs, Background_color c) -> Glyph_string
-{
-    return gs | c;
+    gs.add_color(c);
+    return gs;
 }
 
 auto operator|(char32_t const* gs, Background_color c) -> Glyph_string
@@ -156,22 +147,16 @@ auto operator|(char32_t const* gs, Background_color c) -> Glyph_string
     return Glyph_string{gs} | c;
 }
 
-auto operator|(Glyph_string& gs, Foreground_color c) -> Glyph_string&
+auto operator|=(Glyph_string& gs, Foreground_color c) -> Glyph_string&
 {
     gs.add_color(c);
     return gs;
 }
 
-auto operator|(Glyph_string const& gs, Foreground_color c) -> Glyph_string
+auto operator|(Glyph_string gs, Foreground_color c) -> Glyph_string
 {
-    auto copy = gs;
-    copy.add_color(c);
-    return copy;
-}
-
-auto operator|(Glyph_string&& gs, Foreground_color c) -> Glyph_string
-{
-    return gs | c;
+    gs.add_color(c);
+    return gs;
 }
 
 auto operator|(char32_t const* gs, Foreground_color c) -> Glyph_string
@@ -179,22 +164,19 @@ auto operator|(char32_t const* gs, Foreground_color c) -> Glyph_string
     return Glyph_string{gs} | c;
 }
 
-auto operator|(Glyph_string& gs, Brush b) -> Glyph_string&
+auto operator|=(Glyph_string& gs, Brush b) -> Glyph_string&
 {
     for (auto& g : gs)
         g.brush = b;
     return gs;
 }
 
-auto operator|(Glyph_string const& gs, Brush b) -> Glyph_string
+auto operator|(Glyph_string gs, Brush b) -> Glyph_string
 {
-    auto copy = gs;
-    for (auto& g : copy)
+    for (auto& g : gs)
         g.brush = b;
-    return copy;
+    return gs;
 }
-
-auto operator|(Glyph_string&& gs, Brush b) -> Glyph_string { return gs | b; }
 
 auto operator|(char32_t const* gs, Brush b) -> Glyph_string
 {

@@ -34,8 +34,9 @@ void Notify_light::set_display(Display d)
 {
     display_ = d;
 
-    on_block_ | fg(display_.on) | bg(display_.off);
-    off_block_ | fg(display_.off);
+    on_block_ |= bg(display_.off);
+    on_block_ |= fg(display_.on);
+    off_block_ |= fg(display_.off);
 }
 
 auto Notify_light::get_display() const -> Display { return display_; }

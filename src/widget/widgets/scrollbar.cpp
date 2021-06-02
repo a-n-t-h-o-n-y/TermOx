@@ -80,7 +80,7 @@ void Scrollbar<Layout_t>::Middle::set_size(std::size_t s)
 template <template <typename> typename Layout_t>
 void Scrollbar<Layout_t>::Middle::set_bar_fg(Color c)
 {
-    bar_ | fg(c);
+    bar_ |= fg(c);
     this->update();
 }
 

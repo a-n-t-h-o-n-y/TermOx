@@ -148,7 +148,7 @@ TEST_CASE("Traits pipe Glyph_string construction", "[Glyph_string]")
             CHECK(g.brush.traits == traits);
 
         // L-Value reference
-        gs | Trait::Inverse;
+        gs |= Trait::Inverse;
         auto const traits2 = traits | Trait::Inverse;
         for (auto g : gs)
             CHECK(g.brush.traits == traits2);
@@ -202,8 +202,8 @@ TEST_CASE("Color pipe Glyph_string construction", "[Glyph_string]")
         }
 
         // L-Value reference
-        gs | bg(Color::Background);
-        gs | fg(Color::Foreground);
+        gs |= bg(Color::Background);
+        gs |= fg(Color::Foreground);
         for (auto g : gs) {
             CHECK(g.brush.background == Color::Background);
             CHECK(g.brush.foreground == Color::Foreground);
@@ -256,7 +256,7 @@ TEST_CASE("Brush pipe Glyph_string construction", "[Glyph_string]")
             CHECK(g.brush == brush);
 
         // L-Value reference
-        gs | brush2;
+        gs |= brush2;
         for (auto g : gs)
             CHECK(g.brush == brush2);
     }

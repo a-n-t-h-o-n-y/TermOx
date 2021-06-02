@@ -165,13 +165,11 @@ class Glyph_string : private std::vector<Glyph> {
     using std::vector<Glyph>::swap;
 };
 
-// Trait -----------------------------------------------------------------------
-/// Modifying Operation
-auto operator|(Glyph_string& gs, Traits ts) -> Glyph_string&;
+// Traits ----------------------------------------------------------------------
 
-[[nodiscard]] auto operator|(Glyph_string const& gs, Traits ts) -> Glyph_string;
+auto operator|=(Glyph_string& gs, Traits ts) -> Glyph_string&;
 
-[[nodiscard]] auto operator|(Glyph_string&& gs, Traits ts) -> Glyph_string;
+[[nodiscard]] auto operator|(Glyph_string gs, Traits ts) -> Glyph_string;
 
 }  // namespace ox
 
@@ -190,24 +188,18 @@ namespace esc {  // For ADL; Trait(s) is really in namespace::esc.
 namespace ox {
 
 // Background_color ------------------------------------------------------------
-auto operator|(Glyph_string& gs, Background_color c) -> Glyph_string&;
+auto operator|=(Glyph_string& gs, Background_color c) -> Glyph_string&;
 
-[[nodiscard]] auto operator|(Glyph_string const& gs, Background_color c)
-    -> Glyph_string;
-
-[[nodiscard]] auto operator|(Glyph_string&& gs, Background_color c)
+[[nodiscard]] auto operator|(Glyph_string gs, Background_color c)
     -> Glyph_string;
 
 [[nodiscard]] auto operator|(char32_t const* gs, Background_color c)
     -> Glyph_string;
 
 // Foreground_color ------------------------------------------------------------
-auto operator|(Glyph_string& gs, Foreground_color c) -> Glyph_string&;
+auto operator|=(Glyph_string& gs, Foreground_color c) -> Glyph_string&;
 
-[[nodiscard]] auto operator|(Glyph_string const& gs, Foreground_color c)
-    -> Glyph_string;
-
-[[nodiscard]] auto operator|(Glyph_string&& gs, Foreground_color c)
+[[nodiscard]] auto operator|(Glyph_string gs, Foreground_color c)
     -> Glyph_string;
 
 [[nodiscard]] auto operator|(char32_t const* gs, Foreground_color c)
@@ -215,12 +207,9 @@ auto operator|(Glyph_string& gs, Foreground_color c) -> Glyph_string&;
 
 // Brush -----------------------------------------------------------------------
 /// Assigns the Brush \p b to each Glyph in \p gs.
-auto operator|(Glyph_string& gs, Brush b) -> Glyph_string&;
+auto operator|=(Glyph_string& gs, Brush b) -> Glyph_string&;
 
-[[nodiscard]] auto operator|(Glyph_string const& gs, Brush b) -> Glyph_string;
-
-/// Assigns the Brush \p b to each Glyph in \p gs.
-[[nodiscard]] auto operator|(Glyph_string&& gs, Brush b) -> Glyph_string;
+[[nodiscard]] auto operator|(Glyph_string gs, Brush b) -> Glyph_string;
 
 /// Assigns the Brush \p b to each Glyph in \p gs.
 [[nodiscard]] auto operator|(char32_t const* gs, Brush b) -> Glyph_string;
