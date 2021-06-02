@@ -63,7 +63,7 @@ class Widget {
     Signal<void(Key)> key_pressed;
     Signal<void()> focused_in;
     Signal<void()> focused_out;
-    Signal<void()> destroyed;
+    Signal<void()> deleted;
     Signal<void()> painted;
     Signal<void()> timer;
 
@@ -82,7 +82,7 @@ class Widget {
     Signal<void(Widget&, Key)> key_pressed_filter;
     Signal<void(Widget&)> focused_in_filter;
     Signal<void(Widget&)> focused_out_filter;
-    Signal<void(Widget&)> destroyed_filter;
+    Signal<void(Widget&)> deleted_filter;
     Signal<void(Widget&)> painted_filter;
     Signal<void(Widget&)> timer_filter;
 

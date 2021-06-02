@@ -244,7 +244,7 @@ my_widget | children() | for_each([](auto& w){ log(w.name()); });
 - `on_focus_out(Handler)`
 - `on_paint(Handler)`
 - `on_timer(Handler)`
-- `on_destroyed(Handler)`
+- `on_deleted(Handler)`
 - `on_color_selected(Handler)`
 - `on_press(Handler)`
 

@@ -145,7 +145,7 @@ auto filter_send(ox::Delete_event const& e) -> bool
     return apply_until_accepted(
         [&e](Widget* filter) {
             auto const x = filter->delete_event_filter(*e.removed);
-            filter->destroyed_filter.emit(*e.removed);
+            filter->deleted_filter.emit(*e.removed);
             return x;
         },
         e.removed->get_event_filters());

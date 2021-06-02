@@ -122,7 +122,7 @@ void Widget::install_event_filter(Widget& filter)
             [this, &filter]() { this->remove_event_filter(filter); }};
         // In case *this has been destroyed and the filter has not.
         remove_on_destroy.track(this->lifetime);
-        filter.destroyed.connect(remove_on_destroy);
+        filter.deleted.connect(remove_on_destroy);
     }
 }
 

@@ -866,10 +866,10 @@ template <typename Handler>
 }
 
 template <typename Handler>
-[[nodiscard]] inline auto on_destroyed(Handler&& op)
+[[nodiscard]] inline auto on_deleted(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
-        get(w).destroyed.connect(std::forward<Handler>(op));
+        get(w).deleted.connect(std::forward<Handler>(op));
         return std::forward<decltype(w)>(w);
     };
 }

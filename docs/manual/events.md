@@ -78,7 +78,7 @@ Signal<void()> disabled;
 
 /// This Widget was removed from its parent and is scheduled to be deleted after this event is processed.
 bool delete_event();
-Signal<void()> destroyed;
+Signal<void()> deleted;
 ```
 
 ### Display Events

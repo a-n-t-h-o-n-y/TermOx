@@ -24,7 +24,7 @@ namespace {
 void do_delete(ox::Widget& w)
 {
     w.delete_event();
-    w.destroyed.emit();
+    w.deleted.emit();
     w.disable_animation();
     if (ox::detail::Focus::focus_widget() == std::addressof(w))
         ox::detail::Focus::clear_without_posting_event();
