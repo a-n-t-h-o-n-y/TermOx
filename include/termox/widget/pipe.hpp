@@ -43,7 +43,7 @@ namespace ox::pipe {
 
 // Generic Tools ---------------------------------------------------------------
 template <typename F>
-auto for_each(F&& f)
+[[nodiscard]] auto for_each(F&& f)
 {
     return [&](auto&& w) -> decltype(auto) {
         std::forward<F>(f)(get(w));
@@ -73,7 +73,7 @@ template <typename Widget_t>
 }
 
 // Widget Modifiers ------------------------------------------------------------
-inline auto name(std::string const& name)
+[[nodiscard]] inline auto name(std::string const& name)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).set_name(std::move(name));
@@ -81,7 +81,7 @@ inline auto name(std::string const& name)
     };
 }
 
-inline auto install_filter(Widget& filter)
+[[nodiscard]] inline auto install_filter(Widget& filter)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).install_event_filter(filter);
@@ -89,7 +89,7 @@ inline auto install_filter(Widget& filter)
     };
 }
 
-inline auto remove_filter(Widget& filter)
+[[nodiscard]] inline auto remove_filter(Widget& filter)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).remove_event_filter(filter);
@@ -97,7 +97,7 @@ inline auto remove_filter(Widget& filter)
     };
 }
 
-inline auto animate(std::chrono::milliseconds interval)
+[[nodiscard]] inline auto animate(std::chrono::milliseconds interval)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).enable_animation(interval);
@@ -105,7 +105,7 @@ inline auto animate(std::chrono::milliseconds interval)
     };
 }
 
-inline auto animate(FPS fps)
+[[nodiscard]] inline auto animate(FPS fps)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).enable_animation(fps);
@@ -113,7 +113,7 @@ inline auto animate(FPS fps)
     };
 }
 
-inline auto disanimate()
+[[nodiscard]] inline auto disanimate()
 {
     return [](auto&& w) -> decltype(auto) {
         get(w).disable_animation();
@@ -122,7 +122,7 @@ inline auto disanimate()
 }
 
 // Wallpaper Modifiers ---------------------------------------------------------
-inline auto wallpaper(Glyph g)
+[[nodiscard]] inline auto wallpaper(Glyph g)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).set_wallpaper(g);
@@ -130,7 +130,7 @@ inline auto wallpaper(Glyph g)
     };
 }
 
-inline auto wallpaper_with_brush()
+[[nodiscard]] inline auto wallpaper_with_brush()
 {
     return [](auto&& w) -> decltype(auto) {
         get(w).paint_wallpaper_with_brush(true);
@@ -138,7 +138,7 @@ inline auto wallpaper_with_brush()
     };
 }
 
-inline auto wallpaper_without_brush()
+[[nodiscard]] inline auto wallpaper_without_brush()
 {
     return [](auto&& w) -> decltype(auto) {
         get(w).paint_wallpaper_with_brush(false);
@@ -251,7 +251,7 @@ auto operator|(std::unique_ptr<Bordered<Widget_t>> w_ptr, Foreground_color fg)
 
 namespace ox::pipe {
 
-inline auto drop_north()
+[[nodiscard]] inline auto drop_north()
 {
     return [](auto&& w) -> decltype(auto) {
         get(w).set_border(ox::drop_north(get(w).Bordered::border()));
@@ -259,7 +259,7 @@ inline auto drop_north()
     };
 }
 
-inline auto drop_south()
+[[nodiscard]] inline auto drop_south()
 {
     return [](auto&& w) -> decltype(auto) {
         get(w).set_border(ox::drop_south(get(w).Bordered::border()));
@@ -267,7 +267,7 @@ inline auto drop_south()
     };
 }
 
-inline auto drop_east()
+[[nodiscard]] inline auto drop_east()
 {
     return [](auto&& w) -> decltype(auto) {
         get(w).set_border(ox::drop_east(get(w).Bordered::border()));
@@ -275,7 +275,7 @@ inline auto drop_east()
     };
 }
 
-inline auto drop_west()
+[[nodiscard]] inline auto drop_west()
 {
     return [](auto&& w) -> decltype(auto) {
         get(w).set_border(ox::drop_west(get(w).Bordered::border()));
@@ -283,7 +283,7 @@ inline auto drop_west()
     };
 }
 
-inline auto take_north()
+[[nodiscard]] inline auto take_north()
 {
     return [](auto&& w) -> decltype(auto) {
         get(w).set_border(ox::take_north(get(w).Bordered::border()));
@@ -291,7 +291,7 @@ inline auto take_north()
     };
 }
 
-inline auto take_south()
+[[nodiscard]] inline auto take_south()
 {
     return [](auto&& w) -> decltype(auto) {
         get(w).set_border(ox::take_south(get(w).Bordered::border()));
@@ -299,7 +299,7 @@ inline auto take_south()
     };
 }
 
-inline auto take_east()
+[[nodiscard]] inline auto take_east()
 {
     return [](auto&& w) -> decltype(auto) {
         get(w).set_border(ox::take_east(get(w).Bordered::border()));
@@ -307,7 +307,7 @@ inline auto take_east()
     };
 }
 
-inline auto take_west()
+[[nodiscard]] inline auto take_west()
 {
     return [](auto&& w) -> decltype(auto) {
         get(w).set_border(ox::take_west(get(w).Bordered::border()));
@@ -364,7 +364,7 @@ inline auto take_west()
                     }};
 }
 
-inline auto clear_traits()
+[[nodiscard]] inline auto clear_traits()
 {
     return Overload{[](Brush& b) -> Brush& {
                         b.traits = Trait::None;
@@ -408,7 +408,7 @@ inline auto clear_traits()
 }
 
 // Cursor Modifiers ------------------------------------------------------------
-inline auto show_cursor()
+[[nodiscard]] inline auto show_cursor()
 {
     return [](auto&& w) -> decltype(auto) {
         get(w).cursor.enable();
@@ -416,7 +416,7 @@ inline auto show_cursor()
     };
 }
 
-inline auto hide_cursor()
+[[nodiscard]] inline auto hide_cursor()
 {
     return [](auto&& w) -> decltype(auto) {
         get(w).cursor.disable();
@@ -424,7 +424,7 @@ inline auto hide_cursor()
     };
 }
 
-inline auto put_cursor(Point p)
+[[nodiscard]] inline auto put_cursor(Point p)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).cursor.set_position(p);
@@ -433,7 +433,7 @@ inline auto put_cursor(Point p)
 }
 
 // Focus_policy ----------------------------------------------------------------
-inline auto focus(Focus_policy p)
+[[nodiscard]] inline auto focus(Focus_policy p)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).focus_policy = p;
@@ -441,18 +441,18 @@ inline auto focus(Focus_policy p)
     };
 }
 
-inline auto no_focus() { return focus(Focus_policy::None); }
+[[nodiscard]] inline auto no_focus() { return focus(Focus_policy::None); }
 
-inline auto tab_focus() { return focus(Focus_policy::Tab); }
+[[nodiscard]] inline auto tab_focus() { return focus(Focus_policy::Tab); }
 
-inline auto click_focus() { return focus(Focus_policy::Click); }
+[[nodiscard]] inline auto click_focus() { return focus(Focus_policy::Click); }
 
-inline auto strong_focus() { return focus(Focus_policy::Strong); }
+[[nodiscard]] inline auto strong_focus() { return focus(Focus_policy::Strong); }
 
-inline auto direct_focus() { return focus(Focus_policy::Direct); }
+[[nodiscard]] inline auto direct_focus() { return focus(Focus_policy::Direct); }
 
 /// Give focus to \p receiver when the piped Widget gets focus_in_event.
-inline auto forward_focus(Widget& receiver)
+[[nodiscard]] inline auto forward_focus(Widget& receiver)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).focused_in.connect([&] { ::ox::System::set_focus(receiver); });
@@ -462,7 +462,7 @@ inline auto forward_focus(Widget& receiver)
 
 // Width Policy Modifiers -----------------------------------------------------
 
-inline auto fixed_width(int hint)
+[[nodiscard]] inline auto fixed_width(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).width_policy.fixed(hint);
@@ -470,7 +470,7 @@ inline auto fixed_width(int hint)
     };
 }
 
-inline auto minimum_width(int hint)
+[[nodiscard]] inline auto minimum_width(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).width_policy.minimum(hint);
@@ -478,7 +478,7 @@ inline auto minimum_width(int hint)
     };
 }
 
-inline auto maximum_width(int hint)
+[[nodiscard]] inline auto maximum_width(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).width_policy.maximum(hint);
@@ -486,7 +486,7 @@ inline auto maximum_width(int hint)
     };
 }
 
-inline auto preferred_width(int hint)
+[[nodiscard]] inline auto preferred_width(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).width_policy.preferred(hint);
@@ -494,7 +494,7 @@ inline auto preferred_width(int hint)
     };
 }
 
-inline auto expanding_width(int hint)
+[[nodiscard]] inline auto expanding_width(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).width_policy.expanding(hint);
@@ -502,7 +502,7 @@ inline auto expanding_width(int hint)
     };
 }
 
-inline auto minimum_expanding_width(int hint)
+[[nodiscard]] inline auto minimum_expanding_width(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).width_policy.minimum_expanding(hint);
@@ -510,7 +510,7 @@ inline auto minimum_expanding_width(int hint)
     };
 }
 
-inline auto ignored_width()
+[[nodiscard]] inline auto ignored_width()
 {
     return [](auto&& w) -> decltype(auto) {
         get(w).width_policy.ignored();
@@ -518,7 +518,7 @@ inline auto ignored_width()
     };
 }
 
-inline auto width_hint(int hint)
+[[nodiscard]] inline auto width_hint(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).width_policy.hint(hint);
@@ -526,7 +526,7 @@ inline auto width_hint(int hint)
     };
 }
 
-inline auto width_min(int min)
+[[nodiscard]] inline auto width_min(int min)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).width_policy.min(min);
@@ -534,7 +534,7 @@ inline auto width_min(int min)
     };
 }
 
-inline auto width_max(int max)
+[[nodiscard]] inline auto width_max(int max)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).width_policy.max(max);
@@ -542,7 +542,7 @@ inline auto width_max(int max)
     };
 }
 
-inline auto width_stretch(double stretch)
+[[nodiscard]] inline auto width_stretch(double stretch)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).width_policy.stretch(stretch);
@@ -550,7 +550,7 @@ inline auto width_stretch(double stretch)
     };
 }
 
-inline auto can_ignore_width_min()
+[[nodiscard]] inline auto can_ignore_width_min()
 {
     return [](auto&& w) -> decltype(auto) {
         get(w).width_policy.can_ignore_min(true);
@@ -558,7 +558,7 @@ inline auto can_ignore_width_min()
     };
 }
 
-inline auto cannot_ignore_width_min()
+[[nodiscard]] inline auto cannot_ignore_width_min()
 {
     return [](auto&& w) -> decltype(auto) {
         get(w).width_policy.can_ignore_min(false);
@@ -568,7 +568,7 @@ inline auto cannot_ignore_width_min()
 
 // Height Policy Modifiers -----------------------------------------------------
 
-inline auto fixed_height(int hint)
+[[nodiscard]] inline auto fixed_height(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).height_policy.fixed(hint);
@@ -576,7 +576,7 @@ inline auto fixed_height(int hint)
     };
 }
 
-inline auto minimum_height(int hint)
+[[nodiscard]] inline auto minimum_height(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).height_policy.minimum(hint);
@@ -584,7 +584,7 @@ inline auto minimum_height(int hint)
     };
 }
 
-inline auto maximum_height(int hint)
+[[nodiscard]] inline auto maximum_height(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).height_policy.maximum(hint);
@@ -592,7 +592,7 @@ inline auto maximum_height(int hint)
     };
 }
 
-inline auto preferred_height(int hint)
+[[nodiscard]] inline auto preferred_height(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).height_policy.preferred(hint);
@@ -600,7 +600,7 @@ inline auto preferred_height(int hint)
     };
 }
 
-inline auto expanding_height(int hint)
+[[nodiscard]] inline auto expanding_height(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).height_policy.expanding(hint);
@@ -608,7 +608,7 @@ inline auto expanding_height(int hint)
     };
 }
 
-inline auto minimum_expanding_height(int hint)
+[[nodiscard]] inline auto minimum_expanding_height(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).height_policy.minimum_expanding(hint);
@@ -616,7 +616,7 @@ inline auto minimum_expanding_height(int hint)
     };
 }
 
-inline auto ignored_height()
+[[nodiscard]] inline auto ignored_height()
 {
     return [](auto&& w) -> decltype(auto) {
         get(w).height_policy.ignored();
@@ -624,7 +624,7 @@ inline auto ignored_height()
     };
 }
 
-inline auto height_hint(int hint)
+[[nodiscard]] inline auto height_hint(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).height_policy.hint(hint);
@@ -632,7 +632,7 @@ inline auto height_hint(int hint)
     };
 }
 
-inline auto height_min(int min)
+[[nodiscard]] inline auto height_min(int min)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).height_policy.min(min);
@@ -640,7 +640,7 @@ inline auto height_min(int min)
     };
 }
 
-inline auto height_max(int max)
+[[nodiscard]] inline auto height_max(int max)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).height_policy.max(max);
@@ -648,7 +648,7 @@ inline auto height_max(int max)
     };
 }
 
-inline auto height_stretch(double stretch)
+[[nodiscard]] inline auto height_stretch(double stretch)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).height_policy.stretch(stretch);
@@ -656,7 +656,7 @@ inline auto height_stretch(double stretch)
     };
 }
 
-inline auto can_ignore_height_min()
+[[nodiscard]] inline auto can_ignore_height_min()
 {
     return [](auto&& w) -> decltype(auto) {
         get(w).height_policy.can_ignore_min(true);
@@ -664,7 +664,7 @@ inline auto can_ignore_height_min()
     };
 }
 
-inline auto cannot_ignore_height_min()
+[[nodiscard]] inline auto cannot_ignore_height_min()
 {
     return [](auto&& w) -> decltype(auto) {
         get(w).height_policy.can_ignore_min(false);
@@ -674,7 +674,7 @@ inline auto cannot_ignore_height_min()
 
 // Widget::Signals -------------------------------------------------------------
 template <typename Handler>
-inline auto on_enable(Handler&& op)
+[[nodiscard]] inline auto on_enable(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).enabled.connect(std::forward<Handler>(op));
@@ -683,7 +683,7 @@ inline auto on_enable(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_disable(Handler&& op)
+[[nodiscard]] inline auto on_disable(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).disabled.connect(std::forward<Handler>(op));
@@ -692,7 +692,7 @@ inline auto on_disable(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_child_added(Handler&& op)
+[[nodiscard]] inline auto on_child_added(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).child_added.connect(std::forward<Handler>(op));
@@ -701,7 +701,7 @@ inline auto on_child_added(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_child_removed(Handler&& op)
+[[nodiscard]] inline auto on_child_removed(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).child_removed.connect(std::forward<Handler>(op));
@@ -710,7 +710,7 @@ inline auto on_child_removed(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_child_polished(Handler&& op)
+[[nodiscard]] inline auto on_child_polished(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).child_polished.connect(std::forward<Handler>(op));
@@ -719,7 +719,7 @@ inline auto on_child_polished(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_move(Handler&& op)
+[[nodiscard]] inline auto on_move(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).moved.connect(std::forward<Handler>(op));
@@ -728,7 +728,7 @@ inline auto on_move(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_resize(Handler&& op)
+[[nodiscard]] inline auto on_resize(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).resized.connect(std::forward<Handler>(op));
@@ -737,7 +737,7 @@ inline auto on_resize(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_mouse_press(Handler&& op)
+[[nodiscard]] inline auto on_mouse_press(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).mouse_pressed.connect(std::forward<Handler>(op));
@@ -746,7 +746,7 @@ inline auto on_mouse_press(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_left_click(Handler&& op)
+[[nodiscard]] inline auto on_left_click(Handler&& op)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).mouse_pressed.connect([op](auto const& m) {
@@ -758,7 +758,7 @@ inline auto on_left_click(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_middle_click(Handler&& op)
+[[nodiscard]] inline auto on_middle_click(Handler&& op)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).mouse_pressed.connect([op](auto const& m) {
@@ -770,7 +770,7 @@ inline auto on_middle_click(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_right_click(Handler&& op)
+[[nodiscard]] inline auto on_right_click(Handler&& op)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).mouse_pressed.connect([op](auto const& m) {
@@ -782,7 +782,7 @@ inline auto on_right_click(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_mouse_release(Handler&& op)
+[[nodiscard]] inline auto on_mouse_release(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).mouse_released.connect(std::forward<Handler>(op));
@@ -791,7 +791,7 @@ inline auto on_mouse_release(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_mouse_double_click(Handler&& op)
+[[nodiscard]] inline auto on_mouse_double_click(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).mouse_double_clicked.connect(std::forward<Handler>(op));
@@ -800,7 +800,7 @@ inline auto on_mouse_double_click(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_mouse_move(Handler&& op)
+[[nodiscard]] inline auto on_mouse_move(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).mouse_moved.connect(std::forward<Handler>(op));
@@ -809,7 +809,7 @@ inline auto on_mouse_move(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_key_press(Handler&& op)
+[[nodiscard]] inline auto on_key_press(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).key_pressed.connect(std::forward<Handler>(op));
@@ -818,7 +818,7 @@ inline auto on_key_press(Handler&& op)
 }
 
 template <typename Handler>
-inline auto bind_key(Key k, Handler&& op)
+[[nodiscard]] inline auto bind_key(Key k, Handler&& op)
 {
     return [op = std::forward<Handler>(op), k](auto&& w) -> decltype(auto) {
         get(w).key_pressed.connect([&w, &op, k](auto pressed) {
@@ -830,7 +830,7 @@ inline auto bind_key(Key k, Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_focus_in(Handler&& op)
+[[nodiscard]] inline auto on_focus_in(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).focused_in.connect(std::forward<Handler>(op));
@@ -839,7 +839,7 @@ inline auto on_focus_in(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_focus_out(Handler&& op)
+[[nodiscard]] inline auto on_focus_out(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).focused_out.connect(std::forward<Handler>(op));
@@ -848,7 +848,7 @@ inline auto on_focus_out(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_paint(Handler&& op)
+[[nodiscard]] inline auto on_paint(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).painted.connect(std::forward<Handler>(op));
@@ -857,7 +857,7 @@ inline auto on_paint(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_timer(Handler&& op)
+[[nodiscard]] inline auto on_timer(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).timer.connect(std::forward<Handler>(op));
@@ -866,7 +866,7 @@ inline auto on_timer(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_destroyed(Handler&& op)
+[[nodiscard]] inline auto on_destroyed(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).destroyed.connect(std::forward<Handler>(op));
@@ -876,7 +876,7 @@ inline auto on_destroyed(Handler&& op)
 
 // Derived Widget::Signals -----------------------------------------------------
 template <typename Handler>
-inline auto on_color_selected(Handler&& op)
+[[nodiscard]] inline auto on_color_selected(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).color_selected.connect(std::forward<Handler>(op));
@@ -885,7 +885,7 @@ inline auto on_color_selected(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_press(Handler&& op)
+[[nodiscard]] inline auto on_press(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).pressed.connect(std::forward<Handler>(op));
@@ -894,7 +894,7 @@ inline auto on_press(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_check(Handler&& op)
+[[nodiscard]] inline auto on_check(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).checked.connect(std::forward<Handler>(op));
@@ -903,7 +903,7 @@ inline auto on_check(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_uncheck(Handler&& op)
+[[nodiscard]] inline auto on_uncheck(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).unchecked.connect(std::forward<Handler>(op));
@@ -912,7 +912,7 @@ inline auto on_uncheck(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_toggle(Handler&& op)
+[[nodiscard]] inline auto on_toggle(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).toggled.connect(std::forward<Handler>(op));
@@ -921,7 +921,7 @@ inline auto on_toggle(Handler&& op)
 }
 
 // Derived Widget Modifiers ----------------------------------------------------
-inline auto active_page(std::size_t p)
+[[nodiscard]] inline auto active_page(std::size_t p)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).set_active_page(p);
@@ -929,7 +929,7 @@ inline auto active_page(std::size_t p)
     };
 }
 
-inline auto label(Glyph_string const& x)
+[[nodiscard]] inline auto label(Glyph_string const& x)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).set_label(x);
@@ -937,13 +937,13 @@ inline auto label(Glyph_string const& x)
     };
 }
 
-inline auto wrapped()
+[[nodiscard]] inline auto wrapped()
 {
     return [](auto&& w) -> auto& { return get(w).wrapped; };
 }
 
 // Labeled_cycle_box
-inline auto divider(Glyph x)
+[[nodiscard]] inline auto divider(Glyph x)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).set_divider(x);
@@ -951,7 +951,7 @@ inline auto divider(Glyph x)
     };
 }
 
-inline auto any_wrap()
+[[nodiscard]] inline auto any_wrap()
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).set_wrap(Wrap::Any);
@@ -959,7 +959,7 @@ inline auto any_wrap()
     };
 }
 
-inline auto word_wrap()
+[[nodiscard]] inline auto word_wrap()
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).set_wrap(Wrap::Word);
@@ -967,7 +967,7 @@ inline auto word_wrap()
     };
 }
 
-inline auto text(Glyph_string x)
+[[nodiscard]] inline auto text(Glyph_string x)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).set_text(x);
@@ -976,7 +976,7 @@ inline auto text(Glyph_string x)
 }
 
 template <typename Number_t>
-inline auto value(Number_t x)
+[[nodiscard]] inline auto value(Number_t x)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).set_value(x);
@@ -984,7 +984,7 @@ inline auto value(Number_t x)
     };
 }
 
-inline auto align_left()
+[[nodiscard]] inline auto align_left()
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).set_alignment(Align::Left);
@@ -992,7 +992,7 @@ inline auto align_left()
     };
 }
 
-inline auto align_center()
+[[nodiscard]] inline auto align_center()
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).set_alignment(Align::Center);
@@ -1000,7 +1000,7 @@ inline auto align_center()
     };
 }
 
-inline auto align_right()
+[[nodiscard]] inline auto align_right()
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).set_alignment(Align::Right);
@@ -1009,7 +1009,7 @@ inline auto align_right()
 }
 
 // Label
-inline auto dynamic_growth()
+[[nodiscard]] inline auto dynamic_growth()
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).set_growth_strategy(Growth::Dynamic);
@@ -1017,7 +1017,7 @@ inline auto dynamic_growth()
     };
 }
 
-inline auto no_growth()
+[[nodiscard]] inline auto no_growth()
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).set_growth_strategy(Growth::Static);
