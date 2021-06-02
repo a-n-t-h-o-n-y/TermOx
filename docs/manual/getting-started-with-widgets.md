@@ -82,11 +82,10 @@ operator, a wide string literal is used for the text.
 ---
 
 ```cpp
-auto p    = Painter{*this};
 p.put(text, {10, 5});
 ```
 
-Create a `Painter` object to put [`Glyphs`](glyph.md) to the screen. The `put`
+Put `text` [`Glyph`](glyph.md) to the screen at the given point. The `put`
 method takes a `Glyph` or `Glyph_string` and a [`Point`](point.md). The
 coordinates are local to the Widget, with the origin at the top left, x extends
 to the right with positive values, and y extends downward with positive values.
