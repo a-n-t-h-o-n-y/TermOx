@@ -13,6 +13,11 @@ auto is_sendable(ox::Key_press_event const& event) -> bool
 }
 
 // Below are always Sendable.
+
+auto is_sendable(ox::Move_event const&) -> bool { return true; }
+
+auto is_sendable(ox::Resize_event const&) -> bool { return true; }
+
 auto is_sendable(ox::Child_added_event const&) -> bool { return true; }
 
 auto is_sendable(ox::Child_removed_event const&) -> bool { return true; }

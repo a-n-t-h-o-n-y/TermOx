@@ -47,10 +47,12 @@ class Stack : public Layout<Child_t> {
             return;
         if (previous != nullptr)
             previous->disable();
-        active_page_->enable();
+
+        active_page_->enable(this->is_enabled());
+        // TODO move if enabled and force move if disabled?
         this->move_active_page();
         this->resize_active_page();
-        if (sets_focus_)
+        if (sets_focus_ && this->is_enabled())
             System::set_focus(*active_page_);
         this->page_changed(index);
     }
@@ -115,7 +117,8 @@ class Stack : public Layout<Child_t> {
     {
         if (index >= this->Stack::size())
             throw std::out_of_range{"Stack::delete_page: index is invalid"};
-        auto* page_to_delete = std::addressof(this->get_children()[index]);
+        auto const* page_to_delete =
+            std::addressof(this->get_children()[index]);
         if (page_to_delete == this->get_active_page())
             active_page_ = nullptr;
         this->remove_and_delete_child(page_to_delete);
@@ -131,7 +134,8 @@ class Stack : public Layout<Child_t> {
     {
         if (index >= this->size())
             throw std::out_of_range{"Stack::remove_page: index is invalid."};
-        auto* page_to_remove = std::addressof(this->get_children()[index]);
+        auto const* page_to_remove =
+            std::addressof(this->get_children()[index]);
         if (page_to_remove == this->get_active_page())
             active_page_ = nullptr;
         return this->remove_child(page_to_remove);
@@ -146,7 +150,6 @@ class Stack : public Layout<Child_t> {
     }
 
     /// Return number of pages in this Stack.
-    // TODO change to page_count()
     [[nodiscard]] auto size() const -> std::size_t
     {
         return this->child_count();
@@ -168,10 +171,10 @@ class Stack : public Layout<Child_t> {
         auto const end = std::cend(this->get_children());
         auto distance  = 0;
         for (; begin != end; ++begin) {
-            if (std::addressof(*begin) != active_page_)
-                ++distance;
-            else
+            if (std::addressof(*begin) == active_page_)
                 break;
+            else
+                ++distance;
         }
         return distance;
     }

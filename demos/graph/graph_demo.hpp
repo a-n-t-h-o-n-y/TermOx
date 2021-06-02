@@ -9,7 +9,9 @@
 #include <signals_light/signal.hpp>
 
 #include <termox/painter/color.hpp>
+#include <termox/widget/array.hpp>
 #include <termox/widget/layouts/horizontal.hpp>
+#include <termox/widget/layouts/passive.hpp>
 #include <termox/widget/layouts/vertical.hpp>
 #include <termox/widget/pair.hpp>
 #include <termox/widget/pipe.hpp>
@@ -21,7 +23,6 @@
 #include <termox/widget/widgets/line.hpp>
 #include <termox/widget/widgets/number_edit.hpp>
 #include <termox/widget/widgets/toggle_button.hpp>
-#include "termox/widget/array.hpp"
 
 namespace graph {
 
@@ -375,11 +376,12 @@ struct Settings : ox::VTuple<ox::Labeled_cycle_box,
     void reset_scale_box();
 };
 
-class Graph_demo : public ox::HPair<Graph_core, ox::Bordered<Settings>> {
+class Graph_demo
+    : public ox::HPair<Graph_core, ox::Passive<ox::Bordered<Settings>>> {
    public:
-    Graph_core& core   = this->first;
-    Settings& settings = this->second | ox::pipe::take_west() |
-                         ox::pipe::fixed_width(25) | ox::pipe::wrapped();
+    Graph_core& core = this->first;
+    Settings& settings =
+        this->second | ox::pipe::take_west() | ox::pipe::wrapped();
 
    public:
     Graph_demo();

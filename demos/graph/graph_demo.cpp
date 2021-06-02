@@ -592,6 +592,8 @@ Settings::Settings()
     using namespace ox;
     using namespace ox::pipe;
 
+    *this | fixed_width(25);
+
     start_stop_btn | fixed_height(1);
     start_stop_btn.top | bg(apple_ii::Green);
     start_stop_btn.bottom | bg(apple_ii::Dark_pink);

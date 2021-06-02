@@ -33,8 +33,8 @@ void Textbox_base::scroll_up(int n)
     if (this->top_line() == 0)
         return;
     Text_view::scroll_up(n);
-    auto const y =
-        std::min(this->cursor.position().y + n, this->area().height - 1);
+    auto const y = std::min(this->cursor.position().y + n,
+                            std::max(this->area().height - 1, 0));
     this->set_cursor({this->cursor.position().x, y});
 }
 

@@ -11,7 +11,6 @@
 
 #include <termox/painter/brush.hpp>
 #include <termox/painter/glyph.hpp>
-#include <termox/system/detail/focus.hpp>
 #include <termox/system/event.hpp>
 #include <termox/system/system.hpp>
 #include <termox/terminal/terminal.hpp>
@@ -201,218 +200,107 @@ auto Widget::child_count() const -> std::size_t { return children_.size(); }
 auto Widget::enable_event() -> bool
 {
     this->update();
-    enabled();
     return true;
 }
 
-auto Widget::disable_event() -> bool
-{
-    disabled();
-    return true;
-}
+auto Widget::disable_event() -> bool { return true; }
 
-auto Widget::child_added_event(Widget& child) -> bool
-{
-    child_added(child);
-    return true;
-}
+auto Widget::child_added_event(Widget&) -> bool { return true; }
 
-auto Widget::child_removed_event(Widget& child) -> bool
-{
-    child_removed(child);
-    return true;
-}
+auto Widget::child_removed_event(Widget&) -> bool { return true; }
 
-auto Widget::child_polished_event(Widget& child) -> bool
+auto Widget::child_polished_event(Widget&) -> bool
 {
     this->update();
-    child_polished(child);
     return true;
 }
 
-auto Widget::move_event(Point new_position, Point old_position) -> bool
+auto Widget::move_event(Point, Point) -> bool
 {
     this->update();
-    moved(new_position, old_position);
     return true;
 }
 
-auto Widget::resize_event(Area new_size, Area old_size) -> bool
+auto Widget::resize_event(Area, Area) -> bool
 {
     this->update();
-    resized(new_size, old_size);
     return true;
 }
 
-auto Widget::mouse_press_event(Mouse const& m) -> bool
-{
-    mouse_pressed(m);
-    return true;
-}
+auto Widget::mouse_press_event(Mouse const&) -> bool { return true; }
 
-auto Widget::mouse_release_event(Mouse const& m) -> bool
-{
-    mouse_released(m);
-    return true;
-}
+auto Widget::mouse_release_event(Mouse const&) -> bool { return true; }
 
-auto Widget::mouse_wheel_event(Mouse const& m) -> bool
-{
-    mouse_wheel_scrolled(m);
-    return true;
-}
+auto Widget::mouse_wheel_event(Mouse const&) -> bool { return true; }
 
-auto Widget::mouse_move_event(Mouse const& m) -> bool
-{
-    mouse_moved(m);
-    return true;
-}
+auto Widget::mouse_move_event(Mouse const&) -> bool { return true; }
 
-auto Widget::key_press_event(Key k) -> bool
-{
-    key_pressed(k);
-    return true;
-}
+auto Widget::key_press_event(Key) -> bool { return true; }
 
-auto Widget::focus_in_event() -> bool
-{
-    focused_in();
-    return true;
-}
+auto Widget::focus_in_event() -> bool { return true; }
 
-auto Widget::focus_out_event() -> bool
-{
-    focused_out();
-    return true;
-}
+auto Widget::focus_out_event() -> bool { return true; }
 
-auto Widget::delete_event() -> bool
-{
-    this->disable_animation();
-    destroyed();
-    if (detail::Focus::focus_widget() == this)
-        detail::Focus::clear_without_posting_event();
-    return true;
-}
+auto Widget::delete_event() -> bool { return true; }
 
-auto Widget::paint_event(Painter&) -> bool
-{
-    painted();
-    return true;
-}
+auto Widget::paint_event(Painter&) -> bool { return true; }
 
-auto Widget::timer_event() -> bool
-{
-    timer();
-    return true;
-}
+auto Widget::timer_event() -> bool { return true; }
 
-auto Widget::enable_event_filter(Widget& receiver) -> bool
+auto Widget::enable_event_filter(Widget&) -> bool { return false; }
+
+auto Widget::disable_event_filter(Widget&) -> bool { return false; }
+
+auto Widget::child_added_event_filter(Widget&, Widget&) -> bool
 {
-    enabled_filter(receiver);
     return false;
 }
 
-auto Widget::disable_event_filter(Widget& receiver) -> bool
+auto Widget::child_removed_event_filter(Widget&, Widget&) -> bool
 {
-    disabled_filter(receiver);
     return false;
 }
 
-auto Widget::child_added_event_filter(Widget& receiver, Widget& child) -> bool
+auto Widget::child_polished_event_filter(Widget&, Widget&) -> bool
 {
-    child_added_filter(receiver, child);
     return false;
 }
 
-auto Widget::child_removed_event_filter(Widget& receiver, Widget& child) -> bool
+auto Widget::move_event_filter(Widget&, Point, Point) -> bool { return false; }
+
+auto Widget::resize_event_filter(Widget&, Area, Area) -> bool { return false; }
+
+auto Widget::mouse_press_event_filter(Widget&, Mouse const&) -> bool
 {
-    child_removed_filter(receiver, child);
     return false;
 }
 
-auto Widget::child_polished_event_filter(Widget& receiver, Widget& child)
-    -> bool
+auto Widget::mouse_release_event_filter(Widget&, Mouse const&) -> bool
 {
-    child_polished_filter(receiver, child);
     return false;
 }
 
-auto Widget::move_event_filter(Widget& receiver,
-                               Point new_position,
-                               Point old_position) -> bool
+auto Widget::mouse_wheel_event_filter(Widget&, Mouse const&) -> bool
 {
-    moved_filter(receiver, new_position, old_position);
     return false;
 }
 
-auto Widget::resize_event_filter(Widget& receiver, Area new_size, Area old_size)
-    -> bool
+auto Widget::mouse_move_event_filter(Widget&, Mouse const&) -> bool
 {
-    resized_filter(receiver, new_size, old_size);
     return false;
 }
 
-auto Widget::mouse_press_event_filter(Widget& receiver, Mouse const& m) -> bool
-{
-    mouse_pressed_filter(receiver, m);
-    return false;
-}
+auto Widget::key_press_event_filter(Widget&, Key) -> bool { return false; }
 
-auto Widget::mouse_release_event_filter(Widget& receiver, Mouse const& m)
-    -> bool
-{
-    mouse_released_filter(receiver, m);
-    return false;
-}
+auto Widget::focus_in_event_filter(Widget&) -> bool { return false; }
 
-auto Widget::mouse_wheel_event_filter(Widget& receiver, Mouse const& m) -> bool
-{
-    mouse_wheel_scrolled_filter(receiver, m);
-    return false;
-}
+auto Widget::focus_out_event_filter(Widget&) -> bool { return false; }
 
-auto Widget::mouse_move_event_filter(Widget& receiver, Mouse const& m) -> bool
-{
-    mouse_moved_filter(receiver, m);
-    return false;
-}
+auto Widget::delete_event_filter(Widget&) -> bool { return false; }
 
-auto Widget::key_press_event_filter(Widget& receiver, Key k) -> bool
-{
-    key_pressed_filter(receiver, k);
-    return false;
-}
+auto Widget::paint_event_filter(Widget&) -> bool { return false; }
 
-auto Widget::focus_in_event_filter(Widget& receiver) -> bool
-{
-    focused_in_filter(receiver);
-    return false;
-}
-
-auto Widget::focus_out_event_filter(Widget& receiver) -> bool
-{
-    focused_out_filter(receiver);
-    return false;
-}
-
-auto Widget::delete_event_filter(Widget& receiver) -> bool
-{
-    destroyed_filter(receiver);
-    return false;
-}
-
-auto Widget::paint_event_filter(Widget& receiver) -> bool
-{
-    painted_filter(receiver);
-    return false;
-}
-
-auto Widget::timer_event_filter(Widget& receiver) -> bool
-{
-    timer_filter(receiver);
-    return false;
-}
+auto Widget::timer_event_filter(Widget&) -> bool { return false; }
 
 void Widget::set_top_left(Point p) { top_left_position_ = p; }
 

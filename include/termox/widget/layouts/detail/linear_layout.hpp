@@ -194,28 +194,19 @@ class Linear_layout : public Layout<Child> {
 
     auto child_added_event(Widget& child) -> bool override
     {
-        // Only update if *this is enabled. Child_added_event can be sent if
-        // *this is disabled, and updating will call enable on children.
-        if (this->is_enabled())
-            this->resize_and_move_children();
+        this->resize_and_move_children();
         return Layout<Child>::child_added_event(child);
     }
 
     auto child_removed_event(Widget& child) -> bool override
     {
-        // Only update if *this is enabled. Child_removed_event can be sent if
-        // *this is disabled, and updating will call enable on children.
-        if (this->is_enabled())
-            this->resize_and_move_children();
+        this->resize_and_move_children();
         return Layout<Child>::child_removed_event(child);
     }
 
     auto child_polished_event(Widget& child) -> bool override
     {
-        // Only update if *this is enabled. Child_polished_event can be sent if
-        // *this is disabled, and updating will call enable on children.
-        if (this->is_enabled())
-            this->resize_and_move_children();
+        this->resize_and_move_children();
         return Layout<Child>::child_polished_event(child);
     }
 
@@ -231,6 +222,8 @@ class Linear_layout : public Layout<Child> {
     {
         // TODO validate both height and width Size_policies that they make
         // sense and assert() if they do not.
+        if (!this->is_enabled())
+            return;
         auto const primary_lengths = shared_space_.calculate_lengths(*this);
         auto const primary_pos =
             shared_space_.calculate_positions(primary_lengths);
@@ -250,17 +243,13 @@ class Linear_layout : public Layout<Child> {
     {
         auto const children = this->get_children();
         auto const offset   = this->get_child_offset();
-        for (auto i = 0uL; i < offset; ++i) {
-            if (children[i].is_enabled())
-                children[i].disable();
-        }
+        for (auto i = 0uL; i < offset; ++i)
+            children[i].disable();
         for (auto i = 0uL; i < primary.size(); ++i) {
             auto& child = children[offset + i];
-            if (is_valid(primary[i], secondary[i])) {
-                if (!child.is_enabled())
-                    child.enable();
-            }
-            else if (child.is_enabled())
+            if (is_valid(primary[i], secondary[i]))
+                child.enable();
+            else
                 child.disable();
         }
     }
@@ -272,11 +261,9 @@ class Linear_layout : public Layout<Child> {
         auto const offset   = this->get_child_offset();
         for (auto i = 0uL; i < primary.size(); ++i) {
             auto& child = children[offset + i];
-            if (child.is_enabled()) {
-                auto const area =
-                    typename Parameters::get_area{}(primary[i], secondary[i]);
-                System::post_event(Resize_event{child, area});
-            }
+            auto const area =
+                typename Parameters::get_area{}(primary[i], secondary[i]);
+            System::post_event(Resize_event{child, area});
         }
     }
 
@@ -290,13 +277,10 @@ class Linear_layout : public Layout<Child> {
         auto const secondary_offset =
             typename Parameters::Secondary::get_offset{}(*this);
         for (auto i = 0uL; i < primary.size(); ++i) {
-            auto& child = children[offset + i];
-            if (child.is_enabled()) {
-                auto const point = typename Parameters::get_point{}(
-                    primary[i] + primary_offset,
-                    secondary[i] + secondary_offset);
-                System::post_event(Move_event{child, point});
-            }
+            auto& child      = children[offset + i];
+            auto const point = typename Parameters::get_point{}(
+                primary[i] + primary_offset, secondary[i] + secondary_offset);
+            System::post_event(Move_event{child, point});
         }
     }
 
