@@ -37,8 +37,8 @@ auto filter_send(ox::Paint_event const& e) -> bool
                 return false;
             auto p = Painter{e.receiver, ox::Terminal::screen_buffers.next};
             auto const x = filter->paint_event_filter(e.receiver, p);
-            filter->painted_filter.emit(e.receiver, p);
-            return x;
+            auto const y = filter->painted_filter.emit(e.receiver, p);
+            return x || (y ? *y : false);
         },
         e.receiver.get().get_event_filters());
 }
@@ -56,8 +56,9 @@ auto filter_send(ox::Key_press_event const& e) -> bool
         [&e](Widget* filter) {
             auto const x =
                 filter->key_press_event_filter(e.receiver->get(), e.key);
-            filter->key_pressed_filter.emit(e.receiver->get(), e.key);
-            return x;
+            auto const y =
+                filter->key_pressed_filter.emit(e.receiver->get(), e.key);
+            return x || (y ? *y : false);
         },
         e.receiver->get().get_event_filters());
 }
@@ -67,8 +68,9 @@ auto filter_send(ox::Mouse_press_event const& e) -> bool
     return apply_until_accepted(
         [&e](Widget* filter) {
             auto const x = filter->mouse_press_event_filter(e.receiver, e.data);
-            filter->mouse_pressed_filter.emit(e.receiver, e.data);
-            return x;
+            auto const y =
+                filter->mouse_pressed_filter.emit(e.receiver, e.data);
+            return x || (y ? *y : false);
         },
         e.receiver.get().get_event_filters());
 }
@@ -79,8 +81,9 @@ auto filter_send(ox::Mouse_release_event const& e) -> bool
         [&e](Widget* filter) {
             auto const x =
                 filter->mouse_release_event_filter(e.receiver, e.data);
-            filter->mouse_released_filter.emit(e.receiver, e.data);
-            return x;
+            auto const y =
+                filter->mouse_released_filter.emit(e.receiver, e.data);
+            return x || (y ? *y : false);
         },
         e.receiver.get().get_event_filters());
 }
@@ -90,8 +93,9 @@ auto filter_send(ox::Mouse_wheel_event const& e) -> bool
     return apply_until_accepted(
         [&e](Widget* filter) {
             auto const x = filter->mouse_wheel_event_filter(e.receiver, e.data);
-            filter->mouse_wheel_scrolled_filter.emit(e.receiver, e.data);
-            return x;
+            auto const y =
+                filter->mouse_wheel_scrolled_filter.emit(e.receiver, e.data);
+            return x || (y ? *y : false);
         },
         e.receiver.get().get_event_filters());
 }
@@ -101,8 +105,8 @@ auto filter_send(ox::Mouse_move_event const& e) -> bool
     return apply_until_accepted(
         [&e](Widget* filter) {
             auto const x = filter->mouse_move_event_filter(e.receiver, e.data);
-            filter->mouse_moved_filter.emit(e.receiver, e.data);
-            return x;
+            auto const y = filter->mouse_moved_filter.emit(e.receiver, e.data);
+            return x || (y ? *y : false);
         },
         e.receiver.get().get_event_filters());
 }
@@ -113,8 +117,8 @@ auto filter_send(ox::Child_added_event const& e) -> bool
         [&e](Widget* filter) {
             auto const x =
                 filter->child_added_event_filter(e.receiver, e.child);
-            filter->child_added_filter.emit(e.receiver, e.child);
-            return x;
+            auto const y = filter->child_added_filter.emit(e.receiver, e.child);
+            return x || (y ? *y : false);
         },
         e.receiver.get().get_event_filters());
 }
@@ -125,8 +129,9 @@ auto filter_send(ox::Child_removed_event const& e) -> bool
         [&e](Widget* filter) {
             auto const x =
                 filter->child_removed_event_filter(e.receiver, e.child);
-            filter->child_removed_filter.emit(e.receiver, e.child);
-            return x;
+            auto const y =
+                filter->child_removed_filter.emit(e.receiver, e.child);
+            return x || (y ? *y : false);
         },
         e.receiver.get().get_event_filters());
 }
@@ -137,8 +142,9 @@ auto filter_send(ox::Child_polished_event const& e) -> bool
         [&e](Widget* filter) {
             auto const x =
                 filter->child_polished_event_filter(e.receiver, e.child);
-            filter->child_polished_filter.emit(e.receiver, e.child);
-            return x;
+            auto const y =
+                filter->child_polished_filter.emit(e.receiver, e.child);
+            return x || (y ? *y : false);
         },
         e.receiver.get().get_event_filters());
 }
@@ -148,8 +154,8 @@ auto filter_send(ox::Delete_event const& e) -> bool
     return apply_until_accepted(
         [&e](Widget* filter) {
             auto const x = filter->delete_event_filter(*e.removed);
-            filter->deleted_filter.emit(*e.removed);
-            return x;
+            auto const y = filter->deleted_filter.emit(*e.removed);
+            return x || (y ? *y : false);
         },
         e.removed->get_event_filters());
 }
@@ -159,8 +165,8 @@ auto filter_send(ox::Disable_event const& e) -> bool
     return apply_until_accepted(
         [&e](Widget* filter) {
             auto const x = filter->disable_event_filter(e.receiver);
-            filter->disabled_filter.emit(e.receiver);
-            return x;
+            auto const y = filter->disabled_filter.emit(e.receiver);
+            return x || (y ? *y : false);
         },
         e.receiver.get().get_event_filters());
 }
@@ -170,8 +176,8 @@ auto filter_send(ox::Enable_event const& e) -> bool
     return apply_until_accepted(
         [&e](Widget* filter) {
             auto const x = filter->enable_event_filter(e.receiver);
-            filter->enabled_filter.emit(e.receiver);
-            return x;
+            auto const y = filter->enabled_filter.emit(e.receiver);
+            return x || (y ? *y : false);
         },
         e.receiver.get().get_event_filters());
 }
@@ -181,8 +187,8 @@ auto filter_send(ox::Focus_in_event const& e) -> bool
     return apply_until_accepted(
         [&e](Widget* filter) {
             auto const x = filter->focus_in_event_filter(e.receiver);
-            filter->focused_in_filter.emit(e.receiver);
-            return x;
+            auto const y = filter->focused_in_filter.emit(e.receiver);
+            return x || (y ? *y : false);
         },
         e.receiver.get().get_event_filters());
 }
@@ -192,8 +198,8 @@ auto filter_send(ox::Focus_out_event const& e) -> bool
     return apply_until_accepted(
         [&e](Widget* filter) {
             auto const x = filter->focus_out_event_filter(e.receiver);
-            filter->focused_out_filter.emit(e.receiver);
-            return x;
+            auto const y = filter->focused_out_filter.emit(e.receiver);
+            return x || (y ? *y : false);
         },
         e.receiver.get().get_event_filters());
 }
@@ -208,8 +214,9 @@ auto filter_send(ox::Move_event const& e) -> bool
         [&](Widget* filter) {
             auto const x = filter->move_event_filter(e.receiver, new_position,
                                                      old_position);
-            filter->moved_filter.emit(e.receiver, new_position, old_position);
-            return x;
+            auto const y = filter->moved_filter.emit(e.receiver, new_position,
+                                                     old_position);
+            return x || (y ? *y : false);
         },
         e.receiver.get().get_event_filters());
 }
@@ -224,8 +231,9 @@ auto filter_send(ox::Resize_event const& e) -> bool
         [&](Widget* filter) {
             auto const x =
                 filter->resize_event_filter(e.receiver, new_area, previous);
-            filter->resized_filter.emit(e.receiver, new_area, previous);
-            return x;
+            auto const y =
+                filter->resized_filter.emit(e.receiver, new_area, previous);
+            return x || (y ? *y : false);
         },
         e.receiver.get().get_event_filters());
 }
@@ -235,8 +243,8 @@ auto filter_send(ox::Timer_event const& e) -> bool
     return apply_until_accepted(
         [&e](Widget* filter) {
             auto const x = filter->timer_event_filter(e.receiver);
-            filter->timer_filter.emit(e.receiver);
-            return x;
+            auto const y = filter->timer_filter.emit(e.receiver);
+            return x || (y ? *y : false);
         },
         e.receiver.get().get_event_filters());
 }

@@ -68,23 +68,23 @@ class Widget {
     Signal<void()> timer;
 
     // Event filter Signals. The first parameter is the original receiver.
-    Signal<void(Widget&)> enabled_filter;
-    Signal<void(Widget&)> disabled_filter;
-    Signal<void(Widget&, Widget&)> child_added_filter;
-    Signal<void(Widget&, Widget&)> child_removed_filter;
-    Signal<void(Widget&, Widget&)> child_polished_filter;
-    Signal<void(Widget&, Point, Point)> moved_filter;
-    Signal<void(Widget&, Area, Area)> resized_filter;
-    Signal<void(Widget&, Mouse const&)> mouse_pressed_filter;
-    Signal<void(Widget&, Mouse const&)> mouse_released_filter;
-    Signal<void(Widget&, Mouse const&)> mouse_wheel_scrolled_filter;
-    Signal<void(Widget&, Mouse const&)> mouse_moved_filter;
-    Signal<void(Widget&, Key)> key_pressed_filter;
-    Signal<void(Widget&)> focused_in_filter;
-    Signal<void(Widget&)> focused_out_filter;
-    Signal<void(Widget&)> deleted_filter;
-    Signal<void(Widget&, Painter&)> painted_filter;
-    Signal<void(Widget&)> timer_filter;
+    Signal<bool(Widget&)> enabled_filter;
+    Signal<bool(Widget&)> disabled_filter;
+    Signal<bool(Widget&, Widget&)> child_added_filter;
+    Signal<bool(Widget&, Widget&)> child_removed_filter;
+    Signal<bool(Widget&, Widget&)> child_polished_filter;
+    Signal<bool(Widget&, Point, Point)> moved_filter;
+    Signal<bool(Widget&, Area, Area)> resized_filter;
+    Signal<bool(Widget&, Mouse const&)> mouse_pressed_filter;
+    Signal<bool(Widget&, Mouse const&)> mouse_released_filter;
+    Signal<bool(Widget&, Mouse const&)> mouse_wheel_scrolled_filter;
+    Signal<bool(Widget&, Mouse const&)> mouse_moved_filter;
+    Signal<bool(Widget&, Key)> key_pressed_filter;
+    Signal<bool(Widget&)> focused_in_filter;
+    Signal<bool(Widget&)> focused_out_filter;
+    Signal<bool(Widget&)> deleted_filter;
+    Signal<bool(Widget&, Painter&)> painted_filter;
+    Signal<bool(Widget&)> timer_filter;
 
    public:
     /// Describes how focus is given to this Widget.
@@ -145,13 +145,12 @@ class Widget {
     /// Return the currently in use wallpaper or std::nullopt if none.
     [[nodiscard]] auto get_wallpaper() const -> Glyph;
 
-    /// Enable this Widget and send an Enable or Disable Event to itself.
+    /// Enable this Widget and send an Enable_event to itself.
+    /** If \p enable is false, Widget is Disabled. */
     void enable(bool enable = true);
 
-    /// Post a Disable_event to this widget, and all descendants.
-    /** Will only post a Child_polished_event to the parent if requested. Useful
-     *  for disabling a child Widget from a parent's Child_polished_event
-     *  handler. */
+    /// Disable this Widget and send a Disable_event to itself.
+    /** If \p disable is false, Widget is Enabled. */
     void disable(bool disable = true);
 
     /// Check whether the Widget is enabled.

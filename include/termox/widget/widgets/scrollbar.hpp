@@ -201,7 +201,7 @@ void link(Scrollbar<Layout_t>& scrollbar,
         });
         scrollbar.mouse_wheel_scrolled_filter.connect(
             [&](auto&, auto const& mouse) {
-                scrollbar.handle_wheel(mouse.button);
+                return scrollbar.handle_wheel(mouse.button);
             });
         layout.mouse_wheel_scrolled.connect(
             [&](auto const& mouse) { scrollbar.handle_wheel(mouse.button); });
