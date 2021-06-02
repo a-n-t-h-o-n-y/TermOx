@@ -298,7 +298,7 @@ auto Widget::focus_out_event_filter(Widget&) -> bool { return false; }
 
 auto Widget::delete_event_filter(Widget&) -> bool { return false; }
 
-auto Widget::paint_event_filter(Widget&) -> bool { return false; }
+auto Widget::paint_event_filter(Widget&, Painter&) -> bool { return false; }
 
 auto Widget::timer_event_filter(Widget&) -> bool { return false; }
 

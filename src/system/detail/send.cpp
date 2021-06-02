@@ -40,7 +40,7 @@ void send(ox::Paint_event e)
         return;
     auto p = Painter{e.receiver, ox::Terminal::screen_buffers.next};
     e.receiver.get().paint_event(p);
-    e.receiver.get().painted.emit();
+    e.receiver.get().painted.emit(p);
 }
 
 void send(ox::Key_press_event e)
@@ -78,20 +78,20 @@ void send(ox::Mouse_move_event e)
 
 void send(ox::Child_added_event e)
 {
-    e.receiver.get().child_added_event(e.child.get());
-    e.receiver.get().child_added.emit(e.child.get());
+    e.receiver.get().child_added_event(e.child);
+    e.receiver.get().child_added.emit(e.child);
 }
 
 void send(ox::Child_removed_event e)
 {
-    e.receiver.get().child_removed_event(e.child.get());
-    e.receiver.get().child_removed.emit(e.child.get());
+    e.receiver.get().child_removed_event(e.child);
+    e.receiver.get().child_removed.emit(e.child);
 }
 
 void send(ox::Child_polished_event e)
 {
-    e.receiver.get().child_polished_event(e.child.get());
-    e.receiver.get().child_polished.emit(e.child.get());
+    e.receiver.get().child_polished_event(e.child);
+    e.receiver.get().child_polished.emit(e.child);
 }
 
 void send(ox::Delete_event e)

@@ -64,7 +64,7 @@ class Widget {
     Signal<void()> focused_in;
     Signal<void()> focused_out;
     Signal<void()> deleted;
-    Signal<void()> painted;
+    Signal<void(Painter&)> painted;
     Signal<void()> timer;
 
     // Event filter Signals. The first parameter is the original receiver.
@@ -83,7 +83,7 @@ class Widget {
     Signal<void(Widget&)> focused_in_filter;
     Signal<void(Widget&)> focused_out_filter;
     Signal<void(Widget&)> deleted_filter;
-    Signal<void(Widget&)> painted_filter;
+    Signal<void(Widget&, Painter&)> painted_filter;
     Signal<void(Widget&)> timer_filter;
 
    public:
@@ -357,7 +357,7 @@ class Widget {
     virtual auto delete_event_filter(Widget& receiver) -> bool;
 
     /// Handles Paint_event objects filtered from other Widgets.
-    virtual auto paint_event_filter(Widget& receiver) -> bool;
+    virtual auto paint_event_filter(Widget& receiver, Painter& p) -> bool;
 
     /// Handles Timer_event objects filtered from other Widgets.
     virtual auto timer_event_filter(Widget& receiver) -> bool;
