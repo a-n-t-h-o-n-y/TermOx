@@ -91,9 +91,7 @@ class Size_policy {
 
     /// Specifically does not copy the Signal, so Widget is still notified.
     auto operator=(Size_policy const& x) -> Size_policy&;
-
-    /// Specifically does not copy the Signal, so Widget is still notified.
-    auto operator=(Size_policy&& x) -> Size_policy&;
+    auto operator=(Size_policy&& x) -> Size_policy& = delete;
 
     friend auto operator==(Size_policy const& a, Size_policy const& b) -> bool;
     friend auto operator!=(Size_policy const& a, Size_policy const& b) -> bool;
@@ -335,6 +333,9 @@ struct Ignored_width : Widget_t {
         this->width_policy.ignored();
     }
 };
+
+/// Return true if all members make sense in relation to eachother.
+[[nodiscard]] auto is_valid(Size_policy const& p) -> bool;
 
 }  // namespace ox
 #endif  // TERMOX_WIDGET_SIZE_POLICY_HPP

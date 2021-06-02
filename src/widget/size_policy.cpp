@@ -16,7 +16,6 @@ auto Size_policy::hint() const -> int { return data_.hint; }
 void Size_policy::min(int value)
 {
     data_.min = value;
-    data_.max = std::max(data_.max, data_.min);
     policy_updated.emit();
 }
 
@@ -25,7 +24,6 @@ auto Size_policy::min() const -> int { return data_.min; }
 void Size_policy::max(int value)
 {
     data_.max = value;
-    data_.min = std::min(data_.min, data_.max);
     policy_updated.emit();
 }
 
@@ -33,8 +31,6 @@ auto Size_policy::max() const -> int { return data_.max; }
 
 void Size_policy::stretch(double value)
 {
-    if (value <= 0.)
-        return;
     data_.stretch = value;
     policy_updated.emit();
 }
@@ -60,20 +56,22 @@ void Size_policy::fixed(int hint)
 void Size_policy::minimum(int hint)
 {
     data_.hint = hint;
-    this->min(hint);
+    data_.min  = hint;
+    policy_updated.emit();
 }
 
 void Size_policy::maximum(int hint)
 {
     data_.hint = hint;
-    this->max(hint);
+    data_.max  = hint;
+    policy_updated.emit();
 }
 
 void Size_policy::preferred(int hint)
 {
     data_.hint = hint;
-    data_.min  = std::min(hint, data_.min);
-    data_.max  = std::max(hint, data_.max);
+    data_.min  = 0;
+    data_.max  = maximum_max;
     policy_updated.emit();
 }
 
@@ -81,8 +79,8 @@ void Size_policy::expanding(int hint)
 {
     data_.stretch = 100'000.;
     data_.hint    = hint;
-    data_.min     = std::min(data_.min, hint);
-    data_.max     = std::max(data_.max, hint);
+    data_.min     = 0;
+    data_.max     = maximum_max;
     policy_updated.emit();
 }
 
@@ -90,7 +88,7 @@ void Size_policy::minimum_expanding(int hint)
 {
     data_.stretch = 100'000.;
     data_.hint    = hint;
-    this->min(hint);
+    data_.min     = hint;
 }
 
 void Size_policy::ignored()
@@ -112,13 +110,6 @@ auto Size_policy::operator=(Size_policy const& x) -> Size_policy&
     return *this;
 }
 
-auto Size_policy::operator=(Size_policy&& x) -> Size_policy&
-{
-    data_ = std::move(x.data_);
-    policy_updated.emit();
-    return *this;
-}
-
 auto operator==(Size_policy const& a, Size_policy const& b) -> bool
 {
     return std::tie(a.data_.hint, a.data_.min, a.data_.max, a.data_.stretch,
@@ -130,6 +121,12 @@ auto operator==(Size_policy const& a, Size_policy const& b) -> bool
 auto operator!=(Size_policy const& a, Size_policy const& b) -> bool
 {
     return !(a == b);
+}
+
+auto is_valid(Size_policy const& p) -> bool
+{
+    return p.min() <= p.max() && p.hint() >= p.min() && p.hint() <= p.max() &&
+           p.stretch() > 0.;
 }
 
 }  // namespace ox

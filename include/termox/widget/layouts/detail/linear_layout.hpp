@@ -4,6 +4,7 @@
 
 #include <termox/system/event.hpp>
 #include <termox/widget/layout.hpp>
+#include <termox/widget/size_policy.hpp>
 
 #include "shared_space.hpp"
 #include "unique_space.hpp"
@@ -220,10 +221,16 @@ class Linear_layout : public Layout<Child> {
    private:
     void resize_and_move_children()
     {
-        // TODO validate both height and width Size_policies that they make
-        // sense and assert() if they do not.
         if (!this->is_enabled())
             return;
+
+#ifndef NDEBUG  // Validate Size_policies
+        for (auto& child : this->get_children()) {
+            assert(ox::is_valid(child.width_policy) &&
+                   ox::is_valid(child.height_policy));
+        }
+#endif
+
         auto const primary_lengths = shared_space_.calculate_lengths(*this);
         auto const primary_pos =
             shared_space_.calculate_positions(primary_lengths);
