@@ -68,8 +68,9 @@ class Tuple : public Layout_t {
     template <std::size_t... Is>
     [[nodiscard]] auto indexed_init_children(std::index_sequence<Is...>)
     {
-        return std::forward_as_tuple(
-            this->insert_child(std::make_unique<Widget_t>(), Is)...);
+        (this->append_child(std::make_unique<Widget_t>()), ...);
+        auto children = this->get_children();
+        return std::forward_as_tuple(static_cast<Widget_t&>(children[Is])...);
     }
 
     template <std::size_t... Is>
@@ -78,15 +79,16 @@ class Tuple : public Layout_t {
     {
         // Default construct Widget_t if it doesn't have Parameters constructor.
         // All widgets have Parameters struct inherited from Widget.
-        return std::forward_as_tuple(this->insert_child(
-            [&] {
-                if constexpr (std::is_constructible_v<
-                                  Widget_t, typename Widget_t::Parameters>)
-                    return std::make_unique<Widget_t>(std::move(p));
-                else
-                    return std::make_unique<Widget_t>();
-            }(),
-            Is)...);
+        (this->append_child([&] {
+            if constexpr (std::is_constructible_v<
+                              Widget_t, typename Widget_t::Parameters>)
+                return std::make_unique<Widget_t>(std::move(p));
+            else
+                return std::make_unique<Widget_t>();
+        }()),
+         ...);
+        auto children = this->get_children();
+        return std::forward_as_tuple(static_cast<Widget_t&>(children[Is])...);
     }
 
     template <std::size_t... Is>
@@ -94,17 +96,20 @@ class Tuple : public Layout_t {
         std::index_sequence<Is...>,
         std::unique_ptr<Widget_t>... widget_ptrs)
     {
-        return std::forward_as_tuple(
-            this->insert_child(std::move(widget_ptrs), Is)...);
+        (this->append_child(std::move(widget_ptrs)), ...);
+        auto children = this->get_children();
+        return std::forward_as_tuple(static_cast<Widget_t&>(children[Is])...);
     }
 
     template <std::size_t... Is>
     [[nodiscard]] auto tuple_init_children(std::index_sequence<Is...>,
                                            Tuple::Parameters parameters)
     {
-        return std::forward_as_tuple(this->insert_child(
-            std::make_unique<Widget_t>(std::move(std::get<Is>(parameters))),
-            Is)...);
+        (this->append_child(
+             std::make_unique<Widget_t>(std::move(std::get<Is>(parameters)))),
+         ...);
+        auto children = this->get_children();
+        return std::forward_as_tuple(static_cast<Widget_t&>(children[Is])...);
     }
 
    private:
