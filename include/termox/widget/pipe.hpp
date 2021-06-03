@@ -214,7 +214,7 @@ template <
 auto operator|(Bordered<Widget_t>& w, Background_color bg)
     -> Bordered<Widget_t>&
 {
-    w.set_border(w.Bordered::border() | bg);
+    w.set_border(w.Bordered<Widget_t>::border() | bg);
     return w;
 }
 
@@ -224,7 +224,7 @@ template <
 auto operator|(std::unique_ptr<Bordered<Widget_t>> w_ptr, Background_color bg)
     -> std::unique_ptr<Bordered<Widget_t>>
 {
-    w_ptr->set_border(w_ptr->Bordered::border() | bg);
+    w_ptr->set_border(w_ptr->Bordered<Widget_t>::border() | bg);
     return w_ptr;
 }
 
@@ -234,7 +234,7 @@ template <
 auto operator|(Bordered<Widget_t>& w, Foreground_color fg)
     -> Bordered<Widget_t>&
 {
-    w.set_border(w.Bordered::border() | fg);
+    w.set_border(w.Bordered<Widget_t>::border() | fg);
     return w;
 }
 
@@ -244,7 +244,7 @@ template <
 auto operator|(std::unique_ptr<Bordered<Widget_t>> w_ptr, Foreground_color fg)
     -> std::unique_ptr<Bordered<Widget_t>>
 {
-    w_ptr->set_border(w_ptr->Bordered::border() | fg);
+    w_ptr->set_border(w_ptr->Bordered<Widget_t>::border() | fg);
     return std::move(w_ptr);
 }
 
@@ -255,7 +255,7 @@ namespace ox::pipe {
 [[nodiscard]] inline auto drop_north()
 {
     return [](auto&& w) -> decltype(auto) {
-        get(w).set_border(ox::drop_north(get(w).Bordered::border()));
+        get(w).set_border(ox::drop_north(get(w).border()));
         return std::forward<decltype(w)>(w);
     };
 }
@@ -263,7 +263,7 @@ namespace ox::pipe {
 [[nodiscard]] inline auto drop_south()
 {
     return [](auto&& w) -> decltype(auto) {
-        get(w).set_border(ox::drop_south(get(w).Bordered::border()));
+        get(w).set_border(ox::drop_south(get(w).border()));
         return std::forward<decltype(w)>(w);
     };
 }
@@ -271,7 +271,7 @@ namespace ox::pipe {
 [[nodiscard]] inline auto drop_east()
 {
     return [](auto&& w) -> decltype(auto) {
-        get(w).set_border(ox::drop_east(get(w).Bordered::border()));
+        get(w).set_border(ox::drop_east(get(w).border()));
         return std::forward<decltype(w)>(w);
     };
 }
@@ -279,7 +279,7 @@ namespace ox::pipe {
 [[nodiscard]] inline auto drop_west()
 {
     return [](auto&& w) -> decltype(auto) {
-        get(w).set_border(ox::drop_west(get(w).Bordered::border()));
+        get(w).set_border(ox::drop_west(get(w).border()));
         return std::forward<decltype(w)>(w);
     };
 }
@@ -287,7 +287,7 @@ namespace ox::pipe {
 [[nodiscard]] inline auto take_north()
 {
     return [](auto&& w) -> decltype(auto) {
-        get(w).set_border(ox::take_north(get(w).Bordered::border()));
+        get(w).set_border(ox::take_north(get(w).border()));
         return std::forward<decltype(w)>(w);
     };
 }
@@ -295,7 +295,7 @@ namespace ox::pipe {
 [[nodiscard]] inline auto take_south()
 {
     return [](auto&& w) -> decltype(auto) {
-        get(w).set_border(ox::take_south(get(w).Bordered::border()));
+        get(w).set_border(ox::take_south(get(w).border()));
         return std::forward<decltype(w)>(w);
     };
 }
@@ -303,7 +303,7 @@ namespace ox::pipe {
 [[nodiscard]] inline auto take_east()
 {
     return [](auto&& w) -> decltype(auto) {
-        get(w).set_border(ox::take_east(get(w).Bordered::border()));
+        get(w).set_border(ox::take_east(get(w).border()));
         return std::forward<decltype(w)>(w);
     };
 }
@@ -311,7 +311,7 @@ namespace ox::pipe {
 [[nodiscard]] inline auto take_west()
 {
     return [](auto&& w) -> decltype(auto) {
-        get(w).set_border(ox::take_west(get(w).Bordered::border()));
+        get(w).set_border(ox::take_west(get(w).border()));
         return std::forward<decltype(w)>(w);
     };
 }
