@@ -268,9 +268,9 @@ class Bordered : public layout::Horizontal<Column> {
         Wall(Glyph g)
         {
             if constexpr (layout::is_vertical_v<Layout_t<Widget>>)
-                this->width_policy.fixed(1);
+                this->width_policy = Size_policy::fixed(1);
             else
-                this->height_policy.fixed(1);
+                this->height_policy = Size_policy::fixed(1);
             this->set_glyph(g);
         };
 
@@ -373,7 +373,7 @@ class Bordered : public layout::Horizontal<Column> {
         if (left_column.has_value()) {
             auto& lc =
                 this->insert_child(std::make_unique<Column>(), *left_column);
-            lc.width_policy.fixed(1);
+            lc.width_policy = Size_policy::fixed(1);
             if (b.north.has_value())
                 init(lc.template make_child<Corner>(b.nw_corner));
             init(lc.template make_child<VWall>(*b.west));
@@ -383,7 +383,7 @@ class Bordered : public layout::Horizontal<Column> {
         if (right_column.has_value()) {
             auto& rc =
                 this->insert_child(std::make_unique<Column>(), *right_column);
-            rc.width_policy.fixed(1);
+            rc.width_policy = Size_policy::fixed(1);
             if (b.north.has_value())
                 init(rc.template make_child<Corner>(b.ne_corner));
             init(rc.template make_child<VWall>(*b.east));

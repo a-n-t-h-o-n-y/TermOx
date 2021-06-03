@@ -22,6 +22,7 @@
 #include <termox/widget/point.hpp>
 #include <termox/widget/widget.hpp>
 #include <termox/widget/wrap.hpp>
+#include "termox/widget/size_policy.hpp"
 
 namespace ox::pipe {
 
@@ -465,7 +466,7 @@ namespace ox::pipe {
 [[nodiscard]] inline auto fixed_width(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).width_policy.fixed(hint);
+        get(w).width_policy = ox::Size_policy::fixed(hint);
         return std::forward<decltype(w)>(w);
     };
 }
@@ -473,7 +474,7 @@ namespace ox::pipe {
 [[nodiscard]] inline auto minimum_width(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).width_policy.minimum(hint);
+        get(w).width_policy = ox::Size_policy::minimum(hint);
         return std::forward<decltype(w)>(w);
     };
 }
@@ -481,7 +482,7 @@ namespace ox::pipe {
 [[nodiscard]] inline auto maximum_width(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).width_policy.maximum(hint);
+        get(w).width_policy = ox::Size_policy::maximum(hint);
         return std::forward<decltype(w)>(w);
     };
 }
@@ -489,7 +490,7 @@ namespace ox::pipe {
 [[nodiscard]] inline auto preferred_width(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).width_policy.preferred(hint);
+        get(w).width_policy = ox::Size_policy::preferred(hint);
         return std::forward<decltype(w)>(w);
     };
 }
@@ -497,7 +498,7 @@ namespace ox::pipe {
 [[nodiscard]] inline auto expanding_width(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).width_policy.expanding(hint);
+        get(w).width_policy = ox::Size_policy::expanding(hint);
         return std::forward<decltype(w)>(w);
     };
 }
@@ -505,7 +506,7 @@ namespace ox::pipe {
 [[nodiscard]] inline auto minimum_expanding_width(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).width_policy.minimum_expanding(hint);
+        get(w).width_policy = ox::Size_policy::minimum_expanding(hint);
         return std::forward<decltype(w)>(w);
     };
 }
@@ -513,7 +514,7 @@ namespace ox::pipe {
 [[nodiscard]] inline auto ignored_width()
 {
     return [](auto&& w) -> decltype(auto) {
-        get(w).width_policy.ignored();
+        get(w).width_policy = ox::Size_policy::ignored();
         return std::forward<decltype(w)>(w);
     };
 }
@@ -571,7 +572,7 @@ namespace ox::pipe {
 [[nodiscard]] inline auto fixed_height(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).height_policy.fixed(hint);
+        get(w).height_policy = ox::Size_policy::fixed(hint);
         return std::forward<decltype(w)>(w);
     };
 }
@@ -579,7 +580,7 @@ namespace ox::pipe {
 [[nodiscard]] inline auto minimum_height(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).height_policy.minimum(hint);
+        get(w).height_policy = ox::Size_policy::minimum(hint);
         return std::forward<decltype(w)>(w);
     };
 }
@@ -587,7 +588,7 @@ namespace ox::pipe {
 [[nodiscard]] inline auto maximum_height(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).height_policy.maximum(hint);
+        get(w).height_policy = ox::Size_policy::maximum(hint);
         return std::forward<decltype(w)>(w);
     };
 }
@@ -595,7 +596,7 @@ namespace ox::pipe {
 [[nodiscard]] inline auto preferred_height(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).height_policy.preferred(hint);
+        get(w).height_policy = ox::Size_policy::preferred(hint);
         return std::forward<decltype(w)>(w);
     };
 }
@@ -603,7 +604,7 @@ namespace ox::pipe {
 [[nodiscard]] inline auto expanding_height(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).height_policy.expanding(hint);
+        get(w).height_policy = ox::Size_policy::expanding(hint);
         return std::forward<decltype(w)>(w);
     };
 }
@@ -611,7 +612,7 @@ namespace ox::pipe {
 [[nodiscard]] inline auto minimum_expanding_height(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).height_policy.minimum_expanding(hint);
+        get(w).height_policy = ox::Size_policy::minimum_expanding(hint);
         return std::forward<decltype(w)>(w);
     };
 }
@@ -619,7 +620,7 @@ namespace ox::pipe {
 [[nodiscard]] inline auto ignored_height()
 {
     return [](auto&& w) -> decltype(auto) {
-        get(w).height_policy.ignored();
+        get(w).height_policy = ox::Size_policy::ignored();
         return std::forward<decltype(w)>(w);
     };
 }

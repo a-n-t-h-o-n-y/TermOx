@@ -13,7 +13,7 @@ There are seven defaults for a Size Policy.
 
 ### Fixed
 
-`void fixed(std::size_t hint)`
+`static auto fixed(std::size_t hint) -> Size_policy`
 
 The length is always fixed to exactly `hint` cells. If there is not enough space
 for this length, the Widget will be disabled, unless ` can_ignore_min(...)` is
@@ -21,41 +21,41 @@ enabled.
 
 ### Minimum
 
-`void minimum(std::size_t hint)`
+`static auto minimum(std::size_t hint) -> Size_policy`
 
 `hint` will be the minimum length, relying on its Stretch Factor for its length.
 `can_ignore_min(...)` can be used with this default.
 
 ### Maximum
 
-`void maximum(std::size_t hint)`
+`static auto maximum(std::size_t hint) -> Size_policy`
 
 `hint` will be the maximum length, relying on its Stretch Factor for its dynamic
 length.
 
 ### Preferred
 
-`void preferred(std::size_t hint)`
+`static auto preferred(std::size_t hint) -> Size_policy`
 
 `hint` will be the preferred size, the Stretch Factor determines if it should
 shrink or expand from the hint.
 
 ### Expanding
 
-`void expanding(std::size_t hint)`
+`static auto expanding(std::size_t hint) -> Size_policy`
 
 Same as `preferred`, but will expand into extra space before other policies.
 
 ### Minimum Expanding
 
-`void minimum_expanding(std::size_t hint)`
+`static auto minimum_expanding(std::size_t hint) -> Size_policy`
 
 `hint` is the minimum, will expand into extra space before other policies.
 `can_ignore_min(...)` can be used with this default.
 
 ### Ignored
 
-`void ignored()`
+`static auto ignored() -> Size_policy`
 
 Stretch Factor is the only consideration for this policy.
 

@@ -28,7 +28,7 @@ class Trait_box : public ox::layout::Vertical<> {
         make_child<Checkbox>({U"Underline" | ox::Trait::Underline});
 
    public:
-    Trait_box() { this->height_policy.fixed(4); }
+    Trait_box() { this->height_policy = ox::Size_policy::fixed(4); }
 };
 
 }  // namespace paint

@@ -27,6 +27,28 @@ class Size_policy {
         std::numeric_limits<decltype(data_.max)>::max();
 
    public:
+    explicit Size_policy(int hint            = 0,
+                         int min             = 0,
+                         int max             = maximum_max,
+                         double stretch      = 1.,
+                         bool can_ignore_min = true);
+
+    /// Does not copy the Signal, so no slots are connected on copy init.
+    Size_policy(Size_policy const& x);
+
+    /// Does not move the Signal, so no slots are connected on move init.
+    Size_policy(Size_policy&& x);
+
+    /// Specifically does not copy the Signal, so Widget is still notified.
+    auto operator=(Size_policy const& x) -> Size_policy&;
+
+    /// Specifically does not copy the Signal, so Widget is still notified.
+    auto operator=(Size_policy&& x) -> Size_policy&;
+
+    friend auto operator==(Size_policy const& a, Size_policy const& b) -> bool;
+    friend auto operator!=(Size_policy const& a, Size_policy const& b) -> bool;
+
+   public:
     /// Set the size hint, used as the initial value in calculations.
     void hint(int value);
 
@@ -58,43 +80,28 @@ class Size_policy {
     /// Return if min can be ignored for the last displayed widget in a layout.
     [[nodiscard]] auto can_ignore_min() const -> bool;
 
+   public:
     /* _Helper Methods_ */
     /// Fixed: \p hint is the only acceptable size.
-    void fixed(int hint);
+    [[nodiscard]] static auto fixed(int hint) -> Size_policy;
 
     /// Minimum: \p hint is the minimum acceptable size, may be larger.
-    void minimum(int hint);
+    [[nodiscard]] static auto minimum(int hint) -> Size_policy;
 
     /// Maximum: \p hint is the maximum acceptable size, may be smaller.
-    void maximum(int hint);
+    [[nodiscard]] static auto maximum(int hint) -> Size_policy;
 
     /// Preferred: \p hint is preferred, though it can be any size.
-    void preferred(int hint);
+    [[nodiscard]] static auto preferred(int hint) -> Size_policy;
 
     /// Expanding: \p hint is preferred, but it will expand to use extra space.
-    void expanding(int hint);
+    [[nodiscard]] static auto expanding(int hint) -> Size_policy;
 
     /// Minimum Expanding: \p hint is minimum, it will expand into unused space.
-    void minimum_expanding(int hint);
+    [[nodiscard]] static auto minimum_expanding(int hint) -> Size_policy;
 
     /// Ignored: Stretch is the only consideration.
-    void ignored();
-
-   public:
-    Size_policy() = default;
-
-    /// Does not copy the Signal, so no slots are connected on copy init.
-    Size_policy(Size_policy const& x);
-
-    /// Does not move the Signal, so no slots are connected on move init.
-    Size_policy(Size_policy&& x);
-
-    /// Specifically does not copy the Signal, so Widget is still notified.
-    auto operator=(Size_policy const& x) -> Size_policy&;
-    auto operator=(Size_policy&& x) -> Size_policy& = delete;
-
-    friend auto operator==(Size_policy const& a, Size_policy const& b) -> bool;
-    friend auto operator!=(Size_policy const& a, Size_policy const& b) -> bool;
+    [[nodiscard]] static auto ignored() -> Size_policy;
 };
 
 /// Wrapper type to set the height Size_policy at construction.
@@ -104,13 +111,13 @@ struct Fixed_height : Widget_t {
     explicit Fixed_height(Args&&... args)
         : Widget_t{std::forward<Args>(args)...}
     {
-        this->height_policy.fixed(Hint);
+        this->height_policy = Size_policy::fixed(Hint);
     }
 
     explicit Fixed_height(typename Widget_t::Parameters parameters)
         : Widget_t{std::move(parameters)}
     {
-        this->height_policy.fixed(Hint);
+        this->height_policy = Size_policy::fixed(Hint);
     }
 };
 
@@ -120,13 +127,13 @@ struct Fixed_width : Widget_t {
     template <typename... Args>
     explicit Fixed_width(Args&&... args) : Widget_t{std::forward<Args>(args)...}
     {
-        this->width_policy.fixed(Hint);
+        this->width_policy = Size_policy::fixed(Hint);
     }
 
     explicit Fixed_width(typename Widget_t::Parameters parameters)
         : Widget_t{std::move(parameters)}
     {
-        this->width_policy.fixed(Hint);
+        this->width_policy = Size_policy::fixed(Hint);
     }
 };
 
@@ -137,13 +144,13 @@ struct Minimum_height : Widget_t {
     explicit Minimum_height(Args&&... args)
         : Widget_t{std::forward<Args>(args)...}
     {
-        this->height_policy.minimum(Hint);
+        this->height_policy = Size_policy::minimum(Hint);
     }
 
     explicit Minimum_height(typename Widget_t::Parameters parameters)
         : Widget_t{std::move(parameters)}
     {
-        this->height_policy.minimum(Hint);
+        this->height_policy = Size_policy::minimum(Hint);
     }
 };
 
@@ -154,13 +161,13 @@ struct Minimum_width : Widget_t {
     explicit Minimum_width(Args&&... args)
         : Widget_t{std::forward<Args>(args)...}
     {
-        this->width_policy.minimum(Hint);
+        this->width_policy = Size_policy::minimum(Hint);
     }
 
     explicit Minimum_width(typename Widget_t::Parameters parameters)
         : Widget_t{std::move(parameters)}
     {
-        this->width_policy.minimum(Hint);
+        this->width_policy = Size_policy::minimum(Hint);
     }
 };
 
@@ -171,13 +178,13 @@ struct Maximum_height : Widget_t {
     explicit Maximum_height(Args&&... args)
         : Widget_t{std::forward<Args>(args)...}
     {
-        this->height_policy.maximum(Hint);
+        this->height_policy = Size_policy::maximum(Hint);
     }
 
     explicit Maximum_height(typename Widget_t::Parameters parameters)
         : Widget_t{std::move(parameters)}
     {
-        this->height_policy.maximum(Hint);
+        this->height_policy = Size_policy::maximum(Hint);
     }
 };
 
@@ -188,13 +195,13 @@ struct Maximum_width : Widget_t {
     explicit Maximum_width(Args&&... args)
         : Widget_t{std::forward<Args>(args)...}
     {
-        this->width_policy.maximum(Hint);
+        this->width_policy = Size_policy::maximum(Hint);
     }
 
     explicit Maximum_width(typename Widget_t::Parameters parameters)
         : Widget_t{std::move(parameters)}
     {
-        this->width_policy.maximum(Hint);
+        this->width_policy = Size_policy::maximum(Hint);
     }
 };
 
@@ -205,13 +212,13 @@ struct Preferred_height : Widget_t {
     explicit Preferred_height(Args&&... args)
         : Widget_t{std::forward<Args>(args)...}
     {
-        this->height_policy.preferred(Hint);
+        this->height_policy = Size_policy::preferred(Hint);
     }
 
     explicit Preferred_height(typename Widget_t::Parameters parameters)
         : Widget_t{std::move(parameters)}
     {
-        this->height_policy.preferred(Hint);
+        this->height_policy = Size_policy::preferred(Hint);
     }
 };
 
@@ -222,13 +229,13 @@ struct Preferred_width : Widget_t {
     explicit Preferred_width(Args&&... args)
         : Widget_t{std::forward<Args>(args)...}
     {
-        this->width_policy.preferred(Hint);
+        this->width_policy = Size_policy::preferred(Hint);
     }
 
     explicit Preferred_width(typename Widget_t::Parameters parameters)
         : Widget_t{std::move(parameters)}
     {
-        this->width_policy.preferred(Hint);
+        this->width_policy = Size_policy::preferred(Hint);
     }
 };
 
@@ -239,13 +246,13 @@ struct Expanding_height : Widget_t {
     explicit Expanding_height(Args&&... args)
         : Widget_t{std::forward<Args>(args)...}
     {
-        this->height_policy.expanding(Hint);
+        this->height_policy = Size_policy::expanding(Hint);
     }
 
     explicit Expanding_height(typename Widget_t::Parameters parameters)
         : Widget_t{std::move(parameters)}
     {
-        this->height_policy.expanding(Hint);
+        this->height_policy = Size_policy::expanding(Hint);
     }
 };
 
@@ -256,13 +263,13 @@ struct Expanding_width : Widget_t {
     explicit Expanding_width(Args&&... args)
         : Widget_t{std::forward<Args>(args)...}
     {
-        this->width_policy.expanding(Hint);
+        this->width_policy = Size_policy::expanding(Hint);
     }
 
     explicit Expanding_width(typename Widget_t::Parameters parameters)
         : Widget_t{std::move(parameters)}
     {
-        this->width_policy.expanding(Hint);
+        this->width_policy = Size_policy::expanding(Hint);
     }
 };
 
@@ -273,13 +280,13 @@ struct Minimum_expanding_height : Widget_t {
     explicit Minimum_expanding_height(Args&&... args)
         : Widget_t{std::forward<Args>(args)...}
     {
-        this->height_policy.minimum_expanding(Hint);
+        this->height_policy = Size_policy::minimum_expanding(Hint);
     }
 
     explicit Minimum_expanding_height(typename Widget_t::Parameters parameters)
         : Widget_t{std::move(parameters)}
     {
-        this->height_policy.minimum_expanding(Hint);
+        this->height_policy = Size_policy::minimum_expanding(Hint);
     }
 };
 
@@ -290,13 +297,13 @@ struct Minimum_expanding_width : Widget_t {
     explicit Minimum_expanding_width(Args&&... args)
         : Widget_t{std::forward<Args>(args)...}
     {
-        this->width_policy.minimum_expanding(Hint);
+        this->width_policy = Size_policy::minimum_expanding(Hint);
     }
 
     explicit Minimum_expanding_width(typename Widget_t::Parameters parameters)
         : Widget_t{std::move(parameters)}
     {
-        this->width_policy.minimum_expanding(Hint);
+        this->width_policy = Size_policy::minimum_expanding(Hint);
     }
 };
 
@@ -307,13 +314,13 @@ struct Ignored_height : Widget_t {
     explicit Ignored_height(Args&&... args)
         : Widget_t{std::forward<Args>(args)...}
     {
-        this->height_policy.ignored();
+        this->height_policy = Size_policy::ignored();
     }
 
     explicit Ignored_height(typename Widget_t::Parameters parameters)
         : Widget_t{std::move(parameters)}
     {
-        this->height_policy.ignored();
+        this->height_policy = Size_policy::ignored();
     }
 };
 
@@ -324,13 +331,13 @@ struct Ignored_width : Widget_t {
     explicit Ignored_width(Args&&... args)
         : Widget_t{std::forward<Args>(args)...}
     {
-        this->width_policy.ignored();
+        this->width_policy = Size_policy::ignored();
     }
 
     explicit Ignored_width(typename Widget_t::Parameters parameters)
         : Widget_t{std::move(parameters)}
     {
-        this->width_policy.ignored();
+        this->width_policy = Size_policy::ignored();
     }
 };
 

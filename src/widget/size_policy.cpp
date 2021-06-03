@@ -5,6 +5,14 @@
 
 namespace ox {
 
+Size_policy::Size_policy(int hint,
+                         int min,
+                         int max,
+                         double stretch,
+                         bool can_ignore_min)
+    : data_{hint, min, max, stretch, can_ignore_min}
+{}
+
 void Size_policy::hint(int value)
 {
     data_.hint = value;
@@ -44,59 +52,46 @@ auto Size_policy::can_ignore_min() const -> bool
     return data_.can_ignore_min;
 }
 
-void Size_policy::fixed(int hint)
+auto Size_policy::fixed(int hint) -> Size_policy
 {
-    data_.hint    = hint;
-    data_.min     = hint;
-    data_.max     = hint;
-    data_.stretch = 1.;
-    policy_updated.emit();
+    // {hint, min, max}
+    return Size_policy{hint, hint, hint};
 }
 
-void Size_policy::minimum(int hint)
+auto Size_policy::minimum(int hint) -> Size_policy
 {
-    data_.hint = hint;
-    data_.min  = hint;
-    policy_updated.emit();
+    // {hint, min}
+    return Size_policy{hint, hint};
 }
 
-void Size_policy::maximum(int hint)
+auto Size_policy::maximum(int hint) -> Size_policy
 {
-    data_.hint = hint;
-    data_.max  = hint;
-    policy_updated.emit();
+    // {hint, min, max}
+    return Size_policy{hint, 0, hint};
 }
 
-void Size_policy::preferred(int hint)
+auto Size_policy::preferred(int hint) -> Size_policy
 {
-    data_.hint = hint;
-    data_.min  = 0;
-    data_.max  = maximum_max;
-    policy_updated.emit();
+    // {hint}
+    return Size_policy{hint};
 }
 
-void Size_policy::expanding(int hint)
+auto Size_policy::expanding(int hint) -> Size_policy
 {
-    data_.stretch = 100'000.;
-    data_.hint    = hint;
-    data_.min     = 0;
-    data_.max     = maximum_max;
-    policy_updated.emit();
+    // {hint, min, max, stretch}
+    return Size_policy{hint, 0, maximum_max, 100'000};
 }
 
-void Size_policy::minimum_expanding(int hint)
+auto Size_policy::minimum_expanding(int hint) -> Size_policy
 {
-    data_.stretch = 100'000.;
-    data_.hint    = hint;
-    data_.min     = hint;
+    // {hint, min, max, stretch}
+    return Size_policy{hint, hint, maximum_max, 100'000};
 }
 
-void Size_policy::ignored()
+auto Size_policy::ignored() -> Size_policy
 {
-    data_.hint = 0;
-    data_.min  = 0;
-    data_.max  = maximum_max;
-    policy_updated.emit();
+    // {hint, min, max}
+    return Size_policy{0, 0, maximum_max};
 }
 
 Size_policy::Size_policy(Size_policy const& x) : data_{x.data_} {}
@@ -106,6 +101,13 @@ Size_policy::Size_policy(Size_policy&& x) : data_{std::move(x.data_)} {}
 auto Size_policy::operator=(Size_policy const& x) -> Size_policy&
 {
     data_ = x.data_;
+    policy_updated.emit();
+    return *this;
+}
+
+auto Size_policy::operator=(Size_policy&& x) -> Size_policy&
+{
+    data_ = std::move(x.data_);
     policy_updated.emit();
     return *this;
 }

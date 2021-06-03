@@ -39,8 +39,8 @@ auto Spinner::period() const noexcept -> Interval_t { return period_; }
 
 void Spinner::set_width(int width)
 {
-    width_ = width;
-    width_policy.fixed(width_);
+    width_       = width;
+    width_policy = Size_policy::fixed(width_);
 }
 
 auto Spinner::spinner_width() const noexcept -> int { return width_; }

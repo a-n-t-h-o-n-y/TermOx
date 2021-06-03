@@ -1,6 +1,7 @@
 #ifndef TERMOX_DEMOS_LAYOUT_DEMO_HPP
 #define TERMOX_DEMOS_LAYOUT_DEMO_HPP
 #include <termox/termox.hpp>
+#include "termox/widget/size_policy.hpp"
 #include "termox/widget/widgets/number_edit.hpp"
 
 namespace demo {
@@ -99,7 +100,7 @@ struct Size_policy_settings : ox::layout::Vertical<> {
     {
         // this->height_policy.fixed(6);
 
-        title.height_policy.fixed(1);
+        title.height_policy    = ox::Size_policy::fixed(1);
         title.brush.background = ox::Color::Dark_gray;
 
         // types_box.type_updated.connect([this](auto type) {
@@ -194,9 +195,9 @@ struct Settings : ox::layout::Vertical<> {
     Settings()
     {
         // this->width_policy.maximum(20);
-        this->width_policy.fixed(20);
+        this->width_policy = ox::Size_policy::fixed(20);
 
-        title.height_policy.fixed(1);
+        title.height_policy = ox::Size_policy::fixed(1);
         title.set_alignment(ox::Align::Center);
         title.brush.background = ox::Color::Dark_gray;
 
@@ -206,12 +207,12 @@ struct Settings : ox::layout::Vertical<> {
             });
 
         add_btn.pressed.connect([this] { this->add_widget(); });
-        add_btn.height_policy.fixed(3);
+        add_btn.height_policy    = ox::Size_policy::fixed(3);
         add_btn.brush.background = ox::Color::Light_blue;
         add_btn.brush.foreground = ox::Color::Black;
 
         remove_btn.pressed.connect([this] { this->remove_selected(); });
-        remove_btn.height_policy.fixed(3);
+        remove_btn.height_policy    = ox::Size_policy::fixed(3);
         remove_btn.brush.background = ox::Color::Violet;
         remove_btn.brush.foreground = ox::Color::Black;
     }
