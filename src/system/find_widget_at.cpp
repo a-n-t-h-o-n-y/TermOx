@@ -36,8 +36,11 @@ namespace ox::detail {
 {
     if (auto* head = System::head(); head == nullptr)
         return nullptr;
-    else
-        return find_owner_of(*head, p);
+    else {
+        // Some terminals allow clicks outside of term screen, so return head.
+        auto* const at = find_owner_of(*head, p);
+        return (at == nullptr) ? ox::System::head() : at;
+    }
 }
 
 }  // namespace ox::detail
