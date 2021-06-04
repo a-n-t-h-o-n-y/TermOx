@@ -9,11 +9,7 @@
 #include <type_traits>
 #include <vector>
 
-#include <termox/painter/palette/apple_ii.hpp>
 #include <termox/termox.hpp>
-#include <termox/widget/pipe.hpp>
-#include <termox/widget/widgets/confirm_button.hpp>
-#include <termox/widget/widgets/toggle_button.hpp>
 
 namespace {
 

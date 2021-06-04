@@ -10,25 +10,19 @@
 #include <utility>
 #include <vector>
 
+#include <termox/painter/color.hpp>
 #include <termox/painter/glyph.hpp>
 #include <termox/painter/painter.hpp>
+#include <termox/widget/boundary.hpp>
 #include <termox/widget/point.hpp>
 #include <termox/widget/widget.hpp>
 
 namespace ox {
 
-/// Four point Boundary, edges are inclusive.
-template <typename Number_t>
-struct Boundary {
-    Number_t west  = 0;
-    Number_t east  = 1;
-    Number_t north = 1;
-    Number_t south = 0;
-};
-
 /// Bounded box that can display added Coordinates within the Boundary.
 /** X axis is horizontal and increasing from left to right.
- *  Y axis is vertical and increasing from bottom to top. */
+ *  Y axis is vertical and increasing from bottom to top.
+ *  Uses Braille characters, allowing up to 8 points per terminal cell. */
 template <typename Number_t = double>
 class Graph : public Widget {
    public:
@@ -126,15 +120,15 @@ class Graph : public Widget {
             auto const h_offset = h_ratio * distance(boundary_.west, c.x);
             auto const v_offset =
                 area.height - v_ratio * distance(boundary_.south, c.y);
-            if (h_offset >= area.width)  // h_offset can't be negative.
+            if (h_offset >= area.width)  // h_offset already can't be negative.
                 continue;
             if (v_offset >= area.height || v_offset < 0)
                 continue;
             auto const point = Point{(int)h_offset, (int)v_offset};
             auto const mask  = this->to_cell_mask(h_offset, v_offset);
-            auto existing    = p.at(point);
-            existing.symbol  = combine(existing.symbol, mask);
-            p.put(existing, point);
+            auto current     = p.at(point);
+            current.symbol   = combine(current.symbol, mask);
+            p.put(current, point);
         }
         return Widget::paint_event(p);
     }
@@ -205,81 +199,171 @@ template <typename Number_t = double>
     return std::make_unique<Graph<Number_t>>(std::move(p));
 }
 
-/// Return the input Boundary \p b, with each corner scaled by \p amount.
-/** Only accepts finite values greater than zero for \p amount. */
-template <typename Number_t>
-[[nodiscard]] auto scale(Boundary<Number_t> b, double amount)
-    -> Boundary<Number_t>
+/// Bounded box that can display added Color Coordinates within the Boundary.
+/** X axis is horizontal and increasing from left to right.
+ *  Y axis is vertical and increasing from bottom to top.
+ *  Uses half-block characters, allowing two points per terminal cell. */
+template <typename Number_t = double>
+class Color_graph : public Widget {
+   public:
+    /// x is horizontal, y is vertical.
+    struct Coordinate {
+        Number_t x;
+        Number_t y;
+    };
+
+   public:
+    struct Parameters {
+        Boundary<Number_t> boundary                           = {};
+        std::vector<std::pair<Coordinate, Color>> coordinates = {};
+    };
+
+   public:
+    /// Create a Color_graph with given Boundary and Coordinates, Colors.
+    explicit Color_graph(Boundary<Number_t> b                        = {},
+                         std::vector<std::pair<Coordinate, Color>> x = {})
+        : boundary_{b}, coordinates_{std::move(x)}
+    {
+        assert(b.west < b.east && b.south < b.north);
+    }
+
+    /// Create a Color_graph with given Parameters.
+    explicit Color_graph(Parameters p)
+        : Color_graph{p.boundary, std::move(p.coordinates)}
+    {}
+
+   public:
+    /// Set a new Boundary and repaint the Widget.
+    void set_boundary(Boundary<Number_t> b)
+    {
+        assert(b.west < b.east && b.south < b.north);
+        boundary_ = b;
+        this->update();
+    }
+
+    /// Return the currently set Boundary.
+    [[nodiscard]] auto boundary() const -> Boundary<Number_t>
+    {
+        return boundary_;
+    }
+
+    /// Replace the current state with the given Coordinates vector \p x.
+    void reset(std::vector<std::pair<Coordinate, Color>> x)
+    {
+        coordinates_ = std::move(x);
+        this->update();
+    }
+
+    /// Replace with copies of <Coordinate, Color>s given by iterators.
+    /** Iter1_t must have a value type of std::pair<Coordinate, Color>. */
+    template <typename Iter1_t, typename Iter2_t>
+    void reset(Iter1_t first, Iter2_t last)
+    {
+        static_assert(
+            std::is_same_v<typename std::iterator_traits<Iter1_t>::value_type,
+                           std::pair<Coordinate, Color>>,
+            "Must add with a iterators pointing to Coordinates, Color pair.");
+        coordinates_.clear();
+        std::copy(first, last, std::back_inserter(coordinates_));
+        this->update();
+    }
+
+    /// Add a single <Coordinate, Color> to the Graph.
+    void add(std::pair<Coordinate, Color> p)
+    {
+        coordinates_.push_back(p);
+        this->update();
+    }
+
+    /// Remove all points from the Graph and repaint.
+    void clear()
+    {
+        coordinates_.clear();
+        this->update();
+    }
+
+    /// Return a reference to the current container of Coordinates.
+    [[nodiscard]] auto coordinates() const
+        -> std::vector<std::pair<Coordinate, Color>> const&
+    {
+        return coordinates_;
+    }
+
+   protected:
+    auto paint_event(Painter& p) -> bool override
+    {
+        auto const area = this->area();
+        auto const h_ratio =
+            (double)area.width / distance(boundary_.west, boundary_.east);
+        auto const v_ratio =
+            (double)area.height / distance(boundary_.south, boundary_.north);
+
+        for (auto const [coord, color] : coordinates_) {
+            auto const h_offset = h_ratio * distance(boundary_.west, coord.x);
+            auto const v_offset =
+                area.height - v_ratio * distance(boundary_.south, coord.y);
+            // if (h_offset >= area.width)  // h_offset already can't be
+            // negative.
+            //     continue;
+            // if (v_offset >= area.height || v_offset < 0)
+            //     continue;
+            auto const point  = Point{(int)h_offset, (int)v_offset};
+            auto const is_top = is_top_region(v_offset);
+            auto const glyph  = combine(p.at(point), is_top, color);
+            p.put(glyph, point);
+        }
+        return Widget::paint_event(p);
+    }
+
+   private:
+    Boundary<Number_t> boundary_;
+    std::vector<std::pair<Coordinate, Color>> coordinates_;
+
+   private:
+    /// Finds the distance between two values. It's just subtraction.
+    [[nodiscard]] static auto distance(Number_t smaller, Number_t larger)
+        -> Number_t
+    {
+        return larger - smaller;
+    }
+
+    /// Return true if the given offset cooresponds to the top region.
+    /** False if is bottom half. */
+    [[nodiscard]] static auto is_top_region(double v_offset) -> bool
+    {
+        return std::fmod(v_offset, 1.) < 0.5;
+    }
+
+    /// Returns a new Glyph dependent on \p is_top and \p c.
+    [[nodiscard]] static auto combine(Glyph current, bool is_top, Color c)
+        -> Glyph
+    {
+        if (current.symbol == U' ')
+            current.symbol = U'▀';
+        if (is_top)
+            current |= fg(c);
+        else
+            current |= bg(c);
+        return current;
+    }
+};
+
+/// Helper function to create a Color_graph instance.
+template <typename Number_t = double>
+[[nodiscard]] auto color_graph(
+    Boundary<Number_t> b = {},
+    std::vector<std::pair<typename Color_graph<Number_t>::Coordinate, Color>>
+        x = {}) -> std::unique_ptr<Color_graph<Number_t>>
 {
-    assert(amount > 0. && std::isfinite(amount));
-    return {Number_t(b.west * amount), Number_t(b.east * amount),
-            Number_t(b.north * amount), Number_t(b.south * amount)};
+    return std::make_unique<Color_graph<Number_t>>(b, std::move(x));
 }
 
-/// Scrolls \p b horizontally left by \p amount.
-/** \p amount has to be positive. */
-template <typename Number_t>
-[[nodiscard]] auto scroll_west(Boundary<Number_t> b, Number_t amount)
-    -> Boundary<Number_t>
+/// Helper function to create a Color_graph instance.
+template <typename Number_t = double>
+[[nodiscard]] auto color_graph(typename Color_graph<Number_t>::Parameters p)
+    -> std::unique_ptr<Color_graph<Number_t>>
 {
-    assert(amount >= 0.);
-    b.west -= amount;
-    b.east -= amount;
-    return b;
-}
-
-/// Scrolls \p b horizontally right by \p amount.
-/** \p amount has to be positive. */
-template <typename Number_t>
-[[nodiscard]] auto scroll_east(Boundary<Number_t> b, Number_t amount)
-    -> Boundary<Number_t>
-{
-    assert(amount >= 0.);
-    b.west += amount;
-    b.east += amount;
-    return b;
-}
-
-/// Scrolls \p b vertically upwards by \p amount.
-/** \p amount has to be positive. */
-template <typename Number_t>
-[[nodiscard]] auto scroll_north(Boundary<Number_t> b, Number_t amount)
-    -> Boundary<Number_t>
-{
-    assert(amount >= 0.);
-    b.north += amount;
-    b.south += amount;
-    return b;
-}
-
-/// Scrolls \p b vertically downwards by \p amount.
-/** \p amount has to be positive. */
-template <typename Number_t>
-[[nodiscard]] auto scroll_south(Boundary<Number_t> b, Number_t amount)
-    -> Boundary<Number_t>
-{
-    assert(amount >= 0.);
-    b.north -= amount;
-    b.south -= amount;
-    return b;
-}
-
-/// Subtract cooresponding Boundary members.
-template <typename Number_t>
-[[nodiscard]] auto operator-(Boundary<Number_t> a, Boundary<Number_t> b)
-    -> Boundary<Number_t>
-{
-    return {a.west - b.west, a.east - b.east, a.north - b.north,
-            a.south - b.south};
-}
-
-/// Add cooresponding Boundary members.
-template <typename Number_t>
-[[nodiscard]] auto operator+(Boundary<Number_t> a, Boundary<Number_t> b)
-    -> Boundary<Number_t>
-{
-    return {a.west + b.west, a.east + b.east, a.north + b.north,
-            a.south + b.south};
+    return std::make_unique<Color_graph<Number_t>>(std::move(p));
 }
 
 }  // namespace ox

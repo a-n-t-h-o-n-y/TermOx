@@ -80,8 +80,7 @@ class Layout : public Widget {
     {
         static_assert(std::is_base_of_v<Child_t, Widget_t>,
                       "Layout::insert: Widget_t must be a Child_t type");
-        if (index > this->child_count())
-            index = this->child_count();
+        assert(index <= this->child_count());
         auto& inserted = *w;
         children_.emplace(this->iter_at(index), std::move(w));
         inserted.set_parent(this);

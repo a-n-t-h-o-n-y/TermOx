@@ -15,6 +15,7 @@
 #include "animation_demo.hpp"
 #include "color_sliders.hpp"
 #include "focus_demo.hpp"
+#include "fractal/fractal_demo.hpp"
 #include "game_of_life/gol_demo.hpp"
 #include "glyph_paint/glyph_paint.hpp"
 #include "graph/graph_demo.hpp"
@@ -45,6 +46,7 @@ class Demo_menu : public ox::Menu_stack {
 
         auto constexpr brush = ox::Brush{fg(ox::apple_ii::Aqua)};
 
+        this->make_page<fractal::Fractal_demo>(U"Fractals" | brush);
         this->make_page<snake::Snake_game>(U"Snake Game" | brush);
         this->make_page<gol::GoL_demo>(U"Game of Life" | brush);
         // this->make_page<Notepad>(U"Notepad" | brush); // seg-faults on Load
