@@ -31,7 +31,7 @@ template <typename Number_t>
 [[nodiscard]] auto scroll_west(Boundary<Number_t> b, Number_t amount)
     -> Boundary<Number_t>
 {
-    assert(amount >= 0.);
+    assert(amount >= 0. && std::isfinite(amount));
     b.west -= amount;
     b.east -= amount;
     return b;
@@ -43,7 +43,7 @@ template <typename Number_t>
 [[nodiscard]] auto scroll_east(Boundary<Number_t> b, Number_t amount)
     -> Boundary<Number_t>
 {
-    assert(amount >= 0.);
+    assert(amount >= 0. && std::isfinite(amount));
     b.west += amount;
     b.east += amount;
     return b;
@@ -55,7 +55,7 @@ template <typename Number_t>
 [[nodiscard]] auto scroll_north(Boundary<Number_t> b, Number_t amount)
     -> Boundary<Number_t>
 {
-    assert(amount >= 0.);
+    assert(amount >= 0. && std::isfinite(amount));
     b.north += amount;
     b.south += amount;
     return b;
@@ -67,7 +67,7 @@ template <typename Number_t>
 [[nodiscard]] auto scroll_south(Boundary<Number_t> b, Number_t amount)
     -> Boundary<Number_t>
 {
-    assert(amount >= 0.);
+    assert(amount >= 0. && std::isfinite(amount));
     b.north -= amount;
     b.south -= amount;
     return b;

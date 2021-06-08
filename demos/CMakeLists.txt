@@ -29,6 +29,7 @@ target_sources(demos
         notepad/notepad.cpp
         snake/snake.cpp
         graph/graph_demo.cpp
+        fractal/fractal_demo.cpp
 )
 
 # Conway's Game of Life

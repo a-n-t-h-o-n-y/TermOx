@@ -298,15 +298,14 @@ class Color_graph : public Widget {
         auto const v_ratio =
             (double)area.height / distance(boundary_.south, boundary_.north);
 
-        for (auto const [coord, color] : coordinates_) {
+        for (auto const& [coord, color] : coordinates_) {
             auto const h_offset = h_ratio * distance(boundary_.west, coord.x);
             auto const v_offset =
                 area.height - v_ratio * distance(boundary_.south, coord.y);
-            // if (h_offset >= area.width)  // h_offset already can't be
-            // negative.
-            //     continue;
-            // if (v_offset >= area.height || v_offset < 0)
-            //     continue;
+            if (h_offset >= area.width)  // h_offset already can't be negative.
+                continue;
+            if (v_offset >= area.height || v_offset < 0)
+                continue;
             auto const point  = Point{(int)h_offset, (int)v_offset};
             auto const is_top = is_top_region(v_offset);
             auto const glyph  = combine(p.at(point), is_top, color);
@@ -339,7 +338,7 @@ class Color_graph : public Widget {
         -> Glyph
     {
         if (current.symbol == U' ')
-            current.symbol = U'▀';
+            current = U'▀' | fg(Color::Background);
         if (is_top)
             current |= fg(c);
         else

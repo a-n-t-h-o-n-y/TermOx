@@ -112,6 +112,10 @@ library to provide Widget to Widget communication. Widgets can add Signals as
 class members, a Signal can be emitted anytime by its Widget, and all registered
 observers of the Signal will be notified along with any data sent when emitted.
 
+<p align="center">
+  <img src="docs/images/fractal.png">
+</p>
+
 ## Build Instructions
 
 TermOx depends on the [Signals

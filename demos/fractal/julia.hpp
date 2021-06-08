@@ -1,7 +1,6 @@
 #ifndef TERMOX_DEMOS_FRACTAL_JULIA_HPP
 #define TERMOX_DEMOS_FRACTAL_JULIA_HPP
 #include <complex>
-#include <utility>
 
 #include "float_t.hpp"
 #include "square_sum.hpp"
