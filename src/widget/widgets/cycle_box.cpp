@@ -36,10 +36,18 @@ auto wrapped_decrement(std::size_t i, std::size_t edge) -> std::size_t
 
 namespace ox {
 
-Cycle_box::Cycle_box() : HLabel{U""}
+Cycle_box::Cycle_box(Align alignment,
+                     int extra_left,
+                     int extra_right,
+                     Growth growth_strategy)
+    : HLabel{U"", alignment, extra_left, extra_right, growth_strategy}
 {
-    *this | pipe::align_center() | pipe::strong_focus();
+    *this | pipe::strong_focus();
 }
+
+Cycle_box::Cycle_box(Parameters p)
+    : Cycle_box{p.alignment, p.extra_left, p.extra_right, p.growth_strategy}
+{}
 
 auto Cycle_box::add_option(Glyph_string label) -> sl::Signal<void()>&
 {

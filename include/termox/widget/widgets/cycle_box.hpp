@@ -11,6 +11,8 @@
 #include <termox/painter/glyph_string.hpp>
 #include <termox/system/key.hpp>
 #include <termox/system/mouse.hpp>
+#include <termox/widget/align.hpp>
+#include <termox/widget/growth.hpp>
 #include <termox/widget/tuple.hpp>
 #include <termox/widget/widgets/label.hpp>
 #include <termox/widget/widgets/tile.hpp>
@@ -24,13 +26,28 @@ namespace ox {
  *  by a scroll down button press, or arrow keys. */
 class Cycle_box : public HLabel {
    public:
+    struct Parameters {
+        Align alignment        = Align::Center;
+        int extra_left         = 0;
+        int extra_right        = 0;
+        Growth growth_strategy = Growth::Static;
+    };
+
+   public:
     /// Emitted when the option is changed, sends the new option's string rep.
     sl::Signal<void(std::string)> option_changed;
 
    public:
-    Cycle_box();
+    /// Given Label parameters are applied to each option's display.
+    explicit Cycle_box(Align alignment        = Align::Center,
+                       int extra_left         = 0,
+                       int extra_right        = 0,
+                       Growth growth_strategy = Growth::Static);
 
-    /// Add an option/label to the Cycle_box.
+    explicit Cycle_box(Parameters p);
+
+   public:
+    /// Add an option/label to the Cycle_box using Label constructor parameters.
     /** The returned Signal reference will be emitted every time this option is
      *  enabled. \p label's string representation is the identifying param. */
     auto add_option(Glyph_string label) -> sl::Signal<void()>&;
