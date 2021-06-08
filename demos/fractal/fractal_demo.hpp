@@ -6,10 +6,13 @@
 #include <termox/widget/boundary.hpp>
 #include <termox/widget/pair.hpp>
 #include <termox/widget/point.hpp>
+#include <termox/widget/widgets/button.hpp>
 #include <termox/widget/widgets/cycle_box.hpp>
 #include <termox/widget/widgets/graph.hpp>
 #include <termox/widget/widgets/label.hpp>
 #include <termox/widget/widgets/number_edit.hpp>
+#include <termox/widget/widgets/text_view.hpp>
+#include <termox/widget/widgets/toggle_button.hpp>
 
 #include "float_t.hpp"
 
@@ -21,18 +24,31 @@ struct Float_edit : ox::HPair<ox::HLabel, ox::Number_edit<Float_t>> {
     Float_edit();
 };
 
-class Top_bar : public ox::Cycle_box {
+class Top_bar : public ox::HPair<ox::Cycle_box, ox::Toggle_button> {
+   public:
+    ox::Cycle_box& selector    = this->first;
+    ox::Toggle_button& buttons = this->second;
+
    public:
     sl::Signal<void(Fractal)> fractal_changed;
+    sl::Signal<void()>& instructions_request = buttons.top_pressed;
+    sl::Signal<void()>& fractal_view_request = buttons.bottom_pressed;
 
    public:
     Top_bar();
 };
 
-class Fractal_demo : public ox::VPair<Top_bar, ox::Color_graph<Float_t>> {
+class Instructions : public ox::Text_view {
+   public:
+    Instructions();
+};
+
+class Fractal_demo
+    : public ox::VPair<Top_bar,
+                       ox::SPair<ox::Color_graph<Float_t>, Instructions>> {
    public:
     Top_bar& top_bar                = this->first;
-    ox::Color_graph<Float_t>& graph = this->second;
+    ox::Color_graph<Float_t>& graph = this->second.first;
 
    public:
     Fractal_demo();
@@ -68,6 +84,10 @@ class Fractal_demo : public ox::VPair<Top_bar, ox::Color_graph<Float_t>> {
 
     /// Zoom out towards Point \p p.
     void zoom_out_at(ox::Point p);
+
+    void show_instructions() { this->second.set_active_page(1); }
+
+    void show_fractals() { this->second.set_active_page(0); }
 };
 
 }  // namespace fractal

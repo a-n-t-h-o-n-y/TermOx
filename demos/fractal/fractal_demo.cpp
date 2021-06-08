@@ -153,6 +153,43 @@ template <typename Fn>
     return result;
 }
 
+[[nodiscard]] auto make_instructions() -> ox::Glyph_string
+{
+    using ox::Trait;
+    auto x = ox::Glyph_string{};
+    x.append(U"Instructions" | Trait::Bold);
+    x.append(U"\n\n");
+    x.append(U"Switch between ");
+    x.append(U"fractal types" | Trait::Bold);
+    x.append(U" with top bar selector.");
+    x.append(U"\n\n");
+    x.append(U"Zoom" | Trait::Bold);
+    x.append(U'\n');
+    x.append(
+        U"  [Scroll Mouse Wheel] - Zoom in/out on point over mouse cursor.\n"
+        U"  [CTRL + Up Arrow]    - Zoom in on center point.\n  [CTRL + "
+        U"Down Arrow]  - Zoom out on center point.");
+    x.append(U"\n\n");
+    x.append(U"Move" | Trait::Bold);
+    x.append(U" around with the arrow keys.");
+    x.append(U"\n\n");
+    x.append(U"The ");
+    x.append(U"Julia Set" | Trait::Bold);
+    x.append(
+        U" can have its constant `C` modified by left mouse clicking and "
+        U"dragging on the fractal surface.");
+    x.append(U"\n\n");
+    x.append(U"Decrease terminal font size to increase fractal ");
+    x.append(U"resolution" | Trait::Bold);
+    x.append(U".");
+    x.append(U"\n\n");
+    x.append(
+        U"If you zoom in far enough it will bottom out on `long double` "
+        U"floating point resolution and will freeze with black lines across "
+        U"the image.");
+    return x;
+}
+
 }  // namespace
 
 namespace fractal {
@@ -165,21 +202,34 @@ Float_edit::Float_edit()
 }
 
 Top_bar::Top_bar()
+    : ox::HPair<ox::Cycle_box, ox::Toggle_button>{
+          {ox::Align::Center, 0, 14},
+          {U"Instructions", U"Fractal View"}}
 {
     using namespace ox::pipe;
     *this | fixed_height(1);
 
-    this->add_option(U"< Mandelbrot >").connect([this] {
+    buttons | fixed_width(14) | children() | bg(ox::Color::White) |
+        fg(ox::Color::Black);
+
+    selector.add_option(U"< Mandelbrot >").connect([this] {
         fractal_changed.emit(Fractal::Mandelbrot);
     });
 
-    this->add_option(U"<    Julia   >").connect([this] {
+    selector.add_option(U"<    Julia   >").connect([this] {
         fractal_changed.emit(Fractal::Julia);
     });
 }
 
+Instructions::Instructions() : ox::Text_view{make_instructions()}
+{
+    *this | bg(ox::Color{16}) | fg(ox::Color{45});
+}
+
 Fractal_demo::Fractal_demo()
-    : ox::VPair<Top_bar, ox::Color_graph<Float_t>>{{}, {{-2, 2, 2, -2}, {}}}
+    : ox::VPair<Top_bar, ox::SPair<ox::Color_graph<Float_t>, Instructions>>{
+          {},
+          {{{-2, 2, 2, -2}}, {}}}
 {
     using namespace ox::pipe;
 
@@ -189,7 +239,13 @@ Fractal_demo::Fractal_demo()
         on_focus_in([=] { ox::Terminal::set_palette(pal); }) |
         forward_focus(graph);
 
+    auto& stack = this->second;
+    stack | active_page(0);
+
     graph | strong_focus();
+
+    top_bar.instructions_request.connect([this] { this->show_instructions(); });
+    top_bar.fractal_view_request.connect([this] { this->show_fractals(); });
 
     top_bar.fractal_changed.connect([this](auto type) {
         fractal_type_ = type;

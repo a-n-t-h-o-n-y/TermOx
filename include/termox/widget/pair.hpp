@@ -13,6 +13,12 @@ namespace ox {
 template <typename Layout_t, typename First, typename Second>
 struct Pair : Layout_t {
    public:
+    struct Parameters {
+        typename First::Parameters first;
+        typename Second::Parameters second;
+    };
+
+   public:
     First& first;
     Second& second;
 
@@ -21,6 +27,13 @@ struct Pair : Layout_t {
     Pair()
         : first{this->template make_child<First>()},
           second{this->template make_child<Second>()}
+    {}
+
+    explicit Pair(Parameters p)
+        : first{this->make_child_maybe_with_parameters<First>(
+              std::move(p.first))},
+          second{this->make_child_maybe_with_parameters<Second>(
+              std::move(p.second))}
     {}
 
     /// Widgets are constructed with passed in First/Second::Parameters objects.
