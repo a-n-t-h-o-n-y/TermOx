@@ -121,7 +121,7 @@ template <typename Fn>
                        ((boundary.north - boundary.south) / y_step);
     result.reserve(count);
 
-    // Parallelize Into Chunks
+    // Break Into Chunks
     auto const thread_count = std::thread::hardware_concurrency();
     auto const chunk_distance =
         (boundary.east - boundary.west) / (double)thread_count;

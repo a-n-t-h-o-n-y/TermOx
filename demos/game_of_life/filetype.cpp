@@ -7,6 +7,7 @@
 #include <string>
 
 namespace {
+
 /// Remove all control characters from the string.
 void remove_controls(std::string& s)
 {
@@ -14,11 +15,12 @@ void remove_controls(std::string& s)
                                     [](char c) { return std::iscntrl(c); });
     s.erase(end, std::end(s));
 }
+
 }  // namespace
 
 namespace gol {
 
-FileType get_filetype(const std::string& filename)
+auto get_filetype(const std::string& filename) -> FileType
 {
     auto result     = FileType::Unknown;
     auto input_file = std::ifstream{filename};
@@ -44,7 +46,7 @@ FileType get_filetype(const std::string& filename)
     return result;
 }
 
-std::string get_extension(const std::string& filename)
+auto get_extension(const std::string& filename) -> std::string
 {
     auto result   = std::string{""};
     const auto at = std::find(std::rbegin(filename), std::rend(filename), '.');

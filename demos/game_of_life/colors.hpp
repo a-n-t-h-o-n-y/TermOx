@@ -3,8 +3,7 @@
 #include <termox/painter/color.hpp>
 #include <termox/painter/dynamic_colors.hpp>
 
-namespace gol {
-namespace color {
+namespace gol::color {
 
 inline auto constexpr Black       = ox::Color::Background;
 inline auto constexpr Light_green = ox::Color{1};
@@ -13,7 +12,9 @@ inline auto constexpr Teal        = ox::Color{3};
 inline auto constexpr Rainbow     = ox::Color{4};
 inline auto constexpr White       = ox::Color::Foreground;
 
-}  // namespace color
+}  // namespace gol::color
+
+namespace gol {
 
 inline auto const gol_palette = ox::Palette{
     // clang-format off

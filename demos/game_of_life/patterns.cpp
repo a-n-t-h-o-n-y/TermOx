@@ -679,15 +679,4 @@ Pattern const xp4_63p4ky2k4p36zy1ci11iczog68aw11wa86goz011y611 =
 b2o10b2o$2o12b2o$o2b2o6b2o2bo$2bo10bo$2bobo6bobo$7b2o$6bo2bo$5bo4bo$5bo4bo$6b
 o2bo$7b2o$2bobo6bobo$2bo10bo$o2b2o6b2o2bo$2o12b2o$b2o10b2o!)");
 
-// Pattern const twin_bees_shuttle = make_pattern(R"()");
-// Pattern const twin_bees_shuttle = make_pattern(R"()");
-// Pattern const twin_bees_shuttle = make_pattern(R"()");
-// Pattern const twin_bees_shuttle = make_pattern(R"()");
-// Pattern const twin_bees_shuttle = make_pattern(R"()");
-// Pattern const twin_bees_shuttle = make_pattern(R"()");
-// Pattern const twin_bees_shuttle = make_pattern(R"()");
-// Pattern const twin_bees_shuttle = make_pattern(R"()");
-// Pattern const twin_bees_shuttle = make_pattern(R"()");
-// Pattern const twin_bees_shuttle = make_pattern(R"()");
-
 }  // namespace gol::pattern

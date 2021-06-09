@@ -32,17 +32,9 @@ class GoL_demo : public ox::layout::Horizontal<> {
     Pattern_store pattern_store_;
 
    private:
-    void add_rule_example(Rule_store::Name name, std::string_view rule_string)
-    {
-        rule_store_.add_rule(name, parse_rule_string(rule_string));
-        side_panel.patterns_rulesets.rulesets.add_option(std::u32string{name});
-    }
+    void add_rule_example(Rule_store::Name name, std::string_view rule_string);
 
-    void add_pattern_example(Pattern_store::Name name, Pattern pattern)
-    {
-        pattern_store_.add_pattern(name, pattern);
-        side_panel.patterns_rulesets.patterns.add_option(std::u32string{name});
-    }
+    void add_pattern_example(Pattern_store::Name name, Pattern pattern);
 };
 
 }  // namespace gol

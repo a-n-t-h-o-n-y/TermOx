@@ -35,7 +35,9 @@ class Bitset {
         auto operator*() const -> Value;
 
         friend auto operator<(Iterator const& x, Iterator const& y) -> bool;
+
         friend auto operator==(Iterator const& x, Iterator const& y) -> bool;
+
         friend auto operator!=(Iterator const& x, Iterator const& y) -> bool;
 
        private:
@@ -54,6 +56,8 @@ class Bitset {
     void remove(Coordinate c);
 
     [[nodiscard]] auto contains(Coordinate c) const -> bool;
+
+    [[nodiscard]] auto size() const -> std::size_t { return values_.size(); }
 
     /// Sets all bits to false.
     void clear();
@@ -81,8 +85,8 @@ class Bitset {
     /// Visual Coordinate to vector index.
     auto get_offset(Coordinate c) const -> std::size_t;
 
-    /// Add more memory to the Bitmap to handle larger sizes.
-    /// The size passed in should be the length of one side of a square.
+    /// Add more memory to the Bitset to handle larger sizes.
+    /** The size passed in should be the length of one side of a square. */
     void resize(Dimension_t new_side_length);
 
     /// Return true if c is out of bounds of the memory allocated.

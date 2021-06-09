@@ -35,6 +35,7 @@ target_sources(demos
 # Conway's Game of Life
 target_sources(demos
     PRIVATE
+        game_of_life/game_of_life_engine.cpp
         game_of_life/gol_widget.cpp
         game_of_life/patterns.cpp
         game_of_life/gol_demo.cpp
@@ -44,7 +45,6 @@ target_sources(demos
         game_of_life/get_life_1_05.cpp
         game_of_life/get_life_1_06.cpp
         game_of_life/get_plaintext.cpp
-        game_of_life/bitmap.cpp
         game_of_life/bitset.cpp
 )
 
