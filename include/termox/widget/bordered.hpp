@@ -223,32 +223,6 @@ namespace ox::border {
             U'▟'};
 };
 
-[[nodiscard]] auto constexpr half_block_inner_1() -> Border
-{
-    return {U'▄', U'▄' | Trait::Inverse,
-            U'▌', U'▌' | Trait::Inverse,
-            U'▗', U'▖',
-            U'▝', U'▘'};
-};
-
-[[nodiscard]] auto constexpr half_block_inner_2() -> Border
-{
-    return {U'▄', U'▄' | Trait::Inverse,
-            U'▌', U'▌' | Trait::Inverse,
-            U'▚', U'▞',
-            U'▞', U'▚'};
-};
-
-[[nodiscard]] auto constexpr block_corners() -> Border
-{
-    return {U'─', U'─', U'│', U'│', U'▘', U'▝', U'▖', U'▗'};
-};
-
-[[nodiscard]] auto constexpr floating_block_corners() -> Border
-{
-    return {U'─', U'─', U'│', U'│', U'▗', U'▖', U'▝', U'▘'};
-};
-
 }  // namespace ox::border
 
 namespace ox {

@@ -2,7 +2,6 @@
 #include <string>
 
 #include <termox/termox.hpp>
-#include "termox/widget/pipe.hpp"
 
 // Custom Widget - Mouse press to insert pins.
 class Pinbox : public ox::Widget {
@@ -12,6 +11,19 @@ class Pinbox : public ox::Widget {
 
     // Emitted when an existing pin is removed.
     sl::Signal<void(ox::Point)> pin_removed;
+
+   public:
+    Pinbox()
+    {
+        using namespace ox::pipe;
+        *this | on_mouse_press([&](auto const& m) { this->handle_mouse(m); }) |
+            on_mouse_move([&](auto const& m) { this->handle_mouse(m); }) |
+            on_paint([&](auto& p) {
+                for (auto [xy, color] : points_)
+                    p.put(U'•' | fg(color), xy);
+                return Widget::paint_event(p);
+            });
+    }
 
    public:
     // Set the Color to be used for new pins inserted.
@@ -24,25 +36,9 @@ class Pinbox : public ox::Widget {
         this->update();
     }
 
-   protected:
-    auto paint_event(ox::Painter& p) -> bool override
-    {
-        for (auto [xy, color] : points_)
-            p.put(U'•' | fg(color), xy);
-        return Widget::paint_event(p);
-    }
-
-    auto mouse_press_event(ox::Mouse const& m) -> bool override
-    {
-        this->handle_mouse(m);
-        return Widget::mouse_press_event(m);
-    }
-
-    auto mouse_move_event(ox::Mouse const& m) -> bool override
-    {
-        this->handle_mouse(m);
-        return Widget::mouse_move_event(m);
-    }
+   private:
+    std::map<ox::Point, ox::Color> points_;
+    ox::Color foreground_ = ox::Color::Light_blue;
 
    private:
     // Inserts pin at Point p, if p is empty; emits pin_inserted Signal.
@@ -73,10 +69,6 @@ class Pinbox : public ox::Widget {
             default: break;
         }
     }
-
-   private:
-    std::map<ox::Point, ox::Color> points_;
-    ox::Color foreground_ = ox::Color::Light_blue;
 };
 
 // With Classes ----------------------------------------------------------------
@@ -169,7 +161,7 @@ auto pinbox_app()
                 ox::hlabel("- Color -" | ox::Trait::Bold) | align_center(),
                 ox::color_select() | fixed_height(2),
                 ox::hlabel("Status" | ox::Trait::Bold),
-                ox::text_display() | fixed_height(1) | bg(ox::Color::Dark_blue),
+                ox::text_view() | fixed_height(1) | bg(ox::Color::Dark_blue),
                 ox::hline(),
                 ox::hpair(
                     ox::hlabel("Pin Count" | ox::Trait::Bold) | fixed_width(10),

@@ -192,13 +192,13 @@ class Text_view : public Widget {
 };
 
 /// Helper function to create a Text_view instance.
-[[nodiscard]] auto text_display(Glyph_string text = U"",
-                                Align alignment   = Align::Left,
-                                Wrap wrap         = Wrap::Word)
+[[nodiscard]] auto text_view(Glyph_string text = U"",
+                             Align alignment   = Align::Left,
+                             Wrap wrap         = Wrap::Word)
     -> std::unique_ptr<Text_view>;
 
 /// Helper function to create a Text_view instance.
-[[nodiscard]] auto text_display(Text_view::Parameters p)
+[[nodiscard]] auto text_view(Text_view::Parameters p)
     -> std::unique_ptr<Text_view>;
 
 }  // namespace ox

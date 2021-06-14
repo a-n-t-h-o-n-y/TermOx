@@ -1,118 +1,122 @@
 # Borders
 
-Widgets can be wrapped in a `Bordered` Widget, this will apply a single line
-border around the entire Widget. The wrapped Widget is accessible via the
-`wrapped` member. The Border can be modified with simple pipe operations, there
-are a number of pre-defined Borders in the `ox::border` namespace. These can be
-use with the pipe operator to set a `Bordered` object. The pipe operator can
-also be used to change the background color, foreground color, and traits of
-each border Glyph. The `take_...` methods allow you to extract a single wall of
-the Border, and the `drop_...` methods allow you to remove a single wall of the
-Border. There is a Passive override for border, so that the Bordered object
-takes the size policy of the wrapped Widget, plus room for the border.
+A Border can be wrapped around a single Widget to provide a one cell thick
+Glyph border.
 
-Each Widget has a `Border` object, named `border`, that can be used to outline
-the interior edges of the Widget. Borders can be enabled and disabled, they also
-hold a `Segments` struct, which holds a Glyph for each wall/corner of the
-Border.
+```cpp
+using Wall = std::optional<Glyph>;
 
-The space for the Border comes from the Widget's Area. If a Border is enabled,
-the geometry of the Widget is affected, the various access methods of Widget
-account for this:
+struct Border {
+    Wall north;
+    Wall south;
+    Wall east;
+    Wall west;
+    Glyph nw_corner;  // North West
+    Glyph ne_corner;  // North East
+    Glyph sw_corner;  // South West
+    Glyph se_corner;  // South East
+};
+```
 
-### `Widget::area() -> Area`
+Walls are optional, and if disabled will not display that wall. A corner is only
+displayed if both adjacent walls are enabled. A list of predefined borders is
+given below.
 
-This returns the area of the Widget without the Border, the space that can be
-painted to. This area starts at `Widget::inner_top_left() -> Point`.
+Borders can be combined with colors and traits using the pipe operator. This
+will modify all walls and corners of the border. There are other Border
+modifying functions, these are the `drop_` and `take_` functions. The drop
+functions will remove the named wall from the Border and the take functions will
+remove all walls except the named wall from the Border. These can also be used
+in their pipe form where they take no arguments but are piped with a Border.
 
-### `Widget::top_left() -> Point`
+```cpp
+using namespace ox;
+border::rounded() | fg(Color::Orange) | Trait::Inverse | pipe::drop_east();
+```
 
-This returns the top left coordinate of the Widget, including any Border space.
+To wrap a Border around a Widget, the class template `Bordered` is used. This
+takes a Border and the Widget to be wrapped as a child widget.
+
+```cpp
+using namespace ox;
+using namespace ox::pipe;
+
+struct Textboxes : HPair<Textbox, Bordered<Textbox>> {
+    Textbox& box_1 = this->first;
+    Textbox& box_2 = this->second | border::rounded() | fixed_width(17) | wrapped();
+    // pipe::wrapped() returns a reference to the Border wrapped Widget.
+    // The fixed width of 17 applies to the Border and wrapped Widget together.
+};
+```
+
+There is a `Passive` class template specialization for `Bordered` that will give
+the Bordered object the same size policy as the Wrapped widget, plus space for
+the Border Glyphs.
+
+```cpp
+using namespace ox;
+using namespace ox::pipe;
+
+struct Textboxes : HPair<Textbox, Passive<Bordered<Textbox>>> {
+    Textbox& box_1 = this->first;
+    Textbox& box_2 = this->second | wrapped() | fixed_width(15);
+    // box_2 will have width 15 and border with box_2 will have width 17.
+};
+```
+
+## Predefined Borders
+
+These are located in the `ox::border` namespace. They can be combined with a
+`Bordered` object and the pipe operator to assign a given `Border` look.
+
+`bordered_textbox | ox::border::rounded();`
+
+```
+   squared()        rounded()      plus_corners()     asterisk()
+    ┌────┐           ╭────╮           +────+           ******
+    │    │           │    │           │    │           *    *
+    └────┘           ╰────╯           +────+           ******
+
+   dashed_1()       dashed_2()       dashed_3()       dashed_4()
+    ┌╶╶╶╶┐           ┌╌╌╌╌┐           ┌┄┄┄┄┐           ┌┈┈┈┈┐
+    ╷    ╷           ╎    ╎           ┆    ┆           ┊    ┊
+    └╶╶╶╶┘           └╌╌╌╌┘           └┄┄┄┄┘           └┈┈┈┈┘
+
+bold_dashed_1()  bold_dashed_2()  bold_dashed_3()  bold_dashed_4()
+    ┏╺╺╺╺┓           ┏╍╍╍╍┓           ┏┅┅┅┅┓           ┏┉┉┉┉┓
+    ╻    ╻           ╏    ╏           ┇    ┇           ┋    ┋
+    ┗╺╺╺╺┛           ┗╍╍╍╍┛           ┗┅┅┅┅┛           ┗┉┉┉┉┛
+
+   block_1()        block_2()        block_3()        block_4()
+    ██████           ▓▓▓▓▓▓           ▒▒▒▒▒▒           ░░░░░░
+    █    █           ▓    ▓           ▒    ▒           ░    ░
+    ██████           ▓▓▓▓▓▓           ▒▒▒▒▒▒           ░░░░░░
+
+ half_block()                        doubled()         bold()   none()
+          # Can't be fully rendered   ╔════╗           ┏━━━━┓
+    ▌     # in ascii without          ║    ║           ┃    ┃
+    ▙▄▄▄▄ # inverting chars.          ╚════╝           ┗━━━━┛
+```
+
+Most fonts will connect the adjacent walls and corners completely.
 
 ## Pipe Methods
 
-### Enabling Border and Walls
+These functions can be used with a `Border` combined with the pipe operator.
+`drop_...` functions will remove the indicated wall from the Border. `take_...`
+functions will remove everything except for the indicated wall from the Border.
 
-These enable/disable segments of the Border.
-
-- `bordered()`
-- `not_bordered()`
-- `north_border()`
-- `south_border()`
-- `east_border()`
-- `west_border()`
-- `north_east_border()`
-- `north_west_border()`
-- `south_east_border()`
-- `south_west_border()`
-- `north_south_border()`
-- `east_west_border()`
-- `corners_border()`
-- `no_corners_border()`
-- `no_walls_border()`
-
-### Setting Wall Look
-
-These do not enable the border to display automatically.
-
-- `walls(Traits...)`
-- `north_wall(Glyph)`
-- `north_wall(Traits...)`
-- `south_wall(Glyph)`
-- `south_wall(Traits...)`
-- `east_wall(Glyph)`
-- `east_wall(Traits...)`
-- `west_wall(Glyph)`
-- `west_wall(Traits...)`
-- `north_south_walls(Glyph)`
-- `north_south_walls(Traits...)`
-- `east_west_walls(Glyph)`
-- `east_west_walls(Traits...)`
-- `north_east_corner(Glyph)`
-- `north_east_corner(Traits...)`
-- `north_east_walls(Glyph)`
-- `north_east_walls(Traits...)`
-- `north_west_corner(Glyph)`
-- `north_west_corner(Traits...)`
-- `north_west_walls(Glyph)`
-- `north_west_walls(Traits...)`
-- `south_east_corner(Glyph)`
-- `south_east_corner(Traits...)`
-- `south_east_walls(Glyph)`
-- `south_east_walls(Traits...)`
-- `south_west_corner(Glyph)`
-- `south_west_corner(Traits...)`
-- `south_west_walls(Glyph)`
-- `south_west_walls(Traits...)`
-
-### Pre-Formatted Borders
-
-These do not enable the border to display automatically.
-
-- `squared_corners()`
-- `rounded_corners()`
-- `plus_corners()`
-- `asterisk_walls()`
-- `doubled_walls()`
-- `bold_walls()`
-- `dashed_walls_1()`
-- `dashed_walls_2()`
-- `dashed_walls_3()`
-- `dashed_walls_4()`
-- `bold_dashed_walls_1()`
-- `bold_dashed_walls_2()`
-- `bold_dashed_walls_3()`
-- `bold_dashed_walls_4()`
-- `block_walls_1()`
-- `block_walls_2()`
-- `block_walls_3()`
-- `block_walls_4()`
-- `half_block_walls()`
-- `half_block_inner_walls_1()`
-- `half_block_inner_walls_2()`
-- `block_corners()`
-- `floating_block_corners()`
+- `drop_north()`
+- `drop_south()`
+- `drop_east()`
+- `drop_west()`
+- `take_north()`
+- `take_south()`
+- `take_east()`
+- `take_west()`
 
 ## See Also
 
-- [Reference](https://a-n-t-h-o-n-y.github.io/TermOx/classox_1_1Border.html)
+- [Reference](https://a-n-t-h-o-n-y.github.io/TermOx/classox_1_1Bordered.html)
+
+<!-- TODO replace the above reference link if it is not valid. -->

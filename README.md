@@ -133,6 +133,8 @@ included as git submodules.
     make termox.ui.tests                      # Build UI Tests(optional)
     make install                              # Install to system directories(optional)
 
+Try out the `./demos/demos` app to get a feel for what TermOx is capable of.
+
 ## Using the Library
 
 It is recommended to clone this library into your project and use it as a
@@ -169,42 +171,47 @@ dark background, much like a Lite-Brite.
 
 #include <termox/termox.hpp>
 
-class Pinbox : public ox::Widget {
+using namespace ox;
+
+class Pinbox : public Widget {
    public:
     // Emitted when a new pin is inserted.
-    sl::Signal<void(ox::Point)> pin_inserted;
+    sl::Signal<void(Point)> pin_inserted;
 
     // Emitted when an existing pin is removed.
-    sl::Signal<void(ox::Point)> pin_removed;
+    sl::Signal<void(Point)> pin_removed;
+
+   public:
+    Pinbox()
+    {
+        using namespace ox::pipe;
+        *this | on_mouse_press([&](auto const& m) { this->handle_mouse(m); })
+              | on_mouse_move ([&](auto const& m) { this->handle_mouse(m); })
+              | on_paint([&](auto& p) {
+                  for (auto [xy, color] : points_)
+                      p.put(U'•' | fg(color), xy);
+                  return Widget::paint_event(p);
+              });
+    }
 
    public:
     // Set the Color to be used for new pins inserted.
-    void set_foreground(ox::Color c) { foreground_ = c; }
+    void set_foreground(Color c) { foreground_ = c; }
 
     // Remove all pins from the screen.
-    void clear_screen() { points_.clear(); this->update(); }
-
-   protected:
-    auto paint_event(ox::Painter& p) -> bool override
+    void clear_screen()
     {
-        for (auto [xy, color] : points_)
-            p.put(U'•' | fg(color), xy);
-        return Widget::paint_event(p);
-    }
-
-    auto mouse_press_event(ox::Mouse const& m) -> bool override
-    {
-        this->handle_mouse(m); return Widget::mouse_press_event(m);
-    }
-
-    auto mouse_move_event(ox::Mouse const& m) -> bool override
-    {
-        this->handle_mouse(m); return Widget::mouse_move_event(m);
+        points_.clear();
+        this->update();
     }
 
    private:
-    // Inserts pin at Point p, if p is empty. Emits pin_inserted Signal.
-    void insert_pin(ox::Point p)
+    std::map<Point, Color> points_;
+    Color foreground_ = Color::Light_blue;
+
+   private:
+    // Inserts pin at Point p, if p is empty; emits pin_inserted Signal.
+    void insert_pin(Point p)
     {
         auto const [_, inserted] = points_.insert({p, foreground_});
         if (inserted) {
@@ -213,8 +220,8 @@ class Pinbox : public ox::Widget {
         }
     }
 
-    // Removes pin at Point p, if it exists. Emits pin_removed Signal.
-    void remove_pin(ox::Point p)
+    // Removes pin at Point p, if it exists; emits pin_removed Signal.
+    void remove_pin(Point p)
     {
         auto const count = points_.erase(p);
         if (count != 0) {
@@ -223,24 +230,20 @@ class Pinbox : public ox::Widget {
         }
     }
 
-    void handle_mouse(ox::Mouse const& m)
+    void handle_mouse(Mouse const& m)
     {
         switch (m.button) {
-            case ox::Mouse::Button::Left: this->insert_pin(m.at); break;
-            case ox::Mouse::Button::Right: this->remove_pin(m.at); break;
+            case Mouse::Button::Left: this->insert_pin(m.at); break;
+            case Mouse::Button::Right: this->remove_pin(m.at); break;
             default: break;
         }
     }
-
-   private:
-    std::map<ox::Point, ox::Color> points_;
-    ox::Color foreground_ = ox::Color::Light_blue;
 };
 
 ```
 
-There are two ways of building applications in Termox; with types or values. The
-next two sections demonstrate building up an application around the `Pinbox`
+There are two styles of building applications in Termox; with types or values.
+The next two sections demonstrate building up an application around the `Pinbox`
 Widget. Each section produces the exact same user interface.
 
 ### Building with Types
@@ -248,46 +251,49 @@ Widget. Each section produces the exact same user interface.
 This first section creates new Widget types to build up the interface.
 
 ```cpp
-class Side_pane : public ox::VTuple<ox::HLabel,
-                                    ox::Color_select,
-                                    ox::HLabel,
-                                    ox::Text_view,
-                                    ox::HLine,
-                                    ox::HPair<ox::HLabel, ox::Int_view>,
-                                    ox::HLine,
-                                    ox::Confirm_button,
-                                    ox::Widget> {
+using namespace ox;
+
+class Side_pane : public VTuple<HLabel,
+                                Color_select,
+                                HLabel,
+                                Text_view,
+                                HLine,
+                                HPair<HLabel, Int_view>,
+                                HLine,
+                                Confirm_button,
+                                Widget> {
    public:
-    ox::HLabel& color_label        = this->get<0>();
-    ox::Color_select& color_select = this->get<1>();
-    ox::HLabel& status_label       = this->get<2>();
-    ox::Text_view& status_box      = this->get<3>();
-    ox::HLabel& count_label        = this->get<5>().first;
-    ox::Int_view& count_box        = this->get<5>().second;
-    ox::Confirm_button& clear_btn  = this->get<7>();
-    ox::Widget& empty_space        = this->get<8>();
+    HLabel& color_label        = this->get<0>();
+    Color_select& color_select = this->get<1>();
+    HLabel& status_label       = this->get<2>();
+    Text_view& status_box      = this->get<3>();
+    HLabel& count_label        = this->get<5>().first;
+    Int_view& count_box        = this->get<5>().second;
+    Confirm_button& clear_btn  = this->get<7>();
+    Widget& empty_space        = this->get<8>();
 
    public:
     Side_pane()
     {
         using namespace ox::pipe;
 
-        *this | fixed_width(17) | west_border();
-        color_label | align_center() | text("- Color -" | ox::Trait::Bold);
+        *this | fixed_width(16);
+
+        color_label | align_center() | text("- Color -" | Trait::Bold);
         color_select | fixed_height(2);
-        status_label | text("Status" | ox::Trait::Bold);
-        status_box | fixed_height(1) | bg(ox::Color::Dark_blue);
+        status_label | text("Status" | Trait::Bold);
+        status_box | fixed_height(1) | bg(Color::Dark_blue);
         this->get<5>() | fixed_height(1);
-        count_label | text("Pin Count" | ox::Trait::Bold) | fixed_width(10);
+        count_label | text("Pin Count" | Trait::Bold) | fixed_width(10);
         count_box | value(0);
-        clear_btn.main_btn | text("Clear") | bg(ox::Color::Dark_blue);
+        clear_btn.main_btn | text("Clear") | bg(Color::Dark_blue);
     }
 };
 
-struct Pinbox_app : ox::HPair<Pinbox, ox::Bordered<Side_pane>> {
-    Pinbox& pinbox       = this->first;
-    Side_pane& side_pane = this->second | ox::pipe::take_west() |
-                           ox::pipe::fixed_width(17) | ox::pipe::wrapped();
+struct Pinbox_app : HPair<Pinbox, Passive<Bordered<Side_pane>>> {
+    Pinbox& pinbox = this->first;
+    Side_pane& side_pane =
+        this->second | pipe::take_west() | pipe::wrapped();
 
     Pinbox_app()
     {
@@ -296,9 +302,9 @@ struct Pinbox_app : ox::HPair<Pinbox, ox::Bordered<Side_pane>> {
         auto& status_box = side_pane.status_box;
         auto& count_box  = side_pane.count_box;
 
-        side_pane.color_select.color_selected.connect([&](ox::Color c) {
+        side_pane.color_select.color_selected.connect([&](Color c) {
             pinbox.set_foreground(c);
-            status_box | text(ox::color_to_string(c) + " Set");
+            status_box | text(color_to_string(c) + " Set");
         });
 
         side_pane.clear_btn.pressed.connect([&] {
@@ -307,13 +313,13 @@ struct Pinbox_app : ox::HPair<Pinbox, ox::Bordered<Side_pane>> {
             status_box | text("Screen Cleared");
         });
 
-        pinbox.pin_inserted.connect([&](ox::Point at) {
+        pinbox.pin_inserted.connect([&](Point at) {
             count_box | value(count_box.value() + 1);
             status_box |
                 text("Added x" + to_string(at.x) + " y" + to_string(at.y));
         });
 
-        pinbox.pin_removed.connect([&](ox::Point at) {
+        pinbox.pin_removed.connect([&](Point at) {
             count_box | value(count_box.value() - 1);
             status_box |
                 text("Removed x" + to_string(at.x) + " y" + to_string(at.y));
@@ -321,8 +327,7 @@ struct Pinbox_app : ox::HPair<Pinbox, ox::Bordered<Side_pane>> {
     }
 };
 
-
-int main() { return ox::System{ox::Mouse_mode::Drag}.run<Pinbox_app>(); }
+int main() { return System{Mouse_mode::Drag}.run<Pinbox_app>(); }
 ```
 
 ### Building with Values
@@ -333,23 +338,24 @@ existing Widget objects and modifies them to build up the interface.
 ```cpp
 auto pinbox_app()
 {
+    using namespace ox;
     using namespace ox::pipe;
     auto pa =
-        ox::hpair(
+        hpair(
             std::make_unique<Pinbox>(),
-            ox::bordered(ox::vtuple(
-                ox::hlabel("- Color -" | ox::Trait::Bold) | align_center(),
-                ox::color_select() | fixed_height(2),
-                ox::hlabel("Status" | ox::Trait::Bold),
-                ox::text_display() | fixed_height(1) | bg(ox::Color::Dark_blue),
-                ox::hline(),
-                ox::hpair(
-                    ox::hlabel("Pin Count" | ox::Trait::Bold) | fixed_width(10),
-                    ox::int_view(0)
+            bordered(vtuple(
+                hlabel("- Color -" | Trait::Bold) | align_center(),
+                color_select() | fixed_height(2),
+                hlabel("Status" | Trait::Bold),
+                text_display() | fixed_height(1) | bg(Color::Dark_blue),
+                hline(),
+                hpair(
+                    hlabel("Pin Count" | Trait::Bold) | fixed_width(10),
+                    int_view(0)
                 ) | fixed_height(1),
-                ox::hline(),
-                ox::confirm_button("Clear"),
-                ox::widget()
+                hline(),
+                confirm_button("Clear"),
+                widget()
             ) | fixed_width(17)) | take_west()
         );
 
@@ -359,9 +365,9 @@ auto pinbox_app()
     auto& count_box    = pa->second.wrapped.get<5>().second;
     auto& clear_btn    = pa->second.wrapped.get<7>();
 
-    clear_btn.main_btn | bg(ox::Color::Dark_blue);
+    clear_btn.main_btn | bg(Color::Dark_blue);
 
-    color_select.color_selected.connect([&](ox::Color c) {
+    color_select.color_selected.connect([&](Color c) {
         pinbox.set_foreground(c);
         status_box | text(color_to_string(c) + " Set");
     });
@@ -373,12 +379,12 @@ auto pinbox_app()
     });
 
     using std::to_string;
-    pinbox.pin_inserted.connect([&](ox::Point at) {
+    pinbox.pin_inserted.connect([&](Point at) {
         count_box | value(count_box.value() + 1);
         status_box | text("Added x" + to_string(at.x) + " y" + to_string(at.y));
     });
 
-    pinbox.pin_removed.connect([&](ox::Point at) {
+    pinbox.pin_removed.connect([&](Point at) {
         count_box | value(count_box.value() - 1);
         status_box |
             text("Removed x" + to_string(at.x) + " y" + to_string(at.y));
@@ -387,13 +393,12 @@ auto pinbox_app()
     return pa;
 }
 
-int main() { return ox::System{ox::Mouse_mode::Drag}.run(*pinbox_app()); }
+int main() { return System{Mouse_mode::Drag}.run(*pinbox_app()); }
 ```
 
-Although this code is somewhat less verbose than the typed style, it does have
-the limitation that it cannot add named data. If you need to hold an `int
-count;` variable that multiple Widgets access, you need a new Widget type that
-holds that variable.
+Although this style is a bit less verbose than the typed style, it is limited in
+that it cannot add named data. If you need to hold an `int count;` variable that
+multiple Widgets access, you need a new Widget type that owns that variable.
 
 <p align="center">
   <img src="docs/images/pinbox.png">

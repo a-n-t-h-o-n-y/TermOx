@@ -333,13 +333,13 @@ void Text_view::update_display(int from_line)
     line_count_changed(display_state_.size());
 }
 
-auto text_display(Glyph_string text, Align alignment, Wrap wrap)
+auto text_view(Glyph_string text, Align alignment, Wrap wrap)
     -> std::unique_ptr<Text_view>
 {
     return std::make_unique<Text_view>(std::move(text), alignment, wrap);
 }
 
-auto text_display(Text_view::Parameters p) -> std::unique_ptr<Text_view>
+auto text_view(Text_view::Parameters p) -> std::unique_ptr<Text_view>
 {
     return std::make_unique<Text_view>(std::move(p));
 }
