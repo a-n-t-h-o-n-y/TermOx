@@ -18,24 +18,24 @@ struct Border {
 };
 ```
 
-Walls are optional, and if disabled will not display that wall. A corner is only
-displayed if both adjacent walls are enabled. A list of predefined borders is
-given below.
+Walls that do not contain a value do not form a border around the Widget on that
+side. Any corner touching a Wall without a value is likewise not used.
 
-Borders can be combined with colors and traits using the pipe operator. This
-will modify all walls and corners of the border. There are other Border
-modifying functions, these are the `drop_` and `take_` functions. The drop
-functions will remove the named wall from the Border and the take functions will
-remove all walls except the named wall from the Border. These can also be used
-in their pipe form where they take no arguments but are piped with a Border.
+Borders can be combined with Colors and Traits using the pipe operator(`|`).
+This will modify all walls and corners of the border. Other Border modifying
+functions are the `drop_` and `take_` family. The drop functions will remove the
+named Wall from the Border. The take functions remove every Wall except the
+named Wall from the Border.
 
 ```cpp
 using namespace ox;
 border::rounded() | fg(Color::Orange) | Trait::Inverse | pipe::drop_east();
 ```
 
+To decorate a Widget with a Border, the class template `Bordered` is provided.
+
 To wrap a Border around a Widget, the class template `Bordered` is used. This
-takes a Border and the Widget to be wrapped as a child widget.
+combines a Border and the Widget to be decorated:
 
 ```cpp
 using namespace ox;
@@ -44,14 +44,14 @@ using namespace ox::pipe;
 struct Textboxes : HPair<Textbox, Bordered<Textbox>> {
     Textbox& box_1 = this->first;
     Textbox& box_2 = this->second | border::rounded() | fixed_width(17) | wrapped();
-    // pipe::wrapped() returns a reference to the Border wrapped Widget.
+    // pipe::wrapped() returns a reference to the Widget wrapped in the Border.
     // The fixed width of 17 applies to the Border and wrapped Widget together.
 };
 ```
 
 There is a `Passive` class template specialization for `Bordered` that will give
-the Bordered object the same size policy as the Wrapped widget, plus space for
-the Border Glyphs.
+the Bordered object the same size policy as the wrapped Widget, plus space for
+the Border Glyphs:
 
 ```cpp
 using namespace ox;
@@ -92,7 +92,7 @@ bold_dashed_1()  bold_dashed_2()  bold_dashed_3()  bold_dashed_4()
     █    █           ▓    ▓           ▒    ▒           ░    ░
     ██████           ▓▓▓▓▓▓           ▒▒▒▒▒▒           ░░░░░░
 
- half_block()                        doubled()         bold()   none()
+ half_block()                        doubled()         bold()      none()
           # Can't be fully rendered   ╔════╗           ┏━━━━┓
     ▌     # in ascii without          ║    ║           ┃    ┃
     ▙▄▄▄▄ # inverting chars.          ╚════╝           ┗━━━━┛
@@ -102,9 +102,7 @@ Most fonts will connect the adjacent walls and corners completely.
 
 ## Pipe Methods
 
-These functions can be used with a `Border` combined with the pipe operator.
-`drop_...` functions will remove the indicated wall from the Border. `take_...`
-functions will remove everything except for the indicated wall from the Border.
+These functions are combined with a `Border` and the pipe operator(`|`).
 
 - `drop_north()`
 - `drop_south()`

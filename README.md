@@ -15,14 +15,13 @@ in the terminal.
   <img src="docs/images/library.png">
 </p>
 
-The [Widget Library](docs/manual/widget.md#widget-library) contains many generic
-Widget and Layout types common to many applications. Often times they are the
-building blocks that form a significant portion of a TUI.
+The TermOx [Widget Library](docs/manual/widget.md#widget-library) contains a
+handful of common Widget and Layout types. These are often the building blocks
+for significant portions of an application's TUI.
 
-Widgets in the library are written in a way that attempts to be generic enough
-for most uses. Template parameters allow for slight variantions on the same
-Widget type, many of the most common variations are provided as named type
-aliases.
+The library Widgets attempt to be generic enough for most use cases. Template
+parameters allow for slight variantions of the same Widget, many of the
+most common variations are provided as named type aliases.
 
 ## Layouts
 
@@ -105,9 +104,9 @@ type lets you build on top of existing behavior.
 ## Signals
 
 TermOx uses the [Signals Light](https://github.com/a-n-t-h-o-n-y/signals-light)
-library to provide Widget to Widget communication. Widgets can add Signals as
-class members, a Signal can be emitted anytime by its Widget, and all registered
-observers of the Signal will be notified along with any data sent when emitted.
+library to facilitate communication between Widgets. Signals are added to
+Widgets as members and emitted at anytime to notify registered observers, along
+with any data sent when emitted.
 
 All event handlers(mouse, keyboard, etc...) have a cooresponding Signal emitted
 on the event, these can be connected to for a more reactive style of
