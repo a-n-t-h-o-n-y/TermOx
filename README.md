@@ -9,6 +9,37 @@ on top of [Escape](https://github.com/a-n-t-h-o-n-y/Escape), it defines a set of
 Widgets, Layouts, and Events that make it quick to craft unique user interfaces
 in the terminal.
 
+## Widget Library
+
+<p align="center">
+  <img src="docs/images/library.png">
+</p>
+
+The [Widget Library](docs/manual/widget.md#widget-library) contains many generic
+Widget and Layout types common to many applications. Often times they are the
+building blocks that form a significant portion of a TUI.
+
+Widgets in the library are written in a way that attempts to be generic enough
+for most uses. Template parameters allow for slight variantions on the same
+Widget type, many of the most common variations are provided as named type
+aliases.
+
+## Layouts
+
+<p align="center">
+  <img src="docs/images/combinations.png">
+</p>
+
+Widgets are glued together via Layouts, the three Layout types provided by
+TermOx are `Vertical`, `Horizontal`, and `Stack`. Layouts are themselves Widgets
+that are able to hold other Widgets, they provide the logic for enabling,
+resizing, and placement of each of their child Widgets.
+
+Common Layout patterns are encapsulated in the generic `Pair`, `Tuple`, and
+`Array` class templates; organizing Widgets is as simple as listing Widget types
+in order, or the number of Widgets of a specific type, as in the case of
+`Array`.
+
 ## Colors
 
 <p align="center">
@@ -18,14 +49,11 @@ in the terminal.
 TermOx Color Palettes support full true color with RGB and HSL values, [XTerm
 256 color indices](https://jonasjacek.github.io/colors/), and Dynamic Colors.
 
-Color Palettes are used to group Color Definitions together and assign names to
-each color. Palettes can be changed at runtime to give applications a simple way
-to set up color schemes.
+Color Palettes define a set of names and color values. Palettes can be set at
+runtime, giving applications a simple way to implement color schemes.
 
-Dynamic Colors are a special type of Color Definition that is updated to a new
-value at a given time interval. TermOx comes with Rainbow and Fade Dynamic Color
-types, and various modulation shapes to smoothly transition between the colors
-in time.
+Dynamic Colors are animated colors. Their definition changes over time, and they
+can be assigned to a any color name in a Palette.
 
 Not all terminals support true color or the complete 256 colors defined by
 XTerm.
@@ -57,41 +85,10 @@ modifier keys for their own purposes.
   <img src="docs/images/animation.gif">
 </p>
 
-Each Widget can enable Animation for itself, sending Timer Events to the Widget
-at a specified time interval. The Widget handles these Events with a virtual
-function override and can update its state.
+Each Widget is capable of Animation via Timer Events.  Overriding the
+`timer_event` handler lets the Widget update its state and repaint itself.
 
-Individual color definitions can be animated with Dynamic Colors.
-
-## Widget Library
-
-<p align="center">
-  <img src="docs/images/library.png">
-</p>
-
-The [Widget Library](docs/manual/widget.md#widget-library) contains many generic
-Widget and Layout types common to many applications. Often times they are the
-building blocks that form a significant portion of a TUI.
-
-Widgets in the library are written in a way that attempts to be generic enough
-for most uses. Many variations on the same Widget are possible with template
-parameters and type aliases spelling out useful combinations as distinct Widget
-types.
-
-## Layouts
-
-<p align="center">
-  <img src="docs/images/combinations.png">
-</p>
-
-Widgets are glued together via Layouts, the three Layout types provided by
-TermOx are `Vertical`, `Horizontal`, and `Stack`. Layouts are themselves Widgets
-that are able to hold other Widgets, they provide the logic for enabling,
-resizing, and placement of each of their child Widgets.
-
-Patterns of Layout use are encapsulated by the generic `Pair`, `Tuple`, and
-`Array` utility types; combining Widgets is as simple as listing Widget types,
-or the number of Widgets of specific type, as in the case of `Array`.
+Color definitions can be animated with Dynamic Colors.
 
 ## Custom Widgets
 
@@ -99,11 +96,11 @@ or the number of Widgets of specific type, as in the case of `Array`.
   <img src="docs/images/custom.png">
 </p>
 
-Besides the provided Widget Library, anyone can create new Widgets from scratch.
-By inheriting from the `Widget` class, you are provided with virtual function
-event handlers. These allow handling of everything from user input, animation,
-painting to the screen, focus in/out, and others. Existing Widget types can be
-inherited from in order to build on top of existing behavior.
+Beyond the Widget Library, anyone can create new Widgets from scratch. By
+inheriting from the `Widget` class, you are provided with virtual function event
+handlers. These allow handling of everything from user input, animation,
+painting the screen, focus in/out, etc... Inheriting from an existing Widget
+type lets you build on top of existing behavior.
 
 ## Signals
 
@@ -111,6 +108,10 @@ TermOx uses the [Signals Light](https://github.com/a-n-t-h-o-n-y/signals-light)
 library to provide Widget to Widget communication. Widgets can add Signals as
 class members, a Signal can be emitted anytime by its Widget, and all registered
 observers of the Signal will be notified along with any data sent when emitted.
+
+All event handlers(mouse, keyboard, etc...) have a cooresponding Signal emitted
+on the event, these can be connected to for a more reactive style of
+programming.
 
 <p align="center">
   <img src="docs/images/fractal.png">
@@ -161,9 +162,9 @@ target_link_libraries(my_app TermOx)
 
 ### Custom Widget
 
-The following code demonstrates how to create a new Widget type from scratch. It
-is a simple `Pinbox` Widget that lets a user place pins of various colors on a
-dark background, much like a Lite-Brite.
+This code creates a new Widget type from scratch. It is a simple `Pinbox` Widget
+that lets a user place pins of various colors on a dark background, much like a
+Lite-Brite toy.
 
 ```cpp
 #include <map>
@@ -187,23 +188,18 @@ class Pinbox : public Widget {
         using namespace ox::pipe;
         *this | on_mouse_press([&](auto const& m) { this->handle_mouse(m); })
               | on_mouse_move ([&](auto const& m) { this->handle_mouse(m); })
-              | on_paint([&](auto& p) {
+              | on_paint([&](Painter& p) {
                   for (auto [xy, color] : points_)
                       p.put(U'•' | fg(color), xy);
-                  return Widget::paint_event(p);
               });
     }
 
    public:
-    // Set the Color to be used for new pins inserted.
+    // Set the Color for newly inserted pins.
     void set_foreground(Color c) { foreground_ = c; }
 
     // Remove all pins from the screen.
-    void clear_screen()
-    {
-        points_.clear();
-        this->update();
-    }
+    void clear_screen() { points_.clear(); this->update(); }
 
    private:
     std::map<Point, Color> points_;
@@ -279,21 +275,20 @@ class Side_pane : public VTuple<HLabel,
 
         *this | fixed_width(16);
 
-        color_label | align_center() | text("- Color -" | Trait::Bold);
+        color_label  | align_center() | text("- Color -" | Trait::Bold);
         color_select | fixed_height(2);
         status_label | text("Status" | Trait::Bold);
-        status_box | fixed_height(1) | bg(Color::Dark_blue);
+        status_box   | fixed_height(1) | bg(Color::Dark_blue);
         this->get<5>() | fixed_height(1);
         count_label | text("Pin Count" | Trait::Bold) | fixed_width(10);
-        count_box | value(0);
+        count_box   | value(0);
         clear_btn.main_btn | text("Clear") | bg(Color::Dark_blue);
     }
 };
 
 struct Pinbox_app : HPair<Pinbox, Passive<Bordered<Side_pane>>> {
-    Pinbox& pinbox = this->first;
-    Side_pane& side_pane =
-        this->second | pipe::take_west() | pipe::wrapped();
+    Pinbox& pinbox       = this->first;
+    Side_pane& side_pane = this->second | pipe::take_west() | pipe::wrapped();
 
     Pinbox_app()
     {
@@ -309,20 +304,18 @@ struct Pinbox_app : HPair<Pinbox, Passive<Bordered<Side_pane>>> {
 
         side_pane.clear_btn.pressed.connect([&] {
             pinbox.clear_screen();
-            count_box | value(0);
+            count_box  | value(0);
             status_box | text("Screen Cleared");
         });
 
         pinbox.pin_inserted.connect([&](Point at) {
-            count_box | value(count_box.value() + 1);
-            status_box |
-                text("Added x" + to_string(at.x) + " y" + to_string(at.y));
+            count_box  | value(count_box.value() + 1);
+            status_box | text("Added x" + to_string(at.x) + " y" + to_string(at.y));
         });
 
         pinbox.pin_removed.connect([&](Point at) {
-            count_box | value(count_box.value() - 1);
-            status_box |
-                text("Removed x" + to_string(at.x) + " y" + to_string(at.y));
+            count_box  | value(count_box.value() - 1);
+            status_box | text("Removed x" + to_string(at.x) + " y" + to_string(at.y));
         });
     }
 };

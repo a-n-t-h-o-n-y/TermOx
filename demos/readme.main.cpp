@@ -18,15 +18,14 @@ class Pinbox : public ox::Widget {
         using namespace ox::pipe;
         *this | on_mouse_press([&](auto const& m) { this->handle_mouse(m); }) |
             on_mouse_move([&](auto const& m) { this->handle_mouse(m); }) |
-            on_paint([&](auto& p) {
+            on_paint([&](ox::Painter& p) {
                 for (auto [xy, color] : points_)
                     p.put(U'•' | fg(color), xy);
-                return Widget::paint_event(p);
             });
     }
 
    public:
-    // Set the Color to be used for new pins inserted.
+    // Set the Color for newly inserted pins.
     void set_foreground(ox::Color c) { foreground_ = c; }
 
     // Remove all pins from the screen.
