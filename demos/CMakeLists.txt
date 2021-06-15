@@ -1,17 +1,6 @@
 cmake_minimum_required(VERSION 3.9)
 
-if(${CMAKE_VERSION} VERSION_LESS "3.8")
-    set(CMAKE_CXX_STANDARD 17)
-endif()
-
 add_executable(demos EXCLUDE_FROM_ALL "")
-
-target_compile_options(demos
-    PRIVATE
-        -Wall
-        -Wextra
-        -Wpedantic
-)
 
 # Glyph Paint
 target_sources(demos
@@ -22,7 +11,7 @@ target_sources(demos
         glyph_paint/glyph_selector.cpp
 )
 
-# Notepad / Main Menu
+# Everything Else / Main Menu
 target_sources(demos
     PRIVATE
         demo.main.cpp
@@ -48,11 +37,18 @@ target_sources(demos
         game_of_life/bitset.cpp
 )
 
-target_link_libraries(demos PUBLIC TermOx)
+target_link_libraries(demos
+    PUBLIC
+        TermOx
+)
+
+target_compile_options(demos
+    PRIVATE
+        -Wall
+        -Wextra
+        -Wpedantic
+)
 
 add_executable(readme.demo EXCLUDE_FROM_ALL readme.main.cpp)
 target_link_libraries(readme.demo PUBLIC TermOx)
-
-if(NOT ${CMAKE_VERSION} VERSION_LESS "3.8")
-    target_compile_features(demos INTERFACE cxx_std_17)
-endif()
+target_compile_options(readme.demo PRIVATE -Wall -Wextra -Wpedantic)

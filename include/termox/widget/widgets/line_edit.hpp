@@ -15,7 +15,7 @@ namespace ox {
 
 class Line_edit : public detail::Textline_base {
    public:
-    using Validator_t = std::function<bool(char)>;
+    using Validator_t = std::function<bool(char32_t)>;
 
     struct Parameters {
         Glyph_string initial_text            = U"";

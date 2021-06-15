@@ -35,13 +35,12 @@ auto rainbow(Dynamic_color::Period_t period,
     return {period, Rainbow{saturation, lightness}};
 }
 
-Modulation_base::Modulation_base(unsigned resolution)
-    : step_total_{static_cast<double>(resolution)}
+Modulation_base::Modulation_base(unsigned resolution) : step_total_{resolution}
 {}
 
 auto Modulation_base::get_next_ratio() -> double
 {
-    return this->post_increment_step() / step_total_;
+    return this->post_increment_step() / (double)step_total_;
 }
 
 auto Modulation_base::post_increment_step() -> int

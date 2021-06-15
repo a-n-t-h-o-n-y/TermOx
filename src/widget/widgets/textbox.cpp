@@ -12,10 +12,10 @@ namespace ox {
 Textbox::Textbox(Glyph_string text,
                  Align alignment,
                  Wrap wrap,
-                 Brush insert_brush,
+                 Brush insert_brush_,
                  int scroll_speed,
                  bool text_input)
-    : Textbox_base{std::move(text), alignment, wrap, insert_brush},
+    : Textbox_base{std::move(text), alignment, wrap, insert_brush_},
       scroll_speed_{scroll_speed},
       takes_input_{text_input}
 {

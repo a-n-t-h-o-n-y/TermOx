@@ -160,7 +160,7 @@ class Layout_span {
     [[nodiscard]] auto entire_length() const -> int
     {
         return std::accumulate(
-            dimensions_.begin(), dimensions_.end(), 0uL,
+            dimensions_.begin(), dimensions_.end(), 0,
             [](int total, Dimension const& d) { return total + d.length; });
     }
 

@@ -1,10 +1,6 @@
 cmake_minimum_required(VERSION 3.9)
+
 # TermOx Library
-
-if(${CMAKE_VERSION} VERSION_LESS "3.8")
-    set(CMAKE_CXX_STANDARD 17)
-endif()
-
 add_library(TermOx STATIC
     common/mb_to_u32.cpp
     common/timer.cpp
@@ -85,7 +81,22 @@ target_link_libraries(TermOx
         ${CMAKE_THREAD_LIBS_INIT}
 )
 
-target_include_directories(TermOx PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(TermOx
+    PUBLIC
+        ${PROJECT_SOURCE_DIR}/include
+)
+
+target_compile_features(TermOx
+    PUBLIC
+        cxx_std_17
+)
+
+target_compile_options(TermOx
+    PRIVATE
+        -Wall
+        -Wextra
+        -Wpedantic
+)
 
 include(GNUInstallDirs)
 install(TARGETS TermOx
@@ -99,25 +110,6 @@ install(
     DESTINATION
         ${CMAKE_INSTALL_INCLUDEDIR}
 )
-
-if(NOT ${CMAKE_VERSION} VERSION_LESS "3.8")
-    target_compile_features(TermOx PUBLIC cxx_std_17)
-endif()
-
-target_compile_options(TermOx
-    PRIVATE
-        -Wall
-        -Wextra
-        # -ftime-trace
-)
-
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-target_compile_options(TermOx
-    PUBLIC
-        -Wno-maybe-uninitialized
-        -Wno-unused-but-set-variable
-)
-endif()
 
 # Enable Someday if needed
 # if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16")

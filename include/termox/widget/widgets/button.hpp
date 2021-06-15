@@ -64,15 +64,15 @@ class Push_button : public Button {
    public:
     struct Parameters {
         Glyph_string text;
-        Color pressed  = Color::Foreground;
-        Color released = Color::Background;
+        Color pressed_color  = Color::Foreground;
+        Color released_color = Color::Background;
     };
 
    public:
     /// Construct a new Push_button
-    explicit Push_button(Glyph_string text = U"",
-                         Color pressed     = Color::Foreground,
-                         Color released    = Color::Background);
+    explicit Push_button(Glyph_string text    = U"",
+                         Color pressed_color  = Color::Foreground,
+                         Color released_color = Color::Background);
 
     /// Construct a new Push_button
     explicit Push_button(Parameters p);
@@ -96,9 +96,9 @@ class Push_button : public Button {
 };
 
 /// Helper function to create a Push_button instance.
-[[nodiscard]] auto push_button(Glyph_string text = U"",
-                               Color pressed     = Color::Foreground,
-                               Color released    = Color::Background)
+[[nodiscard]] auto push_button(Glyph_string text    = U"",
+                               Color pressed_color  = Color::Foreground,
+                               Color released_color = Color::Background)
     -> std::unique_ptr<Push_button>;
 
 /// Helper function to create a Push_button instance.

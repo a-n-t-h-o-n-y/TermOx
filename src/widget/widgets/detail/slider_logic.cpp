@@ -75,8 +75,8 @@ void Slider_logic::set_value(Value_t value)
 
 auto Slider_logic::value() const -> Value_t
 {
-    return minimum_ +
-           std::floor(detail::ceil_if_nearly_whole(ratio_ * this->length()));
+    return minimum_ + (Value_t)std::floor(detail::ceil_if_nearly_whole(
+                          ratio_ * this->length()));
 }
 
 auto Slider_logic::length() const -> Value_t { return maximum_ - minimum_; }

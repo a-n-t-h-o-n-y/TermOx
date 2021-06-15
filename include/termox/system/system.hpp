@@ -51,7 +51,7 @@ class System {
     System(System&&)                 = default;
     System& operator=(System&&) = default;
 
-    ~System();
+    [[noreturn]] ~System();
 
    public:
     /// Return a pointer to the currently focused Widget.
@@ -125,7 +125,7 @@ class System {
      *  is because shutdown will be blocked until more user input is entered.
      *  This calls std::_Exit, does not clean up with destructors.
      *  TODO threading design makes this difficult to do properly. */
-    static void exit();
+    [[noreturn]] static void exit();
 
     /// Enable animation for the given Widget \p w at \p interval.
     /** Starts the animation_engine if not started yet. */

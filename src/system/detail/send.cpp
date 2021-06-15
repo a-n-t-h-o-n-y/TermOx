@@ -167,9 +167,9 @@ void send(ox::Dynamic_color_event const& e)
 void send(::esc::Window_resize x)
 {
     ox::Widget& head = []() -> ox::Widget& {
-        ox::Widget* head = ox::System::head();
-        assert(head != nullptr);
-        return *head;
+        ox::Widget* h = ox::System::head();
+        assert(h != nullptr);
+        return *h;
     }();
     auto const previous   = ox::Terminal::screen_buffers.area();
     auto const is_shorter = x.new_dimensions.height < previous.height;

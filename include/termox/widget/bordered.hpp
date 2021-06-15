@@ -246,7 +246,7 @@ class Bordered : public layout::Horizontal<Column> {
             else
                 this->height_policy = Size_policy::fixed(1);
             this->set_glyph(g);
-        };
+        }
 
        public:
         /// Set the single Glyph that is repeated for length of Wall.

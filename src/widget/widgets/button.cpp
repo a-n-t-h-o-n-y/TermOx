@@ -58,10 +58,12 @@ auto button(Button::Parameters p) -> std::unique_ptr<Button>
     return std::make_unique<Button>(std::move(p));
 }
 
-Push_button::Push_button(Glyph_string text, Color pressed, Color released)
+Push_button::Push_button(Glyph_string text,
+                         Color pressed_color,
+                         Color released_color)
     : Button{std::move(text)},
-      pressed_color_{pressed},
-      released_color_{released}
+      pressed_color_{pressed_color},
+      released_color_{released_color}
 {
     *this | bg(released_color_);
     this->Button::pressed.connect([this] { *this | bg(pressed_color_); });
@@ -69,7 +71,7 @@ Push_button::Push_button(Glyph_string text, Color pressed, Color released)
 }
 
 Push_button::Push_button(Parameters p)
-    : Push_button{std::move(p.text), p.pressed, p.released}
+    : Push_button{std::move(p.text), p.pressed_color, p.released_color}
 {}
 
 void Push_button::set_pressed_color(Color c) { pressed_color_ = c; }

@@ -44,9 +44,9 @@ Widget::Widget(std::string name,
                Brush brush_,
                Glyph wallpaper,
                bool brush_paints_wallpaper,
-               Cursor cursor)
+               Cursor cursor_)
     : focus_policy{std::move(focus_policy_)},
-      cursor{std::move(cursor)},
+      cursor{std::move(cursor_)},
       width_policy{std::move(width_policy_)},
       height_policy{std::move(height_policy_)},
       brush{std::move(brush_)},

@@ -43,8 +43,8 @@ class Modulation_base {
     [[nodiscard]] auto get_next_ratio() -> double;
 
    private:
-    double const step_total_;
-    int step_{0};
+    unsigned const step_total_;
+    unsigned step_{0};
 
    private:
     /// Apply a wrapping post increment to step_ and return the previous value.

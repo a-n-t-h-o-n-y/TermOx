@@ -15,6 +15,7 @@
 #include <termox/system/system.hpp>
 #include <termox/widget/detail/link_lifetimes.hpp>
 #include <termox/widget/pipe.hpp>
+#include <termox/widget/widgets/label.hpp>
 
 namespace {
 

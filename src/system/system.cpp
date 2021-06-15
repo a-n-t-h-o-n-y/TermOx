@@ -29,11 +29,7 @@ System::System(Mouse_mode mouse_mode, Signals signals)
     Terminal::initialize(mouse_mode, signals);
 }
 
-System::~System()
-{
-    System::exit();
-    Terminal::uninitialize();
-}
+System::~System() { System::exit(); }
 
 auto System::focus_widget() -> Widget* { return detail::Focus::focus_widget(); }
 

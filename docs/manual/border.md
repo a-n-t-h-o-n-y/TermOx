@@ -23,24 +23,17 @@ side. Any corner touching a Wall without a value is likewise not used.
 
 Borders can be combined with Colors and Traits using the pipe operator(`|`).
 This will modify all walls and corners of the border. Other Border modifying
-functions are the `drop_` and `take_` family. The drop functions will remove the
-named Wall from the Border. The take functions remove every Wall except the
+functions are the `drop_` and `take_` families. The drop functions will remove
+the named Wall from the Border. The take functions remove every Wall except the
 named Wall from the Border.
 
 ```cpp
-using namespace ox;
 border::rounded() | fg(Color::Orange) | Trait::Inverse | pipe::drop_east();
 ```
 
-To decorate a Widget with a Border, the class template `Bordered` is provided.
-
-To wrap a Border around a Widget, the class template `Bordered` is used. This
-combines a Border and the Widget to be decorated:
+To decorate a Widget with a Border, the class template `Bordered` is provided:
 
 ```cpp
-using namespace ox;
-using namespace ox::pipe;
-
 struct Textboxes : HPair<Textbox, Bordered<Textbox>> {
     Textbox& box_1 = this->first;
     Textbox& box_2 = this->second | border::rounded() | fixed_width(17) | wrapped();
@@ -54,9 +47,6 @@ the Bordered object the same size policy as the wrapped Widget, plus space for
 the Border Glyphs:
 
 ```cpp
-using namespace ox;
-using namespace ox::pipe;
-
 struct Textboxes : HPair<Textbox, Passive<Bordered<Textbox>>> {
     Textbox& box_1 = this->first;
     Textbox& box_2 = this->second | wrapped() | fixed_width(15);
@@ -69,7 +59,7 @@ struct Textboxes : HPair<Textbox, Passive<Bordered<Textbox>>> {
 These are located in the `ox::border` namespace. They can be combined with a
 `Bordered` object and the pipe operator to assign a given `Border` look.
 
-`bordered_textbox | ox::border::rounded();`
+`bordered_textbox | border::rounded();`
 
 ```
    squared()        rounded()      plus_corners()     asterisk()

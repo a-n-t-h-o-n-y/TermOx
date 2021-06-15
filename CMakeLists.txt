@@ -48,10 +48,6 @@ message("Build Type: ${CMAKE_BUILD_TYPE}" )
 #     add_compile_options(-D_GLIBCXX_DEBUG -D_LIBCPP_DEBUG=1)
 # endif()
 
-if(${CMAKE_VERSION} VERSION_LESS "3.8")
-    set(CMAKE_CXX_STANDARD_REQUIRED ON)
-endif()
-
 # Add Escape Library
 add_subdirectory(external/Escape)
 
