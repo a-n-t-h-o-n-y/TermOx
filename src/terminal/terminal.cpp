@@ -22,7 +22,7 @@
 #include <termox/terminal/detail/canvas.hpp>
 #include <termox/widget/widget.hpp>
 
-[[noreturn]] extern "C" void handle_sigint(int /* sig*/)
+extern "C" void handle_sigint(int /* sig*/)
 {
     ox::Terminal::uninitialize();
     std::_Exit(0);

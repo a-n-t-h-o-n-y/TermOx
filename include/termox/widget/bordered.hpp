@@ -119,97 +119,97 @@ namespace ox::border {
 {
     return {std::nullopt, std::nullopt, std::nullopt, std::nullopt,
             U' ',         U' ',         U' ',         U' '};
-};
+}
 
 [[nodiscard]] auto constexpr squared() -> Border
 {
     return {U'─', U'─', U'│', U'│', U'┌', U'┐', U'└', U'┘'};
-};
+}
 
 [[nodiscard]] auto constexpr rounded() -> Border
 {
     return {U'─', U'─', U'│', U'│', U'╭', U'╮', U'╰', U'╯'};
-};
+}
 
 [[nodiscard]] auto constexpr plus_corners() -> Border
 {
     return {U'─', U'─', U'│', U'│', U'+', U'+', U'+', U'+'};
-};
+}
 
 [[nodiscard]] auto constexpr asterisk() -> Border
 {
     return {U'*', U'*', U'*', U'*', U'*', U'*', U'*', U'*'};
-};
+}
 
 [[nodiscard]] auto constexpr doubled() -> Border
 {
     return {U'═', U'═', U'║', U'║', U'╔', U'╗', U'╚', U'╝'};
-};
+}
 
 [[nodiscard]] auto constexpr bold() -> Border
 {
     return {U'━', U'━', U'┃', U'┃', U'┏', U'┓', U'┗', U'┛'};
-};
+}
 
 [[nodiscard]] auto constexpr dashed_1() -> Border
 {
     return {U'╶', U'╶', U'╷', U'╷', U'┌', U'┐', U'└', U'┘'};
-};
+}
 
 [[nodiscard]] auto constexpr bold_dashed_1() -> Border
 {
     return {U'╺', U'╺', U'╻', U'╻', U'┏', U'┓', U'┗', U'┛'};
-};
+}
 
 [[nodiscard]] auto constexpr dashed_2() -> Border
 {
     return {U'╌', U'╌', U'╎', U'╎', U'┌', U'┐', U'└', U'┘'};
-};
+}
 
 [[nodiscard]] auto constexpr bold_dashed_2() -> Border
 {
     return {U'╍', U'╍', U'╏', U'╏', U'┏', U'┓', U'┗', U'┛'};
-};
+}
 
 [[nodiscard]] auto constexpr dashed_3() -> Border
 {
     return {U'┄', U'┄', U'┆', U'┆', U'┌', U'┐', U'└', U'┘'};
-};
+}
 
 [[nodiscard]] auto constexpr bold_dashed_3() -> Border
 {
     return {U'┅', U'┅', U'┇', U'┇', U'┏', U'┓', U'┗', U'┛'};
-};
+}
 
 [[nodiscard]] auto constexpr dashed_4() -> Border
 {
     return {U'┈', U'┈', U'┊', U'┊', U'┌', U'┐', U'└', U'┘'};
-};
+}
 
 [[nodiscard]] auto constexpr bold_dashed_4() -> Border
 {
     return {U'┉', U'┉', U'┋', U'┋', U'┏', U'┓', U'┗', U'┛'};
-};
+}
 
 [[nodiscard]] auto constexpr block_1() -> Border
 {
     return {U'█', U'█', U'█', U'█', U'█', U'█', U'█', U'█'};
-};
+}
 
 [[nodiscard]] auto constexpr block_2() -> Border
 {
     return {U'▓', U'▓', U'▓', U'▓', U'▓', U'▓', U'▓', U'▓'};
-};
+}
 
 [[nodiscard]] auto constexpr block_3() -> Border
 {
     return {U'▒', U'▒', U'▒', U'▒', U'▒', U'▒', U'▒', U'▒'};
-};
+}
 
 [[nodiscard]] auto constexpr block_4() -> Border
 {
     return {U'░', U'░', U'░', U'░', U'░', U'░', U'░', U'░'};
-};
+}
 
 [[nodiscard]] auto constexpr half_block() -> Border
 {
