@@ -403,7 +403,7 @@ class Color_graph_static_bounds : public Widget {
 
    public:
     /// Return the currently set Boundary.
-    [[nodiscard]] static auto boundary() -> Boundary<Number_t>
+    [[nodiscard]] static constexpr auto boundary() -> Boundary<Number_t>
     {
         return boundary_;
     }
