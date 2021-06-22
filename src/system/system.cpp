@@ -18,15 +18,18 @@
 #include <termox/system/event_loop.hpp>
 #include <termox/system/event_queue.hpp>
 #include <termox/system/system.hpp>
+#include <termox/terminal/key_mode.hpp>
+#include <termox/terminal/mouse_mode.hpp>
+#include <termox/terminal/signals.hpp>
 #include <termox/terminal/terminal.hpp>
 #include <termox/widget/area.hpp>
 #include <termox/widget/widget.hpp>
 
 namespace ox {
 
-System::System(Mouse_mode mouse_mode, Signals signals)
+System::System(Mouse_mode mouse_mode, Key_mode key_mode, Signals signals)
 {
-    Terminal::initialize(mouse_mode, signals);
+    Terminal::initialize(mouse_mode, key_mode, signals);
 }
 
 System::~System() { System::exit(); }

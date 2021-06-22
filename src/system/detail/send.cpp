@@ -51,6 +51,14 @@ void send(ox::Key_press_event e)
     }
 }
 
+void send(ox::Key_release_event e)
+{
+    if (e.receiver) {
+        e.receiver->get().key_release_event(e.key);
+        e.receiver->get().key_released.emit(e.key);
+    }
+}
+
 void send(ox::Mouse_press_event e)
 {
     detail::Focus::mouse_press(e.receiver);

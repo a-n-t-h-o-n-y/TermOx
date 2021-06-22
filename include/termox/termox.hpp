@@ -48,6 +48,9 @@
 #include <termox/system/shortcuts.hpp>
 #include <termox/system/system.hpp>
 
+#include <termox/terminal/key_mode.hpp>
+#include <termox/terminal/mouse_mode.hpp>
+#include <termox/terminal/signals.hpp>
 #include <termox/terminal/terminal.hpp>
 
 #include <termox/widget/layouts/fixed.hpp>

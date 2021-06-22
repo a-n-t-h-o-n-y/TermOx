@@ -1,12 +1,15 @@
 #ifndef TERMOX_SYSTEM_DETAIL_FILTER_SEND_HPP
 #define TERMOX_SYSTEM_DETAIL_FILTER_SEND_HPP
 #include <termox/system/event_fwd.hpp>
+#include "termox/system/event.hpp"
 
 namespace ox::detail {
 
 [[nodiscard]] auto filter_send(ox::Paint_event const& e) -> bool;
 
 [[nodiscard]] auto filter_send(ox::Key_press_event const& e) -> bool;
+
+[[nodiscard]] auto filter_send(ox::Key_release_event const& e) -> bool;
 
 [[nodiscard]] auto filter_send(ox::Mouse_press_event const& e) -> bool;
 

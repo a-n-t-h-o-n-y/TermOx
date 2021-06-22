@@ -1,6 +1,7 @@
 #ifndef TERMOX_SYSTEM_DETAIL_IS_SENDABLE_HPP
 #define TERMOX_SYSTEM_DETAIL_IS_SENDABLE_HPP
 #include <termox/system/event_fwd.hpp>
+#include "termox/system/event.hpp"
 
 namespace esc {
 struct Window_resize;
@@ -20,6 +21,8 @@ template <typename T>
 [[nodiscard]] auto is_sendable(ox::Resize_event const& event) -> bool;
 
 [[nodiscard]] auto is_sendable(ox::Key_press_event const& event) -> bool;
+
+[[nodiscard]] auto is_sendable(ox::Key_release_event const& event) -> bool;
 
 [[nodiscard]] auto is_sendable(ox::Child_added_event const&) -> bool;
 

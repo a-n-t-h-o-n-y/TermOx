@@ -9,6 +9,7 @@
 #include <termox/system/animation_engine.hpp>
 #include <termox/system/detail/user_input_event_loop.hpp>
 #include <termox/system/event_fwd.hpp>
+#include <termox/terminal/key_mode.hpp>
 #include <termox/terminal/mouse_mode.hpp>
 #include <termox/terminal/signals.hpp>
 #include <termox/widget/cursor.hpp>
@@ -38,12 +39,23 @@ class System {
      *                  Move:  Basic, plus Mouse Move Events are generated with
      *                         or without a button pressed.
      *
+     *  Key_mode - Normal: Key_press Events generated and auto-repeated if key
+     *                     is held down.
+     *             Raw:    Key_press and Key_release Events are generated, the
+     *                     shift key is not applied with other keys, each key
+     *                     press and release is its own event. Useful for games
+     *                     and where you need to keep track of multiple keys
+     *                     held down at once. All keys returned in Raw mode are
+     *                     lower-case. Has only been tested on a single laptop
+     *                     keyboard.
+     *
      *  Signals - - - On:  Signals can be generated from ctrl-[key] presses, for
      *                     instance ctrl-c will send SIGINT instead of byte 3.
      *                Off: Signals will not be generated on ctrl-[key] presses,
      *                     sending the byte value of the ctrl character instead.
      */
     System(Mouse_mode mouse_mode = Mouse_mode::Basic,
+           Key_mode key_mode     = Key_mode::Normal,
            Signals signals       = Signals::On);
 
     System(System const&) = delete;

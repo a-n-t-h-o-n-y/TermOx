@@ -12,6 +12,13 @@ auto is_sendable(ox::Key_press_event const& event) -> bool
     return false;
 }
 
+auto is_sendable(ox::Key_release_event const& event) -> bool
+{
+    if (event.receiver.has_value())
+        return event.receiver->get().is_enabled();
+    return false;
+}
+
 // Below are always Sendable.
 
 auto is_sendable(ox::Move_event const&) -> bool { return true; }

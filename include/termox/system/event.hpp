@@ -29,6 +29,11 @@ struct Key_press_event {
     Key key;
 };
 
+struct Key_release_event {
+    std::optional<Widget_ref> receiver;  // nullopt if no current focus Widget.
+    Key key;
+};
+
 struct Mouse_press_event {
     Widget_ref receiver;
     Mouse data;
@@ -114,6 +119,7 @@ struct Custom_event {
 
 using Event = std::variant<Paint_event,
                            Key_press_event,
+                           Key_release_event,
                            Mouse_press_event,
                            Mouse_release_event,
                            Mouse_wheel_event,

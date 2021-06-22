@@ -1,6 +1,7 @@
 #ifndef TERMOX_SYSTEM_DETAIL_SEND_HPP
 #define TERMOX_SYSTEM_DETAIL_SEND_HPP
 #include <termox/system/event_fwd.hpp>
+#include "termox/system/event.hpp"
 
 namespace esc {
 struct Window_resize;
@@ -11,6 +12,8 @@ namespace ox::detail {
 void send(ox::Paint_event e);
 
 void send(ox::Key_press_event e);
+
+void send(ox::Key_release_event e);
 
 void send(ox::Mouse_press_event e);
 

@@ -10,6 +10,7 @@ namespace ox {
 
 struct Paint_event;
 struct Key_press_event;
+struct Key_release_event;
 struct Mouse_press_event;
 struct Mouse_release_event;
 struct Mouse_wheel_event;
@@ -30,6 +31,7 @@ struct Custom_event;
 
 using Event = std::variant<Paint_event,
                            Key_press_event,
+                           Key_release_event,
                            Mouse_press_event,
                            Mouse_release_event,
                            Mouse_wheel_event,

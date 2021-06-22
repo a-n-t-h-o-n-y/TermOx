@@ -154,6 +154,18 @@ template <typename T>
     return ox::Key_press_event{receiver, x.key};
 }
 
+/// Tranform Key_release events to ox::Events.
+[[nodiscard]] auto transform(::esc::Key_release x) -> ox::Event
+{
+    auto receiver = []() -> decltype(ox::Key_release_event::receiver) {
+        if (ox::Widget* const fw = ox::System::focus_widget(); fw == nullptr)
+            return std::nullopt;
+        else
+            return *fw;
+    }();
+    return ox::Key_release_event{receiver, x.key};
+}
+
 /// Tranform Window_resize events to ox::Events.
 [[nodiscard]] auto transform(::esc::Window_resize x) -> ox::Event { return x; }
 
@@ -168,11 +180,13 @@ template <typename T>
 
 namespace ox {
 
-void Terminal::initialize(Mouse_mode mouse_mode, Signals signals)
+void Terminal::initialize(Mouse_mode mouse_mode,
+                          Key_mode key_mode,
+                          Signals signals)
 {
     if (is_initialized_)
         return;
-    ::esc::initialize_interactive_terminal(mouse_mode, signals);
+    ::esc::initialize_interactive_terminal(mouse_mode, key_mode, signals);
     std::signal(SIGINT, &handle_sigint);
     Terminal::set_palette(dawn_bringer16::palette);
     screen_buffers.resize(Terminal::area());

@@ -63,6 +63,21 @@ auto filter_send(ox::Key_press_event const& e) -> bool
         e.receiver->get().get_event_filters());
 }
 
+auto filter_send(ox::Key_release_event const& e) -> bool
+{
+    if (!e.receiver)
+        return true;
+    return apply_until_accepted(
+        [&e](Widget* filter) {
+            auto const x =
+                filter->key_release_event_filter(e.receiver->get(), e.key);
+            auto const y =
+                filter->key_released_filter.emit(e.receiver->get(), e.key);
+            return x || (y ? *y : false);
+        },
+        e.receiver->get().get_event_filters());
+}
+
 auto filter_send(ox::Mouse_press_event const& e) -> bool
 {
     return apply_until_accepted(

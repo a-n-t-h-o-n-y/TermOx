@@ -61,6 +61,7 @@ class Widget {
     Signal<void(Mouse const&)> mouse_wheel_scrolled;
     Signal<void(Mouse const&)> mouse_moved;
     Signal<void(Key)> key_pressed;
+    Signal<void(Key)> key_released;
     Signal<void()> focused_in;
     Signal<void()> focused_out;
     Signal<void()> deleted;
@@ -80,6 +81,7 @@ class Widget {
     Signal<bool(Widget&, Mouse const&)> mouse_wheel_scrolled_filter;
     Signal<bool(Widget&, Mouse const&)> mouse_moved_filter;
     Signal<bool(Widget&, Key)> key_pressed_filter;
+    Signal<bool(Widget&, Key)> key_released_filter;
     Signal<bool(Widget&)> focused_in_filter;
     Signal<bool(Widget&)> focused_out_filter;
     Signal<bool(Widget&)> deleted_filter;
@@ -283,6 +285,10 @@ class Widget {
     /// Handles Key_press_event objects.
     virtual auto key_press_event(Key k) -> bool;
 
+    /// Handles Key_release_event objects.
+    /** Key_release events are only emitted in Raw keyboard mode; See System. */
+    virtual auto key_release_event(Key k) -> bool;
+
     /// Handles Focus_in_event objects.
     virtual auto focus_in_event() -> bool;
 
@@ -345,6 +351,9 @@ class Widget {
 
     /// Handles Key_press_event objects filtered from other Widgets.
     virtual auto key_press_event_filter(Widget& receiver, Key k) -> bool;
+
+    /// Handles Key_release_event objects filtered from other Widgets.
+    virtual auto key_release_event_filter(Widget& receiver, Key k) -> bool;
 
     /// Handles Focus_in_event objects filtered from other Widgets.
     virtual auto focus_in_event_filter(Widget& receiver) -> bool;

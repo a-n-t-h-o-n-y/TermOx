@@ -237,6 +237,8 @@ auto Widget::mouse_move_event(Mouse const&) -> bool { return true; }
 
 auto Widget::key_press_event(Key) -> bool { return true; }
 
+auto Widget::key_release_event(Key) -> bool { return true; }
+
 auto Widget::focus_in_event() -> bool { return true; }
 
 auto Widget::focus_out_event() -> bool { return true; }
@@ -291,6 +293,8 @@ auto Widget::mouse_move_event_filter(Widget&, Mouse const&) -> bool
 }
 
 auto Widget::key_press_event_filter(Widget&, Key) -> bool { return false; }
+
+auto Widget::key_release_event_filter(Widget&, Key) -> bool { return false; }
 
 auto Widget::focus_in_event_filter(Widget&) -> bool { return false; }
 
