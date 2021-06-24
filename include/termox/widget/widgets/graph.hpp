@@ -149,8 +149,8 @@ class Graph : public Widget {
     [[nodiscard]] static auto to_cell_mask(double h_offset, double v_offset)
         -> std::uint8_t
     {
-        auto const h_cell = std::fmod(h_offset, 1.);
-        auto const v_cell = std::fmod(v_offset, 1.);
+        auto const h_cell = h_offset - std::floor(h_offset);
+        auto const v_cell = v_offset - std::floor(v_offset);
         if (h_cell < 0.5) {
             if (v_cell < 0.25)
                 return 0b00000001;
@@ -330,7 +330,7 @@ class Color_graph : public Widget {
     /** False if is bottom half. */
     [[nodiscard]] static auto is_top_region(double v_offset) -> bool
     {
-        return std::fmod(v_offset, 1.) < 0.5;
+        return (v_offset - std::floor(v_offset)) < 0.5;
     }
 
     /// Returns a new Glyph dependent on \p is_top and \p c.
@@ -495,7 +495,7 @@ class Color_graph_static_bounds : public Widget {
     /** False if is bottom half. */
     [[nodiscard]] static auto is_top_region(double v_offset) -> bool
     {
-        return std::fmod(v_offset, 1.) < 0.5;
+        return (v_offset - std::floor(v_offset)) < 0.5;
     }
 
     /// Returns a new Glyph dependent on \p is_top and \p c.
