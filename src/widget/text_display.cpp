@@ -145,8 +145,6 @@ auto Text_display::paint_event() -> bool
     auto p      = Painter{*this};
     auto line_n = 0uL;
     auto paint  = [&p, &line_n, this](Line_info const& line) {
-        auto const sub_begin = std::begin(this->contents_) + line.start_index;
-        auto const sub_end   = sub_begin + line.length;
         auto start           = 0uL;
         switch (alignment_) {
             case Align::Top:
@@ -157,6 +155,14 @@ auto Text_display::paint_event() -> bool
             case Align::Bottom:
             case Align::Right: start = this->width() - line.length; break;
         }
+
+        if (is_veiled_) {
+            p.put(Glyph_string{veil_, line.length}, start, line_n++);
+            return;
+        }
+
+        auto const sub_begin = std::begin(this->contents_) + line.start_index;
+        auto const sub_end   = sub_begin + line.length;
         p.put(Glyph_string(sub_begin, sub_end), start, line_n++);
     };
     auto const begin = std::begin(display_state_) + this->top_line();

@@ -235,6 +235,21 @@ class Text_display : public Widget {
      *  wrap is enabled, and the contents.*/
     void update_display(std::size_t from_line = 0);
 
+    /// Set whether the Line_edit has veilded output, doesn't alter the content.
+    /** Disabled by default, uses '*' to veil by default. */
+    void veil_text(bool enable = true)
+    {
+        is_veiled_ = enable;
+        this->update();
+    }
+
+    /// Set Glyph used to obscure the display.
+    void set_veil(Glyph veil)
+    {
+        veil_ = veil;
+        this->update();
+    }
+
    private:
     /// Provides a start index into contents and total length for a text line.
     struct Line_info {
@@ -248,6 +263,8 @@ class Text_display : public Widget {
     Align alignment_        = Align::Left;
     Glyph_string contents_;
     std::vector<Line_info> display_state_ = {Line_info{0, 0}};
+    bool is_veiled_        = false;
+    Glyph veil_            = L'*';
 };
 
 /// Helper function to create an instance.
