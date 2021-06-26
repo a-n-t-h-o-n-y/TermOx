@@ -8,7 +8,7 @@
 on top of [Escape](https://github.com/a-n-t-h-o-n-y/Escape), it defines a set of
 Widgets, Layouts, and Events that make it quick to craft unique user interfaces
 in the terminal.
-
+RegExploro
 ## Widget Library
 
 <p align="center">
@@ -156,6 +156,14 @@ add_executable(my_app
 add_subdirectory(external/TermOx)
 target_link_libraries(my_app TermOx)
 ```
+
+## Projects using TermOx
+
+- [CrabWise](https://github.com/a-n-t-h-o-n-y/CrabWise)
+- [NES-Term](https://github.com/a-n-t-h-o-n-y/NES-Term)
+- [GB-Term](https://github.com/a-n-t-h-o-n-y/GB-Term)
+- [RegExplore](https://github.com/a-n-t-h-o-n-y/RegExplore)
+- [Typer](https://github.com/a-n-t-h-o-n-y/Typer)
 
 ## Code Example
 
