@@ -22,7 +22,7 @@
 #include <termox/terminal/detail/canvas.hpp>
 #include <termox/widget/widget.hpp>
 
-extern "C" void handle_sigint(int /* sig*/)
+extern "C" void uninit_and_exit(int /* sig*/)
 {
     ox::Terminal::uninitialize();
     std::_Exit(0);
@@ -187,7 +187,8 @@ void Terminal::initialize(Mouse_mode mouse_mode,
     if (is_initialized_)
         return;
     ::esc::initialize_interactive_terminal(mouse_mode, key_mode, signals);
-    std::signal(SIGINT, &handle_sigint);
+    if (handle_sigint_)
+        std::signal(SIGINT, &uninit_and_exit);
     Terminal::set_palette(dawn_bringer16::palette);
     screen_buffers.resize(Terminal::area());
     is_initialized_ = true;
@@ -303,5 +304,7 @@ void Terminal::flush_screen()
 }
 
 void Terminal::stop_dynamic_color_engine() { dynamic_color_engine_.stop(); }
+
+void Terminal::handle_signint(bool const x) { handle_sigint_ = x; }
 
 }  // namespace ox

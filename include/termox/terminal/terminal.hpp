@@ -112,11 +112,17 @@ class Terminal {
     /// Send exit flag and wait for Dynamic_color_engine thread to shutdown.
     static void stop_dynamic_color_engine();
 
+    /// If set true, will properly uninitialize the screen on SIGINT.
+    /** This must be called before Terminal::initialize to be useful. This is
+     *  set true by default. */
+    static void handle_signint(bool x);
+
    private:
     inline static Palette palette_;
     inline static Dynamic_color_engine dynamic_color_engine_;
     inline static bool is_initialized_ = false;
     inline static bool full_repaint_   = false;
+    inline static bool handle_sigint_  = true;
 };
 
 }  // namespace ox
