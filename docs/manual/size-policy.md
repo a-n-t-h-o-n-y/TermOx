@@ -111,14 +111,6 @@ this to `true` will allow the length to be smaller than the `min` value. When
 multiple Widgets within the same layout have this enabled, the last Widget in
 the layout with this enabled is the one to shrink.
 
-### Passive
-
-`void passive(bool enable)`
-
-If a Layout enables this, then it will set the sum of its children's Size Policy
-hints as its own fixed size. This assumes that all children have a fixed Size
-Policy.
-
 ## Pipe Methods
 
 ### Width
@@ -136,7 +128,6 @@ Policy.
 - `width_stretch(double stretch)`
 - `can_ignore_width_min()`
 - `cannot_ignore_width_min()`
-- `passive_width(bool x = true)`
 
 ### Height
 
@@ -153,4 +144,3 @@ Policy.
 - `height_stretch(double stretch)`
 - `can_ignore_height_min()`
 - `cannot_ignore_height_min()`
-- `passive_height(bool x = true)`
