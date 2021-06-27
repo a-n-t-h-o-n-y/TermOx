@@ -8,7 +8,7 @@
 on top of [Escape](https://github.com/a-n-t-h-o-n-y/Escape), it defines a set of
 Widgets, Layouts, and Events that make it quick to craft unique user interfaces
 in the terminal.
-RegExploro
+
 ## Widget Library
 
 <p align="center">
