@@ -44,6 +44,10 @@ set(CMAKE_CXX_FLAGS_UBSAN
 
 message("Build Type: ${CMAKE_BUILD_TYPE}" )
 
+set(TERMOX_BUILD_TESTS ON CACHE BOOL "Create termox.ui.tests and termox.unit.tests targets")
+
+set(TERMOX_BUILD_DEMOS ON CACHE BOOL "Create demos and readme.demo targets")
+
 # if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 #     add_compile_options(-D_GLIBCXX_DEBUG -D_LIBCPP_DEBUG=1)
 # endif()
@@ -62,10 +66,14 @@ endif()
 add_subdirectory(src)
 
 # Add Demos
-add_subdirectory(demos)
+if (TERMOX_BUILD_DEMOS)
+    add_subdirectory(demos)
+endif()
 
 # Add Tests
-add_subdirectory(tests)
+if (TERMOX_BUILD_TESTS)
+    add_subdirectory(tests)
+endif()
 
 add_custom_target(
     termox.all
