@@ -5,80 +5,91 @@
 
 #include <signals_light/signal.hpp>
 
+#include <termox/widget/layouts/horizontal.hpp>
 #include <termox/widget/layouts/opposite.hpp>
+#include <termox/widget/layouts/passive.hpp>
+#include <termox/widget/layouts/vertical.hpp>
+#include <termox/widget/pair.hpp>
 #include <termox/widget/pipe.hpp>
 #include <termox/widget/widget.hpp>
 #include <termox/widget/widgets/button.hpp>
 #include <termox/widget/widgets/scrollbar.hpp>
 
+namespace ox::detail {
+
+template <template <typename> class Layout_t>
+class Just_a_button_list : public Passive<Layout_t<Button>> {
+   public:
+    sl::Signal<void(std::u32string const& name)> button_pressed;
+
+   public:
+    auto add_button(std::u32string const& name) -> Button&;
+};
+
+template <template <typename> class Layout_t>
+struct Just_a_button_list_and_buffer
+    : Pair<Layout_t<Widget>, Just_a_button_list<Layout_t>, Widget> {
+    Just_a_button_list<Layout_t>& buttons = this->first;
+    Widget& buffer                        = this->second;
+};
+
+}  // namespace ox::detail
+
 namespace ox {
 
 /// A list of buttons with connected scrollbar.
 template <template <typename> class Layout_t>
-class Button_list : public layout::Opposite_t<Layout_t<Widget>> {
+class Button_list
+    : public Pair<layout::Opposite_t<Layout_t<Widget>>,
+                  Scrollbar<Layout_t>,
+                  detail::Just_a_button_list_and_buffer<Layout_t>> {
    private:
-    using Base_t = layout::Opposite_t<Layout_t<Widget>>;
+    Scrollbar<Layout_t>& scrollbar                = this->first;
+    detail::Just_a_button_list<Layout_t>& buttons = this->second.buttons;
+    Widget& buffer                                = this->second.buffer;
 
-    static auto constexpr is_vertical = layout::is_vertical_v<Base_t>;
+   public:
+    sl::Signal<void(std::u32string const& name)>& button_pressed =
+        buttons.button_pressed;
 
-   private:
-    class Button_list_impl : public Layout_t<Button> {
-       private:
-        using Base_t = Layout_t<Button>;
-
-        static auto constexpr is_vertical = layout::is_vertical_v<Base_t>;
-
-       public:
-        sl::Signal<void(std::wstring const& name)> button_pressed;
-
-       public:
-        auto add_button(std::wstring const& name) -> Button&
-        {
-            using namespace ox::pipe;
-            auto& btn = this->template make_child<Button>(name) |
-                        on_press([this, name] { button_pressed(name); });
-            if constexpr (is_vertical)
-                btn | fixed_height(1uL);
-            else
-                btn | fixed_width(1uL);
-            return btn;
-        }
+    struct Parameters {
+        Color scrollbar_bg = Color::Background;
+        Color scrollbar_fg = Color::Foreground;
     };
 
-   private:
-    Scrollbar<Layout_t<Widget>>& scrollbar =
-        this->template make_child<Scrollbar<Layout_t<Widget>>>();
-
-    Button_list_impl& btn_list = this->template make_child<Button_list_impl>();
-
    public:
-    sl::Signal<void(std::wstring const& name)>& button_pressed =
-        btn_list.button_pressed;
+    Button_list();
 
-   public:
-    Button_list() { link(scrollbar, btn_list); }
+    explicit Button_list(Parameters p);
 
    public:
     /// Returns reference to the Button added.
     /** The Brush and the 'pressed' signal are accessible to customize. */
-    auto add_button(std::wstring const& name) -> Button&
-    {
-        return btn_list.add_button(name);
-    }
+    auto add_button(std::u32string const& name) -> Button&;
 
     /// Set the background color of the Scrollbar.
-    void set_scrollbar_bg(Color c) { scrollbar.middle.set_bar_bg(c); }
+    void set_scrollbar_bg(Color c);
 
     /// Set the foreground color of the Scrollbar.
-    void set_scrollbar_fg(Color c) { scrollbar.middle.set_bar_fg(c); }
+    void set_scrollbar_fg(Color c);
 };
 
-/// Helper function to create an instance.
+/// Helper function to create a Button_list instance.
 template <template <typename> class Layout_t>
-auto button_list() -> std::unique_ptr<Button_list<Layout_t>>
-{
-    return std::make_unique<Button_list<Layout_t>>();
-}
+[[nodiscard]] auto button_list(
+    typename Button_list<Layout_t>::Parameters p = {})
+    -> std::unique_ptr<Button_list<Layout_t>>;
+
+using VButton_list = Button_list<layout::Vertical>;
+using HButton_list = Button_list<layout::Horizontal>;
+
+/// Helper function to create a VButton_list instance.
+[[nodiscard]] auto vbutton_list(VButton_list::Parameters p = {})
+    -> std::unique_ptr<VButton_list>;
+
+/// Helper function to create an HButton_list instance.
+[[nodiscard]] auto hbutton_list(HButton_list::Parameters p = {})
+    -> std::unique_ptr<HButton_list>;
 
 }  // namespace ox
 #endif  // TERMOX_WIDGET_WIDGETS_BUTTON_LIST_HPP

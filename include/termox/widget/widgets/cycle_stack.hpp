@@ -4,47 +4,57 @@
 #include <type_traits>
 #include <utility>
 
-#include <termox/painter/brush.hpp>
-#include <termox/painter/color.hpp>
 #include <termox/painter/glyph_string.hpp>
-#include <termox/painter/trait.hpp>
-#include <termox/widget/layouts/horizontal.hpp>
 #include <termox/widget/layouts/stack.hpp>
-#include <termox/widget/layouts/vertical.hpp>
-#include <termox/widget/pipe.hpp>
+#include <termox/widget/pair.hpp>
+#include <termox/widget/tuple.hpp>
 #include <termox/widget/widget.hpp>
 #include <termox/widget/widgets/button.hpp>
 #include <termox/widget/widgets/cycle_box.hpp>
 
+namespace ox::detail {
+
+/// User interface to cycle through the pages of the Stack.
+class CS_top_row : public HTuple<Button, Cycle_box, Button> {
+   public:
+    Button& left_btn     = this->get<0>();
+    Cycle_box& cycle_box = this->get<1>();
+    Button& right_btn    = this->get<2>();
+
+   public:
+    CS_top_row();
+};
+
+}  // namespace ox::detail
 namespace ox {
 
 /// A layout::Stack with an interface to cycle through each Widget in the stack.
 template <typename Child = Widget>
-class Cycle_stack : public layout::Vertical<> {
-   private:
-    /// User interface to cycle through the pages of the Stack.
-    class Top_row : public layout::Horizontal<> {
-       public:
-        Button& left_btn     = this->make_child<Button>(L"<");
-        Cycle_box& cycle_box = this->make_child<Cycle_box>();
-        Button& right_btn    = this->make_child<Button>(L">");
-
-       public:
-        Top_row()
-        {
-            using namespace pipe;
-            *this | fixed_height(1) | children() | bg(Color::Light_gray) |
-                fg(Color::Black);
-
-            left_btn | fixed_width(1) | on_press(slot::previous(cycle_box));
-            right_btn | fixed_width(1) | on_press(slot::next(cycle_box));
-            cycle_box | Trait::Bold;
-        }
-    };
+class Cycle_stack : public VPair<detail::CS_top_row, layout::Stack<Child>> {
+   public:
+    // TODO Parameters needs to take titles for each child as well.
+    using Parameters = typename layout::Stack<Child>::Parameters;
 
    public:
-    Top_row& top_row            = this->make_child<Top_row>();
-    layout::Stack<Child>& stack = this->make_child<layout::Stack<Child>>();
+    detail::CS_top_row& top_row = this->first;
+    layout::Stack<Child>& stack = this->second;
+
+   public:
+    explicit Cycle_stack(Parameters parameters)
+        : VPair<detail::CS_top_row, layout::Stack<Child>>{{},
+                                                          std::move(parameters)}
+    {}
+
+    template <typename... Widget_t>
+    explicit Cycle_stack(
+        std::pair<Glyph_string, std::unique_ptr<Widget_t>>... children)
+    {
+        // Can't move unique_ptrs out of a std::initializer_list... So can't
+        // forward to Layout's constructor.
+        (this->append_page(std::move(children.first),
+                           std::move(children.second)),
+         ...);
+    }
 
    public:
     /// Construct a new Widget_t object and add it to the end of the Stack.
@@ -74,11 +84,22 @@ class Cycle_stack : public layout::Vertical<> {
     }
 };
 
-/// Helper function to create an instance.
-template <typename Child = Widget, typename... Args>
-auto cycle_stack(Args&&... args) -> std::unique_ptr<Cycle_stack<Child>>
+/// Helper function to create a Cycle_stack instance.
+template <typename Child = Widget>
+[[nodiscard]] auto cycle_stack(
+    typename Cycle_stack<Child>::Parameters parameters)
+    -> std::unique_ptr<Cycle_stack<Child>>
 {
-    return std::make_unique<Cycle_stack<Child>>(std::forward<Args>(args)...);
+    return std::make_unique<Cycle_stack<Child>>(std::move(parameters));
+}
+
+/// Helper function to create a Cycle_stack instance.
+template <typename Child = Widget, typename... Widget_t>
+[[nodiscard]] auto cycle_stack(
+    std::pair<Glyph_string, std::unique_ptr<Widget_t>>... children)
+    -> std::unique_ptr<Cycle_stack<Child>>
+{
+    return std::make_unique<Cycle_stack<Child>>(std::move(children)...);
 }
 
 }  // namespace ox

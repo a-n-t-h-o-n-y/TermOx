@@ -15,36 +15,24 @@ class Shortcuts {
     /** Key has combined key presses defined for multi-key shortcuts. The
      *  returned Signal reference will be called each time the keyboard shortcut
      *  is encountered. */
-    static auto add_shortcut(Key k) -> sl::Signal<void()>&
-    {
-        if (shortcuts_.count(k) == 0uL)
-            shortcuts_[k] = sl::Signal<void()>{};
-        return shortcuts_.at(k);
-    }
+    [[nodiscard]] static auto add_shortcut(Key k) -> sl::Signal<void()>&;
 
     /// Stop \p key and its associated Signal from being called.
     /** No-op if key is not an existing shortcut. */
-    static void remove_shortcut(Key k) { shortcuts_.erase(k); }
+    static void remove_shortcut(Key k);
 
     /// Remove all shortcuts from the system.
-    static void clear() { shortcuts_.clear(); }
+    static void clear();
 
     /// Call on the associated Signal if \p key exists as a shortcut.
     /** Returns true if the key was used as a shortcut. */
-    static auto send_key(Key k) -> bool
-    {
-        if (enabled_ && shortcuts_.count(k) == 1uL) {
-            shortcuts_[k]();
-            return true;
-        }
-        return false;
-    }
+    static auto send_key(Key k) -> bool;
 
     /// Stop all shortcuts from working.
-    static void disable_all() { enabled_ = false; }
+    static void disable_all();
 
     /// Allow all shortcuts to be processed, on by default.
-    static void enable_all() { enabled_ = true; }
+    static void enable_all();
 
    private:
     using Map_t = std::unordered_map<Key, sl::Signal<void()>>;

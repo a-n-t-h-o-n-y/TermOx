@@ -1,211 +1,551 @@
 #ifndef TERMOX_WIDGET_WIDGETS_GRAPH_HPP
 #define TERMOX_WIDGET_WIDGETS_GRAPH_HPP
+#include <algorithm>
+#include <cassert>
 #include <cmath>
-#include <cstddef>
+#include <cstdint>
 #include <iterator>
+#include <memory>
 #include <type_traits>
-#include <unordered_map>
+#include <utility>
 #include <vector>
 
+#include <termox/painter/color.hpp>
 #include <termox/painter/glyph.hpp>
 #include <termox/painter/painter.hpp>
+#include <termox/widget/boundary.hpp>
 #include <termox/widget/point.hpp>
 #include <termox/widget/widget.hpp>
 
 namespace ox {
 
+/// Bounded box that can display added Coordinates within the Boundary.
+/** X axis is horizontal and increasing from left to right.
+ *  Y axis is vertical and increasing from bottom to top.
+ *  Uses Braille characters, allowing up to 8 points per terminal cell. */
 template <typename Number_t = double>
 class Graph : public Widget {
    public:
-    struct Coordinates {
+    /// x is horizontal, y is vertical.
+    struct Coordinate {
         Number_t x;
         Number_t y;
     };
 
-    // Half Open Range [west, east) [north, south)
-    struct Boundary {
-        Number_t west  = 0;
-        Number_t east  = 0;
-        Number_t north = 0;
-        Number_t south = 0;
+   public:
+    struct Parameters {
+        Boundary<Number_t> boundary         = {};
+        std::vector<Coordinate> coordinates = {};
     };
 
    public:
-    Graph(Boundary const& b = {}) : boundary_{b} {}
-
-    template <typename Range_t>
-    void add(Range_t const& values)
+    /// Create a Graph with given Boundary and Coordinates.
+    explicit Graph(Boundary<Number_t> b = {}, std::vector<Coordinate> x = {})
+        : boundary_{b}, coordinates_{std::move(x)}
     {
-        this->add(std::cbegin(values), std::cend(values));
+        assert(b.west < b.east && b.south < b.north);
+        auto constexpr empty_braille = U'⠀';
+        this->set_wallpaper(empty_braille);
     }
 
-    template <typename Iter_t>
-    void add(Iter_t first, Iter_t last)
-    {
-        static_assert(
-            std::is_same_v<typename std::iterator_traits<Iter_t>::value_type,
-                           Coordinates>,
-            "Must add with a container of Coordinates.");
-        for (; first != last; ++first)
-            this->add(*first);
-    }
+    /// Create a Graph with given Parameters.
+    explicit Graph(Parameters p) : Graph{p.boundary, std::move(p.coordinates)}
+    {}
 
-    void add(Coordinates const& c)
+   public:
+    /// Set a new Boundary and repaint the Widget.
+    void set_boundary(Boundary<Number_t> b)
     {
-        coordinates_.push_back(c);
-        this->initialize_bitmap(c);
-    }
-
-    void set_boundary(Boundary const& b)
-    {
+        assert(b.west < b.east && b.south < b.north);
         boundary_ = b;
-        this->regenerate_map();
-    }
-
-    void clear()
-    {
-        coordinates_.clear();
-        map_.clear();
         this->update();
     }
 
-    // void set_anchors(Number_t north, Number_t south, Number_t east, ...west);
-    // // change the resolution by scaling the anchors, maybe have a scale
-    // helper
-    // // method to do this by a multiple.
+    /// Return the currently set Boundary.
+    [[nodiscard]] auto boundary() const -> Boundary<Number_t>
+    {
+        return boundary_;
+    }
 
-    // void scale(Number_t multiple) // multiply each anchor by this.
-    // // above one will zoom out, below one will zoom in.
+    /// Replace the current state with the given Coordinates vector \p x.
+    void reset(std::vector<Coordinate> x)
+    {
+        coordinates_ = std::move(x);
+        this->update();
+    }
 
-    // void scroll_horizontal(Number_t distance) (should be able to be negative
-    // even if number_t is unsigned... or create four overloads, that is better)
-    // // this scroll will add the value distance to east and west
+    /// Replace the current state with copies of Coordinates given by iterators.
+    template <typename Iter1_t, typename Iter2_t>
+    void reset(Iter1_t first, Iter2_t last)
+    {
+        static_assert(
+            std::is_same_v<typename std::iterator_traits<Iter1_t>::value_type,
+                           Coordinate>,
+            "Must add with a iterators pointing to Coordinates.");
+        coordinates_.clear();
+        std::copy(first, last, std::back_inserter(coordinates_));
+        this->update();
+    }
+
+    /// Add a single Coordinate to the Graph.
+    void add(Coordinate c)
+    {
+        coordinates_.push_back(c);
+        this->update();
+    }
+
+    /// Remove all points from the Graph and repaint.
+    void clear()
+    {
+        coordinates_.clear();
+        this->update();
+    }
+
+    /// Return a reference to the current container of Coordinates.
+    [[nodiscard]] auto coordinates() const -> std::vector<Coordinate> const&
+    {
+        return coordinates_;
+    }
+
    protected:
-    auto paint_event() -> bool override
+    auto paint_event(Painter& p) -> bool override
     {
-        // Only relies on map_, call regenerate_map() if you need a new size
-        auto p = Painter{*this};
-        for (auto const& [point, bitmap] : map_)
-            p.put(to_symbol(bitmap), point);
-        return Widget::paint_event();
-    }
+        auto const area = this->area();
+        auto const h_ratio =
+            (double)area.width / distance(boundary_.west, boundary_.east);
+        auto const v_ratio =
+            (double)area.height / distance(boundary_.south, boundary_.north);
 
-    auto resize_event(Area new_size, Area old_size) -> bool override
-    {
-        this->regenerate_map();
-        return Widget::resize_event(new_size, old_size);
-    }
-
-   private:
-    class Bitmap {
-       public:
-        void clear() { bits_ = std::byte{0}; }
-
-        void set_top_left() { bits_ |= std::byte{0b00000001}; }
-        void set_top_right() { bits_ |= std::byte{0b00001000}; }
-        void set_mid_top_left() { bits_ |= std::byte{0b00000010}; }
-        void set_mid_top_right() { bits_ |= std::byte{0b00010000}; }
-        void set_mid_bottom_left() { bits_ |= std::byte{0b00000100}; }
-        void set_mid_bottom_right() { bits_ |= std::byte{0b00100000}; }
-        void set_bottom_left() { bits_ |= std::byte{0b01000000}; }
-        void set_bottom_right() { bits_ |= std::byte{0b10000000}; }
-
-        auto get() const -> unsigned char
-        {
-            return std::to_integer<unsigned char>(bits_);
+        for (auto const c : coordinates_) {
+            auto const h_offset = h_ratio * distance(boundary_.west, c.x);
+            auto const v_offset =
+                area.height - v_ratio * distance(boundary_.south, c.y);
+            if (h_offset >= area.width)  // h_offset already can't be negative.
+                continue;
+            if (v_offset >= area.height || v_offset < 0)
+                continue;
+            auto const point = Point{(int)h_offset, (int)v_offset};
+            auto const mask  = this->to_cell_mask(h_offset, v_offset);
+            auto current     = p.at(point);
+            current.symbol   = combine(current.symbol, mask);
+            p.put(current, point);
         }
-
-       private:
-        std::byte bits_{0};
-    };
-
-   private:
-    std::unordered_map<Point, Bitmap> map_;
-    std::vector<Coordinates> coordinates_;
-    Boundary boundary_;
-    Number_t interval_w_ = 0;
-    Number_t interval_h_ = 0;
-
-   private:
-    static auto to_symbol(Bitmap b) -> Glyph
-    {
-        auto constexpr initial_braille = L'⠀';
-        return wchar_t{initial_braille + b.get()};
+        return Widget::paint_event(p);
     }
 
-    static auto distance(Number_t smaller, Number_t larger) -> Number_t
+   private:
+    Boundary<Number_t> boundary_;
+    std::vector<Coordinate> coordinates_;
+
+   private:
+    /// Finds the distance between two values. It's just subtraction.
+    [[nodiscard]] static auto distance(Number_t smaller, Number_t larger)
+        -> Number_t
     {
         return larger - smaller;
     }
 
-    // Update horizontal and vertical intervals used for bitmap calcs.
-    /* Called by resize_event and boundary change. This _will_ be incorrect for
-     * border changes, but that should be rare, since border updates from resize
-     * events should be accounted for. */
-    void update_intervals()
+    /// Returnt the cell mask cooresponding to the fractional parts of inputs.
+    [[nodiscard]] static auto to_cell_mask(double h_offset, double v_offset)
+        -> std::uint8_t
     {
-        auto const domain_w = distance(boundary_.west, boundary_.east);
-        interval_w_         = domain_w / this->width();
-        auto const domain_h = distance(boundary_.north, boundary_.south);
-        interval_h_         = domain_h / this->height();
-    }
-
-    /// User provided Coordinates to visual Point on Widget.
-    void initialize_bitmap(Coordinates const& c)
-    {
-        auto const visual_width  = this->width();
-        auto const visual_height = this->height();
-        if (visual_width == 0 || visual_height == 0)
-            return;
-
-        auto const horizontal_offset =
-            interval_w_ == 0 ? 0 : distance(boundary_.west, c.x) / interval_w_;
-
-        auto const distance_from_bottom =
-            interval_h_ == 0 ? 0 : distance(boundary_.north, c.y) / interval_h_;
-        auto const vertical_offset = visual_height - distance_from_bottom;
-
-        auto& bitmap = map_[{static_cast<std::size_t>(horizontal_offset),
-                             static_cast<std::size_t>(vertical_offset)}];
-
-        auto const h_dec = std::fmod(horizontal_offset, 1.);
-        auto const v_dec = std::fmod(vertical_offset, 1.);
-        if (h_dec < 0.5) {
-            if (v_dec < 0.25)
-                bitmap.set_top_left();
-            else if (v_dec < 0.5)
-                bitmap.set_mid_top_left();
-            else if (v_dec < 0.75)
-                bitmap.set_mid_bottom_left();
+        auto const h_cell = h_offset - std::floor(h_offset);
+        auto const v_cell = v_offset - std::floor(v_offset);
+        if (h_cell < 0.5) {
+            if (v_cell < 0.25)
+                return 0b00000001;
+            else if (v_cell < 0.5)
+                return 0b00000010;
+            else if (v_cell < 0.75)
+                return 0b00000100;
             else
-                bitmap.set_bottom_left();
+                return 0b01000000;
         }
         else {
-            if (v_dec < 0.25)
-                bitmap.set_top_right();
-            else if (v_dec < 0.5)
-                bitmap.set_mid_top_right();
-            else if (v_dec < 0.75)
-                bitmap.set_mid_bottom_right();
+            if (v_cell < 0.25)
+                return 0b00001000;
+            else if (v_cell < 0.5)
+                return 0b00010000;
+            else if (v_cell < 0.75)
+                return 0b00100000;
             else
-                bitmap.set_bottom_right();
+                return 0b10000000;
         }
     }
 
-    void regenerate_map()
+    /// Additive unicode braille combining.
+    [[nodiscard]] static auto combine(char32_t braille, std::uint8_t mask)
+        -> char32_t
     {
-        this->update_intervals();
-        map_.clear();
-        for (auto coord : coordinates_)
-            this->initialize_bitmap(coord);
+        return braille | mask;
     }
 };
 
-/// Helper function to create an instance.
-template <typename Number_t = double, typename... Args>
-auto graph(Args&&... args) -> std::unique_ptr<Graph<Number_t>>
+/// Helper function to create a Graph instance.
+template <typename Number_t = double>
+[[nodiscard]] auto graph(
+    Boundary<Number_t> b                                = {},
+    std::vector<typename Graph<Number_t>::Coordinate> x = {})
+    -> std::unique_ptr<Graph<Number_t>>
 {
-    return std::make_unique<Graph<Number_t>>(std::forward<Args>(args)...);
+    return std::make_unique<Graph<Number_t>>(b, std::move(x));
+}
+
+/// Helper function to create a Graph instance.
+template <typename Number_t = double>
+[[nodiscard]] auto graph(typename Graph<Number_t>::Parameters p)
+    -> std::unique_ptr<Graph<Number_t>>
+{
+    return std::make_unique<Graph<Number_t>>(std::move(p));
+}
+
+/// Bounded box that can display added Color Coordinates within the Boundary.
+/** X axis is horizontal and increasing from left to right.
+ *  Y axis is vertical and increasing from bottom to top.
+ *  Uses half-block characters, allowing two points per terminal cell. */
+template <typename Number_t = double>
+class Color_graph : public Widget {
+   public:
+    /// x is horizontal, y is vertical.
+    struct Coordinate {
+        Number_t x;
+        Number_t y;
+    };
+
+   public:
+    struct Parameters {
+        Boundary<Number_t> boundary                           = {};
+        std::vector<std::pair<Coordinate, Color>> coordinates = {};
+    };
+
+   public:
+    /// Create a Color_graph with given Boundary and Coordinates, Colors.
+    explicit Color_graph(Boundary<Number_t> b                        = {},
+                         std::vector<std::pair<Coordinate, Color>> x = {})
+        : boundary_{b}, coordinates_{std::move(x)}
+    {
+        assert(b.west < b.east && b.south < b.north);
+    }
+
+    /// Create a Color_graph with given Parameters.
+    explicit Color_graph(Parameters p)
+        : Color_graph{p.boundary, std::move(p.coordinates)}
+    {}
+
+   public:
+    /// Set a new Boundary and repaint the Widget.
+    void set_boundary(Boundary<Number_t> b)
+    {
+        assert(b.west < b.east && b.south < b.north);
+        boundary_ = b;
+        this->update();
+    }
+
+    /// Return the currently set Boundary.
+    [[nodiscard]] auto boundary() const -> Boundary<Number_t>
+    {
+        return boundary_;
+    }
+
+    /// Replace the current state with the given Coordinates vector \p x.
+    void reset(std::vector<std::pair<Coordinate, Color>> x)
+    {
+        coordinates_ = std::move(x);
+        this->update();
+    }
+
+    /// Replace with copies of <Coordinate, Color>s given by iterators.
+    /** Iter1_t must have a value type of std::pair<Coordinate, Color>. */
+    template <typename Iter1_t, typename Iter2_t>
+    void reset(Iter1_t first, Iter2_t last)
+    {
+        static_assert(
+            std::is_same_v<typename std::iterator_traits<Iter1_t>::value_type,
+                           std::pair<Coordinate, Color>>,
+            "Must add with a iterators pointing to Coordinates, Color pair.");
+        coordinates_.clear();
+        std::copy(first, last, std::back_inserter(coordinates_));
+        this->update();
+    }
+
+    /// Add a single <Coordinate, Color> to the Graph.
+    void add(std::pair<Coordinate, Color> p)
+    {
+        coordinates_.push_back(p);
+        this->update();
+    }
+
+    /// Remove all points from the Graph and repaint.
+    void clear()
+    {
+        coordinates_.clear();
+        this->update();
+    }
+
+    /// Return a reference to the current container of Coordinates.
+    [[nodiscard]] auto coordinates() const
+        -> std::vector<std::pair<Coordinate, Color>> const&
+    {
+        return coordinates_;
+    }
+
+   protected:
+    auto paint_event(Painter& p) -> bool override
+    {
+        auto const area = this->area();
+        auto const h_ratio =
+            (double)area.width / distance(boundary_.west, boundary_.east);
+        auto const v_ratio =
+            (double)area.height / distance(boundary_.south, boundary_.north);
+
+        for (auto const& [coord, color] : coordinates_) {
+            auto const h_offset = h_ratio * distance(boundary_.west, coord.x);
+            auto const v_offset =
+                area.height - v_ratio * distance(boundary_.south, coord.y);
+            if (h_offset >= area.width)  // h_offset already can't be negative.
+                continue;
+            if (v_offset >= area.height || v_offset < 0)
+                continue;
+            auto const point  = Point{(int)h_offset, (int)v_offset};
+            auto const is_top = is_top_region(v_offset);
+            auto const glyph  = combine(p.at(point), is_top, color);
+            p.put(glyph, point);
+        }
+        return Widget::paint_event(p);
+    }
+
+   private:
+    Boundary<Number_t> boundary_;
+    std::vector<std::pair<Coordinate, Color>> coordinates_;
+
+   private:
+    /// Finds the distance between two values. It's just subtraction.
+    [[nodiscard]] static auto distance(Number_t smaller, Number_t larger)
+        -> Number_t
+    {
+        return larger - smaller;
+    }
+
+    /// Return true if the given offset cooresponds to the top region.
+    /** False if is bottom half. */
+    [[nodiscard]] static auto is_top_region(double v_offset) -> bool
+    {
+        return (v_offset - std::floor(v_offset)) < 0.5;
+    }
+
+    /// Returns a new Glyph dependent on \p is_top and \p c.
+    [[nodiscard]] static auto combine(Glyph current, bool is_top, Color c)
+        -> Glyph
+    {
+        if (current.symbol == U' ')
+            current = U'▀' | fg(Color::Background);
+        if (is_top)
+            current |= fg(c);
+        else
+            current |= bg(c);
+        return current;
+    }
+};
+
+/// Helper function to create a Color_graph instance.
+template <typename Number_t = double>
+[[nodiscard]] auto color_graph(
+    Boundary<Number_t> b = {},
+    std::vector<std::pair<typename Color_graph<Number_t>::Coordinate, Color>>
+        x = {}) -> std::unique_ptr<Color_graph<Number_t>>
+{
+    return std::make_unique<Color_graph<Number_t>>(b, std::move(x));
+}
+
+/// Helper function to create a Color_graph instance.
+template <typename Number_t = double>
+[[nodiscard]] auto color_graph(typename Color_graph<Number_t>::Parameters p)
+    -> std::unique_ptr<Color_graph<Number_t>>
+{
+    return std::make_unique<Color_graph<Number_t>>(std::move(p));
+}
+
+/// Bounded box that can display added Color Coordinates within a static Bound.
+/** X axis is horizontal and increasing from left to right.
+ *  Y axis is vertical and increasing from bottom to top.
+ *  Uses half-block characters, allowing two points per terminal cell. */
+template <typename Number_t,
+          Number_t west,
+          Number_t east,
+          Number_t north,
+          Number_t south>
+class Color_graph_static_bounds : public Widget {
+    static_assert(west < east && south < north);
+
+   public:
+    /// x is horizontal, y is vertical.
+    struct Coordinate {
+        Number_t x;
+        Number_t y;
+    };
+
+   public:
+    struct Parameters {
+        std::vector<std::pair<Coordinate, Color>> coordinates = {};
+    };
+
+   public:
+    /// Create a Color_graph_static_bounds with given Coordinates and Colors.
+    explicit Color_graph_static_bounds(
+        std::vector<std::pair<Coordinate, Color>> x = {})
+        : coordinates_{std::move(x)}
+    {}
+
+    /// Create a Color_graph_static_bounds with given Parameters.
+    explicit Color_graph_static_bounds(Parameters p)
+        : Color_graph_static_bounds{std::move(p.coordinates)}
+    {}
+
+   public:
+    /// Return the currently set Boundary.
+    [[nodiscard]] static constexpr auto boundary() -> Boundary<Number_t>
+    {
+        return boundary_;
+    }
+
+    /// Replace the current state with the given Coordinates vector \p x.
+    void reset(std::vector<std::pair<Coordinate, Color>> x)
+    {
+        coordinates_ = std::move(x);
+        this->update();
+    }
+
+    /// Replace with copies of <Coordinate, Color>s given by iterators.
+    /** Iter1_t must have a value type of std::pair<Coordinate, Color>. */
+    template <typename Iter1_t, typename Iter2_t>
+    void reset(Iter1_t first, Iter2_t last)
+    {
+        static_assert(
+            std::is_same_v<typename std::iterator_traits<Iter1_t>::value_type,
+                           std::pair<Coordinate, Color>>,
+            "Must add with a iterators pointing to Coordinates, Color pair.");
+        coordinates_.clear();
+        std::copy(first, last, std::back_inserter(coordinates_));
+        this->update();
+    }
+
+    /// Add a single <Coordinate, Color> to the Graph.
+    void add(std::pair<Coordinate, Color> p)
+    {
+        coordinates_.push_back(p);
+        this->update();
+    }
+
+    /// Remove all points from the Graph and repaint.
+    void clear()
+    {
+        coordinates_.clear();
+        this->update();
+    }
+
+    /// Return a reference to the current container of Coordinates.
+    [[nodiscard]] auto coordinates() const
+        -> std::vector<std::pair<Coordinate, Color>> const&
+    {
+        return coordinates_;
+    }
+
+   protected:
+    auto paint_event(Painter& p) -> bool override
+    {
+        constexpr double h_distance = distance(boundary_.west, boundary_.east);
+        constexpr double v_distance =
+            distance(boundary_.south, boundary_.north);
+
+        auto const area    = this->area();
+        auto const h_ratio = (double)area.width / h_distance;
+        auto const v_ratio = (double)area.height / v_distance;
+
+        for (auto const& [coord, color] : coordinates_) {
+            auto const h_offset = h_ratio * distance(boundary_.west, coord.x);
+            auto const v_offset =
+                area.height - (v_ratio * distance(boundary_.south, coord.y));
+            if (h_offset >= area.width)  // h_offset already can't be negative.
+                continue;
+            if (v_offset >= area.height || v_offset < 0)
+                continue;
+            auto const point  = Point{(int)h_offset, (int)v_offset};
+            auto const is_top = is_top_region(v_offset);
+            auto const glyph  = combine(p.at(point), is_top, color);
+            p.put(glyph, point);
+        }
+        return Widget::paint_event(p);
+    }
+
+   private:
+    static constexpr auto boundary_ =
+        Boundary<Number_t>{west, east, north, south};
+
+    std::vector<std::pair<Coordinate, Color>> coordinates_;
+
+   private:
+    /// Finds the distance between two values. It's just subtraction.
+    [[nodiscard]] static constexpr auto distance(Number_t smaller,
+                                                 Number_t larger) -> Number_t
+    {
+        return larger - smaller;
+    }
+
+    /// Return true if the given offset cooresponds to the top region.
+    /** False if is bottom half. */
+    [[nodiscard]] static auto is_top_region(double v_offset) -> bool
+    {
+        return (v_offset - std::floor(v_offset)) < 0.5;
+    }
+
+    /// Returns a new Glyph dependent on \p is_top and \p c.
+    [[nodiscard]] static auto combine(Glyph current, bool is_top, Color c)
+        -> Glyph
+    {
+        if (current.symbol == U' ')
+            current = U'▀' | fg(Color::Background);
+        if (is_top)
+            current |= fg(c);
+        else
+            current |= bg(c);
+        return current;
+    }
+};
+
+/// Helper function to create a Color_graph_static_bounds instance.
+template <typename Number_t,
+          Number_t west,
+          Number_t east,
+          Number_t north,
+          Number_t south>
+[[nodiscard]] auto color_graph_static_bounds(
+    std::vector<std::pair<
+        typename Color_graph_static_bounds<Number_t, west, east, north, south>::
+            Coordinate,
+        Color>> x = {})
+    -> std::unique_ptr<
+        Color_graph_static_bounds<Number_t, west, east, north, south>>
+{
+    return std::make_unique<
+        Color_graph_static_bounds<Number_t, west, east, north, south>>(
+        std::move(x));
+}
+
+/// Helper function to create a Color_graph_static_bounds instance.
+template <typename Number_t,
+          Number_t west,
+          Number_t east,
+          Number_t north,
+          Number_t south>
+[[nodiscard]] auto color_graph_static_bounds(
+    typename Color_graph_static_bounds<Number_t, west, east, north, south>::
+        Parameters p)
+    -> std::unique_ptr<
+        Color_graph_static_bounds<Number_t, west, east, north, south>>
+{
+    return std::make_unique<
+        Color_graph_static_bounds<Number_t, west, east, north, south>>(
+        std::move(p));
 }
 
 }  // namespace ox

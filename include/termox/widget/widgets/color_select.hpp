@@ -1,89 +1,65 @@
 #ifndef TERMOX_WIDGET_WIDGETS_COLOR_SELECT_HPP
 #define TERMOX_WIDGET_WIDGETS_COLOR_SELECT_HPP
 #include <memory>
-#include <string>
-#include <utility>
 
 #include <signals_light/signal.hpp>
 
 #include <termox/painter/color.hpp>
-#include <termox/painter/glyph_string.hpp>
-#include <termox/painter/painter.hpp>
 #include <termox/widget/layouts/horizontal.hpp>
 #include <termox/widget/layouts/vertical.hpp>
-#include <termox/widget/pipe.hpp>
 #include <termox/widget/widgets/button.hpp>
 
 namespace ox {
 
 class Color_tile : public Button {
    public:
-    Color_tile(Color c, bool display_number)
-        : color_{std::to_wstring(c.value) | fg(Color::Foreground)},
-          number_{display_number}
-    {
-        using namespace ox::pipe;
-        *this | bg(c) | fg(Color::Foreground);
-    }
+    enum class Display { None, Number };
 
-   protected:
-    auto paint_event() -> bool override
-    {
-        if (number_)
-            Painter{*this}.put(color_, {0uL, 0uL});
-        return Button::paint_event();
-    }
+    struct Parameters {
+        Color color;
+        Display display = Display::None;
+    };
 
-   private:
-    Glyph_string color_;
-    bool number_;
+   public:
+    explicit Color_tile(Color c, Display display = Display::None);
+
+    explicit Color_tile(Parameters p);
 };
 
 using Color_line = layout::Horizontal<Color_tile>;
 
 /// Displays each color of the current palette.
-/** Updates when Terminal::set_pallete() succeeds. */
+/** Updates when Terminal::set_palette() succeeds. */
 class Color_select : public layout::Vertical<Color_line> {
+   public:
+    struct Parameters {
+        Color_tile::Display display = Color_tile::Display::None;
+    };
+
    public:
     sl::Signal<void(Color)> color_selected;
 
    public:
-    explicit Color_select(bool display_numbers = false)
-        : numbers_{display_numbers}
-    {
-        System::terminal.palette_changed.connect(
-            [this](auto const& pal) { this->set_palette(pal); });
-    }
+    explicit Color_select(
+        Color_tile::Display display = Color_tile::Display::None);
+
+    explicit Color_select(Parameters p);
 
    private:
-    void set_palette(Palette const& pal)
-    {
-        this->delete_all_children();
-        auto const size           = pal.size();
-        auto constexpr row_length = 8uL;
-        auto count                = 0uL;
-
-        while (count != size) {
-            auto& color_line = this->make_child();
-            for (auto i = 0uL; i < row_length && count != size; ++i, ++count) {
-                using namespace ox::pipe;
-                auto const color = pal[count].color;
-                color_line.make_child(color, numbers_) |
-                    on_press([this, color]() { color_selected(color); });
-            }
-        }
-    }
+    void set_palette(Palette const& pal);
 
    private:
-    bool numbers_;
+    Color_tile::Display display_;
 };
 
-/// Helper function to create an instance.
-template <typename... Args>
-auto color_select(Args&&... args) -> std::unique_ptr<Color_select>
-{
-    return std::make_unique<Color_select>(std::forward<Args>(args)...);
-}
+/// Helper function to create a Color_select instance.
+[[nodiscard]] auto color_select(
+    Color_tile::Display display = Color_tile::Display::None)
+    -> std::unique_ptr<Color_select>;
+
+/// Helper function to create a Color_select instance.
+[[nodiscard]] auto color_select(Color_select::Parameters p)
+    -> std::unique_ptr<Color_select>;
 
 }  // namespace ox
 #endif  // TERMOX_WIDGET_WIDGETS_COLOR_SELECT_HPP

@@ -1,10 +1,8 @@
 #include <termox/system/detail/focus.hpp>
 
 #include <algorithm>
-#include <cstddef>
 #include <iterator>
 #include <memory>
-#include <utility>
 #include <vector>
 
 #include <termox/system/event.hpp>
@@ -26,11 +24,11 @@ auto is_click_focus_policy(Focus_policy policy) -> bool
     return policy == Focus_policy::Strong || policy == Focus_policy::Click;
 }
 
-auto const is_tab_focusable = [](auto const* widg) {
+auto const is_tab_focusable = [](Widget const* widg) {
     return widg->is_enabled() && is_tab_focus_policy(widg->focus_policy);
 };
 
-// Return a widg tree from System::head() if focus_widget is nullptr.
+// Return a Widget tree from System::head() if focus_widget is nullptr.
 auto gen_focus_front_widg_tree() -> std::vector<ox::Widget*>
 {
     auto widg_tree = System::head()->get_descendants();
@@ -62,10 +60,10 @@ auto previous_tab_focus() -> ox::Widget*
     if (System::head() == nullptr)
         return nullptr;
     auto const widg_tree      = gen_focus_front_widg_tree();
-    auto const begin          = std::rbegin(widg_tree);
-    auto const end            = std::rend(widg_tree);
-    auto const previous_focus = std::find_if(begin, end, is_tab_focusable);
-    return previous_focus != end ? *previous_focus : Focus::focus_widget();
+    auto const rbegin         = std::rbegin(widg_tree);
+    auto const rend           = std::rend(widg_tree);
+    auto const previous_focus = std::find_if(rbegin, rend, is_tab_focusable);
+    return (previous_focus != rend) ? *previous_focus : Focus::focus_widget();
 }
 
 }  // namespace
@@ -75,6 +73,8 @@ namespace ox::detail {
 ox::Widget* Focus::focus_widget_ = nullptr;
 bool Focus::tab_enabled_         = true;
 bool Focus::tab_suppressed_      = false;
+
+auto Focus::focus_widget() -> ox::Widget* { return focus_widget_; }
 
 void Focus::mouse_press(ox::Widget& clicked)
 {
@@ -114,15 +114,16 @@ auto Focus::shift_tab_press() -> bool
 
 void Focus::set(ox::Widget& new_focus)
 {
-    if (&new_focus == focus_widget_)
+    if (std::addressof(new_focus) == focus_widget_)
         return;
     if (new_focus.focus_policy == Focus_policy::None) {
         Focus::clear();
         return;
     }
     if (focus_widget_ != nullptr)
-        System::send_event(Focus_out_event{*focus_widget_});
-    System::send_event(Focus_in_event{new_focus});
+        System::post_event(Focus_out_event{*focus_widget_});
+    focus_widget_ = std::addressof(new_focus);
+    System::post_event(Focus_in_event{new_focus});
 }
 
 void Focus::clear()
@@ -132,5 +133,15 @@ void Focus::clear()
     System::post_event(Focus_out_event{*focus_widget_});
     focus_widget_ = nullptr;
 }
+
+void Focus::clear_without_posting_event() { focus_widget_ = nullptr; }
+
+void Focus::enable_tab_focus() { tab_enabled_ = true; }
+
+void Focus::disable_tab_focus() { tab_enabled_ = false; }
+
+void Focus::suppress_tab() { tab_suppressed_ = true; }
+
+void Focus::unsuppress_tab() { tab_suppressed_ = false; }
 
 }  // namespace ox::detail

@@ -1,14 +1,16 @@
 #ifndef TERMOX_WIDGET_WIDGETS_LOG_HPP
 #define TERMOX_WIDGET_WIDGETS_LOG_HPP
-#include <signals_light/signal.hpp>
+#include <memory>
 
+#include <termox/painter/glyph_string.hpp>
 #include <termox/system/key.hpp>
-#include <termox/widget/widgets/text_display.hpp>
+#include <termox/widget/widgets/text_view.hpp>
 #include <termox/widget/widgets/textbox.hpp>
 
 namespace ox {
-class Glyph_string;
 
+/// A scrollable list of logged messages.
+/** Received messages are posted at the bottom of the Log. */
 class Log : public Textbox {
    public:
     void post_message(Glyph_string message);
@@ -16,26 +18,16 @@ class Log : public Textbox {
    protected:
     auto key_press_event(Key k) -> bool override;
 
-    using Text_display::append;
-    using Text_display::erase;
-    using Text_display::insert;
-    using Text_display::pop_back;
-    using Text_display::set_contents;
+   private:
+    using Text_view::append;
+    using Text_view::erase;
+    using Text_view::insert;
+    using Text_view::pop_back;
+    using Text_view::set_text;
 };
 
-/// Helper function to create an instance.
-template <typename... Args>
-auto log(Args&&... args) -> std::unique_ptr<Log>
-{
-    return std::make_unique<Log>(std::forward<Args>(args)...);
-}
+/// Helper function to create a Log instance.
+[[nodiscard]] auto log() -> std::unique_ptr<Log>;
 
 }  // namespace ox
-
-namespace ox::slot {
-
-auto post_message(Log& log) -> sl::Slot<void(Glyph_string)>;
-auto post_message(Log& log, Glyph_string const& message) -> sl::Slot<void()>;
-
-}  // namespace ox::slot
 #endif  // TERMOX_WIDGET_WIDGETS_LOG_HPP

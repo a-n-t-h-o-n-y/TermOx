@@ -13,7 +13,6 @@
 #include <termox/widget/widgets/button_list.hpp>
 
 #include "colors.hpp"
-#include "make_break.hpp"
 
 namespace gol {
 
@@ -23,7 +22,7 @@ class Thin_btn : public ox::Button {
     Thin_btn(ox::Glyph_string name) : Button{std::move(name)}
     {
         using namespace ox::pipe;
-        *this | fixed_height(1uL) | ox::bg(color::Light_green) |
+        *this | fixed_height(1) | ox::bg(color::Light_green) |
             ox::fg(color::Teal);
     }
 };
@@ -46,19 +45,19 @@ class Selection_page : public ox::layout::Vertical<> {
     }
 
    public:
-    sl::Signal<void(std::wstring const& name)>& selection_made =
+    sl::Signal<void(std::u32string const& name)>& selection_made =
         list.button_pressed;
 
    public:
-    void add_option(std::wstring const& name) { list.add_button(name); }
+    void add_option(std::u32string const& name) { list.add_button(name); }
 };
 
 /// Stack of patterns and rules pages.
 class Patterns_rulesets_box : public ox::layout::Stack<Selection_page> {
    public:
     // The String is for the GoTo Button
-    Selection_page& patterns = this->make_page(L"Rulesets");
-    Selection_page& rulesets = this->make_page(L"Patterns");
+    Selection_page& patterns = this->make_page(U"Rulesets");
+    Selection_page& rulesets = this->make_page(U"Patterns");
 
    public:
     Patterns_rulesets_box()

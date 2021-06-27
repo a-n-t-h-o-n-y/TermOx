@@ -1,22 +1,28 @@
 #ifndef TERMOX_WIDGET_WIDGETS_TOGGLE_BUTTON_HPP
 #define TERMOX_WIDGET_WIDGETS_TOGGLE_BUTTON_HPP
+#include <memory>
 #include <utility>
 
 #include <signals_light/signal.hpp>
 
 #include <termox/painter/glyph_string.hpp>
-#include <termox/widget/layouts/stack.hpp>
+#include <termox/widget/pair.hpp>
 #include <termox/widget/widgets/button.hpp>
 
 namespace ox {
-class Glyph_string;
 
 /// A Button with two alternating sides.
 /** The top button is active first, switching between the two sides on clicks */
-class Toggle_button : public layout::Stack<Button> {
+class Toggle_button : public SPair<Button, Button> {
    public:
-    Button& top;
-    Button& bottom;
+    struct Parameters {
+        Glyph_string top_text;
+        Glyph_string bottom_text;
+    };
+
+   public:
+    Button& top    = this->first;
+    Button& bottom = this->second;
 
    public:
     sl::Signal<void()>& top_pressed    = top.pressed;
@@ -24,42 +30,30 @@ class Toggle_button : public layout::Stack<Button> {
 
    public:
     /// Construct with corresponding labels.
-    Toggle_button(Glyph_string top_label, Glyph_string bottom_label)
-        : top{this->make_page(std::move(top_label))},
-          bottom{this->make_page(std::move(bottom_label))}
-    {
-        top.pressed.connect([this]() { this->set_active_page(bottom_index_); });
-        bottom.pressed.connect([this]() { this->set_active_page(top_index_); });
-        this->set_active_page(top_index_);
-        this->give_focus_on_change(false);
-    }
+    Toggle_button(Glyph_string top_text, Glyph_string bottom_text);
 
+    /// Construct with given \p p.
+    explicit Toggle_button(Parameters p);
+
+   public:
     /// Display the top button, without emitting any Signals.
-    void show_top() { this->set_active_page(top_index_); }
+    void show_top();
 
     /// Display the bottom button, without emitting any Signals.
-    void show_bottom() { this->set_active_page(bottom_index_); }
+    void show_bottom();
 
     /// Change the displayed button without emitting any signals.
-    void toggle()
-    {
-        if (this->active_page_index() == top_index_)
-            this->set_active_page(bottom_index_);
-        else
-            this->set_active_page(top_index_);
-    }
-
-   private:
-    static auto constexpr top_index_    = 0;
-    static auto constexpr bottom_index_ = 1;
+    void toggle();
 };
 
-/// Helper function to create an instance.
-template <typename... Args>
-auto toggle_button(Args&&... args) -> std::unique_ptr<Toggle_button>
-{
-    return std::make_unique<Toggle_button>(std::forward<Args>(args)...);
-}
+/// Helper function to create a Toggle_button instance.
+[[nodiscard]] auto toggle_button(Glyph_string top_text,
+                                 Glyph_string bottom_text)
+    -> std::unique_ptr<Toggle_button>;
+
+/// Helper function to create a Toggle_button instance.
+[[nodiscard]] auto toggle_button(Toggle_button::Parameters p)
+    -> std::unique_ptr<Toggle_button>;
 
 }  // namespace ox
 #endif  // TERMOX_WIDGET_WIDGETS_TOGGLE_BUTTON_HPP

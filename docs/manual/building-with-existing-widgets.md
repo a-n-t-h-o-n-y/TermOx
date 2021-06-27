@@ -8,7 +8,7 @@ class Thin_button : public ox::Button {
     Thin_button(ox::Glyph_string title) : Button{std::move(title)}
     {
         using namespace ox::pipe;
-        *this | fixed_height(1) | wallpaper(L'~') | bg(ox::Color::Red);
+        *this | fixed_height(1) | wallpaper(U'~') | bg(ox::Color::Red);
     }
 };
 ```
@@ -34,11 +34,11 @@ function calls.
 using namespace ox;
 
 struct Settings_pane : layout::Vertical<> {
-    Label& title          = this->make_child<Label>(L"Settings");
-    HCheckbox_label& foo = this->make_child<HCheckbox_label>({L"Foo"});
-    HCheckbox_label& bar = this->make_child<HCheckbox_label>({L"Bar"});
-    Thin_button& baz      = this->make_child<Thin_button>(L"Baz");
-    Confirm_button& reset = this->make_child<Confirm_button>(L"Reset");
+    Label& title          = this->make_child<Label>(U"Settings");
+    HCheckbox_label& foo = this->make_child<HCheckbox_label>({U"Foo"});
+    HCheckbox_label& bar = this->make_child<HCheckbox_label>({U"Bar"});
+    Thin_button& baz      = this->make_child<Thin_button>(U"Baz");
+    Confirm_button& reset = this->make_child<Confirm_button>(U"Reset");
 
     Settings_pane() { *this | pipe::fixed_width(16); }
 };

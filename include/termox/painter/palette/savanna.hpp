@@ -18,16 +18,16 @@ constexpr auto White  = Color::Foreground;
 /// Atelier Savanna scheme by Bram de Haan (http://atelierbramdehaan.nl)
 inline auto const palette = Palette{
     /* clang-format off */
-    {Black,  ANSI{16}, 0x171c19},
-    {Rust,   ANSI{17}, 0xb16139},
-    {Green,  ANSI{18}, 0x489963},
-    {Brown,  ANSI{19}, 0xa07e3b},
-    {Blue,   ANSI{20}, 0x478c90},
-    {Violet, ANSI{21}, 0x55859b},
-    {Cyan,   ANSI{22}, 0x1c9aa0},
-    {Silver, ANSI{23}, 0x78877d},
-    {Gray,   ANSI{24}, 0x526057},
-    {White,  ANSI{25}, 0xecf4ee},
+    {Black,  RGB{0x171c19}},
+    {Rust,   RGB{0xb16139}},
+    {Green,  RGB{0x489963}},
+    {Brown,  RGB{0xa07e3b}},
+    {Blue,   RGB{0x478c90}},
+    {Violet, RGB{0x55859b}},
+    {Cyan,   RGB{0x1c9aa0}},
+    {Silver, RGB{0x78877d}},
+    {Gray,   RGB{0x526057}},
+    {White,  RGB{0xecf4ee}},
     /* clang-format on */
 };
 

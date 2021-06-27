@@ -14,8 +14,8 @@ namespace ox {
 template <typename Iter, typename Map_fn>
 class Transform_iterator {
    public:
-    using iterator_category = std::forward_iterator_tag;
-    using difference_type   = std::ptrdiff_t;
+    using iterator_category = typename Iter::iterator_category;
+    using difference_type   = typename Iter::difference_type;
     using reference  = std::invoke_result_t<Map_fn, typename Iter::reference>;
     using value_type = std::remove_reference_t<reference>;
     using pointer    = value_type*;
@@ -26,7 +26,8 @@ class Transform_iterator {
     {}
 
     Transform_iterator(Transform_iterator const&) = default;
-    Transform_iterator(Transform_iterator&&)      = default;
+
+    Transform_iterator(Transform_iterator&&) = default;
 
     Transform_iterator& operator=(Transform_iterator const& other)
     {
@@ -42,38 +43,115 @@ class Transform_iterator {
         return *this;
     }
 
-    auto operator++(int) -> Transform_iterator { return {it_++, map_fn_}; }
+    [[nodiscard]] auto operator++(int) -> Transform_iterator
+    {
+        return {it_++, map_fn_};
+    }
 
-    auto operator*() const -> reference { return map_fn_(*it_); }
+    auto operator+=(difference_type n) -> Transform_iterator&
+    {
+        it_ += n;
+        return *this;
+    }
 
-    auto operator==(Transform_iterator const& other) const -> bool
+    [[nodiscard]] auto operator+(difference_type n) -> Transform_iterator
+    {
+        return {it_ + n, map_fn_};
+    }
+
+    [[nodiscard]] friend auto operator+(difference_type n,
+                                        Transform_iterator const& it)
+        -> Transform_iterator
+    {
+        return {n + it.underlying(), it.map_fn_};
+    }
+
+    auto operator--() -> Transform_iterator&
+    {
+        --it_;
+        return *this;
+    }
+
+    [[nodiscard]] auto operator--(int) -> Transform_iterator
+    {
+        return {it_--, map_fn_};
+    }
+
+    auto operator-=(difference_type n) -> Transform_iterator&
+    {
+        it_ -= n;
+        return *this;
+    }
+
+    [[nodiscard]] auto operator-(Transform_iterator const& other)
+        -> difference_type
+    {
+        return it_ - other.it_;
+    }
+
+    [[nodiscard]] auto operator-(difference_type n) -> Transform_iterator
+    {
+        return {it_ - n, map_fn_};
+    }
+
+    [[nodiscard]] auto operator*() const -> reference { return map_fn_(*it_); }
+
+    [[nodiscard]] auto operator==(Transform_iterator const& other) const -> bool
     {
         return it_ == other.it_;
     }
 
-    auto operator!=(Transform_iterator const& other) const -> bool
+    [[nodiscard]] auto operator!=(Transform_iterator const& other) const -> bool
     {
         return it_ != other.it_;
     }
 
     template <typename T>
-    auto operator==(T const& other) const -> bool
+    [[nodiscard]] auto operator==(T const& other) const -> bool
     {
         return it_ == other;
     }
 
     template <typename T>
-    auto operator!=(T const& other) const -> bool
+    [[nodiscard]] auto operator!=(T const& other) const -> bool
     {
         return it_ != other;
     }
 
-    auto underlying() const -> Iter { return it_; }
+    [[nodiscard]] auto underlying() const -> Iter { return it_; }
 
    private:
     Iter it_;
     Map_fn map_fn_;
 };
+
+template <typename Iter, typename Map_fn>
+[[nodiscard]] auto operator<(Transform_iterator<Iter, Map_fn> const& a,
+                             Transform_iterator<Iter, Map_fn> const& b) -> bool
+{
+    return a.underlying() < b.underlying();
+}
+
+template <typename Iter, typename Map_fn>
+[[nodiscard]] auto operator<=(Transform_iterator<Iter, Map_fn> const& a,
+                              Transform_iterator<Iter, Map_fn> const& b) -> bool
+{
+    return a.underlying() <= b.underlying();
+}
+
+template <typename Iter, typename Map_fn>
+[[nodiscard]] auto operator>(Transform_iterator<Iter, Map_fn> const& a,
+                             Transform_iterator<Iter, Map_fn> const& b) -> bool
+{
+    return a.underlying() > b.underlying();
+}
+
+template <typename Iter, typename Map_fn>
+[[nodiscard]] auto operator>=(Transform_iterator<Iter, Map_fn> const& a,
+                              Transform_iterator<Iter, Map_fn> const& b) -> bool
+{
+    return a.underlying() >= b.underlying();
+}
 
 }  // namespace ox
 #endif  // TERMOX_COMMON_TRANSFORM_ITERATOR_HPP

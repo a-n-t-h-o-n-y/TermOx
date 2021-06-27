@@ -9,104 +9,128 @@
 namespace ox {
 
 /// Holds the look of any paintable object with Traits and Colors.
-/** sizeof(Brush) == 3 Bytes && alignof(Brush) == 1 Byte. */
+/** sizeof(Brush) == 4 Bytes && alignof(Brush) == 2 Bytes. */
 class Brush {
    public:
     Color background = Color::Background;
     Color foreground = Color::Foreground;
-
-   private:
-    // TODO wrap this in an Traits type, container of traits. then make it
-    // public. Brush constructor and class just uses these objects for
-    // convinience.
-    using Byte_t   = unsigned char;
-    Byte_t traits_ = 0;
+    Traits traits    = Trait::None;
 
    public:
     /// Construct a Brush with given Traits and Colors.
-    template <typename... Traits>
-    constexpr explicit Brush(Traits... traits)
+    template <typename... Items>
+    explicit constexpr Brush(Items... items)
     {
-        this->add_traits(std::forward<Traits>(traits)...);
-    }
-
-   public:
-    /// Add a variable number of Traits or Colors to the brush.
-    /** Use the (back/fore)ground_color(Color c) functions to add colors to the
-     *  list. */
-    template <typename Head, typename... Tail>
-    constexpr void add_traits(Head t, Tail... ts)
-    {
-        this->set_trait(t);
-        this->add_traits(ts...);
-    }
-    constexpr void add_traits() {}
-
-    /// Remove a variable number of Traits from the brush.
-    /** Cannot remove foreground or background colors with this. */
-    template <typename Head, typename... Tail>
-    constexpr void remove_traits(Head t, Tail... ts)
-    {
-        this->unset_trait(t);
-        this->remove_traits(ts...);
-    }
-    constexpr void remove_traits() {}
-
-    /// Remove all of the set Traits from the brush, not including colors.
-    constexpr void clear_traits() { traits_ = 0; }
-
-    /// Provide a check of whether the brush has the provided Trait \p trait.
-    constexpr auto has_trait(Trait trait) const -> bool
-    {
-        auto const mask = 1 << static_cast<Byte_t>(trait);
-        return (traits_ & mask) != 0;
-    }
-
-    /// Compares if the held traits and (back/fore)ground colors are equal.
-    constexpr auto operator==(Brush x) const -> bool
-    {
-        return std::tie(traits_, background, foreground) ==
-               std::tie(x.traits_, x.background, x.foreground);
+        this->add_items(items...);
     }
 
    private:
-    /// Used by add_traits() to set a deail::Background_color.
-    constexpr void set_trait(Background_color bg)
+    /// Add a variable number of Traits or Colors to the brush.
+    template <typename Head, typename... Tail>
+    void constexpr add_items(Head t, Tail... ts)
+    {
+        this->set_item(t);
+        this->add_items(ts...);
+    }
+    void constexpr add_items() {}
+
+    /// Used by add_items() to set a deail::Background_color.
+    void constexpr set_item(Background_color bg)
     {
         background = Color{bg.value};
     }
 
-    /// Used by add_traits() to set a deail::Foreground_color.
-    constexpr void set_trait(Foreground_color fg)
+    /// Used by add_items() to set a deail::Foreground_color.
+    void constexpr set_item(Foreground_color fg)
     {
         foreground = Color{fg.value};
     }
 
-    /// Used by add_traits() to set an Trait.
-    constexpr void set_trait(Trait t)
-    {
-        traits_ |= 1 << static_cast<Byte_t>(t);
-    }
+    /// Used by add_items() to set an Trait.
+    void constexpr set_item(Trait t) { traits |= t; }
 
-    /// Remove a specific Trait, if it is set, otherwise no-op.
-    constexpr void unset_trait(Trait t)
-    {
-        traits_ &= ~(1 << static_cast<Byte_t>(t));
-    }
-
-   private:
-    // TODO remove as friend once Traits are public and their own type.
-    friend constexpr auto merge(Brush, Brush) -> Brush;
+    /// Used by add_items() to set Traits.
+    void constexpr set_item(Traits t) { traits |= t; }
 };
 
+// Pipes -----------------------------------------------------------------------
+
+auto constexpr operator|(Brush& b, Traits ts) -> Brush&
+{
+    b.traits |= ts;
+    return b;
+}
+
+[[nodiscard]] auto constexpr operator|(Brush const& b, Traits ts) -> Brush
+{
+    auto copy = b;
+    copy.traits |= ts;
+    return copy;
+}
+
+[[nodiscard]] auto constexpr operator|(Brush&& b, Traits ts) -> Brush
+{
+    b.traits |= ts;
+    return std::move(b);
+}
+
+auto constexpr operator|(Brush& b, Background_color c) -> Brush&
+{
+    b.background = Color{c.value};
+    return b;
+}
+
+[[nodiscard]] auto constexpr operator|(Brush const& b, Background_color c)
+    -> Brush
+{
+    auto copy       = b;
+    copy.background = Color{c.value};
+    return copy;
+}
+
+[[nodiscard]] auto constexpr operator|(Brush&& b, Background_color c) -> Brush
+{
+    b.background = Color{c.value};
+    return std::move(b);
+}
+
+auto constexpr operator|(Brush& b, Foreground_color c) -> Brush&
+{
+    b.foreground = Color{c.value};
+    return b;
+}
+
+[[nodiscard]] auto constexpr operator|(Brush const& b, Foreground_color c)
+    -> Brush
+{
+    auto copy       = b;
+    copy.foreground = Color{c.value};
+    return copy;
+}
+
+[[nodiscard]] auto constexpr operator|(Brush&& b, Foreground_color c) -> Brush
+{
+    b.foreground = Color{c.value};
+    return std::move(b);
+}
+
+// -----------------------------------------------------------------------------
+
+/// Compares if the held traits and (back/fore)ground colors are equal.
+[[nodiscard]] auto constexpr operator==(Brush a, Brush b) -> bool
+{
+    return std::tie(a.traits, a.background, a.foreground) ==
+           std::tie(b.traits, b.background, b.foreground);
+}
+
 /// Combines the two Brushes, using the primary Brush's Colors, if any, first.
-constexpr inline auto merge(Brush primary, Brush secondary) -> Brush
+[[nodiscard]] auto constexpr merge(Brush primary, Brush secondary) -> Brush
 {
     if (primary.background == Color::Background)
         primary.background = secondary.background;
     if (primary.foreground == Color::Foreground)
         primary.foreground = secondary.foreground;
-    primary.traits_ |= secondary.traits_;
+    primary.traits |= secondary.traits;
     return primary;
 }
 

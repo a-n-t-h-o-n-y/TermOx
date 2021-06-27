@@ -41,7 +41,7 @@ void make_connections_to_children(std::ofstream& file, Widget const& parent)
 {
     add_label(file, std::to_string(parent.unique_id()),
               make_label_text(parent));
-    if (parent.get_children().empty())
+    if (parent.get_children().is_empty())
         return;
     for (auto const& child : parent.get_children()) {
         add_connection(file, std::to_string(parent.unique_id()),

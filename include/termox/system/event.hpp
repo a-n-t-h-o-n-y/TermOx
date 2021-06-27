@@ -2,8 +2,14 @@
 #define TERMOX_SYSTEM_EVENT_HPP
 #include <functional>
 #include <memory>
+#include <optional>
+#include <utility>
 #include <variant>
+#include <vector>
 
+#include <esc/event.hpp>
+
+#include <termox/painter/color.hpp>
 #include <termox/system/key.hpp>
 #include <termox/system/mouse.hpp>
 #include <termox/widget/area.hpp>
@@ -19,8 +25,13 @@ struct Paint_event {
 };
 
 struct Key_press_event {
-    Widget_ref receiver;
-    ox::Key key;
+    std::optional<Widget_ref> receiver;  // nullopt if no current focus Widget.
+    Key key;
+};
+
+struct Key_release_event {
+    std::optional<Widget_ref> receiver;  // nullopt if no current focus Widget.
+    Key key;
 };
 
 struct Mouse_press_event {
@@ -29,11 +40,6 @@ struct Mouse_press_event {
 };
 
 struct Mouse_release_event {
-    Widget_ref receiver;
-    Mouse data;
-};
-
-struct Mouse_double_click_event {
     Widget_ref receiver;
     Mouse data;
 };
@@ -97,6 +103,11 @@ struct Timer_event {
     Widget_ref receiver;
 };
 
+struct Dynamic_color_event {
+    using Processed_colors = std::vector<std::pair<ox::Color, ox::True_color>>;
+    Processed_colors color_data;
+};
+
 /** \p send will be called to send the event, typically would call on a member
  *  function of some receiving Widget type. \p filter_send should call whatever
  *  filter method on each installed filter, and return true if one of the
@@ -108,9 +119,9 @@ struct Custom_event {
 
 using Event = std::variant<Paint_event,
                            Key_press_event,
+                           Key_release_event,
                            Mouse_press_event,
                            Mouse_release_event,
-                           Mouse_double_click_event,
                            Mouse_wheel_event,
                            Mouse_move_event,
                            Child_added_event,
@@ -124,6 +135,8 @@ using Event = std::variant<Paint_event,
                            Move_event,
                            Resize_event,
                            Timer_event,
+                           Dynamic_color_event,
+                           ::esc::Window_resize,
                            Custom_event>;
 
 }  // namespace ox

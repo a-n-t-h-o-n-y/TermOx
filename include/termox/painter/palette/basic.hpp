@@ -24,22 +24,22 @@ constexpr auto White   = Color::Foreground;
 /// The Built-in Default Terminal 16 Color Palette
 inline auto const palette = Palette{
     /* clang-format off */
-    {Black,   ANSI{0}},
-    {Maroon,  ANSI{1}},
-    {Green,   ANSI{2}},
-    {Olive,   ANSI{3}},
-    {Navy,    ANSI{4}},
-    {Purple,  ANSI{5}},
-    {Teal,    ANSI{6}},
-    {Silver,  ANSI{7}},
-    {Grey,    ANSI{8}},
-    {Red,     ANSI{9}},
-    {Lime,    ANSI{10}},
-    {Yellow,  ANSI{11}},
-    {Blue,    ANSI{12}},
-    {Fuchsia, ANSI{13}},
-    {Aqua,    ANSI{14}},
-    {White,   ANSI{15}},
+    {Black,   Color_index{0}},
+    {Maroon,  Color_index{1}},
+    {Green,   Color_index{2}},
+    {Olive,   Color_index{3}},
+    {Navy,    Color_index{4}},
+    {Purple,  Color_index{5}},
+    {Teal,    Color_index{6}},
+    {Silver,  Color_index{7}},
+    {Grey,    Color_index{8}},
+    {Red,     Color_index{9}},
+    {Lime,    Color_index{10}},
+    {Yellow,  Color_index{11}},
+    {Blue,    Color_index{12}},
+    {Fuchsia, Color_index{13}},
+    {Aqua,    Color_index{14}},
+    {White,   Color_index{15}},
     /* clang-format on */
 };
 

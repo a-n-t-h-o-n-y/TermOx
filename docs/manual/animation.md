@@ -6,7 +6,7 @@ separate thread.
 
 ## Methods
 
-### `void Widget::enable_animation(Animation_engine::Period_t period)`
+### `void Widget::enable_animation(Animation_engine::Interval_t interval)`
 
 This will start sending Timer Events to the called on Widget every `period`. Be
 careful with extremely small periods, this could lock up the UI.
@@ -21,7 +21,7 @@ This will stop any Timer Events from being sent to the called on Widget.
 
 ## Pipe Methods
 
-- `animate(Animation_engine::Period_t period)`
+- `animate(Animation_engine::Interval_t interval)`
 - `animate(FPS fps)`
 - `disanimate()`
 

@@ -12,6 +12,13 @@
 
 namespace ox {
 
+// maybe TODO
+// You could simplify the index math if you hold:
+// STuple<Main_menu, layout::Stack<Child_t>> and make it a template on Child_t
+// Then the widgets are in their own stack, you arn't mixing, and you can also
+// have a template parameter if you only want to hold a specific type of Widget,
+// since this is a layout technically.
+
 /// A Stack layout with a Menu to switch between pages.
 /** Menu Widget is not counted as a Stack index, pages start from index 0. */
 class Menu_stack : public layout::Stack<Widget> {
@@ -19,14 +26,14 @@ class Menu_stack : public layout::Stack<Widget> {
     static auto constexpr menu_index_ = 0uL;
 
    public:
-    /// Construct an empty Menu_stack with \p title passed to Menu constructor.
-    Menu_stack(Glyph_string title = "")
-        : menu_{this->Stack::make_page<Menu>(std::move(title))}
+    /// Construct an empty Menu_stack.
+    Menu_stack() : menu_{this->Stack::make_page<Menu>()}
     {
         this->Stack::set_active_page(menu_index_);
         this->focus_policy = Focus_policy::Direct;
     }
 
+   public:
     /// Construct and append a page to the Stack.
     /** This will construct a child Widget of type Widget_t, using \p args
      *  passed to Widget_t's constructor, and then automatically disable it.
@@ -54,13 +61,6 @@ class Menu_stack : public layout::Stack<Widget> {
         this->connect_to_menu(std::move(title), this->Stack::size() - 1);
     }
 
-    template <typename Widget_t>
-    void append_page(Glyph_string title, Widget_t&& w)
-    {
-        this->append_page(std::move(title), std::make_unique<Widget_t>(
-                                                std::forward<Widget_t>(w)));
-    }
-
     /// Insert a Widget at \p index.
     /** No-op if \p index is larger than Widget::child_count() - 1. */
     void insert_page(Glyph_string title,
@@ -84,7 +84,7 @@ class Menu_stack : public layout::Stack<Widget> {
     /** Useful if you need to move a page into another Widget. Use delete_page()
      *  if you want to remove a page and destroy it. No-op if index is not
      *  valid. Sets active page to menu if active page is being removed. */
-    auto remove_page(std::size_t index) -> std::unique_ptr<Widget>
+    [[nodiscard]] auto remove_page(std::size_t index) -> std::unique_ptr<Widget>
     {
         this->remove_from_menu(index + 1);
         return this->Stack::remove_page(index + 1);
@@ -100,13 +100,16 @@ class Menu_stack : public layout::Stack<Widget> {
     }
 
     /// Return the number of pages in this Stack, not including the Menu Widget.
-    auto size() const -> std::size_t { return this->Stack::size() - 1; }
+    [[nodiscard]] auto size() const -> std::size_t
+    {
+        return this->Stack::size() - 1;
+    }
 
     /// Return reference to the Menu Widget at the front of the Stack.
-    auto menu() -> Menu& { return menu_; }
+    [[nodiscard]] auto menu() -> Menu& { return menu_; }
 
     /// Return const reference to the Menu Widget at the front of the Stack.
-    auto menu() const -> Menu const& { return menu_; }
+    [[nodiscard]] auto menu() const -> Menu const& { return menu_; }
 
     /// Set the active page to the menu, useful to control returning to menu.
     void goto_menu() { this->Stack::set_active_page(menu_index_); }
@@ -115,13 +118,6 @@ class Menu_stack : public layout::Stack<Widget> {
     void set_active_page(std::size_t index)
     {
         this->Stack::set_active_page(index + 1);
-    }
-
-   protected:
-    auto focus_in_event() -> bool override
-    {
-        System::set_focus(menu_);
-        return true;
     }
 
    private:
@@ -148,7 +144,7 @@ class Menu_stack : public layout::Stack<Widget> {
 
 /// Helper function to create an instance.
 template <typename... Args>
-auto menu_stack(Args&&... args) -> std::unique_ptr<Menu_stack>
+[[nodiscard]] auto menu_stack(Args&&... args) -> std::unique_ptr<Menu_stack>
 {
     return std::make_unique<Menu_stack>(std::forward<Args>(args)...);
 }

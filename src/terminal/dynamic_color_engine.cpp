@@ -1,45 +1,98 @@
 #include <termox/terminal/dynamic_color_engine.hpp>
 
-#include <mutex>
+#include <algorithm>
+#include <chrono>
+#include <iterator>
 #include <utility>
 #include <vector>
 
-#include <termox/painter/detail/screen.hpp>
+#include <termox/common/lockable.hpp>
+#include <termox/painter/color.hpp>
 #include <termox/system/event.hpp>
-#include <termox/system/system.hpp>
-#include <termox/terminal/output.hpp>
 
-namespace ox::detail {
+namespace ox {
 
-namespace {
-
-using Processed_colors = std::vector<std::pair<ANSI, True_color>>;
-
-/// Create a Custom_event to update color definitions.
-auto dynamic_color_event(Processed_colors colors) -> Custom_event
+void Dynamic_color_engine::register_color(Color color,
+                                          Dynamic_color const& dynamic)
 {
-    return {[=] {
-        {
-            for (auto& [ansi, true_color] : colors)
-                System::terminal.term_set_color(ansi, true_color);
-        }
-        ox::output::refresh();
-    }};
+    auto const lock = this->Lockable::lock();
+    data_.push_back({color, dynamic, Clock_t::now()});
 }
 
-}  // namespace
-
-void Dynamic_color_event_loop::loop_function()
+void Dynamic_color_engine::unregister_color(Color color)
 {
-    {
-        auto processed   = Processed_colors{};
-        auto const guard = std::scoped_lock{colors_mtx_};
-        for (auto& [ansi, dynamic] : colors_)
-            processed.push_back({ansi, dynamic.get_value()});
+    auto const lock = this->Lockable::lock();
+    auto const iter =
+        std::find_if(std::cbegin(data_), std::cend(data_),
+                     [color](auto const& data) { return data.color == color; });
+    if (iter != std::cend(data_))
+        data_.erase(iter);
+}
 
-        System::post_event(dynamic_color_event(processed));
+void Dynamic_color_engine::clear()
+{
+    auto const lock = this->Lockable::lock();
+    data_.clear();
+}
+
+auto Dynamic_color_engine::is_empty() const -> bool
+{
+    auto const lock = this->Lockable::lock();
+    return data_.empty();
+}
+
+void Dynamic_color_engine::start()
+{
+    loop_.run_async([this](Event_queue& q) { this->loop_function(q); });
+}
+
+void Dynamic_color_engine::stop()
+{
+    loop_.exit(0);
+    loop_.wait();
+}
+
+auto Dynamic_color_engine::get_dynamic_color_event() -> Dynamic_color_event
+{
+    auto processed = Dynamic_color_event::Processed_colors{};
+    if (data_.empty()) {
+        timer_.set_interval(default_interval);
+        return Dynamic_color_event{processed};
     }
-    Interval_event_loop::loop_function();
+    {
+        auto const lock    = this->Lockable::lock();
+        auto next_interval = [&, this] {
+            return std::min_element(std::cbegin(data_), std::cend(data_),
+                                    [](auto const& a, auto const& b) {
+                                        return a.dynamic.interval <
+                                               b.dynamic.interval;
+                                    })
+                ->dynamic.interval;
+        }();
+        auto const now = Clock_t::now();
+        for (auto& data : data_) {
+            auto const time_left = std::chrono::duration_cast<Interval_t>(
+                data.dynamic.interval - (now - data.last_event_time));
+            if (time_left <= Interval_t{0}) {
+                data.last_event_time = now;
+                processed.push_back({data.color, data.dynamic.get_value()});
+            }
+            else {
+                next_interval = std::min(next_interval, time_left);
+            }
+        }
+        timer_.set_interval(next_interval);
+    }
+    return Dynamic_color_event{std::move(processed)};
 }
 
-}  // namespace ox::detail
+void Dynamic_color_engine::loop_function(Event_queue& queue)
+{
+    // The first call to this returns immediately.
+    timer_.wait();
+    timer_.begin();
+    // This resets the Timer interval.
+    queue.append(this->get_dynamic_color_event());
+}
+
+}  // namespace ox

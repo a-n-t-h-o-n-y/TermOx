@@ -7,8 +7,8 @@
 
 namespace gol {
 
-void export_as_life_1_05(const std::string& /* filename */,
-                         const Game_of_life_engine& /* engine */)
+void export_as_life_1_05(std::string const& /* filename */,
+                         Game_of_life_engine const& /* engine */)
 {
     // std::ofstream file{filename};
     // file << "#Life 1.05\n";
@@ -35,8 +35,8 @@ void export_as_life_1_05(const std::string& /* filename */,
     // }
 }
 
-void export_as_life_1_06(const std::string& filename,
-                         const Game_of_life_engine& engine)
+void export_as_life_1_06(std::string const& filename,
+                         Game_of_life_engine const& engine)
 {
     auto file = std::ofstream{filename};
     file << "#Life 1.06\n";
@@ -46,11 +46,11 @@ void export_as_life_1_06(const std::string& filename,
     }
 }
 
-void export_as_plaintext(const std::string& /* filename */,
-                         const Game_of_life_engine& /* engine */)
+void export_as_plaintext(std::string const& /* filename */,
+                         Game_of_life_engine const& /* engine */)
 {}
 
-void export_as_rle(const std::string& /* filename */,
-                   const Game_of_life_engine& /* engine */)
+void export_as_rle(std::string const& /* filename */,
+                   Game_of_life_engine const& /* engine */)
 {}
 }  // namespace gol

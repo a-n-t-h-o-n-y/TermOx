@@ -1,23 +1,21 @@
 #ifndef TERMOX_WIDGET_LAYOUTS_DETAIL_LINEAR_LAYOUT_HPP
 #define TERMOX_WIDGET_LAYOUTS_DETAIL_LINEAR_LAYOUT_HPP
-#include <termox/painter/painter.hpp>
+#include <cassert>
+
 #include <termox/system/event.hpp>
 #include <termox/widget/layout.hpp>
+#include <termox/widget/size_policy.hpp>
 
 #include "shared_space.hpp"
 #include "unique_space.hpp"
 
 namespace ox::layout::detail {
 
-template <typename Get_policy_t,
-          typename Get_length_t,
-          typename Get_offset_t,
-          Policy_direction d>
+template <typename Get_policy_t, typename Get_length_t, typename Get_offset_t>
 struct Dimension_parameters {
     using get_policy = Get_policy_t;  // Size_policy const&(Widget const&)
     using get_length = Get_length_t;  // std::size_t(Widget const&) [w/h]
     using get_offset = Get_offset_t;  // std::size_t(Widget const&) [global x/y]
-    static auto const direction = d;
 };
 
 template <typename Primary_t,
@@ -56,7 +54,8 @@ class Linear_layout : public Layout<Child> {
     // virtual, but keep this in mind if you every hold Layouts and Widgets
     // separately.
 
-    auto remove_child(Child_t const* child) -> std::unique_ptr<Widget>
+    [[nodiscard]] auto remove_child(Child_t const* child)
+        -> std::unique_ptr<Widget>
     {
         auto result = this->Base_t::remove_child(child);
         this->reset_offset_if_out_of_bounds();
@@ -67,7 +66,8 @@ class Linear_layout : public Layout<Child> {
     /** If no child is found, returns nullptr. */
     template <typename UnaryPredicate,
               typename = enable_if_invocable<UnaryPredicate>>
-    auto remove_child_if(UnaryPredicate&& predicate) -> std::unique_ptr<Widget>
+    [[nodiscard]] auto remove_child_if(UnaryPredicate&& predicate)
+        -> std::unique_ptr<Widget>
     {
         auto result = this->Base_t::remove_child_if(
             std::forward<UnaryPredicate>(predicate));
@@ -77,7 +77,8 @@ class Linear_layout : public Layout<Child> {
 
     /// Removes and returns the child at \p index in the child container.
     /** Returns nullptr if \p index is out of range. */
-    auto remove_child_at(std::size_t index) -> std::unique_ptr<Widget>
+    [[nodiscard]] auto remove_child_at(std::size_t index)
+        -> std::unique_ptr<Widget>
     {
         auto result = this->Base_t::remove_child_at(index);
         this->reset_offset_if_out_of_bounds();
@@ -118,42 +119,118 @@ class Linear_layout : public Layout<Child> {
     void delete_all_children()
     {
         this->Base_t::delete_all_children();
-        this->set_child_offset(0uL);
+        this->set_child_offset(0);
+    }
+
+    /// Sort children by the given comparison function.
+    template <typename Fn>
+    void sort(Fn compare)
+    {
+        std::stable_sort(std::begin(Base_t::children_),
+                         std::end(Base_t::children_),
+                         [&compare](auto const& a, auto const& b) {
+                             return compare(static_cast<Child_t const&>(*a),
+                                            static_cast<Child_t const&>(*b));
+                         });
+        this->resize_and_move_children();
     }
 
    public:
     /// Sets the child Widget offset, does not do bounds checking.
     void set_child_offset(std::size_t index)
     {
+        assert(index <= this->child_count());
         Widget::child_offset_ = index;
         shared_space_.set_offset(index);
         unique_space_.set_offset(index);
+        // This works, not sure exactly why, calling resize_and_move_children
+        // directly does not work.
         System::post_event(Child_polished_event{*this, *this});
-        this->force_repaint_empty_space();
     }
 
     void decrement_offset()
     {
         auto const offset = this->get_child_offset();
-        if (offset == 0uL)
+        if (offset == 0)
             return;
-        this->set_child_offset(offset - 1uL);
+        this->set_child_offset(offset - 1);
     }
 
     void increment_offset()
     {
         auto const offset = this->get_child_offset();
-        if (offset + 1uL >= this->child_count())
+        if (offset + 1 >= this->child_count())
             return;
-        this->set_child_offset(offset + 1uL);
+        this->set_child_offset(offset + 1);
     }
 
    protected:
     using Parameters_t = Parameters;
 
    protected:
-    void update_geometry() override
+    auto enable_event() -> bool override
     {
+        this->resize_and_move_children();
+        return Layout<Child>::enable_event();
+    }
+
+    auto disable_event() -> bool override
+    {
+        for (Widget& w : this->get_children())
+            w.disable();
+        return Widget::disable_event();
+    }
+
+    auto move_event(Point new_position, Point old_position) -> bool override
+    {
+        this->resize_and_move_children();
+        return Layout<Child>::move_event(new_position, old_position);
+    }
+
+    auto resize_event(Area new_size, Area old_size) -> bool override
+    {
+        this->resize_and_move_children();
+        return Layout<Child>::resize_event(new_size, old_size);
+    }
+
+    auto child_added_event(Widget& child) -> bool override
+    {
+        this->resize_and_move_children();
+        return Layout<Child>::child_added_event(child);
+    }
+
+    auto child_removed_event(Widget& child) -> bool override
+    {
+        this->resize_and_move_children();
+        return Layout<Child>::child_removed_event(child);
+    }
+
+    auto child_polished_event(Widget& child) -> bool override
+    {
+        this->resize_and_move_children();
+        return Layout<Child>::child_polished_event(child);
+    }
+
+   private:
+    using Length_list   = std::vector<int>;
+    using Position_list = std::vector<int>;
+
+    Shared_space<Parameters> shared_space_;
+    Unique_space<Parameters> unique_space_;
+
+   private:
+    void resize_and_move_children()
+    {
+        if (!this->is_enabled())
+            return;
+
+#ifndef NDEBUG  // Validate Size_policies
+        for (auto& child : this->get_children()) {
+            assert(ox::is_valid(child.width_policy) &&
+                   ox::is_valid(child.height_policy));
+        }
+#endif
+
         auto const primary_lengths = shared_space_.calculate_lengths(*this);
         auto const primary_pos =
             shared_space_.calculate_positions(primary_lengths);
@@ -167,58 +244,20 @@ class Linear_layout : public Layout<Child> {
         this->send_move_events(primary_pos, secondary_pos);
     }
 
-    auto child_polished_event(Widget& child) -> bool override
-    {
-        if (this->width_policy.is_passive()) {
-            Widget* parent = this->parent();
-            // Find first parent that is not passive.
-            while (parent != nullptr && parent->width_policy.is_passive())
-                parent = parent->parent();
-            if (parent != nullptr)
-                System::post_event(Child_polished_event{*parent, *this});
-        }
-        if (this->height_policy.is_passive()) {
-            Widget* parent = this->parent();
-            // Find first parent that is not passive.
-            while (parent != nullptr && parent->height_policy.is_passive())
-                parent = parent->parent();
-            if (parent != nullptr)
-                System::post_event(Child_polished_event{*parent, *this});
-        }
-        this->update_geometry();
-        return Widget::child_polished_event(child);
-    }
-
    private:
-    using Length_list   = std::vector<std::size_t>;
-    using Position_list = std::vector<std::size_t>;
-
-    Shared_space<Parameters> shared_space_;
-    Unique_space<Parameters> unique_space_;
-
-   private:
-    // Hack until the paint system is updated and treats layouts accordingly.
-    void force_repaint_empty_space() { Painter{*this}; }
-
     void send_enable_disable_events(Length_list const& primary,
                                     Length_list const& secondary)
     {
         auto const children = this->get_children();
         auto const offset   = this->get_child_offset();
-        for (auto i = 0uL; i < offset; ++i) {
-            if (children[i].is_enabled())
-                children[i].disable(true, false);
-        }
+        for (auto i = 0uL; i < offset; ++i)
+            children[i].disable();
         for (auto i = 0uL; i < primary.size(); ++i) {
             auto& child = children[offset + i];
-            if (is_valid(primary[i], secondary[i])) {
-                if (!child.is_enabled())
-                    child.enable(true, false);
-            }
-            else {
-                if (child.is_enabled())
-                    child.disable(true, false);
-            }
+            if (is_valid(primary[i], secondary[i]))
+                child.enable();
+            else
+                child.disable();
         }
     }
 
@@ -229,11 +268,9 @@ class Linear_layout : public Layout<Child> {
         auto const offset   = this->get_child_offset();
         for (auto i = 0uL; i < primary.size(); ++i) {
             auto& child = children[offset + i];
-            if (child.is_enabled()) {
-                auto const area =
-                    typename Parameters::get_area{}(primary[i], secondary[i]);
-                System::post_event(Resize_event{child, area});
-            }
+            auto const area =
+                typename Parameters::get_area{}(primary[i], secondary[i]);
+            System::post_event(Resize_event{child, area});
         }
     }
 
@@ -247,21 +284,20 @@ class Linear_layout : public Layout<Child> {
         auto const secondary_offset =
             typename Parameters::Secondary::get_offset{}(*this);
         for (auto i = 0uL; i < primary.size(); ++i) {
-            auto& child = children[offset + i];
-            if (child.is_enabled()) {
-                auto const point = typename Parameters::get_point{}(
-                    primary[i] + primary_offset,
-                    secondary[i] + secondary_offset);
-                System::post_event(Move_event{child, point});
-            }
+            auto& child      = children[offset + i];
+            auto const point = typename Parameters::get_point{}(
+                primary[i] + primary_offset, secondary[i] + secondary_offset);
+            System::post_event(Move_event{child, point});
         }
     }
 
     /// Determine whether a widget is valid to display from its lengths
     /** A length of zero in any dimension means the Widget will be disabled. */
-    // TODO This is ambiguous, what is a zero width/height wants to be enabled?
+    // TODO This is ambiguous, what if a zero width/height wants to be enabled?
     // Need another data member to tell if something should be enabled or not.
-    static auto is_valid(std::size_t primary, std::size_t secondary) -> bool
+    // What's the use case? Feb 22, 2021
+    [[nodiscard]] static auto is_valid(std::size_t primary,
+                                       std::size_t secondary) -> bool
     {
         return primary != 0 && secondary != 0;
     }
@@ -270,8 +306,8 @@ class Linear_layout : public Layout<Child> {
     void reset_offset_if_out_of_bounds()
     {
         auto const count = this->child_count();
-        if (count == 0uL)
-            this->set_child_offset(0uL);
+        if (count == 0)
+            this->set_child_offset(0);
         else if (this->get_child_offset() >= count)
             this->set_child_offset(count - 1);
     }

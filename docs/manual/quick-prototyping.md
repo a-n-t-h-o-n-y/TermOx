@@ -17,12 +17,12 @@ auto useless_widgets() -> std::unique_ptr<layout::Horizontal<>>
     return
         layout::horizontal
         (
-            titlebar(L"Useless Widgets"),
-            labeled_checkbox(L"Check Me! | Trait::Bold"),
+            titlebar(U"Useless Widgets"),
+            labeled_checkbox(U"Check Me! | Trait::Bold"),
             layout::horizontal
             (
-                button(L"Press Me!") | bg(Color::Light_blue) | fixed_width(11),
-                textbox(L"Edit Me!"),
+                button(U"Press Me!") | bg(Color::Light_blue) | fixed_width(11),
+                textbox(U"Edit Me!"),
             )
         );
 }
@@ -56,7 +56,7 @@ auto read_write_textbox() -> std::unique_ptr<layout::Vertical<>>
     // Create Widget
     auto w = layout::vertical
     (
-        textbox(L"Edit Me!") | bg(Color::Light_green) | name("textbox"),
+        textbox(U"Edit Me!") | bg(Color::Light_green) | name("textbox"),
         layout::horizontal
         (
             read_file()  | name("read-btn"),
@@ -74,10 +74,10 @@ background color.
     btns.find_child_by_name("read-btn") | on_read([&](auto& fs) {
         auto buffer = std::stringstream{};
         buffer << fs.rdbuf();
-        textbox.set_contents(buffer.str());
+        textbox.set_text(buffer.str());
         });
     btns.find_child_by_name("write-btn") | on_write([&](auto& fs) {
-        fs << textbox.contents();
+        fs << textbox.text();
         });
     return std::move(w);
 }

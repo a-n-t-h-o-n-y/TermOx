@@ -1,9 +1,8 @@
 #ifndef DEMOS_GLYPH_PAINT_PAINT_AREA_HPP
 #define DEMOS_GLYPH_PAINT_PAINT_AREA_HPP
 #include <cstddef>
-#include <cstdint>
 #include <iostream>
-#include <unordered_map>
+#include <map>
 
 #include <signals_light/signal.hpp>
 
@@ -25,11 +24,7 @@ class Paint_area : public ox::Widget {
     sl::Signal<void()> erase_disabled;
 
    public:
-    Paint_area()
-    {
-        using namespace ox::pipe;
-        *this | strong_focus() | east_border();
-    }
+    Paint_area() { *this | ox::pipe::strong_focus(); }
 
    public:
     void set_glyph(ox::Glyph g)
@@ -50,36 +45,36 @@ class Paint_area : public ox::Widget {
         }
         current_glyph_.symbol = s.symbol;
         if (s.brush.background != ox::Color::Background)
-            current_glyph_ | bg(s.brush.background);
+            current_glyph_ |= bg(s.brush.background);
         if (s.brush.foreground != ox::Color::Foreground)
-            current_glyph_ | fg(s.brush.foreground);
+            current_glyph_ |= fg(s.brush.foreground);
         glyph_changed(current_glyph_);
     }
 
     void set_foreground_color(ox::Color c)
     {
-        current_glyph_ | fg(c);
+        current_glyph_ |= fg(c);
         if (!erase_enabled_)
             glyph_changed(current_glyph_);
     }
 
     void set_background_color(ox::Color c)
     {
-        current_glyph_ | bg(c);
+        current_glyph_ |= bg(c);
         if (!erase_enabled_)
             glyph_changed(current_glyph_);
     }
 
     void set_trait(ox::Trait t)
     {
-        current_glyph_ | t;
+        current_glyph_ |= t;
         if (!erase_enabled_)
             glyph_changed(current_glyph_);
     }
 
     void remove_traits(ox::Trait t)
     {
-        current_glyph_.brush.remove_traits(t);
+        current_glyph_.brush.traits.remove(t);
         if (!erase_enabled_)
             glyph_changed(current_glyph_);
     }
@@ -97,7 +92,7 @@ class Paint_area : public ox::Widget {
     void enable_erase()
     {
         erase_enabled_ = true;
-        glyph_changed(L' ');
+        glyph_changed(U' ');
     }
 
     void disable_erase()
@@ -108,13 +103,13 @@ class Paint_area : public ox::Widget {
 
     void enable_grid()
     {
-        this->set_wallpaper(L'┼' | fg(ox::Color::Dark_gray));
+        this->set_wallpaper(U'┼' | fg(ox::Color::Dark_gray));
         this->update();
     }
 
     void disable_grid()
     {
-        this->set_wallpaper(std::nullopt);
+        this->set_wallpaper(U' ');
         this->update();
     }
 
@@ -123,43 +118,57 @@ class Paint_area : public ox::Widget {
     void read(std::istream& is);
 
    protected:
-    auto paint_event() -> bool override
+    auto paint_event(ox::Painter& p) -> bool override
     {
-        auto p       = ox::Painter{*this};
-        auto const w = this->width();
-        auto const h = this->height();
+        auto const a = this->area();
         for (auto const& [at, glyph] : glyphs_painted_) {
-            if (at.x < w && at.y < h)
+            if (at.x < a.width && at.y < a.height)
                 p.put(glyph, at);
         }
-        return Widget::paint_event();
+        return Widget::paint_event(p);
     }
 
     auto mouse_press_event(ox::Mouse const& m) -> bool override
     {
         switch (m.button) {
             using Button = ox::Mouse::Button;
-            case Button::Right: this->remove_glyph(m.local); break;
+            case Button::Left: this->place_glyph(m.at); break;
+            case Button::Right: this->remove_glyph(m.at); break;
             case Button::Middle:
-                if (glyphs_painted_.count(m.local) == 1)
-                    this->set_glyph(glyphs_painted_[m.local]);
+                if (glyphs_painted_.count(m.at) == 1)
+                    this->set_glyph(glyphs_painted_[m.at]);
                 break;
-            default: this->place_glyph(m.local.x, m.local.y); break;
+            default: break;
         }
         return Widget::mouse_press_event(m);
+    }
+
+    auto mouse_move_event(ox::Mouse const& m) -> bool override
+    {
+        switch (m.button) {
+            using Button = ox::Mouse::Button;
+            case Button::Left: this->place_glyph(m.at); break;
+            case Button::Right: this->remove_glyph(m.at); break;
+            case Button::Middle:
+                if (glyphs_painted_.count(m.at) == 1)
+                    this->set_glyph(glyphs_painted_[m.at]);
+                break;
+            default: break;
+        }
+        return Widget::mouse_move_event(m);
     }
 
     auto key_press_event(ox::Key k) -> bool override;
 
    private:
-    std::unordered_map<ox::Point, ox::Glyph> glyphs_painted_;
-    ox::Glyph current_glyph_ = L'x';
-    ox::Glyph before_erase_  = L'x';
+    std::map<ox::Point, ox::Glyph> glyphs_painted_;
+    ox::Glyph current_glyph_ = U'x';
+    ox::Glyph before_erase_  = U'x';
     bool clone_enabled_      = false;
     bool erase_enabled_      = false;
 
    public:
-    void place_glyph(std::size_t x, std::size_t y);
+    void place_glyph(ox::Point p);
 
     void remove_glyph(ox::Point coords)
     {

@@ -1,17 +1,6 @@
-cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
-
-if(${CMAKE_VERSION} VERSION_LESS "3.8")
-    set(CMAKE_CXX_STANDARD 17)
-endif()
+cmake_minimum_required(VERSION 3.9)
 
 add_executable(demos EXCLUDE_FROM_ALL "")
-
-target_compile_options(demos
-    PRIVATE
-        -Wall
-        -Wextra
-        -Wpedantic
-)
 
 # Glyph Paint
 target_sources(demos
@@ -22,27 +11,20 @@ target_sources(demos
         glyph_paint/glyph_selector.cpp
 )
 
-# Palette
-target_sources(demos
-    PRIVATE
-        palette/value_control.cpp
-        palette/color_definition_setter.cpp
-        palette/color_control.cpp
-        palette/palette_helpers.cpp
-        palette/export_panel.cpp
-        palette/all_colors_display.cpp
-)
-
-# Notepad / Main Menu
+# Everything Else / Main Menu
 target_sources(demos
     PRIVATE
         demo.main.cpp
         notepad/notepad.cpp
+        snake/snake.cpp
+        graph/graph_demo.cpp
+        fractal/fractal_demo.cpp
 )
 
 # Conway's Game of Life
 target_sources(demos
     PRIVATE
+        game_of_life/game_of_life_engine.cpp
         game_of_life/gol_widget.cpp
         game_of_life/patterns.cpp
         game_of_life/gol_demo.cpp
@@ -52,6 +34,7 @@ target_sources(demos
         game_of_life/get_life_1_05.cpp
         game_of_life/get_life_1_06.cpp
         game_of_life/get_plaintext.cpp
+        game_of_life/bitset.cpp
 )
 
 target_link_libraries(demos
@@ -59,6 +42,13 @@ target_link_libraries(demos
         TermOx
 )
 
-if(NOT ${CMAKE_VERSION} VERSION_LESS "3.8")
-    target_compile_features(demos INTERFACE cxx_std_17)
-endif()
+target_compile_options(demos
+    PRIVATE
+        -Wall
+        -Wextra
+        -Wpedantic
+)
+
+add_executable(readme.demo EXCLUDE_FROM_ALL readme.main.cpp)
+target_link_libraries(readme.demo PUBLIC TermOx)
+target_compile_options(readme.demo PRIVATE -Wall -Wextra -Wpedantic)

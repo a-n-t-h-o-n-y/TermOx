@@ -8,10 +8,10 @@ some text to the screen:
 using namespace ox;
 
 class App : public Widget {
-    auto paint_event() -> bool override
+    auto paint_event(Painter& p) -> bool override
     {
-        Painter{*this}.put("Hello, World!", {10, 5});
-        return Widget::paint_event();
+        p.put("Hello, World!", {10, 5});
+        return Widget::paint_event(p);
     }
 };
 
@@ -26,12 +26,11 @@ This program will paint the text `Hello, World!` to the screen at coordinates
 using namespace ox;
 
 class App : public Widget {
-    auto paint_event() -> bool override
+    auto paint_event(Painter& p) -> bool override
     {
-        auto text = L"╔═Hello═World═╝" | fg(Color::Green) | Trait::Bold;
-        auto p    = Painter{*this};
+        auto text = U"╔═Hello═World═╝" | fg(Color::Green) | Trait::Bold;
         p.put(text, {10, 5});
-        return Widget::paint_event();
+        return Widget::paint_event(p);
     }
 };
 
@@ -63,7 +62,7 @@ Inherit from `ox::Widget`, creating a new Widget type.
 ---
 
 ```cpp
- auto paint_event() -> bool override
+ auto paint_event(Painter& p) -> bool override
 ```
 
 Override the `paint_event` handler. This method is called every time the Widget
@@ -73,7 +72,7 @@ library internals take care of calling this method when needed.
 ---
 
 ```cpp
-auto text = L"╔═Hello═World═╝" | fg(Color::Green) | Trait::Bold;
+auto text = U"╔═Hello═World═╝" | fg(Color::Green) | Trait::Bold;
 ```
 
 Create a [`Glyph_string`](glyph-string.md) with a foreground [Color](colors.md)
@@ -83,11 +82,10 @@ operator, a wide string literal is used for the text.
 ---
 
 ```cpp
-auto p    = Painter{*this};
 p.put(text, {10, 5});
 ```
 
-Create a `Painter` object to put [`Glyphs`](glyph.md) to the screen. The `put`
+Put `text` [`Glyph`](glyph.md) to the screen at the given point. The `put`
 method takes a `Glyph` or `Glyph_string` and a [`Point`](point.md). The
 coordinates are local to the Widget, with the origin at the top left, x extends
 to the right with positive values, and y extends downward with positive values.
@@ -96,7 +94,7 @@ Each `paint_event` call begins with a blank display.
 ---
 
 ```cpp
-return Widget::paint_event();
+return Widget::paint_event(p);
 ```
 
 Call down to the base class' implementation, this is common practice for all

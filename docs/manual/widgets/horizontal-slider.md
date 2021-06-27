@@ -1,1 +1,0 @@
-# Horizontal Slider Widget

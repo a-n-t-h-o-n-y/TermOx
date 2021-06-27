@@ -1,7 +1,7 @@
 # Wallpaper
 
 Each Widget has a Wallpaper Glyph. This is the Glyph used to fill in any empty
-space not touched by the Painter in `paint_event()`.
+space not touched by the Painter in `paint_event(...)`.
 
 Wallpaper is optional, and if not set will not fill empty space.
 

@@ -6,17 +6,18 @@
 
 namespace {
 
-auto contains(ox::Widget const& w, ox::Point global) -> bool
+/// Return true if \p global is within the (non-bordered) area of \p w.
+[[nodiscard]] auto contains(ox::Widget const& w, ox::Point global) -> bool
 {
-    bool const within_west  = global.x >= w.inner_x();
-    bool const within_east  = global.x < (w.inner_x() + w.width());
-    bool const within_north = global.y >= w.inner_y();
-    bool const within_south = global.y < (w.inner_y() + w.height());
+    bool const within_west  = global.x >= w.top_left().x;
+    bool const within_east  = global.x < (w.top_left().x + w.area().width);
+    bool const within_north = global.y >= w.top_left().y;
+    bool const within_south = global.y < (w.top_left().y + w.area().height);
     return within_west && within_east && within_north && within_south;
 }
 
 /// Returns a descendant of w that owns \p p, or nullptr if none found.
-auto find_owner_of(ox::Widget& w, ox::Point p) -> ox::Widget*
+[[nodiscard]] auto find_owner_of(ox::Widget& w, ox::Point p) -> ox::Widget*
 {
     if (!w.is_enabled() || !contains(w, p))
         return nullptr;
@@ -31,12 +32,15 @@ auto find_owner_of(ox::Widget& w, ox::Point p) -> ox::Widget*
 
 namespace ox::detail {
 
-auto find_widget_at(Point p) -> Widget*
+[[nodiscard]] auto find_widget_at(Point p) -> Widget*
 {
     if (auto* head = System::head(); head == nullptr)
         return nullptr;
-    else
-        return find_owner_of(*head, p);
+    else {
+        // Some terminals allow clicks outside of term screen, so return head.
+        auto* const at = find_owner_of(*head, p);
+        return (at == nullptr) ? ox::System::head() : at;
+    }
 }
 
 }  // namespace ox::detail

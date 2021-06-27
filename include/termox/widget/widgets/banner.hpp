@@ -2,10 +2,8 @@
 #define TERMOX_WIDGET_WIDGETS_BANNER_HPP
 #include <chrono>
 #include <cstddef>
-#include <cstdint>
-#include <numeric>
+#include <memory>
 #include <optional>
-#include <random>
 #include <utility>
 #include <vector>
 
@@ -13,10 +11,6 @@
 
 #include <termox/painter/glyph_string.hpp>
 #include <termox/painter/painter.hpp>
-#include <termox/painter/palette/dawn_bringer16.hpp>
-#include <termox/system/animation_engine.hpp>
-#include <termox/system/system.hpp>
-#include <termox/terminal/terminal.hpp>
 #include <termox/widget/pipe.hpp>
 #include <termox/widget/widget.hpp>
 
@@ -24,27 +18,22 @@ namespace ox {
 
 struct Index_and_position {
     std::size_t index;
-    std::size_t position;
+    int position;
 };
 
-inline auto operator++(Index_and_position& x) -> Index_and_position&
-{
-    ++x.index;
-    ++x.position;
-    return x;
-}
+auto operator++(Index_and_position& x) -> Index_and_position&;
 
 class IP_range {
    public:
     using Iter_t = std::vector<Index_and_position>::const_iterator;
 
    public:
-    IP_range(Iter_t begin, Iter_t end) : begin_{begin}, end_{end} {}
+    IP_range(Iter_t begin, Iter_t end);
 
    public:
-    auto begin() const -> Iter_t { return begin_; }
+    [[nodiscard]] auto begin() const -> Iter_t;
 
-    auto end() const -> Iter_t { return end_; }
+    [[nodiscard]] auto end() const -> Iter_t;
 
    private:
     Iter_t begin_;
@@ -55,14 +44,29 @@ class IP_range {
 template <typename Animator>
 class Banner : public Widget {
    public:
-    template <typename... Args>
-    Banner(Animation_engine::Period_t interval, Args&&... args)
-        : period_{interval}, animator_{std::forward<Args>(args)...}
+    using Interval_t = std::chrono::milliseconds;
+
+    struct Parameters {
+        Glyph_string text   = U"";
+        Interval_t interval = Interval_t{50};
+        Animator animator   = Animator{};
+    };
+
+   public:
+    explicit Banner(Glyph_string text   = U"",
+                    Interval_t interval = std::chrono::milliseconds{50},
+                    Animator animator   = Animator{})
+        : text_{text}, interval_{interval}, animator_{animator}
     {
         *this | pipe::fixed_height(1);
         animator_.start.connect([this] { this->start(); });
         animator_.stop.connect([this] { this->stop(); });
     }
+
+    explicit Banner(Parameters p)
+        : Banner{std::move(p.text), std::move(p.interval),
+                 std::move(p.animator)}
+    {}
 
    public:
     void set_text(Glyph_string text)
@@ -70,23 +74,46 @@ class Banner : public Widget {
         this->stop();
         text_ = std::move(text);
         range_.reset();
-        animator_.set_text_length(this->get_text().size());
+        animator_.set_text_length(text_.size());
         this->update();
     }
 
-    auto get_text() const -> Glyph_string const& { return text_; }
+    [[nodiscard]] auto text() const noexcept -> Glyph_string const&
+    {
+        return text_;
+    }
+
+    void set_interval(Interval_t interval)
+    {
+        auto const running = this->Widget::is_animated();
+        this->stop();
+        interval_ = interval;
+        if (running)
+            this->start();
+    }
+
+    [[nodiscard]] auto interval() const noexcept -> Interval_t
+    {
+        return interval_;
+    }
+
+    [[nodiscard]] auto animator() const noexcept -> Animator const&
+    {
+        return animator_;
+    }
+
+    [[nodiscard]] auto animator() noexcept -> Animator& { return animator_; }
 
    protected:
-    auto paint_event() -> bool override
+    auto paint_event(Painter& p) -> bool override
     {
         if (range_) {
-            auto p = Painter{*this};
             for (auto const& x : *range_)
-                p.put(text_[x.index], {x.position, 0uL});
+                p.put(text_[x.index], {x.position, 0});
         }
         else
-            Painter{*this}.put(text_, {0uL, 0uL});
-        return Widget::paint_event();
+            p.put(text_, {0, 0});
+        return Widget::paint_event(p);
     }
 
     auto timer_event() -> bool override
@@ -103,17 +130,17 @@ class Banner : public Widget {
     }
 
    private:
-    Animation_engine::Period_t const period_;
-    Animator animator_;
     Glyph_string text_;
+    Interval_t interval_;
+    Animator animator_;
     std::optional<IP_range> range_;
 
    private:
     void start()
     {
-        if (text_.size() == 0uL)
+        if (text_.size() == 0)
             return;
-        this->enable_animation(period_);
+        this->enable_animation(interval_);
     }
 
     void stop()
@@ -123,72 +150,66 @@ class Banner : public Widget {
     }
 };
 
-/// Helper function to create an instance.
-template <typename Animator, typename... Args>
-auto banner(Args&&... args) -> std::unique_ptr<Banner<Animator>>
+/// Helper function to create a Banner instance.
+template <typename Animator>
+[[nodiscard]] auto banner(Glyph_string text = U"",
+                          typename Banner<Animator>::Interval_t interval =
+                              std::chrono::milliseconds{50},
+                          Animator animator = Animator{})
+    -> std::unique_ptr<Banner<Animator>>
 {
-    return std::make_unique<Banner<Animator>>(std::forward<Args>(args)...);
+    return std::make_unique<Banner<Animator>>(std::move(text), interval,
+                                              std::move(animator));
 }
 
-namespace animator {
+/// Helper function to create a Banner instance.
+template <typename Animator>
+[[nodiscard]] auto banner(typename Banner<Animator>::Parameters p)
+    -> std::unique_ptr<Banner<Animator>>
+{
+    return std::make_unique<Banner<Animator>>(std::move(p));
+}
+
+}  // namespace ox
+
+namespace ox::animator {
 
 class Animator_base {
    public:
     sl::Signal<void()> start;
     sl::Signal<void()> stop;
 
+   protected:
+    Animator_base();
+
    public:
-    void set_max_length(std::size_t x) { max_length_ = x; }
+    void set_max_length(std::size_t x);
 
-    void set_text_length(std::size_t x) { text_length_ = x; }
-
-   protected:
-    Animator_base()
-    {
-        start.connect([this] { started_ = true; });
-        stop.connect([this] { started_ = false; });
-    }
+    void set_text_length(std::size_t x);
 
    protected:
-    auto data() const -> std::vector<Index_and_position> const&
-    {
-        return data_;
-    }
+    [[nodiscard]] auto data() const -> std::vector<Index_and_position> const&;
 
-    auto data() -> std::vector<Index_and_position>& { return data_; }
+    [[nodiscard]] auto data() -> std::vector<Index_and_position>&;
 
     /// Incremented values, length of text.
-    void initialize_data()
-    {
-        this->data().resize(this->text_length());
-        std::iota(this->begin(), this->end(), Index_and_position{0uL, 0uL});
-    }
+    void initialize_data();
 
-    auto max_length() const -> std::size_t { return max_length_; }
+    [[nodiscard]] auto max_length() const -> std::size_t;
 
-    auto text_length() const -> std::size_t { return text_length_; }
+    [[nodiscard]] auto text_length() const -> std::size_t;
 
-    auto is_started() const -> bool { return started_; }
+    [[nodiscard]] auto is_started() const -> bool;
 
-    auto begin() -> std::vector<Index_and_position>::iterator
-    {
-        return std::begin(data_);
-    }
+    [[nodiscard]] auto begin() -> std::vector<Index_and_position>::iterator;
 
-    auto begin() const -> std::vector<Index_and_position>::const_iterator
-    {
-        return std::cbegin(data_);
-    }
+    [[nodiscard]] auto begin() const
+        -> std::vector<Index_and_position>::const_iterator;
 
-    auto end() -> std::vector<Index_and_position>::iterator
-    {
-        return std::end(data_);
-    }
+    [[nodiscard]] auto end() -> std::vector<Index_and_position>::iterator;
 
-    auto end() const -> std::vector<Index_and_position>::const_iterator
-    {
-        return std::cend(data_);
-    }
+    [[nodiscard]] auto end() const
+        -> std::vector<Index_and_position>::const_iterator;
 
    private:
     std::vector<Index_and_position> data_;
@@ -202,33 +223,9 @@ class Animator_base {
 /// Left to right reveal of text, hold, left to right clearning of text.
 class Scan : public Animator_base {
    public:
-    auto operator()() -> IP_range
-    {
-        auto const t_length = this->text_length();
-        auto const hold_max = t_length * 3;
-        if (begin_ == 0uL && end_ != t_length && hold_ == 0uL)
-            ++end_;
-        else if (begin_ == 0uL && end_ == t_length && hold_ != hold_max)
-            ++hold_;
-        else if (begin_ != t_length && end_ == t_length && hold_ == hold_max)
-            ++begin_;
-        else
-            stop();
+    [[nodiscard]] auto operator()() -> IP_range;
 
-        return {this->begin() + begin_, this->begin() + end_};
-    }
-
-    void set_text_length(std::size_t x)
-    {
-        Animator_base::set_text_length(x);
-        if (this->text_length() == 0uL)
-            return;
-        this->Animator_base::initialize_data();
-        begin_ = 0uL;
-        end_   = 0uL;
-        hold_  = 0uL;
-        start();
-    }
+    void set_text_length(std::size_t x);
 
    private:
     std::size_t begin_;
@@ -239,24 +236,9 @@ class Scan : public Animator_base {
 /// Left to right reveal of text, then hold.
 class Persistent_scan : public Animator_base {
    public:
-    auto operator()() -> IP_range
-    {
-        if (end_ == this->text_length()) {
-            stop();
-            return {this->begin(), this->end()};
-        }
-        return {this->begin(), this->begin() + end_++};
-    }
+    [[nodiscard]] auto operator()() -> IP_range;
 
-    void set_text_length(std::size_t x)
-    {
-        Animator_base::set_text_length(x);
-        if (this->text_length() == 0uL)
-            return;
-        this->Animator_base::initialize_data();
-        end_ = 0uL;
-        start();
-    }
+    void set_text_length(std::size_t x);
 
    private:
     std::size_t end_;
@@ -264,84 +246,28 @@ class Persistent_scan : public Animator_base {
 
 class Random : public Animator_base {
    public:
-    auto operator()() -> IP_range
-    {
-        if (end_ == this->text_length()) {
-            stop();
-            return {this->begin(), this->end()};
-        }
-        return {this->begin(), this->begin() + end_++};
-    }
+    [[nodiscard]] auto operator()() -> IP_range;
 
-    void set_text_length(std::size_t x)
-    {
-        Animator_base::set_text_length(x);
-        if (this->text_length() == 0uL)
-            return;
-        this->Animator_base::initialize_data();
-        shuffle(this->data());
-        end_ = 0uL;
-        start();
-    }
+    void set_text_length(std::size_t x);
 
    private:
     std::size_t end_;
-
-   private:
-    template <typename Container>
-    static void shuffle(Container& container)
-    {
-        static auto gen_ = std::mt19937{std::random_device{}()};
-        std::shuffle(std::begin(container), std::end(container), gen_);
-    }
 };
 
 class Scroll_base : public Animator_base {
    public:
-    auto operator()() -> IP_range
-    {
-        if (hold_ < hold_length_)
-            ++hold_;
-        else if (begin_ == this->text_length()) {
-            this->Animator_base::initialize_data();
-            begin_ = 0uL;
-            hold_  = 0uL;
-        }
-        else {
-            ++begin_;
-            std::for_each(this->begin() + begin_, this->end(),
-                          [](auto& x) { --x.position; });
-        }
-        return {this->begin() + begin_, this->end()};
-    }
+    [[nodiscard]] auto operator()() -> IP_range;
 
-    void set_text_length(std::size_t x)
-    {
-        Animator_base::set_text_length(x);
-        this->reset_hold_length();
-        this->Animator_base::initialize_data();
-        begin_ = 0uL;
-        hold_  = 0uL;
-    }
+    void set_text_length(std::size_t x);
 
-    void set_max_length(std::size_t x)
-    {
-        Animator_base::set_max_length(x);
-        this->reset_hold_length();
-    }
+    void set_max_length(std::size_t x);
 
    protected:
-    std::size_t begin_ = 0uL;
-    std::size_t hold_  = 0uL;
+    std::size_t begin_ = 0;
+    std::size_t hold_  = 0;
 
    private:
-    void reset_hold_length()
-    {
-        // Heuristic
-        hold_length_ =
-            std::min({this->max_length(), this->text_length(), 20uL});
-        hold_length_ = std::max(hold_length_, 20uL);
-    }
+    void reset_hold_length();
 
    private:
     std::size_t hold_length_;
@@ -349,120 +275,118 @@ class Scroll_base : public Animator_base {
 
 class Scroll : public Scroll_base {
    public:
-    void set_text_length(std::size_t x)
-    {
-        Scroll_base::set_text_length(x);
-        if (this->text_length() != 0uL)
-            start();
-    }
+    void set_text_length(std::size_t x);
 };
 
 class Conditional_scroll : public Scroll_base {
    public:
-    void set_text_length(std::size_t x)
-    {
-        Scroll_base::set_text_length(x);
-        if (this->start_condition())
-            start();
-        else if (this->stop_condition())
-            this->stop_and_reset();
-    }
+    void set_text_length(std::size_t x);
 
-    void set_max_length(std::size_t x)
-    {
-        Scroll_base::set_max_length(x);
-        if (this->start_condition())
-            start();
-        else if (this->stop_condition())
-            this->stop_and_reset();
-    }
+    void set_max_length(std::size_t x);
 
    private:
-    auto start_condition() const -> bool
-    {
-        return !this->is_started() &&
-               this->text_length() > this->max_length() &&
-               this->text_length() != 0uL;
-    }
+    [[nodiscard]] auto start_condition() const -> bool;
 
-    auto stop_condition() const -> bool
-    {
-        return this->is_started() && this->text_length() <= this->max_length();
-    }
+    [[nodiscard]] auto stop_condition() const -> bool;
 
-    void stop_and_reset()
-    {
-        this->Scroll_base::initialize_data();
-        hold_  = 0uL;
-        begin_ = 0uL;
-        stop();
-    }
+    void stop_and_reset();
 };
 
 class Unscramble : public Animator_base {
    public:
-    auto operator()() -> IP_range
-    {
-        if (sorted_to_ == this->text_length()) {
-            stop();
-            return {this->begin(), this->end()};
-        }
-        else {
-            // TODO concise rewrite
-            for (auto i = sorted_to_; i < this->data().size(); ++i) {
-                auto& x = this->data()[i];
-                if (x.position == sorted_to_) {
-                    std::swap(x.position, this->data()[sorted_to_].position);
-                    break;
-                }
-            }
-            ++sorted_to_;
-        }
-        return {this->begin(), this->end()};
-    }
+    [[nodiscard]] auto operator()() -> IP_range;
 
-    void set_text_length(std::size_t x)
-    {
-        Animator_base::set_text_length(x);
-        if (this->text_length() == 0uL)
-            return;
-        this->initialize_data();
-        sorted_to_ = 0uL;
-        start();
-    }
+    void set_text_length(std::size_t x);
 
    private:
-    std::size_t sorted_to_;
+    int sorted_to_;
 
    private:
-    void initialize_data()
-    {
-        auto indices   = std::vector<std::size_t>(this->text_length());
-        auto positions = std::vector<std::size_t>(this->text_length());
-        std::iota(std::begin(indices), std::end(indices), 0uL);
-        std::iota(std::begin(positions), std::end(positions), 0uL);
-        shuffle(positions);
-        this->data() = zip<Index_and_position>(indices, positions);
-    }
-
-    template <typename Pair_t, typename Container>
-    static auto zip(Container const& x, Container const& y)
-        -> std::vector<Pair_t>
-    {
-        auto zipped = std::vector<Pair_t>{};
-        for (auto i = 0uL; i < x.size(); ++i)
-            zipped.push_back({x[i], y[i]});
-        return zipped;
-    }
-
-    template <typename Container>
-    static void shuffle(Container& container)
-    {
-        static auto gen_ = std::mt19937{std::random_device{}()};
-        std::shuffle(std::begin(container), std::end(container), gen_);
-    }
+    void initialize_data();
 };
 
-}  // namespace animator
+}  // namespace ox::animator
+
+namespace ox {
+
+using Scan_banner = Banner<animator::Scan>;
+
+/// Helper function to create a Scan_banner instance.
+[[nodiscard]] auto scan_banner(
+    Glyph_string text                = U"",
+    Scan_banner::Interval_t interval = std::chrono::milliseconds{50},
+    animator::Scan animator = animator::Scan{}) -> std::unique_ptr<Scan_banner>;
+
+/// Helper function to create a Scan_banner instance.
+[[nodiscard]] auto scan_banner(Scan_banner::Parameters p)
+    -> std::unique_ptr<Scan_banner>;
+
+using Persistent_scan_banner = Banner<animator::Persistent_scan>;
+
+/// Helper function to create a Persistent_scan_banner instance.
+[[nodiscard]] auto persistent_scan_banner(
+    Glyph_string text                           = U"",
+    Persistent_scan_banner::Interval_t interval = std::chrono::milliseconds{50},
+    animator::Persistent_scan animator          = animator::Persistent_scan{})
+    -> std::unique_ptr<Persistent_scan_banner>;
+
+/// Helper function to create a Persistent_scan_banner instance.
+[[nodiscard]] auto persistent_scan_banner(Persistent_scan_banner::Parameters p)
+    -> std::unique_ptr<Persistent_scan_banner>;
+
+using Random_banner = Banner<animator::Random>;
+
+/// Helper function to create a Random_banner instance.
+[[nodiscard]] auto random_banner(
+    Glyph_string text                  = U"",
+    Random_banner::Interval_t interval = std::chrono::milliseconds{50},
+    animator::Random animator          = animator::Random{})
+    -> std::unique_ptr<Random_banner>;
+
+/// Helper function to create a Random_banner instance.
+[[nodiscard]] auto random_banner(Random_banner::Parameters p)
+    -> std::unique_ptr<Random_banner>;
+
+using Scroll_banner = Banner<animator::Scroll>;
+
+/// Helper function to create a Scroll_banner instance.
+[[nodiscard]] auto scroll_banner(
+    Glyph_string text                  = U"",
+    Scroll_banner::Interval_t interval = std::chrono::milliseconds{50},
+    animator::Scroll animator          = animator::Scroll{})
+    -> std::unique_ptr<Scroll_banner>;
+
+/// Helper function to create a Scroll_banner instance.
+[[nodiscard]] auto scroll_banner(Scroll_banner::Parameters p)
+    -> std::unique_ptr<Scroll_banner>;
+
+using Conditional_scroll_banner = Banner<animator::Conditional_scroll>;
+
+/// Helper function to create a Conditional_scroll_banner instance.
+[[nodiscard]] auto conditional_scroll_banner(
+    Glyph_string text = U"",
+    Conditional_scroll_banner::Interval_t interval =
+        std::chrono::milliseconds{50},
+    animator::Conditional_scroll animator = animator::Conditional_scroll{})
+    -> std::unique_ptr<Conditional_scroll_banner>;
+
+/// Helper function to create a Conditional_scroll_banner instance.
+[[nodiscard]] auto conditional_scroll_banner(
+    Conditional_scroll_banner::Parameters p)
+    -> std::unique_ptr<Conditional_scroll_banner>;
+
+using Unscramble_banner = Banner<animator::Unscramble>;
+
+/// Helper function to create a Unscramble_banner instance.
+[[nodiscard]] auto unscramble_banner(
+    Glyph_string text                      = U"",
+    Unscramble_banner::Interval_t interval = std::chrono::milliseconds{50},
+    animator::Unscramble animator          = animator::Unscramble{})
+    -> std::unique_ptr<Unscramble_banner>;
+
+/// Helper function to create a Unscramble_banner instance.
+[[nodiscard]] auto unscramble_banner(Unscramble_banner::Parameters p)
+    -> std::unique_ptr<Unscramble_banner>;
+
 }  // namespace ox
 #endif  // TERMOX_WIDGET_WIDGETS_BANNER_HPP

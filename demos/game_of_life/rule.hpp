@@ -15,10 +15,14 @@ struct Rule {
     Neighbors survival;  // Numbers of neighbor cells where a cell will survive.
 };
 
-constexpr auto value_of(char n) -> std::uint16_t { return n - '0'; }
+[[nodiscard]] constexpr auto value_of(char n) -> std::uint16_t
+{
+    return n - '0';
+}
 
 /// Each char is interpreted as a number of neighbors.
-constexpr auto make_neighbors(std::string_view numbers) -> Rule::Neighbors
+[[nodiscard]] constexpr auto make_neighbors(std::string_view numbers)
+    -> Rule::Neighbors
 {
     auto bits = 0uLL;
     for (auto ch : numbers)
@@ -26,34 +30,34 @@ constexpr auto make_neighbors(std::string_view numbers) -> Rule::Neighbors
     return {bits};
 }
 
-constexpr auto parse_error_str() -> char const*
+[[nodiscard]] constexpr auto parse_error_str() -> char const*
 {
     return "parse_rule_string() invalid argument.";
 }
 
-constexpr auto parse_bs_rulestring(std::string_view rs) -> Rule
+[[nodiscard]] constexpr auto parse_bs_rulestring(std::string_view rs) -> Rule
 {
     auto const delimit_pos = rs.find('/');
     if (delimit_pos == std::string_view::npos)
         throw std::invalid_argument{parse_error_str()};
-    if (delimit_pos + 1uL >= rs.size())
+    if (delimit_pos + 1 >= rs.size())
         throw std::invalid_argument{parse_error_str()};
-    if (rs[delimit_pos + 1uL] != 'S' && rs[delimit_pos + 1uL] != 's')
+    if (rs[delimit_pos + 1] != 'S' && rs[delimit_pos + 1] != 's')
         throw std::invalid_argument{parse_error_str()};
 
-    auto const b = make_neighbors(rs.substr(1uL, delimit_pos - 1uL));
-    auto const s = make_neighbors(rs.substr(delimit_pos + 2uL));
+    auto const b = make_neighbors(rs.substr(1, delimit_pos - 1));
+    auto const s = make_neighbors(rs.substr(delimit_pos + 2));
     return {b, s};
 }
 
-constexpr auto parse_sb_rulestring(std::string_view rs) -> Rule
+[[nodiscard]] constexpr auto parse_sb_rulestring(std::string_view rs) -> Rule
 {
     auto const delimit_pos = rs.find('/');
     if (delimit_pos == std::string_view::npos)
         throw std::invalid_argument{parse_error_str()};
 
-    auto const s = make_neighbors(rs.substr(0uL, delimit_pos));
-    auto const b = make_neighbors(rs.substr(delimit_pos + 1uL));
+    auto const s = make_neighbors(rs.substr(0, delimit_pos));
+    auto const b = make_neighbors(rs.substr(delimit_pos + 1));
     return {s, b};
 }
 
@@ -72,7 +76,7 @@ inline void add_if_set(std::ostringstream& ss,
  *  S/B Format: \d*\/\d*
  *  Throws std::invalid_argument if string is not in proper format.
  */
-constexpr auto parse_rule_string(std::string_view rs) -> Rule
+[[nodiscard]] constexpr auto parse_rule_string(std::string_view rs) -> Rule
 {
     if (rs.empty())
         throw std::invalid_argument{parse_error_str()};
@@ -83,7 +87,7 @@ constexpr auto parse_rule_string(std::string_view rs) -> Rule
 }
 
 /// Turns Rule into a B/S rulestring
-inline auto to_rule_string(Rule r) -> std::string
+[[nodiscard]] inline auto to_rule_string(Rule r) -> std::string
 {
     auto ss = std::ostringstream{};
     ss << 'B';

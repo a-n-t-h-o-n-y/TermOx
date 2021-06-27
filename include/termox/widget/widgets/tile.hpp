@@ -1,8 +1,9 @@
 #ifndef TERMOX_WIDGET_WIDGETS_TILE_HPP
 #define TERMOX_WIDGET_WIDGETS_TILE_HPP
+#include <memory>
+
 #include <termox/painter/glyph.hpp>
 #include <termox/painter/painter.hpp>
-#include <termox/widget/pipe.hpp>
 #include <termox/widget/widget.hpp>
 
 namespace ox {
@@ -10,41 +11,32 @@ namespace ox {
 /// A unit width/height Widget that can display a single Glyph.
 class Tile : public Widget {
    public:
-    using Parameters = Glyph;
+    struct Parameters {
+        Glyph tile = U' ';
+    };
 
    public:
-    Tile(Glyph g = L' ') : display_{g}
-    {
-        using namespace pipe;
-        *this | fixed_width(1) | fixed_height(1);
-    }
+    explicit Tile(Glyph tile = U' ');
+
+    explicit Tile(Parameters p);
 
    public:
-    void set(Glyph g)
-    {
-        display_ = g;
-        this->update();
-    }
+    void set_tile(Glyph tile);
 
-    auto get() -> Glyph { return display_; }
+    [[nodiscard]] auto tile() -> Glyph;
 
    protected:
-    auto paint_event() -> bool override
-    {
-        Painter{*this}.put(display_, {0, 0});
-        return Widget::paint_event();
-    }
+    auto paint_event(Painter& p) -> bool override;
 
    private:
-    Glyph display_;
+    Glyph tile_;
 };
 
-/// Helper function to create an instance.
-template <typename... Args>
-auto tile(Args&&... args) -> std::unique_ptr<Tile>
-{
-    return std::make_unique<Tile>(std::forward<Args>(args)...);
-}
+/// Helper function to create a Tile instance.
+[[nodiscard]] auto tile(Glyph tile = U' ') -> std::unique_ptr<Tile>;
+
+/// Helper function to create a Tile instance.
+[[nodiscard]] auto tile(Tile::Parameters parameters) -> std::unique_ptr<Tile>;
 
 }  // namespace ox
 #endif  // TERMOX_WIDGET_WIDGETS_TILE_HPP

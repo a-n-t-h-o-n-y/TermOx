@@ -19,16 +19,15 @@ main thread. Posting events to the Event Queue is thread-safe. Events processed
 from the Event Queue are handled one at a time and make it simple to have
 thread-safe handling of each event, even if it is posted from another thread.
 
-A new Event Loop can be created by publicly inheriting from the `Event_loop`
-class and overriding the `virtual void loop_function()` method. This overridden
-method should wait for an event to occur, once it does, it can post it with the
-`System::post_event(...)` method.
+A new Event Loop action can be created by calling `Event_loop::run` or
+`Event_loop::run_async` with an invokable object with signature `void()`. This
+function will be called on each iteration of the loop, and should probably be
+posting an `Event` to the `Event_queue`.
 
 The new Event Loop can be owned by a Widget, the `void Event_loop::run_async()`
 method should be used to launch the loop in a new thread.
 
-All Event Loops post their events to a single, global queue, the main thread is
-the only thread that processes the Event Queue.
+All Event Loops post their events to a single, global queue.
 
 ## See Also
 

@@ -23,17 +23,16 @@ class Canvas : public ox::Widget {
     auto mouse_press_event(ox::Mouse const& m) -> bool override
     {
         if (m.button == ox::Mouse::Button::Left)
-            points_.push_back(m.local);
+            points_.push_back(m.at);
         this->update();  // post a paint event to *this
         return Widget::mouse_press_event(m);
     }
 
-    auto paint_event() -> bool override
+    auto paint_event(Painter& p) -> bool override
     {
-        auto p = ox::painter{*this};
         for (auto point : points_)
-            p.put(L'X', point);
-        return Widget::paint_event();
+            p.put(U'X', point);
+        return Widget::paint_event(p);
     }
 
    private:
@@ -41,23 +40,21 @@ class Canvas : public ox::Widget {
 };
 ```
 
-    This Widget will paint an `X` to the screen at every point the
-        mouse's left button has been clicked.The paint event always starts with
-            a blank slate,
-    so a history is held by `points_` and each element is painted to the screen
-        on each call to `paint_event`.
+This Widget will paint an `X` to the screen at every point the mouse's left
+button has been clicked.The paint event always starts with a blank slate, so a
+history is held by `points_` and each element is painted to the screen on each
+call to `paint_event`.
 
-    ##Extending Existing Widgets
+## Extending Existing Widgets
 
-        The same tools can be used to extend existing Widgets;
-by inheriting from the Widget and overriding event handlers,
-    or changing traits via the constructor
-            .
+The same tools can be used to extend existing Widgets; by inheriting from the
+Widget and overriding event handlers, or changing traits via the constructor.
 
-        The code below will create a new Textbox type that changes its
-            background color when it is in focus.
+The code below will create a new Textbox type that changes its background color
+when it is in focus.
 
-```cpp class Focus_indicator_textbox : public ox::Textbox {
+```cpp
+class Focus_indicator_textbox : public ox::Textbox {
    public:
     Focus_indicator_textbox(Glyph_string text) : Textbox{std::move(text)}
     {
@@ -83,11 +80,11 @@ by inheriting from the Widget and overriding event handlers,
 };
 ```
 
-    ##Next
+## Next
 
-    - [`main()` Function](main - function.md) -
-    [Quick Prototyping](quick - prototyping.md)
+- [`main()` Function](main-function.md)
+- [Quick Prototyping](quick-prototyping.md)
 
-        ##Previous
+## Previous
 
-    - [Building with Existing Widgets](building - with - existing - widgets.md)
+- [Building with Existing Widgets](building-with-existing-widgets.md)

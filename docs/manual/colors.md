@@ -35,16 +35,16 @@ value.
 `Color_definition`s are used to define Colors. There are three ways to use this
 struct:
 
-- ANSI/XTERM Color
+- XTerm-like Color Palette Index
 - True Color
 - Dynamic Color
 
 All three can be mixed together in a `Palette`, which is a type alias for
 `std::vector<Color_definition>`.
 
-### ANSI/XTERM Values
+### XTERM-lib Color Palette Index
 
-The first method uses the 256 colors that ANSI/XTERM terminals provide.
+The first method uses the 256 colors that ANSI/XTERM like terminals provide.
 
 A listing of the 256 ANSI colors can be found
 [here](https://wikipedia.org/wiki/ANSI_escape_code#Colors), under the 8-bit
@@ -54,26 +54,21 @@ heading.
 values used for each color.
 
 ```cpp
-auto const green = Color_definition{Color::Green, ANSI{28}};
+auto const green = Color_definition{Color::Green, Color_index{28}};
 ```
 
-The above line of code will tie `Color::Green` with the ANSI color at 28.
+The above line of code will tie `Color::Green` with the `Color_index` 28.
 
 ### True Color
 
-The second use of `Color_definition` uses true color values, this allows the
-program to redefine ANSI color values with RGB, HSL, or HEX values.
+The second use of `Color_definition` uses 'True Color' values, these are 24 bit
+RGB or HSL values that allow up to 16 million different colors.
 
 ```cpp
-auto const green = Color_definition{Color::Green,  ANSI{18}, 0x5ac54f};
-auto const grey  = Color_definition{Color::Gray,   ANSI{19}, RGB{123, 123, 123}};
-auto const pink  = Color_definition{Color::Violet, ANSI{20}, HSL{324, 100, 50}};
+auto const green = Color_definition{Color::Green,  RGB{0x5ac54f}};
+auto const grey  = Color_definition{Color::Gray,   RGB{123, 123, 123}};
+auto const pink  = Color_definition{Color::Violet, HSL{324, 100, 50}};
 ```
-
-In the above code, the ANSI values are the terminal color values that are being
-re-defined. Some terminals do not reset these when the program exits, so it is
-suggested to not use the terminal's default colors (ANSI values 0-15), since
-this will overwrite those.
 
 ### Dynamic Colors
 
@@ -88,10 +83,10 @@ dynamic colors:
 - [Fade](fade.md)
 
 ```cpp
-auto const rb  = Color_definition{Color{45}, ANSI{100},
+auto const rb  = Color_definition{Color{45},
                     dynamic::rainbow(period, saturation, lightness)};
 
-auto const fd  = Color_definition{Color{46}, ANSI{101},
+auto const fd  = Color_definition{Color{46},
                     dynamic::fade<dynamic::Sine>(HSL{50, 25, 25}, HSL{100, 50, 50})};
 ```
 
@@ -108,51 +103,50 @@ constexpr auto Blue    = Color{1};
 constexpr auto Rainbow = Color{2};
 
 inline auto const palette = Palette {
-    {Yellow,  ANSI{228}                     },
-    {Blue,    ANSI{16}, True_color{0x20283d}},
-    {Rainbow, ANSI{17}, dynamic::rainbow()  }
+    {Yellow,  Color_index{228}  },
+    {Blue,    RGB{0x20283d}     },
+    {Rainbow, dynamic::rainbow()}
 };
 
 } // namespace three_color
 
 // Later...
-System::terminal.set_palette(three_color::palette);
+Terminal::set_palette(three_color::palette);
 
 // Later...
-auto const glyph = L'X' | bg(three_color::Rainbow);
+auto const glyph = U'X' | bg(three_color::Rainbow);
 ```
 
-Palettes can support up to 181 colors at once. They can be set by calling the
-`System::terminal.set_palette(...)` method.
+Palettes can be set by calling the `Terminal::set_palette(...)` method.
 
 ### Library Color Palettes
 
 There are 24 pre-defined palettes in the library:
 
-- amstrad_cpc
-- apple_ii
-- ashes
-- basic
-- basic8
-- cga
-- commodore_64
-- commodore_vic20
-- dawn_bringer16
-- dawn_bringer32
-- en4
-- gameboy
-- gameboy_pocket
-- macintosh_ii
-- msx
-- nes
-- savanna
-- secam
-- stormy6
-- teletext
-- thomson_m05
-- windows
-- windows_console
-- zx_spectrum
+- `amstrad_cpc`
+- `apple_ii`
+- `ashes`
+- `basic`
+- `basic8`
+- `cga`
+- `commodore_64`
+- `commodore_vic20`
+- `dawn_bringer16`
+- `dawn_bringer32`
+- `en4`
+- `gameboy`
+- `gameboy_pocket`
+- `macintosh_ii`
+- `msx`
+- `nes`
+- `savanna`
+- `secam`
+- `stormy6`
+- `teletext`
+- `thomson_m05`
+- `windows`
+- `windows_console`
+- `zx_spectrum`
 
 ## See Also
 

@@ -1,5 +1,7 @@
 #include "glyph_paint.hpp"
 
+#include <termox/painter/palette/dawn_bringer32.hpp>
+#include <termox/widget/pipe.hpp>
 #include <termox/widget/widget_slots.hpp>
 
 using namespace ox;
@@ -8,6 +10,11 @@ namespace paint {
 
 Glyph_paint::Glyph_paint()
 {
+    using namespace ox::pipe;
+    *this | direct_focus() | forward_focus(paint_area) | on_focus_in([] {
+        ox::Terminal::set_palette(ox::dawn_bringer32::palette);
+    });
+
     side_pane.glyph_selector.selected.connect(slot::set_symbol(paint_area));
 
     side_pane.color_pages.foreground.color_selected.connect(
@@ -41,12 +48,12 @@ Glyph_paint::Glyph_paint()
         slot::remove_traits(paint_area, Trait::Underline));
 
     paint_area.glyph_changed.connect(
-        ox::slot::update_status(side_pane.show_glyph));
+        [this](Glyph x) { side_pane.show_glyph.set_text(Glyph_string{x}); });
     side_pane.options_box.options_a.clone_btn.pressed.connect(
         slot::toggle_clone(paint_area));
-    side_pane.options_box.options_a.clone_btn.pressed.connect(
-        ox::slot::update_status(side_pane.show_glyph,
-                                Glyph_string{L"Clone", fg(Color::Light_gray)}));
+    side_pane.options_box.options_a.clone_btn.pressed.connect([this] {
+        side_pane.show_glyph.set_text(U"Clone" | fg(Color::Light_gray));
+    });
     side_pane.options_box.options_a.clear_btn.pressed.connect(
         slot::clear(paint_area));
     side_pane.options_box.options_a.cursor_box.checkbox.toggled.connect(
@@ -63,9 +70,9 @@ Glyph_paint::Glyph_paint()
         slot::enable_grid(paint_area));
     side_pane.options_box.options_a.grid_box.checkbox.unchecked.connect(
         slot::disable_grid(paint_area));
-    side_pane.options_box.options_b.save_file.save_requested.connect(
+    side_pane.options_box.options_b.write_file.request.connect(
         slot::write(paint_area));
-    side_pane.options_box.options_b.open_file.open_requested.connect(
+    side_pane.options_box.options_b.read_file.request.connect(
         slot::read(paint_area));
 }
 

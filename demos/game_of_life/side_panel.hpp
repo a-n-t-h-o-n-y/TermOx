@@ -23,19 +23,19 @@ struct Side_panel : ox::layout::Vertical<> {
 
    public:
     Patterns_rulesets_box& patterns_rulesets =
-        this->make_child<Pattern_rulesets>({L"Examples", ox::Align::Left, line})
+        this->make_child<Pattern_rulesets>({U"Examples", ox::Align::Left, line})
             .wrapped();
 
     Files_box& files =
-        this->make_child<Files>({L"Files", ox::Align::Left, line}).wrapped();
+        this->make_child<Files>({U"Files", ox::Align::Left, line}).wrapped();
 
     Settings& settings_accordion =
-        this->make_child<Settings>({L"Controls", ox::Align::Left, line});
+        this->make_child<Settings>({U"Controls", ox::Align::Left, line});
 
     Controls_box& settings = settings_accordion.wrapped();
 
     Status_box& status =
-        this->make_child<Status>({L"Status", ox::Align::Left, line}).wrapped();
+        this->make_child<Status>({U"Status", ox::Align::Left, line}).wrapped();
 
     ox::Widget& empty_space = this->make_child();
 
@@ -45,14 +45,14 @@ struct Side_panel : ox::layout::Vertical<> {
         using namespace ox;
         using namespace ox::pipe;
 
-        *this | fixed_width(16uL);
+        *this | fixed_width(16);
 
-        empty_space | expanding_height(0uL);
+        empty_space | expanding_height(0);
         settings_accordion.expand();
     }
 
    private:
-    inline static auto const line = L'─' | fg(color::Light_green);
+    inline static auto const line = U'─' | fg(color::Light_green);
 };
 }  // namespace gol
 #endif  // TERMOX_DEMOS_GAME_OF_LIFE_SIDE_PANEL_HPP

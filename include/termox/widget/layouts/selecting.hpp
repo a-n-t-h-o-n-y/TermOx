@@ -71,10 +71,14 @@ class Selecting : public Layout_t {
    public:
     /// Return whether or not a child widget is currently selected.
     /** Useful to call before selected_child(), if you don't want to catch. */
-    auto has_selected_child() const -> bool { return selected_ != nullptr; }
+    [[nodiscard]] auto is_child_selected() const -> bool
+    {
+        return selected_ != nullptr;
+    }
 
     /// Return the currently selected child, UB if no children in Layout.
-    auto selected_child() const -> typename Layout_t::Child_t const&
+    [[nodiscard]] auto selected_child() const ->
+        typename Layout_t::Child_t const&
     {
         if (selected_ != nullptr)
             return *selected_;
@@ -117,6 +121,34 @@ class Selecting : public Layout_t {
         return Layout_t::key_press_event(k);
     }
 
+    auto mouse_wheel_event_filter(Widget&, Mouse const& m) -> bool override
+    {
+        switch (m.button) {
+            case Mouse::Button::ScrollUp:
+                this->decrement_selected_and_scroll_if_necessary();
+                break;
+            case Mouse::Button::ScrollDown:
+                this->increment_selected_and_scroll_if_necessary();
+                break;
+            default: break;
+        }
+        return true;
+    }
+
+    auto mouse_press_event_filter(Widget& w, Mouse const& m) -> bool override
+    {
+        if (!this->contains_child(&w))
+            return false;
+        switch (m.button) {
+            case Mouse::Button::Left:
+                this->set_selected_by_pointer(
+                    static_cast<typename Layout_t::Child_t*>(&w));
+                break;
+            default: break;
+        }
+        return true;
+    }
+
     /// Reset the selected child if needed.
     auto resize_event(ox::Area new_size, ox::Area old_size) -> bool override
     {
@@ -125,12 +157,13 @@ class Selecting : public Layout_t {
         return base_result;
     }
 
+    // This has a focus in event..
     auto focus_in_event() -> bool override
     {
         this->reset_selected_if_necessary();
-        if (this->has_selected_child())
+        if (this->is_child_selected())
             this->selected_child().select();
-        else if (this->child_count() > 0uL)
+        else if (this->child_count() > 0)
             this->select_first_child();
         return Layout_t::focus_in_event();
     }
@@ -138,7 +171,7 @@ class Selecting : public Layout_t {
     auto focus_out_event() -> bool override
     {
         if constexpr (unselect_on_focus_out) {
-            if (this->has_selected_child())
+            if (this->is_child_selected())
                 this->selected_child().unselect();
         }
         return Layout_t::focus_out_event();
@@ -146,22 +179,30 @@ class Selecting : public Layout_t {
 
     auto enable_event() -> bool override
     {
-        if (this->has_selected_child() && System::focus_widget() == this)
+        if (this->is_child_selected() && System::focus_widget() == this)
             this->selected_child().select();
         return Layout_t::enable_event();
     }
 
     auto disable_event() -> bool override
     {
-        if (this->has_selected_child())
+        if (this->is_child_selected())
             this->selected_child().unselect();
         return Layout_t::disable_event();
+    }
+
+    auto child_added_event(Widget& child) -> bool override
+    {
+        if (this->child_count() == 1)
+            this->select_first_child();
+        child.install_event_filter(*this);
+        return Layout_t::child_added_event(child);
     }
 
     auto child_removed_event(Widget& child) -> bool override
     {
         if (&child == selected_) {
-            if (this->child_count() > 0uL)
+            if (this->child_count() > 0)
                 this->set_selected_by_index(this->get_child_offset());
             else
                 selected_ = nullptr;
@@ -187,13 +228,11 @@ class Selecting : public Layout_t {
 
     void increment_selected_and_scroll_if_necessary()
     {
-        if (!this->has_selected_child())
+        if (!this->is_child_selected())
             return;
         this->increment_selected();
-        while (!this->selected_child().is_enabled()) {
+        if (!this->selected_child().is_enabled())
             this->increment_offset();
-            this->update_geometry();
-        }
     }
 
     void decrement_selected()
@@ -206,36 +245,17 @@ class Selecting : public Layout_t {
 
     void decrement_selected_and_scroll_if_necessary()
     {
-        if (!this->has_selected_child())
+        if (!this->is_child_selected())
             return;
         this->decrement_selected();
         if (!this->selected_child().is_enabled())
             this->decrement_offset();
     }
 
-    /// Scroll down or right.
-    void increment_offset()
-    {
-        auto const child_n = this->child_count();
-        if (child_n == 0)
-            return;
-        if (auto const offset = this->get_child_offset(); offset + 1 != child_n)
-            this->set_child_offset(offset + 1);
-    }
-
     void increment_offset_and_increment_selected()
     {
         this->increment_offset();
         this->increment_selected();
-    }
-
-    /// Scroll up or left.
-    void decrement_offset()
-    {
-        if (this->child_count() == 0)
-            return;
-        if (auto const offset = this->get_child_offset(); offset != 0)
-            this->set_child_offset(offset - 1);
     }
 
     void decrement_offset_and_decrement_selected()
@@ -259,7 +279,7 @@ class Selecting : public Layout_t {
     /// unselect() the currently selected child, if any, and select() \p child.
     void set_selected_by_pointer(typename Layout_t::Child_t* child)
     {
-        if (this->has_selected_child())
+        if (this->is_child_selected())
             selected_->unselect();
         selected_ = child;
         selected_->select();
@@ -284,7 +304,7 @@ class Selecting : public Layout_t {
     /// If selected_child is off the screen, select() the last displayed widget.
     void reset_selected_if_necessary()
     {
-        if (this->has_selected_child()) {
+        if (this->is_child_selected()) {
             if (this->selected_child().is_enabled())
                 return;
             else
@@ -293,7 +313,7 @@ class Selecting : public Layout_t {
     }
 
     /// Return true if \p codes contains the value \p key.
-    static auto contains(Key k, Key_codes const& codes) -> bool
+    [[nodiscard]] static auto contains(Key k, Key_codes const& codes) -> bool
     {
         return std::any_of(std::begin(codes), std::end(codes),
                            [=](auto code) { return code == k; });
@@ -304,7 +324,7 @@ class Selecting : public Layout_t {
 template <typename Layout_t,
           bool unselect_on_focus_out = true,
           typename... Args>
-auto selecting(Args&&... args)
+[[nodiscard]] auto selecting(Args&&... args)
     -> std::unique_ptr<Selecting<Layout_t, unselect_on_focus_out>>
 {
     return std::make_unique<Selecting<Layout_t, unselect_on_focus_out>>(

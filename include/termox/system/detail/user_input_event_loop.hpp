@@ -1,19 +1,25 @@
 #ifndef TERMOX_SYSTEM_DETAIL_USER_INPUT_EVENT_LOOP_HPP
 #define TERMOX_SYSTEM_DETAIL_USER_INPUT_EVENT_LOOP_HPP
 #include <termox/system/event_loop.hpp>
+#include <termox/system/event_queue.hpp>
 
 namespace ox::detail {
 
 /// Event loop that blocks for user input on each iteration.
-/** Uses ncurses internally to get input. This is will also process the
- *  Event_queue and flush all changes to the screen on each iteration. */
-class User_input_event_loop : public Event_loop {
+class User_input_event_loop {
    public:
-    User_input_event_loop() { Event_loop::is_main_thread_ = true; }
+    /// Starts listening for user input events in the thread called from.
+    auto run() -> int;
 
-   protected:
-    /// Wait on input::get(), and post the result.
-    void loop_function() override;
+    /// Sets exit flag.
+    void exit(int exit_code);
+
+    /// Return reference to the internal Event_queue.
+    /** Used by System to initialize the current queue. */
+    auto event_queue() -> Event_queue&;
+
+   private:
+    Event_loop loop_;
 };
 
 }  // namespace ox::detail

@@ -16,14 +16,14 @@ constexpr auto Silver = Color::Foreground;
 /// The Built-in Default Terminal 8 Color Palette
 inline auto const palette = Palette{
     /* clang-format off */
-    {Black,   ANSI{0}},
-    {Maroon,  ANSI{1}},
-    {Green,   ANSI{2}},
-    {Olive,   ANSI{3}},
-    {Navy,    ANSI{4}},
-    {Purple,  ANSI{5}},
-    {Teal,    ANSI{6}},
-    {Silver,  ANSI{7}},
+    {Black,   Color_index{0}},
+    {Maroon,  Color_index{1}},
+    {Green,   Color_index{2}},
+    {Olive,   Color_index{3}},
+    {Navy,    Color_index{4}},
+    {Purple,  Color_index{5}},
+    {Teal,    Color_index{6}},
+    {Silver,  Color_index{7}},
     /* clang-format on */
 };
 

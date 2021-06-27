@@ -6,72 +6,81 @@
 #include <termox/widget/align.hpp>
 #include <termox/widget/layouts/horizontal.hpp>
 #include <termox/widget/layouts/vertical.hpp>
+#include <termox/widget/pair.hpp>
 #include <termox/widget/widgets/label.hpp>
+#include <termox/widget/widgets/line.hpp>
 #include <termox/widget/widgets/line_edit.hpp>
 #include <termox/widget/widgets/number_edit.hpp>
-#include <termox/widget/widgets/text_display.hpp>
+#include <termox/widget/widgets/number_view.hpp>
+#include <termox/widget/widgets/text_view.hpp>
 
-#include "make_break.hpp"
+#include "colors.hpp"
 
 namespace gol {
 
-class Generation_count : public ox::layout::Horizontal<> {
+class Generation_count : public ox::HPair<ox::HLabel, ox::Int_view> {
    public:
     Generation_count()
+        : ox::HPair<ox::HLabel, ox::Int_view>{{U"Generation"}, {0}}
     {
-        this->height_policy.fixed(1);
-        this->cursor.disable();
-        title_ | ox::pipe::fixed_width(11uL);
-        count_ | ox::pipe::fixed_width(5uL);
+        using namespace ox::pipe;
+        *this | fixed_height(1) | hide_cursor();
+        title_ | fixed_width(11);
+        count_ | fixed_width(5);
     }
 
-    void update_count(std::uint32_t count)
-    {
-        count_.set_contents(std::to_string(count));
-    }
+   public:
+    void update_count(std::uint32_t count) { count_.set_value(count); }
 
    private:
-    ox::HLabel& title_ = this->make_child<ox::HLabel>({L"Generation"});
-
-    ox::Text_display& count_ = this->make_child<ox::Text_display>(L"0");
+    ox::HLabel& title_   = this->first;
+    ox::Int_view& count_ = this->second;
 };
 
-struct Center_offset : ox::layout::Vertical<> {
+struct Coord_view : ox::HPair<ox::HLabel, ox::Int_edit> {
+    struct Parameters {
+        ox::Glyph_string label;
+    };
+
+    ox::HLabel& label  = this->first;
+    ox::Int_edit& edit = this->second;
+
+    Coord_view(Parameters parameters)
+        : ox::HPair<ox::HLabel, ox::Int_edit>{{parameters.label},
+                                              {0, {-1'000, 1'000}}}
+    {
+        using namespace ox::pipe;
+        label | dynamic_growth();
+        edit | bg(color::Black) | fg(color::White);
+    }
+};
+
+struct Center_offset : ox::VTuple<ox::HLabel, Coord_view, Coord_view> {
    public:
-    ox::HLabel& title_ =
-        this->make_child<ox::HLabel>({L"Center Offset" | ox::Trait::Underline});
-
-    ox::Labeled_number_edit<>& x_coords =
-        this->make_child<ox::Labeled_number_edit<>>(L"x: ", 0);
-
-    ox::Labeled_number_edit<>& y_coords =
-        this->make_child<ox::Labeled_number_edit<>>(L"y: ", 0);
+    ox::HLabel& title_   = this->get<0>();
+    Coord_view& x_coords = this->get<1>();
+    Coord_view& y_coords = this->get<2>();
 
    public:
     Center_offset()
+        : ox::VTuple<ox::HLabel, Coord_view, Coord_view>{
+              {U"Center Offset" | ox::Trait::Underline},
+              {U"x: "},
+              {U"y: "}}
     {
-        using namespace ox;
-
-        title_.set_alignment(Align::Center);
-
-        x_coords.number_edit.brush.background = color::Black;
-        x_coords.number_edit.brush.foreground = color::White;
-        x_coords.number_edit.set_ghost_color(color::White);
-
-        y_coords.number_edit.brush.background = color::Black;
-        y_coords.number_edit.brush.foreground = color::White;
-        y_coords.number_edit.set_ghost_color(color::White);
+        title_ | ox::pipe::align_center();
     }
 };
 
-struct Status_box : ox::layout::Vertical<> {
+struct Status_box : ox::VTuple<Generation_count, ox::HLine, Center_offset> {
    public:
-    Generation_count& gen_count  = this->make_child<Generation_count>();
-    Widget& break_               = this->append_child(make_break());
-    Center_offset& center_offset = this->make_child<Center_offset>();
+    Generation_count& gen_count  = this->get<0>();
+    ox::HLine& break_            = this->get<1>() | fg(color::Teal);
+    Center_offset& center_offset = this->get<2>();
 
    public:
-    Status_box() { this->height_policy.fixed(5uL); }
+    Status_box() { *this | ox::pipe::fixed_height(5); }
 };
+
 }  // namespace gol
 #endif  // TERMOX_DEMOS_GAME_OF_LIFE_STATUS_BOX_HPP

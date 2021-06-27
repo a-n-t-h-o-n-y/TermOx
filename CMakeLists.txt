@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.9)
 project(TermOx LANGUAGES CXX)
 
 # Build Types
@@ -44,15 +44,19 @@ set(CMAKE_CXX_FLAGS_UBSAN
 
 message("Build Type: ${CMAKE_BUILD_TYPE}" )
 
-if(${CMAKE_VERSION} VERSION_LESS "3.8")
-    set(CMAKE_CXX_STANDARD_REQUIRED ON)
-endif()
+# if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+#     add_compile_options(-D_GLIBCXX_DEBUG -D_LIBCPP_DEBUG=1)
+# endif()
 
-# Add nCurses
-add_subdirectory(external/ncurses-snapshots)
+# Add Escape Library
+add_subdirectory(external/Escape)
 
 # Add Signals-Light
 add_subdirectory(external/signals-light)
+
+if (NOT TARGET Catch2)
+    add_subdirectory(external/Catch2 EXCLUDE_FROM_ALL)
+endif()
 
 # Add TermOx
 add_subdirectory(src)
@@ -62,3 +66,12 @@ add_subdirectory(demos)
 
 # Add Tests
 add_subdirectory(tests)
+
+add_custom_target(
+    termox.all
+    DEPENDS
+        demos
+        readme.demo
+        termox.ui.tests
+        termox.unit.tests
+)

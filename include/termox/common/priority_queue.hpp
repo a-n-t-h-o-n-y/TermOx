@@ -17,13 +17,13 @@ class Priority_queue {
 
    public:
     /// Returns a const reference to the element with the highest priority.
-    auto top() const -> T const& { return queue_.top().second; }
+    [[nodiscard]] auto top() const -> T const& { return queue_.top().second; }
 
     /// Returns true if no elements in queue.
-    auto empty() const -> bool { return queue_.empty(); }
+    [[nodiscard]] auto is_empty() const -> bool { return queue_.empty(); }
 
     /// Returns the number of elements currently in the queue.
-    auto size() const -> std::size_t { return queue_.size(); }
+    [[nodiscard]] auto size() const -> std::size_t { return queue_.size(); }
 
     /// Copy an element into the queue with the given priority.
     void push(Priority p, T const& x) { queue_.push(std::pair{p, x}); }
@@ -44,7 +44,8 @@ class Priority_queue {
 
    private:
     struct Compare {
-        auto operator()(Value_t const& x, Value_t const& y) const -> bool
+        [[nodiscard]] auto operator()(Value_t const& x, Value_t const& y) const
+            -> bool
         {
             return x.first < y.first;
         }

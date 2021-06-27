@@ -34,7 +34,7 @@ filter(F&& predicate);
 ```cpp
 using namespace ox::pipe;
 my_widget | children() | filter([](const& w) { return w.brush.has_trait(Trait::Bold); })
-          | wallpaper(L'#' | fg(Color::Violet));
+          | wallpaper(U'#' | fg(Color::Violet));
 ```
 
 Filtering can also happen based on the Widget's type. This filter will only
@@ -78,7 +78,7 @@ my_widget | children() | for_each([](auto& w){ log(w.name()); });
 
 ### Animation
 
-- `animate(Animation_engine::Period_t period)`
+- `animate(Animation_engine::Interval_t interval)`
 - `animate(FPS fps)`
 - `disanimate()`
 
@@ -129,7 +129,6 @@ my_widget | children() | for_each([](auto& w){ log(w.name()); });
 - `width_stretch(double stretch)`
 - `can_ignore_width_min()`
 - `cannot_ignore_width_min()`
-- `passive_width(bool x = true)`
 
 #### Height
 
@@ -146,7 +145,6 @@ my_widget | children() | for_each([](auto& w){ log(w.name()); });
 - `height_stretch(double stretch)`
 - `can_ignore_height_min()`
 - `cannot_ignore_height_min()`
-- `passive_height(bool x = true)`
 
 ### Border
 
@@ -246,7 +244,7 @@ my_widget | children() | for_each([](auto& w){ log(w.name()); });
 - `on_focus_out(Handler)`
 - `on_paint(Handler)`
 - `on_timer(Handler)`
-- `on_destroyed(Handler)`
+- `on_deleted(Handler)`
 - `on_color_selected(Handler)`
 - `on_press(Handler)`
 
@@ -256,9 +254,8 @@ my_widget | children() | for_each([](auto& w){ log(w.name()); });
 - `label(Glyph_string)`
 - `divider(Glyph)`
 - `word_wrap(bool enable)`
-- `contents(Glyph_string)`
+- `text(Glyph_string)`
 - `align_left()`
 - `align_center()`
 - `align_right()`
-- `ghost(Color)`
 - `dynamic_width(bool enable)`

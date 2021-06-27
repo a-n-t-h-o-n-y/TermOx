@@ -1,1 +1,0 @@
-# Text Display Widget

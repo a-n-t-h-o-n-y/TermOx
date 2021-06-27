@@ -12,11 +12,11 @@ namespace ox::layout::detail {
 template <typename Parameters>
 class Unique_space {
    private:
-    using Length_list   = std::vector<std::size_t>;
-    using Position_list = std::vector<std::size_t>;
+    using Length_list   = std::vector<int>;
+    using Position_list = std::vector<int>;
 
    public:
-    auto calculate_lengths(Widget& parent) -> Length_list
+    [[nodiscard]] auto calculate_lengths(Widget& parent) -> Length_list
     {
         auto result      = Length_list{};
         auto const limit = typename Parameters::Secondary::get_length{}(parent);
@@ -29,7 +29,7 @@ class Unique_space {
                 typename Parameters::Secondary::get_policy{}(*begin);
             if (limit > policy.max())
                 result.push_back(policy.max());
-            else if (limit < policy.min() and !policy.can_ignore_min())
+            else if (limit < policy.min() && !policy.can_ignore_min())
                 result.push_back(0);
             else
                 result.push_back(limit);
@@ -37,19 +37,20 @@ class Unique_space {
         return result;
     }
 
-    auto calculate_positions(Length_list const& lengths) -> Position_list
+    [[nodiscard]] auto calculate_positions(Length_list const& lengths)
+        -> Position_list
     {
-        return Position_list(lengths.size(), 0uL);
+        return Position_list(lengths.size(), 0);
     }
 
     /// Return the child Widget offset, the first widget included in the layout.
-    auto get_offset() const -> std::size_t { return offset_; }
+    [[nodiscard]] auto get_offset() const -> std::size_t { return offset_; }
 
     /// Sets the child Widget offset, does not do bounds checking.
-    auto set_offset(std::size_t index) { offset_ = index; }
+    void set_offset(std::size_t index) { offset_ = index; }
 
    private:
-    std::size_t offset_ = 0uL;
+    std::size_t offset_ = 0;
 };
 
 }  // namespace ox::layout::detail

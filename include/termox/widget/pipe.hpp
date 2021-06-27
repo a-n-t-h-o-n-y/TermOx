@@ -1,5 +1,6 @@
 #ifndef TERMOX_WIDGET_PIPE_HPP
 #define TERMOX_WIDGET_PIPE_HPP
+#include <chrono>
 #include <cstddef>
 #include <memory>
 #include <string>
@@ -8,61 +9,26 @@
 #include <vector>
 
 #include <termox/common/filter_iterator.hpp>
+#include <termox/common/overload.hpp>
 #include <termox/common/range.hpp>
 #include <termox/common/transform_iterator.hpp>
 #include <termox/painter/glyph_string.hpp>
-#include <termox/system/animation_engine.hpp>
+#include <termox/system/system.hpp>
 #include <termox/widget/align.hpp>
+#include <termox/widget/bordered.hpp>
+#include <termox/widget/detail/pipe_utility.hpp>
 #include <termox/widget/focus_policy.hpp>
 #include <termox/widget/growth.hpp>
 #include <termox/widget/point.hpp>
 #include <termox/widget/widget.hpp>
-
-namespace ox::pipe::detail {
-
-/// Used to call operator| overload to create a new Range from filter predicate
-template <typename Predicate>
-class Filter_predicate {
-   public:
-    explicit Filter_predicate(Predicate p) : predicate{p} {}
-
-   public:
-    Predicate predicate;
-};
-
-/// Used to call operator| overload to create a new Range from filter predicate
-template <typename W>
-class Dynamic_filter_predicate {
-   public:
-    using Widget_t = W;
-};
-
-template <typename T>
-struct is_widget_ptr : std::false_type {};
-
-template <typename X>
-struct is_widget_ptr<std::unique_ptr<X>> : std::is_base_of<ox::Widget, X> {};
-
-/// True if T is a std::unique_ptr<> to a ox::\idget type.
-template <typename T>
-constexpr bool is_widget_ptr_v = is_widget_ptr<T>::value;
-
-/// True if T is a Widget type.
-template <typename T>
-constexpr bool is_widget_v = std::is_base_of_v<Widget, std::decay_t<T>>;
-
-/// True if T is a Widget type or a Widget pointer.
-template <typename T>
-constexpr bool is_widget_or_wptr =
-    is_widget_v<T> || is_widget_ptr_v<std::decay_t<T>>;
-
-}  // namespace ox::pipe::detail
+#include <termox/widget/wrap.hpp>
+#include "termox/widget/size_policy.hpp"
 
 namespace ox::pipe {
 
 // Widget Accessors ------------------------------------------------------------
 /// Widget -> Range<Children>
-inline auto children()
+[[nodiscard]] inline auto children()
 {
     return [](auto&& w) {
         auto c = get(w).get_children();
@@ -71,14 +37,14 @@ inline auto children()
 }
 
 /// Widget -> std::vector<Widget*>
-inline auto descendants()
+[[nodiscard]] inline auto descendants()
 {
     return [](auto&& w) { return get(w).get_descendants(); };
 }
 
 // Generic Tools ---------------------------------------------------------------
 template <typename F>
-auto for_each(F&& f)
+[[nodiscard]] auto for_each(F&& f)
 {
     return [&](auto&& w) -> decltype(auto) {
         std::forward<F>(f)(get(w));
@@ -88,27 +54,27 @@ auto for_each(F&& f)
 
 /// Container -> Container
 template <typename F>
-auto filter(F&& predicate)
+[[nodiscard]] auto filter(F&& predicate)
 {
-    return detail::Filter_predicate{predicate};
+    return pipe::detail::Filter_predicate{predicate};
 }
 
 /// Filter by name of Widget
-inline auto find(std::string const& name)
+[[nodiscard]] inline auto find(std::string const& name)
 {
-    return detail::Filter_predicate{
+    return pipe::detail::Filter_predicate{
         [=](auto const& w) { return w.name() == name; }};
 }
 
 /// Dynamic cast, be aware.
 template <typename Widget_t>
-auto filter()
+[[nodiscard]] auto filter()
 {
-    return detail::Dynamic_filter_predicate<Widget_t>{};
+    return pipe::detail::Dynamic_filter_predicate<Widget_t>{};
 }
 
 // Widget Modifiers ------------------------------------------------------------
-inline auto name(std::string const& name)
+[[nodiscard]] inline auto name(std::string const& name)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).set_name(std::move(name));
@@ -116,7 +82,7 @@ inline auto name(std::string const& name)
     };
 }
 
-inline auto install_filter(Widget& filter)
+[[nodiscard]] inline auto install_filter(Widget& filter)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).install_event_filter(filter);
@@ -124,7 +90,7 @@ inline auto install_filter(Widget& filter)
     };
 }
 
-inline auto remove_filter(Widget& filter)
+[[nodiscard]] inline auto remove_filter(Widget& filter)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).remove_event_filter(filter);
@@ -132,15 +98,15 @@ inline auto remove_filter(Widget& filter)
     };
 }
 
-inline auto animate(Animation_engine::Period_t period)
+[[nodiscard]] inline auto animate(std::chrono::milliseconds interval)
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).enable_animation(period);
+        get(w).enable_animation(interval);
         return std::forward<decltype(w)>(w);
     };
 }
 
-inline auto animate(FPS fps)
+[[nodiscard]] inline auto animate(FPS fps)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).enable_animation(fps);
@@ -148,7 +114,7 @@ inline auto animate(FPS fps)
     };
 }
 
-inline auto disanimate()
+[[nodiscard]] inline auto disanimate()
 {
     return [](auto&& w) -> decltype(auto) {
         get(w).disable_animation();
@@ -157,7 +123,7 @@ inline auto disanimate()
 }
 
 // Wallpaper Modifiers ---------------------------------------------------------
-inline auto wallpaper(Glyph g)
+[[nodiscard]] inline auto wallpaper(Glyph g)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).set_wallpaper(g);
@@ -165,15 +131,7 @@ inline auto wallpaper(Glyph g)
     };
 }
 
-inline auto wallpaper(std::nullopt_t)
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).set_wallpaper(std::nullopt);
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto wallpaper_with_brush()
+[[nodiscard]] inline auto wallpaper_with_brush()
 {
     return [](auto&& w) -> decltype(auto) {
         get(w).paint_wallpaper_with_brush(true);
@@ -181,7 +139,7 @@ inline auto wallpaper_with_brush()
     };
 }
 
-inline auto wallpaper_without_brush()
+[[nodiscard]] inline auto wallpaper_without_brush()
 {
     return [](auto&& w) -> decltype(auto) {
         get(w).paint_wallpaper_with_brush(false);
@@ -191,8 +149,9 @@ inline auto wallpaper_without_brush()
 
 }  // namespace ox::pipe
 
-// Brush Mofifiers -------------------------------------------------------------
 namespace ox {
+
+// Brush Mofifiers -------------------------------------------------------------
 
 /// Change the Background color of the given Widget.
 template <typename Widget_t,
@@ -200,7 +159,7 @@ template <typename Widget_t,
                                     int> = 0>
 auto operator|(Widget_t&& w, Background_color bg) -> decltype(auto)
 {
-    get(w).brush.add_traits(bg);
+    get(w).brush.background = Color{bg.value};
     get(w).update();
     return std::forward<Widget_t>(w);
 }
@@ -211,7 +170,7 @@ template <typename Widget_t,
                                     int> = 0>
 auto operator|(Widget_t&& w, Foreground_color fg) -> decltype(auto)
 {
-    get(w).brush.add_traits(fg);
+    get(w).brush.foreground = Color{fg.value};
     get(w).update();
     return std::forward<Widget_t>(w);
 }
@@ -222,34 +181,235 @@ template <typename Widget_t,
                                     int> = 0>
 auto operator|(Widget_t&& w, Trait t) -> decltype(auto)
 {
-    get(w).brush.add_traits(t);
+    get(w).brush.traits.insert(t);
     get(w).update();
     return std::forward<Widget_t>(w);
 }
 
+// Border Mofifiers ------------------------------------------------------------
+
+template <
+    typename Widget_t,
+    typename std::enable_if_t<pipe::detail::is_widget_v<Widget_t>, int> = 0>
+auto operator|(Bordered<Widget_t>& w, ox::Border const& b)
+    -> Bordered<Widget_t>&
+{
+    w.set_border(b);
+    return w;
+}
+
+template <
+    typename Widget_t,
+    typename std::enable_if_t<pipe::detail::is_widget_v<Widget_t>, int> = 0>
+auto operator|(std::unique_ptr<Bordered<Widget_t>> w_ptr, ox::Border const& b)
+    -> std::unique_ptr<Bordered<Widget_t>>
+{
+    w_ptr->set_border(b);
+    return w_ptr;
+}
+
+template <
+    typename Widget_t,
+    typename std::enable_if_t<pipe::detail::is_widget_v<Widget_t>, int> = 0>
+auto operator|(Bordered<Widget_t>& w, Background_color bg)
+    -> Bordered<Widget_t>&
+{
+    w.set_border(w.Bordered<Widget_t>::border() | bg);
+    return w;
+}
+
+template <
+    typename Widget_t,
+    typename std::enable_if_t<pipe::detail::is_widget_v<Widget_t>, int> = 0>
+auto operator|(std::unique_ptr<Bordered<Widget_t>> w_ptr, Background_color bg)
+    -> std::unique_ptr<Bordered<Widget_t>>
+{
+    w_ptr->set_border(w_ptr->Bordered<Widget_t>::border() | bg);
+    return w_ptr;
+}
+
+template <
+    typename Widget_t,
+    typename std::enable_if_t<pipe::detail::is_widget_v<Widget_t>, int> = 0>
+auto operator|(Bordered<Widget_t>& w, Foreground_color fg)
+    -> Bordered<Widget_t>&
+{
+    w.set_border(w.Bordered<Widget_t>::border() | fg);
+    return w;
+}
+
+template <
+    typename Widget_t,
+    typename std::enable_if_t<pipe::detail::is_widget_v<Widget_t>, int> = 0>
+auto operator|(std::unique_ptr<Bordered<Widget_t>> w_ptr, Foreground_color fg)
+    -> std::unique_ptr<Bordered<Widget_t>>
+{
+    w_ptr->set_border(w_ptr->Bordered<Widget_t>::border() | fg);
+    return std::move(w_ptr);
+}
+
 }  // namespace ox
+
 namespace ox::pipe {
 
-inline auto discard(Trait t)
+[[nodiscard]] inline auto drop_north()
 {
-    return [=](auto&& w) -> decltype(auto) {
-        get(w).brush.remove_traits(t);
-        get(w).update();
+    return [](auto&& w) -> decltype(auto) {
+        get(w).set_border(ox::drop_north(get(w).border()));
         return std::forward<decltype(w)>(w);
     };
 }
 
-inline auto clear_traits()
+[[nodiscard]] inline auto drop_south()
 {
     return [](auto&& w) -> decltype(auto) {
-        get(w).brush.clear_traits();
-        get(w).update();
+        get(w).set_border(ox::drop_south(get(w).border()));
         return std::forward<decltype(w)>(w);
     };
+}
+
+[[nodiscard]] inline auto drop_east()
+{
+    return [](auto&& w) -> decltype(auto) {
+        get(w).set_border(ox::drop_east(get(w).border()));
+        return std::forward<decltype(w)>(w);
+    };
+}
+
+[[nodiscard]] inline auto drop_west()
+{
+    return [](auto&& w) -> decltype(auto) {
+        get(w).set_border(ox::drop_west(get(w).border()));
+        return std::forward<decltype(w)>(w);
+    };
+}
+
+[[nodiscard]] inline auto take_north()
+{
+    return [](auto&& w) -> decltype(auto) {
+        get(w).set_border(ox::take_north(get(w).border()));
+        return std::forward<decltype(w)>(w);
+    };
+}
+
+[[nodiscard]] inline auto take_south()
+{
+    return [](auto&& w) -> decltype(auto) {
+        get(w).set_border(ox::take_south(get(w).border()));
+        return std::forward<decltype(w)>(w);
+    };
+}
+
+[[nodiscard]] inline auto take_east()
+{
+    return [](auto&& w) -> decltype(auto) {
+        get(w).set_border(ox::take_east(get(w).border()));
+        return std::forward<decltype(w)>(w);
+    };
+}
+
+[[nodiscard]] inline auto take_west()
+{
+    return [](auto&& w) -> decltype(auto) {
+        get(w).set_border(ox::take_west(get(w).border()));
+        return std::forward<decltype(w)>(w);
+    };
+}
+
+/// Discards Traits from Widgets or Glyph_strings
+[[nodiscard]] inline auto discard(Traits ts)
+{
+    return Overload{[ts](Brush& b) -> Brush& {
+                        b.traits.remove(ts);
+                        return b;
+                    },
+                    [ts](Brush const& b) -> Brush {
+                        auto copy = b;
+                        copy.traits.remove(ts);
+                        return copy;
+                    },
+                    [ts](Brush&& b) -> Brush {
+                        b.traits.remove(ts);
+                        return std::move(b);
+                    },
+                    [ts](Glyph& g) -> Glyph& {
+                        g.brush.traits.remove(ts);
+                        return g;
+                    },
+                    [ts](Glyph const& g) -> Glyph {
+                        auto copy = g;
+                        copy.brush.traits.remove(ts);
+                        return copy;
+                    },
+                    [ts](Glyph&& g) -> Glyph {
+                        g.brush.traits.remove(ts);
+                        return std::move(g);
+                    },
+                    [ts](Glyph_string& gs) -> Glyph_string& {
+                        gs.remove_traits(ts);
+                        return gs;
+                    },
+                    [ts](Glyph_string const& gs) -> Glyph_string {
+                        auto copy = gs;
+                        copy.remove_traits(ts);
+                        return copy;
+                    },
+                    [ts](Glyph_string&& gs) -> Glyph_string {
+                        gs.remove_traits(ts);
+                        return std::move(gs);
+                    },
+                    [ts](auto&& w) -> decltype(auto) {
+                        get(w).brush.traits.remove(ts);
+                        get(w).update();
+                        return std::forward<decltype(w)>(w);
+                    }};
+}
+
+[[nodiscard]] inline auto clear_traits()
+{
+    return Overload{[](Brush& b) -> Brush& {
+                        b.traits = Trait::None;
+                        return b;
+                    },
+                    [](Brush b) -> Brush {
+                        b.traits = Trait::None;
+                        return b;
+                    },
+                    [](Glyph& g) -> Glyph& {
+                        g.brush.traits = Trait::None;
+                        return g;
+                    },
+                    [](Glyph const& g) -> Glyph {
+                        auto copy         = g;
+                        copy.brush.traits = Trait::None;
+                        return copy;
+                    },
+                    [](Glyph&& g) -> Glyph {
+                        g.brush.traits = Trait::None;
+                        return std::move(g);
+                    },
+                    [](Glyph_string& gs) -> Glyph_string& {
+                        gs.clear_traits();
+                        return gs;
+                    },
+                    [](Glyph_string const& gs) -> Glyph_string {
+                        auto copy = gs;
+                        copy.clear_traits();
+                        return copy;
+                    },
+                    [](Glyph_string&& gs) -> Glyph_string {
+                        gs.clear_traits();
+                        return std::move(gs);
+                    },
+                    [](auto&& w) -> decltype(auto) {
+                        get(w).brush.traits = Trait::None;
+                        get(w).update();
+                        return std::forward<decltype(w)>(w);
+                    }};
 }
 
 // Cursor Modifiers ------------------------------------------------------------
-inline auto show_cursor()
+[[nodiscard]] inline auto show_cursor()
 {
     return [](auto&& w) -> decltype(auto) {
         get(w).cursor.enable();
@@ -257,7 +417,7 @@ inline auto show_cursor()
     };
 }
 
-inline auto hide_cursor()
+[[nodiscard]] inline auto hide_cursor()
 {
     return [](auto&& w) -> decltype(auto) {
         get(w).cursor.disable();
@@ -265,7 +425,7 @@ inline auto hide_cursor()
     };
 }
 
-inline auto put_cursor(Point p)
+[[nodiscard]] inline auto put_cursor(Point p)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).cursor.set_position(p);
@@ -274,7 +434,7 @@ inline auto put_cursor(Point p)
 }
 
 // Focus_policy ----------------------------------------------------------------
-inline auto focus(Focus_policy p)
+[[nodiscard]] inline auto focus(Focus_policy p)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).focus_policy = p;
@@ -282,75 +442,84 @@ inline auto focus(Focus_policy p)
     };
 }
 
-inline auto no_focus() { return focus(Focus_policy::None); }
+[[nodiscard]] inline auto no_focus() { return focus(Focus_policy::None); }
 
-inline auto tab_focus() { return focus(Focus_policy::Tab); }
+[[nodiscard]] inline auto tab_focus() { return focus(Focus_policy::Tab); }
 
-inline auto click_focus() { return focus(Focus_policy::Click); }
+[[nodiscard]] inline auto click_focus() { return focus(Focus_policy::Click); }
 
-inline auto strong_focus() { return focus(Focus_policy::Strong); }
+[[nodiscard]] inline auto strong_focus() { return focus(Focus_policy::Strong); }
 
-inline auto direct_focus() { return focus(Focus_policy::Direct); }
+[[nodiscard]] inline auto direct_focus() { return focus(Focus_policy::Direct); }
+
+/// Give focus to \p receiver when the piped Widget gets focus_in_event.
+[[nodiscard]] inline auto forward_focus(Widget& receiver)
+{
+    return [&](auto&& w) -> decltype(auto) {
+        get(w).focused_in.connect([&] { ::ox::System::set_focus(receiver); });
+        return std::forward<decltype(w)>(w);
+    };
+}
 
 // Width Policy Modifiers -----------------------------------------------------
 
-inline auto fixed_width(std::size_t hint)
+[[nodiscard]] inline auto fixed_width(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).width_policy.fixed(hint);
+        get(w).width_policy = ox::Size_policy::fixed(hint);
         return std::forward<decltype(w)>(w);
     };
 }
 
-inline auto minimum_width(std::size_t hint)
+[[nodiscard]] inline auto minimum_width(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).width_policy.minimum(hint);
+        get(w).width_policy = ox::Size_policy::minimum(hint);
         return std::forward<decltype(w)>(w);
     };
 }
 
-inline auto maximum_width(std::size_t hint)
+[[nodiscard]] inline auto maximum_width(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).width_policy.maximum(hint);
+        get(w).width_policy = ox::Size_policy::maximum(hint);
         return std::forward<decltype(w)>(w);
     };
 }
 
-inline auto preferred_width(std::size_t hint)
+[[nodiscard]] inline auto preferred_width(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).width_policy.preferred(hint);
+        get(w).width_policy = ox::Size_policy::preferred(hint);
         return std::forward<decltype(w)>(w);
     };
 }
 
-inline auto expanding_width(std::size_t hint)
+[[nodiscard]] inline auto expanding_width(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).width_policy.expanding(hint);
+        get(w).width_policy = ox::Size_policy::expanding(hint);
         return std::forward<decltype(w)>(w);
     };
 }
 
-inline auto minimum_expanding_width(std::size_t hint)
+[[nodiscard]] inline auto minimum_expanding_width(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).width_policy.minimum_expanding(hint);
+        get(w).width_policy = ox::Size_policy::minimum_expanding(hint);
         return std::forward<decltype(w)>(w);
     };
 }
 
-inline auto ignored_width()
+[[nodiscard]] inline auto ignored_width()
 {
     return [](auto&& w) -> decltype(auto) {
-        get(w).width_policy.ignored();
+        get(w).width_policy = ox::Size_policy::ignored();
         return std::forward<decltype(w)>(w);
     };
 }
 
-inline auto width_hint(std::size_t hint)
+[[nodiscard]] inline auto width_hint(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).width_policy.hint(hint);
@@ -358,7 +527,7 @@ inline auto width_hint(std::size_t hint)
     };
 }
 
-inline auto width_min(std::size_t min)
+[[nodiscard]] inline auto width_min(int min)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).width_policy.min(min);
@@ -366,7 +535,7 @@ inline auto width_min(std::size_t min)
     };
 }
 
-inline auto width_max(std::size_t max)
+[[nodiscard]] inline auto width_max(int max)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).width_policy.max(max);
@@ -374,7 +543,7 @@ inline auto width_max(std::size_t max)
     };
 }
 
-inline auto width_stretch(double stretch)
+[[nodiscard]] inline auto width_stretch(double stretch)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).width_policy.stretch(stretch);
@@ -382,7 +551,7 @@ inline auto width_stretch(double stretch)
     };
 }
 
-inline auto can_ignore_width_min()
+[[nodiscard]] inline auto can_ignore_width_min()
 {
     return [](auto&& w) -> decltype(auto) {
         get(w).width_policy.can_ignore_min(true);
@@ -390,7 +559,7 @@ inline auto can_ignore_width_min()
     };
 }
 
-inline auto cannot_ignore_width_min()
+[[nodiscard]] inline auto cannot_ignore_width_min()
 {
     return [](auto&& w) -> decltype(auto) {
         get(w).width_policy.can_ignore_min(false);
@@ -398,73 +567,65 @@ inline auto cannot_ignore_width_min()
     };
 }
 
-inline auto passive_width(bool x = true)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        get(w).width_policy.passive(x);
-        return std::forward<decltype(w)>(w);
-    };
-}
-
 // Height Policy Modifiers -----------------------------------------------------
 
-inline auto fixed_height(std::size_t hint)
+[[nodiscard]] inline auto fixed_height(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).height_policy.fixed(hint);
+        get(w).height_policy = ox::Size_policy::fixed(hint);
         return std::forward<decltype(w)>(w);
     };
 }
 
-inline auto minimum_height(std::size_t hint)
+[[nodiscard]] inline auto minimum_height(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).height_policy.minimum(hint);
+        get(w).height_policy = ox::Size_policy::minimum(hint);
         return std::forward<decltype(w)>(w);
     };
 }
 
-inline auto maximum_height(std::size_t hint)
+[[nodiscard]] inline auto maximum_height(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).height_policy.maximum(hint);
+        get(w).height_policy = ox::Size_policy::maximum(hint);
         return std::forward<decltype(w)>(w);
     };
 }
 
-inline auto preferred_height(std::size_t hint)
+[[nodiscard]] inline auto preferred_height(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).height_policy.preferred(hint);
+        get(w).height_policy = ox::Size_policy::preferred(hint);
         return std::forward<decltype(w)>(w);
     };
 }
 
-inline auto expanding_height(std::size_t hint)
+[[nodiscard]] inline auto expanding_height(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).height_policy.expanding(hint);
+        get(w).height_policy = ox::Size_policy::expanding(hint);
         return std::forward<decltype(w)>(w);
     };
 }
 
-inline auto minimum_expanding_height(std::size_t hint)
+[[nodiscard]] inline auto minimum_expanding_height(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).height_policy.minimum_expanding(hint);
+        get(w).height_policy = ox::Size_policy::minimum_expanding(hint);
         return std::forward<decltype(w)>(w);
     };
 }
 
-inline auto ignored_height()
+[[nodiscard]] inline auto ignored_height()
 {
     return [](auto&& w) -> decltype(auto) {
-        get(w).height_policy.ignored();
+        get(w).height_policy = ox::Size_policy::ignored();
         return std::forward<decltype(w)>(w);
     };
 }
 
-inline auto height_hint(std::size_t hint)
+[[nodiscard]] inline auto height_hint(int hint)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).height_policy.hint(hint);
@@ -472,7 +633,7 @@ inline auto height_hint(std::size_t hint)
     };
 }
 
-inline auto height_min(std::size_t min)
+[[nodiscard]] inline auto height_min(int min)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).height_policy.min(min);
@@ -480,7 +641,7 @@ inline auto height_min(std::size_t min)
     };
 }
 
-inline auto height_max(std::size_t max)
+[[nodiscard]] inline auto height_max(int max)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).height_policy.max(max);
@@ -488,7 +649,7 @@ inline auto height_max(std::size_t max)
     };
 }
 
-inline auto height_stretch(double stretch)
+[[nodiscard]] inline auto height_stretch(double stretch)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).height_policy.stretch(stretch);
@@ -496,7 +657,7 @@ inline auto height_stretch(double stretch)
     };
 }
 
-inline auto can_ignore_height_min()
+[[nodiscard]] inline auto can_ignore_height_min()
 {
     return [](auto&& w) -> decltype(auto) {
         get(w).height_policy.can_ignore_min(true);
@@ -504,7 +665,7 @@ inline auto can_ignore_height_min()
     };
 }
 
-inline auto cannot_ignore_height_min()
+[[nodiscard]] inline auto cannot_ignore_height_min()
 {
     return [](auto&& w) -> decltype(auto) {
         get(w).height_policy.can_ignore_min(false);
@@ -512,968 +673,9 @@ inline auto cannot_ignore_height_min()
     };
 }
 
-inline auto passive_height(bool x = true)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        get(w).height_policy.passive(x);
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-// Border Modifiers ------------------------------------------------------------
-// Pre-Fab Border Shapes - most common of 256 total combinations
-inline auto bordered()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).border.enable();
-        auto& segments = get(w).border.segments;
-        segments.north.enable();
-        segments.south.enable();
-        segments.east.enable();
-        segments.west.enable();
-        segments.north_east.enable();
-        segments.north_west.enable();
-        segments.south_east.enable();
-        segments.south_west.enable();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto not_bordered()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).border.disable();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto north_border()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).border.enable();
-        auto& segments = get(w).border.segments;
-        segments.north.enable();
-        segments.south.disable();
-        segments.east.disable();
-        segments.west.disable();
-        segments.north_east.disable();
-        segments.north_west.disable();
-        segments.south_east.disable();
-        segments.south_west.disable();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto south_border()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).border.enable();
-        auto& segments = get(w).border.segments;
-        segments.north.disable();
-        segments.south.enable();
-        segments.east.disable();
-        segments.west.disable();
-        segments.north_east.disable();
-        segments.north_west.disable();
-        segments.south_east.disable();
-        segments.south_west.disable();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto east_border()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).border.enable();
-        auto& segments = get(w).border.segments;
-        segments.north.disable();
-        segments.south.disable();
-        segments.east.enable();
-        segments.west.disable();
-        segments.north_east.disable();
-        segments.north_west.disable();
-        segments.south_east.disable();
-        segments.south_west.disable();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto west_border()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).border.enable();
-        auto& segments = get(w).border.segments;
-        segments.north.disable();
-        segments.south.disable();
-        segments.east.disable();
-        segments.west.enable();
-        segments.north_east.disable();
-        segments.north_west.disable();
-        segments.south_east.disable();
-        segments.south_west.disable();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto north_east_border()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).border.enable();
-        auto& segments = get(w).border.segments;
-        segments.north.enable();
-        segments.south.disable();
-        segments.east.enable();
-        segments.west.disable();
-        segments.north_east.enable();
-        segments.north_west.disable();
-        segments.south_east.disable();
-        segments.south_west.disable();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto north_west_border()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).border.enable();
-        auto& segments = get(w).border.segments;
-        segments.north.enable();
-        segments.south.disable();
-        segments.east.disable();
-        segments.west.enable();
-        segments.north_east.disable();
-        segments.north_west.enable();
-        segments.south_east.disable();
-        segments.south_west.disable();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto south_east_border()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).border.enable();
-        auto& segments = get(w).border.segments;
-        segments.north.disable();
-        segments.south.enable();
-        segments.east.enable();
-        segments.west.disable();
-        segments.north_east.disable();
-        segments.north_west.disable();
-        segments.south_east.enable();
-        segments.south_west.disable();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto south_west_border()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).border.enable();
-        auto& segments = get(w).border.segments;
-        segments.north.disable();
-        segments.south.enable();
-        segments.east.disable();
-        segments.west.enable();
-        segments.north_east.disable();
-        segments.north_west.disable();
-        segments.south_east.disable();
-        segments.south_west.enable();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto north_south_border()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).border.enable();
-        auto& segments = get(w).border.segments;
-        segments.north.enable();
-        segments.south.enable();
-        segments.east.disable();
-        segments.west.disable();
-        segments.north_east.disable();
-        segments.north_west.disable();
-        segments.south_east.disable();
-        segments.south_west.disable();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto east_west_border()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).border.enable();
-        auto& segments = get(w).border.segments;
-        segments.north.disable();
-        segments.south.disable();
-        segments.east.enable();
-        segments.west.enable();
-        segments.north_east.disable();
-        segments.north_west.disable();
-        segments.south_east.disable();
-        segments.south_west.disable();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto corners_border()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).border.enable();
-        auto& segments = get(w).border.segments;
-        segments.north.disable();
-        segments.south.disable();
-        segments.east.disable();
-        segments.west.disable();
-        segments.north_east.enable();
-        segments.north_west.enable();
-        segments.south_east.enable();
-        segments.south_west.enable();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto no_corners_border()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).border.enable();
-        auto& segments = get(w).border.segments;
-        segments.north.enable();
-        segments.south.enable();
-        segments.east.enable();
-        segments.west.enable();
-        segments.north_east.disable();
-        segments.north_west.disable();
-        segments.south_east.disable();
-        segments.south_west.disable();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto no_walls_border()
-{
-    return [](auto&& w) -> decltype(auto) {
-        get(w).border.enable();
-        auto& segments = get(w).border.segments;
-        segments.north.disable();
-        segments.south.disable();
-        segments.east.disable();
-        segments.west.disable();
-        segments.north_east.enable();
-        segments.north_west.enable();
-        segments.south_east.enable();
-        segments.south_west.enable();
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-namespace detail {
-template <typename G>
-using Can_make_glyph_from_t =
-    std::enable_if_t<std::is_constructible_v<Glyph, G> ||
-                         std::is_convertible_v<G, Glyph>,
-                     int>;
-}
-
-/// Sets traits given to each wall of the border.
-template <typename... Traits>
-auto walls(Traits... a)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x = get(w);
-        x.border.segments.north.brush.add_traits(a...);
-        x.border.segments.south.brush.add_traits(a...);
-        x.border.segments.east.brush.add_traits(a...);
-        x.border.segments.west.brush.add_traits(a...);
-        x.border.segments.north_east.brush.add_traits(a...);
-        x.border.segments.north_west.brush.add_traits(a...);
-        x.border.segments.south_east.brush.add_traits(a...);
-        x.border.segments.south_west.brush.add_traits(a...);
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-// Wall/Corner Glyphs - Does not change border's enabled state.
-template <typename G, typename detail::Can_make_glyph_from_t<G> = 0>
-auto north_wall(G g)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        get(w).border.segments.north = g;
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename... Traits>
-auto north_wall(Traits... a)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        get(w).border.segments.north.brush.add_traits(a...);
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename G, typename detail::Can_make_glyph_from_t<G> = 0>
-auto south_wall(G g)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        get(w).border.segments.south = g;
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename... Traits>
-auto south_wall(Traits... a)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        get(w).border.segments.south.brush.add_traits(a...);
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename G, typename detail::Can_make_glyph_from_t<G> = 0>
-auto east_wall(G g)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        get(w).border.segments.east = g;
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename... Traits>
-auto east_wall(Traits... a)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        get(w).border.segments.east.brush.add_traits(a...);
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename G, typename detail::Can_make_glyph_from_t<G> = 0>
-auto west_wall(G g)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        get(w).border.segments.west = g;
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename... Traits>
-auto west_wall(Traits... a)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        get(w).border.segments.west.brush.add_traits(a...);
-        get(w).update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename G, typename detail::Can_make_glyph_from_t<G> = 0>
-auto north_south_walls(G g)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                 = get(w);
-        x.border.segments.north = g;
-        x.border.segments.south = g;
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename... Traits>
-auto north_south_walls(Traits... a)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x = get(w);
-        x.border.segments.north.brush.add_traits(a...);
-        x.border.segments.south.brush.add_traits(a...);
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename G, typename detail::Can_make_glyph_from_t<G> = 0>
-auto east_west_walls(G g)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                = get(w);
-        x.border.segments.east = g;
-        x.border.segments.west = g;
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename... Traits>
-auto east_west_walls(Traits... a)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x = get(w);
-        x.border.segments.east.brush.add_traits(a...);
-        x.border.segments.west.brush.add_traits(a...);
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename G, typename detail::Can_make_glyph_from_t<G> = 0>
-auto north_east_corner(G g)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north_east = g;
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename... Traits>
-auto north_east_corner(Traits... a)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x = get(w);
-        x.border.segments.north_east.brush.add_traits(a...);
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename G, typename detail::Can_make_glyph_from_t<G> = 0>
-auto north_east_walls(G g)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north      = g;
-        x.border.segments.north_east = g;
-        x.border.segments.east       = g;
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename... Traits>
-auto north_east_walls(Traits... a)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x = get(w);
-        x.border.segments.north.brush.add_traits(a...);
-        x.border.segments.north_east.brush.add_traits(a...);
-        x.border.segments.east.brush.add_traits(a...);
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename G, typename detail::Can_make_glyph_from_t<G> = 0>
-auto north_west_corner(G g)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north_west = g;
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename... Traits>
-auto north_west_corner(Traits... a)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x = get(w);
-        x.border.segments.north_west.brush.add_traits(a...);
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename G, typename detail::Can_make_glyph_from_t<G> = 0>
-auto north_west_walls(G g)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north      = g;
-        x.border.segments.north_west = g;
-        x.border.segments.west       = g;
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename... Traits>
-auto north_west_walls(Traits... a)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x = get(w);
-        x.border.segments.north.brush.add_traits(a...);
-        x.border.segments.north_west.brush.add_traits(a...);
-        x.border.segments.west.brush.add_traits(a...);
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename G, typename detail::Can_make_glyph_from_t<G> = 0>
-auto south_east_corner(G g)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.south_east = g;
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename... Traits>
-auto south_east_corner(Traits... a)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x = get(w);
-        x.border.segments.south_east.brush.add_traits(a...);
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename G, typename detail::Can_make_glyph_from_t<G> = 0>
-auto south_east_walls(G g)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.south      = g;
-        x.border.segments.south_east = g;
-        x.border.segments.east       = g;
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename... Traits>
-auto south_east_walls(Traits... a)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x = get(w);
-        x.border.segments.south.brush.add_traits(a...);
-        x.border.segments.south_east.brush.add_traits(a...);
-        x.border.segments.east.brush.add_traits(a...);
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename G, typename detail::Can_make_glyph_from_t<G> = 0>
-auto south_west_corner(G g)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.south_west = g;
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename... Traits>
-auto south_west_corner(Traits... a)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x = get(w);
-        x.border.segments.south_west.brush.add_traits(a...);
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename G, typename detail::Can_make_glyph_from_t<G> = 0>
-auto south_west_walls(G g)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.south      = g;
-        x.border.segments.south_west = g;
-        x.border.segments.west       = g;
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-template <typename... Traits>
-auto south_west_walls(Traits... a)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x = get(w);
-        x.border.segments.south.brush.add_traits(a...);
-        x.border.segments.south_west.brush.add_traits(a...);
-        x.border.segments.west.brush.add_traits(a...);
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-// Pre-Fab Border Glyphs - Does not change border's enabled state.
-inline auto squared_corners()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north_east = L'┐';
-        x.border.segments.north_west = L'┌';
-        x.border.segments.south_east = L'┘';
-        x.border.segments.south_west = L'└';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto rounded_corners()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north_east = L'╮';
-        x.border.segments.north_west = L'╭';
-        x.border.segments.south_east = L'╯';
-        x.border.segments.south_west = L'╰';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto plus_corners()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north_east = L'+';
-        x.border.segments.north_west = L'+';
-        x.border.segments.south_east = L'+';
-        x.border.segments.south_west = L'+';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto asterisk_walls()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north      = L'*';
-        x.border.segments.south      = L'*';
-        x.border.segments.east       = L'*';
-        x.border.segments.west       = L'*';
-        x.border.segments.north_east = L'*';
-        x.border.segments.north_west = L'*';
-        x.border.segments.south_east = L'*';
-        x.border.segments.south_west = L'*';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto doubled_walls()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north      = L'═';
-        x.border.segments.south      = L'═';
-        x.border.segments.east       = L'║';
-        x.border.segments.west       = L'║';
-        x.border.segments.north_east = L'╗';
-        x.border.segments.north_west = L'╔';
-        x.border.segments.south_east = L'╝';
-        x.border.segments.south_west = L'╚';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto bold_walls()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north      = L'━';
-        x.border.segments.south      = L'━';
-        x.border.segments.east       = L'┃';
-        x.border.segments.west       = L'┃';
-        x.border.segments.north_east = L'┓';
-        x.border.segments.north_west = L'┏';
-        x.border.segments.south_east = L'┛';
-        x.border.segments.south_west = L'┗';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto dashed_walls_1()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                 = get(w);
-        x.border.segments.north = L'╶';
-        x.border.segments.south = L'╶';
-        x.border.segments.east  = L'╷';
-        x.border.segments.west  = L'╷';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto bold_dashed_walls_1()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                 = get(w);
-        x.border.segments.north = L'╺';
-        x.border.segments.south = L'╺';
-        x.border.segments.east  = L'╻';
-        x.border.segments.west  = L'╻';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto dashed_walls_2()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                 = get(w);
-        x.border.segments.north = L'╌';
-        x.border.segments.south = L'╌';
-        x.border.segments.east  = L'╎';
-        x.border.segments.west  = L'╎';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto bold_dashed_walls_2()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                 = get(w);
-        x.border.segments.north = L'╍';
-        x.border.segments.south = L'╍';
-        x.border.segments.east  = L'╏';
-        x.border.segments.west  = L'╏';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto dashed_walls_3()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                 = get(w);
-        x.border.segments.north = L'┄';
-        x.border.segments.south = L'┄';
-        x.border.segments.east  = L'┆';
-        x.border.segments.west  = L'┆';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto bold_dashed_walls_3()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                 = get(w);
-        x.border.segments.north = L'┅';
-        x.border.segments.south = L'┅';
-        x.border.segments.east  = L'┇';
-        x.border.segments.west  = L'┇';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto dashed_walls_4()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                 = get(w);
-        x.border.segments.north = L'┈';
-        x.border.segments.south = L'┈';
-        x.border.segments.east  = L'┊';
-        x.border.segments.west  = L'┊';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto bold_dashed_walls_4()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                 = get(w);
-        x.border.segments.north = L'┉';
-        x.border.segments.south = L'┉';
-        x.border.segments.east  = L'┋';
-        x.border.segments.west  = L'┋';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto block_walls_1()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north      = L'█';
-        x.border.segments.south      = L'█';
-        x.border.segments.east       = L'█';
-        x.border.segments.west       = L'█';
-        x.border.segments.north_east = L'█';
-        x.border.segments.north_west = L'█';
-        x.border.segments.south_east = L'█';
-        x.border.segments.south_west = L'█';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto block_walls_2()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north      = L'▓';
-        x.border.segments.south      = L'▓';
-        x.border.segments.east       = L'▓';
-        x.border.segments.west       = L'▓';
-        x.border.segments.north_east = L'▓';
-        x.border.segments.north_west = L'▓';
-        x.border.segments.south_east = L'▓';
-        x.border.segments.south_west = L'▓';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto block_walls_3()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north      = L'▒';
-        x.border.segments.south      = L'▒';
-        x.border.segments.east       = L'▒';
-        x.border.segments.west       = L'▒';
-        x.border.segments.north_east = L'▒';
-        x.border.segments.north_west = L'▒';
-        x.border.segments.south_east = L'▒';
-        x.border.segments.south_west = L'▒';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto block_walls_4()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north      = L'░';
-        x.border.segments.south      = L'░';
-        x.border.segments.east       = L'░';
-        x.border.segments.west       = L'░';
-        x.border.segments.north_east = L'░';
-        x.border.segments.north_west = L'░';
-        x.border.segments.south_east = L'░';
-        x.border.segments.south_west = L'░';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto half_block_walls()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north      = Glyph{L'▄', Trait::Inverse};
-        x.border.segments.south      = L'▄';
-        x.border.segments.east       = Glyph{L'▌', Trait::Inverse};
-        x.border.segments.west       = L'▌';
-        x.border.segments.north_east = L'▜';
-        x.border.segments.north_west = L'▛';
-        x.border.segments.south_east = L'▟';
-        x.border.segments.south_west = L'▙';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto half_block_inner_walls_1()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north      = L'▄';
-        x.border.segments.south      = Glyph{L'▄', Trait::Inverse};
-        x.border.segments.east       = L'▌';
-        x.border.segments.west       = Glyph{L'▌', Trait::Inverse};
-        x.border.segments.north_east = L'▖';
-        x.border.segments.north_west = L'▗';
-        x.border.segments.south_east = L'▘';
-        x.border.segments.south_west = L'▝';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto half_block_inner_walls_2()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north      = L'▄';
-        x.border.segments.south      = Glyph{L'▄', Trait::Inverse};
-        x.border.segments.east       = L'▌';
-        x.border.segments.west       = Glyph{L'▌', Trait::Inverse};
-        x.border.segments.north_east = L'▞';
-        x.border.segments.north_west = L'▚';
-        x.border.segments.south_east = L'▚';
-        x.border.segments.south_west = L'▞';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto block_corners()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north_east = L'▝';
-        x.border.segments.north_west = L'▘';
-        x.border.segments.south_east = L'▗';
-        x.border.segments.south_west = L'▖';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
-inline auto floating_block_corners()
-{
-    return [=](auto&& w) -> decltype(auto) {
-        auto& x                      = get(w);
-        x.border.segments.north_east = L'▖';
-        x.border.segments.north_west = L'▗';
-        x.border.segments.south_east = L'▘';
-        x.border.segments.south_west = L'▝';
-        x.update();
-        return std::forward<decltype(w)>(w);
-    };
-}
-
 // Widget::Signals -------------------------------------------------------------
 template <typename Handler>
-inline auto on_enable(Handler&& op)
+[[nodiscard]] inline auto on_enable(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).enabled.connect(std::forward<Handler>(op));
@@ -1482,7 +684,7 @@ inline auto on_enable(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_disable(Handler&& op)
+[[nodiscard]] inline auto on_disable(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).disabled.connect(std::forward<Handler>(op));
@@ -1491,7 +693,7 @@ inline auto on_disable(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_child_added(Handler&& op)
+[[nodiscard]] inline auto on_child_added(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).child_added.connect(std::forward<Handler>(op));
@@ -1500,7 +702,7 @@ inline auto on_child_added(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_child_removed(Handler&& op)
+[[nodiscard]] inline auto on_child_removed(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).child_removed.connect(std::forward<Handler>(op));
@@ -1509,7 +711,7 @@ inline auto on_child_removed(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_child_polished(Handler&& op)
+[[nodiscard]] inline auto on_child_polished(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).child_polished.connect(std::forward<Handler>(op));
@@ -1518,7 +720,7 @@ inline auto on_child_polished(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_move(Handler&& op)
+[[nodiscard]] inline auto on_move(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).moved.connect(std::forward<Handler>(op));
@@ -1527,7 +729,7 @@ inline auto on_move(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_resize(Handler&& op)
+[[nodiscard]] inline auto on_resize(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).resized.connect(std::forward<Handler>(op));
@@ -1536,7 +738,7 @@ inline auto on_resize(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_mouse_press(Handler&& op)
+[[nodiscard]] inline auto on_mouse_press(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).mouse_pressed.connect(std::forward<Handler>(op));
@@ -1545,7 +747,7 @@ inline auto on_mouse_press(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_left_click(Handler&& op)
+[[nodiscard]] inline auto on_left_click(Handler&& op)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).mouse_pressed.connect([op](auto const& m) {
@@ -1557,7 +759,7 @@ inline auto on_left_click(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_middle_click(Handler&& op)
+[[nodiscard]] inline auto on_middle_click(Handler&& op)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).mouse_pressed.connect([op](auto const& m) {
@@ -1569,7 +771,7 @@ inline auto on_middle_click(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_right_click(Handler&& op)
+[[nodiscard]] inline auto on_right_click(Handler&& op)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).mouse_pressed.connect([op](auto const& m) {
@@ -1581,7 +783,7 @@ inline auto on_right_click(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_mouse_release(Handler&& op)
+[[nodiscard]] inline auto on_mouse_release(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).mouse_released.connect(std::forward<Handler>(op));
@@ -1590,7 +792,7 @@ inline auto on_mouse_release(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_mouse_double_click(Handler&& op)
+[[nodiscard]] inline auto on_mouse_double_click(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).mouse_double_clicked.connect(std::forward<Handler>(op));
@@ -1599,7 +801,7 @@ inline auto on_mouse_double_click(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_mouse_move(Handler&& op)
+[[nodiscard]] inline auto on_mouse_move(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).mouse_moved.connect(std::forward<Handler>(op));
@@ -1608,7 +810,7 @@ inline auto on_mouse_move(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_key_press(Handler&& op)
+[[nodiscard]] inline auto on_key_press(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).key_pressed.connect(std::forward<Handler>(op));
@@ -1617,11 +819,11 @@ inline auto on_key_press(Handler&& op)
 }
 
 template <typename Handler>
-inline auto bind_key(Key key, Handler&& op)
+[[nodiscard]] inline auto bind_key(Key k, Handler&& op)
 {
-    return [op = std::forward<Handler>(op), key](auto&& w) -> decltype(auto) {
-        get(w).key_pressed.connect([&w, &op, key](auto pressed) {
-            if (pressed == key)
+    return [op = std::forward<Handler>(op), k](auto&& w) -> decltype(auto) {
+        get(w).key_pressed.connect([&w, &op, k](auto pressed) {
+            if (pressed == k)
                 op(w);
         });
         return std::forward<decltype(w)>(w);
@@ -1629,7 +831,7 @@ inline auto bind_key(Key key, Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_focus_in(Handler&& op)
+[[nodiscard]] inline auto on_focus_in(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).focused_in.connect(std::forward<Handler>(op));
@@ -1638,7 +840,7 @@ inline auto on_focus_in(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_focus_out(Handler&& op)
+[[nodiscard]] inline auto on_focus_out(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).focused_out.connect(std::forward<Handler>(op));
@@ -1647,7 +849,7 @@ inline auto on_focus_out(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_paint(Handler&& op)
+[[nodiscard]] inline auto on_paint(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).painted.connect(std::forward<Handler>(op));
@@ -1656,7 +858,7 @@ inline auto on_paint(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_timer(Handler&& op)
+[[nodiscard]] inline auto on_timer(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).timer.connect(std::forward<Handler>(op));
@@ -1665,17 +867,17 @@ inline auto on_timer(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_destroyed(Handler&& op)
+[[nodiscard]] inline auto on_deleted(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
-        get(w).destroyed.connect(std::forward<Handler>(op));
+        get(w).deleted.connect(std::forward<Handler>(op));
         return std::forward<decltype(w)>(w);
     };
 }
 
 // Derived Widget::Signals -----------------------------------------------------
 template <typename Handler>
-inline auto on_color_selected(Handler&& op)
+[[nodiscard]] inline auto on_color_selected(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).color_selected.connect(std::forward<Handler>(op));
@@ -1684,7 +886,7 @@ inline auto on_color_selected(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_press(Handler&& op)
+[[nodiscard]] inline auto on_press(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).pressed.connect(std::forward<Handler>(op));
@@ -1693,7 +895,7 @@ inline auto on_press(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_check(Handler&& op)
+[[nodiscard]] inline auto on_check(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).checked.connect(std::forward<Handler>(op));
@@ -1702,7 +904,7 @@ inline auto on_check(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_uncheck(Handler&& op)
+[[nodiscard]] inline auto on_uncheck(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).unchecked.connect(std::forward<Handler>(op));
@@ -1711,7 +913,7 @@ inline auto on_uncheck(Handler&& op)
 }
 
 template <typename Handler>
-inline auto on_toggle(Handler&& op)
+[[nodiscard]] inline auto on_toggle(Handler&& op)
 {
     return [&](auto&& w) -> decltype(auto) {
         get(w).toggled.connect(std::forward<Handler>(op));
@@ -1720,7 +922,7 @@ inline auto on_toggle(Handler&& op)
 }
 
 // Derived Widget Modifiers ----------------------------------------------------
-inline auto active_page(std::size_t p)
+[[nodiscard]] inline auto active_page(std::size_t p)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).set_active_page(p);
@@ -1728,7 +930,7 @@ inline auto active_page(std::size_t p)
     };
 }
 
-inline auto label(Glyph_string const& x)
+[[nodiscard]] inline auto label(Glyph_string const& x)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).set_label(x);
@@ -1736,8 +938,13 @@ inline auto label(Glyph_string const& x)
     };
 }
 
+[[nodiscard]] inline auto wrapped()
+{
+    return [](auto&& w) -> auto& { return get(w).wrapped; };
+}
+
 // Labeled_cycle_box
-inline auto divider(Glyph x)
+[[nodiscard]] inline auto divider(Glyph x)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).set_divider(x);
@@ -1745,24 +952,23 @@ inline auto divider(Glyph x)
     };
 }
 
-inline auto word_wrap(bool enable)
+[[nodiscard]] inline auto any_wrap()
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).enable_word_wrap(enable);
+        get(w).set_wrap(Wrap::Any);
         return std::forward<decltype(w)>(w);
     };
 }
 
-// TODO remove and replace with text()
-inline auto contents(Glyph_string x)
+[[nodiscard]] inline auto word_wrap()
 {
     return [=](auto&& w) -> decltype(auto) {
-        get(w).set_contents(x);
+        get(w).set_wrap(Wrap::Word);
         return std::forward<decltype(w)>(w);
     };
 }
 
-inline auto text(Glyph_string x)
+[[nodiscard]] inline auto text(Glyph_string x)
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).set_text(x);
@@ -1770,7 +976,16 @@ inline auto text(Glyph_string x)
     };
 }
 
-inline auto align_left()
+template <typename Number_t>
+[[nodiscard]] inline auto value(Number_t x)
+{
+    return [=](auto&& w) -> decltype(auto) {
+        get(w).set_value(x);
+        return std::forward<decltype(w)>(w);
+    };
+}
+
+[[nodiscard]] inline auto align_left()
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).set_alignment(Align::Left);
@@ -1778,7 +993,7 @@ inline auto align_left()
     };
 }
 
-inline auto align_center()
+[[nodiscard]] inline auto align_center()
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).set_alignment(Align::Center);
@@ -1786,7 +1001,7 @@ inline auto align_center()
     };
 }
 
-inline auto align_right()
+[[nodiscard]] inline auto align_right()
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).set_alignment(Align::Right);
@@ -1794,16 +1009,8 @@ inline auto align_right()
     };
 }
 
-inline auto ghost(Color c)
-{
-    return [=](auto&& w) -> decltype(auto) {
-        get(w).set_ghost_color(c);
-        return std::forward<decltype(w)>(w);
-    };
-}
-
 // Label
-inline auto dynamic_growth()
+[[nodiscard]] inline auto dynamic_growth()
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).set_growth_strategy(Growth::Dynamic);
@@ -1811,7 +1018,7 @@ inline auto dynamic_growth()
     };
 }
 
-inline auto no_growth()
+[[nodiscard]] inline auto no_growth()
 {
     return [=](auto&& w) -> decltype(auto) {
         get(w).set_growth_strategy(Growth::Static);
@@ -1823,21 +1030,11 @@ inline auto no_growth()
 
 namespace ox {
 
-/// Return *x if x is a unique_ptr to a Widget type, otherwise x.
-template <typename T>
-constexpr auto get(T& x) -> auto&
-{
-    if constexpr (pipe::detail::is_widget_ptr_v<T>)
-        return *x;
-    else
-        return x;
-}
-
 /// Pipe operator for use with Widget.
-template <typename Widget_t,
-          typename F,
-          typename std::enable_if_t<pipe::detail::is_widget_or_wptr<Widget_t>,
-                                    int> = 0>
+template <
+    typename Widget_t,
+    typename F,
+    typename = std::enable_if_t<pipe::detail::is_widget_or_wptr<Widget_t>, int>>
 auto operator|(Widget_t&& w, F&& op) -> std::invoke_result_t<F, Widget_t&&>
 {
     return std::forward<F>(op)(std::forward<Widget_t>(w));
@@ -1862,22 +1059,21 @@ auto operator|(Range<Iter_1, Iter_2> children,
                  children.end()};
 }
 
-// clang-format off
-// clang format can't handle this one at the moment.
-
 /// Overload to create a filtered range with upcast.
 template <typename Iter_1, typename Iter_2, typename Widget_t>
 auto operator|(Range<Iter_1, Iter_2> children,
                pipe::detail::Dynamic_filter_predicate<Widget_t>)
 {
+    // clang format can't handle this one at the moment.
+    // clang-format off
     return Range{
             Transform_iterator{
                 Filter_iterator{ children.begin(), children.end(),
                 [](auto& w) { return dynamic_cast<Widget_t*>(&w) != nullptr; }},
                 [](auto& w) -> auto& {return static_cast<Widget_t&>(w); }
                 }, children.end()};
-}
 // clang-format on
+}
 
 /// Pipe operator for use with Widget::get_descendants.
 template <typename F>
@@ -1887,6 +1083,72 @@ auto operator|(std::vector<Widget*> const& descendants, F&& op)
     for (auto* d : descendants)
         *d | op;
     return descendants;
+}
+
+/// Glyph_string pipe operator, for any function object pipe argument.
+template <typename F>
+auto operator|(Glyph_string& gs, F&& op)
+    -> std::invoke_result_t<F, Glyph_string&>
+{
+    return std::forward<F>(op)(gs);
+}
+
+/// Glyph_string pipe operator, for any function object pipe argument.
+template <typename F>
+auto operator|(Glyph_string const& gs, F&& op)
+    -> std::invoke_result_t<F, Glyph_string const&>
+{
+    return std::forward<F>(op)(gs);
+}
+
+/// Glyph_string pipe operator, for any function object pipe argument.
+template <typename F>
+auto operator|(Glyph_string&& gs, F&& op)
+    -> std::invoke_result_t<F, Glyph_string&&>
+{
+    return std::forward<F>(op)(std::move(gs));
+}
+
+/// Glyph pipe operator, for any function object pipe argument.
+template <typename F>
+auto operator|(Glyph& g, F&& op) -> std::invoke_result_t<F, Glyph&>
+{
+    return std::forward<F>(op)(g);
+}
+
+/// Glyph pipe operator, for any function object pipe argument.
+template <typename F>
+auto operator|(Glyph const& g, F&& op) -> std::invoke_result_t<F, Glyph const&>
+{
+    return std::forward<F>(op)(g);
+}
+
+/// Glyph pipe operator, for any function object pipe argument.
+template <typename F>
+auto operator|(Glyph&& g, F&& op) -> std::invoke_result_t<F, Glyph&&>
+{
+    return std::forward<F>(op)(std::move(g));
+}
+
+/// Brush pipe operator, for any function object pipe argument.
+template <typename F>
+auto operator|(Brush& b, F&& op) -> std::invoke_result_t<F, Brush&>
+{
+    return std::forward<F>(op)(b);
+}
+
+/// Brush pipe operator, for any function object pipe argument.
+template <typename F>
+auto operator|(Brush const& b, F&& op) -> std::invoke_result_t<F, Brush const&>
+{
+    return std::forward<F>(op)(b);
+}
+
+/// Brush pipe operator, for any function object pipe argument.
+template <typename F>
+auto operator|(Brush&& b, F&& op) -> std::invoke_result_t<F, Brush&&>
+{
+    return std::forward<F>(op)(std::move(b));
 }
 
 }  // namespace ox

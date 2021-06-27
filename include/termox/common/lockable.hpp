@@ -7,12 +7,15 @@ namespace ox {
 template <typename Mutex = std::mutex>
 class Lockable {
    public:
-    auto lock() -> std::scoped_lock<Mutex> { return std::scoped_lock{mtx_}; }
+    [[nodiscard]] auto lock() const -> std::scoped_lock<Mutex>
+    {
+        return std::scoped_lock{mtx_};
+    }
 
-    auto mutex() -> Mutex& { return mtx_; }
+    [[nodiscard]] auto mutex() const -> Mutex& { return mtx_; }
 
    private:
-    Mutex mtx_;
+    mutable Mutex mtx_;
 };
 
 }  // namespace ox

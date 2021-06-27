@@ -1,10 +1,7 @@
 #ifndef TERMOX_DEMOS_GAME_OF_LIFE_BITSET_HPP
 #define TERMOX_DEMOS_GAME_OF_LIFE_BITSET_HPP
-#include <algorithm>
-#include <cmath>
 #include <cstddef>
 #include <cstdint>
-#include <utility>
 #include <vector>
 
 #include "coordinate.hpp"
@@ -14,7 +11,7 @@ namespace gol {
 /// Dynamically Resizing 2D Bitset with std::int16_t Dimensions.
 /** Can replace a std::(unordered_)set<Coordinate>, this is much faster. */
 class Bitset {
-   private:
+   public:
     using Dimension_t = std::int16_t;
     using Container_t = std::vector<bool>;
 
@@ -30,37 +27,18 @@ class Bitset {
        public:
         Iterator(Container_t::const_iterator i,
                  Dimension_t lower,
-                 Dimension_t upper)
-            : i_{i}, lower_{lower}, upper_{upper}
-        {}
+                 Dimension_t upper);
 
        public:
-        auto operator++() -> Iterator&
-        {
-            ++i_;
-            if (++c_.x > upper_) {
-                c_.x = lower_;
-                ++c_.y;
-            }
-            return *this;
-        }
+        auto operator++() -> Iterator&;
 
-        auto operator*() const -> Value { return {*i_, c_}; }
+        auto operator*() const -> Value;
 
-        friend auto operator<(Iterator const& x, Iterator const& y) -> bool
-        {
-            return x.i_ < y.i_;
-        }
+        friend auto operator<(Iterator const& x, Iterator const& y) -> bool;
 
-        friend auto operator==(Iterator const& x, Iterator const& y) -> bool
-        {
-            return x.i_ == y.i_;
-        }
+        friend auto operator==(Iterator const& x, Iterator const& y) -> bool;
 
-        friend auto operator!=(Iterator const& x, Iterator const& y) -> bool
-        {
-            return x.i_ != y.i_;
-        }
+        friend auto operator!=(Iterator const& x, Iterator const& y) -> bool;
 
        private:
         Container_t::const_iterator i_;
@@ -73,43 +51,24 @@ class Bitset {
     using const_iterator = Iterator;
 
    public:
-    void insert(Coordinate c)
-    {
-        if (this->out_of_bounds(c))
-            this->resize(4 * std::max(std::abs(c.x), std::abs(c.y)));
-        values_[this->get_offset(c)] = true;
-    }
+    void insert(Coordinate c);
 
-    void remove(Coordinate c)
-    {
-        if (this->out_of_bounds(c))
-            return;
-        values_[this->get_offset(c)] = false;
-    }
+    void remove(Coordinate c);
 
-    auto contains(Coordinate c) const -> bool
-    {
-        if (this->out_of_bounds(c))
-            return false;
-        return values_[this->get_offset(c)];
-    }
+    [[nodiscard]] auto contains(Coordinate c) const -> bool;
+
+    [[nodiscard]] auto size() const -> std::size_t { return values_.size(); }
 
     /// Sets all bits to false.
-    void clear() { values_ = Container_t(side_length_ * side_length_, false); }
+    void clear();
 
     /// Begin iterator to boolean and Coordinate.
     /** This container is usually fairly large. */
-    auto begin() const -> const_iterator
-    {
-        return {std::cbegin(values_), lower_bound_, upper_bound_};
-    }
+    [[nodiscard]] auto begin() const -> const_iterator;
 
     /// End iterator to boolean and Coordinate.
     /** This container is usually fairly large. */
-    auto end() const -> const_iterator
-    {
-        return {std::cend(values_), lower_bound_, upper_bound_};
-    }
+    [[nodiscard]] auto end() const -> const_iterator;
 
    private:
     Dimension_t side_length_ = 100;
@@ -124,58 +83,14 @@ class Bitset {
 
    private:
     /// Visual Coordinate to vector index.
-    auto get_offset(Coordinate c) const -> std::size_t
-    {
-        return offset(c, side_length_, half_length_);
-    }
+    auto get_offset(Coordinate c) const -> std::size_t;
 
-    /// Visual Coordinate to vector index.
-    static auto offset(Coordinate c,
-                       Dimension_t length,
-                       Dimension_t half_length) -> std::size_t
-    {
-        return (c.x + half_length) + ((c.y + half_length) * length);
-        // c.x: index - half_length
-        // c.y:  / length
-    }
-
-    /// Add more memory to the Bitmap to handle larger sizes.
-    /// The size passed in should be the length of one side of a square.
-    void resize(Dimension_t new_side_length)
-    {
-        auto const new_half_length = new_side_length / 2;
-        auto new_values = Container_t(new_side_length * new_side_length, false);
-
-        for (auto const cell : *this) {
-            if (cell.is_alive) {
-                new_values[offset(cell.coordinate, new_side_length,
-                                  new_half_length)] = true;
-            }
-        }
-
-        // auto c = Coordinate{lower_bound_, lower_bound_};
-        // for (auto b : values_) {
-        //     if (b)
-        //         new_values[offset(c, new_side_length, new_half_length)] = true;
-        //     if (++c.x > upper_bound_) {
-        //         c.x = lower_bound_;
-        //         ++c.y;
-        //     }
-        // }
-
-        values_      = std::move(new_values);
-        side_length_ = new_side_length;
-        half_length_ = side_length_ / 2;
-        lower_bound_ = -half_length_;
-        upper_bound_ = half_length_ - 1;
-    }
+    /// Add more memory to the Bitset to handle larger sizes.
+    /** The size passed in should be the length of one side of a square. */
+    void resize(Dimension_t new_side_length);
 
     /// Return true if c is out of bounds of the memory allocated.
-    auto out_of_bounds(Coordinate c) const -> bool
-    {
-        return c.x < lower_bound_ || c.x > upper_bound_ || c.y < lower_bound_ ||
-               c.y > upper_bound_;
-    }
+    auto out_of_bounds(Coordinate c) const -> bool;
 };
 
 }  // namespace gol

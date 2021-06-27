@@ -3,7 +3,6 @@
 
 namespace ox {
 class Widget;
-struct Focus_in_event;
 }  // namespace ox
 
 namespace ox::detail {
@@ -11,7 +10,7 @@ namespace ox::detail {
 class Focus {
    public:
     /// Return a pointer to the currently focused Widget, can return nullptr.
-    static auto focus_widget() -> ox::Widget* { return focus_widget_; }
+    [[nodiscard]] static auto focus_widget() -> ox::Widget*;
 
     /// Sets the focus to \p clicked if it has a Focus_policy::Mouse/Strong.
     static void mouse_press(ox::Widget& clicked);
@@ -26,24 +25,24 @@ class Focus {
     /** If \p new_focus has Focus_policy::None, calls Focus::clear(). */
     static void set(ox::Widget& new_focus);
 
-    /// Set the focus widget to nullptr.
+    /// Set the focus widget to nullptr and send Focus_out_event to focus_widg.
     static void clear();
 
+    /// Set the focus widget to nullptr and do not send a Focus_out_event.
+    /** Needed to unregister the focus widget if it is being destroyed. */
+    static void clear_without_posting_event();
+
     /// Enable Tab/Back_tab keys to change the focus Widget.
-    static void enable_tab_focus() { tab_enabled_ = true; }
+    static void enable_tab_focus();
 
     /// Disable Tab/Back_tab keys from changing focus Widget.
-    static void disable_tab_focus() { tab_enabled_ = false; }
+    static void disable_tab_focus();
 
     /// Stops a Tab or Back_tab from changing focus to the next Widget.
-    static void suppress_tab() { tab_suppressed_ = true; }
+    static void suppress_tab();
 
     /// Re-enable a Tab or Back_tab to change focus to the next Widget.
-    static void unsuppress_tab() { tab_suppressed_ = false; }
-
-    /// Directly sets the focus widget without sending any events.
-    /** Only for use by send(Focus_in_event). */
-    static void direct_set_focus(ox::Widget& w) { focus_widget_ = &w; }
+    static void unsuppress_tab();
 
    private:
     static ox::Widget* focus_widget_;

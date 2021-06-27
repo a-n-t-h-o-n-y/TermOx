@@ -25,22 +25,22 @@ constexpr auto White       = Color::Foreground;
 /** https://lospec.com/palette-list/dawnbringer-16 */
 inline auto const palette = Palette{
     /* clang-format off */
-    {Black,       ANSI{16}, 0x140c1c},
-    {Dark_red,    ANSI{17}, 0x442434},
-    {Green,       ANSI{18}, 0x346524},
-    {Brown,       ANSI{19}, 0x854c30},
-    {Dark_blue,   ANSI{20}, 0x30346d},
-    {Violet,      ANSI{21}, 0xd2aa99},
-    {Light_blue,  ANSI{22}, 0x6dc2ca},
-    {Light_gray,  ANSI{23}, 0x8595a1},
-    {Dark_gray,   ANSI{24}, 0x4e4a4e},
-    {Red,         ANSI{25}, 0xd04648},
-    {Light_green, ANSI{26}, 0x6daa2c},
-    {Yellow,      ANSI{27}, 0xdad45e},
-    {Blue,        ANSI{28}, 0x597dce},
-    {Orange,      ANSI{29}, 0xd27d2c},
-    {Gray,        ANSI{30}, 0x757161},
-    {White,       ANSI{31}, 0xdeeed6},
+    {Black,       RGB{0x140c1c}},
+    {Dark_red,    RGB{0x442434}},
+    {Green,       RGB{0x346524}},
+    {Brown,       RGB{0x854c30}},
+    {Dark_blue,   RGB{0x30346d}},
+    {Violet,      RGB{0xd2aa99}},
+    {Light_blue,  RGB{0x6dc2ca}},
+    {Light_gray,  RGB{0x8595a1}},
+    {Dark_gray,   RGB{0x4e4a4e}},
+    {Red,         RGB{0xd04648}},
+    {Light_green, RGB{0x6daa2c}},
+    {Yellow,      RGB{0xdad45e}},
+    {Blue,        RGB{0x597dce}},
+    {Orange,      RGB{0xd27d2c}},
+    {Gray,        RGB{0x757161}},
+    {White,       RGB{0xdeeed6}},
     /* clang-format on */
 };
 

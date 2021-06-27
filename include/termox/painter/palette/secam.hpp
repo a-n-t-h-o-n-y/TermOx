@@ -17,14 +17,14 @@ constexpr auto White  = Color::Foreground;
 /** https://lospec.com/palette-list/secam */
 inline auto const palette = Palette{
     /* clang-format off */
-    {Black,  ANSI{16}, 0x000000},
-    {Red,    ANSI{17}, 0xf03c79},
-    {Green,  ANSI{18}, 0x7fff00},
-    {Yellow, ANSI{19}, 0xffff3f},
-    {Blue,   ANSI{20}, 0x2121ff},
-    {Violet, ANSI{21}, 0xff50ff},
-    {Cyan,   ANSI{22}, 0x7fffff},
-    {White,  ANSI{23}, 0xffffff},
+    {Black,  RGB{0x000000}},
+    {Red,    RGB{0xf03c79}},
+    {Green,  RGB{0x7fff00}},
+    {Yellow, RGB{0xffff3f}},
+    {Blue,   RGB{0x2121ff}},
+    {Violet, RGB{0xff50ff}},
+    {Cyan,   RGB{0x7fffff}},
+    {White,  RGB{0xffffff}},
     /* clang-format on */
 };
 

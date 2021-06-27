@@ -1,10 +1,10 @@
 #ifndef TERMOX_WIDGET_WIDGETS_NOTIFY_LIGHT_HPP
 #define TERMOX_WIDGET_WIDGETS_NOTIFY_LIGHT_HPP
 #include <chrono>
+#include <memory>
 
 #include <termox/painter/color.hpp>
 #include <termox/painter/glyph.hpp>
-#include <termox/widget/pipe.hpp>
 #include <termox/widget/widget.hpp>
 
 namespace ox {
@@ -12,12 +12,12 @@ namespace ox {
 /// A 'light' that can be emitted for a given duration to visually notify.
 class Notify_light : public Widget {
    public:
-    using Duration_t = std::chrono::milliseconds;
-
     struct Display {
         Color on;
         Color off;
     };
+
+    using Duration_t = std::chrono::milliseconds;
 
     enum class Fade : bool { On, Off };
 
@@ -27,97 +27,64 @@ class Notify_light : public Widget {
         Fade fade           = Fade::On;
     };
 
+    static auto constexpr default_duration = Duration_t{450};
+
    public:
     explicit Notify_light(Display display     = Display{Color::Foreground,
                                                     Color::Background},
                           Duration_t duration = default_duration,
-                          Fade fade           = Fade::On)
-        : Notify_light{Parameters{display, duration, fade}}
-    {}
+                          Fade fade           = Fade::On);
 
-    Notify_light(Parameters p)
-        : parameters_{std::move(p)},
-          on_block_{initial_block | fg(parameters_.display.on) |
-                    bg(parameters_.display.off)},
-          off_block_{initial_block | fg(parameters_.display.off)}
-    {
-        *this | pipe::fixed_height(1) | pipe::fixed_width(2);
-        this->set_wallpaper(off_block_);
-    }
+    explicit Notify_light(Parameters p);
 
    public:
     /// Start emitting the on color for the set duration.
-    void emit()
-    {
-        this->Widget::disable_animation();
-        on_block_.symbol = L' ';
-        this->Widget::enable_animation(parameters_.duration / block_count);
-    }
+    void emit();
 
     /// Set the on and off Colors of the light.
-    void set_display(Display d)
-    {
-        parameters_.display = d;
-
-        on_block_ | fg(parameters_.display.on) | bg(parameters_.display.off);
-        off_block_ | fg(parameters_.display.off);
-    }
+    void set_display(Display d);
 
     /// Return the on and off Colors currently used.
-    auto get_display() const -> Display { return parameters_.display; }
+    [[nodiscard]] auto get_display() const -> Display;
 
     /// Set the duration from the time emit is called to when the light is off.
-    void set_duration(Duration_t d) { parameters_.duration = d; }
+    void set_duration(Duration_t d);
 
     /// Return the currently set duration.
-    auto get_duration() const -> Duration_t { return parameters_.duration; }
+    [[nodiscard]] auto get_duration() const -> Duration_t;
 
     /// Set the light to Fade or not.
-    void set_fade(Fade f) { parameters_.fade = f; }
+    void set_fade(Fade f);
 
     /// Return the currently set Fade type.
-    auto get_fade() const -> Fade { return parameters_.fade; }
+    [[nodiscard]] auto get_fade() const -> Fade;
 
    protected:
-    auto timer_event() -> bool override
-    {
-        auto constexpr first  = initial_block;
-        auto constexpr second = L'▓';
-        auto constexpr third  = L'▒';
-        auto constexpr fourth = L'░';
-        auto constexpr empty  = L' ';
-
-        switch (on_block_.symbol) {
-            case empty: on_block_.symbol = first; break;
-            case first: on_block_.symbol = second; break;
-            case second: on_block_.symbol = third; break;
-            case third: on_block_.symbol = fourth; break;
-            case fourth: on_block_.symbol = empty; break;
-            default: break;
-        }
-
-        if (parameters_.fade == Fade::On)
-            this->set_wallpaper(on_block_);
-        else if (on_block_.symbol == empty)
-            this->set_wallpaper(off_block_);
-        else
-            this->set_wallpaper(initial_block | fg(parameters_.display.on));
-
-        if (on_block_.symbol == empty)
-            this->Widget::disable_animation();
-
-        return Widget::timer_event();
-    }
+    auto timer_event() -> bool override;
 
    private:
-    Parameters parameters_;
+    Display display_;
+    Duration_t duration_;
+    Fade fade_;
+
     Glyph on_block_;
     Glyph off_block_;
 
-    static auto constexpr initial_block    = L'█';
-    static auto constexpr block_count      = 4;
-    static auto constexpr default_duration = Duration_t{450};
+    static auto constexpr initial_block = U'█';
+    static auto constexpr block_count   = 4;
 };
+
+/// Helper function to create a Notify_light instance.
+[[nodiscard]] auto notify_light(
+    Notify_light::Display display     = Notify_light::Display{Color::Foreground,
+                                                          Color::Background},
+    Notify_light::Duration_t duration = Notify_light::default_duration,
+    Notify_light::Fade fade           = Notify_light::Fade::On)
+    -> std::unique_ptr<Notify_light>;
+
+/// Helper function to create a Notify_light instance.
+[[nodiscard]] auto notify_light(Notify_light::Parameters p)
+    -> std::unique_ptr<Notify_light>;
 
 }  // namespace ox
 #endif  // TERMOX_WIDGET_WIDGETS_NOTIFY_LIGHT_HPP
