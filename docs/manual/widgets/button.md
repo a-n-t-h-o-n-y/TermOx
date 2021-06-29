@@ -1,6 +1,6 @@
 # Button Widgets
 
-- [`termox/widget/widgets/button.hpp`](../../../include/termox/widget/widgets/button.hpp)
+[`termox/widget/widgets/button.hpp`](../../../include/termox/widget/widgets/button.hpp)
 
 ## `Button`
 
