@@ -1,5 +1,7 @@
 # Button Widgets
 
+- [`termox/widget/widgets/button.hpp`](../../../include/termox/widget/widgets/button.hpp)
+
 ## `Button`
 
 Emits `pressed` signal on left mouse button press, and `released` on left mouse
@@ -88,6 +90,21 @@ class Thin_button : public Button {
     explicit Thin_button(Glyph_string text = U"");
     explicit Thin_button(Parameters);
 };
-```
 
-- [`termox/widget/widgets/button.hpp`](../../../include/termox/widget/widgets/button.hpp)
+using HThin_button = Thin_button<layout::Horizontal>;
+using VThin_button = Thin_button<layout::Vertical>;
+
+template <template <typename> typename Layout_t>
+auto thin_button(Glyph_string text = U"") -> std::unique_ptr<Thin_button<Layout_t>>;
+
+template <template <typename> typename Layout_t>
+auto thin_button(typename Thin_button<Layout_t>::Parameters) -> std::unique_ptr<Thin_button<Layout_t>>;
+
+auto hthin_button(Glyph_string text = U"") -> std::unique_ptr<HThin_button>;
+
+auto hthin_button(HThin_button::Parameters) -> std::unique_ptr<HThin_button>;
+
+auto vthin_button(Glyph_string text = U"") -> std::unique_ptr<VThin_button>;
+
+auto vthin_button(VThin_button::Parameters) -> std::unique_ptr<VThin_button>;
+```
