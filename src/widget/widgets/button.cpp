@@ -76,7 +76,7 @@ Push_button::Push_button(Parameters p)
 
 void Push_button::set_pressed_color(Color c) { pressed_color_ = c; }
 
-auto Push_button::get_pressed_color() const -> Color { return pressed_color_; };
+auto Push_button::get_pressed_color() const -> Color { return pressed_color_; }
 
 void Push_button::set_released_color(Color c)
 {

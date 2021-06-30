@@ -206,8 +206,14 @@ class Accordion : public Passive<Layout_t<Widget>> {
     /// Return the wrapped widget.
     [[nodiscard]] auto wrapped() -> Widget_t& { return wrapped_; }
 
+    /// Return the wrapped widget.
+    [[nodiscard]] auto wrapped() const -> Widget_t const& { return wrapped_; }
+
     /// Return the titled Bar widget.
     [[nodiscard]] auto bar() -> Bar_t& { return bar_; }
+
+    /// Return the titled Bar widget.
+    [[nodiscard]] auto bar() const -> Bar_t const& { return bar_; }
 
    private:
     Bar_t& bar_;

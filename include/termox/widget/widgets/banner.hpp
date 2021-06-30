@@ -220,7 +220,7 @@ class Animator_base {
 
 /* ------------------- Banner Animation Implementations ----------------------*/
 
-/// Left to right reveal of text, hold, left to right clearning of text.
+/// Left to right reveal of text, hold, left to right clearing of text.
 class Scan : public Animator_base {
    public:
     [[nodiscard]] auto operator()() -> IP_range;
@@ -244,6 +244,7 @@ class Persistent_scan : public Animator_base {
     std::size_t end_;
 };
 
+/// Random indices are chosed and displayed one at a time.
 class Random : public Animator_base {
    public:
     [[nodiscard]] auto operator()() -> IP_range;
@@ -273,11 +274,13 @@ class Scroll_base : public Animator_base {
     std::size_t hold_length_;
 };
 
+/// Holds, then scrolls from left to right, then restarts.
 class Scroll : public Scroll_base {
    public:
     void set_text_length(std::size_t x);
 };
 
+/// Same as Scroll if text length is longer that display length, else static.
 class Conditional_scroll : public Scroll_base {
    public:
     void set_text_length(std::size_t x);
@@ -292,6 +295,7 @@ class Conditional_scroll : public Scroll_base {
     void stop_and_reset();
 };
 
+/// Starts with scrambled text and sorts itself one Glyph at a time.
 class Unscramble : public Animator_base {
    public:
     [[nodiscard]] auto operator()() -> IP_range;

@@ -58,7 +58,8 @@ class Button_list
     };
 
    public:
-    Button_list();
+    explicit Button_list(Color scrollbar_bg = Color::Background,
+                         Color scrollbar_fg = Color::Foreground);
 
     explicit Button_list(Parameters p);
 

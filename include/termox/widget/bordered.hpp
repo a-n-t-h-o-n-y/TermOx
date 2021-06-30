@@ -221,7 +221,7 @@ namespace ox::border {
             U'▜',
             U'▙',
             U'▟'};
-};
+}
 
 }  // namespace ox::border
 

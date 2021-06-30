@@ -1,6 +1,6 @@
 # Button Widgets
 
-[`termox/widget/widgets/button.hpp`](../../../include/termox/widget/widgets/button.hpp)
+[`<termox/widget/widgets/button.hpp>`](../../../include/termox/widget/widgets/button.hpp)
 
 ## `Button`
 
@@ -26,9 +26,6 @@ class Button : public Widget {
     // Return the current text.
     auto text() const -> Glyph_string const&;
 };
-
-auto button(Glyph_string text = U"") -> std::unique_ptr<Button>;
-auto button(Button::Parameters) -> std::unique_ptr<Button>;
 ```
 
 ## `Push_button`
@@ -65,14 +62,6 @@ class Push_button : public Button {
     // Return the current Color assigned to mouse release events.
     auto get_released_color() const -> Color;
 };
-
-auto push_button(Glyph_string text    = U"",
-                 Color pressed_color  = Color::Foreground,
-                 Color released_color = Color::Background)
-    -> std::unique_ptr<Push_button>;
-
-auto push_button(Push_button::Parameters)
-    -> std::unique_ptr<Push_button>;
 ```
 
 ## `Thin_button`
@@ -93,18 +82,4 @@ class Thin_button : public Button {
 
 using HThin_button = Thin_button<layout::Horizontal>;
 using VThin_button = Thin_button<layout::Vertical>;
-
-template <template <typename> typename Layout_t>
-auto thin_button(Glyph_string text = U"") -> std::unique_ptr<Thin_button<Layout_t>>;
-
-template <template <typename> typename Layout_t>
-auto thin_button(typename Thin_button<Layout_t>::Parameters) -> std::unique_ptr<Thin_button<Layout_t>>;
-
-auto hthin_button(Glyph_string text = U"") -> std::unique_ptr<HThin_button>;
-
-auto hthin_button(HThin_button::Parameters) -> std::unique_ptr<HThin_button>;
-
-auto vthin_button(Glyph_string text = U"") -> std::unique_ptr<VThin_button>;
-
-auto vthin_button(VThin_button::Parameters) -> std::unique_ptr<VThin_button>;
 ```

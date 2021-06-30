@@ -26,18 +26,18 @@ template class Just_a_button_list<layout::Vertical>;
 namespace ox {
 
 template <template <typename> class Layout_t>
-Button_list<Layout_t>::Button_list()
+Button_list<Layout_t>::Button_list(Color scrollbar_bg, Color scrollbar_fg)
 {
+    this->set_scrollbar_bg(scrollbar_bg);
+    this->set_scrollbar_fg(scrollbar_fg);
     link(scrollbar, buttons);
     buffer.install_event_filter(scrollbar);
 }
 
 template <template <typename> class Layout_t>
-Button_list<Layout_t>::Button_list(Parameters p) : Button_list{}
-{
-    this->set_scrollbar_bg(p.scrollbar_bg);
-    this->set_scrollbar_fg(p.scrollbar_fg);
-}
+Button_list<Layout_t>::Button_list(Parameters p)
+    : Button_list{p.scrollbar_bg, p.scrollbar_fg}
+{}
 
 template <template <typename> class Layout_t>
 auto Button_list<Layout_t>::add_button(std::u32string const& name) -> Button&

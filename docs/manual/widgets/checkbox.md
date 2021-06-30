@@ -1,5 +1,7 @@
 # Checkbox Widget
 
+[`<termox/widget/widgets/checkbox.hpp>`](../../../include/termox/widget/widgets/checkbox.hpp)
+
 A Checkbox is a Widget that can be left-clicked to change its state between
 being checked and unchecked, emitting a cooresponding Signal when the state
 changes. A Checkbox may also be locked, so that it cannot be manipulated until
@@ -30,47 +32,50 @@ class Checkbox : public Label<Layout_t> {
     };
 
    public:
-    /// Emitted when box becomes checked.
+    // Emitted when box becomes checked.
     sl::Signal<void()> checked;
 
-    /// Emitted when box becomes unchecked.
+    // Emitted when box becomes unchecked.
     sl::Signal<void()> unchecked;
 
-    /// Emitted every time the box changes state.
+    // Emitted every time the box changes state.
     sl::Signal<void()> toggled;
 
    public:
     explicit Checkbox(State initial_state, Display display, bool locked);
-    explicit Checkbox(Parameters p);
+    explicit Checkbox(Parameters);
 
    public:
-    /// Set the state to be checked.
+    // Set the state to be checked.
     void check();
 
-    /// Set the state to be unchecked.
+    // Set the state to be unchecked.
     void uncheck();
 
-    /// Change state to be unchecked if currently checked, checked otherwise.
+    // Change state to be unchecked if currently checked, checked otherwise.
     void toggle();
 
-    /// Return the current state of the Checkbox as Checkbox::State enum value.
+    // Return the current state of the Checkbox as Checkbox::State enum value.
     auto get_state() const -> State;
 
-    /// Lock the Checkbox, it can not be toggled when locked.
+    // Lock the Checkbox, it can not be toggled when locked.
     void lock();
 
-    /// Unlock the Checkbox, allowing it to be toggled.
+    // Unlock the Checkbox, allowing it to be toggled.
     void unlock();
 
-    /// Return true if the Checkbox is locked.
+    // Return true if the Checkbox is locked.
     auto is_locked() const -> bool;
 
-    /// Set the look of each Checkbox State.
+    // Set the look of each Checkbox State.
     void set_display(Display d);
 
-    /// Return the look of each Checkbox State.
+    // Return the look of each Checkbox State.
     auto get_display() -> Display;
 };
+
+using HCheckbox = Checkbox<layout::Horizontal>;
+using VCheckbox = Checkbox<layout::Vertical>;
 ```
 
 ### Checkbox Library Types
