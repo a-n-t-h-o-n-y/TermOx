@@ -44,6 +44,7 @@ add_library(TermOx STATIC
     widget/widgets/label.cpp
     widget/widgets/line.cpp
     widget/widgets/line_edit.cpp
+    widget/widgets/password_edit.cpp
     widget/widgets/log.cpp
     widget/widgets/matrix_view.cpp
     widget/widgets/menu.cpp

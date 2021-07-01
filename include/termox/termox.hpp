@@ -84,6 +84,7 @@
 #include <termox/widget/widgets/notify_light.hpp>
 #include <termox/widget/widgets/number_edit.hpp>
 #include <termox/widget/widgets/number_view.hpp>
+#include <termox/widget/widgets/password_edit.hpp>
 #include <termox/widget/widgets/read_file.hpp>
 #include <termox/widget/widgets/scrollbar.hpp>
 #include <termox/widget/widgets/selectable.hpp>
