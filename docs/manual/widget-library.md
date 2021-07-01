@@ -17,6 +17,7 @@
 - [`Write_file`](widgets/write-file.md)
 - [`Spinner`](widgets/spinner.md)
 - [`Line_edit`](widgets/line_edit.md)
+- [`Password_edit`](widgets/password_edit.md)
 - [`Number_edit`](widgets/number-edit.md)
 - [`Text_view`](widgets/text-view.md)
 - [`Textbox`](widgets/textbox.md)
