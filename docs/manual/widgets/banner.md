@@ -6,7 +6,6 @@ A Label with animated text display. An Animator class defines how the text
 appears on the Label.
 
 ```cpp
-// Animated Text Line/Label
 template <typename Animator>
 class Banner : public Widget {
    public:
@@ -19,13 +18,12 @@ class Banner : public Widget {
     };
 
    public:
-    explicit Banner(Glyph_string text   = U"",
-                    Interval_t interval = std::chrono::milliseconds{50},
-                    Animator animator   = Animator{});
+    Banner(Glyph_string text   = U"",
+           Interval_t interval = std::chrono::milliseconds{50},
+           Animator animator   = Animator{});
 
-    explicit Banner(Parameters);
+    Banner(Parameters);
 
-   public:
     void set_text(Glyph_string text);
 
     auto text() const -> Glyph_string const&;
@@ -45,19 +43,19 @@ class Banner : public Widget {
 ```cpp
 namespace ox::animator {
 
-/// Left to right reveal of text, hold, left to right clearing of text.
+// Left to right reveal of text, hold, left to right clearing of text.
 class Scan;
 
-/// Left to right reveal of text, then hold.
+// Left to right reveal of text, then hold.
 class Persistent_scan;
 
-/// Holds, then scrolls from left to right, then restarts.
+// Holds, then scrolls from left to right, then restarts.
 class Scroll;
 
-/// Same as Scroll if text length is longer that display length, else static.
+// Same as Scroll if text length is longer that display length, else static.
 class Conditional_scroll;
 
-/// Starts with scrambled text and sorts itself one Glyph at a time.
+// Starts with scrambled text and sorts itself one Glyph at a time.
 class Unscramble;
 
 } // namespace ox::animator

@@ -8,7 +8,7 @@
 
 namespace ox {
 
-/// A Vertical or Horizontal single width line divider.
+/// A Vertical or Horizontal single width/height line divider.
 template <template <typename> typename Layout_t>
 class Line : public Widget {
    public:

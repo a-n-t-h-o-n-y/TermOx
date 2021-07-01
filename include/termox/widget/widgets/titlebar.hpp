@@ -12,7 +12,6 @@ namespace ox {
 /// Provides a centered title and flush-right exit button.
 /** The exit button will call System::quit() when pressed. Titlebar is fixed at
  *  a height of 1. */
-// class Titlebar : public layout::Horizontal<> {
 class Titlebar : public HPair<HLabel, Button> {
    public:
     struct Parameters {

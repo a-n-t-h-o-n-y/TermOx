@@ -145,7 +145,7 @@ class Graph : public Widget {
         return larger - smaller;
     }
 
-    /// Returnt the cell mask cooresponding to the fractional parts of inputs.
+    /// Return the cell mask cooresponding to the fractional parts of inputs.
     [[nodiscard]] static auto to_cell_mask(double h_offset, double v_offset)
         -> std::uint8_t
     {

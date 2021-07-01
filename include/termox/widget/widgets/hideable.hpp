@@ -26,8 +26,7 @@ class Hideable : public SPair<Widget, Widget_t> {
 
     /// Forward constructor Parameters for the Widget_t that is being wrapped.
     /** Wrapped Widget is in visible state when constructed. Access via w. */
-    explicit Hideable(Parameters parameters)
-        : SPair<Widget, Widget_t>{{}, parameters}
+    explicit Hideable(Parameters p) : SPair<Widget, Widget_t>{{}, p}
     {
         this->set_active_page(widget_index_);
         this->give_focus_on_change(false);
@@ -60,10 +59,10 @@ template <typename Widget_t>
 
 /// Helper function to create a Hideable instance.
 template <typename Widget_t>
-[[nodiscard]] auto hideable(typename Hideable<Widget_t>::Parameters parameters)
+[[nodiscard]] auto hideable(typename Hideable<Widget_t>::Parameters p)
     -> std::unique_ptr<Hideable<Widget_t>>
 {
-    return std::make_unique<Hideable<Widget_t>>(std::move(parameters));
+    return std::make_unique<Hideable<Widget_t>>(std::move(p));
 }
 
 }  // namespace ox

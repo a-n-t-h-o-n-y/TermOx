@@ -31,7 +31,8 @@ Checkbox<Layout_t>::Checkbox(State initial_state, Display display, bool locked)
 
 template <template <typename> typename Layout_t>
 Checkbox<Layout_t>::Checkbox(Parameters p)
-    : Checkbox{p.initial_state, p.display, p.locked} {};
+    : Checkbox{p.initial_state, p.display, p.locked}
+{}
 
 template <template <typename> typename Layout_t>
 void Checkbox<Layout_t>::check()

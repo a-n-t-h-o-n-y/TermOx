@@ -22,6 +22,7 @@
 
 ## About Widgets...
 
+- [Widget Library](widget-library.md)
 - [Layouts](layouts.md)
 - [Widget](widget.md)
 - [Signals](signals.md)
@@ -30,7 +31,7 @@
 - [Border](border.md)
 - [Cursor](cursor.md)
 - [Glyph](glyph.md)
-- [Glyph_string](glyph-string.md)
+- [Glyph String](glyph-string.md)
 - [Animation](animation.md)
 - [Wallpaper](wallpaper.md)
 - [Pipe Namespace](pipe.md)

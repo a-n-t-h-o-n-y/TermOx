@@ -17,8 +17,8 @@ class Button : public Widget {
     struct Parameters { Glyph_string text = U""; };
 
    public:
-    explicit Button(Glyph_string text = U"");
-    explicit Button(Parameters);
+    Button(Glyph_string text = U"");
+    Button(Parameters);
 
     // Set the text and repaint.
     void set_text(Glyph_string text);
@@ -43,11 +43,11 @@ class Push_button : public Button {
     };
 
    public:
-    explicit Push_button(Glyph_string text    = U"",
-                         Color pressed_color  = Color::Foreground,
-                         Color released_color = Color::Background);
+    Push_button(Glyph_string text    = U"",
+                Color pressed_color  = Color::Foreground,
+                Color released_color = Color::Background);
 
-    explicit Push_button(Parameters);
+    Push_button(Parameters);
 
    public:
     // Set the background Color of the Button when pressed Signal is emitted.
@@ -76,8 +76,8 @@ class Thin_button : public Button {
     using Button::Parameters;
 
    public:
-    explicit Thin_button(Glyph_string text = U"");
-    explicit Thin_button(Parameters);
+    Thin_button(Glyph_string text = U"");
+    Thin_button(Parameters);
 };
 
 using HThin_button = Thin_button<layout::Horizontal>;

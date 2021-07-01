@@ -18,10 +18,8 @@ class Selectable : public Widget_t {
 
     Selectable(Select_method s,
                Unselect_method u,
-               typename Widget_t::Parameters parameters)
-        : Widget_t{std::move(parameters)},
-          select_{std::move(s)},
-          unselect_{std::move(u)}
+               typename Widget_t::Parameters p)
+        : Widget_t{std::move(p)}, select_{std::move(s)}, unselect_{std::move(u)}
     {}
 
    public:
@@ -50,12 +48,12 @@ template <typename Widget_t, typename Select_method, typename Unselect_method>
 template <typename Widget_t, typename Select_method, typename Unselect_method>
 [[nodiscard]] auto selectable(Select_method s,
                               Unselect_method u,
-                              typename Widget_t::Parameters parameters)
+                              typename Widget_t::Parameters p)
     -> std::unique_ptr<Selectable<Widget_t, Select_method, Unselect_method>>
 {
     return std::make_unique<
         Selectable<Widget_t, Select_method, Unselect_method>>(
-        std::move(s), std::move(u), std::move(parameters));
+        std::move(s), std::move(u), std::move(p));
 }
 
 /// Default overload that set's Widget_t's brush to Trait::Inverse.
@@ -67,7 +65,7 @@ class Selectable<Widget_t, void, void> : public Widget_t {
    public:
     Selectable() = default;
 
-    Selectable(Parameters parameters) : Widget_t{std::move(parameters)} {}
+    Selectable(Parameters p) : Widget_t{std::move(p)} {}
 
    public:
     /// Change visual to mark as selected.
@@ -94,11 +92,10 @@ template <typename Widget_t>
 
 /// Helper function to create a Selectable instance.
 template <typename Widget_t>
-[[nodiscard]] auto selectable(
-    typename Selectable<Widget_t>::Parameters parameters)
+[[nodiscard]] auto selectable(typename Selectable<Widget_t>::Parameters p)
     -> std::unique_ptr<Selectable<Widget_t>>
 {
-    return std::make_unique<Selectable<Widget_t>>(std::move(parameters));
+    return std::make_unique<Selectable<Widget_t>>(std::move(p));
 }
 
 }  // namespace ox

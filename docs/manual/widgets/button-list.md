@@ -5,14 +5,13 @@
 A list of Buttons with a connected scrollbar to move through the Buttons.
 
 ```cpp
-/// A list of buttons with connected scrollbar.
 template <template <typename> class Layout_t>
 class Button_list
     : public Pair<layout::Opposite_t<Layout_t<Widget>>,
                   Scrollbar<Layout_t>,
                   detail::Just_a_button_list_and_buffer<Layout_t>> {
    public:
-    /// Emitted when a given button in the list is pressed.
+    // Emitted when a given button in the list is pressed.
     sl::Signal<void(std::u32string const& name)>& button_pressed =
         buttons.button_pressed;
 
@@ -22,14 +21,13 @@ class Button_list
     };
 
    public:
-    explicit Button_list(Color scrollbar_bg = Color::Background,
-                         Color scrollbar_fg = Color::Foreground);
+    Button_list(Color scrollbar_bg = Color::Background,
+                Color scrollbar_fg = Color::Foreground);
 
-    explicit Button_list(Parameters);
+    Button_list(Parameters);
 
-   public:
     // Returns reference to the Button added.
-    /** The Brush and the 'pressed' signal are accessible to customize. */
+    /* The Brush and the 'pressed' signal are accessible to customize. */
     auto add_button(std::u32string const& name) -> Button&;
 
     // Set the background color of the Scrollbar.

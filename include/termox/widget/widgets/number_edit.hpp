@@ -79,6 +79,7 @@ class Number_edit : public detail::Textline_base {
         this->set_value(value_);  // clamp to new range
     }
 
+    /// Get the currently set Range.
     [[nodiscard]] auto range() const -> Range { return range_; }
 
     /// Set the value to increment/decrement by on arrow key/mouse wheel input.

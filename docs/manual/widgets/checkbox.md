@@ -13,8 +13,8 @@ set of pre-defined Labeled Checkboxes for common combinations.
 ## Checkbox Interface
 
 ```cpp
-/// Checkbox Widget that is either checked or not checked.
-/** Uses mouse left button click to toggle between states. */
+// Checkbox Widget that is either checked or not checked.
+/* Uses mouse left button click to toggle between states. */
 template <template <typename> typename Layout_t>
 class Checkbox : public Label<Layout_t> {
    public:
@@ -31,7 +31,6 @@ class Checkbox : public Label<Layout_t> {
         bool locked;
     };
 
-   public:
     // Emitted when box becomes checked.
     sl::Signal<void()> checked;
 
@@ -42,10 +41,9 @@ class Checkbox : public Label<Layout_t> {
     sl::Signal<void()> toggled;
 
    public:
-    explicit Checkbox(State initial_state, Display display, bool locked);
-    explicit Checkbox(Parameters);
+    Checkbox(State initial_state, Display display, bool locked);
+    Checkbox(Parameters);
 
-   public:
     // Set the state to be checked.
     void check();
 
@@ -130,9 +128,8 @@ class Labeled_checkbox {
     Label_t& label;
 
    public:
-    explicit Labeled_checkbox(
-        typename Label_t::Parameters    label_parameters    = {},
-        typename Checkbox_t::Parameters checkbox_parameters = {});
+    Labeled_checkbox(typename Label_t::Parameters    label_parameters    = {},
+                     typename Checkbox_t::Parameters checkbox_parameters = {});
 };
 ```
 
