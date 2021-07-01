@@ -1,5 +1,7 @@
 # Password Edit Widget
 
+[`<termox/widget/widgets/password_edit.hpp>`](../../../include/termox/widget/widgets/password_edit.hpp)
+
 A `Line_edit` that veils the input characters so the contents are hidden. Does
 not provide a validator, bad chars in a password should be caught after
 submission; Does not provide Alignment choice, always left aligned; Does not
