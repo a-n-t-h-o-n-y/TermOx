@@ -15,7 +15,7 @@ namespace ox {
 class Dynamic_color_engine : private Lockable<std::mutex> {
    public:
     using Clock_t    = Timer::Clock_t;
-    using Interval_t = Timer::Interval_t;
+    using Duration_t = Timer::Duration_t;
     using Time_point = Timer::Time_point;
 
     struct Registered_data {
@@ -24,7 +24,7 @@ class Dynamic_color_engine : private Lockable<std::mutex> {
         Time_point last_event_time;
     };
 
-    static auto constexpr default_interval = Interval_t{100};
+    static auto constexpr default_interval = Duration_t{100};
 
    public:
     /// Add a dynamic color linked to \p color.

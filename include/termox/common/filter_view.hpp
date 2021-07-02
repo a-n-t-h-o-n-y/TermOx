@@ -14,8 +14,8 @@ namespace ox {
 template <typename Container, typename Filter_fn>
 class Filter_view {
    public:
-    Filter_view(Container& c, Filter_fn filter_fn)
-        : container_{c}, filter_fn_{std::move(filter_fn)}
+    Filter_view(Container& c, Filter_fn&& filter_fn)
+        : container_{c}, filter_fn_{std::forward<Filter_fn>(filter_fn)}
     {}
 
    public:
@@ -54,8 +54,9 @@ class Filter_view {
 template <typename Container, typename Filter_fn>
 class Owning_filter_view {
    public:
-    Owning_filter_view(Container c, Filter_fn filter_fn)
-        : container_{std::move(c)}, filter_fn_{std::move(filter_fn)}
+    Owning_filter_view(Container c, Filter_fn&& filter_fn)
+        : container_{std::move(c)},
+          filter_fn_{std::forward<Filter_fn>(filter_fn)}
     {}
 
    public:

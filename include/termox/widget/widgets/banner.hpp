@@ -44,17 +44,17 @@ class IP_range {
 template <typename Animator>
 class Banner : public Widget {
    public:
-    using Interval_t = std::chrono::milliseconds;
+    using Duration_t = std::chrono::milliseconds;
 
     struct Parameters {
         Glyph_string text   = U"";
-        Interval_t interval = Interval_t{50};
+        Duration_t interval = Duration_t{50};
         Animator animator   = Animator{};
     };
 
    public:
     explicit Banner(Glyph_string text   = U"",
-                    Interval_t interval = std::chrono::milliseconds{50},
+                    Duration_t interval = std::chrono::milliseconds{50},
                     Animator animator   = Animator{})
         : text_{text}, interval_{interval}, animator_{animator}
     {
@@ -83,7 +83,7 @@ class Banner : public Widget {
         return text_;
     }
 
-    void set_interval(Interval_t interval)
+    void set_interval(Duration_t interval)
     {
         auto const running = this->Widget::is_animated();
         this->stop();
@@ -92,7 +92,7 @@ class Banner : public Widget {
             this->start();
     }
 
-    [[nodiscard]] auto interval() const noexcept -> Interval_t
+    [[nodiscard]] auto interval() const noexcept -> Duration_t
     {
         return interval_;
     }
@@ -131,7 +131,7 @@ class Banner : public Widget {
 
    private:
     Glyph_string text_;
-    Interval_t interval_;
+    Duration_t interval_;
     Animator animator_;
     std::optional<IP_range> range_;
 
@@ -153,7 +153,7 @@ class Banner : public Widget {
 /// Helper function to create a Banner instance.
 template <typename Animator>
 [[nodiscard]] auto banner(Glyph_string text = U"",
-                          typename Banner<Animator>::Interval_t interval =
+                          typename Banner<Animator>::Duration_t interval =
                               std::chrono::milliseconds{50},
                           Animator animator = Animator{})
     -> std::unique_ptr<Banner<Animator>>
@@ -318,7 +318,7 @@ using Scan_banner = Banner<animator::Scan>;
 /// Helper function to create a Scan_banner instance.
 [[nodiscard]] auto scan_banner(
     Glyph_string text                = U"",
-    Scan_banner::Interval_t interval = std::chrono::milliseconds{50},
+    Scan_banner::Duration_t interval = std::chrono::milliseconds{50},
     animator::Scan animator = animator::Scan{}) -> std::unique_ptr<Scan_banner>;
 
 /// Helper function to create a Scan_banner instance.
@@ -330,7 +330,7 @@ using Persistent_scan_banner = Banner<animator::Persistent_scan>;
 /// Helper function to create a Persistent_scan_banner instance.
 [[nodiscard]] auto persistent_scan_banner(
     Glyph_string text                           = U"",
-    Persistent_scan_banner::Interval_t interval = std::chrono::milliseconds{50},
+    Persistent_scan_banner::Duration_t interval = std::chrono::milliseconds{50},
     animator::Persistent_scan animator          = animator::Persistent_scan{})
     -> std::unique_ptr<Persistent_scan_banner>;
 
@@ -343,7 +343,7 @@ using Random_banner = Banner<animator::Random>;
 /// Helper function to create a Random_banner instance.
 [[nodiscard]] auto random_banner(
     Glyph_string text                  = U"",
-    Random_banner::Interval_t interval = std::chrono::milliseconds{50},
+    Random_banner::Duration_t interval = std::chrono::milliseconds{50},
     animator::Random animator          = animator::Random{})
     -> std::unique_ptr<Random_banner>;
 
@@ -356,7 +356,7 @@ using Scroll_banner = Banner<animator::Scroll>;
 /// Helper function to create a Scroll_banner instance.
 [[nodiscard]] auto scroll_banner(
     Glyph_string text                  = U"",
-    Scroll_banner::Interval_t interval = std::chrono::milliseconds{50},
+    Scroll_banner::Duration_t interval = std::chrono::milliseconds{50},
     animator::Scroll animator          = animator::Scroll{})
     -> std::unique_ptr<Scroll_banner>;
 
@@ -369,7 +369,7 @@ using Conditional_scroll_banner = Banner<animator::Conditional_scroll>;
 /// Helper function to create a Conditional_scroll_banner instance.
 [[nodiscard]] auto conditional_scroll_banner(
     Glyph_string text = U"",
-    Conditional_scroll_banner::Interval_t interval =
+    Conditional_scroll_banner::Duration_t interval =
         std::chrono::milliseconds{50},
     animator::Conditional_scroll animator = animator::Conditional_scroll{})
     -> std::unique_ptr<Conditional_scroll_banner>;
@@ -384,7 +384,7 @@ using Unscramble_banner = Banner<animator::Unscramble>;
 /// Helper function to create a Unscramble_banner instance.
 [[nodiscard]] auto unscramble_banner(
     Glyph_string text                      = U"",
-    Unscramble_banner::Interval_t interval = std::chrono::milliseconds{50},
+    Unscramble_banner::Duration_t interval = std::chrono::milliseconds{50},
     animator::Unscramble animator          = animator::Unscramble{})
     -> std::unique_ptr<Unscramble_banner>;
 

@@ -1,6 +1,7 @@
 #ifndef TERMOX_COMMON_FILTER_ITERATOR_HPP
 #define TERMOX_COMMON_FILTER_ITERATOR_HPP
 #include <iterator>
+#include <utility>
 
 namespace ox {
 
@@ -17,12 +18,13 @@ class Filter_iterator {
    public:
     /// Pass in the iterator to begin at, end iter, and predicate to test with.
     /** This increments \p it until the end or predicate is true. */
-    Filter_iterator(Iter it, Iter_end end, F predicate)
-        : it_{it}, end_{end}, predicate_{predicate}
+    Filter_iterator(Iter const it, Iter_end const end, F&& predicate)
+        : it_{it}, end_{end}, predicate_{std::forward<F>(predicate)}
     {
         this->increment_if_invalid();
     }
 
+   public:
     auto operator++() -> Filter_iterator&
     {
         this->increment();
@@ -62,13 +64,13 @@ class Filter_iterator {
 
    private:
     Iter it_;
-    Iter_end end_;
+    Iter_end const end_;
     F predicate_;
 
    private:
     void increment_if_invalid()
     {
-        while (it_ != end_ && !predicate_(*it_))
+        while ((it_ != end_) && !predicate_(*it_))
             ++it_;
     }
 
@@ -76,7 +78,7 @@ class Filter_iterator {
     {
         do {
             ++it_;
-        } while (it_ != end_ && !predicate_(*it_));
+        } while ((it_ != end_) && !predicate_(*it_));
     }
 };
 

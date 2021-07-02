@@ -1,19 +1,21 @@
 #ifndef TERMOX_COMMON_FPS_HPP
 #define TERMOX_COMMON_FPS_HPP
+#include <cstdint>
+
 namespace ox {
 
 /// Frames Per Second
 struct FPS {
-    unsigned int value;
+    std::uint16_t value;
 };
 
 /// Converts frames per second to an interval of time.
-/** Interval should be a std::chrono::duration type. */
-template <typename Interval>
-[[nodiscard]] auto fps_to_period(FPS fps) -> Interval
+/** Duration_t should be/mimic a std::chrono::duration type. */
+template <typename Duration_t>
+[[nodiscard]] auto fps_to_period(FPS fps) -> Duration_t
 {
-    return Interval{static_cast<typename Interval::rep>((1. / fps.value) *
-                                                        Interval::period::den)};
+    return Duration_t{static_cast<typename Duration_t::rep>(
+        (1. / fps.value) * Duration_t::period::den)};
 }
 
 }  // namespace ox

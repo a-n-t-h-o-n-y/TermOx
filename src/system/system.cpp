@@ -118,7 +118,7 @@ void System::exit()
     std::_Exit(0);
 }
 
-void System::enable_animation(Widget& w, Animation_engine::Interval_t interval)
+void System::enable_animation(Widget& w, Animation_engine::Duration_t interval)
 {
     if (!animation_engine_.is_running())
         animation_engine_.start();

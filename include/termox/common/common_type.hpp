@@ -7,7 +7,8 @@
 namespace ox {
 
 /// If T and U are the same type, then return T, else return ox::Widget.
-/** Useful in layout wrappers to provide a bit of convinience. */
+/** Useful in layout wrappers to provide a bit of convinience. Not actually used
+ *  anywhere at the moment. */
 template <typename T, typename U>
 using Common_type = std::conditional_t<std::is_same_v<T, U>, T, ox::Widget>;
 

@@ -71,9 +71,9 @@ auto Dynamic_color_engine::get_dynamic_color_event() -> Dynamic_color_event
         }();
         auto const now = Clock_t::now();
         for (auto& data : data_) {
-            auto const time_left = std::chrono::duration_cast<Interval_t>(
+            auto const time_left = std::chrono::duration_cast<Duration_t>(
                 data.dynamic.interval - (now - data.last_event_time));
-            if (time_left <= Interval_t{0}) {
+            if (time_left <= Duration_t{0}) {
                 data.last_event_time = now;
                 processed.push_back({data.color, data.dynamic.get_value()});
             }

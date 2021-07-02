@@ -15,19 +15,19 @@ class Widget;
 class Animation_engine : private Lockable<std::recursive_mutex> {
    public:
     using Clock_t    = Timer::Clock_t;
-    using Interval_t = Timer::Interval_t;
+    using Duration_t = Timer::Duration_t;
     using Time_point = Timer::Time_point;
 
     struct Registered_data {
-        Interval_t interval;
+        Duration_t interval;
         Time_point last_event_time;
     };
 
-    static auto constexpr default_interval = Interval_t{100};
+    static auto constexpr default_interval = Duration_t{100};
 
    public:
     /// Register to start sending Timer_events to \p w every \p interval.
-    void register_widget(Widget& w, Interval_t interval);
+    void register_widget(Widget& w, Duration_t interval);
 
     /// Register to start sending Timer_events to \p w at \p fps.
     void register_widget(Widget& w, FPS fps);

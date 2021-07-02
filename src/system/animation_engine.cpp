@@ -21,7 +21,7 @@ auto timer_events = std::vector<ox::Timer_event>{};
 
 namespace ox {
 
-void Animation_engine::register_widget(Widget& w, Interval_t interval)
+void Animation_engine::register_widget(Widget& w, Duration_t interval)
 {
     auto const lock = this->Lockable::lock();
     subjects_.insert(std::pair{&w, Registered_data{interval, Clock_t::now()}});
@@ -29,7 +29,7 @@ void Animation_engine::register_widget(Widget& w, Interval_t interval)
 
 void Animation_engine::register_widget(Widget& w, FPS fps)
 {
-    this->register_widget(w, fps_to_period<Interval_t>(fps));
+    this->register_widget(w, fps_to_period<Duration_t>(fps));
 }
 
 void Animation_engine::unregister_widget(Widget& w)
@@ -81,9 +81,9 @@ auto Animation_engine::get_timer_events() -> std::vector<Timer_event>&
 
     auto const now = Clock_t::now();
     for (auto& [widget, data] : subjects_) {
-        auto const time_left = std::chrono::duration_cast<Interval_t>(
+        auto const time_left = std::chrono::duration_cast<Duration_t>(
             data.interval - (now - data.last_event_time));
-        if (time_left <= Interval_t{0}) {
+        if (time_left <= Duration_t{0}) {
             data.last_event_time = now;
             timer_events.push_back(Timer_event{*widget});
         }

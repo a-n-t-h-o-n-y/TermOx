@@ -142,7 +142,7 @@ class System {
     /// Enable animation for the given Widget \p w at \p interval.
     /** Starts the animation_engine if not started yet. */
     static void enable_animation(Widget& w,
-                                 Animation_engine::Interval_t interval);
+                                 Animation_engine::Duration_t interval);
 
     /// Enable animation for the given Widget \p w at \p fps.
     /** Starts the animation_engine if not started yet. */

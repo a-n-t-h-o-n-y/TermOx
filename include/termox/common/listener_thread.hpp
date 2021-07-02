@@ -65,8 +65,11 @@ class Listener_thread {
     /// Notify the thread to exit.
     void exit()
     {
-        auto const lock = std::lock_guard{mtx_};
-        exit_           = true;
+        {
+            auto const lock = std::lock_guard{mtx_};
+            exit_           = true;
+        }
+        cv_.notify_one();
     }
 
     /// Blocks until the thread is dead.

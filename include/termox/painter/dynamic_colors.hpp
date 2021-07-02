@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstdint>
 #include <random>
+#include <utility>
 
 #include <termox/painter/color.hpp>
 
@@ -154,8 +155,10 @@ class Fade {
     /// Dynamic Color that cycles between \p a and \p b and back.
     /** Shape function object should return ratio of where between the two
      *  colors the fade is at. */
-    Fade(HSL a, HSL b, Shape&& shape_fn)
-        : base_{a}, distance_{find_distance(a, b)}, shape_fn_{shape_fn}
+    Fade(HSL const a, HSL const b, Shape&& shape_fn)
+        : base_{a},
+          distance_{find_distance(a, b)},
+          shape_fn_{std::forward<Shape>(shape_fn)}
     {}
 
    public:
@@ -175,13 +178,6 @@ class Fade {
     Shape shape_fn_;
 
    private:
-    /// Return HSL_diff composed of the distance between \p a and \p b.
-    [[nodiscard]] static auto find_distance(HSL a, HSL b) -> HSL_diff
-    {
-        return {b.hue - a.hue, b.saturation - a.saturation,
-                b.lightness - a.lightness};
-    }
-
     /// Performs a single step and returns the calculated HSL value.
     [[nodiscard]] auto step() -> HSL
     {
@@ -191,13 +187,22 @@ class Fade {
         double const s = base_.saturation + distance_.saturation_diff * ratio;
         double const l = base_.lightness + distance_.lightness_diff * ratio;
 
-        return this->shrink(h, s, l);
+        return narrow(h, s, l);
     }
 
-    // Use to create an HSL from double values, performs narrowing conversions.
-    [[nodiscard]] static auto shrink(double hue,
-                                     double saturation,
-                                     double lightness) -> HSL
+   private:
+    /// Return HSL_diff composed of the distance between \p a and \p b.
+    [[nodiscard]] static auto find_distance(HSL const a, HSL const b)
+        -> HSL_diff
+    {
+        return {b.hue - a.hue, b.saturation - a.saturation,
+                b.lightness - a.lightness};
+    }
+
+    /// Use to create an HSL from double values, performs narrowing conversions.
+    [[nodiscard]] static auto narrow(double const hue,
+                                     double const saturation,
+                                     double const lightness) -> HSL
     {
         return {static_cast<std::uint16_t>(hue),
                 static_cast<std::uint8_t>(saturation),
@@ -207,10 +212,10 @@ class Fade {
 
 /// Returns a Fade Dynamic_color object. Convinience for defining palettes.
 template <typename Shape>
-[[nodiscard]] auto fade(HSL a,
-                        HSL b,
-                        unsigned resolution = 400,
-                        Dynamic_color::Period_t interval =
+[[nodiscard]] auto fade(HSL const a,
+                        HSL const b,
+                        unsigned const resolution = 400,
+                        Dynamic_color::Period_t const interval =
                             std::chrono::milliseconds{40}) -> Dynamic_color
 {
     return {interval, Fade{a, b, Shape{resolution}}};
@@ -218,10 +223,10 @@ template <typename Shape>
 
 /// Returns a Fade Dynamic_color object. Convinience for defining palettes.
 template <typename Shape>
-[[nodiscard]] auto fade(True_color a,
-                        True_color b,
-                        unsigned resolution = 400,
-                        Dynamic_color::Period_t interval =
+[[nodiscard]] auto fade(True_color const a,
+                        True_color const b,
+                        unsigned const resolution = 400,
+                        Dynamic_color::Period_t const interval =
                             std::chrono::milliseconds{40}) -> Dynamic_color
 {
     return fade<Shape>(esc::rgb_to_hsl({a.red, a.green, a.blue}),

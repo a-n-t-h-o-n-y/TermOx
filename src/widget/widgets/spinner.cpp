@@ -10,7 +10,7 @@
 
 namespace ox {
 
-Spinner::Spinner(Glyph_string frames, Interval_t period, int width, int offset)
+Spinner::Spinner(Glyph_string frames, Duration_t period, int width, int offset)
     : frames_{std::move(frames)}, period_{period}, width_{width}, index_{offset}
 {
     *this | pipe::fixed_height(1) | pipe::fixed_width(width_);
@@ -24,7 +24,7 @@ void Spinner::set_frames(Glyph_string frames) { frames_ = std::move(frames); }
 
 auto Spinner::frames() const noexcept -> Glyph_string const& { return frames_; }
 
-void Spinner::set_period(Interval_t period)
+void Spinner::set_period(Duration_t period)
 {
     if (started_) {
         this->stop();
@@ -35,7 +35,7 @@ void Spinner::set_period(Interval_t period)
         period_ = period;
 }
 
-auto Spinner::period() const noexcept -> Interval_t { return period_; }
+auto Spinner::period() const noexcept -> Duration_t { return period_; }
 
 void Spinner::set_width(int width)
 {
@@ -81,7 +81,7 @@ auto Spinner::timer_event() -> bool
 }
 
 auto spinner(Glyph_string frames,
-             Spinner::Interval_t period,
+             Spinner::Duration_t period,
              int width,
              int offset) -> std::unique_ptr<Spinner>
 {
@@ -93,7 +93,7 @@ auto spinner(Spinner::Parameters p) -> std::unique_ptr<Spinner>
     return std::make_unique<Spinner>(std::move(p));
 }
 
-Spinner_cycle::Spinner_cycle(Interval_t period, int width, int offset)
+Spinner_cycle::Spinner_cycle(Duration_t period, int width, int offset)
     : Spinner{U"⠁⠈⠐⠠⢀⡀⠄⠂", period, width, offset}
 {}
 
@@ -101,7 +101,7 @@ Spinner_cycle::Spinner_cycle(Parameters p)
     : Spinner_cycle{p.period, p.width, p.offset}
 {}
 
-auto spinner_cycle(Spinner::Interval_t period, int width, int offset)
+auto spinner_cycle(Spinner::Duration_t period, int width, int offset)
     -> std::unique_ptr<Spinner_cycle>
 {
     return std::make_unique<Spinner_cycle>(period, width, offset);
@@ -113,105 +113,105 @@ auto spinner_cycle(Spinner_cycle::Parameters p)
     return std::make_unique<Spinner_cycle>(std::move(p));
 }
 
-Spinner_cycle_ccw::Spinner_cycle_ccw(Interval_t period, int width, int offset)
+Spinner_cycle_ccw::Spinner_cycle_ccw(Duration_t period, int width, int offset)
     : Spinner{U"⠁⠂⠄⡀⢀⠠⠐⠈", period, width, offset}
 {}
 
-Spinner_fall::Spinner_fall(Interval_t period, int width, int offset)
+Spinner_fall::Spinner_fall(Duration_t period, int width, int offset)
     : Spinner{U"⠁⠂⠄⡀⡈⡐⡠⣀⣁⣂⣄⣌⣔⣤⣥⣦⣮⣶⣷⣿", period, width, offset}
 {}
 
-Spinner_fall_two::Spinner_fall_two(Interval_t period, int width, int offset)
+Spinner_fall_two::Spinner_fall_two(Duration_t period, int width, int offset)
     : Spinner{U" ⠁⠉⠋⠛⠟⠿⡿⣿⣿⣿⣿⣷⣶⣦⣤⣄⣀⡀ ", period, width, offset}
 {}
 
-Spinner_fall_three::Spinner_fall_three(Interval_t period, int width, int offset)
+Spinner_fall_three::Spinner_fall_three(Duration_t period, int width, int offset)
     : Spinner{U"   ⠁⠂⠄⡀⡈⡐⡠⣀⣁⣂⣄⣌⣔⣤⣥⣦⣮⣶⣷⣿⣿⣿⣿⣿⣿⡿⠿⢟⠟⡛⠛⠫⢋⠋⠍⡉⠉⠑⠡⢁⠁⠂⠄⡀   ", period,
               width, offset}
 {}
 
-Spinner_rise::Spinner_rise(Interval_t period, int width, int offset)
+Spinner_rise::Spinner_rise(Duration_t period, int width, int offset)
     : Spinner{U"⡀⠄⠂⠁⢁⠡⠑⠉⡉⠍⠋⢋⠫⠛⡛⠟⢟⠿⡿⣿", period, width, offset}
 {}
 
-Spinner_rise_two::Spinner_rise_two(Interval_t period, int width, int offset)
+Spinner_rise_two::Spinner_rise_two(Duration_t period, int width, int offset)
     : Spinner{U"    ⡀⣀⣄⣤⣦⣶⣷⣿⣿⣿⣿⡿⠿⠟⠛⠋⠉⠁    ", period, width, offset}
 {}
 
-Spinner_rise_three::Spinner_rise_three(Interval_t period, int width, int offset)
+Spinner_rise_three::Spinner_rise_three(Duration_t period, int width, int offset)
     : Spinner{U"   ⡀⠄⠂⠁⢁⠡⠑⠉⡉⠍⠋⢋⠫⠛⡛⠟⢟⠿⡿⣿⣿⣿⣿⣿⣿⣷⣶⣮⣦⣥⣤⣔⣌⣄⣂⣁⣀⡠⡐⡈⡀⠄⠂⠁   ", period,
               width, offset}
 {}
 
-Spinner_fill::Spinner_fill(Interval_t period, int width, int offset)
+Spinner_fill::Spinner_fill(Duration_t period, int width, int offset)
     : Spinner{U"⡀⣀⣄⣤⣦⣶⣷⣿", period, width, offset}
 {}
 
-Spinner_top_fill::Spinner_top_fill(Interval_t period, int width, int offset)
+Spinner_top_fill::Spinner_top_fill(Duration_t period, int width, int offset)
     : Spinner{U"⠁⠉⠋⠛⠟⠿⡿⣿", period, width, offset}
 {}
 
-Spinner_tail::Spinner_tail(Interval_t period, int width, int offset)
+Spinner_tail::Spinner_tail(Duration_t period, int width, int offset)
     : Spinner{U"⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏", period, width, offset}
 {}
 
-Spinner_switch::Spinner_switch(Interval_t period, int width, int offset)
+Spinner_switch::Spinner_switch(Duration_t period, int width, int offset)
     : Spinner{U"⢹⢺⢼⣸⣇⡧⡗⡏", period, width, offset}
 {}
 
-Spinner_chase::Spinner_chase(Interval_t period, int width, int offset)
+Spinner_chase::Spinner_chase(Duration_t period, int width, int offset)
     : Spinner{U"⢄⢂⢁⡁⡈⡐⡠", period, width, offset}
 {}
 
-Spinner_line::Spinner_line(Interval_t period, int width, int offset)
+Spinner_line::Spinner_line(Duration_t period, int width, int offset)
     : Spinner{U"-\\|/", period, width, offset}
 {}
 
-Spinner_block_cycle::Spinner_block_cycle(Interval_t period,
+Spinner_block_cycle::Spinner_block_cycle(Duration_t period,
                                          int width,
                                          int offset)
     : Spinner{U"▖▘▝▗", period, width, offset}
 {}
 
-Spinner_fade::Spinner_fade(Interval_t period, int width, int offset)
+Spinner_fade::Spinner_fade(Duration_t period, int width, int offset)
     : Spinner{U"         ░░▒▓▓██████████████████▓▓▒░░         ", period, width,
               offset}
 {}
 
-Spinner_fade_trail::Spinner_fade_trail(Interval_t period, int width, int offset)
+Spinner_fade_trail::Spinner_fade_trail(Duration_t period, int width, int offset)
     : Spinner{U"⢀⢀⠠⠠⢀⢀⠠⠠⢀░░▒▓▓██████████████████▓▓▒░░⢀⢀⠠⠠⢀⢀⠠⠠⢀", period, width,
               offset}
 {}
 
-Spinner_quarter_circles::Spinner_quarter_circles(Interval_t period,
+Spinner_quarter_circles::Spinner_quarter_circles(Duration_t period,
                                                  int width,
                                                  int offset)
     : Spinner{U"◜◝◞◟", period, width, offset}
 {}
 
-Spinner_triangles::Spinner_triangles(Interval_t period, int width, int offset)
+Spinner_triangles::Spinner_triangles(Duration_t period, int width, int offset)
     : Spinner{U"◤◥◢◣", period, width, offset}
 {}
 
-Spinner_empty_triangles::Spinner_empty_triangles(Interval_t period,
+Spinner_empty_triangles::Spinner_empty_triangles(Duration_t period,
                                                  int width,
                                                  int offset)
     : Spinner{U"◸◹◿◺", period, width, offset}
 {}
 
-Spinner_clock::Spinner_clock(Interval_t period, int width, int offset)
+Spinner_clock::Spinner_clock(Duration_t period, int width, int offset)
     : Spinner{U"◴◷◶◵", period, width, offset}
 {}
 
-Spinner_box::Spinner_box(Interval_t period, int width, int offset)
+Spinner_box::Spinner_box(Duration_t period, int width, int offset)
     : Spinner{U"▤▧▥▨", period, width, offset}
 {}
 
-Spinner_cross::Spinner_cross(Interval_t period, int width, int offset)
+Spinner_cross::Spinner_cross(Duration_t period, int width, int offset)
     : Spinner{U"┽╀┾╁", period, width, offset}
 {}
 
-Spinner_vertical_pass::Spinner_vertical_pass(Interval_t period,
+Spinner_vertical_pass::Spinner_vertical_pass(Duration_t period,
                                              int width,
                                              int offset)
     : Spinner{first().append(second()).append(U" "), period, width, offset}
@@ -226,7 +226,7 @@ auto Spinner_vertical_pass::second() -> Glyph_string
     return result;
 }
 
-Spinner_horizontal_pass::Spinner_horizontal_pass(Interval_t period,
+Spinner_horizontal_pass::Spinner_horizontal_pass(Duration_t period,
                                                  int width,
                                                  int offset)
     : Spinner{first().append(second()).append(U" "), period, width, offset}
@@ -241,7 +241,7 @@ auto Spinner_horizontal_pass::second() -> Glyph_string
     return result;
 }
 
-Spinner_bump::Spinner_bump(Interval_t period, int width, int offset)
+Spinner_bump::Spinner_bump(Duration_t period, int width, int offset)
     : Spinner{U" ▁▂▃▄▅▆▇█▇▆▅▄▃▂▁", period, width, offset}
 {}
 
