@@ -8,18 +8,18 @@ taking each `Glyph` as a single frame.
 ```cpp
 class Spinner : public Widget {
    public:
-    using Interval_t = std::chrono::milliseconds;
+    using Duration_t = std::chrono::milliseconds;
 
     struct Parameters {
         Glyph_string frames;
-        Interval_t period = Interval_t{100};
+        Duration_t period = Duration_t{100};
         int width         = 1;
         int offset        = 0;
     };
 
    public:
     // Each glyph in frames is a frame, offset is starting index into frames.
-    Spinner(Glyph_string frames, Interval_t period = Interval_t{100}, int width = 1, int offset = 0);
+    Spinner(Glyph_string frames, Duration_t period = Duration_t{100}, int width = 1, int offset = 0);
 
     Spinner(Parameters);
 
@@ -27,9 +27,9 @@ class Spinner : public Widget {
 
     auto frames() const -> Glyph_string const&;
 
-    void set_period(Interval_t period);
+    void set_period(Duration_t period);
 
-    auto period() const -> Interval_t;
+    auto period() const -> Duration_t;
 
     void set_width(int width);
 

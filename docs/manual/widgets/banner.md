@@ -9,17 +9,17 @@ appears on the Label.
 template <typename Animator>
 class Banner : public Widget {
    public:
-    using Interval_t = std::chrono::milliseconds;
+    using Duration_t = std::chrono::milliseconds;
 
     struct Parameters {
         Glyph_string text   = U"";
-        Interval_t interval = Interval_t{50};
+        Duration_t interval = Duration_t{50};
         Animator animator   = Animator{};
     };
 
    public:
     Banner(Glyph_string text   = U"",
-           Interval_t interval = std::chrono::milliseconds{50},
+           Duration_t interval = std::chrono::milliseconds{50},
            Animator animator   = Animator{});
 
     Banner(Parameters);
@@ -28,9 +28,9 @@ class Banner : public Widget {
 
     auto text() const -> Glyph_string const&;
 
-    void set_interval(Interval_t interval);
+    void set_interval(Duration_t interval);
 
-    auto interval() const -> Interval_t;
+    auto interval() const -> Duration_t;
 
     auto animator() const -> Animator const&;
 

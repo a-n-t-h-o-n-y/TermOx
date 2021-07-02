@@ -6,7 +6,7 @@ template <typename... Spinners>
 class Spinner_hline
     : public ox::Tuple<ox::layout::Horizontal<>, Spinners..., ox::Widget> {
    public:
-    Spinner_hline(ox::Spinner::Interval_t period = ox::Spinner::Interval_t{100},
+    Spinner_hline(ox::Spinner::Duration_t period = ox::Spinner::Duration_t{100},
                   int width                      = 1,
                   int offset                     = 0)
     {
@@ -17,7 +17,7 @@ class Spinner_hline
 
    private:
     template <std::size_t... Is>
-    void initialize(ox::Spinner::Interval_t period,
+    void initialize(ox::Spinner::Duration_t period,
                     int width,
                     int offset,
                     std::index_sequence<Is...>)
@@ -41,7 +41,7 @@ int main()
         Spinner_empty_triangles, Spinner_clock, Spinner_box, Spinner_cross,
         Spinner_vertical_pass, Spinner_horizontal_pass, Spinner_bump>;
 
-    using Interval = Spinner::Interval_t;
+    using Interval = Spinner::Duration_t;
 
     auto app = vertical(make<All_spinners>(Interval{160}, 1, 0),
                         make<All_spinners>(Interval{160}, 1, 1),

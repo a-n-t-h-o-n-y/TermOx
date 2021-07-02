@@ -13,11 +13,11 @@ class Painter;
 /// Single cell animated spinner.
 class Spinner : public Widget {
    public:
-    using Interval_t = std::chrono::milliseconds;
+    using Duration_t = std::chrono::milliseconds;
 
     struct Parameters {
         Glyph_string frames;
-        Interval_t period = Interval_t{100};
+        Duration_t period = Duration_t{100};
         int width         = 1;
         int offset        = 0;
     };
@@ -25,7 +25,7 @@ class Spinner : public Widget {
    public:
     /// Each glyph in frames is a frame, offset is starting index into frames.
     explicit Spinner(Glyph_string frames,
-                     Interval_t period = Interval_t{100},
+                     Duration_t period = Duration_t{100},
                      int width         = 1,
                      int offset        = 0);
 
@@ -36,9 +36,9 @@ class Spinner : public Widget {
 
     [[nodiscard]] auto frames() const noexcept -> Glyph_string const&;
 
-    void set_period(Interval_t period);
+    void set_period(Duration_t period);
 
-    [[nodiscard]] auto period() const noexcept -> Interval_t;
+    [[nodiscard]] auto period() const noexcept -> Duration_t;
 
     void set_width(int width);
 
@@ -59,7 +59,7 @@ class Spinner : public Widget {
    private:
     bool started_ = false;
     Glyph_string frames_;
-    Interval_t period_;
+    Duration_t period_;
     int width_;
     int index_;
 };
@@ -67,7 +67,7 @@ class Spinner : public Widget {
 /// Helper function to create a Spinner instance.
 [[nodiscard]] auto spinner(
     Glyph_string frames,
-    Spinner::Interval_t period = Spinner::Interval_t{100},
+    Spinner::Duration_t period = Spinner::Duration_t{100},
     int width                  = 1,
     int offset                 = 0) -> std::unique_ptr<Spinner>;
 
@@ -78,12 +78,12 @@ class Spinner : public Widget {
 
 struct Spinner_cycle : Spinner {
     struct Parameters {
-        Interval_t period = Interval_t{100};
+        Duration_t period = Duration_t{100};
         int width         = 1;
         int offset        = 0;
     };
 
-    explicit Spinner_cycle(Interval_t period = Interval_t{100},
+    explicit Spinner_cycle(Duration_t period = Duration_t{100},
                            int width         = 1,
                            int offset        = 0);
 
@@ -91,7 +91,7 @@ struct Spinner_cycle : Spinner {
 };
 
 [[nodiscard]] auto spinner_cycle(
-    Spinner::Interval_t period = Spinner::Interval_t{100},
+    Spinner::Duration_t period = Spinner::Duration_t{100},
     int width                  = 1,
     int offset                 = 0) -> std::unique_ptr<Spinner_cycle>;
 
@@ -99,7 +99,7 @@ struct Spinner_cycle : Spinner {
     -> std::unique_ptr<Spinner_cycle>;
 
 struct Spinner_cycle_ccw : Spinner {
-    Spinner_cycle_ccw(Interval_t period = Interval_t{100},
+    Spinner_cycle_ccw(Duration_t period = Duration_t{100},
                       int width         = 1,
                       int offset        = 0);
 };
@@ -113,7 +113,7 @@ template <typename... Args>
 }
 
 struct Spinner_fall : Spinner {
-    Spinner_fall(Interval_t period = Interval_t{100},
+    Spinner_fall(Duration_t period = Duration_t{100},
                  int width         = 1,
                  int offset        = 0);
 };
@@ -126,7 +126,7 @@ template <typename... Args>
 }
 
 struct Spinner_fall_two : Spinner {
-    Spinner_fall_two(Interval_t period = Interval_t{100},
+    Spinner_fall_two(Duration_t period = Duration_t{100},
                      int width         = 1,
                      int offset        = 0);
 };
@@ -140,7 +140,7 @@ template <typename... Args>
 }
 
 struct Spinner_fall_three : Spinner {
-    Spinner_fall_three(Interval_t period = Interval_t{100},
+    Spinner_fall_three(Duration_t period = Duration_t{100},
                        int width         = 1,
                        int offset        = 0);
 };
@@ -154,7 +154,7 @@ template <typename... Args>
 }
 
 struct Spinner_rise : Spinner {
-    Spinner_rise(Interval_t period = Interval_t{100},
+    Spinner_rise(Duration_t period = Duration_t{100},
                  int width         = 1,
                  int offset        = 0);
 };
@@ -167,7 +167,7 @@ template <typename... Args>
 }
 
 struct Spinner_rise_two : Spinner {
-    Spinner_rise_two(Interval_t period = Interval_t{100},
+    Spinner_rise_two(Duration_t period = Duration_t{100},
                      int width         = 1,
                      int offset        = 0);
 };
@@ -181,7 +181,7 @@ template <typename... Args>
 }
 
 struct Spinner_rise_three : Spinner {
-    Spinner_rise_three(Interval_t period = Interval_t{100},
+    Spinner_rise_three(Duration_t period = Duration_t{100},
                        int width         = 1,
                        int offset        = 0);
 };
@@ -195,7 +195,7 @@ template <typename... Args>
 }
 
 struct Spinner_fill : Spinner {
-    Spinner_fill(Interval_t period = Interval_t{100},
+    Spinner_fill(Duration_t period = Duration_t{100},
                  int width         = 1,
                  int offset        = 0);
 };
@@ -208,7 +208,7 @@ template <typename... Args>
 }
 
 struct Spinner_top_fill : Spinner {
-    Spinner_top_fill(Interval_t period = Interval_t{100},
+    Spinner_top_fill(Duration_t period = Duration_t{100},
                      int width         = 1,
                      int offset        = 0);
 };
@@ -222,7 +222,7 @@ template <typename... Args>
 }
 
 struct Spinner_tail : Spinner {
-    Spinner_tail(Interval_t period = Interval_t{100},
+    Spinner_tail(Duration_t period = Duration_t{100},
                  int width         = 1,
                  int offset        = 0);
 };
@@ -235,7 +235,7 @@ template <typename... Args>
 }
 
 struct Spinner_switch : Spinner {
-    Spinner_switch(Interval_t period = Interval_t{100},
+    Spinner_switch(Duration_t period = Duration_t{100},
                    int width         = 1,
                    int offset        = 0);
 };
@@ -248,7 +248,7 @@ auto spinner_switch(Args&&... args) -> std::unique_ptr<Spinner_switch>
 }
 
 struct Spinner_chase : Spinner {
-    Spinner_chase(Interval_t period = Interval_t{100},
+    Spinner_chase(Duration_t period = Duration_t{100},
                   int width         = 1,
                   int offset        = 0);
 };
@@ -262,7 +262,7 @@ template <typename... Args>
 }
 
 struct Spinner_line : Spinner {
-    Spinner_line(Interval_t period = Interval_t{100},
+    Spinner_line(Duration_t period = Duration_t{100},
                  int width         = 1,
                  int offset        = 0);
 };
@@ -275,7 +275,7 @@ template <typename... Args>
 }
 
 struct Spinner_block_cycle : Spinner {
-    Spinner_block_cycle(Interval_t period = Interval_t{100},
+    Spinner_block_cycle(Duration_t period = Duration_t{100},
                         int width         = 1,
                         int offset        = 0);
 };
@@ -289,7 +289,7 @@ template <typename... Args>
 }
 
 struct Spinner_fade : Spinner {
-    Spinner_fade(Interval_t period = Interval_t{100},
+    Spinner_fade(Duration_t period = Duration_t{100},
                  int width         = 1,
                  int offset        = 0);
 };
@@ -303,7 +303,7 @@ template <typename... Args>
 
 /// Best used with multiple spinners horizontally, each offset one from neighbor
 struct Spinner_fade_trail : Spinner {
-    Spinner_fade_trail(Interval_t period = Interval_t{100},
+    Spinner_fade_trail(Duration_t period = Duration_t{100},
                        int width         = 1,
                        int offset        = 0);
 };
@@ -317,7 +317,7 @@ template <typename... Args>
 }
 
 struct Spinner_quarter_circles : Spinner {
-    Spinner_quarter_circles(Interval_t period = Interval_t{100},
+    Spinner_quarter_circles(Duration_t period = Duration_t{100},
                             int width         = 1,
                             int offset        = 0);
 };
@@ -332,7 +332,7 @@ template <typename... Args>
 }
 
 struct Spinner_triangles : Spinner {
-    Spinner_triangles(Interval_t period = Interval_t{100},
+    Spinner_triangles(Duration_t period = Duration_t{100},
                       int width         = 1,
                       int offset        = 0);
 };
@@ -346,7 +346,7 @@ template <typename... Args>
 }
 
 struct Spinner_empty_triangles : Spinner {
-    Spinner_empty_triangles(Interval_t period = Interval_t{100},
+    Spinner_empty_triangles(Duration_t period = Duration_t{100},
                             int width         = 1,
                             int offset        = 0);
 };
@@ -361,7 +361,7 @@ template <typename... Args>
 }
 
 struct Spinner_clock : Spinner {
-    Spinner_clock(Interval_t period = Interval_t{100},
+    Spinner_clock(Duration_t period = Duration_t{100},
                   int width         = 1,
                   int offset        = 0);
 };
@@ -375,7 +375,7 @@ template <typename... Args>
 }
 
 struct Spinner_box : Spinner {
-    Spinner_box(Interval_t period = Interval_t{100},
+    Spinner_box(Duration_t period = Duration_t{100},
                 int width         = 1,
                 int offset        = 0);
 };
@@ -388,7 +388,7 @@ template <typename... Args>
 }
 
 struct Spinner_cross : Spinner {
-    Spinner_cross(Interval_t period = Interval_t{100},
+    Spinner_cross(Duration_t period = Duration_t{100},
                   int width         = 1,
                   int offset        = 0);
 };
@@ -403,7 +403,7 @@ template <typename... Args>
 
 struct Spinner_vertical_pass : Spinner {
    public:
-    Spinner_vertical_pass(Interval_t period = Interval_t{100},
+    Spinner_vertical_pass(Duration_t period = Duration_t{100},
                           int width         = 1,
                           int offset        = 0);
 
@@ -423,7 +423,7 @@ template <typename... Args>
 
 struct Spinner_horizontal_pass : Spinner {
    public:
-    Spinner_horizontal_pass(Interval_t period = Interval_t{100},
+    Spinner_horizontal_pass(Duration_t period = Duration_t{100},
                             int width         = 1,
                             int offset        = 0);
 
@@ -443,7 +443,7 @@ template <typename... Args>
 }
 
 struct Spinner_bump : Spinner {
-    Spinner_bump(Interval_t period = Interval_t{100},
+    Spinner_bump(Duration_t period = Duration_t{100},
                  int width         = 1,
                  int offset        = 0);
 };

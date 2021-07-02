@@ -21,32 +21,34 @@ namespace {
 
 /// \p edge is one-past-the-last element, will go to zero instead of \p edge
 /** Input Constraints: \p edge > 0  and \p i < \p edge */
-auto wrapped_increment(std::size_t i, std::size_t edge) -> std::size_t
+auto wrapped_increment(std::size_t const i, std::size_t const edge)
+    -> std::size_t
 {
-    return ++i == edge ? 0 : i;
+    return ((i + 1) == edge) ? 0 : (i + 1);
 }
 
 /// \p edge is one-past-the-last element, will go to edge - 1 instead of -1.
 /** Input Constraints: \p edge > 0  and \p i < \p edge */
-auto wrapped_decrement(std::size_t i, std::size_t edge) -> std::size_t
+auto wrapped_decrement(std::size_t const i, std::size_t const edge)
+    -> std::size_t
 {
-    return i == 0 ? --edge : --i;
+    return ((i == 0) ? edge : i) - 1;
 }
 
 }  // namespace
 
 namespace ox {
 
-Cycle_box::Cycle_box(Align alignment,
-                     int extra_left,
-                     int extra_right,
-                     Growth growth_strategy)
+Cycle_box::Cycle_box(Align const alignment,
+                     int const extra_left,
+                     int const extra_right,
+                     Growth const growth_strategy)
     : HLabel{U"", alignment, extra_left, extra_right, growth_strategy}
 {
     *this | pipe::strong_focus();
 }
 
-Cycle_box::Cycle_box(Parameters p)
+Cycle_box::Cycle_box(Parameters const p)
     : Cycle_box{p.alignment, p.extra_left, p.extra_right, p.growth_strategy}
 {}
 

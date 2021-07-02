@@ -299,7 +299,7 @@ void Unscramble::initialize_data()
 namespace ox {
 
 auto scan_banner(Glyph_string text,
-                 Scan_banner::Interval_t interval,
+                 Scan_banner::Duration_t interval,
                  animator::Scan animator) -> std::unique_ptr<Scan_banner>
 {
     return std::make_unique<Scan_banner>(std::move(text), interval,
@@ -312,7 +312,7 @@ auto scan_banner(Scan_banner::Parameters p) -> std::unique_ptr<Scan_banner>
 }
 
 auto persistent_scan_banner(Glyph_string text,
-                            Persistent_scan_banner::Interval_t interval,
+                            Persistent_scan_banner::Duration_t interval,
                             animator::Persistent_scan animator)
     -> std::unique_ptr<Persistent_scan_banner>
 {
@@ -327,7 +327,7 @@ auto persistent_scan_banner(Persistent_scan_banner::Parameters p)
 }
 
 auto random_banner(Glyph_string text,
-                   Random_banner::Interval_t interval,
+                   Random_banner::Duration_t interval,
                    animator::Random animator) -> std::unique_ptr<Random_banner>
 {
     return std::make_unique<Random_banner>(std::move(text), interval,
@@ -341,7 +341,7 @@ auto random_banner(Random_banner::Parameters p)
 }
 
 auto scroll_banner(Glyph_string text,
-                   Scroll_banner::Interval_t interval,
+                   Scroll_banner::Duration_t interval,
                    animator::Scroll animator) -> std::unique_ptr<Scroll_banner>
 {
     return std::make_unique<Scroll_banner>(std::move(text), interval,
@@ -355,7 +355,7 @@ auto scroll_banner(Scroll_banner::Parameters p)
 }
 
 auto conditional_scroll_banner(Glyph_string text,
-                               Conditional_scroll_banner::Interval_t interval,
+                               Conditional_scroll_banner::Duration_t interval,
                                animator::Conditional_scroll animator)
     -> std::unique_ptr<Conditional_scroll_banner>
 {
@@ -370,7 +370,7 @@ auto conditional_scroll_banner(Conditional_scroll_banner::Parameters p)
 }
 
 auto unscramble_banner(Glyph_string text,
-                       Unscramble_banner::Interval_t interval,
+                       Unscramble_banner::Duration_t interval,
                        animator::Unscramble animator)
     -> std::unique_ptr<Unscramble_banner>
 {

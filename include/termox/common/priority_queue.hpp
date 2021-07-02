@@ -43,6 +43,7 @@ class Priority_queue {
     using Value_t = std::pair<Priority, T>;
 
    private:
+    /// Less than comparison on the `first` element of x and y.
     struct Compare {
         [[nodiscard]] auto operator()(Value_t const& x, Value_t const& y) const
             -> bool

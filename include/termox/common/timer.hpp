@@ -11,14 +11,16 @@ class Timer {
    public:
     using Clock_t    = std::chrono::steady_clock;
     using Time_point = Clock_t::time_point;
-    using Interval_t = std::chrono::milliseconds;
+    using Duration_t = std::chrono::milliseconds;
 
    public:
     /// Construct a Timer with the given interval.
-    explicit Timer(Interval_t interval);
+    explicit constexpr Timer(Duration_t interval) : interval_{interval} {}
 
     /// Construct a Timer with the given FPS interval.
-    explicit Timer(FPS fps);
+    explicit constexpr Timer(FPS fps)
+        : interval_{fps_to_period<Duration_t>(fps)}
+    {}
 
    public:
     /// Start the timer, returns immediately.
@@ -30,13 +32,13 @@ class Timer {
     void wait();
 
     /// Set the amount of time to wait for from begin().
-    void set_interval(Interval_t interval);
+    void set_interval(Duration_t interval);
 
     /// Return the currently set interval.
-    [[nodiscard]] auto get_interval() const -> Interval_t;
+    [[nodiscard]] auto get_interval() const -> Duration_t;
 
    private:
-    Interval_t interval_;
+    Duration_t interval_;
     Time_point last_time_;
 
    private:
