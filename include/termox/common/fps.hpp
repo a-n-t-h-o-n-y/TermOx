@@ -12,7 +12,7 @@ struct FPS {
 /// Converts frames per second to an interval of time.
 /** Duration_t should be/mimic a std::chrono::duration type. */
 template <typename Duration_t>
-[[nodiscard]] auto fps_to_period(FPS fps) -> Duration_t
+[[nodiscard]] constexpr auto fps_to_period(FPS fps) -> Duration_t
 {
     return Duration_t{static_cast<typename Duration_t::rep>(
         (1. / fps.value) * Duration_t::period::den)};
