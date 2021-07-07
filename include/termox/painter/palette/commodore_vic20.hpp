@@ -4,22 +4,22 @@
 
 namespace ox::commodore_vic20 {
 
-constexpr auto Black        = Color::Background;
-constexpr auto Dark_red     = Color{1};
-constexpr auto Green        = Color{2};
-constexpr auto Olive        = Color{3};
-constexpr auto Blue         = Color{4};
-constexpr auto Violet       = Color{5};
-constexpr auto Brown        = Color{6};
-constexpr auto Cyan         = Color{7};
-constexpr auto Red          = Color{8};
-constexpr auto Light_green  = Color{9};
-constexpr auto Yellow       = Color{10};
-constexpr auto Light_blue   = Color{11};
-constexpr auto Light_violet = Color{12};
-constexpr auto Sand         = Color{13};
-constexpr auto Light_cyan   = Color{14};
-constexpr auto White        = Color::Foreground;
+inline constexpr auto Black        = Color::Background;
+inline constexpr auto Dark_red     = Color{1};
+inline constexpr auto Green        = Color{2};
+inline constexpr auto Olive        = Color{3};
+inline constexpr auto Blue         = Color{4};
+inline constexpr auto Violet       = Color{5};
+inline constexpr auto Brown        = Color{6};
+inline constexpr auto Cyan         = Color{7};
+inline constexpr auto Red          = Color{8};
+inline constexpr auto Light_green  = Color{9};
+inline constexpr auto Yellow       = Color{10};
+inline constexpr auto Light_blue   = Color{11};
+inline constexpr auto Light_violet = Color{12};
+inline constexpr auto Sand         = Color{13};
+inline constexpr auto Light_cyan   = Color{14};
+inline constexpr auto White        = Color::Foreground;
 
 /// Commodore VIC-20 16 Color Palette
 /** https://lospec.com/palette-list/commodore-vic-20 */

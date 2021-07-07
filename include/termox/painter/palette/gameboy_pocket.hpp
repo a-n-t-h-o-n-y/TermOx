@@ -4,10 +4,10 @@
 
 namespace ox::gameboy_pocket {
 
-constexpr auto Black      = Color::Background;
-constexpr auto Dark_gray  = Color{8};
-constexpr auto Light_gray = Color{7};
-constexpr auto White      = Color::Foreground;
+inline constexpr auto Black      = Color::Background;
+inline constexpr auto Dark_gray  = Color{8};
+inline constexpr auto Light_gray = Color{7};
+inline constexpr auto White      = Color::Foreground;
 
 /// Gameboy Pocket Grayscale Color Palette
 inline auto const palette = Palette{

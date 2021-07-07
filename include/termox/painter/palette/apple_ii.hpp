@@ -4,21 +4,21 @@
 
 namespace ox::apple_ii {
 
-constexpr auto Black        = Color::Background;
-constexpr auto Dark_pink    = Color{1};
-constexpr auto Green        = Color{2};
-constexpr auto Olive        = Color{3};
-constexpr auto Blue         = Color{4};
-constexpr auto Violet       = Color{5};
-constexpr auto Aqua         = Color{6};
-constexpr auto Lavendar     = Color{7};
-constexpr auto Gray         = Color{8};
-constexpr auto Pink         = Color{9};
-constexpr auto Lime         = Color{10};
-constexpr auto Yellow_green = Color{11};
-constexpr auto Magenta      = Color{12};
-constexpr auto Orange       = Color{13};
-constexpr auto White        = Color::Foreground;
+inline constexpr auto Black        = Color::Background;
+inline constexpr auto Dark_pink    = Color{1};
+inline constexpr auto Green        = Color{2};
+inline constexpr auto Olive        = Color{3};
+inline constexpr auto Blue         = Color{4};
+inline constexpr auto Violet       = Color{5};
+inline constexpr auto Aqua         = Color{6};
+inline constexpr auto Lavendar     = Color{7};
+inline constexpr auto Gray         = Color{8};
+inline constexpr auto Pink         = Color{9};
+inline constexpr auto Lime         = Color{10};
+inline constexpr auto Yellow_green = Color{11};
+inline constexpr auto Magenta      = Color{12};
+inline constexpr auto Orange       = Color{13};
+inline constexpr auto White        = Color::Foreground;
 
 /// Apple II 15 Color Palette
 /** https://lospec.com/palette-list/apple-ii */

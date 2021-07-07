@@ -4,22 +4,22 @@
 
 namespace ox::basic {
 
-constexpr auto Black   = Color::Background;
-constexpr auto Maroon  = Color{1};
-constexpr auto Green   = Color{2};
-constexpr auto Olive   = Color{3};
-constexpr auto Navy    = Color{4};
-constexpr auto Purple  = Color{5};
-constexpr auto Teal    = Color{6};
-constexpr auto Silver  = Color{7};
-constexpr auto Grey    = Color{8};
-constexpr auto Red     = Color{9};
-constexpr auto Lime    = Color{10};
-constexpr auto Yellow  = Color{11};
-constexpr auto Blue    = Color{12};
-constexpr auto Fuchsia = Color{13};
-constexpr auto Aqua    = Color{14};
-constexpr auto White   = Color::Foreground;
+inline constexpr auto Black   = Color::Background;
+inline constexpr auto Maroon  = Color{1};
+inline constexpr auto Green   = Color{2};
+inline constexpr auto Olive   = Color{3};
+inline constexpr auto Navy    = Color{4};
+inline constexpr auto Purple  = Color{5};
+inline constexpr auto Teal    = Color{6};
+inline constexpr auto Silver  = Color{7};
+inline constexpr auto Grey    = Color{8};
+inline constexpr auto Red     = Color{9};
+inline constexpr auto Lime    = Color{10};
+inline constexpr auto Yellow  = Color{11};
+inline constexpr auto Blue    = Color{12};
+inline constexpr auto Fuchsia = Color{13};
+inline constexpr auto Aqua    = Color{14};
+inline constexpr auto White   = Color::Foreground;
 
 /// The Built-in Default Terminal 16 Color Palette
 inline auto const palette = Palette{

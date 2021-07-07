@@ -4,38 +4,38 @@
 
 namespace ox::dawn_bringer32 {
 
-constexpr auto Black          = Color::Background;
-constexpr auto Well_read      = Color{1};
-constexpr auto Ocean_green    = Color{2};
-constexpr auto Golden_fizz    = Color{3};
-constexpr auto Royal_blue     = Color{4};
-constexpr auto Hopbush        = Color{5};
-constexpr auto Atlantis       = Color{6};
-constexpr auto Gull_gray      = Color{7};
-constexpr auto Chicago        = Color{8};
-constexpr auto Roman          = Color{9};
-constexpr auto Di_serria      = Color{10};
-constexpr auto Buccaneer      = Color{11};
-constexpr auto Steel_gray     = Color{12};
-constexpr auto Hot_cinnamon   = Color{13};
-constexpr auto Corduroy       = Color{14};
-constexpr auto White          = Color::Foreground;
-constexpr auto Calypso        = Color{16};
-constexpr auto Potters_clay   = Color{17};
-constexpr auto Malibu         = Color{18};
-constexpr auto Turquoise_blue = Color{19};
-constexpr auto Hawkes_blue    = Color{20};
-constexpr auto Chalky         = Color{21};
-constexpr auto East_bay       = Color{22};
-constexpr auto Mobster        = Color{23};
-constexpr auto Cape_cod       = Color{24};
-constexpr auto Livid_brown    = Color{25};
-constexpr auto Affair         = Color{26};
-constexpr auto Chalet_green   = Color{27};
-constexpr auto Conifer        = Color{28};
-constexpr auto Woodland       = Color{29};
-constexpr auto Sycamore       = Color{30};
-constexpr auto Pesto          = Color{31};
+inline constexpr auto Black          = Color::Background;
+inline constexpr auto Well_read      = Color{1};
+inline constexpr auto Ocean_green    = Color{2};
+inline constexpr auto Golden_fizz    = Color{3};
+inline constexpr auto Royal_blue     = Color{4};
+inline constexpr auto Hopbush        = Color{5};
+inline constexpr auto Atlantis       = Color{6};
+inline constexpr auto Gull_gray      = Color{7};
+inline constexpr auto Chicago        = Color{8};
+inline constexpr auto Roman          = Color{9};
+inline constexpr auto Di_serria      = Color{10};
+inline constexpr auto Buccaneer      = Color{11};
+inline constexpr auto Steel_gray     = Color{12};
+inline constexpr auto Hot_cinnamon   = Color{13};
+inline constexpr auto Corduroy       = Color{14};
+inline constexpr auto White          = Color::Foreground;
+inline constexpr auto Calypso        = Color{16};
+inline constexpr auto Potters_clay   = Color{17};
+inline constexpr auto Malibu         = Color{18};
+inline constexpr auto Turquoise_blue = Color{19};
+inline constexpr auto Hawkes_blue    = Color{20};
+inline constexpr auto Chalky         = Color{21};
+inline constexpr auto East_bay       = Color{22};
+inline constexpr auto Mobster        = Color{23};
+inline constexpr auto Cape_cod       = Color{24};
+inline constexpr auto Livid_brown    = Color{25};
+inline constexpr auto Affair         = Color{26};
+inline constexpr auto Chalet_green   = Color{27};
+inline constexpr auto Conifer        = Color{28};
+inline constexpr auto Woodland       = Color{29};
+inline constexpr auto Sycamore       = Color{30};
+inline constexpr auto Pesto          = Color{31};
 
 /// Dawn Bringer 16 Color Palette
 /** https://lospec.com/palette-list/dawnbringer-32 */

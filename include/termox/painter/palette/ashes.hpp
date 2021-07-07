@@ -4,16 +4,16 @@
 
 namespace ox::ashes {
 
-constexpr auto Black       = Color::Background;
-constexpr auto Red         = Color{1};
-constexpr auto Green       = Color{2};
-constexpr auto Brown       = Color{3};
-constexpr auto Blue        = Color{4};
-constexpr auto Violet      = Color{5};
-constexpr auto Light_green = Color{6};
-constexpr auto Silver      = Color{7};
-constexpr auto Gray        = Color{8};
-constexpr auto White       = Color::Foreground;
+inline constexpr auto Black       = Color::Background;
+inline constexpr auto Red         = Color{1};
+inline constexpr auto Green       = Color{2};
+inline constexpr auto Brown       = Color{3};
+inline constexpr auto Blue        = Color{4};
+inline constexpr auto Violet      = Color{5};
+inline constexpr auto Light_green = Color{6};
+inline constexpr auto Silver      = Color{7};
+inline constexpr auto Gray        = Color{8};
+inline constexpr auto White       = Color::Foreground;
 
 /// Ashes scheme by Jannik Siebert (https://github.com/janniks)
 inline auto const palette = Palette{

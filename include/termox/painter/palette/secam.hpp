@@ -4,14 +4,14 @@
 
 namespace ox::secam {
 
-constexpr auto Black  = Color::Background;
-constexpr auto Red    = Color{1};
-constexpr auto Green  = Color{2};
-constexpr auto Yellow = Color{3};
-constexpr auto Blue   = Color{4};
-constexpr auto Violet = Color{5};
-constexpr auto Cyan   = Color{6};
-constexpr auto White  = Color::Foreground;
+inline constexpr auto Black  = Color::Background;
+inline constexpr auto Red    = Color{1};
+inline constexpr auto Green  = Color{2};
+inline constexpr auto Yellow = Color{3};
+inline constexpr auto Blue   = Color{4};
+inline constexpr auto Violet = Color{5};
+inline constexpr auto Cyan   = Color{6};
+inline constexpr auto White  = Color::Foreground;
 
 /// SECAM Color Television 8 Color Palette
 /** https://lospec.com/palette-list/secam */
