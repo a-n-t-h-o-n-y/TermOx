@@ -4,22 +4,22 @@
 
 namespace ox::cga {
 
-constexpr auto Black       = Color::Background;
-constexpr auto Red         = Color{1};
-constexpr auto Green       = Color{2};
-constexpr auto Brown       = Color{3};
-constexpr auto Blue        = Color{4};
-constexpr auto Magenta     = Color{5};
-constexpr auto Cyan        = Color{6};
-constexpr auto Light_gray  = Color{7};
-constexpr auto Gray        = Color{8};
-constexpr auto Light_red   = Color{9};
-constexpr auto Light_green = Color{10};
-constexpr auto Yellow      = Color{11};
-constexpr auto Teal        = Color{12};
-constexpr auto Pink        = Color{13};
-constexpr auto Light_blue  = Color{14};
-constexpr auto White       = Color::Foreground;
+inline constexpr auto Black       = Color::Background;
+inline constexpr auto Red         = Color{1};
+inline constexpr auto Green       = Color{2};
+inline constexpr auto Brown       = Color{3};
+inline constexpr auto Blue        = Color{4};
+inline constexpr auto Magenta     = Color{5};
+inline constexpr auto Cyan        = Color{6};
+inline constexpr auto Light_gray  = Color{7};
+inline constexpr auto Gray        = Color{8};
+inline constexpr auto Light_red   = Color{9};
+inline constexpr auto Light_green = Color{10};
+inline constexpr auto Yellow      = Color{11};
+inline constexpr auto Teal        = Color{12};
+inline constexpr auto Pink        = Color{13};
+inline constexpr auto Light_blue  = Color{14};
+inline constexpr auto White       = Color::Foreground;
 
 /// Color Graphics Adaptor Palette
 /** https://lospec.com/palette-list/color-graphics-adapter */

@@ -4,10 +4,10 @@
 
 namespace ox::en4 {
 
-constexpr auto Blue  = Color::Background;
-constexpr auto Peach = Color{5};
-constexpr auto Green = Color{2};
-constexpr auto White = Color::Foreground;
+inline constexpr auto Blue  = Color::Background;
+inline constexpr auto Peach = Color{5};
+inline constexpr auto Green = Color{2};
+inline constexpr auto White = Color::Foreground;
 
 /// EN 4 Color Palette
 /** https://lospec.com/palette-list/en4 */

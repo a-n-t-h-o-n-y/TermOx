@@ -4,14 +4,14 @@
 
 namespace ox::teletext {
 
-constexpr auto Black   = Color::Background;
-constexpr auto Blue    = Color{4};
-constexpr auto Red     = Color{1};
-constexpr auto Magenta = Color{5};
-constexpr auto Lime    = Color{2};
-constexpr auto Cyan    = Color{6};
-constexpr auto Yellow  = Color{3};
-constexpr auto White   = Color::Foreground;
+inline constexpr auto Black   = Color::Background;
+inline constexpr auto Blue    = Color{4};
+inline constexpr auto Red     = Color{1};
+inline constexpr auto Magenta = Color{5};
+inline constexpr auto Lime    = Color{2};
+inline constexpr auto Cyan    = Color{6};
+inline constexpr auto Yellow  = Color{3};
+inline constexpr auto White   = Color::Foreground;
 
 /// World System Teletext Level 1 Color Palette
 inline auto const palette = Palette{

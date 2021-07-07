@@ -4,22 +4,22 @@
 
 namespace ox::zx_spectrum {
 
-constexpr auto Black       = Color::Background;
-constexpr auto Dark_red    = Color{1};
-constexpr auto Dark_green  = Color{2};
-constexpr auto Olive       = Color{3};
-constexpr auto Dark_blue   = Color{4};
-constexpr auto Dark_violet = Color{5};
-constexpr auto Dark_cyan   = Color{6};
-constexpr auto Silver      = Color{7};
-constexpr auto Black_2     = Color{8};
-constexpr auto Red         = Color{9};
-constexpr auto Green       = Color{10};
-constexpr auto Yellow      = Color{11};
-constexpr auto Blue        = Color{12};
-constexpr auto Violet      = Color{13};
-constexpr auto Cyan        = Color{14};
-constexpr auto White       = Color::Foreground;
+inline constexpr auto Black       = Color::Background;
+inline constexpr auto Dark_red    = Color{1};
+inline constexpr auto Dark_green  = Color{2};
+inline constexpr auto Olive       = Color{3};
+inline constexpr auto Dark_blue   = Color{4};
+inline constexpr auto Dark_violet = Color{5};
+inline constexpr auto Dark_cyan   = Color{6};
+inline constexpr auto Silver      = Color{7};
+inline constexpr auto Black_2     = Color{8};
+inline constexpr auto Red         = Color{9};
+inline constexpr auto Green       = Color{10};
+inline constexpr auto Yellow      = Color{11};
+inline constexpr auto Blue        = Color{12};
+inline constexpr auto Violet      = Color{13};
+inline constexpr auto Cyan        = Color{14};
+inline constexpr auto White       = Color::Foreground;
 
 /// ZX Spectrum 16 Color Palette
 /** https://lospec.com/palette-list/zx-spectrum */

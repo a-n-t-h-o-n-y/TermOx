@@ -4,33 +4,33 @@
 
 namespace ox::amstrad_cpc {
 
-constexpr auto Black        = Color::Background;
-constexpr auto Maroon       = Color{1};
-constexpr auto Green        = Color{2};
-constexpr auto Olive        = Color{3};
-constexpr auto Navy         = Color{4};
-constexpr auto Violet       = Color{5};
-constexpr auto Blue         = Color{6};
-constexpr auto Gray         = Color{7};
-constexpr auto Malibu       = Color{8};
-constexpr auto Red          = Color{9};
-constexpr auto Spring_green = Color{10};
-constexpr auto Yellow       = Color{11};
-constexpr auto Azure        = Color{12};
-constexpr auto Orange       = Color{13};
-constexpr auto Teal         = Color{14};
-constexpr auto White        = Color::Foreground;
-constexpr auto Light_red    = Color{16};
-constexpr auto Light_yellow = Color{17};
-constexpr auto Lime         = Color{18};
-constexpr auto Yellow_green = Color{19};
-constexpr auto Mint         = Color{20};
-constexpr auto Cyan         = Color{21};
-constexpr auto Anakiwa      = Color{22};
-constexpr auto Pink         = Color{23};
-constexpr auto Magenta      = Color{24};
-constexpr auto Rose         = Color{25};
-constexpr auto Eggplant     = Color{26};
+inline constexpr auto Black        = Color::Background;
+inline constexpr auto Maroon       = Color{1};
+inline constexpr auto Green        = Color{2};
+inline constexpr auto Olive        = Color{3};
+inline constexpr auto Navy         = Color{4};
+inline constexpr auto Violet       = Color{5};
+inline constexpr auto Blue         = Color{6};
+inline constexpr auto Gray         = Color{7};
+inline constexpr auto Malibu       = Color{8};
+inline constexpr auto Red          = Color{9};
+inline constexpr auto Spring_green = Color{10};
+inline constexpr auto Yellow       = Color{11};
+inline constexpr auto Azure        = Color{12};
+inline constexpr auto Orange       = Color{13};
+inline constexpr auto Teal         = Color{14};
+inline constexpr auto White        = Color::Foreground;
+inline constexpr auto Light_red    = Color{16};
+inline constexpr auto Light_yellow = Color{17};
+inline constexpr auto Lime         = Color{18};
+inline constexpr auto Yellow_green = Color{19};
+inline constexpr auto Mint         = Color{20};
+inline constexpr auto Cyan         = Color{21};
+inline constexpr auto Anakiwa      = Color{22};
+inline constexpr auto Pink         = Color{23};
+inline constexpr auto Magenta      = Color{24};
+inline constexpr auto Rose         = Color{25};
+inline constexpr auto Eggplant     = Color{26};
 
 /// Amstrad CPC 27 Color Palette
 /** https://lospec.com/palette-list/amstrad-cpc */

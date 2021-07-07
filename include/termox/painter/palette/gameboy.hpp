@@ -4,10 +4,10 @@
 
 namespace ox::gameboy {
 
-constexpr auto Green_1 = Color::Background;
-constexpr auto Green_2 = Color{2};
-constexpr auto Green_3 = Color{3};
-constexpr auto Green_4 = Color::Foreground;
+inline constexpr auto Green_1 = Color::Background;
+inline constexpr auto Green_2 = Color{2};
+inline constexpr auto Green_3 = Color{3};
+inline constexpr auto Green_4 = Color::Foreground;
 
 /// Original Gameboy Greenscale 4 Color Palette
 inline auto const palette = Palette{
