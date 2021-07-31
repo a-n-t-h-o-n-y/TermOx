@@ -18,7 +18,7 @@ auto useless_widgets() -> std::unique_ptr<layout::Horizontal<>>
         layout::horizontal
         (
             titlebar(U"Useless Widgets"),
-            labeled_checkbox(U"Check Me! | Trait::Bold"),
+            labeled_checkbox(U"Check Me!" | Trait::Bold),
             layout::horizontal
             (
                 button(U"Press Me!") | bg(Color::Light_blue) | fixed_width(11),
@@ -64,10 +64,11 @@ auto read_write_textbox() -> std::unique_ptr<layout::Vertical<>>
         ) | fixed_height(1) | name("btn-container")
     );
 
-// TODO verify, also find_by_name returns a pointer, it'll need to be casted,
-really not useful unless you have an example where you know the type. or where
-you don't need useful connections, maybe change widget features like border or
-background color.
+    /* TODO verify, also find_by_name returns a pointer, it'll need to be casted,
+    really not useful unless you have an example where you know the type. or where
+    you don't need useful connections, maybe change widget features like border or
+    background color.*/
+    
     // Connect Signals
     auto* textbox = w->find_child_by_name("textbox");
     auto* btns    = w->find_child_by_name("btn-container");
