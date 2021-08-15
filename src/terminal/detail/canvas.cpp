@@ -7,6 +7,7 @@
 #include <ostream>
 #include <vector>
 
+#include <termox/common/u32_to_mb.hpp>
 #include <termox/painter/brush.hpp>
 #include <termox/painter/color.hpp>
 #include <termox/painter/glyph.hpp>
@@ -152,7 +153,7 @@ auto print(Canvas::Diff const& diff, std::ostream& os) -> std::ostream&
     // using Diff = std::vector<std::pair<ox::Point, ox::Glyph>>;
     for (auto const& [point, glyph] : diff) {
         os << "Point: {" << point.x << ", " << point.y << "}\n";
-        os << "Glyph: symbol: " << glyph.symbol << '\n';
+        os << "Glyph: symbol: " << u32_to_mb(glyph.symbol) << '\n';
         os << "----------------------\n";
     }
     return os;
