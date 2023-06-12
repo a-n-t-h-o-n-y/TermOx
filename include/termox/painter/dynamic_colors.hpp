@@ -37,15 +37,17 @@ class Rainbow {
 class Modulation_base {
    protected:
     /// Resolution is the number of steps to complete a full cycle.
-    Modulation_base(unsigned resolution);
+    /** \p offset is the starting point, in range [0, resolution). */
+    explicit Modulation_base(unsigned resolution, unsigned offset = 0);
 
    protected:
     /// Finds the next ratio between from the current step and resolution.
+    /** Returns a value between [0.0, 1.0]. */
     [[nodiscard]] auto get_next_ratio() -> double;
 
    private:
     unsigned const step_total_;
-    unsigned step_{0};
+    unsigned step_;
 
    private:
     /// Apply a wrapping post increment to step_ and return the previous value.

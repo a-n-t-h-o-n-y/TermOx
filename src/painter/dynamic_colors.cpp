@@ -1,5 +1,6 @@
 #include <termox/painter/dynamic_colors.hpp>
 
+#include <cassert>
 #include <cmath>
 #include <cstdint>
 
@@ -36,9 +37,12 @@ auto rainbow(Dynamic_color::Period_t const period,
     return {period, Rainbow{saturation, lightness}};
 }
 
-Modulation_base::Modulation_base(unsigned const resolution)
-    : step_total_{resolution}
-{}
+Modulation_base::Modulation_base(unsigned const resolution,
+                                 unsigned const offset)
+    : step_total_{resolution}, step_{offset}
+{
+    assert(offset < resolution);
+}
 
 auto Modulation_base::get_next_ratio() -> double
 {
