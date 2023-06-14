@@ -228,8 +228,10 @@ auto Label<Layout_t>::find_offset(int text_length,
 template class Label<layout::Horizontal>;
 template class Label<layout::Vertical>;
 
+#if defined(__clang__) || (defined(__GNUC__) && __GNUC__ >= 12)
 template class Label<layout::Opposite_template<layout::Horizontal<>>::type>;
 template class Label<layout::Opposite_template<layout::Vertical<>>::type>;
+#endif
 
 template <template <typename> typename Layout_t>
 auto label(Glyph_string text,
