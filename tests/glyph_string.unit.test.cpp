@@ -1,6 +1,6 @@
 #include <clocale>
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <termox/painter/brush.hpp>
 #include <termox/painter/color.hpp>

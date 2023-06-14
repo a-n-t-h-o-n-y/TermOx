@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.9)
-
 # TermOx Library
 add_library(TermOx STATIC
     common/mb_to_u32.cpp

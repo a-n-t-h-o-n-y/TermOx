@@ -1,15 +1,16 @@
 #include <algorithm>
-#include <termox/common/unique_queue.hpp>
-
 #include <cassert>
 #include <cstddef>
 #include <initializer_list>
 #include <iterator>
 #include <random>
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
+
+#include <termox/common/unique_queue.hpp>
 
 namespace {
+
 struct Element {
     int i;
 };

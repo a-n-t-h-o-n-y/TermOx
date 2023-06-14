@@ -1,56 +1,22 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.16)
 project(TermOx LANGUAGES CXX)
 
-# Build Types
-set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE}
-    CACHE STRING "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel tsan asan lsan msan ubsan"
-    FORCE
-)
-
-# ThreadSanitizer
-set(CMAKE_CXX_FLAGS_TSAN
-    "-fsanitize=thread -g -O1"
-    CACHE STRING "Flags used by the C++ compiler during ThreadSanitizer builds."
-    FORCE
-)
-
-# AddressSanitize
-set(CMAKE_CXX_FLAGS_ASAN
-    "-fsanitize=address -fno-optimize-sibling-calls -fsanitize-address-use-after-scope -fno-omit-frame-pointer -g -O1"
-    CACHE STRING "Flags used by the C++ compiler during AddressSanitizer builds."
-    FORCE
-)
-
-# LeakSanitizer
-set(CMAKE_CXX_FLAGS_LSAN
-    "-fsanitize=leak -fno-omit-frame-pointer -g -O1"
-    CACHE STRING "Flags used by the C++ compiler during LeakSanitizer builds."
-    FORCE
-)
-
-# MemorySanitizer
-set(CMAKE_CXX_FLAGS_MSAN
-    "-fsanitize=memory -fno-optimize-sibling-calls -fsanitize-memory-track-origins=2 -fno-omit-frame-pointer -g -O2"
-    CACHE STRING "Flags used by the C++ compiler during MemorySanitizer builds."
-    FORCE
-)
-
-# UndefinedBehaviour
-set(CMAKE_CXX_FLAGS_UBSAN
-    "-fsanitize=undefined"
-    CACHE STRING "Flags used by the C++ compiler during UndefinedBehaviourSanitizer builds."
-    FORCE
-)
-
-message("Build Type: ${CMAKE_BUILD_TYPE}" )
-
-set(TERMOX_BUILD_TESTS ON CACHE BOOL "Create termox.ui.tests and termox.unit.tests targets")
-
-set(TERMOX_BUILD_DEMOS ON CACHE BOOL "Create demos and readme.demo targets")
-
+# Adds runtime checks to the standard library; slow.
 # if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 #     add_compile_options(-D_GLIBCXX_DEBUG -D_LIBCPP_DEBUG=1)
 # endif()
+
+include(${CMAKE_SOURCE_DIR}/cmake/sanitizer.cmake)
+
+set(
+    TERMOX_BUILD_TESTS OFF CACHE BOOL
+    "Create termox.ui.tests and termox.unit.tests targets"
+)
+
+set(
+    TERMOX_BUILD_DEMOS OFF CACHE BOOL
+    "Create demos and readme.demo targets"
+)
 
 # Add Escape Library
 add_subdirectory(external/Escape)
@@ -62,7 +28,7 @@ if (NOT TARGET Catch2)
     add_subdirectory(external/Catch2 EXCLUDE_FROM_ALL)
 endif()
 
-# Add TermOx
+# Add TermOx Core
 add_subdirectory(src)
 
 # Add Demos

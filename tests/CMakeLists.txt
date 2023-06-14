@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.9)
-
 # UI Tests
 
 ## Checkbox
@@ -51,12 +49,22 @@ add_custom_target(
 
 # Unit Tests
 add_executable(termox.unit.tests EXCLUDE_FROM_ALL
-    catch2.main.cpp
     glyph_string.unit.test.cpp
     canvas.unit.test.cpp
     unique_queue.unit.test.cpp
 )
-target_compile_options(termox.unit.tests PRIVATE -Wall -Wextra -Wpedantic)
+target_compile_options(
+    termox.unit.tests
+    PRIVATE
+        -Wall
+        -Wextra
+        -Wpedantic
+)
 
-# Catch2::Catch2 relies on signals-light to define it.
-target_link_libraries(termox.unit.tests PRIVATE TermOx Catch2::Catch2)
+# Catch2::Catch2WithMain relies on signals-light to define it.
+target_link_libraries(
+    termox.unit.tests
+    PRIVATE
+        TermOx
+        Catch2::Catch2WithMain
+)
