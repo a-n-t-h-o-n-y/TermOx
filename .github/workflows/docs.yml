@@ -1,21 +1,21 @@
 name: docs
 
 on:
-  push:
-    branches: [ main ]
+    push:
+        branches: [main]
 
 jobs:
-  docs:
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v2.3.1
-      - name: Doxygen Action
-        uses: mattnotmitt/doxygen-action@v1.1.0
-        with:
-          working-directory: 'docs/'
-      - name: Deploy Docs
-        uses: peaceiris/actions-gh-pages@v3.6.4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: ./docs/html
+    docs:
+        runs-on: ubuntu-22.04
+        steps:
+            - uses: actions/checkout@v3
+            - name: Doxygen Action
+              uses: mattnotmitt/doxygen-action@v1.9.5
+              with:
+                  working-directory: "docs/"
+            - name: Deploy Docs
+              uses: peaceiris/actions-gh-pages@v3
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  publish_branch: gh-pages
+                  publish_dir: ./docs/html
