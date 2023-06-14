@@ -17,7 +17,8 @@ jobs:
                   CXX: g++-12
               run: |
                   mkdir build && cd build
-                  cmake .. && make termox.all
+                  cmake .. -DCMAKE_BUILD_TYPE=Debug -DTERMOX_BUILD_TESTS=ON -DTERMOX_BUILD_DEMOS=ON
+                  make termox.all
                   ./tests/termox.unit.tests
     build-ubuntu22-gcc11:
         runs-on: ubuntu-22.04
@@ -30,7 +31,8 @@ jobs:
                   CXX: g++-11
               run: |
                   mkdir build && cd build
-                  cmake .. && make termox.all
+                  cmake .. -DCMAKE_BUILD_TYPE=Debug -DTERMOX_BUILD_TESTS=ON -DTERMOX_BUILD_DEMOS=ON
+                  make termox.all
                   ./tests/termox.unit.tests
     build-ubuntu22-gcc10:
         runs-on: ubuntu-22.04
@@ -43,7 +45,8 @@ jobs:
                   CXX: g++-10
               run: |
                   mkdir build && cd build
-                  cmake .. && make termox.all
+                  cmake .. -DCMAKE_BUILD_TYPE=Debug -DTERMOX_BUILD_TESTS=ON -DTERMOX_BUILD_DEMOS=ON
+                  make termox.all
                   ./tests/termox.unit.tests
     build-ubuntu22-gcc9:
         runs-on: ubuntu-22.04
@@ -56,7 +59,8 @@ jobs:
                   CXX: g++-9
               run: |
                   mkdir build && cd build
-                  cmake .. && make termox.all
+                  cmake .. -DCMAKE_BUILD_TYPE=Debug -DTERMOX_BUILD_TESTS=ON -DTERMOX_BUILD_DEMOS=ON
+                  make termox.all
                   ./tests/termox.unit.tests
 
     # Ubuntu-22 Clang
@@ -71,7 +75,8 @@ jobs:
                   CXX: clang++-14
               run: |
                   mkdir build && cd build
-                  cmake .. && make termox.all
+                  cmake .. -DCMAKE_BUILD_TYPE=Debug -DTERMOX_BUILD_TESTS=ON -DTERMOX_BUILD_DEMOS=ON
+                  make termox.all
                   ./tests/termox.unit.tests
     build-ubuntu22-clang13:
         runs-on: ubuntu-22.04
@@ -84,7 +89,8 @@ jobs:
                   CXX: clang++-13
               run: |
                   mkdir build && cd build
-                  cmake .. && make termox.all
+                  cmake .. -DCMAKE_BUILD_TYPE=Debug -DTERMOX_BUILD_TESTS=ON -DTERMOX_BUILD_DEMOS=ON
+                  make termox.all
                   ./tests/termox.unit.tests
     build-ubuntu22-clang12:
         runs-on: ubuntu-22.04
@@ -97,7 +103,8 @@ jobs:
                   CXX: clang++-12
               run: |
                   mkdir build && cd build
-                  cmake .. && make termox.all
+                  cmake .. -DCMAKE_BUILD_TYPE=Debug -DTERMOX_BUILD_TESTS=ON -DTERMOX_BUILD_DEMOS=ON
+                  make termox.all
                   ./tests/termox.unit.tests
 
     # Ubuntu-20 GCC
@@ -112,7 +119,8 @@ jobs:
                   CXX: g++-10
               run: |
                   mkdir build && cd build
-                  cmake .. && make termox.all
+                  cmake .. -DCMAKE_BUILD_TYPE=Debug -DTERMOX_BUILD_TESTS=ON -DTERMOX_BUILD_DEMOS=ON
+                  make termox.all
                   ./tests/termox.unit.tests
     build-ubuntu20-gcc9:
         runs-on: ubuntu-20.04
@@ -125,7 +133,8 @@ jobs:
                   CXX: g++-9
               run: |
                   mkdir build && cd build
-                  cmake .. && make termox.all
+                  cmake .. -DCMAKE_BUILD_TYPE=Debug -DTERMOX_BUILD_TESTS=ON -DTERMOX_BUILD_DEMOS=ON
+                  make termox.all
                   ./tests/termox.unit.tests
 
     # Ubuntu-20 Clang
@@ -140,7 +149,8 @@ jobs:
                   CXX: clang++-12
               run: |
                   mkdir build && cd build
-                  cmake .. && make termox.all
+                  cmake .. -DCMAKE_BUILD_TYPE=Debug -DTERMOX_BUILD_TESTS=ON -DTERMOX_BUILD_DEMOS=ON
+                  make termox.all
                   ./tests/termox.unit.tests
     build-ubuntu20-clang11:
         runs-on: ubuntu-20.04
@@ -153,7 +163,8 @@ jobs:
                   CXX: clang++-11
               run: |
                   mkdir build && cd build
-                  cmake .. && make termox.all
+                  cmake .. -DCMAKE_BUILD_TYPE=Debug -DTERMOX_BUILD_TESTS=ON -DTERMOX_BUILD_DEMOS=ON
+                  make termox.all
                   ./tests/termox.unit.tests
     build-ubuntu20-clang10:
         runs-on: ubuntu-20.04
@@ -166,7 +177,8 @@ jobs:
                   CXX: clang++-10
               run: |
                   mkdir build && cd build
-                  cmake .. && make termox.all
+                  cmake .. -DCMAKE_BUILD_TYPE=Debug -DTERMOX_BUILD_TESTS=ON -DTERMOX_BUILD_DEMOS=ON
+                  make termox.all
                   ./tests/termox.unit.tests
 
     # MacOS-12 Clang
@@ -181,7 +193,8 @@ jobs:
                   CXX: clang++
               run: |
                   mkdir build && cd build
-                  cmake .. && make termox.all
+                  cmake .. -DCMAKE_BUILD_TYPE=Debug -DTERMOX_BUILD_TESTS=ON -DTERMOX_BUILD_DEMOS=ON
+                  make termox.all
                   ./tests/termox.unit.tests
 
     # MacOS-12 GCC
@@ -196,7 +209,8 @@ jobs:
                   CXX: g++-12
               run: |
                   mkdir build && cd build
-                  cmake .. && make termox.all
+                  cmake .. -DCMAKE_BUILD_TYPE=Debug -DTERMOX_BUILD_TESTS=ON -DTERMOX_BUILD_DEMOS=ON
+                  make termox.all
                   ./tests/termox.unit.tests
     build-MacOS12-gcc11:
         runs-on: macos-12
@@ -209,5 +223,6 @@ jobs:
                   CXX: g++-11
               run: |
                   mkdir build && cd build
-                  cmake .. && make termox.all
+                  cmake .. -DCMAKE_BUILD_TYPE=Debug -DTERMOX_BUILD_TESTS=ON -DTERMOX_BUILD_DEMOS=ON
+                  make termox.all
                   ./tests/termox.unit.tests

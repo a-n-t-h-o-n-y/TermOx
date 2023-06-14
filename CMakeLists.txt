@@ -31,21 +31,44 @@ endif()
 # Add TermOx Core
 add_subdirectory(src)
 
+# Create a list to hold our dependencies
+set(TERMOX_ALL_DEPENDENCIES TermOx)
+
 # Add Demos
 if (TERMOX_BUILD_DEMOS)
     add_subdirectory(demos)
+    # Add the demos and readme.demo targets to our list of dependencies
+    list(APPEND TERMOX_ALL_DEPENDENCIES demos readme.demo)
 endif()
 
 # Add Tests
 if (TERMOX_BUILD_TESTS)
     add_subdirectory(tests)
+    # Add the test targets to our list of dependencies
+    list(APPEND TERMOX_ALL_DEPENDENCIES termox.ui.tests termox.unit.tests)
 endif()
 
 add_custom_target(
     termox.all
-    DEPENDS
-        demos
-        readme.demo
-        termox.ui.tests
-        termox.unit.tests
+    DEPENDS ${TERMOX_ALL_DEPENDENCIES}
 )
+
+
+# # Add Demos
+# if (TERMOX_BUILD_DEMOS)
+#     add_subdirectory(demos)
+# endif()
+
+# # Add Tests
+# if (TERMOX_BUILD_TESTS)
+#     add_subdirectory(tests)
+# endif()
+
+# add_custom_target(
+#     termox.all
+#     DEPENDS
+#         demos
+#         readme.demo
+#         termox.ui.tests
+#         termox.unit.tests
+# )
