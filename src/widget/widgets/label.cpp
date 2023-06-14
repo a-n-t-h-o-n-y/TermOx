@@ -228,10 +228,8 @@ auto Label<Layout_t>::find_offset(int text_length,
 template class Label<layout::Horizontal>;
 template class Label<layout::Vertical>;
 
-#ifdef __clang__  // Clang 12.0 needs these to be explicit, GCC 11.1 does not.
 template class Label<layout::Opposite_template<layout::Horizontal<>>::type>;
 template class Label<layout::Opposite_template<layout::Vertical<>>::type>;
-#endif
 
 template <template <typename> typename Layout_t>
 auto label(Glyph_string text,
