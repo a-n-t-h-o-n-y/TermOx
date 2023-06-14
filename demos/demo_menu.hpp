@@ -44,7 +44,7 @@ class Demo_menu : public ox::Menu_stack {
             this->Menu_stack::goto_menu();
         });
 
-        auto constexpr brush = ox::Brush{fg(ox::apple_ii::Aqua)};
+        auto constexpr brush = ox::Brush{} | fg(ox::apple_ii::Aqua);
 
         this->make_page<fractal::Fractal_demo>(U"Fractals" | brush);
         this->make_page<snake::Snake_game>(U"Snake Game" | brush);

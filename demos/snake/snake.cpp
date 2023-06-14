@@ -85,7 +85,8 @@ using namespace snake;
 [[nodiscard]] auto make_instruction_text() -> ox::Glyph_string
 {
     using namespace ox;
-    auto const standout = Brush{fg(color::Instruction_text), Trait::Bold};
+    // auto const standout = Brush{fg(color::Instruction_text), Trait::Bold};
+    auto const standout = Brush{} | fg(color::Instruction_text) | Trait::Bold;
     auto result         = Glyph_string{U"Start/Stop "};
     result.append(U"Space Bar" | standout);
     result.append(U" - Movement ");

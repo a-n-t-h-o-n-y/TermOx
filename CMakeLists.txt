@@ -6,6 +6,8 @@ project(TermOx LANGUAGES CXX)
 #     add_compile_options(-D_GLIBCXX_DEBUG -D_LIBCPP_DEBUG=1)
 # endif()
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 include(${CMAKE_SOURCE_DIR}/cmake/sanitizer.cmake)
 
 set(

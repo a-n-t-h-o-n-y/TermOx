@@ -185,8 +185,8 @@ struct Size_policy_settings : ox::layout::Vertical<> {
 };
 
 struct Settings : ox::layout::Vertical<> {
-    ox::Text_view& title{this->make_child<ox::Text_view>(
-        ox::Glyph_string{"Settings", ox::Trait::Bold})};
+    ox::Text_view& title{
+        this->make_child<ox::Text_view>("Settings" | ox::Trait::Bold)};
     Size_policy_settings& width_policy_settings{
         this->make_child<Size_policy_settings>()};
     ox::Button& add_btn{this->make_child<ox::Button>("Add Widget")};

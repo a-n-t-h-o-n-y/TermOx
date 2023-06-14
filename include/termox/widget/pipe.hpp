@@ -316,21 +316,12 @@ namespace ox::pipe {
     };
 }
 
-/// Discards Traits from Widgets or Glyph_strings
+/// Discards Traits from Widgets or Glyph_strings or Brushes.
 [[nodiscard]] inline auto discard(Traits ts)
 {
-    return Overload{[ts](Brush& b) -> Brush& {
+    return Overload{[ts](Brush b) -> Brush {
                         b.traits.remove(ts);
                         return b;
-                    },
-                    [ts](Brush const& b) -> Brush {
-                        auto copy = b;
-                        copy.traits.remove(ts);
-                        return copy;
-                    },
-                    [ts](Brush&& b) -> Brush {
-                        b.traits.remove(ts);
-                        return std::move(b);
                     },
                     [ts](Glyph& g) -> Glyph& {
                         g.brush.traits.remove(ts);
@@ -367,11 +358,7 @@ namespace ox::pipe {
 
 [[nodiscard]] inline auto clear_traits()
 {
-    return Overload{[](Brush& b) -> Brush& {
-                        b.traits = Trait::None;
-                        return b;
-                    },
-                    [](Brush b) -> Brush {
+    return Overload{[](Brush b) -> Brush {
                         b.traits = Trait::None;
                         return b;
                     },
@@ -1072,7 +1059,7 @@ auto operator|(Range<Iter_1, Iter_2> children,
                 [](auto& w) { return dynamic_cast<Widget_t*>(&w) != nullptr; }},
                 [](auto& w) -> auto& {return static_cast<Widget_t&>(w); }
                 }, children.end()};
-// clang-format on
+    // clang-format on
 }
 
 /// Pipe operator for use with Widget::get_descendants.
@@ -1132,23 +1119,9 @@ auto operator|(Glyph&& g, F&& op) -> std::invoke_result_t<F, Glyph&&>
 
 /// Brush pipe operator, for any function object pipe argument.
 template <typename F>
-auto operator|(Brush& b, F&& op) -> std::invoke_result_t<F, Brush&>
+[[nodiscard]] auto operator|(Brush b, F&& op) -> std::invoke_result_t<F, Brush>
 {
     return std::forward<F>(op)(b);
-}
-
-/// Brush pipe operator, for any function object pipe argument.
-template <typename F>
-auto operator|(Brush const& b, F&& op) -> std::invoke_result_t<F, Brush const&>
-{
-    return std::forward<F>(op)(b);
-}
-
-/// Brush pipe operator, for any function object pipe argument.
-template <typename F>
-auto operator|(Brush&& b, F&& op) -> std::invoke_result_t<F, Brush&&>
-{
-    return std::forward<F>(op)(std::move(b));
 }
 
 }  // namespace ox

@@ -16,65 +16,62 @@ TEST_CASE("Canvas: Everything", "[Canvas]")
     auto a = ox::detail::Canvas{{15, 20}};
     auto b = ox::detail::Canvas{{15, 20}};
 
-    a.at({1, 1})   = ox::Glyph{U'y', bg(ox::Color::Blue)};
-    a.at({14, 19}) = ox::Glyph{U'z', fg(ox::Color::Orange), ox::Trait::Bold};
+    a.at({1, 1})   = U'y' | bg(ox::Color::Blue);
+    a.at({14, 19}) = U'z' | fg(ox::Color::Orange) | ox::Trait::Bold;
 
-    b.at({10, 2}) = ox::Glyph{U'a', fg(ox::Color::Blue), ox::Trait::Underline};
-    b.at({5, 19}) = ox::Glyph{U'b', ox::Trait::Standout};
+    b.at({10, 2}) = U'a' | fg(ox::Color::Blue) | ox::Trait::Underline;
+    b.at({5, 19}) = U'b' | ox::Trait::Standout;
 
     REQUIRE(std::distance(std::cbegin(a), std::cend(a)) == 300);
     REQUIRE(std::distance(std::cbegin(b), std::cend(b)) == 300);
-    CHECK(a.at({1, 1}) == ox::Glyph{U'y', bg(ox::Color::Blue)});
-    CHECK(a.at({10, 5}) == ox::Glyph{});
-    CHECK(a.at({14, 19}) ==
-          ox::Glyph{U'z', fg(ox::Color::Orange), ox::Trait::Bold});
-    CHECK(b.at({10, 2}) ==
-          ox::Glyph{U'a', fg(ox::Color::Blue), ox::Trait::Underline});
-    CHECK(b.at({5, 19}) == ox::Glyph{U'b', ox::Trait::Standout});
+    REQUIRE(a.at({1, 1}) == (U'y' | bg(ox::Color::Blue)));
+    REQUIRE(a.at({10, 5}) == ox::Glyph{});
+    REQUIRE(a.at({14, 19}) == (U'z' | fg(ox::Color::Orange) | ox::Trait::Bold));
+    REQUIRE(b.at({10, 2}) ==
+            (U'a' | fg(ox::Color::Blue) | ox::Trait::Underline));
+    REQUIRE(b.at({5, 19}) == (U'b' | ox::Trait::Standout));
 
     auto diff = ox::detail::Canvas::Diff{};
     merge_and_diff(a, b, diff);
 
     REQUIRE(std::distance(std::cbegin(a), std::cend(a)) == 300);
     REQUIRE(std::distance(std::cbegin(b), std::cend(b)) == 300);
-    CHECK(b.at({1, 1}) == ox::Glyph{U'y', bg(ox::Color::Blue)});
-    CHECK(b.at({14, 19}) ==
-          ox::Glyph{U'z', fg(ox::Color::Orange), ox::Trait::Bold});
-    CHECK(b.at({10, 2}) ==
-          ox::Glyph{U'a', fg(ox::Color::Blue), ox::Trait::Underline});
-    CHECK(b.at({5, 19}) == ox::Glyph{U'b', ox::Trait::Standout});
-    CHECK(b.at({10, 5}) == ox::Glyph{});
+    REQUIRE(b.at({1, 1}) == (U'y' | bg(ox::Color::Blue)));
+    REQUIRE(b.at({14, 19}) == (U'z' | fg(ox::Color::Orange) | ox::Trait::Bold));
+    REQUIRE(b.at({10, 2}) ==
+            (U'a' | fg(ox::Color::Blue) | ox::Trait::Underline));
+    REQUIRE(b.at({5, 19}) == (U'b' | ox::Trait::Standout));
+    REQUIRE(b.at({10, 5}) == ox::Glyph{});
 
     REQUIRE(diff.size() == 2);
 
-    CHECK(diff.at(0).first == ox::Point{1, 1});
-    CHECK(diff.at(0).second == ox::Glyph{U'y', bg(ox::Color::Blue)});
-    CHECK(diff.at(1).first == ox::Point{14, 19});
-    CHECK(diff.at(1).second ==
-          ox::Glyph{U'z', fg(ox::Color::Orange), ox::Trait::Bold});
+    REQUIRE(diff.at(0).first == ox::Point{1, 1});
+    REQUIRE(diff.at(0).second == (U'y' | bg(ox::Color::Blue)));
+    REQUIRE(diff.at(1).first == ox::Point{14, 19});
+    REQUIRE(diff.at(1).second ==
+            (U'z' | fg(ox::Color::Orange) | ox::Trait::Bold));
 
     a.resize({100, 200});
     REQUIRE(std::distance(std::cbegin(a), std::cend(a)) == 20'000);
-    CHECK(a.at({1, 1}) == ox::Glyph{U'y', bg(ox::Color::Blue)});
-    CHECK(a.at({10, 20}) == ox::Glyph{});
-    CHECK(a.at({14, 19}) ==
-          ox::Glyph{U'z', fg(ox::Color::Orange), ox::Trait::Bold});
+    REQUIRE(a.at({1, 1}) == (U'y' | bg(ox::Color::Blue)));
+    REQUIRE(a.at({10, 20}) == ox::Glyph{});
+    REQUIRE(a.at({14, 19}) == (U'z' | fg(ox::Color::Orange) | ox::Trait::Bold));
 
     a.resize({5, 5});
-    CHECK(a.area() == ox::Area{5, 5});
+    REQUIRE(a.area() == ox::Area{5, 5});
     REQUIRE(std::distance(std::cbegin(a), std::cend(a)) == 25);
-    CHECK(a.at({1, 1}) == ox::Glyph{U'y', bg(ox::Color::Blue)});
-    CHECK(a.at({4, 3}) == ox::Glyph{});
+    REQUIRE(a.at({1, 1}) == (U'y' | bg(ox::Color::Blue)));
+    REQUIRE(a.at({4, 3}) == ox::Glyph{});
 
-    b.at({3, 16}) = ox::Glyph{U'x', bg(ox::Color::Blue)};
+    b.at({3, 16}) = U'x' | bg(ox::Color::Blue);
 
     generate_color_diff(ox::Color::Blue, b, diff);
     REQUIRE(diff.size() == 3);
-    CHECK(diff.at(0).first == ox::Point{1, 1});
-    CHECK(diff.at(0).second == ox::Glyph{U'y', bg(ox::Color::Blue)});
-    CHECK(diff.at(1).first == ox::Point{10, 2});
-    CHECK(diff.at(1).second ==
-          ox::Glyph{U'a', fg(ox::Color::Blue), ox::Trait::Underline});
-    CHECK(diff.at(2).first == ox::Point{3, 16});
-    CHECK(diff.at(2).second == ox::Glyph{U'x', bg(ox::Color::Blue)});
+    REQUIRE(diff.at(0).first == ox::Point{1, 1});
+    REQUIRE(diff.at(0).second == (U'y' | bg(ox::Color::Blue)));
+    REQUIRE(diff.at(1).first == ox::Point{10, 2});
+    REQUIRE(diff.at(1).second ==
+            (U'a' | fg(ox::Color::Blue) | ox::Trait::Underline));
+    REQUIRE(diff.at(2).first == ox::Point{3, 16});
+    REQUIRE(diff.at(2).second == (U'x' | bg(ox::Color::Blue)));
 }

@@ -281,8 +281,9 @@ auto notepad() -> std::unique_ptr<Widget>
         [&](Color c) { tbb | ox::fg(c) | wrapped() | ox::fg(c); });
 
     auto const connect = [&tb](auto& cb, Trait t) {
-        cb.checked.connect([&tb, t] { tb.insert_brush | t; });
-        cb.unchecked.connect([&tb, t] { tb.insert_brush | discard(t); });
+        cb.checked.connect([&tb, t] { tb.insert_brush = tb.insert_brush | t; });
+        cb.unchecked.connect(
+            [&tb, t] { tb.insert_brush = tb.insert_brush | discard(t); });
     };
     connect(bold, Trait::Bold);
     connect(italic, Trait::Italic);
