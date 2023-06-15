@@ -69,7 +69,7 @@ void Text_view::insert(Glyph_string text, int index)
         return;
     }
     for (auto& glyph : text)
-        glyph.brush.traits |= this->insert_brush.traits;
+        glyph = glyph | this->insert_brush.traits;
     contents_.insert(std::begin(contents_) + index, std::begin(text),
                      std::end(text));
     this->update();
@@ -79,7 +79,7 @@ void Text_view::insert(Glyph_string text, int index)
 void Text_view::append(Glyph_string text)
 {
     for (auto& glyph : text)
-        glyph.brush.traits |= this->insert_brush.traits;
+        glyph = glyph | this->insert_brush.traits;
     contents_.append(text);
     this->update();
     contents_modified(contents_);

@@ -340,10 +340,9 @@ class Color_graph : public Widget {
         if (current.symbol == U' ')
             current = U'▀' | fg(Color::Background);
         if (is_top)
-            current |= fg(c);
+            return current | fg(c);
         else
-            current |= bg(c);
-        return current;
+            return current | bg(c);
     }
 };
 
@@ -505,10 +504,9 @@ class Color_graph_static_bounds : public Widget {
         if (current.symbol == U' ')
             current = U'▀' | fg(Color::Background);
         if (is_top)
-            current |= fg(c);
+            return current | fg(c);
         else
-            current |= bg(c);
-        return current;
+            return current | bg(c);
     }
 };
 

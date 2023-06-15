@@ -45,28 +45,28 @@ struct Brush {
 }
 
 /**
- * Merge `c` into `b`, returning a new `Brush` with the result.
+ * Merge `bg` into `b`, returning a new `Brush` with the result.
  *
  * @param b The `Brush` to merge into.
- * @param c The `Background_color` to merge from.
- * @return `b` with any colors from `c` merged in.
+ * @param bg The `Background_color` to merge from.
+ * @return `b` with color from `bg` assigned to background.
  */
-[[nodiscard]] auto constexpr operator|(Brush b, Background_color c) -> Brush
+[[nodiscard]] auto constexpr operator|(Brush b, Background_color bg) -> Brush
 {
-    b.background = Color{c.value};
+    b.background = Color{bg.value};
     return b;
 }
 
 /**
- * Merge `c` into `b`, returning a new `Brush` with the result.
+ * Merge `fg` into `b`, returning a new `Brush` with the result.
  *
  * @param b The `Brush` to merge into.
- * @param c The `Foreground_color` to merge from.
- * @return `b` with any colors from `c` merged in.
+ * @param fg The `Foreground_color` to merge from.
+ * @return `b` with color from `fg` assigned to foreground.
  */
-[[nodiscard]] auto constexpr operator|(Brush b, Foreground_color c) -> Brush
+[[nodiscard]] auto constexpr operator|(Brush b, Foreground_color fg) -> Brush
 {
-    b.foreground = Color{c.value};
+    b.foreground = Color{fg.value};
     return b;
 }
 

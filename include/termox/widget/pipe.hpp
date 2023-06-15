@@ -323,18 +323,9 @@ namespace ox::pipe {
                         b.traits.remove(ts);
                         return b;
                     },
-                    [ts](Glyph& g) -> Glyph& {
+                    [ts](Glyph g) -> Glyph {
                         g.brush.traits.remove(ts);
                         return g;
-                    },
-                    [ts](Glyph const& g) -> Glyph {
-                        auto copy = g;
-                        copy.brush.traits.remove(ts);
-                        return copy;
-                    },
-                    [ts](Glyph&& g) -> Glyph {
-                        g.brush.traits.remove(ts);
-                        return std::move(g);
                     },
                     [ts](Glyph_string& gs) -> Glyph_string& {
                         gs.remove_traits(ts);
@@ -362,18 +353,9 @@ namespace ox::pipe {
                         b.traits = Trait::None;
                         return b;
                     },
-                    [](Glyph& g) -> Glyph& {
+                    [](Glyph g) -> Glyph {
                         g.brush.traits = Trait::None;
                         return g;
-                    },
-                    [](Glyph const& g) -> Glyph {
-                        auto copy         = g;
-                        copy.brush.traits = Trait::None;
-                        return copy;
-                    },
-                    [](Glyph&& g) -> Glyph {
-                        g.brush.traits = Trait::None;
-                        return std::move(g);
                     },
                     [](Glyph_string& gs) -> Glyph_string& {
                         gs.clear_traits();
@@ -1098,23 +1080,9 @@ auto operator|(Glyph_string&& gs, F&& op)
 
 /// Glyph pipe operator, for any function object pipe argument.
 template <typename F>
-auto operator|(Glyph& g, F&& op) -> std::invoke_result_t<F, Glyph&>
+auto operator|(Glyph g, F&& op) -> std::invoke_result_t<F, Glyph>
 {
     return std::forward<F>(op)(g);
-}
-
-/// Glyph pipe operator, for any function object pipe argument.
-template <typename F>
-auto operator|(Glyph const& g, F&& op) -> std::invoke_result_t<F, Glyph const&>
-{
-    return std::forward<F>(op)(g);
-}
-
-/// Glyph pipe operator, for any function object pipe argument.
-template <typename F>
-auto operator|(Glyph&& g, F&& op) -> std::invoke_result_t<F, Glyph&&>
-{
-    return std::forward<F>(op)(std::move(g));
 }
 
 /// Brush pipe operator, for any function object pipe argument.

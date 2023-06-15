@@ -23,8 +23,8 @@ Checkbox<Layout_t>::Checkbox(State initial_state, Display display, bool locked)
       locked_{locked}
 {
     if (locked_) {
-        display_.checked |= Trait::Dim;
-        display_.unchecked |= Trait::Dim;
+        display_.checked   = display_.checked | Trait::Dim;
+        display_.unchecked = display_.unchecked | Trait::Dim;
         this->update_display();
     }
 }
@@ -78,9 +78,9 @@ auto Checkbox<Layout_t>::get_state() const -> State
 template <template <typename> typename Layout_t>
 void Checkbox<Layout_t>::lock()
 {
-    locked_ = true;
-    display_.checked |= Trait::Dim;
-    display_.unchecked |= Trait::Dim;
+    locked_            = true;
+    display_.checked   = display_.checked | Trait::Dim;
+    display_.unchecked = display_.unchecked | Trait::Dim;
     this->update_display();
 }
 
@@ -104,8 +104,8 @@ void Checkbox<Layout_t>::set_display(Display d)
 {
     display_ = std::move(d);
     if (locked_) {
-        display_.checked |= Trait::Dim;
-        display_.unchecked |= Trait::Dim;
+        display_.checked   = display_.checked | Trait::Dim;
+        display_.unchecked = display_.unchecked | Trait::Dim;
     }
     this->update_display();
 }

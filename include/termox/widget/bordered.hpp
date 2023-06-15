@@ -40,17 +40,19 @@ template <typename T>
 auto constexpr pipe_all(Border& b, T x) -> Border&
 {
     if (b.north.has_value())
-        *b.north |= x;
+        b.north = *b.north | x;
     if (b.south.has_value())
-        *b.south |= x;
+        b.south = *b.south | x;
     if (b.east.has_value())
-        *b.east |= x;
+        b.east = *b.east | x;
     if (b.west.has_value())
-        *b.west |= x;
-    b.nw_corner |= x;
-    b.ne_corner |= x;
-    b.sw_corner |= x;
-    b.se_corner |= x;
+        b.west = *b.west | x;
+
+    b.nw_corner = b.nw_corner | x;
+    b.ne_corner = b.ne_corner | x;
+    b.sw_corner = b.sw_corner | x;
+    b.se_corner = b.se_corner | x;
+
     return b;
 }
 
