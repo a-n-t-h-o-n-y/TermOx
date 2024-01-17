@@ -1,9 +1,9 @@
-add_executable(termox.tests.unit EXCLUDE_FROM_ALL
+add_executable(TermOx.tests.unit EXCLUDE_FROM_ALL
     test.test.cpp
 )
 
 target_compile_options(
-    termox.tests.unit
+    TermOx.tests.unit
     PRIVATE
         -Wall
         -Wextra
@@ -11,7 +11,7 @@ target_compile_options(
 )
 
 target_link_libraries(
-    termox.tests.unit
+    TermOx.tests.unit
     PRIVATE
         TermOx
         Catch2::Catch2WithMain
