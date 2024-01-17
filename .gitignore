@@ -1,12 +1,2 @@
-build*/
-out.*/
-docs/html
-notes
+build/
 tags
-.clangd/
-.cache/
-*.[ao]
-*.so
-*.out
-*.json
-*.vim
