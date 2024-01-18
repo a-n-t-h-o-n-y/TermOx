@@ -1,6 +1,6 @@
 # TermOx 🐂
 
-Terminal User Interface Library
+C++23 Terminal User Interface Library
 
 ## Build Instructions
 

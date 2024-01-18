@@ -12,9 +12,13 @@ add_subdirectory(external/signals-light)
 
 # Create Library Target
 add_library(TermOx STATIC
-    src/test.cpp
+    src/application.cpp
+    src/terminal.cpp
 
     include/termox/application.hpp
+    include/termox/common.hpp
+    include/termox/events.hpp
+    include/termox/glyph.hpp
     include/termox/terminal.hpp
     include/termox/widget.hpp
 )
@@ -33,7 +37,7 @@ target_compile_options(TermOx PRIVATE
 
 # Link External Libraries to the Library Target
 target_link_libraries(TermOx PUBLIC
-    Escape
+    escape
     signals-light
 )
 
