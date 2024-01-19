@@ -329,7 +329,10 @@ template <Widget T>
                 return std::nullopt;
             },
             [&](event::Resize const& e) -> EventResponse {
+                // head widget has no layout parent, so set it here.
                 handler.size = e.size;
+                Terminal::current_screen.reset(e.size);
+                Terminal::changes.reset(e.size);
                 if constexpr (HandlesResize<T>) {
                     return handler.handle_resize(e.size);
                 }

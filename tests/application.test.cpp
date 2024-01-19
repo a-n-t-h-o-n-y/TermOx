@@ -20,8 +20,8 @@ TEST_CASE("Construction", "[Application]")
         }
     } widget;
 
-    auto app = ox::Application{widget};
+    auto app = ox::Application{};
     if (false) {  // causes inf loop right now, so compile but don't run.
-        app.run();
+        app.run(widget);
     }
 }

@@ -14,4 +14,16 @@ struct Glyph {
     esc::Brush brush;
 };
 
+/**
+ * @brief Compares the symbol and brush of two Glyphs.
+ *
+ * @param lhs The left hand side of the comparison.
+ * @param rhs The right hand side of the comparison.
+j* @return true if the symbol and brush are equal, false otherwise.
+*/
+[[nodiscard]] inline auto operator==(Glyph const& lhs, Glyph const& rhs) -> bool
+{
+    return lhs.symbol == rhs.symbol && lhs.brush == rhs.brush;
+}
+
 }  // namespace ox

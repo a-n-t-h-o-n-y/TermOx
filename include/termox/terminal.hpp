@@ -1,10 +1,15 @@
 #pragma once
 
+#include <cassert>
 #include <cstddef>
+#include <string>
 #include <vector>
 
 #include <esc/area.hpp>
+#include <esc/io.hpp>
+#include <esc/sequence.hpp>
 
+#include <termox/common.hpp>
 #include <termox/glyph.hpp>
 #include <termox/widget.hpp>
 
@@ -84,6 +89,13 @@ class ScreenBuffer {
         }
     }
 
+    /**
+     * @brief Return the dimensions of the ScreenBuffer.
+     *
+     * @return esc::Area The dimensions of the ScreenBuffer.
+     */
+    [[nodiscard]] auto area() const -> esc::Area { return area_; }
+
    private:
     esc::Area area_;
     std::vector<Glyph> buffer_;
@@ -91,29 +103,50 @@ class ScreenBuffer {
 
 class Terminal {
    public:
-    inline static ScreenBuffer next_screen{{0, 0}};
+    inline static ScreenBuffer changes{{0, 0}};
     inline static ScreenBuffer current_screen{{0, 0}};
 
    public:
-    // TODO probably just provide an initialize() member function instead of a
-    // constructor, since everything is static.
-    Terminal()
+    /**
+     * @brief Write changes ScreenBuffer to the terminal and update
+     * current_screen.
+     *
+     * This is called automatically by the Application class whenever a Canvas
+     * object is returned from an event handler.
+     */
+    static auto commit_changes() -> void
     {
-        // TODO get current screen size and set screen buffers to that size.
+        escape_sequence_.clear();
+        assert(changes.area() == current_screen.area());
 
-        // TODO does this automatically initialze the terminal or is that a
-        // separate explicitly called member function? and if so then you should
-        // resize the screen buffers there.
+        for (auto x = 0; x < changes.area().width; ++x) {
+            for (auto y = 0; y < changes.area().height; ++y) {
+                auto const& change  = changes[{x, y}];
+                auto const& current = current_screen[{x, y}];
+                if (change != current) {
+                    escape_sequence_ += esc::escape(esc::Cursor_position{x, y});
+                    escape_sequence_ += esc::escape(change.brush);
+                    escape_sequence_ += ::ox::u32_to_mb(change.symbol);
+                    current_screen[{x, y}] = change;
+                }
+            }
+        }
+
+        esc::write(escape_sequence_);
     }
 
+    // TODO other terminal specific settings, like cursor visibility, etc.
+    // OS Signal handling? could emit signals? Not sure if that's a good idea.
+
    private:
+    static std::string escape_sequence_;
 };
 
 /**
  * @brief A 2D Matrix of Glyphs that represents a paintable area of a Widget.
  *
  * This is a non-owning view into a global ScreenBuffer, it is not a copy of the
- * data. This allows Widgets to write directly to the Terminal's next_screen
+ * data. This allows Widgets to write directly to the Terminal's `changes`
  * ScreenBuffer.
  *
  * A Widget should create a Canvas object whenever it wants to update it's
@@ -130,7 +163,7 @@ class Canvas {
     explicit Canvas(T& widget)
         : offset_{widget.coordinates},
           size_{widget.size},
-          screen_{Terminal::next_screen}
+          screen_{Terminal::changes}
     {
         // TODO fill with wallpaper if widget has wallpaper?
     }
