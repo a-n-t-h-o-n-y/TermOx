@@ -61,6 +61,8 @@ class Application {
     {
         quit_ = false;
 
+        event_queue_.append(event::Resize{Terminal::area()});
+
         while (!quit_) {
             // Blocking Call
             auto const event = event_queue_.pop();

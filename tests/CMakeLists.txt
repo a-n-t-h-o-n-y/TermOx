@@ -18,3 +18,21 @@ target_link_libraries(
         TermOx
         Catch2::Catch2WithMain
 )
+
+add_executable(scratch EXCLUDE_FROM_ALL
+    scratch.cpp
+)
+
+target_compile_options(
+    scratch
+    PRIVATE
+        -Wall
+        -Wextra
+        -Wpedantic
+)
+
+target_link_libraries(
+    scratch
+    PRIVATE
+        TermOx
+)

@@ -8,6 +8,7 @@
 #include <esc/area.hpp>
 #include <esc/io.hpp>
 #include <esc/sequence.hpp>
+#include <esc/terminal.hpp>
 
 #include <termox/common.hpp>
 #include <termox/glyph.hpp>
@@ -123,7 +124,7 @@ class Terminal {
             for (auto y = 0; y < changes.area().height; ++y) {
                 auto const& change  = changes[{x, y}];
                 auto const& current = current_screen[{x, y}];
-                if (change != current) {
+                if (change.symbol != U'\0' && change != current) {
                     escape_sequence_ += esc::escape(esc::Cursor_position{x, y});
                     escape_sequence_ += esc::escape(change.brush);
                     escape_sequence_ += ::ox::u32_to_mb(change.symbol);
@@ -133,13 +134,24 @@ class Terminal {
         }
 
         esc::write(escape_sequence_);
+        esc::flush();
+    }
+
+    /**
+     * @brief Return the current dimensions of the terminal.
+     *
+     * @return esc::Area The current dimensions of the terminal.
+     */
+    [[nodiscard]] static auto area() -> esc::Area
+    {
+        return esc::terminal_area();
     }
 
     // TODO other terminal specific settings, like cursor visibility, etc.
     // OS Signal handling? could emit signals? Not sure if that's a good idea.
 
    private:
-    static std::string escape_sequence_;
+    inline static std::string escape_sequence_;
 };
 
 /**
