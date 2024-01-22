@@ -177,7 +177,9 @@ class Canvas {
           size_{widget.size},
           screen_{Terminal::changes}
     {
-        // TODO fill with wallpaper if widget has wallpaper?
+        if constexpr (HasFillGlyph<T>) {
+            this->fill(widget.fill_glyph);
+        }
     }
 
    public:

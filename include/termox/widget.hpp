@@ -5,6 +5,8 @@
 #include <esc/area.hpp>
 #include <esc/point.hpp>
 
+#include <termox/glyph.hpp>
+
 namespace ox {
 
 /**
@@ -23,6 +25,16 @@ concept Widget = requires(T t) {
     {
         t.size
     } -> std::same_as<esc::Area&>;
+};
+
+/**
+ * Checks if a type has a fill Glyph for the background.
+ */
+template <typename T>
+concept HasFillGlyph = Widget<T> && requires(T t) {
+    {
+        t.fill_glyph
+    } -> std::same_as<Glyph&>;
 };
 
 }  // namespace ox

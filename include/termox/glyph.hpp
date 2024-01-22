@@ -15,7 +15,7 @@ struct Glyph {
 };
 
 /**
- * @brief Compares the symbol and brush of two Glyphs.
+ * @brief Compares the symbol and brush of two Glyphs for equality
  *
  * @param lhs The left hand side of the comparison.
  * @param rhs The right hand side of the comparison.
@@ -24,6 +24,18 @@ j* @return true if the symbol and brush are equal, false otherwise.
 [[nodiscard]] inline auto operator==(Glyph const& lhs, Glyph const& rhs) -> bool
 {
     return lhs.symbol == rhs.symbol && lhs.brush == rhs.brush;
+}
+
+/**
+ * @brief Compares the symbol and brush of two Glyphs for inequality
+ *
+ * @param lhs The left hand side of the comparison.
+ * @param rhs The right hand side of the comparison.
+ * @return true if the symbol and brush are not equal, false otherwise.
+ */
+[[nodiscard]] inline auto operator!=(Glyph const& lhs, Glyph const& rhs) -> bool
+{
+    return !(lhs == rhs);
 }
 
 }  // namespace ox
