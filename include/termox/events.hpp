@@ -16,7 +16,6 @@
 
 #include <termox/common.hpp>
 #include <termox/terminal.hpp>
-#include <termox/widget.hpp>
 
 namespace ox {
 
@@ -133,7 +132,7 @@ using EventResponse = std::optional<QuitRequest>;
  * Checks if a type can handle a KeyPress event.
  */
 template <typename T>
-concept HandlesKeyPress = Widget<T> && requires(T t, esc::Key k) {
+concept HandlesKeyPress = requires(T t, esc::Key k) {
     {
         t.handle_key_press(k)
     } -> std::same_as<EventResponse>;
@@ -143,7 +142,7 @@ concept HandlesKeyPress = Widget<T> && requires(T t, esc::Key k) {
  * Checks if a type can handle a KeyRelease event.
  */
 template <typename T>
-concept HandlesKeyRelease = Widget<T> && requires(T t, esc::Key k) {
+concept HandlesKeyRelease = requires(T t, esc::Key k) {
     {
         t.handle_key_release(k)
     } -> std::same_as<EventResponse>;
@@ -153,7 +152,7 @@ concept HandlesKeyRelease = Widget<T> && requires(T t, esc::Key k) {
  * Checks if a type can handle a MousePress event.
  */
 template <typename T>
-concept HandlesMousePress = Widget<T> && requires(T t, esc::Mouse m) {
+concept HandlesMousePress = requires(T t, esc::Mouse m) {
     {
         t.handle_mouse_press(m)
     } -> std::same_as<EventResponse>;
@@ -163,7 +162,7 @@ concept HandlesMousePress = Widget<T> && requires(T t, esc::Mouse m) {
  * Checks if a type can handle a MouseRelease event.
  */
 template <typename T>
-concept HandlesMouseRelease = Widget<T> && requires(T t, esc::Mouse m) {
+concept HandlesMouseRelease = requires(T t, esc::Mouse m) {
     {
         t.handle_mouse_release(m)
     } -> std::same_as<EventResponse>;
@@ -173,7 +172,7 @@ concept HandlesMouseRelease = Widget<T> && requires(T t, esc::Mouse m) {
  * Checks if a type can handle a MouseWheel event.
  */
 template <typename T>
-concept HandlesMouseWheel = Widget<T> && requires(T t, esc::Mouse m) {
+concept HandlesMouseWheel = requires(T t, esc::Mouse m) {
     {
         t.handle_mouse_wheel(m)
     } -> std::same_as<EventResponse>;
@@ -183,7 +182,7 @@ concept HandlesMouseWheel = Widget<T> && requires(T t, esc::Mouse m) {
  * Checks if a type can handle a MouseMove event.
  */
 template <typename T>
-concept HandlesMouseMove = Widget<T> && requires(T t, esc::Mouse m) {
+concept HandlesMouseMove = requires(T t, esc::Mouse m) {
     {
         t.handle_mouse_move(m)
     } -> std::same_as<EventResponse>;
@@ -193,7 +192,7 @@ concept HandlesMouseMove = Widget<T> && requires(T t, esc::Mouse m) {
  * Checks if a type can handle a Resize event.
  */
 template <typename T>
-concept HandlesResize = Widget<T> && requires(T t, esc::Area a) {
+concept HandlesResize = requires(T t, esc::Area a) {
     {
         t.handle_resize(a)
     } -> std::same_as<EventResponse>;
@@ -203,7 +202,7 @@ concept HandlesResize = Widget<T> && requires(T t, esc::Area a) {
  * Checks if a type can handle a Timer event.
  */
 template <typename T>
-concept HandlesTimer = Widget<T> && requires(T t) {
+concept HandlesTimer = requires(T t) {
     {
         t.handle_timer()
     } -> std::same_as<EventResponse>;
@@ -220,16 +219,12 @@ concept HandlesTimer = Widget<T> && requires(T t) {
  * for the given Event type.
  *
  * @param ev The Event to handle.
- * @param handler The Widget to handle the Event.
+ * @param handler The event handler to process the event.
  * @return EventResponse The response from the handler.
  */
-template <Widget T>
+template <typename T>
 [[nodiscard]] auto apply_event(Event const& ev, T& handler) -> EventResponse
 {
-    // /// Terminal Window Resized
-    // struct Window_resize {
-    //     Area new_dimensions;
-    // };
     return std::visit(
         Overload{[&](esc::Key_press e) -> EventResponse {
                      if constexpr (HandlesKeyPress<T>) {

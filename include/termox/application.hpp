@@ -9,7 +9,6 @@
 #include <termox/common.hpp>
 #include <termox/events.hpp>
 #include <termox/terminal.hpp>
-#include <termox/widget.hpp>
 
 namespace ox {
 
@@ -47,15 +46,15 @@ class Application {
      * This will block until the application is quit. The application can be
      * quit by responding to an Event handler with a QuitRequest object.
      *
-     * @param head_widget The Widget that will be sent events to process.
+     * @param event_handler The handler that all events will be sent to.
      * @return The return code of the application, passed in via QuitRequest.
      */
-    template <Widget T>
-    auto run(T& head_widget) -> int
+    template <typename T>
+    auto run(T& event_handler) -> int
     {
         while (true) {
             auto const event = event_queue_.pop();  // Blocking Call
-            auto const quit  = apply_event(event, head_widget);
+            auto const quit  = apply_event(event, event_handler);
 
             if (quit.has_value()) {
                 terminal_input_thread_.request_stop();

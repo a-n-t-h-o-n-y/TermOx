@@ -14,5 +14,5 @@ TEST_CASE("Construction", "[Terminal]")
 
     auto sb = ox::ScreenBuffer{{.width = 20, .height = 10}};
 
-    auto c = ox::Canvas{widget};
+    auto c = ox::Painter{widget};
 }

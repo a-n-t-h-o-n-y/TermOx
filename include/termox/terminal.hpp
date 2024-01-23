@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cassert>
+#include <concepts>
 #include <cstddef>
 #include <stop_token>
 #include <string>
@@ -9,12 +10,12 @@
 #include <esc/area.hpp>
 #include <esc/event.hpp>
 #include <esc/io.hpp>
+#include <esc/point.hpp>
 #include <esc/sequence.hpp>
 #include <esc/terminal.hpp>
 
 #include <termox/common.hpp>
 #include <termox/glyph.hpp>
-#include <termox/widget.hpp>
 
 namespace ox {
 
@@ -114,8 +115,8 @@ class Terminal {
      * @brief Write changes ScreenBuffer to the terminal and update
      * current_screen.
      *
-     * This is called automatically by the Application class whenever a Canvas
-     * object is returned from an event handler.
+     * This is called automatically by the Application class after an event has
+     * been processed.
      */
     static auto commit_changes() -> void
     {
@@ -178,36 +179,50 @@ class Terminal {
 };
 
 /**
- * @brief A 2D Matrix of Glyphs that represents a paintable area of a Widget.
- *
- * This is a non-owning view into a global ScreenBuffer, it is not a copy of the
- * data. This allows Widgets to write directly to the Terminal's `changes`
- * ScreenBuffer.
- *
- * A Widget should create a Canvas object whenever it wants to update it's
- * appearance and return it via an event handler.
+ * @brief A 2D Rectangle that represents a paintable area on the terminal with
+ * location and size.
  */
-class Canvas {
+template <typename T>
+concept Canvas = requires(T t) {
+    {
+        t.coordinates
+    } -> std::same_as<esc::Point&>;
+    {
+        t.size
+    } -> std::same_as<esc::Area&>;
+};
+
+/**
+ * @brief Provides a way to draw to the terminal screen.
+ *
+ * This writes directly to the global ScreenBuffer. It can be created from
+ * anywhere; if constructed with a Canvas type it will constrain the drawing to
+ * the Canvas' coordinates and size.
+ */
+class Painter {
    public:
     /**
-     * @brief Construct a Canvas with the given Widget's coordinates and size.
-     *
-     * @param widget The Widget to create a Canvas for.
+     * @brief Construct a Painter for the entire terminal screen.
      */
-    template <Widget T>
-    explicit Canvas(T& widget)
-        : offset_{widget.coordinates},
-          size_{widget.size},
+    Painter()
+        : offset_{0, 0}, size_{Terminal::area()}, screen_{Terminal::changes}
+    {}
+
+    /**
+     * @brief Construct a Painter with the given Canvas' coordinates and size.
+     *
+     * @param canvas The Canvas to create a Painter for.
+     */
+    template <Canvas T>
+    explicit Painter(T& canvas)
+        : offset_{canvas.coordinates},
+          size_{canvas.size},
           screen_{Terminal::changes}
-    {
-        if constexpr (HasFillGlyph<T>) {
-            this->fill(widget.fill_glyph);
-        }
-    }
+    {}
 
    public:
     /**
-     * @brief Access the Glyph at the given position, offset for Widget.
+     * @brief Access the Glyph at the given position, offset for Canvas.
      *
      * The top left is {0, 0} and the bottom right is {width - 1, height - 1}.
      * Does no bounds checking.
@@ -221,7 +236,7 @@ class Canvas {
     }
 
     /**
-     * @brief Access the Glyph at the given position, offset for Widget.
+     * @brief Access the Glyph at the given position, offset for Canvas.
      *
      * The top left is {0, 0} and the bottom right is {width - 1, height - 1}.
      * Does no bounds checking.
@@ -235,7 +250,7 @@ class Canvas {
     }
 
     /**
-     * @brief Clear the Canvas, setting all Glyphs symbols to null.
+     * @brief Clear the underlying Canvas, setting all Glyphs symbols to null.
      *
      * This does not reset their Brush members, a null symbol is 'empty'.
      */
@@ -249,7 +264,7 @@ class Canvas {
     }
 
     /**
-     * @brief Fill the Canvas with the given Glyph.
+     * @brief Fill the underlying Canvas with the given Glyph.
      *
      * @param g The Glyph to fill the Canvas with.
      */

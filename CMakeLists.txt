@@ -21,7 +21,6 @@ add_library(TermOx STATIC
     include/termox/events.hpp
     include/termox/glyph.hpp
     include/termox/terminal.hpp
-    include/termox/widget.hpp
 )
 
 # Include Directories for the Library

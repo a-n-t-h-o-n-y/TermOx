@@ -6,19 +6,19 @@ int main()
 
     auto app = Application{};
 
-    struct {
+    class {
+       public:
         esc::Point coordinates{.x = 0, .y = 0};
         esc::Area size{.width = 20, .height = 10};
 
-        Glyph fill_glyph{U'-'};
-
+       public:
         auto handle_mouse_press(esc::Mouse const& m) -> EventResponse
         {
             if (m.button == esc::Mouse::Button::Left) {
-                auto c  = ox::Canvas{*this};
+                auto c  = Painter{*this};
                 c[m.at] = {U'X', {.foreground = esc::Red}};
             }
-            return std::nullopt;
+            return {};
         }
 
         auto handle_key_press(esc::Key) -> EventResponse
@@ -28,11 +28,7 @@ int main()
 
         auto handle_resize(esc::Area new_size) -> EventResponse
         {
-            // if this was a layout would need to reposition children
-            // and directly call handle_resize on them? and what do you do with
-            // the return value?
             size = new_size;
-            Canvas{*this};
             return {};
         }
     } w;
