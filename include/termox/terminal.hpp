@@ -3,6 +3,7 @@
 #include <cassert>
 #include <concepts>
 #include <cstddef>
+#include <optional>
 #include <stop_token>
 #include <string>
 #include <vector>
@@ -110,6 +111,14 @@ class Terminal {
     inline static ScreenBuffer changes{{0, 0}};
     inline static ScreenBuffer current_screen{{0, 0}};
 
+    /**
+     * @brief The current cursor position on the terminal.
+     *
+     * This is used by the event loop after `changes` has been committed to the
+     * terminal. If this is std::nullopt, then the cursor is not displayed.
+     */
+    inline static std::optional<esc::Point> cursor{std::nullopt};
+
    public:
     /**
      * @brief Write changes ScreenBuffer to the terminal and update
@@ -137,6 +146,15 @@ class Terminal {
         }
 
         esc::write(escape_sequence_);
+
+        if (cursor.has_value()) {
+            esc::set(esc::Cursor::Show);
+            esc::write(esc::escape(esc::Cursor_position{*cursor}));
+        }
+        else {
+            esc::set(esc::Cursor::Hide);
+        }
+
         esc::flush();
     }
 

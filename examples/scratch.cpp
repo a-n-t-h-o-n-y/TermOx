@@ -4,34 +4,26 @@ int main()
 {
     using namespace ox;
 
-    auto app = Application{};
-
     class {
        public:
-        esc::Point coordinates{.x = 0, .y = 0};
-        esc::Area size{.width = 20, .height = 10};
-
-       public:
+        // TODO remove esc::
+        // TODO maybe rename to mouse_press
         auto handle_mouse_press(esc::Mouse const& m) -> EventResponse
         {
             if (m.button == esc::Mouse::Button::Left) {
-                auto c  = Painter{*this};
-                c[m.at] = {U'X', {.foreground = esc::Red}};
+                Painter{}[m.at] = {U'X', {.foreground = esc::Red}};
+                // Painter{}[m.at] = U'X' | fg(Red);
+                // TODO Color::Red?
+                Terminal::cursor = m.at;
             }
             return {};
         }
 
         auto handle_key_press(esc::Key) -> EventResponse
         {
-            return QuitRequest{};
-        }
-
-        auto handle_resize(esc::Area new_size) -> EventResponse
-        {
-            size = new_size;
-            return {};
+            return QuitRequest{0};
         }
     } w;
 
-    return app.run(w);
+    return Application{}.run(w);
 }

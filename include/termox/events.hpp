@@ -225,6 +225,9 @@ concept HandlesTimer = requires(T t) {
 template <typename T>
 [[nodiscard]] auto apply_event(Event const& ev, T& handler) -> EventResponse
 {
+    // TODO can this return an optional event response? so if the first layer is
+    // null then you do nothing, if the second layer is null you commit changes
+    // and if the second is not null then you quit
     return std::visit(
         Overload{[&](esc::Key_press e) -> EventResponse {
                      if constexpr (HandlesKeyPress<T>) {
@@ -275,8 +278,6 @@ template <typename T>
                      }
                  },
                  [&](esc::Window_resize const& e) -> EventResponse {
-                     // head widget has no layout parent, so set it here.
-                     handler.size = e.new_dimensions;
                      Terminal::current_screen.reset(e.new_dimensions);
                      Terminal::changes.reset(e.new_dimensions);
                      if constexpr (HandlesResize<T>) {
