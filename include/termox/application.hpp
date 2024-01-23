@@ -1,13 +1,14 @@
 #pragma once
 
+#include <functional>
 #include <thread>
 #include <variant>
 
-#include <esc/io.hpp>
 #include <esc/terminal.hpp>
 
 #include <termox/common.hpp>
 #include <termox/events.hpp>
+#include <termox/terminal.hpp>
 #include <termox/widget.hpp>
 
 namespace ox {
@@ -28,16 +29,8 @@ class Application {
                          esc::Key_mode key_mode     = esc::Key_mode::Normal,
                          esc::Signals signals       = esc::Signals::On)
         : event_queue_{},
-          quit_{false},
-          event_thread_{[](std::stop_token st, EventQueue& queue) {
-                            while (!st.stop_requested()) {
-                                auto const event = esc::read(16);
-                                if (event.has_value()) {
-                                    queue.append(esc_to_ox_event(*event));
-                                }
-                            }
-                        },
-                        std::ref(event_queue_)}
+          terminal_input_thread_{Terminal::run_read_loop<EventQueue>,
+                                 std::ref(event_queue_)}
     {
         esc::initialize_interactive_terminal(mouse_mode, key_mode, signals);
     }
@@ -55,68 +48,28 @@ class Application {
      * quit by responding to an Event handler with a QuitRequest object.
      *
      * @param head_widget The Widget that will be sent events to process.
+     * @return The return code of the application, passed in via QuitRequest.
      */
     template <Widget T>
-    auto run(T& head_widget) -> void
+    auto run(T& head_widget) -> int
     {
-        quit_ = false;
+        while (true) {
+            auto const event = event_queue_.pop();  // Blocking Call
+            auto const quit  = apply_event(event, head_widget);
 
-        event_queue_.append(event::Resize{Terminal::area()});
-
-        while (!quit_) {
-            // Blocking Call
-            auto const event = event_queue_.pop();
-
-            auto const result = apply_event(event, head_widget);
-
-            if (result.has_value()) {
-                std::visit(
-                    Overload{
-                        [this](QuitRequest) {
-                            event_thread_.request_stop();
-                            quit_ = true;
-                        },
-                        [](Canvas const&) { Terminal::commit_changes(); },
-                    },
-                    *result);
+            if (quit.has_value()) {
+                terminal_input_thread_.request_stop();
+                return quit->return_code;
+            }
+            else {
+                Terminal::commit_changes();
             }
         }
     }
 
    private:
-    static auto esc_to_ox_event(esc::Event const& ev) -> ox::Event
-    {
-        using namespace ox::event;
-        return std::visit(Overload{
-                              [](esc::Mouse_press const& e) -> ox::Event {
-                                  return MousePress{e.state};
-                              },
-                              [](esc::Mouse_release const& e) -> ox::Event {
-                                  return MouseRelease{e.state};
-                              },
-                              [](esc::Scroll_wheel const& e) -> ox::Event {
-                                  return MouseWheel{e.state};
-                              },
-                              [](esc::Mouse_move const& e) -> ox::Event {
-                                  return MouseMove{e.state};
-                              },
-                              [](esc::Key_press const& e) -> ox::Event {
-                                  return KeyPress{e.key};
-                              },
-                              [](esc::Key_release const& e) -> ox::Event {
-                                  return KeyRelease{e.key};
-                              },
-                              [](esc::Window_resize const& e) -> ox::Event {
-                                  return Resize{e.new_dimensions};
-                              },
-                          },
-                          ev);
-    }
-
-   private:
     EventQueue event_queue_;
-    bool quit_;
-    std::jthread event_thread_;
+    std::jthread terminal_input_thread_;
 };
 
 }  // namespace ox

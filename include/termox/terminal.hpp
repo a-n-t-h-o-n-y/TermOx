@@ -2,10 +2,12 @@
 
 #include <cassert>
 #include <cstddef>
+#include <stop_token>
 #include <string>
 #include <vector>
 
 #include <esc/area.hpp>
+#include <esc/event.hpp>
 #include <esc/io.hpp>
 #include <esc/sequence.hpp>
 #include <esc/terminal.hpp>
@@ -135,6 +137,27 @@ class Terminal {
 
         esc::write(escape_sequence_);
         esc::flush();
+    }
+
+    /**
+     * @brief Runs a loop that reads input from the terminal and appends it to
+     * the given queue. Exits when the stop_token is stop_requested().
+     *
+     * @param st The stop_token to check for stop_requested().
+     * @param queue The queue to append input events to, must have append(Event)
+     */
+    template <typename QueueType>
+    static auto run_read_loop(std::stop_token st, QueueType& queue) -> void
+    {
+        queue.append(esc::Window_resize{Terminal::area()});
+
+        while (!st.stop_requested()) {
+            if (auto const event = esc::read(16); event.has_value()) {
+                queue.append(std::visit(
+                    [](auto const& e) -> QueueType::value_type { return e; },
+                    *event));
+            }
+        }
     }
 
     /**

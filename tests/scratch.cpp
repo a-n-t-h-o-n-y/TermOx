@@ -17,7 +17,6 @@ int main()
             if (m.button == esc::Mouse::Button::Left) {
                 auto c  = ox::Canvas{*this};
                 c[m.at] = {U'X', {.foreground = esc::Red}};
-                return c;
             }
             return std::nullopt;
         }
@@ -33,11 +32,10 @@ int main()
             // and directly call handle_resize on them? and what do you do with
             // the return value?
             size = new_size;
-            return Canvas{*this};
+            Canvas{*this};
+            return {};
         }
     } w;
 
-    app.run(w);
-
-    return 0;
+    return app.run(w);
 }

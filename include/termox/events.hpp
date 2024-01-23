@@ -9,6 +9,7 @@
 #include <variant>
 
 #include <esc/area.hpp>
+#include <esc/event.hpp>
 #include <esc/key.hpp>
 #include <esc/mouse.hpp>
 #include <esc/point.hpp>
@@ -33,6 +34,9 @@ namespace ox {
 template <typename T>
 class ConcurrentQueue {
    public:
+    using value_type = T;
+
+   public:
     ConcurrentQueue() = default;
 
     ConcurrentQueue(ConcurrentQueue const&) = delete;
@@ -47,7 +51,7 @@ class ConcurrentQueue {
      *
      * @param value The element to append.
      */
-    auto append(T const& value) -> void
+    auto append(value_type const& value) -> void
     {
         {
             auto const lock = std::scoped_lock{mutex_};
@@ -61,9 +65,9 @@ class ConcurrentQueue {
      *
      * This will block until an element is available. Uses a condition variable.
      *
-     * @return T The element at the front of the queue.
+     * @return value_type The element at the front of the queue.
      */
-    [[nodiscard]] auto pop() -> T
+    [[nodiscard]] auto pop() -> value_type
     {
         auto lock = std::unique_lock{mutex_};
         cond_.wait(lock, [this] { return !queue_.empty(); });
@@ -75,7 +79,7 @@ class ConcurrentQueue {
    private:
     mutable std::mutex mutex_;
     std::condition_variable cond_;
-    std::queue<T> queue_;
+    std::queue<value_type> queue_;
 };
 
 // Events
@@ -83,57 +87,18 @@ class ConcurrentQueue {
 
 namespace event {
 
-struct KeyPress {
-    esc::Key key;
-};
-
-struct KeyRelease {
-    esc::Key key;
-};
-
-struct MousePress {
-    esc::Mouse mouse;
-};
-
-struct MouseRelease {
-    esc::Mouse mouse;
-};
-
-struct MouseWheel {
-    esc::Mouse mouse;
-};
-
-struct MouseMove {
-    esc::Mouse mouse;
-};
-
-struct Move {
-    esc::Point coordinates;
-};
-
-struct Resize {
-    esc::Area size;
-};
-
 struct Timer {};
-
-struct Quit {};
 
 }  // namespace event
 
-/**
- * @brief A variant of all possible Events.
- */
-using Event = std::variant<event::KeyPress,
-                           event::KeyRelease,
-                           event::MousePress,
-                           event::MouseRelease,
-                           event::MouseWheel,
-                           event::MouseMove,
-                           event::Move,
-                           event::Resize,
-                           event::Timer,
-                           event::Quit>;
+using Event = std::variant<esc::Mouse_press,
+                           esc::Mouse_release,
+                           esc::Scroll_wheel,
+                           esc::Mouse_move,
+                           esc::Key_press,
+                           esc::Key_release,
+                           esc::Window_resize,
+                           event::Timer>;
 
 /**
  * @brief A thread-safe queue of Events.
@@ -145,15 +110,21 @@ using EventQueue = ConcurrentQueue<Event>;
 
 /**
  * @brief Indicates an Event handler wants the application to shut down.
+ *
+ * @param return_code The return code that will be returned by
+ * Application::run().
  */
-struct QuitRequest {};
+struct QuitRequest {
+    int return_code = 0;
+};
 
 /**
  * @brief The response from an Event handler.
  *
  * This is so the Event handler can communicate with the Application class.
+ * std::nullopt is a request to do nothing special.
  */
-using EventResponse = std::optional<std::variant<Canvas, QuitRequest>>;
+using EventResponse = std::optional<QuitRequest>;
 
 // Event Handler Concepts
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -219,16 +190,6 @@ concept HandlesMouseMove = Widget<T> && requires(T t, esc::Mouse m) {
 };
 
 /**
- * Checks if a type can handle a Move event.
- */
-template <typename T>
-concept HandlesMove = Widget<T> && requires(T t, esc::Point p) {
-    {
-        t.handle_move(p)
-    } -> std::same_as<EventResponse>;
-};
-
-/**
  * Checks if a type can handle a Resize event.
  */
 template <typename T>
@@ -265,91 +226,79 @@ concept HandlesTimer = Widget<T> && requires(T t) {
 template <Widget T>
 [[nodiscard]] auto apply_event(Event const& ev, T& handler) -> EventResponse
 {
+    // /// Terminal Window Resized
+    // struct Window_resize {
+    //     Area new_dimensions;
+    // };
     return std::visit(
-        Overload{
-            [&](event::KeyPress e) -> EventResponse {
-                if constexpr (HandlesKeyPress<T>) {
-                    return handler.handle_key_press(e.key);
-                }
-                else {
-                    return std::nullopt;
-                }
-            },
-            [&](event::KeyRelease e) -> EventResponse {
-                if constexpr (HandlesKeyRelease<T>) {
-                    return handler.handle_key_release(e.key);
-                }
-                else {
-                    return std::nullopt;
-                }
-            },
-            [&](event::MousePress e) -> EventResponse {
-                if constexpr (HandlesMousePress<T>) {
-                    return handler.handle_mouse_press(e.mouse);
-                }
-                else {
-                    return std::nullopt;
-                }
-            },
-            [&](event::MouseRelease e) -> EventResponse {
-                if constexpr (HandlesMouseRelease<T>) {
-                    return handler.handle_mouse_release(e.mouse);
-                }
-                else {
-                    return std::nullopt;
-                }
-            },
-            [&](event::MouseWheel e) -> EventResponse {
-                if constexpr (HandlesMouseWheel<T>) {
-                    return handler.handle_mouse_wheel(e.mouse);
-                }
-                else {
-                    return std::nullopt;
-                }
-            },
-            [&](event::MouseMove e) -> EventResponse {
-                if constexpr (HandlesMouseMove<T>) {
-                    return handler.handle_mouse_move(e.mouse);
-                }
-                else {
-                    return std::nullopt;
-                }
-            },
-            [&](event::Move e) -> EventResponse {
-                // TODO this doesn't work, you need to directly
-                // send it, so instead maybe move isn't an event
-                // and instead the layout just sets it directly
-                // but you do run into what you thought of
-                // earlier where an app is drawing its coords but
-                // it doesn't know to update them because layout
-                // didn't bother with it. Layout could call the
-                // handler directly.. But that is just moving
-                // responsibility?
-                //  handler.set_coordinates(x.coordinates);
-                return std::nullopt;
-            },
-            [&](event::Resize const& e) -> EventResponse {
-                // head widget has no layout parent, so set it here.
-                handler.size = e.size;
-                Terminal::current_screen.reset(e.size);
-                Terminal::changes.reset(e.size);
-                if constexpr (HandlesResize<T>) {
-                    return handler.handle_resize(e.size);
-                }
-                else {
-                    return std::nullopt;
-                }
-            },
-            [&](event::Timer) -> EventResponse {
-                if constexpr (HandlesTimer<T>) {
-                    return handler.handle_timer();
-                }
-                else {
-                    return std::nullopt;
-                }
-            },
-            [](event::Quit) -> EventResponse { return QuitRequest{}; },
-        },
+        Overload{[&](esc::Key_press e) -> EventResponse {
+                     if constexpr (HandlesKeyPress<T>) {
+                         return handler.handle_key_press(e.key);
+                     }
+                     else {
+                         return std::nullopt;
+                     }
+                 },
+                 [&](esc::Key_release e) -> EventResponse {
+                     if constexpr (HandlesKeyRelease<T>) {
+                         return handler.handle_key_release(e.key);
+                     }
+                     else {
+                         return std::nullopt;
+                     }
+                 },
+                 [&](esc::Mouse_press e) -> EventResponse {
+                     if constexpr (HandlesMousePress<T>) {
+                         return handler.handle_mouse_press(e.state);
+                     }
+                     else {
+                         return std::nullopt;
+                     }
+                 },
+                 [&](esc::Mouse_release e) -> EventResponse {
+                     if constexpr (HandlesMouseRelease<T>) {
+                         return handler.handle_mouse_release(e.state);
+                     }
+                     else {
+                         return std::nullopt;
+                     }
+                 },
+                 [&](esc::Scroll_wheel e) -> EventResponse {
+                     if constexpr (HandlesMouseWheel<T>) {
+                         return handler.handle_mouse_wheel(e.state);
+                     }
+                     else {
+                         return std::nullopt;
+                     }
+                 },
+                 [&](esc::Mouse_move e) -> EventResponse {
+                     if constexpr (HandlesMouseMove<T>) {
+                         return handler.handle_mouse_move(e.state);
+                     }
+                     else {
+                         return std::nullopt;
+                     }
+                 },
+                 [&](esc::Window_resize const& e) -> EventResponse {
+                     // head widget has no layout parent, so set it here.
+                     handler.size = e.new_dimensions;
+                     Terminal::current_screen.reset(e.new_dimensions);
+                     Terminal::changes.reset(e.new_dimensions);
+                     if constexpr (HandlesResize<T>) {
+                         return handler.handle_resize(e.new_dimensions);
+                     }
+                     else {
+                         return std::nullopt;
+                     }
+                 },
+                 [&](event::Timer) -> EventResponse {
+                     if constexpr (HandlesTimer<T>) {
+                         return handler.handle_timer();
+                     }
+                     else {
+                         return std::nullopt;
+                     }
+                 }},
         ev);
 }
 
