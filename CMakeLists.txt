@@ -44,3 +44,4 @@ target_link_libraries(TermOx PUBLIC
 
 # Add the tests subdirectory
 add_subdirectory(tests)
+add_subdirectory(examples)
