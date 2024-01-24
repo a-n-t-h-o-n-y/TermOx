@@ -20,6 +20,9 @@
 
 namespace ox {
 
+using ::esc::Area;
+using ::esc::Point;
+
 /**
  * @brief A 2D Matrix of Glyphs that represents a paintable screen.
  */
@@ -30,7 +33,7 @@ class ScreenBuffer {
      *
      * @param area The dimensions of the ScreenBuffer.
      */
-    explicit ScreenBuffer(esc::Area area)
+    explicit ScreenBuffer(Area area)
         : area_{area}, buffer_((std::size_t)(area.width * area.height))
     {}
 
@@ -44,7 +47,7 @@ class ScreenBuffer {
      * @param p The Point position of the Glyph.
      * @return Glyph& A reference to the Glyph at the given position.
      */
-    [[nodiscard]] auto operator[](esc::Point p) -> Glyph&
+    [[nodiscard]] auto operator[](Point p) -> Glyph&
     {
         return buffer_[(std::size_t)(p.y * area_.width + p.x)];
     }
@@ -58,7 +61,7 @@ class ScreenBuffer {
      * @param p The Point position of the Glyph.
      * @return Glyph const& A reference to the Glyph at the given position.
      */
-    [[nodiscard]] auto operator[](esc::Point p) const -> Glyph const&
+    [[nodiscard]] auto operator[](Point p) const -> Glyph const&
     {
         return buffer_[(std::size_t)(p.y * area_.width + p.x)];
     }
@@ -75,7 +78,7 @@ class ScreenBuffer {
      *
      * @param a The new dimensions of the ScreenBuffer.
      */
-    auto reset(esc::Area a) -> void
+    auto reset(Area a) -> void
     {
         area_ = a;
         buffer_.resize((std::size_t)(a.width * a.height));
@@ -97,12 +100,12 @@ class ScreenBuffer {
     /**
      * @brief Return the dimensions of the ScreenBuffer.
      *
-     * @return esc::Area The dimensions of the ScreenBuffer.
+     * @return Area The dimensions of the ScreenBuffer.
      */
-    [[nodiscard]] auto area() const -> esc::Area { return area_; }
+    [[nodiscard]] auto area() const -> Area { return area_; }
 
    private:
-    esc::Area area_;
+    Area area_;
     std::vector<Glyph> buffer_;
 };
 
@@ -117,7 +120,7 @@ class Terminal {
      * This is used by the event loop after `changes` has been committed to the
      * terminal. If this is std::nullopt, then the cursor is not displayed.
      */
-    inline static std::optional<esc::Point> cursor{std::nullopt};
+    inline static std::optional<Point> cursor{std::nullopt};
 
    public:
     /**
@@ -168,7 +171,7 @@ class Terminal {
     template <typename QueueType>
     static auto run_read_loop(std::stop_token st, QueueType& queue) -> void
     {
-        queue.append(esc::Window_resize{Terminal::area()});
+        queue.append(esc::Resize{Terminal::area()});
 
         while (!st.stop_requested()) {
             if (auto const event = esc::read(16); event.has_value()) {
@@ -182,12 +185,9 @@ class Terminal {
     /**
      * @brief Return the current dimensions of the terminal.
      *
-     * @return esc::Area The current dimensions of the terminal.
+     * @return Area The current dimensions of the terminal.
      */
-    [[nodiscard]] static auto area() -> esc::Area
-    {
-        return esc::terminal_area();
-    }
+    [[nodiscard]] static auto area() -> Area { return esc::terminal_area(); }
 
     // TODO other terminal specific settings, like cursor visibility, etc.
     // OS Signal handling? could emit signals? Not sure if that's a good idea.
@@ -204,10 +204,10 @@ template <typename T>
 concept Canvas = requires(T t) {
     {
         t.coordinates
-    } -> std::same_as<esc::Point&>;
+    } -> std::same_as<Point&>;
     {
         t.size
-    } -> std::same_as<esc::Area&>;
+    } -> std::same_as<Area&>;
 };
 
 /**
@@ -248,7 +248,7 @@ class Painter {
      * @param p The Point position of the Glyph.
      * @return Glyph& A reference to the Glyph at the given position.
      */
-    [[nodiscard]] auto operator[](esc::Point p) -> Glyph&
+    [[nodiscard]] auto operator[](Point p) -> Glyph&
     {
         return screen_[{p.x + offset_.x, p.y + offset_.y}];
     }
@@ -262,7 +262,7 @@ class Painter {
      * @param p The Point position of the Glyph.
      * @return Glyph const& A reference to the Glyph at the given position.
      */
-    [[nodiscard]] auto operator[](esc::Point p) const -> Glyph const&
+    [[nodiscard]] auto operator[](Point p) const -> Glyph const&
     {
         return screen_[{p.x + offset_.x, p.y + offset_.y}];
     }
@@ -299,8 +299,8 @@ class Painter {
     // dimensions yourself in the widget then.
 
    private:
-    esc::Point offset_;
-    esc::Area size_;
+    Point offset_;
+    Area size_;
     ScreenBuffer& screen_;
 };
 

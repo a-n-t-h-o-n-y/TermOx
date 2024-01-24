@@ -8,16 +8,17 @@
 #include <utility>
 #include <variant>
 
-#include <esc/area.hpp>
 #include <esc/event.hpp>
 #include <esc/key.hpp>
 #include <esc/mouse.hpp>
-#include <esc/point.hpp>
 
 #include <termox/common.hpp>
 #include <termox/terminal.hpp>
 
 namespace ox {
+
+using ::esc::Key;
+using ::esc::Mouse;
 
 // Thread Safe Queue
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -90,13 +91,13 @@ struct Timer {};
 
 }  // namespace event
 
-using Event = std::variant<esc::Mouse_press,
-                           esc::Mouse_release,
-                           esc::Scroll_wheel,
-                           esc::Mouse_move,
-                           esc::Key_press,
-                           esc::Key_release,
-                           esc::Window_resize,
+using Event = std::variant<esc::MousePress,
+                           esc::MouseRelease,
+                           esc::MouseWheel,
+                           esc::MouseMove,
+                           esc::KeyPress,
+                           esc::KeyRelease,
+                           esc::Resize,
                            event::Timer>;
 
 /**
@@ -132,7 +133,7 @@ using EventResponse = std::optional<QuitRequest>;
  * Checks if a type can handle a KeyPress event.
  */
 template <typename T>
-concept HandlesKeyPress = requires(T t, esc::Key k) {
+concept HandlesKeyPress = requires(T t, Key k) {
     {
         t.handle_key_press(k)
     } -> std::same_as<EventResponse>;
@@ -142,7 +143,7 @@ concept HandlesKeyPress = requires(T t, esc::Key k) {
  * Checks if a type can handle a KeyRelease event.
  */
 template <typename T>
-concept HandlesKeyRelease = requires(T t, esc::Key k) {
+concept HandlesKeyRelease = requires(T t, Key k) {
     {
         t.handle_key_release(k)
     } -> std::same_as<EventResponse>;
@@ -152,7 +153,7 @@ concept HandlesKeyRelease = requires(T t, esc::Key k) {
  * Checks if a type can handle a MousePress event.
  */
 template <typename T>
-concept HandlesMousePress = requires(T t, esc::Mouse m) {
+concept HandlesMousePress = requires(T t, Mouse m) {
     {
         t.handle_mouse_press(m)
     } -> std::same_as<EventResponse>;
@@ -162,7 +163,7 @@ concept HandlesMousePress = requires(T t, esc::Mouse m) {
  * Checks if a type can handle a MouseRelease event.
  */
 template <typename T>
-concept HandlesMouseRelease = requires(T t, esc::Mouse m) {
+concept HandlesMouseRelease = requires(T t, Mouse m) {
     {
         t.handle_mouse_release(m)
     } -> std::same_as<EventResponse>;
@@ -172,7 +173,7 @@ concept HandlesMouseRelease = requires(T t, esc::Mouse m) {
  * Checks if a type can handle a MouseWheel event.
  */
 template <typename T>
-concept HandlesMouseWheel = requires(T t, esc::Mouse m) {
+concept HandlesMouseWheel = requires(T t, Mouse m) {
     {
         t.handle_mouse_wheel(m)
     } -> std::same_as<EventResponse>;
@@ -182,7 +183,7 @@ concept HandlesMouseWheel = requires(T t, esc::Mouse m) {
  * Checks if a type can handle a MouseMove event.
  */
 template <typename T>
-concept HandlesMouseMove = requires(T t, esc::Mouse m) {
+concept HandlesMouseMove = requires(T t, Mouse m) {
     {
         t.handle_mouse_move(m)
     } -> std::same_as<EventResponse>;
@@ -229,7 +230,7 @@ template <typename T>
     // null then you do nothing, if the second layer is null you commit changes
     // and if the second is not null then you quit
     return std::visit(
-        Overload{[&](esc::Key_press e) -> EventResponse {
+        Overload{[&](esc::KeyPress e) -> EventResponse {
                      if constexpr (HandlesKeyPress<T>) {
                          return handler.handle_key_press(e.key);
                      }
@@ -237,7 +238,7 @@ template <typename T>
                          return std::nullopt;
                      }
                  },
-                 [&](esc::Key_release e) -> EventResponse {
+                 [&](esc::KeyRelease e) -> EventResponse {
                      if constexpr (HandlesKeyRelease<T>) {
                          return handler.handle_key_release(e.key);
                      }
@@ -245,43 +246,43 @@ template <typename T>
                          return std::nullopt;
                      }
                  },
-                 [&](esc::Mouse_press e) -> EventResponse {
+                 [&](esc::MousePress e) -> EventResponse {
                      if constexpr (HandlesMousePress<T>) {
-                         return handler.handle_mouse_press(e.state);
+                         return handler.handle_mouse_press(e.mouse);
                      }
                      else {
                          return std::nullopt;
                      }
                  },
-                 [&](esc::Mouse_release e) -> EventResponse {
+                 [&](esc::MouseRelease e) -> EventResponse {
                      if constexpr (HandlesMouseRelease<T>) {
-                         return handler.handle_mouse_release(e.state);
+                         return handler.handle_mouse_release(e.mouse);
                      }
                      else {
                          return std::nullopt;
                      }
                  },
-                 [&](esc::Scroll_wheel e) -> EventResponse {
+                 [&](esc::MouseWheel e) -> EventResponse {
                      if constexpr (HandlesMouseWheel<T>) {
-                         return handler.handle_mouse_wheel(e.state);
+                         return handler.handle_mouse_wheel(e.mouse);
                      }
                      else {
                          return std::nullopt;
                      }
                  },
-                 [&](esc::Mouse_move e) -> EventResponse {
+                 [&](esc::MouseMove e) -> EventResponse {
                      if constexpr (HandlesMouseMove<T>) {
-                         return handler.handle_mouse_move(e.state);
+                         return handler.handle_mouse_move(e.mouse);
                      }
                      else {
                          return std::nullopt;
                      }
                  },
-                 [&](esc::Window_resize const& e) -> EventResponse {
-                     Terminal::current_screen.reset(e.new_dimensions);
-                     Terminal::changes.reset(e.new_dimensions);
+                 [&](esc::Resize const& e) -> EventResponse {
+                     Terminal::current_screen.reset(e.area);
+                     Terminal::changes.reset(e.area);
                      if constexpr (HandlesResize<T>) {
-                         return handler.handle_resize(e.new_dimensions);
+                         return handler.handle_resize(e.area);
                      }
                      else {
                          return std::nullopt;

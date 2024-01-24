@@ -6,12 +6,14 @@ int main()
 
     class {
        public:
-        // TODO remove esc::
         // TODO maybe rename to mouse_press
-        auto handle_mouse_press(esc::Mouse const& m) -> EventResponse
+        auto handle_mouse_press(Mouse const& m) -> EventResponse
         {
-            if (m.button == esc::Mouse::Button::Left) {
-                Painter{}[m.at] = {U'X', {.foreground = esc::Red}};
+            if (m.button == Mouse::Button::Left) {
+                // Painter{}[m.at] = {U'X',
+                //                    {.foreground = ColorIndex::BrightBlue}};
+                Painter{}[m.at] = {U'X', {.foreground = TrueColor{0x8bb14e}}};
+                // Painter{}[m.at] = {U'X', {.foreground = DefaultColor{}}};
                 // Painter{}[m.at] = U'X' | fg(Red);
                 // TODO Color::Red?
                 Terminal::cursor = m.at;
@@ -19,10 +21,7 @@ int main()
             return {};
         }
 
-        auto handle_key_press(esc::Key) -> EventResponse
-        {
-            return QuitRequest{0};
-        }
+        auto handle_key_press(Key) -> EventResponse { return QuitRequest{0}; }
     } w;
 
     return Application{}.run(w);

@@ -2,19 +2,17 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <esc/area.hpp>
-#include <esc/point.hpp>
-
 TEST_CASE("Construction", "[Application]")
 {
     struct {
-        esc::Point coordinates;
-        esc::Area size;
-        auto handle_key_press(esc::Key) -> ox::EventResponse
+        ox::Point coordinates;
+        ox::Area size;
+
+        auto handle_key_press(ox::Key) -> ox::EventResponse
         {
             return std::nullopt;
         }
-        auto handle_key_release(esc::Key) -> ox::EventResponse
+        auto handle_key_release(ox::Key) -> ox::EventResponse
         {
             return std::nullopt;
         }

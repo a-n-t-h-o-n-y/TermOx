@@ -1,8 +1,15 @@
 #pragma once
 
 #include <esc/brush.hpp>
+#include <esc/color.hpp>
 
 namespace ox {
+
+using ::esc::Brush;
+using ::esc::Color;
+using ::esc::ColorIndex;
+using ::esc::DefaultColor;
+using ::esc::TrueColor;
 
 /**
  * @brief A single terminal cell display unit.
