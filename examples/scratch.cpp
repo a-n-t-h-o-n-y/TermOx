@@ -1,4 +1,4 @@
-#include <termox/application.hpp>
+#include <termox/core.hpp>
 
 int main()
 {
