@@ -1,5 +1,4 @@
 add_executable(TermOx.tests.unit EXCLUDE_FROM_ALL
-    application.test.cpp
     events.test.cpp
     terminal.test.cpp
 )

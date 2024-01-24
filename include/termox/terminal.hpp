@@ -1,14 +1,15 @@
 #pragma once
 
-#include <cassert>
 #include <concepts>
 #include <cstddef>
 #include <optional>
 #include <stop_token>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include <esc/area.hpp>
+#include <esc/detail/signals.hpp>
 #include <esc/event.hpp>
 #include <esc/io.hpp>
 #include <esc/point.hpp>
@@ -16,12 +17,16 @@
 #include <esc/terminal.hpp>
 
 #include <termox/common.hpp>
+#include <termox/events.hpp>
 #include <termox/glyph.hpp>
 
 namespace ox {
 
 using ::esc::Area;
+using ::esc::KeyMode;
+using ::esc::MouseMode;
 using ::esc::Point;
+using ::esc::Signals;
 
 /**
  * @brief A 2D Matrix of Glyphs that represents a paintable screen.
@@ -111,8 +116,8 @@ class ScreenBuffer {
 
 class Terminal {
    public:
-    inline static ScreenBuffer changes{{0, 0}};
-    inline static ScreenBuffer current_screen{{0, 0}};
+    inline static ScreenBuffer changes{{0, 0}};  // write to this
+    inline static EventQueue event_queue;        // read from this
 
     /**
      * @brief The current cursor position on the terminal.
@@ -124,26 +129,55 @@ class Terminal {
 
    public:
     /**
+     * @brief Initializes the terminal display and starts reading events in
+     * separate thread, appending to the event_queue.
+     *
+     * @param mouse_mode The MouseMode to set the terminal to.
+     * @param key_mode The KeyMode to set the terminal to.
+     * @param signals Whether OS Signals should be enabled or disabled.
+     */
+    explicit Terminal(MouseMode mouse_mode = MouseMode::Basic,
+                      KeyMode key_mode     = KeyMode::Normal,
+                      Signals signals      = Signals::On)
+        : terminal_input_thread_{[this](auto st) { this->run_read_loop(st); }}
+    {
+        esc::initialize_interactive_terminal(mouse_mode, key_mode, signals);
+    }
+
+    /**
+     * @brief Uninitializes the terminal display.
+     */
+    ~Terminal()
+    {
+        terminal_input_thread_.request_stop();
+        esc::uninitialize_terminal();
+    }
+
+   public:
+    /**
      * @brief Write changes ScreenBuffer to the terminal and update
-     * current_screen.
+     * current_screen_.
      *
      * This is called automatically by the Application class after an event has
      * been processed.
      */
-    static auto commit_changes() -> void
+    auto commit_changes() -> void
     {
         escape_sequence_.clear();
-        assert(changes.area() == current_screen.area());
+
+        if (Terminal::changes.area() != current_screen_.area()) {
+            current_screen_.reset(Terminal::changes.area());
+        }
 
         for (auto x = 0; x < changes.area().width; ++x) {
             for (auto y = 0; y < changes.area().height; ++y) {
                 auto const& change  = changes[{x, y}];
-                auto const& current = current_screen[{x, y}];
+                auto const& current = current_screen_[{x, y}];
                 if (change.symbol != U'\0' && change != current) {
                     escape_sequence_ += esc::escape(esc::Cursor_position{x, y});
                     escape_sequence_ += esc::escape(change.brush);
                     escape_sequence_ += ::ox::u32_to_mb(change.symbol);
-                    current_screen[{x, y}] = change;
+                    current_screen_[{x, y}] = change;
                 }
             }
         }
@@ -163,21 +197,23 @@ class Terminal {
 
     /**
      * @brief Runs a loop that reads input from the terminal and appends it to
-     * the given queue. Exits when the stop_token is stop_requested().
+     * the Terminal::event_queue. Exits when the stop_token is stop_requested().
      *
      * @param st The stop_token to check for stop_requested().
-     * @param queue The queue to append input events to, must have append(Event)
      */
-    template <typename QueueType>
-    static auto run_read_loop(std::stop_token st, QueueType& queue) -> void
+    auto run_read_loop(std::stop_token st) -> void
     {
-        queue.append(esc::Resize{Terminal::area()});
+        Terminal::event_queue.append(esc::Resize{Terminal::area()});
 
         while (!st.stop_requested()) {
-            if (auto const event = esc::read(16); event.has_value()) {
-                queue.append(std::visit(
-                    [](auto const& e) -> QueueType::value_type { return e; },
-                    *event));
+            if (esc::sigint_flag) {
+                Terminal::event_queue.append(event::Interrupt{});
+                return;
+            }
+            else if (auto const event = esc::read(16); event.has_value()) {
+                Terminal::event_queue.append(std::visit(
+                    [](auto const& e) -> Event { return e; }, *event));
+                // ^^ Translate from esc::Event to ox::Event ^^
             }
         }
     }
@@ -187,13 +223,12 @@ class Terminal {
      *
      * @return Area The current dimensions of the terminal.
      */
-    [[nodiscard]] static auto area() -> Area { return esc::terminal_area(); }
-
-    // TODO other terminal specific settings, like cursor visibility, etc.
-    // OS Signal handling? could emit signals? Not sure if that's a good idea.
+    [[nodiscard]] auto area() -> Area { return esc::terminal_area(); }
 
    private:
-    inline static std::string escape_sequence_;
+    ScreenBuffer current_screen_{{0, 0}};
+    std::jthread terminal_input_thread_;
+    std::string escape_sequence_;
 };
 
 /**
@@ -223,7 +258,9 @@ class Painter {
      * @brief Construct a Painter for the entire terminal screen.
      */
     Painter()
-        : offset_{0, 0}, size_{Terminal::area()}, screen_{Terminal::changes}
+        : offset_{0, 0},
+          size_{Terminal::changes.area()},
+          screen_{Terminal::changes}
     {}
 
     /**
@@ -303,5 +340,122 @@ class Painter {
     Area size_;
     ScreenBuffer& screen_;
 };
+
+/**
+ * @brief Calls the appropriate handler function on \p handler for the given
+ * Event.
+ *
+ * This will only call the handler if the handler has the appropriate function
+ * for the given Event type.
+ *
+ * @param ev The Event to handle.
+ * @param handler The event handler to process the event.
+ * @return EventResponse The response from the handler.
+ */
+template <typename T>
+[[nodiscard]] auto apply_event(Event const& ev, T& handler) -> EventResponse
+{
+    // TODO can this return an optional event response? so if the first layer is
+    // null then you do nothing, if the second layer is null you commit changes
+    // and if the second is not null then you quit. An optimization for when
+    // events have no implementaion.
+    return std::visit(
+        Overload{
+            [&](esc::KeyPress e) -> EventResponse {
+                if constexpr (HandlesKeyPress<T>) {
+                    return handler.handle_key_press(e.key);
+                }
+                else {
+                    return std::nullopt;
+                }
+            },
+            [&](esc::KeyRelease e) -> EventResponse {
+                if constexpr (HandlesKeyRelease<T>) {
+                    return handler.handle_key_release(e.key);
+                }
+                else {
+                    return std::nullopt;
+                }
+            },
+            [&](esc::MousePress e) -> EventResponse {
+                if constexpr (HandlesMousePress<T>) {
+                    return handler.handle_mouse_press(e.mouse);
+                }
+                else {
+                    return std::nullopt;
+                }
+            },
+            [&](esc::MouseRelease e) -> EventResponse {
+                if constexpr (HandlesMouseRelease<T>) {
+                    return handler.handle_mouse_release(e.mouse);
+                }
+                else {
+                    return std::nullopt;
+                }
+            },
+            [&](esc::MouseWheel e) -> EventResponse {
+                if constexpr (HandlesMouseWheel<T>) {
+                    return handler.handle_mouse_wheel(e.mouse);
+                }
+                else {
+                    return std::nullopt;
+                }
+            },
+            [&](esc::MouseMove e) -> EventResponse {
+                if constexpr (HandlesMouseMove<T>) {
+                    return handler.handle_mouse_move(e.mouse);
+                }
+                else {
+                    return std::nullopt;
+                }
+            },
+            [&](esc::Resize const& e) -> EventResponse {
+                Terminal::changes.reset(e.area);
+                if constexpr (HandlesResize<T>) {
+                    return handler.handle_resize(e.area);
+                }
+                else {
+                    return std::nullopt;
+                }
+            },
+            [&](event::Timer) -> EventResponse {
+                if constexpr (HandlesTimer<T>) {
+                    return handler.handle_timer();
+                }
+                else {
+                    return std::nullopt;
+                }
+            },
+            [](event::Interrupt) -> EventResponse { return QuitRequest{1}; }},
+        ev);
+}
+
+/**
+ * @brief Runs an event loop over the Terminal::event_queue, sending events to
+ * the given event handler.
+ *
+ * This will block until it receives a QuitRequest. The application can be
+ * quit by responding to an Event handler with a QuitRequest object.
+ *
+ * @param term The Terminal object.
+ * @param handler The handler object that all events will be sent to.
+ * @return The return code of the application, passed in via QuitRequest.
+ */
+template <typename EventHandler>
+[[nodiscard]] auto process_events(Terminal& term, EventHandler handler) -> int
+{
+    while (true) {
+        auto const event = Terminal::event_queue.pop();  // Blocking Call
+        auto const quit  = apply_event(event, handler);
+
+        if (quit.has_value()) {
+            // TODO add extra optional layer to apply_event response
+            return quit->return_code;
+        }
+        else {
+            term.commit_changes();
+        }
+    }
+}
 
 }  // namespace ox

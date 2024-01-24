@@ -12,11 +12,9 @@ add_subdirectory(external/signals-light)
 
 # Create Library Target
 add_library(TermOx STATIC
-    src/application.cpp
     src/common.cpp
     src/terminal.cpp
 
-    include/termox/application.hpp
     include/termox/common.hpp
     include/termox/core.hpp
     include/termox/events.hpp

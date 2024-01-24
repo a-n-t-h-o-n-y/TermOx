@@ -13,7 +13,6 @@
 #include <esc/mouse.hpp>
 
 #include <termox/common.hpp>
-#include <termox/terminal.hpp>
 
 namespace ox {
 
@@ -89,6 +88,8 @@ namespace event {
 
 struct Timer {};
 
+struct Interrupt {};
+
 }  // namespace event
 
 using Event = std::variant<esc::MousePress,
@@ -98,7 +99,8 @@ using Event = std::variant<esc::MousePress,
                            esc::KeyPress,
                            esc::KeyRelease,
                            esc::Resize,
-                           event::Timer>;
+                           event::Timer,
+                           event::Interrupt>;
 
 /**
  * @brief A thread-safe queue of Events.
@@ -208,95 +210,5 @@ concept HandlesTimer = requires(T t) {
         t.handle_timer()
     } -> std::same_as<EventResponse>;
 };
-
-// Apply Fn
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-/**
- * @brief Calls the appropriate handler function on \p handler for the given
- * Event.
- *
- * This will only call the handler if the handler has the appropriate function
- * for the given Event type.
- *
- * @param ev The Event to handle.
- * @param handler The event handler to process the event.
- * @return EventResponse The response from the handler.
- */
-template <typename T>
-[[nodiscard]] auto apply_event(Event const& ev, T& handler) -> EventResponse
-{
-    // TODO can this return an optional event response? so if the first layer is
-    // null then you do nothing, if the second layer is null you commit changes
-    // and if the second is not null then you quit
-    return std::visit(
-        Overload{[&](esc::KeyPress e) -> EventResponse {
-                     if constexpr (HandlesKeyPress<T>) {
-                         return handler.handle_key_press(e.key);
-                     }
-                     else {
-                         return std::nullopt;
-                     }
-                 },
-                 [&](esc::KeyRelease e) -> EventResponse {
-                     if constexpr (HandlesKeyRelease<T>) {
-                         return handler.handle_key_release(e.key);
-                     }
-                     else {
-                         return std::nullopt;
-                     }
-                 },
-                 [&](esc::MousePress e) -> EventResponse {
-                     if constexpr (HandlesMousePress<T>) {
-                         return handler.handle_mouse_press(e.mouse);
-                     }
-                     else {
-                         return std::nullopt;
-                     }
-                 },
-                 [&](esc::MouseRelease e) -> EventResponse {
-                     if constexpr (HandlesMouseRelease<T>) {
-                         return handler.handle_mouse_release(e.mouse);
-                     }
-                     else {
-                         return std::nullopt;
-                     }
-                 },
-                 [&](esc::MouseWheel e) -> EventResponse {
-                     if constexpr (HandlesMouseWheel<T>) {
-                         return handler.handle_mouse_wheel(e.mouse);
-                     }
-                     else {
-                         return std::nullopt;
-                     }
-                 },
-                 [&](esc::MouseMove e) -> EventResponse {
-                     if constexpr (HandlesMouseMove<T>) {
-                         return handler.handle_mouse_move(e.mouse);
-                     }
-                     else {
-                         return std::nullopt;
-                     }
-                 },
-                 [&](esc::Resize const& e) -> EventResponse {
-                     Terminal::current_screen.reset(e.area);
-                     Terminal::changes.reset(e.area);
-                     if constexpr (HandlesResize<T>) {
-                         return handler.handle_resize(e.area);
-                     }
-                     else {
-                         return std::nullopt;
-                     }
-                 },
-                 [&](event::Timer) -> EventResponse {
-                     if constexpr (HandlesTimer<T>) {
-                         return handler.handle_timer();
-                     }
-                     else {
-                         return std::nullopt;
-                     }
-                 }},
-        ev);
-}
 
 }  // namespace ox

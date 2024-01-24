@@ -1,5 +1,8 @@
 #include <termox/core.hpp>
 
+#include <thread>
+#include <chrono>
+
 using namespace ox;
 
 int main()
@@ -12,6 +15,7 @@ int main()
                 Painter{}[m.at] = U'X' | Trait::Bold | Trait::Italic |
                                   fg(ColorIndex::Red) | bg(TrueColor{0x8bb14e});
                 Terminal::cursor = m.at;
+                std::this_thread::sleep_for(std::chrono::seconds{10});
             }
             return {};
         }
@@ -19,5 +23,7 @@ int main()
         auto handle_key_press(Key) -> EventResponse { return QuitRequest{0}; }
     } w;
 
-    return Application{}.run(w);
+    auto term = Terminal{};
+
+    return process_events(term, w);
 }
