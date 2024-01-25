@@ -2,6 +2,7 @@
 
 #include <concepts>
 #include <condition_variable>
+#include <functional>
 #include <mutex>
 #include <optional>
 #include <queue>
@@ -81,34 +82,6 @@ class ConcurrentQueue {
     std::queue<value_type> queue_;
 };
 
-// Events
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-namespace event {
-
-struct Timer {
-    int id;
-};
-
-struct Interrupt {};
-
-}  // namespace event
-
-using Event = std::variant<esc::MousePress,
-                           esc::MouseRelease,
-                           esc::MouseWheel,
-                           esc::MouseMove,
-                           esc::KeyPress,
-                           esc::KeyRelease,
-                           esc::Resize,
-                           event::Timer,
-                           event::Interrupt>;
-
-/**
- * @brief A thread-safe queue of Events.
- */
-using EventQueue = ConcurrentQueue<Event>;
-
 // Event Handler Response
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -129,6 +102,39 @@ struct QuitRequest {
  * std::nullopt is a request to do nothing special.
  */
 using EventResponse = std::optional<QuitRequest>;
+
+// Events
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+namespace event {
+
+struct Timer {
+    int id;
+};
+
+struct Custom {
+    std::function<EventResponse()> action;
+};
+
+struct Interrupt {};
+
+}  // namespace event
+
+using Event = std::variant<esc::MousePress,
+                           esc::MouseRelease,
+                           esc::MouseWheel,
+                           esc::MouseMove,
+                           esc::KeyPress,
+                           esc::KeyRelease,
+                           esc::Resize,
+                           event::Timer,
+                           event::Custom,
+                           event::Interrupt>;
+
+/**
+ * @brief A thread-safe queue of Events.
+ */
+using EventQueue = ConcurrentQueue<Event>;
 
 // Event Handler Concepts
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

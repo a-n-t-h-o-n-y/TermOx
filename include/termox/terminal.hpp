@@ -1,7 +1,5 @@
 #pragma once
 
-#include <iostream>  //temp
-
 #include <algorithm>
 #include <chrono>
 #include <concepts>
@@ -168,6 +166,14 @@ class TimerThread {
     auto request_stop() -> void { thread_.request_stop(); }
 
    private:
+    /**
+     * @brief Run the TimerThread, calling the callback after the given
+     * duration and repeating until st.stop_requested() is true.
+     *
+     * @param st The stop_token to check for stop_requested().
+     * @param callback The function to call each time the duration has elapsed
+     * @param duration The periodic duration to wait before calling the callback
+     */
     static void run(std::stop_token st,
                     CallbackType const& callback,
                     std::chrono::milliseconds duration)
@@ -181,13 +187,13 @@ class TimerThread {
                 return;
             }
 
-            auto now = ClockType::now();
+            auto const now = ClockType::now();
             if (now >= next_callback_time) {
                 callback();
                 next_callback_time += duration;
             }
 
-            auto time_to_wait =
+            auto const time_to_wait =
                 std::min(next_callback_time - now, timeout_duration);
             std::this_thread::sleep_for(time_to_wait);
         }
@@ -575,6 +581,7 @@ template <typename T>
                     return std::nullopt;
                 }
             },
+            [](event::Custom const& e) -> EventResponse { return e.action(); },
             [](event::Interrupt) -> EventResponse { return QuitRequest{1}; }},
         ev);
 }
@@ -591,7 +598,7 @@ template <typename T>
  * @return The return code of the application, passed in via QuitRequest.
  */
 template <typename EventHandler>
-[[nodiscard]] auto process_events(Terminal& term, EventHandler handler) -> int
+[[nodiscard]] auto process_events(Terminal& term, EventHandler& handler) -> int
 {
     while (true) {
         auto const event = Terminal::event_queue.pop();  // Blocking Call

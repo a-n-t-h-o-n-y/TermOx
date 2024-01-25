@@ -1,7 +1,10 @@
 #include <termox/core.hpp>
 
+#include <chrono>
+#include <future>
 #include <sstream>
 #include <string>
+#include <thread>
 
 using namespace ox;
 
@@ -11,16 +14,15 @@ int main()
 
     class {
        public:
-        // auto handle_mouse_press(Mouse const& m) -> EventResponse
-        // {
-        //     if (m.button == Mouse::Button::Left) {
-        //         Painter{}[m.at] = U'X' | Trait::Bold | Trait::Italic |
-        //                           fg(ColorIndex::Red) |
-        //                           bg(TrueColor{0x8bb14e});
-        //         Terminal::cursor = m.at;
-        //     }
-        //     return {};
-        // }
+        auto handle_mouse_press(Mouse const& m) -> EventResponse
+        {
+            if (m.button == Mouse::Button::Left) {
+                Painter{}[m.at] = U'X' | Trait::Bold | Trait::Italic |
+                                  fg(ColorIndex::Red) | bg(TrueColor{0x8bb14e});
+                Terminal::cursor = m.at;
+            }
+            return {};
+        }
 
         auto handle_key_press(Key k) -> EventResponse
         {
@@ -29,6 +31,21 @@ int main()
             }
             else if (k == Key::q) {
                 return QuitRequest{0};
+            }
+            else if (k == Key::c) {
+                fut_ = std::async(std::launch::async, [this] {
+                    std::this_thread::sleep_for(std::chrono::seconds{4});
+                    Terminal::event_queue.append(
+                        event::Custom{[this]() -> EventResponse {
+                            if (fut_.valid()) {
+                                fut_.get();
+                            }
+                            Terminal::event_queue.append(esc::MousePress{
+                                {.at     = {.x = 8, .y = 4},
+                                 .button = Mouse::Button::Left}});
+                            return {};
+                        }});
+                });
             }
             return {};
         }
@@ -56,6 +73,7 @@ int main()
         }
 
        private:
+        std::future<void> fut_;
         Timer timer_ = Timer{std::chrono::milliseconds{500}};
         int count_   = 0;
         int id_      = -1;
