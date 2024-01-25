@@ -86,7 +86,9 @@ class ConcurrentQueue {
 
 namespace event {
 
-struct Timer {};
+struct Timer {
+    int id;
+};
 
 struct Interrupt {};
 
@@ -205,9 +207,9 @@ concept HandlesResize = requires(T t, esc::Area a) {
  * Checks if a type can handle a Timer event.
  */
 template <typename T>
-concept HandlesTimer = requires(T t) {
+concept HandlesTimer = requires(T t, int id) {
     {
-        t.handle_timer()
+        t.handle_timer(id)
     } -> std::same_as<EventResponse>;
 };
 

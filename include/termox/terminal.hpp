@@ -1,7 +1,13 @@
 #pragma once
 
+#include <iostream>  //temp
+
+#include <algorithm>
+#include <chrono>
 #include <concepts>
 #include <cstddef>
+#include <functional>
+#include <map>
 #include <optional>
 #include <stop_token>
 #include <string>
@@ -114,10 +120,89 @@ class ScreenBuffer {
     std::vector<Glyph> buffer_;
 };
 
+/**
+ * @brief A thread of execution that waits for a given duration and then calls
+ * a callback function.
+ */
+class TimerThread {
+   public:
+    using CallbackType = std::function<void()>;
+    using ClockType    = std::chrono::steady_clock;
+
+   public:
+    /**
+     * @brief Create a placeholder TimerThread that does nothing.
+     *
+     * You'll want to move assign over this to launch a TimerThread.
+     */
+    TimerThread() = default;
+
+    /**
+     * @brief Create a TimerThread that will call the given callback after the
+     * given duration.
+     *
+     * This will not launch a thread, you need to call start() to do that.
+     *
+     * @param duration The periodic duration to wait before calling the callback
+     * @param callback The function to call each time the duration has elapsed
+     */
+    explicit TimerThread(std::chrono::milliseconds duration,
+                         CallbackType callback)
+        : thread_{[cb = std::move(callback), d = std::move(duration)](auto st) {
+              TimerThread::run(st, cb, d);
+          }}
+    {}
+
+    TimerThread(TimerThread const&) = delete;
+    TimerThread(TimerThread&&)      = default;
+
+    auto operator=(TimerThread const&) -> TimerThread& = delete;
+    auto operator=(TimerThread&& x) -> TimerThread&    = default;
+
+   public:
+    /**
+     * @brief Request the TimerThread to stop, returns immediately.
+     *
+     * This will request the thread to stop, it does not wait for it to stop.
+     */
+    auto request_stop() -> void { thread_.request_stop(); }
+
+   private:
+    static void run(std::stop_token st,
+                    CallbackType const& callback,
+                    std::chrono::milliseconds duration)
+    {
+        constexpr auto timeout_duration =
+            std::chrono::duration_cast<ClockType::duration>(
+                std::chrono::milliseconds{16});
+        auto next_callback_time = ClockType::now() + duration;
+        while (true) {
+            if (st.stop_requested()) {
+                return;
+            }
+
+            auto now = ClockType::now();
+            if (now >= next_callback_time) {
+                callback();
+                next_callback_time += duration;
+            }
+
+            auto time_to_wait =
+                std::min(next_callback_time - now, timeout_duration);
+            std::this_thread::sleep_for(time_to_wait);
+        }
+    }
+
+   private:
+    std::jthread thread_;
+};
+
 class Terminal {
    public:
     inline static ScreenBuffer changes{{0, 0}};  // write to this
     inline static EventQueue event_queue;        // read from this
+
+    inline static std::map<int, TimerThread> timers;
 
     /**
      * @brief The current cursor position on the terminal.
@@ -229,6 +314,70 @@ class Terminal {
     ScreenBuffer current_screen_{{0, 0}};
     std::jthread terminal_input_thread_;
     std::string escape_sequence_;
+};
+
+/**
+ * @brief A handle to a Timer in the Terminal's timer system.
+ *
+ * This is used to create a new TimerThread with a given ID and provides access
+ * to start and stop it.
+ */
+class Timer {
+   public:
+    /**
+     * @brief Create a Timer with the given duration.
+     *
+     * This does not start the timer, you must call start() on it.
+     *
+     * @param duration The periodic duration to wait before calling the callback
+     */
+    explicit Timer(std::chrono::milliseconds duration)
+        : id_{next_id_++}, duration_{duration}
+    {
+        Terminal::timers.emplace(id_, TimerThread{});
+    }
+
+   public:
+    /**
+     * @brief Start the timer thread with the given duration.
+     *
+     * This will create and launch a new thread.
+     */
+    auto start() -> void
+    {
+        Terminal::timers[id_] = TimerThread{
+            duration_,
+            [id = id_] { Terminal::event_queue.append(event::Timer{id}); }};
+        is_running_ = true;
+    }
+
+    /**
+     * @brief Request the TimerThread to stop, returns immediately.
+     *
+     * Does not wait for thread to exit. The destructor of Terminal will wait
+     * for it to exit, or if you call start() again.
+     */
+    auto stop() -> void
+    {
+        Terminal::timers[id_].request_stop();
+        is_running_ = false;
+    }
+
+    [[nodiscard]] auto id() const -> int { return id_; }
+
+    [[nodiscard]] auto duration() const -> std::chrono::milliseconds
+    {
+        return duration_;
+    }
+
+    [[nodiscard]] auto is_running() const -> bool { return is_running_; }
+
+   private:
+    inline static int next_id_ = 0;
+
+    int id_;
+    std::chrono::milliseconds duration_;
+    bool is_running_ = false;
 };
 
 /**
@@ -409,7 +558,7 @@ template <typename T>
                     return std::nullopt;
                 }
             },
-            [&](esc::Resize const& e) -> EventResponse {
+            [&](esc::Resize e) -> EventResponse {
                 Terminal::changes.reset(e.area);
                 if constexpr (HandlesResize<T>) {
                     return handler.handle_resize(e.area);
@@ -418,9 +567,9 @@ template <typename T>
                     return std::nullopt;
                 }
             },
-            [&](event::Timer) -> EventResponse {
+            [&](event::Timer e) -> EventResponse {
                 if constexpr (HandlesTimer<T>) {
-                    return handler.handle_timer();
+                    return handler.handle_timer(e.id);
                 }
                 else {
                     return std::nullopt;
