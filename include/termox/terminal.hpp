@@ -206,7 +206,7 @@ class Terminal {
         Terminal::event_queue.append(esc::Resize{Terminal::area()});
 
         while (!st.stop_requested()) {
-            if (esc::sigint_flag) {
+            if (esc::sigint_flag == 1) {
                 Terminal::event_queue.append(event::Interrupt{});
                 return;
             }
