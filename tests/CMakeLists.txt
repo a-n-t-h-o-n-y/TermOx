@@ -1,6 +1,7 @@
 add_executable(TermOx.tests.unit EXCLUDE_FROM_ALL
     events.test.cpp
     terminal.test.cpp
+    glyph.test.cpp
 )
 
 target_compile_options(
