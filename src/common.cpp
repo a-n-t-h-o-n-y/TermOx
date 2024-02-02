@@ -17,8 +17,7 @@ namespace ox {
 
 auto u32_to_mb(char32_t c) -> std::string
 {
-    auto [count, chars] = ::esc::detail::u32_to_mb(c);
-    return std::string(chars.data(), count);
+    return ::esc::detail::u32_to_mb(c);
 }
 
 auto u32_to_mb(std::u32string_view sv) -> std::string

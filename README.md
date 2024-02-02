@@ -15,3 +15,11 @@ included as git submodules.
     cmake ..
     make TermOx                                 # Build library
     make TermOx.tests.unit                      # Build Unit Tests(optional)
+
+### Enabling Link-Time Optimization (LTO)
+
+For optimized builds, you can enable Link-Time Optimization (LTO) to potentially improve the performance of the final binary. Note that enabling LTO can increase build times. To enable LTO, add `-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON` to the CMake configuration command:
+
+```bash
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON ..
+```
