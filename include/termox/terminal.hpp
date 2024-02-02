@@ -265,9 +265,8 @@ class Terminal {
                 auto const& change  = changes[{x, y}];
                 auto const& current = current_screen_[{x, y}];
                 if (change.symbol != U'\0' && change != current) {
-                    escape_sequence_ += esc::escape(esc::Cursor_position{x, y});
-                    escape_sequence_ += esc::escape(change.brush);
-                    escape_sequence_ += ::ox::u32_to_mb(change.symbol);
+                    escape_sequence_ += escape(esc::Cursor_position{x, y});
+                    escape_sequence_ += escape(change);
                     current_screen_[{x, y}] = change;
                 }
             }
@@ -276,8 +275,8 @@ class Terminal {
         esc::write(escape_sequence_);
 
         if (cursor.has_value()) {
-            esc::set(esc::Cursor::Show);
-            esc::write(esc::escape(esc::Cursor_position{*cursor}));
+            set(esc::Cursor::Show);
+            esc::write(escape(esc::Cursor_position{*cursor}));
         }
         else {
             esc::set(esc::Cursor::Hide);
