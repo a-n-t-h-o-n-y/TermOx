@@ -9,15 +9,17 @@
 #include <optional>
 #include <stop_token>
 #include <string>
+#include <string_view>
 #include <thread>
+#include <utility>
+#include <variant>
 #include <vector>
 
 #include <esc/area.hpp>
-#include <esc/detail/signals.hpp>
 #include <esc/event.hpp>
-#include <esc/io.hpp>
+#include <esc/key.hpp>
+#include <esc/mouse.hpp>
 #include <esc/point.hpp>
-#include <esc/sequence.hpp>
 #include <esc/terminal.hpp>
 
 #include <termox/common.hpp>

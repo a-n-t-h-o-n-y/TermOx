@@ -1,5 +1,10 @@
 #include <termox/terminal.hpp>
 
+#include <esc/detail/signals.hpp>
+#include <esc/io.hpp>
+#include <esc/sequence.hpp>
+#include <esc/terminal.hpp>
+
 namespace ox {
 
 ScreenBuffer::ScreenBuffer(Area area)
@@ -66,9 +71,7 @@ auto TimerThread::run(std::stop_token st,
 
 // -----------------------------------------------------------------------------
 
-Terminal::Terminal(MouseMode mouse_mode = MouseMode::Basic,
-                   KeyMode key_mode     = KeyMode::Normal,
-                   Signals signals      = Signals::On)
+Terminal::Terminal(MouseMode mouse_mode, KeyMode key_mode, Signals signals)
     : terminal_input_thread_{[this](auto st) { this->run_read_loop(st); }}
 {
     esc::initialize_interactive_terminal(mouse_mode, key_mode, signals);
