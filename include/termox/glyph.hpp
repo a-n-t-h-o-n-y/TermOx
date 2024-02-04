@@ -13,6 +13,7 @@ using ::esc::ColorIndex;
 using ::esc::DefaultColor;
 using ::esc::Glyph;
 using ::esc::GlyphString;
+using ::esc::InsertableGlyphString;
 using ::esc::Trait;
 using ::esc::Traits;
 using ::esc::TrueColor;
