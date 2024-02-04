@@ -24,11 +24,10 @@ using ::esc::Mouse;
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 /**
- * @brief Thread safe queue for inter-thread communication.
+ * Thread safe queue for inter-thread communication.
  *
- * This is built specifically for Events where multiple threads append and one
- * thread consumes.
- *
+ * @details This is built specifically for Events where multiple threads append
+ * and one thread consumes.
  * @tparam T The type of element to store in the queue.
  */
 template <typename T>
@@ -47,7 +46,7 @@ class ConcurrentQueue {
 
    public:
     /**
-     * @brief Appends an element to the back of the queue.
+     * Appends an element to the back of the queue.
      *
      * @param value The element to append.
      */
@@ -61,10 +60,10 @@ class ConcurrentQueue {
     }
 
     /**
-     * @brief Removes and retrieves the element at the front of the queue.
+     * Removes and retrieves the element at the front of the queue.
      *
-     * This will block until an element is available. Uses a condition variable.
-     *
+     * @details This will block until an element is available. Uses a condition
+     * variable.
      * @return value_type The element at the front of the queue.
      */
     [[nodiscard]] auto pop() -> value_type
@@ -86,7 +85,7 @@ class ConcurrentQueue {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 /**
- * @brief Indicates an Event handler wants the application to shut down.
+ * Indicates an Event handler wants the application to shut down.
  *
  * @param return_code The return code that will be returned by
  * Application::run().
@@ -96,10 +95,10 @@ struct QuitRequest {
 };
 
 /**
- * @brief The response from an Event handler.
+ * The response from an Event handler.
  *
- * This is so the Event handler can communicate with the Application class.
- * std::nullopt is a request to do nothing special.
+ * @details This is so the Event handler can communicate with the Application
+ * class. std::nullopt is a request to do nothing special.
  */
 using EventResponse = std::optional<QuitRequest>;
 
@@ -132,7 +131,7 @@ using Event = std::variant<esc::MousePress,
                            event::Interrupt>;
 
 /**
- * @brief A thread-safe queue of Events.
+ * A thread-safe queue of Events.
  */
 using EventQueue = ConcurrentQueue<Event>;
 
