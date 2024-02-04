@@ -8,6 +8,7 @@
 namespace ox {
 
 using ::esc::Brush;
+using ::esc::Character;
 using ::esc::Color;
 using ::esc::ColorIndex;
 using ::esc::DefaultColor;

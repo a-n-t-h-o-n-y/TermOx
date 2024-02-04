@@ -400,13 +400,112 @@ concept Canvas = requires(T t) {
 };
 
 /**
- * @brief Provides a way to draw to the terminal screen.
+ * Provides a way to draw to the terminal screen.
  *
- * This writes directly to the global ScreenBuffer. It can be created from
- * anywhere; if constructed with a Canvas type it will constrain the drawing to
- * the Canvas' coordinates and size.
+ * @details This writes directly to the global ScreenBuffer. It can be created
+ * from anywhere; if constructed with a Canvas type it will constrain the
+ * drawing to the Canvas' coordinates and size.
  */
 class Painter {
+    /**
+     * Proxy object to write to the screen.
+     *
+     * @details This is created by Painter::operator[](Point) and allows stream
+     * like chained insertion of Glyphs and strings. Any output starts at the
+     * Point passed into Painter::operator[] and moves one cell to the right per
+     * Glyph, until the bounds are reached.
+     */
+    class CursorWriter {
+       public:
+        explicit CursorWriter(Point at, Area bounds, ScreenBuffer& buffer)
+            : at_{at}, bounds_{bounds}, buffer_{buffer}
+        {}
+
+       public:
+        auto operator<<(Glyph const& g) && -> CursorWriter
+        {
+            if (at_.x < bounds_.width && at_.y < bounds_.height) {
+                buffer_[at_] = g;
+                ++at_.x;
+            }
+            return std::move(*this);
+        }
+
+        auto operator<<(Glyph const& g) & -> CursorWriter&
+        {
+            if (at_.x < bounds_.width && at_.y < bounds_.height) {
+                buffer_[at_] = g;
+                ++at_.x;
+            }
+            return *this;
+        }
+
+        template <Character T>
+        auto operator<<(T c) && -> CursorWriter
+        {
+            return std::move(*this) << Glyph{
+                       .symbol = static_cast<char32_t>(c),
+                   };
+        }
+
+        template <Character T>
+        auto operator<<(T c) & -> CursorWriter&
+        {
+            return *this << Glyph{
+                       .symbol = static_cast<char32_t>(c),
+                   };
+        }
+
+        template <GlyphString T>
+        auto operator<<(T const& gs) && -> CursorWriter
+        {
+            auto const end =
+                std::min(gs.size(), (std::size_t)(bounds_.width - at_.x));
+            for (auto i = std::size_t{0}; i < end; ++i) {
+                buffer_[at_] = gs[i];
+                ++at_.x;
+            }
+            return std::move(*this);
+        }
+
+        template <GlyphString T>
+        auto operator<<(T const& gs) & -> CursorWriter&
+        {
+            auto const end =
+                std::min(gs.size(), (std::size_t)(bounds_.width - at_.x));
+            for (auto i = std::size_t{0}; i < end; ++i) {
+                buffer_[at_] = gs[i];
+                ++at_.x;
+            }
+            return *this;
+        }
+
+        auto operator<<(std::string_view sv) && -> CursorWriter
+        {
+            return std::move(*this) << esc::detail::utf8_to_glyphs(sv);
+        }
+
+        auto operator<<(std::string_view sv) & -> CursorWriter&
+        {
+            return *this << esc::detail::utf8_to_glyphs(sv);
+        }
+
+        auto operator<<(std::u32string_view sv) && -> CursorWriter
+        {
+            return std::move(*this) << esc::detail::utf32_to_glyphs(sv);
+        }
+
+        auto operator<<(std::u32string_view sv) & -> CursorWriter&
+        {
+            return *this << esc::detail::utf32_to_glyphs(sv);
+        }
+
+       private:
+        Point at_;
+        Area bounds_;
+        ScreenBuffer& buffer_;
+    };
+
    public:
     /**
      * @brief Construct a Painter for the entire terminal screen.
@@ -430,6 +529,8 @@ class Painter {
     {}
 
    public:
+    // TODO these should return a CursorWriter. Maybe remove the const versions.
+
     /**
      * @brief Access the Glyph at the given position, offset for Canvas.
      *
@@ -439,23 +540,16 @@ class Painter {
      * @param p The Point position of the Glyph.
      * @return Glyph& A reference to the Glyph at the given position.
      */
-    [[nodiscard]] auto operator[](Point p) -> Glyph&
+    [[nodiscard]] auto operator[](Point p) -> CursorWriter
     {
-        return screen_[{p.x + offset_.x, p.y + offset_.y}];
-    }
-
-    /**
-     * @brief Access the Glyph at the given position, offset for Canvas.
-     *
-     * The top left is {0, 0} and the bottom right is {width - 1, height - 1}.
-     * Does no bounds checking.
-     *
-     * @param p The Point position of the Glyph.
-     * @return Glyph const& A reference to the Glyph at the given position.
-     */
-    [[nodiscard]] auto operator[](Point p) const -> Glyph const&
-    {
-        return screen_[{p.x + offset_.x, p.y + offset_.y}];
+        return CursorWriter{
+            {
+                .x = p.x + offset_.x,
+                .y = p.y + offset_.y,
+            },
+            size_,
+            screen_,
+        };
     }
 
     /**
