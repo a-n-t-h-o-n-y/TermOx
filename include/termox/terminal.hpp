@@ -601,12 +601,9 @@ class Painter {
  * @return EventResponse The response from the handler.
  */
 template <typename T>
-[[nodiscard]] auto apply_event(Event const& ev, T& handler) -> EventResponse
+[[nodiscard]] auto apply_event(Event const& ev, T& handler)
+    -> std::optional<EventResponse>
 {
-    // TODO can this return an optional event response? so if the first layer is
-    // null then you do nothing, if the second layer is null you commit changes
-    // and if the second is not null then you quit. An optimization for when
-    // events have no implementaion.
     return std::visit(
         Overload{
             [&](esc::KeyPress e) -> EventResponse {
@@ -694,15 +691,16 @@ template <typename EventHandler>
 [[nodiscard]] auto process_events(Terminal& term, EventHandler& handler) -> int
 {
     while (true) {
-        auto const event = Terminal::event_queue.pop();  // Blocking Call
-        auto const quit  = apply_event(event, handler);
+        auto const event  = Terminal::event_queue.pop();  // Blocking Call
+        auto const result = apply_event(event, handler);
 
-        if (quit.has_value()) {
-            // TODO add extra optional layer to apply_event response
-            return quit->return_code;
-        }
-        else {
-            term.commit_changes();
+        if (result.has_value()) {
+            if (auto& quit = *result; quit.has_value()) {
+                return quit->return_code;
+            }
+            else {
+                term.commit_changes();
+            }
         }
     }
 }
