@@ -26,7 +26,7 @@ int main()
             else if (m.button == Mouse::Button::Right) {
                 auto cursor = Painter{}[m.at];
                 cursor << ("Right Click" | fg(ColorIndex::BrightCyan));
-                cursor << U"Right Click";
+                cursor << U'\0' << U'😀' << U'\0' << U"Right Click";
                 Terminal::cursor = m.at;
             }
 
