@@ -96,7 +96,7 @@ auto Terminal::commit_changes() -> void
             auto const& change  = changes[{x, y}];
             auto const& current = current_screen_[{x, y}];
             if (change.symbol != U'\0' && change != current) {
-                escape_sequence_ += escape(esc::Cursor_position{x, y});
+                escape_sequence_ += escape(esc::CursorPosition{x, y});
                 escape_sequence_ += escape(change);
                 current_screen_[{x, y}] = change;
             }
@@ -107,7 +107,7 @@ auto Terminal::commit_changes() -> void
 
     if (cursor.has_value()) {
         set(esc::Cursor::Show);
-        esc::write(escape(esc::Cursor_position{*cursor}));
+        esc::write(escape(esc::CursorPosition{*cursor}));
     }
     else {
         esc::set(esc::Cursor::Hide);
