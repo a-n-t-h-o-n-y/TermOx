@@ -17,22 +17,20 @@ int main()
         auto handle_mouse_press(Mouse const& m) -> EventResponse
         {
             if (m.button == Mouse::Button::Left) {
-                Painter{}[m.at]
-                    << (U'X' | Trait::Bold | Trait::Italic |
-                        fg(ColorIndex::Red) | bg(TrueColor{0x8bb14e}))
-                    << 'O';
+                Painter{}[m.at] << (U'X' | Trait::Bold | Trait::Italic |
+                                    fg(XColor::Red) | bg(TColor{0x8bb14e}))
+                                << 'O';
                 Terminal::cursor = m.at;
             }
             else if (m.button == Mouse::Button::Right) {
                 auto cursor = Painter{}[m.at];
-                cursor << ("Right Click" | fg(ColorIndex::BrightCyan));
+                cursor << ("Right Click" | fg(XColor::BrightCyan));
                 cursor << U'\0' << U'😀' << U'\0' << U"Right Click";
                 Terminal::cursor = m.at;
             }
 
-            Painter{}[{4, 5}] << ('O' | fg(ColorIndex::Blue))
-                              << ('X' | fg(ColorIndex::Red) | Trait::Bold)
-                              << 'O';
+            Painter{}[{4, 5}] << ('O' | fg(XColor::Blue))
+                              << ('X' | fg(XColor::Red) | Trait::Bold) << 'O';
             return {};
         }
 
@@ -81,7 +79,7 @@ int main()
 
             auto cursor = p[{0, 0}];
             for (auto i = 0uL; i < text.size(); ++i) {
-                cursor << (text[i] | fg(ColorIndex::BrightBlue));
+                cursor << (text[i] | fg(XColor::BrightBlue));
             }
         }
 

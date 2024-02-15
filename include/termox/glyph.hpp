@@ -10,13 +10,13 @@ namespace ox {
 using ::esc::Brush;
 using ::esc::Character;
 using ::esc::Color;
-using ::esc::ColorIndex;
-using ::esc::DefaultColor;
 using ::esc::Glyph;
 using ::esc::GlyphString;
 using ::esc::InsertableGlyphString;
+using ::esc::TColor;
 using ::esc::Trait;
 using ::esc::Traits;
 using ::esc::TrueColor;
+using ::esc::XColor;
 
 }  // namespace ox

@@ -1,6 +1,7 @@
 #include <termox/terminal.hpp>
 
 #include <esc/detail/signals.hpp>
+#include <esc/detail/transcode.hpp>
 #include <esc/io.hpp>
 #include <esc/sequence.hpp>
 #include <esc/terminal.hpp>
@@ -93,11 +94,15 @@ auto Terminal::commit_changes() -> void
 
     for (auto x = 0; x < changes.area().width; ++x) {
         for (auto y = 0; y < changes.area().height; ++y) {
+            // TODO optimize by only writing brush changes if the brush is
+            // different from the previous brush. Hold a fn local brush for the
+            // comparison.
             auto const& change  = changes[{x, y}];
             auto const& current = current_screen_[{x, y}];
             if (change.symbol != U'\0' && change != current) {
-                escape_sequence_ += escape(esc::CursorPosition{x, y});
-                escape_sequence_ += escape(change);
+                escape_sequence_ += escape(esc::Cursor{x, y});
+                escape_sequence_ += escape(change.brush);
+                escape_sequence_ += esc::detail::u32_to_u8(change.symbol);
                 current_screen_[{x, y}] = change;
             }
         }
@@ -106,11 +111,11 @@ auto Terminal::commit_changes() -> void
     esc::write(escape_sequence_);
 
     if (cursor.has_value()) {
-        set(esc::Cursor::Show);
-        esc::write(escape(esc::CursorPosition{*cursor}));
+        set(esc::CursorMode::Show);
+        esc::write(escape(esc::Cursor{*cursor}));
     }
     else {
-        esc::set(esc::Cursor::Hide);
+        esc::set(esc::CursorMode::Hide);
     }
 
     esc::flush();
