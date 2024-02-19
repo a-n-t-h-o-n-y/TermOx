@@ -16,4 +16,22 @@ target_link_libraries(
         TermOx
 )
 
+# PONG -------------------------------------------------------------------------
+
+add_executable(TermOx.examples.pong EXCLUDE_FROM_ALL
+    pong.cpp
+)
+target_compile_options(
+    TermOx.examples.pong
+    PRIVATE
+        -Wall
+        -Wextra
+        -Wpedantic
+)
+target_link_libraries(
+    TermOx.examples.pong
+    PRIVATE
+        TermOx
+)
+
 # ------------------------------------------------------------------------------

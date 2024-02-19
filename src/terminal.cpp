@@ -142,10 +142,40 @@ auto Terminal::area() -> Area { return esc::terminal_area(); }
 
 // -----------------------------------------------------------------------------
 
-Timer::Timer(std::chrono::milliseconds duration)
+Timer::Timer(std::chrono::milliseconds duration, bool launch)
     : id_{next_id_++}, duration_{duration}
 {
     Terminal::timers.emplace(id_, TimerThread{});
+    if (launch) {
+        this->start();
+    }
+}
+
+Timer::Timer(Timer&& other)
+{
+    id_               = std::move(other.id_);
+    duration_         = std::move(other.duration_);
+    is_running_       = std::move(other.is_running_);
+    other.is_running_ = false;
+}
+
+auto Timer::operator=(Timer&& other) -> Timer&
+{
+    if (this->is_running_) {
+        this->stop();
+    }
+    id_               = std::move(other.id_);
+    duration_         = std::move(other.duration_);
+    is_running_       = std::move(other.is_running_);
+    other.is_running_ = false;
+    return *this;
+}
+
+Timer::~Timer()
+{
+    if (is_running_) {
+        this->stop();
+    }
 }
 
 auto Timer::start() -> void
@@ -165,7 +195,10 @@ auto Timer::stop() -> void
 // -----------------------------------------------------------------------------
 
 Painter::CursorWriter::CursorWriter(Point at, Area bounds, ScreenBuffer& buffer)
-    : at_{at}, bounds_{bounds}, buffer_{buffer}
+    : at_{.x = std::max(0, at.x), .y = std::max(0, at.y)},
+      bounds_{.width  = std::max(0, bounds.width),
+              .height = std::max(0, bounds.height)},
+      buffer_{buffer}
 {}
 
 auto Painter::CursorWriter::operator<<(Glyph const& g) && -> CursorWriter
@@ -207,11 +240,94 @@ auto Painter::CursorWriter::operator<<(
     return *this << esc::detail::utf32_to_glyphs(sv);
 }
 
+auto Painter::CursorWriter::operator<<(Painter::Box const& b) -> CursorWriter
+{
+    auto const end = Point{
+        .x = std::min(at_.x + b.area.width, bounds_.width),
+        .y = std::min(at_.y + b.area.height, bounds_.height),
+    };
+
+    // Top
+    buffer_[at_] = U'┌' | b.brush;
+    for (auto x = at_.x + 1; x < end.x - 1; ++x) {
+        buffer_[{x, at_.y}] = U'─' | b.brush;
+    }
+    buffer_[{end.x - 1, at_.y}] = U'┐' | b.brush;
+
+    // Middle
+    for (auto y = at_.y + 1; y < end.y - 1; ++y) {
+        buffer_[{at_.x, y}]     = U'│' | b.brush;
+        buffer_[{end.x - 1, y}] = U'│' | b.brush;
+    }
+
+    // Bottom
+    buffer_[{at_.x, end.y - 1}] = U'└' | b.brush;
+    for (auto x = at_.x + 1; x < end.x - 1; ++x) {
+        buffer_[{x, end.y - 1}] = U'─' | b.brush;
+    }
+    buffer_[{end.x - 1, end.y - 1}] = U'┘' | b.brush;
+
+    return *this;
+}
+
+auto Painter::CursorWriter::operator<<(Painter::RoundedBox const& rb)
+    -> CursorWriter
+{
+    auto const end = Point{
+        .x = std::min(at_.x + rb.area.width, bounds_.width),
+        .y = std::min(at_.y + rb.area.height, bounds_.height),
+    };
+
+    // Top
+    buffer_[at_] = U'╭' | rb.brush;
+    for (auto x = at_.x + 1; x < end.x - 1; ++x) {
+        buffer_[{x, at_.y}] = U'─' | rb.brush;
+    }
+    buffer_[{end.x - 1, at_.y}] = U'╮' | rb.brush;
+
+    // Middle
+    for (auto y = at_.y + 1; y < end.y - 1; ++y) {
+        buffer_[{at_.x, y}]     = U'│' | rb.brush;
+        buffer_[{end.x - 1, y}] = U'│' | rb.brush;
+    }
+
+    // Bottom
+    buffer_[{at_.x, end.y - 1}] = U'╰' | rb.brush;
+    for (auto x = at_.x + 1; x < end.x - 1; ++x) {
+        buffer_[{x, end.y - 1}] = U'─' | rb.brush;
+    }
+    buffer_[{end.x - 1, end.y - 1}] = U'╯' | rb.brush;
+
+    return *this;
+}
+
+auto Painter::CursorWriter::operator<<(Painter::HLine const& hline)
+    -> CursorWriter
+{
+    auto const end = std::min(at_.x + hline.length, bounds_.width);
+    for (auto x = at_.x; x < end; ++x) {
+        buffer_[{x, at_.y}] = hline.glyph;
+    }
+    return *this;
+}
+
+auto Painter::CursorWriter::operator<<(Painter::VLine const& vline)
+    -> CursorWriter
+{
+    auto const end = std::min(at_.y + vline.length, bounds_.height);
+    for (auto y = at_.y; y < end; ++y) {
+        buffer_[{at_.x, y}] = vline.glyph;
+    }
+    return *this;
+}
+
 // -----------------------------------------------------------------------------
 
 Painter::Painter()
     : offset_{0, 0}, size_{Terminal::changes.area()}, screen_{Terminal::changes}
-{}
+{
+    this->fill(Glyph{' '});
+}
 
 auto Painter::operator[](Point p) -> CursorWriter
 {

@@ -117,11 +117,10 @@ class TimerThread {
     TimerThread() = default;
 
     /**
-     * Create a TimerThread that will call the given callback after the given
-     * duration.
+     * Create a TimerThread that will call the callback after the duration in a
+     * loop.
      *
-     * @details This will not launch a thread, you need to call start() to do
-     * that.
+     * @details This will launch a thread immediately.
      * @param duration The periodic duration to wait before calling the callback
      * @param callback The function to call each time the duration has elapsed
      */
@@ -240,10 +239,21 @@ class Timer {
     /**
      * Create a Timer with the given duration.
      *
-     * @details This does not start the timer, you must call start() on it.
      * @param duration The periodic duration to wait before calling the callback
+     * @param launch If true, the TimerThread will be started immediately.
      */
-    explicit Timer(std::chrono::milliseconds duration);
+    explicit Timer(std::chrono::milliseconds duration, bool launch = false);
+
+    Timer(Timer const&) = delete;
+    Timer(Timer&& other);
+
+    auto operator=(Timer const&) -> Timer& = delete;
+    auto operator=(Timer&& other) -> Timer&;
+
+    /**
+     * Stop the TimerThread if it is running.
+     */
+    ~Timer();
 
    public:
     /**
@@ -300,10 +310,60 @@ concept Canvas = requires(T t) {
  * drawing to the Canvas' coordinates and size.
  */
 class Painter {
+   public:
+    /**
+     * Used to paint a rectangle on the terminal screen.
+     *
+     * @details Use with CursorWriter::operator<< to paint a rectangle at the
+     * current cursor position. The cursor will not be moved after painting.
+     * This paints using shart edges: '┌┐└┘'.
+     */
+    struct Box {
+        Area area;
+        Brush brush;
+    };
+
+    /**
+     * Used to paint a rounded rectangle on the terminal screen.
+     *
+     * @details Use with CursorWriter::operator<< to paint a rounded rectangle
+     * at the current cursor position. The cursor will not be moved after
+     * painting. This paints using rounded edges: '╭╮╰╯'.
+     */
+    struct RoundedBox {
+        Area area;
+        Brush brush;
+    };
+
+    /**
+     * Used to paint a horizontal line on the terminal screen.
+     *
+     * @details Use with CursorWriter::operator<< to paint a horizontal line at
+     * the current cursor position. The cursor will not be moved after painting.
+     * This paints using the given Glyph, which defaults to '─'.
+     */
+    struct HLine {
+        int length;
+        Glyph glyph = {.symbol = U'─'};
+    };
+
+    /**
+     * Used to paint a vertical line on the terminal screen.
+     *
+     * @details Use with CursorWriter::operator<< to paint a vertical line at
+     * the current cursor position. The cursor will not be moved after painting.
+     * This paints using the given Glyph, which defaults to '│'.
+     */
+    struct VLine {
+        int length;
+        Glyph glyph = {.symbol = U'│'};
+    };
+
+   public:
     /**
      * Proxy object to write to the screen.
      *
-     * @details This is created by Painter::operator[](Point) and allows stream
+     * @details This is created by Painter::operator[](Point) and allows stream-
      * like chained insertion of Glyphs and strings. Any output starts at the
      * Point passed into Painter::operator[] and moves one cell to the right per
      * Glyph, until the bounds are reached.
@@ -365,6 +425,15 @@ class Painter {
 
         auto operator<<(std::u32string_view sv) & -> CursorWriter&;
 
+       public:
+        auto operator<<(Box const& b) -> CursorWriter;
+
+        auto operator<<(RoundedBox const& rb) -> CursorWriter;
+
+        auto operator<<(HLine const& hline) -> CursorWriter;
+
+        auto operator<<(VLine const& vline) -> CursorWriter;
+
        private:
         Point at_;
         Area bounds_;
@@ -374,12 +443,15 @@ class Painter {
    public:
     /**
      * Construct a Painter for the entire terminal screen.
+     *
+     * @details Creating a Painter will clear previous Glyphs from its region.
      */
     Painter();
 
     /**
      * Construct a Painter with the given Canvas' coordinates and size.
      *
+     * @details Creating a Painter will clear previous Glyphs from its region.
      * @param canvas The Canvas to create a Painter for.
      */
     template <Canvas T>
@@ -387,7 +459,9 @@ class Painter {
         : offset_{canvas.coordinates},
           size_{canvas.size},
           screen_{Terminal::changes}
-    {}
+    {
+        this->fill(Glyph{' '});
+    }
 
    public:
     /**
@@ -415,6 +489,11 @@ class Painter {
      * @param g The Glyph to fill the Canvas with.
      */
     auto fill(Glyph const& g) -> void;
+
+   public:
+    [[nodiscard]] auto offset() const -> Point { return offset_; }
+
+    [[nodiscard]] auto size() const -> Area { return size_; }
 
    private:
     Point offset_;
