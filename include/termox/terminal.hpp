@@ -68,24 +68,20 @@ class ScreenBuffer {
     [[nodiscard]] auto operator[](Point p) const -> Glyph const&;
 
     /**
-     * Resize the ScreenBuffer to the given dimensions and clears state.
+     * Resize the ScreenBuffer to the given dimensions.
      *
-     * @details This does not preserve the contents of the ScreenBuffer, it
-     * overwrites all Glyph symbols with null bytes.
-     * @details This function is provided as an optimized alternative to
-     * constructing a new ScreenBuffer and moving it into the previous one. This
-     * minimizes the vector allocations by re-using the existing buffer.
+     * @details This does not preserve the contents of the ScreenBuffer, the
+     * buffer is left in an undefined state.
      * @param a The new dimensions of the ScreenBuffer.
      */
-    auto reset(Area a) -> void;
+    auto resize(Area a) -> void;
 
     /**
-     * Clear the ScreenBuffer, setting all Glyphs symbols to null.
+     * Fill the ScreenBuffer with the given Glyph.
      *
-     * @details This does not reset their Brush members, a null symbol is
-     * 'empty'.
+     * @param g The Glyph to fill the ScreenBuffer with.
      */
-    auto clear() -> void;
+    auto fill(Glyph const& g) -> void;
 
     /**
      * Return the dimensions of the ScreenBuffer.
@@ -289,25 +285,36 @@ class Timer {
 };
 
 /**
- * A 2D Rectangle that represents a paintable area on the terminal with location
- * and size.
+ * A 2D Rectangle that represents a paintable region on the terminal.
+ *
+ * @details The `at` member is the top left position of the Canvas in the global
+ * terminal space.
  */
-template <typename T>
-concept Canvas = requires(T t) {
-    {
-        t.coordinates
-    } -> std::same_as<Point&>;
-    {
-        t.size
-    } -> std::same_as<Area&>;
+struct Canvas {
+    Point at  = {0, 0};
+    Area size = Terminal::changes.area();
+
+    /**
+     * Provides mutable access to the top left Point of the Canvas.
+     *
+     * @param p The Point position of the Glyph in the Canvas. This will be
+     * clamped to the Canvas' bounds.
+     */
+    [[nodiscard]] auto operator[](Point p) -> Glyph&;
+
+    /**
+     * Provides const access to the top left Point of the Canvas.
+     *
+     * @param p The Point position of the Glyph in the Canvas. This will be
+     * clamped to the Canvas' bounds.
+     */
+    [[nodiscard]] auto operator[](Point p) const -> Glyph const&;
 };
 
 /**
  * Provides a way to draw to the terminal screen.
  *
- * @details This writes directly to the global ScreenBuffer. It can be created
- * from anywhere; if constructed with a Canvas type it will constrain the
- * drawing to the Canvas' coordinates and size.
+ * @details This writes directly to the global ScreenBuffer.
  */
 class Painter {
    public:
@@ -370,7 +377,15 @@ class Painter {
      */
     class CursorWriter {
        public:
-        explicit CursorWriter(Point at, Area bounds, ScreenBuffer& buffer);
+        /**
+         * Construct a CursorWriter with the given Canvas and cursor position.
+         *
+         * @param canvas The Canvas to write to.
+         * @param cursor The position to start writing at. This will be clamped
+         * to the terminal's bounds if out of range when applied to the Canvas
+         * offset.
+         */
+        explicit CursorWriter(Canvas const& canvas, Point cursor);
 
        public:
         auto operator<<(Glyph const& g) && -> CursorWriter;
@@ -396,11 +411,12 @@ class Painter {
         template <GlyphString T>
         auto operator<<(T const& gs) && -> CursorWriter
         {
-            auto const end =
-                std::min(gs.size(), (std::size_t)(bounds_.width - at_.x));
-            for (auto i = std::size_t{0}; i < end; ++i) {
-                buffer_[at_] = gs[i];
-                ++at_.x;
+            for (auto const& g : gs) {
+                if (cursor_.x >= canvas_.size.width) {
+                    break;
+                }
+                canvas_[cursor_] = g;
+                ++cursor_.x;
             }
             return std::move(*this);
         }
@@ -408,11 +424,12 @@ class Painter {
         template <GlyphString T>
         auto operator<<(T const& gs) & -> CursorWriter&
         {
-            auto const end =
-                std::min(gs.size(), (std::size_t)(bounds_.width - at_.x));
-            for (auto i = std::size_t{0}; i < end; ++i) {
-                buffer_[at_] = gs[i];
-                ++at_.x;
+            for (auto const& g : gs) {
+                if (cursor_.x >= canvas_.size.width) {
+                    break;
+                }
+                canvas_[cursor_] = g;
+                ++cursor_.x;
             }
             return *this;
         }
@@ -428,40 +445,24 @@ class Painter {
        public:
         auto operator<<(Box const& b) -> CursorWriter;
 
-        auto operator<<(RoundedBox const& rb) -> CursorWriter;
+        auto operator<<(RoundedBox const& b) -> CursorWriter;
 
         auto operator<<(HLine const& hline) -> CursorWriter;
 
         auto operator<<(VLine const& vline) -> CursorWriter;
 
        private:
-        Point at_;
-        Area bounds_;
-        ScreenBuffer& buffer_;
+        Canvas canvas_;
+        Point cursor_;  // Local to canvas_; top left is {0, 0}
     };
 
    public:
     /**
-     * Construct a Painter for the entire terminal screen.
-     *
-     * @details Creating a Painter will clear previous Glyphs from its region.
-     */
-    Painter();
-
-    /**
      * Construct a Painter with the given Canvas' coordinates and size.
      *
-     * @details Creating a Painter will clear previous Glyphs from its region.
-     * @param canvas The Canvas to create a Painter for.
+     * @param c The Canvas to paint on. Default is the entire terminal.
      */
-    template <Canvas T>
-    explicit Painter(T& canvas)
-        : offset_{canvas.coordinates},
-          size_{canvas.size},
-          screen_{Terminal::changes}
-    {
-        this->fill(Glyph{' '});
-    }
+    explicit Painter(Canvas const& c = {});
 
    public:
     /**
@@ -490,15 +491,8 @@ class Painter {
      */
     auto fill(Glyph const& g) -> void;
 
-   public:
-    [[nodiscard]] auto offset() const -> Point { return offset_; }
-
-    [[nodiscard]] auto size() const -> Area { return size_; }
-
    private:
-    Point offset_;
-    Area size_;
-    ScreenBuffer& screen_;
+    Canvas canvas_;
 };
 
 /**
@@ -508,81 +502,86 @@ class Painter {
  * function for the given Event type.
  * @param ev The Event to handle.
  * @param handler The event handler to process the event.
- * @return EventResponse The response from the handler.
+ * @return std::optional<EventResponse> The response from the handler, or
+ * std::nullopt if not handled.
  */
 template <typename T>
 [[nodiscard]] auto apply_event(Event const& ev, T& handler)
     -> std::optional<EventResponse>
 {
     return std::visit(
-        Overload{
-            [&](esc::KeyPress e) -> EventResponse {
-                if constexpr (HandlesKeyPress<T>) {
-                    return handler.handle_key_press(e.key);
-                }
-                else {
-                    return std::nullopt;
-                }
-            },
-            [&](esc::KeyRelease e) -> EventResponse {
-                if constexpr (HandlesKeyRelease<T>) {
-                    return handler.handle_key_release(e.key);
-                }
-                else {
-                    return std::nullopt;
-                }
-            },
-            [&](esc::MousePress e) -> EventResponse {
-                if constexpr (HandlesMousePress<T>) {
-                    return handler.handle_mouse_press(e.mouse);
-                }
-                else {
-                    return std::nullopt;
-                }
-            },
-            [&](esc::MouseRelease e) -> EventResponse {
-                if constexpr (HandlesMouseRelease<T>) {
-                    return handler.handle_mouse_release(e.mouse);
-                }
-                else {
-                    return std::nullopt;
-                }
-            },
-            [&](esc::MouseWheel e) -> EventResponse {
-                if constexpr (HandlesMouseWheel<T>) {
-                    return handler.handle_mouse_wheel(e.mouse);
-                }
-                else {
-                    return std::nullopt;
-                }
-            },
-            [&](esc::MouseMove e) -> EventResponse {
-                if constexpr (HandlesMouseMove<T>) {
-                    return handler.handle_mouse_move(e.mouse);
-                }
-                else {
-                    return std::nullopt;
-                }
-            },
-            [&](esc::Resize e) -> EventResponse {
-                Terminal::changes.reset(e.area);
-                if constexpr (HandlesResize<T>) {
-                    return handler.handle_resize(e.area);
-                }
-                else {
-                    return std::nullopt;
-                }
-            },
-            [&](event::Timer e) -> EventResponse {
-                if constexpr (HandlesTimer<T>) {
-                    return handler.handle_timer(e.id);
-                }
-                else {
-                    return std::nullopt;
-                }
-            },
-            [](event::Custom const& e) -> EventResponse { return e.action(); },
-            [](event::Interrupt) -> EventResponse { return QuitRequest{1}; }},
+        Overload{[&](esc::KeyPress e) -> std::optional<EventResponse> {
+                     if constexpr (HandlesKeyPress<T>) {
+                         return handler.handle_key_press(e.key);
+                     }
+                     else {
+                         return std::nullopt;
+                     }
+                 },
+                 [&](esc::KeyRelease e) -> std::optional<EventResponse> {
+                     if constexpr (HandlesKeyRelease<T>) {
+                         return handler.handle_key_release(e.key);
+                     }
+                     else {
+                         return std::nullopt;
+                     }
+                 },
+                 [&](esc::MousePress e) -> std::optional<EventResponse> {
+                     if constexpr (HandlesMousePress<T>) {
+                         return handler.handle_mouse_press(e.mouse);
+                     }
+                     else {
+                         return std::nullopt;
+                     }
+                 },
+                 [&](esc::MouseRelease e) -> std::optional<EventResponse> {
+                     if constexpr (HandlesMouseRelease<T>) {
+                         return handler.handle_mouse_release(e.mouse);
+                     }
+                     else {
+                         return std::nullopt;
+                     }
+                 },
+                 [&](esc::MouseWheel e) -> std::optional<EventResponse> {
+                     if constexpr (HandlesMouseWheel<T>) {
+                         return handler.handle_mouse_wheel(e.mouse);
+                     }
+                     else {
+                         return std::nullopt;
+                     }
+                 },
+                 [&](esc::MouseMove e) -> std::optional<EventResponse> {
+                     if constexpr (HandlesMouseMove<T>) {
+                         return handler.handle_mouse_move(e.mouse);
+                     }
+                     else {
+                         return std::nullopt;
+                     }
+                 },
+                 [&](esc::Resize e) -> std::optional<EventResponse> {
+                     Terminal::changes.resize(e.area);
+                     Terminal::changes.fill(Glyph{});
+                     if constexpr (HandlesResize<T>) {
+                         return handler.handle_resize(e.area);
+                     }
+                     else {
+                         return std::nullopt;
+                     }
+                 },
+                 [&](event::Timer e) -> std::optional<EventResponse> {
+                     if constexpr (HandlesTimer<T>) {
+                         return handler.handle_timer(e.id);
+                     }
+                     else {
+                         return std::nullopt;
+                     }
+                 },
+                 [](event::Custom const& e) -> std::optional<EventResponse> {
+                     return e.action();
+                 },
+                 [](event::Interrupt) -> std::optional<EventResponse> {
+                     return QuitRequest{1};
+                 }},
         ev);
 }
 

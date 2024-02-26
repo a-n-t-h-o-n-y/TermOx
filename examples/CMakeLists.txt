@@ -34,4 +34,21 @@ target_link_libraries(
         TermOx
 )
 
+# WIDGETS ----------------------------------------------------------------------
+
+add_executable(TermOx.examples.widgets EXCLUDE_FROM_ALL
+    widgets.cpp
+)
+target_compile_options(
+    TermOx.examples.widgets
+    PRIVATE
+        -Wall
+        -Wextra
+        -Wpedantic
+)
+target_link_libraries(
+    TermOx.examples.widgets
+    PRIVATE
+        TermOx
+)
 # ------------------------------------------------------------------------------

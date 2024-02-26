@@ -139,26 +139,6 @@ using EventQueue = ConcurrentQueue<Event>;
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 /**
- * Checks if a type can handle a KeyPress event.
- */
-template <typename T>
-concept HandlesKeyPress = requires(T t, Key k) {
-    {
-        t.handle_key_press(k)
-    } -> std::same_as<EventResponse>;
-};
-
-/**
- * Checks if a type can handle a KeyRelease event.
- */
-template <typename T>
-concept HandlesKeyRelease = requires(T t, Key k) {
-    {
-        t.handle_key_release(k)
-    } -> std::same_as<EventResponse>;
-};
-
-/**
  * Checks if a type can handle a MousePress event.
  */
 template <typename T>
@@ -195,6 +175,26 @@ template <typename T>
 concept HandlesMouseMove = requires(T t, Mouse m) {
     {
         t.handle_mouse_move(m)
+    } -> std::same_as<EventResponse>;
+};
+
+/**
+ * Checks if a type can handle a KeyPress event.
+ */
+template <typename T>
+concept HandlesKeyPress = requires(T t, Key k) {
+    {
+        t.handle_key_press(k)
+    } -> std::same_as<EventResponse>;
+};
+
+/**
+ * Checks if a type can handle a KeyRelease event.
+ */
+template <typename T>
+concept HandlesKeyRelease = requires(T t, Key k) {
+    {
+        t.handle_key_release(k)
     } -> std::same_as<EventResponse>;
 };
 

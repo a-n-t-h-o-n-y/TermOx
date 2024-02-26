@@ -171,14 +171,15 @@ using State =
 
 // -----------------------------------------------------------------------------
 
-auto paint(SplashScreen const& x, Painter p) -> void
+auto paint(SplashScreen const& x, Canvas const& c) -> void
 {
+    auto p   = Painter{c};
     auto hsl = HSL{.hue = x.hue, .saturation = 90, .lightness = 70};
 
     auto offset = [&]() -> Point {
         auto const text_width = (int)x.display.find('\n');
         return {
-            .x = std::max((p.size().width - text_width) / 2, 0),
+            .x = std::max((c.size.width - text_width) / 2, 0),
             .y = 6,
         };
     }();
@@ -194,18 +195,20 @@ auto paint(SplashScreen const& x, Painter p) -> void
 
     auto const enter = U"Press Enter to continue" | Trait::Dim;
     p[{
-        .x = (p.size().width - (int)enter.size()) / 2,
-        .y = p.size().height - 1,
+        .x = (c.size.width - (int)enter.size()) / 2,
+        .y = c.size.height - 1,
     }] << enter;
 }
 
-auto paint(MainMenu const& x, Painter p) -> void
+auto paint(MainMenu const& x, Canvas const& c) -> void
 {
+    auto p = Painter{c};
+
     {  // Logo
         auto offset = [&]() -> Point {
             auto const width_text = (int)logo.find('\n');
             return {
-                .x = std::max((p.size().width - width_text) / 2, 0),
+                .x = std::max((c.size.width - width_text) / 2, 0),
                 .y = 6,
             };
         }();
@@ -222,7 +225,7 @@ auto paint(MainMenu const& x, Painter p) -> void
     {  // Menu Items
         for (std::size_t i = 0; i < x.options.size(); ++i) {
             auto cursor = p[{
-                .x = (p.size().width - (int)x.options[i].size()) / 2,
+                .x = (c.size.width - (int)x.options[i].size()) / 2,
                 .y = 14 + (int)i,
             }];
             if (i == x.selected) {
@@ -235,48 +238,51 @@ auto paint(MainMenu const& x, Painter p) -> void
     }
 }
 
-auto paint(HowTo const& x, Painter p) -> void
+auto paint(HowTo const& x, Canvas const& c) -> void
 {
-    {  // Border
-        auto const border = Painter::RoundedBox{
-            .area  = p.size(),
-            .brush = {.foreground = XColor::Blue, .traits = Trait::Dim}};
+    auto p = Painter{c};
 
-        p[{0, 0}] << border;
+    {  // Border
+        p[{0, 0}] << Painter::RoundedBox{
+            .area  = c.size,
+            .brush = {.foreground = XColor::Blue, .traits = Trait::Dim},
+        };
     }
     {  // Title
         auto const at =
-            Point{.x = (p.size().width - (int)x.title.size()) / 2, .y = 1};
+            Point{.x = (c.size.width - (int)x.title.size()) / 2, .y = 1};
         p[at] << (x.title | Trait::Bold | Trait::Underline);
     }
     {  // Instructions
         for (std::size_t i = 0; i < x.instructions.size(); ++i) {
             auto const at = Point{
-                .x = (p.size().width - 40) / 2,
+                .x = (c.size.width - 40) / 2,
                 .y = 4 + (int)i,
             };
             p[at] << (x.instructions[i][0] | Trait::Bold);
             p[{
-                .x = (p.size().width + 8) / 2,
+                .x = (c.size.width + 8) / 2,
                 .y = 4 + (int)i,
             }] << x.instructions[i][1];
         }
     }
     {  // Footer
-        p[{.x = 2, .y = p.size().height - 1}]
+        p[{.x = 2, .y = c.size.height - 1}]
             << (U"Press Esc to return to the main menu" | Trait::Dim);
     }
 }
 
-auto paint(PlayerSelectMenu const& x, Painter p) -> void
+auto paint(PlayerSelectMenu const& x, Canvas const& c) -> void
 {
+    auto p = Painter{c};
+
     {  // Title
         auto const at =
-            Point{.x = (p.size().width - (int)x.title.size()) / 2, .y = 1};
+            Point{.x = (c.size.width - (int)x.title.size()) / 2, .y = 1};
         p[at] << x.title;
     }
     {  // Left Player
-        auto const at = Point{.x = p.size().width / 2 - 25, .y = 4};
+        auto const at = Point{.x = c.size.width / 2 - 25, .y = 4};
         if (x.left_selected) {
             p[at] << "Left Player: " << (x.left_player.name | Trait::Standout);
         }
@@ -285,7 +291,7 @@ auto paint(PlayerSelectMenu const& x, Painter p) -> void
         }
     }
     {  // Right Player
-        auto const at = Point{.x = p.size().width / 2 + 10, .y = 4};
+        auto const at = Point{.x = c.size.width / 2 + 10, .y = 4};
         if (!x.left_selected) {
             p[at] << "Right Player: "
                   << (x.right_player.name | Trait::Standout);
@@ -297,7 +303,7 @@ auto paint(PlayerSelectMenu const& x, Painter p) -> void
     {  // Options
         for (std::size_t i = 0; i < x.options.size(); ++i) {
             auto const at = Point{
-                .x = (p.size().width - (int)x.options[i].name.size()) / 2,
+                .x = (c.size.width - (int)x.options[i].name.size()) / 2,
                 .y = 6 + (int)i,
             };
 
@@ -310,28 +316,30 @@ auto paint(PlayerSelectMenu const& x, Painter p) -> void
         }
     }
     {  // Footer
-        p[{.x = 0, .y = p.size().height - 1}]
+        p[{.x = 0, .y = c.size.height - 1}]
             << (U"Press Esc to return to the main menu" | Trait::Dim);
     }
 }
 
-auto paint(Game const& x, Painter p) -> void
+auto paint(Game const& x, Canvas const& c) -> void
 {
     static constexpr auto display_space = Game::game_space;
 
-    if (p.size().width < display_space.width ||
-        p.size().height < display_space.height) {
-        p[{0, 0}] << U"Terminal too small to display game";
+    if (c.size.width < display_space.width ||
+        c.size.height < display_space.height) {
+        Painter{c}[{0, 0}] << U"Terminal too small to display game";
         return;
     }
 
-    auto const offset = Point{
-        .x = (p.size().width - display_space.width) / 2,
-        .y = (p.size().height - display_space.height) / 2,
+    auto game_canvas = Canvas{
+        .at   = {.x = c.at.x + (c.size.width - display_space.width) / 2,
+                 .y = c.at.y + (c.size.height - display_space.height) / 2},
+        .size = display_space,
     };
 
     {  // Net
-        p[offset + Point{display_space.width / 2, 0}] << Painter::VLine{
+        auto p = Painter{game_canvas};
+        p[{.x = display_space.width / 2, .y = 0}] << Painter::VLine{
             .length = display_space.height,
             .glyph  = U'╳' | Trait::Dim,
         };
@@ -353,31 +361,31 @@ auto paint(Game const& x, Painter p) -> void
             return U"▄▃▂▁█▇▆▅"[i];
         }(x.ball.at.y) | fg(color);
 
-        auto at = offset + Point{.x = (int)std::round(x.ball.at.x),
-                                 .y = (int)std::round(x.ball.at.y)};
-        p[at] << (glyph | Trait::Inverse);
-        at.y -= 1;
-        p[at] << glyph;
+        auto const at   = Point{.x = (int)std::round(x.ball.at.x),
+                                .y = (int)std::round(x.ball.at.y)};
+        game_canvas[at] = glyph | Trait::Inverse;
+        game_canvas[{.x = at.x, .y = at.y - 1}] = glyph;
     }
 
     {  // Paddles
         auto const paint_paddle = [&](Game::Paddle const& paddle) {
-            auto const at = offset + Point{.x = (int)std::floor(paddle.top.x),
-                                           .y = (int)std::floor(paddle.top.y)};
-
-            auto const edge = [](float y) {
+            auto const edge = [](float y) -> Glyph {
                 auto const i = (std::size_t)((y - std::floor(y)) * 8);
-                return U"█▇▆▅▄▃▂▁"[i];
+                return {U"█▇▆▅▄▃▂▁"[i]};
             }(paddle.top.y);
 
-            p[at] << edge;
+            auto at = Point{.x = (int)std::floor(paddle.top.x),
+                            .y = (int)std::floor(paddle.top.y)};
+
+            game_canvas[at] = edge;
 
             for (int i = 1; i < Game::Paddle::height; ++i) {
-                p[at + Point{.x = 0, .y = i}] << U'█';
+                at.y += 1;
+                game_canvas[at] = U'█' | Trait::None;
             }
 
-            p[at + Point{.x = 0, .y = (int)Game::Paddle::height}]
-                << (edge | Trait::Inverse);
+            at.y += 1;
+            game_canvas[at] = edge | Trait::Inverse;
         };
 
         paint_paddle(x.left.paddle);
@@ -385,37 +393,38 @@ auto paint(Game const& x, Painter p) -> void
     }
 
     {  // Left Score
-        auto const at = offset + Point{.x = 0, .y = -2};
-        p[at] << x.left.player.name << ": " << std::to_string(x.left.score);
+        Painter{game_canvas}[{0, -2}] << x.left.player.name << ": "
+                                      << std::to_string(x.left.score);
     }
 
     {  // Right Score
         auto const text =
             x.right.player.name + ": " + std::to_string(x.right.score);
-        auto const at =
-            offset +
-            Point{.x = display_space.width - (int)text.size() - 1, .y = -2};
-        p[at] << text;
+        auto const at = Point{
+            .x = display_space.width - (int)text.size() - 1,
+            .y = -2,
+        };
+        Painter{game_canvas}[at] << text;
     }
 
     {  // Border
-        auto const border = Painter::RoundedBox{
+        Painter{c}[game_canvas.at + Point{-1, -1}] << Painter::RoundedBox{
             .area  = {.width  = display_space.width + 2,
                       .height = display_space.height + 2},
-            .brush = {.foreground = XColor::Blue, .traits = Trait::Dim}};
-
-        p[offset - Point{.x = 1, .y = 1}] << border;
+            .brush = {.foreground = XColor::Blue, .traits = Trait::Dim},
+        };
     }
 
     {  // Footer
-        p[{.x = 0, .y = p.size().height - 1}]
+        auto p = Painter{c};
+        p[{.x = 0, .y = c.size.height - 1}]
             << (U"Press Esc to return to the main menu" | Trait::Dim);
 
         auto const enter_text =
             std::u32string{U"Press Enter to start next round"};
         p[{
-            .x = (p.size().width - (int)enter_text.size()),
-            .y = p.size().height - 1,
+            .x = (c.size.width - (int)enter_text.size()),
+            .y = c.size.height - 1,
         }] << (enter_text | Trait::Dim);
     }
 }
@@ -425,7 +434,7 @@ auto paint(Game const& x, Painter p) -> void
  */
 auto paint(State const& x) -> void
 {
-    std::visit([&](auto const& s) { paint(s, Painter{}); }, x);
+    std::visit([&](auto const& s) { paint(s, Canvas{}); }, x);
 }
 
 // -----------------------------------------------------------------------------

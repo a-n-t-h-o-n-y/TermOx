@@ -16,21 +16,28 @@ int main()
        public:
         auto handle_mouse_press(Mouse const& m) -> EventResponse
         {
+            auto canvas = Canvas{
+                .at   = {0, 0},
+                .size = Terminal::changes.area(),
+            };
+
             if (m.button == Mouse::Button::Left) {
-                Painter{}[m.at] << (U'X' | Trait::Bold | Trait::Italic |
-                                    fg(XColor::Red) | bg(TColor{0x8bb14e}))
-                                << 'O';
+                canvas[m.at] = U'X' | Trait::Bold | Trait::Italic |
+                               fg(XColor::Red) | bg(TColor{0x8bb14e});
+                canvas[m.at + Point{1, 0}] = Glyph{U'O'};
+
                 Terminal::cursor = m.at;
             }
             else if (m.button == Mouse::Button::Right) {
-                auto cursor = Painter{}[m.at];
+                auto cursor = Painter{canvas}[m.at];
                 cursor << ("Right Click" | fg(XColor::BrightCyan));
                 cursor << U'\0' << U'😀' << U'\0' << U"Right Click";
                 Terminal::cursor = m.at;
             }
 
-            Painter{}[{4, 5}] << ('O' | fg(XColor::Blue))
-                              << ('X' | fg(XColor::Red) | Trait::Bold) << 'O';
+            Painter{canvas}[{4, 5}] << ('O' | fg(XColor::Blue))
+                                    << ('X' | fg(XColor::Red) | Trait::Bold)
+                                    << 'O';
             return {};
         }
 
@@ -75,7 +82,8 @@ int main()
             ss << U"Count: " << (char32_t)(U'0' + count_) << U"  ID: "
                << (char32_t)(U'0' + id_);
             auto const text = ss.str();
-            auto p          = Painter{};
+
+            auto p = Painter{};
 
             auto cursor = p[{0, 0}];
             for (auto i = 0uL; i < text.size(); ++i) {
