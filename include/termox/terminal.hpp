@@ -42,9 +42,9 @@ class ScreenBuffer {
     /**
      * Construct a ScreenBuffer with the given dimensions.
      *
-     * @param area The dimensions of the ScreenBuffer.
+     * @param size The dimensions of the ScreenBuffer.
      */
-    explicit ScreenBuffer(Area area);
+    explicit ScreenBuffer(Area size);
 
    public:
     /**
@@ -84,14 +84,14 @@ class ScreenBuffer {
     auto fill(Glyph const& g) -> void;
 
     /**
-     * Return the dimensions of the ScreenBuffer.
+     * Return the size of the ScreenBuffer.
      *
      * @return Area The dimensions of the ScreenBuffer.
      */
-    [[nodiscard]] auto area() const -> Area { return area_; }
+    [[nodiscard]] auto size() const -> Area { return size_; }
 
    private:
-    Area area_;
+    Area size_;
     std::vector<Glyph> buffer_;
 };
 
@@ -212,11 +212,11 @@ class Terminal {
     auto run_read_loop(std::stop_token st) -> void;
 
     /**
-     * Return the current dimensions of the terminal.
+     * Return the current size of the terminal.
      *
      * @return Area The current dimensions of the terminal.
      */
-    [[nodiscard]] auto area() -> Area;
+    [[nodiscard]] auto size() -> Area;
 
    private:
     ScreenBuffer current_screen_{{0, 0}};
@@ -292,7 +292,7 @@ class Timer {
  */
 struct Canvas {
     Point at  = {0, 0};
-    Area size = Terminal::changes.area();
+    Area size = Terminal::changes.size();
 
     /**
      * Provides mutable access to the top left Point of the Canvas.
@@ -326,7 +326,7 @@ class Painter {
      * This paints using shart edges: '┌┐└┘'.
      */
     struct Box {
-        Area area;
+        Area size;
         Brush brush;
     };
 
@@ -338,7 +338,7 @@ class Painter {
      * painting. This paints using rounded edges: '╭╮╰╯'.
      */
     struct RoundedBox {
-        Area area;
+        Area size;
         Brush brush;
     };
 
@@ -559,10 +559,10 @@ template <typename T>
                      }
                  },
                  [&](esc::Resize e) -> std::optional<EventResponse> {
-                     Terminal::changes.resize(e.area);
+                     Terminal::changes.resize(e.size);
                      Terminal::changes.fill(Glyph{});
                      if constexpr (HandlesResize<T>) {
-                         return handler.handle_resize(e.area);
+                         return handler.handle_resize(e.size);
                      }
                      else {
                          return std::nullopt;

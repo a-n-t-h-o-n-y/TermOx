@@ -244,7 +244,7 @@ auto paint(HowTo const& x, Canvas const& c) -> void
 
     {  // Border
         p[{0, 0}] << Painter::RoundedBox{
-            .area  = c.size,
+            .size  = c.size,
             .brush = {.foreground = XColor::Blue, .traits = Trait::Dim},
         };
     }
@@ -409,7 +409,7 @@ auto paint(Game const& x, Canvas const& c) -> void
 
     {  // Border
         Painter{c}[game_canvas.at + Point{-1, -1}] << Painter::RoundedBox{
-            .area  = {.width  = display_space.width + 2,
+            .size  = {.width  = display_space.width + 2,
                       .height = display_space.height + 2},
             .brush = {.foreground = XColor::Blue, .traits = Trait::Dim},
         };

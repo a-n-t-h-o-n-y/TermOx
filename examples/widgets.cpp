@@ -41,7 +41,7 @@ void paint(Label const& l, ox::Canvas c)
             break;
     }
 
-    ox::Painter{c}[{0, 0}] << ox::Painter::RoundedBox{.area = c.size};
+    ox::Painter{c}[{0, 0}] << ox::Painter::RoundedBox{.size = c.size};
 }
 
 struct Button {

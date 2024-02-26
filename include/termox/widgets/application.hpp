@@ -23,7 +23,7 @@ class Application {
    public:
     auto run() -> int
     {
-        ox::Terminal::event_queue.append(esc::Resize{term_.area()});
+        ox::Terminal::event_queue.append(esc::Resize{term_.size()});
         return process_events(term_, *this);
     }
 
@@ -31,28 +31,28 @@ class Application {
     auto handle_mouse_press(ox::Mouse m) -> ox::EventResponse
     {
         mouse_press(head_, m);
-        paint(head_, ox::Canvas{.at = {0, 0}, .size = term_.changes.area()});
+        paint(head_, ox::Canvas{.at = {0, 0}, .size = term_.changes.size()});
         return {};
     }
 
     auto handle_mouse_release(ox::Mouse m) -> ox::EventResponse
     {
         mouse_release(head_, m);
-        paint(head_, ox::Canvas{.at = {0, 0}, .size = term_.changes.area()});
+        paint(head_, ox::Canvas{.at = {0, 0}, .size = term_.changes.size()});
         return {};
     }
 
     auto handle_mouse_wheel(ox::Mouse m) -> ox::EventResponse
     {
         mouse_wheel(head_, m);
-        paint(head_, ox::Canvas{.at = {0, 0}, .size = term_.changes.area()});
+        paint(head_, ox::Canvas{.at = {0, 0}, .size = term_.changes.size()});
         return {};
     }
 
     auto handle_mouse_move(ox::Mouse m) -> ox::EventResponse
     {
         mouse_move(head_, m);
-        paint(head_, ox::Canvas{.at = {0, 0}, .size = term_.changes.area()});
+        paint(head_, ox::Canvas{.at = {0, 0}, .size = term_.changes.size()});
         return {};
     }
 
@@ -63,7 +63,7 @@ class Application {
         if (focused != nullptr) {
             key_press(*focused, k);
         }
-        paint(head_, ox::Canvas{.at = {0, 0}, .size = term_.changes.area()});
+        paint(head_, ox::Canvas{.at = {0, 0}, .size = term_.changes.size()});
         return {};
     }
 
@@ -73,7 +73,7 @@ class Application {
         if (focused != nullptr) {
             key_release(*focused, k);
         }
-        paint(head_, ox::Canvas{.at = {0, 0}, .size = term_.changes.area()});
+        paint(head_, ox::Canvas{.at = {0, 0}, .size = term_.changes.size()});
         return {};
     }
 
@@ -90,7 +90,7 @@ class Application {
         // if (w.has_value()) {
         //     timer(*w);
         // }
-        paint(head_, ox::Canvas{.at = {0, 0}, .size = term_.changes.area()});
+        paint(head_, ox::Canvas{.at = {0, 0}, .size = term_.changes.size()});
         return {};
     }
 

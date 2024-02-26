@@ -10,23 +10,23 @@
 
 namespace ox {
 
-ScreenBuffer::ScreenBuffer(Area area)
-    : area_{area}, buffer_((std::size_t)(area.width * area.height))
+ScreenBuffer::ScreenBuffer(Area size)
+    : size_{size}, buffer_((std::size_t)(size.width * size.height))
 {}
 
 auto ScreenBuffer::operator[](Point p) -> Glyph&
 {
-    return buffer_[(std::size_t)(p.y * area_.width + p.x)];
+    return buffer_[(std::size_t)(p.y * size_.width + p.x)];
 }
 
 auto ScreenBuffer::operator[](Point p) const -> Glyph const&
 {
-    return buffer_[(std::size_t)(p.y * area_.width + p.x)];
+    return buffer_[(std::size_t)(p.y * size_.width + p.x)];
 }
 
 auto ScreenBuffer::resize(Area a) -> void
 {
-    area_ = a;
+    size_ = a;
     buffer_.resize((std::size_t)(a.width * a.height));
 }
 
@@ -89,15 +89,15 @@ auto Terminal::commit_changes() -> void
 {
     escape_sequence_.clear();
 
-    if (Terminal::changes.area() != current_screen_.area()) {
-        current_screen_.resize(Terminal::changes.area());
+    if (Terminal::changes.size() != current_screen_.size()) {
+        current_screen_.resize(Terminal::changes.size());
         current_screen_.fill(Glyph{U'\0'});  // Trigger Repaint
     }
 
     auto brush = Brush{};
 
-    for (auto x = 0; x < changes.area().width; ++x) {
-        for (auto y = 0; y < changes.area().height; ++y) {
+    for (auto x = 0; x < changes.size().width; ++x) {
+        for (auto y = 0; y < changes.size().height; ++y) {
             auto const& change  = changes[{x, y}];
             auto const& current = current_screen_[{x, y}];
             if (change != current) {
@@ -131,7 +131,7 @@ auto Terminal::commit_changes() -> void
 
 auto Terminal::run_read_loop(std::stop_token st) -> void
 {
-    Terminal::event_queue.append(esc::Resize{Terminal::area()});
+    Terminal::event_queue.append(esc::Resize{Terminal::size()});
 
     while (!st.stop_requested()) {
         if (esc::sigint_flag == 1) {
@@ -146,7 +146,7 @@ auto Terminal::run_read_loop(std::stop_token st) -> void
     }
 }
 
-auto Terminal::area() -> Area { return esc::terminal_area(); }
+auto Terminal::size() -> Area { return esc::terminal_area(); }
 
 // -----------------------------------------------------------------------------
 
@@ -205,8 +205,8 @@ auto Timer::stop() -> void
 auto Canvas::operator[](Point p) -> Glyph&
 {
     auto const global_point = Point{
-        .x = std::clamp(at.x + p.x, 0, Terminal::changes.area().width - 1),
-        .y = std::clamp(at.y + p.y, 0, Terminal::changes.area().height - 1),
+        .x = std::clamp(at.x + p.x, 0, Terminal::changes.size().width - 1),
+        .y = std::clamp(at.y + p.y, 0, Terminal::changes.size().height - 1),
     };
     return Terminal::changes[global_point];
 }
@@ -214,8 +214,8 @@ auto Canvas::operator[](Point p) -> Glyph&
 auto Canvas::operator[](Point p) const -> Glyph const&
 {
     auto const global_point = Point{
-        .x = std::clamp(at.x + p.x, 0, Terminal::changes.area().width - 1),
-        .y = std::clamp(at.y + p.y, 0, Terminal::changes.area().height - 1),
+        .x = std::clamp(at.x + p.x, 0, Terminal::changes.size().width - 1),
+        .y = std::clamp(at.y + p.y, 0, Terminal::changes.size().height - 1),
     };
     return Terminal::changes[global_point];
 }
@@ -269,8 +269,8 @@ auto Painter::CursorWriter::operator<<(
 auto Painter::CursorWriter::operator<<(Painter::Box const& b) -> CursorWriter
 {
     auto const end = Point{
-        .x = std::min(cursor_.x + b.area.width, canvas_.size.width),
-        .y = std::min(cursor_.y + b.area.height, canvas_.size.height),
+        .x = std::min(cursor_.x + b.size.width, canvas_.size.width),
+        .y = std::min(cursor_.y + b.size.height, canvas_.size.height),
     };
 
     // Top
@@ -300,8 +300,8 @@ auto Painter::CursorWriter::operator<<(Painter::RoundedBox const& b)
     -> CursorWriter
 {
     auto const end = Point{
-        .x = std::min(cursor_.x + b.area.width, canvas_.size.width),
-        .y = std::min(cursor_.y + b.area.height, canvas_.size.height),
+        .x = std::min(cursor_.x + b.size.width, canvas_.size.width),
+        .y = std::min(cursor_.y + b.size.height, canvas_.size.height),
     };
 
     // Top

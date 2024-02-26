@@ -18,7 +18,7 @@ int main()
         {
             auto canvas = Canvas{
                 .at   = {0, 0},
-                .size = Terminal::changes.area(),
+                .size = Terminal::changes.size(),
             };
 
             if (m.button == Mouse::Button::Left) {
