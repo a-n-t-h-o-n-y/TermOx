@@ -18,6 +18,7 @@
 namespace ox {
 
 using ::esc::Key;
+using ::esc::Mod;
 using ::esc::Mouse;
 
 // Thread Safe Queue

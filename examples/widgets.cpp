@@ -16,6 +16,8 @@
 
 struct Label {
     std::string text;
+    bool in_focus = false;
+
     enum class Align { Left, Center, Right } align = Align::Center;
 };
 
@@ -41,8 +43,15 @@ void paint(Label const& l, ox::Canvas c)
             break;
     }
 
-    ox::Painter{c}[{0, 0}] << ox::Painter::RoundedBox{.size = c.size};
+    ox::Painter{c}[{0, 0}] << ox::Painter::RoundedBox{
+        .size  = c.size,
+        .brush = {.foreground = l.in_focus ? ox::XColor::BrightYellow
+                                           : ox::XColor::Default},
+    };
 }
+
+void focus_in(Label& l) { l.in_focus = true; }
+void focus_out(Label& l) { l.in_focus = false; }
 
 struct Button {
     Label label;
@@ -82,7 +91,11 @@ struct Counter {
 struct Textbox {
     std::string text;
     std::size_t cursor = 0;
+    bool in_focus      = false;
 };
+
+void focus_in(Textbox& t) { t.in_focus = true; }
+void focus_out(Textbox& t) { t.in_focus = false; }
 
 void paint(Textbox const& t, ox::Canvas c)
 {
@@ -93,11 +106,15 @@ void paint(Textbox const& t, ox::Canvas c)
             break;
         }
         auto const line = std::string_view{t.text}.substr(start, end - start);
-        ox::Painter{c}[{0, i}] << line;
+        ox::Painter{c}[{0, i}]
+            << (line | fg(t.in_focus ? ox::XColor::BrightYellow
+                                     : ox::XColor::Default));
     }
     // TODO need a way to set cursor if in focus
-    ox::Terminal::cursor = ox::Point{c.at.x + (int)t.cursor % c.size.width,
-                                     c.at.y + (int)t.cursor / c.size.width};
+    if (c.size.width != 0) {
+        ox::Terminal::cursor = ox::Point{c.at.x + (int)t.cursor % c.size.width,
+                                         c.at.y + (int)t.cursor / c.size.width};
+    }
 }
 
 void key_press(Textbox& t, ox::Key k)
@@ -146,9 +163,14 @@ struct MyThing : ox::widgets::HLayout {
         {
             auto v = ox::widgets::VLayout{};
             append(v, Label{.text = "I'm a VLayout Label"},
-                   {.focus_policy = ox::widgets::FocusPolicy::Strong});
-            append(v, Label{.text = "I'm another VLayout Label"});
-            append(v, Label{.text = "I'm another VLayout Label too"});
+                   {.focus_policy = ox::widgets::FocusPolicy::Strong,
+                    .size_policy  = {.min = 0, .flex = 0}});
+            append(v, Label{.text = "I'm another VLayout Label"},
+                   {.focus_policy = ox::widgets::FocusPolicy::Strong,
+                    .size_policy  = {.min = 0, .flex = 0}});
+            append(v, Label{.text = "I'm another VLayout Label too"},
+                   {.focus_policy = ox::widgets::FocusPolicy::Strong,
+                    .size_policy  = {.min = 0, .flex = 0}});
             append(*this, std::move(v));
         }
         append(*this, Clicker{});

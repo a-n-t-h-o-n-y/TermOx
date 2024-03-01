@@ -17,15 +17,17 @@ class Application {
      * the terminal screen.
      */
     template <typename T>
-    explicit Application(T head) : head_{std::move(head)}
+    explicit Application(T head)
+        : head_{std::move(head), {.focus_policy = FocusPolicy::None}}
     {}
+    // TODO ^^ possibly make head hardcoded a layout so focus is handled, then
+    // this 'head' is a child of the actual head layout.
 
    public:
-    auto run() -> int
-    {
-        ox::Terminal::event_queue.append(esc::Resize{term_.size()});
-        return process_events(term_, *this);
-    }
+    /**
+     * Run the application, processing events and painting the screen. Blocking.
+     */
+    auto run() -> int;
 
    public:
     auto handle_mouse_press(ox::Mouse m) -> ox::EventResponse
@@ -56,16 +58,7 @@ class Application {
         return {};
     }
 
-    auto handle_key_press(ox::Key k) -> ox::EventResponse
-    {
-        // TODO a shortcuts manager? processed here?
-        auto focused = Focus::get();
-        if (focused != nullptr) {
-            key_press(*focused, k);
-        }
-        paint(head_, ox::Canvas{.at = {0, 0}, .size = term_.changes.size()});
-        return {};
-    }
+    auto handle_key_press(ox::Key k) -> ox::EventResponse;
 
     auto handle_key_release(ox::Key k) -> ox::EventResponse
     {
@@ -84,7 +77,7 @@ class Application {
         return {};
     }
 
-    auto handle_timer(int id) -> ox::EventResponse
+    auto handle_timer(int /*id*/) -> ox::EventResponse
     {
         // auto w = Timers::get_receiver(Timers::Handle{id});
         // if (w.has_value()) {
