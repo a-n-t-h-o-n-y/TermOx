@@ -173,6 +173,13 @@ auto paint(LinearLayout const& layout, ox::Canvas c) -> void
     }
 }
 
+auto timer(LinearLayout& layout, int id) -> void
+{
+    for (auto& child : layout.children) {
+        timer(child, id);
+    }
+}
+
 auto find_next_tab_focus(LinearLayout& layout,
                          Widget const* current_focus,
                          bool is_active) -> Widget*

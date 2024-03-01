@@ -77,12 +77,9 @@ class Application {
         return {};
     }
 
-    auto handle_timer(int /*id*/) -> ox::EventResponse
+    auto handle_timer(int id) -> ox::EventResponse
     {
-        // auto w = Timers::get_receiver(Timers::Handle{id});
-        // if (w.has_value()) {
-        //     timer(*w);
-        // }
+        timer(head_, id);
         paint(head_, ox::Canvas{.at = {0, 0}, .size = term_.changes.size()});
         return {};
     }

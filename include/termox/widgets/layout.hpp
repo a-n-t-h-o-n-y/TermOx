@@ -64,6 +64,8 @@ auto insert(LinearLayout& layout,
 
 auto paint(LinearLayout const& layout, ox::Canvas c) -> void;
 
+auto timer(LinearLayout& layout, int id) -> void;
+
 [[nodiscard]] auto find_next_tab_focus(LinearLayout& layout,
                                        Widget const* current_focus,
                                        bool is_active) -> Widget*;
