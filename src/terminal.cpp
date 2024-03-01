@@ -116,6 +116,7 @@ auto Terminal::commit_changes() -> void
 
     changes.fill(Glyph{});
 
+    set(esc::CursorMode::Hide);
     esc::write(escape_sequence_);
 
     if (cursor.has_value()) {
