@@ -14,7 +14,9 @@ add_subdirectory(external/signals-light)
 add_library(TermOx STATIC
     src/terminal.cpp
     src/widgets/application.cpp
+    src/widgets/border.cpp
     src/widgets/focus.cpp
+    src/widgets/label.cpp
     src/widgets/layout.cpp
 
     include/termox/common.hpp
@@ -24,7 +26,9 @@ add_library(TermOx STATIC
     include/termox/terminal.hpp
 
     include/termox/widgets/application.hpp
+    include/termox/widgets/border.hpp
     include/termox/widgets/focus.hpp
+    include/termox/widgets/label.hpp
     include/termox/widgets/layout.hpp
     include/termox/widgets/widget.hpp
 )

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <climits>
+#include <concepts>
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -44,16 +45,23 @@ class Widget {
     struct Properties {
         FocusPolicy focus_policy = FocusPolicy::None;
         SizePolicy size_policy   = {};
-        // bool enabled = true; // TODO
-        Point at;
-        Area size;
+        bool enabled             = true;  // TODO - use this somewhere.
+        Point at                 = {0, 0};
+        Area size                = {0, 0};
     } properties;
 
    public:
     template <typename T>
-    Widget(T t, Properties p)
+    Widget(T&& t, Properties p)
         : properties{std::move(p)},
-          self_{std::make_unique<Model<T>>(std::move(t))}
+          self_{std::make_unique<Model<T>>(Model<T>{std::forward<T>(t)})}
+    {}
+
+    // This is for clang 17, which doesn't like Properties having a default
+    template <typename T>
+    Widget(T&& t)
+        : properties{},
+          self_{std::make_unique<Model<T>>(Model<T>{std::forward<T>(t)})}
     {}
 
     Widget(Widget const&) = delete;
@@ -87,11 +95,8 @@ class Widget {
     /**
      * Retrieve the underlying concrete widget object.
      *
-     * @details Please do not use this function for anything but the core
-     * library implementation. You must know the type stored. Being used by
-     * insert/append in layouts to return a stable reference to the inserted
-     * widget.
-     *
+     * @details You must know the type of the underlying widget to use this,
+     * otherwise this results in undefined behavior. Be careful!
      * @tparam T The type of the underlying data.
      * @return A reference to the underlying data.
      */
@@ -373,8 +378,12 @@ class Widget {
             -> Widget* override
         {
             if constexpr (requires(T& w,
-                                   std::function<bool(Widget const&)> const&
-                                       predicate) { find_if(w, predicate); }) {
+                                   std::function<bool(Widget const&)> const
+                                       & predicate) {
+                              {
+                                  find_if(w, predicate)
+                              } -> std::same_as<Widget*>;
+                          }) {
                 return find_if(data_, predicate);
             }
             else {
@@ -386,8 +395,12 @@ class Widget {
             -> Widget const* override
         {
             if constexpr (requires(T const& w,
-                                   std::function<bool(Widget const&)> const&
-                                       predicate) { find_if(w, predicate); }) {
+                                   std::function<bool(Widget const&)> const
+                                       & predicate) {
+                              {
+                                  find_if(w, predicate)
+                              } -> std::same_as<Widget const*>;
+                          }) {
                 return find_if(data_, predicate);
             }
             else {

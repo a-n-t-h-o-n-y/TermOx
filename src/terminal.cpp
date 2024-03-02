@@ -275,55 +275,24 @@ auto Painter::CursorWriter::operator<<(Painter::Box const& b) -> CursorWriter
     };
 
     // Top
-    canvas_[cursor_] = U'┌' | b.brush;
+    canvas_[cursor_] = b.corners[0] | b.brush;
     for (auto x = cursor_.x + 1; x < end.x - 1; ++x) {
-        canvas_[{x, cursor_.y}] = U'─' | b.brush;
+        canvas_[{x, cursor_.y}] = b.walls[0] | b.brush;
     }
-    canvas_[{end.x - 1, cursor_.y}] = U'┐' | b.brush;
+    canvas_[{end.x - 1, cursor_.y}] = b.corners[1] | b.brush;
 
     // Middle
     for (auto y = cursor_.y + 1; y < end.y - 1; ++y) {
-        canvas_[{cursor_.x, y}] = U'│' | b.brush;
-        canvas_[{end.x - 1, y}] = U'│' | b.brush;
+        canvas_[{cursor_.x, y}] = b.walls[1] | b.brush;
+        canvas_[{end.x - 1, y}] = b.walls[1] | b.brush;
     }
 
     // Bottom
-    canvas_[{cursor_.x, end.y - 1}] = U'└' | b.brush;
+    canvas_[{cursor_.x, end.y - 1}] = b.corners[2] | b.brush;
     for (auto x = cursor_.x + 1; x < end.x - 1; ++x) {
-        canvas_[{x, end.y - 1}] = U'─' | b.brush;
+        canvas_[{x, end.y - 1}] = b.walls[0] | b.brush;
     }
-    canvas_[{end.x - 1, end.y - 1}] = U'┘' | b.brush;
-
-    return *this;
-}
-
-auto Painter::CursorWriter::operator<<(Painter::RoundedBox const& b)
-    -> CursorWriter
-{
-    auto const end = Point{
-        .x = std::min(cursor_.x + b.size.width, canvas_.size.width),
-        .y = std::min(cursor_.y + b.size.height, canvas_.size.height),
-    };
-
-    // Top
-    canvas_[cursor_] = U'╭' | b.brush;
-    for (auto x = cursor_.x + 1; x < end.x - 1; ++x) {
-        canvas_[{x, cursor_.y}] = U'─' | b.brush;
-    }
-    canvas_[{end.x - 1, cursor_.y}] = U'╮' | b.brush;
-
-    // Middle
-    for (auto y = cursor_.y + 1; y < end.y - 1; ++y) {
-        canvas_[{cursor_.x, y}] = U'│' | b.brush;
-        canvas_[{end.x - 1, y}] = U'│' | b.brush;
-    }
-
-    // Bottom
-    canvas_[{cursor_.x, end.y - 1}] = U'╰' | b.brush;
-    for (auto x = cursor_.x + 1; x < end.x - 1; ++x) {
-        canvas_[{x, end.y - 1}] = U'─' | b.brush;
-    }
-    canvas_[{end.x - 1, end.y - 1}] = U'╯' | b.brush;
+    canvas_[{end.x - 1, end.y - 1}] = b.corners[3] | b.brush;
 
     return *this;
 }

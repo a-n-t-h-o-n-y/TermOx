@@ -84,7 +84,8 @@ auto any_mouse_event(LinearLayout& layout, ox::Mouse m, EventFn&& event_fn)
 {
     assert(total >= 0);
     for (auto const& child : children) {
-        auto const& [min, max, flex] = child.properties.size_policy;
+        [[maybe_unused]] auto const& [min, max, flex] =
+            child.properties.size_policy;
         assert(min >= 0);
         assert(max >= min);
         assert(flex >= 0);

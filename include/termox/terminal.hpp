@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <concepts>
 #include <cstddef>
@@ -323,23 +324,15 @@ class Painter {
      *
      * @details Use with CursorWriter::operator<< to paint a rectangle at the
      * current cursor position. The cursor will not be moved after painting.
-     * This paints using shart edges: '┌┐└┘'.
      */
     struct Box {
         Area size;
         Brush brush;
-    };
+        std::array<char32_t, 4> corners = square_corners;
+        std::array<char32_t, 2> walls   = {U'─', U'│'};
 
-    /**
-     * Used to paint a rounded rectangle on the terminal screen.
-     *
-     * @details Use with CursorWriter::operator<< to paint a rounded rectangle
-     * at the current cursor position. The cursor will not be moved after
-     * painting. This paints using rounded edges: '╭╮╰╯'.
-     */
-    struct RoundedBox {
-        Area size;
-        Brush brush;
+        static constexpr std::array square_corners = {U'┌', U'┐', U'└', U'┘'};
+        static constexpr std::array round_corners = {U'╭', U'╮', U'╰', U'╯'};
     };
 
     /**
@@ -444,8 +437,6 @@ class Painter {
 
        public:
         auto operator<<(Box const& b) -> CursorWriter;
-
-        auto operator<<(RoundedBox const& b) -> CursorWriter;
 
         auto operator<<(HLine const& hline) -> CursorWriter;
 

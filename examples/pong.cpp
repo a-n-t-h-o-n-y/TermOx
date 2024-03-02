@@ -243,9 +243,10 @@ auto paint(HowTo const& x, Canvas const& c) -> void
     auto p = Painter{c};
 
     {  // Border
-        p[{0, 0}] << Painter::RoundedBox{
-            .size  = c.size,
-            .brush = {.foreground = XColor::Blue, .traits = Trait::Dim},
+        p[{0, 0}] << Painter::Box{
+            .size    = c.size,
+            .brush   = {.foreground = XColor::Blue, .traits = Trait::Dim},
+            .corners = Painter::Box::round_corners,
         };
     }
     {  // Title
@@ -408,10 +409,11 @@ auto paint(Game const& x, Canvas const& c) -> void
     }
 
     {  // Border
-        Painter{c}[game_canvas.at + Point{-1, -1}] << Painter::RoundedBox{
-            .size  = {.width  = display_space.width + 2,
-                      .height = display_space.height + 2},
-            .brush = {.foreground = XColor::Blue, .traits = Trait::Dim},
+        Painter{c}[game_canvas.at + Point{-1, -1}] << Painter::Box{
+            .size    = {.width  = display_space.width + 2,
+                        .height = display_space.height + 2},
+            .brush   = {.foreground = XColor::Blue, .traits = Trait::Dim},
+            .corners = Painter::Box::round_corners,
         };
     }
 

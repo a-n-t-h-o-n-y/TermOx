@@ -7,9 +7,11 @@
 
 namespace ox {
 
+using ::esc::bg;
 using ::esc::Brush;
 using ::esc::Character;
 using ::esc::Color;
+using ::esc::fg;
 using ::esc::Glyph;
 using ::esc::GlyphString;
 using ::esc::HSL;

@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <functional>
 #include <iterator>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -15,6 +16,22 @@ namespace ox::widgets {
  * vertically. Do not use directly, instead use HLayout or VLayout.
  */
 struct LinearLayout {
+    template <typename... Args>
+    LinearLayout(Args&&... widgets)
+    {
+        // If Arg is Widget, use it directly, else construct with Properties.
+        (children.emplace_back([&]() {
+            if constexpr (std::is_same_v<std::decay_t<Args>, Widget>) {
+                return std::forward<Args>(widgets);
+            }
+            else {
+                return Widget(std::forward<Args>(widgets),
+                              Widget::Properties{});
+            }
+        }()),
+         ...);
+    }
+
     std::vector<Widget> children;
 };
 
@@ -85,7 +102,9 @@ auto find_if(LinearLayout const& layout,
 
 // -----------------------------------------------------------------------------
 
-struct HLayout : LinearLayout {};
+struct HLayout : LinearLayout {
+    using LinearLayout::LinearLayout;
+};
 
 auto mouse_press(HLayout& layout, Mouse m) -> void;
 
@@ -99,7 +118,9 @@ auto resize(HLayout& layout, Area a) -> void;
 
 // -----------------------------------------------------------------------------
 
-struct VLayout : LinearLayout {};
+struct VLayout : LinearLayout {
+    using LinearLayout::LinearLayout;
+};
 
 auto mouse_press(VLayout& layout, Mouse m) -> void;
 
