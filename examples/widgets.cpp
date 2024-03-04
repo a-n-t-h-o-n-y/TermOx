@@ -209,6 +209,15 @@ int try_main()
                 .brush = Brush{.background = XColor::Red,
                                .foreground = XColor::Magenta},
             },
+            Border{
+                Button{
+                    .label   = {.text = "A Button"},
+                    .clicked = {[] {
+                        std::cerr << "Button Clicked" << std::endl;
+                    }},
+                },
+                {.corners = Painter::Box::round_corners},
+            },
             Widget{Border{Clicker{}}, {.focus_policy = FocusPolicy::Strong}},
             Label{
                 .text  = "Right Aligned",

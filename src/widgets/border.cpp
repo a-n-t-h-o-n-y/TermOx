@@ -7,7 +7,8 @@ namespace ox::widgets {
 
 auto paint(Border const& b, Canvas c) -> void
 {
-    paint(b.child, {c.at + b.child.properties.at, b.child.properties.size});
+    paint(b.child, {.at   = c.at + b.child.properties.at,
+                    .size = b.child.properties.size});
     Painter{c}[{0, 0}] << b.box;
 }
 
