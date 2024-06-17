@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include <climits>
 #include <concepts>
 #include <cstdint>
@@ -103,6 +104,7 @@ class Widget {
     template <typename T>
     [[nodiscard]] auto data() -> T&
     {
+        assert(dynamic_cast<Model<T>*>(self_.get()) != nullptr);
         return static_cast<Model<T>*>(self_.get())->data();
     }
 
