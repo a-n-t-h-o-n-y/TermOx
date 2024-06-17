@@ -203,11 +203,14 @@ int try_main()
                     .corners = Painter::Box::round_corners,
                 },
             },
-            Label{
-                .text  = "Center Aligned",
-                .align = Label::Align::Center,
-                .brush = Brush{.background = XColor::Red,
-                               .foreground = XColor::Magenta},
+            Widget{
+                TextBox{
+                    .text =
+                        "This is some really long test content that will be "
+                        "used to display within the\ntext box widget.\n\n<< "
+                        "Two newlines right there.\nand another line.",
+                },
+                {.focus_policy = FocusPolicy::Strong},
             },
             Border{
                 Button{
@@ -222,8 +225,8 @@ int try_main()
             Label{
                 .text  = "Right Aligned",
                 .align = Label::Align::Right,
-                .brush = Brush{.background = XColor::White,
-                               .foreground = XColor::Black},
+                .brush = {.background = XColor::White,
+                          .foreground = XColor::Black},
             },
         },
     }

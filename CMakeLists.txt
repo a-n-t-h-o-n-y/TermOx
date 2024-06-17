@@ -18,6 +18,7 @@ add_library(TermOx STATIC
     src/widgets/focus.cpp
     src/widgets/label.cpp
     src/widgets/layout.cpp
+    src/widgets/text_box.cpp
 
     include/termox/common.hpp
     include/termox/core.hpp
@@ -31,6 +32,7 @@ add_library(TermOx STATIC
     include/termox/widgets/focus.hpp
     include/termox/widgets/label.hpp
     include/termox/widgets/layout.hpp
+    include/termox/widgets/text_box.hpp
     include/termox/widgets/widget.hpp
 )
 

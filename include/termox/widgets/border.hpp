@@ -7,6 +7,7 @@ namespace ox::widgets {
 
 /**
  * A Border display that wraps a child widget.
+ *
  * @details The child Widget inherits the FocusPolicy of the Border object, and
  * is sized to fit within the Border.
  */
