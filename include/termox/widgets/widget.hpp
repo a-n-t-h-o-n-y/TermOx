@@ -96,7 +96,7 @@ class Widget {
      * Retrieve the underlying concrete widget object.
      *
      * @details You must know the type of the underlying widget to use this,
-     * otherwise this results in undefined behavior. Be careful!
+     * otherwise this results in undefined behavior
      * @tparam T The type of the underlying data.
      * @return A reference to the underlying data.
      */
@@ -107,38 +107,20 @@ class Widget {
     }
 
    public:
-    friend void paint(Widget const& w, Canvas c)
-    {
-        w.self_->paint_(c, w.properties);
-    }
-    friend void mouse_press(Widget& w, Mouse m)
-    {
-        w.self_->mouse_press_(m, w.properties);
-    }
+    friend void paint(Widget const& w, Canvas c) { w.self_->paint_(c); }
+    friend void mouse_press(Widget& w, Mouse m) { w.self_->mouse_press_(m); }
     friend void mouse_release(Widget& w, Mouse m)
     {
-        w.self_->mouse_release_(m, w.properties);
+        w.self_->mouse_release_(m);
     }
-    friend void mouse_wheel(Widget& w, Mouse m)
-    {
-        w.self_->mouse_wheel_(m, w.properties);
-    }
-    friend void mouse_move(Widget& w, Mouse m)
-    {
-        w.self_->mouse_move_(m, w.properties);
-    }
-    friend void key_press(Widget& w, Key k)
-    {
-        w.self_->key_press_(k, w.properties);
-    }
-    friend void key_release(Widget& w, Key k)
-    {
-        w.self_->key_release_(k, w.properties);
-    }
-    friend void focus_in(Widget& w) { w.self_->focus_in_(w.properties); }
-    friend void focus_out(Widget& w) { w.self_->focus_out_(w.properties); }
-    friend void resize(Widget& w, Area a) { w.self_->resize_(a, w.properties); }
-    friend void timer(Widget& w, int id) { w.self_->timer_(id, w.properties); }
+    friend void mouse_wheel(Widget& w, Mouse m) { w.self_->mouse_wheel_(m); }
+    friend void mouse_move(Widget& w, Mouse m) { w.self_->mouse_move_(m); }
+    friend void key_press(Widget& w, Key k) { w.self_->key_press_(k); }
+    friend void key_release(Widget& w, Key k) { w.self_->key_release_(k); }
+    friend void focus_in(Widget& w) { w.self_->focus_in_(); }
+    friend void focus_out(Widget& w) { w.self_->focus_out_(); }
+    friend void resize(Widget& w, Area a) { w.self_->resize_(a); }
+    friend void timer(Widget& w, int id) { w.self_->timer_(id); }
 
     friend auto find_next_tab_focus(Widget& w,
                                     Widget const* current_focus,
@@ -171,20 +153,21 @@ class Widget {
     }
 
    private:
-    struct Concept {
+    class Concept {
+       public:
         virtual ~Concept() = default;
 
-        virtual void paint_(Canvas, Properties const&) const = 0;
-        virtual void mouse_press_(Mouse, Properties&)        = 0;
-        virtual void mouse_release_(Mouse, Properties&)      = 0;
-        virtual void mouse_wheel_(Mouse, Properties&)        = 0;
-        virtual void mouse_move_(Mouse, Properties&)         = 0;
-        virtual void key_press_(Key, Properties&)            = 0;
-        virtual void key_release_(Key, Properties&)          = 0;
-        virtual void focus_in_(Properties& p)                = 0;
-        virtual void focus_out_(Properties& p)               = 0;
-        virtual void resize_(Area, Properties&)              = 0;
-        virtual void timer_(int, Properties&)                = 0;
+        virtual void paint_(Canvas) const  = 0;
+        virtual void mouse_press_(Mouse)   = 0;
+        virtual void mouse_release_(Mouse) = 0;
+        virtual void mouse_wheel_(Mouse)   = 0;
+        virtual void mouse_move_(Mouse)    = 0;
+        virtual void key_press_(Key)       = 0;
+        virtual void key_release_(Key)     = 0;
+        virtual void focus_in_()           = 0;
+        virtual void focus_out_()          = 0;
+        virtual void resize_(Area)         = 0;
+        virtual void timer_(int)           = 0;
 
         virtual auto find_next_tab_focus_(Widget const*, bool) -> Widget*   = 0;
         virtual auto for_each_(std::function<void(Widget&)> const&) -> void = 0;
@@ -201,146 +184,91 @@ class Widget {
        public:
         Model(T t) : data_{std::move(t)} {}
 
-       public:
+       private:
         auto data() -> T& { return data_; }
 
         auto data() const -> const T& { return data_; }
 
        public:
-        void paint_(Canvas c, Properties const& p) const override
+        void paint_(Canvas c) const override
         {
-            if constexpr (requires(T const& w, Canvas c, Properties const& p) {
-                              paint(w, c, p);
-                          }) {
-                paint(data_, c, p);
-            }
-            else if constexpr (requires(T const& w, Canvas c) {
-                                   paint(w, c);
-                               }) {
+            if constexpr (requires(T const& w, Canvas c) { paint(w, c); }) {
                 paint(data_, c);
             }
         }
 
-        void mouse_press_(Mouse m, Properties& p) override
+        void mouse_press_(Mouse m) override
         {
-            if constexpr (requires(T& w, Mouse m, Properties& p) {
-                              mouse_press(w, m, p);
-                          }) {
-                mouse_press(data_, m, p);
-            }
-            else if constexpr (requires(T& w, Mouse m) { mouse_press(w, m); }) {
+            if constexpr (requires(T& w, Mouse m) { mouse_press(w, m); }) {
                 mouse_press(data_, m);
             }
         }
 
-        void mouse_release_(Mouse m, Properties& p) override
+        void mouse_release_(Mouse m) override
         {
-            if constexpr (requires(T& w, Mouse m, Properties& p) {
-                              mouse_release(w, m, p);
-                          }) {
-                mouse_release(data_, m, p);
-            }
-            else if constexpr (requires(T& w, Mouse m) {
-                                   mouse_release(w, m);
-                               }) {
+            if constexpr (requires(T& w, Mouse m) { mouse_release(w, m); }) {
                 mouse_release(data_, m);
             }
         }
 
-        void mouse_wheel_(Mouse m, Properties& p) override
+        void mouse_wheel_(Mouse m) override
         {
-            if constexpr (requires(T& w, Mouse m, Properties& p) {
-                              mouse_wheel(w, m, p);
-                          }) {
-                mouse_wheel(data_, m, p);
-            }
-            else if constexpr (requires(T& w, Mouse m) { mouse_wheel(w, m); }) {
+            if constexpr (requires(T& w, Mouse m) { mouse_wheel(w, m); }) {
                 mouse_wheel(data_, m);
             }
         }
 
-        void mouse_move_(Mouse m, Properties& p) override
+        void mouse_move_(Mouse m) override
         {
-            if constexpr (requires(T& w, Mouse m, Properties& p) {
-                              mouse_move(w, m, p);
-                          }) {
-                mouse_move(data_, m, p);
-            }
-            else if constexpr (requires(T& w, Mouse m) { mouse_move(w, m); }) {
+            if constexpr (requires(T& w, Mouse m) { mouse_move(w, m); }) {
                 mouse_move(data_, m);
             }
         }
 
-        void key_press_(Key k, Properties& p) override
+        void key_press_(Key k) override
         {
-            if constexpr (requires(T& w, Key k, Properties&) {
-                              key_press(w, k, p);
-                          }) {
-                key_press(data_, k, p);
-            }
-            else if constexpr (requires(T& w, Key k) { key_press(w, k); }) {
+            if constexpr (requires(T& w, Key k) { key_press(w, k); }) {
                 key_press(data_, k);
             }
         }
 
-        void key_release_(Key k, Properties& p) override
+        void key_release_(Key k) override
         {
-            if constexpr (requires(T& w, Key k, Properties& p) {
-                              key_release(w, k, p);
-                          }) {
-                key_release(data_, k, p);
-            }
-            else if constexpr (requires(T& w, Key k) { key_release(w, k); }) {
+            if constexpr (requires(T& w, Key k) { key_release(w, k); }) {
                 key_release(data_, k);
             }
         }
 
-        void focus_in_(Properties& p) override
+        void focus_in_() override
         {
-            if constexpr (requires(T& w, Properties& p) { focus_in(w, p); }) {
-                focus_in(data_, p);
-            }
-            else if constexpr (requires(T& w) { focus_in(w); }) {
+            if constexpr (requires(T& w) { focus_in(w); }) {
                 focus_in(data_);
             }
         }
 
-        void focus_out_(Properties& p) override
+        void focus_out_() override
         {
-            if constexpr (requires(T& w, Properties& p) { focus_out(w, p); }) {
-                focus_out(data_, p);
-            }
-            else if constexpr (requires(T& w) { focus_out(w); }) {
+            if constexpr (requires(T& w) { focus_out(w); }) {
                 focus_out(data_);
             }
         }
 
-        void resize_(Area a, Properties& p) override
+        void resize_(Area a) override
         {
-            if constexpr (requires(T& w, Area a, Properties& p) {
-                              resize(w, a, p);
-                          }) {
-                resize(data_, a, p);
-            }
-            else if constexpr (requires(T& w, Area a) { resize(w, a); }) {
+            if constexpr (requires(T& w, Area a) { resize(w, a); }) {
                 resize(data_, a);
             }
         }
 
-        void timer_(int id, Properties& p) override
+        void timer_(int id) override
         {
-            if constexpr (requires(T& w, int id, Properties& p) {
-                              timer(w, id, p);
-                          }) {
-                timer(data_, id, p);
-            }
-            else if constexpr (requires(T& w, int id) { timer(w, id); }) {
+            if constexpr (requires(T& w, int id) { timer(w, id); }) {
                 timer(data_, id);
             }
         }
 
-        auto find_next_tab_focus_(Widget const* current_focus, bool is_active)
-            -> Widget* override
+        auto find_next_tab_focus_(Widget const* current_focus,
+                                  bool is_active) -> Widget* override
         {
             if constexpr (requires(T& w, Widget const* cf, bool ia) {
                               find_next_tab_focus(w, cf, ia);

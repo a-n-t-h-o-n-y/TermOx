@@ -18,12 +18,13 @@ struct TextBox {
 
     // Index into content where each line starts.
     std::vector<std::size_t> line_start_indices = {0};
+    std::size_t width                           = 0;
 };
 
 auto paint(TextBox const& tb, Canvas c) -> void;
 
 auto resize(TextBox& tb, Area new_size) -> void;
 
-auto key_press(TextBox& tb, Key k, Widget::Properties const& p) -> void;
+auto key_press(TextBox& tb, Key k) -> void;
 
 }  // namespace ox::widgets

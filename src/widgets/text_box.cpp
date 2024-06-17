@@ -65,9 +65,10 @@ auto resize(TextBox& tb, Area new_size) -> void
 {
     tb.line_start_indices = calculate_line_start_indices(
         tb.text, tb.word_wrap, (std::size_t)new_size.width);
+    tb.width = (std::size_t)new_size.width;
 }
 
-auto key_press(TextBox& tb, Key k, Widget::Properties const& p) -> void
+auto key_press(TextBox& tb, Key k) -> void
 {
     switch (k) {
         case Key::Backspace:
@@ -101,8 +102,8 @@ auto key_press(TextBox& tb, Key k, Widget::Properties const& p) -> void
             }
             break;
     }
-    tb.line_start_indices = calculate_line_start_indices(
-        tb.text, tb.word_wrap, (std::size_t)p.size.width);
+    tb.line_start_indices =
+        calculate_line_start_indices(tb.text, tb.word_wrap, tb.width);
 }
 
 }  // namespace ox::widgets
