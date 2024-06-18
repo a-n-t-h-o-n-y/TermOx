@@ -8,7 +8,7 @@ namespace ox::widgets {
 
 struct Button {
     Label label;
-    sl::Signal<void()> clicked;
+    sl::Signal<void()> clicked = {};
 };
 
 inline auto paint(Button const& b, Canvas c) -> void { paint(b.label, c); }

@@ -80,24 +80,23 @@ auto any_mouse_event(LinearLayout& layout,
  * @param total The total space to distribute.
  * @return A vector of the lengths of each child.
  */
-[[nodiscard]] auto distribute_length(std::vector<Widget>& children,
+[[nodiscard]] auto distribute_length(std::vector<SizePolicy>& size_policies,
                                      int total) -> std::vector<int>
 {
     assert(total >= 0);
-    for (auto const& child : children) {
-        [[maybe_unused]] auto const& [min, max, flex] =
-            child.properties.size_policy;
-        assert(min >= 0);
-        assert(max >= min);
-        assert(flex >= 0);
+
+    for (auto const& policy : size_policies) {
+        assert(policy.minimum >= 0);
+        assert(policy.maximum >= policy.minimum);
+        assert(policy.flexibility >= 0);
     }
 
-    auto exact_amounts   = std::vector<float>(children.size(), 0.f);
+    auto exact_amounts   = std::vector<float>(size_policies.size(), 0.f);
     auto total_allocated = 0.f;
 
     // Distribute minimums first
-    for (auto i = std::size_t{0}; i < children.size(); ++i) {
-        exact_amounts[i] = (float)children[i].properties.size_policy.min;
+    for (auto i = std::size_t{0}; i < size_policies.size(); ++i) {
+        exact_amounts[i] = (float)size_policies[i].minimum;
         total_allocated += exact_amounts[i];
     }
 
@@ -106,10 +105,10 @@ auto any_mouse_event(LinearLayout& layout,
     while (remaining_space > 0) {
         auto const total_flex = [&] {
             auto x = 0.f;
-            for (auto i = std::size_t{0}; i < children.size(); ++i) {
-                auto const& policy = children[i].properties.size_policy;
-                if (exact_amounts[i] < (float)policy.max) {
-                    x += policy.flex;
+            for (auto i = std::size_t{0}; i < size_policies.size(); ++i) {
+                auto const& policy = size_policies[i];
+                if (exact_amounts[i] < (float)policy.maximum) {
+                    x += policy.flexibility;
                 }
             }
             return x;
@@ -120,12 +119,12 @@ auto any_mouse_event(LinearLayout& layout,
         }
 
         auto space_distributed_this_round = 0.f;
-        for (auto i = std::size_t{0}; i < children.size(); ++i) {
-            auto const& policy = children[i].properties.size_policy;
-            if (exact_amounts[i] < (float)policy.max) {
-                float additional_space =
-                    std::min(policy.flex / total_flex * (float)remaining_space,
-                             (float)policy.max - exact_amounts[i]);
+        for (auto i = std::size_t{0}; i < size_policies.size(); ++i) {
+            auto const& policy = size_policies[i];
+            if (exact_amounts[i] < (float)policy.maximum) {
+                float additional_space = std::min(
+                    policy.flexibility / total_flex * (float)remaining_space,
+                    (float)policy.maximum - exact_amounts[i]);
                 exact_amounts[i] += additional_space;
                 space_distributed_this_round += additional_space;
             }
@@ -135,7 +134,7 @@ auto any_mouse_event(LinearLayout& layout,
             break;
         }
     }
-    auto results = std::vector<int>(children.size(), 0);
+    auto results = std::vector<int>(size_policies.size(), 0);
 
     // floor values to ints.
     std::ranges::copy(exact_amounts, results.begin());
@@ -145,8 +144,8 @@ auto any_mouse_event(LinearLayout& layout,
         total - std::accumulate(std::begin(results), std::end(results), 0);
     while (remaining > 0) {
         auto space_distributed_this_round = 0;
-        for (auto i = std::size_t{0}; i < children.size(); ++i) {
-            if (results[i] < children[i].properties.size_policy.max) {
+        for (auto i = std::size_t{0}; i < size_policies.size(); ++i) {
+            if (results[i] < size_policies[i].maximum) {
                 results[i] += 1;
                 remaining -= 1;
                 ++space_distributed_this_round;
@@ -168,16 +167,16 @@ namespace ox::widgets {
 
 // -----------------------------------------------------------------------------
 
-auto paint(LinearLayout const& layout, ox::Canvas c) -> void
+auto paint(LinearLayout const& layout, ox::Canvas canvas) -> void
 {
-    for (auto const& child : layout.children) {
-        paint(child, {c.at + child.properties.at, child.properties.size});
+    for (Widget const& child : layout.children) {
+        paint(child, {canvas.at + child.properties.at, child.properties.size});
     }
 }
 
 auto timer(LinearLayout& layout, int id) -> void
 {
-    for (auto& child : layout.children) {
+    for (Widget& child : layout.children) {
         timer(child, id);
     }
 }
@@ -211,7 +210,7 @@ auto mouse_move(HLayout& layout, Mouse m) -> void
 auto resize(HLayout& layout, Area a) -> void
 {
     auto x            = 0;
-    auto const widths = ::distribute_length(layout.children, a.width);
+    auto const widths = ::distribute_length(layout.size_policies, a.width);
     for (auto i = std::size_t{0}; i < layout.children.size(); ++i) {
         auto& child           = layout.children[i];
         child.properties.at   = {x, 0};
@@ -250,7 +249,7 @@ auto mouse_move(VLayout& layout, Mouse m) -> void
 auto resize(VLayout& layout, ox::Area a) -> void
 {
     auto y             = 0;
-    auto const heights = ::distribute_length(layout.children, a.height);
+    auto const heights = ::distribute_length(layout.size_policies, a.height);
     for (auto i = std::size_t{0}; i < layout.children.size(); ++i) {
         auto& child           = layout.children[i];
         child.properties.at   = {0, y};

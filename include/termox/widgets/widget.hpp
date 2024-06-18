@@ -25,15 +25,6 @@ namespace ox::widgets {
 enum class FocusPolicy : std::uint8_t { None, Tab, Click, Strong };
 
 /**
- * Policy for how a widget should be sized by its parent layout.
- */
-struct SizePolicy {
-    int min    = 0;
-    int max    = std::numeric_limits<int>::max();
-    float flex = 1.f;
-};
-
-/**
  * Runtime Concept Idiom based Widget class.
  *
  * @details This models a Widget concept that can be used to store any type that
@@ -46,7 +37,6 @@ class Widget {
    public:
     struct Properties {
         FocusPolicy focus_policy = FocusPolicy::None;
-        SizePolicy size_policy   = {};
         bool enabled             = true;  // TODO - use this somewhere.
         Point at                 = {0, 0};
         Area size                = {0, 0};
@@ -106,7 +96,7 @@ class Widget {
     [[nodiscard]] auto data() -> T&
     {
         assert(dynamic_cast<Model<T>*>(self_.get()) != nullptr);
-        return static_cast<Model<T>*>(self_.get())->data_;
+        return static_cast<Model<T>*>(self_.get())->data();
     }
 
    public:
@@ -259,6 +249,10 @@ class Widget {
                 return {};
             }
         }
+
+       public:
+        [[nodiscard]] auto data() -> T& { return data_; }
+        [[nodiscard]] auto data() const -> T const& { return data_; }
 
        private:
         T data_;

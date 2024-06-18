@@ -15,7 +15,7 @@ namespace ox::widgets {
 struct Label {
     std::string text;
     enum class Align { Left, Center, Right } align = Align::Center;
-    Brush brush;
+    Brush brush                                    = {};
 };
 
 void paint(Label const&, Canvas);
