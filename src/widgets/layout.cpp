@@ -182,30 +182,6 @@ auto timer(LinearLayout& layout, int id) -> void
     }
 }
 
-auto find_next_tab_focus(LinearLayout& layout,
-                         Widget const* current_focus,
-                         bool is_active) -> Widget*
-{
-    for (auto& child : layout.children) {
-        auto const focus_policy = child.properties.focus_policy;
-        if (is_active && (focus_policy == FocusPolicy::Strong ||
-                          focus_policy == FocusPolicy::Tab)) {
-            return &child;
-        }
-
-        if (&child == current_focus) {
-            is_active = !is_active;
-        }
-
-        Widget* const next =
-            find_next_tab_focus(child, current_focus, is_active);
-        if (next != nullptr) {
-            return next;
-        }
-    }
-    return nullptr;
-}
-
 // -----------------------------------------------------------------------------
 
 auto mouse_press(HLayout& layout, Mouse m) -> void

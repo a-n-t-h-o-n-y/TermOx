@@ -136,17 +136,6 @@ class Widget {
         return static_cast<Concept const*>(w.self_.get())->children_();
     }
 
-    // -------------------------------------------------------------------------
-
-    friend auto find_next_tab_focus(Widget& w,
-                                    Widget const* current_focus,
-                                    bool is_active) -> Widget*
-    {
-        return w.self_->find_next_tab_focus_(current_focus, is_active);
-    }
-
-    // -------------------------------------------------------------------------
-
    private:
     class Concept {
        public:
@@ -166,8 +155,6 @@ class Widget {
 
         virtual auto children_() -> std::span<Widget>             = 0;
         virtual auto children_() const -> std::span<Widget const> = 0;
-
-        virtual auto find_next_tab_focus_(Widget const*, bool) -> Widget* = 0;
     };
 
     template <typename T>
@@ -270,19 +257,6 @@ class Widget {
             }
             else {
                 return {};
-            }
-        }
-
-        auto find_next_tab_focus_(Widget const* current_focus,
-                                  bool is_active) -> Widget* override
-        {
-            if constexpr (requires(T& w, Widget const* cf, bool ia) {
-                              find_next_tab_focus(w, cf, ia);
-                          }) {
-                return find_next_tab_focus(data_, current_focus, is_active);
-            }
-            else {
-                return nullptr;
             }
         }
 
