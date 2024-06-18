@@ -25,8 +25,8 @@ enum class Direction : bool { Horizontal, Vertical };
  * child at that point.
  */
 template <Direction D>
-[[nodiscard]] auto child_at(std::vector<Widget>& children, ox::Point p)
-    -> Widget*
+[[nodiscard]] auto child_at(std::vector<Widget>& children,
+                            ox::Point p) -> Widget*
 {
     if constexpr (D == Direction::Horizontal) {
         auto const iter = std::ranges::lower_bound(
@@ -53,8 +53,9 @@ template <Direction D>
  * @param event_fn The event function to call with the child and mouse object.
  */
 template <Direction D, typename EventFn>
-auto any_mouse_event(LinearLayout& layout, ox::Mouse m, EventFn&& event_fn)
-    -> void
+auto any_mouse_event(LinearLayout& layout,
+                     ox::Mouse m,
+                     EventFn&& event_fn) -> void
 {
     auto const widg_ptr = child_at<D>(layout.children, m.at);
 
@@ -79,8 +80,8 @@ auto any_mouse_event(LinearLayout& layout, ox::Mouse m, EventFn&& event_fn)
  * @param total The total space to distribute.
  * @return A vector of the lengths of each child.
  */
-[[nodiscard]] auto distribute_length(std::vector<Widget>& children, int total)
-    -> std::vector<int>
+[[nodiscard]] auto distribute_length(std::vector<Widget>& children,
+                                     int total) -> std::vector<int>
 {
     assert(total >= 0);
     for (auto const& child : children) {
@@ -203,49 +204,6 @@ auto find_next_tab_focus(LinearLayout& layout,
         }
     }
     return nullptr;
-}
-
-auto for_each(LinearLayout& layout, std::function<void(Widget&)> const& fn)
-    -> void
-{
-    for (auto& child : layout.children) {
-        fn(child);
-        for_each(child, fn);
-    }
-}
-
-auto for_each(LinearLayout const& layout,
-              std::function<void(Widget const&)> const& fn) -> void
-{
-    for (auto const& child : layout.children) {
-        fn(child);
-        for_each(child, fn);
-    }
-}
-
-auto find_if(LinearLayout& layout,
-             std::function<bool(Widget const&)> const& predicate) -> Widget*
-{
-    Widget* result = nullptr;
-    for_each(layout, [&](Widget& w) {
-        if (result == nullptr && predicate(w)) {
-            result = &w;
-        }
-    });
-    return result;
-}
-
-auto find_if(LinearLayout const& layout,
-             std::function<bool(Widget const&)> const& predicate)
-    -> Widget const*
-{
-    Widget const* result = nullptr;
-    for_each(layout, [&](Widget const& w) {
-        if (result == nullptr && predicate(w)) {
-            result = &w;
-        }
-    });
-    return result;
 }
 
 // -----------------------------------------------------------------------------

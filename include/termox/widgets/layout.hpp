@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <functional>
 #include <iterator>
+#include <span>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -17,10 +18,10 @@ namespace ox::widgets {
  */
 struct LinearLayout {
     template <typename... Args>
-    LinearLayout(Args&&... widgets)
+    explicit LinearLayout(Args&&... widgets)
     {
         // If Arg is Widget, use it directly, else construct with Properties.
-        (children.emplace_back([&]() {
+        (children.emplace_back([&] {
             if constexpr (std::is_same_v<std::decay_t<Args>, Widget>) {
                 return std::forward<Args>(widgets);
             }
@@ -34,6 +35,16 @@ struct LinearLayout {
 
     std::vector<Widget> children;
 };
+
+inline auto children(LinearLayout& w) -> std::span<Widget>
+{
+    return w.children;
+}
+
+inline auto children(LinearLayout const& w) -> std::span<Widget const>
+{
+    return w.children;
+}
 
 // -----------------------------------------------------------------------------
 
@@ -86,19 +97,6 @@ auto timer(LinearLayout& layout, int id) -> void;
 [[nodiscard]] auto find_next_tab_focus(LinearLayout& layout,
                                        Widget const* current_focus,
                                        bool is_active) -> Widget*;
-
-auto for_each(LinearLayout& layout, std::function<void(Widget&)> const& fn)
-    -> void;
-
-auto for_each(LinearLayout const& layout,
-              std::function<void(Widget const&)> const& fn) -> void;
-
-auto find_if(LinearLayout& layout,
-             std::function<bool(Widget const&)> const& predicate) -> Widget*;
-
-auto find_if(LinearLayout const& layout,
-             std::function<bool(Widget const&)> const& predicate)
-    -> Widget const*;
 
 // -----------------------------------------------------------------------------
 

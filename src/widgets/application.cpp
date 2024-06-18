@@ -33,8 +33,8 @@ auto do_tab_focus_change(Widget& head, Widget const* current_focus) -> void
     }
 }
 
-auto do_shift_tab_focus_change(Widget& head, Widget const* current_focus)
-    -> void
+auto do_shift_tab_focus_change(Widget& head,
+                               Widget const* current_focus) -> void
 {
     Widget* next = nullptr;
 

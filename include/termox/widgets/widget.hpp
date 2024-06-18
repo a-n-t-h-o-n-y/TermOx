@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <span>
 #include <vector>
 
 #include <termox/core.hpp>
@@ -60,7 +61,7 @@ class Widget {
 
     // This is for clang 17, which doesn't like Properties having a default
     template <typename T>
-    Widget(T&& t)
+    explicit Widget(T&& t)
         : properties{},
           self_{std::make_unique<Model<T>>(Model<T>{std::forward<T>(t)})}
     {}
@@ -105,7 +106,7 @@ class Widget {
     [[nodiscard]] auto data() -> T&
     {
         assert(dynamic_cast<Model<T>*>(self_.get()) != nullptr);
-        return static_cast<Model<T>*>(self_.get())->data();
+        return static_cast<Model<T>*>(self_.get())->data_;
     }
 
    public:
@@ -124,6 +125,19 @@ class Widget {
     friend void resize(Widget& w, Area a) { w.self_->resize_(a); }
     friend void timer(Widget& w, int id) { w.self_->timer_(id); }
 
+    [[nodiscard]] friend auto children(Widget& w) -> std::span<Widget>
+    {
+        return w.self_.get()->children_();
+    }
+
+    [[nodiscard]] friend auto children(Widget const& w)
+        -> std::span<Widget const>
+    {
+        return static_cast<Concept const*>(w.self_.get())->children_();
+    }
+
+    // -------------------------------------------------------------------------
+
     friend auto find_next_tab_focus(Widget& w,
                                     Widget const* current_focus,
                                     bool is_active) -> Widget*
@@ -131,28 +145,7 @@ class Widget {
         return w.self_->find_next_tab_focus_(current_focus, is_active);
     }
 
-    friend void for_each(Widget& w, std::function<void(Widget&)> const& fn)
-    {
-        w.self_->for_each_(fn);
-    }
-    friend void for_each(Widget const& w,
-                         std::function<void(Widget const&)> const& fn)
-    {
-        const_cast<Concept const*>(w.self_.get())->for_each_(fn);
-    }
-
-    friend auto find_if(Widget& w,
-                        std::function<bool(Widget const&)> const& predicate)
-        -> Widget*
-    {
-        return w.self_->find_if_(predicate);
-    }
-    friend auto find_if(Widget const& w,
-                        std::function<bool(Widget const&)> const& predicate)
-        -> Widget const*
-    {
-        return const_cast<Concept const*>(w.self_.get())->find_if_(predicate);
-    }
+    // -------------------------------------------------------------------------
 
    private:
     class Concept {
@@ -171,25 +164,16 @@ class Widget {
         virtual void resize_(Area)         = 0;
         virtual void timer_(int)           = 0;
 
-        virtual auto find_next_tab_focus_(Widget const*, bool) -> Widget*   = 0;
-        virtual auto for_each_(std::function<void(Widget&)> const&) -> void = 0;
-        virtual auto for_each_(std::function<void(Widget const&)> const&) const
-            -> void = 0;
-        virtual auto find_if_(std::function<bool(Widget const&)> const&)
-            -> Widget* = 0;
-        virtual auto find_if_(std::function<bool(Widget const&)> const&) const
-            -> Widget const* = 0;
+        virtual auto children_() -> std::span<Widget>             = 0;
+        virtual auto children_() const -> std::span<Widget const> = 0;
+
+        virtual auto find_next_tab_focus_(Widget const*, bool) -> Widget* = 0;
     };
 
     template <typename T>
     class Model final : public Concept {
        public:
         Model(T t) : data_{std::move(t)} {}
-
-       private:
-        auto data() -> T& { return data_; }
-
-        auto data() const -> const T& { return data_; }
 
        public:
         void paint_(Canvas c) const override
@@ -269,6 +253,26 @@ class Widget {
             }
         }
 
+        auto children_() -> std::span<Widget> override
+        {
+            if constexpr (requires(T& w) { children(w); }) {
+                return children(data_);
+            }
+            else {
+                return {};
+            }
+        }
+
+        auto children_() const -> std::span<Widget const> override
+        {
+            if constexpr (requires(T const& w) { children(w); }) {
+                return children(data_);
+            }
+            else {
+                return {};
+            }
+        }
+
         auto find_next_tab_focus_(Widget const* current_focus,
                                   bool is_active) -> Widget* override
         {
@@ -282,62 +286,6 @@ class Widget {
             }
         }
 
-        auto for_each_(std::function<void(Widget&)> const& fn) -> void override
-        {
-            if constexpr (requires(T& w,
-                                   std::function<void(Widget&)> const& fn) {
-                              for_each(w, fn);
-                          }) {
-                for_each(data_, fn);
-            }
-        }
-
-        auto for_each_(std::function<void(Widget const&)> const& fn) const
-            -> void override
-        {
-            if constexpr (requires(
-                              T const& w,
-                              std::function<void(Widget const&)> const& fn) {
-                              for_each(w, fn);
-                          }) {
-                for_each(data_, fn);
-            }
-        }
-
-        auto find_if_(std::function<bool(Widget const&)> const& predicate)
-            -> Widget* override
-        {
-            if constexpr (requires(T& w,
-                                   std::function<bool(Widget const&)> const
-                                       & predicate) {
-                              {
-                                  find_if(w, predicate)
-                              } -> std::same_as<Widget*>;
-                          }) {
-                return find_if(data_, predicate);
-            }
-            else {
-                return nullptr;
-            }
-        }
-
-        auto find_if_(std::function<bool(Widget const&)> const& predicate) const
-            -> Widget const* override
-        {
-            if constexpr (requires(T const& w,
-                                   std::function<bool(Widget const&)> const
-                                       & predicate) {
-                              {
-                                  find_if(w, predicate)
-                              } -> std::same_as<Widget const*>;
-                          }) {
-                return find_if(data_, predicate);
-            }
-            else {
-                return nullptr;
-            }
-        }
-
        private:
         T data_;
     };
@@ -345,5 +293,48 @@ class Widget {
    private:
     std::unique_ptr<Concept> self_;
 };
+
+inline auto for_each(Widget& w, std::function<void(Widget&)> const& fn) -> void
+{
+    for (auto& child : children(w)) {
+        fn(child);
+        for_each(child, fn);
+    }
+}
+
+inline auto for_each(Widget const& w,
+                     std::function<void(Widget const&)> const& fn) -> void
+{
+    for (auto& child : children(w)) {
+        fn(child);
+        for_each(child, fn);
+    }
+}
+
+[[nodiscard]] inline auto find_if(
+    Widget& w,
+    std::function<bool(Widget const&)> const& predicate) -> Widget*
+{
+    Widget* result = nullptr;
+    for_each(w, [&](Widget& child) {
+        if (result == nullptr && predicate(child)) {
+            result = &child;
+        }
+    });
+    return result;
+}
+
+[[nodiscard]] inline auto find_if(
+    Widget const& w,
+    std::function<bool(Widget const&)> const& predicate) -> Widget const*
+{
+    Widget const* result = nullptr;
+    for_each(w, [&](Widget const& child) {
+        if (result == nullptr && predicate(child)) {
+            result = &child;
+        }
+    });
+    return result;
+}
 
 }  // namespace ox::widgets

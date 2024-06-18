@@ -12,8 +12,13 @@ namespace ox::widgets {
  * is sized to fit within the Border.
  */
 struct Border {
+    template <typename T>
+    explicit Border(T child_, Painter::Box box_ = {})
+        : child{Widget{std::move(child_), {}}}, box{std::move(box_)}
+    {}
+
     Widget child;
-    Painter::Box box = {};
+    Painter::Box box;
 };
 
 auto paint(Border const& b, Canvas c) -> void;
