@@ -12,6 +12,10 @@ namespace {
 {
     (void)word_wrap;  // TODO
 
+    if (width == 0) {
+        return {0};
+    }
+
     auto indices = std::vector<std::size_t>{};
     auto start   = std::size_t{0};
 
@@ -39,37 +43,44 @@ namespace ox::widgets {
 
 auto paint(TextBox const& tb, Canvas c) -> void
 {
-    for (auto i = std::size_t{0}; i + 1 < tb.line_start_indices.size(); ++i) {
+    auto const line_start_indices =
+        calculate_line_start_indices(tb.text, tb.word_wrap, tb.width);
+
+    for (auto i = std::size_t{0}; i + 1 < line_start_indices.size(); ++i) {
         if (i >= (std::size_t)c.size.height) {
             break;
         }
-        auto const start = tb.line_start_indices[i];
-        auto const end   = tb.line_start_indices[i + 1];
+        auto const start = line_start_indices[i];
+        auto const end   = line_start_indices[i + 1];
         auto line        = std::string_view{tb.text}.substr(start, end - start);
         if (line.back() == '\n') {
             line.remove_suffix(1);
         }
         ox::Painter{c}[{0, (int)i}] << line;
     }
-    if (!tb.line_start_indices.empty()) {
-        auto const start = tb.line_start_indices.back();
+    if (!line_start_indices.empty()) {
+        auto const start = line_start_indices.back();
         auto line        = std::string_view{tb.text}.substr(start);
         if (line.back() == '\n') {
             line.remove_suffix(1);
         }
-        ox::Painter{c}[{0, (int)tb.line_start_indices.size() - 1}] << line;
+        ox::Painter{c}[{0, (int)line_start_indices.size() - 1}] << line;
     }
 }
 
 auto resize(TextBox& tb, Area new_size) -> void
 {
-    tb.line_start_indices = calculate_line_start_indices(
-        tb.text, tb.word_wrap, (std::size_t)new_size.width);
+    // In case user modified text or cursor_index.
+    tb.cursor_index = std::min(tb.cursor_index, tb.text.size());
+
     tb.width = (std::size_t)new_size.width;
 }
 
 auto key_press(TextBox& tb, Key k) -> void
 {
+    // In case user modified text or cursor_index.
+    tb.cursor_index = std::min(tb.cursor_index, tb.text.size());
+
     switch (k) {
         case Key::Backspace:
             if (!tb.text.empty() && tb.cursor_index <= tb.text.size()) {
@@ -102,8 +113,6 @@ auto key_press(TextBox& tb, Key k) -> void
             }
             break;
     }
-    tb.line_start_indices =
-        calculate_line_start_indices(tb.text, tb.word_wrap, tb.width);
 }
 
 }  // namespace ox::widgets
