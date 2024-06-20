@@ -31,16 +31,14 @@ template <Direction D>
 {
     if constexpr (D == Direction::Horizontal) {
         auto const iter = std::ranges::lower_bound(
-            children, p.x, std::less{}, [](auto const& widg) {
-                return widg.properties.at.x + widg.properties.size.width - 1;
-            });
+            children, p.x, std::less{},
+            [](auto const& widg) { return widg.at.x + widg.size.width - 1; });
         return iter != std::end(children) ? &*iter : nullptr;
     }
     else {
         auto const iter = std::ranges::lower_bound(
-            children, p.y, std::less{}, [](auto const& widg) {
-                return widg.properties.at.y + widg.properties.size.height - 1;
-            });
+            children, p.y, std::less{},
+            [](auto const& widg) { return widg.at.y + widg.size.height - 1; });
         return iter != std::end(children) ? &*iter : nullptr;
     }
 }
@@ -61,15 +59,15 @@ auto any_mouse_event(LinearLayout& layout,
     auto const widg_ptr = child_at<D>(layout.children, m.at);
 
     if (widg_ptr != nullptr) {
-        auto const properties = widg_ptr->properties;
+        auto& child = *widg_ptr;
 
-        if (properties.focus_policy == FocusPolicy::Strong ||
-            properties.focus_policy == FocusPolicy::Click) {
-            Focus::set(*widg_ptr);
+        if (child.focus_policy == FocusPolicy::Strong ||
+            child.focus_policy == FocusPolicy::Click) {
+            Focus::set(child);
         }
 
-        m.at = m.at - properties.at;
-        std::forward<EventFn>(event_fn)(*widg_ptr, m);
+        m.at = m.at - child.at;
+        std::forward<EventFn>(event_fn)(child, m);
     }
 }
 
@@ -171,7 +169,7 @@ namespace ox::widgets {
 auto paint(LinearLayout const& layout, ox::Canvas canvas) -> void
 {
     for (Widget const& child : layout.children) {
-        paint(child, {canvas.at + child.properties.at, child.properties.size});
+        paint(child, {canvas.at + child.at, child.size});
     }
 }
 
@@ -213,10 +211,10 @@ auto resize(HLayout& layout, Area a) -> void
     auto x            = 0;
     auto const widths = ::distribute_length(layout.size_policies, a.width);
     for (auto i = std::size_t{0}; i < layout.children.size(); ++i) {
-        auto& child           = layout.children[i];
-        child.properties.at   = {x, 0};
-        child.properties.size = {widths[i], a.height};
-        resize(child, child.properties.size);
+        auto& child = layout.children[i];
+        child.at    = {x, 0};
+        child.size  = {widths[i], a.height};
+        resize(child, child.size);
         x += widths[i];
     }
 }
@@ -257,10 +255,10 @@ auto resize(VLayout& layout, ox::Area a) -> void
     auto y             = 0;
     auto const heights = ::distribute_length(layout.size_policies, a.height);
     for (auto i = std::size_t{0}; i < layout.children.size(); ++i) {
-        auto& child           = layout.children[i];
-        child.properties.at   = {0, y};
-        child.properties.size = {a.width, heights[i]};
-        resize(child, child.properties.size);
+        auto& child = layout.children[i];
+        child.at    = {0, y};
+        child.size  = {a.width, heights[i]};
+        resize(child, child.size);
         y += heights[i];
     }
 }

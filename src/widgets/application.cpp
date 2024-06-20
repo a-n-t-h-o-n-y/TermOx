@@ -10,8 +10,8 @@ auto do_tab_focus_change(Widget& head, Widget const* current_focus) -> void
     Widget* next =
         find_if(head, [found = false, current_focus](Widget const& w) mutable {
             if (found) {
-                return w.properties.focus_policy == FocusPolicy::Strong ||
-                       w.properties.focus_policy == FocusPolicy::Tab;
+                return w.focus_policy == FocusPolicy::Strong ||
+                       w.focus_policy == FocusPolicy::Tab;
             }
             else {
                 if (&w == current_focus) {
@@ -23,8 +23,8 @@ auto do_tab_focus_change(Widget& head, Widget const* current_focus) -> void
 
     if (next == nullptr) {
         next = find_if(head, [](Widget const& w) {
-            return w.properties.focus_policy == FocusPolicy::Strong ||
-                   w.properties.focus_policy == FocusPolicy::Tab;
+            return w.focus_policy == FocusPolicy::Strong ||
+                   w.focus_policy == FocusPolicy::Tab;
         });
     }
 
@@ -43,16 +43,16 @@ auto do_shift_tab_focus_change(Widget& head,
         if (&w == current_focus) {
             next = previous;
         }
-        if (w.properties.focus_policy == FocusPolicy::Strong ||
-            w.properties.focus_policy == FocusPolicy::Tab) {
+        if (w.focus_policy == FocusPolicy::Strong ||
+            w.focus_policy == FocusPolicy::Tab) {
             previous = &w;
         }
     });
 
     if (next == nullptr) {
         for_each(head, [&next](Widget& w) {
-            if (w.properties.focus_policy == FocusPolicy::Strong ||
-                w.properties.focus_policy == FocusPolicy::Tab) {
+            if (w.focus_policy == FocusPolicy::Strong ||
+                w.focus_policy == FocusPolicy::Tab) {
                 next = &w;
             }
         });
@@ -78,8 +78,8 @@ auto Application::handle_key_press(ox::Key k) -> ox::EventResponse
     // TODO a shortcuts manager? processed here?
     Widget* const focused = Focus::get();
     if (focused != nullptr) {
-        if (focused->properties.focus_policy == FocusPolicy::Strong ||
-            focused->properties.focus_policy == FocusPolicy::Tab) {
+        if (focused->focus_policy == FocusPolicy::Strong ||
+            focused->focus_policy == FocusPolicy::Tab) {
             if (k == ox::Key::Tab) {
                 do_tab_focus_change(head_, focused);
             }

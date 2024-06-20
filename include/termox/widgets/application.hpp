@@ -17,8 +17,7 @@ class Application {
      * the terminal screen.
      */
     template <typename T>
-    explicit Application(T head)
-        : head_{std::move(head), {.focus_policy = FocusPolicy::None}}
+    explicit Application(T head) : head_{std::move(head)}
     {}
     // TODO ^^ possibly make head hardcoded a layout so focus is handled, then
     // this 'head' is a child of the actual head layout.

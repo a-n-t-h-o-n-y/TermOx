@@ -63,9 +63,7 @@ struct LinearLayout {
             (!std::is_same_v<std::remove_cvref_t<Widgets>, Widget> && ...),
             "`Widget` type should not be passed as an argument");
         size_policies.resize(sizeof...(children_), SizePolicy{});
-        (children.emplace_back(std::forward<Widgets>(children_),
-                               Widget::Properties{}),
-         ...);
+        (children.emplace_back(std::forward<Widgets>(children_)), ...);
     }
 
     std::vector<Widget> children          = {};
@@ -103,9 +101,7 @@ auto append(LinearLayout& layout,
 
     layout.size_policies.push_back(size_policy);
 
-    return layout.children
-        .emplace_back(std::move(t),
-                      Widget::Properties{.focus_policy = focus_policy})
+    return layout.children.emplace_back(std::move(t), focus_policy)
         .template data<T>();
 }
 
@@ -140,7 +136,7 @@ auto insert_at(LinearLayout& layout,
 
     return layout.children
         .emplace(std::next(std::begin(layout.children), index), std::move(t),
-                 Widget::Properties{.focus_policy = focus_policy})
+                 focus_policy)
         ->template data<T>();
 }
 

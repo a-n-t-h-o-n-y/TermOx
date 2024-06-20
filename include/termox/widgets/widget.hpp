@@ -35,30 +35,27 @@ enum class FocusPolicy : std::uint8_t { None, Tab, Click, Strong };
  */
 class Widget {
    public:
-    struct Properties {
-        FocusPolicy focus_policy = FocusPolicy::None;
-        bool enabled             = true;  // TODO - use this somewhere.
-        Point at                 = {0, 0};
-        Area size                = {0, 0};
-    } properties;
+    FocusPolicy focus_policy;
+
+    bool enabled = true;  // TODO - use this somewhere.
+    Point at     = {0, 0};
+    Area size    = {0, 0};
 
    public:
     template <typename T>
-    Widget(T&& t, Properties p)
-        : properties{std::move(p)},
+    Widget(T&& t, FocusPolicy fp = FocusPolicy::None)
+        : focus_policy{fp},
           self_{std::make_unique<Model<T>>(Model<T>{std::forward<T>(t)})}
     {}
 
-    // This is for clang 17, which doesn't like Properties having a default
-    template <typename T>
-    explicit Widget(T&& t)
-        : properties{},
-          self_{std::make_unique<Model<T>>(Model<T>{std::forward<T>(t)})}
-    {}
-
+    // TODO if focus can be put in tree, then these can be removed.
     Widget(Widget const&) = delete;
     Widget(Widget&& other)
-        : properties{std::move(other.properties)}, self_{std::move(other.self_)}
+        : focus_policy{other.focus_policy},
+          enabled{other.enabled},
+          at{other.at},
+          size{other.size},
+          self_{std::move(other.self_)}
     {
         if (&other == Focus::in_focus_) {
             Focus::in_focus_ = this;
@@ -68,8 +65,11 @@ class Widget {
     auto operator=(Widget const&) -> Widget& = delete;
     auto operator=(Widget&& other) -> Widget&
     {
-        properties = std::move(other.properties);
-        self_      = std::move(other.self_);
+        focus_policy = other.focus_policy;
+        enabled      = other.enabled;
+        at           = other.at;
+        size         = other.size;
+        self_        = std::move(other.self_);
         if (&other == Focus::in_focus_) {
             Focus::in_focus_ = this;
         }
