@@ -9,11 +9,12 @@ namespace ox::widgets {
 
 void paint(Label const& label, Canvas c)
 {
-    Painter{c}.fill(U' ' | label.brush);
+    auto& brush = label.brush;
+    Painter{c}.fill(U' ' | bg(brush.background) | fg(brush.foreground));
 
     auto const glyphs =
         std::string_view{label.text}.substr(0, (std::size_t)c.size.width) |
-        label.brush;
+        brush;
 
     auto at = Point{.x = 0, .y = c.size.height / 2};
 

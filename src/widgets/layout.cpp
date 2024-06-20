@@ -8,6 +8,7 @@
 #include <utility>
 #include <vector>
 
+#include <termox/widgets/border.hpp>
 #include <termox/widgets/focus.hpp>
 
 namespace {
@@ -220,6 +221,11 @@ auto resize(HLayout& layout, Area a) -> void
     }
 }
 
+auto append_divider(HLayout& layout, Glyph line) -> Divider&
+{
+    return append(layout, Divider{line}, SizePolicy::fixed(1));
+}
+
 // -----------------------------------------------------------------------------
 
 auto mouse_press(VLayout& layout, Mouse m) -> void
@@ -257,6 +263,11 @@ auto resize(VLayout& layout, ox::Area a) -> void
         resize(child, child.properties.size);
         y += heights[i];
     }
+}
+
+auto append_divider(VLayout& layout, Glyph line) -> Divider&
+{
+    return append(layout, Divider{line}, SizePolicy::fixed(1));
 }
 
 }  // namespace ox::widgets

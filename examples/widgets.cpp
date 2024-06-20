@@ -35,55 +35,58 @@
 
 using namespace ox::widgets;
 
-[[nodiscard]] auto message_source(sl::Slot<void(std::string)> on_message)
-    -> VLayout
-{
-    auto layout = VLayout{};
+struct MessageSource : VLayout {
+    sl::Slot<void(std::string)> on_message;
 
-    auto& text_box = append(layout,
-                            TextBox{
-                                .editable = true,
-                            },
-                            SizePolicy::flex(), FocusPolicy::Strong);
-    append(layout,
-           Button{
-               .label = {.text = "Send"},
-               .clicked =
-                   [on_message, &text_box] {
-                       on_message(text_box.text);
-                       text_box.text.clear();
-                   },
-           },
-           SizePolicy::fixed(1));
+    TextBox& text_box = append(*this,
+                               TextBox{
+                                   .editable = true,
+                               },
+                               SizePolicy::flex(),
+                               FocusPolicy::Strong);
 
-    return layout;
-}
+    Divider& div = append_divider(*this);
 
-[[nodiscard]] auto message_app() -> HLayout
-{
-    auto layout = HLayout{};
+    Button& send_button =
+        append(*this,
+               Button{
+                   .label = {.text  = "Send",
+                             .brush = {.background = ox::XColor::BrightBlue,
+                                       .foreground = ox::XColor::Black,
+                                       .traits     = ox::Trait::Underline}},
+                   .clicked =
+                       [on_message = on_message, &text_box = text_box] {
+                           on_message(text_box.text);
+                           text_box.text.clear();
+                       },
+               },
+               SizePolicy::fixed(1));
+};
 
-    auto& rhs = append(layout, TextBox{
-                                   .text     = "Right Hand Side",
-                                   .editable = false,
-                               });
+struct MessageApp : HLayout {
+    Divider& div = append_divider(*this, {U'┃'});
 
-    // TODO editing .text directly leads to inconsistent state. Either a
-    // function or something, but that is dangerous to leave it as a struct. Can
-    // you have private data? Or .. no because text would have to be private as
-    // well. You need some guarantee that the user cannot put it in an
-    // inconsistent state easily.
+    TextBox& rhs = append(*this,
+                          TextBox{
+                              .text     = "Right Hand Side",
+                              .editable = false,
+                          });
 
-    insert_at(layout, 0,
-              message_source([&rhs](std::string msg) { rhs.text = msg; }));
+    MessageSource& lhs = insert_at(
+        *this,
+        0,
+        MessageSource{
+            .on_message =
+                [&rhs = rhs](std::string msg) { rhs.text = std::move(msg); },
+        });
+};
 
-    return layout;
-}
+// -----------------------------------------------------------------------------
 
 int main()
 {
     try {
-        return Application{message_app()}.run();
+        return Application{MessageApp{}}.run();
     }
     catch (std::exception const& e) {
         std::cerr << "Error: " << e.what() << '\n';

@@ -11,6 +11,7 @@
 #include <termox/widgets/widget.hpp>
 
 namespace ox::widgets {
+struct Divider;
 
 /**
  * Policy for how a widget should be sized by its parent layout.
@@ -55,13 +56,15 @@ struct SizePolicy {
  * vertically. Do not use directly, instead use HLayout or VLayout.
  */
 struct LinearLayout {
-    template <typename... Ts>
-    explicit LinearLayout(Ts&&... widgets)
+    template <typename... Widgets>
+    explicit LinearLayout(Widgets&&... children_)
     {
-        static_assert((!std::is_same_v<std::remove_cvref_t<Ts>, Widget> && ...),
-                      "Widget type should not be passed as an argument");
-        size_policies.resize(sizeof...(widgets), SizePolicy{});
-        (children.emplace_back(std::forward<Ts>(widgets), Widget::Properties{}),
+        static_assert(
+            (!std::is_same_v<std::remove_cvref_t<Widgets>, Widget> && ...),
+            "`Widget` type should not be passed as an argument");
+        size_policies.resize(sizeof...(children_), SizePolicy{});
+        (children.emplace_back(std::forward<Widgets>(children_),
+                               Widget::Properties{}),
          ...);
     }
 
@@ -160,6 +163,8 @@ struct HLayout : LinearLayout {
     using LinearLayout::LinearLayout;
 };
 
+// TODO can these be made generic in LinearLayout? Is direction really that
+// important?
 auto mouse_press(HLayout& layout, Mouse m) -> void;
 
 auto mouse_release(HLayout& layout, Mouse m) -> void;
@@ -169,6 +174,8 @@ auto mouse_wheel(HLayout& layout, Mouse m) -> void;
 auto mouse_move(HLayout& layout, Mouse m) -> void;
 
 auto resize(HLayout& layout, Area a) -> void;
+
+auto append_divider(HLayout& layout, Glyph line = {U'│'}) -> Divider&;
 
 // -----------------------------------------------------------------------------
 
@@ -185,6 +192,8 @@ auto mouse_wheel(VLayout& layout, Mouse m) -> void;
 auto mouse_move(VLayout& layout, Mouse m) -> void;
 
 auto resize(VLayout& layout, ox::Area a) -> void;
+
+auto append_divider(VLayout& layout, Glyph line = {U'─'}) -> Divider&;
 
 // -----------------------------------------------------------------------------
 

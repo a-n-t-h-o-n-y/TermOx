@@ -37,4 +37,15 @@ auto mouse_wheel(Border& b, Mouse m) -> void;
 
 auto mouse_move(Border& b, Mouse m) -> void;
 
+// -----------------------------------------------------------------------------
+
+struct Divider {
+    ox::Glyph line;
+};
+
+inline auto paint(Divider const& d, Canvas c) -> void
+{
+    Painter{c}.fill(d.line);
+}
+
 }  // namespace ox::widgets
