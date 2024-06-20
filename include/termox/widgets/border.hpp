@@ -8,8 +8,8 @@ namespace ox::widgets {
 /**
  * A Border display that wraps a child widget.
  *
- * @details The child Widget inherits the FocusPolicy of the Border object, and
- * is sized to fit within the Border.
+ * @details The child Widget inherits the FocusPolicy of the Border object, and is sized
+ * to fit within the Border.
  */
 struct Border {
     template <typename T>
@@ -37,15 +37,12 @@ auto mouse_wheel(Border& b, Mouse m) -> void;
 
 auto mouse_move(Border& b, Mouse m) -> void;
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 
 struct Divider {
     ox::Glyph line;
 };
 
-inline auto paint(Divider const& d, Canvas c) -> void
-{
-    Painter{c}.fill(d.line);
-}
+inline auto paint(Divider const& d, Canvas c) -> void { Painter{c}.fill(d.line); }
 
 }  // namespace ox::widgets

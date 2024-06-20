@@ -17,17 +17,17 @@ using namespace ox::widgets;
 enum class Direction : bool { Horizontal, Vertical };
 
 /**
- * Returns a pointer to the child at the given point, or nullptr if there is no
- * child at that point.
+ * Returns a pointer to the child at the given point, or nullptr if there is no child at
+ * that point.
+ *
  * @tparam D The direction to search in.
  * @param children The children to search.
  * @param p The point to search for.
- * @return A pointer to the child at the given point, or nullptr if there is no
- * child at that point.
+ * @return A pointer to the child at the given point, or nullptr if there is no child at
+ * that point.
  */
 template <Direction D>
-[[nodiscard]] auto child_at(std::vector<Widget>& children,
-                            ox::Point p) -> Widget*
+[[nodiscard]] auto child_at(std::vector<Widget>& children, ox::Point p) -> Widget*
 {
     if constexpr (D == Direction::Horizontal) {
         auto const iter = std::ranges::lower_bound(
@@ -44,17 +44,16 @@ template <Direction D>
 }
 
 /**
- * If there is a child at the given point, call the given event function with
- * the child and the mouse object.
+ * If there is a child at the given point, call the given event function with the child
+ * and the mouse object.
+ *
  * @tparam D The direction to search in.
  * @param layout The layout to search in.
  * @param m The mouse event object.
  * @param event_fn The event function to call with the child and mouse object.
  */
 template <Direction D, typename EventFn>
-auto any_mouse_event(LinearLayout& layout,
-                     ox::Mouse m,
-                     EventFn&& event_fn) -> void
+auto any_mouse_event(LinearLayout& layout, ox::Mouse m, EventFn&& event_fn) -> void
 {
     auto const widg_ptr = child_at<D>(layout.children, m.at);
 
@@ -72,8 +71,8 @@ auto any_mouse_event(LinearLayout& layout,
 }
 
 /**
- * Calculate the length of each child in the given total space based on the
- * its SizePolicy and the total space available.
+ * Calculate the length of each child in the given total space based on the its
+ * SizePolicy and the total space available.
  *
  * @param children The children to distribute the space between.
  * @param total The total space to distribute.
@@ -121,9 +120,9 @@ auto any_mouse_event(LinearLayout& layout,
         for (auto i = std::size_t{0}; i < size_policies.size(); ++i) {
             auto const& policy = size_policies[i];
             if (exact_amounts[i] < (float)policy.maximum) {
-                float additional_space = std::min(
-                    policy.flexibility / total_flex * (float)remaining_space,
-                    (float)policy.maximum - exact_amounts[i]);
+                float additional_space =
+                    std::min(policy.flexibility / total_flex * (float)remaining_space,
+                             (float)policy.maximum - exact_amounts[i]);
                 exact_amounts[i] += additional_space;
                 space_distributed_this_round += additional_space;
             }
@@ -139,8 +138,7 @@ auto any_mouse_event(LinearLayout& layout,
     std::ranges::copy(exact_amounts, results.begin());
 
     // Distribute remaining space from left from flooring.
-    int remaining =
-        total - std::accumulate(std::begin(results), std::end(results), 0);
+    int remaining = total - std::accumulate(std::begin(results), std::end(results), 0);
     while (remaining > 0) {
         auto space_distributed_this_round = 0;
         for (auto i = std::size_t{0}; i < size_policies.size(); ++i) {
@@ -164,7 +162,7 @@ auto any_mouse_event(LinearLayout& layout,
 
 namespace ox::widgets {
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 
 auto paint(LinearLayout const& layout, ox::Canvas canvas) -> void
 {
@@ -180,7 +178,7 @@ auto timer(LinearLayout& layout, int id) -> void
     }
 }
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 
 auto mouse_press(HLayout& layout, Mouse m) -> void
 {
@@ -202,8 +200,8 @@ auto mouse_wheel(HLayout& layout, Mouse m) -> void
 
 auto mouse_move(HLayout& layout, Mouse m) -> void
 {
-    ::any_mouse_event<Direction::Horizontal>(
-        layout, m, [](auto& w, auto m) { mouse_move(w, m); });
+    ::any_mouse_event<Direction::Horizontal>(layout, m,
+                                             [](auto& w, auto m) { mouse_move(w, m); });
 }
 
 auto resize(HLayout& layout, Area a) -> void
@@ -224,12 +222,12 @@ auto append_divider(HLayout& layout, Glyph line) -> Divider&
     return append(layout, Divider{line}, SizePolicy::fixed(1));
 }
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 
 auto mouse_press(VLayout& layout, Mouse m) -> void
 {
-    ::any_mouse_event<Direction::Vertical>(
-        layout, m, [](auto& w, auto m) { mouse_press(w, m); });
+    ::any_mouse_event<Direction::Vertical>(layout, m,
+                                           [](auto& w, auto m) { mouse_press(w, m); });
 }
 
 auto mouse_release(VLayout& layout, Mouse m) -> void
@@ -240,14 +238,14 @@ auto mouse_release(VLayout& layout, Mouse m) -> void
 
 auto mouse_wheel(VLayout& layout, Mouse m) -> void
 {
-    ::any_mouse_event<Direction::Vertical>(
-        layout, m, [](auto& w, auto m) { mouse_wheel(w, m); });
+    ::any_mouse_event<Direction::Vertical>(layout, m,
+                                           [](auto& w, auto m) { mouse_wheel(w, m); });
 }
 
 auto mouse_move(VLayout& layout, Mouse m) -> void
 {
-    ::any_mouse_event<Direction::Vertical>(
-        layout, m, [](auto& w, auto m) { mouse_move(w, m); });
+    ::any_mouse_event<Direction::Vertical>(layout, m,
+                                           [](auto& w, auto m) { mouse_move(w, m); });
 }
 
 auto resize(VLayout& layout, ox::Area a) -> void

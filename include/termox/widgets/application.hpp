@@ -13,14 +13,14 @@ namespace ox::widgets {
 class Application {
    public:
     /**
-     * Construct with a widget to be the head of the application and initialize
-     * the terminal screen.
+     * Construct with a widget to be the head of the application and initialize the
+     * terminal screen.
      */
     template <typename T>
     explicit Application(T head) : head_{std::move(head)}
     {}
-    // TODO ^^ possibly make head hardcoded a layout so focus is handled, then
-    // this 'head' is a child of the actual head layout.
+    // TODO ^^ possibly make head hardcoded a layout so focus is handled, then this
+    // 'head' is a child of the actual head layout.
 
    public:
     /**

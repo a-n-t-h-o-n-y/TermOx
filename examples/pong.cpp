@@ -25,11 +25,11 @@ constexpr auto logo = std::string_view{
 .||.      ''|...|'  .|.   '|   ''|...'|
 )"};
 
-// This is a std::variant based state machine, one struct per screen type with
-// paint() to put the display for each state type and key_press() and timer()
-// to handle events for each state.
+// This is a std::variant based state machine, one struct per screen type with paint()
+// to put the display for each state type and key_press() and timer() to handle events
+// for each state.
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 
 struct SplashScreen {
     std::uint16_t hue{0};
@@ -166,10 +166,9 @@ struct HowTo {
     };
 };
 
-using State =
-    std::variant<SplashScreen, MainMenu, PlayerSelectMenu, Game, HowTo>;
+using State = std::variant<SplashScreen, MainMenu, PlayerSelectMenu, Game, HowTo>;
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 
 auto paint(SplashScreen const& x, Canvas const& c) -> void
 {
@@ -250,8 +249,7 @@ auto paint(HowTo const& x, Canvas const& c) -> void
         };
     }
     {  // Title
-        auto const at =
-            Point{.x = (c.size.width - (int)x.title.size()) / 2, .y = 1};
+        auto const at = Point{.x = (c.size.width - (int)x.title.size()) / 2, .y = 1};
         p[at] << (x.title | Trait::Bold | Trait::Underline);
     }
     {  // Instructions
@@ -278,8 +276,7 @@ auto paint(PlayerSelectMenu const& x, Canvas const& c) -> void
     auto p = Painter{c};
 
     {  // Title
-        auto const at =
-            Point{.x = (c.size.width - (int)x.title.size()) / 2, .y = 1};
+        auto const at = Point{.x = (c.size.width - (int)x.title.size()) / 2, .y = 1};
         p[at] << x.title;
     }
     {  // Left Player
@@ -294,8 +291,7 @@ auto paint(PlayerSelectMenu const& x, Canvas const& c) -> void
     {  // Right Player
         auto const at = Point{.x = c.size.width / 2 + 10, .y = 4};
         if (!x.left_selected) {
-            p[at] << "Right Player: "
-                  << (x.right_player.name | Trait::Standout);
+            p[at] << "Right Player: " << (x.right_player.name | Trait::Standout);
         }
         else {
             p[at] << "Right Player: " << x.right_player.name;
@@ -326,8 +322,7 @@ auto paint(Game const& x, Canvas const& c) -> void
 {
     static constexpr auto display_space = Game::game_space;
 
-    if (c.size.width < display_space.width ||
-        c.size.height < display_space.height) {
+    if (c.size.width < display_space.width || c.size.height < display_space.height) {
         Painter{c}[{0, 0}] << U"Terminal too small to display game";
         return;
     }
@@ -348,8 +343,8 @@ auto paint(Game const& x, Canvas const& c) -> void
 
     {  // Ball
         auto const color = [](auto velocity) -> TColor {
-            auto const speed = std::sqrt(velocity.dx * velocity.dx +
-                                         velocity.dy * velocity.dy);
+            auto const speed =
+                std::sqrt(velocity.dx * velocity.dx + velocity.dy * velocity.dy);
             return HSL{
                 .hue        = (std::uint16_t)((90 + (int)(speed * 160)) % 360),
                 .saturation = 80,
@@ -362,9 +357,9 @@ auto paint(Game const& x, Canvas const& c) -> void
             return U"▄▃▂▁█▇▆▅"[i];
         }(x.ball.at.y) | fg(color);
 
-        auto const at   = Point{.x = (int)std::round(x.ball.at.x),
-                                .y = (int)std::round(x.ball.at.y)};
-        game_canvas[at] = glyph | Trait::Inverse;
+        auto const at =
+            Point{.x = (int)std::round(x.ball.at.x), .y = (int)std::round(x.ball.at.y)};
+        game_canvas[at]                         = glyph | Trait::Inverse;
         game_canvas[{.x = at.x, .y = at.y - 1}] = glyph;
     }
 
@@ -399,11 +394,10 @@ auto paint(Game const& x, Canvas const& c) -> void
     }
 
     {  // Right Score
-        auto const text =
-            x.right.player.name + ": " + std::to_string(x.right.score);
-        auto const at = Point{
-            .x = display_space.width - (int)text.size() - 1,
-            .y = -2,
+        auto const text = x.right.player.name + ": " + std::to_string(x.right.score);
+        auto const at   = Point{
+              .x = display_space.width - (int)text.size() - 1,
+              .y = -2,
         };
         Painter{game_canvas}[at] << text;
     }
@@ -422,8 +416,7 @@ auto paint(Game const& x, Canvas const& c) -> void
         p[{.x = 0, .y = c.size.height - 1}]
             << (U"Press Esc to return to the main menu" | Trait::Dim);
 
-        auto const enter_text =
-            std::u32string{U"Press Enter to start next round"};
+        auto const enter_text = std::u32string{U"Press Enter to start next round"};
         p[{
             .x = (c.size.width - (int)enter_text.size()),
             .y = c.size.height - 1,
@@ -439,7 +432,7 @@ auto paint(State const& x) -> void
     std::visit([&](auto const& s) { paint(s, Canvas{}); }, x);
 }
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 
 /**
  * QuitRequest means the app should quit.
@@ -575,16 +568,14 @@ auto key_press(HowTo x, Key k) -> PongEventResponse
 }
 
 /**
- * Returns the new state after the key press, or std::nullopt if the app
- * should quit.
+ * Returns the new state after the key press, or std::nullopt if the app should quit.
  */
 auto key_press(State s, Key k) -> PongEventResponse
 {
-    return std::visit([k](auto x) { return key_press(std::move(x), k); },
-                      std::move(s));
+    return std::visit([k](auto x) { return key_press(std::move(x), k); }, std::move(s));
 }
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 
 auto timer(SplashScreen x, int id) -> PongEventResponse
 {
@@ -616,8 +607,7 @@ auto timer(Game state, int id) -> PongEventResponse
         ball.velocity.dy += left.paddle.dy * 0.25f;
         ball.at.x = 2.f;
     }
-    else if (ball.velocity.dx > 0.f &&
-             ball.at.x > Game::game_space.width - 3.f &&
+    else if (ball.velocity.dx > 0.f && ball.at.x > Game::game_space.width - 3.f &&
              ball.at.y + 0.5f >= right.paddle.top.y &&
              ball.at.y - 0.5f <= right.paddle.top.y + Game::Paddle::height) {
         ball.velocity.dx *= -1.07;
@@ -652,8 +642,7 @@ auto timer(Game state, int id) -> PongEventResponse
     }
 
     constexpr auto init_ball = Game::Ball{
-        .at       = {.x = Game::game_space.width / 2,
-                     .y = Game::game_space.height / 2},
+        .at       = {.x = Game::game_space.width / 2, .y = Game::game_space.height / 2},
         .velocity = {0, 0},
     };
 
@@ -674,11 +663,9 @@ auto timer(Game state, int id) -> PongEventResponse
             .dy  = 0,
         };
     }
-    else if (left.paddle.top.y >
-             Game::game_space.height - Game::Paddle::height) {
+    else if (left.paddle.top.y > Game::game_space.height - Game::Paddle::height) {
         left.paddle = {
-            .top = {.x = 1,
-                    .y = Game::game_space.height - Game::Paddle::height},
+            .top = {.x = 1, .y = Game::game_space.height - Game::Paddle::height},
             .dy  = 0,
         };
     }
@@ -689,8 +676,7 @@ auto timer(Game state, int id) -> PongEventResponse
             .dy  = 0,
         };
     }
-    else if (right.paddle.top.y >
-             Game::game_space.height - Game::Paddle::height) {
+    else if (right.paddle.top.y > Game::game_space.height - Game::Paddle::height) {
         right.paddle = {
             .top = {.x = Game::game_space.width - 2,
                     .y = Game::game_space.height - Game::Paddle::height},
@@ -731,10 +717,10 @@ auto timer(Game state, int id) -> PongEventResponse
             if (frame_count % ai.action_interval == 0) {
                 auto const paddle_center = paddle.top.y + paddle.height / 2.f;
                 auto const distance      = ball.at.y - paddle_center;
-                paddle.dy += ai.velocity * std::min(distance, 5.f) /
-                             (((Game::game_space.width - ball.at.x) /
-                               ai.reaction_threshold) +
-                              1);
+                paddle.dy +=
+                    ai.velocity * std::min(distance, 5.f) /
+                    (((Game::game_space.width - ball.at.x) / ai.reaction_threshold) +
+                     1);
             }
             ++frame_count;
         }
@@ -754,11 +740,10 @@ auto timer(T x, int /* id */) -> PongEventResponse
 
 auto timer(State s, int id) -> PongEventResponse
 {
-    return std::visit([&](auto x) { return timer(std::move(x), id); },
-                      std::move(s));
+    return std::visit([&](auto x) { return timer(std::move(x), id); }, std::move(s));
 }
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 
 class Pong {
    public:
@@ -804,7 +789,7 @@ class Pong {
     State state_ = SplashScreen{};
 };
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 
 int main()
 {

@@ -27,8 +27,8 @@ using ::esc::Mouse;
 /**
  * Thread safe queue for inter-thread communication.
  *
- * @details This is built specifically for Events where multiple threads append
- * and one thread consumes.
+ * @details This is built specifically for Events where multiple threads append and one
+ * thread consumes.
  * @tparam T The type of element to store in the queue.
  */
 template <typename T>
@@ -88,8 +88,7 @@ class ConcurrentQueue {
 /**
  * Indicates an Event handler wants the application to shut down.
  *
- * @param return_code The return code that will be returned by
- * Application::run().
+ * @param return_code The return code that will be returned by Application::run().
  */
 struct QuitRequest {
     int return_code = 0;
@@ -98,8 +97,8 @@ struct QuitRequest {
 /**
  * The response from an Event handler.
  *
- * @details This is so the Event handler can communicate with the Application
- * class. std::nullopt is a request to do nothing special.
+ * @details This is so the Event handler can communicate with the Application class.
+ * std::nullopt is a request to do nothing special.
  */
 using EventResponse = std::optional<QuitRequest>;
 
@@ -144,9 +143,7 @@ using EventQueue = ConcurrentQueue<Event>;
  */
 template <typename T>
 concept HandlesMousePress = requires(T t, Mouse m) {
-    {
-        t.handle_mouse_press(m)
-    } -> std::same_as<EventResponse>;
+    { t.handle_mouse_press(m) } -> std::same_as<EventResponse>;
 };
 
 /**
@@ -154,9 +151,7 @@ concept HandlesMousePress = requires(T t, Mouse m) {
  */
 template <typename T>
 concept HandlesMouseRelease = requires(T t, Mouse m) {
-    {
-        t.handle_mouse_release(m)
-    } -> std::same_as<EventResponse>;
+    { t.handle_mouse_release(m) } -> std::same_as<EventResponse>;
 };
 
 /**
@@ -164,9 +159,7 @@ concept HandlesMouseRelease = requires(T t, Mouse m) {
  */
 template <typename T>
 concept HandlesMouseWheel = requires(T t, Mouse m) {
-    {
-        t.handle_mouse_wheel(m)
-    } -> std::same_as<EventResponse>;
+    { t.handle_mouse_wheel(m) } -> std::same_as<EventResponse>;
 };
 
 /**
@@ -174,9 +167,7 @@ concept HandlesMouseWheel = requires(T t, Mouse m) {
  */
 template <typename T>
 concept HandlesMouseMove = requires(T t, Mouse m) {
-    {
-        t.handle_mouse_move(m)
-    } -> std::same_as<EventResponse>;
+    { t.handle_mouse_move(m) } -> std::same_as<EventResponse>;
 };
 
 /**
@@ -184,9 +175,7 @@ concept HandlesMouseMove = requires(T t, Mouse m) {
  */
 template <typename T>
 concept HandlesKeyPress = requires(T t, Key k) {
-    {
-        t.handle_key_press(k)
-    } -> std::same_as<EventResponse>;
+    { t.handle_key_press(k) } -> std::same_as<EventResponse>;
 };
 
 /**
@@ -194,9 +183,7 @@ concept HandlesKeyPress = requires(T t, Key k) {
  */
 template <typename T>
 concept HandlesKeyRelease = requires(T t, Key k) {
-    {
-        t.handle_key_release(k)
-    } -> std::same_as<EventResponse>;
+    { t.handle_key_release(k) } -> std::same_as<EventResponse>;
 };
 
 /**
@@ -204,9 +191,7 @@ concept HandlesKeyRelease = requires(T t, Key k) {
  */
 template <typename T>
 concept HandlesResize = requires(T t, esc::Area a) {
-    {
-        t.handle_resize(a)
-    } -> std::same_as<EventResponse>;
+    { t.handle_resize(a) } -> std::same_as<EventResponse>;
 };
 
 /**
@@ -214,9 +199,7 @@ concept HandlesResize = requires(T t, esc::Area a) {
  */
 template <typename T>
 concept HandlesTimer = requires(T t, int id) {
-    {
-        t.handle_timer(id)
-    } -> std::same_as<EventResponse>;
+    { t.handle_timer(id) } -> std::same_as<EventResponse>;
 };
 
 }  // namespace ox

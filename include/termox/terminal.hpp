@@ -51,8 +51,8 @@ class ScreenBuffer {
     /**
      * Access the Glyph at the given position.
      *
-     * @details The top left is `{0, 0}` and the bottom right is `{width - 1,
-     * height - 1}`. Does no bounds checking.
+     * @details The top left is `{0, 0}` and the bottom right is `{width - 1, height -
+     * 1}`. Does no bounds checking.
      * @param p The Point position of the Glyph.
      * @return Glyph& A reference to the Glyph at the given position.
      */
@@ -61,8 +61,8 @@ class ScreenBuffer {
     /**
      * Access the Glyph at the given position.
      *
-     * @details The top left is `{0, 0}` and the bottom right is `{width - 1,
-     * height - 1}`. Does no bounds checking.
+     * @details The top left is `{0, 0}` and the bottom right is `{width - 1, height -
+     * 1}`. Does no bounds checking.
      * @param p The Point position of the Glyph.
      * @return Glyph const& A reference to the Glyph at the given position.
      */
@@ -71,8 +71,8 @@ class ScreenBuffer {
     /**
      * Resize the ScreenBuffer to the given dimensions.
      *
-     * @details This does not preserve the contents of the ScreenBuffer, the
-     * buffer is left in an undefined state.
+     * @details This does not preserve the contents of the ScreenBuffer, the buffer is
+     * left in an undefined state.
      * @param a The new dimensions of the ScreenBuffer.
      */
     auto resize(Area a) -> void;
@@ -97,8 +97,8 @@ class ScreenBuffer {
 };
 
 /**
- * A thread of execution that waits for a given duration and then calls a
- * callback function.
+ * A thread of execution that waits for a given duration and then calls a callback
+ * function.
  */
 class TimerThread {
    public:
@@ -114,15 +114,13 @@ class TimerThread {
     TimerThread() = default;
 
     /**
-     * Create a TimerThread that will call the callback after the duration in a
-     * loop.
+     * Create a TimerThread that will call the callback after the duration in a loop.
      *
      * @details This will launch a thread immediately.
      * @param duration The periodic duration to wait before calling the callback
      * @param callback The function to call each time the duration has elapsed
      */
-    explicit TimerThread(std::chrono::milliseconds duration,
-                         CallbackType callback);
+    explicit TimerThread(std::chrono::milliseconds duration, CallbackType callback);
 
     TimerThread(TimerThread const&) = delete;
     TimerThread(TimerThread&&)      = default;
@@ -134,15 +132,14 @@ class TimerThread {
     /**
      * Request the TimerThread to stop, returns immediately.
      *
-     * @details This will request the thread to stop, it does not wait for it to
-     * stop.
+     * @details This will request the thread to stop, it does not wait for it to stop.
      */
     auto request_stop() -> void { thread_.request_stop(); }
 
    private:
     /**
-     * Run the TimerThread, calling the callback after the given duration and
-     * repeating until st.stop_requested() is true.
+     * Run the TimerThread, calling the callback after the given duration and repeating
+     * until st.stop_requested() is true.
      *
      * @param st The stop_token to check for stop_requested().
      * @param callback The function to call each time the duration has elapsed
@@ -157,8 +154,7 @@ class TimerThread {
 };
 
 /**
- * Represents the terminal itself, providing an event loop and screen writing
- * tools.
+ * Represents the terminal itself, providing an event loop and screen writing tools.
  */
 class Terminal {
    public:
@@ -170,16 +166,15 @@ class Terminal {
     /**
      * The current cursor position on the terminal.
      *
-     * @details This is used by the event loop after `changes` has been
-     * committed to the terminal. If this is std::nullopt, then the cursor is
-     * not displayed.
+     * @details This is used by the event loop after `changes` has been committed to the
+     * terminal. If this is std::nullopt, then the cursor is not displayed.
      */
     inline static std::optional<Point> cursor{std::nullopt};
 
    public:
     /**
-     * Initializes the terminal display and starts reading events in separate
-     * thread, appending to the event_queue.
+     * Initializes the terminal display and starts reading events in separate thread,
+     * appending to the event_queue.
      *
      * @param mouse_mode The MouseMode to set the terminal to.
      * @param key_mode The KeyMode to set the terminal to.
@@ -190,8 +185,8 @@ class Terminal {
                       Signals signals      = Signals::On);
 
     /**
-     * Uninitializes the terminal display, resets the state to before the
-     * constructor was called.
+     * Uninitializes the terminal display, resets the state to before the constructor
+     * was called.
      */
     ~Terminal();
 
@@ -199,8 +194,8 @@ class Terminal {
     /**
      * Write changes ScreenBuffer to the terminal and update current_screen_.
      *
-     * @details This is called automatically by the Application class after an
-     * event has been processed.
+     * @details This is called automatically by the Application class after an event has
+     * been processed.
      */
     auto commit_changes() -> void;
 
@@ -228,8 +223,8 @@ class Terminal {
 /**
  * A handle to a Timer in the Terminal's timer system.
  *
- * @details This is used to create a new TimerThread with a given ID and
- * provides access to start and stop it.
+ * @details This is used to create a new TimerThread with a given ID and provides access
+ * to start and stop it.
  */
 class Timer {
    public:
@@ -263,8 +258,8 @@ class Timer {
     /**
      * Request the TimerThread to stop, returns immediately.
      *
-     * @details Does not wait for thread to exit. The destructor of Terminal
-     * will wait for it to exit, or if you call start() again.
+     * @details Does not wait for thread to exit. The destructor of Terminal will wait
+     * for it to exit, or if you call start() again.
      */
     auto stop() -> void;
 
@@ -298,16 +293,16 @@ struct Canvas {
     /**
      * Provides mutable access to the top left Point of the Canvas.
      *
-     * @param p The Point position of the Glyph in the Canvas. This will be
-     * clamped to the Canvas' bounds.
+     * @param p The Point position of the Glyph in the Canvas. This will be clamped to
+     * the Canvas' bounds.
      */
     [[nodiscard]] auto operator[](Point p) -> Glyph&;
 
     /**
      * Provides const access to the top left Point of the Canvas.
      *
-     * @param p The Point position of the Glyph in the Canvas. This will be
-     * clamped to the Canvas' bounds.
+     * @param p The Point position of the Glyph in the Canvas. This will be clamped to
+     * the Canvas' bounds.
      */
     [[nodiscard]] auto operator[](Point p) const -> Glyph const&;
 };
@@ -322,8 +317,8 @@ class Painter {
     /**
      * Used to paint a rectangle on the terminal screen.
      *
-     * @details Use with CursorWriter::operator<< to paint a rectangle at the
-     * current cursor position. The cursor will not be moved after painting.
+     * @details Use with CursorWriter::operator<< to paint a rectangle at the current
+     * cursor position. The cursor will not be moved after painting.
      */
     struct Box {
         Area size;
@@ -332,15 +327,15 @@ class Painter {
         std::array<char32_t, 2> walls   = {U'─', U'│'};
 
         static constexpr std::array square_corners = {U'┌', U'┐', U'└', U'┘'};
-        static constexpr std::array round_corners = {U'╭', U'╮', U'╰', U'╯'};
+        static constexpr std::array round_corners  = {U'╭', U'╮', U'╰', U'╯'};
     };
 
     /**
      * Used to paint a horizontal line on the terminal screen.
      *
-     * @details Use with CursorWriter::operator<< to paint a horizontal line at
-     * the current cursor position. The cursor will not be moved after painting.
-     * This paints using the given Glyph, which defaults to '─'.
+     * @details Use with CursorWriter::operator<< to paint a horizontal line at the
+     * current cursor position. The cursor will not be moved after painting.  This
+     * paints using the given Glyph, which defaults to '─'.
      */
     struct HLine {
         int length;
@@ -350,9 +345,9 @@ class Painter {
     /**
      * Used to paint a vertical line on the terminal screen.
      *
-     * @details Use with CursorWriter::operator<< to paint a vertical line at
-     * the current cursor position. The cursor will not be moved after painting.
-     * This paints using the given Glyph, which defaults to '│'.
+     * @details Use with CursorWriter::operator<< to paint a vertical line at the
+     * current cursor position. The cursor will not be moved after painting.  This
+     * paints using the given Glyph, which defaults to '│'.
      */
     struct VLine {
         int length;
@@ -363,10 +358,10 @@ class Painter {
     /**
      * Proxy object to write to the screen.
      *
-     * @details This is created by Painter::operator[](Point) and allows stream-
-     * like chained insertion of Glyphs and strings. Any output starts at the
-     * Point passed into Painter::operator[] and moves one cell to the right per
-     * Glyph, until the bounds are reached.
+     * @details This is created by Painter::operator[](Point) and allows stream- like
+     * chained insertion of Glyphs and strings. Any output starts at the Point passed
+     * into Painter::operator[] and moves one cell to the right per Glyph, until the
+     * bounds are reached.
      */
     class CursorWriter {
        public:
@@ -374,9 +369,8 @@ class Painter {
          * Construct a CursorWriter with the given Canvas and cursor position.
          *
          * @param canvas The Canvas to write to.
-         * @param cursor The position to start writing at. This will be clamped
-         * to the terminal's bounds if out of range when applied to the Canvas
-         * offset.
+         * @param cursor The position to start writing at. This will be clamped to the
+         * terminal's bounds if out of range when applied to the Canvas offset.
          */
         explicit CursorWriter(Canvas const& canvas, Point cursor);
 
@@ -459,9 +453,8 @@ class Painter {
     /**
      * Return a CursorWriter ready to write at the given Point.
      *
-     * @details The top left is {0, 0} and the bottom right is {width - 1,
-     * height - 1}. If the given Point is out of bounds, writing will be a
-     * no-op.
+     * @details The top left is {0, 0} and the bottom right is {width - 1, height - 1}.
+     * If the given Point is out of bounds, writing will be a no-op.
      * @param p The Point on the Canvas to start writing at.
      * @return CursorWriter
      */
@@ -470,8 +463,7 @@ class Painter {
     /**
      * Clear the underlying Canvas, setting all Glyphs symbols to null.
      *
-     * @details This does not reset their Brush members, a null symbol is
-     * 'empty'.
+     * @details This does not reset their Brush members, a null symbol is 'empty'.
      */
     auto clear() -> void;
 
@@ -489,16 +481,16 @@ class Painter {
 /**
  * Calls the appropriate handler function on \p handler for the given Event.
  *
- * @details This will only call the handler if the handler has the appropriate
- * function for the given Event type.
+ * @details This will only call the handler if the handler has the appropriate function
+ * for the given Event type.
  * @param ev The Event to handle.
  * @param handler The event handler to process the event.
- * @return std::optional<EventResponse> The response from the handler, or
- * std::nullopt if not handled.
+ * @return std::optional<EventResponse> The response from the handler, or std::nullopt
+ * if not handled.
  */
 template <typename T>
-[[nodiscard]] auto apply_event(Event const& ev, T& handler)
-    -> std::optional<EventResponse>
+[[nodiscard]] auto apply_event(Event const& ev,
+                               T& handler) -> std::optional<EventResponse>
 {
     return std::visit(
         Overload{[&](esc::KeyPress e) -> std::optional<EventResponse> {
@@ -577,11 +569,11 @@ template <typename T>
 }
 
 /**
- * Runs an event loop over the Terminal::event_queue, sending events to the
- * given event handler.
+ * Runs an event loop over the Terminal::event_queue, sending events to the given event
+ * handler.
  *
- * @details This will block until it receives a QuitRequest. The application can
- * be quit by responding to an Event handler with a QuitRequest object.
+ * @details This will block until it receives a QuitRequest. The application can be quit
+ * by responding to an Event handler with a QuitRequest object.
  * @param term The Terminal object.
  * @param handler The handler object that all events will be sent to.
  * @return The return code of the application, passed in via QuitRequest.

@@ -27,11 +27,11 @@ enum class FocusPolicy : std::uint8_t { None, Tab, Click, Strong };
 /**
  * Runtime Concept Idiom based Widget class.
  *
- * @details This models a Widget concept that can be used to store any type that
- * can act like a widget. At a minimum a widget implements the paint free
- * function: `void paint(YourWidget const&, ox::Canvas);`
- * Looking at the friend functions in the implementation will give you an event
- * handler blueprint.
+ * @details This models a Widget concept that can be used to store any type that can act
+ * like a widget. At a minimum a widget implements the paint free function:
+ * `void paint(YourWidget const&, ox::Canvas);`
+ * Looking at the friend functions in the implementation will give you an event handler
+ * blueprint.
  */
 class Widget {
    public:
@@ -87,8 +87,8 @@ class Widget {
     /**
      * Retrieve the underlying concrete widget object.
      *
-     * @details You must know the type of the underlying widget to use this,
-     * otherwise this results in undefined behavior
+     * @details You must know the type of the underlying widget to use this, otherwise
+     * this results in undefined behavior
      * @tparam T The type of the underlying data.
      * @return A reference to the underlying data.
      */
@@ -102,10 +102,7 @@ class Widget {
    public:
     friend void paint(Widget const& w, Canvas c) { w.self_->paint_(c); }
     friend void mouse_press(Widget& w, Mouse m) { w.self_->mouse_press_(m); }
-    friend void mouse_release(Widget& w, Mouse m)
-    {
-        w.self_->mouse_release_(m);
-    }
+    friend void mouse_release(Widget& w, Mouse m) { w.self_->mouse_release_(m); }
     friend void mouse_wheel(Widget& w, Mouse m) { w.self_->mouse_wheel_(m); }
     friend void mouse_move(Widget& w, Mouse m) { w.self_->mouse_move_(m); }
     friend void key_press(Widget& w, Key k) { w.self_->key_press_(k); }
@@ -120,8 +117,7 @@ class Widget {
         return w.self_.get()->children_();
     }
 
-    [[nodiscard]] friend auto children(Widget const& w)
-        -> std::span<Widget const>
+    [[nodiscard]] friend auto children(Widget const& w) -> std::span<Widget const>
     {
         return static_cast<Concept const*>(w.self_.get())->children_();
     }
@@ -279,9 +275,9 @@ inline auto for_each(Widget const& w,
     }
 }
 
-[[nodiscard]] inline auto find_if(
-    Widget& w,
-    std::function<bool(Widget const&)> const& predicate) -> Widget*
+[[nodiscard]] inline auto find_if(Widget& w,
+                                  std::function<bool(Widget const&)> const& predicate)
+    -> Widget*
 {
     Widget* result = nullptr;
     for_each(w, [&](Widget& child) {
@@ -292,9 +288,9 @@ inline auto for_each(Widget const& w,
     return result;
 }
 
-[[nodiscard]] inline auto find_if(
-    Widget const& w,
-    std::function<bool(Widget const&)> const& predicate) -> Widget const*
+[[nodiscard]] inline auto find_if(Widget const& w,
+                                  std::function<bool(Widget const&)> const& predicate)
+    -> Widget const*
 {
     Widget const* result = nullptr;
     for_each(w, [&](Widget const& child) {

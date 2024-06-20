@@ -53,8 +53,8 @@ struct SizePolicy {
 };
 
 /**
- * A layout that arranges its children in a line, either horizontally or
- * vertically. Do not use directly, instead use HLayout or VLayout.
+ * A layout that arranges its children in a line, either horizontally or vertically. Do
+ * not use directly, instead use HLayout or VLayout.
  */
 struct LinearLayout {
     template <typename... Widgets>
@@ -77,7 +77,7 @@ inline auto children(LinearLayout const& w) -> std::span<Widget const>
     return w.children;
 }
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 
 /**
  * Append a Widget to the LinearLayout.
@@ -85,8 +85,8 @@ inline auto children(LinearLayout const& w) -> std::span<Widget const>
  * @param t The Widget to append.
  * @param size_policy The size policy to apply to the Widget.
  * @param focus_policy The focus policy to apply to the Widget.
- * @return A reference to the appended Widget. This reference will remain
- * valid until the Widget is destroyed.
+ * @return A reference to the appended Widget. This reference will remain valid until
+ * the Widget is destroyed.
  */
 template <typename T>
 auto append(LinearLayout& layout,
@@ -104,14 +104,13 @@ auto append(LinearLayout& layout,
 /**
  * Inserts a Widget into the LinearLayout at the given index.
  *
- * @param index The index to insert the Widget at. If this is greater than the
- * current number of children, the Widget will be appended to the end of the
- * layout.
+ * @param index The index to insert the Widget at. If this is greater than the current
+ * number of children, the Widget will be appended to the end of the layout.
  * @param t The Widget to insert.
  * @param size_policy The size policy to apply to the Widget.
  * @param focus_policy The focus policy to apply to the Widget.
- * @return A reference to the inserted Widget. This reference will remain
- * valid until the Widget is destroyed.
+ * @return A reference to the inserted Widget. This reference will remain valid until
+ * the Widget is destroyed.
  */
 template <typename T>
 auto insert_at(LinearLayout& layout,
@@ -183,20 +182,19 @@ inline auto remove_all(LinearLayout& layout) -> std::vector<Widget>
     return removed;
 }
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 
 auto paint(LinearLayout const&, ox::Canvas) -> void;
 
 auto timer(LinearLayout&, int id) -> void;
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 
 struct HLayout : LinearLayout {
     using LinearLayout::LinearLayout;
 };
 
-// TODO can these be made generic in LinearLayout? Is direction really that
-// important?
+// TODO can these be made generic in LinearLayout? Is direction really that important?
 auto mouse_press(HLayout& layout, Mouse m) -> void;
 
 auto mouse_release(HLayout& layout, Mouse m) -> void;
@@ -209,7 +207,7 @@ auto resize(HLayout& layout, Area a) -> void;
 
 auto append_divider(HLayout& layout, Glyph line = {U'│'}) -> Divider&;
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 
 struct VLayout : LinearLayout {
     using LinearLayout::LinearLayout;
@@ -227,7 +225,7 @@ auto resize(VLayout& layout, ox::Area a) -> void;
 
 auto append_divider(VLayout& layout, Glyph line = {U'─'}) -> Divider&;
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 
 // TODO
 struct GridLayout {};

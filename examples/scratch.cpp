@@ -22,8 +22,8 @@ int main()
             };
 
             if (m.button == Mouse::Button::Left) {
-                canvas[m.at] = U'X' | Trait::Bold | Trait::Italic |
-                               fg(XColor::Red) | bg(TColor{0x8bb14e});
+                canvas[m.at] = U'X' | Trait::Bold | Trait::Italic | fg(XColor::Red) |
+                               bg(TColor{0x8bb14e});
                 canvas[m.at + Point{1, 0}] = Glyph{U'O'};
 
                 Terminal::cursor = m.at;
@@ -36,8 +36,7 @@ int main()
             }
 
             Painter{canvas}[{4, 5}] << ('O' | fg(XColor::Blue))
-                                    << ('X' | fg(XColor::Red) | Trait::Bold)
-                                    << 'O';
+                                    << ('X' | fg(XColor::Red) | Trait::Bold) << 'O';
             return {};
         }
 
@@ -57,9 +56,9 @@ int main()
                             if (fut_.valid()) {
                                 fut_.get();
                             }
-                            Terminal::event_queue.append(esc::MousePress{
-                                {.at     = {.x = 8, .y = 4},
-                                 .button = Mouse::Button::Left}});
+                            Terminal::event_queue.append(
+                                esc::MousePress{{.at     = {.x = 8, .y = 4},
+                                                 .button = Mouse::Button::Left}});
                             return {};
                         }});
                 });

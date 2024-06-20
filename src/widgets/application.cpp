@@ -33,21 +33,20 @@ auto do_tab_focus_change(Widget& head, Widget const* current_focus) -> void
     }
 }
 
-auto do_shift_tab_focus_change(Widget& head,
-                               Widget const* current_focus) -> void
+auto do_shift_tab_focus_change(Widget& head, Widget const* current_focus) -> void
 {
     Widget* next = nullptr;
 
-    for_each(head, [&next, previous = (Widget*)nullptr,
-                    current_focus](Widget& w) mutable {
-        if (&w == current_focus) {
-            next = previous;
-        }
-        if (w.focus_policy == FocusPolicy::Strong ||
-            w.focus_policy == FocusPolicy::Tab) {
-            previous = &w;
-        }
-    });
+    for_each(head,
+             [&next, previous = (Widget*)nullptr, current_focus](Widget& w) mutable {
+                 if (&w == current_focus) {
+                     next = previous;
+                 }
+                 if (w.focus_policy == FocusPolicy::Strong ||
+                     w.focus_policy == FocusPolicy::Tab) {
+                     previous = &w;
+                 }
+             });
 
     if (next == nullptr) {
         for_each(head, [&next](Widget& w) {

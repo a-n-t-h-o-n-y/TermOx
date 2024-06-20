@@ -37,10 +37,9 @@ auto ScreenBuffer::fill(Glyph const& g) -> void
     }
 }
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 
-TimerThread::TimerThread(std::chrono::milliseconds duration,
-                         CallbackType callback)
+TimerThread::TimerThread(std::chrono::milliseconds duration, CallbackType callback)
     : thread_{[cb = std::move(callback), d = std::move(duration)](auto st) {
           TimerThread::run(st, cb, d);
       }}
@@ -51,8 +50,7 @@ auto TimerThread::run(std::stop_token st,
                       std::chrono::milliseconds duration) -> void
 {
     constexpr auto timeout_duration =
-        std::chrono::duration_cast<ClockType::duration>(
-            std::chrono::milliseconds{16});
+        std::chrono::duration_cast<ClockType::duration>(std::chrono::milliseconds{16});
     auto next_callback_time = ClockType::now() + duration;
     while (true) {
         if (st.stop_requested()) {
@@ -65,13 +63,12 @@ auto TimerThread::run(std::stop_token st,
             next_callback_time += duration;
         }
 
-        auto const time_to_wait =
-            std::min(next_callback_time - now, timeout_duration);
+        auto const time_to_wait = std::min(next_callback_time - now, timeout_duration);
         std::this_thread::sleep_for(time_to_wait);
     }
 }
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 
 Terminal::Terminal(MouseMode mouse_mode, KeyMode key_mode, Signals signals)
     : terminal_input_thread_{[this](auto st) { this->run_read_loop(st); }}
@@ -149,7 +146,7 @@ auto Terminal::run_read_loop(std::stop_token st) -> void
 
 auto Terminal::size() -> Area { return esc::terminal_area(); }
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 
 Timer::Timer(std::chrono::milliseconds duration, bool launch)
     : id_{next_id_++}, duration_{duration}
@@ -190,8 +187,7 @@ Timer::~Timer()
 auto Timer::start() -> void
 {
     Terminal::timers[id_] = TimerThread{
-        duration_,
-        [id = id_] { Terminal::event_queue.append(event::Timer{id}); }};
+        duration_, [id = id_] { Terminal::event_queue.append(event::Timer{id}); }};
     is_running_ = true;
 }
 
@@ -201,7 +197,7 @@ auto Timer::stop() -> void
     is_running_ = false;
 }
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 
 auto Canvas::operator[](Point p) -> Glyph&
 {
@@ -221,7 +217,7 @@ auto Canvas::operator[](Point p) const -> Glyph const&
     return Terminal::changes[global_point];
 }
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 
 Painter::CursorWriter::CursorWriter(Canvas const& canvas, Point cursor)
     : canvas_{canvas}, cursor_{cursor}
@@ -255,14 +251,12 @@ auto Painter::CursorWriter::operator<<(std::string_view sv) & -> CursorWriter&
     return *this << esc::detail::utf8_to_glyphs(sv);
 }
 
-auto Painter::CursorWriter::operator<<(
-    std::u32string_view sv) && -> CursorWriter
+auto Painter::CursorWriter::operator<<(std::u32string_view sv) && -> CursorWriter
 {
     return std::move(*this) << esc::detail::utf32_to_glyphs(sv);
 }
 
-auto Painter::CursorWriter::operator<<(
-    std::u32string_view sv) & -> CursorWriter&
+auto Painter::CursorWriter::operator<<(std::u32string_view sv) & -> CursorWriter&
 {
     return *this << esc::detail::utf32_to_glyphs(sv);
 }
@@ -297,8 +291,7 @@ auto Painter::CursorWriter::operator<<(Painter::Box const& b) -> CursorWriter
     return *this;
 }
 
-auto Painter::CursorWriter::operator<<(Painter::HLine const& hline)
-    -> CursorWriter
+auto Painter::CursorWriter::operator<<(Painter::HLine const& hline) -> CursorWriter
 {
     auto const end = std::min(cursor_.x + hline.length, canvas_.size.width);
     for (auto x = cursor_.x; x < end; ++x) {
@@ -307,8 +300,7 @@ auto Painter::CursorWriter::operator<<(Painter::HLine const& hline)
     return *this;
 }
 
-auto Painter::CursorWriter::operator<<(Painter::VLine const& vline)
-    -> CursorWriter
+auto Painter::CursorWriter::operator<<(Painter::VLine const& vline) -> CursorWriter
 {
     auto const end = std::min(cursor_.y + vline.length, canvas_.size.height);
     for (auto y = cursor_.y; y < end; ++y) {
@@ -317,14 +309,11 @@ auto Painter::CursorWriter::operator<<(Painter::VLine const& vline)
     return *this;
 }
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 
 Painter::Painter(Canvas const& c) : canvas_{c} {}
 
-auto Painter::operator[](Point p) -> CursorWriter
-{
-    return CursorWriter{canvas_, p};
-}
+auto Painter::operator[](Point p) -> CursorWriter { return CursorWriter{canvas_, p}; }
 
 auto Painter::clear() -> void
 {
