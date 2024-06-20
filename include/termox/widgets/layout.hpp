@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <cstddef>
 #include <functional>
 #include <iterator>
@@ -140,12 +141,53 @@ auto insert_at(LinearLayout& layout,
         ->template data<T>();
 }
 
-// TODO remove(Widget pointer)
-// std::distance() so you can remove from both vectors
+/**
+ * Removes and returns the given Widget from the LinearLayout.
+ *
+ * @details Find \p w with find_if.
+ * @param layout The LinearLayout to remove \p w from.
+ * @param w The Widget to remove.
+ * @return The removed Widget.
+ * @throws std::out_of_range If \p w is not found in \p layout.
+ */
+inline auto remove(LinearLayout& layout, Widget const& w) -> Widget
+{
+    auto const iter = std::ranges::find_if(
+        layout.children, [&w](Widget const* child) { return &w == child; },
+        [](Widget const& child) { return &child; });
 
-// TODO remove_at(index)
+    if (iter == std::end(layout.children)) {
+        throw std::out_of_range{"remove: Widget not found in layout"};
+    }
+    auto const index = std::distance(std::begin(layout.children), iter);
+    layout.size_policies.erase(
+        std::next(std::begin(layout.size_policies), index));
+    auto removed = std::move(*iter);
+    layout.children.erase(iter);
+    return removed;
+}
 
-// TODO remove_all()
+inline auto remove_at(LinearLayout& layout, std::size_t index) -> Widget
+{
+    if (index >= layout.children.size()) {
+        throw std::out_of_range{"remove_at: index out of range"};
+    }
+
+    layout.size_policies.erase(
+        std::next(std::begin(layout.size_policies), (std::ptrdiff_t)index));
+    auto iter = std::next(std::begin(layout.children), (std::ptrdiff_t)index);
+    auto removed = std::move(*iter);
+    layout.children.erase(iter);
+    return removed;
+}
+
+inline auto remove_all(LinearLayout& layout) -> std::vector<Widget>
+{
+    auto removed = std::move(layout.children);
+    layout.children.clear();
+    layout.size_policies.clear();
+    return removed;
+}
 
 // -----------------------------------------------------------------------------
 
