@@ -60,9 +60,8 @@ struct LinearLayout {
     template <typename... Widgets>
     explicit LinearLayout(Widgets&&... children_)
     {
-        static_assert(
-            (!std::is_same_v<std::remove_cvref_t<Widgets>, Widget> && ...),
-            "`Widget` type should not be passed as an argument");
+        static_assert((!std::is_same_v<std::remove_cvref_t<Widgets>, Widget> && ...),
+                      "`Widget` type should not be passed as an argument");
         size_policies.resize(sizeof...(children_), SizePolicy{});
         (children.emplace_back(std::forward<Widgets>(children_)), ...);
     }
@@ -71,10 +70,7 @@ struct LinearLayout {
     std::vector<SizePolicy> size_policies = {};
 };
 
-inline auto children(LinearLayout& w) -> std::span<Widget>
-{
-    return w.children;
-}
+inline auto children(LinearLayout& w) -> std::span<Widget> { return w.children; }
 
 inline auto children(LinearLayout const& w) -> std::span<Widget const>
 {
@@ -102,8 +98,7 @@ auto append(LinearLayout& layout,
 
     layout.size_policies.push_back(size_policy);
 
-    return layout.children.emplace_back(std::move(t), focus_policy)
-        .template data<T>();
+    return layout.children.emplace_back(std::move(t), focus_policy).template data<T>();
 }
 
 /**
@@ -160,8 +155,7 @@ inline auto remove(LinearLayout& layout, Widget const& w) -> Widget
         throw std::out_of_range{"remove: Widget not found in layout"};
     }
     auto const index = std::distance(std::begin(layout.children), iter);
-    layout.size_policies.erase(
-        std::next(std::begin(layout.size_policies), index));
+    layout.size_policies.erase(std::next(std::begin(layout.size_policies), index));
     auto removed = std::move(*iter);
     layout.children.erase(iter);
     return removed;
@@ -175,7 +169,7 @@ inline auto remove_at(LinearLayout& layout, std::size_t index) -> Widget
 
     layout.size_policies.erase(
         std::next(std::begin(layout.size_policies), (std::ptrdiff_t)index));
-    auto iter = std::next(std::begin(layout.children), (std::ptrdiff_t)index);
+    auto iter    = std::next(std::begin(layout.children), (std::ptrdiff_t)index);
     auto removed = std::move(*iter);
     layout.children.erase(iter);
     return removed;

@@ -49,18 +49,21 @@ struct MessageSource : VLayout {
 
     Button& send_button =
         append(*this,
-               Button{
-                   .label = {.text  = "Send",
-                             .brush = {.background = ox::XColor::BrightBlue,
-                                       .foreground = ox::XColor::Black,
+               button({
+                   .text           = "Send",
+                   .brush          = {.background = ox::XColor::BrightBlue,
+                                      .foreground = ox::XColor::Black,
+                                      .traits     = ox::Trait::Underline},
+                   .on_press_brush = {{.background = ox::XColor::Blue,
+                                       .foreground = ox::XColor::White,
                                        .traits     = ox::Trait::Underline}},
-                   .clicked =
+                   .on_release =
                        [on_message = on_message, &text_box = text_box] {
                            on_message(text_box.text);
                            text_box.text.clear();
                        },
-               },
-               SizePolicy::fixed(1));
+               }),
+               SizePolicy::fixed(3));
 };
 
 struct MessageApp : HLayout {
@@ -76,8 +79,7 @@ struct MessageApp : HLayout {
         *this,
         0,
         MessageSource{
-            .on_message =
-                [&rhs = rhs](std::string msg) { rhs.text = std::move(msg); },
+            .on_message = [&rhs = rhs](std::string msg) { rhs.text = std::move(msg); },
         });
 };
 
