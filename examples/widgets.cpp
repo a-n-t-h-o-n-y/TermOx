@@ -14,7 +14,12 @@ struct Clicker {
     ox::Glyph display = U'X' | fg(ox::XColor::Default);
 };
 
-void paint(Clicker const& c, ox::Canvas canvas) { canvas[c.at] = c.display; }
+void paint(Clicker const& c, ox::Canvas canvas)
+{
+    if (c.at.x < canvas.size.width && c.at.y < canvas.size.height) {
+        canvas[c.at] = c.display;
+    }
+}
 
 void mouse_press(Clicker& c, ox::Mouse m)
 {

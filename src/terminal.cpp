@@ -201,6 +201,8 @@ auto Timer::stop() -> void
 
 auto Canvas::operator[](Point p) -> Glyph&
 {
+    p.x = std::clamp(p.x, 0, size.width - 1);
+    p.y = std::clamp(p.y, 0, size.height - 1);
     auto const global_point = Point{
         .x = std::clamp(at.x + p.x, 0, Terminal::changes.size().width - 1),
         .y = std::clamp(at.y + p.y, 0, Terminal::changes.size().height - 1),
@@ -210,6 +212,8 @@ auto Canvas::operator[](Point p) -> Glyph&
 
 auto Canvas::operator[](Point p) const -> Glyph const&
 {
+    p.x = std::clamp(p.x, 0, size.width - 1);
+    p.y = std::clamp(p.y, 0, size.height - 1);
     auto const global_point = Point{
         .x = std::clamp(at.x + p.x, 0, Terminal::changes.size().width - 1),
         .y = std::clamp(at.y + p.y, 0, Terminal::changes.size().height - 1),
