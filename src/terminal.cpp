@@ -95,7 +95,7 @@ auto Terminal::commit_changes() -> void
 
     for (auto x = 0; x < changes.size().width; ++x) {
         for (auto y = 0; y < changes.size().height; ++y) {
-            auto const& change  = changes[{x, y}];
+            auto const& change = changes[{x, y}];
             auto const& current = current_screen_[{x, y}];
             if (change != current) {
                 escape_sequence_ += escape(esc::Cursor{x, y});
@@ -159,9 +159,9 @@ Timer::Timer(std::chrono::milliseconds duration, bool launch)
 
 Timer::Timer(Timer&& other)
 {
-    id_               = std::move(other.id_);
-    duration_         = std::move(other.duration_);
-    is_running_       = std::move(other.is_running_);
+    id_ = std::move(other.id_);
+    duration_ = std::move(other.duration_);
+    is_running_ = std::move(other.is_running_);
     other.is_running_ = false;
 }
 
@@ -170,9 +170,9 @@ auto Timer::operator=(Timer&& other) -> Timer&
     if (this->is_running_) {
         this->stop();
     }
-    id_               = std::move(other.id_);
-    duration_         = std::move(other.duration_);
-    is_running_       = std::move(other.is_running_);
+    id_ = std::move(other.id_);
+    duration_ = std::move(other.duration_);
+    is_running_ = std::move(other.is_running_);
     other.is_running_ = false;
     return *this;
 }

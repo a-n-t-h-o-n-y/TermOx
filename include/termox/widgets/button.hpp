@@ -23,12 +23,12 @@ struct Button {
 
 struct ButtonParameters {
     std::string text;
-    Brush brush                                   = {};
-    std::optional<Brush> on_press_brush           = std::nullopt;
-    std::optional<Brush> on_hover_brush           = std::nullopt;
+    Brush brush = {};
+    std::optional<Brush> on_press_brush = std::nullopt;
+    std::optional<Brush> on_hover_brush = std::nullopt;
     std::chrono::milliseconds on_hover_transition = std::chrono::milliseconds{0};
-    sl::Slot<void()> on_press                     = [] {};
-    sl::Slot<void()> on_release                   = [] {};
+    sl::Slot<void()> on_press = [] {};
+    sl::Slot<void()> on_release = [] {};
 };
 
 [[nodiscard]] inline auto button(ButtonParameters p) -> Button
@@ -36,16 +36,16 @@ struct ButtonParameters {
     return {
         .label =
             {
-                .text  = std::move(p.text),
+                .text = std::move(p.text),
                 .align = Label::Align::Center,
                 .brush = p.brush,
             },
-        .brush               = p.brush,
-        .on_press_brush      = p.on_press_brush.value_or(p.brush),
-        .on_hover_brush      = p.on_hover_brush.value_or(p.brush),
+        .brush = p.brush,
+        .on_press_brush = p.on_press_brush.value_or(p.brush),
+        .on_hover_brush = p.on_hover_brush.value_or(p.brush),
         .on_hover_transition = p.on_hover_transition,
-        .on_press            = std::move(p.on_press),
-        .on_release          = std::move(p.on_release),
+        .on_press = std::move(p.on_press),
+        .on_release = std::move(p.on_release),
     };
 }
 

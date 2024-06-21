@@ -103,7 +103,7 @@ class ScreenBuffer {
 class TimerThread {
    public:
     using CallbackType = std::function<void()>;
-    using ClockType    = std::chrono::steady_clock;
+    using ClockType = std::chrono::steady_clock;
 
    public:
     /**
@@ -123,10 +123,10 @@ class TimerThread {
     explicit TimerThread(std::chrono::milliseconds duration, CallbackType callback);
 
     TimerThread(TimerThread const&) = delete;
-    TimerThread(TimerThread&&)      = default;
+    TimerThread(TimerThread&&) = default;
 
     auto operator=(TimerThread const&) -> TimerThread& = delete;
-    auto operator=(TimerThread&& x) -> TimerThread&    = default;
+    auto operator=(TimerThread&& x) -> TimerThread& = default;
 
    public:
     /**
@@ -181,8 +181,8 @@ class Terminal {
      * @param signals Whether OS Signals should be enabled or disabled.
      */
     explicit Terminal(MouseMode mouse_mode = MouseMode::Basic,
-                      KeyMode key_mode     = KeyMode::Normal,
-                      Signals signals      = Signals::On);
+                      KeyMode key_mode = KeyMode::Normal,
+                      Signals signals = Signals::On);
 
     /**
      * Uninitializes the terminal display, resets the state to before the constructor
@@ -287,7 +287,7 @@ class Timer {
  * terminal space.
  */
 struct Canvas {
-    Point at  = {0, 0};
+    Point at = {0, 0};
     Area size = Terminal::changes.size();
 
     /**
@@ -324,10 +324,10 @@ class Painter {
         Area size;
         Brush brush;
         std::array<char32_t, 4> corners = square_corners;
-        std::array<char32_t, 2> walls   = {U'─', U'│'};
+        std::array<char32_t, 2> walls = {U'─', U'│'};
 
         static constexpr std::array square_corners = {U'┌', U'┐', U'└', U'┘'};
-        static constexpr std::array round_corners  = {U'╭', U'╮', U'╰', U'╯'};
+        static constexpr std::array round_corners = {U'╭', U'╮', U'╰', U'╯'};
     };
 
     /**
@@ -582,7 +582,7 @@ template <typename EventHandler>
 [[nodiscard]] auto process_events(Terminal& term, EventHandler& handler) -> int
 {
     while (true) {
-        auto const event  = Terminal::event_queue.pop();  // Blocking Call
+        auto const event = Terminal::event_queue.pop();  // Blocking Call
         auto const result = apply_event(event, handler);
 
         if (result.has_value()) {

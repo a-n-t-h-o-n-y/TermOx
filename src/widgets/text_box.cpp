@@ -17,7 +17,7 @@ namespace {
     }
 
     auto indices = std::vector<std::size_t>{};
-    auto start   = std::size_t{0};
+    auto start = std::size_t{0};
 
     for (auto i = std::size_t{0}; i < content.size(); ++i) {
         if (content[i] == '\n') {
@@ -51,8 +51,8 @@ auto paint(TextBox const& tb, Canvas c) -> void
             break;
         }
         auto const start = line_start_indices[i];
-        auto const end   = line_start_indices[i + 1];
-        auto line        = std::string_view{tb.text}.substr(start, end - start);
+        auto const end = line_start_indices[i + 1];
+        auto line = std::string_view{tb.text}.substr(start, end - start);
         if (line.back() == '\n') {
             line.remove_suffix(1);
         }
@@ -60,7 +60,7 @@ auto paint(TextBox const& tb, Canvas c) -> void
     }
     if (!line_start_indices.empty()) {
         auto const start = line_start_indices.back();
-        auto line        = std::string_view{tb.text}.substr(start);
+        auto line = std::string_view{tb.text}.substr(start);
         if (line.back() == '\n') {
             line.remove_suffix(1);
         }

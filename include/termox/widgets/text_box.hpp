@@ -11,11 +11,11 @@ namespace ox::widgets {
 
 struct TextBox {
     std::string text = "";
-    bool editable    = true;
-    bool word_wrap   = true;  // TODO
+    bool editable = true;
+    bool word_wrap = true;  // TODO
 
     std::size_t cursor_index = 0;
-    std::size_t width        = 0;
+    std::size_t width = 0;
 
     // TODO Scrolling
     // std::size_t top_display_index = 0;  // index into text

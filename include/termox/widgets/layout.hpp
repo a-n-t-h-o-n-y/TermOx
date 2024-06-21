@@ -18,8 +18,8 @@ struct Divider;
  * Policy for how a widget should be sized by its parent layout.
  */
 struct SizePolicy {
-    int minimum       = 0;
-    int maximum       = std::numeric_limits<int>::max();
+    int minimum = 0;
+    int maximum = std::numeric_limits<int>::max();
     float flexibility = 1.f;
 
     [[nodiscard]] static auto fixed(int size) -> SizePolicy
@@ -29,8 +29,8 @@ struct SizePolicy {
 
     [[nodiscard]] static auto flex(float flex = 1.f) -> SizePolicy
     {
-        return {.minimum     = 0,
-                .maximum     = std::numeric_limits<int>::max(),
+        return {.minimum = 0,
+                .maximum = std::numeric_limits<int>::max(),
                 .flexibility = flex};
     }
 
@@ -41,8 +41,8 @@ struct SizePolicy {
 
     [[nodiscard]] static auto min(int min) -> SizePolicy
     {
-        return {.minimum     = min,
-                .maximum     = std::numeric_limits<int>::max(),
+        return {.minimum = min,
+                .maximum = std::numeric_limits<int>::max(),
                 .flexibility = 1.f};
     }
 
@@ -57,7 +57,7 @@ struct SizePolicy {
  * not use directly, instead use HLayout or VLayout.
  */
 struct LinearLayout {
-    std::vector<Widget> children          = {};
+    std::vector<Widget> children = {};
     std::vector<SizePolicy> size_policies = {};
 
     template <typename... Widgets>
@@ -93,7 +93,7 @@ inline auto children(LinearLayout const& w) -> std::span<Widget const>
 template <typename T>
 auto append(LinearLayout& layout,
             T t,
-            SizePolicy size_policy   = {},
+            SizePolicy size_policy = {},
             FocusPolicy focus_policy = FocusPolicy::None) -> T&
 {
     static_assert(!std::is_same_v<std::remove_cvref_t<T>, Widget>);
@@ -118,7 +118,7 @@ template <typename T>
 auto insert_at(LinearLayout& layout,
                std::size_t index,
                T t,
-               SizePolicy size_policy   = {},
+               SizePolicy size_policy = {},
                FocusPolicy focus_policy = FocusPolicy::None) -> T&
 {
     static_assert(!std::is_same_v<std::remove_cvref_t<T>, Widget>);

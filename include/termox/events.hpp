@@ -40,10 +40,10 @@ class ConcurrentQueue {
     ConcurrentQueue() = default;
 
     ConcurrentQueue(ConcurrentQueue const&) = delete;
-    ConcurrentQueue(ConcurrentQueue&&)      = delete;
+    ConcurrentQueue(ConcurrentQueue&&) = delete;
 
     auto operator=(ConcurrentQueue const&) -> ConcurrentQueue& = delete;
-    auto operator=(ConcurrentQueue&&) -> ConcurrentQueue&      = delete;
+    auto operator=(ConcurrentQueue&&) -> ConcurrentQueue& = delete;
 
    public:
     /**

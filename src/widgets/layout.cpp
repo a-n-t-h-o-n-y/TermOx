@@ -59,7 +59,7 @@ auto any_mouse_event(LinearLayout& layout, ox::Mouse m, EventFn&& event_fn) -> v
         assert(policy.flexibility >= 0);
     }
 
-    auto exact_amounts   = std::vector<float>(size_policies.size(), 0.f);
+    auto exact_amounts = std::vector<float>(size_policies.size(), 0.f);
     auto total_allocated = 0.f;
 
     // Distribute minimums first
@@ -157,7 +157,7 @@ auto remove_at(LinearLayout& layout, std::size_t index) -> Widget
 
     layout.size_policies.erase(
         std::next(std::begin(layout.size_policies), (std::ptrdiff_t)index));
-    auto iter    = std::next(std::begin(layout.children), (std::ptrdiff_t)index);
+    auto iter = std::next(std::begin(layout.children), (std::ptrdiff_t)index);
     auto removed = std::move(*iter);
     layout.children.erase(iter);
     return removed;
@@ -211,12 +211,12 @@ auto mouse_move(LinearLayout& layout, Mouse m) -> void
 
 auto resize(HLayout& layout, Area a) -> void
 {
-    auto x            = 0;
+    auto x = 0;
     auto const widths = ::distribute_length(layout.size_policies, a.width);
     for (auto i = std::size_t{0}; i < layout.children.size(); ++i) {
         auto& child = layout.children[i];
-        child.at    = {x, 0};
-        child.size  = {widths[i], a.height};
+        child.at = {x, 0};
+        child.size = {widths[i], a.height};
         resize(child, child.size);
         x += widths[i];
     }
@@ -231,12 +231,12 @@ auto append_divider(HLayout& layout, Glyph line) -> Divider&
 
 auto resize(VLayout& layout, ox::Area a) -> void
 {
-    auto y             = 0;
+    auto y = 0;
     auto const heights = ::distribute_length(layout.size_policies, a.height);
     for (auto i = std::size_t{0}; i < layout.children.size(); ++i) {
         auto& child = layout.children[i];
-        child.at    = {0, y};
-        child.size  = {a.width, heights[i]};
+        child.at = {0, y};
+        child.size = {a.width, heights[i]};
         resize(child, child.size);
         y += heights[i];
     }

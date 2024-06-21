@@ -50,16 +50,16 @@ struct MessageSource : VLayout {
     Button& send_button =
         append(*this,
                button({
-                   .text           = "Send",
-                   .brush          = {.background = ox::XColor::BrightBlue,
-                                      .foreground = ox::XColor::Black,
-                                      .traits     = ox::Trait::Underline},
+                   .text = "Send",
+                   .brush = {.background = ox::XColor::BrightBlue,
+                             .foreground = ox::XColor::Black,
+                             .traits = ox::Trait::Underline},
                    .on_press_brush = {{.background = ox::XColor::Blue,
                                        .foreground = ox::XColor::White,
-                                       .traits     = ox::Trait::Underline}},
+                                       .traits = ox::Trait::Underline}},
                    .on_hover_brush = {{.background = ox::XColor::Green,
                                        .foreground = ox::XColor::Black,
-                                       .traits     = ox::Trait::Underline}},
+                                       .traits = ox::Trait::Underline}},
                    .on_release =
                        [on_message = on_message, &text_box = text_box] {
                            on_message(text_box.text);
@@ -74,7 +74,7 @@ struct MessageApp : HLayout {
 
     TextBox& rhs = append(*this,
                           TextBox{
-                              .text     = "Right Hand Side",
+                              .text = "Right Hand Side",
                               .editable = false,
                           });
 

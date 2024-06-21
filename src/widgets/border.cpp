@@ -13,8 +13,8 @@ auto paint(Border const& b, Canvas c) -> void
 
 auto resize(Border& b, Area new_size) -> void
 {
-    b.box.size   = new_size;
-    b.child.at   = {1, 1};
+    b.box.size = new_size;
+    b.child.at = {1, 1};
     b.child.size = {new_size.width - 2, new_size.height - 2};
     resize(b.child, b.child.size);
 }

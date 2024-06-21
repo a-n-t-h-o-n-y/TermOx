@@ -17,7 +17,7 @@ int main()
         auto handle_mouse_press(Mouse const& m) -> EventResponse
         {
             auto canvas = Canvas{
-                .at   = {0, 0},
+                .at = {0, 0},
                 .size = Terminal::changes.size(),
             };
 
@@ -57,7 +57,7 @@ int main()
                                 fut_.get();
                             }
                             Terminal::event_queue.append(
-                                esc::MousePress{{.at     = {.x = 8, .y = 4},
+                                esc::MousePress{{.at = {.x = 8, .y = 4},
                                                  .button = Mouse::Button::Left}});
                             return {};
                         }});
@@ -93,8 +93,8 @@ int main()
        private:
         std::future<void> fut_;
         Timer timer_ = Timer{std::chrono::milliseconds{500}};
-        int count_   = 0;
-        int id_      = -1;
+        int count_ = 0;
+        int id_ = -1;
     } w;
 
     return process_events(term, w);

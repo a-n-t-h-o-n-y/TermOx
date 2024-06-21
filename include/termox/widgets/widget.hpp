@@ -38,8 +38,8 @@ class Widget {
     FocusPolicy focus_policy;
 
     bool enabled = true;  // TODO - use this somewhere.
-    Point at     = {0, 0};
-    Area size    = {0, 0};
+    Point at = {0, 0};
+    Area size = {0, 0};
 
    public:
     template <typename T>
@@ -66,10 +66,10 @@ class Widget {
     auto operator=(Widget&& other) -> Widget&
     {
         focus_policy = other.focus_policy;
-        enabled      = other.enabled;
-        at           = other.at;
-        size         = other.size;
-        self_        = std::move(other.self_);
+        enabled = other.enabled;
+        at = other.at;
+        size = other.size;
+        self_ = std::move(other.self_);
         if (&other == Focus::in_focus_) {
             Focus::in_focus_ = this;
         }
@@ -127,19 +127,19 @@ class Widget {
        public:
         virtual ~Concept() = default;
 
-        virtual void paint_(Canvas) const  = 0;
-        virtual void mouse_press_(Mouse)   = 0;
+        virtual void paint_(Canvas) const = 0;
+        virtual void mouse_press_(Mouse) = 0;
         virtual void mouse_release_(Mouse) = 0;
-        virtual void mouse_wheel_(Mouse)   = 0;
-        virtual void mouse_move_(Mouse)    = 0;
-        virtual void key_press_(Key)       = 0;
-        virtual void key_release_(Key)     = 0;
-        virtual void focus_in_()           = 0;
-        virtual void focus_out_()          = 0;
-        virtual void resize_(Area)         = 0;
-        virtual void timer_(int)           = 0;
+        virtual void mouse_wheel_(Mouse) = 0;
+        virtual void mouse_move_(Mouse) = 0;
+        virtual void key_press_(Key) = 0;
+        virtual void key_release_(Key) = 0;
+        virtual void focus_in_() = 0;
+        virtual void focus_out_() = 0;
+        virtual void resize_(Area) = 0;
+        virtual void timer_(int) = 0;
 
-        virtual auto children_() -> std::span<Widget>             = 0;
+        virtual auto children_() -> std::span<Widget> = 0;
         virtual auto children_() const -> std::span<Widget const> = 0;
     };
 

@@ -76,7 +76,7 @@ struct Game {
         Player player;
         Paddle paddle{
             .top = {.x = 1, .y = (game_space.height - Paddle::height) / 2},
-            .dy  = 0,
+            .dy = 0,
         };
     } left;
 
@@ -86,7 +86,7 @@ struct Game {
         Paddle paddle{
             .top = {.x = game_space.width - 2,
                     .y = (game_space.height - Paddle::height) / 2},
-            .dy  = 0,
+            .dy = 0,
         };
     } right;
 
@@ -106,11 +106,11 @@ struct PlayerSelectMenu {
 
     Game::Player left_player = {
         .name = "Human",
-        .ai   = std::nullopt,
+        .ai = std::nullopt,
     };
     Game::Player right_player = {
         .name = "Human",
-        .ai   = std::nullopt,
+        .ai = std::nullopt,
     };
 
     bool left_selected{true};
@@ -119,33 +119,33 @@ struct PlayerSelectMenu {
         {
             "Slow AI",
             Game::AI{
-                .action_interval    = 7,
+                .action_interval = 7,
                 .reaction_threshold = 60.f,
-                .velocity           = 0.1f,
+                .velocity = 0.1f,
             },
         },
         {
             "Medium AI",
             Game::AI{
-                .action_interval    = 5,
+                .action_interval = 5,
                 .reaction_threshold = 30.f,
-                .velocity           = 0.2f,
+                .velocity = 0.2f,
             },
         },
         {
             "Fast AI",
             Game::AI{
-                .action_interval    = 3,
+                .action_interval = 3,
                 .reaction_threshold = 25.f,
-                .velocity           = 0.25f,
+                .velocity = 0.25f,
             },
         },
         {
             "Aggressive AI",
             Game::AI{
-                .action_interval    = 1,
+                .action_interval = 1,
                 .reaction_threshold = 10.f,
-                .velocity           = 0.75f,
+                .velocity = 0.75f,
             },
         },
         {
@@ -172,7 +172,7 @@ using State = std::variant<SplashScreen, MainMenu, PlayerSelectMenu, Game, HowTo
 
 auto paint(SplashScreen const& x, Canvas const& c) -> void
 {
-    auto p   = Painter{c};
+    auto p = Painter{c};
     auto hsl = HSL{.hue = x.hue, .saturation = 90, .lightness = 70};
 
     auto offset = [&]() -> Point {
@@ -185,7 +185,7 @@ auto paint(SplashScreen const& x, Canvas const& c) -> void
 
     auto display = x.display;
     for (auto nl_at = display.find('\n'); nl_at != std::string::npos;
-         nl_at      = display.find('\n')) {
+         nl_at = display.find('\n')) {
         p[offset] << (display.substr(0, nl_at) | Trait::Bold | fg(TColor{hsl}));
         display = display.substr(nl_at + 1);
         hsl.hue = (std::uint16_t)((hsl.hue + 20) % 360);
@@ -214,7 +214,7 @@ auto paint(MainMenu const& x, Canvas const& c) -> void
 
         auto display = logo;
         for (auto nl_at = display.find('\n'); nl_at != std::string::npos;
-             nl_at      = display.find('\n')) {
+             nl_at = display.find('\n')) {
             p[offset] << (display.substr(0, nl_at) | Trait::Dim);
             display = display.substr(nl_at + 1);
             offset.y += 1;
@@ -243,8 +243,8 @@ auto paint(HowTo const& x, Canvas const& c) -> void
 
     {  // Border
         p[{0, 0}] << Painter::Box{
-            .size    = c.size,
-            .brush   = {.foreground = XColor::Blue, .traits = Trait::Dim},
+            .size = c.size,
+            .brush = {.foreground = XColor::Blue, .traits = Trait::Dim},
             .corners = Painter::Box::round_corners,
         };
     }
@@ -328,8 +328,8 @@ auto paint(Game const& x, Canvas const& c) -> void
     }
 
     auto game_canvas = Canvas{
-        .at   = {.x = c.at.x + (c.size.width - display_space.width) / 2,
-                 .y = c.at.y + (c.size.height - display_space.height) / 2},
+        .at = {.x = c.at.x + (c.size.width - display_space.width) / 2,
+               .y = c.at.y + (c.size.height - display_space.height) / 2},
         .size = display_space,
     };
 
@@ -337,7 +337,7 @@ auto paint(Game const& x, Canvas const& c) -> void
         auto p = Painter{game_canvas};
         p[{.x = display_space.width / 2, .y = 0}] << Painter::VLine{
             .length = display_space.height,
-            .glyph  = U'╳' | Trait::Dim,
+            .glyph = U'╳' | Trait::Dim,
         };
     }
 
@@ -346,9 +346,9 @@ auto paint(Game const& x, Canvas const& c) -> void
             auto const speed =
                 std::sqrt(velocity.dx * velocity.dx + velocity.dy * velocity.dy);
             return HSL{
-                .hue        = (std::uint16_t)((90 + (int)(speed * 160)) % 360),
+                .hue = (std::uint16_t)((90 + (int)(speed * 160)) % 360),
                 .saturation = 80,
-                .lightness  = 70,
+                .lightness = 70,
             };
         }(x.ball.velocity);
 
@@ -359,7 +359,7 @@ auto paint(Game const& x, Canvas const& c) -> void
 
         auto const at =
             Point{.x = (int)std::round(x.ball.at.x), .y = (int)std::round(x.ball.at.y)};
-        game_canvas[at]                         = glyph | Trait::Inverse;
+        game_canvas[at] = glyph | Trait::Inverse;
         game_canvas[{.x = at.x, .y = at.y - 1}] = glyph;
     }
 
@@ -395,18 +395,18 @@ auto paint(Game const& x, Canvas const& c) -> void
 
     {  // Right Score
         auto const text = x.right.player.name + ": " + std::to_string(x.right.score);
-        auto const at   = Point{
-              .x = display_space.width - (int)text.size() - 1,
-              .y = -2,
+        auto const at = Point{
+            .x = display_space.width - (int)text.size() - 1,
+            .y = -2,
         };
         Painter{game_canvas}[at] << text;
     }
 
     {  // Border
         Painter{c}[game_canvas.at + Point{-1, -1}] << Painter::Box{
-            .size    = {.width  = display_space.width + 2,
-                        .height = display_space.height + 2},
-            .brush   = {.foreground = XColor::Blue, .traits = Trait::Dim},
+            .size = {.width = display_space.width + 2,
+                     .height = display_space.height + 2},
+            .brush = {.foreground = XColor::Blue, .traits = Trait::Dim},
             .corners = Painter::Box::round_corners,
         };
     }
@@ -490,14 +490,14 @@ auto key_press(PlayerSelectMenu x, Key k) -> PongEventResponse
 
         case Key::Enter: {
             if (x.left_selected) {
-                x.left_player   = x.options[x.selected];
+                x.left_player = x.options[x.selected];
                 x.left_selected = false;
                 return x;
             }
             else {
                 x.right_player = x.options[x.selected];
                 return Game{
-                    .left  = {.player = x.left_player},
+                    .left = {.player = x.left_player},
                     .right = {.player = x.right_player},
                 };
             }
@@ -509,12 +509,12 @@ auto key_press(PlayerSelectMenu x, Key k) -> PongEventResponse
 auto key_press(Game x, Key k) -> PongEventResponse
 {
     auto const generate_initial_velocity = []() -> Game::Ball::Velocity {
-        using int_dist   = std::uniform_int_distribution<int>;
+        using int_dist = std::uniform_int_distribution<int>;
         using float_dist = std::uniform_real_distribution<float>;
 
         auto rng = std::mt19937{std::random_device{}()};
-        auto dx  = float_dist{0.5, 0.8}(rng);
-        auto dy  = float_dist{0.1, 0.4}(rng);
+        auto dx = float_dist{0.5, 0.8}(rng);
+        auto dy = float_dist{0.1, 0.4}(rng);
         if (int_dist{0, 1}(rng) == 0) {
             dx = -dx;
         }
@@ -583,9 +583,9 @@ auto timer(SplashScreen x, int id) -> PongEventResponse
         return x;
     }
     return SplashScreen{
-        .hue     = (std::uint16_t)((x.hue + 2) % 360),
+        .hue = (std::uint16_t)((x.hue + 2) % 360),
         .display = x.display,
-        .timer   = std::move(x.timer),
+        .timer = std::move(x.timer),
     };
 }
 
@@ -595,8 +595,8 @@ auto timer(Game state, int id) -> PongEventResponse
         return state;
     }
 
-    auto& ball  = state.ball;
-    auto& left  = state.left;
+    auto& ball = state.ball;
+    auto& left = state.left;
     auto& right = state.right;
 
     // paddle/ball collisions
@@ -634,15 +634,15 @@ auto timer(Game state, int id) -> PongEventResponse
     // check for ball/wall collisions
     if (ball.at.y <= 0.5) {
         ball.velocity.dy = -ball.velocity.dy;
-        ball.at.y        = 0.51;
+        ball.at.y = 0.51;
     }
     else if (ball.at.y >= Game::game_space.height - 0.5) {
         ball.velocity.dy = -ball.velocity.dy;
-        ball.at.y        = Game::game_space.height - 0.51;
+        ball.at.y = Game::game_space.height - 0.51;
     }
 
     constexpr auto init_ball = Game::Ball{
-        .at       = {.x = Game::game_space.width / 2, .y = Game::game_space.height / 2},
+        .at = {.x = Game::game_space.width / 2, .y = Game::game_space.height / 2},
         .velocity = {0, 0},
     };
 
@@ -660,27 +660,27 @@ auto timer(Game state, int id) -> PongEventResponse
     if (left.paddle.top.y < 0) {
         left.paddle = {
             .top = {.x = 1, .y = 0},
-            .dy  = 0,
+            .dy = 0,
         };
     }
     else if (left.paddle.top.y > Game::game_space.height - Game::Paddle::height) {
         left.paddle = {
             .top = {.x = 1, .y = Game::game_space.height - Game::Paddle::height},
-            .dy  = 0,
+            .dy = 0,
         };
     }
 
     if (right.paddle.top.y < 0) {
         right.paddle = {
             .top = {.x = Game::game_space.width - 2, .y = 0},
-            .dy  = 0,
+            .dy = 0,
         };
     }
     else if (right.paddle.top.y > Game::game_space.height - Game::Paddle::height) {
         right.paddle = {
             .top = {.x = Game::game_space.width - 2,
                     .y = Game::game_space.height - Game::Paddle::height},
-            .dy  = 0,
+            .dy = 0,
         };
     }
 
@@ -688,13 +688,13 @@ auto timer(Game state, int id) -> PongEventResponse
     if (left.player.ai.has_value()) {
         static auto frame_count = 0;
 
-        auto& ai     = *left.player.ai;
+        auto& ai = *left.player.ai;
         auto& paddle = left.paddle;
 
         if (ball.velocity.dx < 0.f && ball.at.x < ai.reaction_threshold) {
             if (frame_count % ai.action_interval == 0) {
                 auto const paddle_center = paddle.top.y + paddle.height / 2.f;
-                auto const distance      = ball.at.y - paddle_center;
+                auto const distance = ball.at.y - paddle_center;
                 paddle.dy += ai.velocity * std::min(distance, 5.f) /
                              ((ball.at.x / ai.reaction_threshold) + 1);
             }
@@ -709,14 +709,14 @@ auto timer(Game state, int id) -> PongEventResponse
     if (right.player.ai.has_value()) {
         static auto frame_count = 0;
 
-        auto& ai     = *right.player.ai;
+        auto& ai = *right.player.ai;
         auto& paddle = right.paddle;
 
         if (ball.velocity.dx > 0.f &&
             ball.at.x > Game::game_space.width - ai.reaction_threshold) {
             if (frame_count % ai.action_interval == 0) {
                 auto const paddle_center = paddle.top.y + paddle.height / 2.f;
-                auto const distance      = ball.at.y - paddle_center;
+                auto const distance = ball.at.y - paddle_center;
                 paddle.dy +=
                     ai.velocity * std::min(distance, 5.f) /
                     (((Game::game_space.width - ball.at.x) / ai.reaction_threshold) +
