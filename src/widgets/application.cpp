@@ -1,5 +1,7 @@
 #include <termox/widgets/application.hpp>
 
+#include <algorithm>
+
 #include <termox/widgets/widget.hpp>
 
 namespace {
@@ -7,8 +9,8 @@ using namespace ox::widgets;
 
 auto do_tab_focus_change(Widget& head, Widget const* current_focus) -> void
 {
-    Widget* next =
-        find_if(head, [found = false, current_focus](Widget const& w) mutable {
+    Widget* next = find_if_depth_first(
+        head, [found = false, current_focus](Widget const& w) mutable {
             if (found) {
                 return w.focus_policy == FocusPolicy::Strong ||
                        w.focus_policy == FocusPolicy::Tab;
@@ -22,7 +24,7 @@ auto do_tab_focus_change(Widget& head, Widget const* current_focus) -> void
         });
 
     if (next == nullptr) {
-        next = find_if(head, [](Widget const& w) {
+        next = find_if_depth_first(head, [](Widget const& w) {
             return w.focus_policy == FocusPolicy::Strong ||
                    w.focus_policy == FocusPolicy::Tab;
         });
@@ -37,19 +39,19 @@ auto do_shift_tab_focus_change(Widget& head, Widget const* current_focus) -> voi
 {
     Widget* next = nullptr;
 
-    for_each(head,
-             [&next, previous = (Widget*)nullptr, current_focus](Widget& w) mutable {
-                 if (&w == current_focus) {
-                     next = previous;
-                 }
-                 if (w.focus_policy == FocusPolicy::Strong ||
-                     w.focus_policy == FocusPolicy::Tab) {
-                     previous = &w;
-                 }
-             });
+    for_each_depth_first(
+        head, [&next, previous = (Widget*)nullptr, current_focus](Widget& w) mutable {
+            if (&w == current_focus) {
+                next = previous;
+            }
+            if (w.focus_policy == FocusPolicy::Strong ||
+                w.focus_policy == FocusPolicy::Tab) {
+                previous = &w;
+            }
+        });
 
     if (next == nullptr) {
-        for_each(head, [&next](Widget& w) {
+        for_each_depth_first(head, [&next](Widget& w) {
             if (w.focus_policy == FocusPolicy::Strong ||
                 w.focus_policy == FocusPolicy::Tab) {
                 next = &w;

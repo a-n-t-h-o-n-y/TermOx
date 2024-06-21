@@ -14,48 +14,18 @@
 namespace {
 using namespace ox::widgets;
 
-enum class Direction : bool { Horizontal, Vertical };
-
-/**
- * Returns a pointer to the child at the given point, or nullptr if there is no child at
- * that point.
- *
- * @tparam D The direction to search in.
- * @param children The children to search.
- * @param p The point to search for.
- * @return A pointer to the child at the given point, or nullptr if there is no child at
- * that point.
- */
-template <Direction D>
-[[nodiscard]] auto child_at(std::vector<Widget>& children, ox::Point p) -> Widget*
-{
-    if constexpr (D == Direction::Horizontal) {
-        auto const iter = std::ranges::lower_bound(
-            children, p.x, std::less{},
-            [](auto const& widg) { return widg.at.x + widg.size.width - 1; });
-        return iter != std::end(children) ? &*iter : nullptr;
-    }
-    else {
-        auto const iter = std::ranges::lower_bound(
-            children, p.y, std::less{},
-            [](auto const& widg) { return widg.at.y + widg.size.height - 1; });
-        return iter != std::end(children) ? &*iter : nullptr;
-    }
-}
-
 /**
  * If there is a child at the given point, call the given event function with the child
  * and the mouse object.
  *
- * @tparam D The direction to search in.
  * @param layout The layout to search in.
  * @param m The mouse event object.
  * @param event_fn The event function to call with the child and mouse object.
  */
-template <Direction D, typename EventFn>
+template <typename EventFn>
 auto any_mouse_event(LinearLayout& layout, ox::Mouse m, EventFn&& event_fn) -> void
 {
-    auto const widg_ptr = child_at<D>(layout.children, m.at);
+    auto const widg_ptr = find_widget_at(layout.children, m.at);
 
     if (widg_ptr != nullptr) {
         auto& child = *widg_ptr;
@@ -164,10 +134,49 @@ namespace ox::widgets {
 
 // -------------------------------------------------------------------------------------
 
+auto remove(LinearLayout& layout, Widget const& w) -> Widget
+{
+    auto const iter = std::ranges::find(layout.children, &w,
+                                        [](Widget const& child) { return &child; });
+
+    if (iter == std::end(layout.children)) {
+        throw std::out_of_range{"remove: Widget not found in layout"};
+    }
+    auto const index = std::distance(std::begin(layout.children), iter);
+    layout.size_policies.erase(std::next(std::begin(layout.size_policies), index));
+    auto removed = std::move(*iter);
+    layout.children.erase(iter);
+    return removed;
+}
+
+auto remove_at(LinearLayout& layout, std::size_t index) -> Widget
+{
+    if (index >= layout.children.size()) {
+        throw std::out_of_range{"remove_at: index out of range"};
+    }
+
+    layout.size_policies.erase(
+        std::next(std::begin(layout.size_policies), (std::ptrdiff_t)index));
+    auto iter    = std::next(std::begin(layout.children), (std::ptrdiff_t)index);
+    auto removed = std::move(*iter);
+    layout.children.erase(iter);
+    return removed;
+}
+
+auto remove_all(LinearLayout& layout) -> std::vector<Widget>
+{
+    auto removed = std::move(layout.children);
+    layout.children.clear();
+    layout.size_policies.clear();
+    return removed;
+}
+
+// -------------------------------------------------------------------------------------
+
 auto paint(LinearLayout const& layout, ox::Canvas canvas) -> void
 {
     for (Widget const& child : layout.children) {
-        paint(child, {canvas.at + child.at, child.size});
+        paint(child, Canvas{.at = canvas.at + child.at, .size = child.size});
     }
 }
 
@@ -178,31 +187,27 @@ auto timer(LinearLayout& layout, int id) -> void
     }
 }
 
+auto mouse_press(LinearLayout& layout, Mouse m) -> void
+{
+    ::any_mouse_event(layout, m, [](auto& w, auto m) { mouse_press(w, m); });
+}
+
+auto mouse_release(LinearLayout& layout, Mouse m) -> void
+{
+    ::any_mouse_event(layout, m, [](auto& w, auto m) { mouse_release(w, m); });
+}
+
+auto mouse_wheel(LinearLayout& layout, Mouse m) -> void
+{
+    ::any_mouse_event(layout, m, [](auto& w, auto m) { mouse_wheel(w, m); });
+}
+
+auto mouse_move(LinearLayout& layout, Mouse m) -> void
+{
+    ::any_mouse_event(layout, m, [](auto& w, auto m) { mouse_move(w, m); });
+}
+
 // -------------------------------------------------------------------------------------
-
-auto mouse_press(HLayout& layout, Mouse m) -> void
-{
-    ::any_mouse_event<Direction::Horizontal>(
-        layout, m, [](auto& w, auto m) { mouse_press(w, m); });
-}
-
-auto mouse_release(HLayout& layout, Mouse m) -> void
-{
-    ::any_mouse_event<Direction::Horizontal>(
-        layout, m, [](auto& w, auto m) { mouse_release(w, m); });
-}
-
-auto mouse_wheel(HLayout& layout, Mouse m) -> void
-{
-    ::any_mouse_event<Direction::Horizontal>(
-        layout, m, [](auto& w, auto m) { mouse_wheel(w, m); });
-}
-
-auto mouse_move(HLayout& layout, Mouse m) -> void
-{
-    ::any_mouse_event<Direction::Horizontal>(layout, m,
-                                             [](auto& w, auto m) { mouse_move(w, m); });
-}
 
 auto resize(HLayout& layout, Area a) -> void
 {
@@ -223,30 +228,6 @@ auto append_divider(HLayout& layout, Glyph line) -> Divider&
 }
 
 // -------------------------------------------------------------------------------------
-
-auto mouse_press(VLayout& layout, Mouse m) -> void
-{
-    ::any_mouse_event<Direction::Vertical>(layout, m,
-                                           [](auto& w, auto m) { mouse_press(w, m); });
-}
-
-auto mouse_release(VLayout& layout, Mouse m) -> void
-{
-    ::any_mouse_event<Direction::Vertical>(
-        layout, m, [](auto& w, auto m) { mouse_release(w, m); });
-}
-
-auto mouse_wheel(VLayout& layout, Mouse m) -> void
-{
-    ::any_mouse_event<Direction::Vertical>(layout, m,
-                                           [](auto& w, auto m) { mouse_wheel(w, m); });
-}
-
-auto mouse_move(VLayout& layout, Mouse m) -> void
-{
-    ::any_mouse_event<Direction::Vertical>(layout, m,
-                                           [](auto& w, auto m) { mouse_move(w, m); });
-}
 
 auto resize(VLayout& layout, ox::Area a) -> void
 {

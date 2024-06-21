@@ -62,9 +62,13 @@ inline auto mouse_press(Button& b, Mouse m) -> void
 inline auto mouse_release(Button& b, Mouse m) -> void
 {
     if (m.button == Mouse::Button::Left) {
-        b.label.brush = b.brush;
+        b.label.brush = b.on_hover_brush;
         b.on_release();
     }
 }
+
+inline auto mouse_enter(Button& b) -> void { b.label.brush = b.on_hover_brush; }
+
+inline auto mouse_leave(Button& b) -> void { b.label.brush = b.brush; }
 
 }  // namespace ox::widgets

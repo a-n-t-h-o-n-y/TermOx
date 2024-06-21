@@ -9,27 +9,23 @@
 
 #include <termox/widgets.hpp>
 
-// struct Clicker {
-//     ox::Point at;
-//     ox::Glyph display = U'X' | fg(ox::XColor::Default);
-// };
+struct Clicker {
+    ox::Point at;
+    ox::Glyph display = U'X' | fg(ox::XColor::Default);
+};
 
-// void paint(Clicker const& c, ox::Canvas canvas) { canvas[c.at] = c.display; }
+void paint(Clicker const& c, ox::Canvas canvas) { canvas[c.at] = c.display; }
 
-// void mouse_press(Clicker& c, ox::Mouse m)
-// {
-//     if (m.button == ox::Mouse::Button::Left) {
-//         c.at = m.at;
-//     }
-// }
+void mouse_press(Clicker& c, ox::Mouse m)
+{
+    if (m.button == ox::Mouse::Button::Left) {
+        c.at = m.at;
+    }
+}
 
-// void focus_in(Clicker& c)
-// {
-//     c.display = c.display | fg(ox::XColor::BrightYellow);
-// }
+void focus_in(Clicker& c) { c.display = c.display | fg(ox::XColor::BrightYellow); }
 
-// void focus_out(Clicker& c) { c.display = c.display | fg(ox::XColor::Default);
-// }
+void focus_out(Clicker& c) { c.display = c.display | fg(ox::XColor::Default); }
 
 // -------------------------------------------------------------------------------------
 
@@ -47,6 +43,10 @@ struct MessageSource : VLayout {
 
     Divider& div = append_divider(*this);
 
+    Clicker& clicker = append(*this, Clicker{}, SizePolicy::fixed(10));
+
+    Divider& div2 = append_divider(*this);
+
     Button& send_button =
         append(*this,
                button({
@@ -56,6 +56,9 @@ struct MessageSource : VLayout {
                                       .traits     = ox::Trait::Underline},
                    .on_press_brush = {{.background = ox::XColor::Blue,
                                        .foreground = ox::XColor::White,
+                                       .traits     = ox::Trait::Underline}},
+                   .on_hover_brush = {{.background = ox::XColor::Green,
+                                       .foreground = ox::XColor::Black,
                                        .traits     = ox::Trait::Underline}},
                    .on_release =
                        [on_message = on_message, &text_box = text_box] {

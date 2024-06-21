@@ -57,17 +57,19 @@ struct SizePolicy {
  * not use directly, instead use HLayout or VLayout.
  */
 struct LinearLayout {
+    std::vector<Widget> children          = {};
+    std::vector<SizePolicy> size_policies = {};
+
     template <typename... Widgets>
     explicit LinearLayout(Widgets&&... children_)
     {
         static_assert((!std::is_same_v<std::remove_cvref_t<Widgets>, Widget> && ...),
                       "`Widget` type should not be passed as an argument");
+
         size_policies.resize(sizeof...(children_), SizePolicy{});
+
         (children.emplace_back(std::forward<Widgets>(children_)), ...);
     }
-
-    std::vector<Widget> children          = {};
-    std::vector<SizePolicy> size_policies = {};
 };
 
 inline auto children(LinearLayout& w) -> std::span<Widget> { return w.children; }
@@ -138,49 +140,32 @@ auto insert_at(LinearLayout& layout,
 /**
  * Removes and returns the given Widget from the LinearLayout.
  *
- * @details Find \p w with find_if.
+ * @details Find \p w with find_if_depth_first.
  * @param layout The LinearLayout to remove \p w from.
  * @param w The Widget to remove.
  * @return The removed Widget.
  * @throws std::out_of_range If \p w is not found in \p layout.
  */
-inline auto remove(LinearLayout& layout, Widget const& w) -> Widget
-{
-    auto const iter = std::ranges::find_if(
-        layout.children, [&w](Widget const* child) { return &w == child; },
-        [](Widget const& child) { return &child; });
+auto remove(LinearLayout& layout, Widget const& w) -> Widget;
 
-    if (iter == std::end(layout.children)) {
-        throw std::out_of_range{"remove: Widget not found in layout"};
-    }
-    auto const index = std::distance(std::begin(layout.children), iter);
-    layout.size_policies.erase(std::next(std::begin(layout.size_policies), index));
-    auto removed = std::move(*iter);
-    layout.children.erase(iter);
-    return removed;
-}
+/**
+ * Removes and returns the Widget at the given index from the LinearLayout.
+ *
+ * @param layout The LinearLayout to remove the Widget from.
+ * @param index The index of the Widget to remove.
+ * @return The removed Widget.
+ * @throws std::out_of_range If \p index is greater than or equal to the number of
+ * children in \p layout.
+ */
+auto remove_at(LinearLayout& layout, std::size_t index) -> Widget;
 
-inline auto remove_at(LinearLayout& layout, std::size_t index) -> Widget
-{
-    if (index >= layout.children.size()) {
-        throw std::out_of_range{"remove_at: index out of range"};
-    }
-
-    layout.size_policies.erase(
-        std::next(std::begin(layout.size_policies), (std::ptrdiff_t)index));
-    auto iter    = std::next(std::begin(layout.children), (std::ptrdiff_t)index);
-    auto removed = std::move(*iter);
-    layout.children.erase(iter);
-    return removed;
-}
-
-inline auto remove_all(LinearLayout& layout) -> std::vector<Widget>
-{
-    auto removed = std::move(layout.children);
-    layout.children.clear();
-    layout.size_policies.clear();
-    return removed;
-}
+/**
+ * Removes and returns all Widgets from the LinearLayout.
+ *
+ * @param layout The LinearLayout to remove all Widgets from.
+ * @return A vector containing all the removed Widgets.
+ */
+auto remove_all(LinearLayout& layout) -> std::vector<Widget>;
 
 // -------------------------------------------------------------------------------------
 
@@ -188,20 +173,19 @@ auto paint(LinearLayout const&, ox::Canvas) -> void;
 
 auto timer(LinearLayout&, int id) -> void;
 
+auto mouse_press(LinearLayout& layout, Mouse m) -> void;
+
+auto mouse_release(LinearLayout& layout, Mouse m) -> void;
+
+auto mouse_wheel(LinearLayout& layout, Mouse m) -> void;
+
+auto mouse_move(LinearLayout& layout, Mouse m) -> void;
+
 // -------------------------------------------------------------------------------------
 
 struct HLayout : LinearLayout {
     using LinearLayout::LinearLayout;
 };
-
-// TODO can these be made generic in LinearLayout? Is direction really that important?
-auto mouse_press(HLayout& layout, Mouse m) -> void;
-
-auto mouse_release(HLayout& layout, Mouse m) -> void;
-
-auto mouse_wheel(HLayout& layout, Mouse m) -> void;
-
-auto mouse_move(HLayout& layout, Mouse m) -> void;
 
 auto resize(HLayout& layout, Area a) -> void;
 
@@ -212,14 +196,6 @@ auto append_divider(HLayout& layout, Glyph line = {U'│'}) -> Divider&;
 struct VLayout : LinearLayout {
     using LinearLayout::LinearLayout;
 };
-
-auto mouse_press(VLayout& layout, Mouse m) -> void;
-
-auto mouse_release(VLayout& layout, Mouse m) -> void;
-
-auto mouse_wheel(VLayout& layout, Mouse m) -> void;
-
-auto mouse_move(VLayout& layout, Mouse m) -> void;
 
 auto resize(VLayout& layout, ox::Area a) -> void;
 

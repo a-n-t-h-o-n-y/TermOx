@@ -309,8 +309,6 @@ auto Painter::CursorWriter::operator<<(Painter::VLine const& vline) -> CursorWri
     return *this;
 }
 
-// -------------------------------------------------------------------------------------
-
 Painter::Painter(Canvas const& c) : canvas_{c} {}
 
 auto Painter::operator[](Point p) -> CursorWriter { return CursorWriter{canvas_, p}; }

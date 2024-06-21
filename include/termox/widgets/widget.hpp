@@ -258,29 +258,51 @@ class Widget {
     std::unique_ptr<Concept> self_;
 };
 
-inline auto for_each(Widget& w, std::function<void(Widget&)> const& fn) -> void
+/**
+ * Execute \p fn on \p w and every descendant of \p w, in a depth first traversal.
+ *
+ * @param w The Widget to start the traversal from.
+ * @param fn The function to execute on each Widget.
+ */
+inline auto for_each_depth_first(Widget& w,
+                                 std::function<void(Widget&)> const& fn) -> void
 {
-    for (auto& child : children(w)) {
-        fn(child);
-        for_each(child, fn);
+    fn(w);
+    for (Widget& child : children(w)) {
+        for_each_depth_first(child, fn);
     }
 }
 
-inline auto for_each(Widget const& w,
-                     std::function<void(Widget const&)> const& fn) -> void
+/**
+ * Execute \p fn on \p w and every descendant of \p w, in a depth first traversal.
+ *
+ * @param w The Widget to start the traversal from.
+ * @param fn The function to execute on each Widget.
+ */
+inline auto for_each_depth_first(Widget const& w,
+                                 std::function<void(Widget const&)> const& fn) -> void
 {
-    for (auto& child : children(w)) {
-        fn(child);
-        for_each(child, fn);
+    fn(w);
+    for (Widget const& child : children(w)) {
+        for_each_depth_first(child, fn);
     }
 }
 
-[[nodiscard]] inline auto find_if(Widget& w,
-                                  std::function<bool(Widget const&)> const& predicate)
-    -> Widget*
+/**
+ * Find the first Widget in \p w and its descendants that satisfies \p predicate.
+ *
+ * @details This includes \p w itself in the search.
+ * @param w The Widget to start the search from.
+ * @param predicate The function to test each Widget with.
+ * @returns A pointer to the first Widget that satisfies \p predicate, or nullptr if no
+ * Widget is found.
+ */
+[[nodiscard]] inline auto find_if_depth_first(
+    Widget& w,
+    std::function<bool(Widget const&)> const& predicate) -> Widget*
 {
     Widget* result = nullptr;
-    for_each(w, [&](Widget& child) {
+    for_each_depth_first(w, [&](Widget& child) {
         if (result == nullptr && predicate(child)) {
             result = &child;
         }
@@ -288,17 +310,48 @@ inline auto for_each(Widget const& w,
     return result;
 }
 
-[[nodiscard]] inline auto find_if(Widget const& w,
-                                  std::function<bool(Widget const&)> const& predicate)
-    -> Widget const*
+/**
+ * Find the first Widget in \p w and its descendants that satisfies \p predicate.
+ *
+ * @details This includes \p w itself in the search.
+ * @param w The Widget to start the search from.
+ * @param predicate The function to test each Widget with.
+ * @returns A pointer to the first Widget that satisfies \p predicate, or nullptr if no
+ * Widget is found.
+ */
+[[nodiscard]] inline auto find_if_depth_first(
+    Widget const& w,
+    std::function<bool(Widget const&)> const& predicate) -> Widget const*
 {
     Widget const* result = nullptr;
-    for_each(w, [&](Widget const& child) {
+    for_each_depth_first(w, [&](Widget const& child) {
         if (result == nullptr && predicate(child)) {
             result = &child;
         }
     });
     return result;
+}
+
+/**
+ * Find the Widget in \p widgets that contains the Point \p p.
+ *
+ * @details This does not check descendants of the Widgets in \p widgets. \p p is
+ * relative to the parent of the passed in Widgets; the top left corner of the parent is
+ * {0, 0}.
+ * @param widgets The Widgets to search.
+ * @param p The Point to search for.
+ * @returns A pointer to the Widget that contains \p p, or nullptr if no Widget.
+ */
+[[nodiscard]] inline auto find_widget_at(std::span<Widget> widgets,
+                                         ox::Point p) -> Widget*
+{
+    auto const at = std::ranges::find_if(widgets, [p](Widget& child) {
+        return child.enabled && child.at.x <= p.x &&
+               p.x < child.at.x + child.size.width && child.at.y <= p.y &&
+               p.y < child.at.y + child.size.height;
+    });
+
+    return (at == std::end(widgets)) ? nullptr : &*at;
 }
 
 }  // namespace ox::widgets
