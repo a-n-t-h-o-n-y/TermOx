@@ -15,32 +15,6 @@ namespace {
 using namespace ox::widgets;
 
 /**
- * If there is a child at the given point, call the given event function with the child
- * and the mouse object.
- *
- * @param layout The layout to search in.
- * @param m The mouse event object.
- * @param event_fn The event function to call with the child and mouse object.
- */
-template <typename EventFn>
-auto any_mouse_event(LinearLayout& layout, ox::Mouse m, EventFn&& event_fn) -> void
-{
-    auto const widg_ptr = find_widget_at(layout.children, m.at);
-
-    if (widg_ptr != nullptr) {
-        auto& child = *widg_ptr;
-
-        if (child.focus_policy == FocusPolicy::Strong ||
-            child.focus_policy == FocusPolicy::Click) {
-            Focus::set(child);
-        }
-
-        m.at = m.at - child.at;
-        std::forward<EventFn>(event_fn)(child, m);
-    }
-}
-
-/**
  * Calculate the length of each child in the given total space based on the its
  * SizePolicy and the total space available.
  *
@@ -130,7 +104,36 @@ auto any_mouse_event(LinearLayout& layout, ox::Mouse m, EventFn&& event_fn) -> v
 
 }  // namespace
 
+// -------------------------------------------------------------------------------------
+
 namespace ox::widgets {
+
+auto SizePolicy::fixed(int size) -> SizePolicy
+{
+    return {.minimum = size, .maximum = size, .flexibility = 0.f};
+}
+
+auto SizePolicy::flex(float flex) -> SizePolicy
+{
+    return {
+        .minimum = 0, .maximum = std::numeric_limits<int>::max(), .flexibility = flex};
+}
+
+auto SizePolicy::bounded(int min, int max) -> SizePolicy
+{
+    return {.minimum = min, .maximum = max, .flexibility = 1.f};
+}
+
+auto SizePolicy::min(int min) -> SizePolicy
+{
+    return {
+        .minimum = min, .maximum = std::numeric_limits<int>::max(), .flexibility = 1.f};
+}
+
+auto SizePolicy::max(int max) -> SizePolicy
+{
+    return {.minimum = 0, .maximum = max, .flexibility = 1.f};
+}
 
 // -------------------------------------------------------------------------------------
 
@@ -169,42 +172,6 @@ auto remove_all(LinearLayout& layout) -> std::vector<Widget>
     layout.children.clear();
     layout.size_policies.clear();
     return removed;
-}
-
-// -------------------------------------------------------------------------------------
-
-auto paint(LinearLayout const& layout, ox::Canvas canvas) -> void
-{
-    for (Widget const& child : layout.children) {
-        paint(child, Canvas{.at = canvas.at + child.at, .size = child.size});
-    }
-}
-
-auto timer(LinearLayout& layout, int id) -> void
-{
-    for (Widget& child : layout.children) {
-        timer(child, id);
-    }
-}
-
-auto mouse_press(LinearLayout& layout, Mouse m) -> void
-{
-    ::any_mouse_event(layout, m, [](auto& w, auto m) { mouse_press(w, m); });
-}
-
-auto mouse_release(LinearLayout& layout, Mouse m) -> void
-{
-    ::any_mouse_event(layout, m, [](auto& w, auto m) { mouse_release(w, m); });
-}
-
-auto mouse_wheel(LinearLayout& layout, Mouse m) -> void
-{
-    ::any_mouse_event(layout, m, [](auto& w, auto m) { mouse_wheel(w, m); });
-}
-
-auto mouse_move(LinearLayout& layout, Mouse m) -> void
-{
-    ::any_mouse_event(layout, m, [](auto& w, auto m) { mouse_move(w, m); });
 }
 
 // -------------------------------------------------------------------------------------

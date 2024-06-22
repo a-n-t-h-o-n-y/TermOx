@@ -21,10 +21,22 @@ void paint(Clicker const& c, ox::Canvas canvas)
     }
 }
 
-void mouse_press(Clicker& c, ox::Mouse m)
+void mouse_release(Clicker& c, ox::Mouse m)
 {
     if (m.button == ox::Mouse::Button::Left) {
         c.at = m.at;
+    }
+}
+
+void mouse_move(Clicker& c, ox::Mouse m) { c.at = m.at; }
+
+void mouse_wheel(Clicker& c, ox::Mouse m)
+{
+    if (m.button == ox::Mouse::Button::ScrollUp) {
+        c.display = c.display | bg(ox::XColor::BrightBlue);
+    }
+    else if (m.button == ox::Mouse::Button::ScrollDown) {
+        c.display = c.display | bg(ox::XColor::BrightRed);
     }
 }
 
@@ -40,9 +52,7 @@ struct MessageSource : VLayout {
     sl::Slot<void(std::string)> on_message;
 
     TextBox& text_box = append(*this,
-                               TextBox{
-                                   .editable = true,
-                               },
+                               TextBox{.editable = true},
                                SizePolicy::flex(),
                                FocusPolicy::Strong);
 
@@ -52,26 +62,26 @@ struct MessageSource : VLayout {
 
     Divider& div2 = append_divider(*this);
 
-    Button& send_button =
-        append(*this,
-               button({
-                   .text = "Send",
-                   .brush = {.background = ox::XColor::BrightBlue,
-                             .foreground = ox::XColor::Black,
-                             .traits = ox::Trait::Underline},
-                   .on_press_brush = {{.background = ox::XColor::Blue,
-                                       .foreground = ox::XColor::White,
-                                       .traits = ox::Trait::Underline}},
-                   .on_hover_brush = {{.background = ox::XColor::Green,
-                                       .foreground = ox::XColor::Black,
-                                       .traits = ox::Trait::Underline}},
-                   .on_release =
-                       [on_message = on_message, &text_box = text_box] {
-                           on_message(text_box.text);
-                           text_box.text.clear();
-                       },
-               }),
-               SizePolicy::fixed(3));
+    Border& send_button = append(
+        *this,
+        Border{button({
+            .text = "Send",
+            .brush = {.background = ox::XColor::BrightBlue,
+                      .foreground = ox::XColor::Black,
+                      .traits = ox::Trait::Underline},
+            .on_press_brush = {{.background = ox::XColor::Blue,
+                                .foreground = ox::XColor::Black,
+                                .traits = ox::Trait::Underline | ox::Trait::Bold}},
+            .on_hover_brush = {{.background = ox::XColor::BrightBlue,
+                                .foreground = ox::XColor::Black,
+                                .traits = ox::Trait::Underline | ox::Trait::Bold}},
+            .on_release =
+                [on_message = on_message, &text_box = text_box] {
+                    on_message(text_box.text);
+                    text_box.text.clear();
+                },
+        })},
+        SizePolicy::fixed(3));
 };
 
 struct MessageApp : HLayout {
@@ -88,15 +98,55 @@ struct MessageApp : HLayout {
         0,
         MessageSource{
             .on_message = [&rhs = rhs](std::string msg) { rhs.text = std::move(msg); },
-        });
+        },
+        SizePolicy::flex(2));
 };
 
 // -------------------------------------------------------------------------------------
 
+struct MessageApp2 : HLayout {
+    MessageApp2()
+    {
+        auto& lay1 = append(*this, VLayout{});
+        append_divider(*this);
+        auto& lay2 = append(*this, VLayout{});
+        append_divider(*this);
+        auto& lay3 = append(*this, VLayout{});
+        append_divider(*this);
+        auto& lay4 = append(*this, VLayout{});
+
+        append(lay1, Clicker{});
+        append_divider(lay1);
+        append(lay1, Clicker{});
+        append_divider(lay1);
+        append(lay1, Clicker{});
+
+        append(lay2, Clicker{});
+        append_divider(lay2);
+        append(lay2, Clicker{});
+
+        append(lay3, Clicker{});
+        append_divider(lay3);
+        append(lay3, Clicker{});
+
+        append(lay4, Clicker{});
+        append_divider(lay4);
+        append(lay4, Border{Clicker{}});
+        append_divider(lay4);
+        append(lay4, Clicker{});
+        append_divider(lay4);
+        append(lay4, Clicker{});
+    }
+};
+
 int main()
 {
     try {
-        return Application{MessageApp{}}.run();
+        return Application{
+            MessageApp{},
+            {ox::MouseMode::Move},
+        }
+            .run();
     }
     catch (std::exception const& e) {
         std::cerr << "Error: " << e.what() << '\n';

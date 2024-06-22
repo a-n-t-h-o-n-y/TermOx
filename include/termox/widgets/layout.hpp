@@ -22,34 +22,11 @@ struct SizePolicy {
     int maximum = std::numeric_limits<int>::max();
     float flexibility = 1.f;
 
-    [[nodiscard]] static auto fixed(int size) -> SizePolicy
-    {
-        return {.minimum = size, .maximum = size, .flexibility = 0.f};
-    }
-
-    [[nodiscard]] static auto flex(float flex = 1.f) -> SizePolicy
-    {
-        return {.minimum = 0,
-                .maximum = std::numeric_limits<int>::max(),
-                .flexibility = flex};
-    }
-
-    [[nodiscard]] static auto bounded(int min, int max) -> SizePolicy
-    {
-        return {.minimum = min, .maximum = max, .flexibility = 1.f};
-    }
-
-    [[nodiscard]] static auto min(int min) -> SizePolicy
-    {
-        return {.minimum = min,
-                .maximum = std::numeric_limits<int>::max(),
-                .flexibility = 1.f};
-    }
-
-    [[nodiscard]] static auto max(int max) -> SizePolicy
-    {
-        return {.minimum = 0, .maximum = max, .flexibility = 1.f};
-    }
+    [[nodiscard]] static auto fixed(int size) -> SizePolicy;
+    [[nodiscard]] static auto flex(float flex = 1.f) -> SizePolicy;
+    [[nodiscard]] static auto bounded(int min, int max) -> SizePolicy;
+    [[nodiscard]] static auto min(int min) -> SizePolicy;
+    [[nodiscard]] static auto max(int max) -> SizePolicy;
 };
 
 /**
@@ -166,20 +143,6 @@ auto remove_at(LinearLayout& layout, std::size_t index) -> Widget;
  * @return A vector containing all the removed Widgets.
  */
 auto remove_all(LinearLayout& layout) -> std::vector<Widget>;
-
-// -------------------------------------------------------------------------------------
-
-auto paint(LinearLayout const&, ox::Canvas) -> void;
-
-auto timer(LinearLayout&, int id) -> void;
-
-auto mouse_press(LinearLayout& layout, Mouse m) -> void;
-
-auto mouse_release(LinearLayout& layout, Mouse m) -> void;
-
-auto mouse_wheel(LinearLayout& layout, Mouse m) -> void;
-
-auto mouse_move(LinearLayout& layout, Mouse m) -> void;
 
 // -------------------------------------------------------------------------------------
 

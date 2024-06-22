@@ -14,7 +14,7 @@ struct Button {
 
     Brush brush;
     Brush on_press_brush;
-    Brush on_hover_brush;                           // TODO
+    Brush on_hover_brush;
     std::chrono::milliseconds on_hover_transition;  // TODO
 
     sl::Signal<void()> on_press;

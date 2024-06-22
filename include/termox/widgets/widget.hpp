@@ -105,6 +105,8 @@ class Widget {
     friend void mouse_release(Widget& w, Mouse m) { w.self_->mouse_release_(m); }
     friend void mouse_wheel(Widget& w, Mouse m) { w.self_->mouse_wheel_(m); }
     friend void mouse_move(Widget& w, Mouse m) { w.self_->mouse_move_(m); }
+    friend void mouse_enter(Widget& w) { w.self_->mouse_enter_(); }
+    friend void mouse_leave(Widget& w) { w.self_->mouse_leave_(); }
     friend void key_press(Widget& w, Key k) { w.self_->key_press_(k); }
     friend void key_release(Widget& w, Key k) { w.self_->key_release_(k); }
     friend void focus_in(Widget& w) { w.self_->focus_in_(); }
@@ -132,6 +134,8 @@ class Widget {
         virtual void mouse_release_(Mouse) = 0;
         virtual void mouse_wheel_(Mouse) = 0;
         virtual void mouse_move_(Mouse) = 0;
+        virtual void mouse_enter_() = 0;
+        virtual void mouse_leave_() = 0;
         virtual void key_press_(Key) = 0;
         virtual void key_release_(Key) = 0;
         virtual void focus_in_() = 0;
@@ -181,6 +185,20 @@ class Widget {
         {
             if constexpr (requires(T& w, Mouse m) { mouse_move(w, m); }) {
                 mouse_move(data_, m);
+            }
+        }
+
+        void mouse_enter_() override
+        {
+            if constexpr (requires(T& w) { mouse_enter(w); }) {
+                mouse_enter(data_);
+            }
+        }
+
+        void mouse_leave_() override
+        {
+            if constexpr (requires(T& w) { mouse_leave(w); }) {
+                mouse_leave(data_);
             }
         }
 

@@ -22,7 +22,7 @@ using ::esc::Mod;
 using ::esc::Mouse;
 
 // Thread Safe Queue
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 /**
  * Thread safe queue for inter-thread communication.
@@ -83,7 +83,7 @@ class ConcurrentQueue {
 };
 
 // Event Handler Response
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 /**
  * Indicates an Event handler wants the application to shut down.
@@ -103,7 +103,7 @@ struct QuitRequest {
 using EventResponse = std::optional<QuitRequest>;
 
 // Events
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 namespace event {
 
@@ -136,7 +136,7 @@ using Event = std::variant<esc::MousePress,
 using EventQueue = ConcurrentQueue<Event>;
 
 // Event Handler Concepts
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 /**
  * Checks if a type can handle a MousePress event.

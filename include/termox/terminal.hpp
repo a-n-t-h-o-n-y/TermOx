@@ -180,9 +180,12 @@ class Terminal {
      * @param key_mode The KeyMode to set the terminal to.
      * @param signals Whether OS Signals should be enabled or disabled.
      */
-    explicit Terminal(MouseMode mouse_mode = MouseMode::Basic,
-                      KeyMode key_mode = KeyMode::Normal,
-                      Signals signals = Signals::On);
+    Terminal(MouseMode mouse_mode = MouseMode::Basic,
+             KeyMode key_mode = KeyMode::Normal,
+             Signals signals = Signals::On);
+
+    Terminal(Terminal&&) = default;
+    auto operator=(Terminal&&) -> Terminal& = default;
 
     /**
      * Uninitializes the terminal display, resets the state to before the constructor
