@@ -128,11 +128,7 @@ auto send_paint_events(Widget& head, ox::Canvas canvas) -> void
 
 namespace ox::widgets {
 
-auto Application::run() -> int
-{
-    ox::Terminal::event_queue.append(esc::Resize{term_.size()});
-    return process_events(term_, *this);
-}
+auto Application::run() -> int { return process_events(term_, *this); }
 
 auto Application::handle_mouse_press(ox::Mouse m) -> ox::EventResponse
 {
