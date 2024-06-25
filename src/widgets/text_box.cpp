@@ -41,6 +41,15 @@ namespace {
 
 namespace ox {
 
+auto text_box(TextBoxInit x) -> TextBox
+{
+    return {
+        .text = std::move(x.text),
+        .editable = x.editable,
+        .word_wrap = x.word_wrap,
+    };
+}
+
 auto paint(TextBox const& tb, Canvas c) -> void
 {
     auto const line_start_indices =

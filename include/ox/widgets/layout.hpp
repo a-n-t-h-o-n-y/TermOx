@@ -150,6 +150,12 @@ struct HLayout : LinearLayout {
     using LinearLayout::LinearLayout;
 };
 
+template <typename... Widgets>
+[[nodiscard]] auto hlayout(Widgets&&... children) -> HLayout
+{
+    return {std::forward<Widgets>(children)...};
+}
+
 auto resize(HLayout& layout, Area a) -> void;
 
 auto append_divider(HLayout& layout, Glyph line = {U'│'}) -> Divider&;
@@ -159,6 +165,12 @@ auto append_divider(HLayout& layout, Glyph line = {U'│'}) -> Divider&;
 struct VLayout : LinearLayout {
     using LinearLayout::LinearLayout;
 };
+
+template <typename... Widgets>
+[[nodiscard]] auto vlayout(Widgets&&... children) -> VLayout
+{
+    return {std::forward<Widgets>(children)...};
+}
 
 auto resize(VLayout& layout, Area a) -> void;
 

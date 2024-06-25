@@ -19,7 +19,7 @@ struct Button {
     sl::Signal<void()> on_release;
 };
 
-struct ButtonParameters {
+struct ButtonInit {
     std::string text;
     Brush brush = {};
     std::optional<Brush> on_press_brush = std::nullopt;
@@ -28,20 +28,20 @@ struct ButtonParameters {
     sl::Slot<void()> on_release = [] {};
 };
 
-[[nodiscard]] inline auto button(ButtonParameters p) -> Button
+[[nodiscard]] inline auto button(ButtonInit x) -> Button
 {
     return {
         .label =
             {
-                .text = std::move(p.text),
+                .text = std::move(x.text),
                 .align = Label::Align::Center,
-                .brush = p.brush,
+                .brush = x.brush,
             },
-        .brush = p.brush,
-        .on_press_brush = p.on_press_brush.value_or(p.brush),
-        .on_hover_brush = p.on_hover_brush.value_or(p.brush),
-        .on_press = std::move(p.on_press),
-        .on_release = std::move(p.on_release),
+        .brush = x.brush,
+        .on_press_brush = x.on_press_brush.value_or(x.brush),
+        .on_hover_brush = x.on_hover_brush.value_or(x.brush),
+        .on_press = std::move(x.on_press),
+        .on_release = std::move(x.on_release),
     };
 }
 

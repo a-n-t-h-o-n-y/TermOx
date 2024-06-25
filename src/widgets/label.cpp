@@ -7,6 +7,15 @@
 
 namespace ox {
 
+auto label(LabelInit x) -> Label
+{
+    return {
+        .text = std::move(x.text),
+        .align = x.align,
+        .brush = x.brush,
+    };
+}
+
 void paint(Label const& label, Canvas c)
 {
     auto& brush = label.brush;

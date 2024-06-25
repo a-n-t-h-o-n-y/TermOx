@@ -48,102 +48,105 @@ void focus_out(Clicker& c) { c.display = c.display | fg(XColor::Default); }
 
 // -------------------------------------------------------------------------------------
 
-struct MessageSource : VLayout {
-    sl::Slot<void(std::string)> on_message;
+[[nodiscard]] auto message_source(sl::Slot<void(std::string)> on_message) -> VLayout
+{
+    auto head = VLayout{};
 
-    TextBox& text_box = append(*this,
-                               TextBox{.editable = true},
-                               SizePolicy::flex(),
-                               FocusPolicy::Strong);
+    auto& tb = append(head, text_box({.editable = true}), SizePolicy::flex(),
+                      FocusPolicy::Strong);
 
-    Divider& div = append_divider(*this);
+    append_divider(head);
 
-    Clicker& clicker = append(*this, Clicker{}, SizePolicy::flex(.5));
+    append(head, Clicker{}, SizePolicy::flex(.5));
 
-    Divider& div2 = append_divider(*this);
+    append_divider(head);
 
-    Border& send_button =
-        append(*this,
-               Border{button({
-                   .text = "Send",
-                   .brush = {.background = XColor::BrightBlue,
-                             .foreground = XColor::Black,
-                             .traits = Trait::Underline},
-                   .on_press_brush = {{.background = XColor::Blue,
-                                       .foreground = XColor::Black,
-                                       .traits = Trait::Underline | Trait::Bold}},
-                   .on_hover_brush = {{.background = XColor::BrightBlue,
-                                       .foreground = XColor::Black,
-                                       .traits = Trait::Underline | Trait::Bold}},
-                   .on_release =
-                       [on_message = on_message, &text_box = text_box] {
-                           on_message(text_box.text);
-                           text_box.text.clear();
-                       },
-               })},
-               SizePolicy::fixed(4));
-};
+    append(head,
+           border({.child = button({
+                       .text = "Send",
+                       .brush = {.background = XColor::BrightBlue,
+                                 .foreground = XColor::Black,
+                                 .traits = Trait::Underline},
+                       .on_press_brush = {{.background = XColor::Blue,
+                                           .foreground = XColor::Black,
+                                           .traits = Trait::Underline | Trait::Bold}},
+                       .on_hover_brush = {{.background = XColor::BrightBlue,
+                                           .foreground = XColor::Black,
+                                           .traits = Trait::Underline | Trait::Bold}},
+                       .on_release =
+                           [on_message = on_message, &tb = tb] {
+                               on_message(tb.text);
+                               tb.text.clear();
+                           },
+                   })}),
+           SizePolicy::fixed(4));
 
-struct MessageApp : HLayout {
-    Divider& div = append_divider(*this, {U'┃'});
+    return head;
+}
 
-    TextBox& rhs = append(*this,
-                          TextBox{
-                              .text = "Right Hand Side",
-                              .editable = false,
-                          });
+[[nodiscard]] auto message_app() -> HLayout
+{
+    auto head = hlayout();
 
-    MessageSource& lhs = insert_at(
-        *this,
-        0,
-        MessageSource{
-            .on_message = [&rhs = rhs](std::string msg) { rhs.text = std::move(msg); },
-        },
-        SizePolicy::flex(2));
-};
+    append_divider(head, {U'┃'});
+
+    auto& rhs = append(head, text_box({
+                                 .text = "Right Hand Side",
+                                 .editable = false,
+                             }));
+
+    insert_at(head, 0, message_source([&rhs = rhs](std::string msg) {
+                  rhs.text = std::move(msg);
+              }),
+              SizePolicy::flex(2));
+
+    return head;
+}
 
 // -------------------------------------------------------------------------------------
 
-struct MessageApp2 : HLayout {
-    MessageApp2()
-    {
-        auto& lay1 = append(*this, VLayout{});
-        append_divider(*this);
-        auto& lay2 = append(*this, VLayout{});
-        append_divider(*this);
-        auto& lay3 = append(*this, VLayout{});
-        append_divider(*this);
-        auto& lay4 = append(*this, VLayout{});
+[[nodiscard]] auto message_app2() -> HLayout
+{
+    auto head = hlayout();
 
-        append(lay1, Clicker{});
-        append_divider(lay1);
-        append(lay1, Clicker{});
-        append_divider(lay1);
-        append(lay1, Clicker{});
+    auto& lay1 = append(head, vlayout());
+    append_divider(head);
+    auto& lay2 = append(head, vlayout());
+    append_divider(head);
+    auto& lay3 = append(head, vlayout());
+    append_divider(head);
+    auto& lay4 = append(head, vlayout());
 
-        append(lay2, Clicker{});
-        append_divider(lay2);
-        append(lay2, Clicker{});
+    append(lay1, Clicker{});
+    append_divider(lay1);
+    append(lay1, Clicker{});
+    append_divider(lay1);
+    append(lay1, Clicker{});
 
-        append(lay3, Clicker{});
-        append_divider(lay3);
-        append(lay3, Clicker{});
+    append(lay2, Clicker{});
+    append_divider(lay2);
+    append(lay2, Clicker{});
 
-        append(lay4, Clicker{});
-        append_divider(lay4);
-        append(lay4, Border{Clicker{}});
-        append_divider(lay4);
-        append(lay4, Clicker{});
-        append_divider(lay4);
-        append(lay4, Clicker{});
-    }
-};
+    append(lay3, Clicker{});
+    append_divider(lay3);
+    append(lay3, Clicker{});
+
+    append(lay4, Clicker{});
+    append_divider(lay4);
+    append(lay4, border({Clicker{}}));
+    append_divider(lay4);
+    append(lay4, Clicker{});
+    append_divider(lay4);
+    append(lay4, Clicker{});
+
+    return head;
+}
 
 int main()
 {
     try {
         return Application{
-            MessageApp{},
+            message_app2(),
             {MouseMode::Move},
         }
             .run();

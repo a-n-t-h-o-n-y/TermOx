@@ -10,9 +10,9 @@
 namespace ox {
 
 struct TextBox {
-    std::string text = "";
-    bool editable = true;
-    bool word_wrap = true;  // TODO
+    std::string text;
+    bool editable;
+    bool word_wrap;  // TODO
 
     std::size_t cursor_index = 0;
     std::size_t width = 0;
@@ -20,6 +20,14 @@ struct TextBox {
     // TODO Scrolling
     // std::size_t top_display_index = 0;  // index into text
 };
+
+struct TextBoxInit {
+    std::string text = "";
+    bool editable = true;
+    bool word_wrap = true;
+};
+
+[[nodiscard]] auto text_box(TextBoxInit x) -> TextBox;
 
 auto paint(TextBox const& tb, Canvas c) -> void;
 

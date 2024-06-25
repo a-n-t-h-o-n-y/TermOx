@@ -7,9 +7,13 @@
 
 namespace ox {
 
-auto children(Border& b) -> std::span<Widget> { return {&b.child, 1}; }
-
-auto children(Border const& w) -> std::span<Widget const> { return {&w.child, 1}; }
+auto border(BorderInit x) -> Border
+{
+    return {
+        .child = std::move(x.child),
+        .box = std::move(x.box),
+    };
+}
 
 // Child is painted by Application class.
 auto paint(Border const& b, Canvas c) -> void { Painter{c}[{0, 0}] << b.box; }
@@ -27,5 +31,13 @@ auto resize(Border& b, Area new_size) -> void
 
 // Forwards Focus
 auto focus_in(Border& b) -> void { Focus::set(b.child); }
+
+auto children(Border& b) -> std::span<Widget> { return {&b.child, 1}; }
+
+auto children(Border const& w) -> std::span<Widget const> { return {&w.child, 1}; }
+
+// -------------------------------------------------------------------------------------
+
+auto divider(Glyph line) -> Divider { return {.line = line}; }
 
 }  // namespace ox

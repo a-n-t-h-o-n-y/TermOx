@@ -14,18 +14,16 @@ namespace ox {
  * to fit within the Border.
  */
 struct Border {
-    template <typename T>
-    explicit Border(T child_, Painter::Box box_ = {})
-        : child{Widget{std::move(child_), {}}}, box{std::move(box_)}
-    {}
-
     Widget child;
     Painter::Box box;
 };
 
-auto children(Border& b) -> std::span<Widget>;
+struct BorderInit {
+    Widget child;
+    Painter::Box box = {};
+};
 
-auto children(Border const& w) -> std::span<Widget const>;
+[[nodiscard]] auto border(BorderInit x) -> Border;
 
 auto paint(Border const& b, Canvas c) -> void;
 
@@ -33,11 +31,17 @@ auto resize(Border& b, Area new_size) -> void;
 
 auto focus_in(Border& b) -> void;
 
+auto children(Border& b) -> std::span<Widget>;
+
+auto children(Border const& w) -> std::span<Widget const>;
+
 // -------------------------------------------------------------------------------------
 
 struct Divider {
     Glyph line;
 };
+
+[[nodiscard]] auto divider(Glyph line) -> Divider;
 
 inline auto paint(Divider const& d, Canvas c) -> void { Painter{c}.fill(d.line); }
 
