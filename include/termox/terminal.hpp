@@ -158,6 +158,9 @@ class TimerThread {
  */
 class Terminal {
    public:
+    using Cursor = std::optional<Point>;
+
+   public:
     inline static ScreenBuffer changes{{0, 0}};  // write to this
     inline static EventQueue event_queue;        // read from this
 
@@ -169,7 +172,7 @@ class Terminal {
      * @details This is used by the event loop after `changes` has been committed to the
      * terminal. If this is std::nullopt, then the cursor is not displayed.
      */
-    inline static std::optional<Point> cursor{std::nullopt};
+    inline static Cursor cursor{std::nullopt};
 
    public:
     /**
@@ -290,8 +293,9 @@ class Timer {
  * terminal space.
  */
 struct Canvas {
-    Point at = {0, 0};
-    Area size = Terminal::changes.size();
+    ScreenBuffer& buffer;
+    Point at;
+    Area size;
 
     /**
      * Provides mutable access to the top left Point of the Canvas.
@@ -450,7 +454,11 @@ class Painter {
      *
      * @param c The Canvas to paint on. Default is the entire terminal.
      */
-    explicit Painter(Canvas const& c = {});
+    explicit Painter(Canvas const& c = {
+                         .buffer = Terminal::changes,
+                         .at = {0, 0},
+                         .size = Terminal::changes.size(),
+                     });
 
    public:
     /**
@@ -571,6 +579,16 @@ template <typename T>
         ev);
 }
 
+template <typename T>
+concept HandlesCursor = requires(T t) {
+    { t.handle_cursor() } -> std::same_as<Terminal::Cursor>;
+};
+
+template <typename T>
+concept HandlesPaint = requires(T const t, Canvas c) {
+    { t.handle_paint(c) } -> std::same_as<void>;
+};
+
 /**
  * Runs an event loop over the Terminal::event_queue, sending events to the given event
  * handler.
@@ -593,6 +611,16 @@ template <typename EventHandler>
                 return quit->return_code;
             }
             else {
+                if constexpr (HandlesPaint<EventHandler>) {
+                    handler.handle_paint(ox::Canvas{
+                        .buffer = Terminal::changes,
+                        .at = {0, 0},
+                        .size = Terminal::changes.size(),
+                    });
+                }
+                if constexpr (HandlesCursor<EventHandler>) {
+                    term.cursor = handler.handle_cursor();
+                }
                 term.commit_changes();
             }
         }

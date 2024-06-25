@@ -58,7 +58,7 @@ struct MessageSource : VLayout {
 
     Divider& div = append_divider(*this);
 
-    Clicker& clicker = append(*this, Clicker{}, SizePolicy::fixed(10));
+    Clicker& clicker = append(*this, Clicker{}, SizePolicy::flex(.5));
 
     Divider& div2 = append_divider(*this);
 
@@ -81,7 +81,7 @@ struct MessageSource : VLayout {
                     text_box.text.clear();
                 },
         })},
-        SizePolicy::fixed(3));
+        SizePolicy::fixed(4));
 };
 
 struct MessageApp : HLayout {

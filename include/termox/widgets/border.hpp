@@ -25,6 +25,8 @@ struct Border {
 
 auto children(Border& b) -> std::span<Widget>;
 
+auto children(Border const& w) -> std::span<Widget const>;
+
 auto paint(Border const& b, Canvas c) -> void;
 
 auto resize(Border& b, Area new_size) -> void;

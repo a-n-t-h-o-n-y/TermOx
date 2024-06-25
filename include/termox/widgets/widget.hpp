@@ -114,6 +114,11 @@ class Widget {
     friend void resize(Widget& w, Area a) { w.self_->resize_(a); }
     friend void timer(Widget& w, int id) { w.self_->timer_(id); }
 
+    friend auto cursor(Widget const& w) -> ox::Terminal::Cursor
+    {
+        return w.self_->cursor_();
+    }
+
     [[nodiscard]] friend auto children(Widget& w) -> std::span<Widget>
     {
         return w.self_.get()->children_();
@@ -142,6 +147,8 @@ class Widget {
         virtual void focus_out_() = 0;
         virtual void resize_(Area) = 0;
         virtual void timer_(int) = 0;
+
+        virtual auto cursor_() const -> ox::Terminal::Cursor = 0;
 
         virtual auto children_() -> std::span<Widget> = 0;
         virtual auto children_() const -> std::span<Widget const> = 0;
@@ -241,6 +248,16 @@ class Widget {
         {
             if constexpr (requires(T& w, int id) { timer(w, id); }) {
                 timer(data_, id);
+            }
+        }
+
+        auto cursor_() const -> ox::Terminal::Cursor override
+        {
+            if constexpr (requires(T& w) { cursor(w); }) {
+                return cursor(data_);
+            }
+            else {
+                return std::nullopt;
             }
         }
 

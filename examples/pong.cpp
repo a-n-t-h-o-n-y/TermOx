@@ -328,6 +328,7 @@ auto paint(Game const& x, Canvas const& c) -> void
     }
 
     auto game_canvas = Canvas{
+        .buffer = c.buffer,
         .at = {.x = c.at.x + (c.size.width - display_space.width) / 2,
                .y = c.at.y + (c.size.height - display_space.height) / 2},
         .size = display_space,
@@ -429,7 +430,15 @@ auto paint(Game const& x, Canvas const& c) -> void
  */
 auto paint(State const& x) -> void
 {
-    std::visit([&](auto const& s) { paint(s, Canvas{}); }, x);
+    std::visit(
+        [&](auto const& s) {
+            paint(s, Canvas{
+                         .buffer = ox::Terminal::changes,
+                         .at = {0, 0},
+                         .size = ox::Terminal::changes.size(),
+                     });
+        },
+        x);
 }
 
 // -------------------------------------------------------------------------------------

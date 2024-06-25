@@ -42,6 +42,18 @@ using namespace ox::widgets;
         total_allocated += exact_amounts[i];
     }
 
+    // TODO
+    // I do not believe this removes space from widgets if the sum of mins is greater
+    // than the total space available.
+    // You could have a check here.
+    // if (total_allocated >= total) {
+    //     auto results = std::vector<int>(size_policies.size(), 0);
+
+    //     // floor values to ints.
+    //     std::ranges::copy(exact_amounts, results.begin());
+    //     return results;
+    // }
+
     // Distribute flex space
     auto remaining_space = (float)total - total_allocated;
     while (remaining_space > 0) {

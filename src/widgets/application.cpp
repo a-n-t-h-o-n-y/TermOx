@@ -116,11 +116,17 @@ auto any_mouse_event(Widget& head, ox::Mouse m, EventFn&& event_fn) -> void
     }
 }
 
-auto send_paint_events(Widget& head, ox::Canvas canvas) -> void
+auto send_paint_events(Widget const& head, ox::Canvas canvas) -> void
 {
-    paint(head, canvas);
-    for (auto& child : children(head)) {
-        send_paint_events(child, {.at = canvas.at + child.at, .size = child.size});
+    if (head.enabled && head.size.width > 0 && head.size.height > 0) {
+        paint(head, canvas);
+    }
+    for (auto const& child : children(head)) {
+        send_paint_events(child, ox::Canvas{
+                                     .buffer = canvas.buffer,
+                                     .at = canvas.at + child.at,
+                                     .size = child.size,
+                                 });
     }
 }
 
@@ -134,7 +140,6 @@ auto Application::handle_mouse_press(ox::Mouse m) -> ox::EventResponse
 {
     ::any_mouse_event<SetFocus::Yes>(head_, m,
                                      [](Widget& w, ox::Mouse m) { mouse_press(w, m); });
-    ::send_paint_events(head_, {.at = {0, 0}, .size = term_.changes.size()});
     return {};
 }
 
@@ -142,7 +147,6 @@ auto Application::handle_mouse_release(ox::Mouse m) -> ox::EventResponse
 {
     ::any_mouse_event<SetFocus::No>(
         head_, m, [](Widget& w, ox::Mouse m) { mouse_release(w, m); });
-    ::send_paint_events(head_, {.at = {0, 0}, .size = term_.changes.size()});
     return {};
 }
 
@@ -150,7 +154,6 @@ auto Application::handle_mouse_wheel(ox::Mouse m) -> ox::EventResponse
 {
     ::any_mouse_event<SetFocus::No>(head_, m,
                                     [](Widget& w, ox::Mouse m) { mouse_wheel(w, m); });
-    ::send_paint_events(head_, {.at = {0, 0}, .size = term_.changes.size()});
     return {};
 }
 
@@ -160,7 +163,6 @@ auto Application::handle_mouse_move(ox::Mouse m) -> ox::EventResponse
     ::any_mouse_event<SetFocus::No>(head_, m,
                                     [](Widget& w, ox::Mouse m) { mouse_move(w, m); });
     previous_mouse_position_ = m.at;
-    ::send_paint_events(head_, {.at = {0, 0}, .size = term_.changes.size()});
     return {};
 }
 
@@ -185,7 +187,6 @@ auto Application::handle_key_press(ox::Key k) -> ox::EventResponse
             key_press(*focused, k);
         }
     }
-    ::send_paint_events(head_, {.at = {0, 0}, .size = term_.changes.size()});
     return {};
 }
 
@@ -195,22 +196,34 @@ auto Application::handle_key_release(ox::Key k) -> ox::EventResponse
     if (focused != nullptr) {
         key_release(*focused, k);
     }
-    ::send_paint_events(head_, {.at = {0, 0}, .size = term_.changes.size()});
     return {};
 }
 
 auto Application::handle_resize(ox::Area new_size) -> ox::EventResponse
 {
     resize(head_, new_size);
-    ::send_paint_events(head_, {.at = {0, 0}, .size = term_.changes.size()});
     return {};
 }
 
 auto Application::handle_timer(int id) -> ox::EventResponse
 {
     for_each_depth_first(head_, [id](Widget& w) { timer(w, id); });
-    ::send_paint_events(head_, {.at = {0, 0}, .size = term_.changes.size()});
     return {};
+}
+
+auto Application::handle_cursor() -> ox::Terminal::Cursor
+{
+    Widget* const focused = Focus::get();
+    // TODO
+    // you need to get the offset to apply to the returned cursor point if it is not
+    // nullopt. If focus is an in tree implementation you can do this, otherwise it is
+    // not straightforward.
+    return focused != nullptr ? cursor(*focused) : std::nullopt;
+}
+
+auto Application::handle_paint(ox::Canvas canvas) const -> void
+{
+    ::send_paint_events(head_, canvas);
 }
 
 }  // namespace ox::widgets

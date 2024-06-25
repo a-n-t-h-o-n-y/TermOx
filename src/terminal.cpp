@@ -1,6 +1,7 @@
 #include <termox/terminal.hpp>
 
 #include <algorithm>
+#include <cassert>
 
 #include <esc/detail/signals.hpp>
 #include <esc/detail/transcode.hpp>
@@ -201,24 +202,24 @@ auto Timer::stop() -> void
 
 auto Canvas::operator[](Point p) -> Glyph&
 {
-    p.x = std::clamp(p.x, 0, size.width - 1);
-    p.y = std::clamp(p.y, 0, size.height - 1);
+    assert(p.x >= 0 && p.x < this->size.width);
+    assert(p.y >= 0 && p.y < this->size.height);
     auto const global_point = Point{
-        .x = std::clamp(at.x + p.x, 0, Terminal::changes.size().width - 1),
-        .y = std::clamp(at.y + p.y, 0, Terminal::changes.size().height - 1),
+        .x = std::clamp(at.x + p.x, 0, this->buffer.size().width - 1),
+        .y = std::clamp(at.y + p.y, 0, this->buffer.size().height - 1),
     };
-    return Terminal::changes[global_point];
+    return buffer[global_point];
 }
 
 auto Canvas::operator[](Point p) const -> Glyph const&
 {
-    p.x = std::clamp(p.x, 0, size.width - 1);
-    p.y = std::clamp(p.y, 0, size.height - 1);
+    assert(p.x >= 0 && p.x < this->size.width);
+    assert(p.y >= 0 && p.y < this->size.height);
     auto const global_point = Point{
-        .x = std::clamp(at.x + p.x, 0, Terminal::changes.size().width - 1),
-        .y = std::clamp(at.y + p.y, 0, Terminal::changes.size().height - 1),
+        .x = std::clamp(at.x + p.x, 0, buffer.size().width - 1),
+        .y = std::clamp(at.y + p.y, 0, buffer.size().height - 1),
     };
-    return Terminal::changes[global_point];
+    return buffer[global_point];
 }
 
 // -------------------------------------------------------------------------------------

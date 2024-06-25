@@ -27,4 +27,6 @@ auto resize(TextBox& tb, Area new_size) -> void;
 
 auto key_press(TextBox& tb, Key k) -> void;
 
+auto cursor(TextBox const& tb) -> ox::Terminal::Cursor;
+
 }  // namespace ox::widgets

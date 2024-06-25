@@ -46,10 +46,9 @@ auto paint(TextBox const& tb, Canvas c) -> void
     auto const line_start_indices =
         calculate_line_start_indices(tb.text, tb.word_wrap, tb.width);
 
-    for (auto i = std::size_t{0}; i + 1 < line_start_indices.size(); ++i) {
-        if (i >= (std::size_t)c.size.height) {
-            break;
-        }
+    // first lines
+    for (auto i = std::size_t{0};
+         (i + 1 < line_start_indices.size()) && (i < (std::size_t)c.size.height); ++i) {
         auto const start = line_start_indices[i];
         auto const end = line_start_indices[i + 1];
         auto line = std::string_view{tb.text}.substr(start, end - start);
@@ -58,7 +57,9 @@ auto paint(TextBox const& tb, Canvas c) -> void
         }
         ox::Painter{c}[{0, (int)i}] << line;
     }
-    if (!line_start_indices.empty()) {
+    // last line
+    if (!line_start_indices.empty() &&
+        (line_start_indices.size() <= (std::size_t)c.size.height)) {
         auto const start = line_start_indices.back();
         auto line = std::string_view{tb.text}.substr(start);
         if (line.back() == '\n') {
@@ -113,6 +114,12 @@ auto key_press(TextBox& tb, Key k) -> void
             }
             break;
     }
+}
+
+auto cursor(TextBox const& /*tb*/) -> ox::Terminal::Cursor
+{
+    // TODO make a real implementation.
+    return Point{.x = 5, .y = 0};
 }
 
 }  // namespace ox::widgets

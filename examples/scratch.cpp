@@ -17,6 +17,7 @@ int main()
         auto handle_mouse_press(Mouse const& m) -> EventResponse
         {
             auto canvas = Canvas{
+                .buffer = Terminal::changes,
                 .at = {0, 0},
                 .size = Terminal::changes.size(),
             };
