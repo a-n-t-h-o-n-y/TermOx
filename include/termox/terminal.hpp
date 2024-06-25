@@ -580,13 +580,8 @@ template <typename T>
 }
 
 template <typename T>
-concept HandlesCursor = requires(T t) {
-    { t.handle_cursor() } -> std::same_as<Terminal::Cursor>;
-};
-
-template <typename T>
 concept HandlesPaint = requires(T const t, Canvas c) {
-    { t.handle_paint(c) } -> std::same_as<void>;
+    { t.handle_paint(c) } -> std::same_as<Terminal::Cursor>;
 };
 
 /**
@@ -612,14 +607,11 @@ template <typename EventHandler>
             }
             else {
                 if constexpr (HandlesPaint<EventHandler>) {
-                    handler.handle_paint(ox::Canvas{
+                    term.cursor = handler.handle_paint(ox::Canvas{
                         .buffer = Terminal::changes,
                         .at = {0, 0},
                         .size = Terminal::changes.size(),
                     });
-                }
-                if constexpr (HandlesCursor<EventHandler>) {
-                    term.cursor = handler.handle_cursor();
                 }
                 term.commit_changes();
             }

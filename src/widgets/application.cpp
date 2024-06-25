@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include <termox/widgets/focus.hpp>
 #include <termox/widgets/widget.hpp>
 
 namespace {
@@ -116,17 +117,27 @@ auto any_mouse_event(Widget& head, ox::Mouse m, EventFn&& event_fn) -> void
     }
 }
 
-auto send_paint_events(Widget const& head, ox::Canvas canvas) -> void
+// Recursively send paint events to each Widget including and below head. \p cursor is
+// assigned to if the current focus widget is painted.
+auto send_paint_events(Widget const& head,
+                       ox::Canvas canvas,
+                       ox::Terminal::Cursor& cursor_out) -> void
 {
     if (head.enabled && head.size.width > 0 && head.size.height > 0) {
         paint(head, canvas);
+        if (Focus::get() == &head) {
+            auto const local_cursor = cursor(head);
+            cursor_out = local_cursor ? canvas.at + *local_cursor : local_cursor;
+        }
     }
     for (auto const& child : children(head)) {
-        send_paint_events(child, ox::Canvas{
-                                     .buffer = canvas.buffer,
-                                     .at = canvas.at + child.at,
-                                     .size = child.size,
-                                 });
+        send_paint_events(child,
+                          ox::Canvas{
+                              .buffer = canvas.buffer,
+                              .at = canvas.at + child.at,
+                              .size = child.size,
+                          },
+                          cursor_out);
     }
 }
 
@@ -211,19 +222,11 @@ auto Application::handle_timer(int id) -> ox::EventResponse
     return {};
 }
 
-auto Application::handle_cursor() -> ox::Terminal::Cursor
+auto Application::handle_paint(ox::Canvas canvas) const -> ox::Terminal::Cursor
 {
-    Widget* const focused = Focus::get();
-    // TODO
-    // you need to get the offset to apply to the returned cursor point if it is not
-    // nullopt. If focus is an in tree implementation you can do this, otherwise it is
-    // not straightforward.
-    return focused != nullptr ? cursor(*focused) : std::nullopt;
-}
-
-auto Application::handle_paint(ox::Canvas canvas) const -> void
-{
-    ::send_paint_events(head_, canvas);
+    auto cursor = ox::Terminal::Cursor{std::nullopt};
+    ::send_paint_events(head_, canvas, cursor);
+    return cursor;
 }
 
 }  // namespace ox::widgets

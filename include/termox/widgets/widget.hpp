@@ -48,7 +48,6 @@ class Widget {
           self_{std::make_unique<Model<T>>(Model<T>{std::forward<T>(t)})}
     {}
 
-    // TODO if focus can be put in tree, then these can be removed.
     Widget(Widget const&) = delete;
     Widget(Widget&& other)
         : focus_policy{other.focus_policy},
@@ -114,7 +113,7 @@ class Widget {
     friend void resize(Widget& w, Area a) { w.self_->resize_(a); }
     friend void timer(Widget& w, int id) { w.self_->timer_(id); }
 
-    friend auto cursor(Widget const& w) -> ox::Terminal::Cursor
+    [[nodiscard]] friend auto cursor(Widget const& w) -> ox::Terminal::Cursor
     {
         return w.self_->cursor_();
     }

@@ -119,7 +119,7 @@ auto key_press(TextBox& tb, Key k) -> void
 auto cursor(TextBox const& /*tb*/) -> ox::Terminal::Cursor
 {
     // TODO make a real implementation.
-    return Point{.x = 5, .y = 0};
+    return Point{.x = 5, .y = 2};
 }
 
 }  // namespace ox::widgets

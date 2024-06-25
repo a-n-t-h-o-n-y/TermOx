@@ -46,9 +46,7 @@ class Application {
 
     auto handle_timer(int id) -> ox::EventResponse;
 
-    auto handle_cursor() -> ox::Terminal::Cursor;
-
-    auto handle_paint(ox::Canvas canvas) const -> void;
+    auto handle_paint(ox::Canvas canvas) const -> ox::Terminal::Cursor;
 
    private:
     Widget head_;
