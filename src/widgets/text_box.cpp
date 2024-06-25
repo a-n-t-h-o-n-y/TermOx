@@ -1,7 +1,7 @@
-#include <termox/widgets/text_box.hpp>
+#include <ox/widgets/text_box.hpp>
 
-#include <termox/core.hpp>
-#include <termox/widgets/widget.hpp>
+#include <ox/core.hpp>
+#include <ox/widgets/widget.hpp>
 
 namespace {
 

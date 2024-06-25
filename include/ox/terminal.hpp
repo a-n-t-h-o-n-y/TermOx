@@ -23,9 +23,9 @@
 #include <esc/point.hpp>
 #include <esc/terminal.hpp>
 
-#include <termox/common.hpp>
-#include <termox/events.hpp>
-#include <termox/glyph.hpp>
+#include <ox/common.hpp>
+#include <ox/events.hpp>
+#include <ox/glyph.hpp>
 
 namespace ox {
 

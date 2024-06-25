@@ -4,7 +4,7 @@
 
 #include <signals_light/signal.hpp>
 
-#include <termox/widgets/label.hpp>
+#include <ox/widgets/label.hpp>
 
 namespace ox::widgets {
 

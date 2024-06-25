@@ -2,8 +2,8 @@
 
 #include <span>
 
-#include <termox/core.hpp>
-#include <termox/widgets/widget.hpp>
+#include <ox/core.hpp>
+#include <ox/widgets/widget.hpp>
 
 namespace ox::widgets {
 

@@ -7,7 +7,7 @@
 
 #include <signals_light/signal.hpp>
 
-#include <termox/widgets.hpp>
+#include <ox/widgets.hpp>
 
 struct Clicker {
     ox::Point at;

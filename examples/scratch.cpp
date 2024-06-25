@@ -1,4 +1,4 @@
-#include <termox/core.hpp>
+#include <ox/core.hpp>
 
 #include <chrono>
 #include <future>

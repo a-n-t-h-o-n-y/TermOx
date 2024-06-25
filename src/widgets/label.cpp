@@ -1,9 +1,9 @@
-#include <termox/widgets/label.hpp>
+#include <ox/widgets/label.hpp>
 
 #include <cstddef>
 #include <string_view>
 
-#include <termox/core.hpp>
+#include <ox/core.hpp>
 
 namespace ox::widgets {
 

@@ -13,7 +13,7 @@
 #include <variant>
 #include <vector>
 
-#include <termox/core.hpp>
+#include <ox/core.hpp>
 
 using namespace ox;
 

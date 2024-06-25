@@ -9,7 +9,7 @@
 #include <utility>
 #include <vector>
 
-#include <termox/widgets/widget.hpp>
+#include <ox/widgets/widget.hpp>
 
 namespace ox::widgets {
 struct Divider;

@@ -1,4 +1,4 @@
-#include <termox/terminal.hpp>
+#include <ox/terminal.hpp>
 
 #include <algorithm>
 #include <cassert>

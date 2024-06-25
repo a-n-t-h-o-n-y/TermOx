@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include <termox/core.hpp>
+#include <ox/core.hpp>
 
 namespace ox::widgets {
 

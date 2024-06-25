@@ -13,7 +13,7 @@
 #include <esc/key.hpp>
 #include <esc/mouse.hpp>
 
-#include <termox/common.hpp>
+#include <ox/common.hpp>
 
 namespace ox {
 

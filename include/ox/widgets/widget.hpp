@@ -9,8 +9,8 @@
 #include <span>
 #include <vector>
 
-#include <termox/core.hpp>
-#include <termox/widgets/focus.hpp>
+#include <ox/core.hpp>
+#include <ox/widgets/focus.hpp>
 
 namespace ox::widgets {
 

@@ -1,4 +1,4 @@
-#include <termox/widgets/layout.hpp>
+#include <ox/widgets/layout.hpp>
 
 #include <algorithm>
 #include <cassert>
@@ -8,8 +8,8 @@
 #include <utility>
 #include <vector>
 
-#include <termox/widgets/border.hpp>
-#include <termox/widgets/focus.hpp>
+#include <ox/widgets/border.hpp>
+#include <ox/widgets/focus.hpp>
 
 namespace {
 using namespace ox::widgets;

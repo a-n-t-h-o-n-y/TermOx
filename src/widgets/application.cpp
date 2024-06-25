@@ -1,9 +1,9 @@
-#include <termox/widgets/application.hpp>
+#include <ox/widgets/application.hpp>
 
 #include <algorithm>
 
-#include <termox/widgets/focus.hpp>
-#include <termox/widgets/widget.hpp>
+#include <ox/widgets/focus.hpp>
+#include <ox/widgets/widget.hpp>
 
 namespace {
 using namespace ox::widgets;

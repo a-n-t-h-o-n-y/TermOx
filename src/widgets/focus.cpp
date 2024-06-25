@@ -1,6 +1,6 @@
-#include <termox/widgets/focus.hpp>
+#include <ox/widgets/focus.hpp>
 
-#include <termox/widgets/widget.hpp>
+#include <ox/widgets/widget.hpp>
 
 namespace ox::widgets {
 

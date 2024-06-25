@@ -20,20 +20,20 @@ add_library(TermOx STATIC
     src/widgets/layout.cpp
     src/widgets/text_box.cpp
 
-    include/termox/common.hpp
-    include/termox/core.hpp
-    include/termox/events.hpp
-    include/termox/glyph.hpp
-    include/termox/terminal.hpp
+    include/ox/common.hpp
+    include/ox/core.hpp
+    include/ox/events.hpp
+    include/ox/glyph.hpp
+    include/ox/terminal.hpp
 
-    include/termox/widgets/application.hpp
-    include/termox/widgets/border.hpp
-    include/termox/widgets/button.hpp
-    include/termox/widgets/focus.hpp
-    include/termox/widgets/label.hpp
-    include/termox/widgets/layout.hpp
-    include/termox/widgets/text_box.hpp
-    include/termox/widgets/widget.hpp
+    include/ox/widgets/application.hpp
+    include/ox/widgets/border.hpp
+    include/ox/widgets/button.hpp
+    include/ox/widgets/focus.hpp
+    include/ox/widgets/label.hpp
+    include/ox/widgets/layout.hpp
+    include/ox/widgets/text_box.hpp
+    include/ox/widgets/widget.hpp
 )
 
 # Include Directories for the Library
