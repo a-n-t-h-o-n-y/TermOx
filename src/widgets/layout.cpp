@@ -12,7 +12,7 @@
 #include <ox/widgets/focus.hpp>
 
 namespace {
-using namespace ox::widgets;
+using namespace ox;
 
 /**
  * Calculate the length of each child in the given total space based on the its
@@ -118,7 +118,7 @@ using namespace ox::widgets;
 
 // -------------------------------------------------------------------------------------
 
-namespace ox::widgets {
+namespace ox {
 
 auto SizePolicy::fixed(int size) -> SizePolicy
 {
@@ -208,7 +208,7 @@ auto append_divider(HLayout& layout, Glyph line) -> Divider&
 
 // -------------------------------------------------------------------------------------
 
-auto resize(VLayout& layout, ox::Area a) -> void
+auto resize(VLayout& layout, Area a) -> void
 {
     auto y = 0;
     auto const heights = ::distribute_length(layout.size_policies, a.height);
@@ -226,4 +226,4 @@ auto append_divider(VLayout& layout, Glyph line) -> Divider&
     return append(layout, Divider{line}, SizePolicy::fixed(1));
 }
 
-}  // namespace ox::widgets
+}  // namespace ox

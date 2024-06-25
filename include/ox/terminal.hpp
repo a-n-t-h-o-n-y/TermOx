@@ -607,7 +607,7 @@ template <typename EventHandler>
             }
             else {
                 if constexpr (HandlesPaint<EventHandler>) {
-                    term.cursor = handler.handle_paint(ox::Canvas{
+                    term.cursor = handler.handle_paint(Canvas{
                         .buffer = Terminal::changes,
                         .at = {0, 0},
                         .size = Terminal::changes.size(),

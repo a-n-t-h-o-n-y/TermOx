@@ -9,44 +9,44 @@
 
 #include <ox/widgets.hpp>
 
+using namespace ox;
+
 struct Clicker {
-    ox::Point at;
-    ox::Glyph display = U'X' | fg(ox::XColor::Default);
+    Point at;
+    Glyph display = U'X' | fg(XColor::Default);
 };
 
-void paint(Clicker const& c, ox::Canvas canvas)
+void paint(Clicker const& c, Canvas canvas)
 {
     if (c.at.x < canvas.size.width && c.at.y < canvas.size.height) {
         canvas[c.at] = c.display;
     }
 }
 
-void mouse_release(Clicker& c, ox::Mouse m)
+void mouse_release(Clicker& c, Mouse m)
 {
-    if (m.button == ox::Mouse::Button::Left) {
+    if (m.button == Mouse::Button::Left) {
         c.at = m.at;
     }
 }
 
-void mouse_move(Clicker& c, ox::Mouse m) { c.at = m.at; }
+void mouse_move(Clicker& c, Mouse m) { c.at = m.at; }
 
-void mouse_wheel(Clicker& c, ox::Mouse m)
+void mouse_wheel(Clicker& c, Mouse m)
 {
-    if (m.button == ox::Mouse::Button::ScrollUp) {
-        c.display = c.display | bg(ox::XColor::BrightBlue);
+    if (m.button == Mouse::Button::ScrollUp) {
+        c.display = c.display | bg(XColor::BrightBlue);
     }
-    else if (m.button == ox::Mouse::Button::ScrollDown) {
-        c.display = c.display | bg(ox::XColor::BrightRed);
+    else if (m.button == Mouse::Button::ScrollDown) {
+        c.display = c.display | bg(XColor::BrightRed);
     }
 }
 
-void focus_in(Clicker& c) { c.display = c.display | fg(ox::XColor::BrightYellow); }
+void focus_in(Clicker& c) { c.display = c.display | fg(XColor::BrightYellow); }
 
-void focus_out(Clicker& c) { c.display = c.display | fg(ox::XColor::Default); }
+void focus_out(Clicker& c) { c.display = c.display | fg(XColor::Default); }
 
 // -------------------------------------------------------------------------------------
-
-using namespace ox::widgets;
 
 struct MessageSource : VLayout {
     sl::Slot<void(std::string)> on_message;
@@ -62,26 +62,26 @@ struct MessageSource : VLayout {
 
     Divider& div2 = append_divider(*this);
 
-    Border& send_button = append(
-        *this,
-        Border{button({
-            .text = "Send",
-            .brush = {.background = ox::XColor::BrightBlue,
-                      .foreground = ox::XColor::Black,
-                      .traits = ox::Trait::Underline},
-            .on_press_brush = {{.background = ox::XColor::Blue,
-                                .foreground = ox::XColor::Black,
-                                .traits = ox::Trait::Underline | ox::Trait::Bold}},
-            .on_hover_brush = {{.background = ox::XColor::BrightBlue,
-                                .foreground = ox::XColor::Black,
-                                .traits = ox::Trait::Underline | ox::Trait::Bold}},
-            .on_release =
-                [on_message = on_message, &text_box = text_box] {
-                    on_message(text_box.text);
-                    text_box.text.clear();
-                },
-        })},
-        SizePolicy::fixed(4));
+    Border& send_button =
+        append(*this,
+               Border{button({
+                   .text = "Send",
+                   .brush = {.background = XColor::BrightBlue,
+                             .foreground = XColor::Black,
+                             .traits = Trait::Underline},
+                   .on_press_brush = {{.background = XColor::Blue,
+                                       .foreground = XColor::Black,
+                                       .traits = Trait::Underline | Trait::Bold}},
+                   .on_hover_brush = {{.background = XColor::BrightBlue,
+                                       .foreground = XColor::Black,
+                                       .traits = Trait::Underline | Trait::Bold}},
+                   .on_release =
+                       [on_message = on_message, &text_box = text_box] {
+                           on_message(text_box.text);
+                           text_box.text.clear();
+                       },
+               })},
+               SizePolicy::fixed(4));
 };
 
 struct MessageApp : HLayout {
@@ -144,7 +144,7 @@ int main()
     try {
         return Application{
             MessageApp{},
-            {ox::MouseMode::Move},
+            {MouseMode::Move},
         }
             .run();
     }

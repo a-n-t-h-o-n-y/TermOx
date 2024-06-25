@@ -11,7 +11,7 @@
 
 #include <ox/widgets/widget.hpp>
 
-namespace ox::widgets {
+namespace ox {
 struct Divider;
 
 /**
@@ -160,7 +160,7 @@ struct VLayout : LinearLayout {
     using LinearLayout::LinearLayout;
 };
 
-auto resize(VLayout& layout, ox::Area a) -> void;
+auto resize(VLayout& layout, Area a) -> void;
 
 auto append_divider(VLayout& layout, Glyph line = {U'─'}) -> Divider&;
 
@@ -169,4 +169,4 @@ auto append_divider(VLayout& layout, Glyph line = {U'─'}) -> Divider&;
 // TODO
 struct GridLayout {};
 
-}  // namespace ox::widgets
+}  // namespace ox

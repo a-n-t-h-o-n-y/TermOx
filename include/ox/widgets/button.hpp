@@ -6,7 +6,7 @@
 
 #include <ox/widgets/label.hpp>
 
-namespace ox::widgets {
+namespace ox {
 
 struct Button {
     Label label;
@@ -67,4 +67,4 @@ inline auto mouse_enter(Button& b) -> void { b.label.brush = b.on_hover_brush; }
 
 inline auto mouse_leave(Button& b) -> void { b.label.brush = b.brush; }
 
-}  // namespace ox::widgets
+}  // namespace ox

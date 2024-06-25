@@ -6,7 +6,7 @@
 #include <ox/widgets/widget.hpp>
 
 namespace {
-using namespace ox::widgets;
+using namespace ox;
 
 auto do_tab_focus_change(Widget& head, Widget const* current_focus) -> void
 {
@@ -65,7 +65,7 @@ auto do_shift_tab_focus_change(Widget& head, Widget const* current_focus) -> voi
     }
 }
 
-auto send_leave_events(Widget& w, ox::Point p) -> void
+auto send_leave_events(Widget& w, Point p) -> void
 {
     mouse_leave(w);
     Widget* const next = find_widget_at(children(w), p);
@@ -74,7 +74,7 @@ auto send_leave_events(Widget& w, ox::Point p) -> void
     }
 }
 
-auto send_enter_events(Widget& w, ox::Point p) -> void
+auto send_enter_events(Widget& w, Point p) -> void
 {
     mouse_enter(w);
     Widget* const next = find_widget_at(children(w), p);
@@ -83,7 +83,7 @@ auto send_enter_events(Widget& w, ox::Point p) -> void
     }
 }
 
-auto send_enter_leave_events(Widget& w, ox::Point previous, ox::Point current) -> void
+auto send_enter_leave_events(Widget& w, Point previous, Point current) -> void
 {
     Widget* const previous_widget = find_widget_at(children(w), previous);
     Widget* const current_widget = find_widget_at(children(w), current);
@@ -98,7 +98,7 @@ auto send_enter_leave_events(Widget& w, ox::Point previous, ox::Point current) -
 enum class SetFocus : bool { Yes, No };
 
 template <SetFocus SF, typename EventFn>
-auto any_mouse_event(Widget& head, ox::Mouse m, EventFn&& event_fn) -> void
+auto any_mouse_event(Widget& head, Mouse m, EventFn&& event_fn) -> void
 {
     Widget* const found_ptr = find_widget_at(children(head), m.at);
 
@@ -120,8 +120,8 @@ auto any_mouse_event(Widget& head, ox::Mouse m, EventFn&& event_fn) -> void
 // Recursively send paint events to each Widget including and below head. \p cursor is
 // assigned to if the current focus widget is painted.
 auto send_paint_events(Widget const& head,
-                       ox::Canvas canvas,
-                       ox::Terminal::Cursor& cursor_out) -> void
+                       Canvas canvas,
+                       Terminal::Cursor& cursor_out) -> void
 {
     if (head.enabled && head.size.width > 0 && head.size.height > 0) {
         paint(head, canvas);
@@ -132,7 +132,7 @@ auto send_paint_events(Widget const& head,
     }
     for (auto const& child : children(head)) {
         send_paint_events(child,
-                          ox::Canvas{
+                          Canvas{
                               .buffer = canvas.buffer,
                               .at = canvas.at + child.at,
                               .size = child.size,
@@ -143,51 +143,51 @@ auto send_paint_events(Widget const& head,
 
 }  // namespace
 
-namespace ox::widgets {
+namespace ox {
 
 auto Application::run() -> int { return process_events(term_, *this); }
 
-auto Application::handle_mouse_press(ox::Mouse m) -> ox::EventResponse
+auto Application::handle_mouse_press(Mouse m) -> EventResponse
 {
     ::any_mouse_event<SetFocus::Yes>(head_, m,
-                                     [](Widget& w, ox::Mouse m) { mouse_press(w, m); });
+                                     [](Widget& w, Mouse m) { mouse_press(w, m); });
     return {};
 }
 
-auto Application::handle_mouse_release(ox::Mouse m) -> ox::EventResponse
-{
-    ::any_mouse_event<SetFocus::No>(
-        head_, m, [](Widget& w, ox::Mouse m) { mouse_release(w, m); });
-    return {};
-}
-
-auto Application::handle_mouse_wheel(ox::Mouse m) -> ox::EventResponse
+auto Application::handle_mouse_release(Mouse m) -> EventResponse
 {
     ::any_mouse_event<SetFocus::No>(head_, m,
-                                    [](Widget& w, ox::Mouse m) { mouse_wheel(w, m); });
+                                    [](Widget& w, Mouse m) { mouse_release(w, m); });
     return {};
 }
 
-auto Application::handle_mouse_move(ox::Mouse m) -> ox::EventResponse
+auto Application::handle_mouse_wheel(Mouse m) -> EventResponse
+{
+    ::any_mouse_event<SetFocus::No>(head_, m,
+                                    [](Widget& w, Mouse m) { mouse_wheel(w, m); });
+    return {};
+}
+
+auto Application::handle_mouse_move(Mouse m) -> EventResponse
 {
     send_enter_leave_events(head_, previous_mouse_position_, m.at);
     ::any_mouse_event<SetFocus::No>(head_, m,
-                                    [](Widget& w, ox::Mouse m) { mouse_move(w, m); });
+                                    [](Widget& w, Mouse m) { mouse_move(w, m); });
     previous_mouse_position_ = m.at;
     return {};
 }
 
-auto Application::handle_key_press(ox::Key k) -> ox::EventResponse
+auto Application::handle_key_press(Key k) -> EventResponse
 {
     // TODO a shortcuts manager? processed here?
     Widget* const focused = Focus::get();
     if (focused != nullptr) {
         if (focused->focus_policy == FocusPolicy::Strong ||
             focused->focus_policy == FocusPolicy::Tab) {
-            if (k == ox::Key::Tab) {
+            if (k == Key::Tab) {
                 do_tab_focus_change(head_, focused);
             }
-            else if (k == ox::Key::BackTab) {
+            else if (k == Key::BackTab) {
                 do_shift_tab_focus_change(head_, focused);
             }
             else {
@@ -201,7 +201,7 @@ auto Application::handle_key_press(ox::Key k) -> ox::EventResponse
     return {};
 }
 
-auto Application::handle_key_release(ox::Key k) -> ox::EventResponse
+auto Application::handle_key_release(Key k) -> EventResponse
 {
     Widget* const focused = Focus::get();
     if (focused != nullptr) {
@@ -210,23 +210,23 @@ auto Application::handle_key_release(ox::Key k) -> ox::EventResponse
     return {};
 }
 
-auto Application::handle_resize(ox::Area new_size) -> ox::EventResponse
+auto Application::handle_resize(Area new_size) -> EventResponse
 {
     resize(head_, new_size);
     return {};
 }
 
-auto Application::handle_timer(int id) -> ox::EventResponse
+auto Application::handle_timer(int id) -> EventResponse
 {
     for_each_depth_first(head_, [id](Widget& w) { timer(w, id); });
     return {};
 }
 
-auto Application::handle_paint(ox::Canvas canvas) const -> ox::Terminal::Cursor
+auto Application::handle_paint(Canvas canvas) const -> Terminal::Cursor
 {
-    auto cursor = ox::Terminal::Cursor{std::nullopt};
+    auto cursor = Terminal::Cursor{std::nullopt};
     ::send_paint_events(head_, canvas, cursor);
     return cursor;
 }
 
-}  // namespace ox::widgets
+}  // namespace ox

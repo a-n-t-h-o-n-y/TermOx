@@ -5,7 +5,7 @@
 #include <ox/core.hpp>
 #include <ox/widgets/widget.hpp>
 
-namespace ox::widgets {
+namespace ox {
 
 /**
  * Top level application class that handles event processing and painting.
@@ -17,7 +17,7 @@ class Application {
      * terminal screen.
      */
     template <typename T>
-    explicit Application(T head, ox::Terminal term = {})
+    explicit Application(T head, Terminal term = {})
         : head_{std::move(head)}, term_{std::move(term)}
     {}
     // TODO ^^ possibly make head hardcoded a layout so focus is handled, then this
@@ -30,28 +30,28 @@ class Application {
     auto run() -> int;
 
    public:
-    auto handle_mouse_press(ox::Mouse m) -> ox::EventResponse;
+    auto handle_mouse_press(Mouse m) -> EventResponse;
 
-    auto handle_mouse_release(ox::Mouse m) -> ox::EventResponse;
+    auto handle_mouse_release(Mouse m) -> EventResponse;
 
-    auto handle_mouse_wheel(ox::Mouse m) -> ox::EventResponse;
+    auto handle_mouse_wheel(Mouse m) -> EventResponse;
 
-    auto handle_mouse_move(ox::Mouse m) -> ox::EventResponse;
+    auto handle_mouse_move(Mouse m) -> EventResponse;
 
-    auto handle_key_press(ox::Key k) -> ox::EventResponse;
+    auto handle_key_press(Key k) -> EventResponse;
 
-    auto handle_key_release(ox::Key k) -> ox::EventResponse;
+    auto handle_key_release(Key k) -> EventResponse;
 
-    auto handle_resize(ox::Area new_size) -> ox::EventResponse;
+    auto handle_resize(Area new_size) -> EventResponse;
 
-    auto handle_timer(int id) -> ox::EventResponse;
+    auto handle_timer(int id) -> EventResponse;
 
-    auto handle_paint(ox::Canvas canvas) const -> ox::Terminal::Cursor;
+    auto handle_paint(Canvas canvas) const -> Terminal::Cursor;
 
    private:
     Widget head_;
-    ox::Terminal term_;
+    Terminal term_;
     Point previous_mouse_position_{0, 0};
 };
 
-}  // namespace ox::widgets
+}  // namespace ox

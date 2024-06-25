@@ -5,7 +5,7 @@
 #include <ox/core.hpp>
 #include <ox/widgets/widget.hpp>
 
-namespace ox::widgets {
+namespace ox {
 
 /**
  * A Border display that wraps a child widget.
@@ -36,9 +36,9 @@ auto focus_in(Border& b) -> void;
 // -------------------------------------------------------------------------------------
 
 struct Divider {
-    ox::Glyph line;
+    Glyph line;
 };
 
 inline auto paint(Divider const& d, Canvas c) -> void { Painter{c}.fill(d.line); }
 
-}  // namespace ox::widgets
+}  // namespace ox

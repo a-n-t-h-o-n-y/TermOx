@@ -5,7 +5,7 @@
 
 #include <ox/core.hpp>
 
-namespace ox::widgets {
+namespace ox {
 
 void paint(Label const& label, Canvas c)
 {
@@ -28,4 +28,4 @@ void paint(Label const& label, Canvas c)
     Painter{c}[at] << glyphs;
 }
 
-}  // namespace ox::widgets
+}  // namespace ox

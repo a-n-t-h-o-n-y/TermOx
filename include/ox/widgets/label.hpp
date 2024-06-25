@@ -4,7 +4,7 @@
 
 #include <ox/core.hpp>
 
-namespace ox::widgets {
+namespace ox {
 
 /**
  * A simple text display widget.
@@ -20,4 +20,4 @@ struct Label {
 
 void paint(Label const&, Canvas);
 
-}  // namespace ox::widgets
+}  // namespace ox

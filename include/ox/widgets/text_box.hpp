@@ -7,7 +7,7 @@
 #include <ox/core.hpp>
 #include <ox/widgets/widget.hpp>
 
-namespace ox::widgets {
+namespace ox {
 
 struct TextBox {
     std::string text = "";
@@ -27,6 +27,6 @@ auto resize(TextBox& tb, Area new_size) -> void;
 
 auto key_press(TextBox& tb, Key k) -> void;
 
-auto cursor(TextBox const& tb) -> ox::Terminal::Cursor;
+auto cursor(TextBox const& tb) -> Terminal::Cursor;
 
-}  // namespace ox::widgets
+}  // namespace ox

@@ -12,7 +12,7 @@
 #include <ox/core.hpp>
 #include <ox/widgets/focus.hpp>
 
-namespace ox::widgets {
+namespace ox {
 
 /**
  * Policy for how a widget should handle focus.
@@ -113,7 +113,7 @@ class Widget {
     friend void resize(Widget& w, Area a) { w.self_->resize_(a); }
     friend void timer(Widget& w, int id) { w.self_->timer_(id); }
 
-    [[nodiscard]] friend auto cursor(Widget const& w) -> ox::Terminal::Cursor
+    [[nodiscard]] friend auto cursor(Widget const& w) -> Terminal::Cursor
     {
         return w.self_->cursor_();
     }
@@ -147,7 +147,7 @@ class Widget {
         virtual void resize_(Area) = 0;
         virtual void timer_(int) = 0;
 
-        virtual auto cursor_() const -> ox::Terminal::Cursor = 0;
+        virtual auto cursor_() const -> Terminal::Cursor = 0;
 
         virtual auto children_() -> std::span<Widget> = 0;
         virtual auto children_() const -> std::span<Widget const> = 0;
@@ -250,7 +250,7 @@ class Widget {
             }
         }
 
-        auto cursor_() const -> ox::Terminal::Cursor override
+        auto cursor_() const -> Terminal::Cursor override
         {
             if constexpr (requires(T& w) { cursor(w); }) {
                 return cursor(data_);
@@ -376,8 +376,7 @@ inline auto for_each_depth_first(Widget const& w,
  * @param p The Point to search for.
  * @returns A pointer to the Widget that contains \p p, or nullptr if no Widget.
  */
-[[nodiscard]] inline auto find_widget_at(std::span<Widget> widgets,
-                                         ox::Point p) -> Widget*
+[[nodiscard]] inline auto find_widget_at(std::span<Widget> widgets, Point p) -> Widget*
 {
     auto const at = std::ranges::find_if(widgets, [p](Widget& child) {
         return child.enabled && child.at.x <= p.x &&
@@ -388,4 +387,4 @@ inline auto for_each_depth_first(Widget const& w,
     return (at == std::end(widgets)) ? nullptr : &*at;
 }
 
-}  // namespace ox::widgets
+}  // namespace ox

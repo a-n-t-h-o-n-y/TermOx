@@ -2,7 +2,7 @@
 
 #include <ox/widgets/widget.hpp>
 
-namespace ox::widgets {
+namespace ox {
 
 void Focus::set(Widget& w)
 {
@@ -23,4 +23,4 @@ void Focus::clear()
     in_focus_ = nullptr;
 }
 
-}  // namespace ox::widgets
+}  // namespace ox

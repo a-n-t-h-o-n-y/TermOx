@@ -1,6 +1,6 @@
 #pragma once
 
-namespace ox::widgets {
+namespace ox {
 class Widget;
 
 /**
@@ -36,4 +36,4 @@ class Focus {
     inline static Widget* in_focus_ = nullptr;
 };
 
-}  // namespace ox::widgets
+}  // namespace ox

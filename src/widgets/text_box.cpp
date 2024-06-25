@@ -39,7 +39,7 @@ namespace {
 
 }  // namespace
 
-namespace ox::widgets {
+namespace ox {
 
 auto paint(TextBox const& tb, Canvas c) -> void
 {
@@ -55,7 +55,7 @@ auto paint(TextBox const& tb, Canvas c) -> void
         if (line.back() == '\n') {
             line.remove_suffix(1);
         }
-        ox::Painter{c}[{0, (int)i}] << line;
+        Painter{c}[{0, (int)i}] << line;
     }
     // last line
     if (!line_start_indices.empty() &&
@@ -65,7 +65,7 @@ auto paint(TextBox const& tb, Canvas c) -> void
         if (line.back() == '\n') {
             line.remove_suffix(1);
         }
-        ox::Painter{c}[{0, (int)line_start_indices.size() - 1}] << line;
+        Painter{c}[{0, (int)line_start_indices.size() - 1}] << line;
     }
 }
 
@@ -116,10 +116,10 @@ auto key_press(TextBox& tb, Key k) -> void
     }
 }
 
-auto cursor(TextBox const& /*tb*/) -> ox::Terminal::Cursor
+auto cursor(TextBox const& /*tb*/) -> Terminal::Cursor
 {
     // TODO make a real implementation.
     return Point{.x = 5, .y = 2};
 }
 
-}  // namespace ox::widgets
+}  // namespace ox

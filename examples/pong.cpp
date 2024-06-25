@@ -433,9 +433,9 @@ auto paint(State const& x) -> void
     std::visit(
         [&](auto const& s) {
             paint(s, Canvas{
-                         .buffer = ox::Terminal::changes,
+                         .buffer = Terminal::changes,
                          .at = {0, 0},
-                         .size = ox::Terminal::changes.size(),
+                         .size = Terminal::changes.size(),
                      });
         },
         x);

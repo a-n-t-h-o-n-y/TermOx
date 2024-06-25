@@ -5,7 +5,7 @@
 #include <ox/core.hpp>
 #include <ox/widgets/focus.hpp>
 
-namespace ox::widgets {
+namespace ox {
 
 auto children(Border& b) -> std::span<Widget> { return {&b.child, 1}; }
 
@@ -28,4 +28,4 @@ auto resize(Border& b, Area new_size) -> void
 // Forwards Focus
 auto focus_in(Border& b) -> void { Focus::set(b.child); }
 
-}  // namespace ox::widgets
+}  // namespace ox
