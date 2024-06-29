@@ -28,6 +28,7 @@ struct ButtonInit {
     sl::Slot<void()> on_release = [] {};
 };
 
+// TODO create more of these, different look and feels so client call site is simpler.
 [[nodiscard]] inline auto button(ButtonInit x) -> Button
 {
     return {

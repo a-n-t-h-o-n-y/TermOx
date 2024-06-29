@@ -37,7 +37,7 @@ target_link_libraries(
 # WIDGETS ----------------------------------------------------------------------
 
 add_executable(TermOx.examples.widgets EXCLUDE_FROM_ALL
-    widgets.cpp
+    widgets_static.cpp
 )
 target_compile_options(
     TermOx.examples.widgets

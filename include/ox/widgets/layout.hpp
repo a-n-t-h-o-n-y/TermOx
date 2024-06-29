@@ -5,6 +5,7 @@
 #include <functional>
 #include <iterator>
 #include <span>
+#include <tuple>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -47,6 +48,28 @@ struct LinearLayout {
 
         (children.emplace_back(std::forward<Widgets>(children_)), ...);
     }
+
+    /**
+     * Append a Widget to the LinearLayout.
+     *
+     * @param t The Widget to append.
+     * @param size_policy The size policy to apply to the Widget.
+     * @param focus_policy The focus policy to apply to the Widget.
+     * @return A reference to the appended Widget. This reference will remain valid
+     * until the Widget is destroyed.
+     */
+    template <typename T>
+    auto append(T t,
+                SizePolicy size_policy = {},
+                FocusPolicy focus_policy = FocusPolicy::None) -> T&
+    {
+        static_assert(!std::is_same_v<std::remove_cvref_t<T>, Widget>);
+
+        this->size_policies.push_back(size_policy);
+
+        return this->children.emplace_back(std::move(t), focus_policy)
+            .template data<T>();
+    }
 };
 
 inline auto children(LinearLayout& w) -> std::span<Widget> { return w.children; }
@@ -57,28 +80,6 @@ inline auto children(LinearLayout const& w) -> std::span<Widget const>
 }
 
 // -------------------------------------------------------------------------------------
-
-/**
- * Append a Widget to the LinearLayout.
- *
- * @param t The Widget to append.
- * @param size_policy The size policy to apply to the Widget.
- * @param focus_policy The focus policy to apply to the Widget.
- * @return A reference to the appended Widget. This reference will remain valid until
- * the Widget is destroyed.
- */
-template <typename T>
-auto append(LinearLayout& layout,
-            T t,
-            SizePolicy size_policy = {},
-            FocusPolicy focus_policy = FocusPolicy::None) -> T&
-{
-    static_assert(!std::is_same_v<std::remove_cvref_t<T>, Widget>);
-
-    layout.size_policies.push_back(size_policy);
-
-    return layout.children.emplace_back(std::move(t), focus_policy).template data<T>();
-}
 
 /**
  * Inserts a Widget into the LinearLayout at the given index.
@@ -101,7 +102,7 @@ auto insert_at(LinearLayout& layout,
     static_assert(!std::is_same_v<std::remove_cvref_t<T>, Widget>);
 
     if (index >= layout.children.size()) {
-        return append(layout, std::move(t), size_policy, focus_policy);
+        return layout.append(std::move(t), size_policy, focus_policy);
     }
 
     layout.size_policies.insert(

@@ -13,11 +13,11 @@ add_subdirectory(external/signals-light)
 # Create Library Target
 add_library(TermOx STATIC
     src/terminal.cpp
-    src/widgets/application.cpp
+    # src/widgets/application.cpp
     src/widgets/border.cpp
     src/widgets/focus.cpp
     src/widgets/label.cpp
-    src/widgets/layout.cpp
+    # src/widgets/layout.cpp
     src/widgets/text_box.cpp
 
     include/ox/common.hpp
@@ -26,14 +26,17 @@ add_library(TermOx STATIC
     include/ox/glyph.hpp
     include/ox/terminal.hpp
 
-    include/ox/widgets/application.hpp
+    # include/ox/widgets/application.hpp
     include/ox/widgets/border.hpp
     include/ox/widgets/button.hpp
     include/ox/widgets/focus.hpp
     include/ox/widgets/label.hpp
-    include/ox/widgets/layout.hpp
+    # include/ox/widgets/layout.hpp
     include/ox/widgets/text_box.hpp
     include/ox/widgets/widget.hpp
+
+    include/ox/static/application.hpp
+    include/ox/static/layout.hpp
 )
 
 # Include Directories for the Library

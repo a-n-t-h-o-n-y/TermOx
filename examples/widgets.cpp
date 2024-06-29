@@ -48,38 +48,111 @@ void focus_out(Clicker& c) { c.display = c.display | fg(XColor::Default); }
 
 // -------------------------------------------------------------------------------------
 
+// struct does not help you, either way you have to take a parameter, which dictates the
+// order of construction. And you don't want to have the order dictated.
+
 [[nodiscard]] auto message_source(sl::Slot<void(std::string)> on_message) -> VLayout
 {
-    auto head = VLayout{};
+    // return VLayout{
+    //     {
+    //         label("Message:"),
+    //         SizePolicy::fixed(5),
+    //         FocusPolicy::Strong,
+    //     },
+    //     Divider{},
+    //     {
+    //         text_box({.editable = true}),
+    //         SizePolicy::flex(),
+    //         FocusPolicy::Strong,
+    //     },
+    //     Divider{},
+    //     {
+    //         Clicker{},
+    //         SizePolicy::flex(.5),
+    //     },
+    //     Divider{},
+    //     {
+    //         border({
+    //             button({
+    //                 .text = "Send",
+    //                 .brush = {.background = XColor::BrightBlue,
+    //                           .foreground = XColor::Black,
+    //                           .traits = Trait::Underline},
+    //                 .on_press_brush = {{.background = XColor::Blue,
+    //                                     .foreground = XColor::Black,
+    //                                     .traits = Trait::Underline | Trait::Bold}},
+    //                 .on_hover_brush = {{.background = XColor::BrightBlue,
+    //                                     .foreground = XColor::Black,
+    //                                     .traits = Trait::Underline | Trait::Bold}},
+    //                 .on_release =
+    //                     [on_message = on_message, &tb = tb] {
+    //                         on_message(tb.text);
+    //                         tb.text.clear();
+    //                     },
+    //             }),
+    //         }),
+    //         SizePolicy::fixed(4),
+    //     },
+    // }
 
-    auto& tb = append(head, text_box({.editable = true}), SizePolicy::flex(),
-                      FocusPolicy::Strong);
+    auto head = vlayout();
+
+    // you can't do the structs because you'd have to name them each time.
+    // auto [title, tb, btn] = head.append(
+    //     {
+    //         label("Message:"),
+    //         SizePolicy::fixed(5),
+    //         FocusPolicy::Strong,
+    //     },
+    //     divider(),
+    //     {
+    //         text_box(),
+    //         SizePolicy::fixed(5),
+    //     },
+    //     divider(),
+    //     {
+    //         button("Send"),
+    //     });
+
+    // btn.on_press = [on_message = on_message, &tb = tb] {
+    //     on_message(tb.text);
+    //     tb.text.clear();
+    // };
+
+    // auto& tb = head.append(textbox() | SizePolicy::flex() | FocusPolicy::Strong);
+    // auto& tb = head.append(textbox(), {SizePolicy::flex(), FocusPolicy::Strong});
+
+    auto& tb = head.append(text_box({.editable = true}), SizePolicy::flex(),
+                           FocusPolicy::Strong);
 
     append_divider(head);
 
-    append(head, Clicker{}, SizePolicy::flex(.5));
+    head.append(Clicker{}, SizePolicy::flex(.5));
 
     append_divider(head);
 
-    append(head,
-           border({.child = button({
-                       .text = "Send",
-                       .brush = {.background = XColor::BrightBlue,
-                                 .foreground = XColor::Black,
-                                 .traits = Trait::Underline},
-                       .on_press_brush = {{.background = XColor::Blue,
-                                           .foreground = XColor::Black,
-                                           .traits = Trait::Underline | Trait::Bold}},
-                       .on_hover_brush = {{.background = XColor::BrightBlue,
-                                           .foreground = XColor::Black,
-                                           .traits = Trait::Underline | Trait::Bold}},
-                       .on_release =
-                           [on_message = on_message, &tb = tb] {
-                               on_message(tb.text);
-                               tb.text.clear();
-                           },
-                   })}),
-           SizePolicy::fixed(4));
+    // TODO a better border interface is border(Box{}), the .child member gets in the
+    // way
+    head.append(border({
+                    .child = button({
+                        .text = "Send",
+                        .brush = {.background = XColor::BrightBlue,
+                                  .foreground = XColor::Black,
+                                  .traits = Trait::Underline},
+                        .on_press_brush = {{.background = XColor::Blue,
+                                            .foreground = XColor::Black,
+                                            .traits = Trait::Underline | Trait::Bold}},
+                        .on_hover_brush = {{.background = XColor::BrightBlue,
+                                            .foreground = XColor::Black,
+                                            .traits = Trait::Underline | Trait::Bold}},
+                        .on_release =
+                            [on_message = on_message, &tb = tb] {
+                                on_message(tb.text);
+                                tb.text.clear();
+                            },
+                    }),
+                }),
+                SizePolicy::fixed(4));
 
     return head;
 }
@@ -90,10 +163,10 @@ void focus_out(Clicker& c) { c.display = c.display | fg(XColor::Default); }
 
     append_divider(head, {U'┃'});
 
-    auto& rhs = append(head, text_box({
-                                 .text = "Right Hand Side",
-                                 .editable = false,
-                             }));
+    auto& rhs = head.append(text_box({
+        .text = "Right Hand Side",
+        .editable = false,
+    }));
 
     insert_at(head, 0, message_source([&rhs = rhs](std::string msg) {
                   rhs.text = std::move(msg);
@@ -109,35 +182,35 @@ void focus_out(Clicker& c) { c.display = c.display | fg(XColor::Default); }
 {
     auto head = hlayout();
 
-    auto& lay1 = append(head, vlayout());
+    auto& lay1 = head.append(vlayout());
     append_divider(head);
-    auto& lay2 = append(head, vlayout());
+    auto& lay2 = head.append(vlayout());
     append_divider(head);
-    auto& lay3 = append(head, vlayout());
+    auto& lay3 = head.append(vlayout());
     append_divider(head);
-    auto& lay4 = append(head, vlayout());
+    auto& lay4 = head.append(vlayout());
 
-    append(lay1, Clicker{});
+    lay1.append(Clicker{});
     append_divider(lay1);
-    append(lay1, Clicker{});
+    lay1.append(Clicker{});
     append_divider(lay1);
-    append(lay1, Clicker{});
+    lay1.append(Clicker{});
 
-    append(lay2, Clicker{});
+    lay2.append(Clicker{});
     append_divider(lay2);
-    append(lay2, Clicker{});
+    lay2.append(Clicker{});
 
-    append(lay3, Clicker{});
+    lay3.append(Clicker{});
     append_divider(lay3);
-    append(lay3, Clicker{});
+    lay3.append(Clicker{});
 
-    append(lay4, Clicker{});
+    lay4.append(Clicker{});
     append_divider(lay4);
-    append(lay4, border({Clicker{}}));
+    lay4.append(border({Clicker{}}));
     append_divider(lay4);
-    append(lay4, Clicker{});
+    lay4.append(Clicker{});
     append_divider(lay4);
-    append(lay4, Clicker{});
+    lay4.append(Clicker{});
 
     return head;
 }

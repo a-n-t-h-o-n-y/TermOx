@@ -203,7 +203,7 @@ auto resize(HLayout& layout, Area a) -> void
 
 auto append_divider(HLayout& layout, Glyph line) -> Divider&
 {
-    return append(layout, Divider{line}, SizePolicy::fixed(1));
+    return layout.append(Divider{line}, SizePolicy::fixed(1));
 }
 
 // -------------------------------------------------------------------------------------
@@ -223,7 +223,7 @@ auto resize(VLayout& layout, Area a) -> void
 
 auto append_divider(VLayout& layout, Glyph line) -> Divider&
 {
-    return append(layout, Divider{line}, SizePolicy::fixed(1));
+    return layout.append(Divider{line}, SizePolicy::fixed(1));
 }
 
 }  // namespace ox
