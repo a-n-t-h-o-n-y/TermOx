@@ -14,11 +14,16 @@ add_subdirectory(external/signals-light)
 add_library(TermOx STATIC
     src/terminal.cpp
     # src/widgets/application.cpp
-    src/widgets/border.cpp
-    src/widgets/focus.cpp
-    src/widgets/label.cpp
+    # src/widgets/border.cpp
+    # src/widgets/focus.cpp
+    # src/widgets/label.cpp
     # src/widgets/layout.cpp
-    src/widgets/text_box.cpp
+    # src/widgets/text_box.cpp
+
+    src/widgets2/application.cpp
+    src/widgets2/focus.cpp
+    src/widgets2/layout.cpp
+    src/widgets2/widget.cpp
 
     include/ox/common.hpp
     include/ox/core.hpp
@@ -27,16 +32,23 @@ add_library(TermOx STATIC
     include/ox/terminal.hpp
 
     # include/ox/widgets/application.hpp
-    include/ox/widgets/border.hpp
-    include/ox/widgets/button.hpp
-    include/ox/widgets/focus.hpp
-    include/ox/widgets/label.hpp
+    # include/ox/widgets/border.hpp
+    # include/ox/widgets/button.hpp
+    # include/ox/widgets/focus.hpp
+    # include/ox/widgets/label.hpp
     # include/ox/widgets/layout.hpp
-    include/ox/widgets/text_box.hpp
-    include/ox/widgets/widget.hpp
+    # include/ox/widgets/text_box.hpp
+    # include/ox/widgets/widget.hpp
 
-    include/ox/static/application.hpp
-    include/ox/static/layout.hpp
+    # include/ox/static/application.hpp
+    # include/ox/static/layout.hpp
+
+    include/ox/widgets2/application.hpp
+    include/ox/widgets2/button.hpp
+    include/ox/widgets2/focus.hpp
+    include/ox/widgets2/label.hpp
+    include/ox/widgets2/layout.hpp
+    include/ox/widgets2/widget.hpp
 )
 
 # Include Directories for the Library

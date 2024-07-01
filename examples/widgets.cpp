@@ -12,7 +12,7 @@
 using namespace ox;
 
 struct Clicker {
-    Point at;
+    Point at = {0, 0};
     Glyph display = U'X' | fg(XColor::Default);
 };
 

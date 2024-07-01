@@ -45,7 +45,10 @@ class Generator {
     using handle_type = std::coroutine_handle<promise_type>;
 
     struct promise_type {
-        std::optional<T> current_value;
+        std::conditional_t<std::is_reference_v<T>,
+                           std::remove_reference_t<T>*,
+                           std::optional<T>>
+            current_value;
         std::exception_ptr exception;
 
         auto get_return_object() { return Generator{handle_type::from_promise(*this)}; }
@@ -56,7 +59,12 @@ class Generator {
 
         auto yield_value(T value) noexcept
         {
-            current_value = std::move(value);
+            if constexpr (std::is_reference_v<T>) {
+                current_value = std::addressof(value);
+            }
+            else {
+                current_value = std::move(value);
+            }
             return std::suspend_always{};
         }
 
@@ -68,15 +76,15 @@ class Generator {
    public:
     explicit Generator(handle_type h) : handle_(h) {}
 
-    Generator(const Generator&) = delete;
-    Generator& operator=(const Generator&) = delete;
+    Generator(Generator const&) = delete;
+    auto operator=(Generator const&) -> Generator& = delete;
 
     Generator(Generator&& other) noexcept : handle_(other.handle_)
     {
         other.handle_ = nullptr;
     }
 
-    Generator& operator=(Generator&& other) noexcept
+    auto operator=(Generator&& other) noexcept -> Generator&
     {
         if (this != &other) {
             if (handle_)
@@ -89,21 +97,22 @@ class Generator {
 
     ~Generator()
     {
-        if (handle_)
+        if (handle_) {
             handle_.destroy();
+        }
     }
 
-    class Iterator {
+    template <bool IsConst>
+    class IteratorBase {
        public:
         using iterator_category = std::input_iterator_tag;
         using difference_type = std::ptrdiff_t;
-        using value_type = T;
-        using reference = T const&;
-        using pointer = T const*;
+        using value_type = std::remove_reference_t<T>;
+        using reference = std::conditional_t<IsConst, const T, T>;
+        using pointer = std::conditional_t<IsConst, const value_type*, value_type*>;
 
-       public:
-        Iterator() noexcept = default;
-        explicit Iterator(handle_type handle) : handle_(handle)
+        IteratorBase() noexcept = default;
+        explicit IteratorBase(handle_type handle) : handle_(handle)
         {
             if (handle_) {
                 handle_.resume();
@@ -113,7 +122,7 @@ class Generator {
             }
         }
 
-        auto operator++() -> Iterator&
+        auto operator++() -> IteratorBase&
         {
             if (handle_ && !handle_.done()) {
                 handle_.resume();
@@ -127,22 +136,34 @@ class Generator {
             return *this;
         }
 
-        auto operator*() const -> reference
+        auto operator++(int) -> IteratorBase
         {
-            if (!handle_ || handle_.done() || !handle_.promise().current_value) {
-                throw std::out_of_range("Generator is exhausted");
-            }
-            return *handle_.promise().current_value;
+            IteratorBase tmp = *this;
+            ++(*this);
+            return tmp;
         }
 
-        auto operator->() const -> pointer { return &(operator*()); }
+        auto operator*() const -> reference
+        {
+            if (!handle_ || handle_.done()) {
+                throw std::out_of_range("Generator is exhausted");
+            }
+            if constexpr (std::is_reference_v<T>) {
+                return *handle_.promise().current_value;
+            }
+            else {
+                return *handle_.promise().current_value;
+            }
+        }
 
-        auto operator==(const Iterator& other) const -> bool noexcept
+        auto operator->() const -> pointer { return std::addressof(operator*()); }
+
+        auto operator==(const IteratorBase& other) const noexcept -> bool
         {
             return handle_ == other.handle_;
         }
 
-        auto operator!=(const Iterator& other) const -> bool noexcept
+        auto operator!=(const IteratorBase& other) const noexcept -> bool
         {
             return !(*this == other);
         }
@@ -151,10 +172,17 @@ class Generator {
         handle_type handle_;
     };
 
+    using Iterator = IteratorBase<false>;
+    using ConstIterator = IteratorBase<true>;
+
    public:
     auto begin() -> Iterator { return Iterator{handle_}; }
+    auto begin() const -> ConstIterator { return ConstIterator{handle_}; }
+    auto cbegin() const -> ConstIterator { return ConstIterator{handle_}; }
 
     auto end() -> Iterator { return Iterator{}; }
+    auto end() const -> ConstIterator { return ConstIterator{}; }
+    auto cend() const -> ConstIterator { return ConstIterator{}; }
 
    private:
     handle_type handle_;
