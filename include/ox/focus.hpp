@@ -21,12 +21,10 @@ class Focus {
     static void set(Widget& w);
 
     /**
-     * Returns the Widget that currently has focus, or nullptr if no Widget has focus.
+     * Returns a LifetimeView of the focused Object, which may not be valid if nothing
+     * is in focus.
      */
-    static auto get() -> Widget*
-    {
-        return in_focus_.valid() ? &(in_focus_.get()) : nullptr;
-    }
+    static auto get() -> LifetimeView<Widget> { return in_focus_; }
 
     /**
      * Clears the focus, setting the focused Widget to nullptr.

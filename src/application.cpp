@@ -139,16 +139,16 @@ auto send_enter_leave_events(Widget& w, Point previous, Point current) -> void
 
 // -------------------------------------------------------------------------------------
 
-auto do_tab_focus_change(Widget& head, Widget const* current_focus) -> void
+auto do_tab_focus_change(Widget& head, Widget const& current_focus) -> void
 {
     Widget* next = find_if_depth_first(
-        head, [found = false, current_focus](Widget const& w) mutable {
+        head, [found = false, &current_focus](Widget const& w) mutable {
             if (found) {
                 return w.focus_policy == FocusPolicy::Strong ||
                        w.focus_policy == FocusPolicy::Tab;
             }
             else {
-                if (&w == current_focus) {
+                if (&w == &current_focus) {
                     found = true;
                 }
                 return false;
@@ -162,18 +162,18 @@ auto do_tab_focus_change(Widget& head, Widget const* current_focus) -> void
         });
     }
 
-    if (next != nullptr && next != current_focus) {
+    if (next != nullptr && next != &current_focus) {
         Focus::set(*next);
     }
 }
 
-auto do_shift_tab_focus_change(Widget& head, Widget const* current_focus) -> void
+auto do_shift_tab_focus_change(Widget& head, Widget const& current_focus) -> void
 {
     Widget* next = nullptr;
 
     for_each_depth_first(
-        head, [&next, previous = (Widget*)nullptr, current_focus](Widget& w) mutable {
-            if (&w == current_focus) {
+        head, [&next, previous = (Widget*)nullptr, &current_focus](Widget& w) mutable {
+            if (&w == &current_focus) {
                 next = previous;
             }
             if (w.focus_policy == FocusPolicy::Strong ||
@@ -191,7 +191,7 @@ auto do_shift_tab_focus_change(Widget& head, Widget const* current_focus) -> voi
         });
     }
 
-    if (next != nullptr && next != current_focus) {
+    if (next != nullptr && next != &current_focus) {
         Focus::set(*next);
     }
 }
@@ -204,7 +204,7 @@ auto send_paint_events(Widget const& head,
 {
     if (head.enabled && head.size.width > 0 && head.size.height > 0) {
         head.paint(canvas);
-        if (Focus::get() == &head) {
+        if (auto const life = Focus::get(); life.valid() && &(life.get()) == &head) {
             cursor_out = head.cursor ? canvas.at + *head.cursor : head.cursor;
         }
     }
@@ -262,13 +262,14 @@ auto Application::handle_mouse_move(Mouse m) -> EventResponse
 auto Application::handle_key_press(Key k) -> EventResponse
 {
     // TODO a shortcuts manager? processed here?
-    Widget* const focused = Focus::get();
-    if (focused == nullptr) {
+    auto const life = Focus::get();
+
+    if (not life.valid()) {
         return {};
     }
-
-    if (focused->focus_policy == FocusPolicy::Strong ||
-        focused->focus_policy == FocusPolicy::Tab) {
+    auto& focused = life.get();
+    if (focused.focus_policy == FocusPolicy::Strong ||
+        focused.focus_policy == FocusPolicy::Tab) {
         if (k == Key::Tab) {
             do_tab_focus_change(head_, focused);
         }
@@ -277,16 +278,15 @@ auto Application::handle_key_press(Key k) -> EventResponse
         }
     }
 
-    focused->key_press(k);
+    focused.key_press(k);
 
     return {};
 }
 
 auto Application::handle_key_release(Key k) -> EventResponse
 {
-    Widget* const focused = Focus::get();
-    if (focused != nullptr) {
-        focused->key_release(k);
+    if (auto const life = Focus::get(); life.valid()) {
+        life.get().key_release(k);
     }
     return {};
 }
