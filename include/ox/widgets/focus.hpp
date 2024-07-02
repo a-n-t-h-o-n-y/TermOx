@@ -1,7 +1,8 @@
 #pragma once
 
+#include <ox/widgets/widget.hpp>
+
 namespace ox {
-class Widget;
 
 /**
  * Manages the focus of Widgets.
@@ -22,7 +23,10 @@ class Focus {
     /**
      * Returns the Widget that currently has focus, or nullptr if no Widget has focus.
      */
-    static auto get() -> Widget* { return in_focus_; }
+    static auto get() -> Widget*
+    {
+        return in_focus_.valid() ? &(in_focus_.get()) : nullptr;
+    }
 
     /**
      * Clears the focus, setting the focused Widget to nullptr.
@@ -30,10 +34,7 @@ class Focus {
     static void clear();
 
    private:
-    // Widget special member functions will update this if it is currently in focus to
-    // avoid a dangling pointer.
-    friend Widget;
-    inline static Widget* in_focus_ = nullptr;
+    inline static LifetimeView<Widget> in_focus_ = std::shared_ptr<Widget*>{nullptr};
 };
 
 }  // namespace ox

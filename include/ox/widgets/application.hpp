@@ -8,20 +8,15 @@
 namespace ox {
 
 /**
- * Top level application class that handles event processing and painting.
+ * Top level Application class that handles event processing and painting.
  */
 class Application {
    public:
     /**
-     * Construct with a widget to be the head of the application and initialize the
-     * terminal screen.
+     * Create an Application that will forward events to the given head Widget and use
+     * the given Terminal to paint the screen.
      */
-    template <typename T>
-    explicit Application(T head, Terminal term = {})
-        : head_{std::move(head)}, term_{std::move(term)}
-    {}
-    // TODO ^^ possibly make head hardcoded a layout so focus is handled, then this
-    // 'head' is a child of the actual head layout.
+    explicit Application(Widget& head, Terminal term = {});
 
    public:
     /**
@@ -49,7 +44,7 @@ class Application {
     auto handle_paint(Canvas canvas) const -> Terminal::Cursor;
 
    private:
-    Widget head_;
+    Widget& head_;
     Terminal term_;
     Point previous_mouse_position_{0, 0};
 };

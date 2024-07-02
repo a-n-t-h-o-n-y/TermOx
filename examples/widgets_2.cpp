@@ -4,11 +4,11 @@
 
 #include <ox/core.hpp>
 
-#include <ox/widgets2/application.hpp>
-#include <ox/widgets2/button.hpp>
-#include <ox/widgets2/label.hpp>
-#include <ox/widgets2/layout.hpp>
-#include <ox/widgets2/widget.hpp>
+#include <ox/widgets/application.hpp>
+#include <ox/widgets/button.hpp>
+#include <ox/widgets/label.hpp>
+#include <ox/widgets/layout.hpp>
+#include <ox/widgets/widget.hpp>
 
 using namespace ox;
 

@@ -1,8 +1,8 @@
-#include <ox/widgets2/widget.hpp>
+#include <ox/widgets/widget.hpp>
 
 #include <memory>
 
-#include <ox/widgets2/focus.hpp>
+#include <ox/widgets/focus.hpp>
 
 namespace ox {
 
