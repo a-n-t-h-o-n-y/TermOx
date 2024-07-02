@@ -52,12 +52,12 @@ int main()
             else if (k == Key::c) {
                 fut_ = std::async(std::launch::async, [this] {
                     std::this_thread::sleep_for(std::chrono::seconds{4});
-                    Terminal::event_queue.append(
+                    Terminal::event_queue.enqueue(
                         event::Custom{[this]() -> EventResponse {
                             if (fut_.valid()) {
                                 fut_.get();
                             }
-                            Terminal::event_queue.append(
+                            Terminal::event_queue.enqueue(
                                 esc::MousePress{{.at = {.x = 8, .y = 4},
                                                  .button = Mouse::Button::Left}});
                             return {};

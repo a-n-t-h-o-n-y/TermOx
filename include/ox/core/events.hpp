@@ -3,9 +3,9 @@
 #include <concepts>
 #include <condition_variable>
 #include <functional>
+#include <list>
 #include <mutex>
 #include <optional>
-#include <queue>
 #include <utility>
 #include <variant>
 
@@ -27,7 +27,7 @@ using ::esc::Mouse;
 /**
  * Thread safe queue for inter-thread communication.
  *
- * @details This is built specifically for Events where multiple threads append and one
+ * @details This is built specifically for Events where multiple threads enqueue and one
  * thread consumes.
  * @tparam T The type of element to store in the queue.
  */
@@ -47,15 +47,17 @@ class ConcurrentQueue {
 
    public:
     /**
-     * Appends an element to the back of the queue.
+     * Adds an element at the back of the queue.
      *
-     * @param value The element to append.
+     * @param value The element to enqueue.
      */
-    auto append(value_type const& value) -> void
+    auto enqueue(value_type value) -> void
     {
+        auto tmp = std::list<value_type>{};
+        tmp.push_back(std::move(value));
         {
             auto const lock = std::scoped_lock{mutex_};
-            queue_.push(value);
+            queue_.splice(std::end(queue_), tmp);
         }
         cond_.notify_one();
     }
@@ -63,23 +65,23 @@ class ConcurrentQueue {
     /**
      * Removes and retrieves the element at the front of the queue.
      *
-     * @details This will block until an element is available. Uses a condition
-     * variable.
+     * @details This blocks until an element is available. Uses a condition variable.
      * @return value_type The element at the front of the queue.
      */
     [[nodiscard]] auto pop() -> value_type
     {
         auto lock = std::unique_lock{mutex_};
         cond_.wait(lock, [this] { return !queue_.empty(); });
+        // After the wait, the lock is re-acquired.
         auto value = std::move(queue_.front());
-        queue_.pop();
+        queue_.pop_front();
         return value;
     }
 
    private:
     mutable std::mutex mutex_;
     std::condition_variable cond_;
-    std::queue<value_type> queue_;
+    std::list<value_type> queue_;
 };
 
 // Event Handler Response

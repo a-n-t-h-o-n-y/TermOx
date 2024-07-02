@@ -130,15 +130,15 @@ auto Terminal::commit_changes() -> void
 
 auto Terminal::run_read_loop(std::stop_token st) -> void
 {
-    Terminal::event_queue.append(esc::Resize{Terminal::size()});
+    Terminal::event_queue.enqueue(esc::Resize{Terminal::size()});
 
     while (!st.stop_requested()) {
         if (esc::sigint_flag == 1) {
-            Terminal::event_queue.append(event::Interrupt{});
+            Terminal::event_queue.enqueue(event::Interrupt{});
             return;
         }
         else if (auto const event = esc::read(16); event.has_value()) {
-            Terminal::event_queue.append(
+            Terminal::event_queue.enqueue(
                 std::visit([](auto const& e) -> Event { return e; }, *event));
             // ^^ Translate from esc::Event to ox::Event ^^
         }
@@ -188,7 +188,7 @@ Timer::~Timer()
 auto Timer::start() -> void
 {
     Terminal::timers[id_] = TimerThread{
-        duration_, [id = id_] { Terminal::event_queue.append(event::Timer{id}); }};
+        duration_, [id = id_] { Terminal::event_queue.enqueue(event::Timer{id}); }};
     is_running_ = true;
 }
 
