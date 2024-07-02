@@ -1,7 +1,7 @@
-#include <ox/widgets/border.hpp>
+#include <ox/border.hpp>
 
-// #include <ox/core.hpp>
-// #include <ox/widgets/focus.hpp>
+// #include <ox/core/core.hpp>
+// #include <ox/focus.hpp>
 
 // namespace ox {
 

@@ -12,30 +12,30 @@ add_subdirectory(external/signals-light)
 
 # Create Library Target
 add_library(TermOx STATIC
-    src/terminal.cpp
+    src/application.cpp
+    # src/border.cpp
+    # src/label.cpp
+    src/focus.cpp
+    src/layout.cpp
+    # src/text_box.cpp
+    src/widget.cpp
+    src/core/terminal.cpp
 
-    src/widgets/application.cpp
-    # src/widgets/border.cpp
-    # src/widgets/label.cpp
-    src/widgets/focus.cpp
-    src/widgets/layout.cpp
-    # src/widgets/text_box.cpp
-    src/widgets/widget.cpp
+    include/ox/ox.hpp
+    include/ox/application.hpp
+    # include/ox/border.hpp
+    include/ox/button.hpp
+    include/ox/focus.hpp
+    include/ox/label.hpp
+    include/ox/layout.hpp
+    # include/ox/text_box.hpp
+    include/ox/widget.hpp
 
-    include/ox/common.hpp
-    include/ox/core.hpp
-    include/ox/events.hpp
-    include/ox/glyph.hpp
-    include/ox/terminal.hpp
-
-    include/ox/widgets/application.hpp
-    # include/ox/widgets/border.hpp
-    include/ox/widgets/button.hpp
-    include/ox/widgets/focus.hpp
-    include/ox/widgets/label.hpp
-    include/ox/widgets/layout.hpp
-    # include/ox/widgets/text_box.hpp
-    include/ox/widgets/widget.hpp
+    include/ox/core/common.hpp
+    include/ox/core/core.hpp
+    include/ox/core/events.hpp
+    include/ox/core/glyph.hpp
+    include/ox/core/terminal.hpp
 )
 
 # Include Directories for the Library

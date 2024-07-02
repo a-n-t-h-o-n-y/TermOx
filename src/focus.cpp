@@ -1,6 +1,6 @@
-#include <ox/widgets/focus.hpp>
+#include <ox/focus.hpp>
 
-#include <ox/widgets/widget.hpp>
+#include <ox/widget.hpp>
 
 namespace ox {
 

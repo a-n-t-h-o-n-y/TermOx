@@ -5,7 +5,7 @@
 
 #include <signals_light/signal.hpp>
 
-#include <ox/core.hpp>
+#include <ox/core/core.hpp>
 
 namespace ox {
 

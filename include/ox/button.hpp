@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ox/widgets/widget.hpp>
+#include <ox/widget.hpp>
 
 namespace ox {
 

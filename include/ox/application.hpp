@@ -2,8 +2,8 @@
 
 #include <cstdint>
 
-#include <ox/core.hpp>
-#include <ox/widgets/widget.hpp>
+#include <ox/core/core.hpp>
+#include <ox/widget.hpp>
 
 namespace ox {
 

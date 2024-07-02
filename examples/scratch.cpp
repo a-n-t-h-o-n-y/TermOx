@@ -1,10 +1,10 @@
-#include <ox/core.hpp>
-
 #include <chrono>
 #include <future>
 #include <sstream>
 #include <string>
 #include <thread>
+
+#include <ox/core/core.hpp>
 
 using namespace ox;
 

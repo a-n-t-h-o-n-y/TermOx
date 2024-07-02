@@ -1,9 +1,9 @@
-#include <ox/widgets/label.hpp>
+#include <ox/label.hpp>
 
 // #include <cstddef>
 // #include <string_view>
 
-// #include <ox/core.hpp>
+// #include <ox/core/core.hpp>
 
 // namespace ox {
 

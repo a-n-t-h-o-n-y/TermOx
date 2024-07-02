@@ -1,4 +1,4 @@
-#include <ox/terminal.hpp>
+#include <ox/core/terminal.hpp>
 
 #include <algorithm>
 #include <cassert>

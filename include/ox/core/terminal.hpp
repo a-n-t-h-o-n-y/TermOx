@@ -23,9 +23,9 @@
 #include <esc/point.hpp>
 #include <esc/terminal.hpp>
 
-#include <ox/common.hpp>
-#include <ox/events.hpp>
-#include <ox/glyph.hpp>
+#include <ox/core/common.hpp>
+#include <ox/core/events.hpp>
+#include <ox/core/glyph.hpp>
 
 namespace ox {
 

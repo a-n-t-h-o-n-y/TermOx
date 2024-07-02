@@ -1,10 +1,10 @@
-#include <ox/widgets/application.hpp>
+#include <ox/application.hpp>
 
 #include <algorithm>
 #include <ranges>
 
-#include <ox/core.hpp>
-#include <ox/widgets/focus.hpp>
+#include <ox/core/core.hpp>
+#include <ox/focus.hpp>
 
 namespace {
 

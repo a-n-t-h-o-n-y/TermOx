@@ -13,7 +13,7 @@
 #include <variant>
 #include <vector>
 
-#include <ox/core.hpp>
+#include <ox/core/core.hpp>
 
 using namespace ox;
 
