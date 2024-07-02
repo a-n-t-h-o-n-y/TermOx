@@ -40,9 +40,6 @@ add_library(TermOx STATIC
     # include/ox/widgets/text_box.hpp
     # include/ox/widgets/widget.hpp
 
-    # include/ox/static/application.hpp
-    # include/ox/static/layout.hpp
-
     include/ox/widgets2/application.hpp
     include/ox/widgets2/button.hpp
     include/ox/widgets2/focus.hpp
