@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <ranges>
 #include <type_traits>
 
 #include <signals_light/signal.hpp>
@@ -20,17 +21,40 @@ namespace ox {
  */
 enum class FocusPolicy : std::uint8_t { None, Tab, Click, Strong };
 
+/**
+ * Policy for how a widget should be sized by its parent layout.
+ */
+struct SizePolicy {
+    int minimum = 0;
+    int maximum = std::numeric_limits<int>::max();
+    float flexibility = 1.f;
+
+    [[nodiscard]] static auto fixed(int size) -> SizePolicy;
+    [[nodiscard]] static auto flex(float flex = 1.f) -> SizePolicy;
+    [[nodiscard]] static auto bounded(int min, int max) -> SizePolicy;
+    [[nodiscard]] static auto min(int min) -> SizePolicy;
+    [[nodiscard]] static auto max(int max) -> SizePolicy;
+};
+
+/**
+ * Base class for interactive UI elements.
+ */
 class Widget {
    public:
     FocusPolicy focus_policy;
+    SizePolicy size_policy;
     Terminal::Cursor cursor = std::nullopt;
-    bool enabled = true;
+    bool active = true;
+
+    //    protected:
     Point at = {0, 0};
     Area size = {0, 0};
     std::shared_ptr<Widget*> lifetime = std::make_shared<Widget*>(this);
 
    public:
-    Widget(FocusPolicy fp = FocusPolicy::None) : focus_policy{fp} {}
+    Widget(FocusPolicy fp = FocusPolicy::None, SizePolicy sp = SizePolicy::flex())
+        : focus_policy{fp}, size_policy{sp}
+    {}
 
     Widget(Widget const&) = delete;
     Widget(Widget&& other);
@@ -97,6 +121,13 @@ class LifetimeView {
 template <typename T>
 concept IsWidgetDerived = std::is_base_of_v<Widget, T>;
 
+namespace filter {
+
+inline constexpr auto is_active =
+    std::views::filter([](Widget const& w) { return w.active; });
+
+}  // namespace filter
+
 /**
  * Create a handle to the lifetime of the given Widget.
  *
@@ -124,16 +155,17 @@ template <typename SlotFn, IsWidgetDerived... TrackedWidgets>
     };
 }
 
+// TODO remove this function
 template <typename Signature>
 void connect(sl::Signal<Signature>& signal, sl::Slot<Signature> slot)
 {
     signal.connect(std::move(slot));
 }
 
+// TODO remove this function
 template <typename Signature, typename SlotFn>
 void connect(sl::Signal<Signature>& signal, SlotFn slot_fn)
 {
-    // TODO constrain SlotFn?
     signal.connect(std::move(slot_fn));
 }
 

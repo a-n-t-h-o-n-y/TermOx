@@ -1,61 +1,281 @@
 #pragma once
 
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
 #include <memory>
+#include <numeric>
+#include <ranges>
 #include <tuple>
 #include <vector>
 
 #include <ox/core/core.hpp>
 #include <ox/widget.hpp>
 
+namespace ox::detail {
+
+/**
+ * Calculate the length of each Widget in the given total length based on the its
+ * SizePolicy and the total space available.
+ *
+ * @param widgets The widgets to distribute the space between.
+ * @param total_length The total space to distribute.
+ * @return A vector of the lengths of each child.
+ */
+template <InputRangeOf<Widget> WidgetRange>
+[[nodiscard]] auto distribute_length(WidgetRange&& widgets,
+                                     int total_length) -> std::vector<int>
+{
+    assert(total_length >= 0);
+
+    // Materialize the range because it can only be iterated once.
+    // I'd like to use ranges filter + transform + to<vector> but must wait for C++23.
+    auto const size_policies = [&] {
+        auto result = std::vector<SizePolicy>{};
+        for (auto const& w : widgets) {
+            if (w.active) {
+                result.push_back(w.size_policy);
+            }
+        }
+        return result;
+    }();
+
+    for (auto const& policy : size_policies) {
+        assert(policy.minimum >= 0);
+        assert(policy.maximum >= policy.minimum);
+        assert(policy.flexibility >= 0);
+    }
+
+    auto exact_amounts = std::vector<float>(size_policies.size(), 0.f);
+    auto total_allocated = 0.f;
+
+    // Distribute minimums first
+    for (auto [exact_amount, size_policy] : zip(exact_amounts, size_policies)) {
+        exact_amount = (float)size_policy.minimum;
+        total_allocated += exact_amount;
+    }
+
+    // TODO
+    // I do not believe this removes space from widgets if the sum of mins is greater
+    // than the total space available.
+    // You could have a check here.
+    // if (total_allocated >= total) {
+    //     auto results = std::vector<int>(policy_count, 0);
+
+    //     // floor values to ints.
+    //     std::ranges::copy(exact_amounts, results.begin());
+    //     return results;
+    // }
+
+    // Distribute flex space
+    auto remaining_space = (float)total_length - total_allocated;
+    while (remaining_space > 0) {
+        auto const total_flex = [&] {
+            auto x = 0.f;
+            for (auto [exact_amount, size_policy] : zip(exact_amounts, size_policies)) {
+                if (exact_amount < (float)size_policy.maximum) {
+                    x += size_policy.flexibility;
+                }
+            }
+            return x;
+        }();
+
+        if (total_flex == 0.f) {
+            break;
+        }
+
+        auto space_distributed_this_round = 0.f;
+        for (auto [exact_amount, size_policy] : zip(exact_amounts, size_policies)) {
+            if (exact_amount < (float)size_policy.maximum) {
+                float additional_space =
+                    std::min(size_policy.flexibility / total_flex * remaining_space,
+                             (float)size_policy.maximum - exact_amount);
+                exact_amount += additional_space;
+                space_distributed_this_round += additional_space;
+            }
+        }
+        remaining_space -= space_distributed_this_round;
+        if (space_distributed_this_round == 0) {
+            break;
+        }
+    }
+    auto results = std::vector<int>(size_policies.size(), 0);
+
+    // floor values to ints.
+    std::ranges::copy(exact_amounts, results.begin());
+
+    // Distribute remaining space from left from flooring.
+    int remaining =
+        total_length - std::accumulate(std::begin(results), std::end(results), 0);
+    while (remaining > 0) {
+        auto space_distributed_this_round = 0;
+        for (auto [result, size_policy] : zip(results, size_policies)) {
+            if (result < size_policy.maximum) {
+                result += 1;
+                remaining -= 1;
+                ++space_distributed_this_round;
+                if (remaining == 0) {
+                    break;
+                }
+            }
+        }
+        if (space_distributed_this_round == 0) {
+            break;
+        }
+    }
+    return results;
+}
+
+// To lessen code duplication.
+template <typename ContainerLayout>
+struct HorizontalLayout : ContainerLayout {
+    void resize(Area new_size) override
+    {
+        auto const widths =
+            detail::distribute_length(this->get_children(), new_size.width);
+
+        auto x = 0;
+        for (auto [child, width] :
+             zip(this->get_children() | filter::is_active, widths)) {
+            child.at = {x, 0};
+            child.size = {width, new_size.height};
+            child.resize({width, new_size.height});
+            x += width;
+        }
+    }
+};
+
+// To lessen code duplication.
+template <typename ContainerLayout>
+struct VerticalLayout : ContainerLayout {
+    void resize(Area new_size) override
+    {
+        auto const heights =
+            detail::distribute_length(this->get_children(), new_size.height);
+
+        auto y = 0;
+        for (auto [child, height] :
+             zip(this->get_children() | filter::is_active, heights)) {
+            child.at = {0, y};
+            child.size = {new_size.width, height};
+            child.resize(child.size);
+            y += height;
+        }
+    }
+};
+
+}  // namespace ox::detail
+
 namespace ox {
 
 /**
- * Policy for how a widget should be sized by its parent layout.
+ * A layout that arranges child widgets in a horizontal or vertical line, using
+ * Widget::size_policy to determine the size of each child widget. Children Widgets are
+ * added/removed at runtime.
  */
-struct SizePolicy {
-    int minimum = 0;
-    int maximum = std::numeric_limits<int>::max();
-    float flexibility = 1.f;
-
-    [[nodiscard]] static auto fixed(int size) -> SizePolicy;
-    [[nodiscard]] static auto flex(float flex = 1.f) -> SizePolicy;
-    [[nodiscard]] static auto bounded(int min, int max) -> SizePolicy;
-    [[nodiscard]] static auto min(int min) -> SizePolicy;
-    [[nodiscard]] static auto max(int max) -> SizePolicy;
-};
-
-// -------------------------------------------------------------------------------------
-
 template <typename WidgetBase>
-struct LinearLayoutDynamic : Widget {
-    // TODO add a make<> type function that check the type inherits from widgetbase or
-    // is widgetbase and inherits from Widget, then make this a class and make children
-    // hidden. Then provide an insert and remove set of fns to work with vector.
-    // separate remove and erase functions? erase would .reset() and remove would
-    // return?
-    std::vector<std::unique_ptr<WidgetBase>> children;
+class VectorLayout : public Widget {
+    static_assert(IsWidgetDerived<WidgetBase>);
 
+   public:
+    /**
+     * Append a child widget to the layout.
+     *
+     * @param child The child widget to append.
+     * @return A reference to the appended child widget.
+     */
+    template <typename ChildType>
+    auto append(ChildType child) -> ChildType&
+    {
+        static_assert(std::is_base_of_v<WidgetBase, ChildType>);
+        children_.push_back(std::make_unique<ChildType>(std::move(child)));
+        this->resize(this->Widget::size);
+        return *static_cast<ChildType*>(children_.back().get());
+    }
+
+    template <typename ChildType>
+    auto insert_at(std::size_t index, ChildType child) -> ChildType&
+    {
+        static_assert(std::is_base_of_v<WidgetBase, ChildType>);
+        children_.insert(
+            std::next(std::begin(children_), static_cast<std::ptrdiff_t>(index)),
+            std::make_unique<ChildType>(std::move(child)));
+        this->resize(this->Widget::size);
+        return *static_cast<ChildType*>(children_[index].get());
+    }
+
+    auto remove_at(std::size_t index) -> std::unique_ptr<WidgetBase>
+    {
+        auto removed = std::move(children_[index]);
+        children_.erase(
+            std::next(std::begin(children_), static_cast<std::ptrdiff_t>(index)));
+        this->resize(this->Widget::size);
+        return removed;
+    }
+
+    auto clear() -> void { children_.clear(); }
+
+   public:
     auto get_children() -> Generator<Widget&> override
     {
-        for (WidgetBase& child_ptr : children) {
+        for (WidgetBase& child_ptr : children_) {
             co_yield *child_ptr;
         }
     }
 
     auto get_children() const -> Generator<Widget const&> override
     {
-        for (WidgetBase const& child_ptr : children) {
+        for (WidgetBase const& child_ptr : children_) {
             co_yield *child_ptr;
         }
     }
+
+    [[nodiscard]] auto get_size_policies() const -> std::vector<SizePolicy>
+    {
+        auto result = std::vector<SizePolicy>{};
+        for (auto const& child : children_) {
+            result.push_back(child->size_policy);
+        }
+        return result;
+    }
+
+   private:
+    std::vector<std::unique_ptr<WidgetBase>> children_;
 };
 
-template <typename... Widgets>
-struct LinearLayout : Widget {
-    std::tuple<Widgets...> children;
-    // TODO what does construction look like and signal hooking up?
-    // Can it be deduced? not if you use it as a base class
+/**
+ * A layout that arranges child widgets in a horizontal line, using Widget::size_policy
+ * to determine the size of each child widget. Children Widgets are added/removed at
+ * runtime.
+ */
+template <typename WidgetBase>
+using HVector = detail::HorizontalLayout<VectorLayout<WidgetBase>>;
 
+/**
+ * A layout that arranges child widgets in a vertical line, using Widget::size_policy to
+ * determine the size of each child widget. Children Widgets are added/removed at
+ * runtime.
+ */
+template <typename WidgetBase>
+using VVector = detail::VerticalLayout<VectorLayout<WidgetBase>>;
+
+// -------------------------------------------------------------------------------------
+
+/**
+ * A layout that arranges child widgets in a horizontal or vertical line. Children
+ * Widgets are determined at compile-time.
+ */
+template <typename... Widgets>
+class TupleLayout : public Widget {
+   public:
+    std::tuple<Widgets...> children;
+
+   public:
+    TupleLayout() = default;
+
+    TupleLayout(Widgets... children_) : children{std::move(children_)...} {}
+
+   public:
     auto get_children() -> Generator<Widget&> override
     {
         return std::apply(
@@ -71,212 +291,42 @@ struct LinearLayout : Widget {
             },
             children);
     }
-};
 
-// -------------------------------------------------------------------------------------
-
-template <typename... Widgets>
-struct HLayout : LinearLayout<Widgets...> {
-    void resize(Area new_size) override
+    [[nodiscard]] auto get_size_policies() const -> std::vector<SizePolicy>
     {
-        // just evenly distribute
-        // auto const total_flex = std::apply(
-        //     [](auto const&... child) {
-        //         return (child.size_policy.flexibility + ...);
-        //     },
-        //     this->children);
-
-        auto const count = sizeof...(Widgets);
-        auto const uniform_height = new_size.height / count;
-        auto const width = new_size.width;
-
-        std::apply(
-            [uniform_height, width, at = 0](auto&... child) mutable {
-                // assign child.size.height and width, then send resize event
-                // do this in lambda?
-
-                (
-                    [&at](auto& child, int height, int width) mutable {
-                        child.size = {width, height};
-                        child.at = {0, at};
-                        at += height;
-                        child.resize({width, height});
-                    }(child, uniform_height, width),
-                    ...);
+        return std::apply(
+            [](auto const&... child) -> std::vector<SizePolicy> {
+                return {child.size_policy...};
             },
-            this->children);
+            children);
     }
 };
 
-// struct Divider;
+/**
+ * A layout that arranges child widgets in a horizontal line, using Widget::size_policy
+ * to determine the size of each child widget. Children Widgets are determined at
+ * compile-time.
+ */
+template <typename... Widgets>
+using HTuple = detail::HorizontalLayout<TupleLayout<Widgets...>>;
 
-// /**
-//  * Policy for how a widget should be sized by its parent layout.
-//  */
-// struct SizePolicy {
-//     int minimum = 0;
-//     int maximum = std::numeric_limits<int>::max();
-//     float flexibility = 1.f;
+template <typename... Widgets>
+using HLayout = HTuple<Widgets...>;
 
-//     [[nodiscard]] static auto fixed(int size) -> SizePolicy;
-//     [[nodiscard]] static auto flex(float flex = 1.f) -> SizePolicy;
-//     [[nodiscard]] static auto bounded(int min, int max) -> SizePolicy;
-//     [[nodiscard]] static auto min(int min) -> SizePolicy;
-//     [[nodiscard]] static auto max(int max) -> SizePolicy;
-// };
+/**
+ * A layout that arranges child widgets in a vertical line, using Widget::size_policy to
+ * determine the size of each child widget. Children Widgets are determined at
+ * compile-time.
+ */
+template <typename... Widgets>
+using VTuple = detail::VerticalLayout<TupleLayout<Widgets...>>;
 
-// /**
-//  * A layout that arranges its children in a line, either horizontally or vertically.
-//  Do
-//  * not use directly, instead use HLayout or VLayout.
-//  */
-// struct LinearLayout {
-//     std::vector<Widget> children = {};
-//     std::vector<SizePolicy> size_policies = {};
+template <typename... Widgets>
+using VLayout = VTuple<Widgets...>;
 
-//     template <typename... Widgets>
-//     explicit LinearLayout(Widgets&&... children_)
-//     {
-//         static_assert((!std::is_same_v<std::remove_cvref_t<Widgets>, Widget> && ...),
-//                       "`Widget` type should not be passed as an argument");
+//--------------------------------------------------------------------------------------
 
-//         size_policies.resize(sizeof...(children_), SizePolicy{});
-
-//         (children.emplace_back(std::forward<Widgets>(children_)), ...);
-//     }
-
-//     /**
-//      * Append a Widget to the LinearLayout.
-//      *
-//      * @param t The Widget to append.
-//      * @param size_policy The size policy to apply to the Widget.
-//      * @param focus_policy The focus policy to apply to the Widget.
-//      * @return A reference to the appended Widget. This reference will remain valid
-//      * until the Widget is destroyed.
-//      */
-//     template <typename T>
-//     auto append(T t,
-//                 SizePolicy size_policy = {},
-//                 FocusPolicy focus_policy = FocusPolicy::None) -> T&
-//     {
-//         static_assert(!std::is_same_v<std::remove_cvref_t<T>, Widget>);
-
-//         this->size_policies.push_back(size_policy);
-
-//         return this->children.emplace_back(std::move(t), focus_policy)
-//             .template data<T>();
-//     }
-// };
-
-// inline auto children(LinearLayout& w) -> std::span<Widget> { return w.children; }
-
-// inline auto children(LinearLayout const& w) -> std::span<Widget const>
-// {
-//     return w.children;
-// }
-
-////-------------------------------------------------------------------------------------
-
-// /**
-//  * Inserts a Widget into the LinearLayout at the given index.
-//  *
-//  * @param index The index to insert the Widget at. If this is greater than the
-//  current
-//  * number of children, the Widget will be appended to the end of the layout.
-//  * @param t The Widget to insert.
-//  * @param size_policy The size policy to apply to the Widget.
-//  * @param focus_policy The focus policy to apply to the Widget.
-//  * @return A reference to the inserted Widget. This reference will remain valid until
-//  * the Widget is destroyed.
-//  */
-// template <typename T>
-// auto insert_at(LinearLayout& layout,
-//                std::size_t index,
-//                T t,
-//                SizePolicy size_policy = {},
-//                FocusPolicy focus_policy = FocusPolicy::None) -> T&
-// {
-//     static_assert(!std::is_same_v<std::remove_cvref_t<T>, Widget>);
-
-//     if (index >= layout.children.size()) {
-//         return layout.append(std::move(t), size_policy, focus_policy);
-//     }
-
-//     layout.size_policies.insert(
-//         std::next(std::begin(layout.size_policies), (std::ptrdiff_t)index),
-//         size_policy);
-
-//     return layout.children
-//         .emplace(std::next(std::begin(layout.children), index), std::move(t),
-//                  focus_policy)
-//         ->template data<T>();
-// }
-
-// /**
-//  * Removes and returns the given Widget from the LinearLayout.
-//  *
-//  * @details Find \p w with find_if_depth_first.
-//  * @param layout The LinearLayout to remove \p w from.
-//  * @param w The Widget to remove.
-//  * @return The removed Widget.
-//  * @throws std::out_of_range If \p w is not found in \p layout.
-//  */
-// auto remove(LinearLayout& layout, Widget const& w) -> Widget;
-
-// /**
-//  * Removes and returns the Widget at the given index from the LinearLayout.
-//  *
-//  * @param layout The LinearLayout to remove the Widget from.
-//  * @param index The index of the Widget to remove.
-//  * @return The removed Widget.
-//  * @throws std::out_of_range If \p index is greater than or equal to the number of
-//  * children in \p layout.
-//  */
-// auto remove_at(LinearLayout& layout, std::size_t index) -> Widget;
-
-// /**
-//  * Removes and returns all Widgets from the LinearLayout.
-//  *
-//  * @param layout The LinearLayout to remove all Widgets from.
-//  * @return A vector containing all the removed Widgets.
-//  */
-// auto remove_all(LinearLayout& layout) -> std::vector<Widget>;
-
-////-------------------------------------------------------------------------------------
-
-// struct HLayout : LinearLayout {
-//     using LinearLayout::LinearLayout;
-// };
-
-// template <typename... Widgets>
-// [[nodiscard]] auto hlayout(Widgets&&... children) -> HLayout
-// {
-//     return {std::forward<Widgets>(children)...};
-// }
-
-// auto resize(HLayout& layout, Area a) -> void;
-
-// auto append_divider(HLayout& layout, Glyph line = {U'│'}) -> Divider&;
-
-////-------------------------------------------------------------------------------------
-
-// struct VLayout : LinearLayout {
-//     using LinearLayout::LinearLayout;
-// };
-
-// template <typename... Widgets>
-// [[nodiscard]] auto vlayout(Widgets&&... children) -> VLayout
-// {
-//     return {std::forward<Widgets>(children)...};
-// }
-
-// auto resize(VLayout& layout, Area a) -> void;
-
-// auto append_divider(VLayout& layout, Glyph line = {U'─'}) -> Divider&;
-
-////-------------------------------------------------------------------------------------
-
-// // TODO
-// struct GridLayout {};
+// TODO
+class GridLayout {};
 
 }  // namespace ox

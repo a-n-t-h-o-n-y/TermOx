@@ -64,9 +64,9 @@ struct Clicker : Widget {
     void resize(Area new_size) override { Widget::size = new_size; }
 };
 
-struct ALayout : LinearLayout<Clicker, Clicker> {};
+struct ALayout : VLayout<Clicker, Clicker> {};
 
-struct SignalTest : HLayout<Label, Button, Clicker, Label> {
+struct SignalTest : VLayout<Label, Button, Clicker, Label> {
     SignalTest()
     {
         auto& [label, button, clicker, label2] = this->children;

@@ -3,9 +3,9 @@
 // #include <cstddef>
 // #include <string_view>
 
-// #include <ox/core/core.hpp>
+#include <ox/core/core.hpp>
 
-// namespace ox {
+namespace ox {
 
 // auto label(LabelInit x) -> Label
 // {
@@ -16,25 +16,22 @@
 //     };
 // }
 
-// void paint(Label const& label, Canvas c)
-// {
-//     auto& brush = label.brush;
-//     Painter{c}.fill(U' ' | bg(brush.background) | fg(brush.foreground));
+void Label::paint(Canvas c) const
+{
+    Painter{c}.fill(U' ' | bg(brush.background) | fg(brush.foreground));
 
-//     auto const glyphs =
-//         std::string_view{label.text}.substr(0, (std::size_t)c.size.width) | brush;
+    auto const glyphs =
+        std::string_view{text}.substr(0, (std::size_t)c.size.width) | brush;
 
-//     auto at = Point{.x = 0, .y = c.size.height / 2};
+    auto at = Point{.x = 0, .y = c.size.height / 2};
 
-//     switch (label.align) {
-//         case Label::Align::Left: break;
-//         case Label::Align::Center:
-//             at.x = (c.size.width - (int)glyphs.size()) / 2;
-//             break;
-//         case Label::Align::Right: at.x = c.size.width - (int)glyphs.size(); break;
-//     }
+    switch (align) {
+        case Align::Left: break;
+        case Align::Center: at.x = (c.size.width - (int)glyphs.size()) / 2; break;
+        case Align::Right: at.x = c.size.width - (int)glyphs.size(); break;
+    }
 
-//     Painter{c}[at] << glyphs;
-// }
+    Painter{c}[at] << glyphs;
+}
 
-// }  // namespace ox
+}  // namespace ox

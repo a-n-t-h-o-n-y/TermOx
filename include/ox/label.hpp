@@ -1,23 +1,23 @@
 #pragma once
 
+#include <ox/core/core.hpp>
 #include <ox/widget.hpp>
 
 namespace ox {
 
+/**
+ * A single line horizontal text label.
+ *
+ * @details The text will be truncated if it is too long to fit across the Label.
+ */
 struct Label : Widget {
-    std::string text = "HELLO";
+    std::string text;
+    enum class Align { Left, Center, Right } align;
+    Brush brush;
 
-    void set_text(std::string new_text) { text = std::move(new_text); }
-
-    void paint(Canvas c) const override { Painter{c}[{0, 0}] << text; };
+    void paint(Canvas c) const override;
 };
 
-// /**
-//  * A single line horizontal text label.
-//  *
-//  * @details The text will be truncated if it is too long to fit in the width of the
-//  * Label.
-//  */
 // struct Label {
 //     std::string text;
 //     enum class Align { Left, Center, Right } align;

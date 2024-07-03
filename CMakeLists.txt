@@ -14,7 +14,7 @@ add_subdirectory(external/signals-light)
 add_library(TermOx STATIC
     src/application.cpp
     # src/border.cpp
-    # src/label.cpp
+    src/label.cpp
     src/focus.cpp
     src/layout.cpp
     # src/text_box.cpp

@@ -20,13 +20,12 @@ using namespace ox;
  * @param p The Point to search for.
  * @returns A pointer to the Widget that contains \p p, or nullptr if no Widget.
  */
-template <std::ranges::input_range R>
+template <InputRangeOf<Widget> R>
 [[nodiscard]] auto find_widget_at(R&& widgets, Point p) -> Widget*
 {
     auto const at = std::ranges::find_if(widgets, [p](Widget& child) {
-        return child.enabled && child.at.x <= p.x &&
-               p.x < child.at.x + child.size.width && child.at.y <= p.y &&
-               p.y < child.at.y + child.size.height;
+        return child.at.x <= p.x && p.x < child.at.x + child.size.width &&
+               child.at.y <= p.y && p.y < child.at.y + child.size.height;
     });
 
     return (at == std::end(widgets)) ? nullptr : &*at;
@@ -90,7 +89,8 @@ enum class SetFocus : bool { Yes, No };
 template <SetFocus SF, typename EventFn>
 auto any_mouse_event(Widget& head, Mouse m, EventFn&& event_fn) -> void
 {
-    Widget* const found_ptr = find_widget_at(head.get_children(), m.at);
+    Widget* const found_ptr =
+        find_widget_at(head.get_children() | filter::is_active, m.at);
 
     if (found_ptr == nullptr) {  // `head` is last Widget that contains m.at
         if constexpr (SF == SetFocus::Yes) {
@@ -110,7 +110,7 @@ auto any_mouse_event(Widget& head, Mouse m, EventFn&& event_fn) -> void
 auto send_leave_events(Widget& w, Point p) -> void
 {
     w.mouse_leave();
-    Widget* const next = find_widget_at(w.get_children(), p);
+    Widget* const next = find_widget_at(w.get_children() | filter::is_active, p);
     if (next != nullptr) {
         send_leave_events(*next, p - next->at);
     }
@@ -119,7 +119,7 @@ auto send_leave_events(Widget& w, Point p) -> void
 auto send_enter_events(Widget& w, Point p) -> void
 {
     w.mouse_enter();
-    Widget* const next = find_widget_at(w.get_children(), p);
+    Widget* const next = find_widget_at(w.get_children() | filter::is_active, p);
     if (next != nullptr) {
         send_enter_events(*next, p - next->at);
     }
@@ -127,8 +127,10 @@ auto send_enter_events(Widget& w, Point p) -> void
 
 auto send_enter_leave_events(Widget& w, Point previous, Point current) -> void
 {
-    Widget* const previous_widget = find_widget_at(w.get_children(), previous);
-    Widget* const current_widget = find_widget_at(w.get_children(), current);
+    Widget* const previous_widget =
+        find_widget_at(w.get_children() | filter::is_active, previous);
+    Widget* const current_widget =
+        find_widget_at(w.get_children() | filter::is_active, current);
 
     if (previous_widget != nullptr && current_widget != nullptr &&
         previous != current) {
@@ -202,13 +204,13 @@ auto send_paint_events(Widget const& head,
                        Canvas canvas,
                        Terminal::Cursor& cursor_out) -> void
 {
-    if (head.enabled && head.size.width > 0 && head.size.height > 0) {
+    if (head.active && head.size.width > 0 && head.size.height > 0) {
         head.paint(canvas);
         if (auto const life = Focus::get(); life.valid() && &(life.get()) == &head) {
             cursor_out = head.cursor ? canvas.at + *head.cursor : head.cursor;
         }
     }
-    for (auto const& child : head.get_children()) {
+    for (auto const& child : head.get_children() | filter::is_active) {
         send_paint_events(child,
                           Canvas{
                               .buffer = canvas.buffer,
