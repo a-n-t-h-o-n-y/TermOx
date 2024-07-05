@@ -16,7 +16,7 @@ add_library(TermOx STATIC
     # src/border.cpp
     src/label.cpp
     src/focus.cpp
-    # src/text_box.cpp
+    src/textbox.cpp
     src/widget.cpp
     src/core/terminal.cpp
 
@@ -27,7 +27,7 @@ add_library(TermOx STATIC
     include/ox/focus.hpp
     include/ox/label.hpp
     include/ox/layout.hpp
-    # include/ox/text_box.hpp
+    include/ox/textbox.hpp
     include/ox/widget.hpp
 
     include/ox/core/common.hpp

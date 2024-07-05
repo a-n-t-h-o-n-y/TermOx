@@ -41,7 +41,7 @@ class Application {
 
     auto handle_timer(int id) -> EventResponse;
 
-    auto handle_paint(Canvas canvas) const -> Terminal::Cursor;
+    auto handle_paint(Canvas canvas) -> Terminal::Cursor;
 
    private:
     Widget& head_;

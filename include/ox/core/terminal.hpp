@@ -580,7 +580,7 @@ template <typename T>
 }
 
 template <typename T>
-concept HandlesPaint = requires(T const t, Canvas c) {
+concept HandlesPaint = requires(T t, Canvas c) {
     { t.handle_paint(c) } -> std::same_as<Terminal::Cursor>;
 };
 

@@ -7,31 +7,21 @@ namespace ox {
 
 /**
  * A single line horizontal text label.
- *
- * @details The text will be truncated if it is too long to fit across the Label.
  */
-struct Label : Widget {
+class Label : public Widget {
+   public:
     std::string text;
     enum class Align { Left, Center, Right } align;
     Brush brush;
+    // Color background;  // TODO
 
-    void paint(Canvas c) const override;
+   public:
+    Label(std::string text_ = "", Align align_ = Align::Center, Brush brush_ = {})
+        : text{std::move(text_)}, align{align_}, brush{brush_}
+    {}
+
+   public:
+    void paint(Canvas c) override;
 };
-
-// struct Label {
-//     std::string text;
-//     enum class Align { Left, Center, Right } align;
-//     Brush brush;
-// };
-
-// struct LabelInit {
-//     std::string text;
-//     Label::Align align = Label::Align::Center;
-//     Brush brush = {};
-// };
-
-// [[nodiscard]] auto label(LabelInit x) -> Label;
-
-// void paint(Label const&, Canvas);
 
 }  // namespace ox

@@ -200,7 +200,7 @@ auto do_shift_tab_focus_change(Widget& head, Widget const& current_focus) -> voi
 
 // Recursively send paint events to each Widget including and below head. \p cursor is
 // assigned to if the current focus widget is painted.
-auto send_paint_events(Widget const& head,
+auto send_paint_events(Widget& head,
                        Canvas canvas,
                        Terminal::Cursor& cursor_out) -> void
 {
@@ -210,7 +210,7 @@ auto send_paint_events(Widget const& head,
             cursor_out = head.cursor ? canvas.at + *head.cursor : head.cursor;
         }
     }
-    for (auto const& child : head.get_children() | filter::is_active) {
+    for (auto& child : head.get_children() | filter::is_active) {
         send_paint_events(child,
                           Canvas{
                               .buffer = canvas.buffer,
@@ -306,7 +306,7 @@ auto Application::handle_timer(int id) -> EventResponse
     return {};
 }
 
-auto Application::handle_paint(Canvas canvas) const -> Terminal::Cursor
+auto Application::handle_paint(Canvas canvas) -> Terminal::Cursor
 {
     auto cursor = Terminal::Cursor{std::nullopt};
     ::send_paint_events(head_, canvas, cursor);

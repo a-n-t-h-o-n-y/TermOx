@@ -129,6 +129,8 @@ template <InputRangeOf<Widget> WidgetRange>
 // To lessen code duplication.
 template <typename ContainerLayout>
 struct HorizontalLayout : ContainerLayout {
+    using ContainerLayout::ContainerLayout;
+
     void resize(Area new_size) override
     {
         auto const widths =
@@ -148,6 +150,8 @@ struct HorizontalLayout : ContainerLayout {
 // To lessen code duplication.
 template <typename ContainerLayout>
 struct VerticalLayout : ContainerLayout {
+    using ContainerLayout::ContainerLayout;
+
     void resize(Area new_size) override
     {
         auto const heights =
@@ -218,14 +222,14 @@ class VectorLayout : public Widget {
    public:
     auto get_children() -> Generator<Widget&> override
     {
-        for (WidgetBase& child_ptr : children_) {
+        for (std::unique_ptr<WidgetBase> const& child_ptr : children_) {
             co_yield *child_ptr;
         }
     }
 
     auto get_children() const -> Generator<Widget const&> override
     {
-        for (WidgetBase const& child_ptr : children_) {
+        for (std::unique_ptr<WidgetBase> const& child_ptr : children_) {
             co_yield *child_ptr;
         }
     }

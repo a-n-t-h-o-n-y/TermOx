@@ -89,7 +89,7 @@ class Widget {
 
     virtual void timer(int /* id */) {}
 
-    virtual void paint(Canvas) const {}
+    virtual void paint(Canvas) {}
 
     virtual auto get_children() -> Generator<Widget&> { co_return; }
 
@@ -153,20 +153,6 @@ template <typename SlotFn, IsWidgetDerived... TrackedWidgets>
             fn(lifetimes.get()..., std::forward<decltype(args)>(args)...);
         }
     };
-}
-
-// TODO remove this function
-template <typename Signature>
-void connect(sl::Signal<Signature>& signal, sl::Slot<Signature> slot)
-{
-    signal.connect(std::move(slot));
-}
-
-// TODO remove this function
-template <typename Signature, typename SlotFn>
-void connect(sl::Signal<Signature>& signal, SlotFn slot_fn)
-{
-    signal.connect(std::move(slot_fn));
 }
 
 }  // namespace ox

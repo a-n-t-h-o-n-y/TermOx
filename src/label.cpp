@@ -1,22 +1,13 @@
 #include <ox/label.hpp>
 
-// #include <cstddef>
-// #include <string_view>
+#include <cstddef>
+#include <string_view>
 
 #include <ox/core/core.hpp>
 
 namespace ox {
 
-// auto label(LabelInit x) -> Label
-// {
-//     return {
-//         .text = std::move(x.text),
-//         .align = x.align,
-//         .brush = x.brush,
-//     };
-// }
-
-void Label::paint(Canvas c) const
+void Label::paint(Canvas c)
 {
     Painter{c}.fill(U' ' | bg(brush.background) | fg(brush.foreground));
 
