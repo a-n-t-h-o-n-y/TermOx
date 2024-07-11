@@ -117,9 +117,10 @@ auto signal_test()
 
     auto& tb = head.append(TextBox{
         U"Hello, world!\nThis is a new line!\n\nThis is another line after two "
-        "newlines!"_gs,
+        "newlines!"_gs |
+            fg(XColor::Black),
         TextBox::Wrap::Word,
-        TextBox::Align::Left,
+        TextBox::Align::Center,
     });
     tb.background = XColor::BrightGreen;
     tb.focus_policy = FocusPolicy::Strong;
@@ -142,7 +143,7 @@ int main()
     auto head = signal_test();
     auto head2 = std::move(head);
     auto head3 = std::move(head2);
-    return Application{head3, {MouseMode::Move}}.run();
+    return Application{head3, {MouseMode::Basic}}.run();
 
     // auto clicker = ALayout{};
     // auto clicker = Clicker{};

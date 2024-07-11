@@ -355,4 +355,18 @@ struct zip_fn {
 
 inline constexpr zip_fn zip{};
 
+// -------------------------------------------------------------------------------------
+
+/**
+ * Pairs elements with an index.
+ */
+template <std::ranges::range R>
+[[nodiscard]] auto enumerate(R&& range, std::size_t init = 0)
+    -> Generator<std::pair<std::size_t, std::ranges::range_reference_t<R>>>
+{
+    for (auto&& e : std::forward<R>(range)) {
+        co_yield (std::pair{init++, e});
+    }
+}
+
 }  // namespace ox

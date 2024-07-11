@@ -22,6 +22,8 @@ using namespace ox;
  * @param glyphs The text to calculate spans for.
  * @param wrap The wrap policy to use.
  * @param width The hard limit to wrap text at.
+ * @returns A vector of spans, each representing a horizontal line. Vector will always
+ * have at least one element.
  */
 [[nodiscard]] auto calculate_spans(std::vector<Glyph> const& glyphs,
                                    TextBox::Wrap wrap,
@@ -33,7 +35,9 @@ using namespace ox;
                std::u32string_view::npos;
     };
 
-    if (width == 0) { return {}; }
+    if (width == 0 || glyphs.empty()) {
+        return {std::span<Glyph const>{}};
+    }
 
     auto spans = std::vector<std::span<Glyph const>>{};
     auto span = std::span<Glyph const>{glyphs};
@@ -41,12 +45,12 @@ using namespace ox;
     while (!span.empty()) {
         auto const max_count = std::min(std::size(span), width);
 
-        auto const newline_count =
+        auto const count_to_newline =
             (std::size_t)std::distance(std::cbegin(span),
                                        std::ranges::find(span, U'\n', &Glyph::symbol)) +
             1;
 
-        auto split_count = std::min(newline_count, max_count);
+        auto split_count = std::min(count_to_newline, max_count);
 
         // If word-wrapping, search for space char nearest the end of the line and
         // re-set split_count to that index.
@@ -67,6 +71,11 @@ using namespace ox;
         span = span.subspan(split_count);
     }
 
+    // Add empty line if newline is last char
+    if (!glyphs.empty() && glyphs.back().symbol == U'\n') {
+        spans.push_back({});
+    }
+
     return spans;
 }
 
@@ -74,29 +83,87 @@ using namespace ox;
  * Convert a text index to a screen position.
  *
  * @param index The index in the text to convert.
+ * @param line_lengths The lengths of each line in the text.
+ * @param top_line The index of the top line of the text box.
  * @return The screen position of the index, or std::nullopt if the index would be off
  * screen.
  */
 template <std::ranges::range R>
 [[nodiscard]] auto index_to_screen(int index,
                                    R&& line_lengths,
-                                   int top_line) -> std::optional<Point>
+                                   int top_line,
+                                   bool is_last) -> std::optional<Point>
 {
-    auto y = -1 * top_line;
+    auto const line_count = std::size(line_lengths);
+    auto point = Point{.x = (int)index, .y = -1 * top_line};
+    for (auto const [count, length] : enumerate(line_lengths)) {
+        if (point.x < length || length == 0) {
+            if (point.y < 0) {
+                return std::nullopt;
+            }
+            return point;
+        }
+        if (is_last && point.x == length && count + 1 == line_count) {
+            return point;
+        }
+        point.x -= length;
+        point.y += 1;
+    }
+    return std::nullopt;
+}
+
+/**
+ * Convert a screen position to a text index.
+ */
+template <std::ranges::range R>
+[[nodiscard]] auto screen_to_index(Point p,
+                                   R&& line_lengths,
+                                   int top_line) -> std::size_t
+{
+    auto const y = top_line + std::min(p.y, (int)std::ssize(line_lengths) - 1);
+    auto index = std::size_t{0};
+    for (auto i = 0; i < y; ++i) {
+        index += (std::size_t)line_lengths[i];
+    }
+    return index + (std::size_t)std::min(p.x, (int)line_lengths[y] - 1);
+}
+
+/**
+ * Convert a text index to a (vertical) line index.
+ *
+ * @param index The index in the text to convert.
+ * @param line_lengths The lengths of each line in the text.
+ * @return The line index of the index, like top_line_.
+ */
+template <std::ranges::range R>
+[[nodiscard]] auto index_to_line(int index, R&& line_lengths) -> int
+{
+    auto y = 0;
     for (auto const length : line_lengths) {
-        if (index < length) {
-            if (y < 0) { return std::nullopt; }
-            return Point{(int)(index), y};
+        if (index <= length) {
+            return y;
         }
         index -= length;
         ++y;
     }
-    return std::nullopt;
+    return y;
 }
 
 }  // namespace
 
 namespace ox {
+
+TextBox::TextBox(std::vector<Glyph> text_,
+                 Wrap wrap_,
+                 Align align_,
+                 Color background_,
+                 Brush insert_brush_)
+    : text{std::move(text_)},
+      wrap{wrap_},
+      align{align_},
+      background{background_},
+      insert_brush{insert_brush_}
+{}
 
 void TextBox::paint(Canvas c)
 {
@@ -104,12 +171,6 @@ void TextBox::paint(Canvas c)
 
     auto const spans =
         calculate_spans(this->text, this->wrap, (std::size_t)c.size.width);
-
-    // TODO clamp top_line_ here and you don't have to worry about it anywhere else?
-    // Because you need the spans to know where to clamp. (0, spans.size())
-    // But do you also scroll if it isn't on screen? How does arrow down scroll if it
-    // doesn't know where top_line_ is, if it if calculates scroll based on the invalid
-    // top_line_ it has set?
 
     for (auto i = top_line_; i < std::ssize(spans) && (i - top_line_) < c.size.height;
          ++i) {
@@ -126,7 +187,9 @@ void TextBox::paint(Canvas c)
         // Overwrite bg if Glyph's bg is XColor::Default.
         auto writer = Painter{c}[{x, i - top_line_}];
         for (Glyph g : span) {
-            if (g.symbol == U'\n') { continue; }
+            if (g.symbol == U'\n') {
+                continue;
+            }
             if (g.brush.background == Color{XColor::Default}) {
                 g.brush.background = background;
             }
@@ -134,11 +197,12 @@ void TextBox::paint(Canvas c)
         }
     }
 
-    auto cursor = index_to_screen(
-        (int)cursor_index_, spans | std::ranges::views::transform([](auto const& span) {
-                                return std::ssize(span);
-                            }),
-        top_line_);
+    auto cursor =
+        index_to_screen((int)cursor_index_,
+                        spans | std::ranges::views::take(top_line_ + c.size.height) |
+                            std::ranges::views::transform(
+                                [](auto const& span) { return std::ssize(span); }),
+                        top_line_, cursor_index_ == std::size(this->text));
 
     // Adjust x for Alignment
     if (cursor.has_value()) {
@@ -160,9 +224,6 @@ void TextBox::key_press(Key k)
     // In case user modified text or cursor_index.
     cursor_index_ = std::min(cursor_index_, text.size());
 
-    // TODO scroll if arrow key moves cursor out of view.
-
-    // TODO
     switch (k) {
         case Key::Backspace:
             if (!text.empty() && cursor_index_ > 0) {
@@ -179,14 +240,18 @@ void TextBox::key_press(Key k)
                 text.erase(std::next(std::cbegin(text), (std::ptrdiff_t)cursor_index_));
             }
             break;
-            // TODO scroll if needed
         case Key::ArrowLeft:
-            if (cursor_index_ > 0) { --cursor_index_; }
+            if (cursor_index_ > 0) {
+                --cursor_index_;
+            }
             break;
         case Key::ArrowRight:
-            if (cursor_index_ < text.size()) { ++cursor_index_; }
+            if (cursor_index_ < text.size()) {
+                ++cursor_index_;
+            }
             break;
-            // TODO these should scroll if needed
+        case Key::ArrowDown: ++top_line_; break;
+        case Key::ArrowUp: top_line_ = std::max(top_line_ - 1, 0); break;
         case Key::Home: cursor_index_ = 0; break;
         case Key::End: cursor_index_ = text.size(); break;
         default:
@@ -202,55 +267,38 @@ void TextBox::key_press(Key k)
     }
 }
 
+void TextBox::mouse_press(Mouse m)
+{
+    auto const spans =
+        calculate_spans(this->text, this->wrap, (std::size_t)this->size.width);
+
+    auto const line_lengths = spans |
+                              std::ranges::views::take(top_line_ + this->size.height) |
+                              std::ranges::views::transform(
+                                  [](auto const& span) { return std::ssize(span); });
+
+    auto const span = spans[(std::size_t)(top_line_ + m.at.y)];
+    m.at.x = m.at.x - [&]() -> int {
+        switch (align) {
+            case Align::Left: return 0;
+            case Align::Center: return (this->size.width - (int)span.size()) / 2;
+            case Align::Right: return this->size.width - (int)span.size();
+        }
+    }();
+
+    cursor_index_ = screen_to_index(m.at, line_lengths, top_line_);
+}
+
+void TextBox::mouse_wheel(Mouse m)
+{
+    if (m.button == Mouse::Button::ScrollUp) {
+        if (top_line_ > 0) {
+            --top_line_;
+        }
+    }
+    else if (m.button == Mouse::Button::ScrollDown) {
+        ++top_line_;
+    }
+}
+
 }  // namespace ox
-
-// namespace ox {
-
-// auto resize(TextBox& tb, Area new_size) -> void
-// {
-//     // In case user modified text or cursor_index.
-//     tb.cursor_index = std::min(tb.cursor_index, tb.text.size());
-
-//     tb.width = (std::size_t)new_size.width;
-// }
-
-// auto key_press(TextBox& tb, Key k) -> void
-// {
-//     // In case user modified text or cursor_index.
-//     tb.cursor_index = std::min(tb.cursor_index, tb.text.size());
-
-//     switch (k) {
-//         case Key::Backspace:
-//             if (!tb.text.empty() && tb.cursor_index <= tb.text.size()) {
-//                 --tb.cursor_index;
-//                 tb.text.erase(tb.cursor_index, 1);
-//             }
-//             break;
-//         case Key::Enter: tb.text.insert(tb.cursor_index++, 1, '\n'); break;
-//         case Key::Delete:
-//             if (tb.cursor_index < tb.text.size()) {
-//                 tb.text.erase(tb.cursor_index, 1);
-//             }
-//             break;
-//         case Key::ArrowLeft:
-//             if (tb.cursor_index > 0) {
-//                 --tb.cursor_index;
-//             }
-//             break;
-//         case Key::ArrowRight:
-//             if (tb.cursor_index < tb.text.size()) {
-//                 ++tb.cursor_index;
-//             }
-//             break;
-//         case Key::Home: tb.cursor_index = 0; break;
-//         case Key::End: tb.cursor_index = tb.text.size(); break;
-//         default:
-//             if (auto const c = key_to_char(k); c != '\0') {
-//                 tb.text.insert(tb.cursor_index, 1, c);
-//                 ++tb.cursor_index;
-//             }
-//             break;
-//     }
-// }
-
-// }  // namespace ox
