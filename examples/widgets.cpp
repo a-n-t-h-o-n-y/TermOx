@@ -108,6 +108,18 @@ auto signal_test()
 
     head.append(Divider::double_h());
 
+    auto& cb_line = head.append(HTuple<CheckBox, Label>{{}, {"State: UnChecked"}});
+    cb_line.size_policy = SizePolicy::fixed(1);
+    auto& [cb, label] = cb_line.children;
+    cb.size_policy = SizePolicy::fixed(4);
+    label.align = Label::Align::Left;
+
+    cb.on_check.connect(tracked([](Label& l) { l.text = "State: Checked"; }, label));
+    cb.on_uncheck.connect(
+        tracked([](Label& l) { l.text = "State: UnChecked"; }, label));
+
+    head.append(Divider::double_h());
+
     head.append(Label{
         "Hello, world! 2",
         Label::Align::Right,

@@ -14,6 +14,7 @@ add_subdirectory(external/signals-light)
 add_library(TermOx STATIC
     src/application.cpp
     src/bordered.cpp
+    src/checkbox.cpp
     src/label.cpp
     src/focus.cpp
     src/textbox.cpp
@@ -24,6 +25,7 @@ add_library(TermOx STATIC
     include/ox/application.hpp
     include/ox/bordered.hpp
     include/ox/button.hpp
+    include/ox/checkbox.hpp
     include/ox/focus.hpp
     include/ox/label.hpp
     include/ox/layout.hpp
