@@ -328,10 +328,10 @@ class Painter {
      * cursor position. The cursor will not be moved after painting.
      */
     struct Box {
-        Area size;
-        Brush brush;
         std::array<char32_t, 4> corners = square_corners;
         std::array<char32_t, 2> walls = {U'─', U'│'};
+        Brush brush = {};
+        Area size = {.width = 0, .height = 0};
 
         static constexpr std::array square_corners = {U'┌', U'┐', U'└', U'┘'};
         static constexpr std::array round_corners = {U'╭', U'╮', U'╰', U'╯'};

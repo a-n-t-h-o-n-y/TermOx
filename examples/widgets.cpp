@@ -60,9 +60,9 @@ struct Clicker : Widget {
 
 struct ALayout : VLayout<Clicker, Clicker> {};
 
-struct SignalTest : VLayout<Label, Button, Clicker, Label> {
+struct SignalTest : VLayout<Label, Button, Bordered<Clicker>, Label> {
     SignalTest()
-        : VLayout<Label, Button, Clicker, Label>{
+        : VLayout<Label, Button, Bordered<Clicker>, Label>{
               {
                   "Label 1",
                   Label::Align::Center,
@@ -73,7 +73,7 @@ struct SignalTest : VLayout<Label, Button, Clicker, Label> {
                   Brush{.background = XColor::Blue, .foreground = XColor::Black},
                   Brush{.background = XColor::BrightBlue, .foreground = XColor::Black},
               },
-              {},
+              {{}, Border::round()},
               {
                   "Label 2",
                   Label::Align::Right,
@@ -96,34 +96,60 @@ auto signal_test()
 {
     auto head = VVector<Widget>{};
 
-    // head.append(Label{
-    //     "Hello, world! 1",
-    //     Label::Align::Center,
-    //     Brush{
-    //         .background = XColor::BrightBlue,
-    //         .foreground = XColor::Black,
-    //         .traits = Trait::Bold,
-    //     },
-    // });
-
-    // head.append(Label{
-    //     "Hello, world! 2",
-    //     Label::Align::Right,
-    //     Brush{
-    //         .background = XColor::BrightRed,
-    //         .foreground = XColor::Black,
-    //     },
-    // });
-
-    auto& tb = head.append(TextBox{
-        U"Hello, world!\nThis is a new line!\n\nThis is another line after two "
-        "newlines!"_gs |
-            fg(XColor::Black),
-        TextBox::Wrap::Word,
-        TextBox::Align::Center,
+    head.append(Label{
+        "Hello, world! 1",
+        Label::Align::Center,
+        Brush{
+            .background = XColor::BrightBlue,
+            .foreground = XColor::Black,
+            .traits = Trait::Bold,
+        },
     });
-    tb.background = XColor::BrightGreen;
-    tb.focus_policy = FocusPolicy::Strong;
+
+    head.append(Label{
+        "Hello, world! 2",
+        Label::Align::Right,
+        Brush{
+            .background = XColor::BrightRed,
+            .foreground = XColor::Black,
+        },
+    });
+
+    {
+        auto [tb, border] = head.append(
+            TextBox{
+                U"Hello, world!\nThis is a new line!\n\nThis is another line after two "
+                "newlines!"_gs |
+                    fg(XColor::Black),
+                TextBox::Wrap::Word,
+                TextBox::Align::Center,
+            } |
+            Border::round("Hello"));
+        tb.background = XColor::BrightGreen;
+        tb.focus_policy = FocusPolicy::Strong;
+
+        border.box.brush = {
+            .background = XColor::BrightGreen,
+            .foreground = XColor::Black,
+        };
+
+        border.label.align = Label::Align::Center;
+        border.label.brush = {
+            .background = XColor::BrightGreen,
+            .foreground = XColor::Black,
+            .traits = Trait::Bold,
+        };
+    }
+
+    head.append(Label{
+                    "Hello, world! 3",
+                    Label::Align::Right,
+                    Brush{
+                        .background = XColor::BrightRed,
+                        .foreground = XColor::Black,
+                    },
+                } |
+                Border::round() | Border::light());
 
     // head.insert_at(0, Label{
     //                       "Hello, world! 0",

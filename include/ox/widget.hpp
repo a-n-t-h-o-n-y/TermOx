@@ -46,9 +46,8 @@ class Widget {
     Terminal::Cursor cursor = std::nullopt;
     bool active = true;
 
-    //    protected:
-    Point at = {0, 0};
-    Area size = {0, 0};
+    Point at = {.x = 0, .y = 0};
+    Area size = {.width = 0, .height = 0};
     std::shared_ptr<Widget*> lifetime = std::make_shared<Widget*>(this);
 
    public:
@@ -119,7 +118,7 @@ class LifetimeView {
 };
 
 template <typename T>
-concept IsWidgetDerived = std::is_base_of_v<Widget, T>;
+concept WidgetDerived = std::is_base_of_v<Widget, T>;
 
 namespace filter {
 
@@ -133,7 +132,7 @@ inline constexpr auto is_active =
  *
  * @details Provides template type deducation convinience.
  */
-template <IsWidgetDerived WidgetType>
+template <WidgetDerived WidgetType>
 [[nodiscard]] auto track(WidgetType& w) -> LifetimeView<WidgetType>
 {
     return {w.lifetime};
@@ -143,7 +142,7 @@ template <IsWidgetDerived WidgetType>
  * Tracks each of the passed in Widget's lifetimes, if they are all valid when this slot
  * is called, it will call the given function with the Widgets as arguments.
  */
-template <typename SlotFn, IsWidgetDerived... TrackedWidgets>
+template <typename SlotFn, WidgetDerived... TrackedWidgets>
 [[nodiscard]] auto tracked(SlotFn&& fn, TrackedWidgets&... widgets)
 {
     // TODO constraint?

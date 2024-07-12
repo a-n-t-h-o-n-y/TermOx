@@ -13,7 +13,6 @@ class Label : public Widget {
     std::string text;
     enum class Align { Left, Center, Right } align;
     Brush brush;
-    // Color background;  // TODO
 
    public:
     Label(std::string text_ = "", Align align_ = Align::Center, Brush brush_ = {})

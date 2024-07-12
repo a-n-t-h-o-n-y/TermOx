@@ -9,6 +9,7 @@
 #include <tuple>
 #include <vector>
 
+#include <ox/bordered.hpp>
 #include <ox/core/core.hpp>
 #include <ox/widget.hpp>
 
@@ -177,10 +178,8 @@ namespace ox {
  * Widget::size_policy to determine the size of each child widget. Children Widgets are
  * added/removed at runtime.
  */
-template <typename WidgetBase>
+template <WidgetDerived WidgetBase>
 class VectorLayout : public Widget {
-    static_assert(IsWidgetDerived<WidgetBase>);
-
    public:
     /**
      * Append a child widget to the layout.
@@ -188,24 +187,43 @@ class VectorLayout : public Widget {
      * @param child The child widget to append.
      * @return A reference to the appended child widget.
      */
-    template <typename ChildType>
+    template <WidgetDerived ChildType>
     auto append(ChildType child) -> ChildType&
     {
-        static_assert(std::is_base_of_v<WidgetBase, ChildType>);
         children_.push_back(std::make_unique<ChildType>(std::move(child)));
         this->resize(this->Widget::size);
         return *static_cast<ChildType*>(children_.back().get());
     }
 
-    template <typename ChildType>
+    template <WidgetDerived ChildType>
+    auto append(Bordered<ChildType> bordered) -> std::pair<ChildType&, Border&>
+    {
+        children_.push_back(std::make_unique<Bordered<ChildType>>(std::move(bordered)));
+        this->resize(this->Widget::size);
+        auto& inplace = *static_cast<Bordered<ChildType>*>(children_.back().get());
+        return {inplace.child, inplace.border};
+    }
+
+    template <WidgetDerived ChildType>
     auto insert_at(std::size_t index, ChildType child) -> ChildType&
     {
-        static_assert(std::is_base_of_v<WidgetBase, ChildType>);
         children_.insert(
             std::next(std::begin(children_), static_cast<std::ptrdiff_t>(index)),
             std::make_unique<ChildType>(std::move(child)));
         this->resize(this->Widget::size);
         return *static_cast<ChildType*>(children_[index].get());
+    }
+
+    template <WidgetDerived ChildType>
+    auto insert_at(std::size_t index,
+                   Bordered<ChildType> child) -> std::pair<ChildType&, Border&>
+    {
+        children_.insert(
+            std::next(std::begin(children_), static_cast<std::ptrdiff_t>(index)),
+            std::make_unique<Bordered<ChildType>>(std::move(child)));
+        this->resize(this->Widget::size);
+        auto& inplace = *static_cast<Bordered<ChildType>*>(children_[index].get());
+        return {inplace.child, inplace.border};
     }
 
     auto remove_at(std::size_t index) -> std::unique_ptr<WidgetBase>
@@ -252,7 +270,7 @@ class VectorLayout : public Widget {
  * to determine the size of each child widget. Children Widgets are added/removed at
  * runtime.
  */
-template <typename WidgetBase>
+template <WidgetDerived WidgetBase>
 using HVector = detail::HorizontalLayout<VectorLayout<WidgetBase>>;
 
 /**
@@ -260,7 +278,7 @@ using HVector = detail::HorizontalLayout<VectorLayout<WidgetBase>>;
  * determine the size of each child widget. Children Widgets are added/removed at
  * runtime.
  */
-template <typename WidgetBase>
+template <WidgetDerived WidgetBase>
 using VVector = detail::VerticalLayout<VectorLayout<WidgetBase>>;
 
 // -------------------------------------------------------------------------------------
@@ -269,7 +287,7 @@ using VVector = detail::VerticalLayout<VectorLayout<WidgetBase>>;
  * A layout that arranges child widgets in a horizontal or vertical line. Children
  * Widgets are determined at compile-time.
  */
-template <typename... Widgets>
+template <WidgetDerived... Widgets>
 class TupleLayout : public Widget {
    public:
     std::tuple<Widgets...> children;
@@ -311,10 +329,10 @@ class TupleLayout : public Widget {
  * to determine the size of each child widget. Children Widgets are determined at
  * compile-time.
  */
-template <typename... Widgets>
+template <WidgetDerived... Widgets>
 using HTuple = detail::HorizontalLayout<TupleLayout<Widgets...>>;
 
-template <typename... Widgets>
+template <WidgetDerived... Widgets>
 using HLayout = HTuple<Widgets...>;
 
 /**
@@ -322,10 +340,10 @@ using HLayout = HTuple<Widgets...>;
  * determine the size of each child widget. Children Widgets are determined at
  * compile-time.
  */
-template <typename... Widgets>
+template <WidgetDerived... Widgets>
 using VTuple = detail::VerticalLayout<TupleLayout<Widgets...>>;
 
-template <typename... Widgets>
+template <WidgetDerived... Widgets>
 using VLayout = VTuple<Widgets...>;
 
 //--------------------------------------------------------------------------------------

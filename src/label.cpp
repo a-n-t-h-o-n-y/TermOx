@@ -9,7 +9,7 @@ namespace ox {
 
 void Label::paint(Canvas c)
 {
-    Painter{c}.fill(U' ' | bg(brush.background) | fg(brush.foreground));
+    Painter{c}.fill(U' ' | bg(brush.background));
 
     auto const glyphs =
         std::string_view{text}.substr(0, (std::size_t)c.size.width) | brush;
