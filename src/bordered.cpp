@@ -74,4 +74,8 @@ auto Border::double_vertical(std::string label) -> Border
     };
 }
 
+// -------------------------------------------------------------------------------------
+
+void Divider::paint(Canvas c) { Painter{c}.fill(line); }
+
 }  // namespace ox

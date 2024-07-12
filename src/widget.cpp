@@ -37,6 +37,7 @@ auto SizePolicy::max(int max) -> SizePolicy
 
 Widget::Widget(Widget&& other)
     : focus_policy{other.focus_policy},
+      size_policy{other.size_policy},
       cursor{other.cursor},
       active{other.active},
       at{other.at},
@@ -49,6 +50,7 @@ Widget::Widget(Widget&& other)
 auto Widget::operator=(Widget&& other) -> Widget&
 {
     focus_policy = other.focus_policy;
+    size_policy = other.size_policy;
     cursor = other.cursor;
     active = other.active;
     at = other.at;

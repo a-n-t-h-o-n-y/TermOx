@@ -112,8 +112,37 @@ template <WidgetDerived WidgetType>
 
 // -------------------------------------------------------------------------------------
 
-// struct Divider {
-//     Glyph line;
-// };
+/// A line divider element.
+class Divider : public Widget {
+   public:
+    Glyph line;
+
+   public:
+    Divider(Glyph line_) : line{line_} { this->size_policy = SizePolicy::fixed(1); }
+
+   public:
+    void paint(Canvas c) override;
+
+   public:
+    [[nodiscard]] static auto light_h() -> Divider { return {{U'─'}}; }
+    [[nodiscard]] static auto light_v() -> Divider { return {{U'│'}}; }
+
+    [[nodiscard]] static auto bold_h() -> Divider { return {{U'━'}}; }
+    [[nodiscard]] static auto bold_v() -> Divider { return {{U'┃'}}; }
+
+    [[nodiscard]] static auto double_h() -> Divider { return {{U'═'}}; }
+    [[nodiscard]] static auto double_v() -> Divider { return {{U'║'}}; }
+
+    [[nodiscard]] static auto dashed_h() -> Divider { return {{U'╌'}}; }
+    [[nodiscard]] static auto dashed_v() -> Divider { return {{U'╎'}}; }
+
+    [[nodiscard]] static auto dotted_h() -> Divider { return {{U'┄'}}; }
+    [[nodiscard]] static auto dotted_v() -> Divider { return {{U'┆'}}; }
+
+    [[nodiscard]] static auto ascii_h() -> Divider { return {{'-'}}; }
+    [[nodiscard]] static auto ascii_v() -> Divider { return {{'|'}}; }
+
+    [[nodiscard]] static auto empty() -> Divider { return {{U' '}}; }
+};
 
 }  // namespace ox

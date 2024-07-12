@@ -106,6 +106,8 @@ auto signal_test()
         },
     });
 
+    head.append(Divider::double_h());
+
     head.append(Label{
         "Hello, world! 2",
         Label::Align::Right,

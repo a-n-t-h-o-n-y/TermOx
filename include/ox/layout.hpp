@@ -252,15 +252,6 @@ class VectorLayout : public Widget {
         }
     }
 
-    [[nodiscard]] auto get_size_policies() const -> std::vector<SizePolicy>
-    {
-        auto result = std::vector<SizePolicy>{};
-        for (auto const& child : children_) {
-            result.push_back(child->size_policy);
-        }
-        return result;
-    }
-
    private:
     std::vector<std::unique_ptr<WidgetBase>> children_;
 };
@@ -310,15 +301,6 @@ class TupleLayout : public Widget {
         return std::apply(
             [](auto const&... child) -> Generator<Widget const&> {
                 (co_yield child, ...);
-            },
-            children);
-    }
-
-    [[nodiscard]] auto get_size_policies() const -> std::vector<SizePolicy>
-    {
-        return std::apply(
-            [](auto const&... child) -> std::vector<SizePolicy> {
-                return {child.size_policy...};
             },
             children);
     }
