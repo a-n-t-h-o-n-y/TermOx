@@ -8,6 +8,7 @@
 #include <vector>
 
 #include <ox/core/core.hpp>
+#include <ox/scrollbar.hpp>
 #include <ox/widget.hpp>
 
 namespace {
@@ -133,7 +134,7 @@ template <std::ranges::range R>
  *
  * @param index The index in the text to convert.
  * @param line_lengths The lengths of each line in the text.
- * @return The line index of the index, like top_line_.
+ * @return The line index of the index, like top_line.
  */
 template <std::ranges::range R>
 [[nodiscard]] auto index_to_line(int index, R&& line_lengths) -> int
@@ -172,7 +173,12 @@ void TextBox::paint(Canvas c)
     auto const spans =
         calculate_spans(this->text, this->wrap, (std::size_t)c.size.width);
 
-    for (auto i = top_line_; i < std::ssize(spans) && (i - top_line_) < c.size.height;
+    // Always emitted, but could be updated to be smarter about this.
+    line_count_ = (int)std::size(spans);
+    top_line = std::clamp(0, top_line, std::max(line_count_ - 1, 0));
+    this->on_scroll_update(top_line, line_count_);
+
+    for (auto i = top_line; i < std::ssize(spans) && (i - top_line) < c.size.height;
          ++i) {
         auto const span = spans[(std::size_t)i];
 
@@ -185,7 +191,7 @@ void TextBox::paint(Canvas c)
         }();
 
         // Overwrite bg if Glyph's bg is XColor::Default.
-        auto writer = Painter{c}[{x, i - top_line_}];
+        auto writer = Painter{c}[{x, i - top_line}];
         for (Glyph g : span) {
             if (g.symbol == U'\n') {
                 continue;
@@ -199,14 +205,14 @@ void TextBox::paint(Canvas c)
 
     auto cursor =
         index_to_screen((int)cursor_index_,
-                        spans | std::ranges::views::take(top_line_ + c.size.height) |
+                        spans | std::ranges::views::take(top_line + c.size.height) |
                             std::ranges::views::transform(
                                 [](auto const& span) { return std::ssize(span); }),
-                        top_line_, cursor_index_ == std::size(this->text));
+                        top_line, cursor_index_ == std::size(this->text));
 
     // Adjust x for Alignment
     if (cursor.has_value()) {
-        auto const span = spans[(std::size_t)(top_line_ + cursor->y)];
+        auto const span = spans[(std::size_t)(top_line + cursor->y)];
         auto const x = [&]() -> int {
             switch (align) {
                 case Align::Left: return 0;
@@ -250,8 +256,10 @@ void TextBox::key_press(Key k)
                 ++cursor_index_;
             }
             break;
-        case Key::ArrowDown: ++top_line_; break;
-        case Key::ArrowUp: top_line_ = std::max(top_line_ - 1, 0); break;
+        case Key::ArrowDown:
+            top_line = std::min(std::max(line_count_ - 1, 0), top_line + 1);
+            break;
+        case Key::ArrowUp: top_line = std::max(top_line - 1, 0); break;
         case Key::Home: cursor_index_ = 0; break;
         case Key::End: cursor_index_ = text.size(); break;
         default:
@@ -273,11 +281,11 @@ void TextBox::mouse_press(Mouse m)
         calculate_spans(this->text, this->wrap, (std::size_t)this->size.width);
 
     auto const line_lengths = spans |
-                              std::ranges::views::take(top_line_ + this->size.height) |
+                              std::ranges::views::take(top_line + this->size.height) |
                               std::ranges::views::transform(
                                   [](auto const& span) { return std::ssize(span); });
 
-    auto const span = spans[(std::size_t)(top_line_ + m.at.y)];
+    auto const span = spans[(std::size_t)(top_line + m.at.y)];
     m.at.x = m.at.x - [&]() -> int {
         switch (align) {
             case Align::Left: return 0;
@@ -286,19 +294,30 @@ void TextBox::mouse_press(Mouse m)
         }
     }();
 
-    cursor_index_ = screen_to_index(m.at, line_lengths, top_line_);
+    cursor_index_ = screen_to_index(m.at, line_lengths, top_line);
 }
 
 void TextBox::mouse_wheel(Mouse m)
 {
     if (m.button == Mouse::Button::ScrollUp) {
-        if (top_line_ > 0) {
-            --top_line_;
+        if (top_line > 0) {
+            --top_line;
         }
     }
     else if (m.button == Mouse::Button::ScrollDown) {
-        ++top_line_;
+        top_line = std::min(std::max(line_count_ - 1, 0), top_line + 1);
     }
+}
+
+void link(TextBox& tb, ScrollBar& sb)
+{
+    tb.on_scroll_update.connect(tracked(
+        [](ScrollBar& sb, int pos, int len) {
+            sb.position = pos;
+            sb.scrollable_length = len;
+        },
+        sb));
+    sb.on_scroll.connect(tracked([](TextBox& tb, int pos) { tb.top_line = pos; }, tb));
 }
 
 }  // namespace ox

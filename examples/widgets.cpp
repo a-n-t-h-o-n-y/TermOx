@@ -155,15 +155,19 @@ auto signal_test()
         };
     }
 
-    head.append(Label{
-                    "Hello, world! 3",
-                    Label::Align::Right,
-                    Brush{
-                        .background = XColor::BrightRed,
-                        .foreground = XColor::Black,
-                    },
-                } |
-                Border::round() | Border::light());
+    auto& [_, sb] = head.append(HTuple<Bordered<Bordered<Label>>, ScrollBar>{
+                                    Label{
+                                        "Hello, world! 3",
+                                        Label::Align::Right,
+                                        Brush{
+                                            .background = XColor::BrightRed,
+                                            .foreground = XColor::Black,
+                                        },
+                                    } | Border::round() |
+                                        Border::light(),
+                                    ScrollBar{100, 0}})
+                        .children;
+    sb.size_policy = SizePolicy::fixed(1);
 
     // head.insert_at(0, Label{
     //                       "Hello, world! 0",
@@ -177,10 +181,27 @@ auto signal_test()
     return head;
 }
 
+auto scrollbar_test()
+{
+    auto head = HVector<>{};
+
+    auto& tb = head.append(TextBox{});
+    tb.focus_policy = FocusPolicy::Strong;
+
+    head.append(Divider::light_v()).line.brush.foreground = XColor::BrightBlack;
+
+    auto& sb = head.append(ScrollBar{100});
+
+    link(tb, sb);
+
+    return head;
+}
+
 int main()
 {
     // auto head = SignalTest{};
-    auto head = signal_test();
+    // auto head = signal_test();
+    auto head = scrollbar_test();
     auto head2 = std::move(head);
     auto head3 = std::move(head2);
     return Application{head3, {MouseMode::Basic}}.run();

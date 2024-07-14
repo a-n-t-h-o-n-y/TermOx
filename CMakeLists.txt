@@ -17,6 +17,7 @@ add_library(TermOx STATIC
     src/checkbox.cpp
     src/label.cpp
     src/focus.cpp
+    src/scrollbar.cpp
     src/textbox.cpp
     src/widget.cpp
     src/core/terminal.cpp
@@ -29,6 +30,7 @@ add_library(TermOx STATIC
     include/ox/focus.hpp
     include/ox/label.hpp
     include/ox/layout.hpp
+    include/ox/scrollbar.hpp
     include/ox/textbox.hpp
     include/ox/widget.hpp
 

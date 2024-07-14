@@ -7,5 +7,6 @@
 #include <ox/focus.hpp>
 #include <ox/label.hpp>
 #include <ox/layout.hpp>
+#include <ox/scrollbar.hpp>
 #include <ox/textbox.hpp>
 #include <ox/widget.hpp>

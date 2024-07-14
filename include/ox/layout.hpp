@@ -41,7 +41,7 @@ template <InputRangeOf<Widget> WidgetRange>
         return result;
     }();
 
-    for (auto const& policy : size_policies) {
+    for ([[maybe_unused]] auto const& policy : size_policies) {
         assert(policy.minimum >= 0);
         assert(policy.maximum >= policy.minimum);
         assert(policy.flexibility >= 0);
@@ -261,7 +261,7 @@ class VectorLayout : public Widget {
  * to determine the size of each child widget. Children Widgets are added/removed at
  * runtime.
  */
-template <WidgetDerived WidgetBase>
+template <WidgetDerived WidgetBase = Widget>
 using HVector = detail::HorizontalLayout<VectorLayout<WidgetBase>>;
 
 /**
@@ -269,7 +269,7 @@ using HVector = detail::HorizontalLayout<VectorLayout<WidgetBase>>;
  * determine the size of each child widget. Children Widgets are added/removed at
  * runtime.
  */
-template <WidgetDerived WidgetBase>
+template <WidgetDerived WidgetBase = Widget>
 using VVector = detail::VerticalLayout<VectorLayout<WidgetBase>>;
 
 // -------------------------------------------------------------------------------------
