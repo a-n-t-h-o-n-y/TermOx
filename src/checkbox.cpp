@@ -65,8 +65,15 @@ void CheckBox::mouse_press(Mouse m)
 
 void CheckBox::paint(Canvas c)
 {
-    Painter{c}[{0, 0}] << (state_ == State::Checked ? display.checked
-                                                    : display.unchecked);
+    auto glyphs = state_ == State::Checked ? display.checked : display.unchecked;
+    if (in_focus_) {
+        glyphs = glyphs | display.in_focus_brush;
+    }
+    Painter{c}[{0, 0}] << glyphs;
 }
+
+void CheckBox::focus_in() { in_focus_ = true; }
+
+void CheckBox::focus_out() { in_focus_ = false; }
 
 }  // namespace ox

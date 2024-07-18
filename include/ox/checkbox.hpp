@@ -17,6 +17,7 @@ class CheckBox : public Widget {
     struct Display {
         std::vector<Glyph> checked;
         std::vector<Glyph> unchecked;
+        Brush in_focus_brush;
     } display;
 
    public:
@@ -25,7 +26,11 @@ class CheckBox : public Widget {
 
    public:
     CheckBox(State init = State::UnChecked,
-             Display display_ = {.checked = U"[X]"_gs, .unchecked = U"[ ]"_gs});
+             Display display_ = {
+                 .checked = U"[X]"_gs,
+                 .unchecked = U"[ ]"_gs,
+                 .in_focus_brush = {.traits = Trait::Bold},
+             });
 
    public:
     void toggle();
@@ -45,8 +50,13 @@ class CheckBox : public Widget {
 
     void paint(Canvas c) override;
 
+    void focus_in() override;
+
+    void focus_out() override;
+
    private:
     State state_;
+    bool in_focus_ = false;
 };
 
 }  // namespace ox

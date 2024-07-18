@@ -109,6 +109,7 @@ auto signal_test()
     cb_line.size_policy = SizePolicy::fixed(1);
     auto& [cb, label] = cb_line.children;
     cb.size_policy = SizePolicy::fixed(4);
+    cb.focus_policy = FocusPolicy::Strong;
     label.align = Label::Align::Left;
 
     cb.on_check.connect(tracked([](Label& l) { l.text = "State: Checked"; }, label));
