@@ -84,7 +84,11 @@ class Widget {
 
     virtual void key_release(Key) {}
 
-    virtual void resize(Area) {}
+    /**
+     * this->size is updated by the time this is invoked. The previous size is passed in
+     * as a parameter.
+     */
+    virtual void resize(Area /* old_size */) {}
 
     virtual void timer(int /* id */) {}
 

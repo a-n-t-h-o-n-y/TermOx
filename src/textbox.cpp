@@ -4,6 +4,7 @@
 #include <optional>
 #include <ranges>
 #include <span>
+#include <stdexcept>
 #include <string_view>
 #include <vector>
 
@@ -107,7 +108,7 @@ template <std::ranges::range R>
         if (is_last && point.x == length && count + 1 == line_count) {
             return point;
         }
-        point.x -= length;
+        point.x -= (int)length;
         point.y += 1;
     }
     return std::nullopt;
@@ -187,6 +188,7 @@ void TextBox::paint(Canvas c)
                 case Align::Left: return 0;
                 case Align::Center: return (c.size.width - (int)span.size()) / 2;
                 case Align::Right: return c.size.width - (int)span.size();
+                default: throw std::logic_error{"Invalid Align"};
             }
         }();
 
@@ -218,6 +220,7 @@ void TextBox::paint(Canvas c)
                 case Align::Left: return 0;
                 case Align::Center: return (c.size.width - (int)span.size()) / 2;
                 case Align::Right: return c.size.width - (int)span.size();
+                default: throw std::logic_error{"Invalid Align"};
             }
         }() + cursor->x;
         cursor = Point{x, cursor->y};
@@ -291,6 +294,7 @@ void TextBox::mouse_press(Mouse m)
             case Align::Left: return 0;
             case Align::Center: return (this->size.width - (int)span.size()) / 2;
             case Align::Right: return this->size.width - (int)span.size();
+            default: throw std::logic_error{"Invalid Align"};
         }
     }();
 

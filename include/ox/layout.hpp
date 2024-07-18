@@ -132,17 +132,18 @@ template <typename ContainerLayout>
 struct HorizontalLayout : ContainerLayout {
     using ContainerLayout::ContainerLayout;
 
-    void resize(Area new_size) override
+    void resize(Area) override
     {
         auto const widths =
-            detail::distribute_length(this->get_children(), new_size.width);
+            detail::distribute_length(this->get_children(), this->size.width);
 
         auto x = 0;
         for (auto [child, width] :
              zip(this->get_children() | filter::is_active, widths)) {
             child.at = {x, 0};
-            child.size = {width, new_size.height};
-            child.resize({width, new_size.height});
+            auto const old_size = child.size;
+            child.size = {width, this->size.height};
+            child.resize(old_size);
             x += width;
         }
     }
@@ -153,17 +154,18 @@ template <typename ContainerLayout>
 struct VerticalLayout : ContainerLayout {
     using ContainerLayout::ContainerLayout;
 
-    void resize(Area new_size) override
+    void resize(Area) override
     {
         auto const heights =
-            detail::distribute_length(this->get_children(), new_size.height);
+            detail::distribute_length(this->get_children(), this->size.height);
 
         auto y = 0;
         for (auto [child, height] :
              zip(this->get_children() | filter::is_active, heights)) {
             child.at = {0, y};
-            child.size = {new_size.width, height};
-            child.resize(child.size);
+            auto const old_size = child.size;
+            child.size = {this->size.width, height};
+            child.resize(old_size);
             y += height;
         }
     }

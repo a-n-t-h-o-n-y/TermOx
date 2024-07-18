@@ -295,8 +295,9 @@ auto Application::handle_key_release(Key k) -> EventResponse
 
 auto Application::handle_resize(Area new_size) -> EventResponse
 {
+    auto const old_size = head_.size;
     head_.size = new_size;
-    head_.resize(new_size);
+    head_.resize(old_size);
     return {};
 }
 

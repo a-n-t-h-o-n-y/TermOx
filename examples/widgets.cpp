@@ -53,9 +53,6 @@ struct Clicker : Widget {
     void focus_in() override { display = display | fg(XColor::BrightYellow); }
 
     void focus_out() override { display = display | fg(XColor::Default); }
-
-    // TODO remove
-    void resize(Area new_size) override { Widget::size = new_size; }
 };
 
 struct ALayout : VLayout<Clicker, Clicker> {};
@@ -118,7 +115,13 @@ auto signal_test()
     cb.on_uncheck.connect(
         tracked([](Label& l) { l.text = "State: UnChecked"; }, label));
 
-    head.append(Divider::double_h());
+    head.append(Divider::light_h());
+
+    auto& le = head.append(LineEdit{});
+    le.ghost_text = "Ghost Text";
+    // le.validator = [](char c) -> bool { return std::isdigit(c); };
+
+    head.append(Divider::light_h());
 
     head.append(Label{
         "Hello, world! 2",
@@ -200,8 +203,8 @@ auto scrollbar_test()
 int main()
 {
     // auto head = SignalTest{};
-    // auto head = signal_test();
-    auto head = scrollbar_test();
+    auto head = signal_test();
+    // auto head = scrollbar_test();
     auto head2 = std::move(head);
     auto head3 = std::move(head2);
     return Application{head3, {MouseMode::Basic}}.run();

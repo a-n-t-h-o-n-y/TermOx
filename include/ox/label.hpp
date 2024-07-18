@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstdint>
+#include <string>
+
 #include <ox/core/core.hpp>
 #include <ox/widget.hpp>
 
@@ -11,7 +14,7 @@ namespace ox {
 class Label : public Widget {
    public:
     std::string text;
-    enum class Align { Left, Center, Right } align;
+    enum class Align : std::uint8_t { Left, Center, Right } align;
     Brush brush;
 
    public:

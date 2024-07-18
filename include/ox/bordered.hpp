@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdexcept>
+
 #include <ox/core/core.hpp>
 #include <ox/label.hpp>
 #include <ox/widget.hpp>
@@ -53,15 +55,16 @@ class Bordered : public Widget {
     {}
 
    public:
-    void resize(Area new_size) override
+    void resize(Area) override
     {
-        border.box.size = new_size;
+        border.box.size = this->size;
         child.at = {1, 1};
+        auto const old_size = child.size;
         child.size = {
-            .width = std::max(0, new_size.width - 2),
-            .height = std::max(0, new_size.height - 2),
+            .width = std::max(0, this->size.width - 2),
+            .height = std::max(0, this->size.height - 2),
         };
-        child.resize(child.size);
+        child.resize(old_size);
     }
 
     void paint(Canvas c) override
@@ -92,6 +95,7 @@ class Bordered : public Widget {
                         .x = 1 + width - (int)glyphs.size(),
                         .y = 0,
                     };
+                default: throw std::logic_error{"Invalid Align"};
             }
         }();
 
