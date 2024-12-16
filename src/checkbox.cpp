@@ -2,8 +2,12 @@
 
 namespace ox {
 
-CheckBox::CheckBox(State init, Display display_)
-    : display{std::move(display_)}, state_{init}
+CheckBox::Init const CheckBox::init = {};
+
+CheckBox::CheckBox(Init state)
+    : Widget{FocusPolicy::None, SizePolicy::fixed(4)},
+      display{std::move(state.display)},
+      state_{state.state}
 {}
 
 void CheckBox::toggle()

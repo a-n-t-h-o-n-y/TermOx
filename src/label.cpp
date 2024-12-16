@@ -7,6 +7,15 @@
 
 namespace ox {
 
+Label::Init const Label::init = {};
+
+Label::Label(Init state)
+    : Widget{FocusPolicy::None, SizePolicy::flex()},
+      text{std::move(state.text)},
+      align{state.align},
+      brush{state.brush}
+{}
+
 void Label::paint(Canvas c)
 {
     Painter{c}.fill(U' ' | bg(brush.background));

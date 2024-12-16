@@ -25,12 +25,16 @@ class CheckBox : public Widget {
     sl::Signal<void()> on_uncheck;
 
    public:
-    CheckBox(State init = State::UnChecked,
-             Display display_ = {
-                 .checked = U"[X]"_gs,
-                 .unchecked = U"[ ]"_gs,
-                 .in_focus_brush = {.traits = Trait::Bold},
-             });
+    struct Init {
+        State state = State::UnChecked;
+        Display display = {
+            .checked = U"[X]"_gs,
+            .unchecked = U"[ ]"_gs,
+            .in_focus_brush = {.traits = Trait::Bold},
+        };
+    } static const init;  // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=88165
+
+    CheckBox(Init state = init);
 
    public:
     void toggle();

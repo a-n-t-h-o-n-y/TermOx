@@ -15,9 +15,16 @@ class ScrollBar : public Widget {
    public:
     int scrollable_length;
     int position;
+    Brush brush;
 
    public:
-    ScrollBar(int scrollable_length_ = 0, int init_position = 0);
+    struct Init {
+        int scrollable_length = 0;
+        int position = 0;
+        Brush brush = {};
+    } static const init;
+
+    ScrollBar(Init state = init);
 
    public:
     void increment_position(int amount = 1);

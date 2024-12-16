@@ -28,13 +28,17 @@ class LineEdit : public Widget {
     std::optional<std::function<bool(char)>> validator;
 
    public:
-    LineEdit(std::string text = {},
-             Brush text_brush = {},
-             Align align = Align::Left,
-             Color background = XColor::Default,
-             std::string ghost_text = {},
-             Brush ghost_text_brush = {.foreground = XColor::BrightBlack},
-             std::optional<std::function<bool(char)>> validator = std::nullopt);
+    struct Init {
+        std::string text = "";
+        Brush text_brush = {};
+        Align align = Align::Left;
+        Color background = XColor::Default;
+        std::string ghost_text = "";
+        Brush ghost_text_brush = {.foreground = XColor::BrightBlack};
+        std::optional<std::function<bool(char)>> validator = std::nullopt;
+    } static const init;
+
+    LineEdit(Init state = init);
 
    public:
     void key_press(Key k) override;

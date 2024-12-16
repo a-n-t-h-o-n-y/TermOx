@@ -118,9 +118,8 @@ template <std::ranges::range R>
  * Convert a screen position to a text index.
  */
 template <std::ranges::range R>
-[[nodiscard]] auto screen_to_index(Point p,
-                                   R&& line_lengths,
-                                   int top_line) -> std::size_t
+[[nodiscard]] auto screen_to_index(Point p, R&& line_lengths, int top_line)
+    -> std::size_t
 {
     auto const y = top_line + std::min(p.y, (int)std::ssize(line_lengths) - 1);
     auto index = std::size_t{0};
@@ -155,16 +154,15 @@ template <std::ranges::range R>
 
 namespace ox {
 
-TextBox::TextBox(std::vector<Glyph> text_,
-                 Wrap wrap_,
-                 Align align_,
-                 Color background_,
-                 Brush insert_brush_)
-    : text{std::move(text_)},
-      wrap{wrap_},
-      align{align_},
-      background{background_},
-      insert_brush{insert_brush_}
+TextBox::Init const TextBox::init = {};
+
+TextBox::TextBox(Init state)
+    : Widget{FocusPolicy::None, SizePolicy::flex()},
+      text{std::move(state.text)},
+      wrap{state.wrap},
+      align{state.align},
+      background{state.background},
+      insert_brush{state.insert_brush}
 {}
 
 void TextBox::paint(Canvas c)

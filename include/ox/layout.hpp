@@ -2,11 +2,13 @@
 
 #include <algorithm>
 #include <cassert>
+#include <concepts>
 #include <cstddef>
 #include <memory>
 #include <numeric>
 #include <ranges>
 #include <tuple>
+#include <type_traits>
 #include <vector>
 
 #include <ox/bordered.hpp>
@@ -24,8 +26,8 @@ namespace ox::detail {
  * @return A vector of the lengths of each child.
  */
 template <InputRangeOf<Widget> WidgetRange>
-[[nodiscard]] auto distribute_length(WidgetRange&& widgets,
-                                     int total_length) -> std::vector<int>
+[[nodiscard]] auto distribute_length(WidgetRange&& widgets, int total_length)
+    -> std::vector<int>
 {
     assert(total_length >= 0);
 
@@ -127,32 +129,103 @@ template <InputRangeOf<Widget> WidgetRange>
     return results;
 }
 
-// To lessen code duplication.
-template <typename ContainerLayout>
-struct HorizontalLayout : ContainerLayout {
-    using ContainerLayout::ContainerLayout;
+}  // namespace ox::detail
 
-    void resize(Area) override
-    {
-        auto const widths =
-            detail::distribute_length(this->get_children(), this->size.width);
+namespace ox {
 
-        auto x = 0;
-        for (auto [child, width] :
-             zip(this->get_children() | filter::is_active, widths)) {
-            child.at = {x, 0};
-            auto const old_size = child.size;
-            child.size = {width, this->size.height};
-            child.resize(old_size);
-            x += width;
-        }
-    }
+/**
+ * tuple, pair, array, etc...
+ */
+template <typename T>
+concept TupleLike = requires {
+    { std::tuple_size<T>::value } -> std::convertible_to<std::size_t>;
 };
 
-// To lessen code duplication.
-template <typename ContainerLayout>
-struct VerticalLayout : ContainerLayout {
-    using ContainerLayout::ContainerLayout;
+/**
+ * vector, set, list, etc...
+ */
+template <typename T>
+concept DynamicContainer = not TupleLike<std::remove_reference_t<T>> &&
+                           std::ranges::range<T> && requires(T& container) {
+                               { container.size() } -> std::convertible_to<std::size_t>;
+                               { container.begin() } -> std::forward_iterator;
+                               { container.end() } -> std::forward_iterator;
+                           };
+
+/**
+ * A Vertical Linear Layout.
+ *
+ * @details This can take either tuple-like or range-like containers of Widgets. It will
+ * order them with the first element on the top and the last on the bottom.
+ */
+template <typename Container>
+class Column : public Widget {
+    static_assert(TupleLike<Container> || DynamicContainer<Container>);
+
+   public:
+    Container children;
+
+   public:
+    Column(Container container)
+        : Widget{FocusPolicy::None, SizePolicy::flex()}, children{std::move(container)}
+    {}
+
+    /**
+     * Takes a function which can access each child to set up signals or anything else
+     * needed after construction. If the container is tuple-like it will pass each child
+     * Widget as a parameter, if it is a dynamic container it will pass the entire
+     * container as parameter.
+     */
+    template <typename Fn>
+    Column(Container container, Fn&& init_fn)
+        : Widget{FocusPolicy::None, SizePolicy::flex()}, children{std::move(container)}
+    {
+        if constexpr (TupleLike<Container>) {
+            std::apply(std::forward<Fn>(init_fn), children);
+        }
+        else {
+            std::forward<Fn>(init_fn)(children);
+        }
+    }
+
+   public:
+    auto get_children() -> Generator<Widget&> override
+    {
+        if constexpr (TupleLike<Container>) {
+            // Re-emitting values from apply so that this scope is a coroutine
+            for (auto& w : std::apply(
+                     [](auto&... child) -> Generator<Widget&> {
+                         (co_yield child, ...);
+                     },
+                     children)) {
+                co_yield w;
+            }
+        }
+        else {
+            for (Widget& child : children) {
+                co_yield child;
+            }
+        }
+    }
+
+    auto get_children() const -> Generator<Widget const&> override
+    {
+        if constexpr (TupleLike<Container>) {
+            // Re-emitting values from apply so that this scope is a coroutine
+            for (auto const& w : std::apply(
+                     [](auto const&... child) -> Generator<Widget const&> {
+                         (co_yield child, ...);
+                     },
+                     children)) {
+                co_yield w;
+            }
+        }
+        else {
+            for (auto const& child : children) {
+                co_yield child;
+            }
+        }
+    }
 
     void resize(Area) override
     {
@@ -171,164 +244,91 @@ struct VerticalLayout : ContainerLayout {
     }
 };
 
-}  // namespace ox::detail
-
-namespace ox {
-
 /**
- * A layout that arranges child widgets in a horizontal or vertical line, using
- * Widget::size_policy to determine the size of each child widget. Children Widgets are
- * added/removed at runtime.
+ * A Horizontal Linear Layout.
+ *
+ * @details This can take either tuple-like or range-like containers of Widgets. It will
+ * order them with the first element on the left and the last on the right.
  */
-template <WidgetDerived WidgetBase>
-class VectorLayout : public Widget {
+template <typename Container>
+class Row : public Widget {
+    static_assert(TupleLike<Container> || DynamicContainer<Container>);
+
    public:
-    /**
-     * Append a child widget to the layout.
-     *
-     * @param child The child widget to append.
-     * @return A reference to the appended child widget.
-     */
-    template <WidgetDerived ChildType>
-    auto append(ChildType child) -> ChildType&
-    {
-        children_.push_back(std::make_unique<ChildType>(std::move(child)));
-        this->resize(this->Widget::size);
-        return *static_cast<ChildType*>(children_.back().get());
-    }
+    Container children;
 
-    template <WidgetDerived ChildType>
-    auto append(Bordered<ChildType> bordered) -> std::pair<ChildType&, Border&>
-    {
-        children_.push_back(std::make_unique<Bordered<ChildType>>(std::move(bordered)));
-        this->resize(this->Widget::size);
-        auto& inplace = *static_cast<Bordered<ChildType>*>(children_.back().get());
-        return {inplace.child, inplace.border};
-    }
+   public:
+    Row(Container container)
+        : Widget{FocusPolicy::None, SizePolicy::flex()}, children{std::move(container)}
+    {}
 
-    template <WidgetDerived ChildType>
-    auto insert_at(std::size_t index, ChildType child) -> ChildType&
+    template <typename Fn>
+    Row(Container container, Fn&& init_fn)
+        : Widget{FocusPolicy::None, SizePolicy::flex()}, children{std::move(container)}
     {
-        children_.insert(
-            std::next(std::begin(children_), static_cast<std::ptrdiff_t>(index)),
-            std::make_unique<ChildType>(std::move(child)));
-        this->resize(this->Widget::size);
-        return *static_cast<ChildType*>(children_[index].get());
+        if constexpr (TupleLike<Container>) {
+            std::apply(std::forward<Fn>(init_fn), children);
+        }
+        else {
+            std::forward<Fn>(init_fn)(children);
+        }
     }
-
-    template <WidgetDerived ChildType>
-    auto insert_at(std::size_t index,
-                   Bordered<ChildType> child) -> std::pair<ChildType&, Border&>
-    {
-        children_.insert(
-            std::next(std::begin(children_), static_cast<std::ptrdiff_t>(index)),
-            std::make_unique<Bordered<ChildType>>(std::move(child)));
-        this->resize(this->Widget::size);
-        auto& inplace = *static_cast<Bordered<ChildType>*>(children_[index].get());
-        return {inplace.child, inplace.border};
-    }
-
-    auto remove_at(std::size_t index) -> std::unique_ptr<WidgetBase>
-    {
-        auto removed = std::move(children_[index]);
-        children_.erase(
-            std::next(std::begin(children_), static_cast<std::ptrdiff_t>(index)));
-        this->resize(this->Widget::size);
-        return removed;
-    }
-
-    auto clear() -> void { children_.clear(); }
 
    public:
     auto get_children() -> Generator<Widget&> override
     {
-        for (std::unique_ptr<WidgetBase> const& child_ptr : children_) {
-            co_yield *child_ptr;
+        if constexpr (TupleLike<Container>) {
+            // Re-emitting values from apply so that this scope is a coroutine
+            for (auto& w : std::apply(
+                     [](auto&... child) -> Generator<Widget&> {
+                         (co_yield child, ...);
+                     },
+                     children)) {
+                co_yield w;
+            }
+        }
+        else {
+            for (Widget& child : children) {
+                co_yield child;
+            }
         }
     }
 
     auto get_children() const -> Generator<Widget const&> override
     {
-        for (std::unique_ptr<WidgetBase> const& child_ptr : children_) {
-            co_yield *child_ptr;
+        if constexpr (TupleLike<Container>) {
+            // Re-emitting values from apply so that this scope is a coroutine
+            for (auto const& w : std::apply(
+                     [](auto const&... child) -> Generator<Widget const&> {
+                         (co_yield child, ...);
+                     },
+                     children)) {
+                co_yield w;
+            }
+        }
+        else {
+            for (auto const& child : children) {
+                co_yield child;
+            }
         }
     }
 
-   private:
-    std::vector<std::unique_ptr<WidgetBase>> children_;
-};
-
-/**
- * A layout that arranges child widgets in a horizontal line, using Widget::size_policy
- * to determine the size of each child widget. Children Widgets are added/removed at
- * runtime.
- */
-template <WidgetDerived WidgetBase = Widget>
-using HVector = detail::HorizontalLayout<VectorLayout<WidgetBase>>;
-
-/**
- * A layout that arranges child widgets in a vertical line, using Widget::size_policy to
- * determine the size of each child widget. Children Widgets are added/removed at
- * runtime.
- */
-template <WidgetDerived WidgetBase = Widget>
-using VVector = detail::VerticalLayout<VectorLayout<WidgetBase>>;
-
-// -------------------------------------------------------------------------------------
-
-/**
- * A layout that arranges child widgets in a horizontal or vertical line. Children
- * Widgets are determined at compile-time.
- */
-template <WidgetDerived... Widgets>
-class TupleLayout : public Widget {
-   public:
-    std::tuple<Widgets...> children;
-
-   public:
-    TupleLayout() = default;
-
-    TupleLayout(Widgets... children_) : children{std::move(children_)...} {}
-
-   public:
-    auto get_children() -> Generator<Widget&> override
+    void resize(Area) override
     {
-        return std::apply(
-            [](auto&... child) -> Generator<Widget&> { (co_yield child, ...); },
-            children);
-    }
+        auto const widths =
+            detail::distribute_length(this->get_children(), this->size.width);
 
-    auto get_children() const -> Generator<Widget const&> override
-    {
-        return std::apply(
-            [](auto const&... child) -> Generator<Widget const&> {
-                (co_yield child, ...);
-            },
-            children);
+        auto x = 0;
+        for (auto [child, width] :
+             zip(this->get_children() | filter::is_active, widths)) {
+            child.at = {x, 0};
+            auto const old_size = child.size;
+            child.size = {width, this->size.height};
+            child.resize(old_size);
+            x += width;
+        }
     }
 };
-
-/**
- * A layout that arranges child widgets in a horizontal line, using Widget::size_policy
- * to determine the size of each child widget. Children Widgets are determined at
- * compile-time.
- */
-template <WidgetDerived... Widgets>
-using HTuple = detail::HorizontalLayout<TupleLayout<Widgets...>>;
-
-template <WidgetDerived... Widgets>
-using HLayout = HTuple<Widgets...>;
-
-/**
- * A layout that arranges child widgets in a vertical line, using Widget::size_policy to
- * determine the size of each child widget. Children Widgets are determined at
- * compile-time.
- */
-template <WidgetDerived... Widgets>
-using VTuple = detail::VerticalLayout<TupleLayout<Widgets...>>;
-
-template <WidgetDerived... Widgets>
-using VLayout = VTuple<Widgets...>;
 
 //--------------------------------------------------------------------------------------
 

@@ -1,7 +1,18 @@
 cmake_minimum_required(VERSION 3.18)
 project(TermOx VERSION 2.0.0 LANGUAGES CXX)
 
-# Set C++23 standard
+# Enable AddressSanitizer for debug builds
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    message(STATUS "AddressSanitizer enabled for Debug build")
+
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+        add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+        add_link_options(-fsanitize=address)
+    elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+        message(WARNING "AddressSanitizer is not supported on MSVC")
+    endif()
+endif()
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -14,6 +25,7 @@ add_subdirectory(external/signals-light)
 add_library(TermOx STATIC
     src/application.cpp
     src/bordered.cpp
+    src/button.cpp
     src/checkbox.cpp
     src/label.cpp
     src/lineedit.cpp

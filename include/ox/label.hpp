@@ -18,9 +18,13 @@ class Label : public Widget {
     Brush brush;
 
    public:
-    Label(std::string text_ = "", Align align_ = Align::Center, Brush brush_ = {})
-        : text{std::move(text_)}, align{align_}, brush{brush_}
-    {}
+    struct Init {
+        std::string text = "";
+        Align align = Align::Center;
+        Brush brush = {};
+    } static const init;
+
+    Label(Init state = init);
 
    public:
     void paint(Canvas c) override;

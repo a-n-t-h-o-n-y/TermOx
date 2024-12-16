@@ -31,11 +31,14 @@ namespace {
 
 namespace ox {
 
-ScrollBar::ScrollBar(int scrollable_length_, int init_position)
-    : scrollable_length{scrollable_length_}, position{init_position}
-{
-    this->size_policy = SizePolicy::fixed(1);
-}
+ScrollBar::Init const ScrollBar::init{};
+
+ScrollBar::ScrollBar(Init state)
+    : Widget{FocusPolicy::None, SizePolicy::fixed(1)},
+      scrollable_length{state.scrollable_length},
+      position{state.position},
+      brush{state.brush}
+{}
 
 void ScrollBar::increment_position(int amount)
 {
@@ -59,14 +62,16 @@ void ScrollBar::paint(Canvas c)
         .y = (int)std::floor(bar_pos),
     };
 
-    c[at] = edge;
+    Painter{c}.fill(U' ' | bg(brush.background));
+
+    c[at] = edge | brush;
 
     Painter{c}[{.x = 0, .y = (int)bar_pos + 1}]
-        << Painter::VLine{.length = std::max(bar_len - 1, 0), .glyph = {U'█'}};
+        << Painter::VLine{.length = std::max(bar_len - 1, 0), .glyph = {U'█' | brush}};
 
     at.y += bar_len;
     if (at.y < this->size.height) {
-        c[at] = edge | Trait::Inverse;
+        c[at] = edge | brush | Trait::Inverse;
     }
 }
 

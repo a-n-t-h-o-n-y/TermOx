@@ -51,9 +51,7 @@ class Widget {
     std::shared_ptr<Widget*> lifetime = std::make_shared<Widget*>(this);
 
    public:
-    Widget(FocusPolicy fp = FocusPolicy::None, SizePolicy sp = SizePolicy::flex())
-        : focus_policy{fp}, size_policy{sp}
-    {}
+    Widget(FocusPolicy fp, SizePolicy sp) : focus_policy{fp}, size_policy{sp} {}
 
     Widget(Widget const&) = delete;
     Widget(Widget&& other);
@@ -123,6 +121,34 @@ class LifetimeView {
 
 template <typename T>
 concept WidgetDerived = std::is_base_of_v<Widget, T>;
+
+template <WidgetDerived WidgetType>
+auto operator|(WidgetType& w, SizePolicy sp) -> WidgetType&
+{
+    w.size_policy = sp;
+    return w;
+}
+
+template <WidgetDerived WidgetType>
+auto operator|(WidgetType&& w, SizePolicy sp) -> WidgetType
+{
+    w.size_policy = sp;
+    return w;
+}
+
+template <WidgetDerived WidgetType>
+auto operator|(WidgetType& w, FocusPolicy fp) -> WidgetType&
+{
+    w.focus_policy = fp;
+    return w;
+}
+
+template <WidgetDerived WidgetType>
+auto operator|(WidgetType&& w, FocusPolicy fp) -> WidgetType
+{
+    w.focus_policy = fp;
+    return w;
+}
 
 namespace filter {
 

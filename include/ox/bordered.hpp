@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <stdexcept>
 
 #include <ox/core/core.hpp>
@@ -9,35 +10,54 @@
 namespace ox {
 
 struct Border {
-    Painter::Box box = {};
+    struct Glyphs {
+        std::array<char32_t, 4> corners = {U'┌', U'┐', U'└', U'┘'};
+        std::array<char32_t, 2> walls = {U'─', U'│'};
+    } glyphs = {};
+
+    Brush brush = {};
     Label label = {};
+
+    struct Init {
+        Brush brush = {};
+        Label label = {};
+    };
 
     /// Light border: ┌┐└┘─│
     [[nodiscard]] static auto light(std::string label = "") -> Border;
+    [[nodiscard]] static auto light(Init state) -> Border;
 
     /// Round border: ╭╮╰╯─│
     [[nodiscard]] static auto round(std::string label = "") -> Border;
+    [[nodiscard]] static auto round(Init state) -> Border;
 
     /// Double-line border: ╔╗╚╝═║
     [[nodiscard]] static auto double_line(std::string label = "") -> Border;
+    [[nodiscard]] static auto double_line(Init state) -> Border;
 
     /// Bold border: ┏┓┗┛━┃
     [[nodiscard]] static auto bold(std::string label = "") -> Border;
+    [[nodiscard]] static auto bold(Init state) -> Border;
 
     /// Dashed border: ┌┐└┘╌╎
     [[nodiscard]] static auto dashed(std::string label = "") -> Border;
+    [[nodiscard]] static auto dashed(Init state) -> Border;
 
     /// Dotted border: ┌┐└┘┄┆
     [[nodiscard]] static auto dotted(std::string label = "") -> Border;
+    [[nodiscard]] static auto dotted(Init state) -> Border;
 
-    /// ASCII border: ++++++-|
+    /// ASCII border: ++++-|
     [[nodiscard]] static auto ascii(std::string label = "") -> Border;
+    [[nodiscard]] static auto ascii(Init state) -> Border;
 
     /// Double horizontal border: ╒╕╘╛═│
     [[nodiscard]] static auto double_horizontal(std::string label = "") -> Border;
+    [[nodiscard]] static auto double_horizontal(Init state) -> Border;
 
     /// Double vertical border: ╓╖╙╜─║
     [[nodiscard]] static auto double_vertical(std::string label = "") -> Border;
+    [[nodiscard]] static auto double_vertical(Init state) -> Border;
 };
 
 /**
@@ -50,15 +70,22 @@ class Bordered : public Widget {
     Border border;
 
    public:
-    Bordered(ChildWidget child_ = {}, Border border_ = {})
-        : child{std::move(child_)}, border{std::move(border_)}
-    {}
+    struct Init {
+        ChildWidget child = {};
+        Border border = {};
+    };
+
+    Bordered(Init state)
+        : Widget{FocusPolicy::None, SizePolicy::flex()},
+          child{std::move(state.child)},
+          border{std::move(state.border)}
+    {
+        child.at = {1, 1};
+    }
 
    public:
     void resize(Area) override
     {
-        border.box.size = this->size;
-        child.at = {1, 1};
         auto const old_size = child.size;
         child.size = {
             .width = std::max(0, this->size.width - 2),
@@ -70,7 +97,12 @@ class Bordered : public Widget {
     void paint(Canvas c) override
     {
         // Box
-        Painter{c}[{0, 0}] << border.box;
+        Painter{c}[{0, 0}] << Painter::Box{
+            .corners = border.glyphs.corners,
+            .walls = border.glyphs.walls,
+            .brush = border.brush,
+            .size = this->size,
+        };
 
         // Label
         auto& label = border.label;
@@ -111,7 +143,7 @@ class Bordered : public Widget {
 template <WidgetDerived WidgetType>
 [[nodiscard]] auto operator|(WidgetType w, Border b) -> Bordered<WidgetType>
 {
-    return {std::move(w), std::move(b)};
+    return {{.child = std::move(w), .border = std::move(b)}};
 }
 
 // -------------------------------------------------------------------------------------
@@ -122,7 +154,8 @@ class Divider : public Widget {
     Glyph line;
 
    public:
-    Divider(Glyph line_) : line{line_} { this->size_policy = SizePolicy::fixed(1); }
+    Divider(Glyph line_) : Widget{FocusPolicy::None, SizePolicy::fixed(1)}, line{line_}
+    {}
 
    public:
     void paint(Canvas c) override;

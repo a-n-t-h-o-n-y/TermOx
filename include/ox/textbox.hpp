@@ -31,11 +31,15 @@ class TextBox : public Widget {
     int top_line = 0;
 
    public:
-    TextBox(std::vector<Glyph> text_ = {},
-            Wrap wrap_ = Wrap::Word,
-            Align align_ = Align::Left,
-            Color background_ = XColor::Default,
-            Brush insert_brush_ = {});
+    struct Init {
+        std::vector<Glyph> text = {};
+        Wrap wrap = Wrap::Word;
+        Align align = Align::Left;
+        Color background = XColor::Default;
+        Brush insert_brush = {};
+    } static const init;
+
+    TextBox(Init state = init);
 
    public:
     void paint(Canvas c) override;
