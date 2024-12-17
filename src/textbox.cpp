@@ -280,14 +280,18 @@ void TextBox::mouse_press(Mouse m)
 {
     auto const spans =
         calculate_spans(this->text, this->wrap, (std::size_t)this->size.width);
+    if (spans.empty()) {
+        return;
+    }
 
     auto const line_lengths = spans |
                               std::ranges::views::take(top_line + this->size.height) |
                               std::ranges::views::transform(
                                   [](auto const& span) { return std::ssize(span); });
 
-    auto const span = spans[(std::size_t)(top_line + m.at.y)];
     m.at.x = m.at.x - [&]() -> int {
+        auto const span =
+            spans[(std::size_t)(std::min(top_line + m.at.y, (int)spans.size() - 1))];
         switch (align) {
             case Align::Left: return 0;
             case Align::Center: return (this->size.width - (int)span.size()) / 2;

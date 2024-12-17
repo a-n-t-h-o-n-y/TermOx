@@ -23,41 +23,41 @@ struct Border {
         Label label = {};
     };
 
-    /// Light border: ┌┐└┘─│
+    /// Light Border: ┌┐└┘─│
     [[nodiscard]] static auto light(std::string label = "") -> Border;
     [[nodiscard]] static auto light(Init state) -> Border;
 
-    /// Round border: ╭╮╰╯─│
+    /// Round Border: ╭╮╰╯─│
     [[nodiscard]] static auto round(std::string label = "") -> Border;
     [[nodiscard]] static auto round(Init state) -> Border;
 
-    /// Double-line border: ╔╗╚╝═║
-    [[nodiscard]] static auto double_line(std::string label = "") -> Border;
-    [[nodiscard]] static auto double_line(Init state) -> Border;
+    /// Twin Border: ╔╗╚╝═║
+    [[nodiscard]] static auto twin(std::string label = "") -> Border;
+    [[nodiscard]] static auto twin(Init state) -> Border;
 
-    /// Bold border: ┏┓┗┛━┃
+    /// Bold Border: ┏┓┗┛━┃
     [[nodiscard]] static auto bold(std::string label = "") -> Border;
     [[nodiscard]] static auto bold(Init state) -> Border;
 
-    /// Dashed border: ┌┐└┘╌╎
+    /// Dashed Border: ┌┐└┘╌╎
     [[nodiscard]] static auto dashed(std::string label = "") -> Border;
     [[nodiscard]] static auto dashed(Init state) -> Border;
 
-    /// Dotted border: ┌┐└┘┄┆
+    /// Dotted Border: ┌┐└┘┄┆
     [[nodiscard]] static auto dotted(std::string label = "") -> Border;
     [[nodiscard]] static auto dotted(Init state) -> Border;
 
-    /// ASCII border: ++++-|
+    /// ASCII Border: ++++-|
     [[nodiscard]] static auto ascii(std::string label = "") -> Border;
     [[nodiscard]] static auto ascii(Init state) -> Border;
 
-    /// Double horizontal border: ╒╕╘╛═│
-    [[nodiscard]] static auto double_horizontal(std::string label = "") -> Border;
-    [[nodiscard]] static auto double_horizontal(Init state) -> Border;
+    /// Twin Horizontal Border: ╒╕╘╛═│
+    [[nodiscard]] static auto twin_horizontal(std::string label = "") -> Border;
+    [[nodiscard]] static auto twin_horizontal(Init state) -> Border;
 
-    /// Double vertical border: ╓╖╙╜─║
-    [[nodiscard]] static auto double_vertical(std::string label = "") -> Border;
-    [[nodiscard]] static auto double_vertical(Init state) -> Border;
+    /// Twin Vertical Border: ╓╖╙╜─║
+    [[nodiscard]] static auto twin_vertical(std::string label = "") -> Border;
+    [[nodiscard]] static auto twin_vertical(Init state) -> Border;
 };
 
 /**
@@ -151,35 +151,58 @@ template <WidgetDerived WidgetType>
 /// A line divider element.
 class Divider : public Widget {
    public:
-    Glyph line;
+    struct Display {
+        char32_t vertical;
+        char32_t horizontal;
+    } lines;
+
+    Brush brush;
+    Label label;  // TODO
 
    public:
-    Divider(Glyph line_) : Widget{FocusPolicy::None, SizePolicy::fixed(1)}, line{line_}
+    struct Init {
+        Display lines = {.vertical = U'│', .horizontal = U'─'};
+        Brush brush = {};
+        Label label = {};
+    };
+
+    Divider(Init state)
+        : Widget{FocusPolicy::None, SizePolicy::fixed(1)},
+          lines{state.lines},
+          brush{state.brush},
+          label{std::move(state.label)}
     {}
 
    public:
     void paint(Canvas c) override;
 
    public:
-    [[nodiscard]] static auto light_h() -> Divider { return {{U'─'}}; }
-    [[nodiscard]] static auto light_v() -> Divider { return {{U'│'}}; }
+    /// Light Divider: ─│
+    [[nodiscard]] static auto light(std::string label = "") -> Divider;
+    [[nodiscard]] static auto light(Init state) -> Divider;
 
-    [[nodiscard]] static auto bold_h() -> Divider { return {{U'━'}}; }
-    [[nodiscard]] static auto bold_v() -> Divider { return {{U'┃'}}; }
+    /// Bold Divider: ━┃
+    [[nodiscard]] static auto bold(std::string label = "") -> Divider;
+    [[nodiscard]] static auto bold(Init state) -> Divider;
 
-    [[nodiscard]] static auto double_h() -> Divider { return {{U'═'}}; }
-    [[nodiscard]] static auto double_v() -> Divider { return {{U'║'}}; }
+    /// Twin Divider: ═║
+    [[nodiscard]] static auto twin(std::string label = "") -> Divider;
+    [[nodiscard]] static auto twin(Init state) -> Divider;
 
-    [[nodiscard]] static auto dashed_h() -> Divider { return {{U'╌'}}; }
-    [[nodiscard]] static auto dashed_v() -> Divider { return {{U'╎'}}; }
+    /// Dashed Divider: ╌╎
+    [[nodiscard]] static auto dashed(std::string label = "") -> Divider;
+    [[nodiscard]] static auto dashed(Init state) -> Divider;
 
-    [[nodiscard]] static auto dotted_h() -> Divider { return {{U'┄'}}; }
-    [[nodiscard]] static auto dotted_v() -> Divider { return {{U'┆'}}; }
+    /// Dotted Divider: ┄┆
+    [[nodiscard]] static auto dotted(std::string label = "") -> Divider;
+    [[nodiscard]] static auto dotted(Init state) -> Divider;
 
-    [[nodiscard]] static auto ascii_h() -> Divider { return {{'-'}}; }
-    [[nodiscard]] static auto ascii_v() -> Divider { return {{'|'}}; }
+    /// ASCII Divider: -|
+    [[nodiscard]] static auto ascii(std::string label = "") -> Divider;
+    [[nodiscard]] static auto ascii(Init state) -> Divider;
 
-    [[nodiscard]] static auto empty() -> Divider { return {{U' '}}; }
+    [[nodiscard]] static auto empty(std::string label = "") -> Divider;
+    [[nodiscard]] static auto empty(Init state) -> Divider;
 };
 
 }  // namespace ox

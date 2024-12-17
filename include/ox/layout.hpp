@@ -166,7 +166,7 @@ class Column : public Widget {
     Container children;
 
    public:
-    Column(Container container)
+    Column(Container container = {})
         : Widget{FocusPolicy::None, SizePolicy::flex()}, children{std::move(container)}
     {}
 
@@ -258,7 +258,7 @@ class Row : public Widget {
     Container children;
 
    public:
-    Row(Container container)
+    Row(Container container = {})
         : Widget{FocusPolicy::None, SizePolicy::flex()}, children{std::move(container)}
     {}
 

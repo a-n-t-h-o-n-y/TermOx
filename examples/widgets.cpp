@@ -101,7 +101,7 @@ auto signal_test()
                       .foreground = XColor::Black,
                       .traits = Trait::Bold},
         }},
-        Divider::double_h(),
+        Divider::twin(),
         Row{
             std::tuple{
                 CheckBox{{}} | FocusPolicy::Strong,
@@ -117,9 +117,9 @@ auto signal_test()
                     tracked([](Label& l) { l.text = "State: UnChecked"; }, label));
             },
         } | SizePolicy::fixed(1),
-        Divider::light_h(),
+        Divider::light(),
         LineEdit{{.ghost_text = "Ghost Text"}},
-        Divider::light_h(),
+        Divider::light(),
         Label{{
             .text = "Hello, world! 2",
             .align = Label::Align::Right,
