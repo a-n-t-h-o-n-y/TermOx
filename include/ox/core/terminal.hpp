@@ -298,7 +298,7 @@ struct Canvas {
     Area size;
 
     /**
-     * Provides mutable access to the top left Point of the Canvas.
+     * Provides mutable access from the top left Point of the Canvas.
      *
      * @param p The Point position of the Glyph in the Canvas. This will be clamped to
      * the Canvas' bounds.
@@ -306,7 +306,7 @@ struct Canvas {
     [[nodiscard]] auto operator[](Point p) -> Glyph&;
 
     /**
-     * Provides const access to the top left Point of the Canvas.
+     * Provides const access from the top left Point of the Canvas.
      *
      * @param p The Point position of the Glyph in the Canvas. This will be clamped to
      * the Canvas' bounds.
@@ -485,6 +485,15 @@ class Painter {
      */
     auto fill(Glyph const& g) -> void;
 
+    /**
+     * Fill a section of the underlying Canvas with the given Glyph.
+     *
+     * @param g The Glyph to fill the Canvas with.
+     * @param at The top left of the rectangle to fill.
+     * @param size The size of the rectangle to fill.
+     */
+    auto fill(Glyph const& g, Point at, Area size) -> void;
+
    private:
     Canvas canvas_;
 };
@@ -500,8 +509,8 @@ class Painter {
  * if not handled.
  */
 template <typename T>
-[[nodiscard]] auto apply_event(Event const& ev,
-                               T& handler) -> std::optional<EventResponse>
+[[nodiscard]] auto apply_event(Event const& ev, T& handler)
+    -> std::optional<EventResponse>
 {
     return std::visit(
         Overload{[&](esc::KeyPress e) -> std::optional<EventResponse> {

@@ -327,11 +327,13 @@ auto Painter::clear() -> void
     }
 }
 
-auto Painter::fill(Glyph const& g) -> void
+auto Painter::fill(Glyph const& g) -> void { this->fill(g, {0, 0}, canvas_.size); }
+
+auto Painter::fill(Glyph const& g, Point at, Area size) -> void
 {
-    for (auto x = 0; x < canvas_.size.width; ++x) {
-        for (auto y = 0; y < canvas_.size.height; ++y) {
-            canvas_[{x, y}] = g;
+    for (auto x = 0; x < size.width; ++x) {
+        for (auto y = 0; y < size.height; ++y) {
+            canvas_[{at.x + x, at.y + y}] = g;
         }
     }
 }

@@ -1,5 +1,4 @@
-# PONG ---------------------------------------------------------------------------------
-
+# Pong ---------------------------------------------------------------------------------
 add_executable(TermOx.examples.pong EXCLUDE_FROM_ALL
     pong.cpp
 )
@@ -16,8 +15,7 @@ target_link_libraries(
         TermOx
 )
 
-# Pinbox-------------------------------------------------------------------------------\
-
+# Pinbox -------------------------------------------------------------------------------
 add_executable(TermOx.examples.pinbox EXCLUDE_FROM_ALL
     pinbox.cpp
 )
@@ -30,6 +28,23 @@ target_compile_options(
 )
 target_link_libraries(
     TermOx.examples.pinbox
+    PRIVATE
+        TermOx
+)
+
+# Snake --------------------------------------------------------------------------------
+add_executable(TermOx.examples.snake EXCLUDE_FROM_ALL
+    snake.cpp
+)
+target_compile_options(
+    TermOx.examples.snake
+    PRIVATE
+        -Wall
+        -Wextra
+        -Wpedantic
+)
+target_link_libraries(
+    TermOx.examples.snake
     PRIVATE
         TermOx
 )
