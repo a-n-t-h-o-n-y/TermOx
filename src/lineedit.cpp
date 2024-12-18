@@ -48,7 +48,8 @@ void LineEdit::key_press(Key k)
             break;
         case Key::End:
             cursor_index_ = text.size();
-            anchor_index_ = std::max((int)text.size() - this->size.width + 1, 0);
+            anchor_index_ =
+                (std::size_t)std::max((int)text.size() - this->size.width + 1, 0);
             break;
         default:
             if (auto const c = esc::key_to_char(k); c != '\0') {
@@ -64,7 +65,7 @@ void LineEdit::key_press(Key k)
 
 void LineEdit::mouse_press(Mouse m)
 {
-    cursor_index_ = std::min(anchor_index_ + m.at.x, text.size());
+    cursor_index_ = std::min(anchor_index_ + (std::size_t)m.at.x, text.size());
 }
 
 void LineEdit::paint(Canvas c)
@@ -81,8 +82,9 @@ void LineEdit::paint(Canvas c)
     }();
 
     auto const trim = [this](std::string_view sv) -> std::string_view {
-        return sv.substr(anchor_index_, std::min(this->size.width,
-                                                 (int)sv.size() - (int)anchor_index_));
+        return sv.substr(anchor_index_,
+                         (std::size_t)std::min(this->size.width,
+                                               (int)sv.size() - (int)anchor_index_));
     };
 
     Painter{c}[{0, 0}] << (trim(is_ghost ? ghost_text : text) |
@@ -101,11 +103,12 @@ void LineEdit::paint(Canvas c)
 void LineEdit::increment_cursor(int amount)
 {
     // Increment
-    cursor_index_ = std::clamp(0, (int)cursor_index_ + amount, (int)text.size());
+    cursor_index_ =
+        (std::size_t)std::clamp(0, (int)cursor_index_ + amount, (int)text.size());
 
     // Scroll
-    if (cursor_index_ >= anchor_index_ + this->size.width) {
-        anchor_index_ = cursor_index_ - this->size.width + 1;
+    if (cursor_index_ >= anchor_index_ + (std::size_t)this->size.width) {
+        anchor_index_ = cursor_index_ - (std::size_t)this->size.width + 1;
     }
     else if (cursor_index_ < anchor_index_) {
         anchor_index_ = cursor_index_;
