@@ -1,5 +1,6 @@
 #pragma once
 
+#include <span>
 #include <utility>
 #include <vector>
 
@@ -23,14 +24,9 @@ class TextBox : public Widget {
     sl::Signal<void(int, int)> on_scroll_update;
 
    public:
-    std::vector<Glyph> text;
-    enum class Wrap { Any, Word } wrap;
-    enum class Align { Left, Center, Right } align;
-    Color background;
-    Brush insert_brush;
-    int top_line = 0;
+    enum class Wrap { Any, Word };
+    enum class Align { Left, Center, Right };
 
-   public:
     struct Init {
         std::vector<Glyph> text = {};
         Wrap wrap = Wrap::Word;
@@ -42,6 +38,33 @@ class TextBox : public Widget {
     TextBox(Init state = init);
 
    public:
+    void set_text(std::vector<Glyph> text);
+
+    [[nodiscard]] auto get_text() const -> std::vector<Glyph> const&;
+
+    void set_wrap(Wrap wrap);
+
+    [[nodiscard]] auto get_wrap() const -> Wrap;
+
+    void set_align(Align align);
+
+    [[nodiscard]] auto get_align() const -> Align;
+
+    void set_background(Color color);
+
+    [[nodiscard]] auto get_background() const -> Color;
+
+    void set_insert_brush(Brush brush);
+
+    [[nodiscard]] auto get_insert_brush() const -> Brush;
+
+    /**
+     * Set the line displayed at the top, scrolling the text. Will change the cursor
+     * index if the cursor is now off screen.
+     */
+    void set_top_line(int line);
+
+   public:
     void paint(Canvas c) override;
 
     void key_press(Key k) override;
@@ -50,9 +73,18 @@ class TextBox : public Widget {
 
     void mouse_wheel(Mouse m) override;
 
+    void resize(Area) override;
+
    private:
-    int line_count_ = 0;
+    std::vector<Glyph> text_;
+    Wrap wrap_;
+    Align align_;
+    Color background_;
+    Brush insert_brush_;
+
+    int top_line_ = 0;
     std::size_t cursor_index_ = 0;  // Can be one past the end of text.
+    std::vector<std::span<Glyph const>> spans_ = {};
 };
 
 /**
