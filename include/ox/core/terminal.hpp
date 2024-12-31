@@ -301,7 +301,7 @@ struct Canvas {
      * Provides mutable access from the top left Point of the Canvas.
      *
      * @param p The Point position of the Glyph in the Canvas. This will be clamped to
-     * the Canvas' bounds.
+     * the Canvas' bounds. The point should be in the range [{0, 0}, size).
      */
     [[nodiscard]] auto operator[](Point p) -> Glyph&;
 
@@ -309,7 +309,7 @@ struct Canvas {
      * Provides const access from the top left Point of the Canvas.
      *
      * @param p The Point position of the Glyph in the Canvas. This will be clamped to
-     * the Canvas' bounds.
+     * the Canvas' bounds. The point should be in the range [{0, 0}, size).
      */
     [[nodiscard]] auto operator[](Point p) const -> Glyph const&;
 };
@@ -405,6 +405,9 @@ class Painter {
         template <GlyphString T>
         auto operator<<(T const& gs) && -> CursorWriter
         {
+            if (cursor_.y >= canvas_.size.height) {
+                return std::move(*this);
+            }
             for (auto const& g : gs) {
                 if (cursor_.x >= canvas_.size.width) {
                     break;
@@ -418,6 +421,9 @@ class Painter {
         template <GlyphString T>
         auto operator<<(T const& gs) & -> CursorWriter&
         {
+            if (cursor_.y >= canvas_.size.height) {
+                return *this;
+            }
             for (auto const& g : gs) {
                 if (cursor_.x >= canvas_.size.width) {
                     break;

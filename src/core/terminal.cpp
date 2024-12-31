@@ -230,7 +230,7 @@ Painter::CursorWriter::CursorWriter(Canvas const& canvas, Point cursor)
 
 auto Painter::CursorWriter::operator<<(Glyph const& g) && -> CursorWriter
 {
-    if (cursor_.x < canvas_.size.width) {
+    if (cursor_.x < canvas_.size.width && cursor_.y < canvas_.size.height) {
         canvas_[cursor_] = g;
         ++cursor_.x;
     }
@@ -239,7 +239,7 @@ auto Painter::CursorWriter::operator<<(Glyph const& g) && -> CursorWriter
 
 auto Painter::CursorWriter::operator<<(Glyph const& g) & -> CursorWriter&
 {
-    if (cursor_.x < canvas_.size.width) {
+    if (cursor_.x < canvas_.size.width && cursor_.y < canvas_.size.height) {
         canvas_[cursor_] = g;
         ++cursor_.x;
     }
@@ -298,18 +298,26 @@ auto Painter::CursorWriter::operator<<(Painter::Box const& b) -> CursorWriter
 
 auto Painter::CursorWriter::operator<<(Painter::HLine const& hline) -> CursorWriter
 {
+    if (cursor_.y >= canvas_.size.height) {
+        return *this;
+    }
     auto const end = std::min(cursor_.x + hline.length, canvas_.size.width);
-    for (auto x = cursor_.x; x < end; ++x) {
-        canvas_[{x, cursor_.y}] = hline.glyph;
+    while (cursor_.x < end) {
+        canvas_[cursor_] = hline.glyph;
+        ++cursor_.x;
     }
     return *this;
 }
 
 auto Painter::CursorWriter::operator<<(Painter::VLine const& vline) -> CursorWriter
 {
+    if (cursor_.x >= canvas_.size.width) {
+        return *this;
+    }
     auto const end = std::min(cursor_.y + vline.length, canvas_.size.height);
-    for (auto y = cursor_.y; y < end; ++y) {
-        canvas_[{cursor_.x, y}] = vline.glyph;
+    while (cursor_.y < end) {
+        canvas_[cursor_] = vline.glyph;
+        ++cursor_.y;
     }
     return *this;
 }

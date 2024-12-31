@@ -4,6 +4,7 @@
 #include <ox/bordered.hpp>
 #include <ox/button.hpp>
 #include <ox/checkbox.hpp>
+#include <ox/datatable.hpp>
 #include <ox/focus.hpp>
 #include <ox/label.hpp>
 #include <ox/layout.hpp>

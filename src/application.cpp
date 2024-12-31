@@ -204,12 +204,6 @@ auto send_paint_events(Widget& head,
                        Canvas canvas,
                        Terminal::Cursor& cursor_out) -> void
 {
-    if (head.active && head.size.width > 0 && head.size.height > 0) {
-        head.paint(canvas);
-        if (auto const life = Focus::get(); life.valid() && &(life.get()) == &head) {
-            cursor_out = head.cursor ? canvas.at + *head.cursor : head.cursor;
-        }
-    }
     for (auto& child : head.get_children() | filter::is_active) {
         send_paint_events(child,
                           Canvas{
@@ -218,6 +212,12 @@ auto send_paint_events(Widget& head,
                               .size = child.size,
                           },
                           cursor_out);
+    }
+    if (head.active && head.size.width > 0 && head.size.height > 0) {
+        head.paint(canvas);
+        if (auto const life = Focus::get(); life.valid() && &(life.get()) == &head) {
+            cursor_out = head.cursor ? canvas.at + *head.cursor : head.cursor;
+        }
     }
 }
 
