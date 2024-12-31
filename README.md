@@ -2,6 +2,17 @@
 
 C++20 Terminal User Interface Library
 
+
+<p align="center">
+  <img src="docs/img/colors.png">
+  <img src="docs/img/combinations.png">
+  <img src="docs/img/animation.gif">
+  <img src="docs/img/interactive.png">
+  <img src="docs/img/library.png">
+  <img src="docs/img/custom.png">
+  <img src="docs/img/fractal.png">
+</p>
+
 ## Build Instructions
 
 **TermOx** depends on the [Signals
