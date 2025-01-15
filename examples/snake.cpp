@@ -196,8 +196,8 @@ class SnakeGameWidget : public Widget {
 
         // Paint Tail
         auto const tail = std::array{U'░', U'▒', U'▓'};
-        for (auto i = 0; i < 4; ++i) {
-            if (i + 1 < (int)engine_.state.snake.size()) {
+        for (auto i = 0; i < std::ssize(tail); ++i) {
+            if (i + 1 < std::ssize(engine_.state.snake)) {
                 c[offset + engine_.state.snake[i]] =
                     tail[i] | fg(XColor::BrightGreen) | bg(XColor::BrightBlack);
             }
