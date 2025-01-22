@@ -200,9 +200,8 @@ auto do_shift_tab_focus_change(Widget& head, Widget const& current_focus) -> voi
 
 // Recursively send paint events to each Widget including and below head. \p cursor is
 // assigned to if the current focus widget is painted.
-auto send_paint_events(Widget& head,
-                       Canvas canvas,
-                       Terminal::Cursor& cursor_out) -> void
+auto send_paint_events(Widget& head, Canvas canvas, Terminal::Cursor& cursor_out)
+    -> void
 {
     for (auto& child : head.get_children() | filter::is_active) {
         send_paint_events(child,
@@ -263,7 +262,6 @@ auto Application::handle_mouse_move(Mouse m) -> EventResponse
 
 auto Application::handle_key_press(Key k) -> EventResponse
 {
-    // TODO a shortcuts manager? processed here?
     auto const life = Focus::get();
 
     if (not life.valid()) {

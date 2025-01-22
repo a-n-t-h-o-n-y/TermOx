@@ -94,8 +94,8 @@ auto Terminal::commit_changes() -> void
 
     auto brush = Brush{};
 
-    for (auto x = 0; x < changes.size().width; ++x) {
-        for (auto y = 0; y < changes.size().height; ++y) {
+    for (auto y = 0; y < changes.size().height; ++y) {
+        for (auto x = 0; x < changes.size().width; ++x) {
             auto const& change = changes[{x, y}];
             auto const& current = current_screen_[{x, y}];
             if (change != current) {
@@ -202,8 +202,6 @@ auto Timer::stop() -> void
 
 auto Canvas::operator[](Point p) -> Glyph&
 {
-    assert(p.x >= 0 && p.x < this->size.width);
-    assert(p.y >= 0 && p.y < this->size.height);
     auto const global_point = Point{
         .x = std::clamp(at.x + p.x, 0, this->buffer.size().width - 1),
         .y = std::clamp(at.y + p.y, 0, this->buffer.size().height - 1),
@@ -213,8 +211,6 @@ auto Canvas::operator[](Point p) -> Glyph&
 
 auto Canvas::operator[](Point p) const -> Glyph const&
 {
-    assert(p.x >= 0 && p.x < this->size.width);
-    assert(p.y >= 0 && p.y < this->size.height);
     auto const global_point = Point{
         .x = std::clamp(at.x + p.x, 0, buffer.size().width - 1),
         .y = std::clamp(at.y + p.y, 0, buffer.size().height - 1),
