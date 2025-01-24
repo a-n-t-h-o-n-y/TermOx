@@ -15,7 +15,7 @@ namespace ox {
 LineEdit::Init const LineEdit::init = {};
 
 LineEdit::LineEdit(Init state)
-    : Widget{FocusPolicy::Strong, SizePolicy::fixed(1)},
+    : Widget{FocusPolicy::Strong, SizePolicy::flex()},
       text{std::move(state.text)},
       text_brush{state.text_brush},
       align{state.align},

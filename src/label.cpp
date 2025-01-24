@@ -20,6 +20,7 @@ void Label::paint(Canvas c)
 {
     Painter{c}.fill(U' ' | bg(brush.background));
 
+    // TODO The substr should count glyphs, not bytes.
     auto const glyphs =
         std::string_view{text}.substr(0, (std::size_t)c.size.width) | brush;
 
