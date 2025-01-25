@@ -25,6 +25,10 @@ constexpr auto logo = std::string_view{
 .||.      ''|...|'  .|.   '|   ''|...'|
 )"};
 
+// This example uses the lower level 'core' library and does not depend on Widget or
+// Application. The `Pong` class acts as an event handler for key presses, resizes, and
+// timer events.
+
 // This is a std::variant based state machine, one struct per screen type with paint()
 // to put the display for each state type and key_press() and timer() to handle events
 // for each state.

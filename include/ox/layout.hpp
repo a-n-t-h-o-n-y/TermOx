@@ -166,7 +166,13 @@ class Column : public Widget {
     Container children;
 
    public:
-    Column(Container container = {})
+    // This is needed for Clang 18, instead of default value.
+    template <typename C = Container>
+        requires std::is_default_constructible_v<C>
+    Column() : Widget{FocusPolicy::None, SizePolicy::flex()}, children{}
+    {}
+
+    Column(Container container)
         : Widget{FocusPolicy::None, SizePolicy::flex()}, children{std::move(container)}
     {}
 
@@ -258,7 +264,13 @@ class Row : public Widget {
     Container children;
 
    public:
-    Row(Container container = {})
+    // This is needed for Clang 18, instead of default value.
+    template <typename C = Container>
+        requires std::is_default_constructible_v<C>
+    Row() : Widget{FocusPolicy::None, SizePolicy::flex()}, children{}
+    {}
+
+    Row(Container container)
         : Widget{FocusPolicy::None, SizePolicy::flex()}, children{std::move(container)}
     {}
 

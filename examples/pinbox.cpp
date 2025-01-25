@@ -40,7 +40,7 @@ class PinBox : public Widget {
         }
     }
 
-    void paint(Canvas c)
+    void paint(Canvas c) override
     {
         for (auto [at, color] : points_) {
             if (at.x < this->size.width && at.y < this->size.height) {
@@ -76,7 +76,7 @@ class ColorSelect : public Row<std::vector<Button>> {
     sl::Signal<void(Color)> on_select;
 
    public:
-    ColorSelect(std::vector<Color> colors)
+    ColorSelect(std::vector<Color> colors = {})
     {
         for (auto const color : colors) {
             children.push_back({{.brush = {.background = color}}});
@@ -93,49 +93,51 @@ int main()
             std::tuple{
                 PinBox{},
                 Divider::bold({.brush = {.foreground = XColor::BrightBlack}}),
-                Column{std::tuple{
-                    Label{{
-                        .text = "Color Select",
-                        .align = Label::Align::Center,
-                        .brush = {.traits = Trait::Bold},
-                    }} | SizePolicy::fixed(1),
-                    ColorSelect{{
-                        XColor::BrightBlue,
-                        XColor::Blue,
-                        XColor::BrightRed,
-                        XColor::Red,
-                        XColor::BrightGreen,
-                        XColor::Green,
-                        XColor::White,
-                        XColor::BrightBlack,
-                    }} | SizePolicy::fixed(1),
-                    Divider::bold({.brush = {.foreground = XColor::BrightBlack}}),
-                    Label{{
-                        .text = "Last Action",
-                        .align = Label::Align::Center,
-                        .brush = {.traits = Trait::Bold},
-                    }} | SizePolicy::fixed(1),
-                    Label{{.align = Label::Align::Left}} | SizePolicy::fixed(1),
-                    Divider::bold({.brush = {.foreground = XColor::BrightBlack}}),
-                    Row{std::tuple{
+                Column{
+                    std::tuple{
                         Label{{
-                            .text = "Pin Count",
-                            .align = Label::Align::Left,
+                            .text = "Color Select",
+                            .align = Label::Align::Center,
                             .brush = {.traits = Trait::Bold},
-                        }} | SizePolicy::fixed(10),
+                        }} | SizePolicy::fixed(1),
+                        ColorSelect{{
+                            XColor::BrightBlue,
+                            XColor::Blue,
+                            XColor::BrightRed,
+                            XColor::Red,
+                            XColor::BrightGreen,
+                            XColor::Green,
+                            XColor::White,
+                            XColor::BrightBlack,
+                        }} | SizePolicy::fixed(1),
+                        Divider::bold({.brush = {.foreground = XColor::BrightBlack}}),
                         Label{{
-                            .text = "0",
-                            .align = Label::Align::Left,
-                        }},
-                    }} | SizePolicy::fixed(1),
-                    Divider::bold({.brush = {.foreground = XColor::BrightBlack}}),
-                    Button{{
-                        .text = "Clear Board",
-                        .brush = {.background = XColor::BrightBlue,
-                                  .foreground = XColor::Black,
-                                  .traits = Trait::Bold},
-                    }} | SizePolicy::fixed(1),
-                }} | SizePolicy::fixed(16),
+                            .text = "Last Action",
+                            .align = Label::Align::Center,
+                            .brush = {.traits = Trait::Bold},
+                        }} | SizePolicy::fixed(1),
+                        Label{{.align = Label::Align::Left}} | SizePolicy::fixed(1),
+                        Divider::bold({.brush = {.foreground = XColor::BrightBlack}}),
+                        Row{std::tuple{
+                            Label{{
+                                .text = "Pin Count",
+                                .align = Label::Align::Left,
+                                .brush = {.traits = Trait::Bold},
+                            }} | SizePolicy::fixed(10),
+                            Label{{
+                                .text = "0",
+                                .align = Label::Align::Left,
+                            }},
+                        }} | SizePolicy::fixed(1),
+                        Divider::bold({.brush = {.foreground = XColor::BrightBlack}}),
+                        Button{{
+                            .text = "Clear Board",
+                            .brush = {.background = XColor::BrightBlue,
+                                      .foreground = XColor::Black,
+                                      .traits = Trait::Bold},
+                        }} | SizePolicy::fixed(1),
+                    },
+                } | SizePolicy::fixed(16),
             },
             [](auto& pb, auto& /*div*/, auto& sb) {
                 std::get<ColorSelect>(sb.children)

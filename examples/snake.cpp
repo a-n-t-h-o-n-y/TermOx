@@ -12,6 +12,9 @@
 using namespace ox;
 using namespace std::chrono_literals;
 
+// This example Uses `SnakeEngine` to run the game logic and `SnakeGameWidget` to
+// display and modify (via keyboard and timer) the game state.
+
 class SnakeEngine {
    public:
     constexpr static auto size = Area{100, 27};
@@ -119,7 +122,6 @@ class SnakeEngine {
     Point last_direction_{.x = 1, .y = 0};
 };
 
-// needs to float the game in the widget
 class SnakeGameWidget : public Widget {
    public:
     SnakeGameWidget()

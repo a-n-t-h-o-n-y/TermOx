@@ -90,7 +90,7 @@ void DataTable::paint(Canvas c)
             }
             if (text.size() + 1 > (std::size_t)cell_width) {
                 painter[cell_point]
-                    << text.substr(0, std::max(cell_width - 2, 0)) + "…";
+                    << text.substr(0, (std::size_t)std::max(cell_width - 2, 0)) + "…";
             }
             else {
                 painter[cell_point] << text;
@@ -147,11 +147,11 @@ void DataTable::paint(Canvas c)
 void DataTable::mouse_wheel(Mouse m)
 {
     if (m.button == Mouse::Button::ScrollUp) {
-        offset = std::max(0, (int)offset - 1);
+        offset = (std::size_t)std::max(0, (int)offset - 1);
     }
     else if (m.button == Mouse::Button::ScrollDown) {
-        offset = std::min(columns_.empty() ? 0 : (int)columns_.front().size() - 1,
-                          (int)offset + 1);
+        offset = (std::size_t)std::min(
+            columns_.empty() ? 0 : (int)columns_.front().size() - 1, (int)offset + 1);
     }
 }
 
