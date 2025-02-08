@@ -12,17 +12,17 @@
 
 namespace ox {
 
-LineEdit::Init const LineEdit::init = {};
+LineEdit::Options const LineEdit::init = {};
 
-LineEdit::LineEdit(Init state)
+LineEdit::LineEdit(Options x)
     : Widget{FocusPolicy::Strong, SizePolicy::flex()},
-      text{std::move(state.text)},
-      text_brush{state.text_brush},
-      align{state.align},
-      background{state.background},
-      ghost_text{std::move(state.ghost_text)},
-      ghost_text_brush{state.ghost_text_brush},
-      validator{std::move(state.validator)}
+      text{std::move(x.text)},
+      text_brush{std::move(x.text_brush)},
+      align{std::move(x.align)},
+      background{std::move(x.background)},
+      ghost_text{std::move(x.ghost_text)},
+      ghost_text_brush{std::move(x.ghost_text_brush)},
+      validator{std::move(x.validator)}
 {}
 
 void LineEdit::key_press(Key k)

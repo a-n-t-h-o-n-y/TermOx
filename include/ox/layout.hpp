@@ -26,8 +26,8 @@ namespace ox::detail {
  * @return A vector of the lengths of each child.
  */
 template <InputRangeOf<Widget> WidgetRange>
-[[nodiscard]] auto distribute_length(WidgetRange&& widgets, int total_length)
-    -> std::vector<int>
+[[nodiscard]]
+auto distribute_length(WidgetRange&& widgets, int total_length) -> std::vector<int>
 {
     assert(total_length >= 0);
 

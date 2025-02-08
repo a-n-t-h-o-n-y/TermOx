@@ -10,12 +10,12 @@ auto Border::light(std::string label) -> Border
     };
 }
 
-auto Border::light(Init state) -> Border
+auto Border::light(Options x) -> Border
 {
     return {
         .glyphs = {.corners = {U'┌', U'┐', U'└', U'┘'}, .walls = {U'─', U'│'}},
-        .brush = state.brush,
-        .label = std::move(state.label),
+        .brush = std::move(x.brush),
+        .label = std::move(x.label),
     };
 }
 
@@ -27,12 +27,12 @@ auto Border::round(std::string label) -> Border
     };
 }
 
-auto Border::round(Init state) -> Border
+auto Border::round(Options x) -> Border
 {
     return {
         .glyphs = {.corners = {U'╭', U'╮', U'╰', U'╯'}, .walls = {U'─', U'│'}},
-        .brush = state.brush,
-        .label = std::move(state.label),
+        .brush = std::move(x.brush),
+        .label = std::move(x.label),
     };
 }
 
@@ -44,12 +44,12 @@ auto Border::twin(std::string label) -> Border
     };
 }
 
-auto Border::twin(Init state) -> Border
+auto Border::twin(Options x) -> Border
 {
     return {
         .glyphs = {.corners = {U'╔', U'╗', U'╚', U'╝'}, .walls = {U'═', U'║'}},
-        .brush = state.brush,
-        .label = std::move(state.label),
+        .brush = std::move(x.brush),
+        .label = std::move(x.label),
     };
 }
 
@@ -61,12 +61,12 @@ auto Border::bold(std::string label) -> Border
     };
 }
 
-auto Border::bold(Init state) -> Border
+auto Border::bold(Options x) -> Border
 {
     return {
         .glyphs = {.corners = {U'┏', U'┓', U'┗', U'┛'}, .walls = {U'━', U'┃'}},
-        .brush = state.brush,
-        .label = std::move(state.label),
+        .brush = std::move(x.brush),
+        .label = std::move(x.label),
     };
 }
 
@@ -78,12 +78,12 @@ auto Border::dashed(std::string label) -> Border
     };
 }
 
-auto Border::dashed(Init state) -> Border
+auto Border::dashed(Options x) -> Border
 {
     return {
         .glyphs = {.corners = {U'┌', U'┐', U'└', U'┘'}, .walls = {U'╌', U'╎'}},
-        .brush = state.brush,
-        .label = std::move(state.label),
+        .brush = std::move(x.brush),
+        .label = std::move(x.label),
     };
 }
 
@@ -95,12 +95,12 @@ auto Border::dotted(std::string label) -> Border
     };
 }
 
-auto Border::dotted(Init state) -> Border
+auto Border::dotted(Options x) -> Border
 {
     return {
         .glyphs = {.corners = {U'┌', U'┐', U'└', U'┘'}, .walls = {U'┄', U'┆'}},
-        .brush = state.brush,
-        .label = std::move(state.label),
+        .brush = std::move(x.brush),
+        .label = std::move(x.label),
     };
 }
 
@@ -112,12 +112,12 @@ auto Border::ascii(std::string label) -> Border
     };
 }
 
-auto Border::ascii(Init state) -> Border
+auto Border::ascii(Options x) -> Border
 {
     return {
         .glyphs = {.corners = {'+', '+', '+', '+'}, .walls = {'-', '|'}},
-        .brush = state.brush,
-        .label = std::move(state.label),
+        .brush = std::move(x.brush),
+        .label = std::move(x.label),
     };
 }
 
@@ -129,12 +129,12 @@ auto Border::twin_horizontal(std::string label) -> Border
     };
 }
 
-auto Border::twin_horizontal(Init state) -> Border
+auto Border::twin_horizontal(Options x) -> Border
 {
     return {
         .glyphs = {.corners = {U'╒', U'╕', U'╘', U'╛'}, .walls = {U'═', U'│'}},
-        .brush = state.brush,
-        .label = std::move(state.label),
+        .brush = std::move(x.brush),
+        .label = std::move(x.label),
     };
 }
 
@@ -146,12 +146,12 @@ auto Border::twin_vertical(std::string label) -> Border
     };
 }
 
-auto Border::twin_vertical(Init state) -> Border
+auto Border::twin_vertical(Options x) -> Border
 {
     return {
         .glyphs = {.corners = {U'╓', U'╖', U'╙', U'╜'}, .walls = {U'─', U'║'}},
-        .brush = state.brush,
-        .label = std::move(state.label),
+        .brush = std::move(x.brush),
+        .label = std::move(x.label),
     };
 }
 
@@ -162,7 +162,7 @@ void Divider::paint(Canvas c)
     // TODO This isn't a perfect heuristic, a 1 by 1 will not know.
     // only way around this is to have user input or parent layout input to it.
     // This is the same issue with a Horizontal Label, you'll need some input without
-    // changing the type. Maybe it is just an enum in Init.
+    // changing the type. Maybe it is just an enum in Options.
     if (this->size.width == 1) {
         Painter{c}.fill(lines.vertical | brush);
     }
@@ -178,10 +178,10 @@ auto Divider::light(std::string label) -> Divider
     });
 }
 
-auto Divider::light(Init state) -> Divider
+auto Divider::light(Options x) -> Divider
 {
-    state.lines = {.vertical = U'│', .horizontal = U'─'};
-    return {std::move(state)};
+    x.lines = {.vertical = U'│', .horizontal = U'─'};
+    return {std::move(x)};
 }
 
 auto Divider::bold(std::string label) -> Divider
@@ -191,10 +191,10 @@ auto Divider::bold(std::string label) -> Divider
     });
 }
 
-auto Divider::bold(Init state) -> Divider
+auto Divider::bold(Options x) -> Divider
 {
-    state.lines = {.vertical = U'┃', .horizontal = U'━'};
-    return {std::move(state)};
+    x.lines = {.vertical = U'┃', .horizontal = U'━'};
+    return {std::move(x)};
 }
 
 auto Divider::twin(std::string label) -> Divider
@@ -204,10 +204,10 @@ auto Divider::twin(std::string label) -> Divider
     });
 }
 
-auto Divider::twin(Init state) -> Divider
+auto Divider::twin(Options x) -> Divider
 {
-    state.lines = {.vertical = U'║', .horizontal = U'═'};
-    return {std::move(state)};
+    x.lines = {.vertical = U'║', .horizontal = U'═'};
+    return {std::move(x)};
 }
 
 auto Divider::dashed(std::string label) -> Divider
@@ -217,10 +217,10 @@ auto Divider::dashed(std::string label) -> Divider
     });
 }
 
-auto Divider::dashed(Init state) -> Divider
+auto Divider::dashed(Options x) -> Divider
 {
-    state.lines = {.vertical = U'╎', .horizontal = U'╌'};
-    return {std::move(state)};
+    x.lines = {.vertical = U'╎', .horizontal = U'╌'};
+    return {std::move(x)};
 }
 
 auto Divider::dotted(std::string label) -> Divider
@@ -230,10 +230,10 @@ auto Divider::dotted(std::string label) -> Divider
     });
 }
 
-auto Divider::dotted(Init state) -> Divider
+auto Divider::dotted(Options x) -> Divider
 {
-    state.lines = {.vertical = U'┆', .horizontal = U'┄'};
-    return {std::move(state)};
+    x.lines = {.vertical = U'┆', .horizontal = U'┄'};
+    return {std::move(x)};
 }
 
 auto Divider::ascii(std::string label) -> Divider
@@ -243,10 +243,10 @@ auto Divider::ascii(std::string label) -> Divider
     });
 }
 
-auto Divider::ascii(Init state) -> Divider
+auto Divider::ascii(Options x) -> Divider
 {
-    state.lines = {.vertical = U'-', .horizontal = U'|'};
-    return {std::move(state)};
+    x.lines = {.vertical = U'-', .horizontal = U'|'};
+    return {std::move(x)};
 }
 
 auto Divider::empty(std::string label) -> Divider
@@ -256,10 +256,10 @@ auto Divider::empty(std::string label) -> Divider
     });
 }
 
-auto Divider::empty(Init state) -> Divider
+auto Divider::empty(Options x) -> Divider
 {
-    state.lines = {.vertical = U' ', .horizontal = U' '};
-    return {std::move(state)};
+    x.lines = {.vertical = U' ', .horizontal = U' '};
+    return {std::move(x)};
 }
 
 }  // namespace ox

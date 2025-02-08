@@ -1,5 +1,8 @@
 #pragma once
 
+#include <signals_light/signal.hpp>
+
+#include <ox/align.hpp>
 #include <ox/application.hpp>
 #include <ox/bordered.hpp>
 #include <ox/button.hpp>

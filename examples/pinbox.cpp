@@ -4,7 +4,6 @@
 #include <vector>
 
 #include <ox/ox.hpp>
-#include <signals_light/signal.hpp>
 
 using namespace ox;
 
@@ -97,7 +96,7 @@ int main()
                     std::tuple{
                         Label{{
                             .text = "Color Select",
-                            .align = Label::Align::Center,
+                            .align = Align::Center,
                             .brush = {.traits = Trait::Bold},
                         }} | SizePolicy::fixed(1),
                         ColorSelect{{
@@ -113,20 +112,20 @@ int main()
                         Divider::bold({.brush = {.foreground = XColor::BrightBlack}}),
                         Label{{
                             .text = "Last Action",
-                            .align = Label::Align::Center,
+                            .align = Align::Center,
                             .brush = {.traits = Trait::Bold},
                         }} | SizePolicy::fixed(1),
-                        Label{{.align = Label::Align::Left}} | SizePolicy::fixed(1),
+                        Label{{.align = Align::Left}} | SizePolicy::fixed(1),
                         Divider::bold({.brush = {.foreground = XColor::BrightBlack}}),
                         Row{std::tuple{
                             Label{{
                                 .text = "Pin Count",
-                                .align = Label::Align::Left,
+                                .align = Align::Left,
                                 .brush = {.traits = Trait::Bold},
                             }} | SizePolicy::fixed(10),
                             Label{{
                                 .text = "0",
-                                .align = Label::Align::Left,
+                                .align = Align::Left,
                             }},
                         }} | SizePolicy::fixed(1),
                         Divider::bold({.brush = {.foreground = XColor::BrightBlack}}),

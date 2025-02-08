@@ -31,13 +31,13 @@ namespace {
 
 namespace ox {
 
-ScrollBar::Init const ScrollBar::init{};
+ScrollBar::Options const ScrollBar::init{};
 
-ScrollBar::ScrollBar(Init state)
+ScrollBar::ScrollBar(Options x)
     : Widget{FocusPolicy::None, SizePolicy::fixed(1)},
-      scrollable_length{state.scrollable_length},
-      position{state.position},
-      brush{state.brush}
+      scrollable_length{std::move(x.scrollable_length)},
+      position{std::move(x.position)},
+      brush{std::move(x.brush)}
 {}
 
 void ScrollBar::increment_position(int amount)

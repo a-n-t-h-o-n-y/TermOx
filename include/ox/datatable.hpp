@@ -22,14 +22,14 @@ class DataTable : public Widget {
     Color background;
     std::size_t offset = 0;  // scrolling
 
-    struct Init {
+    struct Options {
         Brush cell_brush = {};
         Brush line_brush = {};
         Color background = XColor::Default;
     } static const init;
 
    public:
-    DataTable(Init state = init);
+    DataTable(Options x = init);
 
    public:
     /**
@@ -39,7 +39,7 @@ class DataTable : public Widget {
      * @param foreground The foreground color of the column heading.
      */
     void add_column(std::string heading,
-                    Label::Align align = Label::Align::Left,
+                    Align align = Align::Left,
                     Color foreground = XColor::Default);
 
     /**

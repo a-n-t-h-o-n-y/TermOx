@@ -18,46 +18,46 @@ struct Border {
     Brush brush = {};
     Label label = {};
 
-    struct Init {
+    struct Options {
         Brush brush = {};
         Label label = {};
     };
 
     /// Light Border: ┌┐└┘─│
     [[nodiscard]] static auto light(std::string label = "") -> Border;
-    [[nodiscard]] static auto light(Init state) -> Border;
+    [[nodiscard]] static auto light(Options x) -> Border;
 
     /// Round Border: ╭╮╰╯─│
     [[nodiscard]] static auto round(std::string label = "") -> Border;
-    [[nodiscard]] static auto round(Init state) -> Border;
+    [[nodiscard]] static auto round(Options x) -> Border;
 
     /// Twin Border: ╔╗╚╝═║
     [[nodiscard]] static auto twin(std::string label = "") -> Border;
-    [[nodiscard]] static auto twin(Init state) -> Border;
+    [[nodiscard]] static auto twin(Options x) -> Border;
 
     /// Bold Border: ┏┓┗┛━┃
     [[nodiscard]] static auto bold(std::string label = "") -> Border;
-    [[nodiscard]] static auto bold(Init state) -> Border;
+    [[nodiscard]] static auto bold(Options x) -> Border;
 
     /// Dashed Border: ┌┐└┘╌╎
     [[nodiscard]] static auto dashed(std::string label = "") -> Border;
-    [[nodiscard]] static auto dashed(Init state) -> Border;
+    [[nodiscard]] static auto dashed(Options x) -> Border;
 
     /// Dotted Border: ┌┐└┘┄┆
     [[nodiscard]] static auto dotted(std::string label = "") -> Border;
-    [[nodiscard]] static auto dotted(Init state) -> Border;
+    [[nodiscard]] static auto dotted(Options x) -> Border;
 
     /// ASCII Border: ++++-|
     [[nodiscard]] static auto ascii(std::string label = "") -> Border;
-    [[nodiscard]] static auto ascii(Init state) -> Border;
+    [[nodiscard]] static auto ascii(Options x) -> Border;
 
     /// Twin Horizontal Border: ╒╕╘╛═│
     [[nodiscard]] static auto twin_horizontal(std::string label = "") -> Border;
-    [[nodiscard]] static auto twin_horizontal(Init state) -> Border;
+    [[nodiscard]] static auto twin_horizontal(Options x) -> Border;
 
     /// Twin Vertical Border: ╓╖╙╜─║
     [[nodiscard]] static auto twin_vertical(std::string label = "") -> Border;
-    [[nodiscard]] static auto twin_vertical(Init state) -> Border;
+    [[nodiscard]] static auto twin_vertical(Options x) -> Border;
 };
 
 /**
@@ -70,15 +70,15 @@ class Bordered : public Widget {
     Border border;
 
    public:
-    struct Init {
+    struct Options {
         ChildWidget child = {};
         Border border = {};
     };
 
-    Bordered(Init state)
+    Bordered(Options x)
         : Widget{FocusPolicy::None, SizePolicy::flex()},
-          child{std::move(state.child)},
-          border{std::move(state.border)}
+          child{std::move(x.child)},
+          border{std::move(x.border)}
     {
         child.at = {1, 1};
     }
@@ -112,17 +112,17 @@ class Bordered : public Widget {
 
         auto const at = [&]() -> Point {
             switch (label.align) {
-                case Label::Align::Left:
+                case Align::Left:
                     return {
                         .x = 1,
                         .y = 0,
                     };
-                case Label::Align::Center:
+                case Align::Center:
                     return {
                         .x = 1 + (width - (int)glyphs.size()) / 2,
                         .y = 0,
                     };
-                case Label::Align::Right:
+                case Align::Right:
                     return {
                         .x = 1 + width - (int)glyphs.size(),
                         .y = 0,
@@ -160,17 +160,17 @@ class Divider : public Widget {
     Label label;  // TODO
 
    public:
-    struct Init {
+    struct Options {
         Display lines = {.vertical = U'│', .horizontal = U'─'};
         Brush brush = {};
         Label label = {};
     };
 
-    Divider(Init state)
+    Divider(Options x)
         : Widget{FocusPolicy::None, SizePolicy::fixed(1)},
-          lines{state.lines},
-          brush{state.brush},
-          label{std::move(state.label)}
+          lines{std::move(x.lines)},
+          brush{std::move(x.brush)},
+          label{std::move(x.label)}
     {}
 
    public:
@@ -179,30 +179,30 @@ class Divider : public Widget {
    public:
     /// Light Divider: ─│
     [[nodiscard]] static auto light(std::string label = "") -> Divider;
-    [[nodiscard]] static auto light(Init state) -> Divider;
+    [[nodiscard]] static auto light(Options x) -> Divider;
 
     /// Bold Divider: ━┃
     [[nodiscard]] static auto bold(std::string label = "") -> Divider;
-    [[nodiscard]] static auto bold(Init state) -> Divider;
+    [[nodiscard]] static auto bold(Options x) -> Divider;
 
     /// Twin Divider: ═║
     [[nodiscard]] static auto twin(std::string label = "") -> Divider;
-    [[nodiscard]] static auto twin(Init state) -> Divider;
+    [[nodiscard]] static auto twin(Options x) -> Divider;
 
     /// Dashed Divider: ╌╎
     [[nodiscard]] static auto dashed(std::string label = "") -> Divider;
-    [[nodiscard]] static auto dashed(Init state) -> Divider;
+    [[nodiscard]] static auto dashed(Options x) -> Divider;
 
     /// Dotted Divider: ┄┆
     [[nodiscard]] static auto dotted(std::string label = "") -> Divider;
-    [[nodiscard]] static auto dotted(Init state) -> Divider;
+    [[nodiscard]] static auto dotted(Options x) -> Divider;
 
     /// ASCII Divider: -|
     [[nodiscard]] static auto ascii(std::string label = "") -> Divider;
-    [[nodiscard]] static auto ascii(Init state) -> Divider;
+    [[nodiscard]] static auto ascii(Options x) -> Divider;
 
     [[nodiscard]] static auto empty(std::string label = "") -> Divider;
-    [[nodiscard]] static auto empty(Init state) -> Divider;
+    [[nodiscard]] static auto empty(Options x) -> Divider;
 };
 
 }  // namespace ox

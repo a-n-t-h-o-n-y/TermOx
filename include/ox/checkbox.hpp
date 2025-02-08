@@ -25,7 +25,7 @@ class CheckBox : public Widget {
     sl::Signal<void()> on_uncheck;
 
    public:
-    struct Init {
+    struct Options {
         State state = State::UnChecked;
         Display display = {
             .checked = U"[X]"_gs,
@@ -34,7 +34,7 @@ class CheckBox : public Widget {
         };
     } static const init;  // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=88165
 
-    CheckBox(Init state = init);
+    CheckBox(Options x = init);
 
    public:
     void toggle();

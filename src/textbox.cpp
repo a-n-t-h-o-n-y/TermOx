@@ -224,15 +224,15 @@ template <std::ranges::range R>
 
 namespace ox {
 
-TextBox::Init const TextBox::init = {};
+TextBox::Options const TextBox::init = {};
 
-TextBox::TextBox(Init state)
+TextBox::TextBox(Options x)
     : Widget{FocusPolicy::None, SizePolicy::flex()},
-      text_{std::move(state.text)},
-      wrap_{state.wrap},
-      align_{state.align},
-      background_{state.background},
-      insert_brush_{state.insert_brush},
+      text_{std::move(x.text)},
+      wrap_{std::move(x.wrap)},
+      align_{std::move(x.align)},
+      background_{std::move(x.background)},
+      insert_brush_{std::move(x.insert_brush)},
       spans_{calculate_spans(text_, wrap_, (std::size_t)size.width)}
 {}
 

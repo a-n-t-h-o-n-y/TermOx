@@ -16,7 +16,7 @@ int main()
 {
     auto head = Label{{
                     .text  = "C++20 Terminal UI Framework",
-                    .align = Label::Align::Center,
+                    .align = Align::Center,
                     .brush = {.foreground = XColor::Blue, .traits = Trait::Bold},
                 }} | Border::round("TermOx II");
 

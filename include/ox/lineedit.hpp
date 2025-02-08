@@ -7,28 +7,17 @@
 
 #include <signals_light/signal.hpp>
 
+#include <ox/align.hpp>
 #include <ox/core/core.hpp>
 #include <ox/widget.hpp>
 
 namespace ox {
 
-// TODO Implement Align::Right
+// TODO Implement Align::Right and throw on Align::Center
 
 class LineEdit : public Widget {
    public:
-    sl::Signal<void(std::string const&)> on_enter;
-
-   public:
-    std::string text;
-    Brush text_brush;
-    enum class Align : bool { Left } align;
-    Color background;
-    std::string ghost_text;  // visible if text is empty
-    Brush ghost_text_brush;
-    std::optional<std::function<bool(char)>> validator;
-
-   public:
-    struct Init {
+    struct Options {
         std::string text = "";
         Brush text_brush = {};
         Align align = Align::Left;
@@ -38,7 +27,18 @@ class LineEdit : public Widget {
         std::optional<std::function<bool(char)>> validator = std::nullopt;
     } static const init;
 
-    LineEdit(Init state = init);
+   public:
+    sl::Signal<void(std::string const&)> on_enter;
+
+    std::string text;
+    Brush text_brush;
+    Align align;
+    Color background;
+    std::string ghost_text;  // visible if text is empty
+    Brush ghost_text_brush;
+    std::optional<std::function<bool(char)>> validator;
+
+    LineEdit(Options x = init);
 
    public:
     void key_press(Key k) override;

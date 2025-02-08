@@ -49,6 +49,23 @@ target_link_libraries(
         TermOx
 )
 
+# Accumulator --------------------------------------------------------------------------
+add_executable(TermOx.examples.accumulator EXCLUDE_FROM_ALL
+    accumulator.cpp
+)
+target_compile_options(
+    TermOx.examples.accumulator
+    PRIVATE
+        -Wall
+        -Wextra
+        -Wpedantic
+)
+target_link_libraries(
+    TermOx.examples.accumulator
+    PRIVATE
+        TermOx
+)
+
 # Scratch ------------------------------------------------------------------------------
 add_executable(TermOx.examples.scratch EXCLUDE_FROM_ALL
     scratch.cpp

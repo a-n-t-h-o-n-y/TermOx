@@ -4,6 +4,7 @@
 #include <utility>
 #include <vector>
 
+#include <ox/align.hpp>
 #include <ox/core/core.hpp>
 #include <ox/widget.hpp>
 
@@ -25,9 +26,8 @@ class TextBox : public Widget {
 
    public:
     enum class Wrap { Any, Word };
-    enum class Align { Left, Center, Right };
 
-    struct Init {
+    struct Options {
         std::vector<Glyph> text = {};
         Wrap wrap = Wrap::Word;
         Align align = Align::Left;
@@ -35,7 +35,7 @@ class TextBox : public Widget {
         Brush insert_brush = {};
     } static const init;
 
-    TextBox(Init state = init);
+    TextBox(Options x = init);
 
    public:
     void set_text(std::vector<Glyph> text);

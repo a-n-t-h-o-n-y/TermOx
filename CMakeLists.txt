@@ -23,6 +23,7 @@ add_subdirectory(external/signals-light)
 
 # Create Library Target
 add_library(TermOx STATIC
+    src/align.cpp
     src/application.cpp
     src/bordered.cpp
     src/button.cpp
@@ -37,6 +38,7 @@ add_library(TermOx STATIC
     src/core/terminal.cpp
 
     include/ox/ox.hpp
+    include/ox/align.hpp
     include/ox/application.hpp
     include/ox/bordered.hpp
     include/ox/button.hpp

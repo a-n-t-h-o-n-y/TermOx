@@ -1,5 +1,6 @@
 #include <ox/datatable.hpp>
 
+#include <ox/align.hpp>
 #include <ox/core/core.hpp>
 
 #include <algorithm>
@@ -10,16 +11,16 @@
 
 namespace ox {
 
-DataTable::Init const DataTable::init = {};
+DataTable::Options const DataTable::init = {};
 
-DataTable::DataTable(Init init)
+DataTable::DataTable(Options x)
     : Widget{FocusPolicy::None, SizePolicy::flex()},
-      cell_brush{std::move(init.cell_brush)},
-      line_brush{std::move(init.line_brush)},
-      background{init.background}
+      cell_brush{std::move(x.cell_brush)},
+      line_brush{std::move(x.line_brush)},
+      background{std::move(x.background)}
 {}
 
-void DataTable::add_column(std::string heading, Label::Align align, Color foreground)
+void DataTable::add_column(std::string heading, Align align, Color foreground)
 {
     headings_.children.push_back({{
         .text = std::move(heading),
