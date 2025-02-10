@@ -16,17 +16,17 @@ namespace ox {
  * Start by adding columns first, then rows of text data.
  */
 class DataTable : public Widget {
-   public:
-    Brush cell_brush;
-    Brush line_brush;
-    Color background;
-    std::size_t offset = 0;  // scrolling
-
     struct Options {
         Brush cell_brush = {};
         Brush line_brush = {};
         Color background = XColor::Default;
     } static const init;
+
+   public:
+    Brush cell_brush;
+    Brush line_brush;
+    Color background;
+    std::size_t offset = 0;  // scrolling
 
    public:
     DataTable(Options x = init);

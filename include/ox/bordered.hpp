@@ -10,18 +10,17 @@
 namespace ox {
 
 struct Border {
-    struct Glyphs {
-        std::array<char32_t, 4> corners = {U'┌', U'┐', U'└', U'┘'};
-        std::array<char32_t, 2> walls = {U'─', U'│'};
-    } glyphs = {};
-
-    Brush brush = {};
-    Label label = {};
-
     struct Options {
         Brush brush = {};
         Label label = {};
     };
+
+    struct Glyphs {
+        std::array<char32_t, 4> corners = {U'┌', U'┐', U'└', U'┘'};
+        std::array<char32_t, 2> walls = {U'─', U'│'};
+    } glyphs = {};
+    Brush brush = {};
+    Label label = {};
 
     /// Light Border: ┌┐└┘─│
     [[nodiscard]] static auto light(std::string label = "") -> Border;
@@ -65,15 +64,14 @@ struct Border {
  */
 template <WidgetDerived ChildWidget>
 class Bordered : public Widget {
-   public:
-    ChildWidget child;
-    Border border;
-
-   public:
     struct Options {
         ChildWidget child = {};
         Border border = {};
     };
+
+   public:
+    ChildWidget child;
+    Border border;
 
     Bordered(Options x)
         : Widget{FocusPolicy::None, SizePolicy::flex()},
@@ -154,17 +152,19 @@ class Divider : public Widget {
     struct Display {
         char32_t vertical;
         char32_t horizontal;
-    } lines;
+    };
 
-    Brush brush;
-    Label label;  // TODO
-
-   public:
+   private:
     struct Options {
         Display lines = {.vertical = U'│', .horizontal = U'─'};
         Brush brush = {};
         Label label = {};
     };
+
+   public:
+    Display lines;
+    Brush brush;
+    Label label;  // TODO
 
     Divider(Options x)
         : Widget{FocusPolicy::None, SizePolicy::fixed(1)},

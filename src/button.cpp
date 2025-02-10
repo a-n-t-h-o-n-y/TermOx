@@ -16,7 +16,8 @@ Button::Button(Options x)
       }},
       brush{x.brush},
       on_press_brush{std::move(x.on_press_brush)},
-      on_hover_brush{std::move(x.on_hover_brush)} {};
+      on_hover_brush{std::move(x.on_hover_brush)}
+{}
 
 auto Button::paint(Canvas c) -> void { label.paint(c); }
 

@@ -12,23 +12,21 @@
 namespace ox {
 
 class Button : public Widget {
-   public:
-    Label label;
-
-    Brush brush;
-    std::function<Brush(Brush)> on_press_brush;
-    std::function<Brush(Brush)> on_hover_brush;
-
-    sl::Signal<void()> on_press;
-    sl::Signal<void()> on_release;
-
-   public:
     struct Options {
         std::string text = "";
         Brush brush = {};
         std::function<Brush(Brush)> on_press_brush = [](Brush b) { return b; };
         std::function<Brush(Brush)> on_hover_brush = [](Brush b) { return b; };
     } static const init;
+
+   public:
+    Label label;
+    Brush brush;
+    std::function<Brush(Brush)> on_press_brush;
+    std::function<Brush(Brush)> on_hover_brush;
+
+    sl::Signal<void()> on_press;
+    sl::Signal<void()> on_release;
 
     Button(Options x = init);
 

@@ -16,7 +16,6 @@ namespace ox {
 // TODO Implement Align::Right and throw on Align::Center
 
 class LineEdit : public Widget {
-   public:
     struct Options {
         std::string text = "";
         Brush text_brush = {};
@@ -28,15 +27,15 @@ class LineEdit : public Widget {
     } static const init;
 
    public:
-    sl::Signal<void(std::string const&)> on_enter;
-
     std::string text;
     Brush text_brush;
     Align align;
     Color background;
-    std::string ghost_text;  // visible if text is empty
+    std::string ghost_text;  // Visible if text is empty.
     Brush ghost_text_brush;
     std::optional<std::function<bool(char)>> validator;
+
+    sl::Signal<void(std::string const&)> on_enter;
 
     LineEdit(Options x = init);
 

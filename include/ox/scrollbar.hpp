@@ -6,23 +6,19 @@
 namespace ox {
 
 class ScrollBar : public Widget {
-   public:
-    /**
-     * Emitted on any change to position, and passes position as the parameter.
-     */
-    sl::Signal<void(int)> on_scroll;
+    struct Options {
+        int scrollable_length = 0;
+        int position = 0;
+        Brush brush = {};
+    } static const init;
 
    public:
     int scrollable_length;
     int position;
     Brush brush;
 
-   public:
-    struct Options {
-        int scrollable_length = 0;
-        int position = 0;
-        Brush brush = {};
-    } static const init;
+    /// Emitted on any change to position, and passes position as the parameter.
+    sl::Signal<void(int)> on_scroll;
 
     ScrollBar(Options x = init);
 

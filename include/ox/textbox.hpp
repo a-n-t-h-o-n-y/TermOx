@@ -18,15 +18,9 @@ class ScrollBar;
  */
 class TextBox : public Widget {
    public:
-    /**
-     * Emitted when any scroll parameter is updated. For ScrollBar.
-     * void(int position, int line_count)
-     */
-    sl::Signal<void(int, int)> on_scroll_update;
-
-   public:
     enum class Wrap { Any, Word };
 
+   private:
     struct Options {
         std::vector<Glyph> text = {};
         Wrap wrap = Wrap::Word;
@@ -34,6 +28,13 @@ class TextBox : public Widget {
         Color background = XColor::Default;
         Brush insert_brush = {};
     } static const init;
+
+   public:
+    /**
+     * Emitted when any scroll parameter is updated. For ScrollBar.
+     * void(int position, int line_count)
+     */
+    sl::Signal<void(int, int)> on_scroll_update;
 
     TextBox(Options x = init);
 

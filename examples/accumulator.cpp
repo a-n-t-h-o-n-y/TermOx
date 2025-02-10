@@ -29,24 +29,31 @@ struct NumberButton : Button {
     {
         Button::paint(c);
         // line across bottom
-        Painter{c}[{
-            .x = this->size.width > 1 ? 1 : 0,
-            .y = std::max(this->size.height - 1, 0),
-        }] << Painter::HLine{.length = this->size.width,
-                             .glyph = U'─' | fg(XColor::BrightCyan)};
+        for (auto x = 1; x < this->size.width; ++x) {
+            auto& g = c[{
+                .x = x,
+                .y = std::max(this->size.height - 1, 0),
+            }];
+            g.symbol = U'─';
+            g.brush.foreground = XColor::BrightCyan;
+        }
 
-        // line down right side
-        Painter{c}[{
-            .x = std::max(this->size.width - 1, 0),
-            .y = this->size.height > 1 ? 1 : 0,
-        }] << Painter::VLine{.length = this->size.height,
-                             .glyph = U'│' | fg(XColor::BrightCyan)};
+        // line on right side
+        for (auto y = 1; y < this->size.height; ++y) {
+            auto& g = c[{
+                .x = std::max(this->size.width - 1, 0),
+                .y = y,
+            }];
+            g.symbol = U'│';
+            g.brush.foreground = XColor::BrightCyan;
+        }
 
         auto const bottom_right = Point{
             .x = std::max(this->size.width - 1, 0),
             .y = std::max(this->size.height - 1, 0),
         };
-        c[bottom_right] = U'╯' | fg(XColor::BrightCyan);
+        c[bottom_right].symbol = U'╯';
+        c[bottom_right].brush.foreground = XColor::BrightCyan;
     }
 };
 

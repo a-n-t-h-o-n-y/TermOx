@@ -1,12 +1,11 @@
 #pragma once
 
-#include <ox/widget.hpp>
-
 #include <vector>
 
 #include <signals_light/signal.hpp>
 
 #include <ox/core/core.hpp>
+#include <ox/widget.hpp>
 
 namespace ox {
 
@@ -18,13 +17,9 @@ class CheckBox : public Widget {
         std::vector<Glyph> checked;
         std::vector<Glyph> unchecked;
         Brush in_focus_brush;
-    } display;
+    };
 
-   public:
-    sl::Signal<void()> on_check;
-    sl::Signal<void()> on_uncheck;
-
-   public:
+   private:
     struct Options {
         State state = State::UnChecked;
         Display display = {
@@ -33,6 +28,12 @@ class CheckBox : public Widget {
             .in_focus_brush = {.traits = Trait::Bold},
         };
     } static const init;  // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=88165
+
+   public:
+    Display display;
+
+    sl::Signal<void()> on_check;
+    sl::Signal<void()> on_uncheck;
 
     CheckBox(Options x = init);
 
