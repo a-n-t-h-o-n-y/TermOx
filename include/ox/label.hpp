@@ -22,6 +22,7 @@ namespace ox {
  * A single horizontal line of text.
  */
 class Label : public Widget {
+   public:
     struct Options {
         std::string text = "";
         Align align = Align::Center;

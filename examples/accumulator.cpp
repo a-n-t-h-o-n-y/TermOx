@@ -7,54 +7,17 @@ using namespace ox;
 
 struct NumberButton : Button {
     NumberButton(int n = 0)
-        : Button{{
-              .text = std::to_string(n),
-              .brush = {.foreground = XColor::BrightBlack, .traits = Trait::None},
-              .on_press_brush =
-                  [](Brush b) {
-                      b.foreground = XColor::BrightMagenta;
-                      b.traits = Trait::Bold;
-                      return b;
-                  },
-              .on_hover_brush =
-                  [](Brush b) {
-                      b.foreground = XColor::White;
-                      b.traits = Trait::Bold;
-                      return b;
-                  },
-          }}
+        : Button{
+              {.label = {.text = std::to_string(n),
+                         .brush = {.foreground = XColor::BrightBlack,
+                                   .traits = Trait::None}},
+               .style = {
+                   .decoration = four_corners(RGB{0x0a3f46}),
+                   .pressed =
+                       [](Label& l) { l.brush.foreground = XColor::BrightWhite; },
+                   .hover = apply_gradient(four_corners_, RGB{0x0a3f46}, RGB{0x1ecbe1}),
+               }}}
     {}
-
-    auto paint(Canvas c) -> void override
-    {
-        Button::paint(c);
-        // line across bottom
-        for (auto x = 1; x < this->size.width; ++x) {
-            auto& g = c[{
-                .x = x,
-                .y = std::max(this->size.height - 1, 0),
-            }];
-            g.symbol = U'─';
-            g.brush.foreground = XColor::BrightCyan;
-        }
-
-        // line on right side
-        for (auto y = 1; y < this->size.height; ++y) {
-            auto& g = c[{
-                .x = std::max(this->size.width - 1, 0),
-                .y = y,
-            }];
-            g.symbol = U'│';
-            g.brush.foreground = XColor::BrightCyan;
-        }
-
-        auto const bottom_right = Point{
-            .x = std::max(this->size.width - 1, 0),
-            .y = std::max(this->size.height - 1, 0),
-        };
-        c[bottom_right].symbol = U'╯';
-        c[bottom_right].brush.foreground = XColor::BrightCyan;
-    }
 };
 
 template <typename WidgetType>
