@@ -15,105 +15,111 @@
 
 namespace ox {
 
-class Button : public Widget {
+/// Emits signals on left mouse button press and release and enter key press.
+class BasicButton : public Widget {
+   public:
+    sl::Signal<void()> on_press;
+    sl::Signal<void()> on_release;
+
+   public:
+    BasicButton();
+
+   public:
+    void key_press(Key) override;
+
+    void mouse_press(Mouse) override;
+
+    void mouse_release(Mouse) override;
+};
+
+/// Decoration that fades in and out with mouse hover.
+struct Fade {
+    /// (Canvas, percent) where percent is fade amount from [0, 1].
+    std::function<void(Canvas&, float)> paint_fn;
+    std::chrono::milliseconds fade_in = std::chrono::milliseconds{200};
+    std::chrono::milliseconds fade_out = std::chrono::milliseconds{400};
+};
+
+/// BasicButton with a Label and optional Decoration.
+class Button : public BasicButton {
    public:
     using PaintFn = std::function<void(Canvas&)>;
-
-    using ModifyFn =
-        std::variant<std::function<void(Canvas&)>, std::function<void(Label&)>>;
-
-    // TODO do you need a (canvas, label, float) version or does canvas provide enough
-    // to handle any scenario there?
-    using ModifyWithAnimationFn = std::variant<std::function<void(Canvas&, float)>,
-                                               std::function<void(Label&, float)>,
-                                               std::function<void(Label&)>,
-                                               std::function<void(Canvas&)>>;
-    struct Style {
-        PaintFn decoration = [](Canvas&) {};
-        ModifyFn in_focus = [](Label&) {};
-        ModifyFn pressed = [](Label&) {};
-        ModifyWithAnimationFn hover = [](Label&) {};
-    };
+    using Decoration = std::variant<PaintFn, Fade>;
 
     struct Options {
         Label::Options label = {};
-        Style style = {};
+        Decoration decoration = [](Canvas&) {};
+        std::function<void(Label&)> pressed_mod = [](Label&) {};
+        std::function<void(Label&)> focused_mod = [](Label&) {};
     } static const init;
 
    public:
     Label::Options label;
-    Style style;
+    std::function<void(Label&)> pressed_mod;
+    std::function<void(Label&)> focused_mod;
 
-    sl::Signal<void()> on_press;
-    sl::Signal<void()> on_release;
-
+   public:
     Button(Options x = init);
 
    public:
-    // TODO enter key to emit
-    auto paint(Canvas c) -> void override;
+    void paint(Canvas) override;
 
-    auto mouse_press(Mouse m) -> void override;
+    void mouse_press(Mouse) override;
 
-    auto mouse_release(Mouse m) -> void override;
+    void mouse_release(Mouse) override;
 
-    auto mouse_enter() -> void override;
+    void focus_in() override;
 
-    auto mouse_leave() -> void override;
+    void focus_out() override;
 
-    auto focus_in() -> void override;
+    void mouse_enter() override;
 
-    auto focus_out() -> void override;
+    void mouse_leave() override;
 
-    auto timer(int id) -> void override;
+    void timer(int id) override;
 
    private:
-    bool in_focus_ = false;
+    static constexpr auto timer_period_ms = 30;
+
+    struct FadeInternal {
+        Fade fade;
+        int direction = +1;  // +1 or -1
+        float percent = 0.f;
+        Timer timer = Timer{std::chrono::milliseconds{timer_period_ms}, false};
+    };
+    using DecorationInternal = std::variant<PaintFn, FadeInternal>;
+
+    DecorationInternal decoration_;
     bool pressed_ = false;
-    bool hovered_ = false;
-    int hover_direction_ = 1;  // +1 or -1
-    float percent_hovered_ = 0.f;
-    Timer timer_{std::chrono::milliseconds{30}, false};
+    bool in_focus_ = false;
+
+   private:
+    /// Start the fade in animation, if applicable.
+    void start_select();
+
+    /// Start the fade out animation, if applicable.
+    void end_select();
 };
 
-[[nodiscard]] inline auto gradient_blend(TrueColor one, TrueColor two, float percent)
-    -> TrueColor
-{
-    auto blend = [](std::uint8_t a, std::uint8_t b, float t) {
-        return (std::uint8_t)std::clamp(std::lround(a + t * (b - a)), 0L, 255L);
-    };
-
-    return RGB{
-        blend(one.red, two.red, percent),
-        blend(one.green, two.green, percent),
-        blend(one.blue, two.blue, percent),
-    };
-}
+/**
+ * Blend two TrueColor colors together.
+ * @param percent [0, 1] blending amount. 0 is all one, 1 is all two.
+ */
+[[nodiscard]] auto gradient_blend(TrueColor one, TrueColor two, float percent)
+    -> TrueColor;
 
 /**
- * Makes a callable that will apply the given drawing function with a gradient between
- * the two given colors.
+ * Builds a void(Canvas&, float) function from a Shape type and gradient.
+ * @details Shape must be constructible from a Color. Useful for Fade decorations.
  */
-[[nodiscard]]
-inline auto apply_gradient(std::function<void(Canvas&, Color)> const& drawing_fn,
-                           TrueColor one,
-                           TrueColor two) -> std::function<void(Canvas&, float)>
+template <typename Shape>
+[[nodiscard]] auto shape_gradient(TrueColor one, TrueColor two)
+    -> std::function<void(Canvas&, float)>
 {
-    return [drawing_fn, one, two](Canvas& c, float percent) {
+    return [=](Canvas& c, float percent) {
         auto const fg = gradient_blend(one, two, percent);
-        drawing_fn(c, fg);
+        put(c, Shape{fg});
     };
 }
-
-[[nodiscard]] auto half_frame_1(Color fg = XColor::Default)
-    -> std::function<void(Canvas&)>;
-
-void four_corners_(Canvas& c, Color fg = XColor::Default);
-
-[[nodiscard]] auto four_corners(Color fg = XColor::Default)
-    -> std::function<void(Canvas&)>;
-
-// [[nodiscard]] auto four_corners_round(Color fg = XColor::Default)
-//     -> std::function<void(Canvas&)>;
 
 }  // namespace ox

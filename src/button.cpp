@@ -3,207 +3,153 @@
 #include <algorithm>
 #include <functional>
 #include <utility>
+#include <variant>
+
+#include <ox/core/common.hpp>
+#include <ox/put.hpp>
 
 namespace ox {
+
+BasicButton::BasicButton() : Widget{FocusPolicy::Strong, SizePolicy::flex()} {}
+
+void BasicButton::key_press(Key k)
+{
+    if (k == Key::Enter) { this->on_press(); }
+}
+
+auto BasicButton::mouse_press(Mouse m) -> void
+{
+    if (m.button == Mouse::Button::Left) { this->on_press(); }
+}
+
+auto BasicButton::mouse_release(Mouse m) -> void
+{
+    if (m.button == Mouse::Button::Left) { this->on_release(); }
+}
+
+// -------------------------------------------------------------------------------------
 
 Button::Options const Button::init = {};
 
 Button::Button(Options x)
-    : Widget{FocusPolicy::Strong, SizePolicy::flex()},
-      label{std::move(x.label)},
-      style{std::move(x.style)}
+    : label{std::move(x.label)},
+      pressed_mod{std::move(x.pressed_mod)},
+      focused_mod{std::move(x.focused_mod)},
+      decoration_{[d = std::move(x.decoration)] {
+          return std::visit(
+              Overload{
+                  [](PaintFn fn) -> DecorationInternal { return std::move(fn); },
+                  [](Fade f) -> DecorationInternal {
+                      return {FadeInternal{.fade = std::move(f)}};
+                  },
+              },
+              std::move(d));
+      }()}
 {}
 
-auto Button::paint(Canvas c) -> void
+void Button::paint(Canvas c)
 {
-    using LabelFn = std::function<void(Label&)>;
-    using LabelAnimationFn = std::function<void(Label&, float)>;
-    using CanvasFn = std::function<void(Canvas&)>;
-    using CanvasAnimationFn = std::function<void(Canvas&, float)>;
+    auto temp_label = Label{label};
 
-    auto local_label = Label{label};
+    // Label Modifications
+    if (in_focus_ && focused_mod) { focused_mod(temp_label); }
+    if (pressed_ && pressed_mod) { pressed_mod(temp_label); }
 
-    if (in_focus_ && std::holds_alternative<LabelFn>(style.in_focus)) {
-        auto& fn = std::get<LabelFn>(style.in_focus);
-        if (fn) {
-            fn(local_label);
-        }
-    }
+    temp_label.paint(c);
 
-    if (hovered_ && std::holds_alternative<LabelFn>(style.hover)) {
-        auto& fn = std::get<LabelFn>(style.hover);
-        if (fn) {
-            fn(local_label);
-        }
-    }
-    else if (percent_hovered_ != 0.f &&
-             std::holds_alternative<LabelAnimationFn>(style.hover)) {
-        auto& fn = std::get<LabelAnimationFn>(style.hover);
-        if (fn) {
-            fn(local_label, percent_hovered_);
-        }
-    }
-
-    if (pressed_ && std::holds_alternative<LabelFn>(style.pressed)) {
-        auto& fn = std::get<LabelFn>(style.pressed);
-        if (fn) {
-            fn(local_label);
-        }
-    }
-
-    local_label.paint(c);
-
-    if (style.decoration) {
-        style.decoration(c);
-    }
-
-    // Modify Canvas depending on state.
-    if (in_focus_ && std::holds_alternative<CanvasFn>(style.in_focus)) {
-        auto& fn = std::get<CanvasFn>(style.in_focus);
-        if (fn) {
-            fn(c);
-        }
-    }
-
-    if (hovered_ && std::holds_alternative<CanvasFn>(style.hover)) {
-        auto& fn = std::get<CanvasFn>(style.hover);
-        if (fn) {
-            fn(c);
-        }
-    }
-    else if (percent_hovered_ != 0.f &&
-             std::holds_alternative<CanvasAnimationFn>(style.hover)) {
-        auto& fn = std::get<CanvasAnimationFn>(style.hover);
-        if (fn) {
-            fn(c, percent_hovered_);
-        }
-    }
-
-    if (pressed_ && std::holds_alternative<CanvasFn>(style.pressed)) {
-        auto& fn = std::get<CanvasFn>(style.pressed);
-        if (fn) {
-            fn(c);
-        }
-    }
+    // Decoration over Canvas
+    std::visit(Overload{
+                   [&c](PaintFn const& fn) {
+                       if (fn) { fn(c); }
+                   },
+                   [&c](FadeInternal const& f) {
+                       if (f.fade.paint_fn) { f.fade.paint_fn(c, f.percent); }
+                   },
+               },
+               decoration_);
 }
 
-auto Button::mouse_press(Mouse m) -> void
+void Button::mouse_press(Mouse m)
 {
-    if (m.button == Mouse::Button::Left) {
-        pressed_ = true;
-        on_press();
-    }
+    if (m.button == Mouse::Button::Left) { pressed_ = true; }
+    this->BasicButton::mouse_press(m);
 }
 
-auto Button::mouse_release(Mouse m) -> void
+void Button::mouse_release(Mouse m)
 {
-    if (m.button == Mouse::Button::Left) {
-        pressed_ = false;
-        on_release();
-    }
+    if (m.button == Mouse::Button::Left) { pressed_ = false; }
+    this->BasicButton::mouse_release(m);
 }
 
-auto Button::mouse_enter() -> void
+void Button::focus_in()
 {
-    using CanvasAnimationFn = std::function<void(Canvas&, float)>;
-
-    // TODO these two can be represented with a single item. maybe bool and use a
-    // ternary op to determine if +1 or -1.
-    hovered_ = true;
-    hover_direction_ = 1;
-
-    // TODO fix Timer and TimerThread so the thread is reused.
-    if (not timer_.is_running() &&
-        std::holds_alternative<CanvasAnimationFn>(style.hover)) {
-        timer_.start();
-    }
+    in_focus_ = true;
+    this->start_select();
 }
 
-auto Button::mouse_leave() -> void
+void Button::focus_out()
 {
-    hovered_ = false;
-    hover_direction_ = -1;
+    in_focus_ = false;
+    this->end_select();
 }
 
-auto Button::focus_in() -> void { in_focus_ = true; }
+void Button::mouse_enter() { this->start_select(); }
 
-auto Button::focus_out() -> void { in_focus_ = false; }
+void Button::mouse_leave() { this->end_select(); }
 
-auto Button::timer(int id) -> void
+void Button::timer(int id)
 {
-    if (id == timer_.id()) {
-        percent_hovered_ =
-            std::clamp(0.f, percent_hovered_ + 0.1f * (float)hover_direction_, 1.f);
-        if (percent_hovered_ == 0.f) {
-            timer_.stop();
-        }
-    }
-}
+    auto const update_fade = [&id](FadeInternal& f) {
+        if (id != f.timer.id()) { return; }
 
-// TODO move to Painter?
-auto half_frame_1(Color fg) -> std::function<void(Canvas&)>
-{
-    return [fg](Canvas& c) {
-        // line across bottom
-        for (auto x = 1; x < c.size.width; ++x) {
-            auto& g = c[{
-                .x = x,
-                .y = std::max(c.size.height - 1, 0),
-            }];
-            g.symbol = U'─';
-            g.brush.foreground = fg;
-        }
+        auto const delta =
+            timer_period_ms / (float)(f.direction == +1 ? f.fade.fade_in.count()
+                                                        : f.fade.fade_out.count());
 
-        // line on right side
-        for (auto y = 1; y < c.size.height; ++y) {
-            auto& g = c[{
-                .x = std::max(c.size.width - 1, 0),
-                .y = y,
-            }];
-            g.symbol = U'│';
-            g.brush.foreground = fg;
-        }
-
-        auto& bottom_right = c[{
-            .x = std::max(c.size.width - 1, 0),
-            .y = std::max(c.size.height - 1, 0),
-        }];
-        bottom_right.symbol = U'╯';
-        bottom_right.brush.foreground = fg;
+        f.percent = std::clamp(0.f, f.percent + delta * (float)f.direction, 1.f);
+        if (f.percent == 0.f || f.percent == 1.f) { f.timer.stop(); }
     };
+
+    std::visit(Overload{[](PaintFn const&) {}, update_fade}, decoration_);
 }
 
-void four_corners_(Canvas& c, Color fg)
+void Button::start_select()
 {
-    auto& top_left = c[{.x = 0, .y = 0}];
-    top_left.symbol = U'┌';
-    top_left.brush.foreground = fg;
-
-    auto& top_right = c[{
-        .x = std::max(c.size.width - 1, 0),
-        .y = 0,
-    }];
-    top_right.symbol = U'┐';
-    top_right.brush.foreground = fg;
-
-    auto& bottom_left = c[{
-        .x = 0,
-        .y = std::max(c.size.height - 1, 0),
-    }];
-    bottom_left.symbol = U'└';
-    bottom_left.brush.foreground = fg;
-
-    auto& bottom_right = c[{
-        .x = std::max(c.size.width - 1, 0),
-        .y = std::max(c.size.height - 1, 0),
-    }];
-    bottom_right.symbol = U'┘';
-    bottom_right.brush.foreground = fg;
+    std::visit(Overload{
+                   [](PaintFn const&) {},
+                   [](FadeInternal& f) {
+                       f.direction = +1;
+                       if (not f.timer.is_running()) { f.timer.start(); }
+                   },
+               },
+               decoration_);
 }
 
-auto four_corners(Color fg) -> std::function<void(Canvas&)>
+void Button::end_select()
 {
-    return [fg](Canvas& c) { four_corners_(c, fg); };
+    std::visit(Overload{
+                   [](PaintFn const&) {},
+                   [](FadeInternal& f) {
+                       f.direction = -1;
+                       if (not f.timer.is_running()) { f.timer.start(); }
+                   },
+               },
+               decoration_);
+}
+
+// -------------------------------------------------------------------------------------
+
+auto gradient_blend(TrueColor one, TrueColor two, float percent) -> TrueColor
+{
+    auto blend = [](std::uint8_t a, std::uint8_t b, float t) {
+        return (std::uint8_t)std::clamp(std::lround(a + t * (b - a)), 0L, 255L);
+    };
+
+    return RGB{
+        blend(one.red, two.red, percent),
+        blend(one.green, two.green, percent),
+        blend(one.blue, two.blue, percent),
+    };
 }
 
 }  // namespace ox
