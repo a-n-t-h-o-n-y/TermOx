@@ -10,7 +10,7 @@
 
 namespace ox {
 
-BasicButton::BasicButton() : Widget{FocusPolicy::Strong, SizePolicy::flex()} {}
+BasicButton::BasicButton(FocusPolicy fp, SizePolicy sp) : Widget{fp, sp} {}
 
 void BasicButton::key_press(Key k)
 {
@@ -32,7 +32,8 @@ auto BasicButton::mouse_release(Mouse m) -> void
 Button::Options const Button::init = {};
 
 Button::Button(Options x)
-    : label{std::move(x.label)},
+    : BasicButton{x.focus_policy, x.size_policy},
+      label{std::move(x.label)},
       pressed_mod{std::move(x.pressed_mod)},
       focused_mod{std::move(x.focused_mod)},
       decoration_{[d = std::move(x.decoration)] {

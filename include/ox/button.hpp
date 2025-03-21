@@ -22,7 +22,8 @@ class BasicButton : public Widget {
     sl::Signal<void()> on_release;
 
    public:
-    BasicButton();
+    BasicButton(FocusPolicy fp = FocusPolicy::Strong,
+                SizePolicy sp = SizePolicy::flex());
 
    public:
     void key_press(Key) override;
@@ -51,6 +52,8 @@ class Button : public BasicButton {
         Decoration decoration = [](Canvas&) {};
         std::function<void(Label&)> pressed_mod = [](Label&) {};
         std::function<void(Label&)> focused_mod = [](Label&) {};
+        FocusPolicy focus_policy = FocusPolicy::Strong;
+        SizePolicy size_policy = SizePolicy::flex();
     } static const init;
 
    public:

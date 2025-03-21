@@ -42,9 +42,7 @@ class PinBox : public Widget {
     void paint(Canvas c) override
     {
         for (auto [at, color] : points_) {
-            if (at.x < this->size.width && at.y < this->size.height) {
-                Painter{c}[at] << (U'•' | Brush{.foreground = color});
-            }
+            put(c, at, U'•' | fg(color));
         }
     }
 
@@ -52,17 +50,13 @@ class PinBox : public Widget {
     void insert_pin(Point p)
     {
         auto const [_, inserted] = points_.emplace(p, current_color_);
-        if (inserted) {
-            pin_inserted.emit(p);
-        }
+        if (inserted) { pin_inserted.emit(p); }
     }
 
     void remove_pin(Point p)
     {
         auto const count = points_.erase(p);
-        if (count != 0) {
-            pin_removed.emit(p);
-        }
+        if (count != 0) { pin_removed.emit(p); }
     }
 
    private:
@@ -78,7 +72,7 @@ class ColorSelect : public Row<std::vector<Button>> {
     ColorSelect(std::vector<Color> colors = {})
     {
         for (auto const color : colors) {
-            children.push_back({{.brush = {.background = color}}});
+            children.push_back({{.label = {.brush = {.background = color}}}});
             children.back().on_press.connect(
                 tracked([color](auto& self) { self.on_select(color); }, *this));
         }
@@ -130,10 +124,12 @@ int main()
                         }} | SizePolicy::fixed(1),
                         Divider::bold({.brush = {.foreground = XColor::BrightBlack}}),
                         Button{{
-                            .text = "Clear Board",
-                            .brush = {.background = XColor::BrightBlue,
-                                      .foreground = XColor::Black,
-                                      .traits = Trait::Bold},
+                            .label = {
+                                .text = "Clear Board",
+                                .brush = {.background = XColor::BrightBlue,
+                                          .foreground = XColor::Black,
+                                          .traits = Trait::Bold},
+                            },
                         }} | SizePolicy::fixed(1),
                     },
                 } | SizePolicy::fixed(16),

@@ -9,6 +9,7 @@
 
 #include <ox/core/core.hpp>
 #include <ox/focus.hpp>
+#include <ox/put.hpp>
 
 namespace ox {
 
@@ -87,8 +88,10 @@ void LineEdit::paint(Canvas c)
                                                (int)sv.size() - (int)anchor_index_));
     };
 
-    Painter{c}[{0, 0}] << (trim(is_ghost ? ghost_text : text) |
-                           (is_ghost ? ghost_text_brush : text_brush));
+    auto const for_screen =
+        is_ghost ? trim(ghost_text) | ghost_text_brush : trim(text) | text_brush;
+
+    put(c, {.x = 0, .y = 0}, for_screen);
 
     // Cursor
     if ((int)cursor_index_ >= (int)anchor_index_ + this->size.width ||

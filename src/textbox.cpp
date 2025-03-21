@@ -10,6 +10,7 @@
 #include <vector>
 
 #include <ox/core/core.hpp>
+#include <ox/put.hpp>
 #include <ox/scrollbar.hpp>
 #include <ox/widget.hpp>
 
@@ -37,9 +38,7 @@ using namespace ox;
                std::u32string_view::npos;
     };
 
-    if (width == 0 || glyphs.empty()) {
-        return {std::span<Glyph const>{}};
-    }
+    if (width == 0 || glyphs.empty()) { return {std::span<Glyph const>{}}; }
 
     auto spans = std::vector<std::span<Glyph const>>{};
     auto full_span = std::span<Glyph const>{glyphs};
@@ -67,9 +66,7 @@ using namespace ox;
             auto const distance_to_last_space =
                 (std::size_t)std::distance(last_space_iter, std::rend(full_span));
 
-            if (distance_to_last_space > 0) {
-                split_count = distance_to_last_space;
-            }
+            if (distance_to_last_space > 0) { split_count = distance_to_last_space; }
         }
 
         spans.push_back(full_span.subspan(0, split_count));
@@ -77,9 +74,7 @@ using namespace ox;
     }
 
     // Add empty line if newline is last char
-    if (!glyphs.empty() && glyphs.back().symbol == U'\n') {
-        spans.push_back({});
-    }
+    if (!glyphs.empty() && glyphs.back().symbol == U'\n') { spans.push_back({}); }
 
     return spans;
 }
@@ -150,17 +145,13 @@ template <std::ranges::range R>
     // Find target line
     int target_line = 0;
     for (auto const len : line_lengths) {
-        if (cursor_index < current_index + (std::size_t)len) {
-            break;
-        }
+        if (cursor_index < current_index + (std::size_t)len) { break; }
         current_index += (std::size_t)len;
         ++target_line;
     }
 
     // Return 0 if visible, otherwise calculate scroll offset
-    if (target_line >= top_line && target_line <= visible_end) {
-        return 0;
-    }
+    if (target_line >= top_line && target_line <= visible_end) { return 0; }
     return (target_line < top_line) ? target_line - top_line
                                     : target_line - visible_end;
 }
@@ -182,9 +173,7 @@ template <std::ranges::range R>
 
     for (auto const len : line_lengths) {
         // Track the start position of visible area
-        if (current_line == top_line) {
-            screen_start_index = current_index;
-        }
+        if (current_line == top_line) { screen_start_index = current_index; }
 
         // Track the end position of visible area
         if (current_line == top_line + screen_height - 1) {
@@ -196,9 +185,7 @@ template <std::ranges::range R>
         ++current_line;
     }
 
-    if (screen_end_index == 0) {
-        screen_end_index = current_index;
-    }
+    if (screen_end_index == 0) { screen_end_index = current_index; }
 
     // Cursor is already visible
     if (cursor_index >= screen_start_index && cursor_index < screen_end_index) {
@@ -206,9 +193,7 @@ template <std::ranges::range R>
     }
 
     // Cursor is above
-    if (cursor_index < screen_start_index) {
-        return screen_start_index;
-    }
+    if (cursor_index < screen_start_index) { return screen_start_index; }
 
     // Cursor is below
     return screen_end_index > 0 ? screen_end_index - 1 : 0;
@@ -286,7 +271,11 @@ void TextBox::paint(Canvas c)
         }
     };
 
-    Painter{c}.fill(U' ' | bg(background_));
+    put(c, {.x = 0, .y = 0},
+        shape::Fill{
+            .glyph = U' ' | bg(background_),
+            .size = c.size,
+        });
 
     // Always emitted, but could be updated to be smarter about this.
     auto const line_count = (int)std::size(spans_);
@@ -301,9 +290,7 @@ void TextBox::paint(Canvas c)
         // Overwrite bg if Glyph's bg is XColor::Default.
         auto writer = Painter{c}[{x, i - top_line_}];
         for (Glyph g : span) {
-            if (g.symbol == U'\n') {
-                continue;
-            }
+            if (g.symbol == U'\n') { continue; } // TODO this shouldn't happen?
             if (g.brush.background == Color{XColor::Default}) {
                 g.brush.background = background_;
             }
@@ -429,9 +416,7 @@ void TextBox::mouse_press(Mouse m)
 void TextBox::mouse_wheel(Mouse m)
 {
     if (m.button == Mouse::Button::ScrollUp) {
-        if (top_line_ > 0) {
-            this->set_top_line(top_line_ - 1);
-        }
+        if (top_line_ > 0) { this->set_top_line(top_line_ - 1); }
     }
     else if (m.button == Mouse::Button::ScrollDown) {
         this->set_top_line(std::min(top_line_ + 1, (int)std::size(spans_) - 1));

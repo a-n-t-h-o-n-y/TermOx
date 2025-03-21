@@ -3,24 +3,22 @@
 #include <array>
 #include <stdexcept>
 
+#include <ox/align.hpp>
 #include <ox/core/core.hpp>
 #include <ox/label.hpp>
+#include <ox/put.hpp>
 #include <ox/widget.hpp>
 
 namespace ox {
 
 struct Border {
+    shape::Box box = {};
+    Label label = {};
+
     struct Options {
-        Brush brush = {};
+        Color foreground = XColor::Default;
         Label label = {};
     };
-
-    struct Glyphs {
-        std::array<char32_t, 4> corners = {U'┌', U'┐', U'└', U'┘'};
-        std::array<char32_t, 2> walls = {U'─', U'│'};
-    } glyphs = {};
-    Brush brush = {};
-    Label label = {};
 
     /// Light Border: ┌┐└┘─│
     [[nodiscard]] static auto light(std::string label = "") -> Border;
@@ -95,41 +93,19 @@ class Bordered : public Widget {
     void paint(Canvas c) override
     {
         // Box
-        Painter{c}[{0, 0}] << Painter::Box{
-            .corners = border.glyphs.corners,
-            .walls = border.glyphs.walls,
-            .brush = border.brush,
-            .size = this->size,
-        };
+        border.box.size = this->size;
+        put(c, {.x = 0, .y = 0}, border.box);
 
-        // Label
+        // Label - Can't use Label::paint because it paints over border with bg color.
         auto& label = border.label;
         auto const width = std::max(0, c.size.width - 2);
         auto const glyphs =
             std::string_view{label.text}.substr(0, (std::size_t)width) | label.brush;
-
-        auto const at = [&]() -> Point {
-            switch (label.align) {
-                case Align::Left:
-                    return {
-                        .x = 1,
-                        .y = 0,
-                    };
-                case Align::Center:
-                    return {
-                        .x = 1 + (width - (int)glyphs.size()) / 2,
-                        .y = 0,
-                    };
-                case Align::Right:
-                    return {
-                        .x = 1 + width - (int)glyphs.size(),
-                        .y = 0,
-                    };
-                default: throw std::logic_error{"Invalid Align"};
-            }
-        }();
-
-        Painter{c}[at] << glyphs;
+        auto const at = Point{
+            .x = 1 + find_align_offset(label.align, width, glyphs.size()),
+            .y = 0,
+        };
+        put(c, at, glyphs);
     }
 
     auto get_children() -> Generator<Widget&> override { co_yield child; }
