@@ -161,11 +161,14 @@ int main()
 
                 std::get<Button>(sb.children)
                     .on_press.connect(tracked(
-                        [](auto& pb, auto& status_bar) {
+                        [](auto& pb, auto& status_bar,auto& count_label ) {
                             pb.clear();
                             status_bar.text = "Board Cleared";
+                            count_label.text = "0";
                         },
-                        pb, std::get<4>(sb.children)));
+                        pb,
+                        std::get<4>(sb.children),
+                        std::get<1>(std::get<6>(sb.children).children)));
             },
         } |
         Border::round("PinBox");

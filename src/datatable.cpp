@@ -164,8 +164,8 @@ void DataTable::resize(Area)
     headings_.resize(old_size);
 }
 
-auto DataTable::get_children() -> Generator<Widget&> { co_yield headings_; }
+auto DataTable::get_children() -> zzz::Generator<Widget&> { co_yield headings_; }
 
-auto DataTable::get_children() const -> Generator<Widget const&> { co_yield headings_; }
+auto DataTable::get_children() const -> zzz::Generator<Widget const&> { co_yield headings_; }
 
 }  // namespace ox

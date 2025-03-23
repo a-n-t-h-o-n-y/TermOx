@@ -27,7 +27,7 @@ struct Box {
     std::array<char32_t, 4> walls = {U'─', U'─', U'│', U'│'};
 
     Color foreground = XColor::Default;
-    Area size;
+    Area size = {0, 0};
 };
 
 struct Fill {

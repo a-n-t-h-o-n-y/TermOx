@@ -15,5 +15,5 @@ target_link_libraries(
     TermOx.tests.unit
     PRIVATE
         TermOx
-        Catch2::Catch2WithMain
+        zzz
 )

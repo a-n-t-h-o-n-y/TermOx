@@ -108,9 +108,9 @@ class Bordered : public Widget {
         put(c, at, glyphs);
     }
 
-    auto get_children() -> Generator<Widget&> override { co_yield child; }
+    auto get_children() -> zzz::Generator<Widget&> override { co_yield child; }
 
-    auto get_children() const -> Generator<Widget const&> override { co_yield child; }
+    auto get_children() const -> zzz::Generator<Widget const&> override { co_yield child; }
 };
 
 // Moves \p w into a Bordered object

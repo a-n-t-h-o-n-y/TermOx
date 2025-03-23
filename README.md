@@ -45,12 +45,10 @@ to try out the library.
 ## Build Instructions
 
 **TermOx** uses [CMake](https://cmake.org/) and depends on the [Signals
-Light](https://github.com/a-n-t-h-o-n-y/signals-light) and
-[Escape](https://github.com/a-n-t-h-o-n-y/Escape) libraries, which are both included as
-git submodules.
+Light](https://github.com/a-n-t-h-o-n-y/signals-light), [zzz](https://github.com/a-n-t-h-o-n-y/zzz) and
+[Escape](https://github.com/a-n-t-h-o-n-y/Escape) libraries, which are all fetched by cmake automatically.
 
     git clone https://github.com/a-n-t-h-o-n-y/TermOx.git
-    git submodule update --init --recursive     # Pull in dependencies
     mkdir TermOx/build && cd TermOx/build
     cmake ..
     make TermOx                                 # Build library

@@ -4,6 +4,8 @@
 #include <ranges>
 #include <type_traits>
 
+#include <zzz/coro.hpp>
+
 #include <signals_light/signal.hpp>
 
 #include <ox/core/core.hpp>
@@ -92,9 +94,9 @@ class Widget {
 
     virtual void paint(Canvas) {}
 
-    virtual auto get_children() -> Generator<Widget&> { co_return; }
+    virtual auto get_children() -> zzz::Generator<Widget&> { co_return; }
 
-    virtual auto get_children() const -> Generator<Widget const&> { co_return; }
+    virtual auto get_children() const -> zzz::Generator<Widget const&> { co_return; }
 };
 
 /**

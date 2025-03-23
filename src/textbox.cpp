@@ -290,7 +290,10 @@ void TextBox::paint(Canvas c)
         // Overwrite bg if Glyph's bg is XColor::Default.
         auto writer = Painter{c}[{x, i - top_line_}];
         for (Glyph g : span) {
-            if (g.symbol == U'\n') { continue; } // TODO this shouldn't happen?
+            // TODO maybe create a transform view for this and pass it to put.
+            // it'd filter out newlines first? But also those shouldn't happen?
+            if (g.symbol == U'\n') { continue; }  // TODO this shouldn't happen?
+            // TODO also is this the same now with new ideas of Brush?
             if (g.brush.background == Color{XColor::Default}) {
                 g.brush.background = background_;
             }

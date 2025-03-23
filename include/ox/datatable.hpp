@@ -56,9 +56,9 @@ class DataTable : public Widget {
 
     void resize(Area) override;
 
-    auto get_children() -> Generator<Widget&> override;
+    auto get_children() -> zzz::Generator<Widget&> override;
 
-    auto get_children() const -> Generator<Widget const&> override;
+    auto get_children() const -> zzz::Generator<Widget const&> override;
 
    private:
     Row<std::vector<Label>> headings_;

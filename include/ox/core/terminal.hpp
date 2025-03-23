@@ -16,6 +16,8 @@
 #include <variant>
 #include <vector>
 
+#include <zzz/overload.hpp>
+
 #include <esc/area.hpp>
 #include <esc/event.hpp>
 #include <esc/key.hpp>
@@ -405,13 +407,9 @@ class Painter {
         template <GlyphString T>
         auto operator<<(T const& gs) && -> CursorWriter
         {
-            if (cursor_.y >= canvas_.size.height) {
-                return std::move(*this);
-            }
+            if (cursor_.y >= canvas_.size.height) { return std::move(*this); }
             for (auto const& g : gs) {
-                if (cursor_.x >= canvas_.size.width) {
-                    break;
-                }
+                if (cursor_.x >= canvas_.size.width) { break; }
                 canvas_[cursor_] = g;
                 ++cursor_.x;
             }
@@ -421,13 +419,9 @@ class Painter {
         template <GlyphString T>
         auto operator<<(T const& gs) & -> CursorWriter&
         {
-            if (cursor_.y >= canvas_.size.height) {
-                return *this;
-            }
+            if (cursor_.y >= canvas_.size.height) { return *this; }
             for (auto const& g : gs) {
-                if (cursor_.x >= canvas_.size.width) {
-                    break;
-                }
+                if (cursor_.x >= canvas_.size.width) { break; }
                 canvas_[cursor_] = g;
                 ++cursor_.x;
             }
@@ -519,78 +513,78 @@ template <typename T>
     -> std::optional<EventResponse>
 {
     return std::visit(
-        Overload{[&](esc::KeyPress e) -> std::optional<EventResponse> {
-                     if constexpr (HandlesKeyPress<T>) {
-                         return handler.handle_key_press(e.key);
-                     }
-                     else {
-                         return std::nullopt;
-                     }
-                 },
-                 [&](esc::KeyRelease e) -> std::optional<EventResponse> {
-                     if constexpr (HandlesKeyRelease<T>) {
-                         return handler.handle_key_release(e.key);
-                     }
-                     else {
-                         return std::nullopt;
-                     }
-                 },
-                 [&](esc::MousePress e) -> std::optional<EventResponse> {
-                     if constexpr (HandlesMousePress<T>) {
-                         return handler.handle_mouse_press(e.mouse);
-                     }
-                     else {
-                         return std::nullopt;
-                     }
-                 },
-                 [&](esc::MouseRelease e) -> std::optional<EventResponse> {
-                     if constexpr (HandlesMouseRelease<T>) {
-                         return handler.handle_mouse_release(e.mouse);
-                     }
-                     else {
-                         return std::nullopt;
-                     }
-                 },
-                 [&](esc::MouseWheel e) -> std::optional<EventResponse> {
-                     if constexpr (HandlesMouseWheel<T>) {
-                         return handler.handle_mouse_wheel(e.mouse);
-                     }
-                     else {
-                         return std::nullopt;
-                     }
-                 },
-                 [&](esc::MouseMove e) -> std::optional<EventResponse> {
-                     if constexpr (HandlesMouseMove<T>) {
-                         return handler.handle_mouse_move(e.mouse);
-                     }
-                     else {
-                         return std::nullopt;
-                     }
-                 },
-                 [&](esc::Resize e) -> std::optional<EventResponse> {
-                     Terminal::changes.resize(e.size);
-                     Terminal::changes.fill(Glyph{});
-                     if constexpr (HandlesResize<T>) {
-                         return handler.handle_resize(e.size);
-                     }
-                     else {
-                         return std::nullopt;
-                     }
-                 },
-                 [&](event::Timer e) -> std::optional<EventResponse> {
-                     if constexpr (HandlesTimer<T>) {
-                         return handler.handle_timer(e.id);
-                     }
-                     else {
-                         return std::nullopt;
-                     }
-                 },
-                 [](event::Custom const& e) -> std::optional<EventResponse> {
-                     return e.action();
-                 },
-                 [](event::Interrupt) -> std::optional<EventResponse> {
-                     return QuitRequest{1};
-                 }},
+        zzz::Overload{[&](esc::KeyPress e) -> std::optional<EventResponse> {
+                          if constexpr (HandlesKeyPress<T>) {
+                              return handler.handle_key_press(e.key);
+                          }
+                          else {
+                              return std::nullopt;
+                          }
+                      },
+                      [&](esc::KeyRelease e) -> std::optional<EventResponse> {
+                          if constexpr (HandlesKeyRelease<T>) {
+                              return handler.handle_key_release(e.key);
+                          }
+                          else {
+                              return std::nullopt;
+                          }
+                      },
+                      [&](esc::MousePress e) -> std::optional<EventResponse> {
+                          if constexpr (HandlesMousePress<T>) {
+                              return handler.handle_mouse_press(e.mouse);
+                          }
+                          else {
+                              return std::nullopt;
+                          }
+                      },
+                      [&](esc::MouseRelease e) -> std::optional<EventResponse> {
+                          if constexpr (HandlesMouseRelease<T>) {
+                              return handler.handle_mouse_release(e.mouse);
+                          }
+                          else {
+                              return std::nullopt;
+                          }
+                      },
+                      [&](esc::MouseWheel e) -> std::optional<EventResponse> {
+                          if constexpr (HandlesMouseWheel<T>) {
+                              return handler.handle_mouse_wheel(e.mouse);
+                          }
+                          else {
+                              return std::nullopt;
+                          }
+                      },
+                      [&](esc::MouseMove e) -> std::optional<EventResponse> {
+                          if constexpr (HandlesMouseMove<T>) {
+                              return handler.handle_mouse_move(e.mouse);
+                          }
+                          else {
+                              return std::nullopt;
+                          }
+                      },
+                      [&](esc::Resize e) -> std::optional<EventResponse> {
+                          Terminal::changes.resize(e.size);
+                          Terminal::changes.fill(Glyph{});
+                          if constexpr (HandlesResize<T>) {
+                              return handler.handle_resize(e.size);
+                          }
+                          else {
+                              return std::nullopt;
+                          }
+                      },
+                      [&](event::Timer e) -> std::optional<EventResponse> {
+                          if constexpr (HandlesTimer<T>) {
+                              return handler.handle_timer(e.id);
+                          }
+                          else {
+                              return std::nullopt;
+                          }
+                      },
+                      [](event::Custom const& e) -> std::optional<EventResponse> {
+                          return e.action();
+                      },
+                      [](event::Interrupt) -> std::optional<EventResponse> {
+                          return QuitRequest{1};
+                      }},
         ev);
 }
 
@@ -617,9 +611,7 @@ template <typename EventHandler>
         auto const result = apply_event(event, handler);
 
         if (result.has_value()) {
-            if (auto& quit = *result; quit.has_value()) {
-                return quit->return_code;
-            }
+            if (auto& quit = *result; quit.has_value()) { return quit->return_code; }
             else {
                 if constexpr (HandlesPaint<EventHandler>) {
                     term.cursor = handler.handle_paint(Canvas{

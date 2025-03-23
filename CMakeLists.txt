@@ -1,26 +1,6 @@
 cmake_minimum_required(VERSION 3.18)
 project(TermOx VERSION 2.0.0 LANGUAGES CXX)
 
-# Enable AddressSanitizer for debug builds
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    message(STATUS "AddressSanitizer enabled for Debug build")
-
-    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
-        add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
-        add_link_options(-fsanitize=address)
-    elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-        message(WARNING "AddressSanitizer is not supported on MSVC")
-    endif()
-endif()
-
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
-# Add External Dependencies
-add_subdirectory(external/Escape)
-add_subdirectory(external/signals-light)
-
 # Create Library Target
 add_library(TermOx STATIC
     src/align.cpp
@@ -67,16 +47,43 @@ target_include_directories(TermOx PUBLIC
 )
 
 # Compiler Options for the Library
-target_compile_options(TermOx PRIVATE
-    $<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive->
-    $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:GNU>>:
-        -Wall -Wextra -Wpedantic -Wconversion>
+target_compile_options(TermOx
+    PRIVATE
+        $<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive->
+        $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:GNU>>:-Wall -Wextra -Wpedantic -Wconversion>
 )
+
+include(FetchContent)
+
+# zzz Library Dependency
+FetchContent_Declare(
+    zzz
+    GIT_REPOSITORY https://github.com/a-n-t-h-o-n-y/zzz.git
+    GIT_TAG 9d7c047f47c81a95a5ea824075253618356593a2
+)
+FetchContent_MakeAvailable(zzz)
+
+# Escape Library Dependency
+FetchContent_Declare(
+    escape
+    GIT_REPOSITORY https://github.com/a-n-t-h-o-n-y/Escape.git
+    GIT_TAG 730a618eab2a39c78750892335055a3f227e04f2
+)
+FetchContent_MakeAvailable(escape)
+
+# SignalsLight Library Dependency
+FetchContent_Declare(
+    signals-light
+    GIT_REPOSITORY https://github.com/a-n-t-h-o-n-y/signals-light.git
+    GIT_TAG 5b873d0aa515a2085138359e69746cd7d7a5362f
+)
+FetchContent_MakeAvailable(signals-light)
 
 # Link External Libraries to the Library Target
 target_link_libraries(TermOx PUBLIC
     escape
     signals-light
+    zzz
 )
 
 # Add the tests subdirectory

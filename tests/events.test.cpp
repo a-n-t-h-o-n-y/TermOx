@@ -1,9 +1,6 @@
-#include <catch2/catch_test_macros.hpp>
+#define TEST_MAIN
+#include <zzz/test.hpp>
 
 #include <ox/core/core.hpp>
 
-TEST_CASE("Construction", "[Events]")
-{
-    ;
-    ;
-}
+TEST(event_construction) {}

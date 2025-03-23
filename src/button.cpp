@@ -5,6 +5,8 @@
 #include <utility>
 #include <variant>
 
+#include <zzz/overload.hpp>
+
 #include <ox/core/common.hpp>
 #include <ox/put.hpp>
 
@@ -37,14 +39,13 @@ Button::Button(Options x)
       pressed_mod{std::move(x.pressed_mod)},
       focused_mod{std::move(x.focused_mod)},
       decoration_{[d = std::move(x.decoration)] {
-          return std::visit(
-              Overload{
-                  [](PaintFn fn) -> DecorationInternal { return std::move(fn); },
-                  [](Fade f) -> DecorationInternal {
-                      return {FadeInternal{.fade = std::move(f)}};
-                  },
-              },
-              std::move(d));
+          return std::visit(zzz::Overload{
+                                [](PaintFn fn) -> DecorationInternal { return fn; },
+                                [](Fade f) -> DecorationInternal {
+                                    return {FadeInternal{.fade = std::move(f)}};
+                                },
+                            },
+                            std::move(d));
       }()}
 {}
 
@@ -59,7 +60,7 @@ void Button::paint(Canvas c)
     temp_label.paint(c);
 
     // Decoration over Canvas
-    std::visit(Overload{
+    std::visit(zzz::Overload{
                    [&c](PaintFn const& fn) {
                        if (fn) { fn(c); }
                    },
@@ -111,12 +112,12 @@ void Button::timer(int id)
         if (f.percent == 0.f || f.percent == 1.f) { f.timer.stop(); }
     };
 
-    std::visit(Overload{[](PaintFn const&) {}, update_fade}, decoration_);
+    std::visit(zzz::Overload{[](PaintFn const&) {}, update_fade}, decoration_);
 }
 
 void Button::start_select()
 {
-    std::visit(Overload{
+    std::visit(zzz::Overload{
                    [](PaintFn const&) {},
                    [](FadeInternal& f) {
                        f.direction = +1;
@@ -128,7 +129,7 @@ void Button::start_select()
 
 void Button::end_select()
 {
-    std::visit(Overload{
+    std::visit(zzz::Overload{
                    [](PaintFn const&) {},
                    [](FadeInternal& f) {
                        f.direction = -1;
