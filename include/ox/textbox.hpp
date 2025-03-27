@@ -13,57 +13,36 @@ class ScrollBar;
 
 /**
  * A box of text.
- *
  * @details Set FocusPolicy::None to disable editing.
  */
 class TextBox : public Widget {
    public:
     enum class Wrap { Any, Word };
 
-   private:
     struct Options {
-        std::vector<Glyph> text = {};
+        std::string text = {};  // UTF8 encoded
         Wrap wrap = Wrap::Word;
         Align align = Align::Left;
-        Color background = XColor::Default;
-        Brush insert_brush = {};
+        Brush brush = {};
+        FocusPolicy focus_policy = FocusPolicy::None;
+        SizePolicy size_policy = SizePolicy::flex();
     } static const init;
 
    public:
+    std::string text;
+    Wrap wrap;
+    Align align;
+    Brush brush;
+    int scroll_offset = 0;  // Line number of the top displayed line. zero indexed.
+
     /**
      * Emitted when any scroll parameter is updated. For ScrollBar.
-     * void(int position, int line_count)
+     * void(int index, int size)
      */
-    sl::Signal<void(int, int)> on_scroll_update;
-
-    TextBox(Options x = init);
+    sl::Signal<void(int, int)> on_scroll;
 
    public:
-    void set_text(std::vector<Glyph> text);
-
-    [[nodiscard]] auto get_text() const -> std::vector<Glyph> const&;
-
-    void set_wrap(Wrap wrap);
-
-    [[nodiscard]] auto get_wrap() const -> Wrap;
-
-    void set_align(Align align);
-
-    [[nodiscard]] auto get_align() const -> Align;
-
-    void set_background(Color color);
-
-    [[nodiscard]] auto get_background() const -> Color;
-
-    void set_insert_brush(Brush brush);
-
-    [[nodiscard]] auto get_insert_brush() const -> Brush;
-
-    /**
-     * Set the line displayed at the top, scrolling the text. Will change the cursor
-     * index if the cursor is now off screen.
-     */
-    void set_top_line(int line);
+    TextBox(Options x = init);
 
    public:
     void paint(Canvas c) override;
@@ -74,18 +53,13 @@ class TextBox : public Widget {
 
     void mouse_wheel(Mouse m) override;
 
-    void resize(Area) override;
+   private:
+    void update_layout_cache();
 
    private:
-    std::vector<Glyph> text_;
-    Wrap wrap_;
-    Align align_;
-    Color background_;
-    Brush insert_brush_;
-
-    int top_line_ = 0;
-    std::size_t cursor_index_ = 0;  // Can be one past the end of text.
-    std::vector<std::span<Glyph const>> spans_ = {};
+    std::size_t cursor_index_ = 0;                  // [0, unicode_str_.size()]
+    std::u32string unicode_str_ = {};               // cache; updated by paint()
+    std::vector<std::u32string_view> text_layout_;  // cache; updated by paint()
 };
 
 /**

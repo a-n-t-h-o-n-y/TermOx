@@ -105,4 +105,4 @@ target_link_libraries(
         TermOx
 )
 
-enable_asan(TermOx.examples.scratch)
+# enable_asan(TermOx.examples.scratch)

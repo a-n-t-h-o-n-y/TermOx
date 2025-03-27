@@ -2,13 +2,20 @@
 
 #include <algorithm>
 #include <cassert>
+#include <numeric>
 #include <optional>
 #include <ranges>
 #include <span>
 #include <stdexcept>
+#include <string>
 #include <string_view>
 #include <vector>
 
+#include <zzz/coro.hpp>
+
+#include <esc/detail/transcode.hpp>
+
+#include <ox/align.hpp>
 #include <ox/core/core.hpp>
 #include <ox/put.hpp>
 #include <ox/scrollbar.hpp>
@@ -19,62 +26,45 @@ using namespace ox;
 
 /**
  * Calculate the spans of text that fit within the given width and wrap policy.
- *
  * @details Each entry in the returned vector is a span of Glyphs that fit within the
  * given width.
- * @param glyphs The text to calculate spans for.
+ *
+ * @param glyphs The text to calculate spans for, the underlying text must remain valid
+ * for the lifetime of the returned vector.
  * @param wrap The wrap policy to use.
  * @param width The hard limit to wrap text at.
- * @returns A vector of spans, each representing a horizontal line. Vector will always
- * have at least one element.
+ * @returns A vector of std::u32string_view, each representing a horizontal line. Vector
+ * will always have at least one element. It points to the text in \p glyphs.
  */
-[[nodiscard]] auto calculate_spans(std::vector<Glyph> const& glyphs,
-                                   TextBox::Wrap wrap,
-                                   std::size_t width)
-    -> std::vector<std::span<Glyph const>>
+[[nodiscard]] auto perform_text_layout(std::u32string_view glyphs,
+                                       TextBox::Wrap wrap,
+                                       std::size_t width)
+    -> std::vector<std::u32string_view>
 {
-    constexpr auto is_space = [](Glyph const& g) {
-        return std::u32string_view{U" \t\n\r\f\v"}.find(g.symbol) !=
-               std::u32string_view::npos;
-    };
+    if (width == 0 || glyphs.empty()) { return {std::u32string_view{}}; }
 
-    if (width == 0 || glyphs.empty()) { return {std::span<Glyph const>{}}; }
+    auto spans = std::vector<std::u32string_view>{};
+    auto remaining = glyphs;
 
-    auto spans = std::vector<std::span<Glyph const>>{};
-    auto full_span = std::span<Glyph const>{glyphs};
-
-    while (!full_span.empty()) {
-        auto const max_count = std::min(std::size(full_span), width);
-
-        auto const count_to_newline =
-            (std::size_t)std::distance(
-                std::cbegin(full_span),
-                std::ranges::find(full_span, U'\n', &Glyph::symbol)) +
-            1;
-
-        auto split_count = std::min(count_to_newline, max_count);
-
-        // If word-wrapping, search for space char nearest the end of the line.
-        if (wrap == TextBox::Wrap::Word && split_count == width) {
-            auto const last_space_iter = [&] {
-                auto const reverse_split_iter =
-                    std::next(std::rbegin(full_span),
-                              (std::ptrdiff_t)(std::size(full_span) - width));
-                return std::find_if(reverse_split_iter, std::rend(full_span), is_space);
-            }();
-
-            auto const distance_to_last_space =
-                (std::size_t)std::distance(last_space_iter, std::rend(full_span));
-
-            if (distance_to_last_space > 0) { split_count = distance_to_last_space; }
+    while (!remaining.empty()) {
+        auto line = remaining.substr(0, width);
+        auto const newline_at = line.find_first_of(U'\n');
+        if (newline_at != std::u32string_view::npos) {
+            line = line.substr(0, newline_at + 1);
         }
 
-        spans.push_back(full_span.subspan(0, split_count));
-        full_span = full_span.subspan(split_count);
+        if (wrap == TextBox::Wrap::Word && line.size() == width) {
+            auto const last_space = line.find_last_of(U' ');
+            if (last_space != std::u32string_view::npos) {
+                line = line.substr(0, last_space + 1);
+            }
+        }
+        spans.push_back(line);
+        remaining = remaining.substr(line.size());
     }
 
     // Add empty line if newline is last char
-    if (!glyphs.empty() && glyphs.back().symbol == U'\n') { spans.push_back({}); }
+    if (!glyphs.empty() && glyphs.back() == U'\n') { spans.push_back({}); }
 
     return spans;
 }
@@ -85,124 +75,71 @@ using namespace ox;
  * subtract the top display line from the y coordinate to get the actual screen
  * position.
  */
-template <std::ranges::range R>
-[[nodiscard]] auto index_to_screen(std::size_t index, R&& line_lengths) -> Point
+[[nodiscard]] auto index_to_point(std::size_t index,
+                                  std::ranges::random_access_range auto&& line_lengths)
+    -> Point
 {
-    auto current_line = 0;
-    auto current_pos = 0;
-    auto last_len = 0;  // For one past the last index
+    assert(line_lengths.size() > 0);
 
-    for (auto const len : line_lengths) {
+    auto current_index = 0;
+    for (auto y = 0; y < std::ssize(line_lengths); ++y) {
         // Check if index falls within this line
-        if ((int)index >= current_pos && (int)index < current_pos + len) {
-            return {.x = (int)index - current_pos, .y = current_line};
+        auto const len = line_lengths[(std::size_t)y];
+        if ((int)index >= current_index && (int)index < current_index + len) {
+            return {.x = (int)index - current_index, .y = y};
         }
-        current_pos += (int)len;
-        ++current_line;
-        last_len = (int)len;
+        current_index += (int)len;
     }
-    return {.x = last_len, .y = current_line - 1};
+    return {
+        .x = line_lengths[std::size(line_lengths) - 1],
+        .y = (int)std::ssize(line_lengths) - 1,
+    };
 }
 
 /**
- * Convert a screen position to a text index. The input point should have top_line_
- * added into the y coordinate, this does not consider scroll, the 'screen' is the
- * entire text display.
+ * Find the nearest index into unicode_str_ (via \p line_lengths) to the given Point.
+ * @details The Point should have the scroll_offset_ already applied, this works with
+ * the 'abstract' representation before a window into it is applied.
  */
-template <std::ranges::range R>
-[[nodiscard]] auto screen_to_index(Point p, R&& line_lengths) -> std::size_t
+[[nodiscard]] auto point_to_nearest_index(
+    Point p,
+    std::ranges::random_access_range auto&& line_lengths) -> std::size_t
 {
-    auto const line_count = (int)std::ssize(line_lengths);
-
-    // Past the end of text
-    if (p.y >= line_count) {
-        p.y = line_count - 1;
-        p.x = (int)line_lengths[p.y];
-    }
-
-    auto index = std::size_t{0};
-    for (auto i = 0; i < p.y; ++i) {
-        index += (std::size_t)line_lengths[i];
-    }
-    auto const adjustment = (p.y + 1 == line_count) ? 0 : -1;
-    return index + (std::size_t)std::min(p.x, (int)line_lengths[p.y] + adjustment);
+    p.y = std::max(p.y, 0);
+    auto truncated = line_lengths | std::views::take(p.y);
+    auto index = std::accumulate(std::begin(truncated), std::end(truncated), 0);
+    index += std::min(p.x, std::max((int)line_lengths[(std::size_t)p.y] - 1, 0));
+    return index;
 }
 
 /**
- * Calculates the amount that top_line should be offset by in order to make the given
- * cursor index appear visible on screen. Returns 0 if already on screen.
- * @details top_line is assumed to be less than line_lengths size.
+ * Calculates the amount that scroll_offset should be modified by in order to make the
+ * given cursor index appear visible on screen. Returns 0 if already on screen.
  */
 template <std::ranges::range R>
-[[nodiscard]] auto scroll_offset_to_cursor_index(std::size_t cursor_index,
-                                                 R&& line_lengths,
-                                                 int top_line,
-                                                 int screen_height) -> int
+[[nodiscard]] auto y_offset_to_cursor_index(std::size_t cursor_index,
+                                            R&& line_lengths,
+                                            int scroll_offset,
+                                            int screen_height) -> int
 {
-    auto current_index = std::size_t{0};
-    auto const visible_end = top_line + screen_height - 1;
-
-    // Find target line
-    int target_line = 0;
-    for (auto const len : line_lengths) {
-        if (cursor_index < current_index + (std::size_t)len) { break; }
-        current_index += (std::size_t)len;
-        ++target_line;
+    auto const at = index_to_point(cursor_index, line_lengths);
+    if (at.y >= scroll_offset && at.y < scroll_offset + screen_height) { return 0; }
+    else if (at.y < scroll_offset) {
+        return at.y - scroll_offset;
     }
-
-    // Return 0 if visible, otherwise calculate scroll offset
-    if (target_line >= top_line && target_line <= visible_end) { return 0; }
-    return (target_line < top_line) ? target_line - top_line
-                                    : target_line - visible_end;
+    else {
+        return at.y - (scroll_offset + screen_height - 1);
+    }
 }
 
 /**
- * Returns the cursor index that is nearest to the given \p cursor_index and is on
- * screen. Returns \p cursor_index if it is already on screen.
+ * Return a std::view of the lengths of each line in the given \p spans.
  */
-template <std::ranges::range R>
-[[nodiscard]] auto nearest_on_screen_cursor_index(std::size_t cursor_index,
-                                                  R&& line_lengths,
-                                                  int top_line,
-                                                  int screen_height) -> std::size_t
+[[nodiscard]]
+auto line_lengths(std::vector<std::u32string_view> const& spans)
 {
-    auto current_index = std::size_t{0};
-    auto screen_start_index = std::size_t{0};
-    auto screen_end_index = std::size_t{0};
-    auto current_line = 0;
-
-    for (auto const len : line_lengths) {
-        // Track the start position of visible area
-        if (current_line == top_line) { screen_start_index = current_index; }
-
-        // Track the end position of visible area
-        if (current_line == top_line + screen_height - 1) {
-            screen_end_index = current_index + (std::size_t)len;
-            break;
-        }
-
-        current_index += (std::size_t)len;
-        ++current_line;
-    }
-
-    if (screen_end_index == 0) { screen_end_index = current_index; }
-
-    // Cursor is already visible
-    if (cursor_index >= screen_start_index && cursor_index < screen_end_index) {
-        return cursor_index;
-    }
-
-    // Cursor is above
-    if (cursor_index < screen_start_index) { return screen_start_index; }
-
-    // Cursor is below
-    return screen_end_index > 0 ? screen_end_index - 1 : 0;
-}
-
-[[nodiscard]] auto line_lengths(std::vector<std::span<Glyph const>> const& spans)
-{
-    return spans | std::ranges::views::transform(
-                       [](auto const& span) { return std::ssize(span); });
+    return spans |
+           std::views::transform([](auto const& span) { return std::ssize(span); });
 }
 
 }  // namespace
@@ -212,186 +149,111 @@ namespace ox {
 TextBox::Options const TextBox::init = {};
 
 TextBox::TextBox(Options x)
-    : Widget{FocusPolicy::None, SizePolicy::flex()},
-      text_{std::move(x.text)},
-      wrap_{std::move(x.wrap)},
-      align_{std::move(x.align)},
-      background_{std::move(x.background)},
-      insert_brush_{std::move(x.insert_brush)},
-      spans_{calculate_spans(text_, wrap_, (std::size_t)size.width)}
+    : Widget{x.focus_policy, x.size_policy},
+      text{std::move(x.text)},
+      wrap{std::move(x.wrap)},
+      align{std::move(x.align)},
+      brush{std::move(x.brush)}
 {}
-
-void TextBox::set_text(std::vector<Glyph> text)
-{
-    text_ = std::move(text);
-    cursor_index_ = std::min(cursor_index_, text_.size());
-    spans_ = calculate_spans(text_, wrap_, (std::size_t)size.width);
-    top_line_ = std::min(top_line_, (int)std::size(spans_) - 1);
-}
-
-auto TextBox::get_text() const -> std::vector<Glyph> const& { return text_; }
-
-void TextBox::set_wrap(Wrap wrap)
-{
-    wrap_ = wrap;
-    spans_ = calculate_spans(text_, wrap_, (std::size_t)size.width);
-    top_line_ += scroll_offset_to_cursor_index(cursor_index_, line_lengths(spans_),
-                                               top_line_, size.height);
-}
-
-auto TextBox::get_wrap() const -> Wrap { return wrap_; }
-
-void TextBox::set_align(Align align) { align_ = align; }
-
-auto TextBox::get_align() const -> Align { return align_; }
-
-void TextBox::set_background(Color color) { background_ = color; }
-
-auto TextBox::get_background() const -> Color { return background_; }
-
-void TextBox::set_insert_brush(Brush brush) { insert_brush_ = brush; }
-
-auto TextBox::get_insert_brush() const -> Brush { return insert_brush_; }
-
-void TextBox::set_top_line(int line)
-{
-    top_line_ = std::clamp(line, 0, (int)std::size(spans_) - 1);
-    cursor_index_ = nearest_on_screen_cursor_index(cursor_index_, line_lengths(spans_),
-                                                   top_line_, size.height);
-}
 
 void TextBox::paint(Canvas c)
 {
-    auto const align_offset = [this, &c](auto& span) -> int {
-        switch (align_) {
-            case Align::Left: return 0;
-            case Align::Center: return (c.size.width - (int)span.size()) / 2;
-            case Align::Right: return c.size.width - (int)span.size();
-            default: throw std::logic_error{"Invalid Align"};
-        }
-    };
+    this->update_layout_cache();  // updates unicode_str_ and text_layout_
 
-    put(c, {.x = 0, .y = 0},
-        shape::Fill{
-            .glyph = U' ' | bg(background_),
-            .size = c.size,
-        });
+    {  // Adjust scroll and cursor if no longer valid.
+        auto const line_count = (int)std::ssize(text_layout_);
+        scroll_offset = std::clamp(scroll_offset, 0, std::max(line_count - 1, 0));
+        cursor_index_ =
+            std::clamp(cursor_index_, std::size_t{0}, std::size(unicode_str_));
+        scroll_offset += y_offset_to_cursor_index(
+            cursor_index_, line_lengths(text_layout_), scroll_offset, size.height);
 
-    // Always emitted, but could be updated to be smarter about this.
-    auto const line_count = (int)std::size(spans_);
-    top_line_ = std::clamp(0, top_line_, std::max(line_count - 1, 0));
-    this->on_scroll_update(top_line_, line_count);
+        // TODO Always emitted, but could be updated to be smarter about this.
+        this->on_scroll(scroll_offset, line_count);
+    }
 
-    for (auto i = top_line_; i < std::ssize(spans_) && (i - top_line_) < c.size.height;
-         ++i) {
-        auto const span = spans_[(std::size_t)i];
-        auto const x = align_offset(span);
-
-        // Overwrite bg if Glyph's bg is XColor::Default.
-        auto writer = Painter{c}[{x, i - top_line_}];
-        for (Glyph g : span) {
-            // TODO maybe create a transform view for this and pass it to put.
-            // it'd filter out newlines first? But also those shouldn't happen?
-            if (g.symbol == U'\n') { continue; }  // TODO this shouldn't happen?
-            // TODO also is this the same now with new ideas of Brush?
-            if (g.brush.background == Color{XColor::Default}) {
-                g.brush.background = background_;
-            }
-            writer << g;
+    // Fill with Brush
+    for (auto x = 0; x < c.size.width; ++x) {
+        for (auto y = 0; y < c.size.height; ++y) {
+            c[{.x = x, .y = y}].brush = brush;
         }
     }
 
-    auto const cursor = index_to_screen(cursor_index_, line_lengths(spans_));
+    // Paint Text
+    for (auto y = 0; y + scroll_offset < std::ssize(text_layout_) && y < c.size.height;
+         ++y) {
+        auto const span = text_layout_[(std::size_t)(y + scroll_offset)];
+        auto const x = find_align_offset(align, c.size.width, (int)span.size());
 
-    assert(cursor.y >= top_line_ && cursor.y < top_line_ + this->size.height);
+        for (auto i = 0; i < (int)span.size(); ++i) {
+            auto ch = span[(std::size_t)i];
+            if (ch == U'\n') { continue; }
+            c[{.x = x + i, .y = y}].symbol = ch;
+        }
+    }
 
-    // Adjust x for Alignment
-    auto const span = spans_[(std::size_t)cursor.y];
-    auto const x = align_offset(span) + cursor.x;
-    Widget::cursor = {.x = x, .y = cursor.y - top_line_};
+    {  // Position the Cursor
+        auto const cursor = index_to_point(cursor_index_, line_lengths(text_layout_));
+
+        auto const span = text_layout_[(std::size_t)cursor.y];
+        auto const x =
+            find_align_offset(align, c.size.width, (int)std::ssize(span)) + cursor.x;
+        Widget::cursor = {.x = x, .y = cursor.y - scroll_offset};
+    }
 }
 
 void TextBox::key_press(Key k)
 {
     switch (k) {
         case Key::Backspace:
-            if (!text_.empty() && cursor_index_ > 0) {
+            if (!text.empty() && cursor_index_ > 0) {
                 --cursor_index_;
-                text_.erase(
-                    std::next(std::cbegin(text_), (std::ptrdiff_t)cursor_index_));
-                spans_ = calculate_spans(text_, wrap_, (std::size_t)size.width);
-                top_line_ += scroll_offset_to_cursor_index(
-                    cursor_index_, line_lengths(spans_), top_line_, size.height);
+                unicode_str_.erase(std::next(std::cbegin(unicode_str_),
+                                             (std::ptrdiff_t)cursor_index_));
+                text = esc::detail::u32_to_u8(unicode_str_);
             }
             break;
         case Key::Enter:
-            text_.insert(std::next(std::cbegin(text_), (std::ptrdiff_t)cursor_index_++),
-                         {U'\n'});
-            spans_ = calculate_spans(text_, wrap_, (std::size_t)size.width);
-            top_line_ += scroll_offset_to_cursor_index(
-                cursor_index_, line_lengths(spans_), top_line_, size.height);
+            unicode_str_.insert(
+                std::next(std::cbegin(unicode_str_), (std::ptrdiff_t)cursor_index_++),
+                U'\n');
+            text = esc::detail::u32_to_u8(unicode_str_);
             break;
         case Key::Delete:
-            if (cursor_index_ < text_.size()) {
-                text_.erase(
-                    std::next(std::cbegin(text_), (std::ptrdiff_t)cursor_index_));
-                spans_ = calculate_spans(text_, wrap_, (std::size_t)size.width);
-                top_line_ += scroll_offset_to_cursor_index(
-                    cursor_index_, line_lengths(spans_), top_line_, size.height);
+            if (cursor_index_ < text.size()) {
+                unicode_str_.erase(std::next(std::cbegin(unicode_str_),
+                                             (std::ptrdiff_t)cursor_index_));
+                text = esc::detail::u32_to_u8(unicode_str_);
             }
             break;
         case Key::ArrowLeft:
-            if (cursor_index_ > 0) {
-                --cursor_index_;
-                top_line_ += scroll_offset_to_cursor_index(
-                    cursor_index_, line_lengths(spans_), top_line_, size.height);
-            }
+            if (cursor_index_ > 0) { --cursor_index_; }
             break;
         case Key::ArrowRight:
-            if (cursor_index_ < text_.size()) {
-                ++cursor_index_;
-                top_line_ += scroll_offset_to_cursor_index(
-                    cursor_index_, line_lengths(spans_), top_line_, size.height);
-            }
+            if (cursor_index_ < unicode_str_.size()) { ++cursor_index_; }
             break;
         case Key::ArrowDown: {
-            auto at = index_to_screen(cursor_index_, line_lengths(spans_));
+            auto at = index_to_point(cursor_index_, line_lengths(text_layout_));
             at.y += 1;
-            cursor_index_ = screen_to_index(at, line_lengths(spans_));
-            top_line_ += scroll_offset_to_cursor_index(
-                cursor_index_, line_lengths(spans_), top_line_, size.height);
+            if (at.y >= std::ssize(text_layout_)) { break; }
+            cursor_index_ = point_to_nearest_index(at, line_lengths(text_layout_));
             break;
         }
         case Key::ArrowUp: {
-            auto at = index_to_screen(cursor_index_, line_lengths(spans_));
+            auto at = index_to_point(cursor_index_, line_lengths(text_layout_));
             at.y = std::max(at.y - 1, 0);
-            cursor_index_ = screen_to_index(at, line_lengths(spans_));
-            top_line_ += scroll_offset_to_cursor_index(
-                cursor_index_, line_lengths(spans_), top_line_, size.height);
+            cursor_index_ = point_to_nearest_index(at, line_lengths(text_layout_));
             break;
         }
-        case Key::Home:
-            cursor_index_ = 0;
-            top_line_ += scroll_offset_to_cursor_index(
-                cursor_index_, line_lengths(spans_), top_line_, size.height);
-            break;
-        case Key::End:
-            cursor_index_ = text_.size();
-            top_line_ += scroll_offset_to_cursor_index(
-                cursor_index_, line_lengths(spans_), top_line_, size.height);
-            break;
+        case Key::Home: cursor_index_ = 0; break;
+        case Key::End: cursor_index_ = unicode_str_.size(); break;
         default:
-            if (auto const c = esc::key_to_char(k); c != '\0') {
-                text_.insert(
-                    std::next(std::begin(text_), (std::ptrdiff_t)cursor_index_),
-                    {
-                        .symbol = (char32_t)c,
-                        .brush = insert_brush_,
-                    });
+            if (auto const c = esc::key_to_char32(k); c != U'\0') {
+                unicode_str_.insert(
+                    std::next(std::begin(unicode_str_), (std::ptrdiff_t)cursor_index_),
+                    c);
+                text = esc::detail::u32_to_u8(unicode_str_);
                 ++cursor_index_;
-                spans_ = calculate_spans(text_, wrap_, (std::size_t)size.width);
-                top_line_ += scroll_offset_to_cursor_index(
-                    cursor_index_, line_lengths(spans_), top_line_, size.height);
             }
             break;
     }
@@ -399,50 +261,64 @@ void TextBox::key_press(Key k)
 
 void TextBox::mouse_press(Mouse m)
 {
-    // Adjust the mouse position
-    auto const align_offset = [&]() -> int {
-        auto const span =
-            spans_[(std::size_t)(std::min(top_line_ + m.at.y, (int)spans_.size() - 1))];
-        switch (align_) {
-            case Align::Left: return 0;
-            case Align::Center: return (this->size.width - (int)span.size()) / 2;
-            case Align::Right: return this->size.width - (int)span.size();
-            default: throw std::logic_error{"Invalid Align"};
-        }
-    }();
+    if (m.button == Mouse::Button::Left) {
+        // Normalize the mouse position
+        auto const align_offset = [&]() -> int {
+            assert(text_layout_.size() > 0);
+            auto const span = text_layout_[(std::size_t)(std::min(
+                scroll_offset + m.at.y, (int)text_layout_.size() - 1))];
+            return find_align_offset(align, size.width, (int)span.size());
+        }();
 
-    m.at.x -= align_offset;
-    m.at.y += top_line_;
-    cursor_index_ = screen_to_index(m.at, line_lengths(spans_));
+        m.at.x -= align_offset;
+        m.at.y += scroll_offset;
+        cursor_index_ = point_to_nearest_index(m.at, line_lengths(text_layout_));
+    }
 }
 
 void TextBox::mouse_wheel(Mouse m)
 {
     if (m.button == Mouse::Button::ScrollUp) {
-        if (top_line_ > 0) { this->set_top_line(top_line_ - 1); }
+        if (scroll_offset > 0) {
+            --scroll_offset;
+            auto at = index_to_point(cursor_index_, line_lengths(text_layout_));
+            if (at.y >= scroll_offset + size.height) {
+                at.y = std::max(at.y - 1, 0);
+                cursor_index_ = point_to_nearest_index(at, line_lengths(text_layout_));
+            }
+        }
     }
     else if (m.button == Mouse::Button::ScrollDown) {
-        this->set_top_line(std::min(top_line_ + 1, (int)std::size(spans_) - 1));
+        if (scroll_offset + 1 < std::ssize(text_layout_)) {
+            ++scroll_offset;
+            auto at = index_to_point(cursor_index_, line_lengths(text_layout_));
+            if (at.y < scroll_offset) {
+                at.y += 1;
+                cursor_index_ = point_to_nearest_index(at, line_lengths(text_layout_));
+            }
+        }
     }
 }
 
-void TextBox::resize(Area)
+void TextBox::update_layout_cache()
 {
-    spans_ = calculate_spans(text_, wrap_, (std::size_t)size.width);
-    top_line_ += scroll_offset_to_cursor_index(cursor_index_, line_lengths(spans_),
-                                               top_line_, size.height);
+    unicode_str_ = [this] {
+        auto gen = esc::detail::u8_string_to_u32(text);
+        return std::u32string{std::begin(gen), std::end(gen)};
+    }();
+    text_layout_ = perform_text_layout(unicode_str_, wrap, (std::size_t)size.width);
 }
 
 void link(TextBox& tb, ScrollBar& sb)
 {
-    tb.on_scroll_update.connect(tracked(
+    tb.on_scroll.connect(tracked(
         [](ScrollBar& sb, int pos, int len) {
             sb.position = pos;
             sb.scrollable_length = len;
         },
         sb));
     sb.on_scroll.connect(
-        tracked([](TextBox& tb, int pos) { tb.set_top_line(pos); }, tb));
+        tracked([](TextBox& tb, int pos) { tb.scroll_offset = pos; }, tb));
 }
 
 }  // namespace ox

@@ -255,6 +255,14 @@ auto board_holder(T board)
 
 int main()
 {
-    // auto head = Widget{FocusPolicy::None, SizePolicy::flex()};
-    // return Application{head}.run();
+    auto head = TextBox{{
+                    .wrap = TextBox::Wrap::Word,
+                    .align = Align::Left,
+                    .brush = {.background = XColor::BrightBlack,
+                              .foreground = XColor::White,
+                              .traits = Trait::Bold},
+                    .focus_policy = FocusPolicy::Strong,
+                }} |
+                Border::round("TextBox");
+    return Application{head}.run();
 }
