@@ -110,7 +110,10 @@ class Bordered : public Widget {
 
     auto get_children() -> zzz::Generator<Widget&> override { co_yield child; }
 
-    auto get_children() const -> zzz::Generator<Widget const&> override { co_yield child; }
+    auto get_children() const -> zzz::Generator<Widget const&> override
+    {
+        co_yield child;
+    }
 };
 
 // Moves \p w into a Bordered object

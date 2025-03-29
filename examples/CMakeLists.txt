@@ -29,7 +29,7 @@ target_link_libraries(
         TermOx
 )
 
-enable_asan(TermOx.examples.pong)
+# enable_asan(TermOx.examples.pong)
 
 # Pinbox -------------------------------------------------------------------------------
 add_executable(TermOx.examples.pinbox EXCLUDE_FROM_ALL
@@ -48,7 +48,7 @@ target_link_libraries(
         TermOx
 )
 
-enable_asan(TermOx.examples.pinbox)
+# enable_asan(TermOx.examples.pinbox)
 
 # Snake --------------------------------------------------------------------------------
 add_executable(TermOx.examples.snake EXCLUDE_FROM_ALL
@@ -67,7 +67,7 @@ target_link_libraries(
         TermOx
 )
 
-enable_asan(TermOx.examples.snake)
+# enable_asan(TermOx.examples.snake)
 
 # Accumulator --------------------------------------------------------------------------
 add_executable(TermOx.examples.accumulator EXCLUDE_FROM_ALL
@@ -86,7 +86,7 @@ target_link_libraries(
         TermOx
 )
 
-enable_asan(TermOx.examples.accumulator)
+# enable_asan(TermOx.examples.accumulator)
 
 # Scratch ------------------------------------------------------------------------------
 add_executable(TermOx.examples.scratch EXCLUDE_FROM_ALL

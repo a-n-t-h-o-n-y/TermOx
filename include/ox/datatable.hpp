@@ -17,15 +17,16 @@ namespace ox {
  */
 class DataTable : public Widget {
     struct Options {
-        Brush cell_brush = {};
-        Brush line_brush = {};
         Color background = XColor::Default;
+        Color foreground_cell = XColor::Default;
+        Color foreground_line = XColor::Default;
     } static const init;
 
    public:
-    Brush cell_brush;
-    Brush line_brush;
     Color background;
+    Color foreground_cell;
+    Color foreground_line;
+
     std::size_t offset = 0;  // scrolling
 
    public:

@@ -54,9 +54,7 @@ auto TimerThread::run(std::stop_token st,
         std::chrono::duration_cast<ClockType::duration>(std::chrono::milliseconds{16});
     auto next_callback_time = ClockType::now() + duration;
     while (true) {
-        if (st.stop_requested()) {
-            return;
-        }
+        if (st.stop_requested()) { return; }
 
         auto const now = ClockType::now();
         if (now >= next_callback_time) {
@@ -83,7 +81,7 @@ Terminal::~Terminal()
     esc::uninitialize_terminal();
 }
 
-auto Terminal::commit_changes() -> void
+void Terminal::commit_changes()
 {
     escape_sequence_.clear();
 
@@ -153,9 +151,7 @@ Timer::Timer(std::chrono::milliseconds duration, bool launch)
     : id_{next_id_++}, duration_{duration}
 {
     Terminal::timers.emplace(id_, TimerThread{});
-    if (launch) {
-        this->start();
-    }
+    if (launch) { this->start(); }
 }
 
 Timer::Timer(Timer&& other)
@@ -168,9 +164,7 @@ Timer::Timer(Timer&& other)
 
 auto Timer::operator=(Timer&& other) -> Timer&
 {
-    if (this->is_running_) {
-        this->stop();
-    }
+    if (this->is_running_) { this->stop(); }
     id_ = std::move(other.id_);
     duration_ = std::move(other.duration_);
     is_running_ = std::move(other.is_running_);
@@ -180,9 +174,7 @@ auto Timer::operator=(Timer&& other) -> Timer&
 
 Timer::~Timer()
 {
-    if (is_running_) {
-        this->stop();
-    }
+    if (is_running_) { this->stop(); }
 }
 
 auto Timer::start() -> void
@@ -217,130 +209,6 @@ auto Canvas::operator[](Point p) const -> Glyph const&
         .y = std::clamp(at.y + p.y, 0, buffer.size().height - 1),
     };
     return buffer[global_point];
-}
-
-// -------------------------------------------------------------------------------------
-
-Painter::CursorWriter::CursorWriter(Canvas const& canvas, Point cursor)
-    : canvas_{canvas}, cursor_{cursor}
-{}
-
-auto Painter::CursorWriter::operator<<(Glyph const& g) && -> CursorWriter
-{
-    if (cursor_.x < canvas_.size.width && cursor_.y < canvas_.size.height) {
-        canvas_[cursor_] = g;
-        ++cursor_.x;
-    }
-    return std::move(*this);
-}
-
-auto Painter::CursorWriter::operator<<(Glyph const& g) & -> CursorWriter&
-{
-    if (cursor_.x < canvas_.size.width && cursor_.y < canvas_.size.height) {
-        canvas_[cursor_] = g;
-        ++cursor_.x;
-    }
-    return *this;
-}
-
-auto Painter::CursorWriter::operator<<(std::string_view sv) && -> CursorWriter
-{
-    return std::move(*this) << esc::detail::utf8_to_glyphs(sv);
-}
-
-auto Painter::CursorWriter::operator<<(std::string_view sv) & -> CursorWriter&
-{
-    return *this << esc::detail::utf8_to_glyphs(sv);
-}
-
-auto Painter::CursorWriter::operator<<(std::u32string_view sv) && -> CursorWriter
-{
-    return std::move(*this) << esc::detail::utf32_to_glyphs(sv);
-}
-
-auto Painter::CursorWriter::operator<<(std::u32string_view sv) & -> CursorWriter&
-{
-    return *this << esc::detail::utf32_to_glyphs(sv);
-}
-
-auto Painter::CursorWriter::operator<<(Painter::Box const& b) -> CursorWriter
-{
-    auto const end = Point{
-        .x = std::min(cursor_.x + b.size.width, canvas_.size.width),
-        .y = std::min(cursor_.y + b.size.height, canvas_.size.height),
-    };
-
-    // Top
-    canvas_[cursor_] = b.corners[0] | b.brush;
-    for (auto x = cursor_.x + 1; x < end.x - 1; ++x) {
-        canvas_[{x, cursor_.y}] = b.walls[0] | b.brush;
-    }
-    canvas_[{end.x - 1, cursor_.y}] = b.corners[1] | b.brush;
-
-    // Middle
-    for (auto y = cursor_.y + 1; y < end.y - 1; ++y) {
-        canvas_[{cursor_.x, y}] = b.walls[1] | b.brush;
-        canvas_[{end.x - 1, y}] = b.walls[1] | b.brush;
-    }
-
-    // Bottom
-    canvas_[{cursor_.x, end.y - 1}] = b.corners[2] | b.brush;
-    for (auto x = cursor_.x + 1; x < end.x - 1; ++x) {
-        canvas_[{x, end.y - 1}] = b.walls[0] | b.brush;
-    }
-    canvas_[{end.x - 1, end.y - 1}] = b.corners[3] | b.brush;
-
-    return *this;
-}
-
-auto Painter::CursorWriter::operator<<(Painter::HLine const& hline) -> CursorWriter
-{
-    if (cursor_.y >= canvas_.size.height) {
-        return *this;
-    }
-    auto const end = std::min(cursor_.x + hline.length, canvas_.size.width);
-    while (cursor_.x < end) {
-        canvas_[cursor_] = hline.glyph;
-        ++cursor_.x;
-    }
-    return *this;
-}
-
-auto Painter::CursorWriter::operator<<(Painter::VLine const& vline) -> CursorWriter
-{
-    if (cursor_.x >= canvas_.size.width) {
-        return *this;
-    }
-    auto const end = std::min(cursor_.y + vline.length, canvas_.size.height);
-    while (cursor_.y < end) {
-        canvas_[cursor_] = vline.glyph;
-        ++cursor_.y;
-    }
-    return *this;
-}
-
-Painter::Painter(Canvas const& c) : canvas_{c} {}
-
-auto Painter::operator[](Point p) -> CursorWriter { return CursorWriter{canvas_, p}; }
-
-auto Painter::clear() -> void
-{
-    for (auto x = 0; x < canvas_.size.width; ++x) {
-        for (auto y = 0; y < canvas_.size.height; ++y) {
-            canvas_[{x, y}] = Glyph{};
-        }
-    }
-}
-
-auto Painter::fill(Glyph const& g) -> void { this->fill(g, {0, 0}, canvas_.size); }
-
-auto Painter::fill(Glyph const& g, Point at, Area size) -> void
-{
-    for (auto x = 0; x < size.width; ++x) {
-        for (auto y = 0; y < size.height; ++y) {
-            canvas_[{at.x + x, at.y + y}] = g;
-        }
-    }
 }
 
 }  // namespace ox

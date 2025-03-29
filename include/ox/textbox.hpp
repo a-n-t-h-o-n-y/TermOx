@@ -33,7 +33,6 @@ class TextBox : public Widget {
     Wrap wrap;
     Align align;
     Brush brush;
-    int scroll_offset = 0;  // Line number of the top displayed line. zero indexed.
 
     /**
      * Emitted when any scroll parameter is updated. For ScrollBar.
@@ -43,6 +42,18 @@ class TextBox : public Widget {
 
    public:
     TextBox(Options x = init);
+
+   public:
+    /**
+     * Set the line number for the top display line.
+     */
+    void set_scroll_offset(int position);
+
+    /**
+     * Return the number of lines that can be scrolled to.
+     */
+    [[nodiscard]]
+    auto get_scroll_length() const -> int;
 
    public:
     void paint(Canvas c) override;
@@ -57,6 +68,7 @@ class TextBox : public Widget {
     void update_layout_cache();
 
    private:
+    int scroll_offset_ = 0;  // Line number of the top displayed line. zero indexed.
     std::size_t cursor_index_ = 0;                  // [0, unicode_str_.size()]
     std::u32string unicode_str_ = {};               // cache; updated by paint()
     std::vector<std::u32string_view> text_layout_;  // cache; updated by paint()

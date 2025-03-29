@@ -41,12 +41,8 @@ class SnakeEngine {
     [[nodiscard]] auto step() -> bool
     {
         ++state.frame;
-        if (state.level != 1 && state.frame % 777 == 0) {
-            --state.level;
-        }
-        if (state.frame % state.level != 0) {
-            return true;
-        }
+        if (state.level != 1 && state.frame % 777 == 0) { --state.level; }
+        if (state.frame % state.level != 0) { return true; }
 
         // Next Head
         if (state.next_direction + last_direction_ == Point{0, 0}) {
@@ -162,9 +158,7 @@ class SnakeGameWidget : public Widget {
     void timer(int id) override
     {
         if (id == timer_.id()) {
-            if (not engine_.step()) {
-                timer_.stop();
-            }
+            if (not engine_.step()) { timer_.stop(); }
         }
     }
 
@@ -173,7 +167,7 @@ class SnakeGameWidget : public Widget {
         // If Too Small
         if (engine_.size.width > this->size.width ||
             engine_.size.height > this->size.height) {
-            Painter{c}[{0, 0}] << "Terminal Screen is Too Small";
+            put(c, {0, 0}, U"Terminal Screen is Too Small");
             return;
         }
 
@@ -184,9 +178,10 @@ class SnakeGameWidget : public Widget {
         };
 
         // Paint Background
-        Painter{c}.fill(U' ' | bg(XColor::BrightBlack), offset, engine_.size);
+        put(c, offset,
+            shape::Fill{.glyph = U' ' | bg(XColor::BrightBlack), .size = engine_.size});
 
-        // Psaint apples
+        // Paint apples
         for (auto const pt : engine_.state.apple_field) {
             c[offset + pt] = U' ' | bg(XColor::BrightRed);
         }
@@ -206,8 +201,8 @@ class SnakeGameWidget : public Widget {
         }
 
         // Score
-        Painter{c}[{.x = 0, .y = this->size.height - 1}]
-            << "Score: " << std::to_string(engine_.state.score);
+        put(c, {.x = 0, .y = this->size.height - 1},
+            "Score: " + std::to_string(engine_.state.score));
 
         // Press 's' To Start
         if (not timer_.is_running()) {
@@ -217,7 +212,7 @@ class SnakeGameWidget : public Widget {
                              .x = engine_.size.width / 2 - (int)(text.size() / 2),
                              .y = engine_.size.height / 2,
                          };
-            Painter{c}[center] << text;
+            put(c, center, text);
         }
     }
 

@@ -2,6 +2,7 @@
 
 #include <ox/align.hpp>
 #include <ox/core/core.hpp>
+#include <ox/put.hpp>
 
 #include <algorithm>
 #include <span>
@@ -15,9 +16,9 @@ DataTable::Options const DataTable::init = {};
 
 DataTable::DataTable(Options x)
     : Widget{FocusPolicy::None, SizePolicy::flex()},
-      cell_brush{std::move(x.cell_brush)},
-      line_brush{std::move(x.line_brush)},
-      background{std::move(x.background)}
+      background{std::move(x.background)},
+      foreground_cell{std::move(x.foreground_cell)},
+      foreground_line{std::move(x.foreground_line)}
 {}
 
 void DataTable::add_column(std::string heading, Align align, Color foreground)
@@ -44,9 +45,7 @@ void DataTable::add_row(std::vector<std::string> row)
 
 void DataTable::paint(Canvas c)
 {
-    if (this->size.width == 0 || this->size.height == 0 || columns_.empty()) {
-        return;
-    }
+    if (this->size.width == 0 || this->size.height == 0 || columns_.empty()) { return; }
 
     auto const border_area = Area{
         .width = c.size.width,
@@ -54,25 +53,33 @@ void DataTable::paint(Canvas c)
                            ((int)columns_.front().size() - (int)this->offset) * 2 + 3),
     };
 
-    auto painter = Painter{c};
+    // Fill with Background
+    for (auto x = 0; x < c.size.width; ++x) {
+        for (auto y = 0; y < c.size.height; ++y) {
+            c[{x, y}].brush.background = background;
+        }
+    }
 
     // Border
-    painter[{0, 0}] << Painter::Box{
-        .corners = Painter::Box::round_corners,
-        .brush = line_brush,
-        .size = border_area,
-    };
+    put(c, {0, 0},
+        shape::Box{
+            .corners = shape::Box::round_corners,
+            .foreground = foreground_line,
+            .size = border_area,
+        });
 
     // Header Line
     if (this->size.height > 2) {
-        painter[{0, 2}]
-            << (U'╞' | line_brush)
-            << Painter::HLine{
+        put(c, {.x = 0, .y = 2}, U'╞' | fg(foreground_line));
+        put(c, {.x = 1, .y = 2},
+            shape::HLine{
                 .length = std::max(c.size.width - 2, 0),
-                .glyph = {.symbol = U'═', .brush = line_brush},
-            }
-            << (U'╡' | line_brush);
+                .symbol = U'═',
+                .foreground = foreground_line,
+            });
+        put(c, {.x = c.size.width - 1, .y = 2}, U'╡' | fg(foreground_line));
     }
+
     auto const table_y = 3;
 
     // Cell Text
@@ -86,15 +93,13 @@ void DataTable::paint(Canvas c)
         auto const cell_width = headings_.children[column_index].size.width;
 
         for (auto const& text : std::span{column}.subspan(this->offset)) {
-            if (cell_point.y + 1 >= border_area.height) {
-                break;
-            }
+            if (cell_point.y + 1 >= border_area.height) { break; }
             if (text.size() + 1 > (std::size_t)cell_width) {
-                painter[cell_point]
-                    << text.substr(0, (std::size_t)std::max(cell_width - 2, 0)) + "…";
+                put(c, cell_point,
+                    text.substr(0, (std::size_t)std::max(cell_width - 2, 0)) + "…");
             }
             else {
-                painter[cell_point] << text;
+                put(c, cell_point, text);
             }
             cell_point.y += 2;
         }
@@ -102,14 +107,14 @@ void DataTable::paint(Canvas c)
 
     // Border Intersections
     for (auto y = 4; y + 1 < border_area.height; y += 2) {
-        painter[{0, y}] << (U'├' | line_brush);
-        painter[{c.size.width - 1, y}] << (U'┤' | line_brush);
+        put(c, {0, y}, U'├' | fg(foreground_line));
+        put(c, {c.size.width - 1, y}, U'┤' | fg(foreground_line));
     }
     for (auto i = std::size_t{0}; i + 1 < headings_.children.size(); ++i) {
         auto const& heading = headings_.children[i];
         auto const x = heading.at.x + heading.size.width;
-        painter[{x, 2}] << (U'╤' | line_brush);
-        painter[{x, std::max(border_area.height - 1, 0)}] << (U'┴' | line_brush);
+        put(c, {x, 2}, U'╤' | fg(foreground_line));
+        put(c, {x, std::max(border_area.height - 1, 0)}, U'┴' | fg(foreground_line));
     }
 
     // Horizontal Lines
@@ -118,10 +123,12 @@ void DataTable::paint(Canvas c)
              ++column_index) {
             auto const& heading = headings_.children[column_index];
             auto x = heading.at.x;
-            painter[{x + 1, y}] << Painter::HLine{
-                .length = heading.size.width,
-                .glyph = {.symbol = U'─', .brush = line_brush},
-            };
+            put(c, {x + 1, y},
+                shape::HLine{
+                    .length = heading.size.width,
+                    .symbol = U'─',
+                    .foreground = foreground_line,
+                });
         }
     }
 
@@ -131,16 +138,10 @@ void DataTable::paint(Canvas c)
              ++column_index) {
             auto const& heading = headings_.children[column_index];
             auto x = heading.at.x + heading.size.width;
-            painter[{x, y}] << (U'│' | line_brush);
+            put(c, {x, y}, U'│' | fg(foreground_line));
             if (y + 2 < border_area.height) {
-                painter[{x, y + 1}] << (U'┼' | line_brush);
+                put(c, {x, y + 1}, U'┼' | fg(foreground_line));
             }
-        }
-    }
-
-    for (auto x = 0; x < c.size.width; ++x) {
-        for (auto y = 0; y < c.size.height; ++y) {
-            c[{x, y}].brush.background = this->background;
         }
     }
 }
@@ -166,6 +167,9 @@ void DataTable::resize(Area)
 
 auto DataTable::get_children() -> zzz::Generator<Widget&> { co_yield headings_; }
 
-auto DataTable::get_children() const -> zzz::Generator<Widget const&> { co_yield headings_; }
+auto DataTable::get_children() const -> zzz::Generator<Widget const&>
+{
+    co_yield headings_;
+}
 
 }  // namespace ox

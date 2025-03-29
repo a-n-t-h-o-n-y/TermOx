@@ -14,6 +14,7 @@
 #include <vector>
 
 #include <ox/core/core.hpp>
+#include <ox/put.hpp>
 
 using namespace ox;
 
@@ -174,9 +175,8 @@ using State = std::variant<SplashScreen, MainMenu, PlayerSelectMenu, Game, HowTo
 
 // -------------------------------------------------------------------------------------
 
-auto paint(SplashScreen const& x, Canvas const& c) -> void
+auto paint(SplashScreen const& x, Canvas c) -> void
 {
-    auto p = Painter{c};
     auto hsl = HSL{.hue = x.hue, .saturation = 90, .lightness = 70};
 
     auto offset = [&]() -> Point {
@@ -190,23 +190,23 @@ auto paint(SplashScreen const& x, Canvas const& c) -> void
     auto display = x.display;
     for (auto nl_at = display.find('\n'); nl_at != std::string::npos;
          nl_at = display.find('\n')) {
-        p[offset] << (display.substr(0, nl_at) | Trait::Bold | fg(TColor{hsl}));
+        put(c, offset, display.substr(0, nl_at) | Trait::Bold | fg(TColor{hsl}));
         display = display.substr(nl_at + 1);
         hsl.hue = (std::uint16_t)((hsl.hue + 20) % 360);
         offset.y += 1;
     }
 
     auto const enter = U"Press Enter to continue" | Trait::Dim;
-    p[{
-        .x = (c.size.width - (int)enter.size()) / 2,
-        .y = c.size.height - 1,
-    }] << enter;
+    put(c,
+        {
+            .x = (c.size.width - (int)enter.size()) / 2,
+            .y = c.size.height - 1,
+        },
+        enter);
 }
 
-auto paint(MainMenu const& x, Canvas const& c) -> void
+auto paint(MainMenu const& x, Canvas c) -> void
 {
-    auto p = Painter{c};
-
     {  // Logo
         auto offset = [&]() -> Point {
             auto const width_text = (int)logo.find('\n');
@@ -219,7 +219,7 @@ auto paint(MainMenu const& x, Canvas const& c) -> void
         auto display = logo;
         for (auto nl_at = display.find('\n'); nl_at != std::string::npos;
              nl_at = display.find('\n')) {
-            p[offset] << (display.substr(0, nl_at) | Trait::Dim);
+            put(c, offset, display.substr(0, nl_at) | Trait::Dim);
             display = display.substr(nl_at + 1);
             offset.y += 1;
         }
@@ -227,34 +227,31 @@ auto paint(MainMenu const& x, Canvas const& c) -> void
 
     {  // Menu Items
         for (std::size_t i = 0; i < x.options.size(); ++i) {
-            auto cursor = p[{
+            auto const at = Point{
                 .x = (c.size.width - (int)x.options[i].size()) / 2,
                 .y = 14 + (int)i,
-            }];
-            if (i == x.selected) {
-                cursor << (x.options[i] | Trait::Standout);
-            }
+            };
+            if (i == x.selected) { put(c, at, x.options[i] | Trait::Standout); }
             else {
-                cursor << x.options[i];
+                put(c, at, x.options[i]);
             }
         }
     }
 }
 
-auto paint(HowTo const& x, Canvas const& c) -> void
+auto paint(HowTo const& x, Canvas c) -> void
 {
-    auto p = Painter{c};
-
     {  // Border
-        p[{0, 0}] << Painter::Box{
-            .corners = Painter::Box::round_corners,
-            .brush = {.foreground = XColor::Blue, .traits = Trait::Dim},
-            .size = c.size,
-        };
+        put(c, {0, 0},
+            shape::Box{
+                .corners = shape::Box::round_corners,
+                .foreground = XColor::Blue,
+                .size = c.size,
+            });
     }
     {  // Title
         auto const at = Point{.x = (c.size.width - (int)x.title.size()) / 2, .y = 1};
-        p[at] << (x.title | Trait::Bold | Trait::Underline);
+        put(c, at, x.title | Trait::Bold | Trait::Underline);
     }
     {  // Instructions
         for (std::size_t i = 0; i < x.instructions.size(); ++i) {
@@ -262,43 +259,43 @@ auto paint(HowTo const& x, Canvas const& c) -> void
                 .x = (c.size.width - 40) / 2,
                 .y = 4 + (int)i,
             };
-            p[at] << (x.instructions[i][0] | Trait::Bold);
-            p[{
-                .x = (c.size.width + 8) / 2,
-                .y = 4 + (int)i,
-            }] << x.instructions[i][1];
+            put(c, at, x.instructions[i][0] | Trait::Bold);
+            put(c,
+                {
+                    .x = (c.size.width + 8) / 2,
+                    .y = 4 + (int)i,
+                },
+                x.instructions[i][1]);
         }
     }
     {  // Footer
-        p[{.x = 2, .y = c.size.height - 1}]
-            << (U"Press Esc to return to the main menu" | Trait::Dim);
+        put(c, {.x = 2, .y = c.size.height - 1},
+            U"Press Esc to return to the main menu" | Trait::Dim);
     }
 }
 
-auto paint(PlayerSelectMenu const& x, Canvas const& c) -> void
+auto paint(PlayerSelectMenu const& x, Canvas c) -> void
 {
-    auto p = Painter{c};
-
     {  // Title
         auto const at = Point{.x = (c.size.width - (int)x.title.size()) / 2, .y = 1};
-        p[at] << x.title;
+        put(c, at, x.title);
     }
     {  // Left Player
         auto const at = Point{.x = c.size.width / 2 - 25, .y = 4};
         if (x.left_selected) {
-            p[at] << "Left Player: " << (x.left_player.name | Trait::Standout);
+            put(c, at, "Left Player: " + (x.left_player.name | Trait::Standout));
         }
         else {
-            p[at] << "Left Player: " << x.left_player.name;
+            put(c, at, "Left Player: " + x.left_player.name);
         }
     }
     {  // Right Player
         auto const at = Point{.x = c.size.width / 2 + 10, .y = 4};
         if (!x.left_selected) {
-            p[at] << "Right Player: " << (x.right_player.name | Trait::Standout);
+            put(c, at, "Right Player: " + (x.right_player.name | Trait::Standout));
         }
         else {
-            p[at] << "Right Player: " << x.right_player.name;
+            put(c, at, "Right Player: " + x.right_player.name);
         }
     }
     {  // Options
@@ -308,26 +305,24 @@ auto paint(PlayerSelectMenu const& x, Canvas const& c) -> void
                 .y = 6 + (int)i,
             };
 
-            if (i == x.selected) {
-                p[at] << (x.options[i].name | Trait::Standout);
-            }
+            if (i == x.selected) { put(c, at, x.options[i].name | Trait::Standout); }
             else {
-                p[at] << x.options[i].name;
+                put(c, at, x.options[i].name);
             }
         }
     }
     {  // Footer
-        p[{.x = 0, .y = c.size.height - 1}]
-            << (U"Press Esc to return to the main menu" | Trait::Dim);
+        put(c, {.x = 0, .y = c.size.height - 1},
+            U"Press Esc to return to the main menu" | Trait::Dim);
     }
 }
 
-auto paint(Game const& x, Canvas const& c) -> void
+auto paint(Game const& x, Canvas c) -> void
 {
     static constexpr auto display_space = Game::game_space;
 
     if (c.size.width < display_space.width || c.size.height < display_space.height) {
-        Painter{c}[{0, 0}] << U"Terminal too small to display game";
+        put(c, {0, 0}, U"Terminal too small to display game");
         return;
     }
 
@@ -339,11 +334,16 @@ auto paint(Game const& x, Canvas const& c) -> void
     };
 
     {  // Net
-        auto p = Painter{game_canvas};
-        p[{.x = display_space.width / 2, .y = 0}] << Painter::VLine{
-            .length = display_space.height,
-            .glyph = U'╳' | Trait::Dim,
-        };
+        put(game_canvas, {.x = display_space.width / 2, .y = 0},
+            shape::VLine{
+                .length = display_space.height,
+                .symbol = U'╳',
+            });
+        put(game_canvas, {.x = display_space.width / 2, .y = 0},
+            shape::VLine{
+                .length = display_space.height,
+                .symbol = U'╳',
+            });
     }
 
     {  // Ball
@@ -362,8 +362,10 @@ auto paint(Game const& x, Canvas const& c) -> void
             return U"▄▃▂▁█▇▆▅"[i];
         }(x.ball.at.y) | fg(color);
 
-        auto const at =
-            Point{.x = (int)std::round(x.ball.at.x), .y = (int)std::round(x.ball.at.y)};
+        auto const at = Point{
+            .x = (int)std::round(x.ball.at.x),
+            .y = (int)std::round(x.ball.at.y),
+        };
         game_canvas[at] = glyph | Trait::Inverse;
         game_canvas[{.x = at.x, .y = at.y - 1}] = glyph;
     }
@@ -375,8 +377,10 @@ auto paint(Game const& x, Canvas const& c) -> void
                 return {U"█▇▆▅▄▃▂▁"[i]};
             }(paddle.top.y);
 
-            auto at = Point{.x = (int)std::floor(paddle.top.x),
-                            .y = (int)std::floor(paddle.top.y)};
+            auto at = Point{
+                .x = (int)std::floor(paddle.top.x),
+                .y = (int)std::floor(paddle.top.y),
+            };
 
             game_canvas[at] = edge;
 
@@ -386,7 +390,9 @@ auto paint(Game const& x, Canvas const& c) -> void
             }
 
             at.y += 1;
-            game_canvas[at] = edge | Trait::Inverse;
+            if (at.y < game_canvas.size.height) {
+                game_canvas[at] = edge | Trait::Inverse;
+            }
         };
 
         paint_paddle(x.left.paddle);
@@ -394,8 +400,8 @@ auto paint(Game const& x, Canvas const& c) -> void
     }
 
     {  // Left Score
-        Painter{game_canvas}[{0, -2}] << x.left.player.name << ": "
-                                      << std::to_string(x.left.score);
+        put(game_canvas, {0, -2},
+            x.left.player.name + ": " + std::to_string(x.left.score));
     }
 
     {  // Right Score
@@ -404,28 +410,29 @@ auto paint(Game const& x, Canvas const& c) -> void
             .x = display_space.width - (int)text.size() - 1,
             .y = -2,
         };
-        Painter{game_canvas}[at] << text;
+        put(game_canvas, at, text);
     }
 
     {  // Border
-        Painter{c}[game_canvas.at + Point{-1, -1}] << Painter::Box{
-            .corners = Painter::Box::round_corners,
-            .brush = {.foreground = XColor::Blue, .traits = Trait::Dim},
-            .size = {.width = display_space.width + 2,
-                     .height = display_space.height + 2},
-        };
+        put(c, game_canvas.at + Point{-1, -1},
+            shape::Box{
+                .corners = shape::Box::round_corners,
+                .foreground = XColor::Blue,
+                .size = {.width = display_space.width + 2,
+                         .height = display_space.height + 2},
+            });
     }
 
     {  // Footer
-        auto p = Painter{c};
-        p[{.x = 0, .y = c.size.height - 1}]
-            << (U"Press Esc to return to the main menu" | Trait::Dim);
-
+        put(c, {.x = 0, .y = c.size.height - 1},
+            U"Press Esc to return to the main menu" | Trait::Dim);
         auto const enter_text = std::u32string{U"Press Enter to start next round"};
-        p[{
-            .x = (c.size.width - (int)enter_text.size()),
-            .y = c.size.height - 1,
-        }] << (enter_text | Trait::Dim);
+        put(c,
+            {
+                .x = (c.size.width - (int)enter_text.size()),
+                .y = c.size.height - 1,
+            },
+            enter_text | Trait::Dim);
     }
 }
 
@@ -528,12 +535,8 @@ auto key_press(Game x, Key k) -> PongEventResponse
         auto rng = std::mt19937{std::random_device{}()};
         auto dx = float_dist{0.5, 0.8}(rng);
         auto dy = float_dist{0.1, 0.4}(rng);
-        if (int_dist{0, 1}(rng) == 0) {
-            dx = -dx;
-        }
-        if (int_dist{0, 1}(rng) == 0) {
-            dy = -dy;
-        }
+        if (int_dist{0, 1}(rng) == 0) { dx = -dx; }
+        if (int_dist{0, 1}(rng) == 0) { dy = -dy; }
         return {dx, dy};
     };
 
@@ -581,7 +584,8 @@ auto key_press(HowTo x, Key k) -> PongEventResponse
 }
 
 /**
- * Returns the new state after the key press, or std::nullopt if the app should quit.
+ * Returns the new state after the key press, or std::nullopt if the app should
+ * quit.
  */
 auto key_press(State s, Key k) -> PongEventResponse
 {
@@ -592,9 +596,7 @@ auto key_press(State s, Key k) -> PongEventResponse
 
 auto timer(SplashScreen x, int id) -> PongEventResponse
 {
-    if (x.timer.id() != id) {
-        return x;
-    }
+    if (x.timer.id() != id) { return x; }
     return SplashScreen{
         .hue = (std::uint16_t)((x.hue + 2) % 360),
         .display = x.display,
@@ -604,9 +606,7 @@ auto timer(SplashScreen x, int id) -> PongEventResponse
 
 auto timer(Game state, int id) -> PongEventResponse
 {
-    if (state.timer.id() != id) {
-        return state;
-    }
+    if (state.timer.id() != id) { return state; }
 
     auto& ball = state.ball;
     auto& left = state.left;

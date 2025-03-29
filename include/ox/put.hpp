@@ -10,6 +10,7 @@ namespace ox::shape {
 struct HLine {
     int length;
     char32_t symbol = U'─';
+    Brush brush = {};
     Color foreground = XColor::Default;
 };
 
@@ -21,13 +22,16 @@ struct VLine {
 
 struct Box {
     /// {top left, top right, bottom left, bottom right}
-    std::array<char32_t, 4> corners = {U'┌', U'┐', U'└', U'┘'};
+    std::array<char32_t, 4> corners = square_corners;
 
     /// {N, S, E, W}
     std::array<char32_t, 4> walls = {U'─', U'─', U'│', U'│'};
 
     Color foreground = XColor::Default;
     Area size = {0, 0};
+
+    static constexpr auto square_corners = std::array{U'┌', U'┐', U'└', U'┘'};
+    static constexpr auto round_corners = std::array{U'╭', U'╮', U'╰', U'╯'};
 };
 
 struct Fill {

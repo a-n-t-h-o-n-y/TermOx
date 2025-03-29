@@ -7,26 +7,34 @@
 #include <string>
 #include <string_view>
 
+#include <esc/detail/transcode.hpp>
+
 #include <ox/align.hpp>
 #include <ox/core/core.hpp>
 
 namespace ox::detail {
 using namespace ox;
 
+// Used by both Label and BasicNumberLabel
 void paint_label(Canvas c, std::string_view text, Align align, Brush brush)
 {
-    auto painter = Painter{c};
-    painter.fill(U' ' | bg(brush.background));
-
-    auto glyphs = text | brush;  // Count visible space with Glyphs, not bytes.
-    if (std::ssize(glyphs) > c.size.width) {
-        glyphs.resize((std::size_t)c.size.width);
+    // Fill with Brush
+    for (auto x = 0; x < c.size.width; ++x) {
+        for (auto y = 0; y < c.size.height; ++y) {
+            c[{.x = x, .y = y}].brush = brush;
+        }
     }
 
-    painter[{
-        .x = find_align_offset(align, c.size.width, (int)glyphs.size()),
-        .y = c.size.height / 2,
-    }] << glyphs;
+    auto unicode_str = esc::detail::u8_string_to_u32_string(text);
+    if (std::ssize(unicode_str) > c.size.width) {
+        unicode_str.resize((std::size_t)c.size.width);
+    }
+    auto const x = find_align_offset(align, c.size.width, (int)unicode_str.size());
+    auto const y = c.size.height / 2;
+    for (auto i = 0; i < (int)unicode_str.size(); ++i) {
+        auto ch = unicode_str[(std::size_t)i];
+        c[{.x = x + i, .y = y}].symbol = ch;
+    }
 }
 
 }  // namespace ox::detail

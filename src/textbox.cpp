@@ -91,7 +91,7 @@ using namespace ox;
         current_index += (int)len;
     }
     return {
-        .x = line_lengths[std::size(line_lengths) - 1],
+        .x = line_lengths[(std::size_t)(std::ssize(line_lengths) - 1)],
         .y = (int)std::ssize(line_lengths) - 1,
     };
 }
@@ -113,22 +113,22 @@ using namespace ox;
 }
 
 /**
- * Calculates the amount that scroll_offset should be modified by in order to make the
+ * Calculates the amount that scroll_offset_ should be modified by in order to make the
  * given cursor index appear visible on screen. Returns 0 if already on screen.
  */
 template <std::ranges::range R>
 [[nodiscard]] auto y_offset_to_cursor_index(std::size_t cursor_index,
                                             R&& line_lengths,
-                                            int scroll_offset,
+                                            int scroll_offset_,
                                             int screen_height) -> int
 {
     auto const at = index_to_point(cursor_index, line_lengths);
-    if (at.y >= scroll_offset && at.y < scroll_offset + screen_height) { return 0; }
-    else if (at.y < scroll_offset) {
-        return at.y - scroll_offset;
+    if (at.y >= scroll_offset_ && at.y < scroll_offset_ + screen_height) { return 0; }
+    else if (at.y < scroll_offset_) {
+        return at.y - scroll_offset_;
     }
     else {
-        return at.y - (scroll_offset + screen_height - 1);
+        return at.y - (scroll_offset_ + screen_height - 1);
     }
 }
 
@@ -154,7 +154,27 @@ TextBox::TextBox(Options x)
       wrap{std::move(x.wrap)},
       align{std::move(x.align)},
       brush{std::move(x.brush)}
-{}
+{
+    this->update_layout_cache();  // updates unicode_str_ and text_layout_
+}
+
+void TextBox::set_scroll_offset(int position)
+{
+    scroll_offset_ = std::clamp(position, 0, this->get_scroll_length());
+
+    // Adjust cursor if needed.
+    auto at = index_to_point(cursor_index_, line_lengths(text_layout_));
+    if (at.y < scroll_offset_) {
+        at.y = position;
+        cursor_index_ = point_to_nearest_index(at, line_lengths(text_layout_));
+    }
+    else if (at.y >= scroll_offset_ + size.height) {
+        at.y = position + std::max(size.height - 1, 0);
+        cursor_index_ = point_to_nearest_index(at, line_lengths(text_layout_));
+    }
+}
+
+auto TextBox::get_scroll_length() const -> int { return (int)std::ssize(text_layout_); }
 
 void TextBox::paint(Canvas c)
 {
@@ -162,14 +182,14 @@ void TextBox::paint(Canvas c)
 
     {  // Adjust scroll and cursor if no longer valid.
         auto const line_count = (int)std::ssize(text_layout_);
-        scroll_offset = std::clamp(scroll_offset, 0, std::max(line_count - 1, 0));
+        scroll_offset_ = std::clamp(scroll_offset_, 0, std::max(line_count - 1, 0));
         cursor_index_ =
             std::clamp(cursor_index_, std::size_t{0}, std::size(unicode_str_));
-        scroll_offset += y_offset_to_cursor_index(
-            cursor_index_, line_lengths(text_layout_), scroll_offset, size.height);
+        scroll_offset_ += y_offset_to_cursor_index(
+            cursor_index_, line_lengths(text_layout_), scroll_offset_, size.height);
 
         // TODO Always emitted, but could be updated to be smarter about this.
-        this->on_scroll(scroll_offset, line_count);
+        this->on_scroll(scroll_offset_, line_count);
     }
 
     // Fill with Brush
@@ -180,9 +200,9 @@ void TextBox::paint(Canvas c)
     }
 
     // Paint Text
-    for (auto y = 0; y + scroll_offset < std::ssize(text_layout_) && y < c.size.height;
+    for (auto y = 0; y + scroll_offset_ < std::ssize(text_layout_) && y < c.size.height;
          ++y) {
-        auto const span = text_layout_[(std::size_t)(y + scroll_offset)];
+        auto const span = text_layout_[(std::size_t)(y + scroll_offset_)];
         auto const x = find_align_offset(align, c.size.width, (int)span.size());
 
         for (auto i = 0; i < (int)span.size(); ++i) {
@@ -198,7 +218,7 @@ void TextBox::paint(Canvas c)
         auto const span = text_layout_[(std::size_t)cursor.y];
         auto const x =
             find_align_offset(align, c.size.width, (int)std::ssize(span)) + cursor.x;
-        Widget::cursor = {.x = x, .y = cursor.y - scroll_offset};
+        Widget::cursor = {.x = x, .y = cursor.y - scroll_offset_};
     }
 }
 
@@ -210,20 +230,20 @@ void TextBox::key_press(Key k)
                 --cursor_index_;
                 unicode_str_.erase(std::next(std::cbegin(unicode_str_),
                                              (std::ptrdiff_t)cursor_index_));
-                text = esc::detail::u32_to_u8(unicode_str_);
+                esc::detail::u32_to_u8(unicode_str_, text);
             }
             break;
         case Key::Enter:
             unicode_str_.insert(
                 std::next(std::cbegin(unicode_str_), (std::ptrdiff_t)cursor_index_++),
                 U'\n');
-            text = esc::detail::u32_to_u8(unicode_str_);
+            esc::detail::u32_to_u8(unicode_str_, text);
             break;
         case Key::Delete:
             if (cursor_index_ < text.size()) {
                 unicode_str_.erase(std::next(std::cbegin(unicode_str_),
                                              (std::ptrdiff_t)cursor_index_));
-                text = esc::detail::u32_to_u8(unicode_str_);
+                esc::detail::u32_to_u8(unicode_str_, text);
             }
             break;
         case Key::ArrowLeft:
@@ -252,7 +272,7 @@ void TextBox::key_press(Key k)
                 unicode_str_.insert(
                     std::next(std::begin(unicode_str_), (std::ptrdiff_t)cursor_index_),
                     c);
-                text = esc::detail::u32_to_u8(unicode_str_);
+                esc::detail::u32_to_u8(unicode_str_, text);
                 ++cursor_index_;
             }
             break;
@@ -266,12 +286,12 @@ void TextBox::mouse_press(Mouse m)
         auto const align_offset = [&]() -> int {
             assert(text_layout_.size() > 0);
             auto const span = text_layout_[(std::size_t)(std::min(
-                scroll_offset + m.at.y, (int)text_layout_.size() - 1))];
+                scroll_offset_ + m.at.y, (int)text_layout_.size() - 1))];
             return find_align_offset(align, size.width, (int)span.size());
         }();
 
         m.at.x -= align_offset;
-        m.at.y += scroll_offset;
+        m.at.y += scroll_offset_;
         cursor_index_ = point_to_nearest_index(m.at, line_lengths(text_layout_));
     }
 }
@@ -279,33 +299,16 @@ void TextBox::mouse_press(Mouse m)
 void TextBox::mouse_wheel(Mouse m)
 {
     if (m.button == Mouse::Button::ScrollUp) {
-        if (scroll_offset > 0) {
-            --scroll_offset;
-            auto at = index_to_point(cursor_index_, line_lengths(text_layout_));
-            if (at.y >= scroll_offset + size.height) {
-                at.y = std::max(at.y - 1, 0);
-                cursor_index_ = point_to_nearest_index(at, line_lengths(text_layout_));
-            }
-        }
+        this->set_scroll_offset(scroll_offset_ - 1);
     }
     else if (m.button == Mouse::Button::ScrollDown) {
-        if (scroll_offset + 1 < std::ssize(text_layout_)) {
-            ++scroll_offset;
-            auto at = index_to_point(cursor_index_, line_lengths(text_layout_));
-            if (at.y < scroll_offset) {
-                at.y += 1;
-                cursor_index_ = point_to_nearest_index(at, line_lengths(text_layout_));
-            }
-        }
+        this->set_scroll_offset(scroll_offset_ + 1);
     }
 }
 
 void TextBox::update_layout_cache()
 {
-    unicode_str_ = [this] {
-        auto gen = esc::detail::u8_string_to_u32(text);
-        return std::u32string{std::begin(gen), std::end(gen)};
-    }();
+    esc::detail::u8_string_to_u32_string(text, unicode_str_);
     text_layout_ = perform_text_layout(unicode_str_, wrap, (std::size_t)size.width);
 }
 
@@ -318,7 +321,7 @@ void link(TextBox& tb, ScrollBar& sb)
         },
         sb));
     sb.on_scroll.connect(
-        tracked([](TextBox& tb, int pos) { tb.scroll_offset = pos; }, tb));
+        tracked([](TextBox& tb, int pos) { tb.set_scroll_offset(pos); }, tb));
 }
 
 }  // namespace ox
