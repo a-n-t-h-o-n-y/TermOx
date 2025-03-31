@@ -77,14 +77,14 @@ class ScreenBuffer {
      * left in an undefined state.
      * @param a The new dimensions of the ScreenBuffer.
      */
-    auto resize(Area a) -> void;
+    void resize(Area a);
 
     /**
      * Fill the ScreenBuffer with the given Glyph.
      *
      * @param g The Glyph to fill the ScreenBuffer with.
      */
-    auto fill(Glyph const& g) -> void;
+    void fill(Glyph const& g);
 
     /**
      * Return the size of the ScreenBuffer.
@@ -136,7 +136,7 @@ class TimerThread {
      *
      * @details This will request the thread to stop, it does not wait for it to stop.
      */
-    auto request_stop() -> void { thread_.request_stop(); }
+    void request_stop() { thread_.request_stop(); }
 
    private:
     /**
@@ -147,9 +147,9 @@ class TimerThread {
      * @param callback The function to call each time the duration has elapsed
      * @param duration The periodic duration to wait before calling the callback
      */
-    static auto run(std::stop_token st,
+    static void run(std::stop_token st,
                     CallbackType const& callback,
-                    std::chrono::milliseconds duration) -> void;
+                    std::chrono::milliseconds duration);
 
    private:
     std::jthread thread_;
@@ -213,7 +213,7 @@ class Terminal {
      *
      * @param st The stop_token to check for stop_requested().
      */
-    auto run_read_loop(std::stop_token st) -> void;
+    void run_read_loop(std::stop_token st);
 
     /**
      * Return the current size of the terminal.
@@ -261,7 +261,7 @@ class Timer {
      *
      * @details This will create and launch a new thread.
      */
-    auto start() -> void;
+    void start();
 
     /**
      * Request the TimerThread to stop, returns immediately.
@@ -269,7 +269,7 @@ class Timer {
      * @details Does not wait for thread to exit. The destructor of Terminal will wait
      * for it to exit, or if you call start() again.
      */
-    auto stop() -> void;
+    void stop();
 
     [[nodiscard]] auto id() const -> int { return id_; }
 

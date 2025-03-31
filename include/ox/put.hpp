@@ -7,10 +7,13 @@
 
 namespace ox::shape {
 
+// TODO remove fg color from every shape and put it into put function as parameter and
+// an overload with brush, brush overload will overwrite any traits and background color
+// etc.. and fg overload will only override the fg color of that cell.
+
 struct HLine {
     int length;
     char32_t symbol = U'─';
-    Brush brush = {};
     Color foreground = XColor::Default;
 };
 

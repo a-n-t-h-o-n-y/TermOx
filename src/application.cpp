@@ -37,28 +37,13 @@ template <InputRangeOf<Widget> R>
  * @param w The Widget to start the traversal from.
  * @param fn The function to execute on each Widget.
  */
-auto for_each_depth_first(Widget& w, std::function<void(Widget&)> const& fn) -> void
+void for_each_depth_first(Widget& w, std::function<void(Widget&)> const& fn)
 {
     fn(w);
     for (Widget& child : w.get_children()) {
         for_each_depth_first(child, fn);
     }
 }
-
-/**
- * Execute \p fn on \p w and every descendant of \p w, in a depth first traversal.
- *
- * @param w The Widget to start the traversal from.
- * @param fn The function to execute on each Widget.
- */
-// auto for_each_depth_first(Widget const& w,
-//                           std::function<void(Widget const&)> const& fn) -> void
-// {
-//     fn(w);
-//     for (Widget const& child : w.get_children()) {
-//         for_each_depth_first(child, fn);
-//     }
-// }
 
 /**
  * Find the first Widget in \p w and its descendants that satisfies \p predicate.
@@ -75,9 +60,7 @@ auto for_each_depth_first(Widget& w, std::function<void(Widget&)> const& fn) -> 
 {
     Widget* result = nullptr;
     for_each_depth_first(w, [&](Widget& child) {
-        if (result == nullptr && predicate(child)) {
-            result = &child;
-        }
+        if (result == nullptr && predicate(child)) { result = &child; }
     });
     return result;
 }
@@ -87,7 +70,7 @@ auto for_each_depth_first(Widget& w, std::function<void(Widget&)> const& fn) -> 
 enum class SetFocus : bool { Yes, No };
 
 template <SetFocus SF, typename EventFn>
-auto any_mouse_event(Widget& head, Mouse m, EventFn&& event_fn) -> void
+void any_mouse_event(Widget& head, Mouse m, EventFn&& event_fn)
 {
     Widget* const found_ptr =
         find_widget_at(head.get_children() | filter::is_active, m.at);
@@ -107,25 +90,21 @@ auto any_mouse_event(Widget& head, Mouse m, EventFn&& event_fn) -> void
     }
 }
 
-auto send_leave_events(Widget& w, Point p) -> void
+void send_leave_events(Widget& w, Point p)
 {
     w.mouse_leave();
     Widget* const next = find_widget_at(w.get_children() | filter::is_active, p);
-    if (next != nullptr) {
-        send_leave_events(*next, p - next->at);
-    }
+    if (next != nullptr) { send_leave_events(*next, p - next->at); }
 }
 
-auto send_enter_events(Widget& w, Point p) -> void
+void send_enter_events(Widget& w, Point p)
 {
     w.mouse_enter();
     Widget* const next = find_widget_at(w.get_children() | filter::is_active, p);
-    if (next != nullptr) {
-        send_enter_events(*next, p - next->at);
-    }
+    if (next != nullptr) { send_enter_events(*next, p - next->at); }
 }
 
-auto send_enter_leave_events(Widget& w, Point previous, Point current) -> void
+void send_enter_leave_events(Widget& w, Point previous, Point current)
 {
     Widget* const previous_widget =
         find_widget_at(w.get_children() | filter::is_active, previous);
@@ -141,7 +120,7 @@ auto send_enter_leave_events(Widget& w, Point previous, Point current) -> void
 
 // -------------------------------------------------------------------------------------
 
-auto do_tab_focus_change(Widget& head, Widget const& current_focus) -> void
+void do_tab_focus_change(Widget& head, Widget const& current_focus)
 {
     Widget* next = find_if_depth_first(
         head, [found = false, &current_focus](Widget const& w) mutable {
@@ -150,9 +129,7 @@ auto do_tab_focus_change(Widget& head, Widget const& current_focus) -> void
                        w.focus_policy == FocusPolicy::Tab;
             }
             else {
-                if (&w == &current_focus) {
-                    found = true;
-                }
+                if (&w == &current_focus) { found = true; }
                 return false;
             }
         });
@@ -164,20 +141,16 @@ auto do_tab_focus_change(Widget& head, Widget const& current_focus) -> void
         });
     }
 
-    if (next != nullptr && next != &current_focus) {
-        Focus::set(*next);
-    }
+    if (next != nullptr && next != &current_focus) { Focus::set(*next); }
 }
 
-auto do_shift_tab_focus_change(Widget& head, Widget const& current_focus) -> void
+void do_shift_tab_focus_change(Widget& head, Widget const& current_focus)
 {
     Widget* next = nullptr;
 
     for_each_depth_first(
         head, [&next, previous = (Widget*)nullptr, &current_focus](Widget& w) mutable {
-            if (&w == &current_focus) {
-                next = previous;
-            }
+            if (&w == &current_focus) { next = previous; }
             if (w.focus_policy == FocusPolicy::Strong ||
                 w.focus_policy == FocusPolicy::Tab) {
                 previous = &w;
@@ -193,15 +166,12 @@ auto do_shift_tab_focus_change(Widget& head, Widget const& current_focus) -> voi
         });
     }
 
-    if (next != nullptr && next != &current_focus) {
-        Focus::set(*next);
-    }
+    if (next != nullptr && next != &current_focus) { Focus::set(*next); }
 }
 
 // Recursively send paint events to each Widget including and below head. \p cursor is
 // assigned to if the current focus widget is painted.
-auto send_paint_events(Widget& head, Canvas canvas, Terminal::Cursor& cursor_out)
-    -> void
+void send_paint_events(Widget& head, Canvas canvas, Terminal::Cursor& cursor_out)
 {
     for (auto& child : head.get_children() | filter::is_active) {
         send_paint_events(child,
@@ -264,15 +234,11 @@ auto Application::handle_key_press(Key k) -> EventResponse
 {
     auto const life = Focus::get();
 
-    if (not life.valid()) {
-        return {};
-    }
+    if (not life.valid()) { return {}; }
     auto& focused = life.get();
     if (focused.focus_policy == FocusPolicy::Strong ||
         focused.focus_policy == FocusPolicy::Tab) {
-        if (k == Key::Tab) {
-            do_tab_focus_change(head_, focused);
-        }
+        if (k == Key::Tab) { do_tab_focus_change(head_, focused); }
         else if (k == Key::BackTab) {
             do_shift_tab_focus_change(head_, focused);
         }
@@ -285,9 +251,7 @@ auto Application::handle_key_press(Key k) -> EventResponse
 
 auto Application::handle_key_release(Key k) -> EventResponse
 {
-    if (auto const life = Focus::get(); life.valid()) {
-        life.get().key_release(k);
-    }
+    if (auto const life = Focus::get(); life.valid()) { life.get().key_release(k); }
     return {};
 }
 

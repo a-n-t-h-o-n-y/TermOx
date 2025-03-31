@@ -19,12 +19,12 @@ void BasicButton::key_press(Key k)
     if (k == Key::Enter) { this->on_press(); }
 }
 
-auto BasicButton::mouse_press(Mouse m) -> void
+void BasicButton::mouse_press(Mouse m)
 {
     if (m.button == Mouse::Button::Left) { this->on_press(); }
 }
 
-auto BasicButton::mouse_release(Mouse m) -> void
+void BasicButton::mouse_release(Mouse m)
 {
     if (m.button == Mouse::Button::Left) { this->on_release(); }
 }

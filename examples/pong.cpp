@@ -175,7 +175,7 @@ using State = std::variant<SplashScreen, MainMenu, PlayerSelectMenu, Game, HowTo
 
 // -------------------------------------------------------------------------------------
 
-auto paint(SplashScreen const& x, Canvas c) -> void
+void paint(SplashScreen const& x, Canvas c)
 {
     auto hsl = HSL{.hue = x.hue, .saturation = 90, .lightness = 70};
 
@@ -205,7 +205,7 @@ auto paint(SplashScreen const& x, Canvas c) -> void
         enter);
 }
 
-auto paint(MainMenu const& x, Canvas c) -> void
+void paint(MainMenu const& x, Canvas c)
 {
     {  // Logo
         auto offset = [&]() -> Point {
@@ -239,7 +239,7 @@ auto paint(MainMenu const& x, Canvas c) -> void
     }
 }
 
-auto paint(HowTo const& x, Canvas c) -> void
+void paint(HowTo const& x, Canvas c)
 {
     {  // Border
         put(c, {0, 0},
@@ -274,7 +274,7 @@ auto paint(HowTo const& x, Canvas c) -> void
     }
 }
 
-auto paint(PlayerSelectMenu const& x, Canvas c) -> void
+void paint(PlayerSelectMenu const& x, Canvas c)
 {
     {  // Title
         auto const at = Point{.x = (c.size.width - (int)x.title.size()) / 2, .y = 1};
@@ -317,7 +317,7 @@ auto paint(PlayerSelectMenu const& x, Canvas c) -> void
     }
 }
 
-auto paint(Game const& x, Canvas c) -> void
+void paint(Game const& x, Canvas c)
 {
     static constexpr auto display_space = Game::game_space;
 
@@ -439,7 +439,7 @@ auto paint(Game const& x, Canvas c) -> void
 /**
  * Paints the state to the screen.
  */
-auto paint(State const& x) -> void
+void paint(State const& x)
 {
     std::visit(
         [&](auto const& s) {

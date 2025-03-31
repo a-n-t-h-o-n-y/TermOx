@@ -25,13 +25,13 @@ auto ScreenBuffer::operator[](Point p) const -> Glyph const&
     return buffer_[(std::size_t)(p.y * size_.width + p.x)];
 }
 
-auto ScreenBuffer::resize(Area a) -> void
+void ScreenBuffer::resize(Area a)
 {
     size_ = a;
     buffer_.resize((std::size_t)(a.width * a.height));
 }
 
-auto ScreenBuffer::fill(Glyph const& g) -> void
+void ScreenBuffer::fill(Glyph const& g)
 {
     for (auto& glyph : buffer_) {
         glyph = g;
@@ -46,9 +46,9 @@ TimerThread::TimerThread(std::chrono::milliseconds duration, CallbackType callba
       }}
 {}
 
-auto TimerThread::run(std::stop_token st,
+void TimerThread::run(std::stop_token st,
                       CallbackType const& callback,
-                      std::chrono::milliseconds duration) -> void
+                      std::chrono::milliseconds duration)
 {
     constexpr auto timeout_duration =
         std::chrono::duration_cast<ClockType::duration>(std::chrono::milliseconds{16});
@@ -126,7 +126,7 @@ void Terminal::commit_changes()
     esc::flush();
 }
 
-auto Terminal::run_read_loop(std::stop_token st) -> void
+void Terminal::run_read_loop(std::stop_token st)
 {
     Terminal::event_queue.enqueue(esc::Resize{Terminal::size()});
 
@@ -177,7 +177,7 @@ Timer::~Timer()
     if (is_running_) { this->stop(); }
 }
 
-auto Timer::start() -> void
+void Timer::start()
 {
     // TODO fix Timer and TimerThread so the thread is reused.
     Terminal::timers[id_] = TimerThread{
@@ -185,7 +185,7 @@ auto Timer::start() -> void
     is_running_ = true;
 }
 
-auto Timer::stop() -> void
+void Timer::stop()
 {
     Terminal::timers[id_].request_stop();
     is_running_ = false;

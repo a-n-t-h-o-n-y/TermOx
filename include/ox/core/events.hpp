@@ -51,7 +51,7 @@ class ConcurrentQueue {
      *
      * @param value The element to enqueue.
      */
-    auto enqueue(value_type value) -> void
+    void enqueue(value_type value)
     {
         auto tmp = std::list<value_type>{};
         tmp.push_back(std::move(value));
