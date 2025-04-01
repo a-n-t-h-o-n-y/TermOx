@@ -4,7 +4,7 @@
 
 # TermOx 🐂
 
-**TermOx** is a Terminal User Interface(TUI) Framework written in  C++17. Built
+**TermOx** is a Terminal User Interface(TUI) Framework written in C++17 (but with support for C++20). Built
 on top of [Escape](https://github.com/a-n-t-h-o-n-y/Escape), it defines a set of
 Widgets, Layouts, and Events that make it quick to craft unique user interfaces
 in the terminal.
