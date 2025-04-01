@@ -27,6 +27,7 @@ class Label : public Widget {
         std::string text = "";
         Align align = Align::Center;
         Brush brush = {};
+        SizePolicy size_policy = SizePolicy::flex();
     } static const init;
 
    public:

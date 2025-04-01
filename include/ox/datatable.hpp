@@ -21,6 +21,7 @@ class DataTable : public Widget {
         Color background = XColor::Default;
         Color foreground_cell = XColor::Default;
         Color foreground_line = XColor::Default;
+        SizePolicy size_policy = SizePolicy::flex();
     } static const init;
 
    public:

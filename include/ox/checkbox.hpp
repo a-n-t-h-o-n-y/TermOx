@@ -9,6 +9,9 @@
 
 namespace ox {
 
+/**
+ *  Displays a Checkbox with checked and unchecked states emitted. Doesn't have a Label.
+ */
 class CheckBox : public Widget {
    public:
     enum class State : bool { Checked, UnChecked };
@@ -26,6 +29,7 @@ class CheckBox : public Widget {
             .unchecked = U"[ ]"_gs,
             .in_focus_brush = {.traits = Trait::Bold},
         };
+        FocusPolicy focus_policy = FocusPolicy::Strong;
     } static const init;  // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=88165
 
    public:

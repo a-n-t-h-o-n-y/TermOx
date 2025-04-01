@@ -44,7 +44,7 @@ namespace ox {
 Label::Options const Label::init = {};
 
 Label::Label(Options x)
-    : Widget{FocusPolicy::None, SizePolicy::flex()},
+    : Widget{FocusPolicy::None, x.size_policy},
       text{std::move(x.text)},
       align{std::move(x.align)},
       brush{std::move(x.brush)}

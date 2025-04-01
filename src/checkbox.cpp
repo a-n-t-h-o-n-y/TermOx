@@ -7,7 +7,7 @@ namespace ox {
 CheckBox::Options const CheckBox::init = {};
 
 CheckBox::CheckBox(Options x)
-    : Widget{FocusPolicy::None, SizePolicy::fixed(4)},
+    : Widget{x.focus_policy, SizePolicy::fixed(4)},
       display{std::move(x.display)},
       state_{std::move(x.state)}
 {}

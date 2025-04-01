@@ -15,7 +15,7 @@ namespace ox {
 DataTable::Options const DataTable::init = {};
 
 DataTable::DataTable(Options x)
-    : Widget{FocusPolicy::None, SizePolicy::flex()},
+    : Widget{FocusPolicy::None, x.size_policy},
       background{std::move(x.background)},
       foreground_cell{std::move(x.foreground_cell)},
       foreground_line{std::move(x.foreground_line)}

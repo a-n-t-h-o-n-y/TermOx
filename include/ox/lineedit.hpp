@@ -25,6 +25,8 @@ class LineEdit : public Widget {
         std::string ghost_text = "";
         Brush ghost_text_brush = {.foreground = XColor::BrightBlack};
         std::optional<std::function<bool(char)>> validator = std::nullopt;
+        FocusPolicy focus_policy = FocusPolicy::Strong;
+        SizePolicy size_policy = SizePolicy::flex();
     } static const init;
 
    public:
