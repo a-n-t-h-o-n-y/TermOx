@@ -73,8 +73,8 @@ void ScrollBar::paint(Canvas c)
         shape::VLine{
             .length = std::max(bar_len - 1, 0),
             .symbol = U'█',
-            .foreground = brush.foreground,
-        });
+        },
+        brush.foreground);
 
     at.y += bar_len;
     if (at.y < this->size.height) { c[at] = edge | brush | Trait::Inverse; }

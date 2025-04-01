@@ -242,12 +242,7 @@ void paint(MainMenu const& x, Canvas c)
 void paint(HowTo const& x, Canvas c)
 {
     {  // Border
-        put(c, {0, 0},
-            shape::Box{
-                .corners = shape::Box::round_corners,
-                .foreground = XColor::Blue,
-                .size = c.size,
-            });
+        put(c, shape::Frame::square(), XColor::Blue);
     }
     {  // Title
         auto const at = Point{.x = (c.size.width - (int)x.title.size()) / 2, .y = 1};
@@ -338,12 +333,8 @@ void paint(Game const& x, Canvas c)
             shape::VLine{
                 .length = display_space.height,
                 .symbol = U'╳',
-            });
-        put(game_canvas, {.x = display_space.width / 2, .y = 0},
-            shape::VLine{
-                .length = display_space.height,
-                .symbol = U'╳',
-            });
+            },
+            Brush{.traits = Trait::Dim});
     }
 
     {  // Ball
@@ -400,27 +391,38 @@ void paint(Game const& x, Canvas c)
     }
 
     {  // Left Score
-        put(game_canvas, {0, -2},
-            x.left.player.name + ": " + std::to_string(x.left.score));
+        // Use Canvas::buffer to write outside of Canvas.
+        auto const text = x.left.player.name + ": " + std::to_string(x.left.score);
+        auto at = Point{
+            .x = game_canvas.at.x,
+            .y = std::max(0, game_canvas.at.y - 2),
+        };
+        for (auto ch : text) {
+            game_canvas.buffer[at].symbol = ch;
+            ++at.x;
+        }
     }
 
     {  // Right Score
         auto const text = x.right.player.name + ": " + std::to_string(x.right.score);
-        auto const at = Point{
-            .x = display_space.width - (int)text.size() - 1,
-            .y = -2,
+        auto at = Point{
+            .x = game_canvas.at.x + display_space.width - (int)text.size() - 1,
+            .y = std::max(0, game_canvas.at.y - 2),
         };
-        put(game_canvas, at, text);
+        for (auto ch : text) {
+            game_canvas.buffer[at].symbol = ch;
+            ++at.x;
+        }
     }
 
     {  // Border
         put(c, game_canvas.at + Point{-1, -1},
             shape::Box{
                 .corners = shape::Box::round_corners,
-                .foreground = XColor::Blue,
                 .size = {.width = display_space.width + 2,
                          .height = display_space.height + 2},
-            });
+            },
+            XColor::Blue);
     }
 
     {  // Footer

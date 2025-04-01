@@ -7,20 +7,14 @@
 
 namespace ox::shape {
 
-// TODO remove fg color from every shape and put it into put function as parameter and
-// an overload with brush, brush overload will overwrite any traits and background color
-// etc.. and fg overload will only override the fg color of that cell.
-
 struct HLine {
     int length;
     char32_t symbol = U'─';
-    Color foreground = XColor::Default;
 };
 
 struct VLine {
     int length;
     char32_t symbol = U'│';
-    Color foreground = XColor::Default;
 };
 
 struct Box {
@@ -30,7 +24,7 @@ struct Box {
     /// {N, S, E, W}
     std::array<char32_t, 4> walls = {U'─', U'─', U'│', U'│'};
 
-    Color foreground = XColor::Default;
+    // Color foreground = XColor::Default;
     Area size = {0, 0};
 
     static constexpr auto square_corners = std::array{U'┌', U'┐', U'└', U'┘'};
@@ -42,60 +36,124 @@ struct Fill {
     Area size;
 };
 
-struct Corners {
-    Color foreground = XColor::Default;
-};
-
-struct CornersRound {
-    Color foreground = XColor::Default;
-};
-
 struct Frame {
-    Color foreground = XColor::Default;
-};
+    /// {top left, top right, bottom left, bottom right}
+    std::array<char32_t, 4> corners;
 
-struct FrameRound {
-    Color foreground = XColor::Default;
-};
+    /// {N, S, E, W}
+    std::array<char32_t, 4> walls;
 
-struct FrameBold {
-    Color foreground = XColor::Default;
-};
+    static constexpr auto square() -> Frame
+    {
+        return {
+            .corners = {U'┌', U'┐', U'└', U'┘'},
+            .walls = {U'─', U'─', U'│', U'│'},
+        };
+    }
 
-struct FrameTwin {
-    Color foreground = XColor::Default;
-};
+    static constexpr auto half_square() -> Frame
+    {
+        return {
+            .corners = {U'\0', U'\0', U'\0', U'┘'},
+            .walls = {U'\0', U'─', U'│', U'\0'},
+        };
+    }
 
-struct HalfFrame {
-    Color foreground = XColor::Default;
-};
+    static constexpr auto round() -> Frame
+    {
+        return {
+            .corners = {U'╭', U'╮', U'╰', U'╯'},
+            .walls = {U'─', U'─', U'│', U'│'},
+        };
+    }
 
-struct HalfFrameRound {
-    Color foreground = XColor::Default;
-};
+    static constexpr auto half_round() -> Frame
+    {
+        return {
+            .corners = {U'\0', U'\0', U'\0', U'╯'},
+            .walls = {U'\0', U'─', U'│', U'\0'},
+        };
+    }
 
-struct HalfFrameBold {
-    Color foreground = XColor::Default;
-};
+    static constexpr auto bold() -> Frame
+    {
+        return {
+            .corners = {U'┏', U'┓', U'┗', U'┛'},
+            .walls = {U'━', U'━', U'┃', U'┃'},
+        };
+    }
 
-struct HalfFrameTwin {
-    Color foreground = XColor::Default;
-};
+    static constexpr auto half_twin() -> Frame
+    {
+        return {
+            .corners = {U'\0', U'\0', U'\0', U'╝'},
+            .walls = {U'\0', U'═', U'║', U'\0'},
+        };
+    }
 
-struct Brackets {
-    Color foreground = XColor::Default;
-};
+    static constexpr auto twin() -> Frame
+    {
+        return {
+            .corners = {U'╔', U'╗', U'╚', U'╝'},
+            .walls = {U'═', U'═', U'║', U'║'},
+        };
+    }
 
-struct BracketsRound {
-    Color foreground = XColor::Default;
-};
+    static constexpr auto half_bold() -> Frame
+    {
+        return {
+            .corners = {U'\0', U'\0', U'\0', U'┛'},
+            .walls = {U'\0', U'━', U'┃', U'\0'},
+        };
+    }
 
-struct BracketsBold {
-    Color foreground = XColor::Default;
-};
+    static constexpr auto corners_square() -> Frame
+    {
+        return {
+            .corners = {U'┌', U'┐', U'└', U'┘'},
+            .walls = {U'\0', U'\0', U'\0', U'\0'},
+        };
+    }
 
-struct BracketsTwin {
-    Color foreground = XColor::Default;
+    static constexpr auto corners_round() -> Frame
+    {
+        return {
+            .corners = {U'╭', U'╮', U'╰', U'╯'},
+            .walls = {U'\0', U'\0', U'\0', U'\0'},
+        };
+    }
+
+    static constexpr auto brackets() -> Frame
+    {
+        return {
+            .corners = {U'┌', U'┐', U'└', U'┘'},
+            .walls = {U'\0', U'\0', U'│', U'│'},
+        };
+    }
+
+    static constexpr auto brackets_round() -> Frame
+    {
+        return {
+            .corners = {U'╭', U'╮', U'╰', U'╯'},
+            .walls = {U'\0', U'\0', U'│', U'│'},
+        };
+    }
+
+    static constexpr auto brackets_bold() -> Frame
+    {
+        return {
+            .corners = {U'┏', U'┓', U'┗', U'┛'},
+            .walls = {U'\0', U'\0', U'┃', U'┃'},
+        };
+    }
+
+    static constexpr auto brackets_twin() -> Frame
+    {
+        return {
+            .corners = {U'╔', U'╗', U'╚', U'╝'},
+            .walls = {U'\0', U'\0', U'║', U'║'},
+        };
+    }
 };
 
 }  // namespace ox::shape
@@ -104,22 +162,23 @@ namespace ox {
 
 /**
  * Put a single Glyph at the given position on the Canvas.
- * @details Does bounds checking and is no-op if \p at is out of bounds.
+ * @details Does bounds checking and is no-op if \p at is out of Canvas' bounds.
  */
-void put(Canvas& c, Point at, Glyph const& item);
+void put(Canvas c, Point at, Glyph const& item);
 
 /**
  * Put a single character type to the Canvas at the given position.
  * @details Uses the default Brush and the given character.
+ * @details Does bounds checking and is no-op if \p at is out of Canvas' bounds.
  */
-void put(Canvas& c, Point at, Character auto item)
+void put(Canvas c, Point at, Character auto item)
 {
     put(c, at, Glyph{.symbol = static_cast<char32_t>(item)});
 }
 
-void put(Canvas& c, Point at, GlyphString auto const& item)
+void put(Canvas c, Point at, GlyphString auto const& item)
 {
-    if (at.y >= c.size.height) { return; }
+    if (at.x < 0 || at.y < 0 || at.y >= c.size.height) { return; }
 
     for (auto const& g : item) {
         if (at.x >= c.size.width) { break; }
@@ -128,46 +187,53 @@ void put(Canvas& c, Point at, GlyphString auto const& item)
     }
 }
 
-void put(Canvas& c, Point at, std::string_view element);
+void put(Canvas c, Point at, std::string_view element);
 
-void put(Canvas& c, Point at, std::u32string_view element);
+void put(Canvas c, Point at, std::u32string_view element);
 
-void put(Canvas& c, Point at, shape::HLine const& item);
+/**
+ * Paint the given HLine object to the screen.
+ *
+ * @param c The Canvas to Paint on.
+ * @param at The leftmost point of the line, where painting begins.
+ * @param item The HLine to paint.
+ */
+void put(Canvas c, Point at, shape::HLine item);
 
-void put(Canvas& c, Point at, shape::VLine const& item);
+/**
+ * Paint the given HLine object to the screen.
+ *
+ * @param c The Canvas to Paint on.
+ * @param at The leftmost point of the line, where painting begins.
+ * @param item The HLine to paint.
+ * @param foreground The fg color to assign each Cell the line is painted to.
+ */
+void put(Canvas c, Point at, shape::HLine item, Color foreground);
 
-void put(Canvas& c, Point at, shape::Box const& item);
+/**
+ * Paint the given HLine object to the screen.
+ *
+ * @param c The Canvas to Paint on.
+ * @param at The leftmost point of the line, where painting begins.
+ * @param item The HLine to paint.
+ * @param foreground The Brush to assign each Cell the line is painted to.
+ */
+void put(Canvas c, Point at, shape::HLine item, Brush const& brush);
 
-void put(Canvas& c, Point at, shape::Fill const& item);
+void put(Canvas c, Point at, shape::VLine item);
+void put(Canvas c, Point at, shape::VLine item, Color foreground);
+void put(Canvas c, Point at, shape::VLine item, Brush const& brush);
 
-void put(Canvas& c, shape::Corners const& item);
+void put(Canvas c, Point at, shape::Box const& item);
+void put(Canvas c, Point at, shape::Box const& item, Color foreground);
+void put(Canvas c, Point at, shape::Box const& item, Brush const& brush);
 
-void put(Canvas& c, shape::CornersRound const& item);
+void put(Canvas c, Point at, shape::Fill const& item);
 
-void put(Canvas& c, shape::Frame const& item);
+void put(Canvas c, shape::Frame const& item);
+void put(Canvas c, shape::Frame const& item, Color foreground);
+void put(Canvas c, shape::Frame const& item, Brush const& brush);
 
-void put(Canvas& c, shape::FrameRound const& item);
-
-void put(Canvas& c, shape::FrameBold const& item);
-
-void put(Canvas& c, shape::FrameTwin const& item);
-
-void put(Canvas& c, shape::HalfFrame const& item);
-
-void put(Canvas& c, shape::HalfFrameRound const& item);
-
-void put(Canvas& c, shape::HalfFrameBold const& item);
-
-void put(Canvas& c, shape::HalfFrameTwin const& item);
-
-void put(Canvas& c, shape::Brackets const& item);
-
-void put(Canvas& c, shape::BracketsRound const& item);
-
-void put(Canvas& c, shape::BracketsBold const& item);
-
-void put(Canvas& c, shape::BracketsTwin const& item);
-
-void clear(Canvas& c);
+void clear(Canvas c);
 
 }  // namespace ox

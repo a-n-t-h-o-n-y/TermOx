@@ -18,8 +18,8 @@ using namespace ox;
             },
         .decoration =
             Fade{
-                .paint_fn =
-                    shape_gradient<shape::BracketsRound>(RGB{0x0a3f46}, RGB{0x1ecbe1}),
+                .paint_fn = shape_gradient(shape::Frame::brackets_round(),
+                                           RGB{0x0a3f46}, RGB{0x1ecbe1}),
                 .fade_in = std::chrono::milliseconds{300},
                 .fade_out = std::chrono::milliseconds{500},
             },

@@ -12,7 +12,8 @@
 namespace ox {
 
 struct Border {
-    shape::Box box = {};
+    shape::Frame box;
+    Color foreground;  // Only applies to box.
     Label label = {};
 
     struct Options {
@@ -93,8 +94,7 @@ class Bordered : public Widget {
     void paint(Canvas c) override
     {
         // Box
-        border.box.size = this->size;
-        put(c, {.x = 0, .y = 0}, border.box);
+        put(c, border.box, border.foreground);
 
         // Label - Can't use Label::paint because it paints over border with bg color.
         auto& label = border.label;

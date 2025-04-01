@@ -17,12 +17,16 @@ ScreenBuffer::ScreenBuffer(Area size)
 
 auto ScreenBuffer::operator[](Point p) -> Glyph&
 {
-    return buffer_[(std::size_t)(p.y * size_.width + p.x)];
+    auto const at = (std::size_t)(p.y * size_.width + p.x);
+    assert(at < buffer_.size());
+    return buffer_[at];
 }
 
 auto ScreenBuffer::operator[](Point p) const -> Glyph const&
 {
-    return buffer_[(std::size_t)(p.y * size_.width + p.x)];
+    auto const at = (std::size_t)(p.y * size_.width + p.x);
+    assert(at < buffer_.size());
+    return buffer_[at];
 }
 
 void ScreenBuffer::resize(Area a)
@@ -195,20 +199,12 @@ void Timer::stop()
 
 auto Canvas::operator[](Point p) -> Glyph&
 {
-    auto const global_point = Point{
-        .x = std::clamp(at.x + p.x, 0, this->buffer.size().width - 1),
-        .y = std::clamp(at.y + p.y, 0, this->buffer.size().height - 1),
-    };
-    return buffer[global_point];
+    return buffer[{.x = at.x + p.x, .y = at.y + p.y}];
 }
 
 auto Canvas::operator[](Point p) const -> Glyph const&
 {
-    auto const global_point = Point{
-        .x = std::clamp(at.x + p.x, 0, buffer.size().width - 1),
-        .y = std::clamp(at.y + p.y, 0, buffer.size().height - 1),
-    };
-    return buffer[global_point];
+    return buffer[{.x = at.x + p.x, .y = at.y + p.y}];
 }
 
 }  // namespace ox

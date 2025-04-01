@@ -43,6 +43,8 @@ auto distribute_length(WidgetRange&& widgets, int total_length) -> std::vector<i
         return result;
     }();
 
+    if (total_length == 0) { return std::vector<int>(size_policies.size(), 0); }
+
     for ([[maybe_unused]] auto const& policy : size_policies) {
         assert(policy.minimum >= 0);
         assert(policy.maximum >= policy.minimum);
@@ -60,17 +62,29 @@ auto distribute_length(WidgetRange&& widgets, int total_length) -> std::vector<i
         total_allocated += exact_amount;
     }
 
-    // TODO
-    // I do not believe this removes space from widgets if the sum of mins is greater
-    // than the total space available.
-    // You could have a check here.
-    // if (total_allocated >= total) {
-    //     auto results = std::vector<int>(policy_count, 0);
+    auto results = std::vector<int>(size_policies.size(), 0);
 
-    //     // floor values to ints.
-    //     std::ranges::copy(exact_amounts, results.begin());
-    //     return results;
-    // }
+    // floor values to ints.
+    std::ranges::copy(exact_amounts, results.begin());
+
+    // If space is already over allocated.
+    if (auto const actual_alloc =
+            std::accumulate(std::cbegin(results), std::cend(results), 0);
+        actual_alloc >= total_length) {
+        while (std::accumulate(std::cbegin(results), std::cend(results), 0) >=
+               total_length) {
+            for (auto& len : results) {
+                if (len > 0) {
+                    len -= 1;
+                    if (std::accumulate(std::cbegin(results), std::cend(results), 0) <
+                        total_length) {
+                        return results;
+                    }
+                }
+            }
+        }
+        return results;
+    }
 
     // Distribute flex space
     auto remaining_space = (float)total_length - total_allocated;
@@ -100,7 +114,6 @@ auto distribute_length(WidgetRange&& widgets, int total_length) -> std::vector<i
         remaining_space -= space_distributed_this_round;
         if (space_distributed_this_round == 0) { break; }
     }
-    auto results = std::vector<int>(size_policies.size(), 0);
 
     // floor values to ints.
     std::ranges::copy(exact_amounts, results.begin());

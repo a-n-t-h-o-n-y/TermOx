@@ -36,7 +36,7 @@ class BasicButton : public Widget {
 /// Decoration that fades in and out with mouse hover.
 struct Fade {
     /// (Canvas, percent) where percent is fade amount from [0, 1].
-    std::function<void(Canvas&, float)> paint_fn;
+    std::function<void(Canvas, float)> paint_fn;
     std::chrono::milliseconds fade_in = std::chrono::milliseconds{200};
     std::chrono::milliseconds fade_out = std::chrono::milliseconds{400};
 };
@@ -44,12 +44,12 @@ struct Fade {
 /// BasicButton with a Label and optional Decoration.
 class Button : public BasicButton {
    public:
-    using PaintFn = std::function<void(Canvas&)>;
+    using PaintFn = std::function<void(Canvas)>;
     using Decoration = std::variant<PaintFn, Fade>;
 
     struct Options {
         Label::Options label = {};
-        Decoration decoration = [](Canvas&) {};
+        Decoration decoration = [](Canvas) {};
         std::function<void(Label&)> pressed_mod = [](Label&) {};
         std::function<void(Label&)> focused_mod = [](Label&) {};
         FocusPolicy focus_policy = FocusPolicy::Strong;
@@ -112,16 +112,15 @@ class Button : public BasicButton {
     -> TrueColor;
 
 /**
- * Builds a void(Canvas&, float) function from a Shape type and gradient.
- * @details Shape must be constructible from a Color. Useful for Fade decorations.
+ * Builds a void(Canvas, float) function from a Shape object and gradient.
+ * @details Shape must be able to be used with put(...). Useful for Fade decorations.
  */
-template <typename Shape>
-[[nodiscard]] auto shape_gradient(TrueColor one, TrueColor two)
-    -> std::function<void(Canvas&, float)>
+[[nodiscard]] auto shape_gradient(auto const& shape, TrueColor one, TrueColor two)
+    -> std::function<void(Canvas, float)>
 {
-    return [=](Canvas& c, float percent) {
+    return [=](Canvas c, float percent) {
         auto const fg = gradient_blend(one, two, percent);
-        put(c, Shape{fg});
+        put(c, shape, fg);
     };
 }
 

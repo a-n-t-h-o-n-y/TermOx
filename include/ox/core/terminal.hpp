@@ -300,18 +300,18 @@ struct Canvas {
     Area size;
 
     /**
-     * Provides mutable access from the top left Point of the Canvas.
+     * Provides mutable access to the given Point of the Canvas.
      *
-     * @param p The Point position of the Glyph in the Canvas. This will be clamped to
-     * the Canvas' bounds. The point should be in the range [{0, 0}, size).
+     * @param p The Point position of the Glyph in the Canvas. There is no bounds
+     * checking, the point should be in the range [{0, 0}, size).
      */
     [[nodiscard]] auto operator[](Point p) -> Glyph&;
 
     /**
-     * Provides const access from the top left Point of the Canvas.
+     * Provides const access to the given Point of the Canvas.
      *
-     * @param p The Point position of the Glyph in the Canvas. This will be clamped to
-     * the Canvas' bounds. The point should be in the range [{0, 0}, size).
+     * @param p The Point position of the Glyph in the Canvas. There is no bounds
+     * checking, the point should be in the range [{0, 0}, size).
      */
     [[nodiscard]] auto operator[](Point p) const -> Glyph const&;
 };

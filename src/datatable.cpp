@@ -1,14 +1,14 @@
 #include <ox/datatable.hpp>
 
-#include <ox/align.hpp>
-#include <ox/core/core.hpp>
-#include <ox/put.hpp>
-
 #include <algorithm>
 #include <span>
 #include <stdexcept>
 #include <string>
 #include <vector>
+
+#include <ox/align.hpp>
+#include <ox/core/core.hpp>
+#include <ox/put.hpp>
 
 namespace ox {
 
@@ -64,9 +64,9 @@ void DataTable::paint(Canvas c)
     put(c, {0, 0},
         shape::Box{
             .corners = shape::Box::round_corners,
-            .foreground = foreground_line,
             .size = border_area,
-        });
+        },
+        foreground_line);
 
     // Header Line
     if (this->size.height > 2) {
@@ -75,8 +75,8 @@ void DataTable::paint(Canvas c)
             shape::HLine{
                 .length = std::max(c.size.width - 2, 0),
                 .symbol = U'═',
-                .foreground = foreground_line,
-            });
+            },
+            foreground_line);
         put(c, {.x = c.size.width - 1, .y = 2}, U'╡' | fg(foreground_line));
     }
 
@@ -127,8 +127,8 @@ void DataTable::paint(Canvas c)
                 shape::HLine{
                     .length = heading.size.width,
                     .symbol = U'─',
-                    .foreground = foreground_line,
-                });
+                },
+                foreground_line);
         }
     }
 
@@ -160,8 +160,14 @@ void DataTable::mouse_wheel(Mouse m)
 void DataTable::resize(Area)
 {
     auto const old_size = headings_.size;
-    headings_.at = {.x = 1, .y = 1};
-    headings_.size = {.width = size.width - 2, .height = 1};
+    headings_.at = {
+        .x = std::min(1, std::max(size.width - 1, 0)),
+        .y = std::min(1, std::max(size.height - 1, 0)),
+    };
+    headings_.size = {
+        .width = std::max(size.width - 2, 0),
+        .height = std::min(1, size.height),
+    };
     headings_.resize(old_size);
 }
 
