@@ -232,7 +232,8 @@ class Terminal {
  * A handle to a Timer in the Terminal's timer system.
  *
  * @details This is used to create a new TimerThread with a given ID and provides access
- * to start and stop it.
+ * to start and stop it. The thread will post Timer events to the event queue at the
+ * given interval.
  */
 class Timer {
    public:

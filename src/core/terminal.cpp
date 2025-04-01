@@ -184,9 +184,9 @@ Timer::~Timer()
 void Timer::start()
 {
     // TODO fix Timer and TimerThread so the thread is reused.
+    is_running_ = true;
     Terminal::timers[id_] = TimerThread{
         duration_, [id = id_] { Terminal::event_queue.enqueue(event::Timer{id}); }};
-    is_running_ = true;
 }
 
 void Timer::stop()
