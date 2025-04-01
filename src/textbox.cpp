@@ -79,20 +79,20 @@ using namespace ox;
                                   std::ranges::random_access_range auto&& line_lengths)
     -> Point
 {
-    assert(line_lengths.size() > 0);
+    assert(std::size(line_lengths) > 0);
 
-    auto current_index = 0;
-    for (auto y = 0; y < std::ssize(line_lengths); ++y) {
+    auto current_index = std::size_t{0};
+    for (auto y = std::ptrdiff_t{0}; y < std::ssize(line_lengths); ++y) {
         // Check if index falls within this line
-        auto const len = line_lengths[(std::size_t)y];
-        if ((int)index >= current_index && (int)index < current_index + len) {
-            return {.x = (int)index - current_index, .y = y};
+        auto const len = line_lengths[y];
+        if (index >= current_index && index < (current_index + (std::size_t)len)) {
+            return {.x = (int)(index - current_index), .y = (int)y};
         }
-        current_index += (int)len;
+        current_index += (std::size_t)len;
     }
     return {
-        .x = line_lengths[(std::size_t)(std::ssize(line_lengths) - 1)],
-        .y = (int)std::ssize(line_lengths) - 1,
+        .x = line_lengths[std::ssize(line_lengths) - 1],
+        .y = (int)std::size(line_lengths) - 1,
     };
 }
 
@@ -108,8 +108,8 @@ using namespace ox;
     p.y = std::max(p.y, 0);
     auto truncated = line_lengths | std::views::take(p.y);
     auto index = std::accumulate(std::begin(truncated), std::end(truncated), 0);
-    index += std::min(p.x, std::max((int)line_lengths[(std::size_t)p.y] - 1, 0));
-    return index;
+    index += std::min(p.x, std::max((int)line_lengths[p.y] - 1, 0));
+    return (std::size_t)index;
 }
 
 /**
@@ -139,7 +139,7 @@ template <std::ranges::range R>
 auto line_lengths(std::vector<std::u32string_view> const& spans)
 {
     return spans |
-           std::views::transform([](auto const& span) { return std::ssize(span); });
+           std::views::transform([](auto const& span) { return (int)std::size(span); });
 }
 
 }  // namespace

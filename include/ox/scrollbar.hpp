@@ -15,7 +15,7 @@ class ScrollBar : public Widget {
 
    public:
     int scrollable_length;
-    int position;
+    int position;  // [0, scrollable_length)
     Brush brush;
 
     /// Emitted on any change to position, and passes position as the parameter.

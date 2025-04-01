@@ -52,7 +52,7 @@ void ScrollBar::paint(Canvas c)
 
     auto const edge = [](float y) -> char32_t {
         auto const i = (std::size_t)((y - std::floor(y)) * 8);
-        return {U"█▇▆▅▄▃▂▁"[i]};
+        return U"█▇▆▅▄▃▂▁"[i];
     }(bar_pos);
 
     auto at = Point{

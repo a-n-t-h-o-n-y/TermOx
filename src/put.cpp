@@ -4,14 +4,24 @@
 
 #include <ox/core/core.hpp>
 
+namespace {
+
+/**
+ *  Return true if \p at is within the bounds of \p area.
+ */
+[[nodiscard]]
+auto in_bounds(ox::Point at, ox::Area area) -> bool
+{
+    return at.x >= 0 && at.y >= 0 && at.x < area.width && at.y < area.height;
+}
+
+}  // namespace
+
 namespace ox {
 
 void put(Canvas c, Point at, Glyph const& item)
 {
-    if (at.x < 0 | at.y < 0 || at.x >= c.size.width || at.y >= c.size.height) {
-        return;
-    }
-    c[at] = item;
+    if (in_bounds(at, c.size)) { c[at] = item; }
 }
 
 void put(Canvas c, Point at, std::string_view item)
@@ -137,10 +147,6 @@ void put(Canvas c, Point at, shape::Box const& item)
             .length = item.size.height - 2,
             .symbol = item.walls[2],
         });
-
-    auto const in_bounds = [](Point at, Area area) {
-        return at.x >= 0 && at.y >= 0 && at.x < area.width && at.y < area.height;
-    };
 
     // Corners
     if (item.corners[0] != U'\0' && in_bounds(at, c.size)) {

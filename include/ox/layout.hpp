@@ -349,11 +349,11 @@ class Row : public Widget {
         auto active_children = this->get_children() | filter::is_active;
 
         auto x = 0;
-        auto i = 0;
+        auto i = std::size_t{0};
         for (auto& child : active_children) {
-            child.at = {x, 0};
+            child.at = {.x = x, .y = 0};
             auto const old_size = child.size;
-            child.size = {widths[i], this->size.height};
+            child.size = {.width = widths[i], .height = this->size.height};
             child.resize(old_size);
             x += widths[i];
             ++i;
