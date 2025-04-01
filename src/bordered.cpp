@@ -6,7 +6,7 @@ auto Border::light(std::string label) -> Border
 {
     return {
         .box = shape::Frame::square(),
-        .foreground = XColor::Default,
+        .brush = {},
         .label{{.text = std::move(label)}},
     };
 }
@@ -15,7 +15,7 @@ auto Border::light(Options x) -> Border
 {
     return {
         .box = shape::Frame::square(),
-        .foreground = x.foreground,
+        .brush = x.brush,
         .label = std::move(x.label),
     };
 }
@@ -24,7 +24,7 @@ auto Border::round(std::string label) -> Border
 {
     return {
         .box = shape::Frame::round(),
-        .foreground = XColor::Default,
+        .brush = {},
         .label{{.text = std::move(label)}},
     };
 }
@@ -33,7 +33,7 @@ auto Border::round(Options x) -> Border
 {
     return {
         .box = shape::Frame::round(),
-        .foreground = x.foreground,
+        .brush = x.brush,
         .label = std::move(x.label),
     };
 }
@@ -42,7 +42,7 @@ auto Border::twin(std::string label) -> Border
 {
     return {
         .box = shape::Frame::twin(),
-        .foreground = XColor::Default,
+        .brush = {},
         .label{{.text = std::move(label)}},
     };
 }
@@ -51,7 +51,7 @@ auto Border::twin(Options x) -> Border
 {
     return {
         .box = shape::Frame::twin(),
-        .foreground = x.foreground,
+        .brush = x.brush,
         .label = std::move(x.label),
     };
 }
@@ -60,7 +60,7 @@ auto Border::bold(std::string label) -> Border
 {
     return {
         .box = shape::Frame::bold(),
-        .foreground = XColor::Default,
+        .brush = {},
         .label{{.text = std::move(label)}},
     };
 }
@@ -69,7 +69,7 @@ auto Border::bold(Options x) -> Border
 {
     return {
         .box = shape::Frame::bold(),
-        .foreground = x.foreground,
+        .brush = x.brush,
         .label = std::move(x.label),
     };
 }
@@ -78,7 +78,7 @@ auto Border::dashed(std::string label) -> Border
 {
     return {
         .box = {.corners = {U'┌', U'┐', U'└', U'┘'}, .walls = {U'╌', U'╌', U'╎', U'╎'}},
-        .foreground = XColor::Default,
+        .brush = {},
         .label{{.text = std::move(label)}},
     };
 }
@@ -87,7 +87,7 @@ auto Border::dashed(Options x) -> Border
 {
     return {
         .box = {.corners = {U'┌', U'┐', U'└', U'┘'}, .walls = {U'╌', U'╌', U'╎', U'╎'}},
-        .foreground = x.foreground,
+        .brush = x.brush,
         .label = std::move(x.label),
     };
 }
@@ -96,7 +96,7 @@ auto Border::dotted(std::string label) -> Border
 {
     return {
         .box = {.corners = {U'┌', U'┐', U'└', U'┘'}, .walls = {U'┄', U'┄', U'┆', U'┆'}},
-        .foreground = XColor::Default,
+        .brush = {},
         .label{{.text = std::move(label)}},
     };
 }
@@ -105,7 +105,7 @@ auto Border::dotted(Options x) -> Border
 {
     return {
         .box = {.corners = {U'┌', U'┐', U'└', U'┘'}, .walls = {U'┄', U'┄', U'┆', U'┆'}},
-        .foreground = x.foreground,
+        .brush = x.brush,
         .label = std::move(x.label),
     };
 }
@@ -114,7 +114,7 @@ auto Border::ascii(std::string label) -> Border
 {
     return {
         .box = {.corners = {'+', '+', '+', '+'}, .walls = {'-', '-', '|', '|'}},
-        .foreground = XColor::Default,
+        .brush = {},
         .label{{.text = std::move(label)}},
     };
 }
@@ -123,7 +123,7 @@ auto Border::ascii(Options x) -> Border
 {
     return {
         .box = {.corners = {'+', '+', '+', '+'}, .walls = {'-', '-', '|', '|'}},
-        .foreground = x.foreground,
+        .brush = x.brush,
         .label = std::move(x.label),
     };
 }
@@ -132,7 +132,7 @@ auto Border::twin_horizontal(std::string label) -> Border
 {
     return {
         .box = {.corners = {U'╒', U'╕', U'╘', U'╛'}, .walls = {U'═', U'═', U'│', U'│'}},
-        .foreground = XColor::Default,
+        .brush = {},
         .label{{.text = std::move(label)}},
     };
 }
@@ -141,7 +141,7 @@ auto Border::twin_horizontal(Options x) -> Border
 {
     return {
         .box = {.corners = {U'╒', U'╕', U'╘', U'╛'}, .walls = {U'═', U'═', U'│', U'│'}},
-        .foreground = x.foreground,
+        .brush = x.brush,
         .label = std::move(x.label),
     };
 }
@@ -150,7 +150,7 @@ auto Border::twin_vertical(std::string label) -> Border
 {
     return {
         .box = {.corners = {U'╓', U'╖', U'╙', U'╜'}, .walls = {U'─', U'─', U'║', U'║'}},
-        .foreground = XColor::Default,
+        .brush = {},
         .label{{.text = std::move(label)}},
     };
 }
@@ -159,7 +159,7 @@ auto Border::twin_vertical(Options x) -> Border
 {
     return {
         .box = {.corners = {U'╓', U'╖', U'╙', U'╜'}, .walls = {U'─', U'─', U'║', U'║'}},
-        .foreground = x.foreground,
+        .brush = x.brush,
         .label = std::move(x.label),
     };
 }
