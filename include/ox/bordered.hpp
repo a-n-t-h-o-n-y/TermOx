@@ -133,7 +133,6 @@ class Divider : public Widget {
         char32_t horizontal;
     };
 
-   private:
     struct Options {
         Display lines = {.vertical = U'│', .horizontal = U'─'};
         Brush brush = {};

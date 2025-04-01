@@ -19,7 +19,6 @@ class CheckBox : public Widget {
         Brush in_focus_brush;
     };
 
-   private:
     struct Options {
         State state = State::UnChecked;
         Display display = {

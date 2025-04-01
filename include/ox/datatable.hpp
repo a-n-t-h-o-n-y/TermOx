@@ -16,6 +16,7 @@ namespace ox {
  * Start by adding columns first, then rows of text data.
  */
 class DataTable : public Widget {
+   public:
     struct Options {
         Color background = XColor::Default;
         Color foreground_cell = XColor::Default;
@@ -29,7 +30,6 @@ class DataTable : public Widget {
 
     std::size_t offset = 0;  // scrolling
 
-   public:
     DataTable(Options x = init);
 
    public:

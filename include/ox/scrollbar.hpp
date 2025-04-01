@@ -6,6 +6,7 @@
 namespace ox {
 
 class ScrollBar : public Widget {
+   public:
     struct Options {
         int scrollable_length = 0;
         int position = 0;

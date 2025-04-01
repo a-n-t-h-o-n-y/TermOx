@@ -40,7 +40,6 @@ class TextBox : public Widget {
      */
     sl::Signal<void(int, int)> on_scroll;
 
-   public:
     TextBox(Options x = init);
 
    public:

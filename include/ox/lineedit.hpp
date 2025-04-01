@@ -16,6 +16,7 @@ namespace ox {
 // TODO Implement Align::Right and throw on Align::Center
 
 class LineEdit : public Widget {
+   public:
     struct Options {
         std::string text = "";
         Brush text_brush = {};
