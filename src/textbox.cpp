@@ -315,13 +315,13 @@ void TextBox::update_layout_cache()
 void link(TextBox& tb, ScrollBar& sb)
 {
     tb.on_scroll.connect(tracked(
-        [](ScrollBar& sb, int pos, int len) {
+        [](int pos, int len, ScrollBar& sb) {
             sb.position = pos;
             sb.scrollable_length = len;
         },
         sb));
     sb.on_scroll.connect(
-        tracked([](TextBox& tb, int pos) { tb.set_scroll_offset(pos); }, tb));
+        tracked([](int pos, TextBox& tb) { tb.set_scroll_offset(pos); }, tb));
 }
 
 }  // namespace ox

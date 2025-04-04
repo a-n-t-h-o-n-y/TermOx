@@ -69,7 +69,7 @@ int main()
         }
             .init([](auto&, auto& total_label, auto&, auto& numberpad) {
                 numberpad.on_press.connect(
-                    tracked([](auto& total_label, int n) { total_label.value += n; },
+                    tracked([](int n, auto& total_label) { total_label.value += n; },
                             total_label));
             }) |
         Border::bold("Accumulator");

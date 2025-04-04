@@ -181,7 +181,7 @@ template <typename SlotFn, WidgetDerived... TrackedWidgets>
     return [fn = std::forward<SlotFn>(fn),
             ... lifetimes = track(widgets)](auto&&... args) mutable {
         if ((lifetimes.valid() && ...)) {
-            fn(lifetimes.get()..., std::forward<decltype(args)>(args)...);
+            fn(std::forward<decltype(args)>(args)..., lifetimes.get()...);
         }
     };
 }

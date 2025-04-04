@@ -138,10 +138,10 @@ int main()
                        clear_btn] = sidebar.children;
 
                 color_select.on_select.connect(tracked(
-                    [](auto& pinbox, Color c) { pinbox.set_color(c); }, pinbox));
+                    [](Color c, auto& pinbox) { pinbox.set_color(c); }, pinbox));
 
                 pinbox.pin_inserted.connect(tracked(
-                    [](auto& status_bar, auto& count_label, Point at) {
+                    [](Point at, auto& status_bar, auto& count_label) {
                         status_bar.text = "Added (" + std::to_string(at.x) + ", " +
                                           std::to_string(at.y) + ")";
                         count_label.text =
@@ -150,7 +150,7 @@ int main()
                     status, std::get<1>(count.children)));
 
                 pinbox.pin_removed.connect(tracked(
-                    [](auto& status_bar, auto& count_label, Point at) {
+                    [](Point at, auto& status_bar, auto& count_label) {
                         status_bar.text = "Removed (" + std::to_string(at.x) + ", " +
                                           std::to_string(at.y) + ")";
                         count_label.text =
@@ -158,14 +158,13 @@ int main()
                     },
                     status, std::get<1>(count.children)));
 
-                std::get<Button>(sidebar.children)
-                    .on_press.connect(tracked(
-                        [](auto& pinbox, auto& status_bar, auto& count_label) {
-                            pinbox.clear();
-                            status_bar.text = "Board Cleared";
-                            count_label.text = "0";
-                        },
-                        pinbox, status, std::get<1>(count.children)));
+                clear_btn.on_press.connect(tracked(
+                    [](auto& pinbox, auto& status_bar, auto& count_label) {
+                        pinbox.clear();
+                        status_bar.text = "Board Cleared";
+                        count_label.text = "0";
+                    },
+                    pinbox, status, std::get<1>(count.children)));
             }) |
         Border::round("PinBox");
 
