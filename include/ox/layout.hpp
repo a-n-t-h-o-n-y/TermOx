@@ -155,11 +155,10 @@ concept TupleLike = requires {
  */
 template <typename T>
 concept DynamicContainer = not TupleLike<std::remove_reference_t<T>> &&
-                           std::ranges::range<T> && requires(T& container) {
-                               { container.size() } -> std::convertible_to<std::size_t>;
-                               { container.begin() } -> std::forward_iterator;
-                               { container.end() } -> std::forward_iterator;
-                           };
+                           std::ranges::sized_range<T> && std::ranges::forward_range<T>;
+
+template <typename T>
+concept LayoutContainer = DynamicContainer<T> || TupleLike<T>;
 
 /**
  * A Vertical Linear Layout.
@@ -167,10 +166,8 @@ concept DynamicContainer = not TupleLike<std::remove_reference_t<T>> &&
  * @details This can take either tuple-like or range-like containers of Widgets. It will
  * order them with the first element on the top and the last on the bottom.
  */
-template <typename Container>
+template <LayoutContainer Container>
 class Column : public Widget {
-    static_assert(TupleLike<Container> || DynamicContainer<Container>);
-
    public:
     Container children;
 
@@ -185,6 +182,13 @@ class Column : public Widget {
         : Widget{FocusPolicy::None, SizePolicy::flex()}, children{std::move(container)}
     {}
 
+    template <WidgetDerived... Widgets>
+    Column(Widgets&&... ws)
+        : Widget{FocusPolicy::None, SizePolicy::flex()},
+          children{std::tuple{std::forward<Widgets>(ws)...}}
+    {}
+
+   public:
     /**
      * Takes a function which can access each child to set up signals or anything else
      * needed after construction. If the container is tuple-like it will pass each child
@@ -192,18 +196,17 @@ class Column : public Widget {
      * container as parameter.
      */
     template <typename Fn>
-    Column(Container container, Fn&& init_fn)
-        : Widget{FocusPolicy::None, SizePolicy::flex()}, children{std::move(container)}
+    [[nodiscard]] auto init(Fn&& fn) && -> Column
     {
         if constexpr (TupleLike<Container>) {
-            std::apply(std::forward<Fn>(init_fn), children);
+            std::apply(std::forward<Fn>(fn), children);
         }
         else {
-            std::forward<Fn>(init_fn)(children);
+            std::forward<Fn>(fn)(children);
         }
+        return std::move(*this);
     }
 
-   public:
     auto get_children() -> zzz::Generator<Widget&> override
     {
         if constexpr (TupleLike<Container>) {
@@ -264,6 +267,12 @@ class Column : public Widget {
     }
 };
 
+template <LayoutContainer Container>
+Column(Container) -> Column<Container>;
+
+template <WidgetDerived... Widgets>
+Column(Widgets&&...) -> Column<std::tuple<std::decay_t<Widgets>...>>;
+
 /**
  * A Horizontal Linear Layout.
  *
@@ -288,19 +297,31 @@ class Row : public Widget {
         : Widget{FocusPolicy::None, SizePolicy::flex()}, children{std::move(container)}
     {}
 
-    template <typename Fn>
-    Row(Container container, Fn&& init_fn)
-        : Widget{FocusPolicy::None, SizePolicy::flex()}, children{std::move(container)}
-    {
-        if constexpr (TupleLike<Container>) {
-            std::apply(std::forward<Fn>(init_fn), children);
-        }
-        else {
-            std::forward<Fn>(init_fn)(children);
-        }
-    }
+    template <WidgetDerived... Widgets>
+    Row(Widgets&&... ws)
+        : Widget{FocusPolicy::None, SizePolicy::flex()},
+          children{std::tuple{std::forward<Widgets>(ws)...}}
+    {}
 
    public:
+    /**
+     * Takes a function which can access each child to set up signals or anything else
+     * needed after construction. If the container is tuple-like it will pass each child
+     * Widget as a parameter, if it is a dynamic container it will pass the entire
+     * container as parameter.
+     */
+    template <typename Fn>
+    [[nodiscard]] auto init(Fn&& fn) && -> Row
+    {
+        if constexpr (TupleLike<Container>) {
+            std::apply(std::forward<Fn>(fn), children);
+        }
+        else {
+            std::forward<Fn>(fn)(children);
+        }
+        return std::move(*this);
+    }
+
     auto get_children() -> zzz::Generator<Widget&> override
     {
         if constexpr (TupleLike<Container>) {
@@ -360,5 +381,11 @@ class Row : public Widget {
         }
     }
 };
+
+template <LayoutContainer Container>
+Row(Container) -> Row<Container>;
+
+template <WidgetDerived... Widgets>
+Row(Widgets&&...) -> Row<std::tuple<std::decay_t<Widgets>...>>;
 
 }  // namespace ox

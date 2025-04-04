@@ -1,6 +1,5 @@
 #include <ox/ox.hpp>
 
-#include <tuple>
 #include <vector>
 
 using namespace ox;
@@ -58,22 +57,21 @@ int main()
 {
     auto head =
         Column{
-            std::tuple{
-                Label{{.text = "Total", .align = Align::Left}} | SizePolicy::fixed(1),
-                IntegerLabel{{
-                    .value = 0,
-                    .align = Align::Right,
-                    .brush = {.traits = Trait::Bold},
-                    .locale = digit_separator_locale(1),
-                }} | SizePolicy::fixed(1),
-                Divider::bold({.brush = {.foreground = XColor::BrightBlack}}),
-                NumberPad{4, 4},
-            },
-            [](auto&, auto& total_label, auto&, auto& numberpad) {
+            Label{{.text = "Total", .align = Align::Left}} | SizePolicy::fixed(1),
+            IntegerLabel{{
+                .value = 0,
+                .align = Align::Right,
+                .brush = {.traits = Trait::Bold},
+                .locale = digit_separator_locale(1),
+            }} | SizePolicy::fixed(1),
+            Divider::bold({.brush = {.foreground = XColor::BrightBlack}}),
+            NumberPad{4, 4},
+        }
+            .init([](auto&, auto& total_label, auto&, auto& numberpad) {
                 numberpad.on_press.connect(
                     tracked([](auto& total_label, int n) { total_label.value += n; },
                             total_label));
-            }} |
+            }) |
         Border::bold("Accumulator");
 
     return Application{head, Terminal{MouseMode::Move}}.run();

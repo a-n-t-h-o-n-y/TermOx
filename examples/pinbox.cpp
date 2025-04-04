@@ -1,6 +1,5 @@
 #include <map>
 #include <string>
-#include <tuple>
 #include <vector>
 
 #include <ox/ox.hpp>
@@ -83,94 +82,91 @@ int main()
 {
     auto head =
         Row{
-            std::tuple{
-                PinBox{},
-                Divider::bold({.brush = {.foreground = XColor::BrightBlack}}),
-                Column{
-                    std::tuple{
-                        Label{{
-                            .text = "Color Select",
-                            .align = Align::Center,
-                            .brush = {.traits = Trait::Bold},
-                        }} | SizePolicy::fixed(1),
-                        ColorSelect{{
-                            XColor::BrightBlue,
-                            XColor::Blue,
-                            XColor::BrightRed,
-                            XColor::Red,
-                            XColor::BrightGreen,
-                            XColor::Green,
-                            XColor::White,
-                            XColor::BrightBlack,
-                        }} | SizePolicy::fixed(1),
-                        Divider::bold({.brush = {.foreground = XColor::BrightBlack}}),
-                        Label{{
-                            .text = "Last Action",
-                            .align = Align::Center,
-                            .brush = {.traits = Trait::Bold},
-                        }} | SizePolicy::fixed(1),
-                        Label{{.align = Align::Left}} | SizePolicy::fixed(1),
-                        Divider::bold({.brush = {.foreground = XColor::BrightBlack}}),
-                        Row{std::tuple{
-                            Label{{
-                                .text = "Pin Count",
-                                .align = Align::Left,
-                                .brush = {.traits = Trait::Bold},
-                            }} | SizePolicy::fixed(10),
-                            Label{{
-                                .text = "0",
-                                .align = Align::Left,
-                            }},
-                        }} | SizePolicy::fixed(1),
-                        Divider::bold({.brush = {.foreground = XColor::BrightBlack}}),
-                        Button{{
-                            .label = {
-                                .text = "Clear Board",
-                                .brush = {.background = XColor::BrightBlue,
-                                          .foreground = XColor::Black,
-                                          .traits = Trait::Bold},
-                            },
-                        }} | SizePolicy::fixed(1),
-                    },
-                } | SizePolicy::fixed(16),
-            },
-            [](auto& pb, auto& /*div*/, auto& sb) {
-                std::get<ColorSelect>(sb.children)
-                    .on_select.connect(
-                        tracked([](auto& pb, Color c) { pb.set_color(c); }, pb));
+            PinBox{},
 
-                pb.pin_inserted.connect(tracked(
+            Divider::bold({.brush = {.foreground = XColor::BrightBlack}}),
+
+            Column{
+                Label{{
+                    .text = "Color Select",
+                    .align = Align::Center,
+                    .brush = {.traits = Trait::Bold},
+                }} | SizePolicy::fixed(1),
+                ColorSelect{{
+                    XColor::BrightBlue,
+                    XColor::Blue,
+                    XColor::BrightRed,
+                    XColor::Red,
+                    XColor::BrightGreen,
+                    XColor::Green,
+                    XColor::White,
+                    XColor::BrightBlack,
+                }} | SizePolicy::fixed(1),
+                Divider::bold({.brush = {.foreground = XColor::BrightBlack}}),
+                Label{{
+                    .text = "Last Action",
+                    .align = Align::Center,
+                    .brush = {.traits = Trait::Bold},
+                }} | SizePolicy::fixed(1),
+                Label{{.align = Align::Left}} | SizePolicy::fixed(1),
+                Divider::bold({.brush = {.foreground = XColor::BrightBlack}}),
+                Row{
+                    Label{{
+                        .text = "Pin Count",
+                        .align = Align::Left,
+                        .brush = {.traits = Trait::Bold},
+                    }} | SizePolicy::fixed(10),
+                    Label{{
+                        .text = "0",
+                        .align = Align::Left,
+                    }},
+                } | SizePolicy::fixed(1),
+                Divider::bold({.brush = {.foreground = XColor::BrightBlack}}),
+                Button{{
+                    .label =
+                        {
+                            .text = "Clear Board",
+                            .brush = {.background = XColor::BrightBlue,
+                                      .foreground = XColor::Black,
+                                      .traits = Trait::Bold},
+                        },
+                }} | SizePolicy::fixed(1),
+            } | SizePolicy::fixed(16),
+        }
+            .init([](auto& pinbox, auto& /*div*/, auto& sidebar) {
+                auto& [l1, color_select, div1, l2, status, div2, count, div3,
+                       clear_btn] = sidebar.children;
+
+                color_select.on_select.connect(tracked(
+                    [](auto& pinbox, Color c) { pinbox.set_color(c); }, pinbox));
+
+                pinbox.pin_inserted.connect(tracked(
                     [](auto& status_bar, auto& count_label, Point at) {
                         status_bar.text = "Added (" + std::to_string(at.x) + ", " +
                                           std::to_string(at.y) + ")";
                         count_label.text =
                             std::to_string(std::stoi(count_label.text) + 1);
                     },
-                    std::get<4>(sb.children),
-                    std::get<1>(std::get<6>(sb.children).children)));
+                    status, std::get<1>(count.children)));
 
-                pb.pin_removed.connect(tracked(
+                pinbox.pin_removed.connect(tracked(
                     [](auto& status_bar, auto& count_label, Point at) {
                         status_bar.text = "Removed (" + std::to_string(at.x) + ", " +
                                           std::to_string(at.y) + ")";
                         count_label.text =
                             std::to_string(std::stoi(count_label.text) - 1);
                     },
-                    std::get<4>(sb.children),
-                    std::get<1>(std::get<6>(sb.children).children)));
+                    status, std::get<1>(count.children)));
 
-                std::get<Button>(sb.children)
+                std::get<Button>(sidebar.children)
                     .on_press.connect(tracked(
-                        [](auto& pb, auto& status_bar,auto& count_label ) {
-                            pb.clear();
+                        [](auto& pinbox, auto& status_bar, auto& count_label) {
+                            pinbox.clear();
                             status_bar.text = "Board Cleared";
                             count_label.text = "0";
                         },
-                        pb,
-                        std::get<4>(sb.children),
-                        std::get<1>(std::get<6>(sb.children).children)));
-            },
-        } |
+                        pinbox, status, std::get<1>(count.children)));
+            }) |
         Border::round("PinBox");
 
     return Application{head, {MouseMode::Drag}}.run();
