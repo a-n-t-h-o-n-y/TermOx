@@ -68,6 +68,7 @@ class BasicNumberLabel : public Widget {
         Brush brush = {};
         std::locale locale = std::locale{};
         std::string format = "{}";
+        SizePolicy size_policy = SizePolicy::flex();
     } inline static const init = {};
 
    public:
@@ -78,7 +79,7 @@ class BasicNumberLabel : public Widget {
     std::string format;
 
     BasicNumberLabel(Options x = init)
-        : Widget{FocusPolicy::None, SizePolicy::flex()},
+        : Widget{FocusPolicy::None, x.size_policy},
           value{std::move(x.value)},
           align{std::move(x.align)},
           brush{std::move(x.brush)},

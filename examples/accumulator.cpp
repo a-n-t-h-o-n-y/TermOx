@@ -45,8 +45,10 @@ class NumberPad : public Grid<Button> {
             auto& row = this->children.emplace_back();
             for (auto x = 0; x < width; ++x) {
                 row.children.push_back(int_button(i));
-                row.children.back().on_press.connect(
-                    tracked([i](auto& self) { self.on_press(i); }, *this));
+                Connection{
+                    .signal = row.children.back().on_press,
+                    .slot = [i](auto& self) { self.on_press(i); },
+                }(*this);
                 i += i;
             }
         }
@@ -57,22 +59,31 @@ int main()
 {
     auto head =
         Column{
-            Label{{.text = "Total", .align = Align::Left}} | SizePolicy::fixed(1),
+            Label{{
+                .text = "Total",
+                .align = Align::Left,
+                .size_policy = SizePolicy::fixed(1),
+            }},
             IntegerLabel{{
                 .value = 0,
                 .align = Align::Right,
                 .brush = {.traits = Trait::Bold},
                 .locale = digit_separator_locale(1),
-            }} | SizePolicy::fixed(1),
-            Divider::bold({.brush = {.foreground = XColor::BrightBlack}}),
+                .size_policy = SizePolicy::fixed(1),
+            }},
+            Divider::bold({
+                .brush = {.foreground = XColor::BrightBlack},
+            }),
             NumberPad{4, 4},
-        }
-            .init([](auto&, auto& total_label, auto&, auto& numberpad) {
-                numberpad.on_press.connect(
-                    tracked([](int n, auto& total_label) { total_label.value += n; },
-                            total_label));
-            }) |
+        } |
         Border::bold("Accumulator");
+
+    auto& [title_, total_label, div_, numberpad] = head.child.children;
+
+    Connection{
+        .signal = numberpad.on_press,
+        .slot = [](int n, auto& total_label) { total_label.value += n; },
+    }(total_label);
 
     return Application{head, Terminal{MouseMode::Move}}.run();
 }

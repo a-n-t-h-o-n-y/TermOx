@@ -186,4 +186,23 @@ template <typename SlotFn, WidgetDerived... TrackedWidgets>
     };
 }
 
+/**
+ * Enables designated initializers for Signal/Slot connections.
+ * @details Use operator() immediately to connect and track Widgets if needed.
+ */
+template <typename SignalType, typename SlotType>
+struct [[nodiscard("Use operator() to make actual connection.")]] Connection {
+    SignalType& signal;
+    SlotType slot;
+
+    /**
+     * This must be called in order to make the connection.
+     */
+    template <typename... TrackedWidgets>
+    auto operator()(TrackedWidgets&... to_track) && -> sl::Identifier
+    {
+        return signal.connect(tracked(slot, to_track...));
+    }
+};
+
 }  // namespace ox
