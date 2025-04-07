@@ -189,24 +189,6 @@ class Column : public Widget {
     {}
 
    public:
-    /**
-     * Takes a function which can access each child to set up signals or anything else
-     * needed after construction. If the container is tuple-like it will pass each child
-     * Widget as a parameter, if it is a dynamic container it will pass the entire
-     * container as parameter.
-     */
-    template <typename Fn>
-    [[nodiscard]] auto init(Fn&& fn) && -> Column
-    {
-        if constexpr (TupleLike<Container>) {
-            std::apply(std::forward<Fn>(fn), children);
-        }
-        else {
-            std::forward<Fn>(fn)(children);
-        }
-        return std::move(*this);
-    }
-
     auto get_children() -> zzz::Generator<Widget&> override
     {
         if constexpr (TupleLike<Container>) {
@@ -304,24 +286,6 @@ class Row : public Widget {
     {}
 
    public:
-    /**
-     * Takes a function which can access each child to set up signals or anything else
-     * needed after construction. If the container is tuple-like it will pass each child
-     * Widget as a parameter, if it is a dynamic container it will pass the entire
-     * container as parameter.
-     */
-    template <typename Fn>
-    [[nodiscard]] auto init(Fn&& fn) && -> Row
-    {
-        if constexpr (TupleLike<Container>) {
-            std::apply(std::forward<Fn>(fn), children);
-        }
-        else {
-            std::forward<Fn>(fn)(children);
-        }
-        return std::move(*this);
-    }
-
     auto get_children() -> zzz::Generator<Widget&> override
     {
         if constexpr (TupleLike<Container>) {
