@@ -74,7 +74,7 @@ class ColorSelect : public Row<std::vector<Button>> {
             children.push_back({{.label = {.brush = {.background = color}}}});
             Connection{
                 .signal = children.back().on_press,
-                .slot = [color](auto& self) { self.on_select(color); },
+                .slot = [color](auto& parent) { parent.on_select(color); },
             }(*this);
         }
     }
@@ -120,8 +120,8 @@ int main()
                         .brush = {.traits = Trait::Bold},
                         .size_policy = SizePolicy::fixed(10),
                     }},
-                    Label{{
-                        .text = "0",
+                    IntegerLabel{{
+                        .value = 0,
                         .align = Align::Left,
                     }},
                 } | SizePolicy::fixed(1),
@@ -156,9 +156,9 @@ int main()
         .signal = pinbox.pin_inserted,
         .slot =
             [](Point at, auto& status_bar, auto& count_label) {
-                status_bar.text = "Added (" + std::to_string(at.x) + ", " +
-                                  std::to_string(at.y) + ")";
-                count_label.text = std::to_string(std::stoi(count_label.text) + 1);
+                auto pt_str = std::to_string(at.x) + ", " + std::to_string(at.y);
+                status_bar.text = "Added (" + std::move(pt_str) + ")";
+                count_label.value += 1;
             },
     }(status, count);
 
@@ -166,9 +166,9 @@ int main()
         .signal = pinbox.pin_removed,
         .slot =
             [](Point at, auto& status_bar, auto& count_label) {
-                status_bar.text = "Removed (" + std::to_string(at.x) + ", " +
-                                  std::to_string(at.y) + ")";
-                count_label.text = std::to_string(std::stoi(count_label.text) - 1);
+                auto pt_str = std::to_string(at.x) + ", " + std::to_string(at.y);
+                status_bar.text = "Removed (" + std::move(pt_str) + ")";
+                count_label.value -= 1;
             },
     }(status, count);
 
@@ -178,7 +178,7 @@ int main()
             [](auto& pinbox, auto& status_bar, auto& count_label) {
                 pinbox.clear();
                 status_bar.text = "Board Cleared";
-                count_label.text = "0";
+                count_label.value = 0;
             },
     }(pinbox, status, count);
 

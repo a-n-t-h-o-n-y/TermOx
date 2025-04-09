@@ -44,10 +44,10 @@ class NumberPad : public Grid<Button> {
         for (auto y = 0; y < height; ++y) {
             auto& row = this->children.emplace_back();
             for (auto x = 0; x < width; ++x) {
-                row.children.push_back(int_button(i));
+                auto& child = row.children.emplace_back(int_button(i));
                 Connection{
-                    .signal = row.children.back().on_press,
-                    .slot = [i](auto& self) { self.on_press(i); },
+                    .signal = child.on_press,
+                    .slot = [i](auto& parent) { parent.on_press(i); },
                 }(*this);
                 i += i;
             }
