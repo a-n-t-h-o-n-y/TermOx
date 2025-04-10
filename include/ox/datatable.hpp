@@ -18,9 +18,9 @@ namespace ox {
 class DataTable : public Widget {
    public:
     struct Options {
-        Color background = XColor::Default;
-        Color foreground_cell = XColor::Default;
-        Color foreground_line = XColor::Default;
+        Color background = TermColor::Default;
+        Color foreground_cell = TermColor::Default;
+        Color foreground_line = TermColor::Default;
         SizePolicy size_policy = SizePolicy::flex();
     } static const init;
 
@@ -42,7 +42,7 @@ class DataTable : public Widget {
      */
     void add_column(std::string heading,
                     Align align = Align::Left,
-                    Color foreground = XColor::Default);
+                    Color foreground = TermColor::Default);
 
     /**
      * Add a row to the table.

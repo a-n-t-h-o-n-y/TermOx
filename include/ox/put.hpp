@@ -24,7 +24,6 @@ struct Box {
     /// {N, S, E, W}
     std::array<char32_t, 4> walls = {U'─', U'─', U'│', U'│'};
 
-    // Color foreground = XColor::Default;
     Area size = {0, 0};
 
     static constexpr auto square_corners = std::array{U'┌', U'┐', U'└', U'┘'};

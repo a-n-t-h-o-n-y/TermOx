@@ -22,6 +22,7 @@ using ::esc::HSL;
 using ::esc::InsertableGlyphString;
 using ::esc::RGB;
 using ::esc::TColor;
+using ::esc::TermColor;
 using ::esc::Trait;
 using ::esc::Traits;
 using ::esc::TrueColor;

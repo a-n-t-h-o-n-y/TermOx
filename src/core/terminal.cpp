@@ -98,7 +98,16 @@ void Terminal::commit_changes()
 
     for (auto y = 0; y < changes.size().height; ++y) {
         for (auto x = 0; x < changes.size().width; ++x) {
-            auto const& change = changes[{x, y}];
+            auto const change = [&] {
+                auto g = changes[{x, y}];
+                if (g.brush.background == Color{TermColor::Default}) {
+                    g.brush.background = Terminal::background;
+                }
+                if (g.brush.foreground == Color{TermColor::Default}) {
+                    g.brush.foreground = Terminal::foreground;
+                }
+                return g;
+            }();
             auto const& current = current_screen_[{x, y}];
             if (change != current) {
                 escape_sequence_ += escape(esc::Cursor{x, y});

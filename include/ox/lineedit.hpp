@@ -21,7 +21,7 @@ class LineEdit : public Widget {
         std::string text = "";
         Brush text_brush = {};
         Align align = Align::Left;
-        Color background = XColor::Default;
+        Color background = TermColor::Default;
         std::string ghost_text = "";
         Brush ghost_text_brush = {.foreground = XColor::BrightBlack};
         std::optional<std::function<bool(char)>> validator = std::nullopt;

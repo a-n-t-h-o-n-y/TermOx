@@ -168,6 +168,9 @@ class Terminal {
 
     inline static std::map<int, TimerThread> timers;
 
+    inline static Color foreground = TermColor::Default;
+    inline static Color background = TermColor::Default;
+
     /**
      * The current cursor position on the terminal.
      *
