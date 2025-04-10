@@ -11,6 +11,7 @@
 
 #include <ox/align.hpp>
 #include <ox/core/core.hpp>
+#include <ox/put.hpp>
 
 namespace ox::detail {
 using namespace ox;
@@ -18,12 +19,7 @@ using namespace ox;
 // Used by both Label and BasicNumberLabel
 void paint_label(Canvas c, std::string_view text, Align align, Brush brush)
 {
-    // Fill with Brush
-    for (auto x = 0; x < c.size.width; ++x) {
-        for (auto y = 0; y < c.size.height; ++y) {
-            c[{.x = x, .y = y}].brush = brush;
-        }
-    }
+    fill(c, brush);
 
     auto unicode_str = esc::detail::u8_string_to_u32_string(text);
     if (std::ssize(unicode_str) > c.size.width) {

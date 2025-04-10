@@ -27,29 +27,32 @@ auto chessboard()
 //     return Application{head}.run();
 // }
 
-int main()
-{
-    auto head =
-        Row{
-            TextBox{{
-                .wrap = TextBox::Wrap::Word,
-                .align = Align::Left,
-                .brush = {.background = XColor::BrightBlack,
-                          .foreground = XColor::White,
-                          .traits = Trait::Bold},
-                .focus_policy = FocusPolicy::Strong,
-            }},
-            ScrollBar{{}},
-        } |
-        Border::round("TextBox");
+// int main()
+// {
+//     auto head =
+//         Row{
+//             TextBox{{
+//                 .wrap = TextBox::Wrap::Word,
+//                 .align = Align::Left,
+//                 .brush = {.background = XColor::BrightBlack,
+//                           .foreground = XColor::White,
+//                           .traits = Trait::Bold},
+//                 .focus_policy = FocusPolicy::Strong,
+//             }},
+//             ScrollBar{{}},
+//         } |
+//         Border::round("TextBox");
 
-    link(std::get<0>(head.child.children), std::get<1>(head.child.children));
+//     link(std::get<0>(head.child.children), std::get<1>(head.child.children));
 
-    return Application{head}.run();
-}
+//     return Application{head}.run();
+// }
 
 // int main()
 // {
+//     Terminal::background = RGB{0x0a3f46};
+//     Terminal::foreground = RGB{0xB4724B};
+
 //     auto head = DataTable{};
 //     head.add_column("one", Align::Center, XColor::Blue);
 //     head.add_row({"1"});
@@ -69,3 +72,45 @@ int main()
 
 //     return Application{head}.run();
 // }
+
+auto hover_btn(std::string const& label) -> Button
+{
+    auto fade = Fade{
+        .paint_fn =
+            [](Canvas c, float percent) {
+                auto const blend =
+                    gradient_blend(RGB{0x0a3f46}, RGB{0x1ecbe1}, percent);
+                fill(c, bg(blend));
+            },
+        .fade_in = std::chrono::milliseconds{1},
+        .fade_out = std::chrono::milliseconds{300},
+    };
+
+    return Button{{
+        .label = {.text = label},
+        .decoration = fade,
+    }};
+}
+
+int main()
+{
+    Terminal::background = RGB{0x0a3f46};
+    Terminal::foreground = RGB{0xB4724B};
+
+    auto head = Row{
+        Column<std::vector<Button>>{} | SizePolicy::fixed(18),
+        Divider::bold({
+            .brush = {.foreground = XColor::BrightBlack},
+        }),
+        TextBox{{
+            .focus_policy = FocusPolicy::Strong,
+        }},
+    };
+
+    for (auto i = 0; i < 21; ++i) {
+        std::get<0>(head.children)
+            .children.push_back(hover_btn("Hover " + std::to_string(i)));
+    }
+
+    return Application{head, Terminal{MouseMode::Move}}.run();
+}

@@ -30,11 +30,6 @@ struct Box {
     static constexpr auto round_corners = std::array{U'╭', U'╮', U'╰', U'╯'};
 };
 
-struct Fill {
-    Glyph glyph;
-    Area size;
-};
-
 struct Frame {
     /// {top left, top right, bottom left, bottom right}
     std::array<char32_t, 4> corners;
@@ -227,11 +222,16 @@ void put(Canvas c, Point at, shape::Box const& item);
 void put(Canvas c, Point at, shape::Box const& item, Color foreground);
 void put(Canvas c, Point at, shape::Box const& item, Brush const& brush);
 
-void put(Canvas c, Point at, shape::Fill const& item);
-
 void put(Canvas c, shape::Frame const& item);
 void put(Canvas c, shape::Frame const& item, Color foreground);
 void put(Canvas c, shape::Frame const& item, Brush const& brush);
+
+void fill(Canvas c, Glyph g);
+void fill(Canvas c, Brush b);
+void fill(Canvas c, char32_t ch);
+void fill(Canvas c, ColorBG bg);
+void fill(Canvas c, ColorFG fg);
+void fill(Canvas c, Traits ts);
 
 void clear(Canvas c);
 

@@ -311,19 +311,6 @@ void put(Canvas c, Point at, shape::Box const& item, Brush const& brush)
     }
 }
 
-void put(Canvas c, Point at, shape::Fill const& item)
-{
-    auto const end = Point{
-        .x = std::min(at.x + item.size.width, c.size.width),
-        .y = std::min(at.y + item.size.height, c.size.height),
-    };
-    for (auto y = at.y; y < end.y; ++y) {
-        for (auto x = at.x; x < end.x; ++x) {
-            c[{x, y}] = item.glyph;
-        }
-    }
-}
-
 void put(Canvas c, shape::Frame const& item)
 {
     put(c, {.x = 0, .y = 0},
@@ -356,9 +343,60 @@ void put(Canvas c, shape::Frame const& item, Brush const& brush)
         brush);
 }
 
-void clear(Canvas c)
+void fill(Canvas c, Glyph g)
 {
-    put(c, {0, 0}, shape::Fill{.glyph = Glyph{U' '}, .size = c.size});
+    for (auto y = 0; y < c.size.height; ++y) {
+        for (auto x = 0; x < c.size.width; ++x) {
+            c[{x, y}] = g;
+        }
+    }
 }
+
+void fill(Canvas c, Brush b)
+{
+    for (auto y = 0; y < c.size.height; ++y) {
+        for (auto x = 0; x < c.size.width; ++x) {
+            c[{x, y}].brush = b;
+        }
+    }
+}
+
+void fill(Canvas c, char32_t ch)
+{
+    for (auto y = 0; y < c.size.height; ++y) {
+        for (auto x = 0; x < c.size.width; ++x) {
+            c[{x, y}].symbol = ch;
+        }
+    }
+}
+
+void fill(Canvas c, ColorBG bg)
+{
+    for (auto y = 0; y < c.size.height; ++y) {
+        for (auto x = 0; x < c.size.width; ++x) {
+            c[{x, y}].brush.background = bg.value;
+        }
+    }
+}
+
+void fill(Canvas c, ColorFG fg)
+{
+    for (auto y = 0; y < c.size.height; ++y) {
+        for (auto x = 0; x < c.size.width; ++x) {
+            c[{x, y}].brush.foreground = fg.value;
+        }
+    }
+}
+
+void fill(Canvas c, Traits ts)
+{
+    for (auto y = 0; y < c.size.height; ++y) {
+        for (auto x = 0; x < c.size.width; ++x) {
+            c[{x, y}].brush.traits = ts;
+        }
+    }
+}
+
+void clear(Canvas c) { fill(c, Glyph{U' '}); }
 
 }  // namespace ox

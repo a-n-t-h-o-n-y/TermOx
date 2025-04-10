@@ -15,6 +15,8 @@ using ::esc::bg;
 using ::esc::Brush;
 using ::esc::Character;
 using ::esc::Color;
+using ::esc::ColorBG;
+using ::esc::ColorFG;
 using ::esc::fg;
 using ::esc::Glyph;
 using ::esc::GlyphString;

@@ -53,12 +53,7 @@ void DataTable::paint(Canvas c)
                            ((int)columns_.front().size() - (int)this->offset) * 2 + 3),
     };
 
-    // Fill with Background
-    for (auto x = 0; x < c.size.width; ++x) {
-        for (auto y = 0; y < c.size.height; ++y) {
-            c[{x, y}].brush.background = background;
-        }
-    }
+    fill(c, bg(background));
 
     // Border
     put(c, {0, 0},

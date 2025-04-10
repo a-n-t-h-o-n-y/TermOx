@@ -36,8 +36,8 @@ Button::Options const Button::init = {};
 Button::Button(Options x)
     : BasicButton{x.focus_policy, x.size_policy},
       label{std::move(x.label)},
-      pressed_mod{std::move(x.pressed_mod)},
-      focused_mod{std::move(x.focused_mod)},
+      press_mod{std::move(x.press_mod)},
+      focus_mod{std::move(x.focus_mod)},
       decoration_{[d = std::move(x.decoration)] {
           return std::visit(zzz::Overload{
                                 [](PaintFn fn) -> DecorationInternal { return fn; },
@@ -54,8 +54,8 @@ void Button::paint(Canvas c)
     auto temp_label = Label{label};
 
     // Label Modifications
-    if (in_focus_ && focused_mod) { focused_mod(temp_label); }
-    if (pressed_ && pressed_mod) { pressed_mod(temp_label); }
+    if (in_focus_ && focus_mod) { focus_mod(temp_label); }
+    if (pressed_ && press_mod) { press_mod(temp_label); }
 
     temp_label.paint(c);
 
@@ -108,7 +108,7 @@ void Button::timer(int id)
             timer_period_ms / (float)(f.direction == +1 ? f.fade.fade_in.count()
                                                         : f.fade.fade_out.count());
 
-        f.percent = std::clamp(0.f, f.percent + delta * (float)f.direction, 1.f);
+        f.percent = std::clamp(f.percent + delta * (float)f.direction, 0.f, 1.f);
         if (f.percent == 0.f || f.percent == 1.f) { f.timer.stop(); }
     };
 

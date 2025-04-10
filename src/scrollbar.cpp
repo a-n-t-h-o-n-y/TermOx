@@ -60,12 +60,7 @@ void ScrollBar::paint(Canvas c)
         .y = (int)std::floor(bar_pos),
     };
 
-    // Fill with Brush
-    for (auto x = 0; x < c.size.width; ++x) {
-        for (auto y = 0; y < c.size.height; ++y) {
-            c[{.x = x, .y = y}].brush = brush;
-        }
-    }
+    fill(c, brush);
 
     c[at].symbol = edge;
 

@@ -50,16 +50,16 @@ class Button : public BasicButton {
     struct Options {
         Label::Options label = {};
         Decoration decoration = [](Canvas) {};
-        std::function<void(Label&)> pressed_mod = [](Label&) {};
-        std::function<void(Label&)> focused_mod = [](Label&) {};
+        std::function<void(Label&)> press_mod = [](Label&) {};
+        std::function<void(Label&)> focus_mod = [](Label&) {};
         FocusPolicy focus_policy = FocusPolicy::Strong;
         SizePolicy size_policy = SizePolicy::flex();
     } static const init;
 
    public:
     Label::Options label;
-    std::function<void(Label&)> pressed_mod;
-    std::function<void(Label&)> focused_mod;
+    std::function<void(Label&)> press_mod;
+    std::function<void(Label&)> focus_mod;
 
    public:
     Button(Options x = init);
@@ -82,7 +82,7 @@ class Button : public BasicButton {
     void timer(int id) override;
 
    private:
-    static constexpr auto timer_period_ms = 30;
+    static constexpr auto timer_period_ms = 10;
 
     struct FadeInternal {
         Fade fade;

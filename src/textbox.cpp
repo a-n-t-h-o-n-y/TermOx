@@ -192,12 +192,7 @@ void TextBox::paint(Canvas c)
         this->on_scroll(scroll_offset_, line_count);
     }
 
-    // Fill with Brush
-    for (auto x = 0; x < c.size.width; ++x) {
-        for (auto y = 0; y < c.size.height; ++y) {
-            c[{.x = x, .y = y}].brush = brush;
-        }
-    }
+    fill(c, brush);
 
     // Paint Text
     for (auto y = 0; y + scroll_offset_ < std::ssize(text_layout_) && y < c.size.height;

@@ -22,8 +22,8 @@ using namespace ox;
                 .fade_in = std::chrono::milliseconds{300},
                 .fade_out = std::chrono::milliseconds{500},
             },
-        .pressed_mod = [](Label& l) { l.brush.foreground = XColor::BrightWhite; },
-        .focused_mod = [](Label& l) { l.brush.foreground = XColor::BrightCyan; },
+        .press_mod = [](Label& l) { l.brush.foreground = XColor::BrightWhite; },
+        .focus_mod = [](Label& l) { l.brush.foreground = XColor::BrightCyan; },
     }};
 }
 

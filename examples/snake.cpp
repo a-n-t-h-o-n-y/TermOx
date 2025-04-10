@@ -171,31 +171,32 @@ class SnakeGameWidget : public Widget {
             return;
         }
 
-        // Top left of game area relative to top left of *this.
-        auto const offset = Point{
-            .x = (this->size.width - engine_.size.width) / 2,
-            .y = (this->size.height - engine_.size.height) / 2,
-        };
+        auto game_canvas = [&] {
+            auto const offset = Point{
+                .x = (this->size.width - engine_.size.width) / 2,
+                .y = (this->size.height - engine_.size.height) / 2,
+            };
+            return Canvas{c.buffer, c.at + offset, engine_.size};
+        }();
 
         // Paint Background
-        put(c, offset,
-            shape::Fill{.glyph = U' ' | bg(XColor::BrightBlack), .size = engine_.size});
+        fill(game_canvas, U' ' | bg(XColor::BrightBlack));
 
         // Paint apples
         for (auto const pt : engine_.state.apple_field) {
-            c[offset + pt] = U' ' | bg(XColor::BrightRed);
+            game_canvas[pt] = U' ' | bg(XColor::BrightRed);
         }
 
         // Paint Snake
         for (auto const pt : engine_.state.snake) {
-            c[offset + pt] = U' ' | bg(XColor::BrightGreen);
+            game_canvas[pt] = U' ' | bg(XColor::BrightGreen);
         }
 
         // Paint Tail
         auto const tail = std::array{U'░', U'▒', U'▓'};
         for (auto i = 0; i < std::ssize(tail); ++i) {
             if (i + 1 < std::ssize(engine_.state.snake)) {
-                c[offset + engine_.state.snake[i]] =
+                game_canvas[engine_.state.snake[i]] =
                     tail[i] | fg(XColor::BrightGreen) | bg(XColor::BrightBlack);
             }
         }
@@ -207,12 +208,11 @@ class SnakeGameWidget : public Widget {
         // Press 's' To Start
         if (not timer_.is_running()) {
             auto const text = std::string_view{"Press 's' to Start"};
-            auto const center =
-                offset + Point{
-                             .x = engine_.size.width / 2 - (int)(text.size() / 2),
-                             .y = engine_.size.height / 2,
-                         };
-            put(c, center, text);
+            auto const center = Point{
+                .x = engine_.size.width / 2 - (int)(text.size() / 2),
+                .y = engine_.size.height / 2,
+            };
+            put(game_canvas, center, text);
         }
     }
 

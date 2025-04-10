@@ -174,7 +174,7 @@ void Divider::paint(Canvas c)
     // changing the type. Maybe it is just an enum in Options.
 
     auto const glyph = this->size.width == 1 ? lines.vertical : lines.horizontal;
-    put(c, {0, 0}, shape::Fill{.glyph = glyph | brush, .size = c.size});
+    fill(c, glyph | brush);
 }
 
 auto Divider::light(std::string label) -> Divider
