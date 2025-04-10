@@ -12,6 +12,7 @@ add_library(TermOx STATIC
     src/label.cpp
     src/lineedit.cpp
     src/focus.cpp
+    src/pixel_grid.cpp
     src/put.cpp
     src/scrollbar.cpp
     src/textbox.cpp
@@ -29,6 +30,7 @@ add_library(TermOx STATIC
     include/ox/label.hpp
     include/ox/layout.hpp
     include/ox/lineedit.hpp
+    include/ox/pixel_grid.hpp
     include/ox/put.hpp
     include/ox/scrollbar.hpp
     include/ox/textbox.hpp

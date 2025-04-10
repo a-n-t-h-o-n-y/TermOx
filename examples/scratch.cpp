@@ -1,4 +1,6 @@
+#include <filesystem>
 #include <fstream>
+#include <iostream>
 
 #include <ox/ox.hpp>
 using namespace ox;
@@ -17,6 +19,13 @@ auto chessboard()
     }
     return c;
 }
+
+// int main()
+// {
+//     auto head = chessboard();
+
+//     return Application{head}.run();
+// }
 
 int main()
 {

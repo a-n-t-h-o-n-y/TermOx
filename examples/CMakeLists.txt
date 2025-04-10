@@ -88,6 +88,25 @@ target_link_libraries(
 
 # enable_asan(TermOx.examples.accumulator)
 
+# BMP Viewer ---------------------------------------------------------------------------
+add_executable(TermOx.examples.bmp_view EXCLUDE_FROM_ALL
+    bmp_view.cpp
+)
+target_compile_options(
+    TermOx.examples.bmp_view
+    PRIVATE
+        -Wall
+        -Wextra
+        -Wpedantic
+)
+target_link_libraries(
+    TermOx.examples.bmp_view
+    PRIVATE
+        TermOx
+)
+
+# enable_asan(TermOx.examples.bmp_view)
+
 # Scratch ------------------------------------------------------------------------------
 add_executable(TermOx.examples.scratch EXCLUDE_FROM_ALL
     scratch.cpp
