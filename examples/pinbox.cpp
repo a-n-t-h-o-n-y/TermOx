@@ -142,10 +142,10 @@ int main()
 
     auto& [pinbox, div, sidebar] = head.child.children;
 
-    auto& color_select = std::get<1>(sidebar.children);
-    auto& clear_btn = std::get<8>(sidebar.children);
-    auto& status = std::get<4>(sidebar.children);
-    auto& count = std::get<1>(std::get<6>(sidebar.children).children);
+    auto& color_select = get_child<1>(sidebar);
+    auto& status = get_child<4>(sidebar);
+    auto& clear_btn = get_child<8>(sidebar);
+    auto& count = get_child<1>(get_child<6>(sidebar));
 
     Connection{
         .signal = color_select.on_select,

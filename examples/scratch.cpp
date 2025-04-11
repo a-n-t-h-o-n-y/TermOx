@@ -43,7 +43,7 @@ auto chessboard()
 //         } |
 //         Border::round("TextBox");
 
-//     link(std::get<0>(head.child.children), std::get<1>(head.child.children));
+//     link(get_child<0>(head), get_child<1>(head));
 
 //     return Application{head}.run();
 // }
@@ -108,8 +108,7 @@ int main()
     };
 
     for (auto i = 0; i < 21; ++i) {
-        std::get<0>(head.children)
-            .children.push_back(hover_btn("Hover " + std::to_string(i)));
+        get_child<0>(head).children.push_back(hover_btn("Hover " + std::to_string(i)));
     }
 
     return Application{head, Terminal{MouseMode::Move}}.run();

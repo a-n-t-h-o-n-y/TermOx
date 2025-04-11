@@ -352,4 +352,18 @@ Row(Container) -> Row<Container>;
 template <WidgetDerived... Widgets>
 Row(Widgets&&...) -> Row<std::tuple<std::decay_t<Widgets>...>>;
 
+// -------------------------------------------------------------------------------------
+
+template <std::size_t I, TupleLike Container>
+auto get_child(Row<Container>& row) -> auto&
+{
+    return std::get<I>(row.children);
+}
+
+template <std::size_t I, TupleLike Container>
+auto get_child(Column<Container>& row) -> auto&
+{
+    return std::get<I>(row.children);
+}
+
 }  // namespace ox

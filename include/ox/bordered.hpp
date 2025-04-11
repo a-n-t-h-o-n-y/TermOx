@@ -123,6 +123,12 @@ template <WidgetDerived WidgetType>
     return {{.child = std::move(w), .border = std::move(b)}};
 }
 
+template <std::size_t I, WidgetDerived WidgetType>
+auto get_child(Bordered<WidgetType>& bordered) -> auto&
+{
+    return get_child<I>(bordered.child);
+}
+
 // -------------------------------------------------------------------------------------
 
 /// A line divider element.
