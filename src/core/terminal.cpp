@@ -63,6 +63,8 @@ void TimerThread::run(std::stop_token st,
         auto const now = ClockType::now();
         if (now >= next_callback_time) {
             callback();
+            // TODO should this be += duration - (next_callback_time - now) ?
+            // use cerr to verify?
             next_callback_time += duration;
         }
 

@@ -5,20 +5,20 @@
 #include <ox/ox.hpp>
 using namespace ox;
 
-[[nodiscard]]
-auto chessboard()
-{
-    auto c = Column<std::array<Row<std::array<Label, 8>>, 8>>{};
-    auto i = 0;
-    for (auto& row : c.children) {
-        for (auto& label : row.children) {
-            label.brush.background = i % 2 ? XColor::White : XColor::Green;
-            ++i;
-        }
-        ++i;
-    }
-    return c;
-}
+// [[nodiscard]]
+// auto chessboard()
+// {
+//     auto c = Column<std::array<Row<std::array<Label, 8>>, 8>>{};
+//     auto i = 0;
+//     for (auto& row : c.children) {
+//         for (auto& label : row.children) {
+//             label.brush.background = i % 2 ? XColor::White : XColor::Green;
+//             ++i;
+//         }
+//         ++i;
+//     }
+//     return c;
+// }
 
 // int main()
 // {
@@ -27,26 +27,30 @@ auto chessboard()
 //     return Application{head}.run();
 // }
 
-// int main()
-// {
-//     auto head =
-//         Row{
-//             TextBox{{
-//                 .wrap = TextBox::Wrap::Word,
-//                 .align = Align::Left,
-//                 .brush = {.background = XColor::BrightBlack,
-//                           .foreground = XColor::White,
-//                           .traits = Trait::Bold},
-//                 .focus_policy = FocusPolicy::Strong,
-//             }},
-//             ScrollBar{{}},
-//         } |
-//         Border::round("TextBox");
+// -------------------------------------------------------------------------------------
 
-//     link(get_child<0>(head), get_child<1>(head));
+int main()
+{
+    auto head =
+        Row{
+            TextBox{{
+                .wrap = TextBox::Wrap::Word,
+                .align = Align::Left,
+                .brush = {.background = XColor::BrightBlack,
+                          .foreground = XColor::White,
+                          .traits = Trait::Bold},
+                .focus_policy = FocusPolicy::Strong,
+            }},
+            ScrollBar{{}},
+        } |
+        Border::round("TextBox");
 
-//     return Application{head}.run();
-// }
+    link(get_child<0>(head), get_child<1>(head));
+
+    return Application{head}.run();
+}
+
+// -------------------------------------------------------------------------------------
 
 // int main()
 // {
@@ -73,43 +77,46 @@ auto chessboard()
 //     return Application{head}.run();
 // }
 
-auto hover_btn(std::string const& label) -> Button
-{
-    auto fade = Fade{
-        .paint_fn =
-            [](Canvas c, float percent) {
-                auto const blend =
-                    gradient_blend(RGB{0x0a3f46}, RGB{0x1ecbe1}, percent);
-                fill(c, bg(blend));
-            },
-        .fade_in = std::chrono::milliseconds{1},
-        .fade_out = std::chrono::milliseconds{300},
-    };
+// -------------------------------------------------------------------------------------
 
-    return Button{{
-        .label = {.text = label},
-        .decoration = fade,
-    }};
-}
+// auto hover_btn(std::string const& label) -> Button
+// {
+//     auto fade = Fade{
+//         .paint_fn =
+//             [](Canvas c, float percent) {
+//                 auto const blend =
+//                     gradient_blend(RGB{0x0a3f46}, RGB{0x1ecbe1}, percent);
+//                 fill(c, bg(blend));
+//             },
+//         .fade_in = std::chrono::milliseconds{1},
+//         .fade_out = std::chrono::milliseconds{300},
+//     };
 
-int main()
-{
-    Terminal::background = RGB{0x0a3f46};
-    Terminal::foreground = RGB{0xB4724B};
+//     return Button{{
+//         .label = {.text = label},
+//         .decoration = fade,
+//     }};
+// }
 
-    auto head = Row{
-        Column<std::vector<Button>>{} | SizePolicy::fixed(18),
-        Divider::bold({
-            .brush = {.foreground = XColor::BrightBlack},
-        }),
-        TextBox{{
-            .focus_policy = FocusPolicy::Strong,
-        }},
-    };
+// int main()
+// {
+//     Terminal::background = RGB{0x0a3f46};
+//     Terminal::foreground = RGB{0xB4724B};
 
-    for (auto i = 0; i < 21; ++i) {
-        get_child<0>(head).children.push_back(hover_btn("Hover " + std::to_string(i)));
-    }
+//     auto head = Row{
+//         Column<std::vector<Button>>{} | SizePolicy::fixed(18),
+//         Divider::bold({
+//             .brush = {.foreground = XColor::BrightBlack},
+//         }),
+//         TextBox{{
+//             .focus_policy = FocusPolicy::Strong,
+//         }},
+//     };
 
-    return Application{head, Terminal{MouseMode::Move}}.run();
-}
+//     for (auto i = 0; i < 21; ++i) {
+//         get_child<0>(head).children.push_back(hover_btn("Hover " +
+//         std::to_string(i)));
+//     }
+
+//     return Application{head, Terminal{MouseMode::Move}}.run();
+// }

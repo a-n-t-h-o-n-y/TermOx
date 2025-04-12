@@ -1,24 +1,33 @@
 #include <ox/scrollbar.hpp>
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 
 #include <ox/put.hpp>
 
 namespace {
 
+[[nodiscard]]
+constexpr auto ease_out_quint(float const x) -> float
+{
+    return 1.0f - std::pow(1.f - x, 4.f);
+}
+
 /// Returns a float so precision glyph fitting can be done.
-[[nodiscard]] auto bar_top_position(int position,
-                                    int canvas_length,
-                                    int scrollable_length,
-                                    int bar_length) -> float
+[[nodiscard]]
+auto bar_top_position(int position,
+                      int canvas_length,
+                      int scrollable_length,
+                      int bar_length) -> float
 {
     if (scrollable_length == 0) { return 0.f; }
     return (float)(canvas_length - bar_length) *
            ((float)position / (float)scrollable_length);
 }
 
-[[nodiscard]] auto bar_length(int canvas_length, int scrollable_length) -> int
+[[nodiscard]]
+auto bar_length(int canvas_length, int scrollable_length) -> int
 {
     if (scrollable_length == 0) { return 0; }
     double ratio = std::min((double)canvas_length / scrollable_length, 1.0);
@@ -35,14 +44,9 @@ ScrollBar::ScrollBar(Options x)
     : Widget{FocusPolicy::None, SizePolicy::fixed(1)},
       scrollable_length{std::move(x.scrollable_length)},
       position{std::move(x.position)},
-      brush{std::move(x.brush)}
+      brush{std::move(x.brush)},
+      scroll_settle_time{x.scroll_settle_time}
 {}
-
-void ScrollBar::increment_position(int amount)
-{
-    position += amount;
-    position = std::clamp(0, position, std::max(scrollable_length - 1, 0));
-}
 
 void ScrollBar::paint(Canvas c)
 {
@@ -78,23 +82,64 @@ void ScrollBar::paint(Canvas c)
 void ScrollBar::mouse_press(Mouse m)
 {
     if (m.button == Mouse::Button::Left) {
-        position = (int)((float)scrollable_length *
-                         ((float)m.at.y / (float)std::max(this->size.height - 1, 0)));
-        this->on_scroll(position);
+        time_at_click_ = ClockType::now();
+        position_at_click_ = position;
+        target_position_ =
+            (int)((float)(std::max(scrollable_length - 1, 0)) *
+                  ((float)m.at.y / (float)std::max(this->size.height - 1, 0)));
+        timer_.start();
     }
 }
 
 void ScrollBar::mouse_wheel(Mouse m)
 {
-    auto const amount = 1;
+    constexpr auto percent_scrolll = 0.15f;
     if (m.button == Mouse::Button::ScrollDown) {
-        this->increment_position(1 * amount);
-        this->on_scroll(position);
+        time_at_click_ = ClockType::now();
+        position_at_click_ = position;
+        target_position_ = std::min(
+            (int)((float)position + (percent_scrolll * (float)scrollable_length)),
+            std::max(scrollable_length - 1, 0));
+        timer_.start();
     }
     else if (m.button == Mouse::Button::ScrollUp) {
-        this->increment_position(-1 * amount);
-        this->on_scroll(position);
+        time_at_click_ = ClockType::now();
+        position_at_click_ = position;
+        target_position_ = std::max(
+            (int)((float)position - (percent_scrolll * (float)scrollable_length)), 0);
+        timer_.start();
     }
+}
+
+void ScrollBar::timer(int id)
+{
+    if (id != timer_.id()) { return; };
+
+    if (position == target_position_) {
+        timer_.stop();
+        return;
+    }
+
+    auto const time_since_click = ClockType::now() - time_at_click_;
+    auto t =
+        (float)std::chrono::duration_cast<std::chrono::milliseconds>(time_since_click)
+            .count() /
+        (float)scroll_settle_time.count();
+
+    t = std::clamp(t, 0.f, 1.f);
+
+    auto const r = ease_out_quint(t);
+
+    position = (int)std::round(r * (float)(target_position_ - position_at_click_) +
+                               (float)position_at_click_);
+
+    this->on_scroll(position);
+}
+
+void ScrollBar::increment_position(int amount)
+{
+    position += amount;
+    position = std::clamp(0, position, std::max(scrollable_length - 1, 0));
 }
 
 }  // namespace ox
