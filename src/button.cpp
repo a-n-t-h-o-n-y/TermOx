@@ -38,14 +38,23 @@ Button::Button(Options x)
       label{std::move(x.label)},
       press_mod{std::move(x.press_mod)},
       focus_mod{std::move(x.focus_mod)},
-      decoration_{[d = std::move(x.decoration)] {
-          return std::visit(zzz::Overload{
-                                [](PaintFn fn) -> DecorationInternal { return fn; },
-                                [](Fade f) -> DecorationInternal {
-                                    return {FadeInternal{.fade = std::move(f)}};
-                                },
-                            },
-                            std::move(d));
+      decoration_{[this, d = std::move(x.decoration)] {
+          return std::visit(
+              zzz::Overload{
+                  [](PaintFn fn) -> DecorationInternal { return fn; },
+                  [this](Fade f) -> DecorationInternal {
+                      return {FadeInternal{
+                          .fade = std::move(f),
+                          .timer =
+                              Timer{
+                                  *this,
+                                  std::chrono::milliseconds{timer_period_ms},
+                                  false,
+                              },
+                      }};
+                  },
+              },
+              std::move(d));
       }()}
 {}
 
@@ -99,11 +108,9 @@ void Button::mouse_enter() { this->start_select(); }
 
 void Button::mouse_leave() { this->end_select(); }
 
-void Button::timer(int id)
+void Button::timer()
 {
-    auto const update_fade = [&id](FadeInternal& f) {
-        if (id != f.timer.id()) { return; }
-
+    auto const update_fade = [](FadeInternal& f) {
         auto const delta =
             timer_period_ms / (float)(f.direction == +1 ? f.fade.fade_in.count()
                                                         : f.fade.fade_out.count());

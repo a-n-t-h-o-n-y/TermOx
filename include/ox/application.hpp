@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cstdint>
+#include <map>
 
 #include <ox/core/core.hpp>
 #include <ox/widget.hpp>
@@ -11,6 +11,12 @@ namespace ox {
  * Top level Application class that handles event processing and painting.
  */
 class Application {
+   public:
+    /**
+     * Map of Timer::id to target Widget.
+     */
+    static inline std::map<int, LifetimeView<Widget>> timer_targets;
+
    public:
     /**
      * Create an Application that will forward events to the given head Widget and use

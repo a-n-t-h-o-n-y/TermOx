@@ -11,6 +11,7 @@
 
 #include <ox/core/core.hpp>
 #include <ox/label.hpp>
+#include <ox/timer.hpp>
 #include <ox/widget.hpp>
 
 namespace ox {
@@ -79,7 +80,7 @@ class Button : public BasicButton {
 
     void mouse_leave() override;
 
-    void timer(int id) override;
+    void timer() override;
 
    private:
     static constexpr auto timer_period_ms = 10;
@@ -88,7 +89,7 @@ class Button : public BasicButton {
         Fade fade;
         int direction = +1;  // +1 or -1
         float percent = 0.f;
-        Timer timer = Timer{std::chrono::milliseconds{timer_period_ms}, false};
+        Timer timer;
     };
     using DecorationInternal = std::variant<PaintFn, FadeInternal>;
 

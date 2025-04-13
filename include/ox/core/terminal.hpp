@@ -1,18 +1,12 @@
 #pragma once
 
-#include <algorithm>
-#include <array>
 #include <chrono>
-#include <concepts>
-#include <cstddef>
-#include <functional>
 #include <map>
 #include <optional>
 #include <stop_token>
 #include <string>
-#include <string_view>
 #include <thread>
-#include <utility>
+#include <type_traits>
 #include <variant>
 #include <vector>
 
@@ -99,63 +93,6 @@ class ScreenBuffer {
 };
 
 /**
- * A thread of execution that waits for a given duration and then calls a callback
- * function.
- */
-class TimerThread {
-   public:
-    using CallbackType = std::function<void()>;
-    using ClockType = std::chrono::steady_clock;
-
-   public:
-    /**
-     * Create a placeholder TimerThread that does nothing.
-     *
-     * @details You'll want to move assign over this to launch a TimerThread.
-     */
-    TimerThread() = default;
-
-    /**
-     * Create a TimerThread that will call the callback after the duration in a loop.
-     *
-     * @details This will launch a thread immediately.
-     * @param duration The periodic duration to wait before calling the callback
-     * @param callback The function to call each time the duration has elapsed
-     */
-    explicit TimerThread(std::chrono::milliseconds duration, CallbackType callback);
-
-    TimerThread(TimerThread const&) = delete;
-    TimerThread(TimerThread&&) = default;
-
-    auto operator=(TimerThread const&) -> TimerThread& = delete;
-    auto operator=(TimerThread&& x) -> TimerThread& = default;
-
-   public:
-    /**
-     * Request the TimerThread to stop, returns immediately.
-     *
-     * @details This will request the thread to stop, it does not wait for it to stop.
-     */
-    void request_stop() { thread_.request_stop(); }
-
-   private:
-    /**
-     * Run the TimerThread, calling the callback after the given duration and repeating
-     * until st.stop_requested() is true.
-     *
-     * @param st The stop_token to check for stop_requested().
-     * @param callback The function to call each time the duration has elapsed
-     * @param duration The periodic duration to wait before calling the callback
-     */
-    static void run(std::stop_token st,
-                    CallbackType const& callback,
-                    std::chrono::milliseconds duration);
-
-   private:
-    std::jthread thread_;
-};
-
-/**
  * Represents the terminal itself, providing an event loop and screen writing tools.
  */
 class Terminal {
@@ -165,8 +102,6 @@ class Terminal {
    public:
     inline static ScreenBuffer changes{{0, 0}};  // write to this
     inline static EventQueue event_queue;        // read from this
-
-    inline static std::map<int, TimerThread> timers;
 
     inline static Color foreground = TermColor::Default;
     inline static Color background = TermColor::Default;
@@ -229,67 +164,6 @@ class Terminal {
     ScreenBuffer current_screen_{{0, 0}};
     std::jthread terminal_input_thread_;
     std::string escape_sequence_;
-};
-
-/**
- * A handle to a Timer in the Terminal's timer system.
- *
- * @details This is used to create a new TimerThread with a given ID and provides access
- * to start and stop it. The thread will post Timer events to the event queue at the
- * given interval.
- */
-class Timer {
-   public:
-    /**
-     * Create a Timer with the given duration.
-     *
-     * @param duration The periodic duration to wait before calling the callback
-     * @param launch If true, the TimerThread will be started immediately.
-     */
-    explicit Timer(std::chrono::milliseconds duration, bool launch = false);
-
-    Timer(Timer const&) = delete;
-    Timer(Timer&& other);
-
-    auto operator=(Timer const&) -> Timer& = delete;
-    auto operator=(Timer&& other) -> Timer&;
-
-    /**
-     * Stop the TimerThread if it is running.
-     */
-    ~Timer();
-
-   public:
-    /**
-     * Start the timer thread with the given duration.
-     *
-     * @details This will create and launch a new thread.
-     */
-    void start();
-
-    /**
-     * Request the TimerThread to stop, returns immediately.
-     *
-     * @details Does not wait for thread to exit. The destructor of Terminal will wait
-     * for it to exit, or if you call start() again.
-     */
-    void stop();
-
-    [[nodiscard]] auto id() const -> int { return id_; }
-
-    [[nodiscard]] auto duration() const -> std::chrono::milliseconds
-    {
-        return duration_;
-    }
-
-    [[nodiscard]] auto is_running() const -> bool { return is_running_; }
-
-   private:
-    inline static int next_id_ = 0;
-
-    int id_;
-    std::chrono::milliseconds duration_;
-    bool is_running_ = false;
 };
 
 /**

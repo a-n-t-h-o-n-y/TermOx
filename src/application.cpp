@@ -1,7 +1,11 @@
 #include <ox/application.hpp>
 
 #include <algorithm>
+#include <chrono>
 #include <ranges>
+#include <utility>
+
+#include <zzz/timer_thread.hpp>
 
 #include <ox/core/core.hpp>
 #include <ox/focus.hpp>
@@ -265,7 +269,10 @@ auto Application::handle_resize(Area new_size) -> EventResponse
 
 auto Application::handle_timer(int id) -> EventResponse
 {
-    for_each_depth_first(head_, [id](Widget& w) { w.timer(id); });
+    auto const at = timer_targets.find(id);
+    if (at != std::cend(timer_targets)) {
+        if (at->second.valid()) { at->second.get().timer(); }
+    }
     return {};
 }
 

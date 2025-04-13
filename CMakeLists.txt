@@ -16,6 +16,7 @@ add_library(TermOx STATIC
     src/put.cpp
     src/scrollbar.cpp
     src/textbox.cpp
+    src/timer.cpp
     src/widget.cpp
     src/core/terminal.cpp
 
@@ -34,6 +35,7 @@ add_library(TermOx STATIC
     include/ox/put.hpp
     include/ox/scrollbar.hpp
     include/ox/textbox.hpp
+    include/ox/timer.hpp
     include/ox/widget.hpp
 
     include/ox/core/common.hpp
@@ -61,7 +63,7 @@ include(FetchContent)
 FetchContent_Declare(
     zzz
     GIT_REPOSITORY https://github.com/a-n-t-h-o-n-y/zzz.git
-    GIT_TAG 9d7c047f47c81a95a5ea824075253618356593a2
+    GIT_TAG 8989d54a07863de079915406084cdf332675ed7e
 )
 FetchContent_MakeAvailable(zzz)
 

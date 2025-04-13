@@ -13,6 +13,8 @@
 #include <variant>
 #include <vector>
 
+#include <zzz/timer_thread.hpp>
+
 #include <ox/core/core.hpp>
 #include <ox/put.hpp>
 
@@ -39,7 +41,11 @@ constexpr auto logo = std::string_view{
 struct SplashScreen {
     std::uint16_t hue{0};
     std::string_view display{logo};
-    Timer timer{std::chrono::milliseconds{30}, true};
+    static constexpr int timer_id = 1;
+    zzz::TimerThread timer{
+        std::chrono::milliseconds{30},
+        [] { Terminal::event_queue.enqueue(event::Timer{SplashScreen::timer_id}); },
+    };
 };
 
 struct MainMenu {
@@ -103,7 +109,11 @@ struct Game {
         } velocity;
     } ball{};
 
-    Timer timer{std::chrono::milliseconds{30}, true};
+    static constexpr int timer_id = 2;
+    zzz::TimerThread timer{
+        std::chrono::milliseconds{30},
+        [] { Terminal::event_queue.enqueue(event::Timer{Game::timer_id}); },
+    };
 };
 
 struct PlayerSelectMenu {
@@ -598,7 +608,7 @@ auto key_press(State s, Key k) -> PongEventResponse
 
 auto timer(SplashScreen x, int id) -> PongEventResponse
 {
-    if (x.timer.id() != id) { return x; }
+    if (id != SplashScreen::timer_id) { return x; }
     return SplashScreen{
         .hue = (std::uint16_t)((x.hue + 2) % 360),
         .display = x.display,
@@ -608,7 +618,7 @@ auto timer(SplashScreen x, int id) -> PongEventResponse
 
 auto timer(Game state, int id) -> PongEventResponse
 {
-    if (state.timer.id() != id) { return state; }
+    if (id != Game::timer_id) { return state; }
 
     auto& ball = state.ball;
     auto& left = state.left;

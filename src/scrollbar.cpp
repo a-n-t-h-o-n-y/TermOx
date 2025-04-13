@@ -111,10 +111,8 @@ void ScrollBar::mouse_wheel(Mouse m)
     }
 }
 
-void ScrollBar::timer(int id)
+void ScrollBar::timer()
 {
-    if (id != timer_.id()) { return; };
-
     if (position == target_position_) {
         timer_.stop();
         return;

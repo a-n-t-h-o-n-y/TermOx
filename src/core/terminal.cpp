@@ -44,37 +44,6 @@ void ScreenBuffer::fill(Glyph const& g)
 
 // -------------------------------------------------------------------------------------
 
-TimerThread::TimerThread(std::chrono::milliseconds duration, CallbackType callback)
-    : thread_{[cb = std::move(callback), d = std::move(duration)](auto st) {
-          TimerThread::run(st, cb, d);
-      }}
-{}
-
-void TimerThread::run(std::stop_token st,
-                      CallbackType const& callback,
-                      std::chrono::milliseconds duration)
-{
-    constexpr auto timeout_duration =
-        std::chrono::duration_cast<ClockType::duration>(std::chrono::milliseconds{16});
-    auto next_callback_time = ClockType::now() + duration;
-    while (true) {
-        if (st.stop_requested()) { return; }
-
-        auto const now = ClockType::now();
-        if (now >= next_callback_time) {
-            callback();
-            // TODO should this be += duration - (next_callback_time - now) ?
-            // use cerr to verify?
-            next_callback_time += duration;
-        }
-
-        auto const time_to_wait = std::min(next_callback_time - now, timeout_duration);
-        std::this_thread::sleep_for(time_to_wait);
-    }
-}
-
-// -------------------------------------------------------------------------------------
-
 Terminal::Terminal(MouseMode mouse_mode, KeyMode key_mode, Signals signals)
     : terminal_input_thread_{[this](auto st) { this->run_read_loop(st); }}
 {
@@ -159,52 +128,6 @@ void Terminal::run_read_loop(std::stop_token st)
 }
 
 auto Terminal::size() -> Area { return esc::terminal_area(); }
-
-// -------------------------------------------------------------------------------------
-
-Timer::Timer(std::chrono::milliseconds duration, bool launch)
-    : id_{next_id_++}, duration_{duration}
-{
-    Terminal::timers.emplace(id_, TimerThread{});
-    if (launch) { this->start(); }
-}
-
-Timer::Timer(Timer&& other)
-{
-    id_ = std::move(other.id_);
-    duration_ = std::move(other.duration_);
-    is_running_ = std::move(other.is_running_);
-    other.is_running_ = false;
-}
-
-auto Timer::operator=(Timer&& other) -> Timer&
-{
-    if (this->is_running_) { this->stop(); }
-    id_ = std::move(other.id_);
-    duration_ = std::move(other.duration_);
-    is_running_ = std::move(other.is_running_);
-    other.is_running_ = false;
-    return *this;
-}
-
-Timer::~Timer()
-{
-    if (is_running_) { this->stop(); }
-}
-
-void Timer::start()
-{
-    // TODO fix Timer and TimerThread so the thread is reused.
-    is_running_ = true;
-    Terminal::timers[id_] = TimerThread{
-        duration_, [id = id_] { Terminal::event_queue.enqueue(event::Timer{id}); }};
-}
-
-void Timer::stop()
-{
-    Terminal::timers[id_].request_stop();
-    is_running_ = false;
-}
 
 // -------------------------------------------------------------------------------------
 

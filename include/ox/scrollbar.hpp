@@ -3,6 +3,7 @@
 #include <chrono>
 
 #include <ox/core/core.hpp>
+#include <ox/timer.hpp>
 #include <ox/widget.hpp>
 
 namespace ox {
@@ -34,14 +35,14 @@ class ScrollBar : public Widget {
 
     void mouse_wheel(Mouse m) override;
 
-    void timer(int id) override;
+    void timer() override;
 
    private:
     void increment_position(int amount = 1);
 
    private:
     using ClockType = std::chrono::steady_clock;
-    Timer timer_{std::chrono::milliseconds{16}};
+    Timer timer_{*this, std::chrono::milliseconds{16}};
     ClockType::time_point time_at_click_;
     int position_at_click_ = 0;
     int target_position_ = 0;

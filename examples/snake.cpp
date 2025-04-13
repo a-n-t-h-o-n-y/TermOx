@@ -120,9 +120,7 @@ class SnakeEngine {
 
 class SnakeGameWidget : public Widget {
    public:
-    SnakeGameWidget()
-        : Widget{FocusPolicy::Strong, SizePolicy::flex()}, timer_{engine_.speed / 6}
-    {}
+    SnakeGameWidget() : Widget{FocusPolicy::Strong, SizePolicy::flex()} {}
 
    public:
     void key_press(Key k) override
@@ -155,11 +153,9 @@ class SnakeGameWidget : public Widget {
         }
     }
 
-    void timer(int id) override
+    void timer() override
     {
-        if (id == timer_.id()) {
-            if (not engine_.step()) { timer_.stop(); }
-        }
+        if (not engine_.step()) { timer_.stop(); }
     }
 
     void paint(Canvas c) override
@@ -218,7 +214,7 @@ class SnakeGameWidget : public Widget {
 
    private:
     SnakeEngine engine_;
-    Timer timer_;
+    Timer timer_{*this, engine_.speed / 6};
 };
 
 int main()

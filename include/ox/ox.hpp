@@ -16,4 +16,5 @@
 #include <ox/put.hpp>
 #include <ox/scrollbar.hpp>
 #include <ox/textbox.hpp>
+#include <ox/timer.hpp>
 #include <ox/widget.hpp>

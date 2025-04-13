@@ -90,7 +90,7 @@ class Widget {
      */
     virtual void resize(Area /* old_size */) {}
 
-    virtual void timer(int /* id */) {}
+    virtual void timer() {}
 
     virtual void paint(Canvas) {}
 
