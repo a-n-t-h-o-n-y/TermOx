@@ -46,6 +46,20 @@ Label::Label(Options x)
       brush{std::move(x.brush)}
 {}
 
+Label::Label(std::string text_)
+    : Widget{FocusPolicy::None, SizePolicy::flex()},
+      text{std::move(text_)},
+      align{Align::Center},
+      brush{}
+{}
+
+Label::Label(char const* text_)
+    : Widget{FocusPolicy::None, SizePolicy::flex()},
+      text{text_},
+      align{Align::Center},
+      brush{}
+{}
+
 void Label::paint(Canvas c) { detail::paint_label(c, text, align, brush); }
 
 // -------------------------------------------------------------------------------------

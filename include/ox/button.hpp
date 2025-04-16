@@ -114,7 +114,8 @@ class Button : public BasicButton {
 
 /**
  * Builds a void(Canvas, float) function from a Shape object and gradient.
- * @details Shape must be able to be used with put(...). Useful for Fade decorations.
+ * @details Shape must be able to be used with put(Canvas, shape, fg). Useful for Fade
+ * decorations.
  */
 [[nodiscard]] auto shape_gradient(auto const& shape, TrueColor one, TrueColor two)
     -> std::function<void(Canvas, float)>

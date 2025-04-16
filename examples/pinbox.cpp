@@ -86,7 +86,10 @@ int main()
         Row{
             PinBox{},
 
-            Divider::bold({.brush = {.foreground = XColor::BrightBlack}}),
+            Divider{{
+                .lines = Lines::bold(),
+                .brush = {.foreground = XColor::BrightBlack},
+            }},
 
             Column{
                 Label{{
@@ -104,7 +107,10 @@ int main()
                     XColor::White,
                     XColor::BrightBlack,
                 }} | SizePolicy::fixed(1),
-                Divider::bold({.brush = {.foreground = XColor::BrightBlack}}),
+                Divider{{
+                    .lines = Lines::bold(),
+                    .brush = {.foreground = XColor::BrightBlack},
+                }},
                 Label{{
                     .text = "Last Action",
                     .align = Align::Center,
@@ -112,7 +118,10 @@ int main()
                     .size_policy = SizePolicy::fixed(1),
                 }},
                 Label{{.align = Align::Left}} | SizePolicy::fixed(1),
-                Divider::bold({.brush = {.foreground = XColor::BrightBlack}}),
+                Divider{{
+                    .lines = Lines::bold(),
+                    .brush = {.foreground = XColor::BrightBlack},
+                }},
                 Row{
                     Label{{
                         .text = "Pin Count",
@@ -125,7 +134,10 @@ int main()
                         .align = Align::Left,
                     }},
                 } | SizePolicy::fixed(1),
-                Divider::bold({.brush = {.foreground = XColor::BrightBlack}}),
+                Divider{{
+                    .lines = Lines::bold(),
+                    .brush = {.foreground = XColor::BrightBlack},
+                }},
                 Button{{
                     .label =
                         {
@@ -138,7 +150,10 @@ int main()
                 }},
             } | SizePolicy::fixed(16),
         } |
-        Border::round("PinBox");
+        Border{
+            .box = shape::Box::round(),
+            .label = "PinBox",
+        };
 
     auto& [pinbox, div, sidebar] = head.child.children;
 

@@ -68,9 +68,8 @@ void ScrollBar::paint(Canvas c)
 
     c[at].symbol = edge;
 
-    put(c, {.x = 0, .y = (int)bar_pos + 1},
+    put(c, {.x = 0, .y = (int)bar_pos + 1}, std::max(bar_len - 1, 0),
         shape::VLine{
-            .length = std::max(bar_len - 1, 0),
             .symbol = U'█',
         },
         brush.foreground);

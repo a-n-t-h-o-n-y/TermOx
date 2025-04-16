@@ -37,6 +37,10 @@ class Label : public Widget {
 
     Label(Options x = init);
 
+    Label(std::string text_);
+
+    Label(char const* text_);
+
    public:
     void paint(Canvas c) override;
 };

@@ -252,7 +252,7 @@ void paint(MainMenu const& x, Canvas c)
 void paint(HowTo const& x, Canvas c)
 {
     {  // Border
-        put(c, shape::Frame::square(), XColor::Blue);
+        put(c, shape::Box::square(), XColor::Blue);
     }
     {  // Title
         auto const at = Point{.x = (c.size.width - (int)x.title.size()) / 2, .y = 1};
@@ -339,12 +339,8 @@ void paint(Game const& x, Canvas c)
     };
 
     {  // Net
-        put(game_canvas, {.x = display_space.width / 2, .y = 0},
-            shape::VLine{
-                .length = display_space.height,
-                .symbol = U'╳',
-            },
-            Brush{.traits = Trait::Dim});
+        put(game_canvas, {.x = display_space.width / 2, .y = 0}, display_space.height,
+            shape::VLine{.symbol = U'╳'}, Brush{.traits = Trait::Dim});
     }
 
     {  // Ball
@@ -427,12 +423,8 @@ void paint(Game const& x, Canvas c)
 
     {  // Border
         put(c, game_canvas.at + Point{-1, -1},
-            shape::Box{
-                .corners = shape::Box::round_corners,
-                .size = {.width = display_space.width + 2,
-                         .height = display_space.height + 2},
-            },
-            XColor::Blue);
+            Area{.width = display_space.width + 2, .height = display_space.height + 2},
+            shape::Box::round(), XColor::Blue);
     }
 
     {  // Footer

@@ -12,6 +12,9 @@ namespace ox {
  */
 class Focus {
    public:
+    Focus() = delete;
+
+   public:
     /**
      * Changes the current focus to \p w. Invokes focus_out on the Widget currently in
      * focus. If \p w is not nullptr, it triggers focus_in(w).

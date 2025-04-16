@@ -43,7 +43,7 @@ int main()
             }},
             ScrollBar{{}},
         } |
-        Border::round("TextBox");
+        Border{.box = shape::Box::round(), .label = "TextBox"};
 
     link(get_child<0>(head), get_child<1>(head));
 
@@ -105,9 +105,10 @@ int main()
 
 //     auto head = Row{
 //         Column<std::vector<Button>>{} | SizePolicy::fixed(18),
-//         Divider::bold({
+//         Divider{{
+//             .lines = Lines::bold(),
 //             .brush = {.foreground = XColor::BrightBlack},
-//         }),
+//         }},
 //         TextBox{{
 //             .focus_policy = FocusPolicy::Strong,
 //         }},

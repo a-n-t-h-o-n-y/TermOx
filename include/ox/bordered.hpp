@@ -12,50 +12,9 @@
 namespace ox {
 
 struct Border {
-    shape::Frame box;
+    shape::Box box;
     Brush brush = {};  // Only applies to box.
     Label label = {};
-
-    struct Options {
-        Brush brush = {};
-        Label label = {};
-    };
-
-    /// Light Border: ┌┐└┘─│
-    [[nodiscard]] static auto light(std::string label = "") -> Border;
-    [[nodiscard]] static auto light(Options x) -> Border;
-
-    /// Round Border: ╭╮╰╯─│
-    [[nodiscard]] static auto round(std::string label = "") -> Border;
-    [[nodiscard]] static auto round(Options x) -> Border;
-
-    /// Twin Border: ╔╗╚╝═║
-    [[nodiscard]] static auto twin(std::string label = "") -> Border;
-    [[nodiscard]] static auto twin(Options x) -> Border;
-
-    /// Bold Border: ┏┓┗┛━┃
-    [[nodiscard]] static auto bold(std::string label = "") -> Border;
-    [[nodiscard]] static auto bold(Options x) -> Border;
-
-    /// Dashed Border: ┌┐└┘╌╎
-    [[nodiscard]] static auto dashed(std::string label = "") -> Border;
-    [[nodiscard]] static auto dashed(Options x) -> Border;
-
-    /// Dotted Border: ┌┐└┘┄┆
-    [[nodiscard]] static auto dotted(std::string label = "") -> Border;
-    [[nodiscard]] static auto dotted(Options x) -> Border;
-
-    /// ASCII Border: ++++-|
-    [[nodiscard]] static auto ascii(std::string label = "") -> Border;
-    [[nodiscard]] static auto ascii(Options x) -> Border;
-
-    /// Twin Horizontal Border: ╒╕╘╛═│
-    [[nodiscard]] static auto twin_horizontal(std::string label = "") -> Border;
-    [[nodiscard]] static auto twin_horizontal(Options x) -> Border;
-
-    /// Twin Vertical Border: ╓╖╙╜─║
-    [[nodiscard]] static auto twin_vertical(std::string label = "") -> Border;
-    [[nodiscard]] static auto twin_vertical(Options x) -> Border;
 };
 
 /**
@@ -131,62 +90,37 @@ auto get_child(Bordered<WidgetType>& bordered) -> auto&
 
 // -------------------------------------------------------------------------------------
 
+struct Lines {
+    char32_t vertical;
+    char32_t horizontal;
+
+    [[nodiscard]] static constexpr auto light() -> Lines { return {U'│', U'─'}; }
+    [[nodiscard]] static constexpr auto bold() -> Lines { return {U'┃', U'━'}; }
+    [[nodiscard]] static constexpr auto twin() -> Lines { return {U'║', U'═'}; }
+    [[nodiscard]] static constexpr auto dashed() -> Lines { return {U'╎', U'╌'}; }
+    [[nodiscard]] static constexpr auto dotted() -> Lines { return {U'┆', U'┄'}; }
+    [[nodiscard]] static constexpr auto ascii() -> Lines { return {U'-', U'|'}; }
+    [[nodiscard]] static constexpr auto empty() -> Lines { return {U' ', U' '}; }
+};
+
 /// A line divider element.
 class Divider : public Widget {
    public:
-    struct Display {
-        char32_t vertical;
-        char32_t horizontal;
-    };
-
     struct Options {
-        Display lines = {.vertical = U'│', .horizontal = U'─'};
+        Lines lines = Lines::light();
         Brush brush = {};
         Label label = {};
     };
 
    public:
-    Display lines;
+    Lines lines;
     Brush brush;
     Label label;  // TODO
 
-    Divider(Options x)
-        : Widget{FocusPolicy::None, SizePolicy::fixed(1)},
-          lines{std::move(x.lines)},
-          brush{std::move(x.brush)},
-          label{std::move(x.label)}
-    {}
+    Divider(Options x);
 
    public:
     void paint(Canvas c) override;
-
-   public:
-    /// Light Divider: ─│
-    [[nodiscard]] static auto light(std::string label = "") -> Divider;
-    [[nodiscard]] static auto light(Options x) -> Divider;
-
-    /// Bold Divider: ━┃
-    [[nodiscard]] static auto bold(std::string label = "") -> Divider;
-    [[nodiscard]] static auto bold(Options x) -> Divider;
-
-    /// Twin Divider: ═║
-    [[nodiscard]] static auto twin(std::string label = "") -> Divider;
-    [[nodiscard]] static auto twin(Options x) -> Divider;
-
-    /// Dashed Divider: ╌╎
-    [[nodiscard]] static auto dashed(std::string label = "") -> Divider;
-    [[nodiscard]] static auto dashed(Options x) -> Divider;
-
-    /// Dotted Divider: ┄┆
-    [[nodiscard]] static auto dotted(std::string label = "") -> Divider;
-    [[nodiscard]] static auto dotted(Options x) -> Divider;
-
-    /// ASCII Divider: -|
-    [[nodiscard]] static auto ascii(std::string label = "") -> Divider;
-    [[nodiscard]] static auto ascii(Options x) -> Divider;
-
-    [[nodiscard]] static auto empty(std::string label = "") -> Divider;
-    [[nodiscard]] static auto empty(Options x) -> Divider;
 };
 
 }  // namespace ox

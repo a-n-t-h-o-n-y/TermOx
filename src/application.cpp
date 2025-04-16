@@ -202,27 +202,33 @@ Application::Application(Widget& head, Terminal term)
     : head_{head}, term_{std::move(term)}
 {}
 
-auto Application::run() -> int { return process_events(term_, *this); }
+auto Application::run() -> int
+{
+    quit_request_ = std::nullopt;
+    return process_events(term_, *this);
+}
+
+void Application::quit(int code) { quit_request_ = code; }
 
 auto Application::handle_mouse_press(Mouse m) -> EventResponse
 {
     ::any_mouse_event<SetFocus::Yes>(head_, m,
                                      [](Widget& w, Mouse m) { w.mouse_press(m); });
-    return {};
+    return quit_request_ ? QuitRequest{*quit_request_} : EventResponse{};
 }
 
 auto Application::handle_mouse_release(Mouse m) -> EventResponse
 {
     ::any_mouse_event<SetFocus::No>(head_, m,
                                     [](Widget& w, Mouse m) { w.mouse_release(m); });
-    return {};
+    return quit_request_ ? QuitRequest{*quit_request_} : EventResponse{};
 }
 
 auto Application::handle_mouse_wheel(Mouse m) -> EventResponse
 {
     ::any_mouse_event<SetFocus::No>(head_, m,
                                     [](Widget& w, Mouse m) { w.mouse_wheel(m); });
-    return {};
+    return quit_request_ ? QuitRequest{*quit_request_} : EventResponse{};
 }
 
 auto Application::handle_mouse_move(Mouse m) -> EventResponse
@@ -231,7 +237,7 @@ auto Application::handle_mouse_move(Mouse m) -> EventResponse
     ::any_mouse_event<SetFocus::No>(head_, m,
                                     [](Widget& w, Mouse m) { w.mouse_move(m); });
     previous_mouse_position_ = m.at;
-    return {};
+    return quit_request_ ? QuitRequest{*quit_request_} : EventResponse{};
 }
 
 auto Application::handle_key_press(Key k) -> EventResponse
@@ -250,13 +256,13 @@ auto Application::handle_key_press(Key k) -> EventResponse
 
     focused.key_press(k);
 
-    return {};
+    return quit_request_ ? QuitRequest{*quit_request_} : EventResponse{};
 }
 
 auto Application::handle_key_release(Key k) -> EventResponse
 {
     if (auto const life = Focus::get(); life.valid()) { life.get().key_release(k); }
-    return {};
+    return quit_request_ ? QuitRequest{*quit_request_} : EventResponse{};
 }
 
 auto Application::handle_resize(Area new_size) -> EventResponse
@@ -264,7 +270,7 @@ auto Application::handle_resize(Area new_size) -> EventResponse
     auto const old_size = head_.size;
     head_.size = new_size;
     head_.resize(old_size);
-    return {};
+    return quit_request_ ? QuitRequest{*quit_request_} : EventResponse{};
 }
 
 auto Application::handle_timer(int id) -> EventResponse
@@ -273,7 +279,7 @@ auto Application::handle_timer(int id) -> EventResponse
     if (at != std::cend(timer_targets)) {
         if (at->second.valid()) { at->second.get().timer(); }
     }
-    return {};
+    return quit_request_ ? QuitRequest{*quit_request_} : EventResponse{};
 }
 
 auto Application::handle_paint(Canvas canvas) -> Terminal::Cursor
@@ -282,5 +288,7 @@ auto Application::handle_paint(Canvas canvas) -> Terminal::Cursor
     ::send_paint_events(head_, canvas, cursor);
     return cursor;
 }
+
+std::optional<int> Application::quit_request_ = std::nullopt;
 
 }  // namespace ox

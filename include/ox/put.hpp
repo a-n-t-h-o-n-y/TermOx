@@ -8,36 +8,21 @@
 namespace ox::shape {
 
 struct HLine {
-    int length;
     char32_t symbol = U'─';
 };
 
 struct VLine {
-    int length;
     char32_t symbol = U'│';
 };
 
 struct Box {
-    /// {top left, top right, bottom left, bottom right}
-    std::array<char32_t, 4> corners = square_corners;
-
-    /// {N, S, E, W}
-    std::array<char32_t, 4> walls = {U'─', U'─', U'│', U'│'};
-
-    Area size = {0, 0};
-
-    static constexpr auto square_corners = std::array{U'┌', U'┐', U'└', U'┘'};
-    static constexpr auto round_corners = std::array{U'╭', U'╮', U'╰', U'╯'};
-};
-
-struct Frame {
     /// {top left, top right, bottom left, bottom right}
     std::array<char32_t, 4> corners;
 
     /// {N, S, E, W}
     std::array<char32_t, 4> walls;
 
-    static constexpr auto square() -> Frame
+    [[nodiscard]] static constexpr auto square() -> Box
     {
         return {
             .corners = {U'┌', U'┐', U'└', U'┘'},
@@ -45,7 +30,7 @@ struct Frame {
         };
     }
 
-    static constexpr auto half_square() -> Frame
+    [[nodiscard]] static constexpr auto half_square() -> Box
     {
         return {
             .corners = {U'\0', U'\0', U'\0', U'┘'},
@@ -53,7 +38,7 @@ struct Frame {
         };
     }
 
-    static constexpr auto round() -> Frame
+    [[nodiscard]] static constexpr auto round() -> Box
     {
         return {
             .corners = {U'╭', U'╮', U'╰', U'╯'},
@@ -61,7 +46,7 @@ struct Frame {
         };
     }
 
-    static constexpr auto half_round() -> Frame
+    [[nodiscard]] static constexpr auto half_round() -> Box
     {
         return {
             .corners = {U'\0', U'\0', U'\0', U'╯'},
@@ -69,7 +54,7 @@ struct Frame {
         };
     }
 
-    static constexpr auto bold() -> Frame
+    [[nodiscard]] static constexpr auto bold() -> Box
     {
         return {
             .corners = {U'┏', U'┓', U'┗', U'┛'},
@@ -77,7 +62,31 @@ struct Frame {
         };
     }
 
-    static constexpr auto half_twin() -> Frame
+    [[nodiscard]] static constexpr auto dashed() -> Box
+    {
+        return {
+            .corners = {U'┌', U'┐', U'└', U'┘'},
+            .walls = {U'╌', U'╌', U'╎', U'╎'},
+        };
+    }
+
+    [[nodiscard]] static constexpr auto dotted() -> Box
+    {
+        return {
+            .corners = {U'┌', U'┐', U'└', U'┘'},
+            .walls = {U'┄', U'┄', U'┆', U'┆'},
+        };
+    }
+
+    [[nodiscard]] static constexpr auto ascii() -> Box
+    {
+        return {
+            .corners = {'+', '+', '+', '+'},
+            .walls = {'-', '-', '|', '|'},
+        };
+    }
+
+    [[nodiscard]] static constexpr auto half_twin() -> Box
     {
         return {
             .corners = {U'\0', U'\0', U'\0', U'╝'},
@@ -85,7 +94,7 @@ struct Frame {
         };
     }
 
-    static constexpr auto twin() -> Frame
+    [[nodiscard]] static constexpr auto twin() -> Box
     {
         return {
             .corners = {U'╔', U'╗', U'╚', U'╝'},
@@ -93,7 +102,7 @@ struct Frame {
         };
     }
 
-    static constexpr auto half_bold() -> Frame
+    [[nodiscard]] static constexpr auto half_bold() -> Box
     {
         return {
             .corners = {U'\0', U'\0', U'\0', U'┛'},
@@ -101,7 +110,7 @@ struct Frame {
         };
     }
 
-    static constexpr auto corners_square() -> Frame
+    [[nodiscard]] static constexpr auto corners_square() -> Box
     {
         return {
             .corners = {U'┌', U'┐', U'└', U'┘'},
@@ -109,7 +118,7 @@ struct Frame {
         };
     }
 
-    static constexpr auto corners_round() -> Frame
+    [[nodiscard]] static constexpr auto corners_round() -> Box
     {
         return {
             .corners = {U'╭', U'╮', U'╰', U'╯'},
@@ -117,7 +126,7 @@ struct Frame {
         };
     }
 
-    static constexpr auto brackets() -> Frame
+    [[nodiscard]] static constexpr auto brackets() -> Box
     {
         return {
             .corners = {U'┌', U'┐', U'└', U'┘'},
@@ -125,7 +134,7 @@ struct Frame {
         };
     }
 
-    static constexpr auto brackets_round() -> Frame
+    [[nodiscard]] static constexpr auto brackets_round() -> Box
     {
         return {
             .corners = {U'╭', U'╮', U'╰', U'╯'},
@@ -133,7 +142,7 @@ struct Frame {
         };
     }
 
-    static constexpr auto brackets_bold() -> Frame
+    [[nodiscard]] static constexpr auto brackets_bold() -> Box
     {
         return {
             .corners = {U'┏', U'┓', U'┗', U'┛'},
@@ -141,11 +150,27 @@ struct Frame {
         };
     }
 
-    static constexpr auto brackets_twin() -> Frame
+    [[nodiscard]] static constexpr auto brackets_twin() -> Box
     {
         return {
             .corners = {U'╔', U'╗', U'╚', U'╝'},
             .walls = {U'\0', U'\0', U'║', U'║'},
+        };
+    }
+
+    [[nodiscard]] static constexpr auto twin_horizontal() -> Box
+    {
+        return {
+            .corners = {U'╒', U'╕', U'╘', U'╛'},
+            .walls = {U'═', U'═', U'│', U'│'},
+        };
+    }
+
+    [[nodiscard]] static constexpr auto twin_vertical() -> Box
+    {
+        return {
+            .corners = {U'╓', U'╖', U'╙', U'╜'},
+            .walls = {U'─', U'─', U'║', U'║'},
         };
     }
 };
@@ -190,41 +215,43 @@ void put(Canvas c, Point at, std::u32string_view element);
  *
  * @param c The Canvas to Paint on.
  * @param at The leftmost point of the line, where painting begins.
+ * @param length The number of cells to paint.
  * @param item The HLine to paint.
  */
-void put(Canvas c, Point at, shape::HLine item);
+void put(Canvas c, Point at, int length, shape::HLine item);
 
 /**
  * Paint the given HLine object to the screen.
  *
  * @param c The Canvas to Paint on.
  * @param at The leftmost point of the line, where painting begins.
+ * @param length The number of cells to paint.
  * @param item The HLine to paint.
  * @param foreground The fg color to assign each Cell the line is painted to.
  */
-void put(Canvas c, Point at, shape::HLine item, Color foreground);
+void put(Canvas c, Point at, int length, shape::HLine item, Color foreground);
 
 /**
  * Paint the given HLine object to the screen.
  *
  * @param c The Canvas to Paint on.
  * @param at The leftmost point of the line, where painting begins.
+ * @param length The number of cells to paint.
  * @param item The HLine to paint.
  * @param foreground The Brush to assign each Cell the line is painted to.
  */
-void put(Canvas c, Point at, shape::HLine item, Brush const& brush);
+void put(Canvas c, Point at, int length, shape::HLine item, Brush const& brush);
 
-void put(Canvas c, Point at, shape::VLine item);
-void put(Canvas c, Point at, shape::VLine item, Color foreground);
-void put(Canvas c, Point at, shape::VLine item, Brush const& brush);
+void put(Canvas c, Point at, int length, shape::VLine item);
+void put(Canvas c, Point at, int length, shape::VLine item, Color foreground);
+void put(Canvas c, Point at, int length, shape::VLine item, Brush const& brush);
 
-void put(Canvas c, Point at, shape::Box const& item);
-void put(Canvas c, Point at, shape::Box const& item, Color foreground);
-void put(Canvas c, Point at, shape::Box const& item, Brush const& brush);
-
-void put(Canvas c, shape::Frame const& item);
-void put(Canvas c, shape::Frame const& item, Color foreground);
-void put(Canvas c, shape::Frame const& item, Brush const& brush);
+void put(Canvas c, Point at, Area size, shape::Box const& item);
+void put(Canvas c, Point at, Area size, shape::Box const& item, Color foreground);
+void put(Canvas c, Point at, Area size, shape::Box const& item, Brush const& brush);
+void put(Canvas c, shape::Box const& item);
+void put(Canvas c, shape::Box const& item, Color foreground);
+void put(Canvas c, shape::Box const& item, Brush const& brush);
 
 void fill(Canvas c, Glyph g);
 void fill(Canvas c, Brush b);

@@ -1,4 +1,4 @@
-#include <ox/pixel_grid.hpp>
+#include <ox/pixelgrid.hpp>
 
 #include <cstddef>
 #include <memory>

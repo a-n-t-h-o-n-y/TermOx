@@ -17,8 +17,8 @@ using namespace ox;
             },
         .decoration =
             Fade{
-                .paint_fn = shape_gradient(shape::Frame::brackets_round(),
-                                           RGB{0x0a3f46}, RGB{0x1ecbe1}),
+                .paint_fn = shape_gradient(shape::Box::brackets_round(), RGB{0x0a3f46},
+                                           RGB{0x1ecbe1}),
                 .fade_in = std::chrono::milliseconds{300},
                 .fade_out = std::chrono::milliseconds{500},
             },
@@ -71,12 +71,16 @@ int main()
                 .locale = digit_separator_locale(1),
                 .size_policy = SizePolicy::fixed(1),
             }},
-            Divider::bold({
+            Divider{{
+                .lines = Lines::bold(),
                 .brush = {.foreground = XColor::BrightBlack},
-            }),
+            }},
             NumberPad{4, 4},
         } |
-        Border::bold("Accumulator");
+        Border{
+            .box = shape::Box::bold(),
+            .label = "Accumulator",
+        };
 
     auto& [title_, total_label, div_, numberpad] = head.child.children;
 
