@@ -21,6 +21,7 @@ Timer::Timer(Widget& w, std::chrono::milliseconds duration, bool launch)
 Timer::Timer(Timer&& other)
 {
     id_ = std::move(other.id_);
+    other.id_ = -1;
     duration_ = std::move(other.duration_);
     timer_thread_ = std::move(other.timer_thread_);
     is_running_ = std::move(other.is_running_);
@@ -29,12 +30,15 @@ Timer::Timer(Timer&& other)
 
 auto Timer::operator=(Timer&& other) -> Timer&
 {
-    if (this->is_running_) { this->stop(); }
-    id_ = std::move(other.id_);
-    duration_ = std::move(other.duration_);
-    timer_thread_ = std::move(other.timer_thread_);
-    is_running_ = std::move(other.is_running_);
-    other.is_running_ = false;
+    if (this != &other) {
+        if (this->is_running_) { this->stop(); }
+        id_ = std::move(other.id_);
+        other.id_ = -1;
+        duration_ = std::move(other.duration_);
+        timer_thread_ = std::move(other.timer_thread_);
+        is_running_ = std::move(other.is_running_);
+        other.is_running_ = false;
+    }
     return *this;
 }
 
