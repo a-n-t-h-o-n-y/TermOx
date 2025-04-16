@@ -1,6 +1,21 @@
 cmake_minimum_required(VERSION 3.18)
 project(TermOx VERSION 2.0.0 LANGUAGES CXX)
 
+option(USE_ASAN "Enable AddressSanitizer" OFF)
+
+if (TERMOX_USE_ASAN)
+    message(STATUS "Enabling AddressSanitizer for all targets.")
+
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+        add_link_options(-fsanitize=address)
+    elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        add_compile_options(/fsanitize=address /Zi)
+        add_link_options(/fsanitize=address /INCREMENTAL:NO)
+    endif()
+endif()
+
+
 # Create Library Target
 add_library(TermOx STATIC
     src/align.cpp

@@ -1,17 +1,3 @@
-function(enable_asan target)
-    message(STATUS "Enabling AddressSanitizer for ${target}")
-
-    target_compile_options(${target} PRIVATE
-        $<$<CXX_COMPILER_ID:MSVC>:/fsanitize=address>
-        $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:GNU>>:-fsanitize=address -fno-omit-frame-pointer>
-    )
-
-    target_link_options(${target} PRIVATE
-        $<$<CXX_COMPILER_ID:MSVC>:/INCREMENTAL:NO /DEBUG /fsanitize=address>
-        $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:GNU>>:-fsanitize=address>
-    )
-endfunction()
-
 # Pong ---------------------------------------------------------------------------------
 add_executable(TermOx.examples.pong EXCLUDE_FROM_ALL
     pong.cpp
@@ -28,8 +14,6 @@ target_link_libraries(
     PRIVATE
         TermOx
 )
-
-# enable_asan(TermOx.examples.pong)
 
 # Pinbox -------------------------------------------------------------------------------
 add_executable(TermOx.examples.pinbox EXCLUDE_FROM_ALL
@@ -48,8 +32,6 @@ target_link_libraries(
         TermOx
 )
 
-# enable_asan(TermOx.examples.pinbox)
-
 # Snake --------------------------------------------------------------------------------
 add_executable(TermOx.examples.snake EXCLUDE_FROM_ALL
     snake.cpp
@@ -66,8 +48,6 @@ target_link_libraries(
     PRIVATE
         TermOx
 )
-
-# enable_asan(TermOx.examples.snake)
 
 # Accumulator --------------------------------------------------------------------------
 add_executable(TermOx.examples.accumulator EXCLUDE_FROM_ALL
@@ -86,8 +66,6 @@ target_link_libraries(
         TermOx
 )
 
-# enable_asan(TermOx.examples.accumulator)
-
 # BMP Viewer ---------------------------------------------------------------------------
 add_executable(TermOx.examples.bmp_view EXCLUDE_FROM_ALL
     bmp_view.cpp
@@ -105,8 +83,6 @@ target_link_libraries(
         TermOx
 )
 
-# enable_asan(TermOx.examples.bmp_view)
-
 # Scratch ------------------------------------------------------------------------------
 add_executable(TermOx.examples.scratch EXCLUDE_FROM_ALL
     scratch.cpp
@@ -123,5 +99,3 @@ target_link_libraries(
     PRIVATE
         TermOx
 )
-
-# enable_asan(TermOx.examples.scratch)
