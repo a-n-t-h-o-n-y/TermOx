@@ -119,7 +119,12 @@ void Button::timer()
         if (f.percent == 0.f || f.percent == 1.f) { f.timer.stop(); }
     };
 
-    std::visit(zzz::Overload{[](PaintFn const&) {}, update_fade}, decoration_);
+    std::visit(
+        zzz::Overload{
+            [](PaintFn const&) {},
+            update_fade,
+        },
+        decoration_);
 }
 
 void Button::start_select()

@@ -24,18 +24,57 @@ namespace ox {
 enum class FocusPolicy : std::uint8_t { None, Tab, Click, Strong };
 
 /**
- * Policy for how a widget should be sized by its parent layout.
+ * Policy for how a Widget should be sized by its parent layout.
  */
 struct SizePolicy {
     int minimum = 0;
     int maximum = std::numeric_limits<int>::max();
     float flexibility = 1.f;
 
-    [[nodiscard]] static auto fixed(int size) -> SizePolicy;
-    [[nodiscard]] static auto flex(float flex = 1.f) -> SizePolicy;
-    [[nodiscard]] static auto bounded(int min, int max) -> SizePolicy;
-    [[nodiscard]] static auto min(int min) -> SizePolicy;
-    [[nodiscard]] static auto max(int max) -> SizePolicy;
+    [[nodiscard]] static constexpr auto fixed(int size) -> SizePolicy
+    {
+        return {
+            .minimum = size,
+            .maximum = size,
+            .flexibility = 0.f,
+        };
+    }
+
+    [[nodiscard]] static constexpr auto flex(float flex = 1.f) -> SizePolicy
+    {
+        return {
+            .minimum = 0,
+            .maximum = std::numeric_limits<int>::max(),
+            .flexibility = flex,
+        };
+    }
+
+    [[nodiscard]] static constexpr auto bounded(int min, int max) -> SizePolicy
+    {
+        return {
+            .minimum = min,
+            .maximum = max,
+            .flexibility = 1.f,
+        };
+    }
+
+    [[nodiscard]] static constexpr auto min(int min) -> SizePolicy
+    {
+        return {
+            .minimum = min,
+            .maximum = std::numeric_limits<int>::max(),
+            .flexibility = 1.f,
+        };
+    }
+
+    [[nodiscard]] static constexpr auto max(int max) -> SizePolicy
+    {
+        return {
+            .minimum = 0,
+            .maximum = max,
+            .flexibility = 1.f,
+        };
+    }
 };
 
 /**
@@ -53,7 +92,7 @@ class Widget {
     std::shared_ptr<Widget*> lifetime = std::make_shared<Widget*>(this);
 
    public:
-    Widget(FocusPolicy fp, SizePolicy sp) : focus_policy{fp}, size_policy{sp} {}
+    Widget(FocusPolicy fp, SizePolicy sp);
 
     Widget(Widget const&) = delete;
     Widget(Widget&& other);

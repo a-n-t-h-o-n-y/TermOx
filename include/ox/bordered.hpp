@@ -12,7 +12,7 @@
 namespace ox {
 
 struct Border {
-    shape::Box box;
+    shape::Box box = shape::Box::square();
     Brush brush = {};  // Only applies to box.
     Label label = {};
 };
