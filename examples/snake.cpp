@@ -4,7 +4,6 @@
 #include <deque>
 #include <random>
 #include <set>
-#include <string_view>
 
 #include <ox/ox.hpp>
 #include <signals_light/signal.hpp>
@@ -120,6 +119,9 @@ class SnakeEngine {
 
 class SnakeGameWidget : public Widget {
    public:
+    sl::Signal<void(int)> score_update;
+
+   public:
     SnakeGameWidget() : Widget{FocusPolicy::Strong, SizePolicy::flex()} {}
 
    public:
@@ -156,6 +158,7 @@ class SnakeGameWidget : public Widget {
     void timer() override
     {
         if (not engine_.step()) { timer_.stop(); }
+        this->score_update(engine_.state.score);
     }
 
     void paint(Canvas c) override
@@ -167,48 +170,36 @@ class SnakeGameWidget : public Widget {
             return;
         }
 
-        auto game_canvas = [&] {
-            auto const offset = Point{
-                .x = (this->size.width - engine_.size.width) / 2,
-                .y = (this->size.height - engine_.size.height) / 2,
-            };
-            return Canvas{c.buffer, c.at + offset, engine_.size};
-        }();
-
         // Paint Background
-        fill(game_canvas, U' ' | bg(XColor::BrightBlack));
+        fill(c, U' ' | bg(XColor::Black));
 
         // Paint apples
         for (auto const pt : engine_.state.apple_field) {
-            game_canvas[pt] = U' ' | bg(XColor::BrightRed);
+            c[pt] = U' ' | bg(XColor::BrightRed);
         }
 
         // Paint Snake
         for (auto const pt : engine_.state.snake) {
-            game_canvas[pt] = U' ' | bg(XColor::BrightGreen);
+            c[pt] = U' ' | bg(XColor::BrightGreen);
         }
 
         // Paint Tail
         auto const tail = std::array{U'░', U'▒', U'▓'};
         for (auto i = 0; i < std::ssize(tail); ++i) {
             if (i + 1 < std::ssize(engine_.state.snake)) {
-                game_canvas[engine_.state.snake[i]] =
+                c[engine_.state.snake[i]] =
                     tail[i] | fg(XColor::BrightGreen) | bg(XColor::BrightBlack);
             }
         }
 
-        // Score
-        put(c, {.x = 0, .y = this->size.height - 1},
-            "Score: " + std::to_string(engine_.state.score));
-
         // Press 's' To Start
         if (not timer_.is_running()) {
-            auto const text = std::string_view{"Press 's' to Start"};
+            auto const text = "Press 's' to Start" | Trait::Bold;
             auto const center = Point{
                 .x = engine_.size.width / 2 - (int)(text.size() / 2),
                 .y = engine_.size.height / 2,
             };
-            put(game_canvas, center, text);
+            put(c, center, text);
         }
     }
 
@@ -219,6 +210,37 @@ class SnakeGameWidget : public Widget {
 
 int main()
 {
-    auto head = SnakeGameWidget{};
+    auto const score_brush = Brush{
+        .background = XColor::White,
+        .foreground = XColor::Black,
+        .traits = Trait::Bold,
+    };
+
+    auto head = Column{
+        Suspended{
+            SnakeGameWidget{} | SizePolicy::suspended(SnakeEngine::size),
+            {(U'▚' | fg(XColor{235}) | bg(XColor{234}))},
+        },
+        Suspended{
+            Row{
+                Label{{
+                    .text = "Score: ",
+                    .brush = score_brush,
+                }},
+                IntegerLabel{{
+                    .value = 0,
+                    .align = Align::Right,
+                    .brush = score_brush,
+                }},
+            } | SizePolicy::suspended({.width = 14, .height = 1}),
+            {U' ' | score_brush},
+        } | SizePolicy::fixed(1),
+    };
+
+    Connection{
+        .signal = get_child(get_child<0>(head)).score_update,
+        .slot = [](int score, auto& int_label) { int_label.value = score; },
+    }(get_child<1>(get_child(get_child<1>(head))));
+
     return Application{head}.run();
 }

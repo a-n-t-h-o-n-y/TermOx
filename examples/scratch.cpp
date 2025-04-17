@@ -29,26 +29,26 @@ using namespace ox;
 
 // -------------------------------------------------------------------------------------
 
-int main()
-{
-    auto head =
-        Row{
-            TextBox{{
-                .wrap = TextBox::Wrap::Word,
-                .align = Align::Left,
-                .brush = {.background = XColor::BrightBlack,
-                          .foreground = XColor::White,
-                          .traits = Trait::Bold},
-                .focus_policy = FocusPolicy::Strong,
-            }},
-            ScrollBar{{}},
-        } |
-        Border{.box = shape::Box::round(), .label = "TextBox"};
+// int main()
+// {
+//     auto head =
+//         Row{
+//             TextBox{{
+//                 .wrap = TextBox::Wrap::Word,
+//                 .align = Align::Left,
+//                 .brush = {.background = XColor::BrightBlack,
+//                           .foreground = XColor::White,
+//                           .traits = Trait::Bold},
+//                 .focus_policy = FocusPolicy::Strong,
+//             }},
+//             ScrollBar{{}},
+//         } |
+//         Border{.box = shape::Box::round(), .label = "TextBox"};
 
-    link(get_child<0>(head), get_child<1>(head));
+//     link(get_child<0>(head), get_child<1>(head));
 
-    return Application{head}.run();
-}
+//     return Application{head}.run();
+// }
 
 // -------------------------------------------------------------------------------------
 
@@ -121,3 +121,14 @@ int main()
 
 //     return Application{head, Terminal{MouseMode::Move}}.run();
 // }
+
+int main()
+{
+    auto head = Suspended{
+        TextBox{{
+            .brush = {.background = XColor::BrightBlack},
+            .focus_policy = FocusPolicy::Strong,
+        }} | SizePolicy::suspended({.width = 40, .height = 5}),
+    };
+    return Application{head}.run();
+}

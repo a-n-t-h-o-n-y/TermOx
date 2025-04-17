@@ -175,15 +175,15 @@ class Column : public Widget {
     // This is needed for Clang 18, instead of default value.
     template <typename C = Container>
         requires std::is_default_constructible_v<C>
-    Column() : Widget{FocusPolicy::None, SizePolicy::flex()}, children{}
+    explicit Column() : Widget{FocusPolicy::None, SizePolicy::flex()}, children{}
     {}
 
-    Column(Container container)
+    explicit Column(Container container)
         : Widget{FocusPolicy::None, SizePolicy::flex()}, children{std::move(container)}
     {}
 
     template <WidgetDerived... Widgets>
-    Column(Widgets&&... ws)
+    explicit Column(Widgets&&... ws)
         : Widget{FocusPolicy::None, SizePolicy::flex()},
           children{std::tuple{std::forward<Widgets>(ws)...}}
     {}
@@ -272,15 +272,15 @@ class Row : public Widget {
     // This is needed for Clang 18, instead of default value.
     template <typename C = Container>
         requires std::is_default_constructible_v<C>
-    Row() : Widget{FocusPolicy::None, SizePolicy::flex()}, children{}
+    explicit Row() : Widget{FocusPolicy::None, SizePolicy::flex()}, children{}
     {}
 
-    Row(Container container)
+    explicit Row(Container container)
         : Widget{FocusPolicy::None, SizePolicy::flex()}, children{std::move(container)}
     {}
 
     template <WidgetDerived... Widgets>
-    Row(Widgets&&... ws)
+    explicit Row(Widgets&&... ws)
         : Widget{FocusPolicy::None, SizePolicy::flex()},
           children{std::tuple{std::forward<Widgets>(ws)...}}
     {}
@@ -354,6 +354,81 @@ Row(Widgets&&...) -> Row<std::tuple<std::decay_t<Widgets>...>>;
 
 // -------------------------------------------------------------------------------------
 
+template <WidgetDerived ChildType>
+class Suspended : public Widget {
+   public:
+    ChildType child;
+    Glyph fill_glyph;
+
+   public:
+    explicit Suspended(ChildType&& child, Glyph fill = {U' '})
+        : Widget{FocusPolicy::None, SizePolicy::flex()},
+          child{std::move(child)},
+          fill_glyph{fill}
+    {}
+
+   public:
+    void paint(Canvas c) override
+    {
+        // Paint around child Widget.
+        {
+            auto left = c;
+            left.size.width = child.at.x;
+            fill(left, fill_glyph);
+        }
+        {
+            auto right = c;
+            right.at.x += child.at.x + child.size.width;
+            right.size.width = this->size.width - child.size.width - child.at.x;
+            fill(right, fill_glyph);
+        }
+        {
+            auto top = c;
+            top.at.x += child.at.x;
+            top.size = {.width = child.size.width, .height = child.at.y};
+            fill(top, fill_glyph);
+        }
+        {
+            auto bottom = c;
+            bottom.at.x += child.at.x;
+            bottom.at.y += child.at.y + child.size.height;
+            bottom.size = {
+                .width = child.size.width,
+                .height = this->size.height - child.size.height - child.at.y,
+            };
+            fill(bottom, fill_glyph);
+        }
+    }
+
+    void resize(Area) override
+    {
+        auto const old_size = child.size;
+
+        // FIXME: This is a hack
+        // size_policy min => width & size_policy max => height
+        child.size = {
+            .width = std::min(child.size_policy.minimum, this->size.width),
+            .height = std::min(child.size_policy.maximum, this->size.height),
+        };
+
+        child.at = {
+            .x = (this->size.width - child.size.width) / 2,
+            .y = (this->size.height - child.size.height) / 2,
+        };
+
+        child.resize(old_size);
+    }
+
+    auto get_children() -> zzz::Generator<Widget&> override { co_yield child; }
+
+    auto get_children() const -> zzz::Generator<Widget const&> override
+    {
+        co_yield child;
+    }
+};
+
+// -------------------------------------------------------------------------------------
+
 template <std::size_t I, TupleLike Container>
 auto get_child(Row<Container>& row) -> auto&
 {
@@ -364,6 +439,12 @@ template <std::size_t I, TupleLike Container>
 auto get_child(Column<Container>& row) -> auto&
 {
     return std::get<I>(row.children);
+}
+
+template <WidgetDerived ChildType>
+auto get_child(Suspended<ChildType>& sus) -> auto&
+{
+    return sus.child;
 }
 
 }  // namespace ox

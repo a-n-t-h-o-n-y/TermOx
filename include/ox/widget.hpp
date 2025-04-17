@@ -75,6 +75,17 @@ struct SizePolicy {
             .flexibility = 1.f,
         };
     }
+
+    [[nodiscard]] static constexpr auto suspended(Area size) -> SizePolicy
+    {
+        // FIXME: This is a hack at the moment, it works, but each Layout type should
+        // ideally define its own SizePolicy type.
+        return {
+            .minimum = size.width,
+            .maximum = size.height,
+            .flexibility = 0.f,
+        };
+    }
 };
 
 /**
