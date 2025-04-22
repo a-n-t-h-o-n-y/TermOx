@@ -215,40 +215,41 @@ void put(Canvas c, Point at, std::u32string_view element);
  *
  * @param c The Canvas to Paint on.
  * @param at The leftmost point of the line, where painting begins.
- * @param length The number of cells to paint.
  * @param item The HLine to paint.
+ * @param length The number of cells to paint.
  */
-void put(Canvas c, Point at, int length, shape::HLine item);
+void put(Canvas c, Point at, shape::HLine item, int length);
 
 /**
  * Paint the given HLine object to the screen.
  *
  * @param c The Canvas to Paint on.
  * @param at The leftmost point of the line, where painting begins.
- * @param length The number of cells to paint.
  * @param item The HLine to paint.
+ * @param length The number of cells to paint.
  * @param foreground The fg color to assign each Cell the line is painted to.
  */
-void put(Canvas c, Point at, int length, shape::HLine item, Color foreground);
+void put(Canvas c, Point at, shape::HLine item, int length, Color foreground);
 
 /**
  * Paint the given HLine object to the screen.
  *
  * @param c The Canvas to Paint on.
  * @param at The leftmost point of the line, where painting begins.
- * @param length The number of cells to paint.
  * @param item The HLine to paint.
+ * @param length The number of cells to paint.
  * @param foreground The Brush to assign each Cell the line is painted to.
  */
-void put(Canvas c, Point at, int length, shape::HLine item, Brush const& brush);
+void put(Canvas c, Point at, shape::HLine item, int length, Brush const& brush);
 
-void put(Canvas c, Point at, int length, shape::VLine item);
-void put(Canvas c, Point at, int length, shape::VLine item, Color foreground);
-void put(Canvas c, Point at, int length, shape::VLine item, Brush const& brush);
+void put(Canvas c, Point at, shape::VLine item, int length);
+void put(Canvas c, Point at, shape::VLine item, int length, Color foreground);
+void put(Canvas c, Point at, shape::VLine item, int length, Brush const& brush);
 
-void put(Canvas c, Point at, Area size, shape::Box const& item);
-void put(Canvas c, Point at, Area size, shape::Box const& item, Color foreground);
-void put(Canvas c, Point at, Area size, shape::Box const& item, Brush const& brush);
+void put(Canvas c, Point at, shape::Box const& item, Area size);
+void put(Canvas c, Point at, shape::Box const& item, Area size, Color foreground);
+void put(Canvas c, Point at, shape::Box const& item, Area size, Brush const& brush);
+
 void put(Canvas c, shape::Box const& item);
 void put(Canvas c, shape::Box const& item, Color foreground);
 void put(Canvas c, shape::Box const& item, Brush const& brush);

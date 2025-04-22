@@ -9,10 +9,17 @@ namespace ox {
 class Widget;
 
 /**
- * A handle to a Timer in the Terminal's timer system.
- * @details This is used to create a new TimerThread with a given ID and provides access
- * to start and stop it. The thread will post Timer events to the event queue at the
- * given interval.
+ * Posts `event::Timer` objects at regular intervals to the EventQueue.
+ *
+ * @details This uses its own internal thread to enqueue Events. Each Timer is tied to a
+ * single Widget, which will recieve the Events. Timer events are handled with the
+ * `Widget::timer()` virtual function, typically you would update the Widget state, the
+ * `Widget::paint(Canvas)` event handler will be called automatically after the timer
+ * event handler.
+ *
+ * The Widget lifetime is handled by a `LifetimeView` and will remain valid after moving
+ * a Widget. Though not recommended for clarity, it is safe to delete a Widget without
+ * deleting its associated Timer.
  */
 class Timer {
    public:
@@ -20,7 +27,7 @@ class Timer {
      * Create a Timer with the given duration.
      *
      * @param w The Widget to send Timer events to, typically `*this` if owned by Widg.
-     * @param duration The periodic duration to wait before calling the callback
+     * @param duration The interval to wait before posting an Event.
      * @param launch If true, the TimerThread will be started immediately.
      */
     explicit Timer(Widget& w, std::chrono::milliseconds duration, bool launch = false);
@@ -45,8 +52,7 @@ class Timer {
 
     /**
      * Request the TimerThread to stop, returns immediately.
-     * @details Does not wait for thread to exit. The destructor of Terminal will wait
-     * for it to exit, or if you call start() again.
+     * @details Does not wait for thread to exit.
      */
     void stop();
 
@@ -57,6 +63,10 @@ class Timer {
         return duration_;
     }
 
+    /**
+     * Returns true if `start()` has been called and the Timer is currently running.
+     * @details i.e., `stop()` has not been called since the last `start()`.
+     */
     [[nodiscard]] auto is_running() const -> bool { return is_running_; }
 
    private:

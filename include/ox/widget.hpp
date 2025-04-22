@@ -237,7 +237,7 @@ template <typename SlotFn, WidgetDerived... TrackedWidgets>
 }
 
 /**
- * Enables designated initializers for Signal/Slot connections.
+ * Enables designated initializers and Lifetime tracking for Signal/Slot connections.
  * @details Use operator() immediately to connect and track Widgets if needed.
  */
 template <typename SignalType, typename SlotType>

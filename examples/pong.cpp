@@ -207,11 +207,7 @@ void paint(SplashScreen const& x, Canvas c)
     }
 
     auto const enter = U"Press Enter to continue" | Trait::Dim;
-    put(c,
-        {
-            .x = (c.size.width - (int)enter.size()) / 2,
-            .y = c.size.height - 1,
-        },
+    put(c, {.x = (c.size.width - (int)enter.size()) / 2, .y = c.size.height - 1},
         enter);
 }
 
@@ -265,11 +261,7 @@ void paint(HowTo const& x, Canvas c)
                 .y = 4 + (int)i,
             };
             put(c, at, x.instructions[i][0] | Trait::Bold);
-            put(c,
-                {
-                    .x = (c.size.width + 8) / 2,
-                    .y = 4 + (int)i,
-                },
+            put(c, {.x = (c.size.width + 8) / 2, .y = 4 + (int)i},
                 x.instructions[i][1]);
         }
     }
@@ -339,8 +331,9 @@ void paint(Game const& x, Canvas c)
     };
 
     {  // Net
-        put(game_canvas, {.x = display_space.width / 2, .y = 0}, display_space.height,
-            shape::VLine{.symbol = U'╳'}, Brush{.traits = Trait::Dim});
+        put(game_canvas, {.x = display_space.width / 2, .y = 0},
+            shape::VLine{.symbol = U'╳'}, display_space.height,
+            Brush{.traits = Trait::Dim});
     }
 
     {  // Ball
@@ -422,20 +415,16 @@ void paint(Game const& x, Canvas c)
     }
 
     {  // Border
-        put(c, game_canvas.at + Point{-1, -1},
+        put(c, game_canvas.at + Point{-1, -1}, shape::Box::round(),
             Area{.width = display_space.width + 2, .height = display_space.height + 2},
-            shape::Box::round(), XColor::Blue);
+            XColor::Blue);
     }
 
     {  // Footer
         put(c, {.x = 0, .y = c.size.height - 1},
             U"Press Esc to return to the main menu" | Trait::Dim);
         auto const enter_text = std::u32string{U"Press Enter to start next round"};
-        put(c,
-            {
-                .x = (c.size.width - (int)enter_text.size()),
-                .y = c.size.height - 1,
-            },
+        put(c, {.x = (c.size.width - (int)enter_text.size()), .y = c.size.height - 1},
             enter_text | Trait::Dim);
     }
 }

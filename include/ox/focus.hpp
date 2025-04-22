@@ -17,20 +17,18 @@ class Focus {
    public:
     /**
      * Changes the current focus to \p w. Invokes focus_out on the Widget currently in
-     * focus. If \p w is not nullptr, it triggers focus_in(w).
-     *
-     * @param w The Widget to set focus to.
+     * focus.
      */
     static void set(Widget& w);
 
     /**
-     * Returns a LifetimeView of the focused Object, which may not be valid if nothing
+     * Returns a LifetimeView of the focused Widget, which may not be valid if nothing
      * is in focus.
      */
     static auto get() -> LifetimeView<Widget> { return in_focus_; }
 
     /**
-     * Clears the focus, setting the focused Widget to nullptr.
+     * Clears the focus, removing any in focus Widget.
      */
     static void clear();
 

@@ -56,13 +56,13 @@ void DataTable::paint(Canvas c)
     fill(c, bg(background));
 
     // Border
-    put(c, {0, 0}, border_area, shape::Box::round(), foreground_line);
+    put(c, {0, 0}, shape::Box::round(), border_area, foreground_line);
 
     // Header Line
     if (this->size.height > 2) {
         put(c, {.x = 0, .y = 2}, U'╞' | fg(foreground_line));
-        put(c, {.x = 1, .y = 2}, std::max(c.size.width - 2, 0),
-            shape::HLine{.symbol = U'═'}, foreground_line);
+        put(c, {.x = 1, .y = 2}, shape::HLine{.symbol = U'═'},
+            std::max(c.size.width - 2, 0), foreground_line);
         put(c, {.x = c.size.width - 1, .y = 2}, U'╡' | fg(foreground_line));
     }
 
@@ -109,7 +109,7 @@ void DataTable::paint(Canvas c)
              ++column_index) {
             auto const& heading = headings_.children[column_index];
             auto x = heading.at.x;
-            put(c, {x + 1, y}, heading.size.width, shape::HLine{.symbol = U'─'},
+            put(c, {x + 1, y}, shape::HLine{.symbol = U'─'}, heading.size.width,
                 foreground_line);
         }
     }
