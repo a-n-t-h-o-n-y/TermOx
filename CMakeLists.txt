@@ -86,7 +86,7 @@ FetchContent_MakeAvailable(zzz)
 FetchContent_Declare(
     escape
     GIT_REPOSITORY https://github.com/a-n-t-h-o-n-y/Escape.git
-    GIT_TAG 15a47954a7e7dffd1fcb106636930511b2f7d3af
+    GIT_TAG 38044eb930ff8e25957f9a8b8c67fec11299e567
 )
 FetchContent_MakeAvailable(escape)
 
