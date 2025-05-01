@@ -1849,6 +1849,19 @@ Direct access to the children of the Column layout.
 
 ---
 
+### `get_child` Free Function
+
+```cpp
+template <std::size_t I, TupleLike Container>
+auto get_child(Column<Container>& row) -> auto&
+```
+
+Returns the `I`th child of the Column layout. This is provided for convenience and
+uniformity with other Layouts. This is only available for `std::tuple` container
+layouts.
+
+---
+
 </details>
 
 ## 🧩 ox::Row
@@ -1906,6 +1919,76 @@ Container children;
 ```
 
 Direct access to the children of the Row layout.
+
+---
+
+### `get_child` Free Function
+
+```cpp
+template <std::size_t I, TupleLike Container>
+auto get_child(Row<Container>& row) -> auto&
+```
+
+Returns the `I`th child of the Row layout. This is provided for convenience and
+uniformity with other Layouts. This is only available for `std::tuple` container
+layouts.
+
+---
+
+</details>
+
+## 🧩 ox::Suspended
+
+[`#include <ox/layout.hpp>`](../include/ox/layout.hpp)
+
+```cpp
+template <WidgetDerived ChildType>
+class Suspended : public Widget;
+```
+
+A layout holding a single Widget that 'floats' in the center of the layout. The child
+Widget must have a `SizePolicy::suspended(...)` policy, which sets the Widget to a fixed size.
+
+```cpp
+auto sus = Suspended{
+    TextBox{{
+        .brush = {.background = XColor::BrightBlack},
+        .focus_policy = FocusPolicy::Strong,
+    }} | SizePolicy::suspended({.width = 40, .height = 5}),
+};
+```
+
+<details>
+<summary><strong>Details</strong></summary>
+
+### 🏗️ Constructors
+
+```cpp
+explicit Suspended(ChildType&& child, Glyph fill = {U' '});
+```
+
+The constructor takes a single Widget and a fill character. The fill character is used
+to fill the space around the child Widget. The child Widget must have a
+`SizePolicy::suspended(...)` policy, which sets the Widget to a fixed size.
+
+### Public Objects
+
+```cpp
+ChildType child;
+Glyph fill_glyph;
+```
+
+---
+
+### `get_child` Free Function
+
+```cpp
+template <WidgetDerived ChildType>
+auto get_child(Suspended<ChildType>& sus) -> auto&
+```
+
+Returns the child Widget of the Suspended layout. This is provided for convenience and
+uniformity with other Layouts.
 
 ---
 
