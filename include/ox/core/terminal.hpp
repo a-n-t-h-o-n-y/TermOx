@@ -154,7 +154,7 @@ class Terminal {
     void run_read_loop(std::stop_token st);
 
     /**
-     * Return the current size of the terminal.
+     * Returns the current size of the terminal.
      *
      * @return Area The current dimensions of the terminal.
      */

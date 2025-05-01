@@ -88,6 +88,8 @@ void LineEdit::paint(Canvas c)
                                                (int)sv.size() - (int)anchor_index_));
     };
 
+    fill(c, bg(background));
+
     auto const for_screen =
         is_ghost ? trim(ghost_text) | ghost_text_brush : trim(text) | text_brush;
 

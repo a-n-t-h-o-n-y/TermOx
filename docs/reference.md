@@ -43,7 +43,7 @@ Application is non-copyable and non-movable.
 ### `Application::run`
 
 ```cpp
-auto Application::run() -> int;
+auto run() -> int;
 ```
 
 This launches the event loop:
@@ -52,19 +52,21 @@ This launches the event loop:
 - Feed each Event to the head Widget.
 - Write updates to the Terminal.
 
-Will continue to loop until `Application::quit` has been called. The return value is the integer code passed to `Application::quit`.
+Will continue to loop until `Application::quit` has been called. The return value is the
+integer code passed to `Application::quit`.
 
 ---
 
 ### `Application::quit`
 
 ```cpp
-static void Application::quit(int code);
+static void quit(int code);
 ```
 
 Set a flag to break out of the `Application::run` call on the next iteration. This can
 be called from any event processor function, including any Widget virtual function event
-handler (excluding `Widget::paint(...)`). The `code` parameter will be returned from the `Application::run` call.
+handler (excluding `Widget::paint(...)`). The `code` parameter will be returned from the
+`Application::run` call.
 
 If Terminal OS Signals are enabled (the default), `ctrl + c` will quit the Application
 loop as well.
@@ -129,14 +131,16 @@ Move only.
 ### 🧹 Destructor
 
 If the Timer is running, requests a stop and joins the thread. Check out
-`zzz::TimerThread` for details, the gist is it owns a `std::jthread` which will join the thread on destruction. As of this writing, `zzz::TimerThread` checks for a stop request at least every 16 milliseconds.
+`zzz::TimerThread` for details, the gist is it owns a `std::jthread` which will join the
+thread on destruction. As of this writing, `zzz::TimerThread` checks for a stop request
+at least every 16 milliseconds.
 
 ---
 
 ### `Timer::start`
 
 ```cpp
-void Timer::start();
+void start();
 ```
 
 Begin waiting on duration and posting events.
@@ -146,7 +150,7 @@ Begin waiting on duration and posting events.
 ### `Timer::stop`
 
 ```cpp
-void Timer::stop();
+void stop();
 ```
 
 Requests a stop, returns immediately, does not wait on thread to fully quit.
@@ -156,8 +160,7 @@ Requests a stop, returns immediately, does not wait on thread to fully quit.
 ### `Timer::id`
 
 ```cpp
-[[nodiscard]]
-auto Timer::id() const -> int;
+auto id() const -> int;
 ```
 
 Returns the unique Timer id for the instance.
@@ -167,8 +170,7 @@ Returns the unique Timer id for the instance.
 ### `Timer::duration`
 
 ```cpp
-[[nodiscard]]
-auto Timer::duration() const -> std::chrono::milliseconds;
+auto duration() const -> std::chrono::milliseconds;
 ```
 
 Returns the duration the Timer was constructed with.
@@ -178,8 +180,7 @@ Returns the duration the Timer was constructed with.
 ### `Timer::is_running`
 
 ```cpp
-[[nodiscard]]
-auto Timer::is_running() const -> bool;
+auto is_running() const -> bool;
 ```
 
 Returns true if `start()` has been called and the Timer is currently running (i.e.,
@@ -195,7 +196,8 @@ Returns true if `start()` has been called and the Timer is currently running (i.
 
 `class Focus;`
 
-Manages the focus of Widgets. When a Widget is in focus, it will receive keyboard input. Only one Widget can be in focus at a time.
+Manages the focus of Widgets. When a Widget is in focus, it will receive keyboard input.
+Only one Widget can be in focus at a time.
 
 ```cpp
 Focus::set(my_widget);
@@ -224,8 +226,7 @@ Everything is static, no need for instantiations.
 ### `Focus::set`
 
 ```cpp
-static
-void Focus::set(Widget& w);
+static void set(Widget& w);
 ```
 
 Sets the current focus to `w`. Invokes the `Widget::focus_out` event handler on the
@@ -236,8 +237,7 @@ currently in focus Widget, if one exists, and `Widget::focus_in` on the passed i
 ### `Focus::get`
 
 ```cpp
-static
-auto Focus::get() -> LifetimeView<Widget>;
+static auto get() -> LifetimeView<Widget>;
 ```
 
 Returns a `LifetimeView` of the in focus Widget, which will not be valid if nothing is
@@ -248,8 +248,7 @@ in focus.
 ### `Focus::clear`
 
 ```cpp
-static
-void clear();
+static void clear();
 ```
 
 Clears the focus, removing any in focus Widget, invoking `Widget::focus_out` on it.
@@ -430,7 +429,8 @@ void put(Canvas c, shape::Box const& item, Brush const& brush);
 
 [`#include <ox/put.hpp>`](../include/ox/put.hpp)
 
-A function overload set to fill a 2D space on a Canvas. It fills the entire Canvas object given to it.
+A function overload set to fill a 2D space on a Canvas. It fills the entire Canvas
+object given to it.
 
 ```cpp
 void paint(Canvas c) override {
@@ -484,7 +484,9 @@ void paint(Canvas c) override {
 <details>
 <summary><strong>Details</strong></summary>
 
-This function should not be needed in most circumstances, the Canvas is provided cleared on entry to the `Widget::paint(Canvas)` event handler, unless a subclass or parent Widget has written over it.
+This function should not be needed in most circumstances, the Canvas is provided cleared
+on entry to the `Widget::paint(Canvas)` event handler, unless a subclass or parent
+Widget has written over it.
 
 ```cpp
 void clear(Canvas c);
@@ -498,14 +500,33 @@ void clear(Canvas c);
 
 [`#include <ox/widget.hpp>`](../include/ox/widget.hpp)
 
-The base class unit of graphical display and user interaction. Each Widget type is a
-combination of handling user input and painting its state to the screen on its allocated
-screen space (Canvas).
+`class Widget;`
 
-Event handlers are virtual functions that are overridden to provide custom state changes; the paint event handler allows output of that state onto the screen.
+The user input and graphical display unit. Each Widget has a particular piece of the terminal display where is recieves user input events and paints to the screen.
+
+User input event handlers are virtual functions that are overridden to make state
+changes; the paint event handler allows output of that state onto the screen and is always automatically called after an event is sent to the Widget.
 
 ```cpp
-code
+class MyWidget : public Widget {
+   public:
+    MyWidget() : Widget{FocusPolicy::None, SizePolicy::flex()} {}
+
+    void paint(Canvas c) override { 
+        for (auto const at : points_) {
+            put(c, at, U'•' | fg(XColor::Red));
+        }
+    }
+
+    void mouse_press(Mouse m) override
+    {
+        if (m.button == Mouse::Button::Left)
+            points_.emplace(m.at);
+    }
+
+   private:
+    std::set<Point> points_;
+};
 ```
 
 <details>
@@ -517,6 +538,9 @@ code
 Widget(FocusPolicy fp, SizePolicy sp);
 ```
 
+There are no defaults for the constructor parameters, they must be explicitly given by
+each derived class.
+
 ```cpp
 Widget(Widget const&) = delete;
 Widget(Widget&& other);
@@ -525,6 +549,9 @@ auto operator=(Widget const&) -> Widget& = delete;
 auto operator=(Widget&& other) -> Widget&;
 ```
 
+Move only type. The move constructor/assignment operator will move the lifetime of this
+Widget into the source of the move.
+
 ---
 
 ### 🧹 Destructor
@@ -532,6 +559,10 @@ auto operator=(Widget&& other) -> Widget&;
 ```cpp
 virtual ~Widget() = default;
 ```
+
+Does nothing special, the `Widget::lifetime` object will be destroyed (if it hasn't
+already been moved from), and anything that depends on that lifetime will react
+appropriately.
 
 ---
 
@@ -548,6 +579,11 @@ Area size = {.width = 0, .height = 0};
 std::shared_ptr<Widget*> lifetime = std::make_shared<Widget*>(this);
 ```
 
+Any of these can be updated by event handlers, and any changes will be immediately
+visible on screen. The author recommends not messing with `at` and `size` unless you are
+the parent Widget and are implementing a layout type. And obviously `lifetime` is a
+'look, don't touch' object, unless you are feeling particularly adventurous.
+
 ---
 
 ### `Widget::mouse_press`
@@ -555,6 +591,13 @@ std::shared_ptr<Widget*> lifetime = std::make_shared<Widget*>(this);
 ```cpp
 virtual void mouse_press(Mouse);
 ```
+
+Event handler for receiving mouse press events that occur within the bounds of this
+Widget. If the Widget is a layout, it will not recieve mouse press events intended for
+its children.
+
+Events from `Button::ScrollUp` and `Button::ScrollDown` are not received here, see
+`Widget::mouse_wheel`.
 
 ---
 
@@ -564,6 +607,10 @@ virtual void mouse_press(Mouse);
 virtual void mouse_release(Mouse);
 ```
 
+Event handler for receiving mouse release events that occur within the bounds of this
+Widget. If the Widget is a layout, it will not recieve mouse press events intended for
+its children.
+
 ---
 
 ### `Widget::mouse_wheel`
@@ -571,6 +618,10 @@ virtual void mouse_release(Mouse);
 ```cpp
 virtual void mouse_wheel(Mouse);
 ```
+
+Event handler for receiving events generated by either `Button::ScrollUp` or
+`Button::ScrollDown`. Each 'click' or increment of the mouse wheel generates a single
+event.
 
 ---
 
@@ -580,7 +631,9 @@ virtual void mouse_wheel(Mouse);
 virtual void mouse_move(Mouse);
 ```
 
-// enable in application constructor
+Event handler for events generated by movement of the mouse over the Widget. This has to
+be enabled in the `Terminal` constructor with the correct `MouseMode` option, either
+`MouseMode::Move` or `MouseMode::Drag`.
 
 ---
 
@@ -590,7 +643,9 @@ virtual void mouse_move(Mouse);
 virtual void mouse_enter();
 ```
 
-// enable in application constructor with mouse move
+Event handler for events generated by movement of the mouse into the Widget from another
+Widget. This has to be enabled in the `Terminal` constructor with the correct
+`MouseMode` option, either `MouseMode::Move` or `MouseMode::Drag`.
 
 ---
 
@@ -599,7 +654,10 @@ virtual void mouse_enter();
 ```cpp
 virtual void mouse_leave();
 ```
-// enable in application constructor with mouse move
+
+Event handler for events generated by movement of the mouse out of the Widget and into
+another Widget. This has to be enabled in the `Terminal` constructor with the correct
+`MouseMode` option, either `MouseMode::Move` or `MouseMode::Drag`.
 
 ---
 
@@ -609,7 +667,8 @@ virtual void mouse_leave();
 virtual void focus_in();
 ```
 
-// only even recieved if foucs policy is not none
+Called when this Widget recieves keyboard focus. The Widget's `focus_policy` must not be
+`FocusPolicy::None` to receive focus.
 
 ---
 
@@ -619,6 +678,9 @@ virtual void focus_in();
 virtual void focus_out();
 ```
 
+Called when this Widget gives up keyboard focus. The Widget's `focus_policy` must not be
+`FocusPolicy::None` to receive focus.
+
 ---
 
 ### `Widget::key_press`
@@ -627,6 +689,9 @@ virtual void focus_out();
 virtual void key_press(Key);
 ```
 
+Called on keyboard key presses when this Widget has focus. See `KeyMode` for info on
+what types of keypresses are generated.
+
 ---
 
 ### `Widget::key_release`
@@ -634,7 +699,10 @@ virtual void key_press(Key);
 ```cpp
 virtual void key_release(Key);
 ```
-// enable in application constructor, has issues, terminal not built for this, linux only?
+
+Called on keyboard key release when this Widget has focus. `KeyMode::Raw` must be set in
+Terminal in order to receive these events, its support is experimental and as the author
+I'd recommend against using it for serious projects.
 
 ---
 
@@ -644,6 +712,10 @@ virtual void key_release(Key);
 virtual void resize(Area old_size);
 ```
 
+Called each time the Widget receives a new size. Note that the parameter to this
+function is the previous size of the Widget, the Widget will already have its `size`
+member updated to the new size.
+
 ---
 
 ### `Widget::timer`
@@ -652,7 +724,9 @@ virtual void resize(Area old_size);
 virtual void timer();
 ```
 
-// Need a Timer object pointing to *this
+Called after each passing of the time interval of an associated `Timer` object. Each
+Timer object that is currently running and was constructed with the current Widget will
+cause this to be invoked.
 
 ---
 
@@ -662,7 +736,11 @@ virtual void timer();
 virtual void paint(Canvas);
 ```
 
-// never need to call this yourself, done automatically by Application class.
+Called whenever the Widget needs a repaint, in reality it is called once for all
+currently enabled Widgets at the end of each event loop iteration. This function never
+needs to be manually called, the Application instance will handle this.
+
+The Canvas passed to this function is already sized to the Widget.
 
 ---
 
@@ -673,7 +751,8 @@ virtual auto get_children() -> zzz::Generator<Widget&>;
 virtual auto get_children() const -> zzz::Generator<Widget const&>;
 ```
 
-// Only need to override if you are creating a new 'layout' type that owned child Widgets.
+Return a coroutine generator to each child of this Widget. This only needs to be
+implemented if you are creating a new layout type that owns child Widgets.
 
 ---
 
@@ -756,7 +835,8 @@ after.
 Must be called to actually make the connection of the Slot to the Signal even if nothing
 is being tracked. A warning should be issued by the compiler if this is not called.
 
-The returned `sl::Identifier` can be used to disconnect the Slot from the Signal. Any number of Slots can be connected to the same Signal.
+The returned `sl::Identifier` can be used to disconnect the Slot from the Signal. Any
+number of Slots can be connected to the same Signal.
 
 ---
 
@@ -777,7 +857,8 @@ TextBox{} | FocusPolicy::Strong; // Enable editing in a TextBox by providing Foc
 <details>
 <summary><strong>Details</strong></summary>
 
-The pipe (`|`) operator is overloaded for Widget and FocusPolicy to set the FocusPolicy inline with Widget construction.
+The pipe (`|`) operator is overloaded for Widget and FocusPolicy to set the FocusPolicy
+inline with Widget construction.
 
 ```cpp
 enum class FocusPolicy : std::uint8_t { None, Tab, Click, Strong };
@@ -845,7 +926,8 @@ class LifetimeView;
 ```
 
 Provides the ability to track a Widget's lifetime. This should be used with the
-corresponding `track(...)` function to construct a LifetimeView. LifetimeView is useful for Signals/Slots to check if any captured Widgets are no longer around.
+corresponding `track(...)` function to construct a LifetimeView. LifetimeView is useful
+for Signals/Slots to check if any captured Widgets are no longer around.
 
 ```cpp
 auto my_widg = Widget{...};
@@ -857,7 +939,7 @@ if (lv.valid()) { my_widg.get().do_thing(); }
 <details>
 <summary><strong>Details</strong></summary>
 
-It does this by accessing the `lifetime` shared pointer within the Widget class and
+It does this by accessing the `lifetime` shared pointer within the Widget object and
 storing a weak pointer to it. The Widget class also updates the shared pointer on move
 operations. It keeps track of the concrete type of the Widget, so it is able to return a
 reference type that is actually useful.
@@ -867,6 +949,7 @@ reference type that is actually useful.
 ```cpp
 LifetimeView(std::shared_ptr<Widget*> wp);
 ```
+
 Use `track(my_widg);` instead of the constructor.
 
 The type is Copyable and Movable.
@@ -889,7 +972,8 @@ Returns `true` if the tracked Widget is alive.
 auto get() const -> ConcreteType&;
 ```
 
-Returns a reference to the tracked Widget, cast to the ConcreteType provided at construction. Undefined behaviour if the tracked Widget is not valid.
+Returns a reference to the tracked Widget, cast to the ConcreteType provided at
+construction. Undefined behavior if the tracked Widget is not valid.
 
 ---
 
@@ -904,7 +988,8 @@ enum class Align;
 enum class VAlign;
 ```
 
-Describes horizontal (`Align`) or vertical (`VAlign`) alignment of text. Used by various Widgets.
+Describes horizontal (`Align`) or vertical (`VAlign`) alignment of text. Used by various
+Widgets.
 
 ```cpp
 Label{{.text = "Hello", .align = Align::Center}};
@@ -922,19 +1007,158 @@ enum class VAlign : std::uint8_t { Top, Middle, Bottom };
 
 </details>
 
+## 🧩 ox::Mouse
+
+[`#include <ox/core/events.hpp>`](../include/ox/core/events.hpp)
+
+`struct Mouse;`
+
+Contains data about a Mouse user input event.
+
+<details>
+<summary><strong>Details</strong></summary>
+
+```cpp
+struct Mouse {
+    enum class Button : std::uint16_t {
+        Left,
+        Middle,
+        Right,
+        None,
+        ScrollUp,
+        ScrollDown,
+        Six,
+        Seven,
+        Eight,
+        Nine,
+        Ten,
+        Eleven,
+    };
+
+    Point at;
+    Button button;
+
+    struct Modifiers {
+        bool shift = false;
+        bool ctrl = false;
+        bool alt = false;
+    } modifiers;
+};
+```
+
+---
+
+</details>
+
+## 🧩 ox::Key
+
+[`#include <ox/core/events.hpp>`](../include/ox/core/events.hpp)
+
+`enum class Key;`
+
+Contains data about a Key user input event.
+
+<details>
+<summary><strong>Details</strong></summary>
+
+```cpp
+/// see 'esc/key.hpp' in Escape lib dependency for full listing.
+enum class Key : char32_t {
+    // ...
+    Nine,
+    Colon,
+    Semicolon,
+    LessThan,
+    Equals,
+    GreaterThan,
+    QuestionMark,
+    AtSign,
+    A,
+    B,
+    C,
+    // ...
+};
+
+/**
+ * The Mod enum is used to represent modifier keys on a keyboard.
+ * @details It is designed to be used with the Key enum to represent key combinations.
+ * These are only generated when KeyMode::Raw is set. In KeyMode::Normal these not seen
+ * as separate keys, for instance ctrl + a is seen as Key::StartOfHeading and shift + a
+ * is seen as Key::A.
+ */
+enum class Mod : std::underlying_type_t<Key> {
+    // Last bit of unicode currently used is (1 << 20).
+    Shift = (std::underlying_type_t<Key>{1} << 30),
+    Ctrl = (std::underlying_type_t<Key>{1} << 29),
+    Alt = (std::underlying_type_t<Key>{1} << 28),
+    Meta = (std::underlying_type_t<Key>{1} << 27)
+};
+
+/**
+ * Return true if \p mod is set on \p key.
+ */
+constexpr auto is_set(Key key, Mod mod) -> bool;
+```
+
+---
+
+</details>
+
+## 🧩 ox::Border
+
+[`#include <ox/bordered.hpp>`](../include/ox/bordered.hpp)
+
+`struct Border;`
+
+Visual description of a Border surrounding a Widget. To be used with `Bordered` class.
+
+```cpp
+struct Border {
+    shape::Box box = shape::Box::square();
+    Brush brush = {};  // Only applies to box.
+    Label label = {};
+};
+```
+
+<details>
+<summary><strong>Details</strong></summary>
+
+The `Border::brush` member only applies to the drawing of the Box. The Label has its own
+internal Brush it will use to paint its text. Alignment of the Label will properly align
+along the top of the border. If no text is set on the Label, it will display only the
+Box.
+
+---
+
+</details>
+
 ## 🧩 ox::Bordered
 
 [`#include <ox/bordered.hpp>`](../include/ox/bordered.hpp)
 
 ```cpp
 template <WidgetDerived ChildWidget>
-class Bordered;
+class Bordered : public Widget;
 ```
 
-description
+Wraps a Widget in a Border. This is itself a Widget and will have 2 more units of space
+in each dimension than the wrapped Widget, to account for Border space.
+
+This is technically a layout, the wrapped Widget is accessed via the `Bordered::child` member.
+
+A Widget can be easily wrapped in a Border by using the `operator|` overload:
 
 ```cpp
-code
+template <WidgetDerived WidgetType>
+auto operator|(WidgetType w, Border b) -> Bordered<WidgetType>;
+```
+
+The `operator|` overload will create a new Bordered object that will take ownership of
+the passed in Widget.
+
+```cpp
+    auto bordered = MyWidget{} | Border{.box = shape::Box::round(), .label = "A Label"};
+    auto& my_widg = bordered.child;
 ```
 
 <details>
@@ -943,16 +1167,156 @@ code
 ### 🏗️ Constructors
 
 ```cpp
+struct Options {
+    ChildWidget child = {};
+    Border border = {};
+};
+
+Bordered(Options x);
+```
+
+Takes ownership of the child Widget.
+
+---
+
+### Public Objects
+
+```cpp
+ChildWidget child;
+Border border;
+```
+
+Access to the wrapped child Widget and Border.
+
+---
+
+### `get_child` Free Function
+
+```cpp
+template <std::size_t I, WidgetDerived WidgetType>
+auto get_child(Bordered<WidgetType>& bordered) -> auto&;
+```
+
+Returns the `I`th child of the wrapped Widget, provided for convenience and uniformity with other Layouts.
+
+---
+
+</details>
+
+## 🧩 ox::Lines
+
+[`#include <ox/bordered.hpp>`](../include/ox/bordered.hpp)
+
+`struct Lines;`
+
+Visual line data, used by Divider class.
+
+```cpp
+struct Lines {
+    char32_t vertical;
+    char32_t horizontal;
+
+    static constexpr auto light() -> Lines { return {U'│', U'─'}; }
+    static constexpr auto bold() -> Lines { return {U'┃', U'━'}; }
+    static constexpr auto twin() -> Lines { return {U'║', U'═'}; }
+    static constexpr auto dashed() -> Lines { return {U'╎', U'╌'}; }
+    static constexpr auto dotted() -> Lines { return {U'┆', U'┄'}; }
+    static constexpr auto ascii() -> Lines { return {U'-', U'|'}; }
+    static constexpr auto empty() -> Lines { return {U' ', U' '}; }
+};
+```
+
+## 🧩 ox::Divider
+
+[`#include <ox/bordered.hpp>`](../include/ox/bordered.hpp)
+
+`class Divider : public Widget;`
+
+A single line Widget for dividing Widgets within a layout. Vertical/Horizontal is
+determined automatically based on which layout it is used within.
+
+```cpp
+Column{
+    Button{},
+    Divider{{
+        .lines = Lines::bold(),
+        .brush = {.foreground = XColor::BrightBlack},
+    }},
+    Button{},
+};
+```
+
+<details>
+<summary><strong>Details</strong></summary>
+
+### 🏗️ Constructors
+
+```cpp
+struct Options {
+    Lines lines = Lines::light();
+    Brush brush = {};
+    Label label = {};
+};
+
+Divider(Options x);
+```
+
+The `Divider::brush` member only applies to the Line, and not the Label, The Label has
+its own internal Brush.
+
+---
+
+### Public Objects
+
+```cpp
+Lines lines;
+Brush brush;
+Label label;
 ```
 
 ---
 
-### `Bordered::...`
+</details>
+
+## 🧩 ox::BasicButton
+
+[`#include <ox/button.hpp>`](../include/ox/button.hpp)
+
+`class BasicButton : public Widget;`
+
+A simple button Widget, has no special visual elements, use `Button` if you want more.
+Emits Signals on left mouse button press and release and enter key press.
 
 ```cpp
+int i = 0;
+auto btn = BasicButton{};
+Connection{
+    .signal = btn.on_press,
+    .slot = [&] { ++i; },
+}();
 ```
 
-details
+<details>
+<summary><strong>Details</strong></summary>
+
+### 🏗️ Constructors
+
+```cpp
+BasicButton(FocusPolicy fp = FocusPolicy::Strong,
+            SizePolicy sp = SizePolicy::flex());
+```
+
+---
+
+### Signals
+
+```cpp
+sl::Signal<void()> on_press;
+sl::Signal<void()> on_release;
+```
+
+- `on_press` emitted with left mouse button press and enter key press.
+- `on_release` emitted with left mouse button release.
 
 ---
 
@@ -962,12 +1326,26 @@ details
 
 [`#include <ox/button.hpp>`](../include/ox/button.hpp)
 
-`class Button;`
+`class Button : public BasicButton;`
 
-description
+A button with an optional Label and decoration. The decoration can be permanent or
+appear only on mouse hover, with animated fade in and out.
 
 ```cpp
-code
+int i = 0;
+auto btn = Button{{
+    .label = {.text = "A Button"},
+    .decoration = Fade{
+        .paint_fn = shape_gradient(shape::Box::brackets_round(),
+                                   RGB{0x0a3f46}, RGB{0x1ecbe1}),
+    },
+    .press_mod = [](Label& l) { l.brush.foreground = XColor::BrightWhite; },
+    .focus_mod = [](Label& l) { l.brush.foreground = XColor::BrightCyan; },
+}};
+Connection{
+    .signal = btn.on_press,
+    .slot = [&] { ++i; },
+}();
 ```
 
 <details>
@@ -976,16 +1354,69 @@ code
 ### 🏗️ Constructors
 
 ```cpp
+struct Fade {
+    /// (Canvas, percent) where percent is fade amount from [0, 1].
+    std::function<void(Canvas, float)> paint_fn;
+    std::chrono::milliseconds fade_in = std::chrono::milliseconds{200};
+    std::chrono::milliseconds fade_out = std::chrono::milliseconds{400};
+};
+
+using PaintFn = std::function<void(Canvas)>;
+using Decoration = std::variant<PaintFn, Fade>;
+
+struct Options {
+    Label::Options label = {};
+    Decoration decoration = [](Canvas) {};
+    std::function<void(Label&)> press_mod = [](Label&) {};
+    std::function<void(Label&)> focus_mod = [](Label&) {};
+    FocusPolicy focus_policy = FocusPolicy::Strong;
+    SizePolicy size_policy = SizePolicy::flex();
+};
+
+Button(Options x = {});
+```
+
+Construct a Button Widget. The label recieves the entire Canvas to paint on, in practice
+this means it will be centered vertically and its Align parameter will determine its
+horizontal alignment.
+
+The decoration takes either a simple paint function, or a Fade object. If a `PaintFn` is
+used, it will be handed a Canvas that has the Label already painted to it, any
+changes to this Canvas will appear on top of the Button. If a `Fade` object is given,
+the button will have a fade in effect on `mouse_enter` and fade out on `mouse_leave`.
+This fade effect is controlled by `Fade::paint_fn`, which takes a Canvas and float
+percent (0 to 1, where 0 is fully off and 1 is fully on).
+
+The `press_mod` function will be called for each paint event where the button has been
+pressed but not yet released (it is not activated by an enter key press). The label is
+passed into this function rather than the entire Canvas.
+
+The `focus_mod` function will be called for each paint event where the button has focus.
+The label is passed into this function rather than the entire Canvas.
+
+---
+
+### Public Objects
+
+```cpp
+Label::Options label;
+std::function<void(Label&)> press_mod;
+std::function<void(Label&)> focus_mod;
 ```
 
 ---
 
-### `Button::...`
+### `shape_gradient` Free Function
 
 ```cpp
+auto shape_gradient(auto const& shape, TrueColor one, TrueColor two)
+    -> std::function<void(Canvas, float)>
 ```
 
-details
+Builds a `paint_fn` for `Fade` (`void(Canvas, float)`) from a Shape object and gradient.
+Shape must be able to be used with put(Canvas, shape, fg). The returned function will
+paint the shape onto the Canvas, its foreground color will be `one` when the percent is
+`0`, and `two` when the percent is `1`, and somewhere inbetween for other values.
 
 ---
 
@@ -995,12 +1426,17 @@ details
 
 [`#include <ox/checkbox.hpp>`](../include/ox/checkbox.hpp)
 
-`class CheckBox;`
+`class CheckBox : public Widget;`
 
-description
+A simple checkbox Widget with two states, `Checked` and `UnChecked`. This does not
+contain a Label, only a box.
 
 ```cpp
-code
+Column{
+    CheckBox{}, // default is UnChecked
+    CheckBox{{.state = CheckBox::Checked}},
+    CheckBox{{.state = CheckBox::UnChecked}},
+};
 ```
 
 <details>
@@ -1009,16 +1445,105 @@ code
 ### 🏗️ Constructors
 
 ```cpp
+enum class State : bool { Checked, UnChecked };
+
+struct Display {
+    std::vector<Glyph> checked;
+    std::vector<Glyph> unchecked;
+    Brush in_focus_brush;
+};
+
+struct Options {
+    State state = State::UnChecked;
+    Display display = {
+        .checked = U"[X]"_gs,
+        .unchecked = U"[ ]"_gs,
+        .in_focus_brush = {.traits = Trait::Bold},
+    };
+    FocusPolicy focus_policy = FocusPolicy::Strong;
+};
+
+CheckBox(Options x = {});
 ```
+
+Construct a CheckBox Widget. `state` is the initial state of the CheckBox.
+
+The display object describes the look of each state in Glyphs and the Brush to use when
+the CheckBox is in focus.
 
 ---
 
-### `CheckBox::...`
+### Signals
 
 ```cpp
+sl::Signal<void()> on_check;
+sl::Signal<void()> on_uncheck;
 ```
 
-details
+- `on_check` is emitted any time the state is changed from UnChecked to Checked.
+- `on_uncheck` is emitted any time the state is changed from Checked to UnChecked.
+
+---
+
+### Public Objects
+
+```cpp
+Display display;
+```
+
+The current display object.
+
+---
+
+### `CheckBox::toggle`
+
+```cpp
+void toggle();
+```
+
+Change the state from `UnChecked` to `Checked` or from `Checked` to `UnChecked`,
+emitting the appropriate signal.
+
+---
+
+### `CheckBox::check`
+
+```cpp
+void check();
+```
+
+If state is `UnChecked`, sets the state to `Checked` and emits the `on_check` signal.
+
+---
+
+### `CheckBox::uncheck`
+
+```cpp
+void uncheck();
+```
+
+If state is `Checked`, sets the state to `UnChecked` and emits the `on_uncheck` signal.
+
+---
+
+### `CheckBox::set_state`
+
+```cpp
+void set_state(State s);
+```
+
+Set the current state to `s`, emit the appropriate signal if the state changes.
+If the state does not change, no signal is emitted.
+
+---
+
+### `CheckBox::get_state`
+
+```cpp
+auto get_state() const -> State;
+```
+
+Get the current state of the CheckBox.
 
 ---
 
@@ -1028,12 +1553,20 @@ details
 
 [`#include <ox/datatable.hpp>`](../include/ox/datatable.hpp)
 
-`class DataTable;`
+`class DataTable : public Widget;`
 
-description
+A 2D table of strings, with a header for each column. This is not intended to be a full
+spreadsheet application, it is intended to be a simple way to display data in a grid
+with dividing lines.
 
 ```cpp
-code
+auto dt = DataTable{};
+dt.add_column("one", Align::Center, XColor::Blue);
+dt.add_row({"1"});
+dt.add_column("two", Align::Center);
+dt.add_column("three", Align::Center);
+dt.add_row({"2", "3", "4"});
+dt.add_row({"5", "6", "7"});
 ```
 
 <details>
@@ -1042,31 +1575,61 @@ code
 ### 🏗️ Constructors
 
 ```cpp
+struct Options {
+    Color background = TermColor::Default;
+    Color foreground_cell = TermColor::Default;
+    Color foreground_line = TermColor::Default;
+    SizePolicy size_policy = SizePolicy::flex();
+};
+
+DataTable(Options x = {});
 ```
 
 ---
 
-### `DataTable::...`
+### `DataTable::add_column`
 
 ```cpp
+void add_column(std::string heading,
+                Align align = Align::Left,
+                Color foreground = TermColor::Default);
 ```
 
-details
+Add a column to the table. The heading is the text that will be displayed at the top of
+the column. The alignment is the alignment of the text in the column. The foreground
+color is the color of the text in the column heading. The column will be appear at the
+right most position in the table.
 
 ---
 
+### `DataTable::add_row`
+
+```cpp
+void add_row(std::vector<std::string> row);
+```
+
+Add a row to the table. The row is a vector of strings, each string is the text that
+will be displayed in the cell. The row must have the same number of columns as the
+table, otherwise a std::out_of_range exception will be thrown. The row will be added to
+the bottom of the table.
+
+---
 </details>
 
 ## 🧩 ox::Label
 
 [`#include <ox/label.hpp>`](../include/ox/label.hpp)
 
-`class Label;`
+`class Label : public Widget;`
 
-description
+A Widget displaying a static single line of text. The text is not editable, but it can be set directly via its public data members. The text is centered vertically, its horizontal alignment is determined by the `Align` constructor parameter.
 
 ```cpp
-code
+auto label = Label{{
+    .text = "A Label",
+    .align = Align::Left,
+    .brush = {.foreground = XColor::BrightWhite},
+}};
 ```
 
 <details>
@@ -1075,31 +1638,68 @@ code
 ### 🏗️ Constructors
 
 ```cpp
+struct Options {
+    std::string text = "";
+    Align align = Align::Center;
+    Brush brush = {};
+    SizePolicy size_policy = SizePolicy::flex();
+};
+
+Label(Options x = {});
+
+Label(std::string text_);
+
+Label(char const* text_);
 ```
+
+The `std::string` and `char const*` constructors are provided for convenience, they will
+set the `text` member to the provided value and all other options to their default
+values.
+
+The `Options` constructor takes a `std::string` for the text, an `Align` enum for the
+horizontal alignment, a `Brush` to apply to each cell of the Label, and a `SizePolicy`.
 
 ---
 
-### `Label::...`
+### Public Objects
 
 ```cpp
+std::string text;
+Align align;
+Brush brush;
 ```
 
-details
+The text to be displayed, the alignment of the text, and the Brush to use when painting.
 
 ---
 
 </details>
 
-## 🧩 ox::Column
+## 🧩 ox::BasicNumberLabel ox::IntegerLabel ox::FloatLabel
 
-[`#include <ox/layout.hpp>`](../include/ox/layout.hpp)
-
-`class Colum;`
-
-description
+[`#include <ox/label.hpp>`](../include/ox/label.hpp)
 
 ```cpp
-code
+template <typename NumberType>
+class BasicNumberLabel : public Widget;
+
+using IntegerLabel = BasicNumberLabel<int>;
+using FloatLabel = BasicNumberLabel<float>;
+```
+
+A Widget displaying a number of a given type. The number is not editable, but it can be
+set directly via its public data members. The number is centered vertically, its
+horizontal alignment is determined by the `Align` constructor parameter, and its
+formatting is determined by a format string and locale.
+
+```cpp
+auto label = IntegerLabel{{
+    .value = 42,
+    .align = Align::Left,
+    .brush = {.foreground = XColor::BrightWhite},
+    .locale = digit_separator_locale(3),
+    .format = "{:d}",
+}};
 ```
 
 <details>
@@ -1108,16 +1708,144 @@ code
 ### 🏗️ Constructors
 
 ```cpp
+struct Options {
+    NumberType value = 0;
+    Align align = Align::Center;
+    Brush brush = {};
+    std::locale locale = std::locale{};
+    std::string format = "{}";
+    SizePolicy size_policy = SizePolicy::flex();
+};
+
+BasicNumberLabel(Options x = {});
 ```
+
+Construct a BasicNumberLabel Widget. The `value` is the number to be displayed, `align`
+is the horizontal alignment of the text, the `brush` is the Brush to use when painting,
+the `locale` is the locale to use for formatting, and the `format` is the format string
+to use for formatting.
 
 ---
 
-### `Column::...`
+### Public Objects
 
 ```cpp
+NumberType value;
+Align align;
+Brush brush;
+std::locale locale;
+std::string format;
 ```
 
-details
+The number to be displayed, the alignment of the text, the Brush to use when painting,
+the locale to use for formatting, and the format string to use for formatting.
+
+---
+
+### `digit_separator_locale` Free Function
+
+```cpp
+auto digit_separator_locale(std::int8_t spacing = 3,
+                            std::locale init_locale = std::locale{})
+    -> std::locale;
+```
+
+Creates a locale that inserts a digit separator character. The `spacing` parameter
+determines the number of digits between separators. The `init_locale` parameter is the
+locale to base the new locale on. The default is the C locale. The function will throw
+a `std::invalid_argument` exception if the `spacing` parameter is negative.
+
+---
+
+</details>
+
+## Layout Concepts
+
+[`#include <ox/layout.hpp>`](../include/ox/layout.hpp)
+
+A few concepts are provided to help identify the types of containers that can be used
+within Row and Column layouts.
+
+```cpp
+/**
+ * tuple, pair, array, etc...
+ */
+template <typename T>
+concept TupleLike = requires {
+    { std::tuple_size<T>::value } -> std::convertible_to<std::size_t>;
+};
+
+/**
+ * vector, set, list, etc...
+ */
+template <typename T>
+concept DynamicContainer = not TupleLike<std::remove_reference_t<T>> &&
+                           std::ranges::sized_range<T> && std::ranges::forward_range<T>;
+
+template <typename T>
+concept LayoutContainer = DynamicContainer<T> || TupleLike<T>;
+
+template <typename T>
+concept WidgetDerived = std::is_base_of_v<Widget, T>;
+```
+
+## 🧩 ox::Column
+
+[`#include <ox/layout.hpp>`](../include/ox/layout.hpp)
+
+```cpp
+template <LayoutContainer Container>
+class Column : public Widget;
+```
+
+A layout that arranges its children in a vertical column. The children are arranged from
+top to bottom, with the first child of the container at the top and the last child at
+the bottom. Each child is given the same width as the Column, and its height is
+determined by the child's SizePolicy.
+
+The Column layout is a `Widget` itself, so it can be used within other layouts as a
+child.
+
+```cpp
+auto col = Column{
+    Label{"A Label"} | SizePolicy::fixed(1),
+    TextBox{} | SizePolicy::flex(),
+    Label{"Footer"} | SizePolicy::fixed(5),
+};
+
+auto col2 = Column<std::vector<Button>>{};
+col2.children.push_back(Button{"A Button"} | SizePolicy::fixed(5));
+col2.children.push_back(Button{"B Button"} | SizePolicy::flex());
+col2.children.push_back(Button{"C Button"} | SizePolicy::fixed(5));
+```
+
+<details>
+<summary><strong>Details</strong></summary>
+
+### 🏗️ Constructors
+
+```cpp
+explicit Column(Container container = {});
+
+template <WidgetDerived... Widgets>
+explicit Column(Widgets&&... ws);
+```
+
+The first constructor takes a container of Widgets, which can be a tuple, pair, array,
+or any other container that meets the `LayoutContainer` concept.
+
+The second constructor takes a variadic list of Widgets and moves them into a
+`std::tuple` container. This is provided for convenience.
+
+---
+
+### Public Objects
+
+```cpp
+Container children;
+```
+
+Direct access to the children of the Column layout.
 
 ---
 
@@ -1127,12 +1855,28 @@ details
 
 [`#include <ox/layout.hpp>`](../include/ox/layout.hpp)
 
-`class Row;`
+```cpp
+template <LayoutContainer Container>
+class Row : public Widget;
+```
+A layout that arranges its children in a horizontal row. The children are arranged from
+left to right, with the first child of the container on the left and the last child on
+the right. Each child is given the same height as the Row, and its width is determined
+by the child's SizePolicy.
 
-description
+The Row layout is a `Widget` itself, so it can be used within other layouts as a child.
 
 ```cpp
-code
+auto row = Row{
+    Button{"A Button"} | SizePolicy::fixed(5),
+    TextBox{} | SizePolicy::flex(),
+    Button{"B Button"} | SizePolicy::fixed(5),
+};
+
+auto row2 = Row<std::vector<Button>>{};
+row2.children.push_back(Button{"A Button"} | SizePolicy::fixed(5));
+row2.children.push_back(Button{"B Button"} | SizePolicy::flex());
+row2.children.push_back(Button{"C Button"} | SizePolicy::fixed(5));
 ```
 
 <details>
@@ -1141,16 +1885,27 @@ code
 ### 🏗️ Constructors
 
 ```cpp
+explicit Row(Container container = {});
+
+template <WidgetDerived... Widgets>
+explicit Row(Widgets&&... ws);
 ```
+
+The first constructor takes a container of Widgets, which can be a tuple, pair, array,
+or any other container that meets the `LayoutContainer` concept.
+
+The second constructor takes a variadic list of Widgets and moves them into a
+`std::tuple` container. This is provided for convenience.
 
 ---
 
-### `Row::...`
+### Public Objects
 
 ```cpp
+Container children;
 ```
 
-details
+Direct access to the children of the Row layout.
 
 ---
 
@@ -1160,12 +1915,20 @@ details
 
 [`#include <ox/lineedit.hpp>`](../include/ox/lineedit.hpp)
 
-`class LineEdit;`
+`class LineEdit : public Widget;`
 
-description
+A user editable single line text input Widget. 
+
+Note: Right and Center Align are not supported yet.
 
 ```cpp
-code
+auto line_edit = LineEdit{{
+    .text = "A LineEdit",
+    .text_brush = {.foreground = XColor::BrightWhite},
+    .background = XColor::BrightBlue,
+    .ghost_text = "Ghost Text",
+    .validator = [](char c) { return std::isalnum(c); },
+}};
 ```
 
 <details>
@@ -1174,16 +1937,52 @@ code
 ### 🏗️ Constructors
 
 ```cpp
+struct Options {
+    std::string text = "";
+    Brush text_brush = {};
+    Align align = Align::Left;
+    Color background = TermColor::Default;
+    std::string ghost_text = "";
+    Brush ghost_text_brush = {.foreground = XColor::BrightBlack};
+    std::optional<std::function<bool(char)>> validator = std::nullopt;
+    FocusPolicy focus_policy = FocusPolicy::Strong;
+    SizePolicy size_policy = SizePolicy::flex();
+};
+
+LineEdit(Options x = {});
 ```
+
+Construct a LineEdit Widget. The `text` is the initial text to be displayed, the
+`text_brush` is the Brush to use when painting the text, `align` is the horizontal
+alignment of the text, `background` is the background color of the LineEdit,
+`ghost_text` is the text to be displayed when the LineEdit is empty, `ghost_text_brush`
+is the Brush to use when painting the ghost text, `validator` is a function that will be
+called for each character typed into the LineEdit.
 
 ---
 
-### `LineEdit::...`
+### Signals
 
 ```cpp
+sl::Signal<void(std::string const&)> on_enter;
 ```
 
-details
+- `on_enter` is emitted when the user presses the enter key while the LineEdit has
+focus. The current text is passed to the signal. This does not emit the ghost text.
+
+---
+
+### Public Objects
+
+```cpp
+std::string text;
+Brush text_brush;
+Align align;
+Color background;
+std::string ghost_text;  // Visible if text is empty.
+Brush ghost_text_brush;
+std::optional<std::function<bool(char)>> validator;
+```
 
 ---
 
@@ -1193,12 +1992,18 @@ details
 
 [`#include <ox/pixelgrid.hpp>`](../include/ox/pixelgrid.hpp)
 
-`class PixelGrid;`
+`class PixelGrid : public Widget;`
 
-description
+A 2D grid of pixels, each pixel is a `TrueColor` object. Each cell on the terminal holds 2 'pixels', the `▄` character is used to do the drawing.
+
+See the [`bmp_view.cpp`](../examples/bmp_view.cpp) example.
 
 ```cpp
-code
+auto grid = PixelGrid{Area{.width = 10, .height = 10}};
+grid.buffer[{.x = 0, .y = 0}] = RGB{0xFF0000};
+grid.buffer[{.x = 1, .y = 0}] = RGB{0x00FF00};
+grid.buffer[{.x = 2, .y = 0}] = RGB{0x0000FF};
+// ...
 ```
 
 <details>
@@ -1207,16 +2012,34 @@ code
 ### 🏗️ Constructors
 
 ```cpp
+struct Matrix {
+    Area area;
+    std::vector<TrueColor> pixels;
+
+    auto operator[](Point p) -> TrueColor&;
+    auto operator[](Point p) const -> TrueColor;
+};
+
+PixelGrid(Area area);
+
+PixelGrid(Matrix matrix);
 ```
+
+The first constructor takes an `Area` object, which is the size of the grid.
+
+The second constructor takes a `Matrix` object, which is a 2D array of `TrueColor`
+objects. Build up a `Matrix` object with the `Matrix::operator[]` function, do not
+modify the `pixels` vector directly.
 
 ---
 
-### `PixelGrid::...`
+### Public Objects
 
 ```cpp
+Matrix buffer;
 ```
 
-details
+Direct access to the buffer of pixels.
 
 ---
 
@@ -1226,12 +2049,19 @@ details
 
 [`#include <ox/scrollbar.hpp>`](../include/ox/scrollbar.hpp)
 
-`class ScrollBar;`
+`class ScrollBar : public Widget;`
 
-description
+A vertical scroll bar Widget. It can be linked with various Widgets to provide
+scrolling functionality.
 
 ```cpp
-code
+auto tb = TextBox{{
+    .text = "A TextBox",
+}};
+
+auto sb = ScrollBar{};
+
+link(tb, sb);
 ```
 
 <details>
@@ -1240,16 +2070,47 @@ code
 ### 🏗️ Constructors
 
 ```cpp
+struct Options {
+    int scrollable_length = 0;
+    int position = 0;
+    Brush brush = {};
+    std::chrono::milliseconds scroll_settle_time = std::chrono::milliseconds{500};
+};
+
+ScrollBar(Options x = {});
 ```
+
+Construct a ScrollBar Widget. The `scrollable_length` is the length of the scrollable
+area, the `position` is the current position of the scroll bar, the `brush` is the Brush
+to use when painting the scroll bar, and the `scroll_settle_time` is the time it takes
+for the scroll bar to settle after a scroll event. The `position` is clamped to the `[0,
+scrollable_length)` range.
+
+Often you can just default construct a ScrollBar and use the `link` function to link it
+to a Widget. The `link` function will set the `scrollable_length` and `position` to
+the correct values for the linked Widget.
 
 ---
 
-### `ScrollBar::...`
+### Signals
 
 ```cpp
+sl::Signal<void(int)> on_scroll;
 ```
 
-details
+- `on_scroll` is emitted on any change to `position`. The current position is passed to
+the signal.
+
+---
+
+### Public Objects
+
+```cpp
+int scrollable_length;
+int position;  // [0, scrollable_length)
+Brush brush;
+std::chrono::milliseconds scroll_settle_time;
+```
 
 ---
 
@@ -1259,12 +2120,23 @@ details
 
 [`#include <ox/textbox.hpp>`](../include/ox/textbox.hpp)
 
-`class TextBox;`
+`class TextBox : public Widget;`
 
-description
+A basic TextBox Widget. It supports word wrapping and scrolling. It is editable if a
+FocusPolicy other than `None` is set. It can be used with a ScrollBar with the `link`
+function.
 
 ```cpp
-code
+auto tb = TextBox{{
+    .text = "A TextBox",
+    .wrap = Wrap::Word,
+    .align = Align::Center,
+    .brush = {.foreground = XColor::BrightWhite, .traits = Trait::Bold},
+}};
+
+auto sb = ScrollBar{};
+
+link(tb, sb);
 ```
 
 <details>
@@ -1273,89 +2145,121 @@ code
 ### 🏗️ Constructors
 
 ```cpp
+enum class Wrap { Any, Word };
+
+struct Options {
+    std::string text = {};  // UTF8 encoded
+    Wrap wrap = Wrap::Word;
+    Align align = Align::Left;
+    Brush brush = {};
+    FocusPolicy focus_policy = FocusPolicy::None;
+    SizePolicy size_policy = SizePolicy::flex();
+};
+
+TextBox(Options x = {});
+```
+
+Construct a TextBox Widget. The `text` is the initial text to be displayed, the `wrap`
+is the wrapping mode (`Any` will wrap at any character, and `Word` will wrap on word
+boundaries), `align` is the horizontal alignment of the text, `brush` is the Brush to
+use when painting the text.
+
+---
+
+### Signals
+
+```cpp
+sl::Signal<void(int, int)> on_scroll; /// void(int index, int size)
+```
+
+- `on_scroll` is emitted on any scroll parameter update. The current index and size are
+passed to the signal. This is used by the `link` function and does not need to be used
+directly.
+
+
+### Public Objects
+
+```cpp
+std::string text;
+Wrap wrap;
+Align align;
+Brush brush;
 ```
 
 ---
 
-### `TextBox::...`
+### `link` Free Function
 
 ```cpp
+void link(TextBox& tb, ScrollBar& sb);
 ```
 
-details
-
----
-
-</details>
-
-## 🧩 ox::Glyph
-
-[`#include <ox/core/glyph.hpp>`](../include/ox/core/glyph.hpp)
-
-`...`
-
-description
-
-```cpp
-```
-
-<details>
-<summary><strong>Details</strong></summary>
-
----
-
-</details>
-
-## 🧩 ox::Color
-
-[`#include <ox/core/glyph.hpp>`](../include/ox/core/glyph.hpp)
-
-`...`
-
-description
-hsl, rgb, bg, fg, XColor, TrueColor
-
-```cpp
-```
-
-<details>
-<summary><strong>Details</strong></summary>
-
----
-
-</details>
-
-## 🧩 ox::Point
-
-[`#include <ox/core/glyph.hpp>`](../include/ox/core/glyph.hpp)
-
-`...`
-
-description
-
-```cpp
-```
-
-<details>
-<summary><strong>Details</strong></summary>
+Link a ScrollBar to a TextBox, the ScrollBar will control the TextBox, and the
+TextBox will update the ScrollBar.
 
 ---
 
 </details>
 
-## 🧩 ox::Brush
+## 📦 ox::Point
 
-[`#include <ox/core/glyph.hpp>`](../include/ox/core/glyph.hpp)
+[`#include <ox/core/terminal.hpp>`](../include/ox/core/terminal.hpp)
 
-`...`
+`struct Point;`
 
-description
+An `x` (horizontal) and `y` (vertical) coordinate on a 2D grid.
 
 ```cpp
+auto p = Point{.x = 5, .y = 8};
 ```
 
 <details>
 <summary><strong>Details</strong></summary>
+
+```cpp
+struct Point {
+    int x;
+    int y;
+
+    constexpr auto operator==(Point const& other) const -> bool = default;
+    constexpr auto operator!=(Point const& other) const -> bool = default;
+    constexpr auto operator+(Point const& other) const -> Point;
+    constexpr auto operator-(Point const& other) const -> Point;
+    constexpr auto operator<(Point const& other) const -> bool;
+};
+```
+
+`operator+` and `operator-` operate on each corresponding element. ie, `x` is added to
+`x` and `y` is added to `y`.
+
+---
+
+</details>
+
+## 📦 ox::Area
+
+[`#include <ox/core/terminal.hpp>`](../include/ox/core/terminal.hpp)
+
+`struct Area;`
+
+Holds `width` and `height` for a 2D grid.
+
+```cpp
+auto a = Area{.width = 4, .height = 7};
+```
+
+<details>
+<summary><strong>Details</strong></summary>
+
+```cpp
+struct Area {
+    int width;
+    int height;
+
+    constexpr auto operator==(Area const& other) const -> bool = default;
+    constexpr auto operator!=(Area const& other) const -> bool = default;
+};
+```
 
 ---
 
@@ -1365,52 +2269,414 @@ description
 
 [`#include <ox/core/glyph.hpp>`](../include/ox/core/glyph.hpp)
 
-`...`
+`enum class Trait;`
 
-description
-
-```cpp
-```
+Visual traits that can be applied to text on the terminal screen. Not all terminal
+emulators support all Traits.
 
 <details>
 <summary><strong>Details</strong></summary>
 
+```cpp
+enum class Trait : std::uint16_t {
+    None = 0,
+    Standout = 1 << 0,
+    Bold = 1 << 1,
+    Dim = 1 << 2,
+    Italic = 1 << 3,
+    Underline = 1 << 4,
+    Blink = 1 << 5,
+    Inverse = 1 << 6,
+    Invisible = 1 << 7,
+    Crossed_out = 1 << 8,
+    Double_underline = 1 << 9,
+};
+```
+
+A RemoveTrait struct is provided to remove the given Trait, to be used with Glyph and
+GlyphString pipe operators.
+
+```cpp
+struct RemoveTrait {
+    Trait trait;
+};
+
+constexpr auto remove_trait(Trait t) -> RemoveTrait;
+```
+
 ---
 
 </details>
-
 
 ## ox::Traits
 
 [`#include <ox/core/glyph.hpp>`](../include/ox/core/glyph.hpp)
 
-`...`
+`using Traits = detail::Mask<Trait>;`
 
-description
+Bitmask type for combining multiple traits into a single object.
 
 ```cpp
+auto traits = Trait::Bold | Trait::Inverse;
+```
+
+## 🧩 ox::Color
+
+[`#include <ox/core/glyph.hpp>`](../include/ox/core/glyph.hpp)
+
+`using Color = std::variant<XColor, TrueColor, TermColor>;`
+
+Describes a color that can appear on the terminal screen.
+
+```cpp
+Color c = XColor::Blue;
+c = TrueColor{RGB{0x432654}};
+c = TrueColor{HSL{
+    .hue = 250,
+    .saturation = 30,
+    .lightness = 70,
+}};
+c = TermColor::Default;
 ```
 
 <details>
 <summary><strong>Details</strong></summary>
+
+A Color can be an XTerm color palette index (`XColor`), a TrueColor (`HSL` or `RGB`), or
+a Terminal's default color (`TermColor::Default`).
+
+### XColor
+
+```cpp
+/**
+ * Represents a color index for XTerm like palette.
+ * @details The color index is a value from 0 to 255.
+ *     [0, 7] ----- Classic XTerm system colors.
+ *     [8, 15] ---- 'Bright' versions of the classic colors.
+ *     [16, 230] -- 216 non-system colors.
+ *     [231, 255] - Grayscale colors.
+ * The actual color values are defined by your terminal.
+ * @details This provides the first 16 colors of the XTerm palette by name.
+ * @see https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit
+ * @see https://www.ditig.com/publications/256-colors-cheat-sheet
+ */
+struct XColor {
+    std::uint8_t value;
+
+    static XColor const Black;
+    static XColor const Red;
+    static XColor const Green;
+    static XColor const Yellow;
+    static XColor const Blue;
+    static XColor const Magenta;
+    static XColor const Cyan;
+    static XColor const White;
+    static XColor const BrightBlack;
+    static XColor const BrightRed;
+    static XColor const BrightGreen;
+    static XColor const BrightYellow;
+    static XColor const BrightBlue;
+    static XColor const BrightMagenta;
+    static XColor const BrightCyan;
+    static XColor const BrightWhite;
+
+    constexpr bool operator==(XColor const&) const = default;
+    constexpr bool operator!=(XColor const&) const = default;
+};
+```
+
+The static members are provided for convenience, but any XColor can be constructed
+directly by placing the color index in the `value` member.
+
+---
+
+### TrueColor
+
+```cpp
+struct TrueColor {
+    std::uint8_t red;
+    std::uint8_t green;
+    std::uint8_t blue;
+
+    constexpr TrueColor(RGB x);
+    constexpr TrueColor(HSL x);
+
+    constexpr bool operator==(TrueColor const&) const = default;
+    constexpr bool operator!=(TrueColor const&) const = default;
+};
+
+using TColor = TrueColor;
+```
+
+24 bit true color for the terminal display, if your terminal supports it. Constructible
+from either an RGB or HSL value, with HSL there is a conversion to RGB internally. The
+constructor is non-explicit so it can be directly created from an `RGB` or `HSL` struct
+if the expected type is a `TrueColor` (not a `Color`).
+
+---
+
+### TermColor
+
+```cpp
+enum class TermColor : bool { Default };
+```
+
+The default color the terminal uses for either background or foreground, depending on
+where it is assigned in a `Brush`. This is the default Color assigned in Brush for both
+foreground and background.. The actual color can be changed in the `Terminal` class by
+assigning to the following members:
+
+```cpp
+static Color Terminal::foreground = TermColor::Default;
+static Color Terminal::background = TermColor::Default;
+```
+
+If left as `TermColor::Default` it will use the Terminal's settings.
+
+---
+
+### Foreground / Background
+
+A Color can be used for either a foreground or background color, depending on where it
+is assigned in a `Brush`. When using pipe operators the library provides the following
+functions to help assign colors to the correct spot in a Brush:
+
+```cpp
+constexpr auto foreground(Color c) -> ColorFG;
+constexpr auto fg(Color c) -> ColorFG;
+
+constexpr auto background(Color c) -> ColorBG;
+constexpr auto bg(Color c) -> ColorBG;
+```
 
 ---
 
 </details>
 
-## ox::GlyphString
+## 🧩 ox::Brush
 
 [`#include <ox/core/glyph.hpp>`](../include/ox/core/glyph.hpp)
 
-`...`
+`struct Brush;`
 
-description
+A collection of foreground color, background color, and traits. It is used to 'paint' a
+symbol to the terminal screen.
 
 ```cpp
+auto b = Brush{
+    .foreground = RGB{0x32A573},
+    .background = XColor::Blue,
+    .traits = Trait::Bold | Trait::Underline,
+};
 ```
 
 <details>
 <summary><strong>Details</strong></summary>
+
+```cpp
+struct Brush {
+    Color background = TermColor::Default;
+    Color foreground = TermColor::Default;
+    Traits traits = Traits{Trait::None};
+
+    constexpr bool operator==(Brush const&) const = default;
+    constexpr bool operator!=(Brush const&) const = default;
+};
+```
+
+---
+
+</details>
+
+## 🧩 ox::Glyph
+
+[`#include <ox/core/glyph.hpp>`](../include/ox/core/glyph.hpp)
+
+`struct Glyph;`
+
+The unit of visual display for a single cell on the terminal. It contains a symbol,
+colors, and traits.
+
+```cpp
+auto g = Glyph{.symbol = 'o', .brush = {.foreground = XColor::Blue}};
+```
+
+<details>
+<summary><strong>Details</strong></summary>
+
+```cpp
+struct Glyph {
+    char32_t symbol = U' ';
+    Brush brush = {};
+
+    constexpr bool operator==(Glyph const&) const = default;
+    constexpr bool operator!=(Glyph const&) const = default;
+};
+```
+
+---
+
+</details>
+
+## 💡 ox::GlyphString
+
+[`#include <ox/core/glyph.hpp>`](../include/ox/core/glyph.hpp)
+
+```cpp
+template <typename T>
+concept GlyphString =
+    std::ranges::forward_range<T> && std::same_as<std::ranges::range_value_t<T>, Glyph>;
+
+template <typename T>
+concept InsertableGlyphString = GlyphString<T> && requires(T& t, Glyph g) {
+    { *std::inserter(t, std::begin(t)) = g } -> std::same_as<std::insert_iterator<T>&>;
+};
+```
+
+A C++20 concept defining what it means to be a string of Glyphs. Any library function
+that needs to return a GlyphString like type will return a `std::vector<Glyph>`.
+
+<details>
+<summary><strong>Details</strong></summary>
+
+### User Defined Literals
+
+```cpp
+auto operator""_gs(char32_t const* str, std::size_t count) -> std::vector<Glyph>;
+auto operator""_gs(char const* str, std::size_t count) -> std::vector<Glyph>;
+```
+
+GlyphString User Defined Literals to generate a `std::vector<Glyph>`.
+
+```cpp
+auto glyph_string = "Hello, World"_gs;
+auto glyph_string_32 = U"Wow!"_gs;
+```
+
+---
+
+</details>
+
+## 🔧 Glyph And GlyphString Operator Overloads
+
+The library provides a number of convinience operators for modification/creation of
+Glyphs and GlyphStrings.
+
+<details>
+<summary><strong>Details</strong></summary>
+
+### Additional Concepts
+
+These are used in the following operator overloads.
+
+```cpp
+template <typename T>
+concept Character = std::same_as<T, char> || std::same_as<T, signed char> ||
+                    std::same_as<T, unsigned char> || std::same_as<T, char8_t> ||
+                    std::same_as<T, char16_t> || std::same_as<T, char32_t>;
+
+template <typename T>
+concept Attribute =
+    std::same_as<T, ColorBG> || std::same_as<T, ColorFG> || std::same_as<T, Trait> ||
+    std::same_as<T, RemoveTrait> || std::same_as<T, Brush>;
+```
+
+---
+
+### operator| Pipe Operator
+
+```cpp
+// ColorBG
+constexpr auto operator|(Character auto symbol, ColorBG c) -> Glyph;
+constexpr auto operator|(Glyph g, ColorBG c) -> Glyph;
+constexpr auto operator|(GlyphString auto&& gs, ColorBG c) -> decltype(auto);
+
+// ColorFG
+constexpr auto operator|(Character auto symbol, ColorFG c) -> Glyph;
+constexpr auto operator|(Glyph g, ColorFG c) -> Glyph;
+constexpr auto operator|(GlyphString auto&& gs, ColorFG c) -> decltype(auto);
+
+// Trait
+constexpr auto operator|(Character auto symbol, Trait t) -> Glyph;
+constexpr auto operator|(Glyph g, Trait t) -> Glyph;
+constexpr auto operator|(GlyphString auto&& gs, Trait t) -> decltype(auto);
+
+// RemoveTrait
+constexpr auto operator|(Glyph g, RemoveTrait t) -> Glyph;
+constexpr auto operator|(GlyphString auto&& gs, RemoveTrait t) -> decltype(auto);
+
+// Brush
+constexpr auto operator|(Character auto symbol, Brush b) -> Glyph;
+constexpr auto operator|(Glyph g, Brush b) -> Glyph;
+constexpr auto operator|(GlyphString auto&& gs, Brush b) -> decltype(auto);
+
+// Attribute
+auto operator|(std::u32string_view sv, Attribute auto attr) -> std::vector<Glyph>;
+auto operator|(std::string_view sv, Attribute auto attr) -> std::vector<Glyph>;
+```
+
+---
+
+### operator+ Plus Operator
+
+```cpp
+auto operator+(Glyph const& lhs, Glyph const& rhs) -> std::vector<Glyph>;
+auto operator+(Glyph const& lhs, Character auto rhs) -> std::vector<Glyph>;
+auto operator+(Character auto lhs, Glyph const& rhs) -> std::vector<Glyph>;
+
+template <InsertableGlyphString T>
+auto operator+(T lhs, std::string_view rhs) -> T;
+
+template <InsertableGlyphString T>
+auto operator+(std::string_view lhs, T rhs) -> T;
+
+template <InsertableGlyphString T>
+auto operator+(T lhs, std::u32string_view rhs) -> T;
+
+template <InsertableGlyphString T>
+auto operator+(std::u32string_view lhs, T rhs) -> T;
+
+template <InsertableGlyphString T>
+auto operator+(T lhs, GlyphString auto const& rhs) -> T;
+
+template <InsertableGlyphString T>
+auto operator+(T lhs, Glyph const& rhs) -> T;
+
+template <InsertableGlyphString T>
+auto operator+(T lhs, Character auto rhs) -> T;
+
+template <InsertableGlyphString T>
+auto operator+(Glyph const& lhs, T rhs) -> T;
+
+template <InsertableGlyphString T>
+auto operator+(Character auto lhs, T rhs) -> T;
+
+auto operator+(Glyph const& lhs, std::string_view rhs) -> std::vector<Glyph>;
+auto operator+(Glyph const& lhs, std::u32string_view rhs) -> std::vector<Glyph>;
+auto operator+(std::string_view lhs, Glyph const& rhs) -> std::vector<Glyph>;
+auto operator+(std::u32string_view lhs, Glyph const& rhs) -> std::vector<Glyph>;
+```
+
+---
+
+### operator+= Plus Assignment Operator
+
+```cpp
+template <InsertableGlyphString T>
+auto operator+=(T& lhs, GlyphString auto const& rhs) -> T&;
+
+template <InsertableGlyphString T>
+auto operator+=(T& lhs, std::u32string_view rhs) -> T&;
+
+template <InsertableGlyphString T>
+auto operator+=(T& lhs, std::string_view rhs) -> T&;
+
+template <InsertableGlyphString T>
+auto operator+=(T& lhs, Glyph const& rhs) -> T&;
+
+template <InsertableGlyphString T>
+auto operator+=(T& lhs, Character auto rhs) -> T&;
+```
 
 ---
 
@@ -1422,10 +2688,13 @@ description
 
 `class Terminal;`
 
-description
+Represents the terminal itself, providing an event loop and screen writing tools.
+Application object is constructed with a Terminal object.
 
 ```cpp
-code
+auto t = Terminal{MouseMode::Move, KeyMode::Raw};
+t.foreground = RGB{0x773283};
+t.background = RGB{0xFF8A4A};
 ```
 
 <details>
@@ -1434,16 +2703,128 @@ code
 ### 🏗️ Constructors
 
 ```cpp
+Terminal(MouseMode mouse_mode = MouseMode::Basic,
+         KeyMode key_mode = KeyMode::Normal,
+         Signals signals = Signals::On);
 ```
+
+Initialize the terminal screen to the 'alternate screen buffer' for interactive mode
+with the given settings.
+
+`MouseMode` determines which mouse events are generated:
+
+```cpp
+/**
+ * Input modes for the Mouse.
+ * @details Off: No Mouse Events are generated.
+ * @details Basic: Mouse Press & Release Events for all Buttons + Scroll Wheel.
+ * @details Drag: Basic, plus Move Events while a Button is pressed.
+ * @details Move: Basic, plus Move Events sent with or without a Button pressed.
+ */
+enum class MouseMode { Off, Basic, Drag, Move };
+```
+
+`KeyMode` determines the way key events are generated:
+
+```cpp
+/**
+ * `Normal` will generate KeyPress Events and auto-repeat if key is held down;
+ * `Raw` will generate KeyPress and KeyRelease Events, the shift key is not applied with
+ * other keys, each key press and release is its own event, all letters are lowercase.
+ * @details `Raw` mode is experimental, typically requiring superuser privileges, should
+ * be avoided.
+ */
+enum class KeyMode : bool { Normal, Raw };
+```
+
+`Signals` determines if ctrl-key signals will be generated or will just generate normal
+key press events:
+
+```cpp
+/**
+ * `On` will generate signals from ctrl-[key] presses; `Off` will not.
+ */
+enum class Signals : bool { On, Off };
+```
+
+```cpp
+Terminal(Terminal const&) = delete;
+Terminal(Terminal&&) = default;
+auto operator=(Terminal const&) -> Terminal& = delete;
+auto operator=(Terminal&&) -> Terminal& = default;
+```
+
+Move only type.
 
 ---
 
-### `Terminal::...`
+### 🧹 Destructor
+
+Resets the terminal back to the normal screen buffer.
+
+---
+
+### `Terminal::changes`
 
 ```cpp
+static ScreenBuffer changes;  // write to this
 ```
 
-details
+A buffer of the 'staged changes' to commit to the screen later.
+
+### `Terminal::event_queue`
+
+```cpp
+static EventQueue event_queue; // read from this
+```
+
+The queue of user input events.
+
+### `Terminal::foreground` `Terminal::background`
+
+```cpp
+static Color foreground = TermColor::Default;
+static Color background = TermColor::Default;
+```
+
+The Colors used when `TermColor::Default` is used. These are the 'default' colors for
+the entire application, this is what `Brush` defaults to.
+
+### `Terminal::cursor`
+
+```cpp
+using Cursor = std::optional<Point>;
+static Cursor cursor{std::nullopt};
+```
+
+The current cursor location, if any. Top-left is `Point{0, 0}`.
+
+---
+
+### `Terminal::commit_changes`
+
+```cpp
+void commit_changes();
+```
+
+Write the `changes` to the actual terminal screen and reset `changes` to default state.
+
+---
+
+### `Terminal::run_read_loop`
+
+```cpp
+void run_read_loop(std::stop_token st);
+```
+
+Runs a loop that reads input from the terminal and appends it to the `event_queue`.
+Exits when the `stop_token` is `stop_requested()`.
+
+---
+
+### `Terminal::size`
+
+Returns the current size of the terminal screen.
 
 ---
 
@@ -1455,10 +2836,16 @@ details
 
 `struct Canvas;`
 
-description
+A sub-region 'view' of a ScreenBuffer at some offset and bound to some size. This
+provides access to the underlying Glyphs of the buffer without having to do offset math.
+Because it is a view type, Canvas objects can be copied and any modifications will be
+done to the same underlying ScreenBuffer.
 
 ```cpp
-code
+void paint(Canvas c) override {
+    c[{0, 0}] = U'X' | fg(XColor::Blue);
+    c[{.x = 6, .y = 10}].symbol = U'X';
+}
 ```
 
 <details>
@@ -1466,17 +2853,32 @@ code
 
 ### 🏗️ Constructors
 
-```cpp
-```
+Aggregate Constructor, not copy or move assignable because of ScreenBuffer reference
+member.
 
----
-
-### `Canvas::...`
+### Public Objects
 
 ```cpp
+ScreenBuffer& buffer;
+Point at;
+Area size;
 ```
 
-details
+### `Canvas::operator[]`
+
+```cpp
+auto operator[](Point p) -> Glyph&;
+auto operator[](Point p) const -> Glyph const&;
+```
+
+Provides access to a Glyph on the underlying ScreenBuffer. The Glyph is found by
+offsetting the given Point by `Canvas::at`and then accessing that Point in the held
+ScreenBuffer reference.
+
+A Canvas starts at the top left with `Point{.x = 0, .y = 0}` and ends at the bottom
+right with `Point{.x = size.width - 1, .y = size.height - 1}`.
+
+Undefined behavior if Point `p` is out of bounds of the Canvas' dimensions.
 
 ---
 

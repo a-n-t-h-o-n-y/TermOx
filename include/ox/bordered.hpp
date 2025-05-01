@@ -82,6 +82,9 @@ template <WidgetDerived WidgetType>
     return {{.child = std::move(w), .border = std::move(b)}};
 }
 
+/**
+ * Returns the `I`th child of the wrapped Widget. Useful if this is wrapping a Layout.
+ */
 template <std::size_t I, WidgetDerived WidgetType>
 auto get_child(Bordered<WidgetType>& bordered) -> auto&
 {

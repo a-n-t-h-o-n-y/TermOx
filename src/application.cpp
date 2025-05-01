@@ -275,6 +275,8 @@ auto Application::handle_resize(Area new_size) -> EventResponse
 
 auto Application::handle_timer(int id) -> EventResponse
 {
+    // TODO update this so that multiple timers can point to the same widget, and pass
+    // the id to the Widget
     auto const at = timer_targets.find(id);
     if (at != std::cend(timer_targets)) {
         if (at->second.valid()) { at->second.get().timer(); }
