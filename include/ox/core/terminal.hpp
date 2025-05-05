@@ -99,12 +99,20 @@ class Terminal {
    public:
     using Cursor = std::optional<Point>;
 
-   public:
-    inline static ScreenBuffer changes{{0, 0}};  // write to this
-    inline static EventQueue event_queue;        // read from this
+    struct Options {
+        MouseMode mouse_mode = MouseMode::Basic;
+        KeyMode key_mode = KeyMode::Normal;
+        Signals signals = Signals::On;
+        Color foreground = TermColor::Default;
+        Color background = TermColor::Default;
+    };
 
-    inline static Color foreground = TermColor::Default;
-    inline static Color background = TermColor::Default;
+   public:
+    ScreenBuffer changes{{0, 0}};          // write to this
+    inline static EventQueue event_queue;  // read from this
+
+    Color foreground = TermColor::Default;
+    Color background = TermColor::Default;
 
     /**
      * The current cursor position on the terminal.
@@ -112,9 +120,15 @@ class Terminal {
      * @details This is used by the event loop after `changes` has been committed to the
      * terminal. If this is std::nullopt, then the cursor is not displayed.
      */
-    inline static Cursor cursor{std::nullopt};
+    Cursor cursor{std::nullopt};
 
    public:
+    /**
+     * Initializes the terminal display and starts reading events in separate thread,
+     * appending to the event_queue.
+     */
+    Terminal(Options options);
+
     /**
      * Initializes the terminal display and starts reading events in separate thread,
      * appending to the event_queue.
@@ -122,10 +136,14 @@ class Terminal {
      * @param mouse_mode The MouseMode to set the terminal to.
      * @param key_mode The KeyMode to set the terminal to.
      * @param signals Whether OS Signals should be enabled or disabled.
+     * @param foreground The default foreground for the Terminal.
+     * @param background The default background for the Terminal.
      */
     Terminal(MouseMode mouse_mode = MouseMode::Basic,
              KeyMode key_mode = KeyMode::Normal,
-             Signals signals = Signals::On);
+             Signals signals = Signals::On,
+             Color foreground_ = TermColor::Default,
+             Color background_ = TermColor::Default);
 
     Terminal(Terminal&&) = default;
     auto operator=(Terminal&&) -> Terminal& = default;
@@ -201,11 +219,12 @@ struct Canvas {
  * for the given Event type.
  * @param ev The Event to handle.
  * @param handler The event handler to process the event.
+ * @param buffer The ScreenBuffer to write changes to on paint event.
  * @return std::optional<EventResponse> The response from the handler, or std::nullopt
  * if not handled.
  */
 template <typename T>
-[[nodiscard]] auto apply_event(Event const& ev, T& handler)
+[[nodiscard]] auto apply_event(Event const& ev, T& handler, ScreenBuffer& buffer)
     -> std::optional<EventResponse>
 {
     return std::visit(
@@ -258,8 +277,8 @@ template <typename T>
                           }
                       },
                       [&](esc::Resize e) -> std::optional<EventResponse> {
-                          Terminal::changes.resize(e.size);
-                          Terminal::changes.fill(Glyph{});
+                          buffer.resize(e.size);
+                          buffer.fill(Glyph{});
                           if constexpr (HandlesResize<T>) {
                               return handler.handle_resize(e.size);
                           }
@@ -304,16 +323,16 @@ template <typename EventHandler>
 {
     while (true) {
         auto const event = Terminal::event_queue.pop();  // Blocking Call
-        auto const result = apply_event(event, handler);
+        auto const result = apply_event(event, handler, term.changes);
 
         if (result.has_value()) {
             if (auto& quit = *result; quit.has_value()) { return quit->return_code; }
             else {
                 if constexpr (HandlesPaint<EventHandler>) {
                     term.cursor = handler.handle_paint(Canvas{
-                        .buffer = Terminal::changes,
+                        .buffer = term.changes,
                         .at = {0, 0},
-                        .size = Terminal::changes.size(),
+                        .size = term.changes.size(),
                     });
                 }
                 term.commit_changes();

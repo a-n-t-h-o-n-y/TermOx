@@ -2506,12 +2506,12 @@ enum class TermColor : bool { Default };
 
 The default color the terminal uses for either background or foreground, depending on
 where it is assigned in a `Brush`. This is the default Color assigned in Brush for both
-foreground and background.. The actual color can be changed in the `Terminal` class by
+foreground and background. The actual color can be changed in the `Terminal` class by
 assigning to the following members:
 
 ```cpp
-static Color Terminal::foreground = TermColor::Default;
-static Color Terminal::background = TermColor::Default;
+Color Terminal::foreground = TermColor::Default;
+Color Terminal::background = TermColor::Default;
 ```
 
 If left as `TermColor::Default` it will use the Terminal's settings.
@@ -2775,9 +2775,12 @@ Represents the terminal itself, providing an event loop and screen writing tools
 Application object is constructed with a Terminal object.
 
 ```cpp
-auto t = Terminal{MouseMode::Move, KeyMode::Raw};
-t.foreground = RGB{0x773283};
-t.background = RGB{0xFF8A4A};
+auto t = Terminal{{
+    .mouse_mode = MouseMode::Move,
+    .key_mode = KeyMode::Raw,
+    .foreground = RGB{0x773283},
+    .background = RGB{0xFF8A4A},
+}};
 ```
 
 <details>
@@ -2786,9 +2789,21 @@ t.background = RGB{0xFF8A4A};
 ### 🏗️ Constructors
 
 ```cpp
+struct Options {
+    MouseMode mouse_mode = MouseMode::Basic;
+    KeyMode key_mode = KeyMode::Normal;
+    Signals signals = Signals::On;
+    Color foreground = TermColor::Default;
+    Color background = TermColor::Default;
+};
+
+Terminal(Options options);
+
 Terminal(MouseMode mouse_mode = MouseMode::Basic,
          KeyMode key_mode = KeyMode::Normal,
-         Signals signals = Signals::On);
+         Signals signals = Signals::On,
+         Color foreground_ = TermColor::Default,
+         Color background_ = TermColor::Default);
 ```
 
 Initialize the terminal screen to the 'alternate screen buffer' for interactive mode
@@ -2830,6 +2845,8 @@ key press events:
 enum class Signals : bool { On, Off };
 ```
 
+`foreground_` and `background_` determine the default colors for the Terminal.
+
 ```cpp
 Terminal(Terminal const&) = delete;
 Terminal(Terminal&&) = default;
@@ -2850,7 +2867,7 @@ Resets the terminal back to the normal screen buffer.
 ### `Terminal::changes`
 
 ```cpp
-static ScreenBuffer changes;  // write to this
+ScreenBuffer changes;  // write to this
 ```
 
 A buffer of the 'staged changes' to commit to the screen later.
@@ -2866,8 +2883,8 @@ The queue of user input events.
 ### `Terminal::foreground` `Terminal::background`
 
 ```cpp
-static Color foreground = TermColor::Default;
-static Color background = TermColor::Default;
+Color foreground = TermColor::Default;
+Color background = TermColor::Default;
 ```
 
 The Colors used when `TermColor::Default` is used. These are the 'default' colors for
@@ -2877,7 +2894,7 @@ the entire application, this is what `Brush` defaults to.
 
 ```cpp
 using Cursor = std::optional<Point>;
-static Cursor cursor{std::nullopt};
+Cursor cursor{std::nullopt};
 ```
 
 The current cursor location, if any. Top-left is `Point{0, 0}`.

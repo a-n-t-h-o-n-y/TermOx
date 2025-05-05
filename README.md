@@ -1,6 +1,10 @@
 # TermOx II 🐂🐂
 
-**TermOx** is a C++20 library for creating Widget based Terminal User Interfaces.
+**TermOx** is a C++20 Terminal User Interface Library.
+
+- [Guide](docs/guide.md)
+- [Reference](docs/reference.md)
+- [Examples](examples)
 
 ----
 
@@ -51,7 +55,7 @@ Light](https://github.com/a-n-t-h-o-n-y/signals-light), [zzz](https://github.com
     git clone https://github.com/a-n-t-h-o-n-y/TermOx.git
     mkdir TermOx/build && cd TermOx/build
     cmake ..
-    make TermOx                                 # Build library
+    make TermOx
 
 ## Note on Version 2
 

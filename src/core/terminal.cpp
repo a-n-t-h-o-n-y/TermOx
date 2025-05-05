@@ -44,8 +44,19 @@ void ScreenBuffer::fill(Glyph const& g)
 
 // -------------------------------------------------------------------------------------
 
-Terminal::Terminal(MouseMode mouse_mode, KeyMode key_mode, Signals signals)
-    : terminal_input_thread_{[this](auto st) { this->run_read_loop(st); }}
+Terminal::Terminal(Options options)
+    : Terminal{options.mouse_mode, options.key_mode, options.signals,
+               options.foreground, options.background}
+{}
+
+Terminal::Terminal(MouseMode mouse_mode,
+                   KeyMode key_mode,
+                   Signals signals,
+                   Color foreground_,
+                   Color background_)
+    : foreground{foreground_},
+      background{background_},
+      terminal_input_thread_{[this](auto st) { this->run_read_loop(st); }}
 {
     esc::initialize_interactive_terminal(mouse_mode, key_mode, signals);
 }
@@ -60,22 +71,22 @@ void Terminal::commit_changes()
 {
     escape_sequence_.clear();
 
-    if (Terminal::changes.size() != current_screen_.size()) {
-        current_screen_.resize(Terminal::changes.size());
+    if (this->changes.size() != current_screen_.size()) {
+        current_screen_.resize(this->changes.size());
         current_screen_.fill(Glyph{U'\0'});  // Trigger Repaint
     }
 
     auto brush = Brush{};
 
-    for (auto y = 0; y < changes.size().height; ++y) {
-        for (auto x = 0; x < changes.size().width; ++x) {
+    for (auto y = 0; y < this->changes.size().height; ++y) {
+        for (auto x = 0; x < this->changes.size().width; ++x) {
             auto const change = [&] {
-                auto g = changes[{x, y}];
+                auto g = this->changes[{x, y}];
                 if (g.brush.background == Color{TermColor::Default}) {
-                    g.brush.background = Terminal::background;
+                    g.brush.background = this->background;
                 }
                 if (g.brush.foreground == Color{TermColor::Default}) {
-                    g.brush.foreground = Terminal::foreground;
+                    g.brush.foreground = this->foreground;
                 }
                 return g;
             }();
@@ -94,7 +105,7 @@ void Terminal::commit_changes()
     // Reset brush for consistency with above optimization.
     escape_sequence_ += escape(Brush{});
 
-    changes.fill(Glyph{});
+    this->changes.fill(Glyph{});
 
     set(esc::CursorMode::Hide);
     esc::write(escape_sequence_);

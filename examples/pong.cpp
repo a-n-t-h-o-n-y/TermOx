@@ -432,14 +432,14 @@ void paint(Game const& x, Canvas c)
 /**
  * Paints the state to the screen.
  */
-void paint(State const& x)
+void paint(State const& x, ScreenBuffer& buffer)
 {
     std::visit(
         [&](auto const& s) {
             paint(s, Canvas{
-                         .buffer = Terminal::changes,
+                         .buffer = buffer,
                          .at = {0, 0},
-                         .size = Terminal::changes.size(),
+                         .size = buffer.size(),
                      });
         },
         x);
@@ -753,6 +753,9 @@ auto timer(State s, int id) -> PongEventResponse
 
 class Pong {
    public:
+    Pong(ScreenBuffer& buffer) : buffer_{buffer} {}
+
+   public:
     auto handle_key_press(Key k) -> EventResponse
     {
         return std::visit(
@@ -762,7 +765,7 @@ class Pong {
                 }
                 else {
                     state_ = std::move(result);
-                    paint(state_);
+                    paint(state_, buffer_);
                     return {};
                 }
             },
@@ -778,7 +781,7 @@ class Pong {
                 }
                 else {
                     state_ = std::move(result);
-                    paint(state_);
+                    paint(state_, buffer_);
                     return {};
                 }
             },
@@ -787,12 +790,13 @@ class Pong {
 
     auto handle_resize(Area) -> EventResponse
     {
-        paint(state_);
+        paint(state_, buffer_);
         return {};
     }
 
    private:
     State state_ = SplashScreen{};
+    ScreenBuffer& buffer_;
 };
 
 // -------------------------------------------------------------------------------------
@@ -801,7 +805,7 @@ int main()
 {
     try {
         auto term = Terminal{};
-        auto pong = Pong{};
+        auto pong = Pong{term.changes};
 
         return process_events(term, pong);
     }

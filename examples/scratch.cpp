@@ -54,9 +54,6 @@ using namespace ox;
 
 // int main()
 // {
-//     Terminal::background = RGB{0x0a3f46};
-//     Terminal::foreground = RGB{0xB4724B};
-
 //     auto head = DataTable{};
 //     head.add_column("one", Align::Center, XColor::Blue);
 //     head.add_row({"1"});
@@ -74,61 +71,102 @@ using namespace ox;
 //     head.add_row({"33", "34", "35", "36"});
 //     head.add_row({"37", "38", "39", "40"});
 
-//     return Application{head}.run();
+//     return Application{head, Terminal{{
+//                                  .foreground = RGB{0x0a3f46},
+//                                  .background = RGB{0xB4724B},
+//                              }}}
+//         .run();
 // }
 
 // -------------------------------------------------------------------------------------
 
-// auto hover_btn(std::string const& label) -> Button
-// {
-//     auto fade = Fade{
-//         .paint_fn =
-//             [](Canvas c, float percent) {
-//                 auto const blend =
-//                     gradient_blend(RGB{0x0a3f46}, RGB{0x1ecbe1}, percent);
-//                 fill(c, bg(blend));
-//             },
-//         .fade_in = std::chrono::milliseconds{1},
-//         .fade_out = std::chrono::milliseconds{300},
-//     };
+auto hover_btn(std::string const& label) -> Button
+{
+    auto fade = Fade{
+        .paint_fn =
+            [](Canvas c, float percent) {
+                auto const blend =
+                    gradient_blend(RGB{0x0a3f46}, RGB{0x1ecbe1}, percent);
+                fill(c, bg(blend));
+            },
+        .fade_in = std::chrono::milliseconds{1},
+        .fade_out = std::chrono::milliseconds{300},
+    };
 
-//     return Button{{
-//         .label = {.text = label},
-//         .decoration = fade,
-//     }};
-// }
-
-// int main()
-// {
-//     Terminal::background = RGB{0x0a3f46};
-//     Terminal::foreground = RGB{0xB4724B};
-
-//     auto head = Row{
-//         Column<std::vector<Button>>{} | SizePolicy::fixed(18),
-//         Divider{{
-//             .lines = Lines::bold(),
-//             .brush = {.foreground = XColor::BrightBlack},
-//         }},
-//         TextBox{{
-//             .focus_policy = FocusPolicy::Strong,
-//         }},
-//     };
-
-//     for (auto i = 0; i < 21; ++i) {
-//         get_child<0>(head).children.push_back(hover_btn("Hover " +
-//         std::to_string(i)));
-//     }
-
-//     return Application{head, Terminal{MouseMode::Move}}.run();
-// }
+    return Button{{
+        .label = {.text = label},
+        .decoration = fade,
+    }};
+}
 
 int main()
 {
-    auto head = Suspended{
+    auto head = Row{
+        Column<std::vector<Button>>{} | SizePolicy::fixed(18),
+        Divider{{
+            .lines = Lines::bold(),
+            .brush = {.foreground = XColor::BrightBlack},
+        }},
         TextBox{{
-            .brush = {.background = XColor::BrightBlack},
             .focus_policy = FocusPolicy::Strong,
-        }} | SizePolicy::suspended({.width = 40, .height = 5}),
+        }},
     };
-    return Application{head}.run();
+
+    for (auto i = 0; i < 21; ++i) {
+        get_child<0>(head).children.push_back(hover_btn("Hover " + std::to_string(i)));
+    }
+
+    return Application{head, Terminal{{
+                                 .mouse_mode = MouseMode::Move,
+                                 .foreground = RGB{0x0a3f46},
+                                 .background = RGB{0xB4724B},
+                             }}}
+        .run();
 }
+
+// int main()
+// {
+//     auto head = Suspended{
+//         TextBox{{
+//             .brush = {.background = XColor::BrightBlack},
+//             .focus_policy = FocusPolicy::Strong,
+//         }} | SizePolicy::suspended({.width = 40, .height = 5}),
+//     };
+//     return Application{head}.run();
+// }
+
+// struct SWidget : Widget {
+//     SWidget(FocusPolicy fp = FocusPolicy::Strong, SizePolicy sp = SizePolicy::flex())
+//         : Widget{fp, sp}
+//     {}
+
+//     // Signals
+//     sl::Signal<void(Mouse)> on_mouse_press;
+//     sl::Signal<void(Mouse)> on_mouse_release;
+//     sl::Signal<void(Mouse)> on_mouse_wheel;
+//     sl::Signal<void(Mouse)> on_mouse_move;
+//     sl::Signal<void()> on_mouse_enter;
+//     sl::Signal<void()> on_mouse_leave;
+//     sl::Signal<void()> on_focus_in;
+//     sl::Signal<void()> on_focus_out;
+//     sl::Signal<void(Key)> on_key_press;
+//     sl::Signal<void(Key)> on_key_release;
+//     sl::Signal<void(Area)> on_resize;
+//     sl::Signal<void()> on_timer;
+//     sl::Signal<void(Canvas)> on_paint;
+
+//    protected:
+//     void mouse_press(Mouse m) override { this->on_mouse_press(m); }
+//     void mouse_release(Mouse m) override { this->on_mouse_release(m); }
+//     void mouse_wheel(Mouse m) override { this->on_mouse_wheel(m); }
+//     void mouse_move(Mouse m) override { this->on_mouse_move(m); }
+//     void mouse_enter() override { this->on_mouse_enter(); }
+//     void mouse_leave() override { this->on_mouse_leave(); }
+//     void focus_in() override { this->on_focus_in(); }
+//     void focus_out() override { this->on_focus_out(); }
+//     void key_press(Key k) override { this->on_key_press(k); }
+//     void key_release(Key k) override { this->on_key_release(k); }
+//     void resize(Area old_size) override { this->on_resize(old_size); }
+//     void timer() override { this->on_timer(); }
+//     void paint(Canvas c) override { this->on_paint(c); }
+// };
