@@ -13,6 +13,7 @@ class ScrollBar : public Widget {
     struct Options {
         int scrollable_length = 0;
         int position = 0;
+        int item_visual_length = 1;
         Brush brush = {};
         std::chrono::milliseconds scroll_settle_time = std::chrono::milliseconds{500};
     } static const init;
@@ -20,6 +21,7 @@ class ScrollBar : public Widget {
    public:
     int scrollable_length;
     int position;  // [0, scrollable_length)
+    int item_visual_length;
     Brush brush;
     std::chrono::milliseconds scroll_settle_time;
 

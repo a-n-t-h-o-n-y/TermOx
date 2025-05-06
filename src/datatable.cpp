@@ -9,6 +9,7 @@
 #include <ox/align.hpp>
 #include <ox/core/core.hpp>
 #include <ox/put.hpp>
+#include <ox/scrollbar.hpp>
 
 namespace ox {
 
@@ -41,6 +42,7 @@ void DataTable::add_row(std::vector<std::string> row)
     for (auto i = std::size_t{0}; i < columns_.size(); ++i) {
         columns_[i].push_back(std::move(row[i]));
     }
+    this->on_scroll((int)this->offset, (int)columns_.back().size());
 }
 
 void DataTable::paint(Canvas c)
@@ -132,10 +134,17 @@ void DataTable::mouse_wheel(Mouse m)
 {
     if (m.button == Mouse::Button::ScrollUp) {
         offset = (std::size_t)std::max(0, (int)offset - 1);
+        if (!columns_.empty()) {
+            this->on_scroll((int)offset, (int)columns_.back().size());
+        }
     }
     else if (m.button == Mouse::Button::ScrollDown) {
         offset = (std::size_t)std::min(
-            columns_.empty() ? 0 : (int)columns_.front().size() - 1, (int)offset + 1);
+            (int)offset + 1,
+            std::max(columns_.empty() ? 0 : (int)columns_.front().size() - 1, 0));
+        if (!columns_.empty()) {
+            this->on_scroll((int)offset, (int)columns_.back().size());
+        }
     }
 }
 
@@ -158,6 +167,27 @@ auto DataTable::get_children() -> zzz::Generator<Widget&> { co_yield headings_; 
 auto DataTable::get_children() const -> zzz::Generator<Widget const&>
 {
     co_yield headings_;
+}
+
+void link(DataTable& dt, ScrollBar& sb)
+{
+    sb.item_visual_length = 2;
+    sb.scrollable_length = dt.columns().empty() ? 0 : (int)dt.columns().back().size();
+    sb.position = (int)dt.offset;
+
+    Connection{
+        .signal = dt.on_scroll,
+        .slot =
+            [](int pos, int len, ScrollBar& sb) {
+                sb.position = pos;
+                sb.scrollable_length = len;
+            },
+    }(sb);
+
+    Connection{
+        .signal = sb.on_scroll,
+        .slot = [](int pos, DataTable& dt) { dt.offset = (std::size_t)pos; },
+    }(dt);
 }
 
 }  // namespace ox

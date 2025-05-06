@@ -8,6 +8,7 @@
 #include <ox/widget.hpp>
 
 namespace ox {
+class ScrollBar;
 
 /**
  * A table of text data.
@@ -31,6 +32,12 @@ class DataTable : public Widget {
 
     std::size_t offset = 0;  // scrolling
 
+    /**
+     * Emitted when any scroll parameter is updated. For ScrollBar.
+     * void(int index, int size)
+     */
+    sl::Signal<void(int, int)> on_scroll;
+
     DataTable(Options x = init);
 
    public:
@@ -51,6 +58,12 @@ class DataTable : public Widget {
      */
     void add_row(std::vector<std::string> row);
 
+    [[nodiscard]]
+    auto columns() const -> std::vector<std::vector<std::string>> const&
+    {
+        return columns_;
+    }
+
    public:
     void paint(Canvas) override;
 
@@ -66,5 +79,11 @@ class DataTable : public Widget {
     Row<std::vector<Label>> headings_;
     std::vector<std::vector<std::string>> columns_;
 };
+
+/**
+ * Link a ScrollBar to a DataTable, the ScrollBar will control the DataTable, and the
+ * DataTable will update the ScrollBar.
+ */
+void link(DataTable& dt, ScrollBar& sb);
 
 }  // namespace ox

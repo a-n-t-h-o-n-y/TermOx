@@ -1614,6 +1614,18 @@ table, otherwise a std::out_of_range exception will be thrown. The row will be a
 the bottom of the table.
 
 ---
+
+### `link` Free Function
+
+```cpp
+void link(DataTable& dt, ScrollBar& sb);
+```
+
+Link a ScrollBar to a DataTable, the ScrollBar will control the DataTable, and the
+DataTable will update the ScrollBar.
+
+---
+
 </details>
 
 ## 🧩 ox::Label

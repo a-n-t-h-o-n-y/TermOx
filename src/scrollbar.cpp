@@ -27,10 +27,11 @@ auto bar_top_position(int position,
 }
 
 [[nodiscard]]
-auto bar_length(int canvas_length, int scrollable_length) -> int
+auto bar_length(int canvas_length, int scrollable_length, int item_visual_length) -> int
 {
     if (scrollable_length == 0) { return 0; }
-    double ratio = std::min((double)canvas_length / scrollable_length, 1.0);
+    double ratio =
+        std::min(1., (double)canvas_length / (scrollable_length * item_visual_length));
     return (int)std::ceil(canvas_length * ratio);
 }
 
@@ -44,13 +45,15 @@ ScrollBar::ScrollBar(Options x)
     : Widget{FocusPolicy::None, SizePolicy::fixed(1)},
       scrollable_length{std::move(x.scrollable_length)},
       position{std::move(x.position)},
+      item_visual_length{x.item_visual_length},
       brush{std::move(x.brush)},
       scroll_settle_time{x.scroll_settle_time}
 {}
 
 void ScrollBar::paint(Canvas c)
 {
-    auto const bar_len = bar_length(c.size.height, scrollable_length);
+    auto const bar_len =
+        bar_length(c.size.height, scrollable_length, item_visual_length);
     auto const bar_pos =
         bar_top_position(position, c.size.height, scrollable_length, bar_len);
 

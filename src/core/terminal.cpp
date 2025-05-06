@@ -44,9 +44,8 @@ void ScreenBuffer::fill(Glyph const& g)
 
 // -------------------------------------------------------------------------------------
 
-Terminal::Terminal(Options options)
-    : Terminal{options.mouse_mode, options.key_mode, options.signals,
-               options.foreground, options.background}
+Terminal::Terminal(Options x)
+    : Terminal{x.mouse_mode, x.key_mode, x.signals, x.foreground, x.background}
 {}
 
 Terminal::Terminal(MouseMode mouse_mode,

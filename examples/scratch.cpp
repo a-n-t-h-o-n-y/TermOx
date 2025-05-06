@@ -52,77 +52,88 @@ using namespace ox;
 
 // -------------------------------------------------------------------------------------
 
+int main()
+{
+    auto head = Row{
+        DataTable{},
+        ScrollBar{},
+    };
+    auto& [dt, sb] = head.children;
+
+    dt.add_column("one", Align::Center, XColor::Blue);
+    dt.add_row({"1"});
+    dt.add_column("two", Align::Center);
+    dt.add_column("three", Align::Center);
+    dt.add_row({"2", "3", "4"});
+    dt.add_column("four", Align::Center);
+    dt.add_row({"5", "6", "7", "8"});
+    dt.add_row({"9", "10", "11", "12"});
+    dt.add_row({"13", "14", "15", "16"});
+    dt.add_row({"17", "18", "19", "20"});
+    dt.add_row({"21", "22", "23", "24"});
+    dt.add_row({"33", "34", "35", "36"});
+    dt.add_row({"37", "38", "39", "40"});
+
+    for (auto i = 0; i < 1000; ++i) {
+        dt.add_row({std::to_string(i), std::to_string(i + 1), std::to_string(i + 2),
+                    std::to_string(i + 3)});
+    }
+
+    link(dt, sb);
+
+    return Application{head, Terminal{{
+                                 .foreground = RGB{0x030303},
+                                 .background = RGB{0xD4C9BE},
+                             }}}
+        .run();
+}
+
+// -------------------------------------------------------------------------------------
+
+// auto hover_btn(std::string const& label) -> Button
+// {
+//     auto fade = Fade{
+//         .paint_fn =
+//             [](Canvas c, float percent) {
+//                 auto const blend =
+//                     gradient_blend(RGB{0x0a3f46}, RGB{0x1ecbe1}, percent);
+//                 fill(c, bg(blend));
+//             },
+//         .fade_in = std::chrono::milliseconds{1},
+//         .fade_out = std::chrono::milliseconds{300},
+//     };
+
+//     return Button{{
+//         .label = {.text = label},
+//         .decoration = fade,
+//     }};
+// }
+
 // int main()
 // {
-//     auto head = DataTable{};
-//     head.add_column("one", Align::Center, XColor::Blue);
-//     head.add_row({"1"});
-//     head.add_column("two", Align::Center);
-//     head.add_column("three", Align::Center);
-//     head.add_row({"2", "3", "4"});
-//     head.add_column("four", Align::Center);
-//     head.add_row({"5", "6", "7", "8"});
-//     head.add_row({"9", "10", "11", "12"});
-//     head.add_row({"13", "14", "15", "16"});
-//     head.add_row({"17", "18", "19", "20"});
-//     head.add_row({"21", "22", "23", "24"});
-//     head.add_row({"25", "26", "27", "28"});
-//     head.add_row({"29", "30", "31", "32"});
-//     head.add_row({"33", "34", "35", "36"});
-//     head.add_row({"37", "38", "39", "40"});
+//     auto head = Row{
+//         Column<std::vector<Button>>{} | SizePolicy::fixed(18),
+//         Divider{{
+//             .lines = Lines::bold(),
+//             .brush = {.foreground = XColor::BrightBlack},
+//         }},
+//         TextBox{{
+//             .focus_policy = FocusPolicy::Strong,
+//         }},
+//     };
+
+//     for (auto i = 0; i < 21; ++i) {
+//         get_child<0>(head).children.push_back(hover_btn("Hover " +
+//         std::to_string(i)));
+//     }
 
 //     return Application{head, Terminal{{
+//                                  .mouse_mode = MouseMode::Move,
 //                                  .foreground = RGB{0x0a3f46},
 //                                  .background = RGB{0xB4724B},
 //                              }}}
 //         .run();
 // }
-
-// -------------------------------------------------------------------------------------
-
-auto hover_btn(std::string const& label) -> Button
-{
-    auto fade = Fade{
-        .paint_fn =
-            [](Canvas c, float percent) {
-                auto const blend =
-                    gradient_blend(RGB{0x0a3f46}, RGB{0x1ecbe1}, percent);
-                fill(c, bg(blend));
-            },
-        .fade_in = std::chrono::milliseconds{1},
-        .fade_out = std::chrono::milliseconds{300},
-    };
-
-    return Button{{
-        .label = {.text = label},
-        .decoration = fade,
-    }};
-}
-
-int main()
-{
-    auto head = Row{
-        Column<std::vector<Button>>{} | SizePolicy::fixed(18),
-        Divider{{
-            .lines = Lines::bold(),
-            .brush = {.foreground = XColor::BrightBlack},
-        }},
-        TextBox{{
-            .focus_policy = FocusPolicy::Strong,
-        }},
-    };
-
-    for (auto i = 0; i < 21; ++i) {
-        get_child<0>(head).children.push_back(hover_btn("Hover " + std::to_string(i)));
-    }
-
-    return Application{head, Terminal{{
-                                 .mouse_mode = MouseMode::Move,
-                                 .foreground = RGB{0x0a3f46},
-                                 .background = RGB{0xB4724B},
-                             }}}
-        .run();
-}
 
 // int main()
 // {

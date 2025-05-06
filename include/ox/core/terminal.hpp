@@ -127,7 +127,7 @@ class Terminal {
      * Initializes the terminal display and starts reading events in separate thread,
      * appending to the event_queue.
      */
-    Terminal(Options options);
+    Terminal(Options x);
 
     /**
      * Initializes the terminal display and starts reading events in separate thread,
