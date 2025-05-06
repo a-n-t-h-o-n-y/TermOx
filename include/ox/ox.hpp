@@ -14,6 +14,7 @@
 #include <ox/lineedit.hpp>
 #include <ox/pixelgrid.hpp>
 #include <ox/put.hpp>
+#include <ox/radiogroup.hpp>
 #include <ox/scrollbar.hpp>
 #include <ox/textbox.hpp>
 #include <ox/timer.hpp>

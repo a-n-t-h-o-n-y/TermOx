@@ -29,6 +29,7 @@ add_library(TermOx STATIC
     src/focus.cpp
     src/pixelgrid.cpp
     src/put.cpp
+    src/radiogroup.cpp
     src/scrollbar.cpp
     src/textbox.cpp
     src/timer.cpp
@@ -48,6 +49,7 @@ add_library(TermOx STATIC
     include/ox/lineedit.hpp
     include/ox/pixelgrid.hpp
     include/ox/put.hpp
+    include/ox/radiogroup.hpp
     include/ox/scrollbar.hpp
     include/ox/textbox.hpp
     include/ox/timer.hpp

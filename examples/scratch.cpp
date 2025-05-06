@@ -52,41 +52,41 @@ using namespace ox;
 
 // -------------------------------------------------------------------------------------
 
-int main()
-{
-    auto head = Row{
-        DataTable{},
-        ScrollBar{},
-    };
-    auto& [dt, sb] = head.children;
+// int main()
+// {
+//     auto head = Row{
+//         DataTable{},
+//         ScrollBar{},
+//     };
+//     auto& [dt, sb] = head.children;
 
-    dt.add_column("one", Align::Center, XColor::Blue);
-    dt.add_row({"1"});
-    dt.add_column("two", Align::Center);
-    dt.add_column("three", Align::Center);
-    dt.add_row({"2", "3", "4"});
-    dt.add_column("four", Align::Center);
-    dt.add_row({"5", "6", "7", "8"});
-    dt.add_row({"9", "10", "11", "12"});
-    dt.add_row({"13", "14", "15", "16"});
-    dt.add_row({"17", "18", "19", "20"});
-    dt.add_row({"21", "22", "23", "24"});
-    dt.add_row({"33", "34", "35", "36"});
-    dt.add_row({"37", "38", "39", "40"});
+//     dt.add_column("one", Align::Center, XColor::Blue);
+//     dt.add_row({"1"});
+//     dt.add_column("two", Align::Center);
+//     dt.add_column("three", Align::Center);
+//     dt.add_row({"2", "3", "4"});
+//     dt.add_column("four", Align::Center);
+//     dt.add_row({"5", "6", "7", "8"});
+//     dt.add_row({"9", "10", "11", "12"});
+//     dt.add_row({"13", "14", "15", "16"});
+//     dt.add_row({"17", "18", "19", "20"});
+//     dt.add_row({"21", "22", "23", "24"});
+//     dt.add_row({"33", "34", "35", "36"});
+//     dt.add_row({"37", "38", "39", "40"});
 
-    for (auto i = 0; i < 1000; ++i) {
-        dt.add_row({std::to_string(i), std::to_string(i + 1), std::to_string(i + 2),
-                    std::to_string(i + 3)});
-    }
+//     for (auto i = 0; i < 1000; ++i) {
+//         dt.add_row({std::to_string(i), std::to_string(i + 1), std::to_string(i + 2),
+//                     std::to_string(i + 3)});
+//     }
 
-    link(dt, sb);
+//     link(dt, sb);
 
-    return Application{head, Terminal{{
-                                 .foreground = RGB{0x030303},
-                                 .background = RGB{0xD4C9BE},
-                             }}}
-        .run();
-}
+//     return Application{head, Terminal{{
+//                                  .foreground = RGB{0x030303},
+//                                  .background = RGB{0xD4C9BE},
+//                              }}}
+//         .run();
+// }
 
 // -------------------------------------------------------------------------------------
 
@@ -181,3 +181,21 @@ int main()
 //     void timer() override { this->on_timer(); }
 //     void paint(Canvas c) override { this->on_paint(c); }
 // };
+
+int main()
+{
+    auto head = Row{
+        RadioGroup{{
+            .items = {"one", "two", "three"},
+            .focus_policy = FocusPolicy::Strong,
+        }},
+        TextBox{{.focus_policy = FocusPolicy::Strong}},
+    };
+    auto& [rg, tb] = head.children;
+    Connection{
+        .signal = rg.on_select,
+        .slot = [](std::string const& selection, auto& tb) { tb.text = selection; },
+    }(tb);
+
+    return Application{head}.run();
+}
