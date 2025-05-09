@@ -103,7 +103,7 @@ class Widget {
     std::shared_ptr<Widget*> lifetime = std::make_shared<Widget*>(this);
 
    public:
-    Widget(FocusPolicy fp, SizePolicy sp);
+    Widget(FocusPolicy fp = FocusPolicy::None, SizePolicy sp = SizePolicy::flex());
 
     Widget(Widget const&) = delete;
     Widget(Widget&& other);
