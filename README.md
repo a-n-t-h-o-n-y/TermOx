@@ -84,6 +84,9 @@ As such, the API has little in common with the previous version.
 </p>
 
 ```cpp
+#include <ox/ox.hpp>
+using namespace ox;
+
 // Counter Button + Label
 int main()
 {
