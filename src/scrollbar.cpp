@@ -41,7 +41,7 @@ ScrollBar::ScrollBar(Options x)
 void ScrollBar::increment_position(int amount)
 {
     position += amount;
-    position = std::clamp(0, position, std::max(scrollable_length - 1, 0));
+    position = std::clamp(position, 0, std::max(scrollable_length - 1, 0));
 }
 
 void ScrollBar::paint(Canvas c)
