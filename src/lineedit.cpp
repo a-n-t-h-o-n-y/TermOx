@@ -107,7 +107,7 @@ void LineEdit::increment_cursor(int amount)
 {
     // Increment
     cursor_index_ =
-        (std::size_t)std::clamp(0, (int)cursor_index_ + amount, (int)text.size());
+        (std::size_t)std::clamp((int)cursor_index_ + amount, 0, (int)text.size());
 
     // Scroll
     if (cursor_index_ >= anchor_index_ + (std::size_t)this->size.width) {
