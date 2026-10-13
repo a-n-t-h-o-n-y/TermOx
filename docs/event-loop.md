@@ -61,9 +61,18 @@ request exit on the application thread. `post(Event)` is thread safe; background
 should post an `event::Custom` callback to make changes on the application thread.
 Callbacks, focus, widget state, timer operations, and painting stay on that thread.
 
-The terminal driver bounds reads to 16 milliseconds so posted background events remain
-responsive. It drains at most 64 input events per batch, then dispatches and paints,
-allowing timers to run between batches. This uses no input thread or timer threads.
+The terminal driver waits for terminal input, posted events, or the earliest timer,
+parser, or resize-check deadline. Posting to an empty queue signals a nonblocking pipe
+on POSIX or a manual-reset event on Windows; reset and queue transfer share the queue
+lock so posts cannot lose their wakeup. There is no fixed polling interval. Escape's
+default resize checks still wake an idle terminal about every 100 milliseconds.
+The driver drains at most 64 input events per batch, then dispatches and paints,
+allowing timers to run between batches. Terminal I/O stays on the calling thread.
+
+For a custom driver, call `loop.wait(terminal.wait_state())`, then read terminal input
+with a zero timeout. `wait()` never consumes input. `loop.wait()` without a terminal
+waits for a post or scheduled timer, indefinitely when neither has a deadline. Only
+`post()` is thread safe; request repaint, quit, and change timers on the dispatch thread.
 
 ## Timers
 

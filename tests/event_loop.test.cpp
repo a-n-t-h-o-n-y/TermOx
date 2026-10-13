@@ -4,6 +4,10 @@
 #include <memory>
 #include <thread>
 
+#ifndef _WIN32
+#    include <unistd.h>
+#endif
+
 #include <ox/ox.hpp>
 
 using namespace ox;
@@ -321,3 +325,94 @@ TEST(detached_widgets_stop_their_timers_and_can_join_another_application)
     second.step(now + 30ms);
     ASSERT(detached.ticks == 2);
 }
+
+TEST(event_loop_wait_wakes_for_worker_posts_and_resets_between_batches)
+{
+    auto loop = EventLoop{};
+    auto handler = Handler{};
+    for (int batch = 0; batch < 10; ++batch) {
+        auto worker = std::jthread{[&] {
+            std::this_thread::sleep_for(2ms);
+            for (int i = 0; i < 100; ++i) {
+                loop.post(KeyEvent{.key = U'x'});
+            }
+        }};
+        auto const start = EventLoop::Clock::now();
+        loop.wait({.source = {}, .deadline = start + 2s});
+        ASSERT(EventLoop::Clock::now() - start < 1s);
+        worker.join();
+        loop.step(handler);
+        ASSERT(handler.events == (batch + 1) * 100);
+    }
+    // No stale wakeup remains once the last batch has been consumed.
+    auto const start = EventLoop::Clock::now();
+    loop.wait({.source = {}, .deadline = start + 10ms});
+    ASSERT(EventLoop::Clock::now() - start >= 10ms);
+}
+
+TEST(event_loop_wait_observes_ready_input_queue_repaint_quit_and_timer_deadlines)
+{
+    auto loop = EventLoop{};
+    auto handler = Handler{};
+    loop.wait({.source = {}, .ready = true, .deadline = {}});
+    loop.wait({.source = {}, .deadline = EventLoop::Clock::now()});
+    loop.post(KeyEvent{.key = U'x'});
+    loop.wait();
+    loop.step(handler);
+    loop.request_repaint();
+    loop.wait();
+    loop.paint(handler);
+    int ticks = 0;
+    auto timer = Timer{10ms,
+                       [&] {
+                           ++ticks;
+                           return EventResponse{};
+                       },
+                       false};
+    loop.watch(timer);
+    timer.start();
+    loop.wait();
+    loop.step(handler);
+    ASSERT(ticks == 1);
+    loop.quit();
+    loop.wait();
+}
+
+TEST(event_loop_wait_preserves_posts_from_callbacks)
+{
+    auto loop = EventLoop{};
+    auto handler = Handler{};
+    loop.post(event::Custom{[&] {
+        loop.post(KeyEvent{.key = U'x'});
+        return EventResponse{};
+    }});
+    loop.step(handler);
+    ASSERT(handler.events == 0);
+    loop.wait();
+    loop.step(handler);
+    ASSERT(handler.events == 1);
+}
+
+#ifndef _WIN32
+TEST(event_loop_wait_observes_borrowed_input_without_consuming_it)
+{
+    int descriptors[2];
+    ASSERT(::pipe(descriptors) == 0);
+    auto loop = EventLoop{};
+    auto worker = std::jthread{[&] {
+        std::this_thread::sleep_for(2ms);
+        char byte = 'x';
+        (void)::write(descriptors[1], &byte, 1);
+    }};
+    auto const start = EventLoop::Clock::now();
+    loop.wait({.source = {esc::WaitSourceKind::FileDescriptor, descriptors[0]},
+               .deadline = start + 2s});
+    worker.join();
+    char byte = 0;
+    ASSERT(EventLoop::Clock::now() - start < 1s);
+    ASSERT(::read(descriptors[0], &byte, 1) == 1);
+    ASSERT(byte == 'x');
+    ::close(descriptors[0]);
+    ::close(descriptors[1]);
+}
+#endif

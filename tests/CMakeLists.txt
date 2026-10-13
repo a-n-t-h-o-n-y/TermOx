@@ -41,3 +41,7 @@ add_executable(TermOx.tests.text_allocation EXCLUDE_FROM_ALL text_allocation.tes
 target_link_libraries(TermOx.tests.text_allocation PRIVATE TermOx zzz)
 add_dependencies(TermOx.tests.unit TermOx.tests.text_allocation)
 add_test(NAME TermOx.tests.text_allocation COMMAND TermOx.tests.text_allocation)
+
+# PTY probe for idle waiting and cross-thread delivery, without synthetic input.
+add_executable(TermOx.tests.event_loop_terminal EXCLUDE_FROM_ALL event_loop_terminal.cpp)
+target_link_libraries(TermOx.tests.event_loop_terminal PRIVATE TermOx)

@@ -110,8 +110,35 @@ def renderer_smoke(executable):
         os.close(slave)
 
 
+def event_loop_smoke(executable):
+    master, slave = pty.openpty()
+    fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack("HHHH", 2, 8, 0, 0))
+    original = termios.tcgetattr(slave)
+    env = dict(os.environ, TERM="xterm-256color", COLORTERM="truecolor")
+    env.pop("NO_COLOR", None)
+    process = subprocess.Popen([str(executable), "--escape"], stdin=slave,
+                               stdout=slave, stderr=subprocess.PIPE, env=env)
+    try:
+        assert select.select([process.stderr], [], [], 5)[0], "event loop probe did not open"
+        assert process.stderr.readline() == b"ready\n"
+        # No following byte completes a sequence: Escape's parser deadline must
+        # wake the host, and read(0) must deliver the standalone key.
+        os.write(master, b"\x1b")
+        assert process.wait(timeout=2) == 0, "standalone Escape was not delivered"
+        assert termios.tcgetattr(slave) == original, "terminal modes were not restored"
+        print("event loop: standalone Escape deadline and terminal restoration passed")
+    finally:
+        if process.poll() is None:
+            process.kill()
+        process.wait()
+        process.stderr.close()
+        os.close(master)
+        os.close(slave)
+
+
 def main():
     build = Path(sys.argv[1])
+    event_loop_smoke(build / "tests" / "TermOx.tests.event_loop_terminal")
     renderer_smoke(build / "tests" / "TermOx.tests.renderer_terminal")
     examples = build / "examples"
     smoke(examples / "TermOx.examples.pong", [b"\r", b"\x1b[B", b"\x1b[A"])

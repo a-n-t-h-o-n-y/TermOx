@@ -2340,7 +2340,9 @@ Tab behavior, callback mutations, and the breaking callback API change.
 
 Owns queued events, scheduled timers, frame storage, repaint state, and the exit code.
 `post()` is thread safe. `step(handler, now)` and `paint(handler)` run without terminal
-I/O. `process_events(loop, terminal, handler)` drives the same core with terminal input.
+I/O. `wait(terminal.wait_state())` waits for terminal readiness, queued posts, or the
+next deadline without consuming input. `wait()` can also wait without a terminal.
+`process_events(loop, terminal, handler)` drives the same core with terminal input.
 
 ## 🔢 ox::Event
 

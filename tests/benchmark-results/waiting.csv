@@ -1,0 +1,11 @@
+mode,sample,iterations_per_idle_second,post_to_dispatch_us
+polling,1,59,7333.36
+polling,2,59,12115.3
+polling,3,59,16887.9
+polling,4,58,2955.4
+polling,5,58,12901.4
+readiness,1,11,220.016
+readiness,2,11,143.494
+readiness,3,11,232.762
+readiness,4,11,327.01
+readiness,5,11,146.528

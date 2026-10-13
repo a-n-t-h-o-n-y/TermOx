@@ -19,7 +19,12 @@ class EventLoop {
    public:
     using Clock = std::chrono::steady_clock;
 
+    EventLoop();
     ~EventLoop();
+
+    /** Wait for posted events, timers, or a borrowed terminal wait source.
+     * Does not consume terminal input. Call on the dispatch thread. */
+    void wait(esc::WaitState input = {});
 
     Frame screen{{0, 0}};
     Cursor cursor;
@@ -85,6 +90,8 @@ class EventLoop {
     void watch(std::weak_ptr<Timer::State> timer);
     void unwatch(std::weak_ptr<Timer::State> timer);
 
+    esc::WaitSource wake_;
+    std::intptr_t wake_write_ = 0;
     mutable std::mutex mutex_;
     std::deque<Event> events_;
     std::vector<std::weak_ptr<Timer::State>> timers_;
@@ -108,10 +115,8 @@ template <typename Handler>
         loop.step(handler);
         if (loop.paint(handler)) { terminal.commit_changes(loop.screen, loop.cursor); }
         if (loop.exit_code()) { break; }
-        // Bound the wait so events posted by worker threads remain responsive.
-        auto const timeout =
-            std::min(loop.wait_duration(), std::chrono::milliseconds{16});
-        if (auto event = terminal.read(timeout)) {
+        loop.wait(terminal.wait_state());
+        if (auto event = terminal.read(std::chrono::milliseconds{0})) {
             loop.post(std::move(*event));
             // Batch immediately available input; cap the batch so timers cannot starve.
             for (int i = 0; i < 63; ++i) {

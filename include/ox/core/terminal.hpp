@@ -67,6 +67,9 @@ class Terminal {
      */
     void commit_changes(Frame const& screen, Cursor cursor = {});
 
+    /** Borrow Escape readiness and deadlines for a host wait. */
+    auto wait_state() -> esc::WaitState { return session_.wait_state(); }
+
     /** Read terminal input on the calling thread. */
     auto read(std::chrono::milliseconds timeout) -> std::optional<Event>;
 
