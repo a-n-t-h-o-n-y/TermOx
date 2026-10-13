@@ -4,6 +4,7 @@
 #include <string_view>
 
 #include <ox/core/canvas.hpp>
+#include <ox/core/text.hpp>
 
 namespace ox::shape {
 
@@ -266,5 +267,14 @@ void fill(Canvas c, ColorFG fg);
 void fill(Canvas c, Traits ts);
 
 void clear(Canvas c);
+
+/** Draw one cached display row, preserving complete glyphs and selection styling. */
+void put_text_line(Canvas canvas,
+                   Point at,
+                   TextLayout const& layout,
+                   std::size_t row,
+                   Style normal,
+                   Style selected,
+                   std::pair<std::size_t, std::size_t> selection = {0, 0});
 
 }  // namespace ox

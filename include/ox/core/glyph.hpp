@@ -25,6 +25,7 @@ using ::esc::HSL;
 using ::esc::IndexedColor;
 using ::esc::RGB;
 using ::esc::Style;
+using ::esc::StylePatch;
 using ::esc::Trait;
 using ::esc::Traits;
 namespace colors = ::esc::colors;

@@ -50,6 +50,7 @@ class Application {
     std::vector<WidgetNode> tree_;
     std::optional<Point> mouse_position_;
     std::vector<LifetimeView<Widget>> hovered_;
+    LifetimeView<Widget> paste_target_;
 
     auto synchronize() -> EventResponse;
     auto update_hover() -> EventResponse;

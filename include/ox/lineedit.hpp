@@ -13,14 +13,16 @@
 
 namespace ox {
 
-// TODO Implement Align::Right and throw on Align::Center
-
 class LineEdit : public Widget {
    public:
     struct Options {
         std::string text = "";
         Style text_style = {};
         Align align = Align::Left;
+        StylePatch selection_style = {.background = {},
+                                      .foreground = {},
+                                      .enabled = Trait::Inverse,
+                                      .disabled = {}};
         Color background = default_color;
         std::string ghost_text = "";
         Style ghost_text_style = {.foreground = colors::bright_black};
@@ -30,9 +32,12 @@ class LineEdit : public Widget {
     } static const init;
 
    public:
-    std::string text;
+    TextEdit editor;
+    auto text() const -> std::string const& { return editor.text(); }
+    void set_text(std::string_view text);
     Style text_style;
     Align align;
+    StylePatch selection_style;
     Color background;
     std::string ghost_text;  // Visible if text is empty.
     Style ghost_text_style;
@@ -52,12 +57,12 @@ class LineEdit : public Widget {
     void paint(Canvas c) override;
 
    private:
-    void update_scroll_offset();
+    TextLayout layout_;
+    TextLayout ghost_layout_;
+    int scroll_column_ = 0;
 
-   private:
-    std::string paste_buffer_;
-    std::size_t cursor_index_ = 0;  // valid range: [0, number of Unicode scalars]
-    std::size_t anchor_index_ = 0;  // valid range: [0, number of Unicode scalars]
+    void update_layout();
+    auto display_offset(int width) -> int;
 };
 
 }  // namespace ox

@@ -317,7 +317,48 @@ auto Application::handle_key_release(KeyEvent key) -> EventResponse
 }
 auto Application::handle_paste(esc::PasteChunk const& chunk) -> EventResponse
 {
-    return route_focused([&](Widget& widget) { return widget.paste(chunk); });
+    auto result = synchronize();
+    if (result.quit) { return result; }
+    if (chunk.first) {
+        paste_target_ = {};
+        auto const focused = focus_.get();
+        auto const snapshot = tree_;
+        auto index = std::optional<std::size_t>{};
+        for (auto i = std::size_t{0}; i < snapshot.size(); ++i) {
+            if (snapshot[i].widget == focused) {
+                index = i;
+                break;
+            }
+        }
+        while (index) {
+            auto const target = snapshot[*index].widget;
+            if (target.valid() && is_interactive(target.get())) {
+                auto const response = target.get().paste(chunk);
+                result = combine(result, response);
+                if (response.handled && !chunk.last && !chunk.aborted) {
+                    paste_target_ = target;
+                }
+                if (response.quit) { break; }
+                result = combine(result, synchronize());
+                if (response.handled || result.quit) { break; }
+            }
+            index = snapshot[*index].parent;
+        }
+    }
+    else {
+        auto target = paste_target_;
+        if (chunk.last || chunk.aborted) { paste_target_ = {}; }
+        if (target.valid() && is_interactive(target.get())) {
+            auto const response = target.get().paste(chunk);
+            result = combine(result, response);
+            if (!response.quit) { result = combine(result, synchronize()); }
+        }
+        else {
+            paste_target_ = {};
+        }
+    }
+    report(result);
+    return result;
 }
 
 auto Application::handle_resize(Area new_size) -> EventResponse

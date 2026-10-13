@@ -17,22 +17,27 @@ class ScrollBar;
  */
 class TextBox : public Widget {
    public:
-    enum class Wrap { Any, Word };
-
     struct Options {
         std::string text = {};  // UTF8 encoded
-        Wrap wrap = Wrap::Word;
+        TextWrap wrap = TextWrap::Word;
         Align align = Align::Left;
         Style style = {};
+        StylePatch selection_style = {.background = {},
+                                      .foreground = {},
+                                      .enabled = Trait::Inverse,
+                                      .disabled = {}};
         FocusPolicy focus_policy = FocusPolicy::None;
         SizePolicy size_policy = SizePolicy::flex();
     } static const init;
 
    public:
-    std::string text;
-    Wrap wrap;
+    TextEdit editor;
+    auto text() const -> std::string const& { return editor.text(); }
+    void set_text(std::string_view text);
+    TextWrap wrap;
     Align align;
     Style style;
+    StylePatch selection_style;
 
     /**
      * Emitted when any scroll parameter is updated. For ScrollBar.
@@ -46,7 +51,7 @@ class TextBox : public Widget {
     /**
      * Set the line number for the top display line.
      */
-    void set_scroll_offset(int position);
+    auto set_scroll_offset(int position) -> bool;
 
     /**
      * Return the number of lines that can be scrolled to.
@@ -66,14 +71,14 @@ class TextBox : public Widget {
     auto mouse_wheel(MouseWheel m) -> EventResponse override;
 
    private:
-    void update_layout_cache();
+    mutable TextLayout layout_;
+    int scroll_offset_ = 0;
+    int notified_offset_ = -1;
+    int notified_length_ = -1;
 
-   private:
-    std::string paste_buffer_;
-    int scroll_offset_ = 0;  // Line number of the top displayed line. zero indexed.
-    std::size_t cursor_index_ = 0;                  // [0, unicode_str_.size()]
-    std::u32string unicode_str_ = {};               // cache; updated by paint()
-    std::vector<std::u32string_view> text_layout_;  // cache; updated by paint()
+    void update_layout() const;
+    void keep_caret_visible();
+    void notify_scroll();
 };
 
 /**

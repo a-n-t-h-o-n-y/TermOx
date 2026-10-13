@@ -457,7 +457,7 @@ TEST(routing_builtin_widgets_ignore_unused_keys_and_partial_paste_without_repain
     ASSERT(!app.paint());
     ASSERT(!app.handle_key_press(KeyEvent{.key = KeyCode::ArrowLeft}).repaint);
     ASSERT(!app.handle_paste({"hel", true, false}).repaint);
-    ASSERT(app.handle_paste({"lo", false, true}).repaint && edit.text == "hello");
+    ASSERT(app.handle_paste({"lo", false, true}).repaint && edit.text() == "hello");
     auto button = BasicButton{};
     ASSERT(!button.key_press(KeyEvent{.key = KeyCode::Escape}).handled);
     ASSERT(!button.mouse_press({{0, 0}, MouseButton::Right}).handled);

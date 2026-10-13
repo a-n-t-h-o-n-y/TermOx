@@ -206,8 +206,8 @@ TEST(applications_own_focus_frames_and_exit_requests_without_a_terminal)
     second.post(KeyEvent{.key = U'b'});
     first.step();
     second.step();
-    ASSERT(first_edit.text == "a");
-    ASSERT(second_edit.text == "b");
+    ASSERT(first_edit.text() == "a");
+    ASSERT(second_edit.text() == "b");
     ASSERT(&first.focus().get().get() == &first_edit);
     ASSERT(&second.focus().get().get() == &second_edit);
     ASSERT(first.paint());

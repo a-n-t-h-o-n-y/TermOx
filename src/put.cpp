@@ -256,4 +256,34 @@ void fill(Canvas c, Traits traits)
     restyle(c, [&](Style& s) { s.traits = traits; });
 }
 void clear(Canvas c) { fill(c, Glyph{}); }
+void put_text_line(Canvas canvas,
+                   Point at,
+                   TextLayout const& layout,
+                   std::size_t row,
+                   Style normal,
+                   Style selected,
+                   std::pair<std::size_t, std::size_t> selection)
+{
+    if (row >= layout.lines().size()) { throw std::out_of_range{"Text row"}; }
+    auto const line = layout.lines()[row];
+    auto column = 0;
+    auto offset = line.begin;
+    for (auto cluster :
+         esc::graphemes(layout.text().substr(line.begin, line.end - line.begin))) {
+        auto const appearance =
+            offset < selection.second && offset + cluster.size() > selection.first
+                ? selected
+                : normal;
+        auto const display =
+            display_grapheme(cluster, column, layout.policy(), layout.tab_width());
+        put(canvas, translate(at, {column, 0}), esc::glyphs(display, appearance));
+        column += (int)*esc::cell_width(display, layout.policy());
+        offset += cluster.size();
+    }
+    if (line.next > line.end && selection.first <= line.end &&
+        selection.second > line.end) {
+        canvas.write(translate(at, {column, 0}), U" ", selected);
+    }
+}
+
 }  // namespace ox

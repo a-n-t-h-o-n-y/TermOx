@@ -48,8 +48,10 @@ selects the nearest Click/Strong widget along that ancestry before dispatch; oth
 buttons do not change focus. Mouse release and wheel events use the current hit path;
 there is no implicit drag capture.
 
-Keyboard press/release and paste start at the focused widget and bubble through its
-ancestors. Plain Tab and Shift-Tab presses/repeats are consumed by focus navigation
+Keyboard press/release and the first paste chunk start at the focused widget and
+bubble through its ancestors. Further paste chunks stay with the widget that handled
+the first chunk, even if focus changes. Removing or disabling that widget drops the
+rest of the stream. Plain Tab and Shift-Tab presses/repeats are consumed by focus navigation
 and are not delivered to either the previous or new focus. Modified Tab shortcuts
 can be handled normally by widgets.
 

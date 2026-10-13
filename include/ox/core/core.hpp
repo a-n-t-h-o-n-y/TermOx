@@ -11,3 +11,4 @@
 #include <ox/core/layout.hpp>
 #include <ox/core/renderer.hpp>
 #include <ox/core/terminal.hpp>
+#include <ox/core/text.hpp>

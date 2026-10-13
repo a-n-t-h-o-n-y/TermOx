@@ -90,6 +90,10 @@ class Widget {
 
     virtual auto get_children() const -> zzz::Generator<Widget const&> { co_return; }
 
+   protected:
+    /** Schedule painting after a direct widget mutation, if attached. */
+    void request_repaint();
+
    private:
     friend class Timer;
     friend class Application;

@@ -8,6 +8,7 @@ add_executable(TermOx.tests.unit EXCLUDE_FROM_ALL
     layout.test.cpp
     layout_widgets.test.cpp
     routing.test.cpp
+    text.test.cpp
 )
 
 target_compile_options(

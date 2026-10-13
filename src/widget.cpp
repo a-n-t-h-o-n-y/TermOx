@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include <ox/application.hpp>
 #include <ox/focus.hpp>
 
 namespace ox {
@@ -51,6 +52,11 @@ auto Widget::operator=(Widget&& other) -> Widget&
     *lifetime = this;
 
     return *this;
+}
+
+void Widget::request_repaint()
+{
+    if (application_) { application_->request_repaint(); }
 }
 
 Widget::~Widget()

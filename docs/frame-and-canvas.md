@@ -113,8 +113,8 @@ they update all cells of each fully visible footprint together. `clear(canvas)` 
 eligible cells with default spaces. Every fill obeys the inherited clip.
 
 The existing widgets now paint through these operations. Text painting measures columns
-and avoids splitting graphemes. Their editing APIs still use scalar indices; a complete
-redesign of editing and widget behavior belongs to the later widget work.
+and avoids splitting graphemes. Their editing uses the [text editing core](text-editing.md), with grapheme-boundary
+carets, selection, and layout measured in terminal columns.
 
 ## Terminal integration
 

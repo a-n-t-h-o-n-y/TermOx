@@ -1810,9 +1810,12 @@ focus. The current text is passed to the signal. This does not emit the ghost te
 ### Public Objects
 
 ```cpp
-std::string text;
+TextEdit editor;
+auto text() const -> std::string const&;
+void set_text(std::string_view text);
 Style text_style;
 Align align;
+StylePatch selection_style;
 Color background;
 std::string ghost_text;  // Visible if text is empty.
 Style ghost_text_style;
@@ -1964,7 +1967,7 @@ function.
 ```cpp
 auto tb = TextBox{{
     .text = "A TextBox",
-    .wrap = Wrap::Word,
+    .wrap = TextWrap::Word,
     .align = Align::Center,
     .style = {.foreground = colors::bright_white, .traits = Trait::Bold},
 }};
@@ -1980,11 +1983,11 @@ link(tb, sb);
 ### 🏗️ Constructors
 
 ```cpp
-enum class Wrap { Any, Word };
+enum class TextWrap { None, Any, Word };
 
 struct Options {
     std::string text = {};  // UTF8 encoded
-    Wrap wrap = Wrap::Word;
+    TextWrap wrap = TextWrap::Word;
     Align align = Align::Left;
     Style style = {};
     FocusPolicy focus_policy = FocusPolicy::None;
@@ -1995,8 +1998,8 @@ TextBox(Options x = {});
 ```
 
 Construct a TextBox Widget. The `text` is the initial text to be displayed, the `wrap`
-is the wrapping mode (`Any` will wrap at any character, and `Word` will wrap on word
-boundaries), `align` is the horizontal alignment of the text, `style` is the Style to
+is the wrapping mode (`Any` wraps at grapheme boundaries, and `Word` prefers spaces
+or tabs), `align` is the horizontal alignment of the text, `style` is the Style to
 use when painting the text.
 
 ---
@@ -2015,10 +2018,13 @@ directly.
 ### Public Objects
 
 ```cpp
-std::string text;
-Wrap wrap;
+TextEdit editor;
+auto text() const -> std::string const&;
+void set_text(std::string_view text);
+TextWrap wrap;
 Align align;
 Style style;
+StylePatch selection_style;
 ```
 
 ---
@@ -2288,6 +2294,18 @@ return consecutive rectangles. `centered_rect(available, requested)` returns a c
 centered rectangle. These functions have no widget or terminal dependencies.
 
 See [layout calculation](layout.md) for allocation rules and edge cases.
+
+## 🧩 Text editing
+
+[`#include <ox/core/text.hpp>`](../include/ox/core/text.hpp)
+
+`TextEdit` owns UTF-8 text, grapheme-boundary carets, selection, bounded undo/redo,
+and atomic paste assembly. `TextLayout` owns cached display rows and width assumptions;
+`layout_text()` is the pure calculation. Byte offsets and terminal columns remain
+explicitly separate. LineEdit and TextBox compose these with `put_text_line()`.
+
+See [text editing](text-editing.md) for normalization, navigation, history, rendering,
+and the new widget text accessors.
 
 ## 🧩 ox::Renderer
 
