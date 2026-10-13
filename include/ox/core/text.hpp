@@ -68,6 +68,14 @@ class TextLayout {
     std::vector<TextLine> lines_{{0, 0, 0, 0}};
     std::vector<std::size_t> boundaries_{0};
     std::vector<Point> positions_{{0, 0}};
+    // Positive measured columns; zero denotes a tab, minus one a line break.
+    std::vector<int> columns_;
+    std::string text_storage_;
+    std::vector<TextLine> line_storage_;
+    std::vector<std::size_t> boundary_storage_;
+    std::vector<Point> position_storage_;
+    std::vector<int> column_storage_;
+    std::vector<esc::ScalarWidthOverride> override_storage_;
     int width_ = -1;
     TextWrap wrap_ = TextWrap::Word;
     esc::WidthPolicy policy_;

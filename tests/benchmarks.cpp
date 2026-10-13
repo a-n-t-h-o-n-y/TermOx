@@ -171,6 +171,68 @@ void editing_benchmarks()
     });
 }
 
+auto layout_checksum(ox::TextLayout const& layout) -> std::size_t
+{
+    auto result = std::size_t{0};
+    for (auto const& line : layout.lines()) {
+        result += line.begin + line.end + line.next + (std::size_t)line.columns;
+    }
+    auto const caret = layout.position(layout.text().size());
+    return result + (std::size_t)(caret.x + caret.y);
+}
+
+void layout_benchmarks()
+{
+    for (auto count : {1000, 10000}) {
+        auto document = std::string{};
+        for (auto i = 0; i < count; ++i) {
+            document += "The quick brown fox jumps over the lazy dog. 界 é\tend\n";
+        }
+        auto layout = ox::TextLayout{};
+        auto const iterations = count == 1000 ? 50 : 10;
+        auto const suffix = std::to_string(count);
+        layout.update(document, 40);
+        measure("layout.resize." + suffix, iterations, [&](int i) {
+            layout.update(document, 40 + i % 2);
+            return layout_checksum(layout);
+        });
+        measure("layout.wrap." + suffix, iterations, [&](int i) {
+            layout.update(document, 40, i % 2 ? ox::TextWrap::Any : ox::TextWrap::Word);
+            return layout_checksum(layout);
+        });
+        measure("layout.tabs." + suffix, iterations, [&](int i) {
+            layout.update(document, 40, ox::TextWrap::Word, {}, 4 + 4 * (i % 2));
+            return layout_checksum(layout);
+        });
+        measure("layout.policy." + suffix, iterations, [&](int i) {
+            layout.update(document, 40, ox::TextWrap::Word,
+                          {.ambiguous = i % 2 ? esc::AmbiguousWidth::Two
+                                              : esc::AmbiguousWidth::One});
+            return layout_checksum(layout);
+        });
+        measure("layout.text-change." + suffix, iterations, [&](int i) {
+            document[0] = i % 2 ? 'Q' : 'T';
+            layout.update(document, 40);
+            return layout_checksum(layout);
+        });
+        measure("layout.unchanged." + suffix, iterations * 10,
+                [&](int) { return (std::size_t)layout.update(document, 40); });
+        measure("layout.cold." + suffix, iterations, [&](int) {
+            auto fresh = ox::TextLayout{};
+            fresh.update(document, 40);
+            return layout_checksum(fresh);
+        });
+        measure("layout.rows-only." + suffix, iterations, [&](int) {
+            auto const rows = ox::layout_text(document, 40);
+            auto result = std::size_t{0};
+            for (auto const& line : rows) {
+                result += line.begin + line.end + line.next + (std::size_t)line.columns;
+            }
+            return result;
+        });
+    }
+}
+
 void routing_benchmarks()
 {
     for (auto count : {100, 1000}) {
@@ -260,10 +322,14 @@ int main(int argc, char** argv)
 {
     auto const routing_only = argc == 2 && std::string_view{argv[1]} == "--routing";
     auto const editing_only = argc == 2 && std::string_view{argv[1]} == "--editing";
-    if (argc > 1 && !routing_only && !editing_only) { return 2; }
+    auto const layout_only = argc == 2 && std::string_view{argv[1]} == "--layout";
+    if (argc > 1 && !routing_only && !editing_only && !layout_only) { return 2; }
     std::cout << "workload,iterations,median_us_per_operation,checksum,allocations_per_"
                  "operation\n";
-    if (editing_only) { editing_benchmarks(); }
+    if (layout_only) { layout_benchmarks(); }
+    else if (editing_only) {
+        editing_benchmarks();
+    }
     else {
         if (!routing_only) { text_benchmarks(); }
         routing_benchmarks();

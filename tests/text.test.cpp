@@ -480,3 +480,69 @@ TEST(text_identical_selection_replacement_records_only_the_selection_change)
     ASSERT(edit.redo() && edit.text() == original && edit.anchor() == edit.caret());
     check(edit);
 }
+
+TEST(text_layout_reuses_analysis_across_geometry_tabs_policy_copy_and_move)
+{
+    auto layout = TextLayout{};
+    layout.update("a\t界 a", 8, TextWrap::Any);
+    ASSERT(layout.lines().size() == 2 && layout.lines()[0].columns == 8);
+    ASSERT((layout.position(7) == Point{0, 1}));
+    layout.update(layout.text(), 7, TextWrap::Any);
+    ASSERT((layout.position(6) == Point{0, 1}));
+    ASSERT((layout.position(7) == Point{1, 1}));
+    layout.update(layout.text(), 7, TextWrap::Any, {}, 8);
+    ASSERT(layout.lines().size() == 3 && layout.lines()[1].columns == 8);
+    ASSERT((layout.position(2) == Point{0, 2}));
+    ASSERT(layout.offset({7, 1}) == 1);
+    layout.update(layout.text(), 7, TextWrap::None, {}, 8);
+    ASSERT((layout.position(7) == Point{12, 0}));
+    auto overrides = std::array{esc::ScalarWidthOverride{U'a', 2}};
+    layout.update(layout.text(), 7, TextWrap::None, {.overrides = overrides}, 8);
+    ASSERT((layout.position(1) == Point{2, 0}));
+    ASSERT((layout.position(7) == Point{13, 0}));
+    auto copy = layout;
+    overrides[0].cells = 1;
+    layout.update(layout.text(), 7, TextWrap::None, {.overrides = overrides}, 8);
+    ASSERT((layout.position(7) == Point{12, 0}));
+    copy.update(copy.text(), 4, TextWrap::None, copy.policy(), 8);
+    ASSERT((copy.position(7) == Point{13, 0}));
+    auto moved = std::move(copy);
+    ASSERT((copy.position(0) == Point{0, 0}));
+    moved.update("\r\n", 3);
+    ASSERT((moved.position(2) == Point{0, 1}));
+    ASSERT((copy.update("a", 3) && copy.position(1) == Point{1, 0}));
+}
+
+TEST(text_layout_validation_preserves_unicode_error_offsets_and_owned_cache)
+{
+    auto layout = TextLayout{};
+    layout.update("a界", 4, TextWrap::None);
+    auto const rows = layout.lines().data();
+    auto const bytes = layout.text().data();
+    auto const prefix = std::string{"a界éx"};
+    for (auto text : {prefix + "\xf0\x9f", std::string{"\x01"} + prefix + "\xc3"}) {
+        try {
+            layout.update(text, 1);
+            ASSERT(false);
+        }
+        catch (esc::UnicodeError const& error) {
+            ASSERT(error.offset() == text.size() - (text.ends_with("\xc3") ? 1 : 2));
+        }
+    }
+    for (auto c = 0; c < 32; ++c) {
+        if (c == '\r' || c == '\n' || c == '\t') { continue; }
+        ASSERT_THROWS(layout.update(std::string(1, (char)c), 1), std::invalid_argument);
+    }
+    ASSERT_THROWS(layout.update("\x7f", 1), std::invalid_argument);
+    ASSERT_THROWS(layout.update("\xc2\x85", 1), std::invalid_argument);
+    auto spaces = std::array{esc::ScalarWidthOverride{U' ', 2}};
+    ASSERT_THROWS(
+        layout.update(layout.text(), 1, TextWrap::Word, {.overrides = spaces}),
+        std::invalid_argument);
+    ASSERT(layout.text().data() == bytes && layout.lines().data() == rows);
+    ASSERT(!layout.update("a界", 4, TextWrap::None));
+    ASSERT((layout.position(4) == Point{3, 0}));
+    layout.update(layout.text(), 2, TextWrap::Any);
+    ASSERT((layout.position(1) == Point{0, 1}));
+    ASSERT((layout.position(4) == Point{0, 2}));
+}

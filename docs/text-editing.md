@@ -150,3 +150,14 @@ selection, and history. Identical-byte selection replacement still records the s
 change but keeps the existing text and boundaries. History uses bounded deques, so
 removing the oldest delta does not shift the rest. Working buffers retain their capacity
 between edits; the text and boundary vector are still copied to preserve atomicity.
+
+TextLayout separates segmentation and width measurement from wrapping. Width, wrapping,
+and tab-stop changes reuse grapheme boundaries and measured columns. Policy changes
+remeasure columns; text changes redo segmentation and measurement. Tabs are measured
+at their current row column, and original CR/CRLF offsets are preserved. UTF-8 validation
+and control rejection create no discarded decoded or normalized strings. Working text,
+metadata, row, coordinate, and override buffers retain capacity between updates.
+Failed updates leave the owned snapshot, policy, coordinates, and existing row storage
+intact. Cached columns add one integer per grapheme; reusable buffers retain memory
+proportional to the largest document. See the layout construction measurements in the
+[performance guide](performance.md).

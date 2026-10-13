@@ -1,11 +1,14 @@
 #define TEST_MAIN
 #include <zzz/test.hpp>
 
+#include <algorithm>
+#include <array>
 #include <cstdlib>
 #include <new>
 #include <tuple>
 #include <vector>
 
+#include <esc/layout.hpp>
 #include <ox/core/text.hpp>
 
 namespace {
@@ -124,4 +127,79 @@ TEST(text_undo_and_redo_allocation_failures_preserve_both_history_stacks)
             return edit;
         },
         [](ox::TextEdit& edit) { edit.redo(); });
+}
+
+namespace {
+auto layout_state(ox::TextLayout const& layout)
+{
+    auto positions = std::vector<ox::Point>{layout.position(0)};
+    auto at = std::size_t{0};
+    for (auto cluster : esc::graphemes(layout.text())) {
+        at += cluster.size();
+        positions.push_back(layout.position(at));
+    }
+    auto overrides = std::vector<std::pair<char32_t, int>>{};
+    for (auto const& width : layout.policy().overrides) {
+        overrides.emplace_back(width.scalar, width.cells);
+    }
+    auto const policy = layout.policy();
+    return std::tuple{
+        std::string{layout.text()},
+        std::vector<ox::TextLine>{layout.lines().begin(), layout.lines().end()},
+        positions,
+        overrides,
+        policy.ambiguous,
+        policy.emoji,
+        policy.clusters,
+        policy.orphan_marks,
+        policy.unassigned};
+}
+template <typename Action>
+void check_layout_failures(Action action)
+{
+    auto original = ox::TextLayout{};
+    original.update(document(), 40);
+    auto const before = layout_state(original);
+    auto failures = 0;
+    auto succeeded = false;
+    for (auto budget = 0; budget < 64; ++budget) {
+        auto layout = original;
+        auto const rows = layout.lines().data();
+        auto const text = layout.text().data();
+        remaining_allocations = budget;
+        try {
+            action(layout);
+            remaining_allocations = -1;
+            succeeded = true;
+            break;
+        }
+        catch (std::bad_alloc const&) {
+            remaining_allocations = -1;
+            ++failures;
+            ASSERT(layout_state(layout) == before);
+            ASSERT(layout.lines().data() == rows && layout.text().data() == text);
+            ASSERT(!layout.update(original.text(), 40));
+            layout.update(original.text(), 41);
+            ASSERT(std::ranges::equal(layout.lines(),
+                                      ox::layout_text(original.text(), 41)));
+        }
+        catch (...) {
+            remaining_allocations = -1;
+            throw;
+        }
+    }
+    ASSERT(failures > 0 && succeeded);
+}
+}  // namespace
+
+TEST(text_layout_allocation_failures_preserve_analysis_policy_and_row_storage)
+{
+    check_layout_failures(
+        [](ox::TextLayout& layout) { layout.update(layout.text(), 41); });
+    auto const changed = document() + "new text\n";
+    check_layout_failures([&](ox::TextLayout& layout) { layout.update(changed, 41); });
+    auto overrides = std::array{esc::ScalarWidthOverride{U'e', 2}};
+    check_layout_failures([&](ox::TextLayout& layout) {
+        layout.update(layout.text(), 41, ox::TextWrap::Any, {.overrides = overrides});
+    });
 }

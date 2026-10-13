@@ -42,10 +42,8 @@ auto grapheme_boundaries(std::string_view text) -> std::vector<std::size_t>
     return result;
 }
 
-auto columns(std::string_view cluster, int column, esc::WidthPolicy policy, int tabs)
-    -> int
+auto columns(std::string_view cluster, esc::WidthPolicy policy) -> int
 {
-    if (cluster == "\t") { return tabs - column % tabs; }
     auto width = esc::grapheme_width(cluster, policy);
     if (!width) { throw std::invalid_argument{"Text requires known grapheme widths"}; }
     if (*width == 0) {
@@ -111,53 +109,89 @@ auto display_grapheme(std::string_view cluster,
 }
 
 namespace {
-auto build_layout(std::string_view text,
-                  int width,
-                  TextWrap wrap,
-                  esc::WidthPolicy policy,
-                  int tab_width,
-                  std::vector<std::size_t>* boundaries = nullptr,
-                  std::vector<Point>* positions = nullptr) -> std::vector<TextLine>
+constexpr auto tab_columns = 0;
+constexpr auto newline_columns = -1;
+
+void validate_layout(int width, TextWrap wrap, int tabs)
 {
-    if (width < 0 || tab_width <= 0 ||
+    if (width < 0 || tabs <= 0 ||
         (wrap != TextWrap::None && wrap != TextWrap::Any && wrap != TextWrap::Word)) {
         throw std::invalid_argument{"Invalid text layout"};
     }
-    // Validate the entire input, including text beyond the viewport.
-    (void)normalize(text, true);
+}
+
+void analyze_text(std::string_view text, std::vector<std::size_t>& boundaries)
+{
+    boundaries.clear();
+    boundaries.push_back(0);
+    auto at = std::size_t{0};
+    for (auto cluster : esc::graphemes(text)) {
+        at += cluster.size();
+        boundaries.push_back(at);
+    }
+    // Segmentation validates the complete UTF-8 input first. C0/DEL occupy one
+    // byte; valid UTF-8 encodes C1 controls only as C2 80..9F. No decoded or
+    // normalized string is needed, and original CR/CRLF byte offsets are retained.
+    for (auto i = std::size_t{0}; i < text.size(); ++i) {
+        auto const byte = (unsigned char)text[i];
+        if ((byte < 32 && byte != '\n' && byte != '\r' && byte != '\t') ||
+            byte == 127 || (byte == 0xc2 && (unsigned char)text[i + 1] <= 0x9f)) {
+            throw std::invalid_argument{"Text contains a terminal control character"};
+        }
+    }
+}
+
+void measure_columns(std::string_view text,
+                     std::span<std::size_t const> boundaries,
+                     esc::WidthPolicy policy,
+                     std::vector<int>& measured)
+{
     if (esc::grapheme_width(" ", policy) != 1) {
         throw std::invalid_argument{"Text layout requires one-column spaces"};
     }
-    auto lines = std::vector<TextLine>{};
-    // Word wrapping can backtrack. Overwrite those coordinates when the next row
-    // starts.
-    auto record = [&](std::size_t at, int x, int y) {
-        if (!boundaries) { return; }
-        while (!boundaries->empty() && boundaries->back() > at) {
-            boundaries->pop_back();
-            positions->pop_back();
+    measured.clear();
+    measured.reserve(boundaries.size() - 1);
+    for (auto i = std::size_t{0}; i + 1 < boundaries.size(); ++i) {
+        auto const cluster =
+            text.substr(boundaries[i], boundaries[i + 1] - boundaries[i]);
+        measured.push_back(cluster == "\t" ? tab_columns
+                           : cluster == "\n" || cluster == "\r" || cluster == "\r\n"
+                               ? newline_columns
+                               : columns(cluster, policy));
+    }
+}
+
+void wrap_rows(std::string_view text,
+               std::span<std::size_t const> boundaries,
+               std::span<int const> measured,
+               int width,
+               TextWrap wrap,
+               int tabs,
+               std::vector<TextLine>& lines,
+               std::vector<Point>* positions = nullptr)
+{
+    lines.clear();
+    if (positions) { positions->resize(boundaries.size()); }
+    auto record = [&](std::size_t at, int x) {
+        if (lines.size() >= (std::size_t)std::numeric_limits<int>::max()) {
+            throw std::length_error{"Too many text rows"};
         }
-        if (!boundaries->empty() && boundaries->back() == at) {
-            positions->back() = {x, y};
-        }
-        else {
-            boundaries->push_back(at);
-            positions->push_back({x, y});
-        }
+        if (positions) { (*positions)[at] = {x, (int)lines.size()}; }
     };
     auto begin = std::size_t{0};
-    while (begin < text.size()) {
+    while (begin < measured.size()) {
         auto end = begin;
         auto next = begin;
         auto used = 0;
         auto word_end = begin;
         auto word_columns = 0;
-        for (auto cluster : esc::graphemes(text.substr(begin))) {
-            if (cluster == "\n" || cluster == "\r" || cluster == "\r\n") {
-                next = end + cluster.size();
+        while (end < measured.size()) {
+            if (measured[end] == newline_columns) {
+                next = end + 1;
                 break;
             }
-            auto const cells = columns(cluster, used, policy, tab_width);
+            auto const cells =
+                measured[end] == tab_columns ? tabs - used % tabs : measured[end];
             if (wrap != TextWrap::None && width > 0 &&
                 cells > width - std::min(used, width) && end != begin) {
                 if (wrap == TextWrap::Word && word_end > begin) {
@@ -167,30 +201,27 @@ auto build_layout(std::string_view text,
                 next = end;
                 break;
             }
-            record(end, used, (int)lines.size());
+            record(end, used);
             used = add_columns(used, cells);
-            end += cluster.size();
+            ++end;
             next = end;
-            if (whitespace(cluster)) {
+            if (boundaries[end] - boundaries[end - 1] == 1 &&
+                (text[boundaries[end - 1]] == ' ' ||
+                 text[boundaries[end - 1]] == '\t')) {
                 word_end = end;
                 word_columns = used;
             }
         }
-        record(end, used, (int)lines.size());
-        lines.push_back({begin, end, next, used});
+        record(end, used);
+        lines.push_back({boundaries[begin], boundaries[end], boundaries[next], used});
         begin = next;
     }
     if (lines.empty() || lines.back().next > lines.back().end ||
         (wrap != TextWrap::None && width > 0 && lines.back().columns >= width)) {
-        record(text.size(), 0, (int)lines.size());
+        record(measured.size(), 0);
         lines.push_back({text.size(), text.size(), text.size(), 0});
     }
-    if (lines.size() > (std::size_t)std::numeric_limits<int>::max()) {
-        throw std::length_error{"Too many text rows"};
-    }
-    return lines;
 }
-
 }  // namespace
 
 auto layout_text(std::string_view text,
@@ -198,7 +229,16 @@ auto layout_text(std::string_view text,
                  TextWrap wrap,
                  esc::WidthPolicy policy,
                  int tab_width) -> std::vector<TextLine>
-{ return build_layout(text, width, wrap, policy, tab_width); }
+{
+    validate_layout(width, wrap, tab_width);
+    auto boundaries = std::vector<std::size_t>{};
+    analyze_text(text, boundaries);
+    auto measured = std::vector<int>{};
+    measure_columns(text, boundaries, policy, measured);
+    auto lines = std::vector<TextLine>{};
+    wrap_rows(text, boundaries, measured, width, wrap, tab_width, lines);
+    return lines;
+}
 
 void swap(TextLayout& a, TextLayout& b) noexcept
 {
@@ -207,6 +247,13 @@ void swap(TextLayout& a, TextLayout& b) noexcept
     swap(a.lines_, b.lines_);
     swap(a.boundaries_, b.boundaries_);
     swap(a.positions_, b.positions_);
+    swap(a.columns_, b.columns_);
+    swap(a.text_storage_, b.text_storage_);
+    swap(a.line_storage_, b.line_storage_);
+    swap(a.boundary_storage_, b.boundary_storage_);
+    swap(a.position_storage_, b.position_storage_);
+    swap(a.column_storage_, b.column_storage_);
+    swap(a.override_storage_, b.override_storage_);
     swap(a.width_, b.width_);
     swap(a.wrap_, b.wrap_);
     swap(a.policy_, b.policy_);
@@ -233,27 +280,49 @@ auto TextLayout::update(std::string_view text,
                         esc::WidthPolicy policy,
                         int tab_width) -> bool
 {
-    if (width_ >= 0 && width_ == width && wrap_ == wrap && tab_width_ == tab_width &&
-        text_ == text && same_policy(this->policy(), policy)) {
+    auto const new_text = width_ < 0 || text_ != text;
+    auto const new_policy = width_ < 0 || !same_policy(this->policy(), policy);
+    if (!new_text && !new_policy && width_ == width && wrap_ == wrap &&
+        tab_width_ == tab_width) {
         return false;
     }
-    auto breaks = std::vector<std::size_t>{};
-    auto positions = std::vector<Point>{};
-    auto lines =
-        build_layout(text, width, wrap, policy, tab_width, &breaks, &positions);
-    auto owned_text = std::string{text};
-    auto overrides = std::vector<esc::ScalarWidthOverride>{policy.overrides.begin(),
-                                                           policy.overrides.end()};
-    text_.swap(owned_text);
-    lines_.swap(lines);
-    boundaries_.swap(breaks);
-    positions_.swap(positions);
-    overrides_.swap(overrides);
-    policy_ = policy;
-    policy_.overrides = {};
+    validate_layout(width, wrap, tab_width);
+    if (new_text) {
+        analyze_text(text, boundary_storage_);
+        text_storage_.assign(text);
+    }
+    auto const& boundaries = new_text ? boundary_storage_ : boundaries_;
+    if (new_text || new_policy) {
+        measure_columns(text, boundaries, policy, column_storage_);
+    }
+    auto const& measured = new_text || new_policy ? column_storage_ : columns_;
+    wrap_rows(text, boundaries, measured, width, wrap, tab_width, line_storage_,
+              &position_storage_);
+    if (new_policy) {
+        override_storage_.assign(policy.overrides.begin(), policy.overrides.end());
+    }
+
+    if (new_text) {
+        text_.swap(text_storage_);
+        boundaries_.swap(boundary_storage_);
+    }
+    if (new_text || new_policy) { columns_.swap(column_storage_); }
+    lines_.swap(line_storage_);
+    positions_.swap(position_storage_);
+    if (new_policy) {
+        overrides_.swap(override_storage_);
+        policy_ = policy;
+        policy_.overrides = {};
+    }
     width_ = width;
     wrap_ = wrap;
     tab_width_ = tab_width;
+    text_storage_.clear();
+    boundary_storage_.clear();
+    column_storage_.clear();
+    line_storage_.clear();
+    position_storage_.clear();
+    override_storage_.clear();
     return true;
 }
 

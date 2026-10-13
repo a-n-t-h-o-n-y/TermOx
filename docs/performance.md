@@ -205,3 +205,77 @@ its total work remains linear in document size, while Unicode segmentation is li
 to the affected logical lines. A document with no newline requires full-line
 segmentation. Working buffers retain capacity proportional to the largest edited
 document. TextLayout construction is a separate cost and is unchanged by this pass.
+
+## Text layout construction optimization pass
+
+Run the layout-only workloads with:
+
+```sh
+./build-release/tests/TermOx.tests.benchmarks --layout
+```
+
+This pass compares `64b8719` against the optimized layout code using the same expanded
+benchmark source, Release toolchain, flags, and dependencies. The baseline executable
+was saved before changing the library. Every workload checksum matches. Raw results:
+[layout before](../tests/benchmark-results/layout-before.csv) and
+[layout after](../tests/benchmark-results/layout-after.csv).
+
+| Workload | Before µs | After µs | Before allocations/op | After allocations/op |
+| --- | ---: | ---: | ---: | ---: |
+| layout.resize.1000 | 2632.727 | 251.381 | 50.000 | 0.000 |
+| layout.wrap.1000 | 2624.492 | 244.414 | 50.000 | 0.000 |
+| layout.tabs.1000 | 2619.607 | 243.763 | 50.000 | 0.000 |
+| layout.policy.1000 | 2615.099 | 1582.780 | 50.000 | 0.000 |
+| layout.text-change.1000 | 2616.962 | 2038.940 | 50.000 | 0.000 |
+| layout.unchanged.1000 | 2.061 | 2.157 | 0.000 | 0.000 |
+| layout.cold.1000 | 2611.226 | 2062.524 | 53.000 | 35.000 |
+| layout.rows-only.1000 | 2412.984 | 2020.342 | 15.000 | 30.000 |
+| layout.resize.10000 | 30803.959 | 2638.639 | 62.000 | 0.000 |
+| layout.wrap.10000 | 30776.412 | 2618.416 | 62.000 | 0.000 |
+| layout.tabs.10000 | 30698.565 | 2628.595 | 62.000 | 0.000 |
+| layout.policy.10000 | 30712.547 | 16173.268 | 62.000 | 0.000 |
+| layout.text-change.10000 | 30467.216 | 20695.495 | 62.000 | 0.000 |
+| layout.unchanged.10000 | 23.663 | 23.600 | 0.000 | 0.000 |
+| layout.cold.10000 | 30449.028 | 23114.771 | 65.000 | 43.000 |
+| layout.rows-only.10000 | 24738.077 | 21979.658 | 19.000 | 38.000 |
+
+The same multilingual documents contain 1,000 or 10,000 lines. Resize alternates
+widths 40/41; wrapping alternates Word/Any at width 40; tabs alternate stops 4/8;
+policy alternates ambiguous width One/Two. Text change alternates the first ASCII
+character while retaining its width. Cold construction creates and destroys a fresh
+TextLayout each operation. Rows-only calls the pure `layout_text()` function. Each
+workload includes a row checksum scan and final caret query, except unchanged updates
+and rows-only. Samples contain 50 operations for 1,000 lines and ten for 10,000 lines;
+unchanged updates use ten times those counts. Every workload has ten warmups.
+
+The implementation separates UTF-8/grapheme analysis, width measurement, and row
+wrapping. Segmentation validates the complete UTF-8 input, preserving global error
+offsets; a byte scan then rejects terminal controls without constructing decoded or
+normalized strings. Original CR and CRLF byte offsets remain intact. Measured columns
+are cached per grapheme. Tabs and line breaks have explicit markers; tab widths are
+computed from the current row column, so changes in wrapping and tab stops remain
+correct. Word wrapping recognizes complete ASCII space/tab clusters as before.
+
+Geometry and wrapping changes reuse boundaries and measured widths. Policy changes
+remeasure widths while retaining segmentation. Text changes redo both analysis stages.
+Text, boundaries, measured columns, rows, coordinates, and override storage reuse
+capacity. All preparation and allocation completes before swapping live state, so
+failed updates preserve text, row storage, mapping, and the owned policy. Copies and
+moves own their cached analysis independently.
+
+The regular suite contains 132 cases plus three isolated allocation-fault cases.
+All six terminal smoke checks pass. A differential run compared 5,400 combinations of
+random Unicode text, widths, wrap modes, tab stops, and policies against the previous
+implementation: accepted rows, caret positions, mouse hits, pure layout results, and
+rejections all matched. Thirty-two non-exception text/widget cases also pass ASan/UBSan
+with all TermOx sources instrumented and Escape linked as a Release library. Exception
+and allocation-fault cases run in the normal suite because the installed sanitizer
+runtime cannot unwind C++ exceptions.
+
+The largest gains apply when text and policy stay unchanged. Full text changes still
+require full segmentation and width measurement; cold layouts still allocate their
+metadata. The pure rows-only API constructs temporary analysis and performs more
+allocations than the previous streaming implementation, though it is faster in these
+workloads. Cached layout keeps one extra integer per grapheme plus reusable working
+buffers, with capacity proportional to the largest layout. Unchanged updates still
+compare the owned text snapshot, and row construction still visits the full document.
