@@ -5,7 +5,10 @@ and can be exercised with `post()`, `step()`, and `paint()` without opening a te
 
 ## Tree and geometry
 
-`widget_tree(root)` returns a depth-first vector of `WidgetNode` values. Each node
+`widget_tree(root)` returns a depth-first vector of `WidgetNode` values.
+`widget_tree(root, storage)` replaces a caller-owned snapshot while retaining capacity;
+a failed traversal may leave that storage partial. Applications build into separate
+storage so traversal failures do not publish a partial tree. Each node
 contains a lifetime view, its parent index, the end of its subtree, global bounds,
 visible bounds, and input eligibility. The root starts at `{0, 0}`; child positions
 are relative to their parents. Coordinates use checked translation and the same
@@ -16,6 +19,7 @@ An inactive widget (`active = false`) hides its entire subtree. A disabled widge
 focus, and application-owned widget timer callbacks. Painting retains the existing
 child-before-parent order, with siblings painted in their container order.
 
+`hit_test(tree, point)` returns the deepest hit index, or no value.
 `hit_path(tree, point)` returns root-to-target indices. Hits must lie inside every
 ancestor's clip. Later siblings take precedence in overlapping areas. Disabled or
 inactive subtrees are excluded. `focus_order(tree)` returns visible, active, enabled
@@ -92,7 +96,8 @@ the widget's actual response instead of requesting unconditional repaint.
 
 ## Callback mutations
 
-Routing snapshots carry lifetime views rather than retaining raw targets. After each
+Input routing retains only the original ancestry, its bounds, and lifetime views
+rather than copying the entire tree or retaining raw targets. After each
 input callback, the application synchronizes attachment, focus, and hover state before
 continuing propagation. Removed, destroyed, or disabled targets are skipped. Input
 still bubbles along the original ancestry, rather than being redirected to a new hit
@@ -108,3 +113,10 @@ Headless regression tests exercise nested clipping and translation, overlap, bub
 Tab navigation, focus recovery and relocation, hover transitions, callback removal,
 reentrant focus changes, explicit repaint and quit, timer eligibility, and checked
 coordinate arithmetic. Pseudo-terminal smoke tests cover the migrated examples.
+
+Traversal and attachment storage are reused. An unchanged tree skips attachment
+reconciliation, and an unchanged hover path needs no allocation. Focus consumes its
+borrowed tree snapshot before invoking callbacks, so reentrant dispatch can safely
+replace application storage. Failed attachment attempts remain pending and are retried;
+a foreign widget cannot bypass ownership checks on a subsequent unchanged traversal.
+See [performance benchmarks](performance.md) for measured routing workloads.

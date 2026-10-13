@@ -28,16 +28,28 @@ void append_tree(std::vector<WidgetNode>& tree,
 auto widget_tree(Widget& root) -> std::vector<WidgetNode>
 {
     auto tree = std::vector<WidgetNode>{};
-    append_tree(tree, root, {}, {0, 0}, {{0, 0}, root.size}, true);
+    widget_tree(root, tree);
     return tree;
+}
+
+void widget_tree(Widget& root, std::vector<WidgetNode>& tree)
+{
+    tree.clear();
+    append_tree(tree, root, {}, {0, 0}, {{0, 0}, root.size}, true);
+}
+
+auto hit_test(std::span<WidgetNode const> tree, Point point)
+    -> std::optional<std::size_t>
+{
+    for (auto i = tree.size(); i > 0; --i) {
+        if (tree[i - 1].input && contains(tree[i - 1].visible, point)) { return i - 1; }
+    }
+    return {};
 }
 
 auto hit_path(std::span<WidgetNode const> tree, Point point) -> std::vector<std::size_t>
 {
-    auto target = std::optional<std::size_t>{};
-    for (auto i = std::size_t{0}; i < tree.size(); ++i) {
-        if (tree[i].input && contains(tree[i].visible, point)) { target = i; }
-    }
+    auto target = hit_test(tree, point);
     auto path = std::vector<std::size_t>{};
     while (target) {
         path.push_back(*target);

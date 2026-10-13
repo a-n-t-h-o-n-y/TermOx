@@ -1,0 +1,14 @@
+workload,iterations,median_us_per_operation,checksum
+routing.idle.100,100,11.700,0
+routing.key.100,100,18.593,0
+routing.mouse.100,100,16.108,0
+routing.tab.100,100,22.186,500
+routing.paste.100,100,19.243,0
+routing.reorder.100,100,29.097,500
+routing.idle.1000,100,99.406,0
+routing.key.1000,100,150.931,0
+routing.mouse.1000,100,150.825,0
+routing.tab.1000,100,158.194,500
+routing.paste.1000,100,177.300,0
+routing.reorder.1000,100,237.087,500
+routing.key.depth32,100,2051.684,0

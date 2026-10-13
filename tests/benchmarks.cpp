@@ -98,7 +98,45 @@ void routing_benchmarks()
             return (std::size_t)app.handle_key_press({.key = esc::KeyCode::ArrowRight})
                 .handled;
         });
+        auto const point = root.children.back()->at;
+        measure("routing.mouse." + std::to_string(count), 100, [&](int) {
+            return (std::size_t)app.handle_mouse_move({.at = point, .held_button = {}})
+                .handled;
+        });
+        measure("routing.tab." + std::to_string(count), 100, [&](int) {
+            return (std::size_t)app.handle_key_press({.key = esc::KeyCode::Tab})
+                .handled;
+        });
+        measure("routing.paste." + std::to_string(count), 100, [&](int) {
+            return (std::size_t)app.handle_paste({"text", true, true}).handled;
+        });
+        measure("routing.reorder." + std::to_string(count), 100, [&](int) {
+            std::rotate(root.children.begin(), root.children.begin() + 1,
+                        root.children.end());
+            return (std::size_t)app.step().repaint;
+        });
     }
+    auto root = Tree{};
+    root.size = {80, 24};
+    auto* parent = &root;
+    for (auto i = 0; i < 32; ++i) {
+        auto child = std::make_unique<Tree>();
+        child->size = root.size;
+        auto* next = child.get();
+        parent->children.push_back(std::move(child));
+        parent = next;
+    }
+    auto leaf = std::make_unique<ox::Widget>(ox::FocusPolicy::Strong);
+    leaf->size = root.size;
+    parent->children.push_back(std::move(leaf));
+    for (auto i = 0; i < 1000; ++i) {
+        root.children.push_back(std::make_unique<ox::Widget>());
+    }
+    auto app = ox::Application{root};
+    measure("routing.key.depth32", 100, [&](int) {
+        return (std::size_t)app.handle_key_press({.key = esc::KeyCode::ArrowRight})
+            .handled;
+    });
 }
 
 void renderer_benchmarks()
@@ -127,11 +165,13 @@ void renderer_benchmarks()
 }
 }  // namespace
 
-int main()
+int main(int argc, char** argv)
 {
+    auto const routing_only = argc == 2 && std::string_view{argv[1]} == "--routing";
+    if (argc > 1 && !routing_only) { return 2; }
     std::cout << "workload,iterations,median_us_per_operation,checksum\n";
-    text_benchmarks();
+    if (!routing_only) { text_benchmarks(); }
     routing_benchmarks();
-    renderer_benchmarks();
+    if (!routing_only) { renderer_benchmarks(); }
     std::cerr << "checksum=" << checksum << '\n';
 }

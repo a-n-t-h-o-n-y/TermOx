@@ -86,9 +86,11 @@ class Widget {
 
     virtual void paint(Canvas) {}
 
-    virtual auto get_children() -> zzz::Generator<Widget&> { co_return; }
+    virtual auto get_children() -> zzz::Generator<Widget&>
+    { return zzz::Generator<Widget&>{nullptr}; }
 
-    virtual auto get_children() const -> zzz::Generator<Widget const&> { co_return; }
+    virtual auto get_children() const -> zzz::Generator<Widget const&>
+    { return zzz::Generator<Widget const&>{nullptr}; }
 
    protected:
     /** Schedule painting after a direct widget mutation, if attached. */

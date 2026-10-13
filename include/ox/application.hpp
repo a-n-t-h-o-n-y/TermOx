@@ -48,12 +48,16 @@ class Application {
     Focus focus_;
     std::vector<LifetimeView<Widget>> attached_;
     std::vector<WidgetNode> tree_;
+    std::vector<WidgetNode> tree_storage_;
+    std::vector<LifetimeView<Widget>> attachment_storage_;
+    bool attachments_current_ = false;
     std::optional<Point> mouse_position_;
     std::vector<LifetimeView<Widget>> hovered_;
     LifetimeView<Widget> paste_target_;
 
     auto synchronize() -> EventResponse;
-    auto update_hover() -> EventResponse;
+    auto update_hover() -> std::pair<EventResponse, bool>;
+    auto refresh_tree() -> bool;
     void report(EventResponse response);
     template <typename Input>
     auto route_mouse(Input event,

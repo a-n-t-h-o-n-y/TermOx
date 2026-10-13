@@ -6,6 +6,39 @@
 
 namespace ox {
 namespace {
+// Only delivery ancestry survives callbacks, not the entire tree. Indices allow
+// constant-time eligibility checks when a callback leaves the structure intact.
+auto ancestry(std::span<WidgetNode const> tree, std::optional<std::size_t> target)
+    -> std::vector<std::pair<std::size_t, WidgetNode>>
+{
+    auto path = std::vector<std::pair<std::size_t, WidgetNode>>{};
+    while (target) {
+        path.emplace_back(*target, tree[*target]);
+        target = tree[*target].parent;
+    }
+    return path;
+}
+
+auto ancestry(std::span<WidgetNode const> tree, LifetimeView<Widget> target)
+    -> std::vector<std::pair<std::size_t, WidgetNode>>
+{
+    auto const found = std::ranges::find(tree, target, &WidgetNode::widget);
+    return ancestry(tree, found == tree.end() ? std::optional<std::size_t>{}
+                                              : (std::size_t)(found - tree.begin()));
+}
+
+auto accepts_input(std::span<WidgetNode const> tree,
+                   std::size_t index,
+                   LifetimeView<Widget> target) -> bool
+{
+    if (!target.valid()) { return false; }
+    if (index < tree.size() && tree[index].widget == target) {
+        return tree[index].input;
+    }
+    auto const found = std::ranges::find(tree, target, &WidgetNode::widget);
+    return found != tree.end() && found->input;
+}
+
 void paint_tree(std::span<WidgetNode const> tree,
                 std::size_t index,
                 Canvas canvas,
@@ -39,8 +72,8 @@ Application::Application(Widget& head) : head_{head}, focus_{head, loop_}
     try {
         tree_ = widget_tree(head_);
         attach_widgets();
-        auto const order = focus_order(tree_);
-        if (!order.empty()) { focus_.set(tree_[order.front()].widget.get()); }
+        attachments_current_ = true;
+        focus_.reconcile(tree_);
     }
     catch (...) {
         for (auto const& target : attached_) {
@@ -76,19 +109,32 @@ Application::~Application()
 
 void Application::attach_widgets()
 {
-    auto current = std::vector<LifetimeView<Widget>>{};
+    auto current = std::move(attachment_storage_);
+    current.clear();
     current.reserve(tree_.size());
+    auto complete = true;
     for (auto const& node : tree_) {
         if (!node.widget.valid()) { continue; }
         auto& widget = node.widget.get();
         if (widget.application_ && widget.application_ != this) {
             throw std::logic_error{"Widget already belongs to an application"};
         }
+        complete &= widget.application_ == this;
         current.push_back(node.widget);
     }
-    if (current == attached_) { return; }
+    if (complete && current == attached_) {
+        attachment_storage_ = std::move(current);
+        return;
+    }
+    auto present = std::vector<Widget*>{};
+    present.reserve(current.size());
+    for (auto const& target : current) {
+        present.push_back(&target.get());
+    }
+    std::ranges::sort(present, std::less<Widget*>{});
     for (auto const& target : attached_) {
-        if (!target.valid() || std::ranges::find(current, target) != current.end()) {
+        if (!target.valid() ||
+            std::ranges::binary_search(present, &target.get(), std::less<Widget*>{})) {
             continue;
         }
         auto& widget = target.get();
@@ -97,7 +143,8 @@ void Application::attach_widgets()
             loop_.unwatch(entry);
         }
     }
-    attached_ = std::move(current);
+    attached_.swap(current);
+    attachment_storage_ = std::move(current);
     for (auto const& target : attached_) {
         auto& widget = target.get();
         if (widget.application_ == this) { continue; }
@@ -124,15 +171,24 @@ auto Application::is_interactive(Widget const& widget) const -> bool
     });
 }
 
-auto Application::update_hover() -> EventResponse
+auto Application::update_hover() -> std::pair<EventResponse, bool>
 {
-    auto next = std::vector<LifetimeView<Widget>>{};
-    if (mouse_position_) {
-        for (auto index : hit_path(tree_, *mouse_position_)) {
-            next.push_back(tree_[index].widget);
-        }
+    auto const target = mouse_position_ ? hit_test(tree_, *mouse_position_)
+                                        : std::optional<std::size_t>{};
+    auto index = target;
+    auto count = hovered_.size();
+    while (index && count > 0 && tree_[*index].widget == hovered_[count - 1]) {
+        index = tree_[*index].parent;
+        --count;
     }
-    if (next == hovered_) { return {}; }
+    if (!index && count == 0) { return {{}, false}; }
+    auto next = std::vector<LifetimeView<Widget>>{};
+    index = target;
+    while (index) {
+        next.push_back(tree_[*index].widget);
+        index = tree_[*index].parent;
+    }
+    std::ranges::reverse(next);
     auto common = std::size_t{0};
     while (common < hovered_.size() && common < next.size() &&
            hovered_[common] == next[common]) {
@@ -144,7 +200,7 @@ auto Application::update_hover() -> EventResponse
     for (auto i = old.size(); i > common; --i) {
         if (old[i - 1].valid()) {
             result = combine(result, old[i - 1].get().mouse_leave());
-            if (result.quit) { return result; }
+            if (result.quit) { return {result, true}; }
         }
     }
     for (auto i = common; i < entering.size(); ++i) {
@@ -153,38 +209,45 @@ auto Application::update_hover() -> EventResponse
             if (result.quit) { break; }
         }
     }
-    return result;
+    return {result, true};
+}
+
+auto Application::refresh_tree() -> bool
+{
+    // Keep traversal storage local: get_children() can reenter the application.
+    auto next = std::move(tree_storage_);
+    widget_tree(head_, next);
+    auto const changed = next != tree_;
+    tree_.swap(next);
+    tree_storage_ = std::move(next);
+    if (changed || !attachments_current_) {
+        attachments_current_ = false;
+        attach_widgets();
+        attachments_current_ = true;
+    }
+    return changed;
 }
 
 auto Application::synchronize() -> EventResponse
 {
     if (auto code = loop_.exit_code()) { return {.quit = code}; }
-    auto next = widget_tree(head_);
-    auto result = EventResponse{.repaint = next != tree_};
-    tree_ = std::move(next);
-    attach_widgets();
-    // Keep the snapshot alive across callbacks that can reenter the application.
-    auto snapshot = tree_;
-    auto const focus_response = focus_.reconcile(snapshot);
+    auto result = EventResponse{.repaint = refresh_tree()};
+    // Focus consumes the snapshot before invoking callbacks; it never retains it.
+    auto const focus_response = focus_.reconcile(tree_);
     result = combine(result, focus_response);
     if (focus_response.repaint || focus_response.handled || focus_response.quit) {
-        tree_ = widget_tree(head_);
-        attach_widgets();
+        refresh_tree();
     }
     if (!result.quit) {
-        auto const previous_hover = hovered_;
-        result = combine(result, update_hover());
-        if (!result.quit && previous_hover != hovered_) {
-            auto current = widget_tree(head_);
-            result.repaint |= current != tree_;
-            tree_ = std::move(current);
-            attach_widgets();
-            auto stable = tree_;
-            auto const response = focus_.reconcile(stable);
-            result = combine(result, response);
-            if (response.repaint || response.handled || response.quit) {
-                tree_ = widget_tree(head_);
-                attach_widgets();
+        auto const [response, changed] = update_hover();
+        result = combine(result, response);
+        if (!result.quit && changed) {
+            result.repaint |= refresh_tree();
+            auto const focus_response = focus_.reconcile(tree_);
+            result = combine(result, focus_response);
+            if (focus_response.repaint || focus_response.handled ||
+                focus_response.quit) {
+                refresh_tree();
             }
         }
     }
@@ -223,30 +286,28 @@ auto Application::route_mouse(Input event,
 {
     mouse_position_ = event.at;
     auto result = synchronize();
-    auto snapshot = tree_;
-    auto const path = hit_path(snapshot, event.at);
+    auto const path = ancestry(tree_, hit_test(tree_, event.at));
+    auto focus_changed = false;
     if (select && !result.quit) {
-        for (auto it = path.rbegin(); it != path.rend(); ++it) {
-            auto const target = snapshot[*it].widget;
-            if (!target.valid() || !is_interactive(target.get())) { continue; }
+        for (auto const& [index, node] : path) {
+            auto const target = node.widget;
+            if (!accepts_input(tree_, index, target)) { continue; }
             auto const policy = target.get().focus_policy;
             if (policy == FocusPolicy::Click || policy == FocusPolicy::Strong) {
-                result = combine(result, focus_.set(target.get()));
+                auto const response = focus_.set(target.get());
+                focus_changed =
+                    response.repaint || response.handled || response.quit.has_value();
+                result = combine(result, response);
                 break;
             }
         }
     }
-    if (select && !result.quit) { result = combine(result, synchronize()); }
+    if (focus_changed && !result.quit) { result = combine(result, synchronize()); }
     // Focus/hover effects do not consume the input event itself.
     auto input = EventResponse{};
-    for (auto it = path.rbegin(); it != path.rend() && !result.quit; ++it) {
-        auto const& node = snapshot[*it];
-        if (!node.widget.valid() ||
-            !std::ranges::any_of(tree_, [&](auto const& current) {
-                return current.input && current.widget == node.widget;
-            })) {
-            continue;
-        }
+    for (auto const& [index, node] : path) {
+        if (result.quit) { break; }
+        if (!accepts_input(tree_, index, node.widget)) { continue; }
         auto local = event;
         local.at = {event.at.x - node.bounds.at.x, event.at.y - node.bounds.at.y};
         input = combine(input, (node.widget.get().*callback)(local));
@@ -262,26 +323,15 @@ template <typename Callback>
 auto Application::route_focused(Callback callback) -> EventResponse
 {
     auto result = synchronize();
-    auto const focused = focus_.get();
-    auto snapshot = tree_;
-    auto target = std::optional<std::size_t>{};
-    for (auto i = std::size_t{0}; i < snapshot.size(); ++i) {
-        if (snapshot[i].widget == focused) {
-            target = i;
-            break;
-        }
-    }
+    auto const path = ancestry(tree_, focus_.get());
     auto input = EventResponse{};
-    while (target && !result.quit) {
-        auto const& node = snapshot[*target];
-        if (node.widget.valid() && std::ranges::any_of(tree_, [&](auto const& current) {
-                return current.input && current.widget == node.widget;
-            })) {
+    for (auto const& [index, node] : path) {
+        if (result.quit) { break; }
+        if (accepts_input(tree_, index, node.widget)) {
             input = combine(input, callback(node.widget.get()));
             if (!input.quit) { result = combine(result, synchronize()); }
             if (input.handled || input.quit) { break; }
         }
-        target = node.parent;
     }
     result = combine(result, input);
     report(result);
@@ -302,9 +352,8 @@ auto Application::handle_key_press(KeyEvent key) -> EventResponse
     if (key.matches(KeyCode::Tab, {}, key.action) ||
         key.matches(KeyCode::Tab, {.shift = true}, key.action)) {
         auto result = synchronize();
-        auto snapshot = tree_;
         if (!result.quit) {
-            result = combine(result, focus_.advance(snapshot, key.modifiers.shift));
+            result = combine(result, focus_.advance(tree_, key.modifiers.shift));
         }
         result.handled = true;
         report(result);
@@ -322,18 +371,10 @@ auto Application::handle_paste(esc::PasteChunk const& chunk) -> EventResponse
     if (result.quit) { return result; }
     if (chunk.first) {
         paste_target_ = {};
-        auto const focused = focus_.get();
-        auto const snapshot = tree_;
-        auto index = std::optional<std::size_t>{};
-        for (auto i = std::size_t{0}; i < snapshot.size(); ++i) {
-            if (snapshot[i].widget == focused) {
-                index = i;
-                break;
-            }
-        }
-        while (index) {
-            auto const target = snapshot[*index].widget;
-            if (target.valid() && is_interactive(target.get())) {
+        auto const path = ancestry(tree_, focus_.get());
+        for (auto const& [index, node] : path) {
+            auto const target = node.widget;
+            if (accepts_input(tree_, index, target)) {
                 auto const response = target.get().paste(chunk);
                 result = combine(result, response);
                 if (response.handled && !chunk.last && !chunk.aborted) {
@@ -343,13 +384,12 @@ auto Application::handle_paste(esc::PasteChunk const& chunk) -> EventResponse
                 result = combine(result, synchronize());
                 if (response.handled || result.quit) { break; }
             }
-            index = snapshot[*index].parent;
         }
     }
     else {
         auto target = paste_target_;
         if (chunk.last || chunk.aborted) { paste_target_ = {}; }
-        if (target.valid() && is_interactive(target.get())) {
+        if (accepts_input(tree_, tree_.size(), target)) {
             auto const response = target.get().paste(chunk);
             result = combine(result, response);
             if (!response.quit) { result = combine(result, synchronize()); }

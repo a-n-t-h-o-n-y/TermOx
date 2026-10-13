@@ -1,6 +1,7 @@
 #include <ox/focus.hpp>
 
 #include <algorithm>
+#include <ranges>
 #include <stdexcept>
 
 namespace ox {
@@ -12,6 +13,15 @@ auto eligible(std::span<WidgetNode const> tree, LifetimeView<Widget> target) -> 
                node.visible.size.height > 0 && target.valid() &&
                target.get().focus_policy != FocusPolicy::None;
     });
+}
+auto tab_candidate(WidgetNode const& node) -> bool
+{
+    if (!node.input || node.visible.size.width == 0 || node.visible.size.height == 0 ||
+        !node.widget.valid()) {
+        return false;
+    }
+    auto const policy = node.widget.get().focus_policy;
+    return policy == FocusPolicy::Tab || policy == FocusPolicy::Strong;
 }
 }  // namespace
 
@@ -39,7 +49,8 @@ auto Focus::clear() -> EventResponse
 auto Focus::set(Widget& widget) -> EventResponse
 {
     auto target = track(widget);
-    if (!eligible(widget_tree(root_), target)) {
+    auto tree = widget_tree(root_);
+    if (!eligible(tree, target)) {
         throw std::invalid_argument{"Focus target is not eligible in this application"};
     }
     if (in_focus_ == target) { return {}; }
@@ -49,9 +60,9 @@ auto Focus::set(Widget& widget) -> EventResponse
     if (response.quit || revision_ != revision || in_focus_.valid()) {
         return response;
     }
-    if (!eligible(widget_tree(root_), target)) {
+    widget_tree(root_, tree);
+    if (!eligible(tree, target)) {
         recover_ = true;
-        auto const tree = widget_tree(root_);
         return combine(response, reconcile(tree));
     }
     in_focus_ = target;
@@ -66,8 +77,8 @@ auto Focus::set(Widget& widget) -> EventResponse
 auto Focus::reconcile(std::span<WidgetNode const> tree) -> EventResponse
 {
     if (!recover_ || eligible(tree, in_focus_)) { return {}; }
-    auto const order = focus_order(tree);
-    if (!order.empty()) { return set(tree[order.front()].widget.get()); }
+    auto const first = std::ranges::find_if(tree, tab_candidate);
+    if (first != tree.end()) { return set(first->widget.get()); }
     auto const revision = revision_ + 1;
     auto response = clear();
     if (revision_ == revision) { recover_ = true; }
@@ -76,16 +87,22 @@ auto Focus::reconcile(std::span<WidgetNode const> tree) -> EventResponse
 
 auto Focus::advance(std::span<WidgetNode const> tree, bool backward) -> EventResponse
 {
-    auto const order = focus_order(tree);
-    if (order.empty()) { return clear(); }
-    auto const current = std::ranges::find_if(
-        order, [&](auto index) { return tree[index].widget == in_focus_; });
-    auto index = backward ? order.size() - 1 : std::size_t{0};
-    if (current != order.end()) {
-        auto const offset = static_cast<std::size_t>(current - order.begin());
-        index = backward ? (offset + order.size() - 1) % order.size()
-                         : (offset + 1) % order.size();
+    auto candidates = tree | std::views::filter(tab_candidate);
+    auto const first = candidates.begin();
+    auto const end = candidates.end();
+    if (first == end) { return clear(); }
+    auto target = std::ranges::find(candidates, in_focus_, &WidgetNode::widget);
+    if (backward) {
+        if (target == first) { target = end; }
+        --target;
     }
-    return set(tree[order[index]].widget.get());
+    else {
+        if (target == end) { target = first; }
+        else if (++target == end) {
+            target = first;
+        }
+    }
+    // Consume the borrowed candidate before set invokes callbacks.
+    return set(target->widget.get());
 }
 }  // namespace ox
