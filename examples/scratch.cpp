@@ -141,7 +141,8 @@ using namespace ox;
 //         TextBox{{
 //             .style = {.background = colors::bright_black},
 //             .focus_policy = FocusPolicy::Strong,
-//         }} | SizePolicy::suspended({.width = 40, .height = 5}),
+//         }},
+//         {.width = 40, .height = 5},
 //     };
 //     return Application{head}.run();
 // }

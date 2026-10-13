@@ -81,8 +81,9 @@ loop by default, and the session restores terminal state on exit.
 
 Text inputs accept Unicode key text and bracketed paste. Frames store complete
 graphemes with explicit continuation cells, and clipped canvases use Escape's width
-estimates. See [frames and canvases](docs/frame-and-canvas.md) for drawing and resize contracts
-and [rendering](docs/renderer.md) for frame comparison and terminal output.
+estimates. See [frames and canvases](docs/frame-and-canvas.md) for drawing and resize contracts,
+[rendering](docs/renderer.md) for frame comparison and terminal output,
+and [layout calculation](docs/layout.md) for sizing and placement.
 A C++20 compiler and standard library are required.
 
 Build and run the regression tests with:

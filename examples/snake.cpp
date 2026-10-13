@@ -215,7 +215,8 @@ int main()
 
     auto head = Column{
         Suspended{
-            SnakeGameWidget{} | SizePolicy::suspended(SnakeEngine::size),
+            SnakeGameWidget{},
+            SnakeEngine::size,
             {(U'▚' | fg(IndexedColor{235}) | bg(IndexedColor{234}))},
         },
         Suspended{
@@ -229,7 +230,8 @@ int main()
                     .align = Align::Right,
                     .style = score_style,
                 }},
-            } | SizePolicy::suspended({.width = 14, .height = 1}),
+            },
+            {.width = 14, .height = 1},
             {U' ' | score_style},
         } | SizePolicy::fixed(1),
     };

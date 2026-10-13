@@ -5,6 +5,8 @@ add_executable(TermOx.tests.unit EXCLUDE_FROM_ALL
     event_loop.test.cpp
     frame.test.cpp
     renderer.test.cpp
+    layout.test.cpp
+    layout_widgets.test.cpp
 )
 
 target_compile_options(

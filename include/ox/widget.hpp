@@ -9,6 +9,7 @@
 #include <signals_light/signal.hpp>
 
 #include <ox/core/core.hpp>
+#include <ox/core/layout.hpp>
 
 namespace ox {
 class Application;
@@ -23,71 +24,6 @@ class Application;
  * Strong: The widget can be focused by either tab or click.
  */
 enum class FocusPolicy : std::uint8_t { None, Tab, Click, Strong };
-
-/**
- * Policy for how a Widget should be sized by its parent layout.
- */
-struct SizePolicy {
-    int minimum = 0;
-    int maximum = std::numeric_limits<int>::max();
-    float flexibility = 1.f;
-
-    [[nodiscard]] static constexpr auto fixed(int size) -> SizePolicy
-    {
-        return {
-            .minimum = size,
-            .maximum = size,
-            .flexibility = 0.f,
-        };
-    }
-
-    [[nodiscard]] static constexpr auto flex(float flex = 1.f) -> SizePolicy
-    {
-        return {
-            .minimum = 0,
-            .maximum = std::numeric_limits<int>::max(),
-            .flexibility = flex,
-        };
-    }
-
-    [[nodiscard]] static constexpr auto bounded(int min, int max) -> SizePolicy
-    {
-        return {
-            .minimum = min,
-            .maximum = max,
-            .flexibility = 1.f,
-        };
-    }
-
-    [[nodiscard]] static constexpr auto min(int min) -> SizePolicy
-    {
-        return {
-            .minimum = min,
-            .maximum = std::numeric_limits<int>::max(),
-            .flexibility = 1.f,
-        };
-    }
-
-    [[nodiscard]] static constexpr auto max(int max) -> SizePolicy
-    {
-        return {
-            .minimum = 0,
-            .maximum = max,
-            .flexibility = 1.f,
-        };
-    }
-
-    [[nodiscard]] static constexpr auto suspended(Area size) -> SizePolicy
-    {
-        // FIXME: This is a hack at the moment, it works, but each Layout type should
-        // ideally define its own SizePolicy type.
-        return {
-            .minimum = size.width,
-            .maximum = size.height,
-            .flexibility = 0.f,
-        };
-    }
-};
 
 /**
  * Base class for interactive UI elements.

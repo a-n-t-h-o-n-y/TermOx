@@ -665,7 +665,7 @@ Tab Focus.
 
 ## 📦 ox::SizePolicy
 
-[`#include <ox/widget.hpp>`](../include/ox/widget.hpp)
+[`#include <ox/core/layout.hpp>`](../include/ox/core/layout.hpp)
 
 Provides a description of how a Widget can be sized within its parent layout.
 
@@ -680,9 +680,9 @@ Column{
 <details>
 <summary><strong>Details</strong></summary>
 
-The parent layout type provides context to each Widget's SizePolicy, if it is a Row,
-then the policies dictate the width dimension, if it is a Column, the height dimension,
-if it is a Suspended layout, then `SizePolicy::suspended` is the only correct policy.
+A Row uses each child's policy for width; a Column uses it for height. Suspended
+takes a requested Area directly. See [layout calculation](layout.md) for proportional
+shrinking, weighted growth, largest-remainder rounding, and input validation.
 
 Pipe (`|`) operator overloading provided for Widgets to set their SizePolicy.
 
@@ -697,7 +697,6 @@ struct SizePolicy {
     static constexpr auto bounded(int min, int max) -> SizePolicy;
     static constexpr auto min(int min) -> SizePolicy;
     static constexpr auto max(int max) -> SizePolicy;
-    static constexpr auto suspended(Area size) -> SizePolicy;
 };
 ```
 
@@ -1690,15 +1689,16 @@ template <WidgetDerived ChildType>
 class Suspended : public Widget;
 ```
 
-A layout holding a single Widget that 'floats' in the center of the layout. The child
-Widget must have a `SizePolicy::suspended(...)` policy, which sets the Widget to a fixed size.
+A layout holding a single Widget centered within the available area. Its requested
+size is clamped to the available dimensions.
 
 ```cpp
 auto sus = Suspended{
     TextBox{{
         .style = {.background = colors::bright_black},
         .focus_policy = FocusPolicy::Strong,
-    }} | SizePolicy::suspended({.width = 40, .height = 5}),
+    }},
+    {.width = 40, .height = 5},
 };
 ```
 
@@ -1708,17 +1708,17 @@ auto sus = Suspended{
 ### 🏗️ Constructors
 
 ```cpp
-explicit Suspended(ChildType&& child, Glyph fill = {U' '});
+explicit Suspended(ChildType&& child, Area requested, Glyph fill = {U' '});
 ```
 
-The constructor takes a single Widget and a fill character. The fill character is used
-to fill the space around the child Widget. The child Widget must have a
-`SizePolicy::suspended(...)` policy, which sets the Widget to a fixed size.
+The constructor takes a child, a requested size, and a fill glyph for the surrounding
+margins. Change `requested_size` before the next layout to update its dimensions.
 
 ### Public Objects
 
 ```cpp
 ChildType child;
+Area requested_size;
 Glyph fill_glyph;
 ```
 
@@ -2269,6 +2269,17 @@ put(panel, {0, 0}, "Hello 界");
 
 See [the frame and canvas guide](frame-and-canvas.md) for coordinate checks, resize,
 Unicode width policies, complete-footprint clipping, and borrowing rules.
+
+## 🧩 Layout calculation
+
+[`#include <ox/core/layout.hpp>`](../include/ox/core/layout.hpp)
+
+`distribute_length(policies, available)` returns integer lengths from a span of
+`SizePolicy` values. `layout_row(policies, area)` and `layout_column(policies, area)`
+return consecutive rectangles. `centered_rect(available, requested)` returns a clamped,
+centered rectangle. These functions have no widget or terminal dependencies.
+
+See [layout calculation](layout.md) for allocation rules and edge cases.
 
 ## 🧩 ox::Renderer
 

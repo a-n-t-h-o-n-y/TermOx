@@ -1,11 +1,9 @@
 #pragma once
 
 #include <algorithm>
-#include <cassert>
 #include <concepts>
 #include <cstddef>
 #include <memory>
-#include <numeric>
 #include <ranges>
 #include <tuple>
 #include <type_traits>
@@ -14,133 +12,32 @@
 #include <zzz/coro.hpp>
 
 #include <ox/bordered.hpp>
-#include <ox/core/core.hpp>
+#include <ox/core/layout.hpp>
 #include <ox/widget.hpp>
 
-namespace ox::detail {
-
-/**
- * Calculate the length of each Widget in the given total length based on the its
- * SizePolicy and the total space available.
- *
- * @param widgets The widgets to distribute the space between.
- * @param total_length The total space to distribute.
- * @return A vector of the lengths of each child.
- */
-template <InputRangeOf<Widget> WidgetRange>
-[[nodiscard]]
-auto distribute_length(WidgetRange&& widgets, int total_length) -> std::vector<int>
-{
-    assert(total_length >= 0);
-
-    // Materialize the range because it can only be iterated once.
-    // I'd like to use ranges filter + transform + to<vector> but must wait for C++23.
-    auto const size_policies = [&] {
-        auto result = std::vector<SizePolicy>{};
-        for (auto const& w : widgets) {
-            if (w.active) { result.push_back(w.size_policy); }
-        }
-        return result;
-    }();
-
-    if (total_length == 0) { return std::vector<int>(size_policies.size(), 0); }
-
-    for ([[maybe_unused]] auto const& policy : size_policies) {
-        assert(policy.minimum >= 0);
-        assert(policy.maximum >= policy.minimum);
-        assert(policy.flexibility >= 0);
-    }
-
-    auto exact_amounts = std::vector<float>(size_policies.size(), 0.f);
-    auto total_allocated = 0.f;
-
-    // Distribute minimums first
-
-    for (auto i = std::size_t{0}; i < size_policies.size(); ++i) {
-        auto& exact_amount = exact_amounts[i];
-        exact_amount = (float)size_policies[i].minimum;
-        total_allocated += exact_amount;
-    }
-
-    auto results = std::vector<int>(size_policies.size(), 0);
-
-    // floor values to ints.
-    std::ranges::copy(exact_amounts, results.begin());
-
-    // If space is already over allocated.
-    if (auto const actual_alloc =
-            std::accumulate(std::cbegin(results), std::cend(results), 0);
-        actual_alloc >= total_length) {
-        while (std::accumulate(std::cbegin(results), std::cend(results), 0) >=
-               total_length) {
-            for (auto& len : results) {
-                if (len > 0) {
-                    len -= 1;
-                    if (std::accumulate(std::cbegin(results), std::cend(results), 0) <
-                        total_length) {
-                        return results;
-                    }
-                }
-            }
-        }
-        return results;
-    }
-
-    // Distribute flex space
-    auto remaining_space = (float)total_length - total_allocated;
-    while (remaining_space > 0) {
-        auto const total_flex = [&] {
-            auto x = 0.f;
-            for (auto i = std::size_t{0}; i < size_policies.size(); ++i) {
-                if (exact_amounts[i] < (float)size_policies[i].maximum) {
-                    x += size_policies[i].flexibility;
-                }
-            }
-            return x;
-        }();
-
-        if (total_flex == 0.f) { break; }
-
-        auto space_distributed_this_round = 0.f;
-        for (auto i = std::size_t{0}; i < size_policies.size(); ++i) {
-            if (exact_amounts[i] >= (float)size_policies[i].maximum) { continue; }
-
-            float const additional_space =
-                std::min(size_policies[i].flexibility / total_flex * remaining_space,
-                         (float)size_policies[i].maximum - exact_amounts[i]);
-            exact_amounts[i] += additional_space;
-            space_distributed_this_round += additional_space;
-        }
-        remaining_space -= space_distributed_this_round;
-        if (space_distributed_this_round == 0) { break; }
-    }
-
-    // floor values to ints.
-    std::ranges::copy(exact_amounts, results.begin());
-
-    // Distribute remaining space from left from flooring.
-    int remaining =
-        total_length - std::accumulate(std::begin(results), std::end(results), 0);
-    while (remaining > 0) {
-        auto space_distributed_this_round = 0;
-        for (auto i = std::size_t{0}; i < size_policies.size(); ++i) {
-            auto& result = results[i];
-            auto const& size_policy = size_policies[i];
-            if (result < size_policy.maximum) {
-                result += 1;
-                remaining -= 1;
-                ++space_distributed_this_round;
-                if (remaining == 0) { break; }
-            }
-        }
-        if (space_distributed_this_round == 0) { break; }
-    }
-    return results;
-}
-
-}  // namespace ox::detail
-
 namespace ox {
+
+namespace detail {
+inline void resize_children(Widget& parent, bool horizontal)
+{
+    auto children = std::vector<Widget*>{};
+    auto policies = std::vector<SizePolicy>{};
+    for (auto& child : parent.get_children()) {
+        if (!child.active) { continue; }
+        children.push_back(&child);
+        policies.push_back(child.size_policy);
+    }
+    auto const rectangles = horizontal ? layout_row(policies, parent.size)
+                                       : layout_column(policies, parent.size);
+    for (auto i = std::size_t{0}; i < children.size(); ++i) {
+        auto& child = *children[i];
+        auto const old_size = child.size;
+        child.at = rectangles[i].at;
+        child.size = rectangles[i].size;
+        child.resize(old_size);
+    }
+}
+}  // namespace detail
 
 /**
  * tuple, pair, array, etc...
@@ -227,26 +124,7 @@ class Column : public Widget {
         }
     }
 
-    void resize(Area) override
-    {
-        // TODO distribute_length filters out active children, can you do that in this
-        // scope instead?
-        auto const heights =
-            detail::distribute_length(this->get_children(), this->size.height);
-
-        auto active_children = this->get_children() | filter::is_active;
-
-        auto y = 0;
-        auto i = 0;
-        for (auto& child : active_children) {
-            child.at = {0, y};
-            auto const old_size = child.size;
-            child.size = {this->size.width, heights[i]};
-            child.resize(old_size);
-            y += heights[i];
-            ++i;
-        }
-    }
+    void resize(Area) override { detail::resize_children(*this, false); }
 };
 
 template <LayoutContainer Container>
@@ -324,26 +202,7 @@ class Row : public Widget {
         }
     }
 
-    void resize(Area) override
-    {
-        // TODO distribute_length filters out active children, can you do that in this
-        // scope instead?
-        auto const widths =
-            detail::distribute_length(this->get_children(), this->size.width);
-
-        auto active_children = this->get_children() | filter::is_active;
-
-        auto x = 0;
-        auto i = std::size_t{0};
-        for (auto& child : active_children) {
-            child.at = {.x = x, .y = 0};
-            auto const old_size = child.size;
-            child.size = {.width = widths[i], .height = this->size.height};
-            child.resize(old_size);
-            x += widths[i];
-            ++i;
-        }
-    }
+    void resize(Area) override { detail::resize_children(*this, true); }
 };
 
 template <LayoutContainer Container>
@@ -358,14 +217,16 @@ template <WidgetDerived ChildType>
 class Suspended : public Widget {
    public:
     ChildType child;
+    Area requested_size;
     Glyph fill_glyph;
 
    public:
-    explicit Suspended(ChildType&& child, Glyph fill = {U' '})
+    explicit Suspended(ChildType&& child, Area requested, Glyph fill = {U' '})
         : Widget{FocusPolicy::None, SizePolicy::flex()},
           child{std::move(child)},
+          requested_size{requested},
           fill_glyph{fill}
-    {}
+    { validate(requested_size); }
 
    public:
     void paint(Canvas c) override
@@ -389,17 +250,9 @@ class Suspended : public Widget {
     {
         auto const old_size = child.size;
 
-        // FIXME: This is a hack
-        // size_policy min => width & size_policy max => height
-        child.size = {
-            .width = std::min(child.size_policy.minimum, this->size.width),
-            .height = std::min(child.size_policy.maximum, this->size.height),
-        };
-
-        child.at = {
-            .x = (this->size.width - child.size.width) / 2,
-            .y = (this->size.height - child.size.height) / 2,
-        };
+        auto const rectangle = centered_rect(this->size, requested_size);
+        child.size = rectangle.size;
+        child.at = rectangle.at;
 
         child.resize(old_size);
     }
