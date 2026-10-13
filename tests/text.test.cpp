@@ -332,3 +332,42 @@ TEST(text_random_edits_selection_and_history_keep_valid_grapheme_boundaries)
         }
     }
 }
+
+TEST(text_layout_coordinate_index_matches_display_across_wrapping_and_line_breaks)
+{
+    auto const text = std::string{"́a\t界 é🙂\r\n\nword wide界\tend\n"};
+    for (auto wrap : {TextWrap::None, TextWrap::Any, TextWrap::Word}) {
+        for (auto width : {0, 1, 4, 9, 40}) {
+            auto layout = TextLayout{};
+            layout.update(text, width, wrap);
+            for (auto y = std::size_t{0}; y < layout.lines().size(); ++y) {
+                auto const line = layout.lines()[y];
+                auto at = line.begin;
+                auto x = 0;
+                for (auto cluster : esc::graphemes(std::string_view{text}.substr(
+                         line.begin, line.end - line.begin))) {
+                    ASSERT((layout.position(at) == Point{x, (int)y}));
+                    auto cells = 0;
+                    auto const display_text = display_grapheme(cluster, x);
+                    for (auto display : esc::graphemes(display_text)) {
+                        cells += (int)*esc::grapheme_width(display);
+                    }
+                    for (auto column = x; column < x + cells; ++column) {
+                        ASSERT(layout.offset({column, (int)y}) == at);
+                    }
+                    at += cluster.size();
+                    x += cells;
+                }
+                ASSERT(x == line.columns);
+                ASSERT(layout.offset({-100, (int)y}) == line.begin);
+                ASSERT(layout.offset({1000, (int)y}) == line.end);
+                if (line.next > line.end || y + 1 == layout.lines().size()) {
+                    ASSERT((layout.position(line.end) == Point{x, (int)y}));
+                }
+                else {
+                    ASSERT((layout.position(line.end) == Point{0, (int)y + 1}));
+                }
+            }
+        }
+    }
+}

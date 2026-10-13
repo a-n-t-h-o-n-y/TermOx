@@ -31,3 +31,7 @@ add_test(NAME TermOx.tests.unit COMMAND TermOx.tests.unit)
 # POSIX pseudo-terminal integration is driven by smoke_examples.py.
 add_executable(TermOx.tests.renderer_terminal EXCLUDE_FROM_ALL renderer_terminal.cpp)
 target_link_libraries(TermOx.tests.renderer_terminal PRIVATE TermOx)
+
+# Headless benchmarks; build explicitly in Release mode and run directly.
+add_executable(TermOx.tests.benchmarks EXCLUDE_FROM_ALL benchmarks.cpp)
+target_link_libraries(TermOx.tests.benchmarks PRIVATE TermOx)

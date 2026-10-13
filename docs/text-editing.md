@@ -136,3 +136,7 @@ Headless tests cover normalization and rejection, combining sequences and emoji,
 selection and grapheme joining, bounded history, paste transactions, wrapping and
 mapping, width-policy ownership, vertical navigation, cache reuse, extreme hit
 coordinates, randomized edits, and widget/application integration.
+
+TextLayout caches terminal coordinates alongside byte boundaries during construction.
+Caret and hit queries use binary searches without decoding or measuring text again.
+See [performance benchmarks](performance.md) for timings and the storage tradeoff.

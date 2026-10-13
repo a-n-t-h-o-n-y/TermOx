@@ -86,6 +86,7 @@ void Application::attach_widgets()
         }
         current.push_back(node.widget);
     }
+    if (current == attached_) { return; }
     for (auto const& target : attached_) {
         if (!target.valid() || std::ranges::find(current, target) != current.end()) {
             continue;

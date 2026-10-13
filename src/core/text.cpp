@@ -110,11 +110,14 @@ auto display_grapheme(std::string_view cluster,
     return result;
 }
 
-auto layout_text(std::string_view text,
-                 int width,
-                 TextWrap wrap,
-                 esc::WidthPolicy policy,
-                 int tab_width) -> std::vector<TextLine>
+namespace {
+auto build_layout(std::string_view text,
+                  int width,
+                  TextWrap wrap,
+                  esc::WidthPolicy policy,
+                  int tab_width,
+                  std::vector<std::size_t>* boundaries = nullptr,
+                  std::vector<Point>* positions = nullptr) -> std::vector<TextLine>
 {
     if (width < 0 || tab_width <= 0 ||
         (wrap != TextWrap::None && wrap != TextWrap::Any && wrap != TextWrap::Word)) {
@@ -126,6 +129,22 @@ auto layout_text(std::string_view text,
         throw std::invalid_argument{"Text layout requires one-column spaces"};
     }
     auto lines = std::vector<TextLine>{};
+    // Word wrapping can backtrack. Overwrite those coordinates when the next row
+    // starts.
+    auto record = [&](std::size_t at, int x, int y) {
+        if (!boundaries) { return; }
+        while (!boundaries->empty() && boundaries->back() > at) {
+            boundaries->pop_back();
+            positions->pop_back();
+        }
+        if (!boundaries->empty() && boundaries->back() == at) {
+            positions->back() = {x, y};
+        }
+        else {
+            boundaries->push_back(at);
+            positions->push_back({x, y});
+        }
+    };
     auto begin = std::size_t{0};
     while (begin < text.size()) {
         auto end = begin;
@@ -148,6 +167,7 @@ auto layout_text(std::string_view text,
                 next = end;
                 break;
             }
+            record(end, used, (int)lines.size());
             used = add_columns(used, cells);
             end += cluster.size();
             next = end;
@@ -156,11 +176,13 @@ auto layout_text(std::string_view text,
                 word_columns = used;
             }
         }
+        record(end, used, (int)lines.size());
         lines.push_back({begin, end, next, used});
         begin = next;
     }
     if (lines.empty() || lines.back().next > lines.back().end ||
         (wrap != TextWrap::None && width > 0 && lines.back().columns >= width)) {
+        record(text.size(), 0, (int)lines.size());
         lines.push_back({text.size(), text.size(), text.size(), 0});
     }
     if (lines.size() > (std::size_t)std::numeric_limits<int>::max()) {
@@ -169,12 +191,22 @@ auto layout_text(std::string_view text,
     return lines;
 }
 
+}  // namespace
+
+auto layout_text(std::string_view text,
+                 int width,
+                 TextWrap wrap,
+                 esc::WidthPolicy policy,
+                 int tab_width) -> std::vector<TextLine>
+{ return build_layout(text, width, wrap, policy, tab_width); }
+
 void swap(TextLayout& a, TextLayout& b) noexcept
 {
     using std::swap;
     swap(a.text_, b.text_);
     swap(a.lines_, b.lines_);
     swap(a.boundaries_, b.boundaries_);
+    swap(a.positions_, b.positions_);
     swap(a.width_, b.width_);
     swap(a.wrap_, b.wrap_);
     swap(a.policy_, b.policy_);
@@ -205,14 +237,17 @@ auto TextLayout::update(std::string_view text,
         text_ == text && same_policy(this->policy(), policy)) {
         return false;
     }
-    auto lines = layout_text(text, width, wrap, policy, tab_width);
-    auto breaks = grapheme_boundaries(text);
+    auto breaks = std::vector<std::size_t>{};
+    auto positions = std::vector<Point>{};
+    auto lines =
+        build_layout(text, width, wrap, policy, tab_width, &breaks, &positions);
     auto owned_text = std::string{text};
     auto overrides = std::vector<esc::ScalarWidthOverride>{policy.overrides.begin(),
                                                            policy.overrides.end()};
     text_.swap(owned_text);
     lines_.swap(lines);
     boundaries_.swap(breaks);
+    positions_.swap(positions);
     overrides_.swap(overrides);
     policy_ = policy;
     policy_.overrides = {};
@@ -224,37 +259,28 @@ auto TextLayout::update(std::string_view text,
 
 auto TextLayout::position(std::size_t offset) const -> Point
 {
-    if (!std::ranges::binary_search(boundaries_, offset)) {
+    auto const found = std::ranges::lower_bound(boundaries_, offset);
+    if (found == boundaries_.end() || *found != offset) {
         throw std::invalid_argument{"Caret is not a grapheme boundary"};
     }
-    auto y = std::size_t{0};
-    while (y + 1 < lines_.size() && offset >= lines_[y].next) {
-        ++y;
-    }
-    auto x = 0;
-    auto const& line = lines_[y];
-    for (auto cluster : esc::graphemes(
-             std::string_view{text_}.substr(line.begin, offset - line.begin))) {
-        if (cluster == "\n" || cluster == "\r" || cluster == "\r\n") { break; }
-        x = add_columns(x, columns(cluster, x, policy(), tab_width_));
-    }
-    return {x, (int)y};
+    return positions_[(std::size_t)(found - boundaries_.begin())];
 }
 
 auto TextLayout::offset(Point point) const -> std::size_t
 {
     auto const y = std::clamp(point.y, 0, (int)lines_.size() - 1);
     auto const& line = lines_[(std::size_t)y];
-    auto x = 0;
-    auto at = line.begin;
-    for (auto cluster : esc::graphemes(
-             std::string_view{text_}.substr(line.begin, line.end - line.begin))) {
-        auto const end = add_columns(x, columns(cluster, x, policy(), tab_width_));
-        if (point.x < end) { return at; }
-        at += cluster.size();
-        x = end;
-    }
-    return line.end;
+    if (point.x <= 0) { return line.begin; }
+    if (point.x >= line.columns) { return line.end; }
+    auto const begin = (std::size_t)(std::ranges::lower_bound(boundaries_, line.begin) -
+                                     boundaries_.begin());
+    auto const end = (std::size_t)(std::ranges::lower_bound(boundaries_, line.end) -
+                                   boundaries_.begin());
+    auto const found =
+        std::upper_bound(positions_.begin() + (std::ptrdiff_t)begin,
+                         positions_.begin() + (std::ptrdiff_t)end, point.x,
+                         [](int x, Point at) { return x < at.x; });
+    return boundaries_[(std::size_t)(found - positions_.begin()) - 1];
 }
 
 TextEdit::TextEdit(std::string_view text, bool multiline, std::size_t history_limit)

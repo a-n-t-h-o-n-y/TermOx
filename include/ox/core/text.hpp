@@ -66,6 +66,7 @@ class TextLayout {
     std::string text_;
     std::vector<TextLine> lines_{{0, 0, 0, 0}};
     std::vector<std::size_t> boundaries_{0};
+    std::vector<Point> positions_{{0, 0}};
     int width_ = -1;
     TextWrap wrap_ = TextWrap::Word;
     esc::WidthPolicy policy_;

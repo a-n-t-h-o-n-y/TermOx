@@ -104,6 +104,9 @@ cmake --build build --target TermOx.tests.renderer_terminal \
 python3 tests/smoke_examples.py build
 ```
 
+Headless [performance benchmarks](docs/performance.md) cover text editing, layout,
+routing, and rendering, with recorded before/after measurements.
+
 ## Application Core
 
 The application owns its event loop and focus. Timers share the loop's steady-clock
