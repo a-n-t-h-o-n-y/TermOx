@@ -89,13 +89,7 @@ void LineEdit::paint(Canvas c)
     anchor_index_ = std::min(anchor_index_, unicode.size());
     cursor_index_ = std::min(cursor_index_, unicode.size());
 
-    auto const is_ghost = [this] {
-        Widget const* const focused = [] {
-            auto const life = Focus::get();
-            return life.valid() ? &life.get() : nullptr;
-        }();
-        return text.empty() && focused != this;
-    }();
+    auto const is_ghost = text.empty() && !this->focused;
 
     auto const trim = [this](std::u32string_view sv) -> std::u32string_view {
         return sv.substr(anchor_index_,

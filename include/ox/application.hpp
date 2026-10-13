@@ -1,64 +1,51 @@
 #pragma once
 
-#include <map>
-#include <optional>
-
 #include <ox/core/core.hpp>
+#include <ox/focus.hpp>
 #include <ox/widget.hpp>
 
 namespace ox {
 
-/**
- * Top level Application class that handles event processing and painting.
- */
+/** Owns widget interaction and a terminal-independent event loop. */
 class Application {
    public:
-    /// Map of Timer::id to target Widget.
-    static inline std::map<int, LifetimeView<Widget>> timer_targets;
+    explicit Application(Widget& head);
+    ~Application();
 
-   public:
-    /**
-     * Create an Application that will forward events to the given head Widget and use
-     * the given Terminal to paint the screen.
-     */
-    explicit Application(Widget& head, Terminal::Options options = {});
+    Application(Application const&) = delete;
+    auto operator=(Application const&) -> Application& = delete;
 
-   public:
-    /// Run the application, processing events and painting the screen. Blocking.
-    auto run() -> int;
+    /** Open a terminal and drive the application on the calling thread. */
+    auto run(Terminal::Options options = {}) -> int;
 
-    /**
-     * Set a flag to break out of the `run()` loop.
-     * @param code The value that `run()` will return.
-     */
-    static void quit(int code);
+    /** Dispatch a batch and due timers without terminal I/O. */
+    auto step(EventLoop::Clock::time_point now = EventLoop::Clock::now())
+        -> EventResponse;
+    auto paint() -> bool;
+    void post(Event event);
+    void request_repaint();
+    void quit(int code = 0);
 
-   public:
+    auto loop() -> EventLoop& { return loop_; }
+    auto focus() -> Focus& { return focus_; }
+
     auto handle_mouse_press(MousePress m) -> EventResponse;
-
     auto handle_mouse_release(MouseRelease m) -> EventResponse;
-
     auto handle_mouse_wheel(MouseWheel m) -> EventResponse;
-
     auto handle_mouse_move(MouseMove m) -> EventResponse;
-
     auto handle_key_press(KeyEvent k) -> EventResponse;
-
     auto handle_key_release(KeyEvent k) -> EventResponse;
-
     auto handle_paste(esc::PasteChunk const& chunk) -> EventResponse;
-
     auto handle_resize(Area new_size) -> EventResponse;
-
-    auto handle_timer(int id) -> EventResponse;
-
     auto handle_paint(Canvas canvas) -> Terminal::Cursor;
 
    private:
     Widget& head_;
-    Terminal term_;
+    EventLoop loop_;
+    Focus focus_;
+    std::vector<LifetimeView<Widget>> attached_;
     Point previous_mouse_position_{0, 0};
-    static std::optional<int> quit_request_;
-};
 
+    void attach_widgets();
+};
 }  // namespace ox

@@ -2,11 +2,8 @@
 
 #include <chrono>
 #include <map>
-#include <mutex>
 #include <optional>
-#include <stop_token>
 #include <string>
-#include <thread>
 #include <type_traits>
 #include <variant>
 #include <vector>
@@ -107,30 +104,17 @@ class Terminal {
     };
 
    public:
-    ScreenBuffer changes{{0, 0}};          // write to this
-    inline static EventQueue event_queue;  // read from this
-
     Color foreground = default_color;
     Color background = default_color;
 
-    /**
-     * The current cursor position on the terminal.
-     *
-     * @details This is used by the event loop after `changes` has been committed to the
-     * terminal. If this is std::nullopt, then the cursor is not displayed.
-     */
-    Cursor cursor{std::nullopt};
-
    public:
     /**
-     * Initializes the terminal display and starts reading events in separate thread,
-     * appending to the event_queue.
+     * Initializes the terminal display.
      */
     Terminal(Options x);
 
     /**
-     * Initializes the terminal display and starts reading events in separate thread,
-     * appending to the event_queue.
+     * Initializes the terminal display.
      *
      * @param mouse_mode The MouseMode to set the terminal to.
      * @param signals Whether OS Signals should be enabled or disabled.
@@ -149,24 +133,19 @@ class Terminal {
      * Uninitializes the terminal display, resets the state to before the constructor
      * was called.
      */
-    ~Terminal();
+    ~Terminal() = default;
 
    public:
     /**
-     * Write changes ScreenBuffer to the terminal and update current_screen_.
+     * Compare the supplied screen with the previous frame and write changes.
      *
      * @details This is called automatically by the Application class after an event has
      * been processed.
      */
-    void commit_changes();
+    void commit_changes(ScreenBuffer const& screen, Cursor cursor = {});
 
-    /**
-     * Runs a loop that reads input from the terminal and appends it to the
-     * Terminal::event_queue. Exits when the stop_token is stop_requested().
-     *
-     * @param st The stop_token to check for stop_requested().
-     */
-    void run_read_loop(std::stop_token st);
+    /** Read terminal input on the calling thread. */
+    auto read(std::chrono::milliseconds timeout) -> std::optional<Event>;
 
     /**
      * Returns the current size of the terminal.
@@ -178,8 +157,6 @@ class Terminal {
    private:
     ScreenBuffer current_screen_{{0, 0}};
     esc::Terminal session_;
-    std::mutex session_mutex_;
-    std::jthread terminal_input_thread_;
     std::string escape_sequence_;
 };
 
@@ -219,16 +196,15 @@ struct Canvas {
  * @param ev The Event to handle.
  * @param handler The event handler to process the event.
  * @param buffer The ScreenBuffer to write changes to on paint event.
- * @return std::optional<EventResponse> The response from the handler, or std::nullopt
- * if not handled.
+ * @return Handling, repaint, and exit decisions.
  */
 template <typename T>
 [[nodiscard]] auto apply_event(Event const& ev, T& handler, ScreenBuffer& buffer)
-    -> std::optional<EventResponse>
+    -> EventResponse
 {
     return std::visit(
         zzz::Overload{
-            [&](esc::KeyEvent const& e) -> std::optional<EventResponse> {
+            [&](esc::KeyEvent const& e) -> EventResponse {
                 if (e.action == KeyAction::Release) {
                     if constexpr (HandlesKeyRelease<T>) {
                         return handler.handle_key_release(e);
@@ -239,69 +215,69 @@ template <typename T>
                         return handler.handle_key_press(e);
                     }
                 }
-                return std::nullopt;
+                return {};
             },
-            [&](esc::MousePress e) -> std::optional<EventResponse> {
+            [&](esc::MousePress e) -> EventResponse {
                 if constexpr (HandlesMousePress<T>) {
                     return handler.handle_mouse_press(e);
                 }
                 else {
-                    return std::nullopt;
+                    return {};
                 }
             },
-            [&](esc::MouseRelease e) -> std::optional<EventResponse> {
+            [&](esc::MouseRelease e) -> EventResponse {
                 if constexpr (HandlesMouseRelease<T>) {
                     return handler.handle_mouse_release(e);
                 }
                 else {
-                    return std::nullopt;
+                    return {};
                 }
             },
-            [&](esc::MouseWheel e) -> std::optional<EventResponse> {
+            [&](esc::MouseWheel e) -> EventResponse {
                 if constexpr (HandlesMouseWheel<T>) {
                     return handler.handle_mouse_wheel(e);
                 }
                 else {
-                    return std::nullopt;
+                    return {};
                 }
             },
-            [&](esc::MouseMove e) -> std::optional<EventResponse> {
+            [&](esc::MouseMove e) -> EventResponse {
                 if constexpr (HandlesMouseMove<T>) {
                     return handler.handle_mouse_move(e);
                 }
                 else {
-                    return std::nullopt;
+                    return {};
                 }
             },
-            [&](esc::Resize e) -> std::optional<EventResponse> {
+            [&](esc::Resize e) -> EventResponse {
                 buffer.resize(e.size);
                 buffer.fill(Glyph{});
                 if constexpr (HandlesResize<T>) {
-                    return handler.handle_resize(e.size);
+                    auto result = handler.handle_resize(e.size);
+                    result.repaint = true;
+                    return result;
                 }
                 else {
-                    return std::nullopt;
+                    return {.repaint = true};
                 }
             },
-            [&](event::Timer e) -> std::optional<EventResponse> {
+            [&](event::Timer e) -> EventResponse {
                 if constexpr (HandlesTimer<T>) { return handler.handle_timer(e.id); }
                 else {
-                    return std::nullopt;
+                    return {};
                 }
             },
-            [](event::Custom const& e) -> std::optional<EventResponse> {
-                return e.action();
+            [](event::Custom const& e) -> EventResponse { return e.action(); },
+            [](event::Interrupt) -> EventResponse {
+                return {.handled = true, .quit = 1};
             },
-            [](event::Interrupt) -> std::optional<EventResponse> {
-                return QuitRequest{1};
-            },
-            [&](esc::PasteChunk const& e) -> std::optional<EventResponse> {
+            [&](esc::PasteChunk const& e) -> EventResponse {
                 if constexpr (requires { handler.handle_paste(e); }) {
                     return handler.handle_paste(e);
                 }
-                return std::nullopt;
+                return {};
             },
-            [](auto const&) -> std::optional<EventResponse> { return std::nullopt; }},
+            [](auto const&) -> EventResponse { return {}; }},
         ev);
 }
 
@@ -309,38 +285,5 @@ template <typename T>
 concept HandlesPaint = requires(T t, Canvas c) {
     { t.handle_paint(c) } -> std::same_as<Terminal::Cursor>;
 };
-
-/**
- * Runs an event loop over the Terminal::event_queue, sending events to the given event
- * handler.
- *
- * @details This will block until it receives a QuitRequest. The application can be quit
- * by responding to an Event handler with a QuitRequest object.
- * @param term The Terminal object.
- * @param handler The handler object that all events will be sent to.
- * @return The return code of the application, passed in via QuitRequest.
- */
-template <typename EventHandler>
-[[nodiscard]] auto process_events(Terminal& term, EventHandler& handler) -> int
-{
-    while (true) {
-        auto const event = Terminal::event_queue.pop();  // Blocking Call
-        auto const result = apply_event(event, handler, term.changes);
-
-        if (result.has_value()) {
-            if (auto& quit = *result; quit.has_value()) { return quit->return_code; }
-            else {
-                if constexpr (HandlesPaint<EventHandler>) {
-                    term.cursor = handler.handle_paint(Canvas{
-                        .buffer = term.changes,
-                        .at = {0, 0},
-                        .size = term.changes.size(),
-                    });
-                }
-                term.commit_changes();
-            }
-        }
-    }
-}
 
 }  // namespace ox

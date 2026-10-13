@@ -13,8 +13,6 @@
 #include <variant>
 #include <vector>
 
-#include <zzz/timer_thread.hpp>
-
 #include <ox/core/core.hpp>
 #include <ox/put.hpp>
 
@@ -42,10 +40,6 @@ struct SplashScreen {
     std::uint16_t hue{0};
     std::string_view display{logo};
     static constexpr int timer_id = 1;
-    zzz::TimerThread timer{
-        std::chrono::milliseconds{30},
-        [] { Terminal::event_queue.enqueue(event::Timer{SplashScreen::timer_id}); },
-    };
 };
 
 struct MainMenu {
@@ -110,10 +104,6 @@ struct Game {
     } ball{};
 
     static constexpr int timer_id = 2;
-    zzz::TimerThread timer{
-        std::chrono::milliseconds{30},
-        [] { Terminal::event_queue.enqueue(event::Timer{Game::timer_id}); },
-    };
 };
 
 struct PlayerSelectMenu {
@@ -595,7 +585,6 @@ auto timer(SplashScreen x, int id) -> PongEventResponse
     return SplashScreen{
         .hue = (std::uint16_t)((x.hue + 2) % 360),
         .display = x.display,
-        .timer = std::move(x.timer),
     };
 }
 
@@ -753,50 +742,55 @@ auto timer(State s, int id) -> PongEventResponse
 
 class Pong {
    public:
-    Pong(ScreenBuffer& buffer) : buffer_{buffer} {}
+    Pong(EventLoop& loop)
+        : ticker_{std::chrono::milliseconds{30}, [this] {
+                      if (std::holds_alternative<SplashScreen>(state_)) {
+                          return this->handle_timer(SplashScreen::timer_id);
+                      }
+                      if (std::holds_alternative<Game>(state_)) {
+                          return this->handle_timer(Game::timer_id);
+                      }
+                      return EventResponse{};
+                  }}
+    { loop.watch(ticker_); }
 
-   public:
     auto handle_key_press(KeyEvent k) -> EventResponse
-    {
-        return std::visit(
-            [this](auto result) -> EventResponse {
-                if constexpr (std::is_same_v<decltype(result), QuitRequest>) {
-                    return result;
-                }
-                else {
-                    state_ = std::move(result);
-                    paint(state_, buffer_);
-                    return {};
-                }
-            },
-            key_press(std::move(state_), k));
-    }
+    { return this->update(key_press(std::move(state_), k)); }
 
     auto handle_timer(int id) -> EventResponse
-    {
-        return std::visit(
-            [this](auto result) -> EventResponse {
-                if constexpr (std::is_same_v<decltype(result), QuitRequest>) {
-                    return result;
-                }
-                else {
-                    state_ = std::move(result);
-                    paint(state_, buffer_);
-                    return {};
-                }
-            },
-            timer(std::move(state_), id));
-    }
+    { return this->update(timer(std::move(state_), id)); }
 
-    auto handle_resize(Area) -> EventResponse
+    auto handle_paint(Canvas canvas) -> Terminal::Cursor
     {
-        paint(state_, buffer_);
+        paint(state_, canvas.buffer);
         return {};
     }
 
    private:
     State state_ = SplashScreen{};
-    ScreenBuffer& buffer_;
+    Timer ticker_;
+
+    auto update(PongEventResponse response) -> EventResponse
+    {
+        return std::visit(
+            [this](auto result) -> EventResponse {
+                if constexpr (std::same_as<decltype(result), QuitRequest>) {
+                    return {.handled = true, .quit = result.return_code};
+                }
+                else {
+                    state_ = std::move(result);
+                    if (std::holds_alternative<SplashScreen>(state_) ||
+                        std::holds_alternative<Game>(state_)) {
+                        if (!ticker_.is_running()) { ticker_.start(); }
+                    }
+                    else {
+                        ticker_.stop();
+                    }
+                    return {.handled = true, .repaint = true};
+                }
+            },
+            std::move(response));
+    }
 };
 
 // -------------------------------------------------------------------------------------
@@ -805,9 +799,10 @@ int main()
 {
     try {
         auto term = Terminal{};
-        auto pong = Pong{term.changes};
+        auto loop = EventLoop{};
+        auto pong = Pong{loop};
 
-        return process_events(term, pong);
+        return process_events(loop, term, pong);
     }
     catch (std::exception const& e) {
         std::cerr << "Error: " << e.what() << '\n';

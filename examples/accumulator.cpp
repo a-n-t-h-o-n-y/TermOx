@@ -89,5 +89,5 @@ int main()
         .slot = [](int n, auto& total_label) { total_label.value += n; },
     }(total_label);
 
-    return Application{head, {.mouse_mode = MouseMode::Move}}.run();
+    return Application{head}.run({.mouse_mode = MouseMode::Move});
 }

@@ -6,16 +6,20 @@ namespace ox {
 
 void Focus::set(Widget& w)
 {
+    if (in_focus_.valid() && &in_focus_.get() == &w) { return; }
     if (in_focus_.valid()) {
+        in_focus_.get().focused = false;
         in_focus_.get().focus_out();
     }
     in_focus_ = track(w);
+    w.focused = true;
     w.focus_in();
 }
 
 void Focus::clear()
 {
     if (in_focus_.valid()) {
+        in_focus_.get().focused = false;
         in_focus_.get().focus_out();
     }
     in_focus_ = std::shared_ptr<Widget*>{nullptr};

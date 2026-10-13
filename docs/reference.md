@@ -2,260 +2,49 @@
 
 ## 🧩 ox::Application
 
-[`#include <ox/application.hpp`](../include/ox/application.hpp)
+[`#include <ox/application.hpp>`](../include/ox/application.hpp)
 
-`class Application;`
-
-This is the main entry point to any **TermOx** Widget based application. The Application
-class orchestrates reading of Events and writing updates to the Terminal. It implements
-event handler functions to process Events.
+An application owns its event loop, focus, and widget interaction. Construction does
+not open a terminal. The root widget must outlive the application.
 
 ```cpp
-int main() {
-    auto head = MyWidget{};
-    return Application{head, {.mouse_mode = MouseMode::Move}}.run();
-}
+auto app = Application{head};
+return app.run({.mouse_mode = MouseMode::Move});
 ```
 
-<details>
-<summary><strong>Details</strong></summary>
+`step(now)` dispatches posted events and due timers without terminal I/O. `paint()`
+paints a pending frame; `loop().screen` contains its cells. `post(event)` accepts events
+from background threads. `request_repaint()` and `quit(code)` operate on the application
+thread. `focus()` returns the application's focus manager.
 
-### 🏗️ Constructors
-
-```cpp
-explicit Application(Widget& head, Terminal::Options options = {});
-```
-
-Construct an Application object with the given head Widget and Terminal. The head Widget
-is an l-value reference and must outlive the Application object.
-
-```cpp
-Application(Application const&) = delete;
-Application(Application&&) = delete;
-auto operator=(Application const&) -> Application& = delete;
-auto operator=(Application&&) -> Application& = delete;
-```
-
-Application is non-copyable and non-movable.
-
----
-
-### `Application::run`
-
-```cpp
-auto run() -> int;
-```
-
-This launches the event loop:
-
-- Read user input, creating Events.
-- Feed each Event to the head Widget.
-- Write updates to the Terminal.
-
-Will continue to loop until `Application::quit` has been called. The return value is the
-integer code passed to `Application::quit`.
-
----
-
-### `Application::quit`
-
-```cpp
-static void quit(int code);
-```
-
-Set a flag to break out of the `Application::run` call on the next iteration. This can
-be called from any event processor function, including any Widget virtual function event
-handler (excluding `Widget::paint(...)`). The `code` parameter will be returned from the
-`Application::run` call.
-
-If Terminal OS Signals are enabled (the default), `ctrl + c` will quit the Application
-loop as well.
-
----
-
-</details>
+See [the event loop guide](event-loop.md) for the response contract and scheduling.
 
 ## 🧩 ox::Timer
 
-[`#include <ox/timer.hpp`](../include/ox/timer.hpp)
+[`#include <ox/timer.hpp>`](../include/ox/timer.hpp)
 
-`class Timer;`
-
-Posts `event::Timer` objects at regular intervals to the EventQueue.
-
-```cpp
-struct MyWidget : Widget {
-    Timer timer {*this, std::chrono::milliseconds{500}, true};
-    int count{0};
-
-    void timer() override { ++count; }
-};
-```
-
-<details>
-<summary><strong>Details</strong></summary>
-
-This uses its own internal thread to enqueue Events. Each Timer is tied to a single
-Widget, which will recieve the Events. Timer events are handled with the
-`Widget::timer()` virtual function, typically you would update the Widget state, the
-`Widget::paint(Canvas)` event handler will be called automatically after the timer event
-handler.
-
-The Widget lifetime is handled by a `LifetimeView` and will remain valid after moving a
-Widget. Though not recommended for clarity, it is safe to delete a Widget without
-deleting its associated Timer.
-
-
-### 🏗️ Constructors
+A movable timer handle using the event loop's steady-clock scheduler. Timers create no
+threads. Retain the handle to retain its schedule.
 
 ```cpp
-explicit Timer(Widget& w, std::chrono::milliseconds duration, bool launch = false);
+Timer(Widget& widget, std::chrono::milliseconds interval, bool launch = false);
+Timer(std::chrono::milliseconds interval,
+      std::function<EventResponse()> callback,
+      bool launch = true);
 ```
 
-Construct a Timer to post to the EventQueue. The given Widget `w` will receive the Timer
-events, sent every `duration`. If launch is `true`, the Timer will begin at
-construction. The timer does not send an event until after the first `duration`
-interval.
-
-```cpp
-Timer(Timer const&) = delete;
-Timer(Timer&& other);
-auto operator=(Timer const&) -> Timer& = delete;
-auto operator=(Timer&& other) -> Timer&;
-```
-
-Move only.
-
----
-
-### 🧹 Destructor
-
-If the Timer is running, requests a stop and joins the thread. Check out
-`zzz::TimerThread` for details, the gist is it owns a `std::jthread` which will join the
-thread on destruction. As of this writing, `zzz::TimerThread` checks for a stop request
-at least every 16 milliseconds.
-
----
-
-### `Timer::start`
-
-```cpp
-void start();
-```
-
-Begin waiting on duration and posting events.
-
----
-
-### `Timer::stop`
-
-```cpp
-void stop();
-```
-
-Requests a stop, returns immediately, does not wait on thread to fully quit.
-
----
-
-### `Timer::id`
-
-```cpp
-auto id() const -> int;
-```
-
-Returns the unique Timer id for the instance.
-
----
-
-### `Timer::duration`
-
-```cpp
-auto duration() const -> std::chrono::milliseconds;
-```
-
-Returns the duration the Timer was constructed with.
-
----
-
-### `Timer::is_running`
-
-```cpp
-auto is_running() const -> bool;
-```
-
-Returns true if `start()` has been called and the Timer is currently running (i.e.,
-`stop()` has not been called since the last `start()`).
-
----
-
-</details>
+Widget timers are adopted by the owning application. Register a callback timer with
+`loop.watch(timer)`. Intervals must be positive. `start(now)` resets the deadline,
+`stop()` cancels it, and `is_running()` reports whether a deadline exists. Delayed
+execution produces one tick, preserving cadence and skipping missed ticks.
 
 ## 🧩 ox::Focus
 
 [`#include <ox/focus.hpp>`](../include/ox/focus.hpp)
 
-`class Focus;`
-
-Manages the focus of Widgets. When a Widget is in focus, it will receive keyboard input.
-Only one Widget can be in focus at a time.
-
-```cpp
-Focus::set(my_widget);
-
-auto in_focus = Focus::get();
-if (in_focus.valid()) { in_focus.get().foo(); }
-```
-
-<details>
-<summary><strong>Details</strong></summary>
-
-### 🏗️ Constructors
-
-```cpp
-Focus() = delete;
-Focus(Timer const&) = delete;
-Focus(Timer&& other) = delete;
-auto operator=(Focus const&) -> Focus& = delete;
-auto operator=(Focus&& other) -> Focus& = delete;
-```
-
-Everything is static, no need for instantiations.
-
----
-
-### `Focus::set`
-
-```cpp
-static void set(Widget& w);
-```
-
-Sets the current focus to `w`. Invokes the `Widget::focus_out` event handler on the
-currently in focus Widget, if one exists, and `Widget::focus_in` on the passed in `w`.
-
----
-
-### `Focus::get`
-
-```cpp
-static auto get() -> LifetimeView<Widget>;
-```
-
-Returns a `LifetimeView` of the in focus Widget, which will not be valid if nothing is
-in focus.
-
----
-
-### `Focus::clear`
-
-```cpp
-static void clear();
-```
-
-Clears the focus, removing any in focus Widget, invoking `Widget::focus_out` on it.
-
----
-
-</details>
+A focus manager owned by each application. `app.focus().set(widget)` sends focus-out
+and focus-in callbacks, `get()` returns a lifetime view, and `clear()` removes focus.
+`Widget::focused` exposes the current focus state to painting code.
 
 ## 📦 ox::shape::HLine
 
@@ -2371,7 +2160,7 @@ output value; use `esc::glyphs(text)` first when painting to a TermOx canvas.
 `class Terminal;`
 
 Represents the terminal itself, providing an event loop and screen writing tools.
-Application constructs its terminal from `Terminal::Options`.
+Application opens a terminal in `run(Terminal::Options)` on the calling thread.
 
 ```cpp
 auto t = Terminal{{
@@ -2438,80 +2227,22 @@ auto operator=(Terminal const&) -> Terminal& = delete;
 auto operator=(Terminal&&) -> Terminal& = delete;
 ```
 
-Terminals stay at a fixed address while their input thread runs. `Application`
-constructs its terminal in place from `Terminal::Options`.
+Terminal objects own an Escape session. Reading and rendering run on the calling thread.
 
 ---
 
 ### 🧹 Destructor
 
-Stops and joins the input thread, then restores the session-owned terminal state.
+Restores the session-owned terminal state.
 
 ---
 
-### `Terminal::changes`
+### Reading and rendering
 
-```cpp
-ScreenBuffer changes;  // write to this
-```
-
-A buffer of the 'staged changes' to commit to the screen later.
-
-### `Terminal::event_queue`
-
-```cpp
-static EventQueue event_queue; // read from this
-```
-
-The queue of user input events.
-
-### `Terminal::foreground` `Terminal::background`
-
-```cpp
-Color foreground = default_color;
-Color background = default_color;
-```
-
-The Colors used when `default_color` is used. These are the 'default' colors for
-the entire application, this is what `Style` defaults to.
-
-### `Terminal::cursor`
-
-```cpp
-using Cursor = std::optional<Point>;
-Cursor cursor{std::nullopt};
-```
-
-The current cursor location, if any. Top-left is `Point{0, 0}`.
-
----
-
-### `Terminal::commit_changes`
-
-```cpp
-void commit_changes();
-```
-
-Write the `changes` to the actual terminal screen and reset `changes` to default state.
-
----
-
-### `Terminal::run_read_loop`
-
-```cpp
-void run_read_loop(std::stop_token st);
-```
-
-Runs a loop that reads input from the terminal and appends it to the `event_queue`.
-Exits when the `stop_token` is `stop_requested()`.
-
----
-
-### `Terminal::size`
-
-Returns the current size of the terminal screen.
-
----
+`read(timeout)` returns an optional TermOx event. `commit_changes(screen, cursor)`
+compares a supplied screen with the previous frame and presents its changes.
+`size()` returns terminal dimensions. Frame storage and repaint requests belong to
+`EventLoop`, described in [the event loop guide](event-loop.md).
 
 </details>
 
@@ -2579,15 +2310,13 @@ Holds the 2D matrix of Glyphs that make up the screen display state. This is use
 core of the library and direct access should not be needed by the typical user of this
 library.
 
-## 🧩 ox::EventQueue
+## 🧩 ox::EventLoop
 
-[`#include <ox/core/events.hpp>`](../include/ox/core/events.hpp)
+[`#include <ox/core/event_loop.hpp>`](../include/ox/core/event_loop.hpp)
 
-`using EventQueue = ConcurrentQueue<Event>;`
-
-A multi-producer single-consumer queue of Events for the Application to process. This is
-used by the core of the library and direct access should not be needed by the typical
-user of this library.
+Owns queued events, scheduled timers, frame storage, repaint state, and the exit code.
+`post()` is thread safe. `step(handler, now)` and `paint(handler)` run without terminal
+I/O. `process_events(loop, terminal, handler)` drives the same core with terminal input.
 
 ## 🔢 ox::Event
 

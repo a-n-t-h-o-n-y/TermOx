@@ -5,7 +5,7 @@
 #include <ranges>
 #include <utility>
 
-#include <zzz/timer_thread.hpp>
+#include <stdexcept>
 
 #include <ox/core/core.hpp>
 #include <ox/focus.hpp>
@@ -74,7 +74,7 @@ void for_each_depth_first(Widget& w, std::function<void(Widget&)> const& fn)
 enum class SetFocus : bool { Yes, No };
 
 template <SetFocus SF, typename MouseEvent, typename EventFn>
-void any_mouse_event(Widget& head, MouseEvent m, EventFn&& event_fn)
+void any_mouse_event(Focus& focus, Widget& head, MouseEvent m, EventFn&& event_fn)
 {
     Widget* const found_ptr =
         find_widget_at(head.get_children() | filter::is_active, m.at);
@@ -83,14 +83,14 @@ void any_mouse_event(Widget& head, MouseEvent m, EventFn&& event_fn)
         if constexpr (SF == SetFocus::Yes) {
             if (head.focus_policy == FocusPolicy::Strong ||
                 head.focus_policy == FocusPolicy::Click) {
-                Focus::set(head);
+                focus.set(head);
             }
         }
         std::forward<EventFn>(event_fn)(head, m);
     }
     else {
         m.at = m.at - found_ptr->at;
-        any_mouse_event<SF>(*found_ptr, m, event_fn);
+        any_mouse_event<SF>(focus, *found_ptr, m, event_fn);
     }
 }
 
@@ -124,7 +124,7 @@ void send_enter_leave_events(Widget& w, Point previous, Point current)
 
 // -------------------------------------------------------------------------------------
 
-void do_tab_focus_change(Widget& head, Widget const& current_focus)
+void do_tab_focus_change(Focus& focus, Widget& head, Widget const& current_focus)
 {
     Widget* next = find_if_depth_first(
         head, [found = false, &current_focus](Widget const& w) mutable {
@@ -145,10 +145,10 @@ void do_tab_focus_change(Widget& head, Widget const& current_focus)
         });
     }
 
-    if (next != nullptr && next != &current_focus) { Focus::set(*next); }
+    if (next != nullptr && next != &current_focus) { focus.set(*next); }
 }
 
-void do_shift_tab_focus_change(Widget& head, Widget const& current_focus)
+void do_shift_tab_focus_change(Focus& focus, Widget& head, Widget const& current_focus)
 {
     Widget* next = nullptr;
 
@@ -170,15 +170,18 @@ void do_shift_tab_focus_change(Widget& head, Widget const& current_focus)
         });
     }
 
-    if (next != nullptr && next != &current_focus) { Focus::set(*next); }
+    if (next != nullptr && next != &current_focus) { focus.set(*next); }
 }
 
 // Recursively send paint events to each Widget including and below head. \p cursor is
 // assigned to if the current focus widget is painted.
-void send_paint_events(Widget& head, Canvas canvas, Terminal::Cursor& cursor_out)
+void send_paint_events(Focus const& focus,
+                       Widget& head,
+                       Canvas canvas,
+                       Terminal::Cursor& cursor_out)
 {
     for (auto& child : head.get_children() | filter::is_active) {
-        send_paint_events(child,
+        send_paint_events(focus, child,
                           Canvas{
                               .buffer = canvas.buffer,
                               .at = canvas.at + child.at,
@@ -188,7 +191,7 @@ void send_paint_events(Widget& head, Canvas canvas, Terminal::Cursor& cursor_out
     }
     if (head.active && head.size.width > 0 && head.size.height > 0) {
         head.paint(canvas);
-        if (auto const life = Focus::get(); life.valid() && &(life.get()) == &head) {
+        if (auto const life = focus.get(); life.valid() && &(life.get()) == &head) {
             cursor_out = head.cursor ? canvas.at + *head.cursor : head.cursor;
         }
     }
@@ -198,77 +201,160 @@ void send_paint_events(Widget& head, Canvas canvas, Terminal::Cursor& cursor_out
 
 namespace ox {
 
-Application::Application(Widget& head, Terminal::Options options)
-    : head_{head}, term_{options}
-{}
-
-auto Application::run() -> int
+Application::Application(Widget& head) : head_{head}
 {
-    quit_request_ = std::nullopt;
-    return process_events(term_, *this);
+    try {
+        this->attach_widgets();
+        if (auto initial = find_if_depth_first(head_, [](Widget const& widget) {
+                return widget.active && (widget.focus_policy == FocusPolicy::Strong ||
+                                         widget.focus_policy == FocusPolicy::Tab);
+            })) {
+            focus_.set(*initial);
+        }
+    }
+    catch (...) {
+        for (auto const& target : attached_) {
+            if (target.valid() && target.get().application_ == this) {
+                for (auto const& timer : target.get().timers_) {
+                    loop_.unwatch(timer);
+                }
+                target.get().application_ = nullptr;
+            }
+        }
+        throw;
+    }
 }
 
-void Application::quit(int code) { quit_request_ = code; }
+Application::~Application()
+{
+    focus_.clear();
+    for (auto const& target : attached_) {
+        if (target.valid() && target.get().application_ == this) {
+            for (auto const& timer : target.get().timers_) {
+                loop_.unwatch(timer);
+            }
+            target.get().application_ = nullptr;
+        }
+    }
+}
+
+void Application::attach_widgets()
+{
+    auto current = std::vector<LifetimeView<Widget>>{};
+    for_each_depth_first(head_, [&](Widget& widget) {
+        if (widget.application_ && widget.application_ != this) {
+            throw std::logic_error{"Widget already belongs to an application"};
+        }
+        current.push_back(track(widget));
+    });
+    for (auto const& target : attached_) {
+        if (!target.valid()) { continue; }
+        auto& widget = target.get();
+        if (std::ranges::none_of(
+                current, [&](auto const& entry) { return &entry.get() == &widget; })) {
+            if (widget.focused) { focus_.clear(); }
+            widget.application_ = nullptr;
+            for (auto const& entry : widget.timers_) {
+                loop_.unwatch(entry);
+            }
+        }
+    }
+    attached_ = std::move(current);
+    for (auto const& target : attached_) {
+        auto& widget = target.get();
+        if (widget.application_ == this) { continue; }
+        for (auto const& timer : widget.timers_) {
+            loop_.watch(timer);
+        }
+        widget.application_ = this;
+        std::erase_if(widget.timers_,
+                      [](auto const& timer) { return timer.expired(); });
+    }
+}
+
+auto Application::run(Terminal::Options options) -> int
+{
+    if (auto code = loop_.exit_code()) { return *code; }
+    auto terminal = Terminal{options};
+    return process_events(loop_, terminal, *this, [this] { this->attach_widgets(); });
+}
+
+auto Application::step(EventLoop::Clock::time_point now) -> EventResponse
+{
+    this->attach_widgets();
+    auto result = loop_.step(*this, now);
+    this->attach_widgets();
+    return result;
+}
+
+auto Application::paint() -> bool { return loop_.paint(*this); }
+void Application::post(Event event) { loop_.post(std::move(event)); }
+void Application::request_repaint() { loop_.request_repaint(); }
+void Application::quit(int code) { loop_.quit(code); }
 
 auto Application::handle_mouse_press(MousePress m) -> EventResponse
 {
-    ::any_mouse_event<SetFocus::Yes>(head_, m,
+    ::any_mouse_event<SetFocus::Yes>(focus_, head_, m,
                                      [](Widget& w, MousePress m) { w.mouse_press(m); });
-    return quit_request_ ? QuitRequest{*quit_request_} : EventResponse{};
+    return {.handled = true, .repaint = true};
 }
 
 auto Application::handle_mouse_release(MouseRelease m) -> EventResponse
 {
     ::any_mouse_event<SetFocus::No>(
-        head_, m, [](Widget& w, MouseRelease m) { w.mouse_release(m); });
-    return quit_request_ ? QuitRequest{*quit_request_} : EventResponse{};
+        focus_, head_, m, [](Widget& w, MouseRelease m) { w.mouse_release(m); });
+    return {.handled = true, .repaint = true};
 }
 
 auto Application::handle_mouse_wheel(MouseWheel m) -> EventResponse
 {
-    ::any_mouse_event<SetFocus::No>(head_, m,
+    ::any_mouse_event<SetFocus::No>(focus_, head_, m,
                                     [](Widget& w, MouseWheel m) { w.mouse_wheel(m); });
-    return quit_request_ ? QuitRequest{*quit_request_} : EventResponse{};
+    return {.handled = true, .repaint = true};
 }
 
 auto Application::handle_mouse_move(MouseMove m) -> EventResponse
 {
     ::send_enter_leave_events(head_, previous_mouse_position_, m.at);
-    ::any_mouse_event<SetFocus::No>(head_, m,
+    ::any_mouse_event<SetFocus::No>(focus_, head_, m,
                                     [](Widget& w, MouseMove m) { w.mouse_move(m); });
     previous_mouse_position_ = m.at;
-    return quit_request_ ? QuitRequest{*quit_request_} : EventResponse{};
+    return {.handled = true, .repaint = true};
 }
 
 auto Application::handle_key_press(KeyEvent k) -> EventResponse
 {
-    auto const life = Focus::get();
+    auto const life = focus_.get();
 
     if (not life.valid()) { return {}; }
     auto& focused = life.get();
     if (focused.focus_policy == FocusPolicy::Strong ||
         focused.focus_policy == FocusPolicy::Tab) {
-        if (k.matches(KeyCode::Tab)) { do_tab_focus_change(head_, focused); }
+        if (k.matches(KeyCode::Tab)) { do_tab_focus_change(focus_, head_, focused); }
         else if (k.matches(KeyCode::Tab, {.shift = true})) {
-            do_shift_tab_focus_change(head_, focused);
+            do_shift_tab_focus_change(focus_, head_, focused);
         }
     }
 
     focused.key_press(k);
 
-    return quit_request_ ? QuitRequest{*quit_request_} : EventResponse{};
+    return {.handled = true, .repaint = true};
 }
 
 auto Application::handle_key_release(KeyEvent k) -> EventResponse
 {
-    if (auto const life = Focus::get(); life.valid()) { life.get().key_release(k); }
-    return quit_request_ ? QuitRequest{*quit_request_} : EventResponse{};
+    auto const life = focus_.get();
+    if (!life.valid()) { return {}; }
+    life.get().key_release(k);
+    return {.handled = true, .repaint = true};
 }
 
 auto Application::handle_paste(esc::PasteChunk const& chunk) -> EventResponse
 {
-    if (auto const life = Focus::get(); life.valid()) { life.get().paste(chunk); }
-    return quit_request_ ? QuitRequest{*quit_request_} : EventResponse{};
+    auto const life = focus_.get();
+    if (!life.valid()) { return {}; }
+    life.get().paste(chunk);
+    return {.handled = true, .repaint = true};
 }
 
 auto Application::handle_resize(Area new_size) -> EventResponse
@@ -276,27 +362,15 @@ auto Application::handle_resize(Area new_size) -> EventResponse
     auto const old_size = head_.size;
     head_.size = new_size;
     head_.resize(old_size);
-    return quit_request_ ? QuitRequest{*quit_request_} : EventResponse{};
-}
-
-auto Application::handle_timer(int id) -> EventResponse
-{
-    // TODO update this so that multiple timers can point to the same widget, and pass
-    // the id to the Widget
-    auto const at = timer_targets.find(id);
-    if (at != std::cend(timer_targets)) {
-        if (at->second.valid()) { at->second.get().timer(); }
-    }
-    return quit_request_ ? QuitRequest{*quit_request_} : EventResponse{};
+    return {.handled = true, .repaint = true};
 }
 
 auto Application::handle_paint(Canvas canvas) -> Terminal::Cursor
 {
+    this->attach_widgets();
     auto cursor = Terminal::Cursor{std::nullopt};
-    ::send_paint_events(head_, canvas, cursor);
+    ::send_paint_events(focus_, head_, canvas, cursor);
     return cursor;
 }
-
-std::optional<int> Application::quit_request_ = std::nullopt;
 
 }  // namespace ox

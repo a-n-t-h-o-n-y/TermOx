@@ -1,81 +1,51 @@
 #pragma once
 
 #include <chrono>
-#include <map>
+#include <functional>
+#include <memory>
+#include <optional>
 
-#include <zzz/timer_thread.hpp>
+#include <ox/core/events.hpp>
 
 namespace ox {
 class Widget;
+class EventLoop;
+class Application;
 
-/**
- * Posts `event::Timer` objects at regular intervals to the EventQueue.
- *
- * @details This uses its own internal thread to enqueue Events. Each Timer is tied to a
- * single Widget, which will recieve the Events. Timer events are handled with the
- * `Widget::timer()` virtual function, typically you would update the Widget state, the
- * `Widget::paint(Canvas)` event handler will be called automatically after the timer
- * event handler.
- *
- * The Widget lifetime is handled by a `LifetimeView` and will remain valid after moving
- * a Widget. Though not recommended for clarity, it is safe to delete a Widget without
- * deleting its associated Timer.
- */
+/** A movable timer handle. The owning event loop executes its callback. */
 class Timer {
    public:
-    /**
-     * Create a Timer with the given duration.
-     *
-     * @param w The Widget to send Timer events to, typically `*this` if owned by Widg.
-     * @param duration The interval to wait before posting an Event.
-     * @param launch If true, the TimerThread will be started immediately.
-     */
-    explicit Timer(Widget& w, std::chrono::milliseconds duration, bool launch = false);
+    using Clock = std::chrono::steady_clock;
+
+    Timer(std::chrono::milliseconds interval,
+          std::function<EventResponse()> action,
+          bool launch = true);
+
+    explicit Timer(Widget& widget,
+                   std::chrono::milliseconds interval,
+                   bool launch = false);
 
     Timer(Timer const&) = delete;
-    Timer(Timer&& other);
-
+    Timer(Timer&&) = default;
     auto operator=(Timer const&) -> Timer& = delete;
-    auto operator=(Timer&& other) -> Timer&;
+    auto operator=(Timer&&) -> Timer& = default;
 
-    /**
-     * Stop the TimerThread if it is running.
-     */
-    ~Timer();
-
-   public:
-    /**
-     * Start the timer thread with the given duration.
-     * @details This will create and launch a new thread.
-     */
-    void start();
-
-    /**
-     * Request the TimerThread to stop, returns immediately.
-     * @details Does not wait for thread to exit.
-     */
+    void start(Clock::time_point now = Clock::now());
     void stop();
-
-    [[nodiscard]] auto id() const -> int { return id_; }
-
-    [[nodiscard]] auto duration() const -> std::chrono::milliseconds
-    {
-        return duration_;
-    }
-
-    /**
-     * Returns true if `start()` has been called and the Timer is currently running.
-     * @details i.e., `stop()` has not been called since the last `start()`.
-     */
-    [[nodiscard]] auto is_running() const -> bool { return is_running_; }
+    [[nodiscard]] auto is_running() const -> bool;
+    [[nodiscard]] auto duration() const -> std::chrono::milliseconds;
 
    private:
-    inline static int next_id_ = 0;
+    friend class Widget;
+    friend class EventLoop;
+    friend class Application;
+    struct State {
+        std::chrono::milliseconds interval;
+        std::function<EventResponse()> action;
+        std::optional<Clock::time_point> deadline;
+        EventLoop* owner = nullptr;
+    };
 
-    int id_;
-    std::chrono::milliseconds duration_;
-    zzz::TimerThread timer_thread_;
-    bool is_running_ = false;
+    std::shared_ptr<State> state_;
 };
-
 }  // namespace ox

@@ -51,88 +51,17 @@ using ::esc::MouseWheel;
     return text;
 }
 
-// Thread Safe Queue
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-/**
- * Thread safe queue for inter-thread communication.
- *
- * @details This is built specifically for Events where multiple threads enqueue and one
- * thread consumes.
- * @tparam T The type of element to store in the queue.
- */
-template <typename T>
-class ConcurrentQueue {
-   public:
-    using value_type = T;
-
-   public:
-    ConcurrentQueue() = default;
-
-    ConcurrentQueue(ConcurrentQueue const&) = delete;
-    ConcurrentQueue(ConcurrentQueue&&) = delete;
-
-    auto operator=(ConcurrentQueue const&) -> ConcurrentQueue& = delete;
-    auto operator=(ConcurrentQueue&&) -> ConcurrentQueue& = delete;
-
-   public:
-    /**
-     * Adds an element at the back of the queue.
-     *
-     * @param value The element to enqueue.
-     */
-    void enqueue(value_type value)
-    {
-        auto tmp = std::list<value_type>{};
-        tmp.push_back(std::move(value));
-        {
-            auto const lock = std::scoped_lock{mutex_};
-            queue_.splice(std::end(queue_), tmp);
-        }
-        cond_.notify_one();
-    }
-
-    /**
-     * Removes and retrieves the element at the front of the queue.
-     *
-     * @details This blocks until an element is available. Uses a condition variable.
-     * @return value_type The element at the front of the queue.
-     */
-    [[nodiscard]] auto pop() -> value_type
-    {
-        auto lock = std::unique_lock{mutex_};
-        cond_.wait(lock, [this] { return !queue_.empty(); });
-        // After the wait, the lock is re-acquired.
-        auto value = std::move(queue_.front());
-        queue_.pop_front();
-        return value;
-    }
-
-   private:
-    mutable std::mutex mutex_;
-    std::condition_variable cond_;
-    std::list<value_type> queue_;
-};
-
-// Event Handler Response
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-/**
- * Indicates an Event handler wants the application to shut down.
- *
- * @param return_code The return code that will be returned by Application::run().
- */
+/** Request an application exit with the given return code. */
 struct QuitRequest {
     int return_code = 0;
 };
 
-/**
- * The response from an Event handler.
- *
- * @details This is so the Event handler can communicate with the Application class.
- * std::nullopt is a request to do nothing special.
- */
-using EventResponse = std::optional<QuitRequest>;
+/** Handling, painting, and exiting are independent decisions. */
+struct EventResponse {
+    bool handled = false;
+    bool repaint = false;
+    std::optional<int> quit = std::nullopt;
+};
 
 // Events
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -164,11 +93,6 @@ using Event = std::variant<esc::MousePress,
                            event::Timer,
                            event::Custom,
                            event::Interrupt>;
-
-/**
- * A thread-safe queue of Events.
- */
-using EventQueue = ConcurrentQueue<Event>;
 
 // Event Handler Concepts
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

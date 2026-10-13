@@ -26,12 +26,12 @@ TEST(resize_reinitializes_the_screen_buffer)
         auto handle_resize(Area a) -> EventResponse
         {
             size = a;
-            return {};
+            return {.handled = true};
         }
     } handler;
     auto buffer = ScreenBuffer{{1, 1}};
     buffer[{0, 0}] = U'x' | fg(colors::red);
-    ASSERT((apply_event(esc::Resize{{2, 3}}, handler, buffer).has_value()));
+    ASSERT((apply_event(esc::Resize{{2, 3}}, handler, buffer).handled));
     ASSERT(((handler.size == Area{2, 3})));
     ASSERT(((buffer.size() == Area{2, 3})));
     ASSERT((buffer[Point{0, 0}] == Glyph{}));

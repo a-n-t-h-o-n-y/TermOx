@@ -53,8 +53,7 @@ Terminal::Terminal(Options x)
           options.signals = x.signals;
           options.paste = esc::BracketedPaste::On;
           return options;
-      }())},
-      terminal_input_thread_{[this](auto st) { this->run_read_loop(st); }}
+      }())}
 {}
 
 Terminal::Terminal(MouseMode mouse_mode,
@@ -67,28 +66,21 @@ Terminal::Terminal(MouseMode mouse_mode,
                        .background = background_}}
 {}
 
-Terminal::~Terminal()
+void Terminal::commit_changes(ScreenBuffer const& screen, Cursor cursor)
 {
-    terminal_input_thread_.request_stop();
-    terminal_input_thread_.join();
-}
-
-void Terminal::commit_changes()
-{
-    auto const lock = std::scoped_lock{session_mutex_};
     escape_sequence_.clear();
 
-    if (this->changes.size() != current_screen_.size()) {
-        current_screen_.resize(this->changes.size());
+    if (screen.size() != current_screen_.size()) {
+        current_screen_.resize(screen.size());
         current_screen_.fill(Glyph{U'\0'});  // Trigger Repaint
     }
 
     auto style = Style{};
 
-    for (auto y = 0; y < this->changes.size().height; ++y) {
-        for (auto x = 0; x < this->changes.size().width; ++x) {
+    for (auto y = 0; y < screen.size().height; ++y) {
+        for (auto x = 0; x < screen.size().width; ++x) {
             auto const change = [&] {
-                auto g = this->changes[{x, y}];
+                auto g = screen[{x, y}];
                 if (g.style.background == Color{default_color}) {
                     g.style.background = this->background;
                 }
@@ -112,8 +104,6 @@ void Terminal::commit_changes()
     // Reset style for consistency with above optimization.
     escape_sequence_ += esc::encode(session_.profile(), Style{});
 
-    this->changes.fill(Glyph{});
-
     auto frame = session_.frame();
     session_.set(esc::CursorMode::Hide);
     session_.write(escape_sequence_);
@@ -125,45 +115,24 @@ void Terminal::commit_changes()
     frame.close();
 }
 
-void Terminal::run_read_loop(std::stop_token st)
+auto Terminal::read(std::chrono::milliseconds timeout) -> std::optional<Event>
 {
-    try {
-        Terminal::event_queue.enqueue(esc::Resize{this->size()});
-        while (!st.stop_requested()) {
-            auto input = [&] {
-                auto const lock = std::scoped_lock{session_mutex_};
-                return session_.read(std::chrono::milliseconds{16});
-            }();
-            if (auto event = std::get_if<esc::Event>(&input)) {
-                if (auto key = std::get_if<KeyEvent>(event);
-                    key &&
-                    (key->matches(U'c', {.ctrl = true}) || key->matches(U'\x03'))) {
-                    Terminal::event_queue.enqueue(event::Interrupt{});
-                    return;
-                }
-                Terminal::event_queue.enqueue(std::visit(
-                    [](auto&& e) -> Event { return std::move(e); }, std::move(*event)));
-            }
-            else if (std::holds_alternative<esc::EndOfInput>(input)) {
-                Terminal::event_queue.enqueue(
-                    event::Custom{[] { return QuitRequest{}; }});
-                return;
-            }
+    auto input = session_.read(timeout);
+    if (auto event = std::get_if<esc::Event>(&input)) {
+        if (auto key = std::get_if<KeyEvent>(event);
+            key && (key->matches(U'c', {.ctrl = true}) || key->matches(U'\x03'))) {
+            return event::Interrupt{};
         }
+        return std::visit([](auto&& e) -> Event { return std::move(e); },
+                          std::move(*event));
     }
-    catch (...) {
-        Terminal::event_queue.enqueue(
-            event::Custom{[error = std::current_exception()]() -> EventResponse {
-                std::rethrow_exception(error);
-            }});
+    if (std::holds_alternative<esc::EndOfInput>(input)) {
+        return event::Custom{[] { return EventResponse{.handled = true, .quit = 0}; }};
     }
+    return {};
 }
 
-auto Terminal::size() -> Area
-{
-    auto const lock = std::scoped_lock{session_mutex_};
-    return session_.area();
-}
+auto Terminal::size() -> Area { return session_.area(); }
 
 // -------------------------------------------------------------------------------------
 

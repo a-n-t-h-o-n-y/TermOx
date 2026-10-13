@@ -1,66 +1,40 @@
 #include <ox/timer.hpp>
 
-#include <chrono>
-#include <utility>
-
-#include <zzz/timer_thread.hpp>
+#include <stdexcept>
 
 #include <ox/application.hpp>
-#include <ox/core/terminal.hpp>
 #include <ox/widget.hpp>
 
 namespace ox {
 
-Timer::Timer(Widget& w, std::chrono::milliseconds duration, bool launch)
-    : id_{next_id_++}, duration_{duration}, timer_thread_{}
+Timer::Timer(std::chrono::milliseconds interval,
+             std::function<EventResponse()> action,
+             bool launch)
+    : state_{std::make_shared<State>(State{interval, std::move(action), {}})}
 {
-    Application::timer_targets.emplace(std::pair{id_, track(w)});
+    if (interval.count() <= 0) {
+        throw std::invalid_argument{"Timer interval must be positive"};
+    }
+    if (!state_->action) { throw std::invalid_argument{"Timer requires a callback"}; }
     if (launch) { this->start(); }
 }
 
-Timer::Timer(Timer&& other)
+Timer::Timer(Widget& widget, std::chrono::milliseconds interval, bool launch)
+    : Timer{interval,
+            [target = track(widget)] {
+                if (!target.valid()) { return EventResponse{}; }
+                target.get().timer();
+                return EventResponse{.handled = true, .repaint = true};
+            },
+            launch}
 {
-    id_ = std::move(other.id_);
-    other.id_ = -1;
-    duration_ = std::move(other.duration_);
-    timer_thread_ = std::move(other.timer_thread_);
-    is_running_ = std::move(other.is_running_);
-    other.is_running_ = false;
+    widget.timers_.push_back(state_);
+    if (widget.application_) { widget.application_->loop().watch(*this); }
 }
 
-auto Timer::operator=(Timer&& other) -> Timer&
-{
-    if (this != &other) {
-        if (this->is_running_) { this->stop(); }
-        id_ = std::move(other.id_);
-        other.id_ = -1;
-        duration_ = std::move(other.duration_);
-        timer_thread_ = std::move(other.timer_thread_);
-        is_running_ = std::move(other.is_running_);
-        other.is_running_ = false;
-    }
-    return *this;
-}
-
-Timer::~Timer()
-{
-    if (is_running_) { this->stop(); }
-    Application::timer_targets.erase(id_);
-}
-
-void Timer::start()
-{
-    is_running_ = true;
-    timer_thread_ = zzz::TimerThread{
-        duration_,
-        [id = id_] { Terminal::event_queue.enqueue(event::Timer{id}); },
-    };
-}
-
-void Timer::stop()
-{
-    timer_thread_.request_stop();
-    is_running_ = false;
-}
-
+void Timer::start(Clock::time_point now) { state_->deadline = now + state_->interval; }
+void Timer::stop() { state_->deadline.reset(); }
+auto Timer::is_running() const -> bool
+{ return state_ && state_->deadline.has_value(); }
+auto Timer::duration() const -> std::chrono::milliseconds { return state_->interval; }
 }  // namespace ox

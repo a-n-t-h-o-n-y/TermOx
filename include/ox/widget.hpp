@@ -11,6 +11,7 @@
 #include <ox/core/core.hpp>
 
 namespace ox {
+class Application;
 
 /**
  * Policy for how a widget should handle focus.
@@ -97,6 +98,7 @@ class Widget {
     SizePolicy size_policy;
     Terminal::Cursor cursor = std::nullopt;
     bool active = true;
+    bool focused = false;
 
     Point at = {.x = 0, .y = 0};
     Area size = {.width = 0, .height = 0};
@@ -149,6 +151,12 @@ class Widget {
     virtual auto get_children() -> zzz::Generator<Widget&> { co_return; }
 
     virtual auto get_children() const -> zzz::Generator<Widget const&> { co_return; }
+
+   private:
+    friend class Timer;
+    friend class Application;
+    Application* application_ = nullptr;
+    std::vector<std::weak_ptr<Timer::State>> timers_;
 };
 
 /**

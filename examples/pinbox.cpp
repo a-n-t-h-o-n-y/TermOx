@@ -196,5 +196,5 @@ int main()
             },
     }(pinbox, status, count);
 
-    return Application{head, {.mouse_mode = MouseMode::Drag}}.run();
+    return Application{head}.run({.mouse_mode = MouseMode::Drag});
 }

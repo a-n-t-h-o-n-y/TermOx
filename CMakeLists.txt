@@ -35,6 +35,7 @@ add_library(TermOx STATIC
     src/timer.cpp
     src/widget.cpp
     src/core/terminal.cpp
+    src/core/event_loop.cpp
 
     include/ox/ox.hpp
     include/ox/align.hpp
@@ -60,6 +61,7 @@ add_library(TermOx STATIC
     include/ox/core/events.hpp
     include/ox/core/glyph.hpp
     include/ox/core/terminal.hpp
+    include/ox/core/event_loop.hpp
 )
 
 # Include Directories for the Library

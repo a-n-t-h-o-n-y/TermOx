@@ -75,13 +75,13 @@ Dependencies ([Signals Light](https://github.com/a-n-t-h-o-n-y/signals-light),
 
 TermOx uses Escape's session API, `Style`, `RGB`, `IndexedColor`, and typed input
 events. Widget handlers receive `KeyEvent` and the corresponding mouse event type.
-Pass `Terminal::Options` to `Application`, for example
-`Application{head, {.mouse_mode = MouseMode::Move}}`. Ctrl-C exits through the event
-loop by default, and the session restores terminal state after its input thread stops.
+Pass `Terminal::Options` to `run()`, for example
+`Application{head}.run({.mouse_mode = MouseMode::Move})`. Ctrl-C exits through the event
+loop by default, and the session restores terminal state on exit.
 
 Text inputs accept Unicode key text and bracketed paste. The canvas still places
 one Unicode scalar per cell; grapheme and wide-character layout are not implemented.
-A C++20 compiler and standard library with `std::jthread` support are required.
+A C++20 compiler and standard library are required.
 
 Build and run the regression tests with:
 
@@ -97,6 +97,14 @@ cmake --build build --target TermOx.examples.pong TermOx.examples.pinbox \
     TermOx.examples.snake TermOx.examples.accumulator TermOx.examples.scratch
 python3 tests/smoke_examples.py build
 ```
+
+## Application Core
+
+The application owns its event loop and focus. Timers share the loop's steady-clock
+scheduler. Input, callbacks, and rendering run on one thread, with explicit repaint
+requests and one paint per batch. Constructing an application does not open a terminal;
+`step()` and `paint()` can be tested independently. See [the event loop guide](docs/event-loop.md)
+for headless dispatch, posting background work, and lower-level composition.
 
 ## Note on Version 2
 
