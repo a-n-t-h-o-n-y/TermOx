@@ -27,14 +27,16 @@ void RadioGroup::paint(Canvas c)
     }
 }
 
-void RadioGroup::key_press(KeyEvent k)
+auto RadioGroup::key_press(KeyEvent k) -> EventResponse
 {
-    if (items.empty()) { return; }
+    auto const before = focus_selection_;
+    if (items.empty()) { return {}; }
     if (k.matches(KeyCode::Enter, {}, k.action)) {
         if (focus_selection_) {
             selected_index =
-                std::clamp(*focus_selection_, (std::size_t)0, items.size());
+                std::clamp(*focus_selection_, (std::size_t)0, items.size() - 1);
             this->on_select(items[*selected_index]);
+            return {.handled = true, .repaint = true};
         }
     }
     else if (k.matches(KeyCode::ArrowUp, {}, k.action)) {
@@ -47,19 +49,36 @@ void RadioGroup::key_press(KeyEvent k)
             std::clamp(focus_selection_ ? ((int)*focus_selection_ + 1) : 0, 0,
                        (int)items.size() - 1);
     }
+
+    else {
+        return {};
+    }
+    return {.handled = true, .repaint = before != focus_selection_};
 }
 
-void RadioGroup::mouse_press(MousePress m)
+auto RadioGroup::mouse_press(MousePress m) -> EventResponse
 {
+    if (m.button != MouseButton::Left || m.at.y < 0) { return {}; }
     if (m.at.y < (int)items.size() && m.at.y != selected_index) {
         selected_index = m.at.y;
         focus_selection_ = selected_index;
         this->on_select(items[*selected_index]);
+        return {.handled = true, .repaint = true};
     }
+
+    return {};
 }
 
-void RadioGroup::focus_in() { in_focus_ = true; }
+auto RadioGroup::focus_in() -> EventResponse
+{
+    in_focus_ = true;
+    return {.handled = true, .repaint = true};
+}
 
-void RadioGroup::focus_out() { in_focus_ = false; }
+auto RadioGroup::focus_out() -> EventResponse
+{
+    in_focus_ = false;
+    return {.handled = true, .repaint = true};
+}
 
 }  // namespace ox

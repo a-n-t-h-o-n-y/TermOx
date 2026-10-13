@@ -130,12 +130,16 @@ void DataTable::paint(Canvas c)
     }
 }
 
-void DataTable::mouse_wheel(MouseWheel m)
+auto DataTable::mouse_wheel(MouseWheel m) -> EventResponse
 {
-    if (m.dy == 0 || columns_.empty()) { return; }
+    if (m.dy == 0 || columns_.empty()) { return {}; }
+    auto const old = offset;
     offset = (std::size_t)std::clamp((int)offset + m.dy, 0,
                                      std::max((int)columns_.front().size() - 1, 0));
+    if (old == offset) { return {.handled = true}; }
     this->on_scroll((int)offset, (int)columns_.back().size());
+
+    return {.handled = true, .repaint = true};
 }
 
 void DataTable::resize(Area)

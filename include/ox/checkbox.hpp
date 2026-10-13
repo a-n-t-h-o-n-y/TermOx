@@ -52,15 +52,15 @@ class CheckBox : public Widget {
     [[nodiscard]] auto get_state() const -> State;
 
    public:
-    void key_press(KeyEvent k) override;
+    auto key_press(KeyEvent k) -> EventResponse override;
 
-    void mouse_press(MousePress m) override;
+    auto mouse_press(MousePress m) -> EventResponse override;
 
     void paint(Canvas c) override;
 
-    void focus_in() override;
+    auto focus_in() -> EventResponse override;
 
-    void focus_out() override;
+    auto focus_out() -> EventResponse override;
 
    private:
     State state_;

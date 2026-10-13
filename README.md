@@ -83,7 +83,8 @@ Text inputs accept Unicode key text and bracketed paste. Frames store complete
 graphemes with explicit continuation cells, and clipped canvases use Escape's width
 estimates. See [frames and canvases](docs/frame-and-canvas.md) for drawing and resize contracts,
 [rendering](docs/renderer.md) for frame comparison and terminal output,
-and [layout calculation](docs/layout.md) for sizing and placement.
+[layout calculation](docs/layout.md) for sizing and placement,
+and [routing and focus](docs/routing-and-focus.md) for widget interaction.
 A C++20 compiler and standard library are required.
 
 Build and run the regression tests with:

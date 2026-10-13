@@ -26,8 +26,10 @@ LineEdit::LineEdit(Options x)
       validator{std::move(x.validator)}
 {}
 
-void LineEdit::key_press(KeyEvent k)
+auto LineEdit::key_press(KeyEvent k) -> EventResponse
 {
+    auto const old_text = text;
+    auto const old_cursor = cursor_index_;
     auto unicode = esc::utf8_to_utf32(text);
     cursor_index_ = std::min(cursor_index_, unicode.size());
     if (k.matches(KeyCode::Backspace, {}, k.action)) {
@@ -38,7 +40,7 @@ void LineEdit::key_press(KeyEvent k)
     }
     else if (k.matches(KeyCode::Enter, {}, k.action)) {
         this->on_enter(text);
-        return;
+        return {.handled = true, .repaint = true};
     }
     else if (k.matches(KeyCode::ArrowLeft, {}, k.action)) {
         if (cursor_index_ > 0) { --cursor_index_; }
@@ -54,6 +56,7 @@ void LineEdit::key_press(KeyEvent k)
     }
     else {
         auto input = input_text(k);
+        if (input.empty()) { return {}; }
         if (validator) {
             std::erase_if(input, [&](char32_t c) { return !(*validator)(c); });
         }
@@ -62,24 +65,33 @@ void LineEdit::key_press(KeyEvent k)
     }
     text = esc::utf32_to_utf8(unicode);
     this->update_scroll_offset();
+
+    return {.handled = true,
+            .repaint = text != old_text || cursor_index_ != old_cursor};
 }
 
-void LineEdit::paste(esc::PasteChunk const& chunk)
+auto LineEdit::paste(esc::PasteChunk const& chunk) -> EventResponse
 {
     if (chunk.first) { paste_buffer_.clear(); }
     paste_buffer_ += chunk.bytes;
+    auto result = EventResponse{.handled = true};
     if (chunk.last) {
+        auto bytes = std::exchange(paste_buffer_, {});
         if (!chunk.aborted) {
-            this->key_press(KeyEvent{.text = esc::utf8_to_utf32(paste_buffer_)});
+            result = key_press(KeyEvent{.text = esc::utf8_to_utf32(bytes)});
+            result.handled = true;
         }
-        paste_buffer_.clear();
     }
+    return result;
 }
 
-void LineEdit::mouse_press(MousePress m)
+auto LineEdit::mouse_press(MousePress m) -> EventResponse
 {
+    if (m.button != MouseButton::Left) { return {}; }
+    auto const old = cursor_index_;
     cursor_index_ = std::min(anchor_index_ + (std::size_t)std::max(m.at.x, 0),
                              esc::utf8_to_utf32(text).size());
+    return {.handled = true, .repaint = old != cursor_index_};
 }
 
 void LineEdit::paint(Canvas c)

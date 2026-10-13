@@ -224,7 +224,11 @@ TEST(widget_timers_follow_moved_widgets_and_ignore_destroyed_targets)
 {
     struct Counter : Widget {
         int ticks = 0;
-        void timer() override { ++ticks; }
+        auto timer() -> EventResponse override
+        {
+            ++ticks;
+            return {.handled = true, .repaint = true};
+        }
     };
     auto original = Counter{};
     auto timer = Timer{original, 10ms};
@@ -293,7 +297,11 @@ TEST(detached_widgets_stop_their_timers_and_can_join_another_application)
 {
     struct Counter : Widget {
         int ticks = 0;
-        void timer() override { ++ticks; }
+        auto timer() -> EventResponse override
+        {
+            ++ticks;
+            return {.handled = true, .repaint = true};
+        }
     };
     auto root = Column<std::vector<Counter>>{};
     root.children.emplace_back();

@@ -53,14 +53,20 @@ void CheckBox::set_state(State s)
 
 auto CheckBox::get_state() const -> State { return state_; }
 
-void CheckBox::key_press(KeyEvent k)
+auto CheckBox::key_press(KeyEvent k) -> EventResponse
 {
-    if (k.matches(KeyCode::Enter, {}, k.action)) { this->toggle(); }
+    if (!k.matches(KeyCode::Enter, {}, k.action)) { return {}; }
+    this->toggle();
+
+    return {.handled = true, .repaint = true};
 }
 
-void CheckBox::mouse_press(MousePress m)
+auto CheckBox::mouse_press(MousePress m) -> EventResponse
 {
-    if (m.button == MouseButton::Left) { this->toggle(); }
+    if (m.button != MouseButton::Left) { return {}; }
+    this->toggle();
+
+    return {.handled = true, .repaint = true};
 }
 
 void CheckBox::paint(Canvas c)
@@ -70,8 +76,16 @@ void CheckBox::paint(Canvas c)
     put(c, {.x = 0, .y = 0}, glyphs);
 }
 
-void CheckBox::focus_in() { in_focus_ = true; }
+auto CheckBox::focus_in() -> EventResponse
+{
+    in_focus_ = true;
+    return {.handled = true, .repaint = true};
+}
 
-void CheckBox::focus_out() { in_focus_ = false; }
+auto CheckBox::focus_out() -> EventResponse
+{
+    in_focus_ = false;
+    return {.handled = true, .repaint = true};
+}
 
 }  // namespace ox

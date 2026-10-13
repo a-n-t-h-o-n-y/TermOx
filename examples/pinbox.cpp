@@ -20,21 +20,26 @@ class PinBox : public Widget {
     void clear() { points_.clear(); }
 
    public:
-    void mouse_press(MousePress m) override
+    auto mouse_press(MousePress m) -> EventResponse override
     {
         switch (m.button) {
-            case MouseButton::Left: this->insert_pin(m.at); break;
-            case MouseButton::Right: this->remove_pin(m.at); break;
-            default: break;
+            case MouseButton::Left:
+                return {.handled = true, .repaint = insert_pin(m.at)};
+            case MouseButton::Right:
+                return {.handled = true, .repaint = remove_pin(m.at)};
+            default: return {};
         }
     }
 
-    void mouse_move(MouseMove m) override
+    auto mouse_move(MouseMove m) -> EventResponse override
     {
-        if (m.held_button == MouseButton::Left) { this->insert_pin(m.at); }
-        else if (m.held_button == MouseButton::Right) {
-            this->remove_pin(m.at);
+        if (m.held_button == MouseButton::Left) {
+            return {.handled = true, .repaint = insert_pin(m.at)};
         }
+        if (m.held_button == MouseButton::Right) {
+            return {.handled = true, .repaint = remove_pin(m.at)};
+        }
+        return {};
     }
 
     void paint(Canvas c) override
@@ -45,16 +50,18 @@ class PinBox : public Widget {
     }
 
    private:
-    void insert_pin(Point p)
+    auto insert_pin(Point p) -> bool
     {
         auto const [_, inserted] = points_.emplace(p, current_color_);
         if (inserted) { pin_inserted.emit(p); }
+        return inserted;
     }
 
-    void remove_pin(Point p)
+    auto remove_pin(Point p) -> bool
     {
         auto const count = points_.erase(p);
         if (count != 0) { pin_removed.emit(p); }
+        return count != 0;
     }
 
    private:

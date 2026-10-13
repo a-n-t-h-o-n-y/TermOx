@@ -76,21 +76,24 @@ void ScrollBar::paint(Canvas c)
     if (at.y < this->size.height) { put(c, at, edge | style | Trait::Inverse); }
 }
 
-void ScrollBar::mouse_press(MousePress m)
+auto ScrollBar::mouse_press(MousePress m) -> EventResponse
 {
-    if (m.button == MouseButton::Left) {
+    if (m.button != MouseButton::Left) { return {}; }
+    {
         time_at_click_ = ClockType::now();
         position_at_click_ = position;
         target_position_ =
             (int)((float)(std::max(scrollable_length - 1, 0)) *
-                  ((float)m.at.y / (float)std::max(this->size.height - 1, 0)));
+                  ((float)m.at.y / (float)std::max(this->size.height - 1, 1)));
         timer_.start();
     }
+
+    return {.handled = true};
 }
 
-void ScrollBar::mouse_wheel(MouseWheel m)
+auto ScrollBar::mouse_wheel(MouseWheel m) -> EventResponse
 {
-    if (m.dy == 0) { return; }
+    if (m.dy == 0) { return {}; }
     constexpr auto percent_scroll = 0.15f;
     time_at_click_ = ClockType::now();
     position_at_click_ = position;
@@ -99,13 +102,15 @@ void ScrollBar::mouse_wheel(MouseWheel m)
                          percent_scroll * (float)scrollable_length * (float)m.dy),
                    0, std::max(scrollable_length - 1, 0));
     timer_.start();
+
+    return {.handled = true};
 }
 
-void ScrollBar::timer()
+auto ScrollBar::timer() -> EventResponse
 {
     if (position == target_position_) {
         timer_.stop();
-        return;
+        return {};
     }
 
     auto const time_since_click = ClockType::now() - time_at_click_;
@@ -118,10 +123,14 @@ void ScrollBar::timer()
 
     auto const r = ease_out_quint(t);
 
+    auto const old = position;
     position = (int)std::round(r * (float)(target_position_ - position_at_click_) +
                                (float)position_at_click_);
 
+    if (old == position) { return {.handled = true}; }
     this->on_scroll(position);
+
+    return {.handled = true, .repaint = true};
 }
 
 void ScrollBar::increment_position(int amount)

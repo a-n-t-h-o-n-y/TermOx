@@ -15,6 +15,7 @@
 #include <ox/pixelgrid.hpp>
 #include <ox/put.hpp>
 #include <ox/radiogroup.hpp>
+#include <ox/routing.hpp>
 #include <ox/scrollbar.hpp>
 #include <ox/textbox.hpp>
 #include <ox/timer.hpp>

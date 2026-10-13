@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <ranges>
+#include <stdexcept>
 #include <type_traits>
 
 #include <zzz/coro.hpp>
@@ -34,6 +35,7 @@ class Widget {
     SizePolicy size_policy;
     Cursor cursor = std::nullopt;
     bool active = true;
+    bool enabled = true;
     bool focused = false;
 
     Point at = {.x = 0, .y = 0};
@@ -49,30 +51,30 @@ class Widget {
     auto operator=(Widget const&) -> Widget& = delete;
     auto operator=(Widget&& other) -> Widget&;
 
-    virtual ~Widget() = default;
+    virtual ~Widget();
 
    public:
-    virtual void mouse_press(MousePress) {}
+    virtual auto mouse_press(MousePress) -> EventResponse { return {}; }
 
-    virtual void mouse_release(MouseRelease) {}
+    virtual auto mouse_release(MouseRelease) -> EventResponse { return {}; }
 
-    virtual void mouse_wheel(MouseWheel) {}
+    virtual auto mouse_wheel(MouseWheel) -> EventResponse { return {}; }
 
-    virtual void mouse_move(MouseMove) {}
+    virtual auto mouse_move(MouseMove) -> EventResponse { return {}; }
 
-    virtual void mouse_enter() {}
+    virtual auto mouse_enter() -> EventResponse { return {}; }
 
-    virtual void mouse_leave() {}
+    virtual auto mouse_leave() -> EventResponse { return {}; }
 
-    virtual void focus_in() {}
+    virtual auto focus_in() -> EventResponse { return {}; }
 
-    virtual void focus_out() {}
+    virtual auto focus_out() -> EventResponse { return {}; }
 
-    virtual void key_press(KeyEvent) {}
+    virtual auto key_press(KeyEvent) -> EventResponse { return {}; }
 
-    virtual void key_release(KeyEvent) {}
+    virtual auto key_release(KeyEvent) -> EventResponse { return {}; }
 
-    virtual void paste(esc::PasteChunk const&) {}
+    virtual auto paste(esc::PasteChunk const&) -> EventResponse { return {}; }
 
     /**
      * this->size is updated by the time this is invoked. The previous size is passed in
@@ -80,7 +82,7 @@ class Widget {
      */
     virtual void resize(Area /* old_size */) {}
 
-    virtual void timer() {}
+    virtual auto timer() -> EventResponse { return {}; }
 
     virtual void paint(Canvas) {}
 
@@ -103,15 +105,34 @@ class Widget {
 template <typename ConcreteType>
 class LifetimeView {
    public:
+    LifetimeView() = default;
     LifetimeView(std::shared_ptr<Widget*> wp) : widget_ptr_{wp} {}
 
    public:
-    [[nodiscard]] auto valid() const -> bool { return !widget_ptr_.expired(); }
+    [[nodiscard]] auto valid() const -> bool
+    {
+        auto pointer = widget_ptr_.lock();
+        return pointer && *pointer;
+    }
+    template <typename Other>
+    auto operator==(LifetimeView<Other> const& other) const -> bool
+    {
+        return !widget_ptr_.owner_before(other.widget_ptr_) &&
+               !other.widget_ptr_.owner_before(widget_ptr_);
+    }
 
     [[nodiscard]] auto get() const -> ConcreteType&
-    { return static_cast<ConcreteType&>(**(widget_ptr_.lock())); }
+    {
+        auto pointer = widget_ptr_.lock();
+        if (!pointer || !*pointer) {
+            throw std::logic_error{"Expired widget lifetime"};
+        }
+        return static_cast<ConcreteType&>(**pointer);
+    }
 
    private:
+    template <typename>
+    friend class LifetimeView;
     std::weak_ptr<Widget*> widget_ptr_;
 };
 

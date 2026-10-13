@@ -125,13 +125,14 @@ class SnakeGameWidget : public Widget {
     SnakeGameWidget() : Widget{FocusPolicy::Strong, SizePolicy::flex()} {}
 
    public:
-    void key_press(KeyEvent k) override
+    auto key_press(KeyEvent k) -> EventResponse override
     {
         if (k.matches(U's', {}, k.action)) {
             // Start the game
             if (not timer_.is_running()) {
                 engine_.reset();
                 timer_.start();
+                return {.handled = true, .repaint = true};
             }
         }
         else if (k.matches(U'j', {}, k.action) ||
@@ -150,12 +151,19 @@ class SnakeGameWidget : public Widget {
                  k.matches(KeyCode::ArrowLeft, {}, k.action)) {
             engine_.state.next_direction = {.x = -1, .y = 0};
         }
+
+        else {
+            return {};
+        }
+        return {.handled = true};
     }
 
-    void timer() override
+    auto timer() -> EventResponse override
     {
         if (not engine_.step()) { timer_.stop(); }
         this->score_update(engine_.state.score);
+
+        return {.handled = true, .repaint = true};
     }
 
     void paint(Canvas c) override

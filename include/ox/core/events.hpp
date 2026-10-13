@@ -60,6 +60,14 @@ struct EventResponse {
     std::optional<int> quit = std::nullopt;
 };
 
+/** Combine effects; the first exit request wins. */
+[[nodiscard]] inline auto combine(EventResponse a, EventResponse b) -> EventResponse
+{
+    return {.handled = a.handled || b.handled,
+            .repaint = a.repaint || b.repaint,
+            .quit = a.quit ? a.quit : b.quit};
+}
+
 // Events
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

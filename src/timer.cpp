@@ -20,13 +20,18 @@ Timer::Timer(std::chrono::milliseconds interval,
 }
 
 Timer::Timer(Widget& widget, std::chrono::milliseconds interval, bool launch)
-    : Timer{interval,
-            [target = track(widget)] {
-                if (!target.valid()) { return EventResponse{}; }
-                target.get().timer();
-                return EventResponse{.handled = true, .repaint = true};
-            },
-            launch}
+    : Timer{
+          interval,
+          [target = track(widget)] {
+              if (!target.valid()) { return EventResponse{}; }
+              auto& widget = target.get();
+              if (!widget.active || !widget.enabled) { return EventResponse{}; }
+              if (widget.application_ && !widget.application_->is_interactive(widget)) {
+                  return EventResponse{};
+              }
+              return widget.timer();
+          },
+          launch}
 {
     widget.timers_.push_back(state_);
     if (widget.application_) { widget.application_->loop().watch(*this); }

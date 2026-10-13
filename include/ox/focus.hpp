@@ -1,39 +1,33 @@
 #pragma once
 
-#include <ox/widget.hpp>
+#include <ox/routing.hpp>
 
 namespace ox {
 
-/**
- * Manages the focus of Widgets.
- *
- * @details When a Widget is in focus, it will receive keyboard input. Only one Widget
- * can be in focus at a time.
- */
+/** Application-local focus. The root and event loop must outlive this object. */
 class Focus {
    public:
-    Focus() = default;
+    Focus(Widget& root, EventLoop& loop) : root_{root}, loop_{loop} {}
 
-   public:
-    /**
-     * Changes the current focus to \p w. Invokes focus_out on the Widget currently in
-     * focus.
+    /** Reject targets outside the active, enabled tree or with FocusPolicy::None.
+     * Transitions notify widgets and schedule their effects on the owned loop.
      */
-    void set(Widget& w);
-
-    /**
-     * Returns a LifetimeView of the focused Widget, which may not be valid if nothing
-     * is in focus.
-     */
+    auto set(Widget& widget) -> EventResponse;
+    auto clear() -> EventResponse;
     auto get() const -> LifetimeView<Widget> { return in_focus_; }
-
-    /**
-     * Clears the focus, removing any in focus Widget.
-     */
-    void clear();
+    /** Recover invalidated focus using the first tab candidate. Explicit clear
+     * persists. */
+    auto reconcile(std::span<WidgetNode const> tree) -> EventResponse;
+    auto advance(std::span<WidgetNode const> tree, bool backward = false)
+        -> EventResponse;
 
    private:
-    LifetimeView<Widget> in_focus_ = std::shared_ptr<Widget*>{nullptr};
-};
+    Widget& root_;
+    EventLoop& loop_;
+    LifetimeView<Widget> in_focus_;
+    bool recover_ = true;
+    std::size_t revision_ = 0;
 
+    void report(EventResponse response);
+};
 }  // namespace ox

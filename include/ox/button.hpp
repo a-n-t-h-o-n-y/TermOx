@@ -27,11 +27,11 @@ class BasicButton : public Widget {
                 SizePolicy sp = SizePolicy::flex());
 
    public:
-    void key_press(KeyEvent) override;
+    auto key_press(KeyEvent) -> EventResponse override;
 
-    void mouse_press(MousePress) override;
+    auto mouse_press(MousePress) -> EventResponse override;
 
-    void mouse_release(MouseRelease) override;
+    auto mouse_release(MouseRelease) -> EventResponse override;
 };
 
 /// Decoration that fades in and out with mouse hover.
@@ -68,19 +68,19 @@ class Button : public BasicButton {
    public:
     void paint(Canvas) override;
 
-    void mouse_press(MousePress) override;
+    auto mouse_press(MousePress) -> EventResponse override;
 
-    void mouse_release(MouseRelease) override;
+    auto mouse_release(MouseRelease) -> EventResponse override;
 
-    void focus_in() override;
+    auto focus_in() -> EventResponse override;
 
-    void focus_out() override;
+    auto focus_out() -> EventResponse override;
 
-    void mouse_enter() override;
+    auto mouse_enter() -> EventResponse override;
 
-    void mouse_leave() override;
+    auto mouse_leave() -> EventResponse override;
 
-    void timer() override;
+    auto timer() -> EventResponse override;
 
    private:
     static constexpr auto timer_period_ms = 10;

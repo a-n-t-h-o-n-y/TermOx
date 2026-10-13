@@ -57,13 +57,13 @@ class TextBox : public Widget {
    public:
     void paint(Canvas c) override;
 
-    void key_press(KeyEvent k) override;
+    auto key_press(KeyEvent k) -> EventResponse override;
 
-    void paste(esc::PasteChunk const& chunk) override;
+    auto paste(esc::PasteChunk const& chunk) -> EventResponse override;
 
-    void mouse_press(MousePress m) override;
+    auto mouse_press(MousePress m) -> EventResponse override;
 
-    void mouse_wheel(MouseWheel m) override;
+    auto mouse_wheel(MouseWheel m) -> EventResponse override;
 
    private:
     void update_layout_cache();

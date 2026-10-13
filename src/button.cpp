@@ -14,19 +14,28 @@ namespace ox {
 
 BasicButton::BasicButton(FocusPolicy fp, SizePolicy sp) : Widget{fp, sp} {}
 
-void BasicButton::key_press(KeyEvent k)
+auto BasicButton::key_press(KeyEvent k) -> EventResponse
 {
-    if (k.matches(KeyCode::Enter, {}, k.action)) { this->on_press(); }
+    if (!k.matches(KeyCode::Enter, {}, k.action)) { return {}; }
+    this->on_press();
+
+    return {.handled = true, .repaint = true};
 }
 
-void BasicButton::mouse_press(MousePress m)
+auto BasicButton::mouse_press(MousePress m) -> EventResponse
 {
-    if (m.button == MouseButton::Left) { this->on_press(); }
+    if (m.button != MouseButton::Left) { return {}; }
+    this->on_press();
+
+    return {.handled = true, .repaint = true};
 }
 
-void BasicButton::mouse_release(MouseRelease m)
+auto BasicButton::mouse_release(MouseRelease m) -> EventResponse
 {
-    if (!m.button || m.button == MouseButton::Left) { this->on_release(); }
+    if (m.button && m.button != MouseButton::Left) { return {}; }
+    this->on_release();
+
+    return {.handled = true, .repaint = true};
 }
 
 // -------------------------------------------------------------------------------------
@@ -80,51 +89,59 @@ void Button::paint(Canvas c)
                decoration_);
 }
 
-void Button::mouse_press(MousePress m)
+auto Button::mouse_press(MousePress m) -> EventResponse
 {
     if (m.button == MouseButton::Left) { pressed_ = true; }
-    this->BasicButton::mouse_press(m);
+    return this->BasicButton::mouse_press(m);
 }
 
-void Button::mouse_release(MouseRelease m)
+auto Button::mouse_release(MouseRelease m) -> EventResponse
 {
     if (!m.button || m.button == MouseButton::Left) { pressed_ = false; }
-    this->BasicButton::mouse_release(m);
+    return this->BasicButton::mouse_release(m);
 }
 
-void Button::focus_in()
+auto Button::focus_in() -> EventResponse
 {
     in_focus_ = true;
     this->start_select();
+
+    return {.handled = true, .repaint = true};
 }
 
-void Button::focus_out()
+auto Button::focus_out() -> EventResponse
 {
     in_focus_ = false;
     this->end_select();
+
+    return {.handled = true, .repaint = true};
 }
 
-void Button::mouse_enter() { this->start_select(); }
-
-void Button::mouse_leave() { this->end_select(); }
-
-void Button::timer()
+auto Button::mouse_enter() -> EventResponse
 {
-    auto const update_fade = [](FadeInternal& f) {
-        auto const delta =
-            timer_period_ms / (float)(f.direction == +1 ? f.fade.fade_in.count()
-                                                        : f.fade.fade_out.count());
+    this->start_select();
+    return {.handled = true};
+}
 
-        f.percent = std::clamp(f.percent + delta * (float)f.direction, 0.f, 1.f);
-        if (f.percent == 0.f || f.percent == 1.f) { f.timer.stop(); }
-    };
+auto Button::mouse_leave() -> EventResponse
+{
+    this->end_select();
+    return {.handled = true};
+}
 
-    std::visit(
-        zzz::Overload{
-            [](PaintFn const&) {},
-            update_fade,
-        },
-        decoration_);
+auto Button::timer() -> EventResponse
+{
+    auto fade = std::get_if<FadeInternal>(&decoration_);
+    if (!fade) { return {}; }
+    auto const before = fade->percent;
+    auto const duration =
+        fade->direction == +1 ? fade->fade.fade_in : fade->fade.fade_out;
+    auto const delta =
+        duration.count() > 0 ? timer_period_ms / (float)duration.count() : 1.f;
+    fade->percent =
+        std::clamp(fade->percent + delta * (float)fade->direction, 0.f, 1.f);
+    if (fade->percent == 0.f || fade->percent == 1.f) { fade->timer.stop(); }
+    return {.handled = true, .repaint = before != fade->percent};
 }
 
 void Button::start_select()

@@ -49,13 +49,13 @@ class RadioGroup : public Widget {
    public:
     void paint(Canvas c) override;
 
-    void key_press(KeyEvent k) override;
+    auto key_press(KeyEvent k) -> EventResponse override;
 
-    void mouse_press(MousePress m) override;
+    auto mouse_press(MousePress m) -> EventResponse override;
 
-    void focus_in() override;
+    auto focus_in() -> EventResponse override;
 
-    void focus_out() override;
+    auto focus_out() -> EventResponse override;
 
    private:
     std::optional<std::size_t> focus_selection_ = std::nullopt;

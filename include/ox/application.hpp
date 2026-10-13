@@ -29,6 +29,9 @@ class Application {
     auto loop() -> EventLoop& { return loop_; }
     auto focus() -> Focus& { return focus_; }
 
+    /** Whether a widget belongs to the active, enabled input tree. */
+    auto is_interactive(Widget const& widget) const -> bool;
+
     auto handle_mouse_press(MousePress m) -> EventResponse;
     auto handle_mouse_release(MouseRelease m) -> EventResponse;
     auto handle_mouse_wheel(MouseWheel m) -> EventResponse;
@@ -44,7 +47,19 @@ class Application {
     EventLoop loop_;
     Focus focus_;
     std::vector<LifetimeView<Widget>> attached_;
-    Point previous_mouse_position_{0, 0};
+    std::vector<WidgetNode> tree_;
+    std::optional<Point> mouse_position_;
+    std::vector<LifetimeView<Widget>> hovered_;
+
+    auto synchronize() -> EventResponse;
+    auto update_hover() -> EventResponse;
+    void report(EventResponse response);
+    template <typename Input>
+    auto route_mouse(Input event,
+                     EventResponse (Widget::*callback)(Input),
+                     bool select = false) -> EventResponse;
+    template <typename Callback>
+    auto route_focused(Callback callback) -> EventResponse;
 
     void attach_widgets();
 };

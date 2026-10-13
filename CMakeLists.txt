@@ -26,6 +26,7 @@ add_library(TermOx STATIC
     src/datatable.cpp
     src/label.cpp
     src/lineedit.cpp
+    src/routing.cpp
     src/focus.cpp
     src/pixelgrid.cpp
     src/put.cpp
@@ -48,6 +49,7 @@ add_library(TermOx STATIC
     include/ox/button.hpp
     include/ox/checkbox.hpp
     include/ox/datatable.hpp
+    include/ox/routing.hpp
     include/ox/focus.hpp
     include/ox/label.hpp
     include/ox/layout.hpp

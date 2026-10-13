@@ -168,18 +168,73 @@ using namespace ox;
 //     sl::Signal<void(Canvas)> on_paint;
 
 //    protected:
-//     void mouse_press(MousePress m) override { this->on_mouse_press(m); }
-//     void mouse_release(MouseRelease m) override { this->on_mouse_release(m); }
-//     void mouse_wheel(MouseWheel m) override { this->on_mouse_wheel(m); }
-//     void mouse_move(MouseMove m) override { this->on_mouse_move(m); }
-//     void mouse_enter() override { this->on_mouse_enter(); }
-//     void mouse_leave() override { this->on_mouse_leave(); }
-//     void focus_in() override { this->on_focus_in(); }
-//     void focus_out() override { this->on_focus_out(); }
-//     void key_press(KeyEvent k) override { this->on_key_press(k); }
-//     void key_release(KeyEvent k) override { this->on_key_release(k); }
+//     auto mouse_press(MousePress m) -> EventResponse override
+//     {
+//         this->on_mouse_press(m);
+//         return {.handled = true, .repaint = true};
+//     }
+//
+//     auto mouse_release(MouseRelease m) -> EventResponse override
+//     {
+//         this->on_mouse_release(m);
+//         return {.handled = true, .repaint = true};
+//     }
+//
+//     auto mouse_wheel(MouseWheel m) -> EventResponse override
+//     {
+//         this->on_mouse_wheel(m);
+//         return {.handled = true, .repaint = true};
+//     }
+//
+//     auto mouse_move(MouseMove m) -> EventResponse override
+//     {
+//         this->on_mouse_move(m);
+//         return {.handled = true, .repaint = true};
+//     }
+//
+//     auto mouse_enter() -> EventResponse override
+//     {
+//         this->on_mouse_enter();
+//         return {.handled = true, .repaint = true};
+//     }
+//
+//     auto mouse_leave() -> EventResponse override
+//     {
+//         this->on_mouse_leave();
+//         return {.handled = true, .repaint = true};
+//     }
+//
+//     auto focus_in() -> EventResponse override
+//     {
+//         this->on_focus_in();
+//         return {.handled = true, .repaint = true};
+//     }
+//
+//     auto focus_out() -> EventResponse override
+//     {
+//         this->on_focus_out();
+//         return {.handled = true, .repaint = true};
+//     }
+//
+//     auto key_press(KeyEvent k) -> EventResponse override
+//     {
+//         this->on_key_press(k);
+//         return {.handled = true, .repaint = true};
+//     }
+//
+//     auto key_release(KeyEvent k) -> EventResponse override
+//     {
+//         this->on_key_release(k);
+//         return {.handled = true, .repaint = true};
+//     }
+//
+//     auto timer() -> EventResponse override
+//     {
+//         this->on_timer();
+//         return {.handled = true, .repaint = true};
+//     }
+//
 //     void resize(Area old_size) override { this->on_resize(old_size); }
-//     void timer() override { this->on_timer(); }
 //     void paint(Canvas c) override { this->on_paint(c); }
 // };
 

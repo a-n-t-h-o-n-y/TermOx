@@ -33,11 +33,11 @@ class ScrollBar : public Widget {
    public:
     void paint(Canvas c) override;
 
-    void mouse_press(MousePress m) override;
+    auto mouse_press(MousePress m) -> EventResponse override;
 
-    void mouse_wheel(MouseWheel m) override;
+    auto mouse_wheel(MouseWheel m) -> EventResponse override;
 
-    void timer() override;
+    auto timer() -> EventResponse override;
 
    private:
     void increment_position(int amount = 1);

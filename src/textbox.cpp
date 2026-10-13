@@ -116,7 +116,8 @@ using namespace ox;
     Point p,
     std::ranges::random_access_range auto&& line_lengths) -> std::size_t
 {
-    p.y = std::max(p.y, 0);
+    p.y = std::clamp(p.y, 0, (int)std::size(line_lengths) - 1);
+    p.x = std::max(p.x, 0);
     auto truncated = line_lengths | std::views::take(p.y);
     auto index = std::accumulate(std::begin(truncated), std::end(truncated), 0);
     index += std::min(p.x, std::max((int)line_lengths[p.y] - 1, 0));
@@ -238,8 +239,10 @@ void TextBox::paint(Canvas c)
     }
 }
 
-void TextBox::key_press(KeyEvent k)
+auto TextBox::key_press(KeyEvent k) -> EventResponse
 {
+    auto const old_text = text;
+    auto const old_cursor = cursor_index_;
     this->update_layout_cache();
     cursor_index_ = std::min(cursor_index_, unicode_str_.size());
     if (k.matches(KeyCode::Backspace, {}, k.action)) {
@@ -289,49 +292,58 @@ void TextBox::key_press(KeyEvent k)
     }
     else {
         auto const input = input_text(k);
+        if (input.empty()) { return {}; }
         unicode_str_.insert(cursor_index_, input);
         cursor_index_ += input.size();
         text = esc::utf32_to_utf8(unicode_str_);
     }
+
+    return {.handled = true,
+            .repaint = text != old_text || old_cursor != cursor_index_};
 }
 
-void TextBox::paste(esc::PasteChunk const& chunk)
+auto TextBox::paste(esc::PasteChunk const& chunk) -> EventResponse
 {
     if (chunk.first) { paste_buffer_.clear(); }
     paste_buffer_ += chunk.bytes;
+    auto changed = false;
     if (chunk.last) {
-        if (!chunk.aborted) {
+        auto bytes = std::exchange(paste_buffer_, {});
+        if (!chunk.aborted && !bytes.empty()) {
             unicode_str_ = esc::utf8_to_utf32(text);
             cursor_index_ = std::min(cursor_index_, unicode_str_.size());
-            auto const input = esc::utf8_to_utf32(paste_buffer_);
+            auto const input = esc::utf8_to_utf32(bytes);
             unicode_str_.insert(cursor_index_, input);
             cursor_index_ += input.size();
             text = esc::utf32_to_utf8(unicode_str_);
+            changed = true;
         }
-        paste_buffer_.clear();
     }
+    return {.handled = true, .repaint = changed};
 }
 
-void TextBox::mouse_press(MousePress m)
+auto TextBox::mouse_press(MousePress m) -> EventResponse
 {
-    if (m.button == MouseButton::Left) {
-        // Normalize the mouse position
-        auto const align_offset = [&]() -> int {
-            assert(text_layout_.size() > 0);
-            auto const span = text_layout_[(std::size_t)(std::min(
-                scroll_offset_ + m.at.y, (int)text_layout_.size() - 1))];
-            return find_align_offset(align, size.width, (int)span.size());
-        }();
-
-        m.at.x -= align_offset;
-        m.at.y += scroll_offset_;
-        cursor_index_ = point_to_nearest_index(m.at, line_lengths(text_layout_));
-    }
+    if (m.button != MouseButton::Left) { return {}; }
+    update_layout_cache();
+    auto const old = cursor_index_;
+    auto const y = std::clamp(scroll_offset_ + m.at.y, 0, (int)text_layout_.size() - 1);
+    auto const align_offset =
+        find_align_offset(align, size.width, (int)text_layout_[(std::size_t)y].size());
+    m.at.x -= align_offset;
+    m.at.y = y;
+    cursor_index_ = point_to_nearest_index(m.at, line_lengths(text_layout_));
+    return {.handled = true, .repaint = old != cursor_index_};
 }
 
-void TextBox::mouse_wheel(MouseWheel m)
+auto TextBox::mouse_wheel(MouseWheel m) -> EventResponse
 {
-    if (m.dy != 0) { this->set_scroll_offset(scroll_offset_ + m.dy); }
+    if (m.dy == 0) { return {}; }
+    auto const old = scroll_offset_;
+    auto const cursor = cursor_index_;
+    this->set_scroll_offset(scroll_offset_ + m.dy);
+    return {.handled = true,
+            .repaint = old != scroll_offset_ || cursor != cursor_index_};
 }
 
 void TextBox::update_layout_cache()

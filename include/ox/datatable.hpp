@@ -65,7 +65,7 @@ class DataTable : public Widget {
    public:
     void paint(Canvas) override;
 
-    void mouse_wheel(MouseWheel) override;
+    auto mouse_wheel(MouseWheel) -> EventResponse override;
 
     void resize(Area) override;
 

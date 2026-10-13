@@ -17,7 +17,7 @@ int main()
 ```
 
 The root widget must outlive the application. Each widget belongs to one application.
-The application selects the first active widget that accepts tab focus. Focus is local
+The application selects the first visible, active, enabled widget that accepts tab focus. Focus is local
 to the application; use `app.focus().set(widget)`, `get()`, or `clear()`.
 
 ## Dispatch and repaint
@@ -42,9 +42,9 @@ repaint requests are combined into one pending frame. `paint(handler)` calls
 `handle_paint(Canvas)` once if a frame is pending, and returns whether to present it.
 A resize requests a repaint even if the handler has no resize method.
 
-The existing widget callbacks still return `void`, so the application conservatively
-requests a frame after delivering widget input or a widget timer tick. A lower-level
-handler can decide whether each event needs a repaint.
+Widget input, hover, focus, and timer callbacks return `EventResponse`. Handling an
+event does not imply repainting. See [routing and focus](routing-and-focus.md) for
+clipped mouse paths, keyboard bubbling, Tab navigation, and focus lifetime.
 
 ```cpp
 auto editor = LineEdit{};
