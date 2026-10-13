@@ -4,6 +4,7 @@
 #include <string>
 
 // Rendering depends on encoding and frame storage, never a terminal session.
+#include <ox/core/canvas.hpp>
 #include <ox/core/renderer.hpp>
 
 #include <esc/text.hpp>
@@ -294,4 +295,57 @@ TEST(renderer_random_edits_and_resizes_match_headless_display)
         check_text(frame, screen);
         ASSERT(renderer.render(frame).empty());
     }
+}
+
+TEST(renderer_row_tracking_handles_copies_moves_assignments_and_reused_storage)
+{
+    auto renderer = Renderer{profile()};
+    auto frame = Frame{{8, 3}};
+    frame.write({1, 1}, U"x");
+    renderer.render(frame);
+    auto copy = frame;
+    copy.write({1, 1}, U"y");
+    ASSERT(renderer.render(copy).find('y') != std::string_view::npos);
+    ASSERT(renderer.render(frame).find('x') != std::string_view::npos);
+    auto moved = std::move(frame);
+    ASSERT(renderer.render(moved).empty());
+    frame = Frame{{8, 3}};
+    frame.write({1, 1}, U"z");
+    ASSERT(renderer.render(frame).find('z') != std::string_view::npos);
+    frame = copy;
+    ASSERT(renderer.render(frame).find('y') != std::string_view::npos);
+    for (int i = 0; i < 10; ++i) {
+        auto replacement = Frame{{8, 3}};
+        replacement.write({1, 1}, i % 2 ? U"a" : U"b");
+        ASSERT(!renderer.render(replacement).empty());
+    }
+}
+
+TEST(renderer_row_tracking_handles_clear_resize_styles_wide_cells_and_invalidation)
+{
+    auto renderer = Renderer{profile()};
+    auto frame = Frame{{8, 3}};
+    renderer.render(frame);
+    frame.write({2, 1}, U"日");
+    ASSERT(!renderer.render(frame).empty());
+    ASSERT(frame.write({2, 1}, U"日"));
+    ASSERT(renderer.render(frame).empty());
+    auto canvas = Canvas{frame};
+    canvas.restyle({3, 1}, {.traits = Trait::Bold});
+    ASSERT(!renderer.render(frame).empty());
+    canvas.restyle({3, 1}, {.traits = Trait::Bold});
+    ASSERT(renderer.render(frame).empty());
+    frame.write({3, 1}, U"x");
+    ASSERT(!renderer.render(frame).empty());
+    frame.clear();
+    ASSERT(!renderer.render(frame).empty());
+    frame.clear();
+    ASSERT(renderer.render(frame).empty());
+    renderer.invalidate();
+    ASSERT(!renderer.render(frame).empty());
+    ASSERT(!renderer.render(frame, {}, colors::red).empty());
+    frame.resize({8, 3});
+    ASSERT(renderer.render(frame, {}, colors::red).empty());
+    frame.resize({10, 4});
+    ASSERT(!renderer.render(frame, {}, colors::red).empty());
 }

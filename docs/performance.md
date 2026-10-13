@@ -279,3 +279,78 @@ allocations than the previous streaming implementation, though it is faster in t
 workloads. Cached layout keeps one extra integer per grapheme plus reusable working
 buffers, with capacity proportional to the largest layout. Unchanged updates still
 compare the owned text snapshot, and row construction still visits the full document.
+
+## Idle waiting and row revisions
+
+This pass replaces the 16 ms terminal polling limit with readiness waiting. The host
+waits on Escape's borrowed input source and an event-loop wakeup source, bounded by
+the earliest loop or Escape deadline. Empty-to-nonempty posts signal once per batch;
+queue transfer resets the signal under the queue lock. POSIX uses a nonblocking,
+close-on-exec pipe and `poll`; Windows uses a manual-reset event and
+`WaitForMultipleObjects`. Escape still owns parsing, buffered input, EOF, and resize
+checks, and all terminal I/O and callbacks run on the dispatch thread.
+
+The POSIX PTY comparison runs the former polling algorithm and the new driver against
+the same current terminal and queue implementation. Each sample opens a fresh PTY,
+paints the initial frame, waits without input for a worker post after one second, and
+records loop iterations and post-to-callback latency. Five samples alternate drivers.
+Iterations include initial dispatch and exit dispatch. Escape's default 100 ms resize
+checks remain enabled, so an idle terminal still wakes about ten times per second.
+This measures one-second idle samples and scheduler-dependent latency, not CPU usage.
+Raw results: [waiting](../tests/benchmark-results/waiting.csv).
+
+```sh
+cmake --build build-release --target TermOx.tests.event_loop_terminal -j 4
+python3 tests/benchmark_event_loop.py ./build-release/tests/TermOx.tests.event_loop_terminal
+```
+
+Frames now keep a revision per row and an owned identity. Copies and resizes receive
+fresh identities, moves transfer identity, and the renderer retains ownership of the
+last identity so allocator address reuse is harmless. Mutation records revisions
+before changing cells, and revision wrap replaces identity. Identical writes and
+restyles avoid mutation and replacement string construction. Rendering skips rows
+whose identity and revision match, and checks equality on repainted rows before
+encoding. Invalidation and default-color changes still force complete repainting.
+
+The renderer comparison uses baseline `d7f88bb` and the same updated benchmark source
+in both Release builds, with the toolchain and dependencies described above. Run only
+the rendering workloads with `--renderer`. Checksums match and all warmed workloads
+perform zero ordinary C++ allocations. The clear-paint workload includes clearing,
+writing one glyph per row, and rendering identical content on every timed iteration;
+the full-frame workload includes clearing to alternating styles and rendering.
+
+| Workload | Before µs | After µs |
+| --- | ---: | ---: |
+| renderer.unchanged.80x24 | 13.169 | 0.047 |
+| renderer.single-cell.80x24 | 13.257 | 1.234 |
+| renderer.clear-paint.80x24 | 17.763 | 20.394 |
+| renderer.full-frame.80x24 | 108.433 | 118.209 |
+| renderer.unchanged.200x60 | 82.949 | 0.088 |
+| renderer.single-cell.200x60 | 83.931 | 2.740 |
+| renderer.clear-paint.200x60 | 108.868 | 116.236 |
+| renderer.full-frame.200x60 | 679.695 | 731.611 |
+
+Raw results: [rendering before](../tests/benchmark-results/rendering-before.csv) and
+[rendering after](../tests/benchmark-results/rendering-after.csv).
+
+Unchanged retained frames are 280–943 times faster in these workloads, and single-cell
+updates including mutation are 10.7–30.6 times faster. Clear-and-paint is 7–15% slower;
+full-frame style changes are 8–9% slower. These costs are part of the comparison, not
+excluded painting work. Application painting currently clears and redraws the whole
+frame, so it cannot get the revision-only skip used by retained-frame updates; it
+still compares repainted rows. No end-to-end repaint speedup is claimed. Revisions
+add eight bytes per row to each frame and renderer, plus one shared identity allocation
+per frame construction/copy/resize. Warm mutation and rendering retain storage.
+
+The waiting samples show median loop iterations falling from 59 to 11 per idle second,
+and median delivery latency from 12,115 to 220 microseconds (about 55 times lower).
+These are local observations; operating-system scheduling determines delivery latency.
+
+Validation: all 143 Release test cases, including five allocation-fault cases, pass.
+The seven PTY checks and idle benchmark cover worker wakeups, standalone Escape
+parser deadlines, renderer presentation, five examples, resizing, Ctrl-C, and restoration.
+ASan+UBSan passes 37 non-exception frame, renderer, and event-loop cases with every
+TermOx source instrumented and the unchanged Escape Release library linked. Deliberate
+exception cases run in Release; the installed sanitizer runtime cannot unwind even
+an independently reproduced caught exception. The POSIX path was built and exercised
+on macOS; the Windows wait implementation was not executed on this host.

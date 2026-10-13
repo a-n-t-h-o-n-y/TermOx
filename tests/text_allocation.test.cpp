@@ -9,13 +9,15 @@
 #include <vector>
 
 #include <esc/layout.hpp>
+#include <ox/core/renderer.hpp>
 #include <ox/core/text.hpp>
 
 namespace {
 int remaining_allocations = -1;
 }
 
-// Fault injection is confined to this executable and enabled only around an edit.
+// Fault injection is confined to this executable and enabled only around the operation
+// under test.
 auto operator new(std::size_t bytes) -> void*
 {
     if (remaining_allocations == 0) { throw std::bad_alloc{}; }
@@ -202,4 +204,64 @@ TEST(text_layout_allocation_failures_preserve_analysis_policy_and_row_storage)
     check_layout_failures([&](ox::TextLayout& layout) {
         layout.update(layout.text(), 41, ox::TextWrap::Any, {.overrides = overrides});
     });
+}
+
+TEST(frame_resize_allocation_failures_preserve_cells_and_renderer_tracking)
+{
+    auto failures = 0;
+    bool succeeded = false;
+    for (int budget = 0; budget < 16; ++budget) {
+        auto frame = ox::Frame{{4, 2}};
+        frame.write({1, 1}, U"x");
+        auto profile = esc::TerminalProfile{};
+        profile.control = true;
+        auto renderer = ox::Renderer{profile};
+        renderer.render(frame);
+        remaining_allocations = budget;
+        try {
+            frame.resize({8, 4});
+            remaining_allocations = -1;
+            succeeded = true;
+            break;
+        }
+        catch (std::bad_alloc const&) {
+            remaining_allocations = -1;
+            ++failures;
+            ASSERT((frame.size() == ox::Area{4, 2}));
+            ASSERT((frame[ox::Point{1, 1}].text == U"x"));
+            ASSERT(renderer.render(frame).empty());
+            frame.write({1, 1}, U"y");
+            ASSERT(!renderer.render(frame).empty());
+        }
+    }
+    ASSERT(failures >= 3 && succeeded);
+}
+
+TEST(renderer_allocation_failures_invalidate_partial_row_tracking)
+{
+    auto failures = 0;
+    bool succeeded = false;
+    for (int budget = 0; budget < 64; ++budget) {
+        auto profile = esc::TerminalProfile{};
+        profile.control = true;
+        auto renderer = ox::Renderer{profile};
+        auto frame = ox::Frame{{4, 2}};
+        renderer.render(frame);
+        frame.resize({80, 24});
+        frame.write({0, 0}, U"界");
+        remaining_allocations = budget;
+        try {
+            renderer.render(frame);
+            remaining_allocations = -1;
+            succeeded = true;
+            break;
+        }
+        catch (std::bad_alloc const&) {
+            remaining_allocations = -1;
+            ++failures;
+            ASSERT(!renderer.render(frame).empty());
+            ASSERT(renderer.render(frame).empty());
+        }
+    }
+    ASSERT(failures >= 2 && succeeded);
 }

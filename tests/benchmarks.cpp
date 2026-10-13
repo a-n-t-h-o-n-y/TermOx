@@ -310,6 +310,13 @@ void renderer_benchmarks()
             frame.write({size.width / 2, size.height / 2}, i % 2 ? U"x" : U"y");
             return renderer.render(frame).size();
         });
+        measure("renderer.clear-paint." + suffix, 100, [&](int) {
+            frame.clear();
+            for (int y = 0; y < size.height; ++y) {
+                frame.write({size.width / 2, y}, U"x");
+            }
+            return renderer.render(frame).size();
+        });
         measure("renderer.full-frame." + suffix, 100, [&](int i) {
             frame.clear({.traits = i % 2 ? ox::Trait::Bold : ox::Trait::None});
             return renderer.render(frame).size();
@@ -320,13 +327,19 @@ void renderer_benchmarks()
 
 int main(int argc, char** argv)
 {
+    auto const renderer_only = argc == 2 && std::string_view{argv[1]} == "--renderer";
     auto const routing_only = argc == 2 && std::string_view{argv[1]} == "--routing";
     auto const editing_only = argc == 2 && std::string_view{argv[1]} == "--editing";
     auto const layout_only = argc == 2 && std::string_view{argv[1]} == "--layout";
-    if (argc > 1 && !routing_only && !editing_only && !layout_only) { return 2; }
+    if (argc > 1 && !routing_only && !editing_only && !layout_only && !renderer_only) {
+        return 2;
+    }
     std::cout << "workload,iterations,median_us_per_operation,checksum,allocations_per_"
                  "operation\n";
-    if (layout_only) { layout_benchmarks(); }
+    if (renderer_only) { renderer_benchmarks(); }
+    else if (layout_only) {
+        layout_benchmarks();
+    }
     else if (editing_only) {
         editing_benchmarks();
     }

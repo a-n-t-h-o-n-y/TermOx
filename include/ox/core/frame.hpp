@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
+#include <memory>
 #include <span>
 #include <string>
 #include <vector>
@@ -25,7 +27,7 @@ struct Cell {
 class Frame {
    public:
     explicit Frame(Area size = {0, 0}, esc::WidthPolicy policy = {});
-    Frame(Frame const&) = default;
+    Frame(Frame const& other);
     Frame(Frame&& other) noexcept;
     auto operator=(Frame other) noexcept -> Frame&;
 
@@ -47,8 +49,14 @@ class Frame {
 
    private:
     friend class Canvas;
+    friend class Renderer;
+    // A retained identity prevents address reuse and equal revisions on unrelated
+    // frames from hiding changes. Copies receive their own identity.
+    std::shared_ptr<char const> identity_ = std::make_shared<char>();
+    void changed(int row);
     Area size_;
     std::vector<Cell> cells_;
+    std::vector<std::uint64_t> revisions_;
     esc::WidthPolicy policy_;
     std::vector<esc::ScalarWidthOverride> overrides_;
 

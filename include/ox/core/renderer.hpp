@@ -33,6 +33,8 @@ class Renderer {
    private:
     esc::TerminalProfile profile_;
     std::vector<Cell> cells_;
+    std::shared_ptr<char const> identity_;
+    std::vector<std::uint64_t> revisions_;
     Area size_ = {0, 0};
     bool valid_ = false;
     Color foreground_ = default_color;

@@ -26,6 +26,13 @@ policy must match the terminal's glyph widths.
 
 The first frame and every resize paint the entire current rectangle. Later frames
 emit only changed leading cells, including spaces needed to erase old glyph footprints.
+The frame tracks a revision per row. When its identity and a row's revision match
+the last presentation, the renderer skips that row without comparing cells. Identical
+writes and restyles preserve revisions. Clear marks every row; a row equality check
+handles repainting the same content before entering the encoding loop. Copies and
+resizes receive fresh identities, moves preserve identity, and retained identity
+ownership prevents address reuse from hiding changes. Revision wrap resets identity.
+
 Scrolling content is compared as changed rows; the renderer needs no terminal scroll
 regions or scrolling commands. Shrinking assumes the terminal itself was resized;
 columns and rows outside the new dimensions are no longer part of the display.
@@ -47,7 +54,8 @@ that have not changed produce an empty result.
 
 ## Ownership and failures
 
-The renderer retains its cell cache, output string, style buffers, and grapheme buffer.
+The renderer retains its cell cache, row revisions, frame identity, output string,
+style buffers, and grapheme buffer.
 Only changed cell footprints are copied into the cache; there is no full-frame copy
 per presentation. Capacity is retained for subsequent frames and smaller resizes.
 `render()` returns a borrowed `std::string_view`, valid until the next render or

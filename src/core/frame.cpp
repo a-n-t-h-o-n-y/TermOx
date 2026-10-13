@@ -78,6 +78,7 @@ auto translate(Point point, Point offset) -> Point
 Frame::Frame(Area size, esc::WidthPolicy policy)
     : size_{size},
       cells_(cell_count(size)),
+      revisions_((std::size_t)size.height),
       policy_{policy},
       overrides_{policy.overrides.begin(), policy.overrides.end()}
 {
@@ -88,15 +89,27 @@ Frame::Frame(Area size, esc::WidthPolicy policy)
     policy_.overrides = {};
 }
 
+Frame::Frame(Frame const& other)
+    : size_{other.size_},
+      cells_{other.cells_},
+      revisions_{other.revisions_},
+      policy_{other.policy_},
+      overrides_{other.overrides_}
+{}
+
 Frame::Frame(Frame&& other) noexcept
-    : size_{std::exchange(other.size_, Area{0, 0})},
+    : identity_{std::move(other.identity_)},
+      size_{std::exchange(other.size_, Area{0, 0})},
       cells_{std::move(other.cells_)},
+      revisions_{std::move(other.revisions_)},
       policy_{other.policy_},
       overrides_{std::move(other.overrides_)}
 {}
 
 auto Frame::operator=(Frame other) noexcept -> Frame&
 {
+    identity_.swap(other.identity_);
+    revisions_.swap(other.revisions_);
     std::swap(size_, other.size_);
     cells_.swap(other.cells_);
     std::swap(policy_, other.policy_);
@@ -142,13 +155,30 @@ auto Frame::lead_at(Point point) const -> Point
 void Frame::resize(Area size)
 {
     auto cells = std::vector<Cell>(cell_count(size));
+    auto revisions = std::vector<std::uint64_t>((std::size_t)size.height);
+    auto identity = std::shared_ptr<char const>{std::make_shared<char>()};
     cells_.swap(cells);
+    revisions_.swap(revisions);
+    identity_.swap(identity);
     size_ = size;
+}
+
+void Frame::changed(int row)
+{
+    auto& revision = revisions_[(std::size_t)row];
+    if (revision == std::numeric_limits<std::uint64_t>::max()) {
+        identity_ = std::make_shared<char>();
+        std::ranges::fill(revisions_, 0);
+    }
+    ++revision;
 }
 
 void Frame::clear(Style style)
 {
     validate_style(style);
+    for (int y = 0; y < size_.height; ++y) {
+        changed(y);
+    }
     std::ranges::fill(cells_, Cell{U" ", style, 1});
 }
 
@@ -178,7 +208,13 @@ auto Frame::write(Point at, std::u32string_view grapheme, Style style, Rect clip
         (std::int64_t)end > (std::int64_t)clip.at.x + clip.size.width) {
         return false;
     }
+    auto const& existing = (*this)[at];
+    if (existing.columns == *width && existing.text == grapheme &&
+        existing.style == style) {
+        return true;
+    }
     auto replacement = Cell{std::u32string{grapheme}, style, *width};
+    changed(at.y);
     for (int x = first_lead.x; x < end; ++x) {
         auto const index = this->index({x, at.y});
         cells_[index] = Cell{U" ", cells_[index].style, 1};
@@ -201,6 +237,8 @@ auto Frame::restyle(Point at, Style style, Rect clip) -> bool
         (std::int64_t)end > (std::int64_t)clip.at.x + clip.size.width) {
         return false;
     }
+    if ((*this)[lead].style == style) { return true; }
+    changed(at.y);
     for (int x = lead.x; x < end; ++x) {
         cells_[this->index({x, at.y})].style = style;
     }

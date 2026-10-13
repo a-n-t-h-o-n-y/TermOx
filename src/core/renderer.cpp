@@ -1,5 +1,6 @@
 #include <ox/core/renderer.hpp>
 
+#include <algorithm>
 #include <stdexcept>
 
 #include <esc/sequence.hpp>
@@ -46,9 +47,23 @@ auto Renderer::render(Frame const& frame,
             cells_.resize(static_cast<std::size_t>(frame.size().width) *
                           static_cast<std::size_t>(frame.size().height));
         }
+        revisions_.resize((std::size_t)frame.size().height);
+        auto const same_frame = identity_ == frame.identity_;
         for (auto y = 0; y < frame.size().height; ++y) {
+            auto const revision = frame.revisions_[(std::size_t)y];
+            if (!repaint && same_frame && revisions_[(std::size_t)y] == revision) {
+                continue;
+            }
             auto const row = frame.row(y);
             auto const offset = static_cast<std::size_t>(y) * row.size();
+            // Clearing and repainting can restore the same row. Check that common
+            // case outside the encoding loop, then cache its new revision.
+            auto const previous =
+                std::span<Cell const>{cells_}.subspan(offset, row.size());
+            if (!repaint && std::ranges::equal(row, previous)) {
+                revisions_[(std::size_t)y] = revision;
+                continue;
+            }
             for (auto x = std::size_t{0}; x < row.size();) {
                 auto const& cell = row[x];
                 if (repaint || cell != cells_[offset + x]) {
@@ -95,10 +110,12 @@ auto Renderer::render(Frame const& frame,
                 }
                 x += cell.columns;
             }
+            revisions_[(std::size_t)y] = revision;
         }
         if (cursor && contains(Rect{{0, 0}, frame.size()}, *cursor)) {
             move_to(frame.lead_at(*cursor));
         }
+        identity_ = frame.identity_;
         size_ = frame.size();
         foreground_ = foreground;
         background_ = background;
