@@ -3,7 +3,7 @@
 #include <array>
 #include <string_view>
 
-#include <ox/core/core.hpp>
+#include <ox/core/canvas.hpp>
 
 namespace ox::shape {
 
@@ -190,17 +190,23 @@ void put(Canvas c, Point at, Glyph const& item);
  * @details Uses the default Style and the given character.
  * @details Does bounds checking and is no-op if \p at is out of Canvas' bounds.
  */
-void put(Canvas c, Point at, Character auto item)
-{ put(c, at, Glyph{.symbol = static_cast<char32_t>(item)}); }
+void put(Canvas c, Point at, Character auto item) { put(c, at, item | Style{}); }
+
+void put(Canvas c, Point at, std::span<Glyph const> item);
 
 void put(Canvas c, Point at, GlyphRange auto const& item)
 {
-    if (at.x < 0 || at.y < 0 || at.y >= c.size.height) { return; }
-
-    for (auto const& g : item) {
-        if (at.x >= c.size.width) { break; }
-        c[at] = g;
-        ++at.x;
+    if constexpr (std::ranges::contiguous_range<decltype(item)> &&
+                  std::ranges::sized_range<decltype(item)>) {
+        put(c, at,
+            std::span<Glyph const>{std::ranges::data(item), std::ranges::size(item)});
+    }
+    else {
+        auto glyphs = std::vector<Glyph>{};
+        for (auto const& glyph : item) {
+            glyphs.push_back(glyph);
+        }
+        put(c, at, std::span<Glyph const>{glyphs});
     }
 }
 

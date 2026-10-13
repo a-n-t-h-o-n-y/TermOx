@@ -55,14 +55,22 @@ class Bordered : public Widget {
 
         // Label - Can't use Label::paint because it paints over border with bg color.
         auto& label = border.label;
-        auto const width = std::max(0, c.size.width - 2);
-        auto glyphs = esc::glyphs(label.text) | label.style;
-        glyphs.resize(std::min(glyphs.size(), (std::size_t)width));
-        auto const at = Point{
-            .x = 1 + find_align_offset(label.align, width, (int)glyphs.size()),
-            .y = 0,
-        };
-        put(c, at, glyphs);
+        auto const width = std::max(0, c.size().width - 2);
+        auto text = esc::utf8_to_utf32(label.text);
+        auto length = std::size_t{0};
+        auto columns = std::size_t{0};
+        for (auto cluster : esc::graphemes(text)) {
+            auto cells = esc::grapheme_width(cluster, c.width_policy());
+            if (!cells || *cells == 0) {
+                throw std::invalid_argument{"Border label requires printable text"};
+            }
+            if (*cells > (std::size_t)width - columns) { break; }
+            columns += *cells;
+            length += cluster.size();
+        }
+        auto const x = find_align_offset(label.align, width, (int)columns);
+        put(c.subcanvas({1, 0}, {width, 1}), {x, 0},
+            esc::glyphs(std::u32string_view{text}.substr(0, length), label.style));
     }
 
     auto get_children() -> zzz::Generator<Widget&> override { co_yield child; }

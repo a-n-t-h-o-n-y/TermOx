@@ -182,7 +182,7 @@ void paint(SplashScreen const& x, Canvas c)
     auto offset = [&]() -> Point {
         auto const text_width = (int)x.display.find('\n');
         return {
-            .x = std::max((c.size.width - text_width) / 2, 0),
+            .x = std::max((c.size().width - text_width) / 2, 0),
             .y = 6,
         };
     }();
@@ -198,7 +198,7 @@ void paint(SplashScreen const& x, Canvas c)
     }
 
     auto const enter = esc::glyphs(U"Press Enter to continue") | Trait::Dim;
-    put(c, {.x = (c.size.width - (int)enter.size()) / 2, .y = c.size.height - 1},
+    put(c, {.x = (c.size().width - (int)enter.size()) / 2, .y = c.size().height - 1},
         enter);
 }
 
@@ -208,7 +208,7 @@ void paint(MainMenu const& x, Canvas c)
         auto offset = [&]() -> Point {
             auto const width_text = (int)logo.find('\n');
             return {
-                .x = std::max((c.size.width - width_text) / 2, 0),
+                .x = std::max((c.size().width - width_text) / 2, 0),
                 .y = 6,
             };
         }();
@@ -225,7 +225,7 @@ void paint(MainMenu const& x, Canvas c)
     {  // Menu Items
         for (std::size_t i = 0; i < x.options.size(); ++i) {
             auto const at = Point{
-                .x = (c.size.width - (int)x.options[i].size()) / 2,
+                .x = (c.size().width - (int)x.options[i].size()) / 2,
                 .y = 14 + (int)i,
             };
             if (i == x.selected) {
@@ -244,22 +244,22 @@ void paint(HowTo const& x, Canvas c)
         put(c, shape::Box::square(), colors::blue);
     }
     {  // Title
-        auto const at = Point{.x = (c.size.width - (int)x.title.size()) / 2, .y = 1};
+        auto const at = Point{.x = (c.size().width - (int)x.title.size()) / 2, .y = 1};
         put(c, at, esc::glyphs(x.title) | Trait::Bold | Trait::Underline);
     }
     {  // Instructions
         for (std::size_t i = 0; i < x.instructions.size(); ++i) {
             auto const at = Point{
-                .x = (c.size.width - 40) / 2,
+                .x = (c.size().width - 40) / 2,
                 .y = 4 + (int)i,
             };
             put(c, at, esc::glyphs(x.instructions[i][0]) | Trait::Bold);
-            put(c, {.x = (c.size.width + 8) / 2, .y = 4 + (int)i},
+            put(c, {.x = (c.size().width + 8) / 2, .y = 4 + (int)i},
                 x.instructions[i][1]);
         }
     }
     {  // Footer
-        put(c, {.x = 2, .y = c.size.height - 1},
+        put(c, {.x = 2, .y = c.size().height - 1},
             esc::glyphs(U"Press Esc to return to the main menu") | Trait::Dim);
     }
 }
@@ -267,11 +267,11 @@ void paint(HowTo const& x, Canvas c)
 void paint(PlayerSelectMenu const& x, Canvas c)
 {
     {  // Title
-        auto const at = Point{.x = (c.size.width - (int)x.title.size()) / 2, .y = 1};
+        auto const at = Point{.x = (c.size().width - (int)x.title.size()) / 2, .y = 1};
         put(c, at, x.title);
     }
     {  // Left Player
-        auto const at = Point{.x = c.size.width / 2 - 25, .y = 4};
+        auto const at = Point{.x = c.size().width / 2 - 25, .y = 4};
         if (x.left_selected) {
             put(c, at,
                 "Left Player: " + (esc::glyphs(x.left_player.name) | Trait::Standout));
@@ -281,7 +281,7 @@ void paint(PlayerSelectMenu const& x, Canvas c)
         }
     }
     {  // Right Player
-        auto const at = Point{.x = c.size.width / 2 + 10, .y = 4};
+        auto const at = Point{.x = c.size().width / 2 + 10, .y = 4};
         if (!x.left_selected) {
             put(c, at,
                 "Right Player: " +
@@ -294,7 +294,7 @@ void paint(PlayerSelectMenu const& x, Canvas c)
     {  // Options
         for (std::size_t i = 0; i < x.options.size(); ++i) {
             auto const at = Point{
-                .x = (c.size.width - (int)x.options[i].name.size()) / 2,
+                .x = (c.size().width - (int)x.options[i].name.size()) / 2,
                 .y = 6 + (int)i,
             };
 
@@ -307,7 +307,7 @@ void paint(PlayerSelectMenu const& x, Canvas c)
         }
     }
     {  // Footer
-        put(c, {.x = 0, .y = c.size.height - 1},
+        put(c, {.x = 0, .y = c.size().height - 1},
             esc::glyphs(U"Press Esc to return to the main menu") | Trait::Dim);
     }
 }
@@ -316,17 +316,15 @@ void paint(Game const& x, Canvas c)
 {
     static constexpr auto display_space = Game::game_space;
 
-    if (c.size.width < display_space.width || c.size.height < display_space.height) {
+    if (c.size().width < display_space.width ||
+        c.size().height < display_space.height) {
         put(c, {0, 0}, U"Terminal too small to display game");
         return;
     }
 
-    auto game_canvas = Canvas{
-        .buffer = c.buffer,
-        .at = {.x = c.at.x + (c.size.width - display_space.width) / 2,
-               .y = c.at.y + (c.size.height - display_space.height) / 2},
-        .size = display_space,
-    };
+    auto const game_at = Point{(c.size().width - display_space.width) / 2,
+                               (c.size().height - display_space.height) / 2};
+    auto game_canvas = c.subcanvas(game_at, display_space);
 
     {  // Net
         put(game_canvas, {.x = display_space.width / 2, .y = 0},
@@ -354,8 +352,8 @@ void paint(Game const& x, Canvas c)
             .x = (int)std::round(x.ball.at.x),
             .y = (int)std::round(x.ball.at.y),
         };
-        game_canvas[at] = glyph | Trait::Inverse;
-        game_canvas[{.x = at.x, .y = at.y - 1}] = glyph;
+        put(game_canvas, at, glyph | Trait::Inverse);
+        put(game_canvas, {.x = at.x, .y = at.y - 1}, glyph);
     }
 
     {  // Paddles
@@ -370,16 +368,16 @@ void paint(Game const& x, Canvas c)
                 .y = (int)std::floor(paddle.top.y),
             };
 
-            game_canvas[at] = edge;
+            put(game_canvas, at, edge);
 
             for (int i = 1; i < Game::Paddle::height; ++i) {
                 at.y += 1;
-                game_canvas[at] = U'█' | Trait::None;
+                put(game_canvas, at, U'█' | Trait::None);
             }
 
             at.y += 1;
-            if (at.y < game_canvas.size.height) {
-                game_canvas[at] = edge | Trait::Inverse;
+            if (at.y < game_canvas.size().height) {
+                put(game_canvas, at, edge | Trait::Inverse);
             }
         };
 
@@ -388,41 +386,36 @@ void paint(Game const& x, Canvas c)
     }
 
     {  // Left Score
-        // Use Canvas::buffer to write outside of Canvas.
+        // Scores are drawn in the parent canvas.
         auto const text = x.left.player.name + ": " + std::to_string(x.left.score);
         auto at = Point{
-            .x = game_canvas.at.x,
-            .y = std::max(0, game_canvas.at.y - 2),
+            .x = game_at.x,
+            .y = std::max(0, game_at.y - 2),
         };
-        for (auto ch : text) {
-            game_canvas.buffer[at].symbol = ch;
-            ++at.x;
-        }
+        put(c, at, text);
     }
 
     {  // Right Score
         auto const text = x.right.player.name + ": " + std::to_string(x.right.score);
         auto at = Point{
-            .x = game_canvas.at.x + display_space.width - (int)text.size() - 1,
-            .y = std::max(0, game_canvas.at.y - 2),
+            .x = game_at.x + display_space.width - (int)text.size() - 1,
+            .y = std::max(0, game_at.y - 2),
         };
-        for (auto ch : text) {
-            game_canvas.buffer[at].symbol = ch;
-            ++at.x;
-        }
+        put(c, at, text);
     }
 
     {  // Border
-        put(c, game_canvas.at + Point{-1, -1}, shape::Box::round(),
+        put(c, game_at + Point{-1, -1}, shape::Box::round(),
             Area{.width = display_space.width + 2, .height = display_space.height + 2},
             colors::blue);
     }
 
     {  // Footer
-        put(c, {.x = 0, .y = c.size.height - 1},
+        put(c, {.x = 0, .y = c.size().height - 1},
             esc::glyphs(U"Press Esc to return to the main menu") | Trait::Dim);
         auto const enter_text = std::u32string{U"Press Enter to start next round"};
-        put(c, {.x = (c.size.width - (int)enter_text.size()), .y = c.size.height - 1},
+        put(c,
+            {.x = (c.size().width - (int)enter_text.size()), .y = c.size().height - 1},
             esc::glyphs(enter_text) | Trait::Dim);
     }
 }
@@ -430,17 +423,9 @@ void paint(Game const& x, Canvas c)
 /**
  * Paints the state to the screen.
  */
-void paint(State const& x, ScreenBuffer& buffer)
+void paint(State const& x, Canvas canvas)
 {
-    std::visit(
-        [&](auto const& s) {
-            paint(s, Canvas{
-                         .buffer = buffer,
-                         .at = {0, 0},
-                         .size = buffer.size(),
-                     });
-        },
-        x);
+    std::visit([&](auto const& state) { paint(state, canvas); }, x);
 }
 
 // -------------------------------------------------------------------------------------
@@ -760,9 +745,9 @@ class Pong {
     auto handle_timer(int id) -> EventResponse
     { return this->update(timer(std::move(state_), id)); }
 
-    auto handle_paint(Canvas canvas) -> Terminal::Cursor
+    auto handle_paint(Canvas canvas) -> Cursor
     {
-        paint(state_, canvas.buffer);
+        paint(state_, canvas);
         return {};
     }
 

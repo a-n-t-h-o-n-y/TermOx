@@ -47,20 +47,31 @@ using namespace ox;
     auto remaining = glyphs;
 
     while (!remaining.empty()) {
-        auto line = remaining.substr(0, width);
-        auto const newline_at = line.find_first_of(U'\n');
-        if (newline_at != std::u32string_view::npos) {
-            line = line.substr(0, newline_at + 1);
-        }
-
-        if (wrap == TextBox::Wrap::Word && line.size() == width) {
-            auto const last_space = line.find_last_of(U' ');
-            if (last_space != std::u32string_view::npos) {
-                line = line.substr(0, last_space + 1);
+        auto length = std::size_t{0};
+        auto columns = std::size_t{0};
+        auto word_end = std::size_t{0};
+        for (auto cluster : esc::graphemes(remaining)) {
+            if (cluster == U"\n" || cluster == U"\r\n") {
+                length += cluster.size();
+                break;
             }
+            auto cells = esc::grapheme_width(cluster);
+            if (!cells || *cells == 0) {
+                throw std::invalid_argument{"TextBox requires printable text"};
+            }
+            if (*cells > width - columns) {
+                if (length == 0) { length = cluster.size(); }
+                else if (wrap == TextBox::Wrap::Word && word_end != 0) {
+                    length = word_end;
+                }
+                break;
+            }
+            columns += *cells;
+            length += cluster.size();
+            if (cluster == U" ") { word_end = length; }
         }
-        spans.push_back(line);
-        remaining = remaining.substr(line.size());
+        spans.push_back(remaining.substr(0, length));
+        remaining.remove_prefix(length);
     }
 
     // Add empty line if newline is last char
@@ -195,25 +206,35 @@ void TextBox::paint(Canvas c)
     fill(c, style);
 
     // Paint Text
-    for (auto y = 0; y + scroll_offset_ < std::ssize(text_layout_) && y < c.size.height;
-         ++y) {
-        auto const span = text_layout_[(std::size_t)(y + scroll_offset_)];
-        auto const x = find_align_offset(align, c.size.width, (int)span.size());
-
-        for (auto i = 0; i < (int)span.size(); ++i) {
-            auto ch = span[(std::size_t)i];
-            if (ch == U'\n') { continue; }
-            c[{.x = x + i, .y = y}].symbol = ch;
-        }
+    for (auto y = 0;
+         y + scroll_offset_ < std::ssize(text_layout_) && y < c.size().height; ++y) {
+        auto span = text_layout_[(std::size_t)(y + scroll_offset_)];
+        if (span.ends_with(U"\n")) { span.remove_suffix(1); }
+        if (span.ends_with(U"\r")) { span.remove_suffix(1); }
+        auto const width = esc::cell_width(span, c.width_policy());
+        if (!width) { throw std::invalid_argument{"TextBox requires printable text"}; }
+        auto const x = find_align_offset(align, c.size().width, (int)*width);
+        put(c, {x, y}, esc::glyphs(span, style));
     }
 
     {  // Position the Cursor
         auto const cursor = index_to_point(cursor_index_, line_lengths(text_layout_));
 
-        auto const span = text_layout_[(std::size_t)cursor.y];
+        auto span = text_layout_[(std::size_t)cursor.y];
+        if (span.ends_with(U"\n")) { span.remove_suffix(1); }
+        if (span.ends_with(U"\r")) { span.remove_suffix(1); }
+        auto const width = esc::cell_width(span, c.width_policy());
+        if (!width) { throw std::invalid_argument{"TextBox requires printable text"}; }
+        auto columns = std::size_t{0};
+        auto offset = std::size_t{0};
+        for (auto cluster : esc::graphemes(span)) {
+            if (offset + cluster.size() > (std::size_t)cursor.x) { break; }
+            columns += *esc::grapheme_width(cluster, c.width_policy());
+            offset += cluster.size();
+        }
         auto const x =
-            find_align_offset(align, c.size.width, (int)std::ssize(span)) + cursor.x;
-        Widget::cursor = {.x = x, .y = cursor.y - scroll_offset_};
+            find_align_offset(align, c.size().width, (int)*width) + (int)columns;
+        Widget::cursor = Point{x, cursor.y - scroll_offset_};
     }
 }
 

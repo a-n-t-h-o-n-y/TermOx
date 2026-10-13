@@ -11,39 +11,6 @@
 
 namespace ox {
 
-ScreenBuffer::ScreenBuffer(Area size)
-    : size_{size}, buffer_((std::size_t)(size.width * size.height))
-{}
-
-auto ScreenBuffer::operator[](Point p) -> Glyph&
-{
-    auto const at = (std::size_t)(p.y * size_.width + p.x);
-    assert(at < buffer_.size());
-    return buffer_[at];
-}
-
-auto ScreenBuffer::operator[](Point p) const -> Glyph const&
-{
-    auto const at = (std::size_t)(p.y * size_.width + p.x);
-    assert(at < buffer_.size());
-    return buffer_[at];
-}
-
-void ScreenBuffer::resize(Area a)
-{
-    size_ = a;
-    buffer_.resize((std::size_t)(a.width * a.height));
-}
-
-void ScreenBuffer::fill(Glyph const& g)
-{
-    for (auto& glyph : buffer_) {
-        glyph = g;
-    }
-}
-
-// -------------------------------------------------------------------------------------
-
 Terminal::Terminal(Options x)
     : foreground{x.foreground},
       background{x.background},
@@ -66,53 +33,48 @@ Terminal::Terminal(MouseMode mouse_mode,
                        .background = background_}}
 {}
 
-void Terminal::commit_changes(ScreenBuffer const& screen, Cursor cursor)
+void Terminal::commit_changes(Frame const& screen, Cursor cursor)
 {
     escape_sequence_.clear();
-
-    if (screen.size() != current_screen_.size()) {
-        current_screen_.resize(screen.size());
-        current_screen_.fill(Glyph{U'\0'});  // Trigger Repaint
-    }
-
+    auto const repaint = !screen_valid_ || screen.size() != current_screen_.size() ||
+                         foreground != last_foreground_ ||
+                         background != last_background_;
     auto style = Style{};
-
     for (auto y = 0; y < screen.size().height; ++y) {
         for (auto x = 0; x < screen.size().width; ++x) {
-            auto const change = [&] {
-                auto g = screen[{x, y}];
-                if (g.style.background == Color{default_color}) {
-                    g.style.background = this->background;
+            auto const& cell = screen[{x, y}];
+            if (cell.columns == 0) { continue; }
+            if (repaint || cell != current_screen_[{x, y}]) {
+                auto appearance = cell.style;
+                if (appearance.background == Color{default_color}) {
+                    appearance.background = background;
                 }
-                if (g.style.foreground == Color{default_color}) {
-                    g.style.foreground = this->foreground;
+                if (appearance.foreground == Color{default_color}) {
+                    appearance.foreground = foreground;
                 }
-                return g;
-            }();
-            auto const& current = current_screen_[{x, y}];
-            if (change != current) {
                 escape_sequence_ += esc::encode(session_.profile(), esc::Cursor{x, y});
-                if (change.style != style) {
-                    escape_sequence_ += esc::encode(session_.profile(), change.style);
-                    style = change.style;
+                if (appearance != style) {
+                    escape_sequence_ += esc::encode(session_.profile(), appearance);
+                    style = appearance;
                 }
-                escape_sequence_ += esc::encode_utf8(change.symbol).view();
-                current_screen_[{x, y}] = change;
+                esc::append_utf8(escape_sequence_, cell.text);
             }
         }
     }
-    // Reset style for consistency with above optimization.
     escape_sequence_ += esc::encode(session_.profile(), Style{});
-
     auto frame = session_.frame();
     session_.set(esc::CursorMode::Hide);
     session_.write(escape_sequence_);
-
-    if (cursor.has_value()) {
-        session_.write(esc::Cursor{cursor->x, cursor->y});
+    if (cursor && contains(Rect{{0, 0}, screen.size()}, *cursor)) {
+        auto const lead = screen.lead_at(*cursor);
+        session_.write(esc::Cursor{lead.x, lead.y});
         session_.set(esc::CursorMode::Show);
     }
     frame.close();
+    current_screen_ = screen;
+    screen_valid_ = true;
+    last_foreground_ = foreground;
+    last_background_ = background;
 }
 
 auto Terminal::read(std::chrono::milliseconds timeout) -> std::optional<Event>
@@ -133,13 +95,5 @@ auto Terminal::read(std::chrono::milliseconds timeout) -> std::optional<Event>
 }
 
 auto Terminal::size() -> Area { return session_.area(); }
-
-// -------------------------------------------------------------------------------------
-
-auto Canvas::operator[](Point p) -> Glyph&
-{ return buffer[{.x = at.x + p.x, .y = at.y + p.y}]; }
-
-auto Canvas::operator[](Point p) const -> Glyph const&
-{ return buffer[{.x = at.x + p.x, .y = at.y + p.y}]; }
 
 }  // namespace ox

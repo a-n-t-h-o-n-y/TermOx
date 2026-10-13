@@ -107,3 +107,5 @@ The loop owns posted events, scheduling, frame storage, repaint state, and the e
 request. The terminal owns its Escape session and previous rendered frame. Application
 adds widget routing and focus. No process-wide event queue, focus, timer registry, or
 quit flag is used.
+
+Frame storage and clipped drawing are described in [frames and canvases](frame-and-canvas.md).

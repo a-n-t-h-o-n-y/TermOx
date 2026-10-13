@@ -96,7 +96,7 @@ class Widget {
    public:
     FocusPolicy focus_policy;
     SizePolicy size_policy;
-    Terminal::Cursor cursor = std::nullopt;
+    Cursor cursor = std::nullopt;
     bool active = true;
     bool focused = false;
 

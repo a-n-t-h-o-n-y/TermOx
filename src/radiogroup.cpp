@@ -19,7 +19,7 @@ RadioGroup::RadioGroup(Options x)
 void RadioGroup::paint(Canvas c)
 {
     for (auto y = 0; y < (int)items.size(); ++y) {
-        if (y >= c.size.height) { break; }
+        if (y >= c.size().height) { break; }
         auto& btn = (y == selected_index) ? on : off;
         put(c, {0, y}, btn);
         auto& b = in_focus_ && (y == focus_selection_) ? in_focus_style : style;

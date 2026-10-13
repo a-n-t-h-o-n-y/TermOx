@@ -37,7 +37,7 @@ class Application {
     auto handle_key_release(KeyEvent k) -> EventResponse;
     auto handle_paste(esc::PasteChunk const& chunk) -> EventResponse;
     auto handle_resize(Area new_size) -> EventResponse;
-    auto handle_paint(Canvas canvas) -> Terminal::Cursor;
+    auto handle_paint(Canvas canvas) -> Cursor;
 
    private:
     Widget& head_;

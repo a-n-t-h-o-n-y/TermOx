@@ -6,6 +6,7 @@
 #include <optional>
 #include <vector>
 
+#include <ox/core/dispatch.hpp>
 #include <ox/core/terminal.hpp>
 #include <ox/timer.hpp>
 
@@ -20,8 +21,8 @@ class EventLoop {
 
     ~EventLoop();
 
-    ScreenBuffer screen{{0, 0}};
-    Terminal::Cursor cursor;
+    Frame screen{{0, 0}};
+    Cursor cursor;
 
     void post(Event event);
     void watch(Timer const& timer);
@@ -73,8 +74,8 @@ class EventLoop {
         if (!repaint_ || exit_code_) { return false; }
         repaint_ = false;
         if constexpr (HandlesPaint<Handler>) {
-            screen.fill(Glyph{});
-            cursor = handler.handle_paint(Canvas{screen, {0, 0}, screen.size()});
+            screen.clear();
+            cursor = handler.handle_paint(Canvas{screen});
         }
         return true;
     }

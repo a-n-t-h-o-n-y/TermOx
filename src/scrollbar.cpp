@@ -51,9 +51,9 @@ ScrollBar::ScrollBar(Options x)
 void ScrollBar::paint(Canvas c)
 {
     auto const bar_len =
-        bar_length(c.size.height, scrollable_length, item_visual_length);
+        bar_length(c.size().height, scrollable_length, item_visual_length);
     auto const bar_pos =
-        bar_top_position(position, c.size.height, scrollable_length, bar_len);
+        bar_top_position(position, c.size().height, scrollable_length, bar_len);
 
     auto const edge = [](float y) -> char32_t {
         auto const i = (std::size_t)((y - std::floor(y)) * 8);
@@ -67,13 +67,13 @@ void ScrollBar::paint(Canvas c)
 
     fill(c, style);
 
-    c[at].symbol = edge;
+    put(c, at, edge | style);
 
     put(c, {.x = 0, .y = (int)bar_pos + 1}, shape::VLine{.symbol = U'█'},
         std::max(bar_len - 1, 0), style.foreground);
 
     at.y += bar_len;
-    if (at.y < this->size.height) { c[at] = edge | style | Trait::Inverse; }
+    if (at.y < this->size.height) { put(c, at, edge | style | Trait::Inverse); }
 }
 
 void ScrollBar::mouse_press(MousePress m)

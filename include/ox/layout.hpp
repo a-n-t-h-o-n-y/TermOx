@@ -370,34 +370,19 @@ class Suspended : public Widget {
    public:
     void paint(Canvas c) override
     {
-        // Paint around child Widget.
-        {
-            auto left = c;
-            left.size.width = child.at.x;
-            fill(left, fill_glyph);
-        }
-        {
-            auto right = c;
-            right.at.x += child.at.x + child.size.width;
-            right.size.width = this->size.width - child.size.width - child.at.x;
-            fill(right, fill_glyph);
-        }
-        {
-            auto top = c;
-            top.at.x += child.at.x;
-            top.size = {.width = child.size.width, .height = child.at.y};
-            fill(top, fill_glyph);
-        }
-        {
-            auto bottom = c;
-            bottom.at.x += child.at.x;
-            bottom.at.y += child.at.y + child.size.height;
-            bottom.size = {
-                .width = child.size.width,
-                .height = this->size.height - child.size.height - child.at.y,
-            };
-            fill(bottom, fill_glyph);
-        }
+        // Paint the four margins through clipped child views.
+        auto const right = child.at.x + child.size.width;
+        auto const bottom = child.at.y + child.size.height;
+        fill(c.subcanvas({0, 0}, {std::max(child.at.x, 0), c.size().height}),
+             fill_glyph);
+        fill(c.subcanvas({right, 0},
+                         {std::max(c.size().width - right, 0), c.size().height}),
+             fill_glyph);
+        fill(c.subcanvas({child.at.x, 0}, {child.size.width, std::max(child.at.y, 0)}),
+             fill_glyph);
+        fill(c.subcanvas({child.at.x, bottom},
+                         {child.size.width, std::max(c.size().height - bottom, 0)}),
+             fill_glyph);
     }
 
     void resize(Area) override
@@ -422,29 +407,21 @@ class Suspended : public Widget {
     auto get_children() -> zzz::Generator<Widget&> override { co_yield child; }
 
     auto get_children() const -> zzz::Generator<Widget const&> override
-    {
-        co_yield child;
-    }
+    { co_yield child; }
 };
 
 // -------------------------------------------------------------------------------------
 
 template <std::size_t I, TupleLike Container>
 auto get_child(Row<Container>& row) -> auto&
-{
-    return std::get<I>(row.children);
-}
+{ return std::get<I>(row.children); }
 
 template <std::size_t I, TupleLike Container>
 auto get_child(Column<Container>& row) -> auto&
-{
-    return std::get<I>(row.children);
-}
+{ return std::get<I>(row.children); }
 
 template <WidgetDerived ChildType>
 auto get_child(Suspended<ChildType>& sus) -> auto&
-{
-    return sus.child;
-}
+{ return sus.child; }
 
 }  // namespace ox

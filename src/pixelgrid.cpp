@@ -1,4 +1,5 @@
 #include <ox/pixelgrid.hpp>
+#include <ox/put.hpp>
 
 #include <cstddef>
 #include <memory>
@@ -31,8 +32,8 @@ void PixelGrid::paint(Canvas c)
             auto const color_bottom =
                 (y + 1 < buffer.area.height) ? buffer[{x, y + 1}] : RGB{0x000000};
             auto const at = Point{x, y / 2};
-            if (at.x < c.size.width && at.y < c.size.height) {
-                c[at] = U'▄' | bg(color_top) | fg(color_bottom);
+            if (at.x < c.size().width && at.y < c.size().height) {
+                put(c, at, U'▄' | bg(color_top) | fg(color_bottom));
             }
         }
     }

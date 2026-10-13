@@ -91,10 +91,16 @@ void LineEdit::paint(Canvas c)
 
     auto const is_ghost = text.empty() && !this->focused;
 
-    auto const trim = [this](std::u32string_view sv) -> std::u32string_view {
-        return sv.substr(anchor_index_,
-                         (std::size_t)std::min(this->size.width,
-                                               (int)sv.size() - (int)anchor_index_));
+    auto offset = std::size_t{0};
+    for (auto cluster : esc::graphemes(unicode)) {
+        if (anchor_index_ < offset + cluster.size()) {
+            anchor_index_ = offset;
+            break;
+        }
+        offset += cluster.size();
+    }
+    auto const trim = [this](std::u32string_view text) {
+        return text.substr(std::min(anchor_index_, text.size()));
     };
 
     fill(c, bg(background));
@@ -104,14 +110,20 @@ void LineEdit::paint(Canvas c)
 
     put(c, {.x = 0, .y = 0}, for_screen);
 
-    // Cursor
-    if ((int)cursor_index_ >= (int)anchor_index_ + this->size.width ||
-        cursor_index_ < anchor_index_) {
-        Widget::cursor = std::nullopt;
+    // Map the scalar cursor to the leading edge of its grapheme in terminal columns.
+    auto columns = std::size_t{0};
+    offset = anchor_index_;
+    for (auto cluster : esc::graphemes(trim(unicode))) {
+        if (offset + cluster.size() > cursor_index_) { break; }
+        auto const width = esc::grapheme_width(cluster, c.width_policy());
+        if (!width) { throw std::invalid_argument{"LineEdit requires printable text"}; }
+        columns += *width;
+        offset += cluster.size();
     }
-    else {
-        Widget::cursor = Point{.x = (int)cursor_index_ - (int)anchor_index_, .y = 0};
-    }
+    Widget::cursor =
+        cursor_index_ < anchor_index_ || columns >= (std::size_t)c.size().width
+            ? Cursor{}
+            : Cursor{Point{(int)columns, 0}};
 }
 
 void LineEdit::update_scroll_offset()

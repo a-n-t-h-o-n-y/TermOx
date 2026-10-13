@@ -172,20 +172,20 @@ class SnakeGameWidget : public Widget {
 
         // Paint apples
         for (auto const pt : engine_.state.apple_field) {
-            c[pt] = U' ' | bg(colors::bright_red);
+            put(c, pt, U' ' | bg(colors::bright_red));
         }
 
         // Paint Snake
         for (auto const pt : engine_.state.snake) {
-            c[pt] = U' ' | bg(colors::bright_green);
+            put(c, pt, U' ' | bg(colors::bright_green));
         }
 
         // Paint Tail
         auto const tail = std::array{U'░', U'▒', U'▓'};
         for (auto i = 0; i < std::ssize(tail); ++i) {
             if (i + 1 < std::ssize(engine_.state.snake)) {
-                c[engine_.state.snake[i]] =
-                    tail[i] | fg(colors::bright_green) | bg(colors::bright_black);
+                put(c, engine_.state.snake[i],
+                    tail[i] | fg(colors::bright_green) | bg(colors::bright_black));
             }
         }
 

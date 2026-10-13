@@ -19,7 +19,7 @@ struct Handler {
         ++events;
         return {.handled = true, .repaint = redraw};
     }
-    auto handle_paint(Canvas) -> Terminal::Cursor
+    auto handle_paint(Canvas) -> Cursor
     {
         ++paints;
         return {};
@@ -212,8 +212,8 @@ TEST(applications_own_focus_frames_and_exit_requests_without_a_terminal)
     ASSERT(&second.focus().get().get() == &second_edit);
     ASSERT(first.paint());
     ASSERT(second.paint());
-    ASSERT((first.loop().screen[Point{0, 0}].symbol == U'a'));
-    ASSERT((second.loop().screen[Point{0, 0}].symbol == U'b'));
+    ASSERT((first.loop().screen[Point{0, 0}].text == U"a"));
+    ASSERT((second.loop().screen[Point{0, 0}].text == U"b"));
     first.quit(3);
     ASSERT(first.loop().exit_code() == 3);
     ASSERT(first.run() == 3);  // An already stopped application opens no terminal.

@@ -1,10 +1,7 @@
 #pragma once
 
 #include <concepts>
-#include <condition_variable>
 #include <functional>
-#include <list>
-#include <mutex>
 #include <optional>
 #include <string>
 #include <utility>

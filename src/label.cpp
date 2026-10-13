@@ -21,16 +21,21 @@ void paint_label(Canvas c, std::string_view text, Align align, Style style)
 {
     fill(c, style);
 
-    auto unicode_str = esc::utf8_to_utf32(text);
-    if (std::ssize(unicode_str) > c.size.width) {
-        unicode_str.resize((std::size_t)c.size.width);
+    auto const unicode = esc::utf8_to_utf32(text);
+    auto end = std::size_t{0};
+    auto columns = std::size_t{0};
+    for (auto cluster : esc::graphemes(unicode)) {
+        auto const width = esc::grapheme_width(cluster, c.width_policy());
+        if (!width || *width == 0) {
+            throw std::invalid_argument{"Label requires printable text"};
+        }
+        if (*width > (std::size_t)c.size().width - columns) { break; }
+        columns += *width;
+        end += cluster.size();
     }
-    auto const x = find_align_offset(align, c.size.width, (int)unicode_str.size());
-    auto const y = c.size.height / 2;
-    for (auto i = 0; i < (int)unicode_str.size(); ++i) {
-        auto ch = unicode_str[(std::size_t)i];
-        c[{.x = x + i, .y = y}].symbol = ch;
-    }
+    auto const x = find_align_offset(align, c.size().width, (int)columns);
+    put(c, {x, c.size().height / 2},
+        esc::glyphs(std::u32string_view{unicode}.substr(0, end), style));
 }
 
 }  // namespace ox::detail

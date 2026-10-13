@@ -1,329 +1,259 @@
 #include <ox/put.hpp>
 
-#include <string_view>
-
-#include <ox/core/core.hpp>
+#include <algorithm>
+#include <cstdint>
+#include <limits>
+#include <optional>
+#include <stdexcept>
 
 namespace {
+using namespace ox;
 
-/**
- *  Return true if \p at is within the bounds of \p area.
- */
-[[nodiscard]]
-auto in_bounds(ox::Point at, ox::Area area) -> bool
-{ return at.x >= 0 && at.y >= 0 && at.x < area.width && at.y < area.height; }
+// Validate the complete text before modifying any cells.
+void validate_text(std::u32string_view text, esc::WidthPolicy policy)
+{
+    for (auto cluster : esc::graphemes(text)) {
+        auto width = esc::grapheme_width(cluster, policy);
+        if (!width || *width == 0) {
+            throw std::invalid_argument{"Expected printable text"};
+        }
+    }
+}
 
+auto appearance(Canvas c,
+                Point at,
+                std::optional<Style> style,
+                std::optional<Color> color) -> Style
+{
+    auto result = style.value_or(c[at].style);
+    if (color) { result.foreground = *color; }
+    return result;
+}
+
+void validate_symbol(Canvas c, char32_t ch)
+{
+    if (ch != U'\0' &&
+        esc::grapheme_width(std::u32string_view{&ch, 1}, c.width_policy()) != 1) {
+        throw std::invalid_argument{"Shape symbols must occupy one column"};
+    }
+}
+
+void symbol(Canvas c,
+            std::int64_t x,
+            std::int64_t y,
+            char32_t ch,
+            std::optional<Style> style,
+            std::optional<Color> color)
+{
+    if (ch == U'\0') { return; }
+    auto const clip = c.visible();
+    if (x < clip.at.x || y < clip.at.y ||
+        x >= (std::int64_t)clip.at.x + clip.size.width ||
+        y >= (std::int64_t)clip.at.y + clip.size.height) {
+        return;
+    }
+    auto const text = std::u32string_view{&ch, 1};
+    auto const point = Point{(int)x, (int)y};
+    c.write(point, text, appearance(c, point, style, color));
+}
+
+void line(Canvas c,
+          std::int64_t x,
+          std::int64_t y,
+          char32_t ch,
+          int length,
+          bool horizontal,
+          std::optional<Style> style,
+          std::optional<Color> color)
+{
+    if (length < 0) { throw std::invalid_argument{"Negative line length"}; }
+    if (length == 0 || ch == U'\0') { return; }
+    validate_symbol(c, ch);
+    auto const clip = c.visible();
+    auto const begin = std::max(horizontal ? x : y,
+                                (std::int64_t)(horizontal ? clip.at.x : clip.at.y));
+    auto const end = std::min((horizontal ? x : y) + length,
+                              (std::int64_t)(horizontal ? clip.at.x : clip.at.y) +
+                                  (horizontal ? clip.size.width : clip.size.height));
+    for (auto i = begin; i < end; ++i) {
+        symbol(c, horizontal ? i : x, horizontal ? y : i, ch, style, color);
+    }
+}
+
+void box(Canvas c,
+         Point at,
+         shape::Box const& item,
+         Area size,
+         std::optional<Style> style,
+         std::optional<Color> color)
+{
+    validate(size);
+    for (auto ch : item.walls) {
+        validate_symbol(c, ch);
+    }
+    for (auto ch : item.corners) {
+        validate_symbol(c, ch);
+    }
+    if (size.width == 0 || size.height == 0) { return; }
+    auto const right = (std::int64_t)at.x + size.width - 1;
+    auto const bottom = (std::int64_t)at.y + size.height - 1;
+    line(c, (std::int64_t)at.x + 1, at.y, item.walls[0], std::max(size.width - 2, 0),
+         true, style, color);
+    if (size.height > 1) {
+        line(c, (std::int64_t)at.x + 1, bottom, item.walls[1],
+             std::max(size.width - 2, 0), true, style, color);
+    }
+    line(c, at.x, (std::int64_t)at.y + 1, item.walls[3], std::max(size.height - 2, 0),
+         false, style, color);
+    if (size.width > 1) {
+        line(c, right, (std::int64_t)at.y + 1, item.walls[2],
+             std::max(size.height - 2, 0), false, style, color);
+    }
+    symbol(c, at.x, at.y, item.corners[0], style, color);
+    if (size.width > 1) { symbol(c, right, at.y, item.corners[1], style, color); }
+    if (size.height > 1) { symbol(c, at.x, bottom, item.corners[2], style, color); }
+    if (size.width > 1 && size.height > 1) {
+        symbol(c, right, bottom, item.corners[3], style, color);
+    }
+}
+
+void restyle(Canvas c, auto modify)
+{
+    auto const clip = c.visible();
+    for (int y = clip.at.y; y < clip.at.y + clip.size.height; ++y) {
+        for (int x = clip.at.x; x < clip.at.x + clip.size.width;) {
+            auto const& cell = c[{x, y}];
+            if (cell.columns == 0) {
+                ++x;
+                continue;
+            }
+            auto style = cell.style;
+            modify(style);
+            c.restyle({x, y}, style);
+            x += std::min((int)cell.columns, clip.at.x + clip.size.width - x);
+        }
+    }
+}
+
+void fill_symbol(Canvas c, char32_t ch, std::optional<Style> style)
+{
+    auto const text = std::u32string_view{&ch, 1};
+    auto const width = esc::grapheme_width(text, c.width_policy());
+    if (!width || *width == 0) {
+        throw std::invalid_argument{"Expected a printable fill glyph"};
+    }
+    auto const clip = c.visible();
+    for (int y = clip.at.y; y < clip.at.y + clip.size.height; ++y) {
+        // Clear complete old footprints first, leaving partial boundary graphemes
+        // untouched.
+        for (int x = clip.at.x; x < clip.at.x + clip.size.width; ++x) {
+            c.write({x, y}, U" ", style.value_or(c[{x, y}].style));
+        }
+        auto const start = ((std::size_t)clip.at.x + *width - 1) / *width * *width;
+        for (auto x = start; x + *width <= (std::size_t)(clip.at.x + clip.size.width);
+             x += *width) {
+            c.write({(int)x, y}, text, style.value_or(c[{(int)x, y}].style));
+        }
+    }
+}
 }  // namespace
 
 namespace ox {
-
 void put(Canvas c, Point at, Glyph const& item)
+{ c.write(at, std::u32string_view{&item.symbol, 1}, item.style); }
+
+void put(Canvas c, Point at, std::string_view text)
+{ put(c, at, esc::utf8_to_utf32(text)); }
+
+void put(Canvas c, Point at, std::u32string_view text)
 {
-    if (in_bounds(at, c.size)) { c[at] = item; }
+    validate_text(text, c.width_policy());
+    auto x = (std::int64_t)at.x;
+    auto const clip = c.visible();
+    for (auto cluster : esc::graphemes(text)) {
+        auto const width = *esc::grapheme_width(cluster, c.width_policy());
+        if (x >= (std::int64_t)clip.at.x + clip.size.width) { break; }
+        if (x >= std::numeric_limits<int>::min()) { c.write({(int)x, at.y}, cluster); }
+        x += (std::int64_t)width;
+    }
 }
 
-void put(Canvas c, Point at, std::string_view item) { put(c, at, esc::glyphs(item)); }
-
-void put(Canvas c, Point at, std::u32string_view item)
-{ put(c, at, esc::glyphs(item)); }
+void put(Canvas c, Point at, std::span<Glyph const> glyphs)
+{
+    auto text = std::u32string{};
+    text.reserve(glyphs.size());
+    for (auto const& glyph : glyphs) {
+        if (glyph.style.background.valueless_by_exception() ||
+            glyph.style.foreground.valueless_by_exception()) {
+            throw std::invalid_argument{"Expected valid glyph styles"};
+        }
+        text.push_back(glyph.symbol);
+    }
+    validate_text(text, c.width_policy());
+    auto remaining = glyphs;
+    for (auto cluster : esc::graphemes(text)) {
+        auto const style = remaining.front().style;
+        for (auto const& glyph : remaining.first(cluster.size())) {
+            if (glyph.style != style) {
+                throw std::invalid_argument{"One grapheme requires one style"};
+            }
+        }
+        remaining = remaining.subspan(cluster.size());
+    }
+    remaining = glyphs;
+    auto x = (std::int64_t)at.x;
+    auto const clip = c.visible();
+    for (auto cluster : esc::graphemes(text)) {
+        auto const width = *esc::grapheme_width(cluster, c.width_policy());
+        if (x >= (std::int64_t)clip.at.x + clip.size.width) { break; }
+        c.write({(int)x, at.y}, cluster, remaining.front().style);
+        remaining = remaining.subspan(cluster.size());
+        x += (std::int64_t)width;
+    }
+}
 
 void put(Canvas c, Point at, shape::HLine item, int length)
-{
-    if (at.x < 0 || at.y < 0 || at.y >= c.size.height || item.symbol == U'\0') {
-        return;
-    }
-
-    auto const end = std::min(at.x + length, c.size.width);
-    while (at.x < end) {
-        c[at].symbol = item.symbol;
-        ++at.x;
-    }
-}
-
+{ line(c, at.x, at.y, item.symbol, length, true, {}, {}); }
 void put(Canvas c, Point at, shape::HLine item, int length, Color foreground)
-{
-    if (at.x < 0 || at.y < 0 || at.y >= c.size.height || item.symbol == U'\0') {
-        return;
-    }
-
-    auto const end = std::min(at.x + length, c.size.width);
-    while (at.x < end) {
-        c[at].symbol = item.symbol;
-        c[at].style.foreground = foreground;
-        ++at.x;
-    }
-}
-
+{ line(c, at.x, at.y, item.symbol, length, true, {}, foreground); }
 void put(Canvas c, Point at, shape::HLine item, int length, Style const& style)
-{
-    if (at.x < 0 || at.y < 0 || at.y >= c.size.height || item.symbol == U'\0') {
-        return;
-    }
-
-    auto const end = std::min(at.x + length, c.size.width);
-    while (at.x < end) {
-        c[at].symbol = item.symbol;
-        c[at].style = style;
-        ++at.x;
-    }
-}
-
+{ line(c, at.x, at.y, item.symbol, length, true, style, {}); }
 void put(Canvas c, Point at, shape::VLine item, int length)
-{
-    if (at.x < 0 || at.y < 0 || at.x >= c.size.width || item.symbol == U'\0') {
-        return;
-    }
-
-    auto const end = std::min(at.y + length, c.size.height);
-    while (at.y < end) {
-        c[at].symbol = item.symbol;
-        ++at.y;
-    }
-}
-
+{ line(c, at.x, at.y, item.symbol, length, false, {}, {}); }
 void put(Canvas c, Point at, shape::VLine item, int length, Color foreground)
-{
-    if (at.x < 0 || at.y < 0 || at.x >= c.size.width || item.symbol == U'\0') {
-        return;
-    }
-
-    auto const end = std::min(at.y + length, c.size.height);
-    while (at.y < end) {
-        c[at].symbol = item.symbol;
-        c[at].style.foreground = foreground;
-        ++at.y;
-    }
-}
-
+{ line(c, at.x, at.y, item.symbol, length, false, {}, foreground); }
 void put(Canvas c, Point at, shape::VLine item, int length, Style const& style)
-{
-    if (at.x < 0 || at.y < 0 || at.x >= c.size.width || item.symbol == U'\0') {
-        return;
-    }
+{ line(c, at.x, at.y, item.symbol, length, false, style, {}); }
 
-    auto const end = std::min(at.y + length, c.size.height);
-    while (at.y < end) {
-        c[at].symbol = item.symbol;
-        c[at].style = style;
-        ++at.y;
-    }
-}
-
-// -------------------------------------------------------------------------------------
-
-void put(Canvas c, shape::Box const& item) { put(c, {.x = 0, .y = 0}, item, c.size); }
-
+void put(Canvas c, shape::Box const& item) { box(c, {0, 0}, item, c.size(), {}, {}); }
 void put(Canvas c, Point at, shape::Box const& item, Area size)
-{
-    // One Past Bottom Right Corner
-    auto const end = Point{
-        .x = std::min(at.x + size.width, c.size.width),
-        .y = std::min(at.y + size.height, c.size.height),
-    };
-
-    // Horizontal
-    put(c, {at.x + 1, at.y}, shape::HLine{.symbol = item.walls[0]}, size.width - 2);
-    put(c, {at.x + 1, end.y - 1}, shape::HLine{.symbol = item.walls[1]},
-        size.width - 2);
-
-    // Vertical
-    put(c, {at.x, at.y + 1}, shape::VLine{.symbol = item.walls[3]}, size.height - 2);
-    put(c, {end.x - 1, at.y + 1}, shape::VLine{.symbol = item.walls[2]},
-        size.height - 2);
-
-    // Corners
-    if (item.corners[0] != U'\0' && in_bounds(at, c.size)) {
-        c[at].symbol = item.corners[0];
-    }
-
-    if (item.corners[1] != U'\0') {
-        auto const pt = Point{end.x - 1, at.y};
-        if (in_bounds(pt, c.size)) { c[pt].symbol = item.corners[1]; }
-    }
-
-    if (item.corners[2] != U'\0') {
-        auto const pt = Point{at.x, end.y - 1};
-        if (in_bounds(pt, c.size)) { c[pt].symbol = item.corners[2]; }
-    }
-
-    if (item.corners[3] != U'\0') {
-        auto const pt = Point{end.x - 1, end.y - 1};
-        if (in_bounds(pt, c.size)) { c[pt].symbol = item.corners[3]; }
-    }
-}
-
+{ box(c, at, item, size, {}, {}); }
 void put(Canvas c, shape::Box const& item, Color foreground)
-{ put(c, {.x = 0, .y = 0}, item, c.size, foreground); }
-
+{ box(c, {0, 0}, item, c.size(), {}, foreground); }
 void put(Canvas c, Point at, shape::Box const& item, Area size, Color foreground)
-{
-    // One Past Bottom Right Corner
-    auto const end = Point{
-        .x = std::min(at.x + size.width, c.size.width),
-        .y = std::min(at.y + size.height, c.size.height),
-    };
-
-    // Horizontal
-    put(c, {at.x + 1, at.y}, shape::HLine{.symbol = item.walls[0]}, size.width - 2,
-        foreground);
-    put(c, {at.x + 1, end.y - 1}, shape::HLine{.symbol = item.walls[1]}, size.width - 2,
-        foreground);
-
-    // Vertical
-    put(c, {at.x, at.y + 1}, shape::VLine{.symbol = item.walls[3]}, size.height - 2,
-        foreground);
-    put(c, {end.x - 1, at.y + 1}, shape::VLine{.symbol = item.walls[2]},
-        size.height - 2, foreground);
-
-    auto const in_bounds = [](Point at, Area area) {
-        return at.x >= 0 && at.y >= 0 && at.x < area.width && at.y < area.height;
-    };
-
-    // Corners
-    if (item.corners[0] != U'\0' && in_bounds(at, c.size)) {
-        c[at].symbol = item.corners[0];
-        c[at].style.foreground = foreground;
-    }
-
-    if (item.corners[1] != U'\0') {
-        auto const pt = Point{end.x - 1, at.y};
-        if (in_bounds(pt, c.size)) {
-            c[pt].symbol = item.corners[1];
-            c[pt].style.foreground = foreground;
-        }
-    }
-
-    if (item.corners[2] != U'\0') {
-        auto const pt = Point{at.x, end.y - 1};
-        if (in_bounds(pt, c.size)) {
-            c[pt].symbol = item.corners[2];
-            c[pt].style.foreground = foreground;
-        }
-    }
-
-    if (item.corners[3] != U'\0') {
-        auto const pt = Point{end.x - 1, end.y - 1};
-        if (in_bounds(pt, c.size)) {
-            c[pt].symbol = item.corners[3];
-            c[pt].style.foreground = foreground;
-        }
-    }
-}
-
+{ box(c, at, item, size, {}, foreground); }
 void put(Canvas c, shape::Box const& item, Style const& style)
-{ put(c, {.x = 0, .y = 0}, item, c.size, style); }
-
+{ box(c, {0, 0}, item, c.size(), style, {}); }
 void put(Canvas c, Point at, shape::Box const& item, Area size, Style const& style)
+{ box(c, at, item, size, style, {}); }
+
+void fill(Canvas c, Glyph glyph) { fill_symbol(c, glyph.symbol, glyph.style); }
+void fill(Canvas c, Style style)
 {
-    // One Past Bottom Right Corner
-    auto const end = Point{
-        .x = std::min(at.x + size.width, c.size.width),
-        .y = std::min(at.y + size.height, c.size.height),
-    };
-
-    // Horizontal
-    put(c, {at.x + 1, at.y}, shape::HLine{.symbol = item.walls[0]}, size.width - 2,
-        style);
-    put(c, {at.x + 1, end.y - 1}, shape::HLine{.symbol = item.walls[1]}, size.width - 2,
-        style);
-
-    // Vertical
-    put(c, {at.x, at.y + 1}, shape::VLine{.symbol = item.walls[3]}, size.height - 2,
-        style);
-    put(c, {end.x - 1, at.y + 1}, shape::VLine{.symbol = item.walls[2]},
-        size.height - 2, style);
-
-    auto const in_bounds = [](Point at, Area area) {
-        return at.x >= 0 && at.y >= 0 && at.x < area.width && at.y < area.height;
-    };
-
-    // Corners
-    if (item.corners[0] != U'\0' && in_bounds(at, c.size)) {
-        c[at].symbol = item.corners[0];
-        c[at].style = style;
-    }
-
-    if (item.corners[1] != U'\0') {
-        auto const pt = Point{end.x - 1, at.y};
-        if (in_bounds(pt, c.size)) {
-            c[pt].symbol = item.corners[1];
-            c[pt].style = style;
-        }
-    }
-
-    if (item.corners[2] != U'\0') {
-        auto const pt = Point{at.x, end.y - 1};
-        if (in_bounds(pt, c.size)) {
-            c[pt].symbol = item.corners[2];
-            c[pt].style = style;
-        }
-    }
-
-    if (item.corners[3] != U'\0') {
-        auto const pt = Point{end.x - 1, end.y - 1};
-        if (in_bounds(pt, c.size)) {
-            c[pt].symbol = item.corners[3];
-            c[pt].style = style;
-        }
-    }
+    restyle(c, [&](Style& s) { s = style; });
 }
-
-// -------------------------------------------------------------------------------------
-
-void fill(Canvas c, Glyph g)
+void fill(Canvas c, char32_t ch) { fill_symbol(c, ch, {}); }
+void fill(Canvas c, ColorBG color)
 {
-    for (auto y = 0; y < c.size.height; ++y) {
-        for (auto x = 0; x < c.size.width; ++x) {
-            c[{x, y}] = g;
-        }
-    }
+    restyle(c, [&](Style& s) { s.background = color.value; });
 }
-
-void fill(Canvas c, Style b)
+void fill(Canvas c, ColorFG color)
 {
-    for (auto y = 0; y < c.size.height; ++y) {
-        for (auto x = 0; x < c.size.width; ++x) {
-            c[{x, y}].style = b;
-        }
-    }
+    restyle(c, [&](Style& s) { s.foreground = color.value; });
 }
-
-void fill(Canvas c, char32_t ch)
+void fill(Canvas c, Traits traits)
 {
-    for (auto y = 0; y < c.size.height; ++y) {
-        for (auto x = 0; x < c.size.width; ++x) {
-            c[{x, y}].symbol = ch;
-        }
-    }
+    restyle(c, [&](Style& s) { s.traits = traits; });
 }
-
-void fill(Canvas c, ColorBG bg)
-{
-    for (auto y = 0; y < c.size.height; ++y) {
-        for (auto x = 0; x < c.size.width; ++x) {
-            c[{x, y}].style.background = bg.value;
-        }
-    }
-}
-
-void fill(Canvas c, ColorFG fg)
-{
-    for (auto y = 0; y < c.size.height; ++y) {
-        for (auto x = 0; x < c.size.width; ++x) {
-            c[{x, y}].style.foreground = fg.value;
-        }
-    }
-}
-
-void fill(Canvas c, Traits ts)
-{
-    for (auto y = 0; y < c.size.height; ++y) {
-        for (auto x = 0; x < c.size.width; ++x) {
-            c[{x, y}].style.traits = ts;
-        }
-    }
-}
-
-void clear(Canvas c) { fill(c, Glyph{U' '}); }
-
+void clear(Canvas c) { fill(c, Glyph{}); }
 }  // namespace ox

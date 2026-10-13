@@ -178,21 +178,18 @@ void do_shift_tab_focus_change(Focus& focus, Widget& head, Widget const& current
 void send_paint_events(Focus const& focus,
                        Widget& head,
                        Canvas canvas,
-                       Terminal::Cursor& cursor_out)
+                       Cursor& cursor_out)
 {
     for (auto& child : head.get_children() | filter::is_active) {
-        send_paint_events(focus, child,
-                          Canvas{
-                              .buffer = canvas.buffer,
-                              .at = canvas.at + child.at,
-                              .size = child.size,
-                          },
+        send_paint_events(focus, child, canvas.subcanvas(child.at, child.size),
                           cursor_out);
     }
     if (head.active && head.size.width > 0 && head.size.height > 0) {
         head.paint(canvas);
         if (auto const life = focus.get(); life.valid() && &(life.get()) == &head) {
-            cursor_out = head.cursor ? canvas.at + *head.cursor : head.cursor;
+            cursor_out = head.cursor && canvas.contains(*head.cursor)
+                             ? Cursor{canvas.to_global(*head.cursor)}
+                             : Cursor{};
         }
     }
 }
@@ -365,10 +362,10 @@ auto Application::handle_resize(Area new_size) -> EventResponse
     return {.handled = true, .repaint = true};
 }
 
-auto Application::handle_paint(Canvas canvas) -> Terminal::Cursor
+auto Application::handle_paint(Canvas canvas) -> Cursor
 {
     this->attach_widgets();
-    auto cursor = Terminal::Cursor{std::nullopt};
+    auto cursor = Cursor{std::nullopt};
     ::send_paint_events(focus_, head_, canvas, cursor);
     return cursor;
 }

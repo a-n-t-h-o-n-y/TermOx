@@ -46,7 +46,7 @@ to try out the library quickly.
 ### Rich Terminal Styling
 - **Colors** - Full RGB, HSL, and [XTerm 256 Color](https://jonasjacek.github.io/colors/) support
 - **Text Styling** - Bold, italic, underline, strikethrough, and more
-- **Unicode Support** - Validated UTF-8 text and styled Unicode scalars
+- **Unicode Support** - Validated UTF-8 text, complete graphemes, and wide-cell drawing
 
 ### Input Handling
 - **Keyboard** - Press, repeat, and release events, modifiers, and special keys
@@ -79,8 +79,9 @@ Pass `Terminal::Options` to `run()`, for example
 `Application{head}.run({.mouse_mode = MouseMode::Move})`. Ctrl-C exits through the event
 loop by default, and the session restores terminal state on exit.
 
-Text inputs accept Unicode key text and bracketed paste. The canvas still places
-one Unicode scalar per cell; grapheme and wide-character layout are not implemented.
+Text inputs accept Unicode key text and bracketed paste. Frames store complete
+graphemes with explicit continuation cells, and clipped canvases use Escape's width
+estimates. See [frames and canvases](docs/frame-and-canvas.md) for drawing and resize contracts.
 A C++20 compiler and standard library are required.
 
 Build and run the regression tests with:

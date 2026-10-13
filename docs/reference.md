@@ -172,7 +172,7 @@ void paint(Canvas c) override {
 <summary><strong>Details</strong></summary>
 
 A Canvas is a light-weight 2D grid of Glyph objects. It provides a direct mapping to a
-sub-region of the `ScreenBuffer`.
+sub-region of the `Frame`.
 
 `put(...)` functions do bounds checking, and anything painted out of bounds of the
 Canvas will be ignored. These functions are provided as convenience, as an alternative
@@ -360,7 +360,7 @@ appropriately.
 ```cpp
 FocusPolicy focus_policy;
 SizePolicy size_policy;
-Terminal::Cursor cursor = std::nullopt;
+Cursor cursor = std::nullopt;
 bool active = true;
 
 Point at = {.x = 0, .y = 0};
@@ -2136,8 +2136,8 @@ struct Glyph {
 using GlyphString = std::vector<Glyph>;
 ```
 
-A glyph is a styled Unicode scalar. The current canvas places one glyph in each
-cell; it does not lay out grapheme clusters or reserve extra cells for wide glyphs.
+A glyph is a styled Unicode scalar. Frames group scalars into complete graphemes and reserve their terminal column
+footprints, including continuation cells for wide graphemes.
 Use Escape's public conversion and glyph functions for validated text:
 
 ```cpp
@@ -2246,69 +2246,29 @@ compares a supplied screen with the previous frame and presents its changes.
 
 </details>
 
-## 🧩 ox::Canvas
+## 🧩 ox::Frame and ox::Canvas
 
-[`#include <ox/core/terminal.hpp>`](../include/ox/core/terminal.hpp)
+[`#include <ox/core/frame.hpp>`](../include/ox/core/frame.hpp)
+[`#include <ox/core/canvas.hpp>`](../include/ox/core/canvas.hpp)
 
-`struct Canvas;`
+`Frame` owns cells containing complete graphemes, styles, and column widths.
+Continuation cells mark the rest of a wide glyph's footprint. Cell access is read-only;
+use `write()` or the drawing functions to preserve footprint invariants.
 
-A sub-region 'view' of a ScreenBuffer at some offset and bound to some size. This
-provides access to the underlying Glyphs of the buffer without having to do offset math.
-Because it is a view type, Canvas objects can be copied and any modifications will be
-done to the same underlying ScreenBuffer.
-
-```cpp
-void paint(Canvas c) override {
-    c[{0, 0}] = U'X' | fg(colors::blue);
-    c[{.x = 6, .y = 10}].symbol = U'X';
-}
-```
-
-<details>
-<summary><strong>Details</strong></summary>
-
-### 🏗️ Constructors
-
-Aggregate Constructor, not copy or move assignable because of ScreenBuffer reference
-member.
-
-### Public Objects
+`Canvas` borrows a frame and exposes local coordinates, inherited clipping, and
+`subcanvas(offset, size)`. All drawing operations clip without changing the requested
+geometry. Resizing resets the frame; existing canvas objects safely intersect their
+retained geometry with the new bounds.
 
 ```cpp
-ScreenBuffer& buffer;
-Point at;
-Area size;
+auto frame = Frame{{20, 5}};
+auto canvas = Canvas{frame};
+auto panel = canvas.subcanvas({2, 1}, {10, 3});
+put(panel, {0, 0}, "Hello 界");
 ```
 
-### `Canvas::operator[]`
-
-```cpp
-auto operator[](Point p) -> Glyph&;
-auto operator[](Point p) const -> Glyph const&;
-```
-
-Provides access to a Glyph on the underlying ScreenBuffer. The Glyph is found by
-offsetting the given Point by `Canvas::at`and then accessing that Point in the held
-ScreenBuffer reference.
-
-A Canvas starts at the top left with `Point{.x = 0, .y = 0}` and ends at the bottom
-right with `Point{.x = size.width - 1, .y = size.height - 1}`.
-
-Undefined behavior if Point `p` is out of bounds of the Canvas' dimensions.
-
----
-
-</details>
-
-## 🧩 ox::ScreenBuffer
-
-[`#include <ox/core/terminal.hpp>`](../include/ox/core/terminal.hpp)
-
-`class ScreenBuffer;`
-
-Holds the 2D matrix of Glyphs that make up the screen display state. This is used by the
-core of the library and direct access should not be needed by the typical user of this
-library.
+See [the frame and canvas guide](frame-and-canvas.md) for coordinate checks, resize,
+Unicode width policies, complete-footprint clipping, and borrowing rules.
 
 ## 🧩 ox::EventLoop
 

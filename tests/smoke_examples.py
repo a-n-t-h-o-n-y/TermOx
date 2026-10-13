@@ -39,6 +39,11 @@ def smoke(executable, inputs):
             os.write(master, data)
             drain(0.2)
         assert len(output) > before, "input did not trigger a repaint"
+        # Resize in both directions while input and painting are active.
+        fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack("HHHH", 12, 25, 0, 0))
+        drain(0.2)
+        fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack("HHHH", 35, 120, 0, 0))
+        drain(0.2)
         os.write(master, b"\x03")
         deadline = time.monotonic() + 5
         while process.poll() is None and time.monotonic() < deadline:
@@ -64,7 +69,7 @@ def main():
     smoke(examples / "TermOx.examples.pinbox", [b"\x1b[<0;10;5M", b"\x1b[<32;11;5M", b"\x1b[<0;11;5m"])
     smoke(examples / "TermOx.examples.snake", [b"s", b"j", b"l"])
     smoke(examples / "TermOx.examples.accumulator", [b"\x1b[<0;10;5M", b"\x1b[<0;10;5m", b"\t"])
-    smoke(examples / "TermOx.examples.scratch", [b"\x1b[<0;80;4M", "é日".encode(), b"\x1b[200~paste\ntext\x1b[201~"])
+    smoke(examples / "TermOx.examples.scratch", [b"\x1b[<0;80;4M", "é日e\u0301👩\u200d💻".encode(), b"\x1b[200~paste\ntext\x1b[201~"])
 
 
 if __name__ == "__main__":

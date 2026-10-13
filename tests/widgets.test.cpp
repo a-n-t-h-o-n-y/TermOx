@@ -18,10 +18,11 @@ TEST(line_edit_edits_unicode_scalars_and_repeated_keys)
     ASSERT((edit.text == "a界🙂"));
     edit.key_press(KeyEvent{.key = U'x', .modifiers = {.ctrl = true}});
     ASSERT((edit.text == "a界🙂"));
-    auto buffer = ScreenBuffer{{8, 1}};
+    auto buffer = Frame{{8, 1}};
     edit.paint(Canvas{buffer, {0, 0}, {8, 1}});
-    ASSERT((buffer[Point{1, 0}].symbol == U'界'));
-    ASSERT((buffer[Point{2, 0}].symbol == U'🙂'));
+    ASSERT((buffer[Point{1, 0}].text == U"界"));
+    ASSERT((buffer[Point{2, 0}].columns == 0));
+    ASSERT((buffer[Point{3, 0}].text == U"🙂"));
 }
 
 TEST(line_edit_buffers_split_paste_and_applies_scalar_validation)
@@ -92,4 +93,23 @@ TEST(data_table_uses_signed_wheel_steps_and_clamps_scroll)
     ASSERT(table.offset == 0);
     table.mouse_wheel(MouseWheel{{0, 0}, 2, 0});
     ASSERT(table.offset == 0);
+}
+
+TEST(text_painting_never_splits_a_combining_cluster_at_the_viewport_edge)
+{
+    auto editor = LineEdit{{.text = "ae\xcc\x81"}};
+    editor.size = {2, 1};
+    editor.key_press(KeyEvent{.key = KeyCode::End});
+    auto frame = Frame{{2, 1}};
+    editor.paint(Canvas{frame});
+    ASSERT((frame[Point{0, 0}].text == U"e\u0301"));
+    ASSERT((editor.cursor == Cursor{Point{1, 0}}));
+
+    auto box = TextBox{{.text = "e\xcc\x81"
+                                "e\xcc\x81"}};
+    box.size = {1, 2};
+    frame.resize({1, 2});
+    box.paint(Canvas{frame});
+    ASSERT((frame[Point{0, 0}].text == U"e\u0301"));
+    ASSERT((frame[Point{0, 1}].text == U"e\u0301"));
 }

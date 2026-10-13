@@ -50,8 +50,8 @@ void DataTable::paint(Canvas c)
     if (this->size.width == 0 || this->size.height == 0 || columns_.empty()) { return; }
 
     auto const border_area = Area{
-        .width = c.size.width,
-        .height = std::min(c.size.height,
+        .width = c.size().width,
+        .height = std::min(c.size().height,
                            ((int)columns_.front().size() - (int)this->offset) * 2 + 3),
     };
 
@@ -64,8 +64,8 @@ void DataTable::paint(Canvas c)
     if (this->size.height > 2) {
         put(c, {.x = 0, .y = 2}, U'╞' | fg(foreground_line));
         put(c, {.x = 1, .y = 2}, shape::HLine{.symbol = U'═'},
-            std::max(c.size.width - 2, 0), foreground_line);
-        put(c, {.x = c.size.width - 1, .y = 2}, U'╡' | fg(foreground_line));
+            std::max(c.size().width - 2, 0), foreground_line);
+        put(c, {.x = c.size().width - 1, .y = 2}, U'╡' | fg(foreground_line));
     }
 
     auto const table_y = 3;
@@ -96,7 +96,7 @@ void DataTable::paint(Canvas c)
     // Border Intersections
     for (auto y = 4; y + 1 < border_area.height; y += 2) {
         put(c, {0, y}, U'├' | fg(foreground_line));
-        put(c, {c.size.width - 1, y}, U'┤' | fg(foreground_line));
+        put(c, {c.size().width - 1, y}, U'┤' | fg(foreground_line));
     }
     for (auto i = std::size_t{0}; i + 1 < headings_.children.size(); ++i) {
         auto const& heading = headings_.children[i];

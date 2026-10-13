@@ -3,6 +3,7 @@ add_executable(TermOx.tests.unit EXCLUDE_FROM_ALL
     terminal.test.cpp
     widgets.test.cpp
     event_loop.test.cpp
+    frame.test.cpp
 )
 
 target_compile_options(

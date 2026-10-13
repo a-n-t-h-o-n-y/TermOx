@@ -24,7 +24,7 @@ TEST(key_actions_preserve_event_data)
             return {.handled = true};
         }
     } handler;
-    auto buffer = ScreenBuffer{{0, 0}};
+    auto buffer = Frame{{0, 0}};
     auto key = KeyEvent{.key = U'a',
                         .modifiers = {.shift = true},
                         .action = KeyAction::Repeat,
@@ -61,7 +61,7 @@ TEST(mouse_events_preserve_buttons_modifiers_and_wheel_steps)
             return {.handled = true};
         }
     } handler;
-    auto buffer = ScreenBuffer{{0, 0}};
+    auto buffer = Frame{{0, 0}};
     auto const release = MouseRelease{{2, 3}, std::nullopt, {.ctrl = true}};
     auto const move = MouseMove{{4, 5}, MouseButton::Left, {.shift = true}};
     auto const wheel = MouseWheel{{6, 7}, -2, 3, {.alt = true}};
@@ -95,7 +95,7 @@ TEST(paste_dispatch_and_unhandled_events)
             return {.handled = true};
         }
     } handler;
-    auto buffer = ScreenBuffer{{0, 0}};
+    auto buffer = Frame{{0, 0}};
     ASSERT((apply_event(esc::PasteChunk{"abc", true, true}, handler, buffer).handled));
     ASSERT((handler.bytes == "abc"));
     ASSERT((!apply_event(esc::Focus{true}, handler, buffer).handled));
