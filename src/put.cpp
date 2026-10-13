@@ -11,9 +11,7 @@ namespace {
  */
 [[nodiscard]]
 auto in_bounds(ox::Point at, ox::Area area) -> bool
-{
-    return at.x >= 0 && at.y >= 0 && at.x < area.width && at.y < area.height;
-}
+{ return at.x >= 0 && at.y >= 0 && at.x < area.width && at.y < area.height; }
 
 }  // namespace
 
@@ -24,15 +22,10 @@ void put(Canvas c, Point at, Glyph const& item)
     if (in_bounds(at, c.size)) { c[at] = item; }
 }
 
-void put(Canvas c, Point at, std::string_view item)
-{
-    put(c, at, esc::detail::utf8_to_glyphs(item));
-}
+void put(Canvas c, Point at, std::string_view item) { put(c, at, esc::glyphs(item)); }
 
 void put(Canvas c, Point at, std::u32string_view item)
-{
-    put(c, at, esc::detail::utf32_to_glyphs(item));
-}
+{ put(c, at, esc::glyphs(item)); }
 
 void put(Canvas c, Point at, shape::HLine item, int length)
 {
@@ -56,12 +49,12 @@ void put(Canvas c, Point at, shape::HLine item, int length, Color foreground)
     auto const end = std::min(at.x + length, c.size.width);
     while (at.x < end) {
         c[at].symbol = item.symbol;
-        c[at].brush.foreground = foreground;
+        c[at].style.foreground = foreground;
         ++at.x;
     }
 }
 
-void put(Canvas c, Point at, shape::HLine item, int length, Brush const& brush)
+void put(Canvas c, Point at, shape::HLine item, int length, Style const& style)
 {
     if (at.x < 0 || at.y < 0 || at.y >= c.size.height || item.symbol == U'\0') {
         return;
@@ -70,7 +63,7 @@ void put(Canvas c, Point at, shape::HLine item, int length, Brush const& brush)
     auto const end = std::min(at.x + length, c.size.width);
     while (at.x < end) {
         c[at].symbol = item.symbol;
-        c[at].brush = brush;
+        c[at].style = style;
         ++at.x;
     }
 }
@@ -97,12 +90,12 @@ void put(Canvas c, Point at, shape::VLine item, int length, Color foreground)
     auto const end = std::min(at.y + length, c.size.height);
     while (at.y < end) {
         c[at].symbol = item.symbol;
-        c[at].brush.foreground = foreground;
+        c[at].style.foreground = foreground;
         ++at.y;
     }
 }
 
-void put(Canvas c, Point at, shape::VLine item, int length, Brush const& brush)
+void put(Canvas c, Point at, shape::VLine item, int length, Style const& style)
 {
     if (at.x < 0 || at.y < 0 || at.x >= c.size.width || item.symbol == U'\0') {
         return;
@@ -111,7 +104,7 @@ void put(Canvas c, Point at, shape::VLine item, int length, Brush const& brush)
     auto const end = std::min(at.y + length, c.size.height);
     while (at.y < end) {
         c[at].symbol = item.symbol;
-        c[at].brush = brush;
+        c[at].style = style;
         ++at.y;
     }
 }
@@ -160,9 +153,7 @@ void put(Canvas c, Point at, shape::Box const& item, Area size)
 }
 
 void put(Canvas c, shape::Box const& item, Color foreground)
-{
-    put(c, {.x = 0, .y = 0}, item, c.size, foreground);
-}
+{ put(c, {.x = 0, .y = 0}, item, c.size, foreground); }
 
 void put(Canvas c, Point at, shape::Box const& item, Area size, Color foreground)
 {
@@ -191,14 +182,14 @@ void put(Canvas c, Point at, shape::Box const& item, Area size, Color foreground
     // Corners
     if (item.corners[0] != U'\0' && in_bounds(at, c.size)) {
         c[at].symbol = item.corners[0];
-        c[at].brush.foreground = foreground;
+        c[at].style.foreground = foreground;
     }
 
     if (item.corners[1] != U'\0') {
         auto const pt = Point{end.x - 1, at.y};
         if (in_bounds(pt, c.size)) {
             c[pt].symbol = item.corners[1];
-            c[pt].brush.foreground = foreground;
+            c[pt].style.foreground = foreground;
         }
     }
 
@@ -206,7 +197,7 @@ void put(Canvas c, Point at, shape::Box const& item, Area size, Color foreground
         auto const pt = Point{at.x, end.y - 1};
         if (in_bounds(pt, c.size)) {
             c[pt].symbol = item.corners[2];
-            c[pt].brush.foreground = foreground;
+            c[pt].style.foreground = foreground;
         }
     }
 
@@ -214,17 +205,15 @@ void put(Canvas c, Point at, shape::Box const& item, Area size, Color foreground
         auto const pt = Point{end.x - 1, end.y - 1};
         if (in_bounds(pt, c.size)) {
             c[pt].symbol = item.corners[3];
-            c[pt].brush.foreground = foreground;
+            c[pt].style.foreground = foreground;
         }
     }
 }
 
-void put(Canvas c, shape::Box const& item, Brush const& brush)
-{
-    put(c, {.x = 0, .y = 0}, item, c.size, brush);
-}
+void put(Canvas c, shape::Box const& item, Style const& style)
+{ put(c, {.x = 0, .y = 0}, item, c.size, style); }
 
-void put(Canvas c, Point at, shape::Box const& item, Area size, Brush const& brush)
+void put(Canvas c, Point at, shape::Box const& item, Area size, Style const& style)
 {
     // One Past Bottom Right Corner
     auto const end = Point{
@@ -234,15 +223,15 @@ void put(Canvas c, Point at, shape::Box const& item, Area size, Brush const& bru
 
     // Horizontal
     put(c, {at.x + 1, at.y}, shape::HLine{.symbol = item.walls[0]}, size.width - 2,
-        brush);
+        style);
     put(c, {at.x + 1, end.y - 1}, shape::HLine{.symbol = item.walls[1]}, size.width - 2,
-        brush);
+        style);
 
     // Vertical
     put(c, {at.x, at.y + 1}, shape::VLine{.symbol = item.walls[3]}, size.height - 2,
-        brush);
+        style);
     put(c, {end.x - 1, at.y + 1}, shape::VLine{.symbol = item.walls[2]},
-        size.height - 2, brush);
+        size.height - 2, style);
 
     auto const in_bounds = [](Point at, Area area) {
         return at.x >= 0 && at.y >= 0 && at.x < area.width && at.y < area.height;
@@ -251,14 +240,14 @@ void put(Canvas c, Point at, shape::Box const& item, Area size, Brush const& bru
     // Corners
     if (item.corners[0] != U'\0' && in_bounds(at, c.size)) {
         c[at].symbol = item.corners[0];
-        c[at].brush = brush;
+        c[at].style = style;
     }
 
     if (item.corners[1] != U'\0') {
         auto const pt = Point{end.x - 1, at.y};
         if (in_bounds(pt, c.size)) {
             c[pt].symbol = item.corners[1];
-            c[pt].brush = brush;
+            c[pt].style = style;
         }
     }
 
@@ -266,7 +255,7 @@ void put(Canvas c, Point at, shape::Box const& item, Area size, Brush const& bru
         auto const pt = Point{at.x, end.y - 1};
         if (in_bounds(pt, c.size)) {
             c[pt].symbol = item.corners[2];
-            c[pt].brush = brush;
+            c[pt].style = style;
         }
     }
 
@@ -274,7 +263,7 @@ void put(Canvas c, Point at, shape::Box const& item, Area size, Brush const& bru
         auto const pt = Point{end.x - 1, end.y - 1};
         if (in_bounds(pt, c.size)) {
             c[pt].symbol = item.corners[3];
-            c[pt].brush = brush;
+            c[pt].style = style;
         }
     }
 }
@@ -290,11 +279,11 @@ void fill(Canvas c, Glyph g)
     }
 }
 
-void fill(Canvas c, Brush b)
+void fill(Canvas c, Style b)
 {
     for (auto y = 0; y < c.size.height; ++y) {
         for (auto x = 0; x < c.size.width; ++x) {
-            c[{x, y}].brush = b;
+            c[{x, y}].style = b;
         }
     }
 }
@@ -312,7 +301,7 @@ void fill(Canvas c, ColorBG bg)
 {
     for (auto y = 0; y < c.size.height; ++y) {
         for (auto x = 0; x < c.size.width; ++x) {
-            c[{x, y}].brush.background = bg.value;
+            c[{x, y}].style.background = bg.value;
         }
     }
 }
@@ -321,7 +310,7 @@ void fill(Canvas c, ColorFG fg)
 {
     for (auto y = 0; y < c.size.height; ++y) {
         for (auto x = 0; x < c.size.width; ++x) {
-            c[{x, y}].brush.foreground = fg.value;
+            c[{x, y}].style.foreground = fg.value;
         }
     }
 }
@@ -330,7 +319,7 @@ void fill(Canvas c, Traits ts)
 {
     for (auto y = 0; y < c.size.height; ++y) {
         for (auto x = 0; x < c.size.width; ++x) {
-            c[{x, y}].brush.traits = ts;
+            c[{x, y}].style.traits = ts;
         }
     }
 }

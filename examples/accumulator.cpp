@@ -13,7 +13,7 @@ using namespace ox;
         .label =
             {
                 .text = std::to_string(n),
-                .brush = {.foreground = XColor::BrightBlack, .traits = Trait::None},
+                .style = {.foreground = colors::bright_black, .traits = Trait::None},
             },
         .decoration =
             Fade{
@@ -22,8 +22,8 @@ using namespace ox;
                 .fade_in = std::chrono::milliseconds{300},
                 .fade_out = std::chrono::milliseconds{500},
             },
-        .press_mod = [](Label& l) { l.brush.foreground = XColor::BrightWhite; },
-        .focus_mod = [](Label& l) { l.brush.foreground = XColor::BrightCyan; },
+        .press_mod = [](Label& l) { l.style.foreground = colors::bright_white; },
+        .focus_mod = [](Label& l) { l.style.foreground = colors::bright_cyan; },
     }};
 }
 
@@ -67,13 +67,13 @@ int main()
             IntegerLabel{{
                 .value = 0,
                 .align = Align::Right,
-                .brush = {.traits = Trait::Bold},
+                .style = {.traits = Trait::Bold},
                 .locale = digit_separator_locale(1),
                 .size_policy = SizePolicy::fixed(1),
             }},
             Divider{{
                 .lines = Lines::bold(),
-                .brush = {.foreground = XColor::BrightBlack},
+                .style = {.foreground = colors::bright_black},
             }},
             NumberPad{4, 4},
         } |
@@ -89,5 +89,5 @@ int main()
         .slot = [](int n, auto& total_label) { total_label.value += n; },
     }(total_label);
 
-    return Application{head, Terminal{MouseMode::Move}}.run();
+    return Application{head, {.mouse_mode = MouseMode::Move}}.run();
 }

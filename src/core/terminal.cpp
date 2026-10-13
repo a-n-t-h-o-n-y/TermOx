@@ -3,11 +3,11 @@
 #include <algorithm>
 #include <cassert>
 
-#include <esc/detail/signals.hpp>
-#include <esc/detail/transcode.hpp>
 #include <esc/io.hpp>
 #include <esc/sequence.hpp>
 #include <esc/terminal.hpp>
+#include <esc/text.hpp>
+#include <exception>
 
 namespace ox {
 
@@ -45,29 +45,37 @@ void ScreenBuffer::fill(Glyph const& g)
 // -------------------------------------------------------------------------------------
 
 Terminal::Terminal(Options x)
-    : Terminal{x.mouse_mode, x.key_mode, x.signals, x.foreground, x.background}
+    : foreground{x.foreground},
+      background{x.background},
+      session_{esc::Terminal::open([&] {
+          auto options = esc::TerminalOptions::interactive();
+          options.mouse = x.mouse_mode;
+          options.signals = x.signals;
+          options.paste = esc::BracketedPaste::On;
+          return options;
+      }())},
+      terminal_input_thread_{[this](auto st) { this->run_read_loop(st); }}
 {}
 
 Terminal::Terminal(MouseMode mouse_mode,
-                   KeyMode key_mode,
                    Signals signals,
                    Color foreground_,
                    Color background_)
-    : foreground{foreground_},
-      background{background_},
-      terminal_input_thread_{[this](auto st) { this->run_read_loop(st); }}
-{
-    esc::initialize_interactive_terminal(mouse_mode, key_mode, signals);
-}
+    : Terminal{Options{.mouse_mode = mouse_mode,
+                       .signals = signals,
+                       .foreground = foreground_,
+                       .background = background_}}
+{}
 
 Terminal::~Terminal()
 {
     terminal_input_thread_.request_stop();
-    esc::uninitialize_terminal();
+    terminal_input_thread_.join();
 }
 
 void Terminal::commit_changes()
 {
+    auto const lock = std::scoped_lock{session_mutex_};
     escape_sequence_.clear();
 
     if (this->changes.size() != current_screen_.size()) {
@@ -75,80 +83,94 @@ void Terminal::commit_changes()
         current_screen_.fill(Glyph{U'\0'});  // Trigger Repaint
     }
 
-    auto brush = Brush{};
+    auto style = Style{};
 
     for (auto y = 0; y < this->changes.size().height; ++y) {
         for (auto x = 0; x < this->changes.size().width; ++x) {
             auto const change = [&] {
                 auto g = this->changes[{x, y}];
-                if (g.brush.background == Color{TermColor::Default}) {
-                    g.brush.background = this->background;
+                if (g.style.background == Color{default_color}) {
+                    g.style.background = this->background;
                 }
-                if (g.brush.foreground == Color{TermColor::Default}) {
-                    g.brush.foreground = this->foreground;
+                if (g.style.foreground == Color{default_color}) {
+                    g.style.foreground = this->foreground;
                 }
                 return g;
             }();
             auto const& current = current_screen_[{x, y}];
             if (change != current) {
-                escape_sequence_ += escape(esc::Cursor{x, y});
-                if (change.brush != brush) {
-                    escape_sequence_ += escape(change.brush);
-                    brush = change.brush;
+                escape_sequence_ += esc::encode(session_.profile(), esc::Cursor{x, y});
+                if (change.style != style) {
+                    escape_sequence_ += esc::encode(session_.profile(), change.style);
+                    style = change.style;
                 }
-                escape_sequence_ += esc::detail::u32_to_u8(change.symbol);
+                escape_sequence_ += esc::encode_utf8(change.symbol).view();
                 current_screen_[{x, y}] = change;
             }
         }
     }
-    // Reset brush for consistency with above optimization.
-    escape_sequence_ += escape(Brush{});
+    // Reset style for consistency with above optimization.
+    escape_sequence_ += esc::encode(session_.profile(), Style{});
 
     this->changes.fill(Glyph{});
 
-    set(esc::CursorMode::Hide);
-    esc::write(escape_sequence_);
+    auto frame = session_.frame();
+    session_.set(esc::CursorMode::Hide);
+    session_.write(escape_sequence_);
 
     if (cursor.has_value()) {
-        set(esc::CursorMode::Show);
-        esc::write(escape(esc::Cursor{*cursor}));
+        session_.write(esc::Cursor{cursor->x, cursor->y});
+        session_.set(esc::CursorMode::Show);
     }
-    else {
-        esc::set(esc::CursorMode::Hide);
-    }
-
-    esc::flush();
+    frame.close();
 }
 
 void Terminal::run_read_loop(std::stop_token st)
 {
-    Terminal::event_queue.enqueue(esc::Resize{Terminal::size()});
-
-    while (!st.stop_requested()) {
-        if (esc::sigint_flag == 1) {
-            Terminal::event_queue.enqueue(event::Interrupt{});
-            return;
+    try {
+        Terminal::event_queue.enqueue(esc::Resize{this->size()});
+        while (!st.stop_requested()) {
+            auto input = [&] {
+                auto const lock = std::scoped_lock{session_mutex_};
+                return session_.read(std::chrono::milliseconds{16});
+            }();
+            if (auto event = std::get_if<esc::Event>(&input)) {
+                if (auto key = std::get_if<KeyEvent>(event);
+                    key &&
+                    (key->matches(U'c', {.ctrl = true}) || key->matches(U'\x03'))) {
+                    Terminal::event_queue.enqueue(event::Interrupt{});
+                    return;
+                }
+                Terminal::event_queue.enqueue(std::visit(
+                    [](auto&& e) -> Event { return std::move(e); }, std::move(*event)));
+            }
+            else if (std::holds_alternative<esc::EndOfInput>(input)) {
+                Terminal::event_queue.enqueue(
+                    event::Custom{[] { return QuitRequest{}; }});
+                return;
+            }
         }
-        else if (auto const event = esc::read(16); event.has_value()) {
-            Terminal::event_queue.enqueue(
-                std::visit([](auto const& e) -> Event { return e; }, *event));
-            // ^^ Translate from esc::Event to ox::Event ^^
-        }
+    }
+    catch (...) {
+        Terminal::event_queue.enqueue(
+            event::Custom{[error = std::current_exception()]() -> EventResponse {
+                std::rethrow_exception(error);
+            }});
     }
 }
 
-auto Terminal::size() -> Area { return esc::terminal_area(); }
+auto Terminal::size() -> Area
+{
+    auto const lock = std::scoped_lock{session_mutex_};
+    return session_.area();
+}
 
 // -------------------------------------------------------------------------------------
 
 auto Canvas::operator[](Point p) -> Glyph&
-{
-    return buffer[{.x = at.x + p.x, .y = at.y + p.y}];
-}
+{ return buffer[{.x = at.x + p.x, .y = at.y + p.y}]; }
 
 auto Canvas::operator[](Point p) const -> Glyph const&
-{
-    return buffer[{.x = at.x + p.x, .y = at.y + p.y}];
-}
+{ return buffer[{.x = at.x + p.x, .y = at.y + p.y}]; }
 
 }  // namespace ox

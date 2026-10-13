@@ -14,7 +14,7 @@ class ScrollBar : public Widget {
         int scrollable_length = 0;
         int position = 0;
         int item_visual_length = 1;
-        Brush brush = {};
+        Style style = {};
         std::chrono::milliseconds scroll_settle_time = std::chrono::milliseconds{500};
     } static const init;
 
@@ -22,7 +22,7 @@ class ScrollBar : public Widget {
     int scrollable_length;
     int position;  // [0, scrollable_length)
     int item_visual_length;
-    Brush brush;
+    Style style;
     std::chrono::milliseconds scroll_settle_time;
 
     /// Emitted on any change to position, and passes position as the parameter.
@@ -33,9 +33,9 @@ class ScrollBar : public Widget {
    public:
     void paint(Canvas c) override;
 
-    void mouse_press(Mouse m) override;
+    void mouse_press(MousePress m) override;
 
-    void mouse_wheel(Mouse m) override;
+    void mouse_wheel(MouseWheel m) override;
 
     void timer() override;
 

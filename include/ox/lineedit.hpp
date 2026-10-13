@@ -19,42 +19,45 @@ class LineEdit : public Widget {
    public:
     struct Options {
         std::string text = "";
-        Brush text_brush = {};
+        Style text_style = {};
         Align align = Align::Left;
-        Color background = TermColor::Default;
+        Color background = default_color;
         std::string ghost_text = "";
-        Brush ghost_text_brush = {.foreground = XColor::BrightBlack};
-        std::optional<std::function<bool(char)>> validator = std::nullopt;
+        Style ghost_text_style = {.foreground = colors::bright_black};
+        std::optional<std::function<bool(char32_t)>> validator = std::nullopt;
         FocusPolicy focus_policy = FocusPolicy::Strong;
         SizePolicy size_policy = SizePolicy::flex();
     } static const init;
 
    public:
     std::string text;
-    Brush text_brush;
+    Style text_style;
     Align align;
     Color background;
     std::string ghost_text;  // Visible if text is empty.
-    Brush ghost_text_brush;
-    std::optional<std::function<bool(char)>> validator;
+    Style ghost_text_style;
+    std::optional<std::function<bool(char32_t)>> validator;
 
     sl::Signal<void(std::string const&)> on_enter;
 
     LineEdit(Options x = init);
 
    public:
-    void key_press(Key k) override;
+    void key_press(KeyEvent k) override;
 
-    void mouse_press(Mouse m) override;
+    void paste(esc::PasteChunk const& chunk) override;
+
+    void mouse_press(MousePress m) override;
 
     void paint(Canvas c) override;
 
    private:
-    void increment_cursor(int amount);
+    void update_scroll_offset();
 
    private:
-    std::size_t cursor_index_ = 0;  // valid range: [0, text.size()]
-    std::size_t anchor_index_ = 0;  // valid range: [0, text.size()]
+    std::string paste_buffer_;
+    std::size_t cursor_index_ = 0;  // valid range: [0, number of Unicode scalars]
+    std::size_t anchor_index_ = 0;  // valid range: [0, number of Unicode scalars]
 };
 
 }  // namespace ox

@@ -21,7 +21,7 @@ class Application {
      * Create an Application that will forward events to the given head Widget and use
      * the given Terminal to paint the screen.
      */
-    explicit Application(Widget& head, Terminal term = {});
+    explicit Application(Widget& head, Terminal::Options options = {});
 
    public:
     /// Run the application, processing events and painting the screen. Blocking.
@@ -34,17 +34,19 @@ class Application {
     static void quit(int code);
 
    public:
-    auto handle_mouse_press(Mouse m) -> EventResponse;
+    auto handle_mouse_press(MousePress m) -> EventResponse;
 
-    auto handle_mouse_release(Mouse m) -> EventResponse;
+    auto handle_mouse_release(MouseRelease m) -> EventResponse;
 
-    auto handle_mouse_wheel(Mouse m) -> EventResponse;
+    auto handle_mouse_wheel(MouseWheel m) -> EventResponse;
 
-    auto handle_mouse_move(Mouse m) -> EventResponse;
+    auto handle_mouse_move(MouseMove m) -> EventResponse;
 
-    auto handle_key_press(Key k) -> EventResponse;
+    auto handle_key_press(KeyEvent k) -> EventResponse;
 
-    auto handle_key_release(Key k) -> EventResponse;
+    auto handle_key_release(KeyEvent k) -> EventResponse;
+
+    auto handle_paste(esc::PasteChunk const& chunk) -> EventResponse;
 
     auto handle_resize(Area new_size) -> EventResponse;
 

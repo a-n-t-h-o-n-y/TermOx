@@ -12,7 +12,7 @@
 
 namespace ox::detail {
 
-void paint_label(Canvas c, std::string_view text, Align align, Brush brush);
+void paint_label(Canvas c, std::string_view text, Align align, Style style);
 
 }  // namespace ox::detail
 
@@ -26,14 +26,14 @@ class Label : public Widget {
     struct Options {
         std::string text = "";
         Align align = Align::Center;
-        Brush brush = {};
+        Style style = {};
         SizePolicy size_policy = SizePolicy::flex();
     } static const init;
 
    public:
     std::string text;
     Align align;
-    Brush brush;
+    Style style;
 
     Label(Options x = init);
 
@@ -69,7 +69,7 @@ class BasicNumberLabel : public Widget {
     struct Options {
         NumberType value = 0;
         Align align = Align::Center;
-        Brush brush = {};
+        Style style = {};
         std::locale locale = std::locale{};
         std::string format = "{}";
         SizePolicy size_policy = SizePolicy::flex();
@@ -78,7 +78,7 @@ class BasicNumberLabel : public Widget {
    public:
     NumberType value;
     Align align;
-    Brush brush;
+    Style style;
     std::locale locale;
     std::string format;
 
@@ -86,7 +86,7 @@ class BasicNumberLabel : public Widget {
         : Widget{FocusPolicy::None, x.size_policy},
           value{std::move(x.value)},
           align{std::move(x.align)},
-          brush{std::move(x.brush)},
+          style{std::move(x.style)},
           locale{std::move(x.locale)},
           format{std::move(x.format)}
     {}
@@ -95,7 +95,7 @@ class BasicNumberLabel : public Widget {
     void paint(Canvas c) override
     {
         auto const text = std::vformat(locale, format, std::make_format_args(value));
-        detail::paint_label(c, text, align, brush);
+        detail::paint_label(c, text, align, style);
     }
 };
 

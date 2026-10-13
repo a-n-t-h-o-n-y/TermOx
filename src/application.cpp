@@ -73,8 +73,8 @@ void for_each_depth_first(Widget& w, std::function<void(Widget&)> const& fn)
 
 enum class SetFocus : bool { Yes, No };
 
-template <SetFocus SF, typename EventFn>
-void any_mouse_event(Widget& head, Mouse m, EventFn&& event_fn)
+template <SetFocus SF, typename MouseEvent, typename EventFn>
+void any_mouse_event(Widget& head, MouseEvent m, EventFn&& event_fn)
 {
     Widget* const found_ptr =
         find_widget_at(head.get_children() | filter::is_active, m.at);
@@ -198,8 +198,8 @@ void send_paint_events(Widget& head, Canvas canvas, Terminal::Cursor& cursor_out
 
 namespace ox {
 
-Application::Application(Widget& head, Terminal term)
-    : head_{head}, term_{std::move(term)}
+Application::Application(Widget& head, Terminal::Options options)
+    : head_{head}, term_{options}
 {}
 
 auto Application::run() -> int
@@ -210,37 +210,37 @@ auto Application::run() -> int
 
 void Application::quit(int code) { quit_request_ = code; }
 
-auto Application::handle_mouse_press(Mouse m) -> EventResponse
+auto Application::handle_mouse_press(MousePress m) -> EventResponse
 {
     ::any_mouse_event<SetFocus::Yes>(head_, m,
-                                     [](Widget& w, Mouse m) { w.mouse_press(m); });
+                                     [](Widget& w, MousePress m) { w.mouse_press(m); });
     return quit_request_ ? QuitRequest{*quit_request_} : EventResponse{};
 }
 
-auto Application::handle_mouse_release(Mouse m) -> EventResponse
+auto Application::handle_mouse_release(MouseRelease m) -> EventResponse
+{
+    ::any_mouse_event<SetFocus::No>(
+        head_, m, [](Widget& w, MouseRelease m) { w.mouse_release(m); });
+    return quit_request_ ? QuitRequest{*quit_request_} : EventResponse{};
+}
+
+auto Application::handle_mouse_wheel(MouseWheel m) -> EventResponse
 {
     ::any_mouse_event<SetFocus::No>(head_, m,
-                                    [](Widget& w, Mouse m) { w.mouse_release(m); });
+                                    [](Widget& w, MouseWheel m) { w.mouse_wheel(m); });
     return quit_request_ ? QuitRequest{*quit_request_} : EventResponse{};
 }
 
-auto Application::handle_mouse_wheel(Mouse m) -> EventResponse
-{
-    ::any_mouse_event<SetFocus::No>(head_, m,
-                                    [](Widget& w, Mouse m) { w.mouse_wheel(m); });
-    return quit_request_ ? QuitRequest{*quit_request_} : EventResponse{};
-}
-
-auto Application::handle_mouse_move(Mouse m) -> EventResponse
+auto Application::handle_mouse_move(MouseMove m) -> EventResponse
 {
     ::send_enter_leave_events(head_, previous_mouse_position_, m.at);
     ::any_mouse_event<SetFocus::No>(head_, m,
-                                    [](Widget& w, Mouse m) { w.mouse_move(m); });
+                                    [](Widget& w, MouseMove m) { w.mouse_move(m); });
     previous_mouse_position_ = m.at;
     return quit_request_ ? QuitRequest{*quit_request_} : EventResponse{};
 }
 
-auto Application::handle_key_press(Key k) -> EventResponse
+auto Application::handle_key_press(KeyEvent k) -> EventResponse
 {
     auto const life = Focus::get();
 
@@ -248,8 +248,8 @@ auto Application::handle_key_press(Key k) -> EventResponse
     auto& focused = life.get();
     if (focused.focus_policy == FocusPolicy::Strong ||
         focused.focus_policy == FocusPolicy::Tab) {
-        if (k == Key::Tab) { do_tab_focus_change(head_, focused); }
-        else if (k == Key::BackTab) {
+        if (k.matches(KeyCode::Tab)) { do_tab_focus_change(head_, focused); }
+        else if (k.matches(KeyCode::Tab, {.shift = true})) {
             do_shift_tab_focus_change(head_, focused);
         }
     }
@@ -259,9 +259,15 @@ auto Application::handle_key_press(Key k) -> EventResponse
     return quit_request_ ? QuitRequest{*quit_request_} : EventResponse{};
 }
 
-auto Application::handle_key_release(Key k) -> EventResponse
+auto Application::handle_key_release(KeyEvent k) -> EventResponse
 {
     if (auto const life = Focus::get(); life.valid()) { life.get().key_release(k); }
+    return quit_request_ ? QuitRequest{*quit_request_} : EventResponse{};
+}
+
+auto Application::handle_paste(esc::PasteChunk const& chunk) -> EventResponse
+{
+    if (auto const life = Focus::get(); life.valid()) { life.get().paste(chunk); }
     return quit_request_ ? QuitRequest{*quit_request_} : EventResponse{};
 }
 

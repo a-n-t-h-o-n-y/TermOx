@@ -13,13 +13,13 @@ class PixelGrid : public Widget {
    public:
     struct Matrix {
         Area area;
-        std::vector<TrueColor> pixels;
+        std::vector<RGB> pixels;
 
         [[nodiscard]]
-        auto operator[](Point p) -> TrueColor&;
+        auto operator[](Point p) -> RGB&;
 
         [[nodiscard]]
-        auto operator[](Point p) const -> TrueColor;
+        auto operator[](Point p) const -> RGB;
     } buffer;
 
    public:

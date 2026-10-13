@@ -5,7 +5,7 @@ namespace ox {
 Divider::Divider(Options x)
     : Widget{FocusPolicy::None, SizePolicy::fixed(1)},
       lines{std::move(x.lines)},
-      brush{std::move(x.brush)},
+      style{std::move(x.style)},
       label{std::move(x.label)}
 {}
 
@@ -17,7 +17,7 @@ void Divider::paint(Canvas c)
     // changing the type. Maybe it is just an enum in Options.
 
     auto const glyph = this->size.width == 1 ? lines.vertical : lines.horizontal;
-    fill(c, glyph | brush);
+    fill(c, glyph | style);
 }
 
 }  // namespace ox

@@ -18,61 +18,76 @@ LineEdit::Options const LineEdit::init = {};
 LineEdit::LineEdit(Options x)
     : Widget{x.focus_policy, x.size_policy},
       text{std::move(x.text)},
-      text_brush{std::move(x.text_brush)},
+      text_style{std::move(x.text_style)},
       align{std::move(x.align)},
       background{std::move(x.background)},
       ghost_text{std::move(x.ghost_text)},
-      ghost_text_brush{std::move(x.ghost_text_brush)},
+      ghost_text_style{std::move(x.ghost_text_style)},
       validator{std::move(x.validator)}
 {}
 
-void LineEdit::key_press(Key k)
+void LineEdit::key_press(KeyEvent k)
 {
-    switch (k) {
-        case Key::Backspace:
-            if (!text.empty() && cursor_index_ > 0) {
-                this->increment_cursor(-1);
-                text.erase(std::next(std::cbegin(text), (std::ptrdiff_t)cursor_index_));
-            }
-            break;
-        case Key::Delete:
-            if (cursor_index_ < text.size()) {
-                text.erase(std::next(std::cbegin(text), (std::ptrdiff_t)cursor_index_));
-            }
-            break;
-        case Key::Enter: this->on_enter(text); break;
-        case Key::ArrowLeft: this->increment_cursor(-1); break;
-        case Key::ArrowRight: this->increment_cursor(1); break;
-        case Key::Home:
-            cursor_index_ = 0;
-            anchor_index_ = 0;
-            break;
-        case Key::End:
-            cursor_index_ = text.size();
-            anchor_index_ =
-                (std::size_t)std::max((int)text.size() - this->size.width + 1, 0);
-            break;
-        default:
-            if (auto const c = esc::key_to_char(k); c != '\0') {
-                if (!validator || (*validator)(c)) {
-                    text.insert(
-                        std::next(std::begin(text), (std::ptrdiff_t)cursor_index_), c);
-                    this->increment_cursor(1);
-                }
-            }
-            break;
+    auto unicode = esc::utf8_to_utf32(text);
+    cursor_index_ = std::min(cursor_index_, unicode.size());
+    if (k.matches(KeyCode::Backspace, {}, k.action)) {
+        if (cursor_index_ > 0) { unicode.erase(--cursor_index_, 1); }
+    }
+    else if (k.matches(KeyCode::Delete, {}, k.action)) {
+        if (cursor_index_ < unicode.size()) { unicode.erase(cursor_index_, 1); }
+    }
+    else if (k.matches(KeyCode::Enter, {}, k.action)) {
+        this->on_enter(text);
+        return;
+    }
+    else if (k.matches(KeyCode::ArrowLeft, {}, k.action)) {
+        if (cursor_index_ > 0) { --cursor_index_; }
+    }
+    else if (k.matches(KeyCode::ArrowRight, {}, k.action)) {
+        cursor_index_ = std::min(cursor_index_ + 1, unicode.size());
+    }
+    else if (k.matches(KeyCode::Home, {}, k.action)) {
+        cursor_index_ = 0;
+    }
+    else if (k.matches(KeyCode::End, {}, k.action)) {
+        cursor_index_ = unicode.size();
+    }
+    else {
+        auto input = input_text(k);
+        if (validator) {
+            std::erase_if(input, [&](char32_t c) { return !(*validator)(c); });
+        }
+        unicode.insert(cursor_index_, input);
+        cursor_index_ += input.size();
+    }
+    text = esc::utf32_to_utf8(unicode);
+    this->update_scroll_offset();
+}
+
+void LineEdit::paste(esc::PasteChunk const& chunk)
+{
+    if (chunk.first) { paste_buffer_.clear(); }
+    paste_buffer_ += chunk.bytes;
+    if (chunk.last) {
+        if (!chunk.aborted) {
+            this->key_press(KeyEvent{.text = esc::utf8_to_utf32(paste_buffer_)});
+        }
+        paste_buffer_.clear();
     }
 }
 
-void LineEdit::mouse_press(Mouse m)
+void LineEdit::mouse_press(MousePress m)
 {
-    cursor_index_ = std::min(anchor_index_ + (std::size_t)m.at.x, text.size());
+    cursor_index_ = std::min(anchor_index_ + (std::size_t)std::max(m.at.x, 0),
+                             esc::utf8_to_utf32(text).size());
 }
 
 void LineEdit::paint(Canvas c)
 {
-    anchor_index_ = std::min(anchor_index_, text.size());
-    cursor_index_ = std::min(cursor_index_, text.size());
+    auto const unicode = esc::utf8_to_utf32(text);
+    auto const ghost = esc::utf8_to_utf32(ghost_text);
+    anchor_index_ = std::min(anchor_index_, unicode.size());
+    cursor_index_ = std::min(cursor_index_, unicode.size());
 
     auto const is_ghost = [this] {
         Widget const* const focused = [] {
@@ -82,7 +97,7 @@ void LineEdit::paint(Canvas c)
         return text.empty() && focused != this;
     }();
 
-    auto const trim = [this](std::string_view sv) -> std::string_view {
+    auto const trim = [this](std::u32string_view sv) -> std::u32string_view {
         return sv.substr(anchor_index_,
                          (std::size_t)std::min(this->size.width,
                                                (int)sv.size() - (int)anchor_index_));
@@ -90,8 +105,8 @@ void LineEdit::paint(Canvas c)
 
     fill(c, bg(background));
 
-    auto const for_screen =
-        is_ghost ? trim(ghost_text) | ghost_text_brush : trim(text) | text_brush;
+    auto const for_screen = is_ghost ? esc::glyphs(trim(ghost)) | ghost_text_style
+                                     : esc::glyphs(trim(unicode)) | text_style;
 
     put(c, {.x = 0, .y = 0}, for_screen);
 
@@ -105,15 +120,11 @@ void LineEdit::paint(Canvas c)
     }
 }
 
-void LineEdit::increment_cursor(int amount)
+void LineEdit::update_scroll_offset()
 {
-    // Increment
-    cursor_index_ =
-        (std::size_t)std::clamp(0, (int)cursor_index_ + amount, (int)text.size());
-
-    // Scroll
-    if (cursor_index_ >= anchor_index_ + (std::size_t)this->size.width) {
-        anchor_index_ = cursor_index_ - (std::size_t)this->size.width + 1;
+    auto const width = (std::size_t)std::max(this->size.width, 1);
+    if (cursor_index_ >= anchor_index_ + width) {
+        anchor_index_ = cursor_index_ - width + 1;
     }
     else if (cursor_index_ < anchor_index_) {
         anchor_index_ = cursor_index_;

@@ -187,15 +187,13 @@ void put(Canvas c, Point at, Glyph const& item);
 
 /**
  * Put a single character type to the Canvas at the given position.
- * @details Uses the default Brush and the given character.
+ * @details Uses the default Style and the given character.
  * @details Does bounds checking and is no-op if \p at is out of Canvas' bounds.
  */
 void put(Canvas c, Point at, Character auto item)
-{
-    put(c, at, Glyph{.symbol = static_cast<char32_t>(item)});
-}
+{ put(c, at, Glyph{.symbol = static_cast<char32_t>(item)}); }
 
-void put(Canvas c, Point at, GlyphString auto const& item)
+void put(Canvas c, Point at, GlyphRange auto const& item)
 {
     if (at.x < 0 || at.y < 0 || at.y >= c.size.height) { return; }
 
@@ -238,24 +236,24 @@ void put(Canvas c, Point at, shape::HLine item, int length, Color foreground);
  * @param at The leftmost point of the line, where painting begins.
  * @param item The HLine to paint.
  * @param length The number of cells to paint.
- * @param foreground The Brush to assign each Cell the line is painted to.
+ * @param foreground The Style to assign each Cell the line is painted to.
  */
-void put(Canvas c, Point at, shape::HLine item, int length, Brush const& brush);
+void put(Canvas c, Point at, shape::HLine item, int length, Style const& style);
 
 void put(Canvas c, Point at, shape::VLine item, int length);
 void put(Canvas c, Point at, shape::VLine item, int length, Color foreground);
-void put(Canvas c, Point at, shape::VLine item, int length, Brush const& brush);
+void put(Canvas c, Point at, shape::VLine item, int length, Style const& style);
 
 void put(Canvas c, Point at, shape::Box const& item, Area size);
 void put(Canvas c, Point at, shape::Box const& item, Area size, Color foreground);
-void put(Canvas c, Point at, shape::Box const& item, Area size, Brush const& brush);
+void put(Canvas c, Point at, shape::Box const& item, Area size, Style const& style);
 
 void put(Canvas c, shape::Box const& item);
 void put(Canvas c, shape::Box const& item, Color foreground);
-void put(Canvas c, shape::Box const& item, Brush const& brush);
+void put(Canvas c, shape::Box const& item, Style const& style);
 
 void fill(Canvas c, Glyph g);
-void fill(Canvas c, Brush b);
+void fill(Canvas c, Style b);
 void fill(Canvas c, char32_t ch);
 void fill(Canvas c, ColorBG bg);
 void fill(Canvas c, ColorFG fg);

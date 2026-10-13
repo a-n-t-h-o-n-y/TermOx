@@ -1,6 +1,7 @@
 add_executable(TermOx.tests.unit EXCLUDE_FROM_ALL
     events.test.cpp
     terminal.test.cpp
+    widgets.test.cpp
 )
 
 target_compile_options(
@@ -17,3 +18,5 @@ target_link_libraries(
         TermOx
         zzz
 )
+
+add_test(NAME TermOx.tests.unit COMMAND TermOx.tests.unit)

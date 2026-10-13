@@ -23,7 +23,7 @@ class TextBox : public Widget {
         std::string text = {};  // UTF8 encoded
         Wrap wrap = Wrap::Word;
         Align align = Align::Left;
-        Brush brush = {};
+        Style style = {};
         FocusPolicy focus_policy = FocusPolicy::None;
         SizePolicy size_policy = SizePolicy::flex();
     } static const init;
@@ -32,7 +32,7 @@ class TextBox : public Widget {
     std::string text;
     Wrap wrap;
     Align align;
-    Brush brush;
+    Style style;
 
     /**
      * Emitted when any scroll parameter is updated. For ScrollBar.
@@ -57,16 +57,19 @@ class TextBox : public Widget {
    public:
     void paint(Canvas c) override;
 
-    void key_press(Key k) override;
+    void key_press(KeyEvent k) override;
 
-    void mouse_press(Mouse m) override;
+    void paste(esc::PasteChunk const& chunk) override;
 
-    void mouse_wheel(Mouse m) override;
+    void mouse_press(MousePress m) override;
+
+    void mouse_wheel(MouseWheel m) override;
 
    private:
     void update_layout_cache();
 
    private:
+    std::string paste_buffer_;
     int scroll_offset_ = 0;  // Line number of the top displayed line. zero indexed.
     std::size_t cursor_index_ = 0;                  // [0, unicode_str_.size()]
     std::u32string unicode_str_ = {};               // cache; updated by paint()

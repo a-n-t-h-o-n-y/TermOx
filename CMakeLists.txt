@@ -88,7 +88,7 @@ FetchContent_MakeAvailable(zzz)
 FetchContent_Declare(
     escape
     GIT_REPOSITORY https://github.com/a-n-t-h-o-n-y/Escape.git
-    GIT_TAG 38044eb930ff8e25957f9a8b8c67fec11299e567
+    GIT_TAG c714abfa0061526ec0d9ab593b4a8ab447c1d412
 )
 FetchContent_MakeAvailable(escape)
 
@@ -108,5 +108,6 @@ target_link_libraries(TermOx PUBLIC
 )
 
 # Add the tests subdirectory
+enable_testing()
 add_subdirectory(tests)
 add_subdirectory(examples)

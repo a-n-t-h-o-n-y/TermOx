@@ -7,7 +7,7 @@
 #include <string>
 #include <string_view>
 
-#include <esc/detail/transcode.hpp>
+#include <esc/text.hpp>
 
 #include <ox/align.hpp>
 #include <ox/core/core.hpp>
@@ -17,11 +17,11 @@ namespace ox::detail {
 using namespace ox;
 
 // Used by both Label and BasicNumberLabel
-void paint_label(Canvas c, std::string_view text, Align align, Brush brush)
+void paint_label(Canvas c, std::string_view text, Align align, Style style)
 {
-    fill(c, brush);
+    fill(c, style);
 
-    auto unicode_str = esc::detail::u8_string_to_u32_string(text);
+    auto unicode_str = esc::utf8_to_utf32(text);
     if (std::ssize(unicode_str) > c.size.width) {
         unicode_str.resize((std::size_t)c.size.width);
     }
@@ -43,24 +43,24 @@ Label::Label(Options x)
     : Widget{FocusPolicy::None, x.size_policy},
       text{std::move(x.text)},
       align{std::move(x.align)},
-      brush{std::move(x.brush)}
+      style{std::move(x.style)}
 {}
 
 Label::Label(std::string text_)
     : Widget{FocusPolicy::None, SizePolicy::flex()},
       text{std::move(text_)},
       align{Align::Center},
-      brush{}
+      style{}
 {}
 
 Label::Label(char const* text_)
     : Widget{FocusPolicy::None, SizePolicy::flex()},
       text{text_},
       align{Align::Center},
-      brush{}
+      style{}
 {}
 
-void Label::paint(Canvas c) { detail::paint_label(c, text, align, brush); }
+void Label::paint(Canvas c) { detail::paint_label(c, text, align, style); }
 
 // -------------------------------------------------------------------------------------
 
@@ -72,9 +72,7 @@ auto digit_separator_locale(std::int8_t spacing, std::locale init_locale) -> std
         facet(int spacing) : digit_spacing{spacing} {}
 
         auto do_grouping() const -> std::string override
-        {
-            return std::string(1, static_cast<char>(digit_spacing));
-        }
+        { return std::string(1, static_cast<char>(digit_spacing)); }
     };
     if (spacing < 0) {
         throw std::invalid_argument{

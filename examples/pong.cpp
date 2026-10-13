@@ -200,13 +200,14 @@ void paint(SplashScreen const& x, Canvas c)
     auto display = x.display;
     for (auto nl_at = display.find('\n'); nl_at != std::string::npos;
          nl_at = display.find('\n')) {
-        put(c, offset, display.substr(0, nl_at) | Trait::Bold | fg(TColor{hsl}));
+        put(c, offset,
+            esc::glyphs(display.substr(0, nl_at)) | Trait::Bold | fg(RGB{hsl}));
         display = display.substr(nl_at + 1);
         hsl.hue = (std::uint16_t)((hsl.hue + 20) % 360);
         offset.y += 1;
     }
 
-    auto const enter = U"Press Enter to continue" | Trait::Dim;
+    auto const enter = esc::glyphs(U"Press Enter to continue") | Trait::Dim;
     put(c, {.x = (c.size.width - (int)enter.size()) / 2, .y = c.size.height - 1},
         enter);
 }
@@ -225,7 +226,7 @@ void paint(MainMenu const& x, Canvas c)
         auto display = logo;
         for (auto nl_at = display.find('\n'); nl_at != std::string::npos;
              nl_at = display.find('\n')) {
-            put(c, offset, display.substr(0, nl_at) | Trait::Dim);
+            put(c, offset, esc::glyphs(display.substr(0, nl_at)) | Trait::Dim);
             display = display.substr(nl_at + 1);
             offset.y += 1;
         }
@@ -237,7 +238,9 @@ void paint(MainMenu const& x, Canvas c)
                 .x = (c.size.width - (int)x.options[i].size()) / 2,
                 .y = 14 + (int)i,
             };
-            if (i == x.selected) { put(c, at, x.options[i] | Trait::Standout); }
+            if (i == x.selected) {
+                put(c, at, esc::glyphs(x.options[i]) | Trait::Standout);
+            }
             else {
                 put(c, at, x.options[i]);
             }
@@ -248,11 +251,11 @@ void paint(MainMenu const& x, Canvas c)
 void paint(HowTo const& x, Canvas c)
 {
     {  // Border
-        put(c, shape::Box::square(), XColor::Blue);
+        put(c, shape::Box::square(), colors::blue);
     }
     {  // Title
         auto const at = Point{.x = (c.size.width - (int)x.title.size()) / 2, .y = 1};
-        put(c, at, x.title | Trait::Bold | Trait::Underline);
+        put(c, at, esc::glyphs(x.title) | Trait::Bold | Trait::Underline);
     }
     {  // Instructions
         for (std::size_t i = 0; i < x.instructions.size(); ++i) {
@@ -260,14 +263,14 @@ void paint(HowTo const& x, Canvas c)
                 .x = (c.size.width - 40) / 2,
                 .y = 4 + (int)i,
             };
-            put(c, at, x.instructions[i][0] | Trait::Bold);
+            put(c, at, esc::glyphs(x.instructions[i][0]) | Trait::Bold);
             put(c, {.x = (c.size.width + 8) / 2, .y = 4 + (int)i},
                 x.instructions[i][1]);
         }
     }
     {  // Footer
         put(c, {.x = 2, .y = c.size.height - 1},
-            U"Press Esc to return to the main menu" | Trait::Dim);
+            esc::glyphs(U"Press Esc to return to the main menu") | Trait::Dim);
     }
 }
 
@@ -280,7 +283,8 @@ void paint(PlayerSelectMenu const& x, Canvas c)
     {  // Left Player
         auto const at = Point{.x = c.size.width / 2 - 25, .y = 4};
         if (x.left_selected) {
-            put(c, at, "Left Player: " + (x.left_player.name | Trait::Standout));
+            put(c, at,
+                "Left Player: " + (esc::glyphs(x.left_player.name) | Trait::Standout));
         }
         else {
             put(c, at, "Left Player: " + x.left_player.name);
@@ -289,7 +293,9 @@ void paint(PlayerSelectMenu const& x, Canvas c)
     {  // Right Player
         auto const at = Point{.x = c.size.width / 2 + 10, .y = 4};
         if (!x.left_selected) {
-            put(c, at, "Right Player: " + (x.right_player.name | Trait::Standout));
+            put(c, at,
+                "Right Player: " +
+                    (esc::glyphs(x.right_player.name) | Trait::Standout));
         }
         else {
             put(c, at, "Right Player: " + x.right_player.name);
@@ -302,7 +308,9 @@ void paint(PlayerSelectMenu const& x, Canvas c)
                 .y = 6 + (int)i,
             };
 
-            if (i == x.selected) { put(c, at, x.options[i].name | Trait::Standout); }
+            if (i == x.selected) {
+                put(c, at, esc::glyphs(x.options[i].name) | Trait::Standout);
+            }
             else {
                 put(c, at, x.options[i].name);
             }
@@ -310,7 +318,7 @@ void paint(PlayerSelectMenu const& x, Canvas c)
     }
     {  // Footer
         put(c, {.x = 0, .y = c.size.height - 1},
-            U"Press Esc to return to the main menu" | Trait::Dim);
+            esc::glyphs(U"Press Esc to return to the main menu") | Trait::Dim);
     }
 }
 
@@ -333,18 +341,18 @@ void paint(Game const& x, Canvas c)
     {  // Net
         put(game_canvas, {.x = display_space.width / 2, .y = 0},
             shape::VLine{.symbol = U'╳'}, display_space.height,
-            Brush{.traits = Trait::Dim});
+            Style{.traits = Trait::Dim});
     }
 
     {  // Ball
-        auto const color = [](auto velocity) -> TColor {
+        auto const color = [](auto velocity) -> RGB {
             auto const speed =
                 std::sqrt(velocity.dx * velocity.dx + velocity.dy * velocity.dy);
-            return HSL{
+            return RGB{HSL{
                 .hue = (std::uint16_t)((90 + (int)(speed * 160)) % 360),
                 .saturation = 80,
                 .lightness = 70,
-            };
+            }};
         }(x.ball.velocity);
 
         auto const glyph = [](float y) {
@@ -417,15 +425,15 @@ void paint(Game const& x, Canvas c)
     {  // Border
         put(c, game_canvas.at + Point{-1, -1}, shape::Box::round(),
             Area{.width = display_space.width + 2, .height = display_space.height + 2},
-            XColor::Blue);
+            colors::blue);
     }
 
     {  // Footer
         put(c, {.x = 0, .y = c.size.height - 1},
-            U"Press Esc to return to the main menu" | Trait::Dim);
+            esc::glyphs(U"Press Esc to return to the main menu") | Trait::Dim);
         auto const enter_text = std::u32string{U"Press Enter to start next round"};
         put(c, {.x = (c.size.width - (int)enter_text.size()), .y = c.size.height - 1},
-            enter_text | Trait::Dim);
+            esc::glyphs(enter_text) | Trait::Dim);
     }
 }
 
@@ -453,73 +461,71 @@ void paint(State const& x, ScreenBuffer& buffer)
  */
 using PongEventResponse = std::variant<QuitRequest, State>;
 
-auto key_press(SplashScreen x, Key k) -> PongEventResponse
+auto key_press(SplashScreen x, KeyEvent k) -> PongEventResponse
 {
-    switch (k) {
-        case Key::Enter: return MainMenu{};
-        default: return x;
+    if (k.matches(KeyCode::Enter, {}, k.action)) { return MainMenu{}; }
+    else {
+        return x;
     }
 }
 
-auto key_press(MainMenu x, Key k) -> PongEventResponse
+auto key_press(MainMenu x, KeyEvent k) -> PongEventResponse
 {
-    switch (k) {
-        case Key::ArrowDown:
-        case Key::j: x.selected = (x.selected + 1) % x.options.size(); return x;
-
-        case Key::ArrowUp:
-        case Key::k:
-            x.selected = (x.selected + x.options.size() - 1) % x.options.size();
-            return x;
-
-        case Key::Enter:
-            switch (x.selected) {
-                case 0: return PlayerSelectMenu{};
-                case 1: return HowTo{};
-                case 2: return QuitRequest{};
-            }
-            return x;
-
-        default: return x;
+    if (k.matches(KeyCode::ArrowDown, {}, k.action) || k.matches(U'j', {}, k.action)) {
+        x.selected = (x.selected + 1) % x.options.size();
+        return x;
+    }
+    else if (k.matches(KeyCode::ArrowUp, {}, k.action) ||
+             k.matches(U'k', {}, k.action)) {
+        x.selected = (x.selected + x.options.size() - 1) % x.options.size();
+        return x;
+    }
+    else if (k.matches(KeyCode::Enter, {}, k.action)) {
+        switch (x.selected) {
+            case 0: return PlayerSelectMenu{};
+            case 1: return HowTo{};
+            case 2: return QuitRequest{};
+        }
+        return x;
+    }
+    else {
+        return x;
     }
 }
 
-auto key_press(PlayerSelectMenu x, Key k) -> PongEventResponse
+auto key_press(PlayerSelectMenu x, KeyEvent k) -> PongEventResponse
 {
-    switch (k) {
-        case Key::Escape: return MainMenu{};
-
-        case Key::ArrowUp:
-        case Key::k: {
-            x.selected = (x.selected + x.options.size() - 1) % x.options.size();
+    if (k.matches(KeyCode::Escape, {}, k.action)) { return MainMenu{}; }
+    else if (k.matches(KeyCode::ArrowUp, {}, k.action) ||
+             k.matches(U'k', {}, k.action)) {
+        x.selected = (x.selected + x.options.size() - 1) % x.options.size();
+        return x;
+    }
+    else if (k.matches(KeyCode::ArrowDown, {}, k.action) ||
+             k.matches(U'j', {}, k.action)) {
+        x.selected = (x.selected + 1) % x.options.size();
+        return x;
+    }
+    else if (k.matches(KeyCode::Enter, {}, k.action)) {
+        if (x.left_selected) {
+            x.left_player = x.options[x.selected];
+            x.left_selected = false;
             return x;
         }
-
-        case Key::ArrowDown:
-        case Key::j: {
-            x.selected = (x.selected + 1) % x.options.size();
-            return x;
+        else {
+            x.right_player = x.options[x.selected];
+            return Game{
+                .left = {.player = x.left_player},
+                .right = {.player = x.right_player},
+            };
         }
-
-        case Key::Enter: {
-            if (x.left_selected) {
-                x.left_player = x.options[x.selected];
-                x.left_selected = false;
-                return x;
-            }
-            else {
-                x.right_player = x.options[x.selected];
-                return Game{
-                    .left = {.player = x.left_player},
-                    .right = {.player = x.right_player},
-                };
-            }
-        }
-        default: return x;
+    }
+    else {
+        return x;
     }
 }
 
-auto key_press(Game x, Key k) -> PongEventResponse
+auto key_press(Game x, KeyEvent k) -> PongEventResponse
 {
     auto const generate_initial_velocity = []() -> Game::Ball::Velocity {
         using int_dist = std::uniform_int_distribution<int>;
@@ -535,44 +541,40 @@ auto key_press(Game x, Key k) -> PongEventResponse
 
     constexpr auto speed_increment = 0.5f;
 
-    switch (k) {
-        case Key::Escape: return MainMenu{};
-
-        case Key::Enter: {
-            auto& ball = x.ball;
-            if (ball.velocity.dx == 0 && ball.velocity.dy == 0) {
-                ball.velocity = generate_initial_velocity();
-            }
-            return x;
+    if (k.matches(KeyCode::Escape, {}, k.action)) { return MainMenu{}; }
+    else if (k.matches(KeyCode::Enter, {}, k.action)) {
+        auto& ball = x.ball;
+        if (ball.velocity.dx == 0 && ball.velocity.dy == 0) {
+            ball.velocity = generate_initial_velocity();
         }
-
-        case Key::ArrowUp: {
-            x.right.paddle.dy -= speed_increment;
-            return x;
-        }
-        case Key::ArrowDown: {
-            x.right.paddle.dy += speed_increment;
-            return x;
-        }
-
-        case Key::w: {
-            x.left.paddle.dy -= speed_increment;
-            return x;
-        }
-        case Key::s: {
-            x.left.paddle.dy += speed_increment;
-            return x;
-        }
-
-        default: return x;
+        return x;
+    }
+    else if (k.matches(KeyCode::ArrowUp, {}, k.action)) {
+        x.right.paddle.dy -= speed_increment;
+        return x;
+    }
+    else if (k.matches(KeyCode::ArrowDown, {}, k.action)) {
+        x.right.paddle.dy += speed_increment;
+        return x;
+    }
+    else if (k.matches(U'w', {}, k.action)) {
+        x.left.paddle.dy -= speed_increment;
+        return x;
+    }
+    else if (k.matches(U's', {}, k.action)) {
+        x.left.paddle.dy += speed_increment;
+        return x;
+    }
+    else {
+        return x;
     }
 }
 
-auto key_press(HowTo x, Key k) -> PongEventResponse
+auto key_press(HowTo x, KeyEvent k) -> PongEventResponse
 {
-    switch (k) {
-        case Key::Escape: return MainMenu{};
-        default: return x;
+    if (k.matches(KeyCode::Escape, {}, k.action)) { return MainMenu{}; }
+    else {
+        return x;
     }
 }
 
@@ -580,7 +582,7 @@ auto key_press(HowTo x, Key k) -> PongEventResponse
  * Returns the new state after the key press, or std::nullopt if the app should
  * quit.
  */
-auto key_press(State s, Key k) -> PongEventResponse
+auto key_press(State s, KeyEvent k) -> PongEventResponse
 {
     return std::visit([k](auto x) { return key_press(std::move(x), k); }, std::move(s));
 }
@@ -740,9 +742,7 @@ auto timer(Game state, int id) -> PongEventResponse
 
 template <typename T>
 auto timer(T x, int /* id */) -> PongEventResponse
-{
-    return x;
-}
+{ return x; }
 
 auto timer(State s, int id) -> PongEventResponse
 {
@@ -756,7 +756,7 @@ class Pong {
     Pong(ScreenBuffer& buffer) : buffer_{buffer} {}
 
    public:
-    auto handle_key_press(Key k) -> EventResponse
+    auto handle_key_press(KeyEvent k) -> EventResponse
     {
         return std::visit(
             [this](auto result) -> EventResponse {

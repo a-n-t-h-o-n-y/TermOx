@@ -20,21 +20,20 @@ class PinBox : public Widget {
     void clear() { points_.clear(); }
 
    public:
-    void mouse_press(Mouse m) override
+    void mouse_press(MousePress m) override
     {
         switch (m.button) {
-            case Mouse::Button::Left: this->insert_pin(m.at); break;
-            case Mouse::Button::Right: this->remove_pin(m.at); break;
+            case MouseButton::Left: this->insert_pin(m.at); break;
+            case MouseButton::Right: this->remove_pin(m.at); break;
             default: break;
         }
     }
 
-    void mouse_move(Mouse m) override
+    void mouse_move(MouseMove m) override
     {
-        switch (m.button) {
-            case Mouse::Button::Left: this->insert_pin(m.at); break;
-            case Mouse::Button::Right: this->remove_pin(m.at); break;
-            default: break;
+        if (m.held_button == MouseButton::Left) { this->insert_pin(m.at); }
+        else if (m.held_button == MouseButton::Right) {
+            this->remove_pin(m.at);
         }
     }
 
@@ -60,7 +59,7 @@ class PinBox : public Widget {
 
    private:
     std::map<Point, Color> points_;
-    Color current_color_ = XColor::BrightBlue;
+    Color current_color_ = colors::bright_blue;
 };
 
 class ColorSelect : public Row<std::vector<Button>> {
@@ -71,7 +70,7 @@ class ColorSelect : public Row<std::vector<Button>> {
     ColorSelect(std::vector<Color> colors = {})
     {
         for (auto const color : colors) {
-            children.push_back({{.label = {.brush = {.background = color}}}});
+            children.push_back({{.label = {.style = {.background = color}}}});
             Connection{
                 .signal = children.back().on_press,
                 .slot = [color](auto& parent) { parent.on_select(color); },
@@ -88,45 +87,45 @@ int main()
 
             Divider{{
                 .lines = Lines::bold(),
-                .brush = {.foreground = XColor::BrightBlack},
+                .style = {.foreground = colors::bright_black},
             }},
 
             Column{
                 Label{{
                     .text = "Color Select",
                     .align = Align::Center,
-                    .brush = {.traits = Trait::Bold},
+                    .style = {.traits = Trait::Bold},
                 }} | SizePolicy::fixed(1),
                 ColorSelect{{
-                    XColor::BrightBlue,
-                    XColor::Blue,
-                    XColor::BrightRed,
-                    XColor::Red,
-                    XColor::BrightGreen,
-                    XColor::Green,
-                    XColor::White,
-                    XColor::BrightBlack,
+                    colors::bright_blue,
+                    colors::blue,
+                    colors::bright_red,
+                    colors::red,
+                    colors::bright_green,
+                    colors::green,
+                    colors::white,
+                    colors::bright_black,
                 }} | SizePolicy::fixed(1),
                 Divider{{
                     .lines = Lines::bold(),
-                    .brush = {.foreground = XColor::BrightBlack},
+                    .style = {.foreground = colors::bright_black},
                 }},
                 Label{{
                     .text = "Last Action",
                     .align = Align::Center,
-                    .brush = {.traits = Trait::Bold},
+                    .style = {.traits = Trait::Bold},
                     .size_policy = SizePolicy::fixed(1),
                 }},
                 Label{{.align = Align::Left}} | SizePolicy::fixed(1),
                 Divider{{
                     .lines = Lines::bold(),
-                    .brush = {.foreground = XColor::BrightBlack},
+                    .style = {.foreground = colors::bright_black},
                 }},
                 Row{
                     Label{{
                         .text = "Pin Count",
                         .align = Align::Left,
-                        .brush = {.traits = Trait::Bold},
+                        .style = {.traits = Trait::Bold},
                         .size_policy = SizePolicy::fixed(10),
                     }},
                     IntegerLabel{{
@@ -136,14 +135,14 @@ int main()
                 } | SizePolicy::fixed(1),
                 Divider{{
                     .lines = Lines::bold(),
-                    .brush = {.foreground = XColor::BrightBlack},
+                    .style = {.foreground = colors::bright_black},
                 }},
                 Button{{
                     .label =
                         {
                             .text = "Clear Board",
-                            .brush = {.background = XColor::BrightBlue,
-                                      .foreground = XColor::Black,
+                            .style = {.background = colors::bright_blue,
+                                      .foreground = colors::black,
                                       .traits = Trait::Bold},
                         },
                     .size_policy = SizePolicy::fixed(1),
@@ -197,5 +196,5 @@ int main()
             },
     }(pinbox, status, count);
 
-    return Application{head, {MouseMode::Drag}}.run();
+    return Application{head, {.mouse_mode = MouseMode::Drag}}.run();
 }

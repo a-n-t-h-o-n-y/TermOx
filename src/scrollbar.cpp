@@ -10,9 +10,7 @@ namespace {
 
 [[nodiscard]]
 constexpr auto ease_out_quint(float const x) -> float
-{
-    return 1.0f - std::pow(1.f - x, 4.f);
-}
+{ return 1.0f - std::pow(1.f - x, 4.f); }
 
 /// Returns a float so precision glyph fitting can be done.
 [[nodiscard]]
@@ -46,7 +44,7 @@ ScrollBar::ScrollBar(Options x)
       scrollable_length{std::move(x.scrollable_length)},
       position{std::move(x.position)},
       item_visual_length{x.item_visual_length},
-      brush{std::move(x.brush)},
+      style{std::move(x.style)},
       scroll_settle_time{x.scroll_settle_time}
 {}
 
@@ -67,20 +65,20 @@ void ScrollBar::paint(Canvas c)
         .y = (int)std::floor(bar_pos),
     };
 
-    fill(c, brush);
+    fill(c, style);
 
     c[at].symbol = edge;
 
     put(c, {.x = 0, .y = (int)bar_pos + 1}, shape::VLine{.symbol = U'█'},
-        std::max(bar_len - 1, 0), brush.foreground);
+        std::max(bar_len - 1, 0), style.foreground);
 
     at.y += bar_len;
-    if (at.y < this->size.height) { c[at] = edge | brush | Trait::Inverse; }
+    if (at.y < this->size.height) { c[at] = edge | style | Trait::Inverse; }
 }
 
-void ScrollBar::mouse_press(Mouse m)
+void ScrollBar::mouse_press(MousePress m)
 {
-    if (m.button == Mouse::Button::Left) {
+    if (m.button == MouseButton::Left) {
         time_at_click_ = ClockType::now();
         position_at_click_ = position;
         target_position_ =
@@ -90,24 +88,17 @@ void ScrollBar::mouse_press(Mouse m)
     }
 }
 
-void ScrollBar::mouse_wheel(Mouse m)
+void ScrollBar::mouse_wheel(MouseWheel m)
 {
-    constexpr auto percent_scrolll = 0.15f;
-    if (m.button == Mouse::Button::ScrollDown) {
-        time_at_click_ = ClockType::now();
-        position_at_click_ = position;
-        target_position_ = std::min(
-            (int)((float)position + (percent_scrolll * (float)scrollable_length)),
-            std::max(scrollable_length - 1, 0));
-        timer_.start();
-    }
-    else if (m.button == Mouse::Button::ScrollUp) {
-        time_at_click_ = ClockType::now();
-        position_at_click_ = position;
-        target_position_ = std::max(
-            (int)((float)position - (percent_scrolll * (float)scrollable_length)), 0);
-        timer_.start();
-    }
+    if (m.dy == 0) { return; }
+    constexpr auto percent_scroll = 0.15f;
+    time_at_click_ = ClockType::now();
+    position_at_click_ = position;
+    target_position_ =
+        std::clamp((int)((float)position +
+                         percent_scroll * (float)scrollable_length * (float)m.dy),
+                   0, std::max(scrollable_length - 1, 0));
+    timer_.start();
 }
 
 void ScrollBar::timer()

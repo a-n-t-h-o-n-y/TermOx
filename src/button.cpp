@@ -14,19 +14,19 @@ namespace ox {
 
 BasicButton::BasicButton(FocusPolicy fp, SizePolicy sp) : Widget{fp, sp} {}
 
-void BasicButton::key_press(Key k)
+void BasicButton::key_press(KeyEvent k)
 {
-    if (k == Key::Enter) { this->on_press(); }
+    if (k.matches(KeyCode::Enter, {}, k.action)) { this->on_press(); }
 }
 
-void BasicButton::mouse_press(Mouse m)
+void BasicButton::mouse_press(MousePress m)
 {
-    if (m.button == Mouse::Button::Left) { this->on_press(); }
+    if (m.button == MouseButton::Left) { this->on_press(); }
 }
 
-void BasicButton::mouse_release(Mouse m)
+void BasicButton::mouse_release(MouseRelease m)
 {
-    if (m.button == Mouse::Button::Left) { this->on_release(); }
+    if (!m.button || m.button == MouseButton::Left) { this->on_release(); }
 }
 
 // -------------------------------------------------------------------------------------
@@ -80,15 +80,15 @@ void Button::paint(Canvas c)
                decoration_);
 }
 
-void Button::mouse_press(Mouse m)
+void Button::mouse_press(MousePress m)
 {
-    if (m.button == Mouse::Button::Left) { pressed_ = true; }
+    if (m.button == MouseButton::Left) { pressed_ = true; }
     this->BasicButton::mouse_press(m);
 }
 
-void Button::mouse_release(Mouse m)
+void Button::mouse_release(MouseRelease m)
 {
-    if (m.button == Mouse::Button::Left) { pressed_ = false; }
+    if (!m.button || m.button == MouseButton::Left) { pressed_ = false; }
     this->BasicButton::mouse_release(m);
 }
 
@@ -153,7 +153,7 @@ void Button::end_select()
 
 // -------------------------------------------------------------------------------------
 
-auto gradient_blend(TrueColor one, TrueColor two, float percent) -> TrueColor
+auto gradient_blend(RGB one, RGB two, float percent) -> RGB
 {
     auto blend = [](std::uint8_t a, std::uint8_t b, float t) {
         return (std::uint8_t)std::clamp(std::lround(a + t * (b - a)), 0L, 255L);

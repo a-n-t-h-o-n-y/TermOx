@@ -17,7 +17,7 @@ namespace ox {
  *
  * @details Each entry is a single horizontal line. If Focus is enabled, arrow keys and
  * enter are used to make selections.
- * 
+ *
  *  .on = U" ⬤"_gs,
  *  .off = U" ◯"_gs,
  */
@@ -26,8 +26,8 @@ class RadioGroup : public Widget {
     struct Options {
         std::vector<std::string> items = {};
         std::optional<std::size_t> selected_index = std::nullopt;
-        Brush brush = {};
-        Brush in_focus_brush = {.traits = Trait::Bold};
+        Style style = {};
+        Style in_focus_style = {.traits = Trait::Bold};
         std::vector<Glyph> on = U"(X)"_gs;
         std::vector<Glyph> off = U"( )"_gs;
         FocusPolicy focus_policy = FocusPolicy::None;
@@ -36,8 +36,8 @@ class RadioGroup : public Widget {
 
     std::vector<std::string> items;
     std::optional<std::size_t> selected_index;
-    Brush brush;
-    Brush in_focus_brush;
+    Style style;
+    Style in_focus_style;
     std::vector<Glyph> on;
     std::vector<Glyph> off;
 
@@ -49,9 +49,9 @@ class RadioGroup : public Widget {
    public:
     void paint(Canvas c) override;
 
-    void key_press(Key k) override;
+    void key_press(KeyEvent k) override;
 
-    void mouse_press(Mouse m) override;
+    void mouse_press(MousePress m) override;
 
     void focus_in() override;
 

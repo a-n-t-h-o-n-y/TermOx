@@ -114,13 +114,13 @@ class Widget {
     virtual ~Widget() = default;
 
    public:
-    virtual void mouse_press(Mouse) {}
+    virtual void mouse_press(MousePress) {}
 
-    virtual void mouse_release(Mouse) {}
+    virtual void mouse_release(MouseRelease) {}
 
-    virtual void mouse_wheel(Mouse) {}
+    virtual void mouse_wheel(MouseWheel) {}
 
-    virtual void mouse_move(Mouse) {}
+    virtual void mouse_move(MouseMove) {}
 
     virtual void mouse_enter() {}
 
@@ -130,9 +130,11 @@ class Widget {
 
     virtual void focus_out() {}
 
-    virtual void key_press(Key) {}
+    virtual void key_press(KeyEvent) {}
 
-    virtual void key_release(Key) {}
+    virtual void key_release(KeyEvent) {}
+
+    virtual void paste(esc::PasteChunk const&) {}
 
     /**
      * this->size is updated by the time this is invoked. The previous size is passed in
@@ -163,9 +165,7 @@ class LifetimeView {
     [[nodiscard]] auto valid() const -> bool { return !widget_ptr_.expired(); }
 
     [[nodiscard]] auto get() const -> ConcreteType&
-    {
-        return static_cast<ConcreteType&>(**(widget_ptr_.lock()));
-    }
+    { return static_cast<ConcreteType&>(**(widget_ptr_.lock())); }
 
    private:
     std::weak_ptr<Widget*> widget_ptr_;
@@ -216,9 +216,7 @@ inline constexpr auto is_active =
  */
 template <WidgetDerived WidgetType>
 [[nodiscard]] auto track(WidgetType& w) -> LifetimeView<WidgetType>
-{
-    return {w.lifetime};
-}
+{ return {w.lifetime}; }
 
 /**
  * Tracks each of the passed in Widget's lifetimes, if they are all valid when this slot
@@ -250,9 +248,7 @@ struct [[nodiscard("Use operator() to make actual connection.")]] Connection {
      */
     template <typename... TrackedWidgets>
     auto operator()(TrackedWidgets&... to_track) && -> sl::Identifier
-    {
-        return signal.connect(tracked(slot, to_track...));
-    }
+    { return signal.connect(tracked(slot, to_track...)); }
 };
 
 }  // namespace ox

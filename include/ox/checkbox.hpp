@@ -19,7 +19,7 @@ class CheckBox : public Widget {
     struct Display {
         std::vector<Glyph> checked;
         std::vector<Glyph> unchecked;
-        Brush in_focus_brush;
+        Style in_focus_style;
     };
 
     struct Options {
@@ -27,7 +27,7 @@ class CheckBox : public Widget {
         Display display = {
             .checked = U"[X]"_gs,
             .unchecked = U"[ ]"_gs,
-            .in_focus_brush = {.traits = Trait::Bold},
+            .in_focus_style = {.traits = Trait::Bold},
         };
         FocusPolicy focus_policy = FocusPolicy::Strong;
     } static const init;  // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=88165
@@ -52,9 +52,9 @@ class CheckBox : public Widget {
     [[nodiscard]] auto get_state() const -> State;
 
    public:
-    void key_press(Key k) override;
+    void key_press(KeyEvent k) override;
 
-    void mouse_press(Mouse m) override;
+    void mouse_press(MousePress m) override;
 
     void paint(Canvas c) override;
 

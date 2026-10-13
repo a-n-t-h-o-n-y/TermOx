@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <map>
+#include <mutex>
 #include <optional>
 #include <stop_token>
 #include <string>
@@ -26,7 +27,6 @@
 namespace ox {
 
 using ::esc::Area;
-using ::esc::KeyMode;
 using ::esc::MouseMode;
 using ::esc::Point;
 using ::esc::Signals;
@@ -101,18 +101,17 @@ class Terminal {
 
     struct Options {
         MouseMode mouse_mode = MouseMode::Basic;
-        KeyMode key_mode = KeyMode::Normal;
-        Signals signals = Signals::On;
-        Color foreground = TermColor::Default;
-        Color background = TermColor::Default;
+        Signals signals = Signals::Off;
+        Color foreground = default_color;
+        Color background = default_color;
     };
 
    public:
     ScreenBuffer changes{{0, 0}};          // write to this
     inline static EventQueue event_queue;  // read from this
 
-    Color foreground = TermColor::Default;
-    Color background = TermColor::Default;
+    Color foreground = default_color;
+    Color background = default_color;
 
     /**
      * The current cursor position on the terminal.
@@ -134,19 +133,17 @@ class Terminal {
      * appending to the event_queue.
      *
      * @param mouse_mode The MouseMode to set the terminal to.
-     * @param key_mode The KeyMode to set the terminal to.
      * @param signals Whether OS Signals should be enabled or disabled.
      * @param foreground The default foreground for the Terminal.
      * @param background The default background for the Terminal.
      */
     Terminal(MouseMode mouse_mode = MouseMode::Basic,
-             KeyMode key_mode = KeyMode::Normal,
-             Signals signals = Signals::On,
-             Color foreground_ = TermColor::Default,
-             Color background_ = TermColor::Default);
+             Signals signals = Signals::Off,
+             Color foreground_ = default_color,
+             Color background_ = default_color);
 
-    Terminal(Terminal&&) = default;
-    auto operator=(Terminal&&) -> Terminal& = default;
+    Terminal(Terminal&&) = delete;
+    auto operator=(Terminal&&) -> Terminal& = delete;
 
     /**
      * Uninitializes the terminal display, resets the state to before the constructor
@@ -180,6 +177,8 @@ class Terminal {
 
    private:
     ScreenBuffer current_screen_{{0, 0}};
+    esc::Terminal session_;
+    std::mutex session_mutex_;
     std::jthread terminal_input_thread_;
     std::string escape_sequence_;
 };
@@ -228,78 +227,81 @@ template <typename T>
     -> std::optional<EventResponse>
 {
     return std::visit(
-        zzz::Overload{[&](esc::KeyPress e) -> std::optional<EventResponse> {
-                          if constexpr (HandlesKeyPress<T>) {
-                              return handler.handle_key_press(e.key);
-                          }
-                          else {
-                              return std::nullopt;
-                          }
-                      },
-                      [&](esc::KeyRelease e) -> std::optional<EventResponse> {
-                          if constexpr (HandlesKeyRelease<T>) {
-                              return handler.handle_key_release(e.key);
-                          }
-                          else {
-                              return std::nullopt;
-                          }
-                      },
-                      [&](esc::MousePress e) -> std::optional<EventResponse> {
-                          if constexpr (HandlesMousePress<T>) {
-                              return handler.handle_mouse_press(e.mouse);
-                          }
-                          else {
-                              return std::nullopt;
-                          }
-                      },
-                      [&](esc::MouseRelease e) -> std::optional<EventResponse> {
-                          if constexpr (HandlesMouseRelease<T>) {
-                              return handler.handle_mouse_release(e.mouse);
-                          }
-                          else {
-                              return std::nullopt;
-                          }
-                      },
-                      [&](esc::MouseWheel e) -> std::optional<EventResponse> {
-                          if constexpr (HandlesMouseWheel<T>) {
-                              return handler.handle_mouse_wheel(e.mouse);
-                          }
-                          else {
-                              return std::nullopt;
-                          }
-                      },
-                      [&](esc::MouseMove e) -> std::optional<EventResponse> {
-                          if constexpr (HandlesMouseMove<T>) {
-                              return handler.handle_mouse_move(e.mouse);
-                          }
-                          else {
-                              return std::nullopt;
-                          }
-                      },
-                      [&](esc::Resize e) -> std::optional<EventResponse> {
-                          buffer.resize(e.size);
-                          buffer.fill(Glyph{});
-                          if constexpr (HandlesResize<T>) {
-                              return handler.handle_resize(e.size);
-                          }
-                          else {
-                              return std::nullopt;
-                          }
-                      },
-                      [&](event::Timer e) -> std::optional<EventResponse> {
-                          if constexpr (HandlesTimer<T>) {
-                              return handler.handle_timer(e.id);
-                          }
-                          else {
-                              return std::nullopt;
-                          }
-                      },
-                      [](event::Custom const& e) -> std::optional<EventResponse> {
-                          return e.action();
-                      },
-                      [](event::Interrupt) -> std::optional<EventResponse> {
-                          return QuitRequest{1};
-                      }},
+        zzz::Overload{
+            [&](esc::KeyEvent const& e) -> std::optional<EventResponse> {
+                if (e.action == KeyAction::Release) {
+                    if constexpr (HandlesKeyRelease<T>) {
+                        return handler.handle_key_release(e);
+                    }
+                }
+                else {
+                    if constexpr (HandlesKeyPress<T>) {
+                        return handler.handle_key_press(e);
+                    }
+                }
+                return std::nullopt;
+            },
+            [&](esc::MousePress e) -> std::optional<EventResponse> {
+                if constexpr (HandlesMousePress<T>) {
+                    return handler.handle_mouse_press(e);
+                }
+                else {
+                    return std::nullopt;
+                }
+            },
+            [&](esc::MouseRelease e) -> std::optional<EventResponse> {
+                if constexpr (HandlesMouseRelease<T>) {
+                    return handler.handle_mouse_release(e);
+                }
+                else {
+                    return std::nullopt;
+                }
+            },
+            [&](esc::MouseWheel e) -> std::optional<EventResponse> {
+                if constexpr (HandlesMouseWheel<T>) {
+                    return handler.handle_mouse_wheel(e);
+                }
+                else {
+                    return std::nullopt;
+                }
+            },
+            [&](esc::MouseMove e) -> std::optional<EventResponse> {
+                if constexpr (HandlesMouseMove<T>) {
+                    return handler.handle_mouse_move(e);
+                }
+                else {
+                    return std::nullopt;
+                }
+            },
+            [&](esc::Resize e) -> std::optional<EventResponse> {
+                buffer.resize(e.size);
+                buffer.fill(Glyph{});
+                if constexpr (HandlesResize<T>) {
+                    return handler.handle_resize(e.size);
+                }
+                else {
+                    return std::nullopt;
+                }
+            },
+            [&](event::Timer e) -> std::optional<EventResponse> {
+                if constexpr (HandlesTimer<T>) { return handler.handle_timer(e.id); }
+                else {
+                    return std::nullopt;
+                }
+            },
+            [](event::Custom const& e) -> std::optional<EventResponse> {
+                return e.action();
+            },
+            [](event::Interrupt) -> std::optional<EventResponse> {
+                return QuitRequest{1};
+            },
+            [&](esc::PasteChunk const& e) -> std::optional<EventResponse> {
+                if constexpr (requires { handler.handle_paste(e); }) {
+                    return handler.handle_paste(e);
+                }
+                return std::nullopt;
+            },
+            [](auto const&) -> std::optional<EventResponse> { return std::nullopt; }},
         ev);
 }
 

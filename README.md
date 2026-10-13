@@ -22,7 +22,7 @@ int main()
     auto head = Label{{
                     .text  = "C++20 Terminal UI Framework",
                     .align = Align::Center,
-                    .brush = {.foreground = XColor::Blue, .traits = Trait::Bold},
+                    .style = {.foreground = colors::blue, .traits = Trait::Bold},
                 }} | Border{.box = shape::Box::round(), .label = "TermOx II"};
 
     return Application{head}.run();
@@ -46,10 +46,10 @@ to try out the library quickly.
 ### Rich Terminal Styling
 - **Colors** - Full RGB, HSL, and [XTerm 256 Color](https://jonasjacek.github.io/colors/) support
 - **Text Styling** - Bold, italic, underline, strikethrough, and more
-- **Unicode Support** - Wide character and multi-byte encoding compatibility
+- **Unicode Support** - Validated UTF-8 text and styled Unicode scalars
 
 ### Input Handling
-- **Keyboard** - Key press/release events, modifiers, and special keys
+- **Keyboard** - Press, repeat, and release events, modifiers, and special keys
 - **Mouse** - Click, scroll, movement, and enter/leave events
 - **Focus Management** - Tab navigation, mouse click, and focus events
 
@@ -70,6 +70,33 @@ tables and more
 Dependencies ([Signals Light](https://github.com/a-n-t-h-o-n-y/signals-light),
 [zzz](https://github.com/a-n-t-h-o-n-y/zzz), and
 [Escape](https://github.com/a-n-t-h-o-n-y/Escape)) are automatically fetched by CMake.
+
+## Escape API Migration
+
+TermOx uses Escape's session API, `Style`, `RGB`, `IndexedColor`, and typed input
+events. Widget handlers receive `KeyEvent` and the corresponding mouse event type.
+Pass `Terminal::Options` to `Application`, for example
+`Application{head, {.mouse_mode = MouseMode::Move}}`. Ctrl-C exits through the event
+loop by default, and the session restores terminal state after its input thread stops.
+
+Text inputs accept Unicode key text and bracketed paste. The canvas still places
+one Unicode scalar per cell; grapheme and wide-character layout are not implemented.
+A C++20 compiler and standard library with `std::jthread` support are required.
+
+Build and run the regression tests with:
+
+```sh
+cmake --build build --target TermOx.tests.unit
+ctest --test-dir build --output-on-failure
+```
+
+On macOS or Linux, check interactive input and terminal restoration with:
+
+```sh
+cmake --build build --target TermOx.examples.pong TermOx.examples.pinbox \
+    TermOx.examples.snake TermOx.examples.accumulator TermOx.examples.scratch
+python3 tests/smoke_examples.py build
+```
 
 ## Note on Version 2
 
@@ -94,15 +121,15 @@ int main()
         IntegerLabel{{
             .value = 0,
             .align = Align::Center,
-            .brush = {.background = XColor::White, .foreground = XColor::Black},
+            .style = {.background = colors::white, .foreground = colors::black},
         }},
         Button{{
             .text = "Click to Increment",
             .align = Align::Center,
-            .brush = {.background = XColor::Black,
-                      .foreground = XColor::White,
+            .style = {.background = colors::black,
+                      .foreground = colors::white,
                       .traits = Trait::Bold},
-            .press_mod = [](Label& l) { l.brush.foreground = XColor::Yellow; },
+            .press_mod = [](Label& l) { l.style.foreground = colors::yellow; },
         }},
     };
 

@@ -4,12 +4,14 @@
 
 namespace ox {
 
+RadioGroup::Options const RadioGroup::init = {};
+
 RadioGroup::RadioGroup(Options x)
     : Widget{x.focus_policy, x.size_policy},
       items{std::move(x.items)},
       selected_index{x.selected_index},
-      brush{x.brush},
-      in_focus_brush{x.in_focus_brush},
+      style{x.style},
+      in_focus_style{x.in_focus_style},
       on{x.on},
       off{x.off}
 {}
@@ -20,37 +22,34 @@ void RadioGroup::paint(Canvas c)
         if (y >= c.size.height) { break; }
         auto& btn = (y == selected_index) ? on : off;
         put(c, {0, y}, btn);
-        auto& b = in_focus_ && (y == focus_selection_) ? in_focus_brush : brush;
-        put(c, {(int)btn.size(), y}, (' ' + items[(std::size_t)y]) | b);
+        auto& b = in_focus_ && (y == focus_selection_) ? in_focus_style : style;
+        put(c, {(int)btn.size(), y}, esc::glyphs(' ' + items[(std::size_t)y]) | b);
     }
 }
 
-void RadioGroup::key_press(Key k)
+void RadioGroup::key_press(KeyEvent k)
 {
     if (items.empty()) { return; }
-    switch (k) {
-        case Key::Enter:
-            if (focus_selection_) {
-                selected_index =
-                    std::clamp(*focus_selection_, (std::size_t)0, items.size());
-                this->on_select(items[*selected_index]);
-            }
-            break;
-        case Key::ArrowUp:
-            focus_selection_ =
-                std::clamp(focus_selection_ ? ((int)*focus_selection_ - 1) : 0, 0,
-                           (int)items.size() - 1);
-            break;
-        case Key::ArrowDown:
-            focus_selection_ =
-                std::clamp(focus_selection_ ? ((int)*focus_selection_ + 1) : 0, 0,
-                           (int)items.size() - 1);
-            break;
-        default: break;
+    if (k.matches(KeyCode::Enter, {}, k.action)) {
+        if (focus_selection_) {
+            selected_index =
+                std::clamp(*focus_selection_, (std::size_t)0, items.size());
+            this->on_select(items[*selected_index]);
+        }
+    }
+    else if (k.matches(KeyCode::ArrowUp, {}, k.action)) {
+        focus_selection_ =
+            std::clamp(focus_selection_ ? ((int)*focus_selection_ - 1) : 0, 0,
+                       (int)items.size() - 1);
+    }
+    else if (k.matches(KeyCode::ArrowDown, {}, k.action)) {
+        focus_selection_ =
+            std::clamp(focus_selection_ ? ((int)*focus_selection_ + 1) : 0, 0,
+                       (int)items.size() - 1);
     }
 }
 
-void RadioGroup::mouse_press(Mouse m)
+void RadioGroup::mouse_press(MousePress m)
 {
     if (m.at.y < (int)items.size() && m.at.y != selected_index) {
         selected_index = m.at.y;

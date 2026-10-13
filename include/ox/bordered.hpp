@@ -13,7 +13,7 @@ namespace ox {
 
 struct Border {
     shape::Box box = shape::Box::square();
-    Brush brush = {};  // Only applies to box.
+    Style style = {};  // Only applies to box.
     Label label = {};
 };
 
@@ -35,9 +35,7 @@ class Bordered : public Widget {
         : Widget{FocusPolicy::None, SizePolicy::flex()},
           child{std::move(x.child)},
           border{std::move(x.border)}
-    {
-        child.at = {1, 1};
-    }
+    { child.at = {1, 1}; }
 
    public:
     void resize(Area) override
@@ -53,15 +51,15 @@ class Bordered : public Widget {
     void paint(Canvas c) override
     {
         // Box
-        put(c, border.box, border.brush);
+        put(c, border.box, border.style);
 
         // Label - Can't use Label::paint because it paints over border with bg color.
         auto& label = border.label;
         auto const width = std::max(0, c.size.width - 2);
-        auto const glyphs =
-            std::string_view{label.text}.substr(0, (std::size_t)width) | label.brush;
+        auto glyphs = esc::glyphs(label.text) | label.style;
+        glyphs.resize(std::min(glyphs.size(), (std::size_t)width));
         auto const at = Point{
-            .x = 1 + find_align_offset(label.align, width, glyphs.size()),
+            .x = 1 + find_align_offset(label.align, width, (int)glyphs.size()),
             .y = 0,
         };
         put(c, at, glyphs);
@@ -70,26 +68,20 @@ class Bordered : public Widget {
     auto get_children() -> zzz::Generator<Widget&> override { co_yield child; }
 
     auto get_children() const -> zzz::Generator<Widget const&> override
-    {
-        co_yield child;
-    }
+    { co_yield child; }
 };
 
 // Moves \p w into a Bordered object
 template <WidgetDerived WidgetType>
 [[nodiscard]] auto operator|(WidgetType w, Border b) -> Bordered<WidgetType>
-{
-    return {{.child = std::move(w), .border = std::move(b)}};
-}
+{ return {{.child = std::move(w), .border = std::move(b)}}; }
 
 /**
  * Returns the `I`th child of the wrapped Widget. Useful if this is wrapping a Layout.
  */
 template <std::size_t I, WidgetDerived WidgetType>
 auto get_child(Bordered<WidgetType>& bordered) -> auto&
-{
-    return get_child<I>(bordered.child);
-}
+{ return get_child<I>(bordered.child); }
 
 // -------------------------------------------------------------------------------------
 
@@ -111,13 +103,13 @@ class Divider : public Widget {
    public:
     struct Options {
         Lines lines = Lines::light();
-        Brush brush = {};
+        Style style = {};
         Label label = {};
     };
 
    public:
     Lines lines;
-    Brush brush;
+    Style style;
     Label label;  // TODO
 
     Divider(Options x);

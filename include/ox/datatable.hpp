@@ -19,9 +19,9 @@ class ScrollBar;
 class DataTable : public Widget {
    public:
     struct Options {
-        Color background = TermColor::Default;
-        Color foreground_cell = TermColor::Default;
-        Color foreground_line = TermColor::Default;
+        Color background = default_color;
+        Color foreground_cell = default_color;
+        Color foreground_line = default_color;
         SizePolicy size_policy = SizePolicy::flex();
     } static const init;
 
@@ -49,7 +49,7 @@ class DataTable : public Widget {
      */
     void add_column(std::string heading,
                     Align align = Align::Left,
-                    Color foreground = TermColor::Default);
+                    Color foreground = default_color);
 
     /**
      * Add a row to the table.
@@ -60,14 +60,12 @@ class DataTable : public Widget {
 
     [[nodiscard]]
     auto columns() const -> std::vector<std::vector<std::string>> const&
-    {
-        return columns_;
-    }
+    { return columns_; }
 
    public:
     void paint(Canvas) override;
 
-    void mouse_wheel(Mouse) override;
+    void mouse_wheel(MouseWheel) override;
 
     void resize(Area) override;
 

@@ -125,33 +125,30 @@ class SnakeGameWidget : public Widget {
     SnakeGameWidget() : Widget{FocusPolicy::Strong, SizePolicy::flex()} {}
 
    public:
-    void key_press(Key k) override
+    void key_press(KeyEvent k) override
     {
-        switch (k) {
-            case Key::s: {  // Start the game
-                if (not timer_.is_running()) {
-                    engine_.reset();
-                    timer_.start();
-                }
-                break;
+        if (k.matches(U's', {}, k.action)) {
+            // Start the game
+            if (not timer_.is_running()) {
+                engine_.reset();
+                timer_.start();
             }
-            case Key::j:
-            case Key::ArrowDown: engine_.state.next_direction = {.x = 0, .y = 1}; break;
-
-            case Key::k:
-            case Key::ArrowUp: engine_.state.next_direction = {.x = 0, .y = -1}; break;
-
-            case Key::l:
-            case Key::ArrowRight:
-                engine_.state.next_direction = {.x = 1, .y = 0};
-                break;
-
-            case Key::h:
-            case Key::ArrowLeft:
-                engine_.state.next_direction = {.x = -1, .y = 0};
-                break;
-
-            default: break;
+        }
+        else if (k.matches(U'j', {}, k.action) ||
+                 k.matches(KeyCode::ArrowDown, {}, k.action)) {
+            engine_.state.next_direction = {.x = 0, .y = 1};
+        }
+        else if (k.matches(U'k', {}, k.action) ||
+                 k.matches(KeyCode::ArrowUp, {}, k.action)) {
+            engine_.state.next_direction = {.x = 0, .y = -1};
+        }
+        else if (k.matches(U'l', {}, k.action) ||
+                 k.matches(KeyCode::ArrowRight, {}, k.action)) {
+            engine_.state.next_direction = {.x = 1, .y = 0};
+        }
+        else if (k.matches(U'h', {}, k.action) ||
+                 k.matches(KeyCode::ArrowLeft, {}, k.action)) {
+            engine_.state.next_direction = {.x = -1, .y = 0};
         }
     }
 
@@ -171,16 +168,16 @@ class SnakeGameWidget : public Widget {
         }
 
         // Paint Background
-        fill(c, U' ' | bg(XColor::Black));
+        fill(c, U' ' | bg(colors::black));
 
         // Paint apples
         for (auto const pt : engine_.state.apple_field) {
-            c[pt] = U' ' | bg(XColor::BrightRed);
+            c[pt] = U' ' | bg(colors::bright_red);
         }
 
         // Paint Snake
         for (auto const pt : engine_.state.snake) {
-            c[pt] = U' ' | bg(XColor::BrightGreen);
+            c[pt] = U' ' | bg(colors::bright_green);
         }
 
         // Paint Tail
@@ -188,13 +185,13 @@ class SnakeGameWidget : public Widget {
         for (auto i = 0; i < std::ssize(tail); ++i) {
             if (i + 1 < std::ssize(engine_.state.snake)) {
                 c[engine_.state.snake[i]] =
-                    tail[i] | fg(XColor::BrightGreen) | bg(XColor::BrightBlack);
+                    tail[i] | fg(colors::bright_green) | bg(colors::bright_black);
             }
         }
 
         // Press 's' To Start
         if (not timer_.is_running()) {
-            auto const text = "Press 's' to Start" | Trait::Bold;
+            auto const text = esc::glyphs("Press 's' to Start") | Trait::Bold;
             auto const center = Point{
                 .x = engine_.size.width / 2 - (int)(text.size() / 2),
                 .y = engine_.size.height / 2,
@@ -210,30 +207,30 @@ class SnakeGameWidget : public Widget {
 
 int main()
 {
-    auto const score_brush = Brush{
-        .background = XColor::White,
-        .foreground = XColor::Black,
+    auto const score_style = Style{
+        .background = colors::white,
+        .foreground = colors::black,
         .traits = Trait::Bold,
     };
 
     auto head = Column{
         Suspended{
             SnakeGameWidget{} | SizePolicy::suspended(SnakeEngine::size),
-            {(U'▚' | fg(XColor{235}) | bg(XColor{234}))},
+            {(U'▚' | fg(IndexedColor{235}) | bg(IndexedColor{234}))},
         },
         Suspended{
             Row{
                 Label{{
                     .text = "Score: ",
-                    .brush = score_brush,
+                    .style = score_style,
                 }},
                 IntegerLabel{{
                     .value = 0,
                     .align = Align::Right,
-                    .brush = score_brush,
+                    .style = score_style,
                 }},
             } | SizePolicy::suspended({.width = 14, .height = 1}),
-            {U' ' | score_brush},
+            {U' ' | score_style},
         } | SizePolicy::fixed(1),
     };
 

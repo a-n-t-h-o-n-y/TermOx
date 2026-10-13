@@ -105,7 +105,8 @@ auto to_memory(std::filesystem::path const& filepath) -> std::vector<std::byte>
 
     auto out = ox::PixelGrid::Matrix{
         .area = {width, height},
-        .pixels = std::vector<ox::TrueColor>(width * height, {0x000000}),
+        .pixels =
+            std::vector<ox::RGB>((std::size_t)(width * height), ox::RGB{0x000000}),
     };
 
     for (int y = 0; y < height; ++y) {

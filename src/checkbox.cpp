@@ -53,20 +53,20 @@ void CheckBox::set_state(State s)
 
 auto CheckBox::get_state() const -> State { return state_; }
 
-void CheckBox::key_press(Key k)
+void CheckBox::key_press(KeyEvent k)
 {
-    if (k == Key::Enter) { this->toggle(); }
+    if (k.matches(KeyCode::Enter, {}, k.action)) { this->toggle(); }
 }
 
-void CheckBox::mouse_press(Mouse m)
+void CheckBox::mouse_press(MousePress m)
 {
-    if (m.button == Mouse::Button::Left) { this->toggle(); }
+    if (m.button == MouseButton::Left) { this->toggle(); }
 }
 
 void CheckBox::paint(Canvas c)
 {
     auto glyphs = state_ == State::Checked ? display.checked : display.unchecked;
-    if (in_focus_) { glyphs = glyphs | display.in_focus_brush; }
+    if (in_focus_) { glyphs = glyphs | display.in_focus_style; }
     put(c, {.x = 0, .y = 0}, glyphs);
 }
 

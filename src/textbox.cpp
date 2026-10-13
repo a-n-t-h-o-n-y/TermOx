@@ -13,7 +13,7 @@
 
 #include <zzz/coro.hpp>
 
-#include <esc/detail/transcode.hpp>
+#include <esc/text.hpp>
 
 #include <ox/align.hpp>
 #include <ox/core/core.hpp>
@@ -153,7 +153,7 @@ TextBox::TextBox(Options x)
       text{std::move(x.text)},
       wrap{std::move(x.wrap)},
       align{std::move(x.align)},
-      brush{std::move(x.brush)}
+      style{std::move(x.style)}
 {
     this->update_layout_cache();  // updates unicode_str_ and text_layout_
 }
@@ -192,7 +192,7 @@ void TextBox::paint(Canvas c)
         this->on_scroll(scroll_offset_, line_count);
     }
 
-    fill(c, brush);
+    fill(c, style);
 
     // Paint Text
     for (auto y = 0; y + scroll_offset_ < std::ssize(text_layout_) && y < c.size.height;
@@ -217,66 +217,83 @@ void TextBox::paint(Canvas c)
     }
 }
 
-void TextBox::key_press(Key k)
+void TextBox::key_press(KeyEvent k)
 {
-    switch (k) {
-        case Key::Backspace:
-            if (!text.empty() && cursor_index_ > 0) {
-                --cursor_index_;
-                unicode_str_.erase(std::next(std::cbegin(unicode_str_),
-                                             (std::ptrdiff_t)cursor_index_));
-                esc::detail::u32_to_u8(unicode_str_, text);
-            }
-            break;
-        case Key::Enter:
-            unicode_str_.insert(
-                std::next(std::cbegin(unicode_str_), (std::ptrdiff_t)cursor_index_++),
-                U'\n');
-            esc::detail::u32_to_u8(unicode_str_, text);
-            break;
-        case Key::Delete:
-            if (cursor_index_ < text.size()) {
-                unicode_str_.erase(std::next(std::cbegin(unicode_str_),
-                                             (std::ptrdiff_t)cursor_index_));
-                esc::detail::u32_to_u8(unicode_str_, text);
-            }
-            break;
-        case Key::ArrowLeft:
-            if (cursor_index_ > 0) { --cursor_index_; }
-            break;
-        case Key::ArrowRight:
-            if (cursor_index_ < unicode_str_.size()) { ++cursor_index_; }
-            break;
-        case Key::ArrowDown: {
-            auto at = index_to_point(cursor_index_, line_lengths(text_layout_));
-            at.y += 1;
-            if (at.y >= std::ssize(text_layout_)) { break; }
-            cursor_index_ = point_to_nearest_index(at, line_lengths(text_layout_));
-            break;
+    this->update_layout_cache();
+    cursor_index_ = std::min(cursor_index_, unicode_str_.size());
+    if (k.matches(KeyCode::Backspace, {}, k.action)) {
+        if (!text.empty() && cursor_index_ > 0) {
+            --cursor_index_;
+            unicode_str_.erase(
+                std::next(std::cbegin(unicode_str_), (std::ptrdiff_t)cursor_index_));
+            text = esc::utf32_to_utf8(unicode_str_);
         }
-        case Key::ArrowUp: {
-            auto at = index_to_point(cursor_index_, line_lengths(text_layout_));
-            at.y = std::max(at.y - 1, 0);
-            cursor_index_ = point_to_nearest_index(at, line_lengths(text_layout_));
-            break;
+    }
+    else if (k.matches(KeyCode::Enter, {}, k.action)) {
+        unicode_str_.insert(
+            std::next(std::cbegin(unicode_str_), (std::ptrdiff_t)cursor_index_++),
+            U'\n');
+        text = esc::utf32_to_utf8(unicode_str_);
+    }
+    else if (k.matches(KeyCode::Delete, {}, k.action)) {
+        if (cursor_index_ < unicode_str_.size()) {
+            unicode_str_.erase(
+                std::next(std::cbegin(unicode_str_), (std::ptrdiff_t)cursor_index_));
+            text = esc::utf32_to_utf8(unicode_str_);
         }
-        case Key::Home: cursor_index_ = 0; break;
-        case Key::End: cursor_index_ = unicode_str_.size(); break;
-        default:
-            if (auto const c = esc::key_to_char32(k); c != U'\0') {
-                unicode_str_.insert(
-                    std::next(std::begin(unicode_str_), (std::ptrdiff_t)cursor_index_),
-                    c);
-                esc::detail::u32_to_u8(unicode_str_, text);
-                ++cursor_index_;
-            }
-            break;
+    }
+    else if (k.matches(KeyCode::ArrowLeft, {}, k.action)) {
+        if (cursor_index_ > 0) { --cursor_index_; }
+    }
+    else if (k.matches(KeyCode::ArrowRight, {}, k.action)) {
+        if (cursor_index_ < unicode_str_.size()) { ++cursor_index_; }
+    }
+    else if (k.matches(KeyCode::ArrowDown, {}, k.action)) {
+        auto at = index_to_point(cursor_index_, line_lengths(text_layout_));
+        at.y += 1;
+        if (at.y < std::ssize(text_layout_)) {
+            cursor_index_ = point_to_nearest_index(at, line_lengths(text_layout_));
+        }
+    }
+    else if (k.matches(KeyCode::ArrowUp, {}, k.action)) {
+        auto at = index_to_point(cursor_index_, line_lengths(text_layout_));
+        at.y = std::max(at.y - 1, 0);
+        cursor_index_ = point_to_nearest_index(at, line_lengths(text_layout_));
+    }
+    else if (k.matches(KeyCode::Home, {}, k.action)) {
+        cursor_index_ = 0;
+    }
+    else if (k.matches(KeyCode::End, {}, k.action)) {
+        cursor_index_ = unicode_str_.size();
+    }
+    else {
+        auto const input = input_text(k);
+        unicode_str_.insert(cursor_index_, input);
+        cursor_index_ += input.size();
+        text = esc::utf32_to_utf8(unicode_str_);
     }
 }
 
-void TextBox::mouse_press(Mouse m)
+void TextBox::paste(esc::PasteChunk const& chunk)
 {
-    if (m.button == Mouse::Button::Left) {
+    if (chunk.first) { paste_buffer_.clear(); }
+    paste_buffer_ += chunk.bytes;
+    if (chunk.last) {
+        if (!chunk.aborted) {
+            unicode_str_ = esc::utf8_to_utf32(text);
+            cursor_index_ = std::min(cursor_index_, unicode_str_.size());
+            auto const input = esc::utf8_to_utf32(paste_buffer_);
+            unicode_str_.insert(cursor_index_, input);
+            cursor_index_ += input.size();
+            text = esc::utf32_to_utf8(unicode_str_);
+        }
+        paste_buffer_.clear();
+    }
+}
+
+void TextBox::mouse_press(MousePress m)
+{
+    if (m.button == MouseButton::Left) {
         // Normalize the mouse position
         auto const align_offset = [&]() -> int {
             assert(text_layout_.size() > 0);
@@ -291,19 +308,14 @@ void TextBox::mouse_press(Mouse m)
     }
 }
 
-void TextBox::mouse_wheel(Mouse m)
+void TextBox::mouse_wheel(MouseWheel m)
 {
-    if (m.button == Mouse::Button::ScrollUp) {
-        this->set_scroll_offset(scroll_offset_ - 1);
-    }
-    else if (m.button == Mouse::Button::ScrollDown) {
-        this->set_scroll_offset(scroll_offset_ + 1);
-    }
+    if (m.dy != 0) { this->set_scroll_offset(scroll_offset_ + m.dy); }
 }
 
 void TextBox::update_layout_cache()
 {
-    esc::detail::u8_string_to_u32_string(text, unicode_str_);
+    unicode_str_ = esc::utf8_to_utf32(text);
     text_layout_ = perform_text_layout(unicode_str_, wrap, (std::size_t)size.width);
 }
 

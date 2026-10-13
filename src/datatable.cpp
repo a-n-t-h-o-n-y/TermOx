@@ -27,7 +27,7 @@ void DataTable::add_column(std::string heading, Align align, Color foreground)
     headings_.children.push_back({{
         .text = std::move(heading),
         .align = align,
-        .brush = {.foreground = foreground, .traits = Trait::Bold},
+        .style = {.foreground = foreground, .traits = Trait::Bold},
     }});
     auto const existing_size = columns_.empty() ? 0 : columns_.front().size();
     columns_.push_back(std::vector<std::string>(existing_size, ""));
@@ -130,22 +130,12 @@ void DataTable::paint(Canvas c)
     }
 }
 
-void DataTable::mouse_wheel(Mouse m)
+void DataTable::mouse_wheel(MouseWheel m)
 {
-    if (m.button == Mouse::Button::ScrollUp) {
-        offset = (std::size_t)std::max(0, (int)offset - 1);
-        if (!columns_.empty()) {
-            this->on_scroll((int)offset, (int)columns_.back().size());
-        }
-    }
-    else if (m.button == Mouse::Button::ScrollDown) {
-        offset = (std::size_t)std::min(
-            (int)offset + 1,
-            std::max(columns_.empty() ? 0 : (int)columns_.front().size() - 1, 0));
-        if (!columns_.empty()) {
-            this->on_scroll((int)offset, (int)columns_.back().size());
-        }
-    }
+    if (m.dy == 0 || columns_.empty()) { return; }
+    offset = (std::size_t)std::clamp((int)offset + m.dy, 0,
+                                     std::max((int)columns_.front().size() - 1, 0));
+    this->on_scroll((int)offset, (int)columns_.back().size());
 }
 
 void DataTable::resize(Area)
@@ -165,9 +155,7 @@ void DataTable::resize(Area)
 auto DataTable::get_children() -> zzz::Generator<Widget&> { co_yield headings_; }
 
 auto DataTable::get_children() const -> zzz::Generator<Widget const&>
-{
-    co_yield headings_;
-}
+{ co_yield headings_; }
 
 void link(DataTable& dt, ScrollBar& sb)
 {

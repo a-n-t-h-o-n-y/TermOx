@@ -12,7 +12,7 @@ using namespace ox;
 //     auto i = 0;
 //     for (auto& row : c.children) {
 //         for (auto& label : row.children) {
-//             label.brush.background = i % 2 ? XColor::White : XColor::Green;
+//             label.style.background = i % 2 ? colors::white : colors::green;
 //             ++i;
 //         }
 //         ++i;
@@ -36,8 +36,8 @@ using namespace ox;
 //             TextBox{{
 //                 .wrap = TextBox::Wrap::Word,
 //                 .align = Align::Left,
-//                 .brush = {.background = XColor::BrightBlack,
-//                           .foreground = XColor::White,
+//                 .style = {.background = colors::bright_black,
+//                           .foreground = colors::white,
 //                           .traits = Trait::Bold},
 //                 .focus_policy = FocusPolicy::Strong,
 //             }},
@@ -60,7 +60,7 @@ using namespace ox;
 //     };
 //     auto& [dt, sb] = head.children;
 
-//     dt.add_column("one", Align::Center, XColor::Blue);
+//     dt.add_column("one", Align::Center, colors::blue);
 //     dt.add_row({"1"});
 //     dt.add_column("two", Align::Center);
 //     dt.add_column("three", Align::Center);
@@ -115,7 +115,7 @@ using namespace ox;
 //         Column<std::vector<Button>>{} | SizePolicy::fixed(18),
 //         Divider{{
 //             .lines = Lines::bold(),
-//             .brush = {.foreground = XColor::BrightBlack},
+//             .style = {.foreground = colors::bright_black},
 //         }},
 //         TextBox{{
 //             .focus_policy = FocusPolicy::Strong,
@@ -139,7 +139,7 @@ using namespace ox;
 // {
 //     auto head = Suspended{
 //         TextBox{{
-//             .brush = {.background = XColor::BrightBlack},
+//             .style = {.background = colors::bright_black},
 //             .focus_policy = FocusPolicy::Strong,
 //         }} | SizePolicy::suspended({.width = 40, .height = 5}),
 //     };
@@ -152,31 +152,31 @@ using namespace ox;
 //     {}
 
 //     // Signals
-//     sl::Signal<void(Mouse)> on_mouse_press;
-//     sl::Signal<void(Mouse)> on_mouse_release;
-//     sl::Signal<void(Mouse)> on_mouse_wheel;
-//     sl::Signal<void(Mouse)> on_mouse_move;
+//     sl::Signal<void(MousePress)> on_mouse_press;
+//     sl::Signal<void(MouseRelease)> on_mouse_release;
+//     sl::Signal<void(MouseWheel)> on_mouse_wheel;
+//     sl::Signal<void(MouseMove)> on_mouse_move;
 //     sl::Signal<void()> on_mouse_enter;
 //     sl::Signal<void()> on_mouse_leave;
 //     sl::Signal<void()> on_focus_in;
 //     sl::Signal<void()> on_focus_out;
-//     sl::Signal<void(Key)> on_key_press;
-//     sl::Signal<void(Key)> on_key_release;
+//     sl::Signal<void(KeyEvent)> on_key_press;
+//     sl::Signal<void(KeyEvent)> on_key_release;
 //     sl::Signal<void(Area)> on_resize;
 //     sl::Signal<void()> on_timer;
 //     sl::Signal<void(Canvas)> on_paint;
 
 //    protected:
-//     void mouse_press(Mouse m) override { this->on_mouse_press(m); }
-//     void mouse_release(Mouse m) override { this->on_mouse_release(m); }
-//     void mouse_wheel(Mouse m) override { this->on_mouse_wheel(m); }
-//     void mouse_move(Mouse m) override { this->on_mouse_move(m); }
+//     void mouse_press(MousePress m) override { this->on_mouse_press(m); }
+//     void mouse_release(MouseRelease m) override { this->on_mouse_release(m); }
+//     void mouse_wheel(MouseWheel m) override { this->on_mouse_wheel(m); }
+//     void mouse_move(MouseMove m) override { this->on_mouse_move(m); }
 //     void mouse_enter() override { this->on_mouse_enter(); }
 //     void mouse_leave() override { this->on_mouse_leave(); }
 //     void focus_in() override { this->on_focus_in(); }
 //     void focus_out() override { this->on_focus_out(); }
-//     void key_press(Key k) override { this->on_key_press(k); }
-//     void key_release(Key k) override { this->on_key_release(k); }
+//     void key_press(KeyEvent k) override { this->on_key_press(k); }
+//     void key_release(KeyEvent k) override { this->on_key_release(k); }
 //     void resize(Area old_size) override { this->on_resize(old_size); }
 //     void timer() override { this->on_timer(); }
 //     void paint(Canvas c) override { this->on_paint(c); }

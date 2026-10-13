@@ -27,11 +27,11 @@ class BasicButton : public Widget {
                 SizePolicy sp = SizePolicy::flex());
 
    public:
-    void key_press(Key) override;
+    void key_press(KeyEvent) override;
 
-    void mouse_press(Mouse) override;
+    void mouse_press(MousePress) override;
 
-    void mouse_release(Mouse) override;
+    void mouse_release(MouseRelease) override;
 };
 
 /// Decoration that fades in and out with mouse hover.
@@ -68,9 +68,9 @@ class Button : public BasicButton {
    public:
     void paint(Canvas) override;
 
-    void mouse_press(Mouse) override;
+    void mouse_press(MousePress) override;
 
-    void mouse_release(Mouse) override;
+    void mouse_release(MouseRelease) override;
 
     void focus_in() override;
 
@@ -106,18 +106,17 @@ class Button : public BasicButton {
 };
 
 /**
- * Blend two TrueColor colors together.
+ * Blend two RGB colors together.
  * @param percent [0, 1] blending amount. 0 is all one, 1 is all two.
  */
-[[nodiscard]] auto gradient_blend(TrueColor one, TrueColor two, float percent)
-    -> TrueColor;
+[[nodiscard]] auto gradient_blend(RGB one, RGB two, float percent) -> RGB;
 
 /**
  * Builds a void(Canvas, float) function from a Shape object and gradient.
  * @details Shape must be able to be used with put(Canvas, shape, fg). Useful for Fade
  * decorations.
  */
-[[nodiscard]] auto shape_gradient(auto const& shape, TrueColor one, TrueColor two)
+[[nodiscard]] auto shape_gradient(auto const& shape, RGB one, RGB two)
     -> std::function<void(Canvas, float)>
 {
     return [=](Canvas c, float percent) {
