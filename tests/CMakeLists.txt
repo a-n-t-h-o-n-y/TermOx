@@ -35,3 +35,9 @@ target_link_libraries(TermOx.tests.renderer_terminal PRIVATE TermOx)
 # Headless benchmarks; build explicitly in Release mode and run directly.
 add_executable(TermOx.tests.benchmarks EXCLUDE_FROM_ALL benchmarks.cpp)
 target_link_libraries(TermOx.tests.benchmarks PRIVATE TermOx)
+
+# Isolate allocation fault injection from the regular tests and their worker threads.
+add_executable(TermOx.tests.text_allocation EXCLUDE_FROM_ALL text_allocation.test.cpp)
+target_link_libraries(TermOx.tests.text_allocation PRIVATE TermOx zzz)
+add_dependencies(TermOx.tests.unit TermOx.tests.text_allocation)
+add_test(NAME TermOx.tests.text_allocation COMMAND TermOx.tests.text_allocation)

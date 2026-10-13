@@ -1,12 +1,32 @@
 #include <algorithm>
 #include <chrono>
+#include <cstdlib>
 #include <iomanip>
 #include <iostream>
 #include <memory>
+#include <new>
 #include <string>
 #include <vector>
 
 #include <ox/ox.hpp>
+
+namespace {
+std::size_t heap_allocations = 0;
+}
+
+// Count ordinary C++ allocation calls in the single-threaded benchmark executable.
+auto operator new(std::size_t bytes) -> void*
+{
+    auto* memory = std::malloc(bytes == 0 ? 1 : bytes);
+    if (!memory) { throw std::bad_alloc{}; }
+    ++heap_allocations;
+    return memory;
+}
+auto operator new[](std::size_t bytes) -> void* { return ::operator new(bytes); }
+void operator delete(void* memory) noexcept { std::free(memory); }
+void operator delete[](void* memory) noexcept { std::free(memory); }
+void operator delete(void* memory, std::size_t) noexcept { std::free(memory); }
+void operator delete[](void* memory, std::size_t) noexcept { std::free(memory); }
 
 namespace {
 using Clock = std::chrono::steady_clock;
@@ -20,18 +40,22 @@ void measure(std::string const& name, int iterations, Function work)
     }
     auto samples = std::vector<double>{};
     auto const before = checksum;
+    auto allocations = std::size_t{0};
     for (auto sample = 0; sample < 5; ++sample) {
         auto const start = Clock::now();
+        auto const allocation_start = heap_allocations;
         for (auto i = 0; i < iterations; ++i) {
             checksum += work(i);
         }
+        allocations += heap_allocations - allocation_start;
         auto const elapsed =
             std::chrono::duration<double, std::micro>(Clock::now() - start);
         samples.push_back(elapsed.count() / iterations);
     }
     std::ranges::sort(samples);
     std::cout << name << ',' << iterations << ',' << std::fixed << std::setprecision(3)
-              << samples[2] << ',' << checksum - before << '\n';
+              << samples[2] << ',' << checksum - before << ','
+              << (double)allocations / (iterations * 5) << '\n';
 }
 
 struct Tree : ox::Widget {
@@ -77,6 +101,73 @@ void text_benchmarks()
         editor.insert("x");
         editor.erase_backward();
         return editor.text().size();
+    });
+}
+
+void editing_benchmarks()
+{
+    for (auto lines : {1000, 10000}) {
+        auto document = std::string{};
+        for (auto i = 0; i < lines; ++i) {
+            document += "The quick brown fox jumps over the lazy dog. 界 é	end\n";
+        }
+        auto const iterations = lines == 1000 ? 100 : 25;
+        auto const suffix = std::to_string(lines);
+        for (auto position : {"begin", "middle", "end"}) {
+            auto edit = ox::TextEdit{document};
+            auto const offset = std::string_view{position} == "begin" ? 0
+                                : std::string_view{position} == "end"
+                                    ? edit.text().size()
+                                    : edit.boundaries()[edit.boundaries().size() / 2];
+            edit.set_caret(offset);
+            measure("editing.insert-erase." + suffix + "." + position, iterations,
+                    [&](int) {
+                        edit.insert("x");
+                        edit.erase_backward();
+                        return edit.text().size() + edit.caret();
+                    });
+        }
+        auto edit = ox::TextEdit{document};
+        edit.set_caret(edit.boundaries()[edit.boundaries().size() / 2]);
+        edit.insert("x");
+        measure("editing.undo-redo." + suffix, iterations, [&](int) {
+            edit.undo();
+            edit.redo();
+            return edit.text().size() + edit.caret();
+        });
+        edit.undo();
+        auto const begin = edit.caret();
+        auto end = begin;
+        for (auto i = 0; i < 10; ++i) {
+            end = document.find('\n', end) + 1;
+        }
+        edit.set_caret(end, true);
+        measure("editing.selection." + suffix, iterations, [&](int) {
+            edit.insert("replacement\n界é");
+            edit.undo();
+            return edit.text().size() + edit.caret() + edit.anchor();
+        });
+        edit.set_caret(begin);
+        measure("editing.paste." + suffix, iterations, [&](int) {
+            edit.paste({"paste\n\xf0\x9f", true, false});
+            edit.paste({"\x99\x82", false, true});
+            edit.undo();
+            return edit.text().size() + edit.caret();
+        });
+    }
+    auto line = ox::TextEdit{std::string(10000, 'x')};
+    line.set_caret(5000);
+    measure("editing.insert-erase.single-line", 100, [&](int) {
+        line.insert("x");
+        line.erase_backward();
+        return line.text().size() + line.caret();
+    });
+    auto edit = ox::TextEdit{std::string(10000, 'x'), true, 0};
+    edit.set_caret(5000);
+    measure("editing.insert-erase.no-history", 100, [&](int) {
+        edit.insert("x");
+        edit.erase_backward();
+        return edit.text().size() + edit.caret();
     });
 }
 
@@ -168,10 +259,15 @@ void renderer_benchmarks()
 int main(int argc, char** argv)
 {
     auto const routing_only = argc == 2 && std::string_view{argv[1]} == "--routing";
-    if (argc > 1 && !routing_only) { return 2; }
-    std::cout << "workload,iterations,median_us_per_operation,checksum\n";
-    if (!routing_only) { text_benchmarks(); }
-    routing_benchmarks();
-    if (!routing_only) { renderer_benchmarks(); }
+    auto const editing_only = argc == 2 && std::string_view{argv[1]} == "--editing";
+    if (argc > 1 && !routing_only && !editing_only) { return 2; }
+    std::cout << "workload,iterations,median_us_per_operation,checksum,allocations_per_"
+                 "operation\n";
+    if (editing_only) { editing_benchmarks(); }
+    else {
+        if (!routing_only) { text_benchmarks(); }
+        routing_benchmarks();
+        if (!routing_only) { renderer_benchmarks(); }
+    }
     std::cerr << "checksum=" << checksum << '\n';
 }

@@ -1,0 +1,15 @@
+workload,iterations,median_us_per_operation,checksum,allocations_per_operation
+editing.insert-erase.1000.begin,100,64.145,28500000,0.008
+editing.insert-erase.1000.middle,100,48.693,42750000,0.008
+editing.insert-erase.1000.end,100,30.593,57000000,0.008
+editing.undo-redo.1000,100,47.661,42751000,0.000
+editing.selection.1000,100,49.257,57285000,3.000
+editing.paste.1000,100,47.480,42750000,2.000
+editing.insert-erase.10000.begin,25,1007.720,71250000,0.032
+editing.insert-erase.10000.middle,25,861.094,106875000,0.032
+editing.insert-erase.10000.end,25,773.473,142500000,0.032
+editing.undo-redo.10000,25,855.100,106875250,0.000
+editing.selection.10000,25,862.280,142571250,3.000
+editing.paste.10000,25,857.137,106875000,2.000
+editing.insert-erase.single-line,100,107.334,7500000,0.008
+editing.insert-erase.no-history,100,107.412,7500000,0.000

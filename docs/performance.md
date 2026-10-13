@@ -10,7 +10,8 @@ cmake --build build-release --target TermOx.tests.benchmarks -j 4
 ```
 
 The executable prints CSV: workload, iterations per sample, median microseconds per
-operation, and a checksum over all five timed samples. Each workload first runs ten
+operation, a checksum over all five timed samples, and ordinary C++ allocations per
+operation. Older recorded snapshots omit the allocation column. Each workload first runs ten
 warmup operations. Construction and initial layout/rendering are outside the timer;
 the insert/erase and frame mutation workloads include their mutations. There is no
 terminal I/O. Checksums keep the results observable and should agree across versions.
@@ -31,7 +32,8 @@ TextLayout now records byte-boundary coordinates during layout construction and 
 binary searches for caret and hit testing. Coordinate storage adds `sizeof(Point)`
 per grapheme boundary. The layout pass overwrites coordinates when word wrapping
 backtracks, and preserves newline and soft-wrap caret semantics. Unchanged updates
-still compare the owned text snapshot; editing still resegments the complete document.
+still compare the owned text snapshot; at this milestone editing still resegments the
+complete document.
 
 At this milestone, application synchronization still snapshots the widget tree to detect direct mutations
 and preserve callback safety. It now skips attachment reconciliation when the ordered
@@ -130,3 +132,76 @@ non-exception routing cases under ASan/UBSan. The sanitizer run instruments all 
 sources and the routing tests; Escape uses the normal Release build. Exception cases
 run in the normal unit suite
 because the installed sanitizer runtime cannot unwind C++ exceptions.
+
+## Text editing optimization pass
+
+Run the editing-only workloads with:
+
+```sh
+./build-release/tests/TermOx.tests.benchmarks --editing
+```
+
+This pass compares `9e11170` against the optimized editing core using the same expanded
+benchmark executable source, compiler flags, and dependencies. The baseline executable
+was saved before changing the library. The benchmark replaces ordinary scalar and
+array `operator new`/`delete` to count successful C++ allocations during each timed
+sample; aligned allocation and external `malloc` calls are not counted. This counting
+is confined to the single-threaded benchmark executable. Both versions include it,
+and setup, warmups, and measurement storage are excluded from the counts.
+
+Every workload checksum matches. Raw results: [editing before](../tests/benchmark-results/editing-before.csv)
+and [editing after](../tests/benchmark-results/editing-after.csv).
+
+| Workload | Before µs | After µs | Before allocations/op | After allocations/op |
+| --- | ---: | ---: | ---: | ---: |
+| editing.insert-erase.1000.begin | 854.575 | 64.145 | 36.004 | 0.008 |
+| editing.insert-erase.1000.middle | 889.208 | 48.693 | 36.004 | 0.008 |
+| editing.insert-erase.1000.end | 924.778 | 30.593 | 36.004 | 0.008 |
+| editing.undo-redo.1000 | 859.363 | 47.661 | 36.000 | 0.000 |
+| editing.selection.1000 | 829.675 | 49.257 | 40.000 | 3.000 |
+| editing.paste.1000 | 832.359 | 47.480 | 39.000 | 2.000 |
+| editing.insert-erase.10000.begin | 11611.603 | 1007.720 | 44.016 | 0.032 |
+| editing.insert-erase.10000.middle | 11476.197 | 861.094 | 44.016 | 0.032 |
+| editing.insert-erase.10000.end | 11445.935 | 773.473 | 44.016 | 0.032 |
+| editing.undo-redo.10000 | 11478.366 | 855.100 | 44.000 | 0.000 |
+| editing.selection.10000 | 10991.603 | 862.280 | 48.000 | 3.000 |
+| editing.paste.10000 | 10882.461 | 857.137 | 47.000 | 2.000 |
+| editing.insert-erase.single-line | 118.780 | 107.334 | 32.004 | 0.008 |
+| editing.insert-erase.no-history | 116.699 | 107.412 | 32.000 | 0.000 |
+
+Documents contain 1,000 or 10,000 repeated multilingual lines, using the same sentence
+as the initial text benchmark. Insert/erase runs at the beginning, midpoint, and end;
+undo/redo replays one midpoint insertion. Selection replaces approximately ten lines
+and undoes it, restoring the original selection. Paste inserts a two-chunk stream
+with a split UTF-8 emoji and a newline, then undoes it. Single-line and no-history
+workloads use 10,000 ASCII characters and edit at the midpoint. Each operation is an
+edit pair. Samples contain 100 pairs for 1,000-line and single-line workloads, or 25
+pairs for 10,000-line workloads, after ten warmups. Small nonzero history allocation
+rates reflect deque growth and block allocation averaged over the samples.
+
+TextEdit now keeps reusable working text and boundary buffers. It resegments from the
+previous newline through the next surviving newline after the edit, including any
+lines joined by deletion. LF always resets Unicode grapheme context, so arbitrarily
+long regional-indicator, combining, Indic, prepend, and emoji sequences within those
+lines remain correct. Prefix boundaries are retained and suffix boundaries are shifted
+using a bulk transform. Undo and redo use the same preparation path, including byte
+ranges that become internal to a joined grapheme. Identical-byte replacements update
+selection/history without rebuilding text or boundaries. Bounded history uses deques,
+so dropping the oldest delta does not shift every remaining entry. With history disabled,
+removed text is not copied into an unused delta.
+
+Working buffers and history allocation complete before the live document is swapped
+and selection is committed. An isolated test executable injects allocation failures
+into replacement, undo, and redo and verifies unchanged text, boundaries, selection,
+and both history stacks. Building the regular unit target also builds this executable;
+CTest runs both. The complete suite contains 130 regular cases and two allocation-fault
+cases. Thirty-one non-exception text and widget cases also run under ASan/UBSan with
+all TermOx sources instrumented; Escape remains a Release library. Exception and fault
+cases run in the normal suite because the installed sanitizer runtime cannot unwind
+C++ exceptions. All six pseudo-terminal smoke checks pass.
+
+The editor still copies the text and reconstructs the boundary vector for atomicity;
+its total work remains linear in document size, while Unicode segmentation is limited
+to the affected logical lines. A document with no newline requires full-line
+segmentation. Working buffers retain capacity proportional to the largest edited
+document. TextLayout construction is a separate cost and is unchanged by this pass.

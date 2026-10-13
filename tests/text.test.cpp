@@ -371,3 +371,112 @@ TEST(text_layout_coordinate_index_matches_display_across_wrapping_and_line_break
         }
     }
 }
+
+TEST(text_edits_resegment_whole_lines_for_long_unicode_context_and_joined_newlines)
+{
+    for (auto fragment : {"🇺", "क्", "؀", "́", "👩‍"}) {
+        auto text = std::string{"prefix\n"};
+        for (auto i = 0; i < 31; ++i) {
+            text += fragment;
+        }
+        text += '\n';
+        for (auto i = 0; i < 33; ++i) {
+            text += fragment;
+        }
+        text += "a\nsuffix\nunchanged";
+        for (auto inserted : {"🇸", "́", "क्", "x\n؀"}) {
+            auto edit = TextEdit{text};
+            edit.set_caret(7);
+            ASSERT(edit.insert(inserted));
+            check(edit);
+            auto const after = edit.text();
+            auto const caret = edit.caret();
+            ASSERT(edit.undo() && edit.text() == text && edit.caret() == 7);
+            check(edit);
+            ASSERT(edit.redo() && edit.text() == after && edit.caret() == caret);
+            check(edit);
+        }
+        auto edit = TextEdit{text};
+        auto const newline = text.find('\n', 7);
+        edit.set_caret(newline);
+        edit.move_right(true);
+        ASSERT(edit.erase_backward());
+        check(edit);
+        auto expected = text;
+        expected.erase(newline, 1);
+        ASSERT(edit.text() == expected);
+        ASSERT(edit.undo() && edit.text() == text);
+        ASSERT(edit.anchor() == newline && edit.caret() == newline + 1);
+        ASSERT(edit.redo() && edit.text() == expected);
+        check(edit);
+    }
+}
+
+TEST(text_random_multiline_replacements_match_full_segmentation_and_restore_history)
+{
+    auto document = std::string{};
+    for (auto i = 0; i < 200; ++i) {
+        document += "line é界 🇺🇸 👩‍💻 क्\n";
+    }
+    auto edit = TextEdit{document, true, 20};
+    auto random = std::mt19937{89};
+    auto const fragments = std::array{"x", "界", "é", "🇺", "🇸", "́", "\n", "क्", "؀"};
+    for (auto i = 0; i < 400; ++i) {
+        auto const a = (std::size_t)random() % edit.boundaries().size();
+        auto const b = std::min(a + random() % 40, edit.boundaries().size() - 1);
+        auto const left = edit.boundaries()[a];
+        auto const right = edit.boundaries()[b];
+        auto const reverse = random() % 2;
+        edit.set_caret(reverse ? right : left);
+        edit.set_caret(reverse ? left : right, true);
+        auto const anchor = edit.anchor();
+        auto const caret = edit.caret();
+        auto const before = edit.text();
+        auto expected = before;
+        auto const fragment = std::string_view{fragments[random() % fragments.size()]};
+        expected.replace(left, right - left, fragment);
+        ASSERT(edit.insert(fragment) && edit.text() == expected);
+        check(edit);
+        auto const after_caret = edit.caret();
+        ASSERT(edit.undo() && edit.text() == before);
+        ASSERT(edit.anchor() == anchor && edit.caret() == caret);
+        check(edit);
+        ASSERT(edit.redo() && edit.text() == expected && edit.caret() == after_caret);
+        check(edit);
+    }
+}
+
+TEST(text_prepared_edits_survive_copy_move_aliasing_and_reset)
+{
+    auto edit = TextEdit{"prefix\né界\nsuffix", true, 2};
+    edit.set_caret(7);
+    edit.insert("́");
+    auto const changed = edit.text();
+    auto copy = edit;
+    ASSERT(copy.undo() && copy.text() == "prefix\né界\nsuffix");
+    ASSERT(edit.text() == changed);
+    auto moved = std::move(copy);
+    ASSERT(moved.redo() && moved.text() == changed);
+    ASSERT(copy.insert("new") && copy.text() == "new");
+    check(copy);
+    moved.set_text(moved.text());
+    ASSERT(!moved.can_undo() && !moved.can_redo() && moved.caret() == 0);
+    moved.set_caret(moved.text().size());
+    auto const original = moved.text();
+    ASSERT(moved.insert(moved.text()) && moved.text() == original + original);
+    ASSERT(moved.undo() && moved.text() == original);
+    check(moved);
+}
+
+TEST(text_identical_selection_replacement_records_only_the_selection_change)
+{
+    auto edit = TextEdit{"prefix\né界\nsuffix"};
+    auto const original = edit.text();
+    edit.select_all();
+    ASSERT(edit.insert(edit.text()) && edit.text() == original);
+    ASSERT(edit.anchor() == edit.caret() && edit.caret() == original.size());
+    ASSERT(edit.undo() && edit.text() == original);
+    ASSERT(edit.anchor() == 0 && edit.caret() == original.size());
+    ASSERT(edit.redo() && edit.text() == original && edit.anchor() == edit.caret());
+    check(edit);
+}

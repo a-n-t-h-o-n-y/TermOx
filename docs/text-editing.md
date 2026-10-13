@@ -32,8 +32,11 @@ the anchor; ordinary left/right movement collapses an existing selection toward 
 corresponding edge. `select_all()` selects the complete document.
 
 Insertions replace selections. Backspace/Delete remove complete graphemes or the
-selection. Each mutation resegments the resulting text: inserting a combining mark
-or regional indicator can join neighboring clusters. The resulting caret snaps to
+selection. Mutations resegment the affected logical lines: inserting a combining mark
+or regional indicator can join neighboring clusters. Segmentation starts after the
+previous LF and continues through the next surviving LF after the replaced range;
+deleting newlines includes all joined lines. LF resets grapheme context, so unchanged
+lines retain their cached boundaries. A single long line is resegmented in full. The resulting caret snaps to
 the next complete boundary after the inserted bytes. Empty or fully rejected insertions
 preserve a selection; use deletion explicitly to remove it.
 
@@ -140,3 +143,10 @@ coordinates, randomized edits, and widget/application integration.
 TextLayout caches terminal coordinates alongside byte boundaries during construction.
 Caret and hit queries use binary searches without decoding or measuring text again.
 See [performance benchmarks](performance.md) for timings and the storage tradeoff.
+
+TextEdit reuses working text and boundary buffers and commits only after preparation
+and history allocation succeed. Failed edits, undo, and redo preserve text, boundaries,
+selection, and history. Identical-byte selection replacement still records the selection
+change but keeps the existing text and boundaries. History uses bounded deques, so
+removing the oldest delta does not shift the rest. Working buffers retain their capacity
+between edits; the text and boundary vector are still copied to preserve atomicity.

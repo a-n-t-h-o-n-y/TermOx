@@ -298,6 +298,8 @@ void swap(TextEdit& a, TextEdit& b) noexcept
     swap(a.history_limit_, b.history_limit_);
     swap(a.undo_, b.undo_);
     swap(a.redo_, b.redo_);
+    swap(a.text_storage_, b.text_storage_);
+    swap(a.boundary_storage_, b.boundary_storage_);
     swap(a.preferred_column_, b.preferred_column_);
     swap(a.paste_, b.paste_);
     swap(a.pasting_, b.pasting_);
@@ -321,6 +323,8 @@ void TextEdit::set_text(std::string_view text)
     preferred_column_.reset();
     undo_.clear();
     redo_.clear();
+    text_storage_.clear();
+    boundary_storage_.clear();
     paste_.clear();
     pasting_ = false;
 }
@@ -416,23 +420,64 @@ auto TextEdit::move_vertical(TextLayout const& layout, int rows, bool extend) ->
     return changed;
 }
 
+void TextEdit::prepare_replace(std::size_t begin,
+                               std::size_t end,
+                               std::string_view value)
+{
+    text_storage_.assign(text_);
+    text_storage_.replace(begin, end - begin, value);
+
+    // LF always breaks graphemes and resets Unicode segmentation context. Edits
+    // can join clusters across removed newlines, so include the entire affected
+    // logical lines through the next surviving LF, not a fixed-size neighborhood.
+    auto const previous = begin == 0 ? std::string::npos : text_.rfind('\n', begin - 1);
+    auto const start = previous == std::string::npos ? 0 : previous + 1;
+    auto const newline = text_.find('\n', end);
+    auto const stop = newline == std::string::npos ? text_.size() : newline + 1;
+    auto const new_stop = stop - (end - begin) + value.size();
+    auto const prefix = std::ranges::upper_bound(boundaries_, start);
+    auto const suffix = std::ranges::upper_bound(boundaries_, stop);
+    boundary_storage_.reserve(boundaries_.size());
+    boundary_storage_.assign(boundaries_.begin(), prefix);
+    auto at = start;
+    for (auto cluster : esc::graphemes(
+             std::string_view{text_storage_}.substr(start, new_stop - start))) {
+        at += cluster.size();
+        boundary_storage_.push_back(at);
+    }
+    auto const tail = boundary_storage_.size();
+    boundary_storage_.resize(tail + (std::size_t)(boundaries_.end() - suffix));
+    std::transform(
+        suffix, boundaries_.end(), boundary_storage_.begin() + (std::ptrdiff_t)tail,
+        [&](std::size_t offset) { return offset - (end - begin) + value.size(); });
+}
+
+void TextEdit::commit_text() noexcept
+{
+    text_.swap(text_storage_);
+    boundaries_.swap(boundary_storage_);
+    text_storage_.clear();
+    boundary_storage_.clear();
+}
+
 auto TextEdit::replace(std::size_t begin, std::size_t end, std::string value) -> bool
 {
-    auto next = text_;
-    next.replace(begin, end - begin, value);
-    auto breaks = grapheme_boundaries(next);
-    auto const after = *std::ranges::lower_bound(breaks, begin + value.size());
-    if (next == text_ && anchor_ == after && caret_ == after) { return false; }
-    auto change = Change{
-        begin, text_.substr(begin, end - begin), std::move(value), anchor_, caret_,
-        after};
-    if (history_limit_ > 0) { undo_.push_back(std::move(change)); }
-    text_.swap(next);
-    boundaries_.swap(breaks);
+    auto const same_text = std::string_view{text_}.substr(begin, end - begin) == value;
+    if (same_text && anchor_ == end && caret_ == end) { return false; }
+    auto after = end;
+    if (!same_text) {
+        prepare_replace(begin, end, value);
+        after = *std::ranges::lower_bound(boundary_storage_, begin + value.size());
+    }
+    if (history_limit_ > 0) {
+        undo_.push_back({begin, text_.substr(begin, end - begin), std::move(value),
+                         anchor_, caret_, after});
+    }
+    if (!same_text) { commit_text(); }
     anchor_ = caret_ = after;
     preferred_column_.reset();
     redo_.clear();
-    if (undo_.size() > history_limit_) { undo_.erase(undo_.begin()); }
+    if (undo_.size() > history_limit_) { undo_.pop_front(); }
     return true;
 }
 
@@ -476,16 +521,18 @@ auto TextEdit::replay(bool backward) -> bool
     auto& destination = backward ? redo_ : undo_;
     if (source.empty()) { return false; }
     auto const& change = source.back();
-    auto next = text_;
-    next.replace(change.at, backward ? change.inserted.size() : change.removed.size(),
-                 backward ? change.removed : change.inserted);
-    auto breaks = grapheme_boundaries(next);
+    auto const same_text = change.removed == change.inserted;
+    if (!same_text) {
+        prepare_replace(
+            change.at,
+            change.at + (backward ? change.inserted.size() : change.removed.size()),
+            backward ? change.removed : change.inserted);
+    }
     auto const caret = backward ? change.before_caret : change.after_caret;
     auto const anchor = backward ? change.before_anchor : change.after_caret;
     destination.push_back(std::move(source.back()));
     source.pop_back();
-    text_.swap(next);
-    boundaries_.swap(breaks);
+    if (!same_text) { commit_text(); }
     caret_ = caret;
     anchor_ = anchor;
     preferred_column_.reset();

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <deque>
 #include <functional>
 #include <optional>
 #include <span>
@@ -130,8 +131,10 @@ class TextEdit {
     std::size_t anchor_ = 0;
     bool multiline_;
     std::size_t history_limit_;
-    std::vector<Change> undo_;
-    std::vector<Change> redo_;
+    std::deque<Change> undo_;
+    std::deque<Change> redo_;
+    std::string text_storage_;
+    std::vector<std::size_t> boundary_storage_;
     std::optional<int> preferred_column_;
     std::string paste_;
     bool pasting_ = false;
@@ -140,6 +143,8 @@ class TextEdit {
     auto word_right(std::size_t at) const -> std::size_t;
     auto replace(std::size_t begin, std::size_t end, std::string value) -> bool;
     auto replay(bool backward) -> bool;
+    void prepare_replace(std::size_t begin, std::size_t end, std::string_view value);
+    void commit_text() noexcept;
 };
 
 }  // namespace ox
