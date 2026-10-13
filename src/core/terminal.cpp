@@ -1,13 +1,6 @@
 #include <ox/core/terminal.hpp>
 
-#include <algorithm>
-#include <cassert>
-
-#include <esc/io.hpp>
-#include <esc/sequence.hpp>
 #include <esc/terminal.hpp>
-#include <esc/text.hpp>
-#include <exception>
 
 namespace ox {
 
@@ -20,7 +13,8 @@ Terminal::Terminal(Options x)
           options.signals = x.signals;
           options.paste = esc::BracketedPaste::On;
           return options;
-      }())}
+      }())},
+      renderer_{session_.profile()}
 {}
 
 Terminal::Terminal(MouseMode mouse_mode,
@@ -33,48 +27,44 @@ Terminal::Terminal(MouseMode mouse_mode,
                        .background = background_}}
 {}
 
+Terminal::~Terminal() noexcept
+{
+    // Style is retained across frames, but must not leak into the restored screen.
+    try {
+        session_.write(Style{});
+        session_.flush();
+    }
+    catch (...) {
+        // Session destruction still attempts mode restoration after an I/O failure.
+    }
+}
+
 void Terminal::commit_changes(Frame const& screen, Cursor cursor)
 {
-    escape_sequence_.clear();
-    auto const repaint = !screen_valid_ || screen.size() != current_screen_.size() ||
-                         foreground != last_foreground_ ||
-                         background != last_background_;
-    auto style = Style{};
-    for (auto y = 0; y < screen.size().height; ++y) {
-        for (auto x = 0; x < screen.size().width; ++x) {
-            auto const& cell = screen[{x, y}];
-            if (cell.columns == 0) { continue; }
-            if (repaint || cell != current_screen_[{x, y}]) {
-                auto appearance = cell.style;
-                if (appearance.background == Color{default_color}) {
-                    appearance.background = background;
-                }
-                if (appearance.foreground == Color{default_color}) {
-                    appearance.foreground = foreground;
-                }
-                escape_sequence_ += esc::encode(session_.profile(), esc::Cursor{x, y});
-                if (appearance != style) {
-                    escape_sequence_ += esc::encode(session_.profile(), appearance);
-                    style = appearance;
-                }
-                esc::append_utf8(escape_sequence_, cell.text);
-            }
+    try {
+        auto const output = renderer_.render(screen, cursor, foreground, background);
+        auto const visible = cursor && contains(Rect{{0, 0}, screen.size()}, *cursor);
+        auto set_cursor = [&](bool show) {
+            if (cursor_visible_ == show) { return; }
+            session_.set(show ? esc::CursorMode::Show : esc::CursorMode::Hide);
+            cursor_visible_ = show;
+        };
+        // Only change visibility when needed; Escape owns its restoration.
+        // Skip synchronized frames and flushes entirely for unchanged output.
+        if (output.empty()) {
+            set_cursor(visible);
+            return;
         }
+        auto frame = session_.frame();
+        set_cursor(false);
+        session_.write(output);
+        set_cursor(visible);
+        frame.close();
     }
-    escape_sequence_ += esc::encode(session_.profile(), Style{});
-    auto frame = session_.frame();
-    session_.set(esc::CursorMode::Hide);
-    session_.write(escape_sequence_);
-    if (cursor && contains(Rect{{0, 0}, screen.size()}, *cursor)) {
-        auto const lead = screen.lead_at(*cursor);
-        session_.write(esc::Cursor{lead.x, lead.y});
-        session_.set(esc::CursorMode::Show);
+    catch (...) {
+        renderer_.invalidate();
+        throw;
     }
-    frame.close();
-    current_screen_ = screen;
-    screen_valid_ = true;
-    last_foreground_ = foreground;
-    last_background_ = background;
 }
 
 auto Terminal::read(std::chrono::milliseconds timeout) -> std::optional<Event>

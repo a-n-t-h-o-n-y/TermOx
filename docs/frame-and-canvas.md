@@ -121,5 +121,5 @@ redesign of editing and widget behavior belongs to the later widget work.
 `Cursor` is `std::optional<Point>` in the geometry header. `Terminal` accepts a completed
 frame with `commit_changes(frame, cursor)`. Continuation cells are not emitted as text.
 A cursor outside the frame is hidden; one on a continuation cell is presented at that
-footprint's leading cell. Renderer extraction and adjacent-run output optimization are
-separate from these storage and drawing contracts.
+footprint's leading cell. The [renderer](renderer.md) compares frames without terminal
+I/O, emits adjacent changes as runs, and retains output storage and presentation state.

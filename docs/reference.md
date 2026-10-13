@@ -2270,6 +2270,20 @@ put(panel, {0, 0}, "Hello 界");
 See [the frame and canvas guide](frame-and-canvas.md) for coordinate checks, resize,
 Unicode width policies, complete-footprint clipping, and borrowing rules.
 
+## 🧩 ox::Renderer
+
+[`#include <ox/core/renderer.hpp>`](../include/ox/core/renderer.hpp)
+
+`Renderer(profile)` owns an Escape capability profile and reusable presentation storage.
+`render(frame, cursor, foreground, background)` returns borrowed encoded bytes without
+terminal I/O. Adjacent changes form runs; unchanged frames produce no bytes. Cursor
+position and effective style are retained across calls. The caller writes the bytes
+and manages visibility and flushing. Call `invalidate()` if the bytes were discarded,
+output failed, or another writer changed terminal state.
+
+See [the renderer guide](renderer.md) for buffer lifetime, Unicode boundaries,
+capability adaptation, resize behavior, and failure recovery.
+
 ## 🧩 ox::EventLoop
 
 [`#include <ox/core/event_loop.hpp>`](../include/ox/core/event_loop.hpp)

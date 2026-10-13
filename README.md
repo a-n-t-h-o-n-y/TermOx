@@ -81,7 +81,8 @@ loop by default, and the session restores terminal state on exit.
 
 Text inputs accept Unicode key text and bracketed paste. Frames store complete
 graphemes with explicit continuation cells, and clipped canvases use Escape's width
-estimates. See [frames and canvases](docs/frame-and-canvas.md) for drawing and resize contracts.
+estimates. See [frames and canvases](docs/frame-and-canvas.md) for drawing and resize contracts
+and [rendering](docs/renderer.md) for frame comparison and terminal output.
 A C++20 compiler and standard library are required.
 
 Build and run the regression tests with:
@@ -94,7 +95,8 @@ ctest --test-dir build --output-on-failure
 On macOS or Linux, check interactive input and terminal restoration with:
 
 ```sh
-cmake --build build --target TermOx.examples.pong TermOx.examples.pinbox \
+cmake --build build --target TermOx.tests.renderer_terminal \
+    TermOx.examples.pong TermOx.examples.pinbox \
     TermOx.examples.snake TermOx.examples.accumulator TermOx.examples.scratch
 python3 tests/smoke_examples.py build
 ```

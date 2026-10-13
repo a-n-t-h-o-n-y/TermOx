@@ -36,6 +36,7 @@ add_library(TermOx STATIC
     src/widget.cpp
     src/core/frame.cpp
     src/core/canvas.cpp
+    src/core/renderer.cpp
     src/core/terminal.cpp
     src/core/event_loop.cpp
 
@@ -65,6 +66,7 @@ add_library(TermOx STATIC
     include/ox/core/geometry.hpp
     include/ox/core/frame.hpp
     include/ox/core/canvas.hpp
+    include/ox/core/renderer.hpp
     include/ox/core/dispatch.hpp
     include/ox/core/terminal.hpp
     include/ox/core/event_loop.hpp

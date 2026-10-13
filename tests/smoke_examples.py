@@ -17,6 +17,7 @@ def smoke(executable, inputs):
     fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack("HHHH", 35, 120, 0, 0))
     original = termios.tcgetattr(slave)
     env = dict(os.environ, TERM="xterm-256color", COLORTERM="truecolor")
+    env.pop("NO_COLOR", None)
     process = subprocess.Popen([str(executable)], stdin=slave, stdout=slave, stderr=slave, env=env)
     output = bytearray()
 
@@ -63,8 +64,56 @@ def smoke(executable, inputs):
         os.close(slave)
 
 
+def renderer_smoke(executable):
+    master, slave = pty.openpty()
+    fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack("HHHH", 2, 8, 0, 0))
+    original = termios.tcgetattr(slave)
+    env = dict(os.environ, TERM="xterm-256color", COLORTERM="truecolor")
+    env.pop("NO_COLOR", None)
+    process = subprocess.Popen([str(executable)], stdin=slave, stdout=slave,
+                               stderr=subprocess.PIPE, env=env)
+
+    def command(value):
+        os.write(master, value)
+        ready, _, _ = select.select([process.stderr], [], [], 5)
+        assert ready, "renderer terminal probe timed out"
+        acknowledgment = process.stderr.readline()
+        assert acknowledgment == (b"closed\n" if value == b"q" else b"done\n"), acknowledgment
+        output = bytearray()
+        while select.select([master], [], [], 0.05)[0]:
+            output.extend(os.read(master, 65536))
+        return bytes(output)
+
+    try:
+        assert select.select([process.stderr], [], [], 5)[0], "renderer probe did not open"
+        assert process.stderr.readline() == b"ready\n"
+        assert b"x" in command(b"i"), "initial frame was not painted"
+        assert command(b"i") == b"", "unchanged hidden frame emitted bytes"
+        shown = command(b"v")
+        assert b"\x1b[1;1H" in shown and b"\x1b[?25h" in shown, shown
+        assert command(b"v") == b"", "unchanged visible frame emitted bytes"
+        assert command(b"h") == b"\x1b[?25l", "hiding cursor repainted the frame"
+        assert command(b"h") == b"", "hidden cursor was redundantly hidden"
+        assert b"y" in command(b"e"), "edit was not painted"
+        restored = command(b"q")
+        assert b"\x1b[49m\x1b[39m" in restored, f"retained colors were not reset: {restored!r}"
+        assert b"\x1b[?1049l" in restored and b"\x1b[?25h" in restored, restored
+        assert termios.tcgetattr(slave) == original, "terminal modes were not restored"
+        assert process.wait(timeout=5) == 0
+        print("renderer: unchanged output, cursor transitions, style and mode restoration passed")
+    finally:
+        if process.poll() is None:
+            process.kill()
+        process.wait()
+        process.stderr.close()
+        os.close(master)
+        os.close(slave)
+
+
 def main():
-    examples = Path(sys.argv[1]) / "examples"
+    build = Path(sys.argv[1])
+    renderer_smoke(build / "tests" / "TermOx.tests.renderer_terminal")
+    examples = build / "examples"
     smoke(examples / "TermOx.examples.pong", [b"\r", b"\x1b[B", b"\x1b[A"])
     smoke(examples / "TermOx.examples.pinbox", [b"\x1b[<0;10;5M", b"\x1b[<32;11;5M", b"\x1b[<0;11;5m"])
     smoke(examples / "TermOx.examples.snake", [b"s", b"j", b"l"])

@@ -4,6 +4,7 @@ add_executable(TermOx.tests.unit EXCLUDE_FROM_ALL
     widgets.test.cpp
     event_loop.test.cpp
     frame.test.cpp
+    renderer.test.cpp
 )
 
 target_compile_options(
@@ -22,3 +23,7 @@ target_link_libraries(
 )
 
 add_test(NAME TermOx.tests.unit COMMAND TermOx.tests.unit)
+
+# POSIX pseudo-terminal integration is driven by smoke_examples.py.
+add_executable(TermOx.tests.renderer_terminal EXCLUDE_FROM_ALL renderer_terminal.cpp)
+target_link_libraries(TermOx.tests.renderer_terminal PRIVATE TermOx)

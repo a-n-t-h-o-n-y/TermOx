@@ -2,12 +2,12 @@
 
 #include <chrono>
 #include <optional>
-#include <string>
 
 #include <esc/terminal.hpp>
 
 #include <ox/core/events.hpp>
 #include <ox/core/frame.hpp>
+#include <ox/core/renderer.hpp>
 
 namespace ox {
 
@@ -15,7 +15,7 @@ using ::esc::MouseMode;
 using ::esc::Signals;
 
 /**
- * Represents the terminal itself, providing an event loop and screen writing tools.
+ * Owns a terminal session and presents frames through a renderer.
  */
 class Terminal {
    public:
@@ -56,7 +56,7 @@ class Terminal {
      * Uninitializes the terminal display, resets the state to before the constructor
      * was called.
      */
-    ~Terminal() = default;
+    ~Terminal() noexcept;
 
    public:
     /**
@@ -78,12 +78,9 @@ class Terminal {
     [[nodiscard]] auto size() -> Area;
 
    private:
-    Frame current_screen_{{0, 0}};
-    bool screen_valid_ = false;
-    Color last_foreground_ = default_color;
-    Color last_background_ = default_color;
     esc::Terminal session_;
-    std::string escape_sequence_;
+    Renderer renderer_;
+    bool cursor_visible_ = false;
 };
 
 }  // namespace ox
