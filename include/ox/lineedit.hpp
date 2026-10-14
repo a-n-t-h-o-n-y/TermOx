@@ -2,7 +2,6 @@
 
 #include <cstddef>
 #include <functional>
-#include <optional>
 #include <string>
 
 #include <signals_light/signal.hpp>
@@ -28,7 +27,7 @@ class LineEdit : public Widget {
         Color background = default_color;
         std::string ghost_text = "";
         Style ghost_text_style = {.foreground = colors::bright_black};
-        std::optional<std::function<bool(char32_t)>> validator = std::nullopt;
+        std::function<bool(char32_t)> validator = {};
         FocusPolicy focus_policy = FocusPolicy::Strong;
         SizePolicy size_policy = SizePolicy::flex();
     } static const init;
@@ -43,7 +42,7 @@ class LineEdit : public Widget {
     Color background;
     std::string ghost_text;  // Visible if text is empty.
     Style ghost_text_style;
-    std::optional<std::function<bool(char32_t)>> validator;
+    std::function<bool(char32_t)> validator;
 
     sl::Signal<void(std::string const&)> on_enter;
 
@@ -61,10 +60,9 @@ class LineEdit : public Widget {
    private:
     TextLayout layout_;
     TextLayout ghost_layout_;
-    int scroll_column_ = 0;
+    Point scroll_ = {};
 
     void update_layout();
-    auto display_offset(int width) -> int;
 };
 
 }  // namespace ox

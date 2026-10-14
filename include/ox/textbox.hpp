@@ -42,7 +42,7 @@ class TextBox : public Widget {
     StylePatch selection_style;
 
     /**
-     * Emitted when any scroll parameter is updated. For ScrollBar.
+     * Emitted when the top display row or row count changes. For ScrollBar.
      * void(int index, int size)
      */
     sl::Signal<void(int, int)> on_scroll;
@@ -74,12 +74,11 @@ class TextBox : public Widget {
 
    private:
     mutable TextLayout layout_;
-    int scroll_offset_ = 0;
+    Point scroll_ = {};
     int notified_offset_ = -1;
     int notified_length_ = -1;
 
     void update_layout() const;
-    void keep_caret_visible();
     void notify_scroll();
 };
 

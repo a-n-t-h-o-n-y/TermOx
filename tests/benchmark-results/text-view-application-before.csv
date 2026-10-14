@@ -1,0 +1,11 @@
+workload,iterations,median_us_per_operation,checksum,allocations_per_operation
+application.idle.80x24,100,0.381,0,0.000
+application.repaint.80x24,100,736.596,500,1335.000
+application.edit.80x24,100,3053.219,33000,1338.508
+application.scroll.80x24,100,759.926,121500,1338.500
+application.resize.80x24,100,1015.817,1050750,1312.000
+application.idle.200x60,100,0.382,0,0.000
+application.repaint.200x60,100,2491.474,500,3351.000
+application.edit.200x60,100,4827.262,33000,3354.508
+application.scroll.200x60,100,2558.504,267500,3354.500
+application.resize.200x60,100,3121.225,6231750,3328.000

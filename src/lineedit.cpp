@@ -1,10 +1,7 @@
 #include <ox/lineedit.hpp>
 
-#include <algorithm>
-#include <cstdint>
-#include <limits>
-
 #include <ox/put.hpp>
+#include <ox/text_view.hpp>
 
 namespace ox {
 LineEdit::Options const LineEdit::init = {};
@@ -24,36 +21,11 @@ LineEdit::LineEdit(Options x)
 void LineEdit::set_text(std::string_view text)
 {
     editor.set_text(text);
-    scroll_column_ = 0;
+    scroll_ = {};
     request_repaint();
 }
 void LineEdit::update_layout()
 { layout_.update(editor.text(), size().width, TextWrap::None, layout_.policy()); }
-
-auto LineEdit::display_offset(int width) -> int
-{
-    auto const columns = layout_.lines().front().columns;
-    auto const caret = layout_.position(editor.caret()).x;
-    if (width <= 0) {
-        scroll_column_ = 0;
-        return 0;
-    }
-    if (columns < width) {
-        scroll_column_ = 0;
-        return find_align_offset(align, width, columns);
-    }
-    scroll_column_ = std::clamp(scroll_column_, 0, columns);
-    if (caret < scroll_column_) { scroll_column_ = caret; }
-    if (caret - scroll_column_ >= width) {
-        auto const desired = caret - width + 1;
-        auto offset = layout_.offset({desired, 0});
-        if (layout_.position(offset).x < desired) {
-            offset = *std::ranges::upper_bound(editor.boundaries(), offset);
-        }
-        scroll_column_ = layout_.position(offset).x;
-    }
-    return -scroll_column_;
-}
 
 auto LineEdit::handle(KeyEvent const& key) -> EventResponse
 {
@@ -63,38 +35,24 @@ auto LineEdit::handle(KeyEvent const& key) -> EventResponse
         on_enter(value);
         return {.handled = true, .repaint = true};
     }
-    update_layout();
-    auto response = edit_key(editor, key, layout_,
-                             validator.value_or(std::function<bool(char32_t)>{}));
-    if (response.repaint) {
-        update_layout();
-        display_offset(size().width);
-    }
-    return response;
+    return edit_text(editor, layout_, scroll_, size(), TextWrap::None, align, key,
+                     validator);
 }
 
 auto LineEdit::handle(esc::PasteChunk const& chunk) -> EventResponse
 {
-    auto const changed =
-        editor.paste(chunk, validator.value_or(std::function<bool(char32_t)>{}));
-    if (changed) {
-        update_layout();
-        display_offset(size().width);
-    }
-    return {.handled = true, .repaint = changed};
+    return edit_text(editor, layout_, scroll_, size(), TextWrap::None, align, chunk,
+                     validator);
 }
 
 auto LineEdit::handle(MousePress const& mouse) -> EventResponse
 {
     if (mouse.button != MouseButton::Left) { return {}; }
     update_layout();
-    auto const offset = display_offset(size().width);
-    auto const changed = editor.set_caret(
-        layout_.offset(
-            {(int)std::clamp(std::int64_t{mouse.at.x} - offset, std::int64_t{0},
-                             (std::int64_t)std::numeric_limits<int>::max()),
-             0}),
-        mouse.modifiers.shift);
+    scroll_ = text_scroll(layout_, editor.caret(), size(), align, scroll_);
+    auto const changed =
+        editor.set_caret(text_offset(layout_, {mouse.at.x, 0}, size(), align, scroll_),
+                         mouse.modifiers.shift);
     return {.handled = true, .repaint = changed};
 }
 
@@ -102,21 +60,21 @@ auto LineEdit::paint(Canvas canvas) -> Cursor
 {
     layout_.update(editor.text(), canvas.size().width, TextWrap::None,
                    canvas.width_policy());
-    auto const offset = display_offset(canvas.size().width);
+    scroll_ = text_scroll(layout_, editor.caret(), canvas.size(), align, scroll_);
     fill(canvas, bg(background));
+    auto const row = canvas.subcanvas(
+        {0, 0}, {canvas.size().width, canvas.size().height > 0 ? 1 : 0});
     if (editor.text().empty() && !is_focused()) {
         ghost_layout_.update(ghost_text, canvas.size().width, TextWrap::None,
                              canvas.width_policy());
-        auto const x = find_align_offset(align, canvas.size().width,
-                                         ghost_layout_.lines().front().columns);
-        put_text_line(canvas, {x, 0}, ghost_layout_, 0, ghost_text_style,
-                      ghost_text_style);
+        paint_text(row, ghost_layout_, align, {}, ghost_text_style, ghost_text_style);
     }
     else {
-        put_text_line(canvas, {offset, 0}, layout_, 0, text_style,
-                      text_style | selection_style, editor.selection());
+        paint_text(row, layout_, align, scroll_, text_style,
+                   text_style | selection_style, editor.selection());
     }
-    auto const point = Point{layout_.position(editor.caret()).x + offset, 0};
+    auto const point =
+        text_position(layout_, editor.caret(), canvas.size(), align, scroll_);
     return canvas.contains(point) ? Cursor{point} : Cursor{};
 }
 }  // namespace ox

@@ -109,7 +109,9 @@ checked before converting to integer geometry.
 `put_text_line()` composes cached layout with a canvas, normal and selected styles,
 and a selection range. It expands display glyphs, paints whole footprints, and marks
 a selected newline with a space when visible. The layout's width policy must match
-the canvas. LineEdit and TextBox use this same function for painting.
+the canvas. Drawing walks the layout's cached boundaries and measured widths, without row
+resegmentation or per-grapheme glyph vectors. Tabs paint individual spaces, allowing
+partial clipping; other graphemes retain complete footprints.
 
 ## Widget integration and API changes
 
@@ -126,6 +128,7 @@ replace or clear the editor safely.
 
 TextBox uses `TextWrap` (replacing `TextBox::Wrap`), cached multiline layout, vertical
 navigation, alignment-aware hit testing, selection painting, and clamped scrolling.
+Unwrapped text now follows the caret horizontally using the same geometry as LineEdit.
 `set_scroll_offset()` returns whether visible editing state changed. Scroll signals
 are emitted only when the top row or row count changes. Both widgets expose a
 `selection_style` patch, defaulting to inverse video.
@@ -161,3 +164,64 @@ Failed updates leave the owned snapshot, policy, coordinates, and existing row s
 intact. Cached columns add one integer per grapheme; reusable buffers retain memory
 proportional to the largest document. See the layout construction measurements in the
 [performance guide](performance.md).
+
+
+## Text view composition
+
+`<ox/text_view.hpp>` provides the functions used by both widgets. They operate on an
+ordinary `TextEdit`, `TextLayout`, and `Point` scroll value; there is no required widget,
+base class, controller, or additional editor state wrapper. Scroll uses display columns
+and rows. Editing caret/selection values remain UTF-8 byte offsets.
+
+```cpp
+#include <ox/text_view.hpp>
+
+auto editor = ox::TextEdit{"hello 界"};
+auto layout = ox::TextLayout{};
+auto scroll = ox::Point{};
+auto const size = ox::Area{20, 3};
+auto const wrap = ox::TextWrap::Word;
+auto const align = ox::Align::Left;
+auto key = ox::KeyEvent{.key = ox::KeyCode::End};
+auto response = ox::edit_text(editor, layout, scroll, size, wrap, align, key);
+
+// During painting, update the layout with the actual canvas width policy.
+auto frame = ox::Frame{size};
+auto canvas = ox::Canvas{frame};
+layout.update(editor.text(), size.width, wrap, canvas.width_policy());
+scroll = ox::text_scroll(layout, editor.caret(), size, align, scroll);
+ox::paint_text(canvas, layout, align, scroll, {}, {.traits = ox::Trait::Inverse},
+               editor.selection());
+auto point = ox::text_position(layout, editor.caret(), size, align, scroll);
+auto cursor = canvas.contains(point) ? ox::Cursor{point} : ox::Cursor{};
+
+// The same aligned viewport maps a mouse hit back to a byte boundary.
+editor.set_caret(ox::text_offset(layout, {4, 0}, size, align, scroll));
+```
+
+`edit_text` has key and streaming-paste overloads. Both refresh layout and scroll after
+an edit; the key overload prepares layout before geometry-dependent bindings. They
+use the layout's owned width policy and tab width, return effects, and do not apply
+them to an application. An optional scalar predicate uses an empty `std::function`
+to mean no filtering. `LineEdit::validator` now uses this same simple type; clear it
+with `validator = {}` rather than `std::nullopt`.
+
+`text_scroll` keeps the caret visible and snaps scrolling to complete grapheme
+boundaries. Short right-aligned text shifts left one cell when necessary to display
+its end caret. `text_position` and `text_offset` use exactly the same aligned origin
+as painting. Alignment applies when a row fits; wider rows use the horizontal viewport
+offset. Hit testing clamps extreme coordinates without overflow. `paint_text`
+draws only rows visible through the canvas clip and does not clear or fill a background.
+The layout's width policy must match the canvas.
+
+`TextLayout::boundaries()` and `widths()` expose borrowed cached analysis. Boundary
+spans include the final byte offset; widths contain one entry per cluster, with positive
+measured columns, zero for a tab, and minus one for a line break. Tabs expand according
+to the current row column and tab stop. These spans have the same mutation/ownership
+limits as `lines()`; callers cannot modify the cache.
+
+Widget-specific behavior stays local: LineEdit emits Enter and draws an unfocused,
+empty editor's placeholder on its first row; TextBox owns vertical-scroll commands
+and coalesced scroll notifications. Both compose the shared input, geometry, and
+selection drawing functions. Custom bindings can still use `edit_key` or individual
+`TextEdit` operations and call `text_scroll` explicitly.

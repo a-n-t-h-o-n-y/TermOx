@@ -84,7 +84,12 @@ Children paint before parents, allowing borders and overlays to compose.
 `TextEdit` owns document state, selection, grapheme boundaries, and undo history.
 `edit_key(edit, event, layout, validator)` supplies the default keyboard policy as a
 free function. Custom bindings can call editing operations directly without subclassing
-or modifying the document model. `TextLayout` owns the display layout independently.
+or modifying the document model. `TextLayout` owns the display layout independently. `<ox/text_view.hpp>` composes these
+components with plain `Point` scroll state: `edit_text` handles a key or paste and
+refreshes layout/scroll, `text_scroll` reveals a caret, `text_offset` and `text_position`
+share the aligned geometry, and `paint_text` draws cached rows and selection. LineEdit
+and TextBox use these functions without a shared base class or another owned editor
+wrapper. See [text view composition](text-editing.md#text-view-composition).
 
 ## Timers and lifetime
 

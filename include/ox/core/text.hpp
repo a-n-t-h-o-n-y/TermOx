@@ -54,6 +54,10 @@ class TextLayout {
                 esc::WidthPolicy policy = {},
                 int tab_width = 4) -> bool;
     auto text() const -> std::string_view { return text_; }
+    /** Cluster byte boundaries, including the final text size; borrowed until update.
+     * Widths share their cluster indices: positive columns, tab == 0, newline == -1. */
+    auto boundaries() const -> std::span<std::size_t const> { return boundaries_; }
+    auto widths() const -> std::span<int const> { return columns_; }
     auto lines() const -> std::span<TextLine const> { return lines_; }
     auto policy() const -> esc::WidthPolicy;
     auto tab_width() const -> int { return tab_width_; }

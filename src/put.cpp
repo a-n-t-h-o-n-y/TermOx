@@ -266,23 +266,46 @@ void put_text_line(Canvas canvas,
 {
     if (row >= layout.lines().size()) { throw std::out_of_range{"Text row"}; }
     auto const line = layout.lines()[row];
-    auto column = 0;
-    auto offset = line.begin;
-    for (auto cluster :
-         esc::graphemes(layout.text().substr(line.begin, line.end - line.begin))) {
-        auto const appearance =
-            offset < selection.second && offset + cluster.size() > selection.first
-                ? selected
-                : normal;
-        auto const display =
-            display_grapheme(cluster, column, layout.policy(), layout.tab_width());
-        put(canvas, translate(at, {column, 0}), esc::glyphs(display, appearance));
-        column += (int)*esc::cell_width(display, layout.policy());
-        offset += cluster.size();
+    auto const clip = canvas.visible();
+    if (at.y < clip.at.y ||
+        (std::int64_t)at.y >= std::int64_t{clip.at.y} + clip.size.height) {
+        return;
     }
+    auto const right = std::int64_t{clip.at.x} + clip.size.width;
+    auto const boundaries = layout.boundaries();
+    auto index = (std::size_t)(std::ranges::lower_bound(boundaries, line.begin) -
+                               boundaries.begin());
+    auto column = 0;
+    for (; boundaries[index] < line.end; ++index) {
+        auto const begin = boundaries[index];
+        auto const end = boundaries[index + 1];
+        auto const appearance =
+            begin < selection.second && end > selection.first ? selected : normal;
+        auto const measured = layout.widths()[index];
+        auto const width =
+            measured == 0 ? layout.tab_width() - column % layout.tab_width() : measured;
+        auto const x = std::int64_t{at.x} + column;
+        if (x >= right) { break; }
+        if (measured == 0) {
+            // A tab is a run of spaces, so clipping can retain part of its display.
+            for (auto cell = std::max(x, (std::int64_t)clip.at.x);
+                 cell < std::min(x + width, right); ++cell) {
+                canvas.write({(int)cell, at.y}, U" ", appearance);
+            }
+        }
+        else if (x >= clip.at.x && x + width <= right) {
+            auto const cluster = layout.text().substr(begin, end - begin);
+            canvas.write(
+                {(int)x, at.y},
+                display_grapheme(cluster, column, layout.policy(), layout.tab_width()),
+                appearance);
+        }
+        column += width;
+    }
+    auto const newline = std::int64_t{at.x} + line.columns;
     if (line.next > line.end && selection.first <= line.end &&
-        selection.second > line.end) {
-        canvas.write(translate(at, {column, 0}), U" ", selected);
+        selection.second > line.end && newline >= clip.at.x && newline < right) {
+        canvas.write({(int)newline, at.y}, U" ", selected);
     }
 }
 

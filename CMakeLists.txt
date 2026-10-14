@@ -32,6 +32,7 @@ add_library(TermOx STATIC
     src/put.cpp
     src/radiogroup.cpp
     src/scrollbar.cpp
+    src/text_view.cpp
     src/textbox.cpp
     src/timer.cpp
     src/widget.cpp
@@ -59,6 +60,7 @@ add_library(TermOx STATIC
     include/ox/put.hpp
     include/ox/radiogroup.hpp
     include/ox/scrollbar.hpp
+    include/ox/text_view.hpp
     include/ox/textbox.hpp
     include/ox/timer.hpp
     include/ox/widget.hpp

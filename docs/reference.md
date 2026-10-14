@@ -1514,15 +1514,16 @@ uniformity with other Layouts.
 
 A user editable single line text input Widget. 
 
-Note: Right and Center Align are not supported yet.
+Supports Left, Center, and Right alignment, grapheme-aware selection, and horizontal
+caret scrolling through the shared [text view functions](text-editing.md#text-view-composition).
 
 ```cpp
 auto line_edit = LineEdit{{
-    .text = "A LineEdit",
+    .text = "123",
     .text_style = {.foreground = colors::bright_white},
     .background = colors::bright_blue,
     .ghost_text = "Ghost Text",
-    .validator = [](char c) { return std::isalnum(c); },
+    .validator = [](char32_t c) { return c >= U'0' && c <= U'9'; },
 }};
 ```
 
@@ -1539,7 +1540,7 @@ struct Options {
     Color background = default_color;
     std::string ghost_text = "";
     Style ghost_text_style = {.foreground = colors::bright_black};
-    std::optional<std::function<bool(char32_t)>> validator = std::nullopt;
+    std::function<bool(char32_t)> validator = {};
     FocusPolicy focus_policy = FocusPolicy::Strong;
     SizePolicy size_policy = SizePolicy::flex();
 };
@@ -1579,7 +1580,7 @@ StylePatch selection_style;
 Color background;
 std::string ghost_text;  // Visible if text is empty.
 Style ghost_text_style;
-std::optional<std::function<bool(char32_t)>> validator;
+std::function<bool(char32_t)> validator;
 ```
 
 ---
@@ -1720,7 +1721,8 @@ std::chrono::milliseconds scroll_settle_time;
 
 `class TextBox : public Widget;`
 
-A basic TextBox Widget. It supports word wrapping and scrolling. It is editable if a
+A multiline TextBox Widget. It supports word wrapping, selection, vertical scrolling,
+and horizontal caret scrolling for unwrapped text. It is editable if a
 FocusPolicy other than `None` is set. It can be used with a ScrollBar with the `link`
 function.
 
@@ -1770,8 +1772,8 @@ use when painting the text.
 sl::Signal<void(int, int)> on_scroll; /// void(int index, int size)
 ```
 
-- `on_scroll` is emitted on any scroll parameter update. The current index and size are
-passed to the signal. This is used by the `link` function and does not need to be used
+- `on_scroll` is emitted when the top row or display-row count changes. The current
+row index and total display-row count are passed to the signal. This is used by the `link` function and does not need to be used
 directly.
 
 
@@ -2062,7 +2064,7 @@ See [layout calculation](layout.md) for allocation rules and edge cases.
 `TextEdit` owns UTF-8 text, grapheme-boundary carets, selection, bounded undo/redo,
 and atomic paste assembly. `TextLayout` owns cached display rows and width assumptions;
 `layout_text()` is the pure calculation. Byte offsets and terminal columns remain
-explicitly separate. LineEdit and TextBox compose these with `put_text_line()`.
+explicitly separate. LineEdit and TextBox compose these with the functions in `<ox/text_view.hpp>`.
 
 See [text editing](text-editing.md) for normalization, navigation, history, rendering,
 and the new widget text accessors.

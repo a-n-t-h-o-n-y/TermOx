@@ -471,3 +471,65 @@ unchanged Escape Release library linked. Deliberate exception cases run in Relea
 because the installed sanitizer runtime cannot unwind C++ exceptions. New coverage
 checks exact cell equality, clearing long clusters and wide continuations, and
 repainting equal prefixes before sparse and wide-cell changes.
+
+## Text widget composition and cached drawing
+
+This pass compares `be949c9` with shared text view composition, using the identical
+application workloads and Release toolchain from the preceding section. LineEdit
+and TextBox now compose `TextEdit`, `TextLayout`, a plain `Point` scroll value, and
+free input/viewport/drawing functions from `<ox/text_view.hpp>`. Enter, placeholder
+painting, and scroll notifications stay in their respective widgets. The shared
+geometry also keeps right-aligned end carets visible and gives unwrapped TextBox
+rows horizontal caret scrolling.
+
+`put_text_line` walks cached grapheme boundaries and measured widths. It no longer
+resegments every display row or constructs a glyph vector for every displayed cluster.
+Tabs draw their visible spaces individually, while ordinary graphemes retain complete
+footprints; selected newlines retain their visible highlight. Hidden clusters do not
+need display conversion. TextLayout gains read-only boundary/width spans but no additional
+storage. Width assumptions still come from the canvas, and complete input is validated
+when the layout updates.
+
+The comparison uses three alternating processes per version with the existing five
+samples and ten warmups per workload. Checksums match for every process. No build,
+terminal smoke test, or sanitizer work ran during measurement. Reproduce with:
+
+```sh
+python3 tests/benchmark_paint_pipeline.py /path/to/before-benchmarks \
+    ./build-release/tests/TermOx.tests.benchmarks /tmp/text-view-results --modes application
+```
+
+Raw results: [before](../tests/benchmark-results/text-view-application-before.csv),
+[after](../tests/benchmark-results/text-view-application-after.csv), and
+[process samples](../tests/benchmark-results/text-view-samples.csv).
+
+| Workload | 80×24 before µs | After µs | 200×60 before µs | After µs |
+| --- | ---: | ---: | ---: | ---: |
+| idle | 0.381 | 0.384 | 0.382 | 0.384 |
+| repaint | 736.596 | 394.876 | 2491.474 | 1561.421 |
+| edit | 3053.219 | 2838.741 | 4827.262 | 4029.746 |
+| scroll | 759.926 | 412.581 | 2558.504 | 1587.552 |
+| resize | 1015.817 | 759.923 | 3121.225 | 2317.511 |
+
+Text repaints and scrolling are approximately 1.6–1.9 times faster. Editing takes
+about 7–17% less time and resizing about 25–26% less time in these workloads. Idle
+steps are unchanged; their small timing differences reflect run-to-run variation.
+
+Ordinary allocation calls per unchanged repaint fall from 1,335/3,351 at the two sizes
+to one, the lifetime-safe application paint snapshot. Editing falls from roughly
+1,339/3,355 to four calls per frame; scrolling to four; resizing to six. This does not
+promise allocation-free drawing for all text: long clusters can still allocate display
+strings, frame cells own their text, initial layout/frame construction allocates, and
+application snapshots intentionally retain callback safety. Text changes still rebuild
+layout analysis and remain a substantial part of editing-frame cost.
+
+See [text view composition](text-editing.md#text-view-composition) for the interface,
+including selection, alignment, hit testing, input filtering, and ownership rules.
+A differential comparison against the previous row painter matches 9,720 combinations
+of Unicode text, wrap modes, widths, policies, selection ranges, and canvas clipping.
+All 162 Release cases, including five allocation-fault cases, pass; six examples build,
+the seven PTY smoke checks pass, and the standalone documentation example compiles.
+ASan+UBSan passes 48 non-exception text, frame, text-view, and text-widget cases with
+all TermOx sources instrumented and the unchanged Escape Release library linked.
+Deliberate exception and allocation-fault cases run in Release because the installed
+sanitizer runtime cannot unwind C++ exceptions.
