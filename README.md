@@ -154,7 +154,7 @@ int main()
     auto& [label, button] = counter.children;
 
     // Signals and Slots
-    connect(button.on_press, [](IntegerLabel& l) { ++l.value; }, label);
+    Connection{.signal = button.on_press, .slot = [](IntegerLabel& l) { ++l.value; }}(label);
 
     return Application{counter}.run();
 }

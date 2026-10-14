@@ -15,13 +15,11 @@ TEST(signal_connections_borrow_const_and_movable_targets_and_disconnect_explicit
     auto target = Label{{.text = "before"}};
     auto const fixed = Label{{.text = "constant"}};
     auto calls = 0;
-    auto id = connect(
-        signal,
-        [&](int value, Label& label, Label const& other) {
-            label.text = std::to_string(value) + other.text;
-            ++calls;
-        },
-        target, fixed);
+    auto id = Connection{.signal = signal,
+                         .slot = [&](int value, Label& label, Label const& other) {
+                             label.text = std::to_string(value) + other.text;
+                             ++calls;
+                         }}(target, fixed);
     signal(1);
     ASSERT(target.text == "1constant" && calls == 1);
     auto moved = Label{std::move(target)};
@@ -43,7 +41,8 @@ TEST(
     auto calls = 0;
     auto capture = std::make_shared<int>(1);
     auto weak = std::weak_ptr{capture};
-    auto id = connect(signal, [capture, &calls](Label&) { ++calls; }, *target);
+    auto id = Connection{.signal = signal,
+                         .slot = [capture, &calls](Label&) { ++calls; }}(*target);
     capture.reset();
     signal();
     ASSERT(calls == 1);
@@ -53,26 +52,23 @@ TEST(
     signal.disconnect(id);
     ASSERT(weak.expired());
     auto derived = Label{};
-    connect(signal, [&](Label&) { ++calls; }, derived);
+    Connection{.signal = signal, .slot = [&](Label&) { ++calls; }}(derived);
     auto sliced = Widget{std::move(derived)};
     signal();
     ASSERT(calls == 1);
     auto plain = 0;
-    auto plain_id = connect(signal, [&] { ++plain; });
+    auto plain_id = Connection{.signal = signal, .slot = [&] { ++plain; }}();
     signal();
     ASSERT(plain == 1);
     signal.disconnect(plain_id);
     signal();
     ASSERT(plain == 1);
     auto victim = std::make_unique<Widget>();
-    connect(
-        signal,
-        [&](Widget&) {
-            victim.reset();
-            signal();  // Reentrant delivery suppresses the now-expired target.
-            ++plain;
-        },
-        *victim);
+    Connection{.signal = signal, .slot = [&](Widget&) {
+                   victim.reset();
+                   signal();  // Reentrant delivery suppresses the now-expired target.
+                   ++plain;
+               }}(*victim);
     signal();
     signal();
     ASSERT(plain == 2);
@@ -83,10 +79,12 @@ TEST(signal_connections_reject_empty_tracked_callbacks_before_subscribing)
     auto target = Widget{};
     auto signal = sl::Signal<void()>{};
     auto callback = std::function<void(Widget&)>{};
-    ASSERT_THROWS(connect(signal, callback, target), std::invalid_argument);
+    ASSERT_THROWS((Connection{.signal = signal, .slot = callback}(target)),
+                  std::invalid_argument);
     ASSERT_THROWS(tracked(callback, target), std::invalid_argument);
     auto empty = std::function<void()>{};
-    ASSERT_THROWS(connect(signal, empty), std::invalid_argument);
+    ASSERT_THROWS((Connection{.signal = signal, .slot = empty}()),
+                  std::invalid_argument);
     signal();
 }
 

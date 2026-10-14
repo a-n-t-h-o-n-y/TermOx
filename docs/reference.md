@@ -352,18 +352,20 @@ not detected by tree synchronization. Geometry and focus cannot be written direc
 Move operations transfer lifetime tracking; assignment invalidates the overwritten
 identity. `track(widget)` provides safe lookup without exposing lifetime storage.
 
-## 📦 ox::connect
+## 📦 ox::Connection
 
 [`#include <ox/widget.hpp>`](../include/ox/widget.hpp)
 
 ```cpp
-auto id = ox::connect(numberpad.on_press,
-    [](int n, auto& total_label) { total_label.value += n; }, total_label);
+auto id = ox::Connection{
+    .signal = numberpad.on_press,
+    .slot = [](int n, auto& total_label) { total_label.value += n; },
+}(total_label);
 // Optional explicit disconnection:
 numberpad.on_press.disconnect(id);
 ```
 
-`connect(signal, callback, widgets...)` connects a void-returning signal to a callback.
+`Connection{.signal = signal, .slot = callback}(widgets...)` connects a signal to a callback.
 Signal arguments come first, followed by references to tracked widgets. Tracking borrows
 identity, follows moves, permits const targets, and suppresses invocation after
 destruction, overwrite, or slicing. Empty callbacks are rejected before subscription.
@@ -373,7 +375,7 @@ The signal owns its callback. Discarding the returned `sl::Identifier` leaves th
 connection active; it is not an RAII handle. The callback's captures remain owned until
 the signal disconnects the slot or is destroyed, even when a tracked target expires.
 Explicit disconnection returns the slot; retaining that slot retains its captures.
-The temporary Connection wrapper has been removed.
+Constructing the configuration does not connect it; invoke it immediately to subscribe.
 
 ## 🔢 ox::FocusPolicy
 
@@ -463,7 +465,7 @@ if (auto* target = view.try_get()) { target->enabled = false; }
 ```
 
 `tracked(callback, widgets...)` invokes a callback only while every target is valid,
-passing tracked widgets after the invocation's ordinary arguments. `connect`
+passing tracked widgets after the invocation's ordinary arguments. `Connection`
 combines this with signal connection. Views and widget mutation belong to the
 application thread.
 

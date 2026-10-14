@@ -51,8 +51,8 @@ class NumberPad : public Grid<Button> {
             auto& row = this->children.emplace_back();
             for (auto x = 0; x < width; ++x) {
                 auto& child = row.children.emplace_back(int_button(i));
-                connect(
-                    child.on_press, [i](auto& parent) { parent.on_press(i); }, *this);
+                Connection{.signal = child.on_press,
+                           .slot = [i](auto& parent) { parent.on_press(i); }}(*this);
                 i += i;
             }
         }
@@ -88,9 +88,9 @@ int main()
 
     auto& [title_, total_label, div_, numberpad] = head.child.children;
 
-    connect(
-        numberpad.on_press, [](int n, auto& total_label) { total_label.value += n; },
-        total_label);
+    Connection{.signal = numberpad.on_press, .slot = [](int n, auto& total_label) {
+                   total_label.value += n;
+               }}(total_label);
 
     return Application{head}.run({.mouse_mode = MouseMode::Move});
 }

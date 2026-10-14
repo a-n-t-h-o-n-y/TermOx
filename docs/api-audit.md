@@ -36,14 +36,16 @@ leave child geometry unchanged. Direct fill_glyph changes need a repaint request
 
 sl::Signal<void(int)> changed;
 ox::Widget target;
-auto id = ox::connect(changed, [](int value, ox::Widget& widget) {
-    widget.enabled = value != 0;
-}, target);
+auto id = ox::Connection{
+    .signal = changed,
+    .slot = [](int value, ox::Widget& widget) { widget.enabled = value != 0; },
+}(target);
 changed(1);
 changed.disconnect(id);
 ```
 
-The signal owns the callback and its captures. connect returns the existing
+Constructing Connection only configures it; invoke it immediately to subscribe.
+The signal owns the callback and its captures. Invoking Connection returns the existing
 SignalsLight identifier for explicit disconnection; it has no destructor behavior.
 Dropping the identifier keeps the slot connected. A disconnected slot returned by
 signal.disconnect can still be called and keeps its captures alive while retained.
@@ -61,7 +63,7 @@ Migration:
 
 | Previous API | Current API |
 | --- | --- |
-| `Connection{.signal = signal, .slot = fn}(widgets...)` | `connect(signal, fn, widgets...)` |
+| Temporary free connect API | `Connection{.signal = signal, .slot = fn}(widgets...)` |
 | `find_align_offset(align, available, used)` | `align_offset(align, available, used)` |
 | Re-arrange Suspended to apply requested_size | `panel.refresh()` |
 | Manual margin subcanvas construction | `fill_outside(canvas, content, glyph)` |

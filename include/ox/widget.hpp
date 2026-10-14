@@ -264,20 +264,25 @@ template <typename SlotFn, WidgetDerived... TrackedWidgets>
     };
 }
 
-/** The signal owns its slot. The identifier allows explicit signal.disconnect(id);
- * discarding it keeps the connection. Tracked targets are borrowed, not owned. */
-template <typename... Args, typename SlotFn, WidgetDerived... TrackedWidgets>
-    requires std::copy_constructible<std::decay_t<SlotFn>> &&
-             std::invocable<SlotFn&, Args const&..., TrackedWidgets&...>
-auto connect(sl::Signal<void(Args...)>& signal, SlotFn&& fn, TrackedWidgets&... widgets)
-    -> sl::Identifier
-{
-    if constexpr (sizeof...(widgets) == 0) {
-        return signal.connect(std::forward<SlotFn>(fn));
+/** Named signal/slot configuration; invoke immediately to make the connection.
+ * The signal owns its slot. Discarding the identifier keeps it connected;
+ * signal.disconnect(id) removes it. Tracked targets are borrowed, not owned. */
+template <typename SignalType, typename SlotType>
+struct [[nodiscard("Use operator() to make the connection.")]] Connection {
+    SignalType& signal;
+    SlotType slot;
+
+    template <WidgetDerived... TrackedWidgets>
+        requires std::copy_constructible<SlotType>
+    auto operator()(TrackedWidgets&... widgets) && -> sl::Identifier
+    {
+        if constexpr (sizeof...(widgets) == 0) {
+            return signal.connect(std::move(slot));
+        }
+        else {
+            return signal.connect(tracked(std::move(slot), widgets...));
+        }
     }
-    else {
-        return signal.connect(tracked(std::forward<SlotFn>(fn), widgets...));
-    }
-}
+};
 
 }  // namespace ox

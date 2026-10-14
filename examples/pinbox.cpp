@@ -83,9 +83,9 @@ class ColorSelect : public Row<std::vector<Button>> {
     {
         for (auto const color : colors) {
             children.push_back({{.label = {.style = {.background = color}}}});
-            connect(
-                children.back().on_press,
-                [color](auto& parent) { parent.on_select(color); }, *this);
+            Connection{
+                .signal = children.back().on_press,
+                .slot = [color](auto& parent) { parent.on_select(color); }}(*this);
         }
     }
 };
@@ -173,36 +173,29 @@ int main()
     auto& clear_btn = get_child<8>(sidebar);
     auto& count = get_child<1>(get_child<6>(sidebar));
 
-    connect(
-        color_select.on_select, [](Color c, auto& pinbox) { pinbox.set_color(c); },
-        pinbox);
+    Connection{.signal = color_select.on_select,
+               .slot = [](Color c, auto& pinbox) { pinbox.set_color(c); }}(pinbox);
 
-    connect(
-        pinbox.pin_inserted,
-        [](Point at, auto& status_bar, auto& count_label) {
-            auto pt_str = std::to_string(at.x) + ", " + std::to_string(at.y);
-            status_bar.text = "Added (" + std::move(pt_str) + ")";
-            count_label.value += 1;
-        },
-        status, count);
+    Connection{.signal = pinbox.pin_inserted,
+               .slot = [](Point at, auto& status_bar, auto& count_label) {
+                   auto pt_str = std::to_string(at.x) + ", " + std::to_string(at.y);
+                   status_bar.text = "Added (" + std::move(pt_str) + ")";
+                   count_label.value += 1;
+               }}(status, count);
 
-    connect(
-        pinbox.pin_removed,
-        [](Point at, auto& status_bar, auto& count_label) {
-            auto pt_str = std::to_string(at.x) + ", " + std::to_string(at.y);
-            status_bar.text = "Removed (" + std::move(pt_str) + ")";
-            count_label.value -= 1;
-        },
-        status, count);
+    Connection{.signal = pinbox.pin_removed,
+               .slot = [](Point at, auto& status_bar, auto& count_label) {
+                   auto pt_str = std::to_string(at.x) + ", " + std::to_string(at.y);
+                   status_bar.text = "Removed (" + std::move(pt_str) + ")";
+                   count_label.value -= 1;
+               }}(status, count);
 
-    connect(
-        clear_btn.on_press,
-        [](auto& pinbox, auto& status_bar, auto& count_label) {
-            pinbox.clear();
-            status_bar.text = "Board Cleared";
-            count_label.value = 0;
-        },
-        pinbox, status, count);
+    Connection{.signal = clear_btn.on_press,
+               .slot = [](auto& pinbox, auto& status_bar, auto& count_label) {
+                   pinbox.clear();
+                   status_bar.text = "Board Cleared";
+                   count_label.value = 0;
+               }}(pinbox, status, count);
 
     return Application{head}.run({.mouse_mode = MouseMode::Drag});
 }
