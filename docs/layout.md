@@ -84,3 +84,8 @@ Tests cover exact fits, shortage, weighted growth, caps, unused space, rounding,
 invalid input, extreme dimensions and weights, randomized allocation invariants,
 and both tuple and dynamic widget layouts. Nested layouts and explicit centered
 sizes are checked separately from the terminal-free calculation tests.
+
+Change `Suspended::requested_size` and call `refresh()` to recompute the child geometry
+without changing parent bounds. Invalid requested dimensions leave child geometry intact.
+Its margins compose `fill_outside(Canvas, Rect, Glyph)`, which can also be used directly
+with parent-local content rectangles and inherited Canvas clips.

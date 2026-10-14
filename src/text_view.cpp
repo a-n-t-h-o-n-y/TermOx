@@ -13,10 +13,9 @@ auto row_origin(TextLayout const& layout, int row, Area size, Align align, Point
     -> Point
 {
     auto const columns = layout.lines()[(std::size_t)row].columns;
-    auto const x =
-        columns < size.width
-            ? find_align_offset(align, size.width, columns) - std::max(scroll.x, 0)
-            : -std::max(scroll.x, 0);
+    auto const x = columns < size.width ? align_offset(align, size.width, columns) -
+                                              std::max(scroll.x, 0)
+                                        : -std::max(scroll.x, 0);
     return {x, row - scroll.y};
 }
 
@@ -47,9 +46,8 @@ auto text_scroll(TextLayout const& layout,
     if (size.width == 0) { scroll.x = 0; }
     else if (columns < size.width) {
         // Leave a cell for the caret when right alignment reaches the final column.
-        scroll.x = point.x + find_align_offset(align, size.width, columns) >= size.width
-                       ? 1
-                       : 0;
+        scroll.x =
+            point.x + align_offset(align, size.width, columns) >= size.width ? 1 : 0;
     }
     else {
         scroll.x = std::clamp(scroll.x, 0, columns);

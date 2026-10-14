@@ -69,7 +69,6 @@ add_library(TermOx STATIC
     include/ox/timer.hpp
     include/ox/widget.hpp
 
-    include/ox/core/common.hpp
     include/ox/core/core.hpp
     include/ox/core/events.hpp
     include/ox/core/glyph.hpp

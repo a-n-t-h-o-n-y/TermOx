@@ -1,15 +1,20 @@
 #include <ox/align.hpp>
 
+#include <stdexcept>
+
 namespace ox {
 
-auto find_align_offset(Align align, int cells_available, int cells_used) -> int
+auto align_offset(Align align, int cells_available, int cells_used) -> int
 {
+    if (cells_available < 0 || cells_used < 0) {
+        throw std::invalid_argument{"Negative alignment extent"};
+    }
     switch (align) {
         case Align::Left: return 0;
         case Align::Center: return (cells_available - cells_used) / 2;
         case Align::Right: return cells_available - cells_used;
     }
-    return 0;
+    throw std::invalid_argument{"Invalid alignment"};
 }
 
 }  // namespace ox

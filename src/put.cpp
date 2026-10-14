@@ -66,6 +66,7 @@ void line(Canvas c,
           std::optional<Style> style,
           std::optional<Color> color)
 {
+    if (style) { validate(*style); }
     if (length < 0) { throw std::invalid_argument{"Negative line length"}; }
     if (length == 0 || ch == U'\0') { return; }
     validate_symbol(c, ch);
@@ -88,6 +89,7 @@ void box(Canvas c,
          std::optional<Color> color)
 {
     validate(size);
+    if (style) { validate(*style); }
     for (auto ch : item.walls) {
         validate_symbol(c, ch);
     }
@@ -137,6 +139,7 @@ void restyle(Canvas c, auto modify)
 
 void fill_symbol(Canvas c, char32_t ch, std::optional<Style> style)
 {
+    if (style) { validate(*style); }
     auto const text = std::u32string_view{&ch, 1};
     auto const width = esc::grapheme_width(text, c.width_policy());
     if (!width || *width == 0) {
@@ -168,6 +171,7 @@ void put(Canvas c, Point at, std::string_view text, Style style)
 void put(Canvas c, Point at, std::u32string_view text, Style style)
 {
     validate_text(text, c.width_policy());
+    validate(style);
     auto x = (std::int64_t)at.x;
     auto const clip = c.visible();
     for (auto cluster : esc::graphemes(text)) {
@@ -257,6 +261,34 @@ void fill(Canvas c, Traits traits)
 {
     restyle(c, [&](Style& s) { s.traits = traits; });
 }
+void fill_outside(Canvas canvas, Rect content, Glyph glyph)
+{
+    auto const inside = intersection({{}, canvas.size()}, content);
+    // Validate even when no margin is visible, before modifying any cells.
+    validate(glyph.style);
+    auto const width = esc::grapheme_width(std::u32string_view{&glyph.symbol, 1},
+                                           canvas.width_policy());
+    if (!width || *width == 0) {
+        throw std::invalid_argument{"Expected a printable fill glyph"};
+    }
+    if (inside.size.width == 0 || inside.size.height == 0) {
+        fill(canvas, glyph);
+        return;
+    }
+    auto const right = inside.at.x + inside.size.width;
+    auto const bottom = inside.at.y + inside.size.height;
+    auto paint = [&](Rect margin) {
+        auto const visible = intersection(canvas.visible(), margin);
+        if (visible.size.width != 0 && visible.size.height != 0) {
+            fill(canvas.subcanvas(margin.at, margin.size), glyph);
+        }
+    };
+    paint({{}, {canvas.size().width, inside.at.y}});
+    paint({{0, bottom}, {canvas.size().width, canvas.size().height - bottom}});
+    paint({{0, inside.at.y}, {inside.at.x, inside.size.height}});
+    paint({{right, inside.at.y}, {canvas.size().width - right, inside.size.height}});
+}
+
 void clear(Canvas c) { fill(c, Glyph{}); }
 void put_text_line(Canvas canvas,
                    Point at,

@@ -11,8 +11,6 @@
 #include <esc/mouse.hpp>
 #include <esc/text.hpp>
 
-#include <ox/core/common.hpp>
-
 namespace ox {
 
 using ::esc::Key;

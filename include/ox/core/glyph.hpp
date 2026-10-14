@@ -30,6 +30,9 @@ using ::esc::Trait;
 using ::esc::Traits;
 namespace colors = ::esc::colors;
 
+/** Reject styles with a valueless color channel before drawing. */
+void validate(Style const& style);
+
 inline auto operator""_gs(char32_t const* str, std::size_t count) -> std::vector<Glyph>
 { return esc::glyphs(std::u32string_view{str, count}); }
 

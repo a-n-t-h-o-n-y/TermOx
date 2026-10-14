@@ -41,7 +41,7 @@ auto Canvas::subcanvas(Point at, Area size) const -> Canvas
 
 auto Canvas::write(Point at, std::u32string_view grapheme, Style style) const -> bool
 {
-    Frame::validate_style(style);
+    validate(style);
     // Validate even clipped input, so visibility never changes text validity.
     auto width = esc::grapheme_width(grapheme, this->width_policy());
     if (!width || *width == 0) {
@@ -53,7 +53,7 @@ auto Canvas::write(Point at, std::u32string_view grapheme, Style style) const ->
 
 auto Canvas::restyle(Point at, Style style) const -> bool
 {
-    Frame::validate_style(style);
+    validate(style);
     if (!this->contains(at)) { return false; }
     return frame_.restyle(this->to_global(at), style, this->global_clip());
 }

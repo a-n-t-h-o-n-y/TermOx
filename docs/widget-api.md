@@ -115,7 +115,10 @@ nonpositive intervals are rejected. A moved-from handle can be stopped or querie
 null without throwing; `view.get()` throws when unavailable. Typed views also reject
 a target whose derived type was lost through slicing. Lifetime storage is private;
 callers cannot replace it or forge a view from a shared pointer. `tracked` and
-`Connection` compose lifetime checks with signal callbacks.
+`connect(signal, callback, widgets...)` compose lifetime checks with signal callbacks.
+The signal owns the slot; dropping its identifier keeps it connected. Tracked targets
+are borrowed, and callback captures remain owned until explicit removal or signal
+destruction. Empty callbacks are rejected.
 
 Child enumeration remains a borrowed range through `get_children()`, supporting both
 tuple and dynamic-container composites without imposing a new ownership model.
@@ -155,3 +158,6 @@ PixelGrid composes `paint_pixels(Canvas, Area, span<RGB const>, Color)` and ordi
 row-major RGB storage. Dimensions and storage are kept consistent; spans permit batch
 edits, and mutation commands request repaint. See [PixelGrid](reference.md#-oxpixelgrid)
 for checked indexing, clipping, move behavior, and migration from the removed Matrix API.
+
+See the [final API audit](api-audit.md) for free signal connections, ownership rules,
+Suspended refresh, shared margin/style drawing, and removed unused declarations.

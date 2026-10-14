@@ -1,16 +1,24 @@
 #pragma once
 
+#include <concepts>
+#include <cstdint>
+#include <functional>
 #include <memory>
 #include <ranges>
 #include <stdexcept>
+#include <tuple>
 #include <type_traits>
+#include <utility>
+#include <vector>
 
 #include <zzz/coro.hpp>
 
 #include <signals_light/signal.hpp>
 
-#include <ox/core/core.hpp>
+#include <ox/core/canvas.hpp>
+#include <ox/core/events.hpp>
 #include <ox/core/layout.hpp>
+#include <ox/timer.hpp>
 
 namespace ox {
 namespace detail {
@@ -159,7 +167,7 @@ class LifetimeView {
 };
 
 template <typename T>
-concept WidgetDerived = std::is_base_of_v<Widget, T>;
+concept WidgetDerived = std::derived_from<std::remove_cv_t<T>, Widget>;
 
 template <WidgetDerived WidgetType>
 auto operator|(WidgetType& w, SizePolicy sp) -> WidgetType&
@@ -199,7 +207,7 @@ inline constexpr auto is_visible =
 /**
  * Create a handle to the lifetime of the given Widget.
  *
- * @details Provides template type deducation convinience.
+ * Views follow moves, reject slicing, and borrow the widget without extending its life.
  */
 template <typename WidgetType>
 [[nodiscard]] auto track(WidgetType& w) -> LifetimeView<WidgetType>
@@ -230,37 +238,46 @@ Timer::Timer(W& widget,
             launch}
 { attach(widget); }
 
-/**
- * Tracks each of the passed in Widget's lifetimes, if they are all valid when this slot
- * is called, it will call the given function with the Widgets as arguments.
- */
+/** Borrow widget identities and append live references to the callback arguments.
+ * Expired/sliced targets suppress invocation. Callbacks run on the dispatch thread.
+ * Captures owned by the callback remain alive until the callback is removed. */
 template <typename SlotFn, WidgetDerived... TrackedWidgets>
 [[nodiscard]] auto tracked(SlotFn&& fn, TrackedWidgets&... widgets)
 {
-    // TODO constraint?
-    return [fn = std::forward<SlotFn>(fn),
-            ... lifetimes = track(widgets)](auto&&... args) mutable {
-        if ((lifetimes.valid() && ...)) {
-            std::invoke(fn, std::forward<decltype(args)>(args)..., lifetimes.get()...);
+    if constexpr (requires { static_cast<bool>(fn); }) {
+        if (!static_cast<bool>(fn)) {
+            throw std::invalid_argument{"Tracked callback is empty"};
         }
+    }
+    return [fn = std::forward<SlotFn>(fn),
+            ... lifetimes = track(widgets)](auto&&... args) mutable
+        requires std::invocable<SlotFn&, decltype(args)..., TrackedWidgets&...>
+    {
+        auto pointers = std::tuple{lifetimes.try_get()...};
+        std::apply(
+            [&](auto*... pointer) {
+                if (((pointer != nullptr) && ...)) {
+                    std::invoke(fn, std::forward<decltype(args)>(args)..., *pointer...);
+                }
+            },
+            pointers);
     };
 }
 
-/**
- * Enables designated initializers and Lifetime tracking for Signal/Slot connections.
- * @details Use operator() immediately to connect and track Widgets if needed.
- */
-template <typename SignalType, typename SlotType>
-struct [[nodiscard("Use operator() to make actual connection.")]] Connection {
-    SignalType& signal;
-    SlotType slot;
-
-    /**
-     * This must be called in order to make the connection.
-     */
-    template <typename... TrackedWidgets>
-    auto operator()(TrackedWidgets&... to_track) && -> sl::Identifier
-    { return signal.connect(tracked(slot, to_track...)); }
-};
+/** The signal owns its slot. The identifier allows explicit signal.disconnect(id);
+ * discarding it keeps the connection. Tracked targets are borrowed, not owned. */
+template <typename... Args, typename SlotFn, WidgetDerived... TrackedWidgets>
+    requires std::copy_constructible<std::decay_t<SlotFn>> &&
+             std::invocable<SlotFn&, Args const&..., TrackedWidgets&...>
+auto connect(sl::Signal<void(Args...)>& signal, SlotFn&& fn, TrackedWidgets&... widgets)
+    -> sl::Identifier
+{
+    if constexpr (sizeof...(widgets) == 0) {
+        return signal.connect(std::forward<SlotFn>(fn));
+    }
+    else {
+        return signal.connect(tracked(std::forward<SlotFn>(fn), widgets...));
+    }
+}
 
 }  // namespace ox

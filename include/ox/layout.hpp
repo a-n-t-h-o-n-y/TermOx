@@ -288,29 +288,18 @@ class Suspended : public Widget {
    public:
     auto paint(Canvas c) -> Cursor override
     {
-        // Paint the four margins through clipped child views.
-        auto const right = child.at().x + child.size().width;
-        auto const bottom = child.at().y + child.size().height;
-        fill(c.subcanvas({0, 0}, {std::max(child.at().x, 0), c.size().height}),
-             fill_glyph);
-        fill(c.subcanvas({right, 0},
-                         {std::max(c.size().width - right, 0), c.size().height}),
-             fill_glyph);
-        fill(c.subcanvas({child.at().x, 0},
-                         {child.size().width, std::max(child.at().y, 0)}),
-             fill_glyph);
-        fill(c.subcanvas({child.at().x, bottom},
-                         {child.size().width, std::max(c.size().height - bottom, 0)}),
-             fill_glyph);
+        fill_outside(c, child.bounds(), fill_glyph);
 
         return {};
     }
 
    protected:
-    void on_arrange(Rect) override
-    { arrange(child, centered_rect(size(), requested_size)); }
+    void on_arrange(Rect) override { refresh(); }
 
    public:
+    /** Recompute geometry after changing requested_size; notify even if unchanged. */
+    void refresh() { arrange(child, centered_rect(size(), requested_size)); }
+
     auto get_children() -> zzz::Generator<Widget&> override { co_yield child; }
 
     auto get_children() const -> zzz::Generator<Widget const&> override

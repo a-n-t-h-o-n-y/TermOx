@@ -352,89 +352,28 @@ not detected by tree synchronization. Geometry and focus cannot be written direc
 Move operations transfer lifetime tracking; assignment invalidates the overwritten
 identity. `track(widget)` provides safe lookup without exposing lifetime storage.
 
-## 📦 ox::Connection
+## 📦 ox::connect
 
 [`#include <ox/widget.hpp>`](../include/ox/widget.hpp)
 
 ```cpp
-template <typename SignalType, typename SlotType>
-struct Connection;
+auto id = ox::connect(numberpad.on_press,
+    [](int n, auto& total_label) { total_label.value += n; }, total_label);
+// Optional explicit disconnection:
+numberpad.on_press.disconnect(id);
 ```
 
-This struct is provided to make connecting `sl::Signal`s and `sl::Slot`s clearer.
+`connect(signal, callback, widgets...)` connects a void-returning signal to a callback.
+Signal arguments come first, followed by references to tracked widgets. Tracking borrows
+identity, follows moves, permits const targets, and suppresses invocation after
+destruction, overwrite, or slicing. Empty callbacks are rejected before subscription.
+Calls and widget mutations belong to the application thread.
 
-```cpp
-// Increment the total_label's value each time the numberpad is pressed.
-Connection{
-    .signal = numberpad.on_press,
-    .slot = [](int n, auto& total_label) { total_label.value += n; },
-}(total_label);
-
-// numberpad.on_press is a sl::Signal<void(int)>, passing on the value to increment by.
-
-// The slot is a function that takes that passed in value to increment by and a
-// reference to the totals label.
-
-// The total_label object has its lifetime tracked by passing it to Connection::op(),
-// which will make sure the Slot receives it as a parameter if the object is still valid
-```
-
-<details>
-<summary><strong>Details</strong></summary>
-
-TermOx uses the [SignalsLight](https://github.com/a-n-t-h-o-n-y/signals-light) Library
-to provide a Signal/Slot mechanism. A Signal is anything a Widget wants to 'emit' or let
-others know about. For example the `Button` Widget provides a `sl::Signal<void()>
-on_press` signal that is 'emitted' each time the left mouse button is pressed. Any other
-Widget that has access to the Button can then connect a function (Slot) to this Signal
-to be invoked whenever that button is pressed. Because signals are being sent between
-Widgets, you might want to make sure a Slot does not reference a dangling Widget
-reference, so lifetime tracking is provided. This struct attempts to package all of that
-into a single call site.
-
-This struct allows for designated initilizer syntax so the `signal` and `slot` members
-can be explicitly identified in code.
-
-The `operator()` overload provides a way to track Widget lifetimes, Slots tend to need
-to capture Widgets to operate on, if references are stored in lambda captures, those
-references may be left dangling when a Widget is moved from. With `operator()`, you get
-lifetime tracking and the tracked widgets are passed into the connected Slot as function
-parameters if they are valid, otherwise the Slot is not invoked.
-
-```cpp
-template <typename SignalType, typename SlotType>
-struct Connection {
-    SignalType& signal;
-    SlotType slot;
-
-    template <typename... TrackedWidgets>
-    auto operator()(TrackedWidgets&... to_track) && -> sl::Identifier;
-};
-```
-
----
-
-### Connection::operator()
-
-```cpp
-template <typename... TrackedWidgets>
-auto Connection::operator()(TrackedWidgets&... to_track) && -> sl::Identifier;
-```
-
-Make the connection and pass any tracked Widgets into the connection. If any of these
-tracked Widgets is not valid, the Slot will not be invoked. If they are all valid, the
-Slot will be invoked with the parameters from the Signal first, then the tracked Widgets
-after.
-
-Must be called to actually make the connection of the Slot to the Signal even if nothing
-is being tracked. A warning should be issued by the compiler if this is not called.
-
-The returned `sl::Identifier` can be used to disconnect the Slot from the Signal. Any
-number of Slots can be connected to the same Signal.
-
----
-
-</details>
+The signal owns its callback. Discarding the returned `sl::Identifier` leaves the
+connection active; it is not an RAII handle. The callback's captures remain owned until
+the signal disconnects the slot or is destroyed, even when a tracked target expires.
+Explicit disconnection returns the slot; retaining that slot retains its captures.
+The temporary Connection wrapper has been removed.
 
 ## 🔢 ox::FocusPolicy
 
@@ -524,7 +463,7 @@ if (auto* target = view.try_get()) { target->enabled = false; }
 ```
 
 `tracked(callback, widgets...)` invokes a callback only while every target is valid,
-passing tracked widgets after the invocation's ordinary arguments. `Connection`
+passing tracked widgets after the invocation's ordinary arguments. `connect`
 combines this with signal connection. Views and widget mutation belong to the
 application thread.
 
@@ -532,29 +471,16 @@ application thread.
 
 [`#include <ox/align.hpp>`](../include/ox/align.hpp)
 
-```cpp
-enum class Align;
-enum class VAlign;
-```
-
-Describes horizontal (`Align`) or vertical (`VAlign`) alignment of text. Used by various
-Widgets.
+`Align` describes horizontal text alignment: `Left`, `Center`, or `Right`.
 
 ```cpp
 Label{{.text = "Hello", .align = Align::Center}};
+auto offset = align_offset(Align::Center, 10, 4); // 3 terminal columns.
 ```
 
-<details>
-<summary><strong>Details</strong></summary>
-
-```cpp
-enum class Align : std::uint8_t { Left, Center, Right };
-
-enum class VAlign : std::uint8_t { Top, Middle, Bottom };
-```
----
-
-</details>
+`align_offset` requires nonnegative available/used terminal-column counts. Oversized
+content can produce a negative offset. Invalid enum values throw `std::invalid_argument`.
+The unused VAlign enum has been removed; centered layout geometry uses `centered_rect`.
 
 ## 🧩 Mouse Events
 
@@ -1224,7 +1150,9 @@ explicit Suspended(ChildType&& child, Area requested, Glyph fill = {U' '});
 ```
 
 The constructor takes a child, a requested size, and a fill glyph for the surrounding
-margins. Change `requested_size` before the next layout to update its dimensions.
+margins. Change `requested_size` and call `refresh()` to update its dimensions.
+Refresh validates before changing child geometry and notifies the child even when
+geometry is unchanged. Painting composes `fill_outside(canvas, child.bounds(), fill_glyph)`.
 
 ### Public Objects
 

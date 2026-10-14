@@ -249,10 +249,10 @@ int main()
         } | SizePolicy::fixed(1),
     };
 
-    Connection{
-        .signal = get_child(get_child<0>(head)).score_update,
-        .slot = [](int score, auto& int_label) { int_label.value = score; },
-    }(get_child<1>(get_child(get_child<1>(head))));
+    connect(
+        get_child(get_child<0>(head)).score_update,
+        [](int score, auto& int_label) { int_label.value = score; },
+        get_child<1>(get_child(get_child<1>(head))));
 
     return Application{head}.run();
 }

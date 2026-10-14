@@ -6,16 +6,15 @@ namespace ox {
 
 enum class Align : std::uint8_t { Left, Center, Right };
 
-enum class VAlign : std::uint8_t { Top, Middle, Bottom };
-
 /**
- * Return the horizontal offset from the left side of the area to align the given width.
+ * Return the horizontal offset in terminal columns. Nonnegative extents are required;
+ * oversized content can produce a negative offset.
  *
  * @param align The alignment to use.
  * @param cells_available The total number of cells available to put Glyphs to.
- * @param cells_used The number of Glyphs to put in the available cells.
+ * @param cells_used The number of terminal columns used by the content.
  */
 [[nodiscard]]
-auto find_align_offset(Align align, int cells_available, int cells_used) -> int;
+auto align_offset(Align align, int cells_available, int cells_used) -> int;
 
 }  // namespace ox

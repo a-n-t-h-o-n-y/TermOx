@@ -41,7 +41,7 @@ void put_label(Canvas canvas,
         used += (int)length;
         end += cluster.size();
     }
-    auto const offset = find_align_offset(align, available, used);
+    auto const offset = align_offset(align, available, used);
     auto const prefix = std::u32string_view{unicode}.substr(0, end);
     if (!vertical) { put(canvas, {offset, canvas.size().height / 2}, prefix, style); }
     else {

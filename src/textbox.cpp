@@ -133,12 +133,15 @@ void link(TextBox& tb, ScrollBar& sb)
                       box.scroll_offset().y);
     };
     synchronize(tb, sb);
-    Connection{.signal = tb.on_scroll,
-               .slot = [synchronize](int, int, int, TextBox& box, ScrollBar& bar) {
-                   synchronize(box, bar);
-               }}(tb, sb);
-    Connection{.signal = sb.on_scroll, .slot = [](int, TextBox& box, ScrollBar& bar) {
-                   box.set_scroll_offset(bar.position);
-               }}(tb, sb);
+    connect(
+        tb.on_scroll,
+        [synchronize](int, int, int, TextBox& box, ScrollBar& bar) {
+            synchronize(box, bar);
+        },
+        tb, sb);
+    connect(
+        sb.on_scroll,
+        [](int, TextBox& box, ScrollBar& bar) { box.set_scroll_offset(bar.position); },
+        tb, sb);
 }
 }  // namespace ox

@@ -259,8 +259,8 @@ void DataTable::paint_cell(Canvas canvas,
     cell_layout_.update(text, width, TextWrap::None, canvas.width_policy());
     auto const columns = cell_layout_.lines().front().columns;
     if (columns <= width) {
-        put_text_line(canvas, {find_align_offset(align, width, columns), 0},
-                      cell_layout_, 0, appearance, appearance);
+        put_text_line(canvas, {align_offset(align, width, columns), 0}, cell_layout_, 0,
+                      appearance, appearance);
         return;
     }
     auto const marker = esc::grapheme_width(U"…", canvas.width_policy());
@@ -422,18 +422,22 @@ void link(DataTable& table, ScrollBar& bar)
                       bar.vertical ? at.y : at.x);
     };
     synchronize(table, bar);
-    Connection{.signal = table.on_scroll,
-               .slot = [synchronize](Point, Area, Area, DataTable& table,
-                                     ScrollBar& bar) { synchronize(table, bar); }}(
+    connect(
+        table.on_scroll,
+        [synchronize](Point, Area, Area, DataTable& table, ScrollBar& bar) {
+            synchronize(table, bar);
+        },
         table, bar);
-    Connection{.signal = bar.on_scroll,
-               .slot = [](int, DataTable& table, ScrollBar& bar) {
-                   auto at = table.scroll_offset();
-                   if (bar.vertical) { at.y = bar.position; }
-                   else {
-                       at.x = bar.position;
-                   }
-                   table.set_scroll_offset(at);
-               }}(table, bar);
+    connect(
+        bar.on_scroll,
+        [](int, DataTable& table, ScrollBar& bar) {
+            auto at = table.scroll_offset();
+            if (bar.vertical) { at.y = bar.position; }
+            else {
+                at.x = bar.position;
+            }
+            table.set_scroll_offset(at);
+        },
+        table, bar);
 }
 }  // namespace ox

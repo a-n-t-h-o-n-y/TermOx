@@ -195,19 +195,20 @@ void put(Canvas c, Point at, Character auto item) { put(c, at, item | Style{}); 
 
 void put(Canvas c, Point at, std::span<Glyph const> item, StylePatch patch = {});
 
-void put(Canvas c, Point at, GlyphRange auto const& item)
+void put(Canvas c, Point at, GlyphRange auto const& item, StylePatch patch = {})
 {
     if constexpr (std::ranges::contiguous_range<decltype(item)> &&
                   std::ranges::sized_range<decltype(item)>) {
         put(c, at,
-            std::span<Glyph const>{std::ranges::data(item), std::ranges::size(item)});
+            std::span<Glyph const>{std::ranges::data(item), std::ranges::size(item)},
+            patch);
     }
     else {
         auto glyphs = std::vector<Glyph>{};
         for (auto const& glyph : item) {
             glyphs.push_back(glyph);
         }
-        put(c, at, std::span<Glyph const>{glyphs});
+        put(c, at, std::span<Glyph const>{glyphs}, patch);
     }
 }
 
@@ -265,6 +266,9 @@ void fill(Canvas c, char32_t ch);
 void fill(Canvas c, ColorBG bg);
 void fill(Canvas c, ColorFG fg);
 void fill(Canvas c, Traits ts);
+
+/** Fill the visible area outside a parent-local content rectangle. */
+void fill_outside(Canvas canvas, Rect content, Glyph glyph = {});
 
 void clear(Canvas c);
 

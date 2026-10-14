@@ -30,7 +30,7 @@ auto cell_count(ox::Area size) -> std::size_t
 }  // namespace
 
 namespace ox {
-void Frame::validate_style(Style const& style)
+void validate(Style const& style)
 {
     if (style.background.valueless_by_exception() ||
         style.foreground.valueless_by_exception()) {
@@ -175,7 +175,7 @@ void Frame::changed(int row)
 
 void Frame::clear(Style style)
 {
-    validate_style(style);
+    validate(style);
     for (int y = 0; y < size_.height; ++y) {
         changed(y);
     }
@@ -194,7 +194,7 @@ auto Frame::write(Point at, std::u32string_view grapheme, Style style) -> bool
 auto Frame::write(Point at, std::u32string_view grapheme, Style style, Rect clip)
     -> bool
 {
-    validate_style(style);
+    validate(style);
     auto const width = esc::grapheme_width(grapheme, this->width_policy());
     if (!width || *width == 0) {
         throw std::invalid_argument{"Expected a printable grapheme"};
@@ -234,7 +234,7 @@ auto Frame::write(Point at, std::u32string_view grapheme, Style style, Rect clip
 
 auto Frame::restyle(Point at, Style style, Rect clip) -> bool
 {
-    validate_style(style);
+    validate(style);
     clip = intersection(clip, Rect{{0, 0}, size_});
     if (!contains(clip, at)) { return false; }
     auto const lead = this->lead_at(at);

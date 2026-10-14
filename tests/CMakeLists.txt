@@ -1,4 +1,5 @@
 add_executable(TermOx.tests.unit EXCLUDE_FROM_ALL
+    audit.test.cpp
     controls.test.cpp
     decorations.test.cpp
     pixelgrid.test.cpp

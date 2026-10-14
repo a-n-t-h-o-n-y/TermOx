@@ -70,7 +70,6 @@ class Frame {
 
     auto write(Point at, std::u32string_view grapheme, Style style, Rect clip) -> bool;
     auto restyle(Point at, Style style, Rect clip) -> bool;
-    static void validate_style(Style const& style);
     auto index(Point point) const -> std::size_t;
 };
 }  // namespace ox

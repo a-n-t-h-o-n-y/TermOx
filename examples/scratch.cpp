@@ -12,10 +12,9 @@ int main()
         TextBox{{.focus_policy = FocusPolicy::Strong}},
     };
     auto& [rg, tb] = head.children;
-    Connection{
-        .signal = rg.on_select,
-        .slot = [](std::string const& selection, auto& tb) { tb.set_text(selection); },
-    }(tb);
+    connect(
+        rg.on_select,
+        [](std::string const& selection, auto& tb) { tb.set_text(selection); }, tb);
 
     return Application{head}.run();
 }
