@@ -243,17 +243,17 @@ int main(int argc, char** argv)
     ascii.width_policy = SizePolicy::fixed(12);
     auto toolbar = Row{std::tie(brand, theme_choice, motion, ascii)};
     panel_height(toolbar, 1);
-    auto intro = caption("Precise interaction. Expressive, character by character.");
+    auto intro = caption("Widget examples");
     auto status = caption("Ready");
     auto log = LogView{{.max_lines = 200}};
     panel_height(log, 8);
 
     // Overview: shared motion, live semantic values, composition, and palette roles.
-    auto hero = title("Built for the grid.");
-    auto summary = TextBox{
-        {.text = "Copper accents, open-ended focus marks and quiet surfaces. Every "
-                 "control below is live. Explore with the keyboard or mouse.",
-         .read_only = true}};
+    auto hero = title("Progress and values");
+    auto summary =
+        TextBox{{.text = "Run the animation, adjust the value, or open a dialog. "
+                         "Use the toolbar to change the theme and motion settings.",
+                 .read_only = true}};
     summary.focus_policy = FocusPolicy::None;
     panel_height(summary, 3);
     auto run = Button{
@@ -285,13 +285,13 @@ int main(int argc, char** argv)
     auto left =
         Column{std::tie(hero, summary, actions, meter_row, tuning, activity_row)};
     left.gap = 1;
-    auto palette_heading = title("Color with a purpose");
+    auto palette_heading = title("Theme colors");
     auto palette = PaletteView{};
-    auto signal_heading = title("Motion, held to the grid");
+    auto signal_heading = title("Animation");
     auto signal = SignalView{};
     auto signal_note =
-        TextBox{{.text = "Values change immediately. Presentation settles in place. No "
-                         "moving text, no delayed input.",
+        TextBox{{.text = "Run sequence animates the graph and progress bar. "
+                         "Disable Motion to update them without transitions.",
                  .read_only = true}};
     signal_note.focus_policy = FocusPolicy::None;
     panel_height(signal_note, 3);
@@ -338,7 +338,7 @@ int main(int argc, char** argv)
     auto form_actions = Row{std::tie(submit, reset)};
     form_actions.gap = 2;
     panel_height(form_actions, 1);
-    auto controls_title = title("Small controls. Clear states.");
+    auto controls_title = title("Form controls");
     auto controls_note =
         caption("Enter commits numbers. Ctrl+Enter validates the form.");
     auto controls_content =
@@ -401,12 +401,11 @@ int main(int argc, char** argv)
     link(table, table_horizontal);
 
     // Grapheme-safe editing, selection, clipboard, wrapping, and vertical labels.
-    auto text_heading = title("Text keeps its shape");
-    auto text_note =
-        caption("Select, copy, paste, undo. Unicode moves as complete graphemes.");
+    auto text_heading = title("Text editing");
+    auto text_note = caption("Selection, clipboard, undo, and Unicode text");
     auto editor = TextBox{
         {.text =
-             "A terminal is a grid, not a limitation.\n\nTry wide text: 界 "
+             "Editable sample text.\n\nTry wide text: 界 "
              "日本語\nCombining text: café\nEmoji clusters: 👩‍💻\n\nSelect "
              "with "
              "Shift+arrows.\nCtrl+A selects all. Ctrl+Z undoes.\nLong lines wrap while "
@@ -465,8 +464,8 @@ int main(int argc, char** argv)
         }
 
     auto picker = FilePicker{};
-    auto file_heading = title("Explore the filesystem");
-    auto picked = caption("Choose a file to publish its path to the application.");
+    auto file_heading = title("File picker");
+    auto picked = caption("Choose a file to display its path.");
     auto files_content = Column{std::tie(file_heading, picker, picked)};
     files_content.gap = 1;
     auto files = ScrollView{View{files_content}};
@@ -476,10 +475,8 @@ int main(int argc, char** argv)
                                               "Graphics", "Files"}};
 
     // Overlays remain ordinary widgets with modal focus and keyboard routing.
-    auto dialog_text = TextBox{
-        {.text =
-             "A modal surface with scoped focus. Enter a note, then accept or cancel.",
-         .read_only = true}};
+    auto dialog_text =
+        TextBox{{.text = "Enter a note, then accept or cancel.", .read_only = true}};
     dialog_text.focus_policy = FocusPolicy::None;
     panel_height(dialog_text, 3);
     auto dialog_input = LineEdit{{.placeholder = "A short note"}};
@@ -490,7 +487,7 @@ int main(int argc, char** argv)
     panel_height(dialog_actions, 1);
     auto dialog_body = Column{std::tie(dialog_text, dialog_input, dialog_actions)};
     dialog_body.gap = 1;
-    auto dialog = Dialog{View{dialog_body}, "A little room to focus"};
+    auto dialog = Dialog{View{dialog_body}, "Dialog"};
     dialog.requested_size = Area{54, 10};
     auto commands = CommandPalette{};
     auto command_dialog = Dialog{View{commands}, "Commands"};
