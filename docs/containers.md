@@ -64,3 +64,6 @@ disconnected pending slots are skipped, and destroying the signal safely cancels
 callbacks. Mutable callbacks retain their state between emissions; copies own independent
 callback state. TermOx vendors this implementation in `external/signals-light`. Named
 Connection configuration and borrowed lifetime tracking remain unchanged.
+
+See [selection and application structure](selection-and-application.md) for ListView,
+Select/ComboBox, Tabs, root overlays, menus, dialogs, modal scopes, and scoped shortcuts.

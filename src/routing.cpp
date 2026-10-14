@@ -4,12 +4,14 @@
 
 namespace ox {
 namespace {
-void append_tree(std::vector<WidgetNode>& tree,
-                 Widget& widget,
-                 std::optional<std::size_t> parent,
-                 Point origin,
-                 Rect clip,
-                 bool input)
+void append_tree(
+    std::vector<WidgetNode>& tree,
+    Widget& widget,
+    std::optional<std::size_t> parent,
+    Point origin,
+    Rect clip,
+    bool input,
+    std::vector<std::tuple<LifetimeView<Widget>, bool, bool, std::size_t>>& overlays)
 {
     validate(widget.size());
     auto const bounds = Rect{origin, widget.size()};
@@ -19,7 +21,15 @@ void append_tree(std::vector<WidgetNode>& tree,
     auto const index = tree.size();
     tree.push_back({track(widget), parent, 0, bounds, visible, input});
     for (auto& child : widget.get_children()) {
-        append_tree(tree, child, index, translate(origin, child.at()), visible, input);
+        if (child.overlay) {
+            overlays.push_back({track(child), input,
+                                visible.size.width > 0 && visible.size.height > 0,
+                                index});
+        }
+        else {
+            append_tree(tree, child, index, translate(origin, child.at()), visible,
+                        input, overlays);
+        }
     }
     tree[index].end = tree.size();
 }
@@ -35,7 +45,42 @@ auto widget_tree(Widget& root) -> std::vector<WidgetNode>
 void widget_tree(Widget& root, std::vector<WidgetNode>& tree)
 {
     tree.clear();
-    append_tree(tree, root, {}, {0, 0}, {{0, 0}, root.size()}, true);
+    auto overlays =
+        std::vector<std::tuple<LifetimeView<Widget>, bool, bool, std::size_t>>{};
+    auto const clip = Rect{{}, root.size()};
+    append_tree(tree, root, {}, {}, clip, true, overlays);
+    for (std::size_t i = 0; i < overlays.size(); ++i) {
+        std::stable_sort(overlays.begin() + (std::ptrdiff_t)i, overlays.end(),
+                         [](auto const& a, auto const& b) {
+                             auto* x = std::get<0>(a).try_get();
+                             auto* y = std::get<0>(b).try_get();
+                             return (x ? x->overlay_order : 0) <
+                                    (y ? y->overlay_order : 0);
+                         });
+        auto const [target, input, show, parent] = overlays[i];
+        if (auto* widget = target.try_get()) {
+            append_tree(tree, *widget, parent, widget->at(), show ? clip : Rect{},
+                        input, overlays);
+        }
+    }
+    tree[0].end = tree.size();
+    auto active = std::optional<std::size_t>{};
+    for (std::size_t i = 0; i < tree.size(); ++i) {
+        auto const& n = tree[i];
+        if (n.input && n.visible.size.width && n.visible.size.height &&
+            n.widget.valid() && n.widget.get().modal) {
+            active = i;
+        }
+    }
+    if (active) {
+        for (std::size_t i = 0; i < tree.size(); ++i) {
+            auto ancestor = std::optional<std::size_t>{i};
+            while (ancestor && ancestor != active) {
+                ancestor = tree[*ancestor].parent;
+            }
+            if (!ancestor) { tree[i].input = false; }
+        }
+    }
 }
 
 auto hit_test(std::span<WidgetNode const> tree, Point point)

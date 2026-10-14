@@ -69,6 +69,13 @@ class RadioGroup : public Widget {
 
     auto handle(MousePress const& m) -> EventResponse override;
 
+    auto handle(MouseWheel const&) -> EventResponse override;
+    auto scroll_offset() const -> int { return scroll_; }
+    auto set_scroll_offset(int) -> bool;
+    auto item_enabled(std::size_t index) const -> bool
+    { return enabled_items_.at(index); }
+    void set_item_enabled(std::size_t, bool);
+    void refresh() override;
     auto focus_in() -> EventResponse override;
 
     auto focus_out() -> EventResponse override;
@@ -78,6 +85,11 @@ class RadioGroup : public Widget {
     std::optional<std::size_t> selected_;
     std::optional<std::size_t> highlighted_;
     mutable std::vector<TextLayout> measure_layouts_;
+    std::vector<bool> enabled_items_;
+    int scroll_ = 0;
+
+   protected:
+    void on_arrange(Rect) override;
 };
 
 }  // namespace ox

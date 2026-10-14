@@ -11,6 +11,7 @@
 #include <ox/put.hpp>
 #include <ox/scroll.hpp>
 #include <ox/scrollbar.hpp>
+#include <ox/selection.hpp>
 
 namespace {
 void check_text(std::string_view text)
@@ -250,30 +251,7 @@ void DataTable::paint_cell(Canvas canvas,
                            std::string_view text,
                            Align align,
                            Style appearance)
-{
-    fill(canvas, appearance);
-    auto const width = canvas.size().width;
-    if (width == 0 || canvas.visible().size.width == 0 ||
-        canvas.visible().size.height == 0) {
-        return;
-    }
-    cell_layout_.update(text, width, TextWrap::None, canvas.width_policy());
-    auto const columns = cell_layout_.lines().front().columns;
-    if (columns <= width) {
-        put_text_line(canvas, {align_offset(align, width, columns), 0}, cell_layout_, 0,
-                      appearance, appearance);
-        return;
-    }
-    auto const marker = esc::grapheme_width(U"…", canvas.width_policy());
-    if (!marker || *marker == 0 || *marker > (std::size_t)width) {
-        put_text_line(canvas, {}, cell_layout_, 0, appearance, appearance);
-        return;
-    }
-    auto const remaining = width - (int)*marker;
-    put_text_line(canvas.subcanvas({}, {remaining, 1}), {}, cell_layout_, 0, appearance,
-                  appearance);
-    put(canvas, {remaining, 0}, U"…", appearance);
-}
+{ paint_row_text(canvas, text, align, appearance, cell_layout_); }
 auto DataTable::measure(Area available, esc::WidthPolicy) const -> Area
 {
     validate(available);
@@ -294,9 +272,7 @@ auto DataTable::paint(Canvas canvas) -> Cursor
     fill(canvas, style);
     auto const header = header_height();
     auto const body = canvas.subcanvas({0, header}, viewport_);
-    auto const clip = body.visible();
-    auto const first = offset_.y + clip.at.y;
-    auto const last = std::min(content_.height, first + clip.size.height);
+    auto const [first, last] = visible_rows(body, offset_.y, rows_.size());
     auto x = -(std::int64_t)offset_.x;
     for (std::size_t column = 0; column < columns_.size(); ++column) {
         if (x > std::numeric_limits<int>::max()) { break; }
@@ -363,32 +339,14 @@ auto DataTable::handle(KeyEvent const& event) -> EventResponse
              offset_.y});
         return {.handled = true, .repaint = changed};
     }
-    auto delta = 0;
-    if (matches(KeyCode::ArrowUp)) { delta = -1; }
-    else if (matches(KeyCode::ArrowDown)) {
-        delta = 1;
-    }
-    else if (matches(KeyCode::PageUp)) {
-        delta = -std::max(1, viewport_.height);
-    }
-    else if (matches(KeyCode::PageDown)) {
-        delta = std::max(1, viewport_.height);
-    }
-    else if (matches(KeyCode::Home)) {
-        delta = -std::numeric_limits<int>::max();
-    }
-    else if (matches(KeyCode::End)) {
-        delta = std::numeric_limits<int>::max();
-    }
-    else {
-        return {};
-    }
+    if (event.modifiers != Modifiers{}) { return {}; }
+    auto const movement = row_navigation(event, viewport_.height);
+    if (!movement) { return {}; }
+    auto const delta = *movement;
     if (rows_.empty()) { return {}; }
     auto changed = false;
     if (selectable) {
-        auto index = selected_;
-        (void)move_selection(index, rows_.size(), delta);
-        if (!selected_ && matches(KeyCode::End)) { index = rows_.size() - 1; }
+        auto const index = row_target(selected_, rows_.size(), delta);
         changed = select(index);
     }
     else {

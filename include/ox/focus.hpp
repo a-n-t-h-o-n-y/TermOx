@@ -29,5 +29,6 @@ class Focus {
     LifetimeView<Widget> in_focus_;
     bool recover_ = true;
     std::size_t revision_ = 0;
+    std::vector<std::pair<LifetimeView<Widget>, LifetimeView<Widget>>> scopes_;
 };
 }  // namespace ox

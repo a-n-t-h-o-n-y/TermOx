@@ -7,7 +7,7 @@
 
 namespace ox {
 
-/** Unmodified Enter/Space presses and repeats, or the left mouse button. */
+/** Unmodified Enter/Space presses, or the left mouse button. */
 [[nodiscard]] auto activates(KeyEvent const& event) -> bool;
 [[nodiscard]] auto activates(MousePress const& event) -> bool;
 /** Release matching an activation key, or left/unspecified mouse button. */

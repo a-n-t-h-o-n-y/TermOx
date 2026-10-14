@@ -7,6 +7,8 @@
 #include <ox/controls.hpp>
 #include <ox/label.hpp>
 #include <ox/put.hpp>
+#include <ox/scroll.hpp>
+#include <ox/selection.hpp>
 #include <ox/text_view.hpp>
 
 namespace ox {
@@ -21,6 +23,10 @@ RadioGroup::RadioGroup(Options x)
       items_{std::move(x.items)},
       selected_{x.selected_index}
 {
+    for (auto const& text : items_) {
+        validate_row_text(text);
+    }
+    enabled_items_.assign(items_.size(), true);
     if (selected_ && *selected_ >= items_.size()) {
         throw std::out_of_range{"Radio selection"};
     }
@@ -36,7 +42,9 @@ RadioGroup::RadioGroup(RadioGroup&& other)
       items_{std::move(other.items_)},
       selected_{std::exchange(other.selected_, std::nullopt)},
       highlighted_{std::exchange(other.highlighted_, std::nullopt)},
-      measure_layouts_{std::move(other.measure_layouts_)}
+      measure_layouts_{std::move(other.measure_layouts_)},
+      enabled_items_{std::move(other.enabled_items_)},
+      scroll_{std::exchange(other.scroll_, 0)}
 {}
 auto RadioGroup::operator=(RadioGroup&& other) -> RadioGroup&
 {
@@ -51,6 +59,8 @@ auto RadioGroup::operator=(RadioGroup&& other) -> RadioGroup&
     selected_ = std::exchange(other.selected_, std::nullopt);
     highlighted_ = std::exchange(other.highlighted_, std::nullopt);
     measure_layouts_ = std::move(other.measure_layouts_);
+    enabled_items_ = std::move(other.enabled_items_);
+    scroll_ = std::exchange(other.scroll_, 0);
     return *this;
 }
 auto RadioGroup::select(std::optional<std::size_t> index) -> bool
@@ -58,10 +68,19 @@ auto RadioGroup::select(std::optional<std::size_t> index) -> bool
     if (index && *index >= items_.size()) {
         throw std::out_of_range{"Radio selection"};
     }
+    if (index && !enabled_items_[*index]) { return false; }
     auto const changed = selected_ != index;
+    auto const old_scroll = scroll_;
+    if (index) {
+        scroll_ =
+            scroll_to_show(scroll_, (int)*index, 1, (int)items_.size(), size().height);
+    }
     if (index) { highlighted_ = index; }
     selected_ = index;
-    if (!changed) { return false; }
+    if (!changed) {
+        if (old_scroll != scroll_) { request_repaint(); }
+        return old_scroll != scroll_;
+    }
     request_repaint();
     on_select(index);
     return true;
@@ -75,7 +94,10 @@ void RadioGroup::set_items(std::vector<std::string> replacement)
     }
     auto const changed = selected_.has_value();
     request_layout();
+    auto enabled = std::vector<bool>(replacement.size(), true);
     items_.swap(replacement);
+    enabled_items_.swap(enabled);
+    scroll_ = 0;
     selected_.reset();
     highlighted_.reset();
     request_repaint();
@@ -106,13 +128,16 @@ auto RadioGroup::measure(Area available, esc::WidthPolicy policy) const -> Area
 
 auto RadioGroup::paint(Canvas canvas) -> Cursor
 {
-    auto const clip = canvas.visible();
-    for (auto y = clip.at.y;
-         (std::size_t)y < items_.size() && y < clip.at.y + clip.size.height; ++y) {
-        auto const& glyphs = selected_ == (std::size_t)y ? on : off;
-        auto patch = is_focused() && highlighted_ == (std::size_t)y ? focused_style
-                                                                    : StylePatch{};
-        if (!is_enabled()) { patch = patch | disabled_style; }
+    fill(canvas, appearance(style));
+    auto const [first, last] = visible_rows(canvas, scroll_, items_.size());
+    for (auto row = first; row < last; ++row) {
+        auto y = row - scroll_;
+        auto const& glyphs = selected_ == (std::size_t)row ? on : off;
+        auto patch = is_focused() && highlighted_ == (std::size_t)row ? focused_style
+                                                                      : StylePatch{};
+        if (!is_enabled() || !enabled_items_[(std::size_t)row]) {
+            patch = patch | disabled_style;
+        }
         auto const width =
             esc::cell_width(std::span<Glyph const>{glyphs}, canvas.width_policy());
         if (!width) {
@@ -124,45 +149,75 @@ auto RadioGroup::paint(Canvas canvas) -> Cursor
         auto const appearance = style | patch;
         canvas.write({x, y}, U" ", appearance);
         paint_label(canvas.subcanvas({x + 1, y}, {canvas.size().width - x - 1, 1}),
-                    items_[(std::size_t)y], Align::Left, appearance);
+                    items_[(std::size_t)row], Align::Left, appearance);
     }
     return {};
 }
 
 auto RadioGroup::handle(KeyEvent const& event) -> EventResponse
 {
-    if (items_.empty() || event.action == KeyAction::Release) { return {}; }
-    if (activates(event)) {
-        auto const normalized = move_selection(highlighted_, items_.size(), 0);
-        auto const changed = select(*highlighted_);
-        return {.handled = true, .repaint = normalized.repaint || changed};
+    if (!is_enabled() || items_.empty() || event.action == KeyAction::Release) {
+        return {};
     }
-    if (event.matches(KeyCode::ArrowUp, {}, event.action)) {
-        auto const response = move_selection(highlighted_, items_.size(), -1);
-        auto const changed = select(highlighted_);
-        return {.handled = true, .repaint = response.repaint || changed};
-    }
-    if (event.matches(KeyCode::ArrowDown, {}, event.action)) {
-        auto const response = move_selection(highlighted_, items_.size(), 1);
-        auto const changed = select(highlighted_);
-        return {.handled = true, .repaint = response.repaint || changed};
-    }
-    return {};
+    auto steps = row_navigation(event, size().height);
+    if (!steps && !activates(event)) { return {}; }
+    auto target =
+        row_target(highlighted_.has_value() ? highlighted_ : selected_, items_.size(),
+                   steps.value_or(0), [&](auto i) { return enabled_items_[i]; });
+    if (!target) { return {}; }
+    highlighted_ = target;
+    auto changed = select(target);
+    return {.handled = true, .repaint = changed};
 }
 auto RadioGroup::handle(MousePress const& event) -> EventResponse
 {
-    if (!activates(event) || event.at.y < 0 ||
-        (std::size_t)event.at.y >= items_.size()) {
+    if (!is_enabled() || !activates(event) || !contains({{}, size()}, event.at) ||
+        (std::size_t)(event.at.y + scroll_) >= items_.size()) {
         return {};
     }
-    auto const changed = select((std::size_t)event.at.y);
+    auto const changed = select((std::size_t)(event.at.y + scroll_));
     return {.handled = true, .repaint = changed};
+}
+void RadioGroup::on_arrange(Rect)
+{ scroll_ = clamp_scroll(scroll_, (int)items_.size(), size().height); }
+void RadioGroup::refresh()
+{
+    request_layout();
+    on_arrange(bounds());
+    request_repaint();
+}
+auto RadioGroup::set_scroll_offset(int value) -> bool
+{
+    value = clamp_scroll(value, (int)items_.size(), size().height);
+    if (value == scroll_) { return false; }
+    scroll_ = value;
+    request_repaint();
+    return true;
+}
+auto RadioGroup::handle(MouseWheel const& e) -> EventResponse
+{
+    auto changed =
+        set_scroll_offset(scroll_by(scroll_, e.dy, (int)items_.size(), size().height));
+    return {.handled = changed, .repaint = changed};
+}
+void RadioGroup::set_item_enabled(std::size_t index, bool enabled)
+{
+    if (index >= items_.size()) { throw std::out_of_range{"Radio item"}; }
+    if (enabled_items_[index] == enabled) { return; }
+    enabled_items_[index] = enabled;
+    request_repaint();
+    if (!enabled && highlighted_ == index) {
+        highlighted_ =
+            row_target({}, items_.size(), 0, [&](auto i) { return enabled_items_[i]; });
+    }
+    if (!enabled && selected_ == index) { select(std::nullopt); }
 }
 auto RadioGroup::focus_in() -> EventResponse
 {
     if (selected_ && *selected_ < items_.size()) { highlighted_ = selected_; }
     else {
-        (void)move_selection(highlighted_, items_.size(), 0);
+        highlighted_ =
+            row_target({}, items_.size(), 0, [&](auto i) { return enabled_items_[i]; });
     }
     return {.handled = true, .repaint = true};
 }

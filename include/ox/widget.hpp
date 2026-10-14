@@ -53,6 +53,14 @@ class Widget {
     SizePolicy height_policy;
     bool visible = true;
     bool enabled = true;
+    /** Root-layer child: bounds are global and inherited parent clipping is bypassed.
+     */
+    bool overlay = false;
+    /** While visible, input/focus are confined to this subtree. */
+    bool modal = false;
+    std::size_t overlay_order = 0;
+    /** Optional application-wide bindings. Current input/modal eligibility applies. */
+    std::function<EventResponse(KeyEvent const&)> shortcuts = {};
     auto is_enabled() const -> bool
     { return enabled && (!application_ || input_enabled_); }
     StylePatch disabled_style = {.background = {},
@@ -122,6 +130,11 @@ class Widget {
     auto is_pointer_captured() const -> bool;
     auto clipboard() -> Clipboard&;
     auto glyph_width_policy() const -> esc::WidthPolicy;
+    auto screen_size() const -> Area;
+    auto global_bounds() const -> Rect;
+    auto request_focus() -> bool;
+    auto request_focus(Widget& target) -> bool;
+    void bring_to_front();
 
     virtual auto get_children() -> zzz::Generator<Widget&>
     { return zzz::Generator<Widget&>{nullptr}; }

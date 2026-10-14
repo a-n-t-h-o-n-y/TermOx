@@ -136,7 +136,7 @@ class LinearLayout : public Widget {
         auto secondary = 0;
         auto count = 0;
         for_each_child(children, [&](Widget const& child) {
-            if (!child.visible) { return; }
+            if (!child.visible || child.overlay) { return; }
             auto natural = child.measure(available, policy);
             validate(natural);
             auto main = Horizontal ? natural.width : natural.height;
@@ -270,7 +270,7 @@ class LinearLayout : public Widget {
         auto index = std::size_t{0};
         auto changed = false;
         for_each_child(children, [&](Widget const& child) {
-            if (!child.visible) { return; }
+            if (!child.visible || child.overlay) { return; }
             auto const [main, cross] = inputs(child);
             changed |= index >= targets_.size() || targets_[index] != child.lifetime_ ||
                        main != policies_[index] || cross != cross_[index];
@@ -285,7 +285,7 @@ class LinearLayout : public Widget {
         auto next_cross = std::vector<std::pair<Area, SizePolicy>>{};
         target_storage_.clear();
         for_each_child(children, [&](Widget& child) {
-            if (!child.visible) { return; }
+            if (!child.visible || child.overlay) { return; }
             auto [main, cross] = inputs(child);
             policy_storage_.push_back(main);
             next_cross.push_back(cross);

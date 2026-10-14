@@ -17,6 +17,10 @@ Widget::Widget(Widget&& other)
       height_policy{other.height_policy},
       visible{other.visible},
       enabled{other.enabled},
+      overlay{other.overlay},
+      modal{other.modal},
+      overlay_order{other.overlay_order},
+      shortcuts{std::move(other.shortcuts)},
       disabled_style{other.disabled_style},
       bounds_{other.bounds_},
       focused_{std::exchange(other.focused_, false)},
@@ -44,6 +48,10 @@ auto Widget::operator=(Widget&& other) -> Widget&
     height_policy = other.height_policy;
     visible = other.visible;
     enabled = other.enabled;
+    overlay = other.overlay;
+    modal = other.modal;
+    overlay_order = other.overlay_order;
+    shortcuts = std::move(other.shortcuts);
     disabled_style = other.disabled_style;
     focused_ = std::exchange(other.focused_, false);
     input_enabled_ = other.input_enabled_;
@@ -87,6 +95,23 @@ auto Widget::glyph_width_policy() const -> esc::WidthPolicy
 {
     return application_ ? application_->loop().screen.width_policy()
                         : esc::WidthPolicy{};
+}
+
+auto Widget::screen_size() const -> Area
+{ return application_ ? application_->loop().screen.size() : size(); }
+auto Widget::global_bounds() const -> Rect
+{ return application_ ? application_->bounds(*this) : bounds(); }
+auto Widget::request_focus() -> bool { return request_focus(*this); }
+auto Widget::request_focus(Widget& target) -> bool
+{
+    if (!application_ || !application_->is_interactive(target)) { return false; }
+    application_->set_focus(target);
+    return true;
+}
+
+void Widget::bring_to_front()
+{
+    if (application_) { application_->raise_overlay(*this); }
 }
 
 auto Widget::capture_pointer(MouseButton button) -> bool

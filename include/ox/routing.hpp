@@ -8,9 +8,12 @@
 
 namespace ox {
 
-/** A depth-first snapshot. Parent and end delimit ancestry and the subtree.
+/** A normal-tree snapshot followed by root overlays. Parent preserves logical
+ * ancestry; end delimits contiguous painting subtrees (promoted children follow later).
  * Bounds are global; visibility includes every ancestor's visible state and clip.
- * Input eligibility also includes every ancestor's enabled state.
+ * Input eligibility also includes every ancestor's enabled state and the active modal
+ * scope. Root overlays bypass intermediate clips, retain owner visibility, and are
+ * ordered by their application-assigned overlay_order.
  */
 struct WidgetNode {
     LifetimeView<Widget> widget;

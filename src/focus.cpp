@@ -74,9 +74,38 @@ auto Focus::set(Widget& widget) -> EventResponse
 
 auto Focus::reconcile(std::span<WidgetNode const> tree) -> EventResponse
 {
+    auto active = LifetimeView<Widget>{};
+    for (auto const& node : tree) {
+        if (node.input && node.visible.size.width && node.visible.size.height &&
+            node.widget.valid() && node.widget.get().modal) {
+            active = node.widget;
+        }
+    }
+    auto restore = LifetimeView<Widget>{};
+    auto existing = std::ranges::any_of(
+        scopes_, [&](auto const& scope) { return scope.first == active; });
+    while (!scopes_.empty() && scopes_.back().first != active) {
+        auto const still_present = std::ranges::any_of(tree, [&](auto const& n) {
+            return n.widget == scopes_.back().first && n.widget.valid() &&
+                   n.widget.get().visible && n.widget.get().modal &&
+                   n.visible.size.width && n.visible.size.height;
+        });
+        if (active.valid() && still_present && !existing) { break; }
+        restore = scopes_.back().second;
+        scopes_.pop_back();
+    }
+    if (active.valid() && (scopes_.empty() || scopes_.back().first != active)) {
+        scopes_.push_back({active, restore.valid() ? restore : in_focus_});
+        recover_ = true;
+    }
+    if (restore.valid()) {
+        recover_ = true;
+        if (eligible(tree, restore)) { return set(restore.get()); }
+    }
     if (!recover_ || eligible(tree, in_focus_)) { return {}; }
     auto const first = std::ranges::find_if(tree, tab_candidate);
     if (first != tree.end()) { return set(first->widget.get()); }
+    if (active.valid() && eligible(tree, active)) { return set(active.get()); }
     auto const revision = revision_ + 1;
     auto response = clear();
     if (revision_ == revision) { recover_ = true; }
@@ -88,7 +117,15 @@ auto Focus::advance(std::span<WidgetNode const> tree, bool backward) -> EventRes
     auto candidates = tree | std::views::filter(tab_candidate);
     auto const first = candidates.begin();
     auto const end = candidates.end();
-    if (first == end) { return clear(); }
+    if (first == end) {
+        for (auto const& node : tree) {
+            if (node.input && node.widget.valid() && node.widget.get().modal &&
+                eligible(tree, node.widget)) {
+                return set(node.widget.get());
+            }
+        }
+        return clear();
+    }
     auto target = std::ranges::find(candidates, in_focus_, &WidgetNode::widget);
     if (backward) {
         if (target == first) { target = end; }

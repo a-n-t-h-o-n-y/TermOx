@@ -22,6 +22,10 @@ add_library(TermOx STATIC
     src/application.cpp
     src/bordered.cpp
     src/button.cpp
+    src/selection.cpp
+    src/listview.cpp
+    src/select.cpp
+    src/menu.cpp
     src/controls.cpp
     src/checkbox.cpp
     src/datatable.cpp
@@ -51,6 +55,12 @@ add_library(TermOx STATIC
     include/ox/application.hpp
     include/ox/bordered.hpp
     include/ox/button.hpp
+    include/ox/selection.hpp
+    include/ox/listview.hpp
+    include/ox/select.hpp
+    include/ox/menu.hpp
+    include/ox/popup.hpp
+    include/ox/tabs.hpp
     include/ox/controls.hpp
     include/ox/container.hpp
     include/ox/clipboard.hpp

@@ -123,3 +123,6 @@ borrowed tree snapshot before invoking callbacks, so reentrant dispatch can safe
 replace application storage. Failed attachment attempts remain pending and are retried;
 a foreign widget cannot bypass ownership checks on a subsequent unchanged traversal.
 See [performance benchmarks](performance.md) for measured routing workloads.
+
+See [selection and application structure](selection-and-application.md) for ListView,
+Select/ComboBox, Tabs, root overlays, menus, dialogs, modal scopes, and scoped shortcuts.

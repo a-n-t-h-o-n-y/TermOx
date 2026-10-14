@@ -176,3 +176,6 @@ capture when its owner becomes hidden, disabled, detached, or unavailable. Overr
 `pointer_cancel()` to clear gesture state. Capture and the root follow widget moves.
 
 See [container composition](containers.md) and [text editing](text-editing.md).
+
+See [selection and application structure](selection-and-application.md) for ListView,
+Select/ComboBox, Tabs, root overlays, menus, dialogs, modal scopes, and scoped shortcuts.

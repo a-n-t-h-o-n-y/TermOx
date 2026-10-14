@@ -103,3 +103,8 @@ target_link_libraries(
 add_executable(TermOx.examples.datatable EXCLUDE_FROM_ALL datatable.cpp)
 target_compile_options(TermOx.examples.datatable PRIVATE -Wall -Wextra -Wpedantic)
 target_link_libraries(TermOx.examples.datatable PRIVATE TermOx)
+
+# Selection controls, tabs, menus, and modal dialogs.
+add_executable(TermOx.examples.selection EXCLUDE_FROM_ALL selection.cpp)
+target_compile_options(TermOx.examples.selection PRIVATE -Wall -Wextra -Wpedantic)
+target_link_libraries(TermOx.examples.selection PRIVATE TermOx)

@@ -38,6 +38,8 @@ class Application {
 
     /** Whether a widget belongs to the visible, enabled input tree. */
     auto is_interactive(Widget const& widget) const -> bool;
+    auto bounds(Widget const&) const -> Rect;
+    void raise_overlay(Widget&);
 
     /** Capture motion and matching release; cancel when owner leaves the input tree. */
     auto capture_pointer(Widget& widget, MouseButton button = MouseButton::Left)
@@ -62,9 +64,11 @@ class Application {
     std::vector<LifetimeView<Widget>> attached_;
     std::vector<WidgetNode> tree_;
     std::vector<WidgetNode> tree_storage_;
+    std::vector<std::pair<std::size_t, LifetimeView<Widget>>> shortcuts_;
     std::vector<LifetimeView<Widget>> attachment_storage_;
     bool attachments_current_ = false;
     bool layout_pending_ = false;
+    std::size_t overlay_order_ = 0;
     std::optional<Point> mouse_position_;
     std::vector<LifetimeView<Widget>> hovered_;
     LifetimeView<Widget> paste_target_;

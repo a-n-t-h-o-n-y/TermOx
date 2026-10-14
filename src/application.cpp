@@ -61,6 +61,10 @@ void paint_tree(std::span<WidgetNode const> tree,
     }
     for (auto child = index + 1; child < node.end; child = tree[child].end) {
         if (!node.widget.valid()) { return; }
+        if (index == 0 && tree[child].widget.valid() &&
+            tree[child].widget.get().overlay) {
+            continue;
+        }
         auto const& bounds = tree[child].bounds;
         auto const offset =
             Point{bounds.at.x - node.bounds.at.x, bounds.at.y - node.bounds.at.y};
@@ -158,9 +162,34 @@ void Application::attach_widgets()
             loop_.watch(timer);
         }
         widget.application_ = this;
+        if (widget.overlay) {
+            if (widget.visible) { widget.overlay_order = ++overlay_order_; }
+            layout_pending_ = true;
+        }
         std::erase_if(widget.timers_,
                       [](auto const& timer) { return timer.expired(); });
     }
+}
+
+void Application::raise_overlay(Widget& widget)
+{
+    if (widget.application_ != this || !widget.overlay) {
+        throw std::invalid_argument{"Not an attached overlay"};
+    }
+    widget.overlay_order = ++overlay_order_;
+    request_repaint();
+}
+
+auto Application::bounds(Widget const& widget) const -> Rect
+{
+    if (!head_.valid()) { throw std::logic_error{"Application root unavailable"}; }
+    auto const tree = widget_tree(head_.get());
+    auto const target = track(const_cast<Widget&>(widget));
+    auto const found = std::ranges::find(tree, target, &WidgetNode::widget);
+    if (found == tree.end()) {
+        throw std::invalid_argument{"Widget outside application"};
+    }
+    return found->bounds;
 }
 
 auto Application::is_interactive(Widget const& widget) const -> bool
@@ -224,6 +253,12 @@ auto Application::refresh_tree() -> bool
     auto const changed = next != tree_;
     tree_.swap(next);
     tree_storage_ = std::move(next);
+    shortcuts_.clear();
+    for (std::size_t i = 0; i < tree_.size(); ++i) {
+        if (auto* widget = tree_[i].widget.try_get(); widget && widget->shortcuts) {
+            shortcuts_.push_back({i, tree_[i].widget});
+        }
+    }
     if (changed || !attachments_current_) {
         attachments_current_ = false;
         attach_widgets();
@@ -244,12 +279,21 @@ auto Application::synchronize() -> EventResponse
         while (std::exchange(layout_pending_, false)) {
             arrange(head_.get(), head_.get().bounds());
             if (!head_.valid()) { break; }
+            auto overlays = widget_tree(head_.get());
+            auto extent = head_.get().size();
+            for (auto const& node : overlays) {
+                if (auto* widget = node.widget.try_get(); widget && widget->overlay) {
+                    arrange(*widget, {{}, extent});
+                }
+                if (!head_.valid()) { break; }
+            }
         }
         if (!head_.valid()) {
             loop_.quit(0);
             return {.quit = 0};
         }
         result = combine(result, {.repaint = refresh_tree()});
+        if (layout_pending_) { continue; }
         // Focus consumes the snapshot before invoking callbacks; it never retains it.
         auto const focus_response = focus_.reconcile(tree_);
         result = combine(result, focus_response);
@@ -435,17 +479,29 @@ auto Application::handle(MouseMove const& event) -> EventResponse
 
 auto Application::handle(KeyEvent const& key) -> EventResponse
 {
+    auto result = synchronize();
+    if (result.quit) { return result; }
+    auto snapshot = shortcuts_;
+    for (auto const& [index, target] : snapshot) {
+        if (!accepts_input(tree_, index, target)) { continue; }
+        auto callback = target.get().shortcuts;
+        if (!callback) { continue; }
+        auto effect = callback(key);
+        result = combine(result, effect);
+        if (!effect.quit) { result = combine(result, synchronize()); }
+        if (effect.handled || result.quit) { return result; }
+    }
     if (key.action != KeyAction::Release &&
         (key.matches(KeyCode::Tab, {}, key.action) ||
          key.matches(KeyCode::Tab, {.shift = true}, key.action))) {
-        auto result = synchronize();
+        result = combine(result, synchronize());
         if (!result.quit) {
             result = combine(result, focus_.advance(tree_, key.modifiers.shift));
         }
         result.handled = true;
         return result;
     }
-    return route_focused(key);
+    return combine(result, route_focused(key));
 }
 auto Application::handle(esc::PasteChunk const& chunk) -> EventResponse
 {
@@ -487,6 +543,7 @@ auto Application::handle(esc::Resize const& event) -> EventResponse
 {
     if (!head_.valid()) { return {.quit = 0}; }
     arrange(head_.get(), {{0, 0}, event.size});
+    layout_pending_ = true;
     return combine({.handled = true, .repaint = true}, synchronize());
 }
 
@@ -494,7 +551,19 @@ auto Application::paint(Canvas canvas) -> Cursor
 {
     auto const snapshot = tree_;
     auto cursor = Cursor{};
-    if (!snapshot.empty()) { paint_tree(snapshot, 0, canvas, focus_.get(), cursor); }
+    if (!snapshot.empty()) {
+        paint_tree(snapshot, 0, canvas, focus_.get(), cursor);
+        for (auto child = std::size_t{1}; child < snapshot[0].end;
+             child = snapshot[child].end) {
+            if (!snapshot[0].widget.valid()) { break; }
+            if (snapshot[child].widget.valid() &&
+                snapshot[child].widget.get().overlay) {
+                auto bounds = snapshot[child].bounds;
+                paint_tree(snapshot, child, canvas.subcanvas(bounds.at, bounds.size),
+                           focus_.get(), cursor);
+            }
+        }
+    }
     return cursor;
 }
 }  // namespace ox

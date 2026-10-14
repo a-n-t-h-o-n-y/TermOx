@@ -1566,3 +1566,9 @@ using Event = std::variant<esc::MousePress,
                            event::Custom,
                            event::Interrupt>;
 ```
+## Selection and application widgets
+
+`ListView`, `Select`, `ComboBox`, `Tabs`, `Popup`, `Dialog`, `Menu`, and `MenuBar` compose
+shared row selection, clipping, text editing, containers, and routing. See the
+[selection and application guide](selection-and-application.md) for commands, signal
+contracts, keyboard/mouse bindings, lifetime rules, and examples.
