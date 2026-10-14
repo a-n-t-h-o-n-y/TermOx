@@ -10,9 +10,9 @@ auto align_offset(Align align, int cells_available, int cells_used) -> int
         throw std::invalid_argument{"Negative alignment extent"};
     }
     switch (align) {
-        case Align::Left: return 0;
+        case Align::Start: return 0;
         case Align::Center: return (cells_available - cells_used) / 2;
-        case Align::Right: return cells_available - cells_used;
+        case Align::End: return cells_available - cells_used;
     }
     throw std::invalid_argument{"Invalid alignment"};
 }

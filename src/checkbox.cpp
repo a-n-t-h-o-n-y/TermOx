@@ -43,16 +43,16 @@ auto CheckBox::measure(Area available, esc::WidthPolicy policy) const -> Area
     auto const a = esc::cell_width(std::span<Glyph const>{checked_glyphs}, policy);
     auto const b = esc::cell_width(std::span<Glyph const>{unchecked_glyphs}, policy);
     if (!a || !b) { throw std::invalid_argument{"Invalid checkbox indicator"}; }
-    measure_layout_.update(label.text, available.width, TextWrap::None, policy);
+    auto label_size = measure_label(measure_layout_, label.text, label.vertical, policy);
     auto const width =
         std::max(*a, *b) +
         (label.text.empty()
              ? 0
-             : 1 + (std::size_t)text_content_size(measure_layout_).width);
+             : 1 + (std::size_t)label_size.width);
     if (width > (std::size_t)std::numeric_limits<int>::max()) {
         throw std::length_error{"Checkbox width overflow"};
     }
-    return {(int)width, 1};
+    return {(int)width, std::max(1, label_size.height)};
 }
 auto CheckBox::paint(Canvas canvas) -> Cursor
 {
@@ -68,7 +68,7 @@ auto CheckBox::paint(Canvas canvas) -> Cursor
         auto const at = (int)*width + 1;
         paint_label(canvas.subcanvas({at, 0}, {std::max(canvas.size().width - at, 0),
                                                canvas.size().height}),
-                    label.text, label.align, label.style | patch);
+                    label.text, label.align, label.style | patch, label.vertical);
     }
     return {};
 }

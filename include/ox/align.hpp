@@ -4,10 +4,11 @@
 
 namespace ox {
 
-enum class Align : std::uint8_t { Left, Center, Right };
+/** Alignment along the text direction. Left/Right are horizontal spellings. */
+enum class Align : std::uint8_t { Start, Center, End, Left = Start, Right = End };
 
 /**
- * Return the horizontal offset in terminal columns. Nonnegative extents are required;
+ * Return the offset along an axis in cells. Nonnegative extents are required;
  * oversized content can produce a negative offset.
  *
  * @param align The alignment to use.

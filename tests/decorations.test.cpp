@@ -118,3 +118,127 @@ TEST(label_paint_clears_previous_text_while_put_label_only_overlays_its_prefix)
         ASSERT(cell.text == U" ");
     }
 }
+
+TEST(label_orientation_measures_graphemes_and_defaults_to_matching_axis_policies)
+{
+    auto horizontal = Label{{.text = "Aé界🙂"}};
+    auto vertical = Label{{.text = "Aé界🙂", .vertical = true}};
+    ASSERT((horizontal.measure({20, 20}) == Area{6, 1}));
+    ASSERT((vertical.measure({20, 20}) == Area{2, 4}));
+    ASSERT(horizontal.height_policy == SizePolicy::fixed(1));
+    ASSERT(vertical.width_policy.flexibility == 0);
+    ASSERT(vertical.height_policy == SizePolicy::flex());
+    auto overrides = std::array{esc::ScalarWidthOverride{U'A', 2}};
+    auto narrow = Label{{.text = "Ab", .vertical = true}};
+    ASSERT((narrow.measure({20, 20}) == Area{1, 2}));
+    ASSERT((narrow.measure({20, 20}, {.overrides = overrides}) == Area{2, 2}));
+    ASSERT((vertical.measure({0, 0}) == Area{2, 4}));
+    auto row = Row{Label{{.text = "界x", .vertical = true}}, Label{"rest"}};
+    arrange(row, {{}, {12, 5}});
+    ASSERT((std::get<0>(row.children).size() == Area{2, 5}));
+    auto app = Application{row};
+    app.dispatch(esc::Resize{{12, 5}});
+    auto& label = std::get<0>(row.children);
+    label.set_text("abc");
+    app.step();
+    ASSERT(label.size().width == 1);
+    ASSERT(label.set_vertical(false));
+    app.step();
+    ASSERT(label.size().height == 1 && !label.vertical);
+}
+
+TEST(vertical_labels_align_along_rows_center_whole_graphemes_and_clip)
+{
+    auto label = Label{{.text = "é界🙂", .vertical = true, .align = Align::Start}};
+    arrange(label, {{}, {3, 5}});
+    auto frame = Frame{{3, 5}};
+    label.paint(Canvas{frame});
+    ASSERT((frame[Point{1, 0}].text == U"é"));
+    ASSERT((frame[Point{0, 1}].text == U"界"));
+    ASSERT((frame[Point{0, 2}].text == U"🙂"));
+    ASSERT((frame[Point{1, 1}].columns == 0));
+    label.align = Align::Center;
+    label.paint(Canvas{frame});
+    ASSERT((frame[Point{1, 1}].text == U"é"));
+    ASSERT((frame[Point{0, 3}].text == U"🙂"));
+    ASSERT((frame[Point{1, 0}].text == U" "));
+    label.align = Align::End;
+    label.paint(Canvas{frame});
+    ASSERT((frame[Point{1, 2}].text == U"é"));
+    ASSERT((frame[Point{0, 4}].text == U"🙂"));
+    auto tiny = Frame{{1, 3}};
+    label.paint(Canvas{tiny});
+    ASSERT((tiny[Point{0, 2}].text == U"é"));
+    ASSERT((tiny[Point{0, 1}].text == U" ")); // Wide glyph ends the fitting prefix.
+    auto short_frame = Frame{{3, 2}};
+    label.paint(Canvas{short_frame});
+    ASSERT((short_frame[Point{1, 0}].text == U"é"));
+    ASSERT((short_frame[Point{0, 1}].text == U"界"));
+    label.set_text("");
+    ASSERT((label.measure({3, 2}) == Area{0, 0}));
+    label.paint(Canvas{short_frame});
+    for (auto const& cell : short_frame.row(0)) ASSERT(cell.text == U" ");
+}
+
+TEST(label_orientation_is_explicit_in_tiny_views_and_refresh_preserves_custom_policies)
+{
+    auto label = Label{{.text = "ab", .vertical = true, .align = Align::End}};
+    arrange(label, {{}, {1, 1}});
+    auto cell = Frame{{1, 1}};
+    label.paint(Canvas{cell});
+    ASSERT(label.vertical);
+    ASSERT((cell[Point{0, 0}].text == U"a"));
+    ASSERT((label.measure({1, 1}) == Area{1, 2}));
+    label.width_policy = SizePolicy::fixed(4);
+    label.height_policy = SizePolicy::bounded(2, 8);
+    label.vertical = false;
+    label.refresh();
+    ASSERT(label.width_policy == SizePolicy::fixed(4));
+    ASSERT(label.height_policy == SizePolicy::bounded(2, 8));
+    ASSERT((label.measure({1, 1}) == Area{2, 1}));
+    ASSERT(!label.set_vertical(false));
+    ASSERT(align_offset(Align::Start, 5, 2) == 0);
+    ASSERT(align_offset(Align::Center, 5, 2) == 1);
+    ASSERT(align_offset(Align::End, 5, 2) == 3);
+    ASSERT(Align::Left == Align::Start && Align::Right == Align::End);
+    for (auto size : {Area{0, 0}, Area{0, 3}, Area{3, 0}}) {
+        auto empty = Frame{size};
+        label.vertical = true;
+        label.paint(Canvas{empty});
+    }
+}
+
+TEST(label_measurement_and_painting_reject_invalid_text_in_both_directions)
+{
+    for (auto vertical : {false, true}) {
+        auto label = Label{{.vertical = vertical}};
+        for (auto text : {"a\nb", "a\tb", "a\x1b"}) {
+            ASSERT_THROWS(label.set_text(text), std::invalid_argument);
+            label.text = text;
+            ASSERT_THROWS(label.measure({8, 8}), std::invalid_argument);
+            auto frame = Frame{{8, 8}};
+            ASSERT_THROWS(label.paint(Canvas{frame}), std::invalid_argument);
+        }
+        label.text.clear();
+        ASSERT_THROWS(label.set_text("bad\xff"), esc::UnicodeError);
+    }
+}
+
+TEST(shared_label_options_render_vertical_control_captions_and_decoration_alignment)
+{
+    auto button = Button{{.label = {.text = "ab", .vertical = true,
+                                    .align = Align::End}}};
+    ASSERT((button.measure({6, 6}) == Area{1, 2}));
+    arrange(button, {{}, {3, 4}});
+    auto frame = Frame{{3, 4}};
+    button.paint(Canvas{frame});
+    ASSERT((frame[Point{1, 2}].text == U"a"));
+    ASSERT((frame[Point{1, 3}].text == U"b"));
+    auto check = CheckBox{{.label = {.text = "ab", .vertical = true}}};
+    ASSERT(check.measure({10, 10}).height == 2);
+    auto line = Frame{{1, 4}};
+    paint_divider(Canvas{line}, true, Lines::ascii(), {},
+                  {.text = "ab", .align = Align::End});
+    ASSERT((line[Point{0, 2}].text == U"a"));
+    ASSERT((line[Point{0, 3}].text == U"b"));
+}

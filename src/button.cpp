@@ -61,7 +61,7 @@ auto Button::paint(Canvas canvas) -> Cursor
     auto style = appearance(label.style);
     if (is_focused()) { style = style | focused_style; }
     if (pressed_) { style = style | pressed_style; }
-    paint_label(canvas, label.text, label.align, style);
+    paint_label(canvas, label.text, label.align, style, label.vertical);
     if (auto* paint = std::get_if<PaintFn>(&decoration)) {
         if (*paint) { (*paint)(canvas); }
     }
@@ -74,8 +74,7 @@ auto Button::paint(Canvas canvas) -> Cursor
 auto Button::measure(Area available, esc::WidthPolicy policy) const -> Area
 {
     validate(available);
-    measure_layout_.update(label.text, available.width, TextWrap::None, policy);
-    return text_content_size(measure_layout_);
+    return measure_label(measure_layout_, label.text, label.vertical, policy);
 }
 auto Button::activate() -> bool
 {

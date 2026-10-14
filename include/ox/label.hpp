@@ -20,14 +20,18 @@ void put_label(Canvas c,
                Align align,
                Style style,
                bool vertical = false);
-void paint_label(Canvas c, std::string_view text, Align align, Style style);
+void paint_label(Canvas c, std::string_view text, Align align, Style style,
+                 bool vertical = false);
+/** Natural extent of printable, single-line text, using reusable Unicode analysis. */
+auto measure_label(TextLayout& cache, std::string_view text, bool vertical = false,
+                   esc::WidthPolicy policy = {}) -> Area;
 
 }  // namespace ox
 
 namespace ox {
 
 /**
- * A single horizontal line of text.
+ * One horizontal line or vertical stack of complete graphemes.
  */
 class Label : public Widget {
    public:
@@ -35,14 +39,17 @@ class Label : public Widget {
 
     struct Options {
         std::string text = "";
+        bool vertical = false;
         Align align = Align::Center;
         Style style = {};
-        SizePolicy width_policy = SizePolicy::flex();
-        SizePolicy height_policy = SizePolicy::fixed(1);
+        SizePolicy width_policy = vertical ? SizePolicy{.minimum = 1, .flexibility = 0}
+                                           : SizePolicy::flex();
+        SizePolicy height_policy = vertical ? SizePolicy::flex() : SizePolicy::fixed(1);
     } static const init;
 
    public:
     std::string text;
+    bool vertical;
     Align align;
     Style style;
 
@@ -54,11 +61,14 @@ class Label : public Widget {
 
    public:
     auto set_text(std::string value) -> bool;
+    auto set_vertical(bool value) -> bool;
+    void refresh() override;
     auto measure(Area, esc::WidthPolicy = {}) const -> Area override;
     auto paint(Canvas c) -> Cursor override;
 
    private:
     mutable TextLayout measure_layout_;
+    bool policy_vertical_;
 };
 
 // -------------------------------------------------------------------------------------

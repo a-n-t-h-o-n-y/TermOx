@@ -3,7 +3,7 @@
 Border and Divider labels are plain `Label::Options` values, with no Widget lifetime,
 focus state, or child enumeration. Border configuration is copyable. The shared
 `put_label(Canvas, text, align, style, vertical=false)` draws only the text; it preserves
-the line around it. `paint_label` clears the view to styled spaces before drawing.
+the line around it. `paint_label` takes the same optional `vertical` argument and clears the view to styled spaces before drawing.
 Both use terminal columns and whole graphemes, validate the complete UTF-8 input, and
 respect the canvas width policy and inherited clipping. Labels require positive, known
 grapheme widths. Oversized labels keep the longest fitting prefix. A clipped wide
@@ -39,9 +39,53 @@ Divider has explicit `vertical` configuration, defaulting to false, even in a 1�
 Put a vertical divider in a Row and a horizontal one in a Column. Its width is fixed(1) when vertical; its height is fixed(1) when horizontal. Larger views draw the line down the middle of
 the cross axis. `paint_divider` clears its view, draws that line, and overlays its label.
 Horizontal labels are ordinary text; vertical labels stack one grapheme per row, with
-each centered across the width. For vertical labels, Align::Left/Center/Right means
-start/middle/end along the vertical axis. A glyph too wide for the view ends the fitting
+each centered across the width. For vertical labels, `Align::Start/Center/End` means
+top/middle/bottom along the vertical axis. A glyph too wide for the view ends the fitting
 prefix. Lines::ascii now correctly uses `|` vertically and `-` horizontally.
+
+## Label orientation
+
+One `Label` type supports both directions. Orientation is explicit, independent of
+its dimensions, including 1×1 views:
+
+```cpp
+auto heading = ox::Label{{.text = "Heading", .align = ox::Align::Start}};
+auto side = ox::Label{{
+    .text = "Side", .vertical = true, .align = ox::Align::End,
+}};
+```
+
+Horizontal labels draw one line and center it vertically. Vertical labels stack one
+complete grapheme per row and center each grapheme horizontally. `Align::Start`,
+`Center`, and `End` align the text along its direction: left/center/right horizontally,
+top/middle/bottom vertically. `Left` and `Right` remain aliases for Start and End.
+There is no rotation and no guess based on the allocated shape.
+
+Measurement returns the natural extent before clipping: horizontal terminal columns
+by one row, or the widest grapheme by the number of graphemes vertically. Combining
+sequences and emoji stay together. Width measurement honors the supplied terminal
+width policy. Empty vertical text measures 0×0. Painting keeps a fitting prefix,
+never splits wide graphemes, and clears the old label. A vertical grapheme wider than
+the view ends the fitting prefix, even if later text would fit. Tabs, line breaks,
+controls, unknown widths, and invalid UTF-8 are rejected when measuring/drawing or
+calling `set_text()`.
+
+Horizontal defaults are flexible width and height fixed at one. Vertical defaults
+reserve at least one column, use natural measured width without consuming spare Row
+space, and have flexible height. This lets a wide grapheme reserve two columns by
+default. Normal container cross-axis alignment still applies. Explicit width/height
+policies override these defaults.
+
+Use `set_vertical(bool)` to switch at runtime. It updates policies that still match
+the preceding orientation's defaults, preserves customized policies, and requests
+layout/repaint. Directly editing `.vertical` followed by `refresh()` does the same.
+Changing text with `set_text()` also requests layout/repaint.
+
+Button and CheckBox caption options honor `.label.vertical`; those controls retain
+their own size policies, so give a vertical caption enough height. Decoration owners
+choose direction: Border titles stay horizontal, and Divider labels follow the
+Divider's `.vertical` flag. Their embedded label's orientation and size policies
+are unused.
 
 ## Row and Column refresh
 

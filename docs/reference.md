@@ -474,7 +474,9 @@ application thread.
 
 [`#include <ox/align.hpp>`](../include/ox/align.hpp)
 
-`Align` describes horizontal text alignment: `Left`, `Center`, or `Right`.
+`Align` describes alignment along the text direction: `Start`, `Center`, or `End`.
+For horizontal text these mean left/center/right; for vertical labels they mean
+top/middle/bottom. `Left` and `Right` are aliases for Start and End.
 
 ```cpp
 Label{{.text = "Hello", .align = Align::Center}};
@@ -756,7 +758,11 @@ is [examples/datatable.cpp](../examples/datatable.cpp).
 
 `class Label : public Widget;`
 
-A Widget displaying a static single line of text. The text is not editable, but it can be set directly via its public data members. The text is centered vertically, its horizontal alignment is determined by the `Align` constructor parameter.
+A Widget displaying one horizontal line or a vertical stack of complete Unicode
+graphemes. `.vertical` defaults to false. Alignment is along the text direction and
+the cross axis is centered. Use `set_text()` and `set_vertical()` to request layout
+and repaint, or call `refresh()` after public configuration edits. See
+[label orientation](decorations-layouts.md#label-orientation) for sizing and clipping.
 
 ```cpp
 auto label = Label{{
@@ -774,10 +780,12 @@ auto label = Label{{
 ```cpp
 struct Options {
     std::string text = "";
+    bool vertical = false;
     Align align = Align::Center;
     Style style = {};
-    SizePolicy width_policy = SizePolicy::flex();
-    SizePolicy height_policy = SizePolicy::fixed(1);
+    SizePolicy width_policy = vertical ? SizePolicy{.minimum = 1, .flexibility = 0}
+                                       : SizePolicy::flex();
+    SizePolicy height_policy = vertical ? SizePolicy::flex() : SizePolicy::fixed(1);
 };
 
 Label(Options x = {});
@@ -792,7 +800,7 @@ set the `text` member to the provided value and all other options to their defau
 values.
 
 The `Options` constructor takes a `std::string` for the text, an `Align` enum for the
-horizontal alignment, a `Style` to apply to each cell of the Label, and a `SizePolicy`.
+alignment along the text direction, a `Style` to apply to each cell of the Label, and a `SizePolicy`.
 
 ---
 
@@ -800,6 +808,7 @@ horizontal alignment, a `Style` to apply to each cell of the Label, and a `SizeP
 
 ```cpp
 std::string text;
+bool vertical;
 Align align;
 Style style;
 ```

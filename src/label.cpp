@@ -53,10 +53,28 @@ void put_label(Canvas canvas,
         }
     }
 }
-void paint_label(Canvas canvas, std::string_view text, Align align, Style style)
+void paint_label(Canvas canvas, std::string_view text, Align align, Style style,
+                 bool vertical)
 {
     fill(canvas, U' ' | style);
-    put_label(canvas, text, align, style);
+    put_label(canvas, text, align, style, vertical);
+}
+
+auto measure_label(TextLayout& cache, std::string_view text, bool vertical,
+                   esc::WidthPolicy policy) -> Area
+{
+    cache.update(text, std::numeric_limits<int>::max(), TextWrap::None, policy);
+    auto width = 0;
+    auto widths = cache.widths();
+    for (auto cells : widths) {
+        if (cells <= 0)
+            throw std::invalid_argument{"Label requires printable text with known widths"};
+        width = std::max(width, cells);
+    }
+    if (!vertical) return text_content_size(cache);
+    if (widths.size() > (std::size_t)std::numeric_limits<int>::max())
+        throw std::length_error{"Vertical label height overflow"};
+    return {width, (int)widths.size()};
 }
 
 Label::Options const Label::init = {};
@@ -64,8 +82,10 @@ Label::Options const Label::init = {};
 Label::Label(Options x)
     : Widget{FocusPolicy::None, x.width_policy, x.height_policy},
       text{std::move(x.text)},
+      vertical{x.vertical},
       align{std::move(x.align)},
-      style{std::move(x.style)}
+      style{std::move(x.style)},
+      policy_vertical_{x.vertical}
 {}
 
 Label::Label(std::string text_) : Label{Options{.text = std::move(text_)}} {}
@@ -74,23 +94,39 @@ Label::Label(char const* text_) : Label{std::string{text_}} {}
 auto Label::set_text(std::string value) -> bool
 {
     if (value == text) { return false; }
-    if (measure_text(value, {std::numeric_limits<int>::max(), 1}).height != 1) {
-        throw std::invalid_argument{"Label must be single-line"};
-    }
+    auto analysis = TextLayout{};
+    measure_label(analysis, value, vertical);
     text.swap(value);
     request_layout();
     request_repaint();
     return true;
 }
+auto Label::set_vertical(bool value) -> bool
+{
+    if (value == vertical) return false;
+    vertical = value;
+    refresh();
+    return true;
+}
+void Label::refresh()
+{
+    if (policy_vertical_ != vertical) {
+        auto before = Options{.vertical = policy_vertical_};
+        auto after = Options{.vertical = vertical};
+        if (width_policy == before.width_policy) width_policy = after.width_policy;
+        if (height_policy == before.height_policy) height_policy = after.height_policy;
+        policy_vertical_ = vertical;
+    }
+    Widget::refresh();
+}
 auto Label::measure(Area available, esc::WidthPolicy policy) const -> Area
 {
     validate(available);
-    measure_layout_.update(text, available.width, TextWrap::None, policy);
-    return text_content_size(measure_layout_);
+    return measure_label(measure_layout_, text, vertical, policy);
 }
 auto Label::paint(Canvas c) -> Cursor
 {
-    paint_label(c, text, align, appearance(style));
+    paint_label(c, text, align, appearance(style), vertical);
     return {};
 }
 
