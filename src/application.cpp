@@ -1,4 +1,5 @@
 #include <ox/application.hpp>
+#include <ox/put.hpp>
 
 #include <algorithm>
 #include <cstdint>
@@ -90,6 +91,8 @@ Application::Application(Widget& head) : head_{track(head)}, focus_{head}
                 for (auto const& timer : target.get().timers_) {
                     loop_.unwatch(timer);
                 }
+                for (auto const& a : target.get().animations_)
+                    loop_.unwatch(a);
                 target.get().focused_ = false;
                 target.get().application_ = nullptr;
             }
@@ -110,6 +113,8 @@ Application::~Application()
             for (auto const& timer : target.get().timers_) {
                 loop_.unwatch(timer);
             }
+            for (auto const& a : target.get().animations_)
+                loop_.unwatch(a);
             target.get().focused_ = false;
             target.get().application_ = nullptr;
         }
@@ -152,6 +157,8 @@ void Application::attach_widgets()
         for (auto const& entry : widget.timers_) {
             loop_.unwatch(entry);
         }
+        for (auto const& a : widget.animations_)
+            loop_.unwatch(a);
     }
     attached_.swap(current);
     attachment_storage_ = std::move(current);
@@ -161,13 +168,17 @@ void Application::attach_widgets()
         for (auto const& timer : widget.timers_) {
             loop_.watch(timer);
         }
+        for (auto const& a : widget.animations_)
+            loop_.watch(a);
         widget.application_ = this;
+        if (theme_.styled) layout_pending_ = true;
         if (widget.overlay) {
             if (widget.visible) { widget.overlay_order = ++overlay_order_; }
             layout_pending_ = true;
         }
         std::erase_if(widget.timers_,
                       [](auto const& timer) { return timer.expired(); });
+        widget.theme_changed();
     }
 }
 
@@ -350,6 +361,17 @@ auto Application::paint() -> bool
     return loop_.paint(*this);
 }
 void Application::post(Event event) { loop_.post(std::move(event)); }
+void Application::set_theme(Theme theme)
+{
+    validate(theme);
+    theme_ = std::move(theme);
+    loop_.next_frame_.reset();
+    request_layout();
+    auto snapshot = attached_;
+    for (auto const& target : snapshot)
+        if (auto* widget = target.try_get(); widget && widget->application_ == this)
+            widget->theme_changed();
+}
 void Application::request_repaint() { loop_.request_repaint(); }
 void Application::request_layout()
 {
@@ -549,6 +571,7 @@ auto Application::handle(esc::Resize const& event) -> EventResponse
 
 auto Application::paint(Canvas canvas) -> Cursor
 {
+    if (theme_.styled) fill(canvas, theme_style({}, theme_));
     auto const snapshot = tree_;
     auto cursor = Cursor{};
     if (!snapshot.empty()) {

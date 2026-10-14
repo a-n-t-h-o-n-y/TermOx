@@ -248,7 +248,7 @@ auto MenuBar::measure(Area available, esc::WidthPolicy policy) const -> Area
 }
 auto MenuBar::paint(Canvas canvas) -> Cursor
 {
-    fill(canvas, Style{});
+    fill(canvas, appearance({}));
     return {};
 }
 void MenuBar::on_arrange(Rect)

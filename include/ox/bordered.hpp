@@ -57,7 +57,11 @@ class Bordered : public Widget {
     }
     auto paint(Canvas canvas) -> Cursor override
     {
-        paint_border(canvas, border);
+        auto config = border;
+        config.style = appearance(config.style, Surface::Border);
+        config.label.style = appearance(config.label.style, Surface::Accent);
+        if (theme().styled && theme().ascii) config.box = shape::Box::ascii();
+        paint_border(canvas, config);
         return {};
     }
 

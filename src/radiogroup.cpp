@@ -139,6 +139,14 @@ auto RadioGroup::paint(Canvas canvas) -> Cursor
         auto const& glyphs = selected_ == (std::size_t)row ? on : off;
         auto patch = is_focused() && highlighted_ == (std::size_t)row ? focused_style
                                                                       : StylePatch{};
+        if (theme().styled) {
+            if (!patch.background && style.background == Color{default_color})
+                patch.background = theme().palette.background;
+            if (!patch.foreground && style.foreground == Color{default_color})
+                patch.foreground = selected_ == (std::size_t)row
+                                       ? theme().palette.accent
+                                       : theme().palette.muted;
+        }
         if (!is_enabled() || !enabled_items_[(std::size_t)row]) {
             patch = patch | disabled_style;
         }
@@ -150,7 +158,7 @@ auto RadioGroup::paint(Canvas canvas) -> Cursor
         put(canvas, {0, y}, glyphs, patch);
         if (*width >= (std::size_t)canvas.size().width) { continue; }
         auto const x = (int)*width;
-        auto const appearance = style | patch;
+        auto const appearance = this->appearance(style | patch);
         canvas.write({x, y}, U" ", appearance);
         paint_label(canvas.subcanvas({x + 1, y}, {canvas.size().width - x - 1, 1}),
                     items_[(std::size_t)row], Align::Left, appearance);

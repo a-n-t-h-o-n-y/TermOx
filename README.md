@@ -31,6 +31,9 @@ int main()
 
 📂 Explore more in the [examples](examples) directory.
 
+Build `TermOx.examples.showcase` for an interactive tour of widgets, themes, and
+motion. See [theme and motion](docs/theme-and-motion.md) for configuration and controls.
+
 Use [scratch.cpp](examples/scratch.cpp) and the `TermOx.examples.scratch` build target
 to try out the library quickly.
 

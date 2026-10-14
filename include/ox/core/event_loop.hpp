@@ -8,6 +8,7 @@
 
 #include <ox/core/dispatch.hpp>
 #include <ox/core/terminal.hpp>
+#include <ox/motion.hpp>
 #include <ox/timer.hpp>
 
 namespace ox {
@@ -31,6 +32,7 @@ class EventLoop {
 
     void post(Event event);
     void watch(Timer const& timer);
+    void watch(Animation const& animation);
     void unwatch(Timer const& timer);
     /** Apply effects at the dispatch boundary; first quit request wins. */
     void apply(EventResponse response);
@@ -72,6 +74,7 @@ class EventLoop {
             merge(result, timer->action());
             if (exit_code_) { break; }
         }
+        if (!exit_code_) merge(result, tick_animations(now));
         return result;
     }
 
@@ -93,6 +96,12 @@ class EventLoop {
     friend class Application;
     void watch(std::weak_ptr<Timer::State> timer);
     void unwatch(std::weak_ptr<Timer::State> timer);
+    void watch(std::weak_ptr<Animation::State>);
+    void unwatch(std::weak_ptr<Animation::State>);
+    auto tick_animations(Clock::time_point) -> EventResponse;
+    std::vector<std::weak_ptr<Animation::State>> animations_;
+    std::optional<Clock::time_point> next_frame_;
+    bool animations_ticking_ = false;
 
     esc::WaitSource wake_;
     std::intptr_t wake_write_ = 0;

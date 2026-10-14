@@ -1,4 +1,5 @@
 #pragma once
+#include <cmath>
 #include <ox/container.hpp>
 #include <ox/routing.hpp>
 #include <ox/selection.hpp>
@@ -48,6 +49,7 @@ class Tabs : public Widget {
         });
         auto lifetime = track(*this);
         auto changed = pages.select(index);
+        if (auto* self = lifetime.try_get(); self && changed) self->update_indicator();
         if (auto* self = lifetime.try_get(); self && changed && had_focus) {
             auto tree = widget_tree(self->pages);
             auto candidates = focus_order(tree);
@@ -63,17 +65,17 @@ class Tabs : public Widget {
     auto measure(Area available, esc::WidthPolicy policy = {}) const -> Area override
     {
         validate(available);
-        auto natural =
-            pages.measure({available.width, std::max(0, available.height - 1)}, policy);
+        auto natural = pages.measure(
+            {available.width, std::max(0, available.height - strip_height())}, policy);
         auto width = std::int64_t{0};
         for (auto const& text : labels_) {
             width += measure_text(text, available, TextWrap::None, policy).width + 2;
         }
         if (width > std::numeric_limits<int>::max() ||
-            natural.height == std::numeric_limits<int>::max()) {
+            natural.height > std::numeric_limits<int>::max() - strip_height()) {
             throw std::length_error{"Tab extent"};
         }
-        return {std::max(natural.width, (int)width), natural.height + 1};
+        return {std::max(natural.width, (int)width), natural.height + strip_height()};
     }
     auto paint(Canvas canvas) -> Cursor override
     {
@@ -91,17 +93,39 @@ class Tabs : public Widget {
         }
         for (std::size_t i = 0; i < labels_.size(); ++i) {
             auto normal = appearance(style);
-            if (selected_index() == i) { normal = normal | selected_style; }
+            if (selected_index() == i) {
+                normal = theme().styled ? selection_appearance(normal, selected_style)
+                                        : normal | selected_style;
+            }
             paint_row_text(strip.subcanvas({x - scroll_, 0}, {widths[i], 1}),
                            " " + labels_[i] + " ", Align::Left, normal, layout_);
             x += widths[i];
+        }
+        if (theme().styled && canvas.size().height > 1) {
+            auto line = canvas.subcanvas({0, 1}, {canvas.size().width, 1});
+            fill(line, appearance({}, Surface::Border));
+            for (int col = 0; col < line.size().width; ++col)
+                line.write({col, 0}, theme().ascii ? U"-" : U"─",
+                           appearance({}, Surface::Border));
+            if (selected_index()) {
+                auto start = (int)std::lround(indicator_.value()) - scroll_;
+                auto count = std::max(0, (int)std::lround(indicator_width_.value()));
+                auto selected = appearance({}, Surface::Accent);
+                for (int col = 0; col < count; ++col) {
+                    auto glyph =
+                        theme().ascii
+                            ? U"="
+                            : (col == 0 ? U"╺" : (col == count - 1 ? U"╸" : U"━"));
+                    line.write({start + col, 0}, glyph, selected);
+                }
+            }
         }
         return {};
     }
     auto handle(MousePress const& e) -> EventResponse override
     {
-        if (e.button != MouseButton::Left || e.at.y != 0 || e.at.x < 0 ||
-            e.at.x >= size().width) {
+        if (e.button != MouseButton::Left || (e.at.y < 0 || e.at.y >= strip_height()) ||
+            e.at.x < 0 || e.at.x >= size().width) {
             return {};
         }
         auto x = e.at.x + scroll_;
@@ -141,14 +165,45 @@ class Tabs : public Widget {
    protected:
     void on_arrange(Rect) override
     {
-        arrange(pages, {{0, std::min(1, size().height)},
-                        {size().width, std::max(0, size().height - 1)}});
+        update_indicator(last_width_ != size().width);
+        last_width_ = size().width;
+        auto height = std::min(strip_height(), size().height);
+        arrange(pages,
+                {{0, height}, {size().width, std::max(0, size().height - height)}});
     }
 
    private:
     std::vector<std::string> labels_;
     TextLayout layout_;
     int scroll_ = 0;
+    int last_width_ = -1;
+    bool indicator_ready_ = false;
+    Animation indicator_{*this};
+    Animation indicator_width_{*this};
+    auto strip_height() const -> int { return theme().styled ? 2 : 1; }
+    void update_indicator(bool snap = false)
+    {
+        if (!theme().styled) return;
+        auto widths = tab_widths(glyph_width_policy());
+        auto index = selected_index();
+        int start = 0, width = 0;
+        if (index && *index < widths.size()) {
+            for (std::size_t i = 0; i < *index; ++i)
+                start += widths[i];
+            width = widths[*index];
+        }
+        if (snap || !indicator_ready_) {
+            indicator_.reset(start);
+            indicator_width_.reset(width);
+            indicator_ready_ = true;
+        }
+        else {
+            if (indicator_.target() != start)
+                indicator_.to(start, {theme().motion.selection, Ease::OutCubic});
+            if (indicator_width_.target() != width)
+                indicator_width_.to(width, {theme().motion.selection, Ease::OutCubic});
+        }
+    }
     auto tab_widths(esc::WidthPolicy policy) const -> std::vector<int>
     {
         auto widths = std::vector<int>{};

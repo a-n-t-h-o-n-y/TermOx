@@ -12,11 +12,13 @@
 #include <ox/controls.hpp>
 #include <ox/datatable.hpp>
 #include <ox/focus.hpp>
+#include <ox/keyhelp.hpp>
 #include <ox/label.hpp>
 #include <ox/layout.hpp>
 #include <ox/lineedit.hpp>
 #include <ox/listview.hpp>
 #include <ox/menu.hpp>
+#include <ox/motion.hpp>
 #include <ox/pixelgrid.hpp>
 #include <ox/popup.hpp>
 #include <ox/put.hpp>
@@ -29,6 +31,7 @@
 #include <ox/tabs.hpp>
 #include <ox/text_view.hpp>
 #include <ox/textbox.hpp>
+#include <ox/theme.hpp>
 #include <ox/timer.hpp>
 #include <ox/widget.hpp>
 

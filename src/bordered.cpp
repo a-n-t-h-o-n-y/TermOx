@@ -44,7 +44,12 @@ Divider::Divider(Options x)
 {}
 auto Divider::paint(Canvas canvas) -> Cursor
 {
-    paint_divider(canvas, vertical, lines, style, label);
+    auto caption = label;
+    caption.style = appearance(caption.style, Surface::Muted);
+    auto strokes = lines;
+    if (theme().styled && theme().ascii) strokes = Lines::ascii();
+    paint_divider(canvas, vertical, strokes, appearance(style, Surface::Border),
+                  caption);
     return {};
 }
 }  // namespace ox

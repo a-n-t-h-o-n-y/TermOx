@@ -41,7 +41,8 @@ class Padding : public Widget {
         layout_child();
     }
 
-    void paint_background(Canvas canvas) override { fill(canvas, U' ' | style); }
+    void paint_background(Canvas canvas) override
+    { fill(canvas, U' ' | appearance(style)); }
     auto get_children() -> zzz::Generator<Widget&> override { co_yield child; }
     auto get_children() const -> zzz::Generator<Widget const&> override
     { co_yield child; }
@@ -257,7 +258,8 @@ class ScrollView : public Widget {
         auto const changed = set_scroll_offset(next);
         return {.handled = true, .repaint = changed};
     }
-    void paint_background(Canvas canvas) override { fill(canvas, U' ' | style); }
+    void paint_background(Canvas canvas) override
+    { fill(canvas, U' ' | appearance(style)); }
     auto get_children() -> zzz::Generator<Widget&> override { co_yield child; }
     auto get_children() const -> zzz::Generator<Widget const&> override
     { co_yield child; }

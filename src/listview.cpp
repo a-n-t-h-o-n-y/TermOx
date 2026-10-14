@@ -92,6 +92,11 @@ auto ListView::measure(Area available, esc::WidthPolicy policy) const -> Area
         layouts_[i].update(items_[i].text, available.width, TextWrap::None, policy);
         width = std::max(width, text_content_size(layouts_[i]).width);
     }
+    if (theme().styled) {
+        if (width > std::numeric_limits<int>::max() - 2)
+            throw std::length_error{"List extent"};
+        width += 2;
+    }
     return {width, (int)items_.size()};
 }
 void ListView::update_viewport()
@@ -201,16 +206,26 @@ auto ListView::paint(Canvas canvas) -> Cursor
         auto normal = appearance(style) | item.style;
         if (!item.enabled) { normal = normal | disabled_style; }
         if (std::ranges::binary_search(selection_.rows, (std::size_t)row)) {
-            normal = normal | selected_style;
+            normal = selection_appearance(normal, selected_style);
         }
         if (is_focused() && selection_.current == (std::size_t)row) {
             normal = normal | current_style;
         }
         auto line = canvas.subcanvas({0, row - offset_.y}, {size().width, 1});
         fill(line, normal);
-        paint_row_text(line.subcanvas({-offset_.x, 0},
-                                      {std::max(content_.width, size().width), 1}),
-                       item.text, Align::Left, normal, layouts_[(std::size_t)row]);
+        auto gutter = theme().styled ? 2 : 0;
+        if (gutter && (selection_.current == (std::size_t)row ||
+                       std::ranges::binary_search(selection_.rows, (std::size_t)row))) {
+            auto marker = normal;
+            marker.foreground = theme().palette.accent;
+            line.write({0, 0}, theme().ascii ? U">" : U"╺", marker);
+        }
+        paint_row_text(
+            line.subcanvas({gutter, 0}, {std::max(0, size().width - gutter), 1})
+                .subcanvas(
+                    {-offset_.x, 0},
+                    {std::max(0, std::max(content_.width, size().width) - gutter), 1}),
+            item.text, Align::Left, normal, layouts_[(std::size_t)row]);
     }
     return {};
 }

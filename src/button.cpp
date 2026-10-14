@@ -1,4 +1,5 @@
 #include <ox/button.hpp>
+#include <ox/put.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -16,7 +17,12 @@ Button::Button(Options x)
       pressed_style{x.pressed_style},
       focused_style{x.focused_style},
       decoration{std::move(x.decoration)}
-{}
+{
+    feedback_.on_frame([lifetime = track(*this)](double value) {
+        if (auto* self = lifetime.try_get()) self->fade_percent = (float)value;
+        return EventResponse{.repaint = true};
+    });
+}
 
 Button::Button(Button&& other)
     : Widget{std::move(other)},
@@ -33,8 +39,8 @@ Button::Button(Button&& other)
       armed_{std::exchange(other.armed_, decltype(other.armed_){})},
       gesture_{std::exchange(other.gesture_, decltype(other.gesture_){})},
       measure_layout_{std::move(other.measure_layout_)},
-      timer_{std::move(other.timer_)}
-{ other.timer_.reset(); }
+      feedback_{std::move(other.feedback_)}
+{}
 auto Button::operator=(Button&& other) -> Button&
 {
     if (this == &other) { return *this; }
@@ -52,16 +58,46 @@ auto Button::operator=(Button&& other) -> Button&
     armed_ = std::exchange(other.armed_, decltype(other.armed_){});
     gesture_ = std::exchange(other.gesture_, decltype(other.gesture_){});
     measure_layout_ = std::move(other.measure_layout_);
-    timer_ = std::move(other.timer_);
-    other.timer_.reset();
+    feedback_ = std::move(other.feedback_);
     return *this;
 }
 auto Button::paint(Canvas canvas) -> Cursor
 {
-    auto style = appearance(label.style);
+    auto const& visual = theme();
+    auto style = appearance(label.style, Surface::Raised);
+    if (visual.styled) {
+        auto amount = feedback_.active() ? feedback_.value()
+                                         : (hovered_ || is_focused() ? 1. : 0.);
+        if (label.style.background == Color{default_color})
+            style.background =
+                mix_color(visual.palette.surface, visual.palette.selection, amount);
+        if (label.style.foreground == Color{default_color})
+            style.foreground =
+                mix_color(visual.palette.foreground, visual.palette.accent, amount);
+        if (pressed_) {
+            style.background = visual.palette.accent;
+            style.foreground = visual.palette.background;
+        }
+    }
     if (is_focused()) { style = style | focused_style; }
     if (pressed_) { style = style | pressed_style; }
-    paint_label(canvas, label.text, label.align, style, label.vertical);
+    if (!is_enabled()) style = style | disabled_style;
+    if (visual.styled) {
+        fill(canvas, style);
+        auto inset = std::min(2, canvas.size().width);
+        paint_label(
+            canvas.subcanvas({inset, 0}, {std::max(0, canvas.size().width - 2 * inset),
+                                          canvas.size().height}),
+            label.text, label.align, style, label.vertical);
+        if (is_focused() && canvas.size().width > 1 && canvas.size().height > 0) {
+            auto y = canvas.size().height / 2;
+            canvas.write({0, y}, visual.ascii ? U"[" : U"╺", style);
+            canvas.write({canvas.size().width - 1, y}, visual.ascii ? U"]" : U"╸",
+                         style);
+        }
+    }
+    else
+        paint_label(canvas, label.text, label.align, style, label.vertical);
     if (auto* paint = std::get_if<PaintFn>(&decoration)) {
         if (*paint) { (*paint)(canvas); }
     }
@@ -74,7 +110,13 @@ auto Button::paint(Canvas canvas) -> Cursor
 auto Button::measure(Area available, esc::WidthPolicy policy) const -> Area
 {
     validate(available);
-    return measure_label(measure_layout_, label.text, label.vertical, policy);
+    auto result = measure_label(measure_layout_, label.text, label.vertical, policy);
+    if (theme().styled) {
+        if (result.width > std::numeric_limits<int>::max() - 4)
+            throw std::length_error{"Button extent"};
+        result.width += 4;
+    }
+    return result;
 }
 auto Button::activate() -> bool
 {
@@ -159,41 +201,18 @@ auto Button::mouse_leave() -> EventResponse
 void Button::animate()
 {
     auto const* fade = std::get_if<Fade>(&decoration);
-    if (!fade) {
-        if (timer_) { timer_->stop(); }
+    if (!fade && !theme().styled) {
+        feedback_.reset(0);
+        fade_percent = 0;
         return;
     }
-    auto const selected = hovered_ || is_focused();
-    auto const target = selected ? 1.f : 0.f;
-    auto const duration = selected ? fade->fade_in : fade->fade_out;
-    if (duration.count() <= 0) { fade_percent = target; }
-    if (fade_percent == target) {
-        if (timer_) { timer_->stop(); }
-        return;
-    }
-    if (!timer_) {
-        timer_.emplace(*this, std::chrono::milliseconds{timer_period_ms},
-                       [](Button& button) { return button.tick(); });
-    }
-    if (!timer_->is_running()) { timer_->start(); }
+    auto selected = hovered_ || is_focused();
+    auto duration =
+        fade ? (selected ? fade->fade_in : fade->fade_out) : theme().motion.feedback;
+    feedback_.to(selected ? 1. : 0., {duration, Ease::OutCubic});
+    fade_percent = (float)feedback_.value();
 }
-
-auto Button::tick() -> EventResponse
-{
-    auto const* fade = std::get_if<Fade>(&decoration);
-    if (!fade) {
-        if (timer_) { timer_->stop(); }
-        return {};
-    }
-    auto const before = fade_percent;
-    auto const selected = hovered_ || is_focused();
-    auto const duration = selected ? fade->fade_in : fade->fade_out;
-    auto const delta =
-        duration.count() > 0 ? timer_period_ms / (float)duration.count() : 1.f;
-    fade_percent = std::clamp(fade_percent + (selected ? delta : -delta), 0.f, 1.f);
-    if (fade_percent == (selected ? 1.f : 0.f) && timer_) { timer_->stop(); }
-    return {.handled = true, .repaint = before != fade_percent};
-}
+auto Button::tick() -> EventResponse { return feedback_.advance(); }
 
 auto gradient_blend(RGB one, RGB two, float percent) -> RGB
 {

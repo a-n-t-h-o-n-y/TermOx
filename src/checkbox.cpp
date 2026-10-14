@@ -58,6 +58,13 @@ auto CheckBox::paint(Canvas canvas) -> Cursor
 {
     auto const& glyphs = checked_ ? checked_glyphs : unchecked_glyphs;
     auto patch = is_focused() ? focused_style : StylePatch{};
+    if (theme().styled) {
+        if (!patch.background && label.style.background == Color{default_color})
+            patch.background = theme().palette.background;
+        if (!patch.foreground && label.style.foreground == Color{default_color})
+            patch.foreground = checked_ || is_focused() ? theme().palette.accent
+                                                        : theme().palette.muted;
+    }
     if (!is_enabled()) { patch = patch | disabled_style; }
     paint_label(canvas, "", Align::Left, appearance(label.style));
     put(canvas, {0, 0}, glyphs, patch);
@@ -66,9 +73,10 @@ auto CheckBox::paint(Canvas canvas) -> Cursor
     if (!width) { throw std::invalid_argument{"Invalid checkbox indicator"}; }
     if (!label.text.empty() && *width < (std::size_t)canvas.size().width) {
         auto const at = (int)*width + 1;
-        paint_label(canvas.subcanvas({at, 0}, {std::max(canvas.size().width - at, 0),
-                                               canvas.size().height}),
-                    label.text, label.align, label.style | patch, label.vertical);
+        paint_label(
+            canvas.subcanvas(
+                {at, 0}, {std::max(canvas.size().width - at, 0), canvas.size().height}),
+            label.text, label.align, appearance(label.style | patch), label.vertical);
     }
     return {};
 }

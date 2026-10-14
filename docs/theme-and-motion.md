@@ -1,0 +1,143 @@
+# Theme and motion
+
+TermOx can apply one visual policy to the entire widget tree:
+
+```cpp
+auto app = ox::Application{root};
+auto theme = ox::Theme::dark();
+theme.motion.frames_per_second = 60;
+app.set_theme(theme);
+return app.run({.mouse_mode = ox::MouseMode::Move});
+```
+
+`Theme::dark()` uses graphite green surfaces, copper accents, and teal secondary
+color. `Theme::light()` uses warm light surfaces with the same roles.
+`Theme::terminal()` uses the terminal's colors and ASCII control decorations.
+`Theme::plain()` is the default and retains existing drawing and layout.
+
+The styled themes use open-ended focus marks, a moving tab underline, restrained
+selection backgrounds, generous button insets, and fractional progress fills.
+Widget values, selection, focus, and input remain immediate. Motion affects
+presentation; tab contents change immediately while the underline moves.
+
+## Colors and overrides
+
+`theme.palette` exposes `background`, `surface`, `foreground`, `muted`, `accent`,
+`secondary`, `positive`, `negative`, `border`, and `selection`. Customize these
+roles and call `set_theme()` again. Theme changes repaint and recalculate layout,
+including widgets attached later or shown on another page.
+
+Explicit widget foreground/background colors take precedence over theme defaults.
+Custom state patches still apply after the theme's state styling. For custom
+widgets, use `appearance(style, Surface::Raised)` or another semantic role;
+`selection_appearance(style, selected_style)` applies selection consistently.
+Plain `Canvas` drawing remains explicit.
+
+Labels accept a role without needing a color:
+
+```cpp
+auto heading = ox::Label{{.text = "Settings", .role = ox::Surface::Accent}};
+auto detail = ox::Label{{.text = "Saved locally", .role = ox::Surface::Muted}};
+```
+
+Set `theme.ascii = true` for ASCII borders, tab indicators, focus markers,
+scrollbar thumbs, sliders, meters, spinner, and keyboard-help symbols. This does not
+transliterate application text or pixel graphics. RGB themes depend on the
+terminal's color support; select `Theme::terminal()` when palette colors are
+preferred. TermOx does not guess a user's font or terminal capabilities.
+
+## Motion
+
+`theme.motion.enabled = false` makes transitions immediate and stops themed
+spinner timers. This does not disable application timers: background work and
+model updates continue. There is no automatic operating-system preference lookup;
+applications can expose a switch, as the showcase does.
+
+The policy provides `feedback` (120 ms), `selection` (160 ms), and `progress`
+(240 ms) durations, plus a shared frame-rate limit (60 by default; 1–240 allowed).
+Zero durations settle immediately. Buttons, tabs, progress bars, and scrollbar
+settling share the event loop's frame clock. Idle transitions schedule no wakes.
+Dragging scrollbars and editing values remain direct.
+
+Custom widgets can bind presentation to their lifetime:
+
+```cpp
+class Indicator : public ox::Widget {
+    ox::Animation amount_{*this};
+public:
+    void show(double value) {
+        amount_.to(value, {theme().motion.feedback, ox::Ease::OutCubic});
+    }
+    auto paint(ox::Canvas canvas) -> ox::Cursor override {
+        ox::paint_meter(canvas, amount_.value(),
+                        appearance({}, ox::Surface::Accent),
+                        appearance({}, ox::Surface::Border));
+        return {};
+    }
+};
+```
+
+Retain the `Animation` as a member. It follows widget moves, requests repaint,
+respects reduced motion, and unregisters when destroyed. Hidden subtrees do not
+schedule frames; reattachment catches up using elapsed time. Disabled widgets
+settle without animation. `on_frame()` can return additional effects; capture a
+tracked widget when a callback refers to widget storage. Frame callbacks run on
+the application thread, and only when the sampled value changes. Immediate
+transitions do not invoke frame callbacks; model changes belong in the command
+that starts the transition.
+
+`Tween` provides the same elapsed-time interpolation without a widget or scheduler.
+`Linear`, `OutCubic`, `InOutCubic`, and `Spring` are available. `Spring` is a
+normalized critically damped curve with a finite duration and no overshoot.
+Retargeting samples the current position before starting the next transition.
+
+## Keyboard help
+
+`KeyHelp` displays and dispatches the same `Shortcut` definitions. Its actions are
+scoped through the normal widget shortcut routing. Empty actions are help-only.
+Only press events trigger actions; disabled bindings are omitted.
+
+```cpp
+auto help = ox::KeyHelp{{
+    {.keys = {{ox::KeyCode::F2, {}}}, .description = "theme",
+     .action = [&] { app.set_theme(ox::Theme::light());
+                    return ox::EventResponse{}; }},
+}};
+```
+
+Include the help widget in the tree. `expanded = true` enables wrapped help;
+call `refresh()` after changing public bindings or the expanded flag. Applications
+can also use `key_label()` and `dispatch_shortcuts()` independently.
+
+## Showcase
+
+Build and run from the repository root:
+
+```sh
+cmake -S . -B build
+cmake --build build --target TermOx.examples.showcase
+./build/examples/TermOx.examples.showcase
+```
+
+The six pages cover animation and values; a validated form and selection controls;
+filterable lists, tables, trees, logs, and split panes; Unicode text editing and
+labels; pixel graphics; and file picking. Menus, a command palette, dialogs,
+keyboard help, linked scrollbars, and responsive layouts connect the pages.
+
+Use Tab for focus, Ctrl+Tab to change pages, Ctrl+P for commands, F1 for expanded
+help, F2 for theme, F3 for motion, and Ctrl+C to exit. The toolbar also exposes
+motion and ASCII controls. The example offers deterministic headless checks:
+
+```sh
+./build/examples/TermOx.examples.showcase --check
+./build/examples/TermOx.examples.showcase --dump --page 2 --width 120 --height 38
+./build/examples/TermOx.examples.showcase --json --light
+```
+
+On POSIX systems, run `python3 -B tests/smoke_showcase.py build` to exercise input,
+resizing, overlays, and terminal restoration through a pseudo-terminal.
+
+`--page` accepts 0–5. `--terminal` chooses terminal colors. Dumps disable motion
+and print actual frame contents; JSON includes each cell's text, width, and RGB
+colors when present. `--check` exercises every page at large, narrow, tiny, and
+zero sizes, plus validation, filtering, overlays, and theme changes.

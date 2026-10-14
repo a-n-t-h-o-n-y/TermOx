@@ -1,5 +1,4 @@
 #pragma once
-#include <ox/scrollbar.hpp>
 #include <chrono>
 #include <ox/scrollbar.hpp>
 #include <ox/selection.hpp>

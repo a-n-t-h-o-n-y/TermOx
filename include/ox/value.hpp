@@ -5,6 +5,13 @@
 #include <ox/lineedit.hpp>
 #include <ox/timer.hpp>
 namespace ox {
+/** Fractional block fill, clipped to the supplied canvas. Fractions clamp to [0,1]. */
+void paint_meter(Canvas,
+                 double fraction,
+                 Style fill_style,
+                 Style track_style,
+                 bool vertical = false,
+                 bool ascii = false);
 void validate(ValueRange);
 auto clamp_value(double, ValueRange) -> double;
 auto value_fraction(double, ValueRange) -> double;
@@ -66,6 +73,7 @@ class ProgressBar : public Widget {
    private:
     ValueRange range_;
     double value_;
+    Animation display_{*this};
 };
 /** Animated status indicator. No timer runs while stopped; timers follow widget moves.
  */
@@ -87,10 +95,12 @@ class Spinner : public Widget {
     void set_frames(std::vector<std::string>);
     auto frames() const -> std::span<std::string const> { return frames_; }
     auto tick() -> EventResponse;
+    void theme_changed() override;
     auto measure(Area, esc::WidthPolicy = {}) const -> Area override;
     auto paint(Canvas) -> Cursor override;
 
    private:
+    bool running_ = true;
     std::vector<std::string> frames_;
     std::size_t frame_ = 0;
     Timer timer_;

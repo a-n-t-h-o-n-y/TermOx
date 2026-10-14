@@ -113,3 +113,8 @@ target_link_libraries(TermOx.examples.selection PRIVATE TermOx)
 add_executable(TermOx.examples.views EXCLUDE_FROM_ALL views.cpp)
 target_compile_options(TermOx.examples.views PRIVATE -Wall -Wextra -Wpedantic)
 target_link_libraries(TermOx.examples.views PRIVATE TermOx)
+
+# Complete interactive showcase, with optional deterministic headless checks/snapshots.
+add_executable(TermOx.examples.showcase EXCLUDE_FROM_ALL showcase.cpp)
+target_compile_options(TermOx.examples.showcase PRIVATE -Wall -Wextra -Wpedantic)
+target_link_libraries(TermOx.examples.showcase PRIVATE TermOx)

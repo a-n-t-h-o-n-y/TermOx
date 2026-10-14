@@ -42,6 +42,7 @@ class Label : public Widget {
         bool vertical = false;
         Align align = Align::Center;
         Style style = {};
+        Surface role = Surface::Canvas;
         SizePolicy width_policy = vertical ? SizePolicy{.minimum = 1, .flexibility = 0}
                                            : SizePolicy::flex();
         SizePolicy height_policy = vertical ? SizePolicy::flex() : SizePolicy::fixed(1);
@@ -52,6 +53,7 @@ class Label : public Widget {
     bool vertical;
     Align align;
     Style style;
+    Surface role;
 
     Label(Options x = init);
 
@@ -98,6 +100,7 @@ class BasicNumberLabel : public Widget {
         NumberType value = 0;
         Align align = Align::Center;
         Style style = {};
+        Surface role = Surface::Canvas;
         std::locale locale = std::locale{};
         std::string format = "{}";
         std::string prefix = {};
@@ -110,6 +113,7 @@ class BasicNumberLabel : public Widget {
     NumberType value;
     Align align;
     Style style;
+    Surface role;
     std::locale locale;
     std::string format;
     std::string prefix;
@@ -120,6 +124,7 @@ class BasicNumberLabel : public Widget {
           value{std::move(x.value)},
           align{std::move(x.align)},
           style{std::move(x.style)},
+          role{x.role},
           locale{std::move(x.locale)},
           format{std::move(x.format)},
           prefix{std::move(x.prefix)},
@@ -143,7 +148,7 @@ class BasicNumberLabel : public Widget {
     auto paint(Canvas c) -> Cursor override
     {
         auto const text = prefix + std::vformat(locale, format, std::make_format_args(value)) + suffix;
-        paint_label(c, text, align, appearance(style));
+        paint_label(c, text, align, appearance(style, role));
 
         return {};
     }

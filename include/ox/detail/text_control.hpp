@@ -499,7 +499,14 @@ auto TextControl<Multiline>::paint(Canvas canvas) -> Cursor
     }
     scroll_ = {clamp_scroll(scroll_.x, content.width, canvas.size().width),
                clamp_scroll(scroll_.y, content.height, canvas.size().height)};
-    auto const normal = appearance(style);
+    auto normal = appearance(style, Surface::Raised);
+    if constexpr (!Multiline) {
+        if (theme().styled && is_focused()) {
+            normal.traits.insert(Trait::Underline);
+            if (style.foreground == Color{default_color})
+                normal.foreground = theme().palette.accent;
+        }
+    }
     fill(canvas, U' ' | normal);
     auto view = canvas.subcanvas(
         {}, {canvas.size().width,
@@ -507,12 +514,15 @@ auto TextControl<Multiline>::paint(Canvas canvas) -> Cursor
     if (editor_.text().empty() && !placeholder.empty()) {
         placeholder_layout_.update(placeholder, canvas.size().width, wrap,
                                    canvas.width_policy());
-        paint_text(view, placeholder_layout_, align, {}, normal | placeholder_style,
-                   normal | placeholder_style);
+        auto placeholder = normal | placeholder_style;
+        if (theme().styled &&
+            placeholder_style.foreground == std::optional<Color>{colors::bright_black})
+            placeholder.foreground = theme().palette.muted;
+        paint_text(view, placeholder_layout_, align, {}, placeholder, placeholder);
     }
     else {
-        paint_text(view, layout_, align, scroll_, normal, normal | selection_style,
-                   editor_.selection());
+        paint_text(view, layout_, align, scroll_, normal,
+                   selection_appearance(normal, selection_style), editor_.selection());
     }
     auto const point =
         text_position(layout_, editor_.caret(), canvas.size(), align, scroll_);

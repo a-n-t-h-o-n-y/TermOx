@@ -54,10 +54,7 @@ class ScrollBar : public Widget {
     int viewport_length_;
     int position_;
     std::optional<int> drag_offset_;
-    std::optional<Timer> timer_;
-    std::chrono::steady_clock::time_point started_;
-    int start_ = 0;
-    int target_ = 0;
+    Animation movement_{*this};
     auto move_to(int position) -> EventResponse;
 };
 }  // namespace ox

@@ -31,6 +31,8 @@ class Application {
 
     auto loop() -> EventLoop& { return loop_; }
     auto focus() const -> Focus const& { return focus_; }
+    auto theme() const -> Theme const& { return theme_; }
+    void set_theme(Theme theme);
     void set_focus(Widget& widget);
     void clear_focus();
     /** Immediate delivery and effect application; post() defers delivery. */
@@ -60,6 +62,7 @@ class Application {
     std::string clipboard_text_;
     LifetimeView<Widget> head_;
     EventLoop loop_;
+    Theme theme_ = Theme::plain();
     Focus focus_;
     std::vector<LifetimeView<Widget>> attached_;
     std::vector<WidgetNode> tree_;

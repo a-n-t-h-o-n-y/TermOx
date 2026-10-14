@@ -8,6 +8,30 @@
 #include <ox/value.hpp>
 #include <sstream>
 namespace ox {
+void paint_meter(Canvas canvas,
+                 double fraction,
+                 Style filled,
+                 Style track,
+                 bool vertical,
+                 bool ascii)
+{
+    if (!std::isfinite(fraction)) throw std::invalid_argument{"Nonfinite meter value"};
+    fraction = std::clamp(fraction, 0., 1.);
+    fill(canvas, track);
+    auto n = vertical ? canvas.size().height : canvas.size().width;
+    auto levels = std::u32string_view{vertical ? U" ▁▂▃▄▅▆▇█" : U" ▏▎▍▌▋▊▉█"};
+    auto amount = fraction * n;
+    for (int i = 0; i < n; ++i) {
+        auto coverage = std::clamp(amount - i, 0., 1.);
+        auto glyph = ascii ? (coverage >= .5 ? U'#' : U'-')
+                           : levels[(std::size_t)std::lround(coverage * 8)];
+        auto at = vertical ? Point{0, n - 1 - i} : Point{i, 0};
+        if (coverage > 0)
+            canvas.write(at, std::u32string_view{&glyph, 1}, filled);
+        else
+            canvas.write(at, ascii ? U"-" : U"─", track);
+    }
+}
 void validate(ValueRange r)
 {
     if (!std::isfinite(r.minimum) || !std::isfinite(r.maximum) ||
@@ -94,7 +118,7 @@ auto Slider::measure(Area a, esc::WidthPolicy) const -> Area
 }
 auto Slider::paint(Canvas c) -> Cursor
 {
-    auto s = appearance(style);
+    auto s = appearance(style, Surface::Accent);
     if (is_focused()) { s = s | Trait::Bold; }
     fill(c, s);
     auto n = vertical ? c.size().height : c.size().width;
@@ -103,7 +127,10 @@ auto Slider::paint(Canvas c) -> Cursor
     if (vertical) { at = n - 1 - at; }
     for (int i = 0; i < n; ++i) {
         c.write(vertical ? Point{0, i} : Point{i, 0},
-                i == at ? U"●" : (vertical ? U"│" : U"─"), s);
+                theme().styled && theme().ascii
+                    ? (i == at ? U"o" : (vertical ? U"|" : U"-"))
+                    : (i == at ? U"●" : (vertical ? U"│" : U"─")),
+                s);
     }
     return {};
 }
@@ -178,14 +205,20 @@ ProgressBar::ProgressBar(Options x)
       show_percentage{x.show_percentage},
       range_{x.range},
       value_{clamp_value(x.value, x.range)}
-{}
+{ display_.reset(value_fraction(value_, range_)); }
 auto ProgressBar::set_value(double v) -> bool
 {
     v = clamp_value(v, range_);
-    if (std::exchange(value_, v) == v) return false;
-    request_repaint();
-    on_change(v);
-    return true;
+    auto changed = std::exchange(value_, v) != v;
+    display_.to(
+        value_fraction(v, range_),
+        {theme().styled ? theme().motion.progress : std::chrono::milliseconds{0},
+         Ease::Spring});
+    if (changed) {
+        request_repaint();
+        on_change(v);
+    }
+    return changed;
 }
 auto ProgressBar::set_range(ValueRange r) -> bool
 {
@@ -203,12 +236,18 @@ auto ProgressBar::measure(Area a, esc::WidthPolicy) const -> Area
 }
 auto ProgressBar::paint(Canvas c) -> Cursor
 {
-    auto s = appearance(style);
+    auto s = appearance(style, Surface::Accent);
     fill(c, s);
     auto f = value_fraction(value_, range_);
+    if (theme().styled) {
+        auto visual = display_.active() ? display_.value() : f;
+        paint_meter(c, visual, s, appearance({}, Surface::Border), false,
+                    theme().ascii);
+    }
     auto filled = (int)std::llround(f * c.size().width);
-    for (int x = 0; x < c.size().width; ++x)
-        c.write({x, 0}, x < filled ? U"█" : U"░", s);
+    if (!theme().styled)
+        for (int x = 0; x < c.size().width; ++x)
+            c.write({x, 0}, x < filled ? U"█" : U"░", s);
     if (show_percentage) {
         auto label = std::to_string((int)std::llround(f * 100)) + "%";
         put(c, {std::max(0, (c.size().width - (int)label.size()) / 2), 0},
@@ -220,16 +259,23 @@ Spinner::Spinner() : Spinner{Options{}} {}
 Spinner::Spinner(Options x)
     : Widget{FocusPolicy::None, SizePolicy{.flexibility = 0}, SizePolicy::fixed(1)},
       style{x.style},
+      running_{x.running},
       timer_{*this, x.interval, [](Spinner& s) { return s.tick(); }, x.running}
 { set_frames(std::move(x.frames)); }
-auto Spinner::is_running() const -> bool { return timer_.is_running(); }
-auto Spinner::set_running(bool run) -> bool
+auto Spinner::is_running() const -> bool { return running_; }
+void Spinner::theme_changed()
 {
-    if (run == is_running()) return false;
-    if (run)
-        timer_.start();
+    if (running_ && theme().motion.enabled) {
+        if (!timer_.is_running()) timer_.start();
+    }
     else
         timer_.stop();
+}
+auto Spinner::set_running(bool run) -> bool
+{
+    if (run == running_) return false;
+    running_ = run;
+    theme_changed();
     request_repaint();
     on_change(run);
     return true;
@@ -245,7 +291,7 @@ void Spinner::set_frames(std::vector<std::string> f)
 }
 auto Spinner::tick() -> EventResponse
 {
-    if (!is_running() || frames_.empty()) return {};
+    if (!running_ || !theme().motion.enabled || frames_.empty()) return {};
     frame_ = (frame_ + 1) % frames_.size();
     return {.repaint = true};
 }
@@ -260,7 +306,11 @@ auto Spinner::measure(Area a, esc::WidthPolicy p) const -> Area
 auto Spinner::paint(Canvas c) -> Cursor
 {
     if (!frames_.empty())
-        paint_row_text(c, frames_[frame_], Align::Left, appearance(style), layout_);
+        paint_row_text(c,
+                       theme().styled && theme().ascii
+                           ? std::string_view{"*"}
+                           : std::string_view{frames_[frame_]},
+                       Align::Left, appearance(style, Surface::Accent), layout_);
     return {};
 }
 Switch::Switch() : Switch{CheckBox::Options{}} {}

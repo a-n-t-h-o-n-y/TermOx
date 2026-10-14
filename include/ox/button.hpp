@@ -89,8 +89,7 @@ class Button : public Widget {
     bool armed_ = false;
     std::size_t gesture_ = 0;
     mutable TextLayout measure_layout_;
-    static constexpr auto timer_period_ms = 10;
-    std::optional<Timer> timer_;
+    Animation feedback_{*this};
     void animate();
 };
 

@@ -18,6 +18,7 @@
 #include <ox/core/canvas.hpp>
 #include <ox/core/events.hpp>
 #include <ox/core/layout.hpp>
+#include <ox/motion.hpp>
 #include <ox/timer.hpp>
 
 namespace ox {
@@ -67,8 +68,14 @@ class Widget {
                                  .foreground = {},
                                  .enabled = Trait::Dim,
                                  .disabled = {}};
-    auto appearance(Style normal) const -> Style
-    { return is_enabled() ? normal : normal | disabled_style; }
+    auto theme() const -> Theme const&;
+    auto appearance(Style normal, Surface role = Surface::Canvas) const -> Style
+    {
+        normal = theme_style(normal, theme(), role);
+        return is_enabled() ? normal : normal | disabled_style;
+    }
+    auto selection_appearance(Style normal, StylePatch const& patch) const -> Style
+    { return theme_selection(normal, patch, theme()); }
 
     [[nodiscard]] auto bounds() const -> Rect { return bounds_; }
     [[nodiscard]] auto at() const -> Point { return bounds_.at; }
@@ -124,6 +131,9 @@ class Widget {
         request_layout();
         request_repaint();
     }
+    /** Called after attachment and application theme changes. Do not emit model
+     * changes. */
+    virtual void theme_changed() {}
     virtual auto pointer_cancel() -> EventResponse { return {}; }
     auto capture_pointer(MouseButton button = MouseButton::Left) -> bool;
     void release_pointer();
@@ -154,6 +164,7 @@ class Widget {
     template <typename, bool>
     friend class detail::LinearLayout;
     friend class Timer;
+    friend class Animation;
     friend class Application;
     friend class Focus;
     friend void arrange(Widget&, Rect);
@@ -165,6 +176,7 @@ class Widget {
     mutable std::shared_ptr<Widget*> lifetime_ = std::make_shared<Widget*>(this);
     Application* application_ = nullptr;
     std::vector<std::weak_ptr<Timer::State>> timers_;
+    std::vector<std::weak_ptr<Animation::State>> animations_;
 };
 
 /**

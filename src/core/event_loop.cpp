@@ -49,6 +49,8 @@ EventLoop::EventLoop()
 
 EventLoop::~EventLoop()
 {
+    for (auto const& entry : animations_)
+        if (auto a = entry.lock(); a && a->owner == this) a->owner = nullptr;
 #ifdef _WIN32
     CloseHandle((HANDLE)wake_.value);
 #else
@@ -219,6 +221,80 @@ auto EventLoop::wait_duration(Clock::time_point now) const -> std::chrono::milli
             std::chrono::ceil<std::chrono::milliseconds>(*timer->deadline - now);
         wait = std::min(wait, std::max(remaining, std::chrono::milliseconds{0}));
     }
+    for (auto const& entry : animations_) {
+        auto a = entry.lock();
+        if (!a || a->owner != this || !a->tween.active() || !a->eligible()) continue;
+        auto remaining =
+            next_frame_
+                ? std::chrono::ceil<std::chrono::milliseconds>(*next_frame_ - now)
+                : std::chrono::milliseconds{0};
+        wait = std::min(wait, std::max(remaining, std::chrono::milliseconds{0}));
+    }
     return wait;
+}
+void EventLoop::watch(Animation const& a) { watch(a.state_); }
+void EventLoop::watch(std::weak_ptr<Animation::State> entry)
+{
+    auto a = entry.lock();
+    if (!a) return;
+    if (a->owner && a->owner != this)
+        throw std::logic_error{"Animation belongs to another loop"};
+    if (std::ranges::none_of(animations_, [&](auto const& e) { return e.lock() == a; }))
+        animations_.push_back(std::move(entry));
+    a->owner = this;
+}
+void EventLoop::unwatch(std::weak_ptr<Animation::State> entry)
+{
+    if (auto a = entry.lock(); a && a->owner == this) a->owner = nullptr;
+}
+auto EventLoop::tick_animations(Clock::time_point now) -> EventResponse
+{
+    if (animations_ticking_ || (next_frame_ && now < *next_frame_)) return {};
+    std::erase_if(animations_, [this](auto const& entry) {
+        auto a = entry.lock();
+        return !a || a->owner != this;
+    });
+    if (std::ranges::none_of(animations_, [](auto const& entry) {
+            auto a = entry.lock();
+            return a && a->tween.active();
+        })) {
+        next_frame_.reset();
+        return {};
+    }
+    struct Guard {
+        bool& ticking;
+        ~Guard() { ticking = false; }
+    };
+    animations_ticking_ = true;
+    auto guard = Guard{animations_ticking_};
+    // Callbacks may remove/move owners or register further animations.
+    auto snapshot = animations_;
+    auto result = EventResponse{};
+    int fps = 1;
+    bool active = false;
+    for (auto const& entry : snapshot) {
+        auto a = entry.lock();
+        if (!a || a->owner != this) continue;
+        result = combine(result, Animation::advance(a, now));
+        if (result.quit) break;
+        if (a->owner == this && a->tween.active() && a->eligible()) {
+            active = true;
+            fps = std::max(fps, a->policy().frames_per_second);
+        }
+    }
+    // A callback may have started a newly registered animation.
+    for (auto const& entry : animations_) {
+        if (auto a = entry.lock();
+            a && a->owner == this && a->tween.active() && a->eligible()) {
+            active = true;
+            fps = std::max(fps, a->policy().frames_per_second);
+        }
+    }
+    if (active)
+        next_frame_ = now + std::chrono::duration_cast<Clock::duration>(
+                                std::chrono::duration<double>{1. / fps});
+    else
+        next_frame_.reset();
+    return result;
 }
 }  // namespace ox

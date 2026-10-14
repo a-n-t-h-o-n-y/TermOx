@@ -27,7 +27,8 @@ Widget::Widget(Widget&& other)
       input_enabled_{other.input_enabled_},
       lifetime_{std::move(other.lifetime_)},
       application_{std::exchange(other.application_, nullptr)},
-      timers_{std::move(other.timers_)}
+      timers_{std::move(other.timers_)},
+      animations_{std::move(other.animations_)}
 {
     if (!lifetime_) { lifetime_ = std::make_shared<Widget*>(this); }
     *lifetime_ = this;
@@ -36,6 +37,12 @@ Widget::Widget(Widget&& other)
 auto Widget::operator=(Widget&& other) -> Widget&
 {
     if (this == &other) { return *this; }
+    for (auto const& entry : animations_) {
+        if (auto a = entry.lock()) {
+            a->owner = nullptr;
+            a->tween.reset(a->tween.target());
+        }
+    }
     if (lifetime_) { *lifetime_ = nullptr; }
     for (auto const& entry : timers_) {
         if (auto timer = entry.lock()) {
@@ -58,6 +65,7 @@ auto Widget::operator=(Widget&& other) -> Widget&
     bounds_ = other.bounds_;
 
     application_ = std::exchange(other.application_, nullptr);
+    animations_ = std::move(other.animations_);
     timers_ = std::move(other.timers_);
     lifetime_ = std::move(other.lifetime_);
     if (!lifetime_) { lifetime_ = std::make_shared<Widget*>(this); }
@@ -90,6 +98,11 @@ auto Widget::clipboard() -> Clipboard&
         throw std::logic_error{"Clipboard requires an attached widget"};
     }
     return application_->clipboard;
+}
+auto Widget::theme() const -> Theme const&
+{
+    static auto const plain = Theme::plain();
+    return application_ ? application_->theme() : plain;
 }
 auto Widget::glyph_width_policy() const -> esc::WidthPolicy
 {
@@ -129,6 +142,12 @@ Widget::~Widget()
         if (auto timer = entry.lock()) {
             timer->deadline.reset();
             timer->owner = nullptr;
+        }
+    }
+    for (auto const& entry : animations_) {
+        if (auto a = entry.lock()) {
+            a->owner = nullptr;
+            a->tween.reset(a->tween.target());
         }
     }
     if (lifetime_) { *lifetime_ = nullptr; }

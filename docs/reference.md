@@ -1,5 +1,8 @@
 # API Reference
 
+See [theme and motion](theme-and-motion.md) for `Theme`, `MotionPolicy`, `Tween`,
+`Animation`, fractional meters, and `KeyHelp`.
+
 ## 🧩 ox::Application
 
 [`#include <ox/application.hpp>`](../include/ox/application.hpp)

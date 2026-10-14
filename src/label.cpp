@@ -85,6 +85,7 @@ Label::Label(Options x)
       vertical{x.vertical},
       align{std::move(x.align)},
       style{std::move(x.style)},
+      role{x.role},
       policy_vertical_{x.vertical}
 {}
 
@@ -126,7 +127,7 @@ auto Label::measure(Area available, esc::WidthPolicy policy) const -> Area
 }
 auto Label::paint(Canvas c) -> Cursor
 {
-    paint_label(c, text, align, appearance(style), vertical);
+    paint_label(c, text, align, appearance(style, role), vertical);
     return {};
 }
 

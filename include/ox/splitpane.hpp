@@ -92,12 +92,14 @@ class SplitPane : public Widget {
     }
     auto paint(Canvas c) -> Cursor override
     {
-        auto s = appearance(style);
+        auto s = appearance(style, Surface::Border);
         if (is_focused()) s = s | Trait::Bold;
         auto n = vertical ? size().width : size().height;
         for (int i = 0; i < n; ++i)
             c.write(vertical ? Point{i, divider_} : Point{divider_, i},
-                    vertical ? U"─" : U"│", s);
+                    theme().styled && theme().ascii ? (vertical ? U"-" : U"|")
+                                                    : (vertical ? U"─" : U"│"),
+                    s);
         return {};
     }
     auto handle(MousePress const& e) -> EventResponse override

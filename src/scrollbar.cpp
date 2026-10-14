@@ -20,16 +20,31 @@ ScrollBar::ScrollBar(Options x)
       content_length_{x.content_length},
       viewport_length_{x.viewport_length},
       position_{clamp_scroll(x.position, x.content_length, x.viewport_length)}
-{}
+{
+    movement_.reset(position_);
+    movement_.on_frame([lifetime = track(*this)](double value) {
+        auto* self = lifetime.try_get();
+        if (!self) return EventResponse{};
+        if (self->scroll_settle_time.count() <= 0) {
+            value = self->movement_.target();
+            self->movement_.reset(value);
+        }
+        auto next = clamp_scroll((int)std::llround(value), self->content_length_,
+                                 self->viewport_length_);
+        auto changed = std::exchange(self->position_, next) != next;
+        if (changed) {
+            self->request_repaint();
+            self->on_scroll(next);
+        }
+        return EventResponse{.repaint = changed};
+    });
+}
 void ScrollBar::set_range(int content, int viewport, int requested)
 {
     auto const next = clamp_scroll(requested, content, viewport);
     auto const changed =
         content_length_ != content || viewport_length_ != viewport || position_ != next;
-    if (changed) {
-        if (timer_) { timer_->stop(); }
-        target_ = next;
-    }
+    if (changed) { movement_.reset(next); }
     content_length_ = content;
     viewport_length_ = viewport;
     position_ = next;
@@ -45,13 +60,9 @@ ScrollBar::ScrollBar(ScrollBar&& other)
       viewport_length_{std::move(other.viewport_length_)},
       position_{std::move(other.position_)},
       drag_offset_{std::move(other.drag_offset_)},
-      timer_{std::move(other.timer_)},
-      started_{std::move(other.started_)},
-      start_{std::move(other.start_)},
-      target_{std::move(other.target_)}
+      movement_{std::move(other.movement_)}
 {
     other.drag_offset_.reset();
-    other.timer_.reset();
 }
 auto ScrollBar::operator=(ScrollBar&& other) -> ScrollBar&
 {
@@ -65,19 +76,14 @@ auto ScrollBar::operator=(ScrollBar&& other) -> ScrollBar&
     viewport_length_ = std::move(other.viewport_length_);
     position_ = std::move(other.position_);
     drag_offset_ = std::move(other.drag_offset_);
-    timer_ = std::move(other.timer_);
-    started_ = std::move(other.started_);
-    start_ = std::move(other.start_);
-    target_ = std::move(other.target_);
+    movement_ = std::move(other.movement_);
     other.drag_offset_.reset();
-    other.timer_.reset();
     return *this;
 }
 auto ScrollBar::set_position(int requested) -> bool
 {
     auto const next = clamp_scroll(requested, content_length_, viewport_length_);
-    if (timer_) { timer_->stop(); }
-    target_ = next;
+    movement_.reset(next);
     if (std::exchange(position_, next) == next) { return false; }
     request_repaint();
     on_scroll(next);
@@ -85,36 +91,27 @@ auto ScrollBar::set_position(int requested) -> bool
 }
 auto ScrollBar::paint(Canvas canvas) -> Cursor
 {
-    fill(canvas, style);
+    auto thumb_style = appearance(style, Surface::Accent);
+    auto track_style = appearance({}, Surface::Border);
+    fill(canvas, theme().styled ? track_style : style);
     auto const [offset, length] =
         scrollbar_thumb(position_, content_length_, viewport_length_,
                         vertical ? canvas.size().height : canvas.size().width);
     auto const thumb =
         vertical ? canvas.subcanvas({0, offset}, {canvas.size().width, length})
                  : canvas.subcanvas({offset, 0}, {length, canvas.size().height});
-    fill(thumb, U'█' | style);
+    auto glyph = !theme().styled ? U'█' : (theme().ascii ? U'#' : (vertical ? U'┃' : U'━'));
+    fill(thumb, glyph | thumb_style);
     return {};
 }
 auto ScrollBar::move_to(int requested) -> EventResponse
 {
     requested = clamp_scroll(requested, content_length_, viewport_length_);
-    if (scroll_settle_time.count() <= 0) {
-        auto const changed = set_position(requested);
-        return {.handled = true, .repaint = changed};
-    }
-    if (requested == position_) {
-        if (timer_) { timer_->stop(); }
-        target_ = position_;
-        return {.handled = true};
-    }
-    start_ = clamp_scroll(position_, content_length_, viewport_length_);
-    target_ = requested;
-    started_ = std::chrono::steady_clock::now();
-    if (!timer_) {
-        timer_.emplace(*this, std::chrono::milliseconds{16},
-                       [](ScrollBar& bar) { return bar.tick(); });
-    }
-    timer_->start();
+    if (scroll_settle_time.count() <= 0 || !theme().motion.enabled)
+        return {.handled = true, .repaint = set_position(requested)};
+    movement_.to(requested, {scroll_settle_time, Ease::OutCubic});
+    if (!movement_.active())
+        return {.handled = true, .repaint = set_position(requested)};
     return {.handled = true};
 }
 auto ScrollBar::handle(MousePress const& event) -> EventResponse
@@ -168,26 +165,9 @@ auto ScrollBar::handle(MouseWheel const& event) -> EventResponse
 {
     auto const delta = vertical ? event.dy : event.dx;
     if (delta == 0) { return {}; }
-    return move_to(scroll_by(timer_ && timer_->is_running() ? target_ : position_,
-                             delta, content_length_, viewport_length_));
+    return move_to(
+        scroll_by(movement_.active() ? (int)std::lround(movement_.target()) : position_,
+                  delta, content_length_, viewport_length_));
 }
-auto ScrollBar::tick() -> EventResponse
-{
-    auto const elapsed = std::chrono::steady_clock::now() - started_;
-    auto const progress =
-        scroll_settle_time.count() <= 0
-            ? 1.
-            : std::clamp(std::chrono::duration<double, std::milli>{elapsed}.count() /
-                             (double)scroll_settle_time.count(),
-                         0., 1.);
-    auto const eased = 1. - std::pow(1. - progress, 4.);
-    auto const next =
-        clamp_scroll((int)std::llround(start_ + eased * ((double)target_ - start_)),
-                     content_length_, viewport_length_);
-    if (progress == 1. && timer_) { timer_->stop(); }
-    if (std::exchange(position_, next) == next) { return {.handled = true}; }
-    request_repaint();
-    on_scroll(next);
-    return {.handled = true, .repaint = true};
-}
+auto ScrollBar::tick() -> EventResponse { return movement_.advance(); }
 }  // namespace ox

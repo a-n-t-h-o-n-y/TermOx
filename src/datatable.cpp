@@ -269,7 +269,9 @@ auto DataTable::measure(Area available, esc::WidthPolicy) const -> Area
 }
 auto DataTable::paint(Canvas canvas) -> Cursor
 {
-    fill(canvas, style);
+    auto base = appearance(style);
+    auto lines = appearance(line_style, Surface::Border);
+    fill(canvas, base);
     auto const header = header_height();
     auto const body = canvas.subcanvas({0, header}, viewport_);
     auto const [first, last] = visible_rows(body, offset_.y, rows_.size());
@@ -281,20 +283,20 @@ auto DataTable::paint(Canvas canvas) -> Cursor
         auto const& spec = columns_[column];
         if (header) {
             auto heading = canvas.subcanvas({at, 0}, {width, 1});
-            fill(heading, style | spec.style | header_style);
+            fill(heading, base | spec.style | header_style);
             if (heading.visible().size.width > 0) {
                 paint_cell(heading.subcanvas({std::min(1, width), 0},
                                              {std::max(0, width - 2), 1}),
-                           spec.heading, spec.align, style | spec.style | header_style);
+                           spec.heading, spec.align, base | spec.style | header_style);
             }
         }
         for (auto row = first; row < last; ++row) {
             auto cell = body.subcanvas({at, row - offset_.y}, {width, 1});
             if (cell.visible().size.width == 0) { continue; }
-            auto appearance = style | spec.style;
+            auto appearance = base | spec.style;
             if (row % 2) { appearance = appearance | alternate_style; }
             if (selected_ == (std::size_t)row) {
-                appearance = appearance | selected_style;
+                appearance = selection_appearance(appearance, selected_style);
             }
             fill(cell, appearance);
             paint_cell(
@@ -304,18 +306,19 @@ auto DataTable::paint(Canvas canvas) -> Cursor
         x += width;
         if (column_lines && column + 1 < columns_.size() &&
             x <= std::numeric_limits<int>::max()) {
-            put(canvas, {(int)x, 0}, shape::VLine{.symbol = U'│'}, canvas.size().height,
-                line_style);
+            put(canvas, {(int)x, 0},
+                shape::VLine{.symbol = theme().ascii ? U'|' : U'│'},
+                canvas.size().height, lines);
             ++x;
         }
     }
     if (header && canvas.size().height > 1) {
-        put(canvas, {0, 1}, shape::HLine{.symbol = U'─'}, canvas.size().width,
-            line_style);
+        put(canvas, {0, 1}, shape::HLine{.symbol = theme().ascii ? U'-' : U'─'},
+            canvas.size().width, lines);
     }
     if (rows_.empty()) {
         paint_cell(body.subcanvas({}, {viewport_.width, 1}), empty_text, Align::Center,
-                   style);
+                   base);
     }
     return {};
 }
