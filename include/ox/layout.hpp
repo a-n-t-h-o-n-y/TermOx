@@ -1,12 +1,14 @@
 #pragma once
 
 #include <algorithm>
+#include <array>
 #include <concepts>
 #include <cstddef>
 #include <memory>
 #include <ranges>
 #include <tuple>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 #include <zzz/coro.hpp>
@@ -17,200 +19,250 @@
 
 namespace ox {
 
-namespace detail {
-inline void arrange_children(Widget& parent, bool horizontal)
-{
-    auto children = std::vector<Widget*>{};
-    auto policies = std::vector<SizePolicy>{};
-    for (auto& child : parent.get_children()) {
-        if (!child.visible) { continue; }
-        children.push_back(&child);
-        policies.push_back(child.size_policy);
-    }
-    auto const rectangles = horizontal ? layout_row(policies, parent.size())
-                                       : layout_column(policies, parent.size());
-    for (auto i = std::size_t{0}; i < children.size(); ++i) {
-        auto& child = *children[i];
-        arrange(child, rectangles[i]);
-    }
-}
-}  // namespace detail
-
-/**
- * tuple, pair, array, etc...
- */
+/** Mutable widget values/references in a tuple, pair, array, or sized forward range. */
 template <typename T>
 concept TupleLike = requires {
     { std::tuple_size<T>::value } -> std::convertible_to<std::size_t>;
 };
-
-/**
- * vector, set, list, etc...
- */
 template <typename T>
 concept DynamicContainer = not TupleLike<std::remove_reference_t<T>> &&
                            std::ranges::sized_range<T> && std::ranges::forward_range<T>;
-
 template <typename T>
 concept LayoutContainer = DynamicContainer<T> || TupleLike<T>;
 
-/**
- * A Vertical Linear Layout.
- *
- * @details This can take either tuple-like or range-like containers of Widgets. It will
- * order them with the first element on the top and the last on the bottom.
- */
+namespace detail {
+template <LayoutContainer Container, typename Function>
+void for_each_child(Container& container, Function function)
+{
+    if constexpr (TupleLike<Container>) {
+        std::apply([&](auto&... child) { (function(child), ...); }, container);
+    }
+    else {
+        for (auto& child : container) {
+            function(child);
+        }
+    }
+}
+
 template <LayoutContainer Container>
-class Column : public Widget {
+auto child_references(Container& container) -> zzz::Generator<
+    std::conditional_t<std::is_const_v<Container>, Widget const&, Widget&>>
+{
+    if constexpr (TupleLike<Container>) {
+        // One coroutine frame, with tuple pointers stored in that frame.
+        auto pointers = std::apply(
+            [](auto&... child) {
+                using Pointer = std::conditional_t<std::is_const_v<Container>,
+                                                   Widget const*, Widget*>;
+                return std::array<Pointer, sizeof...(child)>{std::addressof(child)...};
+            },
+            container);
+        for (auto* child : pointers) {
+            co_yield *child;
+        }
+    }
+    else {
+        for (auto& child : container) {
+            co_yield child;
+        }
+    }
+}
+
+template <typename Container, bool Horizontal>
+class LinearLayout : public Widget {
+    static_assert(LayoutContainer<Container>);
+
    public:
     using Widget::handle;
-
     Container children;
 
-   public:
-    // This is needed for Clang 18, instead of default value.
-    template <typename C = Container>
-        requires std::is_default_constructible_v<C>
-    explicit Column() : Widget{FocusPolicy::None, SizePolicy::flex()}, children{}
+    explicit LinearLayout()
+        requires std::default_initializable<Container>
+        : Widget{FocusPolicy::None, SizePolicy::flex()}, children{}
     {}
-
-    explicit Column(Container container)
+    explicit LinearLayout(Container container)
         : Widget{FocusPolicy::None, SizePolicy::flex()}, children{std::move(container)}
     {}
-
     template <WidgetDerived... Widgets>
-    explicit Column(Widgets&&... ws)
-        : Widget{FocusPolicy::None, SizePolicy::flex()},
-          children{std::tuple{std::forward<Widgets>(ws)...}}
+        requires(sizeof...(Widgets) > 0)
+    explicit LinearLayout(Widgets&&... widgets)
+        : LinearLayout{Container{std::forward<Widgets>(widgets)...}}
     {}
+    LinearLayout(LinearLayout&& other)
+        : Widget{std::move(other)},
+          children{std::move(other.children)},
+          targets_{std::move(other.targets_)},
+          target_storage_{std::move(other.target_storage_)},
+          policies_{std::move(other.policies_)},
+          policy_storage_{std::move(other.policy_storage_)},
+          rectangles_{std::move(other.rectangles_)},
+          available_{other.available_},
+          arranging_{std::exchange(other.arranging_, false)},
+          pending_{std::exchange(other.pending_, false)}
+    { other.available_ = {-1, -1}; }
+    auto operator=(LinearLayout&& other) -> LinearLayout&
+    {
+        if (this == &other) { return *this; }
+        Widget::operator=(std::move(other));
+        children = std::move(other.children);
+        targets_ = std::move(other.targets_);
+        target_storage_ = std::move(other.target_storage_);
+        policies_ = std::move(other.policies_);
+        policy_storage_ = std::move(other.policy_storage_);
+        rectangles_ = std::move(other.rectangles_);
+        available_ = std::exchange(other.available_, Area{-1, -1});
+        arranging_ = std::exchange(other.arranging_, false);
+        pending_ = std::exchange(other.pending_, false);
+        return *this;
+    }
 
-   public:
+    /** Call after editing children, visibility, or size policies. Arrange also always
+     * refreshes descendants, even if this layout's geometry did not change. */
+    void refresh() { arrange(*this, bounds()); }
     auto get_children() -> zzz::Generator<Widget&> override
-    {
-        if constexpr (TupleLike<Container>) {
-            // Re-emitting values from apply so that this scope is a coroutine
-            for (auto& w : std::apply(
-                     [](auto&... child) -> zzz::Generator<Widget&> {
-                         (co_yield child, ...);
-                     },
-                     children)) {
-                co_yield w;
-            }
-        }
-        else {
-            for (Widget& child : children) {
-                co_yield child;
-            }
-        }
-    }
-
+    { return child_references(children); }
     auto get_children() const -> zzz::Generator<Widget const&> override
-    {
-        if constexpr (TupleLike<Container>) {
-            // Re-emitting values from apply so that this scope is a coroutine
-            for (auto const& w : std::apply(
-                     [](auto const&... child) -> zzz::Generator<Widget const&> {
-                         (co_yield child, ...);
-                     },
-                     children)) {
-                co_yield w;
-            }
-        }
-        else {
-            for (auto const& child : children) {
-                co_yield child;
-            }
-        }
-    }
+    { return child_references(children); }
 
    protected:
-    void on_arrange(Rect) override { detail::arrange_children(*this, false); }
-};
+    void on_arrange(Rect) override
+    {
+        if (arranging_) {
+            pending_ = true;
+            return;
+        }
+        // Retain the identity slot, not the widget. Moves update it; destruction
+        // clears it. Resolve again after every hook without repeated weak locks.
+        auto lifetime = this->lifetime_;
+        auto* previous = static_cast<Widget*>(this);
+        auto* current = this;
+        auto resolve = [&]() -> LinearLayout* {
+            auto* next = lifetime ? *lifetime : nullptr;
+            if (next != previous) {
+                previous = next;
+                current = dynamic_cast<LinearLayout*>(next);
+            }
+            return current;
+        };
+        arranging_ = true;
+        try {
+            auto first = true;
+            for (;;) {
+                auto* layout = resolve();
+                if (!layout) { return; }
+                if (!first && !layout->inputs_changed()) { break; }
+                layout->prepare();
+                layout->pending_ = false;
+                first = false;
+                auto restart = false;
+                auto const count = layout->targets_.size();
+                for (auto i = std::size_t{0}; i < count; ++i) {
+                    layout = resolve();
+                    if (!layout) { return; }
+                    auto* child = layout->targets_[i] ? *layout->targets_[i] : nullptr;
+                    auto const rectangle = layout->rectangles_[i];
+                    if (child && child->visible) { arrange(*child, rectangle); }
+                    layout = resolve();
+                    if (!layout) { return; }
+                    if (layout->pending_) {
+                        restart = layout->inputs_changed();
+                        layout->pending_ = false;
+                        if (restart) { break; }
+                    }
+                }
+                if (restart) { continue; }
+                layout = resolve();
+                if (!layout) { return; }
+                if (!layout->inputs_changed()) { break; }
+            }
+        }
+        catch (...) {
+            if (auto* layout = resolve()) {
+                layout->arranging_ = false;
+                layout->pending_ = false;
+            }
+            throw;
+        }
+        if (auto* layout = resolve()) {
+            layout->arranging_ = false;
+            layout->pending_ = false;
+        }
+    }
 
+   private:
+    std::vector<std::shared_ptr<Widget*>> targets_;
+    std::vector<std::shared_ptr<Widget*>> target_storage_;
+    std::vector<SizePolicy> policies_;
+    std::vector<SizePolicy> policy_storage_;
+    std::vector<Rect> rectangles_;
+    Area available_ = {-1, -1};
+    bool arranging_ = false;
+    bool pending_ = false;
+
+    auto inputs_changed() const -> bool
+    {
+        if (available_ != size()) { return true; }
+        auto index = std::size_t{0};
+        auto changed = false;
+        for_each_child(children, [&](Widget const& child) {
+            if (!child.visible) { return; }
+            changed |= index >= targets_.size() || targets_[index] != child.lifetime_ ||
+                       child.size_policy != policies_[index];
+            ++index;
+        });
+        return changed || index != targets_.size();
+    }
+    void prepare()
+    {
+        if (!inputs_changed()) { return; }
+        policy_storage_.clear();
+        auto index = std::size_t{0};
+        auto membership_changed = false;
+        for_each_child(children, [&](Widget& child) {
+            if (!child.visible) { return; }
+            policy_storage_.push_back(child.size_policy);
+            membership_changed |=
+                index >= targets_.size() || targets_[index] != child.lifetime_;
+            ++index;
+        });
+        membership_changed |= index != targets_.size();
+        if (membership_changed) {
+            target_storage_.clear();
+            for_each_child(children, [&](Widget& child) {
+                if (child.visible) { target_storage_.push_back(child.lifetime_); }
+            });
+        }
+        // Validation and allocation finish before calling any child layout hooks.
+        if (available_ != size() || policy_storage_ != policies_) {
+            auto rectangles = Horizontal ? layout_row(policy_storage_, size())
+                                         : layout_column(policy_storage_, size());
+            rectangles_.swap(rectangles);
+            policies_.swap(policy_storage_);
+            available_ = size();
+        }
+        if (membership_changed) { targets_.swap(target_storage_); }
+    }
+};
+}  // namespace detail
+
+/** Vertical/horizontal layout over an ordinary container of widgets. */
+template <LayoutContainer Container>
+class Column : public detail::LinearLayout<Container, false> {
+   public:
+    using detail::LinearLayout<Container, false>::LinearLayout;
+};
 template <LayoutContainer Container>
 Column(Container) -> Column<Container>;
-
 template <WidgetDerived... Widgets>
 Column(Widgets&&...) -> Column<std::tuple<std::decay_t<Widgets>...>>;
 
-/**
- * A Horizontal Linear Layout.
- *
- * @details This can take either tuple-like or range-like containers of Widgets. It will
- * order them with the first element on the left and the last on the right.
- */
-template <typename Container>
-class Row : public Widget {
+template <LayoutContainer Container>
+class Row : public detail::LinearLayout<Container, true> {
    public:
-    using Widget::handle;
-    static_assert(TupleLike<Container> || DynamicContainer<Container>);
-
-   public:
-    Container children;
-
-   public:
-    // This is needed for Clang 18, instead of default value.
-    template <typename C = Container>
-        requires std::is_default_constructible_v<C>
-    explicit Row() : Widget{FocusPolicy::None, SizePolicy::flex()}, children{}
-    {}
-
-    explicit Row(Container container)
-        : Widget{FocusPolicy::None, SizePolicy::flex()}, children{std::move(container)}
-    {}
-
-    template <WidgetDerived... Widgets>
-    explicit Row(Widgets&&... ws)
-        : Widget{FocusPolicy::None, SizePolicy::flex()},
-          children{std::tuple{std::forward<Widgets>(ws)...}}
-    {}
-
-   public:
-    auto get_children() -> zzz::Generator<Widget&> override
-    {
-        if constexpr (TupleLike<Container>) {
-            // Re-emitting values from apply so that this scope is a coroutine
-            for (auto& w : std::apply(
-                     [](auto&... child) -> zzz::Generator<Widget&> {
-                         (co_yield child, ...);
-                     },
-                     children)) {
-                co_yield w;
-            }
-        }
-        else {
-            for (Widget& child : children) {
-                co_yield child;
-            }
-        }
-    }
-
-    auto get_children() const -> zzz::Generator<Widget const&> override
-    {
-        if constexpr (TupleLike<Container>) {
-            // Re-emitting values from apply so that this scope is a coroutine
-            for (auto const& w : std::apply(
-                     [](auto const&... child) -> zzz::Generator<Widget const&> {
-                         (co_yield child, ...);
-                     },
-                     children)) {
-                co_yield w;
-            }
-        }
-        else {
-            for (auto const& child : children) {
-                co_yield child;
-            }
-        }
-    }
-
-   protected:
-    void on_arrange(Rect) override { detail::arrange_children(*this, true); }
+    using detail::LinearLayout<Container, true>::LinearLayout;
 };
-
 template <LayoutContainer Container>
 Row(Container) -> Row<Container>;
-
 template <WidgetDerived... Widgets>
 Row(Widgets&&...) -> Row<std::tuple<std::decay_t<Widgets>...>>;
 
@@ -274,6 +326,18 @@ auto get_child(Row<Container>& row) -> auto&
 template <std::size_t I, TupleLike Container>
 auto get_child(Column<Container>& row) -> auto&
 { return std::get<I>(row.children); }
+
+template <std::size_t I, TupleLike Container>
+auto get_child(Row<Container> const& row) -> auto const&
+{ return std::get<I>(row.children); }
+
+template <std::size_t I, TupleLike Container>
+auto get_child(Column<Container> const& column) -> auto const&
+{ return std::get<I>(column.children); }
+
+template <WidgetDerived ChildType>
+auto get_child(Suspended<ChildType> const& suspended) -> auto const&
+{ return suspended.child; }
 
 template <WidgetDerived ChildType>
 auto get_child(Suspended<ChildType>& sus) -> auto&

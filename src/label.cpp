@@ -14,33 +14,49 @@
 #include <ox/put.hpp>
 
 namespace ox {
-using namespace ox;
 
-// Used by both Label and BasicNumberLabel
-void paint_label(Canvas c, std::string_view text, Align align, Style style)
+void put_label(Canvas canvas,
+               std::string_view text,
+               Align align,
+               Style style,
+               bool vertical)
 {
-    fill(c, style);
-
     auto const unicode = esc::utf8_to_utf32(text);
     auto end = std::size_t{0};
-    auto columns = std::size_t{0};
+    auto used = 0;
+    auto fits = true;
+    auto const available = vertical ? canvas.size().height : canvas.size().width;
     for (auto cluster : esc::graphemes(unicode)) {
-        auto const width = esc::grapheme_width(cluster, c.width_policy());
-        if (!width || *width == 0) {
-            throw std::invalid_argument{"Label requires printable text"};
+        auto const cells = esc::grapheme_width(cluster, canvas.width_policy());
+        if (!cells || *cells == 0) {
+            throw std::invalid_argument{
+                "Label requires printable text with known widths"};
         }
-        if (*width > (std::size_t)c.size().width - columns) { break; }
-        columns += *width;
+        auto const length = vertical ? std::size_t{1} : *cells;
+        if (!fits || length > (std::size_t)(available - used) ||
+            (vertical && *cells > (std::size_t)canvas.size().width)) {
+            fits = false;
+            continue;
+        }
+        used += (int)length;
         end += cluster.size();
     }
-    auto const x = find_align_offset(align, c.size().width, (int)columns);
-    put(c, {x, c.size().height / 2}, std::u32string_view{unicode}.substr(0, end),
-        style);
+    auto const offset = find_align_offset(align, available, used);
+    auto const prefix = std::u32string_view{unicode}.substr(0, end);
+    if (!vertical) { put(canvas, {offset, canvas.size().height / 2}, prefix, style); }
+    else {
+        auto y = offset;
+        for (auto cluster : esc::graphemes(prefix)) {
+            auto const cells = *esc::grapheme_width(cluster, canvas.width_policy());
+            canvas.write({(canvas.size().width - (int)cells) / 2, y++}, cluster, style);
+        }
+    }
 }
-
-}  // namespace ox
-
-namespace ox {
+void paint_label(Canvas canvas, std::string_view text, Align align, Style style)
+{
+    fill(canvas, U' ' | style);
+    put_label(canvas, text, align, style);
+}
 
 Label::Options const Label::init = {};
 

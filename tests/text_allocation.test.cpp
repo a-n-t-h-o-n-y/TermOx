@@ -12,6 +12,7 @@
 #include <ox/core/renderer.hpp>
 #include <ox/core/text.hpp>
 #include <ox/datatable.hpp>
+#include <ox/layout.hpp>
 
 namespace {
 int remaining_allocations = -1;
@@ -314,4 +315,59 @@ TEST(table_sort_and_schema_allocation_failures_preserve_data_geometry_and_select
         }
         ASSERT(failures > 0 && succeeded);
     }
+}
+
+TEST(
+    layout_allocation_failures_preserve_child_geometry_and_warm_refresh_allocates_nothing)
+{
+    auto failures = 0;
+    auto succeeded = false;
+    for (int budget = 0; budget < 64; ++budget) {
+        auto row = ox::Row<std::vector<ox::Widget>>{};
+        for (int i = 0; i < 10; ++i) {
+            row.children.emplace_back();
+        }
+        ox::arrange(row, {{}, {20, 3}});
+        auto before = std::vector<ox::Rect>{};
+        for (auto const& child : row.children) {
+            before.push_back(child.bounds());
+        }
+        row.children.front().size_policy = ox::SizePolicy::fixed(1);
+        remaining_allocations = budget;
+        try {
+            row.refresh();
+            remaining_allocations = -1;
+            succeeded = true;
+            break;
+        }
+        catch (std::bad_alloc const&) {
+            remaining_allocations = -1;
+            ++failures;
+            for (std::size_t i = 0; i < before.size(); ++i) {
+                ASSERT(row.children[i].bounds() == before[i]);
+            }
+            row.refresh();
+            ASSERT(row.children.front().size().width == 1);
+        }
+        catch (...) {
+            remaining_allocations = -1;
+            throw;
+        }
+    }
+    ASSERT(failures > 0 && succeeded);
+    auto row = ox::Row<std::vector<ox::Widget>>{};
+    for (int i = 0; i < 10; ++i) {
+        row.children.emplace_back();
+    }
+    ox::arrange(row, {{}, {20, 3}});
+    remaining_allocations = 0;
+    try {
+        row.refresh();
+    }
+    catch (...) {
+        remaining_allocations = -1;
+        throw;
+    }
+    remaining_allocations = -1;
+    ASSERT(row.children.back().at().x == 18);
 }

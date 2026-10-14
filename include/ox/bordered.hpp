@@ -1,7 +1,7 @@
 #pragma once
 
-#include <array>
-#include <stdexcept>
+#include <algorithm>
+#include <utility>
 
 #include <ox/align.hpp>
 #include <ox/core/core.hpp>
@@ -14,8 +14,13 @@ namespace ox {
 struct Border {
     shape::Box box = shape::Box::square();
     Style style = {};  // Only applies to box.
-    Label label = {};
+    Label::Options label = {};
 };
+
+/** Interior geometry is valid even when the border consumes the entire area. */
+[[nodiscard]] auto border_content_rect(Area available) -> Rect;
+/** Draw the border and its title; leave the interior untouched. */
+void paint_border(Canvas canvas, Border const& border);
 
 /**
  * A Widget that wraps another Widget with a Border display.
@@ -37,41 +42,15 @@ class Bordered : public Widget {
         : Widget{FocusPolicy::None, SizePolicy::flex()},
           child{std::move(x.child)},
           border{std::move(x.border)}
-    { arrange(child, {{1, 1}, {0, 0}}); }
+    { arrange(child, border_content_rect(size())); }
 
    protected:
-    void on_arrange(Rect) override
-    {
-        arrange(
-            child,
-            {{1, 1}, {std::max(0, size().width - 2), std::max(0, size().height - 2)}});
-    }
+    void on_arrange(Rect) override { arrange(child, border_content_rect(size())); }
 
    public:
-    auto paint(Canvas c) -> Cursor override
+    auto paint(Canvas canvas) -> Cursor override
     {
-        // Box
-        put(c, border.box, border.style);
-
-        // Label - Can't use Label::paint because it paints over border with bg color.
-        auto& label = border.label;
-        auto const width = std::max(0, c.size().width - 2);
-        auto text = esc::utf8_to_utf32(label.text);
-        auto length = std::size_t{0};
-        auto columns = std::size_t{0};
-        for (auto cluster : esc::graphemes(text)) {
-            auto cells = esc::grapheme_width(cluster, c.width_policy());
-            if (!cells || *cells == 0) {
-                throw std::invalid_argument{"Border label requires printable text"};
-            }
-            if (*cells > (std::size_t)width - columns) { break; }
-            columns += *cells;
-            length += cluster.size();
-        }
-        auto const x = find_align_offset(label.align, width, (int)columns);
-        put(c.subcanvas({1, 0}, {width, 1}), {x, 0},
-            esc::glyphs(std::u32string_view{text}.substr(0, length), label.style));
-
+        paint_border(canvas, border);
         return {};
     }
 
@@ -93,6 +72,10 @@ template <std::size_t I, WidgetDerived WidgetType>
 auto get_child(Bordered<WidgetType>& bordered) -> auto&
 { return get_child<I>(bordered.child); }
 
+template <std::size_t I, WidgetDerived WidgetType>
+auto get_child(Bordered<WidgetType> const& bordered) -> auto const&
+{ return get_child<I>(bordered.child); }
+
 // -------------------------------------------------------------------------------------
 
 struct Lines {
@@ -104,9 +87,16 @@ struct Lines {
     [[nodiscard]] static constexpr auto twin() -> Lines { return {U'║', U'═'}; }
     [[nodiscard]] static constexpr auto dashed() -> Lines { return {U'╎', U'╌'}; }
     [[nodiscard]] static constexpr auto dotted() -> Lines { return {U'┆', U'┄'}; }
-    [[nodiscard]] static constexpr auto ascii() -> Lines { return {U'-', U'|'}; }
+    [[nodiscard]] static constexpr auto ascii() -> Lines { return {U'|', U'-'}; }
     [[nodiscard]] static constexpr auto empty() -> Lines { return {U' ', U' '}; }
 };
+
+/** Clear the view, draw a centered line and overlay its label. */
+void paint_divider(Canvas canvas,
+                   bool vertical,
+                   Lines lines,
+                   Style style,
+                   Label::Options const& label = {});
 
 /// A line divider element.
 class Divider : public Widget {
@@ -114,17 +104,19 @@ class Divider : public Widget {
     using Widget::handle;
 
     struct Options {
+        bool vertical = false;
         Lines lines = Lines::light();
         Style style = {};
-        Label label = {};
-    };
+        Label::Options label = {};
+    } static const init;
 
    public:
+    bool vertical;
     Lines lines;
     Style style;
-    Label label;  // TODO
+    Label::Options label;
 
-    Divider(Options x);
+    Divider(Options x = init);
 
    public:
     auto paint(Canvas c) -> Cursor override;

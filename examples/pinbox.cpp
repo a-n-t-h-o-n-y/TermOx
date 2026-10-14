@@ -98,6 +98,7 @@ int main()
             PinBox{},
 
             Divider{{
+                .vertical = true,
                 .lines = Lines::bold(),
                 .style = {.foreground = colors::bright_black},
             }},
@@ -163,7 +164,7 @@ int main()
         } |
         Border{
             .box = shape::Box::round(),
-            .label = "PinBox",
+            .label = {.text = "PinBox"},
         };
 
     auto& [pinbox, div, sidebar] = head.child.children;

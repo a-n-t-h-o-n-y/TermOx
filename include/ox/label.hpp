@@ -12,6 +12,13 @@
 
 namespace ox {
 
+/** Draw a clipped, aligned label without filling around it. Vertical labels stack
+ * graphemes; alignment is along the line and the cross axis is centered. */
+void put_label(Canvas c,
+               std::string_view text,
+               Align align,
+               Style style,
+               bool vertical = false);
 void paint_label(Canvas c, std::string_view text, Align align, Style style);
 
 }  // namespace ox

@@ -23,7 +23,7 @@ int main()
                     .text  = "C++20 Terminal UI Framework",
                     .align = Align::Center,
                     .style = {.foreground = colors::blue, .traits = Trait::Bold},
-                }} | Border{.box = shape::Box::round(), .label = "TermOx II"};
+                }} | Border{.box = shape::Box::round(), .label = {.text = "TermOx II"}};
 
     return Application{head}.run();
 }

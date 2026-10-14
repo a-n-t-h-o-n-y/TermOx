@@ -13,6 +13,7 @@ struct SizePolicy {
     int minimum = 0;
     int maximum = std::numeric_limits<int>::max();
     float flexibility = 1.f;
+    auto operator==(SizePolicy const&) const -> bool = default;
 
     [[nodiscard]] static constexpr auto fixed(int size) -> SizePolicy
     {

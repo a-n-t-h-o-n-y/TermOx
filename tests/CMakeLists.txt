@@ -1,5 +1,6 @@
 add_executable(TermOx.tests.unit EXCLUDE_FROM_ALL
     controls.test.cpp
+    decorations.test.cpp
     scroll.test.cpp
     datatable.test.cpp
     events.test.cpp
@@ -50,3 +51,7 @@ add_test(NAME TermOx.tests.text_allocation COMMAND TermOx.tests.text_allocation)
 # PTY probe for idle waiting and cross-thread delivery, without synthetic input.
 add_executable(TermOx.tests.event_loop_terminal EXCLUDE_FROM_ALL event_loop_terminal.cpp)
 target_link_libraries(TermOx.tests.event_loop_terminal PRIVATE TermOx)
+
+# Compare container arrangement against the same standalone source at another revision.
+add_executable(TermOx.tests.arrangement_benchmarks EXCLUDE_FROM_ALL arrangement_benchmarks.cpp)
+target_link_libraries(TermOx.tests.arrangement_benchmarks PRIVATE TermOx)

@@ -615,7 +615,7 @@ Visual description of a Border surrounding a Widget. To be used with `Bordered` 
 struct Border {
     shape::Box box = shape::Box::square();
     Style style = {};  // Only applies to box.
-    Label label = {};
+    Label::Options label = {};
 };
 ```
 
@@ -640,8 +640,8 @@ template <WidgetDerived ChildWidget>
 class Bordered : public Widget;
 ```
 
-Wraps a Widget in a Border. This is itself a Widget and will have 2 more units of space
-in each dimension than the wrapped Widget, to account for Border space.
+Wraps a Widget in a Border. The child receives `border_content_rect(available)`, inset
+one cell from each edge. Tiny areas can leave an empty child interior.
 
 This is technically a layout, the wrapped Widget is accessed via the `Bordered::child` member.
 
@@ -656,7 +656,7 @@ The `operator|` overload will create a new Bordered object that will take owners
 the passed in Widget.
 
 ```cpp
-    auto bordered = MyWidget{} | Border{.box = shape::Box::round(), .label = "A Label"};
+    auto bordered = MyWidget{} | Border{.box = shape::Box::round(), .label = {.text = "A Label"}};
     auto& my_widg = bordered.child;
 ```
 
@@ -720,7 +720,7 @@ struct Lines {
     static constexpr auto twin() -> Lines { return {U'║', U'═'}; }
     static constexpr auto dashed() -> Lines { return {U'╎', U'╌'}; }
     static constexpr auto dotted() -> Lines { return {U'┆', U'┄'}; }
-    static constexpr auto ascii() -> Lines { return {U'-', U'|'}; }
+    static constexpr auto ascii() -> Lines { return {U'|', U'-'}; }
     static constexpr auto empty() -> Lines { return {U' ', U' '}; }
 };
 ```
@@ -731,8 +731,9 @@ struct Lines {
 
 `class Divider : public Widget;`
 
-A single line Widget for dividing Widgets within a layout. Vertical/Horizontal is
-determined automatically based on which layout it is used within.
+A line widget with explicit `vertical` direction (false by default) and an overlaid
+plain label. Vertical labels stack graphemes along the line. See
+[decorations and layouts](decorations-layouts.md) for geometry, clipping, and migration.
 
 ```cpp
 Column{
@@ -752,9 +753,10 @@ Column{
 
 ```cpp
 struct Options {
+    bool vertical = false;
     Lines lines = Lines::light();
     Style style = {};
-    Label label = {};
+    Label::Options label = {};
 };
 
 Divider(Options x);
@@ -768,9 +770,10 @@ its own internal Style.
 ### Public Objects
 
 ```cpp
+bool vertical;
 Lines lines;
 Style style;
-Label label;
+Label::Options label;
 ```
 
 ---
@@ -1035,6 +1038,10 @@ concept WidgetDerived = std::is_base_of_v<Widget, T>;
 
 ## 🧩 ox::Column
 
+Call `refresh()` after changing children, visibility, or policies. See
+[decorations and layouts](decorations-layouts.md#row-and-column-refresh) for caching
+and mutation/callback behavior.
+
 [`#include <ox/layout.hpp>`](../include/ox/layout.hpp)
 
 ```cpp
@@ -1058,9 +1065,9 @@ auto col = Column{
 };
 
 auto col2 = Column<std::vector<Button>>{};
-col2.children.push_back(Button{"A Button"} | SizePolicy::fixed(5));
-col2.children.push_back(Button{"B Button"} | SizePolicy::flex());
-col2.children.push_back(Button{"C Button"} | SizePolicy::fixed(5));
+col2.children.push_back(Button{{.label = {.text = "A Button"}}} | SizePolicy::fixed(5));
+col2.children.push_back(Button{{.label = {.text = "B Button"}}} | SizePolicy::flex());
+col2.children.push_back(Button{{.label = {.text = "C Button"}}} | SizePolicy::fixed(5));
 ```
 
 <details>
@@ -1110,6 +1117,10 @@ layouts.
 
 ## 🧩 ox::Row
 
+Call `refresh()` after changing children, visibility, or policies. Const get_child
+and ordinary tuple/array/vector/list composition are supported. See
+[decorations and layouts](decorations-layouts.md#row-and-column-refresh).
+
 [`#include <ox/layout.hpp>`](../include/ox/layout.hpp)
 
 ```cpp
@@ -1125,15 +1136,15 @@ The Row layout is a `Widget` itself, so it can be used within other layouts as a
 
 ```cpp
 auto row = Row{
-    Button{"A Button"} | SizePolicy::fixed(5),
+    Button{{.label = {.text = "A Button"}}} | SizePolicy::fixed(5),
     TextBox{} | SizePolicy::flex(),
-    Button{"B Button"} | SizePolicy::fixed(5),
+    Button{{.label = {.text = "B Button"}}} | SizePolicy::fixed(5),
 };
 
 auto row2 = Row<std::vector<Button>>{};
-row2.children.push_back(Button{"A Button"} | SizePolicy::fixed(5));
-row2.children.push_back(Button{"B Button"} | SizePolicy::flex());
-row2.children.push_back(Button{"C Button"} | SizePolicy::fixed(5));
+row2.children.push_back(Button{{.label = {.text = "A Button"}}} | SizePolicy::fixed(5));
+row2.children.push_back(Button{{.label = {.text = "B Button"}}} | SizePolicy::flex());
+row2.children.push_back(Button{{.label = {.text = "C Button"}}} | SizePolicy::fixed(5));
 ```
 
 <details>

@@ -13,6 +13,10 @@
 #include <ox/core/layout.hpp>
 
 namespace ox {
+namespace detail {
+template <typename, bool>
+class LinearLayout;
+}
 class Application;
 template <typename T>
 class LifetimeView;
@@ -93,6 +97,8 @@ class Widget {
     void request_repaint();
 
    private:
+    template <typename, bool>
+    friend class detail::LinearLayout;
     friend class Timer;
     friend class Application;
     friend class Focus;

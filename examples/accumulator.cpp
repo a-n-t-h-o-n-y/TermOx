@@ -85,7 +85,7 @@ int main()
         } |
         Border{
             .box = shape::Box::bold(),
-            .label = "Accumulator",
+            .label = {.text = "Accumulator"},
         };
 
     auto& [title_, total_label, div_, numberpad] = head.child.children;

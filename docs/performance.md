@@ -639,3 +639,70 @@ resize, reentrant/moving/destructive callbacks, animation, and sort/schema alloc
 failures. ASan+UBSan passes 97 non-exception cases with all TermOx sources instrumented
 and the unchanged Escape Release library linked. Deliberate exception/allocation-fault
 cases run in Release because the installed sanitizer runtime cannot unwind C++ exceptions.
+
+
+## Decorations and container arrangement
+
+Bordered and Divider compose plain Label::Options with shared put_label/paint_border/
+paint_divider functions. Title clipping and Unicode width handling are shared with
+Label; no title widget or intermediate glyph vector is constructed. Divider direction
+is explicit, and its label option now draws. These drawing changes are validated by
+frame tests; no decoration-specific speedup is claimed.
+
+Row and Column share an implementation over ordinary containers. Arrangement bypasses
+coroutine enumeration, reuses policy and private identity-slot storage, and caches
+rectangles while size/policies are unchanged. Identity slots follow moves and clear on
+destruction without owning widgets. Every refresh still invokes live visible children's
+layout hooks. Reentrant changes cause a new plan; unchanged requests settle. Tuple child
+enumeration uses one coroutine frame instead of two forwarding frames.
+
+The comparison uses `145427f` as baseline and the standalone workloads in
+[tests/arrangement_benchmarks.cpp](../tests/arrangement_benchmarks.cpp). Both use the same
+Release compiler/options, ten warmups, five timed samples of 100 operations, and three
+alternating processes per version. No builds, tests, or sanitizer work ran during
+measurement. Workload/iteration/checksum triples match. Timings include a scan of the
+resulting child rectangles, and children are plain Widgets with empty arrangement hooks.
+
+```sh
+cmake --build build-release --target TermOx.tests.arrangement_benchmarks
+python3 tests/benchmark_paint_pipeline.py /path/to/before-arrangement-benchmarks \
+    ./build-release/tests/TermOx.tests.arrangement_benchmarks /tmp/arrangement-results \
+    --modes arrangement
+```
+
+Compile the standalone workload against each revision for a comparison. Raw
+[before](../tests/benchmark-results/arrangement-before.csv),
+[after](../tests/benchmark-results/arrangement-after.csv), and
+[process samples](../tests/benchmark-results/arrangement-samples.csv) are retained.
+
+| Workload | Children | Before µs | After µs |
+| --- | ---: | ---: | ---: |
+| unchanged refresh | 10 | 2.701 | 0.161 |
+| resize | 10 | 2.713 | 1.384 |
+| policy change | 10 | 2.672 | 1.324 |
+| unchanged refresh | 1,000 | 113.783 | 15.111 |
+| resize | 1,000 | 114.215 | 111.281 |
+| policy change | 1,000 | 119.193 | 121.569 |
+
+Unchanged refreshes are about 7.5–16.8 times faster here, with ordinary allocation calls
+falling from 16/28 to zero. Ten-child geometry changes are about twice as fast and use
+five calls instead of sixteen. Large geometry changes are effectively unchanged (about
+3% faster to 2% slower), using five calls instead of twenty-eight. Geometry changes still
+run the core allocation/rounding algorithm; custom child hooks and nested layouts can
+allocate independently. This does not promise allocation-free application resize.
+
+See [decorations and layouts](decorations-layouts.md) for drawing, geometry, mutation,
+callback safety, and migration details.
+
+
+Validation passes all 200 Release cases, including seven allocation-fault cases;
+all seven examples build and eight PTY smoke checks pass. The standalone decoration
+example compiles and runs, and the README example compiles. New coverage includes tiny
+border geometry, line-preserving Unicode titles, inherited clipping, custom width
+policies, explicit divider directions, vertical labels, repeated direct label painting,
+array/list/empty containers, const access, nested refresh, reentrant child growth/removal,
+parent moves/destruction/slicing, moved-out children, exception recovery, repaint
+scheduling, and allocation-failure rollback. ASan+UBSan passes 110 non-exception cases
+with every TermOx source instrumented and the unchanged Escape Release library linked.
+Deliberate exception/allocation-fault cases run in Release because the installed
+sanitizer runtime cannot unwind C++ exceptions.

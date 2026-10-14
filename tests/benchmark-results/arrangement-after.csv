@@ -1,0 +1,7 @@
+workload,iterations,median_us_per_operation,checksum,allocations_per_operation
+arrange.unchanged.10,100,0.161,4934000,0.000
+arrange.resize.10,100,1.384,4935500,5.000
+arrange.policy.10,100,1.324,4763000,5.000
+arrange.unchanged.1000,100,15.111,509900000,0.000
+arrange.resize.1000,100,111.281,510149000,5.000
+arrange.policy.1000,100,121.569,510399000,5.000

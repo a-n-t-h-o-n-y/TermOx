@@ -145,3 +145,8 @@ style patches, change notifications, and migration details.
 DataTable and ScrollBar compose shared viewport functions from `<ox/scroll.hpp>`.
 See [data tables and scrolling](data-tables.md) for row-based data, sorting, selection,
 Unicode clipping, two-axis viewports, and the updated scrollbar/TextBox signals.
+
+Bordered/Divider use plain label configuration and shared drawing functions. Row/Column
+keep ordinary containers, expose refresh(), and reuse unchanged geometry while refreshing
+descendants. See [decorations and layouts](decorations-layouts.md) for callback safety
+and migration.
