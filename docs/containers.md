@@ -62,7 +62,7 @@ hiding, disabling, removal, or destruction. Controls clear gesture state through
 Signal emission snapshots entries: newly connected slots wait until the next emission,
 disconnected pending slots are skipped, and destroying the signal safely cancels pending
 callbacks. Mutable callbacks retain their state between emissions; copies own independent
-callback state. TermOx vendors this implementation in `external/signals-light`. Named
+callback state. TermOx fetches the fixed upstream SignalsLight revision through CMake. Named
 Connection configuration and borrowed lifetime tracking remain unchanged.
 
 See [selection and application structure](selection-and-application.md) for ListView,

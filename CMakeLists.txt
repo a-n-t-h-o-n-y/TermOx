@@ -126,9 +126,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(escape)
 
-# SignalsLight with reentrant emission; see external/signals-light/README.md.
-add_library(signals-light INTERFACE)
-target_include_directories(signals-light INTERFACE ${PROJECT_SOURCE_DIR}/external/signals-light/include)
+# SignalsLight Library Dependency
+FetchContent_Declare(
+    signals-light
+    GIT_REPOSITORY https://github.com/a-n-t-h-o-n-y/signals-light.git
+    GIT_TAG ea7a9dc5bf35b457a8dbe8a16654af1da1668b0d
+)
+FetchContent_MakeAvailable(signals-light)
 
 # Link External Libraries to the Library Target
 target_link_libraries(TermOx PUBLIC
