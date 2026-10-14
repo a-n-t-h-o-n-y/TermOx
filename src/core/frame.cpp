@@ -179,7 +179,13 @@ void Frame::clear(Style style)
     for (int y = 0; y < size_.height; ++y) {
         changed(y);
     }
-    std::ranges::fill(cells_, Cell{U" ", style, 1});
+    for (auto& cell : cells_) {
+        if (cell.text.size() != 1 || cell.text[0] != U' ') {
+            cell.text.assign(1, U' ');
+        }
+        cell.style = style;
+        cell.columns = 1;
+    }
 }
 
 auto Frame::write(Point at, std::u32string_view grapheme, Style style) -> bool

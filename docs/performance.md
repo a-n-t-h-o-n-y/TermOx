@@ -354,3 +354,120 @@ TermOx source instrumented and the unchanged Escape Release library linked. Deli
 exception cases run in Release; the installed sanitizer runtime cannot unwind even
 an independently reproduced caught exception. The POSIX path was built and exercised
 on macOS; the Windows wait implementation was not executed on this host.
+
+## Paint pipeline and complete application frames
+
+This pass compares `e49f72b` with the current changes, using the same expanded benchmark
+source, dependencies, and Release toolchain described above. It keeps row revisions,
+reduces clearing work for cells that are already blank, and compares single-scalar cell
+text directly. Equality still includes text, style, and column width. The renderer skips
+Unicode boundary segmentation between printable ASCII neighbors; non-ASCII neighbors
+still use Escape's segmentation, including the cursor barrier for clusters that join.
+Revision bookkeeping moves before encoding; any encoding failure invalidates the cache.
+No widget behavior or public API changes are needed.
+
+The additional commands isolate paint phases and measure complete application frames:
+
+```sh
+./build-release/tests/TermOx.tests.benchmarks --paint
+./build-release/tests/TermOx.tests.benchmarks --application
+python3 tests/benchmark_paint_pipeline.py /path/to/before-benchmarks \
+    ./build-release/tests/TermOx.tests.benchmarks /tmp/paint-results
+```
+
+The comparison harness runs three fresh processes per version and mode, alternating
+version order. Each process uses ten warmups and five timed samples per workload.
+The tables report the median of those three process medians. The harness checks matching
+workload names, iteration counts, and checksums before writing results. Both binaries
+must contain the same benchmark source; for this baseline the expanded
+`tests/benchmarks.cpp` was built against the library at `e49f72b`. No builds, tests,
+or sanitizer processes ran during the recorded measurements.
+
+Raw process samples: [all samples](../tests/benchmark-results/paint-pipeline-samples.csv).
+Aggregate CSVs: [renderer before](../tests/benchmark-results/paint-pipeline-renderer-before.csv),
+[renderer after](../tests/benchmark-results/paint-pipeline-renderer-after.csv),
+[phases before](../tests/benchmark-results/paint-pipeline-paint-before.csv),
+[phases after](../tests/benchmark-results/paint-pipeline-paint-after.csv),
+[application before](../tests/benchmark-results/paint-pipeline-application-before.csv),
+[application after](../tests/benchmark-results/paint-pipeline-application-after.csv).
+
+### Rendering and paint phases
+
+| Workload | 80×24 before µs | After µs | 200×60 before µs | After µs |
+| --- | ---: | ---: | ---: | ---: |
+| unchanged | 0.047 | 0.056 | 0.087 | 0.110 |
+| single-cell | 1.246 | 1.187 | 2.599 | 2.586 |
+| clear-paint | 31.057 | 17.729 | 125.138 | 108.116 |
+| full-frame | 119.294 | 83.852 | 708.612 | 540.379 |
+
+At 200×60, clearing and repainting identical content is about 14% faster; full-frame
+style changes are about 24% faster. Small timings fluctuate: the 80×24 clear-paint
+baseline varied noticeably across processes, so its percentage should not be treated
+as a stable gain. Retained-frame skipping remains around 0.05–0.11 µs, and a single-cell
+update remains around 1–3 µs. Warm renderer workloads still allocate zero times.
+
+A separate alternating comparison reuses the pre-revision `d7f88bb` Release binary and
+the identical renderer workloads. Clear-paint is 17.798 → 17.648 µs at 80×24 and
+107.624 → 102.118 µs at 200×60; full-frame styles are 108.323 → 82.884 µs and
+672.584 → 509.497 µs. This brings clear-paint back to roughly its pre-revision cost
+and improves full-frame encoding while retaining the sparse-update gains. Raw results:
+[pre-revision baseline](../tests/benchmark-results/paint-pipeline-renderer-pre-revisions.csv),
+[current control](../tests/benchmark-results/paint-pipeline-renderer-reference-after.csv),
+[control samples](../tests/benchmark-results/paint-pipeline-renderer-reference-samples.csv).
+The same harness reproduces this control with `--modes renderer`.
+
+| Workload | 80×24 before µs | After µs | 200×60 before µs | After µs |
+| --- | ---: | ---: | ---: | ---: |
+| clear | 4.867 | 3.331 | 30.392 | 20.817 |
+| draw | 126.007 | 128.368 | 786.051 | 806.401 |
+| compare.equal | 13.753 | 11.927 | 85.730 | 72.252 |
+| encode.full | 94.177 | 71.053 | 595.020 | 448.182 |
+
+Clear alternates blank styles; draw toggles every cell between ASCII glyphs and includes
+frame validation and mutation. Compare scans equal independent frames. Encode invalidates
+the renderer before each call, forcing every cell to be emitted; it includes renderer
+bookkeeping, cache updates, cursor/style encoding, and UTF-8 conversion, but no frame
+mutation or terminal I/O. These are separate synthetic workloads, not additive timings
+for one particular application frame. Construction and initial storage growth are
+excluded. The phase workloads perform zero ordinary allocations after warmup.
+
+### Complete application frames
+
+| Workload | 80×24 before µs | After µs | 200×60 before µs | After µs |
+| --- | ---: | ---: | ---: | ---: |
+| idle | 0.383 | 0.381 | 0.383 | 0.381 |
+| repaint | 706.603 | 706.210 | 2290.499 | 2291.857 |
+| edit | 2956.587 | 2936.157 | 4580.349 | 4555.491 |
+| scroll | 721.401 | 724.135 | 2297.691 | 2337.285 |
+| resize | 1039.749 | 949.292 | 3093.929 | 2924.013 |
+
+Each workload uses an editable TextBox with 1,000 numbered multilingual lines containing
+wide characters, combining marks, and tabs. Initial construction, focus, layout, and
+rendering are outside timing. Timed frames include queued event delivery and tree/focus
+synchronization where applicable, model changes, layout, clearing, widget painting,
+frame comparison, cursor handling, and encoding. No terminal write or flush is measured.
+
+Idle steps verify that no paint occurs and do not call the renderer. Repaint explicitly
+requests a full paint with identical content. Editing alternates a character insertion
+and Backspace, restoring the document each pair. Scrolling alternates wheel events down
+and up one line; numbered lines ensure the visible content changes. Resizing alternates
+both dimensions by one cell and includes frame allocation, reflow, and full encoding.
+Every non-idle operation verifies that a paint actually happened. Checksums match across
+versions and all recorded processes.
+
+Resize frames improve by about 5–9%. Unchanged text repaints, scrolling, and editing are
+mostly unchanged; renderer improvements do not translate into the same end-to-end gains.
+Ordinary allocation counts also remain unchanged: forced text repaints still allocate
+1,335 times at 80×24 and 3,351 times at 200×60, largely in the drawing path. The existing
+`put_text_line` path resegments visible text and constructs display strings and glyph
+vectors while drawing. That shared drawing path, and layout reconstruction after edits,
+are the next useful targets. Application painting still clears and redraws its frame;
+these measurements do not claim incremental widget painting.
+
+Validation: all 157 Release cases, including five allocation-fault cases, pass; all
+six examples build and the seven PTY smoke checks pass. ASan+UBSan passes all 27
+non-exception frame/renderer cases with every TermOx source instrumented and the
+unchanged Escape Release library linked. Deliberate exception cases run in Release
+because the installed sanitizer runtime cannot unwind C++ exceptions. New coverage
+checks exact cell equality, clearing long clusters and wide continuations, and
+repainting equal prefixes before sparse and wide-cell changes.

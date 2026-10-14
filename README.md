@@ -106,7 +106,8 @@ python3 tests/smoke_examples.py build
 ```
 
 Headless [performance benchmarks](docs/performance.md) cover text editing, layout,
-routing, and rendering, with recorded before/after measurements.
+routing, rendering, paint phases, and complete application frames, with recorded
+before/after measurements.
 
 ## Application Core
 

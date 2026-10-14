@@ -1,0 +1,9 @@
+workload,iterations,median_us_per_operation,checksum,allocations_per_operation
+renderer.unchanged.80x24,1000,13.567,0,0.000
+renderer.single-cell.80x24,1000,13.598,45000,0.000
+renderer.clear-paint.80x24,100,17.798,0,0.000
+renderer.full-frame.80x24,100,108.323,1056500,0.000
+renderer.unchanged.200x60,1000,83.517,0,0.000
+renderer.single-cell.200x60,1000,82.953,50000,0.000
+renderer.clear-paint.200x60,100,107.624,0,0.000
+renderer.full-frame.200x60,100,672.584,6222500,0.000

@@ -5,6 +5,7 @@
 #include <iostream>
 #include <memory>
 #include <new>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -294,6 +295,105 @@ void routing_benchmarks()
     });
 }
 
+auto terminal_profile() -> esc::TerminalProfile
+{
+    auto profile = esc::TerminalProfile{};
+    profile.control = true;
+    profile.colors = esc::ColorSupport::TrueColor;
+    profile.traits = ox::Trait::Bold;
+    return profile;
+}
+
+void paint_benchmarks()
+{
+    for (auto size : {ox::Area{80, 24}, ox::Area{200, 60}}) {
+        auto frame = ox::Frame{size};
+        auto renderer = ox::Renderer{terminal_profile()};
+        auto const suffix =
+            std::to_string(size.width) + "x" + std::to_string(size.height);
+        measure("paint.clear." + suffix, 1000, [&](int i) {
+            frame.clear({.traits = i % 2 ? ox::Trait::Bold : ox::Trait::None});
+            return frame.row(0)[0].columns;
+        });
+        // Toggle content so drawing cannot become an identical-write benchmark.
+        measure("paint.draw." + suffix, 100, [&](int i) {
+            for (int y = 0; y < size.height; ++y) {
+                for (int x = 0; x < size.width; ++x) {
+                    frame.write({x, y}, i % 2 ? U"x" : U"y");
+                }
+            }
+            return frame.row(0)[0].text[0];
+        });
+        auto other = frame;
+        measure("paint.compare.equal." + suffix, 1000, [&](int) {
+            auto equal = std::size_t{0};
+            for (int y = 0; y < size.height; ++y) {
+                equal += std::ranges::equal(frame.row(y), other.row(y));
+            }
+            return equal;
+        });
+        measure("paint.encode.full." + suffix, 100, [&](int) {
+            renderer.invalidate();
+            return renderer.render(frame).size();
+        });
+    }
+}
+
+void application_benchmarks()
+{
+    auto document = std::string{};
+    for (int i = 0; i < 1000; ++i) {
+        document += std::to_string(i) +
+                    ": The quick brown fox jumps over the lazy dog. 界 é\tend\n";
+    }
+    for (auto size : {ox::Area{80, 24}, ox::Area{200, 60}}) {
+        auto widget =
+            ox::TextBox{{.text = document, .focus_policy = ox::FocusPolicy::Strong}};
+        auto app = ox::Application{widget};
+        auto renderer = ox::Renderer{terminal_profile()};
+        app.dispatch(esc::Resize{size.width, size.height});
+        app.paint();
+        checksum += renderer.render(app.loop().screen, app.loop().cursor).size();
+        auto const suffix =
+            std::to_string(size.width) + "x" + std::to_string(size.height);
+        auto present = [&](bool expected = true) {
+            auto const painted = app.paint();
+            if (painted != expected) {
+                throw std::logic_error{"Unexpected paint state"};
+            }
+            return painted
+                       ? renderer.render(app.loop().screen, app.loop().cursor).size() +
+                             1
+                       : 0;
+        };
+        measure("application.idle." + suffix, 100, [&](int) {
+            app.step();
+            return present(false);
+        });
+        measure("application.repaint." + suffix, 100, [&](int) {
+            app.request_repaint();
+            return present();
+        });
+        measure("application.edit." + suffix, 100, [&](int i) {
+            app.post(ox::KeyEvent{.key = i % 2 ? esc::Key{esc::KeyCode::Backspace}
+                                               : esc::Key{U'x'}});
+            app.step();
+            return present();
+        });
+        // Alternate offsets to bound the workload and keep every scroll visible.
+        measure("application.scroll." + suffix, 100, [&](int i) {
+            app.post(ox::MouseWheel{.at = {0, 0}, .dy = i % 2 ? -1 : 1});
+            app.step();
+            return present();
+        });
+        measure("application.resize." + suffix, 100, [&](int i) {
+            app.post(esc::Resize{size.width - i % 2, size.height - i % 2});
+            app.step();
+            return present();
+        });
+    }
+}
+
 void renderer_benchmarks()
 {
     auto profile = esc::TerminalProfile{};
@@ -329,16 +429,26 @@ void renderer_benchmarks()
 
 int main(int argc, char** argv)
 {
+    auto const paint_only = argc == 2 && std::string_view{argv[1]} == "--paint";
+    auto const application_only =
+        argc == 2 && std::string_view{argv[1]} == "--application";
     auto const renderer_only = argc == 2 && std::string_view{argv[1]} == "--renderer";
     auto const routing_only = argc == 2 && std::string_view{argv[1]} == "--routing";
     auto const editing_only = argc == 2 && std::string_view{argv[1]} == "--editing";
     auto const layout_only = argc == 2 && std::string_view{argv[1]} == "--layout";
-    if (argc > 1 && !routing_only && !editing_only && !layout_only && !renderer_only) {
+    if (argc > 1 && !routing_only && !editing_only && !layout_only && !renderer_only &&
+        !paint_only && !application_only) {
         return 2;
     }
     std::cout << "workload,iterations,median_us_per_operation,checksum,allocations_per_"
                  "operation\n";
-    if (renderer_only) { renderer_benchmarks(); }
+    if (paint_only) { paint_benchmarks(); }
+    else if (application_only) {
+        application_benchmarks();
+    }
+    else if (renderer_only) {
+        renderer_benchmarks();
+    }
     else if (layout_only) {
         layout_benchmarks();
     }
@@ -348,7 +458,11 @@ int main(int argc, char** argv)
     else {
         if (!routing_only) { text_benchmarks(); }
         routing_benchmarks();
-        if (!routing_only) { renderer_benchmarks(); }
+        if (!routing_only) {
+            renderer_benchmarks();
+            paint_benchmarks();
+            application_benchmarks();
+        }
     }
     std::cerr << "checksum=" << checksum << '\n';
 }

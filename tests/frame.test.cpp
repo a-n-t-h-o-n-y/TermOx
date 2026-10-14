@@ -339,3 +339,38 @@ TEST(blank_width_policy_and_invalid_shape_symbols_are_rejected)
     ASSERT_THROWS(put(canvas, {99, 99}, shape::HLine{U'界'}, 3), std::invalid_argument);
     ASSERT(contents(frame) == before);
 }
+
+TEST(cell_equality_includes_text_style_and_columns)
+{
+    auto const texts = std::array<std::u32string, 5>{U"", U" ", U"x", U"界", U"é"};
+    for (auto const& text : texts) {
+        auto cell = Cell{text, {.traits = Trait::Bold}, 1};
+        ASSERT(cell == cell);
+        for (auto const& other : texts) {
+            ASSERT((cell == Cell{other, cell.style, 1}) == (text == other));
+        }
+        ASSERT((cell != Cell{text, {}, 1}));
+        ASSERT((cell != Cell{text, cell.style, 0}));
+    }
+}
+
+TEST(frame_clear_resets_long_clusters_continuations_and_blank_styles)
+{
+    auto frame = Frame{{8, 2}};
+    frame.write({0, 0}, U"é́́́́́́́́́");
+    frame.write({2, 0}, U"界");
+    auto const style = Style{.foreground = colors::red, .traits = Trait::Bold};
+    frame.clear(style);
+    for (int y = 0; y < frame.size().height; ++y) {
+        for (auto const& cell : frame.row(y)) {
+            ASSERT((cell == Cell{U" ", style, 1}));
+        }
+    }
+    frame.clear();
+    for (int y = 0; y < frame.size().height; ++y) {
+        for (auto const& cell : frame.row(y)) {
+            ASSERT(cell == Cell{});
+        }
+    }
+    check_frame(frame);
+}

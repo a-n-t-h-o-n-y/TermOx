@@ -349,3 +349,30 @@ TEST(renderer_row_tracking_handles_clear_resize_styles_wide_cells_and_invalidati
     frame.resize({10, 4});
     ASSERT(!renderer.render(frame, {}, colors::red).empty());
 }
+
+TEST(renderer_repainted_row_preserves_equal_prefix_and_wide_footprints)
+{
+    auto frame = Frame{{24, 2}};
+    auto screen = Frame{frame.size()};
+    auto renderer = Renderer{profile()};
+    auto cursor = Point{};
+    auto paint = [&] {
+        frame.clear();
+        frame.write({0, 0}, U"é");
+        frame.write({8, 0}, U"界");
+        frame.write({20, 0}, U"x");
+    };
+    paint();
+    display(screen, cursor, renderer.render(frame));
+    paint();
+    ASSERT(renderer.render(frame).empty());
+    frame.write({20, 0}, U"y");
+    auto const output = renderer.render(frame);
+    ASSERT(output == at(20, 0) + "y");
+    display(screen, cursor, output);
+    // Replace a continuation near the first mismatch, preserving the prefix.
+    frame.write({9, 0}, U"z");
+    display(screen, cursor, renderer.render(frame));
+    check_text(frame, screen);
+    ASSERT(renderer.render(frame).empty());
+}

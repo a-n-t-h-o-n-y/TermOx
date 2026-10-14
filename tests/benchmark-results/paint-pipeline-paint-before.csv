@@ -1,0 +1,9 @@
+workload,iterations,median_us_per_operation,checksum,allocations_per_operation
+paint.clear.80x24,1000,4.867,5000,0.000
+paint.draw.80x24,100,126.007,60250,0.000
+paint.compare.equal.80x24,1000,13.753,120000,0.000
+paint.encode.full.80x24,100,94.177,1056000,0.000
+paint.clear.200x60,1000,30.392,5000,0.000
+paint.draw.200x60,100,786.051,60250,0.000
+paint.compare.equal.200x60,1000,85.730,300000,0.000
+paint.encode.full.200x60,100,595.020,6222000,0.000

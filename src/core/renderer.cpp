@@ -54,16 +54,15 @@ auto Renderer::render(Frame const& frame,
             if (!repaint && same_frame && revisions_[(std::size_t)y] == revision) {
                 continue;
             }
+            // A failed render invalidates all cached revisions.
+            revisions_[(std::size_t)y] = revision;
             auto const row = frame.row(y);
             auto const offset = static_cast<std::size_t>(y) * row.size();
-            // Clearing and repainting can restore the same row. Check that common
-            // case outside the encoding loop, then cache its new revision.
+            // Clearing and repainting can restore the same row. Skip encoding
+            // in that common case.
             auto const previous =
                 std::span<Cell const>{cells_}.subspan(offset, row.size());
-            if (!repaint && std::ranges::equal(row, previous)) {
-                revisions_[(std::size_t)y] = revision;
-                continue;
-            }
+            if (!repaint && std::ranges::equal(row, previous)) { continue; }
             for (auto x = std::size_t{0}; x < row.size();) {
                 auto const& cell = row[x];
                 if (repaint || cell != cells_[offset + x]) {
@@ -76,7 +75,11 @@ auto Renderer::render(Frame const& frame,
                     }
                     auto const at = Point{static_cast<int>(x), y};
                     auto separate = false;
-                    if (position_ == at && !last_text_.empty()) {
+                    // Printable ASCII boundaries cannot join. Non-ASCII neighbors
+                    // still need Unicode segmentation to detect a merged grapheme.
+                    if (position_ == at && !last_text_.empty() &&
+                        (last_text_.back() >= U'\x7f' ||
+                         cell.text.front() >= U'\x7f')) {
                         auto const length = last_text_.size();
                         last_text_ += cell.text;
                         // Two individually valid clusters can join (e.g. regional
@@ -110,7 +113,6 @@ auto Renderer::render(Frame const& frame,
                 }
                 x += cell.columns;
             }
-            revisions_[(std::size_t)y] = revision;
         }
         if (cursor && contains(Rect{{0, 0}, frame.size()}, *cursor)) {
             move_to(frame.lead_at(*cursor));

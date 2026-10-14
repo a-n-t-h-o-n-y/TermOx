@@ -20,7 +20,15 @@ struct Cell {
     std::u32string text = U" ";
     Style style = {};
     std::size_t columns = 1;
-    auto operator==(Cell const&) const -> bool = default;
+    auto operator==(Cell const& other) const -> bool
+    {
+        // Single scalars (especially blanks) dominate frame comparison. Avoid a
+        // general string comparison for those cells while preserving exact equality.
+        return columns == other.columns && style == other.style &&
+               (text.size() == 1 && other.text.size() == 1
+                    ? text.front() == other.text.front()
+                    : text == other.text);
+    }
 };
 
 /** Owns a rectangular grid; all mutation preserves complete grapheme footprints. */
