@@ -6,6 +6,12 @@
 
 namespace ox {
 
+[[nodiscard]] auto text_content_size(TextLayout const& layout) -> Area;
+[[nodiscard]] auto measure_text(std::string_view text,
+                                Area available,
+                                TextWrap wrap = TextWrap::None,
+                                esc::WidthPolicy policy = {}) -> Area;
+
 /** Keep a caret visible, snapping horizontal scroll to complete grapheme boundaries.
  * Scroll coordinates are display columns and rows, not byte offsets.
  * Alignment reserves a final cursor cell when short right-aligned text needs it. */
@@ -46,8 +52,8 @@ void paint_text(Canvas canvas,
                              TextWrap wrap,
                              Align align,
                              KeyEvent const& key,
-                             std::function<bool(char32_t)> const& accept = {})
-    -> EventResponse;
+                             std::function<bool(char32_t)> const& accept = {},
+                             bool read_only = false) -> EventResponse;
 [[nodiscard]] auto edit_text(TextEdit& editor,
                              TextLayout& layout,
                              Point& scroll,
@@ -55,7 +61,7 @@ void paint_text(Canvas canvas,
                              TextWrap wrap,
                              Align align,
                              esc::PasteChunk const& chunk,
-                             std::function<bool(char32_t)> const& accept = {})
-    -> EventResponse;
+                             std::function<bool(char32_t)> const& accept = {},
+                             bool read_only = false) -> EventResponse;
 
 }  // namespace ox

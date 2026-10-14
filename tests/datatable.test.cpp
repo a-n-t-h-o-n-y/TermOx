@@ -137,18 +137,18 @@ TEST(table_and_scrollbars_synchronize_both_axes_data_and_viewport_changes)
     arrange(table, {{}, {10, 4}});
     link(table, vertical);
     link(table, horizontal);
-    ASSERT(vertical.content_length == 4 && vertical.viewport_length == 2);
-    ASSERT(horizontal.content_length == 16 && horizontal.viewport_length == 10);
+    ASSERT(vertical.content_length() == 4 && vertical.viewport_length() == 2);
+    ASSERT(horizontal.content_length() == 16 && horizontal.viewport_length() == 10);
     vertical.set_position(100);
     horizontal.set_position(100);
     ASSERT((table.scroll_offset() == Point{6, 2}));
     arrange(table, {{}, {16, 10}});
     ASSERT((table.scroll_offset() == Point{}));
-    ASSERT(vertical.position == 0 && vertical.viewport_length == 8);
+    ASSERT(vertical.position() == 0 && vertical.viewport_length() == 8);
     table.add_row({"last", "5"});
-    ASSERT(vertical.content_length == 5);
+    ASSERT(vertical.content_length() == 5);
     table.set_rows({});
-    ASSERT(vertical.content_length == 0 && vertical.position == 0);
+    ASSERT(vertical.content_length() == 0 && vertical.position() == 0);
     int notifications = 0;
     table.on_scroll.connect([&](auto, auto, auto) { ++notifications; });
     table.refresh();
@@ -208,11 +208,12 @@ TEST(textbox_scrollbar_link_tracks_viewport_limits_and_resize)
     arrange(box, {{}, {4, 2}});
     link(box, bar);
     bar.set_position(100);
-    ASSERT(box.scroll_offset().y == 2 && bar.position == 2);
+    ASSERT(box.scroll_offset().y == 2 && bar.position() == 2);
     arrange(box, {{}, {4, 8}});
-    ASSERT(box.scroll_offset().y == 0 && bar.position == 0 && bar.viewport_length == 8);
+    ASSERT(box.scroll_offset().y == 0 && bar.position() == 0 &&
+           bar.viewport_length() == 8);
     box.set_text("one");
-    ASSERT(bar.content_length == 1);
+    ASSERT(bar.content_length() == 1);
 }
 
 TEST(table_scroll_links_follow_live_state_after_reentrant_callbacks)
@@ -225,7 +226,8 @@ TEST(table_scroll_links_follow_live_state_after_reentrant_callbacks)
     });
     link(table, bar);
     table.set_scroll_offset({0, 1});
-    ASSERT(table.rows().size() == 1 && bar.content_length == 1 && bar.position == 0);
+    ASSERT(table.rows().size() == 1 && bar.content_length() == 1 &&
+           bar.position() == 0);
     auto moved = std::move(table);
     moved.add_row({"next", "2"});
     bar.set_position(1);

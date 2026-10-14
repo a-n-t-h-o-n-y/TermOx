@@ -6,7 +6,7 @@ read-only access, and handlers return effects explicitly.
 
 ## State and geometry
 
-`visible`, `enabled`, `focus_policy`, and `size_policy` are public configuration.
+`visible`, `enabled`, `focus_policy`, `width_policy`, and `height_policy` are public configuration.
 Invisible widgets hide their subtree. Disabled widgets remain visible but their
 subtree receives no input, focus, or widget timer callbacks.
 
@@ -77,7 +77,8 @@ commands on the application thread.
 when the widget has none. There is no persistent widget cursor field. The application
 uses only the focused widget's paint result, clips it, and translates it into terminal
 coordinates. Canvas already supplies local size, clipping, and width policy.
-Children paint before parents, allowing borders and overlays to compose.
+The order is `paint_background`, `paint`, children, then `paint_overlay`.
+Fill a container background in the first hook and draw overlays in the last.
 
 ## Editing bindings
 
@@ -88,8 +89,7 @@ or modifying the document model. `TextLayout` owns the display layout independen
 components with plain `Point` scroll state: `edit_text` handles a key or paste and
 refreshes layout/scroll, `text_scroll` reveals a caret, `text_offset` and `text_position`
 share the aligned geometry, and `paint_text` draws cached rows and selection. LineEdit
-and TextBox use these functions without a shared base class or another owned editor
-wrapper. See [text view composition](text-editing.md#text-view-composition).
+and TextBox share an internal implementation that composes these functions. See [text view composition](text-editing.md#text-view-composition).
 
 ## Timers and lifetime
 
@@ -161,3 +161,18 @@ for checked indexing, clipping, move behavior, and migration from the removed Ma
 
 See the [final API audit](api-audit.md) for named signal connections, ownership rules,
 Suspended refresh, shared margin/style drawing, and removed unused declarations.
+
+## Measurement, containers, and capture
+
+`measure(Area available, esc::WidthPolicy)` returns natural content size without changing
+geometry. Width and height policies independently constrain allocation; `refresh()`
+requests layout and repaint after public configuration changes. Text/content commands
+request these effects automatically. `glyph_width_policy()` reads the attached frame's
+Unicode width policy. `is_enabled()` includes ancestor input eligibility when attached.
+
+Use `capture_pointer(button)` to keep receiving motion and matching release outside a
+widget's bounds, and `release_pointer()` to end the gesture. The application cancels
+capture when its owner becomes hidden, disabled, detached, or unavailable. Override
+`pointer_cancel()` to clear gesture state. Capture and the root follow widget moves.
+
+See [container composition](containers.md) and [text editing](text-editing.md).

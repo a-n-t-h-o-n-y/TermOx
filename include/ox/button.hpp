@@ -38,7 +38,8 @@ class Button : public Widget {
         StylePatch pressed_style = {};
         StylePatch focused_style = {};
         FocusPolicy focus_policy = FocusPolicy::Strong;
-        SizePolicy size_policy = SizePolicy::flex();
+        SizePolicy width_policy = SizePolicy::flex();
+        SizePolicy height_policy = SizePolicy::fixed(1);
     } static const init;
 
    public:
@@ -46,16 +47,21 @@ class Button : public Widget {
     StylePatch pressed_style;
     StylePatch focused_style;
     Decoration decoration;
-    bool pressed = false;
-    bool hovered = false;
+    auto is_pressed() const -> bool { return pressed_; }
+    auto is_hovered() const -> bool { return hovered_; }
+    sl::Signal<void()> on_activate;
     float fade_percent = 0.f;
     sl::Signal<void()> on_press;
     sl::Signal<void()> on_release;
 
    public:
     Button(Options x = init);
+    Button(Button&& other);
+    auto operator=(Button&& other) -> Button&;
 
    public:
+    auto measure(Area, esc::WidthPolicy = {}) const -> Area override;
+    auto activate() -> bool;
     auto paint(Canvas) -> Cursor override;
 
     auto handle(KeyEvent const&) -> EventResponse override;
@@ -63,6 +69,9 @@ class Button : public Widget {
     auto handle(MousePress const&) -> EventResponse override;
 
     auto handle(MouseRelease const&) -> EventResponse override;
+
+    auto handle(MouseMove const&) -> EventResponse override;
+    auto pointer_cancel() -> EventResponse override;
 
     auto focus_in() -> EventResponse override;
 
@@ -75,6 +84,11 @@ class Button : public Widget {
     auto tick() -> EventResponse;
 
    private:
+    bool pressed_ = false;
+    bool hovered_ = false;
+    bool armed_ = false;
+    std::size_t gesture_ = 0;
+    mutable TextLayout measure_layout_;
     static constexpr auto timer_period_ms = 10;
     std::optional<Timer> timer_;
     void animate();

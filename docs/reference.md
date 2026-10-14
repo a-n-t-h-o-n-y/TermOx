@@ -307,7 +307,8 @@ for a complete example and migration table.
 
 ```cpp
 FocusPolicy focus_policy;
-SizePolicy size_policy;
+SizePolicy width_policy;
+SizePolicy height_policy;
 bool visible = true;
 bool enabled = true;
 
@@ -714,71 +715,29 @@ Label::Options label;
 
 `class Button : public Widget;`
 
-Button composes activation, a label, style patches, and an optional decoration.
-Unmodified Enter/Space presses and repeats, and left mouse presses, emit `on_press`.
-A matching release clears the pressed appearance and emits `on_release` only while
-pressed. Focus loss or mouse leave cancels the pressed appearance.
+Button composes a label, style patches, and optional animation. Connect actions to
+`on_activate`; Enter/Space presses activate once, and a captured mouse gesture activates
+on release inside. Repeats do not activate. `on_press`/`on_release` describe mouse gestures.
+Read state through `is_pressed()` and `is_hovered()`.
 
 ```cpp
-auto button = Button{{
-    .label = {.text = "Run", .align = Align::Center},
-    .pressed_style = {.foreground = colors::bright_white},
-    .focused_style = {.foreground = colors::bright_cyan},
-}};
-button.on_press.connect([] { /* Run the action. */ });
+auto button = Button{{.label = {.text = "Run"}}};
+button.on_activate.connect([] { /* Run the action. */ });
 ```
-
-Public configuration/state includes `Label::Options label`, `StylePatch pressed_style`,
-`StylePatch focused_style`, `Decoration decoration`, `bool pressed`, `bool hovered`,
-and `float fade_percent`. Decoration is `std::variant<PaintFn, Fade>`; `PaintFn` is
-`std::function<void(Canvas)>`. Fade keeps its paint function and in/out durations.
-Its timer exists only when animation is needed and follows widget moves. Hover and
-focus combine to determine the animation target. `gradient_blend` and `shape_gradient`
-remain available for decoration composition.
-
-Focus styling reads `is_focused()`. Label painting uses the free `paint_label` function
-rather than constructing another widget. There is no BasicButton inheritance layer or
-label-modifier callback; use the same Button with an empty label when no label is wanted.
-Options still accept focus and size policies. See [control composition](controls.md).
 
 ## 🧩 ox::CheckBox
 
-[`#include <ox/checkbox.hpp>`](../include/ox/checkbox.hpp)
-
-`class CheckBox : public Widget;`
-
-```cpp
-auto checkbox = CheckBox{{.checked = true}};
-checkbox.on_toggle.connect([](bool checked) { /* Observe the new value. */ });
-checkbox.set_checked(false);
-checkbox.toggle();
-```
-
-State is a plain public `bool checked`. `checked_glyphs` and `unchecked_glyphs` are
-ordinary glyph vectors; `focused_style` is a StylePatch that preserves their existing
-colors and traits. Options accept these values, focus policy, and size policy.
-Defaults are unchecked, `[X]`/`[ ]`, strong focus, and fixed size four.
-
-`set_checked(bool)` and `toggle()` return whether the state changed. Commands request
-repaint when attached and emit `on_toggle(bool)` once per change. Repeating an identical
-set emits nothing. Keyboard and mouse activation use the shared control functions.
-Direct field changes require an explicit repaint request and emit no signal.
+`<ox/checkbox.hpp>` supplies a checkbox with a plain label caption.
+Read `checked()`; mutate with `set_checked(bool)` or `toggle()`. `on_change(bool)` emits
+only for changes. Glyph vectors and focused style remain public configuration.
 
 ## 🧩 ox::RadioGroup
 
-[`#include <ox/radiogroup.hpp>`](../include/ox/radiogroup.hpp)
-
-A vertical list with public `items`, optional `selected_index`, and optional `highlighted`
-index. Focus policy defaults to Strong. Arrow keys move the highlight without selecting;
-Enter/Space or left click selects. `select(index)` validates the index, updates the
-highlight, requests repaint when needed, and emits `on_select(string const&)` only for
-a changed selection. The signal carries a stable text snapshot, so slots may replace
-the items. Invalid commands are ignored; empty groups do not consume input.
-
-`on`/`off` glyph vectors describe indicators, `style` describes labels, and
-`focused_style` patches the highlighted row while focused. Indicator offsets use
-terminal cell widths rather than scalar counts, including wide and emoji clusters.
-See [control composition](controls.md) for reusable activation and selection functions.
+`<ox/radiogroup.hpp>` supplies a vertical group with owned item strings. Read `items()`,
+`selected_index()`, and `highlighted_index()`; mutate with `set_items` and `select`.
+`select(std::nullopt)` clears selection; invalid indices throw. Arrows move and select,
+while Enter/Space or click selects. `on_select(optional<size_t>)` emits only for changes.
+See [control composition](controls.md) for contracts and migration.
 
 ## 🧩 ox::DataTable
 
@@ -817,7 +776,8 @@ struct Options {
     std::string text = "";
     Align align = Align::Center;
     Style style = {};
-    SizePolicy size_policy = SizePolicy::flex();
+    SizePolicy width_policy = SizePolicy::flex();
+    SizePolicy height_policy = SizePolicy::fixed(1);
 };
 
 Label(Options x = {});
@@ -889,7 +849,8 @@ struct Options {
     Style style = {};
     std::locale locale = std::locale{};
     std::string format = "{}";
-    SizePolicy size_policy = SizePolicy::flex();
+    SizePolicy width_policy = SizePolicy::flex();
+    SizePolicy height_policy = SizePolicy::fixed(1);
 };
 
 BasicNumberLabel(Options x = {});
@@ -1186,80 +1147,21 @@ uniformity with other Layouts.
 
 `class LineEdit : public Widget;`
 
-A user editable single line text input Widget. 
-
-Supports Left, Center, and Right alignment, grapheme-aware selection, and horizontal
-caret scrolling through the shared [text view functions](text-editing.md#text-view-composition).
+A single-line input with Unicode selection, scrolling, undo, clipboard commands,
+read-only behavior, placeholders, and complete-value validation.
 
 ```cpp
-auto line_edit = LineEdit{{
+auto input = LineEdit{{
     .text = "123",
-    .text_style = {.foreground = colors::bright_white},
-    .background = colors::bright_blue,
-    .ghost_text = "Ghost Text",
-    .validator = [](char32_t c) { return c >= U'0' && c <= U'9'; },
+    .style = {.foreground = colors::bright_white},
+    .placeholder = "Number",
+    .accept_character = [](char32_t c) { return c >= U'0' && c <= U'9'; },
 }};
+input.on_submit.connect([](std::string const& text) { /* Use the value. */ });
 ```
 
-<details>
-<summary><strong>Details</strong></summary>
-
-### 🏗️ Constructors
-
-```cpp
-struct Options {
-    std::string text = "";
-    Style text_style = {};
-    Align align = Align::Left;
-    Color background = default_color;
-    std::string ghost_text = "";
-    Style ghost_text_style = {.foreground = colors::bright_black};
-    std::function<bool(char32_t)> validator = {};
-    FocusPolicy focus_policy = FocusPolicy::Strong;
-    SizePolicy size_policy = SizePolicy::flex();
-};
-
-LineEdit(Options x = {});
-```
-
-Construct a LineEdit Widget. The `text` is the initial text to be displayed, the
-`text_style` is the Style to use when painting the text, `align` is the horizontal
-alignment of the text, `background` is the background color of the LineEdit,
-`ghost_text` is the text to be displayed when the LineEdit is empty, `ghost_text_style`
-is the Style to use when painting the ghost text, `validator` is a function that will be
-called for each character typed into the LineEdit.
-
----
-
-### Signals
-
-```cpp
-sl::Signal<void(std::string const&)> on_enter;
-```
-
-- `on_enter` is emitted when the user presses the enter key while the LineEdit has
-focus. The current text is passed to the signal. This does not emit the ghost text.
-
----
-
-### Public Objects
-
-```cpp
-TextEdit editor;
-auto text() const -> std::string const&;
-void set_text(std::string_view text);
-Style text_style;
-Align align;
-StylePatch selection_style;
-Color background;
-std::string ghost_text;  // Visible if text is empty.
-Style ghost_text_style;
-std::function<bool(char32_t)> validator;
-```
-
----
-
-</details>
+See [text editing](text-editing.md#widget-integration-and-api-changes) for the shared
+LineEdit/TextBox mutation commands, signals, validation, and viewport API.
 
 ## 🧩 ox::PixelGrid
 
@@ -1325,88 +1227,23 @@ See [data tables and scrolling](data-tables.md#shared-scrolling-functions).
 
 `class TextBox : public Widget;`
 
-A multiline TextBox Widget. It supports word wrapping, selection, vertical scrolling,
-and horizontal caret scrolling for unwrapped text. It is editable if a
-FocusPolicy other than `None` is set. It can be used with a ScrollBar with the `link`
-function.
+Multiline input with the same editing commands/signals as LineEdit. Word wrapping is
+the default; `TextWrap::None` enables horizontal scrolling. Ctrl-Enter submits. Set
+`read_only` for selectable, noneditable text independently of focus policy.
 
 ```cpp
-auto tb = TextBox{{
-    .text = "A TextBox",
-    .wrap = TextWrap::Word,
-    .align = Align::Center,
-    .style = {.foreground = colors::bright_white, .traits = Trait::Bold},
-}};
-
-auto sb = ScrollBar{};
-
-link(tb, sb);
+auto text = TextBox{{.text = "A TextBox", .wrap = TextWrap::Word}};
+auto bar = ScrollBar{};
+auto connections = link(text, bar);
 ```
 
-<details>
-<summary><strong>Details</strong></summary>
+`link` returns the two signal identifiers; it tracks widget moves and lifetimes.
+See [text editing](text-editing.md#widget-integration-and-api-changes).
 
-### 🏗️ Constructors
+## 🧩 ox::Padding, ox::Stack, ox::ScrollView
 
-```cpp
-enum class TextWrap { None, Any, Word };
-
-struct Options {
-    std::string text = {};  // UTF8 encoded
-    TextWrap wrap = TextWrap::Word;
-    Align align = Align::Left;
-    Style style = {};
-    FocusPolicy focus_policy = FocusPolicy::None;
-    SizePolicy size_policy = SizePolicy::flex();
-};
-
-TextBox(Options x = {});
-```
-
-Construct a TextBox Widget. The `text` is the initial text to be displayed, the `wrap`
-is the wrapping mode (`Any` wraps at grapheme boundaries, and `Word` prefers spaces
-or tabs), `align` is the horizontal alignment of the text, `style` is the Style to
-use when painting the text.
-
----
-
-### Signals
-
-```cpp
-sl::Signal<void(int, int, int)> on_scroll; /// position, content, viewport
-```
-
-- `on_scroll` is emitted when the top row, display-row count, or viewport height changes.
-  Position, content length, and viewport length are passed to the signal. The `link`
-  function uses these values to synchronize a ScrollBar.
-
-
-### Public Objects
-
-```cpp
-TextEdit editor;
-auto text() const -> std::string const&;
-void set_text(std::string_view text);
-TextWrap wrap;
-Align align;
-Style style;
-StylePatch selection_style;
-```
-
----
-
-### `link` Free Function
-
-```cpp
-void link(TextBox& tb, ScrollBar& sb);
-```
-
-Link a ScrollBar to a TextBox, the ScrollBar will control the TextBox, and the
-TextBox will update the ScrollBar.
-
----
-
-</details>
+`<ox/container.hpp>` supplies an inset child with background painting, a selected-page
+container, and a clipped scrolling child. See [container composition](containers.md).
 
 ## 📦 ox::Point
 
@@ -1504,7 +1341,7 @@ struct Style {
 Use `colors::blue` and other named palette colors, `IndexedColor{235}` for a palette
 slot, `RGB{0x773283}` for true color, or `RGB{HSL{120, 90, 70}}` for an HSL conversion.
 `fg(color)` and `bg(color)` select a color channel. Widgets expose `style`,
-`text_style`, `ghost_text_style`, or `focused_style` as appropriate.
+`style`, `placeholder_style`, or `focused_style` as appropriate.
 
 ## 🧩 ox::Glyph and ox::GlyphString
 

@@ -48,7 +48,8 @@ class DataTable : public Widget {
         bool selectable = true;
         std::string empty_text = "No rows";
         FocusPolicy focus_policy = FocusPolicy::Strong;
-        SizePolicy size_policy = SizePolicy::flex();
+        SizePolicy width_policy = SizePolicy::flex();
+        SizePolicy height_policy = SizePolicy::flex();
     } static const init;
 
     Style style;
@@ -94,10 +95,11 @@ class DataTable : public Widget {
                    bool ascending = true,
                    std::function<bool(std::string_view, std::string_view)> less = {});
     /** Recompute widths, clamp scroll/selection, schedule paint and publish changes. */
-    void refresh();
+    void refresh() override;
     auto select(std::optional<std::size_t> row) -> bool;
     auto set_scroll_offset(Point position) -> bool;
 
+    auto measure(Area, esc::WidthPolicy = {}) const -> Area override;
     auto paint(Canvas) -> Cursor override;
     auto handle(KeyEvent const&) -> EventResponse override;
     auto handle(MousePress const&) -> EventResponse override;
@@ -127,5 +129,6 @@ class DataTable : public Widget {
 
 /** Link one axis; lifetime tracked in both directions. Initialize and resize normally.
  */
-void link(DataTable& table, ScrollBar& bar);
+auto link(DataTable& table, ScrollBar& bar)
+    -> std::pair<sl::Identifier, sl::Identifier>;
 }  // namespace ox

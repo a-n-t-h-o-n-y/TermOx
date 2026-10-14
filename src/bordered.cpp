@@ -35,7 +35,8 @@ void paint_divider(Canvas canvas,
 }
 Divider::Options const Divider::init = {};
 Divider::Divider(Options x)
-    : Widget{FocusPolicy::None, SizePolicy::fixed(1)},
+    : Widget{FocusPolicy::None, x.vertical ? SizePolicy::fixed(1) : SizePolicy::flex(),
+             x.vertical ? SizePolicy::flex() : SizePolicy::fixed(1)},
       vertical{x.vertical},
       lines{x.lines},
       style{x.style},

@@ -26,6 +26,7 @@ template <typename, bool>
 class LinearLayout;
 }
 class Application;
+struct Clipboard;
 template <typename T>
 class LifetimeView;
 template <typename T>
@@ -48,9 +49,18 @@ enum class FocusPolicy : std::uint8_t { None, Tab, Click, Strong };
 class Widget {
    public:
     FocusPolicy focus_policy;
-    SizePolicy size_policy;
+    SizePolicy width_policy;
+    SizePolicy height_policy;
     bool visible = true;
     bool enabled = true;
+    auto is_enabled() const -> bool
+    { return enabled && (!application_ || input_enabled_); }
+    StylePatch disabled_style = {.background = {},
+                                 .foreground = {},
+                                 .enabled = Trait::Dim,
+                                 .disabled = {}};
+    auto appearance(Style normal) const -> Style
+    { return is_enabled() ? normal : normal | disabled_style; }
 
     [[nodiscard]] auto bounds() const -> Rect { return bounds_; }
     [[nodiscard]] auto at() const -> Point { return bounds_.at; }
@@ -58,7 +68,9 @@ class Widget {
     [[nodiscard]] auto is_focused() const -> bool { return focused_; }
 
    public:
-    Widget(FocusPolicy fp = FocusPolicy::None, SizePolicy sp = SizePolicy::flex());
+    Widget(FocusPolicy fp = FocusPolicy::None,
+           SizePolicy width = SizePolicy::flex(),
+           SizePolicy height = SizePolicy::flex());
 
     Widget(Widget const&) = delete;
     Widget(Widget&& other);
@@ -89,7 +101,27 @@ class Widget {
 
     virtual auto handle(esc::PasteChunk const&) -> EventResponse { return {}; }
 
+    /** Pure natural-size query. Measurement must not mutate the tree or emit signals.
+     */
+    virtual auto measure(Area available, esc::WidthPolicy = {}) const -> Area
+    {
+        validate(available);
+        return {};
+    }
+    virtual void paint_background(Canvas) {}
     virtual auto paint(Canvas) -> Cursor { return {}; }
+    virtual void paint_overlay(Canvas) {}
+    virtual void refresh()
+    {
+        request_layout();
+        request_repaint();
+    }
+    virtual auto pointer_cancel() -> EventResponse { return {}; }
+    auto capture_pointer(MouseButton button = MouseButton::Left) -> bool;
+    void release_pointer();
+    auto is_pointer_captured() const -> bool;
+    auto clipboard() -> Clipboard&;
+    auto glyph_width_policy() const -> esc::WidthPolicy;
 
     virtual auto get_children() -> zzz::Generator<Widget&>
     { return zzz::Generator<Widget&>{nullptr}; }
@@ -103,6 +135,7 @@ class Widget {
 
     /** Schedule painting after a direct widget mutation, if attached. */
     void request_repaint();
+    void request_layout();
 
    private:
     template <typename, bool>
@@ -115,7 +148,8 @@ class Widget {
     friend auto track(T&) -> LifetimeView<T>;
     Rect bounds_;
     bool focused_ = false;
-    std::shared_ptr<Widget*> lifetime_ = std::make_shared<Widget*>(this);
+    bool input_enabled_ = true;
+    mutable std::shared_ptr<Widget*> lifetime_ = std::make_shared<Widget*>(this);
     Application* application_ = nullptr;
     std::vector<std::weak_ptr<Timer::State>> timers_;
 };
@@ -172,14 +206,16 @@ concept WidgetDerived = std::derived_from<std::remove_cv_t<T>, Widget>;
 template <WidgetDerived WidgetType>
 auto operator|(WidgetType& w, SizePolicy sp) -> WidgetType&
 {
-    w.size_policy = sp;
+    w.width_policy = sp;
+    w.height_policy = sp;
     return w;
 }
 
 template <WidgetDerived WidgetType>
 auto operator|(WidgetType&& w, SizePolicy sp) -> WidgetType
 {
-    w.size_policy = sp;
+    w.width_policy = sp;
+    w.height_policy = sp;
     return w;
 }
 
@@ -213,6 +249,10 @@ template <typename WidgetType>
 [[nodiscard]] auto track(WidgetType& w) -> LifetimeView<WidgetType>
 {
     static_assert(WidgetDerived<WidgetType>);
+    if (!w.lifetime_) {
+        w.lifetime_ = std::make_shared<Widget*>(
+            const_cast<Widget*>(static_cast<Widget const*>(&w)));
+    }
     return LifetimeView<WidgetType>{w.lifetime_};
 }
 

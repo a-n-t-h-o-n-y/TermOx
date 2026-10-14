@@ -84,7 +84,7 @@ class ColorSelect : public Row<std::vector<Button>> {
         for (auto const color : colors) {
             children.push_back({{.label = {.style = {.background = color}}}});
             Connection{
-                .signal = children.back().on_press,
+                .signal = children.back().on_activate,
                 .slot = [color](auto& parent) { parent.on_select(color); }}(*this);
         }
     }
@@ -126,7 +126,7 @@ int main()
                     .text = "Last Action",
                     .align = Align::Center,
                     .style = {.traits = Trait::Bold},
-                    .size_policy = SizePolicy::fixed(1),
+                    .height_policy = SizePolicy::fixed(1),
                 }},
                 Label{{.align = Align::Left}} | SizePolicy::fixed(1),
                 Divider{{
@@ -138,7 +138,7 @@ int main()
                         .text = "Pin Count",
                         .align = Align::Left,
                         .style = {.traits = Trait::Bold},
-                        .size_policy = SizePolicy::fixed(10),
+                        .width_policy = SizePolicy::fixed(10),
                     }},
                     IntegerLabel{{
                         .value = 0,
@@ -157,7 +157,7 @@ int main()
                                       .foreground = colors::black,
                                       .traits = Trait::Bold},
                         },
-                    .size_policy = SizePolicy::fixed(1),
+                    .height_policy = SizePolicy::fixed(1),
                 }},
             } | SizePolicy::fixed(16),
         } |
@@ -190,7 +190,7 @@ int main()
                    count_label.value -= 1;
                }}(status, count);
 
-    Connection{.signal = clear_btn.on_press,
+    Connection{.signal = clear_btn.on_activate,
                .slot = [](auto& pinbox, auto& status_bar, auto& count_label) {
                    pinbox.clear();
                    status_bar.text = "Board Cleared";

@@ -9,7 +9,7 @@ using namespace ox;
 TEST(control_functions_match_activation_and_keep_optional_indices_in_range)
 {
     ASSERT(activates(KeyEvent{.key = U' '}));
-    ASSERT(activates(KeyEvent{.key = KeyCode::Enter, .action = KeyAction::Repeat}));
+    ASSERT(!activates(KeyEvent{.key = KeyCode::Enter, .action = KeyAction::Repeat}));
     ASSERT(!activates(KeyEvent{.key = U' ', .modifiers = {.ctrl = true}}));
     ASSERT(!activates(KeyEvent{.key = KeyCode::Enter, .action = KeyAction::Release}));
     ASSERT(releases(KeyEvent{
@@ -39,7 +39,7 @@ TEST(checkbox_commands_coalesce_notifications_and_preserve_glyph_styles_in_focus
     app.dispatch(esc::Resize{box.size()});
     app.paint();
     auto changes = std::vector<bool>{};
-    box.on_toggle.connect([&](bool checked) { changes.push_back(checked); });
+    box.on_change.connect([&](bool checked) { changes.push_back(checked); });
     ASSERT(box.set_checked(true));
     ASSERT(!box.set_checked(true));
     ASSERT(app.loop().needs_repaint());
@@ -47,7 +47,7 @@ TEST(checkbox_commands_coalesce_notifications_and_preserve_glyph_styles_in_focus
     ASSERT((changes == std::vector<bool>{true}));
     ASSERT((app.loop().screen[Point{1, 0}].style.foreground == Color{colors::blue}));
     ASSERT((app.loop().screen[Point{1, 0}].style.traits.contains(Trait::Bold)));
-    ASSERT(app.dispatch(KeyEvent{.key = U' '}).repaint && !box.checked);
+    ASSERT(app.dispatch(KeyEvent{.key = U' '}).repaint && !box.checked());
     ASSERT((changes == std::vector<bool>{true, false}));
 }
 
@@ -69,12 +69,13 @@ TEST(button_keyboard_visual_state_and_release_use_shared_activation)
     int releases_count = 0;
     button.on_press.connect([&] { ++presses; });
     button.on_release.connect([&] { ++releases_count; });
-    ASSERT(app.dispatch(KeyEvent{.key = U' '}).handled && button.pressed);
+    ASSERT(app.dispatch(MousePress{{0, 0}, MouseButton::Left}).handled &&
+           button.is_pressed());
     app.paint();
     ASSERT((app.loop().screen[Point{0, 0}].style.foreground == Color{colors::red}));
     ASSERT((app.loop().screen[Point{0, 0}].style.traits.contains(Trait::Bold)));
-    ASSERT(app.dispatch(KeyEvent{.key = U' ', .action = KeyAction::Release}).handled);
-    ASSERT(!button.pressed && presses == 1 && releases_count == 1);
+    ASSERT(app.dispatch(MouseRelease{{0, 0}, MouseButton::Left}).handled);
+    ASSERT(!button.is_pressed() && presses == 1 && releases_count == 1);
     ASSERT(!button.handle(MouseRelease{{0, 0}, {}}).handled);
 }
 
@@ -104,24 +105,19 @@ TEST(button_fade_combines_hover_and_focus_and_follows_moves)
 TEST(radio_group_selection_snapshots_survive_item_changes_and_reject_invalid_indices)
 {
     auto group = RadioGroup{{.items = {"one", "two"}}};
-    arrange(group, {{0, 0}, {12, 2}});
-    auto app = Application{group};
-    ASSERT(group.highlighted == 0);
-    auto selected = std::string{};
-    int notifications = 0;
-    group.on_select.connect([&](std::string const&) { group.items = {"replacement"}; });
-    group.on_select.connect([&](std::string const& value) {
-        selected = value;
-        ++notifications;
+    arrange(group, {{}, {12, 2}});
+    auto notifications = std::vector<std::optional<std::size_t>>{};
+    group.on_select.connect([&](std::optional<std::size_t> value) {
+        if (value) { group.set_items({"replacement"}); }
     });
-    ASSERT(app.dispatch(KeyEvent{.key = U' '}).handled);
-    ASSERT(selected == "one" && notifications == 1 && group.selected_index == 0);
-    ASSERT(!group.select(0) && notifications == 1);
-    ASSERT(!group.select(std::numeric_limits<std::size_t>::max()));
-    group.highlighted = std::numeric_limits<std::size_t>::max();
-    ASSERT(group.handle(KeyEvent{.key = KeyCode::ArrowDown}).repaint &&
-           group.highlighted == 0);
-    group.items.clear();
+    group.on_select.connect(
+        [&](std::optional<std::size_t> value) { notifications.push_back(value); });
+    ASSERT(group.select(0));
+    ASSERT((notifications == std::vector<std::optional<std::size_t>>{std::nullopt, 0}));
+    ASSERT(!group.selected_index() && group.items().size() == 1);
+    ASSERT_THROWS(group.select(std::numeric_limits<std::size_t>::max()),
+                  std::out_of_range);
+    group.set_items({});
     ASSERT(!group.handle(KeyEvent{.key = KeyCode::Enter}).handled);
 }
 

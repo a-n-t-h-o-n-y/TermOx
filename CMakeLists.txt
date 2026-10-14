@@ -52,6 +52,8 @@ add_library(TermOx STATIC
     include/ox/bordered.hpp
     include/ox/button.hpp
     include/ox/controls.hpp
+    include/ox/container.hpp
+    include/ox/clipboard.hpp
     include/ox/checkbox.hpp
     include/ox/datatable.hpp
     include/ox/routing.hpp
@@ -59,6 +61,7 @@ add_library(TermOx STATIC
     include/ox/label.hpp
     include/ox/layout.hpp
     include/ox/lineedit.hpp
+    include/ox/detail/text_control.hpp
     include/ox/pixelgrid.hpp
     include/ox/put.hpp
     include/ox/radiogroup.hpp
@@ -113,13 +116,9 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(escape)
 
-# SignalsLight Library Dependency
-FetchContent_Declare(
-    signals-light
-    GIT_REPOSITORY https://github.com/a-n-t-h-o-n-y/signals-light.git
-    GIT_TAG 5b873d0aa515a2085138359e69746cd7d7a5362f
-)
-FetchContent_MakeAvailable(signals-light)
+# SignalsLight with reentrant emission; see external/signals-light/README.md.
+add_library(signals-light INTERFACE)
+target_include_directories(signals-light INTERFACE ${PROJECT_SOURCE_DIR}/external/signals-light/include)
 
 # Link External Libraries to the Library Target
 target_link_libraries(TermOx PUBLIC

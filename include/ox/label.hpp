@@ -8,6 +8,7 @@
 
 #include <ox/align.hpp>
 #include <ox/core/core.hpp>
+#include <ox/text_view.hpp>
 #include <ox/widget.hpp>
 
 namespace ox {
@@ -36,7 +37,8 @@ class Label : public Widget {
         std::string text = "";
         Align align = Align::Center;
         Style style = {};
-        SizePolicy size_policy = SizePolicy::flex();
+        SizePolicy width_policy = SizePolicy::flex();
+        SizePolicy height_policy = SizePolicy::fixed(1);
     } static const init;
 
    public:
@@ -51,7 +53,12 @@ class Label : public Widget {
     Label(char const* text_);
 
    public:
+    auto set_text(std::string value) -> bool;
+    auto measure(Area, esc::WidthPolicy = {}) const -> Area override;
     auto paint(Canvas c) -> Cursor override;
+
+   private:
+    mutable TextLayout measure_layout_;
 };
 
 // -------------------------------------------------------------------------------------
@@ -83,7 +90,8 @@ class BasicNumberLabel : public Widget {
         Style style = {};
         std::locale locale = std::locale{};
         std::string format = "{}";
-        SizePolicy size_policy = SizePolicy::flex();
+        SizePolicy width_policy = SizePolicy::flex();
+        SizePolicy height_policy = SizePolicy::fixed(1);
     } inline static const init = {};
 
    public:
@@ -94,7 +102,7 @@ class BasicNumberLabel : public Widget {
     std::string format;
 
     BasicNumberLabel(Options x = init)
-        : Widget{FocusPolicy::None, x.size_policy},
+        : Widget{FocusPolicy::None, x.width_policy, x.height_policy},
           value{std::move(x.value)},
           align{std::move(x.align)},
           style{std::move(x.style)},
@@ -103,10 +111,23 @@ class BasicNumberLabel : public Widget {
     {}
 
    public:
+    auto set_value(NumberType next) -> bool
+    {
+        if (value == next) { return false; }
+        value = next;
+        request_layout();
+        request_repaint();
+        return true;
+    }
+    auto measure(Area available, esc::WidthPolicy policy = {}) const -> Area override
+    {
+        return measure_text(std::vformat(locale, format, std::make_format_args(value)),
+                            available, TextWrap::None, policy);
+    }
     auto paint(Canvas c) -> Cursor override
     {
         auto const text = std::vformat(locale, format, std::make_format_args(value));
-        paint_label(c, text, align, style);
+        paint_label(c, text, align, appearance(style));
 
         return {};
     }

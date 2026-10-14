@@ -45,6 +45,11 @@ class PixelGrid : public Widget {
     void set_image(Area size, std::vector<RGB> pixels);
     void reset(Area size, RGB fill = RGB{0x000000});
 
+    auto measure(Area available, esc::WidthPolicy = {}) const -> Area override
+    {
+        validate(available);
+        return pixel_cell_size(size_);
+    }
     auto paint(Canvas canvas) -> Cursor override;
 
    private:

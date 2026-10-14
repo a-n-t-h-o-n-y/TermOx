@@ -104,6 +104,7 @@ void PixelGrid::set_image(Area size, std::vector<RGB> pixels)
     if (pixels.size() != pixel_count(size)) {
         throw std::invalid_argument{"Pixel storage does not match dimensions"};
     }
+    request_layout();
     size_ = size;
     pixels_.swap(pixels);
     request_repaint();

@@ -2,11 +2,13 @@
 
 #include <cstddef>
 #include <optional>
+#include <span>
 #include <string>
 #include <vector>
 
 #include <signals_light/signal.hpp>
 
+#include <ox/core/text.hpp>
 #include <ox/widget.hpp>
 
 namespace ox {
@@ -36,25 +38,31 @@ class RadioGroup : public Widget {
         std::vector<Glyph> on = U"(X)"_gs;
         std::vector<Glyph> off = U"( )"_gs;
         FocusPolicy focus_policy = FocusPolicy::Strong;
-        SizePolicy size_policy = SizePolicy::flex();
+        SizePolicy width_policy = SizePolicy::flex();
+        SizePolicy height_policy = SizePolicy::flex();
     } static const init;
 
-    std::vector<std::string> items;
-    std::optional<std::size_t> selected_index;
+    auto items() const -> std::span<std::string const> { return items_; }
+    auto selected_index() const -> std::optional<std::size_t> { return selected_; }
+    void set_items(std::vector<std::string> items);
     Style style;
     StylePatch focused_style;
     std::vector<Glyph> on;
     std::vector<Glyph> off;
 
-    std::optional<std::size_t> highlighted = std::nullopt;
-    sl::Signal<void(std::string const&)> on_select;
+    auto highlighted_index() const -> std::optional<std::size_t>
+    { return highlighted_; }
+    sl::Signal<void(std::optional<std::size_t>)> on_select;
 
    public:
     RadioGroup(Options x = init);
+    RadioGroup(RadioGroup&& other);
+    auto operator=(RadioGroup&& other) -> RadioGroup&;
 
    public:
-    auto select(std::size_t index) -> bool;
+    auto select(std::optional<std::size_t> index) -> bool;
 
+    auto measure(Area, esc::WidthPolicy = {}) const -> Area override;
     auto paint(Canvas c) -> Cursor override;
 
     auto handle(KeyEvent const& k) -> EventResponse override;
@@ -64,6 +72,12 @@ class RadioGroup : public Widget {
     auto focus_in() -> EventResponse override;
 
     auto focus_out() -> EventResponse override;
+
+   private:
+    std::vector<std::string> items_;
+    std::optional<std::size_t> selected_;
+    std::optional<std::size_t> highlighted_;
+    mutable std::vector<TextLayout> measure_layouts_;
 };
 
 }  // namespace ox

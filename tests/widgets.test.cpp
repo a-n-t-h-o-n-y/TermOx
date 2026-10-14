@@ -31,7 +31,7 @@ TEST(line_edit_edits_unicode_scalars_and_repeated_keys)
 
 TEST(line_edit_buffers_split_paste_and_applies_scalar_validation)
 {
-    auto edit = LineEdit{{.validator = [](char32_t c) { return c != U'x'; }}};
+    auto edit = LineEdit{{.accept_character = [](char32_t c) { return c != U'x'; }}};
     arrange(edit, {edit.at(), {8, 1}});
     edit.handle(esc::PasteChunk{"\xc3", true, false});
     ASSERT((edit.text().empty()));
@@ -68,14 +68,14 @@ TEST(button_handles_repeats_and_unidentified_mouse_release)
     button.handle(KeyEvent{.key = KeyCode::Enter, .action = KeyAction::Repeat});
     button.handle(MousePress{{0, 0}, MouseButton::Left});
     button.handle(MouseRelease{{0, 0}, std::nullopt});
-    ASSERT((presses == 2));
+    ASSERT((presses == 1));
     ASSERT((releases == 1));
 }
 
 TEST(line_edit_enter_preserves_changes_from_the_callback)
 {
     auto edit = LineEdit{{.text = "submitted"}};
-    edit.on_enter.connect([&](std::string const&) { edit.set_text(""); });
+    edit.on_submit.connect([&](std::string const&) { edit.set_text(""); });
     edit.handle(KeyEvent{.key = KeyCode::Enter});
     ASSERT(edit.text().empty());
 }
@@ -143,9 +143,9 @@ TEST(line_edit_selection_and_mouse_hits_use_terminal_columns)
     auto line = LineEdit{{.text = "a界b"}};
     arrange(line, {line.at(), {8, 1}});
     line.handle(MousePress{{2, 0}, MouseButton::Left});
-    ASSERT(line.editor.caret() == 1);
+    ASSERT(line.editor().caret() == 1);
     line.handle(MousePress{{3, 0}, MouseButton::Left, {.shift = true}});
-    ASSERT((line.editor.selection() == std::pair<std::size_t, std::size_t>{1, 4}));
+    ASSERT((line.editor().selection() == std::pair<std::size_t, std::size_t>{1, 4}));
     auto frame = Frame{line.size()};
     line.paint(Canvas{frame});
     ASSERT((frame[Point{1, 0}].style.traits.contains(Trait::Inverse)));
@@ -165,9 +165,9 @@ TEST(line_edit_alignment_scrolling_and_hits_share_the_same_geometry)
     line.paint(Canvas{frame});
     ASSERT((frame[Point{5, 0}].text == U"界"));
     line.handle(MousePress{{6, 0}, MouseButton::Left});
-    ASSERT(line.editor.caret() == 0);
+    ASSERT(line.editor().caret() == 0);
     line.handle(MousePress{{7, 0}, MouseButton::Left});
-    ASSERT(line.editor.caret() == 3);
+    ASSERT(line.editor().caret() == 3);
     line.set_text("aé界🙂b");
     arrange(line, {line.at(), {4, 1}});
     frame.resize(line.size());
@@ -175,25 +175,25 @@ TEST(line_edit_alignment_scrolling_and_hits_share_the_same_geometry)
     auto const cursor = line.paint(Canvas{frame});
     ASSERT(cursor && cursor->x < 4);
     line.handle(MousePress{{0, 0}, MouseButton::Left});
-    ASSERT(std::ranges::find(line.editor.boundaries(), line.editor.caret()) !=
-           line.editor.boundaries().end());
+    ASSERT(std::ranges::find(line.editor().boundaries(), line.editor().caret()) !=
+           line.editor().boundaries().end());
 }
 
 TEST(text_box_wrapped_navigation_uses_preferred_columns_before_first_paint)
 {
     auto box = TextBox{{.text = "abcd\nx\n界abc"}};
     arrange(box, {box.at(), {10, 3}});
-    box.editor.set_caret(3);
+    box.set_caret(3);
     box.handle(KeyEvent{.key = KeyCode::ArrowDown});
-    ASSERT(box.editor.caret() == 6);
+    ASSERT(box.editor().caret() == 6);
     box.handle(KeyEvent{.key = KeyCode::ArrowDown});
-    ASSERT(box.editor.caret() == 11);
+    ASSERT(box.editor().caret() == 11);
     box.handle(KeyEvent{.key = KeyCode::ArrowUp});
     box.handle(KeyEvent{.key = KeyCode::ArrowUp});
-    ASSERT(box.editor.caret() == 3);
+    ASSERT(box.editor().caret() == 3);
     arrange(box, {box.at(), {2, 3}});
     box.set_text("é界ab");
-    ASSERT(box.get_scroll_length() == 4);
+    ASSERT(box.content_size().height == 4);
     box.handle(KeyEvent{.key = KeyCode::End, .modifiers = {.ctrl = true}});
     auto frame = Frame{box.size()};
     auto const cursor = box.paint(Canvas{frame});
@@ -204,7 +204,7 @@ TEST(text_box_selection_tabs_newlines_and_orphan_marks_paint_without_controls)
 {
     auto box = TextBox{{.text = "́a\t界\nend"}};
     arrange(box, {box.at(), {8, 3}});
-    box.editor.select_all();
+    box.select_all();
     auto frame = Frame{box.size()};
     box.paint(Canvas{frame});
     ASSERT((frame[Point{0, 0}].text == U"◌́"));
@@ -212,7 +212,7 @@ TEST(text_box_selection_tabs_newlines_and_orphan_marks_paint_without_controls)
     ASSERT((frame[Point{4, 0}].text == U"界"));
     ASSERT((frame[Point{6, 0}].style.traits.contains(Trait::Inverse)));
     box.handle(MousePress{{5, 0}, MouseButton::Left});
-    ASSERT(box.editor.caret() == 4);
+    ASSERT(box.editor().caret() == 4);
 }
 
 TEST(text_widgets_use_and_own_the_canvas_width_policy_for_layout_and_hits)
@@ -224,15 +224,15 @@ TEST(text_widgets_use_and_own_the_canvas_width_policy_for_layout_and_hits)
     line.paint(Canvas{frame});
     overrides[0].cells = 1;
     line.handle(MousePress{{1, 0}, MouseButton::Left});
-    ASSERT(line.editor.caret() == 0);
+    ASSERT(line.editor().caret() == 0);
     line.handle(MousePress{{2, 0}, MouseButton::Left});
-    ASSERT(line.editor.caret() == 1);
+    ASSERT(line.editor().caret() == 1);
     auto box = TextBox{{.text = "ax"}};
     arrange(box, {box.at(), {8, 2}});
     frame.resize(box.size());
     box.paint(Canvas{frame});
     box.handle(MousePress{{2, 0}, MouseButton::Left});
-    ASSERT(box.editor.caret() == 1);
+    ASSERT(box.editor().caret() == 1);
 }
 
 TEST(text_box_scroll_notifications_are_coalesced_and_direct_setters_request_paint)
@@ -243,21 +243,21 @@ TEST(text_box_scroll_notifications_are_coalesced_and_direct_setters_request_pain
     app.post(esc::Resize{box.size()});
     app.step();
     int notifications = 0;
-    box.on_scroll.connect([&](int, int, int) { ++notifications; });
+    box.on_scroll.connect([&](Point, Area, Area) { ++notifications; });
     app.paint();
     auto const initial = notifications;
     app.request_repaint();
     app.paint();
     ASSERT(notifications == initial);
-    ASSERT(box.set_scroll_offset(100));
+    ASSERT(box.set_scroll_offset({0, 100}));
     ASSERT(notifications == initial + 1);
-    ASSERT(!box.set_scroll_offset(100));
+    ASSERT(!box.set_scroll_offset({0, 100}));
     ASSERT(notifications == initial + 1);
     app.paint();
     ASSERT(!app.loop().needs_repaint());
     box.set_text("new");
     ASSERT(app.loop().needs_repaint());
-    ASSERT(box.get_scroll_length() == 1);
+    ASSERT(box.content_size().height == 1);
 }
 
 TEST(application_paste_stays_with_the_original_editor_across_focus_changes)
@@ -271,7 +271,7 @@ TEST(application_paste_stays_with_the_original_editor_across_focus_changes)
     app.set_focus(second);
     app.dispatch(esc::PasteChunk{"́", false, true});
     ASSERT(first.text() == "é" && second.text().empty());
-    ASSERT(first.editor.undo() && first.text().empty());
+    ASSERT(first.undo() && first.text().empty());
     app.dispatch(esc::PasteChunk{"x", true, false});
     second.enabled = false;
     ASSERT(!app.dispatch(esc::PasteChunk{"end", false, true}).handled);
@@ -283,13 +283,13 @@ TEST(text_widgets_extreme_hit_coordinates_clamp_without_overflow)
     auto line = LineEdit{{.text = "abc", .align = Align::Right}};
     arrange(line, {line.at(), {std::numeric_limits<int>::max(), 1}});
     line.handle(MousePress{{std::numeric_limits<int>::min(), 0}, MouseButton::Left});
-    ASSERT(line.editor.caret() == 0);
+    ASSERT(line.editor().caret() == 0);
     line.handle(MousePress{{std::numeric_limits<int>::max(), 0}, MouseButton::Left});
-    ASSERT(line.editor.caret() == 3);
+    ASSERT(line.editor().caret() == 3);
     auto box = TextBox{{.text = "abc", .align = Align::Right}};
     arrange(box, {box.at(), line.size()});
     box.handle(MousePress{{std::numeric_limits<int>::min(), 0}, MouseButton::Left});
-    ASSERT(box.editor.caret() == 0);
+    ASSERT(box.editor().caret() == 0);
 }
 
 TEST(application_text_replacement_cancels_an_unfinished_paste)

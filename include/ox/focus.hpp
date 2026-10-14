@@ -7,7 +7,7 @@ namespace ox {
 /** Application-local focus. The root must outlive this object. */
 class Focus {
    public:
-    explicit Focus(Widget& root) : root_{root} {}
+    explicit Focus(Widget& root) : root_{track(root)} {}
     ~Focus();
     Focus(Focus const&) = delete;
     auto operator=(Focus const&) -> Focus& = delete;
@@ -25,7 +25,7 @@ class Focus {
         -> EventResponse;
 
    private:
-    Widget& root_;
+    LifetimeView<Widget> root_;
     LifetimeView<Widget> in_focus_;
     bool recover_ = true;
     std::size_t revision_ = 0;

@@ -41,7 +41,7 @@ using Grid = Column<std::vector<Row<std::vector<WidgetType>>>>;
  */
 class NumberPad : public Grid<Button> {
    public:
-    sl::Signal<void(int)> on_press;
+    sl::Signal<void(int)> on_activate;
 
    public:
     NumberPad(int width, int height)
@@ -51,8 +51,8 @@ class NumberPad : public Grid<Button> {
             auto& row = this->children.emplace_back();
             for (auto x = 0; x < width; ++x) {
                 auto& child = row.children.emplace_back(int_button(i));
-                Connection{.signal = child.on_press,
-                           .slot = [i](auto& parent) { parent.on_press(i); }}(*this);
+                Connection{.signal = child.on_activate,
+                           .slot = [i](auto& parent) { parent.on_activate(i); }}(*this);
                 i += i;
             }
         }
@@ -66,14 +66,14 @@ int main()
             Label{{
                 .text = "Total",
                 .align = Align::Left,
-                .size_policy = SizePolicy::fixed(1),
+                .height_policy = SizePolicy::fixed(1),
             }},
             IntegerLabel{{
                 .value = 0,
                 .align = Align::Right,
                 .style = {.traits = Trait::Bold},
                 .locale = digit_separator_locale(1),
-                .size_policy = SizePolicy::fixed(1),
+                .height_policy = SizePolicy::fixed(1),
             }},
             Divider{{
                 .lines = Lines::bold(),
@@ -88,8 +88,8 @@ int main()
 
     auto& [title_, total_label, div_, numberpad] = head.child.children;
 
-    Connection{.signal = numberpad.on_press, .slot = [](int n, auto& total_label) {
-                   total_label.value += n;
+    Connection{.signal = numberpad.on_activate, .slot = [](int n, auto& total_label) {
+                   total_label.set_value(total_label.value + n);
                }}(total_label);
 
     return Application{head}.run({.mouse_mode = MouseMode::Move});

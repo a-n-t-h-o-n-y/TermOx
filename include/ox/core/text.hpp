@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <deque>
 #include <functional>
 #include <optional>
@@ -101,6 +102,7 @@ class TextEdit {
     auto operator=(TextEdit other) -> TextEdit&;
     friend void swap(TextEdit& a, TextEdit& b) noexcept;
     auto text() const -> std::string const& { return text_; }
+    auto revision() const -> std::uint64_t { return revision_; }
     auto caret() const -> std::size_t { return caret_; }
     auto anchor() const -> std::size_t { return anchor_; }
     auto selection() const -> std::pair<std::size_t, std::size_t>;
@@ -109,6 +111,8 @@ class TextEdit {
     void set_text(std::string_view text);
     auto set_caret(std::size_t offset, bool extend = false) -> bool;
     auto select_all() -> bool;
+    auto select_word(std::size_t at) -> bool;
+    auto select_line(std::size_t at) -> bool;
     auto move_left(bool extend = false, bool word = false) -> bool;
     auto move_right(bool extend = false, bool word = false) -> bool;
     auto move_vertical(TextLayout const& layout, int rows, bool extend = false) -> bool;
@@ -134,6 +138,7 @@ class TextEdit {
         std::size_t before_caret;
         std::size_t after_caret;
     };
+    std::uint64_t revision_ = 0;
     std::string text_;
     std::vector<std::size_t> boundaries_{0};
     std::size_t caret_ = 0;
@@ -160,7 +165,7 @@ class TextEdit {
 [[nodiscard]] auto edit_key(TextEdit& edit,
                             KeyEvent const& key,
                             TextLayout const& layout,
-                            std::function<bool(char32_t)> const& accept = {})
-    -> EventResponse;
+                            std::function<bool(char32_t)> const& accept = {},
+                            bool read_only = false) -> EventResponse;
 
 }  // namespace ox

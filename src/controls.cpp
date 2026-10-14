@@ -8,7 +8,7 @@ namespace ox {
 
 auto activates(KeyEvent const& event) -> bool
 {
-    return event.action != KeyAction::Release &&
+    return event.action == KeyAction::Press &&
            (event.matches(KeyCode::Enter, {}, event.action) ||
             event.matches(U' ', {}, event.action));
 }

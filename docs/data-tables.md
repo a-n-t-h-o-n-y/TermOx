@@ -91,7 +91,8 @@ of at least one cell. An oversized reveal range aligns its beginning, an empty r
 nothing, and a zero-sized viewport cannot reveal anything. Products and sums use wider
 arithmetic. The same functions drive DataTable, ScrollBar, and vertical text view scrolling.
 
-ScrollBar has content_length, viewport_length, position, and vertical configuration.
+ScrollBar exposes content_length(), viewport_length(), and position() getters,
+with public vertical/style configuration.
 set_position clamps, schedules paint, and emits on_scroll(int) only on change.
 set_range(content, viewport, position) synchronizes without emitting, avoiding feedback
 loops. Painting is passive. Wheel steps use content units; clicks center the thumb.
@@ -101,9 +102,8 @@ A range change cancels animation; feedback of an unchanged position/range preser
 
 `link(table, bar)` initializes and synchronizes the selected axis in both directions;
 choose bar.vertical before linking. The connection tracks both widgets across moves and
-ignores destroyed targets. Link once per axis. For a TextBox, link is vertical and receives
-content and viewport lengths as well as the top row. TextBox::on_scroll now takes three
-integers: position, content length, and viewport length. Arrange controls through their
+ignores destroyed targets. Link once per axis. TextBox links support either axis; on_scroll(Point, Area, Area) reports
+offset, content size, and viewport size. Links return both signal identifiers. Arrange controls through their
 parent layout normally; resizing updates the linked ranges even without a paint.
 
 See [the interactive example](../examples/datatable.cpp) for keyboard navigation,
@@ -116,4 +116,4 @@ Initialize columns/rows together or call set_data; use rows(), columns(), select
 and scroll_offset() to inspect state. The old table on_scroll(int,int) becomes
 on_scroll(Point,Area,Area). ScrollBar's scrollable_length/item_visual_length are replaced
 by content_length/viewport_length in content units. TextBox::on_scroll(int,int) becomes
-on_scroll(int,int,int). There are no compatibility adapters.
+on_scroll(Point,Area,Area). There are no compatibility adapters.

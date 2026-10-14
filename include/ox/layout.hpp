@@ -75,6 +75,8 @@ class LinearLayout : public Widget {
    public:
     using Widget::handle;
     Container children;
+    int gap = 0;
+    CrossAlign cross_align = CrossAlign::Stretch;
 
     explicit LinearLayout()
         requires std::default_initializable<Container>
@@ -91,11 +93,16 @@ class LinearLayout : public Widget {
     LinearLayout(LinearLayout&& other)
         : Widget{std::move(other)},
           children{std::move(other.children)},
+          gap{other.gap},
+          cross_align{other.cross_align},
           targets_{std::move(other.targets_)},
           target_storage_{std::move(other.target_storage_)},
           policies_{std::move(other.policies_)},
           policy_storage_{std::move(other.policy_storage_)},
           rectangles_{std::move(other.rectangles_)},
+          cross_{std::move(other.cross_)},
+          gap_{other.gap_},
+          cross_align_{other.cross_align_},
           available_{other.available_},
           arranging_{std::exchange(other.arranging_, false)},
           pending_{std::exchange(other.pending_, false)}
@@ -105,6 +112,11 @@ class LinearLayout : public Widget {
         if (this == &other) { return *this; }
         Widget::operator=(std::move(other));
         children = std::move(other.children);
+        gap = other.gap;
+        cross_align = other.cross_align;
+        cross_ = std::move(other.cross_);
+        gap_ = other.gap_;
+        cross_align_ = other.cross_align_;
         targets_ = std::move(other.targets_);
         target_storage_ = std::move(other.target_storage_);
         policies_ = std::move(other.policies_);
@@ -116,9 +128,42 @@ class LinearLayout : public Widget {
         return *this;
     }
 
+    auto measure(Area available, esc::WidthPolicy policy = {}) const -> Area override
+    {
+        validate(available);
+        if (gap < 0) { throw std::invalid_argument{"Negative layout gap"}; }
+        auto primary = std::int64_t{0};
+        auto secondary = 0;
+        auto count = 0;
+        for_each_child(children, [&](Widget const& child) {
+            if (!child.visible) { return; }
+            auto natural = child.measure(available, policy);
+            validate(natural);
+            auto main = Horizontal ? natural.width : natural.height;
+            auto cross = Horizontal ? natural.height : natural.width;
+            auto main_policy = Horizontal ? child.width_policy : child.height_policy;
+            auto cross_policy = Horizontal ? child.height_policy : child.width_policy;
+            main =
+                fit_length(main, main_policy, std::numeric_limits<int>::max(), false);
+            cross =
+                fit_length(cross, cross_policy, std::numeric_limits<int>::max(), false);
+            primary += main + (count++ ? (std::int64_t)gap : 0);
+            secondary = std::max(secondary, cross);
+        });
+        if (primary > std::numeric_limits<int>::max()) {
+            throw std::length_error{"Layout extent overflow"};
+        }
+        return Horizontal ? Area{(int)primary, secondary}
+                          : Area{secondary, (int)primary};
+    }
+
     /** Call after editing children, visibility, or size policies. Arrange also always
      * refreshes descendants, even if this layout's geometry did not change. */
-    void refresh() { arrange(*this, bounds()); }
+    void refresh() override
+    {
+        request_layout();
+        arrange(*this, bounds());
+    }
     auto get_children() -> zzz::Generator<Widget&> override
     { return child_references(children); }
     auto get_children() const -> zzz::Generator<Widget const&> override
@@ -195,19 +240,40 @@ class LinearLayout : public Widget {
     std::vector<SizePolicy> policies_;
     std::vector<SizePolicy> policy_storage_;
     std::vector<Rect> rectangles_;
+    std::vector<std::pair<Area, SizePolicy>> cross_;
+    int gap_ = -1;
+    CrossAlign cross_align_ = CrossAlign::Stretch;
     Area available_ = {-1, -1};
     bool arranging_ = false;
     bool pending_ = false;
 
+    auto inputs(Widget const& child) const
+        -> std::pair<SizePolicy, std::pair<Area, SizePolicy>>
+    {
+        (void)track(child);
+        auto available = size();
+        available.width =
+            fit_length(available.width, child.width_policy, available.width, true);
+        auto natural = child.measure(available, glyph_width_policy());
+        validate(natural);
+        auto main = Horizontal ? child.width_policy : child.height_policy;
+        auto const extent = Horizontal ? natural.width : natural.height;
+        (void)fit_length(extent, main, std::numeric_limits<int>::max(), false);
+        main.minimum = std::max(main.minimum, std::min(extent, main.maximum));
+        return {main, {natural, Horizontal ? child.height_policy : child.width_policy}};
+    }
     auto inputs_changed() const -> bool
     {
-        if (available_ != size()) { return true; }
+        if (available_ != size() || gap_ != gap || cross_align_ != cross_align) {
+            return true;
+        }
         auto index = std::size_t{0};
         auto changed = false;
         for_each_child(children, [&](Widget const& child) {
             if (!child.visible) { return; }
+            auto const [main, cross] = inputs(child);
             changed |= index >= targets_.size() || targets_[index] != child.lifetime_ ||
-                       child.size_policy != policies_[index];
+                       main != policies_[index] || cross != cross_[index];
             ++index;
         });
         return changed || index != targets_.size();
@@ -216,31 +282,47 @@ class LinearLayout : public Widget {
     {
         if (!inputs_changed()) { return; }
         policy_storage_.clear();
-        auto index = std::size_t{0};
-        auto membership_changed = false;
+        auto next_cross = std::vector<std::pair<Area, SizePolicy>>{};
+        target_storage_.clear();
         for_each_child(children, [&](Widget& child) {
             if (!child.visible) { return; }
-            policy_storage_.push_back(child.size_policy);
-            membership_changed |=
-                index >= targets_.size() || targets_[index] != child.lifetime_;
-            ++index;
+            auto [main, cross] = inputs(child);
+            policy_storage_.push_back(main);
+            next_cross.push_back(cross);
+            target_storage_.push_back(child.lifetime_);
         });
-        membership_changed |= index != targets_.size();
-        if (membership_changed) {
-            target_storage_.clear();
-            for_each_child(children, [&](Widget& child) {
-                if (child.visible) { target_storage_.push_back(child.lifetime_); }
-            });
+        auto rectangles = Horizontal ? layout_row(policy_storage_, size(), gap)
+                                     : layout_column(policy_storage_, size(), gap);
+        auto const cross_available = Horizontal ? size().height : size().width;
+        for (std::size_t i = 0; i < rectangles.size(); ++i) {
+            auto const [natural, policy] = next_cross[i];
+            auto const extent =
+                fit_length(Horizontal ? natural.height : natural.width, policy,
+                           cross_available, cross_align == CrossAlign::Stretch);
+            auto offset = 0;
+            switch (cross_align) {
+                case CrossAlign::Stretch:
+                case CrossAlign::Start: break;
+                case CrossAlign::Center: offset = (cross_available - extent) / 2; break;
+                case CrossAlign::End: offset = cross_available - extent; break;
+                default: throw std::invalid_argument{"Invalid cross alignment"};
+            }
+            if constexpr (Horizontal) {
+                rectangles[i].at.y = offset;
+                rectangles[i].size.height = extent;
+            }
+            else {
+                rectangles[i].at.x = offset;
+                rectangles[i].size.width = extent;
+            }
         }
-        // Validation and allocation finish before calling any child layout hooks.
-        if (available_ != size() || policy_storage_ != policies_) {
-            auto rectangles = Horizontal ? layout_row(policy_storage_, size())
-                                         : layout_column(policy_storage_, size());
-            rectangles_.swap(rectangles);
-            policies_.swap(policy_storage_);
-            available_ = size();
-        }
-        if (membership_changed) { targets_.swap(target_storage_); }
+        rectangles_.swap(rectangles);
+        policies_.swap(policy_storage_);
+        cross_.swap(next_cross);
+        targets_.swap(target_storage_);
+        available_ = size();
+        gap_ = gap;
+        cross_align_ = cross_align;
     }
 };
 }  // namespace detail
@@ -286,6 +368,12 @@ class Suspended : public Widget {
     { validate(requested_size); }
 
    public:
+    auto measure(Area available, esc::WidthPolicy = {}) const -> Area override
+    {
+        validate(available);
+        validate(requested_size);
+        return requested_size;
+    }
     auto paint(Canvas c) -> Cursor override
     {
         fill_outside(c, child.bounds(), fill_glyph);
@@ -294,11 +382,16 @@ class Suspended : public Widget {
     }
 
    protected:
-    void on_arrange(Rect) override { refresh(); }
+    void on_arrange(Rect) override
+    { arrange(child, centered_rect(size(), requested_size)); }
 
    public:
     /** Recompute geometry after changing requested_size; notify even if unchanged. */
-    void refresh() { arrange(child, centered_rect(size(), requested_size)); }
+    void refresh() override
+    {
+        request_layout();
+        arrange(child, centered_rect(size(), requested_size));
+    }
 
     auto get_children() -> zzz::Generator<Widget&> override { co_yield child; }
 

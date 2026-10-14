@@ -1,6 +1,8 @@
 #include <ox/application.hpp>
 
 #include <algorithm>
+#include <cstdint>
+#include <limits>
 #include <stdexcept>
 #include <utility>
 
@@ -50,26 +52,30 @@ void paint_tree(std::span<WidgetNode const> tree,
         node.visible.size.height == 0) {
         return;
     }
+    node.widget.get().paint_background(canvas);
+    if (!node.widget.valid()) { return; }
+    auto const local = node.widget.get().paint(canvas);
+    if (node.widget.valid() && node.widget == focus) {
+        cursor = local && canvas.contains(*local) ? Cursor{canvas.to_global(*local)}
+                                                  : Cursor{};
+    }
     for (auto child = index + 1; child < node.end; child = tree[child].end) {
+        if (!node.widget.valid()) { return; }
         auto const& bounds = tree[child].bounds;
         auto const offset =
             Point{bounds.at.x - node.bounds.at.x, bounds.at.y - node.bounds.at.y};
         paint_tree(tree, child, canvas.subcanvas(offset, bounds.size), focus, cursor);
     }
-    if (!node.widget.valid()) { return; }
-    auto& widget = node.widget.get();
-    auto const local = widget.paint(canvas);
-    if (node.widget.valid() && node.widget == focus) {
-        cursor = local && canvas.contains(*local) ? Cursor{canvas.to_global(*local)}
-                                                  : Cursor{};
-    }
+    if (node.widget.valid()) { node.widget.get().paint_overlay(canvas); }
 }
 }  // namespace
 
-Application::Application(Widget& head) : head_{head}, focus_{head}
+Application::Application(Widget& head) : head_{track(head)}, focus_{head}
 {
+    clipboard.read = [this] { return clipboard_text_; };
+    clipboard.write = [this](std::string_view text) { clipboard_text_ = text; };
     try {
-        tree_ = widget_tree(head_);
+        tree_ = widget_tree(head_.get());
         attach_widgets();
         attachments_current_ = true;
         loop_.apply(focus_.reconcile(tree_));
@@ -115,6 +121,7 @@ void Application::attach_widgets()
     for (auto const& node : tree_) {
         if (!node.widget.valid()) { continue; }
         auto& widget = node.widget.get();
+        widget.input_enabled_ = node.input;
         if (widget.application_ && widget.application_ != this) {
             throw std::logic_error{"Widget already belongs to an application"};
         }
@@ -158,7 +165,8 @@ void Application::attach_widgets()
 
 auto Application::is_interactive(Widget const& widget) const -> bool
 {
-    auto const tree = widget_tree(head_);
+    if (!head_.valid()) { return false; }
+    auto const tree = widget_tree(head_.get());
     return std::ranges::any_of(tree, [&](auto const& node) {
         return node.input && node.widget.valid() && &node.widget.get() == &widget;
     });
@@ -209,7 +217,10 @@ auto Application::refresh_tree() -> bool
 {
     // Keep traversal storage local: get_children() can reenter the application.
     auto next = std::move(tree_storage_);
-    widget_tree(head_, next);
+    if (head_.valid()) { widget_tree(head_.get(), next); }
+    else {
+        next.clear();
+    }
     auto const changed = next != tree_;
     tree_.swap(next);
     tree_storage_ = std::move(next);
@@ -224,27 +235,49 @@ auto Application::refresh_tree() -> bool
 auto Application::synchronize() -> EventResponse
 {
     if (auto code = loop_.exit_code()) { return {.quit = code}; }
-    auto result = EventResponse{.repaint = refresh_tree()};
-    // Focus consumes the snapshot before invoking callbacks; it never retains it.
-    auto const focus_response = focus_.reconcile(tree_);
-    result = combine(result, focus_response);
-    if (focus_response.repaint || focus_response.handled || focus_response.quit) {
-        refresh_tree();
-    }
-    if (!result.quit) {
-        auto const [response, changed] = update_hover();
-        result = combine(result, response);
-        if (!result.quit && changed) {
-            result.repaint |= refresh_tree();
-            auto const focus_response = focus_.reconcile(tree_);
-            result = combine(result, focus_response);
-            if (focus_response.repaint || focus_response.handled ||
-                focus_response.quit) {
-                refresh_tree();
+    auto result = EventResponse{};
+    for (;;) {
+        if (!head_.valid()) {
+            loop_.quit(0);
+            return {.quit = 0};
+        }
+        while (std::exchange(layout_pending_, false)) {
+            arrange(head_.get(), head_.get().bounds());
+            if (!head_.valid()) { break; }
+        }
+        if (!head_.valid()) {
+            loop_.quit(0);
+            return {.quit = 0};
+        }
+        result = combine(result, {.repaint = refresh_tree()});
+        // Focus consumes the snapshot before invoking callbacks; it never retains it.
+        auto const focus_response = focus_.reconcile(tree_);
+        result = combine(result, focus_response);
+        if (focus_response.repaint || focus_response.handled || focus_response.quit) {
+            refresh_tree();
+        }
+        if (!result.quit) {
+            auto const [response, changed] = update_hover();
+            result = combine(result, response);
+            if (!result.quit && changed) {
+                result.repaint |= refresh_tree();
+                auto const focus_response = focus_.reconcile(tree_);
+                result = combine(result, focus_response);
+                if (focus_response.repaint || focus_response.handled ||
+                    focus_response.quit) {
+                    refresh_tree();
+                }
             }
         }
+        auto captured = pointer_capture_;
+        if (captured.valid() && !accepts_input(tree_, tree_.size(), captured)) {
+            pointer_capture_ = {};
+            ++capture_revision_;
+            result = combine(result, captured.get().pointer_cancel());
+        }
+        if (!pointer_capture_.valid()) { pointer_capture_ = {}; }
+        if (result.quit || (!layout_pending_ && head_.valid())) { return result; }
     }
-    return result;
 }
 
 auto Application::run(Terminal::Options options) -> int
@@ -274,6 +307,11 @@ auto Application::paint() -> bool
 }
 void Application::post(Event event) { loop_.post(std::move(event)); }
 void Application::request_repaint() { loop_.request_repaint(); }
+void Application::request_layout()
+{
+    layout_pending_ = true;
+    loop_.request_repaint();
+}
 void Application::quit(int code) { loop_.quit(code); }
 
 void Application::set_focus(Widget& widget) { loop_.apply(focus_.set(widget)); }
@@ -289,12 +327,42 @@ auto Application::dispatch(Event const& event) -> EventResponse
     return result;
 }
 
+auto Application::capture_pointer(Widget& widget, MouseButton button) -> bool
+{
+    if (!is_interactive(widget)) { return false; }
+    auto previous = pointer_capture_;
+    auto target = track(widget);
+    pointer_capture_ = target;
+    capture_button_ = button;
+    ++capture_revision_;
+    if (previous.valid() && previous != target) {
+        loop_.apply(previous.get().pointer_cancel());
+    }
+    return pointer_capture_ == target && target.valid();
+}
+void Application::release_pointer(Widget& widget)
+{
+    if (pointer_capture_ == track(widget)) {
+        pointer_capture_ = {};
+        ++capture_revision_;
+    }
+}
+
 template <typename Input>
 auto Application::route_mouse(Input event, bool select) -> EventResponse
 {
     mouse_position_ = event.at;
     auto result = synchronize();
-    auto const path = ancestry(tree_, hit_test(tree_, event.at));
+    auto const captured = pointer_capture_;
+    auto const revision = capture_revision_;
+    auto use_capture = false;
+    if constexpr (std::same_as<Input, MouseMove>) { use_capture = captured.valid(); }
+    if constexpr (std::same_as<Input, MouseRelease>) {
+        use_capture =
+            captured.valid() && (!event.button || event.button == capture_button_);
+    }
+    auto const path = use_capture ? ancestry(tree_, captured)
+                                  : ancestry(tree_, hit_test(tree_, event.at));
     auto focus_changed = false;
     if (select && !result.quit) {
         for (auto const& [index, node] : path) {
@@ -317,10 +385,22 @@ auto Application::route_mouse(Input event, bool select) -> EventResponse
         if (result.quit) { break; }
         if (!accepts_input(tree_, index, node.widget)) { continue; }
         auto local = event;
-        local.at = {event.at.x - node.bounds.at.x, event.at.y - node.bounds.at.y};
+        auto difference = [](int position, int origin) {
+            return (int)std::clamp((std::int64_t)position - origin,
+                                   (std::int64_t)std::numeric_limits<int>::min(),
+                                   (std::int64_t)std::numeric_limits<int>::max());
+        };
+        local.at = {difference(event.at.x, node.bounds.at.x),
+                    difference(event.at.y, node.bounds.at.y)};
         input = combine(input, node.widget.get().handle(local));
         if (!input.quit) { result = combine(result, synchronize()); }
         if (input.handled || input.quit) { break; }
+    }
+    if constexpr (std::same_as<Input, MouseRelease>) {
+        if (use_capture && revision == capture_revision_) {
+            pointer_capture_ = {};
+            ++capture_revision_;
+        }
     }
     result = combine(result, input);
     return result;
@@ -405,7 +485,8 @@ auto Application::handle(esc::PasteChunk const& chunk) -> EventResponse
 
 auto Application::handle(esc::Resize const& event) -> EventResponse
 {
-    arrange(head_, {{0, 0}, event.size});
+    if (!head_.valid()) { return {.quit = 0}; }
+    arrange(head_.get(), {{0, 0}, event.size});
     return combine({.handled = true, .repaint = true}, synchronize());
 }
 

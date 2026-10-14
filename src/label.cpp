@@ -1,3 +1,4 @@
+#include <limits>
 #include <ox/label.hpp>
 
 #include <cstddef>
@@ -61,29 +62,35 @@ void paint_label(Canvas canvas, std::string_view text, Align align, Style style)
 Label::Options const Label::init = {};
 
 Label::Label(Options x)
-    : Widget{FocusPolicy::None, x.size_policy},
+    : Widget{FocusPolicy::None, x.width_policy, x.height_policy},
       text{std::move(x.text)},
       align{std::move(x.align)},
       style{std::move(x.style)}
 {}
 
-Label::Label(std::string text_)
-    : Widget{FocusPolicy::None, SizePolicy::flex()},
-      text{std::move(text_)},
-      align{Align::Center},
-      style{}
-{}
+Label::Label(std::string text_) : Label{Options{.text = std::move(text_)}} {}
+Label::Label(char const* text_) : Label{std::string{text_}} {}
 
-Label::Label(char const* text_)
-    : Widget{FocusPolicy::None, SizePolicy::flex()},
-      text{text_},
-      align{Align::Center},
-      style{}
-{}
-
+auto Label::set_text(std::string value) -> bool
+{
+    if (value == text) { return false; }
+    if (measure_text(value, {std::numeric_limits<int>::max(), 1}).height != 1) {
+        throw std::invalid_argument{"Label must be single-line"};
+    }
+    text.swap(value);
+    request_layout();
+    request_repaint();
+    return true;
+}
+auto Label::measure(Area available, esc::WidthPolicy policy) const -> Area
+{
+    validate(available);
+    measure_layout_.update(text, available.width, TextWrap::None, policy);
+    return text_content_size(measure_layout_);
+}
 auto Label::paint(Canvas c) -> Cursor
 {
-    paint_label(c, text, align, style);
+    paint_label(c, text, align, appearance(style));
     return {};
 }
 

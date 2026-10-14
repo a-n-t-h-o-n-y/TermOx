@@ -71,7 +71,7 @@ int main(int argc, char** argv)
             return sum();
         });
         measure("arrange.policy." + std::to_string(count), [&](int i) {
-            row.children[0].size_policy = ox::SizePolicy::fixed(1 + i % 2);
+            row.children[0].width_policy = ox::SizePolicy::fixed(1 + i % 2);
             ox::arrange(row, row.bounds());
             return sum();
         });

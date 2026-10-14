@@ -22,7 +22,7 @@ int main()
     arrange(panel, {{}, {30, 10}});
     auto frame = Frame{panel.size()};
     paint_border(Canvas{frame}, panel.border);
-    get_child<0>(panel).text = "Updated";
+    get_child<0>(panel).set_text("Updated");
     panel.child.refresh();
 }
 ```
@@ -32,12 +32,11 @@ one cell on each side; dimensions smaller than two leave an empty interior. Its 
 is clamped to the available area, including zero-sized views. Bordered uses this function
 for construction and arrangement. `paint_border(Canvas, Border const&)` draws the box
 and overlays the title along the top edge between the corners, leaving the interior
-untouched. Label alignment/style are independent of the box style. Label size_policy
-is unused in decorations. Bordered still exposes child/border and supports `widget | Border`.
+untouched. Label alignment/style are independent of the box style. Label width/height policies
+are unused in decorations. Bordered still exposes child/border and supports `widget | Border`.
 
 Divider has explicit `vertical` configuration, defaulting to false, even in a 1×1 view.
-Put a vertical divider in a Row and a horizontal one in a Column. Its default SizePolicy
-is fixed(1) on the parent's layout axis. Larger views draw the line down the middle of
+Put a vertical divider in a Row and a horizontal one in a Column. Its width is fixed(1) when vertical; its height is fixed(1) when horizontal. Larger views draw the line down the middle of
 the cross axis. `paint_divider` clears its view, draws that line, and overlays its label.
 Horizontal labels are ordinary text; vertical labels stack one grapheme per row, with
 each centered across the width. For vertical labels, Align::Left/Center/Right means
@@ -98,3 +97,6 @@ range. Arrangement itself does not use the borrowed generator.
   previous text when painting directly into a reused canvas.
 
 There are no compatibility adapters.
+
+See [container composition](containers.md) for measurement, gap/cross alignment,
+Padding, Stack, ScrollView, and paint layers.

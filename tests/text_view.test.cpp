@@ -108,14 +108,14 @@ TEST(text_widgets_share_unwrapped_scrolling_and_keep_placeholder_on_one_row)
     ASSERT((cursor == Cursor{Point{3, 0}}));
     ASSERT((frame[Point{0, 0}].text == U"界"));
     box.handle(MousePress{{1, 0}, MouseButton::Left});
-    ASSERT(box.editor.caret() == 3);
+    ASSERT(box.editor().caret() == 3);
     auto line = LineEdit{{.text = "界x", .align = Align::Right}};
     arrange(line, {{0, 0}, {8, 1}});
     line.handle(KeyEvent{.key = KeyCode::End});
     frame.resize(line.size());
     ASSERT((line.paint(Canvas{frame}) == Cursor{Point{7, 0}}));
     line.set_text("");
-    line.ghost_text = "first\nsecond";
+    line.placeholder = "first\nsecond";
     arrange(line, {{0, 0}, {8, 2}});
     frame.resize(line.size());
     line.paint(Canvas{frame});

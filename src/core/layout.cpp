@@ -116,30 +116,59 @@ auto distribute_length(std::span<SizePolicy const> policies, int available)
     return lengths;
 }
 
-auto layout_row(std::span<SizePolicy const> policies, Area available)
+auto layout_row(std::span<SizePolicy const> policies, Area available, int gap)
     -> std::vector<Rect>
 {
     validate(available);
-    auto const lengths = distribute_length(policies, available.width);
+    if (gap < 0) { throw std::invalid_argument{"Negative layout gap"}; }
+    auto const count = policies.size() > 1 ? policies.size() - 1 : 0;
+    auto const spacing =
+        count ? std::min((std::size_t)gap, (std::size_t)available.width / count) : 0;
+    auto const lengths =
+        distribute_length(policies, available.width - (int)(spacing * count));
     auto result = std::vector<Rect>{};
     result.reserve(lengths.size());
     auto x = 0;
     for (auto length : lengths) {
         result.push_back({{x, 0}, {length, available.height}});
         x += length;
+        if (result.size() < lengths.size()) { x += (int)spacing; }
     }
     return result;
 }
 
-auto layout_column(std::span<SizePolicy const> policies, Area available)
+auto layout_column(std::span<SizePolicy const> policies, Area available, int gap)
     -> std::vector<Rect>
 {
-    auto result = layout_row(policies, {available.height, available.width});
+    auto result = layout_row(policies, {available.height, available.width}, gap);
     for (auto& rectangle : result) {
         std::swap(rectangle.at.x, rectangle.at.y);
         std::swap(rectangle.size.width, rectangle.size.height);
     }
     return result;
+}
+
+auto fit_length(int natural, SizePolicy policy, int available, bool stretch) -> int
+{
+    if (natural < 0 || available < 0 || policy.minimum < 0 ||
+        policy.maximum < policy.minimum || !std::isfinite(policy.flexibility) ||
+        policy.flexibility < 0) {
+        throw std::invalid_argument{"Invalid measurement policy"};
+    }
+    return std::min(available, std::clamp(stretch ? available : natural, policy.minimum,
+                                          policy.maximum));
+}
+auto padding_rect(Area available, std::array<int, 4> padding) -> Rect
+{
+    validate(available);
+    for (auto value : padding) {
+        if (value < 0) { throw std::invalid_argument{"Negative padding"}; }
+    }
+    auto const top = std::min(padding[0], available.height);
+    auto const left = std::min(padding[3], available.width);
+    return {{left, top},
+            {available.width - left - std::min(padding[1], available.width - left),
+             available.height - top - std::min(padding[2], available.height - top)}};
 }
 
 auto centered_rect(Area available, Area requested) -> Rect

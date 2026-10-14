@@ -115,25 +115,29 @@ partial clipping; other graphemes retain complete footprints.
 
 ## Widget integration and API changes
 
-Both text widgets expose `TextEdit editor`, `text()`, and `set_text(value)`. The previous
-mutable `text` string field and scalar-index caches have been removed. Options still
-accept an initial UTF-8 string. Direct setters request repaint when attached to an
-application; direct edits through `editor` should be followed by an application repaint
-request or an event response that requests repaint.
+Both text widgets expose `text()` and a read-only `editor()` view. Use `set_text`,
+`set_caret`, `select_all`, `insert`, `undo`, `redo`, or `edit(callback)` for mutations.
+`edit` stages a batch before committing; changing the editor's single/multiline mode
+is rejected. Commands request layout/repaint and coalesce notifications.
 
-LineEdit uses single-line mode, cell-based horizontal scrolling, Left/Center/Right
-alignment, and Shift-click selection. It keeps the caret visible without splitting
-graphemes at the viewport edge. Enter emits a stable string snapshot, so slots can
-replace or clear the editor safely.
+`on_change(string const&)` carries a stable text snapshot. `on_selection_change(anchor,
+caret)` carries byte offsets. `read_only` blocks user mutations while preserving selection,
+copying, and programmatic commands. `accept_character(char32_t)` filters typed/pasted
+scalars; `validator(string_view)` checks complete values at submission and permits
+intermediate input. LineEdit submits on Enter, TextBox on Ctrl-Enter. Successful validation
+emits `on_submit`, failure emits `on_invalid`; repeats never submit.
 
-TextBox uses `TextWrap` (replacing `TextBox::Wrap`), cached multiline layout, vertical
-navigation, alignment-aware hit testing, selection painting, and clamped scrolling.
-Unwrapped text now follows the caret horizontally using the same geometry as LineEdit.
-`set_scroll_offset()` returns whether visible editing state changed. Scroll signals
-carry position, content length, and viewport length, and are emitted only when one
-of those values changes. Vertical limits use the last full viewport through the shared
-scrolling functions; resizing updates linked scrollbars before painting. Both widgets expose a
-`selection_style` patch, defaulting to inverse video.
+Both expose `style`, `placeholder`, `placeholder_style`, `align`, and `selection_style`.
+LineEdit is single-line; TextBox uses `TextWrap` and multiline navigation. Mouse selection
+supports Shift-click, double-click words, triple-click lines, and captured dragging.
+Ctrl-C/X/V use the application `clipboard` service. Its default is application-owned
+memory; set its `read`/`write` callbacks for host clipboard integration.
+
+Both expose `content_size()`, `viewport_size()`, `scroll_offset()`, and
+`set_scroll_offset(Point)`. Manual scrolling preserves caret and selection; edits reveal
+the caret. Paint does not mutate editing state or emit notifications. `on_scroll(Point,
+Area, Area)` emits only when offset, content, or viewport changes. TextBox `link` supports
+vertical and horizontal ScrollBars and returns both connection identifiers for removal.
 
 Applications bind a streaming paste to the widget that handled its first chunk.
 Changing focus does not redirect its remaining chunks. Removal or disabling drops

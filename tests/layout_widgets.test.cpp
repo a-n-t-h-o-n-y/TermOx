@@ -11,8 +11,9 @@ struct Probe : Widget {
    public:
     using Widget::handle;
     std::vector<Area> old_sizes;
-    explicit Probe(SizePolicy policy = SizePolicy::flex())
-        : Widget{FocusPolicy::None, policy}
+    explicit Probe(SizePolicy policy = SizePolicy::flex(),
+                   SizePolicy height = SizePolicy::flex())
+        : Widget{FocusPolicy::None, policy, height}
     {}
     void on_arrange(Rect previous) override { old_sizes.push_back(previous.size); }
 };
@@ -35,7 +36,7 @@ TEST(row_adapts_tuple_children_and_notifies_with_previous_sizes)
 TEST(column_adapts_dynamic_children_and_filters_inactive_policies)
 {
     auto column = Column<std::vector<Probe>>{};
-    column.children.emplace_back(SizePolicy::fixed(2));
+    column.children.emplace_back(SizePolicy::flex(), SizePolicy::fixed(2));
     column.children.emplace_back(SizePolicy{-1, -2, -3});
     column.children.back().visible = false;
     column.children.emplace_back();
@@ -52,11 +53,12 @@ TEST(column_adapts_dynamic_children_and_filters_inactive_policies)
 
 TEST(nested_layouts_refresh_even_when_parent_size_is_unchanged)
 {
-    auto head = Column{Row{Probe{}, Probe{}}, Probe{SizePolicy::fixed(1)}};
+    auto head =
+        Column{Row{Probe{}, Probe{}}, Probe{SizePolicy::flex(), SizePolicy::fixed(1)}};
     arrange(head, {head.at(), {9, 5}});
     auto& row = get_child<0>(head);
     ASSERT((get_child<0>(row).size() == Area{5, 4}));
-    get_child<0>(row).size_policy = SizePolicy::fixed(2);
+    get_child<0>(row).width_policy = SizePolicy::fixed(2);
     arrange(head, head.bounds());
     ASSERT((get_child<0>(row).size() == Area{2, 4}));
     ASSERT((get_child<1>(row).at() == Point{2, 0}));
@@ -69,7 +71,7 @@ TEST(layout_validation_precedes_changes_to_child_geometry)
     ASSERT_THROWS((arrange(row, {row.at(), {8, 3}})), std::invalid_argument);
     ASSERT((get_child<0>(row).size() == Area{0, 0}));
     ASSERT(get_child<0>(row).old_sizes.empty());
-    get_child<1>(row).size_policy = SizePolicy::flex();
+    get_child<1>(row).width_policy = SizePolicy::flex();
     ASSERT_THROWS((arrange(row, {row.at(), {-1, 3}})), std::invalid_argument);
     ASSERT(get_child<0>(row).old_sizes.empty());
 }
@@ -109,7 +111,7 @@ TEST(layout_refresh_handles_arrays_lists_empty_tuples_and_const_child_access)
     auto row = Row{std::array{Probe{SizePolicy::fixed(1)}, Probe{}}};
     arrange(row, {{}, {6, 2}});
     ASSERT((get_child<1>(std::as_const(row)).size() == Area{5, 2}));
-    get_child<0>(row).size_policy = SizePolicy::fixed(3);
+    get_child<0>(row).width_policy = SizePolicy::fixed(3);
     row.refresh();
     ASSERT((get_child<1>(row).at() == Point{3, 0}));
     auto column = Column<std::list<Probe>>{};
@@ -139,7 +141,7 @@ TEST(layout_reentrant_refresh_replans_after_child_growth_and_policy_changes)
     row.children[0].action = [&] {
         if (std::exchange(changed, true)) { return; }
         row.children.emplace_back();  // Relocates both existing children.
-        row.children[0].size_policy = SizePolicy::fixed(2);
+        row.children[0].width_policy = SizePolicy::fixed(2);
         row.refresh();
     };
     arrange(row, {{}, {10, 2}});

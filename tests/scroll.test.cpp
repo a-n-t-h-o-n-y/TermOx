@@ -61,7 +61,7 @@ TEST(scrollbar_commands_draw_full_empty_and_horizontal_ranges_without_duplicate_
     int notifications = 0;
     bar.on_scroll.connect([&](int) { ++notifications; });
     ASSERT(bar.set_position(100));
-    ASSERT(bar.position == 6 && notifications == 1);
+    ASSERT(bar.position() == 6 && notifications == 1);
     ASSERT(!bar.set_position(100));
     auto frame = Frame{bar.size()};
     bar.paint(Canvas{frame});
@@ -69,15 +69,15 @@ TEST(scrollbar_commands_draw_full_empty_and_horizontal_ranges_without_duplicate_
     ASSERT((frame[Point{0, 6}].text == U"█"));
     bar.set_range(0, 4, 10);
     bar.paint(Canvas{frame});
-    ASSERT(bar.position == 0 && notifications == 1);
+    ASSERT(bar.position() == 0 && notifications == 1);
     ASSERT((frame[Point{0, 9}].text == U"█"));
     bar.vertical = false;
     arrange(bar, {{}, {10, 1}});
     bar.set_range(10, 4, 0);
     bar.handle(MousePress{{9, 0}, MouseButton::Left});
-    ASSERT(bar.position == 6);
+    ASSERT(bar.position() == 6);
     bar.handle(MouseWheel{{}, -2, 0});
-    ASSERT(bar.position == 4);
+    ASSERT(bar.position() == 4);
 }
 
 TEST(scrollbar_animation_follows_moves_and_feedback_does_not_stop_it)
@@ -94,5 +94,5 @@ TEST(scrollbar_animation_follows_moves_and_feedback_does_not_stop_it)
     // Timer scheduling is injectable, animation time is elapsed steady time.
     moved.scroll_settle_time = std::chrono::milliseconds{0};
     app.step(EventLoop::Clock::now() + std::chrono::milliseconds{50});
-    ASSERT(moved.position == 90);
+    ASSERT(moved.position() == 90);
 }

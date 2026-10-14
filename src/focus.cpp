@@ -47,7 +47,7 @@ auto Focus::clear() -> EventResponse
 auto Focus::set(Widget& widget) -> EventResponse
 {
     auto target = track(widget);
-    auto tree = widget_tree(root_);
+    auto tree = widget_tree(root_.get());
     if (!eligible(tree, target)) {
         throw std::invalid_argument{"Focus target is not eligible in this application"};
     }
@@ -58,7 +58,8 @@ auto Focus::set(Widget& widget) -> EventResponse
     if (response.quit || revision_ != revision || in_focus_.valid()) {
         return response;
     }
-    widget_tree(root_, tree);
+    if (!root_.valid()) { return response; }
+    widget_tree(root_.get(), tree);
     if (!eligible(tree, target)) {
         recover_ = true;
         return combine(response, reconcile(tree));

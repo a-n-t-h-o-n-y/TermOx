@@ -333,7 +333,7 @@ TEST(
         for (auto const& child : row.children) {
             before.push_back(child.bounds());
         }
-        row.children.front().size_policy = ox::SizePolicy::fixed(1);
+        row.children.front().width_policy = ox::SizePolicy::fixed(1);
         remaining_allocations = budget;
         try {
             row.refresh();

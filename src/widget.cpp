@@ -7,15 +7,20 @@
 
 namespace ox {
 
-Widget::Widget(FocusPolicy fp, SizePolicy sp) : focus_policy{fp}, size_policy{sp} {}
+Widget::Widget(FocusPolicy fp, SizePolicy width, SizePolicy height)
+    : focus_policy{fp}, width_policy{width}, height_policy{height}
+{}
 
 Widget::Widget(Widget&& other)
     : focus_policy{other.focus_policy},
-      size_policy{other.size_policy},
+      width_policy{other.width_policy},
+      height_policy{other.height_policy},
       visible{other.visible},
       enabled{other.enabled},
+      disabled_style{other.disabled_style},
       bounds_{other.bounds_},
       focused_{std::exchange(other.focused_, false)},
+      input_enabled_{other.input_enabled_},
       lifetime_{std::move(other.lifetime_)},
       application_{std::exchange(other.application_, nullptr)},
       timers_{std::move(other.timers_)}
@@ -35,10 +40,13 @@ auto Widget::operator=(Widget&& other) -> Widget&
         }
     }
     focus_policy = other.focus_policy;
-    size_policy = other.size_policy;
+    width_policy = other.width_policy;
+    height_policy = other.height_policy;
     visible = other.visible;
     enabled = other.enabled;
+    disabled_style = other.disabled_style;
     focused_ = std::exchange(other.focused_, false);
+    input_enabled_ = other.input_enabled_;
     bounds_ = other.bounds_;
 
     application_ = std::exchange(other.application_, nullptr);
@@ -62,6 +70,33 @@ void Widget::request_repaint()
 {
     if (application_) { application_->request_repaint(); }
 }
+
+void Widget::request_layout()
+{
+    if (application_) { application_->request_layout(); }
+}
+
+auto Widget::clipboard() -> Clipboard&
+{
+    if (!application_) {
+        throw std::logic_error{"Clipboard requires an attached widget"};
+    }
+    return application_->clipboard;
+}
+auto Widget::glyph_width_policy() const -> esc::WidthPolicy
+{
+    return application_ ? application_->loop().screen.width_policy()
+                        : esc::WidthPolicy{};
+}
+
+auto Widget::capture_pointer(MouseButton button) -> bool
+{ return application_ && application_->capture_pointer(*this, button); }
+void Widget::release_pointer()
+{
+    if (application_) { application_->release_pointer(*this); }
+}
+auto Widget::is_pointer_captured() const -> bool
+{ return application_ && application_->pointer_capture() == track(*this); }
 
 Widget::~Widget()
 {

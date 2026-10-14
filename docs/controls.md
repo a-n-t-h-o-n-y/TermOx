@@ -14,10 +14,9 @@ auto key = ox::KeyEvent{.key = U' '};
 if (ox::activates(key)) { /* Activate the highlighted item. */ }
 ```
 
-`activates` accepts an unmodified Enter/Space press or repeat, or a left mouse press.
-Releases never activate. `releases` accepts an activation-key release even if modifiers
-have changed, or a left/unspecified mouse release. Widget policy determines whether a
-release matches its current pressed state; these functions do not capture input.
+`activates` accepts an unmodified Enter/Space press or a left mouse press.
+Key repeats and releases do not activate. `releases` recognizes activation-key
+releases and left/unspecified mouse releases; widgets match these to their own gestures.
 
 `select_index(selected, index, count)` rejects out-of-range values, returning no effects.
 A valid value is handled and requests repaint only if it differs. `move_selection`
@@ -25,41 +24,39 @@ clamps navigation, initializes an empty optional to zero, and safely normalizes 
 indices after item removal. Empty lists clear the optional and remain unhandled.
 Both return EventResponse and never schedule painting or emit callbacks.
 
-Button derives directly from Widget. It owns public label/decoration configuration,
-pressed/hover state, and fade percentage. Its focused and pressed appearances are
-StylePatch values; it paints through `paint_label(Canvas, text, align, style)` without
-creating a Label widget. Focus comes from Widget. Enter/Space/left-click emits `on_press`;
-a paired release emits `on_release`. Leaving or losing focus cancels its pressed
-appearance. Fade target is hover OR focus, so leaving one state does not cancel the
-other. A lazy, move-aware Timer drives its existing 10 ms fade steps; it stops at the
-target or when decoration is no longer Fade. Nonpositive durations jump to the target.
+Button emits `on_activate()` once for an Enter/Space press, or for a captured mouse
+press released inside the button. Repeats do not activate, and dragging outside cancels
+activation unless the pointer returns before release. `activate()` follows the same
+semantic action. `on_press`/`on_release` describe mouse gestures only. Interaction state
+is read through `is_pressed()` and `is_hovered()`; label, style patches, decoration, and
+fade configuration remain ordinary public values. Fade follows hover OR focus.
 
-CheckBox owns a bool and glyph vectors. `set_checked(value)`/`toggle()` notify only on
-change, using one `on_toggle(bool)` signal. RadioGroup owns item strings and optional
-selected/highlighted indices; navigation and activation are separate. `select(value)`
-rejects invalid indices and emits a stable string snapshot only when selection changes.
-Commands request repaint when attached. Direct field edits emit no signal and need an
-explicit application repaint request, just like other widget configuration changes.
+CheckBox owns its checked state. Read `checked()` and use `set_checked(bool)` or
+`toggle()`; `on_change(bool)` emits once per actual change. Its plain `Label::Options label` adds a clickable caption beside the indicator. Enter/Space repeats do not toggle.
 
-Glyph-span `put` accepts a StylePatch; styled UTF-8/UTF-32 `put` accepts a Style. This
-avoids copying glyph vectors merely to apply focus styling. Radio indicators are
-measured in terminal columns, so a multi-scalar emoji does not misalign its label.
+RadioGroup owns its items and optional selected/highlighted indices. `items()` returns
+a const span; `set_items(...)` replaces the items and clears selection. `select(index)`
+selects, `select(std::nullopt)` clears, and invalid indices throw. `selected_index()` and
+`highlighted_index()` expose state. Arrows move and select; Enter/Space or a left click
+selects the highlighted row. `on_select(std::optional<std::size_t>)` emits only when
+selection changes, preserving identity even when labels repeat. Slots may replace items;
+notification values are snapshots.
 
-## API migration
+Controls use `appearance(style)` for disabled styling. Commands request repaint, and
+changes affecting measurement request layout. For public configuration edits, call
+`refresh()` to recalculate layout and repaint. Named
+`Connection{.signal = signal, .slot = callback}(widgets...)` remains supported.
+
+## Migration
 
 | Previous API | Current API |
 | --- | --- |
-| BasicButton | Button with an empty/default label |
-| Button::press_mod / focus_mod | pressed_style / focused_style StylePatch |
-| Private button decoration | Public Decoration variant and fade_percent |
-| CheckBox::State and Display | bool checked, checked_glyphs, unchecked_glyphs, focused_style |
-| check/uncheck/set_state/get_state | set_checked(true/false), set_checked(value), checked |
-| on_check/on_uncheck | on_toggle(bool) |
-| RadioGroup::in_focus_style | focused_style StylePatch |
-| Private radio focus selection | Public optional highlighted index |
-| Repeated on_select for unchanged activation | Notifications only when selection changes |
-| RadioGroup default focus None | Strong |
+| Button action connected to on_press | on_activate |
+| Button pressed / hovered fields | is_pressed() / is_hovered() |
+| CheckBox checked field / on_toggle | checked() / on_change(bool) |
+| RadioGroup items / selected_index / highlighted fields | items() / selected_index() / highlighted_index() |
+| RadioGroup on_select(string const&) | on_select(optional<size_t>) |
+| Widget size_policy | width_policy and height_policy |
 
-The previous classes/types/callback adapters are removed. There is no compatibility
-layer. Input effects still flow through the application boundary, and explicit widget
-commands can request repaint directly.
+There are no compatibility adapters. See [container composition](containers.md) for
+measurement, independent axis policies, spacing, alignment, and pointer capture.

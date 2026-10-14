@@ -31,6 +31,28 @@ void reveal(TextEdit const& editor,
 }
 }  // namespace
 
+auto text_content_size(TextLayout const& layout) -> Area
+{
+    if (layout.lines().size() > (std::size_t)std::numeric_limits<int>::max()) {
+        throw std::length_error{"Too many text rows"};
+    }
+    auto width = 0;
+    for (auto line : layout.lines()) {
+        width = std::max(width, line.columns);
+    }
+    return {width, (int)layout.lines().size()};
+}
+auto measure_text(std::string_view text,
+                  Area available,
+                  TextWrap wrap,
+                  esc::WidthPolicy policy) -> Area
+{
+    validate(available);
+    auto layout = TextLayout{};
+    layout.update(text, available.width, wrap, policy);
+    return text_content_size(layout);
+}
+
 auto text_scroll(TextLayout const& layout,
                  std::size_t caret,
                  Area size,
@@ -122,12 +144,13 @@ auto edit_text(TextEdit& editor,
                TextWrap wrap,
                Align align,
                KeyEvent const& key,
-               std::function<bool(char32_t)> const& accept) -> EventResponse
+               std::function<bool(char32_t)> const& accept,
+               bool read_only) -> EventResponse
 {
     validate(size);
     if (key.action == KeyAction::Release) { return {}; }
     layout.update(editor.text(), size.width, wrap, layout.policy(), layout.tab_width());
-    auto const response = edit_key(editor, key, layout, accept);
+    auto const response = edit_key(editor, key, layout, accept, read_only);
     if (response.repaint) { reveal(editor, layout, scroll, size, wrap, align); }
     return response;
 }
@@ -139,9 +162,16 @@ auto edit_text(TextEdit& editor,
                TextWrap wrap,
                Align align,
                esc::PasteChunk const& chunk,
-               std::function<bool(char32_t)> const& accept) -> EventResponse
+               std::function<bool(char32_t)> const& accept,
+               bool read_only) -> EventResponse
 {
     validate(size);
+    if (read_only) {
+        auto abort = esc::PasteChunk{};
+        abort.aborted = true;
+        editor.paste(abort);
+        return {.handled = true};
+    }
     auto const changed = editor.paste(chunk, accept);
     if (changed) { reveal(editor, layout, scroll, size, wrap, align); }
     return {.handled = true, .repaint = changed};

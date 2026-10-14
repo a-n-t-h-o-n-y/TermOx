@@ -7,6 +7,8 @@
 #include <ox/bordered.hpp>
 #include <ox/button.hpp>
 #include <ox/checkbox.hpp>
+#include <ox/clipboard.hpp>
+#include <ox/container.hpp>
 #include <ox/controls.hpp>
 #include <ox/datatable.hpp>
 #include <ox/focus.hpp>

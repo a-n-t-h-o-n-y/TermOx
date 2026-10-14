@@ -17,7 +17,7 @@ int main()
             ScrollBar{}},
         Label{
             {.text = "Arrows/Page/Home/End: select | Enter: open | Click header: sort",
-             .size_policy = SizePolicy::fixed(1)}}};
+             .height_policy = SizePolicy::fixed(1)}}};
     auto& body = get_child<0>(root);
     auto& table = get_child<0>(body);
     auto& bar = get_child<1>(body);

@@ -153,11 +153,11 @@ TEST(built_in_actions_ignore_key_releases)
     auto release = KeyEvent{.key = KeyCode::Enter, .action = KeyAction::Release};
     ASSERT(!button.handle(release).handled && presses == 0);
     auto checkbox = CheckBox{};
-    auto const state = checkbox.checked;
-    ASSERT(!checkbox.handle(release).handled && checkbox.checked == state);
+    auto const state = checkbox.checked();
+    ASSERT(!checkbox.handle(release).handled && checkbox.checked() == state);
     auto group = RadioGroup{{.items = {"one", "two"}}};
-    auto const selection = group.selected_index;
-    ASSERT(!group.handle(release).handled && group.selected_index == selection);
+    auto const selection = group.selected_index();
+    ASSERT(!group.handle(release).handled && group.selected_index() == selection);
 }
 
 TEST(typed_dispatch_supports_new_event_handlers_without_handler_concepts)

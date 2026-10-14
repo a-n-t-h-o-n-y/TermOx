@@ -58,7 +58,7 @@ void check_data(std::span<ox::TableColumn const> columns,
 namespace ox {
 DataTable::Options const DataTable::init = {};
 DataTable::DataTable(Options x)
-    : Widget{x.focus_policy, x.size_policy},
+    : Widget{x.focus_policy, x.width_policy, x.height_policy},
       style{x.style},
       line_style{x.line_style},
       header_style{x.header_style},
@@ -103,6 +103,7 @@ void DataTable::update_viewport()
 }
 void DataTable::data_changed()
 {
+    request_layout();
     update_viewport();
     request_repaint();
     notify();
@@ -273,6 +274,21 @@ void DataTable::paint_cell(Canvas canvas,
                   appearance);
     put(canvas, {remaining, 0}, U"…", appearance);
 }
+auto DataTable::measure(Area available, esc::WidthPolicy) const -> Area
+{
+    validate(available);
+    auto width =
+        std::int64_t{column_lines && !columns_.empty() ? (int)columns_.size() - 1 : 0};
+    for (auto const& column : columns_) {
+        width += column.size.minimum;
+    }
+    auto const height = (std::int64_t)rows_.size() + header_height();
+    if (width > std::numeric_limits<int>::max() ||
+        height > std::numeric_limits<int>::max()) {
+        throw std::length_error{"Table extent overflow"};
+    }
+    return {(int)width, (int)height};
+}
 auto DataTable::paint(Canvas canvas) -> Cursor
 {
     fill(canvas, style);
@@ -411,7 +427,7 @@ auto DataTable::handle(MouseWheel const& event) -> EventResponse
          scroll_by(offset_.y, event.dy, content_.height, viewport_.height)});
     return {.handled = true, .repaint = changed};
 }
-void link(DataTable& table, ScrollBar& bar)
+auto link(DataTable& table, ScrollBar& bar) -> std::pair<sl::Identifier, sl::Identifier>
 {
     auto synchronize = [](DataTable& table, ScrollBar& bar) {
         auto const content = table.content_size();
@@ -422,18 +438,25 @@ void link(DataTable& table, ScrollBar& bar)
                       bar.vertical ? at.y : at.x);
     };
     synchronize(table, bar);
-    Connection{.signal = table.on_scroll,
-               .slot = [synchronize](Point, Area, Area, DataTable& table,
-                                     ScrollBar& bar) { synchronize(table, bar); }}(
-        table, bar);
-    Connection{.signal = bar.on_scroll,
-               .slot = [](int, DataTable& table, ScrollBar& bar) {
-                   auto at = table.scroll_offset();
-                   if (bar.vertical) { at.y = bar.position; }
-                   else {
-                       at.x = bar.position;
-                   }
-                   table.set_scroll_offset(at);
-               }}(table, bar);
+    auto first = Connection{
+        .signal = table.on_scroll,
+        .slot = [synchronize](Point, Area, Area, DataTable& table, ScrollBar& bar) {
+            synchronize(table, bar);
+        }}(table, bar);
+    try {
+        return {first, Connection{.signal = bar.on_scroll,
+                                  .slot = [](int, DataTable& table, ScrollBar& bar) {
+                                      auto at = table.scroll_offset();
+                                      if (bar.vertical) { at.y = bar.position(); }
+                                      else {
+                                          at.x = bar.position();
+                                      }
+                                      table.set_scroll_offset(at);
+                                  }}(table, bar)};
+    }
+    catch (...) {
+        table.on_scroll.disconnect(first);
+        throw;
+    }
 }
 }  // namespace ox

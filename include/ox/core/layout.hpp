@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+#include <cstdint>
 #include <limits>
 #include <span>
 #include <vector>
@@ -68,11 +70,22 @@ struct SizePolicy {
 [[nodiscard]] auto distribute_length(std::span<SizePolicy const> policies,
                                      int available) -> std::vector<int>;
 
+enum class CrossAlign : std::uint8_t { Stretch, Start, Center, End };
+/** Clamp a natural extent against an axis policy and available space. */
+[[nodiscard]] auto fit_length(int natural,
+                              SizePolicy policy,
+                              int available,
+                              bool stretch) -> int;
+/** Top/right/bottom/left padding. Negative padding is rejected. */
+[[nodiscard]] auto padding_rect(Area available, std::array<int, 4> padding) -> Rect;
+
 /** Place children consecutively from the origin; the cross axis fills the area. */
-[[nodiscard]] auto layout_row(std::span<SizePolicy const> policies, Area available)
-    -> std::vector<Rect>;
-[[nodiscard]] auto layout_column(std::span<SizePolicy const> policies, Area available)
-    -> std::vector<Rect>;
+[[nodiscard]] auto layout_row(std::span<SizePolicy const> policies,
+                              Area available,
+                              int gap = 0) -> std::vector<Rect>;
+[[nodiscard]] auto layout_column(std::span<SizePolicy const> policies,
+                                 Area available,
+                                 int gap = 0) -> std::vector<Rect>;
 
 /** Clamp a requested size to its available area and center it, rounding toward
  * the top-left. Negative dimensions throw. */

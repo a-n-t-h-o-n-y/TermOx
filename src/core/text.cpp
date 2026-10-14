@@ -505,6 +505,7 @@ TextEdit::TextEdit(std::string_view text, bool multiline, std::size_t history_li
 void swap(TextEdit& a, TextEdit& b) noexcept
 {
     using std::swap;
+    swap(a.revision_, b.revision_);
     swap(a.text_, b.text_);
     swap(a.boundaries_, b.boundaries_);
     swap(a.caret_, b.caret_);
@@ -524,7 +525,9 @@ TextEdit::TextEdit(TextEdit&& other)
 { swap(*this, other); }
 auto TextEdit::operator=(TextEdit other) -> TextEdit&
 {
+    auto const revision = revision_ + (text_ != other.text_ ? 1 : 0);
     swap(*this, other);
+    revision_ = revision;
     return *this;
 }
 
@@ -532,6 +535,7 @@ void TextEdit::set_text(std::string_view text)
 {
     auto value = normalize(text, multiline_);
     auto breaks = grapheme_boundaries(value);
+    if (text_ != value) { ++revision_; }
     text_.swap(value);
     boundaries_.swap(breaks);
     caret_ = anchor_ = 0;
@@ -564,6 +568,50 @@ auto TextEdit::select_all() -> bool
     auto const changed = anchor_ != 0 || caret_ != text_.size();
     anchor_ = 0;
     caret_ = text_.size();
+    preferred_column_.reset();
+    return changed;
+}
+
+auto TextEdit::select_word(std::size_t at) -> bool
+{
+    if (!std::ranges::binary_search(boundaries_, at)) {
+        throw std::invalid_argument{"Word coordinate"};
+    }
+    if (text_.empty()) { return set_caret(0); }
+    auto index =
+        (std::size_t)(std::ranges::lower_bound(boundaries_, at) - boundaries_.begin());
+    index = std::min(index, boundaries_.size() - 2);
+    auto is_space = [&](std::size_t i) {
+        return whitespace(std::string_view{text_}.substr(
+            boundaries_[i], boundaries_[i + 1] - boundaries_[i]));
+    };
+    auto first = index;
+    auto last = index + 1;
+    auto const space = is_space(index);
+    while (first > 0 && is_space(first - 1) == space) {
+        --first;
+    }
+    while (last + 1 < boundaries_.size() && is_space(last) == space) {
+        ++last;
+    }
+    auto const changed = anchor_ != boundaries_[first] || caret_ != boundaries_[last];
+    anchor_ = boundaries_[first];
+    caret_ = boundaries_[last];
+    preferred_column_.reset();
+    return changed;
+}
+auto TextEdit::select_line(std::size_t at) -> bool
+{
+    if (!std::ranges::binary_search(boundaries_, at)) {
+        throw std::invalid_argument{"Line coordinate"};
+    }
+    auto const before = at == 0 ? std::string::npos : text_.rfind('\n', at - 1);
+    auto const after = text_.find('\n', at);
+    auto const begin = before == std::string::npos ? 0 : before + 1;
+    auto const end = after == std::string::npos ? text_.size() : after + 1;
+    auto const changed = anchor_ != begin || caret_ != end;
+    anchor_ = begin;
+    caret_ = end;
     preferred_column_.reset();
     return changed;
 }
@@ -669,6 +717,7 @@ void TextEdit::prepare_replace(std::size_t begin,
 
 void TextEdit::commit_text() noexcept
 {
+    ++revision_;
     text_.swap(text_storage_);
     boundaries_.swap(boundary_storage_);
     text_storage_.clear();
@@ -779,12 +828,20 @@ auto TextEdit::paste(esc::PasteChunk const& chunk,
 auto edit_key(TextEdit& edit,
               KeyEvent const& key,
               TextLayout const& layout,
-              std::function<bool(char32_t)> const& accept) -> EventResponse
+              std::function<bool(char32_t)> const& accept,
+              bool read_only) -> EventResponse
 {
     if (key.action == KeyAction::Release) { return {}; }
     auto matches = [&](auto code, Modifiers modifiers = {}) {
         return key.matches(code, modifiers, key.action);
     };
+    if (read_only && (matches(U'z', {.ctrl = true}) || matches(U'y', {.ctrl = true}) ||
+                      matches(U'z', {.shift = true, .ctrl = true}) ||
+                      matches(KeyCode::Backspace, {.ctrl = key.modifiers.ctrl}) ||
+                      matches(KeyCode::Delete, {.ctrl = key.modifiers.ctrl}) ||
+                      matches(KeyCode::Enter))) {
+        return {.handled = true};
+    }
     auto changed = false;
     auto const shift = key.modifiers.shift;
     auto const ctrl = key.modifiers.ctrl;
@@ -830,6 +887,7 @@ auto edit_key(TextEdit& edit,
     else {
         auto const input = input_text(key);
         if (input.empty()) { return {}; }
+        if (read_only) { return {.handled = true}; }
         changed = edit.insert(esc::utf32_to_utf8(input), accept);
     }
     return {.handled = true, .repaint = changed};

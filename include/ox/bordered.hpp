@@ -48,6 +48,13 @@ class Bordered : public Widget {
     void on_arrange(Rect) override { arrange(child, border_content_rect(size())); }
 
    public:
+    auto measure(Area available, esc::WidthPolicy policy = {}) const -> Area override
+    {
+        auto const natural = child.measure(border_content_rect(available).size, policy);
+        validate(natural);
+        auto const result = translate({natural.width, natural.height}, {2, 2});
+        return {result.x, result.y};
+    }
     auto paint(Canvas canvas) -> Cursor override
     {
         paint_border(canvas, border);
