@@ -137,3 +137,7 @@ tuple and dynamic-container composites without imposing a new ownership model.
 | public `lifetime` storage | `track(widget)` and `try_get()` |
 
 The previous interfaces are removed; there are no compatibility adapters.
+
+Button, CheckBox, and RadioGroup compose the free activation/selection functions in
+`<ox/controls.hpp>`. See [control composition](controls.md) for their explicit state,
+style patches, change notifications, and migration details.

@@ -2,8 +2,8 @@
 
 #include <algorithm>
 #include <chrono>
-#include <cmath>
 #include <functional>
+#include <optional>
 #include <string>
 #include <variant>
 
@@ -16,27 +16,7 @@
 
 namespace ox {
 
-/// Emits signals on left mouse button press and release and enter key press.
-class BasicButton : public Widget {
-   public:
-    using Widget::handle;
-
-    sl::Signal<void()> on_press;
-    sl::Signal<void()> on_release;
-
-   public:
-    BasicButton(FocusPolicy fp = FocusPolicy::Strong,
-                SizePolicy sp = SizePolicy::flex());
-
-   public:
-    auto handle(KeyEvent const&) -> EventResponse override;
-
-    auto handle(MousePress const&) -> EventResponse override;
-
-    auto handle(MouseRelease const&) -> EventResponse override;
-};
-
-/// Decoration that fades in and out with mouse hover.
+/// Decoration that fades in and out with mouse hover or keyboard focus.
 struct Fade {
     /// (Canvas, percent) where percent is fade amount from [0, 1].
     std::function<void(Canvas, float)> paint_fn;
@@ -44,8 +24,8 @@ struct Fade {
     std::chrono::milliseconds fade_out = std::chrono::milliseconds{400};
 };
 
-/// BasicButton with a Label and optional Decoration.
-class Button : public BasicButton {
+/// Activation, label, and decoration composed without another widget.
+class Button : public Widget {
    public:
     using Widget::handle;
 
@@ -55,22 +35,30 @@ class Button : public BasicButton {
     struct Options {
         Label::Options label = {};
         Decoration decoration = [](Canvas) {};
-        std::function<void(Label&)> press_mod = [](Label&) {};
-        std::function<void(Label&)> focus_mod = [](Label&) {};
+        StylePatch pressed_style = {};
+        StylePatch focused_style = {};
         FocusPolicy focus_policy = FocusPolicy::Strong;
         SizePolicy size_policy = SizePolicy::flex();
     } static const init;
 
    public:
     Label::Options label;
-    std::function<void(Label&)> press_mod;
-    std::function<void(Label&)> focus_mod;
+    StylePatch pressed_style;
+    StylePatch focused_style;
+    Decoration decoration;
+    bool pressed = false;
+    bool hovered = false;
+    float fade_percent = 0.f;
+    sl::Signal<void()> on_press;
+    sl::Signal<void()> on_release;
 
    public:
     Button(Options x = init);
 
    public:
     auto paint(Canvas) -> Cursor override;
+
+    auto handle(KeyEvent const&) -> EventResponse override;
 
     auto handle(MousePress const&) -> EventResponse override;
 
@@ -88,25 +76,8 @@ class Button : public BasicButton {
 
    private:
     static constexpr auto timer_period_ms = 10;
-
-    struct FadeInternal {
-        Fade fade;
-        int direction = +1;  // +1 or -1
-        float percent = 0.f;
-        Timer timer;
-    };
-    using DecorationInternal = std::variant<PaintFn, FadeInternal>;
-
-    DecorationInternal decoration_;
-    bool pressed_ = false;
-    bool in_focus_ = false;
-
-   private:
-    /// Start the fade in animation, if applicable.
-    void start_select();
-
-    /// Start the fade out animation, if applicable.
-    void end_select();
+    std::optional<Timer> timer_;
+    void animate();
 };
 
 /**

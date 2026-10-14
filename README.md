@@ -143,12 +143,11 @@ int main()
             .style = {.background = colors::white, .foreground = colors::black},
         }},
         Button{{
-            .text = "Click to Increment",
-            .align = Align::Center,
-            .style = {.background = colors::black,
-                      .foreground = colors::white,
-                      .traits = Trait::Bold},
-            .press_mod = [](Label& l) { l.style.foreground = colors::yellow; },
+            .label = {.text = "Click to Increment", .align = Align::Center,
+                      .style = {.background = colors::black,
+                                .foreground = colors::white,
+                                .traits = Trait::Bold}},
+            .pressed_style = {.foreground = colors::yellow},
         }},
     };
 

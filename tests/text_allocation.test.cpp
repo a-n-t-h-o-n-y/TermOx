@@ -200,6 +200,10 @@ TEST(text_layout_allocation_failures_preserve_analysis_policy_and_row_storage)
         [](ox::TextLayout& layout) { layout.update(layout.text(), 41); });
     auto const changed = document() + "new text\n";
     check_layout_failures([&](ox::TextLayout& layout) { layout.update(changed, 41); });
+    auto middle = document();
+    auto const newline = middle.find('\n', middle.size() / 2);
+    middle.replace(newline, 1, " joined\nnew row\n");
+    check_layout_failures([&](ox::TextLayout& layout) { layout.update(middle, 40); });
     auto overrides = std::array{esc::ScalarWidthOverride{U'e', 2}};
     check_layout_failures([&](ox::TextLayout& layout) {
         layout.update(layout.text(), 41, ox::TextWrap::Any, {.overrides = overrides});

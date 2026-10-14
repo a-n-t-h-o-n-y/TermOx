@@ -193,7 +193,7 @@ void put(Canvas c, Point at, Glyph const& item);
  */
 void put(Canvas c, Point at, Character auto item) { put(c, at, item | Style{}); }
 
-void put(Canvas c, Point at, std::span<Glyph const> item);
+void put(Canvas c, Point at, std::span<Glyph const> item, StylePatch patch = {});
 
 void put(Canvas c, Point at, GlyphRange auto const& item)
 {
@@ -211,9 +211,9 @@ void put(Canvas c, Point at, GlyphRange auto const& item)
     }
 }
 
-void put(Canvas c, Point at, std::string_view element);
+void put(Canvas c, Point at, std::string_view element, Style style = {});
 
-void put(Canvas c, Point at, std::u32string_view element);
+void put(Canvas c, Point at, std::u32string_view element, Style style = {});
 
 /**
  * Paint the given HLine object to the screen.

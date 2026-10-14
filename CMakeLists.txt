@@ -22,6 +22,7 @@ add_library(TermOx STATIC
     src/application.cpp
     src/bordered.cpp
     src/button.cpp
+    src/controls.cpp
     src/checkbox.cpp
     src/datatable.cpp
     src/label.cpp
@@ -49,6 +50,7 @@ add_library(TermOx STATIC
     include/ox/application.hpp
     include/ox/bordered.hpp
     include/ox/button.hpp
+    include/ox/controls.hpp
     include/ox/checkbox.hpp
     include/ox/datatable.hpp
     include/ox/routing.hpp

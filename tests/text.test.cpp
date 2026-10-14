@@ -547,3 +547,102 @@ TEST(text_layout_validation_preserves_unicode_error_offsets_and_owned_cache)
     ASSERT((layout.position(1) == Point{0, 1}));
     ASSERT((layout.position(4) == Point{0, 2}));
 }
+
+namespace {
+void check_incremental_layout(TextLayout const& actual, TextLayout const& expected)
+{
+    ASSERT(std::ranges::equal(actual.lines(), expected.lines()));
+    ASSERT(std::ranges::equal(actual.boundaries(), expected.boundaries()));
+    ASSERT(std::ranges::equal(actual.widths(), expected.widths()));
+    for (auto offset : expected.boundaries()) {
+        ASSERT(actual.position(offset) == expected.position(offset));
+    }
+    for (int y = 0; y < (int)expected.lines().size(); ++y) {
+        for (int x = 0; x <= expected.lines()[(std::size_t)y].columns + 1; ++x) {
+            ASSERT(actual.offset({x, y}) == expected.offset({x, y}));
+        }
+    }
+}
+}  // namespace
+
+TEST(text_incremental_layout_handles_joined_clusters_crlf_and_wrap_convergence)
+{
+    for (auto width : {1, 2, 5, 12}) {
+        for (auto wrap : {TextWrap::None, TextWrap::Any, TextWrap::Word}) {
+            for (auto const& pair : std::vector<std::pair<std::string, std::string>>{
+                     {"a\r", "a\r\n"},
+                     {"a\r\nend", "a\rend"},
+                     {"start\nend", "startend"},
+                     {"ab cd ef\ntail", "ab c ef\ntail"},
+                     {"a\n🇺🇸🇨\ntail", "a\n🇨🇺🇸🇨\ntail"},
+                     {"start\ne\ntail", "start\né\ntail"},
+                     {"x\n👩‍💻\nend", "x\n👩\nend"},
+                     {"start\nend", "start\n"},
+                     {"long long text", ""}}) {
+                auto actual = TextLayout{};
+                actual.update(pair.first, width, wrap);
+                actual.update(pair.second, width, wrap);
+                auto expected = TextLayout{};
+                expected.update(pair.second, width, wrap);
+                check_incremental_layout(actual, expected);
+                actual.update(pair.first, width, wrap);
+                expected.update(pair.first, width, wrap);
+                check_incremental_layout(actual, expected);
+            }
+        }
+    }
+}
+
+TEST(text_incremental_random_replacements_match_full_layout_and_owned_coordinates)
+{
+    auto random = std::mt19937{2026};
+    auto const replacements =
+        std::array<std::string_view, 8>{"", "x", "界", "́", "🇺🇸", "\n", "\r", "\t"};
+    for (auto wrap : {TextWrap::None, TextWrap::Any, TextWrap::Word}) {
+        for (auto width : {1, 4, 13}) {
+            auto text = std::string{"one two three\n界é🇺🇸\r\ntail\n"};
+            auto actual = TextLayout{};
+            actual.update(text, width, wrap);
+            for (int step = 0; step < 120; ++step) {
+                auto const boundaries = actual.boundaries();
+                auto const first = (std::size_t)random() % boundaries.size();
+                auto const last =
+                    first + (std::size_t)random() % (boundaries.size() - first);
+                text.replace(boundaries[first], boundaries[last] - boundaries[first],
+                             replacements[random() % replacements.size()]);
+                actual.update(text, width, wrap);
+                auto expected = TextLayout{};
+                expected.update(text, width, wrap);
+                check_incremental_layout(actual, expected);
+                if (step % 23 == 0) {
+                    actual.update(text, width + 1, wrap);
+                    expected.update(text, width + 1, wrap);
+                    check_incremental_layout(actual, expected);
+                    actual.update(text, width, wrap);
+                }
+            }
+        }
+    }
+}
+
+TEST(text_incremental_invalid_middle_input_preserves_cache_and_global_error_offsets)
+{
+    auto layout = TextLayout{};
+    layout.update("prefix\ngood\nsuffix", 3);
+    auto const before = layout;
+    auto text = std::string{"prefix\n"} + "\xff\nsuffix";
+    try {
+        layout.update(text, 3);
+        ASSERT(false);
+    }
+    catch (esc::UnicodeError const& error) {
+        ASSERT(error.offset() == 7);
+    }
+    check_incremental_layout(layout, before);
+    ASSERT_THROWS(layout.update("prefix\n\x01\nsuffix", 3), std::invalid_argument);
+    check_incremental_layout(layout, before);
+    layout.update("prefix\nnew\nsuffix", 3);
+    auto expected = TextLayout{};
+    expected.update(layout.text(), 3);
+    check_incremental_layout(layout, expected);
+}

@@ -1,6 +1,7 @@
 #include <ox/core/text.hpp>
 
 #include <algorithm>
+#include <concepts>
 #include <cstdint>
 #include <limits>
 #include <stdexcept>
@@ -120,19 +121,23 @@ void validate_layout(int width, TextWrap wrap, int tabs)
     }
 }
 
-void analyze_text(std::string_view text, std::vector<std::size_t>& boundaries)
+void append_analysis(std::string_view text,
+                     std::size_t begin,
+                     std::size_t end,
+                     std::vector<std::size_t>& boundaries)
 {
-    boundaries.clear();
-    boundaries.push_back(0);
-    auto at = std::size_t{0};
-    for (auto cluster : esc::graphemes(text)) {
-        at += cluster.size();
-        boundaries.push_back(at);
+    boundaries.push_back(begin);
+    auto at = begin;
+    try {
+        for (auto cluster : esc::graphemes(text.substr(begin, end - begin))) {
+            at += cluster.size();
+            boundaries.push_back(at);
+        }
     }
-    // Segmentation validates the complete UTF-8 input first. C0/DEL occupy one
-    // byte; valid UTF-8 encodes C1 controls only as C2 80..9F. No decoded or
-    // normalized string is needed, and original CR/CRLF byte offsets are retained.
-    for (auto i = std::size_t{0}; i < text.size(); ++i) {
+    catch (esc::UnicodeError const& error) {
+        throw esc::UnicodeError{begin + error.offset()};
+    }
+    for (auto i = begin; i < end; ++i) {
         auto const byte = (unsigned char)text[i];
         if ((byte < 32 && byte != '\n' && byte != '\r' && byte != '\t') ||
             byte == 127 || (byte == 0xc2 && (unsigned char)text[i + 1] <= 0x9f)) {
@@ -141,16 +146,23 @@ void analyze_text(std::string_view text, std::vector<std::size_t>& boundaries)
     }
 }
 
+void analyze_text(std::string_view text, std::vector<std::size_t>& boundaries)
+{
+    boundaries.clear();
+    append_analysis(text, 0, text.size(), boundaries);
+}
+
 void measure_columns(std::string_view text,
                      std::span<std::size_t const> boundaries,
                      esc::WidthPolicy policy,
-                     std::vector<int>& measured)
+                     std::vector<int>& measured,
+                     bool append = false)
 {
     if (esc::grapheme_width(" ", policy) != 1) {
         throw std::invalid_argument{"Text layout requires one-column spaces"};
     }
-    measured.clear();
-    measured.reserve(boundaries.size() - 1);
+    if (!append) { measured.clear(); }
+    measured.reserve(measured.size() + boundaries.size() - 1);
     for (auto i = std::size_t{0}; i + 1 < boundaries.size(); ++i) {
         auto const cluster =
             text.substr(boundaries[i], boundaries[i + 1] - boundaries[i]);
@@ -161,6 +173,7 @@ void measure_columns(std::string_view text,
     }
 }
 
+template <typename Stop = std::nullptr_t>
 void wrap_rows(std::string_view text,
                std::span<std::size_t const> boundaries,
                std::span<int const> measured,
@@ -168,9 +181,14 @@ void wrap_rows(std::string_view text,
                TextWrap wrap,
                int tabs,
                std::vector<TextLine>& lines,
-               std::vector<Point>* positions = nullptr)
+               std::vector<Point>* positions = nullptr,
+               std::size_t begin = 0,
+               std::size_t limit = std::numeric_limits<std::size_t>::max(),
+               bool finish = true,
+               Stop stable = nullptr)
 {
-    lines.clear();
+    if (begin == 0) { lines.clear(); }
+    limit = std::min(limit, measured.size());
     if (positions) { positions->resize(boundaries.size()); }
     auto record = [&](std::size_t at, int x) {
         if (lines.size() >= (std::size_t)std::numeric_limits<int>::max()) {
@@ -178,14 +196,16 @@ void wrap_rows(std::string_view text,
         }
         if (positions) { (*positions)[at] = {x, (int)lines.size()}; }
     };
-    auto begin = std::size_t{0};
-    while (begin < measured.size()) {
+    while (begin < limit) {
+        if constexpr (std::invocable<Stop, std::size_t>) {
+            if (stable(begin)) { return; }
+        }
         auto end = begin;
         auto next = begin;
         auto used = 0;
         auto word_end = begin;
         auto word_columns = 0;
-        while (end < measured.size()) {
+        while (end < limit) {
             if (measured[end] == newline_columns) {
                 next = end + 1;
                 break;
@@ -216,8 +236,9 @@ void wrap_rows(std::string_view text,
         lines.push_back({boundaries[begin], boundaries[end], boundaries[next], used});
         begin = next;
     }
-    if (lines.empty() || lines.back().next > lines.back().end ||
-        (wrap != TextWrap::None && width > 0 && lines.back().columns >= width)) {
+    if (finish &&
+        (lines.empty() || lines.back().next > lines.back().end ||
+         (wrap != TextWrap::None && width > 0 && lines.back().columns >= width))) {
         record(measured.size(), 0);
         lines.push_back({text.size(), text.size(), text.size(), 0});
     }
@@ -287,17 +308,142 @@ auto TextLayout::update(std::string_view text,
         return false;
     }
     validate_layout(width, wrap, tab_width);
-    if (new_text) {
-        analyze_text(text, boundary_storage_);
-        text_storage_.assign(text);
+    // LF is a Unicode segmentation reset and an independent wrapping boundary.
+    // Compare bytes, then expand to whole logical lines before resegmenting.
+    auto begin = std::size_t{0};
+    auto end = text.size();
+    auto old_end = text_.size();
+    auto first = std::size_t{0};
+    auto last = boundaries_.size() - 1;
+    auto prefix = std::size_t{0};
+    auto suffix = std::size_t{0};
+    auto const incremental = new_text && width_ >= 0;
+    if (incremental) {
+        auto const common = std::min(text_.size(), text.size());
+        while (prefix < common && text_[prefix] == text[prefix]) {
+            ++prefix;
+        }
+        while (suffix < common - prefix &&
+               text_[text_.size() - suffix - 1] == text[text.size() - suffix - 1]) {
+            ++suffix;
+        }
+        auto const previous =
+            prefix == 0 ? std::string_view::npos : text.rfind('\n', prefix - 1);
+        begin = previous == std::string_view::npos ? 0 : previous + 1;
+        auto const next = text.find('\n', text.size() - suffix);
+        end = next == std::string_view::npos ? text.size() : next + 1;
+        old_end = text_.size() - (text.size() - end);
+        first = (std::size_t)(std::ranges::lower_bound(boundaries_, begin) -
+                              boundaries_.begin());
+        last = (std::size_t)(std::ranges::lower_bound(boundaries_, old_end) -
+                             boundaries_.begin());
+        boundary_storage_.assign(boundaries_.begin(),
+                                 boundaries_.begin() + (std::ptrdiff_t)first);
+        append_analysis(text, begin, end, boundary_storage_);
+        for (auto i = last + 1; i < boundaries_.size(); ++i) {
+            boundary_storage_.push_back(boundaries_[i] - old_end + end);
+        }
     }
+    else if (new_text) {
+        analyze_text(text, boundary_storage_);
+    }
+    if (new_text) { text_storage_.assign(text); }
     auto const& boundaries = new_text ? boundary_storage_ : boundaries_;
-    if (new_text || new_policy) {
+    if (incremental && !new_policy) {
+        column_storage_.assign(columns_.begin(),
+                               columns_.begin() + (std::ptrdiff_t)first);
+        auto const stop = (std::size_t)(std::ranges::lower_bound(boundaries, end) -
+                                        boundaries.begin());
+        measure_columns(text, std::span{boundaries}.subspan(first, stop - first + 1),
+                        policy, column_storage_, true);
+        column_storage_.insert(column_storage_.end(),
+                               columns_.begin() + (std::ptrdiff_t)last, columns_.end());
+    }
+    else if (new_text || new_policy) {
         measure_columns(text, boundaries, policy, column_storage_);
     }
     auto const& measured = new_text || new_policy ? column_storage_ : columns_;
-    wrap_rows(text, boundaries, measured, width, wrap, tab_width, line_storage_,
-              &position_storage_);
+    if (incremental && !new_policy && width_ == width && wrap_ == wrap &&
+        tab_width_ == tab_width) {
+        // Word wrapping can change the preceding soft row when a word now fits.
+        // Restart there, then reuse rows when their input boundaries converge.
+        auto const boundary =
+            std::min(*(std::ranges::upper_bound(boundaries_, prefix) - 1),
+                     *(std::ranges::upper_bound(boundaries, prefix) - 1));
+        auto row = (std::size_t)this->position(boundary).y;
+        if (row > 0 && lines_[row - 1].next == lines_[row - 1].end) { --row; }
+        auto const restart = std::max(begin, lines_[row].begin);
+        row = (std::size_t)(std::ranges::lower_bound(lines_, restart, {},
+                                                     &TextLine::begin) -
+                            lines_.begin());
+        auto const start = (std::size_t)(std::ranges::lower_bound(boundaries, restart) -
+                                         boundaries.begin());
+        auto const stop = (std::size_t)(std::ranges::lower_bound(boundaries, end) -
+                                        boundaries.begin());
+        line_storage_.assign(lines_.begin(), lines_.begin() + (std::ptrdiff_t)row);
+        position_storage_.resize(boundaries.size());
+        std::copy_n(positions_.begin(), start, position_storage_.begin());
+        auto reuse_row =
+            end < text.size()
+                ? (std::size_t)(std::ranges::lower_bound(lines_, old_end, {},
+                                                         &TextLine::begin) -
+                                lines_.begin())
+                : lines_.size();
+        auto reuse_old = last;
+        auto reuse_new = stop;
+        auto stable_old = last;
+        auto stable_new = stop;
+        // Matching bytes alone do not imply matching Unicode clusters (RI pairs,
+        // combining marks, CR/LF). Establish a suffix of equal boundaries and widths.
+        while (stable_old > first && stable_new > first &&
+               boundaries[stable_new - 1] >= text.size() - suffix &&
+               boundaries_[stable_old - 1] ==
+                   text_.size() - (text.size() - boundaries[stable_new - 1]) &&
+               columns_[stable_old - 1] == measured[stable_new - 1]) {
+            --stable_old;
+            --stable_new;
+        }
+        auto converged = [&](std::size_t index) {
+            if (index < stable_new || boundaries[index] < text.size() - suffix) {
+                return false;
+            }
+            auto const old_byte = text_.size() - (text.size() - boundaries[index]);
+            auto const found =
+                std::ranges::lower_bound(lines_, old_byte, {}, &TextLine::begin);
+            if (found == lines_.end() || found->begin != old_byte) { return false; }
+            reuse_row = (std::size_t)(found - lines_.begin());
+            reuse_old = stable_old + index - stable_new;
+            reuse_new = index;
+            return true;
+        };
+        wrap_rows(text, boundaries, measured, width, wrap, tab_width, line_storage_,
+                  &position_storage_, start, stop, end == text.size(), converged);
+        if (reuse_row < lines_.size()) {
+            auto const new_row = line_storage_.size();
+            if (new_row + lines_.size() - reuse_row >
+                (std::size_t)std::numeric_limits<int>::max()) {
+                throw std::length_error{"Too many text rows"};
+            }
+            auto const old_byte = boundaries_[reuse_old];
+            auto const new_byte = boundaries[reuse_new];
+            for (auto i = reuse_row; i < lines_.size(); ++i) {
+                auto line = lines_[i];
+                line.begin = line.begin - old_byte + new_byte;
+                line.end = line.end - old_byte + new_byte;
+                line.next = line.next - old_byte + new_byte;
+                line_storage_.push_back(line);
+            }
+            for (auto i = reuse_old; i < positions_.size(); ++i) {
+                auto point = positions_[i];
+                point.y = (int)((std::size_t)point.y - reuse_row + new_row);
+                position_storage_[reuse_new + i - reuse_old] = point;
+            }
+        }
+    }
+    else {
+        wrap_rows(text, boundaries, measured, width, wrap, tab_width, line_storage_,
+                  &position_storage_);
+    }
     if (new_policy) {
         override_storage_.assign(policy.overrides.begin(), policy.overrides.end());
     }

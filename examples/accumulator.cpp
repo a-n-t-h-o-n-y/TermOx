@@ -22,8 +22,14 @@ using namespace ox;
                 .fade_in = std::chrono::milliseconds{300},
                 .fade_out = std::chrono::milliseconds{500},
             },
-        .press_mod = [](Label& l) { l.style.foreground = colors::bright_white; },
-        .focus_mod = [](Label& l) { l.style.foreground = colors::bright_cyan; },
+        .pressed_style = {.background = {},
+                          .foreground = colors::bright_white,
+                          .enabled = {},
+                          .disabled = {}},
+        .focused_style = {.background = {},
+                          .foreground = colors::bright_cyan,
+                          .enabled = {},
+                          .disabled = {}},
     }};
 }
 

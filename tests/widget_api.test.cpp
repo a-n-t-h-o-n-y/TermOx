@@ -153,8 +153,8 @@ TEST(built_in_actions_ignore_key_releases)
     auto release = KeyEvent{.key = KeyCode::Enter, .action = KeyAction::Release};
     ASSERT(!button.handle(release).handled && presses == 0);
     auto checkbox = CheckBox{};
-    auto const state = checkbox.get_state();
-    ASSERT(!checkbox.handle(release).handled && checkbox.get_state() == state);
+    auto const state = checkbox.checked;
+    ASSERT(!checkbox.handle(release).handled && checkbox.checked == state);
     auto group = RadioGroup{{.items = {"one", "two"}}};
     auto const selection = group.selected_index;
     ASSERT(!group.handle(release).handled && group.selected_index == selection);

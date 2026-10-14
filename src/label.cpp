@@ -13,7 +13,7 @@
 #include <ox/core/core.hpp>
 #include <ox/put.hpp>
 
-namespace ox::detail {
+namespace ox {
 using namespace ox;
 
 // Used by both Label and BasicNumberLabel
@@ -34,11 +34,11 @@ void paint_label(Canvas c, std::string_view text, Align align, Style style)
         end += cluster.size();
     }
     auto const x = find_align_offset(align, c.size().width, (int)columns);
-    put(c, {x, c.size().height / 2},
-        esc::glyphs(std::u32string_view{unicode}.substr(0, end), style));
+    put(c, {x, c.size().height / 2}, std::u32string_view{unicode}.substr(0, end),
+        style);
 }
 
-}  // namespace ox::detail
+}  // namespace ox
 
 namespace ox {
 
@@ -67,7 +67,7 @@ Label::Label(char const* text_)
 
 auto Label::paint(Canvas c) -> Cursor
 {
-    detail::paint_label(c, text, align, style);
+    paint_label(c, text, align, style);
     return {};
 }
 

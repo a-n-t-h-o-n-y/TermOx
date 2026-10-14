@@ -1,4 +1,5 @@
 add_executable(TermOx.tests.unit EXCLUDE_FROM_ALL
+    controls.test.cpp
     events.test.cpp
     terminal.test.cpp
     widgets.test.cpp

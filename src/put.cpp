@@ -162,10 +162,10 @@ namespace ox {
 void put(Canvas c, Point at, Glyph const& item)
 { c.write(at, std::u32string_view{&item.symbol, 1}, item.style); }
 
-void put(Canvas c, Point at, std::string_view text)
-{ put(c, at, esc::utf8_to_utf32(text)); }
+void put(Canvas c, Point at, std::string_view text, Style style)
+{ put(c, at, esc::utf8_to_utf32(text), style); }
 
-void put(Canvas c, Point at, std::u32string_view text)
+void put(Canvas c, Point at, std::u32string_view text, Style style)
 {
     validate_text(text, c.width_policy());
     auto x = (std::int64_t)at.x;
@@ -173,12 +173,14 @@ void put(Canvas c, Point at, std::u32string_view text)
     for (auto cluster : esc::graphemes(text)) {
         auto const width = *esc::grapheme_width(cluster, c.width_policy());
         if (x >= (std::int64_t)clip.at.x + clip.size.width) { break; }
-        if (x >= std::numeric_limits<int>::min()) { c.write({(int)x, at.y}, cluster); }
+        if (x >= std::numeric_limits<int>::min()) {
+            c.write({(int)x, at.y}, cluster, style);
+        }
         x += (std::int64_t)width;
     }
 }
 
-void put(Canvas c, Point at, std::span<Glyph const> glyphs)
+void put(Canvas c, Point at, std::span<Glyph const> glyphs, StylePatch patch)
 {
     auto text = std::u32string{};
     text.reserve(glyphs.size());
@@ -206,7 +208,7 @@ void put(Canvas c, Point at, std::span<Glyph const> glyphs)
     for (auto cluster : esc::graphemes(text)) {
         auto const width = *esc::grapheme_width(cluster, c.width_policy());
         if (x >= (std::int64_t)clip.at.x + clip.size.width) { break; }
-        c.write({(int)x, at.y}, cluster, remaining.front().style);
+        c.write({(int)x, at.y}, cluster, remaining.front().style | patch);
         remaining = remaining.subspan(cluster.size());
         x += (std::int64_t)width;
     }

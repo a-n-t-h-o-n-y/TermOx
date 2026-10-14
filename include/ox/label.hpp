@@ -10,11 +10,11 @@
 #include <ox/core/core.hpp>
 #include <ox/widget.hpp>
 
-namespace ox::detail {
+namespace ox {
 
 void paint_label(Canvas c, std::string_view text, Align align, Style style);
 
-}  // namespace ox::detail
+}  // namespace ox
 
 namespace ox {
 
@@ -99,7 +99,7 @@ class BasicNumberLabel : public Widget {
     auto paint(Canvas c) -> Cursor override
     {
         auto const text = std::vformat(locale, format, std::make_format_args(value));
-        detail::paint_label(c, text, align, style);
+        paint_label(c, text, align, style);
 
         return {};
     }

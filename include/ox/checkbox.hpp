@@ -4,69 +4,37 @@
 
 #include <signals_light/signal.hpp>
 
-#include <ox/core/core.hpp>
 #include <ox/widget.hpp>
 
 namespace ox {
 
-/**
- *  Displays a Checkbox with checked and unchecked states emitted. Doesn't have a Label.
- */
 class CheckBox : public Widget {
    public:
     using Widget::handle;
-
-    enum class State : bool { Checked, UnChecked };
-
-    struct Display {
-        std::vector<Glyph> checked;
-        std::vector<Glyph> unchecked;
-        Style in_focus_style;
-    };
-
     struct Options {
-        State state = State::UnChecked;
-        Display display = {
-            .checked = U"[X]"_gs,
-            .unchecked = U"[ ]"_gs,
-            .in_focus_style = {.traits = Trait::Bold},
-        };
+        bool checked = false;
+        std::vector<Glyph> checked_glyphs = U"[X]"_gs;
+        std::vector<Glyph> unchecked_glyphs = U"[ ]"_gs;
+        StylePatch focused_style = {.background = {},
+                                    .foreground = {},
+                                    .enabled = Trait::Bold,
+                                    .disabled = {}};
         FocusPolicy focus_policy = FocusPolicy::Strong;
-    } static const init;  // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=88165
+        SizePolicy size_policy = SizePolicy::fixed(4);
+    } static const init;
 
-   public:
-    Display display;
-
-    sl::Signal<void()> on_check;
-    sl::Signal<void()> on_uncheck;
+    bool checked;
+    std::vector<Glyph> checked_glyphs;
+    std::vector<Glyph> unchecked_glyphs;
+    StylePatch focused_style;
+    sl::Signal<void(bool)> on_toggle;
 
     CheckBox(Options x = init);
-
-   public:
-    void toggle();
-
-    void check();
-
-    void uncheck();
-
-    void set_state(State s);
-
-    [[nodiscard]] auto get_state() const -> State;
-
-   public:
-    auto handle(KeyEvent const& k) -> EventResponse override;
-
-    auto handle(MousePress const& m) -> EventResponse override;
-
-    auto paint(Canvas c) -> Cursor override;
-
-    auto focus_in() -> EventResponse override;
-
-    auto focus_out() -> EventResponse override;
-
-   private:
-    State state_;
-    bool in_focus_ = false;
+    /** Commands notify only on change and request repaint when attached. */
+    auto set_checked(bool value) -> bool;
+    auto toggle() -> bool;
+    auto handle(KeyEvent const& event) -> EventResponse override;
+    auto handle(MousePress const& event) -> EventResponse override;
+    auto paint(Canvas canvas) -> Cursor override;
 };
-
 }  // namespace ox

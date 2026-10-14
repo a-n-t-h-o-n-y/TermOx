@@ -1,87 +1,99 @@
 #include <ox/radiogroup.hpp>
 
+#include <algorithm>
+#include <stdexcept>
+#include <utility>
+
+#include <ox/controls.hpp>
+#include <ox/label.hpp>
 #include <ox/put.hpp>
 
 namespace ox {
-
 RadioGroup::Options const RadioGroup::init = {};
-
 RadioGroup::RadioGroup(Options x)
     : Widget{x.focus_policy, x.size_policy},
       items{std::move(x.items)},
       selected_index{x.selected_index},
       style{x.style},
-      in_focus_style{x.in_focus_style},
-      on{x.on},
-      off{x.off}
+      focused_style{x.focused_style},
+      on{std::move(x.on)},
+      off{std::move(x.off)}
 {}
 
-auto RadioGroup::paint(Canvas c) -> Cursor
+auto RadioGroup::select(std::size_t index) -> bool
 {
-    for (auto y = 0; y < (int)items.size(); ++y) {
-        if (y >= c.size().height) { break; }
-        auto& btn = (y == selected_index) ? on : off;
-        put(c, {0, y}, btn);
-        auto& b = in_focus_ && (y == focus_selection_) ? in_focus_style : style;
-        put(c, {(int)btn.size(), y}, esc::glyphs(' ' + items[(std::size_t)y]) | b);
+    auto const response = select_index(selected_index, index, items.size());
+    if (!response.handled) { return false; }
+    auto const changed = response.repaint || highlighted != index;
+    highlighted = index;
+    if (changed) { request_repaint(); }
+    if (response.repaint) {
+        auto const value =
+            items[index];  // Slots may replace items or destroy this widget.
+        on_select(value);
     }
+    return changed;
+}
 
+auto RadioGroup::paint(Canvas canvas) -> Cursor
+{
+    auto const clip = canvas.visible();
+    for (auto y = clip.at.y;
+         (std::size_t)y < items.size() && y < clip.at.y + clip.size.height; ++y) {
+        auto const& glyphs = selected_index == (std::size_t)y ? on : off;
+        auto const patch = is_focused() && highlighted == (std::size_t)y ? focused_style
+                                                                         : StylePatch{};
+        auto const width =
+            esc::cell_width(std::span<Glyph const>{glyphs}, canvas.width_policy());
+        if (!width) {
+            throw std::invalid_argument{"Radio indicator requires known widths"};
+        }
+        put(canvas, {0, y}, glyphs, patch);
+        if (*width >= (std::size_t)canvas.size().width) { continue; }
+        auto const x = (int)*width;
+        auto const appearance = style | patch;
+        canvas.write({x, y}, U" ", appearance);
+        paint_label(canvas.subcanvas({x + 1, y}, {canvas.size().width - x - 1, 1}),
+                    items[(std::size_t)y], Align::Left, appearance);
+    }
     return {};
 }
 
-auto RadioGroup::handle(KeyEvent const& k) -> EventResponse
+auto RadioGroup::handle(KeyEvent const& event) -> EventResponse
 {
-    if (k.action == KeyAction::Release) { return {}; }
-    auto const before = focus_selection_;
-    if (items.empty()) { return {}; }
-    if (k.matches(KeyCode::Enter, {}, k.action)) {
-        if (focus_selection_) {
-            selected_index =
-                std::clamp(*focus_selection_, (std::size_t)0, items.size() - 1);
-            this->on_select(items[*selected_index]);
-            return {.handled = true, .repaint = true};
-        }
+    if (items.empty() || event.action == KeyAction::Release) { return {}; }
+    if (activates(event)) {
+        auto const normalized = move_selection(highlighted, items.size(), 0);
+        auto const changed = select(*highlighted);
+        return {.handled = true, .repaint = normalized.repaint || changed};
     }
-    else if (k.matches(KeyCode::ArrowUp, {}, k.action)) {
-        focus_selection_ =
-            std::clamp(focus_selection_ ? ((int)*focus_selection_ - 1) : 0, 0,
-                       (int)items.size() - 1);
+    if (event.matches(KeyCode::ArrowUp, {}, event.action)) {
+        return move_selection(highlighted, items.size(), -1);
     }
-    else if (k.matches(KeyCode::ArrowDown, {}, k.action)) {
-        focus_selection_ =
-            std::clamp(focus_selection_ ? ((int)*focus_selection_ + 1) : 0, 0,
-                       (int)items.size() - 1);
+    if (event.matches(KeyCode::ArrowDown, {}, event.action)) {
+        return move_selection(highlighted, items.size(), 1);
     }
-
-    else {
+    return {};
+}
+auto RadioGroup::handle(MousePress const& event) -> EventResponse
+{
+    if (!activates(event) || event.at.y < 0 ||
+        (std::size_t)event.at.y >= items.size()) {
         return {};
     }
-    return {.handled = true, .repaint = before != focus_selection_};
+    auto const changed = select((std::size_t)event.at.y);
+    return {.handled = true, .repaint = changed};
 }
-
-auto RadioGroup::handle(MousePress const& m) -> EventResponse
-{
-    if (m.button != MouseButton::Left || m.at.y < 0) { return {}; }
-    if (m.at.y < (int)items.size() && m.at.y != selected_index) {
-        selected_index = m.at.y;
-        focus_selection_ = selected_index;
-        this->on_select(items[*selected_index]);
-        return {.handled = true, .repaint = true};
-    }
-
-    return {};
-}
-
 auto RadioGroup::focus_in() -> EventResponse
 {
-    in_focus_ = true;
+    if (selected_index && *selected_index < items.size()) {
+        highlighted = selected_index;
+    }
+    else {
+        (void)move_selection(highlighted, items.size(), 0);
+    }
     return {.handled = true, .repaint = true};
 }
-
 auto RadioGroup::focus_out() -> EventResponse
-{
-    in_focus_ = false;
-    return {.handled = true, .repaint = true};
-}
-
+{ return {.handled = true, .repaint = true}; }
 }  // namespace ox

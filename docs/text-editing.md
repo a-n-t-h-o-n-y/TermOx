@@ -156,8 +156,14 @@ between edits; the text and boundary vector are still copied to preserve atomici
 
 TextLayout separates segmentation and width measurement from wrapping. Width, wrapping,
 and tab-stop changes reuse grapheme boundaries and measured columns. Policy changes
-remeasure columns; text changes redo segmentation and measurement. Tabs are measured
-at their current row column, and original CR/CRLF offsets are preserved. UTF-8 validation
+remeasure columns. Text changes compare owned snapshots, resegment changed logical lines,
+and reuse the unchanged boundary/width prefix and suffix. With unchanged geometry and
+policy, wrapping restarts near the changed cluster (including a preceding soft row),
+then converges at a surviving row boundary whose remaining graphemes and widths match.
+Unchanged rows and coordinates are copied with adjusted byte offsets and row indices.
+A shared LF boundary guarantees convergence when Unicode context or wrapping changes
+throughout the logical line. Cold layouts and geometry changes still construct all rows.
+Tabs are measured at their current row column, and original CR/CRLF offsets are preserved. UTF-8 validation
 and control rejection create no discarded decoded or normalized strings. Working text,
 metadata, row, coordinate, and override buffers retain capacity between updates.
 Failed updates leave the owned snapshot, policy, coordinates, and existing row storage

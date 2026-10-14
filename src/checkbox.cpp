@@ -1,94 +1,43 @@
 #include <ox/checkbox.hpp>
 
+#include <utility>
+
+#include <ox/controls.hpp>
 #include <ox/put.hpp>
 
 namespace ox {
-
 CheckBox::Options const CheckBox::init = {};
-
 CheckBox::CheckBox(Options x)
-    : Widget{x.focus_policy, SizePolicy::fixed(4)},
-      display{std::move(x.display)},
-      state_{std::move(x.state)}
+    : Widget{x.focus_policy, x.size_policy},
+      checked{x.checked},
+      checked_glyphs{std::move(x.checked_glyphs)},
+      unchecked_glyphs{std::move(x.unchecked_glyphs)},
+      focused_style{x.focused_style}
 {}
-
-void CheckBox::toggle()
+auto CheckBox::set_checked(bool value) -> bool
 {
-    if (state_ == State::Checked) {
-        state_ = State::UnChecked;
-        this->on_uncheck();
-    }
-    else {
-        state_ = State::Checked;
-        this->on_check();
-    }
+    if (std::exchange(checked, value) == value) { return false; }
+    request_repaint();
+    on_toggle(value);
+    return true;
 }
-
-void CheckBox::check()
+auto CheckBox::toggle() -> bool { return set_checked(!checked); }
+auto CheckBox::handle(KeyEvent const& event) -> EventResponse
 {
-    if (state_ != State::Checked) {
-        state_ = State::Checked;
-        this->on_check();
-    }
+    if (!activates(event)) { return {}; }
+    auto const changed = toggle();
+    return {.handled = true, .repaint = changed};
 }
-
-void CheckBox::uncheck()
+auto CheckBox::handle(MousePress const& event) -> EventResponse
 {
-    if (state_ != State::UnChecked) {
-        state_ = State::UnChecked;
-        this->on_uncheck();
-    }
+    if (!activates(event)) { return {}; }
+    auto const changed = toggle();
+    return {.handled = true, .repaint = changed};
 }
-
-void CheckBox::set_state(State s)
+auto CheckBox::paint(Canvas canvas) -> Cursor
 {
-    if (state_ != s) {
-        state_ = s;
-        if (state_ == State::Checked) { this->on_check(); }
-        else {
-            this->on_uncheck();
-        }
-    }
-}
-
-auto CheckBox::get_state() const -> State { return state_; }
-
-auto CheckBox::handle(KeyEvent const& k) -> EventResponse
-{
-    if (k.action == KeyAction::Release) { return {}; }
-    if (!k.matches(KeyCode::Enter, {}, k.action)) { return {}; }
-    this->toggle();
-
-    return {.handled = true, .repaint = true};
-}
-
-auto CheckBox::handle(MousePress const& m) -> EventResponse
-{
-    if (m.button != MouseButton::Left) { return {}; }
-    this->toggle();
-
-    return {.handled = true, .repaint = true};
-}
-
-auto CheckBox::paint(Canvas c) -> Cursor
-{
-    auto glyphs = state_ == State::Checked ? display.checked : display.unchecked;
-    if (in_focus_) { glyphs = glyphs | display.in_focus_style; }
-    put(c, {.x = 0, .y = 0}, glyphs);
-
+    auto const& glyphs = checked ? checked_glyphs : unchecked_glyphs;
+    put(canvas, {0, 0}, glyphs, is_focused() ? focused_style : StylePatch{});
     return {};
 }
-
-auto CheckBox::focus_in() -> EventResponse
-{
-    in_focus_ = true;
-    return {.handled = true, .repaint = true};
-}
-
-auto CheckBox::focus_out() -> EventResponse
-{
-    in_focus_ = false;
-    return {.handled = true, .repaint = true};
-}
-
 }  // namespace ox

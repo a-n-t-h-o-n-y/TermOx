@@ -777,149 +777,38 @@ Label label;
 
 </details>
 
-## 🧩 ox::BasicButton
-
-[`#include <ox/button.hpp>`](../include/ox/button.hpp)
-
-`class BasicButton : public Widget;`
-
-A simple button Widget, has no special visual elements, use `Button` if you want more.
-Emits Signals on left mouse button press and release and enter key press.
-
-```cpp
-int i = 0;
-auto btn = BasicButton{};
-Connection{
-    .signal = btn.on_press,
-    .slot = [&] { ++i; },
-}();
-```
-
-<details>
-<summary><strong>Details</strong></summary>
-
-### 🏗️ Constructors
-
-```cpp
-BasicButton(FocusPolicy fp = FocusPolicy::Strong,
-            SizePolicy sp = SizePolicy::flex());
-```
-
----
-
-### Signals
-
-```cpp
-sl::Signal<void()> on_press;
-sl::Signal<void()> on_release;
-```
-
-- `on_press` emitted with left mouse button press and enter key press.
-- `on_release` emitted with left mouse button release.
-
----
-
-</details>
-
 ## 🧩 ox::Button
 
 [`#include <ox/button.hpp>`](../include/ox/button.hpp)
 
-`class Button : public BasicButton;`
+`class Button : public Widget;`
 
-A button with an optional Label and decoration. The decoration can be permanent or
-appear only on mouse hover, with animated fade in and out.
+Button composes activation, a label, style patches, and an optional decoration.
+Unmodified Enter/Space presses and repeats, and left mouse presses, emit `on_press`.
+A matching release clears the pressed appearance and emits `on_release` only while
+pressed. Focus loss or mouse leave cancels the pressed appearance.
 
 ```cpp
-int i = 0;
-auto btn = Button{{
-    .label = {.text = "A Button"},
-    .decoration = Fade{
-        .paint_fn = shape_gradient(shape::Box::brackets_round(),
-                                   RGB{0x0a3f46}, RGB{0x1ecbe1}),
-    },
-    .press_mod = [](Label& l) { l.style.foreground = colors::bright_white; },
-    .focus_mod = [](Label& l) { l.style.foreground = colors::bright_cyan; },
+auto button = Button{{
+    .label = {.text = "Run", .align = Align::Center},
+    .pressed_style = {.foreground = colors::bright_white},
+    .focused_style = {.foreground = colors::bright_cyan},
 }};
-Connection{
-    .signal = btn.on_press,
-    .slot = [&] { ++i; },
-}();
+button.on_press.connect([] { /* Run the action. */ });
 ```
 
-<details>
-<summary><strong>Details</strong></summary>
+Public configuration/state includes `Label::Options label`, `StylePatch pressed_style`,
+`StylePatch focused_style`, `Decoration decoration`, `bool pressed`, `bool hovered`,
+and `float fade_percent`. Decoration is `std::variant<PaintFn, Fade>`; `PaintFn` is
+`std::function<void(Canvas)>`. Fade keeps its paint function and in/out durations.
+Its timer exists only when animation is needed and follows widget moves. Hover and
+focus combine to determine the animation target. `gradient_blend` and `shape_gradient`
+remain available for decoration composition.
 
-### 🏗️ Constructors
-
-```cpp
-struct Fade {
-    /// (Canvas, percent) where percent is fade amount from [0, 1].
-    std::function<void(Canvas, float)> paint_fn;
-    std::chrono::milliseconds fade_in = std::chrono::milliseconds{200};
-    std::chrono::milliseconds fade_out = std::chrono::milliseconds{400};
-};
-
-using PaintFn = std::function<void(Canvas)>;
-using Decoration = std::variant<PaintFn, Fade>;
-
-struct Options {
-    Label::Options label = {};
-    Decoration decoration = [](Canvas) {};
-    std::function<void(Label&)> press_mod = [](Label&) {};
-    std::function<void(Label&)> focus_mod = [](Label&) {};
-    FocusPolicy focus_policy = FocusPolicy::Strong;
-    SizePolicy size_policy = SizePolicy::flex();
-};
-
-Button(Options x = {});
-```
-
-Construct a Button Widget. The label recieves the entire Canvas to paint on, in practice
-this means it will be centered vertically and its Align parameter will determine its
-horizontal alignment.
-
-The decoration takes either a simple paint function, or a Fade object. If a `PaintFn` is
-used, it will be handed a Canvas that has the Label already painted to it, any
-changes to this Canvas will appear on top of the Button. If a `Fade` object is given,
-the button will have a fade in effect on `mouse_enter` and fade out on `mouse_leave`.
-This fade effect is controlled by `Fade::paint_fn`, which takes a Canvas and float
-percent (0 to 1, where 0 is fully off and 1 is fully on).
-
-The `press_mod` function will be called for each paint event where the button has been
-pressed but not yet released (it is not activated by an enter key press). The label is
-passed into this function rather than the entire Canvas.
-
-The `focus_mod` function will be called for each paint event where the button has focus.
-The label is passed into this function rather than the entire Canvas.
-
----
-
-### Public Objects
-
-```cpp
-Label::Options label;
-std::function<void(Label&)> press_mod;
-std::function<void(Label&)> focus_mod;
-```
-
----
-
-### `shape_gradient` Free Function
-
-```cpp
-auto shape_gradient(auto const& shape, RGB one, RGB two)
-    -> std::function<void(Canvas, float)>
-```
-
-Builds a `paint_fn` for `Fade` (`void(Canvas, float)`) from a Shape object and gradient.
-Shape must be able to be used with put(Canvas, shape, fg). The returned function will
-paint the shape onto the Canvas, its foreground color will be `one` when the percent is
-`0`, and `two` when the percent is `1`, and somewhere inbetween for other values.
-
----
-
-</details>
+Focus styling reads `is_focused()`. Label painting uses the free `paint_label` function
+rather than constructing another widget. There is no BasicButton inheritance layer or
+label-modifier callback; use the same Button with an empty label when no label is wanted.
+Options still accept focus and size policies. See [control composition](controls.md).
 
 ## 🧩 ox::CheckBox
 
@@ -927,126 +816,38 @@ paint the shape onto the Canvas, its foreground color will be `one` when the per
 
 `class CheckBox : public Widget;`
 
-A simple checkbox Widget with two states, `Checked` and `UnChecked`. This does not
-contain a Label, only a box.
-
 ```cpp
-Column{
-    CheckBox{}, // default is UnChecked
-    CheckBox{{.state = CheckBox::Checked}},
-    CheckBox{{.state = CheckBox::UnChecked}},
-};
+auto checkbox = CheckBox{{.checked = true}};
+checkbox.on_toggle.connect([](bool checked) { /* Observe the new value. */ });
+checkbox.set_checked(false);
+checkbox.toggle();
 ```
 
-<details>
-<summary><strong>Details</strong></summary>
+State is a plain public `bool checked`. `checked_glyphs` and `unchecked_glyphs` are
+ordinary glyph vectors; `focused_style` is a StylePatch that preserves their existing
+colors and traits. Options accept these values, focus policy, and size policy.
+Defaults are unchecked, `[X]`/`[ ]`, strong focus, and fixed size four.
 
-### 🏗️ Constructors
+`set_checked(bool)` and `toggle()` return whether the state changed. Commands request
+repaint when attached and emit `on_toggle(bool)` once per change. Repeating an identical
+set emits nothing. Keyboard and mouse activation use the shared control functions.
+Direct field changes require an explicit repaint request and emit no signal.
 
-```cpp
-enum class State : bool { Checked, UnChecked };
+## 🧩 ox::RadioGroup
 
-struct Display {
-    std::vector<Glyph> checked;
-    std::vector<Glyph> unchecked;
-    Style in_focus_style;
-};
+[`#include <ox/radiogroup.hpp>`](../include/ox/radiogroup.hpp)
 
-struct Options {
-    State state = State::UnChecked;
-    Display display = {
-        .checked = U"[X]"_gs,
-        .unchecked = U"[ ]"_gs,
-        .in_focus_style = {.traits = Trait::Bold},
-    };
-    FocusPolicy focus_policy = FocusPolicy::Strong;
-};
+A vertical list with public `items`, optional `selected_index`, and optional `highlighted`
+index. Focus policy defaults to Strong. Arrow keys move the highlight without selecting;
+Enter/Space or left click selects. `select(index)` validates the index, updates the
+highlight, requests repaint when needed, and emits `on_select(string const&)` only for
+a changed selection. The signal carries a stable text snapshot, so slots may replace
+the items. Invalid commands are ignored; empty groups do not consume input.
 
-CheckBox(Options x = {});
-```
-
-Construct a CheckBox Widget. `state` is the initial state of the CheckBox.
-
-The display object describes the look of each state in Glyphs and the Style to use when
-the CheckBox is in focus.
-
----
-
-### Signals
-
-```cpp
-sl::Signal<void()> on_check;
-sl::Signal<void()> on_uncheck;
-```
-
-- `on_check` is emitted any time the state is changed from UnChecked to Checked.
-- `on_uncheck` is emitted any time the state is changed from Checked to UnChecked.
-
----
-
-### Public Objects
-
-```cpp
-Display display;
-```
-
-The current display object.
-
----
-
-### `CheckBox::toggle`
-
-```cpp
-void toggle();
-```
-
-Change the state from `UnChecked` to `Checked` or from `Checked` to `UnChecked`,
-emitting the appropriate signal.
-
----
-
-### `CheckBox::check`
-
-```cpp
-void check();
-```
-
-If state is `UnChecked`, sets the state to `Checked` and emits the `on_check` signal.
-
----
-
-### `CheckBox::uncheck`
-
-```cpp
-void uncheck();
-```
-
-If state is `Checked`, sets the state to `UnChecked` and emits the `on_uncheck` signal.
-
----
-
-### `CheckBox::set_state`
-
-```cpp
-void set_state(State s);
-```
-
-Set the current state to `s`, emit the appropriate signal if the state changes.
-If the state does not change, no signal is emitted.
-
----
-
-### `CheckBox::get_state`
-
-```cpp
-auto get_state() const -> State;
-```
-
-Get the current state of the CheckBox.
-
----
-
-</details>
+`on`/`off` glyph vectors describe indicators, `style` describes labels, and
+`focused_style` patches the highlighted row while focused. Indicator offsets use
+terminal cell widths rather than scalar counts, including wide and emoji clusters.
+See [control composition](controls.md) for reusable activation and selection functions.
 
 ## 🧩 ox::DataTable
 
@@ -1900,7 +1701,7 @@ struct Style {
 Use `colors::blue` and other named palette colors, `IndexedColor{235}` for a palette
 slot, `RGB{0x773283}` for true color, or `RGB{HSL{120, 90, 70}}` for an HSL conversion.
 `fg(color)` and `bg(color)` select a color channel. Widgets expose `style`,
-`text_style`, `ghost_text_style`, or `in_focus_style` as appropriate.
+`text_style`, `ghost_text_style`, or `focused_style` as appropriate.
 
 ## 🧩 ox::Glyph and ox::GlyphString
 

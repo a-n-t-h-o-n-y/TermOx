@@ -533,3 +533,66 @@ ASan+UBSan passes 48 non-exception text, frame, text-view, and text-widget cases
 all TermOx sources instrumented and the unchanged Escape Release library linked.
 Deliberate exception and allocation-fault cases run in Release because the installed
 sanitizer runtime cannot unwind C++ exceptions.
+
+
+## Incremental layout and control composition
+
+This pass compares `02a0bb6` with incremental TextLayout updates and the composed
+Button, CheckBox, and RadioGroup APIs. The benchmark source and workloads are identical
+in both binaries. The same Release compiler/options apply, with three alternating
+processes per version and five timed samples after warmup. No builds, tests, or sanitizer
+work ran during measurement. All workload/iteration/checksum triples match.
+
+```sh
+python3 tests/benchmark_paint_pipeline.py /path/to/before-benchmarks \
+    ./build-release/tests/TermOx.tests.benchmarks /tmp/incremental-results \
+    --modes layout application
+```
+
+Raw results: [layout before](../tests/benchmark-results/incremental-layout-before.csv),
+[layout after](../tests/benchmark-results/incremental-layout-after.csv),
+[application before](../tests/benchmark-results/incremental-application-before.csv),
+[application after](../tests/benchmark-results/incremental-application-after.csv), and
+[process samples](../tests/benchmark-results/incremental-samples.csv).
+
+| Workload | Before µs | After µs | Speedup |
+| --- | ---: | ---: | ---: |
+| changed layout, 1,000 lines | 2658.503 | 307.073 | 8.66× |
+| changed layout, 10,000 lines | 31356.925 | 3695.943 | 8.48× |
+| complete editing frame, 80×24 | 3636.661 | 984.731 | 3.69× |
+| complete editing frame, 200×60 | 5099.191 | 2781.857 | 1.83× |
+
+The layout workload changes the first character of a mixed Unicode/tab/newline
+document. The application workload edits a 1,000-line TextBox through dispatch,
+painting, frame comparison, and terminal encoding. Warm layout updates retain zero
+ordinary allocation calls; editing frames retain about four. These are workload-specific
+results, not a promise of constant-time edits or allocation-free text rendering.
+
+TextLayout compares old/new bytes, resegments affected logical lines, reuses measured
+widths, and wraps from the preceding potentially affected display row until the rows
+converge. LF boundaries guarantee a safe reset even with long Unicode context. Unchanged
+cache entries are copied or shifted in reusable storage. Byte comparisons, cache copies,
+and coordinate shifts still take time proportional to document size. Width/policy/tab
+changes rebuild the relevant analysis or rows; cold layout still analyzes everything.
+
+Other workload timings fluctuate in both directions. In particular, median unchanged
+repaints take 5%/15% longer at the two sizes, while individual process samples range from
+faster to slower than the baseline. These paths do not benefit from incremental text
+analysis. The raw samples are retained, and no general repaint speedup is claimed.
+
+Controls use shared activation/selection functions and explicit state, with no duplicate
+focus state or temporary Label widgets. Styled string/span drawing avoids intermediate
+label glyph vectors and copies solely for focus styling. Control-specific speedups are
+not measured here; see [control composition](controls.md) for the interface changes.
+
+
+Validation passes all 171 Release cases, including five allocation-fault cases, all six
+example builds, seven PTY smoke checks, and 9,720 cached-painter differential comparisons.
+New tests compare incremental and fresh layouts across 1,080 randomized replacements,
+resizes, Unicode joins, CR/LF changes, and all wrapping modes. Controls cover notification
+coalescing, release handling, focused styling, overlapping hover/focus fades, moved timers,
+stale indices, callback mutation, and multi-scalar indicators. Both the controls example
+and README example compile. ASan+UBSan passes 86 non-exception cases with every TermOx
+source instrumented, linking the unchanged Escape Release library. Deliberate exception
+and allocation-fault cases run in Release because the installed sanitizer runtime cannot
+unwind C++ exceptions.

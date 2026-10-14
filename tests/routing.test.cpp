@@ -463,7 +463,7 @@ TEST(routing_builtin_widgets_ignore_unused_keys_and_partial_paste_without_repain
     ASSERT(!app.dispatch(esc::PasteChunk{"hel", true, false}).repaint);
     ASSERT(app.dispatch(esc::PasteChunk{"lo", false, true}).repaint &&
            edit.text() == "hello");
-    auto button = BasicButton{};
+    auto button = Button{};
     ASSERT(!button.handle(KeyEvent{.key = KeyCode::Escape}).handled);
     ASSERT(!button.handle(MousePress{{0, 0}, MouseButton::Right}).handled);
     auto box = TextBox{{.text = "short"}};

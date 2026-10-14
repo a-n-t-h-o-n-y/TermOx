@@ -60,7 +60,7 @@ TEST(text_box_handles_associated_text_and_multiline_paste)
 
 TEST(button_handles_repeats_and_unidentified_mouse_release)
 {
-    auto button = BasicButton{};
+    auto button = Button{};
     int presses = 0;
     int releases = 0;
     button.on_press.connect([&] { ++presses; });
