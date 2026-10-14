@@ -1,4 +1,5 @@
 add_executable(TermOx.tests.unit EXCLUDE_FROM_ALL
+    value_views.test.cpp
     selection_family.test.cpp
     widget_contracts.test.cpp
     audit.test.cpp

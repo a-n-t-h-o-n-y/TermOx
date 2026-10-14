@@ -1,0 +1,146 @@
+#pragma once
+#include <chrono>
+#include <ox/checkbox.hpp>
+#include <ox/lineedit.hpp>
+#include <ox/timer.hpp>
+namespace ox {
+/** Finite inclusive bounds; positive increment. Values clamp, without quantization. */
+struct ValueRange {
+    double minimum = 0;
+    double maximum = 100;
+    double step = 1;
+    auto operator==(ValueRange const&) const -> bool = default;
+};
+void validate(ValueRange);
+auto clamp_value(double, ValueRange) -> double;
+auto value_fraction(double, ValueRange) -> double;
+class Slider : public Widget {
+   public:
+    using Widget::handle;
+    struct Options {
+        ValueRange range = {};
+        double value = 0;
+        bool vertical = false;
+        Style style = {};
+    };
+    bool vertical;
+    Style style;
+    sl::Signal<void(double)> on_change;
+    Slider();
+    explicit Slider(Options);
+    Slider(Slider&&);
+    auto operator=(Slider&&) -> Slider&;
+    auto range() const -> ValueRange { return range_; }
+    auto value() const -> double { return value_; }
+    auto set_value(double) -> bool;
+    auto set_range(ValueRange) -> bool;
+    auto measure(Area, esc::WidthPolicy = {}) const -> Area override;
+    auto paint(Canvas) -> Cursor override;
+    auto handle(KeyEvent const&) -> EventResponse override;
+    auto handle(MousePress const&) -> EventResponse override;
+    auto handle(MouseMove const&) -> EventResponse override;
+    auto handle(MouseRelease const&) -> EventResponse override;
+    auto pointer_cancel() -> EventResponse override;
+    auto focus_out() -> EventResponse override { return pointer_cancel(); }
+
+   private:
+    ValueRange range_;
+    double value_;
+    bool dragging_ = false;
+    auto point_value(Point) const -> double;
+};
+/** Editing is staged. Enter commits valid input; invalid input retains value. */
+class NumericEdit : public Widget {
+   public:
+    using Widget::handle;
+    struct Options {
+        ValueRange range = {};
+        double value = 0;
+        LineEdit::Options editor = {};
+    };
+    LineEdit editor;
+    sl::Signal<void(double)> on_change;
+    sl::Signal<void(std::string const&)> on_invalid;
+    NumericEdit();
+    explicit NumericEdit(Options);
+    auto range() const -> ValueRange { return range_; }
+    auto value() const -> double { return value_; }
+    auto set_value(double) -> bool;
+    auto set_range(ValueRange) -> bool;
+    auto commit() -> bool;
+    void revert();
+    auto measure(Area, esc::WidthPolicy = {}) const -> Area override;
+    auto get_children() -> zzz::Generator<Widget&> override { co_yield editor; }
+    auto get_children() const -> zzz::Generator<Widget const&> override
+    { co_yield editor; }
+    auto handle(KeyEvent const&) -> EventResponse override;
+
+   protected:
+    void on_arrange(Rect) override;
+
+   private:
+    ValueRange range_;
+    double value_;
+    void sync();
+};
+class ProgressBar : public Widget {
+   public:
+    struct Options {
+        ValueRange range = {};
+        double value = 0;
+        Style style = {};
+        bool show_percentage = true;
+    };
+    Style style;
+    bool show_percentage;
+    sl::Signal<void(double)> on_change;
+    ProgressBar();
+    explicit ProgressBar(Options);
+    auto range() const -> ValueRange { return range_; }
+    auto value() const -> double { return value_; }
+    auto set_value(double) -> bool;
+    auto set_range(ValueRange) -> bool;
+    auto measure(Area, esc::WidthPolicy = {}) const -> Area override;
+    auto paint(Canvas) -> Cursor override;
+
+   private:
+    ValueRange range_;
+    double value_;
+};
+/** Animated status indicator. No timer runs while stopped; timers follow widget moves.
+ */
+class Spinner : public Widget {
+   public:
+    struct Options {
+        std::vector<std::string> frames = {"⠋", "⠙", "⠹", "⠸", "⠼",
+                                           "⠴", "⠦", "⠧", "⠇", "⠏"};
+        std::chrono::milliseconds interval{80};
+        bool running = true;
+        Style style = {};
+    };
+    Style style;
+    sl::Signal<void(bool)> on_change;
+    Spinner();
+    explicit Spinner(Options);
+    auto is_running() const -> bool;
+    auto set_running(bool) -> bool;
+    void set_frames(std::vector<std::string>);
+    auto frames() const -> std::span<std::string const> { return frames_; }
+    auto tick() -> EventResponse;
+    auto measure(Area, esc::WidthPolicy = {}) const -> Area override;
+    auto paint(Canvas) -> Cursor override;
+
+   private:
+    std::vector<std::string> frames_;
+    std::size_t frame_ = 0;
+    Timer timer_;
+    TextLayout layout_;
+};
+/** Same boolean contract and activation bindings as CheckBox, with switch presentation.
+ */
+class Switch : public CheckBox {
+   public:
+    Switch();
+    explicit Switch(CheckBox::Options);
+};
+}  // namespace ox

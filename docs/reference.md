@@ -1572,3 +1572,7 @@ using Event = std::variant<esc::MousePress,
 shared row selection, clipping, text editing, containers, and routing. See the
 [selection and application guide](selection-and-application.md) for commands, signal
 contracts, keyboard/mouse bindings, lifetime rules, and examples.
+
+See [values and composite widgets](value-and-composite-widgets.md) for Slider,
+NumericEdit, ProgressBar, Spinner, Switch, TreeView, LogView, SplitPane, Form,
+FilePicker, and CommandPalette.

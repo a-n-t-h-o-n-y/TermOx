@@ -31,3 +31,11 @@
 #include <ox/textbox.hpp>
 #include <ox/timer.hpp>
 #include <ox/widget.hpp>
+
+#include <ox/value.hpp>
+#include <ox/treeview.hpp>
+#include <ox/logview.hpp>
+#include <ox/splitpane.hpp>
+#include <ox/form.hpp>
+#include <ox/filepicker.hpp>
+#include <ox/commandpalette.hpp>

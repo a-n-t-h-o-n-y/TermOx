@@ -179,3 +179,7 @@ See [container composition](containers.md) and [text editing](text-editing.md).
 
 See [selection and application structure](selection-and-application.md) for ListView,
 Select/ComboBox, Tabs, root overlays, menus, dialogs, modal scopes, and scoped shortcuts.
+
+See [values and composite widgets](value-and-composite-widgets.md) for Slider,
+NumericEdit, ProgressBar, Spinner, Switch, TreeView, LogView, SplitPane, Form,
+FilePicker, and CommandPalette.

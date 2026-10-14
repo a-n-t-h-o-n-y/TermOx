@@ -26,6 +26,11 @@ add_library(TermOx STATIC
     src/listview.cpp
     src/select.cpp
     src/menu.cpp
+    src/value.cpp
+    src/treeview.cpp
+    src/logview.cpp
+    src/commandpalette.cpp
+    src/filepicker.cpp
     src/controls.cpp
     src/checkbox.cpp
     src/datatable.cpp
@@ -61,6 +66,13 @@ add_library(TermOx STATIC
     include/ox/menu.hpp
     include/ox/popup.hpp
     include/ox/tabs.hpp
+    include/ox/value.hpp
+    include/ox/treeview.hpp
+    include/ox/logview.hpp
+    include/ox/splitpane.hpp
+    include/ox/form.hpp
+    include/ox/filepicker.hpp
+    include/ox/commandpalette.hpp
     include/ox/controls.hpp
     include/ox/container.hpp
     include/ox/clipboard.hpp

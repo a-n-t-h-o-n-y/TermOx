@@ -108,3 +108,8 @@ target_link_libraries(TermOx.examples.datatable PRIVATE TermOx)
 add_executable(TermOx.examples.selection EXCLUDE_FROM_ALL selection.cpp)
 target_compile_options(TermOx.examples.selection PRIVATE -Wall -Wextra -Wpedantic)
 target_link_libraries(TermOx.examples.selection PRIVATE TermOx)
+
+# Values, tree/log views, split panes, forms, files, and command search.
+add_executable(TermOx.examples.views EXCLUDE_FROM_ALL views.cpp)
+target_compile_options(TermOx.examples.views PRIVATE -Wall -Wextra -Wpedantic)
+target_link_libraries(TermOx.examples.views PRIVATE TermOx)
