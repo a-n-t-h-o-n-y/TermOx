@@ -23,15 +23,15 @@ TEST(resize_reinitializes_the_screen_buffer)
 {
     struct Handler {
         Area size;
-        auto handle_resize(Area a) -> EventResponse
+        auto handle(esc::Resize const& event) -> EventResponse
         {
-            size = a;
+            size = event.size;
             return {.handled = true};
         }
     } handler;
     auto buffer = Frame{{1, 1}};
     buffer.write({0, 0}, U"x", {.foreground = colors::red});
-    ASSERT((apply_event(esc::Resize{{2, 3}}, handler, buffer).handled));
+    ASSERT((dispatch(esc::Resize{{2, 3}}, handler, buffer).handled));
     ASSERT(((handler.size == Area{2, 3})));
     ASSERT(((buffer.size() == Area{2, 3})));
     ASSERT((buffer[Point{0, 0}] == Cell{}));

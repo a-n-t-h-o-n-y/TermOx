@@ -81,7 +81,8 @@ loop by default, and the session restores terminal state on exit.
 
 Text inputs accept Unicode key text and bracketed paste. Frames store complete
 graphemes with explicit continuation cells, and clipped canvases use Escape's width
-estimates. See [frames and canvases](docs/frame-and-canvas.md) for drawing and resize contracts,
+estimates. See [the widget API](docs/widget-api.md) for handlers, arrangement, ownership, and migration,
+[frames and canvases](docs/frame-and-canvas.md) for drawing and resize contracts,
 [rendering](docs/renderer.md) for frame comparison and terminal output,
 [layout calculation](docs/layout.md) for sizing and placement,
 [routing and focus](docs/routing-and-focus.md) for widget interaction,
@@ -98,7 +99,7 @@ ctest --test-dir build --output-on-failure
 On macOS or Linux, check interactive input and terminal restoration with:
 
 ```sh
-cmake --build build --target TermOx.tests.renderer_terminal \
+cmake --build build --target TermOx.tests.renderer_terminal TermOx.tests.event_loop_terminal \
     TermOx.examples.pong TermOx.examples.pinbox \
     TermOx.examples.snake TermOx.examples.accumulator TermOx.examples.scratch
 python3 tests/smoke_examples.py build

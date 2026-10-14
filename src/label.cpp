@@ -65,7 +65,11 @@ Label::Label(char const* text_)
       style{}
 {}
 
-void Label::paint(Canvas c) { detail::paint_label(c, text, align, style); }
+auto Label::paint(Canvas c) -> Cursor
+{
+    detail::paint_label(c, text, align, style);
+    return {};
+}
 
 // -------------------------------------------------------------------------------------
 

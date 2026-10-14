@@ -630,9 +630,10 @@ auto TextEdit::paste(esc::PasteChunk const& chunk,
     return insert(bytes, accept);
 }
 
-auto TextEdit::key_press(KeyEvent const& key,
-                         TextLayout const& layout,
-                         std::function<bool(char32_t)> const& accept) -> EventResponse
+auto edit_key(TextEdit& edit,
+              KeyEvent const& key,
+              TextLayout const& layout,
+              std::function<bool(char32_t)> const& accept) -> EventResponse
 {
     if (key.action == KeyAction::Release) { return {}; }
     auto matches = [&](auto code, Modifiers modifiers = {}) {
@@ -642,47 +643,48 @@ auto TextEdit::key_press(KeyEvent const& key,
     auto const shift = key.modifiers.shift;
     auto const ctrl = key.modifiers.ctrl;
     auto const modifiers = Modifiers{.shift = shift, .ctrl = ctrl};
-    if (matches(U'a', {.ctrl = true})) { changed = select_all(); }
+    if (matches(U'a', {.ctrl = true})) { changed = edit.select_all(); }
     else if (matches(U'z', {.ctrl = true})) {
-        changed = undo();
+        changed = edit.undo();
     }
     else if (matches(U'y', {.ctrl = true}) ||
              matches(U'z', {.shift = true, .ctrl = true})) {
-        changed = redo();
+        changed = edit.redo();
     }
     else if (matches(KeyCode::ArrowLeft, modifiers)) {
-        changed = move_left(shift, ctrl);
+        changed = edit.move_left(shift, ctrl);
     }
     else if (matches(KeyCode::ArrowRight, modifiers)) {
-        changed = move_right(shift, ctrl);
+        changed = edit.move_right(shift, ctrl);
     }
     else if (matches(KeyCode::Backspace, {.ctrl = ctrl})) {
-        changed = erase_backward(ctrl);
+        changed = edit.erase_backward(ctrl);
     }
     else if (matches(KeyCode::Delete, {.ctrl = ctrl})) {
-        changed = erase_forward(ctrl);
+        changed = edit.erase_forward(ctrl);
     }
     else if (matches(KeyCode::Home, modifiers) || matches(KeyCode::End, modifiers)) {
-        if (layout.text() != text_) {
+        if (layout.text() != edit.text()) {
             throw std::invalid_argument{"Stale text layout"};
         }
         auto const home = matches(KeyCode::Home, modifiers);
-        auto const line = layout.lines()[(std::size_t)layout.position(caret_).y];
-        changed = set_caret(
-            ctrl ? (home ? 0 : text_.size()) : (home ? line.begin : line.end), shift);
+        auto const line = layout.lines()[(std::size_t)layout.position(edit.caret()).y];
+        changed = edit.set_caret(
+            ctrl ? (home ? 0 : edit.text().size()) : (home ? line.begin : line.end),
+            shift);
     }
-    else if (multiline_ && (matches(KeyCode::ArrowUp, {.shift = shift}) ||
-                            matches(KeyCode::ArrowDown, {.shift = shift}))) {
-        changed = move_vertical(
+    else if (edit.multiline() && (matches(KeyCode::ArrowUp, {.shift = shift}) ||
+                                  matches(KeyCode::ArrowDown, {.shift = shift}))) {
+        changed = edit.move_vertical(
             layout, matches(KeyCode::ArrowUp, {.shift = shift}) ? -1 : 1, shift);
     }
-    else if (multiline_ && matches(KeyCode::Enter)) {
-        changed = insert("\n", accept);
+    else if (edit.multiline() && matches(KeyCode::Enter)) {
+        changed = edit.insert("\n", accept);
     }
     else {
         auto const input = input_text(key);
         if (input.empty()) { return {}; }
-        changed = insert(esc::utf32_to_utf8(input), accept);
+        changed = edit.insert(esc::utf32_to_utf8(input), accept);
     }
     return {.handled = true, .repaint = changed};
 }

@@ -2,6 +2,7 @@ add_executable(TermOx.tests.unit EXCLUDE_FROM_ALL
     events.test.cpp
     terminal.test.cpp
     widgets.test.cpp
+    widget_api.test.cpp
     event_loop.test.cpp
     frame.test.cpp
     renderer.test.cpp

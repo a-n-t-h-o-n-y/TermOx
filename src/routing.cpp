@@ -11,15 +11,15 @@ void append_tree(std::vector<WidgetNode>& tree,
                  Rect clip,
                  bool input)
 {
-    validate(widget.size);
-    auto const bounds = Rect{origin, widget.size};
+    validate(widget.size());
+    auto const bounds = Rect{origin, widget.size()};
     auto const visible =
-        widget.active ? intersection(bounds, clip) : Rect{origin, {0, 0}};
-    input = input && widget.active && widget.enabled;
+        widget.visible ? intersection(bounds, clip) : Rect{origin, {0, 0}};
+    input = input && widget.visible && widget.enabled;
     auto const index = tree.size();
     tree.push_back({track(widget), parent, 0, bounds, visible, input});
     for (auto& child : widget.get_children()) {
-        append_tree(tree, child, index, translate(origin, child.at), visible, input);
+        append_tree(tree, child, index, translate(origin, child.at()), visible, input);
     }
     tree[index].end = tree.size();
 }
@@ -35,7 +35,7 @@ auto widget_tree(Widget& root) -> std::vector<WidgetNode>
 void widget_tree(Widget& root, std::vector<WidgetNode>& tree)
 {
     tree.clear();
-    append_tree(tree, root, {}, {0, 0}, {{0, 0}, root.size}, true);
+    append_tree(tree, root, {}, {0, 0}, {{0, 0}, root.size()}, true);
 }
 
 auto hit_test(std::span<WidgetNode const> tree, Point point)

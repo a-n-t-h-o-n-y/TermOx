@@ -120,9 +120,6 @@ class TextEdit {
      */
     auto paste(esc::PasteChunk const& chunk,
                std::function<bool(char32_t)> const& accept = {}) -> bool;
-    auto key_press(KeyEvent const& key,
-                   TextLayout const& layout,
-                   std::function<bool(char32_t)> const& accept = {}) -> EventResponse;
 
    private:
     struct Change {
@@ -154,5 +151,12 @@ class TextEdit {
     void prepare_replace(std::size_t begin, std::size_t end, std::string_view value);
     void commit_text() noexcept;
 };
+
+/** Default editing bindings, independently replaceable by widget code. */
+[[nodiscard]] auto edit_key(TextEdit& edit,
+                            KeyEvent const& key,
+                            TextLayout const& layout,
+                            std::function<bool(char32_t)> const& accept = {})
+    -> EventResponse;
 
 }  // namespace ox

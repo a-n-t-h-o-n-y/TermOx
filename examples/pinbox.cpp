@@ -8,6 +8,9 @@ using namespace ox;
 
 class PinBox : public Widget {
    public:
+    using Widget::handle;
+
+   public:
     sl::Signal<void(Point)> pin_inserted;
     sl::Signal<void(Point)> pin_removed;
 
@@ -20,7 +23,7 @@ class PinBox : public Widget {
     void clear() { points_.clear(); }
 
    public:
-    auto mouse_press(MousePress m) -> EventResponse override
+    auto handle(MousePress const& m) -> EventResponse override
     {
         switch (m.button) {
             case MouseButton::Left:
@@ -31,7 +34,7 @@ class PinBox : public Widget {
         }
     }
 
-    auto mouse_move(MouseMove m) -> EventResponse override
+    auto handle(MouseMove const& m) -> EventResponse override
     {
         if (m.held_button == MouseButton::Left) {
             return {.handled = true, .repaint = insert_pin(m.at)};
@@ -42,11 +45,13 @@ class PinBox : public Widget {
         return {};
     }
 
-    void paint(Canvas c) override
+    auto paint(Canvas c) -> Cursor override
     {
         for (auto [at, color] : points_) {
             put(c, at, U'•' | fg(color));
         }
+
+        return {};
     }
 
    private:

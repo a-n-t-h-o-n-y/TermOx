@@ -187,16 +187,20 @@ void EventLoop::unwatch(std::weak_ptr<Timer::State> entry)
     }
 }
 
-void EventLoop::request_repaint() { repaint_ = true; }
+void EventLoop::request_repaint() { apply({.repaint = true}); }
 
-void EventLoop::quit(int code) { exit_code_ = code; }
+void EventLoop::quit(int code) { apply({.quit = code}); }
+
+void EventLoop::apply(EventResponse response)
+{
+    repaint_ |= response.repaint;
+    if (response.quit && !exit_code_) { exit_code_ = response.quit; }
+}
 
 void EventLoop::merge(EventResponse& result, EventResponse response)
 {
-    result.handled |= response.handled;
-    result.repaint |= response.repaint;
-    repaint_ |= response.repaint;
-    if (response.quit && !exit_code_) { exit_code_ = response.quit; }
+    apply(response);
+    result = combine(result, response);
     result.quit = exit_code_;
 }
 

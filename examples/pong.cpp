@@ -431,10 +431,10 @@ void paint(State const& x, Canvas canvas)
 // -------------------------------------------------------------------------------------
 
 /**
- * QuitRequest means the app should quit.
+ * An integer requests an exit code.
  * State means the app has potentially changed state and should be painted.
  */
-using PongEventResponse = std::variant<QuitRequest, State>;
+using PongEventResponse = std::variant<int, State>;
 
 auto key_press(SplashScreen x, KeyEvent k) -> PongEventResponse
 {
@@ -459,7 +459,7 @@ auto key_press(MainMenu x, KeyEvent k) -> PongEventResponse
         switch (x.selected) {
             case 0: return PlayerSelectMenu{};
             case 1: return HowTo{};
-            case 2: return QuitRequest{};
+            case 2: return 0;
         }
         return x;
     }
@@ -730,24 +730,28 @@ class Pong {
     Pong(EventLoop& loop)
         : ticker_{std::chrono::milliseconds{30}, [this] {
                       if (std::holds_alternative<SplashScreen>(state_)) {
-                          return this->handle_timer(SplashScreen::timer_id);
+                          return this->tick(SplashScreen::timer_id);
                       }
                       if (std::holds_alternative<Game>(state_)) {
-                          return this->handle_timer(Game::timer_id);
+                          return this->tick(Game::timer_id);
                       }
                       return EventResponse{};
                   }}
     { loop.watch(ticker_); }
 
-    auto handle_key_press(KeyEvent k) -> EventResponse
-    { return this->update(key_press(std::move(state_), k)); }
+    auto handle(KeyEvent const& k) -> EventResponse
+    {
+        return k.action == KeyAction::Release
+                   ? EventResponse{}
+                   : this->update(key_press(std::move(state_), k));
+    }
 
-    auto handle_timer(int id) -> EventResponse
+    auto tick(int id) -> EventResponse
     { return this->update(timer(std::move(state_), id)); }
 
-    auto handle_paint(Canvas canvas) -> Cursor
+    auto paint(Canvas canvas) -> Cursor
     {
-        paint(state_, canvas);
+        ::paint(state_, canvas);
         return {};
     }
 
@@ -759,8 +763,8 @@ class Pong {
     {
         return std::visit(
             [this](auto result) -> EventResponse {
-                if constexpr (std::same_as<decltype(result), QuitRequest>) {
-                    return {.handled = true, .quit = result.return_code};
+                if constexpr (std::same_as<decltype(result), int>) {
+                    return {.handled = true, .quit = result};
                 }
                 else {
                     state_ = std::move(result);

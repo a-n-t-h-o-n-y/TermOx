@@ -18,6 +18,8 @@ class ScrollBar;
  */
 class DataTable : public Widget {
    public:
+    using Widget::handle;
+
     struct Options {
         Color background = default_color;
         Color foreground_cell = default_color;
@@ -63,15 +65,16 @@ class DataTable : public Widget {
     { return columns_; }
 
    public:
-    void paint(Canvas) override;
+    auto paint(Canvas) -> Cursor override;
 
-    auto mouse_wheel(MouseWheel) -> EventResponse override;
-
-    void resize(Area) override;
+    auto handle(MouseWheel const&) -> EventResponse override;
 
     auto get_children() -> zzz::Generator<Widget&> override;
 
     auto get_children() const -> zzz::Generator<Widget const&> override;
+
+   protected:
+    void on_arrange(Rect previous) override;
 
    private:
     Row<std::vector<Label>> headings_;

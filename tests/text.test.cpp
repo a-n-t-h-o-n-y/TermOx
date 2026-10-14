@@ -288,21 +288,22 @@ TEST(text_key_commands_support_selection_history_and_ignore_releases_and_unknown
     auto edit = TextEdit{"abc"};
     auto layout = TextLayout{};
     layout.update(edit.text(), 10);
-    ASSERT(!edit.key_press(KeyEvent{.key = KeyCode::Escape}, layout).handled);
-    ASSERT(!edit.key_press(
-                    KeyEvent{.key = KeyCode::ArrowRight, .action = KeyAction::Release},
-                    layout)
+    ASSERT(!edit_key(edit, KeyEvent{.key = KeyCode::Escape}, layout).handled);
+    ASSERT(!edit_key(edit,
+                     KeyEvent{.key = KeyCode::ArrowRight, .action = KeyAction::Release},
+                     layout)
                 .handled);
-    ASSERT(!edit.key_press(KeyEvent{.key = KeyCode::ArrowLeft}, layout).repaint);
-    edit.key_press(KeyEvent{.key = KeyCode::End}, layout);
-    edit.key_press(KeyEvent{.key = KeyCode::ArrowLeft, .modifiers = {.shift = true}},
+    ASSERT(!edit_key(edit, KeyEvent{.key = KeyCode::ArrowLeft}, layout).repaint);
+    (void)edit_key(edit, KeyEvent{.key = KeyCode::End}, layout);
+    (void)edit_key(edit,
+                   KeyEvent{.key = KeyCode::ArrowLeft, .modifiers = {.shift = true}},
                    layout);
     ASSERT((edit.selection() == std::pair<std::size_t, std::size_t>{2, 3}));
-    edit.key_press(KeyEvent{.text = U"🙂"}, layout);
+    (void)edit_key(edit, KeyEvent{.text = U"🙂"}, layout);
     ASSERT(edit.text() == "ab🙂");
-    edit.key_press(KeyEvent{.key = U'z', .modifiers = {.ctrl = true}}, layout);
+    (void)edit_key(edit, KeyEvent{.key = U'z', .modifiers = {.ctrl = true}}, layout);
     ASSERT(edit.text() == "abc");
-    edit.key_press(KeyEvent{.key = U'y', .modifiers = {.ctrl = true}}, layout);
+    (void)edit_key(edit, KeyEvent{.key = U'y', .modifiers = {.ctrl = true}}, layout);
     ASSERT(edit.text() == "ab🙂");
 }
 

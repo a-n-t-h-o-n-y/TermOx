@@ -23,6 +23,8 @@ namespace ox {
  */
 class RadioGroup : public Widget {
    public:
+    using Widget::handle;
+
     struct Options {
         std::vector<std::string> items = {};
         std::optional<std::size_t> selected_index = std::nullopt;
@@ -47,11 +49,11 @@ class RadioGroup : public Widget {
     RadioGroup(Options x = init);
 
    public:
-    void paint(Canvas c) override;
+    auto paint(Canvas c) -> Cursor override;
 
-    auto key_press(KeyEvent k) -> EventResponse override;
+    auto handle(KeyEvent const& k) -> EventResponse override;
 
-    auto mouse_press(MousePress m) -> EventResponse override;
+    auto handle(MousePress const& m) -> EventResponse override;
 
     auto focus_in() -> EventResponse override;
 

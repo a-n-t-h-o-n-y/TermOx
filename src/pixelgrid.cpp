@@ -24,7 +24,7 @@ PixelGrid::PixelGrid(Matrix matrix)
     : Widget{FocusPolicy::None, SizePolicy::flex()}, buffer{std::move(matrix)}
 {}
 
-void PixelGrid::paint(Canvas c)
+auto PixelGrid::paint(Canvas c) -> Cursor
 {
     for (auto y = 0; y < buffer.area.height; y += 2) {
         for (auto x = 0; x < buffer.area.width; ++x) {
@@ -37,6 +37,8 @@ void PixelGrid::paint(Canvas c)
             }
         }
     }
+
+    return {};
 }
 
 }  // namespace ox

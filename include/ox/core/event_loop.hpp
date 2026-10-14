@@ -32,6 +32,8 @@ class EventLoop {
     void post(Event event);
     void watch(Timer const& timer);
     void unwatch(Timer const& timer);
+    /** Apply effects at the dispatch boundary; first quit request wins. */
+    void apply(EventResponse response);
     void request_repaint();
     void quit(int code = 0);
 
@@ -47,7 +49,7 @@ class EventLoop {
         if (exit_code_) { return result; }
         auto events = take_events();
         for (auto const& event : events) {
-            auto response = apply_event(event, handler, screen);
+            auto response = dispatch(event, handler, screen);
             merge(result, response);
             if (exit_code_) { return result; }
         }
@@ -78,9 +80,11 @@ class EventLoop {
     {
         if (!repaint_ || exit_code_) { return false; }
         repaint_ = false;
-        if constexpr (HandlesPaint<Handler>) {
+        if constexpr (requires {
+                          { handler.paint(Canvas{screen}) } -> std::same_as<Cursor>;
+                      }) {
             screen.clear();
-            cursor = handler.handle_paint(Canvas{screen});
+            cursor = handler.paint(Canvas{screen});
         }
         return true;
     }
@@ -107,11 +111,11 @@ template <typename Handler>
 [[nodiscard]] auto process_events(EventLoop& loop,
                                   Terminal& terminal,
                                   Handler& handler,
-                                  std::function<void()> prepare = {}) -> int
+                                  std::function<EventResponse()> prepare = {}) -> int
 {
     loop.post(esc::Resize{terminal.size()});
     while (!loop.exit_code()) {
-        if (prepare) { prepare(); }
+        if (prepare) { loop.apply(prepare()); }
         loop.step(handler);
         if (loop.paint(handler)) { terminal.commit_changes(loop.screen, loop.cursor); }
         if (loop.exit_code()) { break; }

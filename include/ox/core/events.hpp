@@ -1,6 +1,5 @@
 #pragma once
 
-#include <concepts>
 #include <functional>
 #include <optional>
 #include <string>
@@ -48,11 +47,6 @@ using ::esc::MouseWheel;
     return text;
 }
 
-/** Request an application exit with the given return code. */
-struct QuitRequest {
-    int return_code = 0;
-};
-
 /** Handling, painting, and exiting are independent decisions. */
 struct EventResponse {
     bool handled = false;
@@ -73,10 +67,6 @@ struct EventResponse {
 
 namespace event {
 
-struct Timer {
-    int id;
-};
-
 struct Custom {
     std::function<EventResponse()> action;
 };
@@ -95,75 +85,7 @@ using Event = std::variant<esc::MousePress,
                            esc::UnknownInput,
                            esc::TerminalReply,
                            esc::Resize,
-                           event::Timer,
                            event::Custom,
                            event::Interrupt>;
-
-// Event Handler Concepts
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-/**
- * Checks if a type can handle a MousePress event.
- */
-template <typename T>
-concept HandlesMousePress = requires(T t, MousePress m) {
-    { t.handle_mouse_press(m) } -> std::same_as<EventResponse>;
-};
-
-/**
- * Checks if a type can handle a MouseRelease event.
- */
-template <typename T>
-concept HandlesMouseRelease = requires(T t, MouseRelease m) {
-    { t.handle_mouse_release(m) } -> std::same_as<EventResponse>;
-};
-
-/**
- * Checks if a type can handle a MouseWheel event.
- */
-template <typename T>
-concept HandlesMouseWheel = requires(T t, MouseWheel m) {
-    { t.handle_mouse_wheel(m) } -> std::same_as<EventResponse>;
-};
-
-/**
- * Checks if a type can handle a MouseMove event.
- */
-template <typename T>
-concept HandlesMouseMove = requires(T t, MouseMove m) {
-    { t.handle_mouse_move(m) } -> std::same_as<EventResponse>;
-};
-
-/**
- * Checks if a type can handle a key press or repeat.
- */
-template <typename T>
-concept HandlesKeyPress = requires(T t, KeyEvent k) {
-    { t.handle_key_press(k) } -> std::same_as<EventResponse>;
-};
-
-/**
- * Checks if a type can handle a key release.
- */
-template <typename T>
-concept HandlesKeyRelease = requires(T t, KeyEvent k) {
-    { t.handle_key_release(k) } -> std::same_as<EventResponse>;
-};
-
-/**
- * Checks if a type can handle a Resize event.
- */
-template <typename T>
-concept HandlesResize = requires(T t, esc::Area a) {
-    { t.handle_resize(a) } -> std::same_as<EventResponse>;
-};
-
-/**
- * Checks if a type can handle a Timer event.
- */
-template <typename T>
-concept HandlesTimer = requires(T t, int id) {
-    { t.handle_timer(id) } -> std::same_as<EventResponse>;
-};
 
 }  // namespace ox

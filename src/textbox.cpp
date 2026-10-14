@@ -26,7 +26,7 @@ void TextBox::set_text(std::string_view text)
     request_repaint();
 }
 void TextBox::update_layout() const
-{ layout_.update(editor.text(), size.width, wrap, layout_.policy()); }
+{ layout_.update(editor.text(), size().width, wrap, layout_.policy()); }
 
 auto TextBox::get_scroll_length() const -> int
 {
@@ -46,11 +46,11 @@ void TextBox::notify_scroll()
 void TextBox::keep_caret_visible()
 {
     scroll_offset_ = std::clamp(scroll_offset_, 0, (int)layout_.lines().size() - 1);
-    if (size.height <= 0) { return; }
+    if (size().height <= 0) { return; }
     auto const caret = layout_.position(editor.caret()).y;
     if (caret < scroll_offset_) { scroll_offset_ = caret; }
-    else if (caret - scroll_offset_ >= size.height) {
-        scroll_offset_ = caret - size.height + 1;
+    else if (caret - scroll_offset_ >= size().height) {
+        scroll_offset_ = caret - size().height + 1;
     }
 }
 
@@ -61,9 +61,10 @@ auto TextBox::set_scroll_offset(int position) -> bool
     auto const current = layout_.position(editor.caret());
     scroll_offset_ = std::clamp(position, 0, (int)layout_.lines().size() - 1);
     auto changed = old != scroll_offset_;
-    if (size.height > 0) {
-        auto const last = (int)std::min(std::int64_t{scroll_offset_} + size.height - 1,
-                                        (std::int64_t)layout_.lines().size() - 1);
+    if (size().height > 0) {
+        auto const last =
+            (int)std::min(std::int64_t{scroll_offset_} + size().height - 1,
+                          (std::int64_t)layout_.lines().size() - 1);
         auto const row = std::clamp(current.y, scroll_offset_, last);
         if (row != current.y) {
             changed |= editor.set_caret(layout_.offset({current.x, row}));
@@ -74,10 +75,11 @@ auto TextBox::set_scroll_offset(int position) -> bool
     return changed;
 }
 
-auto TextBox::key_press(KeyEvent key) -> EventResponse
+auto TextBox::handle(KeyEvent const& key) -> EventResponse
 {
+    if (key.action == KeyAction::Release) { return {}; }
     update_layout();
-    auto const response = editor.key_press(key, layout_);
+    auto const response = edit_key(editor, key, layout_);
     if (response.repaint) {
         update_layout();
         keep_caret_visible();
@@ -86,7 +88,7 @@ auto TextBox::key_press(KeyEvent key) -> EventResponse
     return response;
 }
 
-auto TextBox::paste(esc::PasteChunk const& chunk) -> EventResponse
+auto TextBox::handle(esc::PasteChunk const& chunk) -> EventResponse
 {
     auto const changed = editor.paste(chunk);
     if (changed) {
@@ -97,15 +99,15 @@ auto TextBox::paste(esc::PasteChunk const& chunk) -> EventResponse
     return {.handled = true, .repaint = changed};
 }
 
-auto TextBox::mouse_press(MousePress mouse) -> EventResponse
+auto TextBox::handle(MousePress const& mouse) -> EventResponse
 {
     if (mouse.button != MouseButton::Left) { return {}; }
     update_layout();
     auto const row =
         (int)std::clamp(std::int64_t{scroll_offset_} + mouse.at.y, std::int64_t{0},
                         (std::int64_t)layout_.lines().size() - 1);
-    auto const offset =
-        find_align_offset(align, size.width, layout_.lines()[(std::size_t)row].columns);
+    auto const offset = find_align_offset(align, size().width,
+                                          layout_.lines()[(std::size_t)row].columns);
     auto const changed = editor.set_caret(
         layout_.offset(
             {(int)std::clamp(std::int64_t{mouse.at.x} - offset, std::int64_t{0},
@@ -115,7 +117,7 @@ auto TextBox::mouse_press(MousePress mouse) -> EventResponse
     return {.handled = true, .repaint = changed};
 }
 
-auto TextBox::mouse_wheel(MouseWheel mouse) -> EventResponse
+auto TextBox::handle(MouseWheel const& mouse) -> EventResponse
 {
     if (mouse.dy == 0) { return {}; }
     auto const position =
@@ -125,7 +127,7 @@ auto TextBox::mouse_wheel(MouseWheel mouse) -> EventResponse
     return {.handled = true, .repaint = changed};
 }
 
-void TextBox::paint(Canvas canvas)
+auto TextBox::paint(Canvas canvas) -> Cursor
 {
     layout_.update(editor.text(), canvas.size().width, wrap, canvas.width_policy());
     keep_caret_visible();
@@ -143,8 +145,8 @@ void TextBox::paint(Canvas canvas)
     point.x += find_align_offset(align, canvas.size().width,
                                  layout_.lines()[(std::size_t)point.y].columns);
     point.y -= scroll_offset_;
-    cursor = canvas.contains(point) ? Cursor{point} : Cursor{};
     notify_scroll();
+    return canvas.contains(point) ? Cursor{point} : Cursor{};
 }
 
 void link(TextBox& tb, ScrollBar& sb)

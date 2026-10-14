@@ -14,6 +14,10 @@
 
 namespace ox {
 class Application;
+template <typename T>
+class LifetimeView;
+template <typename T>
+auto track(T&) -> LifetimeView<T>;
 
 /**
  * Policy for how a widget should handle focus.
@@ -33,14 +37,13 @@ class Widget {
    public:
     FocusPolicy focus_policy;
     SizePolicy size_policy;
-    Cursor cursor = std::nullopt;
-    bool active = true;
+    bool visible = true;
     bool enabled = true;
-    bool focused = false;
 
-    Point at = {.x = 0, .y = 0};
-    Area size = {.width = 0, .height = 0};
-    std::shared_ptr<Widget*> lifetime = std::make_shared<Widget*>(this);
+    [[nodiscard]] auto bounds() const -> Rect { return bounds_; }
+    [[nodiscard]] auto at() const -> Point { return bounds_.at; }
+    [[nodiscard]] auto size() const -> Area { return bounds_.size; }
+    [[nodiscard]] auto is_focused() const -> bool { return focused_; }
 
    public:
     Widget(FocusPolicy fp = FocusPolicy::None, SizePolicy sp = SizePolicy::flex());
@@ -54,13 +57,13 @@ class Widget {
     virtual ~Widget();
 
    public:
-    virtual auto mouse_press(MousePress) -> EventResponse { return {}; }
+    virtual auto handle(MousePress const&) -> EventResponse { return {}; }
 
-    virtual auto mouse_release(MouseRelease) -> EventResponse { return {}; }
+    virtual auto handle(MouseRelease const&) -> EventResponse { return {}; }
 
-    virtual auto mouse_wheel(MouseWheel) -> EventResponse { return {}; }
+    virtual auto handle(MouseWheel const&) -> EventResponse { return {}; }
 
-    virtual auto mouse_move(MouseMove) -> EventResponse { return {}; }
+    virtual auto handle(MouseMove const&) -> EventResponse { return {}; }
 
     virtual auto mouse_enter() -> EventResponse { return {}; }
 
@@ -70,21 +73,11 @@ class Widget {
 
     virtual auto focus_out() -> EventResponse { return {}; }
 
-    virtual auto key_press(KeyEvent) -> EventResponse { return {}; }
+    virtual auto handle(KeyEvent const&) -> EventResponse { return {}; }
 
-    virtual auto key_release(KeyEvent) -> EventResponse { return {}; }
+    virtual auto handle(esc::PasteChunk const&) -> EventResponse { return {}; }
 
-    virtual auto paste(esc::PasteChunk const&) -> EventResponse { return {}; }
-
-    /**
-     * this->size is updated by the time this is invoked. The previous size is passed in
-     * as a parameter.
-     */
-    virtual void resize(Area /* old_size */) {}
-
-    virtual auto timer() -> EventResponse { return {}; }
-
-    virtual void paint(Canvas) {}
+    virtual auto paint(Canvas) -> Cursor { return {}; }
 
     virtual auto get_children() -> zzz::Generator<Widget&>
     { return zzz::Generator<Widget&>{nullptr}; }
@@ -93,12 +86,22 @@ class Widget {
     { return zzz::Generator<Widget const&>{nullptr}; }
 
    protected:
+    /** Geometry is already updated; use arrange() on children. */
+    virtual void on_arrange(Rect /* previous */) {}
+
     /** Schedule painting after a direct widget mutation, if attached. */
     void request_repaint();
 
    private:
     friend class Timer;
     friend class Application;
+    friend class Focus;
+    friend void arrange(Widget&, Rect);
+    template <typename T>
+    friend auto track(T&) -> LifetimeView<T>;
+    Rect bounds_;
+    bool focused_ = false;
+    std::shared_ptr<Widget*> lifetime_ = std::make_shared<Widget*>(this);
     Application* application_ = nullptr;
     std::vector<std::weak_ptr<Timer::State>> timers_;
 };
@@ -112,14 +115,18 @@ template <typename ConcreteType>
 class LifetimeView {
    public:
     LifetimeView() = default;
-    LifetimeView(std::shared_ptr<Widget*> wp) : widget_ptr_{wp} {}
 
    public:
-    [[nodiscard]] auto valid() const -> bool
+    [[nodiscard]] auto try_get() const noexcept -> ConcreteType*
     {
         auto pointer = widget_ptr_.lock();
-        return pointer && *pointer;
+        if (!pointer || !*pointer) { return nullptr; }
+        if constexpr (std::is_same_v<ConcreteType, Widget>) { return *pointer; }
+        else {
+            return dynamic_cast<ConcreteType*>(*pointer);
+        }
     }
+    [[nodiscard]] auto valid() const noexcept -> bool { return try_get() != nullptr; }
     template <typename Other>
     auto operator==(LifetimeView<Other> const& other) const -> bool
     {
@@ -129,16 +136,19 @@ class LifetimeView {
 
     [[nodiscard]] auto get() const -> ConcreteType&
     {
-        auto pointer = widget_ptr_.lock();
-        if (!pointer || !*pointer) {
-            throw std::logic_error{"Expired widget lifetime"};
-        }
-        return static_cast<ConcreteType&>(**pointer);
+        auto* pointer = try_get();
+        if (!pointer) { throw std::logic_error{"Expired widget lifetime"}; }
+        return *pointer;
     }
 
    private:
     template <typename>
     friend class LifetimeView;
+    template <typename T>
+    friend auto track(T&) -> LifetimeView<T>;
+    explicit LifetimeView(std::shared_ptr<Widget*> const& pointer)
+        : widget_ptr_{pointer}
+    {}
     std::weak_ptr<Widget*> widget_ptr_;
 };
 
@@ -175,8 +185,8 @@ auto operator|(WidgetType&& w, FocusPolicy fp) -> WidgetType
 
 namespace filter {
 
-inline constexpr auto is_active =
-    std::views::filter([](Widget const& w) { return w.active; });
+inline constexpr auto is_visible =
+    std::views::filter([](Widget const& w) { return w.visible; });
 
 }  // namespace filter
 
@@ -185,9 +195,34 @@ inline constexpr auto is_active =
  *
  * @details Provides template type deducation convinience.
  */
-template <WidgetDerived WidgetType>
+template <typename WidgetType>
 [[nodiscard]] auto track(WidgetType& w) -> LifetimeView<WidgetType>
-{ return {w.lifetime}; }
+{
+    static_assert(WidgetDerived<WidgetType>);
+    return LifetimeView<WidgetType>{w.lifetime_};
+}
+
+/** Assign parent-local bounds and notify layout, even when bounds are unchanged.
+ * Validation precedes mutation; a throwing layout hook leaves the new bounds. */
+void arrange(Widget& widget, Rect bounds);
+
+template <typename W, typename Callback>
+    requires std::derived_from<W, Widget> &&
+             std::is_invocable_r_v<EventResponse, Callback&, W&>
+Timer::Timer(W& widget,
+             std::chrono::milliseconds interval,
+             Callback action,
+             bool launch)
+    : Timer{interval,
+            widget_action(widget,
+                          [action = checked_callback(std::move(action))](
+                              Widget& base) mutable -> EventResponse {
+                              auto* target = dynamic_cast<W*>(&base);
+                              return target ? std::invoke(action, *target)
+                                            : EventResponse{};
+                          }),
+            launch}
+{ attach(widget); }
 
 /**
  * Tracks each of the passed in Widget's lifetimes, if they are all valid when this slot
@@ -200,7 +235,7 @@ template <typename SlotFn, WidgetDerived... TrackedWidgets>
     return [fn = std::forward<SlotFn>(fn),
             ... lifetimes = track(widgets)](auto&&... args) mutable {
         if ((lifetimes.valid() && ...)) {
-            fn(std::forward<decltype(args)>(args)..., lifetimes.get()...);
+            std::invoke(fn, std::forward<decltype(args)>(args)..., lifetimes.get()...);
         }
     };
 }

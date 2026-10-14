@@ -59,7 +59,7 @@ layout columns and retains the desired column through shorter rows. Horizontal m
 explicit placement, and edits reset that preference. Clicking inside a wide glyph or
 tab chooses its leading boundary; clicking past a row chooses its end.
 
-`key_press(key, layout, validator)` returns `EventResponse`. It supports grapheme
+`edit_key(edit, key, layout, validator)` returns `EventResponse`. It supports grapheme
 arrows, Ctrl+Left/Right and Ctrl+Backspace/Delete, Shift selection, Home/End on the
 display row, Ctrl+Home/End on the document, vertical arrows, Ctrl+A, Ctrl+Z,
 Ctrl+Y/Ctrl+Shift+Z, printable key text, and multiline Enter. Releases and unused keys

@@ -9,7 +9,7 @@
 namespace ox {
 
 /** A depth-first snapshot. Parent and end delimit ancestry and the subtree.
- * Bounds are global; visibility includes every ancestor's active state and clip.
+ * Bounds are global; visibility includes every ancestor's visible state and clip.
  * Input eligibility also includes every ancestor's enabled state.
  */
 struct WidgetNode {

@@ -27,20 +27,23 @@ class Application {
     void quit(int code = 0);
 
     auto loop() -> EventLoop& { return loop_; }
-    auto focus() -> Focus& { return focus_; }
+    auto focus() const -> Focus const& { return focus_; }
+    void set_focus(Widget& widget);
+    void clear_focus();
+    /** Immediate delivery and effect application; post() defers delivery. */
+    auto dispatch(Event const& event) -> EventResponse;
 
-    /** Whether a widget belongs to the active, enabled input tree. */
+    /** Whether a widget belongs to the visible, enabled input tree. */
     auto is_interactive(Widget const& widget) const -> bool;
 
-    auto handle_mouse_press(MousePress m) -> EventResponse;
-    auto handle_mouse_release(MouseRelease m) -> EventResponse;
-    auto handle_mouse_wheel(MouseWheel m) -> EventResponse;
-    auto handle_mouse_move(MouseMove m) -> EventResponse;
-    auto handle_key_press(KeyEvent k) -> EventResponse;
-    auto handle_key_release(KeyEvent k) -> EventResponse;
-    auto handle_paste(esc::PasteChunk const& chunk) -> EventResponse;
-    auto handle_resize(Area new_size) -> EventResponse;
-    auto handle_paint(Canvas canvas) -> Cursor;
+    auto handle(MousePress const& m) -> EventResponse;
+    auto handle(MouseRelease const& m) -> EventResponse;
+    auto handle(MouseWheel const& m) -> EventResponse;
+    auto handle(MouseMove const& m) -> EventResponse;
+    auto handle(KeyEvent const& k) -> EventResponse;
+    auto handle(esc::PasteChunk const& chunk) -> EventResponse;
+    auto handle(esc::Resize const& event) -> EventResponse;
+    auto paint(Canvas canvas) -> Cursor;
 
    private:
     Widget& head_;
@@ -58,13 +61,10 @@ class Application {
     auto synchronize() -> EventResponse;
     auto update_hover() -> std::pair<EventResponse, bool>;
     auto refresh_tree() -> bool;
-    void report(EventResponse response);
     template <typename Input>
-    auto route_mouse(Input event,
-                     EventResponse (Widget::*callback)(Input),
-                     bool select = false) -> EventResponse;
-    template <typename Callback>
-    auto route_focused(Callback callback) -> EventResponse;
+    auto route_mouse(Input event, bool select = false) -> EventResponse;
+    template <typename Input>
+    auto route_focused(Input const& event) -> EventResponse;
 
     void attach_widgets();
 };

@@ -15,6 +15,8 @@ namespace ox {
 
 class LineEdit : public Widget {
    public:
+    using Widget::handle;
+
     struct Options {
         std::string text = "";
         Style text_style = {};
@@ -48,13 +50,13 @@ class LineEdit : public Widget {
     LineEdit(Options x = init);
 
    public:
-    auto key_press(KeyEvent k) -> EventResponse override;
+    auto handle(KeyEvent const& k) -> EventResponse override;
 
-    auto paste(esc::PasteChunk const& chunk) -> EventResponse override;
+    auto handle(esc::PasteChunk const& chunk) -> EventResponse override;
 
-    auto mouse_press(MousePress m) -> EventResponse override;
+    auto handle(MousePress const& m) -> EventResponse override;
 
-    void paint(Canvas c) override;
+    auto paint(Canvas c) -> Cursor override;
 
    private:
     TextLayout layout_;

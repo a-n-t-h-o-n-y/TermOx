@@ -48,7 +48,7 @@ ScrollBar::ScrollBar(Options x)
       scroll_settle_time{x.scroll_settle_time}
 {}
 
-void ScrollBar::paint(Canvas c)
+auto ScrollBar::paint(Canvas c) -> Cursor
 {
     auto const bar_len =
         bar_length(c.size().height, scrollable_length, item_visual_length);
@@ -73,10 +73,12 @@ void ScrollBar::paint(Canvas c)
         std::max(bar_len - 1, 0), style.foreground);
 
     at.y += bar_len;
-    if (at.y < this->size.height) { put(c, at, edge | style | Trait::Inverse); }
+    if (at.y < size().height) { put(c, at, edge | style | Trait::Inverse); }
+
+    return {};
 }
 
-auto ScrollBar::mouse_press(MousePress m) -> EventResponse
+auto ScrollBar::handle(MousePress const& m) -> EventResponse
 {
     if (m.button != MouseButton::Left) { return {}; }
     {
@@ -84,14 +86,14 @@ auto ScrollBar::mouse_press(MousePress m) -> EventResponse
         position_at_click_ = position;
         target_position_ =
             (int)((float)(std::max(scrollable_length - 1, 0)) *
-                  ((float)m.at.y / (float)std::max(this->size.height - 1, 1)));
+                  ((float)m.at.y / (float)std::max(size().height - 1, 1)));
         timer_.start();
     }
 
     return {.handled = true};
 }
 
-auto ScrollBar::mouse_wheel(MouseWheel m) -> EventResponse
+auto ScrollBar::handle(MouseWheel const& m) -> EventResponse
 {
     if (m.dy == 0) { return {}; }
     constexpr auto percent_scroll = 0.15f;
@@ -106,7 +108,7 @@ auto ScrollBar::mouse_wheel(MouseWheel m) -> EventResponse
     return {.handled = true};
 }
 
-auto ScrollBar::timer() -> EventResponse
+auto ScrollBar::tick() -> EventResponse
 {
     if (position == target_position_) {
         timer_.stop();

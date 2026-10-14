@@ -15,7 +15,9 @@ return app.run({.mouse_mode = MouseMode::Move});
 `step(now)` dispatches posted events and due timers without terminal I/O. `paint()`
 paints a pending frame; `loop().screen` contains its cells. `post(event)` accepts events
 from background threads. `request_repaint()` and `quit(code)` operate on the application
-thread. `focus()` returns the application's focus manager.
+thread. `dispatch(event)` delivers immediately and applies effects; raw `handle`
+methods return effects. `set_focus(widget)` and `clear_focus()` are commands;
+`focus()` provides read-only access to the manager.
 
 See [the event loop guide](event-loop.md) for the response contract and scheduling.
 
@@ -27,24 +29,28 @@ A movable timer handle using the event loop's steady-clock scheduler. Timers cre
 threads. Retain the handle to retain its schedule.
 
 ```cpp
-Timer(Widget& widget, std::chrono::milliseconds interval, bool launch = false);
 Timer(std::chrono::milliseconds interval,
       std::function<EventResponse()> callback,
       bool launch = true);
+// For any derived widget W and callback returning EventResponse:
+Timer(W& widget, std::chrono::milliseconds interval, Callback callback,
+      bool launch = false);
 ```
 
-Widget timers are adopted by the owning application. Register a callback timer with
-`loop.watch(timer)`. Intervals must be positive. `start(now)` resets the deadline,
-`stop()` cancels it, and `is_running()` reports whether a deadline exists. Delayed
-execution produces one tick, preserving cadence and skipping missed ticks.
+Widget callbacks receive `W&` at execution time, follow moves, and are adopted by the
+application. Register generic callback timers with `loop.watch(timer)`. Intervals must
+be positive and callbacks nonempty. `start(now)` resets the deadline; `stop()` cancels
+it. `is_running()` reports whether a deadline exists. Delays deliver one tick and
+skip missed ticks. Multiple widget timers have independent callbacks.
 
 ## 🧩 ox::Focus
 
 [`#include <ox/focus.hpp>`](../include/ox/focus.hpp)
 
-A focus manager owned by each application. `app.focus().set(widget)` sends focus-out
-and focus-in callbacks, `get()` returns a lifetime view, and `clear()` removes focus.
-`Widget::focused` exposes the current focus state to painting code.
+`Focus(root)` manages one tree and returns transition effects without applying them.
+`app.set_focus(widget)` and `app.clear_focus()` apply those effects at the application
+boundary. `app.focus().get()` returns a lifetime view; `Widget::is_focused()` reads
+focus state. See [routing and focus](routing-and-focus.md).
 
 ## 📦 ox::shape::HLine
 
@@ -155,7 +161,7 @@ struct Box {
 A function overload set to put Glyphs on a Canvas object.
 
 ```cpp
-void paint(Canvas c) override {
+auto paint(Canvas c) -> Cursor override {
     put(c, {.x = 5, .y = 10}, 'X');
     put(c, {.x = 6, .y = 10}, 'X' | fg(colors::blue));
     put(c, {.x = 7, .y = 10}, "Hello!");
@@ -165,6 +171,8 @@ void paint(Canvas c) override {
     put(c, {.x = 0, .y = 1}, shape::Box::dashed(), {.width = 10, .height = 4});
 
     put(c, shape::Box::bold());  // Outlines the Canvas.
+
+    return {};
 }
 ```
 
@@ -222,7 +230,7 @@ A function overload set to fill a 2D space on a Canvas. It fills the entire Canv
 object given to it.
 
 ```cpp
-void paint(Canvas c) override {
+auto paint(Canvas c) -> Cursor override {
     fill(c, 'X');
     fill(c, fg(RGB{0x33A421}));
     fill(c, Trait::Bold | Trait::Standout);
@@ -233,6 +241,8 @@ void paint(Canvas c) override {
         .size = {.width = 5, .height = 7},
     };
     fill(sub_region, 'X' | bg(colors::red) | fg(colors::black));
+
+    return {};
 }
 ```
 
@@ -264,9 +274,11 @@ void fill(Canvas c, Traits ts);
 Resets all Glyphs in a Canvas to the default empty Glyph.
 
 ```cpp
-void paint(Canvas c) override {
+auto paint(Canvas c) -> Cursor override {
     fill(c, fg(RGB{0x33A421}));
     clear(c);
+
+    return {};
 }
 ```
 
@@ -289,265 +301,56 @@ void clear(Canvas c);
 
 [`#include <ox/widget.hpp>`](../include/ox/widget.hpp)
 
-`class Widget;`
-
-The user input and graphical display unit. Each Widget has a particular piece of the terminal display where is recieves user input events and paints to the screen.
-
-User input event handlers are virtual functions that are overridden to make state
-changes; the paint event handler allows output of that state onto the screen and is always automatically called after an event is sent to the Widget.
-
-```cpp
-class MyWidget : public Widget {
-   public:
-    MyWidget() : Widget{FocusPolicy::None, SizePolicy::flex()} {}
-
-    void paint(Canvas c) override { 
-        for (auto const at : points_) {
-            put(c, at, U'•' | fg(colors::red));
-        }
-    }
-
-    auto mouse_press(MousePress m) -> EventResponse override
-    {
-        if (m.button != MouseButton::Left) { return {}; }
-        auto const inserted = points_.emplace(m.at).second;
-        return {.handled = true, .repaint = inserted};
-    }
-
-   private:
-    std::set<Point> points_;
-};
-```
-
-<details>
-<summary><strong>Details</strong></summary>
-
-### 🏗️ Constructors
-
-```cpp
-Widget(FocusPolicy fp, SizePolicy sp);
-```
-
-There are no defaults for the constructor parameters, they must be explicitly given by
-each derived class.
-
-```cpp
-Widget(Widget const&) = delete;
-Widget(Widget&& other);
-
-auto operator=(Widget const&) -> Widget& = delete;
-auto operator=(Widget&& other) -> Widget&;
-```
-
-Move only type. The move constructor/assignment operator will move the lifetime of this
-Widget into the source of the move.
-
----
-
-### 🧹 Destructor
-
-```cpp
-virtual ~Widget() = default;
-```
-
-Does nothing special, the `Widget::lifetime` object will be destroyed (if it hasn't
-already been moved from), and anything that depends on that lifetime will react
-appropriately.
-
----
-
-### Public Objects
+A move-only base for input and drawing. Configuration is public; geometry, focus,
+and lifetime ownership are controlled by the core. See [the widget API guide](widget-api.md)
+for a complete example and migration table.
 
 ```cpp
 FocusPolicy focus_policy;
 SizePolicy size_policy;
-Cursor cursor = std::nullopt;
-bool active = true;
+bool visible = true;
 bool enabled = true;
 
-Point at = {.x = 0, .y = 0};
-Area size = {.width = 0, .height = 0};
-std::shared_ptr<Widget*> lifetime = std::make_shared<Widget*>(this);
-```
+Rect bounds() const;
+Point at() const;
+Area size() const;
+bool is_focused() const;
 
-Any of these can be updated by event handlers, and any changes will be immediately
-visible on screen. The author recommends not messing with `at` and `size` unless you are
-the parent Widget and are implementing a layout type. And obviously `lifetime` is a
-'look, don't touch' object, unless you are feeling particularly adventurous.
+virtual auto handle(KeyEvent const&) -> EventResponse;
+virtual auto handle(MousePress const&) -> EventResponse;
+virtual auto handle(MouseRelease const&) -> EventResponse;
+virtual auto handle(MouseMove const&) -> EventResponse;
+virtual auto handle(MouseWheel const&) -> EventResponse;
+virtual auto handle(esc::PasteChunk const&) -> EventResponse;
+virtual auto paint(Canvas) -> Cursor;
 
----
-
-### `Widget::mouse_press`
-
-```cpp
-virtual auto mouse_press(MousePress) -> EventResponse;
-```
-
-Event handler for receiving mouse press events that occur within the bounds of this
-Widget. If the Widget is a layout, it will not recieve mouse press events intended for
-its children.
-
-Events from `Button::ScrollUp` and `Button::ScrollDown` are not received here, see
-`Widget::mouse_wheel`.
-
----
-
-### `Widget::mouse_release`
-
-```cpp
-virtual auto mouse_release(MouseRelease) -> EventResponse;
-```
-
-Event handler for receiving mouse release events that occur within the bounds of this
-Widget. If the Widget is a layout, it will not recieve mouse press events intended for
-its children.
-
----
-
-### `Widget::mouse_wheel`
-
-```cpp
-virtual auto mouse_wheel(MouseWheel) -> EventResponse;
-```
-
-Event handler for receiving events generated by either `Button::ScrollUp` or
-`Button::ScrollDown`. Each 'click' or increment of the mouse wheel generates a single
-event.
-
----
-
-### `Widget::mouse_move`
-
-```cpp
-virtual auto mouse_move(MouseMove) -> EventResponse;
-```
-
-Event handler for events generated by movement of the mouse over the Widget. This has to
-be enabled in the `Terminal` constructor with the correct `MouseMode` option, either
-`MouseMode::Move` or `MouseMode::Drag`.
-
----
-
-### `Widget::mouse_enter`
-
-```cpp
+// Hover and focus notifications return EventResponse:
 virtual auto mouse_enter() -> EventResponse;
-```
-
-Event handler for events generated by movement of the mouse into the Widget from another
-Widget. This has to be enabled in the `Terminal` constructor with the correct
-`MouseMode` option, either `MouseMode::Move` or `MouseMode::Drag`.
-
----
-
-### `Widget::mouse_leave`
-
-```cpp
 virtual auto mouse_leave() -> EventResponse;
-```
-
-Event handler for events generated by movement of the mouse out of the Widget and into
-another Widget. This has to be enabled in the `Terminal` constructor with the correct
-`MouseMode` option, either `MouseMode::Move` or `MouseMode::Drag`.
-
----
-
-### `Widget::focus_in`
-
-```cpp
 virtual auto focus_in() -> EventResponse;
-```
-
-Called when this Widget recieves keyboard focus. The Widget's `focus_policy` must not be
-`FocusPolicy::None` to receive focus.
-
----
-
-### `Widget::focus_out`
-
-```cpp
 virtual auto focus_out() -> EventResponse;
-```
 
-Called when this Widget gives up keyboard focus. The Widget's `focus_policy` must not be
-`FocusPolicy::None` to receive focus.
-
----
-
-### `Widget::key_press`
-
-```cpp
-virtual auto key_press(KeyEvent) -> EventResponse;
-```
-
-Called on keyboard key presses and repeats when this Widget has focus. See Escape for
-what types of keypresses are generated.
-
----
-
-### `Widget::key_release`
-
-```cpp
-virtual auto key_release(KeyEvent) -> EventResponse;
-```
-
-Called on keyboard key release when this Widget has focus. Release reporting depends on
-Terminal in order to receive these events, its support is experimental and as the author
-I'd recommend against using it for serious projects.
-
----
-
-### `Widget::resize`
-
-```cpp
-virtual void resize(Area old_size);
-```
-
-Called each time the Widget receives a new size. Note that the parameter to this
-function is the previous size of the Widget, the Widget will already have its `size`
-member updated to the new size.
-
----
-
-### `Widget::timer`
-
-```cpp
-virtual auto timer() -> EventResponse;
-```
-
-Called after each passing of the time interval of an associated `Timer` object. Each
-Timer object that is currently running and was constructed with the current Widget will
-cause this to be invoked.
-
----
-
-### `Widget::paint`
-
-```cpp
-virtual void paint(Canvas);
-```
-
-Called whenever the Widget needs a repaint, in reality it is called once for all
-currently enabled Widgets at the end of each event loop iteration. This function never
-needs to be manually called, the Application instance will handle this.
-
-The Canvas passed to this function is already sized to the Widget.
-
----
-
-### `Widget::get_children`
-
-```cpp
 virtual auto get_children() -> zzz::Generator<Widget&>;
 virtual auto get_children() const -> zzz::Generator<Widget const&>;
+
+// Protected layout hook; bounds have already changed:
+virtual void on_arrange(Rect previous);
 ```
 
-Return a coroutine generator to each child of this Widget. This only needs to be
-implemented if you are creating a new layout type that owns child Widgets.
+Default input and lifecycle handlers return an empty response; default paint returns
+no cursor. Press, repeat, and release actions use the same key handler. Use
+`using Widget::handle;` when a derived class needs direct access to inherited overloads.
 
----
+`arrange(widget, bounds)` validates dimensions, updates parent-local geometry,
+requests painting if attached, and calls the hook even when bounds are unchanged.
+Parents arrange children with this function. Paint returns a local cursor; only the
+focused widget's returned cursor is presented. No persistent cursor field is stored.
 
-</details>
+Public configuration and widget-specific state can be edited directly. Arrange the
+parent again after changing layout policies. Request painting after changes that are
+not detected by tree synchronization. Geometry and focus cannot be written directly.
+Move operations transfer lifetime tracking; assignment invalidates the overwritten
+identity. `track(widget)` provides safe lookup without exposing lifetime storage.
 
 ## 📦 ox::Connection
 
@@ -710,64 +513,20 @@ struct SizePolicy {
 
 [`#include <ox/widget.hpp>`](../include/ox/widget.hpp)
 
-```cpp
-template <typename ConcreteType>
-class LifetimeView;
-```
-
-Provides the ability to track a Widget's lifetime. This should be used with the
-corresponding `track(...)` function to construct a LifetimeView. LifetimeView is useful
-for Signals/Slots to check if any captured Widgets are no longer around.
+`track(widget)` creates a weak view that follows moves and expires on destruction or
+overwrite. Storage is private. `try_get()` returns a typed pointer or null without
+throwing; `get()` returns a reference or throws `std::logic_error`; `valid()` tests
+availability. Typed views reject a target whose derived type was lost through slicing.
 
 ```cpp
-auto my_widg = Widget{...};
-auto lv = track(my_widg);
-auto widg2 = std::move(my_widg); // lv will now point here.
-if (lv.valid()) { my_widg.get().do_thing(); }
+auto view = track(widget);
+if (auto* target = view.try_get()) { target->enabled = false; }
 ```
 
-<details>
-<summary><strong>Details</strong></summary>
-
-It does this by accessing the `lifetime` shared pointer within the Widget object and
-storing a weak pointer to it. The Widget class also updates the shared pointer on move
-operations. It keeps track of the concrete type of the Widget, so it is able to return a
-reference type that is actually useful.
-
-### 🏗️ Constructors
-
-```cpp
-LifetimeView(std::shared_ptr<Widget*> wp);
-```
-
-Use `track(my_widg);` instead of the constructor.
-
-The type is Copyable and Movable.
-
----
-
-### `LifetimeView::valid`
-
-```cpp
-auto valid() const -> bool;
-```
-
-Returns `true` if the tracked Widget is alive.
-
----
-
-### `LifetimeView::get`
-
-```cpp
-auto get() const -> ConcreteType&;
-```
-
-Returns a reference to the tracked Widget, cast to the ConcreteType provided at
-construction. Undefined behavior if the tracked Widget is not valid.
-
----
-
-</details>
+`tracked(callback, widgets...)` invokes a callback only while every target is valid,
+passing tracked widgets after the invocation's ordinary arguments. `Connection`
+combines this with signal connection. Views and widget mutation belong to the
+application thread.
 
 ## 🔢 ox::Align
 
@@ -818,14 +577,15 @@ auto mouse_press(MousePress m) -> EventResponse override
 
 ## 🧩 ox::KeyEvent
 
-TermOx uses Escape's `KeyEvent` directly for `key_press` and `key_release`.
+TermOx uses Escape's `KeyEvent` directly for `handle(KeyEvent const&)`.
 `Key` is a variant of `char32_t`, `KeyCode`, and `esc::KittyKey`. An event has
 an optional key identity, `Modifiers`, a `KeyAction`, and associated UTF-32 text.
 An IME event can carry text without a key identity.
 
 ```cpp
-auto key_press(KeyEvent event) -> EventResponse override
+auto handle(KeyEvent const& event) -> EventResponse override
 {
+    if (event.action == KeyAction::Release) { return {}; }
     if (event.matches(KeyCode::Enter, {}, event.action)) {
         // Accept the current selection.
         return {.handled = true, .repaint = true};
@@ -835,9 +595,9 @@ auto key_press(KeyEvent event) -> EventResponse override
 }
 ```
 
-Press and repeat actions go to `key_press`; release actions go to `key_release`.
+Press, repeat, and release actions reach the same overload; inspect `event.action`.
 `input_text(event)` returns printable text for editing, excluding releases and
-control shortcuts. `paste(esc::PasteChunk const&)` receives bracketed paste chunks.
+control shortcuts. `handle(esc::PasteChunk const&)` receives bracketed paste chunks.
 Text widgets buffer paste bytes until the final chunk so a UTF-8 scalar split
 between chunks is decoded correctly. Aborted pastes are discarded.
 
@@ -2360,7 +2120,6 @@ using Event = std::variant<esc::MousePress,
                            esc::UnknownInput,
                            esc::TerminalReply,
                            esc::Resize,
-                           event::Timer,
                            event::Custom,
                            event::Interrupt>;
 ```

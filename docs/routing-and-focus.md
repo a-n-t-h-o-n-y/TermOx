@@ -14,7 +14,7 @@ visible bounds, and input eligibility. The root starts at `{0, 0}`; child positi
 are relative to their parents. Coordinates use checked translation and the same
 rectangle intersection rules as `Canvas`.
 
-An inactive widget (`active = false`) hides its entire subtree. A disabled widget
+An invisible widget (`visible = false`) hides its entire subtree. A disabled widget
 (`enabled = false`) remains visible but excludes its entire subtree from input,
 focus, and application-owned widget timer callbacks. Painting retains the existing
 child-before-parent order, with siblings painted in their container order.
@@ -22,7 +22,7 @@ child-before-parent order, with siblings painted in their container order.
 `hit_test(tree, point)` returns the deepest hit index, or no value.
 `hit_path(tree, point)` returns root-to-target indices. Hits must lie inside every
 ancestor's clip. Later siblings take precedence in overlapping areas. Disabled or
-inactive subtrees are excluded. `focus_order(tree)` returns visible, active, enabled
+invisible subtrees are excluded. `focus_order(tree)` returns visible, enabled
 Tab/Strong candidates in depth-first order. Zero-area and fully clipped widgets are
 excluded from focus, although eligible timers can still run without a visible area.
 The same snapshot representation supports attachment, hit testing, focus navigation,
@@ -33,9 +33,9 @@ and painting.
 Every widget input, hover, focus, and timer callback returns `EventResponse`:
 
 ```cpp
-auto key_press(ox::KeyEvent key) -> ox::EventResponse override
+auto handle(ox::KeyEvent const& key) -> ox::EventResponse override
 {
-    if (!key.matches(U'x', {}, key.action)) { return {}; }
+    if (key.action == ox::KeyAction::Release || !key.matches(U'x', {}, key.action)) { return {}; }
     ++count;
     return {.handled = true, .repaint = true};
 }
@@ -73,11 +73,13 @@ Tree geometry and input eligibility changes are detected during synchronization.
 
 ## Focus ownership and lifetime
 
-`Focus(root, loop)` is scoped to one widget tree and event loop. Applications expose
-their instance through `app.focus()`. `set(widget)` rejects foreign, inactive, disabled,
-fully clipped, or FocusPolicy::None targets before changing the existing focus.
-Transitions update the `focused` flags, call `focus_out()` and `focus_in()`, and schedule
-repaint and quit effects on the owning loop. Selecting the same widget is a no-op.
+`Focus(root)` is scoped to one widget tree and returns transition effects without
+applying them. Applications expose read-only access through `app.focus()` and explicit
+commands through `app.set_focus(widget)` and `app.clear_focus()`. A foreign, invisible,
+disabled, fully clipped, or FocusPolicy::None target is rejected before changing focus.
+Transitions update the state read by `is_focused()`, call `focus_out()` and `focus_in()`,
+and return repaint and quit effects for the application boundary to apply. Selecting
+the same widget is a no-op.
 
 Initial focus is the first eligible tab candidate once layout gives it a visible area.
 Tab navigation wraps. With no focus, forward navigation selects the first candidate;
@@ -85,12 +87,13 @@ backward navigation selects the last. Click-only widgets are skipped by Tab orde
 
 When focused widgets become ineligible or leave the tree, synchronization clears them
 and selects the first remaining tab candidate. If there are none, focus stays empty
-until one becomes eligible. Explicit `clear()` stays empty until a click, Tab, or
-explicit `set()`. Focus order is independent for each application.
+until one becomes eligible. Explicit `app.clear_focus()` stays empty until a click, Tab, or
+explicit `app.set_focus()`. Focus order is independent for each application.
 
 Lifetime views follow widget moves. Move assignment invalidates the overwritten
-widget's old views; destruction invalidates views even if someone retains its public
-shared lifetime storage. `LifetimeView::get()` throws for an expired target. Widget
+widget's old views; destruction invalidates all views. Lifetime storage is private.
+`LifetimeView::try_get()` returns a pointer or null; `get()` throws when unavailable.
+Typed lookup also rejects targets whose derived type was lost through slicing. Widget
 removal and destruction stop its registered timers. Widget timer callbacks propagate
 the widget's actual response instead of requesting unconditional repaint.
 

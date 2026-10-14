@@ -18,12 +18,12 @@ struct Handler {
     int events = 0;
     int paints = 0;
     bool redraw = false;
-    auto handle_key_press(KeyEvent) -> EventResponse
+    auto handle(KeyEvent const&) -> EventResponse
     {
         ++events;
         return {.handled = true, .repaint = redraw};
     }
-    auto handle_paint(Canvas) -> Cursor
+    auto paint(Canvas) -> Cursor
     {
         ++paints;
         return {};
@@ -227,15 +227,17 @@ TEST(applications_own_focus_frames_and_exit_requests_without_a_terminal)
 TEST(widget_timers_follow_moved_widgets_and_ignore_destroyed_targets)
 {
     struct Counter : Widget {
+       public:
+        using Widget::handle;
         int ticks = 0;
-        auto timer() -> EventResponse override
+        auto tick() -> EventResponse
         {
             ++ticks;
             return {.handled = true, .repaint = true};
         }
     };
     auto original = Counter{};
-    auto timer = Timer{original, 10ms};
+    auto timer = Timer{original, 10ms, [](auto& widget) { return widget.tick(); }};
     auto widget = std::move(original);
     auto app = Application{widget};
     auto const now = EventLoop::Clock::time_point{};
@@ -246,7 +248,7 @@ TEST(widget_timers_follow_moved_widgets_and_ignore_destroyed_targets)
     auto loop = EventLoop{};
     auto handler = Handler{};
     auto target = std::make_unique<Counter>();
-    auto orphan = Timer{*target, 10ms};
+    auto orphan = Timer{*target, 10ms, [](auto& widget) { return widget.tick(); }};
     loop.watch(orphan);
     orphan.start(now);
     target.reset();
@@ -300,8 +302,10 @@ TEST(timers_belong_to_one_loop_and_can_be_reused_after_release)
 TEST(detached_widgets_stop_their_timers_and_can_join_another_application)
 {
     struct Counter : Widget {
+       public:
+        using Widget::handle;
         int ticks = 0;
-        auto timer() -> EventResponse override
+        auto tick() -> EventResponse
         {
             ++ticks;
             return {.handled = true, .repaint = true};
@@ -309,7 +313,8 @@ TEST(detached_widgets_stop_their_timers_and_can_join_another_application)
     };
     auto root = Column<std::vector<Counter>>{};
     root.children.emplace_back();
-    auto timer = Timer{root.children.front(), 10ms};
+    auto timer =
+        Timer{root.children.front(), 10ms, [](auto& widget) { return widget.tick(); }};
     auto first = Application{root};
     auto const now = EventLoop::Clock::time_point{};
     timer.start(now);

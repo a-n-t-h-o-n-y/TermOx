@@ -25,10 +25,9 @@ auto tab_candidate(WidgetNode const& node) -> bool
 }
 }  // namespace
 
-void Focus::report(EventResponse response)
+Focus::~Focus()
 {
-    if (response.repaint) { loop_.request_repaint(); }
-    if (response.quit && !loop_.exit_code()) { loop_.quit(*response.quit); }
+    if (auto* widget = in_focus_.try_get()) { widget->focused_ = false; }
 }
 
 auto Focus::clear() -> EventResponse
@@ -39,10 +38,9 @@ auto Focus::clear() -> EventResponse
     in_focus_ = {};
     auto response = EventResponse{};
     if (old.valid()) {
-        old.get().focused = false;
+        old.get().focused_ = false;
         response = combine({.repaint = true}, old.get().focus_out());
     }
-    report(response);
     return response;
 }
 
@@ -67,10 +65,9 @@ auto Focus::set(Widget& widget) -> EventResponse
     }
     in_focus_ = target;
     recover_ = true;
-    target.get().focused = true;
+    target.get().focused_ = true;
     response = combine(response, combine({.repaint = true}, target.get().focus_in()));
     if (revision_ != revision) { recover_ = in_focus_.valid(); }
-    report(response);
     return response;
 }
 

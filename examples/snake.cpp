@@ -119,13 +119,16 @@ class SnakeEngine {
 
 class SnakeGameWidget : public Widget {
    public:
+    using Widget::handle;
+
+   public:
     sl::Signal<void(int)> score_update;
 
    public:
     SnakeGameWidget() : Widget{FocusPolicy::Strong, SizePolicy::flex()} {}
 
    public:
-    auto key_press(KeyEvent k) -> EventResponse override
+    auto handle(KeyEvent const& k) -> EventResponse override
     {
         if (k.matches(U's', {}, k.action)) {
             // Start the game
@@ -158,7 +161,7 @@ class SnakeGameWidget : public Widget {
         return {.handled = true};
     }
 
-    auto timer() -> EventResponse override
+    auto tick() -> EventResponse
     {
         if (not engine_.step()) { timer_.stop(); }
         this->score_update(engine_.state.score);
@@ -166,13 +169,12 @@ class SnakeGameWidget : public Widget {
         return {.handled = true, .repaint = true};
     }
 
-    void paint(Canvas c) override
+    auto paint(Canvas c) -> Cursor override
     {
         // If Too Small
-        if (engine_.size.width > this->size.width ||
-            engine_.size.height > this->size.height) {
+        if (engine_.size.width > size().width || engine_.size.height > size().height) {
             put(c, {0, 0}, U"Terminal Screen is Too Small");
-            return;
+            return {};
         }
 
         // Paint Background
@@ -206,11 +208,14 @@ class SnakeGameWidget : public Widget {
             };
             put(c, center, text);
         }
+
+        return {};
     }
 
    private:
     SnakeEngine engine_;
-    Timer timer_{*this, engine_.speed / 6};
+    Timer timer_{*this, engine_.speed / 6,
+                 [](SnakeGameWidget& widget) { return widget.tick(); }};
 };
 
 int main()

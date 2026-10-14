@@ -16,7 +16,7 @@ int main(int argc, char** argv)
     auto loop = ox::EventLoop{};
     if (argc == 2 && std::string_view{argv[1]} == "--escape") {
         struct EscapeHandler {
-            auto handle_key_press(ox::KeyEvent event) -> ox::EventResponse
+            auto handle(ox::KeyEvent const& event) -> ox::EventResponse
             { return {.quit = event.matches(esc::KeyCode::Escape) ? 0 : 2}; }
         } handler;
         std::cerr << "ready\n" << std::flush;
@@ -50,7 +50,10 @@ int main(int argc, char** argv)
         }
     }
     else {
-        (void)ox::process_events(loop, terminal, handler, [&] { ++iterations; });
+        (void)ox::process_events(loop, terminal, handler, [&] {
+            ++iterations;
+            return ox::EventResponse{};
+        });
     }
     worker.join();
     std::cerr << iterations << ',' << latency << '\n';

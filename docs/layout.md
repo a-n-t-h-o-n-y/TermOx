@@ -59,13 +59,13 @@ height. `layout_column(policies, area)` places them from top to bottom with the 
 area width. Both start at `{0, 0}`. Results never extend outside the supplied area;
 zero-length children are retained in the result. Negative area dimensions throw.
 
-`Row` and `Column` collect active children and their policies once, calculate all
-rectangles, then apply them in order. Inactive children are excluded and retain their
-previous geometry. Each active child's `resize(old_size)` receives its previous size
-after the new position and size have been assigned. Notifications also run when the
-size is unchanged, so nested layouts can respond to changed policies or activation.
+`Row` and `Column` collect visible children and their policies once, calculate all
+rectangles, then apply them in order. Invisible children are excluded and retain their
+previous geometry. Each visible child's `on_arrange(previous_bounds)` receives its previous rectangle
+after `arrange(child, bounds)` assigns the new geometry. Notifications also run when the
+size is unchanged, so nested layouts can respond to changed policies or visibility.
 Invalid sizing inputs are rejected before any child geometry is changed. Exceptions
-from a child's resize callback propagate; earlier callbacks are not rolled back.
+from a child's layout callback propagate; earlier callbacks are not rolled back.
 
 `centered_rect(available, requested)` clamps the requested width and height to the
 available area, then centers the result. Odd spare cells remain at the right or bottom.

@@ -45,9 +45,9 @@ void DataTable::add_row(std::vector<std::string> row)
     this->on_scroll((int)this->offset, (int)columns_.back().size());
 }
 
-void DataTable::paint(Canvas c)
+auto DataTable::paint(Canvas c) -> Cursor
 {
-    if (this->size.width == 0 || this->size.height == 0 || columns_.empty()) { return; }
+    if (size().width == 0 || size().height == 0 || columns_.empty()) { return {}; }
 
     auto const border_area = Area{
         .width = c.size().width,
@@ -61,7 +61,7 @@ void DataTable::paint(Canvas c)
     put(c, {0, 0}, shape::Box::round(), border_area, foreground_line);
 
     // Header Line
-    if (this->size.height > 2) {
+    if (size().height > 2) {
         put(c, {.x = 0, .y = 2}, U'╞' | fg(foreground_line));
         put(c, {.x = 1, .y = 2}, shape::HLine{.symbol = U'═'},
             std::max(c.size().width - 2, 0), foreground_line);
@@ -75,10 +75,10 @@ void DataTable::paint(Canvas c)
         auto const& column = columns_[column_index];
 
         auto cell_point = Point{
-            .x = headings_.children[column_index].at.x + 1,
+            .x = headings_.children[column_index].at().x + 1,
             .y = table_y,
         };
-        auto const cell_width = headings_.children[column_index].size.width;
+        auto const cell_width = headings_.children[column_index].size().width;
 
         for (auto const& text : std::span{column}.subspan(this->offset)) {
             if (cell_point.y + 1 >= border_area.height) { break; }
@@ -100,7 +100,7 @@ void DataTable::paint(Canvas c)
     }
     for (auto i = std::size_t{0}; i + 1 < headings_.children.size(); ++i) {
         auto const& heading = headings_.children[i];
-        auto const x = heading.at.x + heading.size.width;
+        auto const x = heading.at().x + heading.size().width;
         put(c, {x, 2}, U'╤' | fg(foreground_line));
         put(c, {x, std::max(border_area.height - 1, 0)}, U'┴' | fg(foreground_line));
     }
@@ -110,8 +110,8 @@ void DataTable::paint(Canvas c)
         for (auto column_index = std::size_t{0}; column_index < columns_.size();
              ++column_index) {
             auto const& heading = headings_.children[column_index];
-            auto x = heading.at.x;
-            put(c, {x + 1, y}, shape::HLine{.symbol = U'─'}, heading.size.width,
+            auto x = heading.at().x;
+            put(c, {x + 1, y}, shape::HLine{.symbol = U'─'}, heading.size().width,
                 foreground_line);
         }
     }
@@ -121,16 +121,18 @@ void DataTable::paint(Canvas c)
         for (auto column_index = std::size_t{0}; column_index + 1 < columns_.size();
              ++column_index) {
             auto const& heading = headings_.children[column_index];
-            auto x = heading.at.x + heading.size.width;
+            auto x = heading.at().x + heading.size().width;
             put(c, {x, y}, U'│' | fg(foreground_line));
             if (y + 2 < border_area.height) {
                 put(c, {x, y + 1}, U'┼' | fg(foreground_line));
             }
         }
     }
+
+    return {};
 }
 
-auto DataTable::mouse_wheel(MouseWheel m) -> EventResponse
+auto DataTable::handle(MouseWheel const& m) -> EventResponse
 {
     if (m.dy == 0 || columns_.empty()) { return {}; }
     auto const old = offset;
@@ -142,18 +144,11 @@ auto DataTable::mouse_wheel(MouseWheel m) -> EventResponse
     return {.handled = true, .repaint = true};
 }
 
-void DataTable::resize(Area)
+void DataTable::on_arrange(Rect)
 {
-    auto const old_size = headings_.size;
-    headings_.at = {
-        .x = std::min(1, std::max(size.width - 1, 0)),
-        .y = std::min(1, std::max(size.height - 1, 0)),
-    };
-    headings_.size = {
-        .width = std::max(size.width - 2, 0),
-        .height = std::min(1, size.height),
-    };
-    headings_.resize(old_size);
+    arrange(headings_, {{std::min(1, std::max(size().width - 1, 0)),
+                         std::min(1, std::max(size().height - 1, 0))},
+                        {std::max(size().width - 2, 0), std::min(1, size().height)}});
 }
 
 auto DataTable::get_children() -> zzz::Generator<Widget&> { co_yield headings_; }

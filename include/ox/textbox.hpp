@@ -17,6 +17,8 @@ class ScrollBar;
  */
 class TextBox : public Widget {
    public:
+    using Widget::handle;
+
     struct Options {
         std::string text = {};  // UTF8 encoded
         TextWrap wrap = TextWrap::Word;
@@ -60,15 +62,15 @@ class TextBox : public Widget {
     auto get_scroll_length() const -> int;
 
    public:
-    void paint(Canvas c) override;
+    auto paint(Canvas c) -> Cursor override;
 
-    auto key_press(KeyEvent k) -> EventResponse override;
+    auto handle(KeyEvent const& k) -> EventResponse override;
 
-    auto paste(esc::PasteChunk const& chunk) -> EventResponse override;
+    auto handle(esc::PasteChunk const& chunk) -> EventResponse override;
 
-    auto mouse_press(MousePress m) -> EventResponse override;
+    auto handle(MousePress const& m) -> EventResponse override;
 
-    auto mouse_wheel(MouseWheel m) -> EventResponse override;
+    auto handle(MouseWheel const& m) -> EventResponse override;
 
    private:
     mutable TextLayout layout_;

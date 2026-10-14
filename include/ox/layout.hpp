@@ -18,23 +18,20 @@
 namespace ox {
 
 namespace detail {
-inline void resize_children(Widget& parent, bool horizontal)
+inline void arrange_children(Widget& parent, bool horizontal)
 {
     auto children = std::vector<Widget*>{};
     auto policies = std::vector<SizePolicy>{};
     for (auto& child : parent.get_children()) {
-        if (!child.active) { continue; }
+        if (!child.visible) { continue; }
         children.push_back(&child);
         policies.push_back(child.size_policy);
     }
-    auto const rectangles = horizontal ? layout_row(policies, parent.size)
-                                       : layout_column(policies, parent.size);
+    auto const rectangles = horizontal ? layout_row(policies, parent.size())
+                                       : layout_column(policies, parent.size());
     for (auto i = std::size_t{0}; i < children.size(); ++i) {
         auto& child = *children[i];
-        auto const old_size = child.size;
-        child.at = rectangles[i].at;
-        child.size = rectangles[i].size;
-        child.resize(old_size);
+        arrange(child, rectangles[i]);
     }
 }
 }  // namespace detail
@@ -66,6 +63,8 @@ concept LayoutContainer = DynamicContainer<T> || TupleLike<T>;
 template <LayoutContainer Container>
 class Column : public Widget {
    public:
+    using Widget::handle;
+
     Container children;
 
    public:
@@ -124,7 +123,8 @@ class Column : public Widget {
         }
     }
 
-    void resize(Area) override { detail::resize_children(*this, false); }
+   protected:
+    void on_arrange(Rect) override { detail::arrange_children(*this, false); }
 };
 
 template <LayoutContainer Container>
@@ -141,6 +141,8 @@ Column(Widgets&&...) -> Column<std::tuple<std::decay_t<Widgets>...>>;
  */
 template <typename Container>
 class Row : public Widget {
+   public:
+    using Widget::handle;
     static_assert(TupleLike<Container> || DynamicContainer<Container>);
 
    public:
@@ -202,7 +204,8 @@ class Row : public Widget {
         }
     }
 
-    void resize(Area) override { detail::resize_children(*this, true); }
+   protected:
+    void on_arrange(Rect) override { detail::arrange_children(*this, true); }
 };
 
 template <LayoutContainer Container>
@@ -216,6 +219,8 @@ Row(Widgets&&...) -> Row<std::tuple<std::decay_t<Widgets>...>>;
 template <WidgetDerived ChildType>
 class Suspended : public Widget {
    public:
+    using Widget::handle;
+
     ChildType child;
     Area requested_size;
     Glyph fill_glyph;
@@ -229,34 +234,31 @@ class Suspended : public Widget {
     { validate(requested_size); }
 
    public:
-    void paint(Canvas c) override
+    auto paint(Canvas c) -> Cursor override
     {
         // Paint the four margins through clipped child views.
-        auto const right = child.at.x + child.size.width;
-        auto const bottom = child.at.y + child.size.height;
-        fill(c.subcanvas({0, 0}, {std::max(child.at.x, 0), c.size().height}),
+        auto const right = child.at().x + child.size().width;
+        auto const bottom = child.at().y + child.size().height;
+        fill(c.subcanvas({0, 0}, {std::max(child.at().x, 0), c.size().height}),
              fill_glyph);
         fill(c.subcanvas({right, 0},
                          {std::max(c.size().width - right, 0), c.size().height}),
              fill_glyph);
-        fill(c.subcanvas({child.at.x, 0}, {child.size.width, std::max(child.at.y, 0)}),
+        fill(c.subcanvas({child.at().x, 0},
+                         {child.size().width, std::max(child.at().y, 0)}),
              fill_glyph);
-        fill(c.subcanvas({child.at.x, bottom},
-                         {child.size.width, std::max(c.size().height - bottom, 0)}),
+        fill(c.subcanvas({child.at().x, bottom},
+                         {child.size().width, std::max(c.size().height - bottom, 0)}),
              fill_glyph);
+
+        return {};
     }
 
-    void resize(Area) override
-    {
-        auto const old_size = child.size;
+   protected:
+    void on_arrange(Rect) override
+    { arrange(child, centered_rect(size(), requested_size)); }
 
-        auto const rectangle = centered_rect(this->size, requested_size);
-        child.size = rectangle.size;
-        child.at = rectangle.at;
-
-        child.resize(old_size);
-    }
-
+   public:
     auto get_children() -> zzz::Generator<Widget&> override { co_yield child; }
 
     auto get_children() const -> zzz::Generator<Widget const&> override

@@ -237,31 +237,33 @@ void routing_benchmarks()
 {
     for (auto count : {100, 1000}) {
         auto root = Tree{};
-        root.size = {80, 24};
+        arrange(root, {root.at(), {80, 24}});
         for (auto i = 0; i < count; ++i) {
             auto child = std::make_unique<ox::Widget>(ox::FocusPolicy::Strong);
-            child->size = {1, 1};
-            child->at = {i % 80, i / 80};
+            ox::arrange(*child, {{i % 80, i / 80}, {1, 1}});
             root.children.push_back(std::move(child));
         }
         auto app = ox::Application{root};
         measure("routing.idle." + std::to_string(count), 100,
                 [&](int) { return (std::size_t)app.step().repaint; });
         measure("routing.key." + std::to_string(count), 100, [&](int) {
-            return (std::size_t)app.handle_key_press({.key = esc::KeyCode::ArrowRight})
+            return (std::size_t)app
+                .dispatch(ox::KeyEvent{.key = esc::KeyCode::ArrowRight})
                 .handled;
         });
-        auto const point = root.children.back()->at;
+        auto const point = root.children.back()->at();
         measure("routing.mouse." + std::to_string(count), 100, [&](int) {
-            return (std::size_t)app.handle_mouse_move({.at = point, .held_button = {}})
+            return (std::size_t)app
+                .dispatch(ox::MouseMove{.at = point, .held_button = {}})
                 .handled;
         });
         measure("routing.tab." + std::to_string(count), 100, [&](int) {
-            return (std::size_t)app.handle_key_press({.key = esc::KeyCode::Tab})
+            return (std::size_t)app.dispatch(ox::KeyEvent{.key = esc::KeyCode::Tab})
                 .handled;
         });
         measure("routing.paste." + std::to_string(count), 100, [&](int) {
-            return (std::size_t)app.handle_paste({"text", true, true}).handled;
+            return (std::size_t)app.dispatch(esc::PasteChunk{"text", true, true})
+                .handled;
         });
         measure("routing.reorder." + std::to_string(count), 100, [&](int) {
             std::rotate(root.children.begin(), root.children.begin() + 1,
@@ -270,24 +272,24 @@ void routing_benchmarks()
         });
     }
     auto root = Tree{};
-    root.size = {80, 24};
+    arrange(root, {root.at(), {80, 24}});
     auto* parent = &root;
     for (auto i = 0; i < 32; ++i) {
         auto child = std::make_unique<Tree>();
-        child->size = root.size;
+        ox::arrange(*child, {{0, 0}, root.size()});
         auto* next = child.get();
         parent->children.push_back(std::move(child));
         parent = next;
     }
     auto leaf = std::make_unique<ox::Widget>(ox::FocusPolicy::Strong);
-    leaf->size = root.size;
+    ox::arrange(*leaf, {{0, 0}, root.size()});
     parent->children.push_back(std::move(leaf));
     for (auto i = 0; i < 1000; ++i) {
         root.children.push_back(std::make_unique<ox::Widget>());
     }
     auto app = ox::Application{root};
     measure("routing.key.depth32", 100, [&](int) {
-        return (std::size_t)app.handle_key_press({.key = esc::KeyCode::ArrowRight})
+        return (std::size_t)app.dispatch(ox::KeyEvent{.key = esc::KeyCode::ArrowRight})
             .handled;
     });
 }

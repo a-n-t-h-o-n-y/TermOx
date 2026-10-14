@@ -6,7 +6,6 @@
 #include <ox/widget.hpp>
 
 namespace ox {
-
 Timer::Timer(std::chrono::milliseconds interval,
              std::function<EventResponse()> action,
              bool launch)
@@ -19,27 +18,40 @@ Timer::Timer(std::chrono::milliseconds interval,
     if (launch) { this->start(); }
 }
 
-Timer::Timer(Widget& widget, std::chrono::milliseconds interval, bool launch)
-    : Timer{
-          interval,
-          [target = track(widget)] {
-              if (!target.valid()) { return EventResponse{}; }
-              auto& widget = target.get();
-              if (!widget.active || !widget.enabled) { return EventResponse{}; }
-              if (widget.application_ && !widget.application_->is_interactive(widget)) {
-                  return EventResponse{};
-              }
-              return widget.timer();
-          },
-          launch}
+auto Timer::widget_action(Widget& widget, std::function<EventResponse(Widget&)> action)
+    -> std::function<EventResponse()>
 {
+    return [target = track(widget), action = std::move(action)] {
+        auto* widget = target.try_get();
+        if (!widget || !widget->visible || !widget->enabled) { return EventResponse{}; }
+        if (widget->application_ && !widget->application_->is_interactive(*widget)) {
+            return EventResponse{};
+        }
+        return action(*widget);
+    };
+}
+
+void Timer::attach(Widget& widget)
+{
+    std::erase_if(widget.timers_, [](auto const& entry) { return entry.expired(); });
     widget.timers_.push_back(state_);
     if (widget.application_) { widget.application_->loop().watch(*this); }
 }
 
-void Timer::start(Clock::time_point now) { state_->deadline = now + state_->interval; }
-void Timer::stop() { state_->deadline.reset(); }
+void Timer::start(Clock::time_point now)
+{
+    if (!state_) { throw std::logic_error{"Moved-from timer"}; }
+    state_->deadline = now + state_->interval;
+}
+void Timer::stop()
+{
+    if (state_) { state_->deadline.reset(); }
+}
 auto Timer::is_running() const -> bool
 { return state_ && state_->deadline.has_value(); }
-auto Timer::duration() const -> std::chrono::milliseconds { return state_->interval; }
+auto Timer::duration() const -> std::chrono::milliseconds
+{
+    if (!state_) { throw std::logic_error{"Moved-from timer"}; }
+    return state_->interval;
+}
 }  // namespace ox

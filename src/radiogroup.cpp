@@ -16,7 +16,7 @@ RadioGroup::RadioGroup(Options x)
       off{x.off}
 {}
 
-void RadioGroup::paint(Canvas c)
+auto RadioGroup::paint(Canvas c) -> Cursor
 {
     for (auto y = 0; y < (int)items.size(); ++y) {
         if (y >= c.size().height) { break; }
@@ -25,10 +25,13 @@ void RadioGroup::paint(Canvas c)
         auto& b = in_focus_ && (y == focus_selection_) ? in_focus_style : style;
         put(c, {(int)btn.size(), y}, esc::glyphs(' ' + items[(std::size_t)y]) | b);
     }
+
+    return {};
 }
 
-auto RadioGroup::key_press(KeyEvent k) -> EventResponse
+auto RadioGroup::handle(KeyEvent const& k) -> EventResponse
 {
+    if (k.action == KeyAction::Release) { return {}; }
     auto const before = focus_selection_;
     if (items.empty()) { return {}; }
     if (k.matches(KeyCode::Enter, {}, k.action)) {
@@ -56,7 +59,7 @@ auto RadioGroup::key_press(KeyEvent k) -> EventResponse
     return {.handled = true, .repaint = before != focus_selection_};
 }
 
-auto RadioGroup::mouse_press(MousePress m) -> EventResponse
+auto RadioGroup::handle(MousePress const& m) -> EventResponse
 {
     if (m.button != MouseButton::Left || m.at.y < 0) { return {}; }
     if (m.at.y < (int)items.size() && m.at.y != selected_index) {

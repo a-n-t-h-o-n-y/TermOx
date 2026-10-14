@@ -14,6 +14,8 @@ namespace ox {
  */
 class CheckBox : public Widget {
    public:
+    using Widget::handle;
+
     enum class State : bool { Checked, UnChecked };
 
     struct Display {
@@ -52,11 +54,11 @@ class CheckBox : public Widget {
     [[nodiscard]] auto get_state() const -> State;
 
    public:
-    auto key_press(KeyEvent k) -> EventResponse override;
+    auto handle(KeyEvent const& k) -> EventResponse override;
 
-    auto mouse_press(MousePress m) -> EventResponse override;
+    auto handle(MousePress const& m) -> EventResponse override;
 
-    void paint(Canvas c) override;
+    auto paint(Canvas c) -> Cursor override;
 
     auto focus_in() -> EventResponse override;
 

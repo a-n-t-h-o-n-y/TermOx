@@ -22,6 +22,8 @@ struct Border {
  */
 template <WidgetDerived ChildWidget>
 class Bordered : public Widget {
+   public:
+    using Widget::handle;
     struct Options {
         ChildWidget child = {};
         Border border = {};
@@ -35,20 +37,18 @@ class Bordered : public Widget {
         : Widget{FocusPolicy::None, SizePolicy::flex()},
           child{std::move(x.child)},
           border{std::move(x.border)}
-    { child.at = {1, 1}; }
+    { arrange(child, {{1, 1}, {0, 0}}); }
 
-   public:
-    void resize(Area) override
+   protected:
+    void on_arrange(Rect) override
     {
-        auto const old_size = child.size;
-        child.size = {
-            .width = std::max(0, this->size.width - 2),
-            .height = std::max(0, this->size.height - 2),
-        };
-        child.resize(old_size);
+        arrange(
+            child,
+            {{1, 1}, {std::max(0, size().width - 2), std::max(0, size().height - 2)}});
     }
 
-    void paint(Canvas c) override
+   public:
+    auto paint(Canvas c) -> Cursor override
     {
         // Box
         put(c, border.box, border.style);
@@ -71,6 +71,8 @@ class Bordered : public Widget {
         auto const x = find_align_offset(label.align, width, (int)columns);
         put(c.subcanvas({1, 0}, {width, 1}), {x, 0},
             esc::glyphs(std::u32string_view{text}.substr(0, length), label.style));
+
+        return {};
     }
 
     auto get_children() -> zzz::Generator<Widget&> override { co_yield child; }
@@ -109,6 +111,8 @@ struct Lines {
 /// A line divider element.
 class Divider : public Widget {
    public:
+    using Widget::handle;
+
     struct Options {
         Lines lines = Lines::light();
         Style style = {};
@@ -123,7 +127,7 @@ class Divider : public Widget {
     Divider(Options x);
 
    public:
-    void paint(Canvas c) override;
+    auto paint(Canvas c) -> Cursor override;
 };
 
 }  // namespace ox

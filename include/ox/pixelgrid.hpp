@@ -11,6 +11,8 @@ namespace ox {
  */
 class PixelGrid : public Widget {
    public:
+    using Widget::handle;
+
     struct Matrix {
         Area area;
         std::vector<RGB> pixels;
@@ -36,7 +38,7 @@ class PixelGrid : public Widget {
     PixelGrid(Matrix matrix);
 
    public:
-    void paint(Canvas c) override;
+    auto paint(Canvas c) -> Cursor override;
 };
 
 }  // namespace ox

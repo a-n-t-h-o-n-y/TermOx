@@ -14,15 +14,17 @@ namespace ox {
 
 BasicButton::BasicButton(FocusPolicy fp, SizePolicy sp) : Widget{fp, sp} {}
 
-auto BasicButton::key_press(KeyEvent k) -> EventResponse
+auto BasicButton::handle(KeyEvent const& k) -> EventResponse
 {
-    if (!k.matches(KeyCode::Enter, {}, k.action)) { return {}; }
+    if (k.action == KeyAction::Release || !k.matches(KeyCode::Enter, {}, k.action)) {
+        return {};
+    }
     this->on_press();
 
     return {.handled = true, .repaint = true};
 }
 
-auto BasicButton::mouse_press(MousePress m) -> EventResponse
+auto BasicButton::handle(MousePress const& m) -> EventResponse
 {
     if (m.button != MouseButton::Left) { return {}; }
     this->on_press();
@@ -30,7 +32,7 @@ auto BasicButton::mouse_press(MousePress m) -> EventResponse
     return {.handled = true, .repaint = true};
 }
 
-auto BasicButton::mouse_release(MouseRelease m) -> EventResponse
+auto BasicButton::handle(MouseRelease const& m) -> EventResponse
 {
     if (m.button && m.button != MouseButton::Left) { return {}; }
     this->on_release();
@@ -58,6 +60,7 @@ Button::Button(Options x)
                               Timer{
                                   *this,
                                   std::chrono::milliseconds{timer_period_ms},
+                                  [](Button& widget) { return widget.tick(); },
                                   false,
                               },
                       }};
@@ -67,7 +70,7 @@ Button::Button(Options x)
       }()}
 {}
 
-void Button::paint(Canvas c)
+auto Button::paint(Canvas c) -> Cursor
 {
     auto temp_label = Label{label};
 
@@ -87,18 +90,20 @@ void Button::paint(Canvas c)
                    },
                },
                decoration_);
+
+    return {};
 }
 
-auto Button::mouse_press(MousePress m) -> EventResponse
+auto Button::handle(MousePress const& m) -> EventResponse
 {
     if (m.button == MouseButton::Left) { pressed_ = true; }
-    return this->BasicButton::mouse_press(m);
+    return this->BasicButton::handle(m);
 }
 
-auto Button::mouse_release(MouseRelease m) -> EventResponse
+auto Button::handle(MouseRelease const& m) -> EventResponse
 {
     if (!m.button || m.button == MouseButton::Left) { pressed_ = false; }
-    return this->BasicButton::mouse_release(m);
+    return this->BasicButton::handle(m);
 }
 
 auto Button::focus_in() -> EventResponse
@@ -129,7 +134,7 @@ auto Button::mouse_leave() -> EventResponse
     return {.handled = true};
 }
 
-auto Button::timer() -> EventResponse
+auto Button::tick() -> EventResponse
 {
     auto fade = std::get_if<FadeInternal>(&decoration_);
     if (!fade) { return {}; }

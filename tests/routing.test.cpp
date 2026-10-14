@@ -11,6 +11,8 @@ using namespace std::chrono_literals;
 
 namespace {
 struct Probe : Widget {
+   public:
+    using Widget::handle;
     std::vector<std::unique_ptr<Probe>> children;
     EventResponse reply;
     std::vector<Point> presses;
@@ -24,6 +26,7 @@ struct Probe : Widget {
     int focus_outs = 0;
     int ticks = 0;
     std::optional<char32_t> glyph;
+    Cursor paint_cursor;
     std::function<EventResponse()> enter_action;
     std::function<EventResponse()> key_action;
     std::function<EventResponse()> in_action;
@@ -35,14 +38,14 @@ struct Probe : Widget {
             co_yield *child;
         }
     }
-    auto mouse_press(MousePress m) -> EventResponse override
+    auto handle(MousePress const& m) -> EventResponse override
     {
         presses.push_back(m.at);
         return reply;
     }
-    auto mouse_release(MouseRelease) -> EventResponse override { return reply; }
-    auto mouse_wheel(MouseWheel) -> EventResponse override { return reply; }
-    auto mouse_move(MouseMove m) -> EventResponse override
+    auto handle(MouseRelease const&) -> EventResponse override { return reply; }
+    auto handle(MouseWheel const&) -> EventResponse override { return reply; }
+    auto handle(MouseMove const& m) -> EventResponse override
     {
         moves.push_back(m.at);
         return reply;
@@ -70,30 +73,30 @@ struct Probe : Widget {
         auto action = out_action;
         return action ? action() : EventResponse{};
     }
-    auto key_press(KeyEvent) -> EventResponse override
+    auto handle(KeyEvent const& event) -> EventResponse override
     {
+        if (event.action == KeyAction::Release) {
+            ++releases;
+            return reply;
+        }
         ++keys;
         auto action = key_action;
         return action ? action() : reply;
     }
-    auto key_release(KeyEvent) -> EventResponse override
-    {
-        ++releases;
-        return reply;
-    }
-    auto paste(esc::PasteChunk const&) -> EventResponse override
+    auto handle(esc::PasteChunk const&) -> EventResponse override
     {
         ++pastes;
         return reply;
     }
-    auto timer() -> EventResponse override
+    auto tick() -> EventResponse
     {
         ++ticks;
         return reply;
     }
-    void paint(Canvas canvas) override
+    auto paint(Canvas canvas) -> Cursor override
     {
         if (glyph) { fill(canvas, *glyph); }
+        return paint_cursor;
     }
 };
 
@@ -101,8 +104,7 @@ auto add(Probe& parent, Point at, Area size, FocusPolicy policy = FocusPolicy::N
     -> Probe&
 {
     auto& child = parent.children.emplace_back(std::make_unique<Probe>(policy));
-    child->at = at;
-    child->size = size;
+    arrange(*child, {at, size});
     return *child;
 }
 
@@ -117,21 +119,21 @@ void settle(Application& app)
 TEST(routing_tree_shares_ancestor_clipping_and_local_coordinates_with_paint)
 {
     auto root = Probe{};
-    root.size = {8, 4};
+    arrange(root, {root.at(), {8, 4}});
     auto& parent = add(root, {2, 1}, {3, 2});
     auto& child = add(parent, {-2, -1}, {8, 5});
     child.glyph = U'x';
     child.reply = {.handled = true};
     auto app = Application{root};
-    app.post(esc::Resize{root.size});
+    app.post(esc::Resize{root.size()});
     app.step();
     ASSERT(app.paint());
     ASSERT((app.loop().screen[Point{2, 1}].text == U"x"));
     ASSERT((app.loop().screen[Point{1, 1}].text == U" "));
     ASSERT((app.loop().screen[Point{5, 1}].text == U" "));
-    app.handle_mouse_press({{2, 1}, MouseButton::Left});
+    app.dispatch(MousePress{{2, 1}, MouseButton::Left});
     ASSERT((child.presses == std::vector<Point>{{2, 1}}));
-    app.handle_mouse_press({{1, 1}, MouseButton::Left});
+    app.dispatch(MousePress{{1, 1}, MouseButton::Left});
     ASSERT(child.presses.size() == 1);
     ASSERT((root.presses.back() == Point{1, 1}));
     auto const tree = widget_tree(root);
@@ -143,13 +145,13 @@ TEST(routing_tree_shares_ancestor_clipping_and_local_coordinates_with_paint)
 TEST(routing_mouse_bubbles_to_ancestors_and_stops_at_handling)
 {
     auto root = Probe{};
-    root.size = {12, 5};
+    arrange(root, {root.at(), {12, 5}});
     auto& parent = add(root, {3, 1}, {6, 3});
     auto& child = add(parent, {2, 1}, {2, 1});
     parent.reply = {.handled = true};
     child.reply = {.repaint = true};
     auto app = Application{root};
-    auto const result = app.handle_mouse_press({{5, 2}, MouseButton::Right});
+    auto const result = app.dispatch(MousePress{{5, 2}, MouseButton::Right});
     ASSERT(result.handled && result.repaint);
     ASSERT((child.presses.back() == Point{0, 0}));
     ASSERT((parent.presses.back() == Point{2, 1}));
@@ -159,24 +161,24 @@ TEST(routing_mouse_bubbles_to_ancestors_and_stops_at_handling)
 TEST(routing_later_siblings_win_overlap_and_outside_input_is_ignored)
 {
     auto root = Probe{};
-    root.size = {5, 2};
+    arrange(root, {root.at(), {5, 2}});
     auto& first = add(root, {0, 0}, {5, 2});
     auto& last = add(root, {0, 0}, {5, 2});
     first.reply = last.reply = {.handled = true};
     auto app = Application{root};
-    app.handle_mouse_press({{1, 0}, MouseButton::Left});
+    app.dispatch(MousePress{{1, 0}, MouseButton::Left});
     ASSERT(last.presses.size() == 1 && first.presses.empty());
-    app.handle_mouse_press({{-1, 0}, MouseButton::Left});
-    app.handle_mouse_press({{5, 0}, MouseButton::Left});
+    app.dispatch(MousePress{{-1, 0}, MouseButton::Left});
+    app.dispatch(MousePress{{5, 0}, MouseButton::Left});
     ASSERT(last.presses.size() == 1 && root.presses.empty());
 }
 
 TEST(routing_hidden_and_disabled_ancestors_prune_all_input_and_focus)
 {
     auto root = Probe{};
-    root.size = {10, 3};
+    arrange(root, {root.at(), {10, 3}});
     auto& hidden = add(root, {0, 0}, {3, 3});
-    hidden.active = false;
+    hidden.visible = false;
     auto& hidden_child = add(hidden, {0, 0}, {3, 3}, FocusPolicy::Strong);
     auto& disabled = add(root, {3, 0}, {3, 3});
     disabled.enabled = false;
@@ -185,12 +187,12 @@ TEST(routing_hidden_and_disabled_ancestors_prune_all_input_and_focus)
     auto& chosen = add(root, {6, 0}, {4, 3}, FocusPolicy::Tab);
     auto app = Application{root};
     ASSERT(app.focus().get() == track(chosen));
-    ASSERT_THROWS(app.focus().set(hidden_child), std::invalid_argument);
-    ASSERT_THROWS(app.focus().set(disabled_child), std::invalid_argument);
-    app.handle_mouse_press({{0, 0}, MouseButton::Left});
-    app.handle_mouse_press({{3, 0}, MouseButton::Left});
+    ASSERT_THROWS(app.set_focus(hidden_child), std::invalid_argument);
+    ASSERT_THROWS(app.set_focus(disabled_child), std::invalid_argument);
+    app.dispatch(MousePress{{0, 0}, MouseButton::Left});
+    app.dispatch(MousePress{{3, 0}, MouseButton::Left});
     ASSERT(hidden_child.presses.empty() && disabled_child.presses.empty());
-    app.post(esc::Resize{root.size});
+    app.post(esc::Resize{root.size()});
     app.step();
     app.paint();
     ASSERT((app.loop().screen[Point{3, 0}].text == U"d"));
@@ -200,37 +202,37 @@ TEST(routing_hidden_and_disabled_ancestors_prune_all_input_and_focus)
 TEST(routing_hover_notifies_only_changed_ancestry_and_handles_leaving_root)
 {
     auto root = Probe{};
-    root.size = {8, 2};
+    arrange(root, {root.at(), {8, 2}});
     auto& parent = add(root, {0, 0}, {8, 2});
     auto& left = add(parent, {0, 0}, {4, 2});
     auto& right = add(parent, {4, 0}, {4, 2});
     auto app = Application{root};
-    app.handle_mouse_move({.at = {1, 0}, .held_button = {}});
-    app.handle_mouse_move({.at = {2, 0}, .held_button = {}});
+    app.dispatch(MouseMove{.at = {1, 0}, .held_button = {}});
+    app.dispatch(MouseMove{.at = {2, 0}, .held_button = {}});
     ASSERT(root.enters == 1 && parent.enters == 1 && left.enters == 1);
     ASSERT(root.leaves == 0 && parent.leaves == 0 && left.leaves == 0);
-    app.handle_mouse_move({.at = {5, 0}, .held_button = {}});
+    app.dispatch(MouseMove{.at = {5, 0}, .held_button = {}});
     ASSERT(left.leaves == 1 && right.enters == 1 && parent.leaves == 0);
-    app.handle_mouse_move({.at = {8, 0}, .held_button = {}});
+    app.dispatch(MouseMove{.at = {8, 0}, .held_button = {}});
     ASSERT(right.leaves == 1 && parent.leaves == 1 && root.leaves == 1);
-    app.handle_mouse_move({.at = {9, 0}, .held_button = {}});
+    app.dispatch(MouseMove{.at = {9, 0}, .held_button = {}});
     ASSERT(root.leaves == 1);
 }
 
 TEST(routing_hover_reconciles_geometry_and_activation_without_pointer_motion)
 {
     auto root = Probe{};
-    root.size = {8, 2};
+    arrange(root, {root.at(), {8, 2}});
     auto& child = add(root, {0, 0}, {4, 2});
     auto app = Application{root};
-    app.handle_mouse_move({.at = {1, 0}, .held_button = {}});
-    child.active = false;
+    app.dispatch(MouseMove{.at = {1, 0}, .held_button = {}});
+    child.visible = false;
     app.step();
     ASSERT(child.leaves == 1);
-    child.active = true;
+    child.visible = true;
     app.step();
     ASSERT(child.enters == 2);
-    child.at = {4, 0};
+    arrange(child, {{4, 0}, child.size()});
     app.step();
     ASSERT(child.leaves == 2);
     root.children.clear();
@@ -240,47 +242,46 @@ TEST(routing_hover_reconciles_geometry_and_activation_without_pointer_motion)
 TEST(routing_keyboard_release_and_paste_bubble_from_focus)
 {
     auto root = Probe{};
-    root.size = {4, 2};
+    arrange(root, {root.at(), {4, 2}});
     root.reply = {.handled = true};
     auto& child = add(root, {0, 0}, {4, 2}, FocusPolicy::Strong);
     auto app = Application{root};
     settle(app);
-    ASSERT(app.handle_key_press(KeyEvent{.text = U"x"}).handled);
+    ASSERT(app.dispatch(KeyEvent{.text = U"x"}).handled);
     ASSERT(child.keys == 1 && root.keys == 1);
     ASSERT(!app.loop().needs_repaint());
-    ASSERT(app.handle_key_release(KeyEvent{.key = U'x', .action = KeyAction::Release})
-               .handled);
+    ASSERT(app.dispatch(KeyEvent{.key = U'x', .action = KeyAction::Release}).handled);
     ASSERT(child.releases == 1 && root.releases == 1);
-    ASSERT(app.handle_paste({"text", true, true}).handled);
+    ASSERT(app.dispatch(esc::PasteChunk{"text", true, true}).handled);
     ASSERT(child.pastes == 1 && root.pastes == 1);
     child.reply = {.handled = true};
-    app.handle_key_press(KeyEvent{.text = U"y"});
+    app.dispatch(KeyEvent{.text = U"y"});
     ASSERT(child.keys == 2 && root.keys == 1);
 }
 
 TEST(routing_tab_is_consumed_wraps_and_works_after_click_focus_or_explicit_clear)
 {
     auto root = Probe{};
-    root.size = {8, 2};
+    arrange(root, {root.at(), {8, 2}});
     auto& first = add(root, {0, 0}, {2, 2}, FocusPolicy::Tab);
     auto& click = add(root, {2, 0}, {2, 2}, FocusPolicy::Click);
     auto& last = add(root, {4, 0}, {2, 2}, FocusPolicy::Strong);
     auto& clipped = add(root, {8, 0}, {2, 2}, FocusPolicy::Tab);
     auto app = Application{root};
-    app.handle_key_press(KeyEvent{.key = KeyCode::Tab});
+    app.dispatch(KeyEvent{.key = KeyCode::Tab});
     ASSERT(app.focus().get() == track(last));
     ASSERT(first.keys == 0 && last.keys == 0 && root.keys == 0);
-    app.handle_key_press(KeyEvent{.key = KeyCode::Tab});
+    app.dispatch(KeyEvent{.key = KeyCode::Tab});
     ASSERT(app.focus().get() == track(first));
-    app.handle_key_press(KeyEvent{.key = KeyCode::Tab, .modifiers = {.shift = true}});
+    app.dispatch(KeyEvent{.key = KeyCode::Tab, .modifiers = {.shift = true}});
     ASSERT(app.focus().get() == track(last));
-    app.focus().set(click);
-    app.handle_key_press(KeyEvent{.key = KeyCode::Tab});
+    app.set_focus(click);
+    app.dispatch(KeyEvent{.key = KeyCode::Tab});
     ASSERT(app.focus().get() == track(first));
-    app.focus().clear();
+    app.clear_focus();
     app.step();
     ASSERT(!app.focus().get().valid());
-    app.handle_key_press(KeyEvent{.key = KeyCode::Tab, .modifiers = {.shift = true}});
+    app.dispatch(KeyEvent{.key = KeyCode::Tab, .modifiers = {.shift = true}});
     ASSERT(app.focus().get() == track(last));
     ASSERT(clipped.focus_ins == 0);
 }
@@ -288,68 +289,67 @@ TEST(routing_tab_is_consumed_wraps_and_works_after_click_focus_or_explicit_clear
 TEST(routing_click_uses_nearest_eligible_ancestor_and_only_left_button)
 {
     auto root = Probe{FocusPolicy::Click};
-    root.size = {4, 2};
+    arrange(root, {root.at(), {4, 2}});
     auto& child = add(root, {0, 0}, {4, 2});
     child.reply = {.handled = true};
     auto app = Application{root};
-    app.handle_mouse_press({{1, 0}, MouseButton::Right});
-    ASSERT(!root.focused);
-    app.handle_mouse_press({{1, 0}, MouseButton::Left});
-    ASSERT(root.focused);
+    app.dispatch(MousePress{{1, 0}, MouseButton::Right});
+    ASSERT(!root.is_focused());
+    app.dispatch(MousePress{{1, 0}, MouseButton::Left});
+    ASSERT(root.is_focused());
     ASSERT(app.focus().get() == track(root));
 }
 
 TEST(routing_focus_recovers_on_disable_hide_detach_and_policy_change)
 {
     auto root = Probe{};
-    root.size = {8, 2};
+    arrange(root, {root.at(), {8, 2}});
     auto& first = add(root, {0, 0}, {4, 2}, FocusPolicy::Strong);
     auto& second = add(root, {4, 0}, {4, 2}, FocusPolicy::Strong);
     auto app = Application{root};
     first.enabled = false;
     app.step();
-    ASSERT(!first.focused && first.focus_outs == 1 && second.focused);
+    ASSERT(!first.is_focused() && first.focus_outs == 1 && second.is_focused());
     first.enabled = true;
-    second.active = false;
+    second.visible = false;
     app.step();
-    ASSERT(first.focused);
+    ASSERT(first.is_focused());
     first.focus_policy = FocusPolicy::None;
     app.step();
     ASSERT(!app.focus().get().valid());
-    second.active = true;
+    second.visible = true;
     app.step();
-    ASSERT(second.focused);
+    ASSERT(second.is_focused());
     auto detached = std::move(root.children.back());
     root.children.pop_back();
     app.step();
-    ASSERT(!detached->focused && detached->focus_outs == 2);
+    ASSERT(!detached->is_focused() && detached->focus_outs == 2);
     auto other = Probe{FocusPolicy::Strong};
-    other.size = {1, 1};
-    ASSERT_THROWS(app.focus().set(other), std::invalid_argument);
+    arrange(other, {other.at(), {1, 1}});
+    ASSERT_THROWS(app.set_focus(other), std::invalid_argument);
 }
 
 TEST(routing_focus_tracks_widget_relocation_and_move_assignment_invalidates_old_target)
 {
     auto root = Row<std::vector<Probe>>{};
     root.children.emplace_back(FocusPolicy::Strong);
-    root.size = {10, 2};
-    root.resize({});
+    arrange(root, {root.at(), {10, 2}});
     auto app = Application{root};
     auto original = track(root.children.front());
     for (int i = 0; i < 10; ++i) {
         root.children.emplace_back(FocusPolicy::Strong);
     }
-    root.resize(root.size);
+    arrange(root, root.bounds());
     app.step();
     ASSERT(original.valid() && app.focus().get() == original);
-    ASSERT(original.get().focused && original.get().focus_ins == 1);
+    ASSERT(original.get().is_focused() && original.get().focus_ins == 1);
     auto target = Probe{};
     auto old = track(target);
-    auto external = target.lifetime;
+    auto external = track(target);
     auto source = Probe{};
     auto moved = track(source);
     target = std::move(source);
-    ASSERT(!old.valid() && *external == nullptr && moved.valid());
+    ASSERT(!old.valid() && external.try_get() == nullptr && moved.valid());
     ASSERT(&moved.get() == &target);
     auto& same_target = target;
     target = std::move(same_target);
@@ -359,24 +359,25 @@ TEST(routing_focus_tracks_widget_relocation_and_move_assignment_invalidates_old_
 TEST(routing_destroyed_focus_and_external_lifetime_storage_never_dangle)
 {
     auto root = Probe{};
-    root.size = {4, 2};
+    arrange(root, {root.at(), {4, 2}});
     auto& child = add(root, {0, 0}, {4, 2}, FocusPolicy::Strong);
     auto app = Application{root};
     auto view = track(child);
-    auto external = child.lifetime;
+    auto external = track(child);
     root.children.clear();
     app.step();
-    ASSERT(!view.valid() && !app.focus().get().valid() && *external == nullptr);
+    ASSERT(!view.valid() && !app.focus().get().valid() &&
+           external.try_get() == nullptr);
     ASSERT_THROWS(view.get(), std::logic_error);
     auto& next = add(root, {0, 0}, {4, 2}, FocusPolicy::Strong);
     app.step();
-    ASSERT(next.focused);
+    ASSERT(next.is_focused());
 }
 
 TEST(routing_callback_can_destroy_the_target_and_still_bubble_safely)
 {
     auto root = Probe{};
-    root.size = {4, 2};
+    arrange(root, {root.at(), {4, 2}});
     root.reply = {.handled = true};
     auto& child = add(root, {0, 0}, {4, 2}, FocusPolicy::Strong);
     auto app = Application{root};
@@ -384,40 +385,43 @@ TEST(routing_callback_can_destroy_the_target_and_still_bubble_safely)
         root.children.clear();
         return EventResponse{};
     };
-    ASSERT(app.handle_key_press(KeyEvent{.text = U"x"}).handled);
+    ASSERT(app.dispatch(KeyEvent{.text = U"x"}).handled);
     ASSERT(root.keys == 1 && !app.focus().get().valid());
 }
 
 TEST(routing_reentrant_focus_out_can_override_the_requested_transition)
 {
     auto root = Probe{};
-    root.size = {6, 2};
+    arrange(root, {root.at(), {6, 2}});
     auto& first = add(root, {0, 0}, {2, 2}, FocusPolicy::Strong);
     auto& second = add(root, {2, 0}, {2, 2}, FocusPolicy::Strong);
     auto& third = add(root, {4, 0}, {2, 2}, FocusPolicy::Strong);
     auto app = Application{root};
-    first.out_action = [&] { return app.focus().set(third); };
-    app.focus().set(second);
-    ASSERT(third.focused && !second.focused && !first.focused);
+    first.out_action = [&] {
+        app.set_focus(third);
+        return EventResponse{};
+    };
+    app.set_focus(second);
+    ASSERT(third.is_focused() && !second.is_focused() && !first.is_focused());
     ASSERT(app.focus().get() == track(third));
 }
 
 TEST(routing_quit_stops_propagation_and_repaint_is_explicit)
 {
     auto root = Probe{};
-    root.size = {4, 2};
+    arrange(root, {root.at(), {4, 2}});
     root.reply = {.handled = true};
     auto& child = add(root, {0, 0}, {4, 2}, FocusPolicy::Strong);
     auto app = Application{root};
     settle(app);
     child.reply = {.handled = true};
-    ASSERT(!app.handle_key_press(KeyEvent{.text = U"x"}).repaint);
+    ASSERT(!app.dispatch(KeyEvent{.text = U"x"}).repaint);
     ASSERT(!app.paint());
     child.reply = {.repaint = true};
-    ASSERT(app.handle_key_press(KeyEvent{.text = U"y"}).repaint);
+    ASSERT(app.dispatch(KeyEvent{.text = U"y"}).repaint);
     ASSERT(app.paint());
     child.reply = {.quit = 7};
-    auto const result = app.handle_key_press(KeyEvent{.text = U"q"});
+    auto const result = app.dispatch(KeyEvent{.text = U"q"});
     ASSERT(result.quit == 7 && app.loop().exit_code() == 7);
     ASSERT(root.keys == 1);
 }
@@ -425,12 +429,12 @@ TEST(routing_quit_stops_propagation_and_repaint_is_explicit)
 TEST(routing_widget_timer_results_and_ancestor_eligibility_control_paint)
 {
     auto root = Probe{};
-    root.size = {4, 2};
+    arrange(root, {root.at(), {4, 2}});
     auto& parent = add(root, {0, 0}, {4, 2});
     auto& child = add(parent, {0, 0}, {4, 2});
     auto app = Application{root};
     settle(app);
-    auto timer = Timer{child, 10ms};
+    auto timer = Timer{child, 10ms, [](auto& widget) { return widget.tick(); }};
     auto const now = EventLoop::Clock::time_point{};
     timer.start(now);
     app.step(now + 10ms);
@@ -450,27 +454,28 @@ TEST(routing_widget_timer_results_and_ancestor_eligibility_control_paint)
 TEST(routing_builtin_widgets_ignore_unused_keys_and_partial_paste_without_repaint)
 {
     auto edit = LineEdit{};
-    edit.size = {8, 1};
+    arrange(edit, {edit.at(), {8, 1}});
     auto app = Application{edit};
     settle(app);
-    ASSERT(!app.handle_key_press(KeyEvent{.key = KeyCode::Escape}).handled);
+    ASSERT(!app.dispatch(KeyEvent{.key = KeyCode::Escape}).handled);
     ASSERT(!app.paint());
-    ASSERT(!app.handle_key_press(KeyEvent{.key = KeyCode::ArrowLeft}).repaint);
-    ASSERT(!app.handle_paste({"hel", true, false}).repaint);
-    ASSERT(app.handle_paste({"lo", false, true}).repaint && edit.text() == "hello");
+    ASSERT(!app.dispatch(KeyEvent{.key = KeyCode::ArrowLeft}).repaint);
+    ASSERT(!app.dispatch(esc::PasteChunk{"hel", true, false}).repaint);
+    ASSERT(app.dispatch(esc::PasteChunk{"lo", false, true}).repaint &&
+           edit.text() == "hello");
     auto button = BasicButton{};
-    ASSERT(!button.key_press(KeyEvent{.key = KeyCode::Escape}).handled);
-    ASSERT(!button.mouse_press({{0, 0}, MouseButton::Right}).handled);
+    ASSERT(!button.handle(KeyEvent{.key = KeyCode::Escape}).handled);
+    ASSERT(!button.handle(MousePress{{0, 0}, MouseButton::Right}).handled);
     auto box = TextBox{{.text = "short"}};
-    box.size = {8, 8};
+    arrange(box, {box.at(), {8, 8}});
     box.paint(Canvas{app.loop().screen});
-    ASSERT(box.mouse_press({{0, 7}, MouseButton::Left}).handled);
+    ASSERT(box.handle(MousePress{{0, 7}, MouseButton::Left}).handled);
 }
 
 TEST(routing_checked_geometry_rejects_overflow_without_hit_test_overflow)
 {
     auto root = Probe{};
-    root.size = {8, 2};
+    arrange(root, {root.at(), {8, 2}});
     auto& child = add(root, {std::numeric_limits<int>::max(), 0}, {8, 2});
     ASSERT(hit_path(widget_tree(root), {7, 0}) == std::vector<std::size_t>{0});
     add(child, {1, 0}, {1, 1});
@@ -482,23 +487,22 @@ TEST(routing_focus_out_relocation_reacquires_pending_target)
     auto root = Row<std::vector<Probe>>{};
     root.children.emplace_back(FocusPolicy::Strong);
     root.children.emplace_back(FocusPolicy::Strong);
-    root.size = {10, 2};
-    root.resize({});
+    arrange(root, {root.at(), {10, 2}});
     auto app = Application{root};
     auto target = track(root.children[1]);
     root.children[0].out_action = [&] {
         root.children.reserve(root.children.capacity() + 20);
         return EventResponse{};
     };
-    app.focus().set(root.children[1]);
-    ASSERT(target.valid() && target.get().focused && target.get().focus_ins == 1);
+    app.set_focus(root.children[1]);
+    ASSERT(target.valid() && target.get().is_focused() && target.get().focus_ins == 1);
     ASSERT(app.focus().get() == target);
 }
 
 TEST(routing_focus_and_hover_mutations_precede_mouse_delivery)
 {
     auto root = Probe{};
-    root.size = {6, 2};
+    arrange(root, {root.at(), {6, 2}});
     auto& first = add(root, {0, 0}, {3, 2}, FocusPolicy::Strong);
     auto& second = add(root, {3, 0}, {3, 2}, FocusPolicy::Strong);
     auto app = Application{root};
@@ -506,60 +510,60 @@ TEST(routing_focus_and_hover_mutations_precede_mouse_delivery)
         second.enabled = false;
         return EventResponse{};
     };
-    app.handle_mouse_press({{4, 0}, MouseButton::Left});
+    app.dispatch(MousePress{{4, 0}, MouseButton::Left});
     ASSERT(second.presses.empty());
-    ASSERT(first.focused && !second.focused);
+    ASSERT(first.is_focused() && !second.is_focused());
     first.out_action = {};
     second.enabled = true;
     second.enter_action = [&] {
         second.enabled = false;
         return EventResponse{};
     };
-    app.handle_mouse_move({.at = {-1, 0}, .held_button = {}});
-    app.handle_mouse_press({{4, 0}, MouseButton::Left});
+    app.dispatch(MouseMove{.at = {-1, 0}, .held_button = {}});
+    app.dispatch(MousePress{{4, 0}, MouseButton::Left});
     ASSERT(second.presses.empty());
 }
 
 TEST(routing_focused_cursor_uses_the_painted_clip_and_disappears_when_disabled)
 {
     auto root = Probe{};
-    root.size = {8, 4};
+    arrange(root, {root.at(), {8, 4}});
     auto& parent = add(root, {2, 1}, {3, 2});
     auto& child = add(parent, {-2, -1}, {8, 5}, FocusPolicy::Strong);
-    child.cursor = Point{0, 0};
+    child.paint_cursor = Point{0, 0};
     auto app = Application{root};
-    app.post(esc::Resize{root.size});
+    app.post(esc::Resize{root.size()});
     app.step();
     app.paint();
     ASSERT(!app.loop().cursor);
-    child.cursor = Point{2, 1};
+    child.paint_cursor = Point{2, 1};
     app.request_repaint();
     app.paint();
     ASSERT((app.loop().cursor == Point{2, 1}));
     child.enabled = false;
     app.step();
     app.paint();
-    ASSERT(!app.loop().cursor && !child.focused);
+    ASSERT(!app.loop().cursor && !child.is_focused());
 }
 
 TEST(routing_failed_initial_focus_detaches_and_restores_widget_flags)
 {
     auto root = Probe{FocusPolicy::Strong};
-    root.size = {4, 2};
+    arrange(root, {root.at(), {4, 2}});
     root.in_action = []() -> EventResponse {
         throw std::runtime_error{"focus callback"};
     };
     ASSERT_THROWS(Application{root}, std::runtime_error);
-    ASSERT(!root.focused);
+    ASSERT(!root.is_focused());
     root.in_action = {};
     auto app = Application{root};
-    ASSERT(root.focused && app.focus().get() == track(root));
+    ASSERT(root.is_focused() && app.focus().get() == track(root));
 }
 
 TEST(routing_nested_dispatch_preserves_outer_ancestry_when_a_subtree_is_destroyed)
 {
     auto root = Probe{};
-    root.size = {8, 2};
+    arrange(root, {root.at(), {8, 2}});
     auto& parent = add(root, {0, 0}, {4, 2});
     auto& first = add(parent, {0, 0}, {4, 2}, FocusPolicy::Strong);
     auto& second = add(root, {4, 0}, {4, 2}, FocusPolicy::Strong);
@@ -568,20 +572,20 @@ TEST(routing_nested_dispatch_preserves_outer_ancestry_when_a_subtree_is_destroye
     auto app = Application{root};
     auto first_view = track(first);
     first.key_action = [&] {
-        app.focus().set(second);
-        ASSERT(app.handle_key_press({.text = U"nested"}).handled);
+        app.set_focus(second);
+        ASSERT(app.dispatch(KeyEvent{.text = U"nested"}).handled);
         root.children.erase(root.children.begin());
         return EventResponse{};
     };
-    ASSERT(app.handle_key_press({.text = U"outer"}).handled);
-    ASSERT(!first_view.valid() && second.focused);
+    ASSERT(app.dispatch(KeyEvent{.text = U"outer"}).handled);
+    ASSERT(!first_view.valid() && second.is_focused());
     ASSERT(second.keys == 1 && root.keys == 1);
 }
 
 TEST(routing_tab_consumes_its_snapshot_before_reentrant_focus_callbacks)
 {
     auto root = Probe{};
-    root.size = {8, 2};
+    arrange(root, {root.at(), {8, 2}});
     auto& first = add(root, {0, 0}, {4, 2}, FocusPolicy::Strong);
     auto& second = add(root, {4, 0}, {4, 2}, FocusPolicy::Strong);
     auto app = Application{root};
@@ -592,8 +596,8 @@ TEST(routing_tab_consumes_its_snapshot_before_reentrant_focus_callbacks)
         app.step();
         return EventResponse{};
     };
-    ASSERT(app.handle_key_press({.key = KeyCode::Tab}).handled);
-    ASSERT(second.focused && !first.focused && root.children.size() == 202);
+    ASSERT(app.dispatch(KeyEvent{.key = KeyCode::Tab}).handled);
+    ASSERT(second.is_focused() && !first.is_focused() && root.children.size() == 202);
     ASSERT(app.focus().get() == track(second));
 }
 
@@ -601,27 +605,26 @@ TEST(routing_mouse_bubbles_with_original_coordinates_after_siblings_are_reordere
 {
     struct MovingProbe : Probe {
         std::function<void()> move_action;
-        auto mouse_move(MouseMove move) -> EventResponse override
+        auto handle(MouseMove const& move) -> EventResponse override
         {
-            auto const response = Probe::mouse_move(move);
+            auto const response = Probe::handle(move);
             move_action();
             return response;
         }
     };
     auto root = Probe{};
-    root.size = {10, 3};
+    arrange(root, {root.at(), {10, 3}});
     auto& parent = add(root, {2, 1}, {4, 2});
     add(root, {0, 0}, {0, 0});
     auto child = std::make_unique<MovingProbe>();
-    child->at = {1, 0};
-    child->size = {2, 1};
+    arrange(*child, {{1, 0}, {2, 1}});
     child->move_action = [&] {
-        parent.at = {4, 1};
+        arrange(parent, {{4, 1}, parent.size()});
         std::ranges::reverse(root.children);
     };
     parent.children.push_back(std::move(child));
     auto app = Application{root};
-    app.handle_mouse_move({.at = {3, 1}, .held_button = {}});
+    app.dispatch(MouseMove{.at = {3, 1}, .held_button = {}});
     ASSERT((parent.moves == std::vector<Point>{{1, 0}}));
     ASSERT((root.moves == std::vector<Point>{{3, 1}}));
 }
@@ -629,41 +632,43 @@ TEST(routing_mouse_bubbles_with_original_coordinates_after_siblings_are_reordere
 TEST(routing_failed_tree_refresh_preserves_focus_and_recovers_after_correction)
 {
     auto root = Probe{};
-    root.size = {4, 2};
+    arrange(root, {root.at(), {4, 2}});
     auto& child = add(root, {0, 0}, {4, 2}, FocusPolicy::Strong);
     auto app = Application{root};
-    add(root, {0, 0}, {-1, 1});
-    ASSERT_THROWS(app.step(), std::invalid_argument);
-    ASSERT(child.focused && app.focus().get() == track(child));
+    auto& invalid = add(root, {std::numeric_limits<int>::max(), 0}, {1, 1});
+    add(invalid, {1, 0}, {1, 1});
+    ASSERT_THROWS(app.step(), std::overflow_error);
+    ASSERT(child.is_focused() && app.focus().get() == track(child));
     root.children.pop_back();
-    app.handle_key_press({.text = U"x"});
+    app.dispatch(KeyEvent{.text = U"x"});
     ASSERT(child.keys == 1 && root.keys == 1);
 }
 
 TEST(routing_live_detachment_and_reattachment_update_timer_ownership)
 {
     auto root = Probe{};
-    root.size = {4, 2};
+    arrange(root, {root.at(), {4, 2}});
     auto& child = add(root, {0, 0}, {4, 2}, FocusPolicy::Strong);
     auto app = Application{root};
-    auto timer = Timer{child, 10ms};
+    auto timer = Timer{child, 10ms, [](auto& widget) { return widget.tick(); }};
     auto const now = EventLoop::Clock::time_point{};
     timer.start(now);
     auto detached = std::move(root.children.back());
     root.children.pop_back();
     app.step(now + 10ms);
-    ASSERT(!timer.is_running() && child.ticks == 0 && !child.focused);
+    ASSERT(!timer.is_running() && child.ticks == 0 && !child.is_focused());
     root.children.push_back(std::move(detached));
     timer.start(now + 10ms);
     app.step(now + 20ms);
-    ASSERT(timer.is_running() && child.ticks == 1 && child.focused);
+    ASSERT(timer.is_running() && child.ticks == 1 && child.is_focused());
 }
 
 TEST(routing_failed_attachment_keeps_rejecting_foreign_widgets_until_detached)
 {
     auto first = Probe{};
     auto second = Probe{};
-    first.size = second.size = {4, 2};
+    arrange(first, {{0, 0}, {4, 2}});
+    arrange(second, {{0, 0}, {4, 2}});
     auto& child = add(second, {0, 0}, {4, 2}, FocusPolicy::Strong);
     auto first_app = Application{first};
     auto second_app = Application{second};
@@ -671,10 +676,10 @@ TEST(routing_failed_attachment_keeps_rejecting_foreign_widgets_until_detached)
     second.children.pop_back();
     ASSERT_THROWS(first_app.step(), std::logic_error);
     ASSERT_THROWS(first_app.step(), std::logic_error);
-    ASSERT(child.focused && child.keys == 0);
+    ASSERT(child.is_focused() && child.keys == 0);
     second_app.step();
-    first_app.handle_key_press({.text = U"x"});
-    ASSERT(child.focused && child.keys == 1);
+    first_app.dispatch(KeyEvent{.text = U"x"});
+    ASSERT(child.is_focused() && child.keys == 1);
     ASSERT(first_app.focus().get() == track(child) &&
            !second_app.focus().get().valid());
 }

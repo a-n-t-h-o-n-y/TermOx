@@ -10,6 +10,8 @@ namespace ox {
 
 class ScrollBar : public Widget {
    public:
+    using Widget::handle;
+
     struct Options {
         int scrollable_length = 0;
         int position = 0;
@@ -31,20 +33,21 @@ class ScrollBar : public Widget {
     ScrollBar(Options x = init);
 
    public:
-    void paint(Canvas c) override;
+    auto paint(Canvas c) -> Cursor override;
 
-    auto mouse_press(MousePress m) -> EventResponse override;
+    auto handle(MousePress const& m) -> EventResponse override;
 
-    auto mouse_wheel(MouseWheel m) -> EventResponse override;
+    auto handle(MouseWheel const& m) -> EventResponse override;
 
-    auto timer() -> EventResponse override;
+    auto tick() -> EventResponse;
 
    private:
     void increment_position(int amount = 1);
 
    private:
     using ClockType = std::chrono::steady_clock;
-    Timer timer_{*this, std::chrono::milliseconds{16}};
+    Timer timer_{*this, std::chrono::milliseconds{16},
+                 [](ScrollBar& widget) { return widget.tick(); }};
     ClockType::time_point time_at_click_;
     int position_at_click_ = 0;
     int target_position_ = 0;

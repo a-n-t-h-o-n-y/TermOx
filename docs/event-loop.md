@@ -17,8 +17,8 @@ int main()
 ```
 
 The root widget must outlive the application. Each widget belongs to one application.
-The application selects the first visible, active, enabled widget that accepts tab focus. Focus is local
-to the application; use `app.focus().set(widget)`, `get()`, or `clear()`.
+The application selects the first visible, enabled widget that accepts tab focus. Focus is local
+to the application; use `app.set_focus(widget)`, `app.focus().get()`, or `app.clear_focus()`.
 
 ## Dispatch and repaint
 
@@ -39,10 +39,12 @@ Return `{.handled = true, .repaint = true}` to request a frame, or
 `EventLoop::step(handler, now)` processes a snapshot of posted events, then due timers.
 Posts made during callbacks wait for the next step. Input order is preserved. Multiple
 repaint requests are combined into one pending frame. `paint(handler)` calls
-`handle_paint(Canvas)` once if a frame is pending, and returns whether to present it.
+`paint(Canvas)` once if a frame is pending, and returns whether to present it.
 A resize requests a repaint even if the handler has no resize method.
 
-Widget input, hover, focus, and timer callbacks return `EventResponse`. Handling an
+Widget input, hover, focus, and timer callbacks return `EventResponse`.
+Raw handlers and standalone focus operations return effects; the event loop applies
+them. `app.dispatch(event)` delivers immediately and applies effects. Handling an
 event does not imply repainting. See [routing and focus](routing-and-focus.md) for
 clipped mouse paths, keyboard bubbling, Tab navigation, and focus lifetime.
 
@@ -88,7 +90,8 @@ auto timer = Timer{std::chrono::milliseconds{30}, [&] {
 loop.watch(timer);
 ```
 
-`Timer(widget, interval, launch)` registers a passive widget timer. The application
+`Timer(widget, interval, callback, launch)` registers a passive widget timer.
+The callback receives the current widget by reference, so it follows widget moves. The application
 adopts it when it attaches the widget tree. Timers created after attachment are
 registered immediately. The widget's lifetime handle preserves the target when the
 widget moves; a destroyed target is ignored. Detaching a widget stops and releases its
@@ -108,7 +111,7 @@ An injected `steady_clock::time_point` makes scheduling tests deterministic.
 ```cpp
 auto loop = EventLoop{};
 auto terminal = Terminal{};
-// handler provides handle_key_press, handle_paint, etc. as needed.
+// handler provides handle(KeyEvent const&), paint(Canvas), etc. as needed.
 return process_events(loop, terminal, handler);
 ```
 

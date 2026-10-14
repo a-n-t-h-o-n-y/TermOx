@@ -12,24 +12,22 @@ Widget::Widget(FocusPolicy fp, SizePolicy sp) : focus_policy{fp}, size_policy{sp
 Widget::Widget(Widget&& other)
     : focus_policy{other.focus_policy},
       size_policy{other.size_policy},
-      cursor{other.cursor},
-      active{other.active},
+      visible{other.visible},
       enabled{other.enabled},
-      focused{std::exchange(other.focused, false)},
-      at{other.at},
-      size{other.size},
-      lifetime{std::move(other.lifetime)},
+      bounds_{other.bounds_},
+      focused_{std::exchange(other.focused_, false)},
+      lifetime_{std::move(other.lifetime_)},
       application_{std::exchange(other.application_, nullptr)},
       timers_{std::move(other.timers_)}
 {
-    if (!lifetime) { lifetime = std::make_shared<Widget*>(this); }
-    *lifetime = this;
+    if (!lifetime_) { lifetime_ = std::make_shared<Widget*>(this); }
+    *lifetime_ = this;
 }
 
 auto Widget::operator=(Widget&& other) -> Widget&
 {
     if (this == &other) { return *this; }
-    if (lifetime) { *lifetime = nullptr; }
+    if (lifetime_) { *lifetime_ = nullptr; }
     for (auto const& entry : timers_) {
         if (auto timer = entry.lock()) {
             timer->deadline.reset();
@@ -38,20 +36,26 @@ auto Widget::operator=(Widget&& other) -> Widget&
     }
     focus_policy = other.focus_policy;
     size_policy = other.size_policy;
-    cursor = other.cursor;
-    active = other.active;
+    visible = other.visible;
     enabled = other.enabled;
-    focused = std::exchange(other.focused, false);
-    at = other.at;
-    size = other.size;
+    focused_ = std::exchange(other.focused_, false);
+    bounds_ = other.bounds_;
 
     application_ = std::exchange(other.application_, nullptr);
     timers_ = std::move(other.timers_);
-    lifetime = std::move(other.lifetime);
-    if (!lifetime) { lifetime = std::make_shared<Widget*>(this); }
-    *lifetime = this;
+    lifetime_ = std::move(other.lifetime_);
+    if (!lifetime_) { lifetime_ = std::make_shared<Widget*>(this); }
+    *lifetime_ = this;
 
     return *this;
+}
+
+void arrange(Widget& widget, Rect bounds)
+{
+    validate(bounds.size);
+    auto const previous = std::exchange(widget.bounds_, bounds);
+    widget.request_repaint();
+    widget.on_arrange(previous);
 }
 
 void Widget::request_repaint()
@@ -67,7 +71,7 @@ Widget::~Widget()
             timer->owner = nullptr;
         }
     }
-    if (lifetime) { *lifetime = nullptr; }
+    if (lifetime_) { *lifetime_ = nullptr; }
 }
 
 }  // namespace ox

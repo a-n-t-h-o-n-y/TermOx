@@ -19,6 +19,8 @@ namespace ox {
 /// Emits signals on left mouse button press and release and enter key press.
 class BasicButton : public Widget {
    public:
+    using Widget::handle;
+
     sl::Signal<void()> on_press;
     sl::Signal<void()> on_release;
 
@@ -27,11 +29,11 @@ class BasicButton : public Widget {
                 SizePolicy sp = SizePolicy::flex());
 
    public:
-    auto key_press(KeyEvent) -> EventResponse override;
+    auto handle(KeyEvent const&) -> EventResponse override;
 
-    auto mouse_press(MousePress) -> EventResponse override;
+    auto handle(MousePress const&) -> EventResponse override;
 
-    auto mouse_release(MouseRelease) -> EventResponse override;
+    auto handle(MouseRelease const&) -> EventResponse override;
 };
 
 /// Decoration that fades in and out with mouse hover.
@@ -45,6 +47,8 @@ struct Fade {
 /// BasicButton with a Label and optional Decoration.
 class Button : public BasicButton {
    public:
+    using Widget::handle;
+
     using PaintFn = std::function<void(Canvas)>;
     using Decoration = std::variant<PaintFn, Fade>;
 
@@ -66,11 +70,11 @@ class Button : public BasicButton {
     Button(Options x = init);
 
    public:
-    void paint(Canvas) override;
+    auto paint(Canvas) -> Cursor override;
 
-    auto mouse_press(MousePress) -> EventResponse override;
+    auto handle(MousePress const&) -> EventResponse override;
 
-    auto mouse_release(MouseRelease) -> EventResponse override;
+    auto handle(MouseRelease const&) -> EventResponse override;
 
     auto focus_in() -> EventResponse override;
 
@@ -80,7 +84,7 @@ class Button : public BasicButton {
 
     auto mouse_leave() -> EventResponse override;
 
-    auto timer() -> EventResponse override;
+    auto tick() -> EventResponse;
 
    private:
     static constexpr auto timer_period_ms = 10;

@@ -53,15 +53,16 @@ void CheckBox::set_state(State s)
 
 auto CheckBox::get_state() const -> State { return state_; }
 
-auto CheckBox::key_press(KeyEvent k) -> EventResponse
+auto CheckBox::handle(KeyEvent const& k) -> EventResponse
 {
+    if (k.action == KeyAction::Release) { return {}; }
     if (!k.matches(KeyCode::Enter, {}, k.action)) { return {}; }
     this->toggle();
 
     return {.handled = true, .repaint = true};
 }
 
-auto CheckBox::mouse_press(MousePress m) -> EventResponse
+auto CheckBox::handle(MousePress const& m) -> EventResponse
 {
     if (m.button != MouseButton::Left) { return {}; }
     this->toggle();
@@ -69,11 +70,13 @@ auto CheckBox::mouse_press(MousePress m) -> EventResponse
     return {.handled = true, .repaint = true};
 }
 
-void CheckBox::paint(Canvas c)
+auto CheckBox::paint(Canvas c) -> Cursor
 {
     auto glyphs = state_ == State::Checked ? display.checked : display.unchecked;
     if (in_focus_) { glyphs = glyphs | display.in_focus_style; }
     put(c, {.x = 0, .y = 0}, glyphs);
+
+    return {};
 }
 
 auto CheckBox::focus_in() -> EventResponse

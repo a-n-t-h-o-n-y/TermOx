@@ -28,7 +28,7 @@ void LineEdit::set_text(std::string_view text)
     request_repaint();
 }
 void LineEdit::update_layout()
-{ layout_.update(editor.text(), size.width, TextWrap::None, layout_.policy()); }
+{ layout_.update(editor.text(), size().width, TextWrap::None, layout_.policy()); }
 
 auto LineEdit::display_offset(int width) -> int
 {
@@ -55,40 +55,40 @@ auto LineEdit::display_offset(int width) -> int
     return -scroll_column_;
 }
 
-auto LineEdit::key_press(KeyEvent key) -> EventResponse
+auto LineEdit::handle(KeyEvent const& key) -> EventResponse
 {
-    if (key.action != KeyAction::Release &&
-        key.matches(KeyCode::Enter, {}, key.action)) {
+    if (key.action == KeyAction::Release) { return {}; }
+    if (key.matches(KeyCode::Enter, {}, key.action)) {
         auto const value = editor.text();  // Slots may replace the editor's text.
         on_enter(value);
         return {.handled = true, .repaint = true};
     }
     update_layout();
-    auto response = editor.key_press(
-        key, layout_, validator.value_or(std::function<bool(char32_t)>{}));
+    auto response = edit_key(editor, key, layout_,
+                             validator.value_or(std::function<bool(char32_t)>{}));
     if (response.repaint) {
         update_layout();
-        display_offset(size.width);
+        display_offset(size().width);
     }
     return response;
 }
 
-auto LineEdit::paste(esc::PasteChunk const& chunk) -> EventResponse
+auto LineEdit::handle(esc::PasteChunk const& chunk) -> EventResponse
 {
     auto const changed =
         editor.paste(chunk, validator.value_or(std::function<bool(char32_t)>{}));
     if (changed) {
         update_layout();
-        display_offset(size.width);
+        display_offset(size().width);
     }
     return {.handled = true, .repaint = changed};
 }
 
-auto LineEdit::mouse_press(MousePress mouse) -> EventResponse
+auto LineEdit::handle(MousePress const& mouse) -> EventResponse
 {
     if (mouse.button != MouseButton::Left) { return {}; }
     update_layout();
-    auto const offset = display_offset(size.width);
+    auto const offset = display_offset(size().width);
     auto const changed = editor.set_caret(
         layout_.offset(
             {(int)std::clamp(std::int64_t{mouse.at.x} - offset, std::int64_t{0},
@@ -98,13 +98,13 @@ auto LineEdit::mouse_press(MousePress mouse) -> EventResponse
     return {.handled = true, .repaint = changed};
 }
 
-void LineEdit::paint(Canvas canvas)
+auto LineEdit::paint(Canvas canvas) -> Cursor
 {
     layout_.update(editor.text(), canvas.size().width, TextWrap::None,
                    canvas.width_policy());
     auto const offset = display_offset(canvas.size().width);
     fill(canvas, bg(background));
-    if (editor.text().empty() && !focused) {
+    if (editor.text().empty() && !is_focused()) {
         ghost_layout_.update(ghost_text, canvas.size().width, TextWrap::None,
                              canvas.width_policy());
         auto const x = find_align_offset(align, canvas.size().width,
@@ -117,6 +117,6 @@ void LineEdit::paint(Canvas canvas)
                       text_style | selection_style, editor.selection());
     }
     auto const point = Point{layout_.position(editor.caret()).x + offset, 0};
-    cursor = canvas.contains(point) ? Cursor{point} : Cursor{};
+    return canvas.contains(point) ? Cursor{point} : Cursor{};
 }
 }  // namespace ox

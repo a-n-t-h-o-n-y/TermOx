@@ -4,13 +4,16 @@
 
 namespace ox {
 
-/** Application-local focus. The root and event loop must outlive this object. */
+/** Application-local focus. The root must outlive this object. */
 class Focus {
    public:
-    Focus(Widget& root, EventLoop& loop) : root_{root}, loop_{loop} {}
+    explicit Focus(Widget& root) : root_{root} {}
+    ~Focus();
+    Focus(Focus const&) = delete;
+    auto operator=(Focus const&) -> Focus& = delete;
 
-    /** Reject targets outside the active, enabled tree or with FocusPolicy::None.
-     * Transitions notify widgets and schedule their effects on the owned loop.
+    /** Reject targets outside the visible, enabled tree or with FocusPolicy::None.
+     * Transitions notify widgets and return effects without applying them.
      */
     auto set(Widget& widget) -> EventResponse;
     auto clear() -> EventResponse;
@@ -23,11 +26,8 @@ class Focus {
 
    private:
     Widget& root_;
-    EventLoop& loop_;
     LifetimeView<Widget> in_focus_;
     bool recover_ = true;
     std::size_t revision_ = 0;
-
-    void report(EventResponse response);
 };
 }  // namespace ox

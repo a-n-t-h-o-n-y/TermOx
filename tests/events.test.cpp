@@ -11,29 +11,24 @@ TEST(key_actions_preserve_event_data)
         KeyEvent received;
         bool released = false;
 
-        auto handle_key_press(KeyEvent e) -> EventResponse
+        auto handle(KeyEvent const& e) -> EventResponse
         {
             received = e;
+            released = e.action == KeyAction::Release;
             return {.handled = true};
         }
 
-        auto handle_key_release(KeyEvent e) -> EventResponse
-        {
-            received = e;
-            released = true;
-            return {.handled = true};
-        }
     } handler;
     auto buffer = Frame{{0, 0}};
     auto key = KeyEvent{.key = U'a',
                         .modifiers = {.shift = true},
                         .action = KeyAction::Repeat,
                         .text = U"A"};
-    ASSERT((apply_event(key, handler, buffer).handled));
+    ASSERT((dispatch(key, handler, buffer).handled));
     ASSERT((handler.received == key));
     ASSERT((!handler.released));
     key.action = KeyAction::Release;
-    ASSERT((apply_event(key, handler, buffer).handled));
+    ASSERT((dispatch(key, handler, buffer).handled));
     ASSERT((handler.received == key));
     ASSERT((handler.released));
 }
@@ -45,17 +40,17 @@ TEST(mouse_events_preserve_buttons_modifiers_and_wheel_steps)
         MouseMove move;
         MouseWheel wheel;
 
-        auto handle_mouse_release(MouseRelease e) -> EventResponse
+        auto handle(MouseRelease const& e) -> EventResponse
         {
             release = e;
             return {.handled = true};
         }
-        auto handle_mouse_move(MouseMove e) -> EventResponse
+        auto handle(MouseMove const& e) -> EventResponse
         {
             move = e;
             return {.handled = true};
         }
-        auto handle_mouse_wheel(MouseWheel e) -> EventResponse
+        auto handle(MouseWheel const& e) -> EventResponse
         {
             wheel = e;
             return {.handled = true};
@@ -65,9 +60,9 @@ TEST(mouse_events_preserve_buttons_modifiers_and_wheel_steps)
     auto const release = MouseRelease{{2, 3}, std::nullopt, {.ctrl = true}};
     auto const move = MouseMove{{4, 5}, MouseButton::Left, {.shift = true}};
     auto const wheel = MouseWheel{{6, 7}, -2, 3, {.alt = true}};
-    ASSERT((apply_event(release, handler, buffer).handled));
-    ASSERT((apply_event(move, handler, buffer).handled));
-    ASSERT((apply_event(wheel, handler, buffer).handled));
+    ASSERT((dispatch(release, handler, buffer).handled));
+    ASSERT((dispatch(move, handler, buffer).handled));
+    ASSERT((dispatch(wheel, handler, buffer).handled));
     ASSERT((handler.release == release));
     ASSERT((handler.move == move));
     ASSERT((handler.wheel == wheel));
@@ -89,18 +84,18 @@ TEST(paste_dispatch_and_unhandled_events)
 {
     struct Handler {
         std::string bytes;
-        auto handle_paste(esc::PasteChunk const& chunk) -> EventResponse
+        auto handle(esc::PasteChunk const& chunk) -> EventResponse
         {
             bytes += chunk.bytes;
             return {.handled = true};
         }
     } handler;
     auto buffer = Frame{{0, 0}};
-    ASSERT((apply_event(esc::PasteChunk{"abc", true, true}, handler, buffer).handled));
+    ASSERT((dispatch(esc::PasteChunk{"abc", true, true}, handler, buffer).handled));
     ASSERT((handler.bytes == "abc"));
-    ASSERT((!apply_event(esc::Focus{true}, handler, buffer).handled));
-    ASSERT((!apply_event(KeyEvent{.key = U'a'}, handler, buffer).handled));
-    auto result = apply_event(event::Interrupt{}, handler, buffer);
+    ASSERT((!dispatch(esc::Focus{true}, handler, buffer).handled));
+    ASSERT((!dispatch(KeyEvent{.key = U'a'}, handler, buffer).handled));
+    auto result = dispatch(event::Interrupt{}, handler, buffer);
     ASSERT((result.handled));
     ASSERT((result.quit == 1));
 }

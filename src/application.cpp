@@ -58,22 +58,21 @@ void paint_tree(std::span<WidgetNode const> tree,
     }
     if (!node.widget.valid()) { return; }
     auto& widget = node.widget.get();
-    widget.paint(canvas);
+    auto const local = widget.paint(canvas);
     if (node.widget.valid() && node.widget == focus) {
-        auto const local = node.widget.get().cursor;
         cursor = local && canvas.contains(*local) ? Cursor{canvas.to_global(*local)}
                                                   : Cursor{};
     }
 }
 }  // namespace
 
-Application::Application(Widget& head) : head_{head}, focus_{head, loop_}
+Application::Application(Widget& head) : head_{head}, focus_{head}
 {
     try {
         tree_ = widget_tree(head_);
         attach_widgets();
         attachments_current_ = true;
-        focus_.reconcile(tree_);
+        loop_.apply(focus_.reconcile(tree_));
     }
     catch (...) {
         for (auto const& target : attached_) {
@@ -81,7 +80,7 @@ Application::Application(Widget& head) : head_{head}, focus_{head, loop_}
                 for (auto const& timer : target.get().timers_) {
                     loop_.unwatch(timer);
                 }
-                target.get().focused = false;
+                target.get().focused_ = false;
                 target.get().application_ = nullptr;
             }
         }
@@ -101,7 +100,7 @@ Application::~Application()
             for (auto const& timer : target.get().timers_) {
                 loop_.unwatch(timer);
             }
-            target.get().focused = false;
+            target.get().focused_ = false;
             target.get().application_ = nullptr;
         }
     }
@@ -155,12 +154,6 @@ void Application::attach_widgets()
         std::erase_if(widget.timers_,
                       [](auto const& timer) { return timer.expired(); });
     }
-}
-
-void Application::report(EventResponse response)
-{
-    if (response.repaint) { loop_.request_repaint(); }
-    if (response.quit && !loop_.exit_code()) { loop_.quit(*response.quit); }
 }
 
 auto Application::is_interactive(Widget const& widget) const -> bool
@@ -251,7 +244,6 @@ auto Application::synchronize() -> EventResponse
             }
         }
     }
-    report(result);
     return result;
 }
 
@@ -259,30 +251,46 @@ auto Application::run(Terminal::Options options) -> int
 {
     if (auto code = loop_.exit_code()) { return *code; }
     auto terminal = Terminal{options};
-    return process_events(loop_, terminal, *this, [this] { synchronize(); });
+    return process_events(loop_, terminal, *this, [this] { return synchronize(); });
 }
 
 auto Application::step(EventLoop::Clock::time_point now) -> EventResponse
 {
     auto result = synchronize();
+    loop_.apply(result);
     if (!result.quit) { result = combine(result, loop_.step(*this, now)); }
-    if (!result.quit) { result = combine(result, synchronize()); }
+    if (!result.quit) {
+        auto const response = synchronize();
+        loop_.apply(response);
+        result = combine(result, response);
+    }
     return result;
 }
 
 auto Application::paint() -> bool
 {
-    synchronize();
+    loop_.apply(synchronize());
     return loop_.paint(*this);
 }
 void Application::post(Event event) { loop_.post(std::move(event)); }
 void Application::request_repaint() { loop_.request_repaint(); }
 void Application::quit(int code) { loop_.quit(code); }
 
+void Application::set_focus(Widget& widget) { loop_.apply(focus_.set(widget)); }
+void Application::clear_focus() { loop_.apply(focus_.clear()); }
+auto Application::dispatch(Event const& event) -> EventResponse
+{
+    auto result = synchronize();
+    if (!result.quit) {
+        result = combine(result, ox::dispatch(event, *this, loop_.screen));
+    }
+    loop_.apply(result);
+    result.quit = loop_.exit_code();
+    return result;
+}
+
 template <typename Input>
-auto Application::route_mouse(Input event,
-                              EventResponse (Widget::*callback)(Input),
-                              bool select) -> EventResponse
+auto Application::route_mouse(Input event, bool select) -> EventResponse
 {
     mouse_position_ = event.at;
     auto result = synchronize();
@@ -310,17 +318,16 @@ auto Application::route_mouse(Input event,
         if (!accepts_input(tree_, index, node.widget)) { continue; }
         auto local = event;
         local.at = {event.at.x - node.bounds.at.x, event.at.y - node.bounds.at.y};
-        input = combine(input, (node.widget.get().*callback)(local));
+        input = combine(input, node.widget.get().handle(local));
         if (!input.quit) { result = combine(result, synchronize()); }
         if (input.handled || input.quit) { break; }
     }
     result = combine(result, input);
-    report(result);
     return result;
 }
 
-template <typename Callback>
-auto Application::route_focused(Callback callback) -> EventResponse
+template <typename Input>
+auto Application::route_focused(Input const& event) -> EventResponse
 {
     auto result = synchronize();
     auto const path = ancestry(tree_, focus_.get());
@@ -328,44 +335,39 @@ auto Application::route_focused(Callback callback) -> EventResponse
     for (auto const& [index, node] : path) {
         if (result.quit) { break; }
         if (accepts_input(tree_, index, node.widget)) {
-            input = combine(input, callback(node.widget.get()));
+            input = combine(input, node.widget.get().handle(event));
             if (!input.quit) { result = combine(result, synchronize()); }
             if (input.handled || input.quit) { break; }
         }
     }
     result = combine(result, input);
-    report(result);
     return result;
 }
 
-auto Application::handle_mouse_press(MousePress m) -> EventResponse
-{ return route_mouse(m, &Widget::mouse_press, m.button == MouseButton::Left); }
-auto Application::handle_mouse_release(MouseRelease m) -> EventResponse
-{ return route_mouse(m, &Widget::mouse_release); }
-auto Application::handle_mouse_wheel(MouseWheel m) -> EventResponse
-{ return route_mouse(m, &Widget::mouse_wheel); }
-auto Application::handle_mouse_move(MouseMove m) -> EventResponse
-{ return route_mouse(m, &Widget::mouse_move); }
+auto Application::handle(MousePress const& event) -> EventResponse
+{ return route_mouse(event, event.button == MouseButton::Left); }
+auto Application::handle(MouseRelease const& event) -> EventResponse
+{ return route_mouse(event); }
+auto Application::handle(MouseWheel const& event) -> EventResponse
+{ return route_mouse(event); }
+auto Application::handle(MouseMove const& event) -> EventResponse
+{ return route_mouse(event); }
 
-auto Application::handle_key_press(KeyEvent key) -> EventResponse
+auto Application::handle(KeyEvent const& key) -> EventResponse
 {
-    if (key.matches(KeyCode::Tab, {}, key.action) ||
-        key.matches(KeyCode::Tab, {.shift = true}, key.action)) {
+    if (key.action != KeyAction::Release &&
+        (key.matches(KeyCode::Tab, {}, key.action) ||
+         key.matches(KeyCode::Tab, {.shift = true}, key.action))) {
         auto result = synchronize();
         if (!result.quit) {
             result = combine(result, focus_.advance(tree_, key.modifiers.shift));
         }
         result.handled = true;
-        report(result);
         return result;
     }
-    return route_focused([&](Widget& widget) { return widget.key_press(key); });
+    return route_focused(key);
 }
-auto Application::handle_key_release(KeyEvent key) -> EventResponse
-{
-    return route_focused([&](Widget& widget) { return widget.key_release(key); });
-}
-auto Application::handle_paste(esc::PasteChunk const& chunk) -> EventResponse
+auto Application::handle(esc::PasteChunk const& chunk) -> EventResponse
 {
     auto result = synchronize();
     if (result.quit) { return result; }
@@ -375,7 +377,7 @@ auto Application::handle_paste(esc::PasteChunk const& chunk) -> EventResponse
         for (auto const& [index, node] : path) {
             auto const target = node.widget;
             if (accepts_input(tree_, index, target)) {
-                auto const response = target.get().paste(chunk);
+                auto const response = target.get().handle(chunk);
                 result = combine(result, response);
                 if (response.handled && !chunk.last && !chunk.aborted) {
                     paste_target_ = target;
@@ -390,7 +392,7 @@ auto Application::handle_paste(esc::PasteChunk const& chunk) -> EventResponse
         auto target = paste_target_;
         if (chunk.last || chunk.aborted) { paste_target_ = {}; }
         if (accepts_input(tree_, tree_.size(), target)) {
-            auto const response = target.get().paste(chunk);
+            auto const response = target.get().handle(chunk);
             result = combine(result, response);
             if (!response.quit) { result = combine(result, synchronize()); }
         }
@@ -398,22 +400,17 @@ auto Application::handle_paste(esc::PasteChunk const& chunk) -> EventResponse
             paste_target_ = {};
         }
     }
-    report(result);
     return result;
 }
 
-auto Application::handle_resize(Area new_size) -> EventResponse
+auto Application::handle(esc::Resize const& event) -> EventResponse
 {
-    validate(new_size);
-    auto const old_size = head_.size;
-    head_.size = new_size;
-    head_.resize(old_size);
+    arrange(head_, {{0, 0}, event.size});
     return combine({.handled = true, .repaint = true}, synchronize());
 }
 
-auto Application::handle_paint(Canvas canvas) -> Cursor
+auto Application::paint(Canvas canvas) -> Cursor
 {
-    synchronize();
     auto const snapshot = tree_;
     auto cursor = Cursor{};
     if (!snapshot.empty()) { paint_tree(snapshot, 0, canvas, focus_.get(), cursor); }

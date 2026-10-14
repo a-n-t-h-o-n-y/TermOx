@@ -23,6 +23,8 @@ namespace ox {
  */
 class Label : public Widget {
    public:
+    using Widget::handle;
+
     struct Options {
         std::string text = "";
         Align align = Align::Center;
@@ -42,7 +44,7 @@ class Label : public Widget {
     Label(char const* text_);
 
    public:
-    void paint(Canvas c) override;
+    auto paint(Canvas c) -> Cursor override;
 };
 
 // -------------------------------------------------------------------------------------
@@ -66,6 +68,8 @@ class Label : public Widget {
 template <typename NumberType>
 class BasicNumberLabel : public Widget {
    public:
+    using Widget::handle;
+
     struct Options {
         NumberType value = 0;
         Align align = Align::Center;
@@ -92,10 +96,12 @@ class BasicNumberLabel : public Widget {
     {}
 
    public:
-    void paint(Canvas c) override
+    auto paint(Canvas c) -> Cursor override
     {
         auto const text = std::vformat(locale, format, std::make_format_args(value));
         detail::paint_label(c, text, align, style);
+
+        return {};
     }
 };
 
