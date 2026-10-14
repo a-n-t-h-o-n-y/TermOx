@@ -1,90 +1,131 @@
 #pragma once
+
+#include <functional>
+#include <optional>
+#include <span>
 #include <string>
+#include <string_view>
+#include <tuple>
 #include <vector>
 
-#include <ox/core/core.hpp>
-#include <ox/label.hpp>
-#include <ox/layout.hpp>
+#include <ox/align.hpp>
+#include <ox/core/text.hpp>
 #include <ox/widget.hpp>
 
 namespace ox {
 class ScrollBar;
 
-/**
- * A table of text data.
- * @details This is a simple table of text data. It is not intended to be a full
- * spreadsheet application. It is intended to be a simple way to display data in a grid.
- * Start by adding columns first, then rows of text data.
- */
+/** Width includes one padding cell at either side; separators are additional. */
+struct TableColumn {
+    std::string heading;
+    SizePolicy size = SizePolicy::min(8);
+    Align align = Align::Left;
+    StylePatch style = {};
+};
+
+/** Rectangular UTF-8 data, fixed headers, row selection, and a two-axis viewport.
+ * Cells are single-line printable text. Data mutations validate before committing.
+ * Styling/configuration is public; call refresh() after changing configuration. */
 class DataTable : public Widget {
    public:
     using Widget::handle;
-
     struct Options {
-        Color background = default_color;
-        Color foreground_cell = default_color;
-        Color foreground_line = default_color;
+        std::vector<TableColumn> columns = {};
+        std::vector<std::vector<std::string>> rows = {};
+        Style style = {};
+        Style line_style = {};
+        StylePatch header_style = {.background = {},
+                                   .foreground = {},
+                                   .enabled = Trait::Bold,
+                                   .disabled = {}};
+        StylePatch alternate_style = {};
+        StylePatch selected_style = {.background = {},
+                                     .foreground = {},
+                                     .enabled = Trait::Inverse,
+                                     .disabled = {}};
+        bool show_header = true;
+        bool column_lines = true;
+        bool selectable = true;
+        std::string empty_text = "No rows";
+        FocusPolicy focus_policy = FocusPolicy::Strong;
         SizePolicy size_policy = SizePolicy::flex();
     } static const init;
 
-   public:
-    Color background;
-    Color foreground_cell;
-    Color foreground_line;
+    Style style;
+    Style line_style;
+    StylePatch header_style;
+    StylePatch alternate_style;
+    StylePatch selected_style;
+    bool show_header;
+    bool column_lines;
+    bool selectable;
+    std::string empty_text;
 
-    std::size_t offset = 0;  // scrolling
-
-    /**
-     * Emitted when any scroll parameter is updated. For ScrollBar.
-     * void(int index, int size)
+    /** Index snapshots; callbacks may mutate or destroy the table. */
+    sl::Signal<void(std::optional<std::size_t>)> on_select;
+    sl::Signal<void(std::size_t)> on_activate;
+    sl::Signal<void(std::size_t)> on_header;
+    /** offset, content extent, viewport extent. Also notifies on data/geometry changes.
      */
-    sl::Signal<void(int, int)> on_scroll;
+    sl::Signal<void(Point, Area, Area)> on_scroll;
 
     DataTable(Options x = init);
-
-   public:
-    /**
-     * Add a column to the table.
-     * @param heading The text to display at the top of the column.
-     * @param align The alignment of the text in the column.
-     * @param foreground The foreground color of the column heading.
-     */
-    void add_column(std::string heading,
-                    Align align = Align::Left,
-                    Color foreground = default_color);
-
-    /**
-     * Add a row to the table.
-     * @param row The row to add. Must have the same number of columns as the table.
-     * @throws std::out_of_range if the row has the wrong number of columns.
-     */
-    void add_row(std::vector<std::string> row);
-
-    [[nodiscard]]
-    auto columns() const -> std::vector<std::vector<std::string>> const&
+    [[nodiscard]] auto columns() const -> std::span<TableColumn const>
     { return columns_; }
+    [[nodiscard]] auto rows() const -> std::span<std::vector<std::string> const>
+    { return rows_; }
+    [[nodiscard]] auto selected_row() const -> std::optional<std::size_t>
+    { return selected_; }
+    [[nodiscard]] auto scroll_offset() const -> Point { return offset_; }
+    [[nodiscard]] auto content_size() const -> Area { return content_; }
+    [[nodiscard]] auto viewport_size() const -> Area { return viewport_; }
 
-   public:
+    void set_data(std::vector<TableColumn> columns,
+                  std::vector<std::vector<std::string>> rows);
+    void set_rows(std::vector<std::vector<std::string>> rows);
+    void insert_row(std::size_t index, std::vector<std::string> row);
+    void add_row(std::vector<std::string> row);
+    void erase_row(std::size_t index);
+    void set_cell(std::size_t row, std::size_t column, std::string text);
+    /** Stable sort; preserve the selected row. Empty comparator means lexical order.
+     * Comparators must not mutate the table. Exceptions leave rows/selection unchanged.
+     */
+    void sort_rows(std::size_t column,
+                   bool ascending = true,
+                   std::function<bool(std::string_view, std::string_view)> less = {});
+    /** Recompute widths, clamp scroll/selection, schedule paint and publish changes. */
+    void refresh();
+    auto select(std::optional<std::size_t> row) -> bool;
+    auto set_scroll_offset(Point position) -> bool;
+
     auto paint(Canvas) -> Cursor override;
-
+    auto handle(KeyEvent const&) -> EventResponse override;
+    auto handle(MousePress const&) -> EventResponse override;
     auto handle(MouseWheel const&) -> EventResponse override;
 
-    auto get_children() -> zzz::Generator<Widget&> override;
-
-    auto get_children() const -> zzz::Generator<Widget const&> override;
-
    protected:
-    void on_arrange(Rect previous) override;
+    void on_arrange(Rect) override;
 
    private:
-    Row<std::vector<Label>> headings_;
-    std::vector<std::vector<std::string>> columns_;
+    std::vector<TableColumn> columns_;
+    std::vector<std::vector<std::string>> rows_;
+    std::optional<std::size_t> selected_;
+    Point offset_ = {};
+    Area content_ = {};
+    Area viewport_ = {};
+    std::vector<int> widths_;
+    TextLayout cell_layout_;
+    std::optional<std::size_t> notified_selection_;
+    std::optional<std::tuple<Point, Area, Area>> notified_scroll_;
+    [[nodiscard]] auto header_height() const -> int;
+    void update_geometry();
+    void update_viewport();
+    void data_changed();
+    void notify();
+    void paint_cell(Canvas, std::string_view, Align, Style);
 };
 
-/**
- * Link a ScrollBar to a DataTable, the ScrollBar will control the DataTable, and the
- * DataTable will update the ScrollBar.
+/** Link one axis; lifetime tracked in both directions. Initialize and resize normally.
  */
-void link(DataTable& dt, ScrollBar& sb);
-
+void link(DataTable& table, ScrollBar& bar);
 }  // namespace ox

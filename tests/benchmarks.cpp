@@ -425,6 +425,48 @@ void renderer_benchmarks()
         });
     }
 }
+void table_benchmarks()
+{
+    for (auto count : {100, 10000, 100000}) {
+        auto rows = std::vector<std::vector<std::string>>{};
+        rows.reserve((std::size_t)count);
+        for (int i = 0; i < count; ++i) {
+            rows.push_back({"Item " + std::to_string(i),
+                            "界 é 👩‍💻 long text", std::to_string(i)});
+        }
+        auto table = ox::DataTable{
+            {.columns = {{.heading = "Name", .size = ox::SizePolicy::fixed(18)},
+                         {.heading = "Description", .size = ox::SizePolicy::fixed(32)},
+                         {.heading = "Count",
+                          .size = ox::SizePolicy::fixed(10),
+                          .align = ox::Align::Right}},
+             .rows = std::move(rows)}};
+        ox::arrange(table, {{}, {80, 24}});
+        auto frame = ox::Frame{table.size()};
+        auto const suffix = std::to_string(count);
+        measure("table.repaint." + suffix, 100, [&](int) {
+            table.paint(ox::Canvas{frame});
+            return (std::size_t)frame[ox::Point{1, 2}].text.front();
+        });
+        measure("table.scroll." + suffix, 100, [&](int i) {
+            table.set_scroll_offset({0, i % 10});
+            table.paint(ox::Canvas{frame});
+            return (std::size_t)frame[ox::Point{1, 2}].text.front();
+        });
+        auto app = ox::Application{table};
+        auto renderer = ox::Renderer{terminal_profile()};
+        app.dispatch(esc::Resize{table.size()});
+        app.paint();
+        checksum += renderer.render(app.loop().screen, app.loop().cursor).size();
+        measure("table.application." + suffix, 100, [&](int) {
+            app.request_repaint();
+            app.step();
+            if (!app.paint()) { throw std::logic_error{"Missing table repaint"}; }
+            return renderer.render(app.loop().screen, app.loop().cursor).size() + 1;
+        });
+    }
+}
+
 }  // namespace
 
 int main(int argc, char** argv)
@@ -435,14 +477,18 @@ int main(int argc, char** argv)
     auto const renderer_only = argc == 2 && std::string_view{argv[1]} == "--renderer";
     auto const routing_only = argc == 2 && std::string_view{argv[1]} == "--routing";
     auto const editing_only = argc == 2 && std::string_view{argv[1]} == "--editing";
+    auto const table_only = argc == 2 && std::string_view{argv[1]} == "--table";
     auto const layout_only = argc == 2 && std::string_view{argv[1]} == "--layout";
     if (argc > 1 && !routing_only && !editing_only && !layout_only && !renderer_only &&
-        !paint_only && !application_only) {
+        !paint_only && !application_only && !table_only) {
         return 2;
     }
     std::cout << "workload,iterations,median_us_per_operation,checksum,allocations_per_"
                  "operation\n";
-    if (paint_only) { paint_benchmarks(); }
+    if (table_only) { table_benchmarks(); }
+    else if (paint_only) {
+        paint_benchmarks();
+    }
     else if (application_only) {
         application_benchmarks();
     }

@@ -43,9 +43,9 @@ class TextBox : public Widget {
 
     /**
      * Emitted when the top display row or row count changes. For ScrollBar.
-     * void(int index, int size)
+     * void(int index, int content, int viewport)
      */
-    sl::Signal<void(int, int)> on_scroll;
+    sl::Signal<void(int, int, int)> on_scroll;
 
     TextBox(Options x = init);
 
@@ -61,6 +61,8 @@ class TextBox : public Widget {
     [[nodiscard]]
     auto get_scroll_length() const -> int;
 
+    [[nodiscard]] auto scroll_offset() const -> Point { return scroll_; }
+
    public:
     auto paint(Canvas c) -> Cursor override;
 
@@ -72,11 +74,15 @@ class TextBox : public Widget {
 
     auto handle(MouseWheel const& m) -> EventResponse override;
 
+   protected:
+    void on_arrange(Rect) override;
+
    private:
     mutable TextLayout layout_;
     Point scroll_ = {};
     int notified_offset_ = -1;
     int notified_length_ = -1;
+    int notified_viewport_ = -1;
 
     void update_layout() const;
     void notify_scroll();

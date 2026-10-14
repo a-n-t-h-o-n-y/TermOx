@@ -4,6 +4,7 @@
 #include <cstdint>
 
 #include <ox/put.hpp>
+#include <ox/scroll.hpp>
 #include <ox/scrollbar.hpp>
 #include <ox/text_view.hpp>
 
@@ -23,7 +24,15 @@ void TextBox::set_text(std::string_view text)
 {
     editor.set_text(text);
     scroll_ = {};
+    update_layout();
     request_repaint();
+    notify_scroll();
+}
+void TextBox::on_arrange(Rect)
+{
+    update_layout();
+    scroll_ = text_scroll(layout_, editor.caret(), size(), align, scroll_);
+    notify_scroll();
 }
 void TextBox::update_layout() const
 { layout_.update(editor.text(), size().width, wrap, layout_.policy()); }
@@ -37,10 +46,14 @@ auto TextBox::get_scroll_length() const -> int
 void TextBox::notify_scroll()
 {
     auto const count = (int)layout_.lines().size();
-    if (notified_offset_ == scroll_.y && notified_length_ == count) { return; }
+    if (notified_offset_ == scroll_.y && notified_length_ == count &&
+        notified_viewport_ == size().height) {
+        return;
+    }
     notified_offset_ = scroll_.y;
     notified_length_ = count;
-    on_scroll(scroll_.y, count);
+    notified_viewport_ = size().height;
+    on_scroll(scroll_.y, count, size().height);
 }
 
 auto TextBox::set_scroll_offset(int position) -> bool
@@ -48,7 +61,7 @@ auto TextBox::set_scroll_offset(int position) -> bool
     update_layout();
     auto const old = scroll_;
     auto const current = layout_.position(editor.caret());
-    scroll_.y = std::clamp(position, 0, (int)layout_.lines().size() - 1);
+    scroll_.y = clamp_scroll(position, (int)layout_.lines().size(), size().height);
     auto changed = old.y != scroll_.y;
     if (size().height > 0) {
         auto const last = (int)std::min(std::int64_t{scroll_.y} + size().height - 1,
@@ -94,8 +107,7 @@ auto TextBox::handle(MouseWheel const& mouse) -> EventResponse
 {
     if (mouse.dy == 0) { return {}; }
     auto const position =
-        (int)std::clamp(std::int64_t{scroll_.y} + mouse.dy, std::int64_t{0},
-                        (std::int64_t)get_scroll_length() - 1);
+        scroll_by(scroll_.y, mouse.dy, get_scroll_length(), size().height);
     auto const changed = set_scroll_offset(position);
     return {.handled = true, .repaint = changed};
 }
@@ -115,19 +127,18 @@ auto TextBox::paint(Canvas canvas) -> Cursor
 
 void link(TextBox& tb, ScrollBar& sb)
 {
-    Connection{
-        .signal = tb.on_scroll,
-        .slot =
-            [](int pos, int len, ScrollBar& sb) {
-                sb.position = pos;
-                sb.scrollable_length = len;
-            },
-    }(sb);
-
-    Connection{
-        .signal = sb.on_scroll,
-        .slot = [](int pos, TextBox& tb) { tb.set_scroll_offset(pos); },
-    }(tb);
+    sb.vertical = true;
+    auto synchronize = [](TextBox& box, ScrollBar& bar) {
+        bar.set_range(box.get_scroll_length(), box.size().height,
+                      box.scroll_offset().y);
+    };
+    synchronize(tb, sb);
+    Connection{.signal = tb.on_scroll,
+               .slot = [synchronize](int, int, int, TextBox& box, ScrollBar& bar) {
+                   synchronize(box, bar);
+               }}(tb, sb);
+    Connection{.signal = sb.on_scroll, .slot = [](int, TextBox& box, ScrollBar& bar) {
+                   box.set_scroll_offset(bar.position);
+               }}(tb, sb);
 }
-
 }  // namespace ox

@@ -1,56 +1,49 @@
 #pragma once
 
 #include <chrono>
+#include <optional>
 
-#include <ox/core/core.hpp>
 #include <ox/timer.hpp>
 #include <ox/widget.hpp>
 
 namespace ox {
 
+/** Scroll positions and lengths use the same units as the controlled content. */
 class ScrollBar : public Widget {
    public:
     using Widget::handle;
-
     struct Options {
-        int scrollable_length = 0;
+        int content_length = 0;
+        int viewport_length = 0;
         int position = 0;
-        int item_visual_length = 1;
+        bool vertical = true;
         Style style = {};
-        std::chrono::milliseconds scroll_settle_time = std::chrono::milliseconds{500};
+        std::chrono::milliseconds scroll_settle_time = std::chrono::milliseconds{0};
     } static const init;
 
-   public:
-    int scrollable_length;
-    int position;  // [0, scrollable_length)
-    int item_visual_length;
+    int content_length;
+    int viewport_length;
+    int position;
+    bool vertical;
     Style style;
     std::chrono::milliseconds scroll_settle_time;
-
-    /// Emitted on any change to position, and passes position as the parameter.
     sl::Signal<void(int)> on_scroll;
 
     ScrollBar(Options x = init);
-
-   public:
-    auto paint(Canvas c) -> Cursor override;
-
-    auto handle(MousePress const& m) -> EventResponse override;
-
-    auto handle(MouseWheel const& m) -> EventResponse override;
-
+    /** Synchronize content without emitting on_scroll; cancel pending animation. */
+    void set_range(int content, int viewport, int position);
+    /** Explicit position changes notify only on change. */
+    auto set_position(int position) -> bool;
+    auto paint(Canvas) -> Cursor override;
+    auto handle(MousePress const&) -> EventResponse override;
+    auto handle(MouseWheel const&) -> EventResponse override;
     auto tick() -> EventResponse;
 
    private:
-    void increment_position(int amount = 1);
-
-   private:
-    using ClockType = std::chrono::steady_clock;
-    Timer timer_{*this, std::chrono::milliseconds{16},
-                 [](ScrollBar& widget) { return widget.tick(); }};
-    ClockType::time_point time_at_click_;
-    int position_at_click_ = 0;
-    int target_position_ = 0;
+    std::optional<Timer> timer_;
+    std::chrono::steady_clock::time_point started_;
+    int start_ = 0;
+    int target_ = 0;
+    auto move_to(int position) -> EventResponse;
 };
-
 }  // namespace ox

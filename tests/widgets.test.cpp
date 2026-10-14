@@ -83,20 +83,21 @@ TEST(line_edit_enter_preserves_changes_from_the_callback)
 TEST(data_table_uses_signed_wheel_steps_and_clamps_scroll)
 {
     auto table = DataTable{};
-    table.add_column("Items");
+    table.set_data({{.heading = "Items"}}, {});
+    arrange(table, {{}, {10, 3}});
     for (int i = 0; i < 8; ++i) {
         table.add_row({std::to_string(i)});
     }
     table.handle(MouseWheel{{0, 0}, 0, 3});
-    ASSERT(table.offset == 3);
+    ASSERT(table.scroll_offset().y == 3);
     table.handle(MouseWheel{{0, 0}, 0, -2});
-    ASSERT(table.offset == 1);
+    ASSERT(table.scroll_offset().y == 1);
     table.handle(MouseWheel{{0, 0}, 0, 20});
-    ASSERT(table.offset == 7);
+    ASSERT(table.scroll_offset().y == 7);
     table.handle(MouseWheel{{0, 0}, 0, -20});
-    ASSERT(table.offset == 0);
+    ASSERT(table.scroll_offset().y == 0);
     table.handle(MouseWheel{{0, 0}, 2, 0});
-    ASSERT(table.offset == 0);
+    ASSERT(table.scroll_offset().y == 0);
 }
 
 TEST(text_painting_never_splits_a_combining_cluster_at_the_viewport_edge)
@@ -242,7 +243,7 @@ TEST(text_box_scroll_notifications_are_coalesced_and_direct_setters_request_pain
     app.post(esc::Resize{box.size()});
     app.step();
     int notifications = 0;
-    box.on_scroll.connect([&](int, int) { ++notifications; });
+    box.on_scroll.connect([&](int, int, int) { ++notifications; });
     app.paint();
     auto const initial = notifications;
     app.request_repaint();

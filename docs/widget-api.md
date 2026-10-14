@@ -141,3 +141,7 @@ The previous interfaces are removed; there are no compatibility adapters.
 Button, CheckBox, and RadioGroup compose the free activation/selection functions in
 `<ox/controls.hpp>`. See [control composition](controls.md) for their explicit state,
 style patches, change notifications, and migration details.
+
+DataTable and ScrollBar compose shared viewport functions from `<ox/scroll.hpp>`.
+See [data tables and scrolling](data-tables.md) for row-based data, sorting, selection,
+Unicode clipping, two-axis viewports, and the updated scrollbar/TextBox signals.

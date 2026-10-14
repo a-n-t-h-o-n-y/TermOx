@@ -1,0 +1,10 @@
+workload,iterations,median_us_per_operation,checksum,allocations_per_operation
+table.repaint.100,100,431.318,36500,0.000
+table.scroll.100,100,434.102,36500,0.000
+table.application.100,100,471.284,500,1.000
+table.repaint.10000,100,431.705,36500,0.000
+table.scroll.10000,100,434.274,36500,0.000
+table.application.10000,100,470.438,500,1.000
+table.repaint.100000,100,433.268,36500,0.000
+table.scroll.100000,100,434.885,36500,0.000
+table.application.100000,100,470.595,500,1.000

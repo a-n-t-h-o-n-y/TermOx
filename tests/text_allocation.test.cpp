@@ -11,6 +11,7 @@
 #include <esc/layout.hpp>
 #include <ox/core/renderer.hpp>
 #include <ox/core/text.hpp>
+#include <ox/datatable.hpp>
 
 namespace {
 int remaining_allocations = -1;
@@ -268,4 +269,49 @@ TEST(renderer_allocation_failures_invalidate_partial_row_tracking)
         }
     }
     ASSERT(failures >= 2 && succeeded);
+}
+
+TEST(table_sort_and_schema_allocation_failures_preserve_data_geometry_and_selection)
+{
+    for (auto schema : {false, true}) {
+        auto failures = 0;
+        auto succeeded = false;
+        for (int budget = 0; budget < 64; ++budget) {
+            auto table = ox::DataTable{{.columns = {{.heading = "a"}},
+                                        .rows = {{"third"}, {"second"}, {"first"}}}};
+            ox::arrange(table, {{}, {20, 4}});
+            table.select(1);
+            auto const rows = std::vector<std::vector<std::string>>{
+                table.rows().begin(), table.rows().end()};
+            auto const before = std::tuple{table.selected_row(), table.content_size(),
+                                           table.scroll_offset()};
+            remaining_allocations = budget;
+            try {
+                if (schema) {
+                    table.set_data({{.heading = "replacement"}, {.heading = "next"}},
+                                   {{"a", "b"}});
+                }
+                else {
+                    table.sort_rows(0);
+                }
+                remaining_allocations = -1;
+                succeeded = true;
+                break;
+            }
+            catch (std::bad_alloc const&) {
+                remaining_allocations = -1;
+                ++failures;
+                ASSERT(std::ranges::equal(table.rows(), rows));
+                ASSERT(table.columns().size() == 1 &&
+                       table.columns()[0].heading == "a");
+                ASSERT((std::tuple{table.selected_row(), table.content_size(),
+                                   table.scroll_offset()} == before));
+            }
+            catch (...) {
+                remaining_allocations = -1;
+                throw;
+            }
+        }
+        ASSERT(failures > 0 && succeeded);
+    }
 }

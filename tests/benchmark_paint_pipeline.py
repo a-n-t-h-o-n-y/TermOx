@@ -13,7 +13,7 @@ def main():
     parser.add_argument("before", type=Path)
     parser.add_argument("after", type=Path)
     parser.add_argument("output", type=Path)
-    parser.add_argument("--modes", nargs="+", choices=("renderer", "paint", "application", "layout"),
+    parser.add_argument("--modes", nargs="+", choices=("renderer", "paint", "application", "layout", "table"),
                         default=("renderer", "paint", "application"))
     args = parser.parse_args()
     samples = []

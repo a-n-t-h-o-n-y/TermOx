@@ -1,180 +1,439 @@
 #include <ox/datatable.hpp>
 
 #include <algorithm>
-#include <span>
+#include <cstdint>
+#include <limits>
+#include <numeric>
 #include <stdexcept>
-#include <string>
-#include <vector>
+#include <utility>
 
-#include <ox/align.hpp>
-#include <ox/core/core.hpp>
+#include <ox/controls.hpp>
 #include <ox/put.hpp>
+#include <ox/scroll.hpp>
 #include <ox/scrollbar.hpp>
 
+namespace {
+void check_text(std::string_view text)
+{
+    for (auto scalar : esc::utf8_to_utf32(text)) {
+        if (scalar < U' ' || (scalar >= U'\x7f' && scalar <= U'\x9f')) {
+            throw std::invalid_argument{
+                "Table cells require single-line printable text"};
+        }
+    }
+}
+void check_row(std::span<std::string const> row, std::size_t count)
+{
+    if (row.size() != count) {
+        throw std::invalid_argument{"Table row has wrong column count"};
+    }
+    for (auto const& text : row) {
+        check_text(text);
+    }
+}
+void check_data(std::span<ox::TableColumn const> columns,
+                std::span<std::vector<std::string> const> rows)
+{
+    if (rows.size() > (std::size_t)std::numeric_limits<int>::max() ||
+        columns.size() > (std::size_t)std::numeric_limits<int>::max()) {
+        throw std::length_error{"Table exceeds coordinate range"};
+    }
+    auto policies = std::vector<ox::SizePolicy>{};
+    auto total = columns.empty() ? std::int64_t{0} : (std::int64_t)columns.size() - 1;
+    for (auto const& column : columns) {
+        check_text(column.heading);
+        policies.push_back(column.size);
+        total += column.size.minimum;
+    }
+    if (total > std::numeric_limits<int>::max()) {
+        throw std::length_error{"Table columns exceed coordinate range"};
+    }
+    (void)ox::distribute_length(policies, 0);
+    for (auto const& row : rows) {
+        check_row(row, columns.size());
+    }
+}
+}  // namespace
+
 namespace ox {
-
 DataTable::Options const DataTable::init = {};
-
 DataTable::DataTable(Options x)
-    : Widget{FocusPolicy::None, x.size_policy},
-      background{std::move(x.background)},
-      foreground_cell{std::move(x.foreground_cell)},
-      foreground_line{std::move(x.foreground_line)}
-{}
-
-void DataTable::add_column(std::string heading, Align align, Color foreground)
+    : Widget{x.focus_policy, x.size_policy},
+      style{x.style},
+      line_style{x.line_style},
+      header_style{x.header_style},
+      alternate_style{x.alternate_style},
+      selected_style{x.selected_style},
+      show_header{x.show_header},
+      column_lines{x.column_lines},
+      selectable{x.selectable},
+      empty_text{std::move(x.empty_text)}
 {
-    headings_.children.push_back({{
-        .text = std::move(heading),
-        .align = align,
-        .style = {.foreground = foreground, .traits = Trait::Bold},
-    }});
-    auto const existing_size = columns_.empty() ? 0 : columns_.front().size();
-    columns_.push_back(std::vector<std::string>(existing_size, ""));
+    check_data(x.columns, x.rows);
+    check_text(empty_text);
+    columns_ = std::move(x.columns);
+    rows_ = std::move(x.rows);
+    update_geometry();
 }
-
+auto DataTable::header_height() const -> int
+{ return show_header && !columns_.empty() ? 2 : 0; }
+void DataTable::update_geometry()
+{
+    auto policies = std::vector<SizePolicy>{};
+    auto minimum = 0;
+    auto const gaps = column_lines && !columns_.empty() ? (int)columns_.size() - 1 : 0;
+    for (auto const& column : columns_) {
+        policies.push_back(column.size);
+        minimum += column.size.minimum;
+    }
+    auto widths = distribute_length(policies, std::max(minimum, size().width - gaps));
+    widths_.swap(widths);
+    update_viewport();
+}
+void DataTable::update_viewport()
+{
+    viewport_ = {size().width, std::max(0, size().height - header_height())};
+    auto const gaps = column_lines && !columns_.empty() ? (int)columns_.size() - 1 : 0;
+    content_ = {std::accumulate(widths_.begin(), widths_.end(), gaps),
+                (int)rows_.size()};
+    offset_ = {clamp_scroll(offset_.x, content_.width, viewport_.width),
+               clamp_scroll(offset_.y, content_.height, viewport_.height)};
+    if (selected_ && *selected_ >= rows_.size()) { selected_.reset(); }
+    if (!selectable) { selected_.reset(); }
+}
+void DataTable::data_changed()
+{
+    update_viewport();
+    request_repaint();
+    notify();
+}
+void DataTable::notify()
+{
+    auto lifetime = track(*this);
+    if (notified_selection_ != selected_) {
+        auto const value = selected_;
+        notified_selection_ = value;
+        on_select(value);
+    }
+    // A selection callback may move, mutate, or destroy the table.
+    auto* table = lifetime.try_get();
+    if (!table) { return; }
+    auto const value = std::tuple{table->offset_, table->content_, table->viewport_};
+    if (table->notified_scroll_ == value) { return; }
+    table->notified_scroll_ = value;
+    table->on_scroll(std::get<0>(value), std::get<1>(value), std::get<2>(value));
+}
+void DataTable::refresh()
+{
+    check_text(empty_text);
+    update_geometry();
+    request_repaint();
+    notify();
+}
+void DataTable::on_arrange(Rect) { refresh(); }
+void DataTable::set_data(std::vector<TableColumn> columns,
+                         std::vector<std::vector<std::string>> rows)
+{
+    check_data(columns, rows);
+    // Stage geometry before changing the live data as well.
+    auto policies = std::vector<SizePolicy>{};
+    auto const gaps = column_lines && !columns.empty() ? (int)columns.size() - 1 : 0;
+    auto minimum = 0;
+    for (auto const& column : columns) {
+        policies.push_back(column.size);
+        minimum += column.size.minimum;
+    }
+    auto widths = distribute_length(policies, std::max(minimum, size().width - gaps));
+    columns_.swap(columns);
+    rows_.swap(rows);
+    widths_.swap(widths);
+    selected_.reset();
+    offset_ = {};
+    data_changed();
+}
+void DataTable::set_rows(std::vector<std::vector<std::string>> rows)
+{
+    check_data(columns_, rows);
+    rows_.swap(rows);
+    selected_.reset();
+    offset_.y = 0;
+    data_changed();
+}
+void DataTable::insert_row(std::size_t index, std::vector<std::string> row)
+{
+    if (index > rows_.size()) { throw std::out_of_range{"Table row index"}; }
+    if (rows_.size() == (std::size_t)std::numeric_limits<int>::max()) {
+        throw std::length_error{"Too many table rows"};
+    }
+    check_row(row, columns_.size());
+    rows_.insert(rows_.begin() + (std::ptrdiff_t)index, std::move(row));
+    if (selected_ && *selected_ >= index) { ++*selected_; }
+    if (offset_.y > 0 && index <= (std::size_t)offset_.y) { ++offset_.y; }
+    data_changed();
+}
 void DataTable::add_row(std::vector<std::string> row)
+{ insert_row(rows_.size(), std::move(row)); }
+void DataTable::erase_row(std::size_t index)
 {
-    if (row.size() != columns_.size()) {
-        throw std::runtime_error{
-            "DataTable::add_row: row size does not match column count."};
+    if (index >= rows_.size()) { throw std::out_of_range{"Table row index"}; }
+    rows_.erase(rows_.begin() + (std::ptrdiff_t)index);
+    if (index < (std::size_t)offset_.y) { --offset_.y; }
+    if (selected_ == index) { selected_.reset(); }
+    else if (selected_ && *selected_ > index) {
+        --*selected_;
     }
-    for (auto i = std::size_t{0}; i < columns_.size(); ++i) {
-        columns_[i].push_back(std::move(row[i]));
-    }
-    this->on_scroll((int)this->offset, (int)columns_.back().size());
+    data_changed();
 }
-
-auto DataTable::paint(Canvas c) -> Cursor
+void DataTable::set_cell(std::size_t row, std::size_t column, std::string text)
 {
-    if (size().width == 0 || size().height == 0 || columns_.empty()) { return {}; }
-
-    auto const border_area = Area{
-        .width = c.size().width,
-        .height = std::min(c.size().height,
-                           ((int)columns_.front().size() - (int)this->offset) * 2 + 3),
-    };
-
-    fill(c, bg(background));
-
-    // Border
-    put(c, {0, 0}, shape::Box::round(), border_area, foreground_line);
-
-    // Header Line
-    if (size().height > 2) {
-        put(c, {.x = 0, .y = 2}, U'╞' | fg(foreground_line));
-        put(c, {.x = 1, .y = 2}, shape::HLine{.symbol = U'═'},
-            std::max(c.size().width - 2, 0), foreground_line);
-        put(c, {.x = c.size().width - 1, .y = 2}, U'╡' | fg(foreground_line));
+    if (row >= rows_.size() || column >= columns_.size()) {
+        throw std::out_of_range{"Table cell index"};
     }
-
-    auto const table_y = 3;
-
-    // Cell Text
-    for (std::size_t column_index = 0; column_index < columns_.size(); ++column_index) {
-        auto const& column = columns_[column_index];
-
-        auto cell_point = Point{
-            .x = headings_.children[column_index].at().x + 1,
-            .y = table_y,
-        };
-        auto const cell_width = headings_.children[column_index].size().width;
-
-        for (auto const& text : std::span{column}.subspan(this->offset)) {
-            if (cell_point.y + 1 >= border_area.height) { break; }
-            if (text.size() + 1 > (std::size_t)cell_width) {
-                put(c, cell_point,
-                    text.substr(0, (std::size_t)std::max(cell_width - 2, 0)) + "…");
+    check_text(text);
+    if (rows_[row][column] == text) { return; }
+    rows_[row][column] = std::move(text);
+    request_repaint();
+}
+void DataTable::sort_rows(std::size_t column,
+                          bool ascending,
+                          std::function<bool(std::string_view, std::string_view)> less)
+{
+    if (column >= columns_.size()) { throw std::out_of_range{"Table column index"}; }
+    auto order = std::vector<std::size_t>(rows_.size());
+    std::iota(order.begin(), order.end(), std::size_t{0});
+    std::stable_sort(order.begin(), order.end(), [&](auto a, auto b) {
+        if (!ascending) { std::swap(a, b); }
+        return less ? less(rows_[a][column], rows_[b][column])
+                    : rows_[a][column] < rows_[b][column];
+    });
+    auto rows = std::vector<std::vector<std::string>>{};
+    rows.reserve(rows_.size());
+    for (auto index : order) {
+        rows.push_back(std::move(rows_[index]));
+    }
+    if (selected_) {
+        selected_ = (std::size_t)(std::ranges::find(order, *selected_) - order.begin());
+    }
+    rows_.swap(rows);
+    if (selected_) {
+        offset_.y = scroll_to_show(offset_.y, (int)*selected_, 1, content_.height,
+                                   viewport_.height);
+    }
+    data_changed();
+}
+auto DataTable::select(std::optional<std::size_t> row) -> bool
+{
+    if (row && (!selectable || *row >= rows_.size())) { return false; }
+    auto const before = selected_;
+    auto const old = offset_;
+    selected_ = row;
+    if (row) {
+        offset_.y =
+            scroll_to_show(offset_.y, (int)*row, 1, content_.height, viewport_.height);
+    }
+    auto const changed = before != selected_ || old != offset_;
+    if (changed) { request_repaint(); }
+    notify();
+    return changed;
+}
+auto DataTable::set_scroll_offset(Point position) -> bool
+{
+    position = {clamp_scroll(position.x, content_.width, viewport_.width),
+                clamp_scroll(position.y, content_.height, viewport_.height)};
+    auto const changed = std::exchange(offset_, position) != position;
+    if (changed) { request_repaint(); }
+    notify();
+    return changed;
+}
+void DataTable::paint_cell(Canvas canvas,
+                           std::string_view text,
+                           Align align,
+                           Style appearance)
+{
+    fill(canvas, appearance);
+    auto const width = canvas.size().width;
+    if (width == 0 || canvas.visible().size.width == 0 ||
+        canvas.visible().size.height == 0) {
+        return;
+    }
+    cell_layout_.update(text, width, TextWrap::None, canvas.width_policy());
+    auto const columns = cell_layout_.lines().front().columns;
+    if (columns <= width) {
+        put_text_line(canvas, {find_align_offset(align, width, columns), 0},
+                      cell_layout_, 0, appearance, appearance);
+        return;
+    }
+    auto const marker = esc::grapheme_width(U"…", canvas.width_policy());
+    if (!marker || *marker == 0 || *marker > (std::size_t)width) {
+        put_text_line(canvas, {}, cell_layout_, 0, appearance, appearance);
+        return;
+    }
+    auto const remaining = width - (int)*marker;
+    put_text_line(canvas.subcanvas({}, {remaining, 1}), {}, cell_layout_, 0, appearance,
+                  appearance);
+    put(canvas, {remaining, 0}, U"…", appearance);
+}
+auto DataTable::paint(Canvas canvas) -> Cursor
+{
+    fill(canvas, style);
+    auto const header = header_height();
+    auto const body = canvas.subcanvas({0, header}, viewport_);
+    auto const clip = body.visible();
+    auto const first = offset_.y + clip.at.y;
+    auto const last = std::min(content_.height, first + clip.size.height);
+    auto x = -(std::int64_t)offset_.x;
+    for (std::size_t column = 0; column < columns_.size(); ++column) {
+        if (x > std::numeric_limits<int>::max()) { break; }
+        auto const at = (int)x;
+        auto const width = widths_[column];
+        auto const& spec = columns_[column];
+        if (header) {
+            auto heading = canvas.subcanvas({at, 0}, {width, 1});
+            fill(heading, style | spec.style | header_style);
+            if (heading.visible().size.width > 0) {
+                paint_cell(heading.subcanvas({std::min(1, width), 0},
+                                             {std::max(0, width - 2), 1}),
+                           spec.heading, spec.align, style | spec.style | header_style);
             }
-            else {
-                put(c, cell_point, text);
+        }
+        for (auto row = first; row < last; ++row) {
+            auto cell = body.subcanvas({at, row - offset_.y}, {width, 1});
+            if (cell.visible().size.width == 0) { continue; }
+            auto appearance = style | spec.style;
+            if (row % 2) { appearance = appearance | alternate_style; }
+            if (selected_ == (std::size_t)row) {
+                appearance = appearance | selected_style;
             }
-            cell_point.y += 2;
+            fill(cell, appearance);
+            paint_cell(
+                cell.subcanvas({std::min(1, width), 0}, {std::max(0, width - 2), 1}),
+                rows_[(std::size_t)row][column], spec.align, appearance);
+        }
+        x += width;
+        if (column_lines && column + 1 < columns_.size() &&
+            x <= std::numeric_limits<int>::max()) {
+            put(canvas, {(int)x, 0}, shape::VLine{.symbol = U'│'}, canvas.size().height,
+                line_style);
+            ++x;
         }
     }
-
-    // Border Intersections
-    for (auto y = 4; y + 1 < border_area.height; y += 2) {
-        put(c, {0, y}, U'├' | fg(foreground_line));
-        put(c, {c.size().width - 1, y}, U'┤' | fg(foreground_line));
+    if (header && canvas.size().height > 1) {
+        put(canvas, {0, 1}, shape::HLine{.symbol = U'─'}, canvas.size().width,
+            line_style);
     }
-    for (auto i = std::size_t{0}; i + 1 < headings_.children.size(); ++i) {
-        auto const& heading = headings_.children[i];
-        auto const x = heading.at().x + heading.size().width;
-        put(c, {x, 2}, U'╤' | fg(foreground_line));
-        put(c, {x, std::max(border_area.height - 1, 0)}, U'┴' | fg(foreground_line));
+    if (rows_.empty()) {
+        paint_cell(body.subcanvas({}, {viewport_.width, 1}), empty_text, Align::Center,
+                   style);
     }
-
-    // Horizontal Lines
-    for (auto y = 4; y + 1 < border_area.height; y += 2) {
-        for (auto column_index = std::size_t{0}; column_index < columns_.size();
-             ++column_index) {
-            auto const& heading = headings_.children[column_index];
-            auto x = heading.at().x;
-            put(c, {x + 1, y}, shape::HLine{.symbol = U'─'}, heading.size().width,
-                foreground_line);
-        }
-    }
-
-    // Vertical Lines and Intersection
-    for (auto y = 3; y + 1 < border_area.height; y += 2) {
-        for (auto column_index = std::size_t{0}; column_index + 1 < columns_.size();
-             ++column_index) {
-            auto const& heading = headings_.children[column_index];
-            auto x = heading.at().x + heading.size().width;
-            put(c, {x, y}, U'│' | fg(foreground_line));
-            if (y + 2 < border_area.height) {
-                put(c, {x, y + 1}, U'┼' | fg(foreground_line));
-            }
-        }
-    }
-
     return {};
 }
-
-auto DataTable::handle(MouseWheel const& m) -> EventResponse
+auto DataTable::handle(KeyEvent const& event) -> EventResponse
 {
-    if (m.dy == 0 || columns_.empty()) { return {}; }
-    auto const old = offset;
-    offset = (std::size_t)std::clamp((int)offset + m.dy, 0,
-                                     std::max((int)columns_.front().size() - 1, 0));
-    if (old == offset) { return {.handled = true}; }
-    this->on_scroll((int)offset, (int)columns_.back().size());
-
-    return {.handled = true, .repaint = true};
+    if (event.action == KeyAction::Release) { return {}; }
+    if (selectable && !rows_.empty() && activates(event)) {
+        auto const row = selected_.value_or(0);
+        auto lifetime = track(*this);
+        auto const changed = select(row);
+        if (auto* table = lifetime.try_get(); table && table->selected_ == row) {
+            table->on_activate(row);
+        }
+        return {.handled = true, .repaint = changed};
+    }
+    auto matches = [&](KeyCode code) { return event.matches(code, {}, event.action); };
+    if (matches(KeyCode::ArrowLeft) || matches(KeyCode::ArrowRight)) {
+        auto const changed = set_scroll_offset(
+            {scroll_by(offset_.x, matches(KeyCode::ArrowLeft) ? -1 : 1, content_.width,
+                       viewport_.width),
+             offset_.y});
+        return {.handled = true, .repaint = changed};
+    }
+    auto delta = 0;
+    if (matches(KeyCode::ArrowUp)) { delta = -1; }
+    else if (matches(KeyCode::ArrowDown)) {
+        delta = 1;
+    }
+    else if (matches(KeyCode::PageUp)) {
+        delta = -std::max(1, viewport_.height);
+    }
+    else if (matches(KeyCode::PageDown)) {
+        delta = std::max(1, viewport_.height);
+    }
+    else if (matches(KeyCode::Home)) {
+        delta = -std::numeric_limits<int>::max();
+    }
+    else if (matches(KeyCode::End)) {
+        delta = std::numeric_limits<int>::max();
+    }
+    else {
+        return {};
+    }
+    if (rows_.empty()) { return {}; }
+    auto changed = false;
+    if (selectable) {
+        auto index = selected_;
+        (void)move_selection(index, rows_.size(), delta);
+        if (!selected_ && matches(KeyCode::End)) { index = rows_.size() - 1; }
+        changed = select(index);
+    }
+    else {
+        changed =
+            set_scroll_offset({offset_.x, scroll_by(offset_.y, delta, content_.height,
+                                                    viewport_.height)});
+    }
+    return {.handled = true, .repaint = changed};
 }
-
-void DataTable::on_arrange(Rect)
+auto DataTable::handle(MousePress const& event) -> EventResponse
 {
-    arrange(headings_, {{std::min(1, std::max(size().width - 1, 0)),
-                         std::min(1, std::max(size().height - 1, 0))},
-                        {std::max(size().width - 2, 0), std::min(1, size().height)}});
+    if (!activates(event) || !contains({{}, size()}, event.at)) { return {}; }
+    if (header_height() && event.at.y == 0) {
+        auto x = std::int64_t{event.at.x} + offset_.x;
+        for (std::size_t column = 0; column < widths_.size(); ++column) {
+            if (x < widths_[column]) {
+                on_header(column);
+                return {.handled = true};
+            }
+            x -= widths_[column] + (column_lines ? 1 : 0);
+            if (x < 0) { return {}; }
+        }
+        return {};
+    }
+    if (!selectable || event.at.y < header_height()) { return {}; }
+    auto const row = std::int64_t{event.at.y} - header_height() + offset_.y;
+    if (row >= content_.height) { return {}; }
+    auto const changed = select((std::size_t)row);
+    return {.handled = true, .repaint = changed};
 }
-
-auto DataTable::get_children() -> zzz::Generator<Widget&> { co_yield headings_; }
-
-auto DataTable::get_children() const -> zzz::Generator<Widget const&>
-{ co_yield headings_; }
-
-void link(DataTable& dt, ScrollBar& sb)
+auto DataTable::handle(MouseWheel const& event) -> EventResponse
 {
-    sb.item_visual_length = 2;
-    sb.scrollable_length = dt.columns().empty() ? 0 : (int)dt.columns().back().size();
-    sb.position = (int)dt.offset;
-
-    Connection{
-        .signal = dt.on_scroll,
-        .slot =
-            [](int pos, int len, ScrollBar& sb) {
-                sb.position = pos;
-                sb.scrollable_length = len;
-            },
-    }(sb);
-
-    Connection{
-        .signal = sb.on_scroll,
-        .slot = [](int pos, DataTable& dt) { dt.offset = (std::size_t)pos; },
-    }(dt);
+    if (event.dx == 0 && event.dy == 0) { return {}; }
+    auto const changed = set_scroll_offset(
+        {scroll_by(offset_.x, event.dx, content_.width, viewport_.width),
+         scroll_by(offset_.y, event.dy, content_.height, viewport_.height)});
+    return {.handled = true, .repaint = changed};
 }
-
+void link(DataTable& table, ScrollBar& bar)
+{
+    auto synchronize = [](DataTable& table, ScrollBar& bar) {
+        auto const content = table.content_size();
+        auto const viewport = table.viewport_size();
+        auto const at = table.scroll_offset();
+        bar.set_range(bar.vertical ? content.height : content.width,
+                      bar.vertical ? viewport.height : viewport.width,
+                      bar.vertical ? at.y : at.x);
+    };
+    synchronize(table, bar);
+    Connection{.signal = table.on_scroll,
+               .slot = [synchronize](Point, Area, Area, DataTable& table,
+                                     ScrollBar& bar) { synchronize(table, bar); }}(
+        table, bar);
+    Connection{.signal = bar.on_scroll,
+               .slot = [](int, DataTable& table, ScrollBar& bar) {
+                   auto at = table.scroll_offset();
+                   if (bar.vertical) { at.y = bar.position; }
+                   else {
+                       at.x = bar.position;
+                   }
+                   table.set_scroll_offset(at);
+               }}(table, bar);
+}
 }  // namespace ox

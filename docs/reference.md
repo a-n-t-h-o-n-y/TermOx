@@ -851,82 +851,14 @@ See [control composition](controls.md) for reusable activation and selection fun
 
 ## 🧩 ox::DataTable
 
-[`#include <ox/datatable.hpp>`](../include/ox/datatable.hpp)
+A rectangular table with owned row vectors, column descriptions, fixed headers,
+Unicode-safe ellipsis, two-axis scrolling, keyboard/mouse row selection, activation,
+and stable sorting. Columns compose SizePolicy, Align, and StylePatch. Data access is
+through const spans; mutation functions validate shape and UTF-8 before committing.
 
-`class DataTable : public Widget;`
-
-A 2D table of strings, with a header for each column. This is not intended to be a full
-spreadsheet application, it is intended to be a simple way to display data in a grid
-with dividing lines.
-
-```cpp
-auto dt = DataTable{};
-dt.add_column("one", Align::Center, colors::blue);
-dt.add_row({"1"});
-dt.add_column("two", Align::Center);
-dt.add_column("three", Align::Center);
-dt.add_row({"2", "3", "4"});
-dt.add_row({"5", "6", "7"});
-```
-
-<details>
-<summary><strong>Details</strong></summary>
-
-### 🏗️ Constructors
-
-```cpp
-struct Options {
-    Color background = default_color;
-    Color foreground_cell = default_color;
-    Color foreground_line = default_color;
-    SizePolicy size_policy = SizePolicy::flex();
-};
-
-DataTable(Options x = {});
-```
-
----
-
-### `DataTable::add_column`
-
-```cpp
-void add_column(std::string heading,
-                Align align = Align::Left,
-                Color foreground = default_color);
-```
-
-Add a column to the table. The heading is the text that will be displayed at the top of
-the column. The alignment is the alignment of the text in the column. The foreground
-color is the color of the text in the column heading. The column will be appear at the
-right most position in the table.
-
----
-
-### `DataTable::add_row`
-
-```cpp
-void add_row(std::vector<std::string> row);
-```
-
-Add a row to the table. The row is a vector of strings, each string is the text that
-will be displayed in the cell. The row must have the same number of columns as the
-table, otherwise a std::out_of_range exception will be thrown. The row will be added to
-the bottom of the table.
-
----
-
-### `link` Free Function
-
-```cpp
-void link(DataTable& dt, ScrollBar& sb);
-```
-
-Link a ScrollBar to a DataTable, the ScrollBar will control the DataTable, and the
-DataTable will update the ScrollBar.
-
----
-
-</details>
+See [data tables and scrolling](data-tables.md) for the complete API, examples,
+callbacks, sorting/filtering, viewport rules, and migration. The interactive example
+is [examples/datatable.cpp](../examples/datatable.cpp).
 
 ## 🧩 ox::Label
 
@@ -1447,74 +1379,12 @@ Direct access to the buffer of pixels.
 
 ## 🧩 ox::ScrollBar
 
-[`#include <ox/scrollbar.hpp>`](../include/ox/scrollbar.hpp)
+A vertical or horizontal scroll control with content_length, viewport_length,
+position, style, and optional scroll_settle_time animation. set_position notifies
+only on change; set_range synchronizes without feedback. Shared pure functions in
+`<ox/scroll.hpp>` compute limits, movement, reveal ranges, and thumb/click geometry.
 
-`class ScrollBar : public Widget;`
-
-A vertical scroll bar Widget. It can be linked with various Widgets to provide
-scrolling functionality.
-
-```cpp
-auto tb = TextBox{{
-    .text = "A TextBox",
-}};
-
-auto sb = ScrollBar{};
-
-link(tb, sb);
-```
-
-<details>
-<summary><strong>Details</strong></summary>
-
-### 🏗️ Constructors
-
-```cpp
-struct Options {
-    int scrollable_length = 0;
-    int position = 0;
-    Style style = {};
-    std::chrono::milliseconds scroll_settle_time = std::chrono::milliseconds{500};
-};
-
-ScrollBar(Options x = {});
-```
-
-Construct a ScrollBar Widget. The `scrollable_length` is the length of the scrollable
-area, the `position` is the current position of the scroll bar, the `style` is the Style
-to use when painting the scroll bar, and the `scroll_settle_time` is the time it takes
-for the scroll bar to settle after a scroll event. The `position` is clamped to the `[0,
-scrollable_length)` range.
-
-Often you can just default construct a ScrollBar and use the `link` function to link it
-to a Widget. The `link` function will set the `scrollable_length` and `position` to
-the correct values for the linked Widget.
-
----
-
-### Signals
-
-```cpp
-sl::Signal<void(int)> on_scroll;
-```
-
-- `on_scroll` is emitted on any change to `position`. The current position is passed to
-the signal.
-
----
-
-### Public Objects
-
-```cpp
-int scrollable_length;
-int position;  // [0, scrollable_length)
-Style style;
-std::chrono::milliseconds scroll_settle_time;
-```
-
----
-
-</details>
+See [data tables and scrolling](data-tables.md#shared-scrolling-functions).
 
 ## 🧩 ox::TextBox
 
@@ -1570,12 +1440,12 @@ use when painting the text.
 ### Signals
 
 ```cpp
-sl::Signal<void(int, int)> on_scroll; /// void(int index, int size)
+sl::Signal<void(int, int, int)> on_scroll; /// position, content, viewport
 ```
 
-- `on_scroll` is emitted when the top row or display-row count changes. The current
-row index and total display-row count are passed to the signal. This is used by the `link` function and does not need to be used
-directly.
+- `on_scroll` is emitted when the top row, display-row count, or viewport height changes.
+  Position, content length, and viewport length are passed to the signal. The `link`
+  function uses these values to synchronize a ScrollBar.
 
 
 ### Public Objects

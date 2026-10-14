@@ -17,6 +17,7 @@
 #include <ox/put.hpp>
 #include <ox/radiogroup.hpp>
 #include <ox/routing.hpp>
+#include <ox/scroll.hpp>
 #include <ox/scrollbar.hpp>
 #include <ox/text_view.hpp>
 #include <ox/textbox.hpp>

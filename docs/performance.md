@@ -596,3 +596,46 @@ and README example compile. ASan+UBSan passes 86 non-exception cases with every 
 source instrumented, linking the unchanged Escape Release library. Deliberate exception
 and allocation-fault cases run in Release because the installed sanitizer runtime cannot
 unwind C++ exceptions.
+
+
+## DataTable viewport scaling
+
+DataTable now owns row vectors and column descriptions, without heading child widgets.
+Its paint loop only analyzes visible cells through a reusable TextLayout. The table
+workloads use an 80×24 viewport, three columns, mixed ASCII/CJK/combining/emoji content,
+and 100, 10,000, or 100,000 rows. Construction/validation/sorting are outside the timed
+paint workloads. This measures scaling of the new implementation, not a speedup over
+the previous unfinished table.
+
+Run `TermOx.tests.benchmarks --table` in Release. The reported values are medians of
+three fresh processes, each with ten warmups and five timed samples of 100 operations.
+No builds, tests, or sanitizer work ran during measurement. Workload/iteration/checksum
+triples match in all processes. Raw [medians](../tests/benchmark-results/table-viewport.csv)
+and [process samples](../tests/benchmark-results/table-viewport-samples.csv) are retained.
+
+| Rows | Repaint µs | Scroll + repaint µs | Application repaint + encoding µs |
+| --- | ---: | ---: | ---: |
+| 100 | 431.318 | 434.102 | 471.284 |
+| 10,000 | 431.705 | 434.274 | 470.438 |
+| 100,000 | 433.268 | 434.885 | 470.595 |
+
+Visible repaint/scroll costs stay essentially constant in these workloads. Warm direct
+table painting and scrolling use zero ordinary allocation calls; complete application
+repaints use one, the lifetime-safe paint snapshot. This does not cover initial layouts,
+long grapheme strings, schema changes, data validation, or sorting. Tables own their data;
+construction and memory use grow with row count. Stable sorting orders indices first,
+reserves the new row vector, and then moves row vectors without copying cell strings.
+
+See [data tables and scrolling](data-tables.md) for viewport functions, table ownership,
+selection/sorting, Unicode clipping, linked scrollbar behavior, and breaking API changes.
+
+
+Validation passes all 186 Release cases, including six allocation-fault cases; seven
+examples build, including the new interactive table, and eight PTY checks pass.
+The standalone table documentation example compiles and runs. New coverage exercises
+extreme scroll arithmetic, 2,000 randomized thumb geometries, Unicode/ellipsis/clipping,
+selection/activation, stable numeric and lexical sorting, data mutation, both linked axes,
+resize, reentrant/moving/destructive callbacks, animation, and sort/schema allocation
+failures. ASan+UBSan passes 97 non-exception cases with all TermOx sources instrumented
+and the unchanged Escape Release library linked. Deliberate exception/allocation-fault
+cases run in Release because the installed sanitizer runtime cannot unwind C++ exceptions.

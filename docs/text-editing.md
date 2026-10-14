@@ -130,7 +130,9 @@ TextBox uses `TextWrap` (replacing `TextBox::Wrap`), cached multiline layout, ve
 navigation, alignment-aware hit testing, selection painting, and clamped scrolling.
 Unwrapped text now follows the caret horizontally using the same geometry as LineEdit.
 `set_scroll_offset()` returns whether visible editing state changed. Scroll signals
-are emitted only when the top row or row count changes. Both widgets expose a
+carry position, content length, and viewport length, and are emitted only when one
+of those values changes. Vertical limits use the last full viewport through the shared
+scrolling functions; resizing updates linked scrollbars before painting. Both widgets expose a
 `selection_style` patch, defaulting to inverse video.
 
 Applications bind a streaming paste to the widget that handled its first chunk.

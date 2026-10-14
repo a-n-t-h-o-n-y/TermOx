@@ -145,6 +145,7 @@ def main():
     smoke(examples / "TermOx.examples.pinbox", [b"\x1b[<0;10;5M", b"\x1b[<32;11;5M", b"\x1b[<0;11;5m"])
     smoke(examples / "TermOx.examples.snake", [b"s", b"j", b"l"])
     smoke(examples / "TermOx.examples.accumulator", [b"\x1b[<0;10;5M", b"\x1b[<0;10;5m", b"\t"])
+    smoke(examples / "TermOx.examples.datatable", [b"\x1b[B", b"\x1b[6~", b"\r", b"\x1b[<0;5;1M", b"\x1b[<65;5;4M"])
     smoke(examples / "TermOx.examples.scratch", [b"\x1b[<0;80;4M", "é日e\u0301👩\u200d💻".encode(), b"\x1b[200~paste\ntext\x1b[201~"])
 
 

@@ -5,6 +5,7 @@
 #include <limits>
 
 #include <ox/put.hpp>
+#include <ox/scroll.hpp>
 
 namespace ox {
 namespace {
@@ -40,13 +41,9 @@ auto text_scroll(TextLayout const& layout,
     validate(size);
     auto const point = layout.position(caret);
     auto const columns = layout.lines()[(std::size_t)point.y].columns;
-    scroll.y = std::clamp(scroll.y, 0, (int)layout.lines().size() - 1);
-    if (size.height > 0) {
-        if (point.y < scroll.y) { scroll.y = point.y; }
-        else if (point.y - scroll.y >= size.height) {
-            scroll.y = point.y - size.height + 1;
-        }
-    }
+    scroll.y = clamp_scroll(scroll.y, (int)layout.lines().size(), size.height);
+    scroll.y =
+        scroll_to_show(scroll.y, point.y, 1, (int)layout.lines().size(), size.height);
     if (size.width == 0) { scroll.x = 0; }
     else if (columns < size.width) {
         // Leave a cell for the caret when right alignment reaches the final column.
@@ -79,7 +76,7 @@ auto text_position(TextLayout const& layout,
                    Point scroll) -> Point
 {
     validate(size);
-    scroll.y = std::clamp(scroll.y, 0, (int)layout.lines().size() - 1);
+    scroll.y = clamp_scroll(scroll.y, (int)layout.lines().size(), size.height);
     auto const point = layout.position(offset);
     auto const origin = row_origin(layout, point.y, size, align, scroll);
     return {point.x + origin.x, origin.y};
@@ -92,7 +89,7 @@ auto text_offset(TextLayout const& layout,
                  Point scroll) -> std::size_t
 {
     validate(size);
-    scroll.y = std::clamp(scroll.y, 0, (int)layout.lines().size() - 1);
+    scroll.y = clamp_scroll(scroll.y, (int)layout.lines().size(), size.height);
     auto const row = (int)std::clamp(std::int64_t{scroll.y} + at.y, std::int64_t{0},
                                      (std::int64_t)layout.lines().size() - 1);
     auto const origin = row_origin(layout, row, size, align, scroll);
@@ -109,7 +106,7 @@ void paint_text(Canvas canvas,
                 Style selected,
                 std::pair<std::size_t, std::size_t> selection)
 {
-    scroll.y = std::clamp(scroll.y, 0, (int)layout.lines().size() - 1);
+    scroll.y = clamp_scroll(scroll.y, (int)layout.lines().size(), canvas.size().height);
     auto const clip = canvas.visible();
     auto const end = std::min((std::int64_t)layout.lines().size(),
                               std::int64_t{scroll.y} + clip.at.y + clip.size.height);

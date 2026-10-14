@@ -32,6 +32,7 @@ add_library(TermOx STATIC
     src/pixelgrid.cpp
     src/put.cpp
     src/radiogroup.cpp
+    src/scroll.cpp
     src/scrollbar.cpp
     src/text_view.cpp
     src/textbox.cpp
@@ -61,6 +62,7 @@ add_library(TermOx STATIC
     include/ox/pixelgrid.hpp
     include/ox/put.hpp
     include/ox/radiogroup.hpp
+    include/ox/scroll.hpp
     include/ox/scrollbar.hpp
     include/ox/text_view.hpp
     include/ox/textbox.hpp

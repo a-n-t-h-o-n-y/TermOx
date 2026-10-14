@@ -99,3 +99,7 @@ target_link_libraries(
     PRIVATE
         TermOx
 )
+# Data Table ---------------------------------------------------------------------------
+add_executable(TermOx.examples.datatable EXCLUDE_FROM_ALL datatable.cpp)
+target_compile_options(TermOx.examples.datatable PRIVATE -Wall -Wextra -Wpedantic)
+target_link_libraries(TermOx.examples.datatable PRIVATE TermOx)
