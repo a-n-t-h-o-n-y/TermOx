@@ -1,6 +1,8 @@
 add_executable(TermOx.tests.unit EXCLUDE_FROM_ALL
     controls.test.cpp
     decorations.test.cpp
+    pixelgrid.test.cpp
+    bmp_reader.test.cpp
     scroll.test.cpp
     datatable.test.cpp
     events.test.cpp
@@ -55,3 +57,7 @@ target_link_libraries(TermOx.tests.event_loop_terminal PRIVATE TermOx)
 # Compare container arrangement against the same standalone source at another revision.
 add_executable(TermOx.tests.arrangement_benchmarks EXCLUDE_FROM_ALL arrangement_benchmarks.cpp)
 target_link_libraries(TermOx.tests.arrangement_benchmarks PRIVATE TermOx)
+
+# Clipped pixel image painting, without terminal I/O.
+add_executable(TermOx.tests.pixel_benchmarks EXCLUDE_FROM_ALL pixel_benchmarks.cpp)
+target_link_libraries(TermOx.tests.pixel_benchmarks PRIVATE TermOx)

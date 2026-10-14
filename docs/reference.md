@@ -1337,56 +1337,48 @@ std::function<bool(char32_t)> validator;
 
 `class PixelGrid : public Widget;`
 
-A 2D grid of pixels, each pixel is a `RGB` object. Each cell on the terminal holds 2 'pixels', the `▄` character is used to do the drawing.
-
-See the [`bmp_view.cpp`](../examples/bmp_view.cpp) example.
-
-```cpp
-auto grid = PixelGrid{Area{.width = 10, .height = 10}};
-grid.buffer[{.x = 0, .y = 0}] = RGB{0xFF0000};
-grid.buffer[{.x = 1, .y = 0}] = RGB{0x00FF00};
-grid.buffer[{.x = 2, .y = 0}] = RGB{0x0000FF};
-// ...
-```
-
-<details>
-<summary><strong>Details</strong></summary>
-
-### 🏗️ Constructors
+An owned row-major RGB image. Each terminal cell holds two pixels using `▄`:
+upper pixel as background, lower pixel as foreground. Odd final rows use the
+public `odd_pixel` color (black by default). Native cell size is
+`pixel_cell_size(pixel_size())`; positioning and clipping use ordinary Canvas views.
 
 ```cpp
-struct Matrix {
-    Area area;
-    std::vector<RGB> pixels;
-
-    auto operator[](Point p) -> RGB&;
-    auto operator[](Point p) const -> RGB;
-};
-
-PixelGrid(Area area);
-
-PixelGrid(Matrix matrix);
+auto grid = ox::PixelGrid{ox::Area{10, 11}, ox::RGB{0}};
+grid.set_pixel({0, 0}, ox::RGB{0xff0000}); // Requests repaint when changed.
+grid.reset({20, 12}, ox::RGB{0x123456});
+grid.set_image({2, 1}, {ox::RGB{0xff0000}, ox::RGB{0x0000ff}});
 ```
 
-The first constructor takes an `Area` object, which is the size of the grid.
+`pixel_size()` and `pixels()` expose dimensions and mutable/const spans.
+`at(Point)` provides checked access; no-argument `at()` retains Widget geometry.
+Direct span/reference edits and changes to `odd_pixel` require an application
+repaint request. Image replacement invalidates spans and references. Moves transfer
+Widget identity and image storage and leave an empty, reusable source.
 
-The second constructor takes a `Matrix` object, which is a 2D array of `RGB`
-objects. Build up a `Matrix` object with the `Matrix::operator[]` function, do not
-modify the `pixels` vector directly.
+Dimensions must be nonnegative; storage must contain exactly `width * height`
+RGB values. Counts use checked arithmetic and reject sizes beyond the addressable
+byte range. Invalid dimensions/storage throw `std::invalid_argument`, impossible
+counts throw `std::length_error`, and invalid coordinates throw `std::out_of_range`.
+`reset` and `set_image` preserve the current image if validation/allocation fails.
 
----
-
-### Public Objects
+Custom widgets can compose the same drawing without owning a PixelGrid:
 
 ```cpp
-Matrix buffer;
+void draw(ox::Canvas canvas, ox::Area size, std::span<ox::RGB const> pixels)
+{
+    ox::paint_pixels(canvas, size, pixels);
+}
 ```
 
-Direct access to the buffer of pixels.
+The painter validates storage before writing, visits only visible cells, and
+leaves margins unchanged. Visible output requires a one-column lower-half block
+under the Canvas width policy. `pixel_count` and `pixel_index` provide checked
+row-major arithmetic for callers using their own vectors. The former Matrix and
+public buffer API have been removed.
 
----
-
-</details>
+See the [`bmp_view.cpp`](../examples/bmp_view.cpp) example. Its decoder is kept
+in the example and supports uncompressed 1/4/8/16/24/32-bit BMPs and 16/32-bit
+bitfields, including top-down images, with bounds-checked headers, rows and palettes.
 
 ## 🧩 ox::ScrollBar
 

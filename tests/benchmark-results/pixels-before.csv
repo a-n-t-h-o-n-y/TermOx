@@ -1,0 +1,5 @@
+workload,iterations,median_us_per_operation,checksum
+pixels-128-frame-clip,20,553.681,29952000
+pixels-128-inherited-clip,20,432.504,5616000
+pixels-1024-frame-clip,20,26529.326,29952000
+pixels-1024-inherited-clip,20,26381.266,5616000

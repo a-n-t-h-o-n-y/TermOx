@@ -150,3 +150,8 @@ Bordered/Divider use plain label configuration and shared drawing functions. Row
 keep ordinary containers, expose refresh(), and reuse unchanged geometry while refreshing
 descendants. See [decorations and layouts](decorations-layouts.md) for callback safety
 and migration.
+
+PixelGrid composes `paint_pixels(Canvas, Area, span<RGB const>, Color)` and ordinary
+row-major RGB storage. Dimensions and storage are kept consistent; spans permit batch
+edits, and mutation commands request repaint. See [PixelGrid](reference.md#-oxpixelgrid)
+for checked indexing, clipping, move behavior, and migration from the removed Matrix API.

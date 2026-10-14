@@ -8,17 +8,18 @@ import select
 import struct
 import subprocess
 import sys
+import tempfile
 import termios
 import time
 
 
-def smoke(executable, inputs):
+def smoke(executable, inputs, args=()):
     master, slave = pty.openpty()
     fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack("HHHH", 35, 120, 0, 0))
     original = termios.tcgetattr(slave)
     env = dict(os.environ, TERM="xterm-256color", COLORTERM="truecolor")
     env.pop("NO_COLOR", None)
-    process = subprocess.Popen([str(executable)], stdin=slave, stdout=slave, stderr=slave, env=env)
+    process = subprocess.Popen([str(executable), *args], stdin=slave, stdout=slave, stderr=slave, env=env)
     output = bytearray()
 
     def drain(duration):
@@ -39,7 +40,8 @@ def smoke(executable, inputs):
         for data in inputs:
             os.write(master, data)
             drain(0.2)
-        assert len(output) > before, "input did not trigger a repaint"
+        if inputs:
+            assert len(output) > before, "input did not trigger a repaint"
         # Resize in both directions while input and painting are active.
         fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack("HHHH", 12, 25, 0, 0))
         drain(0.2)
@@ -56,6 +58,7 @@ def smoke(executable, inputs):
         assert b"\x1b[?25h" in output, "cursor was not restored"
         assert b"\x1b[?2004l" in output, "bracketed paste was not disabled"
         print(f"{executable.name}: input, Ctrl-C, and terminal restoration passed")
+        return bytes(output)
     finally:
         if process.poll() is None:
             process.kill()
@@ -147,6 +150,15 @@ def main():
     smoke(examples / "TermOx.examples.accumulator", [b"\x1b[<0;10;5M", b"\x1b[<0;10;5m", b"\t"])
     smoke(examples / "TermOx.examples.datatable", [b"\x1b[B", b"\x1b[6~", b"\r", b"\x1b[<0;5;1M", b"\x1b[<65;5;4M"])
     smoke(examples / "TermOx.examples.scratch", [b"\x1b[<0;80;4M", "é日e\u0301👩\u200d💻".encode(), b"\x1b[200~paste\ntext\x1b[201~"])
+
+    with tempfile.NamedTemporaryFile(suffix=".bmp") as image:
+        # Two padded 24-bit rows, stored bottom-up.
+        image.write(struct.pack("<2sIHHI", b"BM", 62, 0, 0, 54))
+        image.write(struct.pack("<IiiHHIIiiII", 40, 1, 2, 1, 24, 0, 8, 0, 0, 0, 0))
+        image.write(bytes([255, 0, 0, 0, 0, 0, 255, 0]))
+        image.flush()
+        output = smoke(examples / "TermOx.examples.bmp_view", [], [image.name])
+        assert "▄".encode() in output, "BMP pixels were not painted"
 
 
 if __name__ == "__main__":

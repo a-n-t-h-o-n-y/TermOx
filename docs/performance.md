@@ -706,3 +706,52 @@ scheduling, and allocation-failure rollback. ASan+UBSan passes 110 non-exception
 with every TermOx source instrumented and the unchanged Escape Release library linked.
 Deliberate exception/allocation-fault cases run in Release because the installed
 sanitizer runtime cannot unwind C++ exceptions.
+
+
+## Pixel image painting
+
+PixelGrid now composes a free painter with validated dimensions and ordinary RGB
+storage. `paint_pixels` intersects native image bounds with `Canvas::visible()` before
+reading pixels or drawing cells. It draws directly through Canvas rather than creating
+an intermediate Glyph. Work scales with visible cells instead of total image area;
+odd final rows and inherited clips retain the same native two-pixels-per-cell mapping.
+
+The comparison isolates the PixelGrid implementation at `e3be782` against the new
+implementation, using the current core for both. The standalone workload is
+[tests/pixel_benchmarks.cpp](../tests/pixel_benchmarks.cpp); adapt only its image
+constructor to the old Matrix API for the baseline. Both binaries use Clang/libc++22,
+Release `-O3 -DNDEBUG`, no LTO/sanitizers, three warmups, five samples of twenty paints,
+and three alternating processes per version. No builds or tests ran during timing.
+Checksums match across every process. Timing includes scanning the physical 80×24
+frame; the second view inherits a 30×12 clip with a negative child origin.
+
+| Image pixels | Visible cells | Before µs | After µs | Speedup |
+| --- | ---: | ---: | ---: | ---: |
+| 128×128 | 80×24 | 553.681 | 228.670 | 2.4× |
+| 128×128 | 30×12 | 432.504 | 46.257 | 9.3× |
+| 1024×1024 | 80×24 | 26529.326 | 227.166 | 116.8× |
+| 1024×1024 | 30×12 | 26381.266 | 46.867 | 562.9× |
+
+These results measure clipped native image painting, not resizing, image decoding,
+terminal output, or a general application speedup. Ordinary Canvas cell writes still
+perform width/layout validation.
+
+```sh
+cmake --build build-release --target TermOx.tests.pixel_benchmarks
+python3 tests/benchmark_paint_pipeline.py /path/to/before-pixel-benchmarks \
+    ./build-release/tests/TermOx.tests.pixel_benchmarks /tmp/pixel-results --modes pixels
+```
+
+Raw [before](../tests/benchmark-results/pixels-before.csv),
+[after](../tests/benchmark-results/pixels-after.csv), and
+[process samples](../tests/benchmark-results/pixels-samples.csv) are retained.
+
+Validation passes 212 Release cases, including eight allocation-fault cases, all
+seven example builds, and nine PTY smoke checks. Pixel coverage includes checked
+counts/coordinates, odd rows, custom padding, storage mismatches, width policies,
+200 randomized nested views, repaint coalescing, move identity/reuse, and replacement
+rollback. BMP fixtures cover all supported depths, row orientation/padding, palette
+bounds, bitfield normalization, invalid headers/masks, and every truncated prefix.
+ASan+UBSan passes 116 non-exception cases with every TermOx source instrumented.
+Intentional exception tests run in Release because the installed sanitizer runtime
+cannot unwind C++ exceptions. See [PixelGrid](reference.md#-oxpixelgrid) for the API.

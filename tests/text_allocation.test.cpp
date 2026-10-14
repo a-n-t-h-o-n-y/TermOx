@@ -13,6 +13,7 @@
 #include <ox/core/text.hpp>
 #include <ox/datatable.hpp>
 #include <ox/layout.hpp>
+#include <ox/pixelgrid.hpp>
 
 namespace {
 int remaining_allocations = -1;
@@ -370,4 +371,31 @@ TEST(
     }
     remaining_allocations = -1;
     ASSERT(row.children.back().at().x == 18);
+}
+
+TEST(pixel_reset_allocation_failure_preserves_shape_and_colors)
+{
+    auto grid = ox::PixelGrid{ox::Area{2, 3}, ox::RGB{0x123456}};
+    remaining_allocations = 0;
+    auto failed = false;
+    try {
+        grid.reset({100, 100});
+    }
+    catch (std::bad_alloc const&) {
+        failed = true;
+    }
+    catch (...) {
+        remaining_allocations = -1;
+        throw;
+    }
+    remaining_allocations = -1;
+    ASSERT(failed);
+    ASSERT((grid.pixel_size() == ox::Area{2, 3}));
+    ASSERT(grid.pixels().size() == 6);
+    for (auto color : grid.pixels()) {
+        ASSERT(color == ox::RGB{0x123456});
+    }
+    grid.reset({3, 2}, ox::RGB{0xabcdef});
+    ASSERT((grid.pixel_size() == ox::Area{3, 2}));
+    ASSERT(grid.at({2, 1}) == ox::RGB{0xabcdef});
 }

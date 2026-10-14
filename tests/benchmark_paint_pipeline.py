@@ -13,7 +13,7 @@ def main():
     parser.add_argument("before", type=Path)
     parser.add_argument("after", type=Path)
     parser.add_argument("output", type=Path)
-    parser.add_argument("--modes", nargs="+", choices=("renderer", "paint", "application", "layout", "table", "arrangement"),
+    parser.add_argument("--modes", nargs="+", choices=("renderer", "paint", "application", "layout", "table", "arrangement", "pixels"),
                         default=("renderer", "paint", "application"))
     args = parser.parse_args()
     samples = []
@@ -54,6 +54,8 @@ def main():
         rows = [dict(row) for row in runs[0]]
         for index, row in enumerate(rows):
             for column in ("median_us_per_operation", "allocations_per_operation"):
+                if column not in row:
+                    continue
                 row[column] = f"{statistics.median(float(run[index][column]) for run in runs):.3f}"
         path = args.output / f"paint-pipeline-{mode}-{version}.csv"
         with path.open("w", newline="") as stream:
