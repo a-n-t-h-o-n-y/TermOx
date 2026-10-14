@@ -25,6 +25,10 @@ TreeView::TreeView(Options x)
     Connection{
         .signal = list_.on_activate,
         .slot = [](std::size_t row, TreeView& self) { self.activate(row); }}(*this);
+    Connection{.signal = list_.on_scroll,
+        .slot = [](Point at, Area content, Area viewport, TreeView& self) {
+            self.on_scroll(at, content, viewport);
+        }}(*this);
     set_nodes(std::move(x.nodes));
 }
 auto TreeView::node(std::vector<std::size_t> const& path) -> TreeNode&

@@ -50,7 +50,7 @@ connection identifiers. Rendering visits only clipped rows and reuses per-item l
 RadioGroup keeps its existing string-items/optional-index API. It now shares navigation,
 supports Home/End/PageUp/PageDown, wheel scrolling, and `set_item_enabled(index, bool)`.
 Selection reveals the chosen row, and disabled rows are skipped. `scroll_offset()` and
-`set_scroll_offset(int)` control the vertical viewport.
+`set_scroll_offset(Point)` control the vertical viewport; x is always zero.
 
 ## Select and ComboBox
 

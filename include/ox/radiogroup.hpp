@@ -10,6 +10,8 @@
 
 #include <ox/core/text.hpp>
 #include <ox/widget.hpp>
+#include <ox/scrollbar.hpp>
+#include <tuple>
 
 namespace ox {
 
@@ -70,8 +72,11 @@ class RadioGroup : public Widget {
     auto handle(MousePress const& m) -> EventResponse override;
 
     auto handle(MouseWheel const&) -> EventResponse override;
-    auto scroll_offset() const -> int { return scroll_; }
-    auto set_scroll_offset(int) -> bool;
+    auto content_size() const -> Area;
+    auto viewport_size() const -> Area { return size(); }
+    auto scroll_offset() const -> Point { return {0, scroll_}; }
+    auto set_scroll_offset(Point) -> bool;
+    sl::Signal<void(Point, Area, Area)> on_scroll;
     auto item_enabled(std::size_t index) const -> bool
     { return enabled_items_.at(index); }
     void set_item_enabled(std::size_t, bool);
@@ -87,6 +92,8 @@ class RadioGroup : public Widget {
     mutable std::vector<TextLayout> measure_layouts_;
     std::vector<bool> enabled_items_;
     int scroll_ = 0;
+    std::optional<std::tuple<Point, Area, Area>> notified_scroll_;
+    void notify_scroll();
 
    protected:
     void on_arrange(Rect) override;

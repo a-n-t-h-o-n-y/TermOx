@@ -308,33 +308,4 @@ auto ListView::handle(MouseWheel const& e) -> EventResponse
                            scroll_by(offset_.y, e.dy, content_.height, size().height)});
     return {.handled = changed, .repaint = changed};
 }
-auto link(ListView& list, ScrollBar& bar) -> std::pair<sl::Identifier, sl::Identifier>
-{
-    auto sync = [](ListView& list, ScrollBar& bar) {
-        auto c = list.content_size();
-        auto v = list.size();
-        auto p = list.scroll_offset();
-        bar.set_range(bar.vertical ? c.height : c.width,
-                      bar.vertical ? v.height : v.width, bar.vertical ? p.y : p.x);
-    };
-    sync(list, bar);
-    auto first = Connection{.signal = list.on_scroll,
-                            .slot = [sync](Point, Area, Area, ListView& l,
-                                           ScrollBar& b) { sync(l, b); }}(list, bar);
-    try {
-        return {first, Connection{.signal = bar.on_scroll,
-                                  .slot = [](int, ListView& l, ScrollBar& b) {
-                                      auto p = l.scroll_offset();
-                                      if (b.vertical) { p.y = b.position(); }
-                                      else {
-                                          p.x = b.position();
-                                      }
-                                      l.set_scroll_offset(p);
-                                  }}(list, bar)};
-    }
-    catch (...) {
-        list.on_scroll.disconnect(first);
-        throw;
-    }
-}
 }  // namespace ox

@@ -293,38 +293,4 @@ class ScrollView : public Widget {
     }
 };
 
-template <WidgetDerived Child>
-auto link(ScrollView<Child>& view, ScrollBar& bar)
-    -> std::pair<sl::Identifier, sl::Identifier>
-{
-    auto synchronize = [](auto& view, ScrollBar& bar) {
-        auto const content = view.content_size();
-        auto const viewport = view.viewport_size();
-        auto const at = view.scroll_offset();
-        bar.set_range(bar.vertical ? content.height : content.width,
-                      bar.vertical ? viewport.height : viewport.width,
-                      bar.vertical ? at.y : at.x);
-    };
-    synchronize(view, bar);
-    auto first = Connection{
-        .signal = view.on_scroll,
-        .slot = [synchronize](Point, Area, Area, auto& view, ScrollBar& bar) {
-            synchronize(view, bar);
-        }}(view, bar);
-    try {
-        return {first, Connection{.signal = bar.on_scroll,
-                                  .slot = [](int, auto& view, ScrollBar& bar) {
-                                      auto at = view.scroll_offset();
-                                      if (bar.vertical) { at.y = bar.position(); }
-                                      else {
-                                          at.x = bar.position();
-                                      }
-                                      view.set_scroll_offset(at);
-                                  }}(view, bar)};
-    }
-    catch (...) {
-        view.on_scroll.disconnect(first);
-        throw;
-    }
-}
 }  // namespace ox

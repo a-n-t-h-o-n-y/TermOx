@@ -90,6 +90,8 @@ class BasicNumberLabel : public Widget {
         Style style = {};
         std::locale locale = std::locale{};
         std::string format = "{}";
+        std::string prefix = {};
+        std::string suffix = {};
         SizePolicy width_policy = SizePolicy::flex();
         SizePolicy height_policy = SizePolicy::fixed(1);
     } inline static const init = {};
@@ -100,6 +102,8 @@ class BasicNumberLabel : public Widget {
     Style style;
     std::locale locale;
     std::string format;
+    std::string prefix;
+    std::string suffix;
 
     BasicNumberLabel(Options x = init)
         : Widget{FocusPolicy::None, x.width_policy, x.height_policy},
@@ -107,7 +111,9 @@ class BasicNumberLabel : public Widget {
           align{std::move(x.align)},
           style{std::move(x.style)},
           locale{std::move(x.locale)},
-          format{std::move(x.format)}
+          format{std::move(x.format)},
+          prefix{std::move(x.prefix)},
+          suffix{std::move(x.suffix)}
     {}
 
    public:
@@ -121,12 +127,12 @@ class BasicNumberLabel : public Widget {
     }
     auto measure(Area available, esc::WidthPolicy policy = {}) const -> Area override
     {
-        return measure_text(std::vformat(locale, format, std::make_format_args(value)),
+        return measure_text(prefix + std::vformat(locale, format, std::make_format_args(value)) + suffix,
                             available, TextWrap::None, policy);
     }
     auto paint(Canvas c) -> Cursor override
     {
-        auto const text = std::vformat(locale, format, std::make_format_args(value));
+        auto const text = prefix + std::vformat(locale, format, std::make_format_args(value)) + suffix;
         paint_label(c, text, align, appearance(style));
 
         return {};

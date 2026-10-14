@@ -23,6 +23,11 @@ class LogView : public Widget {
     auto set_follow_tail(bool) -> bool;
     void append(std::string_view);
     void clear();
+    auto content_size() const -> Area { return editor.content_size(); }
+    auto viewport_size() const -> Area { return editor.viewport_size(); }
+    auto scroll_offset() const -> Point { return editor.scroll_offset(); }
+    auto set_scroll_offset(Point at) -> bool { return editor.set_scroll_offset(at); }
+    sl::Signal<void(Point, Area, Area)> on_scroll;
     auto measure(Area, esc::WidthPolicy = {}) const -> Area override;
     auto get_children() -> zzz::Generator<Widget&> override { co_yield editor; }
     auto get_children() const -> zzz::Generator<Widget const&> override

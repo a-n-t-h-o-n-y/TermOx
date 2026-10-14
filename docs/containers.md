@@ -67,3 +67,31 @@ Connection configuration and borrowed lifetime tracking remain unchanged.
 
 See [selection and application structure](selection-and-application.md) for ListView,
 Select/ComboBox, Tabs, root overlays, menus, dialogs, modal scopes, and scoped shortcuts.
+
+## Shared scrolling interface
+
+`Scrollable<T>` in `<ox/scrollbar.hpp>` describes a widget with `content_size()` and
+`viewport_size()` returning `Area`, `scroll_offset()` returning `Point`,
+`set_scroll_offset(Point)` returning whether it changed, and
+`on_scroll(Point offset, Area content, Area viewport)`. Units are terminal columns
+and rows. Implement this interface on a custom widget to use the same `link` function.
+TextBox, LineEdit, ListView, DataTable, ScrollView, RadioGroup, TreeView, and LogView
+satisfy the concept. TreeView and LogView expose it directly; callers need not reach
+into their child widgets. RadioGroup scrolls vertically only: its x offset is always
+zero and its content width equals the viewport width.
+
+```cpp
+auto log = ox::LogView{};
+auto bar = ox::ScrollBar{}; // vertical by default
+ox::link(log, bar);
+```
+
+`link` immediately synchronizes the bar's range and position. Geometry/content changes
+and scrolling then synchronize both directions. One generic implementation handles all
+widgets; it tracks their lifetimes and follows widget moves. Returned connection IDs
+allow explicit disconnection from `view.on_scroll` and `bar.on_scroll`. Connections
+remain active when the returned IDs are discarded. A horizontal bar uses
+`ScrollBar{{.vertical = false}}`; link it separately to the same view.
+
+Migration: RadioGroup's integer scroll offset becomes `Point{0, row}`; use
+`scroll_offset().y` to read it and `set_scroll_offset({0, row})` to change it.

@@ -38,13 +38,6 @@ auto increment(double v, ValueRange r, double steps) -> double
     auto next = (long double)v + (long double)r.step * steps;
     return (double)std::clamp(next, (long double)r.minimum, (long double)r.maximum);
 }
-auto value_string(double v) -> std::string
-{
-    char buffer[128];
-    auto [end, error] = std::to_chars(buffer, buffer + sizeof(buffer), v);
-    if (error != std::errc{}) { throw std::runtime_error{"Number formatting failed"}; }
-    return {buffer, end};
-}
 }  // namespace
 Slider::Slider() : Slider{Options{}} {}
 Slider::Slider(Options x)
@@ -177,80 +170,6 @@ auto Slider::pointer_cancel() -> EventResponse
     auto was = std::exchange(dragging_, false);
     release_pointer();
     return {.handled = was};
-}
-NumericEdit::NumericEdit() : NumericEdit{Options{}} {}
-NumericEdit::NumericEdit(Options x)
-    : Widget{FocusPolicy::None, SizePolicy::flex(), SizePolicy::fixed(1)},
-      editor{std::move(x.editor)},
-      range_{x.range},
-      value_{clamp_value(x.value, x.range)}
-{
-    sync();
-    Connection{.signal = editor.on_submit,
-               .slot = [](auto const&, NumericEdit& self) { self.commit(); }}(*this);
-    // Focus is owned by the editor. Scoped bindings leave editing keys to LineEdit.
-    auto lifetime = track(*this);
-    editor.shortcuts = [lifetime](KeyEvent const& e) {
-        auto* self = lifetime.try_get();
-        return self && self->editor.is_focused() ? self->handle(e) : EventResponse{};
-    };
-}
-void NumericEdit::sync() { editor.set_text(value_string(value_)); }
-auto NumericEdit::set_value(double v) -> bool
-{
-    v = clamp_value(v, range_);
-    auto changed = std::exchange(value_, v) != v;
-    auto lifetime = track(*this);
-    sync();
-    if (auto* self = lifetime.try_get(); self && changed && self->value_ == v) {
-        self->on_change(v);
-    }
-    return changed;
-}
-auto NumericEdit::set_range(ValueRange r) -> bool
-{
-    validate(r);
-    if (r == range_) return false;
-    range_ = r;
-    set_value(value_);
-    return true;
-}
-auto NumericEdit::commit() -> bool
-{
-    auto const& text = editor.text();
-    double v = 0;
-    auto input = std::istringstream{text};
-    input.imbue(std::locale::classic());
-    input >> std::noskipws >> v;
-    if (!input || !input.eof() || !std::isfinite(v) || v < range_.minimum ||
-        v > range_.maximum) {
-        auto copy = text;
-        on_invalid(copy);
-        return false;
-    }
-    auto lifetime = track(*this);
-    set_value(v);
-    return lifetime.valid();
-}
-void NumericEdit::revert() { sync(); }
-auto NumericEdit::measure(Area a, esc::WidthPolicy p) const -> Area
-{ return editor.measure(a, p); }
-void NumericEdit::on_arrange(Rect) { arrange(editor, {{}, size()}); }
-auto NumericEdit::handle(KeyEvent const& e) -> EventResponse
-{
-    if (!is_enabled() || editor.read_only || e.action == KeyAction::Release) return {};
-    if (e.matches(KeyCode::Escape, {}, KeyAction::Press)) {
-        revert();
-        return {.handled = true, .repaint = true};
-    }
-    if (e.matches(KeyCode::ArrowUp, {}, e.action) ||
-        e.matches(KeyCode::ArrowDown, {}, e.action)) {
-        return {
-            .handled = true,
-            .repaint = set_value(increment(
-                value_, range_, e.matches(KeyCode::ArrowUp, {}, e.action) ? 1 : -1))};
-    }
-    return {};
 }
 ProgressBar::ProgressBar() : ProgressBar{Options{}} {}
 ProgressBar::ProgressBar(Options x)

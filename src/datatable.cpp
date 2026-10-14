@@ -385,36 +385,4 @@ auto DataTable::handle(MouseWheel const& event) -> EventResponse
          scroll_by(offset_.y, event.dy, content_.height, viewport_.height)});
     return {.handled = true, .repaint = changed};
 }
-auto link(DataTable& table, ScrollBar& bar) -> std::pair<sl::Identifier, sl::Identifier>
-{
-    auto synchronize = [](DataTable& table, ScrollBar& bar) {
-        auto const content = table.content_size();
-        auto const viewport = table.viewport_size();
-        auto const at = table.scroll_offset();
-        bar.set_range(bar.vertical ? content.height : content.width,
-                      bar.vertical ? viewport.height : viewport.width,
-                      bar.vertical ? at.y : at.x);
-    };
-    synchronize(table, bar);
-    auto first = Connection{
-        .signal = table.on_scroll,
-        .slot = [synchronize](Point, Area, Area, DataTable& table, ScrollBar& bar) {
-            synchronize(table, bar);
-        }}(table, bar);
-    try {
-        return {first, Connection{.signal = bar.on_scroll,
-                                  .slot = [](int, DataTable& table, ScrollBar& bar) {
-                                      auto at = table.scroll_offset();
-                                      if (bar.vertical) { at.y = bar.position(); }
-                                      else {
-                                          at.x = bar.position();
-                                      }
-                                      table.set_scroll_offset(at);
-                                  }}(table, bar)};
-    }
-    catch (...) {
-        table.on_scroll.disconnect(first);
-        throw;
-    }
-}
 }  // namespace ox

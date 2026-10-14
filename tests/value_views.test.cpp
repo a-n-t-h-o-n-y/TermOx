@@ -460,3 +460,140 @@ TEST(numeric_readonly_input_and_disabled_command_replacement)
     palette.set_commands({{"off", "", false}, {"on"}});
     ASSERT(palette.choices().current_row() == 1);
 }
+
+TEST(typed_numeric_edit_preserves_integer_precision_and_rejects_fraction_overflow)
+{
+    using I = std::int64_t;
+    auto number = BasicNumericEdit<I>{{
+        .range = {std::numeric_limits<I>::lowest(), std::numeric_limits<I>::max(), 1},
+        .value = 9007199254740993LL}};
+    static_assert(std::same_as<decltype(number.value()), I>);
+    I notified = 0;
+    number.on_change.connect([&](I value) { notified = value; });
+    number.editor.set_text("9007199254740995");
+    ASSERT(number.commit() && notified == 9007199254740995LL);
+    for (auto text : {"1.5", "9223372036854775808", "-9223372036854775809", "1e2", ""}) {
+        number.editor.set_text(text);
+        ASSERT(!number.commit() && number.value() == 9007199254740995LL);
+    }
+    number.editor.set_text("9223372036854775807");
+    ASSERT(number.commit());
+    number.handle(KeyEvent{.key = KeyCode::ArrowUp});
+    ASSERT(number.value() == std::numeric_limits<I>::max());
+    number.editor.set_text("-9223372036854775808");
+    ASSERT(number.commit());
+    number.handle(KeyEvent{.key = KeyCode::ArrowDown});
+    ASSERT(number.value() == std::numeric_limits<I>::lowest());
+    auto positive = BasicNumericEdit<std::uint64_t>{{
+        .range = {0, std::numeric_limits<std::uint64_t>::max(), 1}}};
+    positive.editor.set_text("-1");
+    ASSERT(!positive.commit());
+    positive.editor.set_text("18446744073709551615");
+    ASSERT(positive.commit() && positive.value() == std::numeric_limits<std::uint64_t>::max());
+}
+
+TEST(numeric_format_focus_units_and_drafts_preserve_the_committed_value)
+{
+    auto number = NumericEdit{{.value = 12.3456789, .format = "{:.2f}",
+                               .prefix = "$", .suffix = " kg"}};
+    ASSERT(number.editor.text() == "12.35");
+    ASSERT(number.commit() && number.value() == 12.3456789);
+    auto app = Application{number};
+    app.dispatch(esc::Resize{{16, 1}});
+    app.set_focus(number.editor);
+    ASSERT(number.editor.text() != "12.35");
+    ASSERT(number.commit() && number.value() == 12.3456789);
+    ASSERT(number.editor.bounds().at.x == 1 && number.editor.size().width == 12);
+    number.editor.set_text("13.125");
+    app.clear_focus();
+    ASSERT(number.has_draft() && number.editor.text() == "13.125");
+    ASSERT(number.value() == 12.3456789);
+    number.revert();
+    ASSERT(number.editor.text() == "12.35");
+    number.commit_on_focus_loss = true;
+    app.set_focus(number.editor);
+    number.editor.set_text("14.125");
+    app.clear_focus();
+    ASSERT(number.value() == 14.125 && number.editor.text() == "14.12");
+    app.set_focus(number.editor);
+    number.editor.set_text("bad");
+    app.clear_focus();
+    ASSERT(number.value() == 14.125 && number.editor.text() == "bad");
+    auto frame = Frame{{16, 1}};
+    number.paint(Canvas{frame});
+    ASSERT((frame[Point{0, 0}].text == U"$"));
+    ASSERT((frame[Point{14, 0}].text == U"k"));
+    arrange(number, {{}, {1, 1}});
+    ASSERT(number.editor.size().width == 0);
+}
+
+TEST(numeric_edit_locale_and_integer_alias)
+{
+    struct Comma : std::numpunct<char> {
+        auto do_decimal_point() const -> char override { return ','; }
+    };
+    auto number = NumericEdit{{.format = "{:.2Lf}",
+        .locale = std::locale{std::locale::classic(), new Comma}}};
+    number.editor.set_text("1,25");
+    ASSERT(number.commit() && number.value() == 1.25);
+    ASSERT(number.editor.text() == "1,25");
+    auto count = IntegerEdit{{.value = 3, .suffix = " items"}};
+    count.editor.set_text("3.5");
+    ASSERT(!count.commit() && count.value() == 3);
+}
+
+TEST(form_commits_numeric_drafts_before_validation_and_rejects_invalid_drafts)
+{
+    auto form = Form{std::tuple{IntegerEdit{{.range = {0, 120, 1}, .value = 18}}},
+        std::vector<FormField>{{"Age", "", [](Widget const& w) -> std::optional<std::string> {
+            return static_cast<IntegerEdit const&>(w).value() >= 21
+                ? std::nullopt : std::optional<std::string>{"Must be 21"};
+        }}}};
+    auto& age = std::get<0>(form.children);
+    age.editor.set_text("25");
+    ASSERT(form.submit() && age.value() == 25);
+    age.editor.set_text("25.5");
+    ASSERT(!form.submit() && form.errors()[0] && age.value() == 25);
+    age.editor.set_text("19");
+    ASSERT(!form.submit() && form.errors()[0] == "Must be 21" && age.value() == 19);
+}
+
+TEST(numeric_commit_respects_validator_and_form_supports_explicit_commit_overrides)
+{
+    auto count = IntegerEdit{{.editor = {
+        .validator = [](std::string_view text) { return text != "13"; }}}};
+    count.editor.set_text("13");
+    ASSERT(!count.commit() && count.value() == 0);
+    count.editor.set_text("14");
+    ASSERT(count.commit() && count.value() == 14);
+    auto form = Form{std::tuple{IntegerEdit{}}, std::vector<FormField>{
+        {.label = "Draft", .commit = [](Widget&) { return true; }}}};
+    std::get<0>(form.children).editor.set_text("unfinished");
+    ASSERT(form.submit() && std::get<0>(form.children).has_draft());
+    auto doomed = std::make_unique<IntegerEdit>();
+    doomed->editor.validator = [&](std::string_view) { doomed.reset(); return true; };
+    doomed->editor.set_text("1");
+    ASSERT(!doomed->commit());
+}
+
+TEST(numeric_edit_and_scroll_connections_follow_moves)
+{
+    auto input = IntegerEdit{{.value = 2}};
+    auto moved = std::move(input);
+    moved.editor.set_text("4");
+    ASSERT(moved.commit() && moved.value() == 4);
+    auto app = Application{moved};
+    app.dispatch(esc::Resize{{10, 1}});
+    app.set_focus(moved.editor);
+    app.dispatch(KeyEvent{.key = KeyCode::ArrowUp});
+    ASSERT(moved.value() == 5);
+    auto log = LogView{};
+    arrange(log, {{}, {8, 1}});
+    auto bar = ScrollBar{};
+    link(log, bar);
+    auto moved_log = std::move(log);
+    moved_log.append("a\nb\nc");
+    ASSERT(bar.content_length() == moved_log.content_size().height);
+    bar.set_position(0);
+    ASSERT(moved_log.scroll_offset().y == 0);
+}

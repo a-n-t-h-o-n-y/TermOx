@@ -29,6 +29,11 @@ class TreeView : public Widget {
     auto set_expanded(std::vector<std::size_t> const&, bool) -> bool;
     auto select(std::vector<std::size_t> const&,
                 SelectionAction = SelectionAction::Replace) -> bool;
+    auto content_size() const -> Area { return list_.content_size(); }
+    auto viewport_size() const -> Area { return list_.viewport_size(); }
+    auto scroll_offset() const -> Point { return list_.scroll_offset(); }
+    auto set_scroll_offset(Point at) -> bool { return list_.set_scroll_offset(at); }
+    sl::Signal<void(Point, Area, Area)> on_scroll;
     auto measure(Area, esc::WidthPolicy = {}) const -> Area override;
     auto get_children() -> zzz::Generator<Widget&> override { co_yield list_; }
     auto get_children() const -> zzz::Generator<Widget const&> override

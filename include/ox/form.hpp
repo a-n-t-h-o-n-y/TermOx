@@ -7,6 +7,8 @@ struct FormField {
     std::string label;
     std::string help = {};
     std::function<std::optional<std::string>(Widget const&)> validate = {};
+    /** Override draft commit, including for fields stored through Widget references. */
+    std::function<bool(Widget&)> commit = {};
 };
 /** Own ordinary tuple/range fields; validators return a message or nullopt. */
 template <LayoutContainer Container>
@@ -60,12 +62,33 @@ class Form : public Widget {
         auto lifetime = track(*this);
         auto validators = fields_;
         auto widgets = std::vector<LifetimeView<Widget>>{};
-        detail::for_each_child(children,
-                               [&](Widget& w) { widgets.push_back(track(w)); });
+        auto commits = std::vector<std::function<bool()>>{};
+        detail::for_each_child(children, [&](auto& w) {
+            widgets.push_back(track(static_cast<Widget&>(w)));
+            auto target = track(w);
+            if constexpr (requires { { w.commit() } -> std::same_as<bool>; }) {
+                commits.push_back([target] {
+                    auto* field = target.try_get();
+                    return field && field->commit();
+                });
+            }
+            else commits.push_back([] { return true; });
+        });
         auto errors = std::vector<std::optional<std::string>>(validators.size());
         for (std::size_t i = 0; i < validators.size(); ++i) {
             if (!lifetime.valid() || !widgets[i].valid()) return false;
-            if (validators[i].validate) {
+            auto committed = validators[i].commit
+                ? validators[i].commit(widgets[i].get()) : commits[i]();
+            if (!lifetime.valid() || !widgets[i].valid()) return false;
+            if (!committed) {
+                errors[i] = "Invalid value";
+                continue;
+            }
+        }
+        // Commit every draft before any validator observes cross-field values.
+        for (std::size_t i = 0; i < validators.size(); ++i) {
+            if (!lifetime.valid() || !widgets[i].valid()) return false;
+            if (!errors[i] && validators[i].validate) {
                 errors[i] = validators[i].validate(widgets[i].get());
                 if (errors[i]) validate_row_text(*errors[i]);
             }

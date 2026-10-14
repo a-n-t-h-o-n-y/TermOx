@@ -6,7 +6,8 @@ int main()
         Label{"Tab: focus | Ctrl-Tab: pages | Ctrl-Enter: form | Ctrl-C: exit"},
         Tabs{std::tuple{
                  Column{Slider{{.range = {0, 100, 5}, .value = 30}},
-                        NumericEdit{{.range = {0, 100, 5}, .value = 30}},
+                        NumericEdit{{.range = {0, 100, 5}, .value = 30,
+                                     .format = "{:.2f}", .suffix = " kg"}},
                         ProgressBar{{.value = 30}},
                         Row{Spinner{}, Switch{{.label = {.text = "Enabled"}}}},
                         LogView{{.max_lines = 200}}},
@@ -21,7 +22,7 @@ int main()
                                {"README.md"}}}},
                      LogView{{.max_lines = 100}}},
                  Form{std::tuple{LineEdit{{.placeholder = "Required"}},
-                                 NumericEdit{{.range = {0, 120, 1}, .value = 18}},
+                                 IntegerEdit{{.range = {0, 120, 1}, .value = 18}},
                                  Switch{{.label = {.text = "Notifications"}}}},
                       std::vector<FormField>{
                           {"Name", "",

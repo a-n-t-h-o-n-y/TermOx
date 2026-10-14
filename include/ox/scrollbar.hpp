@@ -61,3 +61,47 @@ class ScrollBar : public Widget {
     auto move_to(int position) -> EventResponse;
 };
 }  // namespace ox
+
+namespace ox {
+/** A scrollable widget uses terminal columns/rows and reports geometry changes. */
+template <typename T>
+concept Scrollable = WidgetDerived<T> && requires(T& view, T const& c, Point at) {
+    { c.content_size() } -> std::same_as<Area>;
+    { c.viewport_size() } -> std::same_as<Area>;
+    { c.scroll_offset() } -> std::same_as<Point>;
+    { view.set_scroll_offset(at) } -> std::same_as<bool>;
+    { view.on_scroll } -> std::same_as<sl::Signal<void(Point, Area, Area)>&>;
+};
+/** Synchronize one axis, tracking both lifetimes. Disconnect using returned IDs. */
+template <Scrollable View>
+auto link(View& view, ScrollBar& bar)
+    -> std::pair<sl::Identifier, sl::Identifier>
+{
+    auto synchronize = [](View& view, ScrollBar& bar) {
+        auto content = view.content_size();
+        auto viewport = view.viewport_size();
+        auto at = view.scroll_offset();
+        bar.set_range(bar.vertical ? content.height : content.width,
+                      bar.vertical ? viewport.height : viewport.width,
+                      bar.vertical ? at.y : at.x);
+    };
+    synchronize(view, bar);
+    auto first = Connection{.signal = view.on_scroll,
+        .slot = [synchronize](Point, Area, Area, View& v, ScrollBar& b) {
+            synchronize(v, b);
+        }}(view, bar);
+    try {
+        return {first, Connection{.signal = bar.on_scroll,
+            .slot = [](int position, View& v, ScrollBar& b) {
+                auto at = v.scroll_offset();
+                if (b.vertical) at.y = position;
+                else at.x = position;
+                v.set_scroll_offset(at);
+            }}(view, bar)};
+    }
+    catch (...) {
+        view.on_scroll.disconnect(first);
+        throw;
+    }
+}
+}  // namespace ox

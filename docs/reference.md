@@ -1576,3 +1576,18 @@ contracts, keyboard/mouse bindings, lifetime rules, and examples.
 See [values and composite widgets](value-and-composite-widgets.md) for Slider,
 NumericEdit, ProgressBar, Spinner, Switch, TreeView, LogView, SplitPane, Form,
 FilePicker, and CommandPalette.
+
+
+### Typed numeric input and shared scrolling
+
+`NumericEdit` is `BasicNumericEdit<double>`; `IntegerEdit` is
+`BasicNumericEdit<int>`. Bounds, steps, values, and `on_change` signals use the numeric
+type. Configure `.format`, `.prefix`, `.suffix`, `.locale`, and
+`.commit_on_focus_loss` without changing the simple default construction. See
+[values and composite widgets](value-and-composite-widgets.md) for precision-safe
+editing and form commit behavior.
+
+All standard scrollable views implement `Scrollable` and use the same
+`link(view, scrollbar)` function. RadioGroup now takes `Point{0, row}` offsets;
+TreeView and LogView expose scrolling directly. See
+[shared scrolling](containers.md#shared-scrolling-interface).

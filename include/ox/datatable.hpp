@@ -1,4 +1,5 @@
 #pragma once
+#include <ox/scrollbar.hpp>
 
 #include <functional>
 #include <optional>
@@ -127,8 +128,4 @@ class DataTable : public Widget {
     void paint_cell(Canvas, std::string_view, Align, Style);
 };
 
-/** Link one axis; lifetime tracked in both directions. Initialize and resize normally.
- */
-auto link(DataTable& table, ScrollBar& bar)
-    -> std::pair<sl::Identifier, sl::Identifier>;
 }  // namespace ox

@@ -39,6 +39,7 @@ RadioGroup::RadioGroup(RadioGroup&& other)
       on{std::move(other.on)},
       off{std::move(other.off)},
       on_select{std::move(other.on_select)},
+      on_scroll{std::move(other.on_scroll)},
       items_{std::move(other.items_)},
       selected_{std::exchange(other.selected_, std::nullopt)},
       highlighted_{std::exchange(other.highlighted_, std::nullopt)},
@@ -55,6 +56,8 @@ auto RadioGroup::operator=(RadioGroup&& other) -> RadioGroup&
     on = std::move(other.on);
     off = std::move(other.off);
     on_select = std::move(other.on_select);
+    on_scroll = std::move(other.on_scroll);
+    notified_scroll_.reset();
     items_ = std::move(other.items_);
     selected_ = std::exchange(other.selected_, std::nullopt);
     highlighted_ = std::exchange(other.highlighted_, std::nullopt);
@@ -77,13 +80,12 @@ auto RadioGroup::select(std::optional<std::size_t> index) -> bool
     }
     if (index) { highlighted_ = index; }
     selected_ = index;
-    if (!changed) {
-        if (old_scroll != scroll_) { request_repaint(); }
-        return old_scroll != scroll_;
-    }
-    request_repaint();
-    on_select(index);
-    return true;
+    auto lifetime = track(*this);
+    auto scrolled = old_scroll != scroll_;
+    if (changed || scrolled) request_repaint();
+    notify_scroll();
+    if (auto* self = lifetime.try_get(); self && changed) self->on_select(index);
+    return changed || scrolled;
 }
 void RadioGroup::set_items(std::vector<std::string> replacement)
 {
@@ -101,7 +103,9 @@ void RadioGroup::set_items(std::vector<std::string> replacement)
     selected_.reset();
     highlighted_.reset();
     request_repaint();
-    if (changed) { on_select(std::nullopt); }
+    auto lifetime = track(*this);
+    notify_scroll();
+    if (auto* self = lifetime.try_get(); self && changed) self->on_select(std::nullopt);
 }
 auto RadioGroup::measure(Area available, esc::WidthPolicy policy) const -> Area
 {
@@ -178,26 +182,43 @@ auto RadioGroup::handle(MousePress const& event) -> EventResponse
     auto const changed = select((std::size_t)(event.at.y + scroll_));
     return {.handled = true, .repaint = changed};
 }
+auto RadioGroup::content_size() const -> Area
+{
+    if (items_.size() > (std::size_t)std::numeric_limits<int>::max())
+        throw std::length_error{"Radio extent overflow"};
+    return {size().width, (int)items_.size()};
+}
+void RadioGroup::notify_scroll()
+{
+    auto value = std::tuple{scroll_offset(), content_size(), viewport_size()};
+    if (notified_scroll_ == value) return;
+    notified_scroll_ = value;
+    on_scroll(std::get<0>(value), std::get<1>(value), std::get<2>(value));
+}
 void RadioGroup::on_arrange(Rect)
-{ scroll_ = clamp_scroll(scroll_, (int)items_.size(), size().height); }
+{
+    scroll_ = clamp_scroll(scroll_, (int)items_.size(), size().height);
+    notify_scroll();
+}
 void RadioGroup::refresh()
 {
     request_layout();
-    on_arrange(bounds());
     request_repaint();
+    on_arrange(bounds());
 }
-auto RadioGroup::set_scroll_offset(int value) -> bool
+auto RadioGroup::set_scroll_offset(Point at) -> bool
 {
-    value = clamp_scroll(value, (int)items_.size(), size().height);
+    auto value = clamp_scroll(at.y, (int)items_.size(), size().height);
     if (value == scroll_) { return false; }
     scroll_ = value;
     request_repaint();
+    notify_scroll();
     return true;
 }
 auto RadioGroup::handle(MouseWheel const& e) -> EventResponse
 {
     auto changed =
-        set_scroll_offset(scroll_by(scroll_, e.dy, (int)items_.size(), size().height));
+        set_scroll_offset({0, scroll_by(scroll_, e.dy, (int)items_.size(), size().height)});
     return {.handled = changed, .repaint = changed};
 }
 void RadioGroup::set_item_enabled(std::size_t index, bool enabled)

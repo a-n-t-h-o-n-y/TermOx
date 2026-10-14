@@ -1,16 +1,10 @@
 #pragma once
 #include <chrono>
+#include <ox/value_range.hpp>
 #include <ox/checkbox.hpp>
 #include <ox/lineedit.hpp>
 #include <ox/timer.hpp>
 namespace ox {
-/** Finite inclusive bounds; positive increment. Values clamp, without quantization. */
-struct ValueRange {
-    double minimum = 0;
-    double maximum = 100;
-    double step = 1;
-    auto operator==(ValueRange const&) const -> bool = default;
-};
 void validate(ValueRange);
 auto clamp_value(double, ValueRange) -> double;
 auto value_fraction(double, ValueRange) -> double;
@@ -48,40 +42,6 @@ class Slider : public Widget {
     double value_;
     bool dragging_ = false;
     auto point_value(Point) const -> double;
-};
-/** Editing is staged. Enter commits valid input; invalid input retains value. */
-class NumericEdit : public Widget {
-   public:
-    using Widget::handle;
-    struct Options {
-        ValueRange range = {};
-        double value = 0;
-        LineEdit::Options editor = {};
-    };
-    LineEdit editor;
-    sl::Signal<void(double)> on_change;
-    sl::Signal<void(std::string const&)> on_invalid;
-    NumericEdit();
-    explicit NumericEdit(Options);
-    auto range() const -> ValueRange { return range_; }
-    auto value() const -> double { return value_; }
-    auto set_value(double) -> bool;
-    auto set_range(ValueRange) -> bool;
-    auto commit() -> bool;
-    void revert();
-    auto measure(Area, esc::WidthPolicy = {}) const -> Area override;
-    auto get_children() -> zzz::Generator<Widget&> override { co_yield editor; }
-    auto get_children() const -> zzz::Generator<Widget const&> override
-    { co_yield editor; }
-    auto handle(KeyEvent const&) -> EventResponse override;
-
-   protected:
-    void on_arrange(Rect) override;
-
-   private:
-    ValueRange range_;
-    double value_;
-    void sync();
 };
 class ProgressBar : public Widget {
    public:
@@ -144,3 +104,5 @@ class Switch : public CheckBox {
     explicit Switch(CheckBox::Options);
 };
 }  // namespace ox
+
+#include <ox/numeric_edit.hpp>

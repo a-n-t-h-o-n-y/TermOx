@@ -88,13 +88,13 @@ TEST(radio_navigation_skips_disabled_items_and_scrolls_to_selection)
     arrange(radio, {{}, {12, 2}});
     radio.set_item_enabled(1, false);
     radio.handle(KeyEvent{.key = KeyCode::End});
-    ASSERT(radio.selected_index() == 3 && radio.scroll_offset() == 2);
+    ASSERT(radio.selected_index() == 3 && radio.scroll_offset().y == 2);
     radio.handle(KeyEvent{.key = KeyCode::Home});
     radio.handle(KeyEvent{.key = KeyCode::ArrowDown});
-    ASSERT(radio.selected_index() == 2 && radio.scroll_offset() == 1);
+    ASSERT(radio.selected_index() == 2 && radio.scroll_offset().y == 1);
     radio.set_item_enabled(2, false);
     ASSERT(!radio.selected_index());
-    radio.set_scroll_offset(2);
+    radio.set_scroll_offset({0, 2});
     radio.handle(MousePress{{1, 1}, MouseButton::Left});
     ASSERT(radio.selected_index() == 3);
 }
@@ -510,4 +510,38 @@ TEST(dropdowns_reveal_committed_rows_and_keep_duplicate_label_identity)
     ASSERT(combo.popup.child.current_row() == 1);
     edit.dispatch(KeyEvent{.key = KeyCode::Enter});
     ASSERT(combo.selected_index() == 2);
+}
+
+TEST(shared_scrollbar_links_radio_tree_and_log_without_inner_widget_access)
+{
+    static_assert(Scrollable<RadioGroup> && Scrollable<TreeView> && Scrollable<LogView>);
+    auto radio = RadioGroup{{.items = {"a", "b", "c", "d"}}};
+    arrange(radio, {{}, {10, 2}});
+    auto bar = ScrollBar{};
+    auto connections = link(radio, bar);
+    ASSERT(bar.content_length() == 4 && bar.viewport_length() == 2);
+    bar.set_position(2);
+    ASSERT((radio.scroll_offset() == Point{0, 2}));
+    radio.select(0);
+    ASSERT(bar.position() == 0);
+    arrange(radio, {{}, {10, 1}});
+    ASSERT(bar.viewport_length() == 1);
+    radio.set_items({"a"});
+    ASSERT(bar.content_length() == 1 && bar.position() == 0);
+    radio.on_scroll.disconnect(connections.first);
+    bar.on_scroll.disconnect(connections.second);
+    auto tree = TreeView{{.nodes = {{"a"}, {"b"}, {"c"}}}};
+    arrange(tree, {{}, {10, 1}});
+    auto treebar = ScrollBar{};
+    link(tree, treebar);
+    treebar.set_position(2);
+    ASSERT(tree.scroll_offset().y == 2);
+    auto log = LogView{};
+    arrange(log, {{}, {10, 1}});
+    auto logbar = ScrollBar{};
+    link(log, logbar);
+    log.append("a\nb\nc");
+    ASSERT(logbar.position() == log.scroll_offset().y);
+    logbar.set_position(0);
+    ASSERT(log.scroll_offset().y == 0 && !log.follows_tail());
 }

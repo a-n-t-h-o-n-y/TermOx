@@ -44,7 +44,6 @@ add_library(TermOx STATIC
     src/scroll.cpp
     src/scrollbar.cpp
     src/text_view.cpp
-    src/textbox.cpp
     src/timer.cpp
     src/widget.cpp
     src/core/text.cpp
@@ -67,6 +66,8 @@ add_library(TermOx STATIC
     include/ox/popup.hpp
     include/ox/tabs.hpp
     include/ox/value.hpp
+    include/ox/numeric_edit.hpp
+    include/ox/value_range.hpp
     include/ox/treeview.hpp
     include/ox/logview.hpp
     include/ox/splitpane.hpp

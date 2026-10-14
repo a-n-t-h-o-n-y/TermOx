@@ -1,4 +1,5 @@
 #pragma once
+#include <ox/scrollbar.hpp>
 #include <chrono>
 #include <ox/scrollbar.hpp>
 #include <ox/selection.hpp>
@@ -85,5 +86,4 @@ class ListView : public Widget {
     void update_viewport();
     void notify();
 };
-auto link(ListView&, ScrollBar&) -> std::pair<sl::Identifier, sl::Identifier>;
 }  // namespace ox

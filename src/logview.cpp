@@ -13,6 +13,10 @@ LogView::LogView(Options x)
       max_lines_{x.max_lines},
       follow_tail_{x.follow_tail}
 {
+    Connection{.signal = editor.on_scroll,
+        .slot = [](Point at, Area content, Area viewport, LogView& self) {
+            self.on_scroll(at, content, viewport);
+        }}(*this);
     if (!max_lines_) throw std::invalid_argument{"Log capacity must be positive"};
     editor.edit([](TextEdit& e) { e = TextEdit{"", true, 0}; });
     Connection{.signal = editor.on_scroll,

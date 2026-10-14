@@ -1,4 +1,5 @@
 #pragma once
+#include <ox/scrollbar.hpp>
 #include <ox/detail/text_control.hpp>
 namespace ox {
 /** Multiline input; Ctrl+Enter submits. Scrolling is independent of the caret. */
@@ -9,5 +10,4 @@ class TextBox : public detail::TextControl<true> {
     TextBox(Options options = init) : detail::TextControl<true>{std::move(options)} {}
 };
 class ScrollBar;
-auto link(TextBox&, ScrollBar&) -> std::pair<sl::Identifier, sl::Identifier>;
 }  // namespace ox

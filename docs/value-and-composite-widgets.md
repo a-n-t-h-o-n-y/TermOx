@@ -22,12 +22,42 @@ Slider supports Left/Right, Up/Down, Home/End, and PageUp/PageDown (ten incremen
 Left/Down decrease; Right/Up increase. Vertical sliders place their maximum at the top.
 Pointer dragging captures the left button and clamps outside the track.
 
-NumericEdit owns a public LineEdit `editor`. Text edits are staged: Enter or `commit()`
-accepts a finite decimal/exponent number in range, using the classic C locale.
-Invalid text remains visible and emits `on_invalid(string const&)`; the numeric value
-stays unchanged. Up/Down steps from the committed value; Escape or `revert()` restores
-its formatted text. Focus loss leaves the draft alone. Programmatic value changes
-replace the draft. Use `editor` for styling, selection, validation, and clipboard behavior.
+`BasicNumericEdit<T>` stores, accepts, and emits exactly `T`. `NumericEdit` is the
+`double` alias; `IntegerEdit` is the `int` alias. `BasicValueRange<T>` keeps bounds
+and step in the same type. Integer parsing rejects fractions and overflow without
+conversion through floating point; stepping saturates safely at the bounds.
+
+```cpp
+auto count = ox::IntegerEdit{{.range = {0, 1000, 1}, .value = 3}};
+auto weight = ox::NumericEdit{{
+    .range = {0, 100, .5}, .value = 12.345,
+    .format = "{:.2f}", .suffix = " kg",
+    .commit_on_focus_loss = true,
+}};
+count.on_change.connect([](int value) { /* value is an int */ });
+```
+
+The default format is `"{}"`; prefix and suffix default to empty strings. Prefix/suffix
+are separate, noneditable decorations, measured in terminal columns and clipped to the
+available space. Numeric labels also accept `.prefix` and `.suffix` alongside `.format`.
+Use standard format specifications, including `L` for locale-aware display. The editor's
+`.locale` defaults to `std::locale::classic()` and controls parsing and round-trip editing
+text. For example, `.format = "{:.2Lf}"` uses the configured locale's decimal separator.
+Formats must produce printable single-line text. Invalid format strings throw.
+
+NumericEdit owns a public LineEdit-compatible `editor`. Text edits are staged: Enter or
+`commit()` accepts a finite number in range; invalid text remains visible, emits
+`on_invalid(string const&)`, and leaves the value unchanged. `commit()` reports validity,
+including an unchanged value. `has_draft()` distinguishes staged text from display text.
+`value()`, `set_value(T)`, and `on_change(T)` use the stored type. Up/Down steps from the
+committed value; Escape or `revert()` discards the draft. Programmatic `set_value` replaces
+any draft. Use `editor` for styling, selection, validation, and clipboard behavior.
+
+Unfocused committed values use `.format`. Focusing an unchanged field exposes full
+round-trip precision, so a format like `"{:.2f}"` cannot silently round the stored value.
+Draft text remains exactly as typed until commit/revert. Focus loss preserves drafts by
+default; `.commit_on_focus_loss = true` attempts a commit instead. Invalid drafts stay
+visible. Public presentation changes should be followed by `refresh()`.
 
 ProgressBar is unfocusable. `show_percentage` controls its centered label. Spinner
 animates printable UTF-8 frames at a positive timer interval; `set_running`, `tick`,
@@ -105,8 +135,13 @@ auto form = ox::Form{std::tuple{ox::LineEdit{}},
 Validators are functions taking the actual field widget and returning an error message
 or nullopt. `submit()` validates every field, stores `errors()`, focuses the first invalid
 field, and emits `on_invalid(errors const&)` or `on_submit()`. Ctrl-Enter submits from
-within the form. Form does not silently commit drafts: a NumericEdit validator can call
-out invalid/uncommitted text explicitly, or the application can commit before submitting.
+within the form. Before validation, Form calls `commit()` on fields whose concrete types expose a
+boolean commit operation, including every BasicNumericEdit specialization. Invalid drafts
+produce an `"Invalid value"` field error and prevent submission. Validation then sees the
+committed typed value. Each `FormField` also accepts an optional `commit(Widget&) -> bool`
+callback, overriding automatic commit; use it for custom composites, fields stored through
+base-class references, or an explicit no-op when preserving drafts is desired. Submission
+is not atomic across fields: successful commits remain if another field is invalid.
 `set_fields` validates labels/count and resets errors. Validate functions must not alter
 field configuration while running.
 
