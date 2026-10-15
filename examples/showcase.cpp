@@ -25,6 +25,31 @@ class View : public Widget {
    protected:
     void on_arrange(Rect) override { arrange(child, {{}, size()}); }
 };
+// Bound long forms and keep actions directly below their fields.
+class Compact : public View {
+   public:
+    int maximum_width;
+    Compact(Widget& w, int width) : View{w}, maximum_width{width} {}
+    auto measure(Area a, esc::WidthPolicy p = {}) const -> Area override
+    {
+        a.width = std::min(a.width, maximum_width);
+        return child.measure(a, p);
+    }
+
+   protected:
+    void on_arrange(Rect) override
+    {
+        auto width = std::min(size().width, maximum_width);
+        auto natural = child.measure({width, size().height}, glyph_width_policy());
+        arrange(child, {{}, {width, std::min(size().height, natural.height)}});
+    }
+};
+auto section(Widget& content, std::string label)
+{
+    return Padding{View{content}, std::array{0, 1, 0, 1}} |
+           Border{.label = {.text = label.empty() ? "" : " " + label + " ",
+                            .align = Align::Start}};
+}
 // The same controls reflow into one column on a small terminal.
 class Responsive : public Widget {
    public:
@@ -249,7 +274,6 @@ int main(int argc, char** argv)
     panel_height(log, 8);
 
     // Overview: shared motion, live semantic values, composition, and palette roles.
-    auto hero = title("Progress and values");
     auto summary =
         TextBox{{.text = "Run the animation, adjust the value, or open a dialog. "
                          "Use the toolbar to change the theme and motion settings.",
@@ -282,8 +306,7 @@ int main(int argc, char** argv)
     auto activity_row = Row{std::tie(spinner, activity)};
     activity_row.gap = 2;
     panel_height(activity_row, 1);
-    auto left =
-        Column{std::tie(hero, summary, actions, meter_row, tuning, activity_row)};
+    auto left = Column{std::tie(summary, actions, meter_row, tuning, activity_row)};
     left.gap = 1;
     auto palette_heading = title("Theme colors");
     auto palette = PaletteView{};
@@ -298,7 +321,9 @@ int main(int argc, char** argv)
     auto right =
         Column{std::tie(palette_heading, palette, signal_heading, signal, signal_note)};
     right.gap = 1;
-    auto overview_content = Responsive{left, right};
+    auto progress_section = section(left, "Progress and values");
+    auto theme_section = section(right, "Theme and animation");
+    auto overview_content = Responsive{progress_section, theme_section};
     auto overview = ScrollView{View{overview_content}};
 
     // Typed form, selection controls and validation.
@@ -313,11 +338,18 @@ int main(int argc, char** argv)
         Select{{.items = {{"Draft"}, {"Balanced"}, {"Detailed"}}, .selected = 1}};
     auto tags = ComboBox{{.items = {{"Animation"}, {"Color"}, {"Layout"}, {"Unicode"}},
                           .editor = {.placeholder = "Choose or type"}}};
-    auto notify = CheckBox{{.checked = true, .label = {.text = "Notifications"}}};
-    auto toggle = Switch{{.checked = true, .label = {.text = "Live preview"}}};
+    auto notify = CheckBox{
+        {.checked = true, .label = {.text = "Notifications", .align = Align::Start}}};
+    auto toggle = Switch{
+        {.checked = true, .label = {.text = "Live preview", .align = Align::Start}}};
     auto mode = RadioGroup{
         {.items = {"Interactive", "Recorded", "Offline"}, .selected_index = 0}};
     panel_height(mode, 3);
+    name.width_policy = SizePolicy::max(40);
+    voices.width_policy = SizePolicy::fixed(22);
+    gain.width_policy = SizePolicy::fixed(22);
+    quality.width_policy = SizePolicy::fixed(26);
+    tags.width_policy = SizePolicy::max(36);
     auto form = Form{std::tie(name, voices, gain, quality, tags, notify, toggle, mode),
                      std::vector<FormField>{
                          {"Name", "Required",
@@ -335,16 +367,18 @@ int main(int argc, char** argv)
                          {"Mode"}}};
     auto submit = Button{{.label = {.text = "Apply settings"}}};
     auto reset = Button{{.label = {.text = "Reset"}}};
+    submit.width_policy = SizePolicy::fixed(18);
+    reset.width_policy = SizePolicy::fixed(14);
     auto form_actions = Row{std::tie(submit, reset)};
+    form_actions.width_policy = SizePolicy::max(34);
     form_actions.gap = 2;
     panel_height(form_actions, 1);
-    auto controls_title = title("Form controls");
     auto controls_note =
         caption("Enter commits numbers. Ctrl+Enter validates the form.");
-    auto controls_content =
-        Column{std::tie(controls_title, controls_note, form, form_actions)};
+    auto controls_content = Column{std::tie(controls_note, form, form_actions)};
     controls_content.gap = 1;
-    auto controls = ScrollView{View{controls_content}};
+    auto controls_section = section(controls_content, "Form controls");
+    auto controls = ScrollView{Compact{controls_section, 78}};
 
     // Searchable rows, sorting, two-axis scrollbars, tree navigation, and a live log.
     auto search = LineEdit{{.placeholder = "Filter widgets…"}};
@@ -353,26 +387,25 @@ int main(int argc, char** argv)
     auto list_bar = ScrollBar{};
     auto list_body = Row{std::tie(items, list_bar)};
     panel_height(list_body, 9);
-    auto list_title = title("Collection");
     auto list_note = caption("Shift: range · Ctrl: toggle");
-    auto list_panel = Column{std::tie(list_title, search, list_body, list_note)};
+    auto list_panel = Column{std::tie(search, list_body, list_note)};
     list_panel.gap = 1;
     auto table = DataTable{{.columns = {{"Widget", SizePolicy::min(17)},
                                         {"Family", SizePolicy::min(12)},
                                         {"State", SizePolicy::min(13)}},
                             .rows = data_rows(),
                             .column_lines = false}};
-    panel_height(table, 12);
+    panel_height(table, 10);
     auto table_bar = ScrollBar{};
     auto table_horizontal = ScrollBar{{.vertical = false}};
     auto table_body = Row{std::tie(table, table_bar)};
-    panel_height(table_body, 12);
-    auto table_title = title("Sample data");
+    panel_height(table_body, 10);
     auto table_note = caption("Click a heading to sort");
-    auto table_panel =
-        Column{std::tie(table_title, table_body, table_horizontal, table_note)};
+    auto table_panel = Column{std::tie(table_body, table_horizontal, table_note)};
     table_panel.gap = 1;
-    auto tables = Responsive{list_panel, table_panel};
+    auto list_section = section(list_panel, "Collection");
+    auto table_section = section(table_panel, "Sample data");
+    auto tables = Responsive{list_section, table_section};
     auto tree = TreeView{
         {.nodes = {
              {"Widgets",
@@ -392,16 +425,16 @@ int main(int argc, char** argv)
     auto log_panel = Column{std::tie(log_head, log)};
     log_panel.gap = 1;
     auto lower = SplitPane{View{tree_panel}, View{log_panel}, .42};
-    panel_height(lower, 10);
-    auto data_content = Column{std::tie(tables, lower)};
-    data_content.gap = 2;
+    auto lower_section = section(lower, "");
+    panel_height(lower_section, 12);
+    auto data_content = Column{std::tie(tables, lower_section)};
+    data_content.gap = 1;
     auto data = ScrollView{View{data_content}};
     link(items, list_bar);
     link(table, table_bar);
     link(table, table_horizontal);
 
     // Grapheme-safe editing, selection, clipboard, wrapping, and vertical labels.
-    auto text_heading = title("Text editing");
     auto text_note = caption("Selection, clipboard, undo, and Unicode text");
     auto editor = TextBox{
         {.text =
@@ -433,10 +466,11 @@ int main(int argc, char** argv)
                                     .format = "{:.2f}",
                                     .prefix = "Total ",
                                     .suffix = " units"}};
-    auto text_content = Column{std::tie(text_heading, text_note, text_with_label,
-                                        text_horizontal, echo, number_label)};
+    auto text_content = Column{
+        std::tie(text_note, text_with_label, text_horizontal, echo, number_label)};
     text_content.gap = 1;
-    auto text = ScrollView{View{text_content}};
+    auto text_section = section(text_content, "Text editing");
+    auto text = ScrollView{View{text_section}};
 
     // Native half-block image rendering inside a clipped two-axis viewport.
     auto image = PixelGrid{{100, 36}};
@@ -448,13 +482,13 @@ int main(int argc, char** argv)
     link(graphics_scroll, graphics_horizontal);
     auto image_body = Row{std::tie(graphics_scroll, graphics_bar)};
     panel_height(image_body, 16);
-    auto graphics_title = title("Character graphics");
     auto graphics_note =
         caption("Half-block pixels · clipped canvas · two-axis scrolling");
-    auto graphics_content = Column{
-        std::tie(graphics_title, graphics_note, image_body, graphics_horizontal)};
+    auto graphics_content =
+        Column{std::tie(graphics_note, image_body, graphics_horizontal)};
     graphics_content.gap = 1;
-    auto graphics = ScrollView{View{graphics_content}};
+    auto graphics_section = section(graphics_content, "Character graphics");
+    auto graphics = ScrollView{View{graphics_section}};
     for (int y = 0; y < 36; ++y)
         for (int x = 0; x < 100; ++x) {
             auto ripple = (std::sin(x * .13) + std::cos(y * .24) + 2) / 4;
@@ -464,11 +498,11 @@ int main(int argc, char** argv)
         }
 
     auto picker = FilePicker{};
-    auto file_heading = title("File picker");
     auto picked = caption("Choose a file to display its path.");
-    auto files_content = Column{std::tie(file_heading, picker, picked)};
+    auto files_content = Column{std::tie(picker, picked)};
     files_content.gap = 1;
-    auto files = ScrollView{View{files_content}};
+    auto files_section = section(files_content, "File picker");
+    auto files = ScrollView{View{files_section}};
 
     auto tabs = Tabs{std::tie(overview, controls, data, text, graphics, files),
                      std::vector<std::string>{"Overview", "Controls", "Data", "Text",

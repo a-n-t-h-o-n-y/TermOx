@@ -121,7 +121,9 @@ continues to route normally. Pane state and focus survive resizing.
 Form owns a tuple or sized forward range of widgets, plus a same-length vector of
 `FormField{label,help,validate}`. Fields remain directly accessible in `children`.
 Labels occupy a shared column; `label_width` optionally fixes it. Help/errors appear
-beneath each field; `gap` separates rows. Put large forms inside ScrollView.
+beneath each field; `gap` separates rows. Field width policies limit controls within
+the shared field column and also constrain measurement of wrapped content. Put large
+forms inside ScrollView.
 
 ```cpp
 auto form = ox::Form{std::tuple{ox::LineEdit{}},

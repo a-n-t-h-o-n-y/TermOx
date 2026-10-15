@@ -55,7 +55,7 @@ spinner timers. This does not disable application timers: background work and
 model updates continue. There is no automatic operating-system preference lookup;
 applications can expose a switch, as the showcase does.
 
-The policy provides `feedback` (120 ms), `selection` (160 ms), and `progress`
+The policy provides `feedback` (120 ms), `selection` (240 ms), and `progress`
 (240 ms) durations, plus a shared frame-rate limit (60 by default; 1–240 allowed).
 Zero durations settle immediately. Buttons, tabs, progress bars, and scrollbar
 settling share the event loop's frame clock. Idle transitions schedule no wakes.

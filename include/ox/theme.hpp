@@ -8,7 +8,7 @@ struct MotionPolicy {
     bool enabled = true;
     int frames_per_second = 60;
     std::chrono::milliseconds feedback{120};
-    std::chrono::milliseconds selection{160};
+    std::chrono::milliseconds selection{240};
     std::chrono::milliseconds progress{240};
 };
 struct Palette {

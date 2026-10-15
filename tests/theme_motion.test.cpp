@@ -362,3 +362,49 @@ TEST(popup_and_dialog_gaps_cover_underlying_text_and_restore_it_on_close)
         check(dialog, theme);
     }
 }
+TEST(form_fields_respect_width_limits_and_clip_them_on_small_screens)
+{
+    auto number = IntegerEdit{{.value = 12, .suffix = " voices"}};
+    number.width_policy = SizePolicy::fixed(22);
+    auto name = LineEdit{};
+    name.width_policy = SizePolicy::max(36);
+    auto form =
+        Form{std::tie(number, name), std::vector<FormField>{{"Voices"}, {"Name"}}};
+    auto app = Application{form};
+    app.dispatch(esc::Resize{{80, 8}});
+    ASSERT(number.size().width == 22 && name.size().width == 36);
+    ASSERT(number.at().x == name.at().x);
+    app.dispatch(esc::Resize{{18, 8}});
+    ASSERT(number.at().x + number.size().width <= 18);
+    ASSERT(name.at().x + name.size().width <= 18);
+}
+TEST(default_tab_indicator_remains_scheduled_for_the_slower_selection_transition)
+{
+    auto tabs = Tabs{std::tuple{LineEdit{}, LineEdit{}},
+                     std::vector<std::string>{"One", "Two"}};
+    auto app = Application{tabs};
+    app.set_theme(Theme::dark());
+    app.dispatch(esc::Resize{{30, 6}});
+    app.step();
+    app.paint();
+    tabs.select(1);
+    auto now = Tween::Clock::now();
+    app.step(now + 180ms);
+    app.paint();
+    ASSERT(app.loop().wait_duration(now + 180ms) != std::chrono::milliseconds::max());
+    app.step(now + 300ms);
+    app.paint();
+    ASSERT(app.loop().wait_duration(now + 300ms) == std::chrono::milliseconds::max());
+}
+TEST(form_measures_wrapped_fields_using_their_constrained_width)
+{
+    auto editor = TextBox{{.text = "one two three four five six seven eight"}};
+    editor.width_policy = SizePolicy::fixed(8);
+    auto expected = editor.measure({8, 100}).height;
+    auto form = Form{std::tie(editor), std::vector<FormField>{{"Notes"}}};
+    auto natural = form.measure({80, 100});
+    ASSERT(natural.height == expected);
+    auto app = Application{form};
+    app.dispatch(esc::Resize{{80, natural.height}});
+    ASSERT(editor.size().width == 8 && editor.size().height == expected);
+}

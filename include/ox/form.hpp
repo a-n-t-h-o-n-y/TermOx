@@ -143,7 +143,11 @@ class Form : public Widget {
         std::int64_t width = labels, height = 0;
         std::size_t i = 0;
         detail::for_each_child(children, [&](Widget const& w) {
-            auto s = w.measure({std::max(0, a.width - labels), a.height}, p);
+            auto available_width = std::max(0, a.width - labels);
+            auto field_width =
+                fit_length(available_width, w.width_policy, available_width, true);
+            auto s = w.measure({field_width, a.height}, p);
+            s.width = fit_length(s.width, w.width_policy, available_width, false);
             width = std::max(width, (std::int64_t)labels + s.width);
             height += std::max(1, s.height) + (message(i).empty() ? 0 : 1);
             if (i++) height += gap;
@@ -165,11 +169,13 @@ class Form : public Widget {
                 fields_[i].label, Align::Left, appearance(style), layouts_[i]);
             auto msg = message(i);
             if (!msg.empty())
-                paint_row_text(c.subcanvas({labels, r.at.y + r.size.height},
-                                           {std::max(0, size().width - labels), 1}),
-                               msg, Align::Left,
-                               appearance(errors_[i] ? error_style : style),
-                               layouts_[i]);
+                paint_row_text(
+                    c.subcanvas({labels, r.at.y + r.size.height},
+                                {std::max(0, size().width - labels), 1}),
+                    msg, Align::Left,
+                    appearance(errors_[i] ? error_style : style,
+                               errors_[i] ? Surface::Negative : Surface::Muted),
+                    layouts_[i]);
         }
         return {};
     }
@@ -184,10 +190,11 @@ class Form : public Widget {
         std::size_t i = 0;
         detail::for_each_child(children, [&](Widget const& w) {
             auto p = w.height_policy;
+            auto available_width = std::max(0, size().width - labels);
+            auto field_width =
+                fit_length(available_width, w.width_policy, available_width, true);
             auto natural =
-                w.measure({std::max(0, size().width - labels), size().height},
-                          glyph_width_policy())
-                    .height;
+                w.measure({field_width, size().height}, glyph_width_policy()).height;
             p.minimum = std::max(p.minimum, std::min(p.maximum, std::max(1, natural)));
             policies.push_back(p);
             if (!message(i++).empty()) ++extra;
@@ -210,7 +217,13 @@ class Form : public Widget {
         auto lifetime = track(*this);
         for (std::size_t j = 0; j < widgets.size(); ++j) {
             if (!lifetime.valid()) return;
-            if (widgets[j].valid()) arrange(widgets[j].get(), rects[j]);
+            if (widgets[j].valid()) {
+                auto bounds=rects[j];
+                bounds.size.width =
+                    fit_length(bounds.size.width, widgets[j].get().width_policy,
+                               bounds.size.width, true);
+                arrange(widgets[j].get(), bounds);
+            }
         }
     }
 
