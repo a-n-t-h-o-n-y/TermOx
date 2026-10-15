@@ -118,3 +118,8 @@ target_link_libraries(TermOx.examples.views PRIVATE TermOx)
 add_executable(TermOx.examples.showcase EXCLUDE_FROM_ALL showcase.cpp)
 target_compile_options(TermOx.examples.showcase PRIVATE -Wall -Wextra -Wpedantic)
 target_link_libraries(TermOx.examples.showcase PRIVATE TermOx)
+
+# Adjustable live stress workloads and headless timings for the library's hot paths.
+add_executable(TermOx.examples.stress EXCLUDE_FROM_ALL stress.cpp)
+target_compile_options(TermOx.examples.stress PRIVATE -Wall -Wextra -Wpedantic)
+target_link_libraries(TermOx.examples.stress PRIVATE TermOx)

@@ -34,6 +34,10 @@ int main()
 Build `TermOx.examples.showcase` for an interactive tour of widgets, themes, and
 motion. See [theme and motion](docs/theme-and-motion.md) for configuration and controls.
 
+Build `TermOx.examples.stress` for an adjustable live [Stress Lab](examples/stress.md):
+large models, streaming logs, Unicode editing, clipped images, widget trees,
+signals/timers/events and sparse/full frame updates, with headless timing reports.
+
 Use [scratch.cpp](examples/scratch.cpp) and the `TermOx.examples.scratch` build target
 to try out the library quickly.
 
