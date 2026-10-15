@@ -247,3 +247,64 @@ TEST(themed_menu_background_covers_unused_space_with_the_canvas_color)
     ASSERT(
         (app.loop().screen[Point{29, 0}].style.background == theme.palette.background));
 }
+namespace {
+struct Backdrop : Widget {
+    auto paint(Canvas c) -> Cursor override
+    {
+        fill(c, U'x' | appearance({}));
+        return {};
+    }
+};
+}  // namespace
+TEST(dropdowns_paint_a_distinct_solid_surface_and_restore_content_when_closed)
+{
+    auto check = [](auto& control, Theme theme) {
+        auto backdrop = Backdrop{};
+        auto root = Column{std::tie(control, backdrop)};
+        auto app = Application{root};
+        theme.motion.enabled = false;
+        app.set_theme(theme);
+        app.dispatch(esc::Resize{{30, 10}});
+        app.paint();
+        control.open();
+        app.step();
+        app.paint();
+        auto bounds = control.popup.child.global_bounds();
+        auto at = Point{bounds.at.x, bounds.at.y + bounds.size.height - 1};
+        ASSERT((app.loop().screen[at].style.background == theme.palette.surface));
+        ASSERT((app.loop().screen[at].style.background != theme.palette.background));
+        ASSERT((app.loop().screen[at].text == U" "));
+        control.popup.child.style.background = colors::blue;
+        app.request_repaint();
+        app.paint();
+        ASSERT((app.loop().screen[at].style.background == Color{colors::blue}));
+        control.popup.hide();
+        app.step();
+        app.paint();
+        ASSERT((app.loop().screen[at].text == U"x"));
+    };
+    for (auto theme : {Theme::dark(), Theme::light()}) {
+        auto select =
+            Select{{.items = {{"Dark"}, {"Light"}, {"Terminal"}}, .selected = 0}};
+        check(select, theme);
+        auto combo = ComboBox{{.items = {{"Dark"}, {"Light"}, {"Terminal"}}}};
+        check(combo, theme);
+    }
+}
+TEST(menus_and_submenus_use_the_raised_surface_role)
+{
+    auto menu = Menu{{{.text = "Child", .children = {{.text = "Leaf"}}}}};
+    auto app = Application{menu};
+    auto theme = Theme::dark();
+    app.set_theme(theme);
+    app.dispatch(esc::Resize{{20, 5}});
+    app.paint();
+    ASSERT((app.loop().screen[Point{0, 0}].style.background == theme.palette.surface));
+    menu.select(0);
+    app.dispatch(KeyEvent{.key = KeyCode::ArrowRight});
+    app.step();
+    app.paint();
+    for (auto const& node : widget_tree(menu))
+        if (auto* child = dynamic_cast<Menu*>(node.widget.try_get()))
+            ASSERT(child->role == Surface::Raised);
+}

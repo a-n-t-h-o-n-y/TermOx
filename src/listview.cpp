@@ -12,6 +12,7 @@ ListView::ListView(Options x)
     : Widget{x.focus_policy, x.width_policy, x.height_policy},
       multiple{x.multiple},
       style{x.style},
+      role{x.role},
       selected_style{x.selected_style},
       current_style{x.current_style}
 { set_items(std::move(x.items)); }
@@ -198,12 +199,12 @@ auto ListView::set_scroll_offset(Point at) -> bool
 }
 auto ListView::paint(Canvas canvas) -> Cursor
 {
-    fill(canvas, appearance(style));
+    fill(canvas, U' ' | appearance(style, role));
     layouts_.resize(items_.size());
     auto const [first, last] = visible_rows(canvas, offset_.y, items_.size());
     for (int row = first; row < last; ++row) {
         auto const& item = items_[(std::size_t)row];
-        auto normal = appearance(style) | item.style;
+        auto normal = appearance(style, role) | item.style;
         if (!item.enabled) { normal = normal | disabled_style; }
         if (std::ranges::binary_search(selection_.rows, (std::size_t)row)) {
             normal = selection_appearance(normal, selected_style);
@@ -212,7 +213,7 @@ auto ListView::paint(Canvas canvas) -> Cursor
             normal = normal | current_style;
         }
         auto line = canvas.subcanvas({0, row - offset_.y}, {size().width, 1});
-        fill(line, normal);
+        fill(line, U' ' | normal);
         auto gutter = theme().styled ? 2 : 0;
         if (gutter && (selection_.current == (std::size_t)row ||
                        std::ranges::binary_search(selection_.rows, (std::size_t)row))) {

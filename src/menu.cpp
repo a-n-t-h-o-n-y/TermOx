@@ -30,6 +30,7 @@ auto display(std::span<MenuItem const> items) -> std::vector<ListItem>
 }  // namespace
 Menu::Menu(std::vector<MenuItem> items) : ListView{}
 {
+    role = Surface::Raised;
     set_items(std::move(items));
     Connection{.signal = on_activate, .slot = [](std::size_t row, Menu& menu) {
                    menu.activate_item(row);

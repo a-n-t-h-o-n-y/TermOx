@@ -31,6 +31,8 @@ Explicit widget foreground/background colors take precedence over theme defaults
 Custom state patches still apply after the theme's state styling. For custom
 widgets, use `appearance(style, Surface::Raised)` or another semantic role;
 `selection_appearance(style, selected_style)` applies selection consistently.
+Dropdowns and menus use the raised surface color to distinguish them from the
+page background. Lists expose a `role` option for choosing their surface.
 Plain `Canvas` drawing remains explicit.
 
 Labels accept a role without needing a color:

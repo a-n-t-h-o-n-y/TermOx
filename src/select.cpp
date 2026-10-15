@@ -10,6 +10,7 @@ Select::Select(Options x)
 {
     popup.anchor = track(static_cast<Widget&>(button));
     popup.placement = PopupPlacement::Below;
+    popup.child.role = Surface::Raised;
     button.label.align = Align::Left;
     Connection{.signal = button.on_activate,
                .slot = [](Select& self) { self.open(); }}(*this);
@@ -89,6 +90,7 @@ ComboBox::ComboBox(Options x)
     popup.modal = false;
     popup.anchor = track(static_cast<Widget&>(editor));
     popup.placement = PopupPlacement::Below;
+    popup.child.role = Surface::Raised;
     Connection{.signal = button.on_activate,
                .slot = [](ComboBox& self) { self.open(); }}(*this);
     Connection{.signal = editor.on_change,

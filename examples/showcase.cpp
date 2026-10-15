@@ -71,12 +71,12 @@ class Responsive : public Widget {
 };
 class PaletteView : public Widget {
    public:
-    PaletteView() : Widget{FocusPolicy::None, SizePolicy::flex(), SizePolicy::fixed(4)}
+    PaletteView() : Widget{FocusPolicy::None, SizePolicy::flex(), SizePolicy::fixed(3)}
     {}
     auto measure(Area a, esc::WidthPolicy = {}) const -> Area override
     {
         validate(a);
-        return {30, 4};
+        return {30, 3};
     }
     auto paint(Canvas c) -> Cursor override
     {
@@ -84,18 +84,18 @@ class PaletteView : public Widget {
         auto const& p = theme().palette;
         std::array<Color, 5> colors{p.foreground, p.muted, p.accent, p.secondary,
                                     p.positive};
-        std::array<std::string_view, 5> names{"text", "quiet", "focus", "signal",
-                                              "ready"};
+        std::array<std::string_view, 5> names{"text", "muted", "accent", "secondary",
+                                              "positive"};
         for (int i = 0; i < 5; ++i) {
             auto x = i * c.size().width / 5;
             auto end = (i + 1) * c.size().width / 5;
             auto area = c.subcanvas(
-                {x, 0}, {std::max(0, end - x - 1), std::min(2, c.size().height)});
+                {x, 0}, {std::max(0, end - x - 1), std::min(1, c.size().height)});
             auto s = appearance({});
             s.foreground = colors[(std::size_t)i];
             fill(area, (theme().ascii ? U'#' : U'▄') | s);
-            if (c.size().height > 2)
-                put_label(c.subcanvas({x, 2}, {std::max(0, end - x - 1), 1}),
+            if (c.size().height > 1)
+                put_label(c.subcanvas({x, 1}, {std::max(0, end - x - 1), 1}),
                           names[(std::size_t)i], Align::Start,
                           appearance({}, Surface::Muted));
         }

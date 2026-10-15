@@ -18,6 +18,7 @@ class ListView : public Widget {
         std::vector<ListItem> items = {};
         bool multiple = false;
         Style style = {};
+        Surface role = Surface::Canvas;
         StylePatch selected_style = {.background = {},
                                      .foreground = {},
                                      .enabled = Trait::Inverse,
@@ -32,6 +33,7 @@ class ListView : public Widget {
     };
     bool multiple;
     Style style;
+    Surface role;
     StylePatch selected_style;
     StylePatch current_style;
     sl::Signal<void(std::vector<std::size_t> const&)> on_select;
