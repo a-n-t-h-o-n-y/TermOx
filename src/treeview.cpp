@@ -164,6 +164,55 @@ void TreeView::activate(std::size_t row)
     if (!n.children.empty()) set_expanded(path, !n.expanded);
     if (auto* self = lifetime.try_get()) self->on_activate(path);
 }
+void TreeView::paint_overlay(Canvas canvas)
+{
+    if (!theme().styled) return;
+    auto offset = list_.scroll_offset();
+    auto clip = canvas.visible();
+    auto first = std::max<std::int64_t>(0, (std::int64_t)offset.y + clip.at.y);
+    auto last =
+        std::min<std::int64_t>((std::int64_t)paths_.size(), first + clip.size.height);
+    for (auto row = first; row < last; ++row) {
+        auto const& path = paths_[(std::size_t)row];
+        auto const* siblings = &nodes_;
+        auto depth = path.size() - 1;
+        auto selected =
+            std::ranges::binary_search(list_.selected_rows(), (std::size_t)row);
+        auto write = [&](std::int64_t x, char32_t glyph, bool connector = true) {
+            x += 2 - offset.x;
+            auto y = (int)(row - offset.y);
+            if (x < 2 || x >= canvas.size().width || !canvas.contains({(int)x, y}))
+                return;
+            auto at = Point{(int)x, y};
+            auto ink = canvas[at].style;
+            if (connector && !selected &&
+                list_.style.foreground == Color{default_color})
+                ink.foreground = theme().palette.border;
+            canvas.write(at, std::u32string_view{&glyph, 1}, ink);
+        };
+        for (std::size_t level = 0; level < path.size(); ++level) {
+            auto index = path[level];
+            auto const& node = (*siblings)[index];
+            auto last_sibling = index + 1 == siblings->size();
+            if (level > 0) {
+                auto x = 2 * (std::int64_t)(level - 1);
+                if (level < depth) {
+                    if (!last_sibling) write(x, theme().ascii ? U'|' : U'│');
+                }
+                else {
+                    write(x, theme().ascii ? (last_sibling ? U'`' : U'+')
+                                           : (last_sibling ? U'└' : U'├'));
+                    write(x + 1, theme().ascii ? U'-' : U'─');
+                    if (node.children.empty())
+                        write(x + 2, theme().ascii ? U'-' : U'╴');
+                }
+            }
+            if (level == depth && !node.children.empty() && theme().ascii)
+                write(2 * (std::int64_t)depth, node.expanded ? U'v' : U'>', false);
+            siblings = &node.children;
+        }
+    }
+}
 auto TreeView::measure(Area a, esc::WidthPolicy p) const -> Area
 { return list_.measure(a, p); }
 void TreeView::on_arrange(Rect) { arrange(list_, {{}, size()}); }

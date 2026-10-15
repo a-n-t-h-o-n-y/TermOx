@@ -35,6 +35,7 @@ class TreeView : public Widget {
     auto set_scroll_offset(Point at) -> bool { return list_.set_scroll_offset(at); }
     sl::Signal<void(Point, Area, Area)> on_scroll;
     auto measure(Area, esc::WidthPolicy = {}) const -> Area override;
+    void paint_overlay(Canvas) override;
     auto get_children() -> zzz::Generator<Widget&> override { co_yield list_; }
     auto get_children() const -> zzz::Generator<Widget const&> override
     { co_yield list_; }

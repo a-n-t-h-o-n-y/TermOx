@@ -93,6 +93,38 @@ that starts the transition.
 normalized critically damped curve with a finite duration and no overshoot.
 Retargeting samples the current position before starting the next transition.
 
+## Lines and endpoints
+
+Styled widgets use capped box-drawing rules. Tab underlines and scrollbar thumbs
+retain fractional positions until painting, where their edges advance in half-cell
+steps. Mixed light/heavy glyphs (`╼`, `╾`, `╽`, `╿`) connect the active segment to
+its track. Sliders use a heavier segment up to the thumb. Dividers, menu separators,
+and progress tracks have directional endpoints; table column rules connect to the
+header separator with junctions rather than being overwritten by it. Tree views
+use branch junctions and continuation lines that follow expansion and scrolling;
+the connectors preserve each row's selection background.
+
+`paint_rule()` exposes the same drawing for custom widgets:
+
+```cpp
+ox::paint_rule(canvas, 2.5, 8.0,
+               appearance({}, ox::Surface::Accent),
+               appearance({}, ox::Surface::Border));
+```
+
+Start and length are in cell units along the first row, or the first column with
+`vertical = true`. A zero length draws only the light track. Segments longer than
+one cell gain caps up to half a cell long; short segments remain visible. Coordinates can
+extend outside the canvas and are clipped without shifting the rule's geometry.
+Nonfinite coordinates, negative lengths, and overflowing endpoints are rejected.
+`ascii = true` uses ordinary ASCII strokes instead. Custom dashed, dotted, double,
+and box presets retain their configured glyphs.
+
+Progress fills still use eighth-cell block characters. An almost-empty partial
+cell now shows the track instead of a blank, and vertical meters use vertical
+strokes. A partly filled block and a thin track cannot occupy the same cell as
+separate glyphs; their appearance also depends on the terminal font.
+
 ## Keyboard help
 
 `KeyHelp` displays and dispatches the same `Shortcut` definitions. Its actions are

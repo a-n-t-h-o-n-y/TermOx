@@ -18,6 +18,7 @@ endif()
 
 # Create Library Target
 add_library(TermOx STATIC
+    src/rule.cpp
     src/keyhelp.cpp
     src/theme.cpp
     src/motion.cpp
@@ -57,6 +58,7 @@ add_library(TermOx STATIC
     src/core/terminal.cpp
     src/core/event_loop.cpp
 
+    include/ox/rule.hpp
     include/ox/keyhelp.hpp
     include/ox/theme.hpp
     include/ox/motion.hpp

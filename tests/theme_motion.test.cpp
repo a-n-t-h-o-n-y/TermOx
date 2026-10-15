@@ -130,7 +130,7 @@ TEST(fractional_meters_clip_quantize_and_keep_their_style)
     auto s = Style{.foreground = colors::red};
     paint_meter(Canvas{f}, .0625, s, {});
     ASSERT((f[Point{0, 0}].text == U"▏" && f[Point{0, 0}].style == s));
-    ASSERT((f[Point{1, 0}].text == U"─"));
+    ASSERT((f[Point{1, 0}].text == U"╴"));
     paint_meter(Canvas{f}, 2, s, {}, false, true);
     ASSERT((f[Point{1, 0}].text == U"#"));
     auto vertical = Frame{{1, 2}};
@@ -155,7 +155,7 @@ TEST(theme_changes_reflow_tabs_and_hidden_pages_inherit_the_application_theme)
     app.step();
     app.paint();
     ASSERT(std::get<1>(tabs.pages.children).theme().palette.accent == t.palette.accent);
-    ASSERT((app.loop().screen[Point{5, 1}].text == U"╺"));
+    ASSERT((app.loop().screen[Point{5, 1}].text == U"╼"));
     app.set_theme(Theme::plain());
     app.step();
     ASSERT(tabs.pages.at().y == 1);

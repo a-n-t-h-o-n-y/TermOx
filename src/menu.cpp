@@ -2,6 +2,7 @@
 #include <ox/controls.hpp>
 #include <ox/label.hpp>
 #include <ox/menu.hpp>
+#include <ox/rule.hpp>
 namespace ox {
 namespace {
 void validate_entries(std::span<MenuItem const> items)
@@ -91,6 +92,24 @@ void Menu::activate_item(std::size_t row)
     auto value = std::vector<std::size_t>{row};
     on_trigger(value);
     if (action) { action(); }
+}
+auto Menu::paint(Canvas canvas) -> Cursor
+{
+    auto cursor = ListView::paint(canvas);
+    if (!theme().styled) return cursor;
+    auto first = std::max(0, scroll_offset().y);
+    auto last = (int)std::min<std::int64_t>((std::int64_t)entries_.size(),
+                                            (std::int64_t)first + canvas.size().height);
+    for (int row = first; row < last; ++row)
+        if (entries_[(std::size_t)row].text.empty()) {
+            auto view = canvas.subcanvas({0, row - first}, {canvas.size().width, 1});
+            fill(view, U' ' | appearance(style, role));
+            auto line = appearance({}, Surface::Border);
+            paint_rule(
+                view.subcanvas({1, 0}, {std::max(0, canvas.size().width - 2), 1}), 0, 0,
+                line, line, false, theme().ascii);
+        }
+    return cursor;
 }
 auto Menu::handle(KeyEvent const& e) -> EventResponse
 {

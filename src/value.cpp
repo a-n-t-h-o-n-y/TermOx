@@ -4,6 +4,7 @@
 #include <limits>
 #include <locale>
 #include <ox/put.hpp>
+#include <ox/rule.hpp>
 #include <ox/selection.hpp>
 #include <ox/value.hpp>
 #include <sstream>
@@ -17,7 +18,7 @@ void paint_meter(Canvas canvas,
 {
     if (!std::isfinite(fraction)) throw std::invalid_argument{"Nonfinite meter value"};
     fraction = std::clamp(fraction, 0., 1.);
-    fill(canvas, track);
+    fill(canvas, U' ' | track);
     auto n = vertical ? canvas.size().height : canvas.size().width;
     auto levels = std::u32string_view{vertical ? U" ▁▂▃▄▅▆▇█" : U" ▏▎▍▌▋▊▉█"};
     auto amount = fraction * n;
@@ -26,10 +27,23 @@ void paint_meter(Canvas canvas,
         auto glyph = ascii ? (coverage >= .5 ? U'#' : U'-')
                            : levels[(std::size_t)std::lround(coverage * 8)];
         auto at = vertical ? Point{0, n - 1 - i} : Point{i, 0};
-        if (coverage > 0)
+        auto level = (int)std::lround(coverage * 8);
+        if (ascii ? coverage >= .5 : level > 0)
             canvas.write(at, std::u32string_view{&glyph, 1}, filled);
-        else
-            canvas.write(at, ascii ? U"-" : U"─", track);
+        else {
+            auto stroke = ascii ? (vertical ? U'|' : U'-') : (vertical ? U'│' : U'─');
+            if (!ascii && n > 1) {
+                if (vertical && at.y == 0)
+                    stroke = U'╷';
+                else if (vertical && at.y == n - 1)
+                    stroke = U'╵';
+                else if (!vertical && at.x == 0)
+                    stroke = U'╶';
+                else if (!vertical && at.x == n - 1)
+                    stroke = U'╴';
+            }
+            canvas.write(at, std::u32string_view{&stroke, 1}, track);
+        }
     }
 }
 void validate(ValueRange r)
@@ -125,6 +139,12 @@ auto Slider::paint(Canvas c) -> Cursor
     if (!n) { return {}; }
     auto at = (int)std::llround(value_fraction(value_, range_) * (n - 1));
     if (vertical) { at = n - 1 - at; }
+    if (theme().styled) {
+        paint_rule(c, vertical ? at : 0, vertical ? n - at : at + 1, s,
+                   appearance({}, Surface::Border), vertical, theme().ascii);
+        c.write(vertical ? Point{0, at} : Point{at, 0}, theme().ascii ? U"o" : U"●", s);
+        return {};
+    }
     for (int i = 0; i < n; ++i) {
         c.write(vertical ? Point{0, i} : Point{i, 0},
                 theme().styled && theme().ascii

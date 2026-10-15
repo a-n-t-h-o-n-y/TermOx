@@ -2,6 +2,7 @@
 #include <cmath>
 #include <ox/container.hpp>
 #include <ox/routing.hpp>
+#include <ox/rule.hpp>
 #include <ox/selection.hpp>
 namespace ox {
 /** A tab strip plus a Stack of ordinary tuple/range pages. */
@@ -103,22 +104,11 @@ class Tabs : public Widget {
         }
         if (theme().styled && canvas.size().height > 1) {
             auto line = canvas.subcanvas({0, 1}, {canvas.size().width, 1});
-            fill(line, appearance({}, Surface::Border));
-            for (int col = 0; col < line.size().width; ++col)
-                line.write({col, 0}, theme().ascii ? U"-" : U"─",
-                           appearance({}, Surface::Border));
-            if (selected_index()) {
-                auto start = (int)std::lround(indicator_.value()) - scroll_;
-                auto count = std::max(0, (int)std::lround(indicator_width_.value()));
-                auto selected = appearance({}, Surface::Accent);
-                for (int col = 0; col < count; ++col) {
-                    auto glyph =
-                        theme().ascii
-                            ? U"="
-                            : (col == 0 ? U"╺" : (col == count - 1 ? U"╸" : U"━"));
-                    line.write({start + col, 0}, glyph, selected);
-                }
-            }
+            auto selected = appearance({}, Surface::Accent);
+            auto track = appearance({}, Surface::Border);
+            paint_rule(line, indicator_.value() - scroll_,
+                       selected_index() ? indicator_width_.value() : 0, selected, track,
+                       false, theme().ascii);
         }
         return {};
     }

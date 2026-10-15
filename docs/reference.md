@@ -1,7 +1,7 @@
 # API Reference
 
 See [theme and motion](theme-and-motion.md) for `Theme`, `MotionPolicy`, `Tween`,
-`Animation`, fractional meters, and `KeyHelp`.
+`Animation`, fractional meters, box-drawing rules, and `KeyHelp`.
 
 ## 🧩 ox::Application
 

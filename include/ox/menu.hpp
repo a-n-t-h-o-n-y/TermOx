@@ -32,6 +32,7 @@ class Menu : public ListView {
     sl::Signal<void(std::vector<std::size_t> const&)> on_trigger;
     sl::Signal<void()> on_back;
     sl::Signal<void(int)> on_next;
+    auto paint(Canvas) -> Cursor override;
     auto handle(KeyEvent const&) -> EventResponse override;
     auto handle(MousePress const&) -> EventResponse override;
     auto handle(MouseMove const&) -> EventResponse override;

@@ -1,4 +1,5 @@
 #include <ox/bordered.hpp>
+#include <ox/rule.hpp>
 
 namespace ox {
 auto border_content_rect(Area available) -> Rect
@@ -50,6 +51,19 @@ auto Divider::paint(Canvas canvas) -> Cursor
     if (theme().styled && theme().ascii) strokes = Lines::ascii();
     paint_divider(canvas, vertical, strokes, appearance(style, Surface::Border),
                   caption);
+    auto symbol = vertical ? strokes.vertical : strokes.horizontal;
+    if (theme().styled && !theme().ascii &&
+        (symbol == U'─' || symbol == U'│' || symbol == U'━' || symbol == U'┃')) {
+        auto view = vertical ? canvas.subcanvas({canvas.size().width / 2, 0},
+                                                {1, canvas.size().height})
+                             : canvas.subcanvas({0, canvas.size().height / 2},
+                                                {canvas.size().width, 1});
+        auto bold = symbol == U'━' || symbol == U'┃';
+        auto n = vertical ? view.size().height : view.size().width;
+        auto line = appearance(style, Surface::Border);
+        paint_rule(view, 0, bold ? n : 0, line, line, vertical);
+        put_label(canvas, caption.text, caption.align, caption.style, vertical);
+    }
     return {};
 }
 }  // namespace ox

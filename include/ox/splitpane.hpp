@@ -1,6 +1,7 @@
 #pragma once
 #include <cmath>
 #include <ox/put.hpp>
+#include <ox/rule.hpp>
 #include <ox/widget.hpp>
 namespace ox {
 /** Two owned panes, a captured divider, and a proportional split preserved on resize.
@@ -95,6 +96,12 @@ class SplitPane : public Widget {
         auto s = appearance(style, Surface::Border);
         if (is_focused()) s = s | Trait::Bold;
         auto n = vertical ? size().width : size().height;
+        if (theme().styled) {
+            auto view = vertical ? c.subcanvas({0, divider_}, {size().width, 1})
+                                 : c.subcanvas({divider_, 0}, {1, size().height});
+            paint_rule(view, 0, is_focused() ? n : 0, s, s, !vertical, theme().ascii);
+            return {};
+        }
         for (int i = 0; i < n; ++i)
             c.write(vertical ? Point{i, divider_} : Point{divider_, i},
                     theme().styled && theme().ascii ? (vertical ? U"-" : U"|")

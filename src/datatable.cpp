@@ -1,4 +1,5 @@
 #include <ox/datatable.hpp>
+#include <ox/rule.hpp>
 
 #include <algorithm>
 #include <cstdint>
@@ -271,7 +272,7 @@ auto DataTable::paint(Canvas canvas) -> Cursor
 {
     auto base = appearance(style);
     auto lines = appearance(line_style, Surface::Border);
-    fill(canvas, base);
+    fill(canvas, U' ' | base);
     auto const header = header_height();
     auto const body = canvas.subcanvas({0, header}, viewport_);
     auto const [first, last] = visible_rows(body, offset_.y, rows_.size());
@@ -306,15 +307,38 @@ auto DataTable::paint(Canvas canvas) -> Cursor
         x += width;
         if (column_lines && column + 1 < columns_.size() &&
             x <= std::numeric_limits<int>::max()) {
-            put(canvas, {(int)x, 0},
-                shape::VLine{.symbol = theme().ascii ? U'|' : U'│'},
-                canvas.size().height, lines);
+            if (theme().styled)
+                paint_rule(canvas.subcanvas({(int)x, 0}, {1, canvas.size().height}), 0,
+                           0, lines, lines, true, theme().ascii);
+            else
+                put(canvas, {(int)x, 0}, shape::VLine{}, canvas.size().height, lines);
             ++x;
         }
     }
     if (header && canvas.size().height > 1) {
-        put(canvas, {0, 1}, shape::HLine{.symbol = theme().ascii ? U'-' : U'─'},
-            canvas.size().width, lines);
+        if (theme().styled) {
+            paint_rule(canvas.subcanvas({0, 1}, {canvas.size().width, 1}), 0, 0, lines,
+                       lines, false, theme().ascii);
+            if (column_lines) {
+                auto boundary = -(std::int64_t)offset_.x;
+                for (std::size_t col = 0; col + 1 < columns_.size(); ++col) {
+                    boundary += widths_[col];
+                    if (boundary >= 0 && boundary < canvas.size().width) {
+                        auto junction = canvas.size().height > 2 ? U'┼' : U'┴';
+                        if (boundary == 0)
+                            junction = canvas.size().height > 2 ? U'├' : U'└';
+                        else if (boundary == canvas.size().width - 1)
+                            junction = canvas.size().height > 2 ? U'┤' : U'┘';
+                        if (theme().ascii) junction = U'+';
+                        canvas.write({(int)boundary, 1},
+                                     std::u32string_view{&junction, 1}, lines);
+                    }
+                    ++boundary;
+                }
+            }
+        }
+        else
+            put(canvas, {0, 1}, shape::HLine{}, canvas.size().width, lines);
     }
     if (rows_.empty()) {
         paint_cell(body.subcanvas({}, {viewport_.width, 1}), empty_text, Align::Center,

@@ -388,7 +388,8 @@ int main(int argc, char** argv)
     auto list_body = Row{std::tie(items, list_bar)};
     panel_height(list_body, 9);
     auto list_note = caption("Shift: range · Ctrl: toggle");
-    auto list_panel = Column{std::tie(search, list_body, list_note)};
+    auto list_title = title("Collection");
+    auto list_panel = Column{std::tie(list_title, search, list_body, list_note)};
     list_panel.gap = 1;
     auto table = DataTable{{.columns = {{"Widget", SizePolicy::min(17)},
                                         {"Family", SizePolicy::min(12)},
@@ -401,11 +402,14 @@ int main(int argc, char** argv)
     auto table_body = Row{std::tie(table, table_bar)};
     panel_height(table_body, 10);
     auto table_note = caption("Click a heading to sort");
-    auto table_panel = Column{std::tie(table_body, table_horizontal, table_note)};
+    auto table_title = title("Sample data");
+    auto table_panel =
+        Column{std::tie(table_title, table_body, table_horizontal, table_note)};
     table_panel.gap = 1;
-    auto list_section = section(list_panel, "Collection");
-    auto table_section = section(table_panel, "Sample data");
+    auto list_section = Compact{list_panel, std::numeric_limits<int>::max()};
+    auto table_section = Compact{table_panel, std::numeric_limits<int>::max()};
     auto tables = Responsive{list_section, table_section};
+    tables.height_policy.flexibility = 0;
     auto tree = TreeView{
         {.nodes = {
              {"Widgets",

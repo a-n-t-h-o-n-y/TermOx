@@ -23,6 +23,7 @@
 #include <ox/popup.hpp>
 #include <ox/put.hpp>
 #include <ox/radiogroup.hpp>
+#include <ox/rule.hpp>
 #include <ox/routing.hpp>
 #include <ox/scroll.hpp>
 #include <ox/scrollbar.hpp>
