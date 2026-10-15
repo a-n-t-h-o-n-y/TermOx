@@ -125,21 +125,21 @@ separate glyphs; their appearance also depends on the terminal font.
 
 ## Keyboard help
 
-`KeyHelp` displays and dispatches the same `Shortcut` definitions. Its actions are
-scoped through the normal widget shortcut routing. Empty actions are help-only.
-Only press events trigger actions; disabled bindings are omitted.
+`KeyHelp` displays and dispatches shared `Command` definitions. Its actions are
+scoped through normal widget shortcut routing. Empty actions are help-only.
+Only press events trigger actions; disabled commands are omitted.
 
 ```cpp
-auto help = ox::KeyHelp{{
-    {.keys = {{ox::KeyCode::F2, {}}}, .description = "theme",
-     .action = [&] { app.set_theme(ox::Theme::light());
-                    return ox::EventResponse{}; }},
-}};
+auto theme = ox::command({.text="theme", .action=[&] {
+    app.set_theme(ox::Theme::light()); return ox::EventResponse{};
+}, .keys={{ox::KeyCode::F2, {}}}});
+auto help = ox::KeyHelp{{theme}};
 ```
 
-Include the help widget in the tree. `expanded = true` enables wrapped help;
-call `refresh()` after changing public bindings or the expanded flag. Applications
-can also use `key_label()` and `dispatch_shortcuts()` independently.
+Include the help widget in the tree. `expanded=true` enables wrapped help;
+call `refresh()` after changing commands or the expanded flag. `key_label()`,
+`command_keys()`, and `dispatch_commands()` are independent functions.
+See [shared commands](commands.md).
 
 ## Showcase
 

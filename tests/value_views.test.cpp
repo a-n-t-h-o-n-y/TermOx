@@ -2,6 +2,7 @@
 #include <fstream>
 #include <memory>
 #include <ox/ox.hpp>
+#include <thread>
 #include <zzz/test.hpp>
 using namespace ox;
 TEST(value_range_validation_and_extreme_fractions)
@@ -243,9 +244,18 @@ TEST(form_validation_errors_submission_and_layout)
 TEST(command_palette_filter_navigation_disabled_and_action_snapshot)
 {
     int invoked = 0;
-    auto palette = CommandPalette{{{"Open File", "file", true, [&] { ++invoked; }},
-                                   {"Close File", "", true, [&] { invoked += 2; }},
-                                   {"Disabled", "", false, [] {}}}};
+    auto palette = CommandPalette{
+        {command({"Open File", "file", true,
+                  [&] {
+                      ++invoked;
+                      return EventResponse{};
+                  }}),
+         command({"Close File", "", true,
+                  [&] {
+                      invoked += 2;
+                      return EventResponse{};
+                  }}),
+         command({"Disabled", "", false, [] { return EventResponse{}; }})}};
     auto app = Application{palette};
     app.dispatch(esc::Resize{{30, 8}});
     app.set_focus(palette.query);
@@ -264,6 +274,20 @@ TEST(command_palette_filter_navigation_disabled_and_action_snapshot)
     ASSERT(invoked == 3 && palette.commands().empty());
 }
 namespace {
+auto settle(FilePicker& picker) -> FilePickerState
+{
+    auto lifetime = track(picker);
+    auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds{5};
+    while (auto* self = lifetime.try_get()) {
+        if (!self->is_loading()) { return self->state(); }
+        if (std::chrono::steady_clock::now() > deadline) {
+            throw std::runtime_error{"FilePicker timeout"};
+        }
+        self->poll();
+        std::this_thread::sleep_for(std::chrono::milliseconds{1});
+    }
+    return FilePickerState::Cancelled;
+}
 struct TempFiles {
     std::filesystem::path path =
         std::filesystem::temp_directory_path() /
@@ -290,30 +314,38 @@ TEST(file_picker_browsing_filter_open_save_and_directory_modes)
     auto picker = FilePicker{{.directory = files.path, .filter = [](auto const& e) {
                                   return e.path().extension() == ".txt";
                               }}};
+    ASSERT(settle(picker) == FilePickerState::Ready);
     ASSERT(picker.paths().size() == 2 && picker.paths()[0].filename() == "sub");
     auto chosen = std::filesystem::path{};
     picker.on_choose.connect([&](auto const& p) { chosen = p; });
     picker.filename.set_text("a.txt");
     ASSERT(picker.accept());
+    ASSERT(settle(picker) == FilePickerState::Ready);
     ASSERT(chosen == files.path / "a.txt");
     picker.filename.set_text("b.cpp");
-    ASSERT(!picker.accept());
+    ASSERT(picker.accept());
+    ASSERT(settle(picker) == FilePickerState::Error);
     ASSERT(picker.set_directory("sub"));
+    ASSERT(settle(picker) == FilePickerState::Ready);
     ASSERT(picker.paths().empty());
-    ASSERT(!picker.set_directory("missing"));
+    ASSERT(picker.set_directory("missing"));
+    ASSERT(settle(picker) == FilePickerState::Error);
     ASSERT(picker.directory() == files.path / "sub");
     picker.mode = FilePickerMode::SaveFile;
     picker.filename.set_text("new.txt");
     ASSERT(picker.accept());
+    ASSERT(settle(picker) == FilePickerState::Ready);
     ASSERT(chosen == files.path / "sub/new.txt");
     ASSERT(!std::filesystem::exists(chosen));
     picker.mode = FilePickerMode::Directory;
     ASSERT(picker.accept());
+    ASSERT(settle(picker) == FilePickerState::Ready);
     ASSERT(chosen == files.path / "sub");
     picker.show_hidden = true;
     picker.filter = {};
     picker.mode = FilePickerMode::OpenFile;
     picker.set_directory(files.path);
+    ASSERT(settle(picker) == FilePickerState::Ready);
     ASSERT(picker.paths().size() == 4);
 }
 TEST(composite_callbacks_may_destroy_the_owner)
@@ -327,15 +359,18 @@ TEST(composite_callbacks_may_destroy_the_owner)
     tree->on_expand.connect([&](auto const&, bool) { tree.reset(); });
     tree->set_expanded({0}, true);
     ASSERT(!tree);
-    auto palette = std::make_unique<CommandPalette>(std::vector<Command>{{"Command"}});
+    auto palette = std::make_unique<CommandPalette>(
+        std::vector<std::shared_ptr<Command>>{command({"Command"})});
     palette->on_execute.connect([&](auto) { palette.reset(); });
     palette->execute(0);
     ASSERT(!palette);
     auto files = TempFiles{};
     auto picker = std::make_unique<FilePicker>(FilePicker::Options{
         .directory = files.path, .mode = FilePickerMode::Directory});
+    ASSERT(settle(*picker) == FilePickerState::Ready);
     picker->on_choose.connect([&](auto const&) { picker.reset(); });
     picker->accept();
+    settle(*picker);
     ASSERT(!picker);
 }
 
@@ -381,6 +416,7 @@ TEST(file_picker_unusual_names_and_filter_lifetime)
     auto files = TempFiles{};
     std::ofstream{files.path / "line\nbreak.txt"} << "data";
     auto picker = FilePicker{{.directory = files.path}};
+    ASSERT(settle(picker) == FilePickerState::Ready);
     auto chosen = std::filesystem::path{};
     picker.on_choose.connect([&](auto const& p) { chosen = p; });
     std::size_t row = 0;
@@ -389,14 +425,17 @@ TEST(file_picker_unusual_names_and_filter_lifetime)
     for (auto& child : picker.get_children())
         if (auto* list = dynamic_cast<ListView*>(&child)) list->select(row);
     ASSERT(picker.accept());
+    ASSERT(settle(picker) == FilePickerState::Ready);
     ASSERT(chosen.filename() == "line\nbreak.txt");
     auto owned =
         std::make_unique<FilePicker>(FilePicker::Options{.directory = files.path});
-    owned->filter = [&](auto const&) {
-        owned.reset();
-        return false;
+    ASSERT(settle(*owned) == FilePickerState::Ready);
+    owned->filter = [](auto const&) -> bool {
+        throw std::runtime_error{"Filter failed"};
     };
+    owned->on_error.connect([&](auto const&) { owned.reset(); });
     owned->reload();
+    settle(*owned);
     ASSERT(!owned);
 }
 TEST(spinner_timer_follows_moves_and_respects_disabled_widgets)
@@ -445,6 +484,7 @@ TEST(file_picker_invalid_native_encoding_is_displayable)
     auto name = std::string{"bad-"} + char(0xff);
     std::ofstream{files.path / name} << "data";
     auto picker = FilePicker{{.directory = files.path}};
+    ASSERT(settle(picker) == FilePickerState::Ready);
     std::error_code ec;
     auto created = std::filesystem::is_regular_file(files.path / name, ec);
     ASSERT(picker.paths().size() == (created ? 4 : 3));
@@ -456,23 +496,24 @@ TEST(numeric_readonly_input_and_disabled_command_replacement)
     auto number = NumericEdit{{.editor = {.read_only = true}}};
     ASSERT(!number.handle(KeyEvent{.key = KeyCode::ArrowUp}).handled);
     ASSERT(number.value() == 0);
-    auto palette = CommandPalette{{{"one"}, {"two"}}};
-    palette.set_commands({{"off", "", false}, {"on"}});
+    auto palette = CommandPalette{{command({"one"}), command({"two"})}};
+    palette.set_commands({command({"off", "", false}), command({"on"})});
     ASSERT(palette.choices().current_row() == 1);
 }
 
 TEST(typed_numeric_edit_preserves_integer_precision_and_rejects_fraction_overflow)
 {
     using I = std::int64_t;
-    auto number = BasicNumericEdit<I>{{
-        .range = {std::numeric_limits<I>::lowest(), std::numeric_limits<I>::max(), 1},
-        .value = 9007199254740993LL}};
+    auto number = BasicNumericEdit<I>{
+        {.range = {std::numeric_limits<I>::lowest(), std::numeric_limits<I>::max(), 1},
+         .value = 9007199254740993LL}};
     static_assert(std::same_as<decltype(number.value()), I>);
     I notified = 0;
     number.on_change.connect([&](I value) { notified = value; });
     number.editor.set_text("9007199254740995");
     ASSERT(number.commit() && notified == 9007199254740995LL);
-    for (auto text : {"1.5", "9223372036854775808", "-9223372036854775809", "1e2", ""}) {
+    for (auto text :
+         {"1.5", "9223372036854775808", "-9223372036854775809", "1e2", ""}) {
         number.editor.set_text(text);
         ASSERT(!number.commit() && number.value() == 9007199254740995LL);
     }
@@ -484,18 +525,19 @@ TEST(typed_numeric_edit_preserves_integer_precision_and_rejects_fraction_overflo
     ASSERT(number.commit());
     number.handle(KeyEvent{.key = KeyCode::ArrowDown});
     ASSERT(number.value() == std::numeric_limits<I>::lowest());
-    auto positive = BasicNumericEdit<std::uint64_t>{{
-        .range = {0, std::numeric_limits<std::uint64_t>::max(), 1}}};
+    auto positive = BasicNumericEdit<std::uint64_t>{
+        {.range = {0, std::numeric_limits<std::uint64_t>::max(), 1}}};
     positive.editor.set_text("-1");
     ASSERT(!positive.commit());
     positive.editor.set_text("18446744073709551615");
-    ASSERT(positive.commit() && positive.value() == std::numeric_limits<std::uint64_t>::max());
+    ASSERT(positive.commit() &&
+           positive.value() == std::numeric_limits<std::uint64_t>::max());
 }
 
 TEST(numeric_format_focus_units_and_drafts_preserve_the_committed_value)
 {
-    auto number = NumericEdit{{.value = 12.3456789, .format = "{:.2f}",
-                               .prefix = "$", .suffix = " kg"}};
+    auto number = NumericEdit{
+        {.value = 12.3456789, .format = "{:.2f}", .prefix = "$", .suffix = " kg"}};
     ASSERT(number.editor.text() == "12.35");
     ASSERT(number.commit() && number.value() == 12.3456789);
     auto app = Application{number};
@@ -532,8 +574,9 @@ TEST(numeric_edit_locale_and_integer_alias)
     struct Comma : std::numpunct<char> {
         auto do_decimal_point() const -> char override { return ','; }
     };
-    auto number = NumericEdit{{.format = "{:.2Lf}",
-        .locale = std::locale{std::locale::classic(), new Comma}}};
+    auto number =
+        NumericEdit{{.format = "{:.2Lf}",
+                     .locale = std::locale{std::locale::classic(), new Comma}}};
     number.editor.set_text("1,25");
     ASSERT(number.commit() && number.value() == 1.25);
     ASSERT(number.editor.text() == "1,25");
@@ -545,10 +588,12 @@ TEST(numeric_edit_locale_and_integer_alias)
 TEST(form_commits_numeric_drafts_before_validation_and_rejects_invalid_drafts)
 {
     auto form = Form{std::tuple{IntegerEdit{{.range = {0, 120, 1}, .value = 18}}},
-        std::vector<FormField>{{"Age", "", [](Widget const& w) -> std::optional<std::string> {
-            return static_cast<IntegerEdit const&>(w).value() >= 21
-                ? std::nullopt : std::optional<std::string>{"Must be 21"};
-        }}}};
+                     std::vector<FormField>{
+                         {"Age", "", [](Widget const& w) -> std::optional<std::string> {
+                              return static_cast<IntegerEdit const&>(w).value() >= 21
+                                         ? std::nullopt
+                                         : std::optional<std::string>{"Must be 21"};
+                          }}}};
     auto& age = std::get<0>(form.children);
     age.editor.set_text("25");
     ASSERT(form.submit() && age.value() == 25);
@@ -560,18 +605,22 @@ TEST(form_commits_numeric_drafts_before_validation_and_rejects_invalid_drafts)
 
 TEST(numeric_commit_respects_validator_and_form_supports_explicit_commit_overrides)
 {
-    auto count = IntegerEdit{{.editor = {
-        .validator = [](std::string_view text) { return text != "13"; }}}};
+    auto count = IntegerEdit{
+        {.editor = {.validator = [](std::string_view text) { return text != "13"; }}}};
     count.editor.set_text("13");
     ASSERT(!count.commit() && count.value() == 0);
     count.editor.set_text("14");
     ASSERT(count.commit() && count.value() == 14);
-    auto form = Form{std::tuple{IntegerEdit{}}, std::vector<FormField>{
-        {.label = "Draft", .commit = [](Widget&) { return true; }}}};
+    auto form = Form{std::tuple{IntegerEdit{}},
+                     std::vector<FormField>{
+                         {.label = "Draft", .commit = [](Widget&) { return true; }}}};
     std::get<0>(form.children).editor.set_text("unfinished");
     ASSERT(form.submit() && std::get<0>(form.children).has_draft());
     auto doomed = std::make_unique<IntegerEdit>();
-    doomed->editor.validator = [&](std::string_view) { doomed.reset(); return true; };
+    doomed->editor.validator = [&](std::string_view) {
+        doomed.reset();
+        return true;
+    };
     doomed->editor.set_text("1");
     ASSERT(!doomed->commit());
 }

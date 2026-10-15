@@ -36,6 +36,8 @@ class EventLoop {
     void unwatch(Timer const& timer);
     /** Apply effects at the dispatch boundary; first quit request wins. */
     void apply(EventResponse response);
+    /** Owner-thread effects sink, safe after the loop or source widget is destroyed. */
+    auto effect_handler() -> std::function<void(EventResponse)>;
     void request_repaint();
     void quit(int code = 0);
 
@@ -103,6 +105,7 @@ class EventLoop {
     std::optional<Clock::time_point> next_frame_;
     bool animations_ticking_ = false;
 
+    std::shared_ptr<EventLoop*> lifetime_ = std::make_shared<EventLoop*>(this);
     esc::WaitSource wake_;
     std::intptr_t wake_write_ = 0;
     mutable std::mutex mutex_;

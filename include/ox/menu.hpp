@@ -1,17 +1,13 @@
 #pragma once
 #include <memory>
 #include <ox/button.hpp>
+#include <ox/command.hpp>
 #include <ox/listview.hpp>
 #include <ox/popup.hpp>
 namespace ox {
-/** Empty text is a separator. Check marks and shortcut labels are presentation;
- * actions run only on activation. Children describe a submenu. */
+/** Null command is a separator. Children describe a submenu. */
 struct MenuItem {
-    std::string text;
-    bool enabled = true;
-    std::optional<bool> checked = {};
-    std::string shortcut = {};
-    std::function<void()> action = {};
+    std::shared_ptr<Command> command;
     std::vector<MenuItem> children = {};
 };
 class Menu : public ListView {
@@ -22,6 +18,7 @@ class Menu : public ListView {
     Menu(Menu&&);
     auto operator=(Menu&&) -> Menu&;
     auto entries() const -> std::span<MenuItem const> { return entries_; }
+    void refresh() override;
     void set_items(std::vector<MenuItem>);
     void close_submenu()
     {
@@ -32,6 +29,7 @@ class Menu : public ListView {
     sl::Signal<void(std::vector<std::size_t> const&)> on_trigger;
     sl::Signal<void()> on_back;
     sl::Signal<void(int)> on_next;
+    auto handle_command(KeyEvent const&) -> EventResponse;
     auto paint(Canvas) -> Cursor override;
     auto handle(KeyEvent const&) -> EventResponse override;
     auto handle(MousePress const&) -> EventResponse override;

@@ -18,8 +18,11 @@ auto command_score(std::string_view query, std::string_view text)
     }
     return score;
 }
-CommandPalette::CommandPalette() : CommandPalette{std::vector<Command>{}} {}
-CommandPalette::CommandPalette(std::vector<Command> commands) : Widget{}
+CommandPalette::CommandPalette()
+    : CommandPalette{std::vector<std::shared_ptr<Command>>{}}
+{}
+CommandPalette::CommandPalette(std::vector<std::shared_ptr<Command>> commands)
+    : Widget{}
 {
     Connection{.signal = query.on_change,
                .slot = [](auto const&, CommandPalette& self) { self.filter(); }}(*this);
@@ -35,15 +38,16 @@ CommandPalette::CommandPalette(std::vector<Command> commands) : Widget{}
                }}(*this);
     set_commands(std::move(commands));
 }
-void CommandPalette::set_commands(std::vector<Command> commands)
+void CommandPalette::set_commands(std::vector<std::shared_ptr<Command>> commands)
 {
     for (auto const& c : commands) {
-        validate_row_text(c.text);
-        validate_row_text(c.keywords);
+        if (!c) { throw std::invalid_argument{"Null palette command"}; }
+        validate(*c);
     }
     commands_ = std::move(commands);
     filter();
 }
+void CommandPalette::refresh() { filter(); }
 void CommandPalette::filter()
 {
     auto current = choices_.current_row();
@@ -53,7 +57,7 @@ void CommandPalette::filter()
     auto ranked = std::vector<std::pair<std::size_t, std::size_t>>{};
     for (std::size_t i = 0; i < commands_.size(); ++i)
         if (auto s = command_score(query.text(),
-                                   commands_[i].text + " " + commands_[i].keywords))
+                                   commands_[i]->text + " " + commands_[i]->keywords))
             ranked.push_back({*s, i});
     std::stable_sort(ranked.begin(), ranked.end(),
                      [](auto a, auto b) { return a.first < b.first; });
@@ -61,7 +65,7 @@ void CommandPalette::filter()
     matches_.clear();
     for (auto [score, i] : ranked) {
         matches_.push_back(i);
-        items.push_back({commands_[i].text, commands_[i].enabled});
+        items.push_back({commands_[i]->text, commands_[i]->enabled});
     }
     auto lifetime = track(*this);
     choices_.set_items(std::move(items));
@@ -73,21 +77,27 @@ void CommandPalette::filter()
         if (it != self->matches_.end())
             target = (std::size_t)(it - self->matches_.begin());
     }
-    if (target && !self->commands_[self->matches_[*target]].enabled) { target.reset(); }
+    if (target && !self->commands_[self->matches_[*target]]->enabled) {
+        target.reset();
+    }
     if (!target)
         target = row_target({}, self->matches_.size(), 1, [&](std::size_t i) {
-            return self->commands_[self->matches_[i]].enabled;
+            return self->commands_[self->matches_[i]]->enabled;
         });
     self->choices_.select(target);
-    if ((self = lifetime.try_get())) self->refresh();
+    if ((self = lifetime.try_get())) self->Widget::refresh();
 }
 auto CommandPalette::execute(std::size_t index) -> bool
 {
-    if (!is_enabled() || index >= commands_.size() || !commands_[index].enabled)
+    if (!is_enabled() || index >= commands_.size() || !commands_[index]->enabled)
         return false;
-    auto action = commands_[index].action;
+    auto action = commands_[index]->action;
+    auto respond = effect_handler();
     on_execute(index);
-    if (action) action();
+    if (action) {
+        auto response = combine({.handled = true}, action());
+        if (respond) { respond(response); }
+    }
     return true;
 }
 auto CommandPalette::handle(KeyEvent const& e) -> EventResponse

@@ -1,13 +1,8 @@
 #pragma once
+#include <ox/command.hpp>
 #include <ox/lineedit.hpp>
 #include <ox/listview.hpp>
 namespace ox {
-struct Command {
-    std::string text;
-    std::string keywords = {};
-    bool enabled = true;
-    std::function<void()> action = {};
-};
 /** Case-insensitive ASCII subsequence match; Unicode scalars match exactly. */
 auto command_score(std::string_view query, std::string_view text)
     -> std::optional<std::size_t>;
@@ -18,11 +13,13 @@ class CommandPalette : public Widget {
     LineEdit query{{.placeholder = "Find a command…"}};
     sl::Signal<void(std::size_t)> on_execute;
     CommandPalette();
-    explicit CommandPalette(std::vector<Command>);
-    auto commands() const -> std::span<Command const> { return commands_; }
+    explicit CommandPalette(std::vector<std::shared_ptr<Command>>);
+    auto commands() const -> std::span<std::shared_ptr<Command> const>
+    { return commands_; }
     auto matches() const -> std::span<std::size_t const> { return matches_; }
     auto choices() const -> ListView const& { return choices_; }
-    void set_commands(std::vector<Command>);
+    void refresh() override;
+    void set_commands(std::vector<std::shared_ptr<Command>>);
     auto execute(std::size_t) -> bool;
     auto measure(Area, esc::WidthPolicy = {}) const -> Area override;
     auto handle(KeyEvent const&) -> EventResponse override;
@@ -41,7 +38,7 @@ class CommandPalette : public Widget {
     void on_arrange(Rect) override;
 
    private:
-    std::vector<Command> commands_;
+    std::vector<std::shared_ptr<Command>> commands_;
     std::vector<std::size_t> matches_;
     ListView choices_;
     void filter();

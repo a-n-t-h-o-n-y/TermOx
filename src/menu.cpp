@@ -8,23 +8,26 @@ namespace {
 void validate_entries(std::span<MenuItem const> items)
 {
     for (auto const& item : items) {
-        validate_row_text(item.text);
-        validate_row_text(item.shortcut);
+        if (item.command) { validate(*item.command); }
         validate_entries(item.children);
     }
 }
-auto display(std::span<MenuItem const> items) -> std::vector<ListItem>
+auto display(std::span<MenuItem const> items, bool ascii) -> std::vector<ListItem>
 {
     auto rows = std::vector<ListItem>{};
     for (auto const& item : items) {
+        auto const& value = item.command;
         auto label =
-            item.text.empty()
+            !value
                 ? "────────"
-                : std::string{item.checked ? (*item.checked ? "✓ " : "  ") : "  "} +
-                      item.text;
-        if (!item.shortcut.empty()) { label += "  " + item.shortcut; }
-        if (!item.children.empty()) { label += "  ▸"; }
-        rows.push_back({std::move(label), item.enabled && !item.text.empty()});
+                : std::string{value->checked ? (*value->checked ? "✓ " : "  ") : "  "} +
+                      value->text;
+        if (value && !value->keys.empty()) {
+            label += "  " + command_keys(*value, ascii);
+        }
+        if (!item.children.empty()) { label += ascii ? "  >" : "  ▸"; }
+        rows.push_back(
+            {std::move(label), value && value->enabled && !value->text.empty()});
     }
     return rows;
 }
@@ -32,6 +35,11 @@ auto display(std::span<MenuItem const> items) -> std::vector<ListItem>
 Menu::Menu(std::vector<MenuItem> items) : ListView{}
 {
     role = Surface::Raised;
+    auto lifetime = track(*this);
+    shortcuts = [lifetime](KeyEvent const& e) {
+        auto* self = lifetime.try_get();
+        return self ? self->handle_command(e) : EventResponse{};
+    };
     set_items(std::move(items));
     Connection{.signal = on_activate, .slot = [](std::size_t row, Menu& menu) {
                    menu.activate_item(row);
@@ -43,16 +51,70 @@ auto Menu::operator=(Menu&&) -> Menu& = default;
 void Menu::set_items(std::vector<MenuItem> items)
 {
     validate_entries(items);
-    auto rows = display(items);
+    auto rows = display(items, theme().ascii);
     submenu_.reset();
     submenu_row_.reset();
     entries_ = std::move(items);
     ListView::set_items(std::move(rows));
 }
+void Menu::refresh()
+{
+    auto rows = display(entries_, theme().ascii);
+    auto same = rows.size() == items().size();
+    for (std::size_t i = 0; same && i < rows.size(); ++i) {
+        same = rows[i].text == items()[i].text && rows[i].enabled == items()[i].enabled;
+    }
+    if (same) {
+        ListView::refresh();
+        return;
+    }
+    auto current = current_row();
+    auto offset = scroll_offset();
+    auto lifetime = track(*this);
+    ListView::set_items(std::move(rows));
+    auto* self = lifetime.try_get();
+    if (!self) { return; }
+    self->select(current);
+    self = lifetime.try_get();
+    if (!self) { return; }
+    self->set_scroll_offset(offset);
+    self = lifetime.try_get();
+    if (self) { self->ListView::refresh(); }
+}
+auto Menu::handle_command(KeyEvent const& event) -> EventResponse
+{
+    if (!enabled || event.action != KeyAction::Press) { return {}; }
+    auto path = std::vector<std::size_t>{};
+    auto found = std::shared_ptr<Command>{};
+    auto search = [&](auto& recurse, std::span<MenuItem const> items) -> bool {
+        for (std::size_t i = 0; i < items.size(); ++i) {
+            auto const& entry = items[i];
+            if (!entry.command || !entry.command->enabled) { continue; }
+            path.push_back(i);
+            if (!entry.children.empty()) {
+                if (recurse(recurse, entry.children)) { return true; }
+            }
+            else if (entry.command->action) {
+                for (auto const& key : entry.command->keys) {
+                    if (event.matches(key.key, key.modifiers)) {
+                        found = entry.command;
+                        return true;
+                    }
+                }
+            }
+            path.pop_back();
+        }
+        return false;
+    };
+    if (!search(search, entries_)) { return {}; }
+    auto action = found->action;
+    on_trigger(path);
+    return combine({.handled = true}, action());
+}
 void Menu::activate_item(std::size_t row)
 {
-    if (row >= entries_.size() || !entries_[row].enabled ||
-        entries_[row].text.empty()) {
+    if (row >= entries_.size() || !entries_[row].command ||
+        !entries_[row].command->enabled || entries_[row].command->text.empty()) {
         return;
     }
     if (!entries_[row].children.empty()) {
@@ -88,10 +150,14 @@ void Menu::activate_item(std::size_t row)
         }
         return;
     }
-    auto action = entries_[row].action;
+    auto action = entries_[row].command->action;
+    auto respond = effect_handler();
     auto value = std::vector<std::size_t>{row};
     on_trigger(value);
-    if (action) { action(); }
+    if (action) {
+        auto effects = action();
+        if (respond) { respond(effects); }
+    }
 }
 auto Menu::paint(Canvas canvas) -> Cursor
 {
@@ -101,7 +167,7 @@ auto Menu::paint(Canvas canvas) -> Cursor
     auto last = (int)std::min<std::int64_t>((std::int64_t)entries_.size(),
                                             (std::int64_t)first + canvas.size().height);
     for (int row = first; row < last; ++row)
-        if (entries_[(std::size_t)row].text.empty()) {
+        if (!entries_[(std::size_t)row].command) {
             auto view = canvas.subcanvas({0, row - first}, {canvas.size().width, 1});
             fill(view, U' ' | appearance(style, role));
             auto line = appearance({}, Surface::Border);
@@ -136,7 +202,8 @@ auto Menu::handle(MousePress const& e) -> EventResponse
     auto revision = items_revision();
     auto result = EventResponse{};
     if (is_enabled() && activates(e) && contains({{}, size()}, e.at) &&
-        row < entries_.size() && entries_[row].enabled && !entries_[row].text.empty()) {
+        row < entries_.size() && entries_[row].command &&
+        entries_[row].command->enabled && !entries_[row].command->text.empty()) {
         result = {.handled = true, .repaint = select(row)};
     }
     if (auto* self = lifetime.try_get(); self && self->items_revision() == revision &&
@@ -150,8 +217,8 @@ auto Menu::handle(MouseMove const& event) -> EventResponse
 {
     if (!is_enabled() || !contains({{}, size()}, event.at)) { return {}; }
     auto row = (std::size_t)(event.at.y + scroll_offset().y);
-    if (row >= entries_.size() || !entries_[row].enabled ||
-        entries_[row].text.empty()) {
+    if (row >= entries_.size() || !entries_[row].command ||
+        !entries_[row].command->enabled || entries_[row].command->text.empty()) {
         return {};
     }
     if (current_row() == row && (!submenu_ || submenu_row_ == row)) {
@@ -206,10 +273,8 @@ MenuBar::MenuBar(std::vector<MenuGroup> groups)
                     bar->close();
                     return EventResponse{.handled = true, .repaint = true};
                 }
-                if (event.modifiers == Modifiers{.alt = true}) {
-                    auto effect = bar->handle_shortcut(event);
-                    if (effect.handled) { return effect; }
-                }
+                auto effect = bar->handle_shortcut(event);
+                if (effect.handled) { return effect; }
             }
             return bindings ? bindings(event) : EventResponse{};
         };
@@ -284,6 +349,10 @@ void MenuBar::on_arrange(Rect)
 auto MenuBar::handle_shortcut(KeyEvent const& event) -> EventResponse
 {
     if (event.action != KeyAction::Press || buttons_.empty()) { return {}; }
+    for (auto& popup : popups_) {
+        auto result = popup.child.handle_command(event);
+        if (result.handled) { return result; }
+    }
     if (event.matches(KeyCode::F10, {}, KeyAction::Press)) {
         current_ = 0;
         buttons_[0].request_focus();

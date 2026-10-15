@@ -153,6 +153,7 @@ class Widget {
     { return zzz::Generator<Widget const&>{nullptr}; }
 
    protected:
+    auto effect_handler() const -> std::function<void(EventResponse)>;
     /** Geometry is already updated; use arrange() on children. */
     virtual void on_arrange(Rect /* previous */) {}
 

@@ -665,96 +665,107 @@ int main(int argc, char** argv)
                                                 : "Dialog cancelled");
     });
     auto close_commands = [&] { command_dialog.hide(); };
-    commands.set_commands({{"Run animation sequence", "motion progress", true,
-                            [&] {
-                                close_commands();
-                                go(0);
-                                step = 0;
-                                timer.start();
-                                run_sequence();
-                            }},
-                           {"Open dialog", "modal popup", true,
-                            [&] {
-                                close_commands();
-                                dialog.show();
-                            }},
-                           {"Dark theme", "appearance", true,
-                            [&] {
-                                close_commands();
-                                theme_choice.select(0);
-                            }},
-                           {"Light theme", "appearance", true,
-                            [&] {
-                                close_commands();
-                                theme_choice.select(1);
-                            }},
-                           {"Terminal palette", "appearance ascii", true,
-                            [&] {
-                                close_commands();
-                                theme_choice.select(2);
-                            }},
-                           {"Toggle motion", "accessibility", true,
-                            [&] {
-                                close_commands();
-                                motion.toggle();
-                            }},
-                           {"Browse files", "filesystem", true,
-                            [&] {
-                                close_commands();
-                                go(5);
-                            }},
-                           {"Quit", "exit", true, [&] { app.quit(); }}});
-    // MenuBar is reassigned before running; tracked connections follow the new object.
+    auto show_commands = command({.text = "Commands",
+                                  .action =
+                                      [&] {
+                                          command_dialog.show();
+                                          return EventResponse{.repaint = true};
+                                      },
+                                  .keys = {{U'p', {.ctrl = true}}}});
+    auto open_dialog =
+        command({.text = "Open dialog", .keywords = "modal popup", .action = [&] {
+                     close_commands();
+                     dialog.show();
+                     return EventResponse{.repaint = true};
+                 }});
+    auto dark = command({.text = "Dark theme", .keywords = "appearance", .action = [&] {
+                             close_commands();
+                             theme_choice.select(0);
+                             return EventResponse{.repaint = true};
+                         }});
+    auto light =
+        command({.text = "Light theme", .keywords = "appearance", .action = [&] {
+                     close_commands();
+                     theme_choice.select(1);
+                     return EventResponse{.repaint = true};
+                 }});
+    auto terminal = command(
+        {.text = "Terminal palette", .keywords = "appearance ascii", .action = [&] {
+             close_commands();
+             theme_choice.select(2);
+             return EventResponse{.repaint = true};
+         }});
+    auto toggle_motion = command({.text = "Toggle motion",
+                                  .keywords = "accessibility",
+                                  .action =
+                                      [&] {
+                                          motion.toggle();
+                                          return EventResponse{.repaint = true};
+                                      },
+                                  .keys = {{KeyCode::F3, {}}}});
+    auto page_command = [&](std::string text, int index) {
+        return command({.text = std::move(text), .action = [&, index] {
+                            close_commands();
+                            go(index);
+                            return EventResponse{.repaint = true};
+                        }});
+    };
+    auto overview_command = page_command("Overview", 0),
+         controls_command = page_command("Controls", 1),
+         data_command = page_command("Data", 2),
+         files_command = page_command("Browse files", 5);
+    auto run_command = command({.text = "Run animation sequence",
+                                .keywords = "motion progress",
+                                .action = [&] {
+                                    close_commands();
+                                    go(0);
+                                    step = 0;
+                                    timer.start();
+                                    run_sequence();
+                                    return EventResponse{.repaint = true};
+                                }});
+    auto quit = command({.text = "Quit",
+                         .keywords = "exit",
+                         .action = [] { return EventResponse{.quit = 0}; },
+                         .keys = {{U'q', {.ctrl = true}}}});
+    commands.set_commands({run_command, show_commands, open_dialog, dark, light,
+                           terminal, toggle_motion, files_command, quit});
     menu = MenuBar{
         {{"Explore",
-          {{.text = "Overview", .action = [&] { go(0); }},
-           {.text = "Controls", .action = [&] { go(1); }},
-           {.text = "Data", .action = [&] { go(2); }},
-           {.text = "Files", .action = [&] { go(5); }}}},
+          {{.command = overview_command},
+           {.command = controls_command},
+           {.command = data_command},
+           {.command = files_command}}},
          {"Actions",
-          {{.text = "Commands",
-            .shortcut = "Ctrl+P",
-            .action = [&] { command_dialog.show(); }},
-           {.text = "Open dialog", .action = [&] { dialog.show(); }},
-           {.text = "Theme",
-            .children = {
-                {.text = "Dark", .action = [&] { theme_choice.select(0); }},
-                {.text = "Light", .action = [&] { theme_choice.select(1); }},
-                {.text = "Terminal", .action = [&] { theme_choice.select(2); }}}}}}}};
+          {{.command = show_commands},
+           {.command = open_dialog},
+           {.command = command({.text = "Theme"}),
+            .children = {{.command = dark}, {.command = light}, {.command = terminal}}},
+           {.command = toggle_motion},
+           {.command = quit}}}}};
     panel_height(menu, 1);
-    help.bindings = {{.keys = {{KeyCode::Tab, {}}}, .description = "focus"},
-                     {.keys = {{KeyCode::Tab, {.ctrl = true}}}, .description = "page"},
-                     {.keys = {{U'p', {.ctrl = true}}},
-                      .description = "commands",
-                      .action =
-                          [&] {
-                              command_dialog.show();
-                              return EventResponse{.repaint = true};
-                          }},
-                     {.keys = {{KeyCode::F1, {}}},
-                      .description = "help",
-                      .action =
-                          [&] {
-                              help.expanded = !help.expanded;
-                              help.refresh();
-                              return EventResponse{.repaint = true};
-                          }},
-                     {.keys = {{KeyCode::F2, {}}},
-                      .description = "theme",
-                      .action =
-                          [&] {
-                              theme_choice.select(
-                                  (theme_choice.selected_index().value_or(0) + 1) % 3);
-                              return EventResponse{.repaint = true};
-                          }},
-                     {.keys = {{KeyCode::F3, {}}},
-                      .description = "motion",
-                      .action =
-                          [&] {
-                              motion.toggle();
-                              return EventResponse{.repaint = true};
-                          }},
-                     {.keys = {{U'c', {.ctrl = true}}}, .description = "quit"}};
+    help.bindings = {
+        command({.text = "focus", .keys = {{KeyCode::Tab, {}}}}),
+        command({.text = "page", .keys = {{KeyCode::Tab, {.ctrl = true}}}}),
+        show_commands,
+        command({.text = "help",
+                 .action =
+                     [&] {
+                         help.expanded = !help.expanded;
+                         help.refresh();
+                         return EventResponse{.repaint = true};
+                     },
+                 .keys = {{KeyCode::F1, {}}}}),
+        command({.text = "theme",
+                 .action =
+                     [&] {
+                         theme_choice.select(
+                             (theme_choice.selected_index().value_or(0) + 1) % 3);
+                         return EventResponse{.repaint = true};
+                     },
+                 .keys = {{KeyCode::F2, {}}}}),
+        toggle_motion,
+        quit};
     help.refresh();
     log.append("Welcome to TermOx.");
     tabs.select((std::size_t)page);

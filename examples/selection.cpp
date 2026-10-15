@@ -3,11 +3,17 @@ using namespace ox;
 int main()
 {
     auto root = Column{
-        MenuBar{{{"File",
-                  {{.text = "New", .action = [] {}},
-                   {.text = "Export",
-                    .children = {{.text = "Text", .action = [] {}},
-                                 {.text = "CSV", .action = [] {}}}}}}}},
+        MenuBar{
+            {{"File",
+              {{.command =
+                    command({.text = "New", .action = [] { return EventResponse{}; }})},
+               {.command = command({.text = "Export"}),
+                .children = {{.command =
+                                  command({.text = "Text",
+                                           .action = [] { return EventResponse{}; }})},
+                             {.command = command(
+                                  {.text = "CSV",
+                                   .action = [] { return EventResponse{}; }})}}}}}}},
         Tabs{
             std::tuple{
                 Column{

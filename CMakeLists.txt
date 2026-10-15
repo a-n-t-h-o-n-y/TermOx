@@ -19,6 +19,7 @@ endif()
 # Create Library Target
 add_library(TermOx STATIC
     src/rule.cpp
+    src/command.cpp
     src/keyhelp.cpp
     src/theme.cpp
     src/motion.cpp
@@ -59,6 +60,7 @@ add_library(TermOx STATIC
     src/core/event_loop.cpp
 
     include/ox/rule.hpp
+    include/ox/command.hpp
     include/ox/keyhelp.hpp
     include/ox/theme.hpp
     include/ox/motion.hpp
@@ -129,6 +131,8 @@ target_compile_options(TermOx
         $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:GNU>>:-Wall -Wextra -Wpedantic -Wconversion>
 )
 
+find_package(Threads REQUIRED)
+
 include(FetchContent)
 
 # zzz Library Dependency
@@ -157,6 +161,7 @@ FetchContent_MakeAvailable(signals-light)
 
 # Link External Libraries to the Library Target
 target_link_libraries(TermOx PUBLIC
+    Threads::Threads
     escape
     signals-light
     zzz

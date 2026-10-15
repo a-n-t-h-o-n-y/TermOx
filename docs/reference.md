@@ -1603,3 +1603,5 @@ All standard scrollable views implement `Scrollable` and use the same
 `link(view, scrollbar)` function. RadioGroup now takes `Point{0, row}` offsets;
 TreeView and LogView expose scrolling directly. See
 [shared scrolling](containers.md#shared-scrolling-interface).
+
+See [shared commands](commands.md) for commands reused by menus, palettes, shortcuts, and KeyHelp.

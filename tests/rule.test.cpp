@@ -91,7 +91,9 @@ TEST(themed_table_header_connects_to_column_rules_in_unicode_and_ascii)
 }
 TEST(themed_menu_separator_fills_its_view_with_a_capped_rule)
 {
-    auto menu = Menu{{{.text = "First"}, {.text = ""}, {.text = "Last"}}};
+    auto menu = Menu{{{.command = command({.text = "First"})},
+                      {},
+                      {.command = command({.text = "Last"})}}};
     auto app = Application{menu};
     app.set_theme(Theme::dark());
     app.dispatch(esc::Resize{{20, 3}});

@@ -157,7 +157,8 @@ FilePicker is ordinary content; use `Dialog{FilePicker{...},"Open"}` for a modal
 It owns public `location`, `filename`, `up`, `choose`, and `cancel` controls. `entries()`
 and `paths()` are const aligned views. Directories sort first; dot-prefixed names are
 hidden unless `show_hidden=true`. A functional `filter(directory_entry const&)` filters
-files, never directories. Call `reload()` after changing the public configuration.
+files, never directories. Filters run on the worker thread. Call `reload()` after
+changing the public configuration.
 
 `FilePickerMode::OpenFile` requires an existing regular file. `SaveFile` accepts an
 existing regular file or a new name in an existing directory. `Directory` returns the
@@ -169,12 +170,34 @@ application/dialog to cancel. Choosing does not close the surrounding dialog aut
 Enter in the location navigates; Enter/double-click on a directory opens it; activating
 files or entering a filename chooses. Up/Alt-Up goes to the parent; F5 reloads.
 Failed navigation preserves the previous model and emits `on_error(string const&)`;
-`error()` is also painted. Filesystem scanning is synchronous. For remote/huge directories,
-applications should supply asynchronously loaded ListView data instead.
+`error()` is also painted. Navigation and file validation run on worker threads.
+`set_directory`, `reload`, and `accept` return whether work started, rather than its
+final success. Observe `on_state(FilePickerState)` and `on_error` for completion.
+`is_loading()` covers `Loading` and `Validating`; other states are `Idle`, `Ready`,
+`Error`, and `Cancelled`. The footer shows loading/checking status, and choosing is
+disabled during work. The previous model remains visible until a successful load.
+
+`cancel_loading()` or Escape cancels work without waiting for filesystem calls.
+New requests supersede old ones; results from cancelled or superseded workers are
+never applied. Destruction and move assignment cancel the old request; moves retain
+active work. Cancellation is cooperative between filesystem calls, so a blocked OS
+call may continue on its worker until it returns. Worker captures remain alive until
+that worker exits.
+
+All widget mutation and signals run on the application thread. An attached timer
+delivers completed results and stops while idle. Detached/headless use calls `poll()`
+explicitly. Filters and the optional `loader(path,stop_token)` must be thread-safe
+and must not access widgets. The default pure `read_directory` returns a plain
+`DirectoryListing` with a canonical directory, directory entries, and an error string.
+A custom loader can provide another filesystem source or deterministic test data.
+The loader must honor stop requests between operations and return absolute paths.
+File validation also runs asynchronously and never creates or truncates a file.
 
 ## CommandPalette
 
-`Command{text,keywords,enabled,action}` is transparent command data. CommandPalette owns
+`Command{text,keywords,enabled,action,keys,checked}` is shared command data. Create
+one with `command({...})` and pass the resulting `std::shared_ptr<Command>` to any
+number of menus, palettes, and KeyHelp widgets. CommandPalette owns
 a public LineEdit `query` and const `choices()`/`matches()` views. Matching uses the pure
 `command_score(query,text)` function: case-insensitive ASCII subsequences, exact non-ASCII
 scalars, and spaces ignored in the query. Smaller skipped-character scores rank first;
@@ -184,7 +207,10 @@ Up/Down/Page/Home/End navigate while query retains focus; Enter executes the cur
 choice. Disabled commands remain visible and cannot execute. `execute(original_index)`
 copies the action before emitting `on_execute(original_index)`, then calls it; callbacks
 may close/destroy the palette without invalidating that copied action. `set_commands`
-validates labels and rebuilds matches. Compose inside Dialog/Popup, and close the host
+validates labels and rebuilds matches; `refresh()` reapplies edited command data.
+Action `EventResponse` effects reach the owning application, including repaint/quit
+effects after a notification destroys the source widget. See [shared commands](commands.md).
+Compose inside Dialog/Popup, and close the host
 from `on_execute` if desired. No implicit global shortcut or application state is installed.
 
 ## Demo

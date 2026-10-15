@@ -163,18 +163,20 @@ TEST(theme_changes_reflow_tabs_and_hidden_pages_inherit_the_application_theme)
 TEST(key_help_and_dispatch_share_bindings_and_ignore_repeats_and_disabled_actions)
 {
     int calls = 0;
-    auto help = KeyHelp{
-        {Shortcut{.keys = {{KeyCode::F2, {}}}, .description = "theme", .action = [&] {
-                      ++calls;
-                      return EventResponse{};
-                  }}}};
+    auto help = KeyHelp{{command({.text = "theme",
+                                  .action =
+                                      [&] {
+                                          ++calls;
+                                          return EventResponse{};
+                                      },
+                                  .keys = {{KeyCode::F2, {}}}})}};
     auto app = Application{help};
     app.dispatch(esc::Resize{{30, 2}});
     app.dispatch(KeyEvent{.key = KeyCode::F2});
     ASSERT(calls == 1);
     app.dispatch(KeyEvent{.key = KeyCode::F2, .action = KeyAction::Repeat});
     ASSERT(calls == 1);
-    help.bindings[0].enabled = false;
+    help.bindings[0]->enabled = false;
     app.dispatch(KeyEvent{.key = KeyCode::F2});
     ASSERT(calls == 1);
     ASSERT(key_label({U'p', {.ctrl = true}}, true) == "ctrl+p");
@@ -293,7 +295,8 @@ TEST(dropdowns_paint_a_distinct_solid_surface_and_restore_content_when_closed)
 }
 TEST(menus_and_submenus_use_the_raised_surface_role)
 {
-    auto menu = Menu{{{.text = "Child", .children = {{.text = "Leaf"}}}}};
+    auto menu = Menu{{{.command = command({.text = "Child"}),
+                       .children = {{.command = command({.text = "Leaf"})}}}}};
     auto app = Application{menu};
     auto theme = Theme::dark();
     app.set_theme(theme);

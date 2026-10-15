@@ -49,6 +49,7 @@ EventLoop::EventLoop()
 
 EventLoop::~EventLoop()
 {
+    *lifetime_ = nullptr;
     for (auto const& entry : animations_)
         if (auto a = entry.lock(); a && a->owner == this) a->owner = nullptr;
 #ifdef _WIN32
@@ -62,6 +63,13 @@ EventLoop::~EventLoop()
             timer->owner = nullptr;
         }
     }
+}
+
+auto EventLoop::effect_handler() -> std::function<void(EventResponse)>
+{
+    return [lifetime=std::weak_ptr{lifetime_}](EventResponse response) {
+        if (auto pointer=lifetime.lock(); pointer && *pointer) { (*pointer)->apply(response); }
+    };
 }
 
 void EventLoop::post(Event event)

@@ -43,3 +43,5 @@
 #include <ox/form.hpp>
 #include <ox/filepicker.hpp>
 #include <ox/commandpalette.hpp>
+
+#include <ox/command.hpp>

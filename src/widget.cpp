@@ -6,6 +6,11 @@
 #include <ox/focus.hpp>
 
 namespace ox {
+auto Widget::effect_handler() const -> std::function<void(EventResponse)>
+{
+    return application_ ? application_->loop().effect_handler() : std::function<void(EventResponse)>{};
+}
+
 
 Widget::Widget(FocusPolicy fp, SizePolicy width, SizePolicy height)
     : focus_policy{fp}, width_policy{width}, height_policy{height}

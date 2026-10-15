@@ -238,9 +238,14 @@ TEST(nested_menu_paths_disabled_entries_and_action_destruction)
     int actions = 0;
     auto root = Column{
         MenuBar{{{"File",
-                  {{.text = "Disabled", .enabled = false},
-                   {.text = "More",
-                    .children = {{.text = "Run", .action = [&] { ++actions; }}}}}}}},
+                  {{.command = command({.text = "Disabled", .enabled = false})},
+                   {.command = command({.text = "More"}),
+                    .children = {{.command = command({.text = "Run",
+                                                      .action =
+                                                          [&] {
+                                                              ++actions;
+                                                              return EventResponse{};
+                                                          }})}}}}}}},
         Label{"body"}};
     auto& bar = std::get<0>(root.children);
     auto app = Application{root};
@@ -256,7 +261,10 @@ TEST(nested_menu_paths_disabled_entries_and_action_destruction)
     ASSERT(actions == 1 && (paths == std::vector<std::vector<std::size_t>>{{0, 1, 0}}));
     auto menu = std::unique_ptr<Menu>{};
     menu = std::make_unique<Menu>(
-        std::vector<MenuItem>{{.text = "Delete", .action = [&] { menu.reset(); }}});
+        std::vector<MenuItem>{{.command = command({.text = "Delete", .action = [&] {
+                                                       menu.reset();
+                                                       return EventResponse{};
+                                                   }})}});
     menu->activate(0);
     ASSERT(!menu);
 }
@@ -322,9 +330,11 @@ TEST(label_dialog_has_keyboard_fallback_and_overlay_order_tracks_opening_order)
 
 TEST(menu_shortcuts_are_global_but_respect_modal_scopes_and_reopening_resets_submenus)
 {
-    auto root = Column{
-        MenuBar{{{"File", {{.text = "More", .children = {{.text = "Action"}}}}}}},
-        LineEdit{}, Dialog{Button{}, "Modal"}};
+    auto root =
+        Column{MenuBar{{{"File",
+                         {{.command = command({.text = "More"}),
+                           .children = {{.command = command({.text = "Action"})}}}}}}},
+               LineEdit{}, Dialog{Button{}, "Modal"}};
     auto& menu = std::get<0>(root.children);
     auto& editor = std::get<1>(root.children);
     auto& dialog = std::get<2>(root.children);
@@ -411,10 +421,11 @@ TEST(combo_popup_keeps_logical_ownership_inside_a_modal_dialog)
 
 TEST(menu_parent_mouse_hover_and_top_level_keyboard_switching)
 {
-    auto bar = MenuBar{
-        {{"File",
-          {{.text = "More", .children = {{.text = "Child"}}}, {.text = "Leaf"}}},
-         {"Edit", {{.text = "Edit action"}}}}};
+    auto bar = MenuBar{{{"File",
+                         {{.command = command({.text = "More"}),
+                           .children = {{.command = command({.text = "Child"})}}},
+                          {.command = command({.text = "Leaf"})}}},
+                        {"Edit", {{.command = command({.text = "Edit action"})}}}}};
     auto app = Application{bar};
     app.dispatch(esc::Resize{{40, 12}});
     bar.open(0);
@@ -470,9 +481,9 @@ TEST(requested_popup_extent_overrides_intrinsic_measurement)
 
 TEST(replacing_a_menu_scope_preserves_the_original_focus_for_dismissal)
 {
-    auto root =
-        Column{MenuBar{{{"File", {{.text = "Open"}}}, {"Edit", {{.text = "Undo"}}}}},
-               LineEdit{}};
+    auto root = Column{MenuBar{{{"File", {{.command = command({.text = "Open"})}}},
+                                {"Edit", {{.command = command({.text = "Undo"})}}}}},
+                       LineEdit{}};
     auto& bar = std::get<0>(root.children);
     auto& editor = std::get<1>(root.children);
     auto app = Application{root};
@@ -514,7 +525,8 @@ TEST(dropdowns_reveal_committed_rows_and_keep_duplicate_label_identity)
 
 TEST(shared_scrollbar_links_radio_tree_and_log_without_inner_widget_access)
 {
-    static_assert(Scrollable<RadioGroup> && Scrollable<TreeView> && Scrollable<LogView>);
+    static_assert(Scrollable<RadioGroup> && Scrollable<TreeView> &&
+                  Scrollable<LogView>);
     auto radio = RadioGroup{{.items = {"a", "b", "c", "d"}}};
     arrange(radio, {{}, {10, 2}});
     auto bar = ScrollBar{};

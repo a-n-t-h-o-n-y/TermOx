@@ -138,22 +138,21 @@ container focus a newly selected descendant before its attachment is reconciled.
 
 ## Menus
 
-`MenuItem` is a transparent description: text, enabled state, optional checked value,
-shortcut label, action function, and child items. Empty text means a separator. Check
-marks and shortcut labels are presentation controlled by the application; actions can
-use ordinary callbacks or `tracked` targets. A Menu composes ListView's disabled-row,
-scrolling, navigation, and typeahead behavior. Activate with Enter or click; hover highlights/opens submenu rows, Right opens
-a submenu, Left returns, and Escape dismisses its popup. Submenus are nonmodal parts
-of their owning menu scope, so the parent remains reachable with the mouse. Nested `on_trigger` values are
-index-path snapshots. Leaf actions are copied before notifications, so closing or deleting
-the menu during a callback is safe.
+`MenuItem` contains a shared `Command` and child items. A null command is a
+separator. Label, enabled/checked state, action, and key bindings belong to that
+command; shortcut labels are generated from the keys that actually dispatch it.
+A Menu composes ListView navigation, scrolling, and typeahead. Enter/click activates;
+hover/Right opens submenus and Left returns. Nested `on_trigger` values are index-path
+snapshots. Leaf actions are copied before notifications, so closing or deleting the
+menu during a callback is safe. Commands retain normal modal shortcut eligibility.
 
 ```cpp
-auto bar = ox::MenuBar{{
-    {"File", {{.text = "Open", .action = [] { /* Open a document. */ }},
-              {.text = "Export", .children = {{.text = "CSV"}, {.text = "Text"}}}}},
-}};
+auto open = ox::command({.text="Open", .action=[] { return ox::EventResponse{}; },
+                         .keys={{U'o', {.ctrl=true}}}});
+auto bar = ox::MenuBar{{{"File", {{.command=open}}}}};
 ```
+
+See [shared commands](commands.md) for reuse across menus, palettes, and KeyHelp.
 
 MenuBar composes buttons and root popups. F10 focuses it from anywhere in its input scope;
 Alt plus a menu label's first letter opens that menu; Alt shortcuts switch menus
