@@ -184,8 +184,13 @@ void put(Canvas c, Point at, std::u32string_view text, Style style)
     }
 }
 
-void put(Canvas c, Point at, std::span<Glyph const> glyphs, StylePatch patch)
+void put(Canvas c,
+         Point at,
+         std::span<Glyph const> glyphs,
+         StylePatch patch,
+         Style defaults)
 {
+    validate(defaults);
     auto text = std::u32string{};
     text.reserve(glyphs.size());
     for (auto const& glyph : glyphs) {
@@ -212,7 +217,13 @@ void put(Canvas c, Point at, std::span<Glyph const> glyphs, StylePatch patch)
     for (auto cluster : esc::graphemes(text)) {
         auto const width = *esc::grapheme_width(cluster, c.width_policy());
         if (x >= (std::int64_t)clip.at.x + clip.size.width) { break; }
-        c.write({(int)x, at.y}, cluster, remaining.front().style | patch);
+        auto style = remaining.front().style;
+        if (style.background == Color{default_color})
+            style.background = defaults.background;
+        if (style.foreground == Color{default_color})
+            style.foreground = defaults.foreground;
+        style.traits.insert(defaults.traits);
+        c.write({(int)x, at.y}, cluster, style | patch);
         remaining = remaining.subspan(cluster.size());
         x += (std::int64_t)width;
     }

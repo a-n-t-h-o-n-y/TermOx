@@ -21,6 +21,9 @@ class CheckBox : public Widget {
                                     .foreground = {},
                                     .enabled = Trait::Bold,
                                     .disabled = {}};
+        StylePatch indicator_style = {};
+        StylePatch checked_style = {};
+        StylePatch unchecked_style = {};
         FocusPolicy focus_policy = FocusPolicy::Strong;
         SizePolicy width_policy = SizePolicy::flex();
         SizePolicy height_policy = SizePolicy::fixed(1);
@@ -31,6 +34,9 @@ class CheckBox : public Widget {
     std::vector<Glyph> checked_glyphs;
     std::vector<Glyph> unchecked_glyphs;
     StylePatch focused_style;
+    StylePatch indicator_style;
+    StylePatch checked_style;
+    StylePatch unchecked_style;
     sl::Signal<void(bool)> on_change;
 
     CheckBox(Options x = init);

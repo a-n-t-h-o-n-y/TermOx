@@ -84,6 +84,12 @@ Slider::Slider(Options x)
              x.vertical ? SizePolicy::flex() : SizePolicy::fixed(1)},
       vertical{x.vertical},
       style{x.style},
+      track_style{x.track_style},
+      fill_style{x.fill_style},
+      thumb_style{x.thumb_style},
+      focused_style{x.focused_style},
+      show_fill{x.show_fill},
+      show_thumb{x.show_thumb},
       range_{x.range},
       value_{clamp_value(x.value, x.range)}
 {}
@@ -91,6 +97,12 @@ Slider::Slider(Slider&& other)
     : Widget{std::move(other)},
       vertical{other.vertical},
       style{other.style},
+      track_style{other.track_style},
+      fill_style{other.fill_style},
+      thumb_style{other.thumb_style},
+      focused_style{other.focused_style},
+      show_fill{other.show_fill},
+      show_thumb{other.show_thumb},
       on_change{std::move(other.on_change)},
       range_{other.range_},
       value_{other.value_},
@@ -102,6 +114,12 @@ auto Slider::operator=(Slider&& other) -> Slider&
     Widget::operator=(std::move(other));
     vertical = other.vertical;
     style = other.style;
+    track_style = other.track_style;
+    fill_style = other.fill_style;
+    thumb_style = other.thumb_style;
+    focused_style = other.focused_style;
+    show_fill = other.show_fill;
+    show_thumb = other.show_thumb;
     on_change = std::move(other.on_change);
     range_ = other.range_;
     value_ = other.value_;
@@ -132,26 +150,25 @@ auto Slider::measure(Area a, esc::WidthPolicy) const -> Area
 }
 auto Slider::paint(Canvas c) -> Cursor
 {
-    auto s = appearance(style, Surface::Accent);
-    if (is_focused()) { s = s | Trait::Bold; }
-    fill(c, s);
+    auto base = style | (is_focused() ? focused_style : StylePatch{});
+    auto filled = appearance(base, Surface::Accent) | fill_style;
+    auto track = appearance(base, Surface::Border) | track_style;
+    auto thumb = filled | thumb_style;
+    if (!is_enabled()) {
+        filled = filled | disabled_style;
+        track = track | disabled_style;
+        thumb = thumb | disabled_style;
+    }
+    fill(c, appearance(base));
     auto n = vertical ? c.size().height : c.size().width;
-    if (!n) { return {}; }
+    if (!n) return {};
     auto at = (int)std::llround(value_fraction(value_, range_) * (n - 1));
-    if (vertical) { at = n - 1 - at; }
-    if (theme().styled) {
-        paint_rule(c, vertical ? at : 0, vertical ? n - at : at + 1, s,
-                   appearance({}, Surface::Border), vertical, theme().ascii);
-        c.write(vertical ? Point{0, at} : Point{at, 0}, theme().ascii ? U"o" : U"●", s);
-        return {};
-    }
-    for (int i = 0; i < n; ++i) {
-        c.write(vertical ? Point{0, i} : Point{i, 0},
-                theme().styled && theme().ascii
-                    ? (i == at ? U"o" : (vertical ? U"|" : U"-"))
-                    : (i == at ? U"●" : (vertical ? U"│" : U"─")),
-                s);
-    }
+    if (vertical) at = n - 1 - at;
+    paint_rule(c, vertical ? at : 0, show_fill ? (vertical ? n - at : at + 1) : 0,
+               filled, track, vertical, theme().ascii);
+    if (show_thumb)
+        c.write(vertical ? Point{0, at} : Point{at, 0}, theme().ascii ? U"o" : U"●",
+                thumb);
     return {};
 }
 auto Slider::point_value(Point p) const -> double
@@ -223,6 +240,9 @@ ProgressBar::ProgressBar(Options x)
     : Widget{FocusPolicy::None, SizePolicy::flex(), SizePolicy::fixed(1)},
       style{x.style},
       show_percentage{x.show_percentage},
+      track_style{x.track_style},
+      fill_style{x.fill_style},
+      label_style{x.label_style},
       range_{x.range},
       value_{clamp_value(x.value, x.range)}
 { display_.reset(value_fraction(value_, range_)); }
@@ -256,22 +276,28 @@ auto ProgressBar::measure(Area a, esc::WidthPolicy) const -> Area
 }
 auto ProgressBar::paint(Canvas c) -> Cursor
 {
-    auto s = appearance(style, Surface::Accent);
-    fill(c, s);
+    auto s = appearance(style, Surface::Accent) | fill_style;
+    auto track = appearance(style, Surface::Border) | track_style;
+    auto label_ink = appearance(style) | label_style;
+    if (!is_enabled()) {
+        s = s | disabled_style;
+        track = track | disabled_style;
+        label_ink = label_ink | disabled_style;
+    }
+    fill(c, track);
     auto f = value_fraction(value_, range_);
     if (theme().styled) {
         auto visual = display_.active() ? display_.value() : f;
-        paint_meter(c, visual, s, appearance({}, Surface::Border), false,
-                    theme().ascii);
+        paint_meter(c, visual, s, track, false, theme().ascii);
     }
     auto filled = (int)std::llround(f * c.size().width);
     if (!theme().styled)
         for (int x = 0; x < c.size().width; ++x)
-            c.write({x, 0}, x < filled ? U"█" : U"░", s);
+            c.write({x, 0}, x < filled ? U"█" : U"░", x < filled ? s : track);
     if (show_percentage) {
         auto label = std::to_string((int)std::llround(f * 100)) + "%";
         put(c, {std::max(0, (c.size().width - (int)label.size()) / 2), 0},
-            std::string_view{label}, s);
+            std::string_view{label}, label_ink);
     }
     return {};
 }
@@ -279,6 +305,8 @@ Spinner::Spinner() : Spinner{Options{}} {}
 Spinner::Spinner(Options x)
     : Widget{FocusPolicy::None, SizePolicy{.flexibility = 0}, SizePolicy::fixed(1)},
       style{x.style},
+      running_style{x.running_style},
+      stopped_style{x.stopped_style},
       running_{x.running},
       timer_{*this, x.interval, [](Spinner& s) { return s.tick(); }, x.running}
 { set_frames(std::move(x.frames)); }
@@ -325,12 +353,16 @@ auto Spinner::measure(Area a, esc::WidthPolicy p) const -> Area
 }
 auto Spinner::paint(Canvas c) -> Cursor
 {
+    auto ink = appearance(style, running_ ? Surface::Accent : Surface::Muted) |
+               (running_ ? running_style : stopped_style);
+    if (!is_enabled()) ink = ink | disabled_style;
+    fill(c, ink);
     if (!frames_.empty())
         paint_row_text(c,
                        theme().styled && theme().ascii
                            ? std::string_view{"*"}
                            : std::string_view{frames_[frame_]},
-                       Align::Left, appearance(style, Surface::Accent), layout_);
+                       Align::Left, ink, layout_);
     return {};
 }
 Switch::Switch() : Switch{CheckBox::Options{}} {}

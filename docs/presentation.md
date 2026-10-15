@@ -1,4 +1,4 @@
-# Quiet details for editors and tables
+# Quiet details for widgets
 
 Build `TermOx.examples.polish` and run it to compare Minimal, Refined and Roomy
 presentations. Its switches enable details independently; its theme selector compares
@@ -121,3 +121,94 @@ cmake --build build-release --target TermOx.examples.polish
 ./build-release/examples/TermOx.examples.polish --check
 python3 tests/smoke_polish.py build-release
 ```
+
+## Lists and trees
+
+`ListView` uses the same restrained row treatment as DataTable. `striped` and
+`hover_rows` default to `false`. `alternate_style` applies to odd rows regardless
+of `striped`; the flag enables an automatic themed background. `hover_style` applies
+only when row hover is enabled and the item is enabled. Hover follows the pointer's
+viewport position when scrolling and clears on pointer exit or model replacement.
+Use mouse move reporting to enable it.
+
+Style order is base/focus (`focused_style` or `blurred_style`) → `ListItem::style` →
+stripe/`alternate_style` → hover → selection → `inactive_selected_style` when unfocused
+→ focused current row → disabled. Selection wins over hover. Inactive selection uses
+the theme's muted foreground by default, preserving explicit selection patches.
+`indicator_style` controls the leading marker separately. `show_indicator=false`
+removes its two-cell gutter; measurement, horizontal scrolling and text placement
+use the same width. Plain themes retain their undecorated list presentation.
+
+`empty_text` displays one row of help when there are no items; `empty_style` patches
+its muted appearance. It contributes one natural row for intrinsic layouts, but creates
+no selectable item or scroll extent. Call `refresh()` after changing presentation fields.
+
+```cpp
+auto choices = ox::ListView{{.items = {{"Inbox"}, {"Review"}, {"Done"}},
+                             .multiple = true,
+                             .striped = true,
+                             .hover_rows = true,
+                             .empty_text = "No matches"}};
+```
+
+Menus inherit these fields, and Select/ComboBox expose their lists as `popup.child`.
+Configure those components directly. CommandPalette and FilePicker also share the
+ListView renderer, so the quieter inactive-selection treatment carries through their
+controlled lists. Selection and activation contracts stay the same. LogView and
+numeric editors use the TextBox/LineEdit options on `editor`.
+
+TreeView accepts shared row presentation in `Options::list`. Each `TreeNode::style`
+styles its row, including after expansion rebuilds. `show_guides` (default `true`)
+controls connector lines independently of expand/collapse markers, and `guide_style`
+patches their subdued border color. Guide placement respects the list's marker gutter
+and horizontal scrolling. Terminal themes use ASCII connectors. Paths, keyboard
+navigation and activation do not depend on guide visibility.
+
+## Buttons and choice indicators
+
+Button adds `hover_style`, `blurred_style` and `show_focus_indicator` (default `true`).
+The style order is themed feedback → focus/blur → hover → pressed → disabled.
+The marker switch hides the keyboard focus marks; focus styling and existing button
+spacing remain. Decorations and fades remain ordinary composed paint functions.
+
+Checkbox and switch labels now keep the normal text color; accent/muted colors belong
+to their indicators. `indicator_style` patches either state, then `checked_style` or
+`unchecked_style` applies to the indicator alone. RadioGroup uses the same split, with
+`indicator_style`, `selected_style` and `unselected_style`. `focused_style` still
+applies to the focused label and indicator, so focus does not rely on color alone.
+Disabled styling applies last. Glyphs with explicit colors retain them unless an
+explicit indicator/state/focus patch overrides them. Label alignment and indicator
+width measurement still use display cells, including for wide Unicode glyphs.
+
+The shared `put` glyph-range overload accepts an optional fifth `Style defaults`
+argument for this composition. Only unspecified glyph colors inherit it, glyph
+traits combine with default traits, and the explicit `StylePatch` applies last.
+Omitting it preserves the existing drawing behavior.
+
+## Values, activity and tabs
+
+Slider exposes `track_style`, `fill_style`, `thumb_style` and `focused_style`.
+`show_fill=false` leaves a uniform track; `show_thumb=false` hides the thumb. Both
+switches default to `true`. These controls affect presentation only: pointer capture,
+value mapping and keyboard steps work identically in either orientation. The thumb
+inherits the fill style before its own patch. ScrollBar similarly exposes
+`track_style` and `thumb_style`, without changing its linked range or scrolling.
+
+ProgressBar exposes `track_style`, `fill_style` and `label_style`. Percentage text
+uses the normal foreground independently of the colored fill; `show_percentage=false`
+leaves only the meter. Committed percentages still update immediately while the
+optional fill animation settles. Spinner uses `running_style` and `stopped_style`;
+the default stopped appearance is muted. Presentation changes start no additional
+timers. All these controls apply disabled styling after role patches.
+
+Tabs exposes `unselected_style`, `indicator_style` and `track_style` alongside its
+existing `selected_style`. `show_separator=false` removes the themed indicator rule
+and gives its row back to the page. Call `refresh()` when toggling it; page geometry,
+measurement and tab mouse hits use the same strip height. Plain themes retain a
+one-row strip. Border, padding, captions and help text remain separate components.
+
+The polish example's **More controls** page puts these details together. Click its
+tab or press **Alt-V** to switch pages. Both pages share the preset and theme controls;
+the second page includes multi-selection, a tree, radio buttons, a switch, linked
+slider/progress, a spinner and a button. `--check` exercises both pages across the
+preset/theme/size matrix.

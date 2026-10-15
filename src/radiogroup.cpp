@@ -18,6 +18,9 @@ RadioGroup::RadioGroup(Options x)
 
       style{x.style},
       focused_style{x.focused_style},
+      indicator_style{x.indicator_style},
+      selected_style{x.selected_style},
+      unselected_style{x.unselected_style},
       on{std::move(x.on)},
       off{std::move(x.off)},
       items_{std::move(x.items)},
@@ -36,6 +39,9 @@ RadioGroup::RadioGroup(RadioGroup&& other)
     : Widget{std::move(other)},
       style{std::move(other.style)},
       focused_style{std::move(other.focused_style)},
+      indicator_style{other.indicator_style},
+      selected_style{other.selected_style},
+      unselected_style{other.unselected_style},
       on{std::move(other.on)},
       off{std::move(other.off)},
       on_select{std::move(other.on_select)},
@@ -53,6 +59,9 @@ auto RadioGroup::operator=(RadioGroup&& other) -> RadioGroup&
     Widget::operator=(std::move(other));
     style = std::move(other.style);
     focused_style = std::move(other.focused_style);
+    indicator_style = other.indicator_style;
+    selected_style = other.selected_style;
+    unselected_style = other.unselected_style;
     on = std::move(other.on);
     off = std::move(other.off);
     on_select = std::move(other.on_select);
@@ -137,28 +146,38 @@ auto RadioGroup::paint(Canvas canvas) -> Cursor
     for (auto row = first; row < last; ++row) {
         auto y = row - scroll_;
         auto const& glyphs = selected_ == (std::size_t)row ? on : off;
-        auto patch = is_focused() && highlighted_ == (std::size_t)row ? focused_style
-                                                                      : StylePatch{};
-        if (theme().styled) {
-            if (!patch.background && style.background == Color{default_color})
-                patch.background = theme().palette.background;
-            if (!patch.foreground && style.foreground == Color{default_color})
-                patch.foreground = selected_ == (std::size_t)row
-                                       ? theme().palette.accent
-                                       : theme().palette.muted;
-        }
+        auto const selected = selected_ == (std::size_t)row;
+        auto normal = appearance(
+            style | (is_focused() && highlighted_ == (std::size_t)row ? focused_style
+                                                                      : StylePatch{}));
+        auto indicator = normal;
+        if (theme().styled && style.foreground == Color{default_color} &&
+            !(is_focused() && highlighted_ == (std::size_t)row &&
+              focused_style.foreground))
+            indicator.foreground =
+                selected ? theme().palette.accent : theme().palette.muted;
+        indicator = indicator | indicator_style |
+                    (selected ? selected_style : unselected_style);
         if (!is_enabled() || !enabled_items_[(std::size_t)row]) {
-            patch = patch | disabled_style;
+            normal = normal | disabled_style;
+            indicator = indicator | disabled_style;
         }
+        auto line = canvas.subcanvas({0, y}, {canvas.size().width, 1});
+        fill(line, normal);
         auto const width =
             esc::cell_width(std::span<Glyph const>{glyphs}, canvas.width_policy());
         if (!width) {
             throw std::invalid_argument{"Radio indicator requires known widths"};
         }
-        put(canvas, {0, y}, glyphs, patch);
+        auto patch = (is_focused() && highlighted_ == (std::size_t)row ? focused_style
+                                                                       : StylePatch{}) |
+                     indicator_style | (selected ? selected_style : unselected_style);
+        if (!is_enabled() || !enabled_items_[(std::size_t)row])
+            patch = patch | disabled_style;
+        put(canvas, {0, y}, glyphs, patch, indicator);
         if (*width >= (std::size_t)canvas.size().width) { continue; }
         auto const x = (int)*width;
-        auto const appearance = this->appearance(style | patch);
+        auto const appearance = normal;
         canvas.write({x, y}, U" ", appearance);
         paint_label(canvas.subcanvas({x + 1, y}, {canvas.size().width - x - 1, 1}),
                     items_[(std::size_t)row], Align::Left, appearance);
@@ -225,8 +244,8 @@ auto RadioGroup::set_scroll_offset(Point at) -> bool
 }
 auto RadioGroup::handle(MouseWheel const& e) -> EventResponse
 {
-    auto changed =
-        set_scroll_offset({0, scroll_by(scroll_, e.dy, (int)items_.size(), size().height)});
+    auto changed = set_scroll_offset(
+        {0, scroll_by(scroll_, e.dy, (int)items_.size(), size().height)});
     return {.handled = changed, .repaint = changed};
 }
 void RadioGroup::set_item_enabled(std::size_t index, bool enabled)

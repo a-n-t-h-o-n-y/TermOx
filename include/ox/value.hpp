@@ -1,9 +1,9 @@
 #pragma once
 #include <chrono>
-#include <ox/value_range.hpp>
 #include <ox/checkbox.hpp>
 #include <ox/lineedit.hpp>
 #include <ox/timer.hpp>
+#include <ox/value_range.hpp>
 namespace ox {
 /** Fractional block fill, clipped to the supplied canvas. Fractions clamp to [0,1]. */
 void paint_meter(Canvas,
@@ -23,9 +23,24 @@ class Slider : public Widget {
         double value = 0;
         bool vertical = false;
         Style style = {};
+        StylePatch track_style = {};
+        StylePatch fill_style = {};
+        StylePatch thumb_style = {};
+        StylePatch focused_style = {.background = {},
+                                    .foreground = {},
+                                    .enabled = Trait::Bold,
+                                    .disabled = {}};
+        bool show_fill = true;
+        bool show_thumb = true;
     };
     bool vertical;
     Style style;
+    StylePatch track_style;
+    StylePatch fill_style;
+    StylePatch thumb_style;
+    StylePatch focused_style;
+    bool show_fill;
+    bool show_thumb;
     sl::Signal<void(double)> on_change;
     Slider();
     explicit Slider(Options);
@@ -57,9 +72,15 @@ class ProgressBar : public Widget {
         double value = 0;
         Style style = {};
         bool show_percentage = true;
+        StylePatch track_style = {};
+        StylePatch fill_style = {};
+        StylePatch label_style = {};
     };
     Style style;
     bool show_percentage;
+    StylePatch track_style;
+    StylePatch fill_style;
+    StylePatch label_style;
     sl::Signal<void(double)> on_change;
     ProgressBar();
     explicit ProgressBar(Options);
@@ -85,8 +106,12 @@ class Spinner : public Widget {
         std::chrono::milliseconds interval{80};
         bool running = true;
         Style style = {};
+        StylePatch running_style = {};
+        StylePatch stopped_style = {};
     };
     Style style;
+    StylePatch running_style;
+    StylePatch stopped_style;
     sl::Signal<void(bool)> on_change;
     Spinner();
     explicit Spinner(Options);

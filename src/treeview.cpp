@@ -18,7 +18,7 @@ auto find_path(std::vector<std::vector<std::size_t>> const& paths,
 }  // namespace
 TreeView::TreeView() : TreeView{Options{}} {}
 TreeView::TreeView(Options x)
-    : Widget{}, list_{[&] {
+    : Widget{}, show_guides{x.show_guides}, guide_style{x.guide_style}, list_{[&] {
           x.list.multiple = x.multiple;
           return std::move(x.list);
       }()}
@@ -95,7 +95,7 @@ auto TreeView::rebuild(std::optional<std::vector<std::size_t>> current, bool pre
                                   : n.expanded       ? "▾ "
                                                      : "▸ ") +
                                  n.text,
-                             enabled && n.enabled});
+                             enabled && n.enabled, n.style});
             if (n.expanded) recurse(recurse, n.children, enabled && n.enabled);
             path.pop_back();
         }
@@ -212,22 +212,26 @@ void TreeView::paint_overlay(Canvas canvas)
         auto selected =
             std::ranges::binary_search(list_.selected_rows(), (std::size_t)row);
         auto write = [&](std::int64_t x, char32_t glyph, bool connector = true) {
-            x += 2 - offset.x;
+            auto gutter = list_.indicator_width();
+            x += gutter - offset.x;
             auto y = (int)(row - offset.y);
-            if (x < 2 || x >= canvas.size().width || !canvas.contains({(int)x, y}))
+            if (x < gutter || x >= canvas.size().width || !canvas.contains({(int)x, y}))
                 return;
             auto at = Point{(int)x, y};
             auto ink = canvas[at].style;
             if (connector && !selected &&
                 list_.style.foreground == Color{default_color})
                 ink.foreground = theme().palette.border;
+            if (connector) ink = ink | guide_style;
+            if (!is_enabled() || !list_.items()[(std::size_t)row].enabled)
+                ink = ink | disabled_style;
             canvas.write(at, std::u32string_view{&glyph, 1}, ink);
         };
         for (std::size_t level = 0; level < path.size(); ++level) {
             auto index = path[level];
             auto const& node = (*siblings)[index];
             auto last_sibling = index + 1 == siblings->size();
-            if (level > 0) {
+            if (show_guides && level > 0) {
                 auto x = 2 * (std::int64_t)(level - 1);
                 if (level < depth) {
                     if (!last_sibling) write(x, theme().ascii ? U'|' : U'│');

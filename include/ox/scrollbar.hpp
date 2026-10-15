@@ -18,6 +18,8 @@ class ScrollBar : public Widget {
         int position = 0;
         bool vertical = true;
         Style style = {};
+        StylePatch track_style = {};
+        StylePatch thumb_style = {};
         std::chrono::milliseconds scroll_settle_time = std::chrono::milliseconds{0};
     } static const init;
 
@@ -26,6 +28,8 @@ class ScrollBar : public Widget {
     auto position() const -> int { return position_; }
     bool vertical;
     Style style;
+    StylePatch track_style;
+    StylePatch thumb_style;
     std::chrono::milliseconds scroll_settle_time;
     sl::Signal<void(int)> on_scroll;
 
@@ -71,8 +75,7 @@ concept Scrollable = WidgetDerived<T> && requires(T& view, T const& c, Point at)
 };
 /** Synchronize one axis, tracking both lifetimes. Disconnect using returned IDs. */
 template <Scrollable View>
-auto link(View& view, ScrollBar& bar)
-    -> std::pair<sl::Identifier, sl::Identifier>
+auto link(View& view, ScrollBar& bar) -> std::pair<sl::Identifier, sl::Identifier>
 {
     auto synchronize = [](View& view, ScrollBar& bar) {
         auto content = view.content_size();
@@ -83,18 +86,21 @@ auto link(View& view, ScrollBar& bar)
                       bar.vertical ? at.y : at.x);
     };
     synchronize(view, bar);
-    auto first = Connection{.signal = view.on_scroll,
-        .slot = [synchronize](Point, Area, Area, View& v, ScrollBar& b) {
-            synchronize(v, b);
-        }}(view, bar);
+    auto first =
+        Connection{.signal = view.on_scroll,
+                   .slot = [synchronize](Point, Area, Area, View& v, ScrollBar& b) {
+                       synchronize(v, b);
+                   }}(view, bar);
     try {
         return {first, Connection{.signal = bar.on_scroll,
-            .slot = [](int position, View& v, ScrollBar& b) {
-                auto at = v.scroll_offset();
-                if (b.vertical) at.y = position;
-                else at.x = position;
-                v.set_scroll_offset(at);
-            }}(view, bar)};
+                                  .slot = [](int position, View& v, ScrollBar& b) {
+                                      auto at = v.scroll_offset();
+                                      if (b.vertical)
+                                          at.y = position;
+                                      else
+                                          at.x = position;
+                                      v.set_scroll_offset(at);
+                                  }}(view, bar)};
     }
     catch (...) {
         view.on_scroll.disconnect(first);

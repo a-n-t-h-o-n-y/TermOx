@@ -9,8 +9,8 @@
 #include <signals_light/signal.hpp>
 
 #include <ox/core/text.hpp>
-#include <ox/widget.hpp>
 #include <ox/scrollbar.hpp>
+#include <ox/widget.hpp>
 #include <tuple>
 
 namespace ox {
@@ -39,6 +39,9 @@ class RadioGroup : public Widget {
                                     .disabled = {}};
         std::vector<Glyph> on = U"(X)"_gs;
         std::vector<Glyph> off = U"( )"_gs;
+        StylePatch indicator_style = {};
+        StylePatch selected_style = {};
+        StylePatch unselected_style = {};
         FocusPolicy focus_policy = FocusPolicy::Strong;
         SizePolicy width_policy = SizePolicy::flex();
         SizePolicy height_policy = SizePolicy::flex();
@@ -49,6 +52,9 @@ class RadioGroup : public Widget {
     void set_items(std::vector<std::string> items);
     Style style;
     StylePatch focused_style;
+    StylePatch indicator_style;
+    StylePatch selected_style;
+    StylePatch unselected_style;
     std::vector<Glyph> on;
     std::vector<Glyph> off;
 

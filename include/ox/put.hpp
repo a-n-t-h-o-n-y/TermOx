@@ -193,22 +193,31 @@ void put(Canvas c, Point at, Glyph const& item);
  */
 void put(Canvas c, Point at, Character auto item) { put(c, at, item | Style{}); }
 
-void put(Canvas c, Point at, std::span<Glyph const> item, StylePatch patch = {});
+/** Glyph colors inherit defaults only when unspecified; the patch applies last. */
+void put(Canvas c,
+         Point at,
+         std::span<Glyph const> item,
+         StylePatch patch = {},
+         Style defaults = {});
 
-void put(Canvas c, Point at, GlyphRange auto const& item, StylePatch patch = {})
+void put(Canvas c,
+         Point at,
+         GlyphRange auto const& item,
+         StylePatch patch = {},
+         Style defaults = {})
 {
     if constexpr (std::ranges::contiguous_range<decltype(item)> &&
                   std::ranges::sized_range<decltype(item)>) {
         put(c, at,
             std::span<Glyph const>{std::ranges::data(item), std::ranges::size(item)},
-            patch);
+            patch, defaults);
     }
     else {
         auto glyphs = std::vector<Glyph>{};
         for (auto const& glyph : item) {
             glyphs.push_back(glyph);
         }
-        put(c, at, std::span<Glyph const>{glyphs}, patch);
+        put(c, at, std::span<Glyph const>{glyphs}, patch, defaults);
     }
 }
 

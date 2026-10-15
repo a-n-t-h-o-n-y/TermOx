@@ -15,6 +15,9 @@ CheckBox::CheckBox(Options x)
       checked_glyphs{std::move(x.checked_glyphs)},
       unchecked_glyphs{std::move(x.unchecked_glyphs)},
       focused_style{x.focused_style},
+      indicator_style{x.indicator_style},
+      checked_style{x.checked_style},
+      unchecked_style{x.unchecked_style},
       checked_{x.checked}
 {}
 auto CheckBox::set_checked(bool value) -> bool
@@ -43,12 +46,10 @@ auto CheckBox::measure(Area available, esc::WidthPolicy policy) const -> Area
     auto const a = esc::cell_width(std::span<Glyph const>{checked_glyphs}, policy);
     auto const b = esc::cell_width(std::span<Glyph const>{unchecked_glyphs}, policy);
     if (!a || !b) { throw std::invalid_argument{"Invalid checkbox indicator"}; }
-    auto label_size = measure_label(measure_layout_, label.text, label.vertical, policy);
+    auto label_size =
+        measure_label(measure_layout_, label.text, label.vertical, policy);
     auto const width =
-        std::max(*a, *b) +
-        (label.text.empty()
-             ? 0
-             : 1 + (std::size_t)label_size.width);
+        std::max(*a, *b) + (label.text.empty() ? 0 : 1 + (std::size_t)label_size.width);
     if (width > (std::size_t)std::numeric_limits<int>::max()) {
         throw std::length_error{"Checkbox width overflow"};
     }
@@ -57,26 +58,32 @@ auto CheckBox::measure(Area available, esc::WidthPolicy policy) const -> Area
 auto CheckBox::paint(Canvas canvas) -> Cursor
 {
     auto const& glyphs = checked_ ? checked_glyphs : unchecked_glyphs;
-    auto patch = is_focused() ? focused_style : StylePatch{};
-    if (theme().styled) {
-        if (!patch.background && label.style.background == Color{default_color})
-            patch.background = theme().palette.background;
-        if (!patch.foreground && label.style.foreground == Color{default_color})
-            patch.foreground = checked_ || is_focused() ? theme().palette.accent
-                                                        : theme().palette.muted;
+    auto normal =
+        appearance(label.style | (is_focused() ? focused_style : StylePatch{}));
+    auto indicator = normal;
+    if (theme().styled && label.style.foreground == Color{default_color} &&
+        !(is_focused() && focused_style.foreground))
+        indicator.foreground =
+            checked_ || is_focused() ? theme().palette.accent : theme().palette.muted;
+    indicator =
+        indicator | indicator_style | (checked_ ? checked_style : unchecked_style);
+    if (!is_enabled()) {
+        normal = normal | disabled_style;
+        indicator = indicator | disabled_style;
     }
-    if (!is_enabled()) { patch = patch | disabled_style; }
-    paint_label(canvas, "", Align::Left, appearance(label.style));
-    put(canvas, {0, 0}, glyphs, patch);
+    fill(canvas, normal);
+    auto patch = (is_focused() ? focused_style : StylePatch{}) | indicator_style |
+                 (checked_ ? checked_style : unchecked_style);
+    if (!is_enabled()) patch = patch | disabled_style;
+    put(canvas, {0, 0}, glyphs, patch, indicator);
     auto const width =
         esc::cell_width(std::span<Glyph const>{glyphs}, canvas.width_policy());
     if (!width) { throw std::invalid_argument{"Invalid checkbox indicator"}; }
     if (!label.text.empty() && *width < (std::size_t)canvas.size().width) {
         auto const at = (int)*width + 1;
-        paint_label(
-            canvas.subcanvas(
-                {at, 0}, {std::max(canvas.size().width - at, 0), canvas.size().height}),
-            label.text, label.align, appearance(label.style | patch), label.vertical);
+        paint_label(canvas.subcanvas({at, 0}, {std::max(canvas.size().width - at, 0),
+                                               canvas.size().height}),
+                    label.text, label.align, normal, label.vertical);
     }
     return {};
 }

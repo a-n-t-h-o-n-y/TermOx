@@ -34,8 +34,9 @@ int main()
 Build `TermOx.examples.showcase` for an interactive tour of widgets, themes, and
 motion. See [theme and motion](docs/theme-and-motion.md) for configuration and controls.
 
-Build `TermOx.examples.polish` to compare optional [TextBox and DataTable details](docs/presentation.md):
-line numbers, current-line shading, quiet selections, row density, hover and semantic cell colors.
+Build `TermOx.examples.polish` to compare optional [widget presentation details](docs/presentation.md):
+editor gutters, table density, list hover/stripes, tree guides, choice indicators,
+value tracks and fills, and tab decoration. Alt-V switches between its two pages.
 
 Build `TermOx.examples.stress` for an adjustable live [Stress Lab](examples/stress.md):
 large models, streaming logs, Unicode editing, clipped images, widget trees,

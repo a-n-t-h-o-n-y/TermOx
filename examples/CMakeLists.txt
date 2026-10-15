@@ -124,7 +124,7 @@ add_executable(TermOx.examples.stress EXCLUDE_FROM_ALL stress.cpp)
 target_compile_options(TermOx.examples.stress PRIVATE -Wall -Wextra -Wpedantic)
 target_link_libraries(TermOx.examples.stress PRIVATE TermOx)
 
-# Quiet, optional TextBox/DataTable details with live presets and themes.
+# Quiet, optional widget details with live presets and themes.
 add_executable(TermOx.examples.polish EXCLUDE_FROM_ALL polish.cpp)
 target_compile_options(TermOx.examples.polish PRIVATE -Wall -Wextra -Wpedantic)
 target_link_libraries(TermOx.examples.polish PRIVATE TermOx)

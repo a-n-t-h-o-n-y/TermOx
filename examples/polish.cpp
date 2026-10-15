@@ -55,7 +55,7 @@ try {
                         .style = {.traits = Trait::Bold},
                         .role = Surface::Accent}};
     auto hint = Label{{.text = "Tab: focus  |  Click headers: sort  |  Alt-S: stack "
-                               "panes  |  Ctrl-C: exit",
+                               "panes  |  Alt-V: page  |  Ctrl-C: exit",
                        .align = Align::Start,
                        .role = Surface::Muted}};
     auto status =
@@ -65,7 +65,54 @@ try {
     auto toolbar = Row{std::tie(title, preset, theme)};
     auto settings = Row{std::tie(numbers, current, stripes, hover, rules)};
     toolbar.height_policy = settings.height_policy = SizePolicy::fixed(1);
-    auto root = Column{std::tie(toolbar, settings, hint, panes, status)};
+    auto list = ListView{{.items = {{"Inbox"},
+                                    {"In progress"},
+                                    {"Review"},
+                                    {"Done"},
+                                    {"Archived", false},
+                                    {"Later"}},
+                          .multiple = true,
+                          .empty_text = "No projects"}};
+    list.select(1);
+    auto tree = TreeView{
+        {.nodes = {{"Workspace",
+                    true,
+                    true,
+                    {{"Sources", true, true, {{"application.cpp"}, {"theme.cpp"}}},
+                     {"Tests", true, false, {{"presentation.cpp"}}},
+                     {"README.md"}}}},
+         .list = {.hover_rows = true}}};
+    auto radio = RadioGroup{{.items = {"Draft", "Review", "Published"},
+                             .selected_index = 1,
+                             .height_policy = SizePolicy::fixed(3)}};
+    auto enabled = Switch{
+        {.checked = true, .label = {.text = "Notifications", .align = Align::Start}}};
+    auto slider = Slider{{.value = 65}};
+    auto progress = ProgressBar{{.value = 65}};
+    auto spinner = Spinner{{.running = false}};
+    auto action = Button{{.label = {.text = "Start task"}}};
+    auto controls_hint = TextBox{{.text = "Drag the slider to adjust progress. "
+                                          "Ctrl/Shift selects several rows. "
+                                          "Arrow keys expand tree nodes.",
+                                  .wrap = TextWrap::Word,
+                                  .read_only = true,
+                                  .focus_policy = FocusPolicy::None,
+                                  .height_policy = SizePolicy::fixed(3)}};
+    auto activity = Row{std::tie(spinner, action)};
+    activity.height_policy = SizePolicy::fixed(1);
+    auto form =
+        Column{std::tie(radio, enabled, slider, progress, activity, controls_hint)};
+    auto choices = Padding{std::move(form), std::array{1, 1, 1, 1}} |
+                   Border{.box = shape::Box::round(), .label = {.text = " Controls "}};
+    auto list_frame = Padding{Row{std::tie(list)}, std::array{1, 1, 1, 1}} |
+                      Border{.box = shape::Box::round(), .label = {.text = " List "}};
+    auto tree_frame = Padding{Row{std::tie(tree)}, std::array{1, 1, 1, 1}} |
+                      Border{.box = shape::Box::round(), .label = {.text = " Tree "}};
+    auto browsers = SplitPane{std::move(list_frame), std::move(tree_frame), .43};
+    auto controls = SplitPane{std::move(browsers), std::move(choices), .62};
+    auto pages =
+        Tabs{std::tie(panes, controls), {"Editors and tables", "More controls"}};
+    auto root = Column{std::tie(toolbar, settings, hint, pages, status)};
     auto app = Application{root};
     auto apply = [&] {
         auto selected = preset.selected_index().value_or(1);
@@ -81,6 +128,23 @@ try {
         table.show_sort_indicator = true;
         editor.refresh();
         table.refresh();
+        list.striped = stripes.checked();
+        list.hover_rows = hover.checked();
+        list.show_indicator = selected != 0;
+        tree.show_guides = rules.checked() || selected != 0;
+        action.show_focus_indicator = selected != 0;
+        pages.show_separator = selected != 0;
+        slider.show_fill = selected != 0;
+        progress.fill_style.foreground = app.theme().palette.secondary;
+        action.hover_style.foreground = app.theme().palette.accent;
+        controls_hint.blurred_style.foreground = app.theme().palette.muted;
+        controls_hint.refresh();
+        list.refresh();
+        tree.refresh();
+        action.refresh();
+        slider.refresh();
+        progress.refresh();
+        pages.refresh();
     };
     for (auto* checkbox : {&numbers, &current, &stripes, &hover, &rules})
         checkbox->on_change.connect([&](bool) { apply(); });
@@ -98,6 +162,7 @@ try {
         app.set_theme(index == 0   ? Theme::dark()
                       : index == 1 ? Theme::light()
                                    : Theme::terminal());
+        apply();
     };
     theme.on_change.connect([&](auto) { change_theme(); });
     table.cell_style = [&](std::size_t row, std::size_t column) {
@@ -129,7 +194,17 @@ try {
         status.set_text(std::format("Draft updated · {} characters",
                                     editor.editor().boundaries().size() - 1));
     });
+    slider.on_change.connect([&](double value) { progress.set_value(value); });
+    action.on_activate.connect([&] {
+        spinner.set_running(!spinner.is_running());
+        action.label.text = spinner.is_running() ? "Pause task" : "Start task";
+        action.refresh();
+        status.set_text(spinner.is_running() ? "Task running" : "Task paused");
+    });
     root.shortcuts = [&](KeyEvent const& key) -> EventResponse {
+        if (key.matches(U'v', {.alt = true}))
+            return {.handled = true,
+                    .repaint = pages.select(pages.selected_index() == 0 ? 1 : 0)};
         if (!key.matches(U's', {.alt = true})) return {};
         panes.vertical = !panes.vertical;
         panes.refresh();
@@ -157,6 +232,7 @@ try {
             preset.select(look);
             for (auto size :
                  {Area{120, 38}, Area{80, 24}, Area{30, 10}, Area{1, 1}, Area{0, 0}}) {
+                pages.select(0);
                 app.dispatch(esc::Resize{size});
                 focus_visible(editor);
                 app.step();
@@ -170,11 +246,25 @@ try {
                 table.handle(MouseMove{.at = {2, 4}, .held_button = {}});
                 app.step();
                 app.paint();
+                pages.select(1);
+                app.step();
+                focus_visible(list);
+                list.select(2, SelectionAction::Toggle);
+                list.handle(MouseMove{.at = {1, 1}, .held_button = {}});
+                tree.select({0, 0, 1});
+                slider.set_value(35);
+                enabled.toggle();
+                action.activate();
+                app.step();
+                app.paint();
+                renderer.render(app.loop().screen, app.loop().cursor);
+                if (!renderer.render(app.loop().screen, app.loop().cursor).empty())
+                    throw std::runtime_error{"Unstable controls frame"};
             }
         }
     }
     std::cout << "Polish: three presets, three themes, five sizes, focus, sorting, "
-                 "hover and stable frames passed.\n";
+                 "hover, composed controls and stable frames passed.\n";
     return 0;
 }
 catch (std::exception const& error) {

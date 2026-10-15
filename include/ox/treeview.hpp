@@ -6,6 +6,7 @@ struct TreeNode {
     bool enabled = true;
     bool expanded = false;
     std::vector<TreeNode> children = {};
+    StylePatch style = {};
 };
 /** Paths are ordinary child-index vectors; replacing the model clears selection. */
 class TreeView : public Widget {
@@ -15,7 +16,11 @@ class TreeView : public Widget {
         std::vector<TreeNode> nodes = {};
         bool multiple = false;
         ListView::Options list = {};
+        bool show_guides = true;
+        StylePatch guide_style = {};
     };
+    bool show_guides;
+    StylePatch guide_style;
     sl::Signal<void(std::vector<std::vector<std::size_t>> const&)> on_select;
     sl::Signal<void(std::vector<std::size_t> const&)> on_activate;
     sl::Signal<void(std::vector<std::size_t> const&, bool)> on_expand;

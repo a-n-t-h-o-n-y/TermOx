@@ -16,6 +16,10 @@ class Tabs : public Widget {
                                  .foreground = {},
                                  .enabled = Trait::Inverse,
                                  .disabled = {}};
+    StylePatch unselected_style = {};
+    StylePatch indicator_style = {};
+    StylePatch track_style = {};
+    bool show_separator = true;
     sl::Signal<void(std::optional<std::size_t>)> on_select;
     Tabs(Container children, std::vector<std::string> labels)
         : Widget{FocusPolicy::Strong}, pages{std::move(children)}
@@ -98,14 +102,21 @@ class Tabs : public Widget {
                 normal = theme().styled ? selection_appearance(normal, selected_style)
                                         : normal | selected_style;
             }
+            else
+                normal = normal | unselected_style;
+            if (!is_enabled()) normal = normal | disabled_style;
             paint_row_text(strip.subcanvas({x - scroll_, 0}, {widths[i], 1}),
                            " " + labels_[i] + " ", Align::Left, normal, layout_);
             x += widths[i];
         }
-        if (theme().styled && canvas.size().height > 1) {
+        if (theme().styled && show_separator && canvas.size().height > 1) {
             auto line = canvas.subcanvas({0, 1}, {canvas.size().width, 1});
-            auto selected = appearance({}, Surface::Accent);
-            auto track = appearance({}, Surface::Border);
+            auto selected = appearance(style, Surface::Accent) | indicator_style;
+            auto track = appearance(style, Surface::Border) | track_style;
+            if (!is_enabled()) {
+                selected = selected | disabled_style;
+                track = track | disabled_style;
+            }
             paint_rule(line, indicator_.value() - scroll_,
                        selected_index() ? indicator_width_.value() : 0, selected, track,
                        false, theme().ascii);
@@ -170,10 +181,16 @@ class Tabs : public Widget {
     bool indicator_ready_ = false;
     Animation indicator_{*this};
     Animation indicator_width_{*this};
-    auto strip_height() const -> int { return theme().styled ? 2 : 1; }
+    auto strip_height() const -> int
+    { return theme().styled && show_separator ? 2 : 1; }
     void update_indicator(bool snap = false)
     {
-        if (!theme().styled) return;
+        if (!theme().styled || !show_separator) {
+            indicator_.reset(0);
+            indicator_width_.reset(0);
+            indicator_ready_ = false;
+            return;
+        }
         auto widths = tab_widths(glyph_width_policy());
         auto index = selected_index();
         int start = 0, width = 0;

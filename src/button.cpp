@@ -16,6 +16,9 @@ Button::Button(Options x)
       label{std::move(x.label)},
       pressed_style{x.pressed_style},
       focused_style{x.focused_style},
+      hover_style{x.hover_style},
+      blurred_style{x.blurred_style},
+      show_focus_indicator{x.show_focus_indicator},
       decoration{std::move(x.decoration)}
 {
     feedback_.on_frame([lifetime = track(*this)](double value) {
@@ -29,6 +32,9 @@ Button::Button(Button&& other)
       label{std::move(other.label)},
       pressed_style{std::move(other.pressed_style)},
       focused_style{std::move(other.focused_style)},
+      hover_style{other.hover_style},
+      blurred_style{other.blurred_style},
+      show_focus_indicator{other.show_focus_indicator},
       decoration{std::move(other.decoration)},
       on_activate{std::move(other.on_activate)},
       fade_percent{std::exchange(other.fade_percent, decltype(other.fade_percent){})},
@@ -48,6 +54,9 @@ auto Button::operator=(Button&& other) -> Button&
     label = std::move(other.label);
     pressed_style = std::move(other.pressed_style);
     focused_style = std::move(other.focused_style);
+    hover_style = other.hover_style;
+    blurred_style = other.blurred_style;
+    show_focus_indicator = other.show_focus_indicator;
     decoration = std::move(other.decoration);
     on_activate = std::move(other.on_activate);
     fade_percent = std::exchange(other.fade_percent, decltype(other.fade_percent){});
@@ -79,7 +88,8 @@ auto Button::paint(Canvas canvas) -> Cursor
             style.foreground = visual.palette.background;
         }
     }
-    if (is_focused()) { style = style | focused_style; }
+    style = style | (is_focused() ? focused_style : blurred_style);
+    if (hovered_) style = style | hover_style;
     if (pressed_) { style = style | pressed_style; }
     if (!is_enabled()) style = style | disabled_style;
     if (visual.styled) {
@@ -89,7 +99,8 @@ auto Button::paint(Canvas canvas) -> Cursor
             canvas.subcanvas({inset, 0}, {std::max(0, canvas.size().width - 2 * inset),
                                           canvas.size().height}),
             label.text, label.align, style, label.vertical);
-        if (is_focused() && canvas.size().width > 1 && canvas.size().height > 0) {
+        if (show_focus_indicator && is_focused() && canvas.size().width > 1 &&
+            canvas.size().height > 0) {
             auto y = canvas.size().height / 2;
             canvas.write({0, y}, visual.ascii ? U"[" : U"╺", style);
             canvas.write({canvas.size().width - 1, y}, visual.ascii ? U"]" : U"╸",

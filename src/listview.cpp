@@ -14,7 +14,18 @@ ListView::ListView(Options x)
       style{x.style},
       role{x.role},
       selected_style{x.selected_style},
-      current_style{x.current_style}
+      current_style{x.current_style},
+      focused_style{x.focused_style},
+      blurred_style{x.blurred_style},
+      inactive_selected_style{x.inactive_selected_style},
+      alternate_style{x.alternate_style},
+      hover_style{x.hover_style},
+      indicator_style{x.indicator_style},
+      empty_style{x.empty_style},
+      striped{x.striped},
+      hover_rows{x.hover_rows},
+      show_indicator{x.show_indicator},
+      empty_text{std::move(x.empty_text)}
 { set_items(std::move(x.items)); }
 void ListView::set_items(std::vector<ListItem> items)
 {
@@ -27,6 +38,7 @@ void ListView::set_items(std::vector<ListItem> items)
     items_ = std::move(items);
     ++items_revision_;
     click_row_.reset();
+    hover_.reset();
     selection_ = {};
     offset_ = {};
     search_.clear();
@@ -87,22 +99,27 @@ void ListView::erase_item(std::size_t index)
 auto ListView::measure(Area available, esc::WidthPolicy policy) const -> Area
 {
     validate(available);
+    if (items_.empty() && !empty_text.empty()) {
+        validate_row_text(empty_text);
+        return {measure_text(empty_text, available, TextWrap::None, policy).width, 1};
+    }
     if (layouts_.size() < items_.size()) { layouts_.resize(items_.size()); }
     int width = 0;
     for (std::size_t i = 0; i < items_.size(); ++i) {
         layouts_[i].update(items_[i].text, available.width, TextWrap::None, policy);
         width = std::max(width, text_content_size(layouts_[i]).width);
     }
-    if (theme().styled) {
-        if (width > std::numeric_limits<int>::max() - 2)
+    if (indicator_width()) {
+        if (width > std::numeric_limits<int>::max() - indicator_width())
             throw std::length_error{"List extent"};
-        width += 2;
+        width += indicator_width();
     }
     return {width, (int)items_.size()};
 }
 void ListView::update_viewport()
 {
-    content_ = measure(size(), glyph_width_policy());
+    auto natural = measure(size(), glyph_width_policy());
+    content_ = items_.empty() ? Area{} : natural;
     offset_ = {clamp_scroll(offset_.x, content_.width, size().width),
                clamp_scroll(offset_.y, content_.height, size().height)};
 }
@@ -199,26 +216,58 @@ auto ListView::set_scroll_offset(Point at) -> bool
 }
 auto ListView::paint(Canvas canvas) -> Cursor
 {
-    fill(canvas, U' ' | appearance(style, role));
+    auto base =
+        appearance(style | (is_focused() ? focused_style : blurred_style), role);
+    fill(canvas, U' ' | base);
+    if (items_.empty() && !empty_text.empty()) {
+        auto ink = base;
+        if (theme().styled && style.foreground == Color{default_color} &&
+            !(is_focused() ? focused_style.foreground : blurred_style.foreground))
+            ink.foreground = theme().palette.muted;
+        ink = ink | empty_style;
+        if (!is_enabled()) ink = ink | disabled_style;
+        paint_row_text(canvas.subcanvas({}, {size().width, std::min(1, size().height)}),
+                       empty_text, Align::Left, ink, empty_layout_);
+    }
     if (layouts_.size() < items_.size()) { layouts_.resize(items_.size()); }
     auto const [first, last] = visible_rows(canvas, offset_.y, items_.size());
+    auto const hovered = hovered_row();
     for (int row = first; row < last; ++row) {
         auto const& item = items_[(std::size_t)row];
-        auto normal = appearance(style, role) | item.style;
-        if (!item.enabled) { normal = normal | disabled_style; }
-        if (std::ranges::binary_search(selection_.rows, (std::size_t)row)) {
-            normal = selection_appearance(normal, selected_style);
+        auto normal = base | item.style;
+        if (row % 2) {
+            if (striped && theme().styled)
+                normal.background =
+                    mix_color(normal.background, theme().palette.selection, .18);
+            normal = normal | alternate_style;
+        }
+        if (hovered == (std::size_t)row && item.enabled) {
+            if (theme().styled)
+                normal.background =
+                    mix_color(normal.background, theme().palette.selection, .4);
+            normal = normal | hover_style;
+        }
+        auto const selected =
+            std::ranges::binary_search(selection_.rows, (std::size_t)row);
+        if (selected) {
+            normal = theme_selection(normal, selected_style, theme(), is_focused());
+            if (!is_focused()) normal = normal | inactive_selected_style;
         }
         if (is_focused() && selection_.current == (std::size_t)row) {
             normal = normal | current_style;
         }
+        if (!is_enabled() || !item.enabled) normal = normal | disabled_style;
         auto line = canvas.subcanvas({0, row - offset_.y}, {size().width, 1});
         fill(line, U' ' | normal);
-        auto gutter = theme().styled ? 2 : 0;
-        if (gutter && (selection_.current == (std::size_t)row ||
-                       std::ranges::binary_search(selection_.rows, (std::size_t)row))) {
+        auto gutter = indicator_width();
+        if (gutter && (selection_.current == (std::size_t)row || selected)) {
             auto marker = normal;
-            marker.foreground = theme().palette.accent;
+            if (!indicator_style.foreground && !item.style.foreground &&
+                style.foreground == Color{default_color})
+                marker.foreground =
+                    is_focused() ? theme().palette.accent : theme().palette.muted;
+            marker = marker | indicator_style;
+            if (!is_enabled() || !item.enabled) marker = marker | disabled_style;
             line.write({0, 0}, theme().ascii ? U">" : U"╺", marker);
         }
         paint_row_text(
@@ -229,6 +278,28 @@ auto ListView::paint(Canvas canvas) -> Cursor
             item.text, Align::Left, normal, layouts_[(std::size_t)row]);
     }
     return {};
+}
+auto ListView::hovered_row() const -> std::optional<std::size_t>
+{
+    if (!hover_rows || !hover_ || !contains({{}, size()}, *hover_)) return {};
+    auto row = (std::int64_t)hover_->y + offset_.y;
+    return row < (std::int64_t)items_.size() ? std::optional{(std::size_t)row}
+                                             : std::nullopt;
+}
+auto ListView::handle(MouseMove const& event) -> EventResponse
+{
+    auto before = hovered_row();
+    hover_ = contains({{}, size()}, event.at) ? std::optional{event.at} : std::nullopt;
+    auto changed = before != hovered_row();
+    if (changed) request_repaint();
+    return {.repaint = changed};
+}
+auto ListView::mouse_leave() -> EventResponse
+{
+    auto changed = hovered_row().has_value();
+    hover_.reset();
+    if (changed) request_repaint();
+    return {.repaint = changed};
 }
 auto ListView::handle(KeyEvent const& event) -> EventResponse
 {

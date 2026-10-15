@@ -17,6 +17,8 @@ ScrollBar::ScrollBar(Options x)
              x.vertical ? SizePolicy::flex() : SizePolicy::fixed(1)},
       vertical{x.vertical},
       style{x.style},
+      track_style{x.track_style},
+      thumb_style{x.thumb_style},
       scroll_settle_time{x.scroll_settle_time},
       content_length_{x.content_length},
       viewport_length_{x.viewport_length},
@@ -55,6 +57,8 @@ ScrollBar::ScrollBar(ScrollBar&& other)
     : Widget{std::move(other)},
       vertical{std::move(other.vertical)},
       style{std::move(other.style)},
+      track_style{other.track_style},
+      thumb_style{other.thumb_style},
       scroll_settle_time{std::move(other.scroll_settle_time)},
       on_scroll{std::move(other.on_scroll)},
       content_length_{std::move(other.content_length_)},
@@ -62,15 +66,15 @@ ScrollBar::ScrollBar(ScrollBar&& other)
       position_{std::move(other.position_)},
       drag_offset_{std::move(other.drag_offset_)},
       movement_{std::move(other.movement_)}
-{
-    other.drag_offset_.reset();
-}
+{ other.drag_offset_.reset(); }
 auto ScrollBar::operator=(ScrollBar&& other) -> ScrollBar&
 {
     if (this == &other) { return *this; }
     Widget::operator=(std::move(other));
     vertical = std::move(other.vertical);
     style = std::move(other.style);
+    track_style = other.track_style;
+    thumb_style = other.thumb_style;
     scroll_settle_time = std::move(other.scroll_settle_time);
     on_scroll = std::move(other.on_scroll);
     content_length_ = std::move(other.content_length_);
@@ -92,21 +96,26 @@ auto ScrollBar::set_position(int requested) -> bool
 }
 auto ScrollBar::paint(Canvas canvas) -> Cursor
 {
-    auto thumb_style = appearance(style, Surface::Accent);
-    auto track_style = appearance({}, Surface::Border);
-    fill(canvas, theme().styled ? track_style : style);
+    auto thumb_ink = appearance(style, Surface::Accent) | thumb_style;
+    auto track_ink = appearance(style, Surface::Border) | track_style;
+    if (!is_enabled()) {
+        thumb_ink = thumb_ink | disabled_style;
+        track_ink = track_ink | disabled_style;
+    }
+    fill(canvas, track_ink);
     auto const [offset, length] =
         scrollbar_thumb(position_, content_length_, viewport_length_,
                         vertical ? canvas.size().height : canvas.size().width);
     if (theme().styled && !theme().ascii) {
-        paint_rule(canvas, offset, length, thumb_style, track_style, vertical);
+        paint_rule(canvas, offset, length, thumb_ink, track_ink, vertical);
         return {};
     }
     auto const thumb =
         vertical ? canvas.subcanvas({0, offset}, {canvas.size().width, length})
                  : canvas.subcanvas({offset, 0}, {length, canvas.size().height});
-    auto glyph = !theme().styled ? U'█' : (theme().ascii ? U'#' : (vertical ? U'┃' : U'━'));
-    fill(thumb, glyph | thumb_style);
+    auto glyph =
+        !theme().styled ? U'█' : (theme().ascii ? U'#' : (vertical ? U'┃' : U'━'));
+    fill(thumb, glyph | thumb_ink);
     return {};
 }
 auto ScrollBar::move_to(int requested) -> EventResponse

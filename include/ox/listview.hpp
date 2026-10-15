@@ -27,6 +27,17 @@ class ListView : public Widget {
                                     .foreground = {},
                                     .enabled = Trait::Bold,
                                     .disabled = {}};
+        StylePatch focused_style = {};
+        StylePatch blurred_style = {};
+        StylePatch inactive_selected_style = {};
+        StylePatch alternate_style = {};
+        StylePatch hover_style = {};
+        StylePatch indicator_style = {};
+        StylePatch empty_style = {};
+        bool striped = false;
+        bool hover_rows = false;
+        bool show_indicator = true;
+        std::string empty_text = "";
         FocusPolicy focus_policy = FocusPolicy::Strong;
         SizePolicy width_policy = SizePolicy::flex();
         SizePolicy height_policy = SizePolicy::flex();
@@ -36,6 +47,20 @@ class ListView : public Widget {
     Surface role;
     StylePatch selected_style;
     StylePatch current_style;
+    StylePatch focused_style;
+    StylePatch blurred_style;
+    StylePatch inactive_selected_style;
+    StylePatch alternate_style;
+    StylePatch hover_style;
+    StylePatch indicator_style;
+    StylePatch empty_style;
+    bool striped;
+    bool hover_rows;
+    bool show_indicator;
+    std::string empty_text;
+    auto indicator_width() const -> int
+    { return theme().styled && show_indicator ? 2 : 0; }
+    auto hovered_row() const -> std::optional<std::size_t>;
     sl::Signal<void(std::vector<std::size_t> const&)> on_select;
     sl::Signal<void(std::optional<std::size_t>)> on_current;
     sl::Signal<void(std::size_t)> on_activate;
@@ -66,6 +91,8 @@ class ListView : public Widget {
     auto handle(KeyEvent const&) -> EventResponse override;
     auto handle(MousePress const&) -> EventResponse override;
     auto handle(MouseWheel const&) -> EventResponse override;
+    auto handle(MouseMove const&) -> EventResponse override;
+    auto mouse_leave() -> EventResponse override;
 
    protected:
     void on_arrange(Rect) override;
@@ -76,6 +103,8 @@ class ListView : public Widget {
     std::optional<std::size_t> click_row_;
     std::chrono::steady_clock::time_point click_time_ = {};
     RowSelection selection_;
+    std::optional<Point> hover_;
+    TextLayout empty_layout_;
     Point offset_ = {};
     Area content_ = {};
     mutable std::vector<TextLayout> layouts_;

@@ -37,6 +37,9 @@ class Button : public Widget {
         Decoration decoration = [](Canvas) {};
         StylePatch pressed_style = {};
         StylePatch focused_style = {};
+        StylePatch hover_style = {};
+        StylePatch blurred_style = {};
+        bool show_focus_indicator = true;
         FocusPolicy focus_policy = FocusPolicy::Strong;
         SizePolicy width_policy = SizePolicy::flex();
         SizePolicy height_policy = SizePolicy::fixed(1);
@@ -46,6 +49,9 @@ class Button : public Widget {
     Label::Options label;
     StylePatch pressed_style;
     StylePatch focused_style;
+    StylePatch hover_style;
+    StylePatch blurred_style;
+    bool show_focus_indicator;
     Decoration decoration;
     auto is_pressed() const -> bool { return pressed_; }
     auto is_hovered() const -> bool { return hovered_; }
