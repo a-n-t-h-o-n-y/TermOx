@@ -155,7 +155,7 @@ TEST(theme_changes_reflow_tabs_and_hidden_pages_inherit_the_application_theme)
     app.step();
     app.paint();
     ASSERT(std::get<1>(tabs.pages.children).theme().palette.accent == t.palette.accent);
-    ASSERT((app.loop().screen[Point{5, 1}].text == U"╼"));
+    ASSERT((app.loop().screen[Point{5, 1}].text == U"─"));
     app.set_theme(Theme::plain());
     app.step();
     ASSERT(tabs.pages.at().y == 1);

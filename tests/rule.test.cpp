@@ -11,19 +11,23 @@ auto glyphs(Frame const& f, bool vertical = false) -> std::u32string
     return result;
 }
 }  // namespace
-TEST(rule_half_cell_motion_uses_mixed_weight_joins_and_capped_tracks)
+TEST(rule_motion_uses_whole_cell_color_boundaries_and_uniform_strokes)
 {
     auto frame = Frame{{6, 1}};
     auto active = Style{.foreground = colors::red};
     auto track = Style{.foreground = colors::blue};
     paint_rule(Canvas{frame}, 0, 3, active, track);
-    ASSERT(glyphs(frame) == U"╺━╾──╴");
+    ASSERT(glyphs(frame) == U"╶────╴");
     ASSERT((frame[Point{2, 0}].style == active));
     ASSERT((frame[Point{3, 0}].style == track));
+    paint_rule(Canvas{frame}, .49, 3, active, track);
+    ASSERT((frame[Point{0, 0}].style == active));
     paint_rule(Canvas{frame}, .5, 3, active, track);
-    ASSERT(glyphs(frame) == U"╶━━──╴");
+    ASSERT((frame[Point{0, 0}].style == track));
+    ASSERT((frame[Point{1, 0}].style == active));
+    ASSERT(glyphs(frame) == U"╶────╴");
     paint_rule(Canvas{frame}, 1, 3, active, track);
-    ASSERT(glyphs(frame) == U"╶╼━╾─╴");
+    ASSERT(glyphs(frame) == U"╶────╴");
     paint_rule(Canvas{frame}, 0, 0, active, track);
     ASSERT(glyphs(frame) == U"╶────╴");
 }
@@ -31,12 +35,12 @@ TEST(rule_vertical_weights_ascii_and_tiny_views)
 {
     auto frame = Frame{{1, 5}};
     paint_rule(Canvas{frame}, 1, 3, {}, {}, true);
-    ASSERT(glyphs(frame, true) == U"╷╽┃╿╵");
+    ASSERT(glyphs(frame, true) == U"╷│││╵");
     paint_rule(Canvas{frame}, 1, 3, {}, {}, true, true);
-    ASSERT(glyphs(frame, true) == U"|###|");
+    ASSERT(glyphs(frame, true) == U"|||||");
     auto single = Frame{{1, 1}};
     paint_rule(Canvas{single}, 0, 1, {}, {});
-    ASSERT(glyphs(single) == U"━");
+    ASSERT(glyphs(single) == U"─");
     paint_rule(Canvas{single}, 0, 0, {}, {});
     ASSERT(glyphs(single) == U"─");
     auto empty = Frame{};
@@ -50,7 +54,7 @@ TEST(rule_clipping_keeps_geometry_and_does_not_touch_other_rows)
     fill(Canvas{frame}, U'x');
     auto view = Canvas{frame}.subcanvas({-1, 0}, {8, 1});
     paint_rule(view, 0, 4, {}, {});
-    ASSERT(glyphs(frame) == U"━━╾──");
+    ASSERT(glyphs(frame) == U"─────");
     for (int x = 0; x < 5; ++x)
         ASSERT((frame[Point{x, 1}].text == U"x"));
 }
@@ -102,11 +106,11 @@ TEST(themed_slider_and_divider_use_capped_connected_strokes)
     app.set_theme(Theme::dark());
     app.dispatch(esc::Resize{{5, 1}});
     app.paint();
-    ASSERT(glyphs(app.loop().screen) == U"╺━●─╴");
+    ASSERT(glyphs(app.loop().screen) == U"╶─●─╴");
     slider.vertical = true;
     app.dispatch(esc::Resize{{1, 5}});
     app.paint();
-    ASSERT(glyphs(app.loop().screen, true) == U"╷│●┃╹");
+    ASSERT(glyphs(app.loop().screen, true) == U"╷│●│╵");
     auto divider = Divider{};
     auto other = Application{divider};
     other.set_theme(Theme::dark());
@@ -118,7 +122,7 @@ TEST(themed_slider_and_divider_use_capped_connected_strokes)
     other.paint();
     ASSERT(glyphs(other.loop().screen) == U"╌╌╌╌╌");
 }
-TEST(themed_scrollbar_keeps_a_half_cell_thumb_position)
+TEST(themed_scrollbar_uses_a_whole_cell_thumb_position)
 {
     auto bar = ScrollBar{{.content_length = 100,
                           .viewport_length = 10,
@@ -128,11 +132,15 @@ TEST(themed_scrollbar_keeps_a_half_cell_thumb_position)
     app.set_theme(Theme::dark());
     app.dispatch(esc::Resize{{10, 1}});
     app.paint();
-    ASSERT((app.loop().screen[Point{0, 0}].text == U"╺"));
-    ASSERT((app.loop().screen[Point{1, 0}].text == U"╾"));
+    ASSERT((app.loop().screen[Point{0, 0}].text == U"╶"));
+    ASSERT((app.loop().screen[Point{1, 0}].text == U"─"));
+    ASSERT((app.loop().screen[Point{0, 0}].style.foreground ==
+            app.theme().palette.border));
+    ASSERT((app.loop().screen[Point{1, 0}].style.foreground ==
+            app.theme().palette.accent));
     bar.set_position(0);
     app.paint();
-    ASSERT((app.loop().screen[Point{0, 0}].text == U"━"));
+    ASSERT((app.loop().screen[Point{0, 0}].text == U"╶"));
 }
 TEST(themed_split_divider_has_vertical_endcaps)
 {
@@ -142,8 +150,8 @@ TEST(themed_split_divider_has_vertical_endcaps)
     app.dispatch(esc::Resize{{11, 4}});
     app.paint();
     auto x = split.first.size().width;
-    ASSERT((app.loop().screen[Point{x, 0}].text == U"╻"));
-    ASSERT((app.loop().screen[Point{x, 3}].text == U"╹"));
+    ASSERT((app.loop().screen[Point{x, 0}].text == U"╷"));
+    ASSERT((app.loop().screen[Point{x, 3}].text == U"╵"));
 }
 TEST(themed_tree_connectors_follow_siblings_selection_scrolling_and_ascii)
 {

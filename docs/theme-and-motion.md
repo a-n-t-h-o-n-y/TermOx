@@ -95,11 +95,10 @@ Retargeting samples the current position before starting the next transition.
 
 ## Lines and endpoints
 
-Styled widgets use capped box-drawing rules. Tab underlines and scrollbar thumbs
-retain fractional positions until painting, where their edges advance in half-cell
-steps. Mixed light/heavy glyphs (`╼`, `╾`, `╽`, `╿`) connect the active segment to
-its track. Sliders use a heavier segment up to the thumb. Dividers, menu separators,
-and progress tracks have directional endpoints; table column rules connect to the
+Styled widgets use capped box-drawing rules with a consistent stroke weight.
+Tab underlines and scrollbar thumbs advance in whole-cell steps. Active and
+inactive portions differ by color; no glyph spans the two colors.
+Dividers, menu separators, and progress tracks have directional endpoints; table column rules connect to the
 header separator with junctions rather than being overwritten by it. Tree views
 use branch junctions and continuation lines that follow expansion and scrolling;
 the connectors preserve each row's selection background.
@@ -113,9 +112,8 @@ ox::paint_rule(canvas, 2.5, 8.0,
 ```
 
 Start and length are in cell units along the first row, or the first column with
-`vertical = true`. A zero length draws only the light track. Segments longer than
-one cell gain caps up to half a cell long; short segments remain visible. Coordinates can
-extend outside the canvas and are clipped without shifting the rule's geometry.
+`vertical = true`. A zero length draws only the track. Start and length are rounded
+to whole cells. Coordinates can extend outside the canvas and are clipped without shifting the rule's geometry.
 Nonfinite coordinates, negative lengths, and overflowing endpoints are rejected.
 `ascii = true` uses ordinary ASCII strokes instead. Custom dashed, dotted, double,
 and box presets retain their configured glyphs.

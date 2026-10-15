@@ -99,10 +99,7 @@ auto ScrollBar::paint(Canvas canvas) -> Cursor
         scrollbar_thumb(position_, content_length_, viewport_length_,
                         vertical ? canvas.size().height : canvas.size().width);
     if (theme().styled && !theme().ascii) {
-        auto n = vertical ? canvas.size().height : canvas.size().width;
-        auto limit = scroll_limit(content_length_, viewport_length_);
-        auto position = limit ? (double)position_ * (n - length) / limit : 0.;
-        paint_rule(canvas, position, length, thumb_style, track_style, vertical);
+        paint_rule(canvas, offset, length, thumb_style, track_style, vertical);
         return {};
     }
     auto const thumb =

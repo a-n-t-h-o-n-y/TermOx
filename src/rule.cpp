@@ -21,20 +21,17 @@ void paint_rule(Canvas c,
         return;
     auto first = vertical ? clip.at.y : clip.at.x;
     auto last = first + (vertical ? clip.size.height : clip.size.width);
-    auto cap = std::clamp((length - 1.) / 2, 0., .5);
-    auto left = start + cap, right = start + length - cap;
-    auto horizontal = std::u32string_view{U" ╶╺╴─╼╸╾━"};
-    auto upright = std::u32string_view{U" ╷╻╵│╽╹╿┃"};
+    auto left = std::round(start);
+    auto right = left + std::round(length);
     for (int i = first; i < std::min(n, last); ++i) {
-        auto half = [&](double position, bool endcap) {
-            if (length > 0 && position >= left && position < right) return 2;
-            return endcap && n > 1 ? 0 : 1;
-        };
-        auto a = half(i + .25, i == 0), b = half(i + .75, i == n - 1);
-        auto selected = a == 2 || b == 2;
-        auto glyph =
-            ascii ? (selected ? (vertical ? U'#' : U'=') : (vertical ? U'|' : U'-'))
-                  : (vertical ? upright : horizontal)[(std::size_t)(a * 3 + b)];
+        auto selected = i >= left && i < right;
+        auto glyph = vertical ? U'│' : U'─';
+        if (ascii)
+            glyph = vertical ? U'|' : U'-';
+        else if (n > 1 && i == 0)
+            glyph = vertical ? U'╷' : U'╶';
+        else if (n > 1 && i == n - 1)
+            glyph = vertical ? U'╵' : U'╴';
         c.write(vertical ? Point{0, i} : Point{i, 0}, std::u32string_view{&glyph, 1},
                 selected ? active : track);
     }
