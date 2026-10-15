@@ -1,23 +1,47 @@
 #include <limits>
 #include <ox/commandpalette.hpp>
 namespace ox {
-auto command_score(std::string_view query, std::string_view text)
+namespace {
+auto folded(std::string_view text) -> std::u32string
+{
+    auto result = esc::utf8_to_utf32(text);
+    for (auto& c : result) {
+        if (c >= U'A' && c <= U'Z') { c += 32; }
+    }
+    return result;
+}
+auto score(std::u32string_view q, std::u32string_view text)
     -> std::optional<std::size_t>
 {
-    auto q = esc::utf8_to_utf32(query), t = esc::utf8_to_utf32(text);
-    auto fold = [](char32_t c) { return c >= U'A' && c <= U'Z' ? c + 32 : c; };
-    auto at = std::size_t{0}, score = std::size_t{0};
+    auto at = std::size_t{0}, result = std::size_t{0};
     for (auto c : q) {
-        if (c == U' ') continue;
+        if (c == U' ') { continue; }
         auto begin = at;
-        while (at < t.size() && fold(t[at]) != fold(c))
+        while (at < text.size() && text[at] != c) {
             ++at;
-        if (at == t.size()) return {};
-        score += at - begin;
+        }
+        if (at == text.size()) { return {}; }
+        result += at - begin;
         ++at;
     }
-    return score;
+    return result;
 }
+auto prepare_search(std::span<std::shared_ptr<Command> const> commands)
+    -> std::vector<std::u32string>
+{
+    auto search = std::vector<std::u32string>{};
+    search.reserve(commands.size());
+    for (auto const& value : commands) {
+        if (!value) { throw std::invalid_argument{"Null palette command"}; }
+        validate(*value);
+        search.push_back(folded(value->text + " " + value->keywords));
+    }
+    return search;
+}
+}  // namespace
+auto command_score(std::string_view query, std::string_view text)
+    -> std::optional<std::size_t>
+{ return score(folded(query), folded(text)); }
 CommandPalette::CommandPalette()
     : CommandPalette{std::vector<std::shared_ptr<Command>>{}}
 {}
@@ -40,29 +64,51 @@ CommandPalette::CommandPalette(std::vector<std::shared_ptr<Command>> commands)
 }
 void CommandPalette::set_commands(std::vector<std::shared_ptr<Command>> commands)
 {
-    for (auto const& c : commands) {
-        if (!c) { throw std::invalid_argument{"Null palette command"}; }
-        validate(*c);
-    }
+    auto search = prepare_search(commands);
     commands_ = std::move(commands);
+    search_ = std::move(search);
     filter();
 }
-void CommandPalette::refresh() { filter(); }
+void CommandPalette::refresh()
+{
+    search_ = prepare_search(commands_);
+    auto lifetime = track(*this);
+    filter();
+    if (auto* self = lifetime.try_get()) {
+        self->choices_.refresh();
+        if ((self = lifetime.try_get())) { self->Widget::refresh(); }
+    }
+}
 void CommandPalette::filter()
 {
     auto current = choices_.current_row();
     auto selected = current && *current < matches_.size()
                         ? std::optional{matches_[*current]}
                         : std::nullopt;
+    auto query_text = folded(query.text());
     auto ranked = std::vector<std::pair<std::size_t, std::size_t>>{};
-    for (std::size_t i = 0; i < commands_.size(); ++i)
-        if (auto s = command_score(query.text(),
-                                   commands_[i]->text + " " + commands_[i]->keywords))
-            ranked.push_back({*s, i});
-    std::stable_sort(ranked.begin(), ranked.end(),
-                     [](auto a, auto b) { return a.first < b.first; });
+    ranked.reserve(commands_.size());
+    for (std::size_t i = 0; i < search_.size(); ++i) {
+        if (auto value = score(query_text, search_[i])) {
+            ranked.push_back({*value, i});
+        }
+    }
+    auto less = [](auto a, auto b) { return a.first < b.first; };
+    if (!std::is_sorted(ranked.begin(), ranked.end(), less)) {
+        std::stable_sort(ranked.begin(), ranked.end(), less);
+    }
+    auto unchanged = ranked.size() == matches_.size();
+    for (std::size_t row = 0; unchanged && row < ranked.size(); ++row) {
+        auto index = ranked[row].second;
+        unchanged = index == matches_[row] &&
+                    choices_.items()[row].text == commands_[index]->text &&
+                    choices_.items()[row].enabled == commands_[index]->enabled;
+    }
+    if (unchanged) { return; }
     auto items = std::vector<ListItem>{};
+    items.reserve(ranked.size());
     matches_.clear();
+    matches_.reserve(ranked.size());
     for (auto [score, i] : ranked) {
         matches_.push_back(i);
         items.push_back({commands_[i]->text, commands_[i]->enabled});

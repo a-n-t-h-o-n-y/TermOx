@@ -87,7 +87,7 @@ void ListView::erase_item(std::size_t index)
 auto ListView::measure(Area available, esc::WidthPolicy policy) const -> Area
 {
     validate(available);
-    layouts_.resize(items_.size());
+    if (layouts_.size() < items_.size()) { layouts_.resize(items_.size()); }
     int width = 0;
     for (std::size_t i = 0; i < items_.size(); ++i) {
         layouts_[i].update(items_[i].text, available.width, TextWrap::None, policy);
@@ -200,7 +200,7 @@ auto ListView::set_scroll_offset(Point at) -> bool
 auto ListView::paint(Canvas canvas) -> Cursor
 {
     fill(canvas, U' ' | appearance(style, role));
-    layouts_.resize(items_.size());
+    if (layouts_.size() < items_.size()) { layouts_.resize(items_.size()); }
     auto const [first, last] = visible_rows(canvas, offset_.y, items_.size());
     for (int row = first; row < last; ++row) {
         auto const& item = items_[(std::size_t)row];

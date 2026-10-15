@@ -399,3 +399,24 @@ TEST(pixel_reset_allocation_failure_preserves_shape_and_colors)
     ASSERT((grid.pixel_size() == ox::Area{3, 2}));
     ASSERT(grid.at({2, 1}) == ox::RGB{0xabcdef});
 }
+
+TEST(streaming_edits_preserve_state_on_allocation_failure)
+{
+    check_failures(
+        [] {
+            auto edit = ox::TextEdit{document()};
+            edit.insert("temporary\n");
+            edit.undo();
+            edit.set_caret(0);
+            edit.set_caret(edit.boundaries()[100], true);
+            return edit;
+        },
+        [](ox::TextEdit& edit) {
+            edit.append_lines("new record é界👩‍💻\n",
+                              edit.text().find('\n') + 1);
+        });
+    check_layout_failures([](ox::TextLayout& layout) {
+        layout.append_lines("new record é界👩‍💻\n",
+                            layout.text().find('\n') + 1);
+    });
+}

@@ -467,10 +467,89 @@ void table_benchmarks()
     }
 }
 
+void view_benchmarks()
+{
+    for (auto count : {1000, 10000}) {
+        auto text = std::string{};
+        for (int i = 0; i < count; ++i) {
+            text += "Record " + std::to_string(i) +
+                    ": status received from worker; value=12345; 界 é\n";
+        }
+        auto log = ox::LogView{{.max_lines = (std::size_t)count,
+                                .follow_tail = false,
+                                .editor = {.wrap = ox::TextWrap::None}}};
+        ox::arrange(log, {{}, {80, 24}});
+        log.append(text);
+        measure("views.log.append." + std::to_string(count), 10, [&](int) {
+            log.append("Newest record: status received from worker; value=12345; 界 é");
+            return log.editor.text().size();
+        });
+        auto root = ox::Column{ox::LogView{{.max_lines = (std::size_t)count,
+                                            .follow_tail = false,
+                                            .editor = {.wrap = ox::TextWrap::None}}},
+                               ox::Label{"Status"}};
+        auto& app_log = ox::get_child<0>(root);
+        auto app = ox::Application{root};
+        app.dispatch(esc::Resize{{80, 24}});
+        app_log.append(text);
+        app.step();
+        measure("views.log.application." + std::to_string(count), 10, [&](int) {
+            app_log.append(
+                "Newest record: status received from worker; value=12345; 界 é");
+            app.step();
+            return app_log.editor.text().size();
+        });
+        auto children = std::vector<ox::TreeNode>{};
+        for (int i = 0; i < count; ++i) {
+            children.push_back({"Node " + std::to_string(i)});
+        }
+        auto tree =
+            ox::TreeView{{.nodes = {{"Root", true, true, std::move(children)}}}};
+        ox::arrange(tree, {{}, {80, 24}});
+        measure("views.tree.select." + std::to_string(count), 100, [&](int i) {
+            tree.select({0, (std::size_t)(count - 1 - i % 2)});
+            return tree.current_path()->back() + 1;
+        });
+        measure("views.tree.expand." + std::to_string(count), 10, [&](int) {
+            tree.set_expanded({0}, false);
+            tree.set_expanded({0}, true);
+            return tree.list().items().size();
+        });
+        auto frame = ox::Frame{{80, 24}};
+        measure("views.tree.paint." + std::to_string(count), 100, [&](int) {
+            for (auto& child : tree.get_children()) {
+                child.paint(ox::Canvas{frame});
+            }
+            return frame[ox::Point{3, 0}].text.size();
+        });
+        auto commands = std::vector<std::shared_ptr<ox::Command>>{};
+        for (int i = 0; i < count; ++i) {
+            commands.push_back(
+                ox::command({.text = "Command " + std::to_string(i) + " 界",
+                             .keywords = "open workspace search status"}));
+        }
+        auto palette = ox::CommandPalette{std::move(commands)};
+        ox::arrange(palette, {{}, {80, 24}});
+        measure("views.palette.filter." + std::to_string(count), 20, [&](int i) {
+            palette.query.set_text(i % 2 ? "workspace" : "status");
+            return palette.matches().size();
+        });
+        measure("views.palette.ranked." + std::to_string(count), 20, [&](int i) {
+            palette.query.set_text(i % 2 ? "command 1" : "command 2");
+            return palette.matches().size();
+        });
+        measure("views.palette.no_match." + std::to_string(count), 20, [&](int i) {
+            palette.query.set_text(i % 2 ? "zzzz" : "xxxx");
+            return palette.matches().size() + 1;
+        });
+    }
+}
+
 }  // namespace
 
 int main(int argc, char** argv)
 {
+    auto const views_only = argc == 2 && std::string_view{argv[1]} == "--views";
     auto const paint_only = argc == 2 && std::string_view{argv[1]} == "--paint";
     auto const application_only =
         argc == 2 && std::string_view{argv[1]} == "--application";
@@ -480,12 +559,15 @@ int main(int argc, char** argv)
     auto const table_only = argc == 2 && std::string_view{argv[1]} == "--table";
     auto const layout_only = argc == 2 && std::string_view{argv[1]} == "--layout";
     if (argc > 1 && !routing_only && !editing_only && !layout_only && !renderer_only &&
-        !paint_only && !application_only && !table_only) {
+        !paint_only && !application_only && !table_only && !views_only) {
         return 2;
     }
     std::cout << "workload,iterations,median_us_per_operation,checksum,allocations_per_"
                  "operation\n";
-    if (table_only) { table_benchmarks(); }
+    if (views_only) { view_benchmarks(); }
+    else if (table_only) {
+        table_benchmarks();
+    }
     else if (paint_only) {
         paint_benchmarks();
     }

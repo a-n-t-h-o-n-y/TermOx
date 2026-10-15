@@ -18,6 +18,7 @@ class CommandPalette : public Widget {
     { return commands_; }
     auto matches() const -> std::span<std::size_t const> { return matches_; }
     auto choices() const -> ListView const& { return choices_; }
+    /** Rebuild cached search text after editing shared commands or presentation. */
     void refresh() override;
     void set_commands(std::vector<std::shared_ptr<Command>>);
     auto execute(std::size_t) -> bool;
@@ -41,6 +42,7 @@ class CommandPalette : public Widget {
     std::vector<std::shared_ptr<Command>> commands_;
     std::vector<std::size_t> matches_;
     ListView choices_;
+    std::vector<std::u32string> search_;
     void filter();
 };
 }  // namespace ox

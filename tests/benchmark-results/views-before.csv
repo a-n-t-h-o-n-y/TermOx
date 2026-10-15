@@ -1,0 +1,17 @@
+workload,iterations,median_us_per_operation,checksum,allocations_per_operation
+views.log.append.1000,10,2266.330,3102100,34.020
+views.log.application.1000,10,4473.337,3102100,43.020
+views.tree.select.1000,100,7.064,499750,10.000
+views.tree.expand.1000,10,2212.244,50050,13041.000
+views.tree.paint.1000,100,1090.094,500,0.000
+views.palette.filter.1000,20,835.299,100000,4032.500
+views.palette.ranked.1000,20,925.042,27100,3302.000
+views.palette.no_match.1000,20,481.864,100,2005.000
+views.log.append.10000,10,27539.545,31452100,34.020
+views.log.application.10000,10,49141.075,31452100,43.020
+views.tree.select.10000,100,60.388,4999750,10.000
+views.tree.expand.10000,10,22833.058,500050,130049.000
+views.tree.paint.10000,100,1103.445,500,0.000
+views.palette.filter.10000,20,8762.414,1000000,40040.500
+views.palette.ranked.10000,20,10086.251,343900,33476.000
+views.palette.no_match.10000,20,4817.797,100,20005.000

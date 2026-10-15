@@ -8,6 +8,13 @@ void validate_nodes(std::vector<TreeNode> const& nodes)
         validate_nodes(n.children);
     }
 }
+// Flattened paths follow the tree's lexicographic preorder.
+auto find_path(std::vector<std::vector<std::size_t>> const& paths,
+               std::vector<std::size_t> const& path)
+{
+    auto found = std::lower_bound(paths.begin(), paths.end(), path);
+    return found != paths.end() && *found == path ? found : paths.end();
+}
 }  // namespace
 TreeView::TreeView() : TreeView{Options{}} {}
 TreeView::TreeView(Options x)
@@ -106,7 +113,7 @@ auto TreeView::rebuild(std::optional<std::vector<std::size_t>> current, bool pre
         auto* self = owner();
         if (!self) { return false; }
         for (auto const& p : selected) {
-            auto it = std::find(self->paths_.begin(), self->paths_.end(), p);
+            auto it = find_path(self->paths_, p);
             if (it != self->paths_.end()) {
                 self->list_.select((std::size_t)(it - self->paths_.begin()),
                                    self->list_.multiple ? SelectionAction::Toggle
@@ -116,7 +123,7 @@ auto TreeView::rebuild(std::optional<std::vector<std::size_t>> current, bool pre
             if (!self) { return false; }
         }
         if (current) {
-            auto it = std::find(self->paths_.begin(), self->paths_.end(), *current);
+            auto it = find_path(self->paths_, *current);
             if (it != self->paths_.end()) {
                 self->list_.select((std::size_t)(it - self->paths_.begin()),
                                    SelectionAction::Move);
@@ -173,7 +180,7 @@ auto TreeView::select(std::vector<std::size_t> const& path, SelectionAction acti
     }
     auto* self = lifetime.try_get();
     if (!self || self->model_revision_ != revision) { return false; }
-    auto it = std::find(self->paths_.begin(), self->paths_.end(), requested);
+    auto it = find_path(self->paths_, requested);
     return it != self->paths_.end() &&
            self->list_.select((std::size_t)(it - self->paths_.begin()), action);
 }

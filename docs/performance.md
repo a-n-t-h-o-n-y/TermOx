@@ -755,3 +755,70 @@ bounds, bitfield normalization, invalid headers/masks, and every truncated prefi
 ASan+UBSan passes 116 non-exception cases with every TermOx source instrumented.
 Intentional exception tests run in Release because the installed sanitizer runtime
 cannot unwind C++ exceptions. See [PixelGrid](reference.md#-oxpixelgrid) for the API.
+
+## Streaming logs, trees, and command searches
+
+`TermOx.tests.benchmarks --views` measures bounded Unicode log appends, the same log
+inside a Column/Application, tree selection/collapse/reopen/visible painting, and
+command queries at 1,000 and 10,000 records. Each append evicts an old record; setup
+is outside timing. Application measurements include layout synchronization, without
+frame painting or terminal output. Palette workloads cover equivalent matches,
+changing ranked matches, and no matches.
+
+The baseline is `802cd56`. Compile the same current benchmark driver against that
+revision's headers and library, and against the optimized revision, with unchanged
+Escape and SignalsLight dependencies. Both use Clang/libc++22, Release `-O3 -DNDEBUG`,
+no LTO or sanitizers. Ten warmups precede five samples per process; the comparison
+runs three alternating processes per revision, with no simultaneous compilation or
+tests. Values are medians of process medians. Every workload checksum must match.
+Ordinary C++ allocation calls are counted; aligned allocations are not counted.
+
+LogView now streams complete records through TextEdit/TextLayout, avoiding a staged
+editor copy and retaining analysis for surviving lines. TextBox also updates its
+matching measurement cache. Retained bytes/indices still move, so append time scales
+with retained text. Tree path lookup uses binary search over its existing preorder
+paths. ListView retains row layout caches at its historical maximum row count until
+destruction, trading retained memory for cheaper collapse/reopen and filtering.
+CommandPalette caches decoded, ASCII-folded labels/keywords, decodes each query once,
+and preserves its list when ranked choices are unchanged. Call `refresh()` after
+editing shared command data. Painting already scales with visible rows and received
+no additional optimization in this pass.
+
+```sh
+cmake --build build-release --target TermOx.tests.benchmarks
+./build-release/tests/TermOx.tests.benchmarks --views
+python3 tests/benchmark_paint_pipeline.py /path/to/before-benchmarks \
+    ./build-release/tests/TermOx.tests.benchmarks /tmp/view-results --modes views
+```
+
+| Workload (10,000 records) | Before µs | After µs | Speedup |
+| --- | ---: | ---: | ---: |
+| Log append | 27539.545 | 4687.005 | 5.9× |
+| Log append + application layout | 49141.075 | 7631.876 | 6.4× |
+| Tree selection | 60.388 | 1.136 | 53.2× |
+| Tree collapse + reopen | 22833.058 | 3233.260 | 7.1× |
+| Tree visible painting | 1103.445 | 1042.244 | 1.1× |
+| Palette equivalent matches | 8762.414 | 488.697 | 17.9× |
+| Palette changing ranked matches | 10086.251 | 3830.886 | 2.6× |
+| Palette no matches | 4817.797 | 277.642 | 17.4× |
+
+Changing ranked palette results reduce ordinary allocations from 33,476 to 3,453
+per query; equivalent matches reduce them from 40,040.5 to 9.5. Collapse/reopen reduces
+allocations from 130,049 to 20,049. The small painting timing difference is incidental;
+its implementation was not optimized. These are workload-specific gains, not an
+overall application speedup.
+
+Raw [before](../tests/benchmark-results/views-before.csv),
+[after](../tests/benchmark-results/views-after.csv), and
+[process samples](../tests/benchmark-results/views-samples.csv) include both sizes.
+
+Validation passes 343 unit cases and nine isolated allocation-fault cases, with all
+examples rebuilt, 13 PTY smoke checks, and the showcase structural checks. ASan+UBSan
+passes 49 targeted non-exception cases with all 40 TermOx source files instrumented.
+Streaming layout is compared against full reconstruction across wrapping modes,
+zero/narrow widths, CRLF, tabs, combining marks, emoji, and prefix eviction, including
+row geometry, widths, caret positions, and hit testing. Regression tests cover large
+batches, selection/history/paste behavior, cached measurement, changing models,
+reentrant notifications, and invalid input/allocation rollback. Deliberate exception
+cases run in Release because the installed sanitizer runtime cannot unwind C++
+exceptions.

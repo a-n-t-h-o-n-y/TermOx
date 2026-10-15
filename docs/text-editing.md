@@ -51,6 +51,28 @@ and pending paste. Text and layout objects own their storage and copy independen
 Moved-from objects remain usable empty objects. Returned string references, boundary
 spans, and layout row spans must not be retained across mutation, assignment, or moves.
 
+## Streaming complete lines
+
+`TextEdit::append_lines(suffix, discard_prefix)` appends LF-terminated records and
+removes an optional complete-line prefix, expressed in bytes of the **old** document.
+The old document and suffix must be empty or end in LF; a nonzero prefix must end
+just after LF. The editor normalizes CR/CRLF in the suffix before checking this rule.
+Surviving caret/anchor offsets shift left by the removed bytes; removed endpoints
+clamp to zero. This programmatic operation clears undo/redo and pending paste.
+
+`TextLayout::append_lines` has the same byte-prefix contract, requires a prior
+`update`, and uses the existing width, wrap, tab width, and width policy. It keeps
+retained grapheme widths, wrapped rows, and coordinate mappings and analyzes only the
+new suffix. Its suffix is raw layout text, without editor newline normalization.
+Both core operations prepare their storage before committing; invalid input or an
+allocation failure preserves the original public state.
+
+`TextBox::append_lines` combines these operations, updates any matching measurement
+cache, and emits ordinary change/selection/scroll notifications. Like `set_text`, it
+is allowed on a read-only control. LogView uses it for bounded streaming. Work still
+includes moving retained bytes and indices in contiguous storage; it is not a
+constant-time ring buffer.
+
 ## Navigation and history
 
 Left/right movement advances one grapheme. Word movement uses spaces, tabs, and line

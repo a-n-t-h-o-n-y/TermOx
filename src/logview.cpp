@@ -69,16 +69,8 @@ void LogView::trim()
     auto bytes = removed.size();
     auto offset =
         retained_offset(editor.scroll_offset(), removed, editor, glyph_width_policy());
-    auto caret = editor.editor().caret();
-    auto anchor = editor.editor().anchor();
     auto lifetime = track(*this);
-    editor.edit([=](TextEdit& e) {
-        e.set_caret(0);
-        e.set_caret(bytes, true);
-        e.erase_backward();
-        e.set_caret(anchor > bytes ? anchor - bytes : 0);
-        e.set_caret(caret > bytes ? caret - bytes : 0, true);
-    });
+    editor.append_lines({}, bytes);
     if (auto* self = lifetime.try_get()) { self->editor.set_scroll_offset(offset); }
 }
 void LogView::set_max_lines(std::size_t n)
@@ -112,8 +104,6 @@ void LogView::append(std::string_view text)
         batch += '\n';
     }
     auto at = editor.scroll_offset();
-    auto caret = editor.editor().caret();
-    auto anchor = editor.editor().anchor();
     for (auto& line : records) {
         lines_.push_back(std::move(line));
     }
@@ -126,17 +116,9 @@ void LogView::append(std::string_view text)
     at = retained_offset(at, removed, editor, glyph_width_policy());
     auto lifetime = track(*this);
     updating_ = true;
-    editor.edit([&](TextEdit& e) {
-        e.set_caret(e.text().size());
-        e.insert(batch);
-        if (!removed.empty()) {
-            e.set_caret(0);
-            e.set_caret(removed.size(), true);
-            e.erase_backward();
-        }
-        e.set_caret(anchor > removed.size() ? anchor - removed.size() : 0);
-        e.set_caret(caret > removed.size() ? caret - removed.size() : 0, true);
-    });
+    auto discard = std::min(removed.size(), editor.text().size());
+    editor.append_lines(std::string_view{batch}.substr(removed.size() - discard),
+                        discard);
     auto* self = lifetime.try_get();
     if (!self) { return; }
     if (self->follow_tail_) { self->reveal_tail(); }

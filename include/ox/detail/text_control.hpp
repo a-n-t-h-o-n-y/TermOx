@@ -58,6 +58,9 @@ class TextControl : public Widget {
     auto set_caret(std::size_t offset, bool extend = false) -> bool;
     auto select_all() -> bool;
     auto insert(std::string_view text) -> bool;
+    /** Stream complete lines without copying the editor; preserve selection. */
+    auto append_lines(std::string_view text, std::size_t discard_prefix = 0) -> bool
+        requires Multiline;
     auto undo() -> bool;
     auto redo() -> bool;
     auto submit() -> bool;
@@ -219,6 +222,24 @@ auto TextControl<Multiline>::insert(std::string_view text) -> bool
 {
     auto const changed = editor_.insert(text, accept_character);
     if (changed) { finish(); }
+    return changed;
+}
+template <bool Multiline>
+auto TextControl<Multiline>::append_lines(std::string_view text, std::size_t discard)
+    -> bool
+    requires Multiline
+{
+    update_layout();
+    auto retained = editor_.text().size() - std::min(discard, editor_.text().size());
+    // Only stream a measured snapshot of this document, never placeholder text.
+    auto measured = !editor_.text().empty() && measure_layout_.text() == editor_.text();
+    auto changed = editor_.append_lines(text, discard);
+    if (changed) {
+        auto suffix = std::string_view{editor_.text()}.substr(retained);
+        layout_.append_lines(suffix, discard);
+        if (measured) { measure_layout_.append_lines(suffix, discard); }
+        finish();
+    }
     return changed;
 }
 template <bool Multiline>

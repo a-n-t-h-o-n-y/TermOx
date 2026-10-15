@@ -472,6 +472,71 @@ auto TextLayout::update(std::string_view text,
     return true;
 }
 
+namespace {
+void validate_line_append(std::string_view text,
+                          std::string_view suffix,
+                          std::size_t discard)
+{
+    if ((!text.empty() && text.back() != '\n') ||
+        (!suffix.empty() && suffix.back() != '\n') || discard > text.size() ||
+        (discard && text[discard - 1] != '\n')) {
+        throw std::invalid_argument{"Streaming edits require complete lines"};
+    }
+}
+}  // namespace
+auto TextLayout::append_lines(std::string_view suffix, std::size_t discard) -> bool
+{
+    if (width_ < 0) { throw std::logic_error{"Uninitialized streaming layout"}; }
+    validate_line_append(text_, suffix, discard);
+    text_storage_.assign(text_, discard);
+    text_storage_.append(suffix);
+    if (text_storage_ == text_) { return false; }
+    auto first = (std::size_t)(std::lower_bound(boundaries_.begin(), boundaries_.end(),
+                                                discard) -
+                               boundaries_.begin());
+    auto retained = boundaries_.size() - first - 1;
+    boundary_storage_.clear();
+    boundary_storage_.reserve(boundaries_.size() - first);
+    for (auto i = first; i < boundaries_.size(); ++i) {
+        boundary_storage_.push_back(boundaries_[i] - discard);
+    }
+    boundary_storage_.pop_back();
+    append_analysis(text_storage_, text_.size() - discard, text_storage_.size(),
+                    boundary_storage_);
+    column_storage_.assign(columns_.begin() + (std::ptrdiff_t)first, columns_.end());
+    measure_columns(text_storage_, std::span{boundary_storage_}.subspan(retained),
+                    policy(), column_storage_, true);
+    auto first_row = (std::size_t)position(discard).y;
+    line_storage_.clear();
+    for (auto row = first_row; row < lines_.size() && lines_[row].begin < text_.size();
+         ++row) {
+        auto line = lines_[row];
+        line.begin -= discard;
+        line.end -= discard;
+        line.next -= discard;
+        line_storage_.push_back(line);
+    }
+    position_storage_.resize(boundary_storage_.size());
+    for (std::size_t i = 0; i < retained; ++i) {
+        auto point = positions_[first + i];
+        point.y -= (int)first_row;
+        position_storage_[i] = point;
+    }
+    wrap_rows(text_storage_, boundary_storage_, column_storage_, width_, wrap_,
+              tab_width_, line_storage_, &position_storage_, retained);
+    text_.swap(text_storage_);
+    boundaries_.swap(boundary_storage_);
+    columns_.swap(column_storage_);
+    lines_.swap(line_storage_);
+    positions_.swap(position_storage_);
+    text_storage_.clear();
+    boundary_storage_.clear();
+    column_storage_.clear();
+    line_storage_.clear();
+    position_storage_.clear();
+    return true;
+}
+
 auto TextLayout::position(std::size_t offset) const -> Point
 {
     auto const found = std::ranges::lower_bound(boundaries_, offset);
@@ -546,6 +611,45 @@ void TextEdit::set_text(std::string_view text)
     boundary_storage_.clear();
     paste_.clear();
     pasting_ = false;
+}
+
+auto TextEdit::append_lines(std::string_view suffix, std::size_t discard) -> bool
+{
+    if (!multiline_) {
+        throw std::invalid_argument{"Streaming edits require multiline text"};
+    }
+    auto value = normalize(suffix, true);
+    validate_line_append(text_, value, discard);
+    text_storage_.assign(text_, discard);
+    text_storage_ += value;
+    auto first = std::lower_bound(boundaries_.begin(), boundaries_.end(), discard);
+    boundary_storage_.clear();
+    boundary_storage_.reserve((std::size_t)(boundaries_.end() - first));
+    for (auto it = first; it != boundaries_.end(); ++it) {
+        boundary_storage_.push_back(*it - discard);
+    }
+    auto at = text_.size() - discard;
+    for (auto cluster : esc::graphemes(value)) {
+        at += cluster.size();
+        boundary_storage_.push_back(at);
+    }
+    auto caret = caret_ > discard ? caret_ - discard : 0;
+    auto anchor = anchor_ > discard ? anchor_ - discard : 0;
+    auto changed = text_storage_ != text_;
+    if (changed) { commit_text(); }
+    else {
+        text_storage_.clear();
+        boundary_storage_.clear();
+    }
+    changed = changed || caret != caret_ || anchor != anchor_;
+    caret_ = caret;
+    anchor_ = anchor;
+    preferred_column_.reset();
+    undo_.clear();
+    redo_.clear();
+    paste_.clear();
+    pasting_ = false;
+    return changed;
 }
 
 auto TextEdit::selection() const -> std::pair<std::size_t, std::size_t>

@@ -101,7 +101,9 @@ A trailing newline does not append an extra blank record; `append("")` appends o
 Invalid input rejects the whole batch. `max_lines` is positive and defaults to 10,000;
 `set_max_lines` trims oldest records. Reducing capacity preserves a paused viewport
 relative to retained text, counting wrapped display rows at the current width.
-Tail-following logs stay at the end. Editing history is disabled.
+Tail-following logs stay at the end. Editing history is disabled. Appends reuse retained
+text/layout analysis through `TextBox::append_lines`, including measurement in layouts;
+batches larger than capacity retain only their newest records.
 
 `set_follow_tail(true)` reveals the newest content. Manual upward scrolling pauses
 following; `set_follow_tail(false)` leaves the viewport alone. Appending preserves selection
@@ -207,7 +209,9 @@ Up/Down/Page/Home/End navigate while query retains focus; Enter executes the cur
 choice. Disabled commands remain visible and cannot execute. `execute(original_index)`
 copies the action before emitting `on_execute(original_index)`, then calls it; callbacks
 may close/destroy the palette without invalidating that copied action. `set_commands`
-validates labels and rebuilds matches; `refresh()` reapplies edited command data.
+validates labels and rebuilds matches; `refresh()` reapplies edited command data,
+including its cached decoded search text. Each query is decoded once. Equivalent
+ranked choices preserve selection and viewport without rebuilding the list.
 Action `EventResponse` effects reach the owning application, including repaint/quit
 effects after a notification destroys the source widget. See [shared commands](commands.md).
 Compose inside Dialog/Popup, and close the host

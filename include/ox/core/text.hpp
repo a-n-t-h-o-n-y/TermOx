@@ -54,6 +54,10 @@ class TextLayout {
                 TextWrap wrap = TextWrap::Word,
                 esc::WidthPolicy policy = {},
                 int tab_width = 4) -> bool;
+    /** Append complete LF-terminated lines and discard a complete-line byte prefix.
+     * Reuse retained analysis; requires an initialized layout ending at a line
+     * boundary. */
+    auto append_lines(std::string_view suffix, std::size_t discard_prefix = 0) -> bool;
     auto text() const -> std::string_view { return text_; }
     /** Cluster byte boundaries, including the final text size; borrowed until update.
      * Widths share their cluster indices: positive columns, tab == 0, newline == -1. */
@@ -109,6 +113,8 @@ class TextEdit {
     auto boundaries() const -> std::span<std::size_t const> { return boundaries_; }
     auto multiline() const -> bool { return multiline_; }
     void set_text(std::string_view text);
+    /** Stream complete lines, preserving surviving selection and clearing history. */
+    auto append_lines(std::string_view suffix, std::size_t discard_prefix = 0) -> bool;
     auto set_caret(std::size_t offset, bool extend = false) -> bool;
     auto select_all() -> bool;
     auto select_word(std::size_t at) -> bool;
