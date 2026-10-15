@@ -16,12 +16,13 @@
 namespace ox {
 class ScrollBar;
 
-/** Width includes one padding cell at either side; separators are additional. */
+/** Width includes cell padding; separators are additional. */
 struct TableColumn {
     std::string heading;
     SizePolicy size = SizePolicy::min(8);
     Align align = Align::Left;
     StylePatch style = {};
+    StylePatch heading_style = {};
 };
 
 /** Rectangular UTF-8 data, fixed headers, row selection, and a two-axis viewport.
@@ -44,6 +45,20 @@ class DataTable : public Widget {
                                      .foreground = {},
                                      .enabled = Trait::Inverse,
                                      .disabled = {}};
+        StylePatch focused_style = {};
+        StylePatch blurred_style = {};
+        StylePatch inactive_selected_style = {};
+        StylePatch hover_style = {};
+        StylePatch empty_style = {};
+        bool striped = false;
+        bool hover_rows = false;
+        bool header_separator = true;
+        bool row_lines = false;
+        bool show_sort_indicator = true;
+        int cell_padding = 1;
+        int row_height = 1;
+        /** Pure visible-cell styling; selection/hover patches apply afterwards. */
+        std::function<StylePatch(std::size_t, std::size_t)> cell_style = {};
         bool show_header = true;
         bool column_lines = true;
         bool selectable = true;
@@ -58,6 +73,19 @@ class DataTable : public Widget {
     StylePatch header_style;
     StylePatch alternate_style;
     StylePatch selected_style;
+    StylePatch focused_style;
+    StylePatch blurred_style;
+    StylePatch inactive_selected_style;
+    StylePatch hover_style;
+    StylePatch empty_style;
+    bool striped;
+    bool hover_rows;
+    bool header_separator;
+    bool row_lines;
+    bool show_sort_indicator;
+    int cell_padding;
+    int row_height;
+    std::function<StylePatch(std::size_t, std::size_t)> cell_style;
     bool show_header;
     bool column_lines;
     bool selectable;
@@ -82,6 +110,11 @@ class DataTable : public Widget {
     [[nodiscard]] auto content_size() const -> Area { return content_; }
     [[nodiscard]] auto viewport_size() const -> Area { return viewport_; }
 
+    /** Last explicit sort {column, ascending}; insertion/key edits/replacement clear
+     * it. */
+    auto sort_order() const -> std::optional<std::pair<std::size_t, bool>>
+    { return sort_; }
+    auto hovered_row() const -> std::optional<std::size_t>;
     void set_data(std::vector<TableColumn> columns,
                   std::vector<std::vector<std::string>> rows);
     void set_rows(std::vector<std::vector<std::string>> rows);
@@ -105,6 +138,8 @@ class DataTable : public Widget {
     auto handle(KeyEvent const&) -> EventResponse override;
     auto handle(MousePress const&) -> EventResponse override;
     auto handle(MouseWheel const&) -> EventResponse override;
+    auto handle(MouseMove const&) -> EventResponse override;
+    auto mouse_leave() -> EventResponse override;
 
    protected:
     void on_arrange(Rect) override;
@@ -120,6 +155,12 @@ class DataTable : public Widget {
     TextLayout cell_layout_;
     std::optional<std::size_t> notified_selection_;
     std::optional<std::tuple<Point, Area, Area>> notified_scroll_;
+    std::optional<std::pair<std::size_t, bool>> sort_;
+    std::optional<Point> hover_;
+    auto row_stride() const -> int;
+    auto row_extent(std::size_t count) const -> int;
+    auto row_at(int y) const -> std::optional<std::size_t>;
+    void paint_separator(Canvas, int y, Style);
     [[nodiscard]] auto header_height() const -> int;
     void update_geometry();
     void update_viewport();

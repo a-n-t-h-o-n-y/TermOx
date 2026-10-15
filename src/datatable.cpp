@@ -55,6 +55,13 @@ void check_data(std::span<ox::TableColumn const> columns,
         check_row(row, columns.size());
     }
 }
+auto checked_height(std::size_t count, int stride, bool row_lines, int header) -> int
+{
+    auto height = (std::int64_t)count * stride - (row_lines && count ? 1 : 0);
+    if (height + header > std::numeric_limits<int>::max())
+        throw std::length_error{"Table extent"};
+    return (int)height;
+}
 }  // namespace
 
 namespace ox {
@@ -66,6 +73,19 @@ DataTable::DataTable(Options x)
       header_style{x.header_style},
       alternate_style{x.alternate_style},
       selected_style{x.selected_style},
+      focused_style{x.focused_style},
+      blurred_style{x.blurred_style},
+      inactive_selected_style{x.inactive_selected_style},
+      hover_style{x.hover_style},
+      empty_style{x.empty_style},
+      striped{x.striped},
+      hover_rows{x.hover_rows},
+      header_separator{x.header_separator},
+      row_lines{x.row_lines},
+      show_sort_indicator{x.show_sort_indicator},
+      cell_padding{x.cell_padding},
+      row_height{x.row_height},
+      cell_style{std::move(x.cell_style)},
       show_header{x.show_header},
       column_lines{x.column_lines},
       selectable{x.selectable},
@@ -78,9 +98,35 @@ DataTable::DataTable(Options x)
     update_geometry();
 }
 auto DataTable::header_height() const -> int
-{ return show_header && !columns_.empty() ? 2 : 0; }
+{ return show_header && !columns_.empty() ? 1 + (int)header_separator : 0; }
+auto DataTable::row_stride() const -> int
+{
+    if (row_height < 1 || cell_padding < 0)
+        throw std::invalid_argument{"Invalid table spacing"};
+    auto stride = (std::int64_t)row_height + (int)row_lines;
+    if (stride > std::numeric_limits<int>::max())
+        throw std::length_error{"Table row extent"};
+    return (int)stride;
+}
+auto DataTable::row_extent(std::size_t count) const -> int
+{ return checked_height(count, row_stride(), row_lines, header_height()); }
+auto DataTable::row_at(int y) const -> std::optional<std::size_t>
+{
+    if (y < header_height() || y >= size().height) return {};
+    auto at = (std::int64_t)y - header_height() + offset_.y;
+    auto stride = row_stride();
+    if (at % stride >= row_height || at / stride >= (std::int64_t)rows_.size())
+        return {};
+    return (std::size_t)(at / stride);
+}
+auto DataTable::hovered_row() const -> std::optional<std::size_t>
+{
+    return hover_rows && hover_ && contains({{}, size()}, *hover_) ? row_at(hover_->y)
+                                                                   : std::nullopt;
+}
 void DataTable::update_geometry()
 {
+    (void)row_extent(rows_.size());
     auto policies = std::vector<SizePolicy>{};
     auto minimum = 0;
     auto const gaps = column_lines && !columns_.empty() ? (int)columns_.size() - 1 : 0;
@@ -94,10 +140,10 @@ void DataTable::update_geometry()
 }
 void DataTable::update_viewport()
 {
-    viewport_ = {size().width, std::max(0, size().height - header_height())};
+    auto height = row_extent(rows_.size());
     auto const gaps = column_lines && !columns_.empty() ? (int)columns_.size() - 1 : 0;
-    content_ = {std::accumulate(widths_.begin(), widths_.end(), gaps),
-                (int)rows_.size()};
+    viewport_ = {size().width, std::max(0, size().height - header_height())};
+    content_ = {std::accumulate(widths_.begin(), widths_.end(), gaps), height};
     offset_ = {clamp_scroll(offset_.x, content_.width, viewport_.width),
                clamp_scroll(offset_.y, content_.height, viewport_.height)};
     if (selected_ && *selected_ >= rows_.size()) { selected_.reset(); }
@@ -130,14 +176,23 @@ void DataTable::refresh()
 {
     check_text(empty_text);
     update_geometry();
+    request_layout();
     request_repaint();
     notify();
 }
-void DataTable::on_arrange(Rect) { refresh(); }
+void DataTable::on_arrange(Rect)
+{
+    check_text(empty_text);
+    update_geometry();
+    request_repaint();
+    notify();
+}
 void DataTable::set_data(std::vector<TableColumn> columns,
                          std::vector<std::vector<std::string>> rows)
 {
     check_data(columns, rows);
+    auto header = show_header && !columns.empty() ? 1 + (int)header_separator : 0;
+    (void)checked_height(rows.size(), row_stride(), row_lines, header);
     // Stage geometry before changing the live data as well.
     auto policies = std::vector<SizePolicy>{};
     auto const gaps = column_lines && !columns.empty() ? (int)columns.size() - 1 : 0;
@@ -151,14 +206,19 @@ void DataTable::set_data(std::vector<TableColumn> columns,
     rows_.swap(rows);
     widths_.swap(widths);
     selected_.reset();
+    sort_.reset();
+    hover_.reset();
     offset_ = {};
     data_changed();
 }
 void DataTable::set_rows(std::vector<std::vector<std::string>> rows)
 {
     check_data(columns_, rows);
+    (void)row_extent(rows.size());
     rows_.swap(rows);
     selected_.reset();
+    sort_.reset();
+    hover_.reset();
     offset_.y = 0;
     data_changed();
 }
@@ -169,9 +229,14 @@ void DataTable::insert_row(std::size_t index, std::vector<std::string> row)
         throw std::length_error{"Too many table rows"};
     }
     check_row(row, columns_.size());
+    (void)row_extent(rows_.size() + 1);
     rows_.insert(rows_.begin() + (std::ptrdiff_t)index, std::move(row));
     if (selected_ && *selected_ >= index) { ++*selected_; }
-    if (offset_.y > 0 && index <= (std::size_t)offset_.y) { ++offset_.y; }
+    if (offset_.y > 0 && (std::int64_t)index * row_stride() <= offset_.y) {
+        offset_.y = (int)std::min((std::int64_t)std::numeric_limits<int>::max(),
+                                  (std::int64_t)offset_.y + row_stride());
+    }
+    sort_.reset();
     data_changed();
 }
 void DataTable::add_row(std::vector<std::string> row)
@@ -180,7 +245,9 @@ void DataTable::erase_row(std::size_t index)
 {
     if (index >= rows_.size()) { throw std::out_of_range{"Table row index"}; }
     rows_.erase(rows_.begin() + (std::ptrdiff_t)index);
-    if (index < (std::size_t)offset_.y) { --offset_.y; }
+    if ((std::int64_t)index * row_stride() < offset_.y) {
+        offset_.y = std::max(0, offset_.y - row_stride());
+    }
     if (selected_ == index) { selected_.reset(); }
     else if (selected_ && *selected_ > index) {
         --*selected_;
@@ -195,6 +262,7 @@ void DataTable::set_cell(std::size_t row, std::size_t column, std::string text)
     check_text(text);
     if (rows_[row][column] == text) { return; }
     rows_[row][column] = std::move(text);
+    if (sort_ && sort_->first == column) sort_.reset();
     request_repaint();
 }
 void DataTable::sort_rows(std::size_t column,
@@ -218,21 +286,23 @@ void DataTable::sort_rows(std::size_t column,
         selected_ = (std::size_t)(std::ranges::find(order, *selected_) - order.begin());
     }
     rows_.swap(rows);
+    sort_ = {{column, ascending}};
     if (selected_) {
-        offset_.y = scroll_to_show(offset_.y, (int)*selected_, 1, content_.height,
-                                   viewport_.height);
+        offset_.y = scroll_to_show(offset_.y, (int)*selected_ * row_stride(),
+                                   row_height, content_.height, viewport_.height);
     }
     data_changed();
 }
 auto DataTable::select(std::optional<std::size_t> row) -> bool
 {
     if (row && (!selectable || *row >= rows_.size())) { return false; }
+    (void)row_extent(rows_.size());
     auto const before = selected_;
     auto const old = offset_;
     selected_ = row;
     if (row) {
-        offset_.y =
-            scroll_to_show(offset_.y, (int)*row, 1, content_.height, viewport_.height);
+        offset_.y = scroll_to_show(offset_.y, (int)*row * row_stride(), row_height,
+                                   content_.height, viewport_.height);
     }
     auto const changed = before != selected_ || old != offset_;
     if (changed) { request_repaint(); }
@@ -261,48 +331,112 @@ auto DataTable::measure(Area available, esc::WidthPolicy) const -> Area
     for (auto const& column : columns_) {
         width += column.size.minimum;
     }
-    auto const height = (std::int64_t)rows_.size() + header_height();
+    auto const height = (std::int64_t)row_extent(rows_.size()) + header_height();
     if (width > std::numeric_limits<int>::max() ||
         height > std::numeric_limits<int>::max()) {
         throw std::length_error{"Table extent overflow"};
     }
     return {(int)width, (int)height};
 }
+void DataTable::paint_separator(Canvas canvas, int y, Style lines)
+{
+    if (theme().styled || row_lines) {
+        paint_rule(canvas.subcanvas({0, y}, {canvas.size().width, 1}), 0, 0, lines,
+                   lines, false, theme().ascii);
+        if (column_lines) {
+            auto boundary = -(std::int64_t)offset_.x;
+            for (std::size_t col = 0; col + 1 < columns_.size(); ++col) {
+                boundary += widths_[col];
+                if (boundary >= 0 && boundary < canvas.size().width) {
+                    auto junction = canvas.size().height > y + 1 ? U'┼' : U'┴';
+                    if (boundary == 0)
+                        junction = canvas.size().height > y + 1 ? U'├' : U'└';
+                    else if (boundary == canvas.size().width - 1)
+                        junction = canvas.size().height > y + 1 ? U'┤' : U'┘';
+                    if (theme().ascii) junction = U'+';
+                    canvas.write({(int)boundary, y}, std::u32string_view{&junction, 1},
+                                 lines);
+                }
+                ++boundary;
+            }
+        }
+    }
+    else
+        put(canvas, {0, y}, shape::HLine{}, canvas.size().width, lines);
+}
 auto DataTable::paint(Canvas canvas) -> Cursor
 {
-    auto base = appearance(style);
+    auto base = appearance(style | (is_focused() ? focused_style : blurred_style));
     auto lines = appearance(line_style, Surface::Border);
     fill(canvas, U' ' | base);
     auto const header = header_height();
     auto const body = canvas.subcanvas({0, header}, viewport_);
-    auto const [first, last] = visible_rows(body, offset_.y, rows_.size());
+    auto clip = body.visible();
+    auto stride = row_stride();
+    auto first = std::clamp(((std::int64_t)offset_.y + clip.at.y) / stride,
+                            std::int64_t{0}, (std::int64_t)rows_.size());
+    auto last = std::clamp(
+        ((std::int64_t)offset_.y + clip.at.y + clip.size.height + stride - 1) / stride,
+        first, (std::int64_t)rows_.size());
+    auto hovered = hovered_row();
     auto x = -(std::int64_t)offset_.x;
     for (std::size_t column = 0; column < columns_.size(); ++column) {
-        if (x > std::numeric_limits<int>::max()) { break; }
-        auto const at = (int)x;
-        auto const width = widths_[column];
+        if (x > std::numeric_limits<int>::max()) break;
+        auto at = (int)x;
+        auto width = widths_[column];
         auto const& spec = columns_[column];
+        auto padding = std::min(cell_padding, width);
+        auto inner = (int)std::max(
+            std::int64_t{0}, (std::int64_t)width - 2 * (std::int64_t)cell_padding);
         if (header) {
             auto heading = canvas.subcanvas({at, 0}, {width, 1});
-            fill(heading, base | spec.style | header_style);
+            auto heading_style =
+                appearance(style | (is_focused() ? focused_style : blurred_style),
+                           Surface::Muted) |
+                header_style | spec.heading_style;
+            fill(heading, heading_style);
             if (heading.visible().size.width > 0) {
-                paint_cell(heading.subcanvas({std::min(1, width), 0},
-                                             {std::max(0, width - 2), 1}),
-                           spec.heading, spec.align, base | spec.style | header_style);
+                auto sorted = show_sort_indicator && sort_ && sort_->first == column;
+                auto label_width = std::max(0, inner - (sorted ? 2 : 0));
+                paint_cell(heading.subcanvas({padding, 0}, {label_width, 1}),
+                           spec.heading, spec.align, heading_style);
+                if (sorted && inner) {
+                    auto indicator = sort_->second ? (theme().ascii ? U'^' : U'↑')
+                                                   : (theme().ascii ? U'v' : U'↓');
+                    auto indicator_style = heading_style;
+                    if (theme().styled)
+                        indicator_style.foreground = theme().palette.accent;
+                    heading.write({padding + inner - 1, 0},
+                                  std::u32string_view{&indicator, 1}, indicator_style);
+                }
             }
         }
         for (auto row = first; row < last; ++row) {
-            auto cell = body.subcanvas({at, row - offset_.y}, {width, 1});
-            if (cell.visible().size.width == 0) { continue; }
-            auto appearance = base | spec.style;
-            if (row % 2) { appearance = appearance | alternate_style; }
-            if (selected_ == (std::size_t)row) {
-                appearance = selection_appearance(appearance, selected_style);
+            auto cell = body.subcanvas({at, (int)(row * stride - offset_.y)},
+                                       {width, row_height});
+            if (cell.visible().size.width == 0 || cell.visible().size.height == 0)
+                continue;
+            auto normal = base | spec.style;
+            if (row % 2) {
+                if (striped && theme().styled)
+                    normal.background =
+                        mix_color(normal.background, theme().palette.selection, .18);
+                normal = normal | alternate_style;
             }
-            fill(cell, appearance);
-            paint_cell(
-                cell.subcanvas({std::min(1, width), 0}, {std::max(0, width - 2), 1}),
-                rows_[(std::size_t)row][column], spec.align, appearance);
+            if (cell_style) normal = normal | cell_style((std::size_t)row, column);
+            if (hovered == (std::size_t)row) {
+                if (theme().styled)
+                    normal.background =
+                        mix_color(normal.background, theme().palette.selection, .4);
+                normal = normal | hover_style;
+            }
+            if (selected_ == (std::size_t)row) {
+                normal = theme_selection(normal, selected_style, theme(), is_focused());
+                if (!is_focused()) normal = normal | inactive_selected_style;
+            }
+            fill(cell, normal);
+            paint_cell(cell.subcanvas({padding, (row_height - 1) / 2}, {inner, 1}),
+                       rows_[(std::size_t)row][column], spec.align, normal);
         }
         x += width;
         if (column_lines && column + 1 < columns_.size() &&
@@ -315,35 +449,21 @@ auto DataTable::paint(Canvas canvas) -> Cursor
             ++x;
         }
     }
-    if (header && canvas.size().height > 1) {
-        if (theme().styled) {
-            paint_rule(canvas.subcanvas({0, 1}, {canvas.size().width, 1}), 0, 0, lines,
-                       lines, false, theme().ascii);
-            if (column_lines) {
-                auto boundary = -(std::int64_t)offset_.x;
-                for (std::size_t col = 0; col + 1 < columns_.size(); ++col) {
-                    boundary += widths_[col];
-                    if (boundary >= 0 && boundary < canvas.size().width) {
-                        auto junction = canvas.size().height > 2 ? U'┼' : U'┴';
-                        if (boundary == 0)
-                            junction = canvas.size().height > 2 ? U'├' : U'└';
-                        else if (boundary == canvas.size().width - 1)
-                            junction = canvas.size().height > 2 ? U'┤' : U'┘';
-                        if (theme().ascii) junction = U'+';
-                        canvas.write({(int)boundary, 1},
-                                     std::u32string_view{&junction, 1}, lines);
-                    }
-                    ++boundary;
-                }
-            }
+    if (header_separator && header && canvas.size().height > 1)
+        paint_separator(canvas, 1, lines);
+    if (row_lines) {
+        for (auto row = first; row < last && row + 1 < (std::int64_t)rows_.size();
+             ++row) {
+            auto y = row * stride + row_height - offset_.y + header;
+            if (y >= header && y < canvas.size().height)
+                paint_separator(canvas, (int)y, lines);
         }
-        else
-            put(canvas, {0, 1}, shape::HLine{}, canvas.size().width, lines);
     }
-    if (rows_.empty()) {
+    if (rows_.empty())
         paint_cell(body.subcanvas({}, {viewport_.width, 1}), empty_text, Align::Center,
-                   base);
-    }
+                   appearance(style | (is_focused() ? focused_style : blurred_style),
+                              Surface::Muted) |
+                       empty_style);
     return {};
 }
 auto DataTable::handle(KeyEvent const& event) -> EventResponse
@@ -367,7 +487,8 @@ auto DataTable::handle(KeyEvent const& event) -> EventResponse
         return {.handled = true, .repaint = changed};
     }
     if (event.modifiers != Modifiers{}) { return {}; }
-    auto const movement = row_navigation(event, viewport_.height);
+    auto const movement =
+        row_navigation(event, std::max(1, viewport_.height / row_stride()));
     if (!movement) { return {}; }
     auto const delta = *movement;
     if (rows_.empty()) { return {}; }
@@ -377,9 +498,13 @@ auto DataTable::handle(KeyEvent const& event) -> EventResponse
         changed = select(index);
     }
     else {
-        changed =
-            set_scroll_offset({offset_.x, scroll_by(offset_.y, delta, content_.height,
-                                                    viewport_.height)});
+        changed = set_scroll_offset(
+            {offset_.x,
+             scroll_by(offset_.y,
+                       (int)std::clamp((std::int64_t)delta * row_stride(),
+                                       (std::int64_t)std::numeric_limits<int>::min(),
+                                       (std::int64_t)std::numeric_limits<int>::max()),
+                       content_.height, viewport_.height)});
     }
     return {.handled = true, .repaint = changed};
 }
@@ -399,17 +524,36 @@ auto DataTable::handle(MousePress const& event) -> EventResponse
         return {};
     }
     if (!selectable || event.at.y < header_height()) { return {}; }
-    auto const row = std::int64_t{event.at.y} - header_height() + offset_.y;
-    if (row >= content_.height) { return {}; }
-    auto const changed = select((std::size_t)row);
+    auto row = row_at(event.at.y);
+    if (!row) return {};
+    auto const changed = select(row);
     return {.handled = true, .repaint = changed};
+}
+auto DataTable::handle(MouseMove const& event) -> EventResponse
+{
+    auto before = hovered_row();
+    hover_ = contains({{}, size()}, event.at) ? std::optional{event.at} : std::nullopt;
+    auto changed = before != hovered_row();
+    if (changed) request_repaint();
+    return {.repaint = changed};
+}
+auto DataTable::mouse_leave() -> EventResponse
+{
+    auto changed = hovered_row().has_value();
+    hover_.reset();
+    if (changed) request_repaint();
+    return {.repaint = changed};
 }
 auto DataTable::handle(MouseWheel const& event) -> EventResponse
 {
     if (event.dx == 0 && event.dy == 0) { return {}; }
     auto const changed = set_scroll_offset(
         {scroll_by(offset_.x, event.dx, content_.width, viewport_.width),
-         scroll_by(offset_.y, event.dy, content_.height, viewport_.height)});
+         scroll_by(offset_.y,
+                   (int)std::clamp((std::int64_t)event.dy * row_stride(),
+                                   (std::int64_t)std::numeric_limits<int>::min(),
+                                   (std::int64_t)std::numeric_limits<int>::max()),
+                   content_.height, viewport_.height)});
     return {.handled = true, .repaint = changed};
 }
 }  // namespace ox

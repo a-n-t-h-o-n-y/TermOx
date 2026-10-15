@@ -10,7 +10,7 @@ auto retained_offset(Point offset,
 {
     if (removed.empty()) { return offset; }
     auto layout = TextLayout{};
-    layout.update(removed, editor.size().width, editor.wrap, policy);
+    layout.update(removed, editor.viewport_size().width, editor.wrap, policy);
     auto rows = (int)layout.lines().size() - 1;
     offset.y = std::max(0, offset.y - rows);
     return offset;

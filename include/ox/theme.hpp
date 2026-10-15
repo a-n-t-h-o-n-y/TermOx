@@ -38,7 +38,8 @@ struct Theme {
 enum class Surface { Canvas, Raised, Muted, Accent, Positive, Negative, Border };
 void validate(Theme const&);
 auto theme_style(Style, Theme const&, Surface = Surface::Canvas) -> Style;
-auto theme_selection(Style, StylePatch const&, Theme const&) -> Style;
+auto theme_selection(Style, StylePatch const&, Theme const&, bool focused = true)
+    -> Style;
 /** RGB interpolation; palette/default colors switch directly rather than guessing RGB.
  */
 auto mix_color(Color const&, Color const&, double amount) -> Color;

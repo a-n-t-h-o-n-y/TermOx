@@ -1605,3 +1605,6 @@ TreeView and LogView expose scrolling directly. See
 [shared scrolling](containers.md#shared-scrolling-interface).
 
 See [shared commands](commands.md) for commands reused by menus, palettes, shortcuts, and KeyHelp.
+
+See [editor and table presentation](presentation.md) for optional TextBox gutters and
+current-line styling, DataTable density/rules/hover, style precedence and sort markers.

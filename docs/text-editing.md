@@ -259,3 +259,6 @@ empty editor's placeholder on its first row; TextBox owns vertical-scroll comman
 and coalesced scroll notifications. Both compose the shared input, geometry, and
 selection drawing functions. Custom bindings can still use `edit_key` or individual
 `TextEdit` operations and call `text_scroll` explicitly.
+
+Optional editor gutters, focus/current-line styling, and composed borders/scrollbars
+are described in [editor and table presentation](presentation.md).

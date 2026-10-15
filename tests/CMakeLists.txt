@@ -1,4 +1,5 @@
 add_executable(TermOx.tests.unit EXCLUDE_FROM_ALL
+    presentation.test.cpp
     view_performance.test.cpp
     commands_async.test.cpp
     rule.test.cpp

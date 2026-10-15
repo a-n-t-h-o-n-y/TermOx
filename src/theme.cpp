@@ -78,11 +78,12 @@ auto theme_style(Style s, Theme const& t, Surface role) -> Style
     }
     return s;
 }
-auto theme_selection(Style s, StylePatch const& custom, Theme const& t) -> Style
+auto theme_selection(Style s, StylePatch const& custom, Theme const& t, bool focused)
+    -> Style
 {
     if (!t.styled) return s | custom;
     s.background = t.palette.selection;
-    s.foreground = t.palette.accent;
+    s.foreground = focused ? t.palette.accent : t.palette.muted;
     // The legacy default inverse patch becomes semantic selection; custom patches
     // (including explicitly configured colors) still take precedence.
     auto stock = StylePatch{
