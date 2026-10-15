@@ -26,9 +26,9 @@ TreeView::TreeView(Options x)
         .signal = list_.on_activate,
         .slot = [](std::size_t row, TreeView& self) { self.activate(row); }}(*this);
     Connection{.signal = list_.on_scroll,
-        .slot = [](Point at, Area content, Area viewport, TreeView& self) {
-            self.on_scroll(at, content, viewport);
-        }}(*this);
+               .slot = [](Point at, Area content, Area viewport, TreeView& self) {
+                   self.on_scroll(at, content, viewport);
+               }}(*this);
     set_nodes(std::move(x.nodes));
 }
 auto TreeView::node(std::vector<std::size_t> const& path) -> TreeNode&
@@ -48,8 +48,9 @@ void TreeView::set_nodes(std::vector<TreeNode> nodes)
     validate_nodes(nodes);
     auto previous = selected_paths();
     nodes_ = std::move(nodes);
+    ++model_revision_;
     auto lifetime = track(*this);
-    rebuild({}, false);
+    if (!rebuild({}, false)) { return; }
     if (auto* self = lifetime.try_get(); self && !previous.empty()) {
         auto empty = std::vector<std::vector<std::size_t>>{};
         self->on_select(empty);
@@ -67,8 +68,10 @@ auto TreeView::current_path() const -> std::optional<std::vector<std::size_t>>
     auto row = list_.current_row();
     return row && *row < paths_.size() ? std::optional{paths_[*row]} : std::nullopt;
 }
-void TreeView::rebuild(std::optional<std::vector<std::size_t>> current, bool preserve)
+auto TreeView::rebuild(std::optional<std::vector<std::size_t>> current, bool preserve)
+    -> bool
 {
+    auto revision = ++rebuild_revision_;
     auto selected =
         preserve ? selected_paths() : std::vector<std::vector<std::size_t>>{};
     auto items = std::vector<ListItem>{};
@@ -94,29 +97,43 @@ void TreeView::rebuild(std::optional<std::vector<std::size_t>> current, bool pre
     paths_ = std::move(paths);
     rebuilding_ = true;
     auto lifetime = track(*this);
-    list_.set_items(std::move(items));
-    auto* self = lifetime.try_get();
-    if (!self) return;
-    for (auto const& p : selected) {
-        auto it = std::find(self->paths_.begin(), self->paths_.end(), p);
-        if (it != self->paths_.end())
-            self->list_.select((std::size_t)(it - self->paths_.begin()),
-                               self->list_.multiple ? SelectionAction::Toggle
-                                                    : SelectionAction::Replace);
-        self = lifetime.try_get();
-        if (!self) return;
+    auto owner = [lifetime, revision]() -> TreeView* {
+        auto* self = lifetime.try_get();
+        return self && self->rebuild_revision_ == revision ? self : nullptr;
+    };
+    try {
+        list_.set_items(std::move(items));
+        auto* self = owner();
+        if (!self) { return false; }
+        for (auto const& p : selected) {
+            auto it = std::find(self->paths_.begin(), self->paths_.end(), p);
+            if (it != self->paths_.end()) {
+                self->list_.select((std::size_t)(it - self->paths_.begin()),
+                                   self->list_.multiple ? SelectionAction::Toggle
+                                                        : SelectionAction::Replace);
+            }
+            self = owner();
+            if (!self) { return false; }
+        }
+        if (current) {
+            auto it = std::find(self->paths_.begin(), self->paths_.end(), *current);
+            if (it != self->paths_.end()) {
+                self->list_.select((std::size_t)(it - self->paths_.begin()),
+                                   SelectionAction::Move);
+            }
+        }
+        self = owner();
+        if (!self) { return false; }
+        self->rebuilding_ = false;
+        self->refresh();
+        return owner() != nullptr;
     }
-    if (current) {
-        auto it = std::find(self->paths_.begin(), self->paths_.end(), *current);
-        if (it != self->paths_.end())
-            self->list_.select((std::size_t)(it - self->paths_.begin()),
-                               SelectionAction::Move);
+    catch (...) {
+        if (auto* self = owner()) { self->rebuilding_ = false; }
+        throw;
     }
-    self = lifetime.try_get();
-    if (!self) return;
-    self->rebuilding_ = false;
-    self->refresh();
 }
+
 auto TreeView::set_expanded(std::vector<std::size_t> const& path, bool expanded) -> bool
 {
     auto copy = path;
@@ -129,40 +146,49 @@ auto TreeView::set_expanded(std::vector<std::size_t> const& path, bool expanded)
         std::equal(copy.begin(), copy.end(), current->begin()))
         current = copy;
     auto lifetime = track(*this);
-    rebuild(current);
+    if (!rebuild(current)) { return true; }
     auto* self = lifetime.try_get();
     if (!self) return true;
+    auto revision = self->rebuild_revision_;
     auto after = self->selected_paths();
     if (before != after) self->on_select(after);
-    if ((self = lifetime.try_get())) self->on_expand(copy, expanded);
+    if ((self = lifetime.try_get()) && self->rebuild_revision_ == revision) {
+        self->on_expand(copy, expanded);
+    }
     return true;
 }
 auto TreeView::select(std::vector<std::size_t> const& path, SelectionAction action)
     -> bool
 {
-    node(path);
+    auto requested = path;
+    node(requested);
+    auto revision = model_revision_;
     auto prefix = std::vector<std::size_t>{};
     auto lifetime = track(*this);
-    for (std::size_t i = 0; i + 1 < path.size(); ++i) {
-        prefix.push_back(path[i]);
+    for (std::size_t i = 0; i + 1 < requested.size(); ++i) {
+        prefix.push_back(requested[i]);
         auto* self = lifetime.try_get();
-        if (!self) return false;
+        if (!self || self->model_revision_ != revision) { return false; }
         self->set_expanded(prefix, true);
     }
     auto* self = lifetime.try_get();
-    if (!self) return false;
-    auto it = std::find(self->paths_.begin(), self->paths_.end(), path);
+    if (!self || self->model_revision_ != revision) { return false; }
+    auto it = std::find(self->paths_.begin(), self->paths_.end(), requested);
     return it != self->paths_.end() &&
            self->list_.select((std::size_t)(it - self->paths_.begin()), action);
 }
+
 void TreeView::activate(std::size_t row)
 {
     if (row >= paths_.size()) return;
     auto path = paths_[row];
+    auto revision = model_revision_;
     auto lifetime = track(*this);
     auto& n = node(path);
     if (!n.children.empty()) set_expanded(path, !n.expanded);
-    if (auto* self = lifetime.try_get()) self->on_activate(path);
+    if (auto* self = lifetime.try_get(); self && self->model_revision_ == revision) {
+        self->on_activate(path);
+    }
 }
 void TreeView::paint_overlay(Canvas canvas)
 {

@@ -49,9 +49,11 @@ class TreeView : public Widget {
     ListView list_;
     std::vector<std::vector<std::size_t>> paths_;
     bool rebuilding_ = false;
+    std::uint64_t model_revision_ = 0;
+    std::uint64_t rebuild_revision_ = 0;
     auto node(std::vector<std::size_t> const&) -> TreeNode&;
-    void rebuild(std::optional<std::vector<std::size_t>> current = {},
-                 bool preserve = true);
+    auto rebuild(std::optional<std::vector<std::size_t>> current = {},
+                 bool preserve = true) -> bool;
     void activate(std::size_t);
 };
 }  // namespace ox

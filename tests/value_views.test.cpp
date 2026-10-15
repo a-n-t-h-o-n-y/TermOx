@@ -597,3 +597,172 @@ TEST(numeric_edit_and_scroll_connections_follow_moves)
     bar.set_position(0);
     ASSERT(moved_log.scroll_offset().y == 0);
 }
+
+TEST(tree_selection_cancels_when_expansion_replaces_the_model)
+{
+    for (bool empty : {false, true}) {
+        auto tree = TreeView{
+            {.nodes = {{"root", true, false, {{"branch", true, false, {{"leaf"}}}}}}}};
+        int expansions = 0;
+        tree.on_expand.connect([&](auto const&, bool) {
+            ++expansions;
+            tree.set_nodes(
+                empty ? std::vector<TreeNode>{}
+                      : std::vector<TreeNode>{{"replacement",
+                                               true,
+                                               false,
+                                               {{"branch", true, false, {{"leaf"}}}}}});
+        });
+        ASSERT(!tree.select({0, 0, 0}));
+        ASSERT(expansions == 1);
+        ASSERT(tree.selected_paths().empty());
+        ASSERT(!tree.current_path());
+        if (!empty) {
+            ASSERT(tree.nodes()[0].text == "replacement");
+            ASSERT(!tree.nodes()[0].expanded);
+        }
+    }
+}
+
+TEST(tree_model_replacement_cancels_stale_activation)
+{
+    auto tree = TreeView{{.nodes = {{"root", true, false, {{"leaf"}}}}}};
+    int activations = 0;
+    tree.on_activate.connect([&](auto const&) { ++activations; });
+    tree.on_expand.connect([&](auto const&, bool) {
+        tree.set_nodes({{"replacement"}});
+        tree.select({0});
+    });
+    for (auto& child : tree.get_children()) {
+        static_cast<ListView&>(child).activate(0);
+    }
+    ASSERT(activations == 0);
+    ASSERT((tree.selected_paths() == std::vector<std::vector<std::size_t>>{{0}}));
+    ASSERT(tree.nodes()[0].text == "replacement");
+}
+
+TEST(tree_nested_scroll_rebuild_preserves_the_replacement_selection)
+{
+    auto tree = TreeView{
+        {.nodes = {{"root", true, false, {{"leaf"}}}, {"other"}}, .multiple = true}};
+    arrange(tree, {{}, {20, 1}});
+    tree.select({1});
+    bool armed = true;
+    int expansions = 0;
+    tree.on_expand.connect([&](auto const&, bool) { ++expansions; });
+    tree.on_scroll.connect([&](auto, auto, auto) {
+        if (!std::exchange(armed, false)) { return; }
+        tree.set_nodes({{"replacement"}, {"new selection"}});
+        tree.select({1});
+    });
+    tree.set_expanded({0}, true);
+    ASSERT(!armed);
+    ASSERT(expansions == 0);
+    ASSERT(tree.nodes()[0].text == "replacement");
+    ASSERT((tree.selected_paths() == std::vector<std::vector<std::size_t>>{{1}}));
+    ASSERT((tree.current_path() == std::optional{std::vector<std::size_t>{1}}));
+}
+
+TEST(tree_selection_follows_a_move_during_expansion)
+{
+    auto source = std::make_unique<TreeView>(TreeView::Options{
+        .nodes = {{"root", true, false, {{"branch", true, false, {{"leaf"}}}}}}});
+    auto moved = std::unique_ptr<TreeView>{};
+    source->on_expand.connect([&](auto const&, bool) {
+        if (source) {
+            moved = std::make_unique<TreeView>(std::move(*source));
+            source.reset();
+        }
+    });
+    ASSERT(source->select({0, 0, 0}));
+    ASSERT(!source && moved);
+    ASSERT(
+        (moved->selected_paths() == std::vector<std::vector<std::size_t>>{{0, 0, 0}}));
+}
+
+TEST(log_capacity_trimming_preserves_paused_viewport_and_selection)
+{
+    auto log = LogView{
+        {.max_lines = 10, .follow_tail = false, .editor = {.wrap = TextWrap::None}}};
+    arrange(log, {{}, {4, 1}});
+    log.append("zero-long\none-long\ntwo-long\nthree-long\nfour-long");
+    log.editor.set_caret(19);
+    log.editor.set_caret(22, true);
+    log.set_scroll_offset({2, 3});
+    log.set_max_lines(3);
+    ASSERT(log.editor.text() == "two-long\nthree-long\nfour-long\n");
+    ASSERT((log.scroll_offset() == Point{2, 1}));
+    ASSERT(
+        (log.editor.editor().selection() == std::pair<std::size_t, std::size_t>{0, 3}));
+    ASSERT(!log.follows_tail());
+    log.set_max_lines(1);
+    ASSERT((log.scroll_offset() == Point{2, 0}));
+}
+
+TEST(log_capacity_trimming_counts_wrapped_unicode_rows_after_resize)
+{
+    for (auto wrap : {TextWrap::Word, TextWrap::Any}) {
+        auto log =
+            LogView{{.max_lines = 10, .follow_tail = false, .editor = {.wrap = wrap}}};
+        arrange(log, {{}, {8, 1}});
+        log.append("界界界界\nsecond\nthird\nfourth");
+        arrange(log, {{}, {4, 1}});
+        auto removed = TextLayout{};
+        removed.update("界界界界\n", 4, wrap);
+        auto rows = (int)removed.lines().size() - 1;
+        log.set_scroll_offset({0, rows + 1});
+        log.set_max_lines(3);
+        ASSERT(log.scroll_offset().y == 1);
+        ASSERT(log.editor.text() == "second\nthird\nfourth\n");
+        ASSERT(!log.follows_tail());
+    }
+}
+
+TEST(log_capacity_trimming_keeps_tail_following_and_allows_owner_destruction)
+{
+    auto log = LogView{{.max_lines = 10, .editor = {.wrap = TextWrap::None}}};
+    arrange(log, {{}, {10, 1}});
+    log.append("zero\none\ntwo\nthree\nfour");
+    log.set_max_lines(2);
+    ASSERT(log.follows_tail());
+    ASSERT(log.scroll_offset().y ==
+           log.content_size().height - log.viewport_size().height);
+    auto owned = std::make_unique<LogView>(LogView::Options{.follow_tail = false});
+    owned->append("zero\none\ntwo");
+    owned->editor.on_change.connect([&](auto const&) { owned.reset(); });
+    owned->set_max_lines(1);
+    ASSERT(!owned);
+}
+
+TEST(tree_selection_callback_replacement_cancels_stale_expansion_notice)
+{
+    auto tree = TreeView{{.nodes = {{"root", true, true, {{"leaf"}}}}}};
+    tree.select({0, 0});
+    int expansions = 0;
+    tree.on_expand.connect([&](auto const&, bool) { ++expansions; });
+    tree.on_select.connect([&](auto const& selected) {
+        if (!selected.empty()) { return; }
+        tree.set_nodes({{"replacement"}});
+        tree.select({0});
+    });
+    tree.set_expanded({0}, false);
+    ASSERT(expansions == 0);
+    ASSERT(tree.nodes()[0].text == "replacement");
+    ASSERT((tree.selected_paths() == std::vector<std::vector<std::size_t>>{{0}}));
+}
+
+TEST(tree_rebuild_callback_exception_restores_selection_notifications)
+{
+    auto tree = TreeView{{.nodes = {{"root", true, false, {{"leaf"}}}, {"other"}}}};
+    arrange(tree, {{}, {20, 1}});
+    tree.select({0});
+    bool armed = true;
+    tree.on_scroll.connect([&](auto, auto, auto) {
+        if (std::exchange(armed, false)) { throw std::runtime_error{"callback"}; }
+    });
+    ASSERT_THROWS(tree.set_expanded({0}, true), std::runtime_error);
+    int selections = 0;
+    tree.on_select.connect([&](auto const&) { ++selections; });
+    ASSERT(tree.select({1}));
+    ASSERT(selections == 1);
+}

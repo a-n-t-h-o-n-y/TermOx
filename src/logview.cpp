@@ -2,6 +2,20 @@
 #include <ox/logview.hpp>
 #include <ox/selection.hpp>
 namespace ox {
+namespace {
+auto retained_offset(Point offset,
+                     std::string_view removed,
+                     TextBox const& editor,
+                     esc::WidthPolicy policy) -> Point
+{
+    if (removed.empty()) { return offset; }
+    auto layout = TextLayout{};
+    layout.update(removed, editor.size().width, editor.wrap, policy);
+    auto rows = (int)layout.lines().size() - 1;
+    offset.y = std::max(0, offset.y - rows);
+    return offset;
+}
+}  // namespace
 LogView::LogView() : LogView{Options{}} {}
 LogView::LogView(Options x)
     : Widget{},
@@ -14,9 +28,9 @@ LogView::LogView(Options x)
       follow_tail_{x.follow_tail}
 {
     Connection{.signal = editor.on_scroll,
-        .slot = [](Point at, Area content, Area viewport, LogView& self) {
-            self.on_scroll(at, content, viewport);
-        }}(*this);
+               .slot = [](Point at, Area content, Area viewport, LogView& self) {
+                   self.on_scroll(at, content, viewport);
+               }}(*this);
     if (!max_lines_) throw std::invalid_argument{"Log capacity must be positive"};
     editor.edit([](TextEdit& e) { e = TextEdit{"", true, 0}; });
     Connection{.signal = editor.on_scroll,
@@ -45,13 +59,16 @@ auto LogView::set_follow_tail(bool follow) -> bool
 }
 void LogView::trim()
 {
-    auto bytes = std::size_t{0};
+    auto removed = std::string{};
     while (lines_.size() > max_lines_) {
-        bytes += lines_.front().size() + 1;
+        removed += lines_.front();
+        removed += '\n';
         lines_.pop_front();
     }
-    if (!bytes) return;
-    auto offset = editor.scroll_offset();
+    if (removed.empty()) return;
+    auto bytes = removed.size();
+    auto offset =
+        retained_offset(editor.scroll_offset(), removed, editor, glyph_width_policy());
     auto caret = editor.editor().caret();
     auto anchor = editor.editor().anchor();
     auto lifetime = track(*this);
@@ -62,7 +79,6 @@ void LogView::trim()
         e.set_caret(anchor > bytes ? anchor - bytes : 0);
         e.set_caret(caret > bytes ? caret - bytes : 0, true);
     });
-    // Wrapped line counts can change on resize; clamp the retained viewport.
     if (auto* self = lifetime.try_get()) { self->editor.set_scroll_offset(offset); }
 }
 void LogView::set_max_lines(std::size_t n)
@@ -107,11 +123,7 @@ void LogView::append(std::string_view text)
         removed += '\n';
         lines_.pop_front();
     }
-    auto removed_layout = TextLayout{};
-    removed_layout.update(removed, editor.size().width, editor.wrap,
-                          glyph_width_policy());
-    auto rows = removed.empty() ? 0 : (int)removed_layout.lines().size() - 1;
-    at.y = std::max(0, at.y - rows);
+    at = retained_offset(at, removed, editor, glyph_width_policy());
     auto lifetime = track(*this);
     updating_ = true;
     editor.edit([&](TextEdit& e) {

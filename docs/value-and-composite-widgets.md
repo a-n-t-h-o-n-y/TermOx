@@ -89,7 +89,9 @@ cursor path. `on_select(vector<vector<size_t>> const&)`, `on_activate(path const
 `on_expand(path const&,bool)` deliver stable snapshots. Enter/double-click activates and
 toggles branches. Right expands or enters a branch; Left collapses or selects its parent.
 Scrolling, Unicode painting, typeahead, and ordinary navigation come from ListView.
-Paths belong to the current model, rather than providing persistent identity across replacement.
+Paths belong to the current model, rather than providing persistent identity across
+replacement. Model replacement from a callback cancels pending path selection and
+activation; nested rebuilds retain the latest model and selection.
 
 ## LogView
 
@@ -97,7 +99,9 @@ LogView owns a public read-only TextBox `editor` and a bounded deque of lines. `
 accepts printable UTF-8 records separated by newlines; each retained record ends in a newline.
 A trailing newline does not append an extra blank record; `append("")` appends one blank line.
 Invalid input rejects the whole batch. `max_lines` is positive and defaults to 10,000;
-`set_max_lines` trims oldest records. Editing history is disabled.
+`set_max_lines` trims oldest records. Reducing capacity preserves a paused viewport
+relative to retained text, counting wrapped display rows at the current width.
+Tail-following logs stay at the end. Editing history is disabled.
 
 `set_follow_tail(true)` reveals the newest content. Manual upward scrolling pauses
 following; `set_follow_tail(false)` leaves the viewport alone. Appending preserves selection
