@@ -106,7 +106,9 @@ overlay; opening a Popup does this automatically. Ordering belongs to the applic
 
 Popup owns its content, a borrowed move-aware `anchor`, placement (`Center`, `Below`,
 `Right`), optional requested size, and offset. Panel geometry clamps to the screen and
-flips above/left when needed. `show`/`hide` are idempotent and emit `on_open`/`on_close`.
+flips above/left when needed. Before drawing content, Popup clears the complete panel
+rectangle with the theme's raised surface, including gaps between children. The rest
+of the screen remains visible. `show`/`hide` are idempotent and emit `on_open`/`on_close`.
 Escape, outside-click, and Tab dismissal are configurable. Tab closes ordinary popups
 before normal focus traversal; Dialog disables this behavior to keep Tab inside it. Defaults are modal and dismissible;
 set `modal = false` for a nonmodal popover. Keep Popup in the owner's child enumeration;

@@ -5,7 +5,8 @@
 #include <ox/routing.hpp>
 namespace ox {
 enum class PopupPlacement { Center, Below, Right };
-/** Root overlay; child owns content, anchor is borrowed and follows moves. */
+/** Root overlay with an opaque content rectangle; anchor is borrowed and follows moves.
+ */
 template <WidgetDerived Child>
 class Popup : public Widget {
    public:
@@ -61,6 +62,13 @@ class Popup : public Widget {
     {
         request_layout();
         arrange(*this, {{}, screen_size()});
+    }
+    void paint_background(Canvas canvas) override
+    {
+        // Layouts and borders can leave gaps. Clear the whole content rectangle
+        // before painting descendants so those gaps cannot expose lower layers.
+        fill(canvas.subcanvas(child.at(), child.size()),
+             U' ' | appearance({}, Surface::Raised));
     }
     auto get_children() -> zzz::Generator<Widget&> override { co_yield child; }
     auto get_children() const -> zzz::Generator<Widget const&> override

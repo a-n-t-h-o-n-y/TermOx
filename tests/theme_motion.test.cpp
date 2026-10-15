@@ -308,3 +308,57 @@ TEST(menus_and_submenus_use_the_raised_surface_role)
         if (auto* child = dynamic_cast<Menu*>(node.widget.try_get()))
             ASSERT(child->role == Surface::Raised);
 }
+TEST(popup_and_dialog_gaps_cover_underlying_text_and_restore_it_on_close)
+{
+    auto check = [](auto& popup, Theme theme) {
+        auto backdrop = Backdrop{};
+        auto root = Column{std::tie(backdrop, popup)};
+        auto app = Application{root};
+        theme.motion.enabled = false;
+        app.set_theme(theme);
+        app.dispatch(esc::Resize{{36, 16}});
+        app.paint();
+        auto before = app.loop().screen;
+        popup.requested_size = Area{24, 10};
+        popup.show();
+        app.step();
+        app.paint();
+        auto bounds = popup.child.global_bounds();
+        for (int y = 0; y < 16; ++y)
+            for (int x = 0; x < 36; ++x) {
+                auto at = Point{x, y};
+                if (contains(bounds, at))
+                    ASSERT(app.loop().screen[at].text != U"x");
+                else
+                    ASSERT(app.loop().screen[at].text == U"x");
+            }
+        // Resize with the overlay open; its newly covered area must also clear.
+        app.dispatch(esc::Resize{{20, 12}});
+        app.paint();
+        bounds = popup.child.global_bounds();
+        for (int y = bounds.at.y; y < bounds.at.y + bounds.size.height; ++y)
+            for (int x = bounds.at.x; x < bounds.at.x + bounds.size.width; ++x)
+                ASSERT((app.loop().screen[Point{x, y}].text != U"x"));
+        popup.hide();
+        app.dispatch(esc::Resize{{36, 16}});
+        app.step();
+        app.paint();
+        for (int y = 0; y < 16; ++y)
+            for (int x = 0; x < 36; ++x) {
+                auto at = Point{x, y};
+                ASSERT(app.loop().screen[at] == before[at]);
+            }
+    };
+    for (auto theme : {Theme::plain(), Theme::dark(), Theme::light()}) {
+        auto content =
+            Column{Label{"Note"}, LineEdit{}, Button{{.label = {.text = "Accept"}}}};
+        content.gap = 2;
+        auto popup = Popup{std::move(content)};
+        check(popup, theme);
+        auto body =
+            Column{Label{"Note"}, LineEdit{}, Button{{.label = {.text = "Accept"}}}};
+        body.gap = 2;
+        auto dialog = Dialog{std::move(body), "Dialog"};
+        check(dialog, theme);
+    }
+}
