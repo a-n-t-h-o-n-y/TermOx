@@ -6,9 +6,8 @@ dark, light and terminal colors. Alt-S stacks the panes. The example composes ex
 `Padding`, `Border`, `SplitPane`, `ScrollBar` and `link` with ordinary TextBox/DataTable
 controls. `--check` exercises three presets, three themes and five terminal sizes.
 
-The visual roles are inspired by the independently styled header/cell/selection and
-editor text/gutter/current-line roles in [Bubbles](https://github.com/charmbracelet/bubbles).
-TermOx keeps its existing owned state, direct options and Canvas painting.
+Headers, cells, selections, editor text, gutters and current lines have independent
+visual roles. These use owned state, direct options and Canvas painting.
 
 ## TextBox and LineEdit
 

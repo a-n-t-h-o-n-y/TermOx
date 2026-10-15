@@ -46,7 +46,7 @@ and requests an exit code. These decisions are independent. Default widget callb
 return an empty response. `combine(a, b)` combines effects and preserves the first
 exit request. This replaces the previous void callback API completely.
 
-Mouse input goes to the deepest hit target, then bubbles through its ancestors until
+Mouse input goes to the deepest hit target, then propagates through its ancestors until
 handled or quitting. Each receiver gets its own local coordinates. A left press
 selects the nearest Click/Strong widget along that ancestry before dispatch; other
 buttons do not change focus. Mouse release and wheel events use the current hit path;
@@ -103,7 +103,7 @@ Input routing retains only the original ancestry, its bounds, and lifetime views
 rather than copying the entire tree or retaining raw targets. After each
 input callback, the application synchronizes attachment, focus, and hover state before
 continuing propagation. Removed, destroyed, or disabled targets are skipped. Input
-still bubbles along the original ancestry, rather than being redirected to a new hit
+still propagates along the original ancestry, rather than being redirected to a new hit
 or focus midway through an event. A quit result stops further callbacks immediately.
 
 Focus callbacks can reenter focus selection. A newer transition wins over the outer

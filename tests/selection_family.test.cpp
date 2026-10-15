@@ -156,7 +156,7 @@ TEST(combo_filters_choices_commits_original_indices_and_allows_custom_text)
     ASSERT(combo.popup.child.items().size() == 3);
 }
 
-TEST(tabs_arrange_only_selected_pages_and_ctrl_navigation_bubbles_from_editors)
+TEST(tabs_arrange_only_selected_pages_and_ctrl_navigation_propagates_from_editors)
 {
     auto tabs =
         Tabs{std::tuple{LineEdit{{.text = "first"}}, LineEdit{{.text = "second"}}},

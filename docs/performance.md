@@ -70,7 +70,7 @@ character, and tabs, wrapped to 40 cells. The wide-line workloads use 10,000 ASC
 columns with distributed queries. Layout rebuild alternates between widths 40 and 41;
 unchanged updates keep width 41. Editing repeatedly inserts and erases at the midpoint
 with bounded history enabled. Routing uses a flat tree with 100 or 1,000 focusable
-children and measures idle steps and an unhandled key that bubbles to the root.
+children and measures idle steps and an unhandled key that propagates to the root.
 Rendering compares 80×24 and 200×60 frames: unchanged, one alternating cell, and
 alternating bold/default styles across the entire frame.
 
@@ -105,8 +105,8 @@ and [routing after](../tests/benchmark-results/routing-after.csv).
 | routing.key.depth32 | 7266.523 | 2051.684 |
 
 Mouse movement repeatedly hits the last child. Tab cycles through visible candidates;
-paste sends a complete unhandled chunk that bubbles to the root. Reordering rotates
-children once per operation and includes synchronization. The deep key workload bubbles
+paste sends a complete unhandled chunk that propagates to the root. Reordering rotates
+children once per operation and includes synchronization. The deep key workload propagates
 through 32 nested containers plus the leaf and root, alongside 1,000 unrelated siblings.
 All routing workloads use 100 operations per sample after ten warmups.
 

@@ -142,7 +142,7 @@ TEST(routing_tree_shares_ancestor_clipping_and_local_coordinates_with_paint)
     ASSERT((hit_path(tree, {2, 1}) == std::vector<std::size_t>{0, 1, 2}));
 }
 
-TEST(routing_mouse_bubbles_to_ancestors_and_stops_at_handling)
+TEST(routing_mouse_propagates_to_ancestors_and_stops_at_handling)
 {
     auto root = Probe{};
     arrange(root, {root.at(), {12, 5}});
@@ -601,7 +601,7 @@ TEST(routing_tab_consumes_its_snapshot_before_reentrant_focus_callbacks)
     ASSERT(app.focus().get() == track(second));
 }
 
-TEST(routing_mouse_bubbles_with_original_coordinates_after_siblings_are_reordered)
+TEST(routing_mouse_propagates_with_original_coordinates_after_siblings_are_reordered)
 {
     struct MovingProbe : Probe {
         std::function<void()> move_action;
