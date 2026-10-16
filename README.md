@@ -1,202 +1,66 @@
-# TermOx II 🐂🐂
+# TermOx III 🐂🐂🐂
 
-**TermOx** is a C++20 library for creating rich, interactive terminal user interfaces 
-with minimal code.
+TermOx is a C++20 library for terminal user interfaces. Compose widgets with rows
+and columns, connect their signals, and run the application. It includes text
+editors, tables, trees, menus, and custom drawing, with keyboard and mouse input.
 
-- [📚 Getting Started](docs/getting_started.md)
-- [📖 Reference](docs/reference.md)
-- [💻 Examples](examples)
+![A TermOx table with a selected row and a scrollbar](docs/img/table-v3.svg)
 
-## Quick Example
+## A counter
 
-<p align="center">
-  <img src="docs/img/label.png">
-</p>
+Click **Increment**, or press Tab to focus the button and Enter to activate it.
+Ctrl-C exits.
 
 ```cpp
 #include <ox/ox.hpp>
+
 using namespace ox;
 
 int main()
 {
-    auto head = Label{{
-                    .text  = "C++20 Terminal UI Framework",
-                    .align = Align::Center,
-                    .style = {.foreground = colors::blue, .traits = Trait::Bold},
-                }} | Border{.box = shape::Box::round(), .label = {.text = "TermOx II"}};
-
-    return Application{head}.run();
-}
-```
-
-📂 Explore more in the [examples](examples) directory.
-
-Build `TermOx.examples.showcase` for an interactive tour of widgets, themes, and
-motion. See [theme and motion](docs/theme-and-motion.md) for configuration and controls.
-
-Build `TermOx.examples.polish` to compare optional [widget presentation details](docs/presentation.md):
-editor gutters, table density, list hover/stripes, tree guides, choice indicators,
-value tracks and fills, and tab decoration. Alt-V switches between its two pages.
-
-Build `TermOx.examples.stress` for an adjustable live [Stress Lab](examples/stress.md):
-large models, streaming logs, Unicode editing, clipped images, widget trees,
-signals/timers/events and sparse/full frame updates, with headless timing reports.
-
-Use [scratch.cpp](examples/scratch.cpp) and the `TermOx.examples.scratch` build target
-to try out the library quickly.
-
-## Features
-
-### Core Capabilities
-- **Flexible Layout System** - Size policies and automatic sizing
-- **Event-Driven Architecture** - Clean handling of user input and system events
-- **Signal/Slot System** - Based on [Signals Light](https://github.com/a-n-t-h-o-n-y/signals-light)
-- **Timer Support** - Periodic actions with timer events
-- **Custom Widgets** - Create your own widgets with ease
-
-### Rich Terminal Styling
-- **Colors** - Full RGB, HSL, and [XTerm 256 Color](https://jonasjacek.github.io/colors/) support
-- **Text Styling** - Bold, italic, underline, strikethrough, and more
-- **Unicode Support** - Validated UTF-8 text, complete graphemes, and wide-cell drawing
-
-### Input Handling
-- **Keyboard** - Press, repeat, and release events, modifiers, and special keys
-- **Mouse** - Click, scroll, movement, and enter/leave events
-- **Focus Management** - Tab navigation, mouse click, and focus events
-
-### Widget Library
-- **Core Widgets** - Labels, buttons, text inputs, checkboxes, radio buttons, data
-tables and more
-- **Layout Widgets** - Horizontal, vertical, and suspended layouts
-
-## Build Instructions
-
-**TermOx** uses [CMake](https://cmake.org/) to generate build targets.
-
-    git clone https://github.com/a-n-t-h-o-n-y/TermOx.git
-    mkdir TermOx/build && cd TermOx/build
-    cmake ..
-    make TermOx
-
-Dependencies ([Signals Light](https://github.com/a-n-t-h-o-n-y/signals-light),
-[zzz](https://github.com/a-n-t-h-o-n-y/zzz), and
-[Escape](https://github.com/a-n-t-h-o-n-y/Escape)) are automatically fetched by CMake.
-
-## Escape API Migration
-
-TermOx uses Escape's session API, `Style`, `RGB`, `IndexedColor`, and typed input
-events. Widget handlers receive `KeyEvent` and the corresponding mouse event type.
-Pass `Terminal::Options` to `run()`, for example
-`Application{head}.run({.mouse_mode = MouseMode::Move})`. Ctrl-C exits through the event
-loop by default, and the session restores terminal state on exit.
-
-Text inputs accept Unicode key text and bracketed paste. Frames store complete
-graphemes with explicit continuation cells, and clipped canvases use Escape's width
-estimates. See [the widget API](docs/widget-api.md) for handlers, arrangement, ownership, and migration,
-[frames and canvases](docs/frame-and-canvas.md) for drawing and resize contracts,
-[rendering](docs/renderer.md) for frame comparison and terminal output,
-[layout calculation](docs/layout.md) for sizing and placement,
-[routing and focus](docs/routing-and-focus.md) for widget interaction,
-and [text editing](docs/text-editing.md) for grapheme-aware editing and selection.
-A C++20 compiler and standard library are required.
-
-Build and run the regression tests with:
-
-```sh
-cmake --build build --target TermOx.tests.unit
-ctest --test-dir build --output-on-failure
-```
-
-On macOS or Linux, check interactive input and terminal restoration with:
-
-```sh
-cmake --build build --target TermOx.tests.renderer_terminal TermOx.tests.event_loop_terminal \
-    TermOx.examples.pong TermOx.examples.pinbox \
-    TermOx.examples.snake TermOx.examples.accumulator TermOx.examples.scratch
-python3 tests/smoke_examples.py build
-```
-
-Headless [performance benchmarks](docs/performance.md) cover text editing, layout,
-routing, rendering, paint phases, and complete application frames, with recorded
-before/after measurements.
-
-## Application Core
-
-The application owns its event loop and focus. Timers share the loop's steady-clock
-scheduler. Input, callbacks, and rendering run on one thread, with explicit repaint
-requests and one paint per batch. Constructing an application does not open a terminal;
-`step()` and `paint()` can be tested independently. See [the event loop guide](docs/event-loop.md)
-for headless dispatch, posting background work, and lower-level composition.
-
-## Note on Version 2
-
-Version 2 is a complete rewrite of the library. It focuses on providing a simpler set of
-base widgets and a light-weight core implementation of events processing and rendering.
-As such, the API has little in common with the previous version.
-
-## A Second Example
-
-<p align="center">
-  <img src="docs/img/counter.png">
-</p>
-
-```cpp
-#include <ox/ox.hpp>
-using namespace ox;
-
-// Counter Button + Label
-int main()
-{
-    auto counter = Row{
-        IntegerLabel{{
-            .value = 0,
-            .align = Align::Center,
-            .style = {.background = colors::white, .foreground = colors::black},
-        }},
-        Button{{
-            .label = {.text = "Click to Increment", .align = Align::Center,
-                      .style = {.background = colors::black,
-                                .foreground = colors::white,
-                                .traits = Trait::Bold}},
-            .pressed_style = {.foreground = colors::yellow},
-        }},
+    auto root = Column{
+        IntegerLabel{{.value = 0}},
+        Button{{.label = {.text = "Increment"}}},
     };
+    auto& [count, button] = root.children;
+    Connection{
+        .signal = button.on_activate,
+        .slot = [](IntegerLabel& count) { count.set_value(count.value + 1); },
+    }(count);
 
-    auto& [label, button] = counter.children;
-
-    // Signals and Slots
-    Connection{.signal = button.on_activate, .slot = [](IntegerLabel& l) { l.set_value(l.value + 1); }}(label);
-
-    return Application{counter}.run();
+    return Application{root}.run();
 }
 ```
 
-## Gallery
+The layout owns the widgets. The connection passes the live label to the callback;
+`set_value()` updates it and requests a repaint.
 
-<p align="center">
-  <img src="docs/img/custom.png">
-</p>
-<p align="center">
-  <img src="docs/img/library.png">
-</p>
-<p align="center">
-  <img src="docs/img/colors.png">
-</p>
-<p align="center">
-  <img src="docs/img/combinations.png">
-</p>
-<p align="center">
-  <img src="docs/img/animation.gif">
-</p>
-<p align="center">
-  <img src="docs/img/fractal.png">
-</p>
+## Build and run
 
-## Contributing
+You need Git, CMake 3.18 or newer, and a C++20 compiler and standard library with
+`std::format` support. CMake fetches the dependencies on the first configure.
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+```sh
+git clone https://github.com/a-n-t-h-o-n-y/TermOx.git
+cd TermOx
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --target TermOx.examples.counter
+./build/examples/TermOx.examples.counter
+```
 
-## License
+See [Getting Started](docs/getting_started.md) for build details and using TermOx
+in your own project.
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for
-details.
+## Documentation
+
+- [Guides](docs/README.md): layout, input, styling, custom widgets, and internals.
+- [API reference](docs/reference.md): interfaces and their headers.
+- [Examples](examples/README.md): runnable programs, build targets, and walkthroughs.
+- [Table walkthrough](examples/datatable.md): sorting, scrolling, and responding to selection.
+
+Version 3 changes the widget API, event processing, layout, and rendering. Existing
+applications should check the migration sections in the [widget API](docs/widget-api.md),
+[containers and decorations](docs/decorations-layouts.md), and
+[text editing](docs/text-editing.md) guides.
+
+Contributions are welcome. TermOx is released under the [MIT license](LICENSE).

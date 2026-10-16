@@ -128,3 +128,7 @@ target_link_libraries(TermOx.examples.stress PRIVATE TermOx)
 add_executable(TermOx.examples.polish EXCLUDE_FROM_ALL polish.cpp)
 target_compile_options(TermOx.examples.polish PRIVATE -Wall -Wextra -Wpedantic)
 target_link_libraries(TermOx.examples.polish PRIVATE TermOx)
+
+# README counter example.
+add_executable(TermOx.examples.counter EXCLUDE_FROM_ALL counter.cpp)
+target_link_libraries(TermOx.examples.counter PRIVATE TermOx)

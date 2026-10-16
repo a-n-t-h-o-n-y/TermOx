@@ -106,7 +106,7 @@ ignores destroyed targets. Link once per axis. TextBox links support either axis
 offset, content size, and viewport size. Links return both signal identifiers. Arrange controls through their
 parent layout normally; resizing updates the linked ranges even without a paint.
 
-See [the interactive example](../examples/datatable.cpp) for keyboard navigation,
+See [the walkthrough](../examples/datatable.md) and its [complete source](../examples/datatable.cpp) for keyboard navigation,
 header sorting, numeric ordering, activation feedback, and a linked scrollbar.
 
 ## Migration

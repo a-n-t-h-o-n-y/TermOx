@@ -1,5 +1,24 @@
 # API Reference
 
+For a first program, see [Getting Started](getting_started.md). For explanations
+of how the pieces fit together, use the [guides index](README.md).
+
+## Find an interface
+
+| Area | Interfaces and documentation |
+| --- | --- |
+| Application | [Application, Timer, Focus](#-oxapplication), [EventLoop](event-loop.md) |
+| Widget composition | [Widget](widget-api.md), [Connection](api-audit.md), [Row, Column, borders](decorations-layouts.md), [Padding, Stack, ScrollView](containers.md) |
+| Controls | [Button, CheckBox, RadioGroup](controls.md), [ListView, Select, ComboBox, Tabs, menus and dialogs](selection-and-application.md) |
+| Data and text | [DataTable, ScrollBar](data-tables.md), [LineEdit, TextBox, text editing](text-editing.md) |
+| Composite widgets | [Numeric inputs, values, TreeView, LogView, SplitPane, Form, FilePicker, CommandPalette](value-and-composite-widgets.md) |
+| Actions and appearance | [Command](commands.md), [Theme, animation, KeyHelp](theme-and-motion.md), [Presentation options](presentation.md) |
+| Drawing and input | [Frame, Canvas](frame-and-canvas.md), [Renderer](renderer.md), [Layout](layout.md), [Routing and focus](routing-and-focus.md) |
+
+The entries below link to their declaring headers. Coverage varies: some list
+members here, while others defer to a topic guide. Consult the linked header for
+the complete declarations and defaults.
+
 See [theme and motion](theme-and-motion.md) for `Theme`, `MotionPolicy`, `Tween`,
 `Animation`, fractional meters, box-drawing rules, and `KeyHelp`.
 

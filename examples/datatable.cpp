@@ -1,14 +1,28 @@
 #include <ox/ox.hpp>
 
+#include <algorithm>
 #include <array>
 #include <string>
 
 using namespace ox;
 
+// Prefer a small viewport; the layout can give it the remaining space.
+class ResultTable : public DataTable {
+   public:
+    using DataTable::DataTable;
+
+    auto measure(Area available, esc::WidthPolicy policy = {}) const -> Area override
+    {
+        auto natural = DataTable::measure(available, policy);
+        natural.height = std::min(natural.height, 3);
+        return natural;
+    }
+};
+
 int main()
 {
     auto root = Column{
-        Row{DataTable{
+        Row{ResultTable{
                 {.columns = {{.heading = "Name", .size = SizePolicy::min(18)},
                              {.heading = "Count",
                               .size = SizePolicy::fixed(10),
@@ -26,7 +40,7 @@ int main()
     for (int i = 0; i < 100; ++i) {
         rows.push_back(
             {"Item " + std::to_string(i), std::to_string(100 - i),
-             "Unicode: 界 é 👩‍💻 — long text is clipped safely"});
+             "Storage bin " + std::to_string(i % 10 + 1) + " — ready for dispatch"});
     }
     table.set_rows(std::move(rows));
     link(table, bar);

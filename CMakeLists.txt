@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.18)
-project(TermOx VERSION 2.0.0 LANGUAGES CXX)
+project(TermOx VERSION 3.0.0 LANGUAGES CXX)
 
 option(USE_ASAN "Enable AddressSanitizer" OFF)
 
