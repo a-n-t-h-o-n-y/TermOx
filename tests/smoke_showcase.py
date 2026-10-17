@@ -19,3 +19,6 @@ smoke(showcase, [b"\x10", b"Run", b"\r", *([b""] * 9),
 # Exercise indexed colors/ASCII and palette routing in the other configuration.
 smoke(showcase, [b"\x10", b"files", b"\r", b"\t", b"\x1b[B"],
       ["--terminal"])
+# Select a new preset through the command palette, then cycle past the last preset.
+smoke(showcase, [b"\x10", b"High contrast", b"\r", b"\x1bOQ"],
+      ["--theme", "paper"])

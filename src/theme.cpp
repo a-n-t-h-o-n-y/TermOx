@@ -31,6 +31,76 @@ auto Theme::light() -> Theme
                         .selection = RGB{0xd9dfce}},
             .motion = {}};
 }
+auto Theme::ocean() -> Theme
+{
+    return {.palette = {.background = RGB{0x0f172a},
+                        .surface = RGB{0x17233b},
+                        .foreground = RGB{0xe2e8f0},
+                        .muted = RGB{0xa3b8d0},
+                        .accent = RGB{0x67d5f5},
+                        .secondary = RGB{0xa5b4fc},
+                        .positive = RGB{0x8bd49c},
+                        .negative = RGB{0xff9b9b},
+                        .border = RGB{0x5d789a},
+                        .selection = RGB{0x223954}},
+            .motion = {}};
+}
+auto Theme::ember() -> Theme
+{
+    return {.palette = {.background = RGB{0x211916},
+                        .surface = RGB{0x30231e},
+                        .foreground = RGB{0xf4e6d8},
+                        .muted = RGB{0xc4a998},
+                        .accent = RGB{0xffbd75},
+                        .secondary = RGB{0xedaa9c},
+                        .positive = RGB{0xb4ce86},
+                        .negative = RGB{0xff9a8b},
+                        .border = RGB{0x947566},
+                        .selection = RGB{0x493329}},
+            .motion = {}};
+}
+auto Theme::violet() -> Theme
+{
+    return {.palette = {.background = RGB{0x1c1828},
+                        .surface = RGB{0x292238},
+                        .foreground = RGB{0xeee6f7},
+                        .muted = RGB{0xbcb0ce},
+                        .accent = RGB{0xd6b0ff},
+                        .secondary = RGB{0x8bd5ca},
+                        .positive = RGB{0xa8d995},
+                        .negative = RGB{0xff9eb5},
+                        .border = RGB{0x827293},
+                        .selection = RGB{0x3b2c50}},
+            .motion = {}};
+}
+auto Theme::paper() -> Theme
+{
+    return {.palette = {.background = RGB{0xfaf8f2},
+                        .surface = RGB{0xeeeae0},
+                        .foreground = RGB{0x262d38},
+                        .muted = RGB{0x5d6570},
+                        .accent = RGB{0x2458a6},
+                        .secondary = RGB{0x7a4385},
+                        .positive = RGB{0x2c6b42},
+                        .negative = RGB{0xa0343d},
+                        .border = RGB{0x858174},
+                        .selection = RGB{0xdce5f0}},
+            .motion = {}};
+}
+auto Theme::high_contrast() -> Theme
+{
+    return {.palette = {.background = RGB{0x000000},
+                        .surface = RGB{0x141414},
+                        .foreground = RGB{0xffffff},
+                        .muted = RGB{0xc6c6c6},
+                        .accent = RGB{0xffff00},
+                        .secondary = RGB{0x00ffff},
+                        .positive = RGB{0x66ff66},
+                        .negative = RGB{0xff9090},
+                        .border = RGB{0xaaaaaa},
+                        .selection = RGB{0x303030}},
+            .motion = {}};
+}
 auto Theme::terminal() -> Theme
 {
     return {.palette = {.background = default_color,

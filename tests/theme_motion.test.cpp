@@ -285,7 +285,8 @@ TEST(dropdowns_paint_a_distinct_solid_surface_and_restore_content_when_closed)
         app.paint();
         ASSERT((app.loop().screen[at].text == U"x"));
     };
-    for (auto theme : {Theme::dark(), Theme::light()}) {
+    for (auto theme : {Theme::dark(), Theme::light(), Theme::ocean(), Theme::ember(),
+                       Theme::violet(), Theme::paper(), Theme::high_contrast()}) {
         auto select =
             Select{{.items = {{"Dark"}, {"Light"}, {"Terminal"}}, .selected = 0}};
         check(select, theme);
@@ -410,4 +411,31 @@ TEST(form_measures_wrapped_fields_using_their_constrained_width)
     auto app = Application{form};
     app.dispatch(esc::Resize{{80, natural.height}});
     ASSERT(editor.size().width == 8 && editor.size().height == expected);
+}
+
+TEST(preset_text_roles_remain_readable_on_themed_surfaces)
+{
+    auto luminance = [](Color const& color) {
+        auto rgb = std::get<RGB>(color);
+        auto linear = [](std::uint8_t channel) {
+            auto value = channel / 255.;
+            return value <= .04045 ? value / 12.92
+                                   : std::pow((value + .055) / 1.055, 2.4);
+        };
+        return .2126 * linear(rgb.red) + .7152 * linear(rgb.green) +
+               .0722 * linear(rgb.blue);
+    };
+    for (auto theme : {Theme::ocean(), Theme::ember(), Theme::violet(),
+                       Theme::paper(), Theme::high_contrast()}) {
+        validate(theme);
+        auto const& p = theme.palette;
+        // Text roles are used on ordinary, raised, and selected surfaces.
+        for (auto foreground : {p.foreground, p.muted, p.accent, p.secondary,
+                                p.positive, p.negative})
+            for (auto background : {p.background, p.surface, p.selection}) {
+                auto a = luminance(foreground), b = luminance(background);
+                auto ratio = (std::max(a, b) + .05) / (std::min(a, b) + .05);
+                ASSERT(ratio >= 4.5);
+            }
+    }
 }

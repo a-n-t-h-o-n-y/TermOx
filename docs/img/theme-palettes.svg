@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="910" viewBox="0 0 860 910" role="img" aria-labelledby="title desc">
+<title id="title">TermOx theme palettes</title>
+<desc id="desc">Seven palette samples showing page, raised, and selected surfaces with their text, accent, secondary, status, and border colors.</desc>
+<rect x="0" y="0" width="860" height="130" fill="#141917"/>
+<text x="24" y="35" fill="#e8e6db" font-family="Menlo,Consolas,monospace" font-size="20">Dark</text>
+<text x="24" y="64" fill="#e8e6db" font-family="Menlo,Consolas,monospace" font-size="16">Page text</text>
+<text x="24" y="91" fill="#a4b0a5" font-family="Menlo,Consolas,monospace" font-size="16">Muted text</text>
+<rect x="235" y="18" width="265" height="94" fill="#1f2924" stroke="#53655a"/>
+<text x="251" y="44" fill="#a4b0a5" font-family="Menlo,Consolas,monospace" font-size="14">Raised surface</text>
+<text x="251" y="73" fill="#e7af7d" font-family="Menlo,Consolas,monospace" font-size="16">Accent</text>
+<text x="365" y="73" fill="#83c8bb" font-family="Menlo,Consolas,monospace" font-size="16">Secondary</text>
+<text x="251" y="98" fill="#9bca98" font-family="Menlo,Consolas,monospace" font-size="16">Success</text>
+<text x="365" y="98" fill="#f09285" font-family="Menlo,Consolas,monospace" font-size="16">Error</text>
+<rect x="524" y="18" width="312" height="94" fill="#303c32"/>
+<text x="540" y="44" fill="#a4b0a5" font-family="Menlo,Consolas,monospace" font-size="14">Selection</text>
+<text x="540" y="73" fill="#e8e6db" font-family="Menlo,Consolas,monospace" font-size="16">Selected text</text>
+<text x="540" y="98" fill="#e7af7d" font-family="Menlo,Consolas,monospace" font-size="16">Selected accent</text>
+<rect x="0" y="130" width="860" height="130" fill="#f4f1e8"/>
+<text x="24" y="165" fill="#28362f" font-family="Menlo,Consolas,monospace" font-size="20">Light</text>
+<text x="24" y="194" fill="#28362f" font-family="Menlo,Consolas,monospace" font-size="16">Page text</text>
+<text x="24" y="221" fill="#5f6b61" font-family="Menlo,Consolas,monospace" font-size="16">Muted text</text>
+<rect x="235" y="148" width="265" height="94" fill="#e9e5d8" stroke="#8a9586"/>
+<text x="251" y="174" fill="#5f6b61" font-family="Menlo,Consolas,monospace" font-size="14">Raised surface</text>
+<text x="251" y="203" fill="#905024" font-family="Menlo,Consolas,monospace" font-size="16">Accent</text>
+<text x="365" y="203" fill="#236e66" font-family="Menlo,Consolas,monospace" font-size="16">Secondary</text>
+<text x="251" y="228" fill="#3b6c3a" font-family="Menlo,Consolas,monospace" font-size="16">Success</text>
+<text x="365" y="228" fill="#a23232" font-family="Menlo,Consolas,monospace" font-size="16">Error</text>
+<rect x="524" y="148" width="312" height="94" fill="#d9dfce"/>
+<text x="540" y="174" fill="#5f6b61" font-family="Menlo,Consolas,monospace" font-size="14">Selection</text>
+<text x="540" y="203" fill="#28362f" font-family="Menlo,Consolas,monospace" font-size="16">Selected text</text>
+<text x="540" y="228" fill="#905024" font-family="Menlo,Consolas,monospace" font-size="16">Selected accent</text>
+<rect x="0" y="260" width="860" height="130" fill="#0f172a"/>
+<text x="24" y="295" fill="#e2e8f0" font-family="Menlo,Consolas,monospace" font-size="20">Ocean</text>
+<text x="24" y="324" fill="#e2e8f0" font-family="Menlo,Consolas,monospace" font-size="16">Page text</text>
+<text x="24" y="351" fill="#a3b8d0" font-family="Menlo,Consolas,monospace" font-size="16">Muted text</text>
+<rect x="235" y="278" width="265" height="94" fill="#17233b" stroke="#5d789a"/>
+<text x="251" y="304" fill="#a3b8d0" font-family="Menlo,Consolas,monospace" font-size="14">Raised surface</text>
+<text x="251" y="333" fill="#67d5f5" font-family="Menlo,Consolas,monospace" font-size="16">Accent</text>
+<text x="365" y="333" fill="#a5b4fc" font-family="Menlo,Consolas,monospace" font-size="16">Secondary</text>
+<text x="251" y="358" fill="#8bd49c" font-family="Menlo,Consolas,monospace" font-size="16">Success</text>
+<text x="365" y="358" fill="#ff9b9b" font-family="Menlo,Consolas,monospace" font-size="16">Error</text>
+<rect x="524" y="278" width="312" height="94" fill="#223954"/>
+<text x="540" y="304" fill="#a3b8d0" font-family="Menlo,Consolas,monospace" font-size="14">Selection</text>
+<text x="540" y="333" fill="#e2e8f0" font-family="Menlo,Consolas,monospace" font-size="16">Selected text</text>
+<text x="540" y="358" fill="#67d5f5" font-family="Menlo,Consolas,monospace" font-size="16">Selected accent</text>
+<rect x="0" y="390" width="860" height="130" fill="#211916"/>
+<text x="24" y="425" fill="#f4e6d8" font-family="Menlo,Consolas,monospace" font-size="20">Ember</text>
+<text x="24" y="454" fill="#f4e6d8" font-family="Menlo,Consolas,monospace" font-size="16">Page text</text>
+<text x="24" y="481" fill="#c4a998" font-family="Menlo,Consolas,monospace" font-size="16">Muted text</text>
+<rect x="235" y="408" width="265" height="94" fill="#30231e" stroke="#947566"/>
+<text x="251" y="434" fill="#c4a998" font-family="Menlo,Consolas,monospace" font-size="14">Raised surface</text>
+<text x="251" y="463" fill="#ffbd75" font-family="Menlo,Consolas,monospace" font-size="16">Accent</text>
+<text x="365" y="463" fill="#edaa9c" font-family="Menlo,Consolas,monospace" font-size="16">Secondary</text>
+<text x="251" y="488" fill="#b4ce86" font-family="Menlo,Consolas,monospace" font-size="16">Success</text>
+<text x="365" y="488" fill="#ff9a8b" font-family="Menlo,Consolas,monospace" font-size="16">Error</text>
+<rect x="524" y="408" width="312" height="94" fill="#493329"/>
+<text x="540" y="434" fill="#c4a998" font-family="Menlo,Consolas,monospace" font-size="14">Selection</text>
+<text x="540" y="463" fill="#f4e6d8" font-family="Menlo,Consolas,monospace" font-size="16">Selected text</text>
+<text x="540" y="488" fill="#ffbd75" font-family="Menlo,Consolas,monospace" font-size="16">Selected accent</text>
+<rect x="0" y="520" width="860" height="130" fill="#1c1828"/>
+<text x="24" y="555" fill="#eee6f7" font-family="Menlo,Consolas,monospace" font-size="20">Violet</text>
+<text x="24" y="584" fill="#eee6f7" font-family="Menlo,Consolas,monospace" font-size="16">Page text</text>
+<text x="24" y="611" fill="#bcb0ce" font-family="Menlo,Consolas,monospace" font-size="16">Muted text</text>
+<rect x="235" y="538" width="265" height="94" fill="#292238" stroke="#827293"/>
+<text x="251" y="564" fill="#bcb0ce" font-family="Menlo,Consolas,monospace" font-size="14">Raised surface</text>
+<text x="251" y="593" fill="#d6b0ff" font-family="Menlo,Consolas,monospace" font-size="16">Accent</text>
+<text x="365" y="593" fill="#8bd5ca" font-family="Menlo,Consolas,monospace" font-size="16">Secondary</text>
+<text x="251" y="618" fill="#a8d995" font-family="Menlo,Consolas,monospace" font-size="16">Success</text>
+<text x="365" y="618" fill="#ff9eb5" font-family="Menlo,Consolas,monospace" font-size="16">Error</text>
+<rect x="524" y="538" width="312" height="94" fill="#3b2c50"/>
+<text x="540" y="564" fill="#bcb0ce" font-family="Menlo,Consolas,monospace" font-size="14">Selection</text>
+<text x="540" y="593" fill="#eee6f7" font-family="Menlo,Consolas,monospace" font-size="16">Selected text</text>
+<text x="540" y="618" fill="#d6b0ff" font-family="Menlo,Consolas,monospace" font-size="16">Selected accent</text>
+<rect x="0" y="650" width="860" height="130" fill="#faf8f2"/>
+<text x="24" y="685" fill="#262d38" font-family="Menlo,Consolas,monospace" font-size="20">Paper</text>
+<text x="24" y="714" fill="#262d38" font-family="Menlo,Consolas,monospace" font-size="16">Page text</text>
+<text x="24" y="741" fill="#5d6570" font-family="Menlo,Consolas,monospace" font-size="16">Muted text</text>
+<rect x="235" y="668" width="265" height="94" fill="#eeeae0" stroke="#858174"/>
+<text x="251" y="694" fill="#5d6570" font-family="Menlo,Consolas,monospace" font-size="14">Raised surface</text>
+<text x="251" y="723" fill="#2458a6" font-family="Menlo,Consolas,monospace" font-size="16">Accent</text>
+<text x="365" y="723" fill="#7a4385" font-family="Menlo,Consolas,monospace" font-size="16">Secondary</text>
+<text x="251" y="748" fill="#2c6b42" font-family="Menlo,Consolas,monospace" font-size="16">Success</text>
+<text x="365" y="748" fill="#a0343d" font-family="Menlo,Consolas,monospace" font-size="16">Error</text>
+<rect x="524" y="668" width="312" height="94" fill="#dce5f0"/>
+<text x="540" y="694" fill="#5d6570" font-family="Menlo,Consolas,monospace" font-size="14">Selection</text>
+<text x="540" y="723" fill="#262d38" font-family="Menlo,Consolas,monospace" font-size="16">Selected text</text>
+<text x="540" y="748" fill="#2458a6" font-family="Menlo,Consolas,monospace" font-size="16">Selected accent</text>
+<rect x="0" y="780" width="860" height="130" fill="#000000"/>
+<text x="24" y="815" fill="#ffffff" font-family="Menlo,Consolas,monospace" font-size="20">High Contrast</text>
+<text x="24" y="844" fill="#ffffff" font-family="Menlo,Consolas,monospace" font-size="16">Page text</text>
+<text x="24" y="871" fill="#c6c6c6" font-family="Menlo,Consolas,monospace" font-size="16">Muted text</text>
+<rect x="235" y="798" width="265" height="94" fill="#141414" stroke="#aaaaaa"/>
+<text x="251" y="824" fill="#c6c6c6" font-family="Menlo,Consolas,monospace" font-size="14">Raised surface</text>
+<text x="251" y="853" fill="#ffff00" font-family="Menlo,Consolas,monospace" font-size="16">Accent</text>
+<text x="365" y="853" fill="#00ffff" font-family="Menlo,Consolas,monospace" font-size="16">Secondary</text>
+<text x="251" y="878" fill="#66ff66" font-family="Menlo,Consolas,monospace" font-size="16">Success</text>
+<text x="365" y="878" fill="#ff9090" font-family="Menlo,Consolas,monospace" font-size="16">Error</text>
+<rect x="524" y="798" width="312" height="94" fill="#303030"/>
+<text x="540" y="824" fill="#c6c6c6" font-family="Menlo,Consolas,monospace" font-size="14">Selection</text>
+<text x="540" y="853" fill="#ffffff" font-family="Menlo,Consolas,monospace" font-size="16">Selected text</text>
+<text x="540" y="878" fill="#ffff00" font-family="Menlo,Consolas,monospace" font-size="16">Selected accent</text>
+</svg>

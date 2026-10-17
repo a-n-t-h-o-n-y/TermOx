@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <fstream>
 #include <iomanip>
@@ -6,10 +7,26 @@
 #include <numeric>
 #include <ox/ox.hpp>
 #include <sstream>
+#include <string_view>
 using namespace ox;
 using namespace std::chrono_literals;
 
 namespace {
+struct ThemePreset {
+    std::string_view name;
+    std::string_view label;
+    Theme (*make)();
+};
+constexpr auto theme_presets = std::array{
+    ThemePreset{"dark", "Dark", Theme::dark},
+    ThemePreset{"light", "Light", Theme::light},
+    ThemePreset{"terminal", "Terminal", Theme::terminal},
+    ThemePreset{"ocean", "Ocean", Theme::ocean},
+    ThemePreset{"ember", "Ember", Theme::ember},
+    ThemePreset{"violet", "Violet", Theme::violet},
+    ThemePreset{"paper", "Paper", Theme::paper},
+    ThemePreset{"high-contrast", "High contrast", Theme::high_contrast},
+};
 // Borrowed composition keeps the example's named controls easy to connect.
 class View : public Widget {
    public:
@@ -246,25 +263,39 @@ int main(int argc, char** argv)
             width = std::stoi(argv[++i]);
         else if (arg == "--height" && i + 1 < argc)
             height = std::stoi(argv[++i]);
+        else if (arg == "--theme" && i + 1 < argc) {
+            auto name = std::string_view{argv[++i]};
+            auto preset = std::ranges::find(theme_presets, name, &ThemePreset::name);
+            if (preset == theme_presets.end()) {
+                std::cerr << "Unknown theme: " << name << "\nAvailable themes:";
+                for (auto const& entry : theme_presets) std::cerr << ' ' << entry.name;
+                std::cerr << '\n';
+                return 2;
+            }
+            theme_index = (int)(preset - theme_presets.begin());
+        }
         else if (arg == "--light")
             theme_index = 1;
         else if (arg == "--terminal")
             theme_index = 2;
         else {
             std::cerr << "Usage: showcase [--check|--dump|--json] [--page 0..5] "
-                         "[--width N] [--height N] [--light|--terminal]\n";
+                         "[--width N] [--height N] [--theme NAME|--light|--terminal]\n";
             return 2;
         }
     }
     if (page < 0 || page > 5 || width < 0 || height < 0) return 2;
 
     auto brand = title("TermOx");
-    auto theme_choice = Select{{.items = {{"Dark"}, {"Light"}, {"Terminal"}},
+    auto theme_items = std::vector<ListItem>{};
+    for (auto const& preset : theme_presets)
+        theme_items.push_back({.text = std::string{preset.label}});
+    auto theme_choice = Select{{.items = std::move(theme_items),
                                 .selected = (std::size_t)theme_index}};
-    theme_choice.width_policy = SizePolicy::fixed(16);
+    theme_choice.width_policy = SizePolicy::fixed(19);
     auto motion = CheckBox{{.checked = true, .label = {.text = "Motion"}}};
     motion.width_policy = SizePolicy::fixed(13);
-    auto ascii = CheckBox{{.checked = theme_index == 2, .label = {.text = "ASCII"}}};
+    auto ascii = CheckBox{{.checked = theme_presets[theme_index].make().ascii, .label = {.text = "ASCII"}}};
     ascii.width_policy = SizePolicy::fixed(12);
     auto toolbar = Row{std::tie(brand, theme_choice, motion, ascii)};
     panel_height(toolbar, 1);
@@ -542,8 +573,7 @@ int main(int argc, char** argv)
 
     auto update_theme = [&] {
         auto index = theme_choice.selected_index().value_or(0);
-        auto visual = index == 0 ? Theme::dark()
-                                 : (index == 1 ? Theme::light() : Theme::terminal());
+        auto visual = theme_presets[index].make();
         visual.motion.enabled = motion.checked();
         visual.ascii = ascii.checked();
         app.set_theme(visual);
@@ -557,7 +587,7 @@ int main(int argc, char** argv)
         report("Viewing " + std::string{tabs.labels()[i]});
     };
     theme_choice.on_change.connect([&](auto index) {
-        if (index == 2) ascii.set_checked(true);
+        ascii.set_checked(theme_presets[index.value_or(0)].make().ascii);
         update_theme();
     });
     motion.on_change.connect([&](bool) { update_theme(); });
@@ -678,23 +708,20 @@ int main(int argc, char** argv)
                      dialog.show();
                      return EventResponse{.repaint = true};
                  }});
-    auto dark = command({.text = "Dark theme", .keywords = "appearance", .action = [&] {
-                             close_commands();
-                             theme_choice.select(0);
-                             return EventResponse{.repaint = true};
-                         }});
-    auto light =
-        command({.text = "Light theme", .keywords = "appearance", .action = [&] {
-                     close_commands();
-                     theme_choice.select(1);
-                     return EventResponse{.repaint = true};
-                 }});
-    auto terminal = command(
-        {.text = "Terminal palette", .keywords = "appearance ascii", .action = [&] {
-             close_commands();
-             theme_choice.select(2);
-             return EventResponse{.repaint = true};
-         }});
+    auto theme_commands = std::vector<std::shared_ptr<Command>>{};
+    auto theme_menu = std::vector<MenuItem>{};
+    for (std::size_t i = 0; i < theme_presets.size(); ++i) {
+        auto choose = command({
+            .text = std::string{theme_presets[i].label} + " theme",
+            .keywords = "appearance palette",
+            .action = [&, i] {
+                close_commands();
+                theme_choice.select(i);
+                return EventResponse{.repaint = true};
+            }});
+        theme_commands.push_back(choose);
+        theme_menu.push_back({.command = choose});
+    }
     auto toggle_motion = command({.text = "Toggle motion",
                                   .keywords = "accessibility",
                                   .action =
@@ -728,8 +755,11 @@ int main(int argc, char** argv)
                          .keywords = "exit",
                          .action = [] { return EventResponse{.quit = 0}; },
                          .keys = {{U'q', {.ctrl = true}}}});
-    commands.set_commands({run_command, show_commands, open_dialog, dark, light,
-                           terminal, toggle_motion, files_command, quit});
+    auto palette_commands = std::vector<std::shared_ptr<Command>>{
+        run_command, show_commands, open_dialog, toggle_motion, files_command, quit};
+    palette_commands.insert(palette_commands.end(), theme_commands.begin(),
+                            theme_commands.end());
+    commands.set_commands(std::move(palette_commands));
     menu = MenuBar{
         {{"Explore",
           {{.command = overview_command},
@@ -740,7 +770,7 @@ int main(int argc, char** argv)
           {{.command = show_commands},
            {.command = open_dialog},
            {.command = command({.text = "Theme"}),
-            .children = {{.command = dark}, {.command = light}, {.command = terminal}}},
+            .children = std::move(theme_menu)},
            {.command = toggle_motion},
            {.command = quit}}}}};
     panel_height(menu, 1);
@@ -760,7 +790,8 @@ int main(int argc, char** argv)
                  .action =
                      [&] {
                          theme_choice.select(
-                             (theme_choice.selected_index().value_or(0) + 1) % 3);
+                             (theme_choice.selected_index().value_or(0) + 1) %
+                             theme_presets.size());
                          return EventResponse{.repaint = true};
                      },
                  .keys = {{KeyCode::F2, {}}}}),
@@ -803,9 +834,14 @@ int main(int argc, char** argv)
             search.set_text("Text");
             if (table.rows().size() != 1) return 5;
             search.set_text("");
-            for (std::size_t i = 0; i < 3; ++i) {
+            for (std::size_t i = 0; i < theme_presets.size(); ++i) {
                 theme_choice.select(i);
-                render({80, 24});
+                for (auto size : {Area{120, 38}, Area{80, 24}, Area{40, 16},
+                                  Area{1, 1}, Area{0, 0}})
+                    for (std::size_t page = 0; page < 6; ++page) {
+                        tabs.select(page);
+                        render(size);
+                    }
             }
             tabs.select(0);
             render({80, 24});

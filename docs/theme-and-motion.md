@@ -10,15 +10,50 @@ app.set_theme(theme);
 return app.run({.mouse_mode = ox::MouseMode::Move});
 ```
 
-`Theme::dark()` uses graphite green surfaces, copper accents, and teal secondary
-color. `Theme::light()` uses warm light surfaces with the same roles.
-`Theme::terminal()` uses the terminal's colors and ASCII control decorations.
-`Theme::plain()` is the default and retains existing drawing and layout.
+`Theme::plain()` is the default. Choose a preset to apply colors and styling
+throughout the application.
 
 The styled themes use open-ended focus marks, a moving tab underline, restrained
 selection backgrounds, generous button insets, and fractional progress fills.
 Widget values, selection, focus, and input remain immediate. Motion affects
 presentation; tab contents change immediately while the underline moves.
+
+## On this page
+
+- [Presets](#presets)
+- [Colors and overrides](#colors-and-overrides)
+- [Motion](#motion)
+- [Lines and endpoints](#lines-and-endpoints)
+- [Keyboard help](#keyboard-help)
+- [Showcase](#showcase)
+
+## Presets
+
+| Factory | Appearance |
+| --- | --- |
+| `Theme::dark()` | Graphite green surfaces, copper and teal accents |
+| `Theme::light()` | Warm light surfaces, copper and teal accents |
+| `Theme::ocean()` | Deep blue surfaces, cyan and periwinkle accents |
+| `Theme::ember()` | Warm charcoal surfaces, amber and rose accents |
+| `Theme::violet()` | Aubergine surfaces, lavender and mint accents |
+| `Theme::paper()` | Ivory surfaces, dark ink and blue accents |
+| `Theme::high_contrast()` | Black surfaces, white text, yellow accents and bright borders |
+| `Theme::terminal()` | Terminal palette colors and ASCII decorations |
+| `Theme::plain()` | Unstyled drawing with explicit widget colors |
+
+![Dark, Light, Ocean, Ember, Violet, Paper, and High Contrast palette samples](img/theme-palettes.svg)
+
+Terminal uses the terminal's configured colors, so its appearance varies. Plain
+leaves styling to the application. Neither has a fixed palette preview.
+
+The RGB presets share the same widget styling and motion defaults. Each defines
+all ten palette roles; colors can be changed individually:
+
+```cpp
+auto theme = ox::Theme::ocean();
+theme.palette.accent = ox::RGB{0xffcc88};
+app.set_theme(theme);
+```
 
 ## Colors and overrides
 
@@ -118,8 +153,8 @@ Nonfinite coordinates, negative lengths, and overflowing endpoints are rejected.
 `ascii = true` uses ordinary ASCII strokes instead. Custom dashed, dotted, double,
 and box presets retain their configured glyphs.
 
-Progress fills still use eighth-cell block characters. An almost-empty partial
-cell now shows the track instead of a blank, and vertical meters use vertical
+Progress fills use eighth-cell block characters. An almost-empty partial
+cell shows the track, and vertical meters use vertical
 strokes. A partly filled block and a thin track cannot occupy the same cell as
 separate glyphs; their appearance also depends on the terminal font.
 
@@ -149,6 +184,7 @@ Build and run from the repository root:
 cmake -S . -B build
 cmake --build build --target TermOx.examples.showcase
 ./build/examples/TermOx.examples.showcase
+./build/examples/TermOx.examples.showcase --theme ocean
 ```
 
 The six pages cover animation and values; a validated form and selection controls;
@@ -157,8 +193,10 @@ labels; pixel graphics; and file picking. Menus, a command palette, dialogs,
 keyboard help, linked scrollbars, and responsive layouts connect the pages.
 
 Use Tab for focus, Ctrl+Tab to change pages, Ctrl+P for commands, F1 for expanded
-help, F2 for theme, F3 for motion, and Ctrl+C to exit. The toolbar also exposes
-motion and ASCII controls. The example offers deterministic headless checks:
+help, F2 to cycle themes, F3 for motion, and Ctrl+C to exit. Choose a theme from
+the toolbar, the Actions → Theme menu, or the command palette. Selecting a preset
+also selects its ASCII setting; the toolbar's ASCII checkbox can override it.
+Motion has its own checkbox. The example offers deterministic headless checks:
 
 ```sh
 ./build/examples/TermOx.examples.showcase --check
@@ -169,7 +207,9 @@ motion and ASCII controls. The example offers deterministic headless checks:
 On POSIX systems, run `python3 -B tests/smoke_showcase.py build` to exercise input,
 resizing, overlays, and terminal restoration through a pseudo-terminal.
 
-`--page` accepts 0–5. `--terminal` chooses terminal colors. Dumps disable motion
+`--theme` accepts `dark`, `light`, `terminal`, `ocean`, `ember`, `violet`, `paper`,
+and `high-contrast`. `--light` and `--terminal` are shortcuts for those presets.
+`--page` accepts 0–5. Dumps disable motion
 and print actual frame contents; JSON includes each cell's text, width, and RGB
-colors when present. `--check` exercises every page at large, narrow, tiny, and
-zero sizes, plus validation, filtering, overlays, and theme changes.
+colors when present. `--check` exercises every page in every selectable theme at
+large, narrow, tiny, and zero sizes, plus validation, filtering, and overlays.

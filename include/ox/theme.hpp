@@ -31,6 +31,16 @@ struct Theme {
     bool ascii = false;
     static auto dark() -> Theme;
     static auto light() -> Theme;
+    /** Deep blue surfaces with cyan and periwinkle accents. */
+    static auto ocean() -> Theme;
+    /** Warm charcoal surfaces with amber and rose accents. */
+    static auto ember() -> Theme;
+    /** Aubergine surfaces with lavender and mint accents. */
+    static auto violet() -> Theme;
+    /** Ivory surfaces with dark ink and blue accents. */
+    static auto paper() -> Theme;
+    /** Black surfaces with bright text, yellow accents, and clear borders. */
+    static auto high_contrast() -> Theme;
     static auto terminal() -> Theme;
     /** Preserve unthemed drawing and existing explicit styling. */
     static auto plain() -> Theme;
