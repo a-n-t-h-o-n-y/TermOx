@@ -57,8 +57,10 @@ callbacks, sorting/filtering, and viewport rules. The Data page in the
 ## ox::ScrollBar
 
 A vertical or horizontal scroll control with content_length, viewport_length,
-position, style, and optional scroll_settle_time animation. set_position notifies
-only on change; set_range synchronizes without feedback. Shared pure functions in
+position, style, and optional thumb animation through scroll_settle_time. Scroll
+positions commit immediately; animation frames do not emit on_scroll.
+set_position notifies only on change; set_range synchronizes without feedback.
+Shared pure functions in
 `<ox/scroll.hpp>` compute limits, movement, reveal ranges, and thumb/click geometry.
 
 See [data tables and scrolling](../data-tables.md#shared-scrolling-functions).

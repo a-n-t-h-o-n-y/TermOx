@@ -155,7 +155,9 @@ Both text widgets expose `text()` and a read-only `editor()` view. Use `set_text
 is rejected. Commands request layout/repaint and coalesce notifications.
 
 `on_change(string const&)` carries a stable text snapshot. `on_selection_change(anchor,
-caret)` carries byte offsets. `read_only` blocks user mutations while preserving selection,
+caret)` carries UTF-8 byte offsets in that order. A backward selection has
+`caret < anchor`; use `editor().selection()` for the sorted half-open range.
+`read_only` blocks user mutations while preserving selection,
 copying, and programmatic commands. `accept_character(char32_t)` filters typed/pasted
 scalars; `validator(string_view)` checks complete values at submission and permits
 intermediate input. LineEdit submits on Enter, TextBox on Ctrl-Enter. Successful validation

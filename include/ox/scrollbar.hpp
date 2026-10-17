@@ -11,7 +11,10 @@
 
 namespace ox {
 
-/** Scroll positions and lengths use the same units as the controlled content. */
+/** Scroll positions and lengths use the same units as the controlled content.
+ * Position changes commit and notify immediately; optional motion animates only
+ * the thumb. Dragging uses the displayed thumb and cancels settling.
+ */
 class ScrollBar : public Widget {
    public:
     using Widget::handle;
@@ -31,8 +34,8 @@ class ScrollBar : public Widget {
         StylePatch track_style = {};
         /** Style patch for the visible scrollbar thumb. */
         StylePatch thumb_style = {};
-        /** Positive duration for animated wheel/page scrolling; nonpositive values
-         * update immediately.
+        /** Positive duration for thumb settling after wheel/track input; the scroll
+         * position commits immediately. Nonpositive values disable thumb motion.
          */
         std::chrono::milliseconds scroll_settle_time = std::chrono::milliseconds{0};
     } static const init; ///< Default options used when no explicit configuration is supplied.
@@ -41,7 +44,7 @@ class ScrollBar : public Widget {
     auto content_length() const -> int { return content_length_; }
     /** Return the visible controlled-axis length. */
     auto viewport_length() const -> int { return viewport_length_; }
-    /** Return the current clamped offset; animated scrolling updates it on each frame. */
+    /** Return the committed clamped offset, independent of thumb animation. */
     auto position() const -> int { return position_; }
     /** Control the vertical axis when true; choose orientation before link(). */
     bool vertical;
@@ -51,12 +54,12 @@ class ScrollBar : public Widget {
     StylePatch track_style;
     /** Style patch for the visible scrollbar thumb. */
     StylePatch thumb_style;
-    /** Positive duration for animated wheel/page scrolling; nonpositive values update
-     * immediately.
+    /** Positive duration for thumb settling after wheel/track input; the scroll
+     * position commits immediately. Nonpositive values disable thumb motion.
      */
     std::chrono::milliseconds scroll_settle_time;
-    /** Emits changed positions from explicit commands and animated scrolling frames;
-     * set_range() stays silent.
+    /** Emits the committed position once per effective input or command change.
+     * Animation frames and set_range() do not emit.
      */
     sl::Signal<void(int)> on_scroll;
 
@@ -76,7 +79,7 @@ class ScrollBar : public Widget {
      * geometry/position cancels animation.
      */
     void set_range(int content, int viewport, int position);
-    /** Explicit position changes notify only on change. */
+    /** Clamp and commit immediately, cancel thumb animation, and notify only on change. */
     auto set_position(int position) -> bool;
     auto measure(Area available, esc::WidthPolicy = {}) const -> Area override
     {
@@ -98,6 +101,7 @@ class ScrollBar : public Widget {
     int position_;
     std::optional<int> drag_offset_;
     Animation movement_{*this};
+    auto visual_position() const -> int;
     auto move_to(int position) -> EventResponse;
 };
 }  // namespace ox

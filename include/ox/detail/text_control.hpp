@@ -116,7 +116,7 @@ class TextControl : public Widget {
     /** Emits UTF-8 byte offsets (anchor, caret) when either changes; reversed selections
      * have caret < anchor.
      */
-    sl::Signal<void(std::size_t, std::size_t)> on_selection_change;
+    sl::Signal<void(std::size_t anchor, std::size_t caret)> on_selection_change;
     /** Emits the complete document when submit() passes the optional whole-value validator. */
     sl::Signal<void(std::string const&)> on_submit;
     /** Emits the complete document when the optional whole-value validator rejects

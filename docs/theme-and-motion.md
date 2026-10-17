@@ -94,7 +94,8 @@ The policy provides `feedback` (120 ms), `selection` (240 ms), and `progress`
 (240 ms) durations, plus a shared frame-rate limit (60 by default; 1–240 allowed).
 Zero durations settle immediately. Buttons, tabs, progress bars, and scrollbar
 settling share the event loop's frame clock. Idle transitions schedule no wakes.
-Dragging scrollbars and editing values remain direct.
+Scroll positions commit immediately; only the scrollbar thumb eases toward its
+target. Dragging scrollbars and editing values remain direct.
 
 Custom widgets can bind presentation to their lifetime:
 

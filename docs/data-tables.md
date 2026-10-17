@@ -122,9 +122,12 @@ with public vertical/style configuration.
 set_position clamps, schedules paint, and emits on_scroll(int) only on change.
 set_range(content, viewport, position) synchronizes without emitting, avoiding feedback
 loops. Painting is passive. Wheel steps use content units; clicks center the thumb.
-Scrolling is immediate by default. Set scroll_settle_time to a positive duration for a
-lazy, move-aware timer and elapsed-time easing. Nonpositive durations are immediate.
-A range change cancels animation; feedback of an unchanged position/range preserves it.
+Scrolling always commits immediately and emits `on_scroll` once per changed position.
+Set `scroll_settle_time` to a positive duration to animate the thumb toward that
+position; animation frames do not change content or emit scroll signals. Nonpositive
+durations disable thumb motion. A range change cancels animation; feedback of an
+unchanged position/range preserves it. Grabbing a moving thumb stops it at its
+displayed position and begins direct dragging.
 
 ## Linking a scrollbar
 

@@ -25,21 +25,13 @@ ScrollBar::ScrollBar(Options x)
       position_{clamp_scroll(x.position, x.content_length, x.viewport_length)}
 {
     movement_.reset(position_);
-    movement_.on_frame([lifetime = track(*this)](double value) {
+    movement_.on_frame([lifetime = track(*this)](double) {
         auto* self = lifetime.try_get();
         if (!self) return EventResponse{};
         if (self->scroll_settle_time.count() <= 0) {
-            value = self->movement_.target();
-            self->movement_.reset(value);
+            self->movement_.reset(self->position_);
         }
-        auto next = clamp_scroll((int)std::llround(value), self->content_length_,
-                                 self->viewport_length_);
-        auto changed = std::exchange(self->position_, next) != next;
-        if (changed) {
-            self->request_repaint();
-            self->on_scroll(next);
-        }
-        return EventResponse{.repaint = changed};
+        return EventResponse{.repaint = true};
     });
 }
 void ScrollBar::set_range(int content, int viewport, int requested)
@@ -94,6 +86,12 @@ auto ScrollBar::set_position(int requested) -> bool
     on_scroll(next);
     return true;
 }
+auto ScrollBar::visual_position() const -> int
+{
+    return scroll_settle_time.count() > 0 && movement_.active()
+               ? (int)std::llround(movement_.value())
+               : position_;
+}
 auto ScrollBar::paint(Canvas canvas) -> Cursor
 {
     auto thumb_ink = appearance(style, Surface::Accent) | thumb_style;
@@ -104,7 +102,7 @@ auto ScrollBar::paint(Canvas canvas) -> Cursor
     }
     fill(canvas, track_ink);
     auto const [offset, length] =
-        scrollbar_thumb(position_, content_length_, viewport_length_,
+        scrollbar_thumb(visual_position(), content_length_, viewport_length_,
                         vertical ? canvas.size().height : canvas.size().width);
     if (theme().styled && !theme().ascii) {
         paint_rule(canvas, offset, length, thumb_ink, track_ink, vertical);
@@ -123,22 +121,26 @@ auto ScrollBar::move_to(int requested) -> EventResponse
     requested = clamp_scroll(requested, content_length_, viewport_length_);
     if (scroll_settle_time.count() <= 0 || !theme().motion.enabled)
         return {.handled = true, .repaint = set_position(requested)};
+    if (position_ == requested) return {.handled = true};
     movement_.to(requested, {scroll_settle_time, Ease::OutCubic});
-    if (!movement_.active())
-        return {.handled = true, .repaint = set_position(requested)};
-    return {.handled = true};
+    position_ = requested;
+    on_scroll(requested);
+    return {.handled = true, .repaint = true};
 }
 auto ScrollBar::handle(MousePress const& event) -> EventResponse
 {
     if (!is_enabled() || event.button != MouseButton::Left) { return {}; }
     auto const track = vertical ? size().height : size().width;
     auto const cell = vertical ? event.at.y : event.at.x;
+    auto const displayed = visual_position();
     auto const [offset, length] =
-        scrollbar_thumb(position_, content_length_, viewport_length_, track);
+        scrollbar_thumb(displayed, content_length_, viewport_length_, track);
     if (cell >= offset && cell < offset + length) {
         drag_offset_ = cell - offset;
+        auto lifetime = ox::track(*this);
         capture_pointer();
-        return {.handled = true};
+        auto* self = lifetime.try_get();
+        return {.handled = true, .repaint = self && self->set_position(displayed)};
     }
     return move_to(scrollbar_position(cell, content_length_, viewport_length_, track));
 }
@@ -179,9 +181,7 @@ auto ScrollBar::handle(MouseWheel const& event) -> EventResponse
 {
     auto const delta = vertical ? event.dy : event.dx;
     if (delta == 0) { return {}; }
-    return move_to(
-        scroll_by(movement_.active() ? (int)std::lround(movement_.target()) : position_,
-                  delta, content_length_, viewport_length_));
+    return move_to(scroll_by(position_, delta, content_length_, viewport_length_));
 }
 auto ScrollBar::tick() -> EventResponse { return movement_.advance(); }
 }  // namespace ox

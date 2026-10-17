@@ -194,6 +194,27 @@ TEST(pointer_selection_and_scrollbar_drag_continue_outside_widget_bounds)
     ASSERT(!bar.is_pointer_captured());
 }
 
+TEST(editor_selection_signals_preserve_anchor_caret_order_and_utf8_byte_units)
+{
+    auto check = [](auto& editor) {
+        auto events = std::vector<std::pair<std::size_t, std::size_t>>{};
+        editor.on_selection_change.connect([&](std::size_t anchor, std::size_t caret) {
+            events.emplace_back(anchor, caret);
+        });
+        editor.set_caret(7);
+        editor.set_caret(1, true);
+        ASSERT((events.back() == std::pair<std::size_t, std::size_t>{7, 1}));
+        ASSERT((editor.editor().selection() ==
+                std::pair<std::size_t, std::size_t>{1, 7}));
+        editor.set_caret(8, true);
+        ASSERT((events.back() == std::pair<std::size_t, std::size_t>{7, 8}));
+    };
+    auto line = LineEdit{{.text = "aé🙂z"}};
+    check(line);
+    auto box = TextBox{{.text = "aé🙂z"}};
+    check(box);
+}
+
 TEST(measured_layout_combines_axis_policies_gap_unicode_and_cross_alignment)
 {
     auto row = Row{Label{"界"}, Button{{.label = {.text = "run"}}}};
