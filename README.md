@@ -58,9 +58,4 @@ in your own project.
 - [Examples](examples/README.md): runnable programs, build targets, and walkthroughs.
 - [Table walkthrough](examples/datatable.md): sorting, scrolling, and responding to selection.
 
-Version 3 changes the widget API, event processing, layout, and rendering. Existing
-applications should check the migration sections in the [widget API](docs/widget-api.md),
-[containers and decorations](docs/decorations-layouts.md), and
-[text editing](docs/text-editing.md) guides.
-
 Contributions are welcome. TermOx is released under the [MIT license](LICENSE).

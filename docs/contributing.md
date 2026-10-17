@@ -19,7 +19,9 @@ On macOS or Linux, check interactive input and terminal restoration with:
 ```sh
 cmake --build build --target TermOx.tests.renderer_terminal TermOx.tests.event_loop_terminal \
     TermOx.examples.pong TermOx.examples.pinbox \
-    TermOx.examples.snake TermOx.examples.accumulator TermOx.examples.scratch
+    TermOx.examples.snake TermOx.examples.accumulator \
+    TermOx.examples.datatable TermOx.examples.views TermOx.examples.selection \
+    TermOx.examples.bmp_view
 python3 tests/smoke_examples.py build
 ```
 
@@ -32,15 +34,20 @@ Use relative links so the documentation works in a checkout and on GitHub.
 
 Screenshots should come from the current code. The README's table image is a
 rendering of the example's headless frame, with a dark background and monospace
-font. Older images remain in `docs/img/` for reference; they are not used as
-version-three screenshots.
+font. Other images are stored in `docs/img/`.
+
+## Documentation layout
+
+`reference.md` indexes the interface entries in `reference/`. Topic guides explain
+contracts and composition; walkthroughs live beside their example source in
+`examples/`. Add an entry to the [guides index](README.md) when adding a guide.
 
 ## Background material
 
 - [Performance](performance.md): benchmark commands, recorded environments, and
   measurements from optimization work.
-- [API audit](api-audit.md): drawing, layout, and connection conventions, with
-  migration notes and validation results from that audit.
+- [API audit record](api-audit.md): validation results recorded during the drawing,
+  layout, and connection audit.
 - [Stress Lab](../examples/stress.md): adjustable workloads and headless timing.
 
 Validation counts in historical notes describe those runs, not the current test

@@ -1,10 +1,25 @@
 # Container composition
 
+## On this page
+
+- [Measurement and size policies](#measurement-and-size-policies)
+- [Row and Column](#row-and-column)
+- [Padding](#padding)
+- [Stack](#stack)
+- [ScrollView](#scrollview)
+- [Paint layers and pointer capture](#paint-layers-and-pointer-capture)
+- [Suspended](#suspended)
+- [Shared scrolling interface](#shared-scrolling-interface)
+
+## Measurement and size policies
+
 Widgets measure their natural content with `measure(available, width_policy)`.
 Measurement does not arrange or paint. `width_policy` and `height_policy` independently
 control minimum, maximum, and flexible allocation. Single-line controls default to one
 row; flexible widgets can fill remaining space. Applying `widget | SizePolicy` sets
 both axes; set individual policies for one-axis constraints.
+
+## Row and Column
 
 Row and Column keep ordinary tuple/range storage, measured child sizes, reusable layout
 plans, and move-aware child identities. Set `gap` for spacing and `cross_align` to
@@ -24,15 +39,21 @@ auto pages = ox::Stack{std::move(padded), ox::TextBox{{.text = "Details"}}};
 pages.select(1);
 ```
 
+## Padding
+
 Padding owns one `child`, T/R/B/L `padding`, and a background `style`. Measurement adds
 insets, arrangement clips the child to the interior, and background paints before it.
 Negative insets are rejected; tiny views produce an empty interior.
+
+## Stack
 
 Stack keeps pages in the same ordinary containers as Row/Column. Only its selected page
 participates in the tree, so focus, timers, painting, and pointer capture follow the
 active page. `selected_index()` reads state; `select(optional<size_t>)` changes it and
 emits `on_select`. Invalid indices throw; null selects no page. Pages retain their own
 `visible` flags. Refresh after editing a dynamic pages container.
+
+## ScrollView
 
 ScrollView owns one `child`, measured content, and a clipped two-axis viewport. Supply
 `requested_size` when a custom child needs a specific extent. Read `content_size()`,
@@ -50,6 +71,8 @@ auto bar = ox::ScrollBar{};
 auto connections = ox::link(image, bar);
 ```
 
+## Paint layers and pointer capture
+
 Application painting runs background, own content, children, then overlay for each
 widget. Use `paint_background` for fills and `paint_overlay` for decorations over children.
 The focused widget's `paint` result supplies its cursor.
@@ -59,14 +82,24 @@ its bounds; hover still follows hit testing. Capture follows moves and cancels o
 hiding, disabling, removal, or destruction. Controls clear gesture state through
 `pointer_cancel`. Application and standalone Focus roots also follow moves.
 
-Signal emission snapshots entries: newly connected slots wait until the next emission,
-disconnected pending slots are skipped, and destroying the signal safely cancels pending
-callbacks. Mutable callbacks retain their state between emissions; copies own independent
-callback state. TermOx fetches the fixed upstream SignalsLight revision through CMake. Named
-Connection configuration and borrowed lifetime tracking remain unchanged.
-
 See [selection and application structure](selection-and-application.md) for ListView,
 Select/ComboBox, Tabs, root overlays, menus, dialogs, modal scopes, and scoped shortcuts.
+
+## Suspended
+
+```cpp
+#include <ox/layout.hpp>
+
+auto panel = ox::Suspended{ox::Widget{}, ox::Area{12, 4}};
+ox::arrange(panel, {{}, {20, 10}});
+panel.requested_size = {16, 6};
+panel.refresh();
+```
+
+Suspended owns its child. Its refresh recomputes centered, clamped geometry and notifies
+the child even when geometry is unchanged, matching Row and Column. Painting composes
+fill_outside; normal application traversal paints the child. Invalid requested sizes
+leave child geometry unchanged. Direct fill_glyph changes need a repaint request.
 
 ## Shared scrolling interface
 
@@ -92,6 +125,3 @@ widgets; it tracks their lifetimes and follows widget moves. Returned connection
 allow explicit disconnection from `view.on_scroll` and `bar.on_scroll`. Connections
 remain active when the returned IDs are discarded. A horizontal bar uses
 `ScrollBar{{.vertical = false}}`; link it separately to the same view.
-
-Migration: RadioGroup's integer scroll offset becomes `Point{0, row}`; use
-`scroll_offset().y` to read it and `set_scroll_offset({0, row})` to change it.

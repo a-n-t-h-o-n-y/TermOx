@@ -4,6 +4,17 @@ Widgets expose ordinary configuration and compose with the same geometry, drawin
 text, and event functions used by standalone handlers. Application-owned state has
 read-only access, and handlers return effects explicitly.
 
+## On this page
+
+- [State and geometry](#state-and-geometry)
+- [Measurement and refresh](#measurement-and-refresh)
+- [Input and effects](#input-and-effects)
+- [Pointer capture](#pointer-capture)
+- [Painting](#painting)
+- [Editing bindings](#editing-bindings)
+- [Timers and lifetime](#timers-and-lifetime)
+- [Related guides](#related-guides)
+
 ## State and geometry
 
 `visible`, `enabled`, `focus_policy`, `width_policy`, and `height_policy` are public configuration.
@@ -24,6 +35,20 @@ layout can react to changed content or policy. Validation failure leaves geometr
 intact. If the hook throws, the new geometry remains; layout callbacks are not a
 transaction across a whole subtree. Parents arrange their children through the same
 function. Root positioning starts at the terminal origin.
+
+`WidgetDerived` requires public inheritance and accepts const-qualified targets for borrowing. Widget's header
+includes the drawing, events, geometry, and timer declarations it uses directly, rather
+than relying on the core umbrella header to expose unrelated terminal machinery.
+
+<a id="measurement-containers-and-capture"></a>
+
+## Measurement and refresh
+
+`measure(Area available, esc::WidthPolicy)` returns natural content size without changing
+geometry. Width and height policies independently constrain allocation; `refresh()`
+requests layout and repaint after public configuration changes. Text/content commands
+request these effects automatically. `glyph_width_policy()` reads the attached frame's
+Unicode width policy. `is_enabled()` includes ancestor input eligibility when attached.
 
 ## Input and effects
 
@@ -70,6 +95,13 @@ queues delivery for a later step and is thread safe. `app.set_focus(widget)` and
 effects without an event loop. Keep one focus manager per tree. Destruction releases
 the focus flag without calling lifecycle hooks; call `clear()` explicitly to notify. `app.request_repaint()` and `app.quit(code)` are direct
 commands on the application thread.
+
+## Pointer capture
+
+Use `capture_pointer(button)` to keep receiving motion and matching release outside a
+widget's bounds, and `release_pointer()` to end the gesture. The application cancels
+capture when its owner becomes hidden, disabled, detached, or unavailable. Override
+`pointer_cancel()` to clear gesture state. Capture and the root follow widget moves.
 
 ## Painting
 
@@ -123,63 +155,16 @@ destruction. Empty callbacks are rejected.
 Child enumeration remains a borrowed range through `get_children()`, supporting both
 tuple and dynamic-container composites without imposing a new ownership model.
 
-## Migration
+## Related guides
 
-| Previous API | Current API |
+| Topic | Guide |
 | --- | --- |
-| `active` | `visible` |
-| `focused` | `is_focused()` |
-| assign `at`/`size`, then `resize(old_size)` | `arrange(widget, Rect)`; override `on_arrange(Rect)` |
-| `mouse_press`, `key_press`, `key_release`, `paste` | overloaded `handle(Input const&)` |
-| core `handle_key_press`, `handle_paint`, `handle_resize` | `handle(KeyEvent const&)`, `paint(Canvas)`, `handle(esc::Resize const&)` |
-| widget `cursor` and `void paint(Canvas)` | cursor returned from `paint(Canvas)` |
-| `app.focus().set/clear` | `app.set_focus/clear_focus` |
-| `Timer(widget, interval)` and virtual `timer()` | `Timer(widget, interval, callback)` |
-| `TextEdit::key_press` | `edit_key(edit, event, layout, validator)` |
-| `apply_event(event, handler, frame)` | `dispatch(event, handler, frame)` |
-| public `lifetime` storage | `track(widget)` and `try_get()` |
-
-The previous interfaces are removed; there are no compatibility adapters.
-
-Button, CheckBox, and RadioGroup compose the free activation/selection functions in
-`<ox/controls.hpp>`. See [control composition](controls.md) for their explicit state,
-style patches, change notifications, and migration details.
-
-DataTable and ScrollBar compose shared viewport functions from `<ox/scroll.hpp>`.
-See [data tables and scrolling](data-tables.md) for row-based data, sorting, selection,
-Unicode clipping, two-axis viewports, and the updated scrollbar/TextBox signals.
-
-Bordered/Divider use plain label configuration and shared drawing functions. Row/Column
-keep ordinary containers, expose refresh(), and reuse unchanged geometry while refreshing
-descendants. See [decorations and layouts](decorations-layouts.md) for callback safety
-and migration.
-
-PixelGrid composes `paint_pixels(Canvas, Area, span<RGB const>, Color)` and ordinary
-row-major RGB storage. Dimensions and storage are kept consistent; spans permit batch
-edits, and mutation commands request repaint. See [PixelGrid](reference.md#-oxpixelgrid)
-for checked indexing, clipping, move behavior, and migration from the removed Matrix API.
-
-See the [final API audit](api-audit.md) for named signal connections, ownership rules,
-Suspended refresh, shared margin/style drawing, and removed unused declarations.
-
-## Measurement, containers, and capture
-
-`measure(Area available, esc::WidthPolicy)` returns natural content size without changing
-geometry. Width and height policies independently constrain allocation; `refresh()`
-requests layout and repaint after public configuration changes. Text/content commands
-request these effects automatically. `glyph_width_policy()` reads the attached frame's
-Unicode width policy. `is_enabled()` includes ancestor input eligibility when attached.
-
-Use `capture_pointer(button)` to keep receiving motion and matching release outside a
-widget's bounds, and `release_pointer()` to end the gesture. The application cancels
-capture when its owner becomes hidden, disabled, detached, or unavailable. Override
-`pointer_cancel()` to clear gesture state. Capture and the root follow widget moves.
-
-See [container composition](containers.md) and [text editing](text-editing.md).
-
-See [selection and application structure](selection-and-application.md) for ListView,
-Select/ComboBox, Tabs, root overlays, menus, dialogs, modal scopes, and scoped shortcuts.
-
-See [values and composite widgets](value-and-composite-widgets.md) for Slider,
-NumericEdit, ProgressBar, Spinner, Switch, TreeView, LogView, SplitPane, Form,
-FilePicker, and CommandPalette.
+| Signal callbacks and tracked widget arguments | [Connections and lifetime](connections.md) |
+| Layout containers and shared scrolling | [Container composition](containers.md) |
+| Borders, dividers, and labels | [Decorations and layouts](decorations-layouts.md) |
+| Buttons, checkboxes, and radio groups | [Controls](controls.md) |
+| Tables and scrollbars | [Data tables](data-tables.md) |
+| Editors and text views | [Text editing](text-editing.md) |
+| Lists, choices, tabs, overlays, and menus | [Selection widgets](selection-and-application.md) |
+| Values, trees, logs, forms, and files | [Composite widgets](value-and-composite-widgets.md) |
+| Pixel images | [PixelGrid reference](reference/drawing.md#oxpixelgrid) |

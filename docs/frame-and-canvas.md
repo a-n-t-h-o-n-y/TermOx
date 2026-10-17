@@ -16,6 +16,14 @@ put(panel, {0, 0}, "Hello 界");
 fill(panel, bg(colors::blue));
 ```
 
+## On this page
+
+- [Frame storage](#frame-storage)
+- [Resize and lifetime](#resize-and-lifetime)
+- [Coordinates and clipping](#coordinates-and-clipping)
+- [Drawing](#drawing)
+- [Terminal integration](#terminal-integration)
+
 ## Frame storage
 
 A leading `Cell` owns one complete UTF-32 grapheme, one `Style`, and its number of
@@ -96,7 +104,9 @@ replace either half because the complete old footprint belongs to its view.
 
 ## Drawing
 
-`put()` accepts a glyph, UTF-8/UTF-32 text, glyph ranges, and line or box shapes. Text is
+`put()` accepts a glyph, UTF-8/UTF-32 text, glyph ranges, and line or box shapes.
+Spans and contiguous containers use the same `StylePatch` behavior as other glyph
+ranges. Drawing functions borrow the canvas and perform no terminal I/O. Text is
 validated before any cells are modified. A styled glyph range must assign one style
 to every scalar of each grapheme; mixing styles within a single grapheme is rejected.
 Shape symbols must occupy one column; a zero symbol in a shape descriptor omits that
@@ -112,7 +122,17 @@ Style, foreground, background, and trait fills change appearance without changin
 they update all cells of each fully visible footprint together. `clear(canvas)` fills
 eligible cells with default spaces. Every fill obeys the inherited clip.
 
-The existing widgets now paint through these operations. Text painting measures columns
+UTF-8/text/style validation precedes writes. `validate(Style const&)` shares color
+channel validation between drawing helpers, Canvas, and Frame. Allocation failures
+while painting are not a frame transaction.
+
+`fill_outside(canvas, content, glyph)` fills margins around a parent-local Rect, after
+intersecting the content with the logical canvas. Empty or disjoint content fills the
+whole visible view. Full content leaves it untouched. Negative dimensions or an invalid
+fill glyph are rejected before drawing, even if there is no margin to paint. Complete
+wide content glyphs and inherited clips remain protected by Canvas.
+
+Widgets paint through these operations. Text painting measures columns
 and avoids splitting graphemes. Their editing uses the [text editing core](text-editing.md), with grapheme-boundary
 carets, selection, and layout measured in terminal columns.
 

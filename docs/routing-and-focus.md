@@ -3,6 +3,13 @@
 `Application` owns routing, hover state, and focus. All run on the event-loop thread
 and can be exercised with `post()`, `step()`, and `paint()` without opening a terminal.
 
+## On this page
+
+- [Tree and geometry](#tree-and-geometry)
+- [Responses and propagation](#responses-and-propagation)
+- [Focus ownership and lifetime](#focus-ownership-and-lifetime)
+- [Callback mutations](#callback-mutations)
+
 ## Tree and geometry
 
 `widget_tree(root)` returns a depth-first vector of `WidgetNode` values.
@@ -44,7 +51,7 @@ auto handle(ox::KeyEvent const& key) -> ox::EventResponse override
 `handled` stops input propagation; `repaint` requests painting; `quit` stops dispatch
 and requests an exit code. These decisions are independent. Default widget callbacks
 return an empty response. `combine(a, b)` combines effects and preserves the first
-exit request. This replaces the previous void callback API completely.
+exit request.
 
 Mouse input goes to the deepest hit target, then propagates through its ancestors until
 handled or quitting. Each receiver gets its own local coordinates. A left press
@@ -115,7 +122,7 @@ single-threaded for widget mutation; background work should post an event-loop a
 Headless regression tests exercise nested clipping and translation, overlap, bubbling,
 Tab navigation, focus recovery and relocation, hover transitions, callback removal,
 reentrant focus changes, explicit repaint and quit, timer eligibility, and checked
-coordinate arithmetic. Pseudo-terminal smoke tests cover the migrated examples.
+coordinate arithmetic. Pseudo-terminal smoke tests cover interactive input and terminal restoration.
 
 Traversal and attachment storage are reused. An unchanged tree skips attachment
 reconciliation, and an unchanged hover path needs no allocation. Focus consumes its

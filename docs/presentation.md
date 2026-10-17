@@ -1,13 +1,15 @@
 # Quiet details for widgets
 
-Build `TermOx.examples.polish` and run it to compare Minimal, Refined and Roomy
-presentations. Its switches enable details independently; its theme selector compares
-dark, light and terminal colors. Alt-S stacks the panes. The example composes existing
-`Padding`, `Border`, `SplitPane`, `ScrollBar` and `link` with ordinary TextBox/DataTable
-controls. `--check` exercises three presets, three themes and five terminal sizes.
-
 Headers, cells, selections, editor text, gutters and current lines have independent
 visual roles. These use owned state, direct options and Canvas painting.
+
+## On this page
+
+- [TextBox and LineEdit](#textbox-and-lineedit)
+- [DataTable](#datatable)
+- [Lists and trees](#lists-and-trees)
+- [Buttons and choice indicators](#buttons-and-choice-indicators)
+- [Values, activity and tabs](#values-activity-and-tabs)
 
 ## TextBox and LineEdit
 
@@ -97,7 +99,8 @@ row remains selected through sorting. Replacing data, inserting a row or modifyi
 the sorted column clears the indicator; erasing rows or changing another column
 preserves it. Comparators that throw preserve the previous model/order. Header clicks
 still emit `on_header`; the application chooses whether/how to sort. Unicode markers
-become `^`/`v` in the ASCII theme. The example demonstrates numeric sorting explicitly.
+become `^`/`v` in the ASCII theme. The [table walkthrough](../examples/datatable.md#sort-when-a-heading-is-clicked)
+explains numeric sorting.
 
 ```cpp
 auto table = ox::DataTable{{.columns = {{"Project"}, {"Status"}},
@@ -114,13 +117,6 @@ Call `refresh()` after changing presentation fields. Use mouse move reporting fo
 hover (`Application::run({.mouse_mode = MouseMode::Move})`). Plain themes use explicit
 stripe/hover patches; styled themes supply the subtle automatic colors. Border shape,
 outer spacing, scrollbars, captions and status/help lines remain ordinary composition.
-
-```sh
-cmake --build build-release --target TermOx.examples.polish
-./build-release/examples/TermOx.examples.polish
-./build-release/examples/TermOx.examples.polish --check
-python3 tests/smoke_polish.py build-release
-```
 
 ## Lists and trees
 
@@ -171,7 +167,7 @@ The style order is themed feedback → focus/blur → hover → pressed → disa
 The marker switch hides the keyboard focus marks; focus styling and existing button
 spacing remain. Decorations and fades remain ordinary composed paint functions.
 
-Checkbox and switch labels now keep the normal text color; accent/muted colors belong
+Checkbox and switch labels keep the normal text color; accent/muted colors belong
 to their indicators. `indicator_style` patches either state, then `checked_style` or
 `unchecked_style` applies to the indicator alone. RadioGroup uses the same split, with
 `indicator_style`, `selected_style` and `unselected_style`. `focused_style` still
@@ -206,9 +202,3 @@ existing `selected_style`. `show_separator=false` removes the themed indicator r
 and gives its row back to the page. Call `refresh()` when toggling it; page geometry,
 measurement and tab mouse hits use the same strip height. Plain themes retain a
 one-row strip. Border, padding, captions and help text remain separate components.
-
-The polish example's **More controls** page puts these details together. Click its
-tab or press **Alt-V** to switch pages. Both pages share the preset and theme controls;
-the second page includes multi-selection, a tree, radio buttons, a switch, linked
-slider/progress, a spinner and a button. `--check` exercises both pages across the
-preset/theme/size matrix.

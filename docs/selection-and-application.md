@@ -3,6 +3,15 @@
 Include `<ox/ox.hpp>` or the individual headers `selection.hpp`, `listview.hpp`,
 `select.hpp`, `tabs.hpp`, `popup.hpp`, and `menu.hpp`.
 
+## On this page
+
+- [Shared row components](#shared-row-components)
+- [ListView](#listview)
+- [Select and ComboBox](#select-and-combobox)
+- [Tabs](#tabs)
+- [Root overlays, popups, and dialogs](#root-overlays-popups-and-dialogs)
+- [Menus](#menus)
+
 ## Shared row components
 
 `RowSelection` is an ordinary value containing sorted selected `rows`, a keyboard
@@ -47,8 +56,8 @@ Navigation and explicit selection reveal the cursor. Selecting an already select
 can restore its viewport without emitting another selection change. `link(list, bar)` supports either axis and returns both
 connection identifiers. Rendering visits only clipped rows and reuses per-item layouts.
 
-RadioGroup keeps its existing string-items/optional-index API. It now shares navigation,
-supports Home/End/PageUp/PageDown, wheel scrolling, and `set_item_enabled(index, bool)`.
+RadioGroup uses string items and optional selection indices. It supports
+Home/End/PageUp/PageDown, wheel scrolling, and `set_item_enabled(index, bool)`.
 Selection reveals the chosen row, and disabled rows are skipped. `scroll_offset()` and
 `set_scroll_offset(Point)` control the vertical viewport; x is always zero.
 

@@ -27,6 +27,16 @@ int main()
 }
 ```
 
+## On this page
+
+- [Borders](#borders)
+- [Dividers](#dividers)
+- [Label orientation](#label-orientation)
+- [Row and Column refresh](#row-and-column-refresh)
+- [Related guides](#related-guides)
+
+## Borders
+
 `border_content_rect(Area)` gives the child's parent-local rectangle. The border uses
 one cell on each side; dimensions smaller than two leave an empty interior. Its origin
 is clamped to the available area, including zero-sized views. Bordered uses this function
@@ -35,13 +45,15 @@ and overlays the title along the top edge between the corners, leaving the inter
 untouched. Label alignment/style are independent of the box style. Label width/height policies
 are unused in decorations. Bordered still exposes child/border and supports `widget | Border`.
 
+## Dividers
+
 Divider has explicit `vertical` configuration, defaulting to false, even in a 1×1 view.
 Put a vertical divider in a Row and a horizontal one in a Column. Its width is fixed(1) when vertical; its height is fixed(1) when horizontal. Larger views draw the line down the middle of
 the cross axis. `paint_divider` clears its view, draws that line, and overlays its label.
 Horizontal labels are ordinary text; vertical labels stack one grapheme per row, with
 each centered across the width. For vertical labels, `Align::Start/Center/End` means
 top/middle/bottom along the vertical axis. A glyph too wide for the view ends the fitting
-prefix. Lines::ascii now correctly uses `|` vertically and `-` horizontally.
+prefix. Lines::ascii uses `|` vertically and `-` horizontally.
 
 ## Label orientation
 
@@ -129,18 +141,7 @@ Borrowed child enumeration uses one coroutine frame rather than nested forwardin
 coroutines for tuple children. Keep the container stable while iterating that borrowed
 range. Arrangement itself does not use the borrowed generator.
 
-## Migration
+## Related guides
 
-- Border::label and Divider::label change from Label widgets to Label::Options.
-  Replace `.label = "Title"` with `.label = {.text = "Title"}`.
-- Divider no longer guesses direction from dimensions. Set `.vertical = true` for
-  vertical dividers. The previously unused label option now draws its label.
-- Row/Column retain their public names, CTAD, ordinary containers, and get_child helpers.
-  Use refresh after mutations rather than spelling arrange(layout, layout.bounds()).
-- put_label is the drawing-only counterpart of paint_label. paint_label now clears
-  previous text when painting directly into a reused canvas.
-
-There are no compatibility adapters.
-
-See [container composition](containers.md) for measurement, gap/cross alignment,
+See [Container composition](containers.md) for measurement, gap/cross alignment,
 Padding, Stack, ScrollView, and paint layers.

@@ -1,5 +1,26 @@
 # Headless performance benchmarks
 
+Commands and recorded measurements from the refactor. Each run identifies its
+environment and comparison; validation counts describe that revision.
+
+## On this page
+
+- [Running benchmarks](#running-benchmarks)
+- [Initial optimization pass](#initial-optimization-pass)
+- [Routing and focus optimization pass](#routing-and-focus-optimization-pass)
+- [Text editing optimization pass](#text-editing-optimization-pass)
+- [Text layout construction optimization pass](#text-layout-construction-optimization-pass)
+- [Idle waiting and row revisions](#idle-waiting-and-row-revisions)
+- [Paint pipeline and complete application frames](#paint-pipeline-and-complete-application-frames)
+- [Text widget composition and cached drawing](#text-widget-composition-and-cached-drawing)
+- [Incremental layout and control composition](#incremental-layout-and-control-composition)
+- [DataTable viewport scaling](#datatable-viewport-scaling)
+- [Decorations and container arrangement](#decorations-and-container-arrangement)
+- [Pixel image painting](#pixel-image-painting)
+- [Streaming logs, trees, and command searches](#streaming-logs-trees-and-command-searches)
+
+## Running benchmarks
+
 Build and run the benchmark target explicitly using a Release configuration and the
 same C++20 toolchain used for the library:
 
@@ -534,7 +555,6 @@ all TermOx sources instrumented and the unchanged Escape Release library linked.
 Deliberate exception and allocation-fault cases run in Release because the installed
 sanitizer runtime cannot unwind C++ exceptions.
 
-
 ## Incremental layout and control composition
 
 This pass compares `02a0bb6` with incremental TextLayout updates and the composed
@@ -585,7 +605,6 @@ focus state or temporary Label widgets. Styled string/span drawing avoids interm
 label glyph vectors and copies solely for focus styling. Control-specific speedups are
 not measured here; see [control composition](controls.md) for the interface changes.
 
-
 Validation passes all 171 Release cases, including five allocation-fault cases, all six
 example builds, seven PTY smoke checks, and 9,720 cached-painter differential comparisons.
 New tests compare incremental and fresh layouts across 1,080 randomized replacements,
@@ -596,7 +615,6 @@ and README example compile. ASan+UBSan passes 86 non-exception cases with every 
 source instrumented, linking the unchanged Escape Release library. Deliberate exception
 and allocation-fault cases run in Release because the installed sanitizer runtime cannot
 unwind C++ exceptions.
-
 
 ## DataTable viewport scaling
 
@@ -627,8 +645,7 @@ construction and memory use grow with row count. Stable sorting orders indices f
 reserves the new row vector, and then moves row vectors without copying cell strings.
 
 See [data tables and scrolling](data-tables.md) for viewport functions, table ownership,
-selection/sorting, Unicode clipping, linked scrollbar behavior, and breaking API changes.
-
+selection/sorting, Unicode clipping, and linked scrollbar behavior.
 
 Validation passes all 186 Release cases, including six allocation-fault cases; seven
 examples build, including the new interactive table, and eight PTY checks pass.
@@ -639,7 +656,6 @@ resize, reentrant/moving/destructive callbacks, animation, and sort/schema alloc
 failures. ASan+UBSan passes 97 non-exception cases with all TermOx sources instrumented
 and the unchanged Escape Release library linked. Deliberate exception/allocation-fault
 cases run in Release because the installed sanitizer runtime cannot unwind C++ exceptions.
-
 
 ## Decorations and container arrangement
 
@@ -692,8 +708,7 @@ run the core allocation/rounding algorithm; custom child hooks and nested layout
 allocate independently. This does not promise allocation-free application resize.
 
 See [decorations and layouts](decorations-layouts.md) for drawing, geometry, mutation,
-callback safety, and migration details.
-
+and callback safety.
 
 Validation passes all 200 Release cases, including seven allocation-fault cases;
 all seven examples build and eight PTY smoke checks pass. The standalone decoration
@@ -707,7 +722,6 @@ with every TermOx source instrumented and the unchanged Escape Release library l
 Deliberate exception/allocation-fault cases run in Release because the installed
 sanitizer runtime cannot unwind C++ exceptions.
 
-
 ## Pixel image painting
 
 PixelGrid now composes a free painter with validated dimensions and ordinary RGB
@@ -718,8 +732,7 @@ odd final rows and inherited clips retain the same native two-pixels-per-cell ma
 
 The comparison isolates the PixelGrid implementation at `e3be782` against the new
 implementation, using the current core for both. The standalone workload is
-[tests/pixel_benchmarks.cpp](../tests/pixel_benchmarks.cpp); adapt only its image
-constructor to the old Matrix API for the baseline. Both binaries use Clang/libc++22,
+[tests/pixel_benchmarks.cpp](../tests/pixel_benchmarks.cpp). Both binaries use Clang/libc++22,
 Release `-O3 -DNDEBUG`, no LTO/sanitizers, three warmups, five samples of twenty paints,
 and three alternating processes per version. No builds or tests ran during timing.
 Checksums match across every process. Timing includes scanning the physical 80×24
@@ -754,7 +767,7 @@ rollback. BMP fixtures cover all supported depths, row orientation/padding, pale
 bounds, bitfield normalization, invalid headers/masks, and every truncated prefix.
 ASan+UBSan passes 116 non-exception cases with every TermOx source instrumented.
 Intentional exception tests run in Release because the installed sanitizer runtime
-cannot unwind C++ exceptions. See [PixelGrid](reference.md#-oxpixelgrid) for the API.
+cannot unwind C++ exceptions. See [PixelGrid](reference/drawing.md#oxpixelgrid) for the API.
 
 ## Streaming logs, trees, and command searches
 

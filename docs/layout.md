@@ -76,8 +76,7 @@ auto panel = ox::Suspended{ox::TextBox{}, ox::Area{40, 5}};
 panel.requested_size = {30, 8};
 ```
 
-The old `SizePolicy::suspended()` encoding has been removed. A child's one-dimensional
-size policy is not consulted by `Suspended`; the layout's own policy still controls
+A child's one-dimensional size policy is not consulted by `Suspended`; the layout's own policy still controls
 how its parent allocates space to it.
 
 Tests cover exact fits, shortage, weighted growth, caps, unused space, rounding,

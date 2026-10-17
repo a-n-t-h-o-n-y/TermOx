@@ -1,42 +1,56 @@
 # Documentation
 
-Start with [Getting Started](getting_started.md) to build a program, or follow the
-[table walkthrough](../examples/datatable.md) to add sorting and scrolling.
-The [examples index](../examples/README.md) lists runnable programs.
+Use [Getting Started](getting_started.md) to build your first program. The
+[API reference](reference.md) lists interfaces by topic and links to their headers.
+The guides below explain how those interfaces work together.
 
-## Find an interface
+## Tutorials and examples
 
-The [API reference](reference.md) describes public interfaces and links to their
-headers. The topic guides below explain how related interfaces work together.
-
-| Topic | Guide |
+| Start with | What it covers |
 | --- | --- |
-| Widget state, events, painting, and lifetime | [Widget API](widget-api.md) |
-| Padding, stacks, and scroll views | [Container composition](containers.md) |
-| Borders, labels, rows, and columns | [Decorations and layouts](decorations-layouts.md) |
-| Buttons, checkboxes, and radio groups | [Controls](controls.md) |
-| Tables and scrollbars | [Data tables](data-tables.md) |
-| Lists, selects, tabs, popups, dialogs, and menus | [Selection and application structure](selection-and-application.md) |
-| Values, trees, logs, split panes, forms, files, and command search | [Values and composite widgets](value-and-composite-widgets.md) |
-| Shared actions and keyboard shortcuts | [Commands](commands.md) |
-| Colors, animation, rules, and keyboard help | [Theme and motion](theme-and-motion.md) |
-| Gutters, stripes, indicators, and other appearance options | [Widget presentation](presentation.md) |
+| [Getting Started](getting_started.md) | Build the counter, connect a signal, and use TermOx from CMake |
+| [Table walkthrough](../examples/datatable.md) | Lay out a table, sort columns, link a scrollbar, and handle activation |
+| [Examples index](../examples/README.md) | Source files, build targets, demos, and games |
 
-## Application and drawing internals
+## Widgets and layout
 
-These guides cover custom widgets, event handling, and the rendering pipeline.
+Read Widget API for the common contract, then choose a guide for the widgets you
+need. Connections and lifetime explains callback ownership in more detail.
 
-| Topic | Guide |
+| Guide | Contents |
 | --- | --- |
-| Dispatch, repaint requests, timers, and background work | [Application and event loop](event-loop.md) |
-| Event propagation, pointer capture, and focus | [Routing and focus](routing-and-focus.md) |
-| Unicode text, selection, history, and text views | [Text editing](text-editing.md) |
-| Size allocation and placement | [Layout calculation](layout.md) |
-| Frame storage, coordinates, clipping, and drawing | [Frames and canvases](frame-and-canvas.md) |
-| Frame comparison and terminal output | [Renderer](renderer.md) |
+| [Widget API](widget-api.md) | State, measurement, events, painting, timers, and lifetime |
+| [Connections and lifetime](connections.md) | Signal subscriptions, tracked arguments, and callback ownership |
+| [Container composition](containers.md) | Rows, columns, padding, stacks, scroll views, and shared scrolling |
+| [Decorations and layouts](decorations-layouts.md) | Borders, dividers, label orientation, and layout refresh |
+| [Controls](controls.md) | Buttons, checkboxes, radio groups, and shared input helpers |
+| [Data tables](data-tables.md) | Rows, columns, sorting, selection, clipping, and scrollbars |
+| [Selection widgets](selection-and-application.md) | Lists, selects, tabs, popups, dialogs, and menus |
+| [Values and composite widgets](value-and-composite-widgets.md) | Numeric input, values, trees, logs, split panes, forms, files, and command search |
+| [Commands](commands.md) | Shared actions and keyboard shortcuts |
 
-## Maintenance
+## Appearance
 
-[Contributing](contributing.md) covers builds and checks, with links to benchmark
-results and the API audit. Migration notes remain in the relevant topic guides;
-start with the [widget API migration section](widget-api.md#migration).
+| Guide | Contents |
+| --- | --- |
+| [Theme and motion](theme-and-motion.md) | Palette roles, overrides, animation, rules, and keyboard help |
+| [Widget presentation](presentation.md) | Gutters, stripes, indicators, density, and decoration options |
+
+## Application and drawing
+
+Use these guides for custom widgets, background work, or composing the core
+without an Application.
+
+| Guide | Contents |
+| --- | --- |
+| [Application and event loop](event-loop.md) | Dispatch, repaint, posting background work, and timers |
+| [Routing and focus](routing-and-focus.md) | Event propagation, pointer capture, focus, and callback mutations |
+| [Text editing](text-editing.md) | Unicode text, selection, history, text layout, and editor composition |
+| [Layout calculation](layout.md) | Size allocation and placement |
+| [Frames and canvases](frame-and-canvas.md) | Frame storage, coordinates, clipping, and drawing contracts |
+| [Renderer](renderer.md) | Frame comparison and terminal output |
+
+## Contributing
+
+- [Contributing](contributing.md): build checks, documentation conventions, and maintenance records.
+- [Performance](performance.md): benchmark commands and recorded optimization results.

@@ -3,6 +3,17 @@
 Include `<ox/value.hpp>` for Slider, NumericEdit, ProgressBar, Spinner, and Switch.
 The other widgets have their own headers; `<ox/ox.hpp>` includes everything.
 
+## On this page
+
+- [Values and status](#values-and-status)
+- [TreeView](#treeview)
+- [LogView](#logview)
+- [SplitPane](#splitpane)
+- [Forms](#forms)
+- [FilePicker](#filepicker)
+- [CommandPalette](#commandpalette)
+- [Demo](#demo)
+
 ## Values and status
 
 `ValueRange{.minimum=0, .maximum=100, .step=1}` uses finite inclusive bounds and

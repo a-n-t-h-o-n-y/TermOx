@@ -21,6 +21,16 @@ auto clicked = layout.offset({3, 0});
 edit.set_caret(clicked);
 ```
 
+## On this page
+
+- [Text, carets, and selection](#text-carets-and-selection)
+- [Streaming complete lines](#streaming-complete-lines)
+- [Navigation and history](#navigation-and-history)
+- [Layout and display](#layout-and-display)
+- [Widget integration](#widget-integration)
+- [Storage and caching](#storage-and-caching)
+- [Text view composition](#text-view-composition)
+
 ## Text, carets, and selection
 
 `TextEdit` owns its text. `text()` returns a const string reference. Caret and anchor
@@ -135,7 +145,9 @@ the canvas. Drawing walks the layout's cached boundaries and measured widths, wi
 resegmentation or per-grapheme glyph vectors. Tabs paint individual spaces, allowing
 partial clipping; other graphemes retain complete footprints.
 
-## Widget integration and API changes
+<a id="widget-integration-and-api-changes"></a>
+
+## Widget integration
 
 Both text widgets expose `text()` and a read-only `editor()` view. Use `set_text`,
 `set_caret`, `select_all`, `insert`, `undo`, `redo`, or `edit(callback)` for mutations.
@@ -171,6 +183,8 @@ selection and grapheme joining, bounded history, paste transactions, wrapping an
 mapping, width-policy ownership, vertical navigation, cache reuse, extreme hit
 coordinates, randomized edits, and widget/application integration.
 
+## Storage and caching
+
 TextLayout caches terminal coordinates alongside byte boundaries during construction.
 Caret and hit queries use binary searches without decoding or measuring text again.
 See [performance benchmarks](performance.md) for timings and the storage tradeoff.
@@ -198,7 +212,6 @@ Failed updates leave the owned snapshot, policy, coordinates, and existing row s
 intact. Cached columns add one integer per grapheme; reusable buffers retain memory
 proportional to the largest document. See the layout construction measurements in the
 [performance guide](performance.md).
-
 
 ## Text view composition
 
@@ -237,8 +250,8 @@ editor.set_caret(ox::text_offset(layout, {4, 0}, size, align, scroll));
 an edit; the key overload prepares layout before geometry-dependent bindings. They
 use the layout's owned width policy and tab width, return effects, and do not apply
 them to an application. An optional scalar predicate uses an empty `std::function`
-to mean no filtering. `LineEdit::validator` now uses this same simple type; clear it
-with `validator = {}` rather than `std::nullopt`.
+to mean no filtering. `LineEdit::validator` uses this same type; clear it
+with `validator = {}`.
 
 `text_scroll` keeps the caret visible and snaps scrolling to complete grapheme
 boundaries. Short right-aligned text shifts left one cell when necessary to display

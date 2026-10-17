@@ -20,6 +20,12 @@ The root widget must outlive the application. Each widget belongs to one applica
 The application selects the first visible, enabled widget that accepts tab focus. Focus is local
 to the application; use `app.set_focus(widget)`, `app.focus().get()`, or `app.clear_focus()`.
 
+## On this page
+
+- [Dispatch and repaint](#dispatch-and-repaint)
+- [Timers](#timers)
+- [Lower-level composition](#lower-level-composition)
+
 ## Dispatch and repaint
 
 A handler returns an explicit result:
