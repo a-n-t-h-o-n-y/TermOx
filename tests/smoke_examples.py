@@ -145,6 +145,7 @@ def main():
     renderer_smoke(build / "tests" / "TermOx.tests.renderer_terminal")
     examples = build / "examples"
     smoke(examples / "TermOx.examples.pong", [b"\r", b"\x1b[B", b"\x1b[A"])
+    subprocess.run([str(examples / "TermOx.examples.pinbox"), "--check"], check=True)
     smoke(examples / "TermOx.examples.pinbox", [b"\x1b[<0;10;5M", b"\x1b[<32;11;5M", b"\x1b[<0;11;5m"])
     smoke(examples / "TermOx.examples.snake", [b"s", b"j", b"l"])
     smoke(examples / "TermOx.examples.accumulator", [b"\x1b[<0;10;5M", b"\x1b[<0;10;5m", b"\t"])
