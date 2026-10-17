@@ -80,23 +80,69 @@ class PinBox : public Widget {
     Color current_color_ = colors::bright_blue;
 };
 
-class ColorSelect : public Row<std::vector<Button>> {
+class ColorSwatch : public Button {
    public:
+    Color color;
+    Color ink;
+    bool selected = false;
+
+    ColorSwatch(Color color_, Color ink_) : color{color_}, ink{ink_} {}
+    auto paint(Canvas canvas) -> Cursor override
+    {
+        auto style = Style{.background = color, .foreground = ink};
+        fill(canvas, style);
+        if (selected && canvas.size().width > 0)
+            canvas.write({canvas.size().width / 2, 0}, U"*", style);
+        if (is_focused() && canvas.size().width >= 3) {
+            canvas.write({0, 0}, U"[", style);
+            canvas.write({canvas.size().width - 1, 0}, U"]", style);
+        }
+        return {};
+    }
+};
+
+using SwatchRow = Row<std::vector<ColorSwatch>>;
+using PaletteLayout = Column<std::tuple<SwatchRow, SwatchRow, Label>>;
+class ColorSelect : public PaletteLayout {
+   public:
+    struct Choice { Color color; std::string name; Color ink; };
     sl::Signal<void(Color)> on_select;
 
-   public:
-    ColorSelect(std::vector<Color> colors = {})
+    explicit ColorSelect(std::vector<Choice> choices)
+        : PaletteLayout{SwatchRow{}, SwatchRow{}, Label{{.align = Align::Center}}},
+          choices_{std::move(choices)}
     {
-        height_policy = SizePolicy::fixed(1);
-        for (auto const color : colors) {
-            children.push_back({{.label = {.text = "  ",
-                                           .style = {.background = color}},
-                                 .width_policy = SizePolicy::fixed(2)}});
+        height_policy = SizePolicy::fixed(3);
+        auto& first = get_child<0>(*this);
+        auto& second = get_child<1>(*this);
+        first.gap = second.gap = 1;
+        first.height_policy = second.height_policy = SizePolicy::fixed(1);
+        for (std::size_t i = 0; i < choices_.size(); ++i) {
+            auto& row = i < 4 ? first : second;
+            row.children.emplace_back(choices_[i].color, choices_[i].ink);
             Connection{
-                .signal = children.back().on_activate,
-                .slot = [color](auto& parent) { parent.on_select(color); }}(*this);
+                .signal = row.children.back().on_activate,
+                .slot = [i](auto& parent) { parent.select(i); }}(*this);
         }
+        select(0);
     }
+    auto swatch(std::size_t i) -> ColorSwatch&
+    {
+        return i < 4 ? get_child<0>(*this).children[i]
+                     : get_child<1>(*this).children[i - 4];
+    }
+    void select(std::size_t index)
+    {
+        for (std::size_t i = 0; i < choices_.size(); ++i) {
+            swatch(i).selected = i == index;
+            swatch(i).refresh();
+        }
+        get_child<2>(*this).set_text(choices_[index].name);
+        on_select(choices_[index].color);
+    }
+
+   private:
+    std::vector<Choice> choices_;
 };
 
 int main(int argc, char** argv)
@@ -118,14 +164,14 @@ int main(int argc, char** argv)
                     .style = {.traits = Trait::Bold},
                 }},
                 ColorSelect{{
-                    colors::bright_blue,
-                    colors::blue,
-                    colors::bright_red,
-                    colors::red,
-                    colors::bright_green,
-                    colors::green,
-                    colors::white,
-                    colors::bright_black,
+                    {colors::bright_blue, "Bright blue", colors::black},
+                    {colors::blue, "Blue", colors::white},
+                    {colors::bright_red, "Bright red", colors::black},
+                    {colors::red, "Red", colors::white},
+                    {colors::bright_green, "Bright green", colors::black},
+                    {colors::green, "Green", colors::white},
+                    {colors::white, "White", colors::black},
+                    {colors::bright_black, "Gray", colors::white},
                 }},
                 Divider{{
                     .lines = Lines::bold(),
@@ -228,12 +274,24 @@ int main(int argc, char** argv)
         };
         if (!has_text(U"Color Select") || !has_text(U"Last Action") ||
             !has_text(U"Pin Count")) return 7;
-        for (auto& button : color_select.children) {
+        for (std::size_t i = 0; i < 8; ++i) {
+            auto& button = color_select.swatch(i);
             auto frame = Frame{button.size()};
             button.paint(Canvas{frame});
-            if (frame[{0, 0}].style.background != button.label.style.background) return 3;
+            if (frame[{0, 0}].style.background != button.color) return 3;
         }
+        color_select.swatch(3).activate();
+        app.paint();
+        if (!has_text(U"Red") || !color_select.swatch(3).selected ||
+            color_select.swatch(0).selected) return 9;
+        app.set_focus(color_select.swatch(3));
+        auto focused = Frame{color_select.swatch(3).size()};
+        color_select.swatch(3).paint(Canvas{focused});
+        if (focused[{0, 0}].text != U"[") return 10;
         pinbox.handle(MousePress{.at = {3, 4}, .button = MouseButton::Left});
+        auto board = Frame{pinbox.size()};
+        pinbox.paint(Canvas{board});
+        if (board[{3, 4}].style.foreground != Color{colors::red}) return 11;
         if (status.text != "Added (3, 4)" || count.value != 1) return 4;
         pinbox.handle(MousePress{.at = {3, 4}, .button = MouseButton::Right});
         if (status.text != "Removed (3, 4)" || count.value != 0) return 5;
