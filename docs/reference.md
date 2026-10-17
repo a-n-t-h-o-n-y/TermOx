@@ -1,5 +1,9 @@
 # API reference
 
+The [generated API reference](https://a-n-t-h-o-n-y.github.io/TermOx/) lists public
+classes and their members directly from the headers. The handwritten entries below
+remain available while inline documentation is expanded.
+
 Look up an interface below. Each entry links to its declaration and usage details.
 For a first program, see [Getting Started](getting_started.md); for explanations
 of related interfaces, use the [guides index](README.md).

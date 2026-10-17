@@ -101,6 +101,8 @@ class Button : public Widget {
 
 /**
  * Blend two RGB colors together.
+ * @param one The color returned at zero percent.
+ * @param two The color returned at one hundred percent.
  * @param percent [0, 1] blending amount. 0 is all one, 1 is all two.
  */
 [[nodiscard]] auto gradient_blend(RGB one, RGB two, float percent) -> RGB;

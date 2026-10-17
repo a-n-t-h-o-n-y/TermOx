@@ -54,7 +54,7 @@ in your own project.
 ## Documentation
 
 - [Guides](docs/README.md): layout, input, styling, custom widgets, and internals.
-- [API reference](docs/reference.md): interfaces and their headers.
+- [API reference](https://a-n-t-h-o-n-y.github.io/TermOx/): generated classes, methods, options, and signals.
 - [Examples](examples/README.md): runnable programs, build targets, and walkthroughs.
 
 Contributions are welcome. TermOx is released under the [MIT license](LICENSE).

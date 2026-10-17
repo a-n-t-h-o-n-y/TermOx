@@ -34,6 +34,10 @@ Screenshots should come from the current code. The README's table image is a
 rendering of a painted DataTable frame, with a dark background and monospace
 font. Other images are stored in `docs/img/`.
 
+Build the generated reference using [the Doxygen instructions](doxygen/README.md).
+The reference workflow checks comments on pull requests and publishes the HTML
+automatically from the configured publishing branch.
+
 ## Documentation layout
 
 `reference.md` indexes the interface entries in `reference/`. Topic guides explain

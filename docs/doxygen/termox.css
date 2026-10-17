@@ -1,0 +1,20 @@
+/* Keep the theme's layout and controls; use TermOx's copper and green palette. */
+html {
+    --primary-color: #905024;
+    --primary-dark-color: #703b1a;
+    --primary-light-color: #ad6938;
+    --page-background-color: #faf8f2;
+    --page-foreground-color: #28362f;
+    --side-nav-background: #eeeae0;
+    --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-family-monospace: ui-monospace, "SFMono-Regular", Consolas, monospace;
+    --side-nav-fixed-width: 280px;
+}
+html.dark-mode {
+    --primary-color: #e7af7d;
+    --primary-dark-color: #f0c49e;
+    --primary-light-color: #cd9061;
+    --page-background-color: #141917;
+    --page-foreground-color: #e8e6db;
+    --side-nav-background: #1f2924;
+}

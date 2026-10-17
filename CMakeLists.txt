@@ -171,3 +171,9 @@ target_link_libraries(TermOx PUBLIC
 enable_testing()
 add_subdirectory(tests)
 add_subdirectory(examples)
+
+# Documentation is optional; its standalone build needs no C++ dependencies.
+option(TERMOX_BUILD_DOCUMENTATION "Add the Doxygen API reference target" OFF)
+if(TERMOX_BUILD_DOCUMENTATION)
+    add_subdirectory(docs/doxygen)
+endif()

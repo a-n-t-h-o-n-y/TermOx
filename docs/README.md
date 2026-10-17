@@ -1,7 +1,8 @@
 # Documentation
 
 Use [Getting Started](getting_started.md) to build your first program. The
-[API reference](reference.md) lists interfaces by topic and links to their headers.
+[generated API reference](https://a-n-t-h-o-n-y.github.io/TermOx/) lists public interfaces
+and their members. [Reference notes](reference.md) provide the existing topic entries.
 The guides below explain how those interfaces work together.
 
 ## Tutorials and examples

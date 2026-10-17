@@ -41,8 +41,8 @@ class Terminal {
      *
      * @param mouse_mode The MouseMode to set the terminal to.
      * @param signals Whether OS Signals should be enabled or disabled.
-     * @param foreground The default foreground for the Terminal.
-     * @param background The default background for the Terminal.
+     * @param foreground_ The default foreground for the Terminal.
+     * @param background_ The default background for the Terminal.
      */
     Terminal(MouseMode mouse_mode = MouseMode::Basic,
              Signals signals = Signals::Off,

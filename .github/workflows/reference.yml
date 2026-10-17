@@ -1,0 +1,59 @@
+name: API reference
+
+on:
+  push:
+    branches: [library-refactor]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: reference-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install Doxygen 1.18.0
+        run: |
+          curl --fail --location --retry 3 \
+            https://github.com/doxygen/doxygen/releases/download/Release_1_18_0/doxygen-1.18.0.linux.bin.tar.gz \
+            --output "$RUNNER_TEMP/doxygen.tar.gz"
+          echo "14fa81bdc34171edb5f1f02b1d60e74802f0439b77fa44e592565d517d72df90  $RUNNER_TEMP/doxygen.tar.gz" | sha256sum --check
+          tar -xzf "$RUNNER_TEMP/doxygen.tar.gz" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/doxygen-1.18.0/bin" >> "$GITHUB_PATH"
+      - name: Configure reference
+        run: cmake -S docs/doxygen -B build/docs
+      - name: Build reference
+        run: cmake --build build/docs --target TermOx.docs
+      - name: Upload build for inspection
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-reference
+          path: build/docs/html
+      - name: Prepare Pages artifact
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/library-refactor'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: build/docs/html
+
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/library-refactor'
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Publish reference
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,58 @@
+PROJECT_NAME           = TermOx
+PROJECT_NUMBER         = @TERMOX_DOC_VERSION@
+PROJECT_BRIEF          = "C++20 terminal user interfaces"
+OUTPUT_DIRECTORY       = "@TERMOX_DOC_OUTPUT@"
+INPUT                  = "@TERMOX_SOURCE_DIR@/include/ox" \
+                         "@TERMOX_DOC_SOURCE@/mainpage.md"
+RECURSIVE              = YES
+FILE_PATTERNS          = *.hpp *.md
+EXCLUDE_PATTERNS       = */detail/*
+EXCLUDE_SYMBOLS        = ox::detail ox::detail::*
+STRIP_FROM_PATH        = "@TERMOX_SOURCE_DIR@/include/"
+STRIP_FROM_INC_PATH    = "@TERMOX_SOURCE_DIR@/include/"
+USE_MDFILE_AS_MAINPAGE  = "@TERMOX_DOC_SOURCE@/mainpage.md"
+MARKDOWN_SUPPORT       = YES
+AUTOLINK_SUPPORT       = YES
+JAVADOC_AUTOBRIEF      = YES
+OPTIMIZE_OUTPUT_FOR_C  = NO
+
+# Include every public declaration while inline documentation is being completed.
+# Missing-description enforcement will be enabled after the header pass.
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = NO
+EXTRACT_PRIV_VIRTUAL   = NO
+EXTRACT_STATIC         = NO
+INTERNAL_DOCS          = NO
+HIDE_UNDOC_MEMBERS     = NO
+HIDE_UNDOC_CLASSES     = NO
+SHOW_INCLUDE_FILES     = YES
+FULL_PATH_NAMES        = NO
+SORT_MEMBER_DOCS       = NO
+GENERATE_LATEX         = NO
+GENERATE_HTML          = YES
+HTML_OUTPUT            = html
+HTML_HEADER            = "@TERMOX_DOC_OUTPUT@/header.html"
+HTML_EXTRA_STYLESHEET  = "@TERMOX_DOC_THEME@/doxygen-awesome.css" \
+                         "@TERMOX_DOC_THEME@/doxygen-awesome-sidebar-only.css" \
+                         "@TERMOX_DOC_THEME@/doxygen-awesome-sidebar-only-darkmode-toggle.css" \
+                         "@TERMOX_DOC_SOURCE@/termox.css"
+HTML_EXTRA_FILES       = "@TERMOX_DOC_THEME@/doxygen-awesome-darkmode-toggle.js"
+HTML_COLORSTYLE        = LIGHT
+GENERATE_TREEVIEW      = YES
+DISABLE_INDEX          = NO
+FULL_SIDEBAR           = NO
+PAGE_OUTLINE_PANEL     = NO
+SEARCHENGINE           = YES
+HTML_COPY_CLIPBOARD    = YES
+HAVE_DOT               = NO
+CLASS_GRAPH            = NO
+COLLABORATION_GRAPH    = NO
+SOURCE_BROWSER         = YES
+INLINE_SOURCES         = NO
+QUIET                  = YES
+WARNINGS               = YES
+WARN_IF_UNDOCUMENTED   = NO
+WARN_IF_DOC_ERROR      = YES
+WARN_NO_PARAMDOC       = NO
+WARN_AS_ERROR          = FAIL_ON_WARNINGS
+WARN_LOGFILE           = "@TERMOX_DOC_OUTPUT@/warnings.log"

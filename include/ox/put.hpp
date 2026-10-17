@@ -253,7 +253,7 @@ void put(Canvas c, Point at, shape::HLine item, int length, Color foreground);
  * @param at The leftmost point of the line, where painting begins.
  * @param item The HLine to paint.
  * @param length The number of cells to paint.
- * @param foreground The Style to assign each Cell the line is painted to.
+ * @param style The Style to assign each Cell the line is painted to.
  */
 void put(Canvas c, Point at, shape::HLine item, int length, Style const& style);
 
